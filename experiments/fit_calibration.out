@@ -1,0 +1,5 @@
+depth   8 | c_final 0.994706 | final-layer MSE raw 3.952e-05 -> cal 1.321e-05 | 32s
+depth  16 | c_final 0.993526 | final-layer MSE raw 5.102e-05 -> cal 1.796e-05 | 53s
+depth  32 | c_final 0.993142 | final-layer MSE raw 9.333e-05 -> cal 2.577e-05 | 89s
+MC(200k) vs MC(200k) final-layer MSE: 4.973e-07  (2*var/N)
+wrote /home/claude/arc-whest/experiments/calibration.json

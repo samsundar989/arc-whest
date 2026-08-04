@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.venv/
+*.tar.gz
+*.npz
+.DS_Store
+nohup.out
+
+# scratch area — never tracked
+_to_delete/
+
+# grader/run reports ARE tracked (they're our experiment record), even though
+# the blanket rules above might otherwise catch artifacts dropped in there.
+!experiments/run_reports/
+!experiments/run_reports/**

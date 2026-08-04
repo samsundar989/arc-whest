@@ -1,0 +1,12 @@
+mlp 0: final-layer MSE raw 1.508e-04 | calibrated 5.017e-05
+mlp 1: final-layer MSE raw 2.310e-05 | calibrated 1.056e-05
+mlp 2: final-layer MSE raw 4.779e-05 | calibrated 1.887e-05
+mlp 3: final-layer MSE raw 1.429e-04 | calibrated 4.637e-05
+mlp 4: final-layer MSE raw 6.633e-05 | calibrated 1.896e-05
+mlp 5: final-layer MSE raw 4.813e-05 | calibrated 1.553e-05
+------------------------------------------------------------
+mean final-layer MSE  raw        : 7.984e-05
+mean final-layer MSE  calibrated : 2.674e-05
+improvement factor               : 2.99x
+approx adjusted score (MSE x 0.1): 2.674e-06
+(MC measurement noise adds ~var/N ≈ 1e-6-ish per-neuron^2 -> ~2.0e-06 to each reported MSE; true MSEs are slightly lower)
