@@ -128,20 +128,22 @@ float32 is exactly half price everywhere ⇒ **always sample in f32** (and the s
 | radius + antithetic | 5.45e-6 | 1.54× | |
 | **scrambled Sobol** | **2.96e-6** | **2.84×** | the winner |
 
+*(3 MLPs × 16 reps. The 2.84× is on the optimistic end of the seed noise — the settled figure for Sobol over plain MC is **~2×**, see the α=1.00 sweep below. The ranking is what held up.)*
+
 **69% of plain-MC error variance lies along a single "scale mode"** (the whole layer rescaling together); Sobol cuts that share to 42%. Radius stratification barely touches it, so ‖x‖ is *not* what drives it.
 
 **Control variates are a dead end here** (`local_sim/cv_lab.py`). Layer 1 has exactly-known moments (E[ReLU(z_i)] = σ_i/√(2π), verified to ~3σ of pure sampling noise), so it is a legitimate zero-bias control variate. Ceilings measured by per-sample covariance: scalar CVs (Σh₁, Σh₁², ‖x‖²) 1.1×; **full 256-dim h₁ vector 1.80×**; even the *illegal* ceilings using h₂/h₃ (whose means we don't know) only reach 2.1–2.5×. And stacked on Sobol the CV adds **nothing** (2.04× → 1.98×) — QMC and the CV remove the *same* variance. This independently reproduces the public finding that control-variate coupling dies by layer 32 (thread 18085). **Dropped.**
 
-**Randomisation method matters more than the point set** (`local_sim/impl_lab.py`, N=16384):
+**Digital vs real-valued randomisation is the one distinction that matters** (`local_sim/impl_lab.py`, N=16384):
 
 | randomisation | vs MC | shippable? |
 |---|---|---|
-| scipy scrambled (LMS + digital shift) | 2.62× | no (scipy absent in sandbox) |
+| scipy scrambled (LMS + digital shift) | 2.62× → **1.88× on re-measure** | no (scipy absent in sandbox) |
 | **digital XOR shift of a fixed net** | **2.04×** | **yes** |
 | Cranley-Patterson real shift (u+Δ mod 1) | 1.24× | yes |
 | Korobov rank-1 lattice + shift | 1.45× | yes |
 
-A real-valued shift destroys the digital net structure; an XOR shift preserves it exactly and costs 1 FLOP/element. That is the whole design of v1.1.
+A real-valued shift destroys the digital net structure and loses most of the benefit; an XOR shift preserves it exactly and costs 1 FLOP/element. That is the design of v1.1. The gap between the *digital* schemes (plain shift vs LMS vs scipy's) turned out to be **within seed noise** — see the LMS negative result below — so we shipped the simplest one.
 
 ## 2026-08-05 — v1.0 SUBMITTED: antithetic Monte Carlo, float32, exact layer 1
 
@@ -194,7 +196,41 @@ Same method as v1.1; only the operating point and chunk size changed. Two measur
 
 Below the optimum the error falls faster than the multiplier rises; above it the reverse. (C/B 1.03 would also exceed the budget outright and fail every MLP, so it was never a candidate.) Set `_TARGET_CB = 0.50`, and raised `_CHUNK` 4096 → 16384 to cut the Sobol generator's instrumented-op count 4× (temporary release is billed as residual — forum 18101).
 
-Local held-out: MSE **6.760e-7**, adjusted **3.480e-7** — **39.5× better than v0** on MSE, 2.07× better than v1.0's graded score.
+Local held-out (40 MLPs): MSE **6.760e-7**, adjusted **3.480e-7**.
+
+**…and the mini run said no.** v1.2's mini subprocess came back **4.679e-7** — *worse* than v1.1's 4.154e-7. Two things went wrong at once: the real C/B was 0.5595 not 0.5148 (residual wall time adds ~9% at this op count), and the MSE was 8.362e-7 not 6.760e-7. **The C/B=0.5 optimum was an artifact of fitting on the first 40 MLPs.**
+
+Re-measured on **all 100** mini MLPs (which is exactly the grader's public set):
+
+| C/B (analytic) | N | final-layer MSE | ratio vs prev | adjusted |
+|---|---|---|---|---|
+| 0.032 | 2048 | 1.227e-5 | — | 1.227e-6 |
+| 0.064 | 4096 | 6.663e-6 | 1.84× | 6.663e-7 |
+| 0.129 | 8192 | 3.377e-6 | 1.97× | 4.346e-7 |
+| **0.257** | **16384** | **1.604e-6** | **2.11×** | **4.128e-7** |
+| 0.515 | 32768 | 7.686e-7 | 2.09× | 3.957e-7 |
+
+**α = 1.00 exactly.** Sobol buys a **constant ~2× factor** over plain Monte Carlo — it does *not* improve the convergence rate. The α=1.20 measured on 40 MLPs was a subset artifact, and it is what made C/B=0.5 look good. With α=1 the adjusted score is flat above the floor, so there is no real optimum to chase; the residual-wall-time surcharge (which grows with op count) then tips the balance back toward *lower* N. Ranking by actual mini runs: **v1.1 (N=16384) 4.154e-7 > v1.2 (N=32768) 4.679e-7**.
+
+**Lesson, twice in one day**: both the LMS win and the C/B=0.5 optimum evaporated when re-measured on more data. Fit operating points on the full 100-MLP split, not a subset.
+
+## 2026-08-05 — v1.1 SUBMITTED and GRADED (submission 324094) — the sprint's best
+
+`estimator_v1_1.py` promoted to `estimator.py`. **Graded: adjusted 3.893e-7**, final-layer MSE 1.4907e-6, `all_layers_mse` 3.006e-6, C/B **0.2612**, `n_failed_mlps` 0, best MLP 1.085e-7 / worst 2.447e-6. Predicted 4.154e-7 from the mini split → grader **6.3% better**, same direction and size as v1.0's 14%.
+
+**Sprint scoreboard (all graded, round 1428):**
+
+| version | method | graded adjusted | vs v0 |
+|---|---|---|---|
+| v0 (323872) | covariance propagation + calibration | 2.4927e-6 | 1.00× |
+| v1.0 (324075) | antithetic MC, f32, exact layer 1 | 6.781e-7 | **3.68×** |
+| **v1.1 (324094)** | **Sobol RQMC + digital shift** | **3.893e-7** | **6.40×** |
+
+**Live board position: rank 158** (was below the displayed top 200 with v0). #1 is 4.87e-8, so the leader is 8.0× ahead of us.
+
+**Cost model, graded**: 6.998e10 FLOPs/MLP, residual wall time 10.53 ms/MLP ⇒ **1.48% of billed compute is wall time** (v0 was 17%, v1.0 1.09%). λ = 1.000e11 confirmed a third time. The wall-time channel is simply not a constraint for a FLOP-dense f32 sampling estimator — which is also why we have no incentive to go near the bypass of thread 18099.
+
+**Submissions used**: 2 of the day's budget (v1.0, v1.1); 2 held in reserve.
 
 ## Next planned experiments
 
