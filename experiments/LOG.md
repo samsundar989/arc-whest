@@ -232,6 +232,81 @@ Re-measured on **all 100** mini MLPs (which is exactly the grader's public set):
 
 **Submissions used**: 2 of the day's budget (v1.0, v1.1); 2 held in reserve.
 
+## 2026-08-05 — B1 FUSION: negative. The premise was wrong.
+
+**Verdict: do not ship. B1 buys ~5–7% MSE for a 4.7% compute tax — net ≈ 2%. Gate (mini ≤3.2e-7) not met, so nothing was submitted; v1.1 remains our Phase 1 entry.**
+
+New instruments: `local_sim/covprop_features.py` (numpy mirror of v0, verified against `estimator_v0_archive.py` to **8.9e-15**), `collect_fusion_data.py` (caches t/p/s/σ̂/α̂/var per MLP for a whole split), plus `fusion_anatomy.py`, `covprop_bias_model.py`, `scale_mode_probe.py`, `scale_source_probe.py`, `layer_crossover.py`, `b2_tail_probe.py`, `fit_fusion.py`. Fitted on the **full 1000-MLP split** (1e9-sample truth ⇒ zero label noise), 200 MLPs held out.
+
+### The premise that failed
+
+The plan assumed *"v1.1's error is pure variance; v0's is pure smooth bias"*, so fusing them should pay. Measured:
+
+| | MSE | common-scale share |
+|---|---|---|
+| covprop (v0) | 2.650e-5 | 25% |
+| sampling (v1.1) | 1.611e-6 | **48%** |
+| corr(their errors) | −0.098 | (near 0, so fusion is *sound*, just weak) |
+
+**Covprop's residual is not a smooth bias.** Conditioning on α = μ̂/σ̂, the residual's conditional mean is only 0.1–0.5 of its conditional rms, and subtracting a fitted α-curve removes just **3.5%** of its variance held-out (3.154e-5 → 3.004e-5). It is conditionally-centred noise.
+
+**And covprop loses to sampling in every α band** by 10–100× (only α<−4 favours it, where both errors are ~1e-13 and irrelevant). An α-gated hard switch gives **0.0%**. So the per-neuron GLS blend has w_i≈0 everywhere; blending helps only through the generic independent-errors effect, w_global = 0.052.
+
+### Held-out results (200 MLPs, disjoint from the fit)
+
+| variant | MSE | vs sampling |
+|---|---|---|
+| sampling alone (v1.1) | 1.4893e-6 | — |
+| + scale-mode kill | 1.4360e-6 | +3.6% |
+| + global precision blend | 1.4195e-6 | +4.7% |
+| + per-neuron GLS blend | 1.4718e-6 | +1.2% |
+| + scale kill **and** per-neuron blend | 1.5395e-6 | **−3.4%** |
+
+### Why the scale kill can't work from covprop
+
+The 48% scale mode is real and worth 1.9× if it could be removed exactly (oracle: 1.604e-6 → 8.349e-7). But the online observable ĝ = ⟨s−p, p⟩/⟨p,p⟩ measures *covprop's* scale error, not ours: sd(g_covprop) = 0.00276 vs sd(g_sampling) = 0.00088, a 3× contamination. Predicted usable R² = 0.092; **measured holdout R² = 0.094.** Using a mid-depth probe (layer 12) instead of the final layer raises the LOO R² to 0.155 — better, still ~7% of MSE.
+
+Two source-level alternatives were tested and are dead: the realized **radial imbalance** of the point set (LOO R² = **−0.010** — the scale mode is *not* an unlucky radius) and the **layer-1 exact reference** (LOO R² = **−0.037** — the information isn't there early; the fluctuation is generated through depth, corr(g_k, g_L) climbing 0.22 → 0.99).
+
+### B2: k = 0. Both mechanisms measured, both negative.
+
+*Propagating analytically from the input* stops beating sampling at **layer 4** and degrades monotonically to 18.2× worse by layer 32:
+
+| layer | covprop MSE | sampling MSE | winner |
+|---|---|---|---|
+| 2 | 1.463e-6 | 4.139e-6 | covprop |
+| 3 | 3.904e-6 | 5.222e-6 | covprop |
+| **4** | 6.129e-6 | 5.518e-6 | **sampling** |
+| 32 | 2.704e-5 | 1.489e-6 | sampling (18.2×) |
+
+*Starting the analytic step from the sampled state at L−k* — B2's actual proposal — is worse still (`b2_tail_probe.py`, 40 held-out MLPs, N=16384):
+
+| tail treatment | MSE | vs sampling |
+|---|---|---|
+| pure sampling | 1.6933e-6 | — |
+| analytic last 1 layer | 2.8327e-6 | **−67.3%** |
+| analytic last 2 layers | 4.0619e-6 | −139.9% |
+| analytic last 3 layers | 5.3203e-6 | −214.2% |
+
+Even **one** Gaussian-closure step from accurately sampled moments costs more bias than the MC noise it removes. **Recommended k = 0**; B2 as conceived should be dropped.
+
+### Fusion-hurt map (the requested diagnostic)
+
+Global blend at w=0.052, final layer, held-out, by α band:
+
+| α band | share of neurons | change vs sampling |
+|---|---|---|
+| < −3 | 34% | +1.2% |
+| −3…−2 | 8% | −1.9% |
+| −2…−1 | 7% | **−6.0%** |
+| −1…0 | 7% | −0.7% |
+| 0…1 | 7% | +1.5% |
+| 1…2 | 7% | +2.0% |
+| 2…3 | 8% | +5.0% |
+| > 3 | 33% | +5.4% |
+
+Blending helps only where α > 0 and hurts most at α ∈ [−2,−1] — the partially-firing neurons where Gaussian closure is least accurate. Gating the blend on α > 0 would give ≈ +4.9% instead of +4.7%: not worth the complexity. **α > 0 neurons carry 98% of the final-layer MSE**, so any future analytic effort belongs there, not on the dead/saturated tails.
+
 ## Next planned experiments
 
 1. ~~Submit v0 → parse run report~~ ✅ done (above). Remaining open item: `wall_time_limit_s`

@@ -36,16 +36,35 @@ Build the tuned RQMC estimator: scrambled Sobol or rank-1 lattice points (implem
 
 *Target: ~1.5–4e-7 adjusted (validated publicly by two Phase-1 write-ups). Decision data: measure error-vs-samples slope to choose the C/B operating point (for 1/N methods, anywhere between 10% and 100% budget scores the same — spend where the curve says).*
 
-## Phase B — the hybrid (weeks 2–4; the expected winner)
+## Phase B — FUSION (revised Aug 5 after Phase A; the expected winner)
 
-Layer the classic variance-reduction stack, each piece validated in local_sim before grafting on:
+Phase A's measurements rewrote this section. The original plan (control variates, radius stratification, Rao-Blackwell tail) is **dead on arrival**: measured against real ground truth, the layer-1 control variate's ceiling is 1.80× and it adds *nothing* on top of QMC (both remove the same variance); radius stratification is 1.20×; antithetic is 1.03×. See `experiments/LOG.md` 2026-08-05.
 
-1. **Control variate**: run covariance propagation analytically; on the *same* sampled inputs, evaluate a coupled linearized/frozen-mask surrogate whose exact mean we know; sample only the residual. Fit per-neuron CV coefficients offline (they're properties of the distribution, not of the specific MLP — shippable).
-2. **Smoothed tail (Rao-Blackwell)**: at layers L−1/L, replace sampled ReLUs with conditional Gaussian expectations given the sampled layer L−2 state — closed forms exist; kills most of the last-layer variance at zero extra samples.
-3. **Stratify/condition on ‖x‖** (the input radius drives a big shared variance component; 1-D quadrature over it is nearly free).
-4. Budget tuning: measure marginal MSE per FLOP for each component; allocate.
+What the data *did* show is that our two estimators fail in orthogonal ways:
 
-*Target: ≤5e-8 adjusted, i.e. top-3 territory on Phase-1 numbers. Milestone gate: if we're not ≤2e-7 by Aug 21, simplify and consolidate instead of adding pieces.*
+| | error character | size |
+|---|---|---|
+| v0 covariance propagation | **pure smooth bias**, per-neuron, ~zero common mode | MSE 2.5e-5 |
+| v1.1 Sobol RQMC | **pure variance**, flat in N (α=1.00), **42% in one common scale mode** | MSE 1.49e-6 |
+
+Two estimators with uncorrelated errors are worth more together than apart. Hence:
+
+### B1 — precision-weighted fusion (`estimator_v2.py`)
+Run both (covprop costs 3.3e9 FLOPs ≈ 4.7% on top of sampling's 7.0e10), then combine in closed form, O(n) online:
+1. **Scale-mode kill**: estimate the sampling run's common scale fluctuation ĝ by regressing s on p across the 256 neurons, weighted by 1/Var(ε_i); shrink ĝ by its own estimation noise; correct s′ = s/(1+γĝ). This attacks the 42% directly, using covprop as the reference direction.
+2. **Per-neuron GLS blend**: t̂_i = w_i p_i + (1−w_i) s′_i with w_i = Var(s′_i)/(Var(s′_i)+Var(covprop residual_i)).
+
+Error models are fitted offline on the **full 1000-MLP split** (1e9-sample truth = zero label noise) and ship as literals: sampling noise from covprop's own in-flight σ̂² (rescaled — covprop underestimates post-ReLU variance ~30%), covprop residual variance as a low-dimensional function of (σ̂_i, α̂_i).
+
+*Target: graded ≤2.4e-7. Gates: mini ≤3.2e-7, 0 failures, C/B 0.26–0.30, determinism.*
+
+### B2 — push the last k layers analytically
+The fusion-hurt map (neurons where the covprop error model is wrong) tells us where the analytic side is untrustworthy. B2 replaces the last k layers' sampled ReLUs with a better analytic treatment, k chosen from that map.
+
+### B3 — GPU learnability probe (2-day box, parallel)
+Mint 50k He MLPs on the RTX 5090 (38.3 TFLOP/s measured), label with 64k–256k-sample MC, train a small per-neuron regressor to predict the *calibrated covprop residual*. **R² > 0.5 → Phase C is alive** (a learned error model replaces B1's static one); **R² < 0.15 → drop Phase C**, GPU pivots to B2 calibration data.
+
+*Overall target: ≤5e-8 adjusted. Milestone gate: if not ≤2e-7 by Aug 21, consolidate instead of adding pieces.*
 
 ## Phase C — learned residual corrector (weeks 3–5, GPU)
 
