@@ -1014,6 +1014,35 @@ immutability. All pass, all deterministic on rerun, no negative means, no
 non-finite values, shapes always (depth, width). Determinism also re-confirmed
 bit-identical on real dataset MLPs.
 
+### ⚠️ Tooling caveat found while doing this: the shim path and `whest run` disagree by 18%
+
+Three implementations of the *same* `estimator.py` on the *same* 100 public mini
+MLPs:
+
+| path | final-layer MSE |
+|---|---|
+| `whest run --runner subprocess` (real flopscope), stored Aug-5 12:41 | 1.607934e-6 |
+| `whest run` re-measured tonight | **1.61e-6** (adjusted 3.40e-7, mult 0.21578, 0 failed) |
+| GPU mirror (cuSOLVER `eigh`) | 1.5962e-6 |
+| `local_sim/eval_estimator.py` (numpy shim path) | **1.3624e-6** |
+
+The whest path is reproducible to 0.07% across a 10-hour gap, so the outlier is the
+**shim path, and it is 18% low**. The likely cause is the one already identified in
+the Track T work: the alignment basis is only well determined in its leading
+directions, `eigh` picks an arbitrary basis in the near-degenerate tail, and
+different LAPACK paths pick differently (106 of 256 columns differ beyond sign
+between numpy and cuSOLVER). Consistent with this, the shim path agreed with whest
+to 3% for **v1.1**, which had no rotation; the divergence appeared with v2.0's
+`eig(JJᵀ)`.
+
+**No decision in this project is affected** — every gate was measured within a
+single consistent path (whest-parity, or paired inside the GPU mirror), and paired
+comparisons are immune to basis choice. But `eval_estimator.py` can no longer be
+trusted for *absolute* levels of a rotation-using estimator, and the "grader runs
+~20% better than local" pattern recorded for v2.4 should be treated as unexplained
+rather than as evidence about the MLP draw. Steer offline with whest-parity runs or
+the GPU mirror.
+
 ### Verdict — fresh-re-run readiness
 
 **Ready.** Across 1800 fresh and deliberately deformed MLPs the shipped pipeline
