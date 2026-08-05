@@ -38,6 +38,29 @@
 
 ~~Phase 1 top-10 adjusted: 1.24e-8, 2.30e-8, 2.32e-8, 4.63e-8, 5.59e-8, 6.38e-8, 9.18e-8, 9.47e-8, 9.76e-8, 1.06e-7. 636 participants / 76 teams / 13.2k submissions (Jul 28 snapshot).~~ **SUPERSEDED** — see §5b for the live board measured Aug 4 (#1 4.87e-8, #10 9.85e-8, #200 6.40e-7). The Jul 28 numbers match no live round; do not use them for target-setting. Warm-up (256×8) winner: 3.91e-8 (round 1425 board, confirms the "<4e-8" Manifold resolution).
 
+## 2e. What makes a QMC estimator unbiased — a lesson that cost us a 2.35× regression
+
+**Do not "standardise" a QMC point set.** Forcing exact per-coordinate mean 0 and
+variance 1 on the shipped Sobol set, with **no optimisation at all**, moved held-out
+MSE from 9.156e-6 to 2.152e-5 — a **2.35× regression** (measured 2026-08-05,
+`local_sim/g2_optimize.py`).
+
+Mechanism: a QMC estimator is unbiased because its points are the correct **quantile
+transform** of an equidistributed net, *not* because their sample moments happen to
+equal the distribution's moments. The Sobol set's per-coordinate sample moments are
+mean **−0.00149**, std **1.00278**. Rescaling to force (0,1) applies a ~0.3% affine
+map to every point, and a systematic 0.3% scale error on activations of ~0.45 is far
+larger than the ~1e-6 MSE we are chasing. Moment matching trades a negligible
+variance reduction for a **first-order bias**.
+
+Corollary, equally counter-intuitive: the net's most extreme point — the first Sobol
+point, which maps to z = −6.12 in *every* coordinate, norm 97.9 against a typical
+16.0 — is **load-bearing**. Deleting it as an "outlier" costs 0.734×. The extreme
+points are what balance the low-discrepancy structure.
+
+(For plain iid Monte Carlo, standardising is a legitimate and well-known variance
+reduction. The lesson is specifically that it does not transfer to QMC.)
+
 ## 3. Key forum threads (discourse.aicrowd.com)
 
 - **17997** challenge open — grader specs, 50/day. `/t/arc-white-box-estimation-challenge-is-now-open/17997`
@@ -48,7 +71,8 @@
 - **18078** townhall summary + recording (youtu.be/pvCgbUJ-nTo) — final-layer-only scoring; OSI; fresh private MLPs; ARC hints: cumulant prop > QMC long-term, low-rank refinements, Edgeworth divergence/Borel resummation. `/t/townhall-summary-recording/18078`
 - **18085** variance/bias budget write-up (radiant-allomancer) — RQMC prefix + shrinkage + Edgeworth + offline ridge corrector = 4.47e-7; **≥58% of residual is bias not variance**; control-variate coupling dies by layer 32 (0.86→0.25); third-cumulant transport loses ~98% signal. `/t/phase-1-write-up-a-variance-bias-budget-.../18085`
 - **18099** ⚠️ flopscope bypass bug (Kerensa) — raw NumPy-backed arrays escape FLOP counting; billed only wall-time at λ=1e11 < real AVX throughput; jtel: top submissions show instrumented/effective ratios <0.001. No organizer reply as of crawl. `/t/potential-flopscope-accounting-bypass-bug/18099`
-- **18106** structure-aware hybrid write-up (natasha_stewart) — dead/on/kink classification, antithetic Sobol to layer 30, linearized "on" neurons last layers → 1.551e-7. `/t/phase-i-submission-structure-aware-estimation-.../18106`
+- **18106** structure-aware hybrid write-up (natasha_stewart) — dead/on/kink classification, antithetic Sobol to layer 30, linearized "on" neurons last layers → **1.551e-7**. Still the strongest published Phase-1 method, 2.5× ahead of our 3.893e-7. `/t/phase-i-submission-structure-aware-estimation-.../18106`
+- **18097** trajectory-calibrated moment chain (submission 314695) — read in full 2026-08-05, see §3e for the verdict.
 - **18108** mliston (#4) proposal to fix wall-time channel (cap share / raise λ to 1e12 / require instrumented APIs). `/t/recommendation-restoring-the-estimation-framing-.../18108`
 
 ## 3b. The re-score story — RESOLVED 2026-08-05 (hypothesis partly wrong)
@@ -99,6 +123,30 @@ Timeline, from the threads:
 — per-sample variance × per-sample cost, with N cancelling entirely. (Verified: V = 1.4893e-6 × 16384 = 2.44e-2, c = 4.273e6, B = 2.72e11 → 3.83e-7 vs v1.1's graded 3.893e-7.) So *cheapening a sample is worth exactly as much as de-noising it*, and choosing N is not a lever at all once past the floor. This is why dead-neuron pruning — pure cost reduction — is the strongest Sprint-1 item.
 
 **Why α = 1.00 (theory, He & Wang 2015).** For discontinuous integrands the RQMC convergence-rate bonus over plain MC is 1/(4d−2), which at d=256 is ≈0.001. Sobol can therefore only ever buy us a **constant factor**, never a better rate — exactly what we measured (α = 1.00 on the full 100-MLP split). Rate recovery requires concentrating the discontinuities (ReLU kinks) into a few coordinates, which is precisely why an input rotation moved α (0.87 → 1.01/1.06) and is the only structural lever on the rate.
+
+## 3e. Thread 18097 — "trajectory-calibrated moment chain" — read 2026-08-05. **Verdict: no analytic assist; write-up material only.**
+
+**What it is.** A k=2 moment chain (not K≥3 — "*the depth-32 failure of k=2 propagation is error dynamics, not closure order*") with **per-layer linear corrections fitted on the chain's own rolled-forward trajectories** — a DAgger-style calibration. The key claim is that corrections must be fitted against the chain's *own* behaviour, because successive layers' errors anticorrelate and partly cancel; fitting to *true* cumulants reportedly makes things **worse**.
+
+**Its numbers.**
+
+| | |
+|---|---|
+| raw final-layer MSE | 5.89e-6 |
+| adjusted, post-erratum | **1.76842e-6** (multiplier 0.300) |
+| adjusted as originally quoted | 9.97e-7 (multiplier 0.169) — superseded by the flopscope 0.10.0 repricing |
+| cost | 7.40e10 FLOPs/MLP in f64 (3.70e10 f32-equivalent) |
+| its own summary | "*well short of the sampling frontier*"; "*Sampling wins Phase 1's raw metric, and the write-up says so plainly*" |
+
+**Verdict for us: it does not re-open the analytic track.** Their adjusted 1.768e-6 is **4.5× worse than our v1.1's graded 3.893e-7**, at roughly the same compute. Not usable as a pruned-tail patch (our patch is the closed-form rectified-Gaussian mean, already at 3.8e-9 on pruned neurons) nor as a low-weight variance-free base (that is exactly the B1 fusion we measured at net ~0, and their residual variance would be *larger* than the closure's).
+
+**But two of their findings corroborate ours precisely, and one refines a result:**
+
+1. **"the chained estimator attenuates zero-mean noise while amplifying small coherent biases (measured end-to-end at a ~16:1 exchange rate)"** — an independent, quantified version of why our fusion family died. Same closure "*is 52× worse*" when chained.
+2. Their **true-input closure beats sampling: 1.16e-6 vs 1.61e-6.** This *refines* our B2 kill. We measured analytic-tail-from-**sampled**-moments at −67% (k=1); they measure analytic-tail-from-**exact**-moments as a win. The entire gap is therefore **moment-estimation noise** — a 256×256 covariance estimated from 16k samples — not closure bias. Our k=0 recommendation stands for the practical case, but the reason is sharper than we had it, and it says a cheaper/better *moment estimator* (not a better closure) is the only thing that could revive the tail.
+3. Even with reconstructed true third cumulants (cosine similarity 0.83) they "*still lose 4.5× to a plain N=4096 MC probe, 10/10 IDs*" — third-order structure does not rescue it.
+
+**No other new write-ups or organizer posts as of 2026-08-05** (re-crawled): the set remains 18053, 18063, 18085, 18097, 18106. 18099/18108 still have **no organizer reply**.
 
 ## 4. The science (papers that matter, ranked)
 

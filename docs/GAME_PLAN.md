@@ -66,6 +66,19 @@ Mint 50k He MLPs on the RTX 5090 (38.3 TFLOP/s measured), label with 64k–256k-
 
 *Overall target: ≤5e-8 adjusted. Milestone gate: if not ≤2e-7 by Aug 21, consolidate instead of adding pieces.*
 
+## REV 4 (2026-08-05, evening) — variance is at its floor; we work cost, governance, and the write-up
+
+Rev 3 retired the analytic family. Rev 4 retires **variance reduction itself** as a growth area, on evidence:
+
+- **The common mode is irreducible variance, not correctable bias.** Five independent attempts to predict the per-MLP scale fluctuation g — closure reference at the final layer (R² 0.094) and mid-depth (0.155), point-set radial imbalance (−0.010), the exact closed-form layer 1 (−0.037), and a learned regressor over 3000 MLPs × 8 draws (out-of-fold corr 0.012). The official reason is **projection geometry**: g = ⟨ŝ−t, t⟩/⟨t,t⟩ projects onto the unknown truth direction, and every proxy for that direction carries more error along it than g itself. This predicted R² ≈ 0.09 before measurement. **No further prediction attempts.**
+- **Point sets are bounded by theory.** He & Wang 2015: the RQMC rate bonus for discontinuous integrands is 1/(4d−2) = 1/1022 at d=256. Measured α = 1.00. Every variant lands within ±15% of plain Sobol, including direct gradient optimisation (G2 plateaued at 1.06×).
+
+**Operating frame: adjusted ≈ V·c/B, V is at floor, so we work c.** Three tracks:
+
+1. **Cost (c).** Dead-neuron pruning was the largest single win of the month (1.47×). Op-count engineering is the untouched channel — residual wall time was 10.8% of billed compute at 1794 ops/MLP.
+2. **Governance.** The 18099 wall-time bypass has no organizer reply. A neutral, technical clarification email is drafted at `docs/email-draft-organizers.md` for Samuel to send from his own address. Never posted to the forum.
+3. **The write-up** (`docs/writeup-draft.md`, private). Our negative results have mechanisms attached, which is what the contribution prize rewards. Due Sep 26.
+
 ## REV 3 (2026-08-05) — the analytic family is retired
 
 Everything on the analytic side has now been measured against 1e9-sample truth and killed: B1 fusion (net ~0), B2 analytic tail (−67% to −214% at every k), B3 learned covprop residual (held-out R² = 0.012 on 50k MLPs). Covariance propagation is 18× worse than sampling at layer 32 and its residual is not a learnable bias. **We stop trying to make the analytic estimator contribute.**
