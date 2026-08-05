@@ -80,6 +80,26 @@ Timeline, from the threads:
 5. λ = 1e11 FLOP/s independently confirmed by 18092's arithmetic, matching our own derivation from per-MLP telemetry.
 6. Historic exploit, now closed: batched-RHS `solve` (18082). Do not build on `solve` tricks.
 
+## 3d. flopscope pricing — VERIFIED from the docs (2026-08-05). Read before designing anything.
+
+| item | price | consequence for us |
+|---|---|---|
+| **float16 / int8 / bool** | **rate 1.0 — same as float32** | **There is no dtype trick.** Do not spend time on half-precision or quantised paths. float64 is rate 2.0, so f32 remains the right choice, and that is the whole of it. |
+| matmul (M,K)@(K,N) | **(2K−1)·M·N — by SHAPES ONLY** | Sparsity is never rewarded. Pruning pays **only** by materialising smaller *dense* matrices (drop dead output columns of W_k *and* the matching input rows of W_{k+1}). Verified: (256,256)@(256,256) f32 = 33,488,896 = 511×65536 exactly. |
+| gather / where / sort | 4 / element | Slicing to prune is cheap relative to the matmul it saves, but not free. |
+| transcendentals | 16 / element | `stats.norm.ppf` measured at 168/elt (it is more than one transcendental). |
+| thin SVD | ≈26n³ ≈ **4.4e8** (0.16% B) | Per-MLP linear algebra is affordable — a basis change costs less than 1% of budget. |
+| eigh | 9n³ ≈ 1.5e8 | " |
+| inv | 2n³ | " |
+
+**The scoring identity that follows.** Above the 0.1 multiplier floor,
+
+    adjusted = MSE × C/B = (V/N) × (N·c/B) = **V·c/B**
+
+— per-sample variance × per-sample cost, with N cancelling entirely. (Verified: V = 1.4893e-6 × 16384 = 2.44e-2, c = 4.273e6, B = 2.72e11 → 3.83e-7 vs v1.1's graded 3.893e-7.) So *cheapening a sample is worth exactly as much as de-noising it*, and choosing N is not a lever at all once past the floor. This is why dead-neuron pruning — pure cost reduction — is the strongest Sprint-1 item.
+
+**Why α = 1.00 (theory, He & Wang 2015).** For discontinuous integrands the RQMC convergence-rate bonus over plain MC is 1/(4d−2), which at d=256 is ≈0.001. Sobol can therefore only ever buy us a **constant factor**, never a better rate — exactly what we measured (α = 1.00 on the full 100-MLP split). Rate recovery requires concentrating the discontinuities (ReLU kinks) into a few coordinates, which is precisely why an input rotation moved α (0.87 → 1.01/1.06) and is the only structural lever on the rate.
+
 ## 4. The science (papers that matter, ranked)
 
 **Directly on-task:**

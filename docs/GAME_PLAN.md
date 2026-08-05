@@ -66,7 +66,26 @@ Mint 50k He MLPs on the RTX 5090 (38.3 TFLOP/s measured), label with 64k–256k-
 
 *Overall target: ≤5e-8 adjusted. Milestone gate: if not ≤2e-7 by Aug 21, consolidate instead of adding pieces.*
 
-## Phase C — learned residual corrector (weeks 3–5, GPU)
+## REV 3 (2026-08-05) — the analytic family is retired
+
+Everything on the analytic side has now been measured against 1e9-sample truth and killed: B1 fusion (net ~0), B2 analytic tail (−67% to −214% at every k), B3 learned covprop residual (held-out R² = 0.012 on 50k MLPs). Covariance propagation is 18× worse than sampling at layer 32 and its residual is not a learnable bias. **We stop trying to make the analytic estimator contribute.**
+
+What replaces it follows directly from the scoring identity `adjusted = V·c/B` (RESEARCH_NOTES §3d): the only two levers are per-sample **variance** and per-sample **cost**.
+
+### Sprint 1 — cheap wins stacked on v1.1 (before Phase 1 closes Aug 7 23:59 UTC)
+1. **Dead-neuron pruning** (cost lever). Predict dead neurons from covprop's α, slice both sides of each matmul to smaller dense shapes, compensate with the exact constant offset, report pruned neurons with their closed-form rectified-Gaussian mean.
+2. **Rotation + radius** (variance/rate lever). Fold an alignment basis Q into W1 (zero marginal per-sample cost); put an exactly stratified chi₂₅₆ radius on one Sobol coordinate.
+3. **Offline base-set choice** (free). Compare the shipped Sobol set against orthogonal-block + antithetic variants and Owen scrambling.
+
+*Gate: combined ≥1.2× over v1.1 (mini adjusted ≤3.4e-7), n_failed=0, determinism → spend ONE reserve on Phase 1 before close. Otherwise submit nothing.*
+
+### Track G — GPU, through ~Aug 12
+- **G1 amortized common-mode regressor.** 48% of the error is one per-MLP scalar worth 1.9× if removed exactly. Train offline over (MLP × K sample-set draws) to predict it from cheap online observables; cross-fitted and James-Stein shrunk by out-of-fold R² so it cannot add net bias. Ship as inline float literals. *Gate: ≥1.3× held-out, confirmed on real mini.*
+- **G2 task-optimized point set.** Optimise the base point matrix directly against minted-MLP final-layer error; regularise with exact moment matching and drift penalties. *Gate: ≥1.3× held-out + mini.* G1 and G2 overlap on the mode — report the **combined** gain, never the product of solo gains.
+
+**Standing measurement policy**: no operating-point or variant decision on fewer than the full 100-MLP mini split. Three separate "wins" (LMS scrambling, C/B=0.5, a +33% rotation) evaporated when re-measured.
+
+## Phase C — learned residual corrector — RETIRED (see REV 3; B3 measured R² = 0.012)
 
 Mint 10⁵–10⁶ He MLPs on the RTX GPU with high-precision MC labels (torch, float32, batched — each 256×32 MLP takes ~seconds at 1e6+ samples). Train a *small* per-neuron corrector (permutation-equivariant features: analytic μ̂/σ̂, firing probability, row norms, Gram-overlap stats, depth index) to predict the hybrid's residual. Distill to pure-`fnp` inference (a few matmuls, ~1e7 FLOPs) + shipped `.npz` weights (≤50 MiB).
 
