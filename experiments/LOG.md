@@ -354,6 +354,107 @@ So the mission's "R² > 0.5 → Phase C alive" threshold would itself only have 
 
 *Caveat kept honest*: the features were per-neuron covprop diagnostics + last-two-layer weight norms + per-MLP aggregate context. A fundamentally different representation (weight-space equivariant networks over the whole MLP) is not ruled out by this experiment — but at 18× the sampling variance it would have to reach R² > 0.9 to be worth anything, and nothing in the data suggests that is close.
 
+## 2026-08-05 — SPRINT 1: the score identity, and two wins that stack to 1.61×
+
+**The framing that made this session productive.** Above the 0.1 multiplier floor,
+
+    adjusted = MSE × C/B = (V/N) × (N·c/B) = **V·c/B**
+
+per-sample variance × per-sample cost, with N cancelling. (Check: V = 1.4893e-6 × 16384 = 2.44e-2, c = 4.273e6 ⇒ 3.83e-7 vs v1.1's graded 3.893e-7.) So **cheapening a sample is worth exactly as much as de-noising it**, and picking N is not a lever at all. Every Sprint-1 component is judged on V·c/B, never on MSE.
+
+Pricing verified from the flopscope docs and re-measured locally: **f16/int8/bool are rate 1.0, identical to f32 — there is no dtype trick**; matmul bills `(2K−1)·M·N` **by shapes only** (verified exactly: 511×65536); gather/where 4/elt; `norm.ppf` 168/elt; `eigh` measured 3.0e8, `svd` 8.7e8 (so eigh on JJᵀ replaces an SVD at a third the price).
+
+### 1. Dead-neuron pruning — a pure COST lever
+
+α-histogram over all 32 layers (20 MLPs): 5.1% below −5, 4.8% in [−5,−4), 6.3% in [−4,−3), 8.1% in [−3,−2) — so ~16% of neurons sit below α = −3 and barely ever fire. Prune them from **both** sides of each matmul (only smaller *dense* matrices earn anything), compensating with the exact constant offset Σ_dead W[i,:]·μ_i, and report them with their closed-form rectified-Gaussian mean.
+
+| τ | alive | cost/sample | cost cut | MSE | MSE change | V·c/B | gain |
+|---|---|---|---|---|---|---|---|
+| −2.0 | 75.9% | 2,511,196 | 40.0% | 2.2653e-6 | +35.3% | 3.427e-7 | 1.23× |
+| **−2.5** | **80.1%** | **2,777,144** | **33.7%** | **1.7180e-6** | **+2.6%** | **2.874e-7** | **1.47×** |
+| −3.0 | 83.9% | 3,020,231 | 27.9% | 1.6770e-6 | +0.2% | 3.051e-7 | 1.38× |
+| −4.0 | 90.1% | 3,445,113 | 17.7% | 1.6741e-6 | −0.0% | 3.474e-7 | 1.22× |
+
+**τ = −2.5**, where the pruned neurons' own MSE against their true means is **3.8e-9** — far inside the ≪1e-8 bias budget. Below −2.5 the MSE penalty explodes (+35% at −2.0).
+
+### 2. Alignment rotation — a VARIANCE lever, at zero marginal cost
+
+x ~ N(0,I) is rotation-invariant, so x = Qu is free; folding Q into W₁ makes the per-sample cost exactly zero (only the one-off basis computation is billed). Two bases measured.
+
+### Full stack, all combinations, **100-MLP mini**, honest end-to-end cost
+
+| prune | rotation | radius | MSE | cost/sample | C/B | V·c/B | gain |
+|---|---|---|---|---|---|---|---|
+| no | none | no | 1.6742e-6 | 4,451,745 | 0.268 | 4.489e-7 | 1.00× |
+| no | none | yes | 1.6830e-6 | 4,452,681 | 0.268 | 4.514e-7 | 0.99× |
+| no | eig(W₁W₁ᵀ) | no | 1.5360e-6 | 4,460,961 | 0.269 | 4.127e-7 | 1.09× |
+| no | eig(JJᵀ) | no | 1.4691e-6 | 4,541,733 | 0.274 | 4.019e-7 | 1.12× |
+| yes | none | no | 1.7180e-6 | 3,042,777 | 0.183 | 3.149e-7 | 1.43× |
+| yes | eig(W₁W₁ᵀ) | no | 1.5557e-6 | 3,051,993 | 0.184 | 2.860e-7 | 1.57× |
+| yes | eig(W₁W₁ᵀ) | yes | 1.5430e-6 | 3,052,929 | 0.184 | 2.838e-7 | 1.58× |
+| **yes** | **eig(JJᵀ)** | **no** | **1.4769e-6** | **3,132,765** | **0.189** | **2.787e-7** | **1.61×** |
+
+**Radius is neutral** (±0.5% everywhere) — dropped, which also avoids extending the shipped Sobol table to 257 dimensions. The two wins are close to multiplicative (1.43 × 1.12 = 1.60 vs 1.61 measured), consistent with one attacking cost and the other variance.
+
+`estimator_v2.py`: Sobol RQMC + pruning at τ=−2.5 + eig(JJᵀ) rotation folded into W₁. Validates, deterministic, local mini MSE **1.3624e-6**. Note `all_layers_mse` rises to 5.3e-5 because rows 1..31 now carry closure means rather than sampled ones — deliberate (only the final layer is scored, and it avoids a scatter).
+
+## 2026-08-05 — G1 amortized common-mode regressor: **fails its gate (1.000×)**
+
+3000 minted He MLPs × 8 independent digitally-shifted Sobol draws each (GPU, ~11 min). Observables per draw, all computable online: the per-layer empirical gain trajectory mean‖h_l‖²/‖h_{l−1}‖², per-layer mean activation (64 features). Target: the realized final-layer scale mode g, against 2M-sample GPU truth. Cross-fitted 5-fold **over MLPs** (never over draws — splitting draws would leak the network).
+
+| | |
+|---|---|
+| minted error variance | 1.6679e-6 |
+| scale-mode share | **44.5%** (real data said 48% — the mint reproduces it) |
+| sd(g) | 0.00092 |
+| **out-of-fold correlation** | **+0.0116** |
+| James-Stein shrinkage factor | 0.0024 |
+| variance after correction | 1.6678e-6 (**1.000×**) |
+| oracle ceiling (g known) | 9.2550e-7 (1.802×) |
+
+**The safety design worked.** Because the prediction is shrunk by its own out-of-fold reliability, a useless model collapses to a no-op instead of injecting bias — the corrector changed the error by 0.006%. That is the behaviour we want from anything that ships.
+
+**This is the fifth independent failure to predict g**, and they now cover very different information sources:
+
+| observable | result |
+|---|---|
+| covprop reference at the final layer | R² 0.094 |
+| covprop reference at mid-depth (layer 12) | LOO R² 0.155 |
+| point-set radial imbalance | LOO R² −0.010 |
+| exact layer-1 closed form | LOO R² −0.037 |
+| **learned, from the gain trajectory (G1)** | **out-of-fold corr 0.012** |
+
+The common mode is worth 1.80–1.90× and is the largest single structure in our error, but it is looking genuinely unobservable from anything cheap. `g = ⟨ŝ − t, t⟩/⟨t,t⟩` is a projection onto the unknown truth direction; every proxy for that direction we have is noisier than the quantity being measured. **Recommendation: stop attacking the mode through prediction.** What remains is to attack it at the source — a point set whose realized error has less mass in that direction (which is G2's premise, and does not require predicting anything per-MLP).
+
+## 2026-08-05 — v2 on the grader-parity split: 1.19×, **misses the gate, nothing submitted**
+
+| version | change | mini adjusted | mini MSE | C/B | vs v1.1 |
+|---|---|---|---|---|---|
+| v1.1 (graded 3.893e-7) | — | 4.154e-7 | 1.4700e-6 | 0.2826 | 1.00× |
+| **v2.0** | prune τ=−2.5 + eig(JJᵀ) rotation | **3.483e-7** | 1.6079e-6 | 0.2208 | **1.19×** |
+| v2.1 | + diagonal α, W₁ basis | — | offline 1.834e-6 | — | rejected |
+| v2.2 | + N doubled (32768) | 3.588e-7 | 8.863e-7 | 0.4112 | 1.16× |
+| v2.3 | + f32 closure and Jacobian | — | offline 1.424e-6 | — | rejected |
+
+Gate was ≥1.2× **and** mini ≤3.4e-7. v2.0 gives 1.19× and 3.483e-7 — a miss by ~1%, on both. Four separate attempts to close it, all failed:
+
+1. **v2.1 — cheaper scaffolds.** Diagonal (mean-field) propagation for α plus the W₁ basis. **MSE +35%.** The diagonal ignores correlations, mis-ranks neurons and prunes live ones. α is worth its cost.
+2. **v2.2 — amortise fixed costs over more samples.** The identity `adjusted = (V·c_marginal + V·F/N)/B` says larger N should help, since F ≈ 6.9e9 per MLP doesn't scale. MSE did halve as predicted — but C/B rose 1.86× because **residual wall time scales with chunk count**, not just with fixed work (64.8 → 115.8 ms/MLP). Net worse.
+3. **v2.3 — f32 for the closure and Jacobian.** Saves 6% of FLOPs (f64 is rate 2.0), but perturbs α enough to shift pruning decisions: **offline MSE +4.5%**, which more than eats the saving.
+4. **Better pruning criterion.** α says how *often* a neuron fires, not how much the output *cares*. Tried ranking by Var(h)·‖B_k‖² (B_k = backward sensitivity to the final layer, 31 matmuls ≈ 1.0e9) and by Var(h) alone, at matched alive fraction with global thresholds:
+
+| criterion | keep 0.75 | keep 0.80 | keep 0.85 |
+|---|---|---|---|
+| **α** | **4.629e-7** | **3.146e-7** | **3.388e-7** |
+| Var(h)·‖sensitivity‖² | 9.681e-7 (0.48×) | 3.316e-7 (0.95×) | 3.446e-7 (0.98×) |
+| Var(h) alone | 5.256e-7 (0.88×) | 3.265e-7 (0.96×) | 3.393e-7 (1.00×) |
+
+**α wins outright**, and the sensitivity weighting costs an extra 1.0e9 for nothing. *(A first version of this experiment forced a fixed pruned fraction per layer and produced MSEs of ~1e-3 — a bug, not a result: at layer 1 the input mean is zero so μ_pre = 0 and α = 0 for every neuron, meaning nothing there is dead and a per-layer quota prunes fully live neurons. Global thresholds are the correct analogue of τ.)*
+
+**Decision: no submission.** Both reserves kept; v1.1 (graded 3.893e-7, rank ~159) remains our Phase 1 entry. The marginal value of a 13% gain on a board we sit at #159 on, two days from close, does not justify overriding the gate — and the grader-parity run already confirmed pruning runs clean (n_failed = 0), which was the real information we wanted before Phase 2.
+
+**Residual wall time is now the binding constraint on this design**: 10.8% of billed compute at 1794 ops/MLP, against v1.1's 1.5% at ~250 ops. Any further cost work must reduce op *count*, not FLOPs.
+
 ## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
 
 **Where we stand**: v1.1 graded 3.893e-7, rank ~159. The leader is 4.87e-8 — **8.0× ahead**. Every analytic-side avenue we tested this session is dead:
