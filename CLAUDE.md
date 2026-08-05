@@ -31,12 +31,14 @@ uv run python local_sim/validate_estimator.py    # offline held-out MSE check
 uv run python local_sim/fit_calibration.py       # refit calibration (writes experiments/calibration.json)
 ```
 
-## Known unknowns / gotchas (as of 2026-08-04)
+## Known unknowns / gotchas (updated 2026-08-04, after submission 323872)
 
-- **Phase 2 config unconfirmed** — assumed same as Phase 1 (256×32, B=2.72e11, floor 0.1, λ=1e11). The graded run report's `admin_config` is authoritative (also grab `wall_time_limit_s`). No `v1-phase2` HF dataset tag existed as of Aug 4 — if one appears, switch local runs to it and note in LOG.
-- The shims in `local_sim/` approximate the real fnp API. If `whest validate` flags a name/signature (`fnp.diagonal`, `fnp.diag`, `fnp.outer`, `flops.stats.norm.*`, `flops.as_symmetric`), fix `estimator.py` minimally without changing the math, mirror the fix into the shim if needed, and log it.
-- `whest login`/submit 302 or permission errors usually mean challenge rules need (re-)accepting in the browser for the current phase — stop and ask Samuel.
-- Expected v0 grader result: adjusted ≈ 2–3e-6, `mean_compute_utilization` < 2% (multiplier at 0.1 floor). If >3× off from local expectation, investigate before resubmitting (flopscope pricing of einsum/norm.cdf, wall-time overhead ≈ 3.7% budget per 0.1 s are prime suspects).
+- **We are in PHASE 1 until Aug 7 23:59 UTC.** Rounds (from the challenge page): 1425 warm-up (closed), **1428 "Phase 1" Jun 18 → Aug 7 23:59 — LIVE**, 1429 "Phase 2" Aug 8 → Sep 19 23:59 — UPCOMING (empty leaderboard, no `v1-phase2` HF tag). Earlier docs said Phase 2 opened Aug 1; wrong.
+- **Phase 1 config confirmed** by the graded report: width 256 × depth 32, n_mlps 100, B = 2.72e11, λ = 1.000e11 (derived exactly from per-MLP telemetry), multiplier floor 0.1. **`admin_config` is admin-only** — participants never see it; `evaluation.config_snapshot` + per-MLP telemetry is what we get. `wall_time_limit_s` remains unknown (only bound: ≥0.6 s, our max was 0.592 s with no timeouts). **Phase 2's config stays unverified until a graded run in round 1429 (Aug 8+).**
+- Real flopscope API matches `estimator.py` exactly — `whest validate` passed with zero changes (`fnp.diagonal/diag/outer/einsum`, `flops.stats.norm.cdf/pdf`, `flops.as_symmetric(data, *, symmetry=(0,1))` all correct, and `as_symmetric` accepts our width-256 covariance). If a future edit trips a name/signature, fix `estimator.py` minimally without changing the math, mirror into the shim, and log it.
+- Grader reports are **not** returned by `whest submit --json` (it gives only id/score/score_secondary) nor by the `/api/v1/submissions/{id}` endpoint. The full report lives in the submission page's `data-react-props` payload → `props.data.submission.evaluation`.
+- `whest login`/submit 302 or permission errors usually mean challenge rules need (re-)accepting in the browser for the current phase — stop and ask Samuel. (Did not occur for the Phase 1 round.)
+- v0 grader baseline to beat: adjusted **2.4927e-6**, `mean_compute_utilization` 1.45%, 0 failures. Local mini-split predicts the grader to within ~7%. If a future run is >3× off local expectation, investigate before resubmitting.
 
 ## Working style
 

@@ -72,13 +72,35 @@ Phase 1 top-10 adjusted: 1.24e-8, 2.30e-8, 2.32e-8, 4.63e-8, 5.59e-8, 6.38e-8, 9
 3. ARC's own wishlist (townhall) = Phase D of our plan: depth-robust low-rank cumulants + resummation. They have effectively pre-announced what impresses them.
 4. Everyone's negative results (failed learned correctors, dead control variates at depth 32) used *generic* regressors on *final-layer* residuals. Our angle: correct *per-layer* along the way (stop compounding early) rather than patch the end.
 
+## 5b. Round structure — MEASURED 2026-08-04 (supersedes §1 timeline row)
+
+Read directly off the challenge page's round objects:
+
+| round id | name | window (UTC) | state | leaderboard |
+|---|---|---|---|---|
+| 1425 | warm-up | — | closed | 79 entries, top 3.91e-8 |
+| **1428** | **Phase 1** | **2026-06-18 → 2026-08-07 23:59** | **LIVE** | 200+ entries, top 4.87e-8, #10 9.85e-8, #200 6.40e-7 |
+| 1429 | Phase 2 | 2026-08-08 → 2026-09-19 23:59 | UPCOMING | empty |
+
+Phase 2 had **not** started on Aug 4 (§1 and the game plan assumed an Aug 1 start — wrong).
+Our submission 323872 graded into round 1428. Note the live Phase-1 top (4.87e-8) does not
+match the "Phase 1 #1 = 1.24e-8" figure in §2's Jul 28 snapshot; the numbers in this table
+are freshly measured and should be preferred.
+
+**Phase 1 config confirmed** from the graded report: 256×32, n_mlps 100, B=2.72e11,
+λ=1.000e11 (derived exactly from per-MLP telemetry on all 100 MLPs), multiplier floor 0.1.
+`admin_config` is **admin-only and never shown to participants**; `wall_time_limit_s` is
+therefore still unknown (lower bound ≥0.6 s). Details in `experiments/LOG.md`.
+
 ## 6. Open questions / to verify next
 
-- [ ] Phase 2 config: same 256×32 + 2.72e11? floor still 0.1? λ still 1e11? → first graded run report (`admin_config`) + forum. No `v1-phase2` HF tag as of Aug 4.
+- [x] ~~Phase 1 config~~ confirmed 2026-08-04 (see §5b): 256×32, B=2.72e11, λ=1e11, floor 0.1.
+- [ ] Phase 2 config: cannot be checked before the round opens **Aug 8**. First graded run in round 1429 + any `v1-phase2` HF tag will settle it.
+- [ ] `admin_config.wall_time_limit_s` — not in the participant report; infer from a deliberately slow submission or ask on the forum.
 - [ ] Did organizers respond to 18099/18108 (loophole)? Any flopscope ≥0.10 patch notes?
-- [ ] Exact flopscope pricing of `stats.norm.cdf/pdf`, `standard_normal` (~16/elt), einsum paths, `as_symmetric` — read from our own run reports.
-- [ ] Grader wall cap `admin_config.wall_time_limit_s`; real per-run wall time of our estimator (Python-loop overhead × λ matters: 0.1s ≈ 3.7% budget).
-- [ ] Whether `fnp.diagonal`, `fnp.outer`, `flops.stats` names match exactly (validate will tell).
+- [x] ~~flopscope pricing~~ measured on the mini split (per MLP, 256×32, f64): `einsum` W^T Cov W 3.219e9 (98.5% of our total), `as_symmetric` 2.94e7, `outer` 2.1e6, `matmul` 8.4e6, `stats.norm.cdf` 7.9e5 / `pdf` 4.4e5, `diagonal` 0. `standard_normal` untested (v0 draws no samples) — measure when Phase A lands.
+- [x] ~~Real per-run wall time~~: grader 0.48 s/MLP wall, of which **6.74 ms is uninstrumented residual** → 6.74e8 FLOP-equiv at λ=1e11 = 17% of our billed compute. Local box: 0.12 s/MLP, 4 ms residual. flopscope's own overhead is *not* charged.
+- [x] ~~`fnp.diagonal`/`fnp.outer`/`flops.stats` names~~ all correct — `whest validate` passed with no estimator changes.
 - [ ] Team-formation rules for Phase 2 (Phase 1 merges closed Jul 31).
 - [ ] Phase 1 final standings & any released winner write-ups (Aug 7 write-up deadline) — free intel, check ~Aug 8.
 
