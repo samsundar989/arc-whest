@@ -539,6 +539,37 @@ Identical results at every rank gave the mechanism away: **the factor never leav
 
 Every depth profile is worse. The sharp global optimum is genuinely flat-optimal in the profile direction — the threshold is set by where the analytic patch stops being accurate, and that does not drift with depth.
 
+## 2026-08-05 — v2.4 GRADED (submission 324420): **2.7194e-7**, rank ~88
+
+| version | method | graded adjusted | vs previous | vs v0 |
+|---|---|---|---|---|
+| v0 (323872) | covariance propagation + calibration | 2.4927e-6 | — | 1.00× |
+| v1.0 (324075) | antithetic MC, f32, exact layer 1 | 6.781e-7 | 3.68× | 3.68× |
+| v1.1 (324094) | Sobol RQMC + digital shift | 3.893e-7 | 1.74× | 6.40× |
+| **v2.4 (324420)** | **+ pruning + rotation + op engineering** | **2.7194e-7** | **1.43×** | **9.17×** |
+
+Grader detail: MSE 1.3748e-6, C/B **0.19898**, n_failed 0, best MLP 6.155e-8 / worst 8.080e-7, λ = 1.000e11 confirmed a fourth time. **Rank ~88** (was ~162 with v1.1).
+
+**The op-count work paid off more on the grader than locally.** Residual wall time is **9.84 ms/MLP = 1.83% of billed compute**, against 54.3 ms / 9.2% on our own machine — the grader's hardware handles temporary churn far better. So we comfortably beat the ≤3% residual target *on the machine that matters*, and the local figure was a pessimistic proxy. Worth remembering: **local residual over-predicts grader residual by ~5×**, so op-count work should be validated on graded runs, not local ones.
+
+The mini split predicted 3.40e-7 and the grader returned 2.72e-7 — 20% better, the same direction as every previous submission (v1.0 14%, v1.1 6.3%) but larger.
+
+**Submissions today: 3** (v1.0, v1.1, v2.4). One reserve untouched, as planned.
+
+*A submit attempt failed first with exit 255 and no output. Before retrying I checked ids 324420+ via the API — all 404, so no submission had been created and a retry was free rather than a wasted reserve. The retry succeeded and took id 324420. Worth keeping as a habit: verify creation before re-submitting.*
+
+### ⚠️ Flagged for the Aug-8 bypass forensics: scores below the apparent label-noise floor
+
+Every graded report we hold carries `sampling_mse = 6.469470189211361e-07`, **identical to 16 digits across v0, v1.0, v1.1 and v2.4** — so it is a property of the grading set, not of our estimator. It is *not* the shipped dataset's 1e9-sample noise (that would be ~3.8e-11); 0.0424/65536 ≈ 6.47e-7, consistent with the grader scoring against its own ~65k-sample MC truth.
+
+If that reading is right, then for any estimator measured against noisy labels t̂ = t + ε:
+
+    E[(pred − t̂)²] = E[(pred − t)²] + Var(ε) ≥ 6.47e-7
+
+so with the multiplier floored at 0.1, **no honest submission can score below ≈ 6.47e-8**. The live board currently shows **#1 = 5.6e-9**, and the public feed contains several entries at 7.6e-9, 8.0e-9, 1.04e-8, 1.07e-8 — an order of magnitude below that bound.
+
+**Caveat, held deliberately**: this rests on inferring what `sampling_mse` denotes, which the docs do not state. It is a hypothesis with an arithmetic consequence, not a conclusion — exactly the test Mission 3 specifies. Run it properly on the Phase 2 board on Aug 8 (record adjusted, MSE column, entry counts, implied C/B per entry) before drawing any inference. **Nothing about this goes on the forum.**
+
 ## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
 
 **Where we stand**: v1.1 graded 3.893e-7, rank ~159. The leader is 4.87e-8 — **8.0× ahead**. Every analytic-side avenue we tested this session is dead:
