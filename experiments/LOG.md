@@ -103,6 +103,77 @@ than the Jul 28 snapshot in RESEARCH_NOTES §2 suggested (that snapshot's "Phase
 v0's job was to prove the pipeline, and it did: local harness ≈ grader, zero failures,
 config confirmed.
 
+## 2026-08-05 — Phase A: measurement first (what actually reduces sampling error)
+
+**New instrument, and it changes what we can measure.** `local_sim/real_data.py` now loads the *real* phase-1 dataset — 100 MLPs with the shipped **1e9-sample ground truth** (noise ~2e-10). The old route (self-generated MLPs + 200k-sample MC truth) carried ~5e-7 of its own noise, which is the same size as everything Phase A is trying to measure — it literally could not see the signal. Every number below is against real ground truth. `local_sim/eval_estimator.py` runs any estimator file against it through the shims.
+
+**Real flopscope pricing** (measured, per element, `scratchpad` probe → now in RESEARCH_NOTES §6):
+
+| op | f64 | f32 |
+|---|---|---|
+| matmul | 4 /MAC | **2 /MAC** |
+| standard_normal | 32 | **16** |
+| ReLU (`maximum`) | 1 | 0.5 |
+| `stats.norm.cdf` / `pdf` / **`ppf`** | 96 / 54 / **168** | — |
+
+float32 is exactly half price everywhere ⇒ **always sample in f32** (and the shipped weights are float32 values anyway, so it is lossless). One 256×32 forward-pass sample costs **4.21e6 FLOPs** ⇒ ~64.6k samples at full budget, ~6.5k at the 0.1 floor. Weights arrive from the grader as **float64**, so the `.astype(float32)` cast is worth 2× on the dominant term for a 2.1e6-FLOP one-off.
+
+**Variance structure of the final layer** (`local_sim/variance_lab.py`, N=8192, real GT):
+
+| scheme | MSE | vs MC | note |
+|---|---|---|---|
+| plain MC | 8.39e-6 | 1.00× | |
+| antithetic (±x) | 8.17e-6 | 1.03× | **essentially nothing** |
+| radius stratification | 6.98e-6 | 1.20× | |
+| radius + antithetic | 5.45e-6 | 1.54× | |
+| **scrambled Sobol** | **2.96e-6** | **2.84×** | the winner |
+
+**69% of plain-MC error variance lies along a single "scale mode"** (the whole layer rescaling together); Sobol cuts that share to 42%. Radius stratification barely touches it, so ‖x‖ is *not* what drives it.
+
+**Control variates are a dead end here** (`local_sim/cv_lab.py`). Layer 1 has exactly-known moments (E[ReLU(z_i)] = σ_i/√(2π), verified to ~3σ of pure sampling noise), so it is a legitimate zero-bias control variate. Ceilings measured by per-sample covariance: scalar CVs (Σh₁, Σh₁², ‖x‖²) 1.1×; **full 256-dim h₁ vector 1.80×**; even the *illegal* ceilings using h₂/h₃ (whose means we don't know) only reach 2.1–2.5×. And stacked on Sobol the CV adds **nothing** (2.04× → 1.98×) — QMC and the CV remove the *same* variance. This independently reproduces the public finding that control-variate coupling dies by layer 32 (thread 18085). **Dropped.**
+
+**Randomisation method matters more than the point set** (`local_sim/impl_lab.py`, N=16384):
+
+| randomisation | vs MC | shippable? |
+|---|---|---|
+| scipy scrambled (LMS + digital shift) | 2.62× | no (scipy absent in sandbox) |
+| **digital XOR shift of a fixed net** | **2.04×** | **yes** |
+| Cranley-Patterson real shift (u+Δ mod 1) | 1.24× | yes |
+| Korobov rank-1 lattice + shift | 1.45× | yes |
+
+A real-valued shift destroys the digital net structure; an XOR shift preserves it exactly and costs 1 FLOP/element. That is the whole design of v1.1.
+
+## 2026-08-05 — v1.0 SUBMITTED: antithetic Monte Carlo, float32, exact layer 1
+
+`estimator_v1.py`. N sized analytically from the budget to C/B ≈ 0.15 (**never** calling `budget_summary_dict()` — forum 18092 measured a 157× residual blowup from that). Analytic cost model verified against real flopscope: predicted 4,210,688 FLOPs/sample vs measured 4,213,120 — **0.06% error**.
+
+**Gates (all passed):**
+
+| gate | requirement | result |
+|---|---|---|
+| (a) local held-out | ≥5× better than v0's 2.67e-5 | 4.80e-6 → **5.56×** ✅ |
+| (b) error-vs-N | ~1/N | ratios 2.89× / 1.90× / 2.07× per budget doubling; α=1.15 ✅ |
+| (c) `whest validate` | pass | ✅ |
+| (d) mini subprocess | 0 failures, C/B ∈ [0.10,0.20], adj < 1e-6 | 0 failures, C/B **0.1597**, adj **7.906e-7** ✅ |
+
+Mini-split MSE 4.946e-6 vs local prediction 4.80e-6 — **3% agreement**, so the offline rig now predicts the grader well. Wall time 0.239 s/MLP locally; residual 26 ms/MLP = 2.6e9 FLOP-equiv, i.e. **6.4% of billed compute is wall time** (was 17% for v0 — the sampling estimator is more FLOP-dense, so the wall-time channel matters *less*).
+
+Antithetic pairing was kept (it is free) but is worth ~3%, not more — the measurement above says so plainly. The win here is float32 + sampling, not the antithetic trick.
+
+## 2026-08-05 — v1.1: Sobol RQMC with digital shift
+
+`estimator_v1_1.py`. Joe-Kuo direction numbers (30×256 uint32) **embedded in the file** as a zlib+base64 blob (~27 KB) so single-file submission survives; `local_sim/make_sobol_blob.py` regenerates them and asserts the pure-integer generator reproduces scipy's point set **exactly**, and `local_sim/inject_sobol_blob.py` round-trips the blob after injection. Points are generated in-estimator with 30 XOR passes (~0.14% of budget), digitally shifted per dimension from `mlp.seed`, mapped through `flops.stats.norm.ppf` (168 FLOPs/elt ≈ 1% of budget), then run forward in f32. N is a power of two (net property), C/B target 0.25.
+
+**Local held-out (40 MLPs, real GT):**
+
+| budget × | N | C/B | final-layer MSE | adjusted |
+|---|---|---|---|---|
+| 0.25 | 4096 | 0.064 | 8.32e-6 | 8.32e-7 |
+| 0.5 | 8192 | 0.129 | 3.87e-6 | 4.98e-7 |
+| **1.0** | **16384** | **0.257** | **1.573e-6** | **4.049e-7** |
+
+α = **1.20** — genuinely superlinear, so unlike plain MC this *does* reward spending past the floor. **1.78× better than v1.0** on adjusted score (gate wanted ≥1.5×), **17× better than v0** on MSE.
+
 ## Next planned experiments
 
 1. ~~Submit v0 → parse run report~~ ✅ done (above). Remaining open item: `wall_time_limit_s`

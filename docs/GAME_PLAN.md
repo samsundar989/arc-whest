@@ -1,10 +1,20 @@
 # Game plan — ARC White-Box Estimation Challenge 2026
 
-*Goal: win Phase 2 (Best Score, $50k) and contend for Best Algorithmic Contribution ($20k). Deadline: **Sep 19, 2026, 23:59 UTC** (~6.5 weeks). Written Aug 4, 2026.*
+*Goal: win Phase 2 (Best Score, $50k) and contend for Best Algorithmic Contribution ($20k). Written Aug 4, 2026; **round dates corrected Aug 5** after reading them off the challenge page.*
+
+## Round calendar (measured, authoritative)
+
+| round | window (UTC) | state as of Aug 5 |
+|---|---|---|
+| warm-up (1425) | — | closed |
+| **Phase 1 (1428)** | **Jun 18 → Aug 7, 23:59** | **LIVE — closes in days** |
+| Phase 2 (1429) | **Aug 8 → Sep 19, 23:59** | upcoming, empty leaderboard, same grader stack |
+
+Earlier drafts assumed Phase 2 opened Aug 1. Wrong — Phase 1 is still live and closes **Aug 7 23:59 UTC**, so near-term work targets the Phase 1 board; Phase 2 opens Aug 8 and re-verification of its config happens with our first submission there.
 
 ## The strategic picture
 
-- **The bar**: Phase 1's leader sat at **1.24e-8** adjusted; warm-up resolved below 4e-8. Assume winning Phase 2 means **≲1e-8**, i.e. final-layer MSE ≲1e-7 at ≤10% budget, or ≲1e-8 at full budget. Ground-truth noise (~2e-10) says there's real room below the current leader.
+- **The bar** (live Phase-1 board, measured Aug 4): **#1 = 4.87e-8**, #10 = 9.85e-8, #200 = 6.40e-7. The warm-up round topped out at 3.91e-8. ~~Phase 1's leader sat at 1.24e-8~~ — that late-July figure is **superseded**; it does not match any live round and should not be used for target-setting. Assume winning Phase 2 means **≲4e-8**. Ground-truth noise (~2e-10) says there's real room below the current leader.
 - **The two currencies**: leaderboard score (engineering + statistics) and the contribution prize (mechanistic insight + a clean PDF write-up). These pull in the same direction until late September, when we split effort.
 - **Our structural advantages**: (1) the data distribution is *fully known* — He-init MLPs — so we can mint unlimited labeled data offline; offline compute is unmetered and we have a recent NVIDIA GPU for it; (2) the cloud workspace runs the exact submission file against self-generated ground truth (local_sim/), so iteration never waits on the grader; (3) 50 submissions/day is effectively unlimited — the grader is our oracle for anything ambiguous (flopscope pricing, wall-time caps, Phase 2 config).
 - **Fair play**: the flopscope wall-time loophole (RESEARCH_NOTES §5) is off-limits. It's explicitly against organizer statements, poisons the contribution prize, and a patch + re-grade could vaporize scores built on it. We build methods that win a *fair* re-run. If organizers patch it mid-phase, our relative position improves for free.

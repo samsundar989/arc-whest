@@ -36,7 +36,7 @@
 | **Phase 1 #1** | 3.12e-8 (col.) | ~40% B | **1.24e-8** |
 | GT noise floor | ~2e-10 | — | — |
 
-Phase 1 top-10 adjusted: 1.24e-8, 2.30e-8, 2.32e-8, 4.63e-8, 5.59e-8, 6.38e-8, 9.18e-8, 9.47e-8, 9.76e-8, 1.06e-7. 636 participants / 76 teams / 13.2k submissions (Jul 28 snapshot). Warm-up (256×8) winner: <4e-8 (Manifold market resolution).
+~~Phase 1 top-10 adjusted: 1.24e-8, 2.30e-8, 2.32e-8, 4.63e-8, 5.59e-8, 6.38e-8, 9.18e-8, 9.47e-8, 9.76e-8, 1.06e-7. 636 participants / 76 teams / 13.2k submissions (Jul 28 snapshot).~~ **SUPERSEDED** — see §5b for the live board measured Aug 4 (#1 4.87e-8, #10 9.85e-8, #200 6.40e-7). The Jul 28 numbers match no live round; do not use them for target-setting. Warm-up (256×8) winner: 3.91e-8 (round 1425 board, confirms the "<4e-8" Manifold resolution).
 
 ## 3. Key forum threads (discourse.aicrowd.com)
 
@@ -50,6 +50,35 @@ Phase 1 top-10 adjusted: 1.24e-8, 2.30e-8, 2.32e-8, 4.63e-8, 5.59e-8, 6.38e-8, 9
 - **18099** ⚠️ flopscope bypass bug (Kerensa) — raw NumPy-backed arrays escape FLOP counting; billed only wall-time at λ=1e11 < real AVX throughput; jtel: top submissions show instrumented/effective ratios <0.001. No organizer reply as of crawl. `/t/potential-flopscope-accounting-bypass-bug/18099`
 - **18106** structure-aware hybrid write-up (natasha_stewart) — dead/on/kink classification, antithetic Sobol to layer 30, linearized "on" neurons last layers → 1.551e-7. `/t/phase-i-submission-structure-aware-estimation-.../18106`
 - **18108** mliston (#4) proposal to fix wall-time channel (cap share / raise λ to 1e12 / require instrumented APIs). `/t/recommendation-restoring-the-estimation-framing-.../18108`
+
+## 3b. The re-score story — RESOLVED 2026-08-05 (hypothesis partly wrong)
+
+**Working hypothesis was**: "flopscope 0.10 closed the wall-time bypass and the board was re-scored, forcing the extension." **Verdict: the re-score and extension are confirmed, but the bypass is NOT the cause and appears still open.**
+
+Timeline, from the threads:
+
+| date | thread | what happened |
+|---|---|---|
+| Jul 16–17 | **18076** | Zero-sized contractions charged **negative** FLOPs — "increases the remaining budget inside a BudgetContext". Fixed, PR #146 + regression tests. |
+| Jul 23 | flopscope 0.9.0 | "dtype-aware four-factor cost model + reviewer-driven re-tiering (#150)" — a full accounting overhaul. |
+| Jul 23–25 | **18082** | `fnp.linalg.solve` undercharged batched RHS by the **whole batch factor** (256×256 @ 256×1024 and 40×256×1024 both billed 145,402,538). Exploitable by "rewriting each layer `A @ W` as `solve(inv(W.T), A.T)`". Organizer confirmed and fixed: *"once the fix is in, the affected submissions will automatically be evaluated using the patched flopscope."* |
+| Jul 25–26 | **18099** | The raw-NumPy-array bypass. jtel showed top submissions with instrumented/effective **< 0.001**. **No organizer reply.** |
+| Jul 28 | **18108** | mliston's three fixes (cap residual / raise λ to 1e12 / analytical-only scoring). **No organizer reply.** |
+| Jul 30 | flopscope 0.10.0 | Prices **destination writes**; **voids symmetry-tag discounts when the tagged buffer is rewritten**; refused ops uniformly free; stops charging for results the server cannot deliver. **Nothing about the raw-array bypass or λ.** |
+| ~Jul 31 | **18109** | pranay212 asked for an extension: board "re-evaluated only a few days ago", bugs/PRs still landing, *"we don't currently know what the real scores are"*. Organizer (Mohanty): *"We have therefore decided to extend the Phase 1 deadline by one week."* → **Phase 1 Jul 31 → Aug 7**; algorithmic write-up → **Aug 17**. inverted_donkey pushed back: *"Every flopscope update effectively changes the rules of the competition."* |
+
+**So**: the re-score was driven by the `solve` undercount fix (18082) plus the 0.9/0.10 cost-model overhaul, and *that* forced the extension. The wall-time bypass of 18099/18108 has **no organizer response and no changelog entry** — assume it is still open and that some of the top board remains inflated. Our position is unchanged: build clean (rule 3), and note the organizers' standing commitment that **"every submission made in Phase 1 until the change will be re-evaluated on the updated cost model"** — a fair re-grade helps us.
+
+**Grader stack now**: flopscope **0.10.0**, whestbench **0.14.0** (confirmed in our own graded report). Phase 1 originally evaluated on 0.8.0rc1/0.12.0rc0 — the upgrade is real.
+
+## 3c. Cost-model facts that constrain how we write estimators
+
+1. **Never call `budget_summary_dict()` / `budget_summary()` inside `predict`** (18092). Measured: 0.40 s → **62.4 s** residual on the 100-MLP mini split, score 2.03e-5 → 4.60e-5. It aggregates the whole per-op history, so it is O(ops so far). At λ=1e11 those 62 s are ~6.2e12 FLOP-equivalents ≈ **23× the entire budget**. Compute sample counts analytically instead; if you must calibrate, do it once per shape and cache.
+2. **Freeing big temporaries is billed as residual wall time** (18101): ~100–120 µs/op when temporaries are released between instrumented calls vs ~6–8 µs when release is deferred — 13–16×. `fnp.matmul` has no `out=`, so it is not fully avoidable. Practical rule: **fewer, larger ops** — a sampling estimator should use a small number of big chunks, not many small ones.
+3. **Destination writes are priced** as of 0.10.0, so `out=` is not a free lunch.
+4. **Symmetry tags are voided if the tagged buffer is rewritten** (0.10.0) — our v0 rebuilds `cov` each layer rather than mutating, so its `as_symmetric` discount stands (measured 2.94e7 FLOPs/MLP).
+5. λ = 1e11 FLOP/s independently confirmed by 18092's arithmetic, matching our own derivation from per-MLP telemetry.
+6. Historic exploit, now closed: batched-RHS `solve` (18082). Do not build on `solve` tricks.
 
 ## 4. The science (papers that matter, ranked)
 
