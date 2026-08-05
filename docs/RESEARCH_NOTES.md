@@ -142,6 +142,37 @@ knows the answers has no reason to do. Recorded, not explained away.
    whether `public_scores` still exposes per-MLP values. Snapshot the board daily
    with `board_snapshot.py` and diff with `--diff`.
 
+## 2h. Evaluation mechanics — what actually decides the prize (confirmed 2026-08-05)
+
+> Placeholder for the strategy session's own §2h and
+> `docs/eval-mechanics-and-reconstruction.md`, **neither of which had synced to this
+> repo** when this was written. Merge rather than overwrite.
+
+**The frame, as confirmed:** prizes are decided by a **private re-run of each team's
+one designated submission on fresh MLPs**. The public leaderboard is not the
+ranking; combined with §2g (a fixed 50-MLP scored set with exact per-MLP feedback)
+it is a reconstruction game, and rank on it carries no information about how a
+method will do on unseen draws.
+
+**Operational consequences, which is why this section exists:**
+
+1. **Judge everything on fresh-MLP score.** The local 100-MLP mini split (public
+   1e9-sample truth, never used for fitting) and ≥1000 freshly minted He MLPs
+   (`local_sim/robustness.py`) are the decision instruments. A change that helps on
+   the graded 50 and not on those is not a change we want.
+2. **The distribution matters, not the mean.** One designated submission, one fresh
+   draw, and a failed MLP scores as zeros — so p99 and max are first-class metrics.
+   `local_sim/edge_cases.py` covers the contract failure modes on the shipped file.
+3. **Don't chase published numbers.** 18106's 1.551e-7 is attributed to the
+   dead/on/kink family that Sprint 3 measured end-to-end at ~1.02×; either the
+   method differs from its description or the number reflects the board. Trust
+   local measurement.
+4. **Open questions for the organizers** (drafted in `docs/email-draft-organizers.md`,
+   not yet sent): how designation works and by when; the re-run set's size and
+   architecture (the townhall said "finalized closer to the time"); and whether the
+   contribution-prize top-K screening pool comes from the public board or the
+   private re-run.
+
 ## 3. Key forum threads (discourse.aicrowd.com)
 
 - **17997** challenge open — grader specs, 50/day. `/t/arc-white-box-estimation-challenge-is-now-open/17997`

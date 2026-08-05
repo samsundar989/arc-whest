@@ -66,6 +66,52 @@ Mint 50k He MLPs on the RTX 5090 (38.3 TFLOP/s measured), label with 64k–256k-
 
 *Overall target: ≤5e-8 adjusted. Milestone gate: if not ≤2e-7 by Aug 21, consolidate instead of adding pieces.*
 
+## REV 6 (2026-08-05, late) — the honest sampling frontier is declared at ~2.7e-7
+
+> **Merge note.** Written by the Claude Code session. The strategy session's own
+> rev 6, `RESEARCH_NOTES §2h`, and `docs/eval-mechanics-and-reconstruction.md` had
+> **not synced to this repo** when this was written — this rev is built on rev 5,
+> §2g and the verdicts relayed in the Aug-5 tasking. Merge deliberately.
+
+**Sprint 3 (structure-aware FLOP allocation) came back at 1.0246× against a 1.20×
+gate, and the ceiling is arithmetic.** Details in LOG. The short form: for a
+confidently-on neuron ReLU is the identity, so at the scored layer it needs no
+per-sample value and at a feed-forward layer it is linear and composes — both
+verified, the second to within 0.07% MSE over eight layers. But under `(2K−1)MN`
+billing the multiply is the cost, not the nonlinearity, so the reduction is worth
+the share of the cost model it touches: **the scored layer is 3.67% of the
+per-sample budget, so freeing it entirely is 1.038×.** Clearing 1.20× would need
+six of the last layers to cost nothing.
+
+**Therefore: we stop optimising score.** Every remaining known lever is small and
+additive — a hand-rolled normal quantile in place of `stats.norm.ppf` (~1.4%), the
+Sprint-3 scheme (~2.5%) — perhaps 1.04× in total, for new code paths on an
+estimator we are scored on **once**, on MLPs we have never seen. That is a bad
+trade. v2.4 stands as the designated submission unless Phase 2 changes shape.
+
+**What the effort goes to instead, in priority order:**
+
+1. **Robustness on fresh MLPs** (`local_sim/robustness.py`, `edge_cases.py`). The
+   private re-run scores one designated submission on unseen draws, so the
+   distribution's tail is the risk, not its mean. Edge-case suite on the shipped
+   file: **24/24 pass**, including degenerate pruning, a identically-zero layer,
+   1e4 dynamic range, seed 2⁶³−1, widths 64/128, depths 2–64, budget 0, and input
+   immutability.
+2. **The write-up** (`docs/writeup-draft.md`), due Sep 26. This is now where the
+   remaining expected value is. The negative results carry mechanisms *and* oracle
+   bounds, and the on-neuron reduction gives it a theorem with a price tag.
+3. **Phase 2 config verification** (Aug 8). If the shape changes, re-measure before
+   optimising: α-histogram → error-vs-N → τ → stack. v1.1 stays the shape-generic
+   fallback.
+4. **Governance**: the organizer email is drafted and waits on Samuel. Nothing on
+   the forum.
+
+**Scoring policy, restated because it now drives everything**: judge on the local
+100-MLP mini split and on ≥1000 fresh minted MLPs. Public-board rank is not a
+target — §2g establishes the board is a fixed-suite reconstruction game — and our
+own graded runs are *paired re-measurements* on 50 fixed MLPs, useful only against
+our own prior submissions.
+
 ## REV 5 (2026-08-05, night) — both analytic revivals are bounded out; the board is signal-poor; optimise for FRESH MLPs
 
 Rev 4 retired variance reduction as a growth area. Rev 5 closes the two tracks that

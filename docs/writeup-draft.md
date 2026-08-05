@@ -152,6 +152,50 @@ MSE = 1.47×**, with the pruned neurons' own MSE at 3.8e-9.
 **Ablation to include.** α beats both Var(h) and the sensitivity-weighted criterion
 Var(h)·‖∂z_L/∂h‖² at matched cost — the criterion that looks more principled loses.
 
+### 4b. The on-neuron reduction, and exactly what it is worth
+
+**The theorem, stated once and used twice.** For a neuron whose firing index α is
+large, Φ(α) → 1 and φ(α) → 0, so the rectified-Gaussian mean collapses to the
+plain mean: E[ReLU(z)] = E[z]. Two consequences, and they are different claims:
+
+* *At the scored layer* the neuron needs **no per-sample value at all** — its
+  answer is wᵀ(incoming sample mean) plus the exact rectification correction
+  σ[φ(α) − αΦ(−α)]. Measured: the correction extends the usable threshold down by
+  about one unit of α, and at α > 3 it is unnecessary.
+* *At a feed-forward layer* ReLU is the identity, so the neuron is **linear** and
+  its path composes with the next layer's weights into a precomputed matrix. We
+  verified this survives propagation: linearising every α > 2.5 neuron in the last
+  eight layers changes the final-layer MSE by **0.07%**.
+
+The distinction matters because the *other* reading — replace the on-neuron by its
+mean — is catastrophic: 48× worse MSE at k=2 and three orders of magnitude by k=8.
+Deleting a neuron's fluctuation biases every downstream ReLU, since ReLU is convex
+in it. Same mechanism as the projection result in §3c, and worth showing side by
+side.
+
+**And it buys 1.02×.** This is the part we would most want a reader to take away,
+because it is where a plausible-sounding structural insight meets shape-based
+billing and loses. Under `(2K−1)MN` pricing, what costs money is the matmul, and
+linearising a neuron removes its ReLU, not its multiply: the contribution still has
+to be carried, either explicitly per sample or implicitly through a composed matrix
+whose source width grows with every kink activation retained. Re-materialising to
+reset that width costs *more* than a dense layer. Pricing the exact optimum of that
+trade-off (a DP over which layers re-materialise) gives 1.025× cheaper samples at
+0.06% MSE.
+
+The ceiling is arithmetic, not a property of our implementation. In our per-sample
+budget the scored layer is **3.67%** of the cost, so making it entirely free is
+worth **1.038×**; making the last *eight* layers free would be needed for 1.32×.
+**Track T's theorem buys exactly one layer, and one layer is 3.67%.** State it that
+way — the general lesson is that a structural reduction is worth the share of the
+cost model it actually touches, and under shape-based billing the nonlinearity is
+never the expensive part.
+
+*A methodological aside worth one sentence*: the variance rescale κ = 1.363 that
+Track T fitted to correct the closure's final-layer variance made things **worse**
+when reused inside this correction term. A constant fitted for one role does not
+transfer to another, even within the same layer of the same estimator.
+
 ## 5. What didn't work, and why it *couldn't*
 
 The section that earns the prize if written honestly.
@@ -248,6 +292,28 @@ narrower and blames no one: **a leaderboard that scores a fixed set and returns
 per-item errors is a fixed-design regression problem, not an estimation benchmark,
 and the only defence is the private re-run on fresh instances.** That sentence can
 stand in a public write-up without any of F.1–F.6 behind it.
+
+## 8. Robustness, and why the distribution is the deliverable
+
+The competition's final ranking comes from re-running one designated submission on
+MLPs it has never seen. That makes the *distribution* of per-MLP score the object
+to engineer — a method with a good mean and a fragile tail loses a fresh re-run,
+and a single failed MLP scores as zeros. We think this framing is under-discussed
+in the write-ups so far, all of which (ours included, until now) report a mean.
+
+**Evidence to include**: the per-MLP adjusted-score distribution over ≥1000 freshly
+minted He MLPs with 4.2M-sample MC labels — median, p90, p99, max, and max/median —
+plus the same for deliberately atypical networks (inflated row norms, a collapsed
+layer, an amplified layer, a mean-shifted layer). And the contract suite on the
+shipped file: degenerate pruning where an entire layer falls below τ, an
+identically-zero layer, 10⁴ dynamic range, seed 2⁶³−1, widths 64/128, depths 2–64,
+budget 0, and input-array immutability.
+
+**The design point worth arguing**: our pruning rule fires on a *predicted*
+quantity (the closure's α), so its failure mode on an atypical network is
+misclassification, not a crash — and the analytic patch that replaces a pruned
+neuron is a closed form that cannot diverge. Rules that depend on sampled
+quantities do not have that property.
 
 ## Open items before this is publishable
 

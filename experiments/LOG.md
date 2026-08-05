@@ -794,6 +794,136 @@ is also the honest proxy for the private re-run that sets the final ranking. **W
 not use this channel.** It is not the wall-time grey area of rule 3; reconstructing
 reference values is not estimation at all.
 
+## 2026-08-05 (night) — SPRINT 3: structure-aware FLOP allocation. **1.0246× — gate FAIL, and the ceiling is arithmetic**
+
+**Verdict: 1.0246× against a 1.20× gate. Nothing submitted. We declare the honest
+sampling frontier at ~2.7e-7.** `local_sim/sprint3_probe.py`, full 100-MLP mini
+split, N=16384, real 1e9-sample truth.
+
+The idea was to spend Track T's theorem as compute: a confidently-on neuron has
+ReLU = identity, so at the scored layer it needs no per-sample value at all
+(its mean is `wᵀ·(incoming sample mean)` plus an exact rectification correction),
+and at a feed-forward layer it is *linear*, so its path composes into a
+precomputed matrix. Only kink neurons need a per-sample ReLU, and shape-based
+billing rewards materialising the narrow matmul.
+
+### The on-population is real and grows with depth
+
+Share of **alive** neurons above the threshold (closure α), 100 MLPs:
+
+| layer | α>1.0 | α>2.0 | α>3.0 | α>4.0 |
+|---|---|---|---|---|
+| 4 | 0.210 | 0.053 | 0.007 | 0.000 |
+| 8 | 0.358 | 0.187 | 0.076 | 0.022 |
+| 16 | 0.500 | 0.359 | 0.232 | 0.129 |
+| 24 | 0.592 | 0.474 | 0.362 | 0.245 |
+| 31 | 0.659 | 0.555 | 0.453 | 0.340 |
+| 32 (scored) | 0.434 | 0.371 | 0.299 | 0.223 |
+
+α becomes bimodal with depth, exactly as the mean-field picture predicts once
+activation correlations approach 1 (σ² = wᵀΣw ≈ c·μ², so |α| → 1/√c). By layer 31
+**45% of alive neurons are confidently on**. The structure the plan assumed is
+there.
+
+### It still does not pay — 1.0246×
+
+Linearise variant, final-layer on-value = mean + exact rectification correction:
+
+| k | α>2.0 | α>2.5 | α>3.0 | α>4.0 |
+|---|---|---|---|---|
+| 1 | 0.917× | 1.003× | 1.019× | 1.017× |
+| 2 | 0.911× | 1.008× | 1.023× | 1.018× |
+| 4 | 0.890× | 1.013× | **1.024×** | 1.018× |
+| 8 | 0.809× | 1.011× | **1.025×** | 1.018× |
+| 12 | 0.713× | 1.007× | 1.025× | 1.018× |
+
+Best cell: k=8, α_hi=3.0 → MSE 1.5971e-6 (vs baseline 1.5962e-6, +0.06%), cost
+2,785,293 vs 2,855,460 (**1.025× cheaper**) ⇒ **1.0246×**. *(That cost model is
+marginal-only; folding in the per-MLP fixed work — closure 3.27e9, Jacobian chain
+1.04e9, eigh 1.5e8, ≈2.7e5 per sample at N=16384, which Sprint 3 does not touch —
+dilutes the real figure to **~1.022×**. The model reproduces v2.4's graded
+3.25e6 FLOPs/sample to within 2%, so this is the honest number.)* Below α_hi≈2.5 the MSE
+penalty overwhelms everything: at α_hi=2.0 the linearisation is already a net loss
+at every k, and at α_hi=1.0 it is 0.013×–0.36×.
+
+**The mechanism, and it is the whole finding: linearisation removes the ReLU, not
+the matmul.** An on-neuron's contribution still has to be multiplied through —
+either explicitly per sample, or implicitly through a composed matrix whose
+*source width grows by every kink activation you have had to keep*. Composing k
+layers costs `Σ 2(a + f·a·i)·(f·a)` against a baseline `2a²k`, so the saving turns
+over at modest k, and re-materialising to reset the source width costs *more* than
+a dense layer (`2·src·a > 2a²`). The probe prices the exact optimum of that
+trade-off by DP over which layers re-materialise; the optimum is ~1.03%.
+
+**The ceiling is arithmetic and does not depend on any of this.** In v2.4's
+per-sample budget the scored layer is `(2·205−1)·256 + relu = 104,832` FLOPs =
+**3.67%** of 2,855,460. So:
+
+| if these layers were **entirely free** | share | ceiling |
+|---|---|---|
+| the scored layer | 3.67% | **1.038×** |
+| the last 2 | 6.61% | 1.071× |
+| the last 4 | 12.49% | 1.143× |
+| the last 8 | 24.25% | 1.320× |
+
+Clearing a 1.20× gate needs **six or more of the final layers to cost literally
+nothing**. Track T's theorem buys exactly one layer, and one layer is 3.67%.
+
+### The correctness check the plan asked for — answered, decisively
+
+Feed-forward on-neurons must be **linearised** (h = z), never **mean-replaced**
+(h = E[z]):
+
+| k | linearise (α>3) | mean-replace (α>3) |
+|---|---|---|
+| 1 | 1.5972e-6 | 1.5972e-6 (identical — nothing feeds forward) |
+| 2 | 1.5972e-6 | **7.68e-5** (48× worse) |
+| 4 | 1.5972e-6 | 4.44e-4 |
+| 8 | 1.5973e-6 | 1.51e-3 |
+
+Mean-replacement deletes the neuron's fluctuation, and every downstream ReLU is
+convex in it — the same Jensen mechanism that killed Track P, at 3 orders of
+magnitude. **Linearisation, by contrast, propagates forward with no measurable
+bias at α_hi ≥ 2.5**: the k=8 MSE is within 0.07% of baseline. So Track T's
+"closure ≡ sampling for on-neurons" *does* survive being propagated forward, not
+just at the scored layer — which is the theoretical result Sprint 3 was really
+testing, and it is the one thing here worth keeping.
+
+### The rectification correction is worth having, and κ is not
+
+Isolating the scored layer (k=1), on-value = E[z] versus E[z] + σ·[φ(α) − α·Φ(−α)]:
+
+| α_hi | E[z] only | + corr (σ_closure) | + corr (κ-scaled σ) |
+|---|---|---|---|
+| 1.0 | 5.7158e-6 | **1.8281e-6** | 4.5919e-6 |
+| 2.0 | 1.6329e-6 | **1.6115e-6** | 1.7800e-6 |
+| 3.0 | 1.5978e-6 | 1.5973e-6 | 1.5972e-6 |
+
+The exact correction extends the usable threshold down by about one unit of α (at
+α_hi=2 it recovers the whole penalty). But the κ=1.363 variance rescale — fitted
+in Track T for the *closure's* final-layer variance — makes things **worse** at
+low α_hi. Track T fitted κ to correct the closure's variance as a shrinkage
+target; here σ enters a first-order correction term where the closure's raw σ is
+already the better estimate. **A constant fitted for one purpose does not
+transfer to another**, even within the same layer of the same estimator.
+
+### Decision
+
+Gate was ≥1.20× and adjusted ≤2.27e-7; measured 1.0246× and 2.68e-7. Per the plan:
+**we stop grinding score and declare the honest sampling frontier at ~2.7e-7**
+(graded 2.7194e-7, local mini 2.75e-7 on a FLOPs-only cost model). Remaining known
+cost levers are small and additive at best — a hand-rolled normal quantile in place
+of `stats.norm.ppf` at 168 FLOPs/element is worth ~1.4%, and this scheme ~2.5% —
+so ~1.04× total for real implementation risk on a private re-run we are scored on
+once. Not worth it. Effort moves to robustness and the write-up.
+
+*On 18106's 1.551e-7*: that is 1.8× beyond our V·c, and it is attributed to this
+exact family (dead/on/kink + linearised on-neurons in the last layers). We have now
+measured the family end-to-end at 1.02×. Either the published method contains
+something materially different from what is described, or the number reflects the
+public board rather than fresh MLPs. We trust our own measurement and do not chase
+it.
+
 ## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
 
 **Where we stand**: v1.1 graded 3.893e-7, rank ~159. The leader is 4.87e-8 — **8.0× ahead**. Every analytic-side avenue we tested this session is dead:
@@ -810,7 +940,40 @@ reference values is not estimation at all.
 
 **The one structural fact worth attacking**: 48% of v1.1's error is a single per-MLP scalar (the whole layer scaled by 1+g), worth **1.9×** if removed exactly (1.604e-6 → 8.349e-7 ⇒ adjusted ~2.0e-7). Nothing we can currently observe predicts g better than R² ≈ 0.15. Finding an observable for g is the highest-value open problem we have.
 
-1. **Effective-dimension / better rotation.** The α shift from 0.87 → 1.06 under the Jacobian rotation is the only hint of a *rate* improvement seen all session. Measure how much final-layer variance lives in the top-k input directions; if it is genuinely low-dimensional, a targeted QMC/stratification split (QMC on k dims, MC on the rest) could buy a rate rather than a constant. Test on the **full 100-MLP mini split** only.
-2. **Smoothing for QMC.** α = 1.00 is the signature of a non-smooth integrand (ReLU kinks) defeating QMC. Conditional-expectation smoothing of the last layer is the standard remedy and is untested here.
-3. `wall_time_limit_s` still unknown (not in the participant report); it has never bound us (0.41 s/MLP used, ~98× headroom), so this is low priority.
-4. **Phase 2 opens Aug 8 00:00 UTC** (round 1429). Run `local_sim/phase2_checklist.py`, submit v1.1, then `fetch_graded_report.py` to re-derive shape/budget/λ/floor and record in RESEARCH_NOTES §1.
+1. ~~**Effective-dimension / better rotation.**~~ **Done — Track P.** The deviation
+   spectrum *is* low-dimensional (effective rank 25.9 → 2.8 over depth, top-64 holds
+   96.2% by layer 16) and the closure's own covariance eigenvectors find it for free.
+   It cannot be spent: rank-k propagation is a rank-k weight factorisation and
+   shape-based billing breaks even at k = width/2, which is also the rank truncation
+   needs. Bounded at 1.093× even with a free oracle correction.
+2. ~~**Smoothing for QMC.**~~ **Done — Track T.** Conditional-expectation smoothing of
+   the last layer is a *no-op*: in the α ≥ 3 band carrying 76.5% of the MSE, the
+   rectified-Gaussian formula reduces algebraically to the sample mean (ρ = 1.000).
+   Overall 1.0001× cross-fitted.
+3. `wall_time_limit_s` still unknown (not in the participant report); it has never bound
+   us (0.41 s/MLP used, ~98× headroom), so this is low priority.
+
+### Aug-8 runbook (Phase 2 opens 00:00 UTC, round 1429)
+
+Score optimisation is **closed** (GAME_PLAN rev 6 — the sampling frontier is
+declared at ~2.7e-7). Phase 2 work is verification and robustness, in this order:
+
+1. `uv run python local_sim/phase2_checklist.py` — is 1429 live, is there a
+   `v1-phase2` HF tag, are the boards up?
+2. `uv run python local_sim/board_snapshot.py --top 30 --label phase2_open` — and
+   daily thereafter; `--diff` against the previous file.
+3. `uv run whest validate --estimator estimator.py` then a mini run, then submit
+   **v2.4** (unchanged). One submission, not two — the fixed-suite question is
+   already answered for Phase 1 by identical `mlp_name` lists, so the twin test
+   costs two submissions to re-confirm something we can get from the first Phase-2
+   report's names alone.
+4. `uv run python local_sim/fetch_graded_report.py <id> 2026-08-08_phase2` then
+   `uv run python local_sim/twin_diff.py --all`. Record: shape / n_mlps / budget /
+   λ / floor from `config_snapshot` + telemetry; whether `public_scores` still
+   returns per-MLP and per-layer MSE (i.e. whether the disclosure was acted on);
+   whether `sampling_mse` changed (a new value ⇒ new suite).
+5. **If the shape changed**: do not optimise. Re-measure in order — α-histogram,
+   error-vs-N, τ sweep, then re-select the stack. `estimator_v1_1.py` is the
+   shape-generic fallback; the edge-case suite already covers widths 64/128 and
+   depths 2–64, all passing.
+6. `>3×` grader-vs-local divergence ⇒ stop and investigate before resubmitting.

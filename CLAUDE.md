@@ -36,10 +36,18 @@ uv run python local_sim/phase2_checklist.py                         # rounds / d
 uv run python local_sim/export_split.py --split mini --n 100 --out <npz>   # dataset -> npz for the GPU venv
 .venv-gpu\Scripts\python.exe local_sim/track_t_mint.py --data <npz> --out <npz> --draws 256
 .venv-gpu\Scripts\python.exe local_sim/track_p_spectrum.py --data <npz> --mlps 100 --jensen --out <npz>
+.venv-gpu\Scripts\python.exe local_sim/sprint3_probe.py --data <npz> --mlps 100   # on/kink FLOP allocation
+.venv-gpu\Scripts\python.exe local_sim/robustness.py --mlps 1200 --truth 4194304  # fresh-MLP score distribution
+.venv-gpu\Scripts\python.exe local_sim/robustness.py --stress                     # atypical-MLP safety
+uv run python local_sim/edge_cases.py            # contract + numerical edges on the SHIPPED file
 ```
 
 ## Known unknowns / gotchas (updated 2026-08-05 night)
 
+- **Prizes are decided by a private re-run of ONE designated submission on FRESH MLPs.** Public-board rank is not a target; judge everything on the local 100-MLP mini split and on ≥1000 fresh minted MLPs (`local_sim/robustness.py`). The tail of the fresh-MLP score distribution is the real risk, not the mean.
+- **Score optimisation is CLOSED — the honest sampling frontier is ~2.7e-7** (GAME_PLAN rev 6). Sprint 3 (structure-aware on/kink FLOP allocation) measured **1.0246×** against a 1.20× gate. Ceiling is arithmetic: the scored layer is 3.67% of the per-sample budget, so freeing it entirely is 1.038×; clearing 1.20× needs six of the last layers to cost nothing. **Linearisation removes the ReLU, not the matmul.** Don't reopen without a lever that touches a bigger share of the cost model.
+- **On-neuron reduction, verified twice** (keep — it is the write-up's theorem): for α large, E[ReLU(z)] = E[z], so at the scored layer an on-neuron needs no per-sample value, and at a feed-forward layer it is *linear* and composes (linearising every α>2.5 neuron in the last 8 layers costs 0.07% MSE). But **never mean-replace** a feed-forward on-neuron — that deletes its fluctuation and costs 48× at k=2, 3 orders of magnitude by k=8.
+- **A constant fitted for one role does not transfer to another**: κ=1.363 (Track T's closure-variance rescale) makes the Sprint-3 rectification correction *worse*.
 - **The public score is the mean over 50 FIXED MLPs (indices 0–49)**, and every submission returns those MLPs' exact per-MLP `final_layer_mse` + a 32-long `per_layer_mse` in `results.public_scores`. Verified bit-for-bit against the aggregates; the suite is identical across all four of our submissions. Consequences: (a) our graded A/B comparisons are **paired re-measurements**, not fresh samples — never read a graded improvement as population evidence; (b) the level carries a fixed 7–20% offset vs the local 100; (c) **decisions stay on the local 100-MLP mini split**, which is the honest proxy for the private re-run that sets the final ranking. Full record + the arithmetic: RESEARCH_NOTES §2g (**private — never the forum**). **We do not use that channel.**
 - **The `sampling_mse` label-noise bound is WITHDRAWN.** 89 of 200 board entries show a final-layer MSE below 6.4695e-7, so it cannot be additive reference noise. Most likely a reference sampling baseline's MSE. Do not repeat the "nothing honest below 6.47e-8" claim.
 - **Track T (shrinkage-moment tail) is CLOSED** — 0.9998× vs a 1.10× gate. Only `diag(WᵀΣW)` = `mean(z²)−mean(z)²` enters, so there is no covariance to estimate (no MP regime); v̂ is already 1.13% rms accurate and the exact-variance oracle still gives 0.611×. 41% of the analytic tail's error is irreducible model bias; ρ=1.000 with the sample mean in the α≥3 band that carries 76.5% of the MSE. Don't reopen without a new mechanism.
