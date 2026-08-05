@@ -76,10 +76,18 @@ def est_of(w, x):
 
 
 def normalise_(X):
-    """Re-impose exact per-coordinate mean 0 / variance 1 (keeps it a sampler)."""
-    with torch.no_grad():
-        X -= X.mean(0, keepdim=True)
-        X /= X.std(0, keepdim=True).clamp_min(1e-8)
+    """DISABLED -- measured to be actively harmful.
+
+    Forcing exact per-coordinate mean 0 / variance 1 was the plan's suggested
+    regulariser, and it alone (with no gradient steps at all) costs 2.35x:
+    9.156e-6 -> 2.152e-5 on held-out MLPs. The Sobol set's sample moments are
+    mean -0.00149, std 1.00278; standardising them applies a ~0.3% rescale to
+    every point, and a systematic 0.3% scale error on activations of ~0.45 is
+    far larger than the ~1e-6 MSE we are chasing. A QMC set is unbiased because
+    it is the correct quantile transform of an equidistributed net, NOT because
+    its sample moments are exactly (0, 1) -- moment-matching trades a negligible
+    variance reduction for a first-order bias. Drift regularisation only."""
+    return
 
 
 def main():

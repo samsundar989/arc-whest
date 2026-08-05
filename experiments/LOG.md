@@ -455,6 +455,29 @@ Gate was ≥1.2× **and** mini ≤3.4e-7. v2.0 gives 1.19× and 3.483e-7 — a m
 
 **Residual wall time is now the binding constraint on this design**: 10.8% of billed compute at 1794 ops/MLP, against v1.1's 1.5% at ~250 ops. Any further cost work must reduce op *count*, not FLOPs.
 
+## 2026-08-05 — G2 task-optimized point set: plateaus at ~1.06×, and a regulariser that BIASES
+
+First run looked catastrophic — held-out 2.15e-5 against a Sobol baseline of 9.156e-6, i.e. **0.43×**, and it never recovered over 200 steps. Dropping the learning rate 200× changed nothing (drift stayed at 0.0032), which ruled out the optimiser. The cause was the regulariser:
+
+**`normalise_` alone, with zero gradient steps, costs 2.35×** (9.156e-6 → 2.152e-5).
+
+The plan called for "exact per-coordinate mean/var matching" to keep the set a valid sampler. Measured, that is actively harmful. The Sobol set's per-coordinate sample moments are mean **−0.00149**, std **1.00278**; forcing them to exactly (0,1) applies a ~0.3% rescale to every point, and a systematic 0.3% scale error on activations of ~0.45 is far larger than the ~1e-6 MSE we are chasing. **A QMC set is unbiased because it is the correct quantile transform of an equidistributed net, not because its sample moments are exactly (0,1)** — moment-matching trades a negligible variance reduction for a first-order bias. Disabled; drift regularisation only.
+
+(Related, and counter-intuitive: the very first Sobol point maps to z = −6.12 in *every* coordinate — norm 97.9 against a typical 16.0. Deleting that outlier makes things **worse** (0.734×): it is load-bearing, balancing the rest of the net.)
+
+With the regulariser removed, G2 behaves:
+
+| step | held-out | vs Sobol | drift |
+|---|---|---|---|
+| 0 | 9.132e-6 | 1.003× | 0.0002 |
+| 50 | 8.702e-6 | 1.052× | 0.0014 |
+| **125** | **8.588e-6** | **1.066×** | 0.0020 |
+| 250 | 8.720e-6 | 1.050× | 0.0027 |
+
+**Read: not tracking toward ship-worthy.** It gains ~6% by step 125 and then plateaus — the curve is flat-to-regressing, not still climbing, and the gate is 1.3×. This is consistent with everything else we know: He & Wang's 1/(4d−2) bound says point-set choice can only buy constants at d=256, and every variant we have measured (Owen, LMS, Korobov, radial, antithetic, and now direct optimisation) lands within ±15% of plain digitally-shifted Sobol. The one structured transform that beat that band is the **rotation** (1.12×), which v2 already ships.
+
+*Caveats*: n=4096 rather than the shipped 16384, 250 steps, batch of 8 MLPs, truth at 2^18 samples (noise 1.3e-7, ~1.5% of the loss). A longer run at full n could do better, but the plateau is the signal, and the train/held gap (~7e-6 vs 8.6e-6) shows no severe ensemble overfitting to blame.
+
 ## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
 
 **Where we stand**: v1.1 graded 3.893e-7, rank ~159. The leader is 4.87e-8 — **8.0× ahead**. Every analytic-side avenue we tested this session is dead:
