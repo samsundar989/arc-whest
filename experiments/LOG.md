@@ -174,6 +174,28 @@ Antithetic pairing was kept (it is free) but is worth ~3%, not more — the meas
 
 α = **1.20** — genuinely superlinear, so unlike plain MC this *does* reward spending past the floor. **1.78× better than v1.0** on adjusted score (gate wanted ≥1.5×), **17× better than v0** on MSE.
 
+**Mini subprocess (gate d)**: adjusted **4.154e-7**, MSE 1.470e-6, C/B 0.2826, 0 failures — within 2.6% of the local prediction. Not submitted: v1.2 below supersedes it, so it would have wasted a submission.
+
+**Negative result — LMS scrambling is not worth it.** scipy's `scramble=True` is linear-matrix-scrambling + digital shift, and an earlier 3-seed measurement suggested it was worth 2.62× vs our digital shift's 2.04×. Re-measured with 8 reps × 3 MLPs, the schemes are **within noise of each other**: digital shift 2.03×, LMS+shift 2.18×, scipy scrambled 1.88× (i.e. scipy came out *worse* than our shift on this seed set). The earlier 2.62× was seed luck. LMS would have cost a fiddly GF(2) bit-matrix transform for ~7%. **Dropped** — and a reminder to re-measure apparent wins with more seeds before building on them.
+
+## 2026-08-05 — v1.2: the operating point is an interior optimum
+
+Same method as v1.1; only the operating point and chunk size changed. Two measurements drove it:
+
+**1. Wall time is a non-issue, so budget is the only constraint.** From v1.0's graded report: grader wall time **0.408 s/MLP** (max 0.611) for 4.08e10 FLOPs — 134.7 GFLOP/s through flopscope, and *less* wall time than v0 spent on 12× fewer FLOPs (f32 matmul is far more flopscope-efficient than f64 einsum). Residual was **4.49 ms/MLP = 1.09% of billed compute**. Against a 60 s limit that is ~98× headroom.
+
+**2. The adjusted score has a genuine interior optimum** (40 MLPs, real GT):
+
+| C/B | N | final-layer MSE | adjusted |
+|---|---|---|---|
+| 0.257 | 16384 | 1.573e-6 | 4.049e-7 |
+| **0.515** | **32768** | **6.760e-7** | **3.480e-7** |
+| 1.030 | 65536 | 3.533e-7 | 3.638e-7 |
+
+Below the optimum the error falls faster than the multiplier rises; above it the reverse. (C/B 1.03 would also exceed the budget outright and fail every MLP, so it was never a candidate.) Set `_TARGET_CB = 0.50`, and raised `_CHUNK` 4096 → 16384 to cut the Sobol generator's instrumented-op count 4× (temporary release is billed as residual — forum 18101).
+
+Local held-out: MSE **6.760e-7**, adjusted **3.480e-7** — **39.5× better than v0** on MSE, 2.07× better than v1.0's graded score.
+
 ## Next planned experiments
 
 1. ~~Submit v0 → parse run report~~ ✅ done (above). Remaining open item: `wall_time_limit_s`
