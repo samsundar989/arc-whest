@@ -307,15 +307,70 @@ Global blend at w=0.052, final layer, held-out, by α band:
 
 Blending helps only where α > 0 and hurts most at α ∈ [−2,−1] — the partially-firing neurons where Gaussian closure is least accurate. Gating the blend on α > 0 would give ≈ +4.9% instead of +4.7%: not worth the complexity. **α > 0 neurons carry 98% of the final-layer MSE**, so any future analytic effort belongs there, not on the dead/saturated tails.
 
-## Next planned experiments
+## 2026-08-05 — input rotation (untasked side-experiment): small, real, and a third lesson
 
-1. ~~Submit v0 → parse run report~~ ✅ done (above). Remaining open item: `wall_time_limit_s`
-   is not in the participant report — infer it from a deliberately slow submission later,
-   or ask on the forum.
-2. Phase A: RQMC sampler (Sobol + antithetic + exact layer 1) in local_sim; error-vs-samples
-   curve → pick C/B operating point. Budget headroom measured above: 1.45% used of 10%-free.
-3. Exact pair-covariance ReLU update (Wright et al. 2024 formulas) as drop-in upgrade to the
-   gain approximation — measure whether residual bias shrinks enough to matter before Phase B.
-4. Decide Phase 1 endgame: round 1428 closes Aug 7 23:59 UTC. Anything we want on the Phase 1
-   board must land before then; Phase 2 (round 1429) opens Aug 8 and its config is unverified
-   until the first graded run in that round.
+Our Sobol net converges at **α = 1.00**, i.e. it buys a constant factor over plain MC and no better rate. The textbook cause is dimension ordering: a Sobol net is equidistributed best in its low-indexed coordinates, and we feed the 256 input dimensions in arbitrary order, so the network's most influential input directions land on arbitrary (often poor) Sobol dimensions. Since x ~ N(0,I) is rotationally invariant, substituting x = Qu for orthogonal Q is free statistically and costs one (N×256)@(256×256) matmul — one extra layer out of 32, ≈3.2% of the sampling budget. Deterministic (Q comes from the weights), so the seed contract is untouched.
+
+| rotation | 40 MLPs of `full` | **100 MLPs of `mini`** | α (mini) |
+|---|---|---|---|
+| none | 1.8711e-6 | 1.6742e-6 | 0.87 |
+| **eig(W₁W₁ᵀ)**, descending | 1.2476e-6 (**+33.3%**) | 1.5360e-6 (**+8.3%**) | 1.01 |
+| eig(JJᵀ), linearised Jacobian | 1.6668e-6 (+10.9%) | 1.4916e-6 (+10.9%) | 1.06 |
+
+**The 40-MLP result did not survive.** +33.3% became +8.3% on the full 100-MLP split — the *third* time in two days a subset measurement has evaporated (after LMS scrambling and the C/B=0.5 "optimum"). Net of its 3.2% tax the W₁ rotation is worth ~5%, and the Jacobian variant ~3% net once covprop's 4.7% is paid. Below anything worth a submission, but the α shift (0.87 → 1.01/1.06) is the one hint that a *better* rotation might buy a rate rather than a constant.
+
+**Standing rule from here on: no operating-point or variant decision on fewer than the full 100-MLP mini split.**
+
+## 2026-08-05 — B3 GPU learnability probe: **R² = 0.012 → DROP Phase C**
+
+Setup (`local_sim/gpu_mint.py`, `gpu_train_probe.py`, isolated `.venv-gpu` with torch 2.13+cu130; **no torch/numpy anywhere near an estimator file**). RTX 5090 measured at 38.3 TFLOP/s fp32.
+
+**Parity first**, as required: GPU forward pass vs the CPU/flopscope path on 5 real dataset MLPs at 262k samples — final-layer means agree to **2.7e-3 max** (pure MC noise at that sample count; the required bar was ~1e-3 rms), and GPU covprop matches the CPU reference to **1e-15**. Passed.
+
+**Mint**: 50,000 He 256×32 MLPs, labels = 65,536-sample MC of the final-layer means, plus calibrated-covprop features and the residual b_i = truth_i − p_i. 20 min wall. Sanity: minted Var(b) = **2.697e-5** vs the real dataset's **2.650e-5** — the synthetic distribution matches.
+
+**Result** (split by MLP, never by neuron — 42,500 train / 7,500 held-out, 12.8M neuron examples):
+
+| model | held-out R² |
+|---|---|
+| linear on 40 features | 0.0145 |
+| 2-hidden-layer MLP (256 wide) | **0.0120** |
+
+Label noise is ~5.3e-7 against Var(b) = 2.7e-5, i.e. **2%** — an R² ceiling of 0.98, so noise is not masking the signal. It simply isn't there. This corroborates the α-curve result above (3.5% of variance removable) and the public negative results in thread 18063 ("learned correctors all failed to beat the scalar at depth 32").
+
+**What R² would have needed to be.** Because Var(b) is 18.2× the sampling variance, R² translates into fused score very unfavourably:
+
+| R² | covprop variance after correction | best fused MSE | vs v1.1 |
+|---|---|---|---|
+| 0.00 | 2.713e-5 | 1.4118e-6 | +5.2% |
+| 0.50 | 1.357e-5 | 1.3420e-6 | +9.9% |
+| 0.90 | 2.713e-6 | 9.615e-7 | +35.4% |
+| 0.95 | 1.357e-6 | 7.099e-7 | +52.3% |
+| **0.012 (measured)** | 2.680e-5 | 1.4109e-6 | **+5.3%** |
+
+So the mission's "R² > 0.5 → Phase C alive" threshold would itself only have bought ~10%; the fusion direction needed **R² > 0.9** to matter. We measured 0.012.
+
+**Verdict: drop Phase C.** The GPU pivots to B2 calibration data per the plan — though note B2's own measurement (k=0) says that track is also dead, so the GPU is better spent on variance reduction for the *sampling* estimator.
+
+*Caveat kept honest*: the features were per-neuron covprop diagnostics + last-two-layer weight norms + per-MLP aggregate context. A fundamentally different representation (weight-space equivariant networks over the whole MLP) is not ruled out by this experiment — but at 18× the sampling variance it would have to reach R² > 0.9 to be worth anything, and nothing in the data suggests that is close.
+
+## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
+
+**Where we stand**: v1.1 graded 3.893e-7, rank ~159. The leader is 4.87e-8 — **8.0× ahead**. Every analytic-side avenue we tested this session is dead:
+
+| direction | verdict | evidence |
+|---|---|---|
+| B1 precision-weighted fusion | +4.7% best, vs 4.7% compute tax ⇒ net ~0 | full-split holdout |
+| B1 scale-mode kill via covprop | +3.6%; contaminated (R² 0.094) | predicted 0.092, measured 0.094 |
+| scale mode from point-set radius | dead (LOO R² −0.010) | `scale_source_probe` |
+| scale mode from exact layer 1 | dead (LOO R² −0.037) | `scale_source_probe` |
+| B2 analytic tail, any k | −67% to −214% | `b2_tail_probe` |
+| B3 learned covprop residual | R² 0.012 ⇒ drop Phase C | 50k MLPs, 7.5k held out |
+| input rotation (untasked) | +8.3% for 3.2% cost ⇒ ~5% net | full mini split |
+
+**The one structural fact worth attacking**: 48% of v1.1's error is a single per-MLP scalar (the whole layer scaled by 1+g), worth **1.9×** if removed exactly (1.604e-6 → 8.349e-7 ⇒ adjusted ~2.0e-7). Nothing we can currently observe predicts g better than R² ≈ 0.15. Finding an observable for g is the highest-value open problem we have.
+
+1. **Effective-dimension / better rotation.** The α shift from 0.87 → 1.06 under the Jacobian rotation is the only hint of a *rate* improvement seen all session. Measure how much final-layer variance lives in the top-k input directions; if it is genuinely low-dimensional, a targeted QMC/stratification split (QMC on k dims, MC on the rest) could buy a rate rather than a constant. Test on the **full 100-MLP mini split** only.
+2. **Smoothing for QMC.** α = 1.00 is the signature of a non-smooth integrand (ReLU kinks) defeating QMC. Conditional-expectation smoothing of the last layer is the standard remedy and is untested here.
+3. `wall_time_limit_s` still unknown (not in the participant report); it has never bound us (0.41 s/MLP used, ~98× headroom), so this is low priority.
+4. **Phase 2 opens Aug 8 00:00 UTC** (round 1429). Run `local_sim/phase2_checklist.py`, submit v1.1, then `fetch_graded_report.py` to re-derive shape/budget/λ/floor and record in RESEARCH_NOTES §1.

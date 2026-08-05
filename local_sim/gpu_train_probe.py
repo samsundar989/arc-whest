@@ -95,10 +95,13 @@ def main():
 
     # ---- baseline: best constant, and a linear model ----------------------
     var_te = yte.var().item()
-    Xd = torch.cat([xtr, torch.ones(len(xtr), 1, device=dev)], 1)
-    beta = torch.linalg.lstsq(Xd, ytr.unsqueeze(1)).solution
-    lin_pred = torch.cat([xte, torch.ones(len(xte), 1, device=dev)], 1) @ beta
-    r2_lin = 1 - ((yte - lin_pred.squeeze(1)) ** 2).mean().item() / var_te
+    # normal equations in float64 (41x41) — cuSOLVER's lstsq chokes on 10M+ rows
+    Xd = torch.cat([xtr, torch.ones(len(xtr), 1, device=dev)], 1).double()
+    XtX = Xd.T @ Xd
+    Xty = Xd.T @ ytr.double().unsqueeze(1)
+    beta = torch.linalg.solve(XtX + 1e-6 * torch.eye(XtX.shape[0], device=dev, dtype=torch.float64), Xty)
+    lin_pred = (torch.cat([xte, torch.ones(len(xte), 1, device=dev)], 1).double() @ beta).squeeze(1).float()
+    r2_lin = 1 - ((yte - lin_pred) ** 2).mean().item() / var_te
     print(f"\nlinear model      held-out R^2 = {r2_lin:.4f}")
 
     # ---- small MLP --------------------------------------------------------
