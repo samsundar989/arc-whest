@@ -61,6 +61,87 @@ points are what balance the low-discrepancy structure.
 (For plain iid Monte Carlo, standardising is a legitimate and well-known variance
 reduction. The lesson is specifically that it does not transfer to QMC.)
 
+## 2g. Scoring-channel forensics — measured 2026-08-05. **PRIVATE: never the forum, never a public write-up without an explicit decision.**
+
+*Framing: every line below is labelled **verified** (read off a report or the board
+and reproducible with a named script), **derived** (arithmetic on verified facts),
+or **hypothesis** (fits the evidence, not established). Two of our own hypotheses
+died in this section; that is the point of keeping the labels.*
+
+### Verified
+
+| # | fact | how |
+|---|---|---|
+| V1 | Board columns are `score` = **Adjusted Score** and `scoreSecondary` = **Final Layer MSE** — the board's own `scoreTitle`/`scoreSecondaryTitle`. Our row (rank 87, display name **`neopok919`**) reads 2.719e-7 / 1.3748e-6, matching submission 324420 exactly. So `score/scoreSecondary` is each entry's realised `max(0.1, C/B)`. | `board_snapshot.py`, `board_forensics.py` |
+| V2 | **The evaluation suite is fixed across submissions.** The 100 `per_mlp` `mlp_name`s are identical *and identically ordered* in the v0, v1.0, v1.1 and v2.4 graded reports (Aug 4 → Aug 5). | `twin_diff.py --all` |
+| V3 | The graded suite is **not** the public data: 1/100 name overlap with public `mini`, 0/100 with `full`. | same |
+| V4 | **The public score is the mean over exactly 50 MLPs (indices 0–49)**, and each submission returns *those* MLPs' individual `final_layer_mse`, `all_layers_mse`, `adjusted_final_layer_score` and a 32-long `per_layer_mse` in `results.public_scores`. Their mean reproduces the aggregate `final_layer_mse`, `score` and `all_layers_mse` **bit-for-bit**, and their min/max reproduce the reported best/worst MLP. | report schema |
+| V5 | `sampling_mse` = 6.469470189211361e-07, identical to 17 digits across all four submissions — a property of the suite, not of our estimator. Still **undocumented** in `score-report-fields.md`. | reports |
+| V6 | Phase-1 board (Aug 5, 18:54 UTC): #1 5.6e-9 with **917 entries**; #2 5.08e-8; top-30 median entries 153. #1's `scoreHistory` shows 4.87e-8 at 06:04Z and **5.6e-9 at 17:21Z the same day**, after a month of ≤1.1× steps. | archived snapshot |
+
+### Derived
+
+**D1 — the reconstruction arithmetic.** For a scored MLP j, submitting prediction p
+returns `‖p − t_j‖²/256` to 17 significant digits (V4). Differencing two submissions:
+
+    ⟨p_a − p_b, t_j⟩ = ( ‖p_a‖² − ‖p_b‖² − 256·(MSE_a − MSE_b) ) / 2
+
+a **linear** equation in t_j's 256 unknowns, supplied for all 50 scored MLPs by the
+same submission pair. **257 submissions determine every scored reference exactly**;
+the leader has 917 (3.6×).
+
+**D2 — implied physics.** Above the floor `adjusted = V·c/B`, so `V·c = adjusted·B`
+is comparable across teams. Ours 7.4e4; best *published* method (18106) 4.2e4;
+#1 **1.5e3** — 28× below anything published and 49× below us. Flag threshold used in
+`board_forensics.py`: >3× below the best published.
+
+**D3 — the bypass cannot reach it.** To hit 5.6e-9 at the 0.1 floor you need MSE
+5.6e-8, i.e. N ≈ 2.4e5 samples at the best known per-sample variance ⇒ 7.5e11 real
+FLOPs = 2.75×B. Charged only as `λ·wall`, staying inside 0.1B needs sustained
+**≥2.8 TFLOP/s f32** on the 16-vCPU grader; a fast AVX-512 CPU delivers ~0.1–0.5.
+At 0.4 TFLOP/s the bypass is worth ~4×, taking the best published 1.55e-7 to about
+**4e-8** — an order of magnitude short of 5.6e-9. *(Sensitivity stated deliberately:
+the conclusion depends on grader throughput, which we have not measured.)*
+
+### Hypothesis (not established)
+
+**H1** — the sub-1e-8 cluster is reference reconstruction against the fixed scored
+set, not estimation. Supported by V2+V4+D1+D2+V6. **Does not fit**: #1 ran at
+multiplier 0.98, leaving the 10× floor discount unused, which a party that already
+knows the answers has no reason to do. Recorded, not explained away.
+
+### Two hypotheses that died here (kept as a record of the method)
+
+* **"`sampling_mse` is reference label noise, so nothing honest can score below
+  ≈6.47e-8 adjusted."** **Refuted.** If it were additive noise, no entry could show
+  a final-layer MSE below 6.4695e-7; **89 of 200 do**, in a smooth continuum with no
+  gap there. The bound recorded in LOG.md on Aug 5 is withdrawn. Best remaining
+  reading (hypothesis): the MSE of a reference full-budget plain-MC sampler on the
+  fixed suite — ~6–7e-7, which matches.
+* **"917 submissions can't leak enough to matter."** Also wrong, and wrong because
+  it reasoned about the schema instead of reading it. The aggregate-only channel
+  would have left probing ~100× short; `public_scores` is what makes it
+  over-determined. **Read the payload before doing the information budget.**
+
+### Standing rules and Phase-2 re-checks
+
+1. **We do not use this channel.** This is not the wall-time grey area of rule 3 —
+   solving for reference values is not estimation. It also cannot survive the
+   private re-run on fresh MLPs, which is what sets the final ranking.
+2. Nothing here goes on the forum. The organizer email (`docs/email-draft-organizers.md`)
+   states V2/V4 as neutral observations and asks whether they are intended; it names
+   no one and draws no inference.
+3. **Read our own graded scores correctly**: they are a deterministic function of our
+   estimator on 50 *fixed* MLPs. Our submission-to-submission comparisons are
+   therefore *paired* and cleaner than we assumed — but the level carries a fixed
+   7–20% offset versus the public 100 and is never evidence a change helped.
+   Decisions stay on the local 100-MLP split.
+4. On Aug 8, re-run `twin_diff.py --all` after the first Phase-2 graded report to
+   confirm whether round 1429 also uses a fixed suite, whether `sampling_mse` changes
+   (a new value ⇒ new suite; the same 16 digits ⇒ the same reference machinery), and
+   whether `public_scores` still exposes per-MLP values. Snapshot the board daily
+   with `board_snapshot.py` and diff with `--diff`.
+
 ## 3. Key forum threads (discourse.aicrowd.com)
 
 - **17997** challenge open — grader specs, 50/day. `/t/arc-white-box-estimation-challenge-is-now-open/17997`

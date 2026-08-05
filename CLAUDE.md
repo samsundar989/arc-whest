@@ -29,9 +29,25 @@ uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-
 uv run whest submit --estimator estimator.py --watch
 uv run python local_sim/validate_estimator.py    # offline held-out MSE check
 uv run python local_sim/fit_calibration.py       # refit calibration (writes experiments/calibration.json)
+uv run python local_sim/board_snapshot.py --top 30 --label <tag>   # archive a leaderboard (+ --diff a.json b.json)
+uv run python local_sim/board_forensics.py                          # implied V*c, entry counts, score timeline
+uv run python local_sim/twin_diff.py --all                          # suite identity across our graded reports
+uv run python local_sim/phase2_checklist.py                         # rounds / dataset tags / boards
+uv run python local_sim/export_split.py --split mini --n 100 --out <npz>   # dataset -> npz for the GPU venv
+.venv-gpu\Scripts\python.exe local_sim/track_t_mint.py --data <npz> --out <npz> --draws 256
+.venv-gpu\Scripts\python.exe local_sim/track_p_spectrum.py --data <npz> --mlps 100 --jensen --out <npz>
 ```
 
-## Known unknowns / gotchas (updated 2026-08-04, after submission 323872)
+## Known unknowns / gotchas (updated 2026-08-05 night)
+
+- **The public score is the mean over 50 FIXED MLPs (indices 0–49)**, and every submission returns those MLPs' exact per-MLP `final_layer_mse` + a 32-long `per_layer_mse` in `results.public_scores`. Verified bit-for-bit against the aggregates; the suite is identical across all four of our submissions. Consequences: (a) our graded A/B comparisons are **paired re-measurements**, not fresh samples — never read a graded improvement as population evidence; (b) the level carries a fixed 7–20% offset vs the local 100; (c) **decisions stay on the local 100-MLP mini split**, which is the honest proxy for the private re-run that sets the final ranking. Full record + the arithmetic: RESEARCH_NOTES §2g (**private — never the forum**). **We do not use that channel.**
+- **The `sampling_mse` label-noise bound is WITHDRAWN.** 89 of 200 board entries show a final-layer MSE below 6.4695e-7, so it cannot be additive reference noise. Most likely a reference sampling baseline's MSE. Do not repeat the "nothing honest below 6.47e-8" claim.
+- **Track T (shrinkage-moment tail) is CLOSED** — 0.9998× vs a 1.10× gate. Only `diag(WᵀΣW)` = `mean(z²)−mean(z)²` enters, so there is no covariance to estimate (no MP regime); v̂ is already 1.13% rms accurate and the exact-variance oracle still gives 0.611×. 41% of the analytic tail's error is irreducible model bias; ρ=1.000 with the sample mean in the α≥3 band that carries 76.5% of the MSE. Don't reopen without a new mechanism.
+- **Track P (rank-k deviation propagation) is CLOSED** — 1.093× vs a 1.25× gate, even pricing an oracle Jensen correction at zero. Rank-k propagation *is* a rank-k weight factorisation; shape-based billing breaks even at k = width/2 = 128, which is also the rank truncation needs. (The spectrum result itself is real and write-up-worthy: effective rank 25.9→2.8 over depth, and the closure's own covariance eigenvectors find the subspace for free.)
+- **`fnp.linalg.eigh` on JJᵀ is only well-determined in its leading directions** — LAPACK and cuSOLVER disagree on 106 of 256 columns beyond sign. The rotation's *distribution* is unaffected but the realised per-MLP error is BLAS-dependent, so expect ~1% of unexplained local-vs-grader difference from this alone.
+- **RQMC helps the first moment only**: measured effective N 32,870 for `mean(z)` (2.01×) but 18,719 for the sample variance (1.14×). Any scheme leaning on sample *variances* gets no QMC discount.
+
+## Older gotchas (from 2026-08-04, after submission 323872)
 
 - **We are in PHASE 1 until Aug 7 23:59 UTC.** Rounds (from the challenge page): 1425 warm-up (closed), **1428 "Phase 1" Jun 18 → Aug 7 23:59 — LIVE**, 1429 "Phase 2" Aug 8 → Sep 19 23:59 — UPCOMING (empty leaderboard, no `v1-phase2` HF tag). Earlier docs said Phase 2 opened Aug 1; wrong. Phase 1 was **extended one week** (Jul 31 → Aug 7) after a leaderboard re-score; write-up deadline moved to **Aug 17** (forum 18109). Phase 2 uses the same grader stack.
 - **Live board (Aug 4)**: #1 4.87e-8, #10 9.85e-8, #200 6.40e-7. The old "Phase 1 #1 = 1.24e-8" note is superseded — see RESEARCH_NOTES §5b.

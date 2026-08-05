@@ -570,6 +570,230 @@ so with the multiplier floored at 0.1, **no honest submission can score below �
 
 **Caveat, held deliberately**: this rests on inferring what `sampling_mse` denotes, which the docs do not state. It is a hypothesis with an arithmetic consequence, not a conclusion — exactly the test Mission 3 specifies. Run it properly on the Phase 2 board on Aug 8 (record adjusted, MSE column, entry counts, implied C/B per entry) before drawing any inference. **Nothing about this goes on the forum.**
 
+## 2026-08-05 (night) — TRACK T: shrinkage-moment tail revival. **FAILS, three independent bounds**
+
+**Verdict: 1.0001× cross-fitted, gate 0.9998× against a 1.10× bar. Nothing submitted.**
+The mechanism is clean enough to close the analytic-tail question for good.
+
+New instruments: `local_sim/export_split.py` (dataset → npz so the GPU venv, which
+deliberately has no whestbench, can see the real MLPs), `track_t_mint.py` (GPU;
+the exact v2.4 pipeline — closure → prune τ=−2.5 → eig(JJᵀ) rotation — run with
+**R = 256 independent digital shifts** per MLP at N=16384), `track_t_analyze.py`.
+Fit on 100 MLPs of the `full` split, evaluated on the 100-MLP `mini` split;
+**verified disjoint** (same ids, different weights and names).
+
+*Pipeline parity*: draw 0 uses the shipped shift, and over all 100 mini MLPs gives
+**1.5962e-6** against v2.4's CPU-measured 1.6079e-6 — 0.7% apart. The residue is a
+real and previously unnoticed effect: `eigh` on JJᵀ is only well-determined in its
+leading directions, and LAPACK vs cuSOLVER pick different bases in the
+near-degenerate tail (106 of 256 columns differ by more than a sign). **The
+shipped estimator's realized error therefore depends on the grader's LAPACK**,
+though its distribution does not.
+
+### The identity that collapses the design space
+
+    diag(Wᵀ Σ̂ W) = mean_s(z²) − mean_s(z)²     (verified to 1.8e-8 relative)
+
+Only the **diagonal** of the propagated covariance enters the final-layer means, so
+there is no 256×256 covariance to estimate — just 256 independent scalar second
+moments — and **no Marchenko-Pastur regime to fix**. Linear shrinkage commutes with
+the quadratic form (verified to 8.8e-9), so the planned `λΣ_closure + (1−λ)Σ_sample`
+*is* a scalar blend of two variance estimates.
+
+### The four arms (100 MLPs × 256 draws, real 1e9-sample truth)
+
+| arm | MSE | vs v2.4 |
+|---|---|---|
+| direct sample mean (= v2.4) | 1.5259e-6 | 1.000× |
+| analytic (sampled μ, sampled v) — this is B2's k=1 | 2.5241e-6 | 0.605× |
+| analytic (**reference** μ, sampled v) | 1.0581e-6 | 1.442× |
+| analytic (sampled μ, **reference** v) | 2.4965e-6 | **0.611×** |
+| analytic (reference μ, reference v) = pure model bias | 1.0350e-6 | 1.474× |
+| reference direct mean at 4.19M samples | 3.382e-8 | 45.1× |
+
+Row 4 is the **oracle for every variance-denoising scheme there is** — linear or
+nonlinear, shrunk or eigenvalue-clipped: replacing v̂ with the *exact* variance is
+the best any of them can do, and it is still 0.611× of v2.4. Track T is bounded
+out before any estimator is written.
+
+Row 5 reproduces **18097's central claim** independently: closure from exact
+moments beats sampling (they measured 1.16e-6 vs 1.61e-6; we get 1.035e-6 vs
+1.526e-6 — ratios 0.72 and 0.68). The ceiling of the whole analytic-tail family is
+therefore 1.47×, and it is unreachable because the exact moments are precisely
+what the sampling is estimating.
+
+Row 6 is a useful by-product: v2.4's **N→∞ floor is 3.38e-8**, i.e. pruning bias is
+2.2% of current MSE. No bias wall until we are 45× better than today.
+
+### Where the damage actually is
+
+| term | mean square | share |
+|---|---|---|
+| model bias (Gaussian closure of a non-Gaussian z, + pruning) | 1.0350e-6 | 41.0% |
+| **mean-estimation noise** | 1.4608e-6 | **57.9%** |
+| variance-estimation noise | 2.3792e-8 | **0.9%** |
+| interaction | 6.1e-13 | 0.0% |
+
+Bias/variance split across the 256 draws: v2.4 is 1.8% bias, the analytic arm is
+40.8% bias. The analytic arm's *variance* (1.4952e-6) is statistically identical to
+sampling's (1.4980e-6) — the smoothing removes nothing.
+
+### Why the shrinkage cannot help, and why the blend cannot
+
+* **v̂ is already accurate**: rms relative error **1.13%** at N=16384. The closure's
+  variance target is biased 27% low (κ = mean(v_ref)/mean(v_closure) = **1.363**) and
+  even after that global rescale its rms relative error is **24.0%** — 21× worse
+  than the thing it would be shrinking. λ = 0 is optimal and λ = 0.1 already costs
+  27%. **Ledoit-Wolf's analytic intensity independently returns λ = 0.0037**, i.e.
+  "don't" — LW works, the target is just useless.
+* **The blend is capped by same-sample correlation**: ρ(analytic error, sampling
+  error) = **+0.7704**. The correlation-aware optimum is β = 0.0137 (worth
+  1.0001×); the textbook independent-error weight would be 0.377 and would cost
+  **9%**. This is exactly the trap the plan flagged.
+* **Per-α-band blending does not rescue it.** In the α ≥ 3 band — which carries
+  **76.5% of the final-layer MSE** — ρ = **1.000**: with α that large, Φ = 1 and
+  φ = 0, so the "analytic tail" *is algebraically the direct sample mean*. An
+  oracle per-band blend is worth **1.0003×**. The last-layer Rao-Blackwellisation
+  is a no-op exactly where the error lives.
+
+### Cross-fit and gate
+
+Fit set (100 disjoint MLPs) chose κ=1.388, λ=0.060, β=0.020 → applied to mini:
+**1.0001×**. Draw-0 only (one realisation, as the grader would see it): 1.0000×.
+Added cost is negligible (+0.027%: mean(z) and mean(z²) are 3 FLOPs/element on the
+pre-activations), so **V·c/B ratio 0.9998× — GATE FAIL**.
+
+### Sobol is not iid, measured rather than assumed
+
+LW theory assumes iid draws, so the intensity was fed an *empirical* Var(v̂) across
+256 shifts. The measurement is worth keeping on its own:
+
+| statistic | measured variance | iid prediction | effective N |
+|---|---|---|---|
+| mean(z) | 3.0852e-6 | 6.1896e-6 | 32,870 (**2.01×**) |
+| v̂ = mean(z²)−mean(z)² | 3.0686e-6 | 3.5058e-6 | 18,719 (**1.14×**) |
+
+**RQMC's benefit is concentrated in the first moment.** For second moments our
+Sobol net behaves essentially like iid (rms rel error 1.13% vs the iid-Gaussian
+1.10%). That is a useful constraint on any future scheme that leans on
+sample *variances* rather than sample *means*.
+
+## 2026-08-05 (night) — TRACK P stage 1: the rank you need and the rank that pays are the same number
+
+**Stage-1 energy gate PASSES; end-to-end arithmetic FAILS at 1.093× against a 1.25×
+bar — and the bound holds even with a free, oracle-accurate correction.** No
+prototype built; the stage-1 data already bounds one.
+
+`local_sim/track_p_spectrum.py` (GPU) + `track_p_cost.py`, 100 mini MLPs, N=16384.
+
+**Deviation-energy spectrum** (fraction of the sample-fluctuation energy in the top
+k directions; "closure" = eigenvectors of the Gaussian closure's own propagated
+covariance, which v2.4 already computes for free):
+
+| layer | eff. rank | PCA 32 | PCA 64 | PCA 128 | closure 64 | W Wᵀ 64 |
+|---|---|---|---|---|---|---|
+| 8 | 25.9 | 0.795 | 0.909 | 0.975 | 0.902 | 0.251 |
+| 16 | 8.8 | 0.906 | **0.962** | 0.993 | 0.954 | 0.250 |
+| 24 | 4.4 | 0.951 | **0.982** | 0.998 | 0.976 | 0.251 |
+| 32 | 2.8 | 0.973 | **0.991** | 0.999 | 0.986 | 0.248 |
+
+Two real findings here. The fluctuation **does** collapse with depth (effective rank
+25.9 → 2.8), and **a precomputable basis finds it**: the closure covariance's top-k
+captures within 1 point of the data PCA at every depth, while W Wᵀ eigenvectors are
+worth exactly k/256, i.e. nothing. Gate (≥95% in top-64 for layers ≥16): **PASS**.
+
+**And it still does not pay.** Propagating the deviation in a k-dimensional
+subspace *is* a rank-k factorisation of each weight matrix, and under shape-based
+billing two factors cost `(2k−1)·256 + 511·k ≈ 1023k` per sample-layer against
+`130,816` dense — so the break-even is **exactly k = 128 = width/2**:
+
+| k | rank-k layer | vs dense |
+|---|---|---|
+| 32 | 32,480 | 4.03× |
+| 64 | 65,216 | 2.01× |
+| **128** | **130,688** | **1.001×** |
+
+End-to-end V·c against full-width sampling, with the **oracle** Jensen correction
+(exact E[ReLU(z+ε)] using the unprojected run's variances at every downstream
+layer — an upper bound no implementation can reach):
+
+| project from | k=32 | k=64 | k=128 |
+|---|---|---|---|
+| layer 8 | 0.348× | 0.612× | 0.791× |
+| layer 16 | 0.729× | **0.992×** | 0.917× |
+| layer 24 | 0.863× | **1.009×** | 0.961× |
+
+Pricing the oracle correction as **free** (which bounds any cheaper approximation
+of the rectified-Gaussian) the best cell rises only to **1.093×**, at layer 16 /
+k=64. Gate is 1.25×. **FAIL.**
+
+The mechanism in one line: *the rank at which the factorisation starts saving FLOPs
+(128) is the same rank at which the truncation stops costing accuracy* — 95.9% of
+the energy retained at layer 16 / k=64 still costs 6.3× MSE uncorrected, and 1.22×
+even with the oracle correction, because the dropped variance compounds through
+every remaining ReLU.
+
+## 2026-08-05 (night) — FORENSICS: the scored set is 50 fixed MLPs, and each submission returns their exact per-MLP MSEs
+
+*Private. Nothing here goes on the forum. New tools: `local_sim/board_snapshot.py`,
+`board_forensics.py`, `twin_diff.py --all`.*
+
+**Four facts, each verified rather than inferred.**
+
+1. **The two board columns are what we assumed** — the board's own metadata says
+   `scoreTitle='Adjusted Score'`, `scoreSecondaryTitle='Final Layer MSE'`, and our
+   own row (rank 87, `neopok919`) reads 2.719e-7 / 1.3748e-6, matching our graded
+   report exactly. So `score/scoreSecondary` is each entry's realised multiplier.
+2. **The evaluation suite is fixed.** The 100 `mlp_name`s in our graded reports are
+   identical *and in the same order* across v0, v1.0, v1.1 and v2.4 (Aug 4 → Aug 5).
+   Mission 2's twin test is answered for Phase 1 without spending a submission.
+3. **The suite is not the public data**: 1/100 name overlap with public `mini`
+   (a name collision) and 0/100 with `full`. The answers are not downloadable, and
+   our local measurements are genuinely out-of-sample.
+4. **The public score is the mean over exactly the 50 MLPs whose individual scores
+   are returned to us.** `results.public_scores` has 50 rows (indices 0–49), each
+   carrying `final_layer_mse`, `all_layers_mse`, `adjusted_final_layer_score` and a
+   32-long `per_layer_mse`. The mean of those 50 reproduces the aggregate
+   `final_layer_mse`, `score` **and** `all_layers_mse` to the last bit, and their
+   min/max reproduce the reported best/worst MLP scores.
+
+**What follows arithmetically.** For a scored MLP j, a submission of prediction p
+returns ‖p − t_j‖²/256 to 17 significant digits. Differencing two submissions gives
+
+    ⟨p_a − p_b, t_j⟩ = (‖p_a‖² − ‖p_b‖² − 256·(MSE_a − MSE_b)) / 2
+
+— a **linear** equation in the 256 unknowns of t_j, and each submission supplies one
+for all 50 scored MLPs at once. **257 submissions therefore determine every scored
+reference vector exactly.** The Phase-1 leader has **917 entries** (top-30 median:
+153), and moved 4.87e-8 → **5.6e-9 in a single step at 2026-08-05T17:21Z** after a
+month of ≤1.1× increments. Their implied V·c = 1.5e3 is 28× below the best
+published method (18106) and 49× below ours.
+
+**Hypothesis discipline — two of our own hypotheses died here.**
+
+* **The label-noise reading of `sampling_mse` is refuted.** If 6.4695e-7 were
+  additive reference noise, no entry could show a final-layer MSE below it;
+  **89 of the 200 board entries do**, in a smooth continuum with no gap at that
+  value. The "no honest submission below ≈6.47e-8 adjusted" bound recorded on
+  Aug 5 is **withdrawn**. The value is most consistent with a reference sampling
+  baseline's MSE on the fixed suite (a full-budget plain-MC run is ~6–7e-7).
+* **The first version of the probing arithmetic was wrong too** — it assumed the
+  aggregate MSE was the only channel, which would have left 917 submissions ~100×
+  short. Reading the actual schema (rather than reasoning about it) found
+  `public_scores`, and that is what makes the reconstruction over-determined.
+
+**What does not fit**, and is recorded rather than explained away: the leader ran at
+multiplier 0.98, leaving the 10× floor discount on the table. A reconstruction that
+already knows the answers has no reason to spend the budget.
+
+**For us**: the graded score is a deterministic function of our estimator on 50
+*fixed* MLPs, so our own graded A/B comparisons are paired and cleaner than assumed,
+but the *level* carries a fixed 7–20% offset versus the public 100 and should never
+be read as evidence a change helped. Decisions stay on the local 100-MLP split, which
+is also the honest proxy for the private re-run that sets the final ranking. **We do
+not use this channel.** It is not the wall-time grey area of rule 3; reconstructing
+reference values is not estimation at all.
+
 ## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
 
 **Where we stand**: v1.1 graded 3.893e-7, rank ~159. The leader is 4.87e-8 — **8.0× ahead**. Every analytic-side avenue we tested this session is dead:

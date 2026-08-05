@@ -80,7 +80,59 @@ have not seen made elsewhere and that would have saved us the experiment.
 **Corroboration.** Independently reported by two Phase-1 write-ups (18063, 18085) and
 consistent with 18097's finding that the depth-32 failure is *error dynamics* (a
 measured 16:1 bias-amplification-to-noise-attenuation exchange rate), not closure
-order.
+order. Quote 18097 directly on this — "*the chained estimator attenuates zero-mean
+noise while amplifying small coherent biases (measured end-to-end at a ~16:1
+exchange rate)*" — because it is the same phenomenon our fusion family died of,
+arrived at from a different direction and with a number attached.
+
+### 3b. The one place the analytic side genuinely wins, and why it is unreachable
+
+**The cross-confirmation worth leading with.** 18097 reports that their closure run
+*from exact input moments* beats sampling, 1.16e-6 against 1.61e-6. We measured the
+same comparison at the last layer, on 100 MLPs against 1e9-sample truth: closure
+from reference moments **1.035e-6** against sampling's **1.526e-6**. Two independent
+setups, ratios 0.72 and 0.68. So the analytic step is not inaccurate — *it is
+starved*.
+
+**And the starvation is structural, which is the contribution.** The last-layer
+closure needs only the 256 scalar pre-activation variances, because
+
+    diag(Wᵀ Σ̂ W) = mean_s(z²) − mean_s(z)²
+
+exactly. There is no covariance matrix to estimate and therefore no
+Marchenko-Pastur regime to shrink away — we verified the identity to 1.8e-8
+relative, and the sample variances are already accurate to **1.13% rms** at
+N=16384. The whole error decomposes as **41% irreducible model bias / 57.9%
+mean-estimation noise / 0.9% variance-estimation noise**, and the mean-estimation
+noise *is* the sampling noise. Replacing the variances with their exact values —
+the oracle for every denoising scheme there is, linear or nonlinear — moves the
+analytic tail from 0.605× to 0.611× of the sampling baseline.
+
+**The sharpest single fact.** In the α ≥ 3 band, which carries **76.5% of the
+final-layer MSE**, the correlation between the analytic and sampled estimates is
+**1.000** — with α that large, Φ = 1 and φ = 0, so the rectified-Gaussian formula
+*is algebraically the sample mean*. Last-layer Rao-Blackwellisation is a no-op
+exactly where the error lives. That is worth stating plainly, because "smooth the
+final ReLU" is the standard remedy for a QMC estimator with α = 1.
+
+### 3c. Rank-k propagation: when the accuracy rank equals the break-even rank
+
+The sample-to-sample fluctuation of the activation vector does collapse with depth
+— effective rank 25.9 → 8.8 → 4.4 → 2.8 at layers 8/16/24/32, with 96.2% of the
+energy in the top 64 by layer 16 — and a **precomputable** basis finds it: the
+Gaussian closure's own propagated covariance captures within one point of the data
+PCA at every depth, while W Wᵀ eigenvectors capture exactly k/256, i.e. nothing.
+That is a genuinely useful structural fact about deep random ReLU nets.
+
+It still cannot be spent. Propagating deviations in a k-dimensional subspace is a
+rank-k factorisation of each weight matrix, and under shape-based FLOP billing two
+factors cost `(2k−1)·n + (2n−1)·k` against `(2n−1)·n` dense — **break-even at
+k = n/2**, exactly 128 here. And 128 is also the rank at which truncation stops
+costing accuracy: at layer 16 with k=64 the retained 96% of energy still costs 6.3×
+in final-layer MSE, because the dropped variance compounds through every remaining
+ReLU. Adding the dropped variance back through the closure formula recovers most of
+it, but even an **oracle** correction priced at **zero** tops out at 1.093×
+end-to-end. The accuracy rank and the break-even rank are the same number.
 
 ## 4. The cost channel, which is where the room is
 
@@ -140,6 +192,62 @@ point deserves its own paragraph: at these effect sizes, subset measurement is n
 evidence.
 
 ---
+
+---
+
+## Appendix F (PRIVATE — not part of any submitted PDF unless explicitly decided)
+
+*Kept with the write-up because it is the same kind of object — a claim with an
+arithmetic consequence and a labelled confidence — and because the decision about
+what to publish should be made once, at the end, with all of it visible. Default is
+**do not publish**. Nothing here has been posted anywhere. Full record and the
+scripts that reproduce it: RESEARCH_NOTES §2g.*
+
+**F.1 What the scoring channel actually is (verified).** The public Phase-1 score is
+the mean over exactly **50 fixed MLPs** (indices 0–49), and every submission returns
+those MLPs' individual `final_layer_mse`, `all_layers_mse`, `adjusted_final_layer_score`
+and a 32-long `per_layer_mse` in `results.public_scores`. The mean of the 50
+reproduces all three reported aggregates bit-for-bit, and their min/max reproduce the
+reported best/worst MLP. The suite is fixed: the 100 `mlp_name`s are identical and
+identically ordered across four of our submissions spanning two days. It is not the
+public dataset (1/100 name overlap with `mini`, 0/100 with `full`).
+
+**F.2 The consequence (derived).** For a scored MLP j, a submission of prediction p
+returns ‖p − t_j‖²/256 to 17 significant digits, so differencing two submissions
+gives a *linear* equation in t_j's 256 unknowns — one per scored MLP per pair.
+**257 submissions determine every scored reference vector exactly.**
+
+**F.3 Why the wall-time bypass is not the explanation (derived, with its
+sensitivity).** Reaching 5.6e-9 at the multiplier floor needs MSE 5.6e-8, i.e.
+~2.4e5 samples ⇒ 7.5e11 real FLOPs ⇒ 2.75× the budget. Billed only as λ·wall, that
+stays inside 0.1B only at sustained ≥2.8 TFLOP/s f32 on a 16-vCPU grader; realistic
+AVX-512 throughput is 0.1–0.5, where the bypass is worth ~4× and takes the best
+published method to ~4e-8. The conclusion depends on a throughput figure we have not
+measured, and the appendix should say so.
+
+**F.4 Timeline (verified).** Phase-1 record improvements ran 2.13e-6 → 4.87e-8 in
+~25 gradual steps from Jun 19 to Aug 5 06:04Z, then **4.87e-8 → 5.6e-9 in one step
+at 2026-08-05T17:21Z**. The entry has 917 submissions against a top-30 median of 153.
+Implied V·c = 1.5e3: 28× below the best published method and 49× below ours.
+
+**F.5 What does not fit.** That entry ran at multiplier 0.98, leaving the 10× floor
+discount unused — which a party that already knows the references has no reason to
+do. Recorded rather than explained away.
+
+**F.6 Two of our own hypotheses died here**, and the appendix is more useful for
+saying so than for the accusation it declines to make:
+* *"`sampling_mse` is reference label noise, so nothing honest can beat ≈6.47e-8."*
+  Refuted — 89 of 200 board entries show a final-layer MSE below that value, in a
+  smooth continuum with no gap there.
+* *"917 submissions cannot leak enough to matter."* Wrong, and wrong because it
+  reasoned about the report schema instead of reading it.
+
+**F.7 Our position.** We do not use this channel; it is not estimation. The
+methodological point that *is* publishable, and is worth publishing on its own, is
+narrower and blames no one: **a leaderboard that scores a fixed set and returns
+per-item errors is a fixed-design regression problem, not an estimation benchmark,
+and the only defence is the private re-run on fresh instances.** That sentence can
+stand in a public write-up without any of F.1–F.6 behind it.
 
 ## Open items before this is publishable
 

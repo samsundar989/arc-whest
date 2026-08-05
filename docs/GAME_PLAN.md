@@ -66,6 +66,66 @@ Mint 50k He MLPs on the RTX 5090 (38.3 TFLOP/s measured), label with 64k–256k-
 
 *Overall target: ≤5e-8 adjusted. Milestone gate: if not ≤2e-7 by Aug 21, consolidate instead of adding pieces.*
 
+## REV 5 (2026-08-05, night) — both analytic revivals are bounded out; the board is signal-poor; optimise for FRESH MLPs
+
+Rev 4 retired variance reduction as a growth area. Rev 5 closes the two tracks that
+were meant to reopen it, and changes what we optimise *for*.
+
+**Track T (shrinkage-moment tail) — dead, 0.9998× against a 1.10× gate.** Three
+independent bounds, any one of which is sufficient (LOG 2026-08-05 night):
+1. Only `diag(WᵀΣW)` enters the final-layer means, and that equals
+   `mean(z²) − mean(z)²` exactly — so there is no covariance matrix to estimate,
+   no Marchenko-Pastur regime, and v̂ is already accurate to **1.13% rms**.
+   Replacing it with the *exact* variance — the oracle for every denoising scheme,
+   linear or not — still gives only **0.611×** of v2.4.
+2. The analytic tail's residual is **41% irreducible model bias**; with exact
+   moments it beats sampling **1.474×** (independently reproducing 18097), but the
+   exact moments are the very thing sampling estimates, and at N=16384 the
+   mean-estimation noise alone is 57.9% of the error.
+3. Blending is capped by ρ = **0.77** between the two errors. In the α ≥ 3 band —
+   **76.5% of the MSE** — ρ = **1.000**, because there Φ=1 and the "analytic tail"
+   *is* the sample mean. Oracle per-band blending: 1.0003×.
+
+**Track P (rank-k deviation propagation) — bounded out at 1.093× against 1.25×.**
+Stage 1's energy gate passes handsomely (top-64 holds 96.2% at layer 16, and the
+closure's own covariance eigenvectors find the subspace for free), but propagating
+in a rank-k subspace *is* a rank-k factorisation of each weight matrix, and under
+shape-based billing two factors only beat a dense 256×256 matmul for **k < 128** —
+which is exactly the rank at which truncation stops costing accuracy. Even pricing
+an oracle-accurate Jensen correction at **zero**, the best cell in the whole grid is
+1.093×. No prototype: the stage-1 data already bounds one.
+
+**The board is signal-poor, so stop steering by it.** Measured Aug 5: the public
+score is the mean over **50 fixed MLPs whose exact per-MLP MSEs are returned with
+every submission**, the suite is identical across all four of our submissions, and
+257 submissions suffice to solve for those references outright (RESEARCH_NOTES §2g).
+The Phase-1 leader has 917. Consequences for planning:
+
+* **Optimise expected score on FRESH MLPs.** The final ranking is a private re-run
+  on MLPs nobody has seen; that is also what our local 100-MLP split proxies.
+  Rank on the public board is now a weak target and a misleading one.
+* **Our own graded runs are paired re-measurements**, not fresh samples. Useful for
+  A/B against our own prior submission, useless as evidence about the population.
+* **We do not touch that channel** (§2g rule 1). It is not the wall-time grey area.
+* The email to organizers states the observation neutrally and asks whether it is
+  intended. Nothing goes on the forum.
+
+**What is left that could still move the score**, in order of expected value:
+1. **Cost (c).** Still the only channel with headroom, and the one the field ignores.
+   v2.4 spends 2.86e6 FLOPs/sample; the irreducible dense-matmul floor at the
+   measured 80% alive fraction is ~2.8e6, so *this* design is nearly optimal — the
+   next win has to change the design, not tune it. Pruning τ is at a sharp optimum,
+   the op-count work is banked, and residual wall time is 1.83% on the grader.
+2. **The write-up** (`docs/writeup-draft.md`). Our negative results now come with
+   mechanisms *and* oracle bounds, which is the strongest form of the genre. Due
+   Sep 26. This is where the remaining expected value actually is.
+3. **Phase 2 config verification** (Aug 8) and a shape-generic fallback. If the shape
+   changes, re-measure before optimising: α-histogram → error-vs-N → τ → stack.
+
+**Standing measurement policy is unchanged and was vindicated twice more**: the
+Track T and Track P verdicts both came from the full 100-MLP split with oracle arms
+that bound the entire family, not from a promising subset.
+
 ## REV 4 (2026-08-05, evening) — variance is at its floor; we work cost, governance, and the write-up
 
 Rev 3 retired the analytic family. Rev 4 retires **variance reduction itself** as a growth area, on evidence:
