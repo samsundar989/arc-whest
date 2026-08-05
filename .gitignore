@@ -13,3 +13,6 @@ _to_delete/
 # the blanket rules above might otherwise catch artifacts dropped in there.
 !experiments/run_reports/
 !experiments/run_reports/**
+
+# large intermediate npz caches live in the scratchpad, not the repo
+experiments/sprint3_robustness/*.npy
