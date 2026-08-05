@@ -301,12 +301,28 @@ to engineer — a method with a good mean and a fragile tail loses a fresh re-ru
 and a single failed MLP scores as zeros. We think this framing is under-discussed
 in the write-ups so far, all of which (ours included, until now) report a mean.
 
-**Evidence to include**: the per-MLP adjusted-score distribution over ≥1000 freshly
-minted He MLPs with 4.2M-sample MC labels — median, p90, p99, max, and max/median —
-plus the same for deliberately atypical networks (inflated row norms, a collapsed
-layer, an amplified layer, a mean-shifted layer). And the contract suite on the
-shipped file: degenerate pruning where an entire layer falls below τ, an
-identically-zero layer, 10⁴ dynamic range, seed 2⁶³−1, widths 64/128, depths 2–64,
+**Measured**, on 1200 freshly minted He MLPs with 4.19M-sample MC labels: mean
+adjusted 3.01e-7, median 2.19e-7, p90 5.69e-7, p99 1.65e-6, **max/median 12.9×**.
+The worst 1% of networks carry 6.9% of the total score. Bootstrapping the re-run
+score by set size R: at **R=10 the p90 is 50% above the median and the p99 is
+2.05×**; at R=100 the p90 spread is 13%; at R=1000, 4%. A competition that
+re-runs on ten fresh MLPs is measuring draw luck as much as method.
+
+**And the skew is mostly the metric, not the method** — the finding we would lead
+with. The score is an *unnormalised* MSE, and He-init draws vary about 5× in
+activation scale: `corr(log per-MLP MSE, log mean(truth²)) = +0.548`, and
+normalising by that scale cuts p99/median from 6.87× to 4.06×. The five worst
+networks have mean(truth²) of 1.5–3.7 against a median of 0.70. So the tail is
+largely inherited from the target, shared by every competitor, and not something
+estimator engineering can remove.
+
+**Robustness of the machinery, separately**: across 1800 fresh and deliberately
+deformed networks (inflated row norms, a collapsed layer, an amplified layer, a
+mean-shifted layer) there were no non-finite outputs, the alive count after
+pruning never fell below 117/256, the degenerate-layer fallback never fired, and
+the analytic patch stayed bounded at 6.3e-3 with α reaching ±12.4. The contract
+suite on the shipped file passes 24/24, including an identically-zero layer
+(σ → 0 in α = μ/σ), 10⁴ dynamic range, seed 2⁶³−1, widths 64–256, depths 2–64,
 budget 0, and input-array immutability.
 
 **The design point worth arguing**: our pruning rule fires on a *predicted*
@@ -317,11 +333,26 @@ quantities do not have that property.
 
 ## Open items before this is publishable
 
-- [ ] Decide whether to publish at all, and what to withhold (the cost channel is
-      our live advantage; the negative results are not).
+- [ ] Decide whether to publish at all, and what to withhold. Appendix F stays out
+      by default and until the organizers have had a chance to respond to the
+      disclosure; §7's one-sentence methodological version can stand alone.
 - [ ] Phase 2 numbers throughout — everything above is Phase 1 (256×32, B=2.72e11).
 - [ ] Reproduce the headline table on the Phase 2 shape once known.
-- [ ] Figures: error-vs-N with the α=1.00 fit; the α-histogram with the τ cliff;
-      corr(g_k, g_L) versus depth.
+- [ ] Figures, in priority order: (1) the fresh-MLP score distribution with the
+      bootstrap-by-R inset — it is the most under-reported thing we have;
+      (2) per-MLP MSE against mean(truth²) on log axes, showing the +0.55 slope
+      that explains the tail; (3) the α-histogram by depth showing bimodality
+      emerging (0.007 → 0.45 above α=3 from layer 4 to layer 31), with the τ cliff
+      marked; (4) error-vs-N with the α=1.00 fit; (5) corr(g_k, g_L) versus depth.
+- [ ] One table that carries the whole cost argument: each structural idea against
+      the share of the per-sample cost model it touches, and the resulting ceiling
+      (pruning 33.7% → 1.47×; scored-layer on-neurons 3.67% → 1.038×; rank-k
+      propagation, break-even k = n/2 → 1.09× with a free oracle correction).
 - [ ] Cite 18053, 18063, 18085, 18097, 18106 properly; He & Wang 2015; Owen on
-      scrambled nets.
+      scrambled nets. For §8, Blum & Hardt (arXiv:1502.04585) and Dwork et al.
+      (arXiv:1506.02629) on why a fixed evaluation set with per-item feedback is a
+      different object from a held-out test set.
+- [ ] Decide whether to report the eigensolver realisation effect: the alignment
+      basis is only determined in its leading directions, so LAPACK and cuSOLVER
+      give different realised errors from identical code. It is a real caveat for
+      anyone reproducing QMC results and we have not seen it stated.

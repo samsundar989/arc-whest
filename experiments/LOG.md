@@ -924,6 +924,111 @@ something materially different from what is described, or the number reflects th
 public board rather than fresh MLPs. We trust our own measurement and do not chase
 it.
 
+## 2026-08-05 (night) — FRESH-RE-RUN ROBUSTNESS: no failure modes, but the metric has a heavy tail
+
+New instruments: `local_sim/robustness.py` (GPU: mint fresh He MLPs, label at
+4.19M samples, run the v2.4 pipeline, report the whole distribution),
+`local_sim/edge_cases.py` (contract + numerical edges on the **shipped file**),
+`local_sim/fresh_eval.py` (shipped file over dumped fresh MLPs).
+
+### 1200 fresh MLPs — the distribution, not the mean
+
+| | adjusted score |
+|---|---|
+| mean | 3.0102e-7 |
+| median | 2.1919e-7 |
+| p90 | 5.6918e-7 |
+| p99 | 1.6529e-6 |
+| max | 2.8336e-6 |
+| **max / median** | **12.93×** |
+
+MSE: mean 1.6178e-6, median 1.1705e-6, max 1.4352e-5. C/B 0.1875. The worst 1% of
+MLPs carry **6.9%** of the total score and the worst 10% carry **31.9%** — the
+metric is a mean of a right-skewed quantity (mean/median = 1.37).
+
+**Mint validation**: the same GPU pipeline scores 1.6178e-6 on fresh minted MLPs
+and 1.5962e-6 on the real public mini MLPs — **+1.4%**, so the mint reproduces the
+competition's generator and these numbers transfer.
+
+### What that implies for a re-run of size R (bootstrap, 20k resamples)
+
+| R | median | p90 | p99 | max |
+|---|---|---|---|---|
+| **10** | 2.84e-7 | **4.26e-7** | 5.83e-7 | 9.34e-7 |
+| 25 | 2.94e-7 | 3.77e-7 | 4.60e-7 | 6.21e-7 |
+| 50 | 2.98e-7 | 3.54e-7 | 4.11e-7 | 4.98e-7 |
+| 100 | 2.99e-7 | 3.39e-7 | 3.74e-7 | 4.35e-7 |
+| 1000 | 3.01e-7 | 3.13e-7 | 3.23e-7 | 3.40e-7 |
+
+**At R=10 the score's p90 is 50% above its median and its p99 is 2.05× the median.**
+A draw of 10 has a 9.6% chance of containing a worst-1% MLP, and one such MLP alone
+adds 2.1e-7 to the mean — as much as the entire typical score. At R=100 the p90
+spread is 13%; at R=1000, 4%. **This is why the email asks for the re-run set
+size**: it is the difference between a measurement and a coin flip, and no amount
+of estimator work changes it.
+
+### The tail is mostly the metric, not our fragility
+
+On 250 fresh MLPs, per-MLP MSE against the MLP's own activation scale:
+
+| quantity | median | p99/median | max/median |
+|---|---|---|---|
+| raw MSE | 1.1903e-6 | 6.87× | 8.92× |
+| **MSE / mean(truth²)** | 1.7819e-6 | **4.06×** | **5.24×** |
+| mean(truth²) itself | 0.704 | 3.95× | 5.41× |
+
+`corr(log MSE, log mean(truth²)) = +0.548`, and the five worst MLPs have
+mean(truth²) of 1.5–3.7 against a median of 0.70. The scored metric is an
+*unnormalised* MSE, and He-init draws vary ~5× in activation scale, so a large
+share of the spread is inherited from the network rather than produced by the
+estimator. Normalising removes roughly half the excess dispersion; the remaining
+4× is real per-MLP difficulty. Two consequences: the draw risk above is shared by
+every competitor, and chasing the tail by making the estimator "more robust" would
+be attacking the wrong term. (`corr(log MSE, alive fraction) = −0.281`: heavier
+pruning costs a little, as expected, and nowhere near enough to matter.)
+
+### Stress: deliberately atypical networks (120 each)
+
+| set | mean adj | median | max/median | min alive | non-finite |
+|---|---|---|---|---|---|
+| plain | 3.3763e-7 | 2.3776e-7 | 9.62× | 138 | **0** |
+| fat_rows (10% of rows ×3) | 5.6949e-7 | 4.0626e-7 | 8.73× | 139 | **0** |
+| collapsed_layer (×0.25) | 1.8571e-8 | 1.2295e-8 | 7.59× | 142 | **0** |
+| amplified_layer (×4) | 4.9794e-6 | 3.9273e-6 | 3.72× | 139 | **0** |
+| biased_layer (+0.5σ) | 4.4291e-6 | 1.8583e-6 | 18.28× | 117 | **0** |
+
+Scores move by three orders of magnitude across these deformations — as they
+should, since the target itself moves — but **the machinery never breaks**: no
+non-finite output anywhere in 1800 MLPs, the alive count never fell below 117/256
+(τ = −2.5 never came close to emptying a layer), the degenerate-layer fallback
+never had to fire, the analytic patch offset stayed ≤ 6.3e-3, and α reached ±12.4
+without incident.
+
+### Contract suite on the shipped file: 24/24
+
+`edge_cases.py` against `estimator.py` itself, not the GPU mirror: an
+identically-zero layer (σ → 0 in α = μ/σ), layers scaled 0.001× and 1e4×, a
+mean-shifted all-on layer, seeds 0 / 1 / 2³¹−1 / 2⁶³−1 / >2⁶³, widths 64/128/256,
+depths 2/4/8/32/64, budgets 0 / 1 / 1e7 / 1e9 / 10×B, and grader-array
+immutability. All pass, all deterministic on rerun, no negative means, no
+non-finite values, shapes always (depth, width). Determinism also re-confirmed
+bit-identical on real dataset MLPs.
+
+### Verdict — fresh-re-run readiness
+
+**Ready.** Across 1800 fresh and deliberately deformed MLPs the shipped pipeline
+produced no failures, no non-finite values, and no degenerate pruning, and the
+contract suite passes 24/24 on the submission file itself including shapes and
+budgets far outside Phase 1's. The score distribution on fresh draws is
+right-skewed (mean 3.01e-7, median 2.19e-7, max/median 12.9×), but the skew is
+substantially inherited from the unnormalised metric — per-MLP MSE correlates
++0.55 in logs with the MLP's own activation scale — rather than from estimator
+fragility, so it is a risk shared with every competitor and not one we can
+engineer away. The one actionable consequence is that a **small** re-run set makes
+the outcome noisy: at R=10 the p90 score is 50% above the median. That argues for
+asking the organizers what R is (the email does), and for spending no further
+effort on score at the ~2% level, since draw variance dwarfs it.
+
 ## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
 
 **Where we stand**: v1.1 graded 3.893e-7, rank ~159. The leader is 4.87e-8 — **8.0× ahead**. Every analytic-side avenue we tested this session is dead:
