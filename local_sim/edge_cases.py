@@ -93,7 +93,7 @@ def check(name, est, mlp, budget=BUDGET, expect_depth=None, rerun=True):
 
 
 def main():
-    est_mod = load()
+    est_mod = load(sys.argv[1] if len(sys.argv) > 1 else "estimator.py")
     est = est_mod.Estimator()
 
     class Ctx:

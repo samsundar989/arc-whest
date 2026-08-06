@@ -820,10 +820,16 @@ Share of **alive** neurons above the threshold (closure α), 100 MLPs:
 | 31 | 0.659 | 0.555 | 0.453 | 0.340 |
 | 32 (scored) | 0.434 | 0.371 | 0.299 | 0.223 |
 
-α becomes bimodal with depth, exactly as the mean-field picture predicts once
-activation correlations approach 1 (σ² = wᵀΣw ≈ c·μ², so |α| → 1/√c). By layer 31
-**45% of alive neurons are confidently on**. The structure the plan assumed is
-there.
+By layer 31 **45% of alive neurons are confidently on**. The structure the plan
+assumed is there.
+
+**Correction (2026-08-06)**: this table was first written up as α "becoming
+bimodal with depth". Plotting the actual per-layer density (figure 3) shows that
+is **wrong** — the distribution stays *unimodal* and simply **widens**, so the
+tails fill from both ends. By layer 32 that leaves 34% below τ=−2.5 and 30% above
++3, with **36% still in the kink band** — which is the largest single population
+at the final layer, not a depleted one. The estimator's leverage comes from the
+widening, not from a split, and nothing downstream depended on the stronger claim.
 
 ### It still does not pay — 1.0246×
 
@@ -1058,6 +1064,115 @@ the outcome noisy: at R=10 the p90 score is 50% above the median. That argues fo
 asking the organizers what R is (the email does), and for spending no further
 effort on score at the ~2% level, since draw variance dwarfs it.
 
+## 2026-08-06 — v2.4.1: the rotation is now reproducible. **The 18% gap was a rank-deficiency artifact, not LAPACK conventions**
+
+**Shipped.** `estimator.py` = v2.4.1; v2.4 archived as `estimator_v2_4_1.py`'s parent.
+Method unchanged, score unchanged, realisation now stable.
+
+### The diagnosis — and my previous one was wrong
+
+Yesterday's entry blamed the shim-vs-whest gap on "LAPACK vs cuSOLVER eigenvector
+conventions". Tested properly, **every primitive is bit-identical between
+backends**: `fnp.random.default_rng(...).integers` (exact match), `stats.norm.cdf`
+(max abs diff **0.0** against scipy's `ndtr` over 20k points), and
+`fnp.linalg.eigh` (**0.0** eigenvalue and eigenvector difference, even on a
+JJᵀ-like matrix with a 6.6e15 condition ratio). Only `stats.norm.ppf` differed, by
+4.3e-9 — far too small to matter. Running the evaluation loop against the *real*
+flopscope instead of the shim still diverged, so it was never shim-vs-real either.
+
+The real mechanism, measured:
+
+| relative weight perturbation | max column move, raw eigenbasis | with canonical signs | truncated to rank 32 |
+|---|---|---|---|
+| 1e-15 | **0.81 – 0.84** | **0.81 – 0.84** (no help) | **2.7e-11** |
+
+JJᵀ is numerically rank ~68 — λ₃₂/λ₀ = 1.2e-6, λ₆₄/λ₀ = 6.4e-12, λ₉₆/λ₀ = 4.5e-17
+— so past that index LAPACK is returning an arbitrary orthonormal basis for a
+numerically null subspace. **A 1e-15 relative perturbation, smaller than the
+difference between any two harnesses, therefore hands you a different rotation and
+an independent realised point set.** That is why per-MLP MSE ratios between the two
+harnesses scattered 0.036–8.16 with a **median of 1.036**: not a bias, two draws.
+
+**The plan's proposed fix — canonical eigenvector signs — does not work**, and the
+table above is why: the ambiguity is a *rotation inside a near-degenerate subspace*,
+which no sign convention can pin. What works is keeping only the well-conditioned
+leading block and completing the basis deterministically (`fnp.linalg.qr(...,
+mode="complete")`, 2.0e6 FLOPs = 0.004% of budget, 150× cheaper than the eigh we
+already pay).
+
+### Verification
+
+| check | requirement | result |
+|---|---|---|
+| (a) shim-vs-whest absolute gap | ≤3% | **1.66%** (shim 1.5143e-6 vs whest 1.4895290e-6). v2.4 was **18%** ✅ |
+| (b) parity with v2.4 | ~equal, and >5% ⇒ stop | **0.9959×** ✅ |
+| (c) determinism + edge cases | 24/24, bit-identical | **24/24**, all deterministic ✅ |
+| `whest validate` | pass | ✅ |
+| mini run | n_failed 0 | 0 of 100 ✅ |
+
+Check (b) needed care: swapping the basis *changes the realisation*, and two
+realisations differ ~18% in the 100-MLP mean, so a single paired run cannot resolve
+a 5% question. `local_sim/basis_parity.py` instead averages each MLP over **32
+independent digital shifts**, which removes the realisation noise rather than
+measuring it:
+
+| basis | mean MSE over 32 draws | vs full | basis move @1e-15 |
+|---|---|---|---|
+| full eigh (v2.4) | 1.5246e-6 | 1.0000× | 6.86e-1 |
+| truncated rank 16 | 1.5666e-6 | 0.9732× | 5.05e-14 |
+| **truncated rank 32 (shipped)** | **1.5309e-6** | **0.9959×** | **6.81e-12** |
+| truncated rank 64 | 1.5141e-6 | 1.0070× | 2.31e-6 |
+
+Rank 32 is statistically indistinguishable from the full basis and eleven orders of
+magnitude more stable. Rank 16 costs 2.7% (it starts discarding real alignment);
+rank 64 is inside the noise floor of the spectrum and much less stable.
+
+**Do not bank the mini-run improvement.** v2.4.1's grader-parity run came in at
+adjusted **3.1725e-7** against v2.4's 3.400e-7 — 6.7% "better". That is realisation
+luck, not method: the 32-draw test says parity to 0.4%. The honest statement is
+that v2.4.1 scores the same as v2.4 and is reproducible.
+
+## 2026-08-06 — FORUM HARVEST: the deadline moved, and both cost-model questions were answered
+
+Passive-watch crawl (Mission 5). Nothing here reopens score work; three things
+change our calendar and our email.
+
+1. **Phase 1 now closes 10 August 23:59 UTC** (thread 18125, organizer, Aug 3);
+   write-up 17 August; registration/team freeze 5 September. **But the challenge
+   page's round object still ends Phase 1 at 2026-08-07 23:59 UTC and opens Phase 2
+   at 2026-08-08 00:00.** Thread 18130 raised exactly this on Aug 5 — no reply.
+   **We plan against the earlier date (Aug 7)** and the Phase-2 runbook stays
+   event-triggered on round 1429 going active rather than date-triggered.
+2. **The raw-array bypass is closed, and it was ruled on.** 18122: "on the eval
+   servers you have flopscope-client and not the flopscope core package, so you
+   wont be able to do operations directly on the array that bypass the accounting
+   boundary"; `flopscope.numpy.ndarray` is a `RemoteArray` with no `.base`. And
+   "with the recent changes, and the fact that you will have 1 core available to
+   you, it would be cheaper for you to use flopscope instead". 18132 adds:
+   "we will examine this during the private re-evaluation and prize due diligence",
+   and "optimizing ordinary control flow and data handling is legitimate. Using
+   residual pricing as an alternative arithmetic budget is not." **Our email's λ
+   paragraph was rewritten from a request-for-ruling into an acknowledgement plus
+   our own instrumented share (98.2%)**, which 18132 says gets examined anyway.
+3. **Cost model, re-validated against the release we already run on.** 18125
+   confirms dtype-aware pricing (f32 multiply 1, f64 2), data movement now billed
+   (copies/fills/concat 1 per element written, gather/sort/histogram 4), and — new
+   to us — **participant code is restricted to one physical core (2 vCPUs) while
+   the flopscope backend gets seven (14 vCPUs)**, with λ unchanged at 1e11. All of
+   our graded numbers (v0 → v2.4) were measured on flopscope 0.10.0 *after* these
+   changes, so RESEARCH_NOTES §3d needs no repricing. The one-core restriction
+   raises the relative price of residual wall time, which strengthens rather than
+   weakens the op-count work already banked (residual is 1.83% of our billed C).
+4. Also logged, not acted on: 18125's replier reports `predict_timeout_s = 30.0`
+   and `wall_time_limit_s = 60.0` as documented values, with observed runs at
+   64.8 s — that finally puts a number on a long-standing unknown in §6, though the
+   observation contradicts it. Our worst per-MLP wall time is 0.59 s.
+
+**External-evidence rule check: nothing reopens score work.** The dtype and
+data-movement prices are ones we already build against; the one-core change makes
+cost work *more* valuable but our residual is already 1.8%; and the bypass ruling
+removes the discount that would have made the honest frontier look worse than it is.
+
 ## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
 
 **Where we stand**: v1.1 graded 3.893e-7, rank ~159. The leader is 4.87e-8 — **8.0× ahead**. Every analytic-side avenue we tested this session is dead:
@@ -1087,7 +1202,11 @@ effort on score at the ~2% level, since draw variance dwarfs it.
 3. `wall_time_limit_s` still unknown (not in the participant report); it has never bound
    us (0.41 s/MLP used, ~98× headroom), so this is low priority.
 
-### Aug-8 runbook (Phase 2 opens 00:00 UTC, round 1429)
+### Phase-2 opening runbook — **event-triggered on round 1429 going active**
+
+*(Date corrected 2026-08-06: the challenge page still says Phase 2 opens Aug 8, the
+organizer announcement says Phase 1 runs to Aug 10. Trigger on the round flipping
+active, not on a date. Poll with `phase2_checklist.py`.)*
 
 Score optimisation is **closed** (GAME_PLAN rev 6 — the sampling frontier is
 declared at ~2.7e-7). Phase 2 work is verification and robustness, in this order:

@@ -66,12 +66,43 @@ Mint 50k He MLPs on the RTX 5090 (38.3 TFLOP/s measured), label with 64k–256k-
 
 *Overall target: ≤5e-8 adjusted. Milestone gate: if not ≤2e-7 by Aug 21, consolidate instead of adding pieces.*
 
-## REV 6 (2026-08-05, late) — the honest sampling frontier is declared at ~2.7e-7
+## REV 7 (2026-08-06) — endgame doctrine: write-up primary, governance, stewardship, opportunistic
 
-> **Merge note.** Written by the Claude Code session. The strategy session's own
-> rev 6, `RESEARCH_NOTES §2h`, and `docs/eval-mechanics-and-reconstruction.md` had
-> **not synced to this repo** when this was written — this rev is built on rev 5,
-> §2g and the verdicts relayed in the Aug-5 tasking. Merge deliberately.
+*Repo docs are canon; strategy verdicts arrive in prompts and get folded in here.
+Rev 6 below is the Claude Code rev — the strategy session's own rev 6 and §2h never
+synced, so both were merged into this file rather than either overwriting the
+other.*
+
+**Score work is closed** (rev 6) and stays closed unless *external* evidence
+reopens it. The four workstreams from here, in priority order:
+
+1. **Write-up — primary.** `docs/writeup-draft.md`, full draft by **Sep 5**, due
+   Sep 26. Now has the cost-ceiling table and DP result as §4b's centrepiece, §8's
+   R-bootstrap and metric-tail decomposition, three rendered figures in
+   `docs/figures/`, and a stub at §7b for the NNGP correlation-collapse theory with
+   the measured numbers it has to explain. Appendix F stays private.
+2. **Governance.** The organizer email is final and waits on Samuel. Note that two
+   of its five paragraphs were *retired by evidence* during the Aug-6 crawl — the
+   organizers ruled on residual billing in 18122/18132 — which is the model for how
+   this workstream should behave: crawl, then ask only what is actually open.
+3. **Stewardship.** The estimator is a designation candidate, not a work in
+   progress. v2.4.1 hardened the one real defect (an irreproducible rotation).
+   Remaining stewardship: keep `edge_cases.py` at 24/24, keep the fresh-MLP
+   distribution current if the shape changes, and re-validate pricing on any
+   flopscope/whestbench release (done for 0.10.0 — all our graded numbers are
+   already post-change).
+4. **Opportunistic.** Phase-2 opening (event-triggered), the Phase-1 write-up
+   harvest through Aug 17, and anything the organizers answer.
+
+**Ranking-noise nuance, corrected.** The fresh-MLP score distribution is heavy
+(max/median 12.9×, p90/median 1.50× at R=10), but the re-run suite is **common
+across teams**, so hardness is a common-mode term that inflates or deflates
+everyone together and largely cancels in the *ranking*. What survives is the
+interaction between draw and method. Ranking jitter between two similarly-placed
+teams at R=10 is therefore **±10–20%, not ±50%**. Both numbers go in the write-up;
+conflating them overstates the case.
+
+## REV 6 (2026-08-05, late) — the honest sampling frontier is declared at ~2.7e-7
 
 **Sprint 3 (structure-aware FLOP allocation) came back at 1.0246× against a 1.20×
 gate, and the ceiling is arithmetic.** Details in LOG. The short form: for a

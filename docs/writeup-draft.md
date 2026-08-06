@@ -191,6 +191,30 @@ way — the general lesson is that a structural reduction is worth the share of 
 cost model it actually touches, and under shape-based billing the nonlinearity is
 never the expensive part.
 
+### The table that carries the argument
+
+Every structural idea we tried, against the share of the per-sample cost model it
+touches and the ceiling that share implies. This is the section's centerpiece: the
+ceiling column is computable *before* implementing anything, and in every case it
+predicted the outcome.
+
+| idea | what it removes | share of per-sample cost | ceiling | measured |
+|---|---|---|---|---|
+| **dead-neuron pruning** (τ=−2.5) | whole rows *and* columns → smaller dense matmuls | 33.7% of the matmul | 1.51× | **1.47×** |
+| on-neurons at the scored layer | that layer's per-sample values entirely | 3.67% | 1.038× | 1.02× |
+| on-neurons linearised, last *k* layers | the ReLU only — never the multiply | 0% extra | see below | 1.025× at k=8 |
+| rank-*k* deviation propagation | width, via a rank-*k* weight factorisation | break-even at k = n/2 | 1.09× (free oracle correction) | not built |
+| moment denoising at the tail (Track T) | nothing in the cost model | 0% | — | 1.0001× |
+
+The third row is the instructive one and needs the DP to state honestly.
+Propagating on-neurons implicitly means carrying a composed matrix whose *source
+width grows with every kink activation retained*, and re-materialising to reset
+that width costs `2·src·n > 2n²`, i.e. more than a dense layer. So the scheme is
+neither "always compose" nor "always dense": the cheapest schedule is a choice per
+layer, which we solve exactly by dynamic programming over which layers
+re-materialise. Even at that optimum it is 1.025×. **A structural insight with no
+denominator in the cost model is worth nothing, however true it is.**
+
 *A methodological aside worth one sentence*: the variance rescale κ = 1.363 that
 Track T fitted to correct the closure's final-layer variance made things **worse**
 when reused inside this correction term. A constant fitted for one role does not
@@ -293,6 +317,38 @@ per-item errors is a fixed-design regression problem, not an estimation benchmar
 and the only defence is the private re-run on fresh instances.** That sentence can
 stand in a public write-up without any of F.1–F.6 behind it.
 
+## 7b. Why the fluctuations collapse — NNGP correlation growth  *(STUB — strategy session to draft)*
+
+*Placeholder. The numbers this section has to explain are all measured and in the
+repo; the theory is being written elsewhere. Do not fill this in here without
+merging that draft.*
+
+**The measurements it must account for** (figure 1, and `figure_data.py`):
+
+| layer | 1 | 8 | 16 | 24 | 32 |
+|---|---|---|---|---|---|
+| effective rank (participation ratio) | **165.0** | 25.9 | 8.8 | 4.4 | **2.8** |
+
+and the companion facts:
+
+* top-64 principal directions hold 90.9% of the fluctuation energy at layer 8,
+  **96.2%** at layer 16, 98.2% at 24, **99.1%** at 32;
+* the **Gaussian closure's own propagated covariance** finds the same subspace —
+  its top-k captures within one point of the data PCA at every depth — while
+  eigenvectors of W Wᵀ capture exactly k/256, i.e. nothing;
+* JJᵀ for the linearised end-to-end map is numerically rank ~68: λ₃₂/λ₀ = 1.2e-6,
+  λ₆₄/λ₀ = 6.4e-12, λ₉₆/λ₀ = 4.5e-17;
+* the firing index does **not** become bimodal — it stays unimodal and widens, so
+  the tails fill from both ends (figure 3).
+
+**The expected shape of the argument** (for the drafter, not a claim yet): He init
+is ReLU-critical, so norms are preserved but input–input correlations approach 1
+only algebraically with depth (Poole 1606.05340; Schoenholz 1611.01232; Hayou
+1902.06853). As the correlation between two inputs' representations → 1, the
+covariance of the activation vector across inputs approaches a rank-one object,
+which is exactly a participation ratio falling toward 1. Our measurement says it
+reaches ~3 at depth 32 rather than 1, and the gap is the interesting part.
+
 ## 8. Robustness, and why the distribution is the deliverable
 
 The competition's final ranking comes from re-running one designated submission on
@@ -303,18 +359,44 @@ in the write-ups so far, all of which (ours included, until now) report a mean.
 
 **Measured**, on 1200 freshly minted He MLPs with 4.19M-sample MC labels: mean
 adjusted 3.01e-7, median 2.19e-7, p90 5.69e-7, p99 1.65e-6, **max/median 12.9×**.
-The worst 1% of networks carry 6.9% of the total score. Bootstrapping the re-run
-score by set size R: at **R=10 the p90 is 50% above the median and the p99 is
-2.05×**; at R=100 the p90 spread is 13%; at R=1000, 4%. A competition that
-re-runs on ten fresh MLPs is measuring draw luck as much as method.
+The worst 1% of networks carry 6.9% of the total score, the worst 10% carry 31.9%.
+
+Bootstrapping the score a re-run of size R would produce (20k resamples):
+
+| R | median | p90 | p99 | p90/median |
+|---|---|---|---|---|
+| **10** | 2.84e-7 | 4.26e-7 | 5.83e-7 | **1.50×** |
+| 25 | 2.94e-7 | 3.77e-7 | 4.60e-7 | 1.28× |
+| 50 | 2.98e-7 | 3.54e-7 | 4.11e-7 | 1.19× |
+| 100 | 2.99e-7 | 3.39e-7 | 3.74e-7 | 1.13× |
+| 250 | 3.00e-7 | 3.25e-7 | 3.47e-7 | 1.08× |
+| 1000 | 3.01e-7 | 3.13e-7 | 3.23e-7 | 1.04× |
+
+**The nuance that keeps this honest**: the re-run suite is *common to all teams*,
+so MLP hardness is a common-mode term. It inflates or deflates everyone's score
+together and mostly cancels in the *ranking*. What does not cancel is the
+interaction between draw and method — different estimators are not uniformly
+better across the difficulty range — so the ranking jitter between two
+similarly-placed teams at R=10 is on the order of **±10–20%**, not the ±50% the
+absolute spread suggests. Both numbers belong in the paper, and confusing them
+overstates the case.
 
 **And the skew is mostly the metric, not the method** — the finding we would lead
-with. The score is an *unnormalised* MSE, and He-init draws vary about 5× in
-activation scale: `corr(log per-MLP MSE, log mean(truth²)) = +0.548`, and
-normalising by that scale cuts p99/median from 6.87× to 4.06×. The five worst
-networks have mean(truth²) of 1.5–3.7 against a median of 0.70. So the tail is
-largely inherited from the target, shared by every competitor, and not something
-estimator engineering can remove.
+with, and the one an organizer could act on:
+
+| quantity | median | p99/median | max/median |
+|---|---|---|---|
+| raw per-MLP MSE | 1.19e-6 | 6.87× | 8.92× |
+| **MSE / mean(truth²)** | 1.78e-6 | **4.06×** | **5.24×** |
+| mean(truth²) itself | 0.704 | 3.95× | 5.41× |
+
+The score is an *unnormalised* MSE and He-init draws vary about 5× in activation
+scale: `corr(log per-MLP MSE, log mean(truth²)) = +0.548`, and normalising by that
+scale removes roughly half the excess dispersion. The five worst networks have
+mean(truth²) of 1.5–3.7 against a median of 0.70. So a large part of the tail is
+inherited from the target, is shared by every competitor, and is not something
+estimator engineering can remove — **reporting a scale-normalised MSE alongside the
+raw one would make the benchmark measure the estimator rather than the draw.**
 
 **Robustness of the machinery, separately**: across 1800 fresh and deliberately
 deformed networks (inflated row norms, a collapsed layer, an amplified layer, a
@@ -338,12 +420,19 @@ quantities do not have that property.
       disclosure; §7's one-sentence methodological version can stand alone.
 - [ ] Phase 2 numbers throughout — everything above is Phase 1 (256×32, B=2.72e11).
 - [ ] Reproduce the headline table on the Phase 2 shape once known.
-- [ ] Figures, in priority order: (1) the fresh-MLP score distribution with the
-      bootstrap-by-R inset — it is the most under-reported thing we have;
-      (2) per-MLP MSE against mean(truth²) on log axes, showing the +0.55 slope
-      that explains the tail; (3) the α-histogram by depth showing bimodality
-      emerging (0.007 → 0.45 above α=3 from layer 4 to layer 31), with the τ cliff
-      marked; (4) error-vs-N with the α=1.00 fit; (5) corr(g_k, g_L) versus depth.
+- [x] **Figures 1–3 drafted** (`docs/figures/`, rendered by
+      `local_sim/make_figures.py` from `local_sim/figure_data.py`):
+      (1) effective-rank collapse by depth, 165 → 26 → 9 → 4 → 3, with a
+      10–90th-percentile band — the empirical fact the NNGP section must explain;
+      (2) error-vs-N in two panels (never two y-scales): MSE ∝ N^−0.988 above,
+      adjusted score below, showing it fall steeply while the multiplier is pinned
+      at the 0.1 floor and go flat the moment the floor is cleared;
+      (3) the α density by layer, per-column scaled, over a stacked dead/kink/on
+      share panel.
+- [ ] Remaining figures: (4) the fresh-MLP score distribution with the
+      bootstrap-by-R inset — the most under-reported thing we have;
+      (5) per-MLP MSE against mean(truth²) on log axes, showing the +0.55 slope
+      that explains the tail; (6) corr(g_k, g_L) versus depth.
 - [ ] One table that carries the whole cost argument: each structural idea against
       the share of the per-sample cost model it touches, and the resulting ceiling
       (pruning 33.7% → 1.47×; scored-layer on-neurons 3.67% → 1.038×; rank-k

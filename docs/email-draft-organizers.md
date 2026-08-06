@@ -1,7 +1,22 @@
 # Draft email to the organizers — for Samuel to send from his own address
 
 **To:** arc-whestbench@aicrowd.com
-**Subject:** Final-ranking mechanics, and a scoring-channel issue worth a look
+**Subject:** Final-ranking mechanics, a scoring-channel issue, and a cost-model ruling request
+
+> **Status: final, revised 2026-08-06 after a forum crawl. Ready for Samuel to
+> send — none of it goes on the forum.**
+>
+> **What changed and why**: the λ / raw-array question was drafted as a request for
+> a ruling, and then the crawl found the organizers had already ruled, twice —
+> thread 18122 ("on the eval servers you have flopscope-client … you won't be able
+> to do operations directly on the array that bypass the accounting boundary") and
+> thread 18132 ("we will examine this during the private re-evaluation and prize
+> due diligence … using residual pricing as an alternative arithmetic budget is
+> not [legitimate]"). Sending the original text would have asked for something
+> already given. Paragraph 5 is now an acknowledgement plus our own instrumented
+> share (98.2%), volunteered because 18132 says that number gets examined anyway.
+> A new paragraph 0 raises the Aug-7-vs-Aug-10 deadline contradiction, which is
+> genuinely unanswered and genuinely time-critical.
 
 > Notes for Samuel before sending:
 > - Send from your own address; this is a participant asking about rules and
@@ -18,20 +33,37 @@
 > - Q4 deliberately stops at "here is the mechanism and here are the standard
 >   fixes". It does not say anyone has used it, because we have not established
 >   that and it is not our place to.
+> - Q5 is back in as its own paragraph because it is the one integrity question
+>   the private re-run does **not** settle. A leaderboard artifact disappears when
+>   the ranking is decided on fresh MLPs; a billing discount does not, because it
+>   is a property of how work is priced, not of which MLPs are used. Both threads
+>   are public and were raised by others, so pointing at them adds nothing to the
+>   world.
 
 ---
 
 Hello,
 
 I'm competing in the ARC White-Box Estimation Challenge (participant
-`neopok919`). Three questions about how the final ranking is decided, and one
-technical report about the scoring channel that I think you'll want to see.
+`neopok919`). One time-sensitive discrepancy, three questions about how the final
+ranking is decided, and one technical report about the scoring channel that I
+think you'll want to see.
+
+**0. One operational thing first**, because it may be time-critical: the update in
+thread 18125 gives the Phase 1 deadline as 10 August 23:59 UTC, but the challenge
+page's own round object still ends Phase 1 at **2026-08-07 23:59 UTC** and starts
+Phase 2 at 2026-08-08 00:00 UTC. Thread 18130 raised the same discrepancy on
+5 August and hasn't had a reply. Which one governs submission acceptance? We are
+planning around the earlier of the two to be safe, but teams reading only the
+announcement may find the round closed under them.
 
 **1–2. The private re-run.** My understanding is that prizes are decided by
 re-running each team's *one designated submission* on a fresh set of MLPs the
-submission has never seen, rather than by public-leaderboard position. Could you
-confirm that, and confirm how the designation works in Phase 2 (default to
-best-public-score, or an explicit choice by the team, and by when)? Relatedly,
+submission has never seen, rather than by public-leaderboard position — thread
+18125 says as much. Could you confirm how the designation works (default to
+best-public-score, or an explicit choice by the team), where that interface is,
+and by when it must be done? Thread 18130 asked this on 5 August and is still
+open. Relatedly,
 the townhall said the re-run set would be "finalized closer to the time" — could
 you say what is currently expected for its **size and architecture**? We are
 spending effort on making our estimator robust across MLP draws rather than tuned
@@ -74,12 +106,19 @@ scored offline against the public 1e9-sample ground truth — and I'm not asking
 any change to our scores. Happy to send the exact field names, our four reports, or
 a worked example if that's useful.
 
-(Separately, and lower priority since it is already public: threads 18099 and 18108
-asked whether computation performed on raw NumPy-backed arrays — charged only
-through the residual wall-time term — is within the intended cost model or a defect
-of the same kind as the batched-RHS `linalg.solve` undercount in 18082. We build
-entirely through the instrumented API either way, but an answer would tell us
-whether to expect a re-evaluation before the final ranking.)
+**5. Residual-time billing — noted, and one volunteered number.** I had a question
+drafted here about whether computation charged only through the residual term was
+within the intended cost model (threads 18099 and 18108). Your replies in 18122
+and 18132 answer it, so I'll just say I've read them and that we agree with the
+line drawn — "optimizing ordinary control flow and data handling is legitimate,
+using residual pricing as an alternative arithmetic budget is not." Since you
+mentioned instrumented share will be examined during prize due diligence, here is
+ours up front rather than on request: on submission 324420 the per-MLP telemetry
+gives 5.31e10 instrumented FLOPs against 9.84e-3 s of residual wall time, i.e.
+**98.2% of our billed compute is instrumented**, and the residual is the ordinary
+cost of allocating and freeing sampling buffers. Our estimator is Sobol RQMC with
+analytic dead-neuron pruning, built entirely through `flopscope.numpy`; happy to
+walk through it if that is ever useful.
 
 Thanks for your work on the challenge,
 

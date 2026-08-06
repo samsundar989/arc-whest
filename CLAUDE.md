@@ -42,7 +42,15 @@ uv run python local_sim/export_split.py --split mini --n 100 --out <npz>   # dat
 uv run python local_sim/edge_cases.py            # contract + numerical edges on the SHIPPED file
 ```
 
-## Known unknowns / gotchas (updated 2026-08-05 night)
+## Known unknowns / gotchas (updated 2026-08-06)
+
+- **DEADLINE CONFLICT — plan against Aug 7.** Organizer thread 18125 (Aug 3) says Phase 1 closes **10 Aug 23:59 UTC**; the challenge page's round object still ends round 1428 at **2026-08-07 23:59 UTC** and opens 1429 at Aug 8 00:00. Thread 18130 flagged it Aug 5, no reply. Treat Aug 7 as operative and **trigger the Phase-2 runbook on round 1429 going active**, never on a date. Write-up due 17 Aug; registration/team freeze 5 Sep.
+- **The residual-billing question is RULED ON — don't re-ask it.** 18122: eval servers ship `flopscope-client`, `fnp.ndarray` is a `RemoteArray` with no `.base`, so raw-array bypass is impossible there, and "it would be cheaper for you to use flopscope instead". 18132: "we will examine this during the private re-evaluation and prize due diligence"; "using residual pricing as an alternative arithmetic budget is not [legitimate]". **Our instrumented share is 98.2%** (5.31e10 FLOPs vs 9.84 ms residual on submission 324420) — quote it if due diligence ever asks.
+- **Participant code runs on ONE physical core (2 vCPUs)**; the flopscope backend gets seven (14 vCPUs); λ still 1e11. All our graded numbers are post-0.10.0, so §3d pricing needs no revalidation.
+- **v2.4.1 shipped** — same method and same score as v2.4 (0.9959× over 32 draws/MLP), but the rotation is now reproducible. JJᵀ is numerically rank ~68 (λ₉₆/λ₀ = 4.5e-17), so the raw eigenbasis is arbitrary past that: a **1e-15** relative weight perturbation moved it by 0.81 in max column distance and handed us an independent realisation. Canonical *signs* do not fix this (same 0.81) — the ambiguity is a rotation inside a near-degenerate subspace. Fix = keep the top 32 directions, pin signs, complete by `fnp.linalg.qr(mode="complete")` (2.0e6 FLOPs). Shim-vs-whest gap: **18% → 1.66%**.
+- **A single 100-MLP mini run cannot resolve a <15% question.** Two realisations of the same estimator differ ~18% in the mean. For any A/B on the point set or the basis, average each MLP over many digital shifts (`local_sim/basis_parity.py`, 32 draws) instead. v2.4.1's mini run looks 6.7% better than v2.4 — that is luck, not method.
+
+## Older gotchas (2026-08-05 night)
 
 - **Prizes are decided by a private re-run of ONE designated submission on FRESH MLPs.** Public-board rank is not a target; judge everything on the local 100-MLP mini split and on ≥1000 fresh minted MLPs (`local_sim/robustness.py`). The tail of the fresh-MLP score distribution is the real risk, not the mean.
 - **Score optimisation is CLOSED — the honest sampling frontier is ~2.7e-7** (GAME_PLAN rev 6). Sprint 3 (structure-aware on/kink FLOP allocation) measured **1.0246×** against a 1.20× gate. Ceiling is arithmetic: the scored layer is 3.67% of the per-sample budget, so freeing it entirely is 1.038×; clearing 1.20× needs six of the last layers to cost nothing. **Linearisation removes the ReLU, not the matmul.** Don't reopen without a lever that touches a bigger share of the cost model.

@@ -71,6 +71,15 @@ Stacked: 1.61x over v1.1 on the full 100-MLP public split (V*c/B 4.489e-7 ->
 2.787e-7). A stratified radius on an extra Sobol coordinate was also measured
 and is neutral (+/-0.5%), so it is not included.
 
+v2.4.1 changes nothing about the method and is not expected to change the score.
+It fixes a reproducibility defect: J J^T is numerically rank ~68, so the tail of
+its eigenvector matrix is arbitrary, and a relative weight perturbation as small
+as 1e-15 was enough to hand us a completely different rotation and therefore a
+completely different realised point set. Two harnesses running this identical
+file disagreed by 18% in mean MSE over the same 100 MLPs for exactly that reason.
+The rotation is now built from the well-conditioned leading directions only, with
+canonical column signs and a deterministic QR completion.
+
 Rows other than the last carry covariance propagation's means rather than
 sampled ones (only the final layer is scored, and this avoids a scatter); row 1
 keeps its exact closed form.
@@ -108,6 +117,23 @@ _CHUNK = 16384
 # optimum on the full 100-MLP split; -3.0 gives 1.38x and -2.0 only 1.23x
 # (the MSE penalty explodes below -2.5).
 _PRUNE_TAU = -2.5
+
+# How many eigenvectors of J J^T are trusted as *directions*.
+#
+# J J^T is numerically rank-deficient: its relative spectrum falls to 1e-6 by
+# index 32, 6e-12 by index 64 and 4e-17 by index 96, so everything past ~68 is
+# below float64 noise and LAPACK returns an arbitrary orthogonal basis for it.
+# Measured consequence: perturbing the weights by a RELATIVE 1e-15 — far less
+# than the difference between two evaluation harnesses — changes the raw
+# eigenvector matrix by 0.81 in max column distance, i.e. a completely different
+# rotation, and therefore a completely different realised point set. Fixing
+# eigenvector signs does not help (measured: same 0.81), because the ambiguity is
+# a rotation inside near-degenerate subspaces, not a sign.
+#
+# Keeping only the well-conditioned leading directions and completing the basis
+# with a Householder QR makes the rotation reproducible: at rank 32 the same
+# 1e-15 perturbation moves it by 2.7e-11.
+_BASIS_RANK = 32
 
 _SOBOL_BITS = 30
 _SOBOL_DIM = 256
@@ -570,16 +596,37 @@ class Estimator(BaseEstimator):
 
     # ------------------------------------------------------------------ #
     def _alignment_basis(self, w64, phis, width, depth):
-        """Leading eigenvectors of J J^T for the linearised end-to-end map.
+        """Reproducible leading eigenvectors of J J^T for the linearised map.
 
         eigh on J J^T gives the same left singular vectors as an SVD of J for
         roughly a third of the price (measured 3.0e8 vs 8.7e8 FLOPs at n=256).
+        Only the first `_BASIS_RANK` of them carry information (see the note
+        there); the rest are numerical noise whose arbitrary orientation would
+        otherwise make our realised error depend on the linear-algebra backend.
+        So we keep the leading block, pin its column signs, and complete the
+        basis with a complete-mode QR — deterministic given the leading block,
+        and 2.0e6 FLOPs, i.e. 0.004% of budget and 150x cheaper than the eigh.
         """
         J = w64[0]
         for k in range(1, depth):
             J = (J * phis[k - 1]) @ w64[k]
         _, vecs = fnp.linalg.eigh(J @ J.T)
-        return vecs[:, ::-1]  # descending eigenvalue
+        k = _BASIS_RANK if _BASIS_RANK < width else width
+        top = vecs[:, width - k :][:, ::-1]  # top-k, descending eigenvalue
+
+        # Canonical sign: make each column's largest-magnitude entry positive,
+        # using reductions only (no fancy indexing into a grader array).
+        hi = fnp.max(top, axis=0)
+        lo = fnp.min(top, axis=0)
+        top = top * fnp.where(hi >= -lo, 1.0, -1.0)
+
+        # For orthonormal input the R factor's leading k x k block is diagonal
+        # with entries +/-1, so undoing those signs makes q[:, :k] reproduce
+        # `top` exactly; q[:, k:] is then a deterministic completion.
+        q, r = fnp.linalg.qr(top, mode="complete")
+        d = fnp.diagonal(r)
+        fix = fnp.concatenate([fnp.where(d < 0.0, -1.0, 1.0), fnp.ones(width - k)])
+        return q * fix
 
     # ------------------------------------------------------------------ #
     def _slice_weights(self, weights, mus, alive_idx, width, depth):
