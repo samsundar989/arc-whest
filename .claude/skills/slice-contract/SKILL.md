@@ -1,9 +1,15 @@
 ---
 name: slice-contract
-description: Run a STRATEGIC slice in arc-whest — pre-register a Slice Contract in experiments/LOG.md before any data exists, spend a decision block once, and return an Evidence Packet. Use whenever the work touches estimator.py, spends or allocates a seed block, touches the vault, changes a gate/threshold/residual model or the three-tier protocol, makes a write-up claim, or reopens a closed lane. Also use when asked to "run an experiment", "test whether X helps", "check if we can beat", or "compare A vs B" on any scored quantity.
+description: INTERNAL PRIMITIVE, normally invoked by /next-slice rather than directly. Owns the pre-registration protocol for a STRATEGIC slice in arc-whest — allocate the seed block, write the contract and freeze the residual model into experiments/LOG.md before any data exists, take Samuel's prediction, spend the decision block once, return an Evidence Packet. Invoke directly only when resuming a slice already under contract. For choosing what to work on, use /next-slice; for closing the loop afterwards, use /review-slice.
 ---
 
 # Slice Contract — arc-whest
+
+> **Position in the workflow.** This is an internal primitive beneath the standard
+> control surface. `/next-slice` decides *that* a strategic slice is the right move
+> and invokes this; this skill governs *how* the slice runs and ends at the Evidence
+> Packet; `/review-slice` then closes the epistemic loop. Invoking this directly is
+> fine when resuming a slice that is already under contract.
 
 This project's decisive failure mode is not bad code. It is **a number that was
 chosen after the answer was visible.** Sprint 4 produced a 1.41× headline that
@@ -140,19 +146,18 @@ must change · what this implies for the next experiment.
 Update `docs/CURRENT_STATE.md` if a lane opened or closed. Add to `docs/GOTCHAS.md`
 if a trap was found. Both, if both.
 
-## Step 8 — independent falsification
+## Step 8 — hand off to `/review-slice`, then stop
 
-Launch the `skeptic` agent with the contract, the diff, the protocol, and the **raw
-artifacts** — not with your summary of them. Its verdict (ACCEPT / PROVISIONAL /
-REJECT) goes into the LOG entry. A PROVISIONAL verdict names the cheapest
-discriminating follow-up; run that before promoting anything.
+The slice ends at the Evidence Packet. **Do not review your own work here, and do not
+open the next slice from inside this one.**
 
-## Step 9 — teach-back, then stop
+`/review-slice` owns what comes next: independent falsification via the `skeptic`
+agent, the Knowledge Delta into durable docs, Samuel's teach-back, and the single
+terminal state (PROMOTE_AND_CONTINUE / FOLLOW_UP_EXPERIMENT / REVERT /
+STRATEGIC_RESEARCH / STRATEGIC_DECISION / FIX_EVALUATION).
 
-Two to four questions, e.g. *why did this work or fail* · *which component is most
-causally important* · *what assumption is still uncertain* · *if this regressed
-tomorrow, where would you look first*. Then **stop.** Do not open the next strategic
-slice from inside this one. Synthesis first — that rule is what keeps the project's
+Tell Samuel the packet is ready and that `/review-slice` is the next command.
+Synthesis before the next strategic change is the rule that keeps this project's
 beliefs from drifting ahead of its evidence.
 
 ## Standing prohibitions

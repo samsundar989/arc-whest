@@ -79,6 +79,32 @@ Full reference (GPU venv, probes, dead-lane commands): `docs/SETUP_WINDOWS.md` �
 **Run `whest` from PowerShell**, or set `PYTHONIOENCODING=utf-8` in Bash — the CLI's
 box-drawing output kills Git Bash's cp1252 console inside its own error printer.
 
+## Human workflow
+
+```text
+Start / re-enter a session      /session-start     (blank HUMAN_MODEL.md → first-orientation)
+Choose the next high-value move /next-slice        (may be a diagnostic, not code)
+After an IMPORTANT/STRATEGIC slice  /review-slice
+Periodically check the mental model /cold-start
+Mechanical work                 /routine <task>
+End the work session            /session-close
+```
+
+Daily loop: `/session-start` → `/next-slice` → work → `/review-slice` → repeat →
+`/session-close`. Run `/cold-start` every 3–5 strategic slices.
+
+Project-specific machinery runs *beneath* these: the `slice-contract` skill
+(pre-registration), the `skeptic` agent (independent falsification),
+`scripts/preflight.ps1`, `local_sim/seed_blocks.py`, `local_sim/vault.py`, and the
+probes. Do not invoke them as a substitute for the workflow above.
+
+When `/next-slice` or `/review-slice` emits **STRATEGIC_RESEARCH** or
+**STRATEGIC_DECISION**, it produces a Strategist Packet — send that to the strongest
+reasoning model and bring the returned Slice Contract back through `/next-slice`.
+
+**`docs/HUMAN_MODEL.md` is human-owned and must not be silently edited by agents**
+(enforced by a hook). Agents read it, quiz against it, and propose corrections.
+
 ## Work classification
 
 | class | what | required |
