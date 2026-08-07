@@ -1,0 +1,54 @@
+diff --git a/src/mlp_kprop/cumulants.py b/src/mlp_kprop/cumulants.py
+--- a/src/mlp_kprop/cumulants.py
++++ b/src/mlp_kprop/cumulants.py
+@@ -18,2 +18,2 @@
+-type Samples = Float[Tensor, "samples n"]  # Note this is the transpose of the torch.cov convention
+-type SampleStream = Iterator[Samples]  # samples -> (samples n)
++Samples = Float[Tensor, "samples n"]  # Python 3.10 compatibility
++SampleStream = Iterator[Samples]  # samples -> (samples n)
+diff --git a/src/mlp_kprop/diagslice.py b/src/mlp_kprop/diagslice.py
+--- a/src/mlp_kprop/diagslice.py
++++ b/src/mlp_kprop/diagslice.py
+@@ -8,1 +8,1 @@
+-from typing import Self
++from typing_extensions import Self
+diff --git a/src/mlp_kprop/factor_k3.py b/src/mlp_kprop/factor_k3.py
+--- a/src/mlp_kprop/factor_k3.py
++++ b/src/mlp_kprop/factor_k3.py
+@@ -277,1 +277,1 @@
+-type FacHTower = dict[int, FactoredTensor| HTensor]
++FacHTower = dict[int, FactoredTensor | HTensor]
+diff --git a/src/mlp_kprop/factor_k4.py b/src/mlp_kprop/factor_k4.py
+--- a/src/mlp_kprop/factor_k4.py
++++ b/src/mlp_kprop/factor_k4.py
+@@ -320,1 +320,1 @@
+-type FacHTower = dict[int, FactoredTensor4| HTensor]
++FacHTower = dict[int, FactoredTensor4 | HTensor]
+diff --git a/src/mlp_kprop/harmonic.py b/src/mlp_kprop/harmonic.py
+--- a/src/mlp_kprop/harmonic.py
++++ b/src/mlp_kprop/harmonic.py
+@@ -727,1 +727,1 @@
+-type HTower = dict[int, HTensor]
++HTower = dict[int, HTensor]
+diff --git a/src/mlp_kprop/partitions.py b/src/mlp_kprop/partitions.py
+--- a/src/mlp_kprop/partitions.py
++++ b/src/mlp_kprop/partitions.py
+@@ -8,1 +8,2 @@
+-from typing import Any, Optional, Self
++from typing import Any, Optional
++from typing_extensions import Self
+@@ -20,4 +21,4 @@
+-type IntPartition = tuple[int, ...]
+-type SetPartition[T] = tuple[frozenset[T], ...]
+-type Vec = tuple[int, ...]
+-type VecPartition = tuple[Vec, ...]
++IntPartition = tuple[int, ...]
++SetPartition = tuple
++Vec = tuple[int, ...]
++VecPartition = tuple[Vec, ...]
+diff --git a/src/mlp_kprop/tensor_utils.py b/src/mlp_kprop/tensor_utils.py
+--- a/src/mlp_kprop/tensor_utils.py
++++ b/src/mlp_kprop/tensor_utils.py
+@@ -14,1 +14,1 @@
+-type Tower = dict[int, Float[Tensor, "*n"]]  # d -> (n,)*d.
++Tower = dict[int, Float[Tensor, "*n"]]  # d -> (n,)*d.
