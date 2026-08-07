@@ -1173,6 +1173,1096 @@ data-movement prices are ones we already build against; the one-core change make
 cost work *more* valuable but our residual is already 1.8%; and the bypass ruling
 removes the discount that would have made the honest frontier look worse than it is.
 
+## 2026-08-06 — MINT PROVENANCE: our MLPs were **not** the grader's MLPs. Now they are, bit-for-bit
+
+**The question, finally closed.** Every offline number in this log rested on an
+unstated assumption: that a network minted by `local_sim` is the network
+`whestbench` would have minted. It was not. Same distribution, different
+realisation, and with a coupling the grader does not have.
+
+**The authority.** Both `dataset.bake_*` (public splits) and `scoring.make_contest`
+(the private re-run suites) build networks identically:
+
+```python
+weight_ss, sample_ss, estimator_seed = SeedSequence(input_seed).spawn(3)
+mlp = sample_mlp(width, depth, default_rng(weight_ss), seed=estimator_seed)
+```
+
+Three deliberately independent substreams: spawn[0] weights, spawn[1] ground-truth
+draws, spawn[2] the `MLP.seed` the estimator receives.
+
+**Three defects found:**
+
+| | evaluator | ours before today |
+|---|---|---|
+| draw | float64 normal × float64 scale, **one cast at the end** | float32-native `standard_normal(dtype=float32)` |
+| weight seed | `default_rng(SeedSequence(s).spawn(3)[0])` | `default_rng(s)` |
+| `MLP.seed` | `spawn(3)[2]`, independent of the weights | **`s`, the weight seed itself** |
+| GPU mirror | — | torch Philox, a different generator entirely |
+
+The float32-native draw consumes the bit stream by a different algorithm, so the
+numbers differ completely, not by rounding. The **seed aliasing is the one that
+could have bitten**: `estimator.py:532` derives its Sobol digital shift from
+`mlp.seed`, so on our mints the point set was a deterministic function of the very
+network it scored. The grader has no such coupling.
+
+**The fix and the proof** (`local_sim/mint_provenance.py`). `canonical_mint` is a
+pure-numpy reimplementation — possible because `fnp.random.SeedSequence` **is**
+`numpy.random.SeedSequence` (identity) and `fnp.random.default_rng` forwards
+`standard_normal` unchanged. Checked on raw uint32 bit patterns, not a tolerance:
+
+| shape | seeds | weights bit-identical | MLP.seed identical | legacy identical |
+|---|---|---|---|---|
+| 256×32 / 256×8 / 128×16 / 64×4 / 256×2 | 20 each | **100/100** | 100/100 | **0/100** |
+
+Legacy max relative elementwise divergence **1.868**. But the distribution was
+right: over 12 × 256×8 nets, weight std / He target 1.000329 (canonical) vs
+1.000025 (legacy). **So every statistical result in this log stands; per-seed
+reproducibility against the grader never existed.**
+
+**GPU mirror** (`local_sim/gpu_parity.py`), two claims to two standards:
+generation **bit-for-bit** 6/6 (it now mints on CPU and copies to device — torch
+cannot reproduce numpy's stream, only its distribution); forward pass max
+disagreement **5.55e-17** absolute, 1.03e-16 relative, implied MSE **1.2e-35**, or
+9e-30 of the 1.4e-6 signal.
+
+**Banked consequences.** `harness.gen_mlp`, `robustness.mint` and `gpu_mint.he_mlp`
+all route through `canonical_mint`; the old one survives as `gen_mlp_legacy` for
+reproducing historical numbers only. Ground truth now uses spawn[1], so it is
+independent of weights and estimator seed *by construction*. And the vault can
+store 500 seeds instead of 4.2 GB of float32, because the seed→weights map is
+proven exact.
+
+**Seed blocks** (`local_sim/seed_blocks.py`, new): V = 20,260,806,000 (vault, 500);
+D01–D10 = 30,806,00N,000 (600 each). Legacy blocks L1–L5 recorded so they are never
+re-issued; nothing minted on them is comparable to anything minted after today.
+
+## 2026-08-06 — INVARIANT SUITE: 24/24 → **29/29**, and layer 1 is exact to 1.8e-16
+
+`edge_cases.py` asked *does it survive?* Finite output is necessary and nowhere near
+sufficient, so five classes were added that ask *is it computing the right thing?*
+Fresh draws from seed block **D06**.
+
+**Layer-1 closed form.** For x ~ N(0,I), E[ReLU(z_j)] = ‖W₁[:,j]‖/√(2π) exactly.
+Max relative error 1.77e-16 (256×32), 1.64e-16 (128×8), 1.63e-16 (64×4),
+1.72e-16 (256×2) — machine epsilon. Any future drift here is arithmetic, not noise.
+
+**Permutation equivariance** — the one test that catches a transposed index or an
+axis swapped in a reduction, mistakes that produce perfectly plausible wrong
+numbers. Relabel hidden layer k (permute W_k's output columns and W_{k+1}'s input
+rows); the true answer must permute row k and leave every other row alone.
+
+| case | permuted row | other rows | implied MSE |
+|---|---|---|---|
+| 256×32 layer 7 | 2.22e-15 | 4.38e-08 | 1.18e-16 |
+| 256×32 layer 20 | 1.78e-15 | 2.07e-08 | 3.43e-17 |
+| 128×8 layer 3 | 8.88e-16 | 1.42e-09 | 1.97e-19 |
+| 256×32 layer 30 | 1.33e-15 | 4.96e-09 | 1.23e-18 |
+
+The permuted row matches to floating point. The residual elsewhere is *explained*,
+not slop: reordering columns reorders every downstream matmul's summation, so JJᵀ
+moves at 1e-16 and the alignment basis inherits it. At ≤1.2e-16 implied MSE that is
+nine orders below anything we act on. **This also re-measures v2.4.1's rotation
+stability independently**: the pre-v2.4.1 raw eigenbasis moved 0.81 in max column
+distance under a 1e-15 perturbation; a full relabelling now moves the final row by
+4.4e-8.
+
+**Budget monotonicity.** Analytic fallback through 1e9; N=2⁹ at 1e10, 2¹¹ at 2.72e10,
+**2¹⁴ at the Phase-1 budget**, 2¹⁷ at 10×. Monotone, valid, no exceptions.
+
+**Determinism.** Three runs bit-identical *plus* a freshly constructed `Estimator`
+with its own `setup()` — the case that would catch state leaking between MLPs
+through the cached Sobol table. Passes at 256×32 and 128×8.
+
+**Seed hygiene.** `check_disjoint()` on live blocks is now asserted in CI, so an
+overlapping block fails the suite instead of silently producing correlated
+"independent" evidence.
+
+## 2026-08-06 — PUBLIC–PRIVATE DIVERGENCE: **NOT VISIBLE**, but the cost half is
+
+18118 describes Phase 1 as 50 public + 50 private MLPs. `local_sim/private_half.py`
+confirms the mechanism from our side and settles what we can see.
+
+**Verified across all four graded reports:** `results.per_mlp` has **100** entries;
+`results.public_scores` has **50** (indices 0–49, contiguous); `aggregates` has a
+`public` key and no sibling. An exhaustive recursive key search for
+private/hidden/holdout/secret finds **nothing**. So MLPs 50–99 execute inside our
+submission and are scored out of sight. **We cannot compute an accuracy divergence
+and will not claim one.**
+
+**What is visible** is the hidden half's compute telemetry, which answers the
+narrower question of whether the estimator *behaves* the same on untuned draws:
+
+| submission | private state | errors | eff-compute priv/pub | residual ratio |
+|---|---|---|---|---|
+| 323872 v0 | completed | 0 | 0.9999 | 0.9992 |
+| 324075 v1.0 | completed | 0 | 0.9999 | 0.9885 |
+| 324094 v1.1 | completed | 0 | 0.9999 | 0.9940 |
+| 324420 v2.4 | completed | 0 | **0.9916** | 1.0006 |
+
+v2.4 spends 0.84% *less* on the hidden 50 — pruning prunes marginally more there.
+Free credibility for the write-up's integrity section, stated exactly as: cost
+ratio measured, score ratio not observable.
+
+## 2026-08-06 — BOARD CENSUS: **#82 of 193 plausible-honest**, on 5 submissions
+
+`local_sim/board_census.py` (PRIVATE — never the forum). Criteria fixed before
+looking: reconstruction-capable = ≥257 entries (§2g D1's bound); late step-change =
+≥3× between consecutive personal bests *after* already below 1e-6; sub-frontier =
+below 1e-7, i.e. beating the best published method by >1.5×. Flag only when
+sub-frontier **and** (capable **or** stepped) — because beating the published state
+of the art is what *we* are trying to do, and 900 honest submissions is a work
+ethic, not a method.
+
+Round 1428, snapshot 2026-08-06T05:38Z, 200 entries: **7 probing-signature, 193
+plausible-honest, us #82 of 193** (raw #89 of 200) at 2.719e-7 on **5 entries** —
+by far the lowest submission count of anyone near us. Board #1 is now **4.2e-9**
+on 936 entries with a 7.38× late jump; its implied V·c is 1.5e3, 28× below anything
+published.
+
+The screen is deliberately conservative, so #82/193 is an **upper bound** on how
+many real methods beat us, not an estimate. Five sub-1e-7 teams trip neither
+criterion.
+
+## 2026-08-06 — PHASE-1 WINDOW: no submission, selection left at the default
+
+Round 1428 is live to Aug 7 23:59 UTC. **Decision (Samuel, this session): do not
+spend a Phase-1 submission on v2.4.1.** The reasoning, recorded because it will
+recur in Phase 2:
+
+* There is **no participant-side selection mechanism** — `whest` has no designate
+  command and `aicrowd_client.py` exposes no such endpoint. So 18118's default
+  (top-2 public scores) governs, and it currently picks **{v2.4 2.719e-7, v1.1
+  3.893e-7}**.
+* v2.4.1's mini run is 3.172e-7 vs v2.4's 3.400e-7 (both 0 failures), so a graded
+  v2.4.1 would land ~2.7e-7 and **displace v1.1** — replacing the only
+  rotation-free hedge with a near-duplicate of v2.4.
+* The graded-parity information was marginal: we already have a full `whest run` on
+  the real flopscope/whestbench stack. A grader run would add only their BLAS.
+* v2.4.1 debuts in round 1429 on Aug 8 at zero displacement cost.
+
+Also repaired: `2026-08-06_v2.4.1_mini_subprocess.json` had 703 characters of
+PowerShell stderr ("uv : Warning: You are sending unauthenticated requests…")
+prepended, making it unparseable. Stripped; the JSON was intact underneath.
+
+## 2026-08-06 — THEORY VERIFICATION: **P1 PASSES**, **P3 is sharper than expected**, P2 blocked
+
+`local_sim/theory_probe.py`, fresh mints from seed block **D07**. Thresholds stated
+before running; nothing here has a fitted parameter, which is the point.
+
+**P1 — the parameter-free correlation map holds.** For He-init ReLU the uncentered
+correlation of two inputs' representations should follow `c_{l+1} = R(c_l)` with
+`R(c) = [√(1−c²) + c(π − arccos c)]/π` (arc-cosine kernel, Cho & Saul 2009; the
+2/n scaling makes it exactly norm-preserving, so there is no constant to fit).
+Measured over 4 starting correlations × 32 layers × 8 nets × 2048 input pairs:
+**max |measured − R-iterate| = 0.0133**, against a pre-registered 0.02. **PASS.**
+
+The useful corollary: at depth 32 the correlation has only reached ~0.98, not 1.
+The approach is algebraic, not geometric — which is the quantitative reason the
+participation ratio stalls near 3 instead of collapsing to 1. That gap was flagged
+in the §7b stub as "the interesting part"; it now has a number attached.
+
+**P3 — the collapse is toward μ specifically.** Low rank does not say *which*
+direction survives; this does. Alignment of the fluctuation covariance's leading
+eigenvector with the mean activation direction:
+
+| layer | 1 | 9 | 17 | 25 | 32 |
+|---|---|---|---|---|---|
+| \|⟨v₁, μ̂⟩\| | 0.079 | 0.947 | 0.970 | 0.987 | **0.994** |
+| PR | 159.3 | 21.5 | 8.6 | 4.2 | **2.4** |
+| λ₁ share | 0.013 | 0.149 | 0.305 | 0.476 | **0.651** |
+
+At the scored layer the dominant mode holds 65% of the fluctuation energy and is
+**99.4% aligned with μ**. **This is the common mode of §2 in different vocabulary**:
+an error along μ̂ is a rescaling of the whole output layer, which is exactly what
+`1 + g` is. §2 and §7b are describing one phenomenon and the write-up should say so.
+
+PR here reads 159.3 at layer 1 vs figure 1's 165.0 — expected downward bias from
+estimating a 256-dim covariance with 4096 samples. Trend unaffected; quote
+figure 1's values.
+
+**P2 — NOT RUN, and deliberately.** The two-sector participation-ratio fit held out
+at layers 12/20/28 needs the functional form in `docs/nngp-theory-draft.md`, which
+**is not in the repo** (searched Documents/Downloads/Desktop too). Guessing a
+two-sector form and reporting it as a verification would invert the exercise.
+**Blocked on Samuel supplying the draft.**
+
+## 2026-08-06 — VAULT BASELINE: v2.4.1, touch #1
+
+The sealed 500-MLP holdout (seed block **V**, 2²⁵-sample ground truth per MLP)
+received its one authorized seal-time baseline evaluation. Integrity verification
+passed immediately beforehand: all four array hashes matched the manifest, five
+spot-reconstructed networks matched the canonical seed→weights path, and the
+manifest/log counters both read zero before evaluation.
+
+| quantity | result |
+|---|---|
+| adjusted median | **2.4651e-7** |
+| adjusted mean | **3.2669e-7** |
+| adjusted p90 / p99 | 5.8172e-7 / **2.0535e-6** |
+| adjusted max / max:median | 3.0469e-6 / 12.36× |
+| raw MSE mean / median | 1.7622e-6 / 1.3234e-6 |
+| mean C/B | 0.1873 |
+| non-finite predictions | **0 / 500** |
+| GT-noise MSE | 1.575e-9 = **0.09%** of measured raw MSE |
+
+The result is consistent with the earlier 1200-network legacy-mint distribution
+(median 2.19e-7, mean 3.01e-7, p99 1.65e-6) while now carrying exact evaluator
+mint provenance and an independent estimator-seed stream. Touch #1 is recorded in
+`experiments/vault/touch_log.jsonl`; the manifest and generated README both report
+one touch. No estimator choice was made from this result.
+
+The invariant suite was re-run after recovery and now passes **30/30** (the extra
+count is the vault GT-noise-floor assertion; the earlier 29/29 documentation was
+stale by one test).
+
+## 2026-08-06 — CONSTANTS AUDIT: three keep, one bound withdrawn, one candidate rejected after real pricing
+
+`local_sim/audit_constants.py`, fresh canonical mints from the preallocated,
+never-reused blocks D01–D05. The τ/rank/N sweeps use 200 MLPs × 32 independent
+digital shifts with paired common random numbers and 8,388,608-sample truth per
+MLP; patch and calibration checks use 50 MLPs at the same truth precision. Full
+paired means: `experiments/constants_audit_2026-08-06.json`. The original output
+stream was interrupted after that JSON was saved, so the rank and N sweeps were
+recomputed identically—not as new evidence—to preserve their paired standard
+errors in `constants_audit_rank_2026-08-06.json` and
+`constants_audit_cb_2026-08-06.json`.
+
+| item | frozen | fresh result | verdict / action |
+|---|---|---|---|
+| pruning τ | -2.5 | **-2.5 is the exact optimum**; -3.0 is worse at 22.6σ, -2.0 at 13.3σ | **KEEP** |
+| rotation rank | 32 | rank 256 appears 1.0108× better, only **0.7σ** | **KEEP 32**; apparent optimum is noise |
+| sample count N | 16,384 | 65,536 is 1.0408× better at **3.2σ** in the FLOP-only model; 32,768 is 1.0343× | real-price CONFIRM before action |
+| pruned-value patch bound | 3.8e-9 | **1.043e-8**, with GT noise 1.65e-12 | old bound **WITHDRAWN**; independent end-to-end τ sweep still selects -2.5 |
+| v0 calibration | legacy table | max shown fresh/frozen drift **0.07%** | **KEEP values**; wiring debt below |
+
+The patch result changes the claim, not the estimator. It measures error on the
+substituted nearly-dead values themselves; the D01 objective already includes
+their entire downstream effect and independently keeps τ=-2.5. The honest bound
+is now 1.043e-8 on canonical mints. The earlier 3.8e-9 number is not repeated.
+
+The calibration audit found a separate implementation debt: v2.4.1's
+`_analytic_only` fallback returns raw closure means and does **not** contain the
+audited `_CAL_LAYER_SCALE` table. That path only runs below the sampling ladder
+and cannot affect the Phase-1 configuration. It is recorded, not patched into a
+designation candidate; if Phase 2 supplies a low budget, restore the fresh-verified
+table before using the fallback.
+
+### N=65,536 real-stack confirmation — candidate rejected for now
+
+The D03 GPU audit prices FLOPs but cannot reproduce the participant process's
+residual-wall-time charge. A temporary v2.4.1 candidate changed only the sizing
+guards (`_TARGET_CB=1.05`, `_MAX_CB=1.10`), passed `whest validate`, and ran the
+read-only public mini split through the real subprocess stack:
+
+| | N=16,384 frozen | N=65,536 candidate |
+|---|---|---|
+| adjusted | 3.17246e-7 | **3.15e-7** |
+| raw final-layer MSE | 1.48953e-6 | 4.10e-7 |
+| mean multiplier | 0.21598 | 0.78299 |
+| failed MLPs | 0 | 0 |
+| total residual wall time / 100 | 5.45 s | 20.33 s |
+
+Only ~0.7% survives real local pricing, below the change threshold. Per the
+read-only protocol, no choice was made from the public labels: D03 nominated the
+arm, and the public stack supplied the omitted cost term. `estimator.py` was
+restored to N=16,384, no submission was made, and the vault was **not** touched.
+Because the grader historically charges much less residual time (v2.4: 9.84
+ms/MLP vs 54 ms locally), keep the larger-N arm as a Phase-2 telemetry candidate,
+not as a frozen change. Summary artifact:
+`run_reports/2026-08-06_v2.4.1_N65536_mini_confirm_summary.json`.
+
+## 2026-08-06 10:03Z — BOARD REFRESH: honest rank holds, probing signatures increase to eight
+
+Fresh round-1428 snapshot after the recovery work:
+`board_snapshots/2026-08-06T1003Z_2026-08-06_phase1_resume_board.json`, with the
+full census in the adjacent `_census.json`. The board moved materially in 4.5
+hours: dpskv5 stepped from 5.08e-8 to 5.8e-9 (8.76× late jump), making it the
+eighth probing-signature team. Our raw rank moved #89→#90, but the headline rank
+among plausible-honest teams is unchanged at **#82**, now **#82 of 192**.
+
+Phase state at the same check: round 1428 live; round 1429 inactive and empty;
+no `v1-phase2` dataset tag. Therefore the Phase-2 day-1 protocol has **not**
+started and no Phase-2 submission or snapshot is due yet.
+
+## 2026-08-06 — MOONSHOT INFRASTRUCTURE: low-rank K3/K4 adapter, no gate opened
+
+Implemented `local_sim/lowrank_cumulant_flow.py`, fenced from `estimator.py`.
+It adapts ARC `mlp_cumulant_propagation` revision
+`93d091a4c26c042bfffa28f2e76a81bc0aba94bb`: full-dimensional K1/K2, factored
+K3/K4 nonlinear propagation, top-r K2-eigenbasis projection after every ReLU,
+and explicit per-layer K3/K4 renormalization inputs. K4 projection operates on
+the paired factors and does not form an n^4 tensor.
+
+Verification: CUDA projection smoke at width 16/rank 4 passed with maximum
+relative out-of-basis component 1.81e-15. End-to-end three-layer toy flows ran
+for both k_max=3 and k_max=4, returning three projected activation records and
+finite width-4 means. Upstream needs syntax-only Python-3.10 compatibility edits
+in the research checkout; the participant environment remains untouched.
+
+**Classification: infrastructure, not G1 evidence.** D08 has not been minted or
+scored, no gate has been opened, and no GPU-day budget was charged beyond the
+toy smoke. Before G1, keep the estimator's calibrated K=2 closure as a separate
+basis/control trajectory: ARC's full-width K1/K2 path is not bit-identical to
+that baseline. No changes to `estimator.py`, no vault touch, no submission.
+
+## 2026-08-06 — SPRINT 4: packed activation propagation. **The mechanism reproduces; the verdict turns on residual pricing**
+
+GAME_PLAN rev 9 reopened one score lane on external evidence: submission 319341
+spends **2.374e6 effective FLOPs/sample** against our v2.4's 3.303e6, at
+`MSE*N = 1.852e-2` against our 2.252e-2. Sprint 3 had priced *static* late-layer
+on-neuron composition; 319341's described mechanism is different and
+value-dependent — sort activation columns by firing rate, pack a cold prefix,
+bucket rows by their prefix support, skip the exact zero rectangles, gather the
+rest, and use Strassen-style dense blocks. Reproduced here from first principles,
+without reference to any competitor code.
+
+New instruments, all running against **real flopscope 0.10.0**, not the shim:
+`local_sim/packed_sparse_probe.py` (dense reference + packed path + a separate
+analytic cost oracle), `local_sim/packed_truth.py` (labels for a decision block),
+`local_sim/test_packed_sparse.py` (62 focused tests). Seed blocks **D11** (design)
+and **D12** (locked, single-use) were allocated and recorded before any
+measurement.
+
+### S0 — semantic parity: PASS
+
+| check | result |
+|---|---|
+| dense reference vs SHIPPED `estimator.py`, same MLP + same shift | **0.0 — bit-identical** |
+| packing vs dense, max relative | **1.5e-8** |
+| packing + column ordering vs dense | 1.5e-8 |
+| Strassen depth 1 vs dense | 8.5e-8 |
+| MSE change from packing (30 MLPs x 8 shifts, paired) | **1.0000x — none** |
+
+Packing is an arithmetic reorganisation, not an approximation. The only entries
+skipped are exactly `0.0` after the ReLU, where `0.0 * w` contributes exactly
+`0.0`. Top-k selection uses `argpartition`, so a row with fewer than k nonzeros
+gathers surplus **zeros** that self-annihilate, and a row with more than k is
+routed to a wider bucket or to the exact dense remainder — never truncated. The
+test suite drives a **1e-20 activation against a 1e20 weight row** and demands the
+contribution survive; it does, for every bucket size. That test exists because a
+scheme that quietly dropped small activations would look like a free speed-up,
+survive an end-to-end MSE check inside sampling noise, and silently turn an
+"exact" claim into an approximation.
+
+### The structure, measured — and the closure already knew it
+
+Post-ReLU zero fraction, measured against the closure's own `Phi(alpha)`:
+
+| layer | 1 | 4 | 8 | 15 | 23 | 30 |
+|---|---|---|---|---|---|---|
+| measured | 0.500 | 0.466 | 0.445 | 0.350 | 0.275 | 0.224 |
+| closure prediction | 0.500 | 0.466 | 0.445 | 0.350 | 0.276 | 0.225 |
+
+Four decimals at every depth, including layer 30 where the closure's *means* are
+18x worse than sampling. **That single fact kills the pilot component**: an
+empirical firing-rate pass cannot improve on a prediction already exact to 1e-4,
+and it costs a second plan build. Sparsity also *falls* with depth (alphas drift
+positive, median 0.02 at layer 1 to 3.51 at layer 31), so the cold prefix is
+widest and most valuable in the shallow half.
+
+### The prefix rule, derived rather than tuned
+
+Moving a column from the dense hot tail into the cold prefix saves `2*o` FLOPs of
+dot product and costs `g*f*o` for the gathers it adds, where `f` is the column's
+firing rate and `g ~ 6-7` is the per-nonzero gather price (4 to fetch the weight
+row, 2 to multiply-accumulate, inflated by bucket padding). The prefix should
+therefore extend exactly while `f < 2/g ~ 0.3`. **That boundary is a property of
+the flopscope price table, not of the network.** Both the marginal-rate rule and a
+fixed expected-support target were swept on D11; they land within 0.3% of each
+other and `prefix_target = 3` (about three expected nonzeros per row) was kept.
+
+### Three flopscope prices shaped the whole design, and two were surprises
+
+* **basic slicing is free** — `h[:, :P]` bills 0 FLOPs and records *no operation
+  at all*, while `fnp.take(h, arange(P), axis=1)` bills 4/element. Every block
+  split in the packed path and inside Strassen is therefore a slice, never a
+  gather.
+* **`argpartition` is 4/element, `argsort` is 24** — selecting the top-k prefix
+  entries by partition rather than sort is 6x cheaper on that step, and partition
+  is all the algorithm needs because the summation is order-free.
+* `einsum('nk,nko->no', ...)` prices exactly as a matmul, `(2k-1)` per output
+  element, so the gathered correction is billed like the small dense product it is.
+
+### Component ablations (D11, 30 MLPs x 8 shifts, paired, common random numbers)
+
+| component | MSE ratio | FLOP-only cost | net V*c (FLOP-only) | verdict |
+|---|---|---|---|---|
+| packing only | **1.0000** | 1.119x | 1.119x | KEEP |
+| Strassen depth 2 only | 1.0000 | 1.199x | 1.199x | KEEP |
+| Strassen depth 3 | 1.0000 | 1.374x | — | **rejected: 52,575 ops/MLP** |
+| antithetic Sobol | **1.0094** | 1.028x | 1.037x | KEEP |
+| last-layer on-compose (alpha 2.5) † | 0.9983 | 1.019x | 1.017x | KEEP |
+| pilot ordering (512) | 1.0000 | 0.865x | 0.865x | **KILL** |
+| pilot reclassification | 0.9963 | 0.867x | 0.864x | **KILL** |
+| COMBINED candidate | 1.0087 | 1.357x* | 1.369x* | — |
+
+\*the ablation run predates a fix in which `on_compose` sliced the scored layer
+*after* computing every column and so saved nothing; corrected, it restricts the
+per-sample matmul to the kink columns and the combined arm reaches 1.383x.
+
+† the on-compose row is from the separate `alpha_on` sweep (10 MLPs x 4 shifts),
+not the 30 x 8 table, because the threshold had to be re-selected on canonical
+mints. Sprint 3 had chosen 3.0 on legacy mints; the fresh sweep independently
+reproduces the same mechanism and puts the optimum at 2.5:
+
+| alpha_on | MSE ratio | FLOP-only cost | net V*c |
+|---|---|---|---|
+| 2.0 | 0.9798 | 1.0195x | 0.999x — the penalty eats the gain |
+| **2.5** | 0.9983 | 1.0186x | **1.0169x** |
+| 3.0 | 0.9989 | 1.0175x | 1.0164x |
+| 4.0 | 0.9993 | 1.0157x | 1.0150x |
+
+**A methodological note worth keeping.** A 12-MLP x 4-shift run put antithetic's
+MSE ratio at 0.890 — a 12% *loss*. The 30 x 8 run puts it at 1.0094. The small run
+was noise, and it was noise in the direction of a tidy mechanism ("antithetic
+cancels odd components, but the depth-32 error is the even common mode"), which is
+exactly when a wrong number is most persuasive. Standing rule reconfirmed: nothing
+is decided on a small run, however good the story attached to it.
+
+**The pilot's kill is structural, not an implementation artifact.** Pilot ordering
+has MSE ratio *exactly* 1.0000 — it changes nothing, because the closure's firing
+rates are already exact. Reclassification buys 0.6% of MSE for 15% of cost, and
+the cost is dominated by the second plan build (fixed cost 1.517e10 vs 6.854e9).
+
+### Cost anatomy: 1.38x is the arithmetic ceiling for this mechanism
+
+Per MLP, N = 16,384, billed by real flopscope. The separate analytic oracle in
+`oracle_cost()` reproduces the instrumented sampling bill to **0.01%**, which is
+the check that the accounting is not a model of itself:
+
+| | dense v2.4.1 | candidate |
+|---|---|---|
+| counted FLOPs | 5.330e10 | **3.854e10** |
+| ... fixed (closure, eigh, slicing) | 6.85e9 (12.9%) | 6.85e9 (17.8%) |
+| ... sampling | 4.645e10 | 3.169e10 |
+| operations | 1,416 | **10,263 (7.2x)** |
+| host round-trips (data-dependent) | 62 | **~310** |
+| effective FLOPs/sample, FLOP-only | 3.253e6 | **2.352e6** |
+| *published 319341* | — | *2.374e6* |
+
+The ceiling is structural: the maximum saving from packing a prefix of width P is
+`2*P*o` per row, and the firing-rate distribution puts the optimal P at 21-57
+columns depending on depth, i.e. 11-22% of a layer. Strassen contributes an
+independent `(7/8)^d` on the remaining dense block. Depth 3 wins more arithmetic
+(1.374x) and loses on operations (52,575/MLP), which is the trade-off in miniature.
+
+**We reproduced the published arithmetic target.** 2.352e6 effective FLOPs/sample
+against 319341's 2.374e6, derived independently. The mechanism is real and the
+number is reachable.
+
+### S1 — the decision, and the cost model that decides it
+
+Residual is not a rounding error here. flopscope bills `lambda * uninstrumented
+seconds` at `lambda = 1e11`, so v2.4's graded 9.84 ms/MLP is already 1.8% of its
+counted compute — and the packed path needs **7.2x the operations** to express the
+same arithmetic. Value-dependent packing also *requires* data-dependent control
+flow: the prefix width is a `searchsorted` read and every bucket size is a
+`flatnonzero` shape read, taking host round-trips from 62 to about 310 per MLP. On
+the evaluation servers `fnp.ndarray` is a `RemoteArray` (forum 18122), where
+round-trips are precisely what costs.
+
+Because the verdict depends on that model, **the model was fixed before D12 was
+touched**, and all three readings are reported:
+
+* **FLOP-only** — assumes op-count inflation is free. Known false (18101; v2.0 lost
+  10.8% of its compute to residual). An upper bound.
+* **PRE-REGISTERED (deciding)** — v2.4's graded 9.84 ms scaled by the
+  candidate/dense residual ratio measured on an idle machine: **6.706x**, i.e.
+  65.98 ms/MLP.
+* **local residual** — this machine's absolute level, quoted only to show it is ~6x
+  the grader's and therefore unusable as a level.
+
+Residual ratios, idle machine, minimum of three repeats
+(`experiments/packed/D11_residual_candidate.json`):
+
+| arm | ops | residual x dense | modelled grader | cost-only V*c |
+|---|---|---|---|---|
+| dense v2.4.1 | 1,416 | 1.000 | 9.84 ms | 1.0000x |
+| packing only | 3,222 | 3.292 | 32.4 ms | 1.0668x |
+| Strassen 2 only | 8,460 | 5.276 | 51.9 ms | 1.0930x |
+| packing + Strassen 2 | 10,227 | 7.059 | 69.5 ms | 1.1439x |
+| packing + Strassen 3 | 52,575 | 12.682 | 124.8 ms | 1.0588x |
+| **CANDIDATE (frozen)** | **10,263** | **6.706** | **66.0 ms** | **1.2026x** |
+
+**Frozen design, closed on D11 before D12 was read:** packing with
+`prefix_target = 3`, buckets 1/2/4/8/16, hot tail >= 96 columns; Strassen depth 2;
+antithetic Sobol; last-layer on-composition at `alpha_on = 2.5`; no pilot.
+
+### S1 result — **PASS**, but on the cost half, not on the headline number
+
+D12, 50 MLPs x 6 shifts, paired, single use:
+
+| cost model | paired V*c gain | 95% CI |
+|---|---|---|
+| FLOP-only (upper bound) | 1.6175x | [1.4547, 1.7984] |
+| **PRE-REGISTERED (deciding)** | **1.4070x** | **[1.2656, 1.5642]** |
+
+Both readings of the gate pass, including the strict one. **I do not believe
+1.4070x, and the reason is worth more than the number.** The MSE ratio on D12 came
+out at **1.2079** — a 21% variance win that *no component ablation predicted*
+(packing is exact at 1.0000, antithetic 1.0094, on-compose 0.9983). A gain that
+large which no ablation anticipated is the classic shape of an artifact, so the
+frozen configuration was re-run on the DESIGN block to see whether it reproduces:
+
+| block | MSE ratio | effective FLOPs/sample (FLOP-only) | pre-registered V*c |
+|---|---|---|---|
+| D11 (25 MLPs x 6, verification) | **1.0199** | 2.3589e6 | 1.2521x [1.0970, 1.4290] |
+| D12 (50 MLPs x 6, the gate) | **1.2079** | 2.3599e6 | 1.4070x [1.2656, 1.5642] |
+
+**The cost half reproduces to 0.04% across blocks. The MSE half does not.** The
+two intervals overlap, so the blocks are not formally inconsistent, but the
+component ablations put the method-level MSE effect at ~1.01 and D11 agrees at
+1.02. D12's 1.21 is a favourable draw, and quoting 1.4070x as the method's gain
+would be reading a draw as a mechanism — the same error the project has already
+made three times (LMS scrambling, C/B=0.5, a +33% rotation) and once more
+this very sprint with the 12-MLP antithetic number.
+
+**What actually clears the gate is the cost, and it clears it alone.** The
+cost-only paired ratio at the pre-registered residual is **1.2026x** with MSE held
+at exactly neutral. So:
+
+* the honest central estimate is **~1.23x** (1.2026 cost x ~1.02 MSE),
+* the gate is 1.20x,
+* and the pass does not depend on the noisy MSE draw.
+
+That is a much narrower pass than the headline suggests, and it is recorded that
+way so the next person does not budget for 1.41x.
+
+### S2 — real-stack confirmation
+
+`estimator_v2_5.py`, a **separate** candidate file (the shipped `estimator.py` is
+untouched), generated with the Sobol direction-number blob spliced byte-for-byte
+from the graded file rather than retyped:
+
+| check | result |
+|---|---|
+| `whest validate --estimator estimator_v2_5.py` | **pass**, 110 ms |
+| `edge_cases.py estimator_v2_5.py` | **30/30** |
+| layer-1 closed form | exact to 1.8e-16 |
+| permutation equivariance | implied MSE <= 4.0e-15 |
+| budget ladder 0 -> 2.72e12 | monotone, no exceptions |
+| determinism x3 + fresh instance | bit-identical |
+| grader-array immutability | unmodified |
+| vault touches | **1 — not spent** |
+
+**S2 is NOT complete, and the reason is the most important thing this sprint
+found about shipping the method.** The public mini run fails under the runner the
+grader uses:
+
+```
+whest run --estimator estimator_v2_5.py --split mini --runner subprocess
+  -> Error [setup:SETUP_TIMEOUT]: worker setup timed out.      (twice, reproducible)
+whest run --estimator estimator.py     --split mini --runner subprocess
+  -> scores normally                                            (control, same machine)
+```
+
+So it is the candidate, not the harness. It is **not** `setup()` being slow —
+timed directly, v2.5's setup is *faster* than v2.4.1's (162 ms vs 340 ms, 1.26e8
+FLOPs vs 2.53e8) because the antithetic half-set halves the Sobol table. And the
+estimator is functionally sound: `--runner local` scores it without error, and
+`whest validate` passes in 110 ms.
+
+The lead is that the runner announces `memory_limit_mb=65536`, *"enforcement
+requires --runner subprocess (uses RLIMIT_AS)"*. v2.5's transient footprint is
+much larger than v2.4.1's — Strassen depth 2 holds 7 sub-products plus 10 operand
+sums live per level, and the gathered corrections materialise `(rows, k, a_out)`
+intermediates — and a candidate process was observed at ~3.9 GB during the D11
+verification. A worker killed on an address-space limit would be reported by the
+parent exactly as a setup timeout.
+
+**This is a shipping blocker, not a footnote.** A worker that dies scores its
+MLPs as zeros, which is the single worst outcome in this competition. It is also
+the second independent way the same underlying fact bites: packing buys
+arithmetic by spending *operations and memory*, and both are priced — one through
+residual wall time, one through the worker's limits. Until it is understood and
+fixed, v2.5 cannot be designated, and **v2.4.1 remains the fallback**.
+
+### S2 verdict — **FAIL.** The real stack bills the operations, and they cost more than the arithmetic saves
+
+Full 100-MLP public mini, `--runner local`, same machine, same day:
+
+| | v2.4.1 (control) | v2.5 candidate |
+|---|---|---|
+| counted FLOPs / MLP | 5.33e10 | **3.86e10** |
+| residual wall time / MLP | 70.8 ms | **387.6 ms** |
+| effective compute / MLP | 6.04e10 | **7.74e10** |
+| raw final-layer MSE | 1.49e-6 | 1.48e-6 |
+| **adjusted score** | **3.26e-7** | **4.11e-7 (26% WORSE)** |
+| failed MLPs | 0 of 100 | 0 of 100 |
+
+**The arithmetic prediction was exactly right and the conclusion still inverted.**
+Counted FLOPs came in at 3.86e10/MLP against the 3.854e10 the probe predicted —
+0.2%. The packing works. But residual wall time went from 70.8 ms to 387.6 ms,
+which at lambda = 1e11 is 3.88e10 of effective compute — **as much again as the
+entire counted bill** — and it swallows the 1.38x arithmetic gain whole.
+
+Two further facts, and they matter for how this is quoted:
+
+* **The MSE gain is gone too.** 1.48e-6 vs 1.49e-6 on the organizers' own MLPs, a
+  ratio of 1.007. That independently confirms the D11 reading (1.0199) and
+  convicts D12's 1.2079 as a draw. The method-level variance effect is ~1.00.
+* **The residual RATIO is 5.47x** (387.6 / 70.8), measured on the real stack —
+  a better-founded number than the 6.706x the synthetic benchmark gave, and in
+  the same place.
+
+**Does this transfer to the grader?** Honestly: unknown, and that is the whole
+point. This machine bills v2.4.1 **70.8 ms/MLP** of residual where the grader
+billed **9.84 ms** — 7.2x lower. Applying the measured 5.47x ratio to the
+grader's anchor gives v2.5 ~53.8 ms, hence `C = 3.86e10 + 5.38e9 = 4.40e10`
+against v2.4.1's 5.43e10, i.e. **1.23x better** — a pass. Applying this machine's
+*absolute* residual gives a 26% loss. Both cannot be right, and nothing available
+offline decides between them. The eval servers run `flopscope-client` with
+`RemoteArray` (18122), where a 7.2x operation count plausibly costs *more* per op
+than it does in-process, not less — so the pessimistic reading is the one to plan
+against.
+
+### Sprint 4 verdict — **S1 PASS, S2 FAIL. The lane does not promote.**
+
+`estimator.py` is untouched, the vault is untouched (touch count 1), and v2.4.1
+remains the designated fallback. What was actually established:
+
+1. **The published arithmetic target is real and reproducible.** 2.359e6 effective
+   FLOPs/sample against 319341's 2.374e6, rebuilt from first principles, exact to
+   1.5e-8 against the dense reference. The old "honest sampling frontier is 2.7e-7"
+   claim was about *our dense sampler* and stays withdrawn.
+2. **Packing's cost is paid in operations and memory, and flopscope prices both.**
+   7.2x the operations, ~310 data-dependent host round-trips per MLP against 62,
+   a 5.47x residual ratio measured on the real stack, and a worker that dies under
+   the subprocess runner's memory limit. This is the finding, and it generalises:
+   *value-dependent* sparsity exploitation is cheap in arithmetic and expensive in
+   everything an accounting layer actually charges for.
+3. **319341's advantage is therefore mostly NOT the packing.** Their `MSE*N` is
+   1.852e-2 against our 2.58e-2 — a 1.40x per-sample *variance* advantage that
+   packing cannot produce (packing is exact) and that none of our ablated
+   components deliver. **That is where their score comes from, and it is now the
+   open question worth attacking.**
+
+**One graded run would settle the residual question** and nothing else can. That
+is a decision for Samuel, not for this log.
+
+## 2026-08-06 — independent Sprint-4 audit: arithmetic confirmed; promotion evidence corrected
+
+The focused packed suite was rerun independently: **62/62 pass** in 81.8 s.
+`whest validate --estimator estimator_v2_5.py` also passes. The D12 JSON was
+recomputed directly rather than trusting the prose report:
+
+* full pre-registered paired result: **1.407021x [1.265641, 1.564195]**;
+* mean-MSE ratio: **1.207909x**, still not reproduced elsewhere;
+* paired cost-only result with MSE held neutral: **1.199622x
+  [1.196322, 1.202931]**.
+
+The previously quoted 1.202607x cost result is `ratio(mean(cost))`. The gate's
+own statistic is `exp(mean(log(cost_control/cost_candidate)))`, so the cost half
+does **not** independently clear 1.20. S1 is recorded as borderline/inconclusive;
+D12 remains spent.
+
+The alleged subprocess memory failure also did not reproduce as candidate-
+specific. A real one-MLP subprocess prediction with v2.5 completed successfully.
+Across six clean worker starts per file under whestbench 0.14.0's hard 5 s setup
+deadline, v2.4.1 passed 4/6 and timed out 2/6; v2.5 passed 6/6. This host has
+sporadic cold-start latency. A 3.9 GB peak is not evidence of exhausting the
+64 GB address-space cap. Memory remains a design constraint, not a demonstrated
+blocker.
+
+The like-for-like graded variance proxy is corrected to
+`0.02252499 / 0.018520 = 1.21625x`; 1.40x uses D11/local levels across a different
+suite. The published competitor's effective 2.374e6/sample already includes its
+residual bill, so the next comparison must also account for fixed-cost
+amortisation at its much larger N=84,992.
+
+There was also a units mismatch in the Sprint-4 headline. Our 2.359e6/sample is
+`counted_flops/N`; 319341's 2.374e6/sample is `effective_compute/N`. Their
+like-for-like counted value is about 2.144e6/sample. Adding Sprint 4's own
+pre-registered 66 ms residual model puts current v2.5 at about 2.762e6
+effective/sample (the local public run is about 4.72e6). The external effective
+target was therefore not reproduced, although the exact packing arithmetic was.
+
+One offline optimization is already falsified as "nothing left to try": a
+clean-room batched depth-2 Strassen microbenchmark combined 49 leaf products into
+one batched contraction. It was bit-identical to the recursive path and changed a
+representative `(4096,200)@(200,200)` block from 219 to 173 calls, local residual
+3.390 ms to 2.843 ms (-16%), wall time 28.1 ms to 16.6 ms (-40%), at +1.0%
+counted FLOPs. Full-estimator benefit is unmeasured. GAME_PLAN rev 11 therefore
+requires call compression, bucket Pareto work, and an N sweep on new D13/D14
+before any packed telemetry request.
+
+## 2026-08-06 — SPRINT 5 OPENED: seed blocks D13/D14 allocated **before** any measurement
+
+Per GAME_PLAN rev 11 and `docs/VALIDATION.md` §0/§2, two fresh blocks are
+registered in `local_sim/seed_blocks.py` ahead of the first Sprint-5 number:
+
+* **D13** — 30,806,013,000 … 30,806,013,599 (600). *Design/Pareto.* Batched vs
+  recursive Strassen, the bucket/segment Pareto, the N ∈ {16384, 32768, 65536}
+  sweep, and the residual model are all chosen here. Tuning permitted.
+* **D14** — 30,806,014,000 … 30,806,014,599 (600). *Decision, LOCKED,
+  SINGLE-USE*, and added to `SINGLE_USE_BLOCKS`. Not to be inspected until the
+  design **and** the residual model are frozen.
+
+D12 stays spent and is annotated as such in the registry. `check_disjoint()`
+passes with both new blocks.
+
+**Phase-2 checklist at open (`local_sim/phase2_checklist.py`):** round 1428
+Phase 1 still `active=true` (closes 2026-08-07 23:59Z), round 1429 Phase 2
+`active=false` with an empty leaderboard (1480, 0 entries), dataset tags still
+`['v1-phase1', 'v1-warmup']` — **no `v1-phase2` tag**. No configuration change to
+adapt to; no external action taken.
+
+## 2026-08-06 — SPRINT 5 DESIGN RESULTS ON D13, and the **pre-registered freeze** for D14
+
+*Everything below was measured on D13 (design, tuning permitted). The freeze at
+the bottom is written down BEFORE D14 is touched; that is the whole point of
+writing it here.*
+
+### A — batched depth-2 Strassen: bit-identical, −53% operations, **no residual gain**
+
+Built as a separately selectable implementation
+(`Config.strassen_mode = "batched"`). The 7 (depth 1) or 49 (depth 2) leaf
+products are issued as one stacked contraction; flopscope bills a stacked
+`(b,m,k)@(b,k,n)` at exactly `b·(2k−1)·m·n`, so the arithmetic is identical and
+the only overhead is the stacking. **The independent cost oracle predicts it to
+0.02% with no free parameters** (`_sbatch_cost`; combine costs `4·batch·R·C` at
+every level).
+
+| microbenchmark | dense | recursive d2 | **batched d2** |
+|---|---|---|---|
+| (4096,200)@(200,200) — the audit's shape | 3.269e8 F, 1 call | 2.603e8 F, 217 calls, 4.85 ms resid | **2.645e8 F, 47 calls, 4.01 ms resid** |
+| (16384,205)@(205,205) — a real layer | 1.374e9 F, 1 call | 1.128e9 F, 223 calls, 14.30 ms | **1.144e9 F, 53 calls, 10.82 ms** |
+| (16384,199)@(199,187) — odd K and N | 1.216e9 F | 9.825e8 F, 223 calls, 12.71 ms | **9.985e8 F, 53 calls, 19.52 ms** |
+| (65536,205)@(205,205) | 5.495e9 F | 4.511e9 F, 36.30 ms | **4.576e9 F, 39.78 ms** |
+
+**Bitwise identical to the recursion on every shape and depth tested** — both
+paths share `_ops7`/`_combine` and differ only in leaf dispatch, so `array_equal`
+is the right assertion and it holds. Depth 0 falls through to the plain matmul
+bitwise; depth 2 is deterministic over three runs; odd contraction *and* output
+dimensions are padded, not skipped.
+
+**But the audit's −16% residual / −40% wall does not survive the full
+estimator.** On the shipped files, on the same MLPs:
+
+| file | counted FLOPs/MLP | calls | local residual | output |
+|---|---|---|---|---|
+| `estimator.py` (v2.4.1) | 5.357e10 | 1,416 | 60.7 ms | — |
+| `estimator_v2_5.py` | 3.872e10 | **10,263** | 519.0 ms | — |
+| `estimator_v2_5r.py` | 3.914e10 (+1.07%) | **4,823 (−53%)** | 522.7 ms | **bitwise == v2.5** |
+
+And on a quiet machine over 20 MLPs × 3 repeats (minimum kept), batched is
+consistently *worse*: 495.5 → 533.4 ms at N=16,384, 970.2 → 1008.6 at 32,768,
+1764.9 → 1939.6 at 65,536.
+
+**The finding is that residual is not driven by operation count on this backend.**
+Halving the call count while adding ~1.5% of copies made it slightly worse, three
+times over. Residual here is data movement — gathers, temporaries, concatenations
+— and batching adds copies to remove dispatches. The audit's microbenchmark was
+right about its own shape and did not generalise. (The remote `RemoteArray`
+backend could price dispatches differently; organizers say transport is framework
+overhead, so we do not assume it would.)
+
+One real bug fixed on the way: v2.5's Strassen size guard is stated at the
+top-level block, which admits a (16384,33)@(33,33) layer to depth 2 and makes it
+**13% more expensive than a plain matmul**. `estimator_v2_5r.py` states the guard
+at the leaf.
+
+### B — packing-operation Pareto: 24 exact carriers, and no bucket layout wins
+
+Full table: `experiments/packed/2026-08-06_s5B_pareto.json` (6 MLPs × 3 repeats,
+minimum residual, quiet machine). Highlights, all at N = 16,384 against a dense
+v2.4.1 control at 5.283e10 counted FLOPs / 1,419 ops / 59.0 ms:
+
+| carrier | counted FLOPs | ops | shape rd | value rd | resid | ×dense | max array | exact |
+|---|---|---|---|---|---|---|---|---|
+| **b=(1,2,4,8,16) control** | 4.743e10 | 3,227 | 210 | 0 | 174.4 ms | 2.95 | 32 MB | 1.3e-8 |
+| b=() zero-rectangle only | 5.273e10 | 1,935 | 60 | 0 | 113.1 ms | 1.92 | 32 MB | 1.6e-8 |
+| b=(8,) | 4.980e10 | 2,205 | 90 | 0 | 236.4 ms | 4.00 | **122 MB** | 1.3e-8 |
+| b=(16,) | **5.417e10 (worse than dense)** | 2,147 | 90 | 0 | 317.9 ms | 5.38 | **244 MB** | 1.3e-8 |
+| b=(4,8,16) | 4.802e10 | 2,687 | 150 | 0 | 185.9 ms | 3.15 | 51 MB | 1.3e-8 |
+| b=(8,) segment | 4.985e10 | **2,055** | 0 | 60 | 215.0 ms | 3.64 | 122 MB | 1.3e-8 |
+| b=(1,2,4,8,16) segment | 4.747e10 | **2,597** | 0 | 180 | 174.6 ms | 2.96 | 32 MB | 1.3e-8 |
+| b=(8,) slotloop | 4.980e10 | 3,285 | 90 | 0 | 372.7 ms | 6.31 | **32 MB** | 1.6e-8 |
+| control + strassen2 rec | **4.037e10** | 10,235 | 217 | 0 | 454.5 ms | 7.70 | 47 MB | 3.0e-7 |
+| control + strassen2 BAT | 4.080e10 | **4,795** | 217 | 0 | 508.4 ms | 8.61 | 49 MB | 3.0e-7 |
+| control, prefix target 1.5 | 4.817e10 | 3,190 | 210 | 0 | **138.5 ms** | **2.35** | 32 MB | 1.5e-8 |
+
+Four things this table says that a single scalar would have hidden:
+
+1. **Fewer buckets is not cheaper.** `b=(16,)` costs *more counted FLOPs than
+   dense*, because a wide single bucket gathers a `(rows, 16, a_out)` weight
+   tensor at 4 FLOPs/element — `6k·rows·a_out` against the dense prefix's
+   `(2p−1)·rows·a_out`, which only pays for `k < p/3`. The six-class control is
+   already near-optimal in counted FLOPs; Sprint 4 did not choose it by luck.
+2. **The one-sort/segment partitioner works and is roughly a wash.** It reproduces
+   the mask sweep's classes exactly (test 18), removes 500–630 operations, and
+   converts 210 *shape* reads into 180 *value* reads — the more expensive kind on
+   a `RemoteArray`. Residual moved 174.40 → 174.56 ms on the control layout and
+   236.4 → 215.0 ms on `b=(8,)`. Not a lever.
+3. **Peak memory is a bucket-design property nobody had priced.** A single wide
+   bucket materialises a 122–244 MB gather tensor at N=16,384 (× 4 at N=65,536);
+   the six-class layout keeps every bucket small and peaks at 32 MB. `slotloop`
+   caps memory at 32 MB by accumulating slot-by-slot, at +136 ms of residual — it
+   is a memory tool, not a speed tool.
+4. **Every non-Strassen arm is exact to ≤1.6e-8 relative**, end-to-end through 31
+   ReLU layers. The two `prefix_target = 6` arms sit at 3.6e-4: still an exact
+   reorganisation per layer, but a wider prefix moves more terms between
+   accumulation groups, and a f32 perturbation near a ReLU kink flips a sample's
+   sign and compounds over depth. Not adopted; recorded because it is the
+   mechanism that sets the tolerance.
+
+**No carrier beats dense on local effective compute.** The best is 0.947×
+(`control, target 1.5`); the frontier is that every low-FLOP arm needs Strassen,
+which triples residual, and every low-residual arm keeps counted FLOPs ≥ 4.74e10.
+
+### C — the N operating point: reopened, measured, and **not adopted**
+
+Counted-FLOP structure is clean and identical in shape for every carrier:
+`F(N) = F0 + c·N` with **F0 = 6.855e9** (closure, rotation, slicing — all
+N-independent) and
+
+| carrier | c_marginal (counted FLOPs/sample) |
+|---|---|
+| dense | 2.822e6 |
+| pack6 | 2.491e6 |
+| pack6 + strassen2 | **2.056e6** |
+
+**The units-corrected reproduction of 319341's arithmetic:** their counted figure
+is ~2.144e6/sample at N = 84,992. Ours, counted-to-counted at the same N, is
+`2.056e6 + 6.855e9/84,992 = 2.137e6/sample` — **within 0.4%**. Sprint 4's headline
+compared our counted number to their *effective* one; corrected, the arithmetic
+target is not merely reachable, it is reached.
+
+Local residual also splits cleanly, `r(N) = r0 + r1·N`:
+
+| carrier | r0 | r1 | fixed share at N=84,992 |
+|---|---|---|---|
+| dense | 10.5 ms | 3.09e-6 s/sample | 3.8% |
+| pack6 | 31.9 ms | 9.27e-6 s/sample | **3.9%** |
+
+So residual is ~96% marginal in N — which is what licenses transferring the
+competitor's 185.8 ms/MLP as a *per-sample* rate.
+
+**MSE × N is flat, and the first measurement that said otherwise was noise.**
+A 20-MLP × 1-shift pass gave MSE×N = 0.0472 / 0.0414 / 0.0530 at N = 16,384 /
+32,768 / 65,536 — apparently a 14% optimum at 32,768, with an available story
+about Sobol net quality. Re-measured at 24 MLPs × **8 digital shifts**:
+**0.03657 / 0.04036 / 0.03666.** Flat. α = 1.00, as established. The "optimum"
+was one heavy-tailed realisation.
+
+Net of that, N = 65,536 is worth `3.99/3.60 = 1.11× ± 0.11` on local pricing for
+the dense carrier — **not resolvable from 1.00**, and the constants audit's
+independent CONFIRM on the organizers' own 100 MLPs read **1.002×**. Two
+measurements, one of them CONFIRM-tier, and neither establishes a gain.
+Memory is not the obstacle (196 MB largest array, 3.06 GiB process peak at
+N = 65,536 — far inside 4 GiB/array and 64 GB).
+
+### D — the three residual models
+
+| # | model | r_control | r_candidate (pack6+s2rec, N=16,384) |
+|---|---|---|---|
+| 1 | local absolute | 59.5 ms | 495.5 ms |
+| 2 | local ratio × graded dense anchor | 9.84 ms | 82.0 ms |
+| 3 | **conservative = max(model 2, 319341-anchored)** | 9.84 ms | **82.0 ms** |
+
+Model 3's competitor half is 185.8 ms/MLP split 3.9% fixed / 96.1% marginal using
+*our own* measured `r(N)` fit, giving 41.7 ms at N = 16,384. Taking the `max` is
+what makes model 3 conservative for *every* arm: the anchor alone is pessimistic
+for low-ratio carriers and **optimistic for Strassen arms** (which measure 8.3×
+dense locally against the 4.2× the anchor implies), and a model that is
+conservative only for some arms is a selection effect, not a safeguard.
+
+### THE FREEZE — written before D14 is touched
+
+| item | frozen value | why |
+|---|---|---|
+| Strassen implementation | **recursive** | batched is bit-identical and −53% ops but measured worse residual three times over |
+| Strassen depth | **2** | the only lever that reaches the counted-FLOP frontier |
+| bucket design | **(1, 2, 4, 8, 16)**, `flatnonzero` partitioner, `einsum` gather | lowest counted FLOPs, lowest peak memory, best residual among low-FLOP arms |
+| prefix target | **3.0** | target 6 breaks the 1e-6 exactness tolerance; target 1.5 costs 1.9% more FLOPs than it saves in residual |
+| N | **16,384** | the N gain is 1.11× ± 0.11 locally and 1.002× on CONFIRM |
+| antithetic | **off** | Sprint 4 measured 1.009×, inside noise |
+| on-compose | **off** | not re-measured this sprint; adding an unmeasured component to a frozen candidate is how D12 got its phantom |
+| residual model | **model 3, `max(local-ratio, 319341-anchored)`** | conservative for every arm, and half of it is someone else's measurement |
+| gate | **paired geometric-mean `V·C` ≥ 1.15×, 95% CI excluding 1.0** | GAME_PLAN rev 11 |
+
+**Predicted D13 value of the frozen candidate under the frozen model: 1.113×** —
+already below the gate. D14 is spent anyway, because the design block is data the
+candidate was tuned on and the registered decision is the one taken on data it
+was not.
+
+## 2026-08-06 — **D14 GATE: FAIL at 1.1216×. The packed lane is killed.**
+
+D14 spent once, against the design and the residual model frozen in the entry
+above. 100 MLPs × 3 shifts, paired, common random numbers.
+`experiments/packed/2026-08-06_s5E_D14_decision.json`.
+
+| | MSE | MSE×N | counted/MLP | counted/sample | ops | local residual |
+|---|---|---|---|---|---|---|
+| v2.4.1 dense control | 1.5586e-06 | 0.02554 | 5.2928e10 | 3.2304e6 | 1,417 | 62.3 ms |
+| Sprint-5 candidate (frozen) | **1.5586e-06** | 0.02554 | **4.0300e10** | **2.4597e6** | 10,230 | 490.4 ms |
+
+| residual model | r_ctrl | r_cand | paired `V·C` | 95% CI |
+|---|---|---|---|---|
+| 1. local absolute | 62.3 ms | 490.4 ms | 0.6618× | [0.6591, 0.6645] |
+| 2. local ratio × graded anchor | 9.84 ms | 77.5 ms | 1.1216× | [1.1188, 1.1244] |
+| **3. conservative (deciding)** | 9.84 ms | 77.5 ms | **1.1216×** | **[1.1188, 1.1244]** |
+
+**Gate: 1.1216× < 1.15×. FAIL.** The CI excludes 1.0 and exactness holds, so this
+is not a null result — the carrier really is ~12% cheaper — it is a result that
+misses a pre-registered bar. D14 is spent and will not be reused; the candidate
+will not be retuned against it.
+
+Four things this run settles that earlier ones did not:
+
+* **The D12 "1.2079× MSE advantage" is dead.** Control and candidate MSE agree to
+  **five significant figures** (1.5586e-06 both), on 300 measurements. Exact
+  packing cannot move variance and now demonstrably does not. Sprint 4's headline
+  1.4070× was the product of a real 1.20× cost gain and a phantom.
+* **D13 and D14 agree on cost.** The design block predicted 1.113× under the
+  frozen model; the decision block measured 1.1216×, a 0.8% difference. No
+  one-block anomaly is doing any work here, in either direction.
+* **Model 3 collapsed onto model 2**, because the candidate's own local residual
+  ratio (7.88× dense) is worse than the 4.2× implied by 319341's published
+  185.8 ms. The `max` did its job: had model 3 been defined as the competitor
+  anchor alone it would have read ~1.21× and *passed* a gate the carrier does not
+  deserve.
+* **The counted-FLOP target was reached; the effective-cost target was not.**
+  2.4597e6 counted/sample here, and 2.137e6/sample when the frozen carrier is
+  extrapolated to 319341's N = 84,992 against their 2.144e6 — a 0.4% match,
+  counted-to-counted. Their advantage is therefore not arithmetic. It is that
+  they pay 185.8 ms of residual for a carrier of this shape and *still* win,
+  which means their per-sample variance, not their packing, is the thing worth
+  understanding.
+
+**Why the lane cannot be rescued by more engineering.** flopscope prices a gather
+at 4 FLOPs/element. Packing's entire saving is substituting gathers for dense
+multiply-adds: `6k·rows·a_out` instead of `(2p−1)·rows·a_out`. But a random-access
+gather of a `(rows, k, a_out)` weight tensor costs vastly more *wall time* per
+element than a BLAS multiply-add does, and flopscope charges wall time back at
+λ = 1e11. The lane trades an operation that is expensive in the price table for
+one that is expensive in physics, and the price table is not the thing being
+billed twice. That is why every Sprint-5 compression lever measured ≤1.0×:
+batched Strassen (−53% operations, +8% residual), the one-sort partitioner (−630
+operations, ±0% residual), slot-loop gathers (−4× peak memory, +136 ms), fewer
+buckets (+7% counted FLOPs), and larger N (1.11× ± 0.11 locally, 1.002× on
+CONFIRM).
+
+**Status.** `estimator.py` (v2.4.1) untouched and still designated. The vault was
+not touched (counter still 1). `estimator_v2_5.py` preserved as the Sprint-4
+historical candidate. `estimator_v2_5r.py` exists, passes `whest validate`, is
+bitwise identical to v2.5 on 256×32, carries the tested batched-Strassen
+implementation behind a flag that is **shipped off**, and fixes a real
+narrow-layer Strassen guard bug. **No telemetry submission is requested for it.**
+
+Test suite: `local_sim/test_packed_sparse.py` **93/93** (was 62/62);
+`local_sim/edge_cases.py` **30/30** on the shipped file; vault touches 1.
+
+## 2026-08-06 — MOONSHOT G0: the convention is right, and G1's baseline now exists
+
+Opened per GAME_PLAN rev 12 after the packed lane was killed. `local_sim/moonshot_g0.py`,
+seed block **D15** (newly allocated, infrastructure only). **D08/D09 untouched**,
+no gate decided, **no cost claimed**.
+
+MOONSHOT.md listed two prerequisites for spending D08 on G1. Neither existed.
+
+**1. Layer-convention parity — VERIFIED, and the adapter was right.**
+`lowrank_challenge_flow` transposes every weight (`W.mT`) on the stated grounds
+that whestbench propagates row vectors while ARC's k-propagation uses column
+vectors. That was an assertion. Measured against per-layer MC truth on 24
+canonical mints, propagating the closure both ways:
+
+| layer | row convention (`W^T μ`) | column convention (`W μ`) | ratio |
+|---|---|---|---|
+| 1 | 1.67e-07 | 1.21e-03 | **7,222×** |
+| 2 | 2.84e-06 | 3.56e-01 | 125,585× |
+| 8 (depth 8) | 3.39e-05 | 1.02e+00 | 30,058× |
+| 32 (depth 32) | 6.28e-05 | 1.05e+00 | 16,787× |
+
+The divergence starts at the **first matmul** and never recovers, which is the
+signature of a transpose rather than of an accumulating modelling error. So
+`W.mT` is correct and a mis-wired G1 has been ruled out as an explanation for
+any future negative result — which was the point of checking before, not after.
+
+Layer 1 is the control on the control: the closure there is 1.67e-07 against a
+**GT-noise floor of 1.63e-07**, i.e. 97.3% of it is truth noise, and the exact
+closed form agrees with the closure to the same 1.98e-3 max relative deviation.
+Layer 1 is exact and the harness knows it.
+
+**2. The separate calibrated-K2 control — BUILT and REGISTERED.**
+It did not exist anywhere: MOONSHOT requires the baseline to be the *calibrated*
+closure, ARC's own K1/K2 is a different trajectory, and v2.4.1's low-budget
+analytic path returns **raw** closure — the table lives only in
+`experiments/calibration.json`. Now implemented in torch, row convention, exact
+layer 1, per-layer `c_layers` from the depth-matched table (constants audit:
+≤0.07% drift on canonical mints).
+
+| depth | raw closure | **calibrated K2** | gain | GT noise | G1/G2 must beat (÷3) |
+|---|---|---|---|---|---|
+| **8** (G1's shape) | 3.3872e-05 | **1.2835e-05** | 2.639× | 4.10e-08 (0.32%) | **≤4.278e-06** |
+| 32 (G2's shape) | 6.2759e-05 | **2.4428e-05** | 2.569× | — | ≤8.143e-06 |
+
+Registered on D15 **before any D08 network has been drawn**, which is what makes
+it a baseline rather than a number chosen once the challenger's score is known.
+
+**3. The flow as an accuracy oracle — run, after Samuel approved the checkout.**
+ARC's `mlp_kprop` was not installed and no checkout existed on disk. With
+approval, the pinned revision `93d091a4` was cloned to
+`C:\Users\samsu\Documents\mlp_cumulant_propagation` and
+`local_sim/mlp_kprop_py310.patch` applied cleanly (7 files). Set
+`MLP_KPROP_SRC=C:\Users\samsu\Documents\mlp_cumulant_propagation\src`. Smoke test
+reproduces MOONSHOT's recorded 1.81e-15 out-of-basis norm.
+
+**Parity, now measured on ARC's own code:** at `k_max=2` the projection and the
+renormalizers are inert, so the flow reduces to ARC's Gaussian closure. Against
+ours, per-layer, the **max relative MSE difference is 8.373e-15** — floating-point
+identity. The transpose and the `init_scale` metric are correct. (`linear_kprop`'s
+own signature, `W: Float[Tensor, 'out_dim in_dim']`, says the same thing
+independently.) A mis-wired G1 is ruled out.
+
+**A real defect found and fixed.** At `k_max=3` upstream's tower still carries a
+degree-4 slot, and it arrives as an `HTensor` rather than a `FactoredTensor4`, so
+the adapter's dense fallback tried to materialise a 256⁴ tensor — **34 GB — and
+took the GPU down.** The module's docstring claimed it "never materializes an n^4
+tensor"; that was true only of the factored path. `project_higher_cumulants` now
+takes `k_max` (so an order-3 flow does not project degree 4 at all) and refuses
+an over-large dense projection with a diagnostic instead of an OOM. `k_max=3`
+went from a crash to 0.3 s/MLP.
+
+**And then the oracle reading, which is the substantive G0 result.** Depth 8,
+width 256, 8 MLPs, ARC `k_max=3`, **unrenormalized** (`k3/k4_scales = 1.0`),
+against the registered calibrated-K2 baseline of 1.2067e-05:
+
+| rank | final-layer MSE | vs raw closure | **vs calibrated K2** |
+|---|---|---|---|
+| 4 | 2.8245e-05 | 1.112× | **0.427×** |
+| 8 | 2.5900e-05 | 1.213× | **0.466×** |
+| 16 | 2.2127e-05 | 1.419× | **0.545×** |
+| 32 | 1.5799e-05 | 1.988× | 0.764× |
+| 64 | 9.2819e-06 | 3.384× | 1.300× |
+| 128 | 4.0283e-06 | 7.797× | **2.996×** |
+| 256 (no truncation) | 9.4378e-07 | 33.279× | **12.786×** |
+
+Two things at once, and they point opposite ways:
+
+* **The mechanism is real.** At full rank ARC's K3 flow is **12.8× better than
+  the calibrated closure** at depth 8. That is a large, clean effect and it is
+  the first positive evidence this lane has produced.
+* **The low-rank premise, as pre-registered, is wrong by an order of magnitude
+  in r.** At MOONSHOT's proposed r ∈ {4, 8, 16} the flow is *worse than the
+  control* (0.43–0.55×), and G1's ≥3× gate is not reached until **r ≈ 128 =
+  width/2**.
+
+That number is not a coincidence. It is exactly where **Track P** landed: rank-k
+propagation *is* a rank-k factorisation, and under shape-based billing two
+factors only beat a dense 256×256 matmul for k < width/2 = 128 — which is also
+the rank truncation needs. The moonshot's compression hypothesis has walked into
+the same wall from the other side, and the wall is in the same place.
+
+**This is not a G1 kill and must not be recorded as one.** These runs use
+unfitted renormalization scalars, and MOONSHOT's method specifies per-layer
+scalars fitted offline against the chain's own trajectories (18097's DAgger
+calibration, seed block D10, allocated for exactly this). Fitting them is the
+next step, and it is the thing that could lift the low-rank arms. D08 and D09
+remain untouched; **G1 has not been run.** No cost model, compressed
+representation, or r³ claim is made or implied.
+
 ## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
 
 **Where we stand**: v1.1 graded 3.893e-7, rank ~159. The leader is 4.87e-8 — **8.0× ahead**. Every analytic-side avenue we tested this session is dead:

@@ -66,6 +66,353 @@ Mint 50k He MLPs on the RTX 5090 (38.3 TFLOP/s measured), label with 64k–256k-
 
 *Overall target: ≤5e-8 adjusted. Milestone gate: if not ≤2e-7 by Aug 21, consolidate instead of adding pieces.*
 
+## REV 12 (2026-08-06) — Sprint 5 ran to conclusion. **The packed lane is killed on D14.** Moonshot G0 opens.
+
+Rev 11 sent Sprint 5 to compress the carrier before spending telemetry. It did,
+measured every lever, and the lane missed its gate.
+
+**D14 (locked, single-use, now spent): paired `V·C` = 1.1216× [1.1188, 1.1244]
+against a pre-registered 1.15×. FAIL.** 100 MLPs × 3 shifts, design and residual
+model frozen and written into `experiments/LOG.md` before the block was touched.
+
+Three results are banked and three interpretations are corrected:
+
+1. **The published arithmetic target is reached, counted-to-counted.** Extrapolated
+   to 319341's N = 84,992 our frozen carrier costs **2.137e6 counted FLOPs/sample
+   against their 2.144e6** — 0.4%. Rev 11 was right that the Sprint-4 headline
+   mixed units; corrected, the arithmetic is not merely reachable but reached.
+2. **Exact packing moves no variance, definitively.** On D14 control and candidate
+   MSE agree to five significant figures (1.5586e-06). D12's 1.2079× is retired.
+3. **Operation count is not the residual driver on this backend.** Batched
+   depth-2 Strassen is bitwise identical to the recursion and cuts the shipped
+   file from 10,263 to 4,823 operations — and measured **worse** residual at all
+   three sample counts. Shipped off, kept behind a flag, fully tested.
+4. **N is not a lever.** `MSE × N` is flat over {16,384, 32,768, 65,536} once
+   measured with 8-shift averaging; the 14% "optimum" a 1-shift pass showed was
+   one heavy-tailed realisation. Residual is ~96% marginal in N, so amortisation
+   buys 1.11× ± 0.11 locally against 1.002× on CONFIRM.
+5. **The structural verdict.** flopscope prices a gather at 4 FLOPs/element;
+   packing's entire saving is substituting gathers for dense multiply-adds. A
+   random-access gather costs far more *wall time* per element than a BLAS
+   multiply-add, and flopscope charges wall time back at λ = 1e11. The lane
+   trades an operation that is cheap in the price table for one that is expensive
+   in physics. No amount of further engineering changes that exchange rate.
+
+**Priority order from here.**
+
+0. **Round operations stay event-triggered.** Checked 2026-08-06: round 1428 still
+   LIVE (closes Aug 7 23:59 UTC), 1429 UPCOMING with an empty board, dataset tags
+   still `['v1-phase1','v1-warmup']`. On 1429 opening, the first Phase-2 action is
+   still **frozen v2.4.1 for configuration telemetry, and only with Samuel's
+   explicit approval.** **No telemetry submission is requested for any packed
+   candidate.** `estimator.py` untouched; vault untouched (counter 1).
+1. **Moonshot G0 only** (`docs/MOONSHOT.md`). Establish layer-convention parity,
+   build the separate calibrated-K2 control path, and treat
+   `lowrank_cumulant_flow.py` as an accuracy oracle. **Do not touch D08 and do
+   not claim compressed cost.** G1 stays closed until G0's parity is proven.
+2. **319341's variance advantage is the only score question left open.** Their
+   `MSE × N` is 0.018520 against our graded 0.022525 — **1.216×**, and it is not
+   arithmetic, not packing, and not antithetic. It is the highest-value unknown
+   on the score lane and it is a *variance* question.
+3. **Write-up.** Sprint 5's negative result is unusually clean contribution
+   material: a pre-registered gate, a conservative model frozen in advance that
+   was later shown to matter (defining it as the competitor anchor alone would
+   have passed a carrier that does not deserve it), and a mechanism — price-table
+   arbitrage against physics — that generalises past this competition.
+
+## REV 11 (2026-08-06, independent audit) — do not spend telemetry yet; compress the carrier first
+
+Rev 10's core result survives audit: exact activation packing is real, the FLOP
+oracle is accurate, and the current v2.5 file must not replace v2.4.1. Three
+interpretations do not survive:
+
+1. **S1 is borderline, not a cost-only pass.** The quoted 1.2026x is a ratio of
+   mean costs. The pre-registered paired statistic is the geometric mean of the
+   per-MLP ratios; recomputed on D12 with variance held neutral it is **1.1996x,
+   95% CI [1.1963, 1.2029]**. The full 1.4070x result still exists, but depends on
+   the D12-only MSE draw that did not reproduce on D11 or the public mini. Record
+   S1 as **inconclusive/borderline** rather than independently passed by cost.
+2. **`SETUP_TIMEOUT` is not a demonstrated candidate or memory failure.** The
+   local subprocess runner has a hard five-second worker-start deadline. In an
+   independent six-start audit, v2.4.1 itself timed out 2/6 times while v2.5
+   passed 6/6; v2.5 also completed a real one-MLP subprocess prediction. A 3.9 GB
+   process does not establish exhaustion of a 64 GB address-space cap. Keep
+   memory bounded, but remove this alleged shipping blocker until reproduced in
+   a candidate-specific way.
+3. **The like-for-like published variance gap is about 1.22x, not 1.40x.** Use
+   graded v2.4.1 `MSE*N = 0.022525` against 319341's `0.018520` (1.216x). The
+   1.40x figure compares a D11/local level with a different graded suite and is
+   only a diagnostic. Exact packing cannot create a variance gain, but the size
+   of the remaining gap must not be overstated.
+4. **The published effective-cost target was not reproduced yet.** Our 2.359e6
+   number is counted FLOPs/sample. Submission 319341's 2.374e6 number is
+   effective compute/sample, including residual; its like-for-like counted
+   figure is about **2.144e6/sample**. Under Sprint 4's own pre-registered 66 ms
+   residual model, our current candidate is about **2.762e6 effective/sample**.
+   The packing arithmetic is validated, but the external cost target remains
+   open and must be compared counted-to-counted and effective-to-effective.
+
+The local 100-MLP result remains a valid warning: current v2.5 is 26% worse on
+this machine because residual time rises 5.47x. It is not the final remote bill.
+Flopscope's published model assigns client/server transport to framework
+overhead, while participant Python and temporary release can still land in
+residual. The current implementation's 10,266 calls and large temporary churn
+are therefore an engineering target, not a reason to jump straight to a graded
+oracle.
+
+### Sprint 5 — round-trip compression and fixed-cost amortisation
+
+0. **Round operations remain event-triggered.** First Phase-2 action, only with
+   Samuel's approval, is still frozen v2.4.1 for configuration telemetry. Do not
+   submit the current v2.5 file.
+1. **Compress Strassen calls.** Batch the 49 depth-2 leaf products into batched
+   contractions and then reconstruct the quadrants. A clean-room microbenchmark
+   was bit-identical and changed one representative block from 219 to 173 calls,
+   residual -16%, wall time -40%, for +1% counted FLOPs. Validate on full layers.
+2. **Build an operation/FLOP Pareto for packing.** Compare the existing six
+   support buckets with one- and two-bucket designs, one row sort plus segment
+   boundaries, and packing-only / Strassen-only hybrids. Fewer remote operations
+   may be worth modestly more counted arithmetic. Never threshold a nonzero.
+3. **Reopen N for the packed carrier.** Rev 10 compares our N=16,384 carrier with
+   319341 at N=84,992. With fixed closure, setup, Python, and temporary-release
+   costs, N does not cancel completely: `score = V*(c_marginal + F/N)/B`. Sweep
+   16,384 / 32,768 / 65,536 on a fresh design block, with per-array size below
+   4 GiB and total live memory below 64 GB. The published competitor demonstrates
+   that a large-N packed carrier can be viable; do not assume our old dense-N
+   conclusion transfers.
+4. **Allocate D13/D14 before measurement.** D13 is design/Pareto work. D14 is a
+   locked, single-use decision block. D12 stays spent and must never be reused.
+5. **Promotion gates.** Preserve S0 exactness. On D14 require a pre-registered
+   candidate to improve paired `V*C` by at least 1.15x with its 95% interval
+   excluding 1.0 under a conservative residual model, and confirm that the gain
+   is not supplied by a one-block variance anomaly. Then require repeated
+   subprocess starts for both control and candidate, a multi-MLP subprocess run,
+   the full public mini, and all existing invariants. Only after those pass may
+   Samuel be asked to approve one optimized Phase-2 telemetry submission.
+6. **Moonshot stays next, not concurrent noise.** If the optimized carrier misses
+   D14 or real-stack gates, bank the exact-sparsity result and move to Moonshot
+   G0 (calibrated K2 control plus layer-convention parity). Do not keep tuning a
+   failed packed carrier on confirmation data.
+
+## REV 10 (2026-08-06, late) — Sprint 4: the arithmetic reproduces, the shipping does not. **S1 pass, S2 fail, no promotion**
+
+Rev 9 reopened one score lane on the strength of submission 319341's published
+telemetry. Sprint 4 ran it to conclusion. **The mechanism is real and reproduces
+the published arithmetic exactly. It still loses on the real stack, because
+flopscope charges for the operations that value-dependent packing needs.**
+
+The one-line version: **1.38x cheaper in FLOPs, 5.5x more expensive in residual
+wall time, 26% worse in adjusted score on the organizers' own 100 MLPs.**
+
+**What was built.** `local_sim/packed_sparse_probe.py`, a laboratory with a
+v2.4.1-equivalent dense reference (**bit-identical** to the shipped file) and an
+exactly equivalent packed path, both running against **real flopscope 0.10.0**,
+plus a *separate* analytic cost oracle that reproduces the instrumented bill to
+0.01%. 62 focused tests. Fresh seed blocks D11 (design) and D12 (locked,
+single-use) allocated before any measurement.
+
+**What was measured.**
+
+| | v2.4.1 | v2.5 candidate | 319341 (published) |
+|---|---|---|---|
+| effective FLOPs/sample, arithmetic | 3.253e6 | **2.359e6** | 2.374e6 |
+| counted FLOPs/MLP | 5.333e10 | 3.866e10 | — |
+| operations/MLP | 1,416 | **10,266** | — |
+| S1 paired `V*c` (pre-registered) | 1.000x | **1.407x** [1.266, 1.564] | — |
+| S1 cost half alone | 1.000x | **1.203x** | — |
+| **S2: public mini, real stack** | **3.26e-7** | **4.11e-7 (26% WORSE)** | — |
+| ... residual wall time / MLP | 70.8 ms | **387.6 ms** | — |
+
+**S1's headline was not the method.** D12's 1.407x leans on an MSE ratio of 1.2079
+that the design block puts at 1.0199 and that the organizers' own 100 MLPs put at
+1.007. The cost half is the real gain and it does reproduce (0.04% across blocks).
+But S2 then measured what the cost half actually costs: **residual wall time went
+70.8 -> 387.6 ms/MLP, which at lambda = 1e11 is 3.9e10 of effective compute — as
+much again as the entire counted bill.**
+
+**The lane does not promote.** `estimator.py` is untouched, the vault is untouched,
+v2.4.1 stays designated. Two things are nonetheless banked:
+
+* **The published arithmetic target is reachable** — 2.359e6 effective FLOPs/sample
+  against 319341's 2.374e6, rebuilt independently and exact to 1.5e-8.
+* **Their advantage is therefore mostly NOT the packing.** Their `MSE*N` is
+  1.852e-2 against our 2.58e-2 — a **1.40x per-sample variance** advantage that
+  packing cannot produce and none of our components deliver. That is where their
+  score lives, and it is now the open question worth attacking.
+
+**Priority order from here.**
+
+0. **Round operations stay event-triggered.** Round 1428 is still LIVE (closes
+   Aug 7 23:59 UTC by the round object); 1429 is UPCOMING with an empty board and
+   no `v1-phase2` dataset tag. On 1429 opening, submit frozen **v2.4.1** first for
+   configuration telemetry. **No submission without Samuel's explicit approval.**
+1. **One graded run settles the only open question.** Everything above is
+   arithmetic we can bill ourselves; what we cannot see offline is how the grader
+   prices the **7.2x operation count** and the **~310 data-dependent host
+   round-trips per MLP** that value-dependent packing requires (`fnp.ndarray` is a
+   `RemoteArray` on the eval servers — 18122). Our pre-registered model says
+   66 ms/MLP of residual against v2.4's 9.84 ms; the break-even is 75.7 ms. A
+   single Phase-2 telemetry submission of v2.5 resolves it and nothing else can.
+2. **v2.4.1 remains the designated fallback** until that telemetry exists. v2.5 is
+   a *candidate*: separate file, `whest validate` passed, invariants 30/30, public
+   mini confirmed read-only, vault **not** touched.
+3. **The variance half of 319341 is still unexplained and is the bigger prize.**
+   Their `MSE*N` is 1.852e-2 against our 2.58e-2 — a 1.40x per-sample variance
+   advantage that packing cannot explain (packing is exact) and that our ablated
+   components do not deliver. Whatever buys it is a *variance* mechanism. That is
+   now the most valuable open question on the score lane, and it is a better
+   target than another 5% of cost.
+4. **Moonshot and write-up unchanged** from rev 9.
+
+**Method note that belongs in the write-up.** Two "findings" in this sprint were
+noise that arrived wearing a mechanism: a 12-MLP run said antithetic sampling cost
+12% of variance (the 30x8 run says it *gains* 0.9%), and D12 said the candidate
+wins 21% of variance (the design block says 2%). Both had a tidy causal story
+available on demand. The defence that worked was the same one every time — refuse
+to accept a number that no ablation predicted until it reproduces on a different
+block.
+
+## REV 9 (2026-08-06) — reopen one score lane: packed activation sparsity was never tested
+
+Rev 8 correctly fixed the measurement instrument, but rev 6 closed score work one
+experiment too early. Sprint 3 tested **static late-layer on-neuron composition**.
+The strongest published honest competitor (submission 319341, regraded under
+flopscope 0.10.0) uses a materially different mechanism: after dead-neuron removal
+it sorts sampled activation columns by empirical firing rate, packs a cold prefix,
+buckets rows by 0/1/2/4/8 active prefix entries, skips the exact zero rectangles,
+and uses Strassen-style dense blocks. This is value-dependent exact arithmetic,
+not the static shape reduction Sprint 3 priced.
+
+The live telemetry makes the gap concrete. Our v2.4 spends 16,384 samples at
+3.303e6 effective FLOPs/sample and has variance proxy `MSE*N = 2.252e-2`.
+Submission 319341 spends 84,992 samples at 2.374e6 effective FLOPs/sample and has
+`MSE*N = 1.852e-2`. Its regraded adjusted score is 1.599e-7 versus our 2.719e-7:
+about **1.39x cheaper samples and 1.22x lower per-sample variance, 1.70x combined**.
+That is too large, too public, and too mechanistically specific to dismiss without
+reproduction. The old "honest sampling frontier is 2.7e-7" statement is therefore
+withdrawn; 2.7e-7 is the frontier of **our current dense sampler**.
+
+### Revised priority order
+
+0. **Round operations are event-triggered.** The live round object still closes
+   Phase 1 on Aug 7 and opens Phase 2 on Aug 8, while organizer thread 18125 says
+   Aug 10. Trust `phase2_checklist.py`'s live state, not either date. On round 1429
+   opening, submit frozen v2.4.1 first for configuration telemetry, then branch.
+   No external submission is made without Samuel's approval.
+1. **Sprint 4 — packed activation propagation (one tightly gated score sprint).**
+   Reproduce 319341's mechanism independently on canonical fresh mints, first as
+   a GPU/NumPy accuracy-and-cost oracle and then in a separate flopscope candidate.
+   Keep each ingredient ablated: antithetic Sobol, pilot reclassification, cold
+   prefix + row buckets, and Strassen. The packed multiply must be an arithmetic
+   reorganization of the same sampled forward pass; never approximate a sampled
+   nonzero as zero. Allocate fresh D11/D12 blocks before measuring. Do not touch
+   `estimator.py` during exploration.
+2. **Moonshot lane continues, but the current adapter is an accuracy oracle, not
+   yet a shippable low-rank algorithm.** `lowrank_cumulant_flow.py` projects K3/K4
+   factors back into full-width objects; that tests whether the subspace carries
+   useful signal but does not itself realize r^3 online cost. Before D08/G1, add
+   the missing separate calibrated-K2 control path and prove layer conventions.
+   If G1 passes, require a compressed representation plus honest flopscope cost
+   model before spending D09/G2. No implied symmetric-tensor-kernel discounts.
+3. **Write-ups become deadline-specific, not a reason to stop research.** Produce
+   a sanitized Phase-1 PDF by Aug 17, tied to one graded artifact and sent privately;
+   Appendix F stays out. Continue the Phase-2 paper as a living lab notebook, with
+   one bounded writing block per week until the Sep 5 full-draft target.
+4. **Stewardship stays strict.** v2.4.1 remains the fallback. Every candidate still
+   passes provenance, 30/30 invariants, contract validation, read-only public
+   confirmation, GPU parity, and exactly one vault touch only after it is frozen.
+
+### Sprint-4 gates
+
+1. **S0 — semantic parity.** On identical points, packed and dense propagation
+   agree to the documented floating-point tolerance; any MSE change must come from
+   the separately ablated point-set/pilot choice, not silently dropped arithmetic.
+2. **S1 — fresh-mint decision.** On a new registered seed block with paired shifts,
+   `V*c` improves by **at least 1.20x** over v2.4.1, with the paired uncertainty
+   reported. Anything smaller is killed as complexity risk.
+3. **S2 — real-stack confirmation.** The separate candidate passes `whest validate`,
+   a full 100-MLP subprocess mini run, determinism, zero failures, and stays below
+   the Phase-2 compute/wall envelope. The public mini is confirmation only and
+   chooses no threshold.
+4. **S3 — promotion.** Only after S0–S2 does the candidate replace `estimator.py`
+   and spend one vault touch. Target: at least the published 1.6e-7 class on the
+   current shape. Passing this gate does not win by itself; it creates the cheaper
+   sampling carrier that a successful mechanistic correction can beat or augment.
+
+### Phase-1 artifact decision, reopened only by new organizer evidence
+
+The earlier no-submit decision assumed there was no selection mechanism. Thread
+18125 now says teams will receive nomination instructions and may explicitly choose
+two submissions. Therefore, **if Samuel approves before the live round closes**,
+grade v2.4.1 in Phase 1 so the reproducible artifact can anchor the Phase-1 PDF,
+then nominate `{v2.4.1, v1.1}` when the email arrives. If approval or the nomination
+path is absent, keep the existing no-submit decision. Claude Code must stop before
+any submission command and ask Samuel.
+
+## REV 8 (2026-08-06) — the truth harness: measurement becomes the deliverable
+
+Rev 7 said the write-up is primary and the estimator is a designation candidate, not
+a work in progress. Rev 8 acts on that by fixing the *instrument*, because we found
+it was broken in a way that had gone unnoticed for a month.
+
+**The finding.** Our offline networks were not the grader's networks. Same
+distribution — weight std within 3e-4 of He — but a different realisation, because
+`whestbench.sample_mlp` draws in float64 and casts once while we drew natively in
+float32. Worse, the evaluator expands one root seed into **three independent
+substreams** (weights / ground-truth draws / the estimator's seed) and we used one
+seed for all three, so our Sobol digital shift was a deterministic function of the
+network it was scoring. `local_sim/mint_provenance.py` now reproduces the protocol
+**bit-identically, 100/100** across five shapes × twenty seeds, and every mint site
+(CPU and GPU) routes through it. No past *statistical* conclusion changes; per-seed
+reproducibility against the evaluator never existed until today.
+
+**The protocol that follows** (`docs/VALIDATION.md` is now canon for measurement):
+
+1. **DECIDE** on fresh mints, a new seed block per experiment, never reused
+   (`local_sim/seed_blocks.py`).
+2. **CONFIRM** on the public split — **read-only. No constant is ever fitted there
+   again.** A split that has steered a month of decisions has an optimum that is
+   partly a memory of our own search.
+3. **VAULT** — 500 sealed networks, GT at 2²⁵ samples (noise ~1.6e-9), hashes
+   committed, **touch-counted**. Three permitted touches: baseline, one per
+   estimator change, designation day.
+
+**Priorities, updated.** Rev 7's four workstreams stand, with the harness inserted
+above them because everything else reports through it:
+
+0. **The harness** (this rev). Done: provenance proof, three-tier protocol, sealed
+   vault, invariant suite 24/24 → **30/30** (layer-1 closed form exact to 1.8e-16,
+   permutation equivariance, budget monotonicity, determinism ×3, seed hygiene),
+   constants audit, public–private self-check.
+   The audit kept τ=-2.5, rank 32, and the v0 calibration values. It withdrew the
+   old 3.8e-9 pruned-value bound (canonical-mint value 1.043e-8, while the
+   independent end-to-end τ optimum remains unchanged). A 65,536-point arm won
+   1.0408× in the FLOP-only mint model but only ~1.007× under real local residual
+   pricing, so the shipped 16,384-point operating point stays frozen and the
+   larger arm is only a Phase-2 telemetry candidate.
+1. **Write-up — primary.** Now has an abstract, an introduction, and §7 as a
+   validation section in its own right. The measurement findings are contribution
+   material, not housekeeping: "same distribution is not a reproducibility claim"
+   and "a fixed evaluation set with per-item feedback is not a held-out test set"
+   both generalise well beyond this task.
+2. **Governance / stewardship / opportunistic** — unchanged from rev 7.
+3. **Moonshot lane** (`docs/MOONSHOT.md`), newly opened and strictly fenced:
+   low-rank cumulant flow with **pre-registered** gates G1/G2/G3, ≤2 GPU-days per
+   week, kill-by-default Sep 1, never touches `estimator.py`. Both outcomes ship.
+
+**Theory (§7b) moved from stub to partly verified.** P1 — the parameter-free ReLU
+correlation map — **passes** at max absolute deviation 0.0133 with no fitted
+constant. P3 shows the fluctuation collapse is toward the **mean direction
+specifically**: |⟨v₁, μ̂⟩| runs 0.079 → **0.994** over 32 layers while λ₁'s energy
+share reaches 0.651. That makes §2's common mode and §7b's collapse **one
+phenomenon**, which is the strongest structural claim in the write-up. P2 awaits
+the theory draft.
+
+**Phase-1 close.** No further Phase-1 submission (decided 2026-08-06): there is no
+participant-side selection mechanism, so 18118's top-2 default governs and picks
+{v2.4, v1.1}; submitting v2.4.1 would displace the only rotation-free hedge.
+v2.4.1 debuts in round 1429.
+
 ## REV 7 (2026-08-06) — endgame doctrine: write-up primary, governance, stewardship, opportunistic
 
 *Repo docs are canon; strategy verdicts arrive in prompts and get folded in here.

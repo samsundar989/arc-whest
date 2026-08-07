@@ -14,6 +14,111 @@ a cost-variance account, and five ways of not predicting the common mode*
 
 ---
 
+## Abstract  *(draft 2026-08-06)*
+
+We give a quantitative account of what limits estimation of the expected
+activations of a wide random ReLU MLP under a compute budget, at the depth where
+the published methods stop working. Our organising result is an identity: above the
+scoring floor the adjusted score factors as `V·c/B`, per-sample variance times
+per-sample cost, with the sample count cancelling exactly. Sample count is
+therefore not a design variable, and de-noising a sample and cheapening a sample
+are worth precisely the same.
+
+Read through that identity, the field's remaining levers are small and we can say
+how small. On the variance side we report five independent attempts to predict the
+dominant error mode — a single per-network scalar carrying 48 % of the squared
+error and worth 1.9× if removed exactly — that fail at held-out R² between −0.04
+and 0.15, and we give the reason: the target is a projection onto the unknown truth
+direction, and every available proxy for that direction carries more error along it
+than the target itself. We predicted R² ≈ 0.09 before measuring 0.094. On the rate
+side, randomised QMC cannot help: for discontinuous integrands the rate bonus is
+1/(4d−2), which at d = 256 is 0.001, and we measure the convergence exponent at
+1.00 as theory requires.
+
+On the cost side we prove and price a reduction that does work — a confidently-on
+ReLU is the identity, so such a neuron needs no per-sample value at the scored
+layer and is linear and composable at a feed-forward layer, verified to within
+0.07 % over eight layers — and then show it cannot pay, because shape-based FLOP
+billing charges for the multiply and not the nonlinearity. The scored layer is
+3.67 % of the per-sample cost, so eliminating it entirely is worth 1.038×. The same
+arithmetic bounds rank-k propagation: the rank at which truncation stops losing
+accuracy is the rank at which factorisation stops saving compute, and both equal
+half the width.
+
+We also report the evaluation-methodology findings, which we believe generalise
+beyond this task. Ground-truth generation must be verified bit-for-bit, not
+distributionally: our own generator matched the evaluator's distribution to 3e-4
+while sharing none of its values, and coupled the estimator's random seed to the
+weights in a way the evaluator does not. A fixed evaluation set that returns
+per-item feedback is not a held-out test set, and we give the arithmetic for how
+many queries determine it outright. We describe the three-tier data protocol,
+sealed holdout, and invariant suite we adopted in response, including a permutation
+-equivariance check that verifies the estimator computes the right function rather
+than merely a finite one.
+
+Our final estimator — dead-neuron pruning with a closed-form analytic patch, an
+alignment rotation folded into the first layer, and a scrambled Sobol point set —
+reaches an adjusted score of 2.72e-7 on the public evaluation. We argue the honest
+sampling frontier for this task is near 2.7e-7 and explain what would have to
+change for it to move.
+
+---
+
+## 0. Introduction
+
+The task is deceptively simple to state. Draw a ReLU MLP of width 256 and depth 32
+with He-initialised weights and no biases. For inputs x ~ N(0, I), predict the
+expected post-ReLU activation of every neuron. You are scored on the final layer's
+mean squared error, multiplied by the fraction of a fixed compute budget you spend.
+Everything about the data-generating process is known: there is no distribution
+shift, no label ambiguity, no missing information. The only question is how
+efficiently you can turn compute into accuracy.
+
+That transparency is what makes the problem worth studying. When a method fails
+here it fails for a reason you can write down, and this paper is mostly a
+collection of such reasons. Three shape the argument.
+
+**First, the scoring rule is a factorisation, and it removes a degree of freedom
+most participants spend effort on.** Because the multiplier is proportional to
+compute and the error is inversely proportional to sample count, the sample count
+cancels: the score depends only on the variance of a single sample and its cost.
+Choosing "how many samples to draw" is not a lever at all above the floor, and
+every real improvement is either a cheaper sample or a quieter one. Section 1.
+
+**Second, the error at depth 32 is not where the literature looks for it.** The
+dominant component is not per-neuron noise but a single scalar per network — the
+whole output layer scaled by 1 + g — carrying 48 % of the squared error. It looks
+exactly like a bias, it is stable enough to be worth 1.9× if removed, and it is not
+predictable from anything we can observe. We give five failed predictors and the
+geometric argument for why a sixth will also fail. Sections 2 and 3.
+
+**Third, the analytic and sampling estimators fail in ways that do not compose.**
+Gaussian closure at depth 32 is 18× worse than sampling and its residual is not a
+learnable function of the network (held-out R² = 0.012 over 50,000 networks). Its
+errors do not cancel against sampling's either: the chain attenuates zero-mean
+noise while amplifying coherent bias, which we and one other group measure
+independently. Section 3.
+
+The cost channel is the one with room left, and Section 4 is our positive result:
+a proof that confidently-on neurons need no sampling, an exact price for it, and
+the demonstration that the price is set by matrix shapes rather than by
+nonlinearities — which caps the whole structure-aware family well below what its
+reception suggests.
+
+Section 7 is about measurement rather than estimation, and is the part we would
+most like to see adopted. Working on a benchmark whose data are *generated* and
+whose evaluation set returns *per-item feedback* creates two failure modes that
+ordinary machine-learning hygiene does not cover, and we walked into the first one.
+We describe both and the protocol we now use.
+
+We report negative results at length and deliberately. Every one below is
+accompanied by a mechanism and, where we could construct one, an oracle bound —
+the value of the exact quantity the method was trying to estimate, priced at zero.
+An oracle bound converts "we could not make this work" into "this cannot work,"
+and that is the difference between a lab note and a result.
+
+---
+
 ## 1. The scoring identity, and why sample count is not a lever
 
 **Claim.** Above the multiplier floor the adjusted score is
@@ -144,7 +249,9 @@ trick we found.
 earns nothing unless materialised. Predicting dead neurons analytically (α ≤ −2.5),
 dropping them from **both** sides of each matmul, and patching their contribution
 with the closed-form rectified-Gaussian mean gives **33.7% cheaper samples for +2.6%
-MSE = 1.47×**, with the pruned neurons' own MSE at 3.8e-9.
+MSE = 1.47×**. The original 3.8e-9 estimate for the pruned values themselves was
+withdrawn after the canonical-mint audit measured 1.043e-8; the independent
+end-to-end sweep nevertheless selects the same sharp optimum, τ=-2.5.
 
 **The sharp optimum, worth explaining.** τ=−3.0 → 1.38×, τ=−2.5 → 1.47×, τ=−2.0 →
 1.23× (MSE +35%). The cliff is where the analytic patch stops being accurate.
@@ -251,13 +358,131 @@ Sobol RQMC, digitally shifted from `mlp.seed`, float32 throughout, exact closed-
 first layer, dead-neuron pruning with analytic tail patch, alignment rotation folded
 into W₁. Direction numbers embedded so the submission stays a single file.
 
-## 7. Reproducibility
+## 7. Validation: how we know any of this
 
-Everything measured against the public dataset's 1e9-sample ground truth (noise
-~2e-10) on the **full 100-MLP** split — a policy adopted after three separate
-apparent wins evaporated on re-measurement from 40-MLP subsets. That methodological
-point deserves its own paragraph: at these effect sizes, subset measurement is not
-evidence.
+Every number above is a prediction about networks nobody has seen, because that is
+what the competition scores. A prediction is worth its instrument, so this section
+describes the instrument. We think it is the most transferable part of the work:
+the estimator is specific to this task, but the failure modes below are generic to
+any benchmark that reports per-item feedback on a fixed evaluation set.
+
+### 7.1 The defect that motivated all of it
+
+Our offline networks were not the evaluator's networks. Both are He-initialised
+ReLU MLPs of the same shape, drawn from the same distribution, and for a month
+that seemed like enough. It is not. The evaluator draws each weight matrix in
+float64 and casts once at the end; we drew natively in float32, which consumes the
+random bit stream by a different algorithm and produces entirely different numbers.
+More seriously, the evaluator expands one root seed into **three independent
+substreams** — weights, ground-truth samples, and the seed handed to the estimator
+— while we used a single seed for all three. Our estimator derives its randomised
+QMC digital shift from that seed, so on our own data the point set was a
+deterministic function of the very network it was scoring. The evaluator has no
+such coupling.
+
+Neither defect invalidated a statistical result: the distribution was right to
+within 3e-4 in weight standard deviation. Both made per-seed reproducibility
+against the evaluator impossible, and the second was a live path to a result that
+would have evaporated on unseen data.
+
+The fix is a reimplementation of the evaluator's generation protocol checked for
+**bit-identity on raw integer representations**, not to a tolerance: 100/100 across
+five shapes × twenty seeds, weights and seed semantics both. The old generator
+never matched, at a maximum relative elementwise divergence of 1.87.
+
+**The general lesson: "same distribution" is not a reproducibility claim.** If a
+benchmark's data are generated rather than fixed, verify the generator bit-for-bit
+or you have a different experiment than the one you are being scored on.
+
+### 7.2 A three-tier data protocol
+
+The reason the defect survived a month is that we had one pool of data doing three
+incompatible jobs. Separating them:
+
+| tier | data | may be used to | may not |
+|---|---|---|---|
+| **decide** | freshly minted networks, a new seed block per experiment, never reused | choose constants, compare methods, kill tracks | — |
+| **confirm** | the organizers' public split, 1e9-sample truth | check that a decision survives on their data | choose anything; read-only |
+| **vault** | 500 sealed networks, 2²⁵-sample truth, touch-counted | estimate the level expected on the private re-run | iterate |
+
+The middle tier is the one people get wrong, and we did. A split that has steered a
+month of decisions has an optimum that is partly a memory of the search that
+visited it; a constant fitted there carries that memory into the final evaluation.
+The split remains the best data available — it is the organizers' own, with truth
+three orders below any effect we chase — but only as a check.
+
+The first tier rotates seeds because re-measuring a constant on the seeds that
+chose it is not independent evidence, it is the first measurement's noise served
+twice.
+
+### 7.3 The vault
+
+Five hundred networks, ground truth at 2²⁵ = 33.5M samples each (Monte-Carlo noise
+1.6e-9, or 0.11 % of the effect we act on), sealed by hashing the contents and
+committing the hashes. Every evaluation increments a counter and appends a line to
+a log, so a reported baseline can be checked against the number of attempts that
+produced it. Three touches are permitted: a baseline, one per estimator change, and
+designation day.
+
+The seal-time v2.4.1 baseline used exactly one touch: adjusted median
+**2.4651e-7**, mean **3.2669e-7**, p99 **2.0535e-6**, maximum 3.0469e-6, with
+zero non-finite predictions. Ground-truth noise was 0.09% of measured raw MSE.
+
+Only seeds and ground truth are stored — not weights. Once the generation protocol
+is proven bit-exact, 4 KB of seeds pins down what would otherwise be 4.2 GB of
+float32, which is the provenance proof paying rent immediately.
+
+We are aware that a self-imposed touch counter is not a cryptographic commitment
+and that a sufficiently motivated author could ignore it. It is not aimed at that
+threat. It is aimed at the ordinary and far more common one: running an evaluation
+five times, remembering the third.
+
+### 7.4 Invariants, not just smoke tests
+
+A contract suite that only asks *did it crash?* passes happily on code that
+computes a plausible wrong answer. Five properties of the *true* answer are
+therefore checked on the shipped file at every change:
+
+* **A closed form where one exists.** For x ~ N(0, I) the first layer's expected
+  post-ReLU activation is ‖w‖/√(2π) exactly. Measured agreement: 1.8e-16.
+* **Permutation equivariance.** Relabelling a hidden layer's neurons leaves the
+  network's function unchanged, so predictions must permute with it and every other
+  layer must be untouched. This is the only test in the suite that catches a
+  transposed index or an axis swapped inside a reduction — errors that are finite,
+  plausible, and wrong. The permuted row matches to 2.2e-15; other rows move by
+  ≤4.4e-8, which is not slop but the reordering of summations inside downstream
+  matmuls, and is nine orders below the decision signal.
+* **Budget monotonicity.** More budget never buys fewer samples, and every rung
+  down to zero degrades rather than throws.
+* **Bit-identical determinism**, including from a freshly constructed estimator —
+  the case that catches state leaking between items through a cache.
+* **Ground-truth noise reported with every MSE**, so an "improvement" smaller than
+  the label noise cannot be mistaken for one.
+
+### 7.5 Constants audit
+
+Every frozen constant was re-measured on fresh, never-reused seeds, asking not "is
+there a better value" — there always is, by noise — but "is the frozen value inside
+the measurement error of the fresh optimum?" Paired comparisons with common random
+numbers and 32-shift averaging bring the resolution to ~1 %, where a single
+100-network run cannot resolve 15 %: two realisations of the *same* estimator
+differ by ~18 % in mean MSE.
+
+| item | fresh result | verdict |
+|---|---|---|
+| pruning threshold | τ=-2.5 is the exact sweep optimum | keep |
+| rotation rank | full rank appears 1.0108× better, only 0.7σ | keep rank 32 |
+| operating point | N=65,536 beats 16,384 by 1.0408× at 3.2σ in the FLOP-only audit | real-stack residual billing leaves ~1.007×; do not adopt |
+| pruned-value patch | 1.043e-8 vs the old 3.8e-9 bound | withdraw the bound; end-to-end τ verdict unchanged |
+| v0 calibration | ≤0.07% fresh/frozen drift | keep values; fallback wiring debt recorded |
+
+### 7.6 Measurement discipline, stated as a result
+
+Three separate apparent wins in this project evaporated on re-measurement from
+larger samples. At these effect sizes subset measurement is not evidence, and we
+report the rule we adopted as one of the findings: **nothing is decided on fewer
+than the full split, and any comparison of point sets or bases is averaged over
+many independent randomisations rather than measured once.**
 
 ---
 
@@ -348,6 +573,57 @@ only algebraically with depth (Poole 1606.05340; Schoenholz 1611.01232; Hayou
 covariance of the activation vector across inputs approaches a rank-one object,
 which is exactly a participation ratio falling toward 1. Our measurement says it
 reaches ~3 at depth 32 rather than 1, and the gap is the interesting part.
+
+### Verification runs — measured 2026-08-06, `local_sim/theory_probe.py`
+
+*These are measurements against pre-stated, parameter-free predictions, run on
+fresh mints (seed block D07). They are reported here for the drafter; the prose
+of §7b is still to be written and must not be back-fitted to them.*
+
+**P1 — the correlation map is parameter-free and it holds.** For He-init ReLU the
+uncentered correlation of two inputs' representations should obey
+`c_{l+1} = R(c_l)` with `R(c) = [√(1−c²) + c(π − arccos c)] / π` — the arc-cosine
+kernel, no fitted constant, because the 2/n scaling makes the map exactly
+norm-preserving. Measured against R iterated from the input correlation, over four
+starting correlations × 32 layers × 8 networks × 2048 input pairs:
+
+| layer | c₀ = 0.0 meas / pred | c₀ = 0.3 | c₀ = 0.6 | c₀ = 0.9 |
+|---|---|---|---|---|
+| 17 | 0.9440 / 0.9351 | 0.9279 / 0.9397 | 0.9486 / 0.9482 | 0.9701 / 0.9709 |
+| 25 | 0.9681 / 0.9629 | 0.9603 / 0.9649 | 0.9718 / 0.9687 | 0.9802 / 0.9802 |
+| 32 | 0.9777 / 0.9747 | 0.9655 / 0.9758 | 0.9801 / 0.9780 | 0.9862 / 0.9851 |
+
+**Maximum absolute deviation over every layer and every start: 0.0133**, against a
+pre-registered threshold of 0.02. The correlation really does approach 1
+algebraically rather than geometrically — by depth 32 it is only ~0.98, which is
+the quantitative reason the participation ratio stalls near 3 instead of reaching 1.
+
+**P3 — and the collapse is toward the mean direction specifically.** This is the
+sharper result and it was not obvious in advance: low rank does not by itself say
+*which* direction survives. Measuring the leading eigenvector v₁ of the
+across-input fluctuation covariance against the mean activation direction μ:
+
+| layer | 1 | 5 | 9 | 13 | 17 | 21 | 25 | 29 | 32 |
+|---|---|---|---|---|---|---|---|---|---|
+| \|⟨v₁, μ̂⟩\| | 0.079 | 0.866 | 0.947 | 0.963 | 0.970 | 0.980 | 0.987 | 0.993 | **0.994** |
+| participation ratio | 159.3 | 45.0 | 21.5 | 12.8 | 8.6 | 6.4 | 4.2 | 3.1 | **2.4** |
+| λ₁ share of energy | 0.013 | 0.067 | 0.149 | 0.228 | 0.305 | 0.366 | 0.476 | 0.571 | **0.651** |
+
+At the scored layer the dominant fluctuation mode carries 65 % of the energy and is
+**99.4 % aligned with the mean**. That is the mechanism behind the common mode of
+§2 stated in a different vocabulary: an error along μ̂ is exactly a rescaling of the
+whole output layer, which is what `1 + g` is. The two sections are describing one
+phenomenon and the write-up should say so.
+
+*Caveat on the PR column: a 256-dimensional covariance estimated from 4096 samples
+is downward-biased, which is why layer 1 reads 159.3 against the 165.0 of figure 1
+(measured at higher sample count on an older mint). The trend is unaffected; the
+absolute values in figure 1 are the ones to quote.*
+
+**P2** — the two-sector participation-ratio fit held out at layers 12/20/28 — is
+**not run**. Its functional form is in the theory draft, which is not yet in the
+repo, and inventing a two-sector form here and then reporting it as a
+verification would invert the point of the exercise.
 
 ## 8. Robustness, and why the distribution is the deliverable
 
