@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "permissions": {
+    "allow": [
+      "Read",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "PowerShell(git status*)",
+      "PowerShell(git diff*)",
+      "PowerShell(git log*)",
+      "PowerShell(git show*)",
+      "Bash(uv run python local_sim/*)",
+      "PowerShell(uv run python local_sim/*)",
+      "Bash(uv run whest validate*)",
+      "PowerShell(uv run whest validate*)",
+      "PowerShell(.\\scripts\\preflight.ps1*)",
+      "PowerShell(./scripts/preflight.ps1*)"
+    ],
+    "deny": [
+      "Edit(./docs/HUMAN_MODEL.md)",
+      "Edit(./experiments/vault/manifest.json)",
+      "Edit(./experiments/vault/touch_log.jsonl)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit|Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-protected-files.sh\"",
+            "timeout": 10,
+            "statusMessage": "Checking protected paths"
+          }
+        ]
+      }
+    ]
+  }
+}

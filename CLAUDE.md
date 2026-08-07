@@ -1,87 +1,134 @@
-# CLAUDE.md — arc-whest project memory
+# CLAUDE.md — arc-whest
 
-## What this repo is
+*A map and a contract, not an encyclopedia. Deeper knowledge lives in `docs/`.
+Harness audit: 2026-08-07. Re-audit triggers at the bottom.*
 
-Samuel's entry for the **ARC White-Box Estimation Challenge 2026** (AIcrowd). Task: given a random He-init ReLU MLP (Phase 1: 256 wide × 32 deep, no biases), predict every neuron's expected post-ReLU activation under x ~ N(0, I), returning a (depth, width) array. Score = mean over MLPs of `final_layer_MSE × max(0.1, C/B)`, lower is better; C = flopscope-counted FLOPs + 1e11 × uninstrumented wall-seconds; B = 2.72e11 (Phase 1). **Phase 2 deadline: Sep 19, 2026, 23:59 UTC.** Full context: `docs/COMPETITION_BRIEF.md` (explainer), `docs/GAME_PLAN.md` (strategy), `docs/RESEARCH_NOTES.md` (rules/intel/links), `docs/SETUP_WINDOWS.md` (pipeline commands), `experiments/LOG.md` (results so far). Read them before nontrivial work.
+## Objective
+
+Samuel's entry for the **ARC White-Box Estimation Challenge 2026** (AIcrowd).
+Given a random He-init ReLU MLP (Phase 1: 256 wide × 32 deep, no biases), predict
+every neuron's expected post-ReLU activation under x ~ N(0, I) as a `(depth, width)`
+array. Score = mean over MLPs of `final_layer_MSE × max(0.1, C/B)`, lower is better;
+`C` = flopscope-counted FLOPs + 1e11 × uninstrumented wall-seconds, `B` = 2.72e11.
+
+**The prize is decided by a private re-run of ONE designated submission on fresh
+MLPs.** Public board rank is not the target. There is a second, now co-equal
+objective: the **$20k contribution prize**, whose deliverable is the write-up
+(`docs/writeup-draft.md`).
+
+Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
 
 ## Layout
 
-- `estimator.py` — THE submission (self-contained single file; `whest submit` ships only this). v0 = covariance propagation + offline-fitted per-layer calibration (`_CAL_LAYER_SCALE`, fitted at width 256; provenance `experiments/calibration.json`).
-- `local_sim/` — offline lab: numpy shims for `flopscope`/`whestbench` so the exact `estimator.py` runs without competition packages; He-MLP generator; MC ground truth; `fit_calibration.py`; `validate_estimator.py` (held-out check — v0 reference: raw 7.98e-5 → calibrated 2.67e-5 final-layer MSE).
-- `experiments/` — LOG.md (append every experiment: idea → local MSE → graded score → verdict), calibration.json, run reports (save grader reports under `experiments/run_reports/`).
+| path | what |
+|---|---|
+| `estimator.py` | **THE submission.** Self-contained; `whest submit` ships only this file. Currently v2.4.1, byte-identical to `estimator_v2_4_1.py` modulo line endings. |
+| `estimator_v*.py` | frozen version archive — never edited, only read |
+| `local_sim/` | the offline lab: numpy shims for `flopscope`/`whestbench`, grader-identical mint (`mint_provenance.py`), invariants (`edge_cases.py`), seed registry (`seed_blocks.py`), sealed holdout (`vault.py`), probes |
+| `experiments/` | `LOG.md` (append every experiment), run reports, vault seal, JSON artifacts |
+| `docs/` | see pointers below |
+| `scripts/` | `preflight.ps1` — the gate that runs on every estimator change |
 
-## Hard rules (grader + integrity)
+## Hard rules — grader contract and research integrity
 
-1. `estimator.py` may import ONLY `flopscope`, `flopscope.numpy as fnp`, `whestbench`, and Python stdlib. No numpy/scipy/torch in that file — the grader sandbox doesn't have them. Grader arrays are immutable (no `a[i]=`, no `+=` on arrays); pass `str` not `Path`; single array ≤ 4 GiB.
-2. Determinism: any randomness must derive from `mlp.seed` (predict) / `context.seed` (setup) via `fnp.random.default_rng(...)`. Never `fnp.random.seed(...)`, never time-based seeds. v0 is fully deterministic (no RNG).
-3. **Never exploit the flopscope wall-time accounting loophole** (RESEARCH_NOTES §3, thread 18099) — routing math through raw uninstrumented arrays to dodge FLOP counting. Organizers call it out; we compete clean and build for the private re-grade.
-4. Secrets: the AIcrowd API key lives only in `whest login`'s credential store. Never write it into tracked files, logs, or LOG.md.
-5. Budget discipline: 50 submissions/day cap exists, but default to ≤2/day with purpose; validate → local mini-split run → submit, in that order. A failed MLP scores as zeros (catastrophic) — never submit something that hasn't passed `whest validate` + a clean mini run (`n_failed_mlps: 0`).
-6. Keep `estimator.py` shape-generic (read `mlp.width`/`len(mlp.weights)`); calibration auto-disables off-width via `_calibration_column`. Env var `ARC_WHEST_DISABLE_CAL=1` disables calibration (used by fitting).
+1. `estimator.py` may import ONLY `flopscope`, `flopscope.numpy as fnp`, `whestbench`,
+   and Python stdlib. No numpy/scipy/torch — the grader sandbox lacks them. Grader
+   arrays are **immutable** (no `a[i]=`, no `+=` on arrays); pass `str` not `Path`;
+   single array ≤ 4 GiB.
+2. Determinism: randomness derives from `mlp.seed` (predict) / `context.seed` (setup)
+   via `fnp.random.default_rng(...)`. Never `fnp.random.seed(...)`, never time-based.
+3. **Never exploit the flopscope wall-time loophole** (routing math through raw
+   uninstrumented arrays). Organizers call it out; we compete clean.
+4. Never `flops.budget_summary_dict()` / `budget_summary()` inside `predict` — O(op
+   history), 157× residual blowup.
+5. Secrets: the AIcrowd key lives only in `whest login`'s credential store. Never in
+   tracked files, logs, or LOG.md.
+6. **Never submit without Samuel's explicit approval.** A failed MLP scores as zeros.
+   Order is always: `whest validate` → clean mini run (`n_failed_mlps: 0`) → ask.
+7. Keep `estimator.py` shape-generic (`mlp.width`, `len(mlp.weights)`).
+   `ARC_WHEST_DISABLE_CAL=1` disables calibration (used by fitting).
+
+## Measurement law — `docs/VALIDATION.md` is binding
+
+- **Three tiers.** DECIDE on freshly minted networks with a **new seed block per
+  experiment, never reused** (`local_sim/seed_blocks.py`) → CONFIRM on the public
+  split (**read-only; no constant may ever be fitted there**) → VAULT for milestones
+  (touch-counted; three permitted touches, ever).
+- **Pre-register before you measure.** A decision block is single-use. Its design,
+  gate threshold, and residual model go into `experiments/LOG.md` *before* the block
+  is touched. A model chosen after seeing the answer is not evidence.
+- **Counted compares to counted; effective compares to effective.** The paired
+  statistic is the geometric mean of per-MLP ratios, not the ratio of means.
+- **Every MSE is quoted with its ground-truth noise floor.**
+- **Local residual wall time is ~7× the grader's** and the shim path reads ~18% low
+  for rotation-using estimators. Never quote a local absolute; transfer ratios only.
 
 ## Commands
 
 ```powershell
-uv sync                                          # env (Python 3.10 + flopscope + whestbench)
-uv add --dev numpy scipy                         # dev-only deps for local_sim tools
-uv run whest validate --estimator estimator.py   # contract check (seconds)
+uv sync                                                   # environment
+.\scripts\preflight.ps1                                   # THE gate: provenance + 30 invariants + contract + ship-file identity
+uv run whest validate --estimator estimator.py            # contract only (~46 ms)
 uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v1-phase1 --split mini --runner subprocess
-uv run whest submit --estimator estimator.py --watch
-uv run python local_sim/validate_estimator.py    # offline held-out MSE check
-uv run python local_sim/fit_calibration.py       # refit calibration (writes experiments/calibration.json)
-uv run python local_sim/board_snapshot.py --top 30 --label <tag>   # archive a leaderboard (+ --diff a.json b.json)
-uv run python local_sim/board_forensics.py                          # implied V*c, entry counts, score timeline
-uv run python local_sim/twin_diff.py --all                          # suite identity across our graded reports
-uv run python local_sim/phase2_checklist.py                         # rounds / dataset tags / boards
-uv run python local_sim/export_split.py --split mini --n 100 --out <npz>   # dataset -> npz for the GPU venv
-.venv-gpu\Scripts\python.exe local_sim/track_t_mint.py --data <npz> --out <npz> --draws 256
-.venv-gpu\Scripts\python.exe local_sim/track_p_spectrum.py --data <npz> --mlps 100 --jensen --out <npz>
-.venv-gpu\Scripts\python.exe local_sim/sprint3_probe.py --data <npz> --mlps 100   # on/kink FLOP allocation
-.venv-gpu\Scripts\python.exe local_sim/robustness.py --mlps 1200 --truth 4194304  # fresh-MLP score distribution
-.venv-gpu\Scripts\python.exe local_sim/robustness.py --stress                     # atypical-MLP safety
-uv run python local_sim/edge_cases.py            # contract + numerical edges on the SHIPPED file
+uv run python local_sim/phase2_checklist.py               # rounds / dataset tags / boards
+uv run python local_sim/seed_blocks.py                    # allocate a block BEFORE any experiment
+.venv-gpu\Scripts\python.exe local_sim/vault.py verify    # seal integrity + touch log
 ```
 
-## Known unknowns / gotchas (updated 2026-08-06)
+Full reference (GPU venv, probes, dead-lane commands): `docs/SETUP_WINDOWS.md` §7.
+**Run `whest` from PowerShell**, or set `PYTHONIOENCODING=utf-8` in Bash — the CLI's
+box-drawing output kills Git Bash's cp1252 console inside its own error printer.
 
-- **DEADLINE CONFLICT — plan against Aug 7.** Organizer thread 18125 (Aug 3) says Phase 1 closes **10 Aug 23:59 UTC**; the challenge page's round object still ends round 1428 at **2026-08-07 23:59 UTC** and opens 1429 at Aug 8 00:00. Thread 18130 flagged it Aug 5, no reply. Treat Aug 7 as operative and **trigger the Phase-2 runbook on round 1429 going active**, never on a date. Write-up due 17 Aug; registration/team freeze 5 Sep.
-- **The residual-billing question is RULED ON — don't re-ask it.** 18122: eval servers ship `flopscope-client`, `fnp.ndarray` is a `RemoteArray` with no `.base`, so raw-array bypass is impossible there, and "it would be cheaper for you to use flopscope instead". 18132: "we will examine this during the private re-evaluation and prize due diligence"; "using residual pricing as an alternative arithmetic budget is not [legitimate]". **Our instrumented share is 98.2%** (5.31e10 FLOPs vs 9.84 ms residual on submission 324420) — quote it if due diligence ever asks.
-- **Participant code runs on ONE physical core (2 vCPUs)**; the flopscope backend gets seven (14 vCPUs); λ still 1e11. All our graded numbers are post-0.10.0, so §3d pricing needs no revalidation.
-- **v2.4.1 shipped** — same method and same score as v2.4 (0.9959× over 32 draws/MLP), but the rotation is now reproducible. JJᵀ is numerically rank ~68 (λ₉₆/λ₀ = 4.5e-17), so the raw eigenbasis is arbitrary past that: a **1e-15** relative weight perturbation moved it by 0.81 in max column distance and handed us an independent realisation. Canonical *signs* do not fix this (same 0.81) — the ambiguity is a rotation inside a near-degenerate subspace. Fix = keep the top 32 directions, pin signs, complete by `fnp.linalg.qr(mode="complete")` (2.0e6 FLOPs). Shim-vs-whest gap: **18% → 1.66%**.
-- **A single 100-MLP mini run cannot resolve a <15% question.** Two realisations of the same estimator differ ~18% in the mean. For any A/B on the point set or the basis, average each MLP over many digital shifts (`local_sim/basis_parity.py`, 32 draws) instead. v2.4.1's mini run looks 6.7% better than v2.4 — that is luck, not method.
+## Work classification
 
-## Older gotchas (2026-08-05 night)
+| class | what | required |
+|---|---|---|
+| **ROUTINE** | doc edits, figures, board snapshots, report fetching, new tests, lab scripts that touch no seed block and no shipped file | just run it; verification only |
+| **IMPORTANT** | anything changing *the instrument* — `harness.py`, `mint_provenance.py`, `edge_cases.py`, `seed_blocks.py`, `vault.py`, a probe's math, grader-report parsing | written prediction first, `scripts/preflight.ps1` green, LOG entry with a knowledge delta |
+| **STRATEGIC** | `estimator.py`; spending a decision block; a vault touch; a submission; changing a gate, a residual model, or the three-tier protocol; a write-up claim; reopening a closed lane | **Slice Contract** pre-registered in LOG before data exists → Samuel's prediction → build → evidence packet → independent Skeptic → teach-back. Use the `slice-contract` skill. |
 
-- **Prizes are decided by a private re-run of ONE designated submission on FRESH MLPs.** Public-board rank is not a target; judge everything on the local 100-MLP mini split and on ≥1000 fresh minted MLPs (`local_sim/robustness.py`). The tail of the fresh-MLP score distribution is the real risk, not the mean.
-- **Score optimisation is CLOSED — the honest sampling frontier is ~2.7e-7** (GAME_PLAN rev 6). Sprint 3 (structure-aware on/kink FLOP allocation) measured **1.0246×** against a 1.20× gate. Ceiling is arithmetic: the scored layer is 3.67% of the per-sample budget, so freeing it entirely is 1.038×; clearing 1.20× needs six of the last layers to cost nothing. **Linearisation removes the ReLU, not the matmul.** Don't reopen without a lever that touches a bigger share of the cost model.
-- **On-neuron reduction, verified twice** (keep — it is the write-up's theorem): for α large, E[ReLU(z)] = E[z], so at the scored layer an on-neuron needs no per-sample value, and at a feed-forward layer it is *linear* and composes (linearising every α>2.5 neuron in the last 8 layers costs 0.07% MSE). But **never mean-replace** a feed-forward on-neuron — that deletes its fluctuation and costs 48× at k=2, 3 orders of magnitude by k=8.
-- **A constant fitted for one role does not transfer to another**: κ=1.363 (Track T's closure-variance rescale) makes the Sprint-3 rectification correction *worse*.
-- **Fresh-re-run readiness: READY.** 1800 fresh + deformed MLPs, zero non-finite outputs, alive count never below 117/256, degenerate-layer fallback never fired, analytic patch bounded at 6.3e-3, α to ±12.4. Contract suite `edge_cases.py` **24/24** on the shipped file (zero layer, 1e4 dynamic range, seed 2⁶³−1, widths 64–256, depths 2–64, budget 0, input immutability).
-- **The scored metric has a heavy tail, and it is mostly the metric.** Fresh-MLP adjusted score: median 2.19e-7, mean 3.01e-7, p99 1.65e-6, **max/median 12.9×**; worst 1% of MLPs carry 6.9% of the score. `corr(log per-MLP MSE, log mean(truth²)) = +0.548` — MSE is unnormalised and He draws vary ~5× in activation scale. **At a re-run size R=10 the p90 score is 50% above the median**; at R=100, 13%. Draw variance dwarfs any remaining ~2% estimator gain — which is the quantitative reason score work is closed.
-- Minted MLPs are a faithful stand-in (GPU mirror: 1.6178e-6 fresh vs 1.5962e-6 on real mini, +1.4%) and if anything slightly *harder* in median (1.19e-6 vs 0.97e-6), so fresh-MLP numbers are conservative. The shipped file and the GPU mirror agree to 0.1% in median on the same fresh MLPs.
-- **The public score is the mean over 50 FIXED MLPs (indices 0–49)**, and every submission returns those MLPs' exact per-MLP `final_layer_mse` + a 32-long `per_layer_mse` in `results.public_scores`. Verified bit-for-bit against the aggregates; the suite is identical across all four of our submissions. Consequences: (a) our graded A/B comparisons are **paired re-measurements**, not fresh samples — never read a graded improvement as population evidence; (b) the level carries a fixed 7–20% offset vs the local 100; (c) **decisions stay on the local 100-MLP mini split**, which is the honest proxy for the private re-run that sets the final ranking. Full record + the arithmetic: RESEARCH_NOTES §2g (**private — never the forum**). **We do not use that channel.**
-- **The `sampling_mse` label-noise bound is WITHDRAWN.** 89 of 200 board entries show a final-layer MSE below 6.4695e-7, so it cannot be additive reference noise. Most likely a reference sampling baseline's MSE. Do not repeat the "nothing honest below 6.47e-8" claim.
-- **Track T (shrinkage-moment tail) is CLOSED** — 0.9998× vs a 1.10× gate. Only `diag(WᵀΣW)` = `mean(z²)−mean(z)²` enters, so there is no covariance to estimate (no MP regime); v̂ is already 1.13% rms accurate and the exact-variance oracle still gives 0.611×. 41% of the analytic tail's error is irreducible model bias; ρ=1.000 with the sample mean in the α≥3 band that carries 76.5% of the MSE. Don't reopen without a new mechanism.
-- **Track P (rank-k deviation propagation) is CLOSED** — 1.093× vs a 1.25× gate, even pricing an oracle Jensen correction at zero. Rank-k propagation *is* a rank-k weight factorisation; shape-based billing breaks even at k = width/2 = 128, which is also the rank truncation needs. (The spectrum result itself is real and write-up-worthy: effective rank 25.9→2.8 over depth, and the closure's own covariance eigenvectors find the subspace for free.)
-- **⚠️ `local_sim/eval_estimator.py` (shim path) is 18% LOW vs `whest run` for rotation-using estimators.** Same `estimator.py`, same 100 mini MLPs: whest 1.6079e-6 (reproduced to 0.07% twice), GPU mirror 1.5962e-6, shim path 1.3624e-6. The shim agreed to 3% for v1.1, which had no rotation — the divergence arrived with `eig(JJᵀ)`. **Steer offline with whest-parity runs or the GPU mirror, never the shim's absolute level**; paired comparisons within one path are still fine. The "grader runs ~20% better than local" note for v2.4 is therefore unexplained, not draw evidence.
-- **`fnp.linalg.eigh` on JJᵀ is only well-determined in its leading directions** — LAPACK and cuSOLVER disagree on 106 of 256 columns beyond sign. The rotation's *distribution* is unaffected but the realised per-MLP error is BLAS-dependent, so expect ~1% of unexplained local-vs-grader difference from this alone.
-- **RQMC helps the first moment only**: measured effective N 32,870 for `mean(z)` (2.01×) but 18,719 for the sample variance (1.14×). Any scheme leaning on sample *variances* gets no QMC discount.
+**Never let one strategic result flow into the next implementation without
+synthesis.** Closed lanes stay closed unless new *external* evidence reopens them —
+the reopening condition goes in the contract.
 
-## Older gotchas (from 2026-08-04, after submission 323872)
+## Tools — enabled and deliberately not
 
-- **We are in PHASE 1 until Aug 7 23:59 UTC.** Rounds (from the challenge page): 1425 warm-up (closed), **1428 "Phase 1" Jun 18 → Aug 7 23:59 — LIVE**, 1429 "Phase 2" Aug 8 → Sep 19 23:59 — UPCOMING (empty leaderboard, no `v1-phase2` HF tag). Earlier docs said Phase 2 opened Aug 1; wrong. Phase 1 was **extended one week** (Jul 31 → Aug 7) after a leaderboard re-score; write-up deadline moved to **Aug 17** (forum 18109). Phase 2 uses the same grader stack.
-- **Live board (Aug 4)**: #1 4.87e-8, #10 9.85e-8, #200 6.40e-7. The old "Phase 1 #1 = 1.24e-8" note is superseded — see RESEARCH_NOTES §5b.
-- **Never call `flops.budget_summary_dict()`/`budget_summary()` inside `predict`** — O(op history), measured 157× residual blowup (forum 18092). Size sample counts analytically. Freeing large temporaries also bills residual wall time (18101), so prefer **few large chunks over many small ops**. Full list: RESEARCH_NOTES §3c.
-- **The score is `V·c/B`** — per-sample variance × per-sample cost; N cancels above the 0.1 floor. Cheapening a sample is worth exactly as much as de-noising it. Pricing that matters: **f16/int8/bool are rate 1.0, same as f32 — there is no dtype trick**; matmul bills `(2K−1)·M·N` **by shapes only**, so pruning pays only via smaller *dense* matrices; gather/where 4/elt; transcendentals 16/elt (`norm.ppf` 168/elt); thin SVD 26n³ ≈ 0.16% B, eigh 9n³. Full table: RESEARCH_NOTES §3d.
-- **α = 1.00 is theory, not a bug** — for discontinuous integrands the RQMC rate bonus is 1/(4d−2) ≈ 0.001 at d=256 (He & Wang 2015). Sobol buys constants only; rate recovery needs kinks concentrated into few coordinates.
-- **Decision policy: nothing is decided on fewer than the full 100-MLP mini split.** Three "wins" evaporated on re-measurement (LMS scrambling, C/B=0.5, a +33% rotation).
-- **The analytic family is retired** (GAME_PLAN rev 3): B1 fusion net ~0, B2 tail −67%…−214%, B3 learned residual R²=0.012.
-- **Phase 1 config confirmed** by the graded report: width 256 × depth 32, n_mlps 100, B = 2.72e11, λ = 1.000e11 (derived exactly from per-MLP telemetry), multiplier floor 0.1. **`admin_config` is admin-only** — participants never see it; `evaluation.config_snapshot` + per-MLP telemetry is what we get. `wall_time_limit_s` remains unknown (only bound: ≥0.6 s, our max was 0.592 s with no timeouts). **Phase 2's config stays unverified until a graded run in round 1429 (Aug 8+).**
-- Real flopscope API matches `estimator.py` exactly — `whest validate` passed with zero changes (`fnp.diagonal/diag/outer/einsum`, `flops.stats.norm.cdf/pdf`, `flops.as_symmetric(data, *, symmetry=(0,1))` all correct, and `as_symmetric` accepts our width-256 covariance). If a future edit trips a name/signature, fix `estimator.py` minimally without changing the math, mirror into the shim, and log it.
-- Grader reports are **not** returned by `whest submit --json` (it gives only id/score/score_secondary) nor by the `/api/v1/submissions/{id}` endpoint. The full report lives in the submission page's `data-react-props` payload → `props.data.submission.evaluation`.
-- `whest login`/submit 302 or permission errors usually mean challenge rules need (re-)accepting in the browser for the current phase — stop and ask Samuel. (Did not occur for the Phase 1 round.)
-- v0 grader baseline to beat: adjusted **2.4927e-6**, `mean_compute_utilization` 1.45%, 0 failures. Local mini-split predicts the grader to within ~7%. If a future run is >3× off local expectation, investigate before resubmitting.
+**Enabled**: the project's own scripts (they *are* the evaluator), `git`/`gh`,
+`scripts/preflight.ps1`, skill `slice-contract`, agent `skeptic`.
+
+**Deliberately disabled** — do not add without a named bottleneck: Ralph/autonomous
+optimization loops (**the cost half of the evaluator is E1 — forbidden**), MLflow /
+Phoenix / Langfuse, Context7, Serena, Repomix, Promptfoo, Playwright / Chrome
+DevTools, Exa / Firecrawl / last30days, GitHub MCP, Symphony / Agent Deck, workflow
+orchestration. Rationale: `docs/CURRENT_STATE.md` § *Harness*.
+
+## Pointers
+
+| doc | when to read it |
+|---|---|
+| `docs/CURRENT_STATE.md` | **first, always.** Baseline, open questions, closed lanes, next action |
+| `docs/VALIDATION.md` | before measuring anything. The protocol and its proofs |
+| `docs/GOTCHAS.md` | before quoting a number, comparing a cost, or trusting an offline path |
+| `docs/GAME_PLAN.md` | strategy. **Rev 12 is authoritative**; earlier revs are history |
+| `docs/BENCHMARK.md` | our numbers vs the field. **PRIVATE — never the forum** |
+| `docs/COMPETITION_BRIEF.md` | plain-English explainer of the task and the math |
+| `docs/RESEARCH_NOTES.md` | rules, forum intel, pricing table, links. §2g is **PRIVATE** |
+| `docs/MOONSHOT.md` | the cumulant-flow lane (Phase D, the contribution prize) |
+| `docs/HUMAN_MODEL.md` | **Samuel's file.** Agents read and critique it; agents never write it |
+| `experiments/LOG.md` | the full narrative record, newest at the bottom |
 
 ## Working style
 
-Samuel has a CS degree but is new to ML/probability — explain what you're doing in plain English as you go, in the final summaries. Claude (cloud session) drives strategy and heavy experiments; Claude Code handles local pipeline, submissions, and grader feedback. Roadmap and phase gates: `docs/GAME_PLAN.md` (A: RQMC → B: hybrid+control variates → C: learned corrector → D: mechanistic cumulant track for the $20k contribution prize, write-up due Sep 26).
+Samuel has a CS degree but is new to ML/probability — explain what you're doing in
+plain English in the final summary, not in jargon. Concentrate his understanding on
+the *decision-critical* path (the score identity, the data protocol, the residual
+model); do not make him learn commodity code.
+
+Claude (cloud session) drives strategy and heavy experiments; Claude Code handles
+local pipeline, submissions, and grader feedback. Handoffs between them go through
+**Slice Contracts and Evidence Packets in `experiments/LOG.md`**, never chat history.
+
+## Re-audit this harness when
+
+The competition phase changes · the evaluator's cost half becomes trustworthy · a
+lane reopens · the write-up ships · agent/tool overhead becomes noticeable.

@@ -7,8 +7,13 @@ https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026
 
 | Path | What |
 |---|---|
+| `docs/CURRENT_STATE.md` | **Where we stand right now**: baseline, closed lanes, open questions, next actions, the clock. **Start here to work.** |
 | `estimator.py` | **The submission** (v0: covariance propagation + offline per-layer calibration). Self-contained; only imports allowed in the grader sandbox. |
-| `docs/COMPETITION_BRIEF.md` | Plain-English explainer: the competition, the math, what to learn. **Start here.** |
+| `docs/COMPETITION_BRIEF.md` | Plain-English explainer: the competition, the math, what to learn. **Start here to understand.** |
+| `docs/VALIDATION.md` | The measurement protocol and its proofs. Binding on anything measured. |
+| `docs/GOTCHAS.md` | Standing operational knowledge — traps that must not be rediscovered. |
+| `docs/HUMAN_MODEL.md` | Samuel's own mental model. Agents read and critique it; agents never write it. |
+| `scripts/preflight.ps1` | The gate that runs on every estimator change (5 checks, ~2 min). |
 | `docs/GAME_PLAN.md` | Strategy & roadmap to a winning score. |
 | `docs/RESEARCH_NOTES.md` | Intel: rules, leaderboard, forum threads, papers, open questions. |
 | `docs/SETUP_WINDOWS.md` | Copy-paste guide: install → validate → first submission. |
