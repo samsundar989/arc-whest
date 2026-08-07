@@ -1,0 +1,18 @@
+[
+  {
+    "constant": "sample count N (C/B operating point)",
+    "frozen": 16384,
+    "fresh_optimum": 65536,
+    "means": {
+      "4096": 6.528785503874988e-07,
+      "8192": 3.371008178578648e-07,
+      "16384": 3.0232908210302895e-07,
+      "32768": 2.923149563452061e-07,
+      "65536": 2.9048724907620123e-07
+    },
+    "optimum_differs": true,
+    "paired_sigma_vs_frozen": 3.2058862848714313,
+    "statistically_resolved_drift": true,
+    "statistical_action": "refit-required"
+  }
+]

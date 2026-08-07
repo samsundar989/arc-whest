@@ -27,6 +27,7 @@ import time
 import numpy as np
 import torch
 
+from mint_provenance import canonical_mint, seed_streams
 from track_t_mint import alignment_basis, closure, draw_points, sobol_base
 
 BUDGET = 2.72e11
@@ -38,10 +39,17 @@ FIXED_FLOPS = 4.51e9 + 9.84e8
 
 
 def mint(seed, dev, width=WIDTH, depth=DEPTH, kind="plain"):
-    """A fresh He-init MLP, optionally deformed to be atypical."""
-    g = torch.Generator(device=dev).manual_seed(int(seed) & 0x7FFFFFFF)
-    w = torch.randn(depth, width, width, generator=g, device=dev, dtype=torch.float32)
-    w = w * math.sqrt(2.0 / width)
+    """A fresh MLP for input seed `seed`, optionally deformed to be atypical.
+
+    The plain path is minted on the CPU by `mint_provenance.canonical_mint` and
+    moved to the device, so it is **bit-for-bit** the network
+    `whestbench.sample_mlp` would have produced for the same input seed (proven
+    in `mint_provenance.verify()` and re-checked here by `gpu_parity.py`). It is
+    not a torch look-alike: torch's Philox stream cannot reproduce numpy's, so
+    generating on-device would only ever match in distribution.
+    """
+    w_np, _est_seed, _sample_ss = canonical_mint(width, depth, int(seed))
+    w = torch.from_numpy(np.stack(w_np)).to(dev)
     if kind == "plain":
         return w
     r = torch.Generator(device=dev).manual_seed((int(seed) ^ 0x5EED) & 0x7FFFFFFF)
@@ -80,8 +88,14 @@ def truth_final(w, n_samples, dev, chunk=131072, seed=12345):
     return acc / n_samples
 
 
-def run_v24(w, seed, base_pts, dev, n):
-    """The shipped v2.4 pipeline. Returns (prediction, per-sample cost, diagnostics)."""
+def run_v24(w, est_seed, base_pts, dev, n):
+    """The shipped v2.4 pipeline. Returns (prediction, per-sample cost, diagnostics).
+
+    `est_seed` must be the ESTIMATOR seed the evaluator would hand us —
+    `seed_streams(input_seed)[2]` — not the input seed. On the grader the digital
+    shift is an independent substream of the weights; passing the input seed here
+    would couple the point set to the network being scored.
+    """
     depth, width = w.shape[0], w.shape[-1]
     w64 = w.to(torch.float64)
     alph, mus, phis, _, _ = closure(w64, dev)
@@ -122,7 +136,7 @@ def run_v24(w, seed, base_pts, dev, n):
         cost += (2 * kk - 1) * int(cur.numel()) + 1.5 * int(cur.numel())
         prev = cur
 
-    gen = np.random.default_rng(int(seed))
+    gen = np.random.default_rng(int(est_seed))
     shift = torch.from_numpy(gen.integers(0, 1 << 30, size=width, dtype=np.uint32).astype(np.int64)).to(dev)
     h = draw_points(base_pts, shift, dev)
     for li in range(depth):
@@ -178,9 +192,12 @@ def main():
                "alpha_min": 1e9, "alpha_max": -1e9, "nonfinite": 0}
         for j in range(per_kind):
             seed = args.seed0 + 1000 * kinds.index(kind) + j
+            _wss, sample_ss, est_seed = seed_streams(seed)
             w = mint(seed, dev, kind=kind)
-            t = truth_final(w, args.truth, dev, seed=seed ^ 0xABCD)
-            pred, cps, diag = run_v24(w, seed, base_pts, dev, args.n)
+            # ground truth on the evaluator's own sampling substream (spawn[1]) —
+            # independent of both the weights and the estimator seed by construction
+            t = truth_final(w, args.truth, dev, seed=int(sample_ss.generate_state(1)[0]) & 0x7FFFFFFF)
+            pred, cps, diag = run_v24(w, est_seed, base_pts, dev, args.n)
             if args.dump and len(dump_w) < 250:
                 dump_w.append(w.cpu().numpy())
                 dump_t.append(t.cpu().numpy())

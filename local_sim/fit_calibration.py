@@ -8,6 +8,10 @@ pooled over K MLPs (this is unbiased w.r.t. independent MC noise in truth).
 
 Outputs experiments/calibration.json and prints a summary. Run time on 2 vCPU:
 a few minutes (dominated by the Monte Carlo).
+
+NOTE (2026-08-06): mints are now grader-identical (mint_provenance), so a refit
+will not reproduce experiments/calibration.json exactly. Refit only if the
+shape changes; the table is used solely by the analytic fallback path.
 """
 
 import json

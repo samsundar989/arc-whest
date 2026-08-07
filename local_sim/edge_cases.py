@@ -17,6 +17,25 @@ Cases, each chosen to hit a specific line rather than to be generically nasty:
   shape generality     width 64/128, depth 2/8            -> off-calibration path
   tiny budget          budget forcing log2n below the floor -> analytic fallback
 
+INVARIANTS (added 2026-08-06). The cases above ask "does it survive?"; these ask
+"is it computing the right thing?" — which no amount of finite output proves:
+
+  layer-1 closed form  E[ReLU(w.x)] = ||w||/sqrt(2pi) exactly for x ~ N(0,I),
+                       so row 0 has a known answer and must hit it to fp
+                       tolerance. Any drift here is arithmetic, not sampling.
+  permutation          relabelling the neurons of a hidden layer leaves the
+  equivariance         network's function unchanged, so predictions must permute
+                       with it and every other layer must be untouched. This is
+                       the one test that catches a transposed index, an axis
+                       swapped in a reduction, or a basis applied on the wrong
+                       side — mistakes that produce perfectly finite, perfectly
+                       plausible, wrong numbers.
+  budget monotonicity  more budget must never buy fewer samples, and every rung
+                       of the ladder down to zero must degrade rather than throw.
+  determinism x3       three runs bit-identical, plus a re-instantiated
+                       Estimator, so setup state cannot leak between MLPs.
+  seed hygiene         live seed blocks are disjoint (seed_blocks.py).
+
 Run: uv run python local_sim/edge_cases.py
 """
 
@@ -148,9 +167,193 @@ def main():
     print(f"  {'input weights unmodified':<34} {'ok' if same else 'MUTATED INPUT'}")
     results.append(same)
 
+    results += invariants(est, est_mod)
+
     n_ok = sum(1 for r in results if r)
     print(f"\n{n_ok}/{len(results)} checks passed")
     return 0 if n_ok == len(results) else 1
+
+
+# =====================================================================
+# INVARIANTS — properties the true answer has, that a wrong answer will not
+# =====================================================================
+
+def canon(depth, width, seed):
+    """A grader-identical MLP (mint_provenance) as an edge-case MLP object."""
+    from mint_provenance import canonical_mint
+
+    w, est_seed, _ = canonical_mint(width, depth, seed)
+    m = MLP(w, seed=est_seed)
+    return m
+
+
+def inv_layer1(est):
+    """Row 0 must equal ||W1[:,j]||_2 / sqrt(2*pi) to floating-point tolerance.
+
+    For x ~ N(0, I) the layer-1 pre-activation z_j = <W1[:,j], x> is exactly
+    N(0, ||W1[:,j]||^2), and E[ReLU(N(0, s^2))] = s/sqrt(2*pi). No sampling, no
+    closure, no approximation — this row has a closed form and it is checkable.
+    """
+    print("\n8. LAYER-1 CLOSED FORM  (exact: ||W1[:,j]|| / sqrt(2*pi))")
+    ok = True
+    for depth, width, seed in ((32, 256, 30_806_006_001), (8, 128, 30_806_006_002),
+                               (4, 64, 30_806_006_003), (2, 256, 30_806_006_004)):
+        m = canon(depth, width, seed)
+        pred = np.asarray(est.predict(m, BUDGET), dtype=np.float64)
+        w0 = np.asarray(m.weights[0], dtype=np.float64)
+        exact = np.sqrt((w0 * w0).sum(axis=0)) / np.sqrt(2.0 * np.pi)
+        rel = float(np.abs(pred[0] - exact).max() / np.abs(exact).max())
+        good = rel < 1e-12
+        ok &= good
+        print(f"  {f'{width}x{depth}':<34} max rel err {rel:.3e}   "
+              f"{'ok' if good else 'FAILED (>1e-12)'}")
+    return [ok]
+
+
+def inv_permutation(est):
+    """Relabelling hidden layer k must permute row k and change nothing else.
+
+    Swapping the output columns of W_k and the matching input rows of W_{k+1} by
+    the same permutation P leaves the network's input-output map identical and
+    simply renames the layer-k neurons. So the true answer satisfies
+        pred'[k] = pred[k][P],   pred'[l] = pred[l]  for every l != k.
+
+    The residual we tolerate is not slop: reordering columns reorders the
+    summation inside every downstream matmul, so JJ^T shifts at the 1e-16 level
+    and the alignment basis inherits that. We therefore report the deviation as
+    a share of the ~1.4e-6 MSE we make decisions on, rather than asserting an
+    exact equality the hardware cannot deliver.
+    """
+    print("\n9. PERMUTATION EQUIVARIANCE  (hidden-layer relabelling)")
+    rng = np.random.default_rng(30_806_006_100)
+    ok = True
+    for depth, width, seed, k in ((32, 256, 30_806_006_011, 7),
+                                  (32, 256, 30_806_006_012, 20),
+                                  (8, 128, 30_806_006_013, 3),
+                                  (32, 256, 30_806_006_014, 30)):
+        m = canon(depth, width, seed)
+        base = np.asarray(est.predict(m, BUDGET), dtype=np.float64)
+
+        P = rng.permutation(width)
+        w = [np.array(x) for x in m.weights]
+        w[k] = w[k][:, P]                      # rename layer-k outputs
+        w[k + 1] = w[k + 1][P, :]              # and the matching inputs
+        mp = MLP(w, seed=m.seed)
+        perm = np.asarray(est.predict(mp, BUDGET), dtype=np.float64)
+
+        d_k = float(np.abs(perm[k] - base[k][P]).max())
+        others = [l for l in range(depth) if l != k]
+        d_other = float(np.abs(perm[others] - base[others]).max())
+        d_final = float(np.abs(perm[-1] - base[-1]).max()) if k != depth - 1 else 0.0
+        scale = float(np.abs(base[-1]).mean())
+        implied = float(((perm[-1] - base[-1]) ** 2).mean()) if k != depth - 1 else 0.0
+
+        good = (d_k / max(scale, 1e-30) < 1e-6) and (implied < 1.4e-8)
+        ok &= good
+        print(f"  {f'{width}x{depth} permute layer {k}':<34} "
+              f"row-k {d_k:.2e}  other-rows {d_other:.2e}  final {d_final:.2e}")
+        print(f"  {'':<34} implied MSE {implied:.2e} = "
+              f"{implied / 1.4e-6 * 100:.4f}% of decision signal   "
+              f"{'ok' if good else 'FAILED'}")
+    return [ok]
+
+
+def inv_budget_monotone(est, est_mod):
+    """More budget must never buy fewer samples, and no rung may throw."""
+    print("\n10. BUDGET MONOTONICITY  (the failsafe ladder)")
+    m = canon(32, 256, 30_806_006_021)
+    ladder = [0, 1, 10**6, 10**7, 10**8, 10**9, 10**10, 27_200_000_000,
+              272_000_000_000, 2_720_000_000_000]
+    prev_n, ok, rows = -2, True, []
+    for b in ladder:
+        try:
+            log2n = est._log2_samples(256, 32, b)
+            out = np.asarray(est.predict(m, b), dtype=np.float64)
+            fin = bool(np.isfinite(out).all()) and out.shape == (32, 256) and (out >= 0).all()
+        except Exception as e:
+            print(f"  budget {b:>16,}  RAISED {type(e).__name__}: {e}")
+            ok = False
+            continue
+        mono = log2n >= prev_n
+        ok &= fin and mono
+        mode = "analytic" if log2n < est_mod._MIN_LOG2_N else f"N=2^{log2n}"
+        rows.append((b, mode, fin, mono))
+        prev_n = log2n
+    for b, mode, fin, mono in rows:
+        print(f"  budget {b:>16,}  {mode:<10} valid={fin}  non-decreasing={mono}")
+    print(f"  {'ladder monotone and total':<34} {'ok' if ok else 'FAILED'}")
+    return [ok]
+
+
+def inv_determinism(est, est_mod):
+    """Three bit-identical runs, plus a fresh Estimator instance."""
+    print("\n11. DETERMINISM  (3x bit-identity + fresh instance)")
+    ok = True
+    for depth, width, seed in ((32, 256, 30_806_006_031), (8, 128, 30_806_006_032)):
+        m = canon(depth, width, seed)
+        runs = [np.asarray(est.predict(m, BUDGET), dtype=np.float64) for _ in range(3)]
+        same3 = all(np.array_equal(runs[0], r) for r in runs[1:])
+
+        fresh = est_mod.Estimator()
+
+        class Ctx:
+            flop_budget, seed = BUDGET, 0
+
+        Ctx.width, Ctx.depth = width, depth
+        fresh.setup(Ctx())
+        r4 = np.asarray(fresh.predict(m, BUDGET), dtype=np.float64)
+        same_fresh = np.array_equal(runs[0], r4)
+        ok &= same3 and same_fresh
+        print(f"  {f'{width}x{depth}':<34} 3x identical={same3}  "
+              f"fresh-instance identical={same_fresh}  "
+              f"{'ok' if same3 and same_fresh else 'FAILED'}")
+    return [ok]
+
+
+def inv_seed_hygiene():
+    print("\n12. SEED-BLOCK HYGIENE")
+    from seed_blocks import DECISION_BLOCKS, VAULT_BLOCK, check_disjoint
+
+    try:
+        ok = check_disjoint()
+    except AssertionError as e:
+        print(f"  {'live blocks disjoint':<34} FAILED: {e}")
+        return [False]
+    print(f"  {'live blocks disjoint':<34} ok   "
+          f"({len(DECISION_BLOCKS)} decision blocks + vault block "
+          f"{VAULT_BLOCK[1]:,}..{VAULT_BLOCK[1] + VAULT_BLOCK[2] - 1:,})")
+    return [ok]
+
+
+def inv_gt_noise_reporting():
+    """The vault's GT noise, so every MSE quoted against it is read correctly."""
+    print("\n13. GT-NOISE FLOOR  (what counts as signal)")
+    import json
+
+    man_path = os.path.join(_ROOT, "experiments", "vault", "manifest.json")
+    if not os.path.exists(man_path):
+        print(f"  {'vault not minted yet':<34} skipped")
+        return []
+    man = json.load(open(man_path))
+    noise = man["gt_noise_mse_mean"]
+    print(f"  {'vault GT samples/MLP':<34} {man['gt_samples_per_mlp']:,}")
+    print(f"  {'vault GT-noise MSE (mean)':<34} {noise:.3e}  "
+          f"({noise / 1.4e-6 * 100:.3f}% of the 1.4e-6 decision signal)")
+    print(f"  {'vault touches':<34} {man['touches']}")
+    ok = noise < 1.4e-7  # under 10% of the signal, or the vault cannot arbitrate
+    print(f"  {'noise < 10% of signal':<34} {'ok' if ok else 'FAILED'}")
+    return [ok]
+
+
+def invariants(est, est_mod):
+    out = []
+    out += inv_layer1(est)
+    out += inv_permutation(est)
+    out += inv_budget_monotone(est, est_mod)
+    out += inv_determinism(est, est_mod)
+    out += inv_seed_hygiene()
+    out += inv_gt_noise_reporting()
+    return out
 
 
 if __name__ == "__main__":

@@ -5,6 +5,12 @@ on fresh MLPs (seeds disjoint from the calibration fit).
 Reports final-layer MSE raw vs calibrated, plus the approximate adjusted
 leaderboard score (MSE x 0.1, since covariance propagation uses <10% of the
 FLOP budget and lands on the multiplier floor).
+
+NOTE (2026-08-06): `gen_mlp` now mints grader-identical networks via
+mint_provenance.canonical_mint, so the SAME seeds produce DIFFERENT (correct)
+networks than before. The v0 reference numbers in older docs (raw 7.98e-5 ->
+calibrated 2.67e-5) were measured on the legacy mint and will not reproduce
+bit-for-bit; the level is unchanged. Seeds here are legacy block L1.
 """
 
 import os

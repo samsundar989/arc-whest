@@ -1,0 +1,18 @@
+[
+  {
+    "constant": "rotation rank",
+    "frozen": 32,
+    "fresh_optimum": 256,
+    "means": {
+      "8": 3.125191226155293e-07,
+      "16": 3.1352577125375057e-07,
+      "32": 3.1435355541399867e-07,
+      "64": 3.130036631875572e-07,
+      "256": 3.109881649420041e-07
+    },
+    "optimum_differs": true,
+    "paired_sigma_vs_frozen": 0.7485785824808616,
+    "statistically_resolved_drift": false,
+    "statistical_action": "keep-frozen"
+  }
+]

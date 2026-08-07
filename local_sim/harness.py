@@ -23,8 +23,26 @@ from whestbench import MLP  # noqa: E402  (shim)
 
 
 def gen_mlp(width: int, depth: int, seed: int) -> MLP:
-    """He-Gaussian init N(0, 2/n), float32 — matches the starter kit's
-    local_engine.build_mlp / whestbench.sample_mlp distribution."""
+    """A grader-identical MLP for input seed `seed`.
+
+    Delegates to `mint_provenance.canonical_mint`, which is proven bit-identical
+    to `whestbench.sample_mlp` driven by `whestbench.seeds.derive_seed_streams`
+    (100/100 across 5 shapes x 20 seeds — see `mint_provenance.verify()` and
+    docs/VALIDATION.md). `mlp.seed` therefore carries the evaluator's INDEPENDENT
+    estimator substream, not the weight seed.
+    """
+    from mint_provenance import canonical_mint
+
+    weights, estimator_seed, _sample_ss = canonical_mint(width, depth, seed)
+    return MLP(width=width, depth=depth, weights=weights, seed=estimator_seed)
+
+
+def gen_mlp_legacy(width: int, depth: int, seed: int) -> MLP:
+    """The pre-2026-08-06 generator. Same distribution, different realisation,
+    and it aliased `mlp.seed` to the weight seed.
+
+    Kept only to reproduce historical numbers; never use it for new decisions.
+    """
     rng = np.random.default_rng(seed)
     scale = np.float32(np.sqrt(2.0 / width))
     weights = [
@@ -32,6 +50,17 @@ def gen_mlp(width: int, depth: int, seed: int) -> MLP:
         for _ in range(depth)
     ]
     return MLP(width=width, depth=depth, weights=weights, seed=seed)
+
+
+def gt_rng(seed: int):
+    """The evaluator's ground-truth sampling substream for input seed `seed`.
+
+    Using it means our MC labels are drawn from the same stream the grader would
+    have used, so a vault MLP's truth is reproducible from its seed alone.
+    """
+    from mint_provenance import seed_streams
+
+    return np.random.default_rng(seed_streams(seed)[1])
 
 
 def mc_layer_means(mlp: MLP, n_samples: int, seed: int, batch: int = 50_000):

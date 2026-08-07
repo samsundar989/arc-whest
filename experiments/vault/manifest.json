@@ -1,0 +1,20 @@
+{
+  "created_utc": "2026-08-06T06:52:32Z",
+  "seed_block": "V",
+  "seed_start": 20260806000,
+  "n_mlps": 500,
+  "width": 256,
+  "depth": 32,
+  "gt_samples_per_mlp": 33554432,
+  "mint_protocol": "whestbench.sample_mlp via mint_provenance.canonical_mint (proven bit-identical, 100/100)",
+  "gt_stream": "seed_streams(input_seed)[1] -> torch generator",
+  "sha256": {
+    "seeds": "d42bb96896d8dc5c5545c7c725ff2c5f8f346609c3070192cb8fff96610ed639",
+    "truth": "a0f3e05a169a3a4f99702835a343facea5a261e24a4ccccd3813164333a2d526",
+    "truth_var": "9064f20b7ab0dc0c3f0a8572fbffb2738faeb7dad9f1f0346e108fd0f37a0aaf",
+    "gt_noise": "61cc0f50451b720173fa62254f895d9cd71d4facdbf09fa05e273b8400aea595"
+  },
+  "gt_noise_mse_mean": 1.5751857363090474e-09,
+  "gt_noise_mse_max": 6.182960820515786e-09,
+  "touches": 1
+}

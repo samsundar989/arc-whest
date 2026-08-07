@@ -103,9 +103,15 @@ def covprop_gpu(weights, calibrate=True):
 
 
 def he_mlp(seed, width=WIDTH, depth=DEPTH, dev="cuda"):
-    g = torch.Generator(device=dev).manual_seed(int(seed))
-    scale = math.sqrt(2.0 / width)
-    return torch.randn(depth, width, width, device=dev, dtype=torch.float32, generator=g) * scale
+    """Grader-identical weights for input seed `seed` (see mint_provenance.py).
+
+    Minted on the CPU by the canonical numpy protocol and moved to the device;
+    torch's own RNG cannot reproduce numpy's stream, only its distribution.
+    """
+    from mint_provenance import canonical_mint
+
+    w_np, _est_seed, _sample_ss = canonical_mint(width, depth, int(seed))
+    return torch.from_numpy(np.stack(w_np)).to(dev)
 
 
 # ------------------------------------------------------------------ parity ---
