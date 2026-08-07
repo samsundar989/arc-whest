@@ -1,0 +1,23 @@
+{
+  "date_utc": "2026-08-06",
+  "tier": "CONFIRM",
+  "purpose": "Fresh-mint D03 operating-point drift confirmation under real flopscope and residual billing",
+  "estimator": "v2.4.1 temporary candidate",
+  "n_points": 65536,
+  "target_cb": 1.05,
+  "max_cb": 1.10,
+  "dataset": "hf://aicrowd/arc-whestbench-public-2026@v1-phase1",
+  "split": "mini",
+  "runner": "subprocess",
+  "adjusted_final_layer_score": 3.15e-7,
+  "final_layer_mse": 4.10e-7,
+  "mean_score_multiplier": 0.78298622,
+  "mean_compute_utilization": 0.78298622,
+  "n_failed_mlps": 0,
+  "total_flops_used": 1.93e13,
+  "total_effective_compute": 2.13e13,
+  "total_residual_wall_time_s": 20.332037,
+  "run_duration_s": 496.520720,
+  "baseline_adjusted_final_layer_score": 3.1724606661185942e-7,
+  "verdict": "Do not adopt: only about 0.7% better than frozen v2.4.1 under real local pricing, below the project change threshold. estimator.py restored to N=16384. Retain as a Phase-2 telemetry candidate because grader residual billing has historically been lower."
+}
