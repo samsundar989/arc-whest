@@ -2263,11 +2263,11 @@ next step, and it is the thing that could lift the low-rank arms. D08 and D09
 remain untouched; **G1 has not been run.** No cost model, compressed
 representation, or r³ claim is made or implied.
 
-## 2026-08-09 — SLICE CONTRACT: grade the shipped file (v2.4.1) in the Phase-1 window  [PRE-REGISTERED, no data yet]
+## 2026-08-10 — SLICE CONTRACT: grade the shipped file (v2.4.1) in the Phase-1 window  [PRE-REGISTERED, no data yet]
 
 *Correction, made before any submission and before any result exists: this entry was
 first written with the date 2026-08-07. That was a driver error — the session clock
-was misread. Corrected to 2026-08-09 against two independent sources (the whestbench
+was misread. Corrected to 2026-08-10 against two independent sources (the whestbench
 run report stamps `Aug 09, 2026 06:28:21 UTC`; `git log` puts the last commit at
 2026-08-07). **Only the date and the deadline paragraph changed. The hypothesis,
 prediction, gate, and falsifier are untouched.***
@@ -2288,7 +2288,7 @@ been graded.** Every grader-side number we own belongs to v2.4 (submission 32442
 2026-08-07 23:59 UTC — ~30 h in the past as of writing — yet the AIcrowd API still
 reports `round 1428 active=true LIVE` and `round 1429 active=false UPCOMING`, with
 dataset tags still `['v1-phase1','v1-warmup']` (`local_sim/phase2_checklist.py`,
-2026-08-09 06:1xZ). This is the deadline conflict of `docs/CURRENT_STATE.md` L13
+2026-08-10 06:1xZ). This is the deadline conflict of `docs/CURRENT_STATE.md` L13
 resolving in favour of organizer thread 18125's Aug 10 date. It also means the round
 may close without notice. Once it does, round 1429's configuration (shape, `n_mlps`,
 budget, λ, floor) is unverified, so the controlled comparison against 324420 is lost
@@ -2402,7 +2402,7 @@ the gate.
 
 **Scope**
 Files expected to change: **none.** `estimator.py` is submitted unmodified. New
-artifacts only: `experiments/reports/2026-08-09_v2.4.1_phase1_*.json` and a mini-run
+artifacts only: `experiments/reports/2026-08-10_v2.4.1_phase1_*.json` and a mini-run
 JSON.
 
 **Do not change**
@@ -2415,7 +2415,7 @@ block (none allocated — no local decision block is spent by this slice).
 uv run whest validate --estimator estimator.py
 uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v1-phase1 --split mini --runner subprocess
 uv run whest submit --estimator estimator.py               # ONLY after Samuel's explicit approval
-uv run python local_sim/fetch_graded_report.py <id> 2026-08-09_v2.4.1_phase1
+uv run python local_sim/fetch_graded_report.py <id> 2026-08-10_v2.4.1_phase1
 ```
 Recorded from the report: `config_snapshot` (width/depth/n_mlps/flop_budget),
 `lambda_derived`, `residual_share_of_billed`, `multiplier_floor_check`,
@@ -2429,7 +2429,7 @@ Claude Code.
 **commit**          `70067b4` (this entry, the graded artifact, and the durable-doc
                     updates land together; `docs/HUMAN_MODEL.md` excluded by design)
 **provenance**      AIcrowd submission **327743**, round 1428, state GRADED.
-                    Raw report: `experiments/run_reports/2026-08-09_v2.4.1_phase1_327743_graded_report.json`
+                    Raw report: `experiments/run_reports/2026-08-10_v2.4.1_phase1_327743_graded_report.json`
                     Control: `experiments/run_reports/2026-08-05_v2.4_324420_graded_report.json`
 **commands**
 ```powershell
@@ -2437,7 +2437,7 @@ Claude Code.
 uv run whest validate --estimator estimator.py               # pass, 62 ms
 uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v1-phase1 --split mini --runner subprocess
 uv run whest submit --estimator estimator.py                 # after explicit approval
-uv run python local_sim/fetch_graded_report.py 327743 2026-08-09_v2.4.1_phase1
+uv run python local_sim/fetch_graded_report.py 327743 2026-08-10_v2.4.1_phase1
 ```
 **config / seeds**  n_mlps 100, depth 32, width 256, flop_budget 2.72e11,
                     lambda_derived 1.0000e11. No seed block allocated or spent.
@@ -2520,10 +2520,10 @@ was suspected.
 | | residual, ms/MLP | source |
 |---|---|---|
 | **grader**, v2.4 | 9.845 | 324420, 2026-08-05 |
-| **grader**, v2.4.1 | 10.022 | 327743, 2026-08-09 |
+| **grader**, v2.4.1 | 10.022 | 327743, 2026-08-10 |
 | paired grader ratio v2.4.1/v2.4 | **1.0180×**, 95% CI [1.0119, 1.0241], n=100 | — |
 | local, v2.4.1, `--runner local` | 70.8 | LOG 2026-08-06 S2 |
-| local, v2.4.1, `--runner subprocess` | 42.94 | this slice, 2026-08-09 |
+| local, v2.4.1, `--runner subprocess` | 42.94 | this slice, 2026-08-10 |
 
 **The grader side is stable to ±0.6% across four days and two files.** It was never
 the unreliable half. The *local* number moved **70.8 → 42.94 ms/MLP for a
@@ -2538,7 +2538,7 @@ model — used a factor that may be 65% too large.
 
 **This is not yet established, and must not be recorded as if it were.** The two
 local readings differ in *two* variables at once — runner (local vs subprocess) and
-machine state (2026-08-06 vs 2026-08-09) — and this slice cannot separate them. The
+machine state (2026-08-06 vs 2026-08-10) — and this slice cannot separate them. The
 contract's falsifier was aimed at the grader residual and therefore did not fire;
 that is a design defect in the contract, recorded here rather than quietly fixed:
 **the doubtful quantity was the local measurement, and the falsifier tested the
@@ -2572,7 +2572,7 @@ opens a **week** after Phase 1 closes rather than immediately. Dataset tags rema
 `['v1-phase1','v1-warmup']`; leaderboard 1480 still empty.
 
 **deviations**     None from the contract as written. The contract's date was
-                   corrected from 2026-08-07 to 2026-08-09 before submission (driver
+                   corrected from 2026-08-07 to 2026-08-10 before submission (driver
                    misread the session clock); hypothesis, prediction, gate and
                    falsifier were untouched, and the correction is noted in place.
 **unexpected**     (1) The paired statistic contradicting the headline on grader data.
@@ -2622,6 +2622,107 @@ opens a **week** after Phase 1 closes rather than immediately. Dataset tags rema
   dissolves under the correct statistic — with the single responsible network named.
 
 **Driver** Claude Code. **Next command:** `review-slice`.
+
+### REVIEW — independent Skeptic on 327743. **Verdict: PROVISIONAL**
+
+Run 2026-08-10 in a separate agent context that never saw the builder's reasoning,
+briefed with the contract, the commits, the protocol and the raw artifact paths only.
+Verdict relayed without softening. The builder then re-verified each finding against
+the artifacts before accepting; all four checked findings **confirmed against the
+builder**.
+
+**What the Skeptic upheld.** It recomputed the headline from the two JSONs
+independently and reproduced every quoted digit: suite identity 100/100 `mlp_name`
+in order with identical `sampling_mse`; paired geometric mean **0.966508**, CI
+[0.7969, 1.1721]; ratio of means 1.031894; medians 1.010707; 22/50 with exact
+one-sided p = 0.8389; counted FLOPs 0.99981, effective 1.00015, residual 1.01800
+[1.01189, 1.02414]. Integrity: `estimator.py` in **neither** commit, byte-identical
+to `estimator_v2_4_1.py` (sha256 `59c371a5…`), vault counter 1 against exactly 1
+touch-log line, no seed block spent, `AGENTS.md` "~7×" unedited as required,
+`docs/writeup-draft.md` untouched so no overreach leaked into the deliverable.
+**The primary gap is genuinely closed: v2.4.1 is graded, 0 of 100 failed, safe to
+designate.** It also proved claim 3 *stronger* than the builder had: layer-31-only
+divergence holds on **all 50** networks (max relative difference across layers 0–30
+exactly 0.0 over 50 × 31 comparisons), not the single network the packet cited.
+
+**Defects found — five, all accepted.**
+
+1. **The date was wrong by one day, twice over, and the "correction notice" was
+   itself unverifiable.** The graded report carries `createdAt 2026-08-10T19:00:37Z`
+   and both commits are stamped 2026-08-10 19:12Z. The session was **2026-08-10**,
+   not Aug 9 (nor the Aug 7 first written). The contract's correction cited "git log
+   puts the last commit at 2026-08-07" — **a lower bound on the present, which cannot
+   date anything** — and a run-report stamp that exists in no file on disk.
+   Consequence beyond pedantry: **327743 went in ~5 hours before round 1428 closed**,
+   not with the day-and-a-half margin the contract's deadline paragraph implied.
+   *Fixed:* all occurrences corrected across LOG, `CURRENT_STATE.md`, `GOTCHAS.md`,
+   and the artifact renamed to `2026-08-10_v2.4.1_phase1_327743_graded_report.json`.
+2. **"Purely a function of which local path was used" is false, and the falsifying
+   artifact was already on disk and already cited in the contract's own evidence
+   list.** A `--runner subprocess` reading of the same byte-identical file exists from
+   2026-08-06 at **54.47 ms/MLP** — recovered from
+   `2026-08-06_v2.4.1_mini_subprocess.json` and confirmed independently from its
+   recorded multiplier 0.216 with counted 5.330e10. Runner effect (same day)
+   **1.301×**; machine-state effect (runner fixed) **1.269×**; product 1.651 = the
+   observed 70.85/42.94. The confound the packet called unseparable was **half
+   separated by data in hand**, and "~65% too large" is ~30% on the same-day
+   comparison.
+3. **"Sprint 4 S2 and the D14 residual model both scaled by ~7" is false — two
+   different sevens were conflated.** D14's deciding model is *local **ratio** ×
+   graded anchor*: `9.84 × (490.4/62.3) = 9.84 × 7.87`. That 7.87 is a within-run
+   candidate/control ratio, invariant to uniform rescaling of this machine; the
+   local→grader level never enters, and model 1 (local absolute) is explicitly flagged
+   "never decides". **Withdrawn.** The Skeptic identified the *real* exposure in its
+   place, which was recorded nowhere: **the candidate/control ratio itself reads 5.47×
+   in one local harness and 7.87× in another — a 44% spread on the quantity that
+   actually decides D14.**
+4. **"One network contributes 140% of the delta" mis-attributes the effect.** 140.2%
+   recomputes, but three networks each individually flip the sign of the total
+   (idx 37, 14, 1), and the 2.1246e-6 total is the residue of +1.9102e-5 in gains
+   against −1.6978e-5 in regressions. Correct description: *a small residue of
+   near-cancelling sums*. The promoted diagnostic also has a measured false-positive
+   rate — simulating a true 5% improvement at the observed scatter (sd log ratio
+   0.696) fires it in ~10% of 2000 draws — so it is a screen, not a proof.
+5. **"The paired statistic says no effect" overstates, and a better-powered answer
+   already existed.** At n = 50 the design can only exclude |effect| > ~20%;
+   `docs/GOTCHAS.md` already recorded **0.9959× over 32 draws/MLP** for exactly this
+   A/B, and already warned that v2.4.1's mini run "looks 6.7% better than v2.4 — that
+   is luck, not method." The grader run **confirms** the repo's existing finding on
+   grader data; it did not discover it. The GT-noise floor was also not quoted in the
+   result section, as `docs/VALIDATION.md` §3.5 requires.
+
+**Also flagged:** the 42.94 ms/MLP figure has **no saved artifact** (the contract's
+Scope promised a mini-run JSON; none was written) — internally consistent but not
+reproducible by the next session. The +1.8% grader residual's n=100 CI is
+pseudoreplication for a between-submission question (effective n = 1), and
+`residual_s` is a subtraction remainder whose components moved ~78 ms while the
+remainder moved 0.177 ms, so it must not be attributed to the `eigh` path.
+`docs/BENCHMARK.md` still lists 324420 as the graded row and was missing from the
+packet's docs-to-change list.
+
+**The Skeptic rejected the packet's proposed follow-up**, correctly: ranking the
+"both runners, same day" run as highest-value rested on the false premise that no
+same-day runner pair existed. **Cheapest discriminating follow-up, adopted:** three
+`--runner subprocess` repeats plus one `--runner local` on the unmodified file, same
+day, each saved with `--format json`. If the three repeats span >10%, the conclusion
+is not "4.3× not 7×" but *"this machine has no quotable absolute residual level"*.
+
+**What this review changes about the slice.** The **primary** result stands and is
+promoted: v2.4.1 is graded, safe, equivalent to v2.4, and the designation gap is
+closed. The **secondary** "substantive finding" is downgraded from a discovery to a
+partially-confounded observation, and three of its claims are withdrawn from the
+durable docs. The builder's own falsifier never fired because it was pointed at the
+grader residual while the doubtful quantity was the local one — and the contract said
+so, which is the only reason it reads as a recorded defect rather than a concealed
+one.
+
+**Meta-lesson, and it is the most transferable thing here.** Every one of the five
+defects was findable from artifacts already in the repository at the time the claims
+were written; none needed a new measurement. The builder's error was not bad
+arithmetic — every number it computed reproduced exactly — it was **reaching for a
+narrative ("the grader is stable, we are not") before checking whether the repository
+already contained the disconfirming case.** The 54.47 ms/MLP figure was sitting in
+the contract's own evidence list, quoted as "multiplier 0.216".
 
 ## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
 

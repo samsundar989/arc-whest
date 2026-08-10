@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — read this first
 
-*Snapshot, not narrative. Last updated **2026-08-09** (submission 327743 graded).
+*Snapshot, not narrative. Last updated **2026-08-10** (submission 327743 graded).
 Update this file when a lane opens or closes, a number is graded, or the phase
 changes — not on every experiment. The narrative record is `experiments/LOG.md`.*
 
@@ -10,8 +10,8 @@ changes — not on every experiment. The narrative record is `experiments/LOG.md
 
 | event | when | status |
 |---|---|---|
-| Round 1428 "Phase 1" | closes **2026-08-10 23:59 UTC** | **LIVE.** Deadline conflict RESOLVED 2026-08-09: the API round object itself moved from Aug 7 to Aug 10, matching organizer thread 18125 |
-| Round 1429 "Phase 2" | opens **2026-08-18 00:00 UTC**, closes **2026-09-19 23:59 UTC** | UPCOMING, empty board, no `v1-phase2` HF tag. **Opening moved Aug 8 → Aug 18** (observed 2026-08-09): there is now a 7-day gap after Phase 1, not a same-day handover |
+| Round 1428 "Phase 1" | closes **2026-08-10 23:59 UTC** | **LIVE.** Deadline conflict RESOLVED 2026-08-10: the API round object itself moved from Aug 7 to Aug 10, matching organizer thread 18125 |
+| Round 1429 "Phase 2" | opens **2026-08-18 00:00 UTC**, closes **2026-09-19 23:59 UTC** | UPCOMING, empty board, no `v1-phase2` HF tag. **Opening moved Aug 8 → Aug 18** (observed 2026-08-10): there is now a 7-day gap after Phase 1, not a same-day handover |
 | Write-up due | **2026-08-17** (forum 18109) | the contribution-prize deliverable |
 | Registration / team freeze | 2026-09-05 | |
 | Results | 2026-10-01 | private re-run of ONE designated submission on fresh MLPs |
@@ -28,7 +28,7 @@ explicit approval.**
 
 | instrument | tier | value | date |
 |---|---|---|---|
-| **graded, submission 327743 (v2.4.1 — THE SHIPPED FILE)** | graded | **2.6314e-7** adjusted · 1.3323e-6 MSE · mult 0.19896 · residual 10.022 ms/MLP · **0 of 100 failed** | 2026-08-09 |
+| **graded, submission 327743 (v2.4.1 — THE SHIPPED FILE)** | graded | **2.6314e-7** adjusted · 1.3323e-6 MSE · mult 0.19896 · residual 10.022 ms/MLP · **0 of 100 failed** | 2026-08-10 |
 | graded, submission 324420 (v2.4) | graded | 2.7194e-7 adjusted · 1.3748e-6 MSE · mult 0.1990 · residual 9.845 ms/MLP | 2026-08-05 |
 | graded, 324094 (v1.1) | graded | 3.893e-7 | 2026-08-05 |
 | vault, 500 sealed MLPs, v2.4.1 | VAULT | median **2.4651e-7** · mean 3.2669e-7 · p99 2.0535e-6 · max 3.0469e-6 · 0 non-finite | touch #1, 2026-08-06 |
@@ -38,16 +38,23 @@ explicit approval.**
 
 **Shipped file**: `estimator.py` == `estimator_v2_4_1.py` (byte-identical modulo
 line endings — `scripts/preflight.ps1` asserts this). **v2.4.1 is now graded**
-(327743, 2026-08-09, Phase 1): 0 failures, safe to designate. Vault touch counter: **1**.
+(327743, 2026-08-10, Phase 1): 0 failures, safe to designate. Vault touch counter: **1**.
 
 **v2.4.1 vs v2.4 is a DRAW, not a 3.2% improvement.** The headline adjusted score
 fell 2.7194e-7 → 2.6314e-7, but both were scored on the *same* 100 networks
-(`mlp_name` lists identical), so the paired statistic applies and it says no effect:
-geometric mean of per-MLP ratios **0.9665×, 95% CI [0.7969, 1.1721]**, v2.4.1 better
-on **22 of 50** (sign test p = 0.839). **One network, `mlp_index 37`, contributes
-140% of the entire aggregate delta.** Counted FLOPs agree to 0.02% and layers 1–31
-are bit-identical; only the scored final layer differs. Quote v2.4.1 as *equivalent
-to* v2.4, never as better. Full analysis: `experiments/LOG.md` 2026-08-09.
+(`mlp_name` lists identical, `sampling_mse` identical to 17 digits), so the paired
+statistic applies: geometric mean of per-MLP ratios **0.9665×, 95% CI [0.7969,
+1.1721]**, better on **22 of 50** (exact p = 0.839). The aggregate delta is a small
+residue of near-cancelling sums (+1.91e-5 of gains against −1.70e-5 of regressions);
+three networks each individually flip its sign. Counted FLOPs agree to 0.02%, and
+layers 0–30 are exactly float-equal on **all 50** networks — only the scored final
+layer differs. **Quote v2.4.1 as *equivalent to* v2.4, never as better.**
+
+*Precisely: "no **resolvable** effect." At n = 50 with sd(log ratio) = 0.696 this
+design can only exclude |effect| > ~20%. The better-powered answer already existed
+and agrees — 0.9959× over 32 draws/MLP (`docs/GOTCHAS.md`). The grader run confirmed
+it; it did not discover it.* Full analysis and the independent audit that corrected
+three claims in this section: `experiments/LOG.md` 2026-08-10.
 
 Field anchors: best published honest method 1.551e-7 · our declared honest sampling
 frontier ~2.7e-7 · GT noise floor of the metric ~2e-10. Full table: `docs/BENCHMARK.md`.
@@ -109,12 +116,12 @@ The lane arbitrages the price table against physics, and loses.
   `scripts/verify_portability.py`, `scripts/git-hooks/`, `scripts/human_model_state.py`,
   `scripts/install_git_hooks.py`, `.claude/hooks/guard_hook.py`, plus modifications to
   all six SKILL.md adapters, `CLAUDE.md` and `README.md` — all **untracked** as of
-  2026-08-09. `7040f41` committed only the Claude-side skills.
+  2026-08-10. `7040f41` committed only the Claude-side skills.
   This is sharper than the original risk: `CLAUDE.md` `@`-imports `AGENTS.md` as the
   operating contract, and `verify_portability.py` reports 174/174 against files that
   exist **only in the working tree**. Losing this tree loses the entire
   agent-independent layer and both agents' enforcement.
-- **The cost half of the evaluator is not trustworthy.** See below. **New, 2026-08-09:
+- **The cost half of the evaluator is not trustworthy.** See below. **New, 2026-08-10:
   the unreliable half is OUR measurement, not the grader's** — see the transfer-ratio
   note in § *Evaluator trust*.
 - **Deadline conflict**, unresolved by the organizers since Aug 5 (thread 18130).
@@ -135,24 +142,38 @@ different standards. We are currently at `C/B ≈ 0.20`, well above the 0.1 floo
 | **Accuracy (MSE)** | **E2, approaching E3** | mint proven bit-identical to the grader (100/100, uint32); seed-block registry with machine-readable single-use blocks; gates pre-registered in LOG before the block is touched; paired common-random-number statistics with CIs; 32-shift averaging; every MSE quoted against its GT-noise floor; 30/30 invariants including permutation equivariance; touch-counted sealed vault |
 | **Cost (`C` = counted FLOPs + λ·residual seconds)** | **E1 — directional only** | counted FLOPs are exact and reproducible. Uninstrumented wall time is not measurable on this machine: it bills the same file several× what the grader bills it. Every dense-vs-non-dense cost comparison therefore rests on a *model*, and the deciding model is a frozen assumption, not an observation |
 
-**The transfer ratio is path-dependent — established 2026-08-09 (submission 327743).**
-The grader side turns out to be the *stable* half: **9.845 ms/MLP (v2.4) → 10.022
-ms/MLP (v2.4.1)** across four days and two files, paired ratio 1.0180× with a 95% CI
-of [1.0119, 1.0241] over 100 networks. The local side is what moves. The **same
-byte-identical file** billed **70.8 ms/MLP under `--runner local`** (2026-08-06) and
-**42.94 ms/MLP under `--runner subprocess`** (2026-08-09) — putting local/grader at
-**7.06× or 4.28×** purely as a function of which local path was used.
+**The local residual has no quotable level — established 2026-08-10 (submission
+327743), corrected the same day after independent falsification.** Same
+byte-identical `estimator.py`, same 100-MLP mini split:
 
-`AGENTS.md` § *Measurement law* states "~7×" as binding. That figure came from the
-`local` runner; against the `subprocess` runner — which is what the grader uses — it
-is ~4.3×. **Every cost verdict that scaled a local residual by ~7 may have used a
-factor 65% too large, including Sprint 4 S2 and the D14 residual model.**
+| reading | ms/MLP | vs grader 10.022 |
+|---|---|---|
+| `--runner local`, 2026-08-06 | 70.85 | 7.07× |
+| `--runner subprocess`, 2026-08-06 | **54.47** | **5.44×** |
+| `--runner subprocess`, 2026-08-10 | 42.94 | 4.28× |
 
-**Not yet established.** The two local readings differ in runner *and* in machine
-state (Aug 6 vs Aug 9); one slice cannot separate them. **Do not edit the ~7× figure
-in `AGENTS.md` until the discriminating run is done:** the same file, same mini
-split, both runners, back to back, same day. It costs no seed block, no vault touch
-and no submission, and it gates the credibility of every cost number in the write-up.
+Runner effect, same day **1.301×**; machine-state effect, runner fixed **1.269×**;
+they multiply to the observed 1.65×. So the spread is **half path, half time** — not
+"purely the runner", and the overstatement is ~30%, not 65%.
+
+`AGENTS.md` § *Measurement law* states "~7×" as binding and **must stay unedited**
+until repeatability is measured. If three same-day repeats span >10%, the correct fix
+is not "4.3× instead of 7×" but *"this machine has no quotable absolute residual
+level"*, with the line replaced by a range carrying its measurement path.
+
+**What this does NOT contaminate.** The claim that Sprint 4 S2 and the D14 residual
+model "scaled by ~7" was **false and is withdrawn** — two different sevens were
+conflated. D14's deciding model is *local **ratio** × graded anchor*
+(`9.84 ms × 490.4/62.3`); the 7.87 there is a within-run candidate/control ratio,
+invariant to any uniform rescaling of this machine, and the local→grader level never
+enters. The local-absolute model is explicitly flagged "never decides". **The real
+exposure, newly identified: that candidate/control ratio itself reads 5.47× in one
+local harness and 7.87× in another — a 44% spread on the quantity that does decide.**
+
+**Grader-side residual: a detected shift, not stability.** Paired 1.0180× [1.0119,
+1.0241] excludes 1.0. But n = 1 submission per file, so the n = 100 CI is
+pseudoreplication; and `residual_s` is a subtraction remainder whose components moved
+~78 ms while the remainder moved 0.177 ms. Do not attribute it to the `eigh` path.
 
 **Consequences, binding:**
 
@@ -215,19 +236,22 @@ Codex hook *registration* schema, because Codex is not installed here — see
 
 ## Next actions
 
-1. **The runner-vs-machine-state discriminating run.** Same unmodified
-   `estimator.py`, same mini split, `--runner local` and `--runner subprocess` back
-   to back on the same day. Resolves whether the transfer factor is ~4.3× or ~7×.
-   Free, and it gates every cost claim in the write-up. **Highest value in the
-   repository right now.**
-2. **`review-slice` on submission 327743** — the Skeptic has not yet seen the
-   2026-08-09 slice.
+1. **Local-residual repeatability run.** Three `--runner subprocess` repeats plus one
+   `--runner local`, unmodified `estimator.py`, mini split, same day, each saved with
+   `--format json`. The runner arm is *already answered from disk* (1.301×); what is
+   unmeasured is whether this machine's residual is repeatable at all. If the three
+   repeats span >10%, no local absolute level is quotable and `AGENTS.md`'s "~7×"
+   becomes a range. ~20 min, no seed block, no vault touch, no submission.
+2. **Save the artifact for any local cost number.** The 42.94 ms/MLP reading has no
+   saved JSON — it is internally consistent (multiplier 0.2117 with counted 5.33e10)
+   but not reproducible by the next session. Contract said a mini-run JSON would be
+   produced; it was not.
 3. **Write-up** — due **Aug 17**, eight days out, co-equal with the score lane. Two
-   new pieces of material landed 2026-08-09: the aggregate-vs-paired dissolution on
+   new pieces of material landed 2026-08-10: the aggregate-vs-paired dissolution on
    real grader data (with the responsible network named), and the path-dependent
    transfer ratio.
 4. **Phase 1 closes Aug 10 23:59 UTC**; Phase 2 does not open until Aug 18. Decide
    before Aug 10 whether any further Phase-1 submission is wanted — after that there
    is a seven-day window with no live round.
 5. **D10 renormalization fit** if the Moonshot lane continues; do not touch D08.
-6. ~~Samuel fills in `docs/HUMAN_MODEL.md`.~~ **Done 2026-08-09.**
+6. ~~Samuel fills in `docs/HUMAN_MODEL.md`.~~ **Done 2026-08-10.**

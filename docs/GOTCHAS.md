@@ -15,37 +15,91 @@ narrative record), `docs/GAME_PLAN.md` (strategy, rev 12 is authoritative).
 
 ---
 
-## GRADED v2.4.1 (2026-08-09, submission 327743) — two traps, both about how a number is read
+## GRADED v2.4.1 (2026-08-10, submission 327743) — how a number is read
+
+*Written 2026-08-10, then **corrected the same day after independent falsification**.
+The struck claims are kept because the correction is the lesson: three of them were
+falsified by artifacts that were already on disk and already cited in the slice's own
+contract. Skeptic verdict PROVISIONAL; full audit in `experiments/LOG.md`.*
 
 - **A 3.2% aggregate improvement on 50 real grader networks was a DRAW.** v2.4.1
   scored 2.6314e-7 against v2.4's 2.7194e-7 on the *identical* suite (all 100
-  `mlp_name` values match in order, so the design is genuinely paired). The mandated
-  statistic — geometric mean of per-MLP ratios — is **0.9665×, 95% CI [0.7969,
-  1.1721]**, v2.4.1 better on **22 of 50** (sign test p = 0.839). The headline came
-  from **one network**: `mlp_index 37` went 3.985e-06 → 1.005e-06 and alone
-  contributes **140% of the total delta** across all fifty. The sum is positive only
-  because a broad tail of small regressions is outweighed by a few large favourable
-  draws.
-  **The diagnostic, use it every time:** rank the per-MLP deltas and ask what
-  fraction of the total the single biggest mover carries. Anything near or above
-  100% is a draw until proven otherwise. This is the cheapest available detector for
-  the project's most frequent error, and it works on grader reports directly.
-- **The ~7× local/grader residual ratio is PATH-DEPENDENT, and the grader is the
-  stable half.** Grader residual for the same estimator family is steady to ±0.6%:
-  9.845 ms/MLP (v2.4, Aug 5) → 10.022 ms/MLP (v2.4.1, Aug 9), paired ratio 1.0180×
-  [1.0119, 1.0241] over 100 networks. **Ours is what moves.** The byte-identical file
-  billed **70.8 ms/MLP under `--runner local`** and **42.94 ms/MLP under
-  `--runner subprocess`** — 7.06× vs 4.28× against the grader.
-  `AGENTS.md` § *Measurement law* still says "~7×"; that came from the `local`
-  runner, while the grader uses `subprocess`. **Do not quote a single transfer
-  factor as measured, and do not edit AGENTS.md, until the discriminating run —
-  same file, same split, both runners, same day — separates runner from machine
-  state.** Sprint 4 S2 and the D14 residual model both scaled by ~7.
-- **Only the final layer differs between v2.4 and v2.4.1.** `per_layer_mse` is
-  bit-identical in 31 of 32 layers; first divergence is layer index 31. Useful as an
-  invariant: a rotation/sampling change that alters an earlier layer has escaped its
-  intended scope.
-- **Round dates changed under us mid-session** (two polls 30 min apart, 2026-08-09):
+  `mlp_name` values match in order, and `sampling_mse` is identical to 17 digits, so
+  the design is genuinely paired). The mandated statistic — geometric mean of per-MLP
+  ratios — is **0.9665×, 95% CI [0.7969, 1.1721]**, v2.4.1 better on **22 of 50**
+  (exact one-sided p = 0.839). Ratio of means 1.0319, ratio of medians 1.0107.
+  **Say "no *resolvable* effect", not "no effect".** With sd(log ratio) = 0.696 at
+  n = 50 this design can only exclude |effect| > ~20%. A better-powered answer
+  already existed and agrees: **0.9959× over 32 draws/MLP** (see the v2.4.1 entry
+  below). The grader run *confirms* what the 32-shift local test already said; it did
+  not discover it.
+- ~~"The headline came from one network, `mlp_index 37`, which alone contributes 140%
+  of the total delta."~~ **Overstated.** 140.2% recomputes correctly, but *three*
+  networks each individually flip the sign of the total (idx 37 −8.55e-7, idx 14
+  −6.48e-7, idx 1 −3.06e-8). The 2.1246e-6 total is the residue of **+1.9102e-5 in
+  gains against −1.6978e-5 in regressions**. The honest description is *"the headline
+  is a small residue of near-cancelling sums"*, not *"one network did it"*.
+  **The diagnostic still earns its place, with a stated false-positive rate:** rank
+  the per-MLP deltas and ask what fraction of the total the biggest mover carries.
+  ≥100% means treat as a draw until proven otherwise. Simulating a *true* 5%
+  improvement at the observed scatter fires it in ~10% of draws, so it is a screen,
+  not a proof.
+- **The local/grader residual ratio is path-dependent AND time-dependent, in roughly
+  equal measure.** Same byte-identical `estimator.py`, same 100-MLP mini split:
+
+  | reading | ms/MLP | vs grader 10.022 |
+  |---|---|---|
+  | `--runner local`, 2026-08-06 | 70.85 | 7.07× |
+  | `--runner subprocess`, 2026-08-06 | **54.47** | **5.44×** |
+  | `--runner subprocess`, 2026-08-10 | 42.94 | 4.28× |
+
+  Runner effect, same day: **1.301×**. Machine-state effect, runner held fixed:
+  **1.269×**. They multiply to the observed 1.65×. ~~"Purely a function of which
+  local path was used"~~ is **false**, and ~~"~65% too large"~~ becomes **~30%** on
+  the same-day comparison. The Aug-6 subprocess figure is recoverable from
+  `2026-08-06_v2.4.1_mini_subprocess.json` and independently from its own recorded
+  multiplier 0.216 with counted 5.330e10 — it was in the contract's evidence list the
+  whole time.
+- ~~"Sprint 4 S2 and the D14 residual model both scaled by ~7."~~ **False — two
+  different sevens were conflated.** D14's deciding model is *local **ratio** ×
+  graded anchor*: `r_cand = 9.84 ms × (490.4/62.3) = 9.84 × 7.87` (`experiments/LOG.md`,
+  D14 residual-model table). That 7.87 is a **within-run candidate/control ratio**,
+  invariant to any uniform rescaling of this machine; the local→grader *level* never
+  enters. S2 is the same shape (`9.84 × 5.47`). Model 1, local absolute, is explicitly
+  flagged "never decides". **The real exposure is different and is not yet recorded
+  anywhere else: that candidate/control ratio itself reads 5.47× in one local harness
+  and 7.87× in another — a 44% spread on the quantity that actually decides.**
+- **`AGENTS.md` § *Measurement law* still says "~7×" and must stay unedited** until
+  the repeatability run below. If three same-day repeats span >10%, the right fix is
+  not "4.3× instead of 7×" — it is *"this machine has no quotable absolute residual
+  level"*, and the line should become a range with its measurement path attached.
+- **Only the final layer differs between v2.4 and v2.4.1 — verified on all 50, not
+  one.** `per_layer_mse` has exactly one differing layer per network and it is
+  *always* index 31; layers 0–30 are exactly float-equal across 50 × 31 comparisons.
+  Good invariant candidate: a rotation/sampling change that alters an earlier layer
+  has escaped its intended scope.
+- **The +1.8% grader residual is a detected shift, not evidence of stability.** Paired
+  1.0180× [1.0119, 1.0241] **excludes 1.0**, so calling the grader "steady to ±0.6%"
+  mislabels a CI half-width as drift. But n = 1 submission per file: the n = 100 CI is
+  pseudoreplication for a between-submission question, effective n = 1. `residual_s`
+  is also a *subtraction remainder* (`wall − backend − overhead`), and the components
+  moved far more than the remainder — paired backend 0.9417, overhead 1.0476, wall
+  0.9629 — so a 0.177 ms difference is a 0.27% residue of ~78 ms of component motion.
+  Do not attribute it to the `eigh` path.
+- **Round dates changed under us mid-session** (two polls 30 min apart, 2026-08-10):
+  Phase 1 end moved Aug 7 → **Aug 10 23:59 UTC**, Phase 2 open moved Aug 8 →
+  **Aug 18**. Round metadata is live data, not a constant — re-poll
+  `phase2_checklist.py` immediately before acting on a deadline, never trust a
+  cached one. Submission 327743 went in at **19:00Z, ~5 h before close**, not with
+  the day-and-a-half margin the slice contract assumed.
+- **The driver misread the session date twice** (as Aug 7, then Aug 9; actually
+  Aug 10), and wrote it into a filename, a LOG heading and two durable docs before it
+  was caught. `Get-Date` was misread, and a "correction against two independent
+  sources" cited a `git log` last-commit date, which is a *lower bound on the present*
+  and cannot date anything. **Date the session from an artifact the grader or the
+  filesystem stamped** — a graded report's `createdAt`, a commit you just made — never
+  from an older commit.
+- **Round dates changed under us mid-session** (two polls 30 min apart, 2026-08-10):
   Phase 1 end moved Aug 7 → **Aug 10 23:59 UTC**, Phase 2 open moved Aug 8 →
   **Aug 18**. Round metadata is live data, not a constant — re-poll
   `phase2_checklist.py` immediately before acting on a deadline, never trust a

@@ -25,8 +25,12 @@ anchors are (§2), and how many teams above us plausibly got there by estimating
 | fresh-mint distribution, 1200 MLPs | DECIDE | median 2.19e-7, mean 3.01e-7, p99 1.65e-6, max/median 12.9× | 2026-08-05 | pre-provenance-fix mint (block L3) |
 | public mini split (100) | CONFIRM | v2.4.1 **3.172e-7** adj / 1.4895e-6 MSE / mult 0.216 / 0 failed | 2026-08-06 | v2.4 was 3.400e-7 / 1.6079e-6 |
 | public mini, N=65,536 candidate | CONFIRM | **3.15e-7** adj / 4.10e-7 MSE / mult 0.783 / 0 failed | 2026-08-06 | only ~0.7% better after real local residual billing; not adopted |
-| **graded (submission 324420, v2.4)** | graded | **2.7194e-7** adj / 1.3748e-6 MSE / mult 0.1990 | 2026-08-05 | current rank #90 of 200 |
+| **graded (submission 327743, v2.4.1 — THE SHIPPED FILE)** | graded | **2.6314e-7** adj / 1.3323e-6 MSE / mult 0.19896 / residual 10.022 ms/MLP / 0 of 100 failed | 2026-08-10 | **equivalent to v2.4, not better** — paired geo-mean 0.9665× [0.7969, 1.1721], 22/50, p = 0.839. Quote as a draw |
+| graded (submission 324420, v2.4) | graded | 2.7194e-7 adj / 1.3748e-6 MSE / mult 0.1990 / residual 9.845 ms/MLP | 2026-08-05 | rank #90 of 200 at 2026-08-06 |
 | graded (324094, v1.1) | graded | 3.893e-7 | 2026-08-05 | the diversified second selection |
+
+**Private/public effective-compute ratio, the write-up's honest cost-divergence
+claim, now has a fifth point:** 327743 reads **0.99198**, beside v2.4's 0.99157.
 
 Reminders that keep these readable:
 
