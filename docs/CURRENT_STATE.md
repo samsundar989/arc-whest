@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — read this first
 
-*Snapshot, not narrative. Last updated **2026-08-07** (harness audit).
+*Snapshot, not narrative. Last updated **2026-08-09** (submission 327743 graded).
 Update this file when a lane opens or closes, a number is graded, or the phase
 changes — not on every experiment. The narrative record is `experiments/LOG.md`.*
 
@@ -10,8 +10,8 @@ changes — not on every experiment. The narrative record is `experiments/LOG.md
 
 | event | when | status |
 |---|---|---|
-| Round 1428 "Phase 1" | closes **2026-08-07 23:59 UTC** (challenge page) / Aug 10 (organizer thread 18125) | **LIVE, conflicting dates — plan against Aug 7** |
-| Round 1429 "Phase 2" | opens Aug 8 00:00 UTC, closes **2026-09-19 23:59 UTC** | UPCOMING, empty board, no `v1-phase2` HF tag yet |
+| Round 1428 "Phase 1" | closes **2026-08-10 23:59 UTC** | **LIVE.** Deadline conflict RESOLVED 2026-08-09: the API round object itself moved from Aug 7 to Aug 10, matching organizer thread 18125 |
+| Round 1429 "Phase 2" | opens **2026-08-18 00:00 UTC**, closes **2026-09-19 23:59 UTC** | UPCOMING, empty board, no `v1-phase2` HF tag. **Opening moved Aug 8 → Aug 18** (observed 2026-08-09): there is now a 7-day gap after Phase 1, not a same-day handover |
 | Write-up due | **2026-08-17** (forum 18109) | the contribution-prize deliverable |
 | Registration / team freeze | 2026-09-05 | |
 | Results | 2026-10-01 | private re-run of ONE designated submission on fresh MLPs |
@@ -28,7 +28,8 @@ explicit approval.**
 
 | instrument | tier | value | date |
 |---|---|---|---|
-| **graded, submission 324420 (v2.4)** | graded | **2.7194e-7** adjusted · 1.3748e-6 MSE · mult 0.1990 | 2026-08-05 |
+| **graded, submission 327743 (v2.4.1 — THE SHIPPED FILE)** | graded | **2.6314e-7** adjusted · 1.3323e-6 MSE · mult 0.19896 · residual 10.022 ms/MLP · **0 of 100 failed** | 2026-08-09 |
+| graded, submission 324420 (v2.4) | graded | 2.7194e-7 adjusted · 1.3748e-6 MSE · mult 0.1990 · residual 9.845 ms/MLP | 2026-08-05 |
 | graded, 324094 (v1.1) | graded | 3.893e-7 | 2026-08-05 |
 | vault, 500 sealed MLPs, v2.4.1 | VAULT | median **2.4651e-7** · mean 3.2669e-7 · p99 2.0535e-6 · max 3.0469e-6 · 0 non-finite | touch #1, 2026-08-06 |
 | public mini (100), v2.4.1 | CONFIRM | 3.172e-7 adjusted · 1.4895e-6 MSE · mult 0.216 · 0 failed | 2026-08-06 |
@@ -36,9 +37,17 @@ explicit approval.**
 | board position | — | raw #90/200; **#82 of 192 plausible-honest** on 5 entries | 2026-08-06 10:03Z |
 
 **Shipped file**: `estimator.py` == `estimator_v2_4_1.py` (byte-identical modulo
-line endings — `scripts/preflight.ps1` asserts this). v2.4.1 has **never been
-graded**: no submission was made in the Phase-1 window, and selection was left at
-the default. Vault touch counter: **1**.
+line endings — `scripts/preflight.ps1` asserts this). **v2.4.1 is now graded**
+(327743, 2026-08-09, Phase 1): 0 failures, safe to designate. Vault touch counter: **1**.
+
+**v2.4.1 vs v2.4 is a DRAW, not a 3.2% improvement.** The headline adjusted score
+fell 2.7194e-7 → 2.6314e-7, but both were scored on the *same* 100 networks
+(`mlp_name` lists identical), so the paired statistic applies and it says no effect:
+geometric mean of per-MLP ratios **0.9665×, 95% CI [0.7969, 1.1721]**, v2.4.1 better
+on **22 of 50** (sign test p = 0.839). **One network, `mlp_index 37`, contributes
+140% of the entire aggregate delta.** Counted FLOPs agree to 0.02% and layers 1–31
+are bit-identical; only the scored final layer differs. Quote v2.4.1 as *equivalent
+to* v2.4, never as better. Full analysis: `experiments/LOG.md` 2026-08-09.
 
 Field anchors: best published honest method 1.551e-7 · our declared honest sampling
 frontier ~2.7e-7 · GT noise floor of the metric ~2e-10. Full table: `docs/BENCHMARK.md`.
@@ -92,12 +101,22 @@ The lane arbitrages the price table against physics, and loses.
 
 ## Standing risks
 
-- **Uncommitted work.** As of the audit: 38 untracked files and ~2,250 modified
-  lines — the entire 2026-08-06/07 body of work (mint provenance fix, vault,
-  invariant suite, constants audit, Sprints 4 and 5, Moonshot G0). Last commit is
-  `2dde612`, 2026-08-05. **No LOG entry can currently cite a commit.** Highest-value
-  fix in the repository; see § *Harness* below.
-- **The cost half of the evaluator is not trustworthy.** See below.
+- **Uncommitted work — PARTIALLY resolved, and the remainder is load-bearing.**
+  The *experiment* record landed across five commits through `7040f41` (mint
+  provenance, vault, invariant suite, Sprints 4–5, Moonshot G0, records), so LOG
+  entries can cite commits again. **What did not land is the cross-agent harness
+  itself**: `AGENTS.md`, `ai/`, `.agents/`, `.codex/`, `scripts/guard_paths.py`,
+  `scripts/verify_portability.py`, `scripts/git-hooks/`, `scripts/human_model_state.py`,
+  `scripts/install_git_hooks.py`, `.claude/hooks/guard_hook.py`, plus modifications to
+  all six SKILL.md adapters, `CLAUDE.md` and `README.md` — all **untracked** as of
+  2026-08-09. `7040f41` committed only the Claude-side skills.
+  This is sharper than the original risk: `CLAUDE.md` `@`-imports `AGENTS.md` as the
+  operating contract, and `verify_portability.py` reports 174/174 against files that
+  exist **only in the working tree**. Losing this tree loses the entire
+  agent-independent layer and both agents' enforcement.
+- **The cost half of the evaluator is not trustworthy.** See below. **New, 2026-08-09:
+  the unreliable half is OUR measurement, not the grader's** — see the transfer-ratio
+  note in § *Evaluator trust*.
 - **Deadline conflict**, unresolved by the organizers since Aug 5 (thread 18130).
 - **The metric has a heavy tail.** Fresh-MLP max/median = 12.9×; the worst 1% of
   MLPs carry 6.9% of the score. At a re-run of size R = 10 the p90 score is 50%
@@ -114,7 +133,26 @@ different standards. We are currently at `C/B ≈ 0.20`, well above the 0.1 floo
 | half | level | why |
 |---|---|---|
 | **Accuracy (MSE)** | **E2, approaching E3** | mint proven bit-identical to the grader (100/100, uint32); seed-block registry with machine-readable single-use blocks; gates pre-registered in LOG before the block is touched; paired common-random-number statistics with CIs; 32-shift averaging; every MSE quoted against its GT-noise floor; 30/30 invariants including permutation equivariance; touch-counted sealed vault |
-| **Cost (`C` = counted FLOPs + λ·residual seconds)** | **E1 — directional only** | counted FLOPs are exact and reproducible. **Uninstrumented wall time is not measurable on this machine at all**: it bills the same file ~7× what the grader billed it. Every dense-vs-non-dense cost comparison therefore rests on a *model*, and the deciding model is a frozen assumption, not an observation |
+| **Cost (`C` = counted FLOPs + λ·residual seconds)** | **E1 — directional only** | counted FLOPs are exact and reproducible. Uninstrumented wall time is not measurable on this machine: it bills the same file several× what the grader bills it. Every dense-vs-non-dense cost comparison therefore rests on a *model*, and the deciding model is a frozen assumption, not an observation |
+
+**The transfer ratio is path-dependent — established 2026-08-09 (submission 327743).**
+The grader side turns out to be the *stable* half: **9.845 ms/MLP (v2.4) → 10.022
+ms/MLP (v2.4.1)** across four days and two files, paired ratio 1.0180× with a 95% CI
+of [1.0119, 1.0241] over 100 networks. The local side is what moves. The **same
+byte-identical file** billed **70.8 ms/MLP under `--runner local`** (2026-08-06) and
+**42.94 ms/MLP under `--runner subprocess`** (2026-08-09) — putting local/grader at
+**7.06× or 4.28×** purely as a function of which local path was used.
+
+`AGENTS.md` § *Measurement law* states "~7×" as binding. That figure came from the
+`local` runner; against the `subprocess` runner — which is what the grader uses — it
+is ~4.3×. **Every cost verdict that scaled a local residual by ~7 may have used a
+factor 65% too large, including Sprint 4 S2 and the D14 residual model.**
+
+**Not yet established.** The two local readings differ in runner *and* in machine
+state (Aug 6 vs Aug 9); one slice cannot separate them. **Do not edit the ~7× figure
+in `AGENTS.md` until the discriminating run is done:** the same file, same mini
+split, both runners, back to back, same day. It costs no seed block, no vault touch
+and no submission, and it gates the credibility of every cost number in the write-up.
 
 **Consequences, binding:**
 
@@ -141,6 +179,21 @@ different standards. We are currently at `C/B ≈ 0.20`, well above the 0.1 floo
 | Orientation | this file + `docs/GOTCHAS.md` | a fresh session previously had to read ~150 KB across 12 stacked GAME_PLAN revisions to learn what was decided |
 | Human comprehension | `docs/HUMAN_MODEL.md` (Samuel-owned, write-protected from agents) | no comprehension checkpoint existed anywhere in the record |
 | Prompt friction | `.claude/settings.json` allowlist | read-only lab commands prompted on every invocation |
+| **Agent portability** (audit 2026-08-07) | `AGENTS.md` + `ai/workflows/` + shared `scripts/` enforcement | the whole harness lived under `.claude/`. Exhausting one agent's quota meant losing the methodology, not just the session |
+
+**The portability layer, in one paragraph.** `AGENTS.md` is now the cross-agent
+operating contract and `CLAUDE.md` imports it, so no project behaviour is
+agent-specific. The six workflow commands are defined once in `ai/workflows/`;
+`.claude/skills/` and `.agents/skills/` (Codex) are thin adapters that load them, and
+`scripts/verify_portability.py` (162 checks) fails if either side drifts, grows a rule
+of its own, or names a product where it should name a role. The Skeptic exists for
+both agents (`.claude/agents/`, `.codex/agents/`) over one shared brief. Enforcement is
+one implementation, `scripts/guard_paths.py`, called by both agents' hooks *and* by
+`scripts/git-hooks/pre-commit` — the backstop that holds even for an agent whose hooks
+nobody has wired. **Switching drivers is: start the agent in the repo root, run
+`session-start`, continue with `next-slice`.** Not verified in this environment: the
+Codex hook *registration* schema, because Codex is not installed here — see
+`.codex/hooks/README.md`. The pre-commit backstop covers the gap meanwhile.
 
 **Deliberately not enabled** — each was considered and rejected for a stated reason:
 
@@ -162,11 +215,19 @@ different standards. We are currently at `C/B ≈ 0.20`, well above the 0.1 floo
 
 ## Next actions
 
-1. **Commit the outstanding work** (see § *Standing risks*). Restores the evidence
-   chain that every LOG entry implicitly claims.
-2. **Samuel fills in `docs/HUMAN_MODEL.md`.** ~15 minutes, once. It is the input to
-   every future comprehension checkpoint and the thing that lets him direct rather
-   than ratify.
-3. **Poll for round 1429** and follow the runbook when it flips active.
-4. **Write-up** — Aug 17, and it is now co-equal with the score lane.
+1. **The runner-vs-machine-state discriminating run.** Same unmodified
+   `estimator.py`, same mini split, `--runner local` and `--runner subprocess` back
+   to back on the same day. Resolves whether the transfer factor is ~4.3× or ~7×.
+   Free, and it gates every cost claim in the write-up. **Highest value in the
+   repository right now.**
+2. **`review-slice` on submission 327743** — the Skeptic has not yet seen the
+   2026-08-09 slice.
+3. **Write-up** — due **Aug 17**, eight days out, co-equal with the score lane. Two
+   new pieces of material landed 2026-08-09: the aggregate-vs-paired dissolution on
+   real grader data (with the responsible network named), and the path-dependent
+   transfer ratio.
+4. **Phase 1 closes Aug 10 23:59 UTC**; Phase 2 does not open until Aug 18. Decide
+   before Aug 10 whether any further Phase-1 submission is wanted — after that there
+   is a seven-day window with no live round.
 5. **D10 renormalization fit** if the Moonshot lane continues; do not touch D08.
+6. ~~Samuel fills in `docs/HUMAN_MODEL.md`.~~ **Done 2026-08-09.**

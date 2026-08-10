@@ -15,6 +15,44 @@ narrative record), `docs/GAME_PLAN.md` (strategy, rev 12 is authoritative).
 
 ---
 
+## GRADED v2.4.1 (2026-08-09, submission 327743) — two traps, both about how a number is read
+
+- **A 3.2% aggregate improvement on 50 real grader networks was a DRAW.** v2.4.1
+  scored 2.6314e-7 against v2.4's 2.7194e-7 on the *identical* suite (all 100
+  `mlp_name` values match in order, so the design is genuinely paired). The mandated
+  statistic — geometric mean of per-MLP ratios — is **0.9665×, 95% CI [0.7969,
+  1.1721]**, v2.4.1 better on **22 of 50** (sign test p = 0.839). The headline came
+  from **one network**: `mlp_index 37` went 3.985e-06 → 1.005e-06 and alone
+  contributes **140% of the total delta** across all fifty. The sum is positive only
+  because a broad tail of small regressions is outweighed by a few large favourable
+  draws.
+  **The diagnostic, use it every time:** rank the per-MLP deltas and ask what
+  fraction of the total the single biggest mover carries. Anything near or above
+  100% is a draw until proven otherwise. This is the cheapest available detector for
+  the project's most frequent error, and it works on grader reports directly.
+- **The ~7× local/grader residual ratio is PATH-DEPENDENT, and the grader is the
+  stable half.** Grader residual for the same estimator family is steady to ±0.6%:
+  9.845 ms/MLP (v2.4, Aug 5) → 10.022 ms/MLP (v2.4.1, Aug 9), paired ratio 1.0180×
+  [1.0119, 1.0241] over 100 networks. **Ours is what moves.** The byte-identical file
+  billed **70.8 ms/MLP under `--runner local`** and **42.94 ms/MLP under
+  `--runner subprocess`** — 7.06× vs 4.28× against the grader.
+  `AGENTS.md` § *Measurement law* still says "~7×"; that came from the `local`
+  runner, while the grader uses `subprocess`. **Do not quote a single transfer
+  factor as measured, and do not edit AGENTS.md, until the discriminating run —
+  same file, same split, both runners, same day — separates runner from machine
+  state.** Sprint 4 S2 and the D14 residual model both scaled by ~7.
+- **Only the final layer differs between v2.4 and v2.4.1.** `per_layer_mse` is
+  bit-identical in 31 of 32 layers; first divergence is layer index 31. Useful as an
+  invariant: a rotation/sampling change that alters an earlier layer has escaped its
+  intended scope.
+- **Round dates changed under us mid-session** (two polls 30 min apart, 2026-08-09):
+  Phase 1 end moved Aug 7 → **Aug 10 23:59 UTC**, Phase 2 open moved Aug 8 →
+  **Aug 18**. Round metadata is live data, not a constant — re-poll
+  `phase2_checklist.py` immediately before acting on a deadline, never trust a
+  cached one.
+
+---
+
 ## THE TRUTH HARNESS (2026-08-06) — read `docs/VALIDATION.md` before measuring anything
 
 - **Our mints ARE the grader's mints now, and were not before.** `whestbench` builds

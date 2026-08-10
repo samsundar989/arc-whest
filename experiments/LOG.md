@@ -2263,6 +2263,364 @@ next step, and it is the thing that could lift the low-rank arms. D08 and D09
 remain untouched; **G1 has not been run.** No cost model, compressed
 representation, or r³ claim is made or implied.
 
+## 2026-08-09 — SLICE CONTRACT: grade the shipped file (v2.4.1) in the Phase-1 window  [PRE-REGISTERED, no data yet]
+
+*Correction, made before any submission and before any result exists: this entry was
+first written with the date 2026-08-07. That was a driver error — the session clock
+was misread. Corrected to 2026-08-09 against two independent sources (the whestbench
+run report stamps `Aug 09, 2026 06:28:21 UTC`; `git log` puts the last commit at
+2026-08-07). **Only the date and the deadline paragraph changed. The hypothesis,
+prediction, gate, and falsifier are untouched.***
+
+**Strategic question**
+Does the file we would actually designate behave on the grader the way our only
+graded anchor did — and does the local→grader residual transfer ratio still hold?
+
+**Current bottleneck**
+The cost half of the evaluator is E1 (`docs/CURRENT_STATE.md` § *Evaluator trust*).
+This machine bills v2.4.1 at 70.8 ms/MLP residual (LOG 2026-08-06, S2 verdict table,
+`--runner local`, 100-MLP public mini) where the grader billed v2.4 at 9.84 ms/MLP —
+a 7.2× discrepancy. Narrower and more urgent: **`estimator.py` == v2.4.1 has never
+been graded.** Every grader-side number we own belongs to v2.4 (submission 324420,
+2026-08-05).
+
+**The window is an unannounced extension.** Round 1428's published end was
+2026-08-07 23:59 UTC — ~30 h in the past as of writing — yet the AIcrowd API still
+reports `round 1428 active=true LIVE` and `round 1429 active=false UPCOMING`, with
+dataset tags still `['v1-phase1','v1-warmup']` (`local_sim/phase2_checklist.py`,
+2026-08-09 06:1xZ). This is the deadline conflict of `docs/CURRENT_STATE.md` L13
+resolving in favour of organizer thread 18125's Aug 10 date. It also means the round
+may close without notice. Once it does, round 1429's configuration (shape, `n_mlps`,
+budget, λ, floor) is unverified, so the controlled comparison against 324420 is lost
+permanently.
+
+**Evidence**
+- CONFIRMED — v2.4 graded: adjusted **2.7194e-7**, raw MSE 1.3748e-6, multiplier
+  0.1990, residual 9.84 ms/MLP (submission 324420, 2026-08-05).
+- CONFIRMED — v2.4.1 on CONFIRM tier (public mini, 100 MLPs, 2026-08-06): adjusted
+  3.172e-7, raw MSE 1.4895e-6, multiplier 0.216, 0 failed.
+- CONFIRMED — v2.4.1 on VAULT (500 sealed, touch #1, 2026-08-06): median 2.4651e-7,
+  mean 3.2669e-7, p99 2.0535e-6, 0 non-finite.
+- CONFIRMED — `estimator.py` is byte-identical to `estimator_v2_4_1.py` modulo line
+  endings (`scripts/preflight.ps1` #4); invariant suite 30/30 on the shipped file.
+- CONFIRMED — v2.4 → v2.4.1 is a *reproducibility* change only: the rotation basis
+  moved to `eigh` on `J Jᵀ` with a deterministic sign convention (LOG 2026-08-06,
+  "the 18% gap was a rank-deficiency artifact"). No change to `_PRUNE_TAU`,
+  `_BASIS_RANK`, N, the calibration table, or the sampling path.
+- CONFIRMED — submission quota is 50/day/team (`docs/RESEARCH_NOTES.md` §1). The
+  scarce resource is the round window, not the quota.
+- CONFIRMED — nomination is explicit, not default top-2 (organizer thread 18125,
+  recorded `docs/GOTCHAS.md` L74–79). This is the *new external evidence* that made
+  the earlier no-submit decision conditional rather than final.
+- INFERRED — the local→grader residual transfer ratio is ~7.2×, from one file on
+  one day. It is the load-bearing assumption in every cost verdict this project has
+  issued, and it rests on a single pair of observations.
+
+**Hypothesis**
+v2.4.1 grades statistically indistinguishable from v2.4 on both halves of the score,
+because the two differ only in how the rotation basis is chosen, not in what is
+computed. Its graded residual therefore also lands near 9.84 ms/MLP, giving a second
+independent anchor for the transfer ratio.
+
+**Mechanism**
+The rotation change replaced an SVD whose sign/ordering conventions were
+platform-dependent with `eigh` on `J Jᵀ` plus a fixed sign convention. The subspace
+spanned is the same; only its representation is pinned. Arithmetic per sample is
+unchanged (measured: same counted-FLOP anatomy, 5.33e10/MLP), so counted `C` should
+match to well under 1%, and the operation count is unchanged, so residual should
+match too.
+
+**Intervention**
+Submit the **unmodified** shipped `estimator.py` to round 1428. Nothing is edited.
+One submission, not two.
+
+**Prediction (registered before submitting)**
+- graded adjusted score ∈ [2.4e-7, 3.1e-7], centred on ~2.72e-7
+- counted FLOPs/MLP within 1% of v2.4's
+- graded residual ∈ [7.4, 13.1] ms/MLP (±33% of 9.84)
+- multiplier ≈ 0.199, floor untouched (`score / score_secondary` ≠ 0.1)
+- `n_failed_mlps` = 0
+
+**Samuel's prediction (registered before submitting, verbatim)**
+> "I expect it to grade better than our last submission, if the leaderboard score is
+> wrong then thats the disproving result."
+
+Read: adjusted score **below** v2.4's 2.7194e-7. Falsifier as stated is loose; the
+driver's reading is "the graded score contradicts what our local evidence implies."
+
+**This is a registered disagreement between human and driver, and that is why it is
+recorded.** The driver predicted *statistically indistinguishable* from v2.4
+(centred ~2.72e-7, band [2.4e-7, 3.1e-7]) on the grounds that v2.4→v2.4.1 is a
+reproducibility change only. Samuel predicts a genuine improvement. The two are
+separable by the result: a graded score materially below ~2.6e-7 favours Samuel and
+would mean the rotation fix moved accuracy, not just determinism; a score inside
+2.7e-7 ± noise favours the driver. Either way one prior is corrected, which is worth
+more than the submission.
+
+**Gate**
+This slice is *instrumentation*, so the gate is on the instrument, not on a win:
+**PASS** if `n_failed_mlps` = 0 AND the graded adjusted score is within 1.30× of
+v2.4's 2.7194e-7 in either direction. That band is deliberately wide — two
+realisations of the same estimator differ ~18% in the mean (VALIDATION standing
+rule), and the grader's public set is ~50 MLPs.
+
+**Falsifier**
+- Any failed MLP ⇒ the shipped file is not safe to designate, and that is the single
+  most valuable thing this slice could discover.
+- Graded residual outside [7.4, 13.1] ms/MLP ⇒ the 7.2× transfer ratio is not a
+  property of the grader stack, and **every cost verdict in this repository that
+  used it is downgraded**, including Sprint 4's S2 and Sprint 5's D14 residual
+  models. That would be a larger finding than the submission itself.
+- Adjusted score > 1.30× v2.4's ⇒ the "reproducibility-only" claim for v2.4.1 is
+  false and v2.4 is the file to nominate.
+
+**Baseline**
+v2.4, submission 324420, GRADED tier, 2026-08-05: 2.7194e-7 adjusted / 1.3748e-6
+raw MSE / 0.1990 multiplier / 9.84 ms/MLP residual. Same round, same dataset
+revision (`v1-phase1`), same fixed 50-MLP public suite (forensics 2026-08-05
+established the scored set is fixed and returns per-MLP MSEs).
+
+**Residual model**
+Not consumed — **produced.** This slice makes no cost *claim*; it creates the
+observation that other slices' models are anchored to. The three-model rule
+(`docs/VALIDATION.md` §2b) does not apply because no local residual enters the
+verdict. Local absolute residual is quoted nowhere in the result.
+
+**Statistic**
+Not a paired local experiment. The comparison is graded-to-graded, single
+observation per file, on the grader's own fixed suite — which is why the gate band
+is wide and no CI is claimed. Per-MLP MSEs from `public_scores` permit a paired
+per-MLP comparison against 324420's report *post hoc*; that is a bonus reading, not
+the gate.
+
+**Confounders**
+- The grader's machine load varies; residual is a wall-time measurement on hardware
+  we do not control. A single reading cannot separate "v2.4.1 is slower" from "the
+  grader was busier." Stated as a limit, not resolved.
+- If the organizers changed the public suite mid-round, `sampling_mse` and the
+  `mlp_name` list would differ; both are checked in the report before any comparison.
+
+**Scope**
+Files expected to change: **none.** `estimator.py` is submitted unmodified. New
+artifacts only: `experiments/reports/2026-08-09_v2.4.1_phase1_*.json` and a mini-run
+JSON.
+
+**Do not change**
+`estimator.py` (byte-for-byte), any constant, the vault (counter stays 1), any seed
+block (none allocated — no local decision block is spent by this slice).
+
+**Evidence required**
+```powershell
+.\scripts\preflight.ps1                                    # must be GREEN
+uv run whest validate --estimator estimator.py
+uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v1-phase1 --split mini --runner subprocess
+uv run whest submit --estimator estimator.py               # ONLY after Samuel's explicit approval
+uv run python local_sim/fetch_graded_report.py <id> 2026-08-09_v2.4.1_phase1
+```
+Recorded from the report: `config_snapshot` (width/depth/n_mlps/flop_budget),
+`lambda_derived`, `residual_share_of_billed`, `multiplier_floor_check`,
+`runtime_environment`, `sampling_mse`, the `mlp_name` list, per-MLP `public_scores`.
+
+**Driver**
+Claude Code.
+
+### RESULT — grade the shipped file (v2.4.1), submission 327743  [contract above, unmodified]
+
+**provenance**      AIcrowd submission **327743**, round 1428, state GRADED.
+                    Raw report: `experiments/run_reports/2026-08-09_v2.4.1_phase1_327743_graded_report.json`
+                    Control: `experiments/run_reports/2026-08-05_v2.4_324420_graded_report.json`
+**commands**
+```powershell
+.\scripts\preflight.ps1                                      # GREEN 5/5
+uv run whest validate --estimator estimator.py               # pass, 62 ms
+uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v1-phase1 --split mini --runner subprocess
+uv run whest submit --estimator estimator.py                 # after explicit approval
+uv run python local_sim/fetch_graded_report.py 327743 2026-08-09_v2.4.1_phase1
+```
+**config / seeds**  n_mlps 100, depth 32, width 256, flop_budget 2.72e11,
+                    lambda_derived 1.0000e11. No seed block allocated or spent.
+                    Vault touches spent: **0** (counter remains 1).
+**suite identity**  All 100 `mlp_name` values identical and in the same order across
+                    324420 and 327743; the 50 `public_scores` indices are the same
+                    set. **The comparison is paired on identical networks.**
+
+#### Headline
+
+| | v2.4 (324420) | **v2.4.1 (327743)** | ratio |
+|---|---|---|---|
+| adjusted final-layer score | 2.7194e-7 | **2.6314e-7** | 0.9676 |
+| raw final-layer MSE | 1.3748e-6 | 1.3323e-6 | 0.9691 |
+| all-layers MSE | — | 4.8263e-5 | — |
+| mean multiplier | 0.1990 | 0.19896 | 0.9998 |
+| counted FLOPs / MLP | 5.2909e10 | 5.2898e10 | 0.9998 |
+| effective compute / MLP | 5.3893e10 | 5.3901e10 | 1.0001 |
+| grader residual / MLP | 9.845 ms | 10.022 ms | 1.0180 |
+| failed MLPs | 0 | **0 of 100** | — |
+| `multiplier_floor_check` | — | 0.19751 ≠ 0.1 | floor untouched |
+
+**delta vs gate — PASS.** Gate was `n_failed_mlps = 0` AND adjusted within 1.30× of
+2.7194e-7 either way. Both met (0 failures; ratio 0.9676).
+
+#### The 3.2% improvement is a draw. The protocol caught it in real time
+
+The aggregate moved the right way. **The mandated paired statistic says there is no
+effect**, and the disagreement between those two readings is the substance of this
+slice.
+
+| statistic (v2.4 ÷ v2.4.1 on final-layer MSE, >1 favours v2.4.1) | value |
+|---|---|
+| ratio of **means** (the headline) | 1.0319 |
+| ratio of **medians** | 1.0107 |
+| **paired geometric mean of per-MLP ratios, n=50** | **0.9665×**, 95% CI **[0.7969, 1.1721]** |
+| CI excludes 1.0? | **no** |
+| sign test — v2.4.1 better on | **22 of 50**, one-sided p = **0.839** |
+
+**A single network carries the entire headline.** Summing the per-MLP MSE deltas over
+the 50 visible networks gives 2.1246e-06 total. `mlp_index 37` alone contributes
+**140.2%** of it (3.985e-06 → 1.005e-06); the top 2 contribute 271%, the top 5
+contribute 526%. The sum only reaches its positive total because a long tail of small
+*regressions* offsets a handful of large favourable draws. Drop network 37 and the
+aggregate improvement reverses sign.
+
+This is the repository's canonical failure mode, observed for the first time on
+**grader-side data with a genuinely paired design**: `docs/VALIDATION.md`'s rule
+*"the paired statistic is the geometric mean of per-MLP ratios, not the ratio of
+means"* is not a technicality here — it is the difference between "v2.4.1 improved
+accuracy 3.2%" and "v2.4.1 changed nothing." Only the second is defensible.
+
+#### Predictions, scored
+
+| | predicted | outcome |
+|---|---|---|
+| **Driver** | statistically indistinguishable from v2.4; adjusted ∈ [2.4e-7, 3.1e-7]; residual ∈ [7.4, 13.1] ms; counted FLOPs within 1%; 0 failures | **held on every clause.** 2.6314e-7; 10.022 ms; 0.02%; 0 failures; paired CI includes 1.0 |
+| **Samuel** | "better than our last submission" | **the headline went his way, the statistic did not.** Adjusted score is 3.2% lower, but the paired test cannot distinguish it from a draw (22/50, p = 0.839) |
+
+Samuel's prediction was not unreasonable and the number he named did move as he
+said. The reason it does not stand is precisely the rule this project already had in
+place, which is the best possible outcome for a prediction checkpoint: the human's
+prior was corrected by a pre-existing protocol rather than by an argument.
+
+#### Mechanism confirmed structurally, not just by score
+
+`per_layer_mse` for network 0 is **bit-identical between v2.4 and v2.4.1 in 31 of 32
+layers**; the first and only divergence is at **layer index 31**, the scored final
+layer. The two files therefore produce *the same numbers* everywhere the closure
+runs, and differ only in the sampled final-layer estimate — exactly what the
+"reproducibility-only rotation change" claim predicted, verified against the grader
+rather than against our own reasoning. A mis-scoped change would have shown
+divergence from the first sampled layer onward.
+
+#### The substantive finding: the ~7× transfer ratio is path-dependent, and the grader is the stable half
+
+This slice was justified as evaluation repair. What it repaired is not the half that
+was suspected.
+
+| | residual, ms/MLP | source |
+|---|---|---|
+| **grader**, v2.4 | 9.845 | 324420, 2026-08-05 |
+| **grader**, v2.4.1 | 10.022 | 327743, 2026-08-09 |
+| paired grader ratio v2.4.1/v2.4 | **1.0180×**, 95% CI [1.0119, 1.0241], n=100 | — |
+| local, v2.4.1, `--runner local` | 70.8 | LOG 2026-08-06 S2 |
+| local, v2.4.1, `--runner subprocess` | 42.94 | this slice, 2026-08-09 |
+
+**The grader side is stable to ±0.6% across four days and two files.** It was never
+the unreliable half. The *local* number moved **70.8 → 42.94 ms/MLP for a
+byte-identical file**, which puts local/grader at **7.06×** or **4.28×** depending
+entirely on which local path was used.
+
+`AGENTS.md` § *Measurement law* states as binding fact: *"Local residual wall time is
+~7× the grader's."* **That constant was derived from a `--runner local` measurement,
+and against the runner the grader actually uses it is ~4.3×.** Every cost verdict
+that scaled a local residual by ~7 — including Sprint 4's S2 and the D14 residual
+model — used a factor that may be 65% too large.
+
+**This is not yet established, and must not be recorded as if it were.** The two
+local readings differ in *two* variables at once — runner (local vs subprocess) and
+machine state (2026-08-06 vs 2026-08-09) — and this slice cannot separate them. The
+contract's falsifier was aimed at the grader residual and therefore did not fire;
+that is a design defect in the contract, recorded here rather than quietly fixed:
+**the doubtful quantity was the local measurement, and the falsifier tested the
+grader.**
+
+**Cheapest discriminating follow-up:** run the same unmodified file on the same mini
+split today under both `--runner local` and `--runner subprocess`, back to back. It
+spends no seed block, no vault touch, and no submission, and it separates runner from
+machine state in one pass. Deliberately **not** run inside this slice
+(`slice-contract` Step 8: do not open the next slice from inside this one).
+
+#### Regressions and integrity
+
+preflight **5/5 GREEN** · invariants **30/30** · ship-file identity `59c371a5…`
+matches `estimator_v2_4_1.py` · vault counter **1**, untouched · `estimator.py`
+unmodified · no seed block allocated · public mini re-run clean (0/100 failed,
+adjusted 3.11e-7, multiplier 0.2117).
+
+#### Round intelligence captured while submitting
+
+The AIcrowd round objects **changed during this session** (two polls ~30 min apart):
+
+| | first poll | second poll |
+|---|---|---|
+| round 1428 Phase 1 ends | 2026-08-07 23:59 UTC | **2026-08-10 23:59 UTC** |
+| round 1429 Phase 2 opens | 2026-08-08 00:00 UTC | **2026-08-18 00:00 UTC** |
+
+The deadline conflict recorded in `docs/CURRENT_STATE.md` L13 is **resolved in the
+API itself**, in favour of organizer thread 18125's Aug 10 date, and Phase 2 now
+opens a **week** after Phase 1 closes rather than immediately. Dataset tags remain
+`['v1-phase1','v1-warmup']`; leaderboard 1480 still empty.
+
+**deviations**     None from the contract as written. The contract's date was
+                   corrected from 2026-08-07 to 2026-08-09 before submission (driver
+                   misread the session clock); hypothesis, prediction, gate and
+                   falsifier were untouched, and the correction is noted in place.
+**unexpected**     (1) The paired statistic contradicting the headline on grader data.
+                   (2) 31 of 32 layers bit-identical between the two files.
+                   (3) The local residual, not the grader residual, being the
+                       unstable quantity.
+**remaining doubt** Whether ~4.3× or ~7× is the right transfer factor, and whether it
+                   is a constant at all. Whether v2.4.1's +1.8% grader residual is a
+                   real property of the eigh path or grader machine load — the CI is
+                   tight but n=1 submission per file. The 50 hidden networks remain
+                   unobservable.
+
+### Knowledge Delta
+
+- **Learned.** v2.4.1 is graded, safe, and functionally equivalent to v2.4: 0
+  failures, counted FLOPs identical to 0.02%, layers 1–31 bit-identical, paired
+  final-layer MSE indistinguishable. **The file we would designate now has grader
+  evidence.** That was the primary gap and it is closed.
+- **Belief changed — the driver's.** "Local residual is ~7× the grader's" was carried
+  as a property of the grader. It is a property of *a local measurement path*. The
+  grader half is the stable one (±0.6%); ours is the one that moved 65%.
+- **Belief changed — Samuel's.** A 3.2% headline improvement on 50 real grader
+  networks is not evidence of improvement. He predicted a genuine gain; the paired
+  test says draw, driven by one network out of fifty.
+- **New failure signature.** *Aggregate-mean improvement with a paired CI spanning
+  1.0 and a sign test at chance.* Diagnostic: rank the per-MLP deltas and check what
+  fraction of the total the top mover carries. Here it was **140%** — a single
+  network more than accounting for the entire effect. Any delta with that shape is a
+  draw until proven otherwise.
+- **New invariant candidate.** v2.4 and v2.4.1 must agree bit-for-bit on layers 1–31;
+  only the scored final layer may differ. Cheap to assert, and it would catch a
+  rotation change that silently escaped its intended scope.
+- **Remaining uncertainty.** The runner-vs-machine-state confound on the transfer
+  ratio. Until it is resolved, no cost claim should quote a single transfer factor as
+  if it were measured.
+- **Durable docs to change.** `docs/CURRENT_STATE.md` (graded row for v2.4.1, round
+  calendar, transfer-ratio caveat, stale uncommitted-work risk). `docs/GOTCHAS.md`
+  (the path-dependence trap; the aggregate-vs-paired signature).
+  **`AGENTS.md` § *Measurement law* carries the ~7× figure and must NOT be edited
+  until the discriminating run separates runner from machine state.**
+- **Implication for the next experiment.** The discriminating local run comes first;
+  it is nearly free and it gates the credibility of every cost number this project
+  would put in the write-up.
+- **For the write-up.** This is unusually clean contribution material: a
+  pre-registered prediction, a human/driver disagreement recorded before the data
+  existed, a paired design on the organizers' own networks, and a headline that
+  dissolves under the correct statistic — with the single responsible network named.
+
+**Driver** Claude Code. **Next command:** `review-slice`.
+
 ## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
 
 **Where we stand**: v1.1 graded 3.893e-7, rank ~159. The leader is 4.87e-8 — **8.0× ahead**. Every analytic-side avenue we tested this session is dead:
@@ -2320,3 +2678,89 @@ declared at ~2.7e-7). Phase 2 work is verification and robustness, in this order
    shape-generic fallback; the edge-case suite already covers widths 64/128 and
    depths 2–64, all passing.
 6. `>3×` grader-vs-local divergence ⇒ stop and investigate before resubmitting.
+
+---
+
+## 2026-08-07 — HARNESS (IMPORTANT): Claude ↔ Codex portability audit
+
+**Class** IMPORTANT — changes the instrument that governs every other change (the
+workflow layer and the enforcement layer). No seed block allocated, no vault touch,
+`estimator.py` untouched.
+
+**Prediction, written before building** (the IMPORTANT-class requirement): the six
+workflow skills would prove *already* mostly agent-neutral in content, and the real
+portability failures would be (a) no `AGENTS.md`, so the operating contract existed
+only as `CLAUDE.md`; (b) mechanical enforcement existing only as a Claude-shaped
+hook; (c) the Skeptic existing only as a Claude subagent. Predicted that no workflow
+*semantics* would need to change — only their location and their bindings.
+
+**Result: prediction held.** All six workflow bodies moved to `ai/workflows/`
+essentially verbatim. The only content edits were de-branding (`/next-slice` →
+`next-slice`; "launch the skeptic agent" → "run the Skeptic role in a separate agent
+context"; `.claude/skills/slice-contract` → `ai/workflows/slice-contract.md`) plus
+three new paragraphs on handoff continuity. No gate, threshold, residual model, tier
+rule, or classification boundary changed.
+
+### What changed
+
+| layer | before | after |
+|---|---|---|
+| operating contract | `CLAUDE.md` only | `AGENTS.md`; `CLAUDE.md` imports it and is now 62 lines of bindings |
+| workflow semantics | 7 skills under `.claude/skills/` | `ai/workflows/` (6 + slice-contract + skeptic); both agents' skills are <=33-line adapters |
+| Codex control surface | none | `.agents/skills/` (7), `.codex/agents/skeptic.md`, `.codex/hooks/` |
+| enforcement | one bash hook, Claude-shaped, file_path only | `scripts/guard_paths.py` — one implementation behind both agents' hooks and `scripts/git-hooks/pre-commit` |
+| HUMAN_MODEL blank/stale test | agent eyeballs the file | `scripts/human_model_state.py` -> BLANK/PARTIAL/STALE/FILLED |
+| portability itself | unchecked | `scripts/verify_portability.py`, 174 checks |
+
+### Knowledge delta
+
+1. **The old guard had a real hole.** It matched the `file_path` field only, so a
+   shell redirection onto a protected path was never blocked. The shared
+   implementation now resolves the *write target* of a command (redirection takes one
+   token; a verb may be preceded by flags) and denies on that. Found while building
+   the Codex adapter, not by a test — open since the hook was written.
+2. **Precision matters as much as coverage in a guard.** The first cut denied on
+   "protected name appears anywhere in the command", which blocked writing this very
+   LOG entry, because the entry discusses `HUMAN_MODEL.md`. A guard that blocks honest
+   work gets disabled, and then the invariant is gone entirely. The regression cases
+   for both directions are now permanent in `verify_portability.py`.
+3. **An agent hook cannot be the guarantee, only the fast path.** It depends on that
+   agent's hook system being wired and schema-compatible. `scripts/git-hooks/pre-commit`
+   is the agent-independent backstop; it refuses to let a protected path be committed
+   *quietly*. `ARC_WHEST_PROTECTED_OK=1` is the conscious human override, and **Samuel
+   needs it to commit his own `HUMAN_MODEL.md`** — the guard forbids silence, not
+   authorship.
+4. **New failure signature: harness drift.** Two adapter sets can diverge silently,
+   and the symptom appears only at the moment of switching — the worst moment.
+   `verify_portability.py` fails on a missing workflow, a fat adapter, a divergent
+   skill set, a dangling file reference, a broken command chain, or a product name in
+   the canonical layer.
+5. **Not verified, and stated as such:** the Codex hook *registration* schema. Codex
+   is not installed on this machine. `.codex/hooks/guard_hook.py` was verified
+   directly (it satisfies stdin-JSON, flag args, stdout JSON, stderr reason and
+   0/1/2 exit codes simultaneously), but its wiring into `config.toml` was left as a
+   documented paste-once snippet in `.codex/hooks/README.md` rather than written
+   blind — a bad config key can stop an agent starting, which is worse than an unwired
+   hook. The pre-commit backstop covers the integrity invariants meanwhile; what is
+   lost without it is the two advisory *ask* prompts.
+
+### Evidence
+
+```
+python scripts/verify_portability.py           174 checks, 0 failed
+.\scripts\preflight.ps1                        PREFLIGHT GREEN -- 5/5
+uv run whest validate --estimator estimator.py passed, 72 ms
+uv run python scripts/human_model_state.py     BLANK -> FIRST-ORIENTATION MODE
+python scripts/install_git_hooks.py            installed .git/hooks/pre-commit
+```
+
+Guard policy exercised on 21 cases (deny / ask / allow), each run through the shared
+implementation *and* through the Codex adapter, verdicts identical. Pre-commit
+backstop exercised on four staged-file scenarios including the override path and the
+vault-seal-inconsistency refusal.
+
+**Durable state unchanged**: no seed block spent; vault touches still 1; shipped file
+still byte-identical to `estimator_v2_4_1.py` (sha256 59c371a5044e0e00a04e00fe8494ef19).
+
+**Next**: switching drivers is now `session-start` then `next-slice` from the repo
+root. The project's own next actions are unchanged — see `docs/CURRENT_STATE.md`.

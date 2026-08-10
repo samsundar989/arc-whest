@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# arc-whest pre-commit -- interpreter shim only. Logic: scripts/git_precommit_guard.py
+# Install with:  python scripts/install_git_hooks.py
+set -u
+repo="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+
+for candidate in \
+    "$repo/.venv/Scripts/python.exe" \
+    "$repo/.venv/bin/python" \
+    python3 python py
+do
+    if command -v "$candidate" >/dev/null 2>&1; then
+        exec "$candidate" "$repo/scripts/git_precommit_guard.py"
+    fi
+done
+
+echo "arc-whest pre-commit: no Python interpreter found; guard skipped." >&2
+exit 0
