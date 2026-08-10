@@ -2426,6 +2426,8 @@ Claude Code.
 
 ### RESULT — grade the shipped file (v2.4.1), submission 327743  [contract above, unmodified]
 
+**commit**          `70067b4` (this entry, the graded artifact, and the durable-doc
+                    updates land together; `docs/HUMAN_MODEL.md` excluded by design)
 **provenance**      AIcrowd submission **327743**, round 1428, state GRADED.
                     Raw report: `experiments/run_reports/2026-08-09_v2.4.1_phase1_327743_graded_report.json`
                     Control: `experiments/run_reports/2026-08-05_v2.4_324420_graded_report.json`
