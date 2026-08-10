@@ -87,10 +87,19 @@ The lane arbitrages the price table against physics, and loses.
 
 ## Open questions, ranked
 
-1. **319341's variance advantage — the only open score question.** Their `MSE × N`
-   is 0.018520 against our graded 0.022525: **1.216×**. Ruled out: arithmetic,
-   packing, antithetic sampling. It is a *variance* mechanism and we do not know
-   which one.
+1. **THE ACCURACY GAP — reopened 2026-08-10 on new external evidence, and it is much
+   larger than we thought.** Decomposing the public board via
+   `score / scoreSecondary = C/B` shows honest teams are **2–3.6× better on score and
+   4.8–10× better on raw MSE**. The decisive case is **J2W: C/B 0.194 against our
+   0.198 — the same compute — with 4.8× lower MSE.** No operating-point confound.
+   Teams with 18–52 entries (too few to probe the public set meaningfully) sit at
+   2–3.6× better scores. Spending more compute does *not* close it: our N=65,536 arm
+   projects to **0.999×** on the grader's own cost anatomy.
+   **This supersedes "319341's 1.216× variance advantage"** — that was a corner of a
+   much bigger gap. It also means `GAME_PLAN` rev 6's "honest sampling frontier
+   ~2.7e-7" described *our method's* frontier, not the field's. Mechanism unknown;
+   MSE alone cannot distinguish better variance reduction from a better analytic
+   core. **Strategist Packet issued 2026-08-10.** Full analysis: `experiments/LOG.md`.
 2. **Moonshot G1 — blocked on the D10 renormalization fit.** G0 (done 2026-08-07)
    proved the layer convention, built the registered calibrated-K2 baseline
    (depth 8 → 1.2067e-05; G1 must reach ≤4.02e-06), and read the oracle: full-rank

@@ -2724,6 +2724,72 @@ narrative ("the grader is stable, we are not") before checking whether the repos
 already contained the disconfirming case.** The 54.47 ms/MLP figure was sitting in
 the contract's own evidence list, quoted as "multiplier 0.216".
 
+## 2026-08-10 — BOARD DECOMPOSITION: the honest frontier is **2–3.6× ahead of us on ACCURACY**, and it is not an operating-point difference
+
+ROUTINE diagnostic, no seed block, no submission, no vault touch. Snapshot
+`experiments/board_snapshots/2026-08-10T2048Z_phase1_close_full_board.json` (200
+entries, round 1428, 20:48Z).
+
+**The method.** The board publishes `scoreSecondary` alongside `score`, and
+`score = MSE × max(0.1, C/B)`, so `score / scoreSecondary` **recovers every team's
+C/B**. Verified on ourselves: 2.6314e-7 / 1.3323e-6 = 0.1975 against the graded
+0.19896. The board therefore reports each team's **accuracy and compute separately**
+— it is not a single opaque number, and we had never decomposed it before.
+
+**Where we actually stand.** Us: MSE **1.3323e-6** at C/B **0.198**.
+
+| rank | team | MSE | C/B | score | MSE vs us | entries |
+|---|---|---|---|---|---|---|
+| 4 | J2W | 2.784e-7 | **0.194** | 5.39e-8 | **4.8×** | 1093 |
+| 5 | dstepanov | 2.199e-7 | 0.283 | 6.22e-8 | 6.1× | 611 |
+| 7 | yanggan_gu | 2.422e-7 | 0.299 | 7.24e-8 | 5.5× | **31** |
+| 8 | thylinao | 1.724e-7 | 0.439 | 7.56e-8 | 7.7× | 170 |
+| 19 | sweaty_dog | 1.296e-7 | 0.874 | 1.133e-7 | 10.3× | 102 |
+| 22 | andrew_epstein | 2.508e-7 | 0.462 | 1.158e-7 | 5.3× | **52** |
+| 25 | mohanty | 2.037e-7 | 0.607 | 1.236e-7 | 6.5× | **18** |
+| — | **us (327743)** | **1.3323e-6** | **0.198** | **2.6314e-7** | 1.0× | 5 |
+
+**The decisive row is J2W.** They run at **C/B 0.194 against our 0.198** — the same
+compute to within 2% — and get **4.8× lower MSE**. There is no operating-point
+confound to explain away: at our own budget, someone is 4.8× more accurate.
+`yanggan_gu` (31 entries), `andrew_epstein` (52) and `mohanty` (18) reach 2–3.6×
+better *scores* on entry counts too low for meaningful public-set probing.
+
+**More compute does not close it — measured, not assumed.** Our own N=65,536 arm,
+projected onto the **grader's** cost structure rather than this machine's
+(which over-bills residual 4–7×): counted 1.910e11, C/B 0.717, MSE 3.667e-7 (using
+the CONFIRM-measured 3.63× MSE ratio) → projected score **2.630e-7 = 0.999× of
+current**. Even at *zero* residual it is 0.979×, inside the ~18% run-to-run noise.
+The `N` lane stays closed, now confirmed against graded cost anatomy.
+
+**Reconstruction screen, on physics rather than entry counts.** The metric's
+GT-noise floor is ~2e-10 and the best *published* honest method is 1.551e-7 MSE:
+
+| team | MSE | × GT floor | vs best published honest | entries | read |
+|---|---|---|---|---|---|
+| alexander_luz | 1.0e-9 | 5.0× | **155× better** | 259 | not estimation |
+| rayan53 | 1.35e-8 | 67× | 11.5× better | 50 | implausible |
+| ednacob | 3.63e-8 | 182× | 4.3× better | 169 | implausible |
+| J2W and below | ≥2.78e-7 | ≥1392× | *worse* than published | — | plainly legitimate |
+
+Only the top three are implausible. **From rank 4 down the board is real**, which
+means our true standing among honest teams is roughly **#102 of 197**, not the #82
+of 192 the 2026-08-06 census estimated from entry-count heuristics. The earlier
+screen was too generous because it never looked at accuracy.
+
+**Knowledge Delta — this reopens the score question as a lane.** `GAME_PLAN` rev 6
+declared "the honest sampling frontier is ~2.7e-7" and `docs/CURRENT_STATE.md`
+records score optimisation CLOSED on that basis. **That was a statement about our
+own method's frontier, and the board now shows it is not the field's.** Honest teams
+at our exact compute are 4.8× more accurate. Per the reopening rule this is
+*new external evidence* — competitor telemetry — and it is the strongest such
+evidence the project has seen. The open question "319341's variance advantage,
+1.216×" was measuring a corner of a much larger gap.
+
+**What it does NOT tell us.** The mechanism. MSE alone cannot distinguish a better
+variance reduction from a better analytic core from a fundamentally different
+estimator. That is the strategist's question.
+
 ## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
 
 **Where we stand**: v1.1 graded 3.893e-7, rank ~159. The leader is 4.87e-8 — **8.0× ahead**. Every analytic-side avenue we tested this session is dead:
