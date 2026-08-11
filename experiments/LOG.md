@@ -2608,6 +2608,9 @@ opens a **week** after Phase 1 closes rather than immediately. Dataset tags rema
 - **Remaining uncertainty.** The runner-vs-machine-state confound on the transfer
   ratio. Until it is resolved, no cost claim should quote a single transfer factor as
   if it were measured.
+- *(Unrelated to this entry: see the 2026-08-11 Skeptic review of the control-variate
+  kill, which withdraws the "≥58% bias" reading and establishes that our final-layer
+  residual is ~99.9% variance.)*
 - **Durable docs to change.** `docs/CURRENT_STATE.md` (graded row for v2.4.1, round
   calendar, transfer-ratio caveat, stale uncommitted-work risk). `docs/GOTCHAS.md`
   (the path-dependence trap; the aggregate-vs-paired signature).
@@ -3023,9 +3026,111 @@ so the audit trail shows why, and they may be reused by a future experiment.
   time. Caught by the mandatory pre-build verification, which is the second time
   today that step has prevented a wrong claim.
 - **What remains open.** The 4.8× accuracy gap is untouched and remains the
-  bottleneck. Variance reduction of the layer-1-anchored kind is now bounded out
-  three ways; combined with 18085's ≥58%-bias finding, **the gap is probably mostly
-  bias, which points at the closure/calibration core rather than at the sampler.**
+  bottleneck. Variance reduction of the layer-1-anchored *linear* kind is bounded out.
+- ~~"Combined with 18085's ≥58%-bias finding, the gap is probably mostly bias, which
+  points at the closure/calibration core rather than at the sampler."~~
+  **WITHDRAWN 2026-08-11 by the independent Skeptic — this was backwards, and it had
+  already been written into `docs/CURRENT_STATE.md`'s #1 open question.** The ≥58%
+  figure describes *radiant-allomancer's own* estimator (RQMC + shrinkage + Edgeworth
+  + ridge corrector, 4.47e-7), not ours (1.3323e-6), and our own data contradicts it:
+  `MSE×N` = **0.03657 / 0.04036 / 0.03666** at N = 16,384 / 32,768 / 65,536
+  (24 MLPs × 8 shifts, α = 1.00 — LOG 2026-08-06). Solving `MSE(N) = V/N + B²` on the
+  4× endpoints gives **B² ≈ 1.8e-9 ≈ 0.08% of MSE**. **Our final-layer residual is
+  essentially all variance.** The correct implication is the opposite of what was
+  written: the 4.8× gap is a **variance** gap, and the next Strategist Packet must be
+  aimed at variance mechanisms, not at the closure/calibration core.
+
+### REVIEW — independent Skeptic on the control-variate kill. **Verdict: ACCEPT**
+
+Run 2026-08-11 in a fresh context briefed with artifacts only. Relayed without
+softening; the builder verified each finding against the artifacts before accepting.
+
+**The Skeptic did not argue the kill — it measured it.** Finding that the decisive
+"~1.00× stacked on Sobol (2.04 → 1.98)" number had **no reproducible artifact**
+(`local_sim/cv_lab.py` contains no Sobol at all — `collect()` draws
+`rng.standard_normal` at line 43; the only committed CV-on-QMC arm,
+`local_sim/impl_lab.py`, uses a Cranley–Patterson *real* shift scored at 1.24× in
+LOG line 143, and the "2.04×" in that table is a **point-set comparison**, not a CV
+stack), it rebuilt the experiment in the shipped configuration: unscrambled Sobol +
+30-bit digital XOR shift exactly as `estimator.py:540`, N = 16,384, real public MLPs
+against 1e9-sample truth, one shared forward pass (perfect common random numbers),
+14 MLPs × 6 shifts, paired geometric mean.
+
+| point set | correction | paired geo-mean gain |
+|---|---|---|
+| plain MC | fitted-optimal 256-dim h₁ CV | 1.584× |
+| plain MC | **the strategist's fixed analytic `M = ∏(W_l·Φ_l)`** | 1.383× |
+| Sobol + digital shift (**ours**) | fitted-optimal CV | 0.992× |
+| Sobol + digital shift (**ours**) | **the strategist's exact `M`** | **1.010×, 95% CI [0.979, 1.042]** |
+
+**The CI includes 1.0 — the contract's own pre-registered KILL condition** — and
+excludes both the 1.25× PROMOTE tier and the strategist's 2–4×. The kill stands, now
+on an artifact rather than by inheritance.
+
+**What the Skeptic UPHELD in the builder's argument.** The telescoping algebra is
+correct: `e_l = (e_{l-1} @ W_l)·Φ_l` with `e_1 = ε_1` gives
+`e_L = ε_1 @ ∏(W_l diag(Φ_l))`, a fixed linear map of `ε_1` alone. It independently
+verified the load-bearing premise that **`Φ_l` never sees a sample** (`_closure`,
+`estimator.py:574-595`, is a function of `w64` only). It checked every candidate
+escape hatch and found no missed term: pruning restricts the map to alive columns
+(still linear, and smaller); dead-neuron offsets are deterministic and cancel in the
+difference; the folded rotation is orthogonal and pre-layer-1, leaving `x ~ N(0,I)`
+and `ε_1` exactly observable. It also measured *how tight* the containment is — the
+analytic `M` reaches 87% of the fitted optimum on plain MC, so the fixed coefficient
+is a **good** coefficient; it wins nothing because QMC has already removed the
+variance it targets. `mc/cv_fitted` (1.3894e-6) and `sobol_digital/plain` (1.4077e-6)
+coincide, making the "QMC and the CV remove the same variance" mechanism directly
+visible and predicting its *magnitude*, not just its sign. Hygiene clean: `estimator.py`
+byte-identical and untouched, vault 1/1, `check_disjoint()` passes, and the strings
+`30_806_016`/`30_806_017` appear **only** in `seed_blocks.py` — D16/D17 genuinely
+never drawn from.
+
+**Defects found — four, all accepted.**
+
+1. **"Optimal fitted β ≥ any fixed analytic β" is FALSE in the configuration that
+   decides.** `cv_lab.py:54-74` fits β to minimise per-sample covariance, which is the
+   variance-minimising coefficient **under plain MC only**; under an RQMC point set it
+   optimises the wrong objective. Measured: on digital-shift Sobol the fitted
+   coefficient scores 0.992× while the analytic `M` scores 1.010× — **the bound is
+   beaten by the thing it was supposed to bound.** It happens not to change the
+   verdict (both are 1.0), but **this argument must never be reused.**
+2. **The "≥58% bias" cap is inapplicable, and the conclusion drawn from it was
+   backwards.** See the withdrawal above. This is the most consequential finding of
+   the review, because the wrong conclusion had already reached
+   `docs/CURRENT_STATE.md`'s #1 open question.
+3. **The 1.80× standalone ceiling is weaker than the durable docs present it.**
+   `cv_lab.py:135-138` aggregates as `mean(v0)/mean(v)` — **a ratio of means, the
+   exact statistic `docs/VALIDATION.md` §2b forbids** — over **3 MLPs** of the public
+   mini split, on the dense unpruned/unrotated network. The Skeptic's paired geometric
+   mean over 14 MLPs reads **1.584×**, not 1.80×. Both `docs/CURRENT_STATE.md` and
+   this LOG quoted 1.80× as settled without any of those qualifiers.
+4. **Tier violation, disclosed rather than hidden.** The kill was decided entirely on
+   CONFIRM-tier public-split data, which `docs/VALIDATION.md` §0 says may not be used
+   to choose anything. The Skeptic's confirmation shares the defect and says so. The
+   effect size (1.01× against a 1.25× gate) is far outside any plausible
+   DECIDE/CONFIRM difference (documented at +1.4%), so the verdict survives — but the
+   provenance does not meet the protocol.
+
+**Scope correction to the closed-lane row.** "Any linear form" is the honest scope. A
+correction using an **empirical** per-layer gain (the free `mean(z_l > 0)` from the
+forward pass) instead of the analytic `Φ_l` is a *nonlinear* function of the sample
+and formally escapes the linear-CV class. The same overlap mechanism suggests it is
+also worthless, but **no measurement covers it** and the kill must not be cited
+against it.
+
+**Also unmeasured:** the CV has never been run on the actual v2.4.1 path (pruned +
+rank-32 rotated). The Skeptic argues both restrictions shrink the CV's headroom
+further — the rotation deliberately aligns the best-equidistributed Sobol dimensions
+with the dominant directions of the linearised map, which are exactly the directions
+the layer-1 CV exploits — but flags this as a directional argument, not a measurement.
+
+**Recommended follow-up, adopted:** re-measure `MSE×N` for the shipped file at
+N ∈ {16,384, 65,536} on **fresh canonical mints**, 200 MLPs × 8 shifts, and report the
+implied bias floor `B²`. It decides whether the next Strategist Packet targets
+variance or calibration — the single highest-leverage question in the project — and
+**D16 is clean, already allocated to this lane, and sufficient.** No single-use block,
+no vault touch, no submission. The Skeptic also recommends promoting its CV probe into
+`local_sim/` so the kill owns a committed artifact.
 
 ## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
 

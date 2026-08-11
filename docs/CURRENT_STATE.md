@@ -75,7 +75,7 @@ any, is stated. Reopening one is STRATEGIC work and needs a Slice Contract.
 | Sprint 4/5 — packed activation sparsity | **KILLED** | pre-registered 1.15× → **1.1216×** [1.1188, 1.1244] on D14 | LOG 2026-08-06. D12 and **D14 are SPENT — never reuse** |
 | N as an operating-point lever | **CLOSED** | `MSE×N` flat over {16k, 32k, 65k} at 8 shifts | the 14% "optimum" was one heavy-tailed realisation |
 | Batched depth-2 Strassen | **OFF** | bitwise identical, −53% ops, **worse** residual | shipped behind `_STRASSEN_BATCHED`, tests kept |
-| **Control variates (layer-1 exact-mean, any linear form)** | **DEAD** | ceiling **1.80×** standalone; **~1.00× stacked on Sobol** (2.04→1.98); illegal h₂/h₃ variants only 2.1–2.5× | `local_sim/cv_lab.py`, LOG 2026-08-05 line 135. **Covers recursive/per-layer forms too**: any correction that telescopes to a linear map of the layer-1 sample-mean error is in this class — verified 2026-08-10 when a strategist re-proposed one |
+| **Control variates (layer-1 exact-mean, LINEAR forms only)** | **DEAD** | **1.010×, 95% CI [0.979, 1.042]** on our Sobol+digital-shift path — CI includes 1.0. On plain MC the same correction gives 1.383× and the fitted optimum 1.584×: QMC already removes that variance | Skeptic probe 2026-08-11, 14 MLPs × 6 shifts, paired geo-mean, CONFIRM tier. **Covers recursive/per-layer forms** — any correction telescoping to a linear map of the layer-1 sample-mean error is in this class. **Does NOT cover** corrections using an *empirical* per-layer gain (`mean(z>0)`), which are nonlinear and unmeasured. The older "1.80× standalone" is a ratio of means over 3 MLPs and should not be quoted |
 | Score optimisation generally | ~~CLOSED at ~2.7e-7~~ **REOPENED 2026-08-10** | — | GAME_PLAN rev 6's frontier described *our method*, not the field's. Board decomposition shows honest teams 4.8× better on MSE at our compute. See § *Open questions* #1 |
 
 **The mechanism behind the packed lane's death, which generalises**: flopscope
@@ -101,6 +101,19 @@ The lane arbitrages the price table against physics, and loses.
    ~2.7e-7" described *our method's* frontier, not the field's. Mechanism unknown;
    MSE alone cannot distinguish better variance reduction from a better analytic
    core. **Strategist Packet issued 2026-08-10.** Full analysis: `experiments/LOG.md`.
+
+   **It is a VARIANCE gap, not a bias gap — corrected 2026-08-11.** An earlier note
+   here inferred "probably mostly bias → attack the closure/calibration core" from
+   forum 18085's "≥58% of residual is bias". That figure describes *radiant-
+   allomancer's own* estimator (4.47e-7), not ours (1.3323e-6), and **our own data
+   contradicts it**: `MSE×N` = 0.03657 / 0.04036 / 0.03666 at N = 16,384 / 32,768 /
+   65,536 (24 MLPs × 8 shifts, α = 1.00). Solving `MSE(N) = V/N + B²` gives
+   **B² ≈ 1.8e-9 ≈ 0.08% of MSE — the residual is ~99.9% variance.** So J2W's 4.8×
+   lower MSE at our compute is 4.8× lower *variance per sample*, and the next
+   Strategist Packet must target **variance mechanisms**, not calibration.
+   *Caveat: that MSE×N reading is from local mints at one configuration. Confirming
+   it on fresh canonical mints (200 MLPs × 8 shifts, N ∈ {16k, 65k}, block D16) is
+   the #1 next action — it decides where the whole next phase of work aims.*
 2. **Moonshot G1 — blocked on the D10 renormalization fit.** G0 (done 2026-08-07)
    proved the layer convention, built the registered calibrated-K2 baseline
    (depth 8 → 1.2067e-05; G1 must reach ≤4.02e-06), and read the oracle: full-rank
@@ -246,7 +259,13 @@ Codex hook *registration* schema, because Codex is not installed here — see
 
 ## Next actions
 
-1. **Local-residual repeatability run.** Three `--runner subprocess` repeats plus one
+1. **VARIANCE-OR-BIAS: re-measure `MSE×N` on fresh canonical mints.** N ∈ {16,384,
+   65,536}, 200 MLPs × 8 shifts, block **D16** (clean, already allocated, no
+   single-use block needed), report the implied bias floor `B²`. **This decides where
+   the entire next phase of work aims** — variance mechanisms if ~99.9% variance holds
+   on canonical mints, calibration if it does not. No vault touch, no submission.
+   Phase 2 opens 18 Aug, so this should land first.
+2. **Local-residual repeatability run.** Three `--runner subprocess` repeats plus one
    `--runner local`, unmodified `estimator.py`, mini split, same day, each saved with
    `--format json`. The runner arm is *already answered from disk* (1.301×); what is
    unmeasured is whether this machine's residual is repeatable at all. If the three
