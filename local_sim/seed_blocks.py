@@ -69,6 +69,15 @@ DECISION_BLOCKS = [
                                  "calibrated-K2 control (MOONSHOT.md). Infrastructure only -- "
                                  "no gate is decided here, and D08/D09 stay untouched so G1/G2 "
                                  "still have unseen data."),
+    ("D16", 30_806_016_000, 600, "ALLOCATED 2026-08-10 for the layer-local control-variate DESIGN "
+                                 "phase, then RELEASED UNSPENT the same day: the lane was killed "
+                                 "before measurement (the recursion telescopes to a linear map of "
+                                 "the layer-1 sample-mean error, i.e. the control variate whose "
+                                 "1.80x standalone / ~1.00x-on-Sobol ceiling cv_lab measured on "
+                                 "2026-08-05). NO SEED WAS EVER DRAWN. Reusable."),
+    ("D17", 30_806_017_000, 600, "ALLOCATED 2026-08-10 as the matching single-use DECISION block, "
+                                 "then RELEASED UNSPENT the same day for the same reason. "
+                                 "NO SEED WAS EVER DRAWN. Reusable; see SINGLE_USE_BLOCKS."),
 ]
 
 # --- single-use blocks -------------------------------------------------------
@@ -78,6 +87,9 @@ DECISION_BLOCKS = [
 SINGLE_USE_BLOCKS = {
     "D12": "Sprint 4 / S1 paired decision (GAME_PLAN rev 9) — SPENT 2026-08-06",
     "D14": "Sprint 5 / packed-carrier paired decision (GAME_PLAN rev 11)",
+    # D17 was registered here on 2026-08-10 and released the same day without a seed
+    # ever being drawn (lane killed pre-measurement). It is deliberately NOT listed as
+    # single-use: an unspent block is clean, and pretending otherwise wastes 600 seeds.
 }
 
 

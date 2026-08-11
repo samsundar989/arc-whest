@@ -75,7 +75,8 @@ any, is stated. Reopening one is STRATEGIC work and needs a Slice Contract.
 | Sprint 4/5 — packed activation sparsity | **KILLED** | pre-registered 1.15× → **1.1216×** [1.1188, 1.1244] on D14 | LOG 2026-08-06. D12 and **D14 are SPENT — never reuse** |
 | N as an operating-point lever | **CLOSED** | `MSE×N` flat over {16k, 32k, 65k} at 8 shifts | the 14% "optimum" was one heavy-tailed realisation |
 | Batched depth-2 Strassen | **OFF** | bitwise identical, −53% ops, **worse** residual | shipped behind `_STRASSEN_BATCHED`, tests kept |
-| Score optimisation generally | **CLOSED at ~2.7e-7** | GAME_PLAN rev 6 | draw variance dwarfs any remaining ~2% gain |
+| **Control variates (layer-1 exact-mean, any linear form)** | **DEAD** | ceiling **1.80×** standalone; **~1.00× stacked on Sobol** (2.04→1.98); illegal h₂/h₃ variants only 2.1–2.5× | `local_sim/cv_lab.py`, LOG 2026-08-05 line 135. **Covers recursive/per-layer forms too**: any correction that telescopes to a linear map of the layer-1 sample-mean error is in this class — verified 2026-08-10 when a strategist re-proposed one |
+| Score optimisation generally | ~~CLOSED at ~2.7e-7~~ **REOPENED 2026-08-10** | — | GAME_PLAN rev 6's frontier described *our method*, not the field's. Board decomposition shows honest teams 4.8× better on MSE at our compute. See § *Open questions* #1 |
 
 **The mechanism behind the packed lane's death, which generalises**: flopscope
 prices a gather at 4 FLOPs/element, and packing's entire saving is substituting

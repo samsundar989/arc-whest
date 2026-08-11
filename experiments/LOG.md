@@ -2790,6 +2790,243 @@ evidence the project has seen. The open question "319341's variance advantage,
 variance reduction from a better analytic core from a fundamentally different
 estimator. That is the strategist's question.
 
+## 2026-08-10 — SLICE CONTRACT: layer-local control variate, DESIGN on D16 → DECISION on D17  [PRE-REGISTERED, no data yet]
+
+**Origin.** Strategist Packet rev 2 (issued 2026-08-10 after the board decomposition
+reopened the accuracy lane). The returned contract was re-verified against
+`estimator.py` before allocation, per `ai/workflows/next-slice.md`; four corrections
+were made and are recorded below rather than silently applied.
+
+**Strategic question**
+Does removing the *transported layer-1 sampling error* at every layer recover a
+material share of the 4.8× accuracy gap to the honest field, without changing the
+sampled forward path?
+
+**Current bottleneck**
+Accuracy, not cost. Board decomposition (2026-08-10) shows honest teams at our own
+compute (J2W, C/B 0.194 vs our 0.198) reach **4.8× lower MSE**. Our graded raw MSE
+is 1.3323e-6 at C/B 0.198.
+
+**Evidence**
+- CONFIRMED — layer 1 has an exact closed-form mean, error 1.8e-16
+  (`estimator.py:682`, invariant suite check 8).
+- CONFIRMED — the sampled path is a **single trajectory through all 32 layers**
+  (`estimator.py:542-546`): `h` is overwritten by `max(h @ sliced[li], 0)` each
+  layer. Sampling error therefore compounds with depth. *Verified by reading the
+  code, not assumed.*
+- CONFIRMED — the α ≥ 3 band carries **76.5%** of final-layer MSE (LOG 2026-08-05,
+  Track T).
+- CONFIRMED — propagating on-neurons linearly for eight layers changes MSE by
+  **0.07%** (LOG 2026-08-05), which is what licenses a first-order transport model.
+- CONFIRMED — deterministic dead-neuron offsets (`estimator.py:544-545`) are
+  identical across samples and so inject **no sampling error**; the contract's
+  "deterministic offsets cancel" is correct.
+- CONFIRMED — `d/dμ E[ReLU(μ + σZ)] = Φ(μ/σ)` exactly, so the closure's `Φ` is the
+  correct first-order transport gain, not a fitted coefficient.
+- CONFIRMED — historical whole-layer scale error is worth ~1.9× if removed exactly,
+  but every end-of-network predictor for it failed (best R² ≈ 0.15).
+- **NOT SUBSTANTIATED** — the strategist's claim that "closure `Φ(α)` predicts firing
+  probabilities to four decimals" appears nowhere in the repo. Nearest evidence is
+  indirect (pilot reordering was an exact no-op "because the closure's firing rates
+  are already exact", LOG 2026-08-06). **Φ's accuracy is therefore a D16 precondition,
+  not an input.**
+- SPECULATIVE — the recursion removes 2–4× of final MSE (strategist). See *Ceiling*.
+
+**Hypothesis**
+With `s_l` the sampled post-ReLU mean at layer `l` and `mtilde_1` the exact
+first-layer mean,
+
+`mtilde_l = s_l − (((s_{l-1} − mtilde_{l-1}) @ W_l) * Φ_l)`
+
+using the existing sliced weights, alive indices and closure `Φ`, reduces
+final-layer MSE at effectively unchanged cost.
+
+**Mechanism**
+Layer 1 is the one place we know the truth, so `s_1 − mtilde_1` is our sampling
+error *observed exactly*. To first order a mean perturbation `δ` entering layer `l`
+moves that layer's post-ReLU mean by `(δ @ W_l) · Φ_l`. Subtracting it at each layer
+stops a measurable error from being amplified through the remaining depth.
+
+**Ceiling — the correction is narrower than the strategist stated, and this is the
+main risk.** Telescoping the recursion, `e_l = s_l − mtilde_l` unwinds to the
+layer-1 error transported forward by `∏(W·Φ)`. Errors **originating** at layers 2–31
+are never corrected, because they are unobservable. The method's ceiling is therefore
+*the share of final-layer MSE whose origin is layer-1 sampling error*, and **nothing
+in the repository bounds that share.** D16 exists to bound it before D17 is spent.
+
+**Intervention**
+A fenced lab probe implementing exactly the recursion above. Sampled activations,
+point set, shifts, pruning, rotation and N are all unchanged; only the reported
+running mean changes. `estimator.py` is NOT edited in this slice.
+
+**Corrections made to the returned contract** (all before any data):
+1. **Split into DESIGN (D16) and DECISION (D17).** The returned contract gated on the
+   same block it would implement and debug on. Debugging is tuning; that is the
+   failure mode that cost Sprint 4 two results (D11→D12, D13→D14 exist for this).
+2. **`s_l` does not currently exist.** `estimator.py:548` takes `h.mean()` once, at
+   the end; rows 1..30 are filled from the *closure* (`mus`), which is why
+   `all_layers_mse` 4.83e-5 is 36× worse than `final_layer_mse` 1.33e-6. The probe
+   must add 32 reductions — cheap (~0.25% counted) but genuinely new code, not a
+   reinterpretation of existing values.
+3. **Two-tier gate** (below). The returned single gate recorded a project-best result
+   as a failure: 1.25× accuracy at ~0.3% cost is 2.6314e-7 → ~2.1e-7, the largest
+   single gain in this project's history.
+4. **Φ accuracy demoted from evidence to precondition** (see above).
+
+**Prediction — driver**
+Mechanism is correct but narrow. Central estimate **G ≈ 1.1–1.6×**, with material
+probability of ~1.0× if the layer-1-originated share is small. Counted overhead
+**<0.5%** (estimated 0.25%).
+
+**Prediction — Samuel (registered before any data, verbatim)**
+> 1. "I don't know" (what part of the system it changes — taught, then recorded)
+> 2. "A slight improvement"
+> 3. "A major reduction in score/performance" would disprove it
+
+Read: Samuel predicts a positive but modest effect, i.e. closer to the driver's
+1.1–1.6× than to the strategist's 2–4×. **Three-way registered disagreement:
+strategist 2–4×, driver 1.1–1.6×, Samuel "slight".** Samuel's falsifier is a
+*regression*, which is weaker than the pre-registered KILL condition (CI including
+1.0); the gate below is the binding one.
+
+**Gate — two-tier, fixed NOW, before D16 or D17 is touched**
+On 200 D17 MLPs × 8 identical digital shifts,
+`G = exp(mean_j(log(MSE_control,j / MSE_candidate,j)))`:
+
+| tier | threshold | consequence |
+|---|---|---|
+| **EXPLAINS THE GAP** | `G ≥ 2.0` **and** 95% CI lower bound ≥ 1.5 | strategist's claim validated |
+| **PROMOTE** | `G ≥ 1.25` **and** 95% CI excludes 1.0 | real and bankable; proceed to a cost + estimator slice |
+| **KILL** | 95% CI includes 1.0 | layer-1-originated error is not a material share; lane closes |
+
+All outputs must be finite and GT noise must be <10% of candidate MSE in every tier.
+Arithmetic means and worst-decile behaviour are reported but do not replace the
+paired gate.
+
+**Baseline**
+Unmodified v2.4.1 pruned/rotated Sobol computation at N=16,384, on identical samples
+and shifts (common random numbers).
+
+**Residual model**
+**Not consumed — the gate is accuracy-only.** Counted overhead is recorded. **No
+adjusted-score claim, no submission, and no `estimator.py` edit is authorised by a
+passing D17 result**; those require a subsequent slice reporting the three residual
+models and a clean grader-style mini run. This is deliberate: the local residual is
+E1 and currently reads 4.28×–7.07× depending on path.
+
+**Statistic**
+Paired, common random numbers. Per-MLP MSE averaged over 8 shifts; decision
+statistic is the geometric mean of per-MLP ratios with a 95% log-ratio CI. Never a
+ratio of means. Per the 2026-08-10 review, also report the fraction of the aggregate
+delta carried by the single largest mover.
+
+**Confounders**
+Φ is Gaussian-optimal but the true transported gain is not exactly Φ · existing
+pruning bias (the dead-neuron offset uses the *closure* mean, which the recursion
+does not correct) · high correlation between successive recursive errors · GT noise ·
+heavy-tailed MLP difficulty (max/median 12.93×).
+
+**Scope**
+`local_sim/seed_blocks.py` (D16, D17, SINGLE_USE_BLOCKS) · a fenced lab probe ·
+raw JSON under `experiments/` · this LOG entry. **`estimator.py`: unchanged.**
+
+**Do not change**
+N, Sobol point set, digital shifts, `_PRUNE_TAU`, rotation, `_BASIS_RANK`, closure
+equations, `beta = Φ`, block size after measurement, or the gate.
+
+**Evidence required**
+Preflight GREEN before D17 is touched · exact commands and commit sha · raw per-MLP
+per-shift control and candidate MSE · paired ratios with CI · GT-noise floor as a
+fraction of candidate MSE · counted-operation estimate · **zero vault touches**.
+
+**Driver** Claude Code.
+
+### RESULT — **KILLED BEFORE MEASUREMENT. D16 and D17 were allocated but never touched.**
+
+No data was taken. No seed block was spent. No vault touch. `estimator.py` unchanged.
+The lane was closed by evidence already in this repository, found during the
+pre-build verification the workflow requires.
+
+**The finding.** `experiments/LOG.md` line 135 (2026-08-05, `local_sim/cv_lab.py`),
+restated independently in `docs/GAME_PLAN.md` line 41:
+
+> Control variates are a dead end here. Layer 1 has exactly-known moments, so it is
+> a legitimate zero-bias control variate. Ceilings measured by per-sample covariance:
+> scalar CVs 1.1×; **full 256-dim h₁ vector 1.80×**; even the *illegal* ceilings using
+> h₂/h₃ only reach 2.1–2.5×. **And stacked on Sobol the CV adds nothing
+> (2.04× → 1.98×)** — QMC and the CV remove the same variance. Dropped.
+
+**Why it applies to this exact proposal, checked rather than assumed.** Telescoping
+the recursion: `e₁ = ε₁`, `e₂ = (ε₁ @ W₂)·Φ₂`, `e₃ = ((ε₁ @ W₂)·Φ₂ @ W₃)·Φ₃`, so
+every `e_l` is a **fixed linear map of ε₁** and the final correction is `M(ε₁)` with
+`M = ∏(W_l·Φ_l)`. That is precisely a control variate with control `mean(h₁)` and
+known mean `E[h₁]` — the 256-dim layer-1 vector CV — carrying an *analytic*
+coefficient where `cv_lab` measured the *optimal fitted* one. A fixed coefficient
+cannot beat the optimum, so:
+
+| bound | value | source |
+|---|---|---|
+| ceiling of this mechanism class, standalone | **1.80×** | cv_lab, per-sample covariance |
+| ceiling including *illegal* h₂/h₃ information | 2.1–2.5× | cv_lab |
+| **the same CV stacked on Sobol — our configuration** | **~1.00×** (2.04→1.98) | cv_lab |
+| share of residual that is bias, not variance | **≥58%** | forum 18085 |
+
+The strategist predicted **2–4×**, which exceeds the measured ceiling of the whole
+class even before the Sobol result is applied. Our estimator uses Sobol
+(`estimator.py:534-541`), which is the configuration measured at ~1.00×.
+
+**The "per-layer, not end-patch" novelty does not survive either.**
+`docs/RESEARCH_NOTES.md` line 282 correctly identifies per-layer correction as the
+untested angle, but that would only be new if it corrected error *originating* at
+layers 2–31. This recursion cannot: layer 1 is the only layer whose truth we know, so
+every term traces back to ε₁. It is the end-patch in recursive form.
+
+**What was nonetheless verified and is worth keeping.** The strategist's mechanism is
+mathematically correct and its architectural claims held up against the code:
+`d/dμ E[ReLU(μ+σZ)] = Φ(μ/σ)` exactly; the sampled path really is one trajectory
+through all 32 layers (`:542-546`); deterministic dead-neuron offsets inject no
+sampling error (`:544-545`); the row convention matches. **The idea was sound and the
+arithmetic was right — it was already measured.**
+
+**Root cause, and it is the driver's.** The Strategist Packet's "experiments already
+tried and rejected" section listed nine killed lanes and **omitted the control-variate
+result**, the one directly on point. The packet's own text claims that section
+"prevents the recipient re-proposing a mechanism already measured and killed." The
+structural cause is that `docs/CURRENT_STATE.md`'s closed-lane table has eight rows
+and does not include control variates — the kill lives only in a LOG line and a
+GAME_PLAN Phase-A paragraph, neither of which a packet author reads by default.
+**Fixed: the closed-lane table now carries the control-variate row.**
+
+**Blocks D16 and D17 are UNSPENT and remain available.** No experiment has drawn a
+single seed from either. They are recorded in the registry as allocated-then-released
+so the audit trail shows why, and they may be reused by a future experiment.
+
+### Knowledge Delta
+
+- **Learned.** The layer-1 exact-mean control variate has a measured ceiling of 1.80×
+  standalone and ~1.00× on top of QMC, and any correction that is a linear function
+  of the layer-1 sample-mean error — including a recursive per-layer one — lies
+  inside that class.
+- **Belief changed.** "Correct per-layer rather than patch the end" was carried as an
+  *untested* angle (RESEARCH_NOTES 282). It is untested only for errors originating
+  below layer 1, which are unobservable. As stated, it is not a distinct lane.
+- **New failure signature.** *A proposal whose correction telescopes to a fixed linear
+  map of a quantity we already built a control variate from.* Diagnostic: unroll the
+  recursion and ask what it is ultimately a function of. If the answer is a statistic
+  whose exact mean we know, it is a control variate and its ceiling is already
+  measured.
+- **Process defect, now fixed.** A Strategist Packet is only as good as its
+  rejected-lanes section, and that section was assembled from `CURRENT_STATE.md`'s
+  table rather than from the LOG. Any future packet must be checked against the LOG's
+  full kill record, not the summary table.
+- **Cost of the error.** Zero blocks spent, zero GPU hours, ~40 minutes of driver
+  time. Caught by the mandatory pre-build verification, which is the second time
+  today that step has prevented a wrong claim.
+- **What remains open.** The 4.8× accuracy gap is untouched and remains the
+  bottleneck. Variance reduction of the layer-1-anchored kind is now bounded out
+  three ways; combined with 18085's ≥58%-bias finding, **the gap is probably mostly
+  bias, which points at the closure/calibration core rather than at the sampler.**
+
 ## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
 
 **Where we stand**: v1.1 graded 3.893e-7, rank ~159. The leader is 4.87e-8 — **8.0× ahead**. Every analytic-side avenue we tested this session is dead:
