@@ -51,7 +51,7 @@ equal the distribution's moments. The Sobol set's per-coordinate sample moments 
 mean **−0.00149**, std **1.00278**. Rescaling to force (0,1) applies a ~0.3% affine
 map to every point, and a systematic 0.3% scale error on activations of ~0.45 is far
 larger than the ~1e-6 MSE we are chasing. Moment matching trades a negligible
-variance reduction for a **first-order bias**.
+variance reduction for a **first-order bias **[WITHDRAWN 2026-08-19 — the mechanism is wrong. Moment matching's bias is O(1/N) (Glasserman 4.5.1 p.245), and diagonal forcing measures at exactly 1.000x both here (LOG 2026-08-19) and in forum 18151. The 2.35x may be real; this explanation of it is not.]****.
 
 Corollary, equally counter-intuitive: the net's most extreme point — the first Sobol
 point, which maps to z = −6.12 in *every* coordinate, norm 97.9 against a typical

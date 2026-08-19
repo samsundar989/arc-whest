@@ -341,9 +341,21 @@ The section that earns the prize if written honestly.
   the only thing that moved α (0.87 → 1.06). Since x ~ N(0,I) is rotation-invariant,
   the rotation is free and folds into W₁.
 - **Moment-matching a QMC set biases it** (RESEARCH_NOTES §2e). Forcing exact
-  per-coordinate mean 0 / variance 1 cost **2.35×** with no optimisation at all. A
-  QMC set is unbiased because it is the correct quantile transform of an
-  equidistributed net, not because its sample moments are exactly (0,1). Corollary
+  per-coordinate mean 0 / variance 1 cost **2.35×** with no optimisation at all.
+  **[REWRITE REQUIRED — 2026-08-19.** The explanation that followed here, that a
+  QMC set is unbiased because it is the correct quantile transform rather than
+  because its sample moments are (0,1), is *true* but does not explain a 2.35×
+  regression. Moment matching's bias is **O(1/N)** (Glasserman §4.5.1 p.245), i.e.
+  second order, not first. And our shipped Sobol set's **diagonal** second moment is
+  already 107× better than iid, so forcing it is a measured **no-op: 1.0000×, CI
+  [0.999, 1.001]** (LOG 2026-08-19), independently reproduced at "1.000× to three
+  digits" in forum 18151. The 2.35× may be real — the likely confounds are that our
+  `normalise_` also *centres*, and that it ran inside `g2_optimize.py` against a
+  9.156e-6 baseline rather than the shipped configuration — but **this section must
+  not be published until the number is re-measured in the shipped configuration.**
+  The publishable finding in its place is the *off-diagonal* one: our net's
+  off-diagonal second moment is only 5.9× better than iid, and forcing *that* is
+  also worth nothing, because the rotation already collects it.**]** Corollary
   worth stating: the Sobol net's most extreme point (z = −6.12 in every coordinate)
   is *load-bearing* — deleting it costs 0.734×.
 - **A rank-r factor scaffold cannot replace the closure**, and the reason is

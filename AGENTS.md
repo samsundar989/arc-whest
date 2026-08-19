@@ -16,8 +16,11 @@ every neuron's expected post-ReLU activation under x ~ N(0, I) as a `(depth, wid
 array. Score = mean over MLPs of `final_layer_MSE × max(0.1, C/B)`, lower is better;
 `C` = flopscope-counted FLOPs + 1e11 × uninstrumented wall-seconds, `B` = 2.72e11.
 
-**The prize is decided by a private re-run of ONE designated submission on fresh
-MLPs.** Public board rank is not the target. There is a second, now co-equal
+**The prize is decided by a private re-run of UP TO TWO designated submissions per
+team on fresh MLPs** (organiser, forum 18143, 2026-08-10; default if you select
+nothing is your two highest-ranked public entries). The challenge Rules tab still
+says "a single submission"; the contradiction was raised on the forum and is
+unresolved, so plan for two and confirm before any selection deadline.** Public board rank is not the target. There is a second, now co-equal
 objective: the **$20k contribution prize**, whose deliverable is the write-up
 (`docs/writeup-draft.md`).
 

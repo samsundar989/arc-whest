@@ -328,7 +328,17 @@ contract. Skeptic verdict PROVISIONAL; full audit in `experiments/LOG.md`.*
 
 ## Older gotchas (2026-08-05 night)
 
-- **Prizes are decided by a private re-run of ONE designated submission on FRESH MLPs.** Public-board rank is not a target; judge everything on the local 100-MLP mini split and on ≥1000 fresh minted MLPs (`local_sim/robustness.py`). The tail of the fresh-MLP score distribution is the real risk, not the mean.
+- **A probe living in `local_sim/` silently imports the flopscope SHIM, not the
+  grader's cost model.** Python places a script's own directory at `sys.path[0]`,
+  and `local_sim/flopscope/` is a numpy shim of the same name. `import flopscope`
+  from any script in that directory resolves to the shim, whose `BudgetContext`
+  exposes none of the real attributes — so it fails loudly if you read
+  `flops_used` and **silently gives you nothing if you do not**. Any probe that
+  needs real FLOP counts must evict its own directory from `sys.path` before the
+  import and assert on `flops.__file__` (see `local_sim/probe_strassen_carrier.py`),
+  exactly as `mint_provenance.py` already does for `whestbench`. Found 2026-08-19
+  after it produced an `AttributeError` that looked like a flopscope API change.
+- **Prizes are decided by a private re-run of UP TO TWO designated submissions on FRESH MLPs** (forum 18143, 2026-08-10; default = your top two public entries; the Rules tab still says one and the contradiction is unresolved).** Public-board rank is not a target; judge everything on the local 100-MLP mini split and on ≥1000 fresh minted MLPs (`local_sim/robustness.py`). The tail of the fresh-MLP score distribution is the real risk, not the mean.
 - **Score optimisation is closed except Sprint 4's packed-sparsity reproduction**
   (GAME_PLAN rev 9). Sprint 3's static on/kink composition measured 1.0246×, but
   it did **not** test submission 319341's value-dependent cold-column packing,
