@@ -1,0 +1,54 @@
+﻿========================================================================================================
+CARRIER DESIGN STRENGTH — how exact is each point set, and to what degree?
+========================================================================================================
+
+0. the reference moments themselves
+-----------------------------------
+  E[(a.u)^2] == 1/d                                          ok   3.906250e-03
+  E[(a.u)^4] == 3/(d(d+2))                                   ok   4.542151e-05
+  E[(a.u)^6] == 15/(d(d+2)(d+4))                             ok   
+  odd moments are zero                                       ok   
+  iid deviation falls at the Monte-Carlo rate 1/sqrt(n)      ok   expect 3.49x;  k1=3.80  k2=3.59  k3=3.48  k4=3.51  k5=3.54  k6=3.31
+
+1. the radial identity — exact, not a model
+-------------------------------------------
+  mean_radius(d) matches a 400k-sample E||x||                ok   exact 15.984383  sampled 15.983582
+  E||x|| ~ sqrt(d - 1/2) to 1e-4 at d=256                    ok   15.984383 vs 15.984367
+  R and u are uncorrelated (the independence the identity needs) ok   corr(R, |u_0|) = -0.00036
+
+2. MEASURED design strength — d = 256, n = 16384, 4000 probe directions
+-----------------------------------------------------------------------
+
+  carrier                     n         k=1         k=2         k=3         k=4         k=5         k=6
+  -----------------------------------------------------------------------------------------------------
+  iid                     16384   7.630e-03   1.116e-02   2.925e-02   2.548e-02   2.291e-01   5.143e-02
+  iid+sphere              16384   7.630e-03   1.116e-02   2.925e-02   2.548e-02   2.291e-01   5.143e-02
+  sobol (SHIPPED)         16384   2.050e-04   1.964e-03   1.787e-02   1.300e-02   1.925e-01   3.927e-02
+  sobol+anti              16384   1.331e-18   4.082e-03   5.356e-17   1.931e-02   5.781e-16   5.614e-02
+  sobol+anti+sphere       16384   1.323e-18   4.082e-03   5.378e-17   1.931e-02   5.797e-16   5.614e-02
+  haar frames             16384   4.092e-18   4.392e-15   1.546e-17   1.782e-02   1.206e-16   5.601e-02
+
+  ratio to iid (smaller = the carrier is doing more work at that degree)
+  carrier                               k=1         k=2         k=3         k=4         k=5         k=6
+  -----------------------------------------------------------------------------------------------------
+  iid                             1.000e+00   1.000e+00   1.000e+00   1.000e+00   1.000e+00   1.000e+00
+  iid+sphere                      1.000e+00   1.000e+00   1.000e+00   1.000e+00   1.000e+00   1.000e+00
+  sobol (SHIPPED)                 2.687e-02   1.760e-01   6.110e-01   5.102e-01   8.403e-01   7.637e-01
+  sobol+anti                      1.745e-16   3.658e-01   1.831e-15   7.579e-01   2.523e-15   1.092e+00
+  sobol+anti+sphere               1.734e-16   3.658e-01   1.839e-15   7.579e-01   2.530e-15   1.092e+00
+  haar frames                     5.364e-16   3.936e-13   5.286e-16   6.995e-01   5.265e-16   1.089e+00
+
+3. the pre-registered predictions
+---------------------------------
+  S1: Haar frames are EXACT at degree 2                      ok   rel err 4.392e-15
+  S1: Haar frames are NOT exact at degree 4                  ok   rel err 1.782e-02, 0.700x iid
+  S2: shipped Sobol is NOT exact at degree 2                 ok   rel err 1.964e-03
+  S2: shipped Sobol beats iid at degree 2                    ok   5.68x better than iid
+  S3: shipped Sobol's degree-4 error is within 10x of iid's  ok   0.5102x iid  ->  LANE ALIVE — a true degree-4 design still has room
+  S4: antipodal makes every ODD moment exactly zero          ok   k1=1.33e-18  k3=5.36e-17  k5=5.78e-16
+  S4: and the shipped carrier alone does NOT                 ok   k1=2.05e-04  k3=1.79e-02  k5=1.93e-01
+  S5: 256 = 4^4, so the real-MUB bound d/2+1 is attainable   ok   4^4 = 256, bound = 129
+  S5: 129 x 256 x 2 == 66,048 signed directions (Team Puffi's figure) ok   66,048
+  S5: a 66,048-direction bank is 4.03x the shipped operating point ok   4.03x N = 16,384
+
+18/18 checks passed

@@ -155,7 +155,7 @@ with flops.configure(symmetry_warnings=False).
 │ │ └────────┴──────────────────────────┴────────────┘                      │ │
 │ └─────────────────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
-✓ Validation passed in 84ms
+✓ Validation passed in 51ms
 Next: `whest run --estimator estimator.py --split mini`
   PASS  3. whest validate
 

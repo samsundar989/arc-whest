@@ -5302,3 +5302,198 @@ D17 and D19 unspent. D18 192/600. D16 270/600. `estimator.py` ==
 `estimator_v2_6_1.py`, **NOT promoted**; the graded number of record is still
 **v2.4.1 = 2.6314e-7** (submission 327743). Nothing submitted.
 
+
+---
+
+## 2026-08-19 (night) — STAGE 1 / item 5 CONTRACT: measure the carriers' actual design strength before building a design  [PRE-REGISTERED]
+
+**Classification: IMPORTANT.** New lab module, no gate, no estimator change, no
+decision block, no vault touch. It mints no networks at all — the whole slice is
+linear algebra on point sets.
+
+**Scope correction, recorded so the reasoning is auditable.** I previously called
+Stage 1 "blocked on the Phase-2 configuration". Samuel's ruling, 2026-08-19: the
+shape is expected to hold, we should not be tuning to Phase-2 specifics anyway,
+and we cannot submit regardless — so build generically now. He is right, and the
+proposal's own rule is narrower than I read it: *"do not reuse 256x32 **gates**"*
+is about not spending a **single-use decision block** on a shape that might move.
+Building and measuring on DESIGN blocks is unaffected. **D17 and D19 stay
+unspent**; everything here is parameterised by `width` and validated at 256.
+
+### The question this slice answers, and why it comes before any construction
+
+`docs/CURRENT_STATE.md` open question #3 leaves exactly one input-space lane
+alive: a **true degree-4/5 angular design** (Kerdock/MUB-129 or a BCH strength-4
+OA), with an external ceiling of **~1.46x** derived from the layer-32 harmonic
+spectrum (deg <= 5 share ~ 0.36-0.39).
+
+That ceiling is computed against an *ideal* baseline. The carrier audit's
+governing finding was **SUBSTITUTION**: two devices that annihilate the same
+low-order structure do not compose. So the number that actually matters is not
+"how much variance lives in degrees <= 5" but **"how much of it does the shipped
+Sobol + rank-32 rotation carrier already remove?"** If our carrier is already
+near-exact at degree 4, a true design buys almost nothing on top of it, and the
+last input-space lane closes without anyone building a Kerdock set.
+
+**Nobody has measured this.** The audit measured *outcomes* (0.9972x, 1.047x); it
+never measured the carriers' **design strength** directly.
+
+### What gets built
+
+`local_sim/carriers.py` — one interface, `points(n, dim, seed) -> (n, dim)`, plus
+the exact-radius reduction, over: the shipped Sobol path, Sobol+antipodal,
+Sobol+antipodal+sphere, Haar orthonormal frame banks, and iid as a floor.
+
+`local_sim/test_carriers.py` — **measured design strength**. For a point set
+`{u_i}` on the sphere and many random unit `a`, compare the set average of
+`(a.u)^k` against the exact spherical moment
+
+```text
+E[(a.u)^k] = 0                                        k odd
+           = (k-1)!! / (d (d+2) ... (d+k-2))          k even
+```
+
+for k = 1..6. A strength-t design matches exactly for every k <= t. Ridge powers
+`(a.u)^k` generate the degree-k polynomials as `a` varies, so this is a strong
+practical test rather than a proof, and is labelled as such.
+
+### Written prediction
+
+| # | prediction | falsified by |
+|---|---|---|
+| **S1** | A **Haar orthonormal frame bank** (K bases, +-Q e_i, sphere-projected) is **EXACT at degree 2** — relative moment error at machine precision — because for any orthonormal basis `mean_j (a.q_j)^2 = 1/d` identically. It is **NOT exact at degree 4** | either half fails |
+| **S2** | The **shipped Sobol carrier** is **not exact at degree 2**, but its degree-2 error is far below iid. The carrier audit measured its diagonal second moment 107x better than iid and its off-diagonal only 5.9x, so I expect a **clearly nonzero** degree-2 residual dominated by the off-diagonal part | it is exact at degree 2, or no better than iid |
+| **S3** | **The decisive one.** At degree 4 the shipped Sobol carrier is **NOT close to exact** — I expect its degree-4 relative error to be **within one order of magnitude of iid's**, because Sobol equidistribution is a low-dimensional-projection property and degree-4 spherical exactness in d = 256 is not something it buys. **If S3 holds, a true degree-4 design still has room and item 5 is worth building.** If instead Sobol is already near-exact at degree 4, the lane is dead | Sobol's degree-4 error is >= 10x better than iid's |
+| **S4** | Antipodal symmetrisation makes **all odd moments exactly zero** for every carrier it is applied to, at machine precision | any odd moment survives |
+| **S5** | 129 is the **maximum** real MUB count in R^256, and 129 x 256 x 2 = **66,048** signed directions reproduces Team Puffi's published figure exactly — because 256 = 4^4 and the real MUB bound is d/2 + 1 | the arithmetic does not match |
+
+### Explicitly NOT promised by this slice
+
+**A working Kerdock/MUB-129 construction.** Real MUBs in R^{4^k} come from
+orthogonal spreads / Z_4-Kerdock sets, and I am not confident I can write one
+correctly from memory. The honest sequence is: build the **verifier** first, then
+attempt constructions **gated by it**, and report a construction as unavailable
+rather than ship one that is silently not a design. This slice delivers the
+verifier and the measurement; the construction is the next slice, and S3 decides
+whether it is worth starting.
+
+No gate, no block, no vault touch, no estimator edit.
+
+
+---
+
+## 2026-08-19 (night) — STAGE 1 / item 5 EVIDENCE PACKET: the carriers' design strength, measured. **The lane is ALIVE, and we now know exactly which rung is missing.**
+
+Contract: the entry immediately above. **All five predictions confirmed, 18/18
+checks.** Artifact: `experiments/2026-08-19_carriers/design_strength.out`.
+No networks minted, no seed block, no vault touch, no estimator change.
+
+### The measurement
+
+RMS relative deviation from the exact spherical moment `E[(a.u)^k]`, over 4,000
+random probe directions, d = 256, n = 16,384. Points are projected to the sphere
+first, so this is a purely ANGULAR measurement and a carrier's radial choice
+cannot contaminate it.
+
+| carrier | k=1 | k=2 | k=3 | **k=4** | k=5 | k=6 |
+|---|---|---|---|---|---|---|
+| iid | 7.63e-03 | 1.12e-02 | 2.93e-02 | 2.55e-02 | 2.29e-01 | 5.14e-02 |
+| **sobol (SHIPPED)** | 2.05e-04 | 1.96e-03 | 1.79e-02 | **1.30e-02** | 1.93e-01 | 3.93e-02 |
+| sobol+anti | **1.3e-18** | 4.08e-03 | **5.4e-17** | 1.93e-02 | **5.8e-16** | 5.61e-02 |
+| haar frames (32 bases) | **4.1e-18** | **4.4e-15** | **1.5e-17** | 1.78e-02 | **1.2e-16** | 5.60e-02 |
+
+As a ratio to iid — smaller means the carrier is doing more work at that degree:
+
+| carrier | k=1 | k=2 | k=3 | **k=4** | k=5 | k=6 |
+|---|---|---|---|---|---|---|
+| **sobol (SHIPPED)** | 0.027 | 0.176 | 0.611 | **0.510** | 0.840 | 0.764 |
+| sobol+anti | ~0 | 0.366 | ~0 | **0.758** | ~0 | 1.092 |
+| haar frames | ~0 | ~0 | ~0 | **0.700** | ~0 | 1.089 |
+
+### Verdicts
+
+| # | verdict | measured |
+|---|---|---|
+| **S1** | **CONFIRMED, both halves** | Haar frames exact at degree 2 (**4.39e-15**, machine precision) and NOT at degree 4 (1.78e-02, 0.700x iid) |
+| **S2** | **CONFIRMED** | shipped Sobol is not exact at degree 2 (1.96e-03) but is **5.68x better than iid** there |
+| **S3** | **CONFIRMED — THE LANE IS ALIVE** | shipped Sobol's degree-4 error is **0.510x iid's**. It removes only ~49% of the degree-4 deviation; a true degree-4 design removes 100% |
+| **S4** | **CONFIRMED, both halves** | antipodal symmetrisation zeroes k=1,3,5 at 1e-16 to 1e-18; the shipped carrier alone leaves 2.05e-04 / 1.79e-02 / 1.93e-01 |
+| **S5** | **CONFIRMED** | 256 = 4^4, so the real-MUB bound d/2+1 = **129** is attainable, and 129 x 256 x 2 = **66,048** reproduces Team Puffi's published figure exactly |
+
+### Three things this measurement explains that were previously only outcomes
+
+**1. Why the degree-3 design carrier died — mechanistically, for the first time.**
+The carrier audit killed it at 1.047x [0.979, 1.120] against the shipped stack and
+recorded the mechanism as "the rank-32 rotation collects it". The direct
+measurement is sharper: a Haar orthonormal frame bank is **exactly a 3-design** —
+machine-precision at k=1,2,3 — and **nothing at all above it** (0.700x iid at k=4,
+1.089x at k=6). It was killed because degrees 1-3 are the part the shipped carrier
+had already largely taken (0.027x, 0.176x, 0.611x), and it brings nothing to
+degree 4. **The prize is specifically the step from degree 3 to degree 4/5.**
+
+**2. Why sphere projection was worth 1.0010x.** The audit recorded it DEAD on our
+carrier and could not say why. Here `iid` and `iid+sphere` have **identical**
+angular profiles to every digit, as do `sobol+anti` and `sobol+anti+sphere`.
+Projection changes the radius and only the radius — and the radius is not where
+the error is. That is a mechanism, not a number.
+
+**3. Antithetic symmetrisation makes the EVEN degrees WORSE, and nobody had
+quantified it.** `sobol+anti` reads **0.366x** iid at k=2 against plain Sobol's
+0.176x, and **0.758x** at k=4 against 0.510x. It uses only n/2 *distinct* points,
+so every even moment is estimated from half the sample. It buys exact odd moments
+at roughly a **2x** cost in even-moment accuracy. Every surviving combination in
+the audit (`tent+white` at 1.0931x) involves symmetrisation, and this is the tax
+they are all paying.
+
+### The ceiling, and a cost analysis that changes the affordability question
+
+Above degree 4 **nothing we have does anything**: at k=6 every carrier sits at
+0.76-1.09x iid. So the reachable target is degree 4, or degree 5 with antipodes —
+which is exactly what a Kerdock/MUB set claims, and exactly the ~1.46x external
+ceiling `docs/CURRENT_STATE.md` quotes from the deg<=5 harmonic share of 0.36-0.39.
+
+**A full MUB-129 bank is 66,048 directions = 4.03x our operating point** of
+N = 16,384. The obvious objection is that it costs 4x. It does not, and the
+repository's own flat-adjusted law is why: `adjusted = MSE x max(0.1, C/B)` with
+`MSE ~ V/N` and `C ~ c*N` gives `adjusted = V*c/B`, **independent of N above the
+floor** (`local_sim/figure_data.py`, `make_figures.py`, and D03's audit). Moving
+from N = 16,384 to N = 66,048 takes C/B from ~0.199 to ~0.80 and MSE down ~4x, so
+the adjusted score is unchanged and the design's degree-4 exactness is pure gain.
+
+**That is a derivation from a law this repo has already measured, not a new
+measurement, and it carries two live risks:** C/B ~ 0.80 leaves much less headroom
+before the hard `C > B` failure cliff (which costs multiplier 1.0 AND zeroed
+predictions — 5x, per P0.1), and D03 measured only ~1.007x of the FLOP-only 1.0408x
+surviving residual billing at N = 65,536, so the law holds approximately, not
+exactly. **Neither is a reason not to build; both are reasons the operating point
+must be re-swept for a fixed-size design rather than assumed.**
+
+### Knowledge Delta
+
+- **The shipped carrier is a strong 1-design, a decent 2-design, and roughly half
+  a 4-design.** Concretely: 0.027x / 0.176x / 0.611x / 0.510x / 0.840x / 0.764x of
+  iid at degrees 1-6.
+- **A Haar frame bank is exactly a 3-design and nothing more.** This is the
+  measured identity of the "degree-3 structured design carrier" the audit killed.
+- **Antipodal symmetry is free at odd degrees and costs ~2x at even degrees.**
+- **Sphere projection is angularly inert.** It moves the radius only.
+- **The remaining input-space prize is the degree-3 -> degree-4/5 step, and
+  nothing above degree 4 is reachable with anything we have.**
+
+### What this slice deliberately did NOT deliver
+
+**A working Kerdock/MUB-129 construction.** The contract said so in advance. Real
+MUBs in R^{4^k} come from orthogonal spreads / Z_4-Kerdock sets, and I am not
+confident of writing one correctly from memory; shipping a set that is silently
+not a design is the failure mode this whole slice exists to prevent. The verifier
+now exists, so any candidate construction can be accepted or rejected in seconds
+by the table above — a construction is a design exactly when its k<=4 row reads
+1e-15 rather than 1e-2.
+
+### Next
+
+Build the MUB-129 / BCH candidates against this verifier. The pass condition is
+now concrete and cheap: **degree 4 at machine precision.** Only after that does a
+paired end-to-end comparison on a DESIGN block make sense, and only after that
+does the operating-point re-sweep the cost analysis above calls for.
+

@@ -273,6 +273,21 @@ and have moved to § Closed lanes; what is left is genuinely short.*
    file with 1.7× the operation count) is the load-bearing assumption and is
    exactly what an independent falsifier should attack.
 
+2b. **The design lane is ALIVE, and the missing rung is now identified.**
+   Measured 2026-08-19 (`local_sim/test_carriers.py`, 18/18): the shipped Sobol
+   carrier's degree-4 moment error is **0.510× iid's** — it collects about half
+   of degree 4 and none of degree 6. A Haar frame bank is **exactly a 3-design**
+   (machine precision at k=1,2,3) and **0.700× iid at k=4**, which is the
+   mechanistic explanation of the audit's degree-3 kill: it brings nothing the
+   rotation had not already taken. **The remaining prize is specifically the
+   degree-3 → degree-4/5 step**, and nothing above degree 4 is reachable with
+   anything we have (every carrier sits at 0.76–1.09× iid at k=6). Two further
+   mechanisms fell out: sphere projection is **angularly inert** (it moves the
+   radius only, which is why it measured 1.0010×), and antipodal symmetrisation
+   **costs ~2× at even degrees** because it uses n/2 distinct points.
+   *Still to build: a verified Kerdock/MUB-129 or BCH construction. The verifier
+   now exists and the pass condition is concrete — degree 4 at machine precision.*
+
 3. **Where does the ~2.6× to the published honest frontier come from?**
    Unresolved and possibly unresolvable from public data. Their sample counts are
    not published, so their **variance advantage cannot be separated from their
