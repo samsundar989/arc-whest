@@ -8,21 +8,30 @@ changes — not on every experiment. The narrative record is `experiments/LOG.md
 
 ## The clock
 
+*Last polled 2026-08-19 15:13 UTC.*
+
 | event | when | status |
 |---|---|---|
-| Round 1428 "Phase 1" | closes **2026-08-10 23:59 UTC** | **LIVE.** Deadline conflict RESOLVED 2026-08-10: the API round object itself moved from Aug 7 to Aug 10, matching organizer thread 18125 |
-| Round 1429 "Phase 2" | opens **2026-08-18 00:00 UTC**, closes **2026-09-19 23:59 UTC** | UPCOMING, empty board, no `v1-phase2` HF tag. **Opening moved Aug 8 → Aug 18** (observed 2026-08-10): there is now a 7-day gap after Phase 1, not a same-day handover |
-| Write-up due | **2026-08-17** (forum 18109) | the contribution-prize deliverable |
-| Registration / team freeze | 2026-09-05 | |
-| Results | 2026-10-01 | private re-run of UP TO TWO designated submissions on fresh MLPs (forum 18143; Rules tab still says one — unresolved) |
+| Round 1428 "Phase 1" | closed **2026-08-10 23:59 UTC** | **CLOSED.** Our last submission is 327743 (v2.4.1) |
+| Phase 1 submission selection | closed **2026-08-11 23:59 UTC** | **PASSED.** We nominated nothing, so the default applied: our **two** highest-ranked public entries |
+| Phase 1 write-up | closed **2026-08-17 23:59 UTC** | **PASSED, MISSED.** No extension was issued. Write-ups posted after it (18184, 18185) drew no organiser objection, but that is not permission |
+| Round 1429 "Phase 2" | opens **2026-08-20 00:00 UTC** | **UPCOMING.** Slipped twice: Aug 8 → Aug 18 → Aug 19 → Aug 20. Organiser 18186 (2026-08-18): *"still ironing out some details … the deadline for Phase 2 submissions will also be shifted"* |
+| Phase 2 close | nominally 2026-09-19 23:59 UTC | **WILL MOVE** — organiser says so explicitly |
+| Registration / team freeze | **2026-09-05 23:59 UTC** | 17 days out |
+| Results | 2026-10-01 | private re-run of **UP TO TWO** designated submissions on fresh MLPs (forum 18143; the Rules tab still says one and the contradiction is unresolved) |
 
-**Phase-2 opening is event-triggered, never date-triggered.** Poll with
-`uv run python local_sim/phase2_checklist.py`. The runbook is at the tail of
-`experiments/LOG.md` (§ *Phase-2 opening runbook*). First action on 1429 going
-active is **frozen v2.4.1 for configuration telemetry, and only with Samuel's
-explicit approval.**
+**Phase-2 opening is event-triggered, never date-triggered, and the date has now
+moved three times.** Poll with `uv run python local_sim/phase2_checklist.py`.
+**Its configuration is unpublished**: width, depth, biases, init, `n_mlps`, budget
+`B`, λ and the multiplier floor are all unverified for round 1429, and no
+`v1-phase2` HF dataset tag exists. Organiser says details ship by **email**, not
+forum-first. The challenge page's timeline and its `max(0.5, ·)` worked example
+are **stale Phase-1/warm-up copy — do not read constants off it**; the only
+trustworthy live numbers are flopscope 0.10.0 / whestbench 0.14.0 / λ = 1e11 /
+floor 0.1 from organiser thread 18125.
 
----
+**First action when 1429 goes active:** re-fit `_PRUNE_TAU` and `_BASIS_RANK` if
+the shape moved, *then* gate. Both are frozen at 256×32 and neither transfers.
 
 ## Where we stand
 
@@ -56,8 +65,17 @@ and agrees — 0.9959× over 32 draws/MLP (`docs/GOTCHAS.md`). The grader run co
 it; it did not discover it.* Full analysis and the independent audit that corrected
 three claims in this section: `experiments/LOG.md` 2026-08-10.
 
-Field anchors: best published honest method 1.551e-7 · our declared honest sampling
-frontier ~2.7e-7 · GT noise floor of the metric ~2e-10. Full table: `docs/BENCHMARK.md`.
+**Field anchors — corrected 2026-08-19.** Best *published and explained* honest
+score is **9.10e-8** (Team Puffi, analytic+QMC hybrid); the best published raw MSE
+is 1.546e-7. GT noise floor of the metric ~2e-10. **We are ~2.6× behind the best
+published honest method, and behind roughly twelve of them.**
+
+⚠️ **"Our declared honest sampling frontier ~2.7e-7" is WITHDRAWN** (it described
+*our own method's* frontier, not the field's), and so is the framing that the
+cost half of `V·c` is "empty" while variance is "crowded" — the 2026-08-19 carrier
+audit measured our variance carrier at ~85–95% of the achievable ceiling for
+input-space methods, and found the remaining headroom on the **cost** side.
+Full table: `docs/BENCHMARK.md`.
 
 ---
 
@@ -141,57 +159,56 @@ The number may be real; the mechanism is not. **Do not ship it.**
 
 ## Open questions, ranked
 
-1. **THE ACCURACY GAP — reopened 2026-08-10 on new external evidence, and it is much
-   larger than we thought.** Decomposing the public board via
-   `score / scoreSecondary = C/B` shows honest teams are **2–3.6× better on score and
-   4.8–10× better on raw MSE**. The decisive case is **J2W: C/B 0.194 against our
-   0.198 — the same compute — with 4.8× lower MSE.** No operating-point confound.
-   Teams with 18–52 entries (too few to probe the public set meaningfully) sit at
-   2–3.6× better scores. Spending more compute does *not* close it: our N=65,536 arm
-   projects to **0.999×** on the grader's own cost anatomy.
-   **This supersedes "319341's 1.216× variance advantage"** — that was a corner of a
-   much bigger gap. It also means `GAME_PLAN` rev 6's "honest sampling frontier
-   ~2.7e-7" described *our method's* frontier, not the field's. Mechanism unknown;
-   MSE alone cannot distinguish better variance reduction from a better analytic
-   core. **Strategist Packet issued 2026-08-10.** Full analysis: `experiments/LOG.md`.
+*Re-ranked 2026-08-19. Questions 1 and 2 of the previous ranking are now answered
+and have moved to § Closed lanes; what is left is genuinely short.*
 
-   **It is a VARIANCE gap, not a bias gap — MEASURED 2026-08-14 at DECIDE tier,
-   question closed.** Block D16, 200 fresh canonical mints × 8 shifts, paired CRN,
-   GT 2²⁴ samples/MLP, label noise **computed and subtracted**:
+1. **THE PHASE-2 CONFIGURATION — blocking, and it lands within hours.** Shape,
+   `n_mlps`, `B`, λ and the floor are unpublished. This is the highest-ranked
+   open question not because it is deep but because **everything downstream is
+   conditioned on it**: `_PRUNE_TAU = −2.5` and `_BASIS_RANK = 32` are fitted at
+   256×32, D17 is single-use, and any design-carrier work is width-specific.
+   **If `L/n` falls materially — a wider or shallower Phase 2 — the mechanistic
+   lane reopens wholesale**, because ARC's own cumulant propagation breaks even
+   only when `L^K < n` (L < 16 for K=2, L < 6.3 for K=3). At 256×32 we sit at
+   L/n = 1/8 and every variant of it is either over budget or worse than MC.
 
-   | | |
-   |---|---|
-   | α (MSE ∝ N^−α) | **0.9928**, 95% CI [0.9586, 1.0274] |
-   | σ_gt² (label noise) | 3.0925e-9 |
-   | B² **after** subtracting it | **2.3727e-9**, 95% CI **[−2.46e-8, 2.84e-8]** — includes 0 |
-   | **B² as share of MSE** | **0.574% → the residual is 99.4% VARIANCE** |
+2. **Does v2.6 actually win?** Built, preflight GREEN, MSE settled at 0.9949×.
+   The cost claim reads **1.068–1.093× projected on the grader** and **0.952×
+   measured on this machine**, and the sign flips on the residual price — a
+   quantity this document classifies **E1, directional only**. See § *Shipped
+   file*. **Only a graded run decides it.** A Skeptic has not seen the build; the
+   transfer argument (that v2.4.1's measured 4.34× per-op inflation carries to a
+   file with 1.7× the operation count) is the load-bearing assumption and is
+   exactly what an independent falsifier should attack.
 
-   **57% of the previously inferred "bias floor" was the noise in its own ground-truth
-   labels** — σ_gt² and B² are perfectly confounded in an MSE-versus-N fit
-   (`E[(pred−truth−η)²] = E[(pred−truth)²] + σ_gt²`), so any such fit that does not
-   subtract σ_gt² is measuring its own labels. Artifact:
-   `experiments/bias_floor_D16.json`; instrument: `local_sim/bias_floor_lab.py`.
+3. **Where does the ~2.6× to the published honest frontier come from?**
+   Unresolved and possibly unresolvable from public data. Their sample counts are
+   not published, so their **variance advantage cannot be separated from their
+   cost advantage**. Their write-ups attribute it to a strength-4 orthogonal-array
+   design plus dead/on/kink routing plus FWHT. The one variance lane the carrier
+   audit did *not* close is a **true degree-4/5 design** (BCH strength-4 OA, or
+   Kuperberg's 2¹⁶+512-point cubature which is exact to degree 5 for the sphere
+   *and* for N(0,I) simultaneously). External ceiling from the layer-32 harmonic
+   spectrum (deg ≤5 share ≈ 0.36–0.39): **≈1.46×**. Width-specific — do not build
+   it before #1 is answered.
 
-   **Consequence:** J2W's 4.8× lower MSE at our compute is **4.8× lower variance per
-   sample**. The next Strategist Packet targets **variance mechanisms**, and must
-   carry the full kill list — the 2026-08-10 round trip happened because the
-   control-variate lane was omitted from it.
-   *(An earlier note here inferred the opposite — "probably mostly bias → attack the
-   closure core" — from forum 18085's "≥58% bias". That figure describes
-   radiant-allomancer's own estimator, 4.47e-7, not ours. Withdrawn 2026-08-11,
-   closed by measurement 2026-08-14.)*
-2. **Moonshot G1 — blocked on the D10 renormalization fit.** G0 (done 2026-08-07)
-   proved the layer convention, built the registered calibrated-K2 baseline
-   (depth 8 → 1.2067e-05; G1 must reach ≤4.02e-06), and read the oracle: full-rank
-   K3 flow beats the control **12.786×**, but the pre-registered r ∈ {4, 8, 16} is
-   *worse* than the control and the ≥3× gate needs r ≈ 128 = width/2 — exactly
-   where Track P found rank-k factorisation stops paying. **Next step is the D10
-   renormalization fit, not D08.** D08/D09 untouched.
-3. **Phase-2 configuration.** Shape, `n_mlps`, budget, λ, floor are all unverified
-   for round 1429. `wall_time_limit_s` has never been observable.
-4. **The write-up (due Aug 17).** Sprint 5's negative result is unusually clean
-   contribution material: a pre-registered gate, a conservative model frozen in
-   advance that was later shown to be load-bearing, and a transferable mechanism.
+4. **Moonshot G1 — blocked on the D10 renormalization fit, and it now has a
+   deployable gate for the first time.** G0 (2026-08-07) proved the layer
+   convention, built the calibrated-K2 baseline (depth 8 → 1.2067e-05, G1 must
+   reach ≤4.02e-06), and read the oracle: full-rank K3 beats the control 12.786×,
+   but pre-registered r ∈ {4, 8, 16} is *worse* and the ≥3× gate needs r ≈ 128 =
+   width/2 — where Track P found factorisation stops paying. **New, better gate
+   (2026-08-19): a closure whose mid-layer mean is 3–6× more accurate than the
+   present one licenses the mid-layer control-variate lane** (`r_c = δ_c/SE_c < 1`
+   at some depth where ρ² is large), which the oracle prices at up to ~100×. That
+   is a *deployable* success criterion, unlike the old ≥3× accuracy bar which was
+   never tied to a use. Kill-by-default **2026-09-01**. D08/D09/D10 untouched.
+
+5. **Is there a Phase 2 write-up round?** Unverified and worth one email. The
+   Phase 1 window closed 2026-08-17 and we missed it. The "Sep 26" figure in older
+   docs is **uncorroborated by any source**. This matters more than it looks: the
+   contribution prize is where our comparative advantage now sits (§ *Standing
+   risks*), and the answer changes how the month is allocated.
 
 ---
 
@@ -325,33 +342,62 @@ Codex hook *registration* schema, because Codex is not installed here — see
 
 ## Next actions
 
-1. ~~VARIANCE-OR-BIAS on fresh canonical mints.~~ **DONE 2026-08-14 — 99.4% variance,
-   B² CI includes 0.** See § *Open questions* #1. D16 spent (design block).
-2. **THE WRITE-UP — due 2026-08-17 23:59 UTC, ~3 days.** Co-equal prize objective and
-   now the tightest deadline in the project. `docs/writeup-draft.md` exists and is
-   unmodified. Material banked since it was last touched, all of it unusually clean:
-   the D14 pre-registered negative result and its price-table-vs-physics mechanism;
-   the 327743 aggregate-vs-paired dissolution on real grader data; the path-dependent
-   residual ratio; the board decomposition via `score/scoreSecondary`; and this
-   slice's label-noise/bias confound. **Nothing here needs a new measurement.**
-3. **Next Strategist Packet — variance mechanisms.** Must carry the FULL kill list
-   including control variates (the 2026-08-10 round trip happened because it did not).
-2. **Local-residual repeatability run.** Three `--runner subprocess` repeats plus one
-   `--runner local`, unmodified `estimator.py`, mini split, same day, each saved with
-   `--format json`. The runner arm is *already answered from disk* (1.301×); what is
-   unmeasured is whether this machine's residual is repeatable at all. If the three
-   repeats span >10%, no local absolute level is quotable and `AGENTS.md`'s "~7×"
-   becomes a range. ~20 min, no seed block, no vault touch, no submission.
-2. **Save the artifact for any local cost number.** The 42.94 ms/MLP reading has no
-   saved JSON — it is internally consistent (multiplier 0.2117 with counted 5.33e10)
-   but not reproducible by the next session. Contract said a mini-run JSON would be
-   produced; it was not.
-3. **Write-up** — due **Aug 17**, eight days out, co-equal with the score lane. Two
-   new pieces of material landed 2026-08-10: the aggregate-vs-paired dissolution on
-   real grader data (with the responsible network named), and the path-dependent
-   transfer ratio.
-4. **Phase 1 closes Aug 10 23:59 UTC**; Phase 2 does not open until Aug 18. Decide
-   before Aug 10 whether any further Phase-1 submission is wanted — after that there
-   is a seven-day window with no live round.
-5. **D10 renormalization fit** if the Moonshot lane continues; do not touch D08.
-6. ~~Samuel fills in `docs/HUMAN_MODEL.md`.~~ **Done 2026-08-10.**
+*Rewritten 2026-08-19 for a cold start. The previous list had duplicated
+numbering and four items whose deadlines had passed.*
+
+**Start here.** `session-start`, then this list in order. Nothing below depends
+on chat history; every number has an artifact under `experiments/`.
+
+1. **Poll Phase 2 — it opens 2026-08-20 00:00 UTC and the config arrives by
+   email.** `uv run python local_sim/phase2_checklist.py`. Record into
+   `docs/RESEARCH_NOTES.md` §1: width, depth, `n_mlps`, `flop_budget`, λ, the
+   multiplier floor, and the flopscope/whestbench versions. **Nothing else in
+   this list should start before this is known**, because it decides whether the
+   two frozen constants still hold and whether the mechanistic lane reopens.
+
+2. **Skeptic on the v2.6 build** (`review-slice`). Blocked on nothing — do it
+   even before Phase 2 lands. The claim to attack is *not* the accuracy (that is
+   arithmetic and settled) but the **cost transfer**: v2.4.1 measures 4.34× per-op
+   residual inflation locally vs graded, and v2.6 is assumed to inherit it despite
+   having 1.7× the operations and a 1.68× higher local per-op price. If that
+   assumption fails, v2.6 is a 5% regression, which is what this machine actually
+   measures.
+
+3. **If the shape moved: re-fit before gating.** `_PRUNE_TAU` (constants audit
+   selected −2.5 at 256×32; −3.0 is worse at 22.6σ, −2.0 at 13.3σ) and
+   `_BASIS_RANK` (32, chosen for reproducibility not accuracy — rank 256 was
+   1.0108× better at only 0.7σ). The alive-fraction optimum and the effective rank
+   of `J Jᵀ` both depend on width and depth. Use a design block; **D17 is the
+   single-use decision block and must not be spent on a shape that no longer
+   exists.**
+
+4. **Gate v2.6 on D17**, three-model residual rule, paired geometric mean, CI
+   excluding 1.0. Then **one vault touch** (counter is at 1 of 3). Gate on `V·c`,
+   not on MSE — MSE is already known to cost 0.51%.
+
+5. **First Phase 2 submission — the instrument that decides #2 of the open
+   questions.** It returns the grader's own residual telemetry for the new
+   carrier, which is the only way to settle the local/graded disagreement.
+   **Requires Samuel's explicit approval** (hard rule 6). Order is always
+   `whest validate` → clean mini run (`n_failed_mlps: 0`) → ask. Consider
+   submitting frozen **v2.4.1 first** purely for configuration telemetry, then
+   v2.6, so the two are separable on the grader's own numbers.
+
+6. **Two questions to the organisers** — `docs/email-draft-organizers.md` already
+   exists. (a) Is there a Phase 2 write-up round, and when? (b) One designated
+   submission or two — the announcement (18143) says two, the Rules tab says one,
+   a participant raised it and it was not answered.
+
+7. **Team freeze 2026-09-05 23:59 UTC**, 17 days out. Decide if this stays a
+   solo entry.
+
+8. **Not before #1:** the degree-4/5 design carrier (open question #3) and the
+   Moonshot's D10 renormalization fit (open question #4, kill-by-default Sep 1).
+   Both are real; both are conditioned on the Phase 2 shape.
+
+**Explicitly NOT next**, each closed by measurement this month and recorded in
+§ *Closed lanes*: any further input-space variance device (whitening, tent,
+sphere, antithetic, degree-3 designs); mid-layer or layer-1 control variates;
+MLMC over depth; more N-as-an-operating-point work; and chasing the sub-1e-8
+board entries, which three independent forensic analyses fail to explain by any
+constructible estimator.

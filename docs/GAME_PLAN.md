@@ -1,5 +1,28 @@
 # Game plan — ARC White-Box Estimation Challenge 2026
 
+> **REV 13 POINTER — 2026-08-19. Read this before any earlier revision.**
+>
+> Rev 12's strategic thesis — that the cost half of `V·c` is empty and variance is
+> crowded, so effort should go to cost — was **half right, and right for the wrong
+> reason**. The 2026-08-19 carrier audit measured our *variance* carrier at ~85-95%
+> of the achievable ceiling for input-space methods (every device lands at ~1.0x:
+> whitening 0.997x, sphere 1.001x, tent 0.981x, antithetic 1.016x, degree-3 design
+> 1.047x), and found the remaining headroom on the **cost** side after all —
+> Strassen-Winograd, worth 1.150x counted, which rev 12 had closed on the wrong
+> carrier. But rev 6's "honest sampling frontier ~2.7e-7" is **withdrawn**: the
+> published honest frontier is **9.10e-8** and we are ~2.6x behind it.
+>
+> The governing mechanism, measured three ways, is **SUBSTITUTION**: two devices
+> that annihilate the same low-order structure do not compose, and whichever is
+> added first takes the credit. Read every competitor ladder for what its baseline
+> arm contains, never for its largest rung.
+>
+> Current plan of record is **`docs/CURRENT_STATE.md` § Next actions**, not this
+> file. Sections of rev 12 that survive: the scoring identity, the cost-ceiling
+> table, and the closed-lane reasoning. Sections superseded: the variance/cost
+> allocation argument and every frontier estimate.
+
+
 *Goal: win Phase 2 (Best Score, $50k) and contend for Best Algorithmic Contribution ($20k). Written Aug 4, 2026; **round dates corrected Aug 5** after reading them off the challenge page.*
 
 ## Round calendar (measured, authoritative)

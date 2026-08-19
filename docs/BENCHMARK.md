@@ -47,26 +47,56 @@ Reminders that keep these readable:
 
 ---
 
-## 2. Anchor table
+## 2. Anchor table — REBUILT 2026-08-19 from the final Phase-1 board and 17 write-ups
+
+The board was **rescored after Phase 1 closed and two anomalous entries were
+removed** (9.5e-11 and 1.46e-9 adjusted). Everything below is post-rescore.
+
+### 2a. Published and explained honest methods — the real frontier
+
+| adjusted | raw MSE | who / thread | method |
+|---|---|---|---|
+| **9.10e-8** | 1.894e-7 | Team Puffi, 18175 | analytic + QMC hybrid (their mechanistic entry scored 1.65e-6 separately) |
+| 1.23e-7 | 1.55e-7 | pranay212, 18173 | **BCH strength-4 orthogonal array** + dead/on/kink + FWHT + antithetic + homogeneity |
+| 1.334e-7 | — | mliston, 18170 | cumulant closure to L18 + layer-22 control variate (coef 0.6) + a frozen 52k-param GRU centering corrector |
+| 1.4391e-7 | 2.4258e-7 | konstantin_baltsat, 18149 | 66,048-direction Kerdock spherical 5-design, FWHT first layer, Strassen-Winograd depth 5 |
+| 1.546–1.551e-7 | **2.18e-7** | SOX / natasha_stewart, 18106 | structure-aware dead/on/kink; **best published raw MSE** |
+| 2.09e-7 | 2.38e-7 | amalgonim, 18151 | whitened lattice sampler + a 115-page appendix |
+| 2.90e-7 | 2.5651e-6 | hyojun_kwon, 18154 | skew-augmented closure + **mid-layer control variate** (2.39× within their own pipeline) |
+| **2.6314e-7** | **1.3323e-6** | **us, 327743** | Sobol RQMC + dead pruning + rank-32 rotation |
+| 4.10e-7 | — | evaaaz, 18053 | RQMC + Rao-Blackwell, rank-1 lattice |
+| 4.47e-7 | — | radiant-allomancer, 18085 | RQMC prefix + shrinkage + Edgeworth + offline ridge |
+
+**We are ~2.6× behind the best published honest method and behind roughly twelve
+of them.** Note kwon: a *published 2.39× variance win* that still grades worse
+than us — within-pipeline factors do not transfer.
+
+### 2b. Physical anchors
 
 | anchor | adjusted | what it is |
 |---|---|---|
 | GT noise floor (1e9-sample truth) | ~2e-10 | the physical floor of the metric |
-| **reconstruction zone** | **< 1e-7** | below the best published honest method by >1.5×; see §3 |
-| best *published* honest method (18106) | 1.551e-7 | structure-aware dead/on/kink hybrid |
-| published RQMC + Rao-Blackwell (18053) | 4.10e-7 | |
-| published variance/bias budget (18085) | 4.47e-7 | |
-| **us (v2.4, graded)** | **2.719e-7** | |
-| our declared honest sampling frontier | ~2.7e-7 | GAME_PLAN rev 6 |
-| `sampling_mse` on the graded suite | 6.4695e-7 | identical to 17 digits across all our submissions; best reading is a reference full-budget plain-MC sampler |
+| label floor at the scored layer | **6.1e-11 vs 2e-10** | two participants derived it independently and disagreed; unresolved (census O5) |
+| post-rescore board #1 (ednacob) | 1.84e-8 | raw 3.63e-8, multiplier ~0.51 |
+| `sampling_mse` on the graded suite | 6.4695e-7 | **not** label noise — it is plain MC at full budget: 0.0424/65,536 = 6.47e-7, and 2.72e11/4.203e6 = 64,715 samples. `sampling_mse / adjusted` reads directly as "how far above naive sampling you sit" |
 | plain MC at full budget | ~2.8e-6 | |
 | calibrated covariance propagation (our v0) | 2.4927e-6 | graded |
 
-Two cautions carried forward. The `sampling_mse` **label-noise bound is
-withdrawn** — 89 of 200 board entries sit below it, so it cannot be additive
-reference noise. And 18106's 1.551e-7 is attributed to a family that our Sprint 3
-measured end-to-end at ~1.02×, so either the method differs from its description
-or the number reflects the board; trust local measurement.
+### 2c. Two claims withdrawn here
+
+- ⚠️ **"Our declared honest sampling frontier ~2.7e-7" (GAME_PLAN rev 6) is
+  WITHDRAWN.** It described our own method's frontier, not the field's.
+- ⚠️ **The `sampling_mse` label-noise bound is WITHDRAWN** — 89 of 200 entries sat
+  below it, so it cannot be additive reference noise.
+
+### 2d. External ceilings that bound what is left (cite the source, not us)
+
+| bound | value | source |
+|---|---|---|
+| mean dimension of the layer-32 integrand | ν ≈ 20 | Gaussian–Poincaré, census + independent |
+| variance in harmonic degrees ≤ 5, layer 32 | 0.36–0.39 | ⇒ a degree-5 design ceilings at **≈1.46×** |
+| best possible *sampling* method vs plain MC, Lipschitz class at d=256 | **~9% MSE** | Bakhvalov/Novak. A query-model minimax bound — it does **not** bind an algorithm that reads the weights, which is ARC's whole thesis |
+| ARC cumulant propagation break-even | `L^K < n` | L < 16 for K=2, L < 6.3 for K=3. At L=32 every variant is over budget or worse than MC |
 
 ---
 

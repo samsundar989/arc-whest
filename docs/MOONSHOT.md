@@ -1,5 +1,32 @@
 # MOONSHOT.md — low-rank cumulant flow (Phase D-lite)
 
+> **NEW DEPLOYABLE GATE — added 2026-08-19, and it supersedes the ≥3× accuracy bar
+> as the reason this lane exists.**
+>
+> The 2026-08-19 Stage-0 probe closed the mid-layer control-variate lane *for the
+> present closure* and, in doing so, priced exactly what a better closure would be
+> worth. A control variate deploys iff its analytic centre beats the sampling
+> estimate it corrects:
+>
+> ```
+> G_c = 1 / [ (1 - rho^2) + rho^2 * r_c^2 ],     r_c = delta_c / SE_c
+> ```
+>
+> Measured on the shipped carrier (20 mints x 16 shifts, GT 2^23), our closure gives
+> `r_c` = 0.81 (c=1), 1.24 (c=2), 1.91 (c=4), 2.49 (c=6), 3.04 (c=8), 6.23 (c=24) —
+> so `G_c < 1` everywhere and the lane is dead. **A closure with mid-layer means
+> 3-6x more accurate than the present one flips `r_c` below 1 where rho^2 is large,
+> and the oracle prices a perfect penultimate control at ~100x.**
+>
+> **So the Moonshot's success criterion is now: `delta_c` reduced 3-6x at some
+> c in [4, 12], measured against 2^23 truth on the shipped carrier.** That is a
+> deployable target with a known payoff, which the old "≥3x better than calibrated
+> K2 at depth 8" never was. Artifacts: `local_sim/probe_midlayer_cv.py`,
+> `experiments/2026-08-19_carrier_probes/midlayer_cv.json`, LOG 2026-08-19.
+>
+> Kill-by-default remains **2026-09-01**.
+
+
 **Pre-registered 2026-08-06, before any measurement.** The gates, metrics, seed
 blocks and decision rules below are fixed now precisely so that the outcome is
 informative in either direction. If this is edited after a number is seen, the
