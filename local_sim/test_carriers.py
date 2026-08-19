@@ -159,8 +159,14 @@ def t_design_strength():
         n = N
         if name == "haar frames":
             n = (N // (2 * DIM)) * 2 * DIM      # 16384 = 32 bases of 256, exactly
+        elif name.startswith("bch OA"):
+            # An orthogonal array has ONE size. Subsampling it destroys the
+            # balance that makes it an array at all, so it is measured whole:
+            # 2^17 = 131,072 rows, i.e. 65,536 antipodal pairs.
+            n = 1 << 17
         pts = build(name, n, DIM, seed=20260819)
-        profiles[name] = strength_profile(pts, DIM, seed=4242)
+        nd = 800 if n > 40000 else N_DIRS       # the big sets are 8x the work
+        profiles[name] = strength_profile(pts, DIM, seed=4242, n_dirs=nd)
         profiles[name]["_n"] = n
 
     base = profiles["iid"]
@@ -176,6 +182,53 @@ def t_design_strength():
         print(f"  {name:<22}{'':>7}"
               + "".join(f"{p[k] / base[k]:>12.3e}" for k in DEGREES))
     return profiles
+
+
+def t_oa_is_a_cube_design_not_a_sphere_design(profiles):
+    """The OA's strength is combinatorial. Sphericality is a separate question.
+
+    Every coordinate of every OA point is +-1/sqrt(d), so along a COORDINATE
+    direction `(a.u)^4` is identically 1/d^2, against the spherical 3/(d(d+2)).
+    The array can therefore never be a spherical 4-design however high its
+    combinatorial strength. What a random rotation buys is that a generic
+    direction stops being special — which is exactly what the profile measures.
+    """
+    head("2b. the OA is a design for the CUBE. Is it one for the sphere?")
+    d = DIM
+    rot = profiles.get("bch OA (rotated)")
+    unrot = profiles.get("bch OA (unrotated)")
+    if rot is None:
+        return
+    axis = 1.0 / d ** 2
+    sphere = exact_moment(4, d)
+    check("along a coordinate axis the OA's 4th moment is 1/d^2, not 3/(d(d+2))",
+          abs(axis / sphere - (d + 2) / (3.0 * d)) < 1e-12,
+          f"axis {axis:.4e}  vs sphere {sphere:.4e}  ratio {axis / sphere:.4f}")
+
+    # My first version of this check asserted "unrotated is worse than rotated"
+    # and it is FALSE: 7.550e-04 against 7.772e-04, i.e. identical. The reason is
+    # that rotating the POINT SET is the same as rotating the PROBE DIRECTIONS,
+    # and the probes are already isotropic — so an isotropic moment test is
+    # rotation-invariant by construction and CANNOT see axis alignment. The
+    # rotation matters for the real integrand, not for this measurement. The
+    # defect is visible only by probing along the axes themselves.
+    check("the isotropic probe is rotation-invariant, so it cannot see alignment",
+          abs(unrot[4] - rot[4]) / rot[4] < 0.10,
+          f"unrotated {unrot[4]:.3e}  rotated {rot[4]:.3e} — agree, as they must")
+
+    from carriers import bch_oa_unrotated
+    pts = to_sphere(bch_oa_unrotated(1 << 17, d, 0))
+    eye = np.eye(d)
+    got_axis = float(np.mean((pts @ eye) ** 4))
+    check("probed along the AXES, the unrotated OA is badly wrong at degree 4",
+          abs(got_axis - axis) / axis < 1e-9
+          and abs(got_axis - sphere) / sphere > 0.5,
+          f"axis-probe {got_axis:.4e} == 1/d^2, which is {got_axis / sphere:.3f}x "
+          f"the spherical value")
+    check("probed along RANDOM directions the same points are near-exact",
+          unrot[4] < 1e-3,
+          f"{unrot[4]:.3e} relative — {1.0 / (unrot[4] / (axis / sphere - 1) ):.0f}x "
+          f"closer than the axis probe")
 
 
 def t_predictions(profiles):
@@ -231,6 +284,7 @@ def main():
     t_exact_moments_are_right()
     t_radial_identity()
     profiles = t_design_strength()
+    t_oa_is_a_cube_design_not_a_sphere_design(profiles)
     t_predictions(profiles)
     n_ok = sum(1 for r in RESULTS if r)
     print(f"\n{n_ok}/{len(RESULTS)} checks passed")

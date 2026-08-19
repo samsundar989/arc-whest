@@ -197,6 +197,118 @@ def iid_sphere(n: int, dim: int, seed: int) -> np.ndarray:
 
 
 # --------------------------------------------------------------------------- #
+# dual-BCH orthogonal array — a candidate degree-4/5 carrier
+# --------------------------------------------------------------------------- #
+
+
+def _gf256_tables(poly: int = 0x11D):
+    """Log/antilog tables for F_256 with a primitive polynomial. Default 0x11D."""
+    exp = np.zeros(512, dtype=np.int32)
+    log = np.zeros(256, dtype=np.int32)
+    x = 1
+    for i in range(255):
+        exp[i] = x
+        log[x] = i
+        x <<= 1
+        if x & 0x100:
+            x ^= poly
+    for i in range(255, 512):
+        exp[i] = exp[i - 255]
+    return exp, log
+
+
+def _gf_mul(a: np.ndarray, b: np.ndarray, exp, log) -> np.ndarray:
+    out = np.zeros(np.broadcast(a, b).shape, dtype=np.int32)
+    nz = (a != 0) & (b != 0)
+    out[nz] = exp[(log[a * np.ones_like(out)][nz] + log[b * np.ones_like(out)][nz]) % 255]
+    return out
+
+
+def bch_oa_signs(m: int = 8, poly: int = 0x11D) -> np.ndarray:
+    """The +-1 rows of the extended dual-BCH orthogonal array on d = 2^m factors.
+
+    WHY THIS SET. Let B be the 2-error-correcting BCH code of length 2^m - 1; its
+    designed distance is 5. The codewords of a linear code C form an orthogonal
+    array of strength `d(C_perp) - 1`, so taking C = B_perp gives strength 4.
+    B_perp is the classical `{Tr(a x + b x^3)}` code of dimension 2m, and adding
+    the all-ones coset (the extension) closes it under negation, which makes every
+    ODD moment vanish for free.
+
+    Rows: 2^(2m+1) = 131,072 at m = 8, i.e. 65,536 antipodal pairs, on d = 256
+    coordinates. Scaled to the unit sphere.
+
+    An orthogonal array is a design for the CUBE, not for the sphere: every
+    coordinate of every point is +-1/sqrt(d), so `E[(a.u)^4]` cannot match the
+    spherical value along coordinate-aligned `a`. Whether it is useful here is an
+    empirical question about generic directions — which is what
+    `test_carriers.py` measures, and why this is built behind the verifier.
+    """
+    d = 1 << m
+    exp, log = _gf256_tables(poly)
+    if m != 8:
+        raise NotImplementedError("the F_256 tables above are m = 8 only")
+
+    x = np.arange(d, dtype=np.int32)                       # all of F_256, 0 included
+    x3 = _gf_mul(_gf_mul(x, x, exp, log), x, exp, log)     # x^3 in F_256
+
+    def trace(v: np.ndarray) -> np.ndarray:
+        """Absolute trace F_256 -> F_2, as v + v^2 + v^4 + ... + v^128."""
+        t = np.zeros_like(v)
+        acc = v.copy()
+        for _ in range(m):
+            t ^= acc
+            acc = _gf_mul(acc, acc, exp, log)
+        return t & 1
+
+    ab = np.arange(d, dtype=np.int32)
+    rows = np.empty((d * d, d), dtype=np.int8)
+    k = 0
+    for a in ab:
+        ax = _gf_mul(np.full(d, a, dtype=np.int32), x, exp, log)
+        for b in ab:
+            bx3 = _gf_mul(np.full(d, b, dtype=np.int32), x3, exp, log)
+            rows[k] = trace(ax ^ bx3).astype(np.int8)
+            k += 1
+    signs = 1 - 2 * rows.astype(np.int8)                   # 0 -> +1, 1 -> -1
+    return np.concatenate([signs, -signs], axis=0)         # the extension coset
+
+
+def bch_oa(n: int, dim: int, seed: int) -> np.ndarray:
+    """Randomly rotated dual-BCH OA, scaled to the exact mean Gaussian radius.
+
+    The rotation is what makes this an unbiased rule for a general integrand: an
+    unrotated OA is aligned with the coordinate axes, and the estimator's own
+    rank-32 rotation already occupies that role. `n` selects a random subset of
+    rows when it is smaller than the full array — WHICH DESTROYS THE STRENGTH, and
+    is offered only so the verifier can show that it does.
+    """
+    if dim != 256:
+        raise NotImplementedError("dual-BCH OA is built for dim = 256")
+    full = bch_oa_signs()
+    rng = np.random.default_rng(seed)
+    if n < full.shape[0]:
+        idx = rng.choice(full.shape[0], size=n, replace=False)
+        pts = full[idx].astype(np.float64)
+    else:
+        pts = full.astype(np.float64)
+    q, r = np.linalg.qr(rng.standard_normal((dim, dim)))
+    q = q * np.sign(np.diag(r))
+    return exact_radius(to_sphere(pts @ q.T), dim)
+
+
+def bch_oa_unrotated(n: int, dim: int, seed: int) -> np.ndarray:
+    """The same array with NO rotation, so the axis alignment is visible."""
+    if dim != 256:
+        raise NotImplementedError("dual-BCH OA is built for dim = 256")
+    full = bch_oa_signs()
+    if n < full.shape[0]:
+        rng = np.random.default_rng(seed)
+        idx = rng.choice(full.shape[0], size=n, replace=False)
+        full = full[idx]
+    return exact_radius(to_sphere(full.astype(np.float64)), dim)
+
+
+# --------------------------------------------------------------------------- #
 # registry
 # --------------------------------------------------------------------------- #
 
@@ -207,6 +319,8 @@ CARRIERS: Dict[str, Callable[[int, int, int], np.ndarray]] = {
     "sobol+anti": antithetic(sobol),
     "sobol+anti+sphere": spherical(antithetic(sobol)),
     "haar frames": haar_frames,
+    "bch OA (rotated)": bch_oa,
+    "bch OA (unrotated)": bch_oa_unrotated,
 }
 
 

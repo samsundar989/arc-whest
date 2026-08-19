@@ -285,8 +285,20 @@ and have moved to § Closed lanes; what is left is genuinely short.*
    mechanisms fell out: sphere projection is **angularly inert** (it moves the
    radius only, which is why it measured 1.0010×), and antipodal symmetrisation
    **costs ~2× at even degrees** because it uses n/2 distinct points.
-   *Still to build: a verified Kerdock/MUB-129 or BCH construction. The verifier
-   now exists and the pass condition is concrete — degree 4 at machine precision.*
+   **BUILT, same day.** `local_sim/carriers.py:bch_oa` — the extended dual-BCH
+   orthogonal array, `{Tr(ax + bx^3)}` plus the all-ones coset, 2^17 = 131,072
+   rows on 256 coordinates. **Strength 5, verified combinatorially** (every random
+   4- and 5-subset of columns perfectly balanced, 320/320). Its degree-4 moment
+   error is **0.0305× iid — 17× better than the shipped carrier** — and **0.138×
+   at degree 6**, where every other carrier we have sits at 0.76–1.09×. No
+   Kerdock/Z₄ machinery was needed.
+   **The binding constraint is now COST, not construction.** 131,072 points is
+   8× the operating point → projected `C/B ≈ 1.59`, which **fails the hard `C > B`
+   cliff** (scored as a failure: multiplier 1.0 *and* zeroed predictions). One row
+   per antipodal pair is 65,536 → `C/B ≈ 0.80`, affordable. The Rao bound says
+   strength 4 on 256 factors needs ≥ 32,897 runs, so there may be a tighter
+   construction. **No end-to-end number yet** — moment exactness is a property of
+   the point set; what it is worth needs a paired run on a DESIGN block.
 
 3. **Where does the ~2.6× to the published honest frontier come from?**
    Unresolved and possibly unresolvable from public data. Their sample counts are

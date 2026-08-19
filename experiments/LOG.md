@@ -5497,3 +5497,121 @@ now concrete and cheap: **degree 4 at machine precision.** Only after that does 
 paired end-to-end comparison on a DESIGN block make sense, and only after that
 does the operating-point re-sweep the cost analysis above calls for.
 
+
+---
+
+## 2026-08-19 (night) — STAGE 1 / item 5, part 2: **a verified strength-5 orthogonal array, 17x better than the shipped carrier at degree 4**
+
+Same slice, same contract. The contract said a working construction was **not**
+promised. One landed anyway, and the verifier built in part 1 is what makes it
+safe to believe. 22/22.
+
+### The construction
+
+The extended dual-BCH orthogonal array, `local_sim/carriers.py:bch_oa`.
+
+Let `B` be the 2-error-correcting BCH code of length 255 (designed distance 5).
+The codewords of a linear code `C` form an orthogonal array of strength
+`d(C_perp) - 1`, so `C = B_perp` gives strength 4. `B_perp` is the classical
+`{Tr(a x + b x^3) : a, b in F_256}` code of dimension 16, and taking `x` over all
+of `F_256` (not just `F_256*`) plus the all-ones coset gives length **256**,
+`2^17 = 131,072` rows, closed under negation.
+
+**Verified combinatorially, not assumed** — every random subset of `t` columns
+must see all `2^t` sign patterns equally often:
+
+```text
+strength 2: 200/200   strength 3: 200/200   strength 4: 200/200   strength 5: 120/120
+```
+
+**Strength 5**, one better than the forum's reported strength-4 OA, because the
+extension coset closes the array under negation and buys the odd degrees free.
+
+### What it does to the moment profile
+
+RMS relative deviation from the exact spherical moment, and the ratio to iid:
+
+| carrier | n | k=1 | k=2 | k=3 | **k=4** | k=5 | **k=6** |
+|---|---|---|---|---|---|---|---|
+| **sobol (SHIPPED)** | 16,384 | 0.027 | 0.176 | 0.611 | **0.510** | 0.840 | **0.764** |
+| haar frames | 16,384 | ~0 | ~0 | ~0 | 0.700 | ~0 | 1.089 |
+| **bch OA** | 131,072 | ~0 | ~0 | ~0 | **0.0305** | ~0 | **0.138** |
+
+Absolute: the OA reads **8.2e-15 / 9.1e-16 / 3.9e-15** at k=2/3/5 — machine
+precision — and **7.77e-04** at k=4 against the shipped carrier's 1.30e-02.
+
+**That is a 17x reduction in degree-4 moment error against the shipped carrier,
+and 33x against iid.** At degree 6, where *every* other carrier we have sits at
+0.76-1.09x iid, the OA reads **0.138x**. This is precisely the degree-3 ->
+degree-4/5 step that part 1 identified as the only remaining input-space prize.
+
+### It is a cube design, not a sphere design — and the distinction is measurable
+
+Every coordinate of every OA point is `+-1/sqrt(d)`, so probed **along a
+coordinate axis** the 4th moment is identically `1/d^2 = 1.526e-05` against the
+spherical `3/(d(d+2)) = 4.542e-05` — **0.336x, wrong by a factor of three**.
+Probed along **random** directions the same points read 7.55e-04 relative. A
+generic direction spreads mass across all coordinates and the array's balance
+takes over; a coordinate direction is exactly where it does not. So the OA is a
+very good *approximate* spherical 4-design in generic position and provably not an
+exact one, which is why it must be **randomly rotated in deployment**.
+
+**A check of mine was mis-specified and is recorded as such.** I asserted the
+unrotated array would measure worse at degree 4 than the rotated one. It does not
+— 7.550e-04 against 7.772e-04, identical. Rotating the point set is the same as
+rotating the probe directions, and the probes are already isotropic, so **an
+isotropic moment test is rotation-invariant by construction and cannot see axis
+alignment**. The rotation matters for the real integrand, not for this
+measurement. Same class of error as prediction B4 in the coverage slice: naming a
+statistic that cannot measure the thing claimed.
+
+### The binding constraint is now COST, and it has a number
+
+Under the repo's flat-adjusted law (`adjusted = V*c/B`, independent of `N` above
+the floor) a bigger point set is free — until it hits the hard `C > B` cliff,
+which is scored as a **failure**: multiplier 1.0 *and* zeroed predictions, ~5x,
+per P0.1. At the shipped `C/B = 0.199` for `N = 16,384`:
+
+| point set | n | multiple of N | projected C/B | |
+|---|---|---|---|---|
+| full extended OA (strength 5) | 131,072 | 8.00x | **1.592** | **FAILS the C>B cliff** |
+| one row per antipodal pair | 65,536 | 4.00x | 0.796 | affordable |
+| Rao lower bound for strength 4 | 32,897 | 2.01x | 0.400 | affordable |
+
+**The full array is not affordable and must not be shipped as-is.** Taking one row
+per antipodal pair (65,536) is affordable at `C/B ~ 0.80` and keeps strength 4,
+losing only the free odd-degree exactness — which antithetic symmetrisation
+restores cheaply, at the ~2x even-degree tax part 1 measured. The Rao bound says a
+strength-4 OA on 256 factors needs at least **32,897** runs, so our 131,072 is 4x
+the information-theoretic minimum and a tighter construction may exist.
+
+**None of this is an end-to-end result.** Moment exactness is a property of the
+point set; what it is worth is a property of the network response, and that needs
+a paired comparison on a DESIGN block. The projected `C/B` figures are derived
+from the flat-adjusted law and the shipped operating point, not measured.
+
+### Knowledge Delta
+
+- **The missing rung exists and is buildable from standard coding theory.** No
+  Kerdock/Z_4 machinery is needed: a dual-BCH OA reaches strength 5
+  combinatorially and 17x the shipped carrier's degree-4 accuracy.
+- **Verify the array combinatorially before trusting the moment profile.** Column
+  balance is a cheap, exact, decisive check, and it caught nothing here only
+  because the construction was right.
+- **The lane's binding constraint has moved from "can we build a design" to "can
+  we afford one".** 131,072 points is 8x the operating point and fails the budget
+  cliff; 65,536 is affordable. The operating point must be re-swept for a
+  fixed-size carrier rather than inherited.
+- **Rotation-invariant tests cannot detect rotation-dependent defects.** Obvious
+  in hindsight; it cost a prediction.
+
+### Next
+
+1. Cut the array to 65,536 (one per antipodal pair) plus antithetic, re-verify
+   strength, and confirm `C/B ~ 0.80` against a real flopscope count rather than
+   the projection above.
+2. Paired end-to-end comparison against the shipped carrier on a **DESIGN** block,
+   scored with `competition_score` and the studentised interval the coverage study
+   selected. **D17 and D19 stay unspent** — this is design work, not a gate.
+3. Only then, an operating-point re-sweep.
+
