@@ -1,0 +1,35 @@
+﻿uv : C:\Users\samsu\Documents\arc-whest\local_sim\coverage_lab.py:197: ConfigureNoOpWarning: flops.configure() 
+configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so 
+these settings will not affect a graded submission.
+At line:1 char:333
++ ... NG='utf-8'; uv run python local_sim/coverage_lab.py --phase arms 2>&1 ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\samsu\...ded submission.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  flops.configure(symmetry_warnings=False)
+192 networks, GT 2^22, sigma_gt^2 = 1.1418e-08
+
+  arm base   N = 16,384  budget = 205,533,232,189  shift stream 0
+  arm null   N = 16,384  budget = 205,533,232,189  shift stream 1
+  arm small  N = 32,768  budget = 411,066,464,377  shift stream 0
+  arm large  N = 65,536  budget = 822,132,928,753  shift stream 0
+
+    16/192    438.3s  eta  4821.3s  base MSE 1.1241e-06
+    32/192   1014.3s  eta  5071.3s  base MSE 1.4654e-06
+    48/192   1328.9s  eta  3986.7s  base MSE 1.8546e-06
+    64/192   1545.5s  eta  3091.0s  base MSE 1.8469e-06
+    80/192   1763.9s  eta  2469.4s  base MSE 1.8102e-06
+    96/192   1988.6s  eta  1988.6s  base MSE 1.6675e-06
+   112/192   2189.9s  eta  1564.2s  base MSE 1.6750e-06
+   128/192   2368.4s  eta  1184.2s  base MSE 1.6121e-06
+   144/192   2577.0s  eta   859.0s  base MSE 1.6132e-06
+   160/192   2798.4s  eta   559.7s  base MSE 1.6013e-06
+   176/192   3012.9s  eta   273.9s  base MSE 1.5687e-06
+   192/192   3219.0s  eta     0.0s  base MSE 1.5865e-06
+
+saved C:\Users\samsu\Documents\arc-whest\experiments\2026-08-19_coverage\arms_D18.json
+  base   MSE 1.58647e-06   counted 4.7824e+10   resid 192.12 ms
+  null   MSE 1.82557e-06   counted 4.7823e+10   resid 191.87 ms
+  small  MSE 8.45001e-07   counted 8.8800e+10   resid 306.87 ms
+  large  MSE 4.22998e-07   counted 1.7075e+11   resid 540.84 ms

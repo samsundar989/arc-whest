@@ -1,0 +1,10 @@
+﻿seed ledger — consistency
+  ledger records                     22
+  hard collisions (DECISION/VAULT)   0
+  permitted overlaps (DESIGN)        2
+    - D16[30,806,016,200..30,806,016,223]  local_sim/probe_whitening.py  vs  local_sim/probe_design_carrier.py   <- CORRELATED EVIDENCE, never quote as two independent results
+    - D11[30,806,011,000..30,806,011,499]  local_sim/packed_sparse_probe.py  vs  local_sim/packed_truth.py   <- SAME NETWORKS BY DESIGN (one experiment, two roles)
+  CONSISTENT
+
+seed ledger — static source scan
+  no unrecorded seed literals

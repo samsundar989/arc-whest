@@ -3877,3 +3877,1428 @@ break-even. Projected: **2.6314e-7 -> ~2.41-2.46e-7**.
 
 **Driver** Claude Code. **Next command:** `review-slice` (a Skeptic has not seen
 this build, and the local/graded disagreement is exactly what one is for).
+
+---
+
+## 2026-08-19 (night) — STAGE 0 / P0.1 CONTRACT: the canonical arithmetic competition scorer  [PRE-REGISTERED, no data yet]
+
+**Classification: IMPORTANT** (it changes *the instrument* — how a promotion number
+is computed — under `AGENTS.md` § *Work classification*). It is deliberately **not**
+STRATEGIC, because this slice **adds** a primitive and **changes no gate**:
+`docs/VALIDATION.md` §2b's geometric-mean rule stays binding and unedited until a
+Skeptic has seen this and Samuel has approved the protocol amendment. Nothing here
+decides anything.
+
+**Driver** Claude Code. **Source** `docs/CLAUDE_CODE_IMPLEMENTATION_HANDOFF.md`
+→ `docs/FRONTIER_ARCHITECTURE_PROPOSAL.md` § *Stage 0 validation blockers*, P0.1.
+
+### Scope, and what is explicitly out of it
+
+**In.** One module, `local_sim/competition_score.py`, that reproduces the installed
+`whestbench` 0.14.0 scoring identity exactly, plus its test suite
+`local_sim/test_competition_score.py`.
+
+**Out, and untouched by this slice:** `estimator.py`; any seed block (D16, D17 or
+otherwise — this slice consumes **zero** networks and needs none, its inputs are
+synthetic rows and already-durable graded reports); the vault (no evaluate, no
+`--dry-run`, no read of truth); any submission; `docs/HUMAN_MODEL.md`; the twelve
+probes that carry an inline `max(0.1, C/B)` — they are **not** rewritten here; and
+`docs/VALIDATION.md` §2b, whose geometric-mean statistic remains the binding gate.
+
+### The identity being reproduced (read out of the installed package, not assumed)
+
+`.venv/Lib/site-packages/whestbench/budget.py` and `scoring.py`, whestbench 0.14.0:
+
+```text
+C_i        = F_i + lambda * R_i                      # budget.effective_compute
+mult_i     = 1.0                     if failed_i     # budget.score_multiplier
+           = 1.0                     if B_i <= 0
+           = max(0.1, C_i / B_i)     otherwise       # floored, UNCAPPED above
+s_i        = mse_i * mult_i                          # scoring._compute_budget_adjusted_score
+objective  = arithmetic_mean(s_i)                    # scoring.evaluate_estimator
+failed_i   = bool(error_code) or budget_exhausted or time_exhausted
+             or residual_wall_time_exhausted or combined_budget_exhausted
+```
+
+with `lambda = 1e11` and the floor `0.1` **hardcoded** in 0.14.0. On the exception
+path the grader also records `C_i = 0.0`, `F_i = 0`, and `mse_i` = the
+zero-prediction MSE; on the exhaustion paths it keeps the real `F_i`/`R_i` but still
+forces `mult_i = 1.0`. Both are worse than the floor, not better.
+
+### Written prediction — falsifiable, recorded before the code exists
+
+| # | prediction | how it is falsified |
+|---|---|---|
+| **P1** | The reimplementation matches `whestbench.budget.score_multiplier` and `effective_compute` **exactly** (`==`, not `isclose`) on >=10,000 randomised rows spanning failures, `C/B` on both sides of the floor, `B<=0`, zero residual, and huge residual | any single row differs |
+| **P2** | One failed MLP in 100 at our operating point (`mult ~ 0.199`) costs **more than 5x** that MLP's normal contribution to the objective, because the failure multiplier is `1.0` and not the floor `0.1` | measured ratio <= 5 |
+| **P3** | Arithmetic and geometric aggregation **select opposite winners** on a fixture built from the real 50 graded public rows of 327743. Pre-registered mechanism: a candidate that improves every row by a uniform `g` and regresses only the single worst row wins geometrically and loses arithmetically. Pre-registered flip threshold `X* = g * n * mean / worst`; at `g = 3%`, `n = 50` I predict **`X*` lands in [25%, 60%]** | no flip exists at any `X`, or `X*` falls outside [25%, 60%] |
+| **P4** | Read-only replay: for all 50 public rows of **both** 327743 (v2.4.1) and 324420 (v2.4), `mse_i * max(0.1, C_i/B)` reproduces the report's own `adjusted_final_layer_score` to relative **1e-12**, with `B = 2.72e11` | any row exceeds 1e-12 |
+| **P5** | The grader's own `effective_compute` equals `flops_used + 1e11 * residual_wall_time_s` to relative **1e-9** on all 100 rows of both reports — an independent confirmation of `lambda = 1e11` from graded telemetry rather than from the package default | any row exceeds 1e-9 |
+| **P6** | `mean_i(mse_i) * mean_i(mult_i)` differs from `mean_i(mse_i * mult_i)` by **more than the 1e-12 identity tolerance** on the real graded rows — i.e. the MSE/cost correlation is nonzero and the factorised form used inline by several probes is biased | the two agree to 1e-12 |
+| **P7, open** | Whether the report's `aggregates.public` block is the mean over the **50** public rows or over all **100** is not documented anywhere in our record. I predict it is over **100** (the field is a sibling of `n_failed_mlps: 0`, which counts 100). Discriminated by `mean_effective_compute = 5.4118e10` against the telemetry of the first 50 vs all 100 | the 50-row mean matches instead |
+
+### Verification plan
+
+1. `uv run python local_sim/test_competition_score.py` — the suite above, which
+   imports the installed `whestbench` and compares against it directly.
+2. `.\scripts\preflight.ps1` — must stay **GREEN 5/5**; this slice touches no
+   shipped file, so a red preflight means collateral damage.
+3. `uv run python scripts/verify_portability.py` — unchanged count; no harness
+   files are edited.
+4. Independent **Skeptic** over the diff, the raw artifacts and this contract.
+
+### What would make this slice a failure
+
+Any of P1, P4, P5 failing means the reimplementation is not the grader's identity
+and must not be used. P3 failing means the arithmetic/geometric divergence that
+motivates P0.1 is not demonstrable on our own data, and the proposed protocol
+amendment should be withdrawn rather than argued.
+
+### Phase-2 configuration status at contract time
+
+Round 1429 is **UPCOMING, not open** (`phase2_checklist`, this session):
+`2026-08-20T23:59:00Z -> 2026-09-19T23:59:00Z`, leaderboard 1480 exists with 0
+entries, HF tags are still `['v1-phase1', 'v1-warmup']`. **width, depth, biases,
+input distribution, n_mlps, B, lambda, the multiplier floor and the number of
+designatable submissions are all UNKNOWN for round 1429.** The scorer is therefore
+built with `B`, `lambda` and the floor as **per-call parameters**, defaulting to the
+installed 0.14.0 values, and with `B` allowed to vary per MLP even though 0.14.0
+uses one `spec.flop_budget` for all of them. No Phase-1 constant is baked in.
+
+
+---
+
+## 2026-08-19 (night) — STAGE 0 / P0.1 EVIDENCE PACKET: the canonical scorer is built and green. **Two of my seven predictions were falsified, and both falsifications are the findings.**
+
+Contract: this file, the entry immediately above (line ~3883). **Nothing in this
+slice decides anything** — `docs/VALIDATION.md` §2b's geometric-mean gate is still
+the binding rule, unedited, pending Skeptic and Samuel.
+
+### Files (both new; no existing file was modified)
+
+| file | what |
+|---|---|
+| `local_sim/competition_score.py` | the primitive. numpy + stdlib only — imports **nothing** from `whestbench`, verified by import-blocking, and runs unchanged in `.venv-gpu` |
+| `local_sim/test_competition_score.py` | the proof, 64 checks |
+| `experiments/2026-08-19_p0_1_scorer/test_competition_score.out` | raw output |
+| `experiments/2026-08-19_p0_1_scorer/preflight.out` | raw output |
+
+### Commands and outputs
+
+```text
+uv run python local_sim/test_competition_score.py     -> 64/64 checks passed, exit 0 (twice)
+.\scripts\preflight.ps1                               -> PREFLIGHT GREEN 5/5, exit 0
+uv run python scripts/verify_portability.py           -> 174 checks, 0 failed
+uv run python local_sim/phase2_checklist.py           -> round 1429 UPCOMING, 0 entries, no v1-phase2 tag
+environment: whestbench 0.14.0  flopscope 0.10.0  numpy 2.2.6
+```
+
+Vault touch counter unchanged at **1**. No seed block allocated or consumed —
+this slice generated no networks from any registered block; its synthetic
+contests use ad-hoc `ContestSpec.seed` values (515, 99, 20260819) in the
+`whestbench` namespace, which is disjoint from every `seed_blocks.py` range and
+carries no labels. D16 and D17 untouched.
+
+### Verdicts on the seven pre-registered predictions
+
+| # | verdict | measured |
+|---|---|---|
+| **P1** | **CONFIRMED** | `effective_compute`, `score_multiplier`, `is_combined_budget_exhausted` all **0 mismatches under `==`** on 12,000 randomised rows (failures, `B<=0`, `B<0`, zero and large residual, `C/B` on both sides of the floor) |
+| **P2** | **FALSIFIED AS STATED** | predicted "> 5x"; measured **4.680x** on row 0. See below — the prediction was arithmetic sloppiness, and correcting it produced a better fact |
+| **P3** | **CONFIRMED** | pre-registered `X* = g*n*mean/worst` = **41.8%**, inside the pre-registered [25%, 60%]; the observed first flip is at **39.0%**, within 15% of the formula |
+| **P4** | **CONFIRMED, and stronger than predicted** | tolerance was 1e-12; the measured worst relative deviation is **0.000e+00 — bitwise exact** on all 50 rows of *both* submissions |
+| **P5** | **CONFIRMED, bitwise** | `C == F + 1e11*R` to **0.000e+00** on all 100 rows of both reports. Lambda = 1e11 is now confirmed from the grader's own telemetry, not from a package default |
+| **P6** | **CONFIRMED** | factorised bias **+0.7367%**, `corr(mse, mult) = -0.3391`. The correlation is **negative**, so the factorised form **overstates** here; the synthetic positive-correlation case understates by 27.6% |
+| **P7** | **FALSIFIED** | predicted the report aggregate covers 100 MLPs. It covers the **50 public rows**, exactly |
+
+### The two falsifications, which are the load-bearing results
+
+**P2 — the failure penalty is exactly `1/mult_i`, and I predicted it off the wrong
+multiplier.** The multiplier half of a failure costs exactly `1 / mult_i`, because
+the grader replaces `max(0.1, C_i/B_i)` with `1.0`. I derived "> 5x" from the
+*suite-mean* multiplier 0.19896 (-> 5.03x); row 0's own multiplier is 0.2137
+(-> 4.680x). Across the real 50-row suite the penalty ranges **[4.59x, 5.41x]**.
+The test now asserts the exact law rather than my wrong threshold. The number that
+matters is unchanged in spirit and now exact: **a failure costs ~5x on the
+multiplier alone, before the much larger cost of the zeroed prediction.**
+
+**P7 — the published score is the arithmetic mean over the FIFTY public MLPs, and
+it is now reproducible offline, bitwise.** The report's `aggregates.public` block
+is *not* an aggregate over all 100 scored networks. Discriminated on
+`mean_effective_compute`:
+
+| submission | reported | 50-row mean | 100-row mean |
+|---|---|---|---|
+| 324420 (v2.4) | 5.412154e10 | **5.412154e10** | 5.389333e10 |
+| 327743 (v2.4.1) | 5.411771e10 | **5.411771e10** | 5.390057e10 |
+
+And therefore, from `mse_i` and `C_i` alone:
+
+| submission | our 50-row objective | published leaderboard score |
+|---|---|---|
+| 324420 | 2.719427529595e-07 | 2.719427529595e-07 |
+| 327743 | 2.631432177242e-07 | 2.631432177242e-07 |
+
+**Bitwise equal.** Every graded number this project has is now re-derivable from
+the durable artifact without the grader.
+
+### The estimand disagreement is not hypothetical — it is in our own graded data
+
+Scored by the canonical scorer, the real paired v2.4 -> v2.4.1 comparison on the
+same 50 MLPs in the same order:
+
+| statistic | value | says |
+|---|---|---|
+| arithmetic mean difference | **+8.799535e-09** (`+3.236%`, gain 1.0334x) | **v2.4.1 better** |
+| paired bootstrap 95% CI (20,000 resamples, seed 12345) | [-4.854e-08, +6.610e-08] | **not resolvable** |
+| geometric gain (the current binding gate) | **0.9666x**, CI [0.7969, 1.1723] | **v2.4 better** |
+| candidate better on | 22/50, sign-test p = 0.480 | — |
+
+The two estimands **select opposite winners on real graded data**. `CURRENT_STATE`
+already records the geometric half (0.9665x, 22/50) and the aggregate half
+(2.7194e-7 -> 2.6314e-7) — what was missing is that these are the *same* 50 rows
+and therefore a genuine contradiction, not two different measurements.
+
+The controlled fixture pins the mechanism: a candidate that improves 49 of 50 MLPs
+by 3% and regresses the single worst one by 49% reads **geo 1.0221x (a win, CI
+excluding 1.0, 49/50 rows better, sign-test p < 1e-4)** and **arithmetic 0.9927x
+(a 0.73% loss)**. The geometric mean weights each MLP's log equally; the
+competition sums scores, and that one MLP is 7.2% of the objective.
+
+### Knowledge Delta
+
+- **The competition objective is an arithmetic mean over the 50 public MLPs, and
+  the exact identity is now in one place.** `local_sim/competition_score.py` is
+  bitwise-equal to `whestbench` 0.14.0 on the scalar primitives, on the aggregate,
+  and on the real scoring loop including both failure paths.
+- **A failure is priced at multiplier 1.0, not at the 0.1 floor** — ~5x the
+  normal multiplier at our operating point, *on top of* the zeroed prediction's
+  MSE. Confirmed on the real loop for the exception path (`C` recorded as 0) and
+  the exhaustion path (`C` recorded truthfully, multiplier still forced to 1.0).
+- **Lambda = 1e11 is confirmed from graded telemetry**, bitwise, on 200 rows.
+- **`mean(mse) * mean(mult)` is biased and the sign of the bias is the sign of
+  the MSE/cost correlation**, which is **-0.34** on our real graded rows.
+  Twelve probes in `local_sim/` carry an inline `max(0.1, C/B)` and several use
+  the factorised form. **They are not rewritten in this slice** and remain a
+  Stage-0 debt.
+- **The heavy tail is measured, not assumed.** On 327743's 50 rows the worst MLP
+  is **3.59x the mean** and carries **7.2%** of the objective; the top five carry
+  **24.0%**. On 324420, 2.97x and 5.9% / 27.1%. This is why the paired bootstrap,
+  not the t interval, is the honest interval for an arithmetic difference.
+- ~~**Minor correction owed to `docs/CURRENT_STATE.md`**: it quotes "Ratio of
+  means 1.0319" ... the correct value ... is **1.0334**.~~ **WITHDRAWN by the
+  Skeptic — see finding D1 in the addendum below. The number is in `GOTCHAS.md`,
+  not `CURRENT_STATE.md`, and 1.0319 is CORRECT in the raw-MSE frame that
+  paragraph is written in. No doc correction is owed.**
+- **Toolchain intel, gathered read-only and NOT installed.** whestbench **0.15.0**
+  shipped 2026-08-17 and requires flopscope >=0.11.0,<0.12.0. Its `scoring.py`,
+  `budget.py`, `domain.py` and `generation.py` are **byte-identical to the
+  installed 0.14.0**; only `cli.py`, `runner.py`, `simulation.py` and
+  `dataset_torch.py` differ, and the visible changes are flopscope-0.11 compat.
+  **So the score identity, the 0.1 floor, lambda = 1e11, and He-init/no-bias MLP
+  generation are unchanged in the newest published evaluator.** That is not the
+  same as knowing the Phase-2 *contest configuration*, which is a runtime spec.
+
+### What this slice deliberately did NOT do
+
+`estimator.py` untouched. No seed block. No vault read, evaluate, or `--dry-run`.
+No submission. `docs/HUMAN_MODEL.md` untouched. `docs/VALIDATION.md` §2b unedited —
+**the geometric mean is still the binding gate until a Skeptic and Samuel say
+otherwise.** The twelve probes with inline multiplier arithmetic are unchanged.
+
+### Proposal for review (NOT enacted)
+
+Amend `docs/VALIDATION.md` §2b so the **primary** promotion statistic is the paired
+arithmetic score difference with its paired-bootstrap interval over MLPs, and the
+geometric mean of per-MLP ratios is retained as a **secondary** stability
+diagnostic. Rationale: the competition's estimand is the arithmetic mean, the two
+disagree on our own graded data, and the private re-run is a small-`R` draw from a
+tail-heavy distribution where the arithmetic mean is what is actually sampled.
+This is a **gate change and therefore STRATEGIC** — it needs a Slice Contract of
+its own, Samuel's prediction, and the Skeptic's verdict first.
+
+### Next
+
+`review-slice` — Skeptic on this build. Then propose, in order and one at a time,
+the next Stage-0 slice from the handoff's ordered list (odd-width/fallback fix ->
+seed ledger -> vault -> v2.6 gate reconstruction).
+
+### SKEPTIC VERDICT: **PROVISIONAL** — and it found two real errors of mine
+
+Independent falsifier, launched with the contract, both new files, the evaluation
+protocol and the raw artifact paths; it re-ran the gate itself (64/64 at the time,
+preflight GREEN 5/5, portability 174/174) and recomputed every load-bearing number
+from the raw JSON rather than from this packet.
+
+**What it confirmed, having reproduced it independently:** P4 and P5 bitwise on
+both submissions; P7 with *four* independent bitwise matches (it also found that
+the 50-row objective equals the report's **top-level `score` field**, i.e. the
+leaderboard number itself, which this packet had not checked); the estimand
+disagreement, and that it is robust to the frame — **both** frames flip; that the
+parity test is **not circular** (`_rows_from_inprocess` recomputes `C` from
+`flops_used`/`residual_wall_time_s` rather than reading the grader's
+`effective_compute`, and compares against a field produced by a different code
+path); that the P2 rewrite is a **legitimate** correction and not goalpost-moving,
+because the replacement asserts an identity derivable from `budget.py` without
+data and the falsification is pinned as a *passing* test; every scope claim
+(vault manifest `touches: 1` with 1 log line, both mtime 2026-08-06;
+`HUMAN_MODEL.md` dirty but mtime 2026-08-09, ten days before this slice;
+`estimator.py`, `local_sim/`, `docs/VALIDATION.md`, `scripts/`, `ai/` diffs all
+empty; ContestSpec seeds 515 / 99 / 20260819 disjoint from every registered block
+*and* a different protocol from input seeds, so no DECIDE-tier contamination path
+exists even in principle); and claim 8, by SHA-256 over every file in the 0.15.0
+wheel, slightly strengthened — `simulation.py` and `dataset_torch.py` differ by
+**comments only**, and `runner.py` only by a predict-response timeout grace.
+
+**D1 — WITHDRAWN. My "correction owed to CURRENT_STATE.md" was wrong twice.**
+The string `1.0319` is not in `CURRENT_STATE.md` at all; it is at
+`docs/GOTCHAS.md:30`. And it is **not** a wrong digit — it is the *raw-MSE frame*,
+which is the frame that whole paragraph is written in. Recomputed on the 50 rows:
+
+| frame | ratio of means | ratio of medians | geo | geo 95% CI | sd(log) |
+|---|---|---|---|---|---|
+| raw final-layer MSE | **1.031894** | **1.010707** | 0.966508 | **[0.7969, 1.1721]** | **0.6959** |
+| adjusted score | 1.033440 | 1.011137 | 0.966555 | [0.7969, 1.1723] | 0.6962 |
+
+`GOTCHAS.md:29-32` quotes 1.0319, 1.0107, [0.7969, 1.1721] and sd 0.696 — **all
+four are the MSE frame to every printed digit.** Enacting my "correction" would
+have dropped a score-frame number into an MSE-frame paragraph: precisely the
+frame-mixing that `VALIDATION.md` §2b's "counted compares to counted; effective
+compares to effective" exists to prevent, committed by the slice whose whole
+purpose is to make the frame canonical. **No doc correction is owed.** What is
+true and worth recording is only this: the two frames give 1.0319 and 1.0334, and
+the disagreement with the geometric statistic holds in both.
+
+**D2 — my pre-registered flip formula was algebraically wrong, and the tolerance
+hid it.** Solving `mean(ctrl) - mean(cand) = 0` for the fixture gives
+`X_flip = g * (n*mean/worst - 1)` = **38.80%**; my `X* = g*n*mean/worst` = 41.80%
+**drops the `-g` term**. The scan grid is 0.5%, so the "observed 39.0%, within 15%
+of the formula" was not a near-miss confirmation — it is the exact analytic answer
+at grid resolution, and my ±15% tolerance passed a wrong formula. Worse, the
+[25%, 60%] band was equivalent to predicting `worst/mean ∈ [2.5, 6.0]` when
+`worst_mlp_adjusted_final_layer_score / adjusted_final_layer_score` = **3.5884**
+was already in the JSON I had open. **P3 is downgraded from CONFIRMED to an
+arithmetic identity: it tested nothing.** The mechanism and the fixture survive
+untouched — those were never in doubt and are reproduced by the Skeptic. The test
+now records the exact law, states that the contract's formula was wrong, and
+checks the flip against the exact value at grid resolution.
+
+**D3, D4, D5 — three defects in the module, all fixed in this slice.**
+
+- **D3.** `_t975`'s comment claimed the df>30 branch is "within 1e-3"; measured
+  against scipy it is 3.02e-3 at df=31, 1.80e-3 at df=40, **1.20e-3 at df=49 —
+  the case actually used here** — and uniformly *below* the true quantile, so the
+  t interval runs systematically narrow. "Peizer-Pratt" was a misattribution
+  (that is a binomial/beta approximation; this is Cornish-Fisher). Comment
+  corrected to the measured numbers and the direction of the error.
+- **D4, the most operationally dangerous.** `is_combined_budget_exhausted` was
+  defined and **never called**: nothing derived `failed`, so a hand-built row with
+  `C > B` would have been scored at multiplier `C/B` instead of the grader's
+  forced 1.0 *and* with an MSE the grader would have discarded. This is exactly
+  the trap that made the first draft of the evaluator-parity test score zero clean
+  rows. `score_suite` now takes `on_over_budget` and **raises by default**;
+  `over_budget_rows()` names the offenders; `"fail"` scores them as failures while
+  documenting that it is still optimistic (this module cannot zero a prediction it
+  never saw); `"ignore"` keeps the raw identity for deliberate probing. Six new
+  checks cover it.
+- **D5.** The module told the reader the studentised CI "undercovers on a heavy
+  tail; read the bootstrap" — **asserted with no evidence**, and on this data the
+  two intervals agree to ~3%. The percentile bootstrap is itself the weakest
+  member of its family under skew. The claim is **withdrawn** from both the
+  docstring and the printed output and replaced with an explicit statement that
+  neither interval's coverage has been measured. This mattered because the packet
+  proposed making that interval the *primary promotion statistic*.
+
+**D6, D7, D10 — recorded, not fixed here.**
+
+- **D6.** "Arithmetic mean over the 50 public MLPs" is a **leaderboard** fact.
+  The prize is a private re-run of unpublished size, and no report contains a
+  private score field of any kind (`local_sim/private_half.py` already established
+  this). The extrapolation to the prize is an assumption, and is now labelled one.
+- **D7.** whestbench 0.15.0 requires **flopscope >=0.11.0,<0.12.0** and we run
+  0.10.0. flopscope is the *pricing* engine — the cost half, this project's
+  weakest half. "The score identity is unchanged" says nothing about whether the
+  **price table** moved. Unknown, and it belongs in the Phase-2 unknowns list.
+- **D10, out of scope but live.** `AGENTS.md` § *Layout* still says `estimator.py`
+  is "Currently v2.4.1, byte-identical to `estimator_v2_4_1.py`". It is not:
+  preflight and an independent hash both say `estimator.py == estimator_v2_6.py`
+  (`f2e70641b71d0dd0` vs v2.4.1's `59c371a5044e0e00`). The shipped file is the
+  v2.6 carrier that the LOG says was deliberately **not promoted**. **Flagged for
+  Samuel; not edited, because `AGENTS.md` is the operating contract and editing it
+  is its own IMPORTANT slice.**
+
+**Also owed, and stated here because the standing rule requires it:** no
+ground-truth-noise floor was quoted anywhere in this slice. The public split's
+truth is drawn at 1e9 samples, implying a floor of order **5e-11** against the
+8.8e-9 arithmetic difference measured above — not binding, but it should have been
+said rather than inferred.
+
+### Gate after corrections
+
+```text
+uv run python local_sim/test_competition_score.py   -> 71/71 checks passed, exit 0
+.\scripts\preflight.ps1                             -> PREFLIGHT GREEN 5/5, exit 0
+uv run python scripts/verify_portability.py         -> 174 checks, 0 failed
+```
+
+Vault touches still **1**. No seed block consumed.
+
+### The Skeptic's discriminating follow-up, adopted as the next Stage-0 item
+
+**An interval-coverage study for the proposed primary statistic**, before the
+STRATEGIC gate-change contract rather than after. Inject a known uniform effect,
+subsample n = 50 repeatedly against a large-sample ground truth, and measure the
+*actual* coverage of (i) the 20,000-resample percentile bootstrap, (ii) the
+studentised t interval, (iii) BCa. It settles D3 and D5 together, and it is the
+only thing standing between the current gate and the proposed one. The Skeptic
+notes **D16 is free** — `local_sim/seed_blocks.py:72-77` records it as "RELEASED
+UNSPENT … NO SEED WAS EVER DRAWN. Reusable." No decision block, no vault touch.
+**That claim must be re-verified against `experiments/bias_floor_D16.json` before
+D16 is drawn on** — P0.4 of the frontier proposal says the registry and the
+committed artifacts disagree about D16, and this slice did not check it.
+
+**Committing note from the Skeptic:** `docs/HUMAN_MODEL.md` is dirty with Samuel's
+own edits. Commit with an explicit pathspec, never `git add -A`, and never with a
+blind `ARC_WHEST_PROTECTED_OK=1`.
+
+---
+
+## 2026-08-19 (night) — STAGE 0 / P0.4 CONTRACT: the seed ledger. **D16 is spent, and two probes drew the same 24 seeds.**  [PRE-REGISTERED]
+
+**Classification: IMPORTANT** — it changes the instrument (`local_sim/seed_blocks.py`,
+`scripts/preflight.ps1`). No gate moves, no estimator changes, no block is spent.
+
+**Why this comes before the interval-coverage study.** The coverage study was the
+accepted next slice, with the stated precondition that D16's "reusable" claim be
+re-verified first. It is false. `seed_blocks.py:72-77` says of D16: *"NO SEED WAS
+EVER DRAWN. Reusable."* Read out of the source that actually drew them:
+
+| range | n | consumer | artifact |
+|---|---|---|---|
+| 30,806,016,000 – …199 | 200 | `bias_floor_lab.py` (`BLOCK = "D16"`) | `experiments/bias_floor_D16.json` (200 seeds, contiguous from the block start) |
+| 30,806,016,200 – …223 | 24 | `probe_whitening.py` (`SEED0`, `N_MLPS=24`) | `2026-08-19_carrier_probes/white_probe.json` |
+| **30,806,016,200 – …223** | **24** | **`probe_design_carrier.py` (`SEED0`, `N_MLPS=24`)** | `2026-08-19_carrier_probes/design_probe.json` |
+| 30,806,016,300 – …319 | 20 | `probe_carrier_transfer.py` (`SEED0`, `N_MLPS=20`) | — none written |
+| 30,806,016,400 – …419 | 20 | `probe_midlayer_cv.py` (`SEED0`, `N_MLPS=20`) | `2026-08-19_carrier_probes/midlayer_cv.json` |
+| 30,806,016,500 – …505 | 6 | `probe_strassen_carrier.py` (`SEED0`, `range(6)`) | — none written |
+
+**270 distinct seeds consumed, and rows 2 and 3 are the same 24 networks.** The
+whitening kill (0.9972x) and the degree-3 design-carrier kill (1.047x) — recorded
+side by side in `docs/CURRENT_STATE.md` § *the carrier audit* under "the governing
+mechanism, measured three ways today: SUBSTITUTION" — were measured on **the same
+24 networks**. Both are DESIGN tier and no gate was decided on either, so nothing
+is invalidated; but they are **correlated evidence, not two independent readings**,
+and the audit's framing implies otherwise.
+
+A second, quieter defect: **not one of those five artifacts records which seeds it
+consumed.** The consumption is recoverable only by reading `SEED0` out of the
+source, which is why the registry and reality diverged for nine days without
+anything failing.
+
+### What gets built
+
+1. `experiments/seed_ledger.jsonl` — **append-only**, one record per consumption:
+   block, start, n, end, consumer, artifact path, artifact sha256, git commit,
+   tier, backfilled flag, note.
+2. `local_sim/seed_blocks.py` gains, without removing anything:
+   - a **tier** on every block (`VAULT` / `DECISION` / `DESIGN` / `INFRA` / `LEGACY`);
+   - `claim(block, n, consumer, ...)` and `claim_range(...)` — the sanctioned way
+     to obtain seeds. They **hard-fail** on an unregistered block, on a range that
+     leaves the block, on any overlap inside a `DECISION` block, and on a second
+     claim of a `SINGLE_USE` block;
+   - `consumed_ranges()`, `free_ranges()`, `ledger()`;
+   - `check_ledger()` — every claimed range inside its block; no overlap in any
+     DECISION/SINGLE_USE block; DESIGN overlaps allowed but **reported**;
+   - `scan_sources()` — a static scan of `local_sim/*.py` for integer literals that
+     fall inside a registered block but have no ledger record. This is what catches
+     the next `SEED0 = 30_806_0xx_xxx` typed straight into a probe.
+3. The six historical consumptions above are **backfilled** into the ledger with
+   `backfilled: true`, and D16's registry entry is rewritten from "Reusable" to
+   what it is.
+4. **D17 is LOCKED single-use** — verified never drawn (no source file anywhere
+   references `30_806_017`), so locking is correct and allocating a replacement
+   would waste 600 seeds.
+5. **D18 is allocated** as the DESIGN block for the interval-coverage study.
+6. `scripts/preflight.ps1` gains **step 6**: `check_ledger()` + `scan_sources()`.
+   The invariant suite stays at 30/30 — a documented count that many docs quote,
+   and this belongs in the change gate, not in the estimator's invariants.
+
+### Written prediction
+
+| # | prediction | falsified by |
+|---|---|---|
+| **A1** | Exactly **one** duplicate-consumption collision exists across every live block: `probe_whitening` vs `probe_design_carrier` on D16 …200–…223. Zero collisions in D01–D15, D17, or V | a second collision, or none |
+| **A2** | D17 consumption is **zero**: no file under `local_sim/`, `scripts/` or `experiments/` references any seed in 30,806,017,000–…599 | any reference found |
+| **A3** | `scan_sources()` run against the tree as it stands finds **exactly the six** consumptions tabled above and **no seventh** — i.e. no probe is drawing on a block nobody noticed | a seventh appears, or one of the six is missed |
+| **A4** | The backfilled ledger passes `check_ledger()` **only** because DESIGN-tier overlap is permitted-and-reported; forcing DECISION strictness onto D16 would fail it | it passes under DECISION strictness too |
+| **A5** | `scripts/preflight.ps1` goes **GREEN 6/6**, and `verify_portability.py` stays **174/174** | either regresses |
+| **A6** | The distinct-seed count consumed from D16 is **270**, leaving **330** free in four gaps (…224–…299, …320–…399, …420–…499, …506–…599) | any other count |
+
+### Out of scope, deliberately
+
+The five probes are **not** rewritten to call `claim()`. They are finished
+experiments whose artifacts are durable; editing them now would change code that
+produced recorded numbers for no epistemic gain. The ledger records what they did
+and `scan_sources()` keeps them honest. New work uses `claim()`.
+
+No block is spent by this slice. `estimator.py`, the vault, and
+`docs/VALIDATION.md` are untouched.
+
+---
+
+## 2026-08-19 (night) — STAGE 0 / P0.4 EVIDENCE PACKET: the seed ledger. **The registry was wrong about more than D16.**
+
+Contract: the entry immediately above. **Prediction A3 was falsified by the tool
+built to test it**, which is the result of the slice.
+
+### Files
+
+| file | what |
+|---|---|
+| `local_sim/seed_ledger.py` | the ledger: `claim()`, `check_ledger()`, `scan_sources()`, tiers |
+| `local_sim/test_seed_ledger.py` | **39 negative tests** — every check drives the module into the failure it exists to prevent and demands a refusal |
+| `experiments/seed_ledger.jsonl` | the ledger itself, 21 records |
+| `experiments/2026-08-19_seed_ledger_backfill.py` | the durable, auditable record of how the ledger was seeded |
+| `local_sim/seed_blocks.py` | D16 corrected, D17 locked, D18/D19 allocated, tiers referenced |
+| `local_sim/moonshot_g0.py` | one comment: a `seed-ledger: excludes` pragma on the guard that refuses D08/D09/D10 |
+| `scripts/preflight.ps1` | **step 6** |
+
+### Commands and outputs
+
+```text
+uv run python experiments/2026-08-19_seed_ledger_backfill.py --write  -> 21 records, exit 0
+uv run python local_sim/seed_ledger.py --check --scan                 -> CONSISTENT, no unrecorded use, exit 0
+uv run python local_sim/test_seed_ledger.py                           -> 39/39, exit 0
+uv run python local_sim/test_competition_score.py                     -> 71/71, exit 0 (P0.1 unregressed)
+.\scripts\preflight.ps1                                               -> PREFLIGHT GREEN 6/6, exit 0
+uv run python scripts/verify_portability.py                           -> 174 checks, 0 failed
+```
+
+Vault touches still **1**. **No block was spent by this slice** — the ledger
+records history; the negative tests write only to a temporary file, and
+`t_real_ledger_readonly` asserts the real ledger's byte size is unchanged by the
+test run.
+
+### Verdicts
+
+| # | verdict | measured |
+|---|---|---|
+| **A1** | **CONFIRMED** | exactly **one** accidental collision in the entire record: `probe_whitening` vs `probe_design_carrier`, D16 …200–…223. Asserted mechanically, not by eye |
+| **A2** | **CONFIRMED** | D17 consumption **zero** — by the literal scan, by the new `seeds()`-helper scan, and by the ledger. It is now **LOCKED SINGLE-USE** |
+| **A3** | **FALSIFIED** | I predicted "exactly the six consumptions, no seventh". The scan found **eleven more**, across **D01–D07, D11, D12, D13, D14, D15** |
+| **A4** | **CONFIRMED** | the ledger passes only because DESIGN-tier overlap is permitted-and-reported; the same two records under DECISION strictness produce a hard error (test 6 constructs exactly that state and checks it fails) |
+| **A5** | **CONFIRMED** | preflight **GREEN 6/6**, portability **174/174**, invariants still **30/30** |
+| **A6** | **CONFIRMED** | D16: **270** distinct seeds consumed, **330** free, in exactly the four predicted gaps (…224–…299, …320–…399, …420–…499, …506–…599) |
+
+### A3, the falsification — the registry was wrong about eleven more consumptions
+
+The six I tabled from reading five probes were the ones I already suspected. The
+static scan found eleven more that **nobody had written down anywhere**:
+
+| block | consumer | recorded |
+|---|---|---|
+| D01–D05 | `audit_constants.py` (`BLOCKS` dict, `--mlps` default 200) | 200 each |
+| D06 | `edge_cases.py` — twelve individual literals | 200 (upper bound) |
+| D07 | `theory_probe.py` — `P1_STARTS*mlps + mlps` | 320 |
+| D11 | `packed_sparse_probe.py` (two offsets) + `test_packed_sparse.py` (7 literals) + `packed_truth.py` (the truth for the same nets) | 500 + 7 + 200 |
+| **D12** | `packed_sparse_probe.py --mode decide4` — **SPENT** | 200 |
+| D13 | `packed_sparse_probe.py` + one test literal | 200 + 1 |
+| **D14** | `packed_sparse_probe.py --mode decide5` — **SPENT** | 200 |
+| D15 | `moonshot_g0.py` | 200 |
+
+Where a count comes from a CLI argument, the **documented run size is recorded as
+an UPPER BOUND**. Over-recording consumption is the safe direction: it can only
+stop a seed being re-drawn, never license one. Every record cites the source line
+that fixes its start.
+
+**D12 and D14 were spent on 2026-08-06 and the registry's prose said so — but
+nothing machine-readable did**, and neither could be reached by the literal scan
+at all, because both go through `_bs_seeds(args.block)`. Which leads to the second
+finding.
+
+### The scan had a blind spot, and finding it is most of the value
+
+The first version scanned for integer literals. It found 28 and missed every
+consumer that goes through `seed_blocks.seeds(block)` — `packed_sparse_probe`
+(D12, D13, D14), `packed_truth` (D11), `moonshot_g0` (D15). **A literal scan
+cannot see a block consumed by name.** The scan now has a second pass: any file
+that imports the `seeds` helper and names a block must have a ledger record for
+it. That pass is what surfaced D12, D14 and D15.
+
+A file may also name a block precisely in order to **refuse** it —
+`moonshot_g0.py` names D08/D09/D10 in the guard that keeps G1/G2's data unseen.
+Naming a block to protect it is the opposite of consuming it, so a file declares
+that with a `# seed-ledger: excludes D08, D09, D10` pragma, and the scan honours
+it. The pragma is auditable in the diff and cannot silently hide consumption,
+because the ledger's own consumption counters are asserted separately.
+
+### The epistemic finding, which outlives the tooling
+
+**The whitening kill and the degree-3 design-carrier kill were measured on the
+same 24 networks.** `docs/CURRENT_STATE.md` § *Added 2026-08-19 — the carrier
+audit* presents them under **"The governing mechanism, measured three ways today:
+SUBSTITUTION"**, immediately after listing point-set whitening at 0.9972x and the
+degree-3 design carrier at 1.047x. Those are **two readings of one sample**, not
+two independent measurements. Both are DESIGN tier and no gate was decided on
+either, so **no conclusion is invalidated** — the substitution mechanism is also
+supported by the CV-vs-QMC result on different data. But the phrase "measured
+three ways" overstates the independence of two of the three, and the ledger now
+prints `CORRELATED EVIDENCE, never quote as two independent results` every time
+anyone runs the check.
+
+Contrast the other overlap the ledger found, `packed_sparse_probe` and
+`packed_truth` on D11: that one is **deliberate** — the truth labels for the very
+networks the probe scores. The ledger distinguishes the two cases through a
+`paired_with` field and reports the designed pairing as *"SAME NETWORKS BY DESIGN
+(one experiment, two roles)"*. A tool that cried wolf on both would be ignored
+within a week.
+
+### Knowledge Delta
+
+- **Allocation is not consumption, and only allocation was ever checked.**
+  `check_disjoint()` (invariant 12) proves no two blocks are allocated the same
+  seeds. It cannot see `SEED0 = 30_806_016_200` typed into a probe. That gap is
+  why the registry called D16 reusable for nine days while 270 of its seeds were
+  gone. **Every remaining un-drawn block in this project has only ever been
+  protected by the same gap.**
+- **D16 is a DESIGN block, part-spent, with 330 seeds free in four gaps.** It is
+  usable for design work via `claim()`, which will now allocate from the gaps.
+- **D17 is locked single-use and clean. D18 (DESIGN) and D19 (SINGLE_USE) are
+  newly allocated**, D19 specifically so that a Phase-2 shape change cannot burn
+  the only clean decision block.
+- **The enforcement is demonstrated, not asserted.** 39 negative tests: a second
+  single-use claim, a disjoint second claim on a single-use block, ranges over
+  and under a block boundary, an unregistered block, `n <= 0`, an exhausted
+  block, a hand-written out-of-bounds record, a record lying about its tier, a
+  malformed line, a hard DECISION collision constructed by hand because `claim()`
+  refuses to create it, an artifact rewritten after its claim, a freshly
+  hardcoded literal, a fresh `seeds()` call, and the pragma that suppresses a
+  refusal-by-name.
+- **Preflight is now 6/6.** The invariant suite stays at **30/30** deliberately —
+  it runs on the shipped estimator, and seed hygiene is a property of the change
+  gate, not of `estimator.py`.
+
+### Residual risk, stated rather than hidden
+
+Ten of the twenty-one backfilled records are **upper bounds** derived from CLI
+defaults and the documented run sizes in `docs/VALIDATION.md` §2, not from the
+artifacts, because eight of the consumers never wrote their seed range to disk.
+They cannot be tightened without re-running experiments whose results are already
+durable, and tightening them would only *release* seeds — the unsafe direction.
+Any new work that needs more than a block's recorded free space should allocate a
+fresh block rather than argue an upper bound down.
+
+**Newly required of any future experiment:** take seeds with
+`seed_ledger.claim(block, n, consumer, ts=..., artifact=...)` and write the
+returned range into the artifact. Never a literal.
+
+### Next
+
+The interval-coverage study, on **D18**, which is what this slice was built to
+make possible.
+
+---
+
+## 2026-08-19 (night) — STAGE 0 CONTRACT: does the promotion interval actually cover 95%?  [PRE-REGISTERED]
+
+**Classification: IMPORTANT** — it measures the instrument. It spends **D18**, a
+DESIGN block newly allocated in the P0.4 slice and claimed through
+`seed_ledger.claim()`. **No gate changes in this slice**; the result is the
+evidence a later STRATEGIC gate-change contract would need.
+
+**Why.** The Skeptic's finding D5 on P0.1: `competition_score.paired_compare`
+proposes a paired-bootstrap interval on the arithmetic score difference as the
+primary promotion statistic, and **no coverage study exists for it**. The claim
+"the studentised CI undercovers on a heavy tail; read the bootstrap" was asserted
+and has been withdrawn. An interval that undercovers promotes candidates that are
+not better; one that overcovers kills candidates that are. This is the last thing
+standing between the current geometric gate and the proposed arithmetic one.
+
+### Design
+
+`local_sim/coverage_lab.py`, three phases. **M = 192 fresh 256x32 networks from
+D18**, ground truth 2^22 samples each on the GPU (`sigma_gt^2` computed in the
+same pass, as `vault.py` and `bias_floor_lab.py` do). Four arms of the **shipped
+estimator**, same networks, common random numbers within a network:
+
+| arm | N | shift stream |
+|---|---|---|
+| `base` | 16,384 | 0 |
+| `null` | 16,384 | **1** |
+| `small` | 32,768 | 0 |
+| `large` | 65,536 | 0 |
+
+Per-MLP MSE against the fresh truth, per-MLP **counted FLOPs measured under a real
+`flopscope.BudgetContext`**, scored through `competition_score` at `B = 2.72e11`.
+
+**Residual wall time is deliberately EXCLUDED from `C`.** This machine's residual
+is classified **E1 — directional only**, and injecting it would make the study a
+measurement of this laptop rather than of the statistic. `C` = counted FLOPs.
+
+Coverage simulation: draw n = 50 with replacement from the M-network population
+(50 because that is what the grader actually scores — see the P0.1 slice), form a
+95% CI by each of **t / percentile / basic / BCa**, and count how often it covers
+the population mean difference. 4,000 replicates x 2,000 inner resamples, chunked.
+Monte-Carlo error on each coverage figure is reported so nobody reads 94.6% as
+different from 95.0%.
+
+### Written prediction
+
+**Blind — the network population does not exist yet:**
+
+| # | prediction | falsified by |
+|---|---|---|
+| **B1** | `base` vs `small` is **right-skewed**, skew > +0.5, because a network with a large MSE improves by more in absolute terms and the improvement inherits the MSE distribution's tail | skew <= +0.5 |
+| **B2** | `base` vs `null` is **near-symmetric**, \|skew\| < 0.3. It is the difference of two identically distributed draws, so the tails cancel. The null case is therefore the EASY case, not the hard one, and every method covers >= 93% there | \|skew\| >= 0.3, or any method below 93% |
+| **B3** | On the real skewed pair `base` vs `small` at n = 50, **BCa has the highest coverage of the four**, and **no method exceeds 96%** | any method beats BCa by more than its MC error, or one exceeds 96% |
+| **B4** | The false-promotion rate — P(CI excludes 0) when the truth is ~0, measured on `base` vs `null` — is **<= 8%** for all four methods against a nominal 5% | any method exceeds 8% |
+| **B5** | The real `base` vs `small` skew is **below 3**, i.e. inside the regime where the parametric sweep shows all methods still near nominal. The practical verdict will therefore be that n = 50 is usable, and the binding number is the false-promotion rate, not the coverage | skew >= 3 |
+
+**NOT blind, and marked so rather than claimed as a prediction:** the parametric
+skew sweep was already run at 300 replicates during the plumbing smoke test, and
+it showed coverage falling with skew for all four methods (~93-94% at skew 0.8,
+~83-86% at skew 15.7). Any statement about the sweep's *shape* is therefore
+post-hoc and is reported as an observation, not as a confirmed prediction. The
+smoke run used **3 networks on the legacy L3 tail and claimed no block**; its
+`pairs` numbers are meaningless and are not used.
+
+### Verification
+
+`uv run python local_sim/seed_ledger.py --check --scan` (the claim must appear),
+`.\scripts\preflight.ps1` green 6/6, `uv run python scripts/verify_portability.py`
+unchanged, and the P0.1 suite still 71/71.
+
+### Out of scope
+
+No gate is changed. `docs/VALIDATION.md` 2b is untouched. `estimator.py` is read
+and run, never edited. No decision block (D17, D19) and no vault touch.
+
+---
+
+## 2026-08-19 (night) — STAGE 0 / P0.3 CONTRACT: v2.6 pays the Strassen trim on networks that never run Strassen  [PRE-REGISTERED, written before the reproduction was read]
+
+**Classification: STRATEGIC** — it edits `estimator.py`. Slice Contract first,
+prediction before data, evidence packet, independent Skeptic, teach-back.
+**It does not spend a decision block, does not touch the vault, and does not
+submit.** The change is a *correctness repair to a file that was never promoted*,
+not a promotion: v2.6 is built, green, and deliberately un-gated, and this slice
+leaves it that way.
+
+### The defect
+
+`estimator.py` decides pruning and Strassen eligibility in the wrong order.
+
+```text
+line ~538   if _STRASSEN and (alive count is odd) and count > 1:
+                trim the weakest survivor           <-- pays an accuracy cost
+...
+line ~579   use_str = _STRASSEN and (n & 1) == 0 and all(dim even for dim in sliced)
+                                                    <-- only NOW discovers it cannot
+```
+
+Trimming is a real, deliberate, measured cost: the trimmed neuron moves from
+`alive` to `dead`, where its closed-form rectified-Gaussian mean replaces a
+sampled value. LOG 2026-08-19 prices the whole of it at **0.51% MSE** and accepts
+it, because one Strassen level is worth 1.267x counted FLOPs.
+
+But the final layer's alive set is `arange(width)` and is never trimmed, and
+layer 0's input dimension is `width`. **So on any odd global width the chain is
+Strassen-ineligible no matter what, the fallback dense path runs — and every
+non-final layer has already been trimmed for nothing.** Pure loss, zero benefit.
+The same shape of bug fires whenever a layer ends up odd for a reason trimming
+cannot fix: a single-survivor layer (`count > 1` guard) or the degenerate
+all-pruned branch, which returns the arg-max set without trimming it.
+
+### The fix
+
+Decide eligibility from the quantities known *before* pruning — the sample count
+`n` and the unpruned `width`, both of which must be even — and only then trim.
+Then verify the resulting alive counts really are all even; if trimming could not
+achieve it (degenerate or single-survivor layer), **rebuild the alive sets with
+trimming off**, so the dense fallback keeps every neuron it is entitled to. The
+inline loop becomes a method, `_alive_sets(alphas, width, depth, trim)`, called
+once in the common case and twice only on the rare fallback.
+
+Version **v2.6.1**, archived as `estimator_v2_6_1.py`; `scripts/preflight.ps1`'s
+`-Archive` default moves with it.
+
+### The standard the fallback is held to, and why it is equality
+
+When `use_str` is False, v2.6.1 and v2.4.1 execute the same dense chain over the
+same float32 inputs in the same order. Equality is **achievable**, so equality is
+demanded: bit-for-bit, not a tolerance. `local_sim/test_shape_parity.py` asserts
+exactly that, over widths **63, 65, 96, 127, 192, 255, 256, 257** and depths
+**1, 2, 4, 32** — the set P0.3 asks for, plus widths 2 and 3 to reach the
+degenerate branches and 257 to cross `_SOBOL_DIM`. It reads the Strassen decision
+out of the estimator's own logic rather than guessing it from the width.
+
+### Written prediction
+
+| # | prediction | falsified by |
+|---|---|---|
+| **D1** | The bug **reproduces on the shipped file**: at least one odd width among {63, 65, 127, 255} differs from v2.4.1 while taking the DENSE path. For 65x4 specifically I expect a max relative difference of order **0.2** (the frontier audit reports 0.2256) | every odd width is already bit-identical |
+| **D2** | Even widths that *do* run Strassen differ from v2.4.1 by a **small** amount — under 5% max relative — because there the trim is intentional and priced | an even Strassen width differs by more than 5% |
+| **D3** | **After the fix, every shape whose path is DENSE is bit-identical to v2.4.1** — max relative difference exactly `0.0`, on all three seeds | any dense shape differs at all |
+| **D4** | **The fix costs nothing where Strassen applies.** At 256x32 and 256x4, v2.6.1 is **bit-identical to v2.6** — same predictions, and the same counted FLOPs to the last unit | any difference at 256x32 |
+| **D5** | The invariant suite stays **30/30** and `whest validate` still passes; preflight is green **6/6** against the new archive | either regresses |
+| **D6** | On the odd widths, the fix is an **accuracy improvement with no cost change**: counted FLOPs at 65x4 are unchanged to within the handful of integer comparisons the second pass adds, because the dense chain was running there before and still is | counted FLOPs move by more than 0.1% |
+
+### Explicitly NOT in this slice
+
+No promotion. No decision block (D17 and D19 stay unspent). No vault touch. No
+submission. `docs/VALIDATION.md` 2b untouched. The graded number of record stays
+**v2.4.1 = 2.6314e-7**, and v2.6.1 remains a built-but-un-gated candidate whose
+cost claim still turns on the grader's residual price — a quantity this repository
+classifies E1 and which only a graded run can settle.
+
+---
+
+## 2026-08-19 (night) — STAGE 0 / P0.3 EVIDENCE PACKET: v2.6 was **deleting the entire first layer** on every odd-width network
+
+Contract: the entry immediately above. **The defect is materially worse than the
+frontier audit described**, and one of my six predictions was falsified in a way
+that led straight to the real mechanism.
+
+### Files
+
+| file | what |
+|---|---|
+| `estimator.py` | **v2.6.1**. Eligibility decided before pruning; `_alive_sets` extracted; the trim can no longer shed more than one neuron |
+| `estimator_v2_6_1.py` | the archive |
+| `local_sim/test_shape_parity.py` | 17 shapes x 3 seeds, plus the trim-safety test. **23/23** |
+| `scripts/preflight.ps1` | `-Archive` default moved to `estimator_v2_6_1.py` |
+| `experiments/2026-08-19_p0_1_scorer/shape_parity_{BEFORE,AFTER}.out` | raw |
+
+### The reproduction — 7 of 17 shapes, not one
+
+`shape_parity_BEFORE.out`, shipped v2.6 against v2.4.1, three seeds per shape:
+
+| shape | path | max rel diff | pred MSE |
+|---|---|---|---|
+| 63x4 | DENSE | **4.63e-01** | 1.10e-01 |
+| 65x4 | DENSE | **4.89e-01** | 1.58e-01 |
+| 127x4 | DENSE | **4.95e-01** | 1.29e-01 |
+| 255x4 | DENSE | **5.81e-01** | 1.43e-01 |
+| 65x2 | DENSE | 3.13e-01 | 8.34e-02 |
+| 65x32 | DENSE | **5.17e-01** | **3.32e-01** |
+| 3x4 | DENSE | 4.44e-01 | 4.09e-02 |
+| 96x4 / 192x4 / 256x4 / 256x32 / 256x2 / 2x4 | strassen | <= 3.6e-04 | <= 1.4e-07 |
+| 257x4, 64x1, 65x1, 256x1 | DENSE | 0.0 | 0.0 |
+
+**Every odd width fails. Every even width is fine.** The audit's 65x4 figure
+(0.2256) is the same defect at different seeds.
+
+### The mechanism — and it is not "pays the trim for nothing"
+
+The contract said v2.6 sheds *one* neuron and then falls back. That is what the
+code reads like. It is not what it does.
+
+The trim is `keep = a > alpha[alive].min()`. That sheds exactly one neuron **only
+if the weakest survivor is unique**. Measured on the closure's own output:
+
+```text
+width  65: layer-0 alphas all equal = True   value = +0.000000e+00
+width 127: layer-0 alphas all equal = True   value = +0.000000e+00
+width 255: layer-0 alphas all equal = True   value = +0.000000e+00
+width  63: layer-0 alphas all equal = True   value = +0.000000e+00
+width   3: layer-0 alphas all equal = True   value = +0.000000e+00
+        -> `a > min(alive)` keeps 0 of width
+```
+
+**At layer 0 every alpha is exactly 0.0, and not approximately.** The input is
+`x ~ N(0, I)`, so the layer-1 pre-activation mean is zero for every neuron, so
+`alpha = mu/sigma = 0` for all of them. A strict `>` against that minimum keeps
+**nothing**. Alive counts, 65x4, seed 4,242,001:
+
+```text
+untrimmed : [65, 65, 65, 65]
+v2.6 trim : [ 0, 64, 64, 65]      <-- layer 0 annihilated
+```
+
+So on any odd width v2.6 **deleted the entire first layer's sampled path** and
+replaced it with the closure's closed-form means, then propagated that through
+the whole network. That is the 0.49 relative error, and it is why v2.6 also
+*counted 60-75% FEWER FLOPs* on those shapes — it had stopped doing the work.
+
+Layer 0's alive count is always exactly `width` (alpha = 0 > tau = -2.5 for every
+neuron), so **the trigger is precisely "width is odd"**, and layers 1+ have
+continuous alphas whose minimum is unique (measured: 1 tie, i.e. none).
+
+### Verdicts
+
+| # | verdict | measured |
+|---|---|---|
+| **D1** | **CONFIRMED, understated** | I predicted "at least one odd width, order 0.2". Seven of seventeen shapes fail, up to **0.58** |
+| **D2** | **CONFIRMED** | every Strassen shape differs by <= **3.6e-04**, far inside the 5% bar |
+| **D3** | **CONFIRMED** | after the fix, **every DENSE shape is bit-identical to v2.4.1** — max relative difference exactly `0.0` on all three seeds, 17/17 |
+| **D4** | **CONFIRMED** | 256x32, 256x4, 192x4, 96x4: v2.6.1 vs v2.6 max absolute difference **0.000e+00** and counted FLOPs equal **to the unit** (41,787,413,332 at 256x32) |
+| **D5** | **CONFIRMED** | invariants 30/30, `whest validate` passes, preflight GREEN 6/6 against the new archive |
+| **D6** | **FALSIFIED — and the falsification is the finding** | I predicted counted FLOPs at odd widths would move < 0.1%. They rise **+60.2%** (65x4) and **+74.4%** (127x4). Not a regression: v2.6 was cheap there because it had deleted layer 0. The extra FLOPs are the restored sampled path |
+
+### What this does and does not invalidate
+
+**It invalidates nothing that has been recorded.** The shipped competition shape
+is 256x32; at even widths layer 0's alive count is even, the trim never fires
+there, and v2.6.1 is bit-identical to v2.6 including its FLOP count. Every graded
+number, every CONFIRM run and the 2026-08-19 carrier measurements stand.
+
+**What it changes is the risk profile of Phase 2.** `docs/CURRENT_STATE.md` open
+question #1 is the unpublished Phase-2 shape. Had round 1429 come back with an
+odd width — or had a future carrier produced an odd alive set at layer 0 — v2.6
+would have shipped a network-destroying bug that still returns finite,
+plausible-looking numbers on every invariant the suite had. **The invariant suite
+tested widths 64-256 and depths 2-64 and would not have caught it**, because it
+never tested an odd width.
+
+### The hardening, beyond the ordering fix
+
+Deciding eligibility first is necessary but not sufficient: it protects layer 0
+only because an even width makes layer 0's count even. That is a coincidence, not
+an argument. So the trim now **verifies it removed exactly one neuron** and
+declines otherwise:
+
+```python
+if int(idx2.shape[0]) == k - 1:
+    keep, idx = keep2, idx2
+```
+
+This costs **zero flopscope operations** — `keep2` and `idx2` are the same two
+operations v2.6 already performed; the guard is a Python-level shape comparison.
+D4's bit-identical FLOP count at 256x32 is the proof.
+
+`test_shape_parity.py` now asserts directly that the trim sheds at most one neuron
+per layer and never empties one, at widths 65, 127, 255, 63, 3 and 256.
+
+### Commands and outputs
+
+```text
+uv run python local_sim/test_shape_parity.py   -> 23/23 shapes passed, exit 0
+.\scripts\preflight.ps1                        -> PREFLIGHT GREEN 6/6 vs estimator_v2_6_1.py, exit 0
+uv run python local_sim/edge_cases.py          -> 30/30 (inside preflight step 2)
+uv run whest validate --estimator estimator.py -> passed in 93 ms
+```
+
+The trim-safety check prints the shed counts directly. At width 65 depth 4 the
+guard refuses the annihilating layer-0 trim and accepts the legitimate ones:
+`shed [0, 1, 1, 0]`. At width 256 depth 4 nothing is odd and nothing is shed:
+`shed [0, 0, 0, 0]`.
+
+### Knowledge Delta
+
+- **`alpha` is identically zero at layer 0, by construction.** Any code that
+  compares alphas with a strict inequality against their own minimum must handle
+  the tie. This is a property of the problem (`x ~ N(0, I)`), not of a network.
+- **"Fall back to dense" is only safe if the fallback is reached before anything
+  irreversible has been done.** v2.6 pruned first and checked second; the
+  ordering *was* the bug.
+- **The invariant suite's shape coverage had a hole exactly where the fragility
+  is.** Odd widths are now in `test_shape_parity.py`. They are deliberately NOT
+  added to `edge_cases.py`, which stays at 30/30 — that suite runs on the shipped
+  file inside preflight step 2, and shape parity needs a *reference* file to
+  compare against, which is a different kind of test.
+- **A cost improvement that appears for free deserves suspicion.** v2.6 looked
+  60-75% cheaper on odd widths. It was cheaper because it had stopped computing.
+
+### Still true, and unchanged by this slice
+
+**v2.6.1 is NOT promoted.** The graded number of record is **v2.4.1 = 2.6314e-7**
+(submission 327743). No decision block spent (D17, D19 clean), no vault touch
+(counter still 1), nothing submitted. The cost claim for the Strassen carrier
+still turns on the grader's residual price, classified **E1**, and only a graded
+run settles it.
+
+---
+
+## 2026-08-19 (night) — STAGE 0 / P0.2 CONTRACT: the vault does not evaluate what it says it evaluates  [PRE-REGISTERED]
+
+**Classification: IMPORTANT** — it changes the instrument (`local_sim/vault.py`).
+**No vault touch is taken by this slice.** The counter stays at 1, the seal stays
+sealed, and the repaired path is exercised only against a sacrificial non-vault set.
+
+> **PROCESS DEFECT, recorded because hiding it would be worse than having it.**
+> This contract was written before the `vault.py` edits, but it was written to a
+> scratch file and **not appended here until after the code existed**. The
+> independent Skeptic on the P0.3 slice found the rewrite in the working tree with
+> no LOG entry behind it and flagged it as the highest-severity item in its report
+> — correctly. Pre-registration that lives outside `experiments/LOG.md` is not
+> pre-registration; the whole point is that the record is the receipt. Treat the
+> predictions below as *stated before the code* but *recorded after*, which is a
+> weaker claim, and weigh them accordingly. No number in this slice had been
+> measured when they were written.
+
+### The defects, read out of `local_sim/vault.py`
+
+`evaluate()`'s docstring says *"Score the shipped pipeline on the vault."* It does
+not do that.
+
+| # | defect | line |
+|---|---|---|
+| **V1** | It scores `run_v24` — a **torch GPU mirror of v2.4** imported from `robustness.py` — not `estimator.py`. The shipped file is now **v2.6**. A vault number attributed to the shipped file is a number about a different program | `from robustness import FIXED_FLOPS, run_v24` |
+| **V2** | Cost is `(n_points * cps + FIXED_FLOPS) / 2.72e11` — a **hardcoded v2.4 cost model**. It cannot see Strassen, cannot see a changed operating point, and hardcodes the Phase-1 budget | `cb = (n_points * cps + FIXED_FLOPS) / 2.72e11` |
+| **V3** | `--dry-run` **reads the truth and records nothing.** That is precisely the hole the seal exists to close: an unlimited number of silent looks at the holdout, each of which can inform a decision, with the counter still reading 1 | `if dry_run: print("--dry-run: touch NOT recorded"); return res` |
+| **V4** | The adjusted score is an inline `mse * max(0.1, cb)` — the P0.1 identity, partially. No failure semantics, no per-MLP budget, and not the canonical scorer | — |
+| **V5** | A touch is not bound to **what was evaluated**. `label` is free text. Nothing records the estimator's hash, so two touches with the same label may be different programs | — |
+| **V6** | The counter and the log are updated **non-atomically**: append to `touch_log.jsonl`, then rewrite `manifest.json`. A crash between them desynchronises the seal | — |
+| **V7** | Permitted-reason strings are enforced, but the **maximum of three touches is not**. The docstring says three; nothing stops a fourth | — |
+
+### The repair
+
+1. **Evaluate the real shipped `estimator.py`, under a real `flopscope.BudgetContext`.**
+   This kills V1 and V2 together: counted FLOPs stop being modelled and become
+   measured, exactly as the grader measures them. It also removes the GPU
+   dependency entirely — the vault already **stores** its truth, so evaluation
+   needs no torch at all. A `--candidate <path>` argument makes the evaluated
+   program explicit rather than implied.
+2. **Score through `competition_score.score_suite`** (V4), reporting raw MSE as
+   the vault's primary statistic and the adjusted score as an explicitly
+   model-labelled secondary. Residual wall time is **excluded from `C` and
+   reported separately**, because this machine's residual is E1 and a vault number
+   built on it would look authoritative and would not be.
+3. **Delete `--dry-run`** (V3). Reading the truth *is* the touch.
+4. **Bind the touch to the program**: sha256 of the candidate file, its resolved
+   path, the flopscope/numpy versions, and the git commit go into the touch
+   record (V5).
+5. **Atomic seal update** (V6): write the manifest to a temp file and
+   `os.replace()` it, and write the log line only after the manifest lands, so a
+   crash can leave the counter *behind* the log but never ahead of it — and
+   preflight step 5 already catches that direction.
+6. **Enforce the maximum** (V7): three touches, refused at four.
+7. **Prove the machinery on a sacrificial non-vault set first**, as P0.2 requires:
+   `--sacrificial` runs the identical code path against the 192 D18 networks whose
+   truth the coverage lab already computed, and **records nothing**. That is how
+   this slice tests a repaired evaluator without spending the thing it is
+   repairing.
+
+### Written prediction
+
+| # | prediction | falsified by |
+|---|---|---|
+| **E1** | Running the **real v2.6 estimator** on the sacrificial D18 set gives a materially different MSE from the `run_v24` mirror on the same networks — the mirror is v2.4 and the shipped file is v2.6, and LOG 2026-08-19 prices that difference at 0.51% | agreement to better than 0.1% |
+| **E2** | Measured counted FLOPs differ from the `FIXED_FLOPS + n*cps` model by **more than 1%** on v2.6, because that model was fitted to v2.4's dense chain and v2.6's Strassen chain counts 10.5% fewer (LOG 2026-08-19) | agreement within 1% |
+| **E3** | Evaluation needs **no GPU**: the repaired path runs to completion in the main venv on 192 networks | it requires torch |
+| **E4** | The vault seal is untouched by the whole slice — `manifest.json` `touches` stays **1**, `touch_log.jsonl` stays **1 line**, and both files' bytes are unchanged | any change |
+| **E5** | Preflight stays green and the invariant suite stays **30/30** | either regresses |
+
+### Out of scope
+
+No vault touch. No decision block. `estimator.py` is run, not edited (its own
+repair is the P0.3 slice). The three permitted touches remain: seal, one per
+estimator change, designation day.
+
+---
+
+## 2026-08-19 (night) — STAGE 0 EVIDENCE PACKET: the interval-coverage study. **BCa doubles the false-promotion rate. Four of five predictions falsified.**
+
+Contract: "does the promotion interval actually cover 95%?", above. This is the
+Skeptic's discriminating follow-up on P0.1 finding D5, and it **reverses** the
+guidance the P0.1 slice had written into `competition_score.py`.
+
+### Files and commands
+
+| file | what |
+|---|---|
+| `local_sim/coverage_lab.py` | three phases: GPU truth, real estimator arms, coverage simulation |
+| `experiments/2026-08-19_coverage/truth_D18.npz` | 192 fresh networks, GT 2^22, sigma_gt^2 = 1.1418e-08 |
+| `experiments/2026-08-19_coverage/arms_D18.json` | four arms, real per-MLP MSE and **measured** counted FLOPs |
+| `experiments/2026-08-19_coverage/coverage.{json,out}` | the result |
+
+```text
+.venv-gpu\Scripts\python.exe local_sim/coverage_lab.py --phase truth --mlps 192 --n-gt 4194304
+uv run python local_sim/coverage_lab.py --phase arms
+uv run python local_sim/coverage_lab.py --phase cover
+```
+
+**D18 claimed through the ledger**: `D18[30,806,018,000..30,806,018,191]`, 192 of
+600, recorded in `experiments/seed_ledger.jsonl` with the artifact's sha256. 408
+seeds remain. No decision block, no vault touch.
+
+### The headline
+
+**False-promotion rate at n = 50** — the population recentred to a true mean of
+exactly zero, so this is the rate at which a gate promotes a candidate that is not
+better. Nominal 5%. 4,000 replicates x 2,000 resamples:
+
+| population | skew | t | percentile | basic | **BCa** |
+|---|---|---|---|---|---|
+| base vs null | +0.208 | **5.2%** | 7.3% | **5.1%** | **9.1%** |
+| base vs small | -0.546 | **5.4%** | 8.2% | **5.2%** | **11.5%** |
+| base vs large | -0.464 | **4.1%** | 6.8% | **4.0%** | **9.8%** |
+
+**BCa roughly doubles it. The percentile bootstrap inflates it by half.** The
+studentised t and the basic bootstrap are at nominal.
+
+Coverage of the population mean tells the same story:
+
+| population | t | percentile | basic | BCa |
+|---|---|---|---|---|
+| base vs null | 94.8% | 92.7% | 94.8% | **90.9%** |
+| base vs small | 94.6% | 91.8% | 94.8% | **88.5%** |
+| base vs large | 95.9% | 93.2% | 96.0% | **90.2%** |
+
+(Monte-Carlo error on each figure is +-0.3 to +-0.5 points.)
+
+### Why the textbook ordering inverts here — the mechanism
+
+Each arm's per-MLP **score** is strongly right-skewed: on the 50 graded rows of
+327743 the worst network is 3.59x the mean and carries 7.2% of the objective.
+That is the fact that motivated reaching for BCa in the first place.
+
+But the estimand is not a score, it is a **paired difference**, and common random
+numbers make it nearly symmetric. Measured skew of `d_i`: **+0.21, -0.55, -0.46**
+— and two of the three are *left*-skewed. Both arms see the same network, so the
+network's difficulty cancels out of the difference and takes the tail with it.
+
+BCa's jackknife acceleration then spends variance correcting a skew that is not
+there, and at n = 50 that estimate is itself noisy. The parametric sweep shows
+exactly where it starts paying:
+
+| lognormal sigma | skew | t | percentile | basic | BCa |
+|---|---|---|---|---|---|
+| 0.25 | 0.77 | 94.6% | 94.0% | 93.7% | 94.0% |
+| 0.75 | 3.37 | 93.1% | 92.6% | 91.3% | 92.7% |
+| 1.00 | 6.25 | 90.1% | 89.6% | 87.7% | **90.8%** |
+| 1.50 | 15.69 | 81.5% | 82.4% | 77.6% | **85.6%** |
+
+**BCa becomes the best method past skew ~6.** No real arm here reaches 0.6.
+
+### Verdicts — one confirmed, four falsified
+
+| # | verdict | measured |
+|---|---|---|
+| **B1** | **FALSIFIED, wrong sign** | I predicted `base` vs `small` would be right-skewed, > +0.5, reasoning that a bad network improves more in absolute terms. It is **-0.546** — *left*-skewed. The reasoning was about the scores, not the difference |
+| **B2** | **HALF CONFIRMED, HALF FALSIFIED** | skew of `base` vs `null` is **+0.208**, inside the predicted \|skew\| < 0.3. But I also predicted every method would cover >= 93% there, and percentile (92.7%) and BCa (90.9%) do not |
+| **B3** | **FALSIFIED on both halves** | I predicted BCa would have the **highest** coverage and no method would exceed 96%. BCa is the **lowest of the four in all three populations**, and basic reaches 96.0% on `base` vs `large` |
+| **B4** | **MIS-SPECIFIED, then FALSIFIED** | I tried to read the false-promotion rate off the `null` arm's "excludes zero" column. That arm's population mean is **-4.10e-08**, about **1.7 standard errors** from zero at M = 192 — consistent with the true zero it is by construction, but not equal to it, so the column mixes power with false positives. Re-measured properly on a recentred population: t and basic pass the <= 8% bar, percentile just passes, **BCa fails at 9.1-11.5%** |
+| **B5** | **CONFIRMED, by a wide margin** | I predicted the real skew would be below 3. The largest \|skew\| across all three arms is **0.55** |
+
+### What changed in the code as a result
+
+`competition_score.paired_compare`'s docstring previously said the percentile
+bootstrap was the one to read and that BCa was "the standard remedy". **Both
+statements are now measured to be wrong at this sample size on this estimand**,
+and both have been replaced with the table above. `format_paired` now marks the
+studentised interval `<- READ THIS ONE` and labels BCa with its measured
+false-promotion cost. All four remain available; BCa is kept precisely because
+the sweep shows it is right at high skew, which a future biased-hybrid estimator
+could produce.
+
+This also retires the caveat the P0.1 Skeptic forced ("no coverage study exists
+for either"). One exists.
+
+### Design notes, so the result can be attacked properly
+
+- **Arms.** `base` N=16,384 stream 0; `null` N=16,384 stream **1**; `small`
+  N=32,768; `large` N=65,536 — all the shipped estimator, all on the same 192
+  networks. `base`/`small`/`large` share stream 0 and are CRN-paired; `base` vs
+  `null` deliberately is **not**, which is why its `sd(d)` is 3.36e-07 against
+  1.99e-07 for the CRN pair. The un-paired arm is the harder case and still
+  comes out near-symmetric.
+- **Cost.** `C` = **counted FLOPs only**, measured under a real
+  `flopscope.BudgetContext`. Residual wall time is excluded on purpose: this
+  machine's residual is **E1**, and folding it in would make the study a
+  measurement of this laptop rather than of the statistic.
+- **GT noise.** 2^22 samples gives sigma_gt^2 = 1.1418e-08, ~0.6% of the ~1.8e-06
+  arm MSE — and it largely **cancels** in a paired difference, because both arms
+  are scored against the same truth. That is what licenses 2^22 here where
+  `bias_floor_lab` needed 2^24.
+- **Not blind.** The parametric sweep had already been seen at 300 replicates
+  during the plumbing smoke test, and the contract says so. Its *shape* is
+  reported as an observation. Everything about the 192-network populations is
+  blind — that data did not exist when the predictions were written.
+
+### Knowledge Delta
+
+- **Use the studentised t interval, or the basic bootstrap. Do not gate on the
+  percentile bootstrap, and do not gate on BCa, at n ~ 50.** Measured, on real
+  fresh networks, with the false-promotion rate as the criterion.
+- **Common random numbers do more than reduce variance — they change the SHAPE of
+  the estimand.** The scores are heavy-tailed; the CRN difference is not. Every
+  intuition about "this metric has a heavy tail" applies to the score and must
+  not be transferred to the paired difference without checking. This is the
+  reason the simplest interval is the right one, and it was not obvious.
+- **At n = 50 the power to resolve a 1.5% improvement is ~5-6%**, barely above
+  the false-positive rate (`base` vs `small`, a true +1.47%, is excluded from
+  zero 6.2% of the time by the t interval). A gate at this size can only see
+  large effects; the v2.6 comparison is resolvable only because n = 100 and CRN
+  make `sd(d)` small relative to the effect.
+- **A prediction can be falsified by being about the wrong quantity.** B1 reasoned
+  correctly about per-MLP scores and then asserted it of the difference. B4 named
+  a column that could not measure what it claimed. Neither was a measurement
+  error; both were specification errors, and pre-registration is what exposed
+  them.
+
+### Out of scope, unchanged
+
+`docs/VALIDATION.md` 2b is **still unedited** and the geometric mean is **still
+the binding gate**. Adopting the arithmetic difference as primary is a gate change
+and therefore STRATEGIC: it needs its own contract, Samuel's prediction, and a
+Skeptic. What this slice provides is the missing evidence that such a contract
+would need. No estimator was edited, no decision block spent, no vault touch.
+
+---
+
+## 2026-08-19 (night) — STAGE 0 / P0.2 EVIDENCE PACKET: the vault now evaluates a named program, and can tell two of them apart
+
+Contract: the entry immediately above, **with its recorded process defect** (the
+contract reached this file after the code did; the P0.3 Skeptic caught it).
+
+### The demonstration
+
+The repaired evaluator was run twice through the **`sacrificial` subcommand** —
+a separate verb that never opens the vault's arrays and takes no touch — against
+the same 60 non-vault D18 networks, changing only `--candidate`:
+
+| | `estimator.py` (v2.6.1) | `estimator_v2_4_1.py` |
+|---|---|---|
+| sha256 recorded in the touch record | `00240eb1e60810f5…` | `8565c3501555d272…` |
+| raw MSE mean | 1.6204e-06 | 1.6175e-06 |
+| raw MSE median | 1.1415e-06 | 1.1259e-06 |
+| **counted FLOPs, measured** | **4.7796e+10** | **5.3405e+10** |
+| C/B mean | 0.1757 | 0.1963 |
+| adjusted mean (counted-only model) | 2.8400e-07 | 3.1676e-07 |
+| non-finite | 0 | 0 |
+| GT noise | 1.201e-08 = **0.74%** of measured MSE | same truth |
+
+**The old evaluator could not have produced either column.** It ran `run_v24`, a
+torch mirror of a program that no longer ships, and priced it with
+`FIXED_FLOPS + n_points * cps`, a constant fitted to v2.4's dense chain. Whatever
+was in `estimator.py`, the vault would have reported v2.4's numbers.
+
+### Verdicts
+
+| # | verdict | measured |
+|---|---|---|
+| **E1** | **CONFIRMED, narrowly** | v2.6.1 vs v2.4.1 raw MSE differ by **+0.18%** on the same 60 networks — v2.6.1 slightly *worse*, which is the Strassen trim, and the same direction as the 0.51% the LOG records at n = 100 with 32 shifts. Above the 0.1% bar, but only just; at 60 networks and one shift this is not a precise estimate of the trim's cost and must not be quoted as one |
+| **E2** | **CONFIRMED** | measured counted FLOPs differ by **10.5%** between the two files (5.3405e10 vs 4.7796e10). The hardcoded v2.4 cost model would have **overstated v2.6.1's compute by 11.7%**, which at our operating point is most of the margin the carrier is being judged on |
+| **E3** | **CONFIRMED** | no GPU, no torch. The vault stores its truth, so evaluation is a forward pass and a subtraction. Both runs completed in the main venv, where `flopscope` is the **real** package — the repaired code refuses to run if `flopscope` resolves to the numpy shim in `local_sim/`, because counted FLOPs measured against the shim are not the grader's FLOPs |
+| **E4** | **CONFIRMED** | `manifest.json` `touches` = **1**, `touch_log.jsonl` = **1 line**, manifest mtime **2026-08-06** — unchanged by this slice, and both sacrificial runs print *"nothing recorded, no touch taken, seal untouched"* |
+| **E5** | **CONFIRMED** | preflight green, invariants 30/30 |
+
+### What each defect's repair looks like
+
+- **V1/V2** — `evaluate()` takes `--candidate <file>`, imports it by path, and runs
+  it under a real `flopscope.BudgetContext`. Counted FLOPs stop being modelled and
+  become **measured**, which is the same quantity the grader bills.
+- **V3** — `--dry-run` is **gone**. Reading the truth *is* the touch. The
+  replacement is the `sacrificial` subcommand, which is a different verb precisely
+  so that `scripts/guard_paths.py`'s `vault.py evaluate` guard keeps its meaning,
+  and which never opens `vault_v1.npz` at all.
+- **V4** — scoring goes through `competition_score.score_suite` with
+  `on_over_budget="fail"`. **Raw MSE is now the PRIMARY vault statistic** and the
+  adjusted score is explicitly labelled with its cost model. `C` excludes residual
+  wall time, because this machine's residual is **E1**; the measured residual is
+  printed anyway so the exclusion is visible rather than silent. (These runs read
+  196.88 ms/MLP — inflated by three concurrent jobs, and exactly the kind of number
+  that must never enter a vault score.)
+- **V5** — the touch record now carries the candidate's path, its **sha256**, the
+  budget, and the git commit. A touch names a program.
+- **V6** — the manifest is written to a temp file and `os.replace()`d **before**
+  the log line is appended, so a crash can leave the counter behind the log but
+  never ahead of it, and preflight step 5 fails on either direction.
+- **V7** — `MAX_TOUCHES = 3`, refused at four, with a message naming the three
+  permitted reasons.
+
+### Knowledge Delta
+
+- **The vault's baseline is now instrument-incomparable with its own future.**
+  Touch #1 (v2.4.1, median 2.4651e-7, 2026-08-06) was produced by the **old**
+  evaluator: a torch mirror of v2.4 priced by a v2.4 cost model. Every future
+  touch uses the real estimator and measured FLOPs. **Touch #2 must not be
+  differenced against touch #1 and called an improvement.** The honest options are
+  to re-baseline (spending one of three touches) or to treat touch #1 as
+  historical and compare only touches taken with the repaired instrument. This is
+  the single most important consequence of the slice and it was surfaced by the
+  independent Skeptic, not by me.
+- **A "dry run" against a holdout is not a dry run.** Reading the truth is the
+  cost; recording nothing only removes the evidence that it happened.
+- **`local_sim/` shadows the real `flopscope`.** Three labs here prepend that
+  directory to `sys.path`, where numpy shims named `flopscope` and `whestbench`
+  live for the GPU venv. Anything that MEASURES flops must append, not prepend —
+  and now refuses to run if it got the shim.
+
+### Out of scope, unchanged
+
+No vault touch. No decision block. `estimator.py` run, never edited by this slice.
+The three permitted touches are unchanged: seal, one per estimator change,
+designation day.
+
+### Next
+
+The vault's re-baselining question above needs its own decision, and it should be
+made *after* the Phase-2 shape is known — a shape change would force a re-mint
+anyway. Do **not** take touch #2 before that decision is recorded.
+
+---
+
+## 2026-08-19 (night) — STAGE 0, item 4: the recorded v2.6 gate, re-derived under the canonical scorer
+
+**Classification: ROUTINE.** Read-only. `local_sim/reconstruct_v26_gate.py`
+consumes two durable CONFIRM artifacts, mints nothing, claims no seed block,
+touches no vault, and decides nothing. It exists because the P0.1 slice
+established that the competition's estimand is the arithmetic mean, and the v2.6
+comparison was recorded under the geometric one.
+
+### Identity check first
+
+The canonical scorer reproduces **both** artifacts' own numbers:
+
+| artifact | per-MLP worst relative deviation | aggregate |
+|---|---|---|
+| `v2_4_1_mini_control.json` | **0.000e+00** | **0.000e+00** |
+| `v2_6_mini_confirm.json` | **0.000e+00** | **0.000e+00** |
+
+100 MLPs each, same `mlp_name` list in the same order, 0 failures in both. So the
+local CONFIRM harness and the canonical scorer are the same arithmetic, and the
+comparison below is a change of *estimand*, not of implementation.
+
+### The result
+
+| residual model | ARITH gain | 95% CI (relative, t/bootstrap) | geo gain |
+|---|---|---|---|
+| local, as measured — **never decides** | 0.9529x | [-5.77%, -4.11%] | 0.9521x |
+| per-op at the graded **6.953 us/op** | **1.0961x** | [+8.01%, +9.52%] | 1.0927x |
+| transfer (conservative) | **1.0695x** | [+5.75%, +7.25%] | 1.0666x |
+| counted FLOPs only | 1.1147x | [+9.54%, +11.03%] | 1.1109x |
+
+Supporting quantities, all read out of the artifacts rather than assumed:
+ops/MLP **1,417** (v2.4.1) vs **2,434** (v2.6), ratio 1.718x; counted/MLP
+5.3301e10 vs 4.7697e10; local residual median 41.98 ms vs 124.55 ms; graded
+anchor 1,416 ops in 9.845 ms = **6.953 us/op**.
+
+### Verdict
+
+**The estimand correction does not change this decision.** Arithmetic and
+geometric agree in sign in all four models, and the arithmetic reading is
+*slightly more favourable* to v2.6 in every one. The geometric column reproduces
+the LOG's recorded 2026-08-19 (evening) figures — 0.9521x local, 1.0927x at the
+grader price — to four digits, which is the cross-check that the reconstruction is
+reading the same experiment.
+
+**This is not a gate.** No decision block is spent; the networks are the public
+split, which is CONFIRM tier and read-only and may never be an objective; and the
+deciding quantity is still the grader's residual price, classified **E1**.
+
+### One label to fix, found by the Skeptic
+
+The script prints the control's residual as a **median** (41.98 ms) while
+`experiments/LOG.md` 2026-08-19 (evening) quotes the **mean** (42.993 ms), giving
+transfer ratios 4.264x and 4.367x. The two `transfer` models are otherwise
+algebraically identical — `local_cand/(local_ctrl/graded)` is the same thing as
+`graded x (local_cand/local_ctrl)` — and the gains differ by 0.1% (arith 1.0705
+vs 1.0707). Immaterial, but the printed line does not say "median" and reads as a
+contradiction against the LOG. Worth one word when the script is next touched.
+
+
+---
+
+### 2026-08-19 (night) — corrections to tonight's own entries, from the P0.3 Skeptic
+
+The independent Skeptic returned **ACCEPT** on the P0.3 estimator slice and found
+four defects that falsify nothing but that the record should carry.
+
+1. **`vault.py` was rewritten before its contract reached this file.** Found by
+   the Skeptic as an uncommitted 285-line change with no LOG entry behind it, and
+   correctly rated the highest-severity item in its report. The contract was
+   written first but lived in a scratch file. It is now recorded above with that
+   defect stated in its own header. **Pre-registration outside `experiments/LOG.md`
+   is not pre-registration.**
+
+2. **D4 is conditional, not an identity.** The packet says v2.6.1 is bit-identical
+   to v2.6 "wherever Strassen runs". The Skeptic constructed the exception at
+   width 8: if a layer's surviving alphas have an **exact tie at their minimum
+   with odd multiplicity >= 3**, v2.6 sheds 3 (odd -> even, Strassen runs) and
+   v2.6.1 refuses (stays odd -> dense). Directly measured: `v2.6 counts
+   [8, 2, 8, 8] strassen=True` against `v2.6.1 counts [8, 5, 8, 8]
+   strassen=False`. It is directionally safe — v2.6.1 lands on v2.4.1 exactly,
+   v2.6 lands on a silent 3-neuron deletion — but the equality must be stated with
+   its condition. Frequency is now measured by `test_shape_parity.py`'s trim scan;
+   the Skeptic's own scan found **0 ties in 1,200 layer-draws** over 40 fresh
+   256x32 mints.
+
+3. **The `assert` I first used to close the "line-594 trap" was the wrong fix and
+   is gone.** An `assert` in the shipped file turns an impossible state into a
+   grader **failure**, scored at multiplier 1.0 against zeroed predictions. The
+   restatement now **degrades safely**: if it ever disagreed with the pre-pruning
+   decision it rebuilds the alive sets untrimmed, re-slices, and runs dense.
+
+4. **Prose arithmetic error, corrected.** The P0.3 packet says v2.6 "counted
+   60-75% FEWER FLOPs on those shapes". That is the *rise* going the other way.
+   The correct statement is that v2.6.1 counts **+60.2% / +74.4% MORE** than v2.6
+   at 65x4 / 127x4, i.e. **v2.6 counted 35-45% fewer** — the Skeptic measures
+   ratios 0.6545, 0.5953, 0.5547 at 65x4, 127x4, 255x4. The D6 row in that packet
+   is right; the sentence restating it was wrong.
+
+**Two artifact-provenance gaps, stated rather than fixed retroactively.**
+`experiments/2026-08-19_p0_1_scorer/preflight.out` does not contain its own
+`PREFLIGHT GREEN` verdict line, because PowerShell `Write-Host` is not captured by
+`2>&1`; all six steps' output is present with no failure. And
+`shape_parity_BEFORE.out` was produced by an earlier revision of
+`test_shape_parity.py` — the current file has more checks, so re-running the
+command the packet names gives a different total. **Every number in it reproduces
+exactly**; the Skeptic re-derived all seventeen rows against `estimator_v2_6.py`.
+
+**Unresolved, and repo-wide rather than specific to one entry.** All of tonight's
+entries live in an uncommitted `experiments/LOG.md` with no commit SHA cited, so
+pre-registration order cannot be *proved* from the record — only inferred, from
+the fact that four of tonight's predictions were falsified and one was understated,
+which a post-hoc contract does not contain. **The fix is to commit, and that is
+Samuel's call, not an agent's.**
+
+
+---
+
+### 2026-08-19 (night) — STAGE 0 FINAL STATE, verified against the finished tree
+
+Every number below was re-run against the files as they now stand, after the
+P0.3 Skeptic's corrections were applied.
+
+```text
+uv run python local_sim/test_competition_score.py   ->  71/71   exit 0
+uv run python local_sim/test_seed_ledger.py         ->  40/40   exit 0
+uv run python local_sim/test_shape_parity.py        ->  27/27   exit 0
+uv run python local_sim/seed_ledger.py --check --scan-> CONSISTENT, no unrecorded use, exit 0
+.\scripts\preflight.ps1                             ->  PREFLIGHT GREEN -- 6/6, exit 0
+uv run python scripts/verify_portability.py         ->  174 checks, 0 failed
+```
+
+**The D4 caveat is now bounded.** `test_shape_parity.py`'s trim scan — the
+Skeptic's own follow-up, promoted into the suite — over **200 fresh 256x32
+mints**:
+
+```text
+no layer sheds more than one neuron                    ok   max shed 1
+no exact tie at a survivor minimum, layers 1..30       ok   0 tie(s) in 6,000 layer-draws
+no layer left odd after trimming                       ok   0 odd
+no degenerate all-pruned layer                         ok   0
+```
+
+So the one case where v2.6.1 diverges from v2.6 at an even width — an exact tie of
+odd multiplicity >= 3 among a layer's survivors — **did not occur once in 6,000
+layer-draws**. Layer 0 is excluded from that count on purpose: its alphas tie by
+identity, which is the very fact the slice is about. My first version of this
+check included layer 0 and reported 200 ties in 200 networks, a false alarm that
+the label would have made permanent.
+
+**Two test assertions went stale during the session and were repaired, not
+suppressed.** Both were written before the coverage study claimed D18, and both
+failed for the right reason once it had:
+
+- `A2: D18 and D19 have zero consumption` — D18 now legitimately carries 192
+  seeds. Replaced with an assertion that D18 shows **exactly one claim of 192 by
+  `coverage_lab.py`**, and that D19 (the reserved single-use gate block) is still
+  clean.
+- `a hardcoded seed inside a registered block is flagged` — the test's chosen
+  literal `30_806_018_123` fell *inside* the newly claimed range, so the scan
+  correctly did not flag it. Moved to `30_806_018_500`, in D18's free tail. **The
+  scan was working; the test was asserting the wrong thing.**
+
+**Artifact-provenance gap closed.** `preflight.out` is now captured with `*>&1`
+and contains its own `PREFLIGHT GREEN -- 6/6` verdict line, which the earlier
+artifact did not because PowerShell `Write-Host` bypasses `2>&1`.
+
+**Seal, blocks and shipped file at close of Stage 0:** vault touches **1** of 3,
+`touch_log.jsonl` 1 line, manifest mtime 2026-08-06 (untouched all session).
+D17 and D19 unspent. D18 192/600. D16 270/600. `estimator.py` ==
+`estimator_v2_6_1.py`, **NOT promoted**; the graded number of record is still
+**v2.4.1 = 2.6314e-7** (submission 327743). Nothing submitted.
+

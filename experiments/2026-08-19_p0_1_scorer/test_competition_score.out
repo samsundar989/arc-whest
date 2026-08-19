@@ -1,0 +1,148 @@
+﻿====================================================================================================
+CANONICAL COMPETITION SCORER — parity with installed whestbench, and the estimand fixture
+====================================================================================================
+
+0. environment
+--------------
+  whestbench 0.14.0   flopscope 0.10.0   numpy 2.2.6
+  floor constant matches the installed evaluator             ok   
+  graded reports present                                     ok   
+
+1. scalar parity vs whestbench.budget (bitwise ==)
+--------------------------------------------------
+  effective_compute exact on 12,000 rows                     ok   0 mismatches
+  score_multiplier exact on 12,000 rows                      ok   0 mismatches
+  is_combined_budget_exhausted exact                         ok   0 mismatches
+  lambda matches the installed package                       ok   1.000e+11
+  configurable floor: max(floor, C/B), B<=0 -> 1.0           ok   floor=0.5
+  floor boundary C/B = 0.1 exactly                           ok   
+  below floor is clamped, above floor is not capped          ok   
+  failure multiplier is 1.0, NOT the 0.1 floor               ok   
+
+2. aggregation parity — arithmetic mean, same accumulation as the grader
+------------------------------------------------------------------------
+  np.mean == fnp.mean on score lists (200 trials)            ok   bitwise
+
+3. evaluator parity — the REAL whestbench scoring loop
+------------------------------------------------------
+  clean (at floor): per-MLP score bitwise == grader          ok   
+  clean (at floor): aggregate objective == grader            ok   3.233262961730e-02 vs 3.233262961730e-02
+  clean (at floor): n_failed == grader                       ok   0 vs 0
+  clean (at floor): mean multiplier == grader                ok   0.100000
+  clean (at floor): expected 0 failure(s) actually occurred  ok   got 0
+  clean (budget probe): per-MLP score bitwise == grader      ok   
+  clean (budget probe): aggregate objective == grader        ok   3.583830942710e-02 vs 3.583830942710e-02
+  clean (budget probe): n_failed == grader                   ok   0 vs 0
+  clean (budget probe): mean multiplier == grader            ok   0.100000
+  clean (above floor, try 1): per-MLP score bitwise == grader ok   
+  clean (above floor, try 1): aggregate objective == grader  ok   2.683572435886e-01 vs 2.683572435886e-01
+  clean (above floor, try 1): n_failed == grader             ok   0 vs 0
+  clean (above floor, try 1): mean multiplier == grader      ok   0.745270
+  above-floor arm: no failures, every multiplier strictly above the floor ok   mult in [0.712, 0.801]
+  raising (2 of 8): per-MLP score bitwise == grader          ok   
+  raising (2 of 8): aggregate objective == grader            ok   1.841074301861e-01 vs 1.841074301861e-01
+  raising (2 of 8): n_failed == grader                       ok   2 vs 2
+  raising (2 of 8): mean multiplier == grader                ok   0.325000
+  raising (2 of 8): expected 2 failure(s) actually occurred  ok   got 2
+  failure MSE == zero_prediction_mse(target)                 ok   1.943431e-01 vs 1.943431e-01
+  failure row: multiplier forced to 1.0 and C recorded as 0  ok   
+  budget-exhausting: per-MLP score bitwise == grader         ok   
+  budget-exhausting: aggregate objective == grader           ok   6.418364308774e-01 vs 6.418364308774e-01
+  budget-exhausting: n_failed == grader                      ok   4 vs 4
+  budget-exhausting: mean multiplier == grader               ok   1.000000
+  exhaustion path exercised (flops recorded, mult still 1.0) ok   4/4 exhausted
+
+4. heterogeneous per-MLP budgets (whestbench 0.14.0 has one B; we must not assume it)
+-------------------------------------------------------------------------------------
+  per-row scores exact against whestbench with per-row B     ok   
+  objective == arithmetic mean of those rows                 ok   
+
+4b. combined-budget guard — C > B with failed=False must not be scored silently
+-------------------------------------------------------------------------------
+  the grader itself would fail that row                      ok   C = 1.500e+11 vs B = 1.000e+11
+  default on_over_budget='raise' refuses it                  ok   
+  over_budget_rows names the offender                        ok   
+  on_over_budget='fail' forces multiplier 1.0 on that row only ok   mults [0.6, 1.0]
+  on_over_budget='ignore' keeps the raw uncapped identity    ok   mult 1.5000
+  an unknown mode is rejected                                ok   
+  clean suites are unaffected by the guard                   ok   
+
+5. what one failure costs — prediction P2, FALSIFIED AS STATED; the exact law
+-----------------------------------------------------------------------------
+  failure penalty is EXACTLY 1/mult_i (multiplier half only) ok   4.680x   (mult 0.2137 -> 1.0)
+  P2 as written (> 5x) is FALSE for part of the real suite   ok   penalty range [4.59x, 5.41x], at suite-mean mult 0.19896 -> 5.03x
+  one failed MLP in 50 moves the objective measurably        ok   2.631432e-07 -> 2.800687e-07 (+6.43%, MSE held fixed)
+    note: a real failure ALSO replaces mse with mean(target^2); this check isolates the multiplier half only, which is the falsifiable one.
+
+6. MSE/cost correlation — prediction P6 (the factorised form is biased)
+-----------------------------------------------------------------------
+  P6: mean(mse)*mean(mult) != mean(mse*mult) on real graded rows ok   rel bias +0.7367%   corr(mse, mult) = -0.3391
+  positive corr => factorised UNDERstates the objective      ok   3.475020e-07 < 4.798531e-07  (-27.58%)
+
+7. REGRESSION FIXTURE — arithmetic vs geometric select opposite winners (P3)
+----------------------------------------------------------------------------
+  P3 as pre-registered was ALGEBRAICALLY WRONG (dropped the -g term) ok   contract 41.80%  exact 38.80%  error 3.00pp = g
+  a sign flip exists                                         ok   first grid point at X = 39.00%
+  the flip lands on the first grid point above the exact law (0.5% grid) ok   observed 39.00%  exact 38.80%  gap 0.199pp
+  FIXTURE: geometric says candidate WINS, arithmetic says it LOSES ok   geo 1.0221x  vs  arith 0.9927x
+
+paired, n = 50 MLPs   (v2.4.1 graded vs tail-regressing candidate)
+  mean score          v2.4.1 graded: 2.631432e-07   tail-regressing candidate: 2.650692e-07
+  PRIMARY  arithmetic mean difference (ctrl - cand, >0 = candidate better)
+      delta            -1.926031e-09
+      relative         -0.732%   (gain 0.9927x)
+      bootstrap 95% CI [-2.1291e-08, +8.3210e-09]  (20000 resamples, seed 12345)
+      BCa       95% CI [-4.0214e-08, +7.8329e-09]   (2x the false-promotion rate at n~50 — do not gate on it)
+      relative  95% CI [-7.818%, +3.000%]
+      studentised   CI [-2.0842e-08, +1.6990e-08]   <- READ THIS ONE (measured at nominal coverage; see coverage_lab)
+  SECONDARY  geometric mean of per-MLP ratios (>1 = candidate better)
+      gain             1.0221x   95% CI [1.0051, 1.0395]
+  candidate better on 49/50   sign-test p = 0.0000
+  *** ESTIMANDS DISAGREE: arithmetic says control, geometric says candidate. The competition is arithmetic. ***
+
+    mechanism: the candidate improves 49/50 MLPs by 3% and regresses one by 49%.
+    The geometric mean weights every MLP's LOG equally, so a single tail blow-up is
+    invisible to it. The competition sums scores, so that one MLP is 7.2% of the objective.
+
+8. paired statistics — determinism and analytic sanity
+------------------------------------------------------
+  paired_compare is deterministic                            ok   
+  uniform 2x improvement: arithmetic gain == geometric gain == 2 ok   arith 2.000000  geo 2.000000
+  uniform improvement: estimands agree                       ok   
+  identical arms: zero difference, gain 1.0, p = 1           ok   
+  mismatched lengths are refused                             ok   
+
+9. GRADED REPLAY — real published rows, read-only (P4, P5, P7)
+--------------------------------------------------------------
+  P4 v2.4  / 324420: 50 rows reproduce to 1e-12              ok   worst rel 0.000e+00
+  P5 v2.4  / 324420: C == F + 1e11*R on all 100 rows to 1e-9 ok   worst rel 0.000e+00
+  P7 v2.4  / 324420: aggregates.public is over the 50 PUBLIC rows, not 100 ok   reported 5.412154e+10 | 50-row 5.412154e+10 | 100-row 5.389333e+10
+  P7 v2.4  / 324420: our 50-row objective IS the published score, bitwise ok   2.719427529595e-07 vs 2.719427529595e-07
+      worst MLP 8.0801e-07  best 6.1554e-08  worst/mean 2.97x  top-1 tail share 5.9%  top-5 27.1%
+  P4 v2.4.1 / 327743: 50 rows reproduce to 1e-12             ok   worst rel 0.000e+00
+  P5 v2.4.1 / 327743: C == F + 1e11*R on all 100 rows to 1e-9 ok   worst rel 0.000e+00
+  P7 v2.4.1 / 327743: aggregates.public is over the 50 PUBLIC rows, not 100 ok   reported 5.411771e+10 | 50-row 5.411771e+10 | 100-row 5.390057e+10
+  P7 v2.4.1 / 327743: our 50-row objective IS the published score, bitwise ok   2.631432177242e-07 vs 2.631432177242e-07
+      worst MLP 9.4426e-07  best 5.3347e-08  worst/mean 3.59x  top-1 tail share 7.2%  top-5 24.0%
+
+10. the real v2.4 -> v2.4.1 pair, scored by the canonical scorer
+----------------------------------------------------------------
+  the two submissions were scored on the SAME 50 MLPs in the same order ok   50 names
+
+paired, n = 50 MLPs   (v2.4 (324420) vs v2.4.1 (327743))
+  mean score          v2.4 (324420): 2.719428e-07   v2.4.1 (327743): 2.631432e-07
+  PRIMARY  arithmetic mean difference (ctrl - cand, >0 = candidate better)
+      delta            +8.799535e-09
+      relative         +3.236%   (gain 1.0334x)
+      bootstrap 95% CI [-4.8544e-08, +6.6102e-08]  (20000 resamples, seed 12345)
+      BCa       95% CI [-4.8323e-08, +6.6294e-08]   (2x the false-promotion rate at n~50 — do not gate on it)
+      relative  95% CI [-20.165%, +21.336%]
+      studentised   CI [-5.0290e-08, +6.7889e-08]   <- READ THIS ONE (measured at nominal coverage; see coverage_lab)
+  SECONDARY  geometric mean of per-MLP ratios (>1 = candidate better)
+      gain             0.9666x   95% CI [0.7969, 1.1723]
+  candidate better on 22/50   sign-test p = 0.4799
+  *** ESTIMANDS DISAGREE: arithmetic says candidate, geometric says control. The competition is arithmetic. ***
+  the real graded pair reproduces the documented estimand disagreement ok   arith 1.0334x  geo 0.9666x
+  arithmetic improvement is NOT resolvable (bootstrap CI spans 0) ok   [-4.854e-08, 6.610e-08]
+
+71/71 checks passed

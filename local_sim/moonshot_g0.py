@@ -218,6 +218,8 @@ def main():
     ap.add_argument("--out", default="")
     args = ap.parse_args()
 
+    # seed-ledger: excludes D08, D09, D10
+    # These are NAMED here in order to be REFUSED. G1/G2 still need unseen data.
     if args.block in ("D08", "D09", "D10"):
         raise SystemExit("G0 must not touch the moonshot gate blocks; use D15.")
 

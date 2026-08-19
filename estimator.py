@@ -1,4 +1,27 @@
 """
+ARC White-Box Estimation Challenge 2026 — submission estimator (v2.6.1).
+
+v2.6.1 = v2.6 with the Strassen eligibility test moved BEFORE pruning.
+
+v2.6 trimmed the weakest survivor out of every odd alive set to make one Strassen
+level legal, and only afterwards checked whether the chain was Strassen-eligible
+at all. On an odd global width it never can be — `width` is layer 0's input
+dimension and the final layer's output dimension, and pruning changes neither — so
+those networks paid the trim's accuracy cost and then ran the dense chain anyway.
+Measured against v2.4.1 on 7 of 17 shapes, up to 0.58 max relative error and 0.33
+prediction MSE (LOG 2026-08-19, P0.3). v2.6.1 decides eligibility from `n` and
+`width`, which are known before any neuron is pruned, and rebuilds the alive sets
+untrimmed if trimming turns out not to have made every dimension even.
+
+Where Strassen does run, v2.6.1 is bit-identical to v2.6. Where it does not, it is
+bit-identical to v2.4.1. `local_sim/test_shape_parity.py` asserts both.
+
+**NOT PROMOTED.** The graded number of record is still v2.4.1 = 2.6314e-7
+(submission 327743). v2.6's cost claim turns on the grader's residual price, which
+`docs/CURRENT_STATE.md` classifies E1, and only a graded run can settle it.
+
+Original v2.4 notes follow.
+
 ARC White-Box Estimation Challenge 2026 — submission estimator (v2.4).
 
 v2.4 = v2.0's method, re-engineered for OPERATION COUNT. The method is unchanged;
@@ -513,9 +536,87 @@ class Estimator(BaseEstimator):
         alphas, mus, phis = self._closure(w64, width, depth)
         basis = self._alignment_basis(w64, phis, width, depth)
 
-        # Alive/dead index arrays, computed once per MLP from a single
-        # comparison per layer (v2.0 spent five ops per layer rebuilding the
-        # complement with ones/bincount/subtract/astype/flatnonzero).
+        # Strassen eligibility is decided BEFORE pruning, because pruning is not
+        # free. A Strassen level halves every matmul dimension, so the sample
+        # count and the *unpruned* width must both be even -- and `width` is the
+        # input dimension of layer 0 and the output dimension of the final layer,
+        # neither of which pruning can change. v2.6 tested this only AFTER
+        # trimming a survivor out of every odd alive set, so on an odd-width
+        # network it paid the trim's accuracy cost and then fell back to the
+        # dense chain anyway: measured at up to 0.58 max relative error against
+        # v2.4.1 on 7 of 17 shapes (LOG 2026-08-19, P0.3).
+        trim = _STRASSEN and (n & 1) == 0 and (width & 1) == 0
+        alive_idx, dead_idx = self._alive_sets(alphas, width, depth, trim)
+
+        # Trimming cannot always succeed: a layer with a single survivor is left
+        # odd on purpose, and the degenerate all-pruned branch returns whatever
+        # the arg-max set happens to be. If any dimension is still odd we are on
+        # the dense path regardless, so rebuild WITHOUT trimming and keep every
+        # neuron the fallback is entitled to -- v2.4.1's behaviour exactly.
+        use_str = trim and all((int(x.shape[0]) & 1) == 0 for x in alive_idx)
+        if trim and not use_str:
+            alive_idx, dead_idx = self._alive_sets(alphas, width, depth, False)
+
+        sliced, offsets = self._slice(w64, basis, mus, alive_idx, dead_idx, depth)
+
+        # Belt and braces on the Strassen decision, restated over the sliced
+        # shapes. It cannot disagree with the decision made before pruning --
+        # sliced[0].shape[0] is `width` and sliced[li].shape[0] is
+        # |alive[li-1]|, so the two predicates are the same one -- but if it ever
+        # did, simply clearing `use_str` here would send a TRIMMED chain down the
+        # dense path, which is v2.6's exact defect reintroduced silently. So the
+        # recovery rebuilds the alive sets untrimmed and re-slices, and the dense
+        # chain then runs on a full set. Deliberately NOT an `assert`: an assert
+        # in the shipped file turns an impossible state into a grader failure,
+        # which is scored at multiplier 1.0 against zeroed predictions.
+        if use_str and not all(
+                (int(w.shape[0]) & 1) == 0 and (int(w.shape[1]) & 1) == 0 for w in sliced):
+            alive_idx, dead_idx = self._alive_sets(alphas, width, depth, False)
+            sliced, offsets = self._slice(w64, basis, mus, alive_idx, dead_idx, depth)
+            use_str = False
+
+        rng = fnp.random.default_rng(mlp.seed)
+        shift = rng.integers(0, 1 << _SOBOL_BITS, size=width, dtype=fnp.uint32)
+        pts = self._base_points(n, width)
+
+        # One shift + one quantile transform over the whole set: N = 16384 x 256
+        # float32 is ~17 MB, far inside the 4 GiB single-array cap, so there is no
+        # reason to chunk and every reason not to (each extra chunk repeats the
+        # per-layer op sequence, and v2.2 measured residual scaling with chunks).
+        u = (fnp.bitwise_xor(pts, shift).astype(fnp.float64) + 0.5) * (1.0 / float(1 << _SOBOL_BITS))
+        h = flops.stats.norm.ppf(u).astype(fnp.float32)
+
+        if use_str:
+            final = self._strassen_chain(h, sliced, offsets, depth, n)
+        else:
+            for li in range(depth):
+                z = h @ sliced[li]
+                if offsets[li] is not None:
+                    z = z + offsets[li]
+                h = fnp.maximum(z, fnp.float32(0.0))
+            final = h.mean(axis=0, dtype=fnp.float64)
+        rows = [mus[li] for li in range(depth)]
+        rows[0] = self._exact_first_layer(w64[0])
+        rows[depth - 1] = final
+        return fnp.stack(rows, axis=0)
+
+    # ------------------------------------------------------------------ #
+    @staticmethod
+    def _alive_sets(alphas, width, depth, trim):
+        """Per-layer surviving/pruned neuron indices.
+
+        One comparison per layer (v2.0 spent five ops per layer rebuilding the
+        complement with ones/bincount/subtract/astype/flatnonzero).
+
+        `trim` sheds the weakest survivor from any odd alive set, which is what
+        makes a Strassen level legal. The shed neuron moves into `dead`, where
+        the caller's offset carries its closed-form rectified-Gaussian mean, so
+        it is a shift of accounting rather than a loss -- but it IS an
+        approximation where a sampled value would otherwise have been used, and
+        it is only worth paying when Strassen actually runs. The caller decides
+        that before calling, and calls again with `trim=False` if it turns out
+        the chain cannot be made even after all.
+        """
         alive_idx, dead_idx = [], []
         for li in range(depth):
             if li == depth - 1:
@@ -530,20 +631,36 @@ class Estimator(BaseEstimator):
                 alive_idx.append(idx)
                 dead_idx.append(None)
                 continue
-            # A Strassen level halves both matmul dimensions, so every prunable
-            # width must be even. Raising the threshold just past the weakest
-            # survivor sheds exactly the neuron closest to dead -- it moves into
-            # `dead`, where the offset below carries its closed-form rectified-
-            # Gaussian mean exactly, so this is a shift of accounting, not a loss.
-            if _STRASSEN and (int(idx.shape[0]) & 1) and int(idx.shape[0]) > 1:
-                keep = a > fnp.take(a, idx).min()
-                idx = fnp.flatnonzero(keep)
+            if trim and (int(idx.shape[0]) & 1) and int(idx.shape[0]) > 1:
+                k = int(idx.shape[0])
+                keep2 = a > fnp.take(a, idx).min()
+                idx2 = fnp.flatnonzero(keep2)
+                # Raising the threshold past the weakest survivor sheds exactly
+                # one neuron ONLY if that survivor is unique. Where alphas tie at
+                # the minimum it sheds all of them -- and at layer 0 every alpha
+                # is exactly 0.0 by construction, because x ~ N(0, I) makes the
+                # pre-activation mean zero for every neuron. So on any odd width
+                # `a > min` deleted the ENTIRE first layer, replacing the whole
+                # sampled path with the closure's means. v2.6 did that on every
+                # odd-width network (LOG 2026-08-19, P0.3). Accept the trim only
+                # when it removed one. Costs no flopscope op: `keep2`/`idx2` are
+                # the same two operations v2.6 already performed.
+                if int(idx2.shape[0]) == k - 1:
+                    keep, idx = keep2, idx2
             alive_idx.append(idx)
             didx = fnp.flatnonzero(~keep)
             dead_idx.append(didx if int(didx.shape[0]) else None)
+        return alive_idx, dead_idx
 
-        # Fold the rotation into W1 and slice, in float32 throughout: v2.0 built
-        # a float64 list, cast it, then cast again inside the offset path.
+    # ------------------------------------------------------------------ #
+    @staticmethod
+    def _slice(w64, basis, mus, alive_idx, dead_idx, depth):
+        """Fold the rotation into W1 and slice to the alive sets, in float32.
+
+        v2.0 built a float64 list, cast it, then cast again inside the offset
+        path. Extracted from `predict` so the Strassen-shape recovery below can
+        redo it on a rebuilt alive set without duplicating the loop.
+        """
         sliced, offsets = [], []
         prev = None
         for li in range(depth):
@@ -561,36 +678,7 @@ class Estimator(BaseEstimator):
                 wd = fnp.take(fnp.take(w32, dprev, axis=0), cur, axis=1)
                 offsets.append(fnp.take(mus[li - 1], dprev).astype(fnp.float32) @ wd)
             prev = cur
-
-        rng = fnp.random.default_rng(mlp.seed)
-        shift = rng.integers(0, 1 << _SOBOL_BITS, size=width, dtype=fnp.uint32)
-        pts = self._base_points(n, width)
-
-        # One shift + one quantile transform over the whole set: N = 16384 x 256
-        # float32 is ~17 MB, far inside the 4 GiB single-array cap, so there is no
-        # reason to chunk and every reason not to (each extra chunk repeats the
-        # per-layer op sequence, and v2.2 measured residual scaling with chunks).
-        u = (fnp.bitwise_xor(pts, shift).astype(fnp.float64) + 0.5) * (1.0 / float(1 << _SOBOL_BITS))
-        h = flops.stats.norm.ppf(u).astype(fnp.float32)
-
-        # Every width must be even for one Strassen level, including the sample
-        # count and the unpruned input. If any layer is odd (a deformed or tiny
-        # network), fall back to the dense chain -- exactly v2.4.1's behaviour.
-        use_str = _STRASSEN and (n & 1) == 0 and all(
-            (int(w.shape[0]) & 1) == 0 and (int(w.shape[1]) & 1) == 0 for w in sliced)
-        if use_str:
-            final = self._strassen_chain(h, sliced, offsets, depth, n)
-        else:
-            for li in range(depth):
-                z = h @ sliced[li]
-                if offsets[li] is not None:
-                    z = z + offsets[li]
-                h = fnp.maximum(z, fnp.float32(0.0))
-            final = h.mean(axis=0, dtype=fnp.float64)
-        rows = [mus[li] for li in range(depth)]
-        rows[0] = self._exact_first_layer(w64[0])
-        rows[depth - 1] = final
-        return fnp.stack(rows, axis=0)
+        return sliced, offsets
 
     # ------------------------------------------------------------------ #
     @staticmethod

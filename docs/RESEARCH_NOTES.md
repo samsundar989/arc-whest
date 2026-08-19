@@ -20,6 +20,42 @@
 | Timeline | Phase 2: Aug 1 – Sep 19 23:59 UTC; private re-runs Sep 20–30; results Oct 1; NeurIPS ws Dec 11–12; contribution write-up due Sep 26 | overview (re-fetched Aug 3); forum 18041 |
 | Prizes | Phase 2: $50k/$20k/$10k + $20k contribution (Phase 1's $50k separate, closed). Winners: OSI open-source; LLM use allowed w/ disclosure | overview; forum 18026, 18041; townhall |
 
+### 1b. Phase-2 toolchain — read-only reconnaissance, 2026-08-19
+
+Round 1429 is **UPCOMING, not open** (`phase2_checklist`): window
+`2026-08-20T23:59Z -> 2026-09-19T23:59Z`, leaderboard 1480 exists with **0
+entries**, HF tags still `['v1-phase1', 'v1-warmup']`. **width, depth, biases,
+input distribution, `n_mlps`, `B`, λ, the multiplier floor and the number of
+designatable submissions remain UNKNOWN for 1429.** Nothing in the table above is
+confirmed for Phase 2; it is Phase 1 carried forward.
+
+**whestbench 0.15.0 shipped 2026-08-17** (installed: 0.14.0) and requires
+`flopscope>=0.11.0,<0.12.0` (installed: 0.10.0). The wheel was downloaded to a
+scratch directory and diffed **without installing it**:
+
+| module | 0.14.0 vs 0.15.0 |
+|---|---|
+| `scoring.py`, `budget.py`, `domain.py`, `generation.py` | **byte-identical** |
+| `simulation.py`, `dataset_torch.py` | comments only (version strings) |
+| `runner.py` | a predict-response timeout grace |
+| `cli.py` | changed |
+
+**So the score identity, the 0.1 floor, λ = 1e11, and He-init / no-bias MLP
+generation are unchanged in the newest published evaluator.** `MLP` still has no
+bias field at all, so a Phase 2 *with* biases would require a package change that
+has not shipped.
+
+**What this does NOT tell us, and must not be read as telling us:**
+1. the **contest configuration** (width/depth/`n_mlps`/`B`/λ/floor) is a runtime
+   spec, not a package constant — it is passed in as a `ContestSpec`;
+2. **what flopscope 0.11 does to the price table is unknown.** flopscope is the
+   *pricing* engine, i.e. the cost half of the score and this project's weakest
+   half. A repriced gather or matmul would move every cost claim we have.
+
+Verified by the P0.1 slice: the reported leaderboard score is the **arithmetic
+mean over the 50 PUBLIC MLPs**, reproducible offline bitwise from a graded report.
+A failure is priced at multiplier **1.0**, not the 0.1 floor.
+
 ## 2. Baselines & reference numbers (256×32, B=2.72e11, mini split)
 
 | Method | Final-layer MSE | FLOPs | Adjusted |

@@ -1,0 +1,92 @@
+{
+ "budget": 272000000000.0,
+ "n": 100,
+ "graded_us_per_op": 6.9526836158192085,
+ "transfer_ratio": 4.264255960785523,
+ "models": {
+  "local (as measured here) \u2014 NEVER decides": {
+   "mean_control": 3.107573203596037e-07,
+   "mean_candidate": 3.261050670961287e-07,
+   "arithmetic_gain": 0.9529361905560307,
+   "relative_improvement": -0.04938820658758685,
+   "boot_ci_relative": [
+    -0.05773223200471707,
+    -0.04114860039804309
+   ],
+   "bca_ci_difference": [
+    -1.9004928022806575e-08,
+    -1.2308529753768176e-08
+   ],
+   "geometric_gain": 0.9520765869239118,
+   "geometric_ci": [
+    0.9449714591288743,
+    0.959235137328168
+   ],
+   "n_candidate_better": 11,
+   "estimands_disagree": false
+  },
+  "per-op at the graded 6.95 us/op": {
+   "mean_control": 2.9271388475922383e-07,
+   "mean_candidate": 2.6704137694096917e-07,
+   "arithmetic_gain": 1.0961368163703324,
+   "relative_improvement": 0.08770512488456761,
+   "boot_ci_relative": [
+    0.08012875935565027,
+    0.09522848490118133
+   ],
+   "bca_ci_difference": [
+    2.125197877004316e-08,
+    3.248393375433604e-08
+   ],
+   "geometric_gain": 1.0926611209083104,
+   "geometric_ci": [
+    1.0848567063822068,
+    1.1005216800715232
+   ],
+   "n_candidate_better": 98,
+   "estimands_disagree": false
+  },
+  "transfer: local residual / 4.26 (conservative)": {
+   "mean_control": 2.9281622334254786e-07,
+   "mean_candidate": 2.7378383130109563e-07,
+   "arithmetic_gain": 1.0695161286588952,
+   "relative_improvement": 0.0649977375713485,
+   "boot_ci_relative": [
+    0.05747636828889887,
+    0.0724863206641798
+   ],
+   "bca_ci_difference": [
+    1.5495365875472397e-08,
+    2.458304115566522e-08
+   ],
+   "geometric_gain": 1.0666421333612803,
+   "geometric_ci": [
+    1.0590502519668934,
+    1.0742884377285145
+   ],
+   "n_candidate_better": 95,
+   "estimands_disagree": false
+  },
+  "counted FLOPs only (residual excluded)": {
+   "mean_control": 2.8731999472794555e-07,
+   "mean_candidate": 2.577552978700217e-07,
+   "arithmetic_gain": 1.1147006370081767,
+   "relative_improvement": 0.10289815327999621,
+   "boot_ci_relative": [
+    0.0954114441347953,
+    0.11029343851420038
+   ],
+   "bca_ci_difference": [
+    2.4628119740358722e-08,
+    3.702696758332873e-08
+   ],
+   "geometric_gain": 1.1109267720502287,
+   "geometric_ci": [
+    1.1029854299065545,
+    1.1189252907561067
+   ],
+   "n_candidate_better": 100,
+   "estimands_disagree": false
+  }
+ }
+}

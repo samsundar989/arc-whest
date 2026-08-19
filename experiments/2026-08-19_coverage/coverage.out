@@ -1,0 +1,54 @@
+﻿====================================================================================================
+COVERAGE OF THE PROMOTION INTERVAL — real fresh networks, block D18
+====================================================================================================
+
+192 networks, GT 2^22, sigma_gt^2 = 1.1418e-08
+Residual wall time is EXCLUDED from C here: this machine's residual is E1 (docs/CURRENT_STATE.md)
+and injecting it would make the study about this laptop. C = counted FLOPs only.
+
+
+--- base vs null --------------------------------------------------------------------------
+  population: M = 192   mean difference -4.09675e-08   sd 3.362e-07   skew +0.208
+  base score 2.76801e-07   null score 3.17768e-07   relative -14.800%
+  method              coverage  miss lo  miss hi       width  excl. 0
+  t                94.8% +-0.4     2.3%     2.9%   1.879e-07    15.8%
+  percentile       92.7% +-0.4     3.4%     4.0%   1.812e-07    18.4%  <-- UNDERCOVERS
+  basic            94.8% +-0.3     2.2%     2.9%   1.812e-07    16.2%
+  bca              90.9% +-0.5     4.3%     4.8%   1.836e-07    20.9%  <-- UNDERCOVERS
+
+--- base vs small --------------------------------------------------------------------------
+  population: M = 192   mean difference +4.06862e-09   sd 1.994e-07   skew -0.546
+  base score 2.76801e-07   small score 2.72732e-07   relative +1.470%
+  method              coverage  miss lo  miss hi       width  excl. 0
+  t                94.6% +-0.4     3.4%     2.0%   1.094e-07     6.2%
+  percentile       91.8% +-0.4     4.8%     3.4%   1.055e-07     9.1%  <-- UNDERCOVERS
+  basic            94.8% +-0.4     3.3%     1.9%   1.055e-07     5.8%
+  bca              88.5% +-0.5     6.4%     5.0%   1.080e-07    12.3%  <-- UNDERCOVERS
+
+--- base vs large --------------------------------------------------------------------------
+  population: M = 192   mean difference +1.38527e-08   sd 2.166e-07   skew -0.464
+  base score 2.76801e-07   large score 2.62948e-07   relative +5.005%
+  method              coverage  miss lo  miss hi       width  excl. 0
+  t                95.9% +-0.3     1.9%     2.2%   1.192e-07     7.1%  <-- overcovers
+  percentile       93.2% +-0.4     3.1%     3.7%   1.150e-07    10.5%  <-- UNDERCOVERS
+  basic            96.0% +-0.3     2.0%     2.0%   1.150e-07     6.6%  <-- overcovers
+  bca              90.2% +-0.5     4.6%     5.2%   1.180e-07    14.0%  <-- UNDERCOVERS
+
+
+--- FALSE PROMOTION: population recentred to a TRUE mean of exactly 0 ------------
+  population         skew            t   percentile        basic          bca     (nominal 5.0%)
+  base vs null      0.208         5.2%         7.3%         5.1%         9.1%
+  base vs small    -0.546         5.4%         8.2%         5.2%        11.5%
+  base vs large    -0.464         4.1%         6.8%         4.0%         9.8%
+
+
+--- parametric sweep: coverage vs skew of the paired difference ----------------------
+  sigma       skew            t   percentile        basic          bca
+  0.25        0.77        94.6%        94.0%        93.7%        94.0%
+  0.50        1.77        94.3%        93.5%        92.9%        93.2%
+  0.75        3.37        93.1%        92.6%        91.3%        92.7%
+  1.00        6.25        90.1%        89.6%        87.7%        90.8%
+  1.25       10.13        85.9%        85.9%        83.5%        88.3%
+  1.50       15.69        81.5%        82.4%        77.6%        85.6%
+
+saved C:\Users\samsu\Documents\arc-whest\experiments\2026-08-19_coverage\coverage.json

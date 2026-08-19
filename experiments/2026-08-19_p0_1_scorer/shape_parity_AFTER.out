@@ -1,0 +1,42 @@
+﻿========================================================================================================
+SHAPE PARITY — v2.6 fallback vs v2.4.1
+========================================================================================================
+  shipped _STRASSEN = True
+
+TRIM SAFETY — the layer-0 annihilation
+----------------------------------------
+  width 65: trim sheds <=1 per layer and never empties one ok   layer-0 alphas all equal (True)  shed [0, 1, 1, 0]
+  width 127: trim sheds <=1 per layer and never empties one ok   layer-0 alphas all equal (True)  shed [0, 1, 0, 0]
+  width 255: trim sheds <=1 per layer and never empties one ok   layer-0 alphas all equal (True)  shed [0, 1, 1, 0]
+  width 63: trim sheds <=1 per layer and never empties one ok   layer-0 alphas all equal (True)  shed [0, 1, 1, 0]
+  width 3: trim sheds <=1 per layer and never empties one ok   layer-0 alphas all equal (True)  shed [0, 1, 1, 0]
+  width 256: trim sheds <=1 per layer and never empties one ok   layer-0 alphas all equal (True)  shed [0, 0, 0, 0]
+
+TRIM SCAN — 200 fresh 256x32 mints, alphas only
+----------------------------------------------------
+  no layer sheds more than one neuron                    ok   max shed 1
+  no exact tie at a survivor minimum, layers 1..30       ok   0 tie(s) in 6,000 layer-draws
+  no layer left odd after trimming (so Strassen always runs) ok   0 odd
+  no degenerate all-pruned layer                         ok   0
+
+       shape      path   max rel diff     pred MSE  verdict
+  ------------------------------------------------------------------------------------------------
+        63x4     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+        65x4     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+        96x4  strassen     3.6015e-04   1.4381e-07  ok   trim is intentional here
+       127x4     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+       192x4  strassen     5.3635e-05   1.1287e-09  ok   trim is intentional here
+       255x4     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+       256x4  strassen     4.7167e-08   1.1281e-15  ok   trim is intentional here
+       257x4     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+        65x2     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+       65x32     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+      256x32  strassen     6.8131e-05   9.3281e-09  ok   trim is intentional here
+       256x2  strassen     3.2576e-08   3.4842e-16  ok   trim is intentional here
+        64x1     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+        65x1     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+       256x1     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+         2x4  strassen     3.2277e-08   7.5278e-16  ok   trim is intentional here
+         3x4     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+
+27/27 shapes passed

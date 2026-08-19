@@ -1,0 +1,85 @@
+﻿====================================================================================================
+v2.6 GATE, RECONSTRUCTED UNDER THE CANONICAL SCORER
+====================================================================================================
+  control   v2.4.1  v2_4_1_mini_control.json   100 MLPs
+  candidate v2.6    v2_6_mini_confirm.json   100 MLPs
+  budget    272,000,000,000   lambda 1e+11
+  paired    same MLPs in the same order: True
+  replay v2.4.1  per-MLP worst rel 0.000e+00   aggregate rel 0.000e+00   failed 0
+  replay v2.6    per-MLP worst rel 0.000e+00   aggregate rel 0.000e+00   failed 0
+
+  ops/MLP        v2.4.1 1,417   v2.6 2,434   ratio 1.718x
+  counted/MLP    v2.4.1 5.3301e+10   v2.6 4.7697e+10
+  local residual v2.4.1 41.98 ms   v2.6 124.55 ms   (4.26x the graded 9.845 ms)
+  graded price   6.953 us/op  (327743: 1,416 ops in 9.845 ms)
+
+--- local (as measured here) — NEVER decides ----------------------------------
+paired, n = 100 MLPs   (v2.4.1 vs v2.6)
+  mean score          v2.4.1: 3.107573e-07   v2.6: 3.261051e-07
+  PRIMARY  arithmetic mean difference (ctrl - cand, >0 = candidate better)
+      delta            -1.534775e-08
+      relative         -4.939%   (gain 0.9529x)
+      bootstrap 95% CI [-1.8760e-08, -1.2143e-08]  (20000 resamples, seed 12345)
+      BCa       95% CI [-1.9005e-08, -1.2309e-08]
+      relative  95% CI [-5.773%, -4.115%]
+      studentised   CI [-1.8726e-08, -1.1970e-08]   (approximate above df=30, runs slightly narrow)
+  SECONDARY  geometric mean of per-MLP ratios (>1 = candidate better)
+      gain             0.9521x   95% CI [0.9450, 0.9592]
+  candidate better on 11/100   sign-test p = 0.0000
+
+--- per-op at the graded 6.95 us/op -------------------------------------------
+paired, n = 100 MLPs   (v2.4.1 vs v2.6)
+  mean score          v2.4.1: 2.927139e-07   v2.6: 2.670414e-07
+  PRIMARY  arithmetic mean difference (ctrl - cand, >0 = candidate better)
+      delta            +2.567251e-08
+      relative         +8.771%   (gain 1.0961x)
+      bootstrap 95% CI [+2.0632e-08, +3.1466e-08]  (20000 resamples, seed 12345)
+      BCa       95% CI [+2.1252e-08, +3.2484e-08]
+      relative  95% CI [+8.013%, +9.523%]
+      studentised   CI [+2.0151e-08, +3.1194e-08]   (approximate above df=30, runs slightly narrow)
+  SECONDARY  geometric mean of per-MLP ratios (>1 = candidate better)
+      gain             1.0927x   95% CI [1.0849, 1.1005]
+  candidate better on 98/100   sign-test p = 0.0000
+
+--- transfer: local residual / 4.26 (conservative) ----------------------------
+paired, n = 100 MLPs   (v2.4.1 vs v2.6)
+  mean score          v2.4.1: 2.928162e-07   v2.6: 2.737838e-07
+  PRIMARY  arithmetic mean difference (ctrl - cand, >0 = candidate better)
+      delta            +1.903239e-08
+      relative         +6.500%   (gain 1.0695x)
+      bootstrap 95% CI [+1.4995e-08, +2.3709e-08]  (20000 resamples, seed 12345)
+      BCa       95% CI [+1.5495e-08, +2.4583e-08]
+      relative  95% CI [+5.748%, +7.249%]
+      studentised   CI [+1.4579e-08, +2.3486e-08]   (approximate above df=30, runs slightly narrow)
+  SECONDARY  geometric mean of per-MLP ratios (>1 = candidate better)
+      gain             1.0666x   95% CI [1.0591, 1.0743]
+  candidate better on 95/100   sign-test p = 0.0000
+
+--- counted FLOPs only (residual excluded) ------------------------------------
+paired, n = 100 MLPs   (v2.4.1 vs v2.6)
+  mean score          v2.4.1: 2.873200e-07   v2.6: 2.577553e-07
+  PRIMARY  arithmetic mean difference (ctrl - cand, >0 = candidate better)
+      delta            +2.956470e-08
+      relative         +10.290%   (gain 1.1147x)
+      bootstrap 95% CI [+2.3988e-08, +3.5950e-08]  (20000 resamples, seed 12345)
+      BCa       95% CI [+2.4628e-08, +3.7027e-08]
+      relative  95% CI [+9.541%, +11.029%]
+      studentised   CI [+2.3448e-08, +3.5681e-08]   (approximate above df=30, runs slightly narrow)
+  SECONDARY  geometric mean of per-MLP ratios (>1 = candidate better)
+      gain             1.1109x   95% CI [1.1030, 1.1189]
+  candidate better on 100/100   sign-test p = 0.0000
+
+====================================================================================================
+residual model                                  ARITH gain            95% CI (rel)   geo gain
+----------------------------------------------------------------------------------------------------
+local (as measured here) — NEVER decides           0.9529x        [-5.77%, -4.11%]    0.9521x
+per-op at the graded 6.95 us/op                    1.0961x        [+8.01%, +9.52%]    1.0927x
+transfer: local residual / 4.26 (conservative)     1.0695x        [+5.75%, +7.25%]    1.0666x
+counted FLOPs only (residual excluded)             1.1147x       [+9.54%, +11.03%]    1.1109x
+
+NOTE. This reconstructs the recorded comparison under the right estimand.
+It does NOT gate v2.6: no decision block is spent, the networks are the
+public split (CONFIRM tier, read-only, never an objective), and the
+deciding quantity is still the grader's residual price, classified E1.
+
+saved C:\Users\samsu\Documents\arc-whest\experiments\2026-08-19_coverage\v26_gate_reconstruction.json

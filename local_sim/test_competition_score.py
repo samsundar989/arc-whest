@@ -1,0 +1,779 @@
+"""
+The proof that `local_sim/competition_score.py` IS the grader's arithmetic.
+
+Stage 0 / P0.1. Contract and written predictions P1-P7: `experiments/LOG.md`,
+2026-08-19 (night).
+
+`competition_score.py` is a reimplementation, not a wrapper, so that it runs in
+the torch-only GPU venv. A reimplementation is worth nothing without this file.
+Three standards of evidence, in increasing order of how much they can catch:
+
+  1. SCALAR PARITY  — bitwise `==` against `whestbench.budget` on randomised rows.
+  2. EVALUATOR PARITY — drive the REAL `whestbench.scoring.evaluate_estimator`
+     over synthetic contests (clean, raising, and budget-exhausting estimators)
+     and demand our aggregate reproduce its aggregate exactly. This is the only
+     check that exercises the failure semantics on the real code path.
+  3. GRADED REPLAY — replay the 50 published per-MLP rows of submissions 324420
+     (v2.4) and 327743 (v2.4.1) through our scorer. Read-only; no network.
+
+Plus the regression fixture the whole slice exists for: a case where arithmetic
+aggregation and the geometric mean of per-MLP ratios select OPPOSITE winners.
+
+Run: uv run python local_sim/test_competition_score.py
+"""
+
+import json
+import math
+import os
+import sys
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_ROOT = os.path.dirname(_HERE)
+sys.path = [p for p in sys.path if os.path.abspath(p or ".") != _HERE]
+
+import flopscope as flops  # noqa: E402  isort:skip
+import flopscope.numpy as fnp  # noqa: E402  isort:skip
+
+import numpy as np  # noqa: E402
+
+for _p in (_HERE, _ROOT):
+    if _p not in sys.path:
+        sys.path.append(_p)
+
+flops.configure(symmetry_warnings=False)
+
+import whestbench  # noqa: E402
+from whestbench import budget as wb_budget  # noqa: E402
+from whestbench.scoring import (ContestSpec, evaluate_estimator,  # noqa: E402
+                                make_contest)
+from whestbench.sdk import BaseEstimator  # noqa: E402
+
+from competition_score import (LAMBDA_FLOPS_PER_SECOND,  # noqa: E402
+                               MULTIPLIER_FLOOR, PHASE1_FLOP_BUDGET, MlpRow,
+                               effective_compute, format_paired,
+                               is_combined_budget_exhausted, mlp_score,
+                               naive_factorised_objective, over_budget_rows,
+                               paired_compare,
+                               reported_scores_by_index,
+                               rows_from_graded_report, score_multiplier,
+                               score_suite, zero_prediction_mse)
+
+RESULTS = []
+REPORTS = os.path.join(_ROOT, "experiments", "run_reports")
+V24 = os.path.join(REPORTS, "2026-08-05_v2.4_324420_graded_report.json")
+V241 = os.path.join(REPORTS, "2026-08-10_v2.4.1_phase1_327743_graded_report.json")
+
+
+def check(name, ok, detail=""):
+    RESULTS.append(bool(ok))
+    print(f"  {name:<58} {'ok ' if ok else 'FAILED'}  {detail}")
+    return ok
+
+
+def head(title):
+    print(f"\n{title}\n{'-' * len(title)}")
+
+
+# --------------------------------------------------------------------------- #
+# 1. Scalar parity against the installed whestbench — prediction P1
+# --------------------------------------------------------------------------- #
+
+
+def t_scalar_parity():
+    head("1. scalar parity vs whestbench.budget (bitwise ==)")
+    rng = np.random.default_rng(20260819)
+    n = 12_000
+
+    # Deliberately adversarial coverage: budgets that are zero and negative, C/B
+    # straddling the floor, residual terms from 0 to seconds, and huge/small MSE.
+    budgets = np.concatenate([
+        rng.uniform(1e9, 1e12, n - 400),
+        np.zeros(200),
+        -rng.uniform(1, 1e9, 100),
+        np.full(100, PHASE1_FLOP_BUDGET),
+    ])
+    rng.shuffle(budgets)
+    fl = rng.uniform(0.0, 3e11, n)
+    rs = np.concatenate([np.zeros(300), rng.uniform(0.0, 1.0, n - 300)])
+    rng.shuffle(rs)
+    failed = rng.random(n) < 0.15
+
+    bad_c = bad_m = bad_x = 0
+    for i in range(n):
+        c_ours = effective_compute(fl[i], rs[i])
+        c_theirs = wb_budget.effective_compute(fl[i], rs[i])
+        if c_ours != c_theirs:
+            bad_c += 1
+        m_ours = score_multiplier(c_ours, budgets[i], failed=bool(failed[i]))
+        m_theirs = wb_budget.score_multiplier(c_theirs, budgets[i], failed=bool(failed[i]))
+        if m_ours != m_theirs:
+            bad_m += 1
+        x_ours = is_combined_budget_exhausted(fl[i], rs[i], budgets[i])
+        x_theirs = wb_budget.is_combined_budget_exhausted(fl[i], rs[i], budgets[i])
+        if x_ours != x_theirs:
+            bad_x += 1
+
+    check("effective_compute exact on 12,000 rows", bad_c == 0, f"{bad_c} mismatches")
+    check("score_multiplier exact on 12,000 rows", bad_m == 0, f"{bad_m} mismatches")
+    check("is_combined_budget_exhausted exact", bad_x == 0, f"{bad_x} mismatches")
+    check(
+        "lambda matches the installed package",
+        LAMBDA_FLOPS_PER_SECOND == wb_budget.LAMBDA_FLOPS_PER_SECOND,
+        f"{LAMBDA_FLOPS_PER_SECOND:.3e}",
+    )
+
+    # A non-0.1 floor cannot be checked against the package (0.14.0 hardcodes
+    # 0.1), so check the two properties that must hold for ANY future floor.
+    floor = 0.5
+    ok = True
+    for i in range(2000):
+        c = effective_compute(fl[i], rs[i])
+        m = score_multiplier(c, budgets[i], failed=False, floor=floor)
+        if budgets[i] <= 0:
+            ok &= m == 1.0
+        else:
+            ok &= m == max(floor, c / budgets[i]) and m >= floor
+    check("configurable floor: max(floor, C/B), B<=0 -> 1.0", ok, "floor=0.5")
+
+    # The floor boundary itself, exactly.
+    b = 1e11
+    check(
+        "floor boundary C/B = 0.1 exactly",
+        score_multiplier(0.1 * b, b, failed=False) == 0.1
+        and wb_budget.score_multiplier(0.1 * b, b, failed=False) == 0.1,
+    )
+    check(
+        "below floor is clamped, above floor is not capped",
+        score_multiplier(0.01 * b, b, failed=False) == 0.1
+        and score_multiplier(50.0 * b, b, failed=False) == 50.0,
+    )
+    check(
+        "failure multiplier is 1.0, NOT the 0.1 floor",
+        score_multiplier(0.0, b, failed=True) == 1.0
+        and wb_budget.score_multiplier(0.0, b, failed=True) == 1.0,
+    )
+
+
+def t_aggregation_parity():
+    head("2. aggregation parity — arithmetic mean, same accumulation as the grader")
+    rng = np.random.default_rng(7)
+    for trial in range(200):
+        vals = [float(v) for v in rng.lognormal(-15.0, 1.5, rng.integers(2, 400))]
+        theirs = float(fnp.mean(fnp.asarray(vals)))
+        ours = float(np.mean(np.asarray(vals, dtype=np.float64)))
+        if ours != theirs:
+            check("np.mean == fnp.mean on score lists", False, f"trial {trial}")
+            return
+    check("np.mean == fnp.mean on score lists (200 trials)", True, "bitwise")
+
+
+# --------------------------------------------------------------------------- #
+# 2. Evaluator parity — drive the real scoring loop, including failures
+# --------------------------------------------------------------------------- #
+
+
+class _CleanEstimator(BaseEstimator):
+    """Cheap, valid, and deliberately heteroscedastic so MSE and cost correlate.
+
+    `work` sets how many counted matmuls to burn. Raising it makes the per-MLP
+    effective compute dominated by *counted* FLOPs rather than by this machine's
+    noisy residual wall time, which is the only way to place multipliers reliably
+    above the floor in a test.
+    """
+
+    def __init__(self, scale=1.0, work=0):
+        self.scale = scale
+        self.work = work
+        self._i = 0
+
+    def predict(self, mlp, budget):
+        self._i += 1
+        # Vary work per MLP so effective_compute varies across the suite.
+        reps = self.work + 1 + (self._i % 4)
+        a = mlp.weights[0]
+        acc = fnp.zeros_like(a)
+        for _ in range(reps):
+            acc = acc + a @ a
+        col = fnp.linalg.norm(mlp.weights[0], axis=0) / math.sqrt(2.0 * math.pi)
+        rows = [col * (self.scale + 0.01 * k) for k in range(mlp.depth)]
+        return fnp.stack(rows, axis=0) + 0.0 * acc[0]
+
+
+class _RaisingEstimator(_CleanEstimator):
+    """Raises on selected MLPs — the grader's exception path (C recorded as 0)."""
+
+    def __init__(self, fail_on, **kw):
+        super().__init__(**kw)
+        self.fail_on = set(fail_on)
+        self._n = -1
+
+    def predict(self, mlp, budget):
+        self._n += 1
+        if self._n in self.fail_on:
+            raise RuntimeError(f"synthetic failure on mlp {self._n}")
+        return super().predict(mlp, budget)
+
+
+class _GreedyEstimator(_CleanEstimator):
+    """Burns FLOPs until the budget is exhausted — the exhaustion path."""
+
+    def __init__(self, **kw):
+        super().__init__(work=200, **kw)
+
+
+def _rows_from_inprocess(result, spec):
+    """Rebuild MlpRows from an in-process `evaluate_estimator` result."""
+    out = []
+    for e in result["per_mlp"]:
+        out.append(
+            MlpRow(
+                mse=float(e["final_layer_mse"]),
+                flops_used=float(e.get("flops_used", 0.0) or 0.0),
+                residual_wall_time_s=float(e.get("residual_wall_time_s", 0.0) or 0.0),
+                budget=float(spec.flop_budget),
+                failed=bool(e.get("error_code"))
+                or bool(e.get("budget_exhausted"))
+                or bool(e.get("time_exhausted"))
+                or bool(e.get("residual_wall_time_exhausted"))
+                or bool(e.get("combined_budget_exhausted")),
+                name=str(e.get("mlp_name", "")),
+            )
+        )
+    return out
+
+
+def _run_case(label, estimator, spec, data, expect_failures=None):
+    res = evaluate_estimator(estimator, data)
+    rows = _rows_from_inprocess(res, spec)
+    ours = score_suite(rows)
+    theirs = float(res["adjusted_final_layer_score"])
+
+    per_ok = all(
+        ours.scores[i] == float(res["per_mlp"][i]["adjusted_final_layer_score"])
+        for i in range(len(rows))
+    )
+    check(f"{label}: per-MLP score bitwise == grader", per_ok)
+    check(
+        f"{label}: aggregate objective == grader",
+        ours.objective == theirs,
+        f"{ours.objective:.12e} vs {theirs:.12e}",
+    )
+    check(
+        f"{label}: n_failed == grader",
+        ours.n_failed == int(res["n_failed_mlps"]),
+        f"{ours.n_failed} vs {res['n_failed_mlps']}",
+    )
+    check(
+        f"{label}: mean multiplier == grader",
+        abs(ours.mean_multiplier - float(res["mean_score_multiplier"])) < 1e-12,
+        f"{ours.mean_multiplier:.6f}",
+    )
+    if expect_failures is not None:
+        check(
+            f"{label}: expected {expect_failures} failure(s) actually occurred",
+            ours.n_failed == expect_failures,
+            f"got {ours.n_failed}",
+        )
+    return res, ours
+
+
+def t_evaluator_parity():
+    head("3. evaluator parity — the REAL whestbench scoring loop")
+    # The budget must be large enough that lambda * residual does not by itself
+    # exhaust it: at lambda = 1e11 a 12 ms residual is 1.2e9 FLOP-equivalents, so
+    # a "small" budget of 4e7 makes EVERY MLP a combined-budget failure. That is
+    # the grader's real arithmetic, not a quirk — it is why the first draft of
+    # this test scored zero clean rows. Use the Phase-1 budget for the clean arm.
+    spec = ContestSpec(
+        width=16,
+        depth=4,
+        n_mlps=8,
+        flop_budget=int(PHASE1_FLOP_BUDGET),
+        ground_truth_samples=4096,
+        seed=20260819,
+        wall_time_limit_s=120.0,
+    )
+    data = make_contest(spec)
+
+    res_c, ours_c = _run_case("clean (at floor)", _CleanEstimator(), spec, data, expect_failures=0)
+
+    # A second clean arm whose budget is derived from the FIRST arm's observed
+    # compute, so multipliers sit strictly above the floor and vary per MLP.
+    # This is where an MSE/cost correlation bug would show up under the real loop.
+    #
+    # The budget has to be re-derived rather than guessed: at width 16 the counted
+    # FLOPs are trivial, so C is dominated by lambda * residual, and this machine's
+    # residual is noisy enough that a single-shot budget lands either below the
+    # floor or over the combined cap. Widen until every row is strictly inside
+    # (floor*B, B]. Parity is asserted on every attempt regardless.
+    WORK = 1400  # ~1.5e10 counted FLOPs/MLP at width 128, vs ~1e9 from lambda*R
+    probe = ContestSpec(
+        width=128, depth=4, n_mlps=6, flop_budget=int(1e13),
+        ground_truth_samples=4096, seed=515, wall_time_limit_s=180.0,
+    )
+    probe_data = make_contest(probe)
+    _, probe_score = _run_case("clean (budget probe)", _CleanEstimator(work=WORK), probe, probe_data)
+    b_above = float(probe_score.effective_computes.max()) * 1.3
+    ours_a = None
+    for attempt in range(3):
+        spec_a = ContestSpec(
+            width=128, depth=4, n_mlps=6, flop_budget=int(b_above),
+            ground_truth_samples=4096, seed=515, wall_time_limit_s=180.0,
+        )
+        data_a = make_contest(spec_a)
+        _, ours_a = _run_case(
+            f"clean (above floor, try {attempt + 1})", _CleanEstimator(work=WORK), spec_a, data_a
+        )
+        if ours_a.n_failed == 0 and float(ours_a.multipliers.min()) > MULTIPLIER_FLOOR:
+            break
+        b_above = float(ours_a.effective_computes.max()) * 1.3
+    check(
+        "above-floor arm: no failures, every multiplier strictly above the floor",
+        ours_a.n_failed == 0
+        and float(ours_a.multipliers.min()) > MULTIPLIER_FLOOR
+        and float(ours_a.multipliers.std()) > 0.0,
+        f"mult in [{ours_a.multipliers.min():.3f}, {ours_a.multipliers.max():.3f}]",
+    )
+
+    res_f, ours_f = _run_case(
+        "raising (2 of 8)", _RaisingEstimator(fail_on=(2, 5)), spec, data, expect_failures=2
+    )
+
+    # The failure path must use the ZERO-prediction MSE and multiplier 1.0.
+    e = res_f["per_mlp"][2]
+    zmse = zero_prediction_mse(data.final_targets[2])
+    check(
+        "failure MSE == zero_prediction_mse(target)",
+        abs(zmse - float(e["final_layer_mse"])) <= 1e-12 * max(1.0, abs(zmse)),
+        f"{zmse:.6e} vs {float(e['final_layer_mse']):.6e}",
+    )
+    check(
+        "failure row: multiplier forced to 1.0 and C recorded as 0",
+        float(e["effective_compute"]) == 0.0
+        and abs(float(e["adjusted_final_layer_score"]) - float(e["final_layer_mse"])) < 1e-30,
+    )
+
+    # Exhaustion path: real flops recorded, multiplier still 1.0.
+    tight = ContestSpec(
+        width=16,
+        depth=4,
+        n_mlps=4,
+        flop_budget=200_000,
+        ground_truth_samples=2048,
+        seed=99,
+        wall_time_limit_s=120.0,
+    )
+    tdata = make_contest(tight)
+    res_x, ours_x = _run_case("budget-exhausting", _GreedyEstimator(), tight, tdata)
+    ex = [e for e in res_x["per_mlp"] if e.get("budget_exhausted")]
+    check(
+        "exhaustion path exercised (flops recorded, mult still 1.0)",
+        len(ex) > 0
+        and all(
+            float(e["flops_used"]) > 0
+            and abs(float(e["adjusted_final_layer_score"]) - float(e["final_layer_mse"])) < 1e-30
+            for e in ex
+        ),
+        f"{len(ex)}/{len(res_x['per_mlp'])} exhausted",
+    )
+
+
+def t_heterogeneous_budgets():
+    head("4. heterogeneous per-MLP budgets (whestbench 0.14.0 has one B; we must not assume it)")
+    rng = np.random.default_rng(4242)
+    rows, expect = [], []
+    for _ in range(500):
+        b = float(rng.uniform(1e9, 1e12))
+        f = float(rng.uniform(0, 3e11))
+        r = float(rng.uniform(0, 0.5))
+        m = float(rng.lognormal(-14, 1.0))
+        rows.append(MlpRow(mse=m, flops_used=f, residual_wall_time_s=r, budget=b))
+        expect.append(
+            m * wb_budget.score_multiplier(wb_budget.effective_compute(f, r), b, failed=False)
+        )
+    # "ignore": this test probes the RAW identity against whestbench's scalar
+    # primitives, which do not themselves apply the combined-budget check.
+    s = score_suite(rows, on_over_budget="ignore")
+    check(
+        "per-row scores exact against whestbench with per-row B",
+        all(s.scores[i] == expect[i] for i in range(len(rows))),
+    )
+    check(
+        "objective == arithmetic mean of those rows",
+        s.objective == float(np.mean(np.asarray(expect, dtype=np.float64))),
+    )
+
+
+def t_over_budget_guard():
+    head("4b. combined-budget guard — C > B with failed=False must not be scored silently")
+    b = 1e11
+    ok_row = MlpRow(mse=1e-6, flops_used=5e10, residual_wall_time_s=0.1, budget=b)
+    bad_row = MlpRow(mse=1e-6, flops_used=5e10, residual_wall_time_s=1.0, budget=b)
+    check(
+        "the grader itself would fail that row",
+        is_combined_budget_exhausted(5e10, 1.0, b) and not is_combined_budget_exhausted(5e10, 0.1, b),
+        f"C = {bad_row.effective_compute():.3e} vs B = {b:.3e}",
+    )
+    check("default on_over_budget='raise' refuses it", _raises(lambda: score_suite([ok_row, bad_row])))
+    check("over_budget_rows names the offender", over_budget_rows([ok_row, bad_row]) == [1])
+    failed = score_suite([ok_row, bad_row], on_over_budget="fail")
+    check(
+        "on_over_budget='fail' forces multiplier 1.0 on that row only",
+        failed.multipliers[1] == 1.0 and abs(failed.multipliers[0] - 0.6) < 1e-12,
+        f"mults {failed.multipliers.tolist()}",
+    )
+    ignored = score_suite([ok_row, bad_row], on_over_budget="ignore")
+    check(
+        "on_over_budget='ignore' keeps the raw uncapped identity",
+        abs(ignored.multipliers[1] - 1.5) < 1e-12,
+        f"mult {ignored.multipliers[1]:.4f}",
+    )
+    check("an unknown mode is rejected", _raises(lambda: score_suite([ok_row], on_over_budget="x")))
+    check("clean suites are unaffected by the guard", score_suite([ok_row]).n == 1)
+
+
+# --------------------------------------------------------------------------- #
+# 3. The failure penalty — prediction P2
+# --------------------------------------------------------------------------- #
+
+
+def t_failure_cost():
+    head("5. what one failure costs — prediction P2, FALSIFIED AS STATED; the exact law")
+    with open(V241, encoding="utf-8") as fh:
+        rep = json.load(fh)
+    rows = rows_from_graded_report(rep)
+    base = score_suite(rows)
+
+    # P2 predicted "> 5x". That was wrong, and the reason is worth keeping: the
+    # multiplier-only failure penalty is EXACTLY 1 / mult_i, and mult_i is a
+    # per-MLP quantity. P2 was computed off the SUITE MEAN multiplier (0.19896 ->
+    # 5.03x); row 0's own multiplier is 0.2137 -> 4.68x. Any row with C/B > 0.2
+    # falls under 5x. The test now asserts the exact law instead of the wrong
+    # threshold, and reports the suite-wide range.
+    i = 0
+    r = rows[i]
+    normal = base.scores[i]
+    mult_only = MlpRow(
+        mse=r.mse,
+        flops_used=r.flops_used,
+        residual_wall_time_s=r.residual_wall_time_s,
+        budget=r.budget,
+        failed=True,
+    ).score()
+    ratio = mult_only / normal
+    check(
+        "failure penalty is EXACTLY 1/mult_i (multiplier half only)",
+        abs(ratio - 1.0 / r.multiplier()) < 1e-12,
+        f"{ratio:.3f}x   (mult {r.multiplier():.4f} -> 1.0)",
+    )
+    pen = 1.0 / base.multipliers
+    check(
+        "P2 as written (> 5x) is FALSE for part of the real suite",
+        float(pen.min()) < 5.0,
+        f"penalty range [{pen.min():.2f}x, {pen.max():.2f}x], "
+        f"at suite-mean mult {base.mean_multiplier:.5f} -> {1 / base.mean_multiplier:.2f}x",
+    )
+
+    flipped = list(rows)
+    flipped[i] = MlpRow(
+        mse=r.mse,
+        flops_used=r.flops_used,
+        residual_wall_time_s=r.residual_wall_time_s,
+        budget=r.budget,
+        failed=True,
+    )
+    inflated = score_suite(flipped)
+    check(
+        "one failed MLP in 50 moves the objective measurably",
+        inflated.objective > base.objective,
+        f"{base.objective:.6e} -> {inflated.objective:.6e} "
+        f"({(inflated.objective / base.objective - 1) * 100:+.2f}%, MSE held fixed)",
+    )
+    print(
+        f"    note: a real failure ALSO replaces mse with mean(target^2); this "
+        f"check isolates the multiplier half only, which is the falsifiable one."
+    )
+
+
+# --------------------------------------------------------------------------- #
+# 4. MSE/cost correlation — prediction P6
+# --------------------------------------------------------------------------- #
+
+
+def t_correlation_preserved():
+    head("6. MSE/cost correlation — prediction P6 (the factorised form is biased)")
+    with open(V241, encoding="utf-8") as fh:
+        rep = json.load(fh)
+    rows = rows_from_graded_report(rep)
+    s = score_suite(rows)
+    naive = naive_factorised_objective(rows)
+    rel = abs(naive - s.objective) / s.objective
+    rho = float(np.corrcoef(s.mses, s.multipliers)[0, 1])
+    check(
+        "P6: mean(mse)*mean(mult) != mean(mse*mult) on real graded rows",
+        rel > 1e-12,
+        f"rel bias {rel * 100:+.4f}%   corr(mse, mult) = {rho:+.4f}",
+    )
+
+    # A synthetic case with strong positive correlation, where the bias is large
+    # and its SIGN is predictable: positive correlation => factorised UNDERstates.
+    rng = np.random.default_rng(11)
+    z = rng.normal(size=400)
+    rows2 = [
+        MlpRow(
+            mse=float(np.exp(-14 + 1.2 * zi)),
+            flops_used=float(5e10 * np.exp(0.25 * zi)),
+            residual_wall_time_s=0.01,
+            budget=PHASE1_FLOP_BUDGET,
+        )
+        for zi in z
+    ]
+    s2 = score_suite(rows2)
+    n2 = naive_factorised_objective(rows2)
+    check(
+        "positive corr => factorised UNDERstates the objective",
+        n2 < s2.objective,
+        f"{n2:.6e} < {s2.objective:.6e}  ({(n2 / s2.objective - 1) * 100:+.2f}%)",
+    )
+
+
+# --------------------------------------------------------------------------- #
+# 5. The regression fixture: arithmetic and geometric pick opposite winners — P3
+# --------------------------------------------------------------------------- #
+
+
+def t_sign_flip_fixture():
+    head("7. REGRESSION FIXTURE — arithmetic vs geometric select opposite winners (P3)")
+    with open(V241, encoding="utf-8") as fh:
+        rep = json.load(fh)
+    rows = rows_from_graded_report(rep)
+    ctrl = score_suite(rows).scores.copy()
+    n = ctrl.size
+    worst = int(np.argmax(ctrl))
+    g = 0.03
+
+    # The pre-registered threshold was  X* = g * n * mean / worst  = 41.80%.
+    # It is WRONG: it drops a -g term. Solving mean(ctrl) - mean(cand) = 0 for the
+    # fixture cand = ctrl*(1-g) with cand[worst] = ctrl[worst]*(1+x) gives
+    #     g*mean - (worst/n)*(x + g) = 0   =>   X_flip = g * (n*mean/worst - 1)
+    # which is 38.80%. The independent Skeptic caught this on 2026-08-19; the
+    # contract's +-15% tolerance was wide enough to pass a wrong formula, and the
+    # [25%, 60%] band was wide enough that it tested nothing (it is equivalent to
+    # predicting worst/mean in [2.5, 6.0], and 3.59 was already in the JSON).
+    # P3 is therefore recorded as an ARITHMETIC IDENTITY, not a confirmed
+    # prediction. What survives is the MECHANISM and the fixture.
+    x_star_contract = g * n * float(ctrl.mean()) / float(ctrl[worst])
+    x_flip_exact = g * (n * float(ctrl.mean()) / float(ctrl[worst]) - 1.0)
+    check(
+        "P3 as pre-registered was ALGEBRAICALLY WRONG (dropped the -g term)",
+        abs(x_star_contract - x_flip_exact - g) < 1e-12,
+        f"contract {x_star_contract * 100:.2f}%  exact {x_flip_exact * 100:.2f}%  "
+        f"error {(x_star_contract - x_flip_exact) * 100:.2f}pp = g",
+    )
+
+    # Scan X and find the actual flip.
+    flip_at = None
+    for x in np.arange(0.01, 2.0, 0.005):
+        cand = ctrl * (1.0 - g)
+        cand[worst] = ctrl[worst] * (1.0 + x)
+        r = paired_compare(ctrl, cand, boot_resamples=2000)
+        if r.estimands_disagree:
+            flip_at = float(x)
+            break
+    check("a sign flip exists", flip_at is not None,
+          f"first grid point at X = {flip_at:.2%}" if flip_at is not None else "none found")
+    if flip_at is not None:
+        check(
+            "the flip lands on the first grid point above the exact law (0.5% grid)",
+            0.0 <= flip_at - x_flip_exact < 0.005,
+            f"observed {flip_at:.2%}  exact {x_flip_exact:.2%}  "
+            f"gap {(flip_at - x_flip_exact) * 100:.3f}pp",
+        )
+
+    # The canonical fixture, frozen at a value comfortably inside the flip region.
+    x = (flip_at if flip_at is not None else x_flip_exact) + 0.10
+    cand = ctrl * (1.0 - g)
+    cand[worst] = ctrl[worst] * (1.0 + x)
+    res = paired_compare(ctrl, cand)
+    check(
+        "FIXTURE: geometric says candidate WINS, arithmetic says it LOSES",
+        res.geometric_says_candidate_better and not res.arithmetic_says_candidate_better,
+        f"geo {res.geometric_gain:.4f}x  vs  arith {res.arithmetic_gain:.4f}x",
+    )
+    print("\n" + format_paired(res, control="v2.4.1 graded", candidate="tail-regressing candidate"))
+    print(
+        f"\n    mechanism: the candidate improves {n - 1}/{n} MLPs by {g:.0%} and "
+        f"regresses one by {x:.0%}.\n"
+        f"    The geometric mean weights every MLP's LOG equally, so a single tail "
+        f"blow-up is\n    invisible to it. The competition sums scores, so that one "
+        f"MLP is {ctrl[worst] / ctrl.sum() * 100:.1f}% of the objective."
+    )
+
+
+def t_paired_determinism_and_sanity():
+    head("8. paired statistics — determinism and analytic sanity")
+    a = np.array([1.0, 2.0, 4.0, 8.0])
+    b = a / 2.0
+    r1 = paired_compare(a, b, boot_resamples=3000)
+    r2 = paired_compare(a, b, boot_resamples=3000)
+    check(
+        "paired_compare is deterministic",
+        (r1.boot_ci_difference == r2.boot_ci_difference)
+        and (r1.mean_difference == r2.mean_difference),
+    )
+    check(
+        "uniform 2x improvement: arithmetic gain == geometric gain == 2",
+        abs(r1.arithmetic_gain - 2.0) < 1e-12 and abs(r1.geometric_gain - 2.0) < 1e-12,
+        f"arith {r1.arithmetic_gain:.6f}  geo {r1.geometric_gain:.6f}",
+    )
+    check("uniform improvement: estimands agree", not r1.estimands_disagree)
+    check(
+        "identical arms: zero difference, gain 1.0, p = 1",
+        paired_compare(a, a.copy(), boot_resamples=500).mean_difference == 0.0
+        and abs(paired_compare(a, a.copy(), boot_resamples=500).geometric_gain - 1.0) < 1e-15,
+    )
+    check(
+        "mismatched lengths are refused",
+        _raises(lambda: paired_compare(a, b[:2])),
+    )
+
+
+def _raises(fn):
+    try:
+        fn()
+        return False
+    except Exception:
+        return True
+
+
+# --------------------------------------------------------------------------- #
+# 6. Graded replay — predictions P4, P5, P7. Read-only, no network.
+# --------------------------------------------------------------------------- #
+
+
+def t_graded_replay():
+    head("9. GRADED REPLAY — real published rows, read-only (P4, P5, P7)")
+    for label, path in (("v2.4  / 324420", V24), ("v2.4.1 / 327743", V241)):
+        with open(path, encoding="utf-8") as fh:
+            rep = json.load(fh)
+        rows = rows_from_graded_report(rep)
+        reported = reported_scores_by_index(rep)
+        s = score_suite(rows)
+
+        # P4 — reproduce the grader's own per-MLP adjusted score.
+        idx = sorted(reported)
+        worst_rel = 0.0
+        for j, i in enumerate(idx):
+            ours, theirs = s.scores[j], reported[i]
+            worst_rel = max(worst_rel, abs(ours - theirs) / abs(theirs))
+        check(
+            f"P4 {label}: 50 rows reproduce to 1e-12",
+            worst_rel < 1e-12,
+            f"worst rel {worst_rel:.3e}",
+        )
+
+        # P5 — confirm lambda = 1e11 from the grader's OWN telemetry.
+        ev = rep["evaluation"]
+        wr = 0.0
+        for e in ev["results"]["per_mlp"]:
+            t = e["telemetry"]
+            c = effective_compute(t["flops_used"], t["residual_wall_time_s"])
+            wr = max(wr, abs(c - float(t["effective_compute"])) / abs(float(t["effective_compute"])))
+        check(
+            f"P5 {label}: C == F + 1e11*R on all 100 rows to 1e-9",
+            wr < 1e-9,
+            f"worst rel {wr:.3e}",
+        )
+
+        # P7 — is aggregates.public over 50 rows or 100? PREDICTED 100; it is 50.
+        agg = ev["results"]["aggregates"]["public"]
+        tel = [e["telemetry"] for e in ev["results"]["per_mlp"]]
+        c_all = float(np.mean([float(t["effective_compute"]) for t in tel]))
+        c_50 = float(np.mean([float(t["effective_compute"]) for t in tel[:50]]))
+        rep_c = float(agg["mean_effective_compute"])
+        check(
+            f"P7 {label}: aggregates.public is over the 50 PUBLIC rows, not 100",
+            abs(c_50 - rep_c) < abs(c_all - rep_c),
+            f"reported {rep_c:.6e} | 50-row {c_50:.6e} | 100-row {c_all:.6e}",
+        )
+        # ...and therefore the whole leaderboard number is reproducible offline.
+        reported_obj = float(agg["adjusted_final_layer_score"])
+        check(
+            f"P7 {label}: our 50-row objective IS the published score, bitwise",
+            s.objective == reported_obj,
+            f"{s.objective:.12e} vs {reported_obj:.12e}",
+        )
+        print(
+            f"      worst MLP {s.worst:.4e}  best {s.best:.4e}  "
+            f"worst/mean {s.worst / s.objective:.2f}x  "
+            f"top-1 tail share {s.tail_share(1) * 100:.1f}%  "
+            f"top-5 {s.tail_share(5) * 100:.1f}%"
+        )
+
+
+def t_real_pair_v24_vs_v241():
+    head("10. the real v2.4 -> v2.4.1 pair, scored by the canonical scorer")
+    with open(V24, encoding="utf-8") as fh:
+        r24 = json.load(fh)
+    with open(V241, encoding="utf-8") as fh:
+        r241 = json.load(fh)
+    a = rows_from_graded_report(r24)
+    b = rows_from_graded_report(r241)
+    na = [x.name for x in a]
+    nb = [x.name for x in b]
+    check(
+        "the two submissions were scored on the SAME 50 MLPs in the same order",
+        na == nb and all(na),
+        f"{len(na)} names",
+    )
+    sa, sb = score_suite(a), score_suite(b)
+    res = paired_compare(sa.scores, sb.scores)
+    print("\n" + format_paired(res, control="v2.4 (324420)", candidate="v2.4.1 (327743)"))
+    check(
+        "the real graded pair reproduces the documented estimand disagreement",
+        res.estimands_disagree,
+        f"arith {res.arithmetic_gain:.4f}x  geo {res.geometric_gain:.4f}x",
+    )
+    check(
+        "arithmetic improvement is NOT resolvable (bootstrap CI spans 0)",
+        res.boot_ci_difference[0] < 0.0 < res.boot_ci_difference[1],
+        f"[{res.boot_ci_difference[0]:.3e}, {res.boot_ci_difference[1]:.3e}]",
+    )
+
+
+def t_environment():
+    head("0. environment")
+    from importlib.metadata import version as _ver
+
+    print(f"  whestbench {_ver('whestbench')}   flopscope {_ver('flopscope')}   "
+          f"numpy {np.__version__}")
+    check("floor constant matches the installed evaluator", MULTIPLIER_FLOOR == 0.1)
+    check("graded reports present", os.path.exists(V24) and os.path.exists(V241))
+
+
+def main():
+    print("=" * 100)
+    print("CANONICAL COMPETITION SCORER — parity with installed whestbench, and the estimand fixture")
+    print("=" * 100)
+    for fn in (
+        t_environment,
+        t_scalar_parity,
+        t_aggregation_parity,
+        t_evaluator_parity,
+        t_heterogeneous_budgets,
+        t_over_budget_guard,
+        t_failure_cost,
+        t_correlation_preserved,
+        t_sign_flip_fixture,
+        t_paired_determinism_and_sanity,
+        t_graded_replay,
+        t_real_pair_v24_vs_v241,
+    ):
+        fn()
+    n_ok = sum(1 for r in RESULTS if r)
+    print(f"\n{n_ok}/{len(RESULTS)} checks passed")
+    return 0 if n_ok == len(RESULTS) else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

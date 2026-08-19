@@ -1,8 +1,9 @@
 # CURRENT_STATE.md — read this first
 
-*Snapshot, not narrative. Last updated **2026-08-10** (submission 327743 graded).
-Update this file when a lane opens or closes, a number is graded, or the phase
-changes — not on every experiment. The narrative record is `experiments/LOG.md`.*
+*Snapshot, not narrative. Last updated **2026-08-19** (Stage 0 — the instrument
+repair; five slices, two independent Skeptic reviews). Update this file when a lane
+opens or closes, a number is graded, or the phase changes — not on every
+experiment. The narrative record is `experiments/LOG.md`.*
 
 ---
 
@@ -15,7 +16,7 @@ changes — not on every experiment. The narrative record is `experiments/LOG.md
 | Round 1428 "Phase 1" | closed **2026-08-10 23:59 UTC** | **CLOSED.** Our last submission is 327743 (v2.4.1) |
 | Phase 1 submission selection | closed **2026-08-11 23:59 UTC** | **PASSED.** We nominated nothing, so the default applied: our **two** highest-ranked public entries |
 | Phase 1 write-up | closed **2026-08-17 23:59 UTC** | **PASSED, MISSED.** No extension was issued. Write-ups posted after it (18184, 18185) drew no organiser objection, but that is not permission |
-| Round 1429 "Phase 2" | opens **2026-08-20 00:00 UTC** | **UPCOMING.** Slipped twice: Aug 8 → Aug 18 → Aug 19 → Aug 20. Organiser 18186 (2026-08-18): *"still ironing out some details … the deadline for Phase 2 submissions will also be shifted"* |
+| Round 1429 "Phase 2" | opens **2026-08-20 23:59 UTC** | **UPCOMING** (re-polled 2026-08-19: leaderboard 1480 exists, **0 entries**; HF tags still `v1-phase1`/`v1-warmup`). Slipped twice: Aug 8 → Aug 18 → Aug 19 → Aug 20. Organiser 18186 (2026-08-18): *"still ironing out some details … the deadline for Phase 2 submissions will also be shifted"* |
 | Phase 2 close | nominally 2026-09-19 23:59 UTC | **WILL MOVE** — organiser says so explicitly |
 | Registration / team freeze | **2026-09-05 23:59 UTC** | 17 days out |
 | Results | 2026-10-01 | private re-run of **UP TO TWO** designated submissions on fresh MLPs (forum 18143; the Rules tab still says one and the contradiction is unresolved) |
@@ -45,9 +46,12 @@ the shape moved, *then* gate. Both are frozen at 256×32 and neither transfers.
 | invariant suite on the shipped file | — | **30/30** | verified 2026-08-07 |
 | board position | — | raw #90/200; **#82 of 192 plausible-honest** on 5 entries | 2026-08-06 10:03Z |
 
-**Shipped file**: `estimator.py` == `estimator_v2_4_1.py` (byte-identical modulo
-line endings — `scripts/preflight.ps1` asserts this). **v2.4.1 is now graded**
-(327743, 2026-08-10, Phase 1): 0 failures, safe to designate. Vault touch counter: **1**.
+**Shipped file, corrected 2026-08-19**: `estimator.py` == **`estimator_v2_6_1.py`**
+(byte-identical modulo line endings — `scripts/preflight.ps1` step 4 asserts this).
+The **graded** file is `estimator_v2_4_1.py` (327743, 2026-08-10, Phase 1): 0
+failures, safe to designate. **These are not the same file** — v2.6.1 is built,
+green and deliberately un-gated, and the line above said "v2.4.1" until an
+independent audit caught it. Vault touch counter: **1**.
 
 **v2.4.1 vs v2.4 is a DRAW, not a 3.2% improvement.** The headline adjusted score
 fell 2.7194e-7 → 2.6314e-7, but both were scored on the *same* 100 networks
@@ -79,12 +83,28 @@ Full table: `docs/BENCHMARK.md`.
 
 ---
 
-## Shipped file — v2.6 BUILT, NOT PROMOTED (2026-08-19)
+## Shipped file — v2.6.1 BUILT, NOT PROMOTED (2026-08-19)
 
-`estimator.py` is **v2.6** (Strassen-Winograd carrier), archive
-`estimator_v2_6.py`, preflight **GREEN 5/5**, invariants **30/30**, vault
-touches still **1**. **It has not been gated, not been submitted, and no
-decision block has been spent.**
+`estimator.py` is **v2.6.1** (Strassen-Winograd carrier + the P0.3 odd-width
+repair), archive `estimator_v2_6_1.py`, preflight **GREEN 6/6**, invariants
+**30/30**, shape parity **23/23**, vault touches still **1**. **It has not been
+gated, not been submitted, and no decision block has been spent.**
+
+**v2.6 had a network-destroying bug on every odd width and it is fixed.** The
+Strassen trim ran *before* the eligibility test, and the trim itself
+(`keep = a > alpha[alive].min()`) sheds every neuron tied at the minimum — and at
+layer 0 **every alpha is exactly 0.0**, because `x ~ N(0, I)` makes the
+pre-activation mean zero. So on any odd width v2.6 deleted the entire first
+layer's sampled path: 7 of 17 shapes wrong, up to **0.58 max relative error** and
+**0.33 prediction MSE** against v2.4.1. v2.6.1 decides eligibility from `n` and
+`width` first, rebuilds untrimmed if trimming cannot make every dimension even,
+and refuses any trim that would shed more than one neuron.
+
+**Nothing recorded is invalidated**: the competition shape is 256x32, layer 0's
+alive count there is 256 (even), the trim never fired, and v2.6.1 is bit-identical
+to v2.6 at even widths **including its counted FLOP count to the unit**. The
+independent Skeptic confirmed `use_str` was True on 100/100 public-mini networks.
+Full record: `experiments/LOG.md` 2026-08-19 (night), P0.3.
 
 The graded number of record is still **v2.4.1 = 2.6314e-7** (submission 327743).
 
@@ -104,6 +124,69 @@ exactly (1,417 local vs 1,416 graded). Break-even is 55.5 us/op; the grader is
 at 7.0, this machine at 30-51. **Only a graded run can decide it.** MSE is
 settled and costs 0.51% (paired 0.9942x [0.9870, 1.0013]), all of it the
 even-width trim — Strassen itself contributes nothing (LOG 2026-08-19).
+
+## Stage 0 — the instrument, repaired (2026-08-19 night)
+
+Five slices, all recorded in `experiments/LOG.md` with contracts written before
+the data existed. **Nothing was promoted, no decision block was spent, no vault
+touch was taken, nothing was submitted.**
+
+| # | what | state |
+|---|---|---|
+| **P0.1** | `local_sim/competition_score.py` — the grader's identity in one place, bitwise-equal to whestbench 0.14.0 on the scalar primitives, on the aggregate, and on the real scoring loop including both failure paths. **71/71** | done, Skeptic PROVISIONAL |
+| **P0.4** | `local_sim/seed_ledger.py` + `experiments/seed_ledger.jsonl` — consumption recorded, enforced, and statically scanned. **39/39** negative tests. Preflight step **6** | done |
+| **coverage** | `local_sim/coverage_lab.py` — which promotion interval actually covers 95%, on 192 fresh networks (D18) | done |
+| **P0.3** | `estimator.py` -> **v2.6.1**, the odd-width repair. **23/23** shape parity | done, Skeptic **ACCEPT** |
+| **P0.2** | `local_sim/vault.py` — evaluates a named candidate FILE under real flopscope, `--dry-run` deleted, touch bound to a sha256, maximum enforced, atomic seal update | done |
+
+**Three things every future number depends on:**
+
+1. **The competition objective is the ARITHMETIC MEAN of per-MLP scores over the
+   FIFTY public MLPs**, and it is now reproducible offline **bitwise** from the
+   durable graded reports — `2.719427529595e-07` (324420) and
+   `2.631432177242e-07` (327743), exactly. A failure is priced at multiplier
+   **1.0**, not the 0.1 floor: ~5x, on top of the zeroed prediction.
+
+2. **The arithmetic mean and the geometric mean of per-MLP ratios select
+   OPPOSITE winners on our own graded data.** v2.4 -> v2.4.1 on the same 50 rows:
+   arithmetic **1.0334x** (v2.4.1 better), geometric **0.9666x** (v2.4 better),
+   22/50 wins, bootstrap CI spanning zero. `docs/VALIDATION.md` 2b still makes the
+   geometric mean the binding gate and **has not been changed** — that is a gate
+   change, therefore STRATEGIC, and it needs its own contract.
+
+3. **Use the studentised t interval or the basic bootstrap. Do NOT gate on the
+   percentile bootstrap or on BCa at n ~ 50.** Measured false-promotion rate
+   against a true zero (nominal 5%): t **4.1-5.4%**, basic **4.0-5.2%**,
+   percentile 6.8-8.2%, **BCa 9.1-11.5% — roughly double**. The reason is that
+   common random numbers make the *paired difference* nearly symmetric (skew
+   +0.21, -0.55, -0.46) even though each arm's scores are strongly right-skewed,
+   so BCa's skew correction is pure added variance. BCa only starts winning past
+   skew ~6, which no real arm reaches.
+
+**The v2.6 gate, re-derived under the right estimand** (read-only, from the two
+durable CONFIRM artifacts; `local_sim/reconstruct_v26_gate.py`). The scorer
+reproduces both artifacts' per-MLP and aggregate scores at **0.000e+00** relative
+deviation:
+
+| residual model | arithmetic gain | 95% CI (relative) | geometric gain |
+|---|---|---|---|
+| local, as measured — never decides | 0.9529x | [-5.77%, -4.11%] | 0.9521x |
+| per-op at the graded 6.95 us/op | **1.0961x** | [+8.01%, +9.52%] | 1.0927x |
+| transfer (conservative) | **1.0695x** | [+5.75%, +7.25%] | 1.0666x |
+| counted FLOPs only | 1.1147x | [+9.54%, +11.03%] | 1.1109x |
+
+**The estimand correction does not change this decision** — arithmetic and
+geometric agree in sign in all four models, and the arithmetic reading is slightly
+*more* favourable to v2.6. The sign still flips on the grader's residual price,
+which is **E1**, and only a graded run settles it.
+
+**Seed blocks after the ledger repair:** D16 **DESIGN, part-spent** (270 of 600
+drawn by five probes; 330 free in four gaps). D17 **LOCKED SINGLE-USE**, verified
+never drawn. D18 DESIGN, **192 drawn** by the coverage study, 408 free. D19
+**SINGLE-USE, unspent**, held for the v2.6 promotion gate so a Phase-2 shape
+change cannot burn the only clean decision block.
+
+---
 
 ## Closed lanes — do not reopen without new *external* evidence
 
@@ -146,6 +229,15 @@ vs Sobol, design vs rotation, and (previously) CV vs QMC. Two devices that
 annihilate the same low-order structure do not compose — whichever is added first
 takes the credit. **Read every competitor ladder for what its baseline arm
 contains, never for its largest rung.**
+
+⚠️ **Correction, 2026-08-19 (P0.4): two of those three ways are ONE sample.**
+`probe_whitening.py` and `probe_design_carrier.py` both hardcode
+`SEED0 = 30_806_016_200` with `N_MLPS = 24` — **the same 24 networks**. The
+whitening kill (0.9972x) and the degree-3 design-carrier kill (1.047x) are
+therefore **correlated evidence, not two independent readings**. Both are DESIGN
+tier and no gate was decided on either, so neither verdict changes; the claim of
+independence does. The CV-vs-QMC leg is on different data and still stands. The
+seed ledger now prints this every time anyone runs `preflight` step 6.
 
 **New standing number: 7.0 us/op = 695,268 FLOP-equivalents per grader operation**
 (from 327743: 1,416 ops, 9.845 ms). Price any counted-FLOPs-for-op-count trade
@@ -348,20 +440,30 @@ numbering and four items whose deadlines had passed.*
 **Start here.** `session-start`, then this list in order. Nothing below depends
 on chat history; every number has an artifact under `experiments/`.
 
-1. **Poll Phase 2 — it opens 2026-08-20 00:00 UTC and the config arrives by
+*Stage 0 (the instrument repair) is COMPLETE — see the section above. Items 2 and
+3 of the previous list are done: the Skeptic has now seen the v2.6 build and
+returned **ACCEPT**, after the odd-width defect it exposed was fixed.*
+
+1. **Poll Phase 2 — it opens 2026-08-20 23:59 UTC and the config arrives by
    email.** `uv run python local_sim/phase2_checklist.py`. Record into
    `docs/RESEARCH_NOTES.md` §1: width, depth, `n_mlps`, `flop_budget`, λ, the
    multiplier floor, and the flopscope/whestbench versions. **Nothing else in
    this list should start before this is known**, because it decides whether the
    two frozen constants still hold and whether the mechanistic lane reopens.
+   *Toolchain intel, 2026-08-19: **whestbench 0.15.0** shipped 2026-08-17 and
+   requires **flopscope >=0.11.0**. Its `scoring.py`, `budget.py`, `domain.py`
+   and `generation.py` are **byte-identical to the installed 0.14.0**, so the
+   score identity, the 0.1 floor, λ = 1e11 and He-init/no-bias generation are
+   unchanged in the newest published evaluator. **What flopscope 0.11 does to the
+   PRICE TABLE is unknown** — that is the cost half, and it is our weakest half.*
 
-2. **Skeptic on the v2.6 build** (`review-slice`). Blocked on nothing — do it
-   even before Phase 2 lands. The claim to attack is *not* the accuracy (that is
-   arithmetic and settled) but the **cost transfer**: v2.4.1 measures 4.34× per-op
-   residual inflation locally vs graded, and v2.6 is assumed to inherit it despite
-   having 1.7× the operations and a 1.68× higher local per-op price. If that
-   assumption fails, v2.6 is a 5% regression, which is what this machine actually
-   measures.
+2. **The gate-change contract** — adopt the paired arithmetic score difference as
+   the primary promotion statistic, with the studentised t or basic bootstrap
+   interval, demoting the geometric mean to a stability diagnostic. **STRATEGIC**:
+   it needs its own Slice Contract, Samuel's prediction, and a Skeptic.
+   `docs/VALIDATION.md` §2b is deliberately **unchanged** until then. The evidence
+   it needs already exists (Stage 0, above): the two estimands disagree on our own
+   graded data, and the coverage of every candidate interval is now measured.
 
 3. **If the shape moved: re-fit before gating.** `_PRUNE_TAU` (constants audit
    selected −2.5 at 256×32; −3.0 is worse at 22.6σ, −2.0 at 13.3σ) and

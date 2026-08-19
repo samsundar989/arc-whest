@@ -11,6 +11,8 @@
     3. whest validate     - the grader contract
     4. ship-file identity - estimator.py matches its version archive
     5. vault seal         - touch counter still agrees with the log
+    6. seed ledger        - consumption is recorded, and no source file draws
+                            seeds the ledger has never heard of
 
   What this does NOT do, because each costs something real:
     - the public mini run (CONFIRM tier, read-only, minutes)
@@ -28,7 +30,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Archive = "estimator_v2_6.py"
+    [string]$Archive = "estimator_v2_6_1.py"
 )
 
 $ErrorActionPreference = "Stop"
@@ -121,9 +123,20 @@ print('  seal consistent')
     $py | uv run python -
 }
 
+# --- 6. seed ledger ------------------------------------------------------------
+# check_disjoint() (invariant 12) proves no two blocks ALLOCATE the same seeds.
+# It cannot see a probe with a seed hardcoded into it, which is how D16 was drawn
+# 270 seeds dry while seed_blocks.py called it "Reusable" -- and how two probes
+# ended up measuring two "independent" kills on the same 24 networks. This step
+# re-validates the consumption ledger and statically scans the tree for seed
+# literals and seeds() calls that the ledger does not record.
+Step "6. seed ledger (consumption + source scan)" {
+    uv run python local_sim/seed_ledger.py --check --scan
+}
+
 Write-Host ""
 if ($failures.Count -eq 0) {
-    Write-Host "PREFLIGHT GREEN -- 5/5" -ForegroundColor Green
+    Write-Host "PREFLIGHT GREEN -- 6/6" -ForegroundColor Green
     Write-Host ""
     Write-Host "Not covered by this gate, and still required before promotion:" -ForegroundColor Yellow
     Write-Host "  - public mini run (CONFIRM, read-only):  uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v1-phase1 --split mini --runner subprocess"

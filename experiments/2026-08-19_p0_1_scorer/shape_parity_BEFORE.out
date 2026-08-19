@@ -1,0 +1,26 @@
+﻿========================================================================================================
+SHAPE PARITY — v2.6 fallback vs v2.4.1
+========================================================================================================
+  shipped _STRASSEN = True
+
+       shape      path   max rel diff     pred MSE  verdict
+  ------------------------------------------------------------------------------------------------
+        63x4     DENSE     4.6290e-01   1.0962e-01  FAILED  must be BIT-IDENTICAL to v2.4.1
+        65x4     DENSE     4.8885e-01   1.5758e-01  FAILED  must be BIT-IDENTICAL to v2.4.1
+        96x4  strassen     3.6015e-04   1.4381e-07  ok   trim is intentional here
+       127x4     DENSE     4.9499e-01   1.2902e-01  FAILED  must be BIT-IDENTICAL to v2.4.1
+       192x4  strassen     5.3635e-05   1.1287e-09  ok   trim is intentional here
+       255x4     DENSE     5.8129e-01   1.4348e-01  FAILED  must be BIT-IDENTICAL to v2.4.1
+       256x4  strassen     4.7167e-08   1.1281e-15  ok   trim is intentional here
+       257x4     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+        65x2     DENSE     3.1314e-01   8.3403e-02  FAILED  must be BIT-IDENTICAL to v2.4.1
+       65x32     DENSE     5.1691e-01   3.3212e-01  FAILED  must be BIT-IDENTICAL to v2.4.1
+      256x32  strassen     6.8131e-05   9.3281e-09  ok   trim is intentional here
+       256x2  strassen     3.2576e-08   3.4842e-16  ok   trim is intentional here
+        64x1     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+        65x1     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+       256x1     DENSE     0.0000e+00   0.0000e+00  ok   must be BIT-IDENTICAL to v2.4.1
+         2x4  strassen     3.2277e-08   7.5278e-16  ok   trim is intentional here
+         3x4     DENSE     4.4448e-01   4.0940e-02  FAILED  must be BIT-IDENTICAL to v2.4.1
+
+10/17 shapes passed

@@ -169,6 +169,51 @@ Decimal digits are namespaces so a stray seed is readable at a glance.
 `check_disjoint()` is asserted by the invariant suite, so an overlapping block
 fails CI rather than silently producing correlated "independent" evidence.
 
+**But `check_disjoint()` proves only that blocks are ALLOCATED disjointly. It
+cannot see a probe with a seed typed into it — and that is the failure that
+actually happened.** For nine days `seed_blocks.py` said of D16 *"NO SEED WAS
+EVER DRAWN. Reusable."* while five probes had drawn **270 of its 600 seeds**, and
+**two of them had drawn the same 24 networks**: `probe_whitening` and
+`probe_design_carrier`, whose kills (0.9972× and 1.047×) are recorded side by side
+in `docs/CURRENT_STATE.md` under "the governing mechanism, measured three ways
+today". Two of those three ways are one sample. Nothing was invalidated — both are
+DESIGN tier and no gate was decided on either — but they are **correlated
+evidence and must never be quoted as two independent readings**.
+
+### 2a. The consumption ledger — added 2026-08-19 (P0.4)
+
+Allocation is now separated from **consumption**. `local_sim/seed_ledger.py` and
+the append-only `experiments/seed_ledger.jsonl` record who drew which range, when,
+with which artifact and its sha256. Three layers:
+
+| layer | what it stops |
+|---|---|
+| `claim()` / `claim_range()` | the sanctioned way to take seeds. Hard-fails on an unregistered block, a range leaving its block, **any** overlap in a DECISION block, or a second claim on a SINGLE_USE one. DESIGN overlap is permitted and always **reported** |
+| `check_ledger()` | re-validates the whole ledger from scratch, so a hand-edited ledger cannot pass quietly. Catches out-of-block records, tier lies, and artifacts rewritten after their claim |
+| `scan_sources()` | statically scans `local_sim/` and `scripts/` for seed literals **and** for `seed_blocks.seeds()` calls naming a block, with no ledger record. This is the layer that would have caught D16 |
+
+Both run in **`scripts/preflight.ps1` step 6**, so the gate is executable rather
+than prose. A file that names a block in order to *refuse* it — `moonshot_g0.py`
+guards D08/D09/D10 — declares that with a `# seed-ledger: excludes ...` pragma.
+
+Tiers govern strictness: **VAULT**, **SINGLE_USE** (one claim ever), **DECISION**
+(overlap is a hard error), **DESIGN** (overlap permitted, always reported),
+**INFRA**, **LEGACY**. `local_sim/test_seed_ledger.py` drives every refusal and
+asserts it fires: **39/39**.
+
+**Corrected block status, 2026-08-19.** D16 is **DESIGN, part-spent**: 270 seeds
+drawn, 330 free in four gaps. D17 is **LOCKED SINGLE-USE** and verified never
+drawn. **D18** (DESIGN) and **D19** (SINGLE_USE) were allocated 2026-08-19; D18
+has since been drawn on for the interval-coverage study (192 seeds), D19 is held
+for the v2.6 promotion gate so a Phase-2 shape change cannot burn the only clean
+decision block. Ten of the twenty-one backfilled records are **upper bounds**
+taken from CLI defaults where the consumer never wrote its range to disk —
+over-recording consumption is the safe direction.
+
+**Newly required of every experiment:** take seeds with
+`seed_ledger.claim(block, n, consumer, ts=..., artifact=...)` and write the
+returned range into the artifact. Never a literal.
+
 `seed_blocks.SINGLE_USE_BLOCKS` names the blocks that may be consumed by exactly
 one recorded experiment, so the rule is machine-readable instead of a convention
 in a document. The LOG entry that spends such a block is its receipt: if a block

@@ -69,15 +69,27 @@ DECISION_BLOCKS = [
                                  "calibrated-K2 control (MOONSHOT.md). Infrastructure only -- "
                                  "no gate is decided here, and D08/D09 stay untouched so G1/G2 "
                                  "still have unseen data."),
-    ("D16", 30_806_016_000, 600, "ALLOCATED 2026-08-10 for the layer-local control-variate DESIGN "
-                                 "phase, then RELEASED UNSPENT the same day: the lane was killed "
-                                 "before measurement (the recursion telescopes to a linear map of "
-                                 "the layer-1 sample-mean error, i.e. the control variate whose "
-                                 "1.80x standalone / ~1.00x-on-Sobol ceiling cv_lab measured on "
-                                 "2026-08-05). NO SEED WAS EVER DRAWN. Reusable."),
-    ("D17", 30_806_017_000, 600, "ALLOCATED 2026-08-10 as the matching single-use DECISION block, "
-                                 "then RELEASED UNSPENT the same day for the same reason. "
-                                 "NO SEED WAS EVER DRAWN. Reusable; see SINGLE_USE_BLOCKS."),
+    ("D16", 30_806_016_000, 600, "DESIGN block. Allocated 2026-08-10 for the layer-local "
+                                 "control-variate design phase and wrongly recorded as released "
+                                 "unspent. CORRECTED 2026-08-19: it is SPENT in part -- 270 of "
+                                 "600 seeds drawn by five probes, and two of them "
+                                 "(probe_whitening, probe_design_carrier) drew the SAME 24 "
+                                 "networks, so those two kills are correlated evidence and must "
+                                 "never be quoted as independent. Exact ranges, consumers and "
+                                 "artifact hashes: experiments/seed_ledger.jsonl. 330 seeds "
+                                 "remain free; use seed_ledger.claim() to take them."),
+    ("D17", 30_806_017_000, 600, "DECISION block, LOCKED SINGLE-USE 2026-08-19. Allocated "
+                                 "2026-08-10 and never drawn -- verified by static scan of the "
+                                 "whole tree (seed_ledger.scan_sources) and by the empty ledger. "
+                                 "Reserved for the next single-shot gate; see SINGLE_USE_BLOCKS."),
+    ("D18", 30_806_018_000, 600, "DESIGN block, allocated 2026-08-19 for the interval-coverage "
+                                 "study of the paired arithmetic promotion statistic (Skeptic "
+                                 "finding D5 on the P0.1 slice). Tuning permitted; no gate is "
+                                 "decided here."),
+    ("D19", 30_806_019_000, 600, "DECISION block, LOCKED SINGLE-USE, allocated 2026-08-19 and "
+                                 "unspent. Held for the v2.6 promotion gate once the Phase-2 "
+                                 "shape is known -- kept distinct from D17 so a shape change "
+                                 "does not burn the only clean decision block."),
 ]
 
 # --- single-use blocks -------------------------------------------------------
@@ -86,11 +98,16 @@ DECISION_BLOCKS = [
 # LOG.md entry that spends it is the receipt.
 SINGLE_USE_BLOCKS = {
     "D12": "Sprint 4 / S1 paired decision (GAME_PLAN rev 9) — SPENT 2026-08-06",
-    "D14": "Sprint 5 / packed-carrier paired decision (GAME_PLAN rev 11)",
-    # D17 was registered here on 2026-08-10 and released the same day without a seed
-    # ever being drawn (lane killed pre-measurement). It is deliberately NOT listed as
-    # single-use: an unspent block is clean, and pretending otherwise wastes 600 seeds.
+    "D14": "Sprint 5 / packed-carrier paired decision (GAME_PLAN rev 11) — SPENT 2026-08-06",
+    "D17": "reserved single-shot gate — allocated 2026-08-10, never drawn, LOCKED 2026-08-19",
+    "D19": "v2.6 promotion gate once the Phase-2 shape is known — allocated 2026-08-19, unspent",
 }
+
+# Consumption — as opposed to allocation — is recorded in `seed_ledger.py` and
+# `experiments/seed_ledger.jsonl`. `check_disjoint()` below proves that no two
+# blocks ALLOCATE the same seeds; it cannot see a probe with a seed hardcoded
+# into it, which is exactly how D16 was drawn dry while this file called it
+# reusable. Take seeds with `seed_ledger.claim()`, never by writing a literal.
 
 
 def _all():

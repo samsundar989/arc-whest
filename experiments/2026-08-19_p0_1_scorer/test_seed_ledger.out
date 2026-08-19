@@ -1,0 +1,72 @@
+﻿========================================================================================================
+SEED LEDGER — does the enforcement bite?
+========================================================================================================
+
+1. a SINGLE_USE block may be claimed exactly once, ever
+-------------------------------------------------------
+  first claim on D17 succeeds                                    ok   
+  a SECOND claim on D17 is refused even on disjoint seeds        ok   
+  an explicit non-overlapping range is refused too               ok   
+  the refused claims wrote nothing                               ok   
+  D17 and D19 are registered single-use                          ok   
+
+2. a DESIGN block permits overlap — and always reports it
+---------------------------------------------------------
+  the overlapping DESIGN claim is allowed                        ok   
+  and it is reported as a collision                              ok   
+  check_ledger does NOT error on a DESIGN overlap                ok   
+  distinct-seed accounting counts the shared range once          ok   24 distinct from 48 claimed
+
+3. ranges that leave their block, and blocks that do not exist
+--------------------------------------------------------------
+  a range running past the end of the block is refused           ok   
+  a range starting before the block is refused                   ok   
+  an unregistered block is refused                               ok   
+  n <= 0 is refused                                              ok   
+  nothing was written                                            ok   
+
+4. free-range accounting, and running a block dry
+-------------------------------------------------
+  free ranges are the gaps, exactly                              ok   [(30806018100, 30806018199), (30806018300, 30806018599)]
+  claim() takes the FIRST gap that fits                          ok   
+  a request larger than any gap is refused                       ok   
+
+5. a hand-edited ledger does not pass quietly
+---------------------------------------------
+  an out-of-block hand-written record is caught                  ok   1 error(s)
+  a record claiming the wrong tier is caught                     ok   
+  a malformed line raises rather than being skipped              ok   
+
+6. a DECISION-tier overlap is a hard error, not a note
+------------------------------------------------------
+  claimed twice is caught                                        ok   
+  the seed overlap is ALSO caught as a hard collision            ok   2 error(s)
+
+7. an artifact that changes after the claim is caught
+-----------------------------------------------------
+  the claim recorded a hash                                      ok   
+  unchanged artifact passes                                      ok   
+  a rewritten artifact is caught                                 ok   
+
+8. the source scan catches the failure that actually happened
+-------------------------------------------------------------
+  a hardcoded seed inside a registered block is flagged          ok   1 finding(s)
+  a seeds() call with no literal is ALSO flagged                 ok   the blind spot that hid D12/D14/D15
+  an explicit 'excludes' pragma suppresses it (naming a block to refuse it) ok   
+  the temporary probe is gone                                    ok   
+
+9. the REAL ledger — read-only assertions (predictions A1, A2, A6)
+------------------------------------------------------------------
+  the committed ledger is consistent                             ok   0 error(s)
+  allocations are still disjoint (invariant 12)                  ok   
+  A1: exactly ONE accidental collision in the whole record       ok   D16 local_sim/probe_whitening.py vs local_sim/probe_design_carrier.py
+  A1: and it is probe_whitening vs probe_design_carrier on D16   ok   
+  A2: D17 has zero consumption                                   ok   
+  A2: D19 (the reserved single-use gate block) has zero consumption ok   
+  D18 shows exactly one claim, 192 seeds, by coverage_lab        ok   192 consumed by ['local_sim/coverage_lab.py']
+  A6: D16 shows 270 distinct seeds consumed, 330 free            ok   270 consumed, 330 free in 4 gaps
+  A6: the four free gaps are exactly the ones predicted          ok   
+  A3: the tree has no unrecorded seed use                        ok   
+  no test wrote to the real ledger                               ok   
+
+40/40 checks passed

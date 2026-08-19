@@ -1,0 +1,37 @@
+﻿SACRIFICIAL RUN on experiments/2026-08-19_coverage/truth_D18.npz — 192 NON-VAULT networks.
+Nothing is recorded and no touch is taken.
+
+VAULT EVALUATION — sacrificial   (60 MLPs, reason=seal)
+  candidate  estimator_v2_4_1.py
+  sha256     8565c3501555d27234f034a3fa6abe106fdf55ab3c3cc6b86cf65264a87d9f9e
+  budget     272,000,000,000
+
+uv : C:\Users\samsu\Documents\arc-whest\estimator_v2_4_1.py:591: SymmetryLossWarning: Symmetry lost along dims (0, 1): 
+multiply — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is 
+symmetric. Suppress with flops.configure(symmetry_warnings=False).
+At line:1 char:333
++ ... NG='utf-8'; uv run python local_sim/vault.py sacrificial --truth expe ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\samsu\...arnings=False).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)
+C:\Users\samsu\Documents\arc-whest\estimator_v2_4_1.py:591: SymmetryLossWarning: Symmetry lost along dims (0, 1): add 
+— no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. 
+Suppress with flops.configure(symmetry_warnings=False).
+  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)
+  50/60  88s  eta 18s
+
+========================================================================================
+VAULT RESULT — sacrificial
+========================================================================================
+  PRIMARY (accuracy, what this instrument can measure)
+    raw MSE   mean 1.6175e-06   median 1.1259e-06
+    GT noise  1.201e-08 = 0.74% of measured MSE  <- any claim smaller than this is noise
+  SECONDARY (score, MODEL-DEPENDENT: counted FLOPs only; residual EXCLUDED (local residual is E1))
+    adjusted  median 2.1435e-07   mean 3.1676e-07   p90 6.3499e-07
+              p99    1.2913e-06   max  1.2913e-06   max/med 6.02x
+    C/B mean  0.1963   counted 5.3405e+10   non-finite 0
+    local residual 87.47 ms/MLP — EXCLUDED from C above and shown only so the exclusion is visible
+
+  SACRIFICIAL: nothing recorded, no touch taken, seal untouched.

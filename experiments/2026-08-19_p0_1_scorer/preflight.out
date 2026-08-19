@@ -1,0 +1,194 @@
+﻿preflight -- arc-whest
+repo:    C:\Users\samsu\Documents\arc-whest
+shipped: estimator.py   archive: estimator_v2_6_1.py
+
+=== 1. mint provenance ===
+========================================================================================
+MINT PROVENANCE PROOF — canonical_mint  vs  whestbench.sample_mlp
+========================================================================================
+whestbench   : c:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\whestbench\generation.py
+SeedSequence : fnp.random.SeedSequence is np.random.SeedSequence = True
+
+     shape  seeds   weights bit-identical   MLP.seed identical  legacy identical
+----------------------------------------------------------------------------------------
+256x32         20                   20/20                20/20              0/20
+256x8          20                   20/20                20/20              0/20
+128x16         20                   20/20                20/20              0/20
+64x4          20                   20/20                20/20              0/20
+256x2          20                   20/20                20/20              0/20
+----------------------------------------------------------------------------------------
+canonical_mint is bit-identical to whestbench.sample_mlp : True
+legacy harness.gen_mlp ever matched                      : False
+legacy max relative elementwise divergence               : 1.868
+
+DISTRIBUTIONAL CHECK (12 x 256x8 nets, He target std = 0.088388)
+  canonical  mean +2.762e-05   std 0.08841742   std/target 1.000329
+  legacy     mean +9.335e-06   std 0.08839059   std/target 1.000025
+  -> same distribution, different realisation. Past *statistical* results
+     stand; per-seed reproducibility against the grader did not exist.
+
+SEED SEMANTICS
+  input_seed        123456789
+  estimator seed    3367517259   <- what MLP.seed holds on the grader
+  legacy MLP.seed   123456789   <- what our mints used (== the weight seed)
+  The evaluator's estimator seed is an INDEPENDENT substream of the weight
+  seed. Our mints coupled them, so any estimator that derives randomness
+  from mlp.seed (v2.4.1 derives its digital shift from it) had a spurious
+  functional dependence between its point set and the weights it scored.
+
+VERDICT: PROVEN — canonical_mint == whestbench.sample_mlp
+  PASS  1. mint provenance
+
+=== 2. invariant suite (30/30) ===
+shipped estimator: tau=-2.5  target C/B=0.3  chunk=16384
+
+1. NORMAL CASE
+  he 256x32                          ok   shape (32, 256)  range [0.000e+00, 5.171e+00]  final mean 0.6462  deterministic=True
+
+2. DEGENERATE PRUNING (whole layers pushed below tau)
+  layer 5 scaled 0.02                ok   shape (32, 256)  range [0.000e+00, 4.003e+00]  final mean 0.0133  deterministic=True
+  layer 5 scaled 0.001               ok   shape (32, 256)  range [0.000e+00, 4.003e+00]  final mean 0.0007  deterministic=True
+  layer 7 identically zero           ok   shape (32, 256)  range [0.000e+00, 4.352e+00]  final mean 0.0000  deterministic=True
+
+3. EXTREME DYNAMIC RANGE
+  layer 12 scaled 100x               ok   shape (32, 256)  range [0.000e+00, 5.158e+02]  final mean 67.7158  deterministic=True
+  layer 12 scaled 1e-3               ok   shape (32, 256)  range [0.000e+00, 4.554e+00]  final mean 0.0007  deterministic=True
+  layer 12 scaled 1e4                ok   shape (32, 256)  range [0.000e+00, 5.158e+04]  final mean 6771.5833  deterministic=True
+  layer 3 mean-shifted (all on)      ok   shape (32, 256)  range [0.000e+00, 1.577e+02]  final mean 15.9039  deterministic=True
+
+4. SEED EXTREMES (the rng contract)
+  seed 0                             ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5729  deterministic=True
+  seed 1                             ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5720  deterministic=True
+  seed 2147483647                    ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5720  deterministic=True
+  seed 9223372036854775807           ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5728  deterministic=True
+  seed 12345678901234567890          ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5717  deterministic=True
+
+5. SHAPE GENERALITY (calibration must disable itself off-width)
+  depth 2 x width 256                ok   shape (2, 256)  range [7.214e-03, 1.983e+00]  final mean 0.5480  deterministic=True
+  depth 8 x width 128                ok   shape (8, 128)  range [0.000e+00, 2.760e+00]  final mean 0.3155  deterministic=True
+  depth 32 x width 64                ok   shape (32, 64)  range [0.000e+00, 4.656e+00]  final mean 0.1559  deterministic=True
+  depth 4 x width 256                ok   shape (4, 256)  range [1.154e-05, 2.968e+00]  final mean 0.5810  deterministic=True
+  depth 64 x width 256               ok   shape (64, 256)  range [0.000e+00, 4.687e+00]  final mean 0.5158  deterministic=True
+
+6. BUDGET EDGES (the analytic fallback path)
+  budget 0                           ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 1                           ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 1e7 (below min N)           ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 1e9                         ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 10x                         ok   shape (32, 256)  range [0.000e+00, 4.670e+00]  final mean 0.4044  deterministic=True
+
+7. GRADER-ARRAY IMMUTABILITY (weights must be untouched)
+  input weights unmodified           ok
+
+8. LAYER-1 CLOSED FORM  (exact: ||W1[:,j]|| / sqrt(2*pi))
+  256x32                             max rel err 1.773e-16   ok
+  128x8                              max rel err 1.644e-16   ok
+  64x4                               max rel err 1.631e-16   ok
+  256x2                              max rel err 1.724e-16   ok
+
+9. PERMUTATION EQUIVARIANCE  (hidden-layer relabelling)
+  256x32 permute layer 7             row-k 2.22e-15  other-rows 7.75e-08  final 7.75e-08
+                                     implied MSE 4.04e-16 = 0.0000% of decision signal   ok
+  256x32 permute layer 20            row-k 1.78e-15  other-rows 1.93e-07  final 1.93e-07
+                                     implied MSE 1.38e-15 = 0.0000% of decision signal   ok
+  128x8 permute layer 3              row-k 8.88e-16  other-rows 1.06e-07  final 1.06e-07
+                                     implied MSE 5.57e-16 = 0.0000% of decision signal   ok
+  256x32 permute layer 30            row-k 1.33e-15  other-rows 1.59e-07  final 1.59e-07
+                                     implied MSE 9.61e-16 = 0.0000% of decision signal   ok
+
+10. BUDGET MONOTONICITY  (the failsafe ladder)
+  budget                0  analytic   valid=True  non-decreasing=True
+  budget                1  analytic   valid=True  non-decreasing=True
+  budget        1,000,000  analytic   valid=True  non-decreasing=True
+  budget       10,000,000  analytic   valid=True  non-decreasing=True
+  budget      100,000,000  analytic   valid=True  non-decreasing=True
+  budget    1,000,000,000  analytic   valid=True  non-decreasing=True
+  budget   10,000,000,000  N=2^9      valid=True  non-decreasing=True
+  budget   27,200,000,000  N=2^11     valid=True  non-decreasing=True
+  budget  272,000,000,000  N=2^14     valid=True  non-decreasing=True
+  budget 2,720,000,000,000  N=2^17     valid=True  non-decreasing=True
+  ladder monotone and total          ok
+
+11. DETERMINISM  (3x bit-identity + fresh instance)
+  256x32                             3x identical=True  fresh-instance identical=True  ok
+  128x8                              3x identical=True  fresh-instance identical=True  ok
+
+12. SEED-BLOCK HYGIENE
+  live blocks disjoint               ok   (19 decision blocks + vault block 20,260,806,000..20,260,806,499)
+
+13. GT-NOISE FLOOR  (what counts as signal)
+  vault GT samples/MLP               33,554,432
+  vault GT-noise MSE (mean)          1.575e-09  (0.113% of the 1.4e-6 decision signal)
+  vault touches                      1
+  noise < 10% of signal              ok
+
+30/30 checks passed
+  PASS  2. invariant suite (30/30)
+
+=== 3. whest validate ===
+Validating estimator estimator.py
+uv : C:\Users\samsu\Documents\arc-whest\estimator.py:772: SymmetryLossWarning: Symmetry lost along dims (0, 1): 
+multiply — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is 
+symmetric. Suppress with flops.configure(symmetry_warnings=False).
+At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:77 char:28
++ ... 3. whest validate" { uv run whest validate --estimator estimator.py }
++                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\samsu\...arnings=False).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)
+C:\Users\samsu\Documents\arc-whest\estimator.py:772: SymmetryLossWarning: Symmetry lost along dims (0, 1): add — no 
+symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress 
+with flops.configure(symmetry_warnings=False).
+  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)
+┌──────────────────────────────── Validation ─────────────────────────────────┐
+│ Command: validate                                                           │
+│ Status: success                                                             │
+│ ┌──────────────────────────────── Checks ─────────────────────────────────┐ │
+│ │ ┌────────┬──────────────────────────┬────────────┐                      │ │
+│ │ │ Status │ Check                    │ Detail     │                      │ │
+│ │ ├────────┼──────────────────────────┼────────────┤                      │ │
+│ │ │ OK     │ class resolved           │ Estimator  │                      │ │
+│ │ │ OK     │ setup(context) completed │ ok         │                      │ │
+│ │ │ OK     │ predict() returned shape │ (2, 4)     │                      │ │
+│ │ │ OK     │ values finite            │ all finite │                      │ │
+│ │ └────────┴──────────────────────────┴────────────┘                      │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────┘
+✓ Validation passed in 84ms
+Next: `whest run --estimator estimator.py --split mini`
+  PASS  3. whest validate
+
+=== 4. ship-file identity vs estimator_v2_6_1.py ===
+  estimator.py  sha256(lf) = 1caa3752be56e8625ddb8b163ff8ffa8
+  estimator_v2_6_1.py sha256(lf) = 1caa3752be56e8625ddb8b163ff8ffa8
+  identical
+  PASS  4. ship-file identity vs estimator_v2_6_1.py
+
+=== 5. vault seal (counter vs log) ===
+  manifest touches = 1  log entries = 1
+  seal consistent
+  PASS  5. vault seal (counter vs log)
+
+=== 6. seed ledger (consumption + source scan) ===
+seed ledger — consistency
+  ledger records                     22
+  hard collisions (DECISION/VAULT)   0
+  permitted overlaps (DESIGN)        2
+    - D16[30,806,016,200..30,806,016,223]  local_sim/probe_whitening.py  vs  local_sim/probe_design_carrier.py   <- CORRELATED EVIDENCE, never quote as two independent results
+    - D11[30,806,011,000..30,806,011,499]  local_sim/packed_sparse_probe.py  vs  local_sim/packed_truth.py   <- SAME NETWORKS BY DESIGN (one experiment, two roles)
+  CONSISTENT
+
+seed ledger — static source scan
+  no unrecorded seed literals
+  PASS  6. seed ledger (consumption + source scan)
+
+PREFLIGHT GREEN -- 6/6
+
+Not covered by this gate, and still required before promotion:
+  - public mini run (CONFIRM, read-only):  uv run whest run --estimator estimator.py --dataset 
+hf://aicrowd/arc-whestbench-public-2026@v1-phase1 --split mini --runner subprocess
+  - GPU mirror parity:                     .venv-gpu\Scripts\python.exe local_sim/gpu_parity.py
+  - vault touch (ONE per estimator change): .venv-gpu\Scripts\python.exe local_sim/vault.py evaluate --label <v> 
+--reason estimator-change
+  - Samuel's explicit approval before any submission.

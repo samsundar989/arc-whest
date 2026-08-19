@@ -30,7 +30,7 @@ Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
 
 | path | what |
 |---|---|
-| `estimator.py` | **THE submission.** Self-contained; `whest submit` ships only this file. Currently v2.4.1, byte-identical to `estimator_v2_4_1.py` modulo line endings. |
+| `estimator.py` | **THE submission.** Self-contained; `whest submit` ships only this file. Currently **v2.6.1**, byte-identical to `estimator_v2_6_1.py` modulo line endings (`preflight` step 4 asserts it). The **graded** file is still v2.4.1 — v2.6.x is built and deliberately un-gated. |
 | `estimator_v*.py` | frozen version archive — never edited, only read |
 | `local_sim/` | the offline lab: numpy shims for `flopscope`/`whestbench`, grader-identical mint (`mint_provenance.py`), invariants (`edge_cases.py`), seed registry (`seed_blocks.py`), sealed holdout (`vault.py`), probes |
 | `experiments/` | `LOG.md` (append every experiment), run reports, vault seal, JSON artifacts |

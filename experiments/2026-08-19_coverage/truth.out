@@ -1,0 +1,17 @@
+﻿claimed D18[30,806,018,000..30,806,018,191]  192 networks
+GT 4,194,304 samples/MLP   device cuda
+
+    16/192     15.2s  eta   167.5s  gt-noise 1.074e-08
+    32/192     30.3s  eta   151.7s  gt-noise 1.206e-08
+    48/192     45.3s  eta   135.9s  gt-noise 1.210e-08
+    64/192     60.3s  eta   120.5s  gt-noise 1.199e-08
+    80/192     75.1s  eta   105.2s  gt-noise 1.180e-08
+    96/192     89.9s  eta    89.9s  gt-noise 1.161e-08
+   112/192    104.7s  eta    74.8s  gt-noise 1.180e-08
+   128/192    118.5s  eta    59.2s  gt-noise 1.172e-08
+   144/192    132.6s  eta    44.2s  gt-noise 1.185e-08
+   160/192    146.8s  eta    29.4s  gt-noise 1.164e-08
+   176/192    160.9s  eta    14.6s  gt-noise 1.145e-08
+   192/192    175.4s  eta     0.0s  gt-noise 1.142e-08
+
+sigma_gt^2 = 1.1418e-08   saved C:\Users\samsu\Documents\arc-whest\experiments\2026-08-19_coverage\truth_D18.npz

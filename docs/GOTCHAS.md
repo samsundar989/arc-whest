@@ -15,6 +15,66 @@ narrative record), `docs/GAME_PLAN.md` (strategy, rev 12 is authoritative).
 
 ---
 
+## STAGE 0, 2026-08-19 (night) — seven things that must not be rediscovered
+
+*Five slices repaired the instrument. Full record and contracts:
+`experiments/LOG.md` 2026-08-19 (night). Every item below is measured.*
+
+- **Layer-0 alphas are EXACTLY 0.0, for every neuron, on every network.** The
+  input is `x ~ N(0, I)`, so the layer-1 pre-activation mean is zero and
+  `alpha = mu/sigma = 0`. Verified as a single float64 bit pattern across 27
+  (width, seed) combinations, widths 63–257. **Never compare alphas with a strict
+  `>` against their own minimum**: `a > alpha[alive].min()` keeps *nothing* at
+  layer 0. v2.6 did exactly that and deleted the entire first layer's sampled path
+  on every odd-width network — 0.58 max relative error, 0.33 prediction MSE. The
+  design probe it was translated from (`probe_strassen_carrier.py:113`) used
+  `argsort`, which is tie-safe; the bug was introduced turning that into a
+  threshold.
+
+- **The competition objective is the ARITHMETIC MEAN of per-MLP scores over the
+  FIFTY public MLPs** — not all 100 scored, and not a geometric mean. It is now
+  reproducible offline **bitwise** from the durable graded reports:
+  `2.719427529595e-07` (324420) and `2.631432177242e-07` (327743), exactly, from
+  `mse_i` and `C_i` alone. `local_sim/competition_score.py` is the one place that
+  arithmetic lives.
+
+- **A failed MLP is scored at multiplier 1.0, not at the 0.1 floor** — exactly
+  `1/mult_i`, which is 4.59–5.41x across the real graded suite — *and* against
+  zeroed predictions. The exception path records `C = 0`; the exhaustion paths
+  record the real `C` and still force the multiplier to 1.0.
+
+- **The arithmetic and geometric estimands select OPPOSITE winners on our own
+  graded data.** v2.4 -> v2.4.1, same 50 rows: arithmetic **1.0334x** (v2.4.1
+  better), geometric **0.9666x** (v2.4 better), 22/50 wins. Neither is
+  mis-computed; they answer different questions, and the competition asks the
+  arithmetic one. *(`docs/GOTCHAS.md`'s own "ratio of means 1.0319" below is the
+  raw-MSE frame and is CORRECT as written — 1.0334 is the adjusted-score frame.
+  Do not "fix" one into the other; that is the frame-mixing `VALIDATION.md` §2b
+  exists to prevent.)*
+
+- **Common random numbers change the SHAPE of the estimand, not just its
+  variance.** Each arm's per-MLP score is strongly right-skewed (worst/mean 3.59,
+  top-1 tail share 7.2%), but the CRN *paired difference* is nearly symmetric —
+  measured skew **+0.21, -0.55, -0.46** on 192 fresh networks. Do not transfer
+  "this metric has a heavy tail" from the score to the difference.
+
+- **Use the studentised t interval or the basic bootstrap. Do NOT gate on the
+  percentile bootstrap or on BCa at n ~ 50.** Measured false-promotion rate
+  against a true zero, nominal 5%: t **4.1–5.4%**, basic **4.0–5.2%**, percentile
+  6.8–8.2%, **BCa 9.1–11.5% — roughly double**. This inverts the textbook
+  ordering, for the reason above: BCa corrects a skew that CRN already removed.
+  BCa only becomes the best method past skew ~6, which no real arm reaches.
+
+- **Allocating a seed block is not consuming it, and only allocation was ever
+  checked.** `check_disjoint()` cannot see `SEED0 = 30_806_016_200` typed into a
+  probe. D16 was called "Reusable" for nine days while five probes had drawn 270
+  of its seeds — and **`probe_whitening` and `probe_design_carrier` drew the SAME
+  24 networks**, so those two "independent" carrier kills are one sample. Take
+  seeds with `seed_ledger.claim(...)`, never a literal, and write the returned
+  range into the artifact.
+
+---
+
 ## GRADED v2.4.1 (2026-08-10, submission 327743) — how a number is read
 
 *Written 2026-08-10, then **corrected the same day after independent falsification**.

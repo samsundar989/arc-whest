@@ -20,66 +20,66 @@ explanation, not a failure.*
 difference between the number on the leaderboard and the number that decides the
 prize?*
 
->
+> We are trying to optimize the error rate of our prediction algorithm of the neural net given the weights. The leaderboard number is misleading as some times have optimized to the neural net weights iteratively, but will fail on the fresh set of nets the final submissions are graded on. 
 
 ## The system from memory
 
 *Sketch the path from `mlp.weights` to a score. Roughly five boxes. Do not look.*
 
->
+> I don't know 
 
 ## Current bottleneck
 
 *What do I believe most limits progress right now?*
 
->
+> Understanding the mathematics/best frontier architecture for approaching this problem. 
 
 ## Why
 
 *What evidence makes me believe that? Which measurement, on which tier of data?*
 
->
+> Without optimizing specific to the public neural nets, our position on leaderboard is top 100, the best model should be able to predict close/past the reasonable mathematical limit which I don't believe we've hit. 
 
 ## Current strongest hypothesis
 
 *What do I think would unlock the next real gain — on the score lane or the
 contribution lane?*
 
->
+> Evaluating our current architecture and finding a way to improve our estimation without consuming more compute, so the score lane. 
 
 ## Dangerous assumptions
 
 *Three things that, if false, would invalidate work we've already banked.*
 
-1.
-2.
-3.
+1. We already have the best architecture to solve this problem. 
+2. We fully understand the mathematics and the physical limitation of this problem. 
+3. We can beat the over-trained/fitted submissions on the leaderboard with the best possible model (not over trained). 
 
 ## Things I do not understand yet
 
 *Name them plainly. Each one becomes a 3-minute teach-back, not a lecture.*
 
-1.
-2.
-3.
+1. How our system actually works
+2. What the best teams/frontier is doing
+3. The mathematics and what the physical limit of this problem is. 
 
 ## Current failure model
 
 *What are the most likely ways this entry fails on the private re-run? Rank them.*
 
->
+> By over training/over fitting to the public neural nets the leaderboard is set against. 
 
 ## Next experiment
 
 *I expect ______ because ______.*
 
->
+> I expect a higher position on the leaderboard because we improve our system to more accurately predict the behavior of the neural nets without consuming more compute. 
 
 ## Confidence
 
 *What am I confident about vs uncertain about?*
 
->
+> That we are on the right track, as we are currently in the top 100, but I'm not sure we know how to improve from here without over-fitting. 
 
 ---
 
