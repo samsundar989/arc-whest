@@ -14,7 +14,7 @@ changes — not on every experiment. The narrative record is `experiments/LOG.md
 | Round 1429 "Phase 2" | opens **2026-08-18 00:00 UTC**, closes **2026-09-19 23:59 UTC** | UPCOMING, empty board, no `v1-phase2` HF tag. **Opening moved Aug 8 → Aug 18** (observed 2026-08-10): there is now a 7-day gap after Phase 1, not a same-day handover |
 | Write-up due | **2026-08-17** (forum 18109) | the contribution-prize deliverable |
 | Registration / team freeze | 2026-09-05 | |
-| Results | 2026-10-01 | private re-run of ONE designated submission on fresh MLPs |
+| Results | 2026-10-01 | private re-run of UP TO TWO designated submissions on fresh MLPs (forum 18143; Rules tab still says one — unresolved) |
 
 **Phase-2 opening is event-triggered, never date-triggered.** Poll with
 `uv run python local_sim/phase2_checklist.py`. The runbook is at the tail of
@@ -61,6 +61,32 @@ frontier ~2.7e-7 · GT noise floor of the metric ~2e-10. Full table: `docs/BENCH
 
 ---
 
+## Shipped file — v2.6 BUILT, NOT PROMOTED (2026-08-19)
+
+`estimator.py` is **v2.6** (Strassen-Winograd carrier), archive
+`estimator_v2_6.py`, preflight **GREEN 5/5**, invariants **30/30**, vault
+touches still **1**. **It has not been gated, not been submitted, and no
+decision block has been spent.**
+
+The graded number of record is still **v2.4.1 = 2.6314e-7** (submission 327743).
+
+**Why it is held.** The deciding quantity is the grader's residual price per
+operation, which this document classifies **E1 — directional only**, and the
+same byte-identical paired comparison reads:
+
+| | cost ratio | net V.c |
+|---|---|---|
+| grader per-op price 7.0 us/op | 1.0990x | **1.0926x** |
+| transfer the local residual ratio (conservative, quote this one) | 1.0740x | **1.0677x** |
+| **this machine, as measured** | 0.9577x | **0.9522x** |
+
+The sign flips between the local harness and the grader, because local residual
+runs **4.37x** the grader's (42.99 ms/MLP vs 9.845) while the op count transfers
+exactly (1,417 local vs 1,416 graded). Break-even is 55.5 us/op; the grader is
+at 7.0, this machine at 30-51. **Only a graded run can decide it.** MSE is
+settled and costs 0.51% (paired 0.9942x [0.9870, 1.0013]), all of it the
+even-width trim — Strassen itself contributes nothing (LOG 2026-08-19).
+
 ## Closed lanes — do not reopen without new *external* evidence
 
 Each was killed by a measurement, not by a preference. The reopening condition, if
@@ -86,6 +112,33 @@ The lane arbitrages the price table against physics, and loses.
 
 ---
 
+### Added 2026-08-19 — the carrier audit (LOG 2026-08-19)
+
+| lane | verdict | number | note |
+|---|---|---|---|
+| **Point-set whitening (full 256x256 ZCA)** | **DEAD on our carrier** | **0.9972x, CI [0.986, 1.009]** | 24 MLPs x 24 shifts, paired, GT 2^23. Worth **1.23x on iid** — the device works, our Sobol already collects it. The competitor "2.46x" is a rung against an iid+antithetic baseline; that author's own ablation reads 0.97x / 0.994x in both orders and the census records 1.05x |
+| **Diagonal moment standardisation** | **DEAD, and it was always a no-op** | **1.0000x, CI [0.999, 1.001]** | Our shipped Sobol's diagonal second moment is already **107x better than iid**; its off-diagonal is only 5.9x better. The 2026-08-05 kill and the radial-imbalance predictor both probed the already-exact half |
+| **ReLU-homogeneity sphere projection** | **DEAD on our carrier** | 1.0010x, CI [0.998, 1.004] | Exact and free, but Sobol already balances the radius. Worth +4% *inside* a design carrier |
+| **Tent / baker fold** | **DEAD alone** | 0.9810x, CI [0.928, 1.037] | Only `tent+white` clears, at **1.0931x [1.044, 1.148]** — the one surviving input-space combination |
+| **Degree-3 structured design carrier** | **DEAD against the shipped stack** | **1.047x, CI [0.979, 1.120]** | Bare it is 1.182x [1.092, 1.290]; the rank-32 rotation collects it. **Does NOT close a true degree-4/5 design** (strength-4 OA / Kuperberg cubature), whose external ceiling is ~1.46x |
+| ~~Strassen-Winograd~~ | **REOPENED** | **1.267x counted (depth 2), MSE-exact; ~1.10-1.16x net after residual** | Measured on the real flopscope 0.10.0. Our 2026-08-06 negative was on the *packed* v2.5 carrier (tiny irregular blocks). Now the largest bankable lever in the project |
+
+**The governing mechanism, measured three ways today: SUBSTITUTION.** Whitening
+vs Sobol, design vs rotation, and (previously) CV vs QMC. Two devices that
+annihilate the same low-order structure do not compose — whichever is added first
+takes the credit. **Read every competitor ladder for what its baseline arm
+contains, never for its largest rung.**
+
+**New standing number: 7.0 us/op = 695,268 FLOP-equivalents per grader operation**
+(from 327743: 1,416 ops, 9.845 ms). Price any counted-FLOPs-for-op-count trade
+before building it.
+
+**Correction owed to a durable doc.** `docs/writeup-draft.md` and
+`docs/RESEARCH_NOTES.md` attribute the 2.35x moment-standardisation regression to
+"a first-order bias". Moment matching's bias is **O(1/N)** (Glasserman 4.5.1
+p.245) and diagonal forcing measures at exactly 1.000x here and in forum 18151.
+The number may be real; the mechanism is not. **Do not ship it.**
+
 ## Open questions, ranked
 
 1. **THE ACCURACY GAP — reopened 2026-08-10 on new external evidence, and it is much
@@ -102,18 +155,31 @@ The lane arbitrages the price table against physics, and loses.
    MSE alone cannot distinguish better variance reduction from a better analytic
    core. **Strategist Packet issued 2026-08-10.** Full analysis: `experiments/LOG.md`.
 
-   **It is a VARIANCE gap, not a bias gap — corrected 2026-08-11.** An earlier note
-   here inferred "probably mostly bias → attack the closure/calibration core" from
-   forum 18085's "≥58% of residual is bias". That figure describes *radiant-
-   allomancer's own* estimator (4.47e-7), not ours (1.3323e-6), and **our own data
-   contradicts it**: `MSE×N` = 0.03657 / 0.04036 / 0.03666 at N = 16,384 / 32,768 /
-   65,536 (24 MLPs × 8 shifts, α = 1.00). Solving `MSE(N) = V/N + B²` gives
-   **B² ≈ 1.8e-9 ≈ 0.08% of MSE — the residual is ~99.9% variance.** So J2W's 4.8×
-   lower MSE at our compute is 4.8× lower *variance per sample*, and the next
-   Strategist Packet must target **variance mechanisms**, not calibration.
-   *Caveat: that MSE×N reading is from local mints at one configuration. Confirming
-   it on fresh canonical mints (200 MLPs × 8 shifts, N ∈ {16k, 65k}, block D16) is
-   the #1 next action — it decides where the whole next phase of work aims.*
+   **It is a VARIANCE gap, not a bias gap — MEASURED 2026-08-14 at DECIDE tier,
+   question closed.** Block D16, 200 fresh canonical mints × 8 shifts, paired CRN,
+   GT 2²⁴ samples/MLP, label noise **computed and subtracted**:
+
+   | | |
+   |---|---|
+   | α (MSE ∝ N^−α) | **0.9928**, 95% CI [0.9586, 1.0274] |
+   | σ_gt² (label noise) | 3.0925e-9 |
+   | B² **after** subtracting it | **2.3727e-9**, 95% CI **[−2.46e-8, 2.84e-8]** — includes 0 |
+   | **B² as share of MSE** | **0.574% → the residual is 99.4% VARIANCE** |
+
+   **57% of the previously inferred "bias floor" was the noise in its own ground-truth
+   labels** — σ_gt² and B² are perfectly confounded in an MSE-versus-N fit
+   (`E[(pred−truth−η)²] = E[(pred−truth)²] + σ_gt²`), so any such fit that does not
+   subtract σ_gt² is measuring its own labels. Artifact:
+   `experiments/bias_floor_D16.json`; instrument: `local_sim/bias_floor_lab.py`.
+
+   **Consequence:** J2W's 4.8× lower MSE at our compute is **4.8× lower variance per
+   sample**. The next Strategist Packet targets **variance mechanisms**, and must
+   carry the full kill list — the 2026-08-10 round trip happened because the
+   control-variate lane was omitted from it.
+   *(An earlier note here inferred the opposite — "probably mostly bias → attack the
+   closure core" — from forum 18085's "≥58% bias". That figure describes
+   radiant-allomancer's own estimator, 4.47e-7, not ours. Withdrawn 2026-08-11,
+   closed by measurement 2026-08-14.)*
 2. **Moonshot G1 — blocked on the D10 renormalization fit.** G0 (done 2026-08-07)
    proved the layer convention, built the registered calibrated-K2 baseline
    (depth 8 → 1.2067e-05; G1 must reach ≤4.02e-06), and read the oracle: full-rank
@@ -259,12 +325,17 @@ Codex hook *registration* schema, because Codex is not installed here — see
 
 ## Next actions
 
-1. **VARIANCE-OR-BIAS: re-measure `MSE×N` on fresh canonical mints.** N ∈ {16,384,
-   65,536}, 200 MLPs × 8 shifts, block **D16** (clean, already allocated, no
-   single-use block needed), report the implied bias floor `B²`. **This decides where
-   the entire next phase of work aims** — variance mechanisms if ~99.9% variance holds
-   on canonical mints, calibration if it does not. No vault touch, no submission.
-   Phase 2 opens 18 Aug, so this should land first.
+1. ~~VARIANCE-OR-BIAS on fresh canonical mints.~~ **DONE 2026-08-14 — 99.4% variance,
+   B² CI includes 0.** See § *Open questions* #1. D16 spent (design block).
+2. **THE WRITE-UP — due 2026-08-17 23:59 UTC, ~3 days.** Co-equal prize objective and
+   now the tightest deadline in the project. `docs/writeup-draft.md` exists and is
+   unmodified. Material banked since it was last touched, all of it unusually clean:
+   the D14 pre-registered negative result and its price-table-vs-physics mechanism;
+   the 327743 aggregate-vs-paired dissolution on real grader data; the path-dependent
+   residual ratio; the board decomposition via `score/scoreSecondary`; and this
+   slice's label-noise/bias confound. **Nothing here needs a new measurement.**
+3. **Next Strategist Packet — variance mechanisms.** Must carry the FULL kill list
+   including control variates (the 2026-08-10 round trip happened because it did not).
 2. **Local-residual repeatability run.** Three `--runner subprocess` repeats plus one
    `--runner local`, unmodified `estimator.py`, mini split, same day, each saved with
    `--format json`. The runner arm is *already answered from disk* (1.301×); what is

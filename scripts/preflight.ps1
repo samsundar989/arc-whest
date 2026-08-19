@@ -28,7 +28,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Archive = "estimator_v2_4_1.py"
+    [string]$Archive = "estimator_v2_6.py"
 )
 
 $ErrorActionPreference = "Stop"

@@ -3132,6 +3132,153 @@ variance or calibration — the single highest-leverage question in the project 
 no vault touch, no submission. The Skeptic also recommends promoting its CV probe into
 `local_sim/` so the kill owns a committed artifact.
 
+## 2026-08-11 — VARIANCE-OR-BIAS: the shipped file's bias floor on fresh canonical mints (D16)
+
+**Class: IMPORTANT** (a new probe's math + a design block). Not STRATEGIC: D16 is a
+*design* block, not a decision block; `estimator.py` is untouched; no gate is being
+decided, a physical quantity is being measured. Written prediction below is recorded
+**before the probe was run**.
+
+**Why this is the highest-value move.** The 2026-08-11 Skeptic review withdrew the
+"the gap is mostly bias" conclusion and replaced it with "the residual is ~99.9%
+variance", derived from `MSE×N` = 0.03657 / 0.04036 / 0.03666 (LOG 2026-08-06,
+24 MLPs × 8 shifts, **local mints, one configuration**). That single inference now
+steers open question #1 — whether the next Strategist Packet attacks **variance
+mechanisms** or the **closure/calibration core**. It is worth one clean measurement
+before Phase 2 opens on 18 Aug.
+
+**A defect in the previous inference, found while designing this and frozen into the
+model here.** Ground-truth labels are themselves Monte Carlo averages, so
+
+`MSE_measured(N) = E[(pred_N − truth − η)²] = MSE_true(N) + σ_gt²`
+
+with `η` the GT-sampling noise, independent of the estimator. Therefore
+
+`MSE_measured(N) = V/N + B² + σ_gt²`
+
+and **σ_gt² is perfectly confounded with the bias floor B²: GT noise masquerades as
+bias, exactly.** Varying `N` alone cannot separate them. The vault's GT noise at
+2²⁵ samples is **1.575e-9**, and the B² the Skeptic derived was **≈1.8e-9** — the
+same number. **The previously inferred bias floor is plausibly nothing but the GT
+noise of its own labels.** Any measurement that does not subtract σ_gt² explicitly
+cannot answer this question.
+
+**Frozen model and estimator (before any D16 seed is drawn):**
+- `MSE_measured(N) = V/N + B² + σ_gt²`, fitted on the two endpoints
+  N ∈ {16,384, 65,536}.
+- `σ_gt²` is **computed, not fitted**: per MLP, `mean_i Var_i(final-layer ReLU) / n_gt`,
+  accumulated in the same GPU pass that builds the truth (the method `vault.py:114-120`
+  already uses, giving the vault's audited 1.575e-9).
+- `B² = (MSE(N₂)·N₂ − MSE(N₁)·N₁)/(N₂ − N₁) − σ_gt²`.
+- Reported with a paired bootstrap CI over MLPs. Paired common random numbers: the
+  same MLPs and the same 8 digital shifts at both N.
+
+**Prediction — driver, registered before running**
+1. `B²` will be **consistent with zero** — 95% CI including 0, and its upper bound
+   below **5.6e-8** (10% of MSE at N=65,536).
+2. Once `σ_gt²` is subtracted, the apparent bias floor will **drop by roughly the
+   vault's 1.575e-9**, i.e. most or all of the previously inferred 1.8e-9 will prove
+   to be label noise rather than estimator bias.
+3. `α` (the exponent in `MSE ∝ N^−α`) will come out at **1.00 ± 0.03**, reproducing
+   the local-mint result on canonical mints.
+4. The variance-dominance conclusion will **strengthen, not weaken**.
+
+**Falsifier.** `B²` significantly greater than zero after subtracting σ_gt², or
+`α` materially below 1.0, would mean a real bias floor exists, the Skeptic's
+correction was itself wrong, and the next packet must target the closure/calibration
+core after all.
+
+**Scope.** New fenced probe `local_sim/bias_floor_lab.py`; raw JSON under
+`experiments/`; this entry. **`estimator.py` unchanged. No vault touch. D17 untouched.**
+
+**Driver** Claude Code.
+
+### RESULT — **the residual is 99.4% VARIANCE. All four registered predictions held.**
+
+**commands**
+```powershell
+.venv-gpu\Scripts\python.exe local_sim/bias_floor_lab.py --mlps 200 --shifts 8 --n-gt 16777216
+.\scripts\preflight.ps1        # GREEN 5/5, invariants 30/30
+```
+**config** block **D16** (design), 200 fresh canonical mints × 8 digital shifts,
+paired common random numbers, N ∈ {16,384, 65,536}, GT 2²⁴ = 16,777,216 samples/MLP,
+RTX 5090, 4,203 s. **Vault touches: 0. `estimator.py` unchanged. D17 untouched.**
+**raw artifact** `experiments/bias_floor_D16.json` (per-MLP MSE at both N, per-MLP
+σ_gt², seeds).
+
+| quantity | value |
+|---|---|
+| MSE(N = 16,384) | 1.635761e-6 |
+| MSE(N = 65,536) | 4.130391e-7 |
+| **MSE × N at N₁ / N₂** | **0.02680 / 0.02707 — flat** |
+| **α** (MSE ∝ N^−α) | **0.9928**, 95% CI **[0.9586, 1.0274]** — includes 1.00 |
+| σ_gt² (label noise, computed not fitted) | 3.0925e-9 |
+| B² **before** subtracting label noise | 5.4652e-9 |
+| **B² after subtracting label noise** | **2.3727e-9**, 95% CI **[−2.460e-8, 2.840e-8]** — **includes 0** |
+| **B² as a share of MSE(N₂)** | **0.574%** |
+
+**The design defect was real and it accounted for the majority of the effect.**
+Subtracting the computed label noise moved the apparent bias floor from 5.4652e-9 to
+2.3727e-9 — **57% of what looked like estimator bias was the noise in its own
+ground-truth labels.** The measured σ_gt² = 3.0925e-9 at 2²⁴ samples is the expected
+2× of the vault's audited 1.575e-9 at 2²⁵ (half the samples, double the noise),
+which is an independent check that the subtraction is calibrated and not a fudge.
+
+**Predictions, scored against what was written before the block was drawn:**
+
+| # | registered | outcome |
+|---|---|---|
+| 1 | B² consistent with zero, upper bound < 5.6e-8 | **HELD** — CI [−2.46e-8, **2.84e-8**] includes 0 |
+| 2 | apparent floor drops by ≈ the vault's 1.575e-9 once σ_gt² comes out | **HELD** — dropped 3.09e-9, and 3.09e-9 ≈ 2 × 1.575e-9 exactly as the sample count implies |
+| 3 | α = 1.00 ± 0.03 on canonical mints | **HELD** — 0.9928 [0.9586, 1.0274] |
+| 4 | variance-dominance strengthens | **HELD** — 99.4% variance |
+
+**Level note, quoted honestly.** `MSE × N` here is 0.0268 on canonical D16 mints
+against 0.0366 on the older *local* mints (LOG 2026-08-06) and 0.022525 on the
+**graded** suite. The canonical-mint level sits much closer to graded than the old
+local level did, which is what the 2026-08-06 provenance fix was supposed to buy. The
+*shape* — flatness — is what this slice measures, and it reproduces on both.
+
+**deviations** None. **unexpected** That label noise was the majority of the previously
+inferred floor, not a minor correction.
+**remaining doubt** α = 0.9928 is marginally below 1.0; the CI includes 1.00 but also
+0.96. A genuine α slightly under 1 would mean QMC is doing *slightly worse* than
+plain-MC scaling at this N, which is worth knowing but does not change the
+variance/bias verdict. Two endpoints cannot distinguish a small bias floor from a
+small α deficit; a three-point fit would.
+
+### Knowledge Delta
+
+- **Learned, and this is the load-bearing fact for the next phase.** The shipped
+  estimator's final-layer residual is **99.4% variance**, measured at DECIDE tier on
+  fresh canonical mints with label noise removed. There is no bias floor worth
+  attacking.
+- **Belief changed — the driver's, twice, in the same direction it was wrong before.**
+  On 2026-08-10 the LOG asserted "the gap is probably mostly bias → attack the
+  closure/calibration core". The Skeptic withdrew it on 2026-08-11 using local-mint
+  data. This slice confirms the withdrawal at DECIDE tier and closes the question.
+- **New instrument, and a trap it removes.** `local_sim/bias_floor_lab.py`. **Any
+  measurement that fits a bias floor from MSE-versus-N without subtracting σ_gt² is
+  measuring its own label noise.** The two terms are perfectly confounded —
+  `E[(pred − truth − η)²] = E[(pred − truth)²] + σ_gt²` — so GT noise enters exactly
+  as a constant added at every N, indistinguishable from B². This trap had already
+  produced one wrong number in this repository.
+- **New invariant candidate.** Every future MSE-versus-N or bias-floor claim must
+  quote σ_gt² alongside it, the way `docs/VALIDATION.md` §3.5 already requires for
+  plain MSE.
+- **Strategic consequence.** J2W's 4.8× lower MSE at our own compute (C/B 0.194 vs
+  0.198) is **4.8× lower variance per sample**. The next Strategist Packet targets
+  **variance mechanisms**, and it must carry the full kill list — including the
+  control-variate lane, whose omission caused the 2026-08-10 round trip.
+- **What is now bounded out of the variance search.** Layer-1-anchored *linear*
+  control variates (1.010× on our Sobol path, CI includes 1.0). Still open and
+  explicitly NOT covered: corrections using an *empirical* per-layer gain
+  (`mean(z>0)`), which are nonlinear.
+- **Docs changed.** `docs/CURRENT_STATE.md` — open question #1 now states the
+  variance verdict as measured at DECIDE tier rather than inferred from local mints.
+
+**Driver** Claude Code. **Next command:** `review-slice`.
+
 ## Next planned experiments (rewritten 2026-08-05 after B1/B2/B3 all came back negative)
 
 **Where we stand**: v1.1 graded 3.893e-7, rank ~159. The leader is 4.87e-8 — **8.0× ahead**. Every analytic-side avenue we tested this session is dead:
@@ -3275,3 +3422,458 @@ still byte-identical to `estimator_v2_4_1.py` (sha256 59c371a5044e0e00a04e00fe84
 
 **Next**: switching drivers is now `session-start` then `next-slice` from the repo
 root. The project's own next actions are unchanged — see `docs/CURRENT_STATE.md`.
+
+## 2026-08-19 — CARRIER AUDIT: the input-space variance lane is closed, and Strassen is not
+
+**Class: IMPORTANT** (four new probes' math; no seed block spent as a *decision*
+block; `estimator.py` untouched; no gate decided). **These are DESIGN-TIER
+ORIENTATION PROBES, not pre-registered evidence.** They were run to validate a
+proposed pivot, not to promote a candidate. Nothing here may be cited as a gate
+result. Seeds: the unused tail of D16 (30806016200+, 30806016300+), a design block.
+
+**Why this was run.** A strategy review on 2026-08-17/18 proposed pivoting the
+project's whole next phase onto *input-space variance reduction* — full 256x256
+whitening of the point set, the tent/baker fold, ReLU-homogeneity sphere
+projection, and a structured design carrier — on the strength of a competitor's
+published ladder in which whitening reads **2.46x**. Before spending 31 days of
+Phase 2 on that, the pivot was measured.
+
+### Probe 1 — the point set's own moments (no MLPs, no truth, no block)
+
+`local_sim/probe_pointset_moments.py`. Our shipped construction (Sobol integers
+-> 30-bit digital XOR shift -> (u+0.5)/2^30 -> `norm.ppf` -> float32), N=16,384,
+d=256, 8 realisations, against iid:
+
+| | rms error | vs iid |
+|---|---|---|
+| first moments | 1.613e-4 | 48.6x better |
+| second moments, **diagonal** | 1.041e-4 | **107x better** |
+| second moments, **off-diagonal** | **1.315e-3** | **only 5.9x better** |
+
+The off-diagonal block is **12.6x worse than the diagonal**. This is a physical
+property of the construction and needs no protocol tier.
+
+**It also explains two of our own past results.** The 2026-08-05 "moment
+standardisation" kill forced per-coordinate (mean, std) -> (0,1) — the *diagonal*,
+already 107x better than iid. The "point-set radial imbalance" predictor of the
+common mode (LOO R2 = -0.010) is tr(S)/d — also diagonal. **Both probed the
+part of the point set that was already exact.**
+
+### Probe 2 — does fixing the off-diagonal help? `local_sim/probe_whitening.py`
+
+24 fresh canonical mints x 24 digital shifts, paired CRN, N=16,384, GT 2^23
+samples/MLP, **sigma_gt^2 = 5.4393e-9 = 0.38% of MSE**. Artifact:
+`experiments/2026-08-19_carrier_probes/white_probe.json`.
+
+| arm | mean MSE | paired geo-mean vs plain | 95% CI |
+|---|---|---|---|
+| plain (our Sobol) | 1.4486e-6 | 1.0000x | — |
+| `whitediag` (the 2026-08-05 kill) | 1.4487e-6 | **1.0000x** | [0.999, 1.001] |
+| `sphere` (ReLU homogeneity) | 1.4497e-6 | 1.0010x | [0.998, 1.004] |
+| **`white` (full 256x256 ZCA)** | 1.4504e-6 | **0.9972x** | **[0.986, 1.009]** |
+| `sphere+white` | 2.4039e-6 | 0.6824x | [0.632, 0.733] |
+| `tent` (baker fold) | 1.5164e-6 | 0.9810x | [0.928, 1.037] |
+| **`tent+white`** | 1.3307e-6 | **1.0931x** | **[1.044, 1.148]** |
+| `iid` | 2.9160e-6 | 0.6085x | [0.566, 0.657] |
+| **`iid+white`** | 2.2087e-6 | 0.7478x | [0.695, 0.804] |
+
+**Whitening on our carrier is worth nothing** (0.9972x, CI includes 1.0).
+**Whitening on iid is worth 1.23x** (0.7478/0.6085). The device works; our Sobol
+already collects that variance. Only `tent+white` clears 1.0, at **+9.3%**.
+
+### Probe 3 — a structured design carrier. `local_sim/probe_design_carrier.py`
+
+Cheap unbiased proxy for the honest frontier's spherical 5-design: a bank of
+Haar-rotated orthonormal frames (+/- Q e_i, scaled to radius E||x|| = 15.984383),
+exact for every polynomial of degree <= 3 on the sphere. Same 24 MLPs.
+
+| carrier | vs our Sobol | 95% CI |
+|---|---|---|
+| sobol + antithetic | 1.0158x | [0.959, 1.078] |
+| sobol + antithetic + sphere | 1.0153x | [0.958, 1.077] |
+| **Haar frames, on the sphere** | **1.1012x** | **[1.040, 1.173]** |
+| Haar frames, chi radius | 1.0604x | [1.001, 1.131] |
+
+Homogeneity, worth nothing on Sobol, is worth **+4%** *inside* a design carrier.
+
+### Probe 4 — does the design survive our stack? `local_sim/probe_carrier_transfer.py`
+
+The transfer risk: the rank-32 J J^T rotation is tuned to put Sobol's
+best-equidistributed coordinates on the network's most sensitive directions.
+20 MLPs x 16 realisations, two sample counts, frames / sobol:
+
+| stack | N = 16,384 | N = 65,536 |
+|---|---|---|
+| bare | **1.1817x [1.092, 1.290]** | **1.1060x [1.021, 1.199]** |
+| + rank-32 rotation | 1.0529x [0.984, 1.126] | 1.0401x [0.950, 1.135] |
+| + rotation + pruning (**shipped**) | **1.0470x [0.979, 1.120]** | **1.0341x [0.951, 1.122]** |
+
+**Our rotation already collects what a degree-3 design provides.**
+
+### Probe 5 — Strassen-Winograd, measured on the real flopscope 0.10.0
+
+`local_sim/probe_strassen_flops.py`, `probe_cost_stack.py`, `probe_strassen_ops.py`.
+Not modelled — measured against the installed grader cost model. Dense
+(16384,256)@(256,256) bills **2,143,289,344**, exactly m*n*(2k-1).
+
+| depth | FLOPs/layer | vs dense |
+|---|---|---|
+| 0 | 2,143,289,344 | 1.000x |
+| 1 | 1,893,810,176 | 1.132x |
+| 2 | 1,692,102,656 | **1.267x** |
+| 3 | 1,544,635,392 | 1.388x |
+| 4 | 1,466,398,464 | 1.462x |
+
+Strassen is exact, so **raw MSE is unchanged**. Interaction with pruning: padding
+the pruned 205-wide matrices *up* to 256 to enable splitting is a **loss**
+(0.812x vs shipped) — pruning already shrinks both dimensions quadratically. At a
+Strassen-friendly alive width the two compose: pruned-192 + depth-2 reads
+**1.430x vs shipped**, i.e. Strassen contributes 1.254x on top of pruning.
+
+**Then the residual, which is what killed this lane before.** Our shipped file
+runs 1,416 ops at 9.845 ms graded residual -> **7.0 us/op = 695,268
+FLOP-equivalents per operation**. Naive recursive implementation, width 192:
+
+| depth | counted saving | extra ops | break-even us/op | net at our 7.0 us/op |
+|---|---|---|---|---|
+| 1 | 4.377e9 | 864 | 50.7 | **1.108x** |
+| 2 | 7.810e9 | 6,912 | 11.3 | 1.083x |
+| 3 | 10.118e9 | 49,248 | 2.1 | **0.614x (loss)** |
+
+An interior optimum at shallow depth, independently reproducing forum 18184's
+depth-2 finding. Hand-unrolling (weight-side combinations precomputed once per
+MLP, outputs kept as blocks instead of concatenated) should reach ~1.12-1.16x.
+
+**Our 2026-08-06 Strassen negative result is superseded, not contradicted.** It
+measured *batched depth-2 Strassen on the packed v2.5 carrier* — tiny irregular
+bucketed blocks where the add overhead dominates and counted FLOPs actually rose
+1.07%. On the dense chain the arithmetic is entirely different.
+
+### Knowledge Delta
+
+- **The input-space variance lane is CLOSED for this estimator, by our own
+  measurement in our own configuration.** Whitening 0.997x, sphere 1.001x, tent
+  0.981x, antithetic 1.016x, degree-3 design 1.047x — every CI includes or sits
+  at 1.0. Only `tent+white` (1.093x) clears, and it is small.
+- **The governing mechanism is SUBSTITUTION, measured three separate ways today**
+  and corroborated by four independent external teams: whitening vs Sobol
+  (0.997x on ours, 1.23x on iid); design vs rotation (1.18x bare -> 1.047x
+  shipped); and previously CV vs QMC (our own 2.04->1.98, and forum 18179's
+  1.42x->1.04x). **Two devices that annihilate the same low-order structure do not
+  compose; whichever is added first takes the credit.**
+- **The 2.46x that motivated the proposed pivot is a rung ratio against a
+  degraded baseline.** Its own author's four-arm ablation reads 0.97x for
+  "lattice on whitening" and 0.994x for "whitening on lattice"; the technique
+  census records whitening at **1.05x**; and the same document's harmonic budget
+  caps it at **1.22x**. Any ladder table must be read for what its baseline arm
+  contains, not for its largest rung.
+- **A cost lane we had closed is open.** Strassen-Winograd is worth 1.25-1.27x on
+  counted FLOPs, MSE-exact, and ~1.10-1.16x net after residual at our measured
+  7.0 us/op. This is currently the largest bankable lever in the project.
+- **New standing number: 7.0 us/op = 695,268 FLOP-equivalents per operation** on
+  the grader, calibrated from 327743 (1,416 ops, 9.845 ms). Any candidate that
+  trades counted FLOPs for operation count can now be priced before it is built.
+- **A durable doc states a mechanism that is wrong.** `docs/writeup-draft.md` and
+  `docs/RESEARCH_NOTES.md` attribute the 2.35x moment-standardisation
+  regression to "a first-order bias". Moment matching's bias is **O(1/N)**
+  (Glasserman 4.5.1 p.245), i.e. second order, and both this probe and forum
+  18151 measure diagonal forcing at **exactly 1.000x**. The 2.35x may be real;
+  the stated mechanism is not, and the write-up must not ship it.
+- **Contract correction.** `AGENTS.md` says the prize is decided by a re-run of
+  "ONE designated submission". Forum 18143 (organiser, 2026-08-10) says **up to
+  TWO per team, defaulting to the two highest-ranked public entries**. The Rules
+  tab still says one; the discrepancy was raised on the forum and not resolved.
+
+### External bounds gathered alongside (not our measurements — cite the source)
+
+- Mean dimension of the layer-32 integrand, Gaussian-Poincare bound: **nu ~ 20**;
+  share of variance in spherical-harmonic degrees <= 5 falls **0.99 (layer 1) ->
+  ~0.36-0.39 (layer 32)**. A degree-5 design's ceiling at the scored layer is
+  therefore **~1.46x**, and at N=2^16 in 256 dimensions a point set resolves at
+  most ~16 coordinates jointly against interaction order ~20.
+- Bakhvalov/Novak information-based bound for the Lipschitz class at d=256: the
+  best possible *sampling* method beats plain MC by **~4.4% RMSE / ~9% MSE**.
+  This is a query-model minimax bound and does **not** bind an algorithm that
+  reads the weights — which is precisely ARC's mechanistic thesis.
+- ARC's own cumulant propagation (arXiv:2605.05179) breaks even only when
+  L^K < n, i.e. L < 16 for K=2 and L < 6.3 for K=3. At L=32 every variant is
+  either over budget or worse than MC. Their own experiments stop at L=12.
+
+### What this does NOT close
+
+1. **A true degree-4/5 design.** The proxy above is degree-3, which the rotation
+   absorbs. A hypercube strength-4 orthogonal array (BCH dual, 2^16 runs) or
+   Kuperberg's 2^16+512-point degree-5 cubature is a different object. Ceiling
+   from the harmonic spectrum: **~1.46x**.
+2. **The mid-layer control variate.** Not measured here. Its deployment condition
+   is |delta_c| < SE_c and the predicted gain is G = 1/[(1-rho^2) + rho^2 r^2],
+   r = delta_c/SE_c — one cheap probe decides it.
+3. **Phase 2's shape**, which is unpublished (organiser, forum 18186, 2026-08-18:
+   "hope to launch mostly on 19th ... the deadline will also be shifted").
+
+**Driver** Claude Code. **Next command:** `review-slice`.
+
+## 2026-08-19 (later) — STAGE 0: the mid-layer CV dies by identity; the Strassen carrier clears
+
+**Class: IMPORTANT.** Two discriminating probes, both pre-registered in the
+plan above before they were run. DESIGN TIER — no gate promoted, no decision
+block spent, `estimator.py` untouched, vault untouched. Seeds: D16 tail
+(30806016400+, 30806016500+).
+
+### P0.1 — mid-layer control variate: **CLOSED BY IDENTITY**
+
+`local_sim/probe_midlayer_cv.py`, artifact
+`experiments/2026-08-19_carrier_probes/midlayer_cv.json`.
+20 fresh mints x 16 shifts, N=16,384, GT 2^23, **shipped rank-32 rotation on**.
+
+The lane reduces to one number. With `delta_c` the closure's error on the layer-c
+mean, `SE_c` OUR sampling error on that same mean, and `r_c = delta_c / SE_c`:
+
+    G_c = 1 / [ (1 - rho^2) + rho^2 * r_c^2 ]      deploys only if r_c < 1
+
+Rather than fit anything, the probe DEPLOYS the correction that would ship —
+`mu_hat = mean(a_D) - (mean(a_c) - m_c) @ M_{c->D}` with `M` the closure's own
+linearised transport `prod W_l diag(Phi_l)`, which `_closure` already computes —
+and measures the paired MSE ratio.
+
+| layer c | delta_c | SE_c | **r_c** | deployed G_c | 95% CI | wins |
+|---|---|---|---|---|---|---|
+| 1 | 1.652e-3 | 2.045e-3 | **0.81** | **0.8354x** | [0.762, 0.911] | 108/320 |
+| 2 | 2.833e-3 | 2.279e-3 | 1.24 | 0.4998x | [0.414, 0.601] | 62/320 |
+| 4 | 4.457e-3 | 2.332e-3 | 1.91 | 0.1519x | [0.114, 0.199] | 9/320 |
+| **6** | 5.506e-3 | 2.212e-3 | **2.49** | **0.0863x** | [0.065, 0.116] | 2/320 |
+| 8 | 6.187e-3 | 2.036e-3 | 3.04 | 0.0586x | [0.043, 0.079] | 1/320 |
+| 12 | 7.036e-3 | 1.774e-3 | 3.97 | 0.0443x | [0.031, 0.066] | 1/320 |
+| 16 | 7.820e-3 | 1.589e-3 | 4.92 | 0.0334x | [0.023, 0.049] | 0/320 |
+| 24 | 8.189e-3 | 1.315e-3 | 6.23 | 0.0226x | [0.017, 0.029] | 0/320 |
+
+**G_c < 1 at every depth**, and 0.0863x at layer 6 — the exact operating point
+where forum 18154 reports **2.39x**. `r_c` crosses 1.0 between layers 1 and 2 and
+rises monotonically to 6.23.
+
+**The mechanism, and it explains the competitor rather than contradicting them.**
+A control variate helps only when its analytic centre is more accurate than the
+sampling estimate it corrects. Ours is **1.2x to 6.2x LESS accurate**. Forum
+18154 clears the same bar from both sides at once: a weaker carrier (LHS, raw
+1.4x, so larger `SE_c`) and a much better closure (skew-augmented Gram-Charlier
+with a Mehler co-skewness term plus an offline-trained per-layer mean correction,
+so smaller `delta_c`). Their deployed entry grades **2.9045e-7**, worse than our
+2.6314e-7 — the 2.39x is a within-pipeline factor over their own plain MC, not a
+frontier.
+
+**The reopening condition is now quantified, which is the useful part.** This
+lane reopens iff a closure delivers a mid-layer mean **3-6x more accurate than
+our present one** (specifically `r_c < 1` at some c where rho^2 is large). That
+is a concrete target for the Moonshot / cumulant lane, and the first time it has
+had one.
+
+### P0.2 — Strassen carrier: **CLEARS, with an 8x margin on the deciding risk**
+
+`local_sim/probe_strassen_carrier.py`. Real flopscope 0.10.0, 6 canonical mints.
+
+Design as chosen: tau = -2.5 kept; the least-alive neurons trimmed until the
+width divides by 4 (they move to `dead`, where the existing offset machinery
+carries their closed-form mean exactly); **block-resident** — the four output
+quadrants of layer l ARE the four input quadrants of layer l+1, so the 32-layer
+chain never concatenates; the seven weight-side combinations formed once per MLP.
+
+| quantity | value |
+|---|---|
+| mean alive width, tau = -2.5 | 205.88 |
+| mean alive width, trimmed to a multiple of 4 | 204.46 |
+| counted FLOPs, dense (trimmed pruning) | 44,764,200,960 |
+| counted FLOPs, Strassen depth 1 | 39,451,077,607 |
+| ops, dense chain / Strassen chain | 94 / 1,051 |
+| **counted-FLOP ratio** | **1.1500x** |
+| **effective ratio at 7.0 us/op** | **1.1155x** |
+| **break-even residual price** | **55.5 us/op** |
+| max relative prediction deviation | **2.186e-7** |
+
+**Two things make this the most certain lever the project has had.**
+
+1. **The deciding risk has an 8x margin.** Strassen trades counted FLOPs for
+   operation count, and operations are billed as residual. Break-even is 55.5
+   us/op; we measure 7.0. `docs/GOTCHAS.md` records that the candidate/control
+   residual ratio reads 5.47x in one local harness and 7.87x in another — a 44%
+   spread on the deciding quantity. **An 8x margin swallows that entirely**, so
+   for the first time a cost decision here does not depend on the E1 half of the
+   evaluator being trustworthy.
+2. **The accuracy question is arithmetic, not statistical.** Strassen is exact in
+   exact arithmetic; in float32 it reorders summation and moves the prediction by
+   **2.19e-7 relative**, against a relative RMS error of ~0.23% at the scored
+   layer. That is ~10,000x below our own error. No MSE experiment is needed and
+   no decision block is required to establish it.
+
+**Projected score.** Forward chain 4.537e10 -> 3.945e10 counted; `F0` unchanged
+at ~0.80e10; ops 1,416 -> ~2,373 so residual 9.845 -> ~16.6 ms. C: 5.43e10 ->
+~4.91e10, a **1.107x** effective reduction. Expected **2.6314e-7 -> ~2.38e-7**,
+the largest single gain since v2.4's 1.222x.
+
+**Depth 2 is not worth it.** Counted improves to 1.267x, but block-resident depth
+2 costs ~7x the operations (~7,400), and the two effects cancel almost exactly at
+our residual price. Depth 1 is simpler, more numerically stable, and equal.
+
+### Knowledge Delta
+
+- **The mid-layer control-variate lane is closed for this estimator, by identity,
+  at every depth 1..24.** The census's "most actionable open direction, priced at
+  3-5x on score" is worth **< 1x** for us. The deciding quantity is
+  `r_c = delta_c / SE_c` and it is 0.81 at c=1 rising to 6.23 at c=24.
+- **A control variate cannot be evaluated without measuring its centre's accuracy
+  against your own sampling error at your own N.** Every external number for this
+  family is carrier-relative and does not transfer. A better carrier makes a
+  biased control HARDER to deploy, twice over: it shrinks the variance available
+  to remove and it shrinks the bias budget.
+- **Strassen-Winograd on the dense chain is worth 1.1155x effective**, MSE-neutral
+  to 2.2e-7 relative, with a 55.5 us/op break-even against our measured 7.0.
+- **New standing trap, and it invalidates any probe that hits it.** Python places
+  a script's own directory at `sys.path[0]`, and `local_sim/` contains a numpy
+  SHIM named `flopscope`. **Any probe living in `local_sim/` that imports
+  flopscope gets the shim, not the grader's cost model** — and the shim's
+  `BudgetContext` exposes none of the real attributes, so it fails loudly if you
+  read `flops_used` and silently if you do not. Probes needing the real cost
+  model must evict their own directory from `sys.path` before importing (see the
+  header of `probe_strassen_carrier.py`), exactly as `mint_provenance.py`
+  already does for `whestbench`.
+
+### Next
+
+Stage 1: promote the Strassen carrier to **v2.6** under a pre-registered gate —
+predictions within 1e-6 relative of v2.4.1 on >=100 mints, 30/30 invariants,
+paired `V.c` >= 1.08x with CI excluding 1.0 on the three-model residual rule.
+Decision block **D17**. One vault touch at promotion. **Hold for the Phase 2
+configuration**, which is unpublished (organiser 18186, 2026-08-18) and which
+re-fits `_PRUNE_TAU` and `_BASIS_RANK` if the shape changes.
+
+**Driver** Claude Code. **Next command:** `review-slice`.
+
+## 2026-08-19 (evening) — STAGE 1 BUILD: v2.6, the Strassen carrier. BUILT, GREEN, NOT PROMOTED
+
+**Class: STRATEGIC** (`estimator.py` changed). **This entry records a BUILD, not a
+promotion.** No decision block spent, no vault touch, no submission. The gate is
+deliberately deferred until the Phase 2 configuration is published, because two
+shipped constants (`_PRUNE_TAU`, `_BASIS_RANK`) are fitted to 256x32 and D17 is
+single-use.
+
+### What changed
+
+`estimator.py` 691 -> 784 lines; `estimator_v2_6.py` is the byte-identical
+archive; `scripts/preflight.ps1` `$Archive` promoted to it. Three edits:
+
+1. **`_STRASSEN = True`** and a new `_strassen_chain`. One Strassen-Winograd
+   level per layer, replacing eight (m/2,k/2)@(k/2,n/2) products with seven.
+   flopscope bills a matmul as `(2K-1)*M*N` from shapes alone, so a fast matrix
+   multiplication reduces the counted bill exactly.
+2. **The chain is BLOCK-RESIDENT.** Layer l's four output quadrants ARE layer
+   l+1's four input quadrants, so the 32-layer chain never concatenates once
+   (concatenate bills 1/element and costs ~2.7x that again in residual). Only
+   the final column mean is reassembled. The seven right-hand sides depend only
+   on the weights and are formed once per MLP per layer.
+3. **Every prunable width is made even** by raising the threshold just past the
+   weakest survivor, which sheds exactly the neuron closest to dead. It moves
+   into `dead`, where the existing offset carries its closed-form rectified-
+   Gaussian mean exactly. **Depth 1 needs only EVEN widths, not multiples of 4** —
+   the trim is <=1 neuron per layer, not <=3. Any layer that cannot be made even
+   (a deformed or tiny network) falls back to the dense chain, i.e. v2.4.1.
+
+### Gate status
+
+`scripts/preflight.ps1` **GREEN 5/5** — mint provenance, invariants **30/30**
+(including 3x bit-identity determinism and a fresh-instance rebuild), `whest
+validate`, ship-file identity, vault seal (touches still 1).
+
+### Accuracy — measured, and the trim is the whole cost
+
+`trim_mse` probe, 24 mints x 16 shifts, GT 2^23, rotation on, paired CRN:
+
+| arm | mean MSE | vs shipped | 95% CI |
+|---|---|---|---|
+| A shipped pruning, dense | 1.5474e-6 | 1.0000x | — |
+| B trimmed-to-even, dense | 1.5513e-6 | **0.9949x** | [0.9912, 0.9981] |
+| C trimmed + Strassen | 1.5514e-6 | **0.9949x** | [0.9914, 0.9984] |
+
+**B and C agree to four digits: Strassen's float32 reordering contributes
+nothing.** The entire accuracy cost is the one trimmed neuron per odd layer, and
+it is **0.51%**. Confirmed on the public split: final-layer MSE paired geo-mean
+**0.9942x [0.9870, 1.0013]**, 41/100 wins.
+
+### Cost — and the honest disagreement between two harnesses
+
+CONFIRM tier, read-only, 100-MLP mini, subprocess runner, **both arms run within
+the same hour on the same machine**. Artifacts:
+`experiments/2026-08-19_carrier_probes/{v2_6_mini_confirm,v2_4_1_mini_control}.json`.
+
+| paired, n=100 | v2.4.1 | v2.6 | paired geo-mean | 95% CI |
+|---|---|---|---|---|
+| adjusted score | 3.10757e-7 | 3.26105e-7 | **0.9521x** | [0.9453, 0.9590] |
+| final-layer MSE | 1.48953e-6 | 1.49264e-6 | 0.9942x | [0.9870, 1.0013] |
+| effective compute | 5.75999e10 | 6.01423e10 | **0.9577x** | [0.9548, 0.9605] |
+| failed MLPs | 0 | 0 | | |
+
+**On this machine v2.6 LOSES 5%, 0/100 wins on compute — while its counted FLOPs
+are 10.5% LOWER.** The whole sign flip is the residual price:
+
+| | counted/MLP | residual/MLP | ops | us/op |
+|---|---|---|---|---|
+| v2.4.1, local | 5.3301e10 | 42.99 ms | 1,417 | 30.35 |
+| v2.6, local | 4.7697e10 | 124.46 ms | 2,434 | 51.12 |
+| v2.4.1, **graded 327743** | 5.2898e10 | **9.845 ms** | **1,416** | **7.0** |
+
+**The op count transfers exactly — 1,417 measured locally against 1,416 graded.
+Only the price per operation differs, and it differs by the documented amount:**
+local residual is **4.37x** the grader's, local us/op is **4.34x** the grader's.
+Those two agree to 1%, which is what licenses the transfer.
+
+Break-even is **55.5 us/op**. The grader sits at 7.0; this machine at 30-51.
+
+Three models, all anchored on the graded 9.845 ms:
+
+| model | cost ratio | net V.c after the 0.9942x MSE cost |
+|---|---|---|
+| A — grader per-op price 7.0 us/op | 1.0990x | **1.0926x** |
+| B — transfer the measured local residual ratio (2.89x) | 1.0740x | **1.0677x** |
+| local machine as measured | 0.9577x | 0.9522x |
+
+**Model B is the one to quote.** It already absorbs the fact that v2.6's per-op
+price rises (30.3 -> 51.1 us/op locally, a 1.68x increase): even if the same
+relative rise happens on the grader, 7.0 x 1.68 = 11.8 us/op is still 4.7x under
+break-even. Projected: **2.6314e-7 -> ~2.41-2.46e-7**.
+
+### Knowledge Delta
+
+- **v2.6 is built, green, and NOT promoted.** The deciding quantity is the
+  grader's residual price, which `docs/CURRENT_STATE.md` classifies **E1 —
+  directional only**. A local run cannot settle it: the same byte-identical
+  comparison reads **0.952x here and 1.068-1.093x projected on the grader**, and
+  the sign flips. **Only a graded run can decide this, and that requires Phase 2
+  to be open and Samuel's explicit approval.**
+- **The op count is the transferable quantity, not the residual.** 1,417 local
+  vs 1,416 graded on the same file. Any future cost candidate should be priced
+  as `counted + ops x (grader us/op)`, with the grader's us/op re-derived from
+  the most recent graded report — never from a local absolute.
+- **An independent corroboration of the Skeptic's 2026-08-10 correction.** The
+  local subprocess residual measures **4.37x** the grader's today, against the
+  "~7x" that `AGENTS.md` still carries from the `--runner local` path. That is
+  now two independent readings in the 4.3x band. Per the Skeptic's own
+  instruction the text stays unedited until three same-day repeats exist; this
+  is the second.
+- **A structural reason to like this candidate anyway:** it is the first change
+  in the project whose accuracy claim is *arithmetic* rather than statistical.
+  Strassen is exact; the only MSE cost is the 0.51% trim, and it is measured
+  with a CI. There is no scenario in which v2.6's MSE surprises us.
+
+### Next
+
+1. **Hold.** Phase 2 opens 2026-08-20 00:00 UTC (round 1429; slipped from the
+   18th, then the 19th). Width, depth, budget, lambda and floor are unpublished;
+   no `v1-phase2` dataset tag exists.
+2. On the announcement: re-fit `_PRUNE_TAU` and `_BASIS_RANK` if the shape moved,
+   re-measure the cost balance, then gate on **D17** with the three-model rule and
+   one vault touch.
+3. **The first Phase 2 submission is the instrument that decides v2.6**, because
+   it returns the grader's own residual telemetry for the new carrier. Until then
+   the honest statement is "1.07-1.09x projected, 0.95x measured locally, and the
+   difference is a quantity we cannot measure on this machine."
+
+**Driver** Claude Code. **Next command:** `review-slice` (a Skeptic has not seen
+this build, and the local/graded disagreement is exactly what one is for).
