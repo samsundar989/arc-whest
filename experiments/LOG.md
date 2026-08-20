@@ -5615,3 +5615,343 @@ from the flat-adjusted law and the shipped operating point, not measured.
    selected. **D17 and D19 stay unspent** — this is design work, not a gate.
 3. Only then, an operating-point re-sweep.
 
+
+---
+
+## 2026-08-19 (night) — STAGE 1 / item 5 part 3 CONTRACT: what is the OA actually worth, end to end?  [PRE-REGISTERED]
+
+**Classification: IMPORTANT.** Spends a fresh range of the **D18 DESIGN block**
+(408 free). No gate, no single-use block, no vault touch, no estimator change.
+**D17 and D19 stay unspent.**
+
+Part 2 measured the dual-BCH OA's *moment* exactness — 17x the shipped carrier at
+degree 4. That is a property of the POINT SET. What it is worth is a property of
+the NETWORK RESPONSE.
+
+### Design
+
+192 fresh 256x32 networks from D18's free tail, ground truth **2^24** (chosen so
+GT noise is ~0.8% of the smallest arm's MSE rather than ~3% at 2^22, because the
+OA is expected to push MSE down and GT noise is an additive floor). Three arms,
+same networks, common random numbers, **everything except the point set is the
+shipped pipeline called through the shipped file's own methods**:
+
+| arm | carrier | N | isolates |
+|---|---|---|---|
+| A | sobol | 16,384 | the incumbent, shipped operating point |
+| **B** | **sobol** | **65,536** | **"more points" — the control the audit demands** |
+| C | bch OA | 65,536 | "the design" |
+
+`C vs B` is the design's own contribution; `C vs A` is the deployable comparison;
+`A vs B` is a check on the flat-adjusted law. The rotation is folded into the
+first-layer weight (`h @ (R^T S) == (h R^T) @ S`), which costs one 256x256 matmul
+(~3.3e7 FLOPs) instead of rotating 65,536 x 256 points (~8.6e9, 16% of the
+shipped spend).
+
+### Written prediction
+
+| # | prediction | falsified by |
+|---|---|---|
+| **T1** | At **matched point count** (C vs B) the OA improves raw final-layer MSE by a paired factor in **[1.10x, 1.60x]**. Strictly below the naive 1/(1 - 0.38) = 1.61 ceiling from the deg<=5 harmonic share, because the shipped Sobol carrier already collects part of the low-degree content (part 1: 0.510x iid at k=4) | outside that range |
+| **T2** | The **flat-adjusted law holds**: A vs B differ in adjusted score by **less than 5%**, because MSE ~ 1/N and counted cost ~ N cancel. `bias_floor_D16` already measured MSE x N flat (0.0268 vs 0.0271 at N = 16k and 64k) | they differ by more than 5% |
+| **T3** | Arm C's measured `C/B` lands in **[0.75, 0.85]**, confirming part 2's projection of 0.796 from the flat law rather than a guess | outside that range |
+| **T4** | Folding the rotation into W1 keeps arm C's counted FLOPs within **1%** of arm B's — the design is free at matched N, and the entire cost of the lane is the 4x point count | the arms differ by more than 1% |
+| **T5** | The OA is **unbiased**: subtracting the per-network GT-noise floor moves every gain by **less than 3%**, and no arm's GT-subtracted MSE goes negative | a gain moves by more than 3% |
+
+### What would make this a kill
+
+T1 failing low (gain < 1.10x) closes the last input-space lane: it would mean the
+network response has little exploitable degree-<=5 content *beyond what Sobol
+already takes*, which is the SUBSTITUTION mechanism applying one final time.
+That is a real possible outcome and the reason B is in the design.
+
+
+---
+
+## 2026-08-19 (night) — CONTRACT: the grader's residual, calibrated on FIVE graded submissions instead of one  [PRE-REGISTERED]
+
+**Classification: IMPORTANT** — it changes the instrument, specifically the half
+`docs/CURRENT_STATE.md` classifies **E1 — directional only** and about which it
+says *"improving the cost evaluator outranks any further score optimization."*
+Read-only: no networks decided on, no seed block, no vault touch, no submission.
+
+### The question Samuel asked, and why the answer is not "we have no infrastructure"
+
+We have a complete local replica of the competition: `whest run` **is** the real
+`whestbench.scoring.evaluate_estimator` on the organisers' real public split with
+1e9-sample truth; `local_sim/competition_score.py` is bitwise-equal to its
+identity; `mint_provenance` proves our networks are the grader's bit-for-bit.
+Local and graded agree well:
+
+| | local mini (100) | graded 327743 | gap |
+|---|---|---|---|
+| multiplier `C/B` | 0.216 | 0.19896 | **8.6%** |
+| counted FLOPs | 5.330e10 | 5.2898e10 | **0.8%** |
+
+**The only soft term is residual wall time**, and at our operating point it is a
+*small* part of `C`: 9.845 ms x 1e11 = 9.85e8 against 5.29e10 counted, i.e.
+**1.8% of C** on the grader. That is why the shipped file's local score is only
+~8% off.
+
+**It is v2.6 specifically that breaks this**, because it trades counted FLOPs for
+operations: 1.7x the ops, so locally residual becomes **20.7% of C**. A quantity
+that is 2% of the answer for v2.4.1 is 20% of it for v2.6, which is exactly why
+that one decision is unresolved while the shipped file's score is not.
+
+### The unused data
+
+Five graded submissions, each with per-MLP residual telemetry, and all five
+estimator files archived:
+
+| submission | file | counted/MLP | graded residual |
+|---|---|---|---|
+| 323872 v0 | `experiments/estimator_v0_archive.py` | 3.269e9 | 6.743 ms |
+| 324075 v1.0 | `estimator_v1.py` | 4.082e10 | 4.491 ms |
+| 324094 v1.1 | `estimator_v1_1.py` | 6.998e10 | 10.527 ms |
+| 324420 v2.4 | `estimator_v2_4.py` | 5.291e10 | 9.845 ms |
+| 327743 v2.4.1 | `estimator_v2_4_1.py` | 5.290e10 | 10.022 ms |
+
+**We have been using ONE of these as the calibration point** — "7.0 us/op from
+327743" — and treating it as a single ratio through the origin. Five points at
+different operation counts fit a **line**, which separates fixed overhead from
+marginal per-operation cost and is a genuinely predictive model rather than a
+ratio.
+
+`local_sim/residual_model.py` runs each archived version locally under a real
+`flopscope.BudgetContext`, recording counted FLOPs **and operation count**, then
+regresses the *graded* residual on the *local* operation count.
+
+**The validation that makes this trustworthy**: counted FLOPs are deterministic,
+so local counted must reproduce graded counted for all five. If it does, we are
+provably running the same programs the grader ran, and the operation counts are
+trustworthy by the same argument.
+
+### Written prediction
+
+| # | prediction | falsified by |
+|---|---|---|
+| **R1** | Local counted FLOPs reproduce graded counted FLOPs for **all five** versions to within **2%** (allowing for pruning varying across network draws) | any version off by more than 2% |
+| **R2** | Graded residual is **better explained by operation count than by counted FLOPs** — higher R^2 — because forum 18101 and this repo's own evidence say residual tracks the number of operations and the size of their temporaries, not FLOPs. v1.0 is the discriminating case: it has **12x** v0's counted FLOPs but **less** residual | counted FLOPs explain it at least as well |
+| **R3** | The fitted line has a **positive intercept**: a fixed per-MLP overhead independent of the estimator, from process/IPC/telemetry. I expect it to be **1-5 ms**, i.e. a large share of the 4.5-10.5 ms observed range | the intercept is negative or above 5 ms |
+| **R4** | The marginal cost per operation is therefore **below** the 7.0 us/op standing number, because that number is a ratio through the origin and absorbs the intercept. I predict **1-5 us/op** | outside that range |
+| **R5** | Applying the fitted model to v2.6.1's measured local op count gives a projected graded residual, and a projected `V.c` gain against v2.4.1, that lands **inside** the 1.068-1.096x band the three-model rule already brackets — i.e. the calibration **tightens** the estimate rather than moving it outside the existing bracket | it lands outside that band |
+
+**If R5 fails the calibration is the more trustworthy number**, not the bracket —
+five graded observations beat one ratio — and that would be a finding, not an error.
+
+### Standing limits, unchanged by any of this
+
+n = 5 is a small fit and every point is a **different program**, so the model
+confounds "more operations" with "different operations". It cannot become E3. The
+honest ceiling here is a better-supported E2 with a stated interval, which is
+still a large upgrade on a single ratio through the origin.
+
+
+---
+
+## 2026-08-19 (night) — EVIDENCE PACKET: the grader's residual is a LINE, and the cost half is no longer E1
+
+Contract: the entry immediately above. **6/7, one prediction falsified.**
+Artifacts: `experiments/2026-08-19_carriers/residual_model.{out,json}`.
+Read-only: no networks decided on, no seed block, no vault touch, no submission.
+
+### R1 — we are provably running the graded programs
+
+Local counted FLOPs against graded counted FLOPs, 24 throwaway networks per
+version:
+
+| ver | local counted | graded counted | gap | ops | graded residual | n sigma |
+|---|---|---|---|---|---|---|
+| v0 | 3.2670e9 | 3.2691e9 | -0.06% | 841 | 6.743 ms | 0.0 |
+| v1.0 | 4.0817e10 | 4.0821e10 | -0.01% | 329 | 4.491 ms | 0.0 |
+| v1.1 | 6.9975e10 | 6.9979e10 | -0.01% | 1134 | 10.527 ms | 0.0 |
+| v2.4 | 5.2954e10 | 5.2909e10 | +0.09% | 1339 | 9.845 ms | 0.1 |
+| v2.4.1 | 5.2956e10 | 5.2898e10 | +0.11% | 1352 | 10.022 ms | 0.2 |
+
+**Confirmed at <= 0.2 sigma** — but only after a mis-specification of my own.
+The first run used **6** seeds and a flat 2% tolerance, and read 2.51% / 2.53%
+for v2.4 and v2.4.1, i.e. FAILED. The gap is not a program mismatch: v2.4+
+**prunes**, and the alive fraction is network-dependent, so counted FLOPs have a
+**per-network sd of 3.22%** (measured over 40 networks) against **exactly 0.00%**
+for v1.1, which does not prune. At n = 6 the standard error is 1.3% and a 2.5%
+gap is 2 SE — noise. **A tolerance that ignores the estimator's own sampling
+error is not a test**, and this is the third time tonight that class of error has
+bitten (prediction B4, the rotation check, this).
+
+### R2 — residual tracks OPERATIONS, not FLOPs, and now we have shown it ourselves
+
+| model | intercept | slope | R^2 | leave-one-out MAE |
+|---|---|---|---|---|
+| `residual ~ a + b * OPS` | **+2.551 ms** | **5.780 us/op** | **0.898** | **0.829 ms** |
+| `residual ~ a + b * COUNTED` | +5.471 ms | 0.065 ps/FLOP | 0.387 | 3.179 ms |
+
+**The discriminating case is v1.0: 12.5x v0's counted FLOPs and LESS residual**
+(4.491 ms against 6.743 ms). No monotone function of FLOPs can produce that; a
+function of operation count can, because v1.0 runs 329 operations against v0's
+841. Forum 18101 said this and `docs/GOTCHAS.md` records it; **this is the first
+time it has been demonstrated on our own graded telemetry.**
+
+### R3 — a fixed per-MLP overhead of 2.55 ms, which nothing we write can avoid
+
+The intercept is **+2.551 ms**, inside the predicted 1-5 ms. That is **25% of
+v2.4.1's entire 10.02 ms residual**, and at lambda = 1e11 it is **2.55e8
+FLOP-equivalents charged to every MLP before our first operation**. A ratio
+through the origin cannot see it and therefore mis-prices every candidate whose
+operation count differs from the one it was fitted on.
+
+### R4 — FALSIFIED
+
+I predicted the marginal cost would fall in 1-5 us/op once the intercept absorbed
+the fixed part. It is **5.780 us/op** — below the standing 7.0, but by 17%, not
+the 30-80% I implied. The intercept is real but smaller relative to the slope than
+I guessed. **The standing "7.0 us/op" is not badly wrong; it is a ratio through
+the origin that over-charges low-op candidates and under-charges high-op ones**,
+and at v2.4.1's 1,352 ops the two models agree to 6% (9.40 ms vs 10.37 ms fitted).
+
+### R5 — and the answer for v2.6.1
+
+| candidate | model | C/B control | C/B candidate | cost ratio | net V.c (MSE 0.9942x) |
+|---|---|---|---|---|---|
+| v2.6.1 | **fitted line, 5 points** | 0.1983 | **0.1802** | **1.1004x** | **1.0940x** |
+| v2.6.1 | ratio through origin | 0.1979 | 0.1803 | 1.0979x | 1.0915x |
+
+Projected graded residual for v2.6.1: **16.251 ms** (fitted) against v2.4.1's
+observed 10.022 ms. Counted FLOPs fall 10.5%, residual rises 62%, and **because
+residual is only ~2-3% of C on the grader the counted saving wins**.
+
+**CONFIRMED, inside the pre-registered 1.068-1.096x bracket, near its top.**
+
+### Why this changes the classification of the cost half
+
+`docs/CURRENT_STATE.md` calls the cost half **E1 — directional only**, because
+"uninstrumented wall time is not measurable on this machine". True, and
+irrelevant: **we never needed to measure it here.** The grader measured it for us
+five times and the telemetry has been sitting in `experiments/run_reports/`.
+
+Residual's share of `C` **on the grader**:
+
+| | counted | lambda x residual | residual share of C |
+|---|---|---|---|
+| v2.4.1, observed | 5.2956e10 | 1.002e9 | **1.9%** |
+| v2.6.1, projected | 4.7391e10 | 1.625e9 | **3.3%** |
+
+The fit's leave-one-out error is **0.829 ms**. Even allowing double that for
+extrapolation, +-1.7 ms on v2.6.1's C of 4.90e10 is **+-0.35% on C**. So the cost
+ratio 1.1004x is known to well under 1%, against the old three-model bracket of
+**[0.9529, 1.1147]** — a 17-point spread whose sign flipped.
+
+**The local residual measurement was never the right instrument.** It reads 124.55
+ms/MLP for v2.6 where the grader is projected at 16.25 ms — 7.7x — and that ratio
+is the entire reason the sign flipped. Deleting the local number and using graded
+telemetry removes the problem rather than modelling it.
+
+### The honest limits — the new load-bearing assumption
+
+- **n = 5, and every point is a different program.** The model confounds "more
+  operations" with "different operations". It cannot be E3.
+- **v2.6.1 sits at 2,370 ops; the fit is calibrated on 329-1,352. That is
+  EXTRAPOLATION by 1.75x**, and it is now the load-bearing assumption. It is much
+  weaker than the old one — which was that a *local* machine's residual ratio
+  transfers to different hardware — but it is an assumption, and the script prints
+  it every run rather than burying it.
+- **Residual also tracks the SIZE of temporaries, not only their count** (forum
+  18101). v2.6's Strassen blocks are half-size, so its true per-op price may be
+  *below* the fitted line, which would make 1.1004x conservative.
+- v1.1 is the worst-fit point at **-1.42 ms**; the model is not exact.
+
+### Knowledge Delta
+
+- **`residual_graded ~ 2.551 ms + 5.780 us/op`**, R^2 = 0.898, LOO 0.829 ms,
+  calibrated on five graded submissions. Replaces "7.0 us/op" as a ratio through
+  the origin.
+- **2.551 ms of every MLP's residual is fixed overhead** — 25% of v2.4.1's, and
+  2.55e8 FLOP-equivalents charged before any of our code runs.
+- **Residual is ~2-3% of C on the grader**, so the cost half is *far* better
+  determined than the local measurement suggested. The shipped file's local score
+  is only ~8% off graded, and almost all of that gap is the residual term.
+- **v2.6.1 is a projected 1.0940x on V.c**, i.e. **2.6314e-7 -> ~2.406e-7**,
+  known to well under 1% on the cost side rather than to a 17-point bracket.
+- **We had the data for a month and used one fifth of it.** The single-ratio
+  anchor was chosen because it came from the most recent submission, not because
+  the others were unusable.
+
+### Proposed reclassification, NOT enacted
+
+`docs/CURRENT_STATE.md` § *Evaluator trust* should move the cost half from **E1 —
+directional only** to **E2 — quantitative with a stated interval**, on the
+grounds above, with the extrapolation limit named. That is a change to a durable
+classification that gates autonomy rules ("no autonomous loop while the evaluator
+is E1"), so it is **STRATEGIC and needs Samuel's decision**, not an agent's.
+
+
+---
+
+### 2026-08-19 (night) — STAGE 1 item 5: **the OA only works WHOLE**, and that is the lane's real constraint
+
+Recorded before the end-to-end arms finish, because it is a finding in its own
+right and it changes the deployable question.
+
+Part 2 projected that the array could be halved to 65,536 rows — one per
+antipodal pair — for an affordable `C/B ~ 0.80`. **That is wrong three times
+over**, and each way was caught by a different cheap check.
+
+**1. The obvious halving is not an array at all.** One row per antipodal pair
+returns the linear code `{Tr(ax + bx^3)}` itself, and that code has a **constant
+column**: coordinate `x = 0` carries `Tr(a*0 + b*0^3) = 0` for every `(a, b)`.
+Centroid norm **1.000000** — the point set sits off-centre by a full unit vector
+and explores a 255-dimensional slice. Run end to end it measured **41x worse than
+Sobol** (arm C 6.53e-05 against arm A 1.58e-06 at 8 networks) before the run was
+killed and the cause found.
+
+**2. Puncturing to `F_256*` and appending overall parity does not fix it.** Built
+and measured: still one constant column, still centroid norm 1.0. The reason is
+arithmetic — the parity is `Tr(a * sum_{x in F*} x) + Tr(b * sum_{x in F*} x^3)`,
+and **both sums vanish**: `sum x = 0` for m >= 2, and the cubes form the index-3
+subgroup, whose elements are the roots of `X^85 - 1` and therefore sum to zero.
+So parity is identically 0.
+
+**3. A RANDOM half is no design at all.** Measured moment profiles at matched
+n = 65,536, projected to the sphere:
+
+| point set | centroid | k=2 | k=4 | k=6 |
+|---|---|---|---|---|
+| iid | 3.86e-03 | 5.52e-03 | 1.29e-02 | 2.62e-02 |
+| **sobol** | 6.19e-05 | **6.70e-04** | **6.78e-03** | 2.08e-02 |
+| **OA, random half** | 2.71e-03 | **4.06e-03** | **9.31e-03** | 1.97e-02 |
+| **OA, full 131,072** | **0.00e+00** | **8.54e-15** | **7.55e-04** | 7.15e-03 |
+
+**A random half of the array is WORSE than Sobol at both k=2 and k=4**, and
+barely better than iid. The design's entire value is its exact balance, and
+subsampling destroys it completely. There is no partial credit.
+
+### What this does to the lane
+
+**The array is worth a great deal and costs 8x the operating point, and those are
+not separable.** 131,072 points at the shipped per-point cost projects
+`C/B ~ 1.59`, which **exceeds the budget** — scored as a failure, multiplier 1.0
+*and* zeroed predictions. So the deployable question is no longer "is the design
+better" but **"can 131,072 points be made to cost what 16,384 do now"**.
+
+Three routes, in the order they look affordable:
+
+1. **A smaller genuine strength-4 OA.** The Rao bound for strength 4 on 256
+   two-level factors is **32,897 runs**, so ours is 4x the information-theoretic
+   minimum. A tighter construction would land at `C/B ~ 0.40`.
+2. **An FWHT first layer.** The points are `+-1` vectors, so `h @ W1` has
+   Hadamard structure and need not be a dense matmul. **Both frontier write-ups
+   name FWHT** (Team Puffi and the BCH/OA author) — and this is the first
+   explanation this project has for *why they need it*: not as an optimisation,
+   but because the carrier is otherwise unaffordable.
+3. More aggressive pruning, which trades against accuracy.
+
+### Knowledge Delta
+
+- **Check a carrier's CENTROID before anything else.** One line, catches a
+  degenerate point set instantly, and would have saved the 41x run. Now the first
+  thing `test_carriers.py` reports.
+- **Orthogonal arrays do not degrade gracefully.** Unlike Sobol, where any prefix
+  is still low-discrepancy, an OA subsampled is an OA destroyed.
+- **The frontier teams' FWHT is not an optimisation, it is a precondition.** The
+  carrier that buys degree-4/5 exactness is 8x the point count, and a dense first
+  layer cannot pay for it.
+

@@ -114,9 +114,18 @@ same byte-identical paired comparison reads:
 
 | | cost ratio | net V.c |
 |---|---|---|
-| grader per-op price 7.0 us/op | 1.0990x | **1.0926x** |
-| transfer the local residual ratio (conservative, quote this one) | 1.0740x | **1.0677x** |
-| **this machine, as measured** | 0.9577x | **0.9522x** |
+| **fitted line on 5 graded submissions (2026-08-19 — QUOTE THIS)** | **1.1004x** | **1.0940x** |
+| grader per-op price 7.0 us/op (ratio through origin) | 1.0990x | 1.0926x |
+| transfer the local residual ratio (the old conservative choice) | 1.0740x | 1.0677x |
+| **this machine, as measured** — never decides | 0.9577x | 0.9522x |
+
+**The first row supersedes the rest.** Projected graded residual for v2.6.1 is
+**16.251 ms** against v2.4.1's observed 10.022 ms; counted FLOPs fall 10.5%,
+residual rises 62%, and because residual is only 2–3% of `C` on the grader the
+counted saving wins. Known to well under 1% on the cost side, against the
+17-point bracket below whose **sign flipped**. Remaining caveat: v2.6.1 sits at
+2,370 ops and the fit is calibrated on 329–1,352 — a **1.75× extrapolation**,
+which is now the load-bearing assumption and is much weaker than the old one.
 
 The sign flips between the local harness and the grader, because local residual
 runs **4.37x** the grader's (42.99 ms/MLP vs 9.845) while the op count transfers
@@ -239,9 +248,19 @@ tier and no gate was decided on either, so neither verdict changes; the claim of
 independence does. The CV-vs-QMC leg is on different data and still stands. The
 seed ledger now prints this every time anyone runs `preflight` step 6.
 
-**New standing number: 7.0 us/op = 695,268 FLOP-equivalents per grader operation**
-(from 327743: 1,416 ops, 9.845 ms). Price any counted-FLOPs-for-op-count trade
-before building it.
+~~**New standing number: 7.0 us/op**~~ **SUPERSEDED 2026-08-19.** That was a
+ratio *through the origin* from a single submission (327743: 1,416 ops, 9.845 ms).
+Fitted on **all five** graded submissions the grader's residual is a **line**:
+
+    residual_graded  ≈  2.551 ms  +  5.780 µs/op        R² = 0.898, LOO 0.829 ms
+
+**2.551 ms is FIXED overhead charged to every MLP before our first operation** —
+25% of v2.4.1's whole residual, 2.55e8 FLOP-equivalents. A ratio through the
+origin cannot see it and mis-prices every candidate whose op count differs from
+the one it was fitted on. The discriminating evidence: **v1.0 has 12.5× v0's
+counted FLOPs and LESS residual** (4.491 ms vs 6.743 ms), which no function of
+FLOPs can produce. Price any counted-FLOPs-for-op-count trade with the line, and
+note that a candidate far outside 329–1,352 ops is an extrapolation.
 
 **Correction owed to a durable doc.** `docs/writeup-draft.md` and
 `docs/RESEARCH_NOTES.md` attribute the 2.35x moment-standardisation regression to
@@ -365,7 +384,7 @@ different standards. We are currently at `C/B ≈ 0.20`, well above the 0.1 floo
 | half | level | why |
 |---|---|---|
 | **Accuracy (MSE)** | **E2, approaching E3** | mint proven bit-identical to the grader (100/100, uint32); seed-block registry with machine-readable single-use blocks; gates pre-registered in LOG before the block is touched; paired common-random-number statistics with CIs; 32-shift averaging; every MSE quoted against its GT-noise floor; 30/30 invariants including permutation equivariance; touch-counted sealed vault |
-| **Cost (`C` = counted FLOPs + λ·residual seconds)** | **E1 — directional only** | counted FLOPs are exact and reproducible. Uninstrumented wall time is not measurable on this machine: it bills the same file several× what the grader bills it. Every dense-vs-non-dense cost comparison therefore rests on a *model*, and the deciding model is a frozen assumption, not an observation |
+| **Cost (`C` = counted FLOPs + λ·residual seconds)** | **E1 → E2 PROPOSED, 2026-08-19** | counted FLOPs are exact and reproducible. Local wall time is not measurable here — but **we never needed it**. The grader measured residual for us **five times** and the telemetry was sitting unused in `experiments/run_reports/`. Fitted on all five: **`residual ≈ 2.551 ms + 5.780 µs/op`**, R² = 0.898, leave-one-out 0.829 ms. Residual is only **1.9–3.3% of `C` on the grader**, so `C` is now determined to well under 1%. **The reclassification is STRATEGIC and is Samuel's to make** — it gates the "no autonomous loop while E1" rule. See `experiments/LOG.md` 2026-08-19 (night) |
 
 **The local residual has no quotable level — established 2026-08-10 (submission
 327743), corrected the same day after independent falsification.** Same

@@ -65,6 +65,29 @@ narrative record), `docs/GAME_PLAN.md` (strategy, rev 12 is authoritative).
   ordering, for the reason above: BCa corrects a skew that CRN already removed.
   BCa only becomes the best method past skew ~6, which no real arm reaches.
 
+- **The grader's residual is a LINE, not a ratio — and we had the data for a
+  month.** Fitted on all five graded submissions:
+  **`residual ≈ 2.551 ms + 5.780 µs/op`** (R² = 0.898, leave-one-out 0.829 ms).
+  **2.551 ms is fixed overhead charged before our first operation** — 25% of
+  v2.4.1's whole residual. The old "7.0 µs/op" was a ratio *through the origin*
+  from one submission and mis-prices any candidate whose op count differs.
+  **Residual is only 1.9–3.3% of `C` on the grader**, so `C` is determined far
+  better than the local measurement suggests — the local number reads 124.55
+  ms/MLP for v2.6 where the grader projects 16.25 ms, **7.7×**, and that ratio is
+  the entire reason the v2.6 sign used to flip. *Do not model the local residual;
+  use graded telemetry.*
+
+- **Residual tracks OPERATIONS, not FLOPs, and the proof is in our own reports.**
+  v1.0 has **12.5× v0's counted FLOPs and LESS residual** (4.491 ms vs 6.743 ms).
+  No monotone function of FLOPs can produce that. Ops explain residual at
+  R² = 0.898; counted FLOPs at 0.387.
+
+- **A tolerance that ignores the estimator's own sampling error is not a test.**
+  Counted FLOPs are deterministic *given a network*, but v2.4+ prunes and the
+  alive fraction varies: per-network sd **3.22%** for v2.4.1, **exactly 0.00%**
+  for v1.1, which does not prune. Six seeds against a flat 2% bar reads FAILED on
+  noise. Bit three separate checks in one session.
+
 - **Allocating a seed block is not consuming it, and only allocation was ever
   checked.** `check_disjoint()` cannot see `SEED0 = 30_806_016_200` typed into a
   probe. D16 was called "Reusable" for nine days while five probes had drawn 270

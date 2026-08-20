@@ -1,0 +1,14 @@
+﻿uv : C:\Users\samsu\Documents\arc-whest\local_sim\probe_oa_carrier.py:157: ConfigureNoOpWarning: flops.configure() 
+configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so 
+these settings will not affect a graded submission.
+At line:1 char:333
++ ... NG='utf-8'; uv run python local_sim/probe_oa_carrier.py --phase arms  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\samsu\...ded submission.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  flops.configure(symmetry_warnings=False)
+48 networks, GT 2^24, sigma_gt^2 = 3.4852e-09
+
+OA table (131072, 256) in 9.2s — used WHOLE. centroid norm 0.000e+00
+

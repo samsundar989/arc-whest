@@ -1,0 +1,60 @@
+﻿====================================================================================================
+THE GRADER'S RESIDUAL — calibrated on five graded submissions
+====================================================================================================
+
+1. do we reproduce the graded programs? (prediction R1)
+-------------------------------------------------------
+  ver        local counted  graded counted      gap  local ops  graded resid   n sigma
+  --------------------------------------------------------------------------------------
+  v0            3.2670e+09      3.2691e+09   -0.06%        841        6.743ms       0.0
+  v1.0          4.0817e+10      4.0821e+10   -0.01%        329        4.491ms       0.0
+  v1.1          6.9975e+10      6.9979e+10   -0.01%       1134       10.527ms       0.0
+  v2.4          5.2954e+10      5.2909e+10    0.09%       1339        9.845ms       0.1
+  v2.4.1        5.2956e+10      5.2898e+10    0.11%       1352       10.022ms       0.2
+  R1: local counted reproduces graded counted within 3 standard errors ok   worst 0.2 sigma (the estimator's own per-network spread, not a program mismatch)
+
+2. what explains the grader's residual? (prediction R2)
+-------------------------------------------------------
+  residual ~ a + b * OPS      a = +2.551 ms   b = 5.780 us/op    R^2 = 0.8978   LOO 0.829 ms
+  residual ~ a + b * COUNTED  a = +5.471 ms   b = 0.065 ps/FLOP  R^2 = 0.3872   LOO 3.179 ms
+  R2: operation count explains residual better than counted FLOPs ok   R^2 0.8978 vs 0.3872
+  R2: v1.0 is the discriminating case — 12x the FLOPs, LESS residual ok   12.5x FLOPs, 4.49 ms vs 6.74 ms
+
+3. the fitted model (predictions R3, R4)
+----------------------------------------
+  R3: positive fixed overhead, 1-5 ms                      ok   intercept +2.551 ms
+  R4: marginal cost 1-5 us/op, BELOW the 7.0 us/op ratio-through-origin FAILED  5.780 us/op vs the standing 7.0
+
+  ver           ops    observed    fitted     resid   ratio-thru-origin
+  ----------------------------------------------------------------------
+  v0            841      6.743ms    7.413ms   +0.670ms             5.847ms
+  v1.0          329      4.491ms    4.453ms   -0.038ms             2.288ms
+  v1.1         1134     10.527ms    9.106ms   -1.420ms             7.885ms
+  v2.4         1339      9.845ms   10.290ms   +0.445ms             9.308ms
+  v2.4.1       1352     10.022ms   10.365ms   +0.343ms             9.399ms
+
+4. what it says about the un-graded candidates (prediction R5)
+--------------------------------------------------------------
+  v2.6     counted 4.7391e+10   ops   2370   projected graded residual: fitted 16.251 ms   ratio-through-origin 16.479 ms
+  v2.6.1   counted 4.7391e+10   ops   2370   projected graded residual: fitted 16.251 ms   ratio-through-origin 16.479 ms
+
+  candidate model                       C/B ctrl  C/B cand  cost ratio   net V.c (MSE 0.9942x)
+  --------------------------------------------------------------------------------------------
+  v2.6      fitted line (5 points)        0.1983    0.1802     1.1004x                 1.0940x
+  v2.6      ratio through origin          0.1979    0.1803     1.0979x                 1.0915x
+  v2.6.1    fitted line (5 points)        0.1983    0.1802     1.1004x                 1.0940x
+  v2.6.1    ratio through origin          0.1979    0.1803     1.0979x                 1.0915x
+
+  !! v2.6 sits at 2370 ops; the fit is calibrated on 329-1352.
+     EXTRAPOLATION by 1.75x beyond the largest calibration point. This is the new load-bearing assumption -- much weaker than
+     the old one, but still an assumption.
+
+  !! v2.6.1 sits at 2370 ops; the fit is calibrated on 329-1352.
+     EXTRAPOLATION by 1.75x beyond the largest calibration point. This is the new load-bearing assumption -- much weaker than
+     the old one, but still an assumption.
+  extrapolation is reported, not hidden                    ok   calibrated 329-1352 ops; candidates at [2370, 2370]
+  R5: the calibrated net V.c lands inside the 1.068-1.096x bracket ok   1.0940x
+
+saved C:\Users\samsu\Documents\arc-whest\experiments\2026-08-19_carriers\residual_model.json
+
+6/7 checks passed

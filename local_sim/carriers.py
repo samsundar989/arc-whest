@@ -273,6 +273,37 @@ def bch_oa_signs(m: int = 8, poly: int = 0x11D) -> np.ndarray:
     return np.concatenate([signs, -signs], axis=0)         # the extension coset
 
 
+def bch_oa_subsample(n: int, dim: int, seed: int) -> np.ndarray:
+    """A random subset of the FULL array — the affordable option, strength measured.
+
+    WHY NOT SIMPLY HALVE IT. Taking one row per antipodal pair returns the linear
+    code itself, and that code has a **constant column**: coordinate `x = 0`
+    carries `Tr(a*0 + b*0^3) = 0` for every `(a, b)`. Its centroid then has norm
+    **1.0** — the point set sits off-centre by a full unit vector and explores a
+    255-dimensional slice. Measured end to end it was **41x worse than Sobol**.
+
+    Puncturing to `F_256*` and appending the overall parity does not fix it
+    either: `sum_{x in F*} x = 0` and `sum_{x in F*} x^3 = 0` (the cubes are the
+    index-3 subgroup, whose elements are the roots of `X^85 - 1` and therefore sum
+    to zero), so the parity column is constant too. Both were built, both were
+    caught by the centroid check, and neither is offered here.
+
+    What IS offered is an honest approximation: a random subset of the full,
+    verified, antipodally-closed array. Exact combinatorial strength does not
+    survive subsampling — `test_carriers.py` measures what actually does.
+    """
+    if dim != 256:
+        raise NotImplementedError("built for dim = 256")
+    full = bch_oa_signs()
+    if n > full.shape[0]:
+        raise ValueError(f"only {full.shape[0]} rows exist")
+    rng = np.random.default_rng(seed)
+    idx = rng.choice(full.shape[0], size=n, replace=False)
+    q, r = np.linalg.qr(rng.standard_normal((dim, dim)))
+    q = q * np.sign(np.diag(r))
+    return exact_radius(to_sphere(full[idx].astype(np.float64) @ q.T), dim)
+
+
 def bch_oa(n: int, dim: int, seed: int) -> np.ndarray:
     """Randomly rotated dual-BCH OA, scaled to the exact mean Gaussian radius.
 
@@ -320,6 +351,7 @@ CARRIERS: Dict[str, Callable[[int, int, int], np.ndarray]] = {
     "sobol+anti+sphere": spherical(antithetic(sobol)),
     "haar frames": haar_frames,
     "bch OA (rotated)": bch_oa,
+    "bch OA half (random)": bch_oa_subsample,
     "bch OA (unrotated)": bch_oa_unrotated,
 }
 

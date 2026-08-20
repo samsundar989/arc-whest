@@ -159,6 +159,8 @@ def t_design_strength():
         n = N
         if name == "haar frames":
             n = (N // (2 * DIM)) * 2 * DIM      # 16384 = 32 bases of 256, exactly
+        elif name.startswith("bch OA half"):
+            n = 1 << 16
         elif name.startswith("bch OA"):
             # An orthogonal array has ONE size. Subsampling it destroys the
             # balance that makes it an array at all, so it is measured whole:

@@ -1,0 +1,16 @@
+﻿claimed D18[30,806,018,192..30,806,018,383]   GT 16,777,216/MLP   cuda
+
+    16/192     54.9s  eta   604.2s  gt-noise 3.495e-09
+    32/192    107.6s  eta   537.8s  gt-noise 3.473e-09
+    48/192    159.6s  eta   478.8s  gt-noise 3.485e-09
+    64/192    211.3s  eta   422.7s  gt-noise 3.508e-09
+    80/192    264.9s  eta   370.8s  gt-noise 3.561e-09
+    96/192    319.3s  eta   319.3s  gt-noise 3.474e-09
+   112/192    377.3s  eta   269.5s  gt-noise 3.562e-09
+   128/192    434.5s  eta   217.3s  gt-noise 3.677e-09
+   144/192    487.6s  eta   162.5s  gt-noise 3.602e-09
+   160/192    540.9s  eta   108.2s  gt-noise 3.523e-09
+   176/192    594.8s  eta    54.1s  gt-noise 3.503e-09
+   192/192    648.4s  eta     0.0s  gt-noise 3.456e-09
+
+sigma_gt^2 = 3.4565e-09   saved C:\Users\samsu\Documents\arc-whest\experiments\2026-08-19_carriers\oa_truth_D18.npz
