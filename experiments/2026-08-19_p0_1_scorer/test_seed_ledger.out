@@ -63,10 +63,11 @@ SEED LEDGER — does the enforcement bite?
   A1: and it is probe_whitening vs probe_design_carrier on D16   ok   
   A2: D17 has zero consumption                                   ok   
   A2: D19 (the reserved single-use gate block) has zero consumption ok   
-  D18 shows exactly one claim, 192 seeds, by coverage_lab        ok   192 consumed by ['local_sim/coverage_lab.py']
+  D18 accounting closes: consumed + free == the block            ok   384 consumed, 216 free of 600
+  every D18 claim names a real consumer inside the block         ok   2 claim(s): ['local_sim/coverage_lab.py', 'local_sim/probe_oa_carrier.py']
   A6: D16 shows 270 distinct seeds consumed, 330 free            ok   270 consumed, 330 free in 4 gaps
   A6: the four free gaps are exactly the ones predicted          ok   
   A3: the tree has no unrecorded seed use                        ok   
   no test wrote to the real ledger                               ok   
 
-40/40 checks passed
+41/41 checks passed

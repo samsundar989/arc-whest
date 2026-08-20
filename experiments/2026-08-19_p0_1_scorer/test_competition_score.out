@@ -35,10 +35,10 @@ CANONICAL COMPETITION SCORER — parity with installed whestbench, and the estim
   clean (budget probe): n_failed == grader                   ok   0 vs 0
   clean (budget probe): mean multiplier == grader            ok   0.100000
   clean (above floor, try 1): per-MLP score bitwise == grader ok   
-  clean (above floor, try 1): aggregate objective == grader  ok   2.683572435886e-01 vs 2.683572435886e-01
+  clean (above floor, try 1): aggregate objective == grader  ok   2.729690219020e-01 vs 2.729690219020e-01
   clean (above floor, try 1): n_failed == grader             ok   0 vs 0
-  clean (above floor, try 1): mean multiplier == grader      ok   0.745270
-  above-floor arm: no failures, every multiplier strictly above the floor ok   mult in [0.712, 0.801]
+  clean (above floor, try 1): mean multiplier == grader      ok   0.762277
+  above-floor arm: no failures, every multiplier strictly above the floor ok   mult in [0.753, 0.768]
   raising (2 of 8): per-MLP score bitwise == grader          ok   
   raising (2 of 8): aggregate objective == grader            ok   1.841074301861e-01 vs 1.841074301861e-01
   raising (2 of 8): n_failed == grader                       ok   2 vs 2

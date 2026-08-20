@@ -481,3 +481,23 @@ uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-
 
 Steps 1–3 are cheap and unconditional. Step 4 is a check, never an objective.
 Step 6 costs a vault touch and is spent once per change, not once per idea.
+
+**All of steps 1–3, plus the ship-file identity check, the vault seal and the
+seed ledger, are wrapped by `scripts/preflight.ps1` — now SIX steps, and it is
+the gate.** Run it on every estimator change.
+
+**Two things changed on 2026-08-19 that this section has to carry:**
+
+- **`vault.py evaluate` now takes `--candidate <file>`** and runs that file under
+  a real `flopscope.BudgetContext`, so counted FLOPs are *measured* rather than
+  modelled, and the touch record carries the candidate's **sha256**. `--dry-run`
+  is **gone** — reading the truth *is* the touch. A separate `sacrificial`
+  subcommand exercises the identical path against a non-vault truth set and
+  records nothing. **Consequence: touch #1 (v2.4.1, 2026-08-06) was produced by
+  the OLD evaluator — a torch mirror of v2.4 priced by a v2.4 cost model — so it
+  is not comparable with any future touch.** See `docs/CURRENT_STATE.md`
+  § *Next actions* #3.
+- **The residual model of §2b is superseded for the grader.** `residual ≈
+  2.551 ms + 5.780 µs/op`, R² = 0.898, LOO 0.829 ms, fitted on **five** graded
+  submissions (`local_sim/residual_model.py`). The three-model rule remains the
+  fallback where no graded anchor exists; where one does, use the line.

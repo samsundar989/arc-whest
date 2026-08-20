@@ -9,7 +9,7 @@ experiment. The narrative record is `experiments/LOG.md`.*
 
 ## The clock
 
-*Last polled 2026-08-19 15:13 UTC.*
+*Last polled 2026-08-19 (evening). Round 1429 UPCOMING, leaderboard 1480 exists with 0 entries, HF tags still `['v1-phase1', 'v1-warmup']`.*
 
 | event | when | status |
 |---|---|---|
@@ -43,7 +43,12 @@ the shape moved, *then* gate. Both are frozen at 256×32 and neither transfers.
 | graded, 324094 (v1.1) | graded | 3.893e-7 | 2026-08-05 |
 | vault, 500 sealed MLPs, v2.4.1 | VAULT | median **2.4651e-7** · mean 3.2669e-7 · p99 2.0535e-6 · max 3.0469e-6 · 0 non-finite | touch #1, 2026-08-06 |
 | public mini (100), v2.4.1 | CONFIRM | 3.172e-7 adjusted · 1.4895e-6 MSE · mult 0.216 · 0 failed | 2026-08-06 |
-| invariant suite on the shipped file | — | **30/30** | verified 2026-08-07 |
+| invariant suite on the shipped file | — | **30/30** | verified 2026-08-19 |
+| shape parity (v2.6.1 fallback vs v2.4.1) | — | **27/27**, dense paths bit-identical | 2026-08-19 |
+| canonical scorer vs installed whestbench | — | **71/71**, bitwise | 2026-08-19 |
+| seed-ledger enforcement | — | **40/40** negative tests | 2026-08-19 |
+| carrier design strength | — | **27/27** | 2026-08-19 |
+| **the degree-4 design carrier** | DECIDE (D18, 48 nets) | **1.4775× [+14.4%, +45.9%]** — and `C/B = 1.3509`, **over budget** | 2026-08-19 |
 | board position | — | raw #90/200; **#82 of 192 plausible-honest** on 5 entries | 2026-08-06 10:03Z |
 
 **Shipped file, corrected 2026-08-19**: `estimator.py` == **`estimator_v2_6_1.py`**
@@ -513,72 +518,101 @@ Codex hook *registration* schema, because Codex is not installed here — see
 
 ## Next actions
 
-*Rewritten 2026-08-19 for a cold start. The previous list had duplicated
-numbering and four items whose deadlines had passed.*
+*Rewritten 2026-08-19 (night) at session close, after Stage 0 and Stage 1 item 5.
+Nothing below depends on chat history; every number has an artifact under
+`experiments/` and a contract in `experiments/LOG.md`.*
 
-**Start here.** `session-start`, then this list in order. Nothing below depends
-on chat history; every number has an artifact under `experiments/`.
+**Start here.** `session-start`, then this list in order.
 
-*Stage 0 (the instrument repair) is COMPLETE — see the section above. Items 2 and
-3 of the previous list are done: the Skeptic has now seen the v2.6 build and
-returned **ACCEPT**, after the odd-width defect it exposed was fixed.*
+### Waiting on Samuel — no agent may do these
 
-1. **Poll Phase 2 — it opens 2026-08-20 23:59 UTC and the config arrives by
-   email.** `uv run python local_sim/phase2_checklist.py`. Record into
-   `docs/RESEARCH_NOTES.md` §1: width, depth, `n_mlps`, `flop_budget`, λ, the
-   multiplier floor, and the flopscope/whestbench versions. **Nothing else in
-   this list should start before this is known**, because it decides whether the
-   two frozen constants still hold and whether the mechanistic lane reopens.
-   *Toolchain intel, 2026-08-19: **whestbench 0.15.0** shipped 2026-08-17 and
-   requires **flopscope >=0.11.0**. Its `scoring.py`, `budget.py`, `domain.py`
-   and `generation.py` are **byte-identical to the installed 0.14.0**, so the
-   score identity, the 0.1 floor, λ = 1e11 and He-init/no-bias generation are
-   unchanged in the newest published evaluator. **What flopscope 0.11 does to the
-   PRICE TABLE is unknown** — that is the cost half, and it is our weakest half.*
+1. **The gate-change contract.** Adopt the paired **arithmetic** score difference
+   as the primary promotion statistic, with the **studentised t or basic
+   bootstrap** interval, demoting the geometric mean to a stability diagnostic.
+   **STRATEGIC** — its own Slice Contract, Samuel's written prediction, a Skeptic.
+   `docs/VALIDATION.md` §2b is deliberately **unchanged** until then. *All the
+   evidence already exists*: the two estimands select opposite winners on our own
+   graded data, and every candidate interval's false-promotion rate is measured.
 
-2. **The gate-change contract** — adopt the paired arithmetic score difference as
-   the primary promotion statistic, with the studentised t or basic bootstrap
-   interval, demoting the geometric mean to a stability diagnostic. **STRATEGIC**:
-   it needs its own Slice Contract, Samuel's prediction, and a Skeptic.
-   `docs/VALIDATION.md` §2b is deliberately **unchanged** until then. The evidence
-   it needs already exists (Stage 0, above): the two estimands disagree on our own
-   graded data, and the coverage of every candidate interval is now measured.
+2. **The E1 → E2 reclassification of the cost half.** `residual ≈ 2.551 ms +
+   5.780 µs/op` (R² = 0.898, LOO 0.829 ms) fitted on **five** graded submissions,
+   and residual is only 1.9–3.3% of `C` on the grader — so `C` is determined to
+   well under 1%. **STRATEGIC**, because the E1 label gates the "no autonomous
+   optimisation loop" rule in `AGENTS.md` § *Capabilities*. Caveat to weigh:
+   v2.6.1 sits at 2,370 ops and the fit is calibrated on 329–1,352, a **1.75×
+   extrapolation**.
 
-3. **If the shape moved: re-fit before gating.** `_PRUNE_TAU` (constants audit
-   selected −2.5 at 256×32; −3.0 is worse at 22.6σ, −2.0 at 13.3σ) and
-   `_BASIS_RANK` (32, chosen for reproducibility not accuracy — rank 256 was
-   1.0108× better at only 0.7σ). The alive-fraction optimum and the effective rank
-   of `J Jᵀ` both depend on width and depth. Use a design block; **D17 is the
-   single-use decision block and must not be spent on a shape that no longer
-   exists.**
+3. **The vault's baseline is instrument-incomparable with its own future.** Touch
+   #1 (v2.4.1, median 2.4651e-7, 2026-08-06) came from the OLD evaluator — a torch
+   mirror of v2.4 priced by a v2.4 cost model. Every future touch runs the real
+   estimator under real flopscope. **Do not difference touch #2 against touch #1
+   and call it an improvement.** Either re-baseline (spending one of three
+   touches) or treat #1 as historical. Best decided *after* the Phase-2 shape,
+   since a shape change forces a re-mint anyway. Counter is at **1 of 3**.
 
-4. **Gate v2.6 on D17**, three-model residual rule, paired geometric mean, CI
-   excluding 1.0. Then **one vault touch** (counter is at 1 of 3). Gate on `V·c`,
-   not on MSE — MSE is already known to cost 0.51%.
+### Blocked on the organisers
 
-5. **First Phase 2 submission — the instrument that decides #2 of the open
-   questions.** It returns the grader's own residual telemetry for the new
-   carrier, which is the only way to settle the local/graded disagreement.
-   **Requires Samuel's explicit approval** (hard rule 6). Order is always
-   `whest validate` → clean mini run (`n_failed_mlps: 0`) → ask. Consider
-   submitting frozen **v2.4.1 first** purely for configuration telemetry, then
-   v2.6, so the two are separable on the grader's own numbers.
+4. **Poll Phase 2.** `uv run python local_sim/phase2_checklist.py`. As of
+   2026-08-19 round 1429 is **UPCOMING** (0 leaderboard entries, no `v1-phase2`
+   tag) and width/depth/`n_mlps`/`B`/λ/floor are all unpublished. Record into
+   `docs/RESEARCH_NOTES.md` §1b when they land. *Toolchain intel already gathered:
+   **whestbench 0.15.0** (2026-08-17) has `scoring.py`, `budget.py`, `domain.py`
+   and `generation.py` **byte-identical** to the installed 0.14.0, so the score
+   identity, the 0.1 floor, λ = 1e11 and He-init/no-bias generation are unchanged.
+   It requires **flopscope ≥ 0.11**, and **what that does to the PRICE TABLE is
+   unknown** — that is the cost half.*
 
-6. **Two questions to the organisers** — `docs/email-draft-organizers.md` already
-   exists. (a) Is there a Phase 2 write-up round, and when? (b) One designated
-   submission or two — the announcement (18143) says two, the Rules tab says one,
-   a participant raised it and it was not answered.
+5. **Two questions to the organisers** — `docs/email-draft-organizers.md` exists.
+   (a) Is there a Phase 2 write-up round, and when? (b) One designated submission
+   or two — announcement 18143 says two, the Rules tab says one, unanswered.
 
-7. **Team freeze 2026-09-05 23:59 UTC**, 17 days out. Decide if this stays a
-   solo entry.
+6. **Team freeze 2026-09-05 23:59 UTC.** Solo or not.
 
-8. **Not before #1:** the degree-4/5 design carrier (open question #3) and the
-   Moonshot's D10 renormalization fit (open question #4, kill-by-default Sep 1).
-   Both are real; both are conditioned on the Phase 2 shape.
+### Ready to run once 1–2 are decided
 
-**Explicitly NOT next**, each closed by measurement this month and recorded in
-§ *Closed lanes*: any further input-space variance device (whitening, tent,
-sphere, antithetic, degree-3 designs); mid-layer or layer-1 control variates;
-MLMC over depth; more N-as-an-operating-point work; and chasing the sub-1e-8
-board entries, which three independent forensic analyses fail to explain by any
+7. **If the shape moved, re-fit before gating**: `_PRUNE_TAU` (−2.5 at 256×32;
+   −3.0 worse at 22.6σ, −2.0 at 13.3σ) and `_BASIS_RANK` (32; rank 256 was
+   1.0108× better at only 0.7σ). Use a **DESIGN** block — D16 has 330 free, D18
+   has 216. **D17 and D19 are single-use and unspent; neither may be spent on a
+   shape that no longer exists.**
+
+8. **Gate v2.6.1 on D19** (not D17 — keep one clean block in reserve). Use the
+   **arithmetic** statistic and the **calibrated** residual line, not the old
+   three-model rule. Current projection: **net V·c 1.0940×, i.e. 2.6314e-7 →
+   ~2.405e-7**, known to well under 1% on the cost side. Then **one vault touch**,
+   after decision 3 above.
+
+9. **First Phase 2 submission.** Requires **Samuel's explicit approval** (hard
+   rule 6). Order is always `whest validate` → clean mini run
+   (`n_failed_mlps: 0`) → ask. Consider frozen **v2.4.1 first** purely for
+   configuration telemetry, then v2.6.1, so the two are separable on the grader's
+   own numbers — and each new graded submission adds a point to the residual fit.
+
+### Open research, ranked
+
+10. **The affordable degree-4 design.** The carrier is **measured at 1.4775×**
+    [+14.4%, +45.9%] and needs 131,072 points at `C/B = 1.3509` — over the failure
+    cliff. **Two of four routes are closed with proofs** (smaller linear array;
+    subspace cubature). What remains is a **non-linear array or spherical
+    4-design near the 33,152 floor** — pure design theory, no networks, no seed
+    block, no grader. It is the only thing between this project and a measured
+    1.48×, worth `2.6314e-7 / 1.4775 = 1.781e-7`.
+
+11. **Item 6 of the handoff — the fixed shallow analytic centre and layer-9
+    control.** Still unstarted, and **now known NOT to unlock the carrier** (a
+    control variate reduces variance at unchanged cost; the final layer still
+    needs every sample propagated through all 32 layers). Note it also brushes a
+    closed lane — `docs/CURRENT_STATE.md` § *Closed lanes* kills linear mid-layer
+    control variates — so reopening needs a stated reopening condition.
+
+12. **Moonshot D10 renormalization fit**, kill-by-default **2026-09-01**.
+
+**Explicitly NOT next**, each closed by measurement and recorded in § *Closed
+lanes*: any further input-space variance device (whitening, tent, sphere,
+antithetic, degree-3 designs); mid-layer or layer-1 *linear* control variates;
+MLMC over depth; more N-as-an-operating-point work; **a smaller LINEAR orthogonal
+array (131,072 is the proven floor at width 256)**; **a design confined to the
+rank-32 subspace (the rotation is the mechanism and needs all 256 columns)**; and
+chasing the sub-1e-8 board entries, which three independent forensic analyses
+fail to explain by any
 constructible estimator.

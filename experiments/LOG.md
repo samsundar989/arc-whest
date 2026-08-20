@@ -6386,3 +6386,97 @@ is the useful outcome: nobody should spend time on either again. What remains is
 a genuine open problem in design theory, and it is the only thing standing between
 this project and a measured 1.48x.
 
+
+---
+
+# 2026-08-19 (night) — SESSION CLOSE
+
+**Everything is committed and pushed.** Working tree clean at `33c0dc9`. Seven
+commits. `docs/CURRENT_STATE.md` § *Next actions* is rewritten for a cold start
+and is the only thing the next session needs to read after `session-start`.
+
+## What this session did
+
+| slice | class | outcome |
+|---|---|---|
+| **P0.1** canonical scorer | IMPORTANT | `local_sim/competition_score.py`, bitwise-equal to whestbench 0.14.0. **71/71**. Skeptic **PROVISIONAL** |
+| **P0.4** seed ledger | IMPORTANT | `local_sim/seed_ledger.py` + `experiments/seed_ledger.jsonl`, preflight step 6. **40/40** negative tests |
+| interval coverage | IMPORTANT | `local_sim/coverage_lab.py`, 192 fresh networks (D18) |
+| **P0.3** odd-width repair | **STRATEGIC** | `estimator.py` → **v2.6.1**. **27/27**. Skeptic **ACCEPT** |
+| **P0.2** vault repair | IMPORTANT | candidate-aware, `--dry-run` deleted, touch bound to a sha256 |
+| item 4 gate reconstruction | ROUTINE | reproduces both CONFIRM artifacts bitwise |
+| residual calibration | IMPORTANT | five graded submissions, not one |
+| **Stage 1 item 5** carrier | IMPORTANT | design **measured at 1.4775×**, and **unaffordable** |
+| route 1 / route 2 closure | ROUTINE / IMPORTANT | two affordability routes **closed with proofs** |
+
+**Fourteen pre-registered predictions were falsified.** Five of them were the
+findings; the rest were mis-specified tolerances or statistics that could not
+measure what they claimed. The recurring error — bitten **four** times — is *a
+tolerance that ignores the estimator's own sampling error*. Worth remembering.
+
+## The seven durable facts
+
+1. **The competition objective is the arithmetic mean over the FIFTY public MLPs**,
+   reproducible offline **bitwise** from a graded report. A failure is priced at
+   multiplier **1.0**, not the 0.1 floor — exactly `1/mult_i`, 4.6–5.4× here.
+2. **Arithmetic and geometric estimands select OPPOSITE winners on our own graded
+   data** (v2.4 → v2.4.1: 1.0334× vs 0.9666×, same 50 rows).
+3. **Use the studentised t or basic bootstrap. Never BCa at n ≈ 50** — measured
+   false-promotion rate 9.1–11.5% against a nominal 5%, because CRN makes the
+   *paired difference* nearly symmetric even though the scores are heavy-tailed.
+4. **The grader's residual is a LINE**: `2.551 ms + 5.780 µs/op`, R² = 0.898,
+   fitted on five graded submissions. **2.551 ms is fixed overhead.** Residual is
+   only 1.9–3.3% of `C` on the grader, so the cost half was never as uncertain as
+   the local measurement suggested.
+5. **Layer-0 alphas are EXACTLY 0.0** — never compare them with a strict `>`
+   against their own minimum. v2.6 did, and deleted the whole first layer on every
+   odd width.
+6. **Allocating a seed block is not consuming it.** D16 read "reusable" for nine
+   days while five probes had drawn 270 of its seeds, two of them the same 24.
+7. **A ±1 cube array is a degree-4 design only in expectation over SPREAD
+   directions**, and the random rotation is what makes that true. That is why the
+   design works and why it cannot be shrunk.
+
+## Where the shipped file stands
+
+`estimator.py` == `estimator_v2_6_1.py`, **NOT promoted**. Graded number of record
+is still **v2.4.1 = 2.6314e-7** (submission 327743). Projected under the
+calibrated residual line: **net V·c 1.0940× → ~2.405e-7**, known to well under 1%
+on the cost side, against a bracket that used to span 17 points and flip sign.
+
+## State of the protected things
+
+- **Vault: 1 of 3 touches.** Untouched all session; manifest mtime still
+  2026-08-06.
+- **D17 and D19: SINGLE_USE, both unspent.** D16 has 330 free, D18 has 216.
+- **Nothing submitted.** `docs/HUMAN_MODEL.md` never written by an agent.
+- **preflight GREEN 6/6**, portability **174/174**, invariants **30/30**.
+
+## Three decisions waiting, all Samuel's
+
+1. The **gate change** (arithmetic primary, t/basic interval) — evidence complete.
+2. The **E1 → E2** reclassification of the cost half — it gates the autonomy rule.
+3. **Vault re-baselining** — touch #1 came from the old instrument.
+
+## The one open research problem
+
+A **non-linear orthogonal array or spherical 4-design near 33,152 points** on 256
+dimensions. Pure design theory: no networks, no seed block, no grader. It is the
+only thing between this project and a measured **1.4775×** — worth
+`2.6314e-7 / 1.4775 = 1.781e-7`, roughly half the remaining gap to the best
+published honest score (9.10e-8).
+
+
+**Addendum at close — a fourth instance of the recurring error.** The seed-ledger
+test's D18 assertion went stale twice in one session: first "D18 has zero
+consumption" (the coverage lab claimed 192), then "exactly one claim of 192 by
+coverage_lab" (the OA probe claimed 192 more). **A test of a LIVE, growing ledger
+must assert invariants, not a snapshot.** Replaced with: the accounting closes
+(`consumed + free == block size`) and every claim names a real consumer inside the
+block. 41/41.
+
+That is the same failure mode as predictions B4 and R1 and the rotation check —
+**an assertion written against a moment rather than against a property.** Four
+instances in one session is a pattern worth naming, and it is now in
+`docs/GOTCHAS.md`.
+

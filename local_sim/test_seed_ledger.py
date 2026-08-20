@@ -18,8 +18,10 @@ fire, and D16's free gaps are asserted as literals. No network is ever minted fr
 any of them and no truth is drawn, so this is not consumption — but the scan cannot
 know that, so the file declares it in the pragma below. The declaration is itself
 checked: `t_real_ledger_readonly` asserts the real ledger records zero consumption
-for D17/D18/D19 and exactly 270 for D16, which would fail if this file ever did
-mint from them.
+for D17/D19 and exactly 270 for D16, which would fail if this file ever did mint
+from them. D18 is LIVE and grows, so it is checked by invariant (accounting closes,
+every claim names a real consumer inside the block) rather than by snapshot — two
+earlier snapshot assertions went stale within hours of being written.
 """
 
 # seed-ledger: excludes D16, D17, D18, D19
@@ -272,15 +274,23 @@ def t_real_ledger_readonly():
     check("A2: D17 has zero consumption", SL.consumed_seeds("D17") == 0)
     check("A2: D19 (the reserved single-use gate block) has zero consumption",
           SL.consumed_seeds("D19") == 0)
-    # D18 was clean when A2 was written; the interval-coverage study has since
-    # claimed its first 192 seeds through claim(). Assert the claim is exactly
-    # what that study says it took, rather than that the block is untouched.
+    # D18 is a LIVE design block and grows as experiments claim from it. Two
+    # earlier versions of this check asserted a SNAPSHOT ("zero consumption",
+    # then "exactly 192 by coverage_lab") and both went stale within hours. A
+    # test of a growing ledger must assert INVARIANTS, not a moment in time.
     d18 = SL.consumed_ranges("D18")
+    lo, hi = SL.block_span("D18")
     check(
-        "D18 shows exactly one claim, 192 seeds, by coverage_lab",
-        SL.consumed_seeds("D18") == 192 and len(d18) == 1
-        and d18[0][2] == "local_sim/coverage_lab.py",
-        f"{SL.consumed_seeds('D18')} consumed by {[c for _s, _e, c in d18]}",
+        "D18 accounting closes: consumed + free == the block",
+        SL.consumed_seeds("D18") + sum(e - s + 1 for s, e in SL.free_ranges("D18"))
+        == hi - lo + 1,
+        f"{SL.consumed_seeds('D18')} consumed, "
+        f"{sum(e - s + 1 for s, e in SL.free_ranges('D18'))} free of {hi - lo + 1}",
+    )
+    check(
+        "every D18 claim names a real consumer inside the block",
+        all(c and lo <= a and b <= hi for a, b, c in d18) and len(d18) >= 1,
+        f"{len(d18)} claim(s): {[c for _a, _b, c in d18]}",
     )
     check(
         "A6: D16 shows 270 distinct seeds consumed, 330 free",

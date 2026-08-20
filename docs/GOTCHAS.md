@@ -65,6 +65,17 @@ narrative record), `docs/GAME_PLAN.md` (strategy, rev 12 is authoritative).
   ordering, for the reason above: BCa corrects a skew that CRN already removed.
   BCa only becomes the best method past skew ~6, which no real arm reaches.
 
+- **Assert PROPERTIES, not snapshots — and never with a tolerance that ignores
+  the estimator's own sampling error.** This bit four separate checks in a single
+  session (2026-08-19): a 2% bar on counted FLOPs that have a **3.22%**
+  per-network spread (v2.4.1 prunes; v1.1 does not and reads exactly 0.00%); a
+  false-promotion rate read off a column whose population mean was not zero; a
+  rotation check using an isotropic probe, which is rotation-invariant *by
+  construction* and can never see alignment; and a seed-ledger assertion pinned to
+  a snapshot of a block that grows every time an experiment claims from it. Before
+  writing a check, ask what its own noise is, and whether the statistic can
+  measure the thing being claimed.
+
 - **A ±1 cube array is a degree-4 design only IN EXPECTATION OVER SPREAD
   DIRECTIONS, and the random rotation is what makes that true.** For such a point
   set `E[(a·u)⁴] = (3 − 2S)/65536` with `S = Σaᵢ⁴`, against the spherical

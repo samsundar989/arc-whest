@@ -1,5 +1,17 @@
 # BENCHMARK.md — where we actually stand
 
+> **Update 2026-08-19 (night).** Two numbers changed what this table means.
+> **(a)** v2.6.1's projected score, under the residual line now calibrated on five
+> graded submissions rather than one ratio: **2.6314e-7 → ~2.405e-7**, known to
+> well under 1% on the cost side. **(b)** A true degree-4 angular design measures
+> **1.4775×** [+14.4%, +45.9%] against the shipped stack at matched cost on fresh
+> networks — which would be **~1.781e-7**, roughly half the remaining gap to the
+> best published-and-explained honest score of 9.10e-8. It is **not deployable**:
+> the array needs 131,072 points at `C/B = 1.3509`, over the failure cliff, and
+> two of the four routes to affordability are now closed with proofs. Full record:
+> `experiments/LOG.md` 2026-08-19 (night); status: `docs/CURRENT_STATE.md`.
+
+
 **PRIVATE. The census in §3 is a screen, not an accusation. Names never leave
 this repo; nothing here goes on the forum. Cf. RESEARCH_NOTES §2g rule 2.**
 
