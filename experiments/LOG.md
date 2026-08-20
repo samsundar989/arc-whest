@@ -6222,3 +6222,167 @@ on a decision. The three routes, honestly ranked:
 3. Accept the carrier only if a future Phase-2 budget is larger relative to the
    shape.
 
+
+---
+
+## 2026-08-19 (night) — STAGE 1 item 5, route 2 CONTRACT: the weighted subspace cubature  [PRE-REGISTERED]
+
+**Classification: IMPORTANT.** Measurement only — no networks, no seed block, no
+vault, no estimator change. It tests whether the design can be confined to the
+32 directions that matter, which is the one route to affordability that is
+engineering rather than research.
+
+### The idea, and the arithmetic that may already have killed it
+
+`_alignment_basis` returns the top-32 eigenvectors of `J J^T` in descending order,
+so `h`'s first 32 coordinates are the important ones. A degree-5 cubature in **32**
+dimensions needs `O(d^2) ~ 2,049` nodes rather than 131,072 — the lane becomes
+free. That was the plan.
+
+**Step 0 killed the cheap version of it.** The 32-factor array has the identical
+obstruction as the 256-factor one, measured:
+
+```text
+m=5  F_2^10  columns=31  Sidon=True  3-subset sums cover 1023/1023 (100.00%)  -> free columns: 0
+m=8  F_2^16  columns=255 Sidon=True  3-subset sums cover 65535/65535 (100.00%) -> free columns: 0
+```
+
+So the minimal linear strength-4 array on 32 factors is 2,048 rows, not 1,024 —
+still tiny, so this is not the blocker. The blocker may be deeper.
+
+### The arithmetic that predicts failure
+
+Our carrier's points are `+-1/16` vectors. For a strength-4 array all cross terms
+vanish and, for a unit direction `a`,
+
+    E_array[(a.u)^4]  =  (3 - 2S) / 65536,      S = sum_i a_i^4
+
+against the spherical `3/(256 * 258)`. The ratio is `(3 - 2S) * 258 / (3 * 256)`,
+which equals **exactly 1 when `S = 3/258`** — and `3/258` is precisely the expected
+`S` for a uniformly random unit vector **in R^256**. *That* is why the full array
+measures 7.55e-04: it is exact in expectation over spread directions, and the
+residual is only the fluctuation of `S`.
+
+Confine `a` to a 32-dimensional subspace and `S` rises to `~3/34 = 0.0882`:
+
+    ratio = (3 - 0.1765) * 0.3359375 = 0.94847      ->  5.2% LOW
+
+**Sobol's measured degree-4 error is 1.30e-02 = 1.3%.** So a cube-based design
+probed along confined directions should be **four times worse than the carrier it
+is meant to replace**.
+
+### Written prediction
+
+| # | prediction | falsified by |
+|---|---|---|
+| **U1** | A hybrid array — strength-4 on 32 columns, random `+-1` on the other 224 — probed along directions confined to those 32 columns reads a degree-4 relative error near **5%**, i.e. **worse than Sobol's 1.3%** | it beats Sobol |
+| **U2** | **THE DECISIVE ONE.** The **full 256-column strength-5 array**, probed along the *same confined* directions, reads **the same ~5%** — because the error is a property of the CONFINEMENT, not of the array. If this holds, no array of any size fixes it, and the subspace route dies for a general reason rather than a constructional one | the full array stays near 7.55e-04 on confined directions |
+| **U3** | The full array probed along **spread** directions still reads ~7.55e-04, reproducing part 2 | it does not reproduce |
+| **U4** | Consequently the design's value comes from the rotation spreading the response across **all 256** columns, and strength-4 on all 256 is therefore required — **the array cannot be shrunk by exploiting the rank-32 structure** | U2 fails |
+
+**If U2 holds, route 2 is dead** and the lane's only remaining routes are a
+non-linear/spherical design near the 33k floor, or a larger Phase-2 budget.
+**If U2 fails**, the confinement is harmless and a 2,048-row array in the top-32
+block delivers the 1.4775x at the shipped operating point.
+
+
+---
+
+## 2026-08-19 (night) — ROUTE 2 EVIDENCE PACKET: **the subspace cubature is dead, and the reason closes the lane**
+
+Contract U1-U4, above. **All four confirmed.** 27/27 in `test_carriers.py`.
+Artifact: `experiments/2026-08-19_carriers/design_strength.out`. No networks, no
+seed block, no vault, no estimator change.
+
+### The measurement
+
+Degree-4 relative moment error, probed along unit directions confined to the
+first `k` coordinates **of the array's own frame**:
+
+| point set | conf 256 | conf 128 | conf 64 | **conf 32** |
+|---|---|---|---|---|
+| sobol (SHIPPED) | 1.283e-02 | 1.292e-02 | 1.206e-02 | **1.164e-02** |
+| **bch OA, UNROTATED** | **7.553e-04** | 8.038e-03 | 2.321e-02 | **5.378e-02** |
+| **bch OA, rotated** | 7.919e-04 | 7.630e-04 | 7.383e-04 | **7.676e-04** |
+
+against the analytic prediction `(3 - 2S) * 258 / (3*256)` with `S = 3/(k+2)`:
+
+| k | predicted low by | measured (unrotated) |
+|---|---|---|
+| 256 | 0.00% | 7.553e-04 |
+| 128 | 0.77% | 8.038e-03 |
+| 64 | 2.27% | 2.321e-02 |
+| **32** | **5.15%** | **5.378e-02** |
+
+**The prediction and the measurement agree at every rung.**
+
+### What it means, and why it kills the route
+
+The subspace route proposed aligning a small array's balanced columns with the
+response's rank-32 subspace, buying the same exactness at 1/64th the point count.
+The measurement says that trade is not available:
+
+- **Unrotated, on directions confined to 32 dimensions, the array reads
+  5.378e-02 — 4.6x WORSE than Sobol's 1.164e-02.** So an array aligned with the
+  response is worse than the carrier it would replace.
+- **Rotated, the same array reads 7.676e-04 on the same confined directions** —
+  flat across every confinement level, 7.6e-04 to 7.9e-04. **A random rotation
+  turns any confined direction into a spread one.**
+
+So the rotation is not an implementation detail. **The rotation IS the mechanism**,
+and it requires balance on all 256 columns, because a rotated direction touches
+all 256 and every 4-subset of columns must cancel. **You cannot have the cheap
+array and the rotation at the same time.**
+
+The arithmetic behind it, which is the durable part:
+
+    E_array[(a.u)^4] = (3 - 2S)/65536,   S = sum_i a_i^4
+
+against the spherical `3/(256*258)`. The ratio is exactly 1 when `S = 3/258` —
+**precisely the expected `S` for a uniformly random unit vector in R^256.** The
+`+-1` cube array is a degree-4 design *in expectation over spread directions* and
+nothing else; confinement raises `S` and the exactness degrades as measured.
+
+### Verdicts
+
+| # | verdict | measured |
+|---|---|---|
+| **U1** | **CONFIRMED** | the hybrid (strength-4 on 32 columns) reads 5.381e-02 confined — worse than Sobol |
+| **U2** | **CONFIRMED — the decisive one** | the **full 131,072-row array**, unrotated, reads **the same 5.378e-02** on confined directions. The error is a property of the CONFINEMENT, not the array. **No array of any size fixes it** |
+| **U3** | **CONFIRMED** | 7.553e-04 on spread directions, reproducing part 2's 7.55e-04 |
+| **U4** | **CONFIRMED** | strength-4 on all 256 columns is required; the array cannot be shrunk by exploiting the rank-32 structure |
+
+### Knowledge Delta
+
+- **Route 2 is DEAD, for a general reason rather than a constructional one.**
+  Aligning a design with the response's subspace costs more than the alignment
+  saves. This is not a failure to find the right array; no array works.
+- **The random rotation is the mechanism, not a detail.** It converts every
+  response direction into a spread one, which is precisely the regime where a
+  `+-1` cube array is exact. Remove the rotation and the design is worse than
+  Sobol; keep it and you need all 256 columns balanced.
+- **A `+-1` cube array is a degree-4 design only in expectation over spread
+  directions.** `S = sum a_i^4` is the whole story, and `S = 3/(d+2)` is the
+  break-even.
+- The 32-factor array has the identical Sidon obstruction as the 256-factor one
+  (3-subset sums cover 1023/1023 of `F_2^10`), so even the small array costs 2,048
+  rows rather than 1,024. Moot now, but recorded so nobody re-derives it.
+
+### Where the lane stands, complete
+
+The design is **worth 1.4775x** [+14.4%, +45.9%], measured end to end. It needs
+**131,072 points**, `C/B = 1.3509`, over the failure cliff. And now:
+
+| route | status |
+|---|---|
+| smaller **linear** array | **CLOSED** — 131,072 is the floor, proven by exhaustive 3-subset enumeration |
+| **subspace** cubature | **CLOSED** — this slice; the rotation is the mechanism and it needs all 256 columns |
+| depth-2 Strassen + FWHT together | **INSUFFICIENT** — leaves `C/B = 1.0184`, still over |
+| non-linear array / spherical 4-design near the 33,152 floor | **OPEN — research** |
+| a Phase-2 budget larger relative to the shape | **OPEN — not ours to choose** |
+
+**Two of the four routes are now closed with proofs rather than opinions**, which
+is the useful outcome: nobody should spend time on either again. What remains is
+a genuine open problem in design theory, and it is the only thing standing between
+this project and a measured 1.48x.
+

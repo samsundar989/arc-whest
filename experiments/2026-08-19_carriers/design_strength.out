@@ -51,6 +51,25 @@ CARRIER DESIGN STRENGTH — how exact is each point set, and to what degree?
   probed along the AXES, the unrotated OA is badly wrong at degree 4 ok   axis-probe 1.5259e-05 == 1/d^2, which is 0.336x the spherical value
   probed along RANDOM directions the same points are near-exact ok   7.550e-04 relative — -880x closer than the axis probe
 
+2c. is the degree-4 error the ARRAY's or the DIRECTION's?
+---------------------------------------------------------
+  point set                   conf 256      conf 128       conf 64       conf 32
+  ------------------------------------------------------------------------------
+  sobol (SHIPPED)            1.283e-02     1.292e-02     1.206e-02     1.164e-02
+  bch OA, UNROTATED          7.553e-04     8.038e-03     2.321e-02     5.378e-02
+  bch OA, rotated            7.919e-04     7.630e-04     7.383e-04     7.676e-04
+
+  predicted (3-2S)*258/(3*256), S = 3/(k+2):
+    confined to k=256  ratio 1.00000  -> 0.00% low
+    confined to k=128  ratio 0.99231  -> 0.77% low
+    confined to k= 64  ratio 0.97727  -> 2.27% low
+    confined to k= 32  ratio 0.94853  -> 5.15% low
+  the array beats Sobol by >10x on SPREAD directions         ok   17.0x
+  UNROTATED, it LOSES to Sobol on directions confined to 32 dims ok   OA 5.378e-02 vs sobol 1.164e-02 (4.6x worse)
+  and that confined error matches the analytic (3-2S) prediction ok   5.378e-02 vs predicted 5.15e-02
+  ROTATION removes the confinement penalty entirely          ok   rotated 7.676e-04 vs unrotated 5.378e-02 — a random rotation turns any confined direction into a spread one
+  SO the design cannot be shrunk to the rank-32 subspace     ok   aligning the balanced columns with the response costs more than it saves
+
 3. the pre-registered predictions
 ---------------------------------
   S1: Haar frames are EXACT at degree 2                      ok   rel err 4.392e-15
@@ -64,4 +83,4 @@ CARRIER DESIGN STRENGTH — how exact is each point set, and to what degree?
   S5: 129 x 256 x 2 == 66,048 signed directions (Team Puffi's figure) ok   66,048
   S5: a 66,048-direction bank is 4.03x the shipped operating point ok   4.03x N = 16,384
 
-22/22 checks passed
+27/27 checks passed

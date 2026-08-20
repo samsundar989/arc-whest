@@ -65,6 +65,17 @@ narrative record), `docs/GAME_PLAN.md` (strategy, rev 12 is authoritative).
   ordering, for the reason above: BCa corrects a skew that CRN already removed.
   BCa only becomes the best method past skew ~6, which no real arm reaches.
 
+- **A ±1 cube array is a degree-4 design only IN EXPECTATION OVER SPREAD
+  DIRECTIONS, and the random rotation is what makes that true.** For such a point
+  set `E[(a·u)⁴] = (3 − 2S)/65536` with `S = Σaᵢ⁴`, against the spherical
+  `3/(256·258)` — equal exactly when `S = 3/258`, which is the expected `S` for a
+  random unit vector in R²⁵⁶. Confine the direction and it degrades as predicted:
+  0.00 / 0.77 / 2.27 / **5.15%** low at k = 256/128/64/32, measured 7.55e-04 /
+  8.04e-03 / 2.32e-02 / **5.38e-02**. **Unrotated and confined to 32 dims the
+  array is 4.6× WORSE than Sobol; rotated it is flat at 7.7e-04.** So a design
+  cannot be aligned with the response's rank-32 subspace to save points — the
+  alignment costs more than it saves, and balance on all 256 columns is required.
+
 - **The grader's residual is a LINE, not a ratio — and we had the data for a
   month.** Fitted on all five graded submissions:
   **`residual ≈ 2.551 ms + 5.780 µs/op`** (R² = 0.898, leave-one-out 0.829 ms).

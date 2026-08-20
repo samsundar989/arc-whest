@@ -336,14 +336,21 @@ and have moved to § Closed lanes; what is left is genuinely short.*
    **Both known cost levers together are not enough**: depth-2 Strassen (1.267×)
    and an FWHT first layer (1.047×) leave `C/B = 1.0184` — still over, and far too
    close to a cliff that scores as a *failure*.
-   **The most promising untried route is a weighted subspace cubature.** The
-   estimator already rotates so `h`'s first 32 coordinates are the top-32
-   eigendirections of `J Jᵀ`, and a degree-5 Gaussian cubature in **32** dimensions
-   needs `O(d²) ≈ 2,049` nodes rather than 131,072. The obstruction is unequal
-   weights, turning `h.mean(axis=0)` into a weighted mean — small, and
-   flopscope-cheap. Nothing in the repo has tried it.
-   If any route lands, `2.6314e-7 / 1.4775 = 1.781e-7` — roughly half the
-   remaining gap to the best published honest score (9.10e-8), in one step.
+   **The subspace route is CLOSED too, and the reason is the mechanism.** Probed
+   along directions confined to 32 dimensions of its own frame, the *unrotated*
+   array reads **5.378e-02** — 4.6× *worse* than Sobol's 1.164e-02 — while the
+   *rotated* array reads **7.676e-04**, flat across every confinement level.
+   Matching `(3 − 2S)·258/(3·256)` with `S = Σaᵢ⁴ = 3/(k+2)` at every rung
+   (predicted 0.00 / 0.77 / 2.27 / 5.15% low at k = 256/128/64/32).
+   **The random rotation IS the mechanism**: it turns every response direction
+   into a spread one, which is the only regime where a ±1 cube array is exact —
+   and that requires balance on **all 256** columns. You cannot have the cheap
+   array and the rotation at once.
+   **Two of four routes are now closed with proofs.** What remains: a non-linear
+   array or spherical 4-design near the 33,152 floor (**research**), or a Phase-2
+   budget larger relative to the shape (**not ours to choose**). If either lands,
+   `2.6314e-7 / 1.4775 = 1.781e-7` — roughly half the remaining gap to the best
+   published honest score (9.10e-8), in one step.
 
 3. **Where does the ~2.6× to the published honest frontier come from?**
    Unresolved and possibly unresolvable from public data. Their sample counts are

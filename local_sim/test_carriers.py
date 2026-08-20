@@ -233,6 +233,78 @@ def t_oa_is_a_cube_design_not_a_sphere_design(profiles):
           f"closer than the axis probe")
 
 
+def t_confinement(profiles):
+    """Is the degree-4 error a property of the ARRAY, or of the DIRECTION?
+
+    This is the test that killed the subspace route. The estimator's response
+    lives in a rank-32 subspace (`_alignment_basis`), so it looked as though a
+    design confined to 32 dimensions would deliver the same gain at 1/64th the
+    point count. It cannot, and the reason is arithmetic rather than
+    constructional.
+
+    For a `+-1/16` point set with all 4-subsets balanced,
+
+        E[(a.u)^4] = (3 - 2S) / 65536,     S = sum_i a_i^4
+
+    against the spherical `3/(256*258)`. The ratio is `(3 - 2S)*258/(3*256)`,
+    which is **exactly 1 when S = 3/258** — precisely the expected S for a random
+    unit vector in R^256. So the array is exact in expectation for SPREAD
+    directions and increasingly wrong for confined ones, whatever its size.
+    """
+    head("2c. is the degree-4 error the ARRAY's or the DIRECTION's?")
+    rng = np.random.default_rng(20260819)
+    want = exact_moment(4, DIM)
+
+    def dirs(k):
+        a = np.zeros((DIM, 1200))
+        a[:k] = rng.standard_normal((k, 1200))
+        return a / np.linalg.norm(a, axis=0, keepdims=True)
+
+    def err(pts, d):
+        got = ((to_sphere(pts) @ d) ** 4).mean(axis=0)
+        return float(np.sqrt(np.mean(((got - want) / want) ** 2)))
+
+    ks = (256, 128, 64, 32)
+    # The UNROTATED array is the one to probe: "confined to the first k
+    # coordinates" then means confined RELATIVE TO THE ARRAY'S OWN BALANCE
+    # STRUCTURE, which is exactly the subspace route's proposal (align the
+    # balanced columns with the response's subspace). The ROTATED array is the
+    # deployed case and is shown alongside, because the contrast IS the finding.
+    ks = (256, 128, 64, 32)
+    sets = {"sobol (SHIPPED)": build("sobol (SHIPPED)", N, DIM, 20260819),
+            "bch OA, UNROTATED": build("bch OA (unrotated)", 1 << 17, DIM, 20260819),
+            "bch OA, rotated": build("bch OA (rotated)", 1 << 17, DIM, 20260819)}
+    D = {k: dirs(k) for k in ks}
+    print(f"  {'point set':<22}" + "".join(f"{'conf ' + str(k):>14}" for k in ks))
+    print("  " + "-" * (22 + 14 * len(ks)))
+    out = {}
+    for nm, P in sets.items():
+        out[nm] = {k: err(P, D[k]) for k in ks}
+        print(f"  {nm:<22}" + "".join(f"{out[nm][k]:>14.3e}" for k in ks))
+    print("\n  predicted (3-2S)*258/(3*256), S = 3/(k+2):")
+    for k in ks:
+        S = 3.0 / (k + 2)
+        print(f"    confined to k={k:>3}  ratio {(3 - 2*S)*258/(3*256):.5f}  "
+              f"-> {(1 - (3 - 2*S)*258/(3*256))*100:.2f}% low")
+
+    raw, rot, sob = (out["bch OA, UNROTATED"], out["bch OA, rotated"],
+                     out["sobol (SHIPPED)"])
+    check("the array beats Sobol by >10x on SPREAD directions",
+          sob[256] / raw[256] > 10, f"{sob[256] / raw[256]:.1f}x")
+    check("UNROTATED, it LOSES to Sobol on directions confined to 32 dims",
+          raw[32] > sob[32], f"OA {raw[32]:.3e} vs sobol {sob[32]:.3e} "
+          f"({raw[32] / sob[32]:.1f}x worse)")
+    check("and that confined error matches the analytic (3-2S) prediction",
+          abs(raw[32] / 0.0515 - 1) < 0.20, f"{raw[32]:.3e} vs predicted 5.15e-02")
+    check("ROTATION removes the confinement penalty entirely",
+          rot[32] < raw[32] / 10,
+          f"rotated {rot[32]:.3e} vs unrotated {raw[32]:.3e} — a random rotation "
+          f"turns any confined direction into a spread one")
+    check("SO the design cannot be shrunk to the rank-32 subspace",
+          raw[32] > sob[32] and rot[32] < sob[32],
+          "aligning the balanced columns with the response costs more than it saves")
+
+
 def t_predictions(profiles):
     head("3. the pre-registered predictions")
     base = profiles["iid"]
@@ -287,6 +359,7 @@ def main():
     t_radial_identity()
     profiles = t_design_strength()
     t_oa_is_a_cube_design_not_a_sphere_design(profiles)
+    t_confinement(profiles)
     t_predictions(profiles)
     n_ok = sum(1 for r in RESULTS if r)
     print(f"\n{n_ok}/{len(RESULTS)} checks passed")
