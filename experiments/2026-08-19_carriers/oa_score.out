@@ -1,0 +1,67 @@
+﻿====================================================================================================
+OA CARRIER, END TO END — paired on fresh D18 networks
+====================================================================================================
+
+48 networks, GT 2^24, sigma_gt^2 = 3.4852e-09
+C = counted FLOPs only; this machine's residual is E1 (docs/CURRENT_STATE.md).
+
+  arm                     raw MSE  GT-subtracted   counted/MLP     C/B     adjusted
+  ----------------------------------------------------------------------------------
+  A sobol N=16384     2.14948e-06    2.14599e-06    5.1923e+10  0.1909  4.06009e-07
+  B sobol N=131072    2.53683e-07    2.50198e-07    3.6741e+11  1.3508  3.38893e-07
+  C bchOA N=131072    1.71103e-07    1.67618e-07    3.6744e+11  1.3509  2.29366e-07
+
+--- B sobol N=131072  ->  C bchOA N=131072   (the DESIGN's own contribution, matched cost) --------
+paired, n = 48 MLPs   (B sobol N=131072 vs C bchOA N=131072)
+  mean score          B sobol N=131072: 3.388930e-07   C bchOA N=131072: 2.293657e-07
+  PRIMARY  arithmetic mean difference (ctrl - cand, >0 = candidate better)
+      delta            +1.095273e-07
+      relative         +32.319%   (gain 1.4775x)
+      bootstrap 95% CI [+4.2288e-08, +1.7972e-07]  (20000 resamples, seed 12345)
+      BCa       95% CI [+4.3423e-08, +1.8109e-07]   (2x the false-promotion rate at n~50 — do not gate on it)
+      relative  95% CI [+14.396%, +45.923%]
+      studentised   CI [+3.7953e-08, +1.8110e-07]   <- READ THIS ONE (measured at nominal coverage; see coverage_lab)
+  SECONDARY  geometric mean of per-MLP ratios (>1 = candidate better)
+      gain             1.4321x   95% CI [1.1714, 1.7507]
+  candidate better on 33/48   sign-test p = 0.0133
+  [raw] raw-MSE gain 1.4826x   adjusted gain 1.4775x   better on 33/48
+  [GT-subtracted] raw-MSE gain 1.4927x   adjusted gain 1.4874x   better on 33/48
+
+--- A sobol N=16384  ->  C bchOA N=131072   (vs the shipped operating point) --------
+paired, n = 48 MLPs   (A sobol N=16384 vs C bchOA N=131072)
+  mean score          A sobol N=16384: 4.060094e-07   C bchOA N=131072: 2.293657e-07
+  PRIMARY  arithmetic mean difference (ctrl - cand, >0 = candidate better)
+      delta            +1.766437e-07
+      relative         +43.507%   (gain 1.7701x)
+      bootstrap 95% CI [+8.5543e-08, +2.8466e-07]  (20000 resamples, seed 12345)
+      BCa       95% CI [+9.6878e-08, +3.0844e-07]   (2x the false-promotion rate at n~50 — do not gate on it)
+      relative  95% CI [+27.812%, +54.411%]
+      studentised   CI [+7.2827e-08, +2.8046e-07]   <- READ THIS ONE (measured at nominal coverage; see coverage_lab)
+  SECONDARY  geometric mean of per-MLP ratios (>1 = candidate better)
+      gain             1.4547x   95% CI [1.2064, 1.7540]
+  candidate better on 35/48   sign-test p = 0.0021
+  [raw] raw-MSE gain 12.5625x   adjusted gain 1.7701x   better on 35/48
+  [GT-subtracted] raw-MSE gain 12.8029x   adjusted gain 1.8037x   better on 36/48
+
+--- A sobol N=16384  ->  B sobol N=131072   (the flat-adjusted law, as a check) --------
+paired, n = 48 MLPs   (A sobol N=16384 vs B sobol N=131072)
+  mean score          A sobol N=16384: 4.060094e-07   B sobol N=131072: 3.388930e-07
+  PRIMARY  arithmetic mean difference (ctrl - cand, >0 = candidate better)
+      delta            +6.711640e-08
+      relative         +16.531%   (gain 1.1980x)
+      bootstrap 95% CI [-3.8620e-08, +1.9255e-07]  (20000 resamples, seed 12345)
+      BCa       95% CI [-2.4211e-08, +2.1732e-07]   (2x the false-promotion rate at n~50 — do not gate on it)
+      relative  95% CI [-12.337%, +37.267%]
+      studentised   CI [-5.2884e-08, +1.8712e-07]   <- READ THIS ONE (measured at nominal coverage; see coverage_lab)
+  SECONDARY  geometric mean of per-MLP ratios (>1 = candidate better)
+      gain             1.0158x   95% CI [0.8281, 1.2460]
+  candidate better on 20/48   sign-test p = 0.3123
+  [raw] raw-MSE gain 8.4731x   adjusted gain 1.1980x   better on 20/48
+  [GT-subtracted] raw-MSE gain 8.5772x   adjusted gain 1.2127x   better on 20/48
+
+--- what the grader would actually do (C > B is a FAILURE) --------------------
+  A sobol N=16384      0/48 MLPs over budget   objective if failed 4.06009e-07   (DEPLOYABLE)
+  B sobol N=131072    48/48 MLPs over budget   objective if failed 2.53683e-07   (NOT DEPLOYABLE)
+  C bchOA N=131072    48/48 MLPs over budget   objective if failed 1.71103e-07   (NOT DEPLOYABLE)
+
+saved C:\Users\samsu\Documents\arc-whest\experiments\2026-08-19_carriers\oa_score.json

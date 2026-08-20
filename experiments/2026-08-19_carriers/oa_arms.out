@@ -12,3 +12,14 @@ At line:1 char:333
 
 OA table (131072, 256) in 9.2s — used WHOLE. centroid norm 0.000e+00
 
+     8/48     88.5s  eta   442.3s   A 1.5809e-06   B 2.7634e-07   C 1.5798e-07
+    16/48    160.4s  eta   320.7s   A 1.3418e-06   B 2.4699e-07   C 1.3245e-07
+    24/48    229.4s  eta   229.4s   A 1.8796e-06   B 2.6946e-07   C 1.5465e-07
+    32/48    296.8s  eta   148.4s   A 2.1662e-06   B 2.4807e-07   C 1.6833e-07
+    40/48    362.0s  eta    72.4s   A 2.1001e-06   B 2.3435e-07   C 1.7047e-07
+    48/48    426.4s  eta     0.0s   A 2.1495e-06   B 2.5368e-07   C 1.7110e-07
+
+saved C:\Users\samsu\Documents\arc-whest\experiments\2026-08-19_carriers\oa_arms.json
+  A sobol N=16384    MSE 2.14948e-06   counted 5.1923e+10   C/B 0.1909
+  B sobol N=131072   MSE 2.53683e-07   counted 3.6741e+11   C/B 1.3508
+  C bchOA N=131072   MSE 1.71103e-07   counted 3.6744e+11   C/B 1.3509

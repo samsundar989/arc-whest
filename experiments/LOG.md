@@ -5955,3 +5955,136 @@ Three routes, in the order they look affordable:
   carrier that buys degree-4/5 exactness is 8x the point count, and a dense first
   layer cannot pay for it.
 
+
+---
+
+## 2026-08-19 (night) — STAGE 1 item 5 EVIDENCE PACKET: **the design is worth 1.48x, and we cannot afford it**
+
+Contract T1-T5, above. **T1, T4, T5 confirmed; T2 and T3 falsified.** 48 fresh D18
+networks, GT 2^24, sigma_gt^2 = 3.485e-09. Artifacts:
+`experiments/2026-08-19_carriers/oa_{arms,score}.{json,out}`.
+
+### The three arms
+
+| arm | raw MSE | GT-subtracted | counted/MLP | C/B | adjusted |
+|---|---|---|---|---|---|
+| A sobol N=16,384 | 2.14948e-06 | 2.14599e-06 | 5.1923e10 | **0.1909** | 4.06009e-07 |
+| B sobol N=131,072 | 2.53683e-07 | 2.50198e-07 | 3.6741e11 | **1.3508** | 3.38893e-07 |
+| C bchOA N=131,072 | 1.71103e-07 | 1.67618e-07 | 3.6744e11 | **1.3509** | 2.29366e-07 |
+
+### T1 — the design's own contribution, at matched point count AND matched cost
+
+`B -> C`, paired on the same 48 networks, costs identical to 4 significant
+figures (3.6741e11 vs 3.6744e11):
+
+```text
+raw-MSE gain                1.4826x          GT-subtracted 1.4927x
+adjusted gain               1.4775x
+arithmetic difference       +1.095273e-07   (+32.319%)
+studentised 95% CI          [+3.7953e-08, +1.8110e-07]     <- excludes zero
+relative 95% CI             [+14.396%, +45.923%]
+geometric (secondary)       1.4321x  [1.1714, 1.7507]
+better on                   33/48    sign-test p = 0.0133
+```
+
+**CONFIRMED, inside the pre-registered [1.10x, 1.60x].** And it lands within 1.5%
+of the **~1.46x external ceiling** `docs/CURRENT_STATE.md` derived independently
+from the layer-32 harmonic spectrum — two unrelated routes to the same number.
+
+**This is the largest measured effect in the project.** Every other input-space
+device died between 0.98x and 1.09x.
+
+### T4 — the rotation fold is free, as designed
+
+Counted FLOPs differ by **0.008%** between arms B and C (3.6741e11 vs 3.6744e11).
+Folding the random rotation into the first-layer weight instead of rotating
+131,072 x 256 points costs one 256x256 matmul. **The design is free at matched N;
+the entire cost of the lane is the point count.**
+
+### T5 — unbiased, as the homogeneity argument requires
+
+Subtracting the per-network GT-noise floor moves the gain from 1.4826x to
+1.4927x — **0.68%**, inside the predicted 3%. No arm's GT-subtracted MSE went
+negative.
+
+### T2 — FALSIFIED, and the decomposition is worth keeping
+
+I predicted `A -> B` would differ by less than 5% under the flat-adjusted law
+(`adjusted = V*c/B`, independent of N). Measured **1.1980x** — a 20% violation.
+It decomposes exactly:
+
+| factor | value | why |
+|---|---|---|
+| `MSE x N` ratio | **1.0591** | QMC beats the 1/N law by 5.9% at 8x the points |
+| counted-FLOPs-per-point ratio | **1.1306** | the fixed closure cost amortises over more points |
+| product | **1.1974** | vs the measured **1.1980** |
+
+**The flat law is an approximation that breaks in the candidate's favour**, and
+both terms push the same way. This also confirms D03's finding (N = 65,536 read
+1.0408x better) with a mechanism rather than a number.
+
+### T3 — FALSIFIED, because it was written for a point set that does not exist
+
+I predicted arm C's `C/B` would land in [0.75, 0.85]. That was written for the
+**halved** 65,536-row array, which turned out to be degenerate (constant column,
+centroid norm 1.0). The whole array measures **C/B = 1.3509**.
+
+### The blocker, stated precisely
+
+**48 of 48 MLPs are over budget in both arms B and C.** On the real grader
+`C > B` is a **failure**: multiplier forced to 1.0 *and* predictions zeroed. So
+neither arm is deployable, and the 1.4775x is the value of a carrier we cannot
+currently run.
+
+**And the obvious fix does not work.** I speculated earlier today that the
+frontier teams' FWHT first layer is what makes this affordable. Measured: the
+first layer is `131,072 x 256 x 256 x 2 = 1.718e10` of a total **3.674e11** —
+**4.7%**. Even a free first layer leaves `C/B = 1.29`. **The cost is the 32-layer
+chain, not the first layer.** That speculation is withdrawn.
+
+The cost is `N x depth x width^2`, so the only levers are:
+
+1. **A smaller genuine strength-4 array.** The Rao bound for strength 4 on 256
+   two-level factors is **32,897 runs**; ours is 131,072, i.e. **4x** the
+   information-theoretic minimum. At 32,768 points `C/B ~ 0.34` and the lane is
+   comfortably affordable. **This is the highest-value open construction problem
+   in the project** — and it is pure combinatorics, needing no networks, no seed
+   block and no grader.
+2. Cheaper propagation across all 32 layers — Strassen (v2.6.1 already, 10.5%),
+   more aggressive pruning (trades accuracy), or structured weights.
+3. A shallower control layer, which is item 6 of the plan.
+
+### What it would be worth if solved
+
+At matched cost the design is **1.4775x**. Applied to the graded number of record:
+
+    2.6314e-07 / 1.4775  =  1.781e-07
+
+against the best *published and explained* honest score of 9.10e-8. That would
+close roughly **half** the remaining gap to the published frontier in one step.
+**Conditional on a construction that does not exist yet**, and not a projection of
+anything currently runnable.
+
+### Knowledge Delta
+
+- **A true degree-4/5 design is worth 1.4775x [+14.4%, +45.9%] against the shipped
+  stack at matched cost** — measured, paired, on fresh networks, with the interval
+  the coverage study selected. Within 1.5% of the independently derived ~1.46x
+  ceiling.
+- **The design is free; the point count is the cost.** Matched-N arms differ by
+  0.008% in counted FLOPs.
+- **FWHT is not the answer to affordability** — the first layer is 4.7% of the
+  chain. Withdrawn.
+- **The flat-adjusted law breaks by 20% in the candidate's favour at 8x N**, and
+  splits cleanly into QMC superconvergence (1.059) and closure amortisation
+  (1.131).
+- **The open problem is now purely combinatorial**: a strength-4 orthogonal array
+  on 256 two-level factors with ~32,768 runs. Rao says 32,897 is the floor; we are
+  at 4x it.
+
+### Out of scope, unchanged
+
+No gate. No single-use block — **D17 and D19 remain unspent**; this slice used
+D18[30,806,018,192..383], a DESIGN block. No vault touch. `estimator.py` was run,
+never edited. Nothing submitted.
+

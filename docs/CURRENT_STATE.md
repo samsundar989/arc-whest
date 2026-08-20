@@ -311,13 +311,26 @@ and have moved to § Closed lanes; what is left is genuinely short.*
    error is **0.0305× iid — 17× better than the shipped carrier** — and **0.138×
    at degree 6**, where every other carrier we have sits at 0.76–1.09×. No
    Kerdock/Z₄ machinery was needed.
-   **The binding constraint is now COST, not construction.** 131,072 points is
-   8× the operating point → projected `C/B ≈ 1.59`, which **fails the hard `C > B`
-   cliff** (scored as a failure: multiplier 1.0 *and* zeroed predictions). One row
-   per antipodal pair is 65,536 → `C/B ≈ 0.80`, affordable. The Rao bound says
-   strength 4 on 256 factors needs ≥ 32,897 runs, so there may be a tighter
-   construction. **No end-to-end number yet** — moment exactness is a property of
-   the point set; what it is worth needs a paired run on a DESIGN block.
+   **MEASURED END TO END, same night: the design is worth 1.4775x and we cannot
+   afford it.** 48 fresh D18 networks, GT 2^24, arms matched at 131,072 points and
+   at cost (counted FLOPs differ by 0.008%): **adjusted gain 1.4775×, studentised
+   95% CI [+3.80e-08, +1.81e-07] excluding zero, relative [+14.4%, +45.9%], better
+   on 33/48, sign-test p = 0.013.** Raw-MSE gain 1.4826×. **This is the largest
+   measured effect in the project** — every other input-space device died between
+   0.98× and 1.09× — and it lands within 1.5% of the ~1.46× ceiling derived
+   independently from the harmonic spectrum.
+   **The blocker is cost, and it is hard.** `C/B = 1.3509`: **48 of 48 MLPs over
+   budget**, which the grader scores as a *failure* (multiplier 1.0 *and* zeroed
+   predictions). The array only works whole — halving it gives a constant column
+   and centroid norm 1.0 (41× worse end to end), and a *random* half is worse than
+   Sobol at k=2 and k=4. **And FWHT is not the fix**: the first layer is only
+   **4.7%** of the 32-layer chain (1.718e10 of 3.674e11), so even a free first
+   layer leaves `C/B = 1.29`. That earlier speculation is withdrawn.
+   **The open problem is now purely combinatorial**: a strength-4 OA on 256
+   two-level factors at ~32,768 runs. Rao's floor is 32,897; ours is 131,072, i.e.
+   **4× the minimum**. It needs no networks, no seed block and no grader. If
+   solved, `2.6314e-7 / 1.4775 = 1.781e-7` — roughly half the remaining gap to the
+   best published honest score (9.10e-8), closed in one step.
 
 3. **Where does the ~2.6× to the published honest frontier come from?**
    Unresolved and possibly unresolvable from public data. Their sample counts are

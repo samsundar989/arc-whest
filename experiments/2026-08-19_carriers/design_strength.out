@@ -28,6 +28,7 @@ CARRIER DESIGN STRENGTH — how exact is each point set, and to what degree?
   sobol+anti+sphere       16384   1.323e-18   4.082e-03   5.378e-17   1.931e-02   5.797e-16   5.614e-02
   haar frames             16384   4.092e-18   4.392e-15   1.546e-17   1.782e-02   1.206e-16   5.601e-02
   bch OA (rotated)       131072   3.012e-16   8.231e-15   9.072e-16   7.772e-04   3.913e-15   7.086e-03
+  bch OA half (random)    65536   2.823e-03   3.774e-03   1.103e-02   8.671e-03   8.618e-02   1.976e-02
   bch OA (unrotated)     131072   2.833e-16   8.538e-15   9.282e-16   7.550e-04   4.149e-15   7.148e-03
 
   ratio to iid (smaller = the carrier is doing more work at that degree)
@@ -40,6 +41,7 @@ CARRIER DESIGN STRENGTH — how exact is each point set, and to what degree?
   sobol+anti+sphere               1.734e-16   3.658e-01   1.839e-15   7.579e-01   2.530e-15   1.092e+00
   haar frames                     5.364e-16   3.936e-13   5.286e-16   6.995e-01   5.265e-16   1.089e+00
   bch OA (rotated)                3.947e-14   7.376e-13   3.101e-14   3.051e-02   1.708e-14   1.378e-01
+  bch OA half (random)            3.699e-01   3.382e-01   3.771e-01   3.403e-01   3.761e-01   3.843e-01
   bch OA (unrotated)              3.713e-14   7.651e-13   3.173e-14   2.963e-02   1.811e-14   1.390e-01
 
 2b. the OA is a design for the CUBE. Is it one for the sphere?

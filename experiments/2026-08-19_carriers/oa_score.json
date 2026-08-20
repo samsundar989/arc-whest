@@ -1,0 +1,131 @@
+{
+ "summary": {
+  "A sobol N=16384": {
+   "mse_raw": 2.1494763315908963e-06,
+   "mse_sub": 2.1459911151952084e-06,
+   "counted": 51923356810.125,
+   "cb": 0.19089469415487134,
+   "adjusted_raw": 4.0600941871763027e-07,
+   "adjusted_sub": 4.0535319623031145e-07
+  },
+  "B sobol N=131072": {
+   "mse_raw": 2.5368284625215216e-07,
+   "mse_sub": 2.501976298564642e-07,
+   "counted": 367410624308.7917,
+   "cb": 1.3507743540764399,
+   "adjusted_raw": 3.388930193418706e-07,
+   "adjusted_sub": 3.342579690079628e-07
+  },
+  "C bchOA N=131072": {
+   "mse_raw": 1.7110318240057254e-07,
+   "mse_sub": 1.676179660048846e-07,
+   "counted": 367444113204.7917,
+   "cb": 1.3508974750176168,
+   "adjusted_raw": 2.2936568234400007e-07,
+   "adjusted_sub": 2.2473020290696952e-07
+  }
+ },
+ "pairs": {
+  "B sobol N=131072 -> C bchOA N=131072 [raw]": {
+   "why": "the DESIGN's own contribution, matched cost",
+   "mse_gain": 1.4826307885860999,
+   "arithmetic_gain": 1.4775227744558692,
+   "relative_improvement": 0.3231914815199567,
+   "t_ci_difference": [
+    3.7952544713642115e-08,
+    1.8110212928209886e-07
+   ],
+   "boot_ci_relative": [
+    0.1439568707475254,
+    0.4592319320504696
+   ],
+   "geometric_gain": 1.43206016695657,
+   "n_candidate_better": 33
+  },
+  "B sobol N=131072 -> C bchOA N=131072 [GT-subtracted]": {
+   "why": "the DESIGN's own contribution, matched cost",
+   "mse_gain": 1.4926659463769723,
+   "arithmetic_gain": 1.4873744814190997,
+   "relative_improvement": 0.3276743600939672,
+   "t_ci_difference": [
+    3.795296745240821e-08,
+    1.8110256474957846e-07
+   ],
+   "boot_ci_relative": [
+    0.14623008516670574,
+    0.4649564681431622
+   ],
+   "geometric_gain": 1.4422277482059624,
+   "n_candidate_better": 33
+  },
+  "A sobol N=16384 -> C bchOA N=131072 [raw]": {
+   "why": "vs the shipped operating point",
+   "mse_gain": 12.562456766927461,
+   "arithmetic_gain": 1.7701402170037883,
+   "relative_improvement": 0.43507300133961097,
+   "t_ci_difference": [
+    7.282739553183248e-08,
+    2.80460077215428e-07
+   ],
+   "boot_ci_relative": [
+    0.27811976173811825,
+    0.5441114613831128
+   ],
+   "geometric_gain": 1.454680522449423,
+   "n_candidate_better": 35
+  },
+  "A sobol N=16384 -> C bchOA N=131072 [GT-subtracted]": {
+   "why": "vs the shipped operating point",
+   "mse_gain": 12.802870517666774,
+   "arithmetic_gain": 1.8037326135379923,
+   "relative_improvement": 0.44559410164541174,
+   "t_ci_difference": [
+    7.652649312817415e-08,
+    2.847194935185097e-07
+   ],
+   "boot_ci_relative": [
+    0.29118132711376593,
+    0.5531528723614694
+   ],
+   "geometric_gain": 1.4870431314876473,
+   "n_candidate_better": 36
+  },
+  "A sobol N=16384 -> B sobol N=131072 [raw]": {
+   "why": "the flat-adjusted law, as a check",
+   "mse_gain": 8.473085048306299,
+   "arithmetic_gain": 1.1980459777722763,
+   "relative_improvement": 0.16530749357427488,
+   "t_ci_difference": [
+    -5.2884060721103756e-08,
+    1.8711685947262325e-07
+   ],
+   "boot_ci_relative": [
+    -0.1233664692880476,
+    0.372670664505487
+   ],
+   "geometric_gain": 1.015795673963145,
+   "n_candidate_better": 20
+  },
+  "A sobol N=16384 -> B sobol N=131072 [GT-subtracted]": {
+   "why": "the flat-adjusted law, as a check",
+   "mse_gain": 8.577184030185823,
+   "arithmetic_gain": 1.2126956836163119,
+   "relative_improvement": 0.1753908144391542,
+   "t_ci_difference": [
+    -4.9117331098813354e-08,
+    1.913077855435106e-07
+   ],
+   "boot_ci_relative": [
+    -0.11143158087396175,
+    0.38117492448051593
+   ],
+   "geometric_gain": 1.0310737214267527,
+   "n_candidate_better": 20
+  }
+ },
+ "over_budget": {
+  "A sobol N=16384": 0,
+  "B sobol N=131072": 48,
+  "C bchOA N=131072": 48
+ }
+}

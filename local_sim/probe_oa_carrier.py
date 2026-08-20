@@ -13,9 +13,13 @@ RESPONSE, and only a paired end-to-end run answers it.
 
 THE THREE ARMS, and why the middle one is the important one
 ------------------------------------------------------------
-    A  sobol   N = 16,384    the shipped operating point — the incumbent
-    B  sobol   N = 65,536    MATCHED POINT COUNT — isolates "more points"
-    C  bch OA  N = 65,536    MATCHED POINT COUNT — isolates "the design"
+    A  sobol   N =  16,384   the shipped operating point — the incumbent
+    B  sobol   N = 131,072   MATCHED POINT COUNT — isolates "more points"
+    C  bch OA  N = 131,072   MATCHED POINT COUNT — isolates "the design"
+
+The arms are matched at 131,072 because the array only works WHOLE: halving it
+returns the linear code, which has a constant column and a centroid of norm 1.0,
+and a RANDOM half is worse than Sobol at k=2 and k=4. See the note on ARMS.
 
 `C vs B` is the design's own contribution. `C vs A` is the deployable comparison.
 Without B, any gain could simply be 4x the samples — and `docs/CURRENT_STATE.md`'s
@@ -31,7 +35,7 @@ SUBSTITUTION: a device must be tested against the stack it would join, never bar
 THE ROTATION IS FOLDED INTO W1, NOT APPLIED TO THE POINTS
 ----------------------------------------------------------
 The OA must be randomly rotated to be unbiased and to stop being axis-aligned.
-Rotating 65,536 x 256 points costs ~8.6e9 FLOPs, 16% of the shipped spend.
+Rotating 131,072 x 256 points costs ~1.7e10 FLOPs, a third of the shipped spend.
 `h @ (R^T S) == (h R^T) @ S`, so rotating the first-layer weight instead costs one
 256x256 matmul, ~3.3e7 FLOPs. Same estimator, ~260x cheaper.
 
@@ -247,6 +251,13 @@ def phase_score(a):
     sg2 = np.asarray(A["sigma_gt2"])
     labels = [lbl for lbl, _, _ in ARMS]
 
+    # Arms B and C run at N = 131,072 and land at C/B ~ 1.35 — OVER the budget.
+    # `score_suite` refuses those by default, which is the guard working: on the
+    # real grader C > B is a FAILURE (multiplier 1.0 AND zeroed predictions). Both
+    # readings are reported below: "ignore" is the counterfactual value of the
+    # design if it were affordable, "fail" is what the grader would actually do.
+    MODE = "ignore"
+
     def rows(lbl, gt_sub):
         mse = np.asarray(per[lbl]["mse"])
         if gt_sub:
@@ -268,8 +279,8 @@ def phase_score(a):
     print("  " + "-" * 82)
     summ = {}
     for lbl in labels:
-        s_raw = score_suite(rows(lbl, False))
-        s_sub = score_suite(rows(lbl, True))
+        s_raw = score_suite(rows(lbl, False), on_over_budget=MODE)
+        s_sub = score_suite(rows(lbl, True), on_over_budget=MODE)
         summ[lbl] = {"mse_raw": s_raw.mean_mse, "mse_sub": s_sub.mean_mse,
                      "counted": float(np.mean(per[lbl]["flops"])),
                      "cb": s_raw.mean_multiplier,
@@ -279,13 +290,13 @@ def phase_score(a):
               f"{s_raw.objective:>13.5e}")
 
     out = {"summary": summ, "pairs": {}}
-    pairs = [("B sobol N=65536", "C bchOA N=65536", "the DESIGN's own contribution"),
-             ("A sobol N=16384", "C bchOA N=65536", "the DEPLOYABLE comparison"),
-             ("A sobol N=16384", "B sobol N=65536", "the flat-adjusted law, as a check")]
+    pairs = [(labels[1], labels[2], "the DESIGN's own contribution, matched cost"),
+             (labels[0], labels[2], "vs the shipped operating point"),
+             (labels[0], labels[1], "the flat-adjusted law, as a check")]
     for ctrl, cand, why in pairs:
         for gt_sub in (False, True):
-            sc = score_suite(rows(ctrl, gt_sub))
-            sk = score_suite(rows(cand, gt_sub))
+            sc = score_suite(rows(ctrl, gt_sub), on_over_budget=MODE)
+            sk = score_suite(rows(cand, gt_sub), on_over_budget=MODE)
             r = paired_compare(sc.scores, sk.scores)
             mse_gain = sc.mean_mse / sk.mean_mse
             tag = "GT-subtracted" if gt_sub else "raw"
@@ -305,6 +316,18 @@ def phase_score(a):
             print(f"  [{tag}] raw-MSE gain {mse_gain:.4f}x   "
                   f"adjusted gain {r.arithmetic_gain:.4f}x   "
                   f"better on {r.n_candidate_better}/{r.n}")
+
+    # What the grader would ACTUALLY do with an over-budget arm.
+    print("\n--- what the grader would actually do (C > B is a FAILURE) " + "-" * 20)
+    from competition_score import over_budget_rows
+    for lbl in labels:
+        rr = rows(lbl, False)
+        bad = over_budget_rows(rr)
+        sf = score_suite(rr, on_over_budget="fail")
+        print(f"  {lbl:<18}{len(bad):>4}/{len(rr)} MLPs over budget   "
+              f"objective if failed {sf.objective:.5e}   "
+              f"({'DEPLOYABLE' if not bad else 'NOT DEPLOYABLE'})")
+    out["over_budget"] = {lbl: len(over_budget_rows(rows(lbl, False))) for lbl in labels}
 
     os.makedirs(OUTDIR, exist_ok=True)
     with open(SCORE_JSON, "w", encoding="utf-8") as fh:
