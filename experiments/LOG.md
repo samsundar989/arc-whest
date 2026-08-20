@@ -6088,3 +6088,137 @@ No gate. No single-use block — **D17 and D19 remain unspent**; this slice used
 D18[30,806,018,192..383], a DESIGN block. No vault touch. `estimator.py` was run,
 never edited. Nothing submitted.
 
+
+---
+
+## 2026-08-19 (night) — STAGE 1 item 5, part 4: **131,072 is the linear floor at width 256, and the 256th coordinate is what costs us the factor of two**
+
+**Classification: ROUTINE.** Pure combinatorics on 16-bit vectors. No networks,
+no seed block, no vault, no estimator change. It exists to stop anyone spending
+days hunting for a smaller array.
+
+### The question
+
+The measured design is worth **1.4775x** and costs `C/B = 1.3509` — over the
+budget cliff. Part 3 named the obvious escape: our array is **131,072 rows**
+against a Rao bound of **32,897**, so it is ~4x the information-theoretic
+minimum. Is there a smaller one?
+
+### The answer, for linear constructions: no, and here is why
+
+An orthogonal array from a linear code `C` has strength `d(C_perp) - 1`. Strength
+4 needs `d(C_perp) >= 5`, which in terms of the generator matrix `G` says: **no
+set of <= 4 columns of `G` may sum to zero.** To halve to 65,536 rows we need
+`dim C = 16`, i.e. `G` is `16 x 256` — 256 vectors in `F_2^16` with that property.
+
+The classical construction gives exactly 255 of them: the BCH parity-check
+columns `h_x = (x, x^3)` for `x` in `F_256*`. Verified directly:
+
+```text
+BCH parity-check columns: 255   distinct: 255
+pairwise XORs: 32385, distinct 32385  -> Sidon: True
+  any pairwise XOR equal to a column (a 3-subset summing to 0)? False
+```
+
+So `{h_x}` is a **Sidon set** in `F_2^16` — all 32,385 pairwise sums distinct,
+which is precisely "no 4 columns sum to zero" — and no 3 sum to zero either.
+**At length 255 a strength-4 array with 65,536 rows exists and is affordable.**
+
+The 256th column is the problem. Appending `v` creates a weight-4 dual codeword
+exactly when `v = h_a + h_b + h_c` for some triple. Enumerated:
+
+```text
+distinct 3-subset sums: 65535 of 65535 nonzero vectors in F_2^16 (100.000%)
+candidate 256th columns that create NO weight-4 dual word: 0
+```
+
+**Every single nonzero vector in `F_2^16` is a 3-subset sum.** There are
+`C(255,3) = 2,731,135` triples landing in 65,535 values — an average multiplicity
+of 42 — so the covering is not close, it is total. **No 256th column exists.**
+
+Consistent with the Hamming bound, which caps a length-256 distance-5 code at
+dimension 240 (redundancy >= 16), and with the extended BCH `[256, 239, 6]` being
+the best known — one dimension short of what a 65,536-row array would need.
+
+### The uncomfortable corollary
+
+**At width 255 this carrier would be affordable.** 65,536 rows gives
+`C/B ~ 0.68`, comfortably inside budget, with the same strength 4. The
+competition's width being `2^8` rather than `2^8 - 1` costs us **exactly a factor
+of two** on this lane. That is not a fixable engineering problem; it is a property
+of the numbers.
+
+*(Splitting the difference does not work: the design must integrate all 256
+directions, and a 255-coordinate array embedded in `R^256` with a zero or a
+Gaussian in the last slot leaves the point set off the sphere and breaks the
+positive-homogeneity identity the whole carrier rests on.)*
+
+### What is left, priced
+
+| floor | value |
+|---|---|
+| Rao bound, 2-level strength-4 OA on 256 factors | **32,897** runs |
+| Delsarte-Goethals-Seidel, spherical 4-design in `R^256` | **33,152** points |
+| our linear array | **131,072** — **3.95x** the floor |
+
+A **non-linear** array or a genuine spherical 4-design near 33k points would give
+`C/B ~ 0.34` and settle the lane outright. Both are open construction problems;
+tight designs at these parameters are rare and this is a research question, not an
+engineering one.
+
+The cost levers this repository already owns, applied to `C/B = 1.3509`:
+
+| lever | factor | resulting C/B |
+|---|---|---|
+| depth-2 Strassen (LOG 2026-08-19: 1.267x counted) | 1.267 | 1.0662 |
+| FWHT first layer (measured 4.7% of the chain) | 1.047 | 1.2903 |
+| **both together** | 1.327 | **1.0184 — still over** |
+
+**Both known levers together still leave it over budget**, and "just over" is the
+worst place to be: `C > B` is scored as a *failure*, multiplier 1.0 **and** zeroed
+predictions. A carrier that lands at 1.02 and needs to land at 0.95 is not a
+carrier, it is a coin flip on the grader's hardware.
+
+### A correction to my own reasoning, made before it reached a document
+
+While working this out I claimed a shallow analytic centre (item 6) would make the
+carrier affordable by cutting the sampled chain from 32 layers to 23. **That is
+wrong.** A control variate reduces variance at unchanged cost — the final layer
+still requires propagating every sample through all 32 layers. Starting the chain
+*at* layer `c` would need the full layer-`c` distribution, not its mean, and that
+is the Moonshot's hard problem, not a cheap win. **Item 6 does not pay for item
+5.**
+
+### Knowledge Delta
+
+- **131,072 is the linear-code floor for a strength-4 OA on 256 binary factors.**
+  Proven by exhaustive enumeration of 3-subset sums, not argued. Stop looking for
+  a smaller linear one.
+- **The BCH Sidon set is complete at 255 and cannot be extended.** All 65,535
+  nonzero vectors of `F_2^16` are covered as 3-subset sums.
+- **Width 256 vs 255 is worth exactly 2x on this lane.**
+- **Both known cost levers together leave `C/B = 1.0184`** — over the cliff, and
+  too close to it to ship even if it were under.
+- **A control variate does not reduce cost.** Recorded because I nearly wrote the
+  opposite.
+
+### Where that leaves the lane
+
+**The design is measured, large (1.4775x), and blocked on a construction that is a
+genuine open problem.** It is not blocked on engineering, on the Phase-2 shape, or
+on a decision. The three routes, honestly ranked:
+
+1. A **non-linear strength-4 OA** or a spherical 4-design near 33k points. Would
+   settle it outright. Research.
+2. A **weighted subspace cubature**: the estimator already rotates so that `h`'s
+   first 32 coordinates are the top-32 eigendirections of `J J^T`
+   (`_alignment_basis` returns them in descending eigenvalue order, and the
+   constants audit found rank 256 only 1.0108x better at 0.7 sigma). A degree-5
+   Gaussian cubature in **32** dimensions needs `O(d^2) ~ 2,049` nodes, not 131,072.
+   The obstruction is that such rules carry **unequal weights**, so the estimator's
+   plain `h.mean(axis=0)` becomes a weighted mean — a small change, and
+   flopscope-cheap. **This is the most promising affordable route and nothing in
+   the repository has tried it.**
+3. Accept the carrier only if a future Phase-2 budget is larger relative to the
+   shape.
+

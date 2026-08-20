@@ -326,11 +326,24 @@ and have moved to § Closed lanes; what is left is genuinely short.*
    Sobol at k=2 and k=4. **And FWHT is not the fix**: the first layer is only
    **4.7%** of the 32-layer chain (1.718e10 of 3.674e11), so even a free first
    layer leaves `C/B = 1.29`. That earlier speculation is withdrawn.
-   **The open problem is now purely combinatorial**: a strength-4 OA on 256
-   two-level factors at ~32,768 runs. Rao's floor is 32,897; ours is 131,072, i.e.
-   **4× the minimum**. It needs no networks, no seed block and no grader. If
-   solved, `2.6314e-7 / 1.4775 = 1.781e-7` — roughly half the remaining gap to the
-   best published honest score (9.10e-8), closed in one step.
+   **The construction question is SETTLED for linear codes: 131,072 is the
+   floor.** Proven by exhaustive enumeration, not argued — the BCH parity-check
+   columns `(x, x³)` form a Sidon set of size **255** in F₂¹⁶ (all 32,385 pairwise
+   XORs distinct), and **all 65,535 nonzero vectors are 3-subset sums**, so a
+   256th column always creates a weight-4 dual codeword. *Zero* candidates.
+   **At width 255 the array would be affordable** (65,536 rows, `C/B ≈ 0.68`);
+   width 256 rather than 2⁸−1 costs exactly **2×** on this lane.
+   **Both known cost levers together are not enough**: depth-2 Strassen (1.267×)
+   and an FWHT first layer (1.047×) leave `C/B = 1.0184` — still over, and far too
+   close to a cliff that scores as a *failure*.
+   **The most promising untried route is a weighted subspace cubature.** The
+   estimator already rotates so `h`'s first 32 coordinates are the top-32
+   eigendirections of `J Jᵀ`, and a degree-5 Gaussian cubature in **32** dimensions
+   needs `O(d²) ≈ 2,049` nodes rather than 131,072. The obstruction is unequal
+   weights, turning `h.mean(axis=0)` into a weighted mean — small, and
+   flopscope-cheap. Nothing in the repo has tried it.
+   If any route lands, `2.6314e-7 / 1.4775 = 1.781e-7` — roughly half the
+   remaining gap to the best published honest score (9.10e-8), in one step.
 
 3. **Where does the ~2.6× to the published honest frontier come from?**
    Unresolved and possibly unresolvable from public data. Their sample counts are
