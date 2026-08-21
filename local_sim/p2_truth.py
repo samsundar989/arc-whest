@@ -161,6 +161,7 @@ def main() -> int:
         base = 1_000_003
         t0 = time.perf_counter()
         obs_l, pred_l = [], []
+        pm1, pm2, pv1, pv2 = [], [], [], []
         for i in range(a.smoke):
             w, _e, _s = canonical_mint(WIDTH, DEPTH, base + i)
             sa, sb = _replica_seeds(base + i)
@@ -169,6 +170,7 @@ def main() -> int:
             d = m1[-1] - m2[-1]
             obs_l.append(float((d ** 2).mean()))
             pred_l.append(float((v1.mean() + v2.mean()) / n_samples))
+            pm1.append(m1); pm2.append(m2); pv1.append(v1); pv2.append(v2)
         el = time.perf_counter() - t0
         obs, pred = float(np.mean(obs_l)), float(np.mean(pred_l))
         print(f"  {a.smoke} networks x 2 replicas in {el:.1f}s "
@@ -178,6 +180,25 @@ def main() -> int:
         print(f"  truth noise per replica ~ {pred / 2:.4e}")
         print(f"  projected wall time for 48 networks: "
               f"{el / max(a.smoke, 1) * 48 / 60:.1f} min")
+        if a.out:
+            # A PROBE truth file, so the downstream pipeline can be exercised
+            # end to end without spending a block. It is stamped `probe=1` and
+            # every consumer must refuse to treat it as evidence.
+            os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
+            np.savez_compressed(
+                a.out,
+                seeds=np.asarray([base + i for i in range(a.smoke)], dtype=np.int64),
+                means_r1=np.stack(pm1).astype(np.float32),
+                means_r2=np.stack(pm2).astype(np.float32),
+                var_r1=np.stack(pv1), var_r2=np.stack(pv2),
+                gt_noise=np.asarray(
+                    [(x.mean() + y.mean()) / 2.0 / n_samples
+                     for x, y in zip(pv1, pv2)], dtype=np.float64),
+                n_samples=np.int64(n_samples),
+                width=np.int64(WIDTH), depth=np.int64(DEPTH),
+                probe=np.int64(1),
+            )
+            print(f"  wrote PROBE truth (NOT evidence) -> {a.out}")
         print("=" * 78)
         return 0
 

@@ -8910,3 +8910,241 @@ against it.
 
 **Falsifier:** if closing the hole requires weakening any existing refusal, or if
 any SINGLE_USE/overlap verdict moves, the design is wrong and is reverted.
+
+---
+
+# 2026-08-21 — SLICE CONTRACT P2-CP1: which family owns the Phase-2 frontier, on block **P01**  [PRE-REGISTERED, no data yet]
+
+*Everything below is written before any Phase-2 seed has been claimed and before
+any arm has been scored against any fresh truth. The only 1024 x 16 accuracy
+number that exists at the time of writing is the P2-CP0.3 compatibility smoke on
+**public** rows, which selects nothing.*
+
+**Strategic question**
+At 1024 x 16 with `B = 2^41` and a 0.1 multiplier floor, which estimator family
+owns the accuracy/cost frontier — the analytic cumulant/closure family, or
+sampling? And within the analytic family, how much of the remaining error is the
+**post-ReLU covariance truncation** (removable, cheap) versus the **closure's
+non-Gaussianity** (removable only by a K3/Edgeworth correction)?
+
+**Current bottleneck**
+Every Phase-2 accuracy number in this repository is either a projection or a
+public-split compatibility readout. `docs/PHASE2_FRONTIER_ARCHITECTURE.md`
+projects the raw closure near **9.8e-7**; the shipped closure **measures 4.79e-6**
+on public rows, **4.9x worse**. The plan's ordering (deploy K2, then augmented K2,
+then goal-directed K3) rests on that projection, and it has already failed once.
+Nothing has been measured on fresh Phase-2 mints at all.
+
+**Evidence**
+
+- **CONFIRMED.** Mint parity at 1024 x 16, 16/16 bitwise against the organisers'
+  published `v2-phase2` weights, 4/4 on a second shard
+  (`experiments/2026-08-21_phase2_manifest/phase2_mint_parity_shard0_rows16.json`).
+- **CONFIRMED.** `B = 2^41`, floor 0.1, no biases, no separate output layer,
+  forward pass **33,554,432** FLOPs/sample measured under both flopscope releases.
+- **CONFIRMED.** The shipped analytic path costs **`C/B` = 0.062556 counted**,
+  effective 0.071–0.079, i.e. **under the floor**; residual would have to exceed
+  **0.823 s/MLP** at λ = 1e11 to lift it off.
+- **CONFIRMED.** The shipped closure's off-diagonal post-ReLU covariance,
+  `c_ij Φ_i Φ_j`, is **exactly the first-order Price/Hermite truncation** of the
+  exact map. Verified **bitwise** against `arm_k2p1`
+  (`local_sim/p2_test_arms.py` T2). Higher orders cost O(n²) per layer against
+  the O(n³) propagation — measured: order 6 costs `C/B` 0.063007 against order
+  1's 0.062556, i.e. **+0.72%**.
+- **CONFIRMED.** The series converges in the regime the network occupies: the
+  closure's own pre-activation |r| has p99 rising 0.081 → 0.314 over the 16
+  layers, and only 0.085% of pairs exceed 0.4 at the deepest layer. Order 3 is
+  within 2.6e-4 relative at |r| = 0.2.
+- **CONFIRMED.** The ladder is **not monotone**: `a_k = He_{k-2}(-α) φ(α)` changes
+  sign with α, so where `a_3(α_i)` and `a_3(α_j)` have opposite signs the order-3
+  rung overshoots — 22/150 grid points, e.g. α = (−0.3, 0.4), r = 0.6 where order
+  2 is off by 8.8e-5 and order 3 by 5.2e-4.
+- **CONFIRMED.** Sampling costs 33,587,196 FLOPs/sample end to end (+0.10%
+  overhead, **not** the card's 0.4–1%). Budget-maximal N = 62,190 at `C/B` 0.95;
+  floor-maximal N = 6,546.
+- **INFERRED (arithmetic, not measured).** From the published `avg_variance`
+  ≈ 0.0870, naive MC has raw MSE `0.087/N`; at N = 6,546 that is 1.33e-5 at
+  multiplier 0.1, i.e. adjusted **1.33e-6**, and at N = 62,190 it is 1.40e-6 at
+  multiplier 0.95, i.e. **1.33e-6** again — the flat-score law.
+- **SPECULATIVE.** That the Hermite correction is small relative to the closure's
+  total error. The order-1 → order-2 shift is 2.55e-4 relative on the final
+  layer and the ladder plateaus by order 3, but **shift is not error**: a shift
+  toward the truth and a shift away from it look identical without truth.
+
+**Hypothesis**
+
+**H1.** The analytic family owns the Phase-2 frontier. `k2p1` beats every
+sampling arm on canonical arithmetic score by **more than 2x**, because it sits
+under the floor while sampling's score is flat.
+
+**H2.** The Hermite ladder is a **small** win that converges by order 3.
+`k2p2` beats `k2p1` on arithmetic score, `k2p3`/`k2p4`/`k2p6` add little beyond
+`k2p2`, and **no rung reaches 1.25x**. Therefore *"augmented K2" as ARC's paper
+frames it cannot be the aggressive candidate*, and the aggressive lane must be
+K3/non-Gaussian.
+
+**H3.** The residual error is dominated by the closure's **non-Gaussianity**, not
+by its covariance truncation. Operationally: `MSE(k2p6) / MSE(k2p1) > 0.7`.
+
+**H4.** The flat-score law holds: `sample_iid_max` and `sample_iid_floor` score
+within 10% of each other despite a 9.5x budget difference.
+
+**Mechanism**
+The score is `MSE × max(0.1, C/B)`. Any estimator under `C/B` = 0.1 pays the same
+multiplier, so accuracy bought below the floor is free — and the whole analytic
+family sits at 0.063. A `1/N` sampler's score `(V/N)(Nc/B) = Vc/B` is independent
+of N, so sampling cannot buy its way past the floor. Within the analytic family,
+Price's theorem gives the post-ReLU covariance exactly as
+`Σ_k c^k/(k!(σ_iσ_j)^{k−1}) a_k(α_i) a_k(α_j)`, so the truncation error is a
+known, cheap, removable quantity — and what is left once it is removed is the
+Gaussian assumption itself.
+
+**Intervention**
+Score eleven arms — `k1`, `k2p1`, `k2p2`, `k2p3`, `k2p4`, `k2p6`, `k2p1_f32`,
+`sample_iid_max`, `sample_iid_floor`, `sample_orth`, `sample_lattice` — over the
+**same** fresh 1024 x 16 networks through the **one** canonical evaluator
+(`lifecycle_eval.evaluate`), against **two independent truth replicas**. Every arm
+differs from `k2p1` in exactly one place. Nothing is fitted.
+
+**Prediction (builder's, committed before the numbers exist)**
+
+| # | prediction |
+|---|---|
+| **P1** | `k2p1` beats `sample_iid_floor` on arithmetic score by **2.0x – 4.0x** |
+| **P2** | `sample_iid_max` and `sample_iid_floor` agree within **10%** |
+| **P3** | `k2p2` beats `k2p1`, arithmetic gain in **[1.02, 1.20]**, t interval excluding zero |
+| **P4** | `k2p6` beats `k2p2` by less than **1.03x** — the ladder plateaus |
+| **P5** | `MSE(k2p6)/MSE(k2p1) > 0.7` — covariance truncation is the minority of the error |
+| **P6** | `k2p1_f32` costs **0.0606** counted and loses **less than 1%** of score |
+| **P7** | `sample_orth` beats `sample_iid_floor` on raw MSE but **loses on score**, because its QR pushes `C/B` to 0.1093 and off the floor |
+| **P8** | `k1` is **10x – 40x** worse than `k2p1` on raw MSE |
+| **P9** | 0 failures on every arm; `sample_iid_max` does not exhaust the budget |
+| **P10** | the depth curve's layer-1 column is identical across all arms and equals the truth-noise floor — layer 1 is exact for every arm, so that column is a built-in calibration of the whole measurement |
+
+**Gate** — frozen now, passed to `decide(gate=...)`, which has no default
+
+- **The conservative statistic is the arithmetic mean of per-MLP canonical scores**
+  from `competition_score`, and the arm that owns the frontier is the one that
+  minimises it.
+- **Deployment gate for P2-CP2** (the conservative candidate): the winning arm
+  must beat `k2p1` — the currently shipped algorithm — with **arithmetic gain
+  ≥ 1.10x** and a **studentised-t 95% interval on the paired difference excluding
+  zero**, with **zero failures**. Below 1.10x, keep `k2p1` and record the ladder as
+  a measured negative.
+- **Aggressive-lane trigger for P2-CP4:** `MSE(k2p6)/MSE(k2p1) > 0.7`, i.e. the
+  Hermite ladder leaves most of the error standing. If instead that ratio is
+  **< 0.3**, the covariance truncation *was* the error, P2-CP3 becomes the whole
+  aggressive lane, and **K3 is deprioritised**.
+- **Sampling-lane kill:** if the best sampling arm's score exceeds the best
+  analytic arm's by **more than 1.5x**, the sampling architecture is closed for
+  Phase 2 and `_PRUNE_TAU` / `_BASIS_RANK` are **never refitted**.
+
+**Falsifier**
+
+- **H1 falsified** if any sampling arm's arithmetic score is at or below `k2p1`'s.
+  Then the floor argument is wrong or `avg_variance` is not what the card says,
+  and the whole checkpoint order has to be rebuilt.
+- **H2 falsified** if any Hermite rung reaches **1.25x** over `k2p1`. Then
+  augmented K2 *is* the aggressive candidate and P2-CP3 is promoted ahead of CP4.
+- **H3 falsified** if `MSE(k2p6)/MSE(k2p1) < 0.3`.
+- **H4 falsified** if the two iid arms differ by more than 10%; then the flat law
+  is broken at this operating point, exactly as it was at Phase 1 (T2, 2026-08-19),
+  and every argument resting on it must be re-derived.
+
+**Baseline**
+`arm_k2p1`, which is **BITWISE** the shipped `estimator.py` `_analytic_only` path
+at 1024 x 16 (`p2_test_arms.py` T2, max abs diff 0.000e+00). Tier: **DECIDE**,
+fresh mints on a new single-use-free DESIGN block.
+
+**Residual model** — REQUIRED, frozen here by name
+
+Three readings will be reported; **the deciding model is COUNTED FLOPs ONLY**, and
+the freeze is recorded here before the block is touched:
+
+1. **counted FLOPs only** — **FROZEN AS THE DECIDING MODEL.**
+2. local measured residual at λ = 1e11 — reported, never decides (this machine
+   runs 4.3–7.7x the grader's).
+3. the graded line `residual ≈ 2.551 ms + 5.780 µs/op` — reported, and flagged
+   as **doubly stale**: it was fitted on five *Phase-1* submissions at 256 x 32
+   under flopscope 0.10.
+
+Counted FLOPs is the right freeze **here and only here**, for a stated reason
+rather than convenience: every arm in this ladder sits at `C/B` between 0.00006
+and 0.95, and all the analytic arms are **under the 0.1 floor by a factor of 1.6**,
+so the multiplier is pinned at 0.1 for them regardless of any residual model that
+does not add 0.823 s/MLP. The cost half therefore cannot change the ranking of the
+analytic arms at all, and the sampling arms are separated by counted cost by
+construction. **This freeze does not transfer to P2-CP2 or later**, where a
+candidate may sit near the floor and the residual price becomes live again.
+
+**Statistic**
+Paired on common random numbers — every arm sees the same networks and the same
+truth. Binding: **arithmetic** paired score difference with the studentised-t 95%
+interval via `competition_score.decide()`. Geometric gain, estimand disagreement
+and biggest-mover share are reported as **diagnostics with no authority**.
+Percentile and BCa are refused by `decide()` itself. **One shift**: no arm here is
+randomised over point-set shifts, and the sampling arms derive their randomness
+from `mlp.seed` alone, so shift-averaging does not apply — this is stated because
+it is a real limitation on the sampling arms' precision, not an omission.
+
+**Truth and its noise**
+Two independent replicas per network, spawned from the evaluator's own sampling
+substream, at **2^22 = 4,194,304** samples each. Measured on a probe: replica
+disagreement 3.588e-8 against the predicted `2V/N` of 3.540e-8, **ratio 1.0137**,
+so independence is measured rather than assumed. Truth noise per replica
+**1.77e-8 ≈ 0.37%** of the expected signal. Both ordinary MSEs and the
+**cross-product** estimate `mean_j (p_j − y1_j)(p_j − y2_j)` are reported.
+
+**Confounders, and what is done about each**
+
+1. *An arm wins because it is cheaper, not better.* Both frames are reported
+   separately and the multiplier comes only from `competition_score`.
+2. *The ladder's rungs differ in more than one place.* They are **generated** from
+   one source, so they cannot drift; `--check` fails on drift.
+3. *Truth noise inflates every MSE equally.* The cross-product estimate removes
+   it; layer 1 is exact for every arm, so the depth curve's L1 column is an
+   independent read of the noise floor.
+4. *A sampling arm gets lucky on one realisation.* Reported with its per-MLP
+   spread and sign test; and the two iid arms at 9.5x different N cross-check.
+5. *flopscope 0.10 mis-prices a Phase-2 arm.* Every arm's cost is measured under
+   **both** 0.10 and 0.12 and any move is printed.
+6. *Public leakage.* The ladder reads a fresh DESIGN truth file and nothing else.
+   No public number enters any decision.
+
+**Scope** — files expected to change
+
+`local_sim/seed_blocks.py` (allocate block **P01**), `experiments/seed_ledger.jsonl`
+(one claim + one finalize, via the API), `experiments/2026-08-21_p2_cp1/` (truth
+npz + ladder json), `experiments/LOG.md`, `docs/CURRENT_STATE.md`.
+
+**Do not change**
+`estimator.py`. Any `estimator_v*.py`. The vault. D16–D19. The arms, once the
+block is claimed. `competition_score.py`. The gate above.
+
+**Evidence required**
+
+```powershell
+.\scripts\preflight.ps1                       # GREEN before the block is spent
+uv run python local_sim/p2_build_arms.py --check
+uv run python local_sim/p2_build_sampling_arms.py --check
+uv run python local_sim/p2_test_arms.py       # 14/14
+.venv-gpu\Scripts\python.exe local_sim/p2_truth.py --block P01 --n-mlps 48 `
+    --log2-samples 22 --ts 2026-08-21 --out experiments/2026-08-21_p2_cp1/truth_P01.npz
+uv run python local_sim/p2_lab.py --truth experiments/2026-08-21_p2_cp1/truth_P01.npz `
+    --out experiments/2026-08-21_p2_cp1/ladder.json
+```
+
+Artifacts: `truth_P01.npz` (finalized in the ledger), `ladder.json` with per-MLP
+cross-product MSEs, both cost readings, the depth curve and every paired interval.
+Runtime: truth ~8.4 min on the RTX 5090; the ladder ~30–60 min.
+
+**Seed block**
+A **new** block **P01**, DESIGN tier, 600 seeds, namespace `4_0821_xxx_xxx` so a
+Phase-2 seed is distinguishable from a Phase-1 one at a glance. D16–D19 are 256x32
+allocations and mint different-shaped networks; they are **not** reusable and are
+not touched. **D17 and D19 remain single-use and unspent.** 48 of P01's 600 seeds
+are claimed here; the remainder stays free for P2-CP2's disjoint DECIDE draw.
+
+**Driver**
+Claude Opus 5 (1M context), repo-local Builder. Recorded so a later reader knows
+what was in play — the entry does not depend on that agent's chat history.
