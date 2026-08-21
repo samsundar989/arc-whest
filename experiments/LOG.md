@@ -8133,3 +8133,164 @@ block at the new shape. Only then re-open the carrier and estimator questions.
 decision layer and one proved design that the shape change then stranded. It did
 not buy a better score, and there is nothing today that would rank higher —
 Phase 1 is closed and Phase 2 had not opened when this session ended.
+
+---
+
+# 2026-08-21 — P2-CP0 RECONCILIATION: the official Phase-2 state, verified rather than assumed
+
+*Read-only. No slice, no seed block, no vault touch, no estimator edit. Every
+line below was fetched from an official source at execution time and hashed into
+`experiments/2026-08-21_phase2_manifest/phase2_manifest.json`.*
+
+## What is now VERIFIED from official sources
+
+| question | answer | source |
+|---|---|---|
+| is round 1429 LIVE? | **NO — `active=false`, state `UPCOMING`**, opens 2026-08-21T23:59:00Z, closes 2026-09-19T23:59:00Z. Leaderboard 1480 exists with **0 entries** | AIcrowd challenge page, polled 2026-08-21 |
+| dataset revision | **`v2-phase2`**, commit **`ce926b7d1ced65faa668c01b94a43f8c4f43783d`** (also `main`) | HF refs API |
+| shape | **1024 x 16**, no biases, no separate output layer, `h_l = max(0, h_{l-1} @ W_l)`, `W ~ N(0, 2/width)` iid, `x ~ N(0, I)` | `metadata.json` + dataset card |
+| truth | **N = 1e9** per MLP, float64 accumulation, downcast float32. **`avg_variance` is a published column**, so `gt_mse = avg_variance / N` is EXACT for the public split | dataset card |
+| splits | mini **100**, full **1000**, disjoint seeds, 1100 partials | `metadata.json` |
+| budget | **B = 2^41 = 2,199,023,255,552 FLOPs/MLP**; forward pass **33,554,432 FLOPs/sample**; **65,536** naive samples exactly | dataset card, Versions table |
+| multiplier floor | **0.1**, stated on the card as `mse_final · max(0.1, C_m / B_m)` | dataset card |
+| bake stack | whestbench **0.16.0** / flopscope **0.12.0** (provenance) **and** `*_version_reported` **0.14.0 / 0.10.0** (legacy). Both preserved in the manifest; neither chosen | `metadata.hardware_fingerprints[*]` |
+| **whestbench 0.16 installable?** | **NO.** PyPI latest is **0.15.0**; GitHub's newest tag is `v0.15.0` (2026-08-17). 0.16.0 exists only inside the organisers' bake | PyPI JSON API, GitHub tags API |
+| flopscope latest | **0.12.0**, released **2026-08-21T05:42Z** — today, hours before the round opens | PyPI + GitHub releases |
+| nomination rule | **STILL UNCLARIFIED.** Announcement 18143 says "up to 2 submissions per team"; the Rules tab says one; `inverted_donkey` raised the contradiction on 2026-08-10 and **there is no staff reply in that thread** | discourse thread 18143 |
+| new organiser announcement changing the evaluator contract | **NONE.** Newest staff post is 18186 (2026-08-18): *"still ironing out some details ... the deadline for Phase 2 submissions will also be shifted"*. Nothing since | discourse `latest.json`, 60 topics |
+
+## The parity blocker, and it is doubly blocked
+
+**Exact package parity with the Phase-2 bake stack is BLOCKED, for two independent
+reasons**, both detected mechanically by `local_sim/phase2_manifest.py`:
+
+1. `whestbench 0.16.0` is not published on PyPI (latest **0.15.0**) and has no
+   GitHub tag. It is not installable from any public source.
+2. Even setting (1) aside, **public `whestbench 0.15.0` pins
+   `flopscope>=0.11.0,<0.12.0`** — which *excludes* the bake's flopscope 0.12.0.
+   **No public pair of these two packages reproduces the bake stack at all.**
+
+That second reason is the informative one: 0.15.0 cannot be the Phase-2 scoring
+release, because it refuses the flopscope the Phase-2 data was baked with. The
+unreleased 0.16.0 is the release that pairs with flopscope 0.12, and flopscope
+0.12 shipped this morning. **Expect whestbench 0.16.0 to become public when round
+1429 opens; re-run parity then.**
+
+Until it does, every artifact carries `package_parity.limitation_stamp`: *counted
+FLOPs measured under a different flopscope release are not the grader's counted
+FLOPs.*
+
+## flopscope 0.12.0 changes prices, and one of the changes touches K2 directly
+
+From the 0.12.0 release notes (fetched 2026-08-21): *"It ships as a new version
+opening a new phase, so no submission is re-evaluated against it."* Repricings
+that matter here:
+
+- **`is_symmetric` / `as_symmetric` now bill `allclose`'s cost formula**, and
+  every affected dtype cell moves by exactly **2.00x**. Our covariance path uses
+  the symmetry tag; a full-covariance K2 spelling would use it on every layer.
+- `nan`-prefixed reductions cost one extra input-sized pass on float input.
+- Several narrow-dtype and refused-op paths got *cheaper*.
+- **Dense matmul pricing did not move**: the card states the forward-pass count is
+  *"exact, and it does not drift between flopscope releases — verified to the unit
+  against flopscope 0.4.1 ... as well as 0.11.0 and current main."*
+
+**Nothing here is a measured cost.** These are release notes; the numbers have to
+come from running flopscope 0.12.
+
+## Two hard local constraints, recorded because they bound the plan
+
+- **The Phase-2 `full` split is 69.96 GB across 63 parquet shards. This machine
+  has 39 GB free.** `full` cannot be held here. CONFIRM-tier work on Phase 2 is
+  limited to **mini (7.03 GB, 7 shards)** unless disk is freed. One shard is
+  1.119 GB and holds ~16 MLPs — enough for a provenance check.
+- The GPU venv has torch 2.13.0+cu130 on an **RTX 5090, 34.2 GB**. Fresh-mint
+  truth at 1024x16 is therefore affordable: 2^24 samples x 33,554,432 FLOPs
+  is about 5.6e14 FLOPs per network.
+
+## What is still unknown after all of this
+
+`lambda` (the residual price), `setup_timeout_s`, `wall_time_limit_s`,
+`predict_timeout_s`, `memory_limit_mb`, and **how many public MLPs are scored**
+(Phase 1 scored 50 of 100). None is in the dataset. Only a graded Phase-2 report's
+`config_snapshot` + `runtime_environment` + per-MLP telemetry settles them, and
+that costs a submission. **Say "the package default is", never "the grader
+allows".**
+
+## Correction to a durable claim
+
+The 2026-08-21 entry above ("What is still unknown") and `docs/CURRENT_STATE.md`
+both said **"the budget `B`, lambda and the multiplier floor are NOT in the
+dataset"**. That is **wrong for two of the three**: the dataset *card* publishes
+`B = 2^41` in its Versions table and the floor `0.1` in its score-formula prose,
+and it publishes the no-bias / no-output-layer contract explicitly. Only
+**lambda** is genuinely unknown. The error came from reading `metadata.json` and
+not the card at the same tag.
+
+## Artifacts
+
+- `local_sim/phase2_manifest.py` — builds the manifest; `--offline` replays the
+  cached raw sources. Records both stack version pairs, measures package parity
+  rather than assuming it, and hashes every source.
+- `experiments/2026-08-21_phase2_manifest/phase2_manifest.json`
+- `experiments/2026-08-21_phase2_manifest/cache/*.raw` — the fetched bytes, so
+  the hashes are checkable.
+- `local_sim/phase2_checklist.py` — **repaired**. It printed the nonexistent tag
+  `v1-phase2` and recommended the obsolete width-256 Sobol fallback. It now reads
+  the manifest, cross-checks the live tag's commit against the one the manifest
+  was built from (drift = a re-bake), prints package-parity status, and states the
+  1024x16 migration facts including *"do NOT refit `_PRUNE_TAU`/`_BASIS_RANK` as
+  the first Phase-2 action"*. ROUTINE (`ai/workflows/routine.md` names
+  `phase2_checklist.py` in scope): display text and a new read-only artifact, no
+  seed block, no shipped file, no instrument.
+
+---
+
+# 2026-08-21 — P2-CP0.1 [IMPORTANT] the gate must own its children's encoding — PREDICTION, before the fix
+
+*Class: IMPORTANT — `scripts/preflight.ps1` is the enforcement layer
+(`AGENTS.md` section Work classification). Written before the change exists.*
+
+## The defect, reproduced
+
+`.\scripts\preflight.ps1` step 3 goes **RED** on a console whose Python child
+resolves stdout to cp1252 — which is the default here **even with
+`chcp 65001` and `[Console]::OutputEncoding = utf-8`**, because Python 3.10 picks
+the ANSI codepage for a *redirected* stdout regardless of the console codepage.
+
+Reproduced verbatim 2026-08-21 with `PYTHONIOENCODING` unset:
+
+```
+Validating estimator estimator.py
+... SymmetryLossWarning ...
+  File ".../whestbench/cli.py", line 2773, in _main_participant
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-32
+During handling of the above exception, another exception occurred:
+  File ".../whestbench/cli.py", line 3655, in _print_error
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1
+EXITCODE=1
+```
+
+**The estimator validated.** The crash is in the CLI's own results printer at
+`cli.py:2773`, and then again in its *error* printer at `cli.py:3655`. Nothing
+about `estimator.py` is wrong; the gate is reporting the console's encoding as an
+estimator defect. That is the exact failure class this repository has lost four
+checks to — a check reporting a state instead of testing a property.
+
+## Predictions, committed before the change
+
+- **B1.** Setting `PYTHONIOENCODING=utf-8` for preflight's child processes makes
+  step 3 exit 0 with no other change to `estimator.py` or the environment.
+- **B2.** The child's `sys.stdout.encoding` is currently **not** utf-8 and will
+  read `utf-8` after the fix. This is asserted as a property inside the step, so
+  a future environment that silently loses it turns the gate RED **at the
+  assertion**, not at a downstream Unicode crash sixty lines later.
+- **B3.** No other preflight step changes verdict. Steps 1, 2, 4-10 are already
+  green and none prints non-ASCII through the failing path.
+- **B4.** The variables are restored to their prior values when the script exits,
+  so preflight does not silently change the encoding of the shell that called it.
+- **B5.** `scripts/verify_portability.py` stays green: the change is inside an
+  enforcement script both agents already share, and adds no Claude-only rule.
+
+**Falsifier:** if step 3 still fails after the fix, or if any other step's verdict
+moves, the diagnosis is wrong and the fix is reverted.

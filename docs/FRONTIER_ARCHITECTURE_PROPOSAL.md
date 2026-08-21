@@ -1,5 +1,11 @@
 # Frontier architecture and execution plan — rev 2 — 2026-08-20
 
+> **Superseded for Phase 2 on 2026-08-21.** This plan assumed width 256. The
+> published Phase-2 shape is 1024 x 16, which makes the complete Kerdock carrier
+> unaffordable and reopens cumulant propagation. New work follows
+> `docs/PHASE2_FRONTIER_ARCHITECTURE.md`; this file remains the historical field
+> audit and Phase-1 rationale.
+
 **Status:** evidence-backed, non-binding proposal. This document records the
 2026-08-20 repository, leaderboard, forum, public-submission, and literature audit.
 It does **not** supersede `CURRENT_STATE.md`, `GAME_PLAN.md`, `VALIDATION.md`, a

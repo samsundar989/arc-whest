@@ -2,17 +2,18 @@
 
 *Snapshot, not narrative. Last updated **2026-08-21** — the session that repaired
 the decision layer (CP0.1-0.3), built and proved a 66,048-point exact design
-(CP1.1), and then found the Phase-2 shape had moved to **1024 x 16**, which
-obsoletes that design. Four slices, four independent Skeptic reviews. Update this
-file when a lane opens or closes, a number is graded, or the phase changes — not
-on every experiment. The narrative record is `experiments/LOG.md`.*
+(CP1.1), then audited the published **1024 x 16** Phase-2 release and replaced the
+width-256 frontier sequence. Four completed slices, four independent Skeptic
+reviews, plus a read-only Phase-2 strategy audit. Update this file when a lane
+opens or closes, a number is graded, or the phase changes — not on every
+experiment. The narrative record is `experiments/LOG.md`.*
 
-*Documentation note, 2026-08-20:* the external repository/field audit and its
-non-binding frontier execution blueprint are now durable in
-`docs/FRONTIER_ARCHITECTURE_PROPOSAL.md`; the copy-ready Builder handoff is
-`docs/CLAUDE_CODE_FRONTIER_HANDOFF.md`. They do not change the plan of record,
-registered gates, or closed-lane statuses. Reconcile them through `next-slice`
-before implementation.
+*Documentation note, 2026-08-21:* the current non-binding Phase-2 strategist
+packet is `docs/PHASE2_FRONTIER_ARCHITECTURE.md`; the copy-ready Builder handoff
+is `docs/CLAUDE_CODE_FRONTIER_HANDOFF.md`. The earlier
+`docs/FRONTIER_ARCHITECTURE_PROPOSAL.md` is historical Phase-1 context. The new
+packet does not authorize an estimator edit, seed spend, vault touch, or
+submission; reconcile it through `next-slice` before implementation.
 
 ---
 
@@ -33,16 +34,20 @@ before implementation.
 **Phase-2 opening is event-triggered, never date-triggered, and the date has now
 moved four times.** Poll with `uv run python local_sim/phase2_checklist.py`.
 
-**HALF the configuration is now published and half is not.** The dataset gives
-**width 1024, depth 16**, GT 1e9, mini 100 / full 1000. It does **not** give
-**`B`, λ, the multiplier floor, or whether biases are absent** — those live in the
-round config and surface in a graded report's `config_snapshot`. The challenge
-page's timeline and its `max(0.5, ·)` worked example remain **stale Phase-1 copy —
-do not read constants off it**.
+**The public dataset card now supplies nearly the full mathematical contract:**
+**width 1024, depth 16, no biases, no separate output layer, `x ~ N(0,I)`, GT 1e9,
+mini 100 / full 1000, `B = 2^41`, and multiplier floor 0.1.** It also states that
+the budget was calibrated to preserve roughly 65,536 naive samples. The remaining
+deployment constants — especially lambda and timeout/memory details — still need
+the official 0.16 package or a graded report. The challenge page's timeline and
+its `max(0.5, ·)` worked example remain **stale copy — do not read constants off
+it**.
 
-**The shape DID move, so the first action is no longer conditional:** re-fit
-`_PRUNE_TAU` and `_BASIS_RANK` at 1024×16 on a DESIGN block *before* gating
-anything. Both are frozen at 256×32 and neither transfers.
+**The first action is NOT to re-fit `_PRUNE_TAU` or `_BASIS_RANK`.** Those are
+constants inside the obsolete width-256 sampling architecture, and the current
+submission takes analytic-only fallback at width > 256. First complete the narrow
+Phase-2 readiness repairs and run the simple-K2 / augmented-K2 / sampling baseline
+ladder in `docs/PHASE2_FRONTIER_ARCHITECTURE.md`.
 
 ### ⚠️ THE PHASE-2 SHAPE IS **1024 x 16** — CONFIRMED 2026-08-21 FROM THE DATASET
 
@@ -50,23 +55,39 @@ The HF dataset gained a **`v2-phase2`** tag. `metadata.json` gives **width 1024,
 depth 16**, GT 1e9, mini 100 / full 1000, baked with **whestbench 0.16.0 /
 flopscope 0.12.0**. Round 1429 opens **2026-08-21T23:59Z**.
 
+Operational warning: `local_sim/phase2_checklist.py` currently detects this tag
+but prints `v1-phase2` and recommends the old width-256 fallback. Its round/board
+polling is useful, but its tag and migration advice are stale until repaired. The
+official metadata also retains old `*_version_reported` values beside the newer
+provenance versions; record both and resolve them against the public package or a
+graded Phase-2 report.
+
 **This falsifies the working assumption below**, on its own first-listed falsifier
 ("a width that is not 256"). Kept for the record rather than deleted.
 
-**Dead on arrival at the new shape:** the CP1.1 Kerdock/MUB-129 carrier (a
-width-256 object -- `256 = 4^4`, `GR(4,7)`, `d^2 = 2^16`); the dual-BCH array and
-its 131,072 linear floor; `_PRUNE_TAU = -2.5`; `_BASIS_RANK = 32`. The Kerdock
-*mathematics* generalises to `GR(4,9)` at 1,050,624 points; the *object* does not.
+**Dead as Phase-2 backbones:** the CP1.1 Kerdock/MUB-129 carrier (a width-256
+object -- `256 = 4^4`, `GR(4,7)`, `d^2 = 2^16`) and the dual-BCH array. The
+Kerdock mathematics generalises to `GR(4,9)` at 1,050,624 points, but dense
+propagation would cost about **16 budgets**. A reduced 32-basis orthogonal arm is
+still a legitimate sampling comparator; it is not the completed degree-5 rule.
+`_PRUNE_TAU = -2.5` and `_BASIS_RANK = 32` are obsolete Phase-1 constants, not
+facts about Phase 2.
 
 **Reopened, on its own pre-registered condition:** the mechanistic / cumulant lane.
 `L/n` fell from 1/8 to **16/1024 = 1/64**, and `L^K < n` now holds at K = 2
 (`256 < 1024`). Open question #1 said a wider or shallower Phase 2 would reopen it
 "wholesale". It did.
 
-**Still unknown: `B`, lambda, the multiplier floor, and whether biases are absent.**
-None is in the dataset. **Every `C/B` in this document is a Phase-1 number.** Naive
-arithmetic: per-sample propagation is ~8x Phase 1 (16x the layer cost, half the
-depth), so if `B` did not grow proportionally the affordable sample count collapses.
+**Published:** `B = 2^41`, floor 0.1, no biases, no separate output layer. The
+budget grew exactly with the 8x forward-pass cost, preserving about 65,536 naive
+samples. **Still to confirm from the official runtime/report:** lambda and the
+timeout/memory configuration. flopscope 0.12 is public; the card says whestbench
+0.16, but PyPI still exposed 0.15 at the audit time.
+
+**New budget geometry:** ARC's leading polynomials place simple K2 near
+`C/B = 0.0549` and augmented K2 near `0.0871`, both below the 0.1 floor before
+residual. Full factorized K3 is near `4.05` and needs a goal-directed compressed
+spelling. These are planning projections, not measured flopscope-0.12 costs.
 
 Full record: `experiments/LOG.md`, 2026-08-21.
 
@@ -110,9 +131,9 @@ required by whestbench 0.15.0 and its pricing is unverified).
 | public mini (100), v2.4.1 | CONFIRM | 3.172e-7 adjusted · 1.4895e-6 MSE · mult 0.216 · 0 failed | 2026-08-06 |
 | invariant suite on the shipped file | — | **30/30** | verified 2026-08-19 |
 | shape parity (v2.6.1 fallback vs v2.4.1) | — | **27/27**, dense paths bit-identical | 2026-08-19 |
-| canonical scorer vs installed whestbench | — | **71/71**, bitwise | 2026-08-19 |
+| canonical scorer vs installed whestbench | — | **88/88**, bitwise/scorer-path parity on 0.14 | 2026-08-21 |
 | seed-ledger enforcement | — | **44/44** negative tests (was 40/40; three snapshot assertions converted to invariants 2026-08-20) | 2026-08-20 |
-| **the preflight gate itself** | — | **12 checks**, 10 by default and 12 under `-Full`. Was 6 | 2026-08-20 |
+| **the preflight gate itself** | — | **12 checks**, 10 by default and 12 under `-Full`; current non-UTF8 PowerShell run is RED only because `whest validate` crashes printing Unicode after validating. Explicit UTF-8 passes. Script repair remains open | 2026-08-21 |
 | grader-lifecycle evaluator | — | **37/37**, all six failure paths provoked | 2026-08-20 |
 | carrier design strength | — | **48/48** (was 27/27) | 2026-08-21 |
 | **Kerdock + axial, an EXACT spherical 4-design** | design theory | **66,048 points on 256 dims**, degrees 1–5 at machine precision, strength 5 proven by exact Delsarte transform. `C/B = 0.6934` **at the Phase-1 shape**. **OBSOLETED by the 1024×16 shape the same day** | 2026-08-21 |
@@ -784,4 +805,3 @@ it is suspended, not killed, and its 192 networks are 256x32. Measuring a carrie
 for a shape that is no longer scored is the most expensive mistake available right
 now. Do not spend **D17 or D19**; both are single-use, both are unspent, and both
 are 256x32 allocations that should be re-thought at the new shape.
-

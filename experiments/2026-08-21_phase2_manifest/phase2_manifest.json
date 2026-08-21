@@ -1,0 +1,242 @@
+{
+  "artifact": "phase2_manifest",
+  "artifact_version": 1,
+  "generated_at_utc": "2026-08-21T08:18:40.744591+00:00",
+  "generator": "local_sim/phase2_manifest.py",
+  "authority": "The dataset card and metadata.json at the pinned commit are AUTHORITATIVE. The AIcrowd challenge page is known-stale (Phase-1 timeline, a max(0.5, .) worked example) and is not a source here.",
+  "dataset": {
+    "repo": "aicrowd/arc-whestbench-public-2026",
+    "revision_tag": "v2-phase2",
+    "commit": "ce926b7d1ced65faa668c01b94a43f8c4f43783d",
+    "created_at_utc": "2026-08-13T15:11:58.709376+00:00",
+    "schema_version": "3.0",
+    "seed_protocol": {
+      "name": "whestbench_explicit_per_mlp_seeds",
+      "version": "3.0"
+    },
+    "backend": "torch",
+    "partials_count": 1100,
+    "default_split": "mini"
+  },
+  "shape": {
+    "width": 1024,
+    "depth": 16,
+    "n_weight_matrices": 16,
+    "biases": "none",
+    "separate_output_layer": "none",
+    "weight_init": "N(0, 2/width) iid (He)",
+    "input_distribution": "x ~ N(0, I)",
+    "layer_recurrence": "h_l = max(0, h_{l-1} @ W_l), h_0 = x  (row vector on the LEFT)",
+    "L_over_n": 0.015625,
+    "L_over_n_phase1": 0.125
+  },
+  "truth": {
+    "n_samples_per_mlp": 1000000000,
+    "accumulation": "float64 sums, divided by N, downcast to float32",
+    "gt_mse_identity": "avg_variance / N",
+    "gt_mse_note": "avg_variance is a PUBLISHED per-MLP column, so the public split's truth-noise floor is exactly computable without a second replica. Fresh mints still need two replicas."
+  },
+  "splits": {
+    "mini": {
+      "n_mlps": 100,
+      "created_at_utc": "2026-08-13T15:27:02.819926+00:00",
+      "config": "default"
+    },
+    "full": {
+      "n_mlps": 1000,
+      "created_at_utc": "2026-08-13T15:11:58.709376+00:00",
+      "config": "default"
+    }
+  },
+  "budget": {
+    "forward_flops_per_sample": 33554432,
+    "forward_flops_formula": "2 * depth * width^2",
+    "flop_budget_per_mlp": 2199023255552,
+    "flop_budget_expr": "2**41",
+    "effective_naive_samples": 65536,
+    "multiplier_floor": 0.1,
+    "score_formula": "mse_final * max(0.1, C_m / B_m)",
+    "source": "dataset card 'Versions' table + score-formula prose",
+    "phase1_comparison": {
+      "phase1_budget": 272000000000.0,
+      "phase1_forward_flops_per_sample": 4194304,
+      "budget_growth": 8.084644321882353,
+      "per_sample_cost_growth": 8.0,
+      "note": "budget grew ~8.08x against a ~8.00x per-sample cost, so the naive-sample operating point is PRESERVED at ~65,536."
+    }
+  },
+  "stack": {
+    "provenance_versions": {
+      "whestbench": "0.16.0",
+      "flopscope": "0.12.0",
+      "meaning": "the versions the Phase-2 bake actually ran under, per metadata.hardware_fingerprints[*] and the card's Provenance section"
+    },
+    "legacy_version_reported": {
+      "whestbench": "0.14.0",
+      "flopscope": "0.10.0",
+      "meaning": "legacy fields retained beside the newer provenance keys. They equal the PHASE-1 stack (0.14.0 / 0.10.0). Unresolved: whether they are a stale carry-over or a statement about the scoring stack. Only a graded Phase-2 report's runtime_environment settles it. DO NOT silently pick whichever pair is convenient."
+    },
+    "top_level_hardware": {
+      "flopscope_version": "0.12.0",
+      "flopscope_version_reported": "0.10.0",
+      "note": "metadata.hardware (the merge host) carries the same split."
+    }
+  },
+  "package_parity": {
+    "status": "BLOCKED",
+    "bake_stack": {
+      "whestbench": "0.16.0",
+      "flopscope": "0.12.0"
+    },
+    "installed_here": {
+      "whestbench": "0.14.0",
+      "flopscope": "0.10.0",
+      "numpy": "2.2.6"
+    },
+    "pypi": {
+      "whestbench": {
+        "latest": "0.15.0",
+        "all_releases": [
+          "0.4.0",
+          "0.5.0",
+          "0.6.0",
+          "0.7.0",
+          "0.8.0",
+          "0.9.0",
+          "0.9.1",
+          "0.9.2",
+          "0.10.0",
+          "0.11.0rc0",
+          "0.12.0rc0",
+          "0.12.0rc1",
+          "0.12.0rc2",
+          "0.12.0rc3",
+          "0.12.0rc4",
+          "0.12.0rc5",
+          "0.13.0",
+          "0.14.0",
+          "0.15.0"
+        ],
+        "requires_dist": [
+          "datasets>=2.20",
+          "faker~=37.0",
+          "flopscope<0.12.0,>=0.11.0",
+          "httpx>=0.27",
+          "huggingface-hub>=0.24",
+          "jinja2>=3.1",
+          "plotext",
+          "pyarrow>=14",
+          "pyyaml>=6.0",
+          "rich",
+          "threadpoolctl>=3.0",
+          "toml>=0.10",
+          "tqdm",
+          "torch>=2.1; extra == \"gpu\""
+        ],
+        "bake_version_public": false
+      },
+      "flopscope": {
+        "latest": "0.12.0",
+        "all_releases": [
+          "0.2.0",
+          "0.3.0",
+          "0.4.0",
+          "0.4.1",
+          "0.4.2",
+          "0.4.3",
+          "0.5.0",
+          "0.6.0",
+          "0.7.0",
+          "0.8.0rc0",
+          "0.8.0rc1",
+          "0.8.0rc2",
+          "0.8.0rc3",
+          "0.8.0rc4",
+          "0.8.0rc5",
+          "0.9.0",
+          "0.9.1",
+          "0.10.0",
+          "0.11.0",
+          "0.12.0"
+        ],
+        "requires_dist": [
+          "numpy<2.5.0,>=2.0.0",
+          "opt-einsum<4.0.0,>=3.3.0",
+          "rich>=14.3.3",
+          "commitizen>=4.0; extra == \"dev\"",
+          "gitlint>=0.19; extra == \"dev\"",
+          "psutil>=5.9; extra == \"dev\"",
+          "pyright<1.2.0,>=1.1.408; extra == \"dev\"",
+          "pytest-cov; extra == \"dev\"",
+          "pytest>=7.0; extra == \"dev\"",
+          "rich>=13.0; extra == \"dev\"",
+          "ruff>=0.4; extra == \"dev\"",
+          "scipy>=1.10; extra == \"dev\"",
+          "numpydoc>=1.10; extra == \"docs\"",
+          "flopscope-server==0.12.0; extra == \"server\"",
+          "sympy>=1.11; extra == \"sympy\""
+        ],
+        "bake_version_public": true
+      }
+    },
+    "public_whestbench_flopscope_pin": "flopscope<0.12.0,>=0.11.0",
+    "blockers": [
+      "whestbench 0.16.0 is not published on PyPI (latest 0.15.0)",
+      "public whestbench 0.15.0 pins 'flopscope<0.12.0,>=0.11.0', which EXCLUDES the bake's flopscope 0.12.0; no public pair reproduces the bake stack"
+    ],
+    "limitation_stamp": "EXACT PACKAGE PARITY WITH THE PHASE-2 BAKE STACK IS BLOCKED. Every artifact produced while this holds must carry this field. Counted FLOPs measured under a different flopscope release are NOT the grader's counted FLOPs. Re-run parity the moment whestbench 0.16.0 is published."
+  },
+  "unknowns": {
+    "lambda_residual_price": {
+      "value": null,
+      "phase1_value": 100000000000.0,
+      "status": "UNKNOWN for Phase 2. Phase-1 lambda = 1e11 is corroborated from per-MLP telemetry. Not published anywhere for Phase 2; only a graded report settles it."
+    },
+    "setup_timeout_s": {
+      "package_default": 5.0,
+      "observed": null
+    },
+    "wall_time_limit_s": {
+      "package_default": 60.0,
+      "observed": null
+    },
+    "predict_timeout_s": {
+      "package_default": 30.0,
+      "observed": null
+    },
+    "residual_wall_time_limit_s": {
+      "package_default": null,
+      "observed": null
+    },
+    "memory_limit_mb": {
+      "package_default": 65536,
+      "observed": null,
+      "note": "RLIMIT_AS under --runner subprocess; already killed v2.5 at a 3.9 GB peak. At width 1024 a dense float64 covariance is 8.4 MB per layer -- but a K3 tensor would be 8.6 GB."
+    },
+    "n_scored_public_mlps": {
+      "phase1": 50,
+      "phase2": null,
+      "note": "Phase 1 scored 50 of 100 mini MLPs publicly. Unverified for Phase 2."
+    },
+    "how_to_resolve": "a graded Phase-2 report's config_snapshot + runtime_environment + per-MLP telemetry. Costs one submission."
+  },
+  "round": {
+    "id": 1429,
+    "name": "Phase 2",
+    "note": "polled separately by local_sim/phase2_checklist.py; dataset publication and round activation are SEPARATE events."
+  },
+  "source_hashes": {
+    "metadata": "aab61cf11271d20118e2109065c165a931dfacb493849f0d611f7a2d82a03790",
+    "card": "c13c62eaecfcee1fd696e0f63d0c04b2a96d63747517b4977b3e1a7722d361ee",
+    "refs": "d7ac680c5f430d7a0a6e4e369099510bd9751285778252383df773c8140ab39e",
+    "pypi_whestbench": "088e72aa2ccb5cdc77e22bbc6f178186f59e372f9c23db50bba215dec309000b",
+    "pypi_flopscope": "5c81b4ab09b5ac1905e4cbf2ef7e23bd415015662edba36176b0401a15dde460"
+  },
+  "source_urls": {
+    "metadata": "https://huggingface.co/datasets/aicrowd/arc-whestbench-public-2026/resolve/v2-phase2/metadata.json",
+    "card": "https://huggingface.co/datasets/aicrowd/arc-whestbench-public-2026/resolve/v2-phase2/README.md",
+    "refs": "https://huggingface.co/api/datasets/aicrowd/arc-whestbench-public-2026/refs",
+    "pypi_whestbench": "https://pypi.org/pypi/whestbench/json",
+    "pypi_flopscope": "https://pypi.org/pypi/flopscope/json"
+  }
+}
