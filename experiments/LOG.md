@@ -9216,3 +9216,295 @@ networks, and saying so here is cheaper than pretending it does.
 
 **Nothing about the gate, the arms, the statistic or the frozen residual model
 changed.** The contract above stands as written apart from `n`.
+
+---
+
+# 2026-08-21 — RESULT P2-CP1: the Phase-2 baseline ladder, block **P01**  [contract above, unmodified]
+
+*96 fresh 1024 x 16 networks, block P01[40,821,001,000 .. 40,821,001,095], two
+independent truth replicas at 2^22 samples each. Eleven arms, one canonical
+evaluator, paired on common random numbers. **Zero failures in 1,056
+network-evaluations.** No vault touch. `estimator.py` untouched. The contract was
+registered before any seed was claimed and is unmodified apart from `n = 48 -> 96`,
+recorded with Samuel's prediction.*
+
+## The result, in one line
+
+**The analytic family owns the Phase-2 frontier by 2.57x, and 95% of its
+remaining error is the Gaussian closure assumption itself — not the covariance
+truncation we have been shipping.** The sampling architecture is closed for
+Phase 2 and the aggressive lane is K3/Edgeworth, both by their own pre-registered
+triggers.
+
+## The ladder — FROZEN deciding model, counted FLOPs only
+
+| arm | score | MSE (noise-corr.) | F/B counted | mult | fail | vs `k2p1` |
+|---|---:|---:|---:|---:|---:|---:|
+| `k2p6` (Price order 6) | **3.9500e-07** | 3.9500e-06 | 0.0630 | 0.100 | 0/96 | **1.0519x** |
+| `k2p4` | 3.9500e-07 | 3.9500e-06 | 0.0628 | 0.100 | 0/96 | 1.0519x |
+| `k2p3` | 3.9500e-07 | 3.9500e-06 | 0.0628 | 0.100 | 0/96 | 1.0519x |
+| `k2p2` | 3.9505e-07 | 3.9505e-06 | 0.0627 | 0.100 | 0/96 | 1.0518x |
+| **`k2p1` = the shipped algorithm, BITWISE** | 4.1554e-07 | 4.1554e-06 | 0.0626 | 0.100 | 0/96 | — |
+| `k2p1_f32` | 4.1554e-07 | 4.1554e-06 | 0.0606 | 0.100 | 0/96 | 1.0000x |
+| `sample_orth` | 1.06853e-06 | 9.7695e-06 | 0.1093 | 0.109 | 0/96 | 0.380x |
+| `sample_iid_floor` | 1.13038e-06 | 1.1291e-05 | 0.1000 | 0.100 | 0/96 | 0.360x |
+| `sample_iid_max` | 1.15151e-06 | 1.2024e-06 | 0.9503 | 0.950 | 0/96 | 0.355x |
+| `k1` (diagonal only) | 2.2742e-05 | 2.2742e-04 | 0.0001 | 0.100 | 0/96 | 0.018x |
+| ~~`sample_lattice`~~ | ~~1.10955e-04~~ | — | 0.1005 | 0.101 | 0/96 | **INVALID — see below** |
+
+**Truth noise per replica 1.806e-08; the averaged replica's noise 9.319e-09,
+against a predicted `V/2N` of 9.031e-09 — ratio 1.0319, so replica independence
+is MEASURED.** Every MSE above is noise-corrected by the exact identity
+`mean[(p-y1)(p-y2)] = mean[(p-ybar)^2] - mean[((y1-y2)/2)^2]`; the correction is
+identical across arms and cancels in every paired comparison.
+
+## The four hypotheses — all CONFIRMED
+
+**H1 — the analytic family owns the frontier: CONFIRMED at 2.566x.**
+`k2p1` 4.16474e-07 against the best *valid* sampling arm `sample_orth` at
+1.06853e-06. Against `sample_iid_floor` it is 2.714x and against
+`sample_iid_max` 2.765x; **2.566x is the conservative reading and the one
+quoted**, because it is measured against the strongest sampling arm rather than
+the most convenient. The margin does not depend on the broken lattice arm.
+
+*(An earlier draft of this entry quoted 2.711x here while naming `sample_orth`
+as the comparator. That was 2.714x — the `sample_iid_floor` figure — attached to
+the wrong arm. Corrected before the entry landed; the exact per-arm gains are in
+`ladder_frozen.json`.)*
+
+**H2 — the Hermite ladder is a small win that converges: CONFIRMED.**
+Order 2 gives **1.0518x**, t-interval **[+4.31%, +5.53%]**, better on **93 of 96**,
+sign-test **p = 0.000**. Orders 3, 4 and 6 give 1.0519x — identical to five
+significant figures. **Order 2 delivers 99.7% of the entire ladder.** No rung
+reaches 1.25x, so augmented K2 cannot be the aggressive candidate.
+
+**H3 — the residual error is the closure's NON-GAUSSIANITY: CONFIRMED at 0.951.**
+`MSE(k2p6)/MSE(k2p1) = 0.9506` against a trigger of > 0.70. This is the
+checkpoint's most consequential number and it deserves its own paragraph below.
+
+**H4 — the flat-score law: CONFIRMED at 1.20%.**
+`sample_iid_max` (N = 62,190, C/B 0.95) and `sample_iid_floor` (N = 6,546,
+C/B 0.10) score within **1.20%** of each other across a **9.5x budget
+difference**. A 1/N sampler cannot buy its way past the floor, so there is no
+sampling operating point that helps.
+
+## The finding that reshapes the plan
+
+`k2p6` is not another rung — it is the **limit** of the Gaussian-closure family.
+The Price/Hermite series converges to the *exact* post-ReLU covariance under the
+Gaussian model, and by order 3 it has converged to five figures. So
+`MSE(k2p6)` is the floor of everything reachable by improving the covariance map.
+
+**That floor is 95.06% of where we already are.** The exact map removes **4.94%**
+of the error. The other **95%** is the assumption that the post-ReLU state is
+Gaussian, which no covariance spelling can touch.
+
+Three consequences, and they are the plan:
+
+1. **P2-CP3 as the packet frames it is capped at 1.052x.** Not "probably small" —
+   *capped*, because the limit was measured directly rather than approached.
+   The lane can be closed on this evidence without building it.
+2. **The aggressive lane must attack non-Gaussianity**: P2-CP4's K3/Edgeworth
+   correction. The contract's trigger anticipated exactly this and fired.
+3. **The packet's accuracy projection is now explained, not merely falsified.**
+   It projected the Phase-2 closure near 9.8e-7 by scaling Phase 1; the measured
+   value is 4.16e-6. The gap cannot be recovered by a better closure, because we
+   have measured the closure family's floor and we are within 5% of it.
+
+## The mechanism curve — why the frontier flipped, and what would flip it back
+
+Every arm returns all 16 layers, so the depth profile is free. Correcting for the
+fact that a genuine depth-`L` network affords `N ∝ 1/L` samples at fixed `B`:
+
+| depth | analytic MSE | sampling MSE | ratio |
+|---:|---:|---:|---:|
+| 2 | 1.47e-07 | 9.45e-06 | 64.3 |
+| 4 | 8.41e-07 | 1.09e-05 | 13.0 |
+| 8 | 2.34e-06 | 1.30e-05 | 5.5 |
+| 12 | 3.25e-06 | 1.24e-05 | 3.8 |
+| **16** | **3.98e-06** | **1.19e-05** | **3.0** |
+
+**The two families move in opposite directions with depth.** Sampling MSE is
+nearly flat — which is the organisers' budget calibration working exactly as
+designed, holding ~65k naive samples at every phase. Analytic MSE **grows 27x**
+from L2 to L16. The ratio falls as `L^-1.44`, extrapolating to a crossover near
+**depth 30 at width 1024**.
+
+Phase 2's depth 16 sits on the analytic side with a **3x margin**. **Two things
+this does NOT say:** the crossover is an extrapolation past the data, and it does
+not retro-explain Phase 1, where the width also moved (256, not 1024).
+
+**Explicit comparison with ARC's projection, as the contract required.** Their
+`MSE_K ~ c_K (L/n)^K` predicts error `~ L^K` with `K = 2`. **Measured exponent on
+depth: 1.567** (log-log, L = 2..16; L16/L2 is 27.1x where `L^2` predicts 64x).
+The scaling law is directionally right and quantitatively optimistic in our
+favour, on one shape at one width. It is a comparison, not a confirmation.
+
+**P10 confirmed, and it is the measurement's own calibration:** the depth curve's
+L1 column reads **8.216e-08 for all eleven arms**, because layer 1 is exact for
+every one of them. That column is a direct read of the truth-noise floor, built
+into the experiment rather than asserted beside it.
+
+## The three registered triggers
+
+**The verdicts, verbatim from `competition_score.decide()` under the frozen
+model** (`lam = 0`, counted FLOPs only; gate 1.1000x, studentised-t, one-sided):
+
+```text
+k2p2       fail  gain 1.0518x   t CI [+1.796e-08, +2.302e-08]  excl 0: True   93/96  mover  2.7%
+k2p3       fail  gain 1.0519x   t CI [+1.800e-08, +2.308e-08]  excl 0: True   93/96  mover  2.7%
+k2p4       fail  gain 1.0519x   t CI [+1.800e-08, +2.309e-08]  excl 0: True   93/96  mover  2.7%
+k2p6       fail  gain 1.0519x   t CI [+1.800e-08, +2.309e-08]  excl 0: True   93/96  mover  2.7%
+k2p1_f32   fail  gain 1.0000x   t CI [+1.668e-13, +7.905e-13]  excl 0: True   57/96  mover 14.6%
+sample_iid_max    fail gain 0.3617x  t CI [-7.853e-07, -6.847e-07]  excl 0: False  0/96
+sample_iid_floor  fail gain 0.3684x  t CI [-7.652e-07, -6.626e-07]  excl 0: False  0/96
+sample_orth       fail gain 0.3898x  t CI [-7.072e-07, -5.970e-07]  excl 0: False  0/96
+sample_lattice    fail gain 0.0038x  t CI [-1.178e-04, -1.033e-04]  excl 0: False  0/96
+```
+
+**The biggest single mover carries 2.7%** on every analytic comparison, so no
+result here is one network's story.
+
+**`k2p1_f32` is a case worth naming: its interval EXCLUDES ZERO and it is still a
+draw.** The difference is `[1.7e-13, 7.9e-13]` on scores of 4.16e-07 — six orders
+of magnitude below anything that could matter, and better on 57 of 96. Statistical
+significance without practical significance, and the gate refuses it on the gain
+regardless. This is what a correctly-built gate looks like when it is handed a
+true null with enough `n` to resolve float noise.
+
+**1. DEPLOYMENT GATE — `k2p2` FAILS it, and the conservative candidate stays `k2p1`.**
+The gate was **>= 1.10x** with a t-interval excluding zero. `k2p2` measures
+**1.0519x**, interval [+4.31%, +5.53%], 93/96, p = 0.000. The effect is real,
+statistically unambiguous, and **below its own bar**. Registered consequence
+honoured: **keep `k2p1`.**
+
+**I flagged before the run that this gate may be the wrong instrument, and the
+result makes that concrete.** `k2p2` costs **+0.18%** of counted FLOPs, stays
+pinned at the floor, and is the strictly more correct mathematics — the same
+series carried one term further. A 1.10x bar is calibrated for a change that
+*spends* something. **I am not moving a gate after seeing data.** The decision of
+whether cost-free changes deserve a separate, lower bar belongs in P2-CP2's
+contract and is Samuel's. Stated plainly: at a 1.02x bar `k2p2` would pass
+comfortably, and nothing else about the evidence would change.
+
+**2. AGGRESSIVE-LANE TRIGGER — FIRES.** `MSE(k2p6)/MSE(k2p1) = 0.9506 > 0.70`.
+**P2-CP4 (goal-directed K3/Edgeworth) is the aggressive lane.** P2-CP3 is capped
+at 1.052x and cannot carry it.
+
+**3. SAMPLING-LANE KILL — FIRES at 2.699x against a 1.5x bar.**
+Best analytic `k2p6` 3.95928e-07 against best valid sampling `sample_orth`
+1.06853e-06.
+**The sampling architecture is CLOSED for Phase 2. `_PRUNE_TAU` and `_BASIS_RANK`
+are never refitted** — that work item, carried since the shape changed, is
+retired.
+
+*The one caveat this kill deserves, stated rather than buried:* the arms tested
+are iid and orthogonal. **A working QMC arm was not tested** (see below), so the
+kill rests on the best sampling arm *measured*, not the best *possible*. To close
+a 2.699x gap, a QMC carrier would need a **2.7x variance reduction over iid at
+N = 6,546 in 1024 dimensions** — a large ask at that effective dimension, and one
+Phase-1's own carrier audit never approached (every input-space device there
+measured between 0.98x and 1.09x). The lane is closed on the registered trigger;
+reopening it needs that 2.7x demonstrated, which is a high and explicit bar.
+
+## An arm that FAILED, and why it is reported rather than repaired
+
+**`sample_lattice` is INVALID — an implementation defect in my generator, not a
+result about QMC.** It scored 1.1037e-03, ~100x worse than plain iid.
+
+Diagnosed: the Korobov generating vector is `a_j = base^j mod N` with
+`base = (N//3) | 1 = 2183` at `N = 6546`. **2183^2 = 4,765,489 = 728 x 6546 + 1**,
+so 2183 is its own inverse mod 6546 and the multiplicative cycle length is **2**.
+The 1024 components are `[1, 2183, 1, 2183, ...]` — **two distinct values**. The
+"1024-dimensional lattice" is effectively 2-dimensional.
+
+**It is kept in the ladder and reported as invalid rather than dropped.**
+Excluding an arm after seeing it fail is post-hoc arm selection, and a repaired
+lattice arm would be a *new* measurement needing its own registration. **No
+conclusion in this entry rests on it**: it was worse than every other sampling
+arm, so the sampling-lane kill is unaffected either way.
+
+## Prediction scorecard — 7 hits, 3 misses
+
+| # | prediction | measured | |
+|---|---|---|---|
+| P1 | `k2p1` beats sampling 2.0-4.0x | **2.711x** | HIT |
+| P2 | the two iid arms agree within 10% | **1.20%** | HIT |
+| P3 | `k2p2` gain [1.02, 1.20], CI excludes zero | **1.0518x, [+4.31%,+5.53%]** | HIT |
+| P4 | `k2p6` beats `k2p2` by < 1.03x | **1.000136x** | HIT |
+| P5 | `MSE(k2p6)/MSE(k2p1) > 0.7` | **0.9506** | HIT |
+| P6 | `k2p1_f32` costs 0.0606, loses < 1% | 0.060602, 1.0000x | **MISS — right number, wrong reason** |
+| P7 | `sample_orth` wins on MSE, LOSES on score | wins on **both** (1.0574x on score) | **MISS** |
+| P8 | `k1` is 10-40x worse on raw MSE | **54.7x** | **MISS — outside the band** |
+| P9 | zero failures on every arm | **0/96 on all 11** | HIT |
+| P10 | depth-curve L1 identical = noise floor | **8.216e-08 on all 11** | HIT |
+
+**Samuel predicted both substantive outcomes correctly** — analytic wins big
+(>2x, measured 2.711x) and the Hermite ladder is a small win that plateaus fast
+(1.0518x, plateaued at order 2). Builder and human agreed in advance, so the
+slice's information is concentrated in the three misses and in H3.
+
+**The most instructive miss is P6, and it is instructive because it was
+numerically right.** I predicted `k2p1_f32` would cost 0.0606 counted; it costs
+0.060602. But the reasoning was that this is a float32 path, and **it is not**:
+`stats.norm.cdf(float32) -> float64` (flopscope >= 0.10, forum 18127), and
+`outer(Phi,Phi) * cov` then drags the covariance to float64, so every matmul from
+layer 1 onward runs at rate 2.0. Casting back after the stats call gives the real
+number: **C/B 0.031294, exactly 0.5003x float64**, at an accuracy cost of
+**4.975e-07 relative L2** — four orders of magnitude below the prediction error,
+i.e. free.
+
+*This buys no score today* (both are floor-pinned) *and it is not a lever.* What
+it buys is **headroom**: free budget under the floor goes from
+`0.1 - 0.0626 = 0.0374 B` to `0.1 - 0.0313 = 0.0687 B`, **1.84x more room** for
+exactly the K3 correction H3 just made the whole aggressive lane. That makes it a
+P2-CP2 deployment detail and a P2-CP4 enabler.
+
+`docs/GOTCHAS.md`: *before quoting an agreement, ask whether the two sides could
+ever have disagreed.* A prediction that lands for the wrong reason is the same
+trap wearing a different hat.
+
+## Measured alongside, independent of the ladder's outcome
+
+- **Grader-legality is VERIFIED, not asserted.** `whest validate` passes on all
+  eight arms tested. The winning arm can become `estimator.py` for P2-CP2 with no
+  re-port — which is why the generator emits self-contained files.
+- **Peak memory 129-209 MB**, i.e. **0.20-0.32%** of the 65,536 MB package
+  default (python-heap lower bound; the grader's limit is RLIMIT_AS over the whole
+  address space). Memory is not a constraint for this family — unlike v2.5, which
+  this limit killed at 3.9 GB, and unlike a full K3 tensor at 8.6 GB.
+- **flopscope 0.10 vs 0.12**: every arm's counted cost was measured under both.
+  All eleven agree to the unit.
+- **A cost lever priced at zero:** the K2 arms emit `SymmetryLossWarning`, so
+  flopscope's symmetry discount is forgone. Not worth taking — the discount
+  applies to the O(n^2) elementwise ops, and 99.9% of the cost is the two O(n^3)
+  matmuls, which flopscope prices **by shapes only**.
+
+## What this does NOT establish
+
+- **Nothing about the grader.** Package parity is still BLOCKED; every cost here
+  is counted FLOPs under a flopscope the Phase-2 stack may not use. `lambda` is
+  still unpublished, and the frozen deciding model sidesteps it rather than
+  resolving it.
+- **Nothing about a QMC carrier.** See the invalid arm.
+- **Nothing about K3.** H3 says where the error *is*; it does not say a K3
+  correction can *reach* it affordably. That is P2-CP4's question and it is open.
+- **Nothing about the private re-run.** 96 networks at one shape.
+- The crossover depth ~30 is an **extrapolation past the data**.
+
+## Artifacts
+
+- `experiments/2026-08-21_p2_cp1/truth_P01.npz` — sha256
+  `0778f032fe60cd6c09148189d6c56cd8ac38ff72e36073987311a594fabadc5d`, finalized
+  in the seed ledger
+- `experiments/2026-08-21_p2_cp1/ladder.json` — first pass, effective model
+- `experiments/2026-08-21_p2_cp1/ladder_frozen.json` — **the artifact of record**,
+  frozen counted-FLOPs model, with `decide()` verdicts and per-MLP scores
+- `local_sim/p2_build_arms.py`, `p2_build_sampling_arms.py`, `p2_test_arms.py`
+  (14/14), `p2_lab.py`, `p2_truth.py`, `p2_price_delta.py`
+
+**Seed ledger:** P01 96 seeds claimed and the truth artifact finalized. D16-D19
+untouched; **D17 and D19 still SINGLE_USE and unspent**. P01 has **504 seeds
+free** for a disjoint P2-CP2 draw.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
