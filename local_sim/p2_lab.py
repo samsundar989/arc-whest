@@ -156,6 +156,11 @@ def main() -> int:
     ap.add_argument("--out", default="")
     ap.add_argument("--arms", default=",".join(DEFAULT_ARMS))
     ap.add_argument("--n", type=int, default=0, help="0 = every network in the truth file")
+    ap.add_argument("--lam", type=float, default=None,
+                    help="residual price. Pass 0.0 for the COUNTED-FLOPS-ONLY "
+                         "model, which is what the P2-CP1 contract froze as the "
+                         "deciding model. Default: the Phase-1 lambda = 1e11, "
+                         "reported alongside but NOT the frozen model.")
     ap.add_argument("--depth-subset", type=int, default=8,
                     help="networks used for the MSE-by-depth mechanism curve")
     ap.add_argument("--gate", type=float, default=None,
@@ -187,7 +192,20 @@ def main() -> int:
         print("!!  rank, or a gate, and no number from it belongs in a durable doc.")
         print("!" * 92)
 
-    spec = le.LifecycleSpec(width=width, depth=depth, flop_budget=budget, floor=floor)
+    # The DECIDING model is whatever the contract froze, and it is passed in
+    # explicitly rather than defaulted. P2-CP1 froze COUNTED FLOPS ONLY (lam=0):
+    # every analytic arm sits at C/B ~0.063, a factor of 1.6 under the 0.1 floor,
+    # so no residual model that does not add 0.8 s/MLP can reorder them -- and the
+    # sampling arms are separated by counted cost by construction. The local
+    # residual is a --runner local figure that does not transfer (2-3% of C on the
+    # grader against 10-13% here), so letting it into the deciding number would
+    # import this machine's noise into a Phase-2 conclusion.
+    spec = le.LifecycleSpec(width=width, depth=depth, flop_budget=budget,
+                            floor=floor,
+                            **({} if a.lam is None else {"lam": a.lam}))
+    print(f"  deciding model   lambda = {spec.lam:.4g}"
+          + ("   (COUNTED FLOPS ONLY -- the frozen model)" if spec.lam == 0.0
+             else "   (Phase-1 lambda; NOT the frozen P2-CP1 model)"))
     arms = [x for x in a.arms.split(",") if x]
 
     print("=" * 92)
@@ -384,6 +402,10 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
         },
         "seeds": [int(s) for s in seeds],
         "lambda_used": spec.lam,
+        "deciding_model": ("counted FLOPs only (lam=0), as frozen in the P2-CP1 "
+                           "contract" if spec.lam == 0.0 else
+                           "effective F + lam*R at the PHASE-1 lambda; this is "
+                           "NOT the model the contract froze"),
         "lambda_provenance": "PHASE-1 value 1e11; Phase-2 lambda is UNPUBLISHED",
         "residual_is_graded": False,
         "control": CONTROL,
