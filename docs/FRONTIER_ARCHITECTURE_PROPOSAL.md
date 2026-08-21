@@ -1,375 +1,495 @@
-# Frontier architecture proposal — 2026-08-19
+# Frontier architecture and execution plan — rev 2 — 2026-08-20
 
-**Status:** evidence-backed proposal; implementation has not started. This document
-does not supersede `CURRENT_STATE.md`, `GAME_PLAN.md`, or any registered gate. It
-records the external Phase-1 audit and the implementation sequence to review once
-the Phase-2 specification is published.
+**Status:** evidence-backed, non-binding proposal. This document records the
+2026-08-20 repository, leaderboard, forum, public-submission, and literature audit.
+It does **not** supersede `CURRENT_STATE.md`, `GAME_PLAN.md`, `VALIDATION.md`, a
+registered Slice Contract, or a closed-lane verdict. Thresholds below are proposed
+checkpoint criteria; each strategic experiment must freeze its actual gate in
+`experiments/LOG.md` before touching data.
 
-**Safety boundary:** do not spend D17, touch the vault, edit `estimator.py`, or
-submit anything merely because this proposal exists. The validation repairs in
-Stage 0 come first and must follow the work classifications in `AGENTS.md`.
+**Safety boundary:** this document authorizes no edit to `estimator.py`, no seed
+allocation or consumption, no vault touch, and no submission. Follow `AGENTS.md`.
+Any strategic implementation must go through `next-slice` / `slice-contract`, and
+each completed strategic slice through `review-slice` and the independent Skeptic.
 
 ## Executive decision
 
-The current Sobol + rank-32 rotation + pruning estimator is a strong, honest
-baseline and a useful execution kernel. It is not a plausible winning architecture
-through incremental tuning.
+The current Sobol + rank-32 rotation + closure-guided pruning estimator is a strong,
+honest conservative baseline. It is not a plausible winning endpoint through more
+rank, threshold, sample-count, or matrix-multiplication tuning.
 
-The recommended target is a compositional estimator:
+The highest-upside architecture is:
 
-> complete Kerdock/MUB or BCH angular design, exact radial integration,
-> structure-aware propagation, a shallow accurate analytic centre, and a
-> mid-network control variate.
+> **a Kerdock/MUB angular carrier plus an independently cross-fitted,
+> network-adaptive signed correction targeted at the low-dimensional late-layer
+> error subspace.**
 
-The frontier-breaking research bets are (a) improving the analytic centre in the
-downstream-sensitive subspace and (b) learning network-conditioned frame weights or
-frame allocation without target leakage.
+The crucial research question is no longer "which fixed point set is best?" It is:
 
-## Why the present architecture has plateaued
+> Can the network-specific layer-31 mean defect, or an equivalent basis-reweighting
+> direction, be estimated from the weights and a small independent pilot without
+> using benchmark targets?
 
-The working `estimator.py` performs:
+The public evidence says that direction has enough capacity to explain nearly the
+entire gap between fixed Kerdock and the Phase-1 leader. No public team has yet
+shown a deployable target-free estimator of it.
 
-1. full-covariance Gaussian closure for layer means and firing probabilities;
-2. a rank-32 input rotation from the linearised end-to-end map;
-3. closure-guided dead-neuron pruning and deterministic mean fill;
-4. digitally shifted Sobol Gaussian sampling;
-5. one-level Strassen propagation in the unpromoted v2.6 working file; and
-6. a sampled final-layer mean.
+## What is established, inferred, and conjectured
 
-Repository evidence says the remaining error is approximately 99.4% sampling
-variance. Whitening, radial projection, tent transforms, degree-3 designs, and
-layer-1 controls mostly substitute for low-order variance already removed by Sobol
-plus rotation.
+### Established by this repository
 
-The optimistic composition of the remaining known levers is still insufficient:
+- The current graded record is submission 327743 / v2.4.1 at adjusted score
+  `2.6314e-7`, raw final MSE `1.3323e-6`, multiplier `0.19896`, and zero failures.
+- `estimator.py` is v2.6.1: built and green, projected around `2.405e-7`, but not
+  graded or promoted.
+- Approximately 99.4% of the present error is sampling variance; the measured bias
+  floor is negligible at the current sample count.
+- Sobol, the response-aligned rotation, and several low-order controls overlap.
+  Their standalone gains cannot be multiplied.
+- The true degree-4/5 carrier experiment measured `1.4775x` accuracy gain but the
+  available 131,072-row construction is over budget at `C/B = 1.3509`.
+- The current analytic centre is not accurate enough for the proposed mid-layer
+  control: centre error already exceeds sampling standard error at layer 2 and
+  worsens with depth.
 
-```text
-current adjusted score              2.631e-7
-/ optimistic v2.6 cost gain         1.068
-/ external degree-4/5 ceiling       1.46
-= optimistic projected score        1.69e-7
-```
+### Established by public reproducible work
 
-The best published and explained Phase-1 system scored `9.10e-8`. The public #1
-scored `1.84e-8`, but no reproducible method currently explains it. Winning work
-should target fresh-network transfer, not reverse-engineer unexplained public rows.
+- A complete 129-basis Kerdock/MUB construction has 66,048 signed directions in
+  dimension 256. Kuperberg's theorem gives a degree-5 spherical cubature at the
+  same `2^16 + 2n` count using a strength-5 Kerdock array plus axial points.
+- A fully published K129 implementation scored adjusted `1.1433e-7`, raw
+  `2.2068e-7`, with 140.7B effective compute and zero failures.
+- Target-aware nonnegative reweighting of the 129 realized basis endpoints removed
+  95.64% of pooled raw error under a tight weight cap.
+- Fitting those weights on half of the final output coordinates and scoring the
+  unseen half retained 81.82% raw reduction. The correction is therefore not merely
+  129-parameter interpolation.
+- The best tested target-free analytic proxy removed only 1.11%; its cosine with
+  the required basis-weight delta was 0.018.
+- Dense target-side arc-cosine features can recover most of the correction, but
+  score-compatible generic query sampling cannot estimate their mean accurately.
+  The missing sufficient statistic was localized to the 256-dimensional layer-31
+  activation-mean defect.
 
-## External frontier evidence
+Primary public evidence:
 
-| result | adjusted score | relevant mechanism |
-|---|---:|---|
-| Team Puffi | `9.10e-8` | complete 66,048-direction Kerdock/MUB design, exact radius, shallow analytic reference through layer 9, online layer-9→32 ridge control, structure-aware execution |
-| BCH strength-4 OA | `1.23e-7` | near-complete BCH angular carrier, antipodes, homogeneity, dead/on/kink routing, FWHT |
-| mliston | `1.334e-7` | analytic chain through layer 18, layer-22 control, frozen 52k-parameter GRU centre corrector |
-| Kerdock 5-design | `1.439e-7` | 66,048 directions, FWHT first layer, Strassen/Winograd execution |
-| this repository, 327743 | `2.631e-7` | Sobol RQMC, rank-32 rotation, pruning |
+- live board and #1: <https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/leaderboards?round=phase-1>
+- field frontier and failure map: <https://discourse.aicrowd.com/t/phase-1-solution-ideas-for-phase-2-and-the-honest-public-frontier-all-methods-combined-and-explained/18193>
+- technique census: <https://discourse.aicrowd.com/t/a-technique-census-of-phase-1-what-the-mathematics-is-doing-what-walls-it-hit-and-whats-still-open/18157/10>
+- reproducible K129 package: <https://github.com/AndreiBulzan/arc-whitebox-submission-and-documentation>
+- reweighting receipt: <https://github.com/AndreiBulzan/arc-whitebox-submission-and-documentation/blob/main/ledger/experiments/r90_late_basis_calibration_20260809/VERDICT_BF_XCORR_LMCBR_E1_E2_R1_20260809.md>
+- mean-localization receipt: <https://github.com/AndreiBulzan/arc-whitebox-submission-and-documentation/blob/main/ledger/experiments/k129_quenched_arccos_teacher_20260809/VERDICT_QUERY_SCALING_AND_MEAN_LOCALIZATION_R3_R6_20260809.md>
+- Kuperberg cubature: <https://arxiv.org/html/math/0402047>
+- ARC cumulant propagation: <https://arxiv.org/abs/2605.05179>
+- QMC control functionals: <https://arxiv.org/abs/1501.03379>
+- StackMC / sample-split controls: <https://arxiv.org/abs/1606.02261>
+- ReLU spherical harmonics: <https://arxiv.org/abs/1905.12173>
+- Stein control functionals: <https://arxiv.org/abs/1410.2392>
 
-Forum reports are contestant evidence, not organiser-verified theorems. Reproduce
-each mechanism locally before relying on its claimed gain.
+### Strong inference, not disclosure
 
-Primary links:
+The current #1 entry has adjusted score `1.845e-8`, raw MSE `3.633e-8`, a
+`0.5082` multiplier, final-layer-only output, and zero failures. Its roughly 5--6x
+raw advantage over fixed Kerdock is numerically close to the 5.5x capacity retained
+by held-output adaptive basis reweighting. This is evidence that a lawful
+target-side contraction may explain the leader; it is **not** evidence of the
+leader's actual implementation.
 
-- Team Puffi: <https://discourse.aicrowd.com/t/phase-1-write-ups-team-puffi/18175>
-- BCH/OA: <https://discourse.aicrowd.com/t/phase-1-write-up-my-approach-write-up-for-the-submission-327651/18173>
-- Kerdock: <https://discourse.aicrowd.com/t/phase-1-write-up-metered-dead-compacted-kerdock-cubature-with-exact-compiler-reductions-submission-326680/18149>
-- Mid-layer control: <https://discourse.aicrowd.com/t/phase-1-write-up-monetizing-the-approach-to-the-moment-propagation-frontier-an-intra-network-control-variate-and-a-measured-map-of-the-wall-behind-it-submission-326024/18154>
-- Corrected centre + control: <https://discourse.aicrowd.com/t/phase-1-write-up-bias-variance-tradeo-across-control-layers-submission-327723/18170>
-- ARC cumulant method: <https://arxiv.org/html/2605.05179>
-- Kuperberg degree-5 cubature: <https://arxiv.org/abs/math/0402047>
+### Frontier conjecture
 
-## Proposed architecture
+A small independently rotated pilot can learn a network-conditioned signed control
+in a low-dimensional downstream-error basis, then correct a separately rotated
+Kerdock/MUB main carrier without target leakage or fitting bias.
 
-```text
-                         network weights
-                              │
-                cheap closure / small pilot pass
-                ├── dead / on / kink classification
-                ├── row and prefix grouping
-                ├── downstream sensitivity map
-                └── fixed control-layer policy
-                              │
-   exact-radius complete Kerdock/MUB or BCH angular bank
-                              │
-         FWHT first layer + structured dense propagation
-            + conservative pruning + depth-1/2 Strassen
-                              │
-                 capture h_c and h_32 together
-                              │
-weights ──> shallow K2/K3 analytic anchor at c ≈ 7–10
-                              │
-               optional frozen trajectory corrector
-                              │
-                online regularised response c → 32
-                              │
-                   shrinkage CV correction
-                              │
-                      final-layer estimate
-```
+This is supported by control-functional, StackMC, spherical-harmonic, and Stein
+theory. It has not been demonstrated for this deep ReLU estimator.
 
-### Component A — complete angular carrier
-
-Use a true degree-4/5 construction, not the existing degree-3 proxy:
-
-- complete real Kerdock/MUB-129: `129 × 256 × 2 = 66,048` signed directions; or
-- BCH strength-4 orthogonal array at matched cost.
-
-For the Phase-1 bias-free Gaussian problem, replace sampled radii by the exact mean
-Gaussian radius. This is an identity from positive homogeneity, not an
-approximation. Randomise only in a way that preserves the design's exactness and
-supports repeated fresh-network evaluation.
-
-Implementation should expose MUB and BCH behind the same propagation and accounting
-engine so the comparison is about the point set rather than unrelated engineering.
-
-### Component B — structure-aware propagation
-
-Candidate exact or conservatively gated reductions:
-
-- FWHT-based first layer for Kerdock/MUB structure;
-- antipodal layer-2 identity where algebraically valid;
-- pilot-derived dead/on/kink masks with deterministic omitted-neuron mean fill;
-- row grouping and common prefixes rather than random-access sparse packing;
-- one-level or depth-2 Strassen/true Winograd on regular dense blocks;
-- final positive-neuron bypass where it is an exact identity.
-
-Every rewrite must have dense-reference parity tests. Local residual wall time may
-rank gross failures but cannot decide close cost variants; only grader telemetry can.
-
-### Component C — shallow analytic centre
-
-Do not attempt a pure analytic answer at depth 32. Produce an accurate centre at a
-fixed shallow layer, initially `c ∈ {5, 7, 9, 11}`.
-
-Compare:
-
-1. current calibrated K2 closure;
-2. exact Gaussian full-covariance update;
-3. shallow full-rank K3 as an accuracy oracle;
-4. compressed K3 using a covariance eigenbasis;
-5. K3 HOSVD/mode-unfolding bases;
-6. downstream-Jacobian-weighted K3 bases; and
-7. bases transported between layers instead of recomputed independently.
-
-The existing probe shows full-rank K3 is useful at depth 8 while low ranks fail.
-That evidence rejects the current compression basis/rank, not the K3 mechanism.
-
-The deployment metric is not standalone analytic final-layer MSE. For control layer
-`c`, report:
+## Architecture
 
 ```text
-sampling error                     e_c
-analytic-centre error              e_A
-projected centre error             Rᵀ e_A
-end-to-end controlled score        score_CV
+                         Phase/config manifest
+                                  |
+              exact radial identity, only if bias-free homogeneous
+                                  |
+            randomly rotated 129-basis Kerdock/MUB angular carrier
+                                  |
+            exact shallow repairs + conservative structural routing
+                                  |
+       regular dense suffix: Tichavsky / one-level Strassen / grouping
+                                  |
+        +-------------------------+--------------------------+
+        |                                                    |
+  main endpoint estimate                         independent pilot cloud
+  and basis summaries                            and late summaries
+        |                                                    |
+        +------------ network-conditioned control fit -------+
+                                  |
+       signed harmonic correction in a ~6D late-error basis Q
+                                  |
+                         final-layer prediction
 ```
 
-The centre is deployable only when its projected error is smaller than the sampling
-error removed by the control.
+Maintain two deliberate products throughout:
 
-### Component D — mid-network control variate
+1. **Conservative:** complete structured Kerdock/MUB carrier with exact identities,
+   no learned or adaptive correction.
+2. **Aggressive:** the same carrier plus an independently learned signed correction;
+   shallow Stein or compressed K3 is added only if it clears its own gate.
 
-Use aligned point trajectories:
+### A. Phase/config adapter
+
+Before any carrier work, record width, depth, biases, input distribution, MLP count,
+budget `B`, residual price, multiplier floor, package versions, and nomination rule.
+
+- Biases invalidate the exact radial reduction.
+- Non-Gaussian inputs require a new angular/radial derivation.
+- Width changes require rebuilding the Kerdock/BCH construction.
+- Width/depth changes invalidate the current pruning and basis-rank constants.
+- Cost-table changes require new operating points; Phase-1 FLOP projections are not
+  Phase-2 evidence.
+
+### B. Main angular carrier
+
+Use complete Kerdock/MUB-129 at `129 x 256 x 2 = 66,048` signed directions for the
+Phase-1 shape, or the exact Phase-2 analogue. Randomization must preserve the design
+and provide independent pilot/main rotations.
+
+The implementation should expose carrier generation, radial handling, propagation,
+and readout separately. This makes fixed MUB, Kuperberg/Stroud weights, BCH, and any
+future design comparable under one execution engine.
+
+### C. Structure-aware propagation
+
+Reproduce only identities or conservative reductions with dense-reference parity:
+
+- exact radius for homogeneous bias-free networks;
+- FWHT/structured first layer where the carrier permits it;
+- exact shallow layer repairs;
+- dead/on/kink routing with deterministic fill only when the error gate passes;
+- regular row groups and common prefixes, not random-access packing;
+- rank-40 Tichavsky or one-level Strassen where real counted cost pays;
+- final-layer-only output when only that layer is scored.
+
+Cost engineering is secondary to establishing the statistic. Do not optimize a
+carrier variant whose raw estimator has not passed.
+
+### D. Low-dimensional error basis
+
+Build a weight-computable output basis `Q in R^(width x q)`, initially `q ~= 6`,
+from the downstream Lyapunov/adjoint operator or a reproducible equivalent. Measure:
+
+- fraction of fixed-carrier error energy captured by `Q`;
+- stability across networks and output-coordinate folds;
+- whether the same `Q` preserves target-aware basis-reweighting capacity; and
+- cost and numerical condition.
+
+If six dimensions do not transfer, sweep a small preregistered ladder such as
+`q in {3, 6, 12, 24}`. Do not select `q` on the public split.
+
+### E. Sample-split harmonic control
+
+Let `F(u)` be the final activation vector. Choose weight-conditioned directions
+`v_j` from the adjoint image of `Q` or sensitivity-ranked first-layer directions.
+Construct exact-zero spherical controls
 
 ```text
-mu_hat_32_CV = mean(h_32)
-              - beta * R.T @ (mean(h_c) - mu_hat_c_analytic)
+phi_j(u) = C_l^((d-2)/2)(v_j^T u)
 ```
 
-`R` is an online regularised response fitted from the same aligned rows; `beta` is a
-fixed or pre-registered shrinkage rule. Initially reproduce Team Puffi's single
-layer-9 control before trying multiple control layers.
+using Gegenbauer degrees:
 
-### Component E — optional learned centre corrector
+- degree 4 as an audit for a 128-basis Kerdock carrier;
+- degree 6 for a completed degree-5 129-basis carrier;
+- degree 8 only after the lower degree has been measured.
 
-Only after the mechanistic centre and control are working:
-
-- train on newly generated MLPs, never the public split;
-- split by whole MLP, not neurons or layers;
-- expose the model to the same noisy deploy-time features it will receive;
-- train on rolled-forward trajectories, not one-step residuals;
-- optimise projected centre error or end-to-end controlled loss;
-- freeze weights before the decision block; and
-- bundle all weights in the single-file submission.
-
-A small recurrent or permutation-equivariant model is preferable to a generic final
-residual predictor. The latter was already measured at `R² ≈ 0.012` in this repo and
-is not reopened by this proposal.
-
-### Component F — network-conditioned frame allocation
-
-This is the highest-upside and highest-risk lane. Learn frame weights or a subset
-policy from shallow, target-free information such as:
-
-- analytic-versus-sampled discrepancies at early layers;
-- estimated downstream response;
-- kink density and gate margins;
-- frame-level shallow residual summaries; and
-- downstream-sensitive cumulant projections.
-
-Direct selection against evaluation targets is leakage. Use cross-fitting and compare
-against the complete-frame carrier on untouched MLPs.
-
-## Stage 0 validation blockers
-
-Do not begin a strategic estimator experiment until these are repaired.
-
-### P0.1 — decision objective mismatch
-
-The official scorer arithmetic-means per-MLP adjusted scores. The repo currently
-gates on the geometric mean of per-MLP ratios (`VALIDATION.md:218`). Those estimands
-can select opposite winners on a heavy-tailed suite.
-
-Required canonical objective:
+Fit coefficients on pilot rotation `A` only:
 
 ```text
-score_i = mse_i * max(floor, (flops_i + lambda * residual_i) / B)
-objective = arithmetic_mean(score_i)
+C_A = argmin_C || Q^T F(A) - C Phi(A)^T ||^2 + lambda ||C||^2
 ```
 
-Primary inference should be a paired arithmetic score difference with a paired
-bootstrap or studentised interval over MLPs. Retain geometric log-ratio only as a
-secondary stability/mechanism diagnostic.
+Apply to independent main rotation `B`:
 
-### P0.2 — vault evaluates the v2.4 mirror
+```text
+mu_hat = mean_B F - Q C_A mean_B phi
+```
 
-`local_sim/vault.py:227-260` imports `run_v24` and a fixed v2.4 cost model. It does
-not evaluate v2.6 predictions or Strassen cost. It also exposes `--dry-run`, which
-reads truth without recording a touch.
+Conditional on the pilot, the main randomized control has zero expectation. The
+independence boundary is load-bearing: output folds or leave-one-basis folds from
+the same rotation are useful diagnostics but do not prove an unbiased deployable
+estimator.
 
-Required repair:
+Initial implementation grid, to be reduced and frozen by a Slice Contract:
 
-- execute an explicitly selected candidate through the canonical scorer, or declare
-  the vault accuracy-only;
-- remove unlogged truth evaluation;
-- enforce touch maximum/reason counts and atomic counter/log updates;
-- bind a touch to the estimator/archive hash; and
-- prove mirror parity on a sacrificial non-vault block first.
+- pilot rows `P in {512, 1024, 2048, 4096}`;
+- controls `m in {6, 16, 32, 64}`;
+- degree 6, then degree 6+8;
+- ridge, capped signed weights, and positivity-constrained weights;
+- random, adjoint, and sensitivity-ranked direction families.
 
-### P0.3 — v2.6 odd-width correctness bug
+The computation must use the low-rank feature system. A full 66k-by-66k isotropic
+Bayesian-quadrature solve is both unaffordable and symmetry-blind.
 
-`estimator.py:538` removes an odd survivor before `estimator.py:579` discovers that
-Strassen is impossible for an odd global width. The code then runs dense propagation
-after needless trimming. A read-only 65×4 parity check against v2.4.1 produced final
-maximum relative difference `0.2256` and prediction MSE `0.1037`.
+### F. Secondary controls, only after the main hypothesis is tested
 
-Determine whole-chain Strassen eligibility before changing alive sets. Add widths
-63, 65, 96, 127, 192, 255, and 257 plus depth 1 to the invariant matrix. Fallback
-paths should require parity with v2.4.1, not merely finite output.
+1. **Shallow Stein control.** At depth 6--8, use the exact zero-mean identity
+   derived from Gaussian/spherical Stein plus homogeneity. Distribute tangent
+   directions across point groups so overhead is approximately `c/L`, not six full
+   tangent networks.
+2. **Compressed shallow K3 centre.** Recompress the canonical K3 factor sum by
+   tensor interpolative decomposition or another separation-rank method. This is
+   distinct from the closed covariance-eigenbasis projection.
+3. **Small independent mean-defect audit cloud.** Estimate only `Q^T` times the
+   late mean defect, then use generalized-regression / multi-fidelity correction.
 
-### P0.4 — seed consumption is not enforced
+These are fallbacks or additions. Do not build all three before the harmonic
+observability audit decides whether the primary mechanism exists locally.
 
-`seed_blocks.py` says D16 was never drawn, while committed artifacts use all 600 D16
-seeds. D17 is described as both reusable and single-use. The registry detects
-interval overlap but not consumption.
+## Validation blockers before frontier evidence is trusted
 
-Required repair:
+The core mint and counted-FLOP paths are strong. The decision layer still has
+load-bearing mismatches:
 
-- record D16 as spent design data;
-- lock D17 or allocate a fresh decision block after repair;
-- add an append-only range-consumption ledger with artifact hash and commit;
-- make tools hard-fail on spent/unregistered ranges; and
-- have preflight detect duplicate consumption.
+1. `VALIDATION.md` binds promotion to the geometric mean of ratios even though the
+   official objective is the arithmetic mean of per-MLP scores. Repo evidence shows
+   the two can select opposite winners.
+2. `paired_compare()` exposes a percentile bootstrap while project guidance calls
+   for studentised-t or basic-bootstrap inference.
+3. Preflight omits shape parity, canonical scorer, seed-ledger negative tests, and
+   full vault hash verification.
+4. Seed-ledger scanning can miss hardcoded reuse after a seed has already been
+   claimed; dynamic block access is not attributable; completed D18 artifacts have
+   blank hashes.
+5. Vault and coverage evaluators do not reproduce the grader lifecycle: they create
+   a new estimator per MLP and do not call one shared `setup`.
+6. Vault truth can be opened before the touch is durably recorded, so interruption
+   can create an unlogged touch; previous per-touch prediction evidence is
+   overwritten.
+7. The five-point residual model extrapolates about 1.75x in operation count into a
+   new Strassen mix and factorizes aggregate means instead of scoring per MLP.
+8. Public `CONFIRM` is still adaptive if a "survives" result changes selection.
+9. Several truth generators mask sample seeds to 31 bits although official
+   whestbench uses the full 32-bit value; this is unbiased but not bit-reproducible.
+10. One truth replica leaves label-noise bias and a cross-term in decisive MSEs; two
+    independent truth replicas enable a cross-product estimate.
 
-## Evaluation protocol for the new architecture
+Required target architecture for evaluation: one canonical lifecycle evaluator that
+emits immutable per-MLP evidence rows containing candidate/truth hashes, exact seed
+claims, backend provenance, raw and noise-corrected MSE, counted operations, residual
+model ID and uncertainty, exact failure semantics, and the canonical arithmetic
+competition score.
 
-Every candidate/control comparison must:
+Changing the binding gate or validation protocol is **STRATEGIC**. Editing the
+instrument is **IMPORTANT**. This proposal does not make those changes.
 
-1. use common random numbers only across arms within an MLP;
-2. use independent truth and shift streams across MLPs, or a crossed bootstrap;
-3. compute the exact per-MLP competition score before aggregation;
-4. preserve MSE/cost correlation;
-5. report arithmetic mean difference and private-rerun tail risk;
-6. report the one-shift deployed distribution as well as multishift expectation;
-7. subtract or propagate ground-truth noise in the candidate-control interval;
-8. re-sweep sample count for every biased hybrid;
-9. fit nothing on the public split; and
-10. treat local residual time as E1 until graded telemetry exists.
+## Checkpoint protocol
 
-## Implementation sequence and gates
+Every checkpoint ends in exactly one status:
 
-### Stage 0 — repair the instrument
+- `GO` — its preregistered gate passed; the next checkpoint is authorized.
+- `KILL` — the mechanism failed; close it with scope stated precisely.
+- `PIVOT` — evidence supports a narrower successor that was named in advance.
+- `BLOCKED` — an external fact or required human decision is missing.
+
+After every checkpoint, communicate this compact receipt:
+
+```text
+CHECKPOINT <id> — <name>
+Status: GO | KILL | PIVOT | BLOCKED
+Question:
+What changed:
+Evidence tier and seeds/touches used:
+Primary arithmetic-score result and interval:
+Mechanism diagnostics:
+Cost/failure result:
+Gate comparison:
+What the evidence means:
+What it does not mean:
+Files/artifacts:
+Next action:
+Samuel decision needed: none | <one concrete decision>
+```
+
+No checkpoint may be described as "promising" without a terminal status and a gate
+comparison.
+
+## Execution checkpoints
+
+### CP0 — Phase and decision-layer readiness
+
+**Question:** Do we know the real phase configuration, and can the evaluator choose
+the correct estimator without optimistic lifecycle, aggregation, seed, or failure
+errors?
 
 Deliverables:
 
-- canonical scorer;
-- v2.6 shape/fallback fix and expanded invariants;
-- enforceable seed ledger;
-- candidate-aware, non-bypassable vault path;
-- reproducible v2.6 accuracy/cost gate from checked-in code.
+- live phase/config manifest;
+- arithmetic scorer and t/basic paired intervals;
+- canonical grader-lifecycle evaluator;
+- full preflight regression wiring;
+- finalized seed/artifact ledger transactions;
+- transactional, immutable vault evidence;
+- truth backend provenance and two-replica option;
+- residual-cost sensitivity bands, still E1 until graded telemetry.
 
-Exit gate: targeted tests and project preflight green; independent review complete;
-no decision block or vault touch consumed during construction.
+Proposed exit criteria:
 
-### Stage 1 — reproduce the known carrier frontier
+- parity with installed whestbench on sacrificial data;
+- all targeted tests and preflight green;
+- a regression fixture where arithmetic and geometric gates choose opposite arms and
+  the canonical path chooses the arithmetic winner;
+- zero seed-ledger bypasses in negative tests;
+- no seed block or vault touch spent merely constructing the instrument.
 
-Build MUB and BCH under one engine. Compare design alone, design + current rotation,
-design + pruning, and design + pruning + structured multiplication. Do not assume
-standalone gains compose.
+### CP1 — Reproduce the fixed-carrier frontier
 
-Exit gate: fresh-network paired arithmetic improvement, zero failures, algebraic
-parity for every exact reduction, and raw MSE in the published carrier regime at a
-competitive effective-compute model.
+**Question:** Can this repo reproduce a clean, score-compatible K129 carrier before
+attempting novel adaptation?
 
-### Stage 2 — reproduce the layer-9 control
+Required ablations under one engine:
 
-Implement one fixed shallow centre, online ridge response, and shrinkage.
+1. current carrier;
+2. fixed K129 carrier alone;
+3. K129 plus exact radius/early identities;
+4. K129 plus conservative routing;
+5. K129 plus cost engine.
 
-Exit gate: at least 15% end-to-end arithmetic-score improvement with interval
-excluding zero, plus an explicit projected-centre-error decomposition.
+Proposed exit criteria for the Phase-1 shape:
 
-### Stage 3 — improve the centre
+- carrier strength/invariance checks pass exactly;
+- zero failures and dense-reference parity for exact rewrites;
+- at least 4x raw-MSE improvement over the current carrier, or raw MSE in the
+  reproducible public K129 regime (`~1.7e-7` to `2.4e-7`), with truth noise quoted;
+- effective compute remains score-compatible;
+- paired arithmetic score improves on fresh networks with interval excluding zero.
 
-Run the K3 basis ladder and only then test a frozen trajectory corrector.
+If raw accuracy passes but cost fails, `PIVOT` to cost engineering. If raw accuracy
+fails, `KILL` the implementation spelling before optimization.
 
-Exit gate: centre beats sampled error at a useful control layer and the deployed CV
-gain survives untouched networks. A better standalone closure that fails this
-deployment test does not pass.
+### CP2 — Reproduce adaptive-reweighting capacity
 
-### Stage 4 — frontier-breaking experiments
+**Question:** Does the published target-aware basis direction exist on our freshly
+minted networks, and is it low-dimensional and shared across unseen outputs?
 
-Test joint shallow controls and network-conditioned frame weighting. Run factorial
-combinations rather than multiplying isolated gains.
+Diagnostics:
 
-Exit gate: fresh-network arithmetic score below the reproduced complete-carrier
-control with private-rerun tail risk no worse.
+- capped nonnegative and signed 129-basis oracle weights;
+- even/odd and random output-coordinate cross-fitting;
+- `Q` dimension ladder;
+- correction energy, cosine, effective sample size, and row tails.
 
-### Stage 5 — final candidates
+Proposed exit criteria:
 
-Maintain deliberately different candidates:
+- held-output cross-fit removes at least 50% of fixed-carrier raw error on both
+  fresh halves; 70% is the strong-pass target;
+- `Q` retains at least 70% of full-output cross-fit gain at a stable dimension;
+- weight caps/ESS exclude degenerate interpolation;
+- no public split is used for selection.
 
-1. **conservative:** complete structured design carrier without learned correction;
-2. **aggressive:** carrier + analytic/learned centre + mid-layer control and, if
-   validated, network-conditioned frame allocation.
+Failure means the public capacity result does not transfer to our distribution or
+carrier and the adaptive branch is killed before a production proxy is built.
 
-Use the public split only as confirmation. Nomination follows fresh validation and
-the organiser's final clarification on whether one or two submissions are allowed.
+### CP3 — Modal observability audit
 
-## Phase-2 adaptation rules
+**Question:** Do target-free harmonic moment errors point in the oracle correction
+direction?
 
-Before Stage 1, record the actual Phase-2 width, depth, biases, input distribution,
-budget, lambda, multiplier floor, MLP count, and dependency versions.
+Compare degree 4/6/8 controls and random/adjoint/sensitivity directions using frozen
+network and output folds.
 
-| Phase-2 change | consequence |
-|---|---|
-| width > 256 | current estimator falls back to analytic-only; new carrier and Sobol storage must be rebuilt |
-| width/depth changes | refit pruning and rotation constants; rebuild MUB/BCH construction; do not reuse 256×32 gates |
-| materially smaller `L/n` | analytic K2/K3 becomes more attractive and may deserve more compute |
-| biases introduced | positive-homogeneity/exact-radius reduction is invalid |
-| non-Gaussian input | spherical carrier and radial identity must be re-derived |
-| cost model/floor changes | sample count and the bias/cost trade-off must be re-optimised |
+Proposed exit criteria:
 
-## Explicit non-goals
+- cross-fitted controls explain at least 50% of the `Q`-projected oracle correction
+  energy, or deliver correction-direction cosine at least 0.5 on both fresh halves;
+- the selected direction family beats random directions;
+- results are stable to fold assignment and ridge range.
 
-- no more generic Sobol whitening, sphere, tent, degree-3, or sample-count tuning;
-- no full depth-32 K3/K4 implementation before shallow-control evidence;
-- no public-leaderboard fitting or target-selected frame subsets;
-- no uninstrumented FLOP-accounting workaround;
-- no autonomous optimisation loop while cost evaluation remains E1; and
-- no attempt to explain the public #1 by speculation.
+If capacity exists but the named harmonic controls fail, `PIVOT` to CP5 rather than
+tuning them indefinitely.
+
+### CP4 — Deployable independent-pilot control
+
+**Question:** Does the target-free, independent pilot/main estimator improve the
+actual competition objective after its full cost?
+
+Proposed exit criteria:
+
+- at least 1.5x raw-MSE improvement over fixed K129;
+- less than 10% added effective compute for the first promotion, or a larger raw
+  gain that improves the exact per-MLP score after full cost;
+- paired arithmetic score interval excludes zero on the preregistered decision
+  block and improves on both halves;
+- zero failures, bounded signed weights, stable p95/max tails;
+- an independence test demonstrates that shared-rotation fitting is not silently
+  used by the production path.
+
+### CP5 — Fallback control ladder
+
+Run only if CP3/CP4 gives `PIVOT` rather than `KILL`:
+
+1. shallow Stein control;
+2. compressed K3 separation-rank diagnostic;
+3. independent late-mean audit cloud.
+
+Each mechanism gets one capacity gate and one deployability gate. Continue only if
+the measured score gain exceeds its added effective cost by at least 25% and
+transfers across fresh halves.
+
+### CP6 — Composition and robustness
+
+**Question:** Do the passing mechanisms compose, and will the private rerun remain
+safe?
+
+Deliverables:
+
+- factorial ablation of carrier, routing, cost engine, and adaptive correction;
+- 300--600 fresh-network robustness run with exact failure scoring;
+- private-suite bootstrap/simulation at the actual competition `n_mlps`;
+- one-shift deployed distribution, p95/p99/max, and ground-truth noise;
+- conservative and aggressive candidate hashes frozen separately.
+
+Exit criteria:
+
+- arithmetic score gain survives composition rather than multiplying isolated
+  gains;
+- aggressive candidate has no worse catastrophic tail/failure risk;
+- conservative candidate remains a valid independent nomination;
+- winning target is evaluated against the live Phase-2 board with uncertainty and
+  headroom, not only a point estimate.
+
+### CP7 — Grader telemetry and nomination
+
+No submission is authorized by this checkpoint text. Required order is always:
+
+1. `whest validate`;
+2. clean mini run with `n_failed_mlps: 0`;
+3. present candidate hash, local evidence, and exact question to Samuel;
+4. obtain Samuel's explicit approval;
+5. submit and ingest grader telemetry into the canonical evidence bundle.
+
+Nominate the conservative and aggressive candidates only if the organizer confirms
+two selections. If only one is allowed, use private-rerun expected score and tail
+risk, not public rank, to choose.
+
+## Kill list
+
+Do not reopen without new external evidence:
+
+- generic Sobol whitening, sphere, tent, or sample-count tuning;
+- degree-3 designs on top of the current rotation;
+- current K2 closure as a mid-layer control centre;
+- generic offline final residual regression;
+- isotropic full-kernel quadrature on the symmetric K129 frame;
+- target-selected frame subsets or weights;
+- small ordinary query clouds for the dense layer-31 mean;
+- random-access sparse packing;
+- full depth-32 K3/K4 before shallow capacity and cost evidence;
+- multiplying isolated gains instead of measuring composition.
 
 ## Immediate next move
 
-Once the Phase-2 specification is known, begin **Stage 0 only**. The first
-implementation slice should create the canonical arithmetic scorer and regression
-tests demonstrating the present geometric/arithmetic sign difference. Do not fold
-all four P0 repairs into one unreviewable change.
+Reconcile this proposal with the current Phase-2 state and complete **CP0 only**.
+The first strategic change should repair the binding arithmetic decision gate; the
+first instrument change should create the canonical grader-lifecycle evaluator.
+Do not combine the gate, evaluator, seed ledger, vault transaction, and K129 carrier
+into one slice. Each can silently invalidate the evidence produced by the next.

@@ -89,7 +89,7 @@ SESSION CLOSE — <date>
 Driver:         <which agent drove this session>
 Did:            <2-3 lines, results not activities>
 Learned:        <the one thing that changed a belief, or "nothing new">
-State:          working tree <clean/dirty>, preflight <5/5|not run>, vault touches <n>
+State:          working tree <clean/dirty>, preflight <9/11|11/11|not run>, vault touches <n>
 Open:           <blockers, unreviewed slices, in-flight blocks>
 Next session:   session-start, then <the specific next move and why>
 ```

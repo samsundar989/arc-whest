@@ -5,24 +5,31 @@ repair; five slices, two independent Skeptic reviews). Update this file when a l
 opens or closes, a number is graded, or the phase changes — not on every
 experiment. The narrative record is `experiments/LOG.md`.*
 
+*Documentation note, 2026-08-20:* the external repository/field audit and its
+non-binding frontier execution blueprint are now durable in
+`docs/FRONTIER_ARCHITECTURE_PROPOSAL.md`; the copy-ready Builder handoff is
+`docs/CLAUDE_CODE_FRONTIER_HANDOFF.md`. They do not change the plan of record,
+registered gates, or closed-lane statuses. Reconcile them through `next-slice`
+before implementation.
+
 ---
 
 ## The clock
 
-*Last polled 2026-08-19 (evening). Round 1429 UPCOMING, leaderboard 1480 exists with 0 entries, HF tags still `['v1-phase1', 'v1-warmup']`.*
+*Last polled **2026-08-20**. Round 1429 UPCOMING and its open date has slipped a FOURTH time, to **2026-08-21T23:59Z**. Leaderboard 1480 exists with 0 entries; HF tags still `['v1-phase1', 'v1-warmup']`.*
 
 | event | when | status |
 |---|---|---|
 | Round 1428 "Phase 1" | closed **2026-08-10 23:59 UTC** | **CLOSED.** Our last submission is 327743 (v2.4.1) |
 | Phase 1 submission selection | closed **2026-08-11 23:59 UTC** | **PASSED.** We nominated nothing, so the default applied: our **two** highest-ranked public entries |
 | Phase 1 write-up | closed **2026-08-17 23:59 UTC** | **PASSED, MISSED.** No extension was issued. Write-ups posted after it (18184, 18185) drew no organiser objection, but that is not permission |
-| Round 1429 "Phase 2" | opens **2026-08-20 23:59 UTC** | **UPCOMING** (re-polled 2026-08-19: leaderboard 1480 exists, **0 entries**; HF tags still `v1-phase1`/`v1-warmup`). Slipped twice: Aug 8 → Aug 18 → Aug 19 → Aug 20. Organiser 18186 (2026-08-18): *"still ironing out some details … the deadline for Phase 2 submissions will also be shifted"* |
+| Round 1429 "Phase 2" | opens **2026-08-21 23:59 UTC** | **UPCOMING** (re-polled 2026-08-20: leaderboard 1480 exists, **0 entries**; HF tags still `v1-phase1`/`v1-warmup`). Slipped **four** times: Aug 8 → Aug 18 → Aug 19 → Aug 20 → **Aug 21**. Organiser 18186 (2026-08-18): *"still ironing out some details … the deadline for Phase 2 submissions will also be shifted"* |
 | Phase 2 close | nominally 2026-09-19 23:59 UTC | **WILL MOVE** — organiser says so explicitly |
 | Registration / team freeze | **2026-09-05 23:59 UTC** | 17 days out |
 | Results | 2026-10-01 | private re-run of **UP TO TWO** designated submissions on fresh MLPs (forum 18143; the Rules tab still says one and the contradiction is unresolved) |
 
 **Phase-2 opening is event-triggered, never date-triggered, and the date has now
-moved three times.** Poll with `uv run python local_sim/phase2_checklist.py`.
+moved four times.** Poll with `uv run python local_sim/phase2_checklist.py`.
 **Its configuration is unpublished**: width, depth, biases, init, `n_mlps`, budget
 `B`, λ and the multiplier floor are all unverified for round 1429, and no
 `v1-phase2` HF dataset tag exists. Organiser says details ship by **email**, not
@@ -33,6 +40,35 @@ floor 0.1 from organiser thread 18125.
 
 **First action when 1429 goes active:** re-fit `_PRUNE_TAU` and `_BASIS_RANK` if
 the shape moved, *then* gate. Both are frozen at 256×32 and neither transfers.
+
+### SAMUEL'S WORKING ASSUMPTION, 2026-08-20 — planning proceeds on this
+
+Nothing about Phase 2 has been released. Rather than block, Samuel's instruction is
+to **assume Phase 2 is more or less Phase 1 with different MLPs, possibly a little
+harder**, and to build against that.
+
+**This is a stated assumption, not evidence, and it is labelled as such wherever it
+is load-bearing.** Its consequences:
+
+- Build and validate at **256 x 32, no biases, He init, `x ~ N(0, I)`**, budget
+  `B = 2.72e11`, lambda = 1e11, multiplier floor 0.1. These are the Phase-1
+  constants from organiser thread 18125 and the installed whestbench 0.14.0.
+- Keep everything **shape-generic** anyway (hard rule 7). "A little harder" most
+  plausibly means more depth or a tighter budget; both change `C/B` and neither
+  changes the score identity.
+- **Do not spend D17 or D19** — the two clean single-use decision blocks — until the
+  real shape is published. A block spent on a shape that then moves is wasted, and
+  that is the whole reason both were reserved.
+- **Re-poll before acting on any deadline** (`local_sim/phase2_checklist.py`). The
+  open date has now slipped four times, most recently to 2026-08-21T23:59Z.
+
+**What would falsify the assumption**, in rough order of damage: biases (kills the
+exact radial reduction and the layer-1 closed form), a non-Gaussian input
+distribution (a new angular/radial derivation), a width that is not 256 (rebuilds
+every design-carrier construction, and 2^8 is exactly what makes the MUB/BCH
+arithmetic work), a materially different `L/n` ratio (reopens the mechanistic
+cumulant lane wholesale), or a changed flopscope price table (flopscope >= 0.11 is
+required by whestbench 0.15.0 and its pricing is unverified).
 
 ## Where we stand
 
@@ -46,7 +82,9 @@ the shape moved, *then* gate. Both are frozen at 256×32 and neither transfers.
 | invariant suite on the shipped file | — | **30/30** | verified 2026-08-19 |
 | shape parity (v2.6.1 fallback vs v2.4.1) | — | **27/27**, dense paths bit-identical | 2026-08-19 |
 | canonical scorer vs installed whestbench | — | **71/71**, bitwise | 2026-08-19 |
-| seed-ledger enforcement | — | **40/40** negative tests | 2026-08-19 |
+| seed-ledger enforcement | — | **44/44** negative tests (was 40/40; three snapshot assertions converted to invariants 2026-08-20) | 2026-08-20 |
+| **the preflight gate itself** | — | **12 checks**, 10 by default and 12 under `-Full`. Was 6 | 2026-08-20 |
+| grader-lifecycle evaluator | — | **37/37**, all six failure paths provoked | 2026-08-20 |
 | carrier design strength | — | **27/27** | 2026-08-19 |
 | **the degree-4 design carrier** | DECIDE (D18, 48 nets) | **1.4775× [+14.4%, +45.9%]** — and `C/B = 1.3509`, **over budget** | 2026-08-19 |
 | board position | — | raw #90/200; **#82 of 192 plausible-honest** on 5 entries | 2026-08-06 10:03Z |
@@ -91,9 +129,11 @@ Full table: `docs/BENCHMARK.md`.
 ## Shipped file — v2.6.1 BUILT, NOT PROMOTED (2026-08-19)
 
 `estimator.py` is **v2.6.1** (Strassen-Winograd carrier + the P0.3 odd-width
-repair), archive `estimator_v2_6_1.py`, preflight **GREEN 6/6**, invariants
-**30/30**, shape parity **23/23**, vault touches still **1**. **It has not been
-gated, not been submitted, and no decision block has been spent.**
+repair), archive `estimator_v2_6_1.py`, preflight **GREEN 11/11 under `-Full`**
+(2026-08-20; the gate was 6 steps when this line was written and is now 11 —
+see `docs/VALIDATION.md` §7), invariants **30/30**, shape parity **27/27**,
+vault touches still **1**. **It has not been gated, not been submitted, and no
+decision block has been spent.**
 
 **v2.6 had a network-destroying bug on every odd width and it is fixed.** The
 Strassen trim ran *before* the eligibility test, and the trim itself
@@ -138,6 +178,64 @@ exactly (1,417 local vs 1,416 graded). Break-even is 55.5 us/op; the grader is
 at 7.0, this machine at 30-51. **Only a graded run can decide it.** MSE is
 settled and costs 0.51% (paired 0.9942x [0.9870, 1.0013]), all of it the
 even-width trim — Strassen itself contributes nothing (LOG 2026-08-19).
+
+## CP0 — the decision layer, 2026-08-20 (two slices, two independent Skeptics)
+
+*Working against `docs/FRONTIER_ARCHITECTURE_PROPOSAL.md` rev 2 as a non-binding
+strategist packet. **No seed block drawn, no vault touch, no estimator edit,
+nothing submitted.** Vault counter still **1 of 3**.*
+
+**Ten proposed validation blockers were audited against the code with file/line
+evidence.** Two were already partially fixed (2, 8); eight were open. Two are now
+repaired:
+
+| slice | class | outcome |
+|---|---|---|
+| **CP0.1** the gate | IMPORTANT | `scripts/preflight.ps1` **6 → 12 checks**. 165 previously ungated checks are now gated. Skeptic **PROVISIONAL**, found 3 real defects in the repair (plus 1 I introduced fixing them); all fixed |
+| **CP0.2** the lifecycle evaluator | IMPORTANT | `local_sim/lifecycle_eval.py`, **37/37**. Skeptic **PROVISIONAL**, and its lead finding invalidated the slice's own licence; 12 findings fixed, self-test 26/26 → 37/37. Terminal state PROMOTE_AND_CONTINUE |
+
+**The gate is now two-tier and the denominator is always 12.** Default runs 10
+checks in ~135–160 s and prints `GREEN 10/12, 2 SKIPPED` with the skips named in
+red; `-Full` runs all 12 in ~755 s and is **required** before any promotion,
+submission or vault touch. **Quote the tier** — "preflight GREEN" now means two
+different things. Protocol: `docs/VALIDATION.md` §7.
+
+**Five things every future number depends on**, added to the three from Stage 0:
+
+1. **A setup failure kills the WHOLE submission, not one MLP.** `cli.py:2357` calls
+   `runner.start()` outside the try wrapping `evaluate_estimator`. This is the most
+   expensive failure mode a carrier candidate has, and no evaluator here modelled
+   it until 2026-08-20.
+2. **We have never observed the grader's timing or memory limits.** Every graded
+   `config_snapshot` carries exactly `n_mlps`, `depth`, `width`, `flop_budget`.
+   `setup_timeout_s` = 5.0, `wall_time_limit_s` = 60.0, `predict_timeout_s` = 30.0,
+   `memory_limit_mb` = 65,536 are **package defaults**. Only λ = 1e11 is
+   corroborated. **`memory_limit_mb` is RLIMIT_AS and already killed v2.5.**
+3. **The old evaluators over-charge MLP #0 and only MLP #0** — measured
+   **+2.5273e8** counted FLOPs (+0.554%, +155 ops); every other MLP bit-identical,
+   because `_BASE_POINTS` is a module global. **The vault baseline and the coverage
+   study are NOT invalidated.** The narrowness is an accident of v2.6.1's design,
+   not a property of the old evaluator: a carrier held in *instance* state would be
+   billed on all 500.
+4. **A local evaluator's objective is not a graded objective.** Counted FLOPs
+   transfer exactly; residual seconds do not and they enter `C`. λ·R is ~10–13% of
+   `C` locally against 2–3% graded.
+5. **`mean(target²)` is float32.** A float64 version of the failure-path MSE differs
+   by 1.96e-9 relative. Go through `competition_score.zero_prediction_mse`.
+
+**Still open from the CP0 audit, untouched:** blocker 4 (the ledger scan misses a
+literal already covered by another record; dynamic block access invisible; two D18
+artifact hashes blank), 6 (a vault touch is not transactional — an interrupt
+between opening the truth and writing the seal reads the truth and logs nothing),
+7 (the residual model fits five per-submission *aggregate* means and cannot score
+per MLP), 9 (truth seeds masked to 31 bits), 10 (single truth replica). Blocker 1 —
+the arithmetic gate — is **STRATEGIC and waiting on Samuel**; see § *Next actions*.
+
+**`local_sim/vault.py` and `local_sim/coverage_lab.py` were deliberately NOT
+rewired** to the new evaluator. Both have recorded results attached and `vault.py`
+is guarded; that is its own slice with its own prediction.
+
+---
 
 ## Stage 0 — the instrument, repaired (2026-08-19 night)
 

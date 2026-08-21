@@ -15,6 +15,114 @@ narrative record), `docs/GAME_PLAN.md` (strategy, rev 12 is authoritative).
 
 ---
 
+## 2026-08-20 (CP0.2) — what the grader does that we could not see
+
+*Full record and the second independent Skeptic verdict: `experiments/LOG.md`
+2026-08-20, CP0.2.*
+
+- **A setup failure kills the WHOLE submission, not one MLP.** `cli.py:2357` calls
+  `runner.start()` **outside** the `try` that wraps `evaluate_estimator`, and
+  `runner.py:155-172` raises `RunnerError(SETUP_ERROR | SETUP_TIMEOUT)` out of it.
+  Nothing is scored. Any evaluator that reports a per-MLP objective when `setup()`
+  raised or overran is hiding the most expensive failure mode a carrier candidate
+  has. `local_sim/lifecycle_eval.py` now raises `SetupFailure` instead.
+
+- **The setup window is NOT the duration of `setup()`.** `runner.py:144` starts the
+  clock **before** `load_estimator_from_path`; the subprocess path
+  (`runner.py:281`) waits `setup_timeout_s` for the whole round-trip, so the worker
+  process spawn and its imports are inside it too. Measured here: spawn +
+  `import flopscope, flopscope.numpy` = **0.22–0.25 s**. A timer wrapped around
+  `setup()` alone reported **176.9 ms** where the honest figure is **433 ms** —
+  40% of the truth.
+
+- **`import whestbench` costs ~1.05 s cold and ~0.3 ms warm.** First load of
+  `estimator.py` measured 1052.5 ms, second 0.3 ms, third 0.2 ms; a raw `compile()`
+  of its 58,641 bytes is only **1.9 ms**. So the estimator's module body is
+  essentially free and the second is a cold package import (HF `datasets`) that the
+  grader's worker has warm. **Do not attribute a cold-import second to your own
+  code.**
+
+- **We have never observed the grader's timing or memory limits.** All five durable
+  graded reports publish `config_snapshot` with exactly `n_mlps`, `depth`, `width`,
+  `flop_budget`. `setup_timeout_s` (5.0), `wall_time_limit_s` (60.0),
+  `residual_wall_time_limit_s` (None), `predict_timeout_s` (30.0) and
+  `memory_limit_mb` (65,536) are **`ContestSpec` package defaults**. Only λ = 1e11
+  is independently corroborated, from per-MLP telemetry. Say "the package default
+  is", never "the grader allows".
+
+- **`memory_limit_mb = 65,536` is RLIMIT_AS under `--runner subprocess` and it
+  already killed v2.5** at a 3.9 GB peak. For scale: a 66,048-point carrier on 256
+  dimensions is **135 MB** in float64 for the point set alone, before propagation
+  temporaries.
+
+- **A local evaluator's `objective` is not a graded objective**, and the reason is
+  one term. Counted FLOPs transfer exactly; `residual_wall_time_s` does not, and it
+  enters `C = F + λR`. λ·R is ~10–13% of `C` under `--runner local` against 2–3% on
+  the grader. Use ratios inside one measurement path; never quote a local absolute.
+
+- **`mean(target²)` is a float32 quantity.** The grader computes the failure-path
+  MSE in float32 (`scoring.py:846`); a float64 version of the "same" number differs
+  by **1.96e-9** relative. Go through `competition_score.zero_prediction_mse`.
+
+- **A `# seed-ledger: excludes <BLOCK>` pragma is not decoration.**
+  `seed_ledger.py:461` reads it as `bid not in excluded`, so an `excludes V` pragma
+  written "for tidiness" in a file that names no block **permanently disables the
+  vault-seed-literal scan in that file**. Only write one to declare a block you are
+  refusing.
+
+---
+
+## 2026-08-20 (CP0.1) — the fifth "snapshot instead of property", and it was inside the GATE
+
+*Full record and the independent Skeptic verdict: `experiments/LOG.md` 2026-08-20.*
+
+- **A check that could not run must never report a pass.** The first build of the
+  two-tier preflight gate printed step 9's SKIP as a green `PASS` and counted it in
+  `PREFLIGHT GREEN -- 9/9`, while `docs/VALIDATION.md` simultaneously claimed the
+  gate "prints in red exactly which checks it skipped". Both were written in the
+  same hour, by the same person, and the doc was false the moment it was committed.
+  The fix is structural: **the denominator is always 11**, a skip is counted
+  separately and named in red, and a default run reads `GREEN 9/11, 2 SKIPPED`.
+  **Quote the tier when citing a green run** — "preflight GREEN" alone now means two
+  different things.
+
+- **`test_seed_ledger.py` asserted `consumed_seeds("D19") == 0`, and D19 exists in
+  order to be spent.** Once that file was wired into the mandatory gate, the first
+  legitimate claim on the reserved promotion block would have turned preflight RED
+  at exactly the moment `-Full` is required, and the only way forward would have
+  been to edit the gate to get past it. **This is the fifth instance of the same
+  error** (after B4, R1, the rotation check, and the D18 assertion that went stale
+  twice in one session) and the first one wired into an enforcement path. The
+  durable property of a SINGLE_USE block is **"at most one recorded claim, ever"**,
+  never "zero claims today". D16 had the same defect (`== 270` seeds, four exact
+  gaps) on a block with 330 free seeds.
+
+- **A borrowed constant is not a measurement, and the tell is usually already in
+  your own output.** A K129 comparison was priced with `0.5082`, which is the board
+  **#1** entry's multiplier — a different team, different method, unknown point
+  count. K129's own is 0.51728. The builder's own script printed "recomputed
+  1.1215e-7 vs published 1.1433e-7" and did not chase the 1.9% gap. **When a
+  recomputation of someone else's published number misses, stop: the input is
+  wrong, not the rounding.**
+
+- **"The product reproduces the gap exactly" can be an algebraic identity.**
+  `MSE x (C/B)` gap *is* (MSE·N ratio) x (per-sample-cost ratio), by definition. It
+  cannot fail, so it corroborates nothing. Before quoting an agreement, ask whether
+  the two sides could ever have disagreed.
+
+- **"N is not a lever" is an approximation, and this repo measured it breaking.**
+  T2 (2026-08-19, FALSIFIED) measured **1.1980x** at 8x the points on 48 networks:
+  MSE·N **1.0591** (QMC beats the 1/N law) times counted-FLOPs-per-point **1.1306**
+  (the fixed closure cost amortises). Any argument that assumes the flat law at a
+  different operating point is assuming its own conclusion.
+
+- **The affordable-carrier number is `C/B = 0.6932` counted at 66,048 points**,
+  fitted as `C(N) = 6.8534e9 + 2.7508e6 N` on our own D18 arms — not the 0.8021 a
+  flat per-sample extrapolation gives. The flat estimate is **pessimistic** because
+  it charges the fixed closure cost per point.
+
+---
+
 ## STAGE 0, 2026-08-19 (night) — seven things that must not be rediscovered
 
 *Five slices repaired the instrument. Full record and contracts:

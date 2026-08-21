@@ -29,7 +29,7 @@ is itself a finding.
 |---|---|
 | the Slice Contract and its pre-registration | `experiments/LOG.md`, the entry dated before the data |
 | commit / diff | `git log`, `git diff` — the entry should cite a SHA |
-| project checks | `.\scripts\preflight.ps1` (5/5), `local_sim/edge_cases.py` (30/30) |
+| project checks | `.\scripts\preflight.ps1` — quote the tier: `9/11` default, `11/11` with `-Full`. `local_sim/edge_cases.py` (30/30) |
 | raw evaluator output | JSON under `experiments/`, `experiments/run_reports/`, `experiments/packed/` |
 | seeds / block / config | which block, design or decision, n MLPs, n shifts, N, truth samples |
 | GT-noise floor | quoted alongside every MSE, per `docs/VALIDATION.md` §3.5 |
@@ -148,7 +148,8 @@ keeps this project's beliefs from drifting ahead of its evidence.
 Promote only when **all** hold: the pre-registered gate is cleared on a fresh
 single-use block with a 95% interval excluding 1.0 · the statistic is the paired
 geometric mean of per-MLP ratios · the improvement exceeds the GT-noise floor ·
-`preflight` 5/5 and invariants 30/30 · no cost claim rests on a local absolute
+`preflight -Full` **11/11** (a default `9/11` run is NOT sufficient for promotion)
+and invariants 30/30 · no cost claim rests on a local absolute
 residual · the Skeptic did not find a blocking flaw. "It feels cleaner" is not a
 promotion criterion, and neither is a single 100-MLP run — two realisations of the
 same estimator differ ~18% in the mean.

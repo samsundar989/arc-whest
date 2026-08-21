@@ -28,7 +28,7 @@ scope  →  implement  →  project check  →  targeted test  →  evidence
 2. **Implement.** Smallest change that does it.
 3. **Project check.** Whatever is proportionate:
    - touched anything under `local_sim/` that the shipped path or the invariant suite
-     imports → `.\scripts\preflight.ps1` (5/5)
+     imports → `.\scripts\preflight.ps1` (default tier, `9/11`; `-Full` for 11/11)
    - touched anything under `ai/workflows/`, `.claude/`, `.agents/`, or `.codex/` →
      `uv run python scripts/verify_portability.py` (and note that workflow edits are
      IMPORTANT, not routine — see the escalation table)

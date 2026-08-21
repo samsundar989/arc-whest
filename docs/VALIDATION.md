@@ -483,8 +483,77 @@ Steps 1–3 are cheap and unconditional. Step 4 is a check, never an objective.
 Step 6 costs a vault touch and is spent once per change, not once per idea.
 
 **All of steps 1–3, plus the ship-file identity check, the vault seal and the
-seed ledger, are wrapped by `scripts/preflight.ps1` — now SIX steps, and it is
-the gate.** Run it on every estimator change.
+seed ledger, are wrapped by `scripts/preflight.ps1`, and it is the gate.** Run it
+on every estimator change.
+
+**Since 2026-08-20 the gate has TWO TIERS** (CP0.1; `experiments/LOG.md`). Four
+suites and the vault's own hash verification used to pass ungated, so "preflight
+GREEN" was a weaker claim than the entries quoting it assumed:
+
+| tier | steps run | measured wall time | when |
+|---|---|---|---|
+| **default** | **10 of 12** — the original six, plus **7** canonical scorer (71/71), **8** seed-ledger *refusals* (44/44), **9** vault integrity (array sha256s vs the manifest and the seed→weights reconstruction), **10** lifecycle evaluator (37/37) | **~135–160 s** (n = 2 hosts/runs; a single reading is not a measurement) | every change |
+| **`-Full`** | **12 of 12** — adds **11** shape parity (27/27) and **12** carrier strength (27/27) | **~755 s** (n = 1) | **required** before any promotion, submission, or vault touch |
+
+*The 111 s [110, 113] figure recorded earlier describes the **nine**-step tier that
+existed before step 10; it is not comparable with the row above.*
+
+The split is by **cost, not importance**.
+
+**The denominator is always 12, and a skipped step is never counted as a pass.**
+A default run reports `GREEN 10/12, 2 SKIPPED` and names the two in a red
+NOT-CHECKED block; if the vault arrays are also absent it reports `9/12, 3
+SKIPPED`. The first build of this gate reported `9/11` as `9/9` and printed step
+9's skip as a green PASS — caught by the independent Skeptic, and it is the same
+failure this repository has lost four separate checks to: **a check that reports a
+state rather than testing a property.** Quote the tier when citing a green run;
+"preflight GREEN" alone is now ambiguous.
+
+Step 9 reads no candidate predictions and therefore **costs no touch** — verified
+twice over, by counter and log line count (1 → 1) and by the mtime of
+`manifest.json` and `touch_log.jsonl`, both unmoved from 2026-08-06. It degrades to
+a printed SKIP when `experiments/vault/vault_v1.npz` is absent, which is the normal
+state of a fresh clone because the 33 MB array file is gitignored. Step 5 still
+covers the seal in that case, because `manifest.json` and `touch_log.jsonl` *are*
+tracked.
+
+**Step 10 is `local_sim/lifecycle_eval.py`, the canonical grader-lifecycle
+evaluator** (CP0.2). It is the object every candidate comparison is scored
+through: one `Estimator`, `setup()` called once **off-budget** and timed, per-MLP
+`BudgetContext`, all six failure paths **provoked rather than asserted**, float32
+MSE, and immutable content-addressed evidence rows. It does not re-derive the
+score identity — it produces `MlpRow`s and hands them to `competition_score.py`.
+
+Three things about it are binding and easy to get wrong:
+
+1. **The objective it prints is NOT a graded objective.** Every
+   `residual_wall_time_s` is a `--runner local` figure read from the in-process
+   `BudgetContext`; the grader deliberately prefers `last_predict_stats()`
+   (`scoring.py:762-789`). λ·R is ~10–13% of `C` here against 2–3% on the grader.
+   Counted FLOPs transfer exactly; the objective does not. **Ratios inside one
+   path only.** The evidence bundle records `residual_is_graded: false`.
+2. **A setup failure is a RUN-level refusal, not a per-MLP failure.** `cli.py:2357`
+   calls `runner.start()` *outside* the try wrapping `evaluate_estimator`, and
+   `runner.py:155-172` raises `SETUP_ERROR`/`SETUP_TIMEOUT` out of it — the whole
+   submission dies. `evaluate()` therefore raises `SetupFailure` by default rather
+   than returning a clean-looking objective. This is the property that lets the
+   evaluator be trusted to price a candidate with an expensive `setup()`.
+3. **`setup_timeout_s`, `wall_time_limit_s`, `residual_wall_time_limit_s`,
+   `predict_timeout_s` and `memory_limit_mb` are INSTALLED-PACKAGE DEFAULTS, not
+   observed grader configuration.** Every graded `config_snapshot` we hold carries
+   exactly `n_mlps`, `depth`, `width`, `flop_budget`. Only λ = 1e11 is
+   independently corroborated. Two of the six failure paths are therefore gated on
+   constants we have never seen — quote them as a prior, never as a fact.
+
+Timings are quoted with an n and a range because the first measurement of the
+default tier (103.9 s) did not replicate — an independent re-run measured 113.4 s,
+and three replications give 111 s [110, 113]. Nothing turns on it against a target
+of ~2 minutes, but a single unreplicated wall time is not a measurement.
+
+Step 8 is not a duplicate of step 6. Step 6 proves the ledger is *consistent*;
+step 8 proves its *refusals still fire* — unregistered block, range leaving its
+block, overlap in a DECISION block, a second claim on a SINGLE_USE one, a
+hand-edited ledger, an artifact rewritten after its claim.
 
 **Two things changed on 2026-08-19 that this section has to carry:**
 

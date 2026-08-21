@@ -210,6 +210,14 @@ def t_artifact_hash():
 def t_scan_catches_a_new_literal():
     head("8. the source scan catches the failure that actually happened")
     tmp_dir = os.path.join(_ROOT, "local_sim", "_ledger_scan_tmp")
+    # Clear any corpse first. This test writes a real seed literal into the real
+    # tree; a hard kill between the write and the `finally` leaves it there, and
+    # since 2026-08-20 preflight step 6 (--scan) runs BEFORE step 8, so the
+    # leftover would fail the gate on every subsequent run. The scan's message
+    # names the file, so it is self-diagnosing rather than mysterious -- but
+    # clearing it here means the next run repairs it without anyone reading that
+    # message. The directory is gitignored so it can never be committed.
+    shutil.rmtree(tmp_dir, ignore_errors=True)
     os.makedirs(tmp_dir, exist_ok=True)
     probe = os.path.join(tmp_dir, "sneaky_probe.py")
     try:
@@ -265,15 +273,39 @@ def t_real_ledger_readonly():
         "; ".join(f"{a.block} {a.consumer} vs {b.consumer}" for a, b in accidental),
     )
     check(
-        "A1: and it is probe_whitening vs probe_design_carrier on D16",
-        accidental
-        and accidental[0][0].block == "D16"
-        and {accidental[0][0].consumer, accidental[0][1].consumer}
-        == {"local_sim/probe_whitening.py", "local_sim/probe_design_carrier.py"},
+        "A1: and probe_whitening vs probe_design_carrier on D16 is AMONG them",
+        any(
+            a.block == "D16"
+            and {a.consumer, b.consumer}
+            == {"local_sim/probe_whitening.py", "local_sim/probe_design_carrier.py"}
+            for a, b in accidental
+        ),
+        f"{len(accidental)} reported overlap(s)",
     )
-    check("A2: D17 has zero consumption", SL.consumed_seeds("D17") == 0)
-    check("A2: D19 (the reserved single-use gate block) has zero consumption",
-          SL.consumed_seeds("D19") == 0)
+    # D17 and D19 are SINGLE_USE and currently unspent. Asserting "zero
+    # consumption" is a SNAPSHOT, and D19 exists precisely in order to be spent
+    # once -- on the v2.6 promotion gate. Since 2026-08-20 this file runs inside
+    # the mandatory preflight gate, so that snapshot would have turned preflight
+    # RED at the exact moment the block was used as designed, and the only way
+    # forward would have been to edit the gate. That is the failure mode
+    # docs/GOTCHAS.md records four times: an assertion written against a moment
+    # rather than against a property. The durable property of a SINGLE_USE block
+    # is that it is claimed AT MOST ONCE, ever.
+    for blk in ("D17", "D19"):
+        claims = SL.consumed_ranges(blk)
+        lo, hi = SL.block_span(blk)
+        check(
+            f"A2: {blk} is SINGLE_USE and has at most one recorded claim",
+            len(claims) <= 1,
+            f"{len(claims)} claim(s), {SL.consumed_seeds(blk)} seeds"
+            + ("  <- UNSPENT" if not claims else
+               f"  <- SPENT by {claims[0][2]}"),
+        )
+        check(
+            f"A2: any {blk} claim names a real consumer inside the block",
+            all(c and lo <= a and b <= hi for a, b, c in claims),
+            "vacuously true while unspent" if not claims else f"{claims}",
+        )
     # D18 is a LIVE design block and grows as experiments claim from it. Two
     # earlier versions of this check asserted a SNAPSHOT ("zero consumption",
     # then "exactly 192 by coverage_lab") and both went stale within hours. A
@@ -292,20 +324,30 @@ def t_real_ledger_readonly():
         all(c and lo <= a and b <= hi for a, b, c in d18) and len(d18) >= 1,
         f"{len(d18)} claim(s): {[c for _a, _b, c in d18]}",
     )
+    # D16 is a LIVE, part-spent DESIGN block with 330 seeds still free, so its
+    # consumed count and its gap list are both moving targets -- the same
+    # snapshot trap as D17/D19 above. Assert the accounting instead.
+    d16 = SL.consumed_ranges("D16")
+    lo16, hi16 = SL.block_span("D16")
     check(
-        "A6: D16 shows 270 distinct seeds consumed, 330 free",
-        SL.consumed_seeds("D16") == 270,
+        "A6: D16 accounting closes: consumed + free == the block",
+        SL.consumed_seeds("D16")
+        + sum(e - s + 1 for s, e in SL.free_ranges("D16")) == hi16 - lo16 + 1,
         f"{SL.consumed_seeds('D16')} consumed, "
-        f"{600 - SL.consumed_seeds('D16')} free in {len(SL.free_ranges('D16'))} gaps",
+        f"{sum(e - s + 1 for s, e in SL.free_ranges('D16'))} free in "
+        f"{len(SL.free_ranges('D16'))} gaps of {hi16 - lo16 + 1}",
     )
     check(
-        "A6: the four free gaps are exactly the ones predicted",
-        SL.free_ranges("D16") == [
-            (30_806_016_224, 30_806_016_299),
-            (30_806_016_320, 30_806_016_399),
-            (30_806_016_420, 30_806_016_499),
-            (30_806_016_506, 30_806_016_599),
-        ],
+        "A6: every D16 claim names a real consumer inside the block",
+        all(c and lo16 <= a and b <= hi16 for a, b, c in d16) and len(d16) >= 1,
+        f"{len(d16)} claim(s)",
+    )
+    check(
+        "A6: free ranges are disjoint, ascending, and inside the block",
+        all(s <= e for s, e in SL.free_ranges("D16"))
+        and all(SL.free_ranges("D16")[i][1] < SL.free_ranges("D16")[i + 1][0]
+                for i in range(len(SL.free_ranges("D16")) - 1))
+        and all(lo16 <= s and e <= hi16 for s, e in SL.free_ranges("D16")),
     )
     check("A3: the tree has no unrecorded seed use", SL.scan_sources() == [])
     check("no test wrote to the real ledger", os.path.getsize(SL.LEDGER_PATH) == before)

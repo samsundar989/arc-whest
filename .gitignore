@@ -16,3 +16,13 @@ _to_delete/
 
 # large intermediate npz caches live in the scratchpad, not the repo
 experiments/sprint3_robustness/*.npy
+
+# transient scratch created by local_sim/test_seed_ledger.py step 8; a hard kill
+# mid-test would otherwise leave an unrecorded seed literal in the tree and
+# break the ledger scan on every subsequent preflight run
+local_sim/_ledger_scan_tmp/
+
+# transient candidates written by local_sim/lifecycle_eval.py --self-test,
+# which runs inside the preflight gate. Removed in a `finally`; ignored so a
+# hard kill cannot leave one tracked.
+local_sim/_lifecycle_*_tmp.py

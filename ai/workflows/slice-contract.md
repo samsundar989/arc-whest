@@ -133,7 +133,7 @@ baseline            value + tier
 result              value + 95% CI
 delta vs gate       PASS / FAIL, stated as such
 GT-noise floor      and the result as a multiple of it
-regressions         preflight 5/5? invariants 30/30? anything that moved?
+regressions         preflight 11/11 with -Full? invariants 30/30? anything that moved?
 runtime / cost      wall time, vault touches spent (should usually be 0)
 raw artifacts       paths under experiments/
 deviations          anything that differed from the contract, and why
