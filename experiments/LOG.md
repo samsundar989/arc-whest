@@ -7968,3 +7968,98 @@ sobol@66,048, because the question is whether the whole move beats what we ship)
 interval, gate pre-registered, GT-noise floor quoted. **The contract must
 pre-register the `MSE·N` decomposition rather than discover it**, because
 `docs/GOTCHAS.md` already records that law as not resolvable on 48 networks.
+
+
+---
+
+# 2026-08-21 — **THE PHASE-2 CONFIGURATION LANDED. THE SHAPE MOVED: 1024 x 16.**
+
+*Polled 2026-08-21. This supersedes every shape-dependent plan in this file and in
+`docs/CURRENT_STATE.md`. No slice, no seed block, no vault touch -- a read of the
+organisers' published dataset.*
+
+## What is now known, from the dataset itself
+
+The HF dataset `aicrowd/arc-whestbench-public-2026` has gained a **`v2-phase2`**
+tag (it carried only `v1-phase1` / `v1-warmup` this morning). Its `metadata.json`:
+
+| field | Phase 1 | **Phase 2** |
+|---|---|---|
+| width | 256 | **1024** |
+| depth | 32 | **16** |
+| ground-truth samples | 1e9 | 1e9 |
+| splits | mini 100 / full 1000 | mini 100 / full 1000 |
+| baked with | whestbench 0.14.0 | **whestbench 0.16.0, flopscope 0.12.0** |
+| seed protocol | 3.0 | 3.0 (unchanged) |
+
+Round 1429 opens **2026-08-21T23:59Z**, leaderboard 1480 still has 0 entries.
+
+## What this breaks, and it is a great deal
+
+**Samuel's working assumption of 2026-08-20 -- "Phase 1 with different MLPs, maybe
+a little harder" -- is FALSIFIED.** The shape moved on both axes, in opposite
+directions. It was recorded with its falsifiers, and the first one listed ("a width
+that is not 256") is exactly what happened.
+
+1. **The CP1.1 Kerdock/MUB-129 carrier does NOT transfer.** It is a width-256
+   object and the whole construction depends on it: `256 = 4^4` is what makes the
+   real-MUB bound `d/2 + 1 = 129` attainable, `2^16 = d^2` is what makes the axial
+   identity cancel exactly, and the Galois ring is `GR(4,7)` because `2^(7+1) = 256`.
+   At **1024 = 4^5** the analogue is `GR(4,9)`, `d/2 + 1 = 513` bases, and
+   `d^2 = 2^20 = 1,048,576` sign vectors + 2,048 axial = **1,050,624 points**.
+   **The mathematics carries over; the specific object does not.** Whether the
+   width-1024 version is affordable is a new and open cost question.
+2. **`_PRUNE_TAU = -2.5` and `_BASIS_RANK = 32` are fitted at 256x32 and neither
+   transfers.** This was already recorded as the first action when 1429 went live.
+3. **The dual-BCH strength-5 array, the 131,072 linear floor, and the Sidon-set
+   proof are all width-256 statements.** None of them says anything about 1024.
+4. **flopscope moved 0.10.0 -> 0.12.0 and whestbench 0.14.0 -> 0.16.0.** The
+   installed toolchain is behind. `docs/CURRENT_STATE.md` flags the price table as
+   the cost half's live unknown; two minor versions of flopscope is exactly where
+   that would move.
+
+## What this OPENS, and it was pre-registered
+
+`docs/CURRENT_STATE.md` § *Open questions* #1 says, written before any of this was
+known:
+
+> *"If `L/n` falls materially -- a wider or shallower Phase 2 -- the mechanistic
+> lane reopens wholesale, because ARC's own cumulant propagation breaks even only
+> when `L^K < n` (L < 16 for K=2, L < 6.3 for K=3). At 256x32 we sit at L/n = 1/8
+> and every variant of it is either over budget or worse than MC."*
+
+**`L/n` fell from 32/256 = 1/8 to 16/1024 = 1/64 -- a factor of eight.** And the
+break-even condition is now met at K = 2: `L^2 = 256 < 1024 = n`. At K = 3,
+`L^3 = 4096 > 1024`, so it is not met.
+
+**The moonshot / cumulant lane reopens on its own pre-registered condition, by an
+external fact rather than by a new idea about old evidence.** That is exactly the
+reopening standard `AGENTS.md` demands.
+
+## What is still unknown
+
+**The budget `B`, lambda, and the multiplier floor are NOT in the dataset.** They
+live in the round configuration and appear in a graded report's `config_snapshot`.
+Until a Phase-2 run exists we do not know `B`, and **every `C/B` in this repository
+is a Phase-1 number**. Also unknown: whether the networks still have no biases
+(the dataset carries weights, so this is checkable once the toolchain is upgraded).
+
+**Naive scaling, stated as arithmetic and not as a claim:** a dense layer at
+1024 wide costs 16x a 256-wide layer per sample, over half the depth, so
+**per-sample propagation is ~8x Phase 1**. If `B` did not grow by at least that,
+the affordable sample count collapses. This is the first thing to establish.
+
+## Immediate consequences for the plan
+
+- **CP1.2 (the end-to-end Kerdock arm on D18) is SUSPENDED**, not killed. D18's 192
+  networks are 256x32 and would measure a carrier for a shape that is no longer
+  scored. **Spending compute on it now would be measuring the wrong world.**
+- **Nothing that was built is wasted as method.** The instrument work (CP0.1-0.3:
+  the 12-step gate, the lifecycle evaluator, the arithmetic gate) is shape-free and
+  applies unchanged. The Kerdock derivation generalises to `GR(4,9)`.
+- **The first Phase-2 actions are, in order:** upgrade the toolchain to
+  whestbench 0.16.0 / flopscope 0.12.0 and re-verify mint provenance at 1024x16;
+  establish `B` and the price table; re-fit `_PRUNE_TAU` and `_BASIS_RANK` on a
+  DESIGN block at the new shape; only then re-open the carrier question.
+- **D17 and D19 remain unspent, and must stay that way** until the new shape's
+  constants are re-fitted. A single-use block spent on a stale shape is wasted.

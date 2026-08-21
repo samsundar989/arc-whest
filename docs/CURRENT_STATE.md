@@ -41,7 +41,33 @@ floor 0.1 from organiser thread 18125.
 **First action when 1429 goes active:** re-fit `_PRUNE_TAU` and `_BASIS_RANK` if
 the shape moved, *then* gate. Both are frozen at 256×32 and neither transfers.
 
-### SAMUEL'S WORKING ASSUMPTION, 2026-08-20 — planning proceeds on this
+### ⚠️ THE PHASE-2 SHAPE IS **1024 x 16** — CONFIRMED 2026-08-21 FROM THE DATASET
+
+The HF dataset gained a **`v2-phase2`** tag. `metadata.json` gives **width 1024,
+depth 16**, GT 1e9, mini 100 / full 1000, baked with **whestbench 0.16.0 /
+flopscope 0.12.0**. Round 1429 opens **2026-08-21T23:59Z**.
+
+**This falsifies the working assumption below**, on its own first-listed falsifier
+("a width that is not 256"). Kept for the record rather than deleted.
+
+**Dead on arrival at the new shape:** the CP1.1 Kerdock/MUB-129 carrier (a
+width-256 object -- `256 = 4^4`, `GR(4,7)`, `d^2 = 2^16`); the dual-BCH array and
+its 131,072 linear floor; `_PRUNE_TAU = -2.5`; `_BASIS_RANK = 32`. The Kerdock
+*mathematics* generalises to `GR(4,9)` at 1,050,624 points; the *object* does not.
+
+**Reopened, on its own pre-registered condition:** the mechanistic / cumulant lane.
+`L/n` fell from 1/8 to **16/1024 = 1/64**, and `L^K < n` now holds at K = 2
+(`256 < 1024`). Open question #1 said a wider or shallower Phase 2 would reopen it
+"wholesale". It did.
+
+**Still unknown: `B`, lambda, the multiplier floor, and whether biases are absent.**
+None is in the dataset. **Every `C/B` in this document is a Phase-1 number.** Naive
+arithmetic: per-sample propagation is ~8x Phase 1 (16x the layer cost, half the
+depth), so if `B` did not grow proportionally the affordable sample count collapses.
+
+Full record: `experiments/LOG.md`, 2026-08-21.
+
+### SAMUEL'S WORKING ASSUMPTION, 2026-08-20 — FALSIFIED 2026-08-21, kept for the record
 
 Nothing about Phase 2 has been released. Rather than block, Samuel's instruction is
 to **assume Phase 2 is more or less Phase 1 with different MLPs, possibly a little
