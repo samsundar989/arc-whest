@@ -10,7 +10,9 @@
   DEFAULT TIER (10 of 12 steps, ~2-3 minutes) - runs on every change:
     1. mint provenance    - our MLPs are still bit-identical to the grader's
     2. invariant suite    - 30/30 on the SHIPPED file, not on a candidate
-    3. whest validate     - the grader contract
+    3. whest validate     - the grader contract, run with the child's text
+                            encoding OWNED by this gate and ASSERTED, not
+                            assumed. See the PYTHONIOENCODING block below.
     4. ship-file identity - estimator.py matches its version archive
     5. vault seal         - touch counter still agrees with the log
     6. seed ledger        - consumption is recorded, and no source file draws
@@ -78,8 +80,29 @@ $ErrorActionPreference = "Stop"
 $repo = Split-Path -Parent $PSScriptRoot
 Set-Location $repo
 
+# --- the gate OWNS its children's text encoding --------------------------------
+# `whest validate` prints a Unicode box-drawing table. On Windows, Python resolves
+# a REDIRECTED stdout to the ANSI codepage (cp1252 here) regardless of `chcp
+# 65001` or [Console]::OutputEncoding, so the CLI validates successfully, dies in
+# its results printer (cli.py:2773), and then dies again in its error printer
+# (cli.py:3655) -- exit 1, gate RED, estimator fine. A gate that reports the
+# console's encoding as an estimator defect is a check reporting a STATE rather
+# than testing a PROPERTY, which is the failure class this repo has lost four
+# checks to (docs/GOTCHAS.md). So the gate sets it, asserts it in step 3, and
+# restores whatever the caller had.
+$script:PrevPyIoEnc = $env:PYTHONIOENCODING
+$script:PrevPyUtf8  = $env:PYTHONUTF8
+$env:PYTHONIOENCODING = "utf-8"
+$env:PYTHONUTF8       = "1"
+
 $failures = New-Object System.Collections.ArrayList
 $skipped  = New-Object System.Collections.ArrayList
+
+function Restore-CallerEncoding {
+    # preflight must not silently change the encoding of the shell that ran it.
+    $env:PYTHONIOENCODING = $script:PrevPyIoEnc
+    $env:PYTHONUTF8       = $script:PrevPyUtf8
+}
 
 function Step {
     param([string]$Name, [scriptblock]$Body)
@@ -132,7 +155,18 @@ Step "1. mint provenance" { uv run python local_sim/mint_provenance.py }
 Step "2. invariant suite" { uv run python local_sim/edge_cases.py }
 
 # --- 3. grader contract --------------------------------------------------------
-Step "3. whest validate" { uv run whest validate --estimator estimator.py }
+Step "3. whest validate" {
+    # Assert the property, do not assume the export took. A future venv, a
+    # different Python, or a caller that hard-sets PYTHONIOENCODING to something
+    # else must turn the gate RED HERE, with a readable reason -- not sixty lines
+    # later inside someone else's traceback.
+    $enc = (uv run python -c "import sys; print(sys.stdout.encoding)") | Select-Object -Last 1
+    Write-Host "  child stdout encoding: $enc"
+    if ("$enc".Trim() -notmatch '^(?i)utf-?8$') {
+        throw "child stdout encoding is '$enc', not utf-8 -- the gate failed to own it"
+    }
+    uv run whest validate --estimator estimator.py
+}
 
 # --- 4. ship-file identity -----------------------------------------------------
 # estimator.py must be byte-identical to its version archive modulo line endings.
@@ -286,9 +320,11 @@ if ($failures.Count -eq 0) {
     Write-Host "  - GPU mirror parity:                     .venv-gpu\Scripts\python.exe local_sim/gpu_parity.py"
     Write-Host "  - vault touch (ONE per estimator change): .venv-gpu\Scripts\python.exe local_sim/vault.py evaluate --label <v> --reason estimator-change"
     Write-Host "  - Samuel's explicit approval before any submission."
+    Restore-CallerEncoding
     exit 0
 } else {
     Write-Host "PREFLIGHT RED -- failed: $($failures -join ', ')" -ForegroundColor Red
     Write-Host "Do not promote, do not submit, do not spend a decision block." -ForegroundColor Red
+    Restore-CallerEncoding
     exit 1
 }

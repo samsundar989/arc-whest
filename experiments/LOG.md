@@ -8294,3 +8294,51 @@ checks to — a check reporting a state instead of testing a property.
 
 **Falsifier:** if step 3 still fails after the fix, or if any other step's verdict
 moves, the diagnosis is wrong and the fix is reverted.
+
+## P2-CP0.1 — the result, against the predictions committed above
+
+Implemented in `scripts/preflight.ps1`: the gate exports
+`PYTHONIOENCODING=utf-8` and `PYTHONUTF8=1` for its child processes before the
+first step, **asserts inside step 3 that the child actually reports `utf-8`**,
+and restores the caller's prior values on both exit paths through
+`Restore-CallerEncoding`.
+
+Run with `PYTHONIOENCODING` and `PYTHONUTF8` both unset in the calling shell:
+
+```
+=== 3. whest validate ===
+  child stdout encoding: utf-8
+  PASS  3. whest validate
+...
+PREFLIGHT GREEN -- 10/12, 2 SKIPPED
+EXIT=0
+caller PYTHONIOENCODING after = []
+caller PYTHONUTF8 after = []
+```
+
+| prediction | outcome |
+|---|---|
+| **B1** step 3 exits 0 with the export | **CONFIRMED** — `PASS 3. whest validate`, whole gate `GREEN 10/12` |
+| **B2** the child reports `utf-8`, asserted as a property | **CONFIRMED** — the step prints `child stdout encoding: utf-8` and throws a readable error if it is ever anything else |
+| **B3** no other step changes verdict | **CONFIRMED** — 1, 2, 4-10 all PASS; 11, 12 skipped as always without `-Full` |
+| **B4** caller's variables restored | **CONFIRMED** — both read empty after the run, as they were before |
+| **B5** portability stays green | **CONFIRMED** — `174 checks, 0 failed` |
+
+**Vault untouched:** counter `1`, `touch_log.jsonl` one line. **No seed block
+drawn. `estimator.py` untouched.**
+
+### The knowledge delta
+
+**The console codepage is not the child's encoding, and `chcp 65001` does not
+fix this.** The reproduction ran with `chcp` reporting **65001** and
+`[Console]::OutputEncoding` reporting **utf-8**, and the Python child still
+resolved `sys.stdout.encoding` to **cp1252** — because when stdout is a *pipe*
+rather than a console, Python 3.10 takes the locale/ANSI codepage and ignores the
+console entirely. Any advice of the form "run it in a UTF-8 console" is therefore
+wrong for a redirected child. Only `PYTHONIOENCODING` (or `PYTHONUTF8=1`, or
+Python 3.15's default) settles it, and it must be exported by whoever *spawns*
+the process.
+
+`AGENTS.md` and `CLAUDE.md` already told humans to set `PYTHONIOENCODING=utf-8`
+by hand in a POSIX shell. That instruction was correct and is now also
+*mechanical* for the gate: prose that has to be remembered is not enforcement.
