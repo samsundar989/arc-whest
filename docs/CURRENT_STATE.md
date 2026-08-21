@@ -1,9 +1,11 @@
 # CURRENT_STATE.md — read this first
 
-*Snapshot, not narrative. Last updated **2026-08-19** (Stage 0 — the instrument
-repair; five slices, two independent Skeptic reviews). Update this file when a lane
-opens or closes, a number is graded, or the phase changes — not on every
-experiment. The narrative record is `experiments/LOG.md`.*
+*Snapshot, not narrative. Last updated **2026-08-21** — the session that repaired
+the decision layer (CP0.1-0.3), built and proved a 66,048-point exact design
+(CP1.1), and then found the Phase-2 shape had moved to **1024 x 16**, which
+obsoletes that design. Four slices, four independent Skeptic reviews. Update this
+file when a lane opens or closes, a number is graded, or the phase changes — not
+on every experiment. The narrative record is `experiments/LOG.md`.*
 
 *Documentation note, 2026-08-20:* the external repository/field audit and its
 non-binding frontier execution blueprint are now durable in
@@ -16,30 +18,31 @@ before implementation.
 
 ## The clock
 
-*Last polled **2026-08-20**. Round 1429 UPCOMING and its open date has slipped a FOURTH time, to **2026-08-21T23:59Z**. Leaderboard 1480 exists with 0 entries; HF tags still `['v1-phase1', 'v1-warmup']`.*
+*Last polled **2026-08-21**. Round 1429 opens **2026-08-21T23:59Z**, leaderboard 1480 still has 0 entries — and the HF tags now read `['v2-phase2', 'v1-phase1', 'v1-warmup']`. **The Phase-2 dataset is published and the shape has moved: 1024 x 16.** See the boxed section below.*
 
 | event | when | status |
 |---|---|---|
 | Round 1428 "Phase 1" | closed **2026-08-10 23:59 UTC** | **CLOSED.** Our last submission is 327743 (v2.4.1) |
 | Phase 1 submission selection | closed **2026-08-11 23:59 UTC** | **PASSED.** We nominated nothing, so the default applied: our **two** highest-ranked public entries |
 | Phase 1 write-up | closed **2026-08-17 23:59 UTC** | **PASSED, MISSED.** No extension was issued. Write-ups posted after it (18184, 18185) drew no organiser objection, but that is not permission |
-| Round 1429 "Phase 2" | opens **2026-08-21 23:59 UTC** | **UPCOMING** (re-polled 2026-08-20: leaderboard 1480 exists, **0 entries**; HF tags still `v1-phase1`/`v1-warmup`). Slipped **four** times: Aug 8 → Aug 18 → Aug 19 → Aug 20 → **Aug 21**. Organiser 18186 (2026-08-18): *"still ironing out some details … the deadline for Phase 2 submissions will also be shifted"* |
+| Round 1429 "Phase 2" | opens **2026-08-21 23:59 UTC** | **IMMINENT.** Re-polled 2026-08-21: leaderboard 1480 exists with **0 entries**, but the HF dataset now carries a **`v2-phase2`** tag baked 2026-08-13 — **width 1024, depth 16**. Slipped **four** times: Aug 8 → Aug 18 → Aug 19 → Aug 20 → **Aug 21**. Organiser 18186 (2026-08-18): *"still ironing out some details … the deadline for Phase 2 submissions will also be shifted"* |
 | Phase 2 close | nominally 2026-09-19 23:59 UTC | **WILL MOVE** — organiser says so explicitly |
 | Registration / team freeze | **2026-09-05 23:59 UTC** | 17 days out |
 | Results | 2026-10-01 | private re-run of **UP TO TWO** designated submissions on fresh MLPs (forum 18143; the Rules tab still says one and the contradiction is unresolved) |
 
 **Phase-2 opening is event-triggered, never date-triggered, and the date has now
 moved four times.** Poll with `uv run python local_sim/phase2_checklist.py`.
-**Its configuration is unpublished**: width, depth, biases, init, `n_mlps`, budget
-`B`, λ and the multiplier floor are all unverified for round 1429, and no
-`v1-phase2` HF dataset tag exists. Organiser says details ship by **email**, not
-forum-first. The challenge page's timeline and its `max(0.5, ·)` worked example
-are **stale Phase-1/warm-up copy — do not read constants off it**; the only
-trustworthy live numbers are flopscope 0.10.0 / whestbench 0.14.0 / λ = 1e11 /
-floor 0.1 from organiser thread 18125.
 
-**First action when 1429 goes active:** re-fit `_PRUNE_TAU` and `_BASIS_RANK` if
-the shape moved, *then* gate. Both are frozen at 256×32 and neither transfers.
+**HALF the configuration is now published and half is not.** The dataset gives
+**width 1024, depth 16**, GT 1e9, mini 100 / full 1000. It does **not** give
+**`B`, λ, the multiplier floor, or whether biases are absent** — those live in the
+round config and surface in a graded report's `config_snapshot`. The challenge
+page's timeline and its `max(0.5, ·)` worked example remain **stale Phase-1 copy —
+do not read constants off it**.
+
+**The shape DID move, so the first action is no longer conditional:** re-fit
+`_PRUNE_TAU` and `_BASIS_RANK` at 1024×16 on a DESIGN block *before* gating
+anything. Both are frozen at 256×32 and neither transfers.
 
 ### ⚠️ THE PHASE-2 SHAPE IS **1024 x 16** — CONFIRMED 2026-08-21 FROM THE DATASET
 
@@ -111,7 +114,8 @@ required by whestbench 0.15.0 and its pricing is unverified).
 | seed-ledger enforcement | — | **44/44** negative tests (was 40/40; three snapshot assertions converted to invariants 2026-08-20) | 2026-08-20 |
 | **the preflight gate itself** | — | **12 checks**, 10 by default and 12 under `-Full`. Was 6 | 2026-08-20 |
 | grader-lifecycle evaluator | — | **37/37**, all six failure paths provoked | 2026-08-20 |
-| carrier design strength | — | **27/27** | 2026-08-19 |
+| carrier design strength | — | **48/48** (was 27/27) | 2026-08-21 |
+| **Kerdock + axial, an EXACT spherical 4-design** | design theory | **66,048 points on 256 dims**, degrees 1–5 at machine precision, strength 5 proven by exact Delsarte transform. `C/B = 0.6934` **at the Phase-1 shape**. **OBSOLETED by the 1024×16 shape the same day** | 2026-08-21 |
 | **the degree-4 design carrier** | DECIDE (D18, 48 nets) | **1.4775× [+14.4%, +45.9%]** at 131,072 points, where `C/B = 1.3509` is **over budget**. At **66,048** points the cost line fitted on our own arms gives **`C/B = 0.6932` counted — under the cliff** (CP0.3) | 2026-08-20 |
 | the binding promotion gate | — | **arithmetic**, studentised-t / basic bootstrap, executable as `competition_score.decide()`. Re-scoring the whole record flipped **nothing** | 2026-08-20 |
 | board position | — | raw #90/200; **#82 of 192 plausible-honest** on 5 entries | 2026-08-06 10:03Z |
@@ -681,104 +685,103 @@ Codex hook *registration* schema, because Codex is not installed here — see
 
 ## Next actions
 
-*Rewritten 2026-08-19 (night) at session close, after Stage 0 and Stage 1 item 5.
-Nothing below depends on chat history; every number has an artifact under
-`experiments/` and a contract in `experiments/LOG.md`.*
+*Rewritten **2026-08-21** at session close, immediately after the Phase-2 shape
+landed. Everything above this line describes a 256x32 world; **Phase 2 is
+1024 x 16**, and this list is the bridge. Nothing here depends on chat history.*
 
-**Start here.** `session-start`, then this list in order.
+**Start here.** `session-start`, then this list **in order** — the ordering is
+load-bearing, because steps 2 and 3 cannot be costed or trusted until step 1 is done.
+
+### The shape moved. Do these first, in this order.
+
+1. **Upgrade the toolchain and re-prove mint provenance at 1024 x 16.**
+   Installed: whestbench **0.14.0**, flopscope **0.10.0**. The Phase-2 dataset was
+   baked with whestbench **0.16.0**, flopscope **0.12.0**. Until this is done we
+   cannot load the dataset, and `local_sim/mint_provenance.py` has never been run
+   at the new shape. **Everything rests on our networks being the grader's
+   networks; that proof is currently only established at 256x32 and four other
+   Phase-1 shapes.** IMPORTANT (changes the instrument).
+   *Watch for:* flopscope 0.10 -> 0.12 is two minor versions and **the price table
+   is exactly the unverified thing** (`docs/CURRENT_STATE.md` § *Evaluator trust*).
+   Re-run `local_sim/residual_model.py`'s counted-FLOP legs and see if they move.
+
+2. **Establish `B`, λ, the multiplier floor, and whether biases are absent.**
+   None is in the dataset. Sources, cheapest first: the round/challenge config via
+   `whest`; `whestbench` 0.16.0's own defaults; and — decisively — a graded
+   report's `config_snapshot`, which requires a submission. **Every `C/B` in this
+   document is a Phase-1 number and none of them transfers.**
+   *Naive arithmetic, stated as arithmetic:* a 1024-wide layer costs **16x** a
+   256-wide one and there are **half** as many, so per-sample propagation is
+   **~8x Phase 1**. If `B` did not grow to match, the affordable sample count
+   collapses and the whole operating point moves.
+
+3. **Re-fit `_PRUNE_TAU` and `_BASIS_RANK` at 1024 x 16 on a DESIGN block.**
+   -2.5 and 32 are Phase-1 values and neither transfers. `_BASIS_RANK` in
+   particular was chosen as `width/8`; at 1024 the analogue is a different number
+   and possibly a different *mechanism*, since Track P's break-even was
+   `rank = width/2`. **Allocate a NEW design block** (`local_sim/seed_blocks.py`) —
+   D16's 330 free seeds and D18's remainder are 256x32 networks and are **not
+   reusable at the new shape**. STRATEGIC.
+
+4. **Only then** re-open the carrier and estimator questions. See § *Open research*.
 
 ### Waiting on Samuel — no agent may do these
 
-1. ~~**The gate-change contract.**~~ **DONE 2026-08-20 (CP0.3).** Samuel adopted
-   the paired **arithmetic** score difference with the studentised-t or
-   basic-bootstrap interval; the geometric mean is now a stability diagnostic.
-   `docs/VALIDATION.md` §2b-i is binding, `AGENTS.md` § *Measurement law* updated,
-   and the gate is **executable**: `competition_score.decide()` is the only
-   function in the repo that returns a promotion boolean, it requires a
-   pre-registered `gate` with no default, and it **raises** on the percentile
-   bootstrap and BCa. Every recorded verdict was re-scored under both estimands and
-   **none flipped** — D14 reads arithmetic **1.1177×** against geometric 1.1216× and
-   a 1.15× gate, so the packed kill is *strengthened*.
+5. **Submit early for telemetry, or not?** A Phase-2 submission of the frozen
+   **v2.4.1** would return `config_snapshot` — `B`, λ, the floor, the real price
+   table — from the grader's own numbers, unblocking step 2 immediately. It costs
+   a submission slot and posts a Phase-1-tuned score to a fresh board. **Samuel's
+   call**, and hard rule 6 applies regardless: `whest validate` -> clean mini run
+   with `n_failed_mlps: 0` -> ask.
+   *Note:* v2.4.1 and v2.6.1 are both shape-generic and will *run* at 1024x16, but
+   their constants are fitted at 256x32, so a score from either is telemetry, not
+   a competitive entry.
 
-2. **The E1 → E2 reclassification of the cost half.** `residual ≈ 2.551 ms +
-   5.780 µs/op` (R² = 0.898, LOO 0.829 ms) fitted on **five** graded submissions,
-   and residual is only 1.9–3.3% of `C` on the grader — so `C` is determined to
-   well under 1%. **STRATEGIC**, because the E1 label gates the "no autonomous
-   optimisation loop" rule in `AGENTS.md` § *Capabilities*. Caveat to weigh:
-   v2.6.1 sits at 2,370 ops and the fit is calibrated on 329–1,352, a **1.75×
-   extrapolation**.
+6. **The E1 -> E2 reclassification of the cost half.** `residual ≈ 2.551 ms +
+   5.780 µs/op`, R² = 0.898, fitted on five graded submissions. **Now doubly
+   caveated:** those five are Phase-1 submissions at 256x32 under flopscope 0.10,
+   and both the shape and the price table have moved. It may need re-fitting from
+   scratch. STRATEGIC — the E1 label gates the "no autonomous loop" rule.
 
-3. **The vault's baseline is instrument-incomparable with its own future.** Touch
-   #1 (v2.4.1, median 2.4651e-7, 2026-08-06) came from the OLD evaluator — a torch
-   mirror of v2.4 priced by a v2.4 cost model. Every future touch runs the real
-   estimator under real flopscope. **Do not difference touch #2 against touch #1
-   and call it an improvement.** Either re-baseline (spending one of three
-   touches) or treat #1 as historical. Best decided *after* the Phase-2 shape,
-   since a shape change forces a re-mint anyway. Counter is at **1 of 3**.
+7. **The vault is Phase-1 and cannot be re-baselined into Phase 2.** 500 sealed
+   256x32 networks, touch **1 of 3**. A 1024x16 vault is a **new mint**, and the
+   old one becomes historical. Decide whether to build one and what it costs.
+   Do **not** difference a Phase-2 touch against touch #1.
 
-### Blocked on the organisers
+8. **Team freeze 2026-09-05 23:59 UTC.** Solo or not.
 
-4. **Poll Phase 2.** `uv run python local_sim/phase2_checklist.py`. As of
-   2026-08-19 round 1429 is **UPCOMING** (0 leaderboard entries, no `v1-phase2`
-   tag) and width/depth/`n_mlps`/`B`/λ/floor are all unpublished. Record into
-   `docs/RESEARCH_NOTES.md` §1b when they land. *Toolchain intel already gathered:
-   **whestbench 0.15.0** (2026-08-17) has `scoring.py`, `budget.py`, `domain.py`
-   and `generation.py` **byte-identical** to the installed 0.14.0, so the score
-   identity, the 0.1 floor, λ = 1e11 and He-init/no-bias generation are unchanged.
-   It requires **flopscope ≥ 0.11**, and **what that does to the PRICE TABLE is
-   unknown** — that is the cost half.*
-
-5. **Two questions to the organisers** — `docs/email-draft-organizers.md` exists.
+9. **Two questions to the organisers** — `docs/email-draft-organizers.md`.
    (a) Is there a Phase 2 write-up round, and when? (b) One designated submission
-   or two — announcement 18143 says two, the Rules tab says one, unanswered.
+   or two — announcement 18143 says two, the Rules tab says one, still unanswered.
 
-6. **Team freeze 2026-09-05 23:59 UTC.** Solo or not.
+### Open research, ranked for the NEW shape
 
-### Ready to run once 1–2 are decided
+10. **The cumulant / mechanistic lane, REOPENED on its own pre-registered
+    condition.** Open question #1 said a wider or shallower Phase 2 would reopen it
+    "wholesale" because ARC's propagation breaks even only when `L^K < n`.
+    **`L/n` fell from 32/256 = 1/8 to 16/1024 = 1/64**, and `L² = 256 < 1024`
+    now holds at K = 2 (K = 3 does not: `4096 > 1024`). This is a reopening by
+    **external fact**, which is the standard `AGENTS.md` requires. Start from
+    `docs/MOONSHOT.md` and the G0 baseline. **This is now the highest-value
+    research lane**, and it is the one the shape change *helped*.
 
-7. **If the shape moved, re-fit before gating**: `_PRUNE_TAU` (−2.5 at 256×32;
-   −3.0 worse at 22.6σ, −2.0 at 13.3σ) and `_BASIS_RANK` (32; rank 256 was
-   1.0108× better at only 0.7σ). Use a **DESIGN** block — D16 has 330 free, D18
-   has 216. **D17 and D19 are single-use and unspent; neither may be spent on a
-   shape that no longer exists.**
+11. **Generalise the Kerdock design to width 1024, and price it.** The CP1.1
+    object is width-256 and dead at the new shape, but the *mathematics* carries:
+    `1024 = 4^5`, the real-MUB bound is `d/2 + 1 = 513`, the Galois ring is
+    `GR(4,9)`, and the analogue is `d² = 2^20 = 1,048,576` sign vectors plus 2,048
+    axial = **1,050,624 points**. The axial identity
+    `[(3-2S) + 2S]/(d² + 2d) = 3/(d(d+2))` is dimension-free and should hold
+    unchanged. **The open question is entirely cost**: 1,050,624 points at ~8x the
+    per-sample cost is 16x Phase 1's operating point, and affordability depends
+    wholly on step 2. `local_sim/carriers.py` already has the derivation to adapt.
 
-8. **Gate v2.6.1 on D19** (not D17 — keep one clean block in reserve). Use the
-   **arithmetic** statistic and the **calibrated** residual line, not the old
-   three-model rule. Current projection: **net V·c 1.0940×, i.e. 2.6314e-7 →
-   ~2.405e-7**, known to well under 1% on the cost side. Then **one vault touch**,
-   after decision 3 above.
+12. **Moonshot D10 renormalization fit**, kill-by-default **2026-09-01** — but see
+    #10: the break-even arithmetic that made this marginal has just changed in its
+    favour, so re-read the kill condition before honouring it.
 
-9. **First Phase 2 submission.** Requires **Samuel's explicit approval** (hard
-   rule 6). Order is always `whest validate` → clean mini run
-   (`n_failed_mlps: 0`) → ask. Consider frozen **v2.4.1 first** purely for
-   configuration telemetry, then v2.6.1, so the two are separable on the grader's
-   own numbers — and each new graded submission adds a point to the residual fit.
+**Explicitly NOT next.** Do not run **CP1.2**, the end-to-end Kerdock arm on D18 —
+it is suspended, not killed, and its 192 networks are 256x32. Measuring a carrier
+for a shape that is no longer scored is the most expensive mistake available right
+now. Do not spend **D17 or D19**; both are single-use, both are unspent, and both
+are 256x32 allocations that should be re-thought at the new shape.
 
-### Open research, ranked
-
-10. **The affordable degree-4 design.** The carrier is **measured at 1.4775×**
-    [+14.4%, +45.9%] and needs 131,072 points at `C/B = 1.3509` — over the failure
-    cliff. **Two of four routes are closed with proofs** (smaller linear array;
-    subspace cubature). What remains is a **non-linear array or spherical
-    4-design near the 33,152 floor** — pure design theory, no networks, no seed
-    block, no grader. It is the only thing between this project and a measured
-    1.48×, worth `2.6314e-7 / 1.4775 = 1.781e-7`.
-
-11. **Item 6 of the handoff — the fixed shallow analytic centre and layer-9
-    control.** Still unstarted, and **now known NOT to unlock the carrier** (a
-    control variate reduces variance at unchanged cost; the final layer still
-    needs every sample propagated through all 32 layers). Note it also brushes a
-    closed lane — `docs/CURRENT_STATE.md` § *Closed lanes* kills linear mid-layer
-    control variates — so reopening needs a stated reopening condition.
-
-12. **Moonshot D10 renormalization fit**, kill-by-default **2026-09-01**.
-
-**Explicitly NOT next**, each closed by measurement and recorded in § *Closed
-lanes*: any further input-space variance device (whitening, tent, sphere,
-antithetic, degree-3 designs); mid-layer or layer-1 *linear* control variates;
-MLMC over depth; more N-as-an-operating-point work; **a smaller LINEAR orthogonal
-array (131,072 is the proven floor at width 256)**; **a design confined to the
-rank-32 subspace (the rotation is the mechanism and needs all 256 columns)**; and
-chasing the sub-1e-8 board entries, which three independent forensic analyses
-fail to explain by any
-constructible estimator.

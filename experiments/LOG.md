@@ -8063,3 +8063,73 @@ the affordable sample count collapses. This is the first thing to establish.
   DESIGN block at the new shape; only then re-open the carrier question.
 - **D17 and D19 remain unspent, and must stay that way** until the new shape's
   constants are re-fitted. A single-use block spent on a stale shape is wasted.
+
+---
+
+# 2026-08-21 — SESSION CLOSE
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Everything committed and pushed.** Working tree clean.
+
+## What this session did
+
+| slice | class | outcome |
+|---|---|---|
+| **CP0 reconciliation** | read-only | ten proposed validation blockers classified against the code with file/line evidence: 2 partially fixed, 8 open |
+| **CP0.1** the gate | IMPORTANT | preflight **6 → 12 checks**, two tiers, denominator always 12. Skeptic **PROVISIONAL**, 3 real defects in the repair, all fixed |
+| **CP0.2** lifecycle evaluator | IMPORTANT | `local_sim/lifecycle_eval.py`, **37/37**. Skeptic **PROVISIONAL**; its lead finding invalidated the slice's own licence. 12 findings fixed |
+| **CP0.3** the arithmetic gate | **STRATEGIC** | Samuel's decision. `decide()` is now the only promotion boolean in the repo. Every recorded verdict re-scored; **none flipped**. Skeptic **PROVISIONAL**, incl. a leak that passed a strictly-worse candidate |
+| **CP1.1** the Kerdock carrier | IMPORTANT | an **exact spherical 4-design at 66,048 points**, strength 5 proven by exact Delsarte transform. Skeptic **ACCEPT** — the session's only one |
+| **Phase-2 poll** | read-only | **the shape moved to 1024 × 16**, which obsoletes CP1.1 |
+
+## The one thing that changed a belief
+
+**Phase 2 is 1024 wide × 16 deep.** Found by polling the HF dataset tags, where a
+`v2-phase2` tag appeared the day the round opened. It falsified Samuel's recorded
+working assumption on that assumption's own first-listed falsifier, killed the
+CP1.1 carrier as an object, and **reopened the cumulant lane on its own
+pre-registered condition** (`L/n` 1/8 → 1/64; `L² = 256 < 1024`).
+
+## State
+
+- **Working tree clean**, all pushed. Commits this session: `44634f9`, `81c01d8`,
+  `0eb1279` (contract only), `f8f22d9`, `fd3fdf2`, `b2a92a2` (contract only),
+  `2856e7d`, `103ce4c`, `860d249`, and this close.
+- **preflight GREEN 10/12** default (2 skipped, named); **12/12 under `-Full`**,
+  last full run 789 s. **Portability 174/174.**
+- **Vault: 1 of 3 touches**, counter and log agree, `manifest.json` mtime still
+  2026-08-06. **D17 and D19 single-use and unspent.** No block drawn all session.
+- **`estimator.py` untouched all session** — still v2.6.1, byte-identical to its
+  archive.
+- **Nothing submitted.**
+- **`docs/HUMAN_MODEL.md` is STALE** (12 commits behind) and was never written by
+  an agent. `session-start` will open in FIRST-ORIENTATION MODE next time. **That
+  is correct behaviour, not a defect** — and the shape change makes it a good
+  moment for Samuel to revisit it.
+
+## Open, and what is in the way
+
+- **`B`, λ, the multiplier floor and the bias question are unknown**, and every
+  `C/B` in the repository is a Phase-1 number. This blocks all costing.
+- **The toolchain is behind**: whestbench 0.14.0 / flopscope 0.10.0 against the
+  dataset's 0.16.0 / 0.12.0. Blocks loading the Phase-2 data at all.
+- **Five CP0 audit blockers remain open**: 4 (ledger scan gaps), 6 (a vault touch
+  is not transactional), 7 (residual model fits aggregate means), 9 (31-bit seed
+  masking), 10 (single truth replica). None blocks the next step.
+- **CP1.2 is SUSPENDED, not killed.** No block was spent on it.
+- **No slice is mid-flight and no slice is finished-but-unreviewed.** All four
+  IMPORTANT/STRATEGIC slices completed their `review-slice` with an independent
+  Skeptic.
+
+## Next session
+
+`session-start`, then `docs/CURRENT_STATE.md` § *Next actions*, **in order**:
+upgrade the toolchain and re-prove mint provenance at 1024 × 16 → establish `B`
+and the price table → re-fit `_PRUNE_TAU` and `_BASIS_RANK` on a **new** DESIGN
+block at the new shape. Only then re-open the carrier and estimator questions.
+
+**The honest position on the score: it has not moved.** The graded number is still
+**2.6314e-7** (submission 327743, 2026-08-10). This session bought a trustworthy
+decision layer and one proved design that the shape change then stranded. It did
+not buy a better score, and there is nothing today that would rank higher —
+Phase 1 is closed and Phase 2 had not opened when this session ended.

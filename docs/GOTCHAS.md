@@ -15,6 +15,60 @@ narrative record), `docs/GAME_PLAN.md` (strategy, rev 12 is authoritative).
 
 ---
 
+## 2026-08-21 — the Phase-2 shape moved, and what that costs a shape-specific result
+
+*Full record: `experiments/LOG.md`, 2026-08-21.*
+
+- **Phase 2 is 1024 wide x 16 deep.** Read from the HF dataset's own
+  `metadata.json` at the **`v2-phase2`** tag, which appeared the day the round
+  opened and was absent that morning. **Poll the dataset TAGS, not only the round
+  list** — `local_sim/phase2_checklist.py` already prints them and that is where
+  the shape surfaced first, before any forum post or email.
+
+- **A working assumption is worth recording precisely so it can be falsified
+  cleanly.** Samuel's "Phase 1 with different MLPs, maybe a little harder" was
+  written down on 2026-08-20 **with its falsifiers listed in order of damage**.
+  The first one — "a width that is not 256" — is what happened, less than 24 hours
+  later. The assumption cost nothing because the falsifier was named in advance;
+  the entry is kept rather than deleted.
+
+- **`2^8 = 256` was doing more work than it looked.** Three separate results were
+  width-256 objects, not general methods: the Kerdock/MUB-129 carrier
+  (`256 = 4^4` makes the real-MUB bound `d/2+1 = 129` attainable; `GR(4,7)` because
+  `2^(7+1) = 256`; the axial identity cancels because the sign set has exactly
+  `d^2 = 2^16` points), the dual-BCH strength-5 array, and the 131,072 linear-floor
+  proof via the Sidon-set obstruction. **When a construction's size is a power of
+  the dimension, expect the whole thing to be dimension-specific**, and say so in
+  the entry that records it.
+
+- **The mathematics generalises even when the object does not.** At `1024 = 4^5`
+  the analogue is `GR(4,9)`, 513 bases, and `2^20 + 2048 = 1,050,624` points; the
+  axial identity `[(3-2S) + 2S]/(d^2 + 2d) = 3/(d(d+2))` is dimension-free. What
+  changes is entirely the **cost**, which is why the derivation was written into
+  `local_sim/carriers.py` rather than a blob.
+
+- **Per-sample cost does not scale with parameter count.** 1024x16 has 4x the
+  parameters of 256x32, but a dense layer costs `O(width^2)` per sample and there
+  are half as many, so propagation is **~8x** per sample, not 4x. **Check the
+  budget `B` before assuming the operating point survives.**
+
+- **A shape change invalidates seed blocks, not just constants.** D16's 330 free
+  seeds, D18's remainder, and the untouched single-use D17 and D19 are all
+  allocations of **256x32** networks. They cannot be reused at 1024x16 — the seeds
+  would mint different-shaped networks. The vault's 500 sealed networks are in the
+  same position: a Phase-2 vault is a **new mint**, and touch #1 becomes historical
+  rather than a baseline to difference against.
+
+- **`L/n` is the number that decides whether the mechanistic lane is alive**, and
+  it moved by 8x. ARC's cumulant propagation breaks even when `L^K < n`. Phase 1:
+  `L/n = 32/256 = 1/8`, and `L^2 = 1024 > 256` — dead at every K. Phase 2:
+  `16/1024 = 1/64`, and `L^2 = 256 < 1024` — **alive at K = 2**, still dead at
+  K = 3 (`4096 > 1024`). This was pre-registered as the reopening condition in
+  `docs/CURRENT_STATE.md` open question #1 before the shape was known, which is the
+  only reason reopening the lane is legitimate rather than motivated.
+
+---
+
 ## 2026-08-20 (CP0.3) — the arithmetic gate, and three traps found inside it
 
 *Full record and the third Skeptic verdict: `experiments/LOG.md` 2026-08-20, CP0.3.*
