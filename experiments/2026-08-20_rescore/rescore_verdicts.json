@@ -1,0 +1,147 @@
+{
+ "contract_commit": "0eb1279",
+ "lambda": 100000000000.0,
+ "B": 272000000000.0,
+ "graded_dense_residual_s": 0.00984,
+ "n_flipped": 0,
+ "comparisons": [
+  {
+   "lane": "the graded pair",
+   "label": "GRADED v2.4 -> v2.4.1 (50 public MLPs)",
+   "n": 50,
+   "arithmetic_gain": 1.033440098937066,
+   "arith_t_ci": [
+    -5.029035452881602e-08,
+    6.788942499944817e-08
+   ],
+   "arith_mean_diff": 8.799535235316076e-09,
+   "geometric_gain": 0.9665552132957117,
+   "geometric_ci": [
+    0.796935435073716,
+    1.1722768736750968
+   ],
+   "wins": 22,
+   "sign_p": 0.47988766169832786,
+   "biggest_mover_share": -1.5800115641066173,
+   "gate": null,
+   "published": 1.0334,
+   "published_kind": "arithmetic",
+   "note": "the fixture that motivated the whole change",
+   "arith_gain_ci_via_t": [
+    0.8439317582206141,
+    1.3327043262569325
+   ]
+  },
+  {
+   "lane": "Sprint 4/5 packed activation sparsity",
+   "label": "D14 packed (SPENT, gate 1.15x)",
+   "n": 100,
+   "arithmetic_gain": 1.117743200709412,
+   "arith_t_ci": [
+    7947.430130709931,
+    9587.799569813145
+   ],
+   "arith_mean_diff": 8767.614850261538,
+   "geometric_gain": 1.1215684126232477,
+   "geometric_ci": [
+    1.1187735458324908,
+    1.1243702614171163
+   ],
+   "wins": 100,
+   "sign_p": 1.5777218104420236e-30,
+   "biggest_mover_share": 0.025740756618761417,
+   "gate": 1.15,
+   "published": 1.1215684126232477,
+   "published_kind": "geometric",
+   "note": "deciding model 3. CONSERVATIVE = max(model 2, 319341-anchored); r_ctrl 62.3 ms -> 9.84 ms anchored, r_cand 490.4 ms -> 77.51 ms",
+   "arith_gain_ci_via_t": [
+    1.105565909654584,
+    1.130191733690325
+   ],
+   "gate_geometric": "FAIL",
+   "gate_arithmetic": "FAIL",
+   "flips": false
+  },
+  {
+   "lane": "Sprint 4 packed (superseded by D14)",
+   "label": "D12 packed (SPENT)",
+   "n": 50,
+   "arithmetic_gain": 1.4137689429747613,
+   "arith_t_ci": [
+    16235.503785392568,
+    33607.9910802362
+   ],
+   "arith_mean_diff": 24921.747432814384,
+   "geometric_gain": 1.3787448011106886,
+   "geometric_ci": [
+    1.2402319506420303,
+    1.532727185108959
+   ],
+   "wins": 39,
+   "sign_p": 9.021490107130603e-05,
+   "biggest_mover_share": 0.097278019496295,
+   "gate": null,
+   "published": null,
+   "published_kind": "geometric",
+   "note": "model 2 (local ratio on the graded anchor)",
+   "arith_gain_ci_via_t": [
+    1.235579453204015,
+    1.6520147891755688
+   ]
+  },
+  {
+   "lane": "the degree-4 design carrier",
+   "label": "D18 design carrier B->C (matched N and cost)",
+   "n": 48,
+   "arithmetic_gain": 1.4775227744558692,
+   "arith_t_ci": [
+    3.7952544713642115e-08,
+    1.8110212928209886e-07
+   ],
+   "arith_mean_diff": 1.095273369978705e-07,
+   "geometric_gain": 1.43206016695657,
+   "geometric_ci": [
+    1.171400863427755,
+    1.750721196997103
+   ],
+   "wins": 33,
+   "sign_p": 0.013283281562245008,
+   "biggest_mover_share": 0.14661747596163982,
+   "gate": null,
+   "published": 1.4775,
+   "published_kind": "arithmetic",
+   "note": "counted FLOPs only; the arms differ by 0.008% in cost",
+   "arith_gain_ci_via_t": [
+    1.1261131283870254,
+    2.147735013177863
+   ]
+  },
+  {
+   "lane": "N as an operating-point lever",
+   "label": "D18 A->B, the N lever on our own carrier",
+   "n": 48,
+   "arithmetic_gain": 1.1980459777722763,
+   "arith_t_ci": [
+    -5.2884060721103756e-08,
+    1.8711685947262325e-07
+   ],
+   "arith_mean_diff": 6.711639937575975e-08,
+   "geometric_gain": 1.015795673963145,
+   "geometric_ci": [
+    0.8281242537514379,
+    1.2459976224195308
+   ],
+   "wins": 20,
+   "sign_p": 0.31232680747326924,
+   "biggest_mover_share": 0.59930793940144,
+   "gate": null,
+   "published": null,
+   "published_kind": "geometric",
+   "note": "8x the points; the flat law predicts 1.000x",
+   "arith_gain_ci_via_t": [
+    0.8847574369856258,
+    1.8548342626081815
+   ]
+  }
+ ]
+}

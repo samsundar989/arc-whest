@@ -56,7 +56,7 @@ from competition_score import (LAMBDA_FLOPS_PER_SECOND,  # noqa: E402
                                paired_compare,
                                reported_scores_by_index,
                                rows_from_graded_report, score_multiplier,
-                               score_suite, zero_prediction_mse)
+                               score_suite, zero_prediction_mse, decide, Verdict)
 
 RESULTS = []
 REPORTS = os.path.join(_ROOT, "experiments", "run_reports")
@@ -751,6 +751,76 @@ def t_environment():
     check("graded reports present", os.path.exists(V24) and os.path.exists(V241))
 
 
+def t_the_binding_gate():
+    """CP0.3 — `decide()` IS the gate, and it cannot be talked out of a verdict."""
+    head("13. the binding gate — arithmetic primary, t/basic interval only")
+    rng = np.random.default_rng(20260820)
+
+    # An arm that is genuinely better by ~11%, with the heavy right tail the real
+    # metric has, so the two estimands are both well defined.
+    ctrl = rng.lognormal(mean=-15.0, sigma=0.7, size=50)
+    cand = ctrl * rng.uniform(0.86, 0.92, size=50)
+
+    v = decide(ctrl, cand, gate=1.05)
+    check("a real 11% improvement PASSES a 1.05x gate", v.passed,
+          f"gain {v.gain:.4f}x, t CI [{v.ci[0]:+.3e}, {v.ci[1]:+.3e}]")
+    check("...and FAILS a 1.25x gate, on the same data",
+          not decide(ctrl, cand, gate=1.25).passed)
+    check("the gate has NO default — it must be pre-registered",
+          _raises(lambda: decide(ctrl, cand)), "TypeError without gate=")
+
+    check("the percentile bootstrap is REFUSED, not deprecated",
+          _raises(lambda: decide(ctrl, cand, gate=1.05, interval="percentile"),
+                  ValueError))
+    check("BCa is REFUSED (measured 9.1-11.5% false promotion at n~50)",
+          _raises(lambda: decide(ctrl, cand, gate=1.05, interval="bca"),
+                  ValueError))
+    check("the basic bootstrap IS permitted",
+          decide(ctrl, cand, gate=1.05, interval="basic").interval == "basic")
+
+    # A true null: identical arms plus symmetric noise must not promote.
+    null_c = rng.lognormal(mean=-15.0, sigma=0.7, size=50)
+    null_k = null_c * rng.normal(1.0, 0.02, size=50)
+    vn = decide(null_c, null_k, gate=1.05)
+    check("a true null does not clear a 1.05x gate", not vn.passed,
+          f"gain {vn.gain:.4f}x; reasons: {len(vn.reasons)}")
+
+    # The verdict is arithmetic even when geometric disagrees.
+    a, b = _sign_flip_arms()
+    vd = decide(a, b, gate=1.0)
+    check("when the estimands DISAGREE the verdict follows ARITHMETIC",
+          vd.gain > 1.0 and vd.geometric_gain < 1.0 and vd.estimands_disagree,
+          f"arith {vd.gain:.4f}x, geo {vd.geometric_gain:.4f}x")
+    check("...and the disagreement is surfaced in the reasons, not hidden",
+          any("estimands disagree" in r for r in vd.reasons))
+    check("a diagnostic can never flip the verdict",
+          decide(a, b, gate=1.0).passed == (vd.gain >= 1.0 and vd.ci_excludes_zero))
+
+    check("Verdict is frozen — a verdict you can edit is not a verdict",
+          _raises(lambda: setattr(vd, "passed", True)))
+
+
+def _raises(fn, exc=Exception) -> bool:
+    try:
+        fn()
+    except exc:
+        return True
+    except Exception:
+        return False
+    return False
+
+
+def _sign_flip_arms():
+    """Arms on which arithmetic and geometric pick opposite winners.
+
+    The real graded pair does this (1.0334x vs 0.9666x); this is a synthetic
+    version so the gate is tested even if the reports move.
+    """
+    ctrl = np.array([1.0] * 49 + [100.0])
+    cand = np.array([1.05] * 49 + [50.0])   # worse on 49, far better on the heavy one
+    return ctrl, cand
+
+
 def main():
     print("=" * 100)
     print("CANONICAL COMPETITION SCORER — parity with installed whestbench, and the estimand fixture")
@@ -768,6 +838,7 @@ def main():
         t_paired_determinism_and_sanity,
         t_graded_replay,
         t_real_pair_v24_vs_v241,
+        t_the_binding_gate,
     ):
         fn()
     n_ok = sum(1 for r in RESULTS if r)

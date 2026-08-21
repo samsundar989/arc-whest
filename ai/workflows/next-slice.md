@@ -128,7 +128,8 @@ With the measurement that established it.
 
 ## Evidence
 Tag CONFIRMED / INFERRED / SPECULATIVE. Include the seed block and the statistic
-(paired geometric mean of per-MLP ratios, n shifts, CI).
+(paired ARITHMETIC score difference with the studentised-t interval, n
+shifts, CI; geometric as a diagnostic — `docs/VALIDATION.md` 2b-i).
 
 ## Experiments already tried and rejected
 The closed-lane table from docs/CURRENT_STATE.md, with each gate and its result.

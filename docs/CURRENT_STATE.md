@@ -262,9 +262,10 @@ touch was taken, nothing was submitted.**
 2. **The arithmetic mean and the geometric mean of per-MLP ratios select
    OPPOSITE winners on our own graded data.** v2.4 -> v2.4.1 on the same 50 rows:
    arithmetic **1.0334x** (v2.4.1 better), geometric **0.9666x** (v2.4 better),
-   22/50 wins, bootstrap CI spanning zero. `docs/VALIDATION.md` 2b still makes the
-   geometric mean the binding gate and **has not been changed** — that is a gate
-   change, therefore STRATEGIC, and it needs its own contract.
+   22/50 wins, bootstrap CI spanning zero. **RESOLVED 2026-08-20 (CP0.3): Samuel
+   adopted the arithmetic statistic.** `docs/VALIDATION.md` §2b-i is now binding
+   and the gate is executable as `competition_score.decide()`. Re-scoring every
+   recorded verdict under both estimands flipped **nothing**.
 
 3. **Use the studentised t interval or the basic bootstrap. Do NOT gate on the
    percentile bootstrap or on BCa at n ~ 50.** Measured false-promotion rate
@@ -624,13 +625,16 @@ Nothing below depends on chat history; every number has an artifact under
 
 ### Waiting on Samuel — no agent may do these
 
-1. **The gate-change contract.** Adopt the paired **arithmetic** score difference
-   as the primary promotion statistic, with the **studentised t or basic
-   bootstrap** interval, demoting the geometric mean to a stability diagnostic.
-   **STRATEGIC** — its own Slice Contract, Samuel's written prediction, a Skeptic.
-   `docs/VALIDATION.md` §2b is deliberately **unchanged** until then. *All the
-   evidence already exists*: the two estimands select opposite winners on our own
-   graded data, and every candidate interval's false-promotion rate is measured.
+1. ~~**The gate-change contract.**~~ **DONE 2026-08-20 (CP0.3).** Samuel adopted
+   the paired **arithmetic** score difference with the studentised-t or
+   basic-bootstrap interval; the geometric mean is now a stability diagnostic.
+   `docs/VALIDATION.md` §2b-i is binding, `AGENTS.md` § *Measurement law* updated,
+   and the gate is **executable**: `competition_score.decide()` is the only
+   function in the repo that returns a promotion boolean, it requires a
+   pre-registered `gate` with no default, and it **raises** on the percentile
+   bootstrap and BCa. Every recorded verdict was re-scored under both estimands and
+   **none flipped** — D14 reads arithmetic **1.1177×** against geometric 1.1216× and
+   a 1.15× gate, so the packed kill is *strengthened*.
 
 2. **The E1 → E2 reclassification of the cost half.** `residual ≈ 2.551 ms +
    5.780 µs/op` (R² = 0.898, LOO 0.829 ms) fitted on **five** graded submissions,

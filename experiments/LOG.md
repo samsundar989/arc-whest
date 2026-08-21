@@ -7230,7 +7230,7 @@ it and it is right on first principles. The re-scoring decides something else:
 - If **D14 crosses 1.15** → **the packed lane does NOT automatically reopen.**
   `AGENTS.md` requires **new external evidence** to reopen a closed lane, and
   re-scoring old data under a new statistic is not external evidence. Three further
-  reasons the kill stands independently of the statistic: (i) the lane'skill mechanism
+  reasons the kill stands independently of the statistic: (i) the lane's kill mechanism
   is priced, not statistical — flopscope charges a gather 4 FLOPs/element while a
   random-access gather costs far more wall time than a BLAS multiply-add, and λ
   bills that back; (ii) D13 predicted 1.113% and D14 measured 1.1216×, so cost
@@ -7284,3 +7284,145 @@ vault. The 0.1 floor, λ, or the failure semantics.
 
 **Driver**
 Claude Opus 5 (1M context), repo-local Builder, session 2026-08-20.
+
+### RESULT — CP0.3, the arithmetic gate  [contract above, unmodified, committed 0eb1279]
+
+```
+contract commit   0eb1279  (contract ONLY — no implementation, no numbers)
+commands          uv run python local_sim/rescore_verdicts.py
+                  uv run python local_sim/test_competition_score.py
+                  .\scripts\preflight.ps1 -Full
+config / seeds    NO seed block drawn. No network minted. No vault touch.
+                  Every number below is a re-aggregation of arrays already on disk.
+raw artifact      experiments/2026-08-20_rescore/rescore_verdicts.json
+```
+
+#### A1 — reproduction, 5/5. Nothing below counts if these fail
+
+| check | result |
+|---|---|
+| both graded aggregates reproduce **bitwise** | `2.719427529595e-07` / `2.631432177242e-07` |
+| the graded pair reproduces the documented disagreement | arith **1.0334×**, geo **0.9666×** |
+| D14's geometric headline reproduces from the stored arrays | **1.1215684126** vs published **1.1215684126** (rel < 1e-9) |
+| the D18 carrier reproduces its published arithmetic gain | **1.477523** vs published **1.4775** |
+
+#### The re-scoring, every lane with per-MLP data on disk
+
+| lane | n | **arithmetic** | geometric | arith/geo | wins | top mover |
+|---|---|---|---|---|---|---|
+| GRADED v2.4 → v2.4.1 | 50 | **1.0334×** | 0.9666× | 1.0692 | 22/50 | **−158.0%** |
+| **D14 packed (SPENT, gate 1.15×)** | 100 | **1.1177×** | 1.1216× | **0.9966** | **100/100** | 2.6% |
+| D12 packed (SPENT) | 50 | **1.4138×** | 1.3787× | 1.0254 | 39/50 | 9.7% |
+| D18 design carrier B→C | 48 | **1.4775×** | 1.4321× | 1.0317 | 33/48 | 14.7% |
+| D18 A→B, the N lever | 48 | **1.1980×** | 1.0158× | 1.1794 | 20/48 | **59.9%** |
+
+#### Verdict against the pre-registered decision rule
+
+**NO GATED VERDICT FLIPS. The change is verdict-neutral.** The only lane carrying a
+recorded numeric gate is D14, and it fails under both estimands. The contract's
+"if D14 crosses 1.15" branch is **not** triggered and no closed-lane wording needs
+weakening.
+
+#### A3 — FALSIFIED, and in the direction that matters
+
+I predicted D14 would re-score into **[1.12, 1.19]** and gave *roughly even odds of
+crossing the 1.15 gate*, reasoning from a median observed arith/geo gap of 1.03
+applied to 1.1216.
+
+It reads **1.1177×** — **below** my predicted range, and **below** the geometric
+1.1216×. `arith/geo = 0.9966`. **The packed lane's kill is STRENGTHENED by the new
+statistic, not weakened.**
+
+The reasoning error is worth keeping: I generalised an arith/geo *gap* from three
+comparisons where the candidate helped most on the heavy networks, to a lane where
+it does not. Predicting it from three prior readings was extrapolation dressed as a
+mechanism.
+
+**And the real rule is an exact identity, not a tendency.** The arithmetic gain
+`mean(ctrl)/mean(cand)` is algebraically the **candidate-score-weighted mean of the
+per-MLP ratio**; the geometric mean is the unweighted one. So:
+
+```
+sum(cand_i * ratio_i) / sum(cand_i)  =  1.117743  ==  the arithmetic gain, exactly
+unweighted geometric mean of ratio_i =  1.121568
+corr(cand_i, ratio_i)                = -0.5286    <- the sign that decides which is larger
+```
+
+**Arithmetic reads above geometric iff the candidate's relative advantage is
+POSITIVELY correlated with the score it is being weighted by.** On D14 that
+correlation is **−0.53**: the candidate wins on 100/100 networks but wins *least*
+where the score is largest — cheapest third mean ratio **1.1292**, priciest third
+**1.1133**. That is why arithmetic reads lower, and it is checkable on any future
+comparison in one line instead of guessed from a prior gap.
+
+#### The other predictions
+
+- **A2 HELD** — arithmetic ≥ geometric in **4 of 5** (1.0692, 0.9966, 1.0254, 1.0317, 1.1794).
+- **A4 HELD** — D12 moves 2.5% and does not change sign. (Its 1.2079× headline was
+  already retired for unrelated reasons; the re-score reads 1.4138× arithmetic
+  under model 2, and nothing depends on it.)
+- **A5** — see the regressions line below.
+
+#### Two diagnostics that earn their place
+
+- **The graded pair's biggest mover carries −158% of the delta.** The screen fires
+  exactly as designed: ≥100% means treat as a draw. That is independent confirmation
+  of the recorded "no *resolvable* effect" reading, arrived at from a different
+  direction.
+- **D18 A→B — the N lever — reads arithmetic 1.1980× with a top-mover share of
+  59.9%.** The 1.1980× reproduces T2 (LOG 2026-08-19) exactly, so T2 was already
+  arithmetic. But **one network out of 48 carries 60% of that delta**, which the
+  original entry does not say. The T2 decomposition (MSE·N 1.0591 × cost/point
+  1.1306) is unaffected as arithmetic, but the *combined* 1.1980× figure is much
+  more fragile than its two-decimal presentation suggests. **Consequence for the
+  K129 correction made earlier today: the N-effect bracket [1.414, 1.498] rests on
+  the MSE·N leg, not on the combined figure, so it stands — but it should not be
+  tightened on the strength of 1.1980×.**
+
+#### What was built
+
+1. **`local_sim/competition_score.py::decide()`** — the gate, executable. It is
+   the only function in this repository that returns a promotion boolean. It
+   **requires** `gate=` (no default), **raises** on `interval="percentile"` and
+   `"bca"`, returns a **frozen** `Verdict`, and reports the geometric gain, the
+   estimand-disagreement flag and the biggest-mover share as diagnostics that
+   cannot change the outcome.
+2. **`local_sim/rescore_verdicts.py`** — the re-scoring, reproducible.
+3. **Eleven new gate tests** in `test_competition_score.py`: **71/71 → 82/82**,
+   including that a true null does not promote, that the verdict follows arithmetic
+   when the estimands disagree, that the gate has no default, and that `Verdict` is
+   frozen.
+4. The binding change in **seven** governing documents: `docs/VALIDATION.md` §2b-i
+   (new, authoritative), `AGENTS.md` § *Measurement law*,
+   `ai/workflows/review-slice.md` (promotion rule), `slice-contract.md` (template),
+   `next-slice.md` (packet format), `ai/workflows/skeptic.md` (checklist item 1
+   rewritten to catch a geometric/percentile/BCa gate), `docs/CURRENT_STATE.md`.
+
+#### Deviations from the contract
+
+One, and it was in the builder's favour to notice: `lane_graded()` was first
+written with a hand-rolled report parser that looked for `final_layer_mse` in
+`per_mlp`, where it actually lives in `results.public_scores[].scores`. It read
+`mse = 0`, produced `log(0)`, and reported an **infinite** arithmetic gain. The
+canonical adapter `rows_from_graded_report` existed the whole time. Caught by A1 on
+the first run, because A1 was written to check reproduction *before* any headline —
+**the third instance in two days of re-implementing an identity that already had a
+canonical implementation**, and the first one caught by the slice's own
+pre-registered check rather than by a Skeptic.
+
+#### Regressions
+
+`preflight -Full` **GREEN 12/12**. Portability **174/174**. Invariants 30/30.
+Scorer **82/82**. Vault counter **1**, log 1 line. D17 and D19 still unspent.
+`estimator.py` untouched.
+
+#### Remaining doubt
+
+- The re-scoring covers every lane that **stored per-MLP arrays**. Lanes killed
+  before that practice began — Track T, Track P, Sprint 3, the tent/sphere/whitening
+  probes — cannot be re-scored, only re-run. None carried a numeric gate close
+  enough to its result for the estimand to plausibly matter (0.9998×, 1.093× vs a
+  1.25× gate, 1.0246×), but that is an argument, not a measurement.
+- Adopting arithmetic makes the gate **more** sensitive to a single network. That is
+  correct — the competition is too — but it raises the value of the biggest-mover
+  screen, which is now surfaced in every `Verdict` rather than left to the reader.

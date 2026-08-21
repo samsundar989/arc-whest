@@ -146,8 +146,10 @@ keeps this project's beliefs from drifting ahead of its evidence.
 ## Promotion rule for this repository
 
 Promote only when **all** hold: the pre-registered gate is cleared on a fresh
-single-use block with a 95% interval excluding 1.0 · the statistic is the paired
-geometric mean of per-MLP ratios · the improvement exceeds the GT-noise floor ·
+single-use block with a 95% interval excluding zero · the statistic is the paired
+**arithmetic** score difference with the studentised-t or basic-bootstrap interval,
+via `local_sim/competition_score.py::decide()` — the geometric mean is a diagnostic
+only (`docs/VALIDATION.md` §2b-i) · the improvement exceeds the GT-noise floor ·
 `preflight -Full` **11/11** (a default `9/11` run is NOT sufficient for promotion)
 and invariants 30/30 · no cost claim rests on a local absolute
 residual · the Skeptic did not find a blocking flaw. "It feels cleaner" is not a

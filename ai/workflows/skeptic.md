@@ -31,9 +31,21 @@ Work through these before any generic review. Each corresponds to a real, record
 failure or a live structural weakness.
 
 **Statistics**
-1. **Ratio of means vs paired geometric mean.** The pre-registered statistic is
-   `exp(mean(log(ctrl/cand)))`. On D12 the two readings were 1.1996× and 1.2026× —
-   on opposite sides of the gate. Recompute if the code is available.
+1. **Is it the BINDING statistic, and the right interval?** Since 2026-08-20 the
+   binding statistic is the paired **arithmetic** score difference with the
+   studentised-t or basic-bootstrap interval, through
+   `local_sim/competition_score.py::decide()` (`docs/VALIDATION.md` §2b-i). The
+   geometric mean is a **diagnostic only**. Three things to check, and recompute if
+   the code is available:
+   - a gate decided on the geometric mean, on percentile bootstrap, or on **BCa** —
+     the last two have measured false-promotion rates of 6.8–8.2% and **9.1–11.5%**
+     against a nominal 5% at n ≈ 50, and `decide()` refuses them;
+   - an **unpaired** ratio of means presented as paired. On D12 the two readings
+     were 1.1996× and 1.2026× — on opposite sides of the gate;
+   - the estimands **disagreeing** (arithmetic and geometric picking opposite
+     winners) without that being reported. It does not change the verdict, but it
+     means the improvement is narrow rather than broad, and it is exactly what
+     happened on the real graded pair: 1.0334× vs 0.9666× on the same 50 rows.
 2. **One-block anomaly.** Does the effect reproduce on any other block? D12's MSE
    ratio of 1.2079 reproduced nowhere and no ablation predicted it. A component
    ablation that does not sum to the headline is a red flag, not a rounding issue.

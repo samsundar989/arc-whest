@@ -635,6 +635,131 @@ def paired_compare_rows(
     return paired_compare(cs.scores, ks.scores, **kw)
 
 
+@dataclass(frozen=True)
+class Verdict:
+    """The binding promotion decision. THE gate, executable.
+
+    Adopted 2026-08-20 (CP0.3, Samuel's decision): the primary statistic is the
+    paired ARITHMETIC score difference with the STUDENTISED-t interval, because
+    that is the competition's own identity -- `mean_i (mse_i * max(0.1, C_i/B))`
+    over the public MLPs. The geometric mean of per-MLP ratios is retained as a
+    STABILITY DIAGNOSTIC and has no authority over the outcome.
+
+    Before this, `docs/VALIDATION.md` 2b bound the geometric mean, and on our own
+    graded data the two select opposite winners (1.0334x vs 0.9666x, same 50 rows).
+
+    Exists so a caller cannot pick a favourable interval after seeing the answer:
+    `passed` is computed from the pre-registered `gate`, and nothing else in this
+    module returns a boolean.
+    """
+
+    passed: bool
+    gain: float                      # arithmetic, control / candidate
+    gate: float
+    ci: Tuple[float, float]          # studentised-t, on the paired DIFFERENCE
+    ci_excludes_zero: bool
+    interval: str
+    #: Diagnostics. None of these can change `passed`.
+    geometric_gain: float
+    estimands_disagree: bool
+    n: int
+    n_candidate_better: int
+    sign_test_p: float
+    biggest_mover_share: float
+    reasons: Tuple[str, ...]
+
+    def __str__(self) -> str:
+        lines = [
+            f"VERDICT  {'PASS' if self.passed else 'FAIL'}   "
+            f"arithmetic gain {self.gain:.4f}x   gate {self.gate:.4f}x",
+            f"  {self.interval} 95% CI on the paired difference "
+            f"[{self.ci[0]:+.4e}, {self.ci[1]:+.4e}]   "
+            f"excludes zero: {self.ci_excludes_zero}",
+            f"  n = {self.n}, candidate better on {self.n_candidate_better}, "
+            f"sign-test p = {self.sign_test_p:.4f}",
+            f"  DIAGNOSTIC geometric {self.geometric_gain:.4f}x"
+            + ("   *** ESTIMANDS DISAGREE — the competition is arithmetic ***"
+               if self.estimands_disagree else ""),
+            f"  DIAGNOSTIC biggest single mover carries "
+            f"{self.biggest_mover_share * 100:.1f}% of the delta"
+            + ("   *** >=100%: treat as a draw until proven otherwise ***"
+               if abs(self.biggest_mover_share) >= 1.0 else ""),
+        ]
+        for r in self.reasons:
+            lines.append(f"  - {r}")
+        return chr(10).join(lines)
+
+
+def decide(
+    control: Sequence[float] | np.ndarray,
+    candidate: Sequence[float] | np.ndarray,
+    *,
+    gate: float,
+    interval: str = "t",
+    **kw: Any,
+) -> Verdict:
+    """Apply THE gate. Arithmetic primary, studentised-t or basic bootstrap.
+
+    `gate` is the pre-registered threshold and is REQUIRED -- there is no default,
+    so a gate cannot be supplied after the data is visible without that being
+    obvious in the diff.
+
+    `interval` is "t" (default) or "basic". Measured false-promotion rates against
+    a true zero at n ~ 50, nominal 5% (`local_sim/coverage_lab.py`, 192 fresh
+    networks, block D18): t **4.1-5.4%**, basic **4.0-5.2%**, percentile 6.8-8.2%,
+    BCa **9.1-11.5%**. Percentile and BCa are refused here rather than deprecated,
+    because a deprecated option is one somebody still passes.
+
+    A pass requires BOTH the gain to clear the gate AND the interval to exclude
+    zero. Both were required under the old geometric gate too; only the estimand
+    and the interval have changed.
+    """
+    if interval not in ("t", "basic"):
+        raise ValueError(
+            f"interval {interval!r} is not permitted. Use 't' or 'basic'. "
+            "The percentile bootstrap and BCa have measured false-promotion rates "
+            "of 6.8-8.2% and 9.1-11.5% against a nominal 5% at n ~ 50 on this "
+            "metric (docs/GOTCHAS.md); they are not gate-eligible."
+        )
+    res = paired_compare(control, candidate, **kw)
+    a = np.asarray(control, dtype=np.float64)
+    b = np.asarray(candidate, dtype=np.float64)
+    d = a - b
+    ci = (res.t_ci_difference if interval == "t"
+          else paired_diff_ci(d, method="basic",
+                              resamples=res.boot_resamples, seed=res.boot_seed))
+    excl = ci[0] > 0.0 or ci[1] < 0.0
+    tot = float(d.sum())
+    mover = float(d[np.argmax(np.abs(d))] / tot) if tot != 0 else float("nan")
+
+    reasons: List[str] = []
+    if res.arithmetic_gain < gate:
+        reasons.append(f"arithmetic gain {res.arithmetic_gain:.4f}x is below the "
+                       f"pre-registered gate {gate:.4f}x")
+    if not excl:
+        reasons.append(f"the {interval} 95% interval on the paired difference "
+                       f"spans zero")
+    if res.estimands_disagree:
+        reasons.append("the estimands disagree; the improvement is narrow rather "
+                       "than broad — report it, it does not change the verdict")
+    if abs(mover) >= 1.0:
+        reasons.append(f"the biggest single mover carries {mover * 100:.0f}% of the "
+                       f"delta; treat as a draw until proven otherwise")
+    for n in res.notes:
+        reasons.append(n)
+
+    return Verdict(
+        passed=bool(res.arithmetic_gain >= gate and excl),
+        gain=res.arithmetic_gain, gate=float(gate), ci=tuple(ci),
+        ci_excludes_zero=bool(excl), interval=interval,
+        geometric_gain=res.geometric_gain,
+        estimands_disagree=res.estimands_disagree,
+        n=res.n, n_candidate_better=res.n_candidate_better,
+        sign_test_p=res.sign_test_p, biggest_mover_share=mover,
+        reasons=tuple(reasons),
+    )
+
+
 def format_paired(res: PairedResult, *, control: str = "control", candidate: str = "candidate") -> str:
     """One block of text an evidence packet can paste verbatim."""
     lines = [

@@ -15,8 +15,11 @@
     5. vault seal         - touch counter still agrees with the log
     6. seed ledger        - consumption is recorded, and no source file draws
                             seeds the ledger has never heard of
-    7. canonical scorer   - 71/71, the competition identity is still bitwise
-                            equal to the installed whestbench
+    7. canonical scorer   - 82/82, the competition identity is still bitwise
+                            equal to the installed whestbench, AND decide() --
+                            THE gate -- still refuses percentile/BCa, still
+                            requires a pre-registered threshold, and still
+                            follows arithmetic when the estimands disagree
     8. seed-ledger refusals - 44/44 negative tests: every guard still FIRES
     9. vault integrity    - array sha256s vs the manifest and the seed->weights
                             map, not merely the counter. Costs no touch.
@@ -193,7 +196,7 @@ Step "6. seed ledger (consumption + source scan)" {
 # to the installed whestbench on the scalar primitives, on the aggregate, and on
 # the real scoring loop INCLUDING both failure paths -- and carries the graded
 # fixture where the arithmetic and geometric estimands pick opposite winners.
-Step "7. canonical scorer (71/71)" {
+Step "7. canonical scorer + the binding gate (82/82)" {
     uv run python local_sim/test_competition_score.py
 }
 

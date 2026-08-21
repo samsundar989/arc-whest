@@ -260,9 +260,60 @@ Two arithmetic hygiene rules, both of which Sprint 4 broke:
   published 2.374e6/sample is *effective* (residual included); its counted
   figure is ~2.144e6/sample. Comparing our counted number to their effective one
   manufactured a win that was not there.
-* **The paired statistic is the geometric mean of per-MLP ratios**,
-  `exp(mean(log(V·C_ctrl / V·C_cand)))`, not the ratio of the means. On D12 the
-  two read 1.1996× and 1.2026× — on opposite sides of the gate.
+* **Never a bare ratio of means quoted as a paired statistic.** On D12 the paired
+  and unpaired readings were 1.1996× and 1.2026× — on opposite sides of the gate.
+  Pair on common random numbers, always.
+
+### 2b-i. THE BINDING STATISTIC — arithmetic, adopted 2026-08-20 (CP0.3)
+
+**The primary promotion statistic is the paired ARITHMETIC score difference, with
+the studentised-t or basic-bootstrap 95% interval. The geometric mean of per-MLP
+ratios is a STABILITY DIAGNOSTIC and has no authority over any outcome.**
+
+Samuel's decision, 2026-08-20. It replaces the rule — in force from 2026-08-06 to
+2026-08-20 — that made the geometric mean binding.
+
+**Why.** The competition scores `mean_i (mse_i × max(0.1, C_i/B))` over the public
+MLPs. That is an arithmetic mean, it is reproducible offline **bitwise** from a
+graded report, and it is what the private re-run will compute. The geometric mean
+of ratios answers a different question: it discounts the heavy-tailed networks,
+and the competition does not. On our own graded data the two **select opposite
+winners** — v2.4 → v2.4.1 on the same 50 rows reads arithmetic **1.0334×** and
+geometric **0.9666×**.
+
+**Which interval, and which are refused.** Measured, not assumed
+(`local_sim/coverage_lab.py`, 192 fresh networks, block D18, 4,000 subsamples of
+n = 50). False-promotion rate against a population recentred to a **true** mean of
+exactly zero, nominal 5%:
+
+| interval | measured false-promotion rate | status |
+|---|---|---|
+| studentised **t** | **4.1–5.4%** | **gate-eligible, default** |
+| **basic** bootstrap | **4.0–5.2%** | **gate-eligible** |
+| percentile bootstrap | 6.8–8.2% | **refused** |
+| BCa | **9.1–11.5%** | **refused** — roughly double |
+
+That inverts the textbook ordering, and the reason is measurable: common random
+numbers make the paired *difference* nearly symmetric (skew +0.21, −0.55, −0.46)
+even though each arm is strongly right-skewed, so BCa spends variance correcting a
+skew that is not there. BCa only wins past skew ≈ 6, which no real arm reaches.
+
+**The gate is executable, not prose.** `local_sim/competition_score.py::decide()`
+is the only function in this repository that returns a promotion boolean. It
+**requires** a pre-registered `gate` (no default), **raises** on `interval="percentile"`
+or `"bca"`, and returns the geometric gain, the estimand-disagreement flag and the
+biggest-mover share as diagnostics that cannot change the verdict. A pass requires
+both the gain to clear the gate **and** the interval to exclude zero.
+
+**Re-scoring the record — no verdict flipped.** Before adopting the change, every
+recorded verdict with per-MLP data on disk was re-scored under both estimands
+(`local_sim/rescore_verdicts.py`, artifact
+`experiments/2026-08-20_rescore/rescore_verdicts.json`). Five reproduction checks
+passed, including both graded aggregates bitwise and the D14 geometric headline to
+1e-9. **No gated verdict crosses its gate.** In particular **D14** — the spent
+single-use block that killed the packed lane at geometric 1.1216× against a 1.15×
+gate — reads arithmetic **1.1177×**, i.e. *further below* the gate. The kill is
+strengthened, not weakened.
 
 ---
 
@@ -492,7 +543,7 @@ GREEN" was a weaker claim than the entries quoting it assumed:
 
 | tier | steps run | measured wall time | when |
 |---|---|---|---|
-| **default** | **10 of 12** — the original six, plus **7** canonical scorer (71/71), **8** seed-ledger *refusals* (44/44), **9** vault integrity (array sha256s vs the manifest and the seed→weights reconstruction), **10** lifecycle evaluator (37/37) | **~135–160 s** (n = 2 hosts/runs; a single reading is not a measurement) | every change |
+| **default** | **10 of 12** — the original six, plus **7** canonical scorer + the binding gate (82/82), **8** seed-ledger *refusals* (44/44), **9** vault integrity (array sha256s vs the manifest and the seed→weights reconstruction), **10** lifecycle evaluator (37/37) | **~135–160 s** (n = 2 hosts/runs; a single reading is not a measurement) | every change |
 | **`-Full`** | **12 of 12** — adds **11** shape parity (27/27) and **12** carrier strength (27/27) | **~755 s** (n = 1) | **required** before any promotion, submission, or vault touch |
 
 *The 111 s [110, 113] figure recorded earlier describes the **nine**-step tier that

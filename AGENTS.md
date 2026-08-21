@@ -66,8 +66,16 @@ Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
 - **Pre-register before you measure.** A decision block is single-use. Its design,
   gate threshold, and residual model go into `experiments/LOG.md` *before* the block
   is touched. A model chosen after seeing the answer is not evidence.
-- **Counted compares to counted; effective compares to effective.** The paired
-  statistic is the geometric mean of per-MLP ratios, not the ratio of means.
+- **Counted compares to counted; effective compares to effective.** Always pair on
+  common random numbers; never quote a bare ratio of means.
+- **The binding promotion statistic is the paired ARITHMETIC score difference**
+  with the studentised-t or basic-bootstrap interval — the competition's own
+  identity (adopted 2026-08-20, `docs/VALIDATION.md` §2b-i). The geometric mean of
+  per-MLP ratios is a **stability diagnostic** with no authority over an outcome.
+  The percentile bootstrap and BCa are **refused**: measured false-promotion rates
+  6.8–8.2% and 9.1–11.5% against a nominal 5%. The gate is executable —
+  `local_sim/competition_score.py::decide()` is the only function here that returns
+  a promotion boolean.
 - **Every MSE is quoted with its ground-truth noise floor.**
 - **Local residual wall time is ~7× the grader's** and the shim path reads ~18% low
   for rotation-using estimators. Never quote a local absolute; transfer ratios only.

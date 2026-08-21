@@ -71,15 +71,19 @@ that touches the block.** Keep it short enough that it actually gets used.
                         mechanism, there is no experiment — only a search.
 **Intervention**        The smallest change that discriminates. One hypothesis only.
 **Prediction**          A number with a direction and a rough magnitude.
-**Gate**                The threshold, chosen NOW: e.g. paired V·C >= 1.15x with the
-                        95% interval excluding 1.0.
+**Gate**                The threshold, chosen NOW, and passed to `decide(gate=...)`
+                        which has no default: e.g. paired arithmetic V·C >= 1.15x
+                        with the 95% t interval excluding zero.
 **Falsifier**           What result rejects the hypothesis.
 **Baseline**            The exact control, and the tier it was measured on.
 **Residual model**      REQUIRED for any cost claim. Report three (VALIDATION 2b);
                         FREEZE one here by name. The deciding rule is
                         max(local-ratio-on-graded-anchor, competitor-anchored).
-**Statistic**           Paired, common random numbers, geometric mean of per-MLP
-                        ratios. Say how many shifts. Never a ratio of means.
+**Statistic**           Paired, common random numbers, **arithmetic** score
+                        difference with the studentised-t or basic-bootstrap
+                        interval, through `competition_score.decide()`. Geometric
+                        mean reported as a diagnostic. Say how many shifts. Never
+                        a bare ratio of means, never percentile or BCa.
 **Confounders**         What else could produce a positive result?
 **Scope**               Files expected to change.
 **Do not change**       Variables that must stay fixed.
