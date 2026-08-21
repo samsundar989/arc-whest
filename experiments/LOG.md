@@ -7549,3 +7549,167 @@ finding is fixed in-tree and re-verified: tests 82/82 → 88/88, `decide()` leak
 on two independent locks, three stray verdict paths closed, two durable claims
 corrected. Nothing was promoted into `estimator.py`, no seed block drawn, D17 and D19
 unspent, vault counter 1 of 3.
+
+---
+
+# 2026-08-20 — SLICE CONTRACT CP1.1: does a Kerdock/MUB carrier reach degree 4 at 66,048 points?  [PRE-REGISTERED, no data yet]
+
+**IMPORTANT** — changes a probe's math (`local_sim/carriers.py`). **No seed block,
+no network minted, no grader, no vault touch, no `estimator.py` edit.** This is pure
+design theory measured against the existing moment harness.
+
+## Strategic question
+
+`docs/CURRENT_STATE.md` closes the design-carrier lane on cost: the verified
+strength-5 dual-BCH array is worth a measured **1.4775×** but needs 131,072 points
+at `C/B = 1.3509`, over the failure cliff. CP0.3 established that at **66,048**
+points the cost line fitted on our own D18 arms gives **`C/B = 0.6932` counted** —
+comfortably under the cliff.
+
+So the lane turns on one question, and it needs no networks:
+
+> **Is there a 66,048-point set on 256 dimensions whose degree-4 moment error is
+> comparable to the 131,072-point array's `0.0305× iid`?**
+
+If yes, the lane reopens with a measured accuracy prize and an affordable cost.
+If no, the K129 premise in `docs/FRONTIER_ARCHITECTURE_PROPOSAL.md` is wrong for
+*our* carrier and CP1 dies here, cheaply.
+
+## Why 66,048 is the right number, and why it is not arbitrary
+
+Three independent accountings agree, which is what makes this worth building:
+
+- **K129/MUB:** 256 = 4⁴, so the real-MUB bound `d/2 + 1 = 129` is attainable.
+  129 bases × 256 vectors × 2 signs = **66,048** (`test_carriers.py` S5 already
+  asserts this arithmetic and nothing more).
+- **Kuperberg (arXiv math/0402047):** a degree-5 spherical cubature at `2¹⁶ + 2n`
+  points = 65,536 + 512 = **66,048**.
+- **Kerdock:** the binary Kerdock code of length 256 has **2¹⁶ = 65,536**
+  codewords. It contains the all-ones vector, so its ±1 images form **32,768
+  antipodal pairs**; plus the 256 axial directions that is **33,024 distinct
+  directions = 129 × 256**, and 66,048 signed.
+
+The three are the same object counted three ways. That is the structure being
+built.
+
+## Evidence
+
+- CONFIRMED — the shipped Sobol carrier's degree-4 moment error is **0.510× iid**;
+  a Haar frame bank is **exactly** a 3-design and **0.700× iid at k = 4**; the
+  dual-BCH strength-5 array is **0.0305× iid at k = 4** and 0.138× at k = 6.
+- CONFIRMED — a ±1 cube array is a degree-4 design only *in expectation over
+  spread directions*, and the random rotation is what makes that true; balance on
+  **all 256** columns is required (`docs/GOTCHAS.md`).
+- CONFIRMED — 131,072 is the floor **for linear codes** at width 256, proven by
+  exhaustive enumeration of the Sidon-set obstruction. **The Kerdock code is
+  NON-LINEAR**, so it is not covered by that proof. This is the stated reopening
+  condition, and it is met by construction, not by preference.
+- CONFIRMED — `C/B = 0.6932` counted at 66,048 points, from the cost line fitted
+  on our own D18 arms A and B (CP0.3; the leg with 48/48 wins and a 2.1% mover).
+
+## Hypothesis
+
+The Kerdock code of length 256, as ±1 directions plus the axial points and under a
+random rotation, is a degree-4 design of comparable quality to the dual-BCH array
+at **half** the point count.
+
+## Mechanism
+
+Kerdock is the union of 2⁷ = 128 cosets of RM(1,8), whose coset representatives are
+quadratic forms whose pairwise differences all have full rank. That is exactly the
+"spread" property that makes the 128 bases mutually unbiased, and mutual
+unbiasedness at 129 bases is what forces the low-order moments to match the sphere.
+It achieves with a *non-linear* code what a linear code provably cannot do below
+131,072 rows.
+
+## Intervention
+
+Build the Kerdock code via the **Z₄-linear route** — the Gray image of the
+Z₄-linear code over the Galois ring `GR(4, 7)`, which is the construction with an
+unambiguous correctness fingerprint — and measure four carriers on the existing
+harness:
+
+1. `kerdock` — the 65,536 ±1 vectors alone, randomly rotated;
+2. `kerdock+axial` — plus the 512 axial points (Kuperberg's `+2n`);
+3. `kerdock unrotated` — to show, as with the BCH array, that the rotation is the mechanism;
+4. against the existing `bch OA (rotated)`, `sobol (SHIPPED)`, `haar frames`, `iid`.
+
+## Predictions — builder's, committed before the numbers exist
+
+- **K1 — the correctness fingerprint, and it is unambiguous.** The construction
+  yields exactly **65,536 distinct** binary codewords of length 256, closed under
+  complement, with the weight distribution supported on exactly
+  **{0, 120, 128, 136, 256}** — the Kerdock signature (minimum distance
+  `2⁷ − 2³ = 120`). *If K1 fails I have not built Kerdock, and K2/K3 are
+  uninterpretable regardless of how good they look.* This is the check that stops
+  a pretty number from a wrong object.
+- **K2 — the one that decides the lane.** Rotated, the degree-4 moment error is
+  **≤ 0.10× iid**, i.e. within ~3× of the BCH array's 0.0305×, at **half** the
+  points. **Falsifier: ≥ 0.5× iid** — that is Haar-frame territory (0.700×), it
+  would mean the set is no better than a 3-design at degree 4, and the K129
+  premise is then wrong for our carrier.
+- **K3 — least certain, and the specifically Kuperberg part.** Adding the 512
+  axial points **improves** degree 4 over the sign vectors alone. I hold this at
+  about 50/50: the axial points are 0.78% of the set and Kuperberg's theorem
+  weights them, whereas this build will use them unweighted at first.
+- **K4.** Degree 6 stays **well above** degree 4 in relative error — a degree-5
+  cubature is exact to 5, not 6 — but lands **below iid**, i.e. < 1.0×.
+- **K5.** `preflight -Full` stays **GREEN 12/12**; no seed block; vault counter 1.
+
+## Gate
+
+This slice has no promotion gate — it decides whether CP1 continues.
+
+- **degree-4 ≤ 0.10× iid → GO**, and the next slice prices it end to end on fresh
+  networks from a DESIGN block.
+- **0.10× < degree-4 < 0.5× iid → PIVOT**, and the successor is named in advance:
+  weight the axial points as Kuperberg's theorem prescribes rather than using them
+  raw.
+- **degree-4 ≥ 0.5× iid → KILL** the K129 carrier route for width 256, and record
+  that the published K129 entry's advantage must then come from something other
+  than degree-4 carrier strength — which would itself be a finding worth having,
+  because it would redirect CP1 at its own cost engineering instead.
+
+## Falsifier
+
+K1 failing falsifies the construction, not the hypothesis. K2 above 0.5× falsifies
+the hypothesis.
+
+## Baseline
+
+`bch OA (rotated)` at 131,072 points: degree-4 **0.0305× iid**. `sobol (SHIPPED)`:
+**0.510×**. `haar frames`: **0.700×**. All from `test_carriers.py`, 2026-08-19.
+
+## Residual model
+
+Not applicable — no cost claim is made or changed by this slice. The `C/B = 0.6932`
+figure is carried in from CP0.3 unmodified.
+
+## Statistic
+
+RMS relative deviation from the exact spherical moment over ≥800 random probe
+directions, per degree k = 1..6, and the ratio to iid at the same point count.
+Reported as a ratio, never an absolute.
+
+## Confounders
+
+- **Point count is not held equal across carriers**, and cannot be — an orthogonal
+  array has one size. Every row is reported with its `n`, and iid is measured at
+  the *same* n as the carrier it normalises.
+- The probe directions are random; a lucky draw could flatter one carrier. Use the
+  same fixed probe seed for every carrier so the comparison is paired.
+
+## Scope
+
+`local_sim/carriers.py` (new constructions + registry), `local_sim/test_carriers.py`
+(the fingerprint checks), an artifact under `experiments/2026-08-20_kerdock/`.
+
+## Do not change
+
+`estimator.py`. Any residual model. Any seed block. The vault. The existing
+carriers' definitions — `bch_oa` and friends must keep producing byte-identical
+point sets so the 2026-08-19 numbers stay reproducible.
+
+## Driver
+
+Claude Opus 5 (1M context), repo-local Builder, session 2026-08-20.
