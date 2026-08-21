@@ -96,6 +96,17 @@ class Claim:
     #: Truth labelling and the probe that scores against it are one experiment,
     #: not two correlated ones, and the overlap report must say so.
     paired_with: str = ""
+    #: "claim" (the default, and every historical record) or "finalize".
+    #:
+    #: A claim necessarily records its artifact PATH before the artifact exists,
+    #: so its `artifact_sha256` is necessarily blank at claim time -- and nothing
+    #: used to fill it in. That is a fail-OPEN hole: a truth set could be swapped
+    #: after the arms were scored against it and the ledger would still validate.
+    #: A "finalize" record closes one claim's artifact by appending its hash
+    #: after the file is written. Finalize records are NOT consumptions: they are
+    #: excluded from overlap and SINGLE_USE accounting, so closing a claim can
+    #: never look like a second claim on the same block.
+    kind: str = "claim"
 
     @property
     def end(self) -> int:
@@ -192,8 +203,19 @@ def _git_commit() -> str:
 
 def consumed_ranges(block: str, path: str = LEDGER_PATH) -> List[Tuple[int, int, str]]:
     return sorted(
-        (c.start, c.end, c.consumer) for c in ledger(path) if c.block == block
+        (c.start, c.end, c.consumer)
+        for c in ledger(path)
+        if c.block == block and c.kind == "claim"
     )
+
+
+def claims(path: str = LEDGER_PATH) -> List[Claim]:
+    """Consumption records only. `kind == "finalize"` is metadata, not a draw."""
+    return [c for c in ledger(path) if c.kind == "claim"]
+
+
+def finalizations(path: str = LEDGER_PATH) -> List[Claim]:
+    return [c for c in ledger(path) if c.kind == "finalize"]
 
 
 def consumed_seeds(block: str, path: str = LEDGER_PATH) -> int:
@@ -221,8 +243,12 @@ def free_ranges(block: str, path: str = LEDGER_PATH) -> List[Tuple[int, int]]:
 
 
 def collisions(path: str = LEDGER_PATH) -> List[Tuple[Claim, Claim]]:
-    """Every pair of ledger records that draw the same seed."""
-    recs = ledger(path)
+    """Every pair of CLAIM records that draw the same seed.
+
+    `finalize` records carry their claim's range for traceability but are not
+    consumptions, so they can never collide with anything.
+    """
+    recs = claims(path)
     out = []
     for i in range(len(recs)):
         for j in range(i + 1, len(recs)):
@@ -265,7 +291,7 @@ def claim_range(
             f"claim {block}[{start:,}..{end:,}] leaves its block [{lo:,}..{hi:,}]"
         )
 
-    existing = ledger(path)
+    existing = claims(path)
     mine = [c for c in existing if c.block == block]
     cand = Claim(
         block=block, start=start, n=n, consumer=consumer, tier=tier, ts=ts,
@@ -330,9 +356,63 @@ def claim(
 # --------------------------------------------------------------------------- #
 
 
+def finalize(
+    consumer: str,
+    artifact: str,
+    *,
+    ts: str,
+    note: str = "",
+    path: str = LEDGER_PATH,
+) -> str:
+    """Close a claim's artifact by appending its sha256. Returns the hash.
+
+    Call this AFTER the artifact is written. It refuses to record a hash for a
+    file that does not exist, so it cannot manufacture provenance for an artifact
+    that was never produced, and it refuses to finalize an artifact no claim
+    named, so a stray file cannot acquire the authority of a claimed one.
+    """
+    recs = ledger(path)
+    owners = [c for c in recs if c.kind == "claim"
+              and c.consumer == consumer and c.artifact == artifact]
+    if not owners:
+        raise PermissionError(
+            f"no claim by {consumer!r} names artifact {artifact!r}. finalize() "
+            "closes an existing claim; it does not create provenance."
+        )
+    if not os.path.exists(os.path.join(_ROOT, artifact)) and not os.path.exists(artifact):
+        raise FileNotFoundError(
+            f"REFUSED: {artifact} does not exist. A hash cannot be recorded for "
+            "an artifact that was never written."
+        )
+    digest = _sha256(artifact)
+    if not digest:
+        raise FileNotFoundError(f"REFUSED: could not hash {artifact}")
+
+    prior = [c for c in recs if c.kind == "finalize"
+             and c.consumer == consumer and c.artifact == artifact]
+    for q in prior:
+        if q.artifact_sha256 != digest:
+            raise PermissionError(
+                f"REFUSED: {artifact} was already finalized by {consumer!r} at "
+                f"{q.artifact_sha256[:12]} and now hashes to {digest[:12]}. The "
+                "artifact changed after it was closed; that is the exact event "
+                "this record exists to make impossible to hide."
+            )
+        return digest                                   # idempotent re-finalize
+
+    o = owners[0]
+    _append(Claim(
+        block=o.block, start=o.start, n=o.n, consumer=consumer, tier=o.tier,
+        ts=ts, note=note or "artifact finalized", artifact=artifact,
+        artifact_sha256=digest, commit=_git_commit(), kind="finalize",
+    ), path)
+    return digest
+
+
 def check_ledger(path: str = LEDGER_PATH, *, verbose: bool = True) -> List[str]:
     """Re-validate the whole ledger. Returns a list of ERRORS (empty == good)."""
     errors: List[str] = []
+    absent: List[str] = []
     recs = ledger(path)
     for c in recs:
         try:
@@ -361,9 +441,42 @@ def check_ledger(path: str = LEDGER_PATH, *, verbose: bool = True) -> List[str]:
                     f"{c.consumer}: artifact {c.artifact} changed since it was claimed "
                     f"({c.artifact_sha256[:12]} -> {now[:12]})"
                 )
+        elif c.artifact and c.kind == "claim":
+            # THE FAIL-OPEN, CLOSED. A record that names an artifact and carries
+            # no hash used to pass silently, which would let a truth set be
+            # swapped after the arms were scored against it.
+            #
+            # A claim's hash is necessarily blank at claim time (the artifact
+            # does not exist yet), so the hash may come from a `finalize`
+            # record instead -- but it must come from somewhere.
+            closed = [q for q in recs if q.kind == "finalize"
+                      and q.consumer == c.consumer and q.artifact == c.artifact
+                      and q.artifact_sha256]
+            if not closed:
+                errors.append(
+                    f"{c.consumer}: names artifact {c.artifact} but no hash was "
+                    f"ever recorded for it. Call seed_ledger.finalize({c.consumer!r}, "
+                    f"{c.artifact!r}, ts=...) after writing it."
+                )
+            else:
+                now = _sha256(c.artifact)
+                if now and now != closed[-1].artifact_sha256:
+                    errors.append(
+                        f"{c.consumer}: artifact {c.artifact} changed since it was "
+                        f"finalized ({closed[-1].artifact_sha256[:12]} -> {now[:12]})"
+                    )
+                elif not now:
+                    # An ABSENT artifact is reported, never failed. `*.npz` is
+                    # gitignored, so a fresh clone legitimately has none of them,
+                    # and a gate that goes red for that is reporting a state
+                    # rather than testing a property -- the failure class this
+                    # repository has lost five checks to.
+                    absent.append(f"{c.consumer}: {c.artifact}")
 
     seen_single: Dict[str, Claim] = {}
     for c in recs:
+        if c.kind != "claim":
+            continue
         if c.tier == "SINGLE_USE":
             if c.block in seen_single:
                 errors.append(
@@ -383,7 +496,14 @@ def check_ledger(path: str = LEDGER_PATH, *, verbose: bool = True) -> List[str]:
         )
 
     if verbose:
-        print(f"  ledger records                     {len(recs)}")
+        print(f"  ledger records                     {len(recs)}"
+              f"  ({sum(1 for c in recs if c.kind == 'claim')} claims, "
+              f"{sum(1 for c in recs if c.kind == 'finalize')} finalizations)")
+        print(f"  claims naming an artifact          "
+              f"{sum(1 for c in recs if c.kind == 'claim' and c.artifact)}"
+              f"  ({len(absent)} absent on this host, hash recorded)")
+        for a in absent:
+            print(f"    - not on disk here (gitignored?): {a}")
         print(f"  hard collisions (DECISION/VAULT)   {len(hard)}")
         print(f"  permitted overlaps (DESIGN)        {len(permitted)}")
         for a, b in permitted:

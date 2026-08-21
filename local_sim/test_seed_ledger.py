@@ -207,6 +207,93 @@ def t_artifact_hash():
         check("a rewritten artifact is caught", any("changed since" in e for e in errs))
 
 
+def t_artifact_finalization():
+    head("7b. an artifact CLAIMED but never hashed is caught -- the fail-open")
+    with tempfile.TemporaryDirectory() as d:
+        p = os.path.join(d, "l.jsonl")
+        art = os.path.join(d, "truth.npz")
+        rel = os.path.relpath(art, _ROOT)
+
+        # The real pattern: claim names the artifact BEFORE it exists, so the
+        # claim's own hash is necessarily blank. This used to pass silently.
+        SL.claim_range("D18", 30_806_018_400, 10, "lab.py", ts=TS,
+                       artifact=rel, path=p)
+        check("a claim made before its artifact exists records NO hash",
+              SL.ledger(p)[0].artifact_sha256 == "")
+        errs = SL.check_ledger(p, verbose=False)
+        check("an unhashed artifact is now an ERROR, not silence",
+              any("no hash was ever recorded" in e for e in errs), f"{len(errs)} error(s)")
+
+        # L2: finalize refuses to invent provenance for a file that never existed.
+        try:
+            SL.finalize("lab.py", rel, ts=TS, path=p)
+            check("finalize REFUSES an artifact that does not exist", False)
+        except FileNotFoundError:
+            check("finalize REFUSES an artifact that does not exist", True)
+
+        # Now write it and close the claim.
+        with open(art, "wb") as fh:
+            fh.write(b"truth-v1")
+        SL.finalize("lab.py", rel, ts=TS, path=p)
+        check("after finalize the ledger is clean",
+              SL.check_ledger(p, verbose=False) == [])
+        check("finalize is idempotent",
+              SL.finalize("lab.py", rel, ts=TS, path=p) is not None
+              and SL.check_ledger(p, verbose=False) == [])
+
+        # L3: a finalize record is NOT a consumption.
+        check("finalize does not consume seeds",
+              SL.consumed_seeds("D18", p) == 10,
+              f"{SL.consumed_seeds('D18', p)} seeds after 1 claim + 2 finalize calls")
+        check("finalize does not collide with its own claim",
+              SL.collisions(p) == [])
+        check("claims() and finalizations() split the ledger",
+              len(SL.claims(p)) == 1 and len(SL.finalizations(p)) == 1)
+
+        # The whole point: the artifact cannot be swapped after the fact.
+        with open(art, "wb") as fh:
+            fh.write(b"truth-v2-SWAPPED")
+        errs = SL.check_ledger(p, verbose=False)
+        check("an artifact swapped AFTER finalization is caught",
+              any("changed since it was finalized" in e for e in errs))
+        try:
+            SL.finalize("lab.py", rel, ts=TS, path=p)
+            check("re-finalizing a swapped artifact is REFUSED", False)
+        except PermissionError:
+            check("re-finalizing a swapped artifact is REFUSED", True)
+
+        # finalize() closes an existing claim; it does not create provenance.
+        try:
+            SL.finalize("nobody.py", rel, ts=TS, path=p)
+            check("finalize REFUSES an artifact no claim named", False)
+        except PermissionError:
+            check("finalize REFUSES an artifact no claim named", True)
+
+
+def t_absent_artifact_is_reported_not_failed():
+    head("7c. a gitignored artifact absent from a fresh clone is REPORTED, not failed")
+    # *.npz is gitignored, so a fresh clone legitimately has none of them. A gate
+    # that goes RED for that is reporting a STATE rather than testing a PROPERTY
+    # -- the failure class this repository has lost five checks to. The hash stays
+    # recorded and pinned; only the re-check is skipped.
+    with tempfile.TemporaryDirectory() as d:
+        p = os.path.join(d, "l.jsonl")
+        art = os.path.join(d, "gone.npz")
+        rel = os.path.relpath(art, _ROOT)
+        with open(art, "wb") as fh:
+            fh.write(b"payload")
+        SL.claim_range("D18", 30_806_018_420, 5, "lab2.py", ts=TS,
+                       artifact=rel, path=p)
+        SL.finalize("lab2.py", rel, ts=TS, path=p)
+        check("present + finalized is clean", SL.check_ledger(p, verbose=False) == [])
+        digest = SL.finalizations(p)[0].artifact_sha256
+        os.remove(art)
+        check("an ABSENT finalized artifact does not fail the gate",
+              SL.check_ledger(p, verbose=False) == [])
+        check("and its hash is still pinned in the record",
+              SL.finalizations(p)[0].artifact_sha256 == digest and len(digest) == 64)
+
+
 def t_scan_catches_a_new_literal():
     head("8. the source scan catches the failure that actually happened")
     tmp_dir = os.path.join(_ROOT, "local_sim", "_ledger_scan_tmp")
@@ -350,6 +437,20 @@ def t_real_ledger_readonly():
         and all(lo16 <= s and e <= hi16 for s, e in SL.free_ranges("D16")),
     )
     check("A3: the tree has no unrecorded seed use", SL.scan_sources() == [])
+    # Every claim that names an artifact must have a hash from somewhere -- the
+    # fail-open this suite exists to keep closed. Asserted as a PROPERTY over the
+    # live ledger, so it holds for records that do not exist yet.
+    unhashed = [
+        c.consumer for c in SL.claims()
+        if c.artifact and not c.artifact_sha256
+        and not any(q.consumer == c.consumer and q.artifact == c.artifact
+                    and q.artifact_sha256 for q in SL.finalizations())
+    ]
+    check("A7: every artifact-naming claim in the REAL ledger is hashed",
+          unhashed == [], f"unhashed: {unhashed}")
+    check("A7: D17 and D19 are still unspent after the finalize change",
+          SL.consumed_seeds("D17") == 0 and SL.consumed_seeds("D19") == 0,
+          f"D17 {SL.consumed_seeds('D17')}, D19 {SL.consumed_seeds('D19')}")
     check("no test wrote to the real ledger", os.path.getsize(SL.LEDGER_PATH) == before)
 
 
@@ -365,6 +466,8 @@ def main():
         t_ledger_tamper,
         t_hard_collision_on_decision,
         t_artifact_hash,
+        t_artifact_finalization,
+        t_absent_artifact_is_reported_not_failed,
         t_scan_catches_a_new_literal,
         t_real_ledger_readonly,
     ):

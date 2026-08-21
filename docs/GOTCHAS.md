@@ -15,6 +15,110 @@ narrative record), `docs/GAME_PLAN.md` (strategy, rev 12 is authoritative).
 
 ---
 
+## 2026-08-21 (P2-CP0) — the Phase-2 stack, the floor, and a check that could not fail
+
+*Full record and the fifth independent Skeptic verdict: `experiments/LOG.md`
+2026-08-21, P2-CP0 and its review.*
+
+- **The dataset CARD and `metadata.json` are different files, and the card carries
+  the constants.** `metadata.json` has width, depth, N and the splits. **`B`, the
+  multiplier floor, the no-bias / no-output-layer contract, the weight init, the
+  input distribution and the forward-pass FLOP identity are only on the card.**
+  This repository recorded "B and the floor are not in the dataset" for a day
+  because it read one and not the other. **Read both, at the same commit.**
+
+- **Mint parity can be proven against the ORGANISERS' PUBLISHED BYTES when the
+  package is unavailable.** whestbench 0.16 exists on no public index, so the
+  usual `canonical_mint == whestbench.sample_mlp` proof cannot reach the Phase-2
+  release. It does not have to: under seed protocol 3.0 the parquet `mlp_seed`
+  column is the **input** seed, so `canonical_mint(1024, 16, mlp_seed)` must
+  reproduce the published `weights` bit for bit — and it does, 16/16 and 4/4 on a
+  second shard. Those bytes *are* 0.16's output. **When you cannot get the tool,
+  check against the tool's output.**
+
+- **Score a residual against its own noise, not against a tolerance.** The
+  published layer-1 mean is a Monte-Carlo mean over 1e9 draws, so "max relative
+  error 2e-4" says nothing. Its noise is closed-form —
+  `Var[ReLU(z)] = sigma^2 (1/2 - 1/(2 pi))` — so the residual must look like
+  N(0,1), and it does: **rms z = 1.0017** over 16,384 neurons. That single number
+  confirms the row-vector convention, no bias at layer 1, `x ~ N(0,I)`, and the
+  truth-noise model at once. The **wrong** (column-vector) convention reads
+  **rms z = 674.8**, so the statistic bites.
+
+- **Do not quote an "expected maximum" from the Gaussian tail approximation.**
+  `sqrt(2 log(2m/sqrt(2 pi)))` drops the `1/t` factor and overstates E[max]:
+  4.354 against a simulated **4.136 (sd 0.286)** at m = 16,384. Use the **exact**
+  order-statistic p-value `1 - erf(z/sqrt2)^m` instead. There is no reason to
+  approximate a quantity that has a closed form.
+
+- **At Phase 2 the multiplier floor binds for the whole K2 family, and that
+  reframes the objective — but not the way it first looks.** The shipped analytic
+  fallback measures counted `C/B` = **0.062556** and effective **0.071-0.079**,
+  under the 0.1 floor, so its cost is free in score terms; residual would have to
+  exceed **0.823 s/MLP** at lambda = 1e11 to lift it off. **It does NOT follow
+  that the objective is "minimise MSE subject to C/B <= 0.1".** The objective is
+  still `MSE x max(0.1, C/B)`, and above the floor the score is flat *only* for
+  methods whose accuracy improves no faster than 1/compute. **An arm at C/B = 0.3
+  must be scored, not rejected on sight.**
+
+- **A whole estimator can price identically across two flopscope releases while
+  the price table has genuinely moved.** `estimator.py` at 1024 x 16 costs
+  **137,562,547,200 under both 0.10 and 0.12, op by op** — and 4 of 30 probed
+  primitives still differ. The one that matters:
+  **`where(mask, float32_array, 0.0)` is HALF price on 0.12**, because a Python
+  scalar now follows NEP-50 weak promotion instead of being widened to 64-bit.
+  That is exactly the spelling a mixed-precision path produces, and "a float32
+  covariance halves `C/B`" is this project's headline cost lever. `nansum` and
+  `nanmean` on float input went the other way, 2x dearer. **Price every arm under
+  both releases** (`local_sim/p2_price_delta.py`). Three primitives agreeing is
+  not a price table agreeing.
+
+- **A check whose condition is the literal `True` is instance SIX of this
+  repository's signature failure.** `p2_shape_smoke.py` shipped
+  `check("S4 layer-1 closed form is exact", True, ...)`, computed a closed form,
+  compared it to nothing, and had a comment describing a comparison against data
+  the function never read. "8 of 8 passed" was 7 of 8. **Before writing a check,
+  ask what input would make it fail.**
+
+- **An evidence file that a documented invocation can shrink is not evidence.**
+  Running the command printed in `phase2_mint_parity.py`'s own docstring
+  (`--shard 1 --max-rows 4`) overwrote the committed 16-row artifact with a 4-row
+  one. Name artifacts by what varies (`_shard0_rows16`), **refuse** to overwrite
+  differing content, and never `os.remove()` past a refusal that exists on
+  purpose.
+
+- **A second implementation of the score identity hides inside "just reporting".**
+  The smoke computed `max(floor, flops_used / budget)` for its artifact — counted
+  FLOPs where the grader's multiplier is a function of **effective** compute
+  `F + lambda R`. It disagreed with `competition_score` by 0.0626 vs 0.0684 and
+  was hidden only because both were under the floor. At a candidate near 0.09 it
+  would have written a false multiplier into the evidence.
+  **Counted compares to counted; effective compares to effective; and only
+  `competition_score` computes a multiplier.**
+
+- **`claim()` records an artifact path BEFORE the artifact exists, so its hash is
+  necessarily blank — and nothing used to fill it in.** `check_ledger` validated
+  `if c.artifact and c.artifact_sha256`, so a blank hash passed silently and a
+  truth set could be swapped after the arms were scored against it. Closed by
+  `seed_ledger.finalize()`, which appends the hash after the file is written,
+  refuses a file that does not exist, refuses an artifact no claim named, and
+  refuses to re-close one whose hash moved. **Call it after writing every truth
+  file**; an unfinalized artifact now turns the gate RED. An *absent* artifact is
+  reported, never failed — `*.npz` is gitignored and a fresh clone has none.
+
+- **The Phase-2 `full` split is 69.96 GB.** This machine has ~39 GB free, so
+  `full` cannot be held here. Phase-2 CONFIRM work is `mini` (7.03 GB, seven
+  1.119 GB shards of 16 MLPs each) unless disk is freed. One shard is enough for
+  a provenance check or a smoke.
+
+- **Published `mlp_seed` values are 63-bit.** Eight historical torch truth paths
+  mask a sample seed with `& 0x7FFFFFFF`. They are deliberately **not** edited —
+  they carry recorded Phase-1 results and their labels are unbiased — but every
+  new Phase-2 truth path must use the full state. **Fix forward; do not rewrite
+  the provenance of numbers already quoted.**
+
+---
+
 ## 2026-08-21 — the Phase-2 shape moved, and what that costs a shape-specific result
 
 *Full record: `experiments/LOG.md`, 2026-08-21.*

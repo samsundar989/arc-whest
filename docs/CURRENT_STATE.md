@@ -2,11 +2,12 @@
 
 *Snapshot, not narrative. Last updated **2026-08-21** — the session that repaired
 the decision layer (CP0.1-0.3), built and proved a 66,048-point exact design
-(CP1.1), then audited the published **1024 x 16** Phase-2 release and replaced the
-width-256 frontier sequence. Four completed slices, four independent Skeptic
-reviews, plus a read-only Phase-2 strategy audit. Update this file when a lane
-opens or closes, a number is graded, or the phase changes — not on every
-experiment. The narrative record is `experiments/LOG.md`.*
+(CP1.1), audited the published **1024 x 16** Phase-2 release, and then executed
+**P2-CP0**: the official manifest, mint parity proven at the new shape against the
+organisers' own published bytes, the first 1024 x 16 run this repository has ever
+done, and the seed ledger's artifact fail-open closed. Five Skeptic reviews.
+Update this file when a lane opens or closes, a number is graded, or the phase
+changes — not on every experiment. The narrative record is `experiments/LOG.md`.*
 
 *Documentation note, 2026-08-21:* the current non-binding Phase-2 strategist
 packet is `docs/PHASE2_FRONTIER_ARCHITECTURE.md`; the copy-ready Builder handoff
@@ -55,12 +56,14 @@ The HF dataset gained a **`v2-phase2`** tag. `metadata.json` gives **width 1024,
 depth 16**, GT 1e9, mini 100 / full 1000, baked with **whestbench 0.16.0 /
 flopscope 0.12.0**. Round 1429 opens **2026-08-21T23:59Z**.
 
-Operational warning: `local_sim/phase2_checklist.py` currently detects this tag
-but prints `v1-phase2` and recommends the old width-256 fallback. Its round/board
-polling is useful, but its tag and migration advice are stale until repaired. The
-official metadata also retains old `*_version_reported` values beside the newer
-provenance versions; record both and resolve them against the public package or a
-graded Phase-2 report.
+~~Operational warning: `phase2_checklist.py` prints `v1-phase2` and recommends the
+old width-256 fallback.~~ **REPAIRED 2026-08-21 (P2-CP0).** It now reads the
+manifest, cross-checks the live tag's commit against the one the manifest was
+built from (drift there is a re-bake), prints package-parity status, and states
+the 1024 x 16 migration facts. The official metadata retains old
+`*_version_reported` values (0.14.0 / 0.10.0) beside the newer provenance ones
+(0.16.0 / 0.12.0); **both are preserved in the manifest and neither is chosen** —
+only a graded Phase-2 report's `runtime_environment` resolves them.
 
 **This falsifies the working assumption below**, on its own first-listed falsifier
 ("a width that is not 256"). Kept for the record rather than deleted.
@@ -90,6 +93,49 @@ residual. Full factorized K3 is near `4.05` and needs a goal-directed compressed
 spelling. These are planning projections, not measured flopscope-0.12 costs.
 
 Full record: `experiments/LOG.md`, 2026-08-21.
+
+### P2-CP0 — **GO**, 2026-08-21. What is now measured rather than assumed
+
+*Full record: `experiments/LOG.md`, 2026-08-21, from "P2-CP0 RECONCILIATION" to
+the review. Artifacts: `experiments/2026-08-21_phase2_manifest/`,
+`experiments/2026-08-21_p2_shape_smoke/`. No seed block claimed, no vault touch,
+`estimator.py` untouched.*
+
+| | |
+|---|---|
+| **Round 1429** | **UPCOMING, not LIVE** at the time of the audit — `active=false`, opens 2026-08-21T23:59Z. Dataset publication and round activation are separate events |
+| **Mint parity at 1024 x 16** | **PROVEN, 16/16 bit-identical to the organisers' PUBLISHED `v2-phase2` weights**, and 4/4 on a second shard. It did **not** need whestbench 0.16: the published bytes *are* 0.16's output. The layer-1 residual is calibrated in units of the truth's own 1e9-sample noise — **rms z = 1.0017**, and the wrong (column-vector) convention reads **674.8**, so the check demonstrably bites |
+| **Package parity** | **BLOCKED, for two independent reasons.** whestbench 0.16.0 is on neither PyPI nor GitHub, *and* public whestbench 0.15.0 pins `flopscope<0.12.0`, so **no public pair reproduces the bake stack at all**. Stamped on every artifact. `.venv-fs012` isolates flopscope 0.12; the main lockfile is untouched |
+| **flopscope 0.10 vs 0.12** | the **whole estimator** prices **identically, op by op**, at 1024 x 16 (137,562,547,200) — but **4 of 30 primitives moved**, and `where(mask, f32, python_scalar)` is **half price** on 0.12. Every P2-CP1 arm is priced under both. Tool: `local_sim/p2_price_delta.py` |
+| **The floor** | the shipped file's analytic fallback measures counted **`C/B` = 0.062556**, effective **0.071–0.079** — **under the 0.1 floor**. Residual would have to exceed **0.823 s/MLP** at λ = 1e11 to lift it off |
+| **Truth noise, exact** | **7.8286e-11** on the Phase-2 public mini — computable exactly, because `avg_variance` is a published column and `gt_mse = avg_variance / N` |
+| **Still unknown** | **λ**, the timeouts, `memory_limit_mb`, and how many public MLPs are scored. All package defaults or Phase-1 values. Only a graded Phase-2 report settles them |
+
+**The one strategic fact.** At Phase 2 the multiplier floor binds for anything in
+the K2 family, so **accuracy bought below `C/B` = 0.1 is free**. From the
+published `avg_variance` (≈0.0870), naive Monte Carlo at the budget's nominal
+65,536 samples has raw MSE 1.328e-6 at multiplier 1.0; the crude analytic closure
+is **3.60× worse on raw MSE and 2.774× better on score**. *This is arithmetic
+from published columns, not a measured sampling arm — P2-CP1 measures it.*
+**It does not mean "minimise MSE subject to `C/B ≤ 0.1"** — the objective is
+still `MSE × max(0.1, C/B)`, and an arm above the floor must be **scored**, not
+rejected, since the score is flat above the floor only for methods whose accuracy
+improves no faster than 1/compute.
+
+**A projection that did not survive contact.** `docs/PHASE2_FRONTIER_ARCHITECTURE.md`
+projects the Phase-2 raw closure near **9.8e-7** by scaling the Phase-1 figure. It
+**measures 4.79e-6 — 4.9× worse**. Its *cost* projection fares better: simple K2
+projected at 0.055 against 0.0626 measured, 14% high. **Do not quote the packet's
+accuracy projection as fact.** The likely cause is that our closure factorises the
+off-diagonal post-ReLU covariance as `Φᵢ Φⱼ Σᵖʳᵉᵢⱼ`, where the exact
+bivariate-ReLU second moment is a known closed form and strictly better. That is
+P2-CP1's first question.
+
+**Two hard local constraints.** The Phase-2 **`full` split is 69.96 GB** against
+**39 GB free** on this machine — `full` cannot be held here, so Phase-2 CONFIRM
+work is limited to `mini` (7.03 GB, 7 shards of 16 MLPs) unless disk is freed. The
+GPU venv has torch 2.13 on an **RTX 5090, 34.2 GB**, so fresh-mint truth at
+1024 x 16 is affordable (~5.6e14 FLOPs per network at 2²⁴ samples).
 
 ### SAMUEL'S WORKING ASSUMPTION, 2026-08-20 — FALSIFIED 2026-08-21, kept for the record
 
@@ -429,15 +475,17 @@ The number may be real; the mechanism is not. **Do not ship it.**
 *Re-ranked 2026-08-19. Questions 1 and 2 of the previous ranking are now answered
 and have moved to § Closed lanes; what is left is genuinely short.*
 
-1. **THE PHASE-2 CONFIGURATION — blocking, and it lands within hours.** Shape,
-   `n_mlps`, `B`, λ and the floor are unpublished. This is the highest-ranked
-   open question not because it is deep but because **everything downstream is
-   conditioned on it**: `_PRUNE_TAU = −2.5` and `_BASIS_RANK = 32` are fitted at
-   256×32, D17 is single-use, and any design-carrier work is width-specific.
-   **If `L/n` falls materially — a wider or shallower Phase 2 — the mechanistic
-   lane reopens wholesale**, because ARC's own cumulant propagation breaks even
-   only when `L^K < n` (L < 16 for K=2, L < 6.3 for K=3). At 256×32 we sit at
-   L/n = 1/8 and every variant of it is either over budget or worse than MC.
+1. ~~**THE PHASE-2 CONFIGURATION — blocking**~~ **ANSWERED 2026-08-21 (P2-CP0),
+   except for λ.** Everything but λ is now read from official sources and hashed
+   into `experiments/2026-08-21_phase2_manifest/phase2_manifest.json`:
+   **1024 × 16**, no biases, no separate output layer, mini 100 / full 1000,
+   **B = 2⁴¹**, floor **0.1**, 65,536 naive samples. The earlier claim that
+   *"B and the floor are not in the dataset"* was **wrong** — both are on the
+   dataset **card**, which is a different file from `metadata.json`.
+   **λ is the one genuine unknown** and only a graded report settles it.
+   The reopening condition this question named did fire: `L/n` fell 1/8 → 1/64,
+   `L² = 256 < 1024`, and the mechanistic lane is open at K = 2.
+   The new #1 is the one below.
 
 2. **Does v2.6 actually win?** Built, preflight GREEN, MSE settled at 0.9949×.
    The cost claim reads **1.068–1.093× projected on the grader** and **0.952×
@@ -604,8 +652,21 @@ and have moved to § Closed lanes; what is left is genuinely short.*
 ## Evaluator trust — E1/E2, and the split is the point
 
 The score is `MSE × max(0.1, C/B)`, and its two halves are measured to completely
-different standards. We are currently at `C/B ≈ 0.20`, well above the 0.1 floor, so
-**both halves are live**.
+different standards.
+
+⚠️ **The sentence that stood here until 2026-08-21 — "we are currently at
+`C/B ≈ 0.20`, well above the 0.1 floor, so both halves are live" — is a PHASE-1
+statement and is now false.** At 1024 × 16 the shipped file's analytic fallback
+measures **counted `C/B` = 0.062556** and **effective `(F + λR)/B` = 0.071–0.079**,
+i.e. **under the 0.1 floor**, so its multiplier is pinned at 0.1 and *its cost is
+free in score terms*. Residual would have to exceed **0.823 s/MLP** at λ = 1e11 to
+lift it off the floor. An independent Skeptic flagged that a cold-start agent
+reading the old sentence would be misinformed about the one fact P2-CP1 is built
+on. **What this does NOT mean:** the objective is still
+`min MSE × max(0.1, C/B)` — an arm *above* the floor must be **scored**, not
+rejected, because only for methods whose accuracy improves no faster than
+1/compute is the score flat above it. See `experiments/LOG.md` 2026-08-21,
+P2-CP0.3 and the P2-CP0 review.
 
 | half | level | why |
 |---|---|---|
@@ -706,51 +767,78 @@ Codex hook *registration* schema, because Codex is not installed here — see
 
 ## Next actions
 
-*Rewritten **2026-08-21** at session close, immediately after the Phase-2 shape
-landed. Everything above this line describes a 256x32 world; **Phase 2 is
-1024 x 16**, and this list is the bridge. Nothing here depends on chat history.*
+*Rewritten **2026-08-21** after **P2-CP0 closed GO**. Everything above the
+P2-CP0 section describes a 256x32 world; **Phase 2 is 1024 x 16**. Nothing here
+depends on chat history.*
 
-**Start here.** `session-start`, then this list **in order** — the ordering is
-load-bearing, because steps 2 and 3 cannot be costed or trusted until step 1 is done.
+**Start here.** `session-start`, then `next-slice`. The live checkpoint sequence
+is the one in `docs/CLAUDE_CODE_FRONTIER_HANDOFF.md`: **P2-CP0 (done) -> P2-CP1
+-> P2-CP2 -> ...**. Do **not** run the old width-256 CP2-CP7 plan.
 
-### The shape moved. Do these first, in this order.
+### Done — do not redo
 
-1. **Upgrade the toolchain and re-prove mint provenance at 1024 x 16.**
-   Installed: whestbench **0.14.0**, flopscope **0.10.0**. The Phase-2 dataset was
-   baked with whestbench **0.16.0**, flopscope **0.12.0**. Until this is done we
-   cannot load the dataset, and `local_sim/mint_provenance.py` has never been run
-   at the new shape. **Everything rests on our networks being the grader's
-   networks; that proof is currently only established at 256x32 and four other
-   Phase-1 shapes.** IMPORTANT (changes the instrument).
-   *Watch for:* flopscope 0.10 -> 0.12 is two minor versions and **the price table
-   is exactly the unverified thing** (`docs/CURRENT_STATE.md` § *Evaluator trust*).
-   Re-run `local_sim/residual_model.py`'s counted-FLOP legs and see if they move.
+1. ~~Upgrade the toolchain and re-prove mint provenance at 1024 x 16.~~
+   **DONE differently, and better.** whestbench 0.16 is not installable from any
+   public source, so parity was proven **from the other side**: our
+   `canonical_mint` reproduces the organisers' **published** `v2-phase2` weights
+   bit for bit, 16/16 on shard 0 and 4/4 on shard 1. Those bytes *are* 0.16's
+   output. `local_sim/phase2_mint_parity.py`.
+   **Package parity stays BLOCKED and stamped**; re-run it the moment whestbench
+   0.16.0 is published — `uv run python local_sim/phase2_manifest.py`.
+2. ~~Establish `B`, lambda, the multiplier floor, and whether biases are absent.~~
+   **DONE except lambda.** `B = 2^41`, floor `0.1`, no biases, no separate output
+   layer, 65,536 naive samples — all from the dataset **card**, hashed into
+   `experiments/2026-08-21_phase2_manifest/phase2_manifest.json`. **lambda alone
+   is unknown** and needs a graded report.
 
-2. **Establish `B`, λ, the multiplier floor, and whether biases are absent.**
-   None is in the dataset. Sources, cheapest first: the round/challenge config via
-   `whest`; `whestbench` 0.16.0's own defaults; and — decisively — a graded
-   report's `config_snapshot`, which requires a submission. **Every `C/B` in this
-   document is a Phase-1 number and none of them transfers.**
-   *Naive arithmetic, stated as arithmetic:* a 1024-wide layer costs **16x** a
-   256-wide one and there are **half** as many, so per-sample propagation is
-   **~8x Phase 1**. If `B` did not grow to match, the affordable sample count
-   collapses and the whole operating point moves.
+### Next, in order
 
-3. **Re-fit `_PRUNE_TAU` and `_BASIS_RANK` at 1024 x 16 on a DESIGN block.**
-   -2.5 and 32 are Phase-1 values and neither transfers. `_BASIS_RANK` in
-   particular was chosen as `width/8`; at 1024 the analogue is a different number
-   and possibly a different *mechanism*, since Track P's break-even was
-   `rank = width/2`. **Allocate a NEW design block** (`local_sim/seed_blocks.py`) —
-   D16's 330 free seeds and D18's remainder are 256x32 networks and are **not
-   reusable at the new shape**. STRATEGIC.
+3. **P2-CP1 — the Phase-2 baseline ladder. This is the next research slice and it
+   comes before any `estimator.py` edit and before any Phase-1 constant refit.**
+   On fresh 1024 x 16 DESIGN networks with **two independent truth replicas**,
+   compare through **one canonical evaluator** (`local_sim/lifecycle_eval.py`):
+   exact layer-1 control; K1 / raw closure; full-dimensional **simple K2**;
+   full-dimensional **augmented K2**; naive/Sobol sampling near the budget-maximal
+   N; and 32 randomized orthogonal signed bases at matched rows.
+   Report per-MLP arithmetic score, raw and **cross-product noise-corrected** MSE,
+   truth noise, **MSE by depth** (to test the predicted `(L/n)^K` mechanism),
+   exact counted cost **under both flopscope 0.10 and 0.12**, residual, peak
+   memory, failures, and the paired interval with its biggest-mover share.
+   It ends by **freezing the conservative statistic and the deployment gate**.
+   **STRATEGIC** — it allocates a new Phase-2 DESIGN block, so it needs a Slice
+   Contract registered before any data exists, plus Samuel's prediction.
+   *The first question is sharper than the packet's:* our closure factorises the
+   off-diagonal post-ReLU covariance as `Phi_i Phi_j Sigma_ij`, and the exact
+   bivariate-ReLU second moment is a known closed form. Measure that gap first —
+   it may be the whole of the 4.9x projection miss.
+4. **Do NOT refit `_PRUNE_TAU` or `_BASIS_RANK` yet.** They are constants of a
+   width-256 *sampling* architecture, and P2-CP1 may retire that architecture
+   entirely. Refit only if P2-CP1 shows sampling still owns part of the frontier.
+5. **Allocate a NEW Phase-2 DESIGN block before any Phase-2 experiment.** D16's
+   free seeds, D18's remainder, and the untouched single-use **D17** and **D19**
+   are all **256x32** allocations and mint different-shaped networks. They are not
+   reusable. `local_sim/seed_blocks.py` + `seed_ledger.claim()`; **never a
+   literal**, and call `seed_ledger.finalize()` after writing each truth file —
+   an unfinalized artifact now turns the gate RED.
 
-4. **Only then** re-open the carrier and estimator questions. See § *Open research*.
+### Open P2-CP0 items, deferred with named triggers
+
+6. **Vault transactionality** (blocker 6) — deferred until a Phase-2 vault exists,
+   which needs Samuel. There is no Phase-2 vault, so nothing is exposed today.
+7. **`MLP.seed` (spawn[2]) is proven against installed 0.14, not against 0.16.**
+   The published-bytes check covers the weights only, because the dataset does not
+   publish the estimator seed. Irrelevant to the analytic path, which never reads
+   it — **a P2-CP1 sampling arm will**. Bit-reproducibility, not correctness.
+8. **Eight historical torch truth paths mask sample seeds with `& 0x7FFFFFFF`.**
+   Deliberately **not** edited: they carry recorded Phase-1 results, the labels are
+   unbiased, and a 31-bit collision over 600 networks is ~8e-5 likely. **Fix
+   forward** — every new Phase-2 truth path uses the full state.
 
 ### Waiting on Samuel — no agent may do these
 
-5. **Submit early for telemetry, or not?** A Phase-2 submission of the frozen
+9. **Submit early for telemetry, or not?** A Phase-2 submission of the frozen
    **v2.4.1** would return `config_snapshot` — `B`, λ, the floor, the real price
-   table — from the grader's own numbers, unblocking step 2 immediately. It costs
+   table — from the grader's own numbers, unblocking the lambda unknown immediately. It costs
    a submission slot and posts a Phase-1-tuned score to a fresh board. **Samuel's
    call**, and hard rule 6 applies regardless: `whest validate` -> clean mini run
    with `n_failed_mlps: 0` -> ask.
@@ -758,26 +846,26 @@ load-bearing, because steps 2 and 3 cannot be costed or trusted until step 1 is 
    their constants are fitted at 256x32, so a score from either is telemetry, not
    a competitive entry.
 
-6. **The E1 -> E2 reclassification of the cost half.** `residual ≈ 2.551 ms +
+10. **The E1 -> E2 reclassification of the cost half.** `residual ≈ 2.551 ms +
    5.780 µs/op`, R² = 0.898, fitted on five graded submissions. **Now doubly
    caveated:** those five are Phase-1 submissions at 256x32 under flopscope 0.10,
    and both the shape and the price table have moved. It may need re-fitting from
    scratch. STRATEGIC — the E1 label gates the "no autonomous loop" rule.
 
-7. **The vault is Phase-1 and cannot be re-baselined into Phase 2.** 500 sealed
+11. **The vault is Phase-1 and cannot be re-baselined into Phase 2.** 500 sealed
    256x32 networks, touch **1 of 3**. A 1024x16 vault is a **new mint**, and the
    old one becomes historical. Decide whether to build one and what it costs.
    Do **not** difference a Phase-2 touch against touch #1.
 
-8. **Team freeze 2026-09-05 23:59 UTC.** Solo or not.
+12. **Team freeze 2026-09-05 23:59 UTC.** Solo or not.
 
-9. **Two questions to the organisers** — `docs/email-draft-organizers.md`.
+13. **Two questions to the organisers** — `docs/email-draft-organizers.md`.
    (a) Is there a Phase 2 write-up round, and when? (b) One designated submission
    or two — announcement 18143 says two, the Rules tab says one, still unanswered.
 
 ### Open research, ranked for the NEW shape
 
-10. **The cumulant / mechanistic lane, REOPENED on its own pre-registered
+14. **The cumulant / mechanistic lane, REOPENED on its own pre-registered
     condition.** Open question #1 said a wider or shallower Phase 2 would reopen it
     "wholesale" because ARC's propagation breaks even only when `L^K < n`.
     **`L/n` fell from 32/256 = 1/8 to 16/1024 = 1/64**, and `L² = 256 < 1024`
@@ -786,7 +874,7 @@ load-bearing, because steps 2 and 3 cannot be costed or trusted until step 1 is 
     `docs/MOONSHOT.md` and the G0 baseline. **This is now the highest-value
     research lane**, and it is the one the shape change *helped*.
 
-11. **Generalise the Kerdock design to width 1024, and price it.** The CP1.1
+15. **Generalise the Kerdock design to width 1024, and price it.** The CP1.1
     object is width-256 and dead at the new shape, but the *mathematics* carries:
     `1024 = 4^5`, the real-MUB bound is `d/2 + 1 = 513`, the Galois ring is
     `GR(4,9)`, and the analogue is `d² = 2^20 = 1,048,576` sign vectors plus 2,048
@@ -796,8 +884,8 @@ load-bearing, because steps 2 and 3 cannot be costed or trusted until step 1 is 
     per-sample cost is 16x Phase 1's operating point, and affordability depends
     wholly on step 2. `local_sim/carriers.py` already has the derivation to adapt.
 
-12. **Moonshot D10 renormalization fit**, kill-by-default **2026-09-01** — but see
-    #10: the break-even arithmetic that made this marginal has just changed in its
+16. **Moonshot D10 renormalization fit**, kill-by-default **2026-09-01** — but see
+    #14: the break-even arithmetic that made this marginal has just changed in its
     favour, so re-read the kill condition before honouring it.
 
 **Explicitly NOT next.** Do not run **CP1.2**, the end-to-end Kerdock arm on D18 —
