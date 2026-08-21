@@ -710,10 +710,20 @@ def decide(
     BCa **9.1-11.5%**. Percentile and BCa are refused here rather than deprecated,
     because a deprecated option is one somebody still passes.
 
-    A pass requires BOTH the gain to clear the gate AND the interval to exclude
-    zero. Both were required under the old geometric gate too; only the estimand
-    and the interval have changed.
+    A pass requires BOTH the gain to clear the gate AND the interval to lie
+    strictly ABOVE zero -- one-sided, because `control - candidate > 0` is what
+    "the candidate is better" means. `gate` must be finite and >= 1.0.
     """
+    g = float(gate)
+    if not math.isfinite(g):
+        raise ValueError(f"gate must be finite; got {gate!r}")
+    if g < 1.0:
+        raise ValueError(
+            f"gate {g!r} is below 1.0. `gain` is control/candidate, so a gate below "
+            "1.0 asks this function to promote a candidate that is WORSE than the "
+            "control. If you genuinely want a non-inferiority test, write it "
+            "explicitly; do not route it through the promotion gate."
+        )
     if interval not in ("t", "basic"):
         raise ValueError(
             f"interval {interval!r} is not permitted. Use 't' or 'basic'. "
@@ -728,17 +738,27 @@ def decide(
     ci = (res.t_ci_difference if interval == "t"
           else paired_diff_ci(d, method="basic",
                               resamples=res.boot_resamples, seed=res.boot_seed))
-    excl = ci[0] > 0.0 or ci[1] < 0.0
+    # ONE-SIDED, deliberately. `d = control - candidate`, so d > 0 means the
+    # candidate is better. The two-sided test `ci[0] > 0 or ci[1] < 0` counts a
+    # SIGNIFICANT REGRESSION as evidence for promotion -- with a gate below 1.0 it
+    # passed a candidate that was 30% worse on every network, with an empty
+    # `reasons` list. Found by the independent Skeptic on 2026-08-20; the gate
+    # floor above is the second lock on the same door.
+    excl = ci[0] > 0.0
     tot = float(d.sum())
     mover = float(d[np.argmax(np.abs(d))] / tot) if tot != 0 else float("nan")
 
     reasons: List[str] = []
-    if res.arithmetic_gain < gate:
+    if res.arithmetic_gain < g:
         reasons.append(f"arithmetic gain {res.arithmetic_gain:.4f}x is below the "
-                       f"pre-registered gate {gate:.4f}x")
+                       f"pre-registered gate {g:.4f}x")
+    if res.arithmetic_gain < 1.0:
+        reasons.append(f"the candidate is WORSE than the control "
+                       f"({res.arithmetic_gain:.4f}x)")
     if not excl:
-        reasons.append(f"the {interval} 95% interval on the paired difference "
-                       f"spans zero")
+        reasons.append(f"the {interval} 95% interval on the paired difference does "
+                       f"not lie strictly above zero "
+                       f"[{ci[0]:+.4e}, {ci[1]:+.4e}]")
     if res.estimands_disagree:
         reasons.append("the estimands disagree; the improvement is narrow rather "
                        "than broad — report it, it does not change the verdict")
@@ -749,8 +769,8 @@ def decide(
         reasons.append(n)
 
     return Verdict(
-        passed=bool(res.arithmetic_gain >= gate and excl),
-        gain=res.arithmetic_gain, gate=float(gate), ci=tuple(ci),
+        passed=bool(res.arithmetic_gain >= g and excl),
+        gain=res.arithmetic_gain, gate=g, ci=tuple(ci),
         ci_excludes_zero=bool(excl), interval=interval,
         geometric_gain=res.geometric_gain,
         estimands_disagree=res.estimands_disagree,

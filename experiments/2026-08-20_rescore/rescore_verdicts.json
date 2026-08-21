@@ -58,6 +58,10 @@
     1.105565909654584,
     1.130191733690325
    ],
+   "decide_reasons": [
+    "arithmetic gain 1.1177x is below the pre-registered gate 1.1500x"
+   ],
+   "ci_excludes_zero": true,
    "gate_geometric": "FAIL",
    "gate_arithmetic": "FAIL",
    "flips": false
@@ -118,7 +122,7 @@
   },
   {
    "lane": "N as an operating-point lever",
-   "label": "D18 A->B, the N lever on our own carrier",
+   "label": "D18 A->B combined V*c",
    "n": 48,
    "arithmetic_gain": 1.1980459777722763,
    "arith_t_ci": [
@@ -141,6 +145,60 @@
    "arith_gain_ci_via_t": [
     0.8847574369856258,
     1.8548342626081815
+   ]
+  },
+  {
+   "lane": "the N-effect that the K129 bracket divides by",
+   "label": "D18 A->B  leg 1: MSE*N  <- THE DIVISOR",
+   "n": 48,
+   "arithmetic_gain": 1.0591356310382873,
+   "arith_t_ci": [
+    -0.008710538321885692,
+    0.012643142707532012
+   ],
+   "arith_mean_diff": 0.0019663021928231603,
+   "geometric_gain": 0.8983361656947,
+   "geometric_ci": [
+    0.7324546539641134,
+    1.101785430985322
+   ],
+   "wins": 19,
+   "sign_p": 0.19341265286193732,
+   "biggest_mover_share": 1.7419132342380168,
+   "gate": null,
+   "published": null,
+   "published_kind": "geometric",
+   "note": "THIS is the number the K129 correction rests on",
+   "arith_gain_ci_via_t": [
+    0.8017067505762355,
+    1.5600784669071353
+   ]
+  },
+  {
+   "lane": "fixed-cost amortisation over more points",
+   "label": "D18 A->B  leg 2: counted FLOPs/point",
+   "n": 48,
+   "arithmetic_gain": 1.1305793218758053,
+   "arith_t_ci": [
+    366027.89692448074,
+    366031.2792871943
+   ],
+   "arith_mean_diff": 366029.5881058375,
+   "geometric_gain": 1.1307522871213935,
+   "geometric_ci": [
+    1.1293542183817469,
+    1.1321520865812775
+   ],
+   "wins": 48,
+   "sign_p": 7.105427357601002e-15,
+   "biggest_mover_share": 0.02083393977331181,
+   "gate": null,
+   "published": null,
+   "published_kind": "geometric",
+   "note": "the closure's fixed cost spread over 8x the samples",
+   "arith_gain_ci_via_t": [
+    1.1305786397740392,
+    1.1305800039783949
    ]
   }
  ]

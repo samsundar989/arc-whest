@@ -15,7 +15,7 @@
     5. vault seal         - touch counter still agrees with the log
     6. seed ledger        - consumption is recorded, and no source file draws
                             seeds the ledger has never heard of
-    7. canonical scorer   - 82/82, the competition identity is still bitwise
+    7. canonical scorer   - 88/88, the competition identity is still bitwise
                             equal to the installed whestbench, AND decide() --
                             THE gate -- still refuses percentile/BCa, still
                             requires a pre-registered threshold, and still
@@ -196,7 +196,7 @@ Step "6. seed ledger (consumption + source scan)" {
 # to the installed whestbench on the scalar primitives, on the aggregate, and on
 # the real scoring loop INCLUDING both failure paths -- and carries the graded
 # fixture where the arithmetic and geometric estimands pick opposite winners.
-Step "7. canonical scorer + the binding gate (82/82)" {
+Step "7. canonical scorer + the binding gate (88/88)" {
     uv run python local_sim/test_competition_score.py
 }
 

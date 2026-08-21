@@ -7348,19 +7348,30 @@ unweighted geometric mean of ratio_i =  1.121568
 corr(cand_i, ratio_i)                = -0.5286    <- the sign that decides which is larger
 ```
 
-**Arithmetic reads above geometric iff the candidate's relative advantage is
-POSITIVELY correlated with the score it is being weighted by.** On D14 that
-correlation is **−0.53**: the candidate wins on 100/100 networks but wins *least*
+~~**Arithmetic reads above geometric iff the candidate's relative advantage is
+POSITIVELY correlated with the score it is being weighted by.**~~ **WITHDRAWN the
+same day — the "iff" is FALSE, and the identity above is a tautology.** See the
+CP0.3 review below: the correlation is negative on *every* lane and arithmetic
+still exceeds geometric on most, because the AM–GM gap of the ratios usually
+dominates the covariance term. Positive correlation is **sufficient, never
+necessary**. D14 is simply the one lane whose ratios are tight enough (AM–GM gap
+1.0001) for the covariance to decide — and it is the lane the rule was
+generalised from, which is the same error A3 confesses to two paragraphs above.
+What *is* true of D14: the candidate wins on 100/100 networks but wins *least*
 where the score is largest — cheapest third mean ratio **1.1292**, priciest third
-**1.1133**. That is why arithmetic reads lower, and it is checkable on any future
-comparison in one line instead of guessed from a prior gap.
+**1.1133**, `corr = −0.53`.
 
 #### The other predictions
 
 - **A2 HELD** — arithmetic ≥ geometric in **4 of 5** (1.0692, 0.9966, 1.0254, 1.0317, 1.1794).
-- **A4 HELD** — D12 moves 2.5% and does not change sign. (Its 1.2079× headline was
-  already retired for unrelated reasons; the re-score reads 1.4138× arithmetic
-  under model 2, and nothing depends on it.)
+- **A4 HELD ON HALF ITS CONTENT, and that is a defect.** A4 predicted D12 *and*
+  the v2.6 gate reconstruction. Only D12 was checked. D12 moves 2.5% and does not
+  change sign — but its artifact carries **no `gate`, `verdicts`, `deciding_model`
+  or `passed` key**, so the re-score picks the residual model itself, reproduces
+  none of D12's published numbers, gets **no A1 anchor**, and still counted in A2.
+  Treat the D12 row as **unanchored**. The v2.6 half is fine on pre-existing P0.1
+  evidence (per-op arithmetic 1.0961 vs geometric 1.0927) but CP0.3 did not
+  check it.
 - **A5** — see the regressions line below.
 
 #### Two diagnostics that earn their place
@@ -7372,12 +7383,14 @@ comparison in one line instead of guessed from a prior gap.
 - **D18 A→B — the N lever — reads arithmetic 1.1980× with a top-mover share of
   59.9%.** The 1.1980× reproduces T2 (LOG 2026-08-19) exactly, so T2 was already
   arithmetic. But **one network out of 48 carries 60% of that delta**, which the
-  original entry does not say. The T2 decomposition (MSE·N 1.0591 × cost/point
-  1.1306) is unaffected as arithmetic, but the *combined* 1.1980× figure is much
-  more fragile than its two-decimal presentation suggests. **Consequence for the
-  K129 correction made earlier today: the N-effect bracket [1.414, 1.498] rests on
-  the MSE·N leg, not on the combined figure, so it stands — but it should not be
-  tightened on the strength of 1.1980×.**
+  original entry does not say. ~~The T2 decomposition is unaffected... the bracket
+  rests on the MSE·N leg, so it stands.~~ **THAT CONCLUSION IS BACKWARDS AND IS
+  WITHDRAWN** — the Skeptic decomposed the legs and the MSE·N divisor is the
+  *fragile* one: 174.2% top mover, estimands disagreeing 1.0591 vs 0.8983, t
+  interval spanning zero, and a leave-one-out range of [0.9551, 1.1080] that
+  crosses 1.0. See the CP0.3 review below. **The N-effect is not resolvable on 48
+  networks.** The counted-FLOPs-per-point leg (48/48 wins, p = 0.000, 2.1% mover)
+  is solid, so `C/B = 0.6932` at 66,048 points is untouched.
 
 #### What was built
 
@@ -7426,3 +7439,113 @@ Scorer **82/82**. Vault counter **1**, log 1 line. D17 and D19 still unspent.
 - Adopting arithmetic makes the gate **more** sensitive to a single network. That is
   correct — the competition is too — but it raises the value of the biggest-mover
   screen, which is now surfaced in every `Verdict` rather than left to the reader.
+
+---
+
+## 2026-08-20 — CP0.3 REVIEW: Skeptic **PROVISIONAL**. The headline held; two of my three supporting claims did not
+
+Third Skeptic, fresh context. It **verified the pre-registration from git** — this is
+the first slice in this record where that was possible:
+
+> `git show --stat 0eb1279` = `experiments/LOG.md | 145 +++++` and **nothing else**
+> — no implementation, no results. Every number the contract cites is prior
+> published evidence. `f8f22d9`, 21 minutes later, carries the code, the artifact
+> and the result. **The gate did not move**: contract says 1.15× for D14, result
+> says 1.15×.
+
+> **Skeptic verdict: PROVISIONAL**
+>
+> *"The headline — 'no recorded verdict crosses its gate' — survives everything I
+> threw at it. Two of the slice's other three load-bearing claims do not.
+> `decide()` **can** be talked into passing a candidate that is worse on every
+> single network; and the one downstream recommendation the slice makes (the K129
+> N-effect caution) is **backwards on the slice's own diagnostics**."*
+
+### What it falsified
+
+| # | finding | verified? | action |
+|---|---|---|---|
+| 1 | **`decide()` passes a strictly worse candidate.** `excl = ci[0] > 0 or ci[1] < 0` is two-sided, so a *significant regression* counted as evidence FOR promotion; with `gate < 1.0` nothing else caught it. A candidate 30% worse on all 60 networks returned `passed=True` with an **empty** `reasons` list | **yes**, reproduced | **FIXED, two independent locks.** The interval test is now **one-sided** (`ci[0] > 0`), and `gate` must be **finite and >= 1.0** or `decide()` raises. Verified: gates 0.0, 0.5, −1.0, ±inf, NaN all refuse; at gate 1.0 the 30%-worse candidate fails with three stated reasons including "the candidate is WORSE" |
+| 2 | **The "iff" rule I wrote into the LOG is false.** I claimed arithmetic exceeds geometric *iff* `corr(cand, ratio) > 0`. Recomputed on every lane: the correlation is **negative on all of them**, yet arithmetic exceeds geometric on **most** | **yes** — corr −0.5286 / −0.4241 / −0.1852, arith > geo on 2 of those 3 | **WITHDRAWN and replaced** with the correct decomposition, below |
+| 3 | **The K129 caution is backwards.** I said the bracket "rests on the MSE·N leg, so it stands". The MSE·N leg is the **more** fragile of the two | **yes**, and it is worse than the Skeptic's summary | **CORRECTED**, below. This is the finding that changes what a durable doc says |
+| 4 | **"the only function that returns a promotion boolean" was false three times over**: `packed_sparse_probe.py:2227` (`--mode decide5`, a live CLI path, still gating on the geometric mean with a 1.96·SE-on-log interval); `rescore_verdicts.py:139` (inline `arith >= gate` with **no interval condition at all** — a fourth re-implementation, in the slice that adopted the canonical home); `reconstruct_v26_gate.py:165` (BCa as the **sole** interval on the lane D19 is reserved to gate) | **yes** | **ALL THREE FIXED.** `decide5` now **refuses to run** without `ARC_WHEST_ALLOW_LEGACY_GEOMETRIC_GATE=1`, which exists only to reproduce D14's historical decision and says so; `rescore_verdicts` routes every gated lane through `decide()`; `reconstruct_v26_gate` now records `t_ci_difference` and renames the other to `bca_ci_difference_NOT_GATE_ELIGIBLE` |
+| 5 | **A tautological test.** `check("a diagnostic can never flip the verdict", decide(...).passed == (vd.gain >= 1.0 and vd.ci_excludes_zero))` recomputes the implementation's own expression from the Verdict's own fields and **cannot fail for any implementation** | **yes** | **FIXED** — and fixing it exposed that my *replacement* expectation was also wrong (see below) |
+| 6 | A4 was reported HELD on half its content (D12 checked, the v2.6 reconstruction not); the D12 row is unanchored — its artifact has no `gate`/`verdicts`/`passed` key, so it gets no A1 check yet counts in A2 | **yes** | **BOTH LABELLED** in the table below rather than quietly carried |
+
+**Tests: 82/82 → 88/88.** The new ones are the leak itself (a 30%-worse candidate at
+every legal gate), the gate-floor and non-finite refusals, and an explicit assertion
+that the interval condition is one-sided.
+
+### The correct decomposition — replacing the withdrawn "iff"
+
+```
+arith = weighted-AM(ratio, weights = candidate score)
+      = uAM(ratio) + cov(cand, ratio) / mean(cand)
+geo   = uGM(ratio)  <=  uAM(ratio)      by AM-GM, ALWAYS
+```
+
+So **positive correlation is SUFFICIENT for `arith > geo`, and never necessary** —
+arithmetic also wins whenever the AM–GM gap of the ratios exceeds the (negative)
+covariance term. Measured AM–GM gap: **1.0001 on D14** against 1.28 / 1.27 / 1.35 on
+the lanes where arithmetic wins. D14 is the *one* lane whose per-MLP ratios are tight
+enough for the covariance term to dominate — and it is the lane I generalised the
+rule from. **That is structurally the same extrapolation A3 already confessed to,
+committed again two paragraphs later.**
+
+The underlying identity is exact (`|wAM − arith|/arith <= 2e-16`) — and the Skeptic
+is right that it is exact *because it reduces to `sum(ctrl)/sum(cand)` after
+cancellation*. It is a tautology and corroborates nothing. That is the CP0.1 trap —
+*could the two sides ever have disagreed?* — for the second time in one day.
+
+### CORRECTION — the K129 N-effect, and it goes the other way
+
+I wrote: *"the bracket rests on the MSE·N leg, not on the combined figure, so it
+stands — but it should not be tightened."* **The MSE·N leg is the fragile one.**
+Decomposed under the newly binding statistic:
+
+| leg of D18 A→B | arith | geo | t CI on the paired difference | wins | sign p | top mover | leave-one-out gain |
+|---|---|---|---|---|---|---|---|
+| **MSE·N — the divisor the bracket uses** | **1.0591** | **0.8983** | **SPANS ZERO** | 19/48 | 0.193 | **174.2%** | **[0.9551, 1.1080] — crosses 1.0** |
+| counted FLOPs/point | 1.1306 | 1.1308 | excludes zero | **48/48** | 0.000 | 2.1% | [1.1304, 1.1308] |
+| combined `V·c` | 1.1980 | 1.0158 | SPANS ZERO | 20/48 | 0.312 | 59.9% | [1.0812, 1.2503] |
+
+The divisor's estimands **disagree** (1.0591 vs 0.8983, undeclared anywhere before
+now), its interval **spans zero**, **one network of 48 carries 174% of its delta** —
+firing the very ≥100% screen this slice surfaces in every `Verdict` — and **deleting
+that one network flips its sign**.
+
+**So the honest statement is not "it stands, don't tighten it". It is: the N-effect
+is NOT RESOLVABLE on 48 networks.** The bracket `[1.414, 1.498]` is not a
+measurement interval; its low end is exactly `1.4976 / 1.0591`, i.e. the span
+between *no correction* and *a correction that is itself a draw*. The corroboration
+recorded earlier today — that our measured design gain 1.4775× lies inside that
+bracket — therefore **carries less weight than it was given**. It is still true and
+still the right direction; it is just not the ±3% agreement it was described as.
+
+**What does NOT change:** the counted-FLOPs-per-point leg is rock solid (48/48 wins,
+p = 0.000, 2.1% mover), so **`C/B = 0.6932` at 66,048 points stands unqualified**,
+and the affordability conclusion — the single most decision-relevant number in the
+K129 lane — is untouched.
+
+### Where the Skeptic and I still cannot settle it
+
+The graded pair's own t interval on the difference **spans zero** (sign p = 0.48).
+So the fixture that motivated adopting arithmetic is *itself a draw under the
+statistic it motivated*. **That does not weaken the case** — the competition
+computes an arithmetic mean and that settles the estimand on first principles, not
+on this fixture — but `docs/VALIDATION.md` §2b-i must not read as though a real
+disagreement was adjudicated. Amended accordingly.
+
+Resolving the 1.0591 N-effect needs **fresh networks**, and a **DESIGN block will
+do** — D16 has 330 free seeds, D18 is already drawn on. **D17 and D19 must not be
+touched for it**; neither the arithmetic adoption nor the K129 bracket is worth a
+single-use block.
+
+### Terminal state: **PROMOTE_AND_CONTINUE**
+
+The gate change itself is correct, verdict-neutral, and now enforced by a function
+that survived a deliberate attempt to talk it into a wrong answer. Every Skeptic
+finding is fixed in-tree and re-verified: tests 82/82 → 88/88, `decide()` leak closed
+on two independent locks, three stray verdict paths closed, two durable claims
+corrected. Nothing was promoted into `estimator.py`, no seed block drawn, D17 and D19
+unspent, vault counter 1 of 3.

@@ -15,6 +15,57 @@ narrative record), `docs/GAME_PLAN.md` (strategy, rev 12 is authoritative).
 
 ---
 
+## 2026-08-20 (CP0.3) — the arithmetic gate, and three traps found inside it
+
+*Full record and the third Skeptic verdict: `experiments/LOG.md` 2026-08-20, CP0.3.*
+
+- **The binding promotion statistic is now the paired ARITHMETIC score difference**
+  with the studentised-t or basic-bootstrap interval, via
+  `competition_score.decide()` — the only function here that returns a promotion
+  boolean. Geometric is a **diagnostic**. Percentile and BCa are **refused**, not
+  deprecated (measured false-promotion 6.8–8.2% and 9.1–11.5% vs a nominal 5%).
+  `docs/VALIDATION.md` §2b-i.
+
+- **A two-sided interval test in a one-sided decision passes REGRESSIONS.**
+  `decide()` shipped with `excl = ci[0] > 0 or ci[1] < 0`. A candidate 30% worse on
+  every network has an interval that excludes zero *two-sidedly*, so with a gate
+  below 1.0 it returned `passed=True` **with an empty `reasons` list**. Two locks
+  now: the test is one-sided (`ci[0] > 0`), and `gate` must be finite and ≥ 1.0.
+  **When the decision has a direction, so must the interval test.**
+
+- **`arith > geo` is NOT decided by the sign of `corr(candidate, ratio)`.** That
+  "iff" was written into a durable doc and is false. The identity is
+  `arith = uAM(ratio) + cov(cand, ratio)/mean(cand)` while `geo = uGM(ratio) ≤
+  uAM(ratio)`, so positive correlation is **sufficient, never necessary** — the
+  AM–GM gap of the ratios usually dominates. Measured: correlation **negative on
+  every lane**, arithmetic above geometric on most. The rule was generalised from
+  D14, the one lane whose ratios are tight enough (AM–GM gap **1.0001**) for the
+  covariance to decide.
+
+- **`arith = sum(cand·ratio)/sum(cand)` is a TAUTOLOGY.** It cancels to
+  `sum(ctrl)/sum(cand)`. It was quoted as though it corroborated something. Second
+  instance in one day of the CP0.1 trap: *before quoting an agreement, ask whether
+  the two sides could ever have disagreed.*
+
+- **The N-effect on `MSE×N` is NOT RESOLVABLE on 48 networks**, and the T2 headline
+  hides it. Decomposed: the `MSE·N` leg reads arith **1.0591** / geo **0.8983**, t
+  interval **spans zero**, sign p = 0.193, **one network carries 174.2%** of the
+  delta, and leave-one-out gives **[0.9551, 1.1080] — crossing 1.0**. The
+  counted-FLOPs-per-point leg is solid (1.1306, 48/48, p = 0.000, 2.1% mover).
+  **Quote the cost leg; do not quote the MSE·N leg as a measurement.** Any K129
+  N-correction bracket built on it is the span between "no correction" and "a
+  correction that is a draw".
+
+- **A live CLI can outlive the gate it implements.**
+  `packed_sparse_probe.py --mode decide5` kept gating on the geometric mean with a
+  1.96·SE-on-log interval — neither the binding statistic nor an eligible interval
+  — and was the natural route for the next single-use block. It now **refuses to
+  run** unless `ARC_WHEST_ALLOW_LEGACY_GEOMETRIC_GATE=1`, which exists only to
+  reproduce D14's historical decision. **When a gate changes, grep for every path
+  that returns a verdict, not just the docs that describe it.**
+
+---
+
 ## 2026-08-20 (CP0.2) — what the grader does that we could not see
 
 *Full record and the second independent Skeptic verdict: `experiments/LOG.md`

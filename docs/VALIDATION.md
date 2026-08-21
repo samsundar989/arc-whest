@@ -281,6 +281,13 @@ and the competition does not. On our own graded data the two **select opposite
 winners** — v2.4 → v2.4.1 on the same 50 rows reads arithmetic **1.0334×** and
 geometric **0.9666×**.
 
+**A caveat that belongs next to that fixture, not buried:** the graded pair's own
+paired t interval **spans zero** (sign test p = 0.48), so that comparison is a
+*draw* under either estimand. It demonstrates that the two statistics *can* select
+opposite winners on real data; it does not adjudicate which was right, and nothing
+here claims it does. **The case for arithmetic is first-principles — the
+competition computes an arithmetic mean — not empirical.**
+
 **Which interval, and which are refused.** Measured, not assumed
 (`local_sim/coverage_lab.py`, 192 fresh networks, block D18, 4,000 subsamples of
 n = 50). False-promotion rate against a population recentred to a **true** mean of
@@ -543,7 +550,7 @@ GREEN" was a weaker claim than the entries quoting it assumed:
 
 | tier | steps run | measured wall time | when |
 |---|---|---|---|
-| **default** | **10 of 12** — the original six, plus **7** canonical scorer + the binding gate (82/82), **8** seed-ledger *refusals* (44/44), **9** vault integrity (array sha256s vs the manifest and the seed→weights reconstruction), **10** lifecycle evaluator (37/37) | **~135–160 s** (n = 2 hosts/runs; a single reading is not a measurement) | every change |
+| **default** | **10 of 12** — the original six, plus **7** canonical scorer + the binding gate (88/88), **8** seed-ledger *refusals* (44/44), **9** vault integrity (array sha256s vs the manifest and the seed→weights reconstruction), **10** lifecycle evaluator (37/37) | **~135–160 s** (n = 2 hosts/runs; a single reading is not a measurement) | every change |
 | **`-Full`** | **12 of 12** — adds **11** shape parity (27/27) and **12** carrier strength (27/27) | **~755 s** (n = 1) | **required** before any promotion, submission, or vault touch |
 
 *The 111 s [110, 113] figure recorded earlier describes the **nine**-step tier that

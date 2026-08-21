@@ -162,7 +162,14 @@ def main():
             "arithmetic_gain": r.arithmetic_gain,
             "relative_improvement": r.relative_improvement,
             "boot_ci_relative": list(r.boot_ci_relative),
-            "bca_ci_difference": list(r.bca_ci_difference),
+            # The studentised-t interval is the GATE-ELIGIBLE one since 2026-08-20
+            # (docs/VALIDATION.md 2b-i). BCa and the percentile bootstrap are
+            # refused by `competition_score.decide()` -- measured false-promotion
+            # rates 9.1-11.5% and 6.8-8.2% against a nominal 5% at n ~ 50. They are
+            # recorded here only because the earlier artifact quoted them, and they
+            # must not be the sole uncertainty statement on a lane D19 will gate.
+            "t_ci_difference": list(r.t_ci_difference),
+            "bca_ci_difference_NOT_GATE_ELIGIBLE": list(r.bca_ci_difference),
             "geometric_gain": r.geometric_gain,
             "geometric_ci": list(r.geometric_ci),
             "n_candidate_better": r.n_candidate_better,

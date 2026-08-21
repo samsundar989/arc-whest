@@ -45,6 +45,7 @@ for _p in (_HERE, _ROOT):
 import numpy as np  # noqa: E402
 
 from competition_score import (  # noqa: E402
+    decide,
     paired_compare,
     rows_from_graded_report,
 )
@@ -136,8 +137,15 @@ def compare(label: str, ctrl: np.ndarray, cand: np.ndarray, *,
           f"arith/geo {arith / g:>6.4f}   wins {res.n_candidate_better}/{row['n']}"
           f"   top-mover {row['biggest_mover_share'] * 100:>6.1f}%")
     if gate is not None:
-        a_verdict = "PASS" if arith >= gate else "FAIL"
+        # THROUGH `decide()`, not an inline `arith >= gate`. The first draft of
+        # this file computed the verdict inline with no interval condition at all
+        # -- a fourth re-implementation of an identity that has a canonical home,
+        # in the very slice that adopted the canonical home. The Skeptic found it.
+        v = decide(ctrl, cand, gate=gate)
+        a_verdict = "PASS" if v.passed else "FAIL"
         g_verdict = "PASS" if g >= gate else "FAIL"
+        row["decide_reasons"] = list(v.reasons)
+        row["ci_excludes_zero"] = v.ci_excludes_zero
         flip = " <<< FLIPS ACROSS THE GATE" if a_verdict != g_verdict else ""
         print(f"  {'':<44} gate {gate:.2f}x -> geometric {g_verdict}, "
               f"arithmetic {a_verdict}{flip}")
@@ -229,13 +237,24 @@ def lane_oa() -> None:
     check("A1: the D18 carrier reproduces its published 1.4775x ARITHMETIC gain",
           abs(row["arithmetic_gain"] - 1.4775) < 5e-4,
           f"{row['arithmetic_gain']:.6f} vs published 1.4775")
-    # and the N-lever leg, A->B
+    # and the N-lever leg, A->B, DECOMPOSED. The combined figure is not the one
+    # anything downstream rests on: the K129 N-correction bracket divides by the
+    # MSE*N leg alone, so that leg is what has to survive scrutiny.
     ak = "A sobol N=16384"
+    NA, NB = 16_384, 131_072
     am_ = np.array(per[ak]["mse"]); af_ = np.array(per[ak]["flops"])
-    compare("D18 A->B, the N lever on our own carrier",
+    compare("D18 A->B combined V*c",
             am_ * np.maximum(0.1, af_ / B), bs,
             lane="N as an operating-point lever",
             note="8x the points; the flat law predicts 1.000x")
+    compare("D18 A->B  leg 1: MSE*N  <- THE DIVISOR",
+            am_ * NA, bm * NB,
+            lane="the N-effect that the K129 bracket divides by",
+            note="THIS is the number the K129 correction rests on")
+    compare("D18 A->B  leg 2: counted FLOPs/point",
+            af_ / NA, bf / NB,
+            lane="fixed-cost amortisation over more points",
+            note="the closure's fixed cost spread over 8x the samples")
 
 
 def lane_graded() -> None:

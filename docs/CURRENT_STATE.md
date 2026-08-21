@@ -86,7 +86,8 @@ required by whestbench 0.15.0 and its pricing is unverified).
 | **the preflight gate itself** | — | **12 checks**, 10 by default and 12 under `-Full`. Was 6 | 2026-08-20 |
 | grader-lifecycle evaluator | — | **37/37**, all six failure paths provoked | 2026-08-20 |
 | carrier design strength | — | **27/27** | 2026-08-19 |
-| **the degree-4 design carrier** | DECIDE (D18, 48 nets) | **1.4775× [+14.4%, +45.9%]** — and `C/B = 1.3509`, **over budget** | 2026-08-19 |
+| **the degree-4 design carrier** | DECIDE (D18, 48 nets) | **1.4775× [+14.4%, +45.9%]** at 131,072 points, where `C/B = 1.3509` is **over budget**. At **66,048** points the cost line fitted on our own arms gives **`C/B = 0.6932` counted — under the cliff** (CP0.3) | 2026-08-20 |
+| the binding promotion gate | — | **arithmetic**, studentised-t / basic bootstrap, executable as `competition_score.decide()`. Re-scoring the whole record flipped **nothing** | 2026-08-20 |
 | board position | — | raw #90/200; **#82 of 192 plausible-honest** on 5 entries | 2026-08-06 10:03Z |
 
 **Shipped file, corrected 2026-08-19**: `estimator.py` == **`estimator_v2_6_1.py`**

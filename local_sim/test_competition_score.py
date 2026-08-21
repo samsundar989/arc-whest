@@ -793,8 +793,43 @@ def t_the_binding_gate():
           f"arith {vd.gain:.4f}x, geo {vd.geometric_gain:.4f}x")
     check("...and the disagreement is surfaced in the reasons, not hidden",
           any("estimands disagree" in r for r in vd.reasons))
-    check("a diagnostic can never flip the verdict",
-          decide(a, b, gate=1.0).passed == (vd.gain >= 1.0 and vd.ci_excludes_zero))
+    # NOT `vd.gain >= 1.0 and vd.ci_excludes_zero` -- that recomputes the
+    # implementation's own expression from the Verdict's own fields and cannot
+    # fail for ANY implementation. The Skeptic called it a tautology and was
+    # right. Assert against a hand-computed expectation instead.
+    # The GAIN follows arithmetic; the VERDICT still needs the interval. On these
+    # arms the whole gain sits on one network out of 50, so `decide()` refuses
+    # despite a 1.47x arithmetic gain -- which is correct, and is the behaviour
+    # that makes adopting a more outlier-sensitive estimand safe. Asserting
+    # `passed is True` here was the builder's error, not the gate's.
+    vd10 = decide(a, b, gate=1.0)
+    check("the GAIN follows arithmetic even when geometric disagrees",
+          vd10.gain > 1.4 and vd10.geometric_gain < 1.0,
+          f"arith {vd10.gain:.4f}x vs geo {vd10.geometric_gain:.4f}x")
+    check("but a gain resting on ONE network is still refused by the interval",
+          not vd10.passed and not vd10.ci_excludes_zero
+          and abs(vd10.biggest_mover_share) >= 1.0,
+          f"biggest mover carries {vd10.biggest_mover_share * 100:.0f}% of the delta")
+
+    # --- a strictly WORSE candidate must never pass, at ANY legal gate ------
+    # This leaked: `excl` was two-sided, so a SIGNIFICANT REGRESSION counted as
+    # evidence FOR promotion, and with gate < 1.0 nothing else caught it.
+    worse = ctrl / 0.77                       # 30% worse on every single network
+    check("a 30%-worse candidate FAILS at every legal gate",
+          not any(decide(ctrl, worse, gate=gt).passed
+                  for gt in (1.0, 1.0000001, 1.05, 2.0)),
+          "one-sided interval + the gate floor, two independent locks")
+    check("...and the Verdict SAYS it is worse, rather than staying silent",
+          any("WORSE" in r for r in decide(ctrl, worse, gate=1.0).reasons))
+    check("a gate below 1.0 is REFUSED (it would ask to promote a regression)",
+          all(_raises(lambda g=g: decide(ctrl, worse, gate=g), ValueError)
+              for g in (0.0, 0.5, -1.0)))
+    check("a non-finite gate is REFUSED",
+          all(_raises(lambda g=g: decide(ctrl, cand, gate=g), ValueError)
+              for g in (float("nan"), float("inf"), float("-inf"))))
+    check("the interval condition is ONE-SIDED (strictly above zero)",
+          not decide(ctrl, worse, gate=1.0).ci_excludes_zero,
+          "a regression's interval excludes zero two-sidedly; that is not a pass")
 
     check("Verdict is frozen — a verdict you can edit is not a verdict",
           _raises(lambda: setattr(vd, "passed", True)))

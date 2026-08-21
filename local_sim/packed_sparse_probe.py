@@ -2216,6 +2216,26 @@ def mode_decide5(args):
     dec = [k for k in verdicts if k.startswith("3.")][0]
     g, lo, hi = verdicts[dec]
     exact_ok = True
+    # ------------------------------------------------------------------ #
+    # THE BINDING STATISTIC CHANGED ON 2026-08-20 AND THIS PATH DID NOT.
+    # `docs/VALIDATION.md` 2b-i now binds the paired ARITHMETIC score difference
+    # with the studentised-t or basic-bootstrap interval, through
+    # `competition_score.decide()`. Everything below computes the GEOMETRIC mean
+    # with a 1.96*SE-on-log interval -- neither the statistic nor an eligible
+    # interval. It is left intact because D14's record must stay reproducible
+    # exactly as it was decided, and it REFUSES to render a fresh verdict.
+    # ------------------------------------------------------------------ #
+    if not os.environ.get("ARC_WHEST_ALLOW_LEGACY_GEOMETRIC_GATE"):
+        raise SystemExit(
+            "REFUSED: `--mode decide5` gates on the paired GEOMETRIC mean, which "
+            "stopped being the binding statistic on 2026-08-20 (CP0.3, "
+            "docs/VALIDATION.md 2b-i). Score the arms with "
+            "`competition_score.decide(control, candidate, gate=...)` instead.
+"
+            "To REPRODUCE the historical D14 decision exactly as it was taken, set "
+            "ARC_WHEST_ALLOW_LEGACY_GEOMETRIC_GATE=1 -- and do not report the "
+            "result as a current verdict."
+        )
     print("\n" + "=" * 128)
     print(f"D14 GATE — deciding model: {dec}")
     print(f"  paired geometric-mean V*C : {g:.4f}x   95% CI [{lo:.4f}, {hi:.4f}]   "
@@ -2268,7 +2288,9 @@ def main():
     ap.add_argument("--cost-only", dest="cost_only", action="store_true",
                     help="skip labels; measure the cost half of V*c only")
     ap.add_argument("--gate", type=float, default=1.15,
-                    help="decide5: minimum paired geometric-mean V*C gain")
+                    help="decide5: LEGACY geometric-mean gate. Superseded 2026-08-20 "
+                         "by competition_score.decide(); this path now refuses to run "
+                         "without ARC_WHEST_ALLOW_LEGACY_GEOMETRIC_GATE=1.")
     ap.add_argument("--bucket-mode", dest="bucket_mode", default="flatnonzero",
                     choices=["flatnonzero", "segment"])
     ap.add_argument("--gather-mode", dest="gather_mode", default="einsum",
