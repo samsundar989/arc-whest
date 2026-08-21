@@ -413,8 +413,18 @@ and have moved to § Closed lanes; what is left is genuinely short.*
    orthogonal array, `{Tr(ax + bx^3)}` plus the all-ones coset, 2^17 = 131,072
    rows on 256 coordinates. **Strength 5, verified combinatorially** (every random
    4- and 5-subset of columns perfectly balanced, 320/320). Its degree-4 moment
-   error is **0.0305× iid — 17× better than the shipped carrier** — and **0.138×
-   at degree 6**, where every other carrier we have sits at 0.76–1.09×. No
+   error is ~~**0.0305× iid — 17× better than the shipped carrier** — and **0.138×
+   at degree 6**~~ **← BOTH NUMBERS ARE WRONG, CORRECTED 2026-08-20 (CP1.1).**
+   `test_carriers.py` divided *every* carrier by iid at **N = 16,384**, including
+   this 131,072-row array. iid's own moment error falls as `1/√n`, so an array
+   measured at 8× the points was flattered by ≈ `√8 = 2.83×`. **At matched n the
+   BCH array reads 0.0756–0.0908× at degree 4 and 0.343–0.421× at degree 6**, and
+   "17× better than the shipped carrier" is **≈ 5.8×**. The harness is fixed —
+   an iid baseline is now built for every distinct point count — and the ranges
+   quoted here are two independent realisations, because the iid denominator
+   itself carries **±3.5%** per draw. Nothing that was *decided* changes: the
+   array's absolute degree-4 error (7.2321e-04) never moved, and the end-to-end
+   1.4775× was measured against a Sobol arm, not against iid. No
    Kerdock/Z₄ machinery was needed.
    **MEASURED END TO END, same night: the design is worth 1.4775x and we cannot
    afford it.** 48 fresh D18 networks, GT 2^24, arms matched at 131,072 points and
@@ -456,6 +466,33 @@ and have moved to § Closed lanes; what is left is genuinely short.*
    budget larger relative to the shape (**not ours to choose**). If either lands,
    `2.6314e-7 / 1.4775 = 1.781e-7` — roughly half the remaining gap to the best
    published honest score (9.10e-8), in one step.
+
+   **✅ THE NAMED RESEARCH ROUTE LANDED, 2026-08-20 (CP1.1).** The length-256
+   **Kerdock** code — non-linear, so untouched by the 131,072 linear floor —
+   plus the `2d` axial points is an **exact spherical 4-design at 66,048
+   points**, i.e. **33,024 distinct directions, below the 33,152 the route was
+   specified at**. Degrees 1–5 measure 2.5e-16 … 7.0e-15; degree 6 is equivalent
+   to the BCH array once scaled to equal n (1.016).
+   **Strength 5 is PROVEN, not sampled**: the exact Delsarte transform of the
+   weight enumerator gives `B₁…B₅ = 0` and `B₆ = 11,606,784`.
+   **The degree-4 exactness is an identity** — the `2d` axial points contribute
+   precisely the `2S = 2Σaᵢ⁴` the cube array is short by, for *every* direction
+   at uniform weights — so it holds under **confinement to a rank-32 subspace**,
+   which is exactly what killed the subspace route for a bare array.
+   **Both halves are load-bearing** (measured counter-examples): random antipodal
+   signs + axial reads 1.93e-02, and a strength-5 array of the *wrong size*
+   (BCH at 2¹⁷) + axial reads 3.94e-04. The set must be strength ≥ 4 **and** have
+   exactly `d² = 65,536` points.
+   **Cost: `C/B = 0.6934` counted** — under the 1.0 failure cliff, against the
+   131,072-row array's 1.3509 — *provided the random rotation is folded into `W₁`
+   rather than applied to the points*: `W₁ᵀ(Qu) = (QᵀW₁)ᵀu`, verified to 1.7e-13,
+   and **258× cheaper** (6.70e7 vs 1.73e10 FLOPs, i.e. 0.0002 of B instead of
+   0.064).
+   **What is NOT established: any end-to-end MSE gain.** The 1.4775× on record is
+   bchOA-vs-sobol at matched N = 131,072; this is a different design at half the
+   points. That measurement needs fresh networks on a **DESIGN** block (D16 has
+   330 free, D18 has free seeds) — **not D17 or D19**. Artifact:
+   `experiments/2026-08-20_kerdock/kerdock_profile.json`.
 
 3. **Where does the ~2.6× to the published honest frontier come from?**
    Unresolved and possibly unresolvable from public data. Their sample counts are

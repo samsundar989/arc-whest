@@ -178,18 +178,40 @@ def t_design_strength():
         profiles[name] = strength_profile(pts, DIM, seed=4242, n_dirs=nd)
         profiles[name]["_n"] = n
 
-    base = profiles["iid"]
+    # ------------------------------------------------------------------- #
+    # THE DENOMINATOR MUST MATCH THE POINT COUNT.
+    # Until 2026-08-20 this divided EVERY carrier by iid at N = 16,384 -- the
+    # 131,072-row BCH array included. iid's own moment error falls as 1/sqrt(n),
+    # so a carrier measured at 8x the points was flattered by ~sqrt(8) = 2.83x.
+    # `docs/CURRENT_STATE.md` consequently recorded the BCH array at 0.0305x /
+    # 0.138x where the matched-n truth is 0.0908x / 0.4210x, and "17x better than
+    # the shipped carrier" was really ~5.8x. CP1.1's own contract asserted this
+    # was already being done correctly; it was not. Found by the Skeptic.
+    # An iid baseline is now built for every DISTINCT point count in play.
+    # ------------------------------------------------------------------- #
+    iid_by_n = {}
+    for p in profiles.values():
+        n = p["_n"]
+        if n not in iid_by_n:
+            iid_by_n[n] = strength_profile(
+                build("iid", n, DIM, seed=20260819), DIM, seed=4242,
+                n_dirs=800 if n > 40000 else N_DIRS)
+
     print(f"\n  {'carrier':<22}{'n':>7}" + "".join(f"{'k=' + str(k):>12}" for k in DEGREES))
     print("  " + "-" * (29 + 12 * len(DEGREES)))
     for name, p in profiles.items():
         print(f"  {name:<22}{p['_n']:>7}"
               + "".join(f"{p[k]:>12.3e}" for k in DEGREES))
-    print(f"\n  ratio to iid (smaller = the carrier is doing more work at that degree)")
-    print(f"  {'carrier':<22}{'':>7}" + "".join(f"{'k=' + str(k):>12}" for k in DEGREES))
+    print(f"\n  ratio to iid AT THE SAME POINT COUNT  "
+          f"(smaller = the carrier is doing more work at that degree)")
+    print(f"  {'carrier':<22}{'n':>7}" + "".join(f"{'k=' + str(k):>12}" for k in DEGREES))
     print("  " + "-" * (29 + 12 * len(DEGREES)))
     for name, p in profiles.items():
-        print(f"  {name:<22}{'':>7}"
-              + "".join(f"{p[k] / base[k]:>12.3e}" for k in DEGREES))
+        b = iid_by_n[p["_n"]]
+        print(f"  {name:<22}{p['_n']:>7}"
+              + "".join(f"{p[k] / b[k]:>12.3e}" for k in DEGREES))
+    for name, p in profiles.items():
+        p["_iid"] = iid_by_n[p["_n"]]
     return profiles
 
 
@@ -406,6 +428,70 @@ def t_kerdock():
           worst_exact < 1e-12,
           f"worst rel dev {worst_exact:.2e}   [(3-2S) + 2S]/(2^16+2d) = 3/(d(d+2))")
 
+    # ---- WHAT IS ACTUALLY DOING THE WORK -----------------------------------
+    # Two things could explain the exactness: the axial points, or the code. Both
+    # counter-hypotheses are testable and both are refuted here, so the mechanism
+    # is attributed by measurement rather than by the story that fits.
+    #
+    # Raised by the independent Skeptic, 2026-08-20: "if the identity holds for
+    # ANY antipodally-closed sign set then Kerdock is doing no work at degree 4
+    # and a cheaper sign set would do." It does not.
+    def _k4err(pts):
+        us = pts / np.linalg.norm(pts, axis=1, keepdims=True)
+        r = np.random.default_rng(99)
+        e = []
+        for _ in range(12):
+            a = r.standard_normal(d); a /= np.linalg.norm(a)
+            e.append(abs(float(((us @ a) ** 4).mean()) - tgt4) / tgt4)
+        return float(np.sqrt(np.mean(np.square(e))))
+
+    ax_pts = np.concatenate([np.eye(d), -np.eye(d)], axis=0)
+    rr = np.random.default_rng(7)
+    rand_signs = np.sign(rr.standard_normal((1 << 15, d)))
+    rand_anti = np.vstack([rand_signs, -rand_signs]) / math.sqrt(d)
+    from carriers import bch_oa_signs
+    bch_sg = bch_oa_signs().astype(np.float64) / math.sqrt(d)
+
+    e_kerd = _k4err(np.vstack([kerdock_signs(d).astype(np.float64) / math.sqrt(d), ax_pts]))
+    e_rand = _k4err(np.vstack([rand_anti, ax_pts]))
+    e_bch = _k4err(np.vstack([bch_sg, ax_pts]))
+    e_axonly = _k4err(ax_pts)
+    check("counter-example: RANDOM antipodal signs + axial is NOT exact",
+          e_rand > 1e-6, f"{e_rand:.2e}   -> the axial points alone are not the mechanism")
+    check("counter-example: a strength-5 array of the WRONG SIZE + axial is NOT exact",
+          e_bch > 1e-6,
+          f"bch(2^17)+axial {e_bch:.2e}   -> the S-terms cancel only when the sign "
+          f"set has exactly d^2 = {d * d:,} points")
+    check("counter-example: axial points ALONE are far from exact",
+          e_axonly > 1e-3, f"{e_axonly:.2e}")
+    check("...and Kerdock + axial IS exact, at the same probe",
+          e_kerd < 1e-12,
+          f"{e_kerd:.2e}   -> BOTH strength >= 4 AND exactly d^2 points are load-bearing")
+
+    # ---- strength, PROVEN from the weight enumerator, not sampled -----------
+    # Delsarte: B_k = (1/|C|) sum_w A_w K_k(w) with K_k the Krawtchouk polynomial.
+    # The dual distance (first k with B_k != 0) is the orthogonal-array strength.
+    # Exact integer arithmetic, so this is a proof and not a measurement.
+    from math import comb
+    A = {0: 1, 120: 32512, 128: 510, 136: 32512, 256: 1}
+    nlen, size = 256, 65536
+
+    def kraw(k, w):
+        return sum((-1) ** j * comb(w, j) * comb(nlen - w, k - j)
+                   for j in range(0, k + 1))
+
+    B = []
+    for k in range(1, 7):
+        tot = sum(a * kraw(k, w) for w, a in A.items())
+        assert tot % size == 0, f"B_{k} is not an integer multiple of |C|"
+        B.append(tot // size)
+    check("Delsarte: B_1..B_5 are EXACTLY zero -> orthogonal array of strength 5",
+          all(b == 0 for b in B[:5]) and B[5] != 0,
+          f"B_1..B_6 = {B}   (exact integers; B_6 = {B[5]:,})")
+    check("...so strength >= 4 is PROVEN, and the identity's precondition is met",
+          all(b == 0 for b in B[:4]),
+          "the identity needs all weight-2 and weight-4 characters to vanish")
+
     # ---- the deployment case: CONFINED directions ---------------------------
     # docs/GOTCHAS: a bare cube array confined to 32 dims reads 5.15% low and is
     # 4.6x WORSE than Sobol unrotated. That is what closed the subspace route.
@@ -424,25 +510,33 @@ def t_kerdock():
               e < 1e-12, f"rel err {e:.2e}   (a bare cube array degrades here)")
 
     # ---- K2/K3/K4: the measured profile against the recorded baselines ------
-    prof = {}
-    for name, n in (("iid", 65536), ("sobol (SHIPPED)", 65536),
-                    ("haar frames", 65536), ("kerdock (rotated)", 65536),
+    prof, iid_n = {}, {}
+    for name, n in (("sobol (SHIPPED)", 65536), ("haar frames", 65536),
+                    ("kerdock (rotated)", 65536),
                     ("kerdock+axial (rotated)", 66048),
                     ("bch OA (rotated)", 1 << 17)):
         prof[name] = strength_profile(build(name, n, d, seed=20260820), d,
                                       seed=4242, n_dirs=400)
         prof[name]["_n"] = n
-    base = prof["iid"]
-    print(f"\n  {'carrier':<26}{'n':>8}"
-          + "".join(f"{'k=' + str(k):>10}" for k in DEGREES) + "   (ratio to iid)")
+        if n not in iid_n:
+            iid_n[n] = strength_profile(build("iid", n, d, seed=20260820), d,
+                                        seed=4242, n_dirs=400)
+    # EVERY ratio below is against iid AT THAT CARRIER'S OWN POINT COUNT. Dividing
+    # a 131,072-point array by iid at 16,384 flatters it by ~sqrt(8); that is the
+    # bug this slice inherited and it is why docs/CURRENT_STATE.md recorded the
+    # BCH array at 0.0305x rather than 0.0908x.
+    print(f"  {'carrier':<26}{'n':>8}"
+          + "".join(f"{'k=' + str(k):>10}" for k in DEGREES)
+          + "   (ratio to iid at the SAME n)")
     print("  " + "-" * (34 + 10 * len(DEGREES)))
     for nm, p in prof.items():
+        b = iid_n[p["_n"]]
         print(f"  {nm:<26}{p['_n']:>8}"
-              + "".join(f"{p[k] / base[k]:>10.4f}" for k in DEGREES))
+              + "".join(f"{p[k] / b[k]:>10.4f}" for k in DEGREES))
 
-    k4 = prof["kerdock (rotated)"][4] / base[4]
-    k4a = prof["kerdock+axial (rotated)"][4] / base[4]
-    k4b = prof["bch OA (rotated)"][4] / base[4]
+    k4 = prof["kerdock (rotated)"][4] / iid_n[65536][4]
+    k4a = prof["kerdock+axial (rotated)"][4] / iid_n[66048][4]
+    k4b = prof["bch OA (rotated)"][4] / iid_n[1 << 17][4]
     check("K2: rotated Kerdock alone clears the 0.10x GO gate at degree 4",
           k4 <= 0.10, f"{k4:.4f}x iid at 65,536 points "
                       f"(the BCH array reads {k4b:.4f}x at 131,072)")
@@ -452,18 +546,39 @@ def t_kerdock():
           f"{prof['kerdock (rotated)'][4]:.4e} vs {prof['bch OA (rotated)'][4]:.4e}")
     check("K3: the axial points do not merely help, they make degree 4 EXACT",
           k4a < 1e-8, f"{prof['kerdock+axial (rotated)'][4]:.3e} absolute")
-    check("K4: degree 6 is below iid but NOT exact (a 5-design, not a 7-design)",
-          0.0 < prof["kerdock+axial (rotated)"][6] / base[6] < 1.0,
-          f"{prof['kerdock+axial (rotated)'][6] / base[6]:.4f}x iid")
-    check("degrees 1-5 are all at machine precision",
+    k6a = prof["kerdock+axial (rotated)"][6] / iid_n[66048][6]
+    k6b = prof["bch OA (rotated)"][6] / iid_n[1 << 17][6]
+    check("K4: degree 6 is below iid but NOT exact (exact to 4, not to 6)",
+          0.0 < k6a < 1.0, f"{k6a:.4f}x iid")
+    # The first version of this check asserted kerdock+axial BEATS the BCH array
+    # at degree 6 and FAILED, correctly. Measured matched-n ratios are 0.3603 vs
+    # 0.3429 -- a 5% gap, against an iid denominator that itself carries +-3.5%
+    # per draw (6 independent iid draws at each n). So the ratio-of-ratios cannot
+    # resolve 5%. The defensible statement scales the ABSOLUTE errors to equal n
+    # by the 1/sqrt(n) Monte-Carlo law, where they agree to 1.6%.
+    #
+    # What IS resolved: the earlier claim that the BCH array is 43% better at
+    # degree 6 (0.2520 vs 0.3606) was pure denominator artefact.
+    scaled = (prof["kerdock+axial (rotated)"][6] / prof["bch OA (rotated)"][6]
+              * math.sqrt(66048 / (1 << 17)))
+    check("at degree 6 the two designs are EQUIVALENT once scaled to equal n",
+          0.85 < scaled < 1.18,
+          f"absolute-error ratio scaled by sqrt(n): {scaled:.3f}   "
+          f"(matched-n ratios {k6a:.4f} vs {k6b:.4f} differ by "
+          f"{abs(k6a - k6b) / k6b * 100:.0f}%, inside the +-3.5% denominator noise)")
+    # Degrees 1, 3, 5 vanish for ANY antipodally closed set -- the suite's own S4
+    # check asserts exactly that, and haar frames read 0.0000 there too. So the
+    # earned claim is an exact spherical 4-DESIGN; degree 5 comes free from the
+    # symmetry and is not evidence of anything.
+    check("degrees 1-5 are all at machine precision (1,3,5 free from antipodality)",
           all(prof["kerdock+axial (rotated)"][k] < 1e-10 for k in (1, 2, 3, 4, 5)),
           ", ".join(f"k{k}={prof['kerdock+axial (rotated)'][k]:.1e}"
                     for k in (1, 2, 3, 4, 5)))
 
-    # ---- the count, three ways ---------------------------------------------
-    check("2^16 + 2d == 129 x 256 x 2 == 66,048 — the three accountings agree",
-          (1 << 16) + 2 * d == 129 * 256 * 2 == 66048,
-          f"Kerdock+axial = Kuperberg 2^16+2n = K129/MUB")
+    # The "2^16 + 2d == 129*256*2 == 66,048" identity is arithmetic on literals
+    # with no object under test, and S5 above already asserts it. Removed rather
+    # than counted: a check that cannot fail inflates a suite total without
+    # adding coverage.
 
 
 def main():

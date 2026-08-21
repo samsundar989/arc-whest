@@ -7726,8 +7726,12 @@ config / seeds    NO seed block. NO network minted. NO grader. NO vault touch.
 
 ## The result, in one line
 
-**An EXACT spherical 5-design at 66,048 points on 256 dimensions, at
-`C/B = 0.6932` counted — under the failure cliff.**
+**An EXACT spherical 4-design at 66,048 points on 256 dimensions, at
+`C/B = 0.6934` counted — under the failure cliff.**
+
+*(Corrected from “5-design” and “0.6932” after the Skeptic: degrees 1/3/5 vanish for
+ANY antipodally closed set, so only 2 and 4 are earned; and the cost figure must
+carry the carrier’s own rotation — free only if it is folded into `W₁`.)*
 
 The lane `docs/CURRENT_STATE.md` closed on cost is open again, and the object is
 better than the one that was too expensive, not merely cheaper.
@@ -7807,7 +7811,7 @@ not reach it.
 | constraint | measured | limit |
 |---|---|---|
 | construction time | **0.11 s** | 5,000 ms setup (package default, not observed) |
-| the whole construction as a constant | **224 bytes** (108 base64 chars) — one length-127 Z₄ sequence, since `Tr(xʲ·xᵗ) = Tr(x^(j+t))` makes the 7×128 table shifts of one row | the shipped Sobol blob is ~19,000 chars |
+| the whole construction as a constant | **32 bytes** — one length-127 Z₄ sequence (254 bits). *The “224 bytes / 108 base64 chars” first written here was three inconsistent numbers: 224 B is the UNREDUCED 7×128 table and 108 chars is neither. Corrected 2026-08-20.*, since `Tr(xʲ·xᵗ) = Tr(x^(j+t))` makes the 7×128 table shifts of one row | the shipped Sobol blob is ~19,000 chars |
 | point set memory | 135 MB float64 / **68 MB float32** | RLIMIT_AS 65,536 MB |
 | counted cost at 66,048 points | **`C/B = 0.6932`** | failure cliff at 1.0 |
 
@@ -7821,9 +7825,11 @@ bit-for-bit.
   *bchOA vs sobol at matched N = 131,072*. This is a different design at half the
   points. Whether the end-to-end gain is larger, equal or smaller is **unmeasured**
   and needs fresh networks — the next slice, on a **DESIGN** block.
-- Degree 6 is 0.3606× iid, not exact. A 5-design is not a 7-design, and the BCH
-  array is actually *better* at degree 6 (0.2520×). If the response has meaningful
-  degree-6 content, the advantage narrows.
+- ~~Degree 6 … the BCH array is actually *better* (0.2520×).~~ **ARTEFACT, withdrawn.**
+  0.2520× divided a 131,072-point array by iid at 65,536. At matched n it is
+  **0.3429× vs 0.3603× — a 5% gap inside a ±3.5% denominator noise**, and scaling
+  the absolute errors to equal n gives **1.016**. The two designs are
+  **equivalent** at degree 6. Neither is exact there.
 - `C/B = 0.6932` is carried in from CP0.3's cost line, fitted on the Sobol arms.
   **A Kerdock carrier's per-point propagation cost is assumed equal to Sobol's and
   has not been measured.** It should be — the point set is generated differently,
@@ -7841,3 +7847,124 @@ PIVOT and KILL branches are not reached.
 
 `test_carriers.py` **27/27 → 42/42**. Suite time 75 s → ~105 s. No estimator
 change, no seed block, no vault touch, D17 and D19 unspent.
+
+---
+
+## 2026-08-20 — CP1.1 REVIEW: independent Skeptic **ACCEPT**, with five corrections and one inherited bug
+
+Fourth Skeptic, fresh context. **The first ACCEPT of this session.** It verified the
+pre-registration from git — `b2a92a2` is `experiments/LOG.md` alone, no
+implementation and no numbers, and the gate (`degree-4 ≤ 0.10× iid → GO`) is
+byte-identical in contract and result.
+
+> *"The mathematics survives. Every counter-hypothesis I built to break it failed,
+> and one of them (the 'axial points are the whole mechanism') is decisively
+> refuted. But five claims in the durable record are wrong or unsupported, and one
+> of them is a pre-existing `docs/CURRENT_STATE.md` error this slice inherits and
+> propagates."*
+
+### The inherited bug, and it is the most valuable thing here
+
+**`test_carriers.py` divided every carrier by iid at N = 16,384 — including the
+131,072-row BCH array.** iid's own moment error falls as `1/√n`, so any carrier
+measured at more points was flattered by `√(n/16384)`. The CP1.1 contract asserted
+under § *Confounders* that "iid is measured at the same n as the carrier it
+normalises". **It was not.** I asserted a property of the harness without checking
+it — the exact failure this repository has now recorded six times.
+
+| figure | as recorded | matched-n truth |
+|---|---|---|
+| BCH array, degree 4 | **0.0305× iid** | **0.0756–0.0908×** |
+| BCH array, degree 6 | **0.138× iid** | **0.343–0.421×** |
+| "17× better than the shipped carrier" | 17× | **≈ 5.8×** |
+| *(CP1.1's own table)* BCH degree 6 | 0.2520× | 0.3429× |
+
+The ranges are two independent realisations, because **the iid denominator itself
+carries ±3.5% per draw** (6 independent draws at each n). **Fixed at source**: an
+iid baseline is now built for every distinct point count, in both
+`t_design_strength` and `t_kerdock`. `docs/CURRENT_STATE.md` § *Open questions* 2b
+is corrected in place with the reason.
+
+**Nothing that was decided changes.** The array's *absolute* degree-4 error
+(7.2321e-04) never moved, and the end-to-end **1.4775×** was measured against a
+Sobol arm, not against iid.
+
+**And my own concession was an artefact too.** I wrote that "the BCH array is
+actually better at degree 6 (0.2520× vs 0.3606×)". At matched n it is 0.3429× vs
+0.3603× — a **5%** gap inside a ±3.5% denominator noise. Scaling the absolute
+errors to equal n by the `1/√n` law gives **1.016**: at degree 6 the two designs
+are **equivalent**. My first replacement check asserted Kerdock *beats* BCH there
+and **failed**, correctly — the code was right and the new claim was wrong, for the
+second time today.
+
+### The other four corrections
+
+| # | finding | verified | action |
+|---|---|---|---|
+| 2 | **`C/B = 0.6932` omits the carrier's own rotation.** Rotating 66,048 points by a 256×256 matrix is real counted cost the CP0.3 Sobol line never saw | **yes — and it is TWICE the Skeptic's estimate.** Measured under real flopscope: **1.728e10 FLOPs = +0.0635 of B**, not the +0.0318 estimated | **FIXED, and the fix is free.** `W₁ᵀ(Qu) = (QᵀW₁)ᵀu` — rotate the 256×256 weight, not 66,048 points. **258× cheaper** (6.70e7 FLOPs, +0.00025 of B), verified equivalent to **1.705e-13**. Corrected figures: **0.75669** as the code does it today, **0.69341** as a deployed estimator would. Both under the cliff |
+| 3 | **The pre-registered artifact `experiments/2026-08-20_kerdock/` was never written**, and "reproduces an independent scratch build bit-for-bit" had no artifact to check | **yes** | **FIXED.** `local_sim/kerdock_artifact.py` emits it, regenerably, with the fingerprint, the exact Delsarte transform, every arm at matched n, and the cost breakdown |
+| 4 | **"224 bytes (108 base64 chars) — one length-127 Z₄ sequence" is three inconsistent numbers.** A length-127 Z₄ sequence is 254 bits = **32 bytes**; 224 bytes is the unreduced 7×128 table; 108 base64 chars is neither | **yes** | **CORRECTED** to 32 bytes for the reduced sequence |
+| 5 | **"Reopens a lane closed with a proof" overstates it.** `CURRENT_STATE` § *Next actions* #10 already names *"a non-linear array or spherical 4-design near the 33,152 floor"* as the remaining open route | **yes** | **RE-FRAMED.** CP1.1 **executes the sanctioned route**; it does not overturn a closed verdict. The confinement result is true and buys **zero cost** — the subspace route was about spending *fewer* points, and this design spends 66,048 either way |
+| 6 | **"5-design" is degree-4 plus three free odd degrees.** Degrees 1, 3, 5 vanish for *any* antipodally closed set — the suite's own S4 asserts exactly that, and Haar frames read 0.0000 there too | **yes** | **CORRECTED** everywhere to **exact spherical 4-design**; degree 5 is free from the symmetry and is not evidence |
+| 7 | Check-count inflation: `2^16 + 2d == 129*256*2 == 66048` is arithmetic on literals and duplicates the pre-existing S5 | **yes** | **REMOVED** rather than counted |
+
+### What the Skeptic proved that I had only argued
+
+Two findings strengthen the result beyond what the slice claimed, and both are now
+permanent checks:
+
+1. **Strength 5 is PROVEN, not sampled.** The exact integer Delsarte transform of
+   the weight enumerator gives **`B₁ = B₂ = B₃ = B₄ = B₅ = 0`** and
+   **`B₆ = 11,606,784`**. Whether some other inequivalent code shares the
+   fingerprint is now irrelevant: the fingerprint *implies* the only property the
+   identity needs.
+2. **The "cheaper sign set would do" hypothesis is dead, by counter-example.**
+   Measured at one probe:
+
+   | set | n | degree-4 rel err |
+   |---|---|---|
+   | **Kerdock + axial** | **66,048** | **3.11e-16** |
+   | random antipodal signs + axial | 66,048 | 1.93e-02 |
+   | **strength-5 BCH array of the WRONG SIZE + axial** | 131,584 | 3.94e-04 |
+   | axial points alone | 512 | 1.01e-01 |
+
+   **Both conditions are load-bearing**: strength ≥ 4 *and* exactly `d² = 65,536`
+   points, because the `S`-terms cancel only at that count. I had attributed the
+   mechanism to strength alone.
+
+Also noted and accepted: exactness-without-rotation is **degree-4 only** —
+unrotated along a coordinate axis the degree-6 moment is ~34× the spherical value,
+so the rotation still does work above degree 4.
+
+### The caveat that most affects what happens next
+
+> *"The BCH array measured 1.4775× against the repo's own externally derived
+> ceiling of ~1.46×, while carrying a degree-4 error of 0.0756× iid. Kerdock+axial
+> removes that residue — but if BCH is already at the ceiling, degree-4 exactness
+> has ~no room left, and the entire value of CP1.1 is half the points, not a better
+> design."*
+
+**Accepted, and it re-frames the prize.** The commit message's "better AND half the
+size" is **half right**. The bankable claim is **the same accuracy at half the
+cost**, which is what moves `C/B` from 1.3509 (a failure) to 0.6934 (affordable) —
+and that alone is the whole lane. Any *additional* gain from degree-4 exactness is
+speculative until measured end to end.
+
+### Terminal state: **PROMOTE_AND_CONTINUE**
+
+Skeptic ACCEPT. All seven findings fixed in-tree and re-verified; the suite went
+27/27 → **48/48** including six new checks that pin the mechanism by
+counter-example and one that proves the strength exactly. The inherited harness bug
+is fixed at source and its consequence corrected in `docs/CURRENT_STATE.md`.
+
+Nothing promoted into `estimator.py`, no seed block drawn, D17 and D19 unspent,
+vault 1 of 3.
+
+**Next, in the Skeptic's order and mine:** the end-to-end arm on a **DESIGN** block
+— three arms on fresh networks, `sobol@16,384` (the shipped operating point, *not*
+sobol@66,048, because the question is whether the whole move beats what we ship),
+`kerdock+axial@66,048` rotated, and unrotated. Gated through
+`competition_score.decide()` on the arithmetic statistic with a studentised-t
+interval, gate pre-registered, GT-noise floor quoted. **The contract must
+pre-register the `MSE·N` decomposition rather than discover it**, because
+`docs/GOTCHAS.md` already records that law as not resolvable on 48 networks.

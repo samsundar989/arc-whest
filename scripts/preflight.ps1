@@ -35,7 +35,7 @@
                             is the check that would have caught v2.6's odd-width
                             defect, which produced finite, plausible, wrong
                             numbers on 7 of 17 shapes.
-   12. carrier strength   - 42/42 design-strength invariants of local_sim/carriers.py,
+   12. carrier strength   - 48/48 design-strength invariants of local_sim/carriers.py,
                             including the Kerdock fingerprint and the axial identity
 
   The split is by COST, not by importance. Steps 10-11 are ~594 s of the total
@@ -90,6 +90,10 @@ function Step {
     # benign warning on stderr fails the step -- which is exactly what happened
     # to `whest validate`'s SymmetryLossWarning on the first run of this script.
     #
+    # STEP NAMES CARRY NO CHECK COUNTS. A count in a runtime label is a snapshot
+    # that goes stale on the next test added -- this gate had three such bumps in
+    # one day. The verdict is the exit code. Counts live in the header docstring.
+    #
     # A step may report that it did not run, by setting $script:StepSkipped to a
     # reason string. That is NOT a pass: it is counted separately and printed in
     # the red NOT-CHECKED notice. An unrunnable check that reports green is the
@@ -125,7 +129,7 @@ Write-Host "shipped: estimator.py   archive: $Archive"
 Step "1. mint provenance" { uv run python local_sim/mint_provenance.py }
 
 # --- 2. invariants on the SHIPPED file ----------------------------------------
-Step "2. invariant suite (30/30)" { uv run python local_sim/edge_cases.py }
+Step "2. invariant suite" { uv run python local_sim/edge_cases.py }
 
 # --- 3. grader contract --------------------------------------------------------
 Step "3. whest validate" { uv run whest validate --estimator estimator.py }
@@ -197,7 +201,7 @@ Step "6. seed ledger (consumption + source scan)" {
 # to the installed whestbench on the scalar primitives, on the aggregate, and on
 # the real scoring loop INCLUDING both failure paths -- and carries the graded
 # fixture where the arithmetic and geometric estimands pick opposite winners.
-Step "7. canonical scorer + the binding gate (88/88)" {
+Step "7. canonical scorer + the binding gate" {
     uv run python local_sim/test_competition_score.py
 }
 
@@ -206,7 +210,7 @@ Step "7. canonical scorer + the binding gate (88/88)" {
 # These are 44 negative tests: unregistered block, range leaving its block, any
 # overlap in a DECISION block, a second claim on a SINGLE_USE one, a hand-edited
 # ledger, an artifact rewritten after its claim.
-Step "8. seed-ledger refusals (44/44)" {
+Step "8. seed-ledger refusals" {
     uv run python local_sim/test_seed_ledger.py
 }
 
@@ -231,7 +235,7 @@ Step "9. vault integrity (array hashes + seed->weights)" {
 # call setup(); the grader builds ONE and calls setup() once, OFF-budget. This
 # suite pins that lifecycle, the six failure paths, and the immutable evidence
 # rows -- the object every future candidate comparison is scored through.
-Step "10. lifecycle evaluator (37/37)" {
+Step "10. lifecycle evaluator" {
     uv run python local_sim/lifecycle_eval.py --self-test
 }
 
@@ -242,17 +246,17 @@ if ($Full) {
     # BIT FOR BIT. This is the check that would have caught v2.6 deleting the whole
     # first layer's sampled path on every odd width -- 7 of 17 shapes wrong, 0.58
     # max relative error, and every output finite and plausible.
-    Step "11. shape parity (27/27)" {
+    Step "11. shape parity" {
         uv run python local_sim/test_shape_parity.py
     }
     # Carrier design strength: the moment-error invariants that the whole design
     # lane's arithmetic rests on.
-    Step "12. carrier strength (42/42)" {
+    Step "12. carrier strength" {
         uv run python local_sim/test_carriers.py
     }
 } else {
-    [void]$skipped.Add("11. shape parity (27/27)      -- not run without -Full (479 s)")
-    [void]$skipped.Add("12. carrier strength (42/42)  -- not run without -Full (105 s)")
+    [void]$skipped.Add("11. shape parity              -- not run without -Full (~480 s)")
+    [void]$skipped.Add("12. carrier strength         -- not run without -Full (~130 s)")
 }
 
 # There are TWELVE checks in this gate. The default tier runs ten of them and
