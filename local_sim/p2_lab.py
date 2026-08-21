@@ -22,8 +22,14 @@ Per arm, per MLP:
     is measurable here for free because every arm returns all layers;
   * **exact counted cost under BOTH flopscope releases**, because four primitives
     reprice between 0.10 and 0.12 (`local_sim/p2_price_delta.py`);
-  * residual, peak memory, failures, and the paired interval with its
-    biggest-mover share.
+  * residual **and its ratio to the control**, because counted FLOPs and residual
+    wall time are priced by completely different mechanisms and an arm can be
+    cheap in one and ruinous in the other -- that is what killed the packed lane
+    (`docs/GOTCHAS.md`) and it is what the P2-CP1 counted-only freeze hid;
+  * peak memory, MEASURED via `tracemalloc` rather than promised. An earlier
+    build of this docstring listed peak memory and the code never recorded it,
+    which an independent Skeptic caught;
+  * failures, and the paired interval with its biggest-mover share.
 
 Comparisons are **paired on common random numbers** -- every arm sees the same
 networks and the same truth -- and the binding statistic is the paired
@@ -60,6 +66,8 @@ for _p in (_HERE, _ROOT):
         sys.path.append(_p)
 
 import numpy as np  # noqa: E402
+
+import tracemalloc  # noqa: E402
 
 import competition_score as cs  # noqa: E402
 import lifecycle_eval as le  # noqa: E402
@@ -245,7 +253,10 @@ def main() -> int:
         # not return. A mechanism curve does not need 96 networks, so it is
         # computed on a fixed SUBSET and labelled as such rather than pretending
         # otherwise.
+        tracemalloc.start()
         _f, alld = _predict_all(name, seeds[:n_depth], spec)
+        _cur, peak_bytes = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
         by_depth = np.array([
             [float(((alld[i][d] - (all1[i][d] + all2[i][d]) / 2.0) ** 2).mean())
              for d in range(depth)] for i in range(n_depth)])
@@ -253,6 +264,7 @@ def main() -> int:
         results[name] = dict(
             rows=rows, prov=prov, suite=suite, cross=cross, raw=raw,
             by_depth=by_depth, cost012=c012, secs=time.perf_counter() - t0,
+            peak_mb=peak_bytes / 2 ** 20, n_depth=n_depth,
         )
         f = float(np.mean([r.flops_used for r in rows]))
         eff = float(np.mean([cs.effective_compute(r.flops_used,
@@ -262,6 +274,7 @@ def main() -> int:
               f"MSE(corr) {cross.mean():.4e}   MSE(raw) {raw.mean():.4e}   "
               f"F/B {f / budget:.4f}   eff {eff / budget:.4f}   "
               f"mult {suite.mean_multiplier:.4f}   fail {suite.n_failed}/{n}   "
+              f"resid {1000 * float(np.mean([r.residual_wall_time_s for r in rows])):.0f}ms   "
               f"{results[name]['secs']:.0f}s"
               + ("" if c012 is None else
                  f"   [0.12: {c012 / budget:.6f}"
@@ -293,6 +306,32 @@ def main() -> int:
         print(f"  {name:<18} {res.arithmetic_gain:>8.4f} "
               f"[{lo / m:>+10.2%}, {hi / m:>+10.2%}] {res.n_candidate_better:>4}/{res.n:<4} "
               f"p={res.sign_test_p:>6.3f}")
+
+    # ---- does any arm leave the floor once residual is charged? --------------
+    # The frozen deciding model is counted-FLOPs-only, and that is defensible for
+    # RANKING here. It is NOT a licence to ignore residual: an arm can be pinned
+    # at the floor on counted cost and off it on effective cost, and the two are
+    # priced by different mechanisms. flopscope charges the RELEASE of a large
+    # temporary as residual wall time (~100-120 us/op, forum 18101) while pricing
+    # the operation itself at O(n^2) FLOPs -- so an elementwise-heavy arm is cheap
+    # in the frozen model and expensive in reality. That arbitrage is exactly what
+    # killed the packed lane. Report it loudly rather than letting the freeze hide
+    # it, because the next lane (K3/Edgeworth) is elementwise-heavy in the same way.
+    print()
+    print("  FLOOR CHECK -- counted vs effective, at the PHASE-1 lambda = 1e11")
+    print("  (local residual does NOT transfer; the RATIO to the control is the")
+    print("   signal, not the level)")
+    ctl_r = float(np.mean([r.residual_wall_time_s for r in results[CONTROL]["rows"]]))
+    for name in arms:
+        rws = results[name]["rows"]
+        f = float(np.mean([r.flops_used for r in rws]))
+        rr = float(np.mean([r.residual_wall_time_s for r in rws]))
+        eff = [(r.flops_used + 1e11 * r.residual_wall_time_s) / budget for r in rws]
+        off = f / budget < floor <= max(eff)
+        print(f"    {name:<18} F/B {f / budget:.4f}   eff mean {np.mean(eff):.4f}"
+              f"   eff max {max(eff):.4f}   resid {1000 * rr:>6.0f} ms"
+              f"  ({rr / ctl_r if ctl_r else float('nan'):>5.2f}x control)"
+              + ("   *** OFF THE FLOOR once residual is charged ***" if off else ""))
 
     # ---- THE GATE -----------------------------------------------------------
     # The first build of this driver took a `--gate` argument and never used it,
@@ -434,6 +473,15 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
             "n_failed": r["suite"].n_failed,
             "mean_multiplier": r["suite"].mean_multiplier,
             "mse_by_depth": [float(x) for x in r["by_depth"].mean(axis=0)],
+            "mse_by_depth_n_networks": int(r["n_depth"]),
+            "peak_python_heap_mb": r["peak_mb"],
+            "peak_memory_note": ("tracemalloc counts PYTHON allocations only; the "
+                                 "grader's memory_limit_mb is RLIMIT_AS over the "
+                                 "whole address space, so this is a LOWER BOUND"),
+            "mean_residual_wall_time_s": float(np.mean(
+                [x.residual_wall_time_s for x in r["rows"]])),
+            "max_residual_wall_time_s": float(np.max(
+                [x.residual_wall_time_s for x in r["rows"]])),
             "rows_hash": le.rows_hash(r["rows"]),
             "setup_seconds": r["prov"]["setup_seconds"],
             "candidate_sha256": r["prov"]["candidate_sha256"],

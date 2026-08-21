@@ -177,8 +177,15 @@ delivers 99.7% of the ladder (1.0518x); orders 3, 4, 6 agree to five figures.
    broken). Reopening needs a **2.7x variance reduction over iid at N = 6,546 in
    1024 dimensions** demonstrated — a high, explicit bar that no Phase-1
    input-space device ever approached (all measured 0.98-1.09x).
-2. **P2-CP3 (augmented K2) is CAPPED at 1.052x** and can be closed *without
-   building it* — the limit was measured, not approached.
+2. ~~**P2-CP3 (augmented K2) is CAPPED at 1.052x** and can be closed without
+   building it.~~ **RETRACTED 2026-08-21 by the independent Skeptic.** The Hermite
+   ladder is **not** the packet's augmented K2. The packet defines that as
+   *leading **Edgeworth** diagrams* at `11 n^3 L` against simple K2's `7 n^3 L`,
+   i.e. **1.57x the FLOPs**; the ladder is an `O(n^2)`-per-layer covariance
+   refinement measuring **1.007x**. The cost signature alone proves they are
+   different objects. `0.951` caps **covariance-map** work and says nothing about
+   an Edgeworth correction — which targets exactly the 95% the ladder leaves
+   standing. **P2-CP3 is REOPENED** and is the next slice.
 3. **The aggressive lane is P2-CP4, goal-directed K3/Edgeworth.** It is the only
    lane left that attacks the 95%.
 
@@ -192,11 +199,37 @@ change that costs +0.18% and stays under the floor deserves a lower bar is
 **The mechanism, and what would flip it back.** Correcting for a genuine depth-`L`
 network affording `N ∝ 1/L` samples: sampling MSE is **flat in depth** (the
 organisers' budget calibration working as designed) while analytic MSE **grows 27x**
-from L2 to L16. The ratio falls as `L^-1.44`, extrapolating to a crossover near
-**depth 30 at width 1024**. Phase 2's depth 16 sits on the analytic side with a 3x
-margin. **This is an extrapolation past the data and does NOT retro-explain Phase 1**,
-where the width also moved. Measured depth exponent **1.567** against ARC's
-predicted `K = 2` — directionally right, quantitatively optimistic in our favour.
+from L2 to L16. The ratio falls as `L^-1.44`. **Crossover ~30 at fixed `B`, but
+~22 under the organisers' actual rule** (`B` grows with `L`, holding N constant) —
+an earlier draft attributed the flatness to that calibration, which was a
+**non-sequitur**: the correction used holds `B` fixed, and the flatness comes from
+`V_L / L` being roughly constant in these networks. Phase 2's depth 16 sits on the
+analytic side either way. **Both figures are extrapolations past the data and
+neither retro-explains Phase 1**, where the width also moved. Measured depth
+exponent **1.52** (per-layer noise correction; an earlier draft said 1.567 using
+the layer-1 constant at every depth) against ARC's predicted `K = 2`.
+
+**THE OMITTED HALF, found by the Skeptic and binding on P2-CP4.** The frozen
+deciding model was counted-FLOPs-only. Charged at the Phase-1 lambda, **`k2p6`
+does +404% residual for +0.72% counted FLOPs** (763 ms mean / 1595 ms max against
+`k2p1`'s 151 ms) and goes **OFF the 0.1 floor** — effective C/B 0.0977 mean,
+**0.1356 max**. That contradicts the contract's own justification for the freeze
+(*"nothing that does not add 0.823 s/MLP can reorder them"*; `k2p6` adds 0.61
+s/MLP). Every verdict still stands — the freeze was fine for *ranking* — but the
+mechanism it hid is the one that killed the packed lane: flopscope charges the
+**release of a large temporary** as residual wall time while pricing the operation
+at `O(n^2)` FLOPs. **A K3/Edgeworth correction is elementwise-heavy in exactly the
+same way, so P2-CP4's contract must freeze a residual model that can see this.**
+A second, independent reason to prefer order 2: `k2p2` stays under the floor on
+effective cost (0.0748/0.0804) and `k2p6` does not.
+
+**A latent P2-CP2 hazard.** `_n_samples` sizes N from the forward-pass identity and
+ignores arm-specific extra cost — which is why `sample_orth` targeted C/B 0.10 and
+landed at **0.1093**. Harmless at the floor; at `_TARGET_CB = 0.95` the same
+overshoot lands at ~1.04 → `BudgetExhaustedError` → a **scored failure**, ~5x
+worse than merely spending the budget. `sample_iid_max` already sits at effective
+C/B **0.9867**. **Any near-budget candidate must size N from its own measured
+cost, not from the forward-pass identity.**
 
 **A cost lever found and priced: the real float32 closure costs EXACTLY HALF.**
 `stats.norm.cdf` promotes float32 to float64 (forum 18127), and
@@ -204,7 +237,11 @@ predicted `K = 2` — directionally right, quantitatively optimistic in our favo
 float64 in disguise. Casting back gives **C/B 0.031294 = 0.5003x**, at an accuracy
 cost of 4.975e-07 relative L2 — four orders below the prediction error, i.e. free.
 **It buys no score today** (floor-pinned) — it buys **1.84x more headroom** under
-the floor for the K3 correction, from 0.0374 B to 0.0687 B.
+the floor for the K3 correction, from 0.0374 B to 0.0687 B. **Caveat:** this
+variant is **unregistered** — not one of the eleven arms, in no artifact, and
+checked against `k2p1`'s output rather than scored through `lifecycle_eval`. It
+also carries an unflagged risk: `var = max(ez2 - mu^2, 0)` in float32 is
+catastrophic cancellation as `Phi -> 1`. **Register it before P2-CP4 leans on it.**
 
 ### SAMUEL'S WORKING ASSUMPTION, 2026-08-20 — FALSIFIED 2026-08-21, kept for the record
 
@@ -486,7 +523,7 @@ any, is stated. Reopening one is STRATEGIC work and needs a Slice Contract.
 | Score optimisation generally | ~~CLOSED at ~2.7e-7~~ **REOPENED 2026-08-10** | — | GAME_PLAN rev 6's frontier described *our method*, not the field's. Board decomposition shows honest teams 4.8× better on MSE at our compute. See § *Open questions* #1 |
 
 | **The whole SAMPLING architecture, at Phase 2** | **CLOSED 2026-08-21 (P2-CP1)** | pre-registered kill: best sampling > 1.5x best analytic → **measured 2.699x** | 96 fresh 1024x16 nets, block P01, 2 truth replicas. iid at both the floor and 0.95 B, and orthogonal MC, all lose to the analytic closure. The flat-score law was confirmed to **1.20%** across a 9.5x budget difference, so **no sampling operating point helps**. `_PRUNE_TAU` / `_BASIS_RANK` are never refitted. **Reopening condition:** a working QMC carrier demonstrating **≥2.7x variance reduction over iid at N = 6,546 in 1024 dimensions** — ours was broken (Korobov generator with cycle length 2) and that arm is INVALID, not evidence |
-| **Augmented K2 / higher Price orders as an AGGRESSIVE candidate** | **CLOSED 2026-08-21 (P2-CP1)** | capped at **1.052x**, measured at the family's limit | `MSE(k2p6)/MSE(k2p1) = 0.951`: the exact Gaussian-closure covariance removes only 4.94% of the error. The cap is a **measured limit**, not an extrapolation, so no spelling of augmented K2 can beat it. Still worth deploying as a cheap 1.05x if the gate permits — it is closed as the *aggressive* lane, not as an improvement |
+| **Improving the Gaussian-closure COVARIANCE MAP (higher Price/Hermite orders)** | **CLOSED 2026-08-21 (P2-CP1)** | capped at **1.052x**, measured at the family's limit | `MSE(k2p6)/MSE(k2p1) = 0.951`: the exact covariance map under the Gaussian assumption removes only 4.94% of the error. A **measured limit** — orders 6/8/12/20 agree to 7 significant figures and an independent quadrature confirms convergence. **This closes covariance-map work ONLY. It does NOT close augmented K2** — that closure was retracted; see the P2-CP1 section |
 
 **The mechanism behind the packed lane's death, which generalises**: flopscope
 prices a gather at 4 FLOPs/element, and packing's entire saving is substituting
@@ -869,9 +906,17 @@ is the one in `docs/CLAUDE_CODE_FRONTIER_HANDOFF.md`: **P2-CP0 (done) -> P2-CP1
    P2-CP1 section above. What it settled, so it is not re-derived: the analytic
    family owns the frontier 2.57x; 95% of the remaining error is the Gaussian
    assumption; sampling is closed; P2-CP3 is capped at 1.052x; the aggressive lane
-   is P2-CP4. **The next research slice is P2-CP4 (goal-directed K3), and
-   P2-CP2 (deploy the conservative candidate) can run in parallel — the candidate
-   is already chosen and already `whest validate`-clean.**
+   is P2-CP4. **The next research slice is the REOPENED P2-CP3** — build the packet's
+   *actual* augmented K2 (leading Edgeworth diagrams, cost polynomial ~1.57x
+   `k2p1`, not 1.007x) **plus an ORACLE variant** taking the post-ReLU third
+   cumulant from a GPU MC pilot instead of assuming zero, on a **disjoint 48-seed
+   draw from P01's 504 free seeds** (~9 min truth). One truth run answers two
+   questions: whether P2-CP3 was closed on evidence about a different method, and
+   **what fraction of the 95% ANY third-order correction can recover** — the
+   precondition P2-CP4 currently *assumes* rather than measures. The oracle
+   upper-bounds the whole K3 lane before a production spelling exists, exactly as
+   Moonshot G0's oracle did at Phase 1. **P2-CP2 can run in parallel — the
+   conservative candidate is already chosen and `whest validate`-clean.**
    *Historical statement of the slice, kept for the contract's context:*
    On fresh 1024 x 16 DESIGN networks with **two independent truth replicas**,
    compare through **one canonical evaluator** (`local_sim/lifecycle_eval.py`):

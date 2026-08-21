@@ -9282,9 +9282,9 @@ reaches 1.25x, so augmented K2 cannot be the aggressive candidate.
 `MSE(k2p6)/MSE(k2p1) = 0.9506` against a trigger of > 0.70. This is the
 checkpoint's most consequential number and it deserves its own paragraph below.
 
-**H4 — the flat-score law: CONFIRMED at 1.20%.**
+**H4 — the flat-score law: CONFIRMED at 1.87%** (frozen model; 1.20% under the effective model, which is what an earlier draft quoted).
 `sample_iid_max` (N = 62,190, C/B 0.95) and `sample_iid_floor` (N = 6,546,
-C/B 0.10) score within **1.20%** of each other across a **9.5x budget
+C/B 0.10) score within **1.87%** of each other across a **9.5x budget
 difference**. A 1/N sampler cannot buy its way past the floor, so there is no
 sampling operating point that helps.
 
@@ -9336,7 +9336,7 @@ not retro-explain Phase 1, where the width also moved (256, not 1024).
 
 **Explicit comparison with ARC's projection, as the contract required.** Their
 `MSE_K ~ c_K (L/n)^K` predicts error `~ L^K` with `K = 2`. **Measured exponent on
-depth: 1.567** (log-log, L = 2..16; L16/L2 is 27.1x where `L^2` predicts 64x).
+depth: 1.52** (log-log, L = 2..16; L16/L2 is 27.1x where `L^2` predicts 64x).
 The scaling law is directionally right and quantitatively optimistic in our
 favour, on one shape at one width. It is a comparison, not a confirmation.
 
@@ -9428,7 +9428,7 @@ arm, so the sampling-lane kill is unaffected either way.
 
 | # | prediction | measured | |
 |---|---|---|---|
-| P1 | `k2p1` beats sampling 2.0-4.0x | **2.711x** | HIT |
+| P1 | `k2p1` beats sampling 2.0-4.0x | **2.566x** vs the best arm | HIT |
 | P2 | the two iid arms agree within 10% | **1.20%** | HIT |
 | P3 | `k2p2` gain [1.02, 1.20], CI excludes zero | **1.0518x, [+4.31%,+5.53%]** | HIT |
 | P4 | `k2p6` beats `k2p2` by < 1.03x | **1.000136x** | HIT |
@@ -9440,7 +9440,8 @@ arm, so the sampling-lane kill is unaffected either way.
 | P10 | depth-curve L1 identical = noise floor | **8.216e-08 on all 11** | HIT |
 
 **Samuel predicted both substantive outcomes correctly** — analytic wins big
-(>2x, measured 2.711x) and the Hermite ladder is a small win that plateaus fast
+(>2x, measured **2.566x** against the best sampling arm) and the Hermite ladder
+is a small win that plateaus fast
 (1.0518x, plateaued at order 2). Builder and human agreed in advance, so the
 slice's information is concentrated in the three misses and in H3.
 
@@ -9508,3 +9509,231 @@ untouched; **D17 and D19 still SINGLE_USE and unspent**. P01 has **504 seeds
 free** for a disjoint P2-CP2 draw.
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-21 — P2-CP1 REVIEW: independent Skeptic **PROVISIONAL**. One inference RETRACTED, and the omitted half of the cost was the important half
+
+*The Skeptic ran read-only at `f1d7abb` with the contract, the result, both JSON
+artifacts and the code. It re-derived the Price/Hermite mathematics from scratch,
+reimplemented the closure in plain numpy, and checked convergence against
+`scipy.integrate.quad` rather than against our own quadrature. Verdict
+**PROVISIONAL**.*
+
+## What it could NOT break — and it tried hard
+
+- **`arm_k2p1` is bitwise the shipped path at EIGHT shapes**, not just the one I
+  checked: 1024x16, 256x32, 1024x8, 512x16, 64x4, **1023x16**, 2048x4, 1024x2.
+  Max abs diff 0.000e+00 everywhere. The control is stronger than I claimed.
+- **The Price/Hermite derivation is correct.** `a_k = He_{k-2}(-alpha) phi(alpha)`
+  is `E[f^(k)]` after the sigma-scaling; the `cs` accumulator really is
+  `c^k/(sigma_i sigma_j)^(k-1)` after rung k; `inv_ss` is not off by a factor;
+  the diagonal is never taken from the series.
+- **`k2p6` genuinely IS the Gaussian-closure limit.** Independent reimplementation
+  at orders 6, 8, 12 and **20** gives results identical to **7 significant
+  figures**. Adaptive quadrature confirms convergence to the exact bivariate-ReLU
+  covariance: order 20 exact to 1e-10..1e-15, order 6 within 6e-5 relative over
+  the observed regime, order 1 off by 1.3-11%. **The plateau is convergence, not
+  numerically-dead terms** — which was the specific alternative I asked it to test.
+- **The noise identity holds to <= 2.7e-20** on all 11 arms x 96 networks, and
+  cancels in paired comparisons as claimed (H1 2.566 -> 2.569, kill 2.699 -> 2.702).
+- **`sample_orth` is a correct N(0,I) sampler**: 256,000 draws at width 64 give
+  var 1.0006, `E[x^4]` 3.004, `E[|x|^2]` 64.04 against 64, `Var[|x|^2]` 128.06
+  against 128, within-basis max |cos| 2.4e-8. The 1.156x variance reduction is real.
+- **All ten `decide()` verdicts reproduce to four decimals** from `per_mlp_score`,
+  CIs and mover shares included.
+- **Protocol clean, verified from git rather than prose.** Contract `32a3a2f`
+  05:33 -> prediction + `n 48->96` + driver change `193e305` 10:17 -> block claim
+  `4c97139` 10:30 -> truth finalize 10:36 -> result `f1d7abb` 12:00. **Both
+  contract changes precede the claim.** The contract text at `32a3a2f` is
+  **byte-identical** to HEAD apart from the appended prediction: the gate did not
+  move. Nothing chosen on public data. Vault 1 touch, log 1 line, tree clean.
+
+## 1. RETRACTED: I closed P2-CP3 using a measurement of a different method
+
+**This is the review's lead finding and it is correct.**
+
+I wrote: *"P2-CP3 as the packet frames it is capped at 1.052x ... The lane can be
+closed on this evidence without building it."*
+
+**It cannot.** `docs/PHASE2_FRONTIER_ARCHITECTURE.md:202` defines augmented K2 as
+*"keeps additional leading **Edgeworth** diagrams while preserving `O(n^3 L)`"*,
+priced at `11 n^3 L` against simple K2's `7 n^3 L` — **1.57x the FLOPs**. My
+Hermite ladder refines the post-ReLU covariance **under the Gaussian assumption**,
+costs `O(n^2)` per layer, and measures **1.0072x** the FLOPs of `k2p1`.
+
+**The cost signature alone proves they are different objects: 1.007x measured
+against 1.57x specified.**
+
+So `MSE(k2p6)/MSE(k2p1) = 0.951` caps **covariance-map** work. It says nothing
+about an Edgeworth correction — which by my own H3 finding is aimed at exactly
+the 95% the ladder leaves standing. **The entry concluded "the aggressive lane
+must attack non-Gaussianity" and then closed, unmeasured, the cheapest available
+non-Gaussianity lane.** Those two sentences cannot both stand.
+
+**P2-CP3 is REOPENED.** What P2-CP1 actually established about it: *a correction
+that only improves the Gaussian-closure covariance map is capped at 1.052x.* That
+is a real and useful result. It is not a result about Edgeworth diagrams.
+
+**The generalisable error:** I named an arm after a plan item and then let the
+name carry the inference. `k2p2` was labelled "augmented K2" in my own arm
+docstring, and from there "the ladder is capped" became "augmented K2 is capped"
+without anyone re-checking that they were the same thing. **When an arm is named
+after a plan item, verify the arm implements the item — the cost polynomial is
+the cheapest check and it was available the whole time.**
+
+## 2. The omitted half of the cost, and it is the half that binds P2-CP4
+
+The Evidence Packet reported counted FLOPs and did not report the residual
+column that was sitting in its own artifact. Charged at the Phase-1 lambda:
+
+| arm | F/B | resid mean | resid max | eff C/B mean | eff C/B max |
+|---|---:|---:|---:|---:|---:|
+| `k2p1` | 0.0626 | 151 ms | 364 ms | 0.0694 | 0.0791 |
+| `k2p2` | 0.0627 | 268 ms | 391 ms | 0.0748 | 0.0804 |
+| `k2p4` | 0.0628 | 190 ms | 456 ms | 0.0715 | 0.0836 |
+| **`k2p6`** | **0.0630** | **763 ms** | **1595 ms** | **0.0977** | **0.1356** |
+
+**`k2p6` does +404% residual for +0.72% counted FLOPs, and goes OFF THE 0.1
+FLOOR** — 0.0977 mean, 0.1356 max.
+
+**This contradicts my own contract's justification for the counted-only freeze**,
+which said *"no residual model that does not add 0.823 s/MLP can reorder them"*.
+`k2p6` adds **0.61 s/MLP** over `k2p1`. The freeze was defensible for *ranking*
+the arms — every verdict stands — but I used it to stop looking, and the thing it
+hid was the mechanism that killed the packed lane: flopscope charges the
+**release of a large temporary** as residual wall time (~100-120 us/op, forum
+18101) while pricing the operation at `O(n^2)` FLOPs. Five extra elementwise
+passes over 1024^2 arrays per layer are nearly free in the frozen model and
+expensive in reality.
+
+**Binding consequence for P2-CP4: a K3/Edgeworth correction is
+elementwise-heavy in exactly the same way.** Its counted cost will understate it.
+**P2-CP4's contract must freeze a residual model that can see this, and must
+report the residual ratio to the control alongside every counted number.**
+
+**A second, independent reason to prefer order 2** — `k2p2` stays under the floor
+on effective cost (0.0748 / 0.0804) and `k2p6` does not. "Order 2 delivers 99.7%
+of the ladder" was an accuracy statement; it is now also a cost statement, and the
+two agree.
+
+**Repaired in code**, not just noted: `p2_lab.py` now prints a FLOOR CHECK naming
+any arm that is under the floor on counted cost and over it on effective cost,
+reports each arm's residual ratio to the control, and records mean/max residual in
+the artifact.
+
+## 3. The mechanism section is not reproducible from the artifact of record
+
+Three defects, all mine:
+
+- **The depth table in the Evidence Packet came from `ladder.json`** — the
+  `lambda = 1e11` first pass — while the entry names `ladder_frozen.json` as "the
+  artifact of record". The frozen file's `mse_by_depth` is **one network** (I ran
+  it with `--depth-subset 1` to save time), not the eight the table implies, and
+  **neither file recorded `depth_subset`**, so a reader could not tell.
+  **Repaired:** the artifact now records `mse_by_depth_n_networks`.
+- **The noise correction used the layer-1 constant at every depth.** Truth noise
+  is layer-dependent (8.22e-8 at L1 falling to 8.26e-9 at L16), so subtracting the
+  L1 value over-subtracts by 9.4% at L2 and 1.8% at L16 — and the sampling column
+  got no subtraction at all. With per-layer noise on both columns the **analytic
+  depth exponent is 1.515, not 1.567**, and the crossover is 30.5 rather than 29.8.
+  **The bias ran toward ARC's K = 2, i.e. against my own conclusion**, so the
+  direction survives. **Quote 1.52, not 1.567.**
+- **"Sampling MSE is nearly flat — the organisers' budget calibration working
+  exactly as designed" is a NON-SEQUITUR.** My correction holds `B` fixed
+  (`N ∝ 1/L`); the organisers' calibration does the opposite (`B ∝ L`, holding
+  `N` constant). The flatness comes from `V_L/L` being roughly constant in these
+  networks. **Under the organisers' actual rule the crossover is ~22, not ~30** —
+  still comfortably above depth 16, but the margin is smaller than I implied and
+  the explanation was wrong.
+
+*One thing the Skeptic checked that I had only asserted:* `canonical_mint(1024, 4, s)`
+returns weight matrices **bit-identical** to the first four of
+`canonical_mint(1024, 16, s)`, so "layer L of a depth-16 network" really is a
+depth-L network for the analytic arm. That premise holds.
+
+## 4. Frame mixing, four places, and one of them survived my own correction
+
+`docs/VALIDATION.md` 2b: *counted compares to counted; effective compares to
+effective.* The Evidence Packet mixed them:
+
+- the headline table's `vs k2p1` column for the sampling arms is the **effective**
+  model while its `score` column for those arms is the **frozen** model;
+- **H4's "1.20%" is the effective reading; under the frozen deciding model it is
+  1.87%.** Still far inside the 10% bar, but the quoted number was from the wrong
+  model;
+- P7's "1.0574x" is effective (frozen: 1.0579x);
+- **P1's "2.711x" survived in the scorecard and the closing paragraph *after* I
+  wrote a correction note saying the figure is 2.714x / 2.566x.** 2.711
+  reproduces from neither artifact. A correction that does not propagate to every
+  instance of the number is not a correction.
+
+**All four corrected in the entry above.**
+
+## 5. Claims the artifacts did not support
+
+- **"Peak memory 129-209 MB"** — `p2_lab.py`'s own docstring promised peak memory
+  and **the code never measured or recorded it**. The numbers came from an ad-hoc
+  probe outside the pipeline, and no artifact contains them, while the contract
+  and `CURRENT_STATE.md` both require the figure. **Repaired:** `p2_lab.py` now
+  measures peak heap with `tracemalloc` and records it per arm, with the
+  lower-bound caveat attached.
+- **"`whest validate` passes on all eight arms tested"** — eleven arms exist and I
+  did not record which eight. The Skeptic ran six; all pass.
+- **P10's "8.216e-08 for all eleven arms"** is `ladder.json`'s figure; the artifact
+  of record reads 8.1658e-08. *The Skeptic strengthened this one for me:* the
+  layer-1 averaged-replica noise computed straight from the truth agrees with the
+  P10 calibration to **1.2%**, which is a sharper statement than I made.
+
+## 6. Accepted, recorded, not repaired
+
+- **"95% of the error" is an MSE-SHARE statement.** If the truncation error is
+  orthogonal to the Gaussianity error, its L2 *amplitude* is `sqrt(0.049) = 22%`
+  of the total. The score consequence (cap 1.052x) is right because the metric is
+  MSE; the phrasing could mis-aim a K3 design that thinks in amplitudes.
+- **A latent P2-CP2 hazard.** `_n_samples` sizes N from the forward-pass cost only
+  and **ignores arm-specific extra cost** — which is why `sample_orth` targeted
+  0.10 and landed at **0.1093 (+9.3%)**. Harmless at the floor. **At
+  `_TARGET_CB = 0.95` the same overshoot lands at ~1.04 -> `BudgetExhaustedError`
+  -> a scored FAILURE**, which is ~5x worse than merely spending the budget.
+  `sample_iid_max` already sits at effective C/B **0.9867**, 1.3% of margin.
+  **Any P2-CP2 candidate near the budget must size N from its own measured cost,
+  not from the forward-pass identity.**
+- **The replica ratio moved 1.0137 (contract probe) -> 1.0319 (the run)** and I
+  asserted the latter as proof of independence without noting the shift.
+  Immaterial at 9.3e-9 against a 4.16e-6 signal, but it is not the number the
+  contract registered.
+- **The float32 variant is unregistered.** The Skeptic reproduced it exactly
+  (C/B 0.031279 = 0.5000x, relative L2 4.79e-7..5.75e-7, MSE ratio 1.000004) —
+  but it is not one of the eleven arms, is in no artifact, and was checked against
+  `k2p1`'s output rather than scored through `lifecycle_eval`. It also carries an
+  unflagged risk: **`var = max(ez2 - mu^2, 0)` in float32 is catastrophic
+  cancellation as `Phi -> 1`.** The "1.84x more headroom" claim rides on an
+  unregistered measurement and must be registered before P2-CP4 leans on it.
+
+## What did NOT change
+
+**Every verdict stands.** H1-H4 confirmed, all ten `decide()` outputs reproduced,
+the gate did not move, the sampling-lane kill holds at 2.699x (2.702x
+noise-corrected) against a 1.5x bar, and the conservative candidate is still
+`k2p1`. No estimator edit, no vault touch, no block beyond P01's 96 seeds.
+
+**What changed is one inference and the confidence attached to two others.**
+
+## The next slice, adopting the Skeptic's recommendation
+
+Build the packet's **actual** augmented K2 — leading Edgeworth diagrams at
+`O(n^3 L)`, whose cost polynomial should land near **1.57x** `k2p1`, not 1.007x —
+**plus an ORACLE variant** that takes the post-ReLU third cumulant from a GPU
+Monte-Carlo pilot instead of assuming it is zero. Score both on a **disjoint
+48-seed draw from P01's 504 free DESIGN seeds** (~9 min truth on the 5090).
+
+It answers two questions with one truth run:
+
+1. whether P2-CP3 was closed on evidence about a different method (finding 1); and
+2. **what fraction of the 95% ANY third-order correction can recover** — which is
+   the precondition P2-CP4 is currently *assuming* rather than measuring.
+
+The oracle is the important half: it upper-bounds the entire K3 lane before any
+production spelling is built, exactly as Moonshot G0's oracle did at Phase 1.
+**No single-use block is needed; D17 and D19 stay untouched.**
