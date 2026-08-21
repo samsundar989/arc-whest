@@ -8342,3 +8342,235 @@ the process.
 `AGENTS.md` and `CLAUDE.md` already told humans to set `PYTHONIOENCODING=utf-8`
 by hand in a POSIX shell. That instruction was correct and is now also
 *mechanical* for the gate: prose that has to be remembered is not enforcement.
+
+---
+
+# 2026-08-21 — P2-CP0.2: mint parity at 1024 x 16, proven against the ORGANISERS' OWN BYTES
+
+*`local_sim/phase2_mint_parity.py`. No seed block, no vault touch, no estimator
+edit. Artifact: `experiments/2026-08-21_phase2_manifest/phase2_mint_parity.json`.*
+
+## The problem, and why the usual proof could not reach it
+
+`docs/VALIDATION.md` section 1 proves `canonical_mint` is bit-identical to
+`whestbench.sample_mlp` **as installed**, which is 0.14.0. Phase 2 was baked with
+**0.16.0**, which is not installable from any public source. So the standing proof
+had a hole at exactly the release everything now depends on, and the hole could
+not be closed by upgrading a package.
+
+**It was closed from the other side.** The organisers published the weights. Under
+seed protocol 3.0 the parquet `mlp_seed` column is the **input** seed, so the test
+is:
+
+    canonical_mint(1024, 16, row["mlp_seed"])  ==  row["weights"]     bit for bit
+
+comparing raw `uint32` patterns, never a tolerance. Those bytes *are* whestbench
+0.16.0's output. Reproducing them exactly proves the whole chain — seed tree,
+spawn order, float64-draw-then-single-cast precision, the He scale, and the
+`(depth, width, width)` layout — against 0.16.0 without having 0.16.0.
+
+## Result
+
+**16 of 16 bit-identical**, shard `data/mini-00000-of-00007.parquet` at commit
+`ce926b7d1ced65faa668c01b94a43f8c4f43783d`.
+
+| check | result |
+|---|---|
+| weights bit-identical to the published Phase-2 bytes | **16/16** |
+| shape contract (`depth` matrices, `depth` mean rows -> no biases, no separate output layer) | **16/16** |
+| layer-1 residual vs the exact closed form, **rms z** | **1.0017** (N(0,1) expects 1.000) |
+| layer-1 residual, worst \|z\| over 16,384 neurons | **4.52** (the Gaussian order statistic expects ~4.35) |
+| widest published `mlp_seed` | **63 bits** |
+| ground-truth noise floor, exact | **7.8286e-11** |
+
+**MINT PARITY WITH THE PHASE-2 STACK IS PROVEN. The COST half of the parity
+blocker stays open** — flopscope pricing is not testable from published data.
+
+## The layer-1 check is calibrated, and that is the point
+
+A raw relative error would have been meaningless here: the published value is a
+Monte-Carlo mean over 1e9 draws and carries its own noise. So the deviation is
+scored **in units of that noise**, which is itself closed-form — for
+`z ~ N(0, sigma^2)`, `Var[ReLU(z)] = sigma^2 (1/2 - 1/(2 pi))`. The residual then
+has to look like N(0,1), and it does: **rms z = 1.0017** across 16,384 neurons,
+max |z| = 4.52 where the order statistic of 16,384 standard normals expects 4.35.
+
+That single number simultaneously confirms, at the Phase-2 shape:
+
+- the **row-vector convention** `h @ W` (the column convention would put the norm
+  on the wrong axis and blow the residual up by orders of magnitude);
+- **no bias at layer 1** (a bias shifts the mean off the closed form);
+- `x ~ N(0, I)`;
+- that `all_layer_means[0]` really is a mean of post-ReLU activations; and
+- that **N = 1e9 and `gt_mse = avg_variance / N` are the true noise model** — the
+  same model the truth-noise floor is quoted from.
+
+`docs/GOTCHAS.md`: *"a tolerance that ignores the estimator's own sampling error
+is not a test."* This is that lesson applied to the organisers' data.
+
+## Two facts recorded for the paths that will consume Phase-2 seeds
+
+- **Published `mlp_seed` values are up to 63 bits.** Four historical torch truth
+  paths mask a sample seed with `& 0x7FFFFFFF` (`vault.py:105`,
+  `coverage_lab.py:96`, `gpu_parity.py:110`, `robustness.py:199`, plus
+  `audit_constants.py` x3 and `bias_floor_lab.py`). **They are NOT being edited.**
+  They have recorded Phase-1 results attached, the labels they produced are
+  unbiased, and a 31-bit collision over 600 networks has probability ~8e-5, so
+  nothing recorded is at risk. The rule is **fix forward**: every NEW Phase-2
+  truth path uses the full state and must never re-introduce the mask. Rewriting
+  the historical paths would break the reproducibility of numbers already quoted,
+  which is a worse trade than carrying the note.
+- The Phase-2 `full` split is **69.96 GB**; this machine has **39 GB** free.
+  `full` cannot be held here. One 1.119 GB shard (16 MLPs) is the working unit.
+
+---
+
+# 2026-08-21 — P2-CP0.3: the first 1024 x 16 run this repository has ever done
+
+*`local_sim/p2_shape_smoke.py`. CONFIRM tier, read-only, **selects nothing**. No
+seed block, no vault touch, no estimator edit. Artifacts:
+`experiments/2026-08-21_p2_shape_smoke/smoke_*.json`.*
+
+Run through the canonical grader lifecycle (`lifecycle_eval.evaluate`: one
+`Estimator`, `setup()` once and off-budget, per-MLP `BudgetContext`) on 4
+published Phase-2 MLPs at `B = 2^41`, floor 0.1.
+
+**8 of 8 assertions pass, for both `estimator.py` (v2.6.1) and
+`estimator_v2_4_1.py` (the graded file):** every MLP completes, nothing
+non-finite, all-layer `(16, 1024)` shape enforced, counted cost strictly under
+`B`, two independent runs give identical evidence-row hashes, `setup()` fits its
+window (8.0 ms + 240 ms host cold start against a 5,000 ms **package default**).
+
+## The numbers, and the structural fact they expose
+
+| | value |
+|---|---|
+| raw final-layer MSE | **4.785849e-06** |
+| ground-truth noise | 8.703e-11 — **0.0018% of the MSE** |
+| counted `C/B` | **0.062556**, identical on all 4 networks to 6 significant figures |
+| multiplier | **0.10000 — the FLOOR** |
+| adjusted score | **4.785849e-07** |
+| failures | 0 / 4 |
+
+**v2.4.1 and v2.6.1 give byte-identical MSE and cost here**, which confirms both
+take the same `_analytic_only` fallback at `width > 256` and that the Strassen
+carrier never fires.
+
+### THE STRUCTURAL FACT: at Phase 2 the score floor dominates, and it changes the game
+
+`C/B = 0.0626` is **under the 0.1 floor**, so the multiplier is pinned at 0.1 and
+**the cost of this estimator is free in score terms**. Two consequences, and they
+reframe the whole checkpoint sequence:
+
+1. **The naive-sampling reference is beaten before we start.** From the published
+   `avg_variance` (mean 0.0870, since `gt_noise = avg_variance / 1e9 = 8.70e-11`),
+   naive Monte Carlo at the budget's 65,536 samples has raw MSE
+   `0.0870 / 65,536 = 1.33e-06` at `C/B = 1.0`, i.e. **adjusted 1.33e-06**. The
+   crude analytic closure's **4.79e-07** is **2.8x better on score** while being
+   **21x worse on raw MSE** — entirely because it sits under the floor.
+   *(Stated as arithmetic from published columns, not as a measured sampling arm.
+   A measured naive/Sobol arm is P2-CP1's job.)*
+2. **The Phase-2 objective is therefore: minimise raw MSE subject to
+   `C/B <= 0.1`.** Accuracy bought below the floor is free. That is exactly the
+   shape of ARC's projections — simple K2 at 0.055 and augmented K2 at 0.087 both
+   sit under it — and it is why the frontier flipped from sampling to analytic.
+
+### Where the cost actually goes, measured rather than projected
+
+`C/B = 0.062556` decomposes exactly: `_analytic_only` propagates a **full
+covariance in float64**, so each layer pays `W^T Sigma W` = two 1024^3 matmuls at
+flopscope's **float64 rate 2.0**:
+
+    2 x (2*1024 - 1) x 1024^2 x 2 x 16 layers = 1.3737e11 = 0.06247 B
+
+which accounts for the whole figure to within the closure's O(n^2) transcendental
+terms. **A float32 covariance would halve it to `C/B` ~ 0.031**, doubling the
+headroom available to a correction. That is a lever, not a decision — precision
+also changes accuracy, and neither has been measured.
+
+### A projection that did not survive contact
+
+`docs/PHASE2_FRONTIER_ARCHITECTURE.md` projects the Phase-2 raw closure near
+**9.8e-07** by scaling the Phase-1 depth-32 figure. **The measurement is
+4.79e-06 — 4.9x worse.** Either the `(L/n)^K` scaling projection is optimistic at
+this shape, or `_analytic_only` is not the closure ARC's polynomial describes
+(ours factorises the off-diagonal post-ReLU covariance as `Phi_i Phi_j
+Sigma^pre_ij`, where the exact bivariate-ReLU second moment is a known closed
+form and is strictly better). **This is now P2-CP1's first question, and the
+packet's projection must not be quoted as fact anywhere.**
+
+## What this run may and may not be used for
+
+It is a **compatibility readout on a Phase-1-tuned estimator at a shape it was
+never built for, scored on PUBLIC data**. It selects nothing: no constant, rank,
+calibration or arm. It is **not** a Phase-2 baseline and must never be quoted as
+one. Its legitimate uses are exactly two — proving the shape runs at all, and
+exposing the floor-dominance fact above, which is a property of the published
+budget and not of any candidate.
+
+---
+
+# 2026-08-21 — P2-CP0.4: the isolated flopscope 0.12 lane, and a claim of mine that was wrong
+
+`.venv-fs012` — flopscope **0.12.0** + numpy 2.2.6, **no whestbench**, created
+with `uv venv`. The main lockfile is untouched: `pyproject.toml` still pins
+`flopscope>=0.10,<0.11` / `whestbench>=0.14,<0.15`, and changing it against a
+package that does not exist publicly would be exactly the guessing the handoff
+forbids.
+
+Measured, same probe under both releases:
+
+| probe | flopscope 0.10.0 | flopscope 0.12.0 |
+|---|---:|---:|
+| `matmul (1024,1024) @ (1024,1024)` f32 | 2,146,435,072 | **2,146,435,072** |
+| `(2K-1)MN` identity | 2,146,435,072 | exact match |
+| `as_symmetric` on a 1024x1024 **float32** | 7,340,031 | **7,340,031** |
+| one 1024x16 forward pass, 1 sample | 33,554,432 | **33,554,432** |
+
+Two things this settles:
+
+1. **The card's `2 x depth x width^2 = 33,554,432` forward-pass identity is
+   measured, not assumed**, and it is stable across both releases — so
+   "65,536 effective naive samples" is exact, not nominal.
+2. **CORRECTION to my own entry above.** I wrote that flopscope 0.12's
+   `is_symmetric`/`as_symmetric` reprice "touches K2 directly" because every
+   affected cell moves 2.00x. **It does not touch us.** The release notes state
+   plainly that `int64, uint64, float32 and float64 operands are unchanged
+   throughout`; the 2.00x applies to *integer and boolean* operands promoted to a
+   float loop. Measured here: **identical to the unit** on float32 under both
+   releases. The claim was made from release-note prose without running the
+   probe that was one command away, which is the repository's own standing
+   error — *a borrowed constant is not a measurement*.
+
+**What is still not established:** that flopscope 0.12 prices our *whole
+estimator* the same as 0.10. Three primitives agreeing is not a price table
+agreeing. Any P2-CP1 cost number must be produced by running the arm under 0.12,
+and reported beside its 0.10 reading as a sensitivity.
+
+---
+
+# 2026-08-21 — CHECKPOINT P2-CP0 — official-stack and evidence readiness
+
+**Status: GO, with exact package parity BLOCKED and stamped.**
+
+| P2-CP0 required outcome | state |
+|---|---|
+| machine-readable official Phase-2 manifest | **DONE** — `phase2_manifest.py`, hashes every source, `--offline` replay |
+| corrected checklist naming `v2-phase2` and the 1024x16 migration | **DONE** — plus live-commit drift detection against the manifest |
+| exact package status recorded; isolated compat environment | **DONE** — parity **BLOCKED** for two independent reasons, stamped on every artifact; `.venv-fs012` holds flopscope 0.12; main lockfile untouched |
+| UTF-8-safe preflight | **DONE** — P2-CP0.1, asserted as a property, all 5 predictions confirmed |
+| 1024 x 16 shape/fallback smoke without a giant truth set | **DONE** — P2-CP0.3, 8/8 on 4 published rows, no truth generated |
+| new Phase-2 experiments routed through one Estimator + setup once | **DONE for the smoke** — `lifecycle_eval.evaluate` is the only path used. `vault.py`/`coverage_lab.py` still hold their historical per-MLP paths and are **deliberately not rewired**; they carry Phase-1 results and no Phase-2 experiment touches them |
+| full 32-bit sample seeds and nonblank artifact hashes | **PARTIAL, deliberately.** New Phase-2 paths use full seeds; the eight historical `& 0x7FFFFFFF` paths are left alone with the reason recorded (P2-CP0.2). Artifact hashing is live in `lifecycle_eval` evidence rows |
+| seed attribution that fails closed | **DEFERRED to the P2-CP1 contract** — no Phase-2 seed has been claimed yet, so nothing can have evaded attribution. It must be closed **before** the first Phase-2 block is drawn |
+| no decision seed or vault touch spent | **HELD** — vault counter **1**, log 1 line, no block claimed, `estimator.py` untouched |
+
+**Deferred with a named trigger, not silently:** vault transactionality (blocker
+6) — there is no Phase-2 vault and none may be created without Samuel; the
+handoff explicitly permits this deferral until one exists. Seed-attribution
+fail-closed (blocker 4) — must land inside the P2-CP1 Slice Contract, before the
+first claim.
+
+**Gate:** preflight **GREEN 10/12** default (2 named skips), portability
+**174/174**, vault **1 touch**, `estimator.py` byte-identical to
+`estimator_v2_6_1.py`.

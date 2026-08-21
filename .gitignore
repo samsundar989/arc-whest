@@ -26,3 +26,5 @@ local_sim/_ledger_scan_tmp/
 # which runs inside the preflight gate. Removed in a `finally`; ignored so a
 # hard kill cannot leave one tracked.
 local_sim/_lifecycle_*_tmp.py
+
+.venv-fs012/
