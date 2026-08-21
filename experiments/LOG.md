@@ -9737,3 +9737,167 @@ It answers two questions with one truth run:
 The oracle is the important half: it upper-bounds the entire K3 lane before any
 production spelling is built, exactly as Moonshot G0's oracle did at Phase 1.
 **No single-use block is needed; D17 and D19 stay untouched.**
+
+---
+
+# 2026-08-21 — DECISION: the promotion gate for a COST-FREE change, and why it is not a moved goalpost
+
+*Samuel delegated this decision. Recording it as a decision with its reasoning,
+before it is used, because a gate chosen after seeing a number is not a gate.*
+
+**The rule, from here on:** a candidate whose **counted AND effective cost both
+remain under the 0.1 multiplier floor** is gated at **>= 1.02x** arithmetic gain
+with a studentised-t 95% interval on the paired difference excluding zero. Every
+other candidate keeps the standing **1.10x** bar.
+
+**Why the two cases differ.** Above the floor a candidate buys accuracy *with*
+budget, so the gate is hedging a real trade and wants margin. Under the floor the
+multiplier is pinned at 0.1 regardless, so accuracy is **strictly dominant** and
+there is no trade to hedge. The only risk left is promoting noise, and that is
+what the interval is for: at n = 96 a 1.02x effect on this metric is resolvable
+well outside the noise (P2-CP1 measured a 1.0518x effect with a t-interval of
+[+4.31%, +5.53%], i.e. roughly +-0.6% of resolution).
+
+**Why this is not retro-fitting P2-CP1.** It is **not** applied to P2-CP1.
+`k2p2` measured 1.0518x against a registered 1.10x bar and **failed**; that stands
+in the record and is not being reopened. The new rule applies **prospectively**,
+and any candidate promoted under it must be measured on a **draw disjoint from the
+96 networks that produced the 1.0518x**. Re-scoring those same networks against a
+newly-lowered bar would be exactly the failure this repository has a contract
+system to prevent.
+
+**The condition is on EFFECTIVE cost, not counted, deliberately.** P2-CP1's review
+found `k2p6` under the floor on counted cost (0.0630) and **over it on effective
+cost** (0.0977 mean, 0.1356 max) because five extra elementwise passes per layer
+cost 5x the residual. A rule keyed on counted cost alone would have called `k2p6`
+"cost-free" when it is not.
+
+---
+
+# 2026-08-21 — SLICE CONTRACT P2-CP3R: how much of the 95% can ANY cumulant correction reach?  [PRE-REGISTERED, no data yet]
+
+*P2-CP3 REOPENED, after the P2-CP1 review retracted its closure. Block **P01**,
+a draw **disjoint** from the 96 seeds P2-CP1 spent. DESIGN tier: this measures a
+ceiling, it decides no promotion.*
+
+**Strategic question**
+P2-CP1 established that ~95% of the closure's error is its Gaussian assumption,
+and that improving the covariance map is capped at 1.052x. The whole remaining
+plan — P2-CP3 (Edgeworth) and P2-CP4 (goal-directed K3) — assumes a cumulant
+correction can *reach* that 95%. **Nothing has measured whether it can.** This
+slice measures the ceiling before any production spelling is built, exactly as
+Moonshot G0's oracle did at Phase 1.
+
+**Current bottleneck**
+Two checkpoints are queued against an unmeasured precondition. If the ceiling is
+low, both are dead and the conservative candidate is the whole Phase-2 answer.
+
+**Evidence**
+
+- **CONFIRMED (P2-CP1).** `MSE(k2p6)/MSE(k2p1) = 0.951`; the exact
+  Gaussian-closure covariance map recovers only 4.94%.
+- **CONFIRMED (derivation, verified against MC this session).** For `z` with mean
+  `mu`, sd `sigma`, `alpha = mu/sigma`, third central moment `k3` and excess
+  fourth cumulant `k4`, the Edgeworth-corrected ReLU mean is
+  `E[ReLU] = mu*Phi(a) + sigma*phi(a) - (k3/(6 sigma^2)) a phi(a)
+   + (k4/(24 sigma^3)) (a^2 - 1) phi(a)`.
+  Verified numerically: the 3rd term recovers 74-88% of the error on skewed
+  gammas; the 4th recovers ~50% on a kurtotic t at `alpha = 0` where the 3rd
+  vanishes identically.
+- **CONFIRMED (measured this session, one network).** Per-neuron `alpha` has
+  **sd 0 -> 3.67** across the 16 layers, and **at layer 1 every alpha is exactly
+  0**. The 3rd-cumulant weight `|a phi(a)|` averages 0.07-0.16 while the
+  4th-cumulant weight `|(a^2-1) phi(a)|` averages 0.09-0.40 — **the 4th term is
+  weighted comparably or higher at every depth, and it is the ONLY one alive at
+  layer 1.**
+- **SPECULATIVE.** That a first-order Edgeworth correction is accurate enough at
+  the skew/kurtosis these networks actually reach. The MC check showed it
+  *overshooting* at excess kurtosis 3.0.
+
+**Hypothesis**
+**HA.** A cumulant correction to the ReLU mean map, given **perfect** knowledge of
+the true pre-activation cumulants, recovers a large majority of the closure's
+error — `>= 50%` of the gap between `k2p1` and the truth at the final layer.
+**HB.** The **fourth** cumulant contributes at least as much as the third, so a
+K3-only correction (the packet's framing) leaves a substantial part on the table.
+**HC.** The state error and the map error are separable: feeding the true
+`(mu, sigma)` at each layer and keeping the Gaussian map still leaves a large
+error, which is the part a cumulant correction addresses.
+
+**Mechanism**
+The closure is wrong in exactly one place: it models the post-ReLU state as
+Gaussian, so its pre-activation `z` is treated as Gaussian when it is not. The
+Edgeworth expansion writes the exact `E[ReLU(z)]` as the Gaussian value plus terms
+in the true cumulants. Supplying those cumulants from Monte Carlo removes the
+assumption while changing nothing else, which upper-bounds every method that would
+have to *estimate* them.
+
+**Intervention** — an oracle ladder, per layer, per neuron:
+
+| arm | state used | ReLU mean map |
+|---|---|---|
+| `O0` | closure's own `(mu, sigma)` | Gaussian — this is `k2p1` |
+| `O1` | **TRUE** `(mu, sigma)` from MC | Gaussian |
+| `O2` | **TRUE** `(mu, sigma, k3)` | Gaussian + 3rd |
+| `O3` | **TRUE** `(mu, sigma, k3, k4)` | Gaussian + 3rd + 4th |
+
+`O1 - O0` is the **state** error; `O2 - O1` and `O3 - O2` are what the cumulant
+terms buy on top of a perfect state. **None of these is deployable** — they all
+consume MC truth. They bound what any deployable spelling can achieve.
+
+**Predictions, committed before the numbers exist**
+
+| # | prediction |
+|---|---|
+| **Q1** | `O1` (true state, Gaussian map) removes **>= 60%** of `k2p1`'s final-layer MSE — most of the error is state, not map |
+| **Q2** | `O3` removes **>= 80%** of `k2p1`'s final-layer MSE |
+| **Q3** | the 4th-cumulant term contributes **at least as much as** the 3rd, measured as `(O2-O1)` vs `(O3-O2)` at the final layer |
+| **Q4** | at **layer 1** the 3rd-cumulant term contributes **exactly zero** (alpha is identically 0 there) |
+| **Q5** | the true pre-activation excess kurtosis **grows with depth**, from ~0 at layer 1 |
+| **Q6** | `O3` does **not** reach the truth-noise floor — a first-order Edgeworth expansion leaves a visible residue |
+
+**Gate** — this slice promotes nothing, so the "gate" is a **go/no-go for the
+lane**, frozen now:
+
+- **`O3` recovers >= 50%** of `k2p1`'s final-layer MSE -> **the cumulant lane is
+  ALIVE** and P2-CP4 proceeds to ask whether a *deployable* estimate of the
+  cumulants exists.
+- **`O3` recovers < 20%** -> **the cumulant lane is DEAD at Phase 2**, both
+  P2-CP3 and P2-CP4 close, and the conservative K2 candidate is the whole answer.
+- 20-50% -> **PIVOT**: the lane survives only if a cheap partial correction (e.g.
+  the 4th-cumulant term alone, which needs no third moment) captures most of it.
+
+**Falsifier** Q1/Q2 low, or `O3` failing to beat `O1`, kills HA and with it the
+premise both remaining research checkpoints rest on.
+
+**Baseline** `k2p1` = `O0`, bitwise the shipped analytic path (verified at 8 shapes).
+
+**Residual model** — **not applicable and deliberately so.** No arm here is
+deployable and none is scored for promotion; only raw MSE at the final layer is
+compared. **P2-CP4's contract must freeze a residual model that can see
+elementwise cost**, per the P2-CP1 review — but that is a cost question about a
+production spelling, and this slice has none.
+
+**Statistic** Paired on common random numbers across 48 networks; fraction of MSE
+recovered, reported per network with its spread. No `decide()` call, because
+nothing is promoted.
+
+**Confounders**
+1. *The oracle leaks truth into its own baseline.* `O0` uses no truth; only
+   `O1-O3` do. The comparison is oracle-against-honest by construction.
+2. *MC noise in the estimated cumulants.* Third and fourth moments converge more
+   slowly than means; `2^22` samples per network, and the per-network spread is
+   reported so a noise-driven result is visible.
+3. *First-order Edgeworth is itself an approximation.* Q6 predicts a visible
+   residue precisely so this is not mistaken for a measurement of the truth.
+
+**Scope** `local_sim/p2_cumulant_oracle.py`, `experiments/2026-08-21_p2_cp3r/`,
+`experiments/LOG.md`, `docs/CURRENT_STATE.md`.
+
+**Do not change** `estimator.py`, any `estimator_v*.py`, the vault, D16-D19, the
+P2-CP1 arms or artifacts, `competition_score.py`.
+
+**Seed block** **P01[40,821,001,096 .. 40,821,001,143]**, 48 seeds, **disjoint
+from the 96 P2-CP1 spent**. Leaves 456 free. **D17 and D19 remain unspent.**
+
+**Driver** Claude Opus 5 (1M context), repo-local Builder.
