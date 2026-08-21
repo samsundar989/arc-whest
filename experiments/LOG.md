@@ -8467,11 +8467,21 @@ reframe the whole checkpoint sequence:
    naive Monte Carlo at the budget's 65,536 samples has raw MSE
    `0.0870 / 65,536 = 1.33e-06` at `C/B = 1.0`, i.e. **adjusted 1.33e-06**. The
    crude analytic closure's **4.79e-07** is **2.8x better on score** while being
-   **21x worse on raw MSE** — entirely because it sits under the floor.
+   **3.60x worse on raw MSE** — entirely because it sits under the floor.
+   *(This read "21x" until the P2-CP0 review; see the correction there. With a
+   10x multiplier ratio, "2.8x better on score" forces exactly "3.6x worse on
+   raw MSE", so the original three numbers could not all be right.)*
    *(Stated as arithmetic from published columns, not as a measured sampling arm.
    A measured naive/Sobol arm is P2-CP1's job.)*
-2. **The Phase-2 objective is therefore: minimise raw MSE subject to
-   `C/B <= 0.1`.** Accuracy bought below the floor is free. That is exactly the
+2. **Accuracy bought below the floor is free.** *(This originally read "the
+   Phase-2 objective is: minimise raw MSE subject to `C/B <= 0.1`". That is a
+   RESTRICTION of the objective, not the objective, and the P2-CP0 review
+   corrects it: the objective is `min MSE x max(0.1, C/B)`, and above the floor
+   a pure 1/N sampler's score is flat, so the constrained form would wrongly
+   reject a superlinear-return arm at, say, `C/B = 0.3`. The true statement is:
+   for any method whose accuracy improves no faster than 1/compute, all the
+   value below the floor is free and none is lost by spending less than it.
+   An arm above the floor must be SCORED, not rejected on sight.)* That is exactly the
    shape of ARC's projections — simple K2 at 0.055 and augmented K2 at 0.087 both
    sit under it — and it is why the frontier flipped from sampling to analytic.
 
@@ -8574,3 +8584,329 @@ first claim.
 **Gate:** preflight **GREEN 10/12** default (2 named skips), portability
 **174/174**, vault **1 touch**, `estimator.py` byte-identical to
 `estimator_v2_6_1.py`.
+
+---
+
+# 2026-08-21 — P2-CP0 REVIEW: independent Skeptic **PROVISIONAL**, and it found a check that could not fail
+
+*The Skeptic ran read-only against HEAD `2bf763f` with the checkpoint contract,
+the raw artifacts, and permission to execute anything read-only. Verdict
+**PROVISIONAL**. Its one-line summary is worth quoting because it is the right
+diagnosis: **"the physics is right and the bookkeeping is not yet at the standard
+the required outcome asserts."***
+
+## What it could NOT break — independently reproduced
+
+- **Mint parity is genuinely bitwise.** It tested the laundering hypothesis and
+  it fails: the parquet column is Arrow `float` (32-bit), so `.as_py()` gives
+  exact float64 images of float32 values, and the check gates on
+  `mine.dtype == pub_w.dtype` *before* the `.view(np.uint32)` compare, so a
+  float64 mint could not pass and `-0.0` vs `+0.0` would fail. It re-ran on a
+  shard I never used — **shard 1, 4/4 bit-identical**, rms z 1.0110.
+- **The offline manifest replay reproduces all five source sha256s exactly.**
+- **`C/B = 0.06255620392039418` reproduces to the last digit** from a probe it
+  wrote from scratch, loading `estimator.py` directly under a bare
+  `BudgetContext` on its own random He weights.
+- The floor conclusion survives charging `lambda*R`: it computed
+  `(F + lambda R)/B` at 0.0668–0.0684 and bounded the breach at **R > 0.824
+  s/MLP**, i.e. **6.4x headroom**.
+- Vault counter **1**, touch log **1 line**, portability **174/174**, preflight
+  **GREEN 10/12**. No block claimed. `git status` clean when it finished.
+- **Classification is clean, and it checked the thing that would have been
+  fatal**: whether the acceptance criteria were written after the result. The
+  B1-B5 prediction block lands in `507f223` at 03:24:09 and the implementation in
+  `0f5d6cd` at 03:32:18 — the prediction **provably precedes** the fix in git.
+
+It also proved something stronger than I had claimed, which is recorded under
+finding 6 below.
+
+## The findings, and what was done about each
+
+### 1. An assertion that could not fail — instance SIX of this repository's signature error
+
+`p2_shape_smoke.py` line 162 read:
+
+```python
+check("S4  layer-1 closed form is exact at 1024 x 16 (published truth)",
+      True, f"|| W1[:, j] || / sqrt(2 pi), max {l1.max():.4f}")
+```
+
+The condition was the **literal `True`**. The closed form was computed and never
+compared to anything, and the comment claimed a comparison "against the PUBLISHED
+layer-1 mean" that the code did not perform — it never even read
+`all_layer_means`. So "8 of 8 assertions pass" was really **7 of 8**.
+
+`docs/GOTCHAS.md` names this failure class five separate times. This is the
+sixth, and the first inside a Phase-2 artifact.
+
+**FIXED.** S4 now loads the candidate, runs its `predict` on a canonically minted
+network, and compares **the candidate's own layer-1 row** to
+`||W_1[:, j]|| / sqrt(2 pi)`. The bar is float64 epsilon (`< 1e-12`), not a
+tolerance, because layer 1 is exact arithmetic. Measured: **1.835e-16** for both
+`estimator.py` and `estimator_v2_4_1.py`. The `axis=0` column norm is the
+row-vector convention; the column convention would use `axis=1`, which is exactly
+what the assertion now catches.
+
+### 2. The layer-1 z statistic decided nothing, and its bar was wrong
+
+`verdict = w_ok == n_rows == shape_ok` — `layer1_z_rms_mean` was printed and
+stored and **never compared to anything**. If rms z had been 675 the tool would
+still have printed "MINT PARITY IS PROVEN". The LOG presented it as a check row.
+
+Separately, `_gauss_max_expect` dropped the `1/t` factor from the Gaussian tail
+equation and **overstated** E[max]: it returned 4.354 where the Skeptic's 4,000
+simulated draws give **4.136 (sd 0.286)** at m = 16,384. My phrasing "4.52
+against an expected 4.35" was therefore wrong; 4.52 is +1.3 sd from the true
+expectation. Consistent either way, but the label was false.
+
+**FIXED, both.** The approximation is replaced by the **exact** max-order-statistic
+p-value `P(max of m iid |N(0,1)| >= z) = 1 - erf(z/sqrt2)^m`, computed stably via
+`expm1`. And the statistic now **decides**: bars pre-stated as `rms z in
+[0.90, 1.10]` and `P(max) >= 1e-6`, and `verdict` requires them.
+
+The bar is defensible rather than convenient: under the null, rms z has sd
+`~1/sqrt(2 * width * n)` = 0.0055 here, so `[0.90, 1.10]` is an **~18-sigma**
+window — it cannot fire on noise. And it demonstrably fires on the error it
+exists to catch. Measured on the real published rows:
+
+| convention | rms z | max \|z\| | gate |
+|---|---:|---:|---|
+| `axis=0`, column norm — **row-vector, ours** | **1.0120** | 3.59 | **PASS** |
+| `axis=1`, row norm — column-vector, wrong | **674.8064** | 2302.99 | **FAIL** |
+
+Current reading: **rms z 1.0017 PASS**, max \|z\| 4.52 with **exact P = 0.095**
+— entirely unremarkable, which is the honest description.
+
+### 3. A SECOND implementation of the score identity, inside a Phase-2 artifact
+
+`p2_shape_smoke.py` computed `cb = flops_used / budget` and
+`mult = max(floor, cb)` and wrote them to the artifact as `multiplier_min` /
+`multiplier_max`. That is the score identity re-implemented in a module whose own
+canonical evaluator forbids exactly that — and it **already disagreed** with the
+canonical one, 0.0626 against 0.0684, because it used **counted** FLOPs where the
+grader's multiplier is a function of **effective** compute `C = F + lambda*R`.
+
+Today `max(0.1, .)` hid the disagreement. At a P2-CP3-class candidate near the
+projected 0.087 counted, the artifact would have recorded `multiplier = 0.1`
+while the canonical scorer used 0.0928 — and it would have **silently crossed the
+floor at counted 0.095**. *(`docs/GOTCHAS.md`: counted compares to counted;
+effective compares to effective.)*
+
+**FIXED.** Both frames are now computed, labelled and stored separately, and the
+multiplier comes from `competition_score.score_multiplier` on the effective
+compute. Measured: counted `F/B = 0.062556`, effective `(F + lambda R)/B =
+0.0710-0.0790`. The artifact now also carries `lambda_used`,
+`lambda_provenance` ("PHASE-1 value 1e11; Phase-2 lambda is UNPUBLISHED"),
+`residual_is_graded: false`, and the **floor margin** — residual would have to
+exceed **0.823 s/MLP** to lift the multiplier off 0.1, so the claim carries its
+own margin instead of asserting itself.
+
+### 4. A durable-doc arithmetic error in the checkpoint's load-bearing paragraph
+
+I wrote that the analytic closure is *"21x worse on raw MSE and 2.8x better on
+score"*. **The 21x is wrong. It is 3.60x.**
+
+`4.785849e-6 / 1.32794e-6 = 3.604`. With a 10x multiplier ratio, "2.8x better on
+score" **forces** exactly "3.6x worse on raw MSE" — the three numbers in that one
+sentence were internally inconsistent, and the inconsistency was visible without
+any new data. The 2.774x score ratio and the 1.328e-6 naive figure are both
+confirmed correct.
+
+**CORRECTED in place.** The direction of the conclusion is unaffected.
+
+Two caveats the Skeptic added, both now carried:
+
+- **65,536 samples is not actually achievable.** The card calls the
+  effective-sample figure *"an upper bound"* and says RNG, casts and accumulation
+  cost *"another 0.4-1%"*. A real naive arm at 65,536 lands at `C/B > 1.0` ->
+  `BudgetExhaustedError` -> **failure, multiplier 1.0 against zeroed
+  predictions**, which is far worse than 1.33e-6. So the comparison is
+  **conservative in our favour** — but it means the naive reference must be run
+  at its true budget-maximal N, not at 65,536.
+- It is a **measured** number against a **modelled** one, on n = 4 networks whose
+  MSEs span 3.70e-6 to 5.89e-6. Legitimate as arithmetic; not a measurement.
+
+### 5. The floor-dominance conclusion was stated as a RESTRICTION of the objective
+
+I wrote: *"the Phase-2 objective is: minimise raw MSE subject to `C/B <= 0.1`."*
+**That is not the objective.** The objective is `min MSE * max(0.1, C/B)`.
+
+Above the floor a pure `1/N` sampler's score is **flat**: at `C/B = 0.1` naive MC
+affords N = 6,554, giving MSE 1.328e-5 x 0.1 = **1.328e-6** — identical to its
+value at `C/B = 1.0`. So the constrained form is correct *for 1/N methods* and
+would **wrongly reject a superlinear-return arm above the floor**.
+
+**RESTATED, and it changes how P2-CP1 must be run:** an arm at `C/B = 0.3` must
+be **scored**, not rejected on sight. What is true is the weaker and still
+strategically decisive statement: *for any method whose accuracy improves no
+faster than 1/compute, all the value below `C/B = 0.1` is free, and no value is
+lost by spending less than the floor.*
+
+### 6. "0.10 and 0.12 price our primitives identically" — under-evidenced, and FALSE as stated about the price table
+
+Three primitives is not a price table. The Skeptic replaced the claim from both
+directions, and I have now turned its probe into a durable artifact,
+`local_sim/p2_price_delta.py` -> `experiments/2026-08-21_phase2_manifest/p2_price_delta.json`.
+
+**Much stronger than I claimed, for our candidate:**
+
+| | flopscope 0.10.0 | flopscope 0.12.0 |
+|---|---:|---:|
+| whole `estimator.py` `predict`, 1024x16 | **137,562,547,200** | **137,562,547,200** |
+| ops compared / ops that moved | 16 | **0** |
+| Skeptic's independent 256x32 full sampling path (`eigh`, `qr`, `norm.ppf`, `take`, `where`, `bitwise_xor`, f32+f64 matmul) | 354,001,749,470 | **354,001,749,470**, all 35 ops |
+
+So `C/B = 0.0626` **does** transfer to 0.12 — for this op mix. That is a
+statement about this candidate, not about the price table.
+
+**And FALSE as a statement about the price table.** Of 30 probed primitives,
+**4 moved**:
+
+| primitive (256x256) | 0.10.0 | 0.12.0 | |
+|---|---:|---:|---|
+| `nansum` f32 | 65,535 | **131,071** | 2.00x dearer |
+| `nansum` f64 | 131,070 | **262,142** | 2.00x dearer |
+| `nanmean` f32 | 65,536 | **131,072** | 2.00x dearer |
+| **`where(mask, f32_array, 0.0)`** | 524,288 | **262,144** | **0.50x — half price** |
+
+**The `where` row is the one that matters.** Mixing a **Python float scalar** with
+a **float32 array** was billed at the float64 rate under 0.10 and is billed at the
+float32 rate under 0.12 (NEP-50 weak promotion). That is precisely the spelling a
+mixed-precision path produces — and this checkpoint's own headline cost lever is
+*"a float32 covariance would halve `C/B` to ~0.031"*. **A float32 arm's `C/B`
+measured on 0.10 can read up to 2x high on scalar-mixed ops.** The direction is
+conservative (0.10 over-charges), but it is now a measured constraint on
+reporting rather than an unexamined assumption.
+
+**Binding for P2-CP1: every arm is priced under BOTH releases and reported with
+both readings.** `p2_price_delta.py` is the tool.
+
+### 7. Artifact immutability — the required outcome said "immutable", and it was not
+
+`phase2_mint_parity.py` and `phase2_manifest.py` both wrote with a bare
+`open(OUT, "w")`, and `p2_shape_smoke.py` called `os.remove(path)` **specifically
+to bypass** `lifecycle_eval.write_evidence`'s refusal-to-overwrite.
+
+The Skeptic destroyed committed evidence by running **the command printed in
+`phase2_mint_parity.py`'s own docstring** (`--shard 1 --max-rows 4`): the 16-row
+artifact was replaced by a 4-row one, 214 lines deleted. It caught this, verified
+it with `git diff --stat`, and restored it. *An evidence file that a documented
+invocation can shrink is not evidence.*
+
+**FIXED, three ways:**
+- one artifact per `(shard, rows)` and per `(candidate, shard, n)` — a 4-row run
+  can no longer shadow a 16-row one;
+- a rerun that would change content **REFUSES** with a readable message; a rerun
+  producing identical content is a no-op;
+- the `os.remove` bypass is deleted, with the reason in the code.
+
+Verified by re-running the exact destructive command: it now writes
+`phase2_mint_parity_shard1_rows4.json` and leaves shard 0 alone, and a second
+identical run prints `artifact unchanged`.
+
+### 8. `B = 2**41` was a hardcoded literal claiming the card as its source
+
+`width` and `depth` are parsed from `metadata.json`; `B` was a constant. A re-bake
+that moved the budget would have been invisible.
+
+**FIXED.** `B` is now **parsed** from the card's Versions table (superscript
+digits normalised) and **cross-checked against the card's own "Effective MC
+samples" column** — the parse must satisfy `B / forward_flops_per_sample` equal to
+a figure the card itself states, or the build refuses rather than guessing.
+`phase2_manifest.py` also now **refuses to rebuild** if the `v2-phase2` tag points
+at a different commit than the manifest on disk, unless `--allow-rebake` is given
+deliberately.
+
+### 9. Two smaller items, both accepted
+
+- **`Restore-CallerEncoding` was not on every path.** A terminating error raised
+  outside a `Step` block would leave the caller's shell mutated. **FIXED** with a
+  script-scope `trap`.
+- **The preflight comment claimed a falsifier the code cannot produce.** It said a
+  caller that hard-sets `PYTHONIOENCODING` "must turn the gate RED HERE"; the
+  Skeptic ran the gate with `PYTHONIOENCODING=cp1252` and got **GREEN 10/12**,
+  because the export is unconditional — which is the *correct* behaviour (the
+  gate owns the setting), but the comment was false. **FIXED**: the comment now
+  says what the assertion actually catches, which is a toolchain that ignores the
+  variable.
+- **`competition_score.score_multiplier`'s docstring still said "the Phase-2 floor
+  is not yet published".** **FIXED** — it is published, it is 0.1, and the
+  docstring now says where.
+
+### 10. Accepted and recorded, not fixed
+
+- **`MLP.seed` (spawn[2]) is proven against installed 0.14, not against 0.16.**
+  The published-bytes check covers spawn[0] only, because the dataset publishes
+  weights and not the estimator seed. Irrelevant at 1024x16 today — the analytic
+  path never reads `mlp.seed` — but **a P2-CP1 sampling arm will**, and it is a
+  bit-reproducibility gap, not a correctness one.
+- **`local_sim/phase2_manifest.py` was classified ROUTINE and is an instrument by
+  function**: it is now the single source of `width`, `depth`, `flop_budget` and
+  `floor` for every Phase-2 consumer. **Reclassified IMPORTANT going forward**;
+  further edits get a written prediction. The original classification was
+  defensible when it was a poller and stopped being so when things started
+  importing it.
+- **The strategist packet carries no provenance stamp** — who produced it, when,
+  from what. Continuity rule 10 should want one.
+
+## What did NOT change
+
+No estimator edit. No seed block claimed. **Vault counter 1, touch log 1 line.**
+Nothing submitted. Both smokes re-run after every fix: **9/9 assertions** for
+`estimator.py` and for `estimator_v2_4_1.py`, MSE and cost unchanged to the digit.
+
+---
+
+# 2026-08-21 — P2-CP0.5 [IMPORTANT] the ledger's artifact hashes fail OPEN — PREDICTION, before the fix
+
+*Class: IMPORTANT — `local_sim/seed_ledger.py` is enforcement, wired into
+preflight steps 6 and 8. Written before the change exists. This is the last
+P2-CP0 blocker that must close **before the first Phase-2 seed is claimed**,
+because it is the mechanism that would record that claim.*
+
+## The defect
+
+`check_ledger` validates an artifact hash **only if one is present**:
+
+```python
+if c.artifact and c.artifact_sha256:
+    now = _sha256(c.artifact)
+    ...
+```
+
+A record that names an artifact and carries **no** hash passes silently. Two do:
+
+| block | consumer | artifact | hash |
+|---|---|---|---|
+| D18 | `local_sim/coverage_lab.py` | `experiments/2026-08-19_coverage/truth_D18.npz` | **blank** |
+| D18 | `local_sim/probe_oa_carrier.py` | `experiments/2026-08-19_carriers/oa_truth_D18.npz` | **blank** |
+
+Both files exist on disk. The hole is structural, not accidental: `claim()`
+records the artifact **path** before the artifact is written, so its hash is
+*necessarily* blank at claim time, and nothing ever fills it in. That is the
+"artifact finalization has fail-open paths" defect from the handoff, and it is
+the one that would let a Phase-2 truth set be swapped after the arms were scored
+against it.
+
+## Predictions, committed before the change
+
+- **L1.** Adding a `finalize()` that appends a `kind="finalize"` record carrying
+  the artifact's sha256, and making `check_ledger` **error** on a `claim` that
+  names an artifact with no hash from either source, turns `check_ledger` RED on
+  exactly **2** records today and green after both are finalized.
+- **L2.** `finalize()` **refuses** to record a hash for a file that does not
+  exist, so it cannot manufacture a hash for an artifact that was never written.
+- **L3.** `kind="finalize"` records are excluded from overlap and SINGLE_USE
+  accounting, so finalizing does not look like a second claim. Specifically:
+  D18's permitted-overlap report and the SINGLE_USE counts for D12/D14/D17/D19
+  are **unchanged**, and D17/D19 still read as unspent.
+- **L4.** `local_sim/test_seed_ledger.py` stays green and grows negative tests
+  that **provoke** each new refusal rather than asserting it.
+- **L5.** Preflight steps 6 and 8 stay green; the gate's verdict does not move.
+- **L6.** A gitignored artifact that is absent from a fresh clone must **not**
+  turn the gate red — the hash is checked against the record, and an absent file
+  is reported, not failed. Otherwise this becomes the fifth "a check that reports
+  a state rather than testing a property".
+
+**Falsifier:** if closing the hole requires weakening any existing refusal, or if
+any SINGLE_USE/overlap verdict moves, the design is wrong and is reverted.

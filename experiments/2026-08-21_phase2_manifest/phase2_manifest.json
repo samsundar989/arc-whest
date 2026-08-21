@@ -1,7 +1,7 @@
 {
   "artifact": "phase2_manifest",
   "artifact_version": 1,
-  "generated_at_utc": "2026-08-21T08:18:40.744591+00:00",
+  "generated_at_utc": "2026-08-21T09:27:56.087865+00:00",
   "generator": "local_sim/phase2_manifest.py",
   "authority": "The dataset card and metadata.json at the pinned commit are AUTHORITATIVE. The AIcrowd challenge page is known-stale (Phase-1 timeline, a max(0.5, .) worked example) and is not a source here.",
   "dataset": {

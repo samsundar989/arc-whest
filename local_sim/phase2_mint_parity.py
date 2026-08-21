@@ -35,6 +35,8 @@ It also checks three things the same rows can settle for free:
 Run:
     uv run python local_sim/phase2_mint_parity.py
     uv run python local_sim/phase2_mint_parity.py --shard 1 --max-rows 4
+
+One artifact per (shard, rows); a run REFUSES to overwrite a differing file.
 """
 
 from __future__ import annotations
@@ -59,12 +61,30 @@ from phase2_manifest import load as load_manifest  # noqa: E402
 
 REPO = "aicrowd/arc-whestbench-public-2026"
 OUT_DIR = os.path.join(_ROOT, "experiments", "2026-08-21_phase2_manifest")
-OUT = os.path.join(OUT_DIR, "phase2_mint_parity.json")
+def _out_path(shard: int, n_rows: int) -> str:
+    """One file per (shard, rows) -- a 4-row run can no longer clobber a 16-row one.
+
+    The flat `phase2_mint_parity.json` this module first wrote was overwritten by
+    running the command printed in its own docstring, destroying 12 rows of
+    committed evidence. An evidence file that a documented invocation can shrink
+    is not evidence.
+    """
+    return os.path.join(OUT_DIR, f"phase2_mint_parity_shard{shard}_rows{n_rows}.json")
 
 
-def _gauss_max_expect(m: int) -> float:
-    """Expected max of m iid N(0,1) magnitudes -- the bar a max |z| is read against."""
-    return math.sqrt(2 * math.log(2 * m / math.sqrt(2 * math.pi)))
+def _max_abs_z_pvalue(z: float, m: int) -> float:
+    """P(max of m iid |N(0,1)| >= z). EXACT, so it needs no asymptotic bar.
+
+    An earlier version of this file quoted an "expected max" from the tail
+    approximation sqrt(2 log(2m/sqrt(2 pi))), which drops the 1/t factor and
+    OVERSTATES E[max] -- 4.354 against a simulated 4.136 (sd 0.286) at
+    m = 16,384. An independent Skeptic caught it. A p-value is exact, needs no
+    simulation, and is the quantity a bar should be set on anyway.
+    """
+    per = math.erf(z / math.sqrt(2.0))        # P(|N(0,1)| < z)
+    if per >= 1.0:
+        return 0.0
+    return -math.expm1(m * math.log(per))     # 1 - per**m, stable near 1
 
 
 def _shard(idx: int, revision: str) -> str:
@@ -193,6 +213,21 @@ def main() -> int:
         print(f"  {id_col[i]:>4} {name_col[i]:<22} "
               f"{('YES' if bit else 'NO'):>15} {z_abs_max:>10.2f} {z_rms:>9.3f}")
 
+    # ---- the layer-1 statistic DECIDES, it does not merely print ----------
+    # Bars stated before the numbers were looked at, and both are wide enough
+    # that only a structural error trips them:
+    #   rms z has sd ~ 1/sqrt(2 * width * n) under the null, i.e. ~0.0055 here,
+    #   so [0.90, 1.10] is an ~18-sigma bar -- it cannot fire on noise, and the
+    #   wrong (column-norm) convention reads rms z ~ 675.
+    #   the max |z| p-value guards a single structural outlier that an rms
+    #   average would dilute.
+    Z_RMS_LO, Z_RMS_HI, Z_MAX_P_MIN = 0.90, 1.10, 1e-6
+    z_rms_mean = float(np.mean(z_rms_all))
+    z_p = _max_abs_z_pvalue(max_l1_z, n_rows * width)
+    z_ok = (Z_RMS_LO <= z_rms_mean <= Z_RMS_HI) and (z_p >= Z_MAX_P_MIN)
+
+    verdict = (w_ok == n_rows == shape_ok) and z_ok
+
     gt = float(np.mean(gt_noise))
     seed_bits = max(int(r["mlp_seed"]).bit_length() for r in rows)
 
@@ -200,16 +235,16 @@ def main() -> int:
     print(f"  weights bit-identical to the published Phase-2 bytes : {w_ok}/{n_rows}")
     print(f"  shape contract (no biases, no output layer)          : {shape_ok}/{n_rows}")
     print(f"  layer-1 closed form, worst max relative error        : {max_l1_rel:.3e}")
-    print(f"  layer-1 residual, worst |z| over {n_rows * width:,} neurons"
-          f"{'':>3}: {max_l1_z:.2f}"
-          f"   (N(0,1) expects ~{_gauss_max_expect(n_rows * width):.2f})")
-    print(f"  layer-1 residual, rms z (N(0,1) expects 1.000)       : "
-          f"{float(np.mean(z_rms_all)):.4f}")
+    print(f"  layer-1 residual, rms z   [bar {Z_RMS_LO}, {Z_RMS_HI}]"
+          f"{'':>9}: {z_rms_mean:.4f}   {'PASS' if Z_RMS_LO <= z_rms_mean <= Z_RMS_HI else 'FAIL'}")
+    print(f"  layer-1 worst |z| over {n_rows * width:,} neurons"
+          f"{'':>8}: {max_l1_z:.2f}"
+          f"   exact P(max >= z) = {z_p:.3f}   "
+          f"{'PASS' if z_p >= Z_MAX_P_MIN else 'FAIL'}")
     print(f"  widest published mlp_seed                            : {seed_bits} bits")
     print(f"  ground-truth noise floor, EXACT (avg_variance / N)   : {gt:.6e}")
     print()
 
-    verdict = w_ok == n_rows == shape_ok
     if verdict:
         print("  MINT PARITY WITH THE PHASE-2 STACK IS PROVEN.")
         print("  It did not need whestbench 0.16.0: the published weights ARE")
@@ -240,7 +275,10 @@ def main() -> int:
         "layer1_closed_form_max_rel": max_l1_rel,
         "layer1_z_abs_max": max_l1_z,
         "layer1_z_rms_mean": float(np.mean(z_rms_all)),
-        "layer1_z_expected_max": _gauss_max_expect(n_rows * width),
+        "layer1_z_max_pvalue_exact": z_p,
+        "layer1_z_bars": {"rms_lo": Z_RMS_LO, "rms_hi": Z_RMS_HI,
+                          "max_p_min": Z_MAX_P_MIN},
+        "layer1_z_gate_passed": bool(z_ok),
         "layer1_z_note": "residual of the published layer-1 mean against the "
                          "EXACT closed form, in units of its own N = 1e9 Monte "
                          "Carlo standard error. rms z ~ 1 and max |z| near the "
@@ -250,12 +288,33 @@ def main() -> int:
         "gt_noise_floor_exact": gt,
         "gt_noise_floor_formula": "mean_i(avg_variance_i) / N",
         "verdict": "PROVEN" if verdict else "FAILED",
+        "verdict_components": {
+            "weights_bitwise": w_ok == n_rows,
+            "shape_contract": shape_ok == n_rows,
+            "layer1_z_calibrated": bool(z_ok),
+        },
         "rows": rows,
     }
     os.makedirs(OUT_DIR, exist_ok=True)
-    with open(OUT, "w", encoding="utf-8") as fh:
-        fh.write(json.dumps(art, indent=2) + "\n")
-    print(f"  artifact -> {os.path.relpath(OUT, _ROOT)}")
+    out = _out_path(a.shard, n_rows)
+    stable = {k: v for k, v in art.items() if k != "generated_at_utc"}
+    if os.path.exists(out):
+        with open(out, encoding="utf-8") as fh:
+            old = json.load(fh)
+        same = json.dumps({k: old.get(k) for k in stable}, sort_keys=True,
+                          default=str) == json.dumps(stable, sort_keys=True,
+                                                     default=str)
+        if not same:
+            raise SystemExit(
+                f"REFUSED: {os.path.relpath(out, _ROOT)} exists with different "
+                "content. Evidence rows are immutable. Delete it deliberately, "
+                "or run a different shard/row count."
+            )
+        print(f"  artifact unchanged -> {os.path.relpath(out, _ROOT)}")
+    else:
+        with open(out, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(art, indent=2) + "\n")
+        print(f"  artifact -> {os.path.relpath(out, _ROOT)}")
     print("=" * 78)
     return 0 if verdict else 1
 

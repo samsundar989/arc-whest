@@ -114,8 +114,13 @@ def score_multiplier(
 ) -> float:
     """Per-MLP multiplier: 1.0 on failure or no budget, else max(floor, C/B).
 
-    Uncapped above. `floor` is a parameter because the Phase-2 floor is not yet
-    published; the installed evaluator hardcodes 0.1.
+    Uncapped above. `floor` stays a parameter, but it is no longer unknown: the
+    Phase-2 dataset card at commit ce926b7d states the metric as
+    `mse_final * max(0.1, C_m / B_m)`, so the Phase-2 floor is **0.1**, the same
+    as Phase 1 (recorded in the Phase-2 manifest, 2026-08-21). The installed
+    evaluator hardcodes 0.1 too. It remains a parameter so a future phase can
+    move it without a second implementation of this identity appearing
+    somewhere else.
     """
     if failed or flop_budget <= 0:
         return FAILURE_MULTIPLIER

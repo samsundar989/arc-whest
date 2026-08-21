@@ -104,6 +104,13 @@ function Restore-CallerEncoding {
     $env:PYTHONUTF8       = $script:PrevPyUtf8
 }
 
+# A terminating error raised OUTSIDE a Step block -- with $ErrorActionPreference
+# = "Stop" that is any unhandled failure in this script's own plumbing -- would
+# skip the two `Restore-CallerEncoding` calls at the exit paths and leave the
+# CALLER's shell with our encoding settings. A Skeptic pointed out that the
+# restore was not on every path; this trap makes it so.
+trap { Restore-CallerEncoding; break }
+
 function Step {
     param([string]$Name, [scriptblock]$Body)
     Write-Host ""
@@ -156,10 +163,17 @@ Step "2. invariant suite" { uv run python local_sim/edge_cases.py }
 
 # --- 3. grader contract --------------------------------------------------------
 Step "3. whest validate" {
-    # Assert the property, do not assume the export took. A future venv, a
-    # different Python, or a caller that hard-sets PYTHONIOENCODING to something
-    # else must turn the gate RED HERE, with a readable reason -- not sixty lines
-    # later inside someone else's traceback.
+    # Assert the property, do not assume the export took. The export above is
+    # unconditional, so a HOSTILE CALLER cannot trip this -- it is overwritten,
+    # which is the point of the gate owning the setting. (An earlier version of
+    # this comment claimed a caller could turn the gate RED here; an independent
+    # Skeptic falsified it by running the gate with PYTHONIOENCODING=cp1252 and
+    # getting GREEN. A comment asserting a property the code lacks is worse in
+    # the enforcement layer than anywhere else.) What this DOES catch is a
+    # toolchain that ignores the variable: a future venv, a different Python, or
+    # a `uv run` that stops forwarding the environment -- each turns the gate RED
+    # HERE with a readable reason, instead of sixty lines later inside someone
+    # else's traceback.
     $enc = (uv run python -c "import sys; print(sys.stdout.encoding)") | Select-Object -Last 1
     Write-Host "  child stdout encoding: $enc"
     if ("$enc".Trim() -notmatch '^(?i)utf-?8$') {

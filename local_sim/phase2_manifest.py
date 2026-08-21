@@ -61,6 +61,47 @@ SOURCES = {
 BAKE_STACK = {"whestbench": "0.16.0", "flopscope": "0.12.0"}
 
 
+_SUP = {"\u2070": "0", "\u00b9": "1", "\u00b2": "2", "\u00b3": "3",
+        "\u2074": "4", "\u2075": "5", "\u2076": "6", "\u2077": "7",
+        "\u2078": "8", "\u2079": "9"}
+
+
+def _parse_budget(card: str, fwd_flops: int):
+    """Read B per MLP out of the card's Versions table row for this revision.
+
+    Returns (budget_int, expression_string). Raises rather than guessing -- a
+    manifest that silently falls back to a remembered constant is exactly the
+    failure mode this parser exists to remove.
+    """
+    row = None
+    for line in card.splitlines():
+        if "`v2-phase2`" in line and line.lstrip().startswith("|"):
+            row = line
+            break
+    if row is None:
+        raise SystemExit("REFUSED: no v2-phase2 row in the card's Versions table")
+
+    plain = "".join(_SUP.get(ch, ch) for ch in row)
+    m = re.search(r"\*\*2(\d\d)\s", plain) or re.search(r"\b2\^?(\d\d)\b", plain)
+    if not m:
+        raise SystemExit(f"REFUSED: no power-of-two budget in the card row: {row!r}")
+    exp = int(m.group(1))
+    budget = 2 ** exp
+
+    # Cross-check against the card's own "Effective MC samples" column: the
+    # card states B / forward_flops_per_sample, so the two must agree exactly.
+    eff = re.findall(r"\*\*([\d,]{5,})\*\*", plain)
+    stated = {int(x.replace(",", "")) for x in eff}
+    if budget // fwd_flops not in stated:
+        raise SystemExit(
+            f"REFUSED: parsed B = 2**{exp} implies "
+            f"{budget // fwd_flops:,} effective samples, which is not among the "
+            f"card's own bolded figures {sorted(stated)}. The card changed shape "
+            "or the parse is wrong; resolve it deliberately."
+        )
+    return budget, f"2**{exp}"
+
+
 def _sha(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
 
@@ -138,7 +179,13 @@ def build(offline: bool = False) -> dict:
     width = int(meta["width"])
     depth = int(meta["depth"])
     fwd_flops = 2 * depth * width * width
-    budget = 2 ** 41
+
+    # B is PARSED from the card's Versions table, not hardcoded. A hardcoded
+    # 2**41 would survive a re-bake that moved the budget, while `width` and
+    # `depth` (parsed from metadata.json) would not -- an asymmetry an
+    # independent Skeptic flagged. The card writes it as an exponent with a
+    # decimal gloss, e.g. "**2⁴¹ ≈ 2.20 × 10¹²".
+    budget, budget_expr = _parse_budget(card, fwd_flops)
 
     # ---- both stack version pairs, preserved and explained ------------------
     fps = meta.get("hardware_fingerprints", []) or []
@@ -279,7 +326,7 @@ def build(offline: bool = False) -> dict:
             "forward_flops_per_sample": fwd_flops,
             "forward_flops_formula": "2 * depth * width^2",
             "flop_budget_per_mlp": budget,
-            "flop_budget_expr": "2**41",
+            "flop_budget_expr": budget_expr,
             "effective_naive_samples": budget // fwd_flops,
             "multiplier_floor": cc["multiplier_floor"],
             "score_formula": cc["score_formula"],
@@ -360,10 +407,34 @@ def main() -> int:
         action="store_true",
         help="read the cached raw sources instead of fetching",
     )
+    ap.add_argument(
+        "--allow-rebake",
+        action="store_true",
+        help="accept that the v2-phase2 tag now points at a different commit",
+    )
     a = ap.parse_args()
 
     m = build(offline=a.offline)
     os.makedirs(OUT_DIR, exist_ok=True)
+
+    # The manifest is a LIVE POLL, so rebuilding it is normal and overwriting is
+    # correct -- unlike an evidence artifact, which is immutable. The one thing
+    # that must never be silent is the dataset moving underneath us: a new
+    # commit at the same tag is a re-bake, and every shape-dependent result in
+    # the repository is then suspect.
+    if os.path.exists(OUT) and not a.allow_rebake:
+        with open(OUT, encoding="utf-8") as fh:
+            old = json.load(fh)
+        if old["dataset"]["commit"] != m["dataset"]["commit"]:
+            raise SystemExit(
+                "REFUSED: the v2-phase2 tag has MOVED.\n"
+                f"  manifest on disk : {old['dataset']['commit']}\n"
+                f"  live tag now     : {m['dataset']['commit']}\n"
+                "The dataset was re-baked or re-tagged. Every 1024 x 16 result "
+                "in this repository was measured against the old commit and "
+                "must be re-checked. Rerun with --allow-rebake once that is a "
+                "deliberate decision, and record it in experiments/LOG.md."
+            )
     with open(OUT, "w", encoding="utf-8") as fh:
         fh.write(json.dumps(m, indent=2) + "\n")
 

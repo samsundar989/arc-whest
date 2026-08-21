@@ -51,6 +51,7 @@ for _p in (_HERE, _ROOT):
 
 import numpy as np  # noqa: E402
 
+import competition_score as cs  # noqa: E402
 import lifecycle_eval as le  # noqa: E402
 from phase2_manifest import load as load_manifest  # noqa: E402
 from phase2_mint_parity import _shard  # noqa: E402
@@ -59,6 +60,31 @@ OUT_DIR = os.path.join(_ROOT, "experiments", "2026-08-21_p2_shape_smoke")
 
 _PASS = 0
 _FAIL = 0
+
+
+def _candidate_layer1_error(candidate: str, input_seed: int, spec) -> float:
+    """Max relative error of the candidate's OWN layer-1 row vs the closed form.
+
+    Layer 1 is exact for x ~ N(0, I): E[ReLU(h_1)_j] = ||W_1[:, j]|| / sqrt(2 pi).
+    No sampling, no closure, a known answer -- so the bar is float64 epsilon and
+    not a tolerance chosen to pass.
+    """
+    import flopscope as flops
+
+    import harness
+    from mint_provenance import canonical_mint
+
+    mod, _ = le.load_candidate(candidate)
+    est = mod.Estimator()
+    est.setup(le.SetupContext(spec))
+    w_np, est_seed, _ = canonical_mint(spec.width, spec.depth, int(input_seed))
+    mlp = harness.MLP(weights=[np.asarray(x) for x in w_np], width=spec.width,
+                      depth=spec.depth, seed=est_seed)
+    with flops.BudgetContext(flop_budget=spec.flop_budget, quiet=True):
+        pred = np.asarray(est.predict(mlp, spec.flop_budget), dtype=np.float64)
+    exact = np.linalg.norm(np.asarray(w_np[0], dtype=np.float64), axis=0)
+    exact = exact / math.sqrt(2 * math.pi)
+    return float(np.abs(pred[0] - exact).max() / np.abs(exact).max())
 
 
 def check(name: str, ok: bool, detail: str = "") -> bool:
@@ -147,20 +173,54 @@ def main() -> int:
           all(r.width == width and r.depth == depth for r in rows),
           f"{depth} x {width}")
 
-    cb = [r.flops_used / budget for r in rows]
-    mult = [max(floor, c) for c in cb]
-    check("S3  counted cost strictly under B on every MLP",
-          all(c < 1.0 for c in cb),
-          f"C/B in [{min(cb):.6f}, {max(cb):.6f}]  -> multiplier {min(mult):.4f}")
+    # COUNTED and EFFECTIVE are different quantities and are never mixed
+    # (docs/VALIDATION.md section 2b). The multiplier the grader applies is a
+    # function of the EFFECTIVE compute C = F + lambda*R, and it is computed by
+    # `competition_score`, which is the ONE place the score identity is allowed
+    # to live. An earlier build of this file recomputed `max(floor, F/B)` here
+    # -- a second implementation that disagreed with the canonical one (0.0626
+    # vs 0.0684) and was hidden only because both were under the floor. An
+    # independent Skeptic caught it; at a candidate near C/B 0.09 it would have
+    # written a false multiplier into the artifact.
+    cb_counted = [r.flops_used / budget for r in rows]
+    cb_eff = [cs.effective_compute(r.flops_used, r.residual_wall_time_s, spec.lam)
+              / budget for r in rows]
+    mult = [cs.score_multiplier(
+                cs.effective_compute(r.flops_used, r.residual_wall_time_s, spec.lam),
+                budget, failed=r.failed, floor=floor)
+            for r in rows]
+    check("S3  COUNTED cost strictly under B on every MLP",
+          all(c < 1.0 for c in cb_counted),
+          f"F/B in [{min(cb_counted):.6f}, {max(cb_counted):.6f}]")
+    check("S3b EFFECTIVE cost (F + lambda*R) also under B, via competition_score",
+          all(c < 1.0 for c in cb_eff),
+          f"(F+lam*R)/B in [{min(cb_eff):.6f}, {max(cb_eff):.6f}]"
+          f"  -> multiplier {min(mult):.4f}"
+          f"   [lambda = {spec.lam:.3g}, a PHASE-1 value; residual is a"
+          f" --runner local figure and does NOT transfer]")
+    # How much residual it would take to lift this off the floor -- reported so
+    # the floor claim carries its own margin instead of asserting itself.
+    r_breach = (floor * budget - max(r.flops_used for r in rows)) / spec.lam
+    print(f"        floor margin: residual would have to exceed "
+          f"{r_breach:.3f} s/MLP at lambda = {spec.lam:.3g} to lift the "
+          f"multiplier off {floor}")
 
-    # S4: exact layer 1. The candidate returns all layers; re-derive its layer-1
-    # row by rerunning predict is expensive, so assert the property the smoke can
-    # see for free -- the closed form itself, against the PUBLISHED layer-1 mean,
-    # which also re-confirms the row-vector convention at this shape.
-    sig = np.linalg.norm(w1.astype(np.float64), axis=1)          # (n, width)
-    l1 = sig / math.sqrt(2 * math.pi)
-    check("S4  layer-1 closed form is exact at 1024 x 16 (published truth)",
-          True, f"|| W1[:, j] || / sqrt(2 pi), max {l1.max():.4f}")
+    # S4: the CANDIDATE's own layer-1 row against the exact closed form.
+    #
+    # The first build of this check passed the literal `True` as its condition
+    # and computed a closed form it never compared to anything -- a check that
+    # cannot fail, which is the failure class docs/GOTCHAS.md names five times
+    # and an independent Skeptic found here for the sixth. It now runs the
+    # candidate's `predict` and compares row 0.
+    #
+    # `axis=0` is the COLUMN norm ||W1[:, j]||, correct under the row-vector
+    # convention h @ W. The column convention would use axis=1, and that is
+    # exactly what this assertion exists to catch.
+    l1_max_rel = _candidate_layer1_error(a.candidate, seeds[0], spec)
+    check("S4  the CANDIDATE's layer-1 row equals || W1[:, j] || / sqrt(2 pi)",
+          l1_max_rel < 1e-12,
+          f"max relative error {l1_max_rel:.3e}  (exact arithmetic, not a "
+          f"sampling comparison -- the bar is float64 epsilon, not a tolerance)")
 
     h1 = le.rows_hash(rows)
     h2 = le.rows_hash(rows2)
@@ -184,7 +244,7 @@ def main() -> int:
 
     tag = a.tag or os.path.basename(a.candidate).replace(".py", "")
     os.makedirs(OUT_DIR, exist_ok=True)
-    path = os.path.join(OUT_DIR, f"smoke_{tag}.json")
+    path = os.path.join(OUT_DIR, f"smoke_{tag}_shard{a.shard}_n{n}.json")
     prov = dict(prov)
     prov.update({
         "purpose": "P2-CP0 shape/fallback smoke -- selects nothing",
@@ -196,13 +256,31 @@ def main() -> int:
         "limitation_stamp": parity["limitation_stamp"],
         "assertions": {"passed": _PASS, "failed": _FAIL},
         "determinism_rows_hash": h1,
-        "cb_min": min(cb), "cb_max": max(cb),
+        "counted_cb_min": min(cb_counted), "counted_cb_max": max(cb_counted),
+        "effective_cb_min": min(cb_eff), "effective_cb_max": max(cb_eff),
         "multiplier_min": min(mult), "multiplier_max": max(mult),
+        "multiplier_source": "competition_score.score_multiplier on the "
+                             "EFFECTIVE compute F + lambda*R",
+        "lambda_used": spec.lam,
+        "lambda_provenance": "PHASE-1 value 1e11. Phase-2 lambda is UNPUBLISHED.",
+        "residual_is_graded": False,
+        "residual_note": "residual_wall_time_s is a --runner local figure. It "
+                         "does not transfer to the grader (2-3% of C there, "
+                         "10-13% here). Ratios inside one path only.",
+        "floor_breach_residual_s": r_breach,
+        "candidate_layer1_max_rel": l1_max_rel,
     })
+    # NO os.remove() bypass. `write_evidence` refuses to overwrite on purpose,
+    # and an earlier build of this file deleted the file first to get past it --
+    # the same defect that silently shrank the mint-parity evidence from 16 rows
+    # to 4. A rerun with different parameters writes a different file; a rerun
+    # with the same parameters is a no-op.
     if os.path.exists(path):
-        os.remove(path)      # a smoke is regenerable; it decides nothing
-    le.write_evidence(path, rows, prov, suite)
-    print(f"\n  artifact -> {os.path.relpath(path, _ROOT)}")
+        print(f"\n  artifact already exists, not rewritten -> "
+              f"{os.path.relpath(path, _ROOT)}")
+    else:
+        le.write_evidence(path, rows, prov, suite)
+        print(f"\n  artifact -> {os.path.relpath(path, _ROOT)}")
     print("=" * 78)
     return 0 if _FAIL == 0 else 1
 

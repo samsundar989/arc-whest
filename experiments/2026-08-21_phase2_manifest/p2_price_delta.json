@@ -1,0 +1,247 @@
+{
+  "artifact": "p2_price_delta",
+  "artifact_version": 1,
+  "candidate": "estimator.py",
+  "shape": {
+    "width": 1024,
+    "depth": 16
+  },
+  "sides": {
+    "0.10": {
+      "flopscope": "0.10.0",
+      "python": "3.10.19",
+      "estimator": {
+        "total": 137562547200.0,
+        "budget": 2199023255552,
+        "cb": 0.06255620392039418,
+        "ops": {
+          "zeros": {
+            "flops": 0.0,
+            "calls": 1.0
+          },
+          "eye": {
+            "flops": 4096.0,
+            "calls": 2.0
+          },
+          "ones": {
+            "flops": 2097152.0,
+            "calls": 1.0
+          },
+          "subtract": {
+            "flops": 1082368.0,
+            "calls": 17.0
+          },
+          "matmul": {
+            "flops": 137438920704.0,
+            "calls": 48.0
+          },
+          "diagonal": {
+            "flops": 0.0,
+            "calls": 16.0
+          },
+          "maximum": {
+            "flops": 65536.0,
+            "calls": 32.0
+          },
+          "sqrt": {
+            "flops": 34816.0,
+            "calls": 17.0
+          },
+          "true_divide": {
+            "flops": 32768.0,
+            "calls": 16.0
+          },
+          "stats.norm.cdf": {
+            "flops": 1572864.0,
+            "calls": 16.0
+          },
+          "stats.norm.pdf": {
+            "flops": 884736.0,
+            "calls": 16.0
+          },
+          "multiply": {
+            "flops": 67340288.0,
+            "calls": 145.0
+          },
+          "add": {
+            "flops": 33652736.0,
+            "calls": 64.0
+          },
+          "outer": {
+            "flops": 16793600.0,
+            "calls": 16.0
+          },
+          "diag": {
+            "flops": 32768.0,
+            "calls": 16.0
+          },
+          "stack": {
+            "flops": 32768.0,
+            "calls": 1.0
+          }
+        }
+      },
+      "primitives": {
+        "matmul f32": 33488896.0,
+        "matmul f64": 66977792.0,
+        "eigh f64": 301989888.0,
+        "qr f64": 89478488.0,
+        "outer f64": 131072.0,
+        "diag f64": 512.0,
+        "diagonal f64": 0.0,
+        "norm.cdf f64": 6291456.0,
+        "norm.pdf f64": 3538944.0,
+        "norm.ppf f64": 10878976.0,
+        "sqrt f32": 65536.0,
+        "sqrt f64": 131072.0,
+        "exp f64": 2097152.0,
+        "as_symmetric f32": 458751.0,
+        "as_symmetric f64": 917502.0,
+        "sum f32": 65535.0,
+        "sum f64": 131070.0,
+        "mean f32": 65536.0,
+        "nansum f32": 65535.0,
+        "nansum f64": 131070.0,
+        "nanmean f32": 65536.0,
+        "nanmax f32": 65535.0,
+        "where(mask, f32, 0.0 py)": 524288.0,
+        "where(mask, f64, 0.0 py)": 524288.0,
+        "maximum(f32, 0.0 py)": 65536.0,
+        "maximum(f64, 0.0 py)": 131072.0,
+        "f32 * 2.0 py": 65536.0,
+        "f32 * np.float32(2)": 65536.0,
+        "clip(f32, 0.0 py, None)": 65536.0,
+        "astype f32->f64": 131072.0
+      }
+    },
+    "0.12": {
+      "flopscope": "0.12.0",
+      "python": "3.10.19",
+      "estimator": {
+        "total": 137562547200.0,
+        "budget": 2199023255552,
+        "cb": 0.06255620392039418,
+        "ops": {
+          "zeros": {
+            "flops": 0.0,
+            "calls": 1.0
+          },
+          "eye": {
+            "flops": 4096.0,
+            "calls": 2.0
+          },
+          "ones": {
+            "flops": 2097152.0,
+            "calls": 1.0
+          },
+          "subtract": {
+            "flops": 1082368.0,
+            "calls": 17.0
+          },
+          "matmul": {
+            "flops": 137438920704.0,
+            "calls": 48.0
+          },
+          "diagonal": {
+            "flops": 0.0,
+            "calls": 16.0
+          },
+          "maximum": {
+            "flops": 65536.0,
+            "calls": 32.0
+          },
+          "sqrt": {
+            "flops": 34816.0,
+            "calls": 17.0
+          },
+          "true_divide": {
+            "flops": 32768.0,
+            "calls": 16.0
+          },
+          "stats.norm.cdf": {
+            "flops": 1572864.0,
+            "calls": 16.0
+          },
+          "stats.norm.pdf": {
+            "flops": 884736.0,
+            "calls": 16.0
+          },
+          "multiply": {
+            "flops": 67340288.0,
+            "calls": 145.0
+          },
+          "add": {
+            "flops": 33652736.0,
+            "calls": 64.0
+          },
+          "outer": {
+            "flops": 16793600.0,
+            "calls": 16.0
+          },
+          "diag": {
+            "flops": 32768.0,
+            "calls": 16.0
+          },
+          "stack": {
+            "flops": 32768.0,
+            "calls": 1.0
+          }
+        }
+      },
+      "primitives": {
+        "matmul f32": 33488896.0,
+        "matmul f64": 66977792.0,
+        "eigh f64": 301989888.0,
+        "qr f64": 89478488.0,
+        "outer f64": 131072.0,
+        "diag f64": 512.0,
+        "diagonal f64": 0.0,
+        "norm.cdf f64": 6291456.0,
+        "norm.pdf f64": 3538944.0,
+        "norm.ppf f64": 10878976.0,
+        "sqrt f32": 65536.0,
+        "sqrt f64": 131072.0,
+        "exp f64": 2097152.0,
+        "as_symmetric f32": 458751.0,
+        "as_symmetric f64": 917502.0,
+        "sum f32": 65535.0,
+        "sum f64": 131070.0,
+        "mean f32": 65536.0,
+        "nansum f32": 131071.0,
+        "nansum f64": 262142.0,
+        "nanmean f32": 131072.0,
+        "nanmax f32": 65535.0,
+        "where(mask, f32, 0.0 py)": 262144.0,
+        "where(mask, f64, 0.0 py)": 524288.0,
+        "maximum(f32, 0.0 py)": 65536.0,
+        "maximum(f64, 0.0 py)": 131072.0,
+        "f32 * 2.0 py": 65536.0,
+        "f32 * np.float32(2)": 65536.0,
+        "clip(f32, 0.0 py, None)": 65536.0,
+        "astype f32->f64": 131072.0
+      }
+    }
+  },
+  "estimator_total_identical": true,
+  "estimator_ops_moved": {},
+  "primitives_moved": {
+    "nanmean f32": [
+      65536.0,
+      131072.0
+    ],
+    "nansum f32": [
+      65535.0,
+      131071.0
+    ],
+    "nansum f64": [
+      131070.0,
+      262142.0
+    ],
+    "where(mask, f32, 0.0 py)": [
+      524288.0,
+      262144.0
+    ]
+  },
+  "n_primitives_probed": 30,
+  "note": "Counted FLOPs on a dense path are value-independent, so this probe uses an unregistered probe seed and draws NO seed block. It selects nothing."
+}

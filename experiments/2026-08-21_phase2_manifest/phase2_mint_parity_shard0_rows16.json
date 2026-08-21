@@ -26,12 +26,23 @@
   "layer1_closed_form_max_rel": 0.00019995127724969894,
   "layer1_z_abs_max": 4.523521292418663,
   "layer1_z_rms_mean": 1.0016642222851402,
-  "layer1_z_expected_max": 4.353910696189003,
+  "layer1_z_max_pvalue_exact": 0.09484264450293191,
+  "layer1_z_bars": {
+    "rms_lo": 0.9,
+    "rms_hi": 1.1,
+    "max_p_min": 1e-06
+  },
+  "layer1_z_gate_passed": true,
   "layer1_z_note": "residual of the published layer-1 mean against the EXACT closed form, in units of its own N = 1e9 Monte Carlo standard error. rms z ~ 1 and max |z| near the Gaussian order statistic is the calibrated statement; a small relative error is not.",
   "max_published_seed_bits": 63,
   "gt_noise_floor_exact": 7.828604404805722e-11,
   "gt_noise_floor_formula": "mean_i(avg_variance_i) / N",
   "verdict": "PROVEN",
+  "verdict_components": {
+    "weights_bitwise": true,
+    "shape_contract": true,
+    "layer1_z_calibrated": true
+  },
   "rows": [
     {
       "mlp_id": 0,

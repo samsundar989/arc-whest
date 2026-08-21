@@ -1,0 +1,104 @@
+{
+  "artifact": "phase2_mint_parity",
+  "artifact_version": 1,
+  "dataset": {
+    "repo": "aicrowd/arc-whestbench-public-2026",
+    "revision_commit": "ce926b7d1ced65faa668c01b94a43f8c4f43783d",
+    "shard": "data/mini-00001-of-00007.parquet"
+  },
+  "shape": {
+    "width": 1024,
+    "depth": 16
+  },
+  "truth_n_samples": 1000000000,
+  "package_parity_at_check_time": {
+    "status": "BLOCKED",
+    "blockers": [
+      "whestbench 0.16.0 is not published on PyPI (latest 0.15.0)",
+      "public whestbench 0.15.0 pins 'flopscope<0.12.0,>=0.11.0', which EXCLUDES the bake's flopscope 0.12.0; no public pair reproduces the bake stack"
+    ],
+    "limitation_stamp": "EXACT PACKAGE PARITY WITH THE PHASE-2 BAKE STACK IS BLOCKED. Every artifact produced while this holds must carry this field. Counted FLOPs measured under a different flopscope release are NOT the grader's counted FLOPs. Re-run parity the moment whestbench 0.16.0 is published.",
+    "note": "This check is INDEPENDENT of the blocker: it compares our mint to the organisers' published bytes, not to a package."
+  },
+  "n_rows_checked": 4,
+  "weights_bit_identical": 4,
+  "shape_contract_ok": 4,
+  "layer1_closed_form_max_rel": 0.0001845053358680343,
+  "layer1_z_abs_max": 4.338940458745836,
+  "layer1_z_rms_mean": 1.0110045177745746,
+  "layer1_z_max_pvalue_exact": 0.05695698762892501,
+  "layer1_z_bars": {
+    "rms_lo": 0.9,
+    "rms_hi": 1.1,
+    "max_p_min": 1e-06
+  },
+  "layer1_z_gate_passed": true,
+  "layer1_z_note": "residual of the published layer-1 mean against the EXACT closed form, in units of its own N = 1e9 Monte Carlo standard error. rms z ~ 1 and max |z| near the Gaussian order statistic is the calibrated statement; a small relative error is not.",
+  "max_published_seed_bits": 63,
+  "gt_noise_floor_exact": 6.72083484294002e-11,
+  "gt_noise_floor_formula": "mean_i(avg_variance_i) / N",
+  "verdict": "PROVEN",
+  "verdict_components": {
+    "weights_bitwise": true,
+    "shape_contract": true,
+    "layer1_z_calibrated": true
+  },
+  "rows": [
+    {
+      "mlp_id": 16,
+      "mlp_name": "adam-morrison",
+      "mlp_seed": 3786732390200298364,
+      "mlp_seed_bits": 62,
+      "derived_estimator_seed": 250561177,
+      "weights_bitwise_identical": true,
+      "shape_contract_ok": true,
+      "layer1_closed_form_max_rel": 0.00014698108437266022,
+      "avg_variance": 0.07014358031990843,
+      "gt_mse": 7.014358031990843e-11,
+      "layer1_z_abs_max": 3.4868317035241643,
+      "layer1_z_rms": 1.002448917496709
+    },
+    {
+      "mlp_id": 17,
+      "mlp_name": "william-simmons",
+      "mlp_seed": 834438545481244494,
+      "mlp_seed_bits": 60,
+      "derived_estimator_seed": 1664574005,
+      "weights_bitwise_identical": true,
+      "shape_contract_ok": true,
+      "layer1_closed_form_max_rel": 0.00013322208489070184,
+      "avg_variance": 0.06443441642376573,
+      "gt_mse": 6.443441642376572e-11,
+      "layer1_z_abs_max": 3.0449475576092597,
+      "layer1_z_rms": 1.0116860537125856
+    },
+    {
+      "mlp_id": 18,
+      "mlp_name": "william-bryant",
+      "mlp_seed": 2176353874128788411,
+      "mlp_seed_bits": 61,
+      "derived_estimator_seed": 1758913212,
+      "weights_bitwise_identical": true,
+      "shape_contract_ok": true,
+      "layer1_closed_form_max_rel": 0.0001273653963100013,
+      "avg_variance": 0.060339183313887663,
+      "gt_mse": 6.033918331388766e-11,
+      "layer1_z_abs_max": 3.0435049978716604,
+      "layer1_z_rms": 0.9920357138917699
+    },
+    {
+      "mlp_id": 19,
+      "mlp_name": "angela-hancock",
+      "mlp_seed": 8262064847276688196,
+      "mlp_seed_bits": 63,
+      "derived_estimator_seed": 862370453,
+      "weights_bitwise_identical": true,
+      "shape_contract_ok": true,
+      "layer1_closed_form_max_rel": 0.0001845053358680343,
+      "avg_variance": 0.07391621366003896,
+      "gt_mse": 7.391621366003897e-11,
+      "layer1_z_abs_max": 4.338940458745836,
+      "layer1_z_rms": 1.0378473859972333
+    }
+  ]
+}
