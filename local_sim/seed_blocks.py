@@ -17,7 +17,13 @@ Layout — decimal digits are used as namespaces so a stray seed is readable at 
 glance:
 
     2_026_08_06_xxx    reserved: the sealed vault (block V, 500 seeds)
-    3_0dd_nnn_xxx      decision blocks: dd = day-of-month, nnn = block index
+    3_0dd_nnn_xxx      PHASE-1 decision blocks (256 x 32): dd = day-of-month,
+                       nnn = block index
+    4_0mdd_nnn_xxx     PHASE-2 blocks (1024 x 16). A DIFFERENT SHAPE IS A
+                       DIFFERENT EXPERIMENT: the same seed mints a
+                       different-shaped network, so a Phase-1 block cannot be
+                       reused at Phase 2 and the leading digit says which world a
+                       stray seed belongs to at a glance.
     9_0xx_xxx_xxx      legacy pre-2026-08-06 blocks (numbers NOT comparable to
                        anything minted after the provenance fix)
 
@@ -90,6 +96,18 @@ DECISION_BLOCKS = [
                                  "unspent. Held for the v2.6 promotion gate once the Phase-2 "
                                  "shape is known -- kept distinct from D17 so a shape change "
                                  "does not burn the only clean decision block."),
+    # ---- PHASE 2, 1024 x 16. A new shape is a new world: every block above
+    # allocates 256x32 networks and none of them is reusable here.
+    ("P01", 40_821_001_000, 600, "PHASE-2 DESIGN block, allocated 2026-08-21 for "
+                                 "P2-CP1, the 1024x16 baseline ladder (analytic "
+                                 "Price/Hermite rungs vs sampling arms) under the "
+                                 "contract registered in experiments/LOG.md that "
+                                 "day. Tuning and implementation choices are "
+                                 "PERMITTED here; no promotion gate is decided on "
+                                 "it. 96 seeds claimed by the truth generator; the "
+                                 "remaining 504 are held for a DISJOINT P2-CP2 "
+                                 "draw so the deployment gate is not measured on "
+                                 "the networks that chose the candidate."),
 ]
 
 # --- single-use blocks -------------------------------------------------------

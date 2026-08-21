@@ -76,6 +76,8 @@ TIERS: Dict[str, str] = {
     "D17": "SINGLE_USE",
     "D18": "DESIGN",
     "D19": "SINGLE_USE",
+    # ---- Phase 2, 1024 x 16 ----
+    "P01": "DESIGN",
 }
 
 
