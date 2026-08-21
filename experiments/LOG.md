@@ -9148,3 +9148,71 @@ are claimed here; the remainder stays free for P2-CP2's disjoint DECIDE draw.
 **Driver**
 Claude Opus 5 (1M context), repo-local Builder. Recorded so a later reader knows
 what was in play — the entry does not depend on that agent's chat history.
+
+## Samuel's prediction — recorded 2026-08-21, BEFORE the block was claimed
+
+Asked the three questions `ai/workflows/slice-contract.md` step 4 requires, with
+the measured context in front of him and no result in existence.
+
+| question | Samuel's answer |
+|---|---|
+| Which family owns the Phase-2 frontier, and by how much? | **Analytic wins big (>2x).** Agrees with the builder's P1 (2.0x–4.0x) |
+| The shipped closure is the first-order truncation of an exact series; higher orders cost ~0.7% more. What does that buy? | **A small win that plateaus fast.** Agrees with the builder's P3 (1.02–1.20x at order 2) and P4 (order 6 adds < 1.03x over order 2) |
+| Anything to change before the block is spent? | **Go, but more networks.** |
+
+**Builder and human agree on both substantive predictions.** That is worth
+naming rather than glossing: it means this slice has *low* expected information
+if it comes out as predicted, and *high* information if it does not. The
+falsifiers in the contract are therefore the load-bearing part of it, and the
+result section must lead with whichever of H1–H4 came closest to breaking.
+
+### The one contract change, and its consequence
+
+**n = 48 -> n = 96 networks.** Nothing else in the contract moves: same arms,
+same gate, same frozen residual model, same block, same truth design.
+
+- Resolution on the paired difference improves as `1/sqrt(n)`, so roughly
+  **+-10% -> +-7%**.
+- It costs **GPU minutes, not seeds**: P01 has 600, and 96 leaves 504 free for
+  P2-CP2's disjoint DECIDE draw. Truth generation goes ~8.4 min -> ~17 min.
+- The ladder run roughly doubles. See the driver note below, which recovers most
+  of that.
+
+### A driver change made BEFORE the run, and why it is a correction rather than a convenience
+
+The driver as first written ran each arm **twice**: once through
+`lifecycle_eval.evaluate` for the score, and once again outside the budget to
+recover per-MLP predictions for the cross-product noise correction and the
+depth curve. At n = 96 that second pass is about ninety minutes of pure
+duplication.
+
+It is also unnecessary, by an exact identity. Writing `ybar = (y1 + y2)/2`:
+
+```text
+  mean[(p - y1)(p - y2)]  =  mean[(p - ybar)^2]  -  mean[((y1 - y2)/2)^2]
+```
+
+— expand both sides; the cross terms cancel identically. So the **cross-product
+noise-corrected MSE is the ordinary MSE against the AVERAGED replica, minus a
+constant that depends only on the truth and not at all on the prediction.** The
+evaluator already computes the first term, and the second is measured once from
+the truth file.
+
+Three consequences, all of them improvements:
+
+1. **One scored pass per arm**, so there is exactly one set of numbers per arm and
+   no possibility of the two passes disagreeing.
+2. The subtracted constant `mean[((y1-y2)/2)^2]` **is** the noise of the averaged
+   replica, `V / (2N)`, so the correction is now a *measured* quantity with a
+   *predicted* value to check it against, rather than an estimate.
+3. The bias it removes is **identical across arms**, so it cancels exactly in the
+   paired difference — which is the binding statistic. The correction therefore
+   changes no comparison; it only makes the **absolute** MSEs quotable next to
+   the packet's projection, which is what P2-CP1 has to do.
+
+The depth curve still needs full prediction arrays, so it is computed on a fixed
+**subset of 8** networks rather than all 96. A mechanism curve does not need 96
+networks, and saying so here is cheaper than pretending it does.
+
+**Nothing about the gate, the arms, the statistic or the frozen residual model
+changed.** The contract above stands as written apart from `n`.

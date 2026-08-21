@@ -78,9 +78,27 @@ DEFAULT_ARMS = [
 CONTROL = "k2p1"
 
 
-def _cross_mse(pred, y1, y2):
-    """mean_j (p - y1)(p - y2). Unbiased for MSE(p) when E[e1 e2] = 0."""
-    return float(((pred - y1) * (pred - y2)).mean())
+def _replica_noise(y1, y2):
+    """mean_j ((y1 - y2)/2)^2, per network. The AVERAGED replica's own noise.
+
+    This is the whole cross-product correction, and it needs no predictions:
+
+        mean[(p - y1)(p - y2)] = mean[(p - ybar)^2] - mean[((y1 - y2)/2)^2]
+
+    with `ybar = (y1 + y2)/2` -- expand both sides and the cross terms cancel
+    identically. So the noise-corrected MSE is the ordinary MSE against the
+    averaged replica minus a constant that depends only on the truth.
+
+    Three things follow, and they are why the driver runs each arm ONCE:
+      * the evaluator already computes the first term, so no second pass is
+        needed to recover per-MLP predictions;
+      * the subtracted constant IS `V / (2N)`, so it is a measured quantity with
+        a predicted value to check it against;
+      * the bias is IDENTICAL across arms, so it cancels exactly in the paired
+        difference. The correction changes no comparison -- it only makes the
+        ABSOLUTE MSEs quotable next to a projection.
+    """
+    return (((y1 - y2) / 2.0) ** 2).mean(axis=1)
 
 
 def _run_arm(name, seeds, truth_final, spec, gt_noise):
@@ -138,6 +156,8 @@ def main() -> int:
     ap.add_argument("--out", default="")
     ap.add_argument("--arms", default=",".join(DEFAULT_ARMS))
     ap.add_argument("--n", type=int, default=0, help="0 = every network in the truth file")
+    ap.add_argument("--depth-subset", type=int, default=8,
+                    help="networks used for the MSE-by-depth mechanism curve")
     ap.add_argument("--gate", type=float, default=None,
                     help="pre-registered promotion gate; REQUIRED to print a verdict")
     a = ap.parse_args()
@@ -183,26 +203,37 @@ def main() -> int:
         print(f"  STAMP      {parity['limitation_stamp'][:74]}...")
     print()
 
+    # The averaged replica's noise, measured once. Every arm's MSE against `y_mid`
+    # is inflated by exactly this, identically, so it cancels in every paired
+    # comparison and is subtracted only for the ABSOLUTE numbers.
+    rep_noise = _replica_noise(y1, y2)
+    print(f"  replica noise of the AVERAGED truth   measured {rep_noise.mean():.4e}"
+          f"   predicted V/2N {gt_noise.mean() / 2:.4e}"
+          f"   ratio {rep_noise.mean() / (gt_noise.mean() / 2):.4f}")
+    print("     (the ratio is a live check on replica independence; far from 1.0")
+    print("      means the two draws share state and every corrected MSE is wrong)")
+    print()
+
+    n_depth = min(a.depth_subset, n)
     results = {}
     for name in arms:
         t0 = time.perf_counter()
+        # ONE scored pass. `lifecycle_eval` owns every scored number.
         rows, prov = _run_arm(name, seeds, y_mid, spec, list(gt_noise))
         suite = le.score(rows, spec=spec)
-        preds = None                       # re-derive per-MLP predictions cheaply
-        # lifecycle_eval scores the final layer; for the depth curve and the
-        # cross-product estimate we need the arm's own arrays, so re-run the
-        # predict outside the budget (it is deterministic, so this is the same
-        # numbers, and no score is computed from this path).
-        preds, alld = _predict_all(name, seeds, spec)
-        cross = np.array([_cross_mse(preds[i], y1[i], y2[i]) for i in range(n)])
-        mse1 = np.array([float(((preds[i] - y1[i]) ** 2).mean()) for i in range(n)])
-        mse2 = np.array([float(((preds[i] - y2[i]) ** 2).mean()) for i in range(n)])
+        raw = np.array([r.mse for r in rows])
+        cross = raw - rep_noise
+        # The depth curve needs full prediction arrays, which the evaluator does
+        # not return. A mechanism curve does not need 96 networks, so it is
+        # computed on a fixed SUBSET and labelled as such rather than pretending
+        # otherwise.
+        _f, alld = _predict_all(name, seeds[:n_depth], spec)
         by_depth = np.array([
-            [float((((alld[i][d] - (all1[i][d] + all2[i][d]) / 2.0)) ** 2).mean())
-             for d in range(depth)] for i in range(n)])
+            [float(((alld[i][d] - (all1[i][d] + all2[i][d]) / 2.0) ** 2).mean())
+             for d in range(depth)] for i in range(n_depth)])
         c012 = _cost_under_012(name, width, depth, budget)
         results[name] = dict(
-            rows=rows, prov=prov, suite=suite, cross=cross, mse1=mse1, mse2=mse2,
+            rows=rows, prov=prov, suite=suite, cross=cross, raw=raw,
             by_depth=by_depth, cost012=c012, secs=time.perf_counter() - t0,
         )
         f = float(np.mean([r.flops_used for r in rows]))
@@ -210,7 +241,7 @@ def main() -> int:
                                                   r.residual_wall_time_s, spec.lam)
                              for r in rows]))
         print(f"  {name:<18} score {suite.objective:.5e}   "
-              f"MSE(x-prod) {cross.mean():.4e}   MSE(r1) {mse1.mean():.4e}   "
+              f"MSE(corr) {cross.mean():.4e}   MSE(raw) {raw.mean():.4e}   "
               f"F/B {f / budget:.4f}   eff {eff / budget:.4f}   "
               f"mult {suite.mean_multiplier:.4f}   fail {suite.n_failed}/{n}   "
               f"{results[name]['secs']:.0f}s"
@@ -247,7 +278,10 @@ def main() -> int:
 
     # ---- the mechanism curve ----------------------------------------------
     print()
-    print("  MSE BY DEPTH -- the (L/n)^K mechanism curve, cross-replica mean truth")
+    print(f"  MSE BY DEPTH -- the (L/n)^K mechanism curve, on {n_depth} of {n} "
+          f"networks (a mechanism curve does not need all of them)")
+    print("  L1 is exact for EVERY arm, so that column reads the truth-noise "
+          "floor -- a built-in calibration")
     hdr = "  " + f"{'arm':<18}" + "".join(f"{'L' + str(d + 1):>11}"
                                           for d in (0, 1, 3, 7, 11, 15))
     print(hdr)
@@ -301,6 +335,9 @@ def _write(path, results, paired, man, seeds, z, spec, arms):
         "budget": man["budget"],
         "package_parity": man["package_parity"],
         "truth": {
+            "replica_noise_of_average_measured": float(_replica_noise(
+                z["means_r1"][:len(seeds), -1, :].astype(np.float64),
+                z["means_r2"][:len(seeds), -1, :].astype(np.float64)).mean()),
             "n_samples_per_replica": int(z["n_samples"]),
             "n_networks": len(seeds),
             "replicas": 2,
@@ -311,16 +348,21 @@ def _write(path, results, paired, man, seeds, z, spec, arms):
         "lambda_provenance": "PHASE-1 value 1e11; Phase-2 lambda is UNPUBLISHED",
         "residual_is_graded": False,
         "control": CONTROL,
+        "noise_correction_identity": (
+            "mean[(p-y1)(p-y2)] = mean[(p-ybar)^2] - mean[((y1-y2)/2)^2]; the "
+            "subtracted term is the averaged replica's own noise and is identical "
+            "across arms, so it cancels exactly in every paired difference"
+        ),
         "arms": {},
     }
     for name in arms:
         r = results[name]
         payload["arms"][name] = {
             "objective": r["suite"].objective,
-            "mean_mse_r1": float(r["mse1"].mean()),
-            "mean_mse_r2": float(r["mse2"].mean()),
-            "mean_mse_cross": float(r["cross"].mean()),
-            "per_mlp_cross": [float(x) for x in r["cross"]],
+            "mean_mse_raw_vs_averaged_replica": float(r["raw"].mean()),
+            "mean_mse_noise_corrected": float(r["cross"].mean()),
+            "per_mlp_mse_raw": [float(x) for x in r["raw"]],
+            "per_mlp_mse_noise_corrected": [float(x) for x in r["cross"]],
             "mean_flops": float(np.mean([x.flops_used for x in r["rows"]])),
             "flops_012": r["cost012"],
             "n_failed": r["suite"].n_failed,
