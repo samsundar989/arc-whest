@@ -159,6 +159,13 @@ def t_design_strength():
         n = N
         if name == "haar frames":
             n = (N // (2 * DIM)) * 2 * DIM      # 16384 = 32 bases of 256, exactly
+        elif name.startswith("kerdock+axial"):
+            # An exact design has ONE size: 2^16 sign vectors + 2d axial points.
+            # Subsampling restores the S-dependence the axial correction removes,
+            # which is the whole property being measured, so the carrier refuses.
+            n = (1 << 16) + 2 * DIM
+        elif name.startswith("kerdock"):
+            n = 1 << 16
         elif name.startswith("bch OA half"):
             n = 1 << 16
         elif name.startswith("bch OA"):
@@ -351,6 +358,114 @@ def t_predictions(profiles):
           abs(66048 / N - 4.03) < 0.01, f"{66048 / N:.2f}x N = {N:,}")
 
 
+def t_kerdock():
+    """CP1.1 — the non-linear construction, its fingerprint, and the identity.
+
+    Contract and predictions K1-K5: `experiments/LOG.md`, 2026-08-20, committed as
+    b2a92a2 BEFORE any of this ran.
+    """
+    import collections
+    from carriers import (_kerdock_bits, kerdock_signs, kerdock_axial,
+                          kerdock_axial_unrotated)
+
+    head("6. KERDOCK / MUB-129 — the non-linear escape from the 131,072 floor")
+
+    # ---- K1: the fingerprint. If this fails, nothing measured below counts. --
+    bits = _kerdock_bits()
+    uniq = np.unique(np.packbits(bits.astype(np.uint8), axis=1), axis=0)
+    compl = np.unique(np.packbits((1 - bits).astype(np.uint8), axis=1), axis=0)
+    w = bits.sum(axis=1)
+    counts = dict(sorted(collections.Counter(w.tolist()).items()))
+    check("K1: exactly 65,536 distinct codewords of length 256",
+          len(uniq) == 65536 and bits.shape[1] == 256, f"{len(uniq):,} x {bits.shape[1]}")
+    check("K1: closed under complement", np.array_equal(uniq, compl))
+    check("K1: weight support is EXACTLY the Kerdock signature",
+          sorted(counts) == [0, 120, 128, 136, 256],
+          f"{sorted(counts)}   min distance 2^7 - 2^3 = 120")
+    check("K1: and the weight COUNTS are Kerdock's",
+          counts == {0: 1, 120: 32512, 128: 510, 136: 32512, 256: 1}, f"{counts}")
+
+    # ---- the axial correction is an IDENTITY, not a tuning ------------------
+    d = DIM
+    sg = kerdock_signs(d).astype(np.float64)
+    rng = np.random.default_rng(20260820)
+    tgt4 = exact_moment(4, d)
+    worst_pred, worst_exact = 0.0, 0.0
+    for _ in range(24):
+        a = rng.standard_normal(d); a /= np.linalg.norm(a)
+        Sv = float((a ** 4).sum())
+        p = sg @ a / math.sqrt(d)
+        worst_pred = max(worst_pred,
+                         abs(float((p ** 4).mean()) - (3.0 - 2.0 * Sv) / d ** 2)
+                         / ((3.0 - 2.0 * Sv) / d ** 2))
+        tot = float((p ** 4).sum()) + 2.0 * Sv          # axial: (a.e_i)^4 = a_i^4
+        worst_exact = max(worst_exact, abs(tot / (sg.shape[0] + 2 * d) - tgt4) / tgt4)
+    check("the sign set obeys (3 - 2S)/d^2 for EVERY direction",
+          worst_pred < 1e-12, f"worst rel dev {worst_pred:.2e}")
+    check("+ the 2d axial points makes degree 4 EXACT, at uniform weights",
+          worst_exact < 1e-12,
+          f"worst rel dev {worst_exact:.2e}   [(3-2S) + 2S]/(2^16+2d) = 3/(d(d+2))")
+
+    # ---- the deployment case: CONFINED directions ---------------------------
+    # docs/GOTCHAS: a bare cube array confined to 32 dims reads 5.15% low and is
+    # 4.6x WORSE than Sobol unrotated. That is what closed the subspace route.
+    pts = kerdock_axial_unrotated(66048, d, 0)
+    for kdim in (256, 64, 32):
+        errs = []
+        for _ in range(8):
+            a = np.zeros(d)
+            idx = rng.choice(d, kdim, replace=False)
+            a[idx] = rng.standard_normal(kdim)
+            a /= np.linalg.norm(a)
+            pr = to_sphere(pts) @ a
+            errs.append(abs(float((pr ** 4).mean()) - tgt4) / tgt4)
+        e = float(np.sqrt(np.mean(np.square(errs))))
+        check(f"exact at degree 4 with directions confined to {kdim:>3} dims",
+              e < 1e-12, f"rel err {e:.2e}   (a bare cube array degrades here)")
+
+    # ---- K2/K3/K4: the measured profile against the recorded baselines ------
+    prof = {}
+    for name, n in (("iid", 65536), ("sobol (SHIPPED)", 65536),
+                    ("haar frames", 65536), ("kerdock (rotated)", 65536),
+                    ("kerdock+axial (rotated)", 66048),
+                    ("bch OA (rotated)", 1 << 17)):
+        prof[name] = strength_profile(build(name, n, d, seed=20260820), d,
+                                      seed=4242, n_dirs=400)
+        prof[name]["_n"] = n
+    base = prof["iid"]
+    print(f"\n  {'carrier':<26}{'n':>8}"
+          + "".join(f"{'k=' + str(k):>10}" for k in DEGREES) + "   (ratio to iid)")
+    print("  " + "-" * (34 + 10 * len(DEGREES)))
+    for nm, p in prof.items():
+        print(f"  {nm:<26}{p['_n']:>8}"
+              + "".join(f"{p[k] / base[k]:>10.4f}" for k in DEGREES))
+
+    k4 = prof["kerdock (rotated)"][4] / base[4]
+    k4a = prof["kerdock+axial (rotated)"][4] / base[4]
+    k4b = prof["bch OA (rotated)"][4] / base[4]
+    check("K2: rotated Kerdock alone clears the 0.10x GO gate at degree 4",
+          k4 <= 0.10, f"{k4:.4f}x iid at 65,536 points "
+                      f"(the BCH array reads {k4b:.4f}x at 131,072)")
+    check("K2: and it matches the BCH array's degree-4 error at HALF the points",
+          abs(prof["kerdock (rotated)"][4] - prof["bch OA (rotated)"][4])
+          / prof["bch OA (rotated)"][4] < 0.05,
+          f"{prof['kerdock (rotated)'][4]:.4e} vs {prof['bch OA (rotated)'][4]:.4e}")
+    check("K3: the axial points do not merely help, they make degree 4 EXACT",
+          k4a < 1e-8, f"{prof['kerdock+axial (rotated)'][4]:.3e} absolute")
+    check("K4: degree 6 is below iid but NOT exact (a 5-design, not a 7-design)",
+          0.0 < prof["kerdock+axial (rotated)"][6] / base[6] < 1.0,
+          f"{prof['kerdock+axial (rotated)'][6] / base[6]:.4f}x iid")
+    check("degrees 1-5 are all at machine precision",
+          all(prof["kerdock+axial (rotated)"][k] < 1e-10 for k in (1, 2, 3, 4, 5)),
+          ", ".join(f"k{k}={prof['kerdock+axial (rotated)'][k]:.1e}"
+                    for k in (1, 2, 3, 4, 5)))
+
+    # ---- the count, three ways ---------------------------------------------
+    check("2^16 + 2d == 129 x 256 x 2 == 66,048 — the three accountings agree",
+          (1 << 16) + 2 * d == 129 * 256 * 2 == 66048,
+          f"Kerdock+axial = Kuperberg 2^16+2n = K129/MUB")
+
+
 def main():
     print("=" * 104)
     print("CARRIER DESIGN STRENGTH — how exact is each point set, and to what degree?")
@@ -361,6 +476,7 @@ def main():
     t_oa_is_a_cube_design_not_a_sphere_design(profiles)
     t_confinement(profiles)
     t_predictions(profiles)
+    t_kerdock()
     n_ok = sum(1 for r in RESULTS if r)
     print(f"\n{n_ok}/{len(RESULTS)} checks passed")
     return 0 if n_ok == len(RESULTS) else 1

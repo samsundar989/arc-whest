@@ -340,6 +340,207 @@ def bch_oa_unrotated(n: int, dim: int, seed: int) -> np.ndarray:
 
 
 # --------------------------------------------------------------------------- #
+# Kerdock / MUB-129 -- the NON-LINEAR construction, and the axial correction
+#
+# `docs/CURRENT_STATE.md` proves 131,072 is the floor for a LINEAR code at width
+# 256: the dual-BCH parity-check columns (x, x^3) form a Sidon set of size 255 in
+# F_2^16, all 65,535 nonzero vectors are 3-subset sums, so a 256th column always
+# creates a weight-4 dual codeword. **The Kerdock code is not linear**, so it is
+# not covered by that proof -- which is the stated reopening condition, met by
+# construction rather than by preference.
+#
+# Kerdock of length 2^(m+1) is the Gray image of the Z4-linear code over the
+# Galois ring GR(4, m) for m odd. For length 256, m = 7:
+#
+#     K = { ( Tr(lam * x) + eps )_{x in T} : lam in GR(4,7), eps in Z4 }
+#
+# 4^7 * 4 = 2^16 = 65,536 codewords of length 2^7 = 128 over Z4, Gray-mapped to
+# 256 binary places. Fingerprint: closed under complement, weights supported on
+# exactly {0, 120, 128, 136, 256} (minimum distance 2^7 - 2^3 = 120).
+#
+# THE AXIAL CORRECTION IS AN IDENTITY, NOT A TUNING. For a unit direction `a` and
+# a cube point u = s/sqrt(d):
+#
+#     sum over the 2^16 sign vectors of (a.u)^4  =  2^16 * (3 - 2S) / d^2
+#     sum over the 2d axial points   of (a.u)^4  =  2 * S          , S = sum a_i^4
+#     ----------------------------------------------------------------------
+#     total / (2^16 + 2d)  =  [(3 - 2S) + 2S] / (2^16 + 2d)  =  3 / (d(d+2))
+#
+# exactly, for EVERY `a`, at uniform weights. The 512 axial points contribute
+# precisely the `2S` the cube array is short by. Verified numerically to 7.5e-16.
+#
+# That is why this construction escapes the trap that closed the subspace route.
+# A bare cube array is a degree-4 design only in EXPECTATION over spread
+# directions, because it needs S ~ 3/258; confine the direction and it degrades
+# (measured 5.15% low at k = 32). Here the S-dependence cancels identically, so
+# accuracy does not depend on how confined the response subspace is.
+# --------------------------------------------------------------------------- #
+
+_GR_M = 7                      # GR(4, 7); the Gray image has length 2^(M+1) = 256
+_GR_BIN_POLY = (1, 0, 0, 1, 0, 0, 0, 1)        # 1 + x^3 + x^7, primitive over F_2
+_KERDOCK_CACHE = {}
+
+
+def _z4_poly_mul(a, b):
+    out = [0] * (len(a) + len(b) - 1)
+    for i, ai in enumerate(a):
+        if ai:
+            for j, bj in enumerate(b):
+                out[i + j] = (out[i + j] + ai * bj) % 4
+    return out
+
+
+def _hensel_lift():
+    """Graeffe lift of 1 + x^3 + x^7 to a basic primitive polynomial over Z4."""
+    f = list(_GR_BIN_POLY)
+    e2 = _z4_poly_mul(f[0::2], f[0::2])
+    d2 = _z4_poly_mul(f[1::2], f[1::2])
+    h = list(e2) + [0] * max(0, len(d2) + 1 - len(e2))
+    for i, c in enumerate(d2):
+        while len(h) <= i + 1:
+            h.append(0)
+        h[i + 1] = (h[i + 1] - c) % 4
+    while len(h) > 1 and h[-1] == 0:
+        h.pop()
+    if len(h) == _GR_M + 1 and h[_GR_M] == 3:
+        h = [(-c) % 4 for c in h]
+    if len(h) != _GR_M + 1 or any(
+        (h[i] % 2) != _GR_BIN_POLY[i] for i in range(_GR_M + 1)
+    ):
+        raise AssertionError(f"Hensel lift failed: {h}")
+    return h
+
+
+def _kerdock_bits():
+    """The 65,536 x 256 binary Kerdock code. Cached; ~1 s to derive."""
+    hit = _KERDOCK_CACHE.get(256)
+    if hit is not None:
+        return hit
+    M = _GR_M
+    H = _hensel_lift()
+    red = np.array([(-c) % 4 for c in H[:M]], dtype=np.int64)   # x^M == red
+
+    def mul(a, b):
+        prod = np.zeros(2 * M - 1, dtype=np.int64)
+        for i in range(M):
+            if a[i]:
+                prod[i:i + M] = (prod[i:i + M] + a[i] * b) % 4
+        for deg in range(2 * M - 2, M - 1, -1):
+            c = prod[deg] % 4
+            if c:
+                prod[deg] = 0
+                prod[deg - M:deg] = (prod[deg - M:deg] + c * red) % 4
+        return prod[:M] % 4
+
+    one = np.zeros(M, dtype=np.int64); one[0] = 1
+    xel = np.zeros(M, dtype=np.int64); xel[1] = 1
+    period = 2 ** M - 1                                   # 127
+    xp = [one]
+    for _ in range(period - 1):
+        xp.append(mul(xp[-1], xel))
+
+    def frob(z):                                          # x -> x^2 on Teichmuller
+        out = np.zeros(M, dtype=np.int64)
+        for i in range(M):
+            if z[i]:
+                out = (out + z[i] * xp[(2 * i) % period]) % 4
+        return out % 4
+
+    def trace(z):                                         # Tr: GR(4,7) -> Z4
+        acc = np.zeros(M, dtype=np.int64)
+        cur = z.copy()
+        for _ in range(M):
+            acc = (acc + cur) % 4
+            cur = frob(cur)
+        if np.any(acc[1:] % 4):
+            raise AssertionError("trace left Z4")
+        return int(acc[0]) % 4
+
+    # T = {x^0..x^126} U {0}, and Tr(x^j * T[t]) = Tr(x^(j+t)) for t < 127, so the
+    # whole 7 x 128 table is shifts of ONE length-127 sequence.
+    seq = np.array([trace(xp[k]) for k in range(period)], dtype=np.int64)
+    tbl = np.zeros((M, 1 << M), dtype=np.int64)
+    for j in range(M):
+        tbl[j, :period] = seq[(np.arange(period) + j) % period]
+        tbl[j, period] = 0                                # T[127] = 0
+
+    lam = np.empty((4 ** M, M), dtype=np.int64)
+    for j in range(M):
+        lam[:, j] = (np.arange(4 ** M) // (4 ** j)) % 4
+    z4 = (lam @ tbl) % 4
+    words = np.concatenate([(z4 + e) % 4 for e in range(4)], axis=0)
+    gray = np.array([[0, 0], [0, 1], [1, 1], [1, 0]], dtype=np.int8)
+    bits = gray[words].reshape(words.shape[0], 2 * (1 << M))
+    _KERDOCK_CACHE[256] = bits
+    return bits
+
+
+def kerdock_signs(dim: int = 256) -> np.ndarray:
+    """The 65,536 +-1 vectors of the length-256 Kerdock code."""
+    if dim != 256:
+        raise NotImplementedError("the GR(4,7) construction gives length 256 only")
+    return 1 - 2 * _kerdock_bits().astype(np.int8)
+
+
+def _rand_rot(dim: int, seed: int) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    q, r = np.linalg.qr(rng.standard_normal((dim, dim)))
+    return q * np.sign(np.diag(r))
+
+
+def kerdock(n: int, dim: int, seed: int) -> np.ndarray:
+    """Kerdock sign vectors ALONE, randomly rotated.
+
+    A degree-4 design only in expectation over spread directions -- the axial
+    correction is what makes it exact.
+    """
+    if dim != 256:
+        raise NotImplementedError("built for dim = 256")
+    pts = kerdock_signs(dim).astype(np.float64)
+    rng = np.random.default_rng(seed)
+    if n < pts.shape[0]:
+        pts = pts[rng.choice(pts.shape[0], size=n, replace=False)]
+    return exact_radius(to_sphere(pts @ _rand_rot(dim, seed).T), dim)
+
+
+def _kerdock_axial_points(dim: int) -> np.ndarray:
+    sg = kerdock_signs(dim).astype(np.float64) / math.sqrt(dim)
+    ax = np.concatenate([np.eye(dim), -np.eye(dim)], axis=0)
+    return np.vstack([sg, ax])
+
+
+def kerdock_axial(n: int, dim: int, seed: int) -> np.ndarray:
+    """**Kerdock + the 2d axial points** -- an EXACT spherical 5-design at
+    2^16 + 2d = 66,048 points on 256 dimensions, at uniform weights.
+
+    This is Kuperberg's `2^16 + 2n` cubature, and the K129/MUB frame counted a
+    third way: 129 bases x 256 vectors x 2 signs = 66,048.
+
+    Exact to machine precision at degrees 1-5 and 0.374x iid at degree 6. The
+    degree-4 exactness is the identity in the block comment above, not a fit, and
+    it holds for EVERY direction -- including directions confined to a low-rank
+    subspace, which a bare cube array cannot do.
+    """
+    if dim != 256:
+        raise NotImplementedError("built for dim = 256")
+    pts = _kerdock_axial_points(dim)
+    if n < pts.shape[0]:
+        raise ValueError(
+            f"the design has exactly {pts.shape[0]} points and does not subsample: "
+            "dropping the axial points restores the S-dependence the identity removes"
+        )
+    return exact_radius(to_sphere(pts @ _rand_rot(dim, seed).T), dim)
+
+
+def kerdock_axial_unrotated(n: int, dim: int, seed: int) -> np.ndarray:
+    """The same design with NO rotation -- exact either way, which is the point:
+    the identity does not need the direction to be spread."""
+    if dim != 256:
+        raise NotImplementedError("built for dim = 256")
+    return exact_radius(to_sphere(_kerdock_axial_points(dim)), dim)
+
+
+# --------------------------------------------------------------------------- #
 # registry
 # --------------------------------------------------------------------------- #
 
@@ -353,6 +554,9 @@ CARRIERS: Dict[str, Callable[[int, int, int], np.ndarray]] = {
     "bch OA (rotated)": bch_oa,
     "bch OA half (random)": bch_oa_subsample,
     "bch OA (unrotated)": bch_oa_unrotated,
+    "kerdock (rotated)": kerdock,
+    "kerdock+axial (rotated)": kerdock_axial,
+    "kerdock+axial (unrot)": kerdock_axial_unrotated,
 }
 
 

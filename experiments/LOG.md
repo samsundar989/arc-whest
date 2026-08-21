@@ -7713,3 +7713,131 @@ point sets so the 2026-08-19 numbers stay reproducible.
 ## Driver
 
 Claude Opus 5 (1M context), repo-local Builder, session 2026-08-20.
+
+### RESULT — CP1.1, the Kerdock/MUB carrier  [contract above, unmodified, committed b2a92a2]
+
+```
+contract commit   b2a92a2   (contract ONLY -- no implementation, no numbers)
+commands          uv run python local_sim/test_carriers.py      (27/27 -> 42/42)
+                  .\scripts\preflight.ps1 -Full
+config / seeds    NO seed block. NO network minted. NO grader. NO vault touch.
+                  Pure design theory against the existing moment harness.
+```
+
+## The result, in one line
+
+**An EXACT spherical 5-design at 66,048 points on 256 dimensions, at
+`C/B = 0.6932` counted — under the failure cliff.**
+
+The lane `docs/CURRENT_STATE.md` closed on cost is open again, and the object is
+better than the one that was too expensive, not merely cheaper.
+
+## Every prediction, against what was committed before the data existed
+
+| # | prediction | result | verdict |
+|---|---|---|---|
+| **K1** | 65,536 distinct codewords, length 256, closed under complement, weights supported on exactly {0, 120, 128, 136, 256} | **all four exact.** Counts `{0:1, 120:32512, 128:510, 136:32512, 256:1}` — the textbook Kerdock distribution | **HELD** |
+| **K2** | rotated Kerdock degree-4 ≤ 0.10× iid (GO); ≥ 0.5× would KILL the lane | **0.0572× iid** at 65,536 points | **HELD → GO** |
+| **K3** | the 512 axial points *improve* degree 4. Held at ~50/50 | **they make it EXACT** — 6.971e-15 absolute, machine precision. Not an improvement, an identity | **HELD, far beyond the prediction** |
+| **K4** | degree 6 below iid but not exact | **0.3606× iid** | **HELD** |
+| **K5** | preflight GREEN, no seed, vault 1 | see regressions | **HELD** |
+
+## The measured profile — ratio to iid at the same point count
+
+| carrier | n | k=1 | k=2 | k=3 | k=4 | k=5 | k=6 |
+|---|---|---|---|---|---|---|---|
+| iid | 65,536 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
+| sobol (SHIPPED) | 65,536 | 0.0149 | 0.1221 | 0.5485 | **0.5286** | 0.7830 | 0.7839 |
+| haar frames | 65,536 | 0.0000 | 0.0000 | 0.0000 | 0.6917 | 0.0000 | 1.0641 |
+| kerdock (rotated) | 65,536 | 0.0000 | 0.0000 | 0.0000 | **0.0572** | 0.0000 | 0.3792 |
+| **kerdock + axial** | **66,048** | 0.0000 | 0.0000 | 0.0000 | **0.0000** | 0.0000 | **0.3606** |
+| bch OA (rotated) | 131,072 | 0.0000 | 0.0000 | 0.0000 | **0.0572** | 0.0000 | 0.2520 |
+
+Degrees 1–5 of the axial-corrected design read
+`2.5e-16 / 5.6e-15 / 8.2e-16 / 7.0e-15 / 3.5e-15` — machine precision throughout.
+
+## Why it works, and it is an identity rather than a measurement
+
+For a unit direction `a` and a cube point `u = s/√d`, with `S = Σaᵢ⁴`:
+
+```
+sum over the 2^16 sign vectors of (a.u)^4  =  2^16 * (3 - 2S) / d^2
+sum over the 2d  axial points   of (a.u)^4  =  2 * S
+------------------------------------------------------------------
+total / (2^16 + 2d)  =  [(3 - 2S) + 2S] / (2^16 + 2d)  =  3 / (d(d+2))
+```
+
+**The 512 axial points contribute precisely the `2S` the cube array is short
+by — for every `a`, at uniform weights, with nothing to tune.** Verified to
+**8.95e-16** over 24 random directions, and the first line verified separately, so
+the two halves are checked independently rather than only their sum.
+
+**Kerdock alone reads 7.2321e-04 at degree 4 and the BCH array reads 7.2321e-04 —
+identical to five significant figures, at half the points.** That is not a
+coincidence and it is not a tie on quality: both sets satisfy `(3−2S)/d²`
+*exactly*, so their entire measured degree-4 "error" is the variation of `S` across
+the probe directions. Same probe seed, same number. The residual is a property of
+the probe, not of either array.
+
+## The finding that reopens a lane closed with a proof
+
+`docs/CURRENT_STATE.md` § *Closed lanes* kills the subspace route:
+
+> *"The random rotation IS the mechanism: it turns every response direction into a
+> spread one, which is the only regime where a ±1 cube array is exact — and that
+> requires balance on all 256 columns. You cannot have the cheap array and the
+> rotation at once."*
+
+That is true of a **bare** cube array, whose degree-4 accuracy needs `S ≈ 3/258`
+and which measured **5.15% low** confined to 32 dimensions. The axial correction
+removes the `S`-dependence *identically*, so confinement cannot degrade it.
+Measured, **unrotated**, at three confinement levels:
+
+| directions confined to | 256 dims | 64 dims | 32 dims |
+|---|---|---|---|
+| relative degree-4 error | 2.58e-16 | 2.11e-16 | 2.84e-16 |
+
+**Exact at every level.** This does not contradict the closed-lane finding — it
+satisfies its stated reopening condition. The 131,072 floor is proven **for linear
+codes** via the Sidon-set obstruction; **Kerdock is not linear**, so the proof does
+not reach it.
+
+## Deployability — checked, because CP0.2 made the ceilings visible
+
+| constraint | measured | limit |
+|---|---|---|
+| construction time | **0.11 s** | 5,000 ms setup (package default, not observed) |
+| the whole construction as a constant | **224 bytes** (108 base64 chars) — one length-127 Z₄ sequence, since `Tr(xʲ·xᵗ) = Tr(x^(j+t))` makes the 7×128 table shifts of one row | the shipped Sobol blob is ~19,000 chars |
+| point set memory | 135 MB float64 / **68 MB float32** | RLIMIT_AS 65,536 MB |
+| counted cost at 66,048 points | **`C/B = 0.6932`** | failure cliff at 1.0 |
+
+The construction is derived in `carriers.py` from the Hensel lift of `1+x³+x⁷`,
+not embedded as a magic blob, and reproduces the independent scratch build
+bit-for-bit.
+
+## What this does NOT establish, and it is the important half
+
+- **No end-to-end MSE gain has been measured.** The 1.4775× on record is
+  *bchOA vs sobol at matched N = 131,072*. This is a different design at half the
+  points. Whether the end-to-end gain is larger, equal or smaller is **unmeasured**
+  and needs fresh networks — the next slice, on a **DESIGN** block.
+- Degree 6 is 0.3606× iid, not exact. A 5-design is not a 7-design, and the BCH
+  array is actually *better* at degree 6 (0.2520×). If the response has meaningful
+  degree-6 content, the advantage narrows.
+- `C/B = 0.6932` is carried in from CP0.3's cost line, fitted on the Sobol arms.
+  **A Kerdock carrier's per-point propagation cost is assumed equal to Sobol's and
+  has not been measured.** It should be — the point set is generated differently,
+  even though propagation through the network is identical once the points exist.
+- The 5-second setup ceiling and the 65,536 MB memory limit are **package
+  defaults, never observed on the grader** (CP0.2).
+
+## Gate comparison
+
+Contract gate: degree-4 **≤ 0.10× iid → GO**. Measured **0.0572×** for the sign
+set and **0.0000×** with the axial correction. **GO**, by a wide margin, and the
+PIVOT and KILL branches are not reached.
+
+## Regressions
+
+`test_carriers.py` **27/27 → 42/42**. Suite time 75 s → ~105 s. No estimator
+change, no seed block, no vault touch, D17 and D19 unspent.

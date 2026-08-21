@@ -551,7 +551,7 @@ GREEN" was a weaker claim than the entries quoting it assumed:
 | tier | steps run | measured wall time | when |
 |---|---|---|---|
 | **default** | **10 of 12** — the original six, plus **7** canonical scorer + the binding gate (88/88), **8** seed-ledger *refusals* (44/44), **9** vault integrity (array sha256s vs the manifest and the seed→weights reconstruction), **10** lifecycle evaluator (37/37) | **~135–160 s** (n = 2 hosts/runs; a single reading is not a measurement) | every change |
-| **`-Full`** | **12 of 12** — adds **11** shape parity (27/27) and **12** carrier strength (27/27) | **~755 s** (n = 1) | **required** before any promotion, submission, or vault touch |
+| **`-Full`** | **12 of 12** — adds **11** shape parity (27/27) and **12** carrier strength (42/42) | **~755 s** (n = 1) | **required** before any promotion, submission, or vault touch |
 
 *The 111 s [110, 113] figure recorded earlier describes the **nine**-step tier that
 existed before step 10; it is not comparable with the row above.*

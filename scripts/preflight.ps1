@@ -35,7 +35,8 @@
                             is the check that would have caught v2.6's odd-width
                             defect, which produced finite, plausible, wrong
                             numbers on 7 of 17 shapes.
-   12. carrier strength   - 27/27 design-strength invariants of local_sim/carriers.py
+   12. carrier strength   - 42/42 design-strength invariants of local_sim/carriers.py,
+                            including the Kerdock fingerprint and the axial identity
 
   The split is by COST, not by importance. Steps 10-11 are ~594 s of the total
   and cannot fire unless estimator.py or carriers.py moved; a 10-minute
@@ -246,12 +247,12 @@ if ($Full) {
     }
     # Carrier design strength: the moment-error invariants that the whole design
     # lane's arithmetic rests on.
-    Step "12. carrier strength (27/27)" {
+    Step "12. carrier strength (42/42)" {
         uv run python local_sim/test_carriers.py
     }
 } else {
     [void]$skipped.Add("11. shape parity (27/27)      -- not run without -Full (479 s)")
-    [void]$skipped.Add("12. carrier strength (27/27)  -- not run without -Full (104 s)")
+    [void]$skipped.Add("12. carrier strength (42/42)  -- not run without -Full (105 s)")
 }
 
 # There are TWELVE checks in this gate. The default tier runs ten of them and
