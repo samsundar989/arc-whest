@@ -6480,3 +6480,662 @@ That is the same failure mode as predictions B4 and R1 and the rotation check �
 instances in one session is a pattern worth naming, and it is now in
 `docs/GOTCHAS.md`.
 
+
+
+---
+
+# 2026-08-20 — CP0 RECONCILIATION + SLICE CP0.1: the preflight gate does not gate what it claims
+
+*Session opens against `docs/FRONTIER_ARCHITECTURE_PROPOSAL.md` rev 2, treated as a
+non-binding strategist packet. `docs/CURRENT_STATE.md` and the registered contracts
+remain authoritative. Read-only reconciliation first; no seed block drawn, no vault
+touch, no estimator edit, nothing submitted.*
+
+## Entry state, verified not assumed
+
+`preflight` **GREEN 6/6**. `vault.py verify` clean, counter **1 of 3**, log 1 entry.
+`verify_portability.py` **174/174**. `estimator.py` == `estimator_v2_6_1.py`
+(sha256(lf) `1caa3752be56e8625ddb8b163ff8ffa8`). Working tree carries only doc edits.
+
+Phase 2 re-polled 2026-08-20: round 1429 slipped a **fourth** time, Aug 20 ->
+**2026-08-21T23:59Z**. Leaderboard 1480 exists with **0 entries**; HF tags still
+`['v1-phase1', 'v1-warmup']`. Width, depth, `n_mlps`, `B`, lambda and the multiplier
+floor remain unpublished. **CP0's phase/config manifest deliverable is BLOCKED on the
+organisers** and no amount of local repair changes that.
+
+## The ten proposed validation blockers, classified against the code
+
+| # | blocker | status | evidence |
+|---|---|---|---|
+| 1 | gate bound to the geometric mean | **open, deliberate** | `docs/VALIDATION.md` 2b unchanged; `test_competition_score.py` 71/71 carries the graded fixture where the estimands disagree (arith 1.0334x, geo 0.9666x). STRATEGIC, Samuel's |
+| 2 | `paired_compare()` exposes a percentile bootstrap | **partially fixed** | `competition_score.py:514` makes arithmetic primary, `:656` says read `t_ci_difference`. But percentile owns the generic name `boot_ci_difference` and prints first (`:650`); `PairedResult` has no `basic` field although `paired_diff_ci:453` implements it; no single `decide()` a gate is forced through |
+| 3 | preflight regression coverage | **open** | `scripts/preflight.ps1` is 6 steps; step 5 compares counter to log-line count and never re-hashes the vault arrays. Measured 2026-08-20, all green, none gated: scorer 71/71 (9.8 s), shape parity 27/27 (479.3 s), ledger negatives 41/41 (0.6 s), carriers 27/27 (104.4 s), `vault.py verify` (0.4 s) |
+| 4 | ledger scan misses reuse after a claim | **open** | `seed_ledger.py:460` tests `val not in known`, so a literal already covered by ANY record passes silently; `:448` matches block not range; `:466` needs a literal block name, so computed access is invisible. Both D18 rows in `experiments/seed_ledger.jsonl` carry an EMPTY `artifact_sha256` while their artifacts exist |
+| 5 | evaluators do not reproduce the grader lifecycle | **open, measured** | see below |
+| 6 | vault touch is not transactional | **open** | `vault.py:367` opens the truth, `:384` runs 500 MLPs, seal written only at `:429`. An interrupt in between reads the truth and logs nothing. `candidate_preds.npz` is overwritten each touch |
+| 7 | residual model | **open** | `residual_model.py:118` fits five points of per-submission AGGREGATE means; cannot score per MLP, and per-network MSE and cost are correlated. 1.75x op extrapolation stands |
+| 8 | public CONFIRM still adaptive | **partially fixed** | declared read-only in VALIDATION 0; nothing mechanically prevents a "it survives" result from changing selection |
+| 9 | truth seeds masked to 31 bits | **open, low impact** | `& 0x7FFFFFFF` at `vault.py:105`, `coverage_lab.py:96`, `audit_constants.py:252/334/403`, `bias_floor_lab.py:57`, `gpu_parity.py:110`, `robustness.py:199`; whestbench `seeds.py:26` uses the full 32-bit value. Unbiased, not bit-reproducible |
+| 10 | one truth replica | **open** | no replica support anywhere; no cross-product estimator available |
+
+### Blocker 5, measured rather than asserted
+
+Cost-only probe, 6 networks, infra seeds `5_150_000 + i` (outside every registered
+block, the `residual_model.py` convention), real flopscope, no truth read.
+Arm G = grader lifecycle (one `Estimator`, `setup()` once OFF-budget, per-MLP
+`BudgetContext`), matching `whestbench/runner.py:150` and
+`subprocess_worker.py:197`. Arm V = the vault/coverage lifecycle
+(`vault.py:282`, `coverage_lab.py:226`): fresh `Estimator()` per MLP, `setup()`
+never called.
+
+| i | seed | G flops | G ops | V flops | V ops | delta |
+|---|---|---|---|---|---|---|
+| 0 | 5,150,000 | 4.56510e10 | 2371 | 4.59038e10 | 2526 | **+2.5273e08** |
+| 1 | 5,150,001 | 4.72473e10 | 2383 | 4.72473e10 | 2383 | +0.0000e00 |
+| 2-5 | ... | ... | ... | ... | ... | +0.0000e00 |
+
+**The defect is exactly one MLP wide.** MLP #0 is over-charged +2.5273e8 counted
+FLOPs (+0.554% of its own `C`, +155 operations); every other MLP is
+**bit-identical**, because `_BASE_POINTS` (`estimator.py:497`) is a MODULE-level
+dict, so the Sobol table is built inside MLP #0's budget and is free thereafter.
+**The recorded vault baseline and the coverage study are NOT invalidated** — the
+aggregate effect is 1/500 of 0.55%. It becomes load-bearing only for a candidate
+with expensive `setup()`, which is precisely a K129 carrier: 66,048 directions built
+off-budget on the grader, billed to MLP #0 here — or, if held in instance state
+rather than a module global, billed to all 500.
+Artifact: scratchpad `lifecycle_gap.json`; `residual_model.py:128` already calls
+`setup()` and is the one existing path that gets this right.
+
+## SLICE CP0.1 — wire the ungated regressions into the gate. IMPORTANT.
+
+Route EVALUATION_REPAIR, move type instrumentation. Touches `scripts/` only;
+no estimator edit, no seed block, no vault touch, no submission.
+
+**The problem in one line:** four suites and the vault's own hash verification pass
+and are not gated, so "preflight GREEN" is a weaker claim than every later slice
+will take it to be.
+
+**The design decision, stated before implementing.** Two tiers, and the split is by
+*cost*, not by importance, with the skip made loud:
+
+- **default** adds the three cheap checks — canonical scorer (9.8 s), seed-ledger
+  negative tests (0.6 s), full `vault.py verify` hash + seed-reconstruction +
+  counter/log agreement (0.4 s). Target: 9 steps, still ~2-3 minutes.
+- **`-Full`** adds shape parity (479 s) and carriers (104 s). Required before any
+  promotion, submission or vault touch, and the default run must PRINT which checks
+  it skipped rather than implying full coverage.
+
+The rejected alternative is a sha-keyed cache that would auto-run shape parity only
+when `estimator.py` moves. It is more precise and it adds silent-skip state to a
+gate; `docs/GOTCHAS.md` records four separate cases this session's predecessor lost
+to cleverness in a check. Rejected on that ground, not on effort.
+
+### Written predictions, before any of it is run
+
+- **G1.** Default preflight ends **GREEN 9/9** on the current tree.
+- **G2.** Default preflight wall time **<= 200 s**.
+- **G3.** `-Full` ends **GREEN 11/11**, wall time **<= 800 s**.
+- **G4.** `vault.py verify` costs **no touch**: counter reads **1** before and after,
+  and `touch_log.jsonl` still has exactly 1 line. (Partially pre-verified — a manual
+  `verify` at 0.4 s left the counter at 1.)
+- **G5.** The vault step must degrade, not fail, when `experiments/vault/vault_v1.npz`
+  is absent — it is gitignored, so a fresh clone has no arrays. Predict that a naive
+  `vault.py verify` call exits **non-zero** in that case and therefore needs an
+  explicit missing-arrays guard. This is the one prediction I expect to be the
+  failure that costs time.
+- **G6.** `verify_portability.py` stays at **174/174** after the edit.
+- **G7.** No new step touches `docs/HUMAN_MODEL.md`, the vault seal, or any seed
+  block; the guard hooks stay silent.
+
+Recorded before implementation. Results follow.
+
+### CP0.1 RESULTS — all seven predictions held, and G5 was the one that cost time
+
+Implemented in `scripts/preflight.ps1`: a `-Full` switch, three new default-tier
+steps, two `-Full`-only steps, and a red skip-notice in the default trailer.
+
+| # | prediction | result | verdict |
+|---|---|---|---|
+| G1 | default ends GREEN 9/9 | **GREEN 9/9** | HELD |
+| G2 | default <= 200 s | **103.9 s** | HELD |
+| G3 | `-Full` GREEN 11/11, <= 800 s | **GREEN 11/11, 697.6 s** | HELD |
+| G4 | `vault.py verify` costs no touch | counter **1 -> 1**, log **1 -> 1** across both runs | HELD |
+| G5 | a naive `vault.py verify` exits NON-ZERO with the arrays absent, so a guard is needed | **exit 1**, `vault.py:169` `raise SystemExit("vault not minted yet")`. Tested by renaming `vault_v1.npz` inside a `try/finally`: guarded step 9 printed SKIP and the run stayed **GREEN 9/9**; arrays restored and all four sha256s re-verified OK | HELD |
+| G6 | portability stays 174/174 | **174/174** | HELD |
+| G7 | no guard fires; no protected path touched | no denial; `git status` shows only `preflight.ps1`, `LOG.md`, `VALIDATION.md` and the two pre-existing doc edits | HELD |
+
+**The design decision, as built.** Default tier = 9 steps, 103.9 s. `-Full` = 11
+steps, 697.6 s, and steps 10-11 are 583 s of that. The default trailer prints the
+skipped checks **in red** with the exact command to run them and the sentence
+"required before promoting, submitting, or spending a vault touch". Step 8 is not a
+duplicate of step 6: step 6 proves the ledger is CONSISTENT, step 8 proves its
+REFUSALS still fire.
+
+### Knowledge Delta
+
+1. **"preflight GREEN" now covers 165 more checks than it did this morning** —
+   scorer 71, ledger refusals 41, shape parity 27, carriers 27 — plus the vault's
+   four array hashes and the seed->weights reconstruction. Every prior LOG entry
+   that cites "preflight GREEN 6/6" was making a weaker claim than its wording
+   suggests. Nothing recorded is wrong; the coverage was.
+2. **`vault.py verify` costs no touch, and that is now load-bearing rather than
+   incidental.** It is inside the gate, so it runs on every change. Measured: the
+   counter and the log both stay at 1. The touch semantics are about scoring
+   predictions against the truth, not about hashing it.
+3. **The vault arrays are gitignored, so the honest default on a fresh clone is
+   SKIP, not FAIL.** A gate that goes red for a legitimately absent 33 MB artifact
+   teaches people to ignore red. Step 5 still covers the seal there.
+4. **A sha-keyed cache to auto-run shape parity only when `estimator.py` moves was
+   designed and rejected.** It is more precise and it adds silent-skip state to a
+   gate. `docs/GOTCHAS.md` records four separate checks lost to cleverness in one
+   prior session; this is the same shape and was declined on that ground.
+
+Durable: `docs/VALIDATION.md` section 7 now carries the two-tier table and the
+measured wall times.
+
+## Also established this session, read-only — the K129 arithmetic closes exactly
+
+Not a slice; a reconciliation finding. From our own graded record and the published
+K129 aggregates in `docs/FRONTIER_ARCHITECTURE_PROPOSAL.md`:
+
+```
+adjusted-score gap, ours/theirs         2.3636x
+  = variance efficiency (MSE*N ratio)   1.4976x
+  x per-sample cost                     1.5782x        (product reproduces the gap exactly)
+```
+
+**Our own independently measured degree-4 design-carrier gain is 1.4775x** (D18, 48
+networks, studentised CI excluding zero). The variance leg implied by their
+published aggregates is **1.4976x** — a **1.4%** discrepancy between two
+completely independent estimates of the same quantity.
+
+And the affordability blocker reads differently at half the point count. Modelling
+our own per-sample counted cost (3.3030e6 FLOPs/sample at the graded operating
+point) at K129's **66,048** directions:
+
+| arm | raw MSE | C/B | score | vs graded |
+|---|---|---|---|---|
+| our Sobol carrier at N = 66,048 | 3.3049e-07 | 0.8021 | 2.6507e-07 | **1.000x** — reproduces "N is not a lever" exactly, as it must |
+| + the measured 1.4775x design gain | 2.2368e-07 | 0.8021 | 1.7941e-07 | **1.478x** |
+| + their per-sample cost engineering | 2.2368e-07 | 0.5082 | 1.1368e-07 | 2.332x |
+
+`C/B = 0.8021` is **under the failure cliff**. The 131,072-row BCH array died at
+1.3509 — over it. **Halving the point count is what makes the design lane
+affordable**, and `docs/CURRENT_STATE.md`'s proof that 131,072 is the floor is a
+proof about **linear codes**; a MUB frame bank is not one, so it is not covered.
+
+**INFERRED, not measured.** It assumes the 1.4775x gain measured on a strength-5
+array at 131,072 points survives on a MUB bank at 66,048. `local_sim/carriers.py`
+has `sobol`, `haar_frames` and `bch_oa` and **no Kerdock/MUB construction**;
+`test_carriers.py` S5 checks only the arithmetic `129 x 256 x 2 = 66,048` and never
+builds one. The existing degree-1..6 moment harness would price it for free.
+
+**The cheapest discriminating experiment in the project right now needs no
+networks, no seed block and no grader**: build the MUB-129 carrier and read its
+degree-4 moment error against `bch_oa`'s 0.0305x iid and `haar_frames`' 0.700x. If
+it lands near the array, CP1 is alive and affordable. If it lands near the Haar
+bank, it is only a 3-design, the published K129 advantage is not coming from
+degree-4 strength, and the plan's premise needs rewriting before anything is built.
+
+---
+
+## 2026-08-20 — CP0.1 REVIEW: independent Skeptic **PROVISIONAL**, and it was right twice
+
+Skeptic run in a separate agent context that never saw the builder's reasoning,
+handed the contract, the diffs, the evaluation protocol and the raw artifact paths
+— never a prose summary. Verdict relayed unsoftened.
+
+> **Skeptic verdict: PROVISIONAL**
+>
+> *"The gate change (CP0.1) survives everything I threw at it, with two real
+> defects in what it claims and one new coupling hazard it created. The K129
+> arithmetic in the same entry does not survive: it prices a K129 comparison with a
+> different team's multiplier, mislabels an effective cost as counted, and calls a
+> tautology a confirmation."*
+
+It replicated all seven predictions G1–G7 independently, and confirmed by a route
+the builder had not used that step 9 costs no touch: `manifest.json` and
+`touch_log.jsonl` **mtimes unmoved from 2026-08-06** across two of its own runs,
+plus `vault.py:182 verify()` → `:168 load()` having no write path at all.
+
+### What it falsified, and what was done about it
+
+| # | finding | verified? | action |
+|---|---|---|---|
+| 1 | **Step 9's SKIP printed a green PASS and was counted in "9/9"**, and was never added to `$skipped` — so `docs/VALIDATION.md`'s new sentence "prints in red exactly which checks it skipped" was **false as built**, in exactly the fresh-clone case it was written for | **yes** | **FIXED.** `Step` now honours `$script:StepSkipped`; a skip prints yellow SKIP, is counted separately, and is named in the red block. **The denominator is now always 11.** A default run reports `GREEN 9/11, 2 SKIPPED`, never `9/9`; arrays absent reports `8/11, 3 SKIPPED` |
+| 1b | *(found while fixing 1, by the builder)* the first fix denominated against the tier that ran, so it printed `6/9, 3 SKIPPED` — wrong in the other direction | **yes** | **FIXED** in the same edit |
+| 2 | **`test_seed_ledger.py` asserted D17 and D19 have ZERO consumption, and D16 exactly 270 seeds with four exact gaps.** D19 exists to be spent once, on the v2.6 promotion gate. Since this file now runs inside the mandatory gate, **the first legitimate claim on D19 would turn preflight RED at the exact moment `-Full` is mandatory**, and the only way forward would be to edit the gate | **yes** | **FIXED.** Converted to invariants, following the pattern already used for D18 three lines below: a SINGLE_USE block has **at most one** recorded claim, and any claim names a real consumer inside the block; D16's accounting **closes** and its free ranges are disjoint, ascending and in-block. **41/41 → 44/44.** Proved on a synthetic ledger copy: the new assertion holds unspent **and** after a legitimate spend, where the old one flips to False; a second claim is still refused with `PermissionError` |
+| 3 | Step 8 writes `local_sim/_ledger_scan_tmp/sneaky_probe.py` containing a real D18 literal into the tracked tree; a hard kill mid-step leaves it, and **step 6's scan runs BEFORE step 8**, so it would fail the gate on every later run | **yes** | **FIXED**, minimally: directory added to `.gitignore`, and the test clears any corpse before it starts. Deliberately did NOT add a skip rule to `scan_sources` — a scanner that ignores a directory can hide a real finding, and the scan's message names the file, so the failure is self-diagnosing |
+| 4 | **The 103.9 s default-tier wall time did not replicate** — the Skeptic measured 113.36 s and 113.61 s | **yes** | **CORRECTED.** Three replications: **111.3 s mean, range [109.7, 112.8], spread 2.8%.** `docs/VALIDATION.md` now quotes n and range. 103.9 s was a single unreplicated first run |
+| 5 | Stale gate references across durable docs: `ai/workflows/review-slice.md:32,151`, `routine.md:31`, `session-close.md:92`, `slice-contract.md:136` all said "preflight 5/5"; `docs/CURRENT_STATE.md:101` said "GREEN 6/6" and "shape parity 23/23" | **yes** | **FIXED** in all six places. `review-slice.md`'s promotion rule now demands **`-Full` 11/11** explicitly and states that a default `9/11` run is not sufficient |
+| 6 | Pre-registration ordering is **not reconstructible from the repository** — no commit, and G1–G7 plus the RESULTS live in the same uncommitted file | **yes** | **ACCEPTED, not fixed.** Labelled unverified rather than asserted. IMPORTANT work does not require single-use pre-registration so it is not disqualifying, but the Skeptic is right that "recorded before implementation" cannot be checked from disk. **This is an argument for committing each slice, and that decision is Samuel's** |
+
+Attacks that **failed** — the Skeptic tried and could not break these: the SKIP
+guard cannot mask a genuine `vault.py verify` failure (mutually exclusive branches
+of one `if`; a non-zero exit from the `else` side still FAILs the step); step 8 does
+not mutate the live ledger (refusal tests run in `tempfile.TemporaryDirectory()`,
+bracketed by a size assertion on the real path); step 8 is genuinely not a duplicate
+of step 6; the rejected sha-keyed cache was the right call on the stated ground; the
+`$total` count is honest on failure; and G1, G4, G5, G6, G7 all replicated exactly.
+
+### CORRECTION — the K129 factorization, withdrawn and rebuilt
+
+**Three errors, all confirmed by recomputation:**
+
+1. **`0.5082` is not K129's multiplier.** It belongs to the **board #1 entry
+   (ednacob)** — a different team, different method, unknown point count
+   (`docs/FRONTIER_ARCHITECTURE_PROPOSAL.md:90-92`; 1.845e-8/3.633e-8 = 0.50784).
+   K129's own is **0.51728** (140.7e9/B) or **0.51808** (adjusted/raw). The tell was
+   sitting in the builder's own output — the recomputed score read 1.1215e-7 against
+   a published 1.1433e-7 and was not chased. At 0.51808 it reproduces exactly.
+2. **`3.3030e6 FLOPs/sample` was labelled COUNTED and is EFFECTIVE** — it is
+   `0.19896 × B / 16384`, residual included. `docs/VALIDATION.md` §2b exists to stop
+   precisely this. Our counted per-sample is 3.1691e6 (D18 arm A).
+3. **"the product reproduces the gap exactly" is an algebraic identity, not a
+   check.** The `MSE × (C/B)` gap is *by definition* (MSE·N ratio) × (per-sample-cost
+   ratio). It cannot fail, and it was presented as corroboration. **Withdrawn.**
+
+**And a fourth, which the Skeptic found and which matters most: the "N is not a
+lever" row was circular.** It read 1.000× "as it must" — but only because the row
+*assumed* MSE·N flat. This repository's own T2 result from the previous night
+(`experiments/LOG.md`, 2026-08-19 night, **FALSIFIED**) measured the flat law
+breaking by **1.1980×** at 8× the points on 48 networks, decomposing into MSE·N
+**1.0591** and counted-FLOPs-per-point **1.1306**. Part of K129's apparent variance
+advantage is therefore "QMC beats 1/N at 4× the points", not carrier strength.
+
+**Rebuilt from our own measured D18 arms rather than from a borrowed multiplier.**
+Fitting `C(N) = c0 + c1·N` on arms A and B (same 48 networks, same carrier, COUNTED
+FLOPs): `c0 = 6.8534e9`, `c1 = 2.7508e6`.
+
+| quantity | as first written | corrected | source |
+|---|---|---|---|
+| K129 `C/B` | 0.5082 | **0.51728** | its own 140.7e9 effective / B |
+| our `C/B` at N = 66,048 | 0.8021 (flat per-sample) | **0.6932** counted | the fitted line on our own arms — the first figure was **pessimistic** |
+| variance leg | 1.4976× | **1.414× – 1.498×**, point estimate **1.441×** | corrected for the measured N-effect; the bracket spans applying none of the 8× factor to all of it |
+| cost leg | 1.5782× | **NOT COMPUTABLE** | K129's *counted* figure is unpublished; only "140.7B effective" exists, and counted compares to counted |
+| "product reproduces the gap" | presented as a check | **withdrawn** | algebraic identity |
+
+**What survives, and it is the load-bearing part.** Our measured design gain is
+**1.4775×** adjusted / 1.4826× raw (bchOA vs sobol at matched N *and* matched cost,
+48 D18 networks, studentised CI excluding zero). The corrected variance leg implied
+by K129's published aggregates is **1.414× – 1.498×**, and 1.4775 lies **inside**
+that bracket. So the two are **consistent** — but the claimed "1.4% agreement" is
+withdrawn: the honest statement is *consistent within a bracket of about ±3%, whose
+width is set by a modelling choice about how the N-effect interpolates from 8× to
+4×.*
+
+**And the affordability conclusion is STRONGER than first claimed, not weaker.**
+`C/B = 0.6932` counted at 66,048 points, against the failure cliff at 1.0 and the
+131,072-row array's 1.3509. Halving the point count clears the cliff with more
+margin than the first estimate showed.
+
+**The caveat the first version never stated, and which the Skeptic named:**
+1.4775× is bchOA-vs-sobol under matched conditions; the K129 leg is us-vs-them
+across a different first layer (FWHT), different pruning, and a different pipeline.
+Attributing all of it to the carrier requires K129 to draw **zero** variance benefit
+from anything else. That is an assumption, it is unstated in their write-up, and
+their per-component ablation is not published.
+
+### Unresolved, by both of us
+
+(a) whether G1–G7 were written before the edit — no commit, no separating artifact;
+(b) whether K129's variance advantage is carrier strength or FWHT/structure/pruning;
+(c) what point count the ednacob 0.5082 entry uses; (d) whether a MUB-129 bank
+reaches degree-4 strength — `local_sim/carriers.py` still has no Kerdock/MUB
+construction.
+
+### The ten review questions
+
+1. **Prediction supported?** All seven, G1–G7, replicated by the Skeptic. G2's
+   *value* was wrong (103.9 s vs 111.3 s mean) though its *gate* (≤ 200 s) held.
+2. **Mechanism or only sign?** Mechanism. Step 9's no-touch property is established
+   by reading the code path (`verify()` → `load()`, no writes) and confirmed by two
+   independent observables — counter/log, and file mtimes.
+3. **Strongest competing explanation?** That the added steps are theatre because
+   they already passed. Refuted by finding #2: converting D17/D19 from snapshot to
+   invariant removed a defect that would have fired at promotion time — the gate
+   found a real bug in itself within one review cycle.
+4. **Regressions or tradeoffs?** The default gate now costs 111 s and `-Full` ~700 s.
+   Real friction, deliberately taken, with the skip made loud. No estimator change,
+   no seed drawn, no vault touch; the tree is byte-identical after runs.
+5. **New information?** The gate had three defects of its own; a durable claim in the
+   same entry had four arithmetic errors; the affordable-carrier `C/B` is 0.693, not
+   0.802.
+6. **Belief strengthened?** That the design-carrier lane is affordable at 66,048
+   points — on a *better* number than before, computed from our own arms.
+7. **Belief weakened?** That the published K129 advantage is cleanly attributable to
+   the carrier. The cost leg is not computable at all, and the variance leg is a
+   bracket, not a point.
+8. **Uncertain?** (a)–(d) above.
+9. **Durable invariant or failure mode?** Yes — the **fifth** instance of "assert
+   properties, not snapshots", and the first one wired into a mandatory gate.
+   Recorded in `docs/GOTCHAS.md`.
+10. **Next?** Terminal state below.
+
+### Terminal state: **FOLLOW_UP_EXPERIMENT**
+
+Skeptic PROVISIONAL. Its named cheapest discriminating follow-up — recompute the
+K129 factorization before anything is built on it — **has been executed above, and
+its stated decision rule is met**: the corrected variance leg (1.441×, bracket
+[1.414, 1.498]) lands within 5% of the measured 1.4775×, so the carrier attribution
+survives and CP1 may proceed. The follow-up it gates is the MUB-129 moment probe,
+which needs no networks, no seed block and no grader.
+
+The three gate defects are fixed and re-verified. Two items are accepted and not
+fixed, both needing Samuel: the `-Full` requirement is unenforced prose rather than
+an executable precondition in `scripts/guard_paths.py`, and the pre-registration
+ordering is not reconstructible without per-slice commits.
+
+---
+
+# 2026-08-20 — SLICE CP0.2: the canonical grader-lifecycle evaluator. IMPORTANT.
+
+Route EVALUATION_REPAIR, move type instrumentation. Blocker 5 of the CP0 audit,
+plus the per-MLP evidence-row requirement the frontier proposal calls "the required
+target architecture for evaluation". Touches `local_sim/` only: no estimator edit,
+no seed block, no vault touch, no submission.
+
+**Phase-2 assumption in force** (Samuel, 2026-08-20, recorded in
+`docs/CURRENT_STATE.md` § *The clock*): build at 256×32, no biases, He init,
+`B = 2.72e11`, λ = 1e11, floor 0.1 — Phase 1 with different MLPs, possibly a
+little harder. Everything below is shape-generic regardless.
+
+## The problem, measured
+
+`local_sim/vault.py:282` and `local_sim/coverage_lab.py:226` construct a fresh
+`Estimator()` for every MLP and **never call `setup()`**. The grader constructs one
+instance and calls `setup(context)` **once, outside any `BudgetContext`**
+(`whestbench/runner.py:150`, `subprocess_worker.py:197`). Measured cost of the
+mismatch today: MLP #0 over-charged **+2.5273e8** counted FLOPs (+0.554% of its own
+`C`, +155 ops), every other MLP bit-identical, because `_BASE_POINTS`
+(`estimator.py:497`) is a module global.
+
+It is small now and it is structural. A K129 carrier builds 66,048 signed
+directions in `setup()` — free on the grader, billed to MLP #0 here, or billed to
+**all 500** if that carrier is held in instance state instead of a module global.
+CP1 cannot price a carrier candidate on an evaluator that gets this wrong.
+
+## What is being built
+
+`local_sim/lifecycle_eval.py` — one canonical evaluator, used by every future
+comparison, that reproduces the grader's lifecycle and emits immutable per-MLP
+evidence rows. It scores through `local_sim/competition_score.py` (already 71/71
+bitwise against the installed whestbench) rather than re-deriving the identity.
+
+Grader semantics to be mirrored exactly, read from `whestbench/scoring.py`:
+
+- one `Estimator`, `setup(SetupContext)` once, off-budget, **timed against
+  `spec.setup_timeout_s = 5.0`**;
+- per MLP, its own `flopscope.BudgetContext(flop_budget, wall_time_limit_s)`;
+- six failure paths, all zeroing the prediction: `BudgetExhaustedError`,
+  `TimeExhaustedError`, any other `Exception`, post-predict `wall_time_s` over
+  limit, post-predict `residual_wall_time_s` over limit, and the post-hoc combined
+  check `C = F + λR > B`;
+- `failed` is the **disjunction** of budget / time / residual / combined;
+- failure is priced at multiplier **1.0**, not the 0.1 floor, against **zeroed**
+  predictions, so the MSE becomes `mean(target²)`;
+- MSE computed in **float32**, as `scoring.py:846` does.
+
+## Written predictions, before any of it is run
+
+- **L1.** Under the correct lifecycle the per-MLP counted FLOPs equal the arm-G
+  numbers already measured, and **MLP #0 no longer carries the +2.5273e8
+  inflation**: max |Δ counted FLOPs| == **exactly 0** across the 6 probe networks.
+- **L2.** The evaluator's aggregate equals a hand-computed
+  `mean_i mse_i · max(0.1, C_i/B)` at **0.0 relative deviation**, and equals
+  `competition_score.score_suite` on the same rows bitwise.
+- **L3.** `setup()` on the shipped v2.6.1 completes in **< 1.0 s**, well inside the
+  grader's `setup_timeout_s = 5.0`. **This 5-second ceiling is recorded nowhere in
+  this repository and is load-bearing for CP1** — a 66,048-direction carrier must
+  build inside it or fail every MLP.
+- **L4.** All three provokable failure paths reproduce exactly: a tiny budget →
+  `BudgetExhaustedError`; a raising `predict` → the exception path; a row with
+  `C > B` → the combined check. Each gives `failed=True`, zeroed predictions,
+  multiplier **exactly 1.0**, and `mse == mean(target²)`.
+- **L5.** Re-running the vault's *current* lifecycle beside the grader lifecycle on
+  the same 6 networks reproduces the CP0 finding: **exactly one** row differs and
+  it is **index 0**.
+- **L6.** Evidence rows are content-addressed and the hash is **stable across two
+  runs**, with timing fields excluded from the hash because they are not
+  deterministic. *This is the prediction I expect to fail first* — the risk is
+  failing to exclude every nondeterministic field.
+- **L7.** `preflight -Full` stays **GREEN 11/11**; no seed block drawn; vault
+  counter stays **1** and the touch log stays at 1 line.
+
+Recorded before implementation. Results follow.
+
+### CP0.2 RESULTS — 26/26, and L4's first spelling was falsified before it was fixed
+
+Built `local_sim/lifecycle_eval.py` and wired its self-test into the gate as
+**step 10**. The gate is now **10 of 12** by default, **12 of 12** under `-Full`.
+
+| # | prediction | result | verdict |
+|---|---|---|---|
+| L1 | grader-lifecycle counted FLOPs equal arm-G; MLP #0 loses the +2.5273e8 inflation; max abs delta on rows 1.. is exactly 0 | rows 1–5 **0.0000e+00**, all five; MLP #0 delta **+2.5273e8**, +155 ops, and the old path only ever over-charges | **HELD** |
+| L2 | objective equals a hand-computed `mean_i mse_i · max(0.1, C_i/B)` at 0.0 relative | **0.000e+00** relative deviation | **HELD** |
+| L3 | `setup()` under 1.0 s, inside the grader's 5.0 s ceiling | **176.9 ms** of 5000 ms allowed, no error | **HELD** |
+| L4 | all provokable failure paths reproduce exactly | **HELD, after the first spelling was FALSIFIED** — see below | **HELD (corrected)** |
+| L5 | exactly one row differs between lifecycles, and it is index 0 | **1 row, index 0** | **HELD** |
+| L6 | `rows_hash` stable across two runs, timing fields excluded | stable; **and the two lifecycles hash differently**, so the address can discriminate; timings *did* move between runs and the hash did not | **HELD** |
+| L7 | `preflight -Full` GREEN, no seed, vault counter 1 | **GREEN 12/12**, 755.0 s; ledger scan clean; touches **1 → 1**, log **1 → 1** | **HELD** |
+
+**L4's first spelling was falsified, and the finding is worth more than the
+prediction.** The check "a failed MLP's MSE equals `mean(target²)`" failed at a
+1e-12 relative tolerance while printing two apparently identical numbers
+(`8.458488e-02` vs `8.458488e-02`). The cause: the evaluator computed
+`zero_prediction_mse` in **float64** while the grader computes MSE in **float32**
+(`whestbench/scoring.py:846`). Measured divergence **1.96e-9 relative** — far below
+anything that would change a decision, and far above an equality claim.
+
+That is precisely the *two-implementations-of-one-identity* error this module's own
+docstring warns against, committed in the same file that warns against it. The fix
+was to call `competition_score.zero_prediction_mse`, which already existed and
+already matched the grader at **0.000e+00**. Both assertions were then **tightened
+from a 1e-12 tolerance to exact equality**, which is the standard the quantity
+actually supports.
+
+```
+float32 path (grader)  8.45848843455314636e-02
+float64 path (mine)    8.45848841797775808e-02     <- 1.96e-9 relative
+canonical helper       8.45848843455314636e-02     <- 0.000e+00
+```
+
+### What the evaluator pins
+
+Six failure paths, each provoked and asserted, not assumed:
+
+| path | how it was provoked | verdict |
+|---|---|---|
+| `BudgetExhaustedError` | `flop_budget = 1e6` | 2/2 exhausted, failed, zeroed, multiplier **exactly 1.0** |
+| generic `Exception` | a candidate whose `predict` raises | `error_code = RuntimeError`, failed, exactly zeroed |
+| validation failure | a candidate returning a **transposed** `(width, depth)` array | caught as `ValueError` — scored as a failure, never scored as a prediction |
+| combined `C = F + λR > B` | a hand-built row at C = 3.000e11 vs B = 2.72e11 | flagged by `competition_score.over_budget_rows`, not by a second implementation |
+| `TimeExhaustedError`, post-predict wall/residual limits | wired and read from `ContestSpec`; not provokable cheaply | code path present, constants asserted against the installed package |
+
+And step 0 of the self-test asserts the four transcribed grader constants still
+match the installed whestbench, so a version bump that moves `setup_timeout_s`,
+`wall_time_limit_s`, `residual_wall_time_limit_s` or λ fails the gate instead of
+silently changing what "the grader's lifecycle" means.
+
+### Knowledge Delta
+
+1. **The grader allows `setup()` exactly 5.0 seconds** (`ContestSpec.setup_timeout_s`),
+   and that ceiling was recorded **nowhere in this repository** before today. It is
+   directly load-bearing for CP1: a K129/MUB carrier builds 66,048 signed directions
+   in `setup()`, and if that build exceeds 5 s the submission fails **every** MLP.
+   The shipped v2.6.1 uses **176.9 ms of the 5,000 ms**, so there is real headroom —
+   but it is finite and now measured on every preflight run.
+2. **The lifecycle defect is exactly one MLP wide on the shipped file, and it is
+   only that narrow by accident.** `_BASE_POINTS` is a module-level dict. Any
+   candidate that holds its carrier in **instance** state would be billed the full
+   build on **every** MLP under the old evaluator. The narrowness is a property of
+   v2.6.1, not of the old evaluator.
+3. **`mean(target²)` is a float32 quantity, not a float64 one**, and the two differ
+   by ~2e-9 relative. Any future "the failure path is exactly X" claim must go
+   through `competition_score.zero_prediction_mse`.
+4. **Evidence rows are now content-addressed**, with wall-clock fields excluded from
+   the hash. Two runs of the same candidate on the same networks produce the same
+   `rows_hash`; the two lifecycles produce different ones. `write_evidence` **refuses
+   to overwrite** an existing bundle — the failure mode that lost per-touch
+   prediction evidence before (`vault.py` overwrites `candidate_preds.npz` on every
+   touch).
+
+### Deliberately NOT done in this slice
+
+`local_sim/vault.py` and `local_sim/coverage_lab.py` were **not** rewired to use the
+new evaluator. That is a separate slice: both have recorded results attached, and
+`vault.py` is guarded, so changing them is its own IMPORTANT change with its own
+prediction. The new evaluator is additive and nothing currently depends on it except
+the gate.
+
+Blockers 4, 6, 7, 9 and 10 of the CP0 audit remain open and untouched.
+
+---
+
+## 2026-08-20 — CP0.2 REVIEW: independent Skeptic **PROVISIONAL**, and its lead finding invalidated the slice's own licence
+
+Second Skeptic, fresh context, handed the contract, the diffs, the evaluation
+protocol and the raw artifact paths. Verdict relayed unsoftened.
+
+> **Skeptic verdict: PROVISIONAL**
+>
+> *"The per-MLP lifecycle is faithful and I could not break it. The licence the
+> slice grants — 'can therefore be trusted to price a candidate, specifically a
+> future K129/MUB carrier whose `setup()` is expensive' — is not supported, because
+> the setup half of the lifecycle is the one part that is recorded but never
+> enforced, measured on a narrower scope than either grader path, and calibrated
+> against an unverified constant. A K129 carrier that blows the setup budget
+> produces a clean, plausible objective from this evaluator while the grader aborts
+> the entire submission."*
+
+That is exactly right, it is the one thing the slice existed to make safe, and it
+was wrong in the direction that would have cost the most.
+
+### What it falsified, and what was done about it
+
+| # | finding | verified? | action |
+|---|---|---|---|
+| 1 | **`setup_timed_out` / `setup_error` were computed into a provenance blob and read by nothing.** The grader calls `runner.start()` OUTSIDE the try wrapping `evaluate_estimator` (`cli.py:2357`) and `runner.py:155-172` raises `SETUP_ERROR`/`SETUP_TIMEOUT` out of it — **the whole submission dies, every MLP included**. Our evaluator returned a clean objective. A sixth instance of "reports a state instead of testing a property" | **yes**, read at `cli.py:2340-2372` and `runner.py:140-172` | **FIXED.** `evaluate()` now raises `SetupFailure` by default; `on_setup_failure="score_as_failure"` is the explicit opt-in. **Tested**, not asserted: a 6 s `setup()` and a raising `setup()` both refuse |
+| 2 | **The setup timer started in the wrong place.** `runner.py:144` starts its clock BEFORE `load_estimator_from_path`; ours started after. The subprocess path (`runner.py:281`) additionally covers the worker spawn and its imports | **yes** | **FIXED.** `t0` moved before `load_candidate`. Host cold start measured here, 3 repeats: spawn + `import flopscope, flopscope.numpy` = **0.222 / 0.245 / 0.238 s**, recorded as `HOST_COLD_START_S` and added to the margin |
+| 3 | **L3's headroom was measured on 13% of the real consumption.** Reported "176.9 ms of 5000 ms"; the corrected figure is **433 ms** (193 ms module-load + setup, plus 240 ms host cold start) | **yes** | **CORRECTED.** Also chased the Skeptic's claim that the apparent ~1 s was `import whestbench` pulling HF `datasets` — **confirmed**: first load 1052.5 ms, second 0.3 ms, third 0.2 ms, raw `compile()` of the 58,641-byte source only 1.9 ms. So estimator.py's own module body is ~0.3 ms and the second is a cold package import the grader's worker has warm |
+| 4 | **"The grader allows `setup()` exactly 5.0 seconds" is a package default asserted as a grader fact.** All five durable graded reports publish `config_snapshot` with exactly `n_mlps`, `depth`, `width`, `flop_budget`. **None** of the five timing/memory constants appears in any of them; only λ = 1e11 is independently corroborated | **yes** | **CORRECTED** in the module, in Knowledge Delta #1 below, and in `docs/VALIDATION.md` §7. Step 0 now prints "these are PACKAGE DEFAULTS" every run |
+| 5 | **`predict_timeout_s = 30.0` and `memory_limit_mb = 65,536` were not transcribed at all** — and the memory limit (RLIMIT_AS) is a shipping blocker that **already killed v2.5** at 3.9 GB peak | **yes** | **FIXED.** Both added to `LifecycleSpec` and to step 0's equality check against the installed package |
+| 6 | **Every `residual_wall_time_s` is a `--runner local` figure, unlabelled**, so the printed `objective` is not a graded objective. λ·R is ~10–13% of `C` here against 2–3% on the grader | **yes** | **FIXED.** Module docstring, `docs/VALIDATION.md` §7, and the evidence bundle itself (`residual_is_graded: false`, `objective_is_graded: false`, `residual_measurement_path`) |
+| 7 | **Two of the six failure paths were untested and the stated reason — "not provokable cheaply" — was false.** The Skeptic provoked both in under a minute | **yes** | **FIXED.** Both now tested: `residual_wall_time_limit_s = 1e-9` trips the residual path; a candidate sleeping 50 ms at `B = 1e9` gives `C = 6.043e9 > B` and trips the combined path. Both zeroed at multiplier exactly 1.0 |
+| 8 | **A duplicate implementation of `F + λR > B` sat at `:404-408`** — a second implementation of the identity, inside the module whose docstring warns against second implementations | **yes** | **FIXED.** Deleted in favour of `competition_score.is_combined_budget_exhausted` |
+| 9 | Divergences from `evaluate_estimator`: the exception path recorded real `F`/`R` where the grader records `flops_used: 0, effective_compute: 0.0` (`scoring.py:743-744`), and post-predict checks ran on exception rows where the grader `continue`s at `:760` | **yes** | **FIXED.** Exception rows now zero `F` and `R` and skip every post-predict check |
+| 10 | `# seed-ledger: excludes V` was a **no-op that disabled a real check** — `seed_ledger.py:461` reads it as `bid not in excluded`, permanently suppressing the vault-seed-literal scan in this file | **yes** | **REMOVED**, with the reason written where the pragma was |
+| 11 | `.gitignore` covered `_ledger_scan_tmp/` but not `local_sim/_lifecycle_broken_tmp.py`, which step 10 writes into the real tree on every gate run | **yes** | **FIXED** — `local_sim/_lifecycle_*_tmp.py` |
+| 12 | `preflight.ps1`'s accounting comment was a garbled duplicated sentence; step 8's comment said "41 negative tests" where the step name says 44/44; `VALIDATION.md` quoted "~134 s" as a single reading three paragraphs above its own warning against single readings, and the Skeptic measured **156.5 s** | **yes** | **ALL FIXED.** The timing row is now a range with an n, and the 111 s figure is explicitly marked as describing the superseded nine-step tier |
+
+**Self-test: 26/26 → 37/37.**
+
+Attacks that **failed** — tried and could not break: `VOLATILE` is genuinely not a
+dataclass field (the Skeptic enumerated `dataclasses.fields`); `rows_hash` is
+design rather than luck, because `n_ops` and `flops_used` are deterministic *given
+a network* (GOTCHAS' 3.22% is a per-network spread, not run-to-run) — and it
+reproduced across two separate **processes**; L6 is not self-fulfilling, since the
+check fails if timings did not move; `_is_frozen` returns True only via
+`FrozenInstanceError`; `_lifecycle="per_mlp_no_setup"` is detectable in a written
+bundle via `provenance.lifecycle` and `setup_called`; the seed literal is outside
+every registered block; L7 re-verified independently, including
+`manifest.json`/`touch_log.jsonl` mtimes unmoved at 2026-08-06 04:17.
+
+And it **independently reproduced the CP0 baseline** rather than reading it:
+MLP #0 over-charged **+2.5273e8** counted FLOPs (+0.5536% of its own
+`C = 4.56510e10`), **+155 ops**, rows 1–5 delta **exactly 0.0000e+00**. It also
+anchored the absolute level, which the slice had not: the 6-row mean counted is
+**4.798e10** against v2.4.1's graded **5.330e10** = **0.900×**, matching the
+recorded "counted FLOPs fall 10.5%" for v2.6.1.
+
+It also found the premise **understated**: `vault.py:282` and `coverage_lab.py:227`
+not only skip `setup()`, they compute MSE in **float64** where the grader uses
+float32.
+
+### Knowledge Delta
+
+1. **A setup failure is a RUN-level event, not a per-MLP one.** `cli.py:2357` puts
+   `runner.start()` outside the try that wraps scoring. A candidate whose `setup()`
+   raises or overruns scores **nothing** — not one bad MLP, all of them. Any
+   evaluator that reports a per-MLP objective in that case is lying about the most
+   expensive failure mode available to a carrier candidate.
+2. **The grader's timing and memory limits are UNOBSERVED.** `setup_timeout_s`,
+   `wall_time_limit_s`, `residual_wall_time_limit_s`, `predict_timeout_s` and
+   `memory_limit_mb` appear in **no** graded `config_snapshot` we hold. They are
+   `ContestSpec` defaults and nothing more. Only λ = 1e11 is corroborated, from
+   per-MLP telemetry. Quote them as a prior; never as "the grader allows".
+3. **`memory_limit_mb = 65,536` is RLIMIT_AS under `--runner subprocess`, and it
+   already killed v2.5 at a 3.9 GB peak.** A 66,048-point carrier is a
+   66,048 × 256 float64 array = **135 MB** for the point set alone, before any
+   propagation temporaries. This is now in the spec and checked on every gate run.
+4. **The setup window is not the duration of `setup()`.** The local path starts its
+   clock before the module is even loaded; the subprocess path also pays the worker
+   spawn and its imports. Measured here: 0.24 s of spawn+flopscope, and a cold
+   `import whestbench` worth ~1.05 s that the grader's worker has warm. The shipped
+   v2.6.1 uses **433 ms of a nominal 5,000 ms** — comfortable, but 2.5× what a
+   naive timer reports.
+5. **This evaluator's `objective` is a local-runner objective.** Counted FLOPs
+   transfer exactly; residual seconds do not, and they enter `C`. Ratios inside one
+   path only. The bundle now says so in machine-readable form.
+
+### The ten review questions
+
+1. **Prediction supported?** L1, L2, L5, L6, L7 held as written. **L3 held on its
+   gate and was wrong on its number** — 176.9 ms was 40% of the real 433 ms. **L4
+   held only after its first spelling was falsified twice**: once by the float32
+   catch, once by the Skeptic proving "not provokable cheaply" false.
+2. **Mechanism or only sign?** Mechanism, and the mechanism is now enforced rather
+   than observed — which was the entire finding.
+3. **Strongest competing explanation?** That the lifecycle repair is cosmetic
+   because the defect is one MLP wide. Refuted twice over: the narrowness is an
+   accident of `_BASE_POINTS` being a module global, and the setup-abort path the
+   Skeptic found is not narrow at all — it is total.
+4. **Regressions or tradeoffs?** Default gate 111 s → ~135–160 s; `-Full` ~755 s.
+   No estimator change, no seed drawn, no vault touch.
+5. **New information?** Five items above, of which #2 and #3 are the ones that
+   change what CP1 may claim.
+6. **Belief strengthened?** That the per-MLP lifecycle is now faithful — an
+   independent context tried to break it and could not.
+7. **Belief weakened?** That we know the grader's operating limits. We know four
+   configuration fields and λ. Everything else is a package default.
+8. **Uncertain?** Whether the real `setup_timeout_s` / `wall_time_limit_s` /
+   `residual_wall_time_limit_s` are the defaults — not settleable without a
+   submission that deliberately trips one. And the standing E1 residual-transfer
+   problem, which this slice does not touch.
+9. **Durable invariant or failure mode?** Yes, three, now in `docs/GOTCHAS.md`.
+10. **Next?** Terminal state below.
+
+### Terminal state: **PROMOTE_AND_CONTINUE**
+
+Every Skeptic finding is fixed and re-verified in-tree, the self-test went 26/26 →
+37/37 with the new checks provoking rather than asserting, and nothing was promoted
+into `estimator.py`, no block drawn, no vault touch taken. The evaluator is
+additive: only the gate depends on it.
+
+The Skeptic's cheapest discriminating follow-up was a four-item edit list to this
+same file. **All four were executed**, plus the eight housekeeping items. The one
+thing it asked for that cannot be done from here — verifying the grader's actual
+timeout constants — is recorded as unobserved rather than closed.
+
+---
+
+### Provenance for the 2026-08-20 CP0 entries
+
+Code, gate and durable docs committed as **`44634f9`** — *"CP0: repair the
+decision layer — the gate, and the grader-lifecycle evaluator"*, 13 files, +1981
+/ −323. This LOG entry follows in its own commit so the record cites the change
+rather than being part of it.
+
+**Both Skeptics recorded, correctly, that the pre-registration ordering for CP0.1
+and CP0.2 was NOT reconstructible from disk**: the predictions and the results
+lived in the same uncommitted file, so nothing separated them. That gap is closed
+from here on — Samuel authorised per-slice commits on 2026-08-20, and the
+standing rule is now: **commit the slice when the predictions are written, before
+the implementation exists.** The two entries above remain marked as unverified on
+that point, because they are.
+
+*(Also verified while committing: the "uncommitted harness layer" standing risk in
+`docs/CURRENT_STATE.md` § Standing risks is STALE. `AGENTS.md`, `ai/`, `.agents/`,
+`.codex/`, `scripts/guard_paths.py`, `scripts/verify_portability.py` and the six
+adapters are all tracked — they show as modified, not untracked. The risk was real
+on 2026-08-10 and was resolved by a later commit without the note being updated.)*
