@@ -7139,3 +7139,148 @@ that point, because they are.
 `.codex/`, `scripts/guard_paths.py`, `scripts/verify_portability.py` and the six
 adapters are all tracked — they show as modified, not untracked. The risk was real
 on 2026-08-10 and was resolved by a later commit without the note being updated.)*
+
+---
+
+# 2026-08-20 — SLICE CONTRACT CP0.3: adopt the ARITHMETIC gate  [PRE-REGISTERED, no data yet]
+
+**STRATEGIC.** Changes the binding promotion statistic — `AGENTS.md` § *Work
+classification*. Committed before the implementation exists, and before any
+re-scoring is run.
+
+**No seed block is drawn and none is needed.** This slice re-scores artifacts that
+already exist on disk; it mints nothing and touches no network. D17 and D19 stay
+unspent. Vault counter stays 1.
+
+**Samuel's decision, 2026-08-20:** *"adopt arithmetic."* Given after being shown
+that the two estimands select opposite winners on our own graded data.
+
+**Deviation from Step 4, recorded rather than hidden:** Samuel's own numeric
+prediction was NOT taken. He directed continuous execution ("proceed until complete
+or hard blocked / something requiring my decision"), and a prediction is not a
+decision. The protocol's purpose — that no number is chosen after the answer is
+visible — is served by the builder's predictions below being committed to git
+before the re-scoring runs. The calibration record for this slice is therefore
+missing, and that is a real, stated loss.
+
+**Strategic question**
+Does binding promotion to the arithmetic mean of per-MLP scores — the competition's
+own identity — change any verdict this project has already recorded?
+
+**Current bottleneck**
+`docs/VALIDATION.md` §2b binds the geometric mean of per-MLP ratios. The
+competition scores `mean_i (mse_i × max(0.1, C_i/B))` over the 50 public MLPs, and
+`local_sim/competition_score.py` reproduces that **bitwise** from the graded reports
+(2.719427529595e-07 and 2.631432177242e-07, exactly). The gate and the objective
+are different quantities, and on our own graded data they pick opposite winners:
+arithmetic 1.0334× (v2.4.1 better) against geometric 0.9666× (v2.4 better), same 50
+rows, 22/50 wins.
+
+**Evidence**
+- CONFIRMED — the two estimands disagree on real graded data (`test_competition_score.py`, 71/71).
+- CONFIRMED — interval coverage measured on 192 fresh networks (D18): false-promotion rate against a true zero, nominal 5%: t **4.1–5.4%**, basic **4.0–5.2%**, percentile 6.8–8.2%, BCa **9.1–11.5%**.
+- CONFIRMED — CRN makes the paired *difference* nearly symmetric (skew +0.21, −0.55, −0.46) even though each arm is strongly right-skewed. That is why BCa loses here.
+- INFERRED — arithmetic has read HIGHER than geometric in all three recorded comparisons where both exist: 1.0334/0.9666 = **1.069**, 1.4775/1.4321 = **1.032**, 1.0961/1.0927 = **1.003**.
+
+**Hypothesis**
+The change is correct and low-risk: it aligns the gate with the objective, and it
+does not resurrect any lane that was killed on a measurement.
+
+**Mechanism**
+Per-MLP scores are strongly right-skewed. The geometric mean of ratios discounts the
+heavy networks; the arithmetic mean does not, and neither does the competition. So
+the geometric gate answers a question with no prize attached. Where a candidate
+helps most in *absolute* terms on the heavy networks, arithmetic will read higher.
+
+**Intervention**
+1. Bind arithmetic + studentised-t (or basic bootstrap) in `docs/VALIDATION.md` §2b,
+   `AGENTS.md` § *Measurement law*, `ai/workflows/review-slice.md` and
+   `slice-contract.md`. Demote geometric to a **stability diagnostic**.
+2. Make the gate **executable, not prose**: one `decide()` in
+   `local_sim/competition_score.py` that a caller cannot get wrong, returning the
+   arithmetic verdict, the t interval, and the geometric number as a diagnostic.
+3. **Re-score every recorded verdict that has per-MLP data on disk**, under both
+   statistics, and report whether any flips.
+
+**Predictions — builder's, committed before the numbers exist**
+
+- **A1.** The re-scoring pipeline reproduces the D18 carrier's published arithmetic
+  gain **1.4775×** at **0.0** relative deviation (it was already computed
+  arithmetically), and reproduces the graded aggregate 2.631432177242e-07 bitwise.
+  *If A1 fails, the pipeline is wrong and no other number in this slice counts.*
+- **A2.** Arithmetic ≥ geometric in **at least 3 of 4** re-scored comparisons,
+  by the mechanism above.
+- **A3 — the consequential one.** **D14** (Sprint 5 packed lane, SPENT single-use
+  block, killed at geometric **1.1216×** against a pre-registered **1.15×** gate)
+  re-scores arithmetically into **[1.12, 1.19]**. Applying the median observed
+  arith/geo gap of 1.03 to 1.1216 gives **1.155** — *above the gate*. **I therefore
+  predict roughly even odds that D14's arithmetic reading crosses 1.15.**
+- **A4.** D12 (v2.5, retired at 1.2079×) and the v2.6 gate reconstruction both move
+  by less than 5% and neither changes sign.
+- **A5.** `preflight -Full` stays **12/12**; portability **174/174**; vault counter
+  **1**; no seed block consumed.
+
+**Gate / decision rule, fixed NOW — this is the part that must not move**
+
+Adoption of arithmetic is **not contingent** on the re-scoring; Samuel has decided
+it and it is right on first principles. The re-scoring decides something else:
+**what we must say about the lanes it touches.**
+
+- If **no** verdict flips → adopt, and record that the change is verdict-neutral.
+- If **D14 crosses 1.15** → **the packed lane does NOT automatically reopen.**
+  `AGENTS.md` requires **new external evidence** to reopen a closed lane, and
+  re-scoring old data under a new statistic is not external evidence. Three further
+  reasons the kill stands independently of the statistic: (i) the lane'skill mechanism
+  is priced, not statistical — flopscope charges a gather 4 FLOPs/element while a
+  random-access gather costs far more wall time than a BLAS multiply-add, and λ
+  bills that back; (ii) D13 predicted 1.113% and D14 measured 1.1216×, so cost
+  behaviour agreed across two blocks; (iii) D14's verdict also rests on a frozen
+  residual model, unchanged here.
+  **What MUST change is the wording:** the kill becomes *"failed its gate on the
+  binding statistic of the time, and is within noise of that gate under the
+  statistic we now use"* — materially weaker, and it goes in `CURRENT_STATE.md`
+  § *Closed lanes* in those words.
+- If any **other** verdict flips → same treatment, stated per lane.
+
+**Falsifier**
+A1 failing falsifies the pipeline. A verdict flipping in the *direction of killing
+something we currently believe* would be the serious case — e.g. the D18 carrier's
+1.4775× failing to reproduce.
+
+**Baseline**
+Each lane's own recorded verdict and tier, as written in `docs/CURRENT_STATE.md`
+§ *Closed lanes* and the corresponding LOG entries.
+
+**Residual model**
+UNCHANGED, and deliberately so. Each re-scoring uses the residual figures already
+stored in that artifact. This slice changes the *statistic*, not the cost model;
+changing both at once would make neither attributable.
+
+**Statistic**
+Both, side by side, on every comparison: arithmetic difference with the
+**studentised-t** interval (primary), geometric mean of per-MLP ratios (diagnostic),
+sign test, and the biggest-mover share.
+
+**Confounders**
+- Re-scoring uses stored per-MLP arrays; if an artifact's arrays are not the ones
+  its headline was computed from, the "reproduction" is vacuous. A1 exists to catch
+  exactly that.
+- Artifacts differ in what they store (some have `resid`, some `ops`), so a uniform
+  cost model cannot be imposed. Report per artifact what was available.
+
+**Scope**
+`docs/VALIDATION.md`, `AGENTS.md`, `ai/workflows/review-slice.md`,
+`ai/workflows/slice-contract.md`, `local_sim/competition_score.py` (add `decide()`),
+`local_sim/test_competition_score.py`, `docs/CURRENT_STATE.md`, `docs/GOTCHAS.md`,
+a new re-scoring artifact under `experiments/`.
+
+**Do not change**
+Any residual model. Any seed block. `estimator.py`. The three-tier protocol. The
+vault. The 0.1 floor, λ, or the failure semantics.
+
+**Evidence required**
+`uv run python local_sim/rescore_verdicts.py` (new), its JSON artifact,
+`preflight -Full`, `verify_portability.py`.
+
+**Driver**
+Claude Opus 5 (1M context), repo-local Builder, session 2026-08-20.
