@@ -137,6 +137,75 @@ work is limited to `mini` (7.03 GB, 7 shards of 16 MLPs) unless disk is freed. T
 GPU venv has torch 2.13 on an **RTX 5090, 34.2 GB**, so fresh-mint truth at
 1024 x 16 is affordable (~5.6e14 FLOPs per network at 2²⁴ samples).
 
+### P2-CP1 — **GO**, 2026-08-21. The frontier is measured, and two lanes are closed
+
+*96 fresh 1024x16 networks on new Phase-2 block **P01**, two independent truth
+replicas at 2^22 each, 11 arms through one canonical evaluator, paired on common
+random numbers. **Zero failures in 1,056 network-evaluations.** Contract, Samuel's
+prediction and the Evidence Packet: `experiments/LOG.md` 2026-08-21. Artifact of
+record: `experiments/2026-08-21_p2_cp1/ladder_frozen.json`. Vault untouched.*
+
+| arm | score (frozen counted-FLOPs model) | MSE (noise-corr.) | C/B | vs `k2p1` |
+|---|---:|---:|---:|---:|
+| `k2p6` / `k2p4` / `k2p3` | **3.9593e-07** | 3.9500e-06 | 0.0628-0.0630 | **1.0519x** |
+| `k2p2` | 3.9598e-07 | 3.9505e-06 | 0.0627 | 1.0518x |
+| **`k2p1` — the SHIPPED algorithm, bitwise** | **4.1647e-07** | 4.1554e-06 | 0.0626 | — |
+| `sample_orth` (best sampling) | 1.0685e-06 | 9.7695e-06 | 0.1093 | 0.390x |
+| `sample_iid_floor` | 1.1304e-06 | 1.1291e-05 | 0.1000 | 0.368x |
+| `sample_iid_max` | 1.1515e-06 | 1.2024e-06 | 0.9503 | 0.362x |
+| `k1` (diagonal only) | 2.2743e-05 | 2.2742e-04 | 0.0001 | 0.018x |
+| ~~`sample_lattice`~~ | — | — | 0.1005 | **INVALID, see LOG** |
+
+**THE FINDING, and it reshapes the plan.** The shipped closure's off-diagonal
+post-ReLU covariance `c_ij Phi_i Phi_j` is **exactly the first-order Price/Hermite
+truncation** of a convergent series whose limit is the *exact* covariance under the
+Gaussian model — verified **bitwise** against `arm_k2p1`. Carrying that series to
+order 6 gives the **limit** of the whole Gaussian-closure family, and
+
+> **`MSE(k2p6) / MSE(k2p1) = 0.951`.**
+
+**The exact covariance map removes 4.94% of the error. The other 95% is the
+Gaussian assumption itself**, which no covariance spelling can touch. Order 2
+delivers 99.7% of the ladder (1.0518x); orders 3, 4, 6 agree to five figures.
+
+**Three consequences, all by pre-registered trigger:**
+
+1. **SAMPLING IS CLOSED FOR PHASE 2** — best analytic beats best valid sampling
+   **2.699x**, against a 1.5x kill bar. **`_PRUNE_TAU` and `_BASIS_RANK` are never
+   refitted**; that work item, carried since the shape changed, is **retired**.
+   *Caveat, stated not buried:* a working QMC arm was never tested (ours was
+   broken). Reopening needs a **2.7x variance reduction over iid at N = 6,546 in
+   1024 dimensions** demonstrated — a high, explicit bar that no Phase-1
+   input-space device ever approached (all measured 0.98-1.09x).
+2. **P2-CP3 (augmented K2) is CAPPED at 1.052x** and can be closed *without
+   building it* — the limit was measured, not approached.
+3. **The aggressive lane is P2-CP4, goal-directed K3/Edgeworth.** It is the only
+   lane left that attacks the 95%.
+
+**The deployment gate FAILED, deliberately.** `k2p2` measures **1.0518x**,
+t-interval [+1.796e-08, +2.302e-08] excluding zero, 93/96, p = 0.000 — real,
+unambiguous, and **below the pre-registered 1.10x bar**. The registered
+consequence was honoured: **the conservative candidate stays `k2p1`.** *Whether a
+change that costs +0.18% and stays under the floor deserves a lower bar is
+**Samuel's decision for P2-CP2's contract**, not a gate to move after the fact.*
+
+**The mechanism, and what would flip it back.** Correcting for a genuine depth-`L`
+network affording `N ∝ 1/L` samples: sampling MSE is **flat in depth** (the
+organisers' budget calibration working as designed) while analytic MSE **grows 27x**
+from L2 to L16. The ratio falls as `L^-1.44`, extrapolating to a crossover near
+**depth 30 at width 1024**. Phase 2's depth 16 sits on the analytic side with a 3x
+margin. **This is an extrapolation past the data and does NOT retro-explain Phase 1**,
+where the width also moved. Measured depth exponent **1.567** against ARC's
+predicted `K = 2` — directionally right, quantitatively optimistic in our favour.
+
+**A cost lever found and priced: the real float32 closure costs EXACTLY HALF.**
+`stats.norm.cdf` promotes float32 to float64 (forum 18127), and
+`outer(Phi,Phi) * cov` then drags the covariance up, so a naive "float32" arm is
+float64 in disguise. Casting back gives **C/B 0.031294 = 0.5003x**, at an accuracy
+cost of 4.975e-07 relative L2 — four orders below the prediction error, i.e. free.
+**It buys no score today** (floor-pinned) — it buys **1.84x more headroom** under
+the floor for the K3 correction, from 0.0374 B to 0.0687 B.
+
 ### SAMUEL'S WORKING ASSUMPTION, 2026-08-20 — FALSIFIED 2026-08-21, kept for the record
 
 Nothing about Phase 2 has been released. Rather than block, Samuel's instruction is
@@ -415,6 +484,9 @@ any, is stated. Reopening one is STRATEGIC work and needs a Slice Contract.
 | Batched depth-2 Strassen | **OFF** | bitwise identical, −53% ops, **worse** residual | shipped behind `_STRASSEN_BATCHED`, tests kept |
 | **Control variates (layer-1 exact-mean, LINEAR forms only)** | **DEAD** | **1.010×, 95% CI [0.979, 1.042]** on our Sobol+digital-shift path — CI includes 1.0. On plain MC the same correction gives 1.383× and the fitted optimum 1.584×: QMC already removes that variance | Skeptic probe 2026-08-11, 14 MLPs × 6 shifts, paired geo-mean, CONFIRM tier. **Covers recursive/per-layer forms** — any correction telescoping to a linear map of the layer-1 sample-mean error is in this class. **Does NOT cover** corrections using an *empirical* per-layer gain (`mean(z>0)`), which are nonlinear and unmeasured. The older "1.80× standalone" is a ratio of means over 3 MLPs and should not be quoted |
 | Score optimisation generally | ~~CLOSED at ~2.7e-7~~ **REOPENED 2026-08-10** | — | GAME_PLAN rev 6's frontier described *our method*, not the field's. Board decomposition shows honest teams 4.8× better on MSE at our compute. See § *Open questions* #1 |
+
+| **The whole SAMPLING architecture, at Phase 2** | **CLOSED 2026-08-21 (P2-CP1)** | pre-registered kill: best sampling > 1.5x best analytic → **measured 2.699x** | 96 fresh 1024x16 nets, block P01, 2 truth replicas. iid at both the floor and 0.95 B, and orthogonal MC, all lose to the analytic closure. The flat-score law was confirmed to **1.20%** across a 9.5x budget difference, so **no sampling operating point helps**. `_PRUNE_TAU` / `_BASIS_RANK` are never refitted. **Reopening condition:** a working QMC carrier demonstrating **≥2.7x variance reduction over iid at N = 6,546 in 1024 dimensions** — ours was broken (Korobov generator with cycle length 2) and that arm is INVALID, not evidence |
+| **Augmented K2 / higher Price orders as an AGGRESSIVE candidate** | **CLOSED 2026-08-21 (P2-CP1)** | capped at **1.052x**, measured at the family's limit | `MSE(k2p6)/MSE(k2p1) = 0.951`: the exact Gaussian-closure covariance removes only 4.94% of the error. The cap is a **measured limit**, not an extrapolation, so no spelling of augmented K2 can beat it. Still worth deploying as a cheap 1.05x if the gate permits — it is closed as the *aggressive* lane, not as an improvement |
 
 **The mechanism behind the packed lane's death, which generalises**: flopscope
 prices a gather at 4 FLOPs/element, and packing's entire saving is substituting
@@ -793,8 +865,14 @@ is the one in `docs/CLAUDE_CODE_FRONTIER_HANDOFF.md`: **P2-CP0 (done) -> P2-CP1
 
 ### Next, in order
 
-3. **P2-CP1 — the Phase-2 baseline ladder. This is the next research slice and it
-   comes before any `estimator.py` edit and before any Phase-1 constant refit.**
+3. ~~**P2-CP1 — the Phase-2 baseline ladder.**~~ **DONE 2026-08-21, GO.** See the
+   P2-CP1 section above. What it settled, so it is not re-derived: the analytic
+   family owns the frontier 2.57x; 95% of the remaining error is the Gaussian
+   assumption; sampling is closed; P2-CP3 is capped at 1.052x; the aggressive lane
+   is P2-CP4. **The next research slice is P2-CP4 (goal-directed K3), and
+   P2-CP2 (deploy the conservative candidate) can run in parallel — the candidate
+   is already chosen and already `whest validate`-clean.**
+   *Historical statement of the slice, kept for the contract's context:*
    On fresh 1024 x 16 DESIGN networks with **two independent truth replicas**,
    compare through **one canonical evaluator** (`local_sim/lifecycle_eval.py`):
    exact layer-1 control; K1 / raw closure; full-dimensional **simple K2**;
@@ -811,10 +889,14 @@ is the one in `docs/CLAUDE_CODE_FRONTIER_HANDOFF.md`: **P2-CP0 (done) -> P2-CP1
    off-diagonal post-ReLU covariance as `Phi_i Phi_j Sigma_ij`, and the exact
    bivariate-ReLU second moment is a known closed form. Measure that gap first —
    it may be the whole of the 4.9x projection miss.
-4. **Do NOT refit `_PRUNE_TAU` or `_BASIS_RANK` yet.** They are constants of a
-   width-256 *sampling* architecture, and P2-CP1 may retire that architecture
-   entirely. Refit only if P2-CP1 shows sampling still owns part of the frontier.
-5. **Allocate a NEW Phase-2 DESIGN block before any Phase-2 experiment.** D16's
+4. ~~**Do NOT refit `_PRUNE_TAU` or `_BASIS_RANK` yet.**~~ **NEVER REFIT THEM.**
+   P2-CP1 retired the sampling architecture for Phase 2 on its own pre-registered
+   kill trigger (2.699x against a 1.5x bar). This item is **closed**, not deferred.
+5. **P01 is allocated and 96 of its 600 seeds are spent.** **504 remain free and
+   are reserved for a DISJOINT P2-CP2 draw**, so the deployment gate is never
+   measured on the networks that chose the candidate. For a new lane, allocate a
+   new block rather than drawing more of P01.
+   *Standing rule, unchanged:* D16's
    free seeds, D18's remainder, and the untouched single-use **D17** and **D19**
    are all **256x32** allocations and mint different-shaped networks. They are not
    reusable. `local_sim/seed_blocks.py` + `seed_ledger.claim()`; **never a
