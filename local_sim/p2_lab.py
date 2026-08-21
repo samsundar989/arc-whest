@@ -276,6 +276,44 @@ def main() -> int:
               f"[{lo / m:>+10.2%}, {hi / m:>+10.2%}] {res.n_candidate_better:>4}/{res.n:<4} "
               f"p={res.sign_test_p:>6.3f}")
 
+    # ---- THE GATE -----------------------------------------------------------
+    # The first build of this driver took a `--gate` argument and never used it,
+    # leaving the verdict to whoever read the table above. That is precisely the
+    # failure `competition_score.decide()` exists to prevent: it is the ONLY
+    # function in this repository that returns a promotion boolean, it REQUIRES a
+    # pre-registered gate (no default, so a gate supplied after the data is
+    # visible shows up in the diff), it is ONE-SIDED, and it refuses percentile
+    # and BCa outright.
+    verdicts = {}
+    if a.gate is None:
+        print()
+        print("  NO GATE SUPPLIED -- no verdict is printed. The numbers above are")
+        print("  descriptive. Pass --gate <the pre-registered threshold> to get a")
+        print("  decision, and only the threshold registered BEFORE the data.")
+    else:
+        print()
+        print(f"  VERDICT vs {CONTROL}, pre-registered gate {a.gate:.4f}x, "
+              f"studentised-t, one-sided")
+        ctrl_scores = cs.score_suite([r.to_row() for r in ctrl_rows],
+                                     lam=spec.lam, floor=floor).scores
+        for name in arms:
+            if name == CONTROL:
+                continue
+            cand_scores = cs.score_suite(
+                [r.to_row() for r in results[name]["rows"]],
+                lam=spec.lam, floor=floor).scores
+            v = cs.decide(ctrl_scores, cand_scores, gate=a.gate, interval="t")
+            verdicts[name] = v
+            print(f"  {name:<18} {'PASS' if v.passed else 'fail':<5} "
+                  f"gain {v.gain:>7.4f}x   "
+                  f"t CI on the difference [{v.ci[0]:>+.3e}, {v.ci[1]:>+.3e}]"
+                  f"   excl 0: {str(v.ci_excludes_zero):<5}"
+                  f"   {v.n_candidate_better}/{v.n}"
+                  f"   mover {v.biggest_mover_share * 100:>6.1f}%"
+                  + ("   *** ESTIMANDS DISAGREE ***" if v.estimands_disagree else ""))
+            for why in v.reasons:
+                print(f"       - {why}")
+
     # ---- the mechanism curve ----------------------------------------------
     print()
     print(f"  MSE BY DEPTH -- the (L/n)^K mechanism curve, on {n_depth} of {n} "
@@ -291,7 +329,7 @@ def main() -> int:
                                              for d in (0, 1, 3, 7, 11, 15)))
 
     if a.out:
-        _write(a.out, results, paired, man, seeds, z, spec, arms)
+        _write(a.out, results, paired, man, seeds, z, spec, arms, verdicts, a.gate)
         print(f"\n  artifact -> {os.path.relpath(a.out, _ROOT)}")
     print("=" * 92)
     return 0
@@ -324,7 +362,8 @@ def _predict_all(name, seeds, spec):
     return np.asarray(finals), np.asarray(alls)
 
 
-def _write(path, results, paired, man, seeds, z, spec, arms):
+def _write(path, results, paired, man, seeds, z, spec, arms,
+           verdicts=None, gate=None):
     if os.path.exists(path):
         raise SystemExit(f"REFUSED: {path} exists. Evidence is immutable.")
     payload = {
@@ -348,6 +387,11 @@ def _write(path, results, paired, man, seeds, z, spec, arms):
         "lambda_provenance": "PHASE-1 value 1e11; Phase-2 lambda is UNPUBLISHED",
         "residual_is_graded": False,
         "control": CONTROL,
+        "pre_registered_gate": gate,
+        "gate_note": (
+            "the gate is registered in experiments/LOG.md BEFORE any data "
+            "existed; decide() requires it explicitly and has no default"
+        ),
         "noise_correction_identity": (
             "mean[(p-y1)(p-y2)] = mean[(p-ybar)^2] - mean[((y1-y2)/2)^2]; the "
             "subtracted term is the averaged replica's own noise and is identical "
@@ -370,7 +414,33 @@ def _write(path, results, paired, man, seeds, z, spec, arms):
             "mse_by_depth": [float(x) for x in r["by_depth"].mean(axis=0)],
             "rows_hash": le.rows_hash(r["rows"]),
             "setup_seconds": r["prov"]["setup_seconds"],
+            "candidate_sha256": r["prov"]["candidate_sha256"],
+            # Per-MLP scores, so the verdict is reproducible from this file alone
+            # without re-running a single arm.
+            "per_mlp_score": [float(x) for x in cs.score_suite(
+                [x.to_row() for x in r["rows"]],
+                lam=spec.lam, floor=man["budget"]["multiplier_floor"]).scores],
+            "per_mlp_flops": [float(x.flops_used) for x in r["rows"]],
+            "per_mlp_residual_s": [float(x.residual_wall_time_s) for x in r["rows"]],
+            "per_mlp_failed": [bool(x.failed) for x in r["rows"]],
         }
+        if verdicts and name in verdicts:
+            v = verdicts[name]
+            payload["arms"][name]["verdict"] = {
+                "passed": bool(v.passed),
+                "gain": v.gain,
+                "gate": v.gate,
+                "ci_on_paired_difference": list(v.ci),
+                "ci_excludes_zero": bool(v.ci_excludes_zero),
+                "interval": v.interval,
+                "n": v.n,
+                "n_candidate_better": v.n_candidate_better,
+                "sign_test_p": v.sign_test_p,
+                "geometric_gain_DIAGNOSTIC": v.geometric_gain,
+                "estimands_disagree_DIAGNOSTIC": bool(v.estimands_disagree),
+                "biggest_mover_share_DIAGNOSTIC": v.biggest_mover_share,
+                "reasons": list(v.reasons),
+            }
         if name in paired:
             p = paired[name]
             payload["arms"][name]["paired_vs_control"] = {
