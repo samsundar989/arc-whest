@@ -243,6 +243,81 @@ checked against `k2p1`'s output rather than scored through `lifecycle_eval`. It
 also carries an unflagged risk: `var = max(ez2 - mu^2, 0)` in float32 is
 catastrophic cancellation as `Phi -> 1`. **Register it before P2-CP4 leans on it.**
 
+### P2-CP3R — **KILL** for the cumulant lane, **PIVOT** to coupled sampling, 2026-08-21
+
+*48 fresh networks on **P01[1096..1143]**, disjoint from P2-CP1's 96. Two
+independent sample streams per network at 2^22 — stream A supplies the oracle's
+cumulants, stream B the truth. Artifact
+`experiments/2026-08-21_p2_cp3r/oracle.json`. No vault touch.*
+
+**The question:** both remaining research checkpoints assumed a cumulant
+correction could reach the 95% P2-CP1 attributed to non-Gaussianity. **Nothing
+had measured whether it can.** This measured the ceiling before anything was
+built.
+
+| arm | knows | final MSE | recovered |
+|---|---|---:|---:|
+| `O0` honest closure | nothing | 4.2271e-06 | — |
+| `O1` | **true `(mu, sigma)`** | 2.2774e-07 | **94.61%** |
+| `O2` | + true 3rd cumulant | 5.8088e-08 | 98.62% |
+| `O3` | + true 4th cumulant | 3.8785e-08 | 99.08% |
+
+> **Correcting the ReLU MEAN MAP with cumulants is worth 4.47%. The other 94.61%
+> is the propagated STATE — mean and variance drifting as they compound through
+> depth.**
+
+**Consequences, and they converge the plan:**
+
+1. **P2-CP3 closes properly this time**, on the right quantity. Any
+   Edgeworth/cumulant correction to the ReLU mean map is capped at **1.047x**.
+2. **The packet's P2-CP4 framing closes too** — it aims a goal-directed K3
+   correction at the final mean, and that family's ceiling is the 4.47%.
+3. **The 94.61% is state drift**, and P2-CP1 already showed the *exact* Gaussian
+   covariance map recovers only 5% of it. The rest needs joint higher-cumulant
+   propagation at ARC's **4.05 budgets**. **The analytic frontier is essentially
+   where we stand.**
+
+**The gate was MIS-SPECIFIED and the honest reading is the stricter one.** As
+literally registered (`O3` vs `O0` >= 50%) it reads 99.08% -> ALIVE; but that
+total *includes* `O1`, a state correction. The correctly-specified quantity —
+`O1 -> O3`, what the cumulant terms buy on a perfect state — is **4.47%**, below
+even the 20% KILL threshold. **Second mis-specified gate this session.** Durable
+lesson: *write the gate on the DIFFERENCE the slice isolates, not on a total that
+contains it.*
+
+**Mechanism, sharply confirmed.** The 3rd-cumulant term carries a factor `alpha`,
+so it must vanish where the pre-activation is zero-mean. At layer 1 every `alpha`
+is exactly 0 and the term measures **1.784e-13**; at layer 2 it is **1.378e-07**,
+a 10^6 jump. And `O0` grows 26x with depth while `O1` *falls* — the error is not
+made at any one layer, it is accumulated drift. True pre-activation skewness stays
+~1e-5 and excess kurtosis only reaches **0.062**: the pre-activations are **nearly
+Gaussian**, exactly as the CLT over 1024 inputs predicts, so the marginal Gaussian
+assumption is approximately right and the error is in the second moments.
+
+### THE LANE THAT IS ACTUALLY LEFT — coupled residual sampling, ~1.30x free
+
+The closure is a **deterministic bias**; a sampler in the free headroom under the
+0.1 floor is **independent and unbiased**. Inverse-variance combination,
+`MSE_comb = MSE_c MSE_s / (MSE_c + MSE_s)`:
+
+| centre | `C/B` | free | N | `MSE_comb` | gain |
+|---|---:|---:|---:|---:|---:|
+| `k2p1` f64 | 0.0626 | 0.0374 B | 2,448 | 3.72e-06 | 1.137x |
+| `k2p2` f64 | 0.0627 | 0.0373 B | 2,442 | 3.55e-06 | 1.191x |
+| **`k2p2` f32** | **0.0313** | **0.0687 B** | **4,497** | **3.24e-06** | **1.305x** |
+
+**Six times the Hermite ladder, free, still at the floor, and no new mathematics.**
+This is the packet's option D / **P2-CP5**, and it is now the highest-value
+remaining lane. **Arithmetic from measured inputs, NOT a measurement.** Three
+things must be measured first: the combination weight depends on `MSE_c`, a
+DESIGN-fittable constant needing a disjoint validation draw; the float32 lever is
+**unregistered** and risks catastrophic cancellation in `var = max(ez2-mu^2,0)`;
+and the sampler's residual must be charged.
+
+*Route checked and discarded:* estimating `(mu, sigma)` by sampling and plugging
+into the Gaussian map is only **1.03x** better than sampling `E[ReLU]` directly
+once the `sigma-hat` term is included — not the 1.36x obtained by dropping it.
+
 ### SAMUEL'S WORKING ASSUMPTION, 2026-08-20 — FALSIFIED 2026-08-21, kept for the record
 
 Nothing about Phase 2 has been released. Rather than block, Samuel's instruction is
@@ -523,6 +598,7 @@ any, is stated. Reopening one is STRATEGIC work and needs a Slice Contract.
 | Score optimisation generally | ~~CLOSED at ~2.7e-7~~ **REOPENED 2026-08-10** | — | GAME_PLAN rev 6's frontier described *our method*, not the field's. Board decomposition shows honest teams 4.8× better on MSE at our compute. See § *Open questions* #1 |
 
 | **The whole SAMPLING architecture, at Phase 2** | **CLOSED 2026-08-21 (P2-CP1)** | pre-registered kill: best sampling > 1.5x best analytic → **measured 2.699x** | 96 fresh 1024x16 nets, block P01, 2 truth replicas. iid at both the floor and 0.95 B, and orthogonal MC, all lose to the analytic closure. The flat-score law was confirmed to **1.20%** across a 9.5x budget difference, so **no sampling operating point helps**. `_PRUNE_TAU` / `_BASIS_RANK` are never refitted. **Reopening condition:** a working QMC carrier demonstrating **≥2.7x variance reduction over iid at N = 6,546 in 1024 dimensions** — ours was broken (Korobov generator with cycle length 2) and that arm is INVALID, not evidence |
+| **Cumulant / Edgeworth correction to the ReLU MEAN MAP (the packet's augmented K2 AND its goal-directed K3)** | **CLOSED 2026-08-21 (P2-CP3R)** | capped at **1.047x**, measured with an ORACLE handed true cumulants | `O1 -> O3 = 4.47%` of the closure's MSE. 94.61% is propagated STATE drift, which no map correction touches. The oracle bounds the lane from above, so no spelling can beat it. **Reopening condition:** a method that improves the propagated STATE, not the map — and P2-CP1 showed the exact Gaussian covariance map recovers only 5% of that, so it needs genuine joint higher-cumulant propagation (ARC: 4.05 budgets) |
 | **Improving the Gaussian-closure COVARIANCE MAP (higher Price/Hermite orders)** | **CLOSED 2026-08-21 (P2-CP1)** | capped at **1.052x**, measured at the family's limit | `MSE(k2p6)/MSE(k2p1) = 0.951`: the exact covariance map under the Gaussian assumption removes only 4.94% of the error. A **measured limit** — orders 6/8/12/20 agree to 7 significant figures and an independent quadrature confirms convergence. **This closes covariance-map work ONLY. It does NOT close augmented K2** — that closure was retracted; see the P2-CP1 section |
 
 **The mechanism behind the packed lane's death, which generalises**: flopscope
@@ -906,17 +982,13 @@ is the one in `docs/CLAUDE_CODE_FRONTIER_HANDOFF.md`: **P2-CP0 (done) -> P2-CP1
    P2-CP1 section above. What it settled, so it is not re-derived: the analytic
    family owns the frontier 2.57x; 95% of the remaining error is the Gaussian
    assumption; sampling is closed; P2-CP3 is capped at 1.052x; the aggressive lane
-   is P2-CP4. **The next research slice is the REOPENED P2-CP3** — build the packet's
-   *actual* augmented K2 (leading Edgeworth diagrams, cost polynomial ~1.57x
-   `k2p1`, not 1.007x) **plus an ORACLE variant** taking the post-ReLU third
-   cumulant from a GPU MC pilot instead of assuming zero, on a **disjoint 48-seed
-   draw from P01's 504 free seeds** (~9 min truth). One truth run answers two
-   questions: whether P2-CP3 was closed on evidence about a different method, and
-   **what fraction of the 95% ANY third-order correction can recover** — the
-   precondition P2-CP4 currently *assumes* rather than measures. The oracle
-   upper-bounds the whole K3 lane before a production spelling exists, exactly as
-   Moonshot G0's oracle did at Phase 1. **P2-CP2 can run in parallel — the
-   conservative candidate is already chosen and `whest validate`-clean.**
+   is P2-CP4. ~~**The next research slice is the REOPENED P2-CP3.**~~ **DONE 2026-08-21 as
+   P2-CP3R — see that section above. The cumulant lane is DEAD at 4.47%.**
+   **The next slice is P2-CP5: coupled residual sampling**, projected ~1.30x free.
+   Register it with the fitted-weight protocol (fit `MSE_c` on P01's 456 free
+   DESIGN seeds, validate on a **disjoint** draw), register the float32 lever, and
+   charge the sampler's residual. **P2-CP2 can run in parallel — the conservative
+   candidate is chosen (`k2p2`) and `whest validate`-clean.**
    *Historical statement of the slice, kept for the contract's context:*
    On fresh 1024 x 16 DESIGN networks with **two independent truth replicas**,
    compare through **one canonical evaluator** (`local_sim/lifecycle_eval.py`):

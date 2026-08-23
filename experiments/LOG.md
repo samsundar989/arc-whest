@@ -9901,3 +9901,174 @@ P2-CP1 arms or artifacts, `competition_score.py`.
 from the 96 P2-CP1 spent**. Leaves 456 free. **D17 and D19 remain unspent.**
 
 **Driver** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-21 — RESULT P2-CP3R: the cumulant lane's ceiling, and it is 4.5%  [contract above, unmodified]
+
+*48 fresh 1024 x 16 networks, **P01[40,821,001,096 .. 40,821,001,143]** — disjoint
+from the 96 P2-CP1 spent. Two independent sample streams per network at 2^22:
+stream A supplies the oracle's cumulants, stream B the truth it is scored against.
+Artifact `experiments/2026-08-21_p2_cp3r/oracle.json`, sha256
+`61a8a3664f633d8cf00800196fbd99b291cf25c3c98bcf5f66c185e498556f83`, finalized in
+the ledger. No vault touch. `estimator.py` untouched.*
+
+## The result, in one line
+
+**Correcting the ReLU MEAN MAP with cumulants is worth 4.47%. Ninety-five percent
+of the closure's error is the propagated STATE — the mean and variance of the
+pre-activation drifting as they compound through depth.**
+
+## The decomposition
+
+| arm | what it knows | final-layer MSE | recovered vs `O0` |
+|---|---|---:|---:|
+| `O0` | the honest closure — no truth at all | 4.2271e-06 | — |
+| `O1` | **TRUE** `(mu, sigma)`, Gaussian map | 2.2774e-07 | **94.61%** |
+| `O2` | + true 3rd cumulant | 5.8088e-08 | 98.62% |
+| `O3` | + true 4th cumulant | 3.8785e-08 | 99.08% |
+
+| source | share of `O0`'s MSE |
+|---|---:|
+| **propagated STATE drift** | **94.61%** |
+| 3rd-cumulant map correction | 4.01% |
+| 4th-cumulant map correction | 0.46% |
+| **cumulant map, total** | **4.47%** |
+
+**Stream A/B disagreement 3.8750e-08, so the per-stream truth noise is
+1.9375e-08.** `O3`'s measured MSE is 3.8785e-08; subtract stream B's noise and
+`O3`'s own error is **1.941e-08** — indistinguishable from stream A's noise.
+**With exact cumulants the Edgeworth map is essentially perfect**; what remains is
+the sampling noise in the cumulants the oracle was handed.
+
+## The gate — and mine was MIS-SPECIFIED
+
+| reading | value | verdict |
+|---|---:|---|
+| as literally registered: `O3` vs `O0` >= 50% | **99.08%** | ALIVE |
+| correctly specified: `O1 -> O3`, what the cumulant terms buy **on top of a perfect state** | **4.47%** | **below even the 20% KILL threshold** |
+
+`O3` vs `O0` includes `O1`, which is a **state** correction and not a cumulant
+correction at all. I wrote a threshold on a quantity that was not the one the
+slice existed to measure. **The honest reading is the second: the cumulant-map
+lane is DEAD.**
+
+**This is the second mis-specified gate this session** — the first was P2-CP1's
+1.10x bar applied to a change that costs nothing. Both were registered before the
+data, both were honoured, and both measured slightly the wrong thing. The
+durable lesson is narrower than "be careful": **write the gate on the DIFFERENCE
+the slice is built to isolate, not on a total that contains it.** `O1 -> O3` was
+namable at contract time and I did not name it.
+
+## Q4, and it is the sharpest confirmation in the checkpoint
+
+The 3rd-cumulant term carries a factor of `alpha`, so it must vanish identically
+wherever the pre-activation is zero-mean. At layer 1 every `alpha` is exactly 0.
+
+    layer 1:  O1 -> O2 difference = 1.784e-13     (numerically zero)
+    layer 2:  O1 -> O2 difference = 1.378e-07     (a factor of 10^6 jump)
+
+A free self-check fell out of the same table: **at layer 1 the oracle is WORSE
+than the honest closure** (3.240e-07 against 1.627e-07), because there the closure
+is exact arithmetic and the oracle carries Monte-Carlo noise. An oracle that beat
+exact arithmetic would have meant the measurement was broken.
+
+## MSE by depth
+
+| layer | `O0` | `O1` | `O2` | `O3` |
+|---:|---:|---:|---:|---:|
+| 1 | 1.627e-07 | 3.240e-07 | 3.240e-07 | 3.274e-07 |
+| 2 | 2.858e-07 | 3.966e-07 | 2.588e-07 | 2.421e-07 |
+| 4 | 9.561e-07 | 4.474e-07 | 1.843e-07 | 1.512e-07 |
+| 8 | 2.379e-06 | 3.825e-07 | 1.153e-07 | 8.117e-08 |
+| 12 | 3.461e-06 | 2.871e-07 | 7.967e-08 | 5.302e-08 |
+| 16 | 4.227e-06 | 2.277e-07 | 5.809e-08 | 3.878e-08 |
+
+**`O0` grows 26x with depth while `O1` FALLS.** That is the whole story in one
+column: the closure's error is not made at any single layer, it is **accumulated
+state drift**, and resetting the state at every layer removes it.
+
+True pre-activation shape, mean over neurons and networks: skewness stays at
+~1e-5 to 1e-3; excess kurtosis grows **-0.000 -> 0.0623** from layer 1 to 16.
+**The pre-activations are very nearly Gaussian**, which is what the CLT over 1024
+inputs predicts — so the closure's marginal Gaussian assumption is approximately
+*right*, and the error is in the second moments it propagates.
+
+## Predictions — 4 hits, 2 misses
+
+| # | prediction | measured | |
+|---|---|---|---|
+| Q1 | `O1` removes >= 60% | **94.61%** | HIT |
+| Q2 | `O3` removes >= 80% | **99.08%** | HIT |
+| Q3 | 4th cumulant contributes >= 3rd | 3rd **4.01%** vs 4th **0.46%** | **MISS** |
+| Q4 | 3rd term exactly zero at layer 1 | **1.784e-13** | HIT |
+| Q5 | excess kurtosis grows with depth | -0.000 -> 0.0623 | HIT |
+| Q6 | `O3` does NOT reach the noise floor | it **does** | **MISS** |
+
+**Q3 is the instructive miss, and it is the same error a third time.** I predicted
+the 4th cumulant would dominate because I compared the *mean* skewness (~0) with
+the *mean* excess kurtosis (0.06). But mean skewness is ~0 because per-neuron
+skewness is **symmetric about zero**, not because it is small — the mean masks
+the spread, and MSE is per-neuron, so the spread is what acts. **This is the third
+mean-vs-spread confusion this session**: mean `alpha` (which hid that per-neuron
+`alpha` has sd 3.7), mean skewness here, and the same shape of error in the
+P2-CP1 depth narrative. **When a quantity enters a per-neuron sum of squares, look
+at its spread, never its mean.**
+
+## What this means for the plan
+
+1. **P2-CP3 closes properly this time** — on a measurement of the right quantity.
+   Any Edgeworth/cumulant correction to the ReLU mean map is capped at
+   **1.047x**.
+2. **The packet's P2-CP4 framing also closes.** It proposes a goal-directed K3
+   correction to the *final mean*; this measures that family's ceiling at 4.47%.
+3. **The 94.61% lives in the propagated state**, and P2-CP1 already showed that
+   the *exact* Gaussian-closure covariance map recovers only 5% of it. Reaching
+   the rest needs genuine joint higher-cumulant propagation, which ARC prices at
+   **4.05 budgets**. **The analytic frontier is essentially where we stand.**
+
+## The lane that is actually left, and its arithmetic
+
+The closure is a **deterministic bias**; a sampler in the free headroom under the
+0.1 floor is **independent and unbiased**. Their inverse-variance combination is
+`MSE_comb = MSE_c * MSE_s / (MSE_c + MSE_s)`:
+
+| centre | `C/B` | free budget | N | `MSE_s` | `MSE_comb` | gain |
+|---|---:|---:|---:|---:|---:|---:|
+| `k2p1` float64 | 0.0626 | 0.0374 B | 2,448 | 3.10e-05 | 3.72e-06 | 1.137x |
+| `k2p2` float64 | 0.0627 | 0.0373 B | 2,442 | 3.10e-05 | 3.55e-06 | 1.191x |
+| **`k2p2` float32** | **0.0313** | **0.0687 B** | **4,497** | 1.69e-05 | **3.24e-06** | **1.305x** |
+
+**~1.30x, free, still pinned at the floor — six times the Hermite ladder and it
+needs no new mathematics.** This is the packet's option D / P2-CP5.
+
+**Stated as arithmetic, not measurement.** Three things must be measured before
+any of it is believed: the combination weight depends on `MSE_c`, a
+DESIGN-fittable constant that must be fit on P01's free seeds and validated on a
+**disjoint** draw; the float32 lever is still **unregistered** and carries a
+catastrophic-cancellation risk in `var = max(ez2 - mu^2, 0)` as `Phi -> 1`; and
+the sampler's residual cost must be charged, not assumed.
+
+**A route I checked and discarded before proposing this one:** estimating
+`(mu, sigma)` of the final pre-activation by sampling and plugging into the
+Gaussian map. Including the `sigma-hat` term its variance is
+`Phi^2 sigma^2/N + phi^2 sigma^2/(2N)` = `0.330 sigma^2/N` at `alpha = 0`, against
+direct sampling's `Var[ReLU]/N = 0.341 sigma^2/N` — **only 1.03x better, not the
+1.36x I first computed by dropping the `sigma-hat` term.** Plug-in estimation of
+the state is not the route; combining with the closure is.
+
+## What this does NOT establish
+
+- **Nothing about the grader.** Package parity is still BLOCKED, `lambda` is still
+  unpublished, and no arm here was scored through `competition_score` at all —
+  this slice compares raw MSE, deliberately, because nothing in it is deployable.
+- **Nothing about a deployable cumulant estimator.** The oracle is handed its
+  cumulants. It bounds the lane from above; it does not price any spelling.
+- **Nothing about the 1.30x projection**, which is arithmetic from measured inputs
+  and has not been run.
+- 48 networks, one shape.
+
+**Seed ledger:** P01 144 of 600 seeds consumed (96 + 48), **456 free**.
+**D17 and D19 remain SINGLE_USE and unspent.**
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
