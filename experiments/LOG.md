@@ -10072,3 +10072,139 @@ the state is not the route; combining with the closure is.
 **D17 and D19 remain SINGLE_USE and unspent.**
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-24 — LIVE PHASE-2 AUDIT: the board reopens structured sampling; the instrument is stale
+
+**Class:** ROUTINE external/repository audit only. No estimator or instrument edit,
+no seed claim, no measurement on a seed block, no vault touch, no submission. The
+durable report is `docs/PHASE2_LIVE_AUDIT_2026-08-24.md`.
+
+**Sources inspected directly:** live challenge overview, Phase-2 leaderboard,
+submission details, account/team submissions, Discussions, Insights, Resources,
+Rules/launch announcement; WhestBench 0.16.0 release; ARC paper and public kprop
+implementation; repo code/docs/raw P2 artifacts; public Phase-1 papers by Puffi
+and Zachary Martinot. Three parallel audits covered repository architecture,
+official-stack validation, and frontier literature. A fourth independent context
+loaded `docs/SKEPTIC.md` and reviewed only the raw sources.
+
+## Confirmed live facts
+
+- Phase 2 is live through **2026-10-17 23:59 UTC**, shape 1024x16, `B=2**41`.
+- Official stack is WhestBench 0.16 / flopscope 0.12. Lambda is zero; residual
+  above 0.4 seconds fails the MLP; total wall is 120 seconds; process memory 8 GiB.
+- There are about 30 live entries. Puffi leads at `1.802e-8` adjusted,
+  `3.603e-8` raw, and `1.099802385e12` FLOPs. The account has no Phase-2 entry.
+- The repo's P2-CP1 K2 result (`~3.96e-7` adjusted) matches the live rank-19
+  K2-like cluster. The leaders are ~100x better in raw MSE and ~22x in score.
+
+## Knowledge delta — architecture
+
+The independent Skeptic **REJECTED** the repo's global Phase-2 lane closures.
+
+1. **Structured sampling is reopened by external evidence.** Puffi's exact cost is
+   only 0.0264% above the leading dense cost of 32,768 directions, and
+   `32,768 = 16 * 1024 * 2`. With Puffi's published Phase-1 Kerdock/MUB +
+   antipodes + exact-radial method, the strongest mechanism fingerprint is a
+   16-basis width-1024 structured angular carrier. The code is private, so this is
+   an INFERENCE, not a fact. Its ~74x variance reduction over IID at the same rows
+   exceeds the repo's own 2.7x reopening condition.
+2. CP1's random orthogonal arm and invalid two-cycle lattice do not bound a
+   mutually unbiased Kerdock subset. P01 is a DESIGN block; it could support the
+   narrow findings but not a binding DECIDE-tier lane kill.
+3. **Recurrent augmented K2 is open.** `p2_cumulant_oracle.py` resets to true
+   marginal moments at every layer and measures a scalar mean-map correction. It
+   does not propagate O2/O3 corrections forward and cannot bound ARC's joint
+   harmonic/trace state recurrence.
+4. CP3R's mechanistic finding survives: 94.61% of K2 error is accumulated
+   mean/variance state drift and marginal mean-map cumulants buy 4.47%. Its
+   strategic KILL used an O1-vs-O3 estimand substituted after the registered
+   O3-vs-O0 gate passed; it is not a clean closure.
+5. The highest-EV next research order is: reproduce the 32,768-direction Kerdock
+   fingerprint; then faithful recurrent augmented K2; then a Puffi-style
+   checkpoint control/response closure. Coupled residual sampling is deprioritized.
+6. The supposed half-cost float32 K2 arm is not the frozen `k2p1_f32` artifact:
+   recorded cost falls only 3.1%, not 50%. The projected 4,497-row headroom and
+   `1.305x` gain are unsupported until a registered real arm is measured.
+
+## Knowledge delta — evaluator
+
+- Main pins remain 0.14/0.10; scorer/lifecycle defaults encode Phase 1.
+- Official-stack isolated tests pass scorer 80/88 and lifecycle 33/37. Failures
+  are exactly the stale lambda/wall/residual/memory semantics.
+- Local lifecycle mints ordinary NumPy weights, so `w.astype` is unmetered locally.
+  Official one-row FLOPs are `137,600,326,656` versus local `137,562,547,200`, a
+  37,779,456 (0.0275%) shortfall. Exact op-by-op parity is false.
+- P2-CP1 disabled the official 0.4-second residual cliff; deployment claims for
+  the slower arms are provisional. Native memory and worker restart are not emulated.
+- The current estimator is contract-valid and passed a one-row official subprocess
+  smoke: score `4.501854e-7`, raw MSE `4.501854e-6`, `C/B=0.0625734`, residual
+  `0.05368s`, wall `0.35487s`, zero failures. This is a smoke anchor only.
+
+## Next action and authority boundary
+
+First run an **IMPORTANT foundation-repair slice**: official pins, round-aware
+config, flopscope-backed local weights, exact FLOP anchor, residual/memory/process
+semantics, live manifest, and Phase-2 preflight. It requires Samuel's written
+prediction, green preflight, an evidence packet, and an independent Skeptic.
+
+Only then preregister the strategic carrier experiment. Use a new Phase-2 DESIGN
+block for basis construction/tuning and a new SINGLE_USE DECIDE block for the
+binding comparison. P01 has spent 144/600 and has 456 DESIGN seeds left; do not
+rewrite it into a decision block. `estimator.py`, vault, and submissions remain
+untouched pending their existing approval sequences.
+
+**Independent Skeptic verdict:** **REJECT** the old global closures; accept only
+the narrow K2-vs-tested-arms, covariance-map plateau, and marginal-map findings.
+
+---
+
+# 2026-08-24 — DOCUMENTATION CONSOLIDATION: one Phase-2 plan and one Claude handoff
+
+**Class:** ROUTINE documentation/continuity work. No estimator or instrument edit,
+no dependency change, no seed claim or measurement, no vault touch, no submission.
+
+**Request:** Samuel asked for the validated architecture/plan to be made durable,
+old or superseded action documents to be updated/removed, and a copy-ready Claude
+Code handoff that executes the plan to completion.
+
+## Changes
+
+1. Replaced the stacked 963-line `CURRENT_STATE.md` plus override with a concise
+   live Phase-2 snapshot, authoritative document map, evidence scope, evaluator
+   blockers, active queue, lane table, and approval boundaries.
+2. Replaced the numbered-revision `GAME_PLAN.md` with the sole active Phase-2
+   architecture and execution plan: 16-basis width-1024 Kerdock/MUB carrier,
+   antipodes/exact radial integration, K2p2/recurrent augmented-K2 analytic state,
+   checkpoint response closure, bounded optional state models, two-candidate finish,
+   and Phase 0–6 gates/timeline/completion definition.
+3. Added `docs/CLAUDE_CODE_HANDOFF.md`, a self-contained Builder prompt that begins
+   with the required Samuel predictions, performs the IMPORTANT evaluator repair,
+   and then executes every strategic phase under preregistration, seed-tier,
+   independent-Skeptic, vault, and submission rules.
+4. Deleted the two superseded Claude handoff files. Replaced the old Phase-1
+   frontier, pre-launch Phase-2 frontier, and Moonshot plan bodies with short archive
+   stubs because historical source comments and tools still cite those filenames.
+   Original content remains in git history and experimental claims remain in this
+   log/raw artifacts.
+5. Relabeled the dated Phase-2 live audit as evidence rather than a competing plan.
+6. Updated `README.md`, `AGENTS.md`, `VALIDATION.md`, `SETUP_WINDOWS.md`,
+   `COMPETITION_BRIEF.md`, `GOTCHAS.md`, `RESEARCH_NOTES.md`, and `BENCHMARK.md` so
+   live navigation, Phase-2 dataset/runtime facts, and submission authority no longer
+   point at the obsolete action sequence.
+
+## Knowledge delta
+
+There is now one unambiguous operational chain:
+
+```text
+AGENTS.md -> CURRENT_STATE.md -> GAME_PLAN.md -> VALIDATION.md
+                                      |
+                                      +-> CLAUDE_CODE_HANDOFF.md
+```
+
+`PHASE2_LIVE_AUDIT_2026-08-24.md` supplies evidence; archived filenames supply only
+historical link continuity. The immediate next action remains the IMPORTANT Phase-0
+evaluator repair, awaiting Samuel's three written predictions. Documentation work
+does not authorize that instrument edit or any later STRATEGIC action.

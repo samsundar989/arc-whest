@@ -1,6 +1,7 @@
 # The ARC White-Box Estimation Challenge, explained from zero
 
-*Written for Samuel — CS degree, no ML background assumed. Everything a claim, everything sourced (links at the bottom and in RESEARCH_NOTES.md). Last updated: Aug 4, 2026.*
+*Written for Samuel — CS degree, no ML background assumed. Phase-2 facts updated
+2026-08-24. Detailed live provenance is in `PHASE2_LIVE_AUDIT_2026-08-24.md`.*
 
 ---
 
@@ -25,33 +26,44 @@ One more thing worth knowing: they chose **randomly-initialized** networks (not 
 Forget the brain metaphors. For this competition a neural network is a tiny, fixed program:
 
 ```
-x = input                     # a list of 256 numbers
-for W in weight_matrices:     # 32 matrices, each 256x256
+x = input                     # a list of 1,024 numbers
+for W in weight_matrices:     # 16 matrices, each 1,024x1,024
     x = relu(x @ W)           # matrix multiply, then clamp negatives to 0
 ```
 
 That's the entire thing. Two operations:
 
-- **Matrix multiply (`x @ W`)**: each of the 256 output slots is a weighted sum of all 256 inputs. The weights are the program's constants.
+- **Matrix multiply (`x @ W`)**: each of the 1,024 output slots is a weighted sum of all 1,024 inputs. The weights are the program's constants.
 - **ReLU** ("rectified linear unit"): `max(0, v)` applied to each number. This is the only nonlinearity — the only reason the network isn't just one big matrix multiply.
 
-Vocabulary map: each of the 256 slots at each of the 32 steps is a **neuron** (8,192 total). The value a neuron takes for a given input is its **activation**. The value *before* the ReLU clamp is the **pre-activation**. The network here is an **MLP** (multi-layer perceptron) that is 256 **wide** and 32 **deep**, with **no biases** (no `+ b` term — simplifies the math).
+Vocabulary map: each of the 1,024 slots at each of the 16 steps is a **neuron**
+(16,384 total). The value a neuron takes for a given input is its **activation**.
+The value *before* the ReLU clamp is the **pre-activation**. The Phase-2 MLP is
+1,024 **wide** and 16 **deep**, with **no biases**.
 
-The networks in this challenge are **random**: every weight is drawn independently from a bell curve (Gaussian) with mean 0 and variance `2/256` — the so-called **He initialization**, chosen because it keeps signal sizes roughly stable as data flows through many ReLU layers instead of exploding or dying out.
+The networks are **random**: every weight is drawn independently from a Gaussian
+with mean 0 and variance `2/1024`—the **He initialization**, chosen to keep signal
+sizes roughly stable through ReLU layers.
 
 ---
 
 ## 4. The exact question you must answer
 
-The input `x` is itself random: 256 independent draws from the **standard normal distribution** N(0,1) (the classic bell curve). Since the input is random, every neuron's activation is a random quantity too. The task:
+The input `x` is itself random: 1,024 independent draws from the **standard normal
+distribution** N(0,1). Since the input is random, every neuron's activation is a
+random quantity too. The task:
 
-> For **every one of the 8,192 neurons**, predict its **expected activation** — the average value it would take over infinitely many random inputs. Return a 32×256 grid of numbers.
+> For **every one of the 16,384 neurons**, predict its **expected activation**—the
+> average over infinitely many random inputs. Return a 16×1,024 grid.
 
 "Expected value" is just the long-run average: E[f(X)] = the number that `mean(f(x) for x in samples)` converges to as samples → ∞. Notation you'll see: **E[ReLU(zᵢ)]** where zᵢ is neuron i's pre-activation.
 
-Only the **final layer's 256 numbers are scored** — the other 31 rows are diagnostics. (But the whole grid must be returned, all values finite.)
+Only the **final layer's 1,024 numbers are scored**—the other 15 rows are
+diagnostics, but the complete finite grid is required.
 
-Concretely, a graded run hands your code ~10 networks, one at a time, as an `MLP` object (`mlp.width`, `mlp.depth`, `mlp.weights` — a list of 256×256 matrices), and your `predict(mlp, budget)` must return the grid. The public practice set has 1,000 such networks with ground-truth answers included.
+Concretely, the private evaluation has 100 networks: 50 provide public feedback
+and 50 remain sealed for the final re-run. The public dataset has a 100-network
+mini and 1,000-network full split with ground truth.
 
 ---
 
@@ -59,9 +71,14 @@ Concretely, a graded run hands your code ~10 networks, one at a time, as an `MLP
 
 **The dumb way works, but slowly.** Sample many random inputs, run them through, average: error shrinks like 1/√N (10,000 samples ≈ 1% error; 1,000,000 ≈ 0.1%). The organizers computed their "ground truth" answer keys exactly this way — with **one billion samples per network**.
 
-**The budget makes the dumb way uncompetitive.** Your code runs under a **FLOP accountant** (a library called `flopscope` that wraps every math operation and counts floating-point operations). Phase 1's budget: **2.72×10¹¹ FLOPs per network**. One forward pass costs ~4.2 million FLOPs, so the budget buys ~65,000 samples — a sampling error around 2×10⁻³ per neuron, mean-squared-error ≈ 3×10⁻⁶. The current leaderboard leader is at ~10⁻⁸ — **hundreds of times more accurate than pure brute force at budget**. They are not sampling harder; they are doing math.
+**The budget makes the dumb way uncompetitive.** Your code runs under a **FLOP
+accountant** called `flopscope`. Phase 2 allows `2**41 ≈ 2.199×10¹²` FLOPs per
+network, calibrated to roughly 65,536 dense samples. The live leader's raw MSE is
+`3.603e-8`, far below ordinary Monte Carlo at that row count. The strongest public
+evidence points to algebraically structured quadrature, not merely more random
+samples.
 
-**The math way, in one idea.** Random inputs are Gaussians. A weighted sum of Gaussians is Gaussian — so the *first* layer's pre-activations are *exactly* Gaussian, with mean and covariance you can compute directly from the weights, no samples needed. And the average of ReLU(Gaussian) has a **closed-form formula**. So layer 1 can be answered *exactly* by pure algebra. The trouble starts at layer 2: after a ReLU clamp, values aren't Gaussian anymore (they can't go negative, the distribution has a kink). But they're *approximately* Gaussian, so you can *pretend*, carry the (mean, covariance) bookkeeping forward layer by layer, and get remarkably good answers. That's **covariance propagation** — our starting method. The approximation error compounds with **depth** — each layer's small "it's still Gaussian, trust me" lie stacks — which is precisely why ARC made the networks 32 layers deep.
+**The math way, in one idea.** Random inputs are Gaussians. A weighted sum of Gaussians is Gaussian—so the *first* layer's pre-activations are *exactly* Gaussian, and the average of ReLU(Gaussian) has a closed form. At layer 2, ReLU has made the state non-Gaussian. Covariance propagation pretends a Gaussian state remains adequate and carries mean/covariance forward. Its small state error compounds through all 16 Phase-2 layers; winning methods need a better structured measurement or a compositional correction to that state.
 
 **Why anyone cares:** replace "average activation of neuron 4,201" with "probability the AI does something catastrophic" and you have ARC's research program. Averages of random nets are the training wheels.
 
@@ -69,70 +86,99 @@ Concretely, a graded run hands your code ~10 networks, one at a time, as an `MLP
 
 ## 6. Scoring, precisely
 
-Per network m: **score_m = MSE_m × max(0.1, C_m / B)**, averaged over networks. Lower is better.
+Per network m: **score_m = MSE_m × max(0.1, C_m / B)**, averaged over networks.
+Lower is better.
 
-- **MSE_m**: mean squared error over the final layer's 256 neurons, against the billion-sample ground truth.
-- **C_m**: compute you spent = FLOPs counted by flopscope **plus** a wall-clock term: every second of *uninstrumented* runtime (plain Python work the accountant can't see) is billed as 10¹¹ FLOPs (λ = 1e11 FLOPs/sec).
-- **B**: the budget (2.72e11 in Phase 1).
+- **MSE_m**: mean squared error over the final layer's 1,024 neurons, against the billion-sample ground truth.
+- **C_m**: Phase-2 counted flopscope FLOPs. Lambda is zero, so residual time is not added to compute—but residual above 0.4 seconds fails that MLP.
+- **B**: `2**41 = 2,199,023,255,552` FLOPs.
 - **The 0.1 floor**: use less than 10% of the budget and your multiplier stops improving at 0.1. So a method that's cheap *and* accurate gets a 10× score bonus, but no more. (The challenge overview page shows an older `max(0.5, ·)` example — the starter kit docs, FAQ, and the actual leaderboard arithmetic all confirm **0.1** is what's used.)
 - **Failure = zeros**: crash, wrong shape, NaN, or budget overrun on a network ⇒ that network is scored as if you predicted all zeros (MSE ≈ 0.9, multiplier 1.0) — catastrophic but not disqualifying.
 - Ground truth itself has noise ≈ **2×10⁻¹⁰** MSE (a billion samples isn't infinity). That's the physical floor of the game; the leader is within ~100× of it.
 
-Worked example: covariance propagation costs ~3×10⁹ FLOPs ≈ 1% of budget → multiplier floor 0.1. Its raw final-layer MSE ≈ 8.4×10⁻⁵ → adjusted score ≈ 8.4×10⁻⁶. Full-budget Monte Carlo: MSE ≈ 2.8×10⁻⁶ × multiplier 1.0 ≈ 2.8×10⁻⁶. The leader: 1.24×10⁻⁸. That's the landscape.
+Live reference: our Phase-2 K2 path is around `3.95e-6` raw / `3.96e-7`
+adjusted, while the leader is `3.603e-8` raw / `1.802e-8` adjusted. That is the
+gap the architecture in `GAME_PLAN.md` must close.
 
 ---
 
 ## 7. How submissions actually work
 
-- You submit **code** (a single `estimator.py`), via a CLI: `uv run whest submit --estimator estimator.py`. It runs on AIcrowd's servers: **CPU-only, 16 vCPU, 64 GB RAM, no network, no GPU**.
+- You submit **code** (a single `estimator.py`). The official environment is CPU-only with no network; the solution process has an 8-GiB memory limit and the host has separate flopscope workers.
 - Inside the sandbox you may import **only** `flopscope`, `whestbench`, and the Python standard library. **No numpy, no scipy, no torch** — all math goes through `flopscope.numpy` (a numpy-compatible, FLOP-counted clone, imported as `fnp`).
 - Your class must be named `Estimator`, subclass `BaseEstimator`, and implement `predict(mlp, budget) -> (depth, width) array`. Optional `setup(context)` runs once, off-budget, ≤~5s — you can load precomputed files you shipped (up to 50 MiB / 50 files per submission). **Offline precomputation is legal and unmetered**: you can train models at home for a week and ship the resulting numbers.
 - Any randomness must be seeded from `mlp.seed` / `context.seed` (grader-provided). Unseeded or self-seeded randomness risks disqualification; determinism is re-checked when they re-grade.
-- **50 submissions per team per UTC day.** Final ranking: your designated Phase 2 submission is re-run privately on **fresh, unseen networks** Sep 20–30.
-- Arrays are immutable in the grader (no `a[i] = v`, no `+=`), single arrays capped at 4 GiB, and there's an undocumented per-network wall-clock cap (readable as `admin_config.wall_time_limit_s` in your own run reports).
+- **10 submissions per team per UTC day.** Up to two nominated submissions are privately re-run on fresh networks after the public round.
+- Arrays are immutable, single arrays are capped at 4 GiB, residual is capped at 0.4 seconds, total wall at 120 seconds, setup at 5 seconds, and solution memory at 8 GiB.
 
 ---
 
 ## 8. Timeline, prizes, and the state of play
 
-**Timeline** (all UTC): Warm-up opened May 28 (width 256 × depth 8). Phase 1 ran Jun 18 – Jul 31 (256 × 32). **Phase 2 — the one that counts — is live now: Aug 1 → Sep 19, 23:59 UTC.** Private re-runs Sep 20–30; results Oct 1; NeurIPS workshop Dec 11–12.
+**Timeline** (all UTC): Phase 2 closes **October 17, 23:59**; registration/team
+freeze is October 2; private re-runs run October 17–November 7; winners are
+announced November 15; the algorithmic-contribution write-up is due October 24.
 
 **Prizes**: Phase 2 Best Score $50,000 / $20,000 / $10,000, plus **$20,000 for "Best Algorithmic Contribution"** — judged by ARC on scientific merit, explicitly favoring *mechanistic* (math-based) methods over tuned sampling and "opaque LLM-optimized code". Phase 1 had its own $50k which has already been decided. Winners must open-source their code (OSI license). LLM assistance (e.g., me) is explicitly allowed with disclosure.
 
-**Leaderboard as of late July (Phase 1, lower = better, adjusted score):**
+**Phase-2 leaderboard snapshot, August 24 (lower is better):**
 
 | Rank | Team | Adjusted score |
 |---|---|---|
-| 1 | joe_wanza | 1.24e-8 |
-| 2 | abhinav_gorrepati | 2.30e-8 |
-| 3 | daddy_yours | 2.32e-8 |
-| 4 | mliston | 4.63e-8 |
-| 10 | Puffi | 1.06e-7 |
-| ~50 | (tail of board) | ~2.2e-7 |
+| 1 | Puffi | 1.802e-8 |
+| 2 | pranav | 1.87e-8 |
+| 3 | Activation-Regions | 3.079e-8 |
+| ~19 | K2-like cluster | ~3.93e-7 |
 
-Reference points: random guessing ≈ 7.5e-2, mean propagation ≈ 9.5e-5, covariance propagation ≈ 8.4e-6, pure Monte Carlo at full budget ≈ 2.8e-6. 636 participants / 76 teams / 13,000+ submissions so far. **Phase 2 leaderboards restart** — everyone re-proves themselves on (possibly) new settings, and the final ranking comes from the private re-run.
+The account has no Phase-2 entry. The live board is only public feedback; final
+ranking comes from private re-runs of up to two nominated submissions.
 
-**Public intel from Phase 1 write-ups** (details + links in RESEARCH_NOTES.md): one team hit 1.55e-7 with a hybrid "classify neurons as dead/on/kinked, sample the ambiguous ones, treat the rest analytically" approach. Another documented that covariance propagation's error is a **stable, systematic ~0.8% scale bias** at depth 32 — fixable with a single multiplicative constant for a ~3× accuracy gain (we've gone further and fit a *per-layer* correction curve — see below). ARC's townhall dropped hints: they expect **cumulant propagation** (tracking third/fourth-order statistics, not just mean/covariance) to eventually win, and are exploring **low-rank refinements** and fancy series-resummation.
+**Public frontier evidence:** Puffi's Phase-1 system combined Kerdock/Walsh mutually
+unbiased bases, antipodes, exact radial integration, an analytic prefix, and a
+mid-network control variate. Its leading Phase-2 FLOP count almost exactly matches
+16 width-1024 bases with antipodes. That mechanism is inferred because the Phase-2
+code is private. ARC's reference augmented-K2 method separately shows how selected
+joint third/fourth state can be propagated without a full dense K3 object.
 
-**A live controversy you should know about**: participants discovered the FLOP accountant can be partially **bypassed** — computation routed through raw arrays gets billed only via the wall-clock λ rate, which is *cheaper than real CPU throughput*, effectively inflating scores of teams that exploit it (evidence suggests some top entries do). The #4 team publicly proposed fixes; organizers hadn't formally responded as of the last crawl. **We will not exploit this** — it's against the stated rules ("must not exploit" per organizers), it's worthless for the algorithmic prize, and it could be patched (and offenders re-scored) at any time. Strategically it means: don't panic-chase leaderboard numbers that may be partly artifacts; build methods that survive a fair re-grade.
+**Clean-compute rule:** meaningful computation must go through flopscope. The old
+wall-time pricing loophole is not a research lane and lambda is now zero. We do not
+route numerical work through uninstrumented raw arrays, FFI, subprocesses, threads,
+runtime code generation, or bundled compiled libraries.
 
 ---
 
 ## 9. The science menu (plain English), from baseline to frontier
 
-**Mean propagation** — track each neuron's (mean, variance) independently; ignore correlations between neurons. Cheap (11M FLOPs), crude (MSE ~9.5e-4). The "hello world".
+**Mean propagation**—track each neuron independently and ignore cross-neuron state.
+It is a cheap sanity baseline, not a competitive method.
 
-**Covariance propagation** — also track how every *pair* of neurons co-varies (a 256×256 table). Linear layers transform the table exactly; ReLU steps use closed-form Gaussian formulas plus one approximation for the pair terms. MSE ~8.4e-5. **This is our v0** — with our fitted per-layer bias correction on top.
+**K2 covariance propagation**—also track how every *pair* of 1,024 neurons
+co-varies. Linear layers transform this state exactly; ReLU uses Gaussian formulas.
+This is our current Phase-2 fallback. It is stable and cheap but about 100x behind
+the leader in raw MSE.
 
-**Cumulant propagation (ARC's paper)** — go beyond pairs: track triple and quadruple co-variation ("cumulants" — think higher-order Taylor terms of a distribution's shape). More accurate in theory; error still compounds like (depth)^K, and the paper admits it *loses* to plain sampling by depth 8+ in its current form. Making a depth-robust version = the open research problem = the algorithmic prize.
+**Augmented K2**—track only selected joint third/fourth-order harmonic/trace pieces
+that repair the state passed to later layers. This is open and distinct from merely
+adding skew/kurtosis to the final ReLU mean formula.
 
-**Smart sampling (quasi-Monte Carlo)** — sample, but with cleverness: use low-discrepancy point sets instead of raw random draws (error ~1/N instead of 1/√N), pair each sample x with −x ("antithetic" — cancels errors by symmetry), and integrate analytically wherever possible. A public write-up validated this family at ~4e-7.
+**Structured angular quadrature**—replace random directions with algebraically
+balanced orthogonal bases, pair every direction with its antipode, and integrate
+the Gaussian radius separately. The primary Phase-2 target is 16 Kerdock/MUB bases,
+not generic IID or ordinary random orthogonal sampling.
 
-**Hybrids (the current winning family, most likely)** — exact math for layer 1; smart sampling through the middle layers; then for the *last* layer(s), don't sample the ReLU — compute its conditional average in closed form given the penultimate layer ("Rao-Blackwellization": replace sampled randomness with its exact average wherever you can). Subtract an analytic prediction as a "control variate" so you only sample the *difference* between reality and theory — small differences = small variance = fewer samples needed.
+**Compositional hybrids**—run the structured carrier and analytic state in parallel,
+measure their discrepancy at registered checkpoints, and transport a compact
+correction forward. This follows where the error develops instead of trying to fit
+one opaque final residual.
 
-**Learned correctors (our secret weapon candidate)** — the networks come from a *known random recipe*. So we can generate unlimited practice networks at home, compute near-perfect answers offline (GPU Monte Carlo), and *train a small model that predicts the analytic method's residual error* from cheap features of the weights. Ship the trained corrector inside the submission (offline compute is free!). Public evidence says naive versions underperform (the remaining error near layer 32 is mostly ground-truth noise + hard-to-learn structure), so this is a refinement layer, not a magic bullet.
+**Compact learned state correction**—only a conditional final branch. If used, it
+must respect hidden-neuron permutation symmetry, train on rolled-forward state, use
+DESIGN-only data, and improve a preregistered score. Naive final-residual fitting has
+already failed.
 
-The deep truth connecting all of these: **depth compounds errors**. Every method's story is "how do I stop layer-32 error from being 32 layers of accumulated lies?" ARC's theory says the natural expansion parameter is depth/width = 32/256 — small but not negligible, which is why corrections work and why they're needed.
+The deep truth connecting all of these is **state drift through composition**. The
+target architecture measures that drift with a structured carrier and repairs it
+with a mechanistic state/control branch.
 
 ---
 

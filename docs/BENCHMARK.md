@@ -1,5 +1,11 @@
 # BENCHMARK.md — where we actually stand
 
+> **Phase-2 status — 2026-08-24.** The body below is the private Phase-1 benchmark
+> record and must not be used as the live target. Current Phase-2 anchors are:
+> leader `1.802e-8` adjusted / `3.603e-8` raw / `1.099802385e12` FLOPs; present repo
+> K2 path `~3.96e-7` adjusted / `~3.95e-6` raw. Use `CURRENT_STATE.md` and
+> `GAME_PLAN.md`; detailed provenance is in `PHASE2_LIVE_AUDIT_2026-08-24.md`.
+
 > **Update 2026-08-19 (night).** Two numbers changed what this table means.
 > **(a)** v2.6.1's projected score, under the residual line now calibrated on five
 > graded submissions rather than one ratio: **2.6314e-7 → ~2.405e-7**, known to

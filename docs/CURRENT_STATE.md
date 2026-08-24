@@ -1,1099 +1,210 @@
 # CURRENT_STATE.md — read this first
 
-*Snapshot, not narrative. Last updated **2026-08-21** — the session that repaired
-the decision layer (CP0.1-0.3), built and proved a 66,048-point exact design
-(CP1.1), audited the published **1024 x 16** Phase-2 release, and then executed
-**P2-CP0**: the official manifest, mint parity proven at the new shape against the
-organisers' own published bytes, the first 1024 x 16 run this repository has ever
-done, and the seed ledger's artifact fail-open closed. Five Skeptic reviews.
-Update this file when a lane opens or closes, a number is graded, or the phase
-changes — not on every experiment. The narrative record is `experiments/LOG.md`.*
+**Snapshot: 2026-08-24. Phase 2 is live.** This file says where execution stands;
+[`GAME_PLAN.md`](GAME_PLAN.md) is the only active architecture/roadmap;
+[`VALIDATION.md`](VALIDATION.md) is binding for measurement; the newest entries at
+the bottom of `experiments/LOG.md` contain the evidence narrative.
 
-*Documentation note, 2026-08-21:* the current non-binding Phase-2 strategist
-packet is `docs/PHASE2_FRONTIER_ARCHITECTURE.md`; the copy-ready Builder handoff
-is `docs/CLAUDE_CODE_FRONTIER_HANDOFF.md`. The earlier
-`docs/FRONTIER_ARCHITECTURE_PROPOSAL.md` is historical Phase-1 context. The new
-packet does not authorize an estimator edit, seed spend, vault touch, or
-submission; register a contract (AGENTS.md Rule 1) before implementation.
+## One-minute orientation
 
----
+- Phase 2 closes **2026-10-17 23:59 UTC**. Team/registration freeze is
+  **2026-10-02 23:59 UTC**; contribution write-up is due **2026-10-24 23:59 UTC**.
+- Shape is `1024 x 16`; budget is `2**41`; multiplier floor is `0.1`.
+- Official stack is WhestBench 0.16 / flopscope 0.12. Lambda is zero; residual cap
+  is 0.4 seconds; total wall cap 120 seconds; solution memory 8 GiB.
+- The live leader is Puffi at `1.802e-8` adjusted / `3.603e-8` raw with
+  `1.099802385e12` FLOPs. There were about 30 entries at the snapshot.
+- This account has **no Phase-2 submission**.
+- The current shipped file routes Phase-2 width to basic `k2p1`. Expected Phase-2
+  performance is around `3.96e-7` adjusted / `3.95e-6` raw: about 22x and 100x
+  behind the leader respectively.
+- The repo's scientific decision protocol is strong. Its deployment evaluator is
+  not yet Phase-2-truthful.
+- **Immediate next action:** Phase-2 evaluator repair, an IMPORTANT slice. Samuel's
+  three written predictions are required before instrument edits.
 
-## The clock
+## Authoritative document map
 
-*Last polled **2026-08-21**. Round 1429 opens **2026-08-21T23:59Z**, leaderboard 1480 still has 0 entries — and the HF tags now read `['v2-phase2', 'v1-phase1', 'v1-warmup']`. **The Phase-2 dataset is published and the shape has moved: 1024 x 16.** See the boxed section below.*
-
-| event | when | status |
-|---|---|---|
-| Round 1428 "Phase 1" | closed **2026-08-10 23:59 UTC** | **CLOSED.** Our last submission is 327743 (v2.4.1) |
-| Phase 1 submission selection | closed **2026-08-11 23:59 UTC** | **PASSED.** We nominated nothing, so the default applied: our **two** highest-ranked public entries |
-| Phase 1 write-up | closed **2026-08-17 23:59 UTC** | **PASSED, MISSED.** No extension was issued. Write-ups posted after it (18184, 18185) drew no organiser objection, but that is not permission |
-| Round 1429 "Phase 2" | opens **2026-08-21 23:59 UTC** | **IMMINENT.** Re-polled 2026-08-21: leaderboard 1480 exists with **0 entries**, but the HF dataset now carries a **`v2-phase2`** tag baked 2026-08-13 — **width 1024, depth 16**. Slipped **four** times: Aug 8 → Aug 18 → Aug 19 → Aug 20 → **Aug 21**. Organiser 18186 (2026-08-18): *"still ironing out some details … the deadline for Phase 2 submissions will also be shifted"* |
-| Phase 2 close | nominally 2026-09-19 23:59 UTC | **WILL MOVE** — organiser says so explicitly |
-| Registration / team freeze | **2026-09-05 23:59 UTC** | 17 days out |
-| Results | 2026-10-01 | private re-run of **UP TO TWO** designated submissions on fresh MLPs (forum 18143; the Rules tab still says one and the contradiction is unresolved) |
-
-**Phase-2 opening is event-triggered, never date-triggered, and the date has now
-moved four times.** Poll with `uv run python local_sim/phase2_checklist.py`.
-
-**The public dataset card now supplies nearly the full mathematical contract:**
-**width 1024, depth 16, no biases, no separate output layer, `x ~ N(0,I)`, GT 1e9,
-mini 100 / full 1000, `B = 2^41`, and multiplier floor 0.1.** It also states that
-the budget was calibrated to preserve roughly 65,536 naive samples. The remaining
-deployment constants — especially lambda and timeout/memory details — still need
-the official 0.16 package or a graded report. The challenge page's timeline and
-its `max(0.5, ·)` worked example remain **stale copy — do not read constants off
-it**.
-
-**The first action is NOT to re-fit `_PRUNE_TAU` or `_BASIS_RANK`.** Those are
-constants inside the obsolete width-256 sampling architecture, and the current
-submission takes analytic-only fallback at width > 256. First complete the narrow
-Phase-2 readiness repairs and run the simple-K2 / augmented-K2 / sampling baseline
-ladder in `docs/PHASE2_FRONTIER_ARCHITECTURE.md`.
-
-### ⚠️ THE PHASE-2 SHAPE IS **1024 x 16** — CONFIRMED 2026-08-21 FROM THE DATASET
-
-The HF dataset gained a **`v2-phase2`** tag. `metadata.json` gives **width 1024,
-depth 16**, GT 1e9, mini 100 / full 1000, baked with **whestbench 0.16.0 /
-flopscope 0.12.0**. Round 1429 opens **2026-08-21T23:59Z**.
-
-~~Operational warning: `phase2_checklist.py` prints `v1-phase2` and recommends the
-old width-256 fallback.~~ **REPAIRED 2026-08-21 (P2-CP0).** It now reads the
-manifest, cross-checks the live tag's commit against the one the manifest was
-built from (drift there is a re-bake), prints package-parity status, and states
-the 1024 x 16 migration facts. The official metadata retains old
-`*_version_reported` values (0.14.0 / 0.10.0) beside the newer provenance ones
-(0.16.0 / 0.12.0); **both are preserved in the manifest and neither is chosen** —
-only a graded Phase-2 report's `runtime_environment` resolves them.
-
-**This falsifies the working assumption below**, on its own first-listed falsifier
-("a width that is not 256"). Kept for the record rather than deleted.
-
-**Dead as Phase-2 backbones:** the CP1.1 Kerdock/MUB-129 carrier (a width-256
-object -- `256 = 4^4`, `GR(4,7)`, `d^2 = 2^16`) and the dual-BCH array. The
-Kerdock mathematics generalises to `GR(4,9)` at 1,050,624 points, but dense
-propagation would cost about **16 budgets**. A reduced 32-basis orthogonal arm is
-still a legitimate sampling comparator; it is not the completed degree-5 rule.
-`_PRUNE_TAU = -2.5` and `_BASIS_RANK = 32` are obsolete Phase-1 constants, not
-facts about Phase 2.
-
-**Reopened, on its own pre-registered condition:** the mechanistic / cumulant lane.
-`L/n` fell from 1/8 to **16/1024 = 1/64**, and `L^K < n` now holds at K = 2
-(`256 < 1024`). Open question #1 said a wider or shallower Phase 2 would reopen it
-"wholesale". It did.
-
-**Published:** `B = 2^41`, floor 0.1, no biases, no separate output layer. The
-budget grew exactly with the 8x forward-pass cost, preserving about 65,536 naive
-samples. **Still to confirm from the official runtime/report:** lambda and the
-timeout/memory configuration. flopscope 0.12 is public; the card says whestbench
-0.16, but PyPI still exposed 0.15 at the audit time.
-
-**New budget geometry:** ARC's leading polynomials place simple K2 near
-`C/B = 0.0549` and augmented K2 near `0.0871`, both below the 0.1 floor before
-residual. Full factorized K3 is near `4.05` and needs a goal-directed compressed
-spelling. These are planning projections, not measured flopscope-0.12 costs.
-
-Full record: `experiments/LOG.md`, 2026-08-21.
-
-### P2-CP0 — **GO**, 2026-08-21. What is now measured rather than assumed
-
-*Full record: `experiments/LOG.md`, 2026-08-21, from "P2-CP0 RECONCILIATION" to
-the review. Artifacts: `experiments/2026-08-21_phase2_manifest/`,
-`experiments/2026-08-21_p2_shape_smoke/`. No seed block claimed, no vault touch,
-`estimator.py` untouched.*
-
-| | |
+| need | source |
 |---|---|
-| **Round 1429** | **UPCOMING, not LIVE** at the time of the audit — `active=false`, opens 2026-08-21T23:59Z. Dataset publication and round activation are separate events |
-| **Mint parity at 1024 x 16** | **PROVEN, 16/16 bit-identical to the organisers' PUBLISHED `v2-phase2` weights**, and 4/4 on a second shard. It did **not** need whestbench 0.16: the published bytes *are* 0.16's output. The layer-1 residual is calibrated in units of the truth's own 1e9-sample noise — **rms z = 1.0017**, and the wrong (column-vector) convention reads **674.8**, so the check demonstrably bites |
-| **Package parity** | **BLOCKED, for two independent reasons.** whestbench 0.16.0 is on neither PyPI nor GitHub, *and* public whestbench 0.15.0 pins `flopscope<0.12.0`, so **no public pair reproduces the bake stack at all**. Stamped on every artifact. `.venv-fs012` isolates flopscope 0.12; the main lockfile is untouched |
-| **flopscope 0.10 vs 0.12** | the **whole estimator** prices **identically, op by op**, at 1024 x 16 (137,562,547,200) — but **4 of 30 primitives moved**, and `where(mask, f32, python_scalar)` is **half price** on 0.12. Every P2-CP1 arm is priced under both. Tool: `local_sim/p2_price_delta.py` |
-| **The floor** | the shipped file's analytic fallback measures counted **`C/B` = 0.062556**, effective **0.071–0.079** — **under the 0.1 floor**. Residual would have to exceed **0.823 s/MLP** at λ = 1e11 to lift it off |
-| **Truth noise, exact** | **7.8286e-11** on the Phase-2 public mini — computable exactly, because `avg_variance` is a published column and `gt_mse = avg_variance / N` |
-| **Still unknown** | **λ**, the timeouts, `memory_limit_mb`, and how many public MLPs are scored. All package defaults or Phase-1 values. Only a graded Phase-2 report settles them |
+| current status and next action | this file |
+| target architecture and full execution plan | `docs/GAME_PLAN.md` |
+| live rules/leaderboard/research evidence | `docs/PHASE2_LIVE_AUDIT_2026-08-24.md` |
+| measurement protocol | `docs/VALIDATION.md` |
+| operational traps | `docs/GOTCHAS.md` |
+| contracts, results, Skeptic verdicts | bottom of `experiments/LOG.md` |
+| independent review brief | `docs/SKEPTIC.md` |
+| Claude implementation prompt | `docs/CLAUDE_CODE_HANDOFF.md` |
+| contribution manuscript | `docs/writeup-draft.md` |
 
-**The one strategic fact.** At Phase 2 the multiplier floor binds for anything in
-the K2 family, so **accuracy bought below `C/B` = 0.1 is free**. From the
-published `avg_variance` (≈0.0870), naive Monte Carlo at the budget's nominal
-65,536 samples has raw MSE 1.328e-6 at multiplier 1.0; the crude analytic closure
-is **3.60× worse on raw MSE and 2.774× better on score**. *This is arithmetic
-from published columns, not a measured sampling arm — P2-CP1 measures it.*
-**It does not mean "minimise MSE subject to `C/B ≤ 0.1"** — the objective is
-still `MSE × max(0.1, C/B)`, and an arm above the floor must be **scored**, not
-rejected, since the score is flat above the floor only for methods whose accuracy
-improves no faster than 1/compute.
+The old frontier packets and handoffs are superseded. Stub files remain only where
+source comments/tools link to their historical names; they redirect here and must
+not be treated as plans.
 
-**A projection that did not survive contact.** `docs/PHASE2_FRONTIER_ARCHITECTURE.md`
-projects the Phase-2 raw closure near **9.8e-7** by scaling the Phase-1 figure. It
-**measures 4.79e-6 — 4.9× worse**. Its *cost* projection fares better: simple K2
-projected at 0.055 against 0.0626 measured, 14% high. **Do not quote the packet's
-accuracy projection as fact.** The likely cause is that our closure factorises the
-off-diagonal post-ReLU covariance as `Φᵢ Φⱼ Σᵖʳᵉᵢⱼ`, where the exact
-bivariate-ReLU second moment is a known closed form and strictly better. That is
-P2-CP1's first question.
+## Current deployed and research state
 
-**Two hard local constraints.** The Phase-2 **`full` split is 69.96 GB** against
-**39 GB free** on this machine — `full` cannot be held here, so Phase-2 CONFIRM
-work is limited to `mini` (7.03 GB, 7 shards of 16 MLPs) unless disk is freed. The
-GPU venv has torch 2.13 on an **RTX 5090, 34.2 GB**, so fresh-mint truth at
-1024 x 16 is affordable (~5.6e14 FLOPs per network at 2²⁴ samples).
+### Shipped estimator
 
-### P2-CP1 — **GO**, 2026-08-21. The frontier is measured, and two lanes are closed
+- `estimator.py` is still v2.6.1 and must remain byte-identical to its frozen archive
+  unless a STRATEGIC contract authorizes a versioned change.
+- The graded Phase-1 file remains v2.4.1.
+- Phase-2 width takes `_analytic_only`; the effective method is K2p1.
+- None of the Phase-1 rotation/Sobol/pruning/Strassen carrier is active at width
+  1024.
+- Official 0.16 validation passes.
+- One official Phase-2 subprocess smoke produced:
 
-*96 fresh 1024x16 networks on new Phase-2 block **P01**, two independent truth
-replicas at 2^22 each, 11 arms through one canonical evaluator, paired on common
-random numbers. **Zero failures in 1,056 network-evaluations.** Contract, Samuel's
-prediction and the Evidence Packet: `experiments/LOG.md` 2026-08-21. Artifact of
-record: `experiments/2026-08-21_p2_cp1/ladder_frozen.json`. Vault untouched.*
+| metric | one-row anchor |
+|---|---:|
+| score | `4.501854e-7` |
+| final-layer MSE | `4.501854e-6` |
+| multiplier | `0.1` |
+| counted FLOPs | `137,600,326,656` |
+| `C/B` | `0.0625734` |
+| residual | `0.05368 s` |
+| total wall | `0.35487 s` |
+| failures | `0` |
 
-| arm | score (frozen counted-FLOPs model) | MSE (noise-corr.) | C/B | vs `k2p1` |
-|---|---:|---:|---:|---:|
-| `k2p6` / `k2p4` / `k2p3` | **3.9593e-07** | 3.9500e-06 | 0.0628-0.0630 | **1.0519x** |
-| `k2p2` | 3.9598e-07 | 3.9505e-06 | 0.0627 | 1.0518x |
-| **`k2p1` — the SHIPPED algorithm, bitwise** | **4.1647e-07** | 4.1554e-06 | 0.0626 | — |
-| `sample_orth` (best sampling) | 1.0685e-06 | 9.7695e-06 | 0.1093 | 0.390x |
-| `sample_iid_floor` | 1.1304e-06 | 1.1291e-05 | 0.1000 | 0.368x |
-| `sample_iid_max` | 1.1515e-06 | 1.2024e-06 | 0.9503 | 0.362x |
-| `k1` (diagonal only) | 2.2743e-05 | 2.2742e-04 | 0.0001 | 0.018x |
-| ~~`sample_lattice`~~ | — | — | 0.1005 | **INVALID, see LOG** |
+This is an operational smoke, not a score estimate.
 
-**THE FINDING, and it reshapes the plan.** The shipped closure's off-diagonal
-post-ReLU covariance `c_ij Phi_i Phi_j` is **exactly the first-order Price/Hermite
-truncation** of a convergent series whose limit is the *exact* covariance under the
-Gaussian model — verified **bitwise** against `arm_k2p1`. Carrying that series to
-order 6 gives the **limit** of the whole Gaussian-closure family, and
+### Phase-2 local evidence that survives audit
 
-> **`MSE(k2p6) / MSE(k2p1) = 0.951`.**
+P2-CP1 used 96 fresh 1024x16 networks and two independent `2**22` truth replicas.
+There were no truth failures. Its narrow conclusions remain credible:
 
-**The exact covariance map removes 4.94% of the error. The other 95% is the
-Gaussian assumption itself**, which no covariance spelling can touch. Order 2
-delivers 99.7% of the ladder (1.0518x); orders 3, 4, 6 agree to five figures.
+- K2p2 improved K2p1 about 1.052x for about 0.18% extra counted cost.
+- Tested IID and ordinary random-orthogonal arms lost to K2.
+- Higher Price/Hermite covariance-map orders plateaued.
+- Those arms do not bound valid Kerdock/MUB structured quadrature.
+- P01 was a DESIGN block, so it cannot support binding global lane kills.
 
-**Three consequences, all by pre-registered trigger:**
+P2-CP3R's durable mechanistic result:
 
-1. **SAMPLING IS CLOSED FOR PHASE 2** — best analytic beats best valid sampling
-   **2.699x**, against a 1.5x kill bar. **`_PRUNE_TAU` and `_BASIS_RANK` are never
-   refitted**; that work item, carried since the shape changed, is **retired**.
-   *Caveat, stated not buried:* a working QMC arm was never tested (ours was
-   broken). Reopening needs a **2.7x variance reduction over iid at N = 6,546 in
-   1024 dimensions** demonstrated — a high, explicit bar that no Phase-1
-   input-space device ever approached (all measured 0.98-1.09x).
-2. ~~**P2-CP3 (augmented K2) is CAPPED at 1.052x** and can be closed without
-   building it.~~ **RETRACTED 2026-08-21 by the independent Skeptic.** The Hermite
-   ladder is **not** the packet's augmented K2. The packet defines that as
-   *leading **Edgeworth** diagrams* at `11 n^3 L` against simple K2's `7 n^3 L`,
-   i.e. **1.57x the FLOPs**; the ladder is an `O(n^2)`-per-layer covariance
-   refinement measuring **1.007x**. The cost signature alone proves they are
-   different objects. `0.951` caps **covariance-map** work and says nothing about
-   an Edgeworth correction — which targets exactly the 95% the ladder leaves
-   standing. **P2-CP3 is REOPENED** and is the next slice.
-3. **The aggressive lane is P2-CP4, goal-directed K3/Edgeworth.** It is the only
-   lane left that attacks the 95%.
+- 94.61% of K2 error is accumulated mean/variance-state drift;
+- marginal third/fourth corrections in the scalar ReLU mean map recover 4.47%;
+- the registered O3-versus-O0 gate passed, then the recorded KILL used a different
+  post-hoc O1-versus-O3 estimand;
+- the oracle reset to true marginal state every layer and did not propagate ARC's
+  augmented-K2 joint state.
 
-**The deployment gate FAILED, deliberately.** `k2p2` measures **1.0518x**,
-t-interval [+1.796e-08, +2.302e-08] excluding zero, 93/96, p = 0.000 — real,
-unambiguous, and **below the pre-registered 1.10x bar**. The registered
-consequence was honoured: **the conservative candidate stays `k2p1`.** *Whether a
-change that costs +0.18% and stays under the floor deserves a lower bar is
-**Samuel's decision for P2-CP2's contract**, not a gate to move after the fact.*
+Therefore marginal final-mean Edgeworth correction remains low value, but recurrent
+joint-state augmented K2 is open.
 
-**The mechanism, and what would flip it back.** Correcting for a genuine depth-`L`
-network affording `N ∝ 1/L` samples: sampling MSE is **flat in depth** (the
-organisers' budget calibration working as designed) while analytic MSE **grows 27x**
-from L2 to L16. The ratio falls as `L^-1.44`. **Crossover ~30 at fixed `B`, but
-~22 under the organisers' actual rule** (`B` grows with `L`, holding N constant) —
-an earlier draft attributed the flatness to that calibration, which was a
-**non-sequitur**: the correction used holds `B` fixed, and the flatness comes from
-`V_L / L` being roughly constant in these networks. Phase 2's depth 16 sits on the
-analytic side either way. **Both figures are extrapolations past the data and
-neither retro-explains Phase 1**, where the width also moved. Measured depth
-exponent **1.52** (per-layer noise correction; an earlier draft said 1.567 using
-the layer-1 constant at every depth) against ARC's predicted `K = 2`.
+### Seed and vault state
 
-**THE OMITTED HALF, found by the Skeptic and binding on P2-CP4.** The frozen
-deciding model was counted-FLOPs-only. Charged at the Phase-1 lambda, **`k2p6`
-does +404% residual for +0.72% counted FLOPs** (763 ms mean / 1595 ms max against
-`k2p1`'s 151 ms) and goes **OFF the 0.1 floor** — effective C/B 0.0977 mean,
-**0.1356 max**. That contradicts the contract's own justification for the freeze
-(*"nothing that does not add 0.823 s/MLP can reorder them"*; `k2p6` adds 0.61
-s/MLP). Every verdict still stands — the freeze was fine for *ranking* — but the
-mechanism it hid is the one that killed the packed lane: flopscope charges the
-**release of a large temporary** as residual wall time while pricing the operation
-at `O(n^2)` FLOPs. **A K3/Edgeworth correction is elementwise-heavy in exactly the
-same way, so P2-CP4's contract must freeze a residual model that can see this.**
-A second, independent reason to prefer order 2: `k2p2` stays under the floor on
-effective cost (0.0748/0.0804) and `k2p6` does not.
+- P01 has consumed **144/600** seeds; 456 DESIGN seeds remain.
+- P01 is not a DECIDE block.
+- Existing SINGLE_USE Phase-1 blocks keep their recorded state in the ledger.
+- The Phase-1 vault cannot be used as a Phase-2 vault.
+- No Phase-2 vault exists. Creating or touching one requires Samuel's explicit
+  authorization and a STRATEGIC preregistration.
 
-**A latent P2-CP2 hazard.** `_n_samples` sizes N from the forward-pass identity and
-ignores arm-specific extra cost — which is why `sample_orth` targeted C/B 0.10 and
-landed at **0.1093**. Harmless at the floor; at `_TARGET_CB = 0.95` the same
-overshoot lands at ~1.04 → `BudgetExhaustedError` → a **scored failure**, ~5x
-worse than merely spending the budget. `sample_iid_max` already sits at effective
-C/B **0.9867**. **Any near-budget candidate must size N from its own measured
-cost, not from the forward-pass identity.**
+## Live frontier and architecture decision
 
-**A cost lever found and priced: the real float32 closure costs EXACTLY HALF.**
-`stats.norm.cdf` promotes float32 to float64 (forum 18127), and
-`outer(Phi,Phi) * cov` then drags the covariance up, so a naive "float32" arm is
-float64 in disguise. Casting back gives **C/B 0.031294 = 0.5003x**, at an accuracy
-cost of 4.975e-07 relative L2 — four orders below the prediction error, i.e. free.
-**It buys no score today** (floor-pinned) — it buys **1.84x more headroom** under
-the floor for the K3 correction, from 0.0374 B to 0.0687 B. **Caveat:** this
-variant is **unregistered** — not one of the eleven arms, in no artifact, and
-checked against `k2p1`'s output rather than scored through `lifecycle_eval`. It
-also carries an unflagged risk: `var = max(ez2 - mu^2, 0)` in float32 is
-catastrophic cancellation as `Phi -> 1`. **Register it before P2-CP4 leans on it.**
+The strongest external clue is Puffi's cost:
 
-### P2-CP3R — **KILL** for the cumulant lane, **PIVOT** to coupled sampling, 2026-08-21
+```text
+1,099,802,385,000 FLOPs ~= cost of 32,768 full dense directions
+32,768 = 16 Kerdock/MUB bases * 1,024 axes * 2 antipodes
+```
 
-*48 fresh networks on **P01[1096..1143]**, disjoint from P2-CP1's 96. Two
-independent sample streams per network at 2^22 — stream A supplies the oracle's
-cumulants, stream B the truth. Artifact
-`experiments/2026-08-21_p2_cp3r/oracle.json`. No vault touch.*
+Puffi publicly used Kerdock/Walsh mutually unbiased bases, antipodes, exact radial
+integration, analytic state, and checkpoint control in Phase 1. Phase-2 code is
+private, so the specific carrier is **inferred**, not confirmed. The factorization
+and roughly 74x improvement over matched-row IID are nevertheless strong enough to
+reopen structured sampling under the repository's own rule.
 
-**The question:** both remaining research checkpoints assumed a cumulant
-correction could reach the 95% P2-CP1 attributed to non-Gaussianity. **Nothing
-had measured whether it can.** This measured the ceiling before anything was
-built.
+The target architecture is now:
 
-| arm | knows | final MSE | recovered |
-|---|---|---:|---:|
-| `O0` honest closure | nothing | 4.2271e-06 | — |
-| `O1` | **true `(mu, sigma)`** | 2.2774e-07 | **94.61%** |
-| `O2` | + true 3rd cumulant | 5.8088e-08 | 98.62% |
-| `O3` | + true 4th cumulant | 3.8785e-08 | 99.08% |
+1. 16-basis width-1024 Kerdock/MUB angular carrier;
+2. antipodes and exact radial integration;
+3. K2p2 analytic state reference;
+4. faithful recurrent augmented-K2 joint state if it passes its own decision;
+5. compact mid-network sampled-versus-analytic checkpoint response;
+6. optional shared-scale/equivariant state correction only if residual diagnostics
+   justify it;
+7. two final nominees: a conservative carrier/reference candidate and an aggressive
+   supported state/response hybrid.
 
-> **Correcting the ReLU MEAN MAP with cumulants is worth 4.47%. The other 94.61%
-> is the propagated STATE — mean and variance drifting as they compound through
-> depth.**
+Coupled residual sampling is deprioritized. Its former 1.305x projection assumed a
+float32 K2 cost reduction that the frozen artifact does not show: measured cost fell
+only 3.1%, not 50%.
 
-**Consequences, and they converge the plan:**
+## Evaluator blockers
 
-1. **P2-CP3 closes properly this time**, on the right quantity. Any
-   Edgeworth/cumulant correction to the ReLU mean map is capped at **1.047x**.
-2. **The packet's P2-CP4 framing closes too** — it aims a goal-directed K3
-   correction at the final mean, and that family's ceiling is the 4.47%.
-3. **The 94.61% is state drift**, and P2-CP1 already showed the *exact* Gaussian
-   covariance map recovers only 5% of it. The rest needs joint higher-cumulant
-   propagation at ARC's **4.05 budgets**. **The analytic frontier is essentially
-   where we stand.**
+Phase 0 in `GAME_PLAN.md` must fix these before promotion evidence is trusted:
 
-**The gate was MIS-SPECIFIED and the honest reading is the stricter one.** As
-literally registered (`O3` vs `O0` >= 50%) it reads 99.08% -> ALIVE; but that
-total *includes* `O1`, a state correction. The correctly-specified quantity —
-`O1 -> O3`, what the cumulant terms buy on a perfect state — is **4.47%**, below
-even the 20% KILL threshold. **Second mis-specified gate this session.** Durable
-lesson: *write the gate on the DIFFERENCE the slice isolates, not on a total that
-contains it.*
+1. `pyproject.toml` still pins WhestBench 0.14 / flopscope 0.10.
+2. `competition_score.py` defaults to the old `1e11` lambda.
+3. `lifecycle_eval.py` defaults to Phase-1 wall/residual/memory/budget semantics.
+4. Local lifecycle creates raw NumPy weights, so weight-method operations such as
+   `astype` are not metered like official flopscope arrays.
+5. Local K2 price is low by 37,779,456 FLOPs (0.0275%) versus the official anchor.
+6. The old Phase-2 ladder did not enforce the 0.4-second residual failure cliff.
+7. Native 8-GiB memory and worker death/restart are not faithfully emulated.
+8. Manifest/checklist and preflight can be green while exercising the stale stack.
+9. Shape/GPU parity does not yet prove the 1024x16 live path.
 
-**Mechanism, sharply confirmed.** The 3rd-cumulant term carries a factor `alpha`,
-so it must vanish where the pre-activation is zero-mean. At layer 1 every `alpha`
-is exactly 0 and the term measures **1.784e-13**; at layer 2 it is **1.378e-07**,
-a 10^6 jump. And `O0` grows 26x with depth while `O1` *falls* — the error is not
-made at any one layer, it is accumulated drift. True pre-activation skewness stays
-~1e-5 and excess kurtosis only reaches **0.062**: the pre-activations are **nearly
-Gaussian**, exactly as the CLT over 1024 inputs predicts, so the marginal Gaussian
-assumption is approximately right and the error is in the second moments.
+The paired arithmetic score test, common-random-number design, ground-truth noise
+reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 
-### THE LANE THAT IS ACTUALLY LEFT — coupled residual sampling, ~1.30x free
+## Active execution queue
 
-The closure is a **deterministic bias**; a sampler in the free headroom under the
-0.1 floor is **independent and unbiased**. Inverse-variance combination,
-`MSE_comb = MSE_c MSE_s / (MSE_c + MSE_s)`:
+| order | slice | class | status |
+|---:|---|---|---|
+| 0 | official-stack/evaluator repair | IMPORTANT | **NEXT; awaiting Samuel predictions** |
+| 1 | Kerdock/MUB generator, radial rule, invariants | ROUTINE/IMPORTANT | pending |
+| 2 | structured carrier DESIGN | STRATEGIC on seed claim | pending |
+| 3 | structured carrier DECIDE | STRATEGIC | pending |
+| 4 | recurrent augmented-K2 parity and DESIGN | IMPORTANT/STRATEGIC | pending |
+| 5 | recurrent augmented-K2 DECIDE | STRATEGIC | pending |
+| 6 | checkpoint response DESIGN/DECIDE | STRATEGIC | pending |
+| 7 | integrated frontier and robustness | STRATEGIC | pending |
+| 8 | public CONFIRM / authorized Phase-2 vault | STRATEGIC | pending |
+| 9 | two frozen submissions and nomination | STRATEGIC | pending |
+| 10 | contribution write-up | STRATEGIC claim review | pending |
 
-| centre | `C/B` | free | N | `MSE_comb` | gain |
-|---|---:|---:|---:|---:|---:|
-| `k2p1` f64 | 0.0626 | 0.0374 B | 2,448 | 3.72e-06 | 1.137x |
-| `k2p2` f64 | 0.0627 | 0.0373 B | 2,442 | 3.55e-06 | 1.191x |
-| **`k2p2` f32** | **0.0313** | **0.0687 B** | **4,497** | **3.24e-06** | **1.305x** |
+## Required predictions before Phase 0
 
-**Six times the Hermite ladder, free, still at the floor, and no new mathematics.**
-This is the packet's option D / **P2-CP5**, and it is now the highest-value
-remaining lane. **Arithmetic from measured inputs, NOT a measurement.** Three
-things must be measured first: the combination weight depends on `MSE_c`, a
-DESIGN-fittable constant needing a disjoint validation draw; the float32 lever is
-**unregistered** and risks catastrophic cancellation in `var = max(ez2-mu^2,0)`;
-and the sampler's residual must be charged.
+Record Samuel's answers in `experiments/LOG.md` before changing the instrument:
 
-*Route checked and discarded:* estimating `(mu, sigma)` by sampling and plugging
-into the Gaussian map is only **1.03x** better than sampling `E[ReLU]` directly
-once the `sigma-hat` term is included — not the 1.36x obtained by dropping it.
+1. Official-stack repair changes current K2 score by `<1%`, `1–5%`, or `>5%`.
+2. Kerdock16 reduces variance versus IID at 32,768 directions by `<2.7x`,
+   `2.7–20x`, or `>20x`.
+3. Expected raw-MSE gain from recurrent augmented K2, plus whether any official
+   residual-cap failures are expected.
 
-### SAMUEL'S WORKING ASSUMPTION, 2026-08-20 — FALSIFIED 2026-08-21, kept for the record
+Then write the IMPORTANT foundation contract/knowledge target, capture baseline
+evidence, implement, run full preflight/portability/official subprocess checks, and
+send raw artifacts to a fresh independent Skeptic. Do not spend a seed or edit the
+submission before the relevant STRATEGIC contract.
 
-Nothing about Phase 2 has been released. Rather than block, Samuel's instruction is
-to **assume Phase 2 is more or less Phase 1 with different MLPs, possibly a little
-harder**, and to build against that.
+## Closed and open lanes
 
-**This is a stated assumption, not evidence, and it is labelled as such wherever it
-is load-bearing.** Its consequences:
-
-- Build and validate at **256 x 32, no biases, He init, `x ~ N(0, I)`**, budget
-  `B = 2.72e11`, lambda = 1e11, multiplier floor 0.1. These are the Phase-1
-  constants from organiser thread 18125 and the installed whestbench 0.14.0.
-- Keep everything **shape-generic** anyway (hard rule 7). "A little harder" most
-  plausibly means more depth or a tighter budget; both change `C/B` and neither
-  changes the score identity.
-- **Do not spend D17 or D19** — the two clean single-use decision blocks — until the
-  real shape is published. A block spent on a shape that then moves is wasted, and
-  that is the whole reason both were reserved.
-- **Re-poll before acting on any deadline** (`local_sim/phase2_checklist.py`). The
-  open date has now slipped four times, most recently to 2026-08-21T23:59Z.
-
-**What would falsify the assumption**, in rough order of damage: biases (kills the
-exact radial reduction and the layer-1 closed form), a non-Gaussian input
-distribution (a new angular/radial derivation), a width that is not 256 (rebuilds
-every design-carrier construction, and 2^8 is exactly what makes the MUB/BCH
-arithmetic work), a materially different `L/n` ratio (reopens the mechanistic
-cumulant lane wholesale), or a changed flopscope price table (flopscope >= 0.11 is
-required by whestbench 0.15.0 and its pricing is unverified).
-
-## Where we stand
-
-| instrument | tier | value | date |
-|---|---|---|---|
-| **graded, submission 327743 (v2.4.1 — THE SHIPPED FILE)** | graded | **2.6314e-7** adjusted · 1.3323e-6 MSE · mult 0.19896 · residual 10.022 ms/MLP · **0 of 100 failed** | 2026-08-10 |
-| graded, submission 324420 (v2.4) | graded | 2.7194e-7 adjusted · 1.3748e-6 MSE · mult 0.1990 · residual 9.845 ms/MLP | 2026-08-05 |
-| graded, 324094 (v1.1) | graded | 3.893e-7 | 2026-08-05 |
-| vault, 500 sealed MLPs, v2.4.1 | VAULT | median **2.4651e-7** · mean 3.2669e-7 · p99 2.0535e-6 · max 3.0469e-6 · 0 non-finite | touch #1, 2026-08-06 |
-| public mini (100), v2.4.1 | CONFIRM | 3.172e-7 adjusted · 1.4895e-6 MSE · mult 0.216 · 0 failed | 2026-08-06 |
-| invariant suite on the shipped file | — | **30/30** | verified 2026-08-19 |
-| shape parity (v2.6.1 fallback vs v2.4.1) | — | **27/27**, dense paths bit-identical | 2026-08-19 |
-| canonical scorer vs installed whestbench | — | **88/88**, bitwise/scorer-path parity on 0.14 | 2026-08-21 |
-| seed-ledger enforcement | — | **44/44** negative tests (was 40/40; three snapshot assertions converted to invariants 2026-08-20) | 2026-08-20 |
-| **the preflight gate itself** | — | **12 checks**, 10 by default and 12 under `-Full`; current non-UTF8 PowerShell run is RED only because `whest validate` crashes printing Unicode after validating. Explicit UTF-8 passes. Script repair remains open | 2026-08-21 |
-| grader-lifecycle evaluator | — | **37/37**, all six failure paths provoked | 2026-08-20 |
-| carrier design strength | — | **48/48** (was 27/27) | 2026-08-21 |
-| **Kerdock + axial, an EXACT spherical 4-design** | design theory | **66,048 points on 256 dims**, degrees 1–5 at machine precision, strength 5 proven by exact Delsarte transform. `C/B = 0.6934` **at the Phase-1 shape**. **OBSOLETED by the 1024×16 shape the same day** | 2026-08-21 |
-| **the degree-4 design carrier** | DECIDE (D18, 48 nets) | **1.4775× [+14.4%, +45.9%]** at 131,072 points, where `C/B = 1.3509` is **over budget**. At **66,048** points the cost line fitted on our own arms gives **`C/B = 0.6932` counted — under the cliff** (CP0.3) | 2026-08-20 |
-| the binding promotion gate | — | **arithmetic**, studentised-t / basic bootstrap, executable as `competition_score.decide()`. Re-scoring the whole record flipped **nothing** | 2026-08-20 |
-| board position | — | raw #90/200; **#82 of 192 plausible-honest** on 5 entries | 2026-08-06 10:03Z |
-
-**Shipped file, corrected 2026-08-19**: `estimator.py` == **`estimator_v2_6_1.py`**
-(byte-identical modulo line endings — `scripts/preflight.ps1` step 4 asserts this).
-The **graded** file is `estimator_v2_4_1.py` (327743, 2026-08-10, Phase 1): 0
-failures, safe to designate. **These are not the same file** — v2.6.1 is built,
-green and deliberately un-gated, and the line above said "v2.4.1" until an
-independent audit caught it. Vault touch counter: **1**.
-
-**v2.4.1 vs v2.4 is a DRAW, not a 3.2% improvement.** The headline adjusted score
-fell 2.7194e-7 → 2.6314e-7, but both were scored on the *same* 100 networks
-(`mlp_name` lists identical, `sampling_mse` identical to 17 digits), so the paired
-statistic applies: geometric mean of per-MLP ratios **0.9665×, 95% CI [0.7969,
-1.1721]**, better on **22 of 50** (exact p = 0.839). The aggregate delta is a small
-residue of near-cancelling sums (+1.91e-5 of gains against −1.70e-5 of regressions);
-three networks each individually flip its sign. Counted FLOPs agree to 0.02%, and
-layers 0–30 are exactly float-equal on **all 50** networks — only the scored final
-layer differs. **Quote v2.4.1 as *equivalent to* v2.4, never as better.**
-
-*Precisely: "no **resolvable** effect." At n = 50 with sd(log ratio) = 0.696 this
-design can only exclude |effect| > ~20%. The better-powered answer already existed
-and agrees — 0.9959× over 32 draws/MLP (`docs/GOTCHAS.md`). The grader run confirmed
-it; it did not discover it.* Full analysis and the independent audit that corrected
-three claims in this section: `experiments/LOG.md` 2026-08-10.
-
-**Field anchors — corrected 2026-08-19.** Best *published and explained* honest
-score is **9.10e-8** (Team Puffi, analytic+QMC hybrid); the best published raw MSE
-is 1.546e-7. GT noise floor of the metric ~2e-10. **We are ~2.6× behind the best
-published honest method, and behind roughly twelve of them.**
-
-⚠️ **"Our declared honest sampling frontier ~2.7e-7" is WITHDRAWN** (it described
-*our own method's* frontier, not the field's), and so is the framing that the
-cost half of `V·c` is "empty" while variance is "crowded" — the 2026-08-19 carrier
-audit measured our variance carrier at ~85–95% of the achievable ceiling for
-input-space methods, and found the remaining headroom on the **cost** side.
-Full table: `docs/BENCHMARK.md`.
-
----
-
-## Shipped file — v2.6.1 BUILT, NOT PROMOTED (2026-08-19)
-
-`estimator.py` is **v2.6.1** (Strassen-Winograd carrier + the P0.3 odd-width
-repair), archive `estimator_v2_6_1.py`, preflight **GREEN 11/11 under `-Full`**
-(2026-08-20; the gate was 6 steps when this line was written and is now 11 —
-see `docs/VALIDATION.md` §7), invariants **30/30**, shape parity **27/27**,
-vault touches still **1**. **It has not been gated, not been submitted, and no
-decision block has been spent.**
-
-**v2.6 had a network-destroying bug on every odd width and it is fixed.** The
-Strassen trim ran *before* the eligibility test, and the trim itself
-(`keep = a > alpha[alive].min()`) sheds every neuron tied at the minimum — and at
-layer 0 **every alpha is exactly 0.0**, because `x ~ N(0, I)` makes the
-pre-activation mean zero. So on any odd width v2.6 deleted the entire first
-layer's sampled path: 7 of 17 shapes wrong, up to **0.58 max relative error** and
-**0.33 prediction MSE** against v2.4.1. v2.6.1 decides eligibility from `n` and
-`width` first, rebuilds untrimmed if trimming cannot make every dimension even,
-and refuses any trim that would shed more than one neuron.
-
-**Nothing recorded is invalidated**: the competition shape is 256x32, layer 0's
-alive count there is 256 (even), the trim never fired, and v2.6.1 is bit-identical
-to v2.6 at even widths **including its counted FLOP count to the unit**. The
-independent Skeptic confirmed `use_str` was True on 100/100 public-mini networks.
-Full record: `experiments/LOG.md` 2026-08-19 (night), P0.3.
-
-The graded number of record is still **v2.4.1 = 2.6314e-7** (submission 327743).
-
-**Why it is held.** The deciding quantity is the grader's residual price per
-operation, which this document classifies **E1 — directional only**, and the
-same byte-identical paired comparison reads:
-
-| | cost ratio | net V.c |
+| lane | state | scope |
 |---|---|---|
-| **fitted line on 5 graded submissions (2026-08-19 — QUOTE THIS)** | **1.1004x** | **1.0940x** |
-| grader per-op price 7.0 us/op (ratio through origin) | 1.0990x | 1.0926x |
-| transfer the local residual ratio (the old conservative choice) | 1.0740x | 1.0677x |
-| **this machine, as measured** — never decides | 0.9577x | 0.9522x |
-
-**The first row supersedes the rest.** Projected graded residual for v2.6.1 is
-**16.251 ms** against v2.4.1's observed 10.022 ms; counted FLOPs fall 10.5%,
-residual rises 62%, and because residual is only 2–3% of `C` on the grader the
-counted saving wins. Known to well under 1% on the cost side, against the
-17-point bracket below whose **sign flipped**. Remaining caveat: v2.6.1 sits at
-2,370 ops and the fit is calibrated on 329–1,352 — a **1.75× extrapolation**,
-which is now the load-bearing assumption and is much weaker than the old one.
-
-The sign flips between the local harness and the grader, because local residual
-runs **4.37x** the grader's (42.99 ms/MLP vs 9.845) while the op count transfers
-exactly (1,417 local vs 1,416 graded). Break-even is 55.5 us/op; the grader is
-at 7.0, this machine at 30-51. **Only a graded run can decide it.** MSE is
-settled and costs 0.51% (paired 0.9942x [0.9870, 1.0013]), all of it the
-even-width trim — Strassen itself contributes nothing (LOG 2026-08-19).
-
-## CP0 — the decision layer, 2026-08-20 (two slices, two independent Skeptics)
-
-*Working against `docs/FRONTIER_ARCHITECTURE_PROPOSAL.md` rev 2 as a non-binding
-strategist packet. **No seed block drawn, no vault touch, no estimator edit,
-nothing submitted.** Vault counter still **1 of 3**.*
-
-**Ten proposed validation blockers were audited against the code with file/line
-evidence.** Two were already partially fixed (2, 8); eight were open. Two are now
-repaired:
-
-| slice | class | outcome |
-|---|---|---|
-| **CP0.1** the gate | IMPORTANT | `scripts/preflight.ps1` **6 → 12 checks**. 165 previously ungated checks are now gated. Skeptic **PROVISIONAL**, found 3 real defects in the repair (plus 1 I introduced fixing them); all fixed |
-| **CP0.2** the lifecycle evaluator | IMPORTANT | `local_sim/lifecycle_eval.py`, **37/37**. Skeptic **PROVISIONAL**, and its lead finding invalidated the slice's own licence; 12 findings fixed, self-test 26/26 → 37/37. Terminal state PROMOTE_AND_CONTINUE |
-
-**The gate is now two-tier and the denominator is always 12.** Default runs 10
-checks in ~135–160 s and prints `GREEN 10/12, 2 SKIPPED` with the skips named in
-red; `-Full` runs all 12 in ~755 s and is **required** before any promotion,
-submission or vault touch. **Quote the tier** — "preflight GREEN" now means two
-different things. Protocol: `docs/VALIDATION.md` §7.
-
-**Five things every future number depends on**, added to the three from Stage 0:
-
-1. **A setup failure kills the WHOLE submission, not one MLP.** `cli.py:2357` calls
-   `runner.start()` outside the try wrapping `evaluate_estimator`. This is the most
-   expensive failure mode a carrier candidate has, and no evaluator here modelled
-   it until 2026-08-20.
-2. **We have never observed the grader's timing or memory limits.** Every graded
-   `config_snapshot` carries exactly `n_mlps`, `depth`, `width`, `flop_budget`.
-   `setup_timeout_s` = 5.0, `wall_time_limit_s` = 60.0, `predict_timeout_s` = 30.0,
-   `memory_limit_mb` = 65,536 are **package defaults**. Only λ = 1e11 is
-   corroborated. **`memory_limit_mb` is RLIMIT_AS and already killed v2.5.**
-3. **The old evaluators over-charge MLP #0 and only MLP #0** — measured
-   **+2.5273e8** counted FLOPs (+0.554%, +155 ops); every other MLP bit-identical,
-   because `_BASE_POINTS` is a module global. **The vault baseline and the coverage
-   study are NOT invalidated.** The narrowness is an accident of v2.6.1's design,
-   not a property of the old evaluator: a carrier held in *instance* state would be
-   billed on all 500.
-4. **A local evaluator's objective is not a graded objective.** Counted FLOPs
-   transfer exactly; residual seconds do not and they enter `C`. λ·R is ~10–13% of
-   `C` locally against 2–3% graded.
-5. **`mean(target²)` is float32.** A float64 version of the failure-path MSE differs
-   by 1.96e-9 relative. Go through `competition_score.zero_prediction_mse`.
-
-**Still open from the CP0 audit, untouched:** blocker 4 (the ledger scan misses a
-literal already covered by another record; dynamic block access invisible; two D18
-artifact hashes blank), 6 (a vault touch is not transactional — an interrupt
-between opening the truth and writing the seal reads the truth and logs nothing),
-7 (the residual model fits five per-submission *aggregate* means and cannot score
-per MLP), 9 (truth seeds masked to 31 bits), 10 (single truth replica). Blocker 1 —
-the arithmetic gate — is **STRATEGIC and waiting on Samuel**; see § *Next actions*.
-
-**`local_sim/vault.py` and `local_sim/coverage_lab.py` were deliberately NOT
-rewired** to the new evaluator. Both have recorded results attached and `vault.py`
-is guarded; that is its own slice with its own prediction.
-
----
-
-## Stage 0 — the instrument, repaired (2026-08-19 night)
-
-Five slices, all recorded in `experiments/LOG.md` with contracts written before
-the data existed. **Nothing was promoted, no decision block was spent, no vault
-touch was taken, nothing was submitted.**
-
-| # | what | state |
-|---|---|---|
-| **P0.1** | `local_sim/competition_score.py` — the grader's identity in one place, bitwise-equal to whestbench 0.14.0 on the scalar primitives, on the aggregate, and on the real scoring loop including both failure paths. **71/71** | done, Skeptic PROVISIONAL |
-| **P0.4** | `local_sim/seed_ledger.py` + `experiments/seed_ledger.jsonl` — consumption recorded, enforced, and statically scanned. **39/39** negative tests. Preflight step **6** | done |
-| **coverage** | `local_sim/coverage_lab.py` — which promotion interval actually covers 95%, on 192 fresh networks (D18) | done |
-| **P0.3** | `estimator.py` -> **v2.6.1**, the odd-width repair. **23/23** shape parity | done, Skeptic **ACCEPT** |
-| **P0.2** | `local_sim/vault.py` — evaluates a named candidate FILE under real flopscope, `--dry-run` deleted, touch bound to a sha256, maximum enforced, atomic seal update | done |
-
-**Three things every future number depends on:**
-
-1. **The competition objective is the ARITHMETIC MEAN of per-MLP scores over the
-   FIFTY public MLPs**, and it is now reproducible offline **bitwise** from the
-   durable graded reports — `2.719427529595e-07` (324420) and
-   `2.631432177242e-07` (327743), exactly. A failure is priced at multiplier
-   **1.0**, not the 0.1 floor: ~5x, on top of the zeroed prediction.
-
-2. **The arithmetic mean and the geometric mean of per-MLP ratios select
-   OPPOSITE winners on our own graded data.** v2.4 -> v2.4.1 on the same 50 rows:
-   arithmetic **1.0334x** (v2.4.1 better), geometric **0.9666x** (v2.4 better),
-   22/50 wins, bootstrap CI spanning zero. **RESOLVED 2026-08-20 (CP0.3): Samuel
-   adopted the arithmetic statistic.** `docs/VALIDATION.md` §2b-i is now binding
-   and the gate is executable as `competition_score.decide()`. Re-scoring every
-   recorded verdict under both estimands flipped **nothing**.
-
-3. **Use the studentised t interval or the basic bootstrap. Do NOT gate on the
-   percentile bootstrap or on BCa at n ~ 50.** Measured false-promotion rate
-   against a true zero (nominal 5%): t **4.1-5.4%**, basic **4.0-5.2%**,
-   percentile 6.8-8.2%, **BCa 9.1-11.5% — roughly double**. The reason is that
-   common random numbers make the *paired difference* nearly symmetric (skew
-   +0.21, -0.55, -0.46) even though each arm's scores are strongly right-skewed,
-   so BCa's skew correction is pure added variance. BCa only starts winning past
-   skew ~6, which no real arm reaches.
-
-**The v2.6 gate, re-derived under the right estimand** (read-only, from the two
-durable CONFIRM artifacts; `local_sim/reconstruct_v26_gate.py`). The scorer
-reproduces both artifacts' per-MLP and aggregate scores at **0.000e+00** relative
-deviation:
-
-| residual model | arithmetic gain | 95% CI (relative) | geometric gain |
-|---|---|---|---|
-| local, as measured — never decides | 0.9529x | [-5.77%, -4.11%] | 0.9521x |
-| per-op at the graded 6.95 us/op | **1.0961x** | [+8.01%, +9.52%] | 1.0927x |
-| transfer (conservative) | **1.0695x** | [+5.75%, +7.25%] | 1.0666x |
-| counted FLOPs only | 1.1147x | [+9.54%, +11.03%] | 1.1109x |
-
-**The estimand correction does not change this decision** — arithmetic and
-geometric agree in sign in all four models, and the arithmetic reading is slightly
-*more* favourable to v2.6. The sign still flips on the grader's residual price,
-which is **E1**, and only a graded run settles it.
-
-**Seed blocks after the ledger repair:** D16 **DESIGN, part-spent** (270 of 600
-drawn by five probes; 330 free in four gaps). D17 **LOCKED SINGLE-USE**, verified
-never drawn. D18 DESIGN, **192 drawn** by the coverage study, 408 free. D19
-**SINGLE-USE, unspent**, held for the v2.6 promotion gate so a Phase-2 shape
-change cannot burn the only clean decision block.
-
----
-
-## Closed lanes — do not reopen without new *external* evidence
-
-Each was killed by a measurement, not by a preference. The reopening condition, if
-any, is stated. Reopening one is STRATEGIC work and needs a Slice Contract.
-
-| lane | verdict | gate vs result | evidence |
-|---|---|---|---|
-| Analytic family (B1 fusion / B2 tail / B3 learned residual) | **DEAD** | fusion net ~0 · tail −67…−214% · R²=0.012 | GAME_PLAN rev 3 |
-| Track T — shrinkage-moment tail | **CLOSED** | 1.10× gate → 0.9998× | LOG 2026-08-05 |
-| Track P — rank-k deviation propagation | **CLOSED** | 1.25× gate → 1.093× even with a free oracle | LOG 2026-08-05. Break-even rank = width/2 |
-| Sprint 3 — structure-aware FLOP allocation | **FAIL** | → 1.0246× | LOG 2026-08-05 |
-| Sprint 4/5 — packed activation sparsity | **KILLED** | pre-registered 1.15× → **1.1216×** [1.1188, 1.1244] on D14 | LOG 2026-08-06. D12 and **D14 are SPENT — never reuse** |
-| N as an operating-point lever | **CLOSED** | `MSE×N` flat over {16k, 32k, 65k} at 8 shifts | the 14% "optimum" was one heavy-tailed realisation |
-| Batched depth-2 Strassen | **OFF** | bitwise identical, −53% ops, **worse** residual | shipped behind `_STRASSEN_BATCHED`, tests kept |
-| **Control variates (layer-1 exact-mean, LINEAR forms only)** | **DEAD** | **1.010×, 95% CI [0.979, 1.042]** on our Sobol+digital-shift path — CI includes 1.0. On plain MC the same correction gives 1.383× and the fitted optimum 1.584×: QMC already removes that variance | Skeptic probe 2026-08-11, 14 MLPs × 6 shifts, paired geo-mean, CONFIRM tier. **Covers recursive/per-layer forms** — any correction telescoping to a linear map of the layer-1 sample-mean error is in this class. **Does NOT cover** corrections using an *empirical* per-layer gain (`mean(z>0)`), which are nonlinear and unmeasured. The older "1.80× standalone" is a ratio of means over 3 MLPs and should not be quoted |
-| Score optimisation generally | ~~CLOSED at ~2.7e-7~~ **REOPENED 2026-08-10** | — | GAME_PLAN rev 6's frontier described *our method*, not the field's. Board decomposition shows honest teams 4.8× better on MSE at our compute. See § *Open questions* #1 |
-
-| **The whole SAMPLING architecture, at Phase 2** | **CLOSED 2026-08-21 (P2-CP1)** | pre-registered kill: best sampling > 1.5x best analytic → **measured 2.699x** | 96 fresh 1024x16 nets, block P01, 2 truth replicas. iid at both the floor and 0.95 B, and orthogonal MC, all lose to the analytic closure. The flat-score law was confirmed to **1.20%** across a 9.5x budget difference, so **no sampling operating point helps**. `_PRUNE_TAU` / `_BASIS_RANK` are never refitted. **Reopening condition:** a working QMC carrier demonstrating **≥2.7x variance reduction over iid at N = 6,546 in 1024 dimensions** — ours was broken (Korobov generator with cycle length 2) and that arm is INVALID, not evidence |
-| **Cumulant / Edgeworth correction to the ReLU MEAN MAP (the packet's augmented K2 AND its goal-directed K3)** | **CLOSED 2026-08-21 (P2-CP3R)** | capped at **1.047x**, measured with an ORACLE handed true cumulants | `O1 -> O3 = 4.47%` of the closure's MSE. 94.61% is propagated STATE drift, which no map correction touches. The oracle bounds the lane from above, so no spelling can beat it. **Reopening condition:** a method that improves the propagated STATE, not the map — and P2-CP1 showed the exact Gaussian covariance map recovers only 5% of that, so it needs genuine joint higher-cumulant propagation (ARC: 4.05 budgets) |
-| **Improving the Gaussian-closure COVARIANCE MAP (higher Price/Hermite orders)** | **CLOSED 2026-08-21 (P2-CP1)** | capped at **1.052x**, measured at the family's limit | `MSE(k2p6)/MSE(k2p1) = 0.951`: the exact covariance map under the Gaussian assumption removes only 4.94% of the error. A **measured limit** — orders 6/8/12/20 agree to 7 significant figures and an independent quadrature confirms convergence. **This closes covariance-map work ONLY. It does NOT close augmented K2** — that closure was retracted; see the P2-CP1 section |
-
-**The mechanism behind the packed lane's death, which generalises**: flopscope
-prices a gather at 4 FLOPs/element, and packing's entire saving is substituting
-gathers for dense multiply-adds. A random-access gather costs far more *wall time*
-per element than a BLAS multiply-add, and wall time is charged back at λ = 1e11.
-The lane arbitrages the price table against physics, and loses.
-
----
-
-### Added 2026-08-19 — the carrier audit (LOG 2026-08-19)
-
-| lane | verdict | number | note |
-|---|---|---|---|
-| **Point-set whitening (full 256x256 ZCA)** | **DEAD on our carrier** | **0.9972x, CI [0.986, 1.009]** | 24 MLPs x 24 shifts, paired, GT 2^23. Worth **1.23x on iid** — the device works, our Sobol already collects it. The competitor "2.46x" is a rung against an iid+antithetic baseline; that author's own ablation reads 0.97x / 0.994x in both orders and the census records 1.05x |
-| **Diagonal moment standardisation** | **DEAD, and it was always a no-op** | **1.0000x, CI [0.999, 1.001]** | Our shipped Sobol's diagonal second moment is already **107x better than iid**; its off-diagonal is only 5.9x better. The 2026-08-05 kill and the radial-imbalance predictor both probed the already-exact half |
-| **ReLU-homogeneity sphere projection** | **DEAD on our carrier** | 1.0010x, CI [0.998, 1.004] | Exact and free, but Sobol already balances the radius. Worth +4% *inside* a design carrier |
-| **Tent / baker fold** | **DEAD alone** | 0.9810x, CI [0.928, 1.037] | Only `tent+white` clears, at **1.0931x [1.044, 1.148]** — the one surviving input-space combination |
-| **Degree-3 structured design carrier** | **DEAD against the shipped stack** | **1.047x, CI [0.979, 1.120]** | Bare it is 1.182x [1.092, 1.290]; the rank-32 rotation collects it. **Does NOT close a true degree-4/5 design** (strength-4 OA / Kuperberg cubature), whose external ceiling is ~1.46x |
-| ~~Strassen-Winograd~~ | **REOPENED** | **1.267x counted (depth 2), MSE-exact; ~1.10-1.16x net after residual** | Measured on the real flopscope 0.10.0. Our 2026-08-06 negative was on the *packed* v2.5 carrier (tiny irregular blocks). Now the largest bankable lever in the project |
-
-**The governing mechanism, measured three ways today: SUBSTITUTION.** Whitening
-vs Sobol, design vs rotation, and (previously) CV vs QMC. Two devices that
-annihilate the same low-order structure do not compose — whichever is added first
-takes the credit. **Read every competitor ladder for what its baseline arm
-contains, never for its largest rung.**
-
-⚠️ **Correction, 2026-08-19 (P0.4): two of those three ways are ONE sample.**
-`probe_whitening.py` and `probe_design_carrier.py` both hardcode
-`SEED0 = 30_806_016_200` with `N_MLPS = 24` — **the same 24 networks**. The
-whitening kill (0.9972x) and the degree-3 design-carrier kill (1.047x) are
-therefore **correlated evidence, not two independent readings**. Both are DESIGN
-tier and no gate was decided on either, so neither verdict changes; the claim of
-independence does. The CV-vs-QMC leg is on different data and still stands. The
-seed ledger now prints this every time anyone runs `preflight` step 6.
-
-~~**New standing number: 7.0 us/op**~~ **SUPERSEDED 2026-08-19.** That was a
-ratio *through the origin* from a single submission (327743: 1,416 ops, 9.845 ms).
-Fitted on **all five** graded submissions the grader's residual is a **line**:
-
-    residual_graded  ≈  2.551 ms  +  5.780 µs/op        R² = 0.898, LOO 0.829 ms
-
-**2.551 ms is FIXED overhead charged to every MLP before our first operation** —
-25% of v2.4.1's whole residual, 2.55e8 FLOP-equivalents. A ratio through the
-origin cannot see it and mis-prices every candidate whose op count differs from
-the one it was fitted on. The discriminating evidence: **v1.0 has 12.5× v0's
-counted FLOPs and LESS residual** (4.491 ms vs 6.743 ms), which no function of
-FLOPs can produce. Price any counted-FLOPs-for-op-count trade with the line, and
-note that a candidate far outside 329–1,352 ops is an extrapolation.
-
-**Correction owed to a durable doc.** `docs/writeup-draft.md` and
-`docs/RESEARCH_NOTES.md` attribute the 2.35x moment-standardisation regression to
-"a first-order bias". Moment matching's bias is **O(1/N)** (Glasserman 4.5.1
-p.245) and diagonal forcing measures at exactly 1.000x here and in forum 18151.
-The number may be real; the mechanism is not. **Do not ship it.**
-
-## Open questions, ranked
-
-*Re-ranked 2026-08-19. Questions 1 and 2 of the previous ranking are now answered
-and have moved to § Closed lanes; what is left is genuinely short.*
-
-1. ~~**THE PHASE-2 CONFIGURATION — blocking**~~ **ANSWERED 2026-08-21 (P2-CP0),
-   except for λ.** Everything but λ is now read from official sources and hashed
-   into `experiments/2026-08-21_phase2_manifest/phase2_manifest.json`:
-   **1024 × 16**, no biases, no separate output layer, mini 100 / full 1000,
-   **B = 2⁴¹**, floor **0.1**, 65,536 naive samples. The earlier claim that
-   *"B and the floor are not in the dataset"* was **wrong** — both are on the
-   dataset **card**, which is a different file from `metadata.json`.
-   **λ is the one genuine unknown** and only a graded report settles it.
-   The reopening condition this question named did fire: `L/n` fell 1/8 → 1/64,
-   `L² = 256 < 1024`, and the mechanistic lane is open at K = 2.
-   The new #1 is the one below.
-
-2. **Does v2.6 actually win?** Built, preflight GREEN, MSE settled at 0.9949×.
-   The cost claim reads **1.068–1.093× projected on the grader** and **0.952×
-   measured on this machine**, and the sign flips on the residual price — a
-   quantity this document classifies **E1, directional only**. See § *Shipped
-   file*. **Only a graded run decides it.** A Skeptic has not seen the build; the
-   transfer argument (that v2.4.1's measured 4.34× per-op inflation carries to a
-   file with 1.7× the operation count) is the load-bearing assumption and is
-   exactly what an independent falsifier should attack.
-
-2b. **The design lane is ALIVE, and the missing rung is now identified.**
-   Measured 2026-08-19 (`local_sim/test_carriers.py`, 18/18): the shipped Sobol
-   carrier's degree-4 moment error is **0.510× iid's** — it collects about half
-   of degree 4 and none of degree 6. A Haar frame bank is **exactly a 3-design**
-   (machine precision at k=1,2,3) and **0.700× iid at k=4**, which is the
-   mechanistic explanation of the audit's degree-3 kill: it brings nothing the
-   rotation had not already taken. **The remaining prize is specifically the
-   degree-3 → degree-4/5 step**, and nothing above degree 4 is reachable with
-   anything we have (every carrier sits at 0.76–1.09× iid at k=6). Two further
-   mechanisms fell out: sphere projection is **angularly inert** (it moves the
-   radius only, which is why it measured 1.0010×), and antipodal symmetrisation
-   **costs ~2× at even degrees** because it uses n/2 distinct points.
-   **BUILT, same day.** `local_sim/carriers.py:bch_oa` — the extended dual-BCH
-   orthogonal array, `{Tr(ax + bx^3)}` plus the all-ones coset, 2^17 = 131,072
-   rows on 256 coordinates. **Strength 5, verified combinatorially** (every random
-   4- and 5-subset of columns perfectly balanced, 320/320). Its degree-4 moment
-   error is ~~**0.0305× iid — 17× better than the shipped carrier** — and **0.138×
-   at degree 6**~~ **← BOTH NUMBERS ARE WRONG, CORRECTED 2026-08-20 (CP1.1).**
-   `test_carriers.py` divided *every* carrier by iid at **N = 16,384**, including
-   this 131,072-row array. iid's own moment error falls as `1/√n`, so an array
-   measured at 8× the points was flattered by ≈ `√8 = 2.83×`. **At matched n the
-   BCH array reads 0.0756–0.0908× at degree 4 and 0.343–0.421× at degree 6**, and
-   "17× better than the shipped carrier" is **≈ 5.8×**. The harness is fixed —
-   an iid baseline is now built for every distinct point count — and the ranges
-   quoted here are two independent realisations, because the iid denominator
-   itself carries **±3.5%** per draw. Nothing that was *decided* changes: the
-   array's absolute degree-4 error (7.2321e-04) never moved, and the end-to-end
-   1.4775× was measured against a Sobol arm, not against iid. No
-   Kerdock/Z₄ machinery was needed.
-   **MEASURED END TO END, same night: the design is worth 1.4775x and we cannot
-   afford it.** 48 fresh D18 networks, GT 2^24, arms matched at 131,072 points and
-   at cost (counted FLOPs differ by 0.008%): **adjusted gain 1.4775×, studentised
-   95% CI [+3.80e-08, +1.81e-07] excluding zero, relative [+14.4%, +45.9%], better
-   on 33/48, sign-test p = 0.013.** Raw-MSE gain 1.4826×. **This is the largest
-   measured effect in the project** — every other input-space device died between
-   0.98× and 1.09× — and it lands within 1.5% of the ~1.46× ceiling derived
-   independently from the harmonic spectrum.
-   **The blocker is cost, and it is hard.** `C/B = 1.3509`: **48 of 48 MLPs over
-   budget**, which the grader scores as a *failure* (multiplier 1.0 *and* zeroed
-   predictions). The array only works whole — halving it gives a constant column
-   and centroid norm 1.0 (41× worse end to end), and a *random* half is worse than
-   Sobol at k=2 and k=4. **And FWHT is not the fix**: the first layer is only
-   **4.7%** of the 32-layer chain (1.718e10 of 3.674e11), so even a free first
-   layer leaves `C/B = 1.29`. That earlier speculation is withdrawn.
-   **The construction question is SETTLED for linear codes: 131,072 is the
-   floor.** Proven by exhaustive enumeration, not argued — the BCH parity-check
-   columns `(x, x³)` form a Sidon set of size **255** in F₂¹⁶ (all 32,385 pairwise
-   XORs distinct), and **all 65,535 nonzero vectors are 3-subset sums**, so a
-   256th column always creates a weight-4 dual codeword. *Zero* candidates.
-   **At width 255 the array would be affordable** (65,536 rows, `C/B ≈ 0.68`);
-   width 256 rather than 2⁸−1 costs exactly **2×** on this lane.
-   **Both known cost levers together are not enough**: depth-2 Strassen (1.267×)
-   and an FWHT first layer (1.047×) leave `C/B = 1.0184` — still over, and far too
-   close to a cliff that scores as a *failure*.
-   **The subspace route is CLOSED too, and the reason is the mechanism.** Probed
-   along directions confined to 32 dimensions of its own frame, the *unrotated*
-   array reads **5.378e-02** — 4.6× *worse* than Sobol's 1.164e-02 — while the
-   *rotated* array reads **7.676e-04**, flat across every confinement level.
-   Matching `(3 − 2S)·258/(3·256)` with `S = Σaᵢ⁴ = 3/(k+2)` at every rung
-   (predicted 0.00 / 0.77 / 2.27 / 5.15% low at k = 256/128/64/32).
-   **The random rotation IS the mechanism**: it turns every response direction
-   into a spread one, which is the only regime where a ±1 cube array is exact —
-   and that requires balance on **all 256** columns. You cannot have the cheap
-   array and the rotation at once.
-   **Two of four routes are now closed with proofs.** What remains: a non-linear
-   array or spherical 4-design near the 33,152 floor (**research**), or a Phase-2
-   budget larger relative to the shape (**not ours to choose**). If either lands,
-   `2.6314e-7 / 1.4775 = 1.781e-7` — roughly half the remaining gap to the best
-   published honest score (9.10e-8), in one step.
-
-   **✅ THE NAMED RESEARCH ROUTE LANDED, 2026-08-20 (CP1.1).** The length-256
-   **Kerdock** code — non-linear, so untouched by the 131,072 linear floor —
-   plus the `2d` axial points is an **exact spherical 4-design at 66,048
-   points**, i.e. **33,024 distinct directions, below the 33,152 the route was
-   specified at**. Degrees 1–5 measure 2.5e-16 … 7.0e-15; degree 6 is equivalent
-   to the BCH array once scaled to equal n (1.016).
-   **Strength 5 is PROVEN, not sampled**: the exact Delsarte transform of the
-   weight enumerator gives `B₁…B₅ = 0` and `B₆ = 11,606,784`.
-   **The degree-4 exactness is an identity** — the `2d` axial points contribute
-   precisely the `2S = 2Σaᵢ⁴` the cube array is short by, for *every* direction
-   at uniform weights — so it holds under **confinement to a rank-32 subspace**,
-   which is exactly what killed the subspace route for a bare array.
-   **Both halves are load-bearing** (measured counter-examples): random antipodal
-   signs + axial reads 1.93e-02, and a strength-5 array of the *wrong size*
-   (BCH at 2¹⁷) + axial reads 3.94e-04. The set must be strength ≥ 4 **and** have
-   exactly `d² = 65,536` points.
-   **Cost: `C/B = 0.6934` counted** — under the 1.0 failure cliff, against the
-   131,072-row array's 1.3509 — *provided the random rotation is folded into `W₁`
-   rather than applied to the points*: `W₁ᵀ(Qu) = (QᵀW₁)ᵀu`, verified to 1.7e-13,
-   and **258× cheaper** (6.70e7 vs 1.73e10 FLOPs, i.e. 0.0002 of B instead of
-   0.064).
-   **What is NOT established: any end-to-end MSE gain.** The 1.4775× on record is
-   bchOA-vs-sobol at matched N = 131,072; this is a different design at half the
-   points. That measurement needs fresh networks on a **DESIGN** block (D16 has
-   330 free, D18 has free seeds) — **not D17 or D19**. Artifact:
-   `experiments/2026-08-20_kerdock/kerdock_profile.json`.
-
-3. **Where does the ~2.6× to the published honest frontier come from?**
-   Unresolved and possibly unresolvable from public data. Their sample counts are
-   not published, so their **variance advantage cannot be separated from their
-   cost advantage**. Their write-ups attribute it to a strength-4 orthogonal-array
-   design plus dead/on/kink routing plus FWHT. The one variance lane the carrier
-   audit did *not* close is a **true degree-4/5 design** (BCH strength-4 OA, or
-   Kuperberg's 2¹⁶+512-point cubature which is exact to degree 5 for the sphere
-   *and* for N(0,I) simultaneously). External ceiling from the layer-32 harmonic
-   spectrum (deg ≤5 share ≈ 0.36–0.39): **≈1.46×**. Width-specific — do not build
-   it before #1 is answered.
-
-4. **Moonshot G1 — blocked on the D10 renormalization fit, and it now has a
-   deployable gate for the first time.** G0 (2026-08-07) proved the layer
-   convention, built the calibrated-K2 baseline (depth 8 → 1.2067e-05, G1 must
-   reach ≤4.02e-06), and read the oracle: full-rank K3 beats the control 12.786×,
-   but pre-registered r ∈ {4, 8, 16} is *worse* and the ≥3× gate needs r ≈ 128 =
-   width/2 — where Track P found factorisation stops paying. **New, better gate
-   (2026-08-19): a closure whose mid-layer mean is 3–6× more accurate than the
-   present one licenses the mid-layer control-variate lane** (`r_c = δ_c/SE_c < 1`
-   at some depth where ρ² is large), which the oracle prices at up to ~100×. That
-   is a *deployable* success criterion, unlike the old ≥3× accuracy bar which was
-   never tied to a use. Kill-by-default **2026-09-01**. D08/D09/D10 untouched.
-
-5. **Is there a Phase 2 write-up round?** Unverified and worth one email. The
-   Phase 1 window closed 2026-08-17 and we missed it. The "Sep 26" figure in older
-   docs is **uncorroborated by any source**. This matters more than it looks: the
-   contribution prize is where our comparative advantage now sits (§ *Standing
-   risks*), and the answer changes how the month is allocated.
-
----
-
-## Standing risks
-
-- **Uncommitted work — PARTIALLY resolved, and the remainder is load-bearing.**
-  The *experiment* record landed across five commits through `7040f41` (mint
-  provenance, vault, invariant suite, Sprints 4–5, Moonshot G0, records), so LOG
-  entries can cite commits again. **What did not land is the cross-agent harness
-  itself**: `AGENTS.md`, `ai/`, `.agents/`, `.codex/`, `scripts/guard_paths.py`,
-  `scripts/verify_portability.py`, `scripts/git-hooks/`, `scripts/human_model_state.py`,
-  `scripts/install_git_hooks.py`, `.claude/hooks/guard_hook.py`, plus modifications to
-  all six SKILL.md adapters, `CLAUDE.md` and `README.md` — all **untracked** as of
-  2026-08-10. `7040f41` committed only the Claude-side skills.
-  This is sharper than the original risk: `CLAUDE.md` `@`-imports `AGENTS.md` as the
-  operating contract, and `verify_portability.py` reports 174/174 against files that
-  exist **only in the working tree**. Losing this tree loses the entire
-  agent-independent layer and both agents' enforcement.
-- **The cost half of the evaluator is not trustworthy.** See below. **New, 2026-08-10:
-  the unreliable half is OUR measurement, not the grader's** — see the transfer-ratio
-  note in § *Evaluator trust*.
-- **Deadline conflict**, unresolved by the organizers since Aug 5 (thread 18130).
-- **The metric has a heavy tail.** Fresh-MLP max/median = 12.9×; the worst 1% of
-  MLPs carry 6.9% of the score. At a re-run of size R = 10 the p90 score is 50%
-  above the median. Tail risk, not mean improvement, is what the re-run measures.
-
----
-
-## Evaluator trust — E1/E2, and the split is the point
-
-The score is `MSE × max(0.1, C/B)`, and its two halves are measured to completely
-different standards.
-
-⚠️ **The sentence that stood here until 2026-08-21 — "we are currently at
-`C/B ≈ 0.20`, well above the 0.1 floor, so both halves are live" — is a PHASE-1
-statement and is now false.** At 1024 × 16 the shipped file's analytic fallback
-measures **counted `C/B` = 0.062556** and **effective `(F + λR)/B` = 0.071–0.079**,
-i.e. **under the 0.1 floor**, so its multiplier is pinned at 0.1 and *its cost is
-free in score terms*. Residual would have to exceed **0.823 s/MLP** at λ = 1e11 to
-lift it off the floor. An independent Skeptic flagged that a cold-start agent
-reading the old sentence would be misinformed about the one fact P2-CP1 is built
-on. **What this does NOT mean:** the objective is still
-`min MSE × max(0.1, C/B)` — an arm *above* the floor must be **scored**, not
-rejected, because only for methods whose accuracy improves no faster than
-1/compute is the score flat above it. See `experiments/LOG.md` 2026-08-21,
-P2-CP0.3 and the P2-CP0 review.
-
-| half | level | why |
-|---|---|---|
-| **Accuracy (MSE)** | **E2, approaching E3** | mint proven bit-identical to the grader (100/100, uint32); seed-block registry with machine-readable single-use blocks; gates pre-registered in LOG before the block is touched; paired common-random-number statistics with CIs; 32-shift averaging; every MSE quoted against its GT-noise floor; 30/30 invariants including permutation equivariance; touch-counted sealed vault |
-| **Cost (`C` = counted FLOPs + λ·residual seconds)** | **E1 → E2 PROPOSED, 2026-08-19** | counted FLOPs are exact and reproducible. Local wall time is not measurable here — but **we never needed it**. The grader measured residual for us **five times** and the telemetry was sitting unused in `experiments/run_reports/`. Fitted on all five: **`residual ≈ 2.551 ms + 5.780 µs/op`**, R² = 0.898, leave-one-out 0.829 ms. Residual is only **1.9–3.3% of `C` on the grader**, so `C` is now determined to well under 1%. **The reclassification is STRATEGIC and is Samuel's to make** — it gates the "no autonomous loop while E1" rule. See `experiments/LOG.md` 2026-08-19 (night) |
-
-**The local residual has no quotable level — established 2026-08-10 (submission
-327743), corrected the same day after independent falsification.** Same
-byte-identical `estimator.py`, same 100-MLP mini split:
-
-| reading | ms/MLP | vs grader 10.022 |
-|---|---|---|
-| `--runner local`, 2026-08-06 | 70.85 | 7.07× |
-| `--runner subprocess`, 2026-08-06 | **54.47** | **5.44×** |
-| `--runner subprocess`, 2026-08-10 | 42.94 | 4.28× |
-
-Runner effect, same day **1.301×**; machine-state effect, runner fixed **1.269×**;
-they multiply to the observed 1.65×. So the spread is **half path, half time** — not
-"purely the runner", and the overstatement is ~30%, not 65%.
-
-`AGENTS.md` § *Measurement law* states "~7×" as binding and **must stay unedited**
-until repeatability is measured. If three same-day repeats span >10%, the correct fix
-is not "4.3× instead of 7×" but *"this machine has no quotable absolute residual
-level"*, with the line replaced by a range carrying its measurement path.
-
-**What this does NOT contaminate.** The claim that Sprint 4 S2 and the D14 residual
-model "scaled by ~7" was **false and is withdrawn** — two different sevens were
-conflated. D14's deciding model is *local **ratio** × graded anchor*
-(`9.84 ms × 490.4/62.3`); the 7.87 there is a within-run candidate/control ratio,
-invariant to any uniform rescaling of this machine, and the local→grader level never
-enters. The local-absolute model is explicitly flagged "never decides". **The real
-exposure, newly identified: that candidate/control ratio itself reads 5.47× in one
-local harness and 7.87× in another — a 44% spread on the quantity that does decide.**
-
-**Grader-side residual: a detected shift, not stability.** Paired 1.0180× [1.0119,
-1.0241] excludes 1.0. But n = 1 submission per file, so the n = 100 CI is
-pseudoreplication; and `residual_s` is a subtraction remainder whose components moved
-~78 ms while the remainder moved 0.177 ms. Do not attribute it to the `eigh` path.
-
-**Consequences, binding:**
-
-- **No autonomous / Ralph-style optimization loop.** The framework rule is
-  evaluator ≥ E2 before bounded autonomy; the composite here is not.
-- Cost claims follow the three-model rule (`docs/VALIDATION.md` §2b): report three,
-  freeze one *before* the decision block, decide on
-  `max(local-ratio-on-graded-anchor, competitor-anchored)`. The `max` is
-  load-bearing — the competitor anchor alone would have passed a carrier that
-  did not deserve it.
-- **Improving the cost evaluator outranks any further score optimization.** The only
-  instrument that would do it is a graded run, which costs a submission.
-
----
-
-## Harness — what is enabled and why
-
-| capability | layer chosen | bottleneck it removes |
-|---|---|---|
-| Evaluation | the project's own scripts (`edge_cases`, `mint_provenance`, `vault`, `whest run`) | already best-in-class; wrapped, not replaced |
-| Change gate | `scripts/preflight.ps1` | four commands that must all run on every estimator change, previously prose in `VALIDATION.md` §7; adds the ship-file identity check that existed nowhere |
-| Pre-registration | **AGENTS.md Rule 1** (was the `slice-contract` skill until 2026-08-21) | the repo's #1 historical failure mode: a residual model or gate chosen after seeing the answer (Sprint 4 twice) |
-| Independent falsification | agent `skeptic` | two "findings with tidy causal stories" turned out to be noise; the one independent audit (rev 11) corrected four claims |
-| Orientation | this file + `docs/GOTCHAS.md` | a fresh session previously had to read ~150 KB across 12 stacked GAME_PLAN revisions to learn what was decided |
-| Human comprehension | `docs/HUMAN_MODEL.md` (Samuel-owned, write-protected from agents) | no comprehension checkpoint existed anywhere in the record |
-| Prompt friction | `.claude/settings.json` allowlist | read-only lab commands prompted on every invocation |
-| **Agent portability** (audit 2026-08-07, re-scoped 2026-08-21) | `AGENTS.md` + `docs/SKEPTIC.md` + shared `scripts/` enforcement | the whole harness lived under `.claude/`. Exhausting one agent's quota meant losing the methodology, not just the session |
-
-**The portability layer, in one paragraph.** `AGENTS.md` is now the cross-agent
-operating contract and `CLAUDE.md` imports it, so no project behaviour is
-agent-specific. **The six workflow commands and the skills layer were REMOVED on
-2026-08-21** — they restated what a careful agent does anyway, and both agents read
-the files rather than invoking them. What survived is what actually caught mistakes:
-**AGENTS.md Rules 1 and 2** (pre-register before measuring; an independent Skeptic
-after every IMPORTANT/STRATEGIC slice). The Skeptic exists for both agents
-(`.claude/agents/`, `.codex/agents/`) over one shared brief, `docs/SKEPTIC.md`, and
-`scripts/verify_portability.py` (99 checks) fails if either side drifts, grows a rule
-of its own, names a product where it should name a role, or lets the removed layer
-reappear on one side only. Enforcement is one implementation,
-`scripts/guard_paths.py`, called by both agents' hooks *and* by
-`scripts/git-hooks/pre-commit` — the backstop that holds even for an agent whose hooks
-nobody has wired. **Switching drivers is: start the agent in the repo root and have it
-read `docs/CURRENT_STATE.md`, then `experiments/LOG.md` from the bottom.** Not verified in this environment: the
-Codex hook *registration* schema, because Codex is not installed here — see
-`.codex/hooks/README.md`. The pre-commit backstop covers the gap meanwhile.
-
-**Deliberately not enabled** — each was considered and rejected for a stated reason:
-
-| rejected | reason |
-|---|---|
-| Ralph / autonomous loops | cost half of the evaluator is E1. Forbidden until a graded anchor exists |
-| MLflow / Phoenix / Langfuse | ~30 decisive experiments total, and the artifacts already exceed what these capture. None can model a single-use seed block or a touch-counted holdout — which are the properties that actually protect this project |
-| Context7 | two pinned dependencies; the real API surface is already verified against the installed package and recorded |
-| Serena | ~70 source files; `rg` + Read is sufficient |
-| Repomix | the repo is local; subagents read it directly |
-| Promptfoo | there is no LLM in the product |
-| Playwright / Chrome DevTools / design skills | no UI anywhere |
-| Exa / Firecrawl / last30days | the research surface is one forum and one leaderboard, already scripted (`board_snapshot`, `board_forensics`, `board_census`, `phase2_checklist`) |
-| GitHub MCP | `git` + `gh` cover it |
-| Symphony / Agent Deck / workflow orchestration | one operator, one working tree, evidence-gated work. Parallel agents here would create merge and provenance risk, not throughput |
-| Google Drive / Slack / Gmail / Calendar MCPs | irrelevant to this repo; Gmail and Calendar are also unauthenticated in this environment |
-
----
-
-## Next actions
-
-*Rewritten **2026-08-21** after **P2-CP0 closed GO**. Everything above the
-P2-CP0 section describes a 256x32 world; **Phase 2 is 1024 x 16**. Nothing here
-depends on chat history.*
-
-**Start here.** Read this file, then `experiments/LOG.md` from the bottom. The live
-checkpoint sequence
-is the one in `docs/CLAUDE_CODE_FRONTIER_HANDOFF.md`: **P2-CP0 (done) -> P2-CP1
--> P2-CP2 -> ...**. Do **not** run the old width-256 CP2-CP7 plan.
-
-### Done — do not redo
-
-1. ~~Upgrade the toolchain and re-prove mint provenance at 1024 x 16.~~
-   **DONE differently, and better.** whestbench 0.16 is not installable from any
-   public source, so parity was proven **from the other side**: our
-   `canonical_mint` reproduces the organisers' **published** `v2-phase2` weights
-   bit for bit, 16/16 on shard 0 and 4/4 on shard 1. Those bytes *are* 0.16's
-   output. `local_sim/phase2_mint_parity.py`.
-   **Package parity stays BLOCKED and stamped**; re-run it the moment whestbench
-   0.16.0 is published — `uv run python local_sim/phase2_manifest.py`.
-2. ~~Establish `B`, lambda, the multiplier floor, and whether biases are absent.~~
-   **DONE except lambda.** `B = 2^41`, floor `0.1`, no biases, no separate output
-   layer, 65,536 naive samples — all from the dataset **card**, hashed into
-   `experiments/2026-08-21_phase2_manifest/phase2_manifest.json`. **lambda alone
-   is unknown** and needs a graded report.
-
-### Next, in order
-
-3. ~~**P2-CP1 — the Phase-2 baseline ladder.**~~ **DONE 2026-08-21, GO.** See the
-   P2-CP1 section above. What it settled, so it is not re-derived: the analytic
-   family owns the frontier 2.57x; 95% of the remaining error is the Gaussian
-   assumption; sampling is closed; P2-CP3 is capped at 1.052x; the aggressive lane
-   is P2-CP4. ~~**The next research slice is the REOPENED P2-CP3.**~~ **DONE 2026-08-21 as
-   P2-CP3R — see that section above. The cumulant lane is DEAD at 4.47%.**
-   **The next slice is P2-CP5: coupled residual sampling**, projected ~1.30x free.
-   Register it with the fitted-weight protocol (fit `MSE_c` on P01's 456 free
-   DESIGN seeds, validate on a **disjoint** draw), register the float32 lever, and
-   charge the sampler's residual. **P2-CP2 can run in parallel — the conservative
-   candidate is chosen (`k2p2`) and `whest validate`-clean.**
-   *Historical statement of the slice, kept for the contract's context:*
-   On fresh 1024 x 16 DESIGN networks with **two independent truth replicas**,
-   compare through **one canonical evaluator** (`local_sim/lifecycle_eval.py`):
-   exact layer-1 control; K1 / raw closure; full-dimensional **simple K2**;
-   full-dimensional **augmented K2**; naive/Sobol sampling near the budget-maximal
-   N; and 32 randomized orthogonal signed bases at matched rows.
-   Report per-MLP arithmetic score, raw and **cross-product noise-corrected** MSE,
-   truth noise, **MSE by depth** (to test the predicted `(L/n)^K` mechanism),
-   exact counted cost **under both flopscope 0.10 and 0.12**, residual, peak
-   memory, failures, and the paired interval with its biggest-mover share.
-   It ends by **freezing the conservative statistic and the deployment gate**.
-   **STRATEGIC** — it allocates a new Phase-2 DESIGN block, so it needs a Slice
-   Contract registered before any data exists, plus Samuel's prediction.
-   *The first question is sharper than the packet's:* our closure factorises the
-   off-diagonal post-ReLU covariance as `Phi_i Phi_j Sigma_ij`, and the exact
-   bivariate-ReLU second moment is a known closed form. Measure that gap first —
-   it may be the whole of the 4.9x projection miss.
-4. ~~**Do NOT refit `_PRUNE_TAU` or `_BASIS_RANK` yet.**~~ **NEVER REFIT THEM.**
-   P2-CP1 retired the sampling architecture for Phase 2 on its own pre-registered
-   kill trigger (2.699x against a 1.5x bar). This item is **closed**, not deferred.
-5. **P01 is allocated and 96 of its 600 seeds are spent.** **504 remain free and
-   are reserved for a DISJOINT P2-CP2 draw**, so the deployment gate is never
-   measured on the networks that chose the candidate. For a new lane, allocate a
-   new block rather than drawing more of P01.
-   *Standing rule, unchanged:* D16's
-   free seeds, D18's remainder, and the untouched single-use **D17** and **D19**
-   are all **256x32** allocations and mint different-shaped networks. They are not
-   reusable. `local_sim/seed_blocks.py` + `seed_ledger.claim()`; **never a
-   literal**, and call `seed_ledger.finalize()` after writing each truth file —
-   an unfinalized artifact now turns the gate RED.
-
-### Open P2-CP0 items, deferred with named triggers
-
-6. **Vault transactionality** (blocker 6) — deferred until a Phase-2 vault exists,
-   which needs Samuel. There is no Phase-2 vault, so nothing is exposed today.
-7. **`MLP.seed` (spawn[2]) is proven against installed 0.14, not against 0.16.**
-   The published-bytes check covers the weights only, because the dataset does not
-   publish the estimator seed. Irrelevant to the analytic path, which never reads
-   it — **a P2-CP1 sampling arm will**. Bit-reproducibility, not correctness.
-8. **Eight historical torch truth paths mask sample seeds with `& 0x7FFFFFFF`.**
-   Deliberately **not** edited: they carry recorded Phase-1 results, the labels are
-   unbiased, and a 31-bit collision over 600 networks is ~8e-5 likely. **Fix
-   forward** — every new Phase-2 truth path uses the full state.
-
-### Waiting on Samuel — no agent may do these
-
-9. **Submit early for telemetry, or not?** A Phase-2 submission of the frozen
-   **v2.4.1** would return `config_snapshot` — `B`, λ, the floor, the real price
-   table — from the grader's own numbers, unblocking the lambda unknown immediately. It costs
-   a submission slot and posts a Phase-1-tuned score to a fresh board. **Samuel's
-   call**, and hard rule 6 applies regardless: `whest validate` -> clean mini run
-   with `n_failed_mlps: 0` -> ask.
-   *Note:* v2.4.1 and v2.6.1 are both shape-generic and will *run* at 1024x16, but
-   their constants are fitted at 256x32, so a score from either is telemetry, not
-   a competitive entry.
-
-10. **The E1 -> E2 reclassification of the cost half.** `residual ≈ 2.551 ms +
-   5.780 µs/op`, R² = 0.898, fitted on five graded submissions. **Now doubly
-   caveated:** those five are Phase-1 submissions at 256x32 under flopscope 0.10,
-   and both the shape and the price table have moved. It may need re-fitting from
-   scratch. STRATEGIC — the E1 label gates the "no autonomous loop" rule.
-
-11. **The vault is Phase-1 and cannot be re-baselined into Phase 2.** 500 sealed
-   256x32 networks, touch **1 of 3**. A 1024x16 vault is a **new mint**, and the
-   old one becomes historical. Decide whether to build one and what it costs.
-   Do **not** difference a Phase-2 touch against touch #1.
-
-12. **Team freeze 2026-09-05 23:59 UTC.** Solo or not.
-
-13. **Two questions to the organisers** — `docs/email-draft-organizers.md`.
-   (a) Is there a Phase 2 write-up round, and when? (b) One designated submission
-   or two — announcement 18143 says two, the Rules tab says one, still unanswered.
-
-### Open research, ranked for the NEW shape
-
-14. **The cumulant / mechanistic lane, REOPENED on its own pre-registered
-    condition.** Open question #1 said a wider or shallower Phase 2 would reopen it
-    "wholesale" because ARC's propagation breaks even only when `L^K < n`.
-    **`L/n` fell from 32/256 = 1/8 to 16/1024 = 1/64**, and `L² = 256 < 1024`
-    now holds at K = 2 (K = 3 does not: `4096 > 1024`). This is a reopening by
-    **external fact**, which is the standard `AGENTS.md` requires. Start from
-    `docs/MOONSHOT.md` and the G0 baseline. **This is now the highest-value
-    research lane**, and it is the one the shape change *helped*.
-
-15. **Generalise the Kerdock design to width 1024, and price it.** The CP1.1
-    object is width-256 and dead at the new shape, but the *mathematics* carries:
-    `1024 = 4^5`, the real-MUB bound is `d/2 + 1 = 513`, the Galois ring is
-    `GR(4,9)`, and the analogue is `d² = 2^20 = 1,048,576` sign vectors plus 2,048
-    axial = **1,050,624 points**. The axial identity
-    `[(3-2S) + 2S]/(d² + 2d) = 3/(d(d+2))` is dimension-free and should hold
-    unchanged. **The open question is entirely cost**: 1,050,624 points at ~8x the
-    per-sample cost is 16x Phase 1's operating point, and affordability depends
-    wholly on step 2. `local_sim/carriers.py` already has the derivation to adapt.
-
-16. **Moonshot D10 renormalization fit**, kill-by-default **2026-09-01** — but see
-    #14: the break-even arithmetic that made this marginal has just changed in its
-    favour, so re-read the kill condition before honouring it.
-
-**Explicitly NOT next.** Do not run **CP1.2**, the end-to-end Kerdock arm on D18 —
-it is suspended, not killed, and its 192 networks are 256x32. Measuring a carrier
-for a shape that is no longer scored is the most expensive mistake available right
-now. Do not spend **D17 or D19**; both are single-use, both are unspent, and both
-are 256x32 allocations that should be re-thought at the new shape.
+| basic K2/K2p2 | control / conservative branch | sound but not winning alone |
+| higher Gaussian covariance-map orders | low value | measured plateau near 1.052x |
+| marginal ReLU mean Edgeworth | closed | capped near 1.047x in CP3R |
+| recurrent augmented K2 joint state | **open** | never tested by CP3R |
+| 16-basis Kerdock/MUB + radial | **highest priority** | reopened by external fingerprint |
+| ordinary IID/random orthogonal | control only | tested arms lose |
+| broken two-cycle lattice | closed | does not bound valid QMC/MUB |
+| checkpoint response closure | **open after carrier** | compositional mechanism |
+| shared-scale mixture | conditional | run only on matching residual evidence |
+| equivariant learned state corrector | conditional | rollout/cross-fit required |
+| dense full K3 | deferred | projected multiple budgets |
+| coupled residual sampler | deprioritized | float32/headroom premise unsupported |
+
+## Authority boundaries
+
+- Do not edit `docs/HUMAN_MODEL.md`.
+- Do not edit `estimator.py`, claim a seed block, reopen a killed lane, touch a
+  vault, change a gate/residual model/protocol, or make a write-up claim without the
+  required STRATEGIC sequence.
+- Do not submit without Samuel's explicit approval after official validate and a
+  clean Phase-2 subprocess mini with zero failures.
+- After every IMPORTANT or STRATEGIC slice, obtain an independent Skeptic verdict
+  from raw artifacts before believing or propagating the result.
+- Keep `CURRENT_STATE.md` updated when a lane, baseline, live rule, or next action
+  changes. Do not stack another override on top of this file.

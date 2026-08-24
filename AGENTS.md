@@ -11,10 +11,12 @@ Harness audit: 2026-08-07. Portability audit: 2026-08-07. Re-audit triggers at t
 ## Objective
 
 Samuel's entry for the **ARC White-Box Estimation Challenge 2026** (AIcrowd).
-Given a random He-init ReLU MLP (Phase 1: 256 wide × 32 deep, no biases), predict
-every neuron's expected post-ReLU activation under x ~ N(0, I) as a `(depth, width)`
-array. Score = mean over MLPs of `final_layer_MSE × max(0.1, C/B)`, lower is better;
-`C` = flopscope-counted FLOPs + 1e11 × uninstrumented wall-seconds, `B` = 2.72e11.
+Given a random He-init ReLU MLP (live Phase 2: 1024 wide × 16 deep, no biases),
+predict every neuron's expected post-ReLU activation under x ~ N(0, I) as a
+`(depth, width)` array. Score = mean over MLPs of
+`final_layer_MSE × max(0.1, FLOPs/2**41)`, lower is better. The official Phase-2
+stack is WhestBench 0.16 / flopscope 0.12; lambda is zero; residual cap is 0.4 s,
+total wall 120 s, solution memory 8 GiB.
 
 **The prize is decided by a private re-run of UP TO TWO designated submissions per
 team on fresh MLPs** (organiser, forum 18143, 2026-08-10; default if you select
@@ -30,7 +32,7 @@ Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
 
 | path | what |
 |---|---|
-| `estimator.py` | **THE submission.** Self-contained; `whest submit` ships only this file. Currently **v2.6.1**, byte-identical to `estimator_v2_6_1.py` modulo line endings (`preflight` step 4 asserts it). The **graded** file is still v2.4.1 — v2.6.x is built and deliberately un-gated. |
+| `estimator.py` | **THE submission.** Self-contained; `whest submit` ships only this file. Currently **v2.6.1**, byte-identical to `estimator_v2_6_1.py` modulo line endings (`preflight` step 4 asserts it). The **graded Phase-1** file is still v2.4.1. There is no Phase-2 submission; width 1024 currently takes the basic K2p1 analytic fallback. |
 | `estimator_v*.py` | frozen version archive — never edited, only read |
 | `local_sim/` | the offline lab: numpy shims for `flopscope`/`whestbench`, grader-identical mint (`mint_provenance.py`), invariants (`edge_cases.py`), seed registry (`seed_blocks.py`), sealed holdout (`vault.py`), probes |
 | `experiments/` | `LOG.md` (append every experiment), run reports, vault seal, JSON artifacts |
@@ -85,7 +87,7 @@ Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
 uv sync                                                   # environment
 .\scripts\preflight.ps1                                   # THE gate: provenance + 30 invariants + contract + ship-file identity + vault seal
 uv run whest validate --estimator estimator.py            # contract only (~46 ms)
-uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v1-phase1 --split mini --runner subprocess
+uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --runner subprocess
 uv run python local_sim/phase2_checklist.py               # rounds / dataset tags / boards
 uv run python local_sim/seed_blocks.py                    # allocate a block BEFORE any experiment
 .venv-gpu\Scripts\python.exe local_sim/vault.py verify    # seal integrity + touch log
@@ -191,7 +193,8 @@ Everything required to resume lives in the repository:
 | every experiment, contract, result, Skeptic verdict | `experiments/LOG.md` |
 | the binding measurement protocol | `docs/VALIDATION.md` |
 | traps not to rediscover | `docs/GOTCHAS.md` |
-| strategy (rev 12 authoritative) | `docs/GAME_PLAN.md` |
+| target architecture and sole active execution plan | `docs/GAME_PLAN.md` |
+| copy-ready Claude Builder handoff | `docs/CLAUDE_CODE_HANDOFF.md` |
 | the human's own beliefs | `docs/HUMAN_MODEL.md` |
 | raw evidence | JSON under `experiments/` |
 | evaluation state | vault seal, seed-block registry, run reports |
@@ -287,11 +290,12 @@ never chat history.
 | `docs/CURRENT_STATE.md` | **first, always.** Baseline, open questions, closed lanes, next action |
 | `docs/VALIDATION.md` | before measuring anything. The protocol and its proofs |
 | `docs/GOTCHAS.md` | before quoting a number, comparing a cost, or trusting an offline path |
-| `docs/GAME_PLAN.md` | strategy. **Rev 12 is authoritative**; earlier revs are history |
+| `docs/GAME_PLAN.md` | **sole active Phase-2 strategy and execution plan** |
 | `docs/BENCHMARK.md` | our numbers vs the field. **PRIVATE — never the forum** |
 | `docs/COMPETITION_BRIEF.md` | plain-English explainer of the task and the math |
 | `docs/RESEARCH_NOTES.md` | rules, forum intel, pricing table, links. §2g is **PRIVATE** |
-| `docs/MOONSHOT.md` | the cumulant-flow lane (Phase D, the contribution prize) |
+| `docs/CLAUDE_CODE_HANDOFF.md` | copy-ready prompt for Claude to execute the plan |
+| `docs/MOONSHOT.md` | archived Phase-1 cumulant-flow plan; historical references only |
 | `docs/HUMAN_MODEL.md` | **Samuel's file.** Agents read and critique it; agents never write it |
 | `experiments/LOG.md` | the full narrative record, newest at the bottom |
 

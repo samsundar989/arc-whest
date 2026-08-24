@@ -4,7 +4,7 @@
 gets measured, and the record of the proofs behind it. It supersedes ad-hoc
 practice everywhere it conflicts.*
 
-The competition is decided by a private re-run of one designated submission on
+The competition is decided by a private re-run of up to two designated submissions per team on
 networks nobody has seen. Every number we quote is therefore a prediction about
 unseen data, and a prediction is only as good as the instrument that produced it.
 This document is the instrument's calibration certificate.
@@ -532,13 +532,16 @@ write-up's integrity section, state it exactly that way.
 uv run python local_sim/mint_provenance.py              # 1. provenance still proven
 uv run python local_sim/edge_cases.py                   # 2. invariants, 30/30
 uv run whest validate --estimator estimator.py          # 3. contract
-uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v1-phase1 --split mini --runner subprocess   # 4. CONFIRM (read-only)
+uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --runner subprocess   # 4. Phase-2 CONFIRM (read-only)
 .venv-gpu\Scripts\python.exe local_sim/gpu_parity.py    # 5. mirror still exact
 .venv-gpu\Scripts\python.exe local_sim/vault.py evaluate --label "<version>" --reason estimator-change
 ```
 
 Steps 1–3 are cheap and unconditional. Step 4 is a check, never an objective.
-Step 6 costs a vault touch and is spent once per change, not once per idea.
+Step 6 costs a vault touch and is spent once per change, not once per idea. The
+existing Phase-1 vault is not a Phase-2 vault; do not run that example for a
+Phase-2 candidate unless Samuel has explicitly authorized creation/use of the
+separate Phase-2 vault and the command has been updated accordingly.
 
 **All of steps 1–3, plus the ship-file identity check, the vault seal and the
 seed ledger, are wrapped by `scripts/preflight.ps1`, and it is the gate.** Run it

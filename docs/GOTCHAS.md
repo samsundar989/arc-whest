@@ -11,7 +11,13 @@ reopening a closed lane, or trusting an offline measurement path.
 
 Companion docs: `docs/VALIDATION.md` (how anything gets measured — the protocol),
 `docs/CURRENT_STATE.md` (what is true right now), `experiments/LOG.md` (the full
-narrative record), `docs/GAME_PLAN.md` (strategy, rev 12 is authoritative).
+narrative record), `docs/GAME_PLAN.md` (the sole active Phase-2 strategy).
+
+> **Phase-2 reading rule, 2026-08-24:** later sections that name a numbered
+> `GAME_PLAN` revision or call a Phase-1 sprint plan "authoritative" are preserved
+> historical lessons, not current directions. `docs/GAME_PLAN.md` replaced every
+> numbered revision. Do not infer a live lane state from an old GOTCHAS section;
+> use `CURRENT_STATE.md`.
 
 ---
 

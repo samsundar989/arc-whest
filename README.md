@@ -1,6 +1,10 @@
 # arc-whest — Samuel's entry, ARC White-Box Estimation Challenge 2026
 
-**Challenge**: estimate every neuron's expected activation of a random 256-wide × 32-deep ReLU MLP under N(0,1) inputs, from the weights, under a FLOP budget. Lower `final_layer_MSE × max(0.1, compute/budget)` wins. **Phase 2 deadline: Sep 19, 2026 (results Oct 1).**
+**Challenge**: estimate every neuron's expected activation of a random Phase-2
+`1024 x 16` ReLU MLP under `N(0,I)` inputs, from the weights, under a FLOP budget.
+Lower `final_layer_MSE × max(0.1, FLOPs/2**41)` wins. **Phase 2 is live and closes
+2026-10-17 23:59 UTC.** Start with [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md),
+then execute [`docs/GAME_PLAN.md`](docs/GAME_PLAN.md).
 https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026
 
 ## Map
@@ -8,6 +12,9 @@ https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026
 | Path | What |
 |---|---|
 | `docs/CURRENT_STATE.md` | **Where we stand right now**: baseline, closed lanes, open questions, next actions, the clock. **Start here to work.** |
+| `docs/GAME_PLAN.md` | **The only active strategy:** target architecture, experiment order, gates, timeline, and completion definition. |
+| `docs/CLAUDE_CODE_HANDOFF.md` | Copy-ready prompt for a new Claude Code Builder to execute the plan. |
+| `docs/PHASE2_LIVE_AUDIT_2026-08-24.md` | Dated live rules, leaderboard, competitor, literature, and evaluator evidence behind the plan. |
 | `AGENTS.md` | The cross-agent repository operating contract. Any coding agent reads this first; `CLAUDE.md` imports it. |
 | `docs/SKEPTIC.md` | The independent-falsifier brief. `.claude/agents/skeptic.md` and `.codex/agents/skeptic.md` are thin adapters that load it. |
 | `estimator.py` | **The submission** (v0: covariance propagation + offline per-layer calibration). Self-contained; only imports allowed in the grader sandbox. |
@@ -18,7 +25,6 @@ https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026
 | `scripts/preflight.ps1` | The gate that runs on every estimator change (12 checks; 10 by default ~2-3 min, 12 under `-Full`). |
 | `scripts/guard_paths.py` | The one implementation of the protected-path / irreversible-action rules. Both agents' hooks and the git pre-commit backstop call it. |
 | `scripts/verify_portability.py` | Checks the harness is still swappable between agents (99 checks). |
-| `docs/GAME_PLAN.md` | Strategy & roadmap to a winning score. |
 | `docs/RESEARCH_NOTES.md` | Intel: rules, leaderboard, forum threads, papers, open questions. |
 | `docs/SETUP_WINDOWS.md` | Copy-paste guide: install → validate → first submission. |
 | `local_sim/` | Offline lab: numpy shims for `flopscope`/`whestbench` so the *exact* `estimator.py` runs anywhere; MLP generator; MC ground truth; calibration fitting; held-out validation. |
@@ -60,18 +66,29 @@ cd $env:USERPROFILE\Documents\arc-whest
 uv sync
 uv run whest login          # AIcrowd API key
 uv run whest validate --estimator estimator.py
-uv run whest submit --estimator estimator.py --watch
+# Never submit from a quick-start command. Follow the explicit approval gate in AGENTS.md.
 ```
 
 Full walkthrough: `docs/SETUP_WINDOWS.md`.
 
-## Local lab (no competition packages needed)
+## Phase-2 lab status
 
-```bash
-python local_sim/fit_calibration.py     # refit per-layer bias corrections (writes experiments/calibration.json)
-python local_sim/validate_estimator.py  # held-out check of estimator.py vs Monte Carlo
+```powershell
+.\scripts\preflight.ps1
+uv run python local_sim/phase2_checklist.py
+uv run whest validate --estimator estimator.py
+uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --n-mlps 1 --runner subprocess
 ```
 
-## Method (v0) in three sentences
+The current preflight/checklist still uses stale package/config assumptions in some
+paths. `GAME_PLAN.md` Phase 0 is the required repair before local results can claim
+grader parity. The old calibration/Phase-1 experiment commands remain documented in
+`SETUP_WINDOWS.md` only as historical lab references.
 
-Layer 1 of a Gaussian-input MLP is exactly solvable; deeper layers we approximate by propagating each layer's mean vector and full covariance matrix through the closed-form Gaussian-ReLU moment formulas ("Gaussian closure", ~3e9 FLOPs ≈ 1% of budget → 0.1 score-multiplier floor). Gaussian closure has a small systematic per-layer bias at width 256, so we multiply each layer's predictions by correction factors fitted offline against Monte Carlo on self-generated networks from the identical He-init distribution (legal: offline compute is unmetered). Roadmap to beat it: RQMC hybrid + control variates + smoothed final layers, then a learned residual corrector — see `docs/GAME_PLAN.md`.
+## Current method and target
+
+The current Phase-2 path is basic Gaussian K2 propagation and is not competitive.
+The target is a width-1024 Kerdock/MUB structured angular carrier with antipodes
+and exact radial integration, supported by a compositional K2/augmented-K2 analytic
+state and a compact checkpoint response closure. The evidence, module interfaces,
+experiment gates, and two-candidate finish are in `docs/GAME_PLAN.md`.

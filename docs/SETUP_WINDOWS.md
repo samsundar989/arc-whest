@@ -1,4 +1,4 @@
-# Windows setup → first submission (copy-paste guide)
+# Windows setup → Phase-2 validation (copy-paste guide)
 
 *One-time setup ~10 minutes + one ~850 MB dataset download. All commands in PowerShell.*
 
@@ -37,22 +37,25 @@ Paste the API key when prompted.
 # a) Contract check — runs your estimator on a toy MLP, verifies shapes/types (~seconds)
 uv run whest validate --estimator estimator.py
 
-# b) Real scoring on the public mini split (100 MLPs; downloads ~850 MB once)
-uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v1-phase1 --split mini --runner local
+# b) Grader-parity Phase-2 smoke on one public-mini MLP
+uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --n-mlps 1 --runner subprocess
 
-# c) Grader-parity mode (isolated subprocess, like the real thing)
-uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v1-phase1 --split mini --runner subprocess
+# c) Full public-mini CONFIRM only after the candidate is frozen
+uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --runner subprocess
 ```
 
-What to look for in (b)/(c): `adjusted_final_layer_score` (expect ~2–3e-6 for our v0), `mean_compute_utilization` (expect <2%), `n_failed_mlps` (must be 0). If `validate` complains about any `fnp.` function name, tell Claude — one-line fixes.
+What to look for in (b)/(c): `adjusted_final_layer_score`, exact counted FLOPs,
+`residual_wall_time_s < 0.4`, and `n_failed_mlps = 0`. The current K2 path is only
+an operational smoke and is not competitive. Never fit a constant or select a
+candidate on the public mini split.
 
-## 5. Submit 🚀
+## 5. Submission is an approval gate
 
-```powershell
-uv run whest submit --estimator estimator.py --watch
-```
-
-`--watch` streams grading progress. Afterwards, grab the **run report** (shown in the CLI / on the AIcrowd submission page) and paste it into the Claude session — it contains `admin_config` values (budget, wall-time cap, λ) that confirm Phase 2's exact settings.
+Do not keep a copy-paste submission command in the quick-start path. Submission
+requires full preflight, official Phase-2 validate, a clean subprocess mini with
+zero failures, a frozen candidate hash/evidence packet, and Samuel's explicit
+approval. Follow `AGENTS.md` and `docs/GAME_PLAN.md` Phase 6. This setup guide is
+not submission authorization.
 
 ## 6. Optional but recommended
 
@@ -71,7 +74,7 @@ git clone https://github.com/AIcrowd/whest-starterkit.git
 
 - `uv: command not found` → reopen terminal (PATH refresh).
 - `whest login` 302/redirect error → an old bug (forum thread 18031); make sure you clicked **Participate** on the challenge page and re-accepted rules for the current phase.
-- Dataset download slow/fails → retry; it's Hugging Face-hosted (Xet). `uv run whest dataset download aicrowd/arc-whestbench-public-2026 --revision v1-phase1` prefetches.
+- Dataset download slow/fails → retry; it's Hugging Face-hosted (Xet). `uv run whest dataset download aicrowd/arc-whestbench-public-2026 --revision v2-phase2` prefetches.
 - Score 10× worse on grader than local → you fell off the 0.1 multiplier floor (over 10% budget) or a wall-time surprise; send Claude the run report.
 - Windows Defender/SmartScreen on uv installer → it's the official Astral installer (astral.sh); allow it.
 
@@ -89,8 +92,8 @@ record — do not rerun a spent decision block. Verdicts: `docs/GOTCHAS.md`.*
 uv sync                                          # env (Python 3.10 + flopscope + whestbench)
 uv add --dev numpy scipy                         # dev-only deps for local_sim tools
 uv run whest validate --estimator estimator.py   # contract check (seconds)
-uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v1-phase1 --split mini --runner subprocess
-uv run whest submit --estimator estimator.py --watch
+uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --runner subprocess
+# Submission command intentionally omitted; use the explicit approval gate.
 uv run python local_sim/validate_estimator.py    # offline held-out MSE check
 uv run python local_sim/fit_calibration.py       # refit calibration (writes experiments/calibration.json)
 uv run python local_sim/board_snapshot.py --top 30 --label <tag>   # archive a leaderboard (+ --diff a.json b.json)
