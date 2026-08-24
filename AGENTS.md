@@ -34,8 +34,7 @@ Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
 | `estimator_v*.py` | frozen version archive — never edited, only read |
 | `local_sim/` | the offline lab: numpy shims for `flopscope`/`whestbench`, grader-identical mint (`mint_provenance.py`), invariants (`edge_cases.py`), seed registry (`seed_blocks.py`), sealed holdout (`vault.py`), probes |
 | `experiments/` | `LOG.md` (append every experiment), run reports, vault seal, JSON artifacts |
-| `docs/` | durable knowledge — see pointers below |
-| `ai/workflows/` | **the canonical workflow layer.** The six human commands, plus `slice-contract` and the `skeptic` brief. Agent-independent |
+| `docs/` | durable knowledge — see pointers below. `SKEPTIC.md` is the independent-falsifier brief both agents load |
 | `scripts/` | shared executable enforcement: `preflight.ps1` (the change gate), `guard_paths.py`, `human_model_state.py`, `git-hooks/`, `verify_portability.py` |
 
 ## Hard rules — grader contract and research integrity
@@ -90,7 +89,7 @@ uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-
 uv run python local_sim/phase2_checklist.py               # rounds / dataset tags / boards
 uv run python local_sim/seed_blocks.py                    # allocate a block BEFORE any experiment
 .venv-gpu\Scripts\python.exe local_sim/vault.py verify    # seal integrity + touch log
-uv run python scripts/human_model_state.py                # BLANK/PARTIAL/STALE/FILLED — drives session-start
+uv run python scripts/human_model_state.py                # BLANK/PARTIAL/STALE/FILLED — is the human model current?
 uv run python scripts/verify_portability.py               # the harness is still swappable between agents
 python scripts/install_git_hooks.py                       # install the agent-independent pre-commit backstop
 ```
@@ -99,34 +98,72 @@ Full reference (GPU venv, probes, dead-lane commands): `docs/SETUP_WINDOWS.md` �
 **Run `whest` from PowerShell**, or set `PYTHONIOENCODING=utf-8` in a POSIX shell — the
 CLI's box-drawing output kills a cp1252 console inside its own error printer.
 
-## Human workflow — identical under every agent
+## How work is done
 
-```text
-Start / re-enter a session          session-start     (blank HUMAN_MODEL.md → first-orientation)
-Choose the next high-value move     next-slice        (may be a diagnostic, not code)
-After an IMPORTANT/STRATEGIC slice  review-slice
-Periodically check the mental model cold-start
-Mechanical work                     routine <task>
-End the work session                session-close
-```
+*The six slash-command workflows (`session-start`, `next-slice`, `review-slice`,
+`cold-start`, `routine`, `session-close`) and the `slice-contract` primitive were
+removed on 2026-08-21. They were ceremony that described what a careful agent does
+anyway, and in practice agents read the files rather than invoking them. **What
+they wrapped was never the ceremony — it was two rules, and those are now stated
+here directly and are still binding.***
 
-Daily loop: `session-start` → `next-slice` → work → `review-slice` → repeat →
-`session-close`. Run `cold-start` every 3–5 strategic slices.
+**Start a session by reading `docs/CURRENT_STATE.md`.** It is the snapshot: where
+we stand, what is open, which lanes are closed, and what to do next. Then
+`experiments/LOG.md` from the bottom for the narrative. That is the whole
+orientation procedure; there is no command for it.
 
-**The authoritative definitions are in [`ai/workflows/`](ai/workflows/README.md)** —
-one file per command. Every agent exposes them under its own invocation syntax
-(a leading `/` in most), but the semantics come from those files and nowhere else.
+### Rule 1 — pre-register before you measure
 
-Project-specific machinery runs *beneath* these: `ai/workflows/slice-contract.md`
-(pre-registration), `ai/workflows/skeptic.md` (independent falsification),
-`scripts/preflight.ps1`, `local_sim/seed_blocks.py`, `local_sim/vault.py`, and the
-probes. Do not invoke them as a substitute for the workflow above.
+**Binding for every STRATEGIC slice** (see the classification table below), and it
+is the rule this repository has lost the most to when skipped.
 
-When `next-slice` or `review-slice` emits **STRATEGIC_RESEARCH** or
-**STRATEGIC_DECISION**, it produces a Strategist Packet — send that to the strongest
-reasoning capability available and bring the returned Slice Contract back through
-`next-slice`. The packet is self-contained by construction: the recipient may be any
-model, any vendor, or a human, and has neither repo access nor shared chat history.
+Before any data exists, append to `experiments/LOG.md` a dated entry containing:
+
+| field | what |
+|---|---|
+| **Question** | what we are trying to learn |
+| **Evidence** | what is already known, each item marked CONFIRMED / INFERRED / SPECULATIVE |
+| **Hypothesis + mechanism** | what we believe and *why it should be true*. No mechanism means it is a search, not an experiment |
+| **Intervention** | the smallest change that discriminates; one hypothesis |
+| **Predictions** | numbered, with directions and rough magnitudes |
+| **Gate** | the threshold, chosen NOW, passed to `competition_score.decide(gate=...)`, which has no default. **Write the gate on the DIFFERENCE the slice isolates, not on a total that contains it** — two gates in one session measured slightly the wrong quantity |
+| **Falsifier** | what result rejects the hypothesis |
+| **Baseline** | the exact control and its tier |
+| **Residual model** | REQUIRED for any cost claim. Report three (`docs/VALIDATION.md` §2b), FREEZE one by name here, and make sure it can see the cost the candidate actually incurs — a counted-FLOPs freeze hides elementwise residual |
+| **Statistic** | paired, common random numbers, arithmetic score difference, studentised-t or basic bootstrap. Never percentile or BCa |
+| **Seed block** | claimed through `local_sim/seed_ledger.py`, never a literal |
+| **Confounders / scope / what must not change** | |
+
+Then **take Samuel's prediction and record it before the result exists.** Three
+short questions, two minutes. It is the only record of whether the project's model
+of itself is any good, and "I don't know" is a valid answer.
+
+Commit the contract **before** running anything that touches the block, so git
+timestamps prove it preceded the data.
+
+### Rule 2 — an independent Skeptic before anything is believed
+
+**Binding after every IMPORTANT or STRATEGIC slice, before any promotion,
+submission, or write-up claim.**
+
+Launch the `skeptic` subagent in a context that has **never seen the builder's
+reasoning**, with the contract, the diff, the evaluation protocol and the **raw
+artifact paths** — never a prose summary. The canonical brief is `docs/SKEPTIC.md`;
+`.claude/agents/skeptic.md` and `.codex/agents/skeptic.md` are thin adapters.
+
+It has earned its place: on 2026-08-21 it retracted a lane closure that had been
+made on a measurement of a different method, and found an omitted cost column that
+changed the next checkpoint's design.
+
+### Everything else is judgement
+
+Classify the work (below), do it, verify it, record it. Escalate the moment a task
+turns out to touch `estimator.py`, a seed block, the vault, a gate, a residual
+model, a closed lane, or a submission.
+
+When repository evidence is exhausted, write a **Strategist Packet** — a
+self-contained brief for a stronger reasoning capability, assuming no repo access
+and no shared chat history — and bring the returned plan back as a contract.
 
 **`docs/HUMAN_MODEL.md` is human-owned and must not be edited by agents.** Enforced
 mechanically (see § *Enforcement*), not by this sentence.
@@ -136,8 +173,8 @@ mechanically (see § *Enforcement*), not by this sentence.
 | class | what | required |
 |---|---|---|
 | **ROUTINE** | doc edits, figures, board snapshots, report fetching, new tests, lab scripts that touch no seed block and no shipped file | just run it; verification only |
-| **IMPORTANT** | anything changing *the instrument* — `harness.py`, `mint_provenance.py`, `edge_cases.py`, `seed_blocks.py`, `vault.py`, a probe's math, grader-report parsing, **or the workflow/enforcement layer (`ai/workflows/`, `scripts/`)** | written prediction first, `scripts/preflight.ps1` green, LOG entry with a knowledge delta |
-| **STRATEGIC** | `estimator.py`; spending a decision block; a vault touch; a submission; changing a gate, a residual model, or the three-tier protocol; a write-up claim; reopening a closed lane | **Slice Contract** pre-registered in LOG before data exists → Samuel's prediction → build → evidence packet → independent Skeptic → teach-back. Use `ai/workflows/slice-contract.md`. |
+| **IMPORTANT** | anything changing *the instrument* — `harness.py`, `mint_provenance.py`, `edge_cases.py`, `seed_blocks.py`, `seed_ledger.py`, `competition_score.py`, `lifecycle_eval.py`, `vault.py`, a probe's math, grader-report parsing, **or the enforcement layer under `scripts/`** | written prediction first, `scripts/preflight.ps1` green, LOG entry with a knowledge delta |
+| **STRATEGIC** | `estimator.py`; spending a decision block; a vault touch; a submission; changing a gate, a residual model, or the three-tier protocol; a write-up claim; reopening a closed lane | pre-registered contract in LOG before data exists (**Rule 1** above) → Samuel's prediction → build → evidence packet → independent Skeptic (**Rule 2**) |
 
 **Never let one strategic result flow into the next implementation without
 synthesis.** Closed lanes stay closed unless new *external* evidence reopens them —
@@ -159,10 +196,10 @@ Everything required to resume lives in the repository:
 | raw evidence | JSON under `experiments/` |
 | evaluation state | vault seal, seed-block registry, run reports |
 
-**Switching drivers is exactly:** start the new agent in the repository root, invoke
-`session-start`, continue with `next-slice`. If that is not sufficient, the previous
-session failed to close properly — that is a `session-close` defect, not a reason to
-consult a transcript.
+**Switching drivers is exactly:** start the new agent in the repository root and
+have it read `docs/CURRENT_STATE.md`, then `experiments/LOG.md` from the bottom. If
+that is not sufficient, the previous session failed to record something it should
+have — that is a documentation defect, not a reason to consult a transcript.
 
 ## Enforcement — mechanical, not prose
 
@@ -195,7 +232,7 @@ missing one of the first four cannot drive a strategic slice.
 | repository read + content search | any agent's native file/grep tools | everything |
 | shell execution (PowerShell **and** a POSIX shell) | native | `whest`, `preflight.ps1`, `uv`, hooks |
 | **the evaluator** | this repo's own scripts — `preflight.ps1`, `edge_cases.py`, `mint_provenance.py`, `vault.py`, `whest run` | every gate |
-| an **independent subagent context** for the Skeptic | `.claude/agents/skeptic.md`, `.codex/agents/skeptic.md` | `review-slice` step 2 |
+| an **independent subagent context** for the Skeptic | `.claude/agents/skeptic.md`, `.codex/agents/skeptic.md` | Rule 2 — after every IMPORTANT/STRATEGIC slice |
 | version control | `git`, `gh` | provenance for every LOG entry |
 | escalation to a stronger reasoning capability | the Strategist Packet, delivered by hand | STRATEGIC_RESEARCH / DECISION |
 
@@ -209,21 +246,24 @@ disadvantaged here; an agent that uses them is deviating from the contract.
 
 ## Agent adapters
 
-| agent | instruction discovery | skills | subagents | hooks |
-|---|---|---|---|---|
-| any | `AGENTS.md` (this file) | `ai/workflows/` | `ai/workflows/skeptic.md` | `scripts/guard_paths.py` + `scripts/git-hooks/` |
-| Claude Code | `CLAUDE.md` (imports this file) | `.claude/skills/<name>/SKILL.md` | `.claude/agents/skeptic.md` | `.claude/settings.json` → `.claude/hooks/` |
-| Codex | `AGENTS.md` directly | `.agents/skills/<name>/SKILL.md` | `.codex/agents/skeptic.md` | `.codex/hooks/` (see `.codex/hooks/README.md`) |
+| agent | instruction discovery | subagents | hooks |
+|---|---|---|---|
+| any | `AGENTS.md` (this file) | `docs/SKEPTIC.md` | `scripts/guard_paths.py` + `scripts/git-hooks/` |
+| Claude Code | `CLAUDE.md` (imports this file) | `.claude/agents/skeptic.md` | `.claude/settings.json` → `.claude/hooks/` |
+| Codex | `AGENTS.md` directly | `.codex/agents/skeptic.md` | `.codex/hooks/` (see `.codex/hooks/README.md`) |
+
+*There is no skills layer. The six workflow commands were removed 2026-08-21; what
+they enforced is Rules 1 and 2 above.*
 
 **Working-directory assumption: every agent is started from the repository root**
-(`c:\Users\samsu\Documents\arc-whest`). All paths in this file, in `ai/workflows/`,
-and in every adapter are repo-relative and assume that root. There are no nested
+(`c:\Users\samsu\Documents\arc-whest`). All paths in this file and in
+every adapter are repo-relative and assume that root. There are no nested
 `AGENTS.md` files and no directory-scoped skill overrides; if one is ever added, the
 more deeply nested file wins for work inside its directory, and that must be recorded
 here. Starting an agent from a subdirectory may prevent skill discovery entirely.
 
 Adapters are thin by rule. If an adapter contains project behaviour that is not in
-`ai/workflows/` or `docs/`, that is a portability bug — `scripts/verify_portability.py`
+`docs/`, that is a portability bug — `scripts/verify_portability.py`
 checks for it.
 
 ## Working style
@@ -245,7 +285,6 @@ never chat history.
 | doc | when to read it |
 |---|---|
 | `docs/CURRENT_STATE.md` | **first, always.** Baseline, open questions, closed lanes, next action |
-| `ai/workflows/README.md` | the six commands and what they mean |
 | `docs/VALIDATION.md` | before measuring anything. The protocol and its proofs |
 | `docs/GOTCHAS.md` | before quoting a number, comparing a cost, or trusting an offline path |
 | `docs/GAME_PLAN.md` | strategy. **Rev 12 is authoritative**; earlier revs are history |

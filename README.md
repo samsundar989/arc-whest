@@ -9,15 +9,15 @@ https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026
 |---|---|
 | `docs/CURRENT_STATE.md` | **Where we stand right now**: baseline, closed lanes, open questions, next actions, the clock. **Start here to work.** |
 | `AGENTS.md` | The cross-agent repository operating contract. Any coding agent reads this first; `CLAUDE.md` imports it. |
-| `ai/workflows/` | The six human commands — `session-start`, `next-slice`, `review-slice`, `cold-start`, `routine`, `session-close` — defined once, agent-independently. `.claude/skills/` and `.agents/skills/` are thin adapters. |
+| `docs/SKEPTIC.md` | The independent-falsifier brief. `.claude/agents/skeptic.md` and `.codex/agents/skeptic.md` are thin adapters that load it. |
 | `estimator.py` | **The submission** (v0: covariance propagation + offline per-layer calibration). Self-contained; only imports allowed in the grader sandbox. |
 | `docs/COMPETITION_BRIEF.md` | Plain-English explainer: the competition, the math, what to learn. **Start here to understand.** |
 | `docs/VALIDATION.md` | The measurement protocol and its proofs. Binding on anything measured. |
 | `docs/GOTCHAS.md` | Standing operational knowledge — traps that must not be rediscovered. |
 | `docs/HUMAN_MODEL.md` | Samuel's own mental model. Agents read and critique it; agents never write it. |
-| `scripts/preflight.ps1` | The gate that runs on every estimator change (5 checks, ~2 min). |
+| `scripts/preflight.ps1` | The gate that runs on every estimator change (12 checks; 10 by default ~2-3 min, 12 under `-Full`). |
 | `scripts/guard_paths.py` | The one implementation of the protected-path / irreversible-action rules. Both agents' hooks and the git pre-commit backstop call it. |
-| `scripts/verify_portability.py` | Checks the harness is still swappable between agents (162 checks). |
+| `scripts/verify_portability.py` | Checks the harness is still swappable between agents (99 checks). |
 | `docs/GAME_PLAN.md` | Strategy & roadmap to a winning score. |
 | `docs/RESEARCH_NOTES.md` | Intel: rules, leaderboard, forum threads, papers, open questions. |
 | `docs/SETUP_WINDOWS.md` | Copy-paste guide: install → validate → first submission. |
@@ -26,17 +26,25 @@ https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026
 
 ## Working on this project
 
-The workflow is the same whichever coding agent is driving:
+**Read `docs/CURRENT_STATE.md`, then `experiments/LOG.md` from the bottom.** That is
+the whole orientation procedure. **Switching agents is: start it in the repo root and
+have it do exactly that.** No chat history transfers, and none is needed.
 
-```text
-session-start → next-slice → work → review-slice → … → session-close
-```
+*There were six slash-command workflows (`session-start`, `next-slice`,
+`review-slice`, `cold-start`, `routine`, `session-close`) plus a `slice-contract`
+primitive. They were **removed on 2026-08-21** — they restated what a careful agent
+does anyway, and in practice agents read the files rather than invoking them.*
 
-Semantics live in [`ai/workflows/`](ai/workflows/README.md); each agent exposes them
-under its own syntax (Claude Code: `/session-start`; Codex: the repo skills in
-`.agents/skills/`). **Switching agents is: start it in the repo root, run
-`session-start`, continue with `next-slice`.** No chat history transfers, and none is
-needed — continuity lives in `docs/CURRENT_STATE.md` and `experiments/LOG.md`.
+**Two rules survived, because they were the part that actually caught mistakes**, and
+they are stated directly in `AGENTS.md` § *How work is done*:
+
+1. **Pre-register before you measure.** Question, hypothesis, mechanism, numbered
+   predictions, the gate, the falsifier, the frozen residual model and the seed block
+   — appended to `experiments/LOG.md` **and committed** before any data exists, plus
+   Samuel's prediction before the result.
+2. **An independent Skeptic** after every IMPORTANT or STRATEGIC slice, launched in a
+   context that never saw the builder's reasoning, with raw artifact paths rather than
+   a prose summary.
 
 One-time setup for the agent-independent guard:
 

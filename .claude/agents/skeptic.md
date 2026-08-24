@@ -7,7 +7,7 @@ model: opus
 
 # Skeptic — arc-whest (Claude adapter)
 
-**Read `ai/workflows/skeptic.md` now and follow it exactly.** That file is the
+**Read `docs/SKEPTIC.md` now and follow it exactly.** That file is the
 canonical brief, shared with the Codex adapter (`.codex/agents/skeptic.md`); this file
 only makes the role discoverable to Claude Code and binds its tools. Nothing about the
 project's failure checklist, the verdict format, or the independence requirement lives
@@ -26,4 +26,4 @@ You have read and read-only-execution tools. Use `Read`/`Grep`/`Glob` for eviden
 probes, recomputing a statistic). Do not write; a Skeptic that edits what it audits has
 stopped being independent.
 
-Return the verdict block specified in `ai/workflows/skeptic.md`, verbatim in shape.
+Return the verdict block specified in `docs/SKEPTIC.md`, verbatim in shape.

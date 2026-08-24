@@ -5,7 +5,7 @@ description: Independent falsification of a strategically important claim in arc
 
 # Skeptic — arc-whest (Codex adapter)
 
-**Read `ai/workflows/skeptic.md` now and follow it exactly.** That file is the
+**Read `docs/SKEPTIC.md` now and follow it exactly.** That file is the
 canonical brief, shared with the Claude adapter (`.claude/agents/skeptic.md`); this
 file only makes the role discoverable to Codex. Nothing about the project's failure
 checklist, the verdict format, or the independence requirement lives here — if this
@@ -22,4 +22,4 @@ You must be invoked in a context that has not seen the builder's reasoning. If y
 were given only a prose summary, say so and ask for the raw artifact paths — that
 request is itself a finding.
 
-Return the verdict block specified in `ai/workflows/skeptic.md`, verbatim in shape.
+Return the verdict block specified in `docs/SKEPTIC.md`, verbatim in shape.

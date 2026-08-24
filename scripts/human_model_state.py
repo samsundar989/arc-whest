@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """Is docs/HUMAN_MODEL.md blank, partial, stale, or filled?
 
-`session-start` branches into FIRST-ORIENTATION MODE on this answer.  That branch
+This was the branch `session-start` keyed on before the workflow commands were
+removed (2026-08-21).  It is still the honest staleness signal, and it
 must not depend on an agent eyeballing the file, because two agents will eyeball it
 differently and the human workflow is supposed to be identical under both.  So the
 test is mechanical and lives here.
@@ -148,7 +149,7 @@ def main(argv: list[str] | None = None) -> int:
             print("    %s" % line)
         print("  -> confirm staleness by reading both files; this is a prompt, not a proof.")
     print(
-        "  session-start action: %s"
+        "  orientation needed: %s"
         % ("FIRST-ORIENTATION MODE" if payload["first_orientation_mode"]
            else "control panel")
     )

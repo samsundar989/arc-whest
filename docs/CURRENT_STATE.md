@@ -14,7 +14,7 @@ packet is `docs/PHASE2_FRONTIER_ARCHITECTURE.md`; the copy-ready Builder handoff
 is `docs/CLAUDE_CODE_FRONTIER_HANDOFF.md`. The earlier
 `docs/FRONTIER_ARCHITECTURE_PROPOSAL.md` is historical Phase-1 context. The new
 packet does not authorize an estimator edit, seed spend, vault touch, or
-submission; reconcile it through `next-slice` before implementation.
+submission; register a contract (AGENTS.md Rule 1) before implementation.
 
 ---
 
@@ -911,24 +911,28 @@ pseudoreplication; and `residual_s` is a subtraction remainder whose components 
 |---|---|---|
 | Evaluation | the project's own scripts (`edge_cases`, `mint_provenance`, `vault`, `whest run`) | already best-in-class; wrapped, not replaced |
 | Change gate | `scripts/preflight.ps1` | four commands that must all run on every estimator change, previously prose in `VALIDATION.md` §7; adds the ship-file identity check that existed nowhere |
-| Pre-registration | skill `slice-contract` | the repo's #1 historical failure mode: a residual model or gate chosen after seeing the answer (Sprint 4 twice) |
+| Pre-registration | **AGENTS.md Rule 1** (was the `slice-contract` skill until 2026-08-21) | the repo's #1 historical failure mode: a residual model or gate chosen after seeing the answer (Sprint 4 twice) |
 | Independent falsification | agent `skeptic` | two "findings with tidy causal stories" turned out to be noise; the one independent audit (rev 11) corrected four claims |
 | Orientation | this file + `docs/GOTCHAS.md` | a fresh session previously had to read ~150 KB across 12 stacked GAME_PLAN revisions to learn what was decided |
 | Human comprehension | `docs/HUMAN_MODEL.md` (Samuel-owned, write-protected from agents) | no comprehension checkpoint existed anywhere in the record |
 | Prompt friction | `.claude/settings.json` allowlist | read-only lab commands prompted on every invocation |
-| **Agent portability** (audit 2026-08-07) | `AGENTS.md` + `ai/workflows/` + shared `scripts/` enforcement | the whole harness lived under `.claude/`. Exhausting one agent's quota meant losing the methodology, not just the session |
+| **Agent portability** (audit 2026-08-07, re-scoped 2026-08-21) | `AGENTS.md` + `docs/SKEPTIC.md` + shared `scripts/` enforcement | the whole harness lived under `.claude/`. Exhausting one agent's quota meant losing the methodology, not just the session |
 
 **The portability layer, in one paragraph.** `AGENTS.md` is now the cross-agent
 operating contract and `CLAUDE.md` imports it, so no project behaviour is
-agent-specific. The six workflow commands are defined once in `ai/workflows/`;
-`.claude/skills/` and `.agents/skills/` (Codex) are thin adapters that load them, and
-`scripts/verify_portability.py` (162 checks) fails if either side drifts, grows a rule
-of its own, or names a product where it should name a role. The Skeptic exists for
-both agents (`.claude/agents/`, `.codex/agents/`) over one shared brief. Enforcement is
-one implementation, `scripts/guard_paths.py`, called by both agents' hooks *and* by
+agent-specific. **The six workflow commands and the skills layer were REMOVED on
+2026-08-21** — they restated what a careful agent does anyway, and both agents read
+the files rather than invoking them. What survived is what actually caught mistakes:
+**AGENTS.md Rules 1 and 2** (pre-register before measuring; an independent Skeptic
+after every IMPORTANT/STRATEGIC slice). The Skeptic exists for both agents
+(`.claude/agents/`, `.codex/agents/`) over one shared brief, `docs/SKEPTIC.md`, and
+`scripts/verify_portability.py` (99 checks) fails if either side drifts, grows a rule
+of its own, names a product where it should name a role, or lets the removed layer
+reappear on one side only. Enforcement is one implementation,
+`scripts/guard_paths.py`, called by both agents' hooks *and* by
 `scripts/git-hooks/pre-commit` — the backstop that holds even for an agent whose hooks
-nobody has wired. **Switching drivers is: start the agent in the repo root, run
-`session-start`, continue with `next-slice`.** Not verified in this environment: the
+nobody has wired. **Switching drivers is: start the agent in the repo root and have it
+read `docs/CURRENT_STATE.md`, then `experiments/LOG.md` from the bottom.** Not verified in this environment: the
 Codex hook *registration* schema, because Codex is not installed here — see
 `.codex/hooks/README.md`. The pre-commit backstop covers the gap meanwhile.
 
@@ -956,7 +960,8 @@ Codex hook *registration* schema, because Codex is not installed here — see
 P2-CP0 section describes a 256x32 world; **Phase 2 is 1024 x 16**. Nothing here
 depends on chat history.*
 
-**Start here.** `session-start`, then `next-slice`. The live checkpoint sequence
+**Start here.** Read this file, then `experiments/LOG.md` from the bottom. The live
+checkpoint sequence
 is the one in `docs/CLAUDE_CODE_FRONTIER_HANDOFF.md`: **P2-CP0 (done) -> P2-CP1
 -> P2-CP2 -> ...**. Do **not** run the old width-256 CP2-CP7 plan.
 

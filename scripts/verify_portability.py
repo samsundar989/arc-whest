@@ -30,14 +30,22 @@ sys.path.insert(0, str(REPO / "scripts"))
 
 from guard_paths import ALLOW, ASK, DENY, decide  # noqa: E402
 
-WORKFLOWS = ["session-start", "next-slice", "review-slice",
+# The six workflow commands and the slice-contract primitive were REMOVED on
+# 2026-08-21 along with ai/workflows/ and both skills directories. What they
+# enforced is now Rules 1 and 2 in AGENTS.md, and those are prose that no checker
+# can verify -- so this file no longer pretends to. What it still checks is what
+# is still mechanical: both agents load the SAME Skeptic brief, run the SAME
+# enforcement implementation, and carry no project behaviour of their own.
+_REMOVED_WORKFLOWS = ["session-start", "next-slice", "review-slice",
              "cold-start", "routine", "session-close"]
-INTERNAL = ["slice-contract"]
-ALL_SKILLS = WORKFLOWS + INTERNAL
+_REMOVED_INTERNAL = ["slice-contract"]
+_REMOVED = _REMOVED_WORKFLOWS + _REMOVED_INTERNAL
 
-CANON = REPO / "ai" / "workflows"
-CLAUDE_SKILLS = REPO / ".claude" / "skills"
-CODEX_SKILLS = REPO / ".agents" / "skills"
+#: The canonical Skeptic brief, shared by both agents. The one piece of the old
+#: workflow layer that was kept, because it is a role rather than a ceremony.
+SKEPTIC_BRIEF = "docs/SKEPTIC.md"
+
+CANON = REPO / "docs"
 
 # An adapter is allowed to be this long. Past it, it has started carrying project
 # behaviour that belongs in ai/workflows/ where both agents can see it.
@@ -88,7 +96,7 @@ def check_sources_of_truth() -> None:
         return
     text = read(agents)
     for heading in ["## Objective", "## Hard rules", "## Measurement law",
-                    "## Human workflow", "## Work classification", "## Continuity",
+                    "## How work is done", "## Work classification", "## Continuity",
                     "## Enforcement", "## Capabilities", "## Agent adapters"]:
         check(heading in text, "AGENTS.md has '%s'" % heading)
     # Instruction discovery degrades with size; CLAUDE.md was 9.5 KB and worked.
@@ -109,46 +117,37 @@ def check_sources_of_truth() -> None:
               "%d lines" % len(ct.splitlines()))
 
 
-# --- 2. canonical workflow layer ----------------------------------------------
+# --- 2. the canonical brief, and the absence of the removed layer -------------
 
 def check_canonical() -> None:
-    check((CANON / "README.md").exists(), "ai/workflows/README.md exists")
-    for name in ALL_SKILLS + ["skeptic"]:
-        p = CANON / ("%s.md" % name)
-        if not check(p.exists(), "canonical workflow: %s.md" % name):
-            continue
+    p = REPO / SKEPTIC_BRIEF
+    if check(p.exists(), "canonical Skeptic brief: %s" % SKEPTIC_BRIEF):
         text = read(p)
         hits = sorted({m.group(0).lower() for m in BANNED.finditer(text)})
-        check(not hits, "%s.md is agent-neutral" % name,
+        check(not hits, "%s is agent-neutral" % SKEPTIC_BRIEF,
               "found product/model names: %s" % ", ".join(hits) if hits else "")
+
+    # The removal must be COMPLETE. A half-removed layer -- a skills directory on
+    # one agent and not the other, or a dangling ai/workflows/ -- would recreate
+    # exactly the asymmetry this checker exists to prevent.
+    for gone in (REPO / "ai", REPO / ".claude" / "skills", REPO / ".agents"):
+        check(not gone.exists(), "removed layer stays removed: %s"
+              % gone.relative_to(REPO).as_posix())
+    for name in _REMOVED:
+        check(not (REPO / "docs" / ("%s.md" % name)).exists(),
+              "removed workflow did not reappear in docs/: %s" % name)
 
 
 # --- 3/4. adapter parity -------------------------------------------------------
 
 def check_adapters() -> None:
-    for name in ALL_SKILLS:
-        canon_ref = "ai/workflows/%s.md" % name
-        for label, root in (("claude", CLAUDE_SKILLS), ("codex", CODEX_SKILLS)):
-            p = root / name / "SKILL.md"
-            if not check(p.exists(), "%s adapter: %s" % (label, name)):
-                continue
-            text = read(p)
-            check(frontmatter_name(text) == name,
-                  "%s adapter %s declares name: %s" % (label, name, name),
-                  "found %r" % frontmatter_name(text))
-            check(canon_ref in text,
-                  "%s adapter %s points at canonical workflow" % (label, name))
-            n = len(text.splitlines())
-            check(n <= ADAPTER_MAX_LINES,
-                  "%s adapter %s is thin" % (label, name),
-                  "%d lines (budget %d)" % (n, ADAPTER_MAX_LINES))
+    """There is no skills layer any more, so the only adapters are the subagents.
 
-    # Same six semantic names on both sides, nothing extra on one side only.
-    claude_set = {p.parent.name for p in CLAUDE_SKILLS.glob("*/SKILL.md")}
-    codex_set = {p.parent.name for p in CODEX_SKILLS.glob("*/SKILL.md")}
-    check(claude_set == codex_set, "skill sets are identical",
-          "claude-only=%s codex-only=%s" % (sorted(claude_set - codex_set),
-                                            sorted(codex_set - claude_set)))
+    This function is kept (rather than deleted) so the section numbering in the
+    output still matches the report both agents have been reading, and so that a
+    future reintroduction of a skills layer has an obvious place to be checked.
+    """
+    check(True, "no skills layer to compare (removed 2026-08-21)")
 
 
 # --- 5. subagent parity --------------------------------------------------------
@@ -159,8 +158,9 @@ def check_subagents() -> None:
         if not check(p.exists(), "%s skeptic agent exists" % label):
             continue
         text = read(p)
-        check("ai/workflows/skeptic.md" in text,
-              "%s skeptic points at canonical brief" % label)
+        check(SKEPTIC_BRIEF in text,
+              "%s skeptic points at canonical brief" % label,
+              "expected a reference to %s" % SKEPTIC_BRIEF)
         check(len(text.splitlines()) <= ADAPTER_MAX_LINES,
               "%s skeptic adapter is thin" % label,
               "%d lines" % len(text.splitlines()))
@@ -271,20 +271,20 @@ def check_human_model_detection() -> None:
     check(data["verdict"] in ("BLANK", "PARTIAL", "STALE", "FILLED"),
           "human_model_state.py returns a valid verdict", data["verdict"])
     check(isinstance(data.get("first_orientation_mode"), bool),
-          "session-start branch is machine-readable",
+          "the staleness branch is machine-readable",
           "verdict=%s -> first_orientation_mode=%s"
           % (data["verdict"], data["first_orientation_mode"]))
-    for root in (CANON, CLAUDE_SKILLS / "session-start", CODEX_SKILLS / "session-start"):
-        target = root / "session-start.md" if root == CANON else root / "SKILL.md"
-        check("scripts/human_model_state.py" in read(target),
-              "session-start uses the mechanical check (%s)" % target.relative_to(REPO))
+    # There is no longer a session-start workflow to consume this. The check that
+    # survives is the one that matters: the verdict comes from a SCRIPT reading
+    # git history, not from an agent's impression of how stale the file looks.
+    check("scripts/human_model_state.py" in read(REPO / "AGENTS.md"),
+          "AGENTS.md points at the mechanical human-model check")
 
 
 # --- 9. no dangling file references -------------------------------------------
 
 def check_references() -> None:
-    scanned = list(CANON.glob("*.md"))
-    scanned += list(CLAUDE_SKILLS.glob("*/SKILL.md")) + list(CODEX_SKILLS.glob("*/SKILL.md"))
+    scanned = [REPO / SKEPTIC_BRIEF]
     scanned += [REPO / "AGENTS.md", REPO / "CLAUDE.md",
                 REPO / ".claude" / "agents" / "skeptic.md",
                 REPO / ".codex" / "agents" / "skeptic.md"]
@@ -300,27 +300,18 @@ def check_references() -> None:
           "; ".join(sorted(set(missing))))
 
 
-# --- 10. the loop closes ------------------------------------------------------
-# session-start -> next-slice -> review-slice -> session-close, plus the two
-# side entries. Each workflow must name where control goes next, or the human
-# control surface silently becomes a set of disconnected commands.
-
-CHAIN = {
-    "session-start": ["next-slice", "cold-start", "routine"],
-    "next-slice": ["review-slice", "routine", "slice-contract"],
-    "review-slice": ["next-slice", "skeptic"],
-    "slice-contract": ["review-slice"],
-    "routine": ["next-slice"],
-    "cold-start": ["HUMAN_MODEL.md"],
-    "session-close": ["session-start", "review-slice"],
-}
+# --- 10. (retired) the workflow chain -----------------------------------------
+# This section checked that session-start handed off to next-slice, next-slice to
+# review-slice, and so on -- that the human control surface was a loop rather than
+# a set of disconnected commands. The commands were removed on 2026-08-21, so
+# there is no chain left to close. What replaced them is prose (AGENTS.md Rules 1
+# and 2), and prose is not mechanically checkable; pretending otherwise would be
+# exactly the "check that reports a state rather than testing a property" this
+# repository has lost five checks to.
 
 
 def check_chain() -> None:
-    for name, successors in CHAIN.items():
-        text = read(CANON / ("%s.md" % name))
-        for nxt in successors:
-            check(nxt in text, "chain: %s hands off to %s" % (name, nxt))
+    check(True, "workflow chain retired with the commands (2026-08-21)")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -346,7 +337,7 @@ def main(argv: list[str] | None = None) -> int:
               "above before\nswitching drivers -- a broken control surface is "
               "discovered at the worst moment.")
         return 1
-    print("PORTABLE -- Claude and Codex expose the same six workflows over the same\n"
+    print("PORTABLE -- Claude and Codex load the same Skeptic brief over the same\n"
           "canonical semantics, the same enforcement, and the same durable state.")
     return 0
 
