@@ -21,7 +21,7 @@ claim to authority is `local_sim/test_competition_score.py`, which checks it
 against the installed `whestbench` for *bitwise* equality on randomised rows and
 replays the real graded reports through it.
 
-THE IDENTITY (whestbench 0.14.0, `budget.py` + `scoring.py`)
+THE IDENTITY (whestbench 0.16.0, `budget.py` + `scoring.py`)
 ------------------------------------------------------------
     C_i       = F_i + lambda * R_i
     mult_i    = 1.0                    if failed_i
@@ -37,14 +37,29 @@ Note the shape of the failure penalty: a failed MLP is scored at multiplier 1.0,
 not at the 0.1 floor, *and* against zeroed predictions. At our operating point
 (mult ~ 0.199) that is roughly a 5x multiplier penalty on top of a much larger MSE.
 
-PHASE-2 SAFETY
---------------
-As of 2026-08-19 round 1429 is UPCOMING and its configuration is unpublished. No
-Phase-1 constant is baked in here: `budget`, `lam` and `floor` are per-call
-parameters, `budget` may vary per MLP (whestbench 0.14.0 and 0.15.0 both use one
-`spec.flop_budget` for every MLP, but nothing in this module assumes it), and
-`LAMBDA_FLOPS_PER_SECOND` / `MULTIPLIER_FLOOR` below are labelled as the *installed
-0.14.0* values rather than as competition constants.
+PHASE-2 (updated 2026-08-24, P2-P0)
+-----------------------------------
+Round 1429 is LIVE and its configuration is published. `budget`, `lam` and `floor`
+remain per-call parameters -- `budget` may vary per MLP, and nothing here assumes
+otherwise -- but the DEFAULTS now come from `local_sim/official_config.py`, the one
+place that carries the live round and asserts it against the installed package.
+
+**`lambda` is 0.0 in Phase 2, so `C == F`.** Residual wall time no longer prices
+into the multiplier by any path; it is gated instead, at 0.4 s per MLP, and that
+gate is a *failure* path, not a cost. Anything in this repository that treats
+residual as a price is describing Phase 1.
+
+Note the trap this module now mirrors deliberately from the package: the name
+`LAMBDA_FLOPS_PER_SECOND` still exists and is still `1e11`, because it has always
+meant the *Phase-1* rate. It is NOT the live default. Use
+`DEFAULT_LAMBDA_FLOPS_PER_SECOND` (0.0) for the live round and
+`PHASE1_LAMBDA_FLOPS_PER_SECOND` (1e11) to replay a Phase-1 artifact. A stale
+constant that keeps its spelling and changes its meaning is precisely how the
+old default survived a version bump unnoticed.
+
+This module still imports nothing from `whestbench`, so it runs in the torch-only
+GPU venv. `official_config` preserves that property: it *states* its values and
+verifies them against the package only when asked.
 
 Run the self-check:  uv run python local_sim/test_competition_score.py
 """
@@ -57,18 +72,39 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
 
+from official_config import LIVE as _LIVE_ROUND  # noqa: E402
+from official_config import PHASE1 as _PHASE1_ROUND  # noqa: E402
+
 # --------------------------------------------------------------------------- #
-# Constants — the values the INSTALLED whestbench uses, not competition axioms.
-# Verified byte-identical in whestbench 0.14.0 (installed) and 0.15.0 (the
-# newest release, 2026-08-17, inspected read-only without installing it).
+# Constants — every one of them derived from `official_config`, which carries the
+# live round and asserts it field by field against the installed whestbench
+# (`official_config.verify()`, run by preflight). Nothing is transcribed twice.
 # --------------------------------------------------------------------------- #
 
-LAMBDA_FLOPS_PER_SECOND: float = 1e11
-MULTIPLIER_FLOOR: float = 0.1
-FAILURE_MULTIPLIER: float = 1.0
+#: The LIVE round's rate. Phase 2 = 0.0, so C == F and residual is gated, not priced.
+DEFAULT_LAMBDA_FLOPS_PER_SECOND: float = _LIVE_ROUND.lambda_flops_per_second
+
+#: The Phase-1 rate. Pass it explicitly to replay a Phase-1 or warm-up artifact.
+PHASE1_LAMBDA_FLOPS_PER_SECOND: float = _PHASE1_ROUND.lambda_flops_per_second
+
+#: DEPRECATED ALIAS, kept because `whestbench.budget` keeps it under the same name
+#: with the same meaning: it has always been the PHASE-1 rate and still is. It is
+#: NOT the live default. Prefer the two explicit names above.
+LAMBDA_FLOPS_PER_SECOND: float = PHASE1_LAMBDA_FLOPS_PER_SECOND
+
+MULTIPLIER_FLOOR: float = _LIVE_ROUND.multiplier_floor
+FAILURE_MULTIPLIER: float = _LIVE_ROUND.failure_multiplier
+
+#: The LIVE round's per-MLP budget. Phase 2 = 2**41.
+DEFAULT_FLOP_BUDGET: float = float(_LIVE_ROUND.flop_budget)
 
 #: Phase-1 budget. Present for replaying Phase-1 artifacts ONLY. Never a default.
-PHASE1_FLOP_BUDGET: float = 272_000_000_000.0
+PHASE1_FLOP_BUDGET: float = float(_PHASE1_ROUND.flop_budget)
+
+#: The LIVE round's residual cap, in seconds. `None` on a round that prices
+#: residual instead of gating it. Under Phase 2 this is the ONLY route by which
+#: residual wall time can change an outcome, and it does so by FAILING the MLP.
+RESIDUAL_WALL_TIME_LIMIT_S: Optional[float] = _LIVE_ROUND.residual_wall_time_limit_s
 
 _FAILURE_FLAGS = (
     "budget_exhausted",
@@ -87,7 +123,7 @@ _FAILURE_FLAGS = (
 def effective_compute(
     flops_used: float,
     residual_wall_time_s: float,
-    lam: float = LAMBDA_FLOPS_PER_SECOND,
+    lam: float = DEFAULT_LAMBDA_FLOPS_PER_SECOND,
 ) -> float:
     """C_i = F_i + lambda * R_i."""
     return float(flops_used) + float(lam) * float(residual_wall_time_s)
@@ -97,7 +133,7 @@ def is_combined_budget_exhausted(
     flops_used: float,
     residual_wall_time_s: float,
     flop_budget: float,
-    lam: float = LAMBDA_FLOPS_PER_SECOND,
+    lam: float = DEFAULT_LAMBDA_FLOPS_PER_SECOND,
 ) -> bool:
     """True when C_i strictly exceeds B_i. Strict `>`: C_i == B_i is in budget."""
     if flop_budget <= 0:
@@ -134,7 +170,7 @@ def mlp_score(
     flop_budget: float,
     *,
     failed: bool = False,
-    lam: float = LAMBDA_FLOPS_PER_SECOND,
+    lam: float = DEFAULT_LAMBDA_FLOPS_PER_SECOND,
     floor: float = MULTIPLIER_FLOOR,
 ) -> float:
     """s_i = mse_i * mult_i — the per-MLP competition score. Lower is better."""
@@ -174,18 +210,18 @@ class MlpRow:
     failed: bool = False
     name: str = ""
 
-    def effective_compute(self, lam: float = LAMBDA_FLOPS_PER_SECOND) -> float:
+    def effective_compute(self, lam: float = DEFAULT_LAMBDA_FLOPS_PER_SECOND) -> float:
         return effective_compute(self.flops_used, self.residual_wall_time_s, lam)
 
     def multiplier(
-        self, lam: float = LAMBDA_FLOPS_PER_SECOND, floor: float = MULTIPLIER_FLOOR
+        self, lam: float = DEFAULT_LAMBDA_FLOPS_PER_SECOND, floor: float = MULTIPLIER_FLOOR
     ) -> float:
         return score_multiplier(
             self.effective_compute(lam), self.budget, failed=self.failed, floor=floor
         )
 
     def score(
-        self, lam: float = LAMBDA_FLOPS_PER_SECOND, floor: float = MULTIPLIER_FLOOR
+        self, lam: float = DEFAULT_LAMBDA_FLOPS_PER_SECOND, floor: float = MULTIPLIER_FLOOR
     ) -> float:
         return float(self.mse) * self.multiplier(lam, floor)
 
@@ -228,7 +264,7 @@ class SuiteScore:
 
 
 def over_budget_rows(
-    rows: Sequence[MlpRow], lam: float = LAMBDA_FLOPS_PER_SECOND
+    rows: Sequence[MlpRow], lam: float = DEFAULT_LAMBDA_FLOPS_PER_SECOND
 ) -> List[int]:
     """Indices of rows the grader would have FAILED on the combined-budget check.
 
@@ -248,7 +284,7 @@ def over_budget_rows(
 def score_suite(
     rows: Iterable[MlpRow],
     *,
-    lam: float = LAMBDA_FLOPS_PER_SECOND,
+    lam: float = DEFAULT_LAMBDA_FLOPS_PER_SECOND,
     floor: float = MULTIPLIER_FLOOR,
     on_over_budget: str = "raise",
 ) -> SuiteScore:
@@ -321,7 +357,7 @@ def score_suite(
 def naive_factorised_objective(
     rows: Iterable[MlpRow],
     *,
-    lam: float = LAMBDA_FLOPS_PER_SECOND,
+    lam: float = DEFAULT_LAMBDA_FLOPS_PER_SECOND,
     floor: float = MULTIPLIER_FLOOR,
     on_over_budget: str = "raise",
 ) -> float:
@@ -627,7 +663,7 @@ def paired_compare_rows(
     control_rows: Sequence[MlpRow],
     candidate_rows: Sequence[MlpRow],
     *,
-    lam: float = LAMBDA_FLOPS_PER_SECOND,
+    lam: float = DEFAULT_LAMBDA_FLOPS_PER_SECOND,
     floor: float = MULTIPLIER_FLOOR,
     on_over_budget: str = "raise",
     **kw: Any,

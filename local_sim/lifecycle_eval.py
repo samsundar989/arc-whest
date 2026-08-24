@@ -96,7 +96,7 @@ for _p in (_HERE, _ROOT):
 import numpy as np  # noqa: E402
 
 from competition_score import (  # noqa: E402
-    LAMBDA_FLOPS_PER_SECOND,
+    DEFAULT_LAMBDA_FLOPS_PER_SECOND,
     MULTIPLIER_FLOOR,
     MlpRow,
     SuiteScore,
@@ -106,30 +106,50 @@ from competition_score import (  # noqa: E402
 )
 
 # --------------------------------------------------------------------------- #
-# INSTALLED-PACKAGE DEFAULTS -- *not* verified grader configuration.
+# THE LIVE ROUND'S CONFIGURATION -- from `local_sim/official_config.py`, which is
+# the single authority and asserts every value field by field against the
+# installed whestbench (`official_config.verify()`, run by preflight).
 #
-# These are `whestbench.scoring.ContestSpec`'s defaults, transcribed rather than
-# imported so this module states the contract it believes it is meeting; step 0 of
-# the self-test asserts they still agree with the installed package and fails
-# loudly if a version bump moves one.
+# Until 2026-08-24 these were Phase-1 literals transcribed into this file:
+# wall 60 s, residual None, memory 65,536 MB, budget 2.72e11, lambda 1e11. Phase 2
+# moved ALL FIVE at once and added a constraint that did not previously exist --
+# the 0.4 s residual cap -- so a transcription that had merely been stale became
+# one that could pass a candidate the grader would fail.
 #
 # READ THIS BEFORE QUOTING ANY OF THEM AS "the grader allows X".
 # Every graded report we hold publishes `config_snapshot` with exactly four keys --
-# `n_mlps`, `depth`, `width`, `flop_budget`. NONE of the five below appears in any
-# of them, and `docs/CURRENT_STATE.md` records the rest of `admin_config` as
-# admin-only. Only lambda = 1e11 is independently corroborated, from per-MLP
-# telemetry. So: two of the six failure paths this module models are gated on
-# constants we have never observed. Treat them as the best available prior, and
-# say so wherever a margin against them is reported.
+# `n_mlps`, `depth`, `width`, `flop_budget`. The rest are PACKAGE DEFAULTS. They
+# are now additionally corroborated by the `run_config` block of a real
+# `whest run --json` report (experiments/2026-08-24_p2_p0/official_anchor_1row.json),
+# which records what the runner actually USED rather than what it declares -- but
+# no GRADED report has ever published them, and that distinction stands.
 # --------------------------------------------------------------------------- #
 
-SETUP_TIMEOUT_S: float = 5.0            # ContestSpec default; NOT grader-verified
-WALL_TIME_LIMIT_S: Optional[float] = 60.0          # ditto
-RESIDUAL_WALL_TIME_LIMIT_S: Optional[float] = None  # ditto
-PREDICT_TIMEOUT_S: float = 30.0         # ditto -- modelled only as a recorded bound
-MEMORY_LIMIT_MB: int = 65_536           # ditto -- RLIMIT_AS under --runner subprocess,
-                                        # and it already killed v2.5 (docs/GOTCHAS.md)
-DEFAULT_BUDGET: int = 272_000_000_000
+from official_config import LIVE as OFFICIAL_ROUND  # noqa: E402
+from official_config import PHASE1 as PHASE1_ROUND  # noqa: E402
+
+SETUP_TIMEOUT_S: float = OFFICIAL_ROUND.setup_timeout_s                # 5.0
+WALL_TIME_LIMIT_S: Optional[float] = OFFICIAL_ROUND.wall_time_limit_s  # 120.0
+#: Phase 2's hard cliff. NOT None any more. An MLP whose residual wall time exceeds
+#: this is FAILED -- zeroed predictions, multiplier 1.0 -- and because lambda is 0
+#: this is the ONLY route by which residual can change an outcome. P2-CP1 ran with
+#: this disabled; every Phase-2 cost/failure claim made before 2026-08-24 is
+#: provisional for that reason.
+RESIDUAL_WALL_TIME_LIMIT_S: Optional[float] = OFFICIAL_ROUND.residual_wall_time_limit_s
+PREDICT_TIMEOUT_S: float = OFFICIAL_ROUND.predict_timeout_s            # 30.0
+#: 8,192 MB -- EIGHT TIMES tighter than the Phase-1 limit that already killed v2.5
+#: (docs/GOTCHAS.md). RLIMIT_AS under `--runner subprocess`.
+MEMORY_LIMIT_MB: int = OFFICIAL_ROUND.memory_limit_mb                  # 8_192
+DEFAULT_BUDGET: int = OFFICIAL_ROUND.flop_budget                       # 2**41
+
+#: THE Phase-2 counted-FLOP anchor for the shipped `estimator.py` at 1024x16, from
+#: a real `whest run --runner subprocess --profile --json` against the official
+#: `v2-phase2` dataset (`experiments/2026-08-24_p2_p0/official_anchor_1row.json`).
+#: This module's self-test asserts EQUALITY against it, which is the single check
+#: that says the local meter bills what the grader bills. Counted FLOPs on this
+#: dense path are value-independent, so it holds for any seed.
+#: When it moves, `local_sim/p2_flop_anchor.py` says which operation moved.
+P2_OFFICIAL_ANCHOR_FLOPS: int = 137_600_326_656
 
 #: Measured on this host, 2026-08-20, three repeats. The grader's SUBPROCESS setup
 #: window (`runner.py:281`) covers the worker process spawn and its imports as well
@@ -155,9 +175,83 @@ class LifecycleSpec:
     residual_wall_time_limit_s: Optional[float] = RESIDUAL_WALL_TIME_LIMIT_S
     predict_timeout_s: float = PREDICT_TIMEOUT_S
     memory_limit_mb: int = MEMORY_LIMIT_MB
-    lam: float = LAMBDA_FLOPS_PER_SECOND
+    lam: float = DEFAULT_LAMBDA_FLOPS_PER_SECOND
     floor: float = MULTIPLIER_FLOOR
     seed: int = 0
+    #: Which official round this spec claims to model. Recorded so a run report
+    #: says which rulebook produced it, and asserted by `for_round`.
+    round_tag: str = OFFICIAL_ROUND.tag
+
+    @classmethod
+    def for_round(cls, round_or_tag, *, seed: int = 0, **overrides) -> "LifecycleSpec":
+        """Build a spec from an `official_config.OfficialRound`, or from its tag.
+
+        This is the only sanctioned way to construct a spec for a round that is
+        not the live one. Replaying a Phase-1 artifact means naming Phase 1 --
+        `LifecycleSpec.for_round("v1-phase1")` -- and getting ALL SIX of its
+        constants together. Overriding them one at a time is how a run ends up
+        with Phase-2's budget and Phase-1's lambda, which is a rulebook that has
+        never existed.
+
+        `overrides` are applied last and are for deliberate what-if analysis
+        (`residual_wall_time_limit_s=1e-9` to provoke the cliff, for instance).
+        They are recorded in the provenance blob so a report can never claim to be
+        a clean round it was not.
+        """
+        import official_config
+
+        r = (round_or_tag if isinstance(round_or_tag, official_config.OfficialRound)
+             else official_config.by_tag(str(round_or_tag)))
+        base = dict(
+            width=r.width,
+            depth=r.depth,
+            flop_budget=r.flop_budget,
+            setup_timeout_s=r.setup_timeout_s,
+            wall_time_limit_s=r.wall_time_limit_s,
+            residual_wall_time_limit_s=r.residual_wall_time_limit_s,
+            predict_timeout_s=r.predict_timeout_s,
+            memory_limit_mb=r.memory_limit_mb,
+            lam=r.lambda_flops_per_second,
+            floor=r.multiplier_floor,
+            round_tag=r.tag,
+            seed=seed,
+        )
+        unknown = set(overrides) - set(base)
+        if unknown:
+            raise TypeError(f"unknown LifecycleSpec field(s): {sorted(unknown)}")
+        base.update(overrides)
+        return cls(**base)
+
+    def deviations_from_round(self) -> Dict[str, Any]:
+        """Every field that does NOT match the round this spec names.
+
+        An evaluator that silently runs a modified rulebook and reports a clean
+        objective is the failure this whole slice exists to remove, so the
+        deviations travel with the provenance rather than living in a comment.
+        """
+        import official_config
+
+        try:
+            r = official_config.by_tag(self.round_tag)
+        except KeyError:
+            return {"round_tag": [self.round_tag, "<unknown round>"]}
+        out: Dict[str, Any] = {}
+        for field, theirs in (
+            ("width", r.width),
+            ("depth", r.depth),
+            ("flop_budget", r.flop_budget),
+            ("setup_timeout_s", r.setup_timeout_s),
+            ("wall_time_limit_s", r.wall_time_limit_s),
+            ("residual_wall_time_limit_s", r.residual_wall_time_limit_s),
+            ("predict_timeout_s", r.predict_timeout_s),
+            ("memory_limit_mb", r.memory_limit_mb),
+            ("lam", r.lambda_flops_per_second),
+            ("floor", r.multiplier_floor),
+        ):
+            mine = getattr(self, field)
+            if mine != theirs:
+                out[field] = [mine, theirs]
+        return out
 
 
 @dataclass(frozen=True)
@@ -259,6 +353,41 @@ def _require_real_flopscope():
     return flops
 
 
+def _require_real_fnp():
+    """`flopscope.numpy`, after the same shim refusal as `_require_real_flopscope`."""
+    _require_real_flopscope()
+    import flopscope.numpy as fnp
+
+    return fnp
+
+
+def materialise_predictions(predictions, *, depth: int, width: int):
+    """`whestbench.scoring.materialise_predictions` -- the IN-WINDOW half.
+
+    Prefers the installed function so this cannot drift from the package. The
+    fallback is the two lines the package runs, and
+    `local_sim/p2_flop_anchor.py`'s self-test asserts the two cost exactly the
+    same, so the fallback is not a second implementation with its own price.
+
+    Only the SHAPE CHECK and the dtype coercion belong here. The finiteness scan
+    costs `2*numel - 1` and the package deliberately keeps it outside the metered
+    window; `validate_predictions` above owns that half.
+    """
+    try:
+        from whestbench.scoring import (  # type: ignore
+            materialise_predictions as _pkg,
+        )
+    except Exception:
+        fnp = _require_real_fnp()
+        shape = tuple(predictions.shape) if hasattr(predictions, "shape") else ()
+        if shape != (depth, width):
+            raise ValueError(
+                f"predictions have shape {shape}, expected {(depth, width)}"
+            )
+        return fnp.asarray(predictions, dtype=fnp.float32)
+    return _pkg(predictions, depth=depth, width=width)
+
+
 def _file_sha(path: str) -> str:
     h = hashlib.sha256()
     with open(path, "rb") as fh:
@@ -350,6 +479,7 @@ def evaluate(
     same code and show the difference. Never use it to produce evidence.
     """
     flops = _require_real_flopscope()
+    fnp = _require_real_fnp()
     try:
         flops.configure(symmetry_warnings=False)
     except Exception:
@@ -414,8 +544,20 @@ def evaluate(
     rows: List[EvidenceRow] = []
     for i, s in enumerate(seeds):
         w_np, est_seed, _ = mint(spec.width, spec.depth, int(s))
+        # FLOPSCOPE-BACKED, exactly as `whestbench.domain.MLP.from_row` builds
+        # them (`fnp.array(w)`). Until 2026-08-24 this was `np.asarray(x)`, and
+        # the difference is not cosmetic: an operation invoked as a METHOD ON A
+        # WEIGHT goes through the meter on the grader and through bare NumPy here.
+        # The shipped file's live Phase-2 path opens with
+        # `[w.astype(fnp.float64) for w in mlp.weights]`, which the grader bills at
+        # 33,554,432 FLOPs and this module used to bill at zero. That was
+        # 33.5M of the 37.8M total shortfall against the official anchor
+        # (`local_sim/p2_flop_anchor.py`).
+        #
+        # Built OUTSIDE the BudgetContext below, because `from_row` runs during
+        # dataset load on the grader, so construction itself is free there too.
         mlp = harness.MLP(
-            weights=[np.asarray(x) for x in w_np],
+            weights=[fnp.array(x) for x in w_np],
             width=spec.width,
             depth=spec.depth,
             seed=est_seed,
@@ -434,6 +576,20 @@ def evaluate(
         try:
             with ctx:
                 raw = e.predict(mlp, spec.flop_budget)
+                # IN-WINDOW, because whestbench 0.16 does it in-window
+                # (`scoring.py`, inside `with budget_ctx:`). Its docstring calls
+                # the shape check and the `fnp.asarray` "free ops, so a correct
+                # estimator is billed nothing" -- true only for an estimator that
+                # already returns float32. Ours returns float64, so the harness's
+                # own materialisation is a dtype conversion at 2 FLOPs/element:
+                # 16 x 1024 x 2 = 32,768 FLOPs, billed to us. That was the last
+                # 32,768 of the shortfall against the official anchor.
+                #
+                # The metered finiteness scan (2*numel - 1) stays OUTSIDE, below,
+                # exactly as the package keeps it outside.
+                raw = materialise_predictions(
+                    raw, depth=spec.depth, width=spec.width
+                )
             preds = validate_predictions(raw, depth=spec.depth, width=spec.width)
         except flops.BudgetExhaustedError:
             budget_exhausted = True
@@ -542,6 +698,14 @@ def evaluate(
         "truth_sha256": truth_sha,
         "n_mlps": len(seeds),
         "spec": dataclasses.asdict(spec),
+        #: Which official round this run claims to model, and every field that
+        #: does NOT match it. An empty dict means a clean round; anything in it
+        #: means the run used a rulebook the competition does not, and any number
+        #: taken from the run must say so. This is the record that stops a
+        #: cliff-disabled run from being quoted as a deployment result, which is
+        #: exactly what happened to P2-CP1.
+        "round_tag": spec.round_tag,
+        "round_deviations": spec.deviations_from_round(),
         "lifecycle": _lifecycle,
         "setup_called": _lifecycle == "grader",
         "setup_seconds": setup_s,
@@ -675,7 +839,6 @@ def _self_test() -> int:
     print("LIFECYCLE EVALUATOR — self-test (predictions L1-L6)")
     print("=" * 104)
 
-    WIDTH, DEPTH = 256, 32
     # Legacy-namespace throwaway seeds, the local_sim/residual_model.py convention:
     # this file measures COST and mechanics, decides nothing, and must not draw on
     # a registered block. 5,150,000+ is outside every registered span (nearest is
@@ -684,7 +847,22 @@ def _self_test() -> int:
     # `bid not in excluded`, permanently disabling the VAULT-seed-literal scan in
     # this file. One was written and removed.
     SEEDS = [5_150_000 + i for i in range(6)]
-    spec = LifecycleSpec(width=WIDTH, depth=DEPTH)
+
+    # L1-L6 run on the PHASE-1 shape, and therefore under the PHASE-1 RULEBOOK --
+    # named, not inherited. Two reasons this must be `for_round` rather than
+    # `LifecycleSpec(width=256, depth=32)`:
+    #
+    #  1. the estimator is BUDGET-ADAPTIVE. `predict(mlp, budget)` sizes its work
+    #     to the budget it is handed, so a 256x32 network under Phase 2's 2**41
+    #     costs ~7x what it costs under Phase 1's 2.72e11. That is not a Phase-1
+    #     measurement; it is a measurement of a rulebook that has never existed.
+    #  2. lambda, wall and residual differ too, and picking them up one at a time
+    #     is exactly how a run ends up with a Phase-2 budget and a Phase-1 lambda.
+    #
+    # Section 7 below runs the LIVE round at its own shape, so both rulebooks are
+    # exercised in one pass and neither borrows the other's constants.
+    spec = LifecycleSpec.for_round("v1-phase1")
+    WIDTH, DEPTH = spec.width, spec.depth
 
     head("0. the transcribed grader constants still match the installed whestbench")
     check("setup_timeout_s", ContestSpec.setup_timeout_s == SETUP_TIMEOUT_S,
@@ -694,7 +872,7 @@ def _self_test() -> int:
     check("residual_wall_time_limit_s",
           ContestSpec.residual_wall_time_limit_s == RESIDUAL_WALL_TIME_LIMIT_S,
           f"{ContestSpec.residual_wall_time_limit_s}")
-    check("lambda", ContestSpec.lambda_flops_per_second == LAMBDA_FLOPS_PER_SECOND,
+    check("lambda", ContestSpec.lambda_flops_per_second == DEFAULT_LAMBDA_FLOPS_PER_SECOND,
           f"{ContestSpec.lambda_flops_per_second:.3e}")
     check("predict_timeout_s", ContestSpec.predict_timeout_s == PREDICT_TIMEOUT_S,
           f"{ContestSpec.predict_timeout_s}")
@@ -839,11 +1017,19 @@ def _self_test() -> int:
         if os.path.exists(slow):
             os.remove(slow)
 
+    from competition_score import PHASE1_LAMBDA_FLOPS_PER_SECOND, over_budget_rows
     over = MlpRow(mse=1.0, flops_used=2.0e11, residual_wall_time_s=1.0,
                   budget=2.72e11, failed=False)
-    from competition_score import over_budget_rows
     check("L4: and `competition_score` owns that predicate, not this module",
-          over_budget_rows([over]) == [0],
+          over_budget_rows([over], lam=PHASE1_LAMBDA_FLOPS_PER_SECOND) == [0],
+          f"C = {over.effective_compute(PHASE1_LAMBDA_FLOPS_PER_SECOND):.3e} "
+          f"vs B = 2.72e11, at the PHASE-1 rate")
+    # The same row is NOT over budget under the live round, because lambda is 0.
+    # Stated as its own check so the round-dependence is visible rather than
+    # inferred: `over_budget_rows` is a function of the rulebook, not of the row.
+    check("L4: ...and under the LIVE round the same row is IN budget, because "
+          "lambda is 0",
+          over_budget_rows([over]) == [],
           f"C = {over.effective_compute():.3e} vs B = 2.72e11")
 
     head("4b. SETUP failure is a REFUSAL, because the grader aborts the whole run")
@@ -918,6 +1104,104 @@ def _self_test() -> int:
           else "timings did NOT differ — weak evidence, not a failure")
     check("L6: EvidenceRow is frozen (an editable row is not evidence)",
           _is_frozen(g_rows[0]))
+
+    # ---------------------------------------------------------------------- #
+    # 6. L7 -- the round is NAMED, and a deviation from it cannot hide
+    # ---------------------------------------------------------------------- #
+    head("6. L7 — a spec names its round, and any deviation from it is recorded")
+    check("L7: for_round('v1-phase1') carries ALL SIX Phase-1 constants together",
+          (spec.width, spec.depth, spec.flop_budget, spec.lam,
+           spec.wall_time_limit_s, spec.residual_wall_time_limit_s)
+          == (256, 32, 272_000_000_000, 1e11, 60.0, None),
+          f"B={spec.flop_budget:.3e} lam={spec.lam:.0e} wall={spec.wall_time_limit_s} "
+          f"residual={spec.residual_wall_time_limit_s}")
+    check("L7: a clean spec reports NO deviation from the round it names",
+          spec.deviations_from_round() == {}, f"{spec.deviations_from_round()}")
+    dev = dataclasses.replace(spec, flop_budget=1_000_000)
+    check("L7: ...and a modified one names exactly what it changed",
+          dev.deviations_from_round() == {"flop_budget": [1_000_000, 272_000_000_000]},
+          f"{dev.deviations_from_round()}")
+    check("L7: the provenance blob carries the round tag and its deviations",
+          g_prov["spec"]["round_tag"] == "v1-phase1"
+          and g_prov.get("round_deviations") == {},
+          f"{g_prov['spec']['round_tag']}, deviations "
+          f"{g_prov.get('round_deviations')!r}")
+    _bad = False
+    try:
+        LifecycleSpec.for_round("v2-phase2", nonsense=1)
+    except TypeError:
+        _bad = True
+    except Exception:
+        pass
+    check("L7: for_round refuses an unknown field rather than ignoring it", _bad)
+
+    # ---------------------------------------------------------------------- #
+    # 7. L8 -- THE LIVE ROUND, at its own shape. Everything above is Phase 1.
+    # ---------------------------------------------------------------------- #
+    head("7. L8 — the LIVE round at 1024x16: the exact anchor and the 0.4 s cliff")
+    p2 = LifecycleSpec.for_round("v2-phase2")
+    check("L8: the live spec is Phase 2, with the cliff ARMED",
+          (p2.width, p2.depth, p2.flop_budget, p2.lam,
+           p2.wall_time_limit_s, p2.residual_wall_time_limit_s,
+           p2.memory_limit_mb)
+          == (1024, 16, 2 ** 41, 0.0, 120.0, 0.4, 8192),
+          f"B=2**41 lam={p2.lam} residual_cap={p2.residual_wall_time_limit_s}s "
+          f"mem={p2.memory_limit_mb} MB")
+    p2_seeds = SEEDS[:1]
+    p2_truth = np.zeros((1, p2.width), dtype=np.float32)
+    p2_rows, p2_prov = evaluate("estimator.py", p2_seeds, p2_truth, spec=p2)
+    r0 = p2_rows[0]
+    # THE anchor. Counted FLOPs on this dense path are value-independent, so this
+    # holds for any seed and is an exact equality, not a tolerance. It is the
+    # single number that says the local meter bills what the grader bills; when it
+    # moves, `local_sim/p2_flop_anchor.py` says which operation moved.
+    check("L8: counted FLOPs EXACTLY equal the official one-row subprocess anchor",
+          r0.flops_used == float(P2_OFFICIAL_ANCHOR_FLOPS),
+          f"{r0.flops_used:,.0f} vs {P2_OFFICIAL_ANCHOR_FLOPS:,} "
+          f"(delta {r0.flops_used - P2_OFFICIAL_ANCHOR_FLOPS:+,.0f})")
+    check("L8: ...which is 37,779,456 MORE than the pre-repair local figure",
+          r0.flops_used - 137_562_547_200 == 37_779_456,
+          f"+{r0.flops_used - 137_562_547_200:,.0f}")
+    check("L8: C == F, because lambda is 0",
+          r0.to_row().effective_compute(p2.lam) == r0.flops_used,
+          f"C = {r0.to_row().effective_compute(p2.lam):,.0f}")
+    check("L8: the multiplier is pinned at the 0.1 floor at this operating point",
+          r0.to_row().multiplier(p2.lam, p2.floor) == 0.1,
+          f"C/B = {r0.flops_used / p2.flop_budget:.7f} < floor 0.1")
+    check("L8: no failure path fires on the shipped file", not r0.failed,
+          f"budget={r0.budget_exhausted} time={r0.time_exhausted} "
+          f"residual={r0.residual_exhausted} combined={r0.combined_exhausted} "
+          f"error={r0.error_code!r}")
+    # Residual is a CLIFF now, so what matters is the margin to it. The local
+    # in-process figure is the PESSIMISTIC side of that margin (docs/GOTCHAS.md
+    # measures this host at ~7x the grader), so it is reported as local headroom
+    # and never as a deployment fact.
+    import official_config as _oc
+    hr = _oc.PHASE2.residual_headroom(r0.residual_wall_time_s)
+    check("L8: local in-process residual leaves headroom under the 0.4 s cliff",
+          hr is not None and hr > 1.0,
+          f"{r0.residual_wall_time_s * 1e3:.1f} ms local -> {hr:.2f}x headroom "
+          f"(LOCAL, in-process; the grader's own figure is the authority)")
+    # And the cliff must actually FIRE, not merely be configured. A limit that has
+    # never been provoked is a comment.
+    p2_cliff = LifecycleSpec.for_round("v2-phase2", residual_wall_time_limit_s=1e-9)
+    c2_rows, c2_prov = evaluate("estimator.py", p2_seeds, p2_truth, spec=p2_cliff)
+    check("L8: the 0.4 s cliff FIRES when provoked (1e-9 s limit)",
+          c2_rows[0].residual_exhausted and c2_rows[0].failed)
+    check("L8: a residual failure is zeroed and priced at multiplier 1.0, not 0.1",
+          c2_rows[0].mse == c2_rows[0].zero_prediction_mse
+          and c2_rows[0].to_row().multiplier(p2_cliff.lam, p2_cliff.floor) == 1.0,
+          f"mult {c2_rows[0].to_row().multiplier(p2_cliff.lam, p2_cliff.floor)}")
+    check("L8: ...and that run's provenance DECLARES it was not a clean round",
+          c2_prov.get("round_deviations", {}).get("residual_wall_time_limit_s")
+          == [1e-9, 0.4],
+          f"{c2_prov.get('round_deviations')}")
+    # Under Phase 2 residual cannot put a row over the COMBINED budget by any
+    # amount, because lambda is 0. This is the half of the old model that quietly
+    # stopped applying, so it is asserted rather than assumed.
+    check("L8: no amount of residual can trip the combined budget under lambda 0",
+          not is_combined_budget_exhausted(r0.flops_used, 1e9, p2.flop_budget, p2.lam),
+          f"C = {r0.flops_used + p2.lam * 1e9:,.0f} vs B = {p2.flop_budget:,}")
 
     print("\n" + "=" * 104)
     print(f"{_PASS}/{_PASS + _FAIL} checks passed")

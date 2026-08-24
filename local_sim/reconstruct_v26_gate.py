@@ -50,7 +50,7 @@ for _p in (_HERE, _ROOT):
 
 import numpy as np  # noqa: E402
 
-from competition_score import (LAMBDA_FLOPS_PER_SECOND,  # noqa: E402
+from competition_score import (PHASE1_LAMBDA_FLOPS_PER_SECOND,  # noqa: E402
                               PHASE1_FLOP_BUDGET, MlpRow, format_paired,
                               paired_compare, score_suite)
 
@@ -91,10 +91,17 @@ def _rows(path):
 
 
 def _score(rows, resid_s, budget):
+    # PHASE 1, named explicitly. This tool reconstructs a Phase-1 gate from
+    # Phase-1 graded reports, and it is the one replay path in this repository
+    # that PRICES residual (`C = F + lambda*R`). Since P2-P0 the module default
+    # is the LIVE round, where lambda is 0 -- inheriting it here would silently
+    # delete the entire residual half of every residual model this file exists to
+    # compare, and the three models would collapse onto one another.
     return score_suite(
         [MlpRow(mse=r["mse"], flops_used=r["flops"], residual_wall_time_s=rs,
                 budget=budget, failed=r["failed"], name=r["name"])
          for r, rs in zip(rows, resid_s)],
+        lam=PHASE1_LAMBDA_FLOPS_PER_SECOND,
         on_over_budget="fail",
     )
 
@@ -109,7 +116,8 @@ def main():
     print("=" * 100)
     print(f"  control   v2.4.1  {os.path.basename(CTRL)}   {len(a)} MLPs")
     print(f"  candidate v2.6    {os.path.basename(CAND)}   {len(b)} MLPs")
-    print(f"  budget    {budget:,.0f}   lambda {LAMBDA_FLOPS_PER_SECOND:.3g}")
+    print(f"  budget    {budget:,.0f}   lambda {PHASE1_LAMBDA_FLOPS_PER_SECOND:.3g}"
+          f"   (round v1-phase1, named explicitly)")
 
     paired = [x["name"] for x in a] == [x["name"] for x in b] and all(x["name"] for x in a)
     print(f"  paired    same MLPs in the same order: {paired}")

@@ -49,6 +49,9 @@ from whestbench.scoring import (ContestSpec, evaluate_estimator,  # noqa: E402
 from whestbench.sdk import BaseEstimator  # noqa: E402
 
 from competition_score import (LAMBDA_FLOPS_PER_SECOND,  # noqa: E402
+                               DEFAULT_LAMBDA_FLOPS_PER_SECOND,
+                               PHASE1_LAMBDA_FLOPS_PER_SECOND,
+                               DEFAULT_FLOP_BUDGET,
                                MULTIPLIER_FLOOR, PHASE1_FLOP_BUDGET, MlpRow,
                                effective_compute, format_paired,
                                is_combined_budget_exhausted, mlp_score,
@@ -62,6 +65,17 @@ RESULTS = []
 REPORTS = os.path.join(_ROOT, "experiments", "run_reports")
 V24 = os.path.join(REPORTS, "2026-08-05_v2.4_324420_graded_report.json")
 V241 = os.path.join(REPORTS, "2026-08-10_v2.4.1_phase1_327743_graded_report.json")
+
+#: EVERY published graded report this repository holds is from PHASE 1
+#: (`v1-phase1`: lambda 1e11, B = 2.72e11). Since P2-P0 the module default is the
+#: LIVE round, where lambda is **0**, so a Phase-1 replay must name its own rate.
+#: This is the only sanctioned way to do it, and it exists so the naming is
+#: visible at every call site rather than inherited.
+#:
+#: Replaying a Phase-1 report at lambda 0 does not error. It silently drops
+#: `lambda * R` from every row -- 10-13% of C on this hardware -- and the
+#: reproduction checks below (P4/P5/P7) are what caught it when the default moved.
+P1 = dict(lam=PHASE1_LAMBDA_FLOPS_PER_SECOND)
 
 
 def check(name, ok, detail=""):
@@ -117,9 +131,39 @@ def t_scalar_parity():
     check("score_multiplier exact on 12,000 rows", bad_m == 0, f"{bad_m} mismatches")
     check("is_combined_budget_exhausted exact", bad_x == 0, f"{bad_x} mismatches")
     check(
-        "lambda matches the installed package",
+        "the DEPRECATED lambda alias matches the package's deprecated alias",
         LAMBDA_FLOPS_PER_SECOND == wb_budget.LAMBDA_FLOPS_PER_SECOND,
         f"{LAMBDA_FLOPS_PER_SECOND:.3e}",
+    )
+    # The alias above is 1e11 in both, and it is NOT the live rate. That
+    # coincidence of spelling is exactly what let a Phase-1 default survive into
+    # Phase 2 unnoticed, so the LIVE rate gets its own check.
+    check(
+        "the LIVE default lambda matches the package's live default",
+        DEFAULT_LAMBDA_FLOPS_PER_SECOND == wb_budget.DEFAULT_LAMBDA_FLOPS_PER_SECOND,
+        f"{DEFAULT_LAMBDA_FLOPS_PER_SECOND:.3e}",
+    )
+    check(
+        "...and it is ZERO, so C == F and residual is gated, not priced",
+        DEFAULT_LAMBDA_FLOPS_PER_SECOND == 0.0
+        and effective_compute(1.0e9, 1.0e6) == 1.0e9,
+        f"C({1.0e9:.0e} FLOPs, 1e6 s) = {effective_compute(1.0e9, 1.0e6):.6e}",
+    )
+    check(
+        "the Phase-1 rate is still available, explicitly, for replay",
+        PHASE1_LAMBDA_FLOPS_PER_SECOND == wb_budget.PHASE1_LAMBDA_FLOPS_PER_SECOND
+        == 1e11,
+        f"{PHASE1_LAMBDA_FLOPS_PER_SECOND:.3e}",
+    )
+    check(
+        "the LIVE budget matches the package's live default",
+        DEFAULT_FLOP_BUDGET == float(wb_budget.DEFAULT_FLOP_BUDGET) == float(2 ** 41),
+        f"{DEFAULT_FLOP_BUDGET:,.0f}",
+    )
+    check(
+        "the Phase-1 budget is still available, explicitly, for replay",
+        PHASE1_FLOP_BUDGET == float(wb_budget.PHASE1_FLOP_BUDGET) == 272e9,
+        f"{PHASE1_FLOP_BUDGET:,.0f}",
     )
 
     # A non-0.1 floor cannot be checked against the package (0.14.0 hardcodes
@@ -407,27 +451,66 @@ def t_heterogeneous_budgets():
 def t_over_budget_guard():
     head("4b. combined-budget guard — C > B with failed=False must not be scored silently")
     b = 1e11
+
+    # --- PHASE 1: residual is PRICED, so a slow row can go over budget on time
+    # alone. This is the regime the guard was written for, and it must keep
+    # working for replay, so the Phase-1 rate is passed EXPLICITLY. It is no
+    # longer the default and must never be reached by inheritance again.
+    lam1 = PHASE1_LAMBDA_FLOPS_PER_SECOND
     ok_row = MlpRow(mse=1e-6, flops_used=5e10, residual_wall_time_s=0.1, budget=b)
     bad_row = MlpRow(mse=1e-6, flops_used=5e10, residual_wall_time_s=1.0, budget=b)
     check(
-        "the grader itself would fail that row",
-        is_combined_budget_exhausted(5e10, 1.0, b) and not is_combined_budget_exhausted(5e10, 0.1, b),
-        f"C = {bad_row.effective_compute():.3e} vs B = {b:.3e}",
+        "P1: the grader itself would fail that row",
+        is_combined_budget_exhausted(5e10, 1.0, b, lam1)
+        and not is_combined_budget_exhausted(5e10, 0.1, b, lam1),
+        f"C = {bad_row.effective_compute(lam1):.3e} vs B = {b:.3e}",
     )
-    check("default on_over_budget='raise' refuses it", _raises(lambda: score_suite([ok_row, bad_row])))
-    check("over_budget_rows names the offender", over_budget_rows([ok_row, bad_row]) == [1])
-    failed = score_suite([ok_row, bad_row], on_over_budget="fail")
+    check("P1: default on_over_budget='raise' refuses it",
+          _raises(lambda: score_suite([ok_row, bad_row], lam=lam1)))
+    check("P1: over_budget_rows names the offender",
+          over_budget_rows([ok_row, bad_row], lam=lam1) == [1])
+    failed = score_suite([ok_row, bad_row], lam=lam1, on_over_budget="fail")
     check(
-        "on_over_budget='fail' forces multiplier 1.0 on that row only",
+        "P1: on_over_budget='fail' forces multiplier 1.0 on that row only",
         failed.multipliers[1] == 1.0 and abs(failed.multipliers[0] - 0.6) < 1e-12,
         f"mults {failed.multipliers.tolist()}",
     )
-    ignored = score_suite([ok_row, bad_row], on_over_budget="ignore")
+    ignored = score_suite([ok_row, bad_row], lam=lam1, on_over_budget="ignore")
     check(
-        "on_over_budget='ignore' keeps the raw uncapped identity",
+        "P1: on_over_budget='ignore' keeps the raw uncapped identity",
         abs(ignored.multipliers[1] - 1.5) < 1e-12,
         f"mult {ignored.multipliers[1]:.4f}",
     )
+
+    # --- PHASE 2: lambda is 0, so C == F. Residual CANNOT put a row over budget
+    # by any amount — it is gated at 0.4 s instead, which is a failure path the
+    # lifecycle owns, not an arithmetic one this module can see. The only way over
+    # budget now is FLOPs. Both halves are asserted, because "the guard still
+    # fires" and "it no longer fires on residual" are different claims.
+    slow = MlpRow(mse=1e-6, flops_used=5e10, residual_wall_time_s=1e6, budget=b)
+    check(
+        "P2: an absurdly slow row is NOT over budget — lambda is 0, so C == F",
+        not is_combined_budget_exhausted(5e10, 1e6, b),
+        f"C = {slow.effective_compute():.3e} vs B = {b:.3e} at 1e6 s of residual",
+    )
+    check("P2: ...and the guard therefore does not fire on it",
+          over_budget_rows([slow]) == [])
+    fat = MlpRow(mse=1e-6, flops_used=1.5e11, residual_wall_time_s=0.0, budget=b)
+    check(
+        "P2: a row over budget on FLOPs alone still trips the guard",
+        is_combined_budget_exhausted(1.5e11, 0.0, b)
+        and over_budget_rows([ok_row, fat]) == [1],
+        f"C = {fat.effective_compute():.3e} vs B = {b:.3e}",
+    )
+    check("P2: default on_over_budget='raise' refuses it",
+          _raises(lambda: score_suite([ok_row, fat])))
+    p2_failed = score_suite([ok_row, fat], on_over_budget="fail")
+    check(
+        "P2: 'fail' forces multiplier 1.0 on that row only",
+        p2_failed.multipliers[1] == 1.0 and abs(p2_failed.multipliers[0] - 0.5) < 1e-12,
+        f"mults {p2_failed.multipliers.tolist()}",
+    )
+
     check("an unknown mode is rejected", _raises(lambda: score_suite([ok_row], on_over_budget="x")))
     check("clean suites are unaffected by the guard", score_suite([ok_row]).n == 1)
 
@@ -442,7 +525,7 @@ def t_failure_cost():
     with open(V241, encoding="utf-8") as fh:
         rep = json.load(fh)
     rows = rows_from_graded_report(rep)
-    base = score_suite(rows)
+    base = score_suite(rows, **P1)
 
     # P2 predicted "> 5x". That was wrong, and the reason is worth keeping: the
     # multiplier-only failure penalty is EXACTLY 1 / mult_i, and mult_i is a
@@ -459,12 +542,15 @@ def t_failure_cost():
         residual_wall_time_s=r.residual_wall_time_s,
         budget=r.budget,
         failed=True,
-    ).score()
+    ).score(**P1)
+    # `base` above was scored at the Phase-1 rate, and these row methods take the
+    # rate too. Mixing a P1 suite with a lambda-0 row method compares two
+    # different identities and the ratio stops being 1/mult_i at all.
     ratio = mult_only / normal
     check(
         "failure penalty is EXACTLY 1/mult_i (multiplier half only)",
-        abs(ratio - 1.0 / r.multiplier()) < 1e-12,
-        f"{ratio:.3f}x   (mult {r.multiplier():.4f} -> 1.0)",
+        abs(ratio - 1.0 / r.multiplier(**P1)) < 1e-12,
+        f"{ratio:.3f}x   (mult {r.multiplier(**P1):.4f} -> 1.0)",
     )
     pen = 1.0 / base.multipliers
     check(
@@ -505,8 +591,8 @@ def t_correlation_preserved():
     with open(V241, encoding="utf-8") as fh:
         rep = json.load(fh)
     rows = rows_from_graded_report(rep)
-    s = score_suite(rows)
-    naive = naive_factorised_objective(rows)
+    s = score_suite(rows, **P1)
+    naive = naive_factorised_objective(rows, **P1)
     rel = abs(naive - s.objective) / s.objective
     rho = float(np.corrcoef(s.mses, s.multipliers)[0, 1])
     check(
@@ -547,7 +633,7 @@ def t_sign_flip_fixture():
     with open(V241, encoding="utf-8") as fh:
         rep = json.load(fh)
     rows = rows_from_graded_report(rep)
-    ctrl = score_suite(rows).scores.copy()
+    ctrl = score_suite(rows, **P1).scores.copy()
     n = ctrl.size
     worst = int(np.argmax(ctrl))
     g = 0.03
@@ -658,7 +744,7 @@ def t_graded_replay():
             rep = json.load(fh)
         rows = rows_from_graded_report(rep)
         reported = reported_scores_by_index(rep)
-        s = score_suite(rows)
+        s = score_suite(rows, **P1)
 
         # P4 — reproduce the grader's own per-MLP adjusted score.
         idx = sorted(reported)
@@ -677,7 +763,8 @@ def t_graded_replay():
         wr = 0.0
         for e in ev["results"]["per_mlp"]:
             t = e["telemetry"]
-            c = effective_compute(t["flops_used"], t["residual_wall_time_s"])
+            c = effective_compute(t["flops_used"], t["residual_wall_time_s"],
+                                  **P1)
             wr = max(wr, abs(c - float(t["effective_compute"])) / abs(float(t["effective_compute"])))
         check(
             f"P5 {label}: C == F + 1e11*R on all 100 rows to 1e-9",
