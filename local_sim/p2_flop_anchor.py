@@ -149,6 +149,27 @@ HISTORICAL_LOCAL_FLOPS = 137_562_547_200
 OFFICIAL_REPORT = os.path.join(OUT_DIR, "official_anchor_1row.json")
 
 
+#: sha256 of the `estimator.py` the official report was recorded against, so the
+#: anchor cannot be silently rebased onto a different candidate. This is the
+#: `CP0.1 D19 == 0` trap in a new place: a stored reference that a gate compares
+#: against, whose documented remedy when it goes RED is "regenerate the reference".
+#: Regenerating it for a CHANGED candidate is correct and must be deliberate;
+#: regenerating it to make a gate go green is how a reference stops being one.
+OFFICIAL_REPORT_CANDIDATE_SHA256 = (
+    "00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec"
+)
+
+
+def _candidate_sha256(path: str) -> str:
+    import hashlib
+
+    h = hashlib.sha256()
+    with open(os.path.join(_ROOT, path), "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def load_official_ops(path: str = OFFICIAL_REPORT) -> dict | None:
     """Per-operation counted FLOPs from an official `whest run --json` report.
 
@@ -189,12 +210,32 @@ def _require_real_flopscope(flops) -> None:
         raise RuntimeError(f"flopscope at {path} has no BudgetContext.")
 
 
-def _stub_whestbench() -> None:
-    """A minimal `whestbench` so the isolated flopscope-0.12 venv can load the
-    candidate. The shipped estimator imports `whestbench` for its base class only;
-    nothing it needs from the package participates in metering."""
-    if "whestbench" in sys.modules:
-        return
+def _stub_whestbench() -> bool:
+    """Install a minimal `whestbench` ONLY if the real one is unavailable.
+
+    Returns True if a stub is in place, False if the real package is being used.
+
+    The stub exists so the flopscope-0.10 replay venv, which deliberately has no
+    whestbench, can still load a candidate. It used to be installed
+    UNCONDITIONALLY, and that was a defect an independent Skeptic caught: the stub
+    sets `__path__ = []`, so `from whestbench.scoring import materialise_predictions`
+    raised `ModuleNotFoundError` and the grader arm ALWAYS took the local fallback
+    -- in an interpreter where the real package was importable, and under a
+    docstring promising it "prefers the installed function so this cannot drift".
+    The number was unaffected (the two cost the same, and the self-test now proves
+    that non-vacuously), but the guard against drift was doing nothing.
+    """
+    try:
+        import whestbench  # noqa: F401
+        from whestbench.scoring import materialise_predictions  # noqa: F401
+    except Exception:
+        pass
+    else:
+        return False
+    if "whestbench" in sys.modules and not isinstance(
+        sys.modules["whestbench"], types.ModuleType
+    ):
+        return True
     wb = types.ModuleType("whestbench")
 
     class MLP:
@@ -213,6 +254,7 @@ def _stub_whestbench() -> None:
     wb.BaseEstimator = BaseEstimator
     wb.__path__ = []
     sys.modules["whestbench"] = wb
+    return True
 
 
 def _mint_weights():
@@ -245,22 +287,34 @@ ARMS = {
 }
 
 
-def materialise_like_grader(predictions, depth: int, width: int):
-    """`whestbench.scoring.materialise_predictions`, in-window, spelled locally.
+def _materialise_fallback(predictions, depth: int, width: int):
+    """The two lines `whestbench.scoring.materialise_predictions` runs, spelled
+    locally, for the replay venv that has no whestbench.
 
-    Prefers the installed function so this cannot drift from the package. Falls
-    back to the two lines the package runs, because the flopscope-0.10 replay venv
-    deliberately has no whestbench and must still be able to price this arm.
+    Kept as its own function so the self-test can price it against the package
+    DIRECTLY. Testing it through `materialise_like_grader` instead compares
+    whichever branch that dispatcher happened to take against itself, which is a
+    check that cannot fail -- and did not, for one revision of this file.
     """
     import flopscope.numpy as fnp
 
+    shape = tuple(predictions.shape) if hasattr(predictions, "shape") else ()
+    if shape != (depth, width):
+        raise ValueError(f"predictions have shape {shape}, expected {(depth, width)}")
+    return fnp.asarray(predictions, dtype=fnp.float32)
+
+
+def materialise_like_grader(predictions, depth: int, width: int):
+    """`whestbench.scoring.materialise_predictions`, in-window.
+
+    Uses the installed function wherever it is importable, so this cannot drift
+    from the package. Falls back to `_materialise_fallback` only in the
+    flopscope-0.10 replay venv, which deliberately has no whestbench.
+    """
     try:
         from whestbench.scoring import materialise_predictions  # type: ignore
     except Exception:
-        shape = tuple(predictions.shape) if hasattr(predictions, "shape") else ()
-        if shape != (depth, width):
-            raise ValueError(f"predictions have shape {shape}, expected {(depth, width)}")
-        return fnp.asarray(predictions, dtype=fnp.float32)
+        return _materialise_fallback(predictions, depth, width)
     return materialise_predictions(predictions, depth=depth, width=width)
 
 
@@ -598,17 +652,36 @@ def _self_test() -> int:
     # The whestbench-less replay venv prices this arm with the local fallback
     # spelling. Where the real function IS importable, the two must cost the same,
     # or the 0.10 side of the version comparison is measuring a different thing.
+    #
+    # This compares `_materialise_fallback` against the PACKAGE FUNCTION directly.
+    # An earlier revision compared `materialise_like_grader` against the package,
+    # which in an interpreter that has whestbench is the package compared against
+    # itself -- a check that cannot fail, and instance seven of the pattern
+    # docs/GOTCHAS.md tracks. It is asserted here that the two are not the same
+    # object, so the comparison can never silently become vacuous again.
     try:
         from whestbench.scoring import materialise_predictions as _real
     except Exception:
         print("  SKIP  fallback == package materialise_predictions "
-              "(no whestbench in this interpreter)")
+              "(no whestbench in this interpreter -- this IS the replay venv)")
     else:
+        check("the two implementations really are two implementations",
+              _real is not _materialise_fallback
+              and _real.__module__.startswith("whestbench"),
+              f"package {_real.__module__}, local {_materialise_fallback.__module__}")
         with flops.BudgetContext(flop_budget=10 ** 12, quiet=True) as c:
             _real(p64, depth=d, width=wd)
             real64 = float(c.flops_used)
+        with flops.BudgetContext(flop_budget=10 ** 12, quiet=True) as c:
+            _materialise_fallback(p64, d, wd)
+            fb64 = float(c.flops_used)
         check("the local fallback costs exactly what the package costs",
-              real64 == cost64, f"{real64:,.0f} vs {cost64:,.0f}")
+              real64 == fb64, f"package {real64:,.0f} vs fallback {fb64:,.0f}")
+        # ...and the dispatcher must be routing to the PACKAGE here, which is the
+        # property the docstring claims and the stub used to silently break.
+        _stubbed = _stub_whestbench()
+        check("with a real whestbench present, no stub is installed",
+              not _stubbed, "dispatcher routes to the package")
 
     # Reconciliation arithmetic is a property of the function, not of today's run.
     def _arm(total):
@@ -661,6 +734,33 @@ def main() -> int:
         return 0
 
     if args.gate:
+        # The stored report was recorded against ONE candidate. Comparing a
+        # different one against it and calling the result "parity" is meaningless,
+        # and the failure is silent: a changed estimator produces a changed op
+        # table, the gate goes RED, and the obvious remedy -- regenerate the
+        # report -- rebases the reference onto the very change it was meant to
+        # check. So the mismatch is named as a MISMATCH, with the required action
+        # spelled out, rather than presented as a parity failure.
+        got = _candidate_sha256(args.candidate)
+        if got != OFFICIAL_REPORT_CANDIDATE_SHA256:
+            print(f"  candidate         {args.candidate}")
+            print(f"  its sha256        {got}")
+            print(f"  report recorded   {OFFICIAL_REPORT_CANDIDATE_SHA256}")
+            print()
+            print("  REFUSED: the stored official report was produced against a")
+            print("  DIFFERENT candidate, so an op-by-op comparison against it is")
+            print("  not a parity check.")
+            print()
+            print("  If the candidate changed deliberately, regenerate the report")
+            print("  FOR THE NEW CANDIDATE and update")
+            print("  OFFICIAL_REPORT_CANDIDATE_SHA256 in the same commit:")
+            print("    whest run --estimator <candidate> --profile --detail full "
+                  "--json \\")
+            print("      --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 \\")
+            print("      --split mini --runner subprocess --n-mlps 1")
+            print("  Do NOT regenerate it to make this gate go green.")
+            return 4
+
         official = load_official_ops()
         if official is None:
             print("REFUSED: no official report at "

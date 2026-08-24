@@ -1159,9 +1159,12 @@ def _self_test() -> int:
           r0.flops_used == float(P2_OFFICIAL_ANCHOR_FLOPS),
           f"{r0.flops_used:,.0f} vs {P2_OFFICIAL_ANCHOR_FLOPS:,} "
           f"(delta {r0.flops_used - P2_OFFICIAL_ANCHOR_FLOPS:+,.0f})")
-    check("L8: ...which is 37,779,456 MORE than the pre-repair local figure",
-          r0.flops_used - 137_562_547_200 == 37_779_456,
-          f"+{r0.flops_used - 137_562_547_200:,.0f}")
+    # NOT a second check: given the equality above, this is two constants
+    # subtracted and cannot fail independently. It is printed as context for the
+    # reader and deliberately kept OUT of the denominator -- a suite that counts
+    # its own restatements is padding.
+    print(f"        (context: that is +{r0.flops_used - 137_562_547_200:,.0f} FLOPs "
+          f"on the pre-repair local figure of 137,562,547,200)")
     check("L8: C == F, because lambda is 0",
           r0.to_row().effective_compute(p2.lam) == r0.flops_used,
           f"C = {r0.to_row().effective_compute(p2.lam):,.0f}")

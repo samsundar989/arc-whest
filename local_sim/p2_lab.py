@@ -80,9 +80,20 @@ DEFAULT_ARMS = [
     "sample_iid_max", "sample_iid_floor", "sample_orth", "sample_lattice",
 ]
 
-#: The arm every other arm is compared against. `k2p1` is BITWISE the shipped
-#: `estimator.py` analytic path at this shape (`p2_test_arms.py` T2), so the
-#: control is the thing being controlled, not a re-derivation of it.
+#: The arm every other arm is compared against.
+#:
+#: `p2_test_arms.py` T2 proves `k2p1` reproduces the shipped `estimator.py`
+#: `_analytic_only` path **bitwise in its OUTPUT** at this shape. That makes it a
+#: sound ACCURACY control.
+#:
+#: It is NOT a cost-identical control, and this comment used to imply it was.
+#: Measured 2026-08-24 (`p2_flop_anchor.py --gate --candidate
+#: local_sim/p2_arms/arm_k2p1.py`): 137,600,363,520 against the shipped file's
+#: 137,600,326,656 -- **+36,864 FLOPs over three operations** (one extra `astype`,
+#: a `concatenate`, a `reshape`) from the arm's own scaffolding. Negligible at
+#: 0.000027%, and irrelevant while the multiplier is pinned at the 0.1 floor --
+#: but "bitwise identical" and "identical cost" are different claims, and this
+#: ladder reports both accuracy and cost.
 CONTROL = "k2p1"
 
 

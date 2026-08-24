@@ -164,9 +164,11 @@ full grader spelling            137,600,326,656   == official, unexplained 0
 
 19 operations compared; every name, call count and FLOP figure agrees.
 
-**A free 32,768 FLOPs is available to any candidate that returns float32.**
+**A candidate whose final assembly is NATIVELY float32 avoids 32,768 FLOPs.**
 `materialise_predictions` is free on a float32 return and 2 FLOPs/element on a
-float64 one. The shipped file returns float64. Taking it means changing
+float64 one. The shipped file returns float64. The saving is CONDITIONAL: adding a
+cast to reach float32 costs the same 2 FLOPs/element and nets zero, so it is only
+free if the last array is built in float32. Taking it means changing
 `estimator.py`, which is STRATEGIC and needs its own contract.
 
 ### What the evaluator still cannot do
@@ -174,11 +176,19 @@ float64 one. The shipped file returns float64. Taking it means changing
 - **Enforce the 8,192 MB memory limit.** Windows has no `resource` module, so the
   subprocess worker's `RLIMIT_AS` call is skipped and `--runner local` is advisory
   by design. Measured accounting for the shipped file: weights 64.0 MB, peak
-  working set 440.8 MB, peak commit 918.0 MB -> **8.9x headroom, a LOWER BOUND**
-  (RLIMIT_AS caps virtual address space; no Windows counter reports it).
-- **Observe the grader's own configuration.** Every limit above is a PACKAGE fact
-  corroborated by a real `whest run` `run_config`. No graded report publishes any
-  of them, and none exists for Phase 2.
+  working set 440.8 MB, peak commit 918.0 MB -> **at most 8.9x headroom, an UPPER
+  BOUND**. RLIMIT_AS caps virtual address space, which exceeds both counters by an
+  amount no Windows counter reports, so the true headroom is SMALLER than 8.9x by
+  an unmeasured factor. This is the optimistic reading, not a safety margin.
+- **Observe the grader's own configuration.** Every limit above is a PACKAGE fact,
+  and they are not equally well corroborated. A real `whest run --json`
+  `run_config` records what the runner USED for `width`, `depth`, `flop_budget`,
+  `lambda_flops_per_second`, `residual_wall_time_limit_s`, `wall_time_limit_s` and
+  `setup_timeout_s` — and **not** for `memory_limit_mb` or `predict_timeout_s`,
+  which remain `ContestSpec` class defaults only. So the **8,192 MB limit — the one
+  constraint this host cannot test at all — is also the one with the weakest
+  provenance**. No graded report publishes any of them, and none exists for
+  Phase 2.
 - **Transfer a local second.** The deployment authority for residual is
   `whest run --runner subprocess`, never the in-process figure.
 

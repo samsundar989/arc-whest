@@ -298,7 +298,7 @@ def _run_candidate(candidate, seeds, truth, budget, limit_note=""):
 
 def _score_block(mses, fl, rs, budget, gt_noise, nonfinite, extra):
     """Everything the vault reports, through the canonical scorer."""
-    from competition_score import (LAMBDA_FLOPS_PER_SECOND, MlpRow,
+    from competition_score import (DEFAULT_LAMBDA_FLOPS_PER_SECOND, MlpRow,
                                    effective_compute, score_suite)
 
     rows = [MlpRow(mse=float(m), flops_used=float(f), residual_wall_time_s=0.0,
@@ -330,7 +330,13 @@ def _score_block(mses, fl, rs, budget, gt_noise, nonfinite, extra):
         # Reported so the exclusion above is visible rather than silent.
         "local_residual_s_median": float(np.median(rs)),
         "local_effective_compute_mean_INFORMATIONAL": float(local_c.mean()),
-        "lambda": LAMBDA_FLOPS_PER_SECOND,
+        # The rate this block ACTUALLY used, not a constant that happens to be in
+        # scope. Until 2026-08-24 this recorded `LAMBDA_FLOPS_PER_SECOND` while
+        # `effective_compute` above inherited the module default -- and P2-P0 moved
+        # those apart: the name became a DEPRECATED ALIAS for the Phase-1 rate
+        # (1e11) while the live default went to 0. A touch record is one of three
+        # that will ever exist; it must not state a rate it did not use.
+        "lambda": DEFAULT_LAMBDA_FLOPS_PER_SECOND,
     }
     out.update(extra)
     return out

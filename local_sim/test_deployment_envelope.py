@@ -43,11 +43,14 @@ WHAT IT ACTUALLY MEASURES
    on one MLP. The grader restarts the worker and scopes the failure to that MLP
    (`runner.py:359-380`); a suite that scored every remaining MLP as failed would
    turn one bad network into a whole-submission loss.
-3. **A peak-memory accounting number** at the live shape, from the Windows
-   working-set counter, with its limitation stated: RLIMIT_AS caps *virtual
-   address space*, working set measures *resident* memory, and the first is
-   normally the larger. The number here is a LOWER BOUND on what the grader's
-   limit would see, and is quoted as such or not at all.
+3. **A peak-memory accounting number** at the live shape, with its limitation
+   stated and its direction stated correctly. RLIMIT_AS caps *virtual address
+   space*; the counters here measure *resident* and *committed* memory, both of
+   which are smaller. So the measured peak is a **lower bound on the charged
+   quantity**, and the headroom derived from it is therefore an **UPPER bound** --
+   the most optimistic reading, never a safety margin. (An earlier revision of
+   this file called that headroom a lower bound. It is not, and inverting the
+   sign of the one constraint this host cannot test is the worst place to do it.)
 4. **The timeout arithmetic**, which is not what it looks like: the runner waits
    `max(predict_timeout_s, wall_time_limit_s + grace)`, so under Phase 2's 120 s
    wall the 30 s `predict_timeout_s` is NOT the binding constraint.
@@ -163,7 +166,10 @@ def enforceability() -> dict:
                                   "setrlimit call is caught and skipped, and "
                                   "--runner local is advisory by design"),
                 "provoked_by": None,
-                "accounting_instead": "peak working set, measured below",
+                "accounting_instead": ("peak working set and peak commit, measured "
+                                       "below; both are LOWER bounds on the "
+                                       "RLIMIT_AS charge, so the headroom they "
+                                       "imply is an UPPER bound"),
             },
             "worker_death_restart": {
                 "value": None,
@@ -462,21 +468,29 @@ def main() -> int:
         # working set where the platform does not report it.
         binding_mb = peak.get("commit", peak["working_set"]) / MB
         weights_mb = mem["weight_bytes"] / MB
-        headroom = r.memory_limit_mb / binding_mb
+        # SIGN, and an independent Skeptic caught it pointing the wrong way.
+        # `peak_commit` is a LOWER bound on the quantity RLIMIT_AS charges (that
+        # bounds VIRTUAL ADDRESS SPACE, which is larger). Dividing a fixed limit by
+        # a LOWER bound on the denominator therefore yields an UPPER bound on the
+        # headroom -- the most OPTIMISTIC reading available, not the floor.
+        # Labelling it a lower bound inverted the safety direction of the one
+        # constraint this host cannot test at all.
+        headroom_ub = r.memory_limit_mb / binding_mb
         mem_report.update({"peak_working_set_mb": ws_mb,
                            "peak_commit_mb": binding_mb,
                            "weights_mb": weights_mb,
-                           "headroom_lower_bound": headroom})
+                           "headroom_upper_bound": headroom_ub})
         print(f"  weights alone            {weights_mb:>10.1f} MB "
               f"({r.depth} x {r.width}x{r.width} float32)")
         print(f"  peak WORKING SET         {ws_mb:>10.1f} MB   (resident)")
         print(f"  peak COMMIT              {binding_mb:>10.1f} MB   "
-              f"(closest analogue of the RLIMIT_AS charge)")
+              f"(a LOWER bound on the RLIMIT_AS charge)")
         print(f"  Phase-2 limit            {r.memory_limit_mb:>10.1f} MB")
         check("the shipped file's peak memory fits the Phase-2 limit",
               binding_mb < r.memory_limit_mb,
-              f"{headroom:.1f}x headroom -- a LOWER BOUND. RLIMIT_AS caps VIRTUAL "
-              f"address space, which is larger than either counter above")
+              f"at most {headroom_ub:.1f}x headroom -- an UPPER BOUND, i.e. the "
+              f"most optimistic reading. RLIMIT_AS caps VIRTUAL address space, "
+              f"which exceeds both counters above by an unmeasured amount")
         check("...and the peak is at least as large as the weights alone",
               binding_mb > weights_mb,
               f"{binding_mb:.1f} MB > {weights_mb:.1f} MB (a peak below the "

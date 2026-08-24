@@ -311,8 +311,13 @@ def verify() -> Tuple[List[Tuple[str, bool, str]], bool]:
           wb_ver.startswith("0.16."), wb_ver)
     check("flopscope is the official Phase-2 stack (0.12.x)",
           fs_ver.startswith("0.12."), fs_ver)
+    # Not `True`: a check whose condition is a literal cannot fail, and this repo
+    # has lost several checks to exactly that. `_real_whestbench()` above raises on
+    # the shim, so the property IS enforced -- but a passing line that tests
+    # nothing still inflates the denominator, so it tests the property itself.
     check("whestbench is the real package, not the local_sim shim",
-          True, os.path.dirname(wb.__file__))
+          not os.path.abspath(wb.__file__).startswith(os.path.abspath(_HERE) + os.sep),
+          os.path.dirname(wb.__file__))
 
     # --- the live round is the one the package grades -----------------------
     pkg_current = wbudget.CURRENT_ROUND
@@ -465,6 +470,17 @@ def verify() -> Tuple[List[Tuple[str, bool, str]], bool]:
         ):
             check(f"run_config.{key} (what the runner USED)", rc.get(key) == mine,
                   f"{mine!r} == {rc.get(key)!r}")
+        # ...and the two it does NOT carry, asserted as ABSENT. Without this, a
+        # reader sees seven corroborated limits and generalises to "the run_config
+        # corroborates the limits" -- which a durable doc did, for exactly the two
+        # weakest ones. `memory_limit_mb` is the limit this host cannot test at
+        # all, so it is also the one whose provenance matters most to state
+        # honestly. If a future whestbench starts publishing them, this check
+        # fails and the claim can be UPGRADED deliberately.
+        for key in ("memory_limit_mb", "predict_timeout_s"):
+            check(f"run_config does NOT carry {key} (class default only)",
+                  key not in rc,
+                  "absent -- so it is a ContestSpec default, not an observation")
         mult = (doc.get("results") or {}).get("mean_score_multiplier")
         check("the observed multiplier is the floor, so C/B < floor at this "
               "operating point", mult == LIVE.multiplier_floor, f"{mult!r}")

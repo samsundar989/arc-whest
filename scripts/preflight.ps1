@@ -85,18 +85,36 @@
   version. Update this default when a new version is promoted.
 
 .PARAMETER Full
-  Also run shape parity and carrier strength. Mandatory before promotion,
-  submission, or spending a vault touch.
+  Also run shape parity, carrier strength, the deployment envelope and the
+  official Phase-2 smoke. Mandatory before promotion, submission, or spending a
+  vault touch.
+
+.PARAMETER Log
+  Write a COMPLETE transcript to this path, verdicts included.
+
+  Use this rather than redirecting, and the reason is a defect found on
+  2026-08-24: every preflight transcript this repository had ever committed as
+  evidence was MISSING ITS VERDICTS. The step results and the final
+  GREEN/RED/SKIPPED summary are written with `Write-Host`, which in Windows
+  PowerShell 5.1 goes to the information stream -- so `.\preflight.ps1 2>&1 | Out-File`
+  captures every child process's stdout and NONE of the gate's own conclusions.
+  Three committed transcripts contained 900 lines of detail and zero verdict
+  lines, and were cited as evidence of green runs.
+
+  `-Log` uses Start-Transcript, which captures all streams. A caller who wants to
+  redirect manually must use `*>&1`, not `2>&1`.
 
 .EXAMPLE
   .\scripts\preflight.ps1
   .\scripts\preflight.ps1 -Full
+  .\scripts\preflight.ps1 -Full -Log experiments/2026-08-24_p2_p0/preflight.txt
   .\scripts\preflight.ps1 -Archive estimator_v2_5r.py
 #>
 [CmdletBinding()]
 param(
     [string]$Archive = "estimator_v2_6_1.py",
-    [switch]$Full
+    [switch]$Full,
+    [string]$Log = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -121,10 +139,31 @@ $env:PYTHONUTF8       = "1"
 $failures = New-Object System.Collections.ArrayList
 $skipped  = New-Object System.Collections.ArrayList
 
+$script:Transcribing = $false
+if ($Log) {
+    $logDir = Split-Path -Parent $Log
+    if ($logDir -and -not (Test-Path $logDir)) {
+        New-Item -ItemType Directory -Force -Path $logDir | Out-Null
+    }
+    try {
+        Start-Transcript -Path $Log -Force | Out-Null
+        $script:Transcribing = $true
+    } catch {
+        # A transcript that silently did not start would produce exactly the
+        # verdict-free evidence file this parameter exists to prevent.
+        Write-Host "FAILED to start transcript at ${Log}: $_" -ForegroundColor Red
+        exit 2
+    }
+}
+
 function Restore-CallerEncoding {
     # preflight must not silently change the encoding of the shell that ran it.
     $env:PYTHONIOENCODING = $script:PrevPyIoEnc
     $env:PYTHONUTF8       = $script:PrevPyUtf8
+    if ($script:Transcribing) {
+        try { Stop-Transcript | Out-Null } catch { }
+        $script:Transcribing = $false
+    }
 }
 
 # A terminating error raised OUTSIDE a Step block -- with $ErrorActionPreference

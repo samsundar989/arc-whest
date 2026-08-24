@@ -95,7 +95,7 @@ Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
 ```powershell
 uv sync                                                   # environment
 .\scripts\preflight.ps1                                   # THE gate, 12 of 16 steps: official stack + provenance + 30 invariants + contract + ship-file identity + vault seal + FLOP anchor
-.\scripts\preflight.ps1 -Full                             # all 16: adds shape parity, carriers, deployment envelope, official Phase-2 smoke
+.\scripts\preflight.ps1 -Full -Log <path>                  # all 16 + a COMPLETE transcript (2>&1 drops the verdicts; see GOTCHAS)
 uv run whest validate --estimator estimator.py            # contract only (~46 ms)
 uv run python local_sim/official_config.py                # the LIVE round, asserted against the installed package
 uv run python local_sim/p2_flop_anchor.py --gate          # does the local meter bill what the grader bills? op by op

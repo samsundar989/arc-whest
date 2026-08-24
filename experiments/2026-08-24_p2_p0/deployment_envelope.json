@@ -36,7 +36,7 @@
         "enforced_locally": false,
         "by": "NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design",
         "provoked_by": null,
-        "accounting_instead": "peak working set, measured below"
+        "accounting_instead": "peak working set and peak commit, measured below; both are LOWER bounds on the RLIMIT_AS charge, so the headroom they imply is an UPPER bound"
       },
       "worker_death_restart": {
         "value": null,
@@ -60,42 +60,34 @@
     {
       "constraint": "predict_response_timeout_s",
       "why": "runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint"
+    },
+    {
+      "constraint": "worker_death_restart",
+      "why": "--skip-worker-death was passed"
     }
   ],
   "predict_response_timeout_s": 125.0,
   "memory": {
     "measurement": {
       "baseline": {
-        "working_set": 130568192,
-        "commit": 606961664
+        "working_set": 131239936,
+        "commit": 607469568
       },
       "peak": {
-        "working_set": 462053376,
-        "commit": 962109440
+        "working_set": 461717504,
+        "commit": 962813952
       },
       "weight_bytes": 67108864
     },
     "limit_mb": 8192,
-    "peak_working_set_mb": 440.6484375,
-    "peak_commit_mb": 917.5390625,
+    "peak_working_set_mb": 440.328125,
+    "peak_commit_mb": 918.2109375,
     "weights_mb": 64.0,
-    "headroom_lower_bound": 8.92823023542935
+    "headroom_upper_bound": 8.921697254341408
   },
   "worker_death": {
-    "skipped": false,
-    "n_mlps": 3,
-    "n_failed_mlps": 1,
-    "failed_indices": [
-      0
-    ],
-    "failure_breakdown": {
-      "budget_exhausted": 0,
-      "time_exhausted": 0,
-      "residual_wall_time_exhausted": 0,
-      "combined_budget_exhausted": 0,
-      "error": 1
-    }
+    "skipped": true
   },
-  "checks_passed": 14,
-  "checks_total": 14
+  "checks_passed": 11,
+  "checks_total": 11
 }

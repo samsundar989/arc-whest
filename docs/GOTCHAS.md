@@ -93,9 +93,12 @@ Raw artifacts: `experiments/2026-08-24_p2_p0/`.*
   float32. Returning float64 costs **32,768 FLOPs** at the graded shape
   (16 × 1024 × 2). Verified both ways: 0 FLOPs on a float32 return, 2
   FLOPs/element on a float64 one (`p2_flop_anchor.py --self-test`).
-  **A free 32,768 FLOPs is available to any candidate that returns float32**, and
-  it costs no accuracy — the harness casts to float32 regardless. Not taken yet:
-  changing the shipped file is STRATEGIC and needs its own contract.
+  **A candidate whose final assembly is NATIVELY float32 avoids that 32,768**, at
+  no accuracy cost — the harness casts to float32 regardless. The saving is
+  CONDITIONAL and it is easy to state too strongly: reaching float32 by adding a
+  cast costs the identical 2 FLOPs/element and nets exactly zero. It is only free
+  if the last array is built in float32 to begin with. Not taken yet: changing the
+  shipped file is STRATEGIC and needs its own contract.
 
 - **A matching TOTAL with a moved OPERATION is a coincidence, not parity.** The
   anchor check compares the op table, 19 operations, name by name and call count
@@ -110,8 +113,14 @@ Raw artifacts: `experiments/2026-08-24_p2_p0/`.*
   already killed v2.5; Phase 2's is **eight times tighter** against sixteen times
   the weight bytes. Memory here is an accounting constraint, never a test passed.
   Measured for the shipped file: weights 64.0 MB, peak working set 440.8 MB, peak
-  commit 918.0 MB against 8,192 MB — **8.9× headroom, and that is a LOWER BOUND**,
-  because RLIMIT_AS caps *virtual address space* and no Windows counter reports it.
+  commit 918.0 MB against 8,192 MB — **at most 8.9× headroom, and that is an UPPER
+  BOUND**. RLIMIT_AS caps *virtual address space*, which is larger than either
+  counter and which no Windows counter reports, so the real headroom is smaller by
+  an unmeasured factor. Dividing a fixed limit by a LOWER bound on the charge gives
+  an UPPER bound on the margin — the optimistic end, never a safety factor. (This
+  was recorded the wrong way round on first writing and corrected by an independent
+  Skeptic the same day; inverting the sign of the one constraint this host cannot
+  test is the worst available place for a unit error.)
 
 - **The 30 s `predict_timeout_s` is not the binding timeout.** The runner waits
   `max(predict_timeout_s, wall_time_limit_s + grace)` = **125 s**, so under Phase
@@ -131,6 +140,27 @@ Raw artifacts: `experiments/2026-08-24_p2_p0/`.*
   measurement of a rulebook that has never existed. `LifecycleSpec.for_round()`
   takes all six of a round's constants together for exactly this reason, and
   records any deviation in the run's provenance.
+
+- **Every preflight transcript this repository had ever committed was missing its
+  verdicts, and they were cited as evidence of green runs.** `preflight.ps1` writes
+  its step results and its final `PREFLIGHT GREEN / RED / n SKIPPED` summary with
+  `Write-Host`. In Windows PowerShell 5.1 that goes to the **information stream**,
+  which `2>&1 |` does not redirect. So `.\scripts\preflight.ps1 2>&1 | Out-File log.txt`
+  captures every child process's stdout — hundreds of lines of convincing detail —
+  and **none of the gate's own conclusions**. Audited 2026-08-24: three committed
+  transcripts, 912 / 595 / 564 lines, `PREFLIGHT` verdict lines **0**, step
+  `PASS` lines **0**.
+
+  This is the failure class the gate's own accounting section warns about, arriving
+  through the back door: not a check that reported a state instead of a property,
+  but a check whose verdict never reached the file that was offered as proof of it.
+  Found by an independent Skeptic, who could not locate a witness for a claimed
+  "GREEN 16/16".
+
+  **Use `preflight.ps1 -Log <path>`**, which uses `Start-Transcript` and captures
+  all streams. If you must redirect by hand, `*>&1`, never `2>&1`. And when a
+  transcript is committed as evidence, grep it for its own verdict line before
+  believing it.
 
 - **A gate cannot catch what it does not look at.** For three days `preflight.ps1`
   reported GREEN 10/12 while running every check against whestbench 0.14 /
