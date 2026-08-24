@@ -1,0 +1,101 @@
+{
+  "artifact": "deployment_envelope",
+  "artifact_version": 1,
+  "round": "v2-phase2",
+  "enforceability": {
+    "platform": "win32",
+    "rlimit_as_available": false,
+    "constraints": {
+      "flop_budget": {
+        "value": 2199023255552,
+        "enforced_locally": true,
+        "by": "flopscope.BudgetContext raises BudgetExhaustedError",
+        "provoked_by": "local_sim/lifecycle_eval.py --self-test (L4)"
+      },
+      "wall_time_limit_s": {
+        "value": 120.0,
+        "enforced_locally": true,
+        "by": "flopscope.BudgetContext wall clock -> TimeExhaustedError",
+        "provoked_by": "local_sim/lifecycle_eval.py --self-test (L4)"
+      },
+      "residual_wall_time_limit_s": {
+        "value": 0.4,
+        "enforced_locally": true,
+        "by": "post-predict comparison against BudgetContext residual",
+        "provoked_by": "local_sim/lifecycle_eval.py --self-test (L8)",
+        "note": "the LOCAL residual is a different instrument from the graded one; the cliff is modelled faithfully, the seconds are not transferable"
+      },
+      "setup_timeout_s": {
+        "value": 5.0,
+        "enforced_locally": true,
+        "by": "timed module load + setup(), plus HOST_COLD_START_S",
+        "provoked_by": "local_sim/lifecycle_eval.py --self-test (4b)"
+      },
+      "memory_limit_mb": {
+        "value": 8192,
+        "enforced_locally": false,
+        "by": "NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design",
+        "provoked_by": null,
+        "accounting_instead": "peak working set, measured below"
+      },
+      "worker_death_restart": {
+        "value": null,
+        "enforced_locally": true,
+        "by": "whest run --runner subprocess restarts a dead worker",
+        "provoked_by": "this file, section 3"
+      },
+      "predict_response_timeout_s": {
+        "value": 30.0,
+        "enforced_locally": false,
+        "by": "runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint",
+        "provoked_by": null
+      }
+    }
+  },
+  "unprovable_here": [
+    {
+      "constraint": "memory_limit_mb",
+      "why": "NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design"
+    },
+    {
+      "constraint": "predict_response_timeout_s",
+      "why": "runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint"
+    }
+  ],
+  "predict_response_timeout_s": 125.0,
+  "memory": {
+    "measurement": {
+      "baseline": {
+        "working_set": 130891776,
+        "commit": 607404032
+      },
+      "peak": {
+        "working_set": 462262272,
+        "commit": 962473984
+      },
+      "weight_bytes": 67108864
+    },
+    "limit_mb": 8192,
+    "peak_working_set_mb": 440.84765625,
+    "peak_commit_mb": 917.88671875,
+    "weights_mb": 64.0,
+    "headroom_lower_bound": 8.924848603492228
+  },
+  "worker_death": {
+    "skipped": false,
+    "n_mlps": 3,
+    "n_failed_mlps": 1,
+    "failed_indices": [
+      0
+    ],
+    "failure_breakdown": {
+      "budget_exhausted": 0,
+      "time_exhausted": 0,
+      "residual_wall_time_exhausted": 0,
+      "combined_budget_exhausted": 0,
+      "error": 1
+    }
+  },
+  "checks_passed": 14,
+  "checks_total": 14
+}

@@ -29,3 +29,5 @@ local_sim/_lifecycle_*_tmp.py
 
 .venv-fs012/
 .venv-fs010/
+
+local_sim/_envelope_*_tmp*
