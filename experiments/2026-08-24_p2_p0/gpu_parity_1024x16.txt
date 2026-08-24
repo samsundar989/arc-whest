@@ -1,0 +1,34 @@
+============================================================================================
+GPU MIRROR PARITY
+============================================================================================
+device       : NVIDIA GeForce RTX 5090
+torch        : 2.13.0+cu130   tf32 disabled
+shape        : 1024x16   4 MLPs   65,536 samples/MLP
+
+CLAIM 1 — generation is bit-for-bit identical to the canonical mint
+--------------------------------------------------------------------------------------------
+  input seed   bits equal     dtype   device roundtrip    est. seed
+--------------------------------------------------------------------------------------------
+      424242         True   float32           lossless   3627126063
+      424243         True   float32           lossless    791191561
+      424244         True   float32           lossless   3134393931
+      424245         True   float32           lossless   2323357425
+--------------------------------------------------------------------------------------------
+generation bit-for-bit: True
+
+CLAIM 2 — forward pass agrees within tolerance (BLAS reduction order)
+--------------------------------------------------------------------------------------------
+  input seed   max|dGPU-CPU| final   rel. to mean act.   implied MSE  vs 1.4e-6 signal
+--------------------------------------------------------------------------------------------
+      424242             2.222e-08            4.66e-08     2.474e-17          1.8e-11x
+      424243             2.222e-08            4.13e-08     3.142e-17          2.2e-11x
+      424244             3.149e-08            4.53e-08     3.269e-17          2.3e-11x
+      424245             2.210e-08            4.97e-08     2.590e-17          1.8e-11x
+--------------------------------------------------------------------------------------------
+worst relative final-layer disagreement : 4.97e-08
+worst implied MSE from BLAS alone       : 3.269e-17
+  ... as a share of the 1.4e-6 raw MSE we make decisions on: 2.34e-11
+
+VERDICT
+  generation bit-for-bit ................ PASS
+  forward within 1% of decision signal .. PASS

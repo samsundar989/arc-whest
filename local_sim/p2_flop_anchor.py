@@ -277,6 +277,14 @@ def _run_arm(candidate: str, arm: str) -> dict:
     import flopscope.numpy as fnp
 
     _require_real_flopscope(flops)
+    # The shipped file's covariance line legitimately drops flopscope's symmetry
+    # tag, and the warning is emitted per call. It says nothing about counted
+    # FLOPs, and on Windows PowerShell a native command's stderr is wrapped in an
+    # ErrorRecord, so leaving it on makes this probe look like a failing step.
+    try:
+        flops.configure(symmetry_warnings=False)
+    except Exception:
+        pass
     _stub_whestbench()
 
     try:
@@ -635,6 +643,12 @@ def main() -> int:
     ap.add_argument("--emit", action="store_true",
                     help="run this interpreter's side and print JSON")
     ap.add_argument("--self-test", action="store_true")
+    ap.add_argument("--gate", action="store_true",
+                    help=("run ONLY the grader arm on this interpreter and assert "
+                          "op-by-op parity with the official report. This is the "
+                          "form preflight runs: it needs one venv, not two, so a "
+                          "missing replay venv cannot turn the gate green by "
+                          "skipping the comparison."))
     ap.add_argument("--candidate", default="estimator.py")
     ap.add_argument("--out", default=OUT)
     args = ap.parse_args()
@@ -644,6 +658,38 @@ def main() -> int:
 
     if args.emit:
         print(json.dumps(_emit(args.candidate)))
+        return 0
+
+    if args.gate:
+        official = load_official_ops()
+        if official is None:
+            print("REFUSED: no official report at "
+                  f"{os.path.relpath(OFFICIAL_REPORT, _ROOT)}.")
+            print("A matching total is not parity, and an ABSENT comparison is not")
+            print("a pass. Produce the report and re-run:")
+            print("  whest run --estimator estimator.py --profile --detail full "
+                  "--json \\")
+            print("    --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 \\")
+            print("    --split mini --runner subprocess --n-mlps 1")
+            return 3
+        arm = _run_arm(args.candidate, "grader")
+        moved = _op_delta({"ops": official["ops"]}, {"ops": arm["ops"]})
+        print(f"  candidate         {args.candidate}")
+        print(f"  official report   {official['report']} "
+              f"(whestbench {official['whestbench']})")
+        print(f"  official total    {official['total']:>20,.0f}")
+        print(f"  local total       {arm['total']:>20,.0f}   "
+              f"delta {arm['total'] - official['total']:+,.0f}")
+        print(f"  operations        {len(official['ops'])} compared, "
+              f"{len(moved)} disagreeing")
+        for op, m in moved.items():
+            print(f"      {op:<18} official {m['flops'][0]:>16,.0f} / "
+                  f"{m['calls'][0]:>4,.0f} calls   local {m['flops'][1]:>16,.0f} / "
+                  f"{m['calls'][1]:>4,.0f} calls")
+        if moved or arm["total"] != official["total"]:
+            print("\n  *** THE LOCAL METER DOES NOT BILL WHAT THE GRADER BILLS ***")
+            return 2
+        print("\n  op-by-op parity with the official runner: EXACT")
         return 0
 
     sides = {}

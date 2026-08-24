@@ -251,10 +251,22 @@ def build(offline: bool = False) -> dict:
             f"{BAKE_STACK['flopscope']}; no public pair reproduces the bake stack"
         )
 
+    # The DECISIVE check, added 2026-08-24 (P2-P0). Everything above asks whether
+    # the bake stack is publicly AVAILABLE. That is the wrong question once it is
+    # installed: what a measurement depends on is the stack it actually ran under.
+    # `AVAILABLE` and `ACHIEVED` are different states and conflating them is how a
+    # manifest reports parity that no environment has.
+    _inst = _installed()
+    installed_matches_bake = all(
+        str(_inst.get(p, "")) == BAKE_STACK[p] for p in ("whestbench", "flopscope")
+    )
+
     parity = {
-        "status": "BLOCKED" if blockers else "AVAILABLE",
+        "status": ("ACHIEVED" if installed_matches_bake
+                   else ("BLOCKED" if blockers else "AVAILABLE")),
+        "installed_matches_bake": installed_matches_bake,
         "bake_stack": BAKE_STACK,
-        "installed_here": _installed(),
+        "installed_here": _inst,
         "pypi": pypi,
         "public_whestbench_flopscope_pin": wb_pin,
         "blockers": blockers,
@@ -266,7 +278,7 @@ def build(offline: bool = False) -> dict:
                 "NOT the grader's counted FLOPs. Re-run parity the moment "
                 f"whestbench {BAKE_STACK['whestbench']} is published."
             )
-            if blockers
+            if blockers and not installed_matches_bake
             else None
         ),
     }
@@ -344,27 +356,58 @@ def build(offline: bool = False) -> dict:
         },
         "stack": stack,
         "package_parity": parity,
-        "unknowns": {
+        # RESOLVED 2026-08-24 (P2-P0). These were unknown while the environment
+        # ran whestbench 0.14, whose defaults are Phase-1's. Installing the bake
+        # stack settles every one of them from `budget.PHASE2_ROUND` and
+        # `scoring.ContestSpec`, and each is additionally corroborated by the
+        # `run_config` block of a real `whest run --json` -- which records what the
+        # runner USED, not merely what it declares. The authority is
+        # `local_sim/official_config.py`; the values below are its output.
+        #
+        # They remain PACKAGE-sourced, not GRADED-report-sourced. No graded report
+        # we hold publishes them, and that distinction survives the resolution.
+        "resolved_from_package": {
+            "resolved_on": "2026-08-24",
+            "source": "whestbench 0.16.0 budget.PHASE2_ROUND + scoring.ContestSpec",
+            "corroborated_by": (
+                "experiments/2026-08-24_p2_p0/official_anchor_1row.json run_config"
+            ),
             "lambda_residual_price": {
-                "value": None,
+                "value": 0.0,
                 "phase1_value": 1e11,
                 "status": (
-                    "UNKNOWN for Phase 2. Phase-1 lambda = 1e11 is corroborated "
-                    "from per-MLP telemetry. Not published anywhere for Phase 2; "
-                    "only a graded report settles it."
+                    "RESOLVED: lambda is 0.0 for Phase 2, so C == F and residual "
+                    "wall time does not price into the multiplier by any path. It "
+                    "is GATED instead, at 0.4 s per MLP, which is a FAILURE path. "
+                    "Note the trap: whestbench 0.16 still exports a name "
+                    "LAMBDA_FLOPS_PER_SECOND = 1e11, as a deprecated alias for the "
+                    "PHASE-1 rate. Same spelling, different meaning."
                 ),
             },
-            "setup_timeout_s": {"package_default": 5.0, "observed": None},
-            "wall_time_limit_s": {"package_default": 60.0, "observed": None},
-            "predict_timeout_s": {"package_default": 30.0, "observed": None},
-            "residual_wall_time_limit_s": {"package_default": None, "observed": None},
-            "memory_limit_mb": {
-                "package_default": 65536,
+            "setup_timeout_s": {"package_default": 5.0, "observed": 5.0},
+            "wall_time_limit_s": {"package_default": 120.0, "observed": 120.0},
+            "predict_timeout_s": {
+                "package_default": 30.0,
                 "observed": None,
                 "note": (
-                    "RLIMIT_AS under --runner subprocess; already killed v2.5 at "
-                    "a 3.9 GB peak. At width 1024 a dense float64 covariance is "
-                    "8.4 MB per layer -- but a K3 tensor would be 8.6 GB."
+                    "the runner waits max(predict_timeout_s, wall + grace) = 125 s, "
+                    "so under Phase 2 the 120 s WALL binds and this never does"
+                ),
+            },
+            "residual_wall_time_limit_s": {"package_default": 0.4, "observed": 0.4},
+            "memory_limit_mb": {
+                "package_default": 8192,
+                "observed": 8192,
+                "note": (
+                    "RLIMIT_AS under --runner subprocess; the PHASE-1 limit of "
+                    "65,536 MB already killed v2.5 at a 3.9 GB peak, and this one "
+                    "is EIGHT TIMES tighter against sixteen times the weight bytes. "
+                    "It cannot be enforced on Windows at all (no `resource` "
+                    "module), so it is an accounting constraint here, not a test: "
+                    "see experiments/2026-08-24_p2_p0/deployment_envelope.json. "
+                    "At width 1024 a dense float64 covariance is 8.4 MB per layer "
+                    "-- but a K3 tensor would be 8.6 GB, i.e. over the limit on its "
+                    "own."
                 ),
             },
             "n_scored_public_mlps": {
@@ -486,10 +529,14 @@ def main() -> int:
     if p["limitation_stamp"]:
         print("    STAMP: " + p["limitation_stamp"])
     print()
-    print("  UNKNOWN, and none of them is in the dataset:")
-    print("    lambda (residual price)                       -> Phase-1 1e11 only")
-    print("    setup/wall/predict timeouts, memory_limit_mb  -> PACKAGE DEFAULTS ONLY")
+    print("  RESOLVED from the bake stack (package-sourced, not graded-report-sourced):")
+    print("    lambda = 0.0   -> C == F; residual is GATED at 0.4 s, not priced")
+    print("    wall 120 s   residual cap 0.4 s   memory 8,192 MB   setup 5 s")
+    print()
+    print("  STILL UNKNOWN, and not in the dataset:")
     print("    n scored public MLPs                          -> unverified for Phase 2")
+    print("    every limit above as a GRADED fact            -> no graded report publishes them")
+    print("    the 8,192 MB limit is UNENFORCEABLE on Windows -> accounting only")
     print("=" * 72)
     return 0
 

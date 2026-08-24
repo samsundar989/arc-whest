@@ -7,54 +7,77 @@
   check that previously existed nowhere, plus the regression suites that used to
   pass ungated:
 
-  DEFAULT TIER (10 of 12 steps, ~2-3 minutes) - runs on every change:
-    1. mint provenance    - our MLPs are still bit-identical to the grader's
-    2. invariant suite    - 30/30 on the SHIPPED file, not on a candidate
-    3. whest validate     - the grader contract, run with the child's text
+  DEFAULT TIER (12 of 16 steps, ~3-4 minutes) - runs on every change:
+    1. official stack     - the LIVE round, asserted field by field against the
+                            INSTALLED whestbench. Added 2026-08-24 because this
+                            gate ran ten green steps against whestbench 0.14 /
+                            flopscope 0.10 while the competition graded on
+                            0.16 / 0.12 -- and nothing in it looked.
+    2. mint provenance    - our MLPs are still bit-identical to the grader's, at
+                            the LIVE 1024x16 shape first
+    3. invariant suite    - 30/30 on the SHIPPED file, not on a candidate
+    4. whest validate     - the grader contract, run with the child's text
                             encoding OWNED by this gate and ASSERTED, not
                             assumed. See the PYTHONIOENCODING block below.
-    4. ship-file identity - estimator.py matches its version archive
-    5. vault seal         - touch counter still agrees with the log
-    6. seed ledger        - consumption is recorded, and no source file draws
+    5. ship-file identity - estimator.py matches its version archive
+    6. vault seal         - touch counter still agrees with the log
+    7. seed ledger        - consumption is recorded, and no source file draws
                             seeds the ledger has never heard of
-    7. canonical scorer   - 88/88, the competition identity is still bitwise
+    8. canonical scorer   - 98/98, the competition identity is still bitwise
                             equal to the installed whestbench, AND decide() --
                             THE gate -- still refuses percentile/BCa, still
                             requires a pre-registered threshold, and still
                             follows arithmetic when the estimands disagree
-    8. seed-ledger refusals - 44/44 negative tests: every guard still FIRES
-    9. vault integrity    - array sha256s vs the manifest and the seed->weights
+    9. seed-ledger refusals - 44/44 negative tests: every guard still FIRES
+   10. vault integrity    - array sha256s vs the manifest and the seed->weights
                             map, not merely the counter. Costs no touch.
-   10. lifecycle evaluator - 37/37. The canonical grader lifecycle (one Estimator,
+   11. lifecycle evaluator - 54/54. The canonical grader lifecycle (one Estimator,
                             setup() once OFF-budget and TIMED), all six failure
                             paths PROVOKED not asserted, setup failure treated as
-                            a run-level refusal the way the grader treats it, and
-                            the immutable evidence rows every comparison uses.
+                            a run-level refusal the way the grader treats it, the
+                            immutable evidence rows every comparison uses, and --
+                            since 2026-08-24 -- a spec that NAMES its round and
+                            records any deviation from it.
+   12. counted-FLOP anchor - op by op against a real `whest run --profile --json`
+                            report. THE check that says the local meter bills what
+                            the grader bills. It REFUSES when the report is absent:
+                            an absent comparison is not a pass.
 
-  -Full TIER (adds 2 steps, ~10 minutes) - REQUIRED before promotion, submission
+  -Full TIER (adds 4 steps, ~11 minutes) - REQUIRED before promotion, submission
   or a vault touch:
-   11. shape parity       - 27/27. The fallback path is v2.4.1 BIT FOR BIT. This
+   13. shape parity       - 27/27. The fallback path is v2.4.1 BIT FOR BIT. This
                             is the check that would have caught v2.6's odd-width
                             defect, which produced finite, plausible, wrong
                             numbers on 7 of 17 shapes.
-   12. carrier strength   - 48/48 design-strength invariants of local_sim/carriers.py,
+   14. carrier strength   - 48/48 design-strength invariants of local_sim/carriers.py,
                             including the Kerdock fingerprint and the axial identity
+   15. deployment envelope - what fails a Phase-2 MLP, AND the two constraints this
+                            host cannot enforce at all. It prints those as NOT
+                            PROVABLE rather than passing them.
+   16. official Phase-2 smoke - DEPLOYMENT AUTHORITY. The grader's own subprocess
+                            runner on the organisers' own v2-phase2 data, with
+                            zero failures required and the live config asserted
+                            from the report's own run_config.
 
-  The split is by COST, not by importance. Steps 10-11 are ~594 s of the total
+  The split is by COST, not by importance. Steps 13-14 are ~594 s of the total
   and cannot fire unless estimator.py or carriers.py moved; a 10-minute
   unconditional gate is a gate people learn to skip.
 
-  ACCOUNTING: the denominator is always TWELVE, and every step that did not run
+  ACCOUNTING: the denominator is always SIXTEEN, and every step that did not run
   is named in a red NOT-CHECKED block. A default run therefore reports
-  "GREEN 10/12, 2 SKIPPED", never "10/10". A check that could not run is not a
+  "GREEN 12/16, 4 SKIPPED", never "12/12". A check that could not run is not a
   pass, and a gate that says otherwise is worse than no gate -- this repository
   has lost four separate checks to assertions that reported a state rather than
   testing a property (docs/GOTCHAS.md).
 
   What this still does NOT do, because each costs something real:
-    - the public mini run (CONFIRM tier, read-only, minutes)
+    - the public Phase-2 mini run over all 100 rows (CONFIRM tier, read-only)
     - a vault touch (one per estimator change, ever)
     - anything on the GPU venv
+    - the 8,192 MB memory limit, which is UNENFORCEABLE on Windows: there is no
+      `resource` module, so the subprocess worker's RLIMIT_AS call is skipped and
+      --runner local is advisory by design. Step 15 ACCOUNTS for it. Nothing here
+      TESTS it, and no green run may be read as saying otherwise.
   Those stay explicit. See docs/VALIDATION.md section 7.
 
 .PARAMETER Archive
@@ -155,14 +178,32 @@ Write-Host "preflight -- arc-whest" -ForegroundColor White
 Write-Host "repo:    $repo"
 Write-Host "shipped: estimator.py   archive: $Archive"
 
-# --- 1. provenance: are our mints still the grader's mints? -------------------
-Step "1. mint provenance" { uv run python local_sim/mint_provenance.py }
+# --- 1. the OFFICIAL STACK, before anything is measured against it -------------
+# Everything below is a measurement, and a measurement taken under the wrong
+# packages is not a weaker measurement -- it is a different one. Until 2026-08-24
+# this gate ran ten green steps against whestbench 0.14 / flopscope 0.10 while the
+# competition graded on 0.16 / 0.12, and reported GREEN. It could not have done
+# otherwise: nothing in it looked.
+#
+# `official_config.verify()` asserts the live round field by field against the
+# INSTALLED package -- budget.RoundConfig for all three rounds, ContestSpec for the
+# live one's limits, score_multiplier EXERCISED rather than read, and the
+# run_config of a real `whest run --json`, which is what the runner actually used
+# rather than what it declares. It also pins the trap that made the stale default
+# invisible: the package still exports LAMBDA_FLOPS_PER_SECOND = 1e11 as a
+# DEPRECATED ALIAS for the Phase-1 rate, while the live rate is 0.
+Step "1. official stack + round configuration" {
+    uv run python local_sim/official_config.py
+}
 
-# --- 2. invariants on the SHIPPED file ----------------------------------------
-Step "2. invariant suite" { uv run python local_sim/edge_cases.py }
+# --- 2. provenance: are our mints still the grader's mints? -------------------
+Step "2. mint provenance" { uv run python local_sim/mint_provenance.py }
 
-# --- 3. grader contract --------------------------------------------------------
-Step "3. whest validate" {
+# --- 3. invariants on the SHIPPED file ----------------------------------------
+Step "3. invariant suite" { uv run python local_sim/edge_cases.py }
+
+# --- 4. grader contract --------------------------------------------------------
+Step "4. whest validate" {
     # Assert the property, do not assume the export took. The export above is
     # unconditional, so a HOSTILE CALLER cannot trip this -- it is overwritten,
     # which is the point of the gate owning the setting. (An earlier version of
@@ -182,11 +223,11 @@ Step "3. whest validate" {
     uv run whest validate --estimator estimator.py
 }
 
-# --- 4. ship-file identity -----------------------------------------------------
+# --- 5. ship-file identity -----------------------------------------------------
 # estimator.py must be byte-identical to its version archive modulo line endings.
 # Nothing else in the repo asserts this, and the archive is what every graded
 # number is attributed to.
-Step "4. ship-file identity vs $Archive" {
+Step "5. ship-file identity vs $Archive" {
     $py = @"
 import hashlib, sys, pathlib
 ship = pathlib.Path('estimator.py').read_bytes().replace(b'\r\n', b'\n')
@@ -205,10 +246,10 @@ print('  identical')
     $py | uv run python -
 }
 
-# --- 5. vault seal -------------------------------------------------------------
+# --- 6. vault seal -------------------------------------------------------------
 # Counter must equal the number of touch-log lines. A quiet extra evaluation is
 # exactly what the seal exists to make impossible.
-Step "5. vault seal (counter vs log)" {
+Step "6. vault seal (counter vs log)" {
     if (-not (Test-Path "experiments/vault/manifest.json")) {
         Write-Host "  experiments/vault/manifest.json absent -- no vault to seal-check"
         $script:StepSkipped = "no vault manifest"
@@ -232,43 +273,43 @@ print('  seal consistent')
     $py | uv run python -
 }
 
-# --- 6. seed ledger ------------------------------------------------------------
+# --- 7. seed ledger ------------------------------------------------------------
 # check_disjoint() (invariant 12) proves no two blocks ALLOCATE the same seeds.
 # It cannot see a probe with a seed hardcoded into it, which is how D16 was drawn
 # 270 seeds dry while seed_blocks.py called it "Reusable" -- and how two probes
 # ended up measuring two "independent" kills on the same 24 networks. This step
 # re-validates the consumption ledger and statically scans the tree for seed
 # literals and seeds() calls that the ledger does not record.
-Step "6. seed ledger (consumption + source scan)" {
+Step "7. seed ledger (consumption + source scan)" {
     uv run python local_sim/seed_ledger.py --check --scan
 }
 
-# --- 7. the canonical competition scorer ---------------------------------------
+# --- 8. the canonical competition scorer ---------------------------------------
 # local_sim/competition_score.py is the ONE place the grader's identity lives, and
 # every gate downstream reads its numbers. 71/71 asserts it is still bitwise equal
 # to the installed whestbench on the scalar primitives, on the aggregate, and on
 # the real scoring loop INCLUDING both failure paths -- and carries the graded
 # fixture where the arithmetic and geometric estimands pick opposite winners.
-Step "7. canonical scorer + the binding gate" {
+Step "8. canonical scorer + the binding gate" {
     uv run python local_sim/test_competition_score.py
 }
 
-# --- 8. the seed ledger's refusals actually fire --------------------------------
+# --- 9. the seed ledger's refusals actually fire --------------------------------
 # Step 6 proves the ledger is CONSISTENT. It cannot prove the guards still refuse.
 # These are 44 negative tests: unregistered block, range leaving its block, any
 # overlap in a DECISION block, a second claim on a SINGLE_USE one, a hand-edited
 # ledger, an artifact rewritten after its claim.
-Step "8. seed-ledger refusals" {
+Step "9. seed-ledger refusals" {
     uv run python local_sim/test_seed_ledger.py
 }
 
-# --- 9. vault integrity, not merely the counter ---------------------------------
+# --- 10. vault integrity, not merely the counter ---------------------------------
 # Step 5 compares a number to a line count. This re-hashes every stored array
 # against the manifest and reconstructs networks from their seeds to confirm the
 # seed->weights map still holds. It reads no candidate predictions, so it COSTS NO
 # TOUCH. The arrays are gitignored (33 MB), so a fresh clone legitimately has none
 # and must not go red for it -- step 5 still covers the seal there.
-Step "9. vault integrity (array hashes + seed->weights)" {
+Step "10. vault integrity (array hashes + seed->weights)" {
     if (-not (Test-Path "experiments/vault/vault_v1.npz")) {
         Write-Host "  experiments/vault/vault_v1.npz absent (gitignored)."
         Write-Host "  Run 'uv run python local_sim/vault.py mint' to restore it."
@@ -278,41 +319,119 @@ Step "9. vault integrity (array hashes + seed->weights)" {
     uv run python local_sim/vault.py verify
 }
 
-# --- 10. the canonical grader-lifecycle evaluator -------------------------------
+# --- 11. the canonical grader-lifecycle evaluator -------------------------------
 # vault.py:282 and coverage_lab.py:226 build a fresh Estimator per MLP and never
 # call setup(); the grader builds ONE and calls setup() once, OFF-budget. This
 # suite pins that lifecycle, the six failure paths, and the immutable evidence
 # rows -- the object every future candidate comparison is scored through.
-Step "10. lifecycle evaluator" {
+Step "11. lifecycle evaluator" {
     uv run python local_sim/lifecycle_eval.py --self-test
 }
 
-# --- 11-12. -Full only ----------------------------------------------------------
+# --- 12. the counted-FLOP anchor against the OFFICIAL runner --------------------
+# The one check that says the local meter bills what the grader bills, OP BY OP.
+# It caught two mechanisms worth 37,779,456 FLOPs between them: local weights that
+# were raw NumPy rather than flopscope-backed (so every weight-METHOD call was free
+# here and billed there), and whestbench 0.16's own in-window
+# `materialise_predictions`, which is free for a float32 return and 2 FLOPs per
+# element for a float64 one.
+#
+# It compares against a stored real `whest run --profile --json` report, and it
+# REFUSES rather than skips when that report is absent -- an absent comparison is
+# not a pass, and a matching TOTAL with a moved OPERATION is a coincidence, not
+# parity.
+Step "12. counted-FLOP anchor vs the official runner" {
+    uv run python local_sim/p2_flop_anchor.py --gate
+}
+
+# --- 13-16. -Full only ----------------------------------------------------------
 if ($Full) {
     # Shape parity: on any Strassen-INELIGIBLE shape the estimator falls back to
     # the dense chain, which is v2.4.1's algorithm exactly, and must reproduce it
     # BIT FOR BIT. This is the check that would have caught v2.6 deleting the whole
     # first layer's sampled path on every odd width -- 7 of 17 shapes wrong, 0.58
     # max relative error, and every output finite and plausible.
-    Step "11. shape parity" {
+    Step "13. shape parity" {
         uv run python local_sim/test_shape_parity.py
     }
     # Carrier design strength: the moment-error invariants that the whole design
     # lane's arithmetic rests on.
-    Step "12. carrier strength" {
+    Step "14. carrier strength" {
         uv run python local_sim/test_carriers.py
     }
+    # The deployment envelope, including the two constraints this host CANNOT
+    # enforce. It prints those as NOT PROVABLE rather than passing them, which is
+    # the whole reason it is a step: the 8,192 MB memory limit has no enforcement
+    # path on Windows at all, and a gate that stayed silent about that would be
+    # certifying a candidate against a limit nothing here measures.
+    Step "15. deployment envelope (+ what it cannot prove)" {
+        uv run python local_sim/test_deployment_envelope.py
+    }
+    # DEPLOYMENT AUTHORITY. Everything else in this gate is a local MODEL of the
+    # grader; this is the grader's own runner on the organisers' own Phase-2 data.
+    # Zero failures is the bar, and `--runner subprocess` is not optional: the
+    # in-process runner cannot reproduce worker death, and its residual figure is a
+    # different instrument from the one the 0.4 s cliff is measured against.
+    Step "16. official Phase-2 subprocess smoke (zero failures)" {
+        $py = @"
+import json, subprocess, sys, os
+cmd = [os.path.join(os.path.dirname(sys.executable), 'whest.exe'), 'run',
+       '--estimator', 'estimator.py',
+       '--dataset', 'hf://aicrowd/arc-whestbench-public-2026@v2-phase2',
+       '--split', 'mini', '--runner', 'subprocess', '--n-mlps', '2', '--json']
+p = subprocess.run(cmd, capture_output=True, text=True)
+i = p.stdout.find('{')
+if i < 0:
+    print('no JSON report:', (p.stderr or p.stdout)[-2000:]); sys.exit(1)
+d = json.loads(p.stdout[i:])
+if not d.get('results'):
+    print('run REFUSED:', json.dumps(d)[:2000]); sys.exit(1)
+r, cfg = d['results'], d['run_config']
+print('  whestbench   %s' % d['whestbench_version'])
+print('  dataset      %s' % cfg['dataset']['path'])
+print('  shape        %sx%s   B = %s   lambda = %s' % (
+    cfg['width'], cfg['depth'], format(cfg['flop_budget'], ','),
+    cfg['lambda_flops_per_second']))
+print('  residual cap %ss   wall %ss' % (
+    cfg['residual_wall_time_limit_s'], cfg['wall_time_limit_s']))
+print('  score        %.6e   raw MSE %.6e   mult %.4f' % (
+    r['adjusted_final_layer_score'], r['final_layer_mse'],
+    r['mean_score_multiplier']))
+print('  C/B          %.7f   failures %d' % (
+    r['mean_compute_utilization'], r['n_failed_mlps']))
+worst = max(m['residual_wall_time_s'] for m in r['per_mlp'])
+cap = cfg['residual_wall_time_limit_s']
+print('  worst residual %.5f s of %.2f s cap  -> %.1fx headroom (GRADED PATH)' % (
+    worst, cap, cap / worst if worst else float('inf')))
+bad = []
+if r['n_failed_mlps'] != 0:
+    bad.append('n_failed_mlps = %d' % r['n_failed_mlps'])
+if not str(cfg['dataset']['path']).endswith('@v2-phase2'):
+    bad.append('not the v2-phase2 dataset')
+if cfg['lambda_flops_per_second'] != 0.0:
+    bad.append('lambda is not 0')
+if cfg['residual_wall_time_limit_s'] != 0.4:
+    bad.append('residual cap is not 0.4 s')
+if worst > cap:
+    bad.append('worst residual %.4f s exceeds the %.2f s cap' % (worst, cap))
+if bad:
+    print('  REFUSED: ' + '; '.join(bad)); sys.exit(1)
+"@
+        $py | uv run python -
+    }
 } else {
-    [void]$skipped.Add("11. shape parity              -- not run without -Full (~480 s)")
-    [void]$skipped.Add("12. carrier strength         -- not run without -Full (~130 s)")
+    [void]$skipped.Add("13. shape parity              -- not run without -Full (~480 s)")
+    [void]$skipped.Add("14. carrier strength         -- not run without -Full (~130 s)")
+    [void]$skipped.Add("15. deployment envelope      -- not run without -Full (~40 s)")
+    [void]$skipped.Add("16. official Phase-2 smoke   -- not run without -Full (~30 s), and it is DEPLOYMENT AUTHORITY")
 }
 
-# There are TWELVE checks in this gate. The default tier runs ten of them and
-# skips two; a missing vault array skips a third. Denominating against the tier
-# that happened to run would let an incomplete run report "10/10", which is the
+# There are SIXTEEN checks in this gate. The default tier runs twelve of them and
+# skips four; a missing vault array skips another. Denominating against the tier
+# that happened to run would let an incomplete run report "12/12", which is the
 # precise dishonesty this accounting exists to prevent -- so the denominator is
-# always 12 and every skip is named below.
-$total  = 12
+# always 16 and every skip is named below.
+$total  = 16
 $ran    = $total - $skipped.Count
 $verdict = if ($skipped.Count -eq 0) { "$total/$total" }
            else { "$ran/$total, $($skipped.Count) SKIPPED" }
@@ -330,7 +449,11 @@ if ($failures.Count -eq 0) {
     }
     Write-Host ""
     Write-Host "Not covered by this gate, and still required before promotion:" -ForegroundColor Yellow
-    Write-Host "  - public mini run (CONFIRM, read-only):  uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v1-phase1 --split mini --runner subprocess"
+    Write-Host "  - public Phase-2 mini (CONFIRM, read-only -- FIT NOTHING ON IT):"
+    Write-Host "      uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --runner subprocess"
+    Write-Host "    (v1-phase1 is the PHASE-1 split; use it only to replay a Phase-1 artifact)"
+    Write-Host "  - the 8,192 MB memory limit is UNENFORCEABLE on this host (no RLIMIT_AS on"
+    Write-Host "    Windows). Step 15 ACCOUNTS for it; nothing here TESTS it."
     Write-Host "  - GPU mirror parity:                     .venv-gpu\Scripts\python.exe local_sim/gpu_parity.py"
     Write-Host "  - vault touch (ONE per estimator change): .venv-gpu\Scripts\python.exe local_sim/vault.py evaluate --label <v> --reason estimator-change"
     Write-Host "  - Samuel's explicit approval before any submission."

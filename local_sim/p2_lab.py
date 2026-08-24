@@ -208,6 +208,21 @@ def main() -> int:
     # residual is a --runner local figure that does not transfer (2-3% of C on the
     # grader against 10-13% here), so letting it into the deciding number would
     # import this machine's noise into a Phase-2 conclusion.
+    # CHANGED UNDER YOU, 2026-08-24 (P2-P0). This call takes LifecycleSpec's
+    # DEFAULTS for everything it does not name, and two of those defaults moved:
+    #
+    #   residual_wall_time_limit_s   None  ->  0.4 s     the cliff is now ARMED
+    #   lam                          1e11  ->  0.0       the live Phase-2 rate
+    #
+    # The lambda change is a no-op for this slice: P2-CP1 froze lam = 0 explicitly
+    # and it turns out that is not merely conservative, it is EXACTLY the Phase-2
+    # rule -- the round sets lambda to zero, so C == F. The frozen model was right.
+    #
+    # The cliff is not a no-op. P2-CP1 ran with it DISABLED, so its failure
+    # accounting could not see a 0.4 s violation, and re-running this ladder today
+    # may fail an arm that passed then. That is the correct behaviour and the
+    # difference is a finding, not a regression -- see the P2-P0 correction in
+    # experiments/LOG.md before comparing a new run to the recorded one.
     spec = le.LifecycleSpec(width=width, depth=depth, flop_budget=budget,
                             floor=floor,
                             **({} if a.lam is None else {"lam": a.lam}))

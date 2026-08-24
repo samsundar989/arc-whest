@@ -299,7 +299,8 @@ def t_scan_catches_a_new_literal():
     tmp_dir = os.path.join(_ROOT, "local_sim", "_ledger_scan_tmp")
     # Clear any corpse first. This test writes a real seed literal into the real
     # tree; a hard kill between the write and the `finally` leaves it there, and
-    # since 2026-08-20 preflight step 6 (--scan) runs BEFORE step 8, so the
+    # since 2026-08-20 preflight's ledger step (--scan) runs BEFORE its refusals
+    # step -- step 7 before step 9 after the 2026-08-24 renumber -- so the
     # leftover would fail the gate on every subsequent run. The scan's message
     # names the file, so it is self-diagnosing rather than mysterious -- but
     # clearing it here means the next run repairs it without anyone reading that

@@ -32,7 +32,7 @@ Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
 
 | path | what |
 |---|---|
-| `estimator.py` | **THE submission.** Self-contained; `whest submit` ships only this file. Currently **v2.6.1**, byte-identical to `estimator_v2_6_1.py` modulo line endings (`preflight` step 4 asserts it). The **graded Phase-1** file is still v2.4.1. There is no Phase-2 submission; width 1024 currently takes the basic K2p1 analytic fallback. |
+| `estimator.py` | **THE submission.** Self-contained; `whest submit` ships only this file. Currently **v2.6.1**, byte-identical to `estimator_v2_6_1.py` modulo line endings (`preflight` step 5 asserts it). The **graded Phase-1** file is still v2.4.1. There is no Phase-2 submission; width 1024 currently takes the basic K2p1 analytic fallback. |
 | `estimator_v*.py` | frozen version archive — never edited, only read |
 | `local_sim/` | the offline lab: numpy shims for `flopscope`/`whestbench`, grader-identical mint (`mint_provenance.py`), invariants (`edge_cases.py`), seed registry (`seed_blocks.py`), sealed holdout (`vault.py`), probes |
 | `experiments/` | `LOG.md` (append every experiment), run reports, vault seal, JSON artifacts |
@@ -65,7 +65,7 @@ Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
   split (**read-only; no constant may ever be fitted there**) → VAULT for milestones
   (touch-counted; three permitted touches, ever).
 - **Pre-register before you measure.** A decision block is single-use. Its design,
-  gate threshold, and residual model go into `experiments/LOG.md` *before* the block
+  gate threshold, and cost model go into `experiments/LOG.md` *before* the block
   is touched. A model chosen after seeing the answer is not evidence.
 - **Counted compares to counted; effective compares to effective.** Always pair on
   common random numbers; never quote a bare ratio of means.
@@ -78,15 +78,27 @@ Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
   `local_sim/competition_score.py::decide()` is the only function here that returns
   a promotion boolean.
 - **Every MSE is quoted with its ground-truth noise floor.**
-- **Local residual wall time is ~7× the grader's** and the shim path reads ~18% low
-  for rotation-using estimators. Never quote a local absolute; transfer ratios only.
+- **Phase 2 sets λ = 0, so `C = F` and residual is not a cost** — it is a 0.4 s
+  per-MLP cliff that FAILS the MLP. Freeze a counted-FLOP model; report *headroom*,
+  `0.4 / observed`. `VALIDATION.md` §2b is Phase-1 law, §2b-ii governs Phase 2.
+- **Never quote a local absolute wall time.** Authority is `--runner subprocess`.
+  The old "~7×" is local-vs-GRADED and has no Phase-2 counterpart; locally the
+  three instruments agree to ~7% run-to-run, so a local margin is not a safety
+  factor either way. The shim reads ~18% low for rotation-using estimators.
+- **The local meter bills what the grader bills, op for op** (reconciled to zero
+  2026-08-24; `preflight` step 12 *refuses* rather than skips if the official
+  report is absent). **The 8,192 MB limit is unenforceable here** — Windows has no
+  `RLIMIT_AS` — so it is accounting, never a test passed. `docs/GOTCHAS.md`.
 
 ## Commands
 
 ```powershell
 uv sync                                                   # environment
-.\scripts\preflight.ps1                                   # THE gate: provenance + 30 invariants + contract + ship-file identity + vault seal
+.\scripts\preflight.ps1                                   # THE gate, 12 of 16 steps: official stack + provenance + 30 invariants + contract + ship-file identity + vault seal + FLOP anchor
+.\scripts\preflight.ps1 -Full                             # all 16: adds shape parity, carriers, deployment envelope, official Phase-2 smoke
 uv run whest validate --estimator estimator.py            # contract only (~46 ms)
+uv run python local_sim/official_config.py                # the LIVE round, asserted against the installed package
+uv run python local_sim/p2_flop_anchor.py --gate          # does the local meter bill what the grader bills? op by op
 uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --runner subprocess
 uv run python local_sim/phase2_checklist.py               # rounds / dataset tags / boards
 uv run python local_sim/seed_blocks.py                    # allocate a block BEFORE any experiment
@@ -215,8 +227,8 @@ shared so both agents enforce the same thing:
 | the vault seal is moved only by `vault.py` | `scripts/guard_paths.py` | same three |
 | `whest submit` requires explicit confirmation | `scripts/guard_paths.py` | both agent hooks |
 | `vault.py evaluate` requires explicit confirmation | `scripts/guard_paths.py` | both agent hooks |
-| vault counter == touch-log line count | `scripts/preflight.ps1` #5, `scripts/git_precommit_guard.py` | preflight, pre-commit |
-| the shipped file matches its version archive | `scripts/preflight.ps1` #4 | preflight |
+| vault counter == touch-log line count | `scripts/preflight.ps1` #6, `scripts/git_precommit_guard.py` | preflight, pre-commit |
+| the shipped file matches its version archive | `scripts/preflight.ps1` #5 | preflight |
 | the harness stays agent-swappable | `scripts/verify_portability.py` | run after any harness edit |
 
 The git pre-commit hook is the **agent-independent backstop**: it holds even for an

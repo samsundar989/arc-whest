@@ -1,7 +1,7 @@
 {
   "artifact": "phase2_manifest",
   "artifact_version": 1,
-  "generated_at_utc": "2026-08-21T09:27:56.087865+00:00",
+  "generated_at_utc": "2026-08-24T20:05:32.127895+00:00",
   "generator": "local_sim/phase2_manifest.py",
   "authority": "The dataset card and metadata.json at the pinned commit are AUTHORITATIVE. The AIcrowd challenge page is known-stale (Phase-1 timeline, a max(0.5, .) worked example) and is not a source here.",
   "dataset": {
@@ -83,19 +83,20 @@
     }
   },
   "package_parity": {
-    "status": "BLOCKED",
+    "status": "ACHIEVED",
+    "installed_matches_bake": true,
     "bake_stack": {
       "whestbench": "0.16.0",
       "flopscope": "0.12.0"
     },
     "installed_here": {
-      "whestbench": "0.14.0",
-      "flopscope": "0.10.0",
+      "whestbench": "0.16.0",
+      "flopscope": "0.12.0",
       "numpy": "2.2.6"
     },
     "pypi": {
       "whestbench": {
-        "latest": "0.15.0",
+        "latest": "0.16.0",
         "all_releases": [
           "0.4.0",
           "0.5.0",
@@ -115,12 +116,13 @@
           "0.12.0rc5",
           "0.13.0",
           "0.14.0",
-          "0.15.0"
+          "0.15.0",
+          "0.16.0"
         ],
         "requires_dist": [
           "datasets>=2.20",
           "faker~=37.0",
-          "flopscope<0.12.0,>=0.11.0",
+          "flopscope<0.13.0,>=0.12.0",
           "httpx>=0.27",
           "huggingface-hub>=0.24",
           "jinja2>=3.1",
@@ -133,7 +135,7 @@
           "tqdm",
           "torch>=2.1; extra == \"gpu\""
         ],
-        "bake_version_public": false
+        "bake_version_public": true
       },
       "flopscope": {
         "latest": "0.12.0",
@@ -179,39 +181,40 @@
         "bake_version_public": true
       }
     },
-    "public_whestbench_flopscope_pin": "flopscope<0.12.0,>=0.11.0",
-    "blockers": [
-      "whestbench 0.16.0 is not published on PyPI (latest 0.15.0)",
-      "public whestbench 0.15.0 pins 'flopscope<0.12.0,>=0.11.0', which EXCLUDES the bake's flopscope 0.12.0; no public pair reproduces the bake stack"
-    ],
-    "limitation_stamp": "EXACT PACKAGE PARITY WITH THE PHASE-2 BAKE STACK IS BLOCKED. Every artifact produced while this holds must carry this field. Counted FLOPs measured under a different flopscope release are NOT the grader's counted FLOPs. Re-run parity the moment whestbench 0.16.0 is published."
+    "public_whestbench_flopscope_pin": "flopscope<0.13.0,>=0.12.0",
+    "blockers": [],
+    "limitation_stamp": null
   },
-  "unknowns": {
+  "resolved_from_package": {
+    "resolved_on": "2026-08-24",
+    "source": "whestbench 0.16.0 budget.PHASE2_ROUND + scoring.ContestSpec",
+    "corroborated_by": "experiments/2026-08-24_p2_p0/official_anchor_1row.json run_config",
     "lambda_residual_price": {
-      "value": null,
+      "value": 0.0,
       "phase1_value": 100000000000.0,
-      "status": "UNKNOWN for Phase 2. Phase-1 lambda = 1e11 is corroborated from per-MLP telemetry. Not published anywhere for Phase 2; only a graded report settles it."
+      "status": "RESOLVED: lambda is 0.0 for Phase 2, so C == F and residual wall time does not price into the multiplier by any path. It is GATED instead, at 0.4 s per MLP, which is a FAILURE path. Note the trap: whestbench 0.16 still exports a name LAMBDA_FLOPS_PER_SECOND = 1e11, as a deprecated alias for the PHASE-1 rate. Same spelling, different meaning."
     },
     "setup_timeout_s": {
       "package_default": 5.0,
-      "observed": null
+      "observed": 5.0
     },
     "wall_time_limit_s": {
-      "package_default": 60.0,
-      "observed": null
+      "package_default": 120.0,
+      "observed": 120.0
     },
     "predict_timeout_s": {
       "package_default": 30.0,
-      "observed": null
+      "observed": null,
+      "note": "the runner waits max(predict_timeout_s, wall + grace) = 125 s, so under Phase 2 the 120 s WALL binds and this never does"
     },
     "residual_wall_time_limit_s": {
-      "package_default": null,
-      "observed": null
+      "package_default": 0.4,
+      "observed": 0.4
     },
     "memory_limit_mb": {
-      "package_default": 65536,
-      "observed": null,
-      "note": "RLIMIT_AS under --runner subprocess; already killed v2.5 at a 3.9 GB peak. At width 1024 a dense float64 covariance is 8.4 MB per layer -- but a K3 tensor would be 8.6 GB."
+      "package_default": 8192,
+      "observed": 8192,
+      "note": "RLIMIT_AS under --runner subprocess; the PHASE-1 limit of 65,536 MB already killed v2.5 at a 3.9 GB peak, and this one is EIGHT TIMES tighter against sixteen times the weight bytes. It cannot be enforced on Windows at all (no `resource` module), so it is an accounting constraint here, not a test: see experiments/2026-08-24_p2_p0/deployment_envelope.json. At width 1024 a dense float64 covariance is 8.4 MB per layer -- but a K3 tensor would be 8.6 GB, i.e. over the limit on its own."
     },
     "n_scored_public_mlps": {
       "phase1": 50,
@@ -229,7 +232,7 @@
     "metadata": "aab61cf11271d20118e2109065c165a931dfacb493849f0d611f7a2d82a03790",
     "card": "c13c62eaecfcee1fd696e0f63d0c04b2a96d63747517b4977b3e1a7722d361ee",
     "refs": "d7ac680c5f430d7a0a6e4e369099510bd9751285778252383df773c8140ab39e",
-    "pypi_whestbench": "088e72aa2ccb5cdc77e22bbc6f178186f59e372f9c23db50bba215dec309000b",
+    "pypi_whestbench": "7dfab5b6bc85c8b88c126fc744b394b60d00d29b1b8d35c8f650b470f0213b42",
     "pypi_flopscope": "5c81b4ab09b5ac1905e4cbf2ef7e23bd415015662edba36176b0401a15dde460"
   },
   "source_urls": {

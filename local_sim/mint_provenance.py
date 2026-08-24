@@ -128,7 +128,16 @@ def _legacy_weights(width, depth, seed):
             for _ in range(depth)]
 
 
-def verify(n_seeds=20, shapes=((256, 32), (256, 8), (128, 16), (64, 4), (256, 2))):
+def verify(n_seeds=20,
+           # 1024x16 FIRST: it is the LIVE Phase-2 shape, and until 2026-08-24
+           # this list did not contain it -- the gate proved the mint on five
+           # shapes the competition no longer uses. It is checkable directly
+           # now only because the environment carries whestbench 0.16, the
+           # release the Phase-2 data was actually baked with; before that the
+           # hole had to be closed sideways, against the organisers' published
+           # bytes (local_sim/phase2_mint_parity.py), which remains the
+           # stronger end-to-end check and is still worth running.
+           shapes=((1024, 16), (256, 32), (256, 8), (128, 16), (64, 4), (256, 2))):
     """Bit-identity of `canonical_mint` against the installed whestbench."""
     import flopscope.numpy as fnp
 

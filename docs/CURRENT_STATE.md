@@ -18,10 +18,11 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
 - The current shipped file routes Phase-2 width to basic `k2p1`. Expected Phase-2
   performance is around `3.96e-7` adjusted / `3.95e-6` raw: about 22x and 100x
   behind the leader respectively.
-- The repo's scientific decision protocol is strong. Its deployment evaluator is
-  not yet Phase-2-truthful.
-- **Immediate next action:** Phase-2 evaluator repair, an IMPORTANT slice. Samuel's
-  three written predictions are required before instrument edits.
+- The repo's scientific decision protocol is strong. Its deployment evaluator
+  **was** not Phase-2-truthful; **P2-P0 repaired it on 2026-08-24** and the local
+  meter now reproduces the official runner op by op, to zero.
+- **Immediate next action:** Phase 1 of `GAME_PLAN.md` — the width-1024
+  Kerdock/MUB carrier, its invariants, and a new Phase-2 DESIGN block.
 
 ## Authoritative document map
 
@@ -130,20 +131,56 @@ Coupled residual sampling is deprioritized. Its former 1.305x projection assumed
 float32 K2 cost reduction that the frozen artifact does not show: measured cost fell
 only 3.1%, not 50%.
 
-## Evaluator blockers
+## Evaluator state — P2-P0 CLOSED these on 2026-08-24
 
-Phase 0 in `GAME_PLAN.md` must fix these before promotion evidence is trusted:
+All nine blockers are resolved. Raw evidence: `experiments/2026-08-24_p2_p0/`;
+contract, result and Skeptic verdict at the bottom of `experiments/LOG.md`.
 
-1. `pyproject.toml` still pins WhestBench 0.14 / flopscope 0.10.
-2. `competition_score.py` defaults to the old `1e11` lambda.
-3. `lifecycle_eval.py` defaults to Phase-1 wall/residual/memory/budget semantics.
-4. Local lifecycle creates raw NumPy weights, so weight-method operations such as
-   `astype` are not metered like official flopscope arrays.
-5. Local K2 price is low by 37,779,456 FLOPs (0.0275%) versus the official anchor.
-6. The old Phase-2 ladder did not enforce the 0.4-second residual failure cliff.
-7. Native 8-GiB memory and worker death/restart are not faithfully emulated.
-8. Manifest/checklist and preflight can be green while exercising the stale stack.
-9. Shape/GPU parity does not yet prove the 1024x16 live path.
+| # | blocker | state |
+|---|---|---|
+| 1 | `pyproject.toml` pinned WhestBench 0.14 / flopscope 0.10 | **fixed** — 0.16 / 0.12 pinned and locked; the lock diff is exactly those two packages |
+| 2 | `competition_score.py` defaulted to `1e11` lambda | **fixed** — defaults come from `official_config`; live lambda is **0** |
+| 3 | `lifecycle_eval.py` defaulted to Phase-1 wall/residual/memory/budget | **fixed** — `LifecycleSpec.for_round()` takes a round's six constants together and records deviations |
+| 4 | local weights were raw NumPy, so weight-method ops were unmetered | **fixed** — `fnp.array`, as `MLP.from_row` builds them |
+| 5 | local price low by 37,779,456 FLOPs vs the official anchor | **fixed** — reconciled to **zero**, op by op (see below) |
+| 6 | the 0.4 s residual cliff was not enforced | **fixed** — armed by default and PROVOKED in the self-test |
+| 7 | 8-GiB memory and worker death/restart not emulated | **partly** — worker restart is provoked for real through the official runner; **memory cannot be enforced on Windows at all** and is now an accounting constraint, not a test |
+| 8 | manifest/checklist/preflight could be green on the stale stack | **fixed** — preflight step 1 asserts the live stack; the manifest reports `PACKAGE PARITY: ACHIEVED` |
+| 9 | shape/GPU parity did not prove the 1024x16 live path | **fixed** — `mint_provenance` now checks 1024x16 FIRST, bit-identical against the installed 0.16 |
+
+### The anchor, reconciled
+
+The 37,779,456-FLOP shortfall had two mechanisms, and neither was the version bump
+(flopscope 0.10 -> 0.12 moved **nothing** the shipped file executes):
+
+```text
+local, historical spelling      137,562,547,200
+  + weight representation            37,746,688   fnp.array weights: astype 33,554,432
+                                                  over 16 calls, plus multiply and sum
+  + harness materialisation              32,768   whestbench 0.16 calls
+                                                  materialise_predictions IN-window
+full grader spelling            137,600,326,656   == official, unexplained 0
+```
+
+19 operations compared; every name, call count and FLOP figure agrees.
+
+**A free 32,768 FLOPs is available to any candidate that returns float32.**
+`materialise_predictions` is free on a float32 return and 2 FLOPs/element on a
+float64 one. The shipped file returns float64. Taking it means changing
+`estimator.py`, which is STRATEGIC and needs its own contract.
+
+### What the evaluator still cannot do
+
+- **Enforce the 8,192 MB memory limit.** Windows has no `resource` module, so the
+  subprocess worker's `RLIMIT_AS` call is skipped and `--runner local` is advisory
+  by design. Measured accounting for the shipped file: weights 64.0 MB, peak
+  working set 440.8 MB, peak commit 918.0 MB -> **8.9x headroom, a LOWER BOUND**
+  (RLIMIT_AS caps virtual address space; no Windows counter reports it).
+- **Observe the grader's own configuration.** Every limit above is a PACKAGE fact
+  corroborated by a real `whest run` `run_config`. No graded report publishes any
+  of them, and none exists for Phase 2.
+- **Transfer a local second.** The deployment authority for residual is
+  `whest run --runner subprocess`, never the in-process figure.
 
 The paired arithmetic score test, common-random-number design, ground-truth noise
 reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
@@ -152,8 +189,8 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 
 | order | slice | class | status |
 |---:|---|---|---|
-| 0 | official-stack/evaluator repair | IMPORTANT | **NEXT; awaiting Samuel predictions** |
-| 1 | Kerdock/MUB generator, radial rule, invariants | ROUTINE/IMPORTANT | pending |
+| 0 | official-stack/evaluator repair | IMPORTANT | **DONE 2026-08-24** — preflight 16/16, anchor reconciled to zero |
+| 1 | Kerdock/MUB generator, radial rule, invariants | ROUTINE/IMPORTANT | **NEXT** |
 | 2 | structured carrier DESIGN | STRATEGIC on seed claim | pending |
 | 3 | structured carrier DECIDE | STRATEGIC | pending |
 | 4 | recurrent augmented-K2 parity and DESIGN | IMPORTANT/STRATEGIC | pending |
@@ -164,20 +201,23 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 | 9 | two frozen submissions and nomination | STRATEGIC | pending |
 | 10 | contribution write-up | STRATEGIC claim review | pending |
 
-## Required predictions before Phase 0
+## Samuel's standing predictions — recorded 2026-08-24, before the data
 
-Record Samuel's answers in `experiments/LOG.md` before changing the instrument:
+Taken before the Phase-0 repair and before any carrier or augmented-K2 slice
+exists. S2 and S3 are **not yet tested**; they will be restated in the contracts
+that test them, and they must not be edited in the meantime.
 
-1. Official-stack repair changes current K2 score by `<1%`, `1–5%`, or `>5%`.
-2. Kerdock16 reduces variance versus IID at 32,768 directions by `<2.7x`,
-   `2.7–20x`, or `>20x`.
-3. Expected raw-MSE gain from recurrent augmented K2, plus whether any official
-   residual-cap failures are expected.
+| # | question | Samuel | outcome |
+|---|---|---|---|
+| S1 | official-stack repair changes the current K2 score by | `<1%` | **HIT** — exactly 0%; the multiplier is pinned at the 0.1 floor before and after |
+| S2 | Kerdock16 vs matched-row IID at 32,768 directions | `2.7x`–`20x` | open (Phase 2 of the plan) |
+| S3a | raw-MSE gain of faithful recurrent augmented K2 over K2p2, standalone | `<1.1x` | open (Phase 3) |
+| S3b | official 0.4 s residual-cap failure risk | aug-K2 at risk, carrier safe | open |
 
-Then write the IMPORTANT foundation contract/knowledge target, capture baseline
-evidence, implement, run full preflight/portability/official subprocess checks, and
-send raw artifacts to a fresh independent Skeptic. Do not spend a seed or edit the
-submission before the relevant STRATEGIC contract.
+S2 sits **below** the ~74x implied by the Puffi cost fingerprint. If the carrier
+lands in Samuel's band rather than near 74x, the fingerprint inference is
+incomplete and the leader has a second mechanism. That disagreement is registered
+and worth watching.
 
 ## Closed and open lanes
 

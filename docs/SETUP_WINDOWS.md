@@ -23,6 +23,22 @@ uv sync
 
 This downloads Python 3.10 + the two competition packages (`whestbench` = harness & CLI, `flopscope` = FLOP counter) into a local `.venv`. Nothing global is touched.
 
+Since 2026-08-24 the pins are the **official Phase-2 bake stack**: `whestbench 0.16.x` / `flopscope 0.12.x`. `preflight` step 1 refuses to run against anything else, so a stale environment fails the gate loudly instead of producing ten green steps against the wrong round — which is exactly what it did for three days.
+
+Two auxiliary venvs, both gitignored, both optional:
+
+| venv | contents | why it exists |
+|---|---|---|
+| `.venv-fs010` | flopscope 0.10 only | keeps the 0.10-vs-0.12 price comparison reproducible now that `.venv` has moved to 0.12. Only `p2_flop_anchor.py`'s two-sided run needs it; its `--gate` mode does not. |
+| `.venv-gpu` | torch + CUDA, no whestbench/flopscope | the GPU truth mirror. Uses the numpy shims in `local_sim/`, so it must never measure counted FLOPs. |
+
+Create the first with:
+
+```powershell
+uv venv .venv-fs010 --python 3.10
+$env:VIRTUAL_ENV=".venv-fs010"; uv pip install "flopscope==0.10.0" "numpy==2.2.6"
+```
+
 ## 3. Log in to AIcrowd (one time)
 
 ```powershell
@@ -107,7 +123,15 @@ uv run python local_sim/export_split.py --split mini --n 100 --out <npz>   # dat
 .venv-gpu\Scripts\python.exe local_sim/robustness.py --mlps 1200 --truth 4194304  # fresh-MLP score distribution
 .venv-gpu\Scripts\python.exe local_sim/robustness.py --stress                     # atypical-MLP safety
 uv run python local_sim/edge_cases.py            # contract + INVARIANTS on the SHIPPED file (30/30)
-uv run python local_sim/mint_provenance.py       # prove canonical_mint == whestbench.sample_mlp
+uv run python local_sim/mint_provenance.py       # prove canonical_mint == whestbench.sample_mlp (1024x16 first)
+
+# Phase-2 evaluator truthfulness (P2-P0, 2026-08-24)
+uv run python local_sim/official_config.py                # the LIVE round, asserted against the installed package
+uv run python local_sim/p2_flop_anchor.py                 # 3 arms x 2 flopscope versions; needs .venv-fs010
+uv run python local_sim/p2_flop_anchor.py --gate          # op-by-op parity only; ONE venv (what preflight runs)
+uv run python local_sim/test_deployment_envelope.py       # what fails an MLP, AND what this host cannot enforce
+uv run python local_sim/p2_residual_paths.py --n-mlps 20  # 3 residual instruments; QUIET MACHINE ONLY
+uv run python local_sim/phase2_manifest.py                # rebuild the manifest (package parity, live constants)
 uv run python local_sim/seed_blocks.py           # seed-block registry (allocate before any experiment)
 uv run python local_sim/private_half.py          # public-private divergence self-check
 uv run python local_sim/board_census.py          # honest-team census (PRIVATE)

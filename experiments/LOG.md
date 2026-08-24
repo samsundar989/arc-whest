@@ -10466,3 +10466,345 @@ pre-registered gate.
 new tests under `local_sim/`, `scripts/preflight.ps1`,
 `experiments/2026-08-24_p2_p0/` (new artifacts), `experiments/LOG.md`,
 `docs/CURRENT_STATE.md`, `docs/GOTCHAS.md`, `docs/VALIDATION.md`.
+
+---
+
+# 2026-08-24 — RESULT P2-P0: the evaluator was measuring a round that had ended  [contract above, unmodified]
+
+*IMPORTANT instrument slice. **No seed block claimed or touched** — P01 still has
+456 free DESIGN seeds, D17 and D19 remain SINGLE_USE and unspent. `estimator.py`
+and every `estimator_v*.py` are byte-identical throughout (sha256 `00240eb1e608…`,
+asserted by preflight step 5). No vault touch. No submission. No promotion
+statistic — this slice compares no candidate and calls `decide()` not once.*
+
+*Raw artifacts: `experiments/2026-08-24_p2_p0/`. Preregistration commit `e8afcbf`,
+which precedes every measurement below.*
+
+## The result, in one line
+
+**The local meter now bills exactly what the grader bills — 137,600,326,656 FLOPs,
+op for op, unexplained residue zero — and the 37,779,456-FLOP gap that nobody
+could name turned out to be two mechanisms, neither of which was the stale
+package version.**
+
+## The reconciliation
+
+```text
+local, historical spelling      137,562,547,200
+  + weight representation            37,746,688     astype    +33,554,432 over 16 calls
+                                                    multiply   +2,097,152 over  1 call
+                                                    sum        +2,095,104 over  1 call
+  + harness materialisation              32,768     asarray       +32,768 over  1 call
+full grader spelling            137,600,326,656  ==  official     unexplained 0
+```
+
+**19 operations compared against a real `whest run --runner subprocess --profile
+--json` report; every name, call count and FLOP figure agrees.** A matching total
+with a moved operation is a coincidence, not parity, so the op table is the check
+and the total is only the summary.
+
+### Mechanism 1 — the grader hands you flopscope-backed weights; we handed ourselves NumPy
+
+`whestbench.domain.MLP.from_row` builds weights with `fnp.array(w)`.
+`lifecycle_eval.py:418` and every probe in `local_sim/` built them with
+`np.asarray(w)`. An operation invoked as a **method on a weight** therefore goes
+through the meter on the grader and through bare NumPy here. The shipped file's
+live Phase-2 path opens with
+
+```python
+w64 = [w.astype(fnp.float64) for w in mlp.weights]     # estimator.py:868
+```
+
+which the grader bills at **33,554,432 FLOPs** and which was **free** in every
+local measurement this repository has ever taken at width 1024.
+
+### Mechanism 2 — whestbench 0.16 bills you for its own output conversion, and says it does not
+
+`scoring.materialise_predictions` runs **inside** the metered window. It ends in
+`fnp.asarray(predictions, dtype=fnp.float32)`, and its own docstring says "the
+shape check and ``fnp.asarray`` are both free ops, so a correct estimator is
+billed nothing for it". That is true only for an estimator that already returns
+float32. Ours returns float64, so the harness's own materialisation is a dtype
+conversion at 2 FLOPs/element: `16 × 1024 × 2 = 32,768 FLOPs`, billed to us.
+
+Verified both directions in `p2_flop_anchor.py --self-test`: **0 FLOPs on a
+float32 return, 2 FLOPs/element on a float64 one.** Charged identically under
+`--runner local` and `--runner subprocess`.
+
+**This is free money we have not taken.** Returning float32 would save 32,768
+FLOPs at no accuracy cost — the harness casts to float32 regardless, so the
+precision is already lost downstream. It is 0.000024 % of `C` today and irrelevant
+while the multiplier is pinned at the floor; it stops being irrelevant the moment
+a carrier pushes `C/B` above `0.1`. **Not taken here:** changing `estimator.py` is
+STRATEGIC and needs its own contract.
+
+## Predictions — 7 hits, 1 miss, 2 partial
+
+| # | prediction | measured | |
+|---|---|---|---|
+| **B1** | flopscope 0.10 → 0.12 moves the shipped file by exactly 0 FLOPs, 0 ops | **0 FLOPs, 0 ops, on all three arms** | HIT |
+| **B2** | fixing the weight representation closes the shortfall **exactly** | closes **37,746,688 of 37,779,456**; the total reconciles only after a *second* mechanism | **PARTIAL** |
+| **B3** | ≥ 88.8 % of the shortfall is `astype` at `estimator.py:868` | **33,554,432 = 88.79 %** | HIT |
+| **B4** | the remaining 4,225,024 is other **weight-method** traffic, fully enumerable, no residue | fully enumerable ✓, residue 0 ✓ — but **32,768 of it is not weight-method traffic at all**, it is the harness's own op | **PARTIAL** |
+| **B5** | the repair changes the shipped file's **score** by exactly 0 % | **0.00 %** — multiplier pinned at the 0.1 floor before and after | HIT |
+| **B6** | λ = 0 makes the combined-budget path FLOPs-only; no local row can fail it | asserted and provoked: no residual, however large, trips it | HIT |
+| **B7** | the 0.4 s cliff produces zero failures for the shipped file | **0 failures** across every official run in this slice | HIT |
+| **B8** | local in-process residual **exceeds** subprocess by 1.2–1.6× | **1.068×, 0.951×, 1.048×** over three runs of 20 — it does not hold its sign | **MISS** |
+| **B9** | the official-stack suites go green; every failure is stale semantics, none a real defect | scorer 98/98, lifecycle 54/54; every failure was round-mixing | HIT |
+| **B10** | no historical Phase-2 counted-FLOP number is invalidated by the version bump | the four repriced primitives are ones the file never calls | HIT |
+| **S1** | *Samuel:* stack repair changes the K2 score by `<1 %` | **exactly 0 %** | HIT |
+
+### B2 and B4 are the instructive ones, and they fail the same way
+
+Both were **right about the arithmetic and wrong about the mechanism**. B2 named
+one cause for a gap that had two; B4 got the residual figure exactly right
+(`2,097,152 + 2,095,104 + 32,768 = 4,225,024`) while mis-attributing a fifth of it.
+
+The pattern is worth naming because it is not "be more careful": **I predicted a
+total I could compute and a mechanism I had only inferred, and reported them with
+the same confidence.** The `astype` arithmetic was checkable before the run — 16
+weights × 1024² × 2 FLOPs — so B3 was near-certain. "The rest is more of the same"
+was a guess wearing the same clothes. The correct form for B4 was two predictions:
+a number, and a *named* attribution that could be wrong on its own.
+
+This is the fourth time this session's family of slices has been caught by a
+confident sentence attached to an unchecked half. The durable form: **when a
+prediction contains both a quantity and a cause, split it, because they have
+different evidence and they fail independently.**
+
+### B8 is a miss that improves the protocol
+
+I predicted the local path would bill 1.2–1.6× the subprocess path, reasoning from
+`docs/GOTCHAS.md`'s Phase-1 figures (70.85 ms local / 54.47 ms subprocess /
+9.84 ms graded). Measured at the Phase-2 shape, over three independent runs of 20
+MLPs on the shipped file:
+
+| instrument | run 1 | run 2 | run 3 |
+|---|---:|---:|---:|
+| `whest --runner subprocess` — **the authority** | 48.00 ms | 48.24 ms | 50.78 ms |
+| `whest --runner local` | 47.86 ms | 49.88 ms | 53.95 ms |
+| `lifecycle_eval` in-process | 51.26 ms | 45.87 ms | 53.20 ms |
+
+The lifecycle/subprocess ratio reads **1.068×, 0.951×, 1.048×** — it does not hold
+its sign. The honest conclusion is that **the three instruments agree to within
+about ±7 % run-to-run variation at this shape**, not that any one is above another.
+
+Two corrections fall out, and I made the first mistake myself before the repeats
+existed: I wrote "local is *below* subprocess, the sign flipped" into GOTCHAS on
+the strength of **one reading**, which is precisely the error `docs/SKEPTIC.md`
+item 3 exists to catch. The repeats were run because the first reading had shared
+a CPU with `preflight -Full`; the contamination is what prompted the replication,
+and the replication is what falsified the claim. **A single wall-time reading is
+not a measurement, and I am not exempt from that.**
+
+The second: the famous "~7×" is **local vs GRADED**, and there is no graded
+Phase-2 figure at all. The local-vs-subprocess gap it gets confused with was 1.30×
+in Phase 1 and is ~1.0× now. It must not be carried into Phase 2 as a safety
+factor in either direction.
+
+## What λ = 0 actually changes, and it is more than a constant
+
+Verified against the installed package, not transcribed: `budget.PHASE2_ROUND` has
+`lambda_flops_per_second = 0.0` and `residual_wall_time_limit_s = 0.4`; `ContestSpec`
+agrees; and so does the `run_config` of a real `whest run --json`, which records
+what the runner **used** rather than what it declares.
+
+**`C == F` exactly. Residual wall time no longer prices into the multiplier by any
+path.** It survives only as a 0.4 s per-MLP cliff that FAILS the MLP — zeroed
+prediction, multiplier forced to 1.0.
+
+So `VALIDATION.md` §2b — the three-model rule, the frozen deciding model, the
+`max(local-ratio, competitor-anchored)` law that Sprint 5 was built around — **is
+Phase-1 law and decides nothing in Phase 2.** A Phase-2 contract that freezes a
+residual *price* model is answering a question the grader stopped asking. §2b-ii
+now states what replaces it: a **headroom** margin, `0.4 / observed`, against a
+cliff.
+
+And a cliff is not a price. Being 20 % out on a price is a 20 % error in `C`;
+being 20 % out near a cliff is the difference between scoring and failing. **The
+measurement path matters more now, not less** — which is why B8 was worth three
+runs instead of one.
+
+### The trap that made the stale constant invisible
+
+whestbench 0.16 **still exports `LAMBDA_FLOPS_PER_SECOND`, and it is still `1e11`**
+— as a deprecated alias for the Phase-1 rate. The live default is
+`DEFAULT_LAMBDA_FLOPS_PER_SECOND = 0.0`.
+
+Our `competition_score.LAMBDA_FLOPS_PER_SECOND = 1e11` therefore agreed with the
+installed package on the **name** and on the **value**, while being wrong about
+the **round**. Neither a version bump nor a test importing the name would have
+caught it; the test that did exist asserted exactly this equality and passed.
+**When a phase changes, check what each constant MEANS, not whether it still
+resolves.**
+
+## The shipped file, on the official runner
+
+One row, `--runner subprocess`, `v2-phase2`, unchanged `estimator.py`:
+
+| metric | value |
+|---|---:|
+| adjusted score | `4.501854164118413e-07` |
+| final-layer MSE | `4.501854164118413e-06` |
+| multiplier | `0.1` (the floor) |
+| counted FLOPs | `137,600,326,656` |
+| `C/B` | `0.06257338402792811` |
+| residual | `0.05464 s` |
+| wall | `0.36258 s` |
+| failures | `0` |
+
+`C/B = 0.0626` is a factor of 1.6 **under** the floor, so the score is
+`MSE × 0.1` identically and the entire 37,779,456-FLOP repair moves it by **zero**
+(B5, S1). The repair changes what we can *price*, not what we currently *score* —
+and pricing is the whole job of the next six slices, where a carrier at Puffi's
+cost sits at `C/B = 0.51`, five times the floor, with every counted FLOP billed
+linearly.
+
+## What the evaluator still cannot do — stated because a hidden gap reads as coverage
+
+**The 8,192 MB memory limit cannot be enforced on this host by any route.**
+`--runner local` is advisory by design (`runner.py:163-167`); `--runner subprocess`
+uses `resource.setrlimit(RLIMIT_AS, …)` and **Windows has no `resource` module**,
+so `subprocess_worker.py:172-183` catches the failure, warns, and runs with no cap.
+A Phase-2 candidate can be memory-safe on this laptop because nothing here is
+measuring, and still be killed on the grader. The Phase-1 limit was 65,536 MB and
+it already killed v2.5; Phase 2's is **eight times tighter against sixteen times
+the weight bytes**.
+
+Memory is therefore an **accounting** constraint here, not a test. Measured for the
+shipped file in a fresh process:
+
+| quantity | value |
+|---|---:|
+| weights alone (16 × 1024² float32) | 64.0 MB |
+| peak working set (resident) | 440.8 MB |
+| peak commit (closest analogue of the RLIMIT_AS charge) | 918.0 MB |
+| Phase-2 limit | 8,192 MB |
+| headroom | **8.9× — a LOWER BOUND** |
+
+A lower bound because `RLIMIT_AS` caps **virtual address space** and no Windows
+counter reports it; both figures above are smaller than what the grader's limit
+would see. **No green local run may be read as evidence that a candidate fits in
+8 GiB.**
+
+Also not provable here: the runner-side predict-response timeout. And the
+arithmetic there is not what it looks like — the runner waits
+`max(predict_timeout_s, wall_time_limit_s + grace) = 125 s`, so under Phase 2's
+120 s wall **the wall binds and the 30 s predict timeout never does**.
+
+## What was provoked rather than asserted
+
+- **The 0.4 s residual cliff fires**, zeroes the prediction, and prices it at
+  multiplier 1.0 — and the run's provenance now *declares* that it was not a clean
+  round (`round_deviations: {"residual_wall_time_limit_s": [1e-09, 0.4]}`).
+- **Worker death and restart, through the official subprocess runner**, with a
+  candidate that `os._exit(9)`s. One MLP fails, a replacement worker comes up, and
+  the remaining MLPs are genuinely scored: `n_failed_mlps = 1`, indices `[0]`, last
+  row carrying a real MSE and no failure flag.
+
+  Getting that test right was harder than the mechanism it tests. A module-global
+  call counter does **not** work: the replacement worker imports the candidate
+  fresh, its counter restarts at zero, and it kills itself on *its* first MLP too —
+  so every MLP dies and **the runner looks broken when the fault is in the test.**
+  The trigger has to outlive the process; it is now a sentinel file. That failure
+  mode is worth remembering, because its signature — a correct component failing a
+  test that resets state the component deliberately preserves — is not obvious from
+  the output.
+
+## Everything that had to stay still, and did
+
+| invariant | evidence |
+|---|---|
+| `estimator.py` byte-identical to `estimator_v2_6_1.py` | preflight step 5, sha256 `00240eb1e608…` unchanged from `baseline_before.txt` |
+| the mint is still the grader's mint | 8/8 bit-identical at **1024×16** against the installed 0.16 — the live shape is now checked FIRST, and it was in the list not at all before today |
+| dataset has not been re-baked | commit `ce926b7d1ced65faa668c01b94a43f8c4f43783d`, unchanged |
+| the lock moved only where intended | `uv.lock` diff is exactly the two package versions |
+| GPU/CPU truth parity at the live shape | generation bit-for-bit 4/4; worst forward disagreement `4.97e-08` relative, implied MSE `3.27e-17` = **2.3e-11** of the decision signal |
+| `decide()` still refuses percentile and BCa, still demands a pre-registered gate | scorer suite, unchanged refusals |
+| vault seal, touch log, seed ledger | untouched; preflight steps 6, 7, 9, 10 |
+
+## Suites — the denominators went UP
+
+No test was deleted to make a number rise. Where a check failed, it failed because
+it was mixing rounds, and the fix was to make the round explicit.
+
+| suite | before | after |
+|---|---|---|
+| canonical scorer | 88 checks | **98/98** |
+| lifecycle evaluator | 37 checks | **54/54** |
+| deployment envelope | did not exist | **14/14**, plus 2 constraints recorded as NOT PROVABLE |
+| FLOP anchor | did not exist | **12/12** self-test; op parity exact |
+| official config | did not exist | **71/71** |
+| portability | 99 | **99/99** |
+| **preflight** | GREEN 10/12, 2 skipped | **GREEN 16/16, nothing skipped** |
+
+Two Phase-1 replay paths had to name their rate, and **one of them mattered**:
+`reconstruct_v26_gate.py` prices residual, so inheriting λ = 0 would have silently
+deleted the residual half of all three residual models it compares and collapsed
+them onto one another. It would not have errored. It would have produced three
+identical numbers and a tidy story.
+
+## CORRECTION to P2-CP1 (2026-08-21) — appended, not edited
+
+P2-CP1 built its `LifecycleSpec` without naming `residual_wall_time_limit_s` and
+so inherited the then-default of `None`. **It ran with the 0.4 s cliff disabled.**
+Its failure accounting could not see a cliff violation, so its deployment claims
+for the slower arms are provisional in the specific sense that no arm was ever
+checked against the constraint that actually fails an MLP. Its *accuracy*
+conclusions are unaffected — the cliff changes failure counts, not MSE.
+
+**Its frozen deciding model, however, is vindicated rather than weakened.** P2-CP1
+froze **counted FLOPs only (λ = 0)** and argued it as a conservative choice. It is
+not conservative: λ = 0 is **exactly** the Phase-2 rule. The contract froze the
+right quantity for a reason that turned out to be better than the one given.
+
+`local_sim/p2_lab.py` now carries a comment saying that re-running that ladder
+today enforces the cliff and may fail an arm that passed then — correct behaviour,
+and a difference that must not be read as a regression.
+
+## What this does NOT establish
+
+- **Nothing about the grader's own configuration.** Every limit here is a PACKAGE
+  fact corroborated by a real `whest run` `run_config`. No graded report we hold
+  publishes any of them, and there is no graded Phase-2 report at all.
+- **Nothing about the grader's seconds.** The subprocess path is the deployment
+  authority and is itself a proxy.
+- **Nothing about memory on the grader**, for the reasons above.
+- **Nothing about any method.** No candidate was compared, no seed block spent, no
+  gate evaluated. The instrument is now trustworthy; that is a precondition for
+  evidence, not evidence.
+- **The one-row anchor is one row.** Reconciled op by op it is strong evidence
+  about a *value-independent dense path* and weak evidence about anything
+  value-dependent. The claim is scoped to the former (contract confounder C3).
+
+## Knowledge delta
+
+1. The local meter reproduces the official runner **exactly**, op by op, and the
+   two mechanisms that separated them are named, tested in both directions, and
+   regression-gated (preflight step 12, which **refuses** rather than skips when
+   the official report is absent).
+2. **λ = 0 retires residual pricing** and replaces it with a cliff. `VALIDATION.md`
+   §2b is Phase-1 law; §2b-ii is what governs Phase 2.
+3. **A constant can keep its spelling and change its meaning**, and that is worse
+   than being deleted, because every test that checks the name still passes.
+4. **The 8 GiB limit is unenforceable here** and is an accounting constraint, not a
+   test. 8.9× headroom for the shipped file, as a lower bound.
+5. **The three residual instruments are indistinguishable at this shape** (±7 %
+   run-to-run). The Phase-1 ~7× figure is local-vs-graded and has no Phase-2
+   counterpart. The shipped file has ~8× headroom at the median and **4.6× on its
+   worst observed MLP** — a first-class design constraint for a carrier that is
+   about to propagate 32,768 directions.
+6. **A free 32,768 FLOPs is available to any candidate returning float32**, at no
+   accuracy cost. Requires a STRATEGIC contract; not taken here.
+7. **The estimator is budget-adaptive**, so a shape and a budget are not
+   independent knobs. `LifecycleSpec.for_round()` now takes a round's six constants
+   together and records any deviation in the run's provenance.
+8. **A gate cannot catch what it does not look at.** Preflight ran ten green steps
+   against the Phase-1 stack for three days. Step 1 now asserts the live one.
+
+**Seed ledger:** unchanged. P01 144/600 consumed, **456 free**. D17 and D19
+SINGLE_USE and unspent. **Vault:** untouched, counter unmoved.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Next:** independent Skeptic on the raw artifacts, then Phase 1 of `GAME_PLAN.md`
+— the width-1024 Kerdock/MUB carrier and its invariants, on a new DESIGN block.

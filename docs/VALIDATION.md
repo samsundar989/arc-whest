@@ -192,7 +192,7 @@ with which artifact and its sha256. Three layers:
 | `check_ledger()` | re-validates the whole ledger from scratch, so a hand-edited ledger cannot pass quietly. Catches out-of-block records, tier lies, and artifacts rewritten after their claim |
 | `scan_sources()` | statically scans `local_sim/` and `scripts/` for seed literals **and** for `seed_blocks.seeds()` calls naming a block, with no ledger record. This is the layer that would have caught D16 |
 
-Both run in **`scripts/preflight.ps1` step 6**, so the gate is executable rather
+Both run in **`scripts/preflight.ps1` step 7**, so the gate is executable rather
 than prose. A file that names a block in order to *refuse* it — `moonshot_g0.py`
 guards D08/D09/D10 — declares that with a `# seed-ledger: excludes ...` pragma.
 
@@ -230,6 +230,22 @@ of the 1.4e-6 decision signal.
 
 ## 2b. Residual models — the rule that stops a cost claim from being a choice
 
+> ### ⚠ SUPERSEDED FOR PHASE 2 — read §2b-ii before using anything below
+>
+> Everything in §2b is **Phase-1 law**. It exists to price residual wall time,
+> because Phase 1 billed `C = F + λ·R` with **λ = 1e11**.
+>
+> **Phase 2 sets λ = 0.** `C == F` exactly. Residual wall time does not enter the
+> multiplier by any path, so there is nothing left for a residual *price* model to
+> decide. What replaced it is a **hard 0.4-second per-MLP cliff** that FAILS the
+> MLP — zeroed predictions at multiplier 1.0 — and a cliff is not priced, it is
+> cleared. Verified against the installed whestbench 0.16 on 2026-08-24
+> (`local_sim/official_config.py::verify`, preflight step 1).
+>
+> §2b remains binding for **replaying a Phase-1 artifact**, and every word of it
+> is still true of that round. Applying it to a Phase-2 decision would freeze a
+> deciding model for a quantity the Phase-2 grader does not charge.
+
 Counted FLOPs are measured. **Uninstrumented wall time is not measurable here at
 all**: the grader bills `λ × residual_seconds` with λ = 1e11, and this machine
 bills the *same file* ~7× what the grader billed it (70.8 ms/MLP locally against
@@ -263,6 +279,57 @@ Two arithmetic hygiene rules, both of which Sprint 4 broke:
 * **Never a bare ratio of means quoted as a paired statistic.** On D12 the paired
   and unpaired readings were 1.1996× and 1.2026× — on opposite sides of the gate.
   Pair on common random numbers, always.
+
+### 2b-ii. PHASE 2 — residual is a cliff, not a price (P2-P0, 2026-08-24)
+
+`λ = 0`, so `C = F`. Three consequences, and each one retires a Phase-1 habit:
+
+1. **There is no residual cost model to freeze for a Phase-2 decision.** The
+   `max(local-ratio-on-graded-anchor, competitor-anchored)` rule of §2b decides
+   nothing here, because the quantity it prices is multiplied by zero. A Phase-2
+   contract that freezes one is answering a question the grader stopped asking.
+   Freeze a **counted-FLOP** model instead; that is now the whole of `C`.
+2. **What replaces it is a headroom margin.** The constraint is
+   `residual_wall_time_s ≤ 0.4` per MLP, and exceeding it FAILS the MLP — the
+   prediction is zeroed and the multiplier is forced to 1.0, which at our
+   operating point is a ~10× multiplier penalty on top of a much larger MSE.
+   Report `0.4 / observed` and call it headroom.
+   `official_config.OfficialRound.residual_headroom()` is the only spelling.
+3. **The measurement path matters more than it did, not less.** A price is
+   smooth; a cliff is not. Being 20 % out on a price is a 20 % error in `C`;
+   being 20 % out near a cliff is the difference between scoring and failing.
+   This host's in-process residual is a *different instrument* from the graded
+   one, so:
+
+   - **the deployment authority is `whest run --runner subprocess`**, never the
+     in-process figure, and never a local absolute;
+   - a local headroom figure is quoted **as local**, with the word LOCAL in the
+     sentence;
+   - the direction of the local bias is **not assumed, and at this shape it is
+     not even resolvable**. Three runs of 20 MLPs give a lifecycle/subprocess
+     ratio of 1.068×, 0.951×, 1.048× — the sign is not stable, so the three paths
+     agree to within about ±7 % run-to-run variation
+     (`local_sim/p2_residual_paths.py`, artifact
+     `experiments/2026-08-24_p2_p0/p2_residual_paths.json`). A local margin is
+     therefore **not** a safety factor in either direction, and a single reading
+     is not a measurement. Phase 1's ~7× figure was local vs GRADED and has no
+     Phase-2 counterpart, because no graded Phase-2 report exists.
+
+**Everything that made a Phase-1 cost claim hard is still true of counted FLOPs.**
+Counted compares to counted. Never a bare ratio of means. The freeze must be able
+to see the cost the candidate actually incurs — and since 2026-08-24 the local
+meter can finally see all of it: `local_sim/p2_flop_anchor.py` reconciles the
+shipped file to the official runner **op by op, to zero**, after two mechanisms
+worth 37,779,456 FLOPs were found and named (flopscope-backed weights; whestbench
+0.16's own in-window `materialise_predictions`).
+
+**The 8,192 MB memory limit has no local enforcement at all** on this host —
+Windows has no `resource` module, so the subprocess worker's `RLIMIT_AS` call is
+skipped and `--runner local` is advisory by design. It is an accounting
+constraint here, not a test: `local_sim/test_deployment_envelope.py` measures peak
+commit and reports it as a **lower bound**, because `RLIMIT_AS` caps virtual
+address space and no Windows counter reports that. No green local run may be read
+as evidence that a candidate fits in 8 GiB.
 
 ### 2b-i. THE BINDING STATISTIC — arithmetic, adopted 2026-08-20 (CP0.3)
 
@@ -604,17 +671,33 @@ Three things about it are binding and easy to get wrong:
 3. **`setup_timeout_s`, `wall_time_limit_s`, `residual_wall_time_limit_s`,
    `predict_timeout_s` and `memory_limit_mb` are INSTALLED-PACKAGE DEFAULTS, not
    observed grader configuration.** Every graded `config_snapshot` we hold carries
-   exactly `n_mlps`, `depth`, `width`, `flop_budget`. Only λ = 1e11 is
-   independently corroborated. Two of the six failure paths are therefore gated on
-   constants we have never seen — quote them as a prior, never as a fact.
+   exactly `n_mlps`, `depth`, `width`, `flop_budget`. Two of the six failure paths
+   are therefore gated on constants we have never seen in a graded report — quote
+   them as a prior, never as a fact.
+
+   Updated 2026-08-24 (P2-P0): they are no longer *transcribed* priors. They come
+   from `local_sim/official_config.py`, which asserts each against
+   `whestbench.budget.RoundConfig` and `scoring.ContestSpec`, and additionally
+   against the `run_config` block of a real `whest run --json` — which records
+   what the runner **used**, not what it declares. That is a much stronger prior
+   and it is still not a graded fact. The Phase-2 values are: setup 5 s, wall
+   120 s, residual cap **0.4 s**, predict 30 s, memory **8,192 MB**, λ **0**.
+
+   Note the trap the old wording sat on. λ = 1e11 *was* corroborated — for
+   Phase 1. whestbench 0.16 still exports `LAMBDA_FLOPS_PER_SECOND = 1e11` as a
+   **deprecated alias meaning the Phase-1 rate**, while the live default is
+   `DEFAULT_LAMBDA_FLOPS_PER_SECOND = 0.0`. Same spelling, different meaning, and
+   a local constant that agreed with the package on the name and not on the value
+   is exactly how the stale default survived a phase change unnoticed.
 
 Timings are quoted with an n and a range because the first measurement of the
 default tier (103.9 s) did not replicate — an independent re-run measured 113.4 s,
 and three replications give 111 s [110, 113]. Nothing turns on it against a target
 of ~2 minutes, but a single unreplicated wall time is not a measurement.
 
-Step 8 is not a duplicate of step 6. Step 6 proves the ledger is *consistent*;
-step 8 proves its *refusals still fire* — unregistered block, range leaving its
+Step 9 is not a duplicate of step 7 (steps 6 and 8 before the 2026-08-24
+renumber). Step 7 proves the ledger is *consistent*;
+step 9 proves its *refusals still fire* — unregistered block, range leaving its
 block, overlap in a DECISION block, a second claim on a SINGLE_USE one, a
 hand-edited ledger, an artifact rewritten after its claim.
 
@@ -633,3 +716,6 @@ hand-edited ledger, an artifact rewritten after its claim.
   2.551 ms + 5.780 µs/op`, R² = 0.898, LOO 0.829 ms, fitted on **five** graded
   submissions (`local_sim/residual_model.py`). The three-model rule remains the
   fallback where no graded anchor exists; where one does, use the line.
+  **Both are Phase-1 statements.** Under Phase 2's λ = 0 the fitted line prices
+  nothing; it survives only as a *predictor of seconds*, which is still useful for
+  estimating headroom against the 0.4 s cliff (§2b-ii) and useless as a cost.

@@ -21,6 +21,132 @@ narrative record), `docs/GAME_PLAN.md` (the sole active Phase-2 strategy).
 
 ---
 
+## 2026-08-24 (P2-P0) — the evaluator was measuring a round that had ended
+
+*Full record, contract and predictions: `experiments/LOG.md` 2026-08-24, P2-P0.
+Raw artifacts: `experiments/2026-08-24_p2_p0/`.*
+
+- **A constant can keep its spelling and change its meaning, and that is worse
+  than being deleted.** whestbench 0.16 still exports `LAMBDA_FLOPS_PER_SECOND`
+  and it is still `1e11` — as a **deprecated alias for the PHASE-1 rate**. The
+  live default is `DEFAULT_LAMBDA_FLOPS_PER_SECOND = 0.0`. Our local
+  `competition_score.LAMBDA_FLOPS_PER_SECOND = 1e11` therefore agreed with the
+  package on the name and on the value while being wrong about the round. Neither
+  a version bump nor a test that imports the name would have caught it. **When a
+  phase changes, check what each constant MEANS, not whether it still resolves.**
+
+- **λ = 0 in Phase 2, so `C == F`, and residual wall time stops being a cost.**
+  It survives only as a **0.4 s per-MLP cliff** that FAILS the MLP — zeroed
+  prediction, multiplier forced to 1.0. Everything in `VALIDATION.md` §2b about
+  freezing a residual *price* model is Phase-1 law and decides nothing here
+  (§2b-ii). What replaces it is headroom: `0.4 / observed`.
+
+- **A price is smooth; a cliff is not.** Being 20 % out on a residual price is a
+  20 % error in `C`. Being 20 % out near a cliff is the difference between scoring
+  and failing. So the measurement path matters *more* now, not less.
+
+- **At the Phase-2 shape the three residual instruments are INDISTINGUISHABLE, and
+  a local margin is therefore not a safety factor.** Measured over three
+  independent runs of 20 MLPs each on the shipped file
+  (`local_sim/p2_residual_paths.py`), median residual per MLP:
+
+  | instrument | run 1 | run 2 | run 3 |
+  |---|---:|---:|---:|
+  | `whest --runner subprocess` (authority) | 48.00 ms | 48.24 ms | 50.78 ms |
+  | `whest --runner local` | 47.86 ms | 49.88 ms | 53.95 ms |
+  | `lifecycle_eval` in-process | 51.26 ms | 45.87 ms | 53.20 ms |
+
+  The lifecycle/subprocess ratio reads **1.068×, 0.951×, 1.048×** — it does not
+  even hold its SIGN across runs, so the honest statement is that the three paths
+  agree to within about ±7 % run-to-run variation, not that one is above another.
+  **A single wall-time reading is not a measurement.** The first of these runs was
+  taken while `preflight -Full` was on the same CPU and was discarded as
+  contaminated before the others were run.
+
+- **Do not carry the Phase-1 ~7× rule of thumb into Phase 2.** That factor was
+  local vs **GRADED** (70.85 ms local / 9.84 ms graded), and there is no graded
+  Phase-2 figure at all. The local-vs-subprocess gap it is often confused with was
+  1.30× in Phase 1 and is ~1.0× here. **The subprocess path remains the deployment
+  authority** — not because it is slower, but because it is the runner the grader
+  uses and the package itself prefers the worker's own stats over the host
+  context.
+
+- **The shipped K2p1 has about 8× residual headroom, and that is less comfortable
+  than it sounds.** Median ~48–51 ms against the 0.4 s cliff; the WORST single MLP
+  observed was 87.3 ms, i.e. **4.6×**. The Phase-1 carrier lane is about to
+  propagate 32,768 directions through sixteen layers. Residual headroom is a
+  first-class design constraint for that work, not a box to tick afterwards.
+
+- **Weight-METHOD operations are free locally and billed on the grader, unless
+  the local MLP is flopscope-backed.** `whestbench.domain.MLP.from_row` builds
+  weights with `fnp.array(w)`; every probe in `local_sim/` built them with
+  `np.asarray(w)`. The shipped file's live Phase-2 path opens with
+  `[w.astype(fnp.float64) for w in mlp.weights]` — **33,554,432 FLOPs on the
+  grader, zero here**. That was 33.5M of a 37.8M shortfall nobody could explain
+  for three days. **Build local MLPs the way the runner builds them, or the meter
+  cannot see anything the candidate does *to* a weight.**
+
+- **whestbench 0.16 bills you for the harness's own output conversion, and its
+  docstring says it does not.** `scoring.materialise_predictions` runs INSIDE the
+  metered window and ends in `fnp.asarray(predictions, dtype=fnp.float32)`. The
+  docstring calls that free; it is free only for an estimator that already returns
+  float32. Returning float64 costs **32,768 FLOPs** at the graded shape
+  (16 × 1024 × 2). Verified both ways: 0 FLOPs on a float32 return, 2
+  FLOPs/element on a float64 one (`p2_flop_anchor.py --self-test`).
+  **A free 32,768 FLOPs is available to any candidate that returns float32**, and
+  it costs no accuracy — the harness casts to float32 regardless. Not taken yet:
+  changing the shipped file is STRATEGIC and needs its own contract.
+
+- **A matching TOTAL with a moved OPERATION is a coincidence, not parity.** The
+  anchor check compares the op table, 19 operations, name by name and call count
+  by call count. It also **refuses** when the official report is missing rather
+  than skipping: an absent comparison is not a pass.
+
+- **The 8,192 MB memory limit CANNOT BE ENFORCED ON WINDOWS AT ALL.**
+  `--runner local` is advisory by design (`runner.py:163-167`);
+  `--runner subprocess` uses `resource.setrlimit(RLIMIT_AS, ...)` and **there is
+  no `resource` module on Windows**, so `subprocess_worker.py:172-183` catches the
+  failure, warns, and runs with no cap. The Phase-1 limit was 65,536 MB and it
+  already killed v2.5; Phase 2's is **eight times tighter** against sixteen times
+  the weight bytes. Memory here is an accounting constraint, never a test passed.
+  Measured for the shipped file: weights 64.0 MB, peak working set 440.8 MB, peak
+  commit 918.0 MB against 8,192 MB — **8.9× headroom, and that is a LOWER BOUND**,
+  because RLIMIT_AS caps *virtual address space* and no Windows counter reports it.
+
+- **The 30 s `predict_timeout_s` is not the binding timeout.** The runner waits
+  `max(predict_timeout_s, wall_time_limit_s + grace)` = **125 s**, so under Phase
+  2's 120 s wall the wall binds and the predict timeout never does.
+
+- **A worker that dies is scoped to its own MLP — and testing that is harder than
+  it looks.** `whest run --runner subprocess` restarts a dead worker and fails
+  only the MLP that killed it. Provoking it with a module-global call counter does
+  NOT work: the replacement worker imports the candidate fresh, its counter starts
+  at zero, and it kills itself on *its* first MLP too — so every MLP dies and the
+  runner looks broken when the fault is in the test. The trigger has to outlive the
+  process; `test_deployment_envelope.py` uses a sentinel file.
+
+- **The estimator is BUDGET-ADAPTIVE, so a shape and a budget are not independent
+  knobs.** `predict(mlp, budget)` sizes its work to the budget it is handed. Running
+  the Phase-1 shape under Phase-2's `2**41` costs ~7× what Phase 1 costs and is a
+  measurement of a rulebook that has never existed. `LifecycleSpec.for_round()`
+  takes all six of a round's constants together for exactly this reason, and
+  records any deviation in the run's provenance.
+
+- **A gate cannot catch what it does not look at.** For three days `preflight.ps1`
+  reported GREEN 10/12 while running every check against whestbench 0.14 /
+  flopscope 0.10 — the Phase-**1** stack — with the competition grading on
+  0.16 / 0.12. Nothing in the gate examined its own environment. Step 1 now does,
+  and step 12 asserts the counted-FLOP anchor op by op against a real graded-path
+  report.
+
+- **The flopscope 0.10 → 0.12 bump moved NOTHING the shipped file executes.**
+  Measured on three arms: delta exactly 0 FLOPs, 0 operations moved. The four
+  repriced primitives (`nansum`, `nanmean`, `where(mask, f32, python scalar)`) are
+  ones it never calls. **No historical Phase-2 counted-FLOP number is invalidated
+  by the version change** — the shortfall was entirely the two mechanisms above.
+
+---
+
 ## 2026-08-21 (P2-CP0) — the Phase-2 stack, the floor, and a check that could not fail
 
 *Full record and the fifth independent Skeptic verdict: `experiments/LOG.md`

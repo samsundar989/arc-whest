@@ -194,19 +194,30 @@ def main():
     dataset_tags()
     leaderboards(tok)
     print("\n" + "=" * 72)
-    print("4. STILL UNKNOWN -- only a graded Phase-2 report settles these")
+    print("4. RESOLVED FROM THE BAKE STACK, and what a graded report still owes us")
     print("=" * 72)
     man = _manifest()
     if man is not None:
-        u = man["unknowns"]
+        # Key renamed from "unknowns" on 2026-08-24 (P2-P0): installing the bake
+        # stack resolved every scalar in it. The old name is still read, so an
+        # un-rebuilt manifest reports honestly instead of raising.
+        u = man.get("resolved_from_package") or man.get("unknowns") or {}
+        if "resolved_from_package" not in man:
+            print("  *** this manifest predates the P2-P0 repair; rebuild it with")
+            print("      uv run python local_sim/phase2_manifest.py ***")
         print(f"  lambda (residual price)  {u['lambda_residual_price']['status']}")
         for k in ("setup_timeout_s", "wall_time_limit_s", "predict_timeout_s",
-                  "memory_limit_mb"):
-            print(f"  {k:<24} package default {u[k]['package_default']}, "
-                  f"observed {u[k]['observed']}")
-        print(f"  {'n scored public MLPs':<24} Phase 1 = "
+                  "memory_limit_mb", "residual_wall_time_limit_s"):
+            rec = u.get(k) or {}
+            print(f"  {k:<28} package default {rec.get('package_default')}, "
+                  f"observed {rec.get('observed')}")
+        print(f"  {'n scored public MLPs':<28} Phase 1 = "
               f"{u['n_scored_public_mlps']['phase1']}, Phase 2 = "
-              f"{u['n_scored_public_mlps']['phase2']}")
+              f"{u['n_scored_public_mlps']['phase2']}   <- STILL UNKNOWN")
+        print()
+        print("  These are PACKAGE facts, not GRADED facts. No graded report we")
+        print("  hold publishes any limit above, and a graded Phase-2 report is")
+        print("  still the only thing that confirms the runtime we are scored on.")
     print("""
   Once a Phase-2 submission exists:
     uv run python local_sim/fetch_graded_report.py <submission_id> 2026-08-21_phase2
