@@ -1,0 +1,26 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260824174123
+Username: SAM_MEGA_PC\samsu
+RunAs User: SAM_MEGA_PC\samsu
+Configuration Name: 
+Machine: SAM_MEGA_PC (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command try { $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8' } catch {}; if ($ExecutionContext.SessionState.LanguageMode -eq 'FullLanguage') { try { $OutputEncoding = [System.Text.UTF8Encoding]::new() } catch {}; if ($null -ne $PSStyle) { try { $PSStyle.OutputRendering = 'PlainText' } catch {} } }; .\scripts\preflight.ps1 -Full -Log experiments\2026-08-24_p2_p0\preflight_full_complete.txt; Write-Output "PREFLIGHT_EXIT=$LASTEXITCODE"
+; $_ec = if ($null -ne $LASTEXITCODE) { $LASTEXITCODE } elseif ($?) { 0 } else { 1 }
+; (Get-Location).Path | Out-File -FilePath 'C:\Users\samsu\AppData\Local\Temp\claude\claude-pwd-ps-0eb5' -Encoding utf8 -NoNewline
+; if ($ExecutionContext.SessionState.LanguageMode -eq 'FullLanguage') { $host.SetShouldExit($_ec) } else { exit $_ec }
+Process ID: 6060
+PSVersion: 5.1.26100.9168
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9168
+BuildVersion: 10.0.26100.9168
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+preflight -- arc-whest
+repo:    C:\Users\samsu\Documents\arc-whest
+shipped: estimator.py   archive: estimator_v2_6_1.py
+
+=== 1. official stack + round configuration ===

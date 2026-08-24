@@ -10808,3 +10808,343 @@ SINGLE_USE and unspent. **Vault:** untouched, counter unmoved.
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
 **Next:** independent Skeptic on the raw artifacts, then Phase 1 of `GAME_PLAN.md`
 — the width-1024 Kerdock/MUB carrier and its invariants, on a new DESIGN block.
+
+---
+
+# 2026-08-24 — P2-P0 REVIEW: Skeptic **PROVISIONAL**. The counted half holds; the residual half was measuring the wrong quantity
+
+*Independent Skeptic, fresh context, given the contract, the diff `e8afcbf..e98e96b`,
+the evaluation protocol and the raw artifact paths — never a prose summary. It ran
+the full protocol plus its own probes.*
+
+**Verdict: PROVISIONAL.** Its strongest challenge, in its own framing: *the
+counted-FLOP half of this slice is genuinely repaired and could not be broken; the
+residual half is not, and it is the half the next slice depends on.*
+
+Every finding below I reproduced myself before accepting it. Two of the Skeptic's
+own claims did not survive that check and are recorded as such — an audit is
+evidence, not an oracle.
+
+## Accepted, and fixed
+
+### 1. The memory headroom pointed the wrong way — a sign error in the one constraint we cannot test
+
+`headroom = 8192 / peak_commit` was stored as `headroom_lower_bound` and printed as
+"a LOWER BOUND". It is an **upper** bound. `peak_commit` is a *lower* bound on what
+`RLIMIT_AS` charges (that bounds virtual address space, which is larger), and
+dividing a fixed limit by a lower bound on the denominator gives the **most
+optimistic** margin, not the floor.
+
+So `8.9×` is the best case, and the true headroom is smaller by an unmeasured
+factor. Inverting the safety direction of the **one limit this host cannot enforce
+at all** is the worst available place for a unit error. Fixed in
+`test_deployment_envelope.py` and in the three docs that had already copied it.
+
+### 2. A check that could not fail — instance **seven** of the pattern
+
+`p2_flop_anchor.py`'s self-test claimed to prove "the local fallback costs exactly
+what the package costs". `_self_test` never called `_stub_whestbench()`, so
+`materialise_like_grader` took the *package* branch and the check compared the
+package function **to itself**.
+
+And the converse held where it mattered: `_run_arm` *did* stub, and the stub sets
+`__path__ = []`, so `from whestbench.scoring import materialise_predictions` raised
+`ModuleNotFoundError` and the grader arm **always** used the local re-spelling — in
+an interpreter where the real package was importable, under a docstring promising it
+"prefers the installed function so this cannot drift". Reproduced both halves
+directly.
+
+The anchor number is unaffected (the two implementations genuinely cost the same),
+but the guard against drift was doing nothing. Fixed three ways: the stub now
+installs **only** when the real package is absent and returns whether it did; the
+fallback is a separate function so it can be priced against the package directly;
+and the self-test asserts the two are *not the same object* before comparing them,
+so it cannot silently become vacuous again.
+
+### 3. "preflight GREEN 16/16" had no witness — and the reason is worse than the claim
+
+The committed transcript was a partial prefix, and the run that completed ended in
+`SETUP_TIMEOUT` on step 16. But auditing all three committed transcripts turned up
+something larger:
+
+| transcript | lines | `PREFLIGHT` verdict lines | step `PASS` lines |
+|---|---:|---:|---:|
+| `preflight_before_stale_stack.txt` | 564 | **0** | **0** |
+| `preflight_after_repair_run1.txt` | 595 | **0** | **0** |
+| `preflight_full_after_repair.txt` | 912 | **0** | **0** |
+
+**Every preflight transcript this repository has ever committed as evidence is
+missing its verdicts.** `preflight.ps1` writes step results and the final summary
+with `Write-Host`, which in Windows PowerShell 5.1 goes to the information stream —
+and `2>&1 |` does not redirect it. The files captured hundreds of lines of child
+process detail and none of the gate's own conclusions. Confirmed with a two-line
+control: `2>&1` drops `Write-Host`, `*>&1` keeps it.
+
+This is the repository's own named failure class arriving through a door nobody was
+watching: not a check that reported a state instead of testing a property, but a
+check whose *verdict never reached the file offered as proof of it*.
+
+Fixed at the source rather than in the caller: `preflight.ps1` gains **`-Log <path>`**,
+which uses `Start-Transcript` and captures every stream, and refuses to run if the
+transcript cannot be started — a transcript that silently failed to start would
+produce exactly the verdict-free file the parameter exists to prevent.
+
+**The witness now exists.** `experiments/2026-08-24_p2_p0/preflight_full_witnessed.txt`
+ends in `PREFLIGHT GREEN -- 16/16` with all sixteen step verdicts present, on a
+quiet host, exit code 0. It is the first preflight transcript in this repository
+that contains its own conclusion.
+
+### 4. `SETUP_TIMEOUT` is real, and our model of the setup window was an order of magnitude out
+
+The completed `-Full` run failed step 16 with
+`{"stage": "setup", "code": "SETUP_TIMEOUT"}`. It then reproduced **3/3** on demand.
+The Skeptic fairly flagged that its own concurrent probes likely caused it, and it
+was right about the cause — but the underlying number is ours:
+
+```text
+import numpy + flopscope     0.19 s
+import whestbench            1.27 s  (quiet)   ...  4.7-9.1 s  (loaded)
+our estimator load + setup   0.0006 s
+process spawn                0.20 s
+                             ------
+TOTAL, quiet                 1.67 s   of a 5.00 s ceiling
+```
+
+`import whestbench` **alone** exceeds the entire setup budget under load. Our own
+contribution is 0.6 **milliseconds** — six parts in ten thousand of the window.
+
+`lifecycle_eval.HOST_COLD_START_S = 0.24` models the subprocess spawn-and-import
+cost, and its self-test reports "419 ms of 5000 ms" — twelve times headroom on a
+constraint that had just failed three times in a row. The in-process timer measures
+a strictly smaller window than the grader's, and the enforceability matrix listed
+`setup_timeout_s` as "enforced here" on that basis. It is enforced against the
+**wrong window**.
+
+This does not mean the grader will time out — ~30 entries score fine, so its worker
+imports whestbench well inside 5 s. It means **our local setup-headroom figure is
+not transferable and must stop being quoted as one**, and it matters for exactly the
+work coming next: `docs/GAME_PLAN.md` Module A builds the carrier's point set in
+`setup()`, where the grader bills it nothing but the 5 s ceiling still applies.
+
+### 5. `vault.py` used one λ and recorded another
+
+`_score_block` called `effective_compute(f, r)` with the module default — now
+**0.0** — while recording `"lambda": LAMBDA_FLOPS_PER_SECOND`, which P2-P0 had just
+turned into the deprecated **1e11** Phase-1 alias. Behaviourally harmless (its rows
+carry `residual_wall_time_s = 0.0`, so `C == F` either way), but it would have
+written a rate it did not use into one of **three touch records that will ever
+exist**. Fixed to record `DEFAULT_LAMBDA_FLOPS_PER_SECOND`.
+
+The other five importers of `competition_score` were audited and are clean: they
+either pass `lam=spec.lam` explicitly or carry zero residual.
+
+### 6. `arm_k2p1` is not a cost-identical control, and a comment said it was
+
+`p2_lab.py` read: "`k2p1` is BITWISE the shipped `estimator.py` analytic path at
+this shape (`p2_test_arms.py` T2), so the control is the thing being controlled".
+T2 proves bitwise identity of the **output**. Measured:
+
+```text
+estimator.py                   137,600,326,656
+local_sim/p2_arms/arm_k2p1.py  137,600,363,520   +36,864 over 3 operations
+                                                 (extra astype, concatenate, reshape)
+```
+
+Negligible — 0.000027%, and irrelevant while the multiplier is pinned at the floor
+— but "bitwise identical output" and "identical cost" are different claims, and
+that ladder reports both accuracy **and** cost. Comment corrected with the measured
+figure rather than removed.
+
+### 7. Two overclaims and two padded checks
+
+- **`run_config` does not corroborate every limit.** It carries `width`, `depth`,
+  `flop_budget`, `lambda`, `residual_wall_time_limit_s`, `wall_time_limit_s`,
+  `setup_timeout_s` — and **not** `memory_limit_mb` or `predict_timeout_s`. So the
+  **8,192 MB limit, the one constraint untestable here, also has the weakest
+  provenance**: a `ContestSpec` class default and nothing more. `CURRENT_STATE.md`
+  said "every limit above" and was wrong. `official_config.verify()` now asserts
+  those two keys are **absent**, so the generalisation cannot be made again — and
+  if a future release starts publishing them, the check fails and the claim gets
+  upgraded deliberately.
+- **The "free 32,768 FLOPs" is conditional.** It is free only if the final array is
+  *natively* float32. Reaching float32 by adding a cast costs the identical
+  2 FLOPs/element and nets zero. Stated unconditionally in three places; fixed.
+- `official_config.py` had a `check(..., True, ...)` — a literal condition, which
+  cannot fail. Now tests the property. `lifecycle_eval.py` L8 had a check that was
+  two constants subtracted given its predecessor; demoted to a printed line and
+  removed from the denominator. **Suite counts went 71→73 and 54→53**: one
+  genuinely gained, one honestly lost.
+
+### 8. Also adopted: the anchor was rebaseable
+
+Not a defect yet, and the Skeptic flagged it as forward-looking. Preflight step 12
+compared the current `estimator.py` against a stored report that recorded **no
+candidate hash**. The first legitimate estimator change turns the gate RED, and the
+remedy the gate itself printed was "regenerate the reference" — which rebases the
+reference onto the very change it exists to check. That is the `CP0.1 D19 == 0`
+trap in a new place.
+
+The report is now bound to `OFFICIAL_REPORT_CANDIDATE_SHA256`. A different candidate
+gets a **REFUSED** naming the mismatch and the required action, not a parity
+failure, and the message says in terms: *do not regenerate it to make this gate go
+green.*
+
+## Where I checked the Skeptic and it was wrong
+
+**`ladder_frozen.json` contains no residual data.** The review presents a per-arm
+residual table and says "the actual failure counts were five lines of arithmetic
+away in an artifact the entry already knew about". They were not. The artifact
+carries `objective`, per-MLP MSE, `mean_flops`, `flops_012`, `n_failed` — and
+`residual_is_graded: false`. There is no residual column in it, or anywhere else in
+`experiments/2026-08-21_p2_cp1/`. Its table came from **re-running 96 networks × 11
+arms itself**, which is a legitimate and valuable thing to have done, and a
+materially different claim from "the entry ignored data it held".
+
+That matters for how much weight the table carries: it was produced on a machine
+simultaneously running this session's `preflight -Full` **and** the Skeptic's own
+probes — so its absolute levels are exactly as contention-suspect as it argues
+everyone else's are.
+
+**The substance survives the correction, and is the important part.** The arms'
+residual levels against a now-armed cliff were never measured by anyone, the
+architecture's designated reference (`k2p2`) may sit close to it, and P2-P0's
+correction to P2-CP1 understated that by saying only that "deployment claims for
+the slower arms are provisional".
+
+## The finding that actually changes what happens next
+
+P2-P0 promoted **"the three residual instruments agree to within about ±7 %
+run-to-run"** into `VALIDATION.md` §2b-ii, `GOTCHAS.md` and `CURRENT_STATE.md`, and
+used it to characterise headroom against the 0.4 s cliff.
+
+**That is the wrong quantity.** ±7 % is an *intra-session, instrument-versus-instrument
+ratio*. A cliff compares against an **absolute level**, and an instrument ratio says
+nothing about how much that level moves between sessions. The same file, the same
+instrument, measured 45.9–53.2 ms in one session and ~69 ms in another — an order of
+magnitude outside the interval now written into the binding protocol.
+
+The ratio claim was *true* and was *used for something it cannot support*. That is a
+subtler error than a wrong number and it is the one worth remembering: **check that
+the interval you quote bounds the quantity the decision depends on.**
+
+`local_sim/p2_residual_paths.py` is rewritten accordingly — it takes `--candidates`
+and `--repeat`, reports the **absolute level and its between-pass spread** beside
+every headroom figure, and refuses to print a spread it did not measure. §2b-ii is
+corrected to require the between-session term.
+
+### The measurement, and it refutes the alarm — including the Skeptic's own
+
+Five candidate-passes × three instruments × 20 MLPs at 1024×16 = **300 per-MLP
+readings**, on a quiet host, `--runner subprocess` as the authority
+(`experiments/2026-08-24_p2_p0/p2_residual_paths.json`):
+
+| candidate | subprocess median | worst MLP | headroom @ worst | over the 0.4 s cap |
+|---|---:|---:|---:|---:|
+| `estimator.py` (shipped K2p1) | 56.6 ms | 83.6 ms | 4.8× | **0/20** |
+| `arm_k2p1` | 55.9 / 59.4 ms | 95.5 ms | 4.2× | **0/20** |
+| `arm_k2p2` — the architecture's reference | 94.6 / 95.1 ms | 140.6 ms | **2.8×** | **0/20** |
+
+**Nothing exceeded the cap, in any arm, in any instrument.** Back-to-back passes
+on a quiet host agree to **1.01×–1.06×** on the median.
+
+Against the Skeptic's table for the same arm — **260.7 ms median, 390.6 ms max,
+1.02× worst-case headroom** — the quiet-host figure is **2.75× lower**. The
+Skeptic flagged that its probes ran beside this session's `preflight -Full` and
+declined to claim the gate failed on its merits. That caution was exactly right,
+and this quantifies it.
+
+Corroborating from the same run: the one sub-run that fell inside the contended
+window — `estimator.py`, pass 0 — is the only one of the fifteen that **died**,
+and it died with `SETUP_TIMEOUT`. Contention is visible in both the level and the
+failures.
+
+**So the rule that comes out of this is not "add a between-session variance term".**
+Back-to-back quiet passes agree to a few percent; the dominant term is not drift,
+it is load. The rule is:
+
+> **A residual measurement taken on a contended host is not evidence.** Measure on
+> a quiet machine, report the worst MLP and not only the median, and state what
+> else was running. A contended reading can be 2.75× high — enough to condemn a
+> method that has 2.8× headroom, or to fail a run that would have scored.
+
+That is sharper than a variance term and it is checkable: both contended readings
+this repository holds are explained by what ran beside them, and every quiet
+reading agrees to a few percent.
+
+### What it means for Phase 1, concretely
+
+`k2p2` spends **~95 ms of the 400 ms** cap on a quiet host. The carrier that
+`GAME_PLAN.md` Module A builds sits **on top of** that reference and must propagate
+32,768 directions through sixteen layers, so the budget it is designing against is
+**~305 ms** — before any safety margin, and before whatever the grader's hardware
+does to these numbers, which no graded Phase-2 report can yet tell us.
+
+That number goes into the Phase-1 contract as a design constraint with a falsifier,
+not as a check performed after the carrier exists. It is the single most useful
+thing this review produced, and the repository did not have it an hour ago.
+
+## Corrections to the P2-P0 result entry, appended not edited
+
+- **"preflight GREEN 16/16, nothing skipped"** was written before a run producing
+  that verdict had been captured. The 16/16 run did happen (exit code 0, background
+  task `b0yl8jx1i`), but no committed transcript witnessed it, for the `Write-Host`
+  reason above. Re-captured with `-Log`; see the table below.
+- **The suite table compared a default-tier "10/12" against a `-Full` "16/16"
+  without naming either tier**, which `VALIDATION.md` §7 forbids for exactly the
+  reason it happened here. The honest comparison is **default 10/12 → 12/16** and
+  **`-Full` 12/12 → 16/16**.
+- **Mint parity understated its own evidence**: the entry says 8/8 at 1024×16,
+  which was an ad-hoc run with `--seeds 8`. The gate runs the default 20, so the
+  standing claim is **20/20**.
+- Suite counts after this review: `official_config` **73/73** (was 71 — the padded
+  check became a real one and two run_config-absence checks were added), anchor
+  self-test **14/14**, `lifecycle_eval` **53/53** (was 54 — one padded check
+  removed), envelope **14/14 + 2 NOT PROVABLE**, scorer **98/98**, portability
+  **99/99**.
+
+## What is NOT retracted
+
+The counted-FLOP repair stands, and the Skeptic verified it independently rather
+than reading it:
+
+- op-by-op parity reproduces: 19 operations, 0 disagreeing, delta +0;
+- the official side is **parsed from a real report**, not hardcoded;
+- **confounder C3 is stronger than P2-P0 claimed** — the Skeptic ran three further
+  networks and got byte-identical op tables, so four distinct networks now support
+  the value-independence the one-row anchor rests on;
+- mechanism 2 confirmed at package source level, both runner paths;
+- λ = 0 verified against what the runner *used*;
+- the score moves by exactly 0 %;
+- **no test was deleted or weakened** — every changed check was a genuine
+  round-mixing fix;
+- `estimator.py` byte-identical, vault untouched, no seed block claimed;
+- **B8's MISS survives a better statistic than the one used to score it.** The
+  Skeptic ran the paired per-MLP test this repo's own law prefers:
+  lifecycle − subprocess is `−3.99 ms (t = −1.85)` and `+0.68 ms (t = +0.46)`;
+  not resolvable, sign unstable. The discarded contaminated run is not load-bearing
+  — the two surviving runs already disagree in sign.
+
+## Knowledge delta
+
+1. **Check that the interval you quote bounds the quantity the decision depends
+   on.** A true ratio claim was used to characterise a level, and only a level
+   clears a cliff.
+2. **A transcript is not evidence until you have found its verdict in it.** Three
+   committed files, 2,071 lines, zero verdicts.
+3. **Dividing a limit by a lower bound gives an upper bound on the margin.** Get
+   the direction right on any constraint that cannot be tested.
+4. **The setup window the grader enforces is not the one we time.** Ours is
+   0.6 ms of it; `import whestbench` is 1.3–9 s of it. Model the window, not our
+   share of it — and the carrier builds its point set in `setup()`.
+5. **A stub that shadows a real package turns a drift guard into a no-op**, and the
+   self-test that should catch it will compare the survivor to itself.
+6. An audit is evidence, not an oracle: two of this review's own claims did not
+   survive checking, and saying so is part of accepting the rest.
+
+**Seed ledger:** unchanged. P01 144/600 consumed, **456 free**. D17 and D19
+SINGLE_USE and unspent. **Vault:** untouched. `estimator.py` byte-identical.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Status:** Phase 0 is accepted with the corrections above applied. The residual
+LEVEL question is settled below and carries into the Phase-1 contract as a design
+constraint rather than a check performed afterwards.

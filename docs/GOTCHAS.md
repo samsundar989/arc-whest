@@ -71,11 +71,32 @@ Raw artifacts: `experiments/2026-08-24_p2_p0/`.*
   uses and the package itself prefers the worker's own stats over the host
   context.
 
-- **The shipped K2p1 has about 8× residual headroom, and that is less comfortable
-  than it sounds.** Median ~48–51 ms against the 0.4 s cliff; the WORST single MLP
-  observed was 87.3 ms, i.e. **4.6×**. The Phase-1 carrier lane is about to
-  propagate 32,768 directions through sixteen layers. Residual headroom is a
-  first-class design constraint for that work, not a box to tick afterwards.
+- **An instrument ratio does not bound a level, and only a level clears a cliff.**
+  The ±7 % agreement above is real and was briefly used to characterise headroom
+  against the 0.4 s cap. That was wrong, and an independent Skeptic rejected it:
+  ±7 % is intra-session and instrument-to-instrument, while the cap tests an
+  absolute second. Measured properly, 300 per-MLP readings on a quiet host:
+
+  | candidate | subprocess median | worst MLP | worst-case headroom | over cap |
+  |---|---:|---:|---:|---:|
+  | `estimator.py` (shipped K2p1) | 56.6 ms | 83.6 ms | 4.8× | 0/20 |
+  | `arm_k2p1` | 55.9 / 59.4 ms | 95.5 ms | 4.2× | 0/20 |
+  | `arm_k2p2` (the architecture's reference) | 94.6 / 95.1 ms | 140.6 ms | **2.8×** | 0/20 |
+
+- **A residual measurement taken on a CONTENDED host is not evidence, and the
+  error is big enough to invert a decision.** The same `arm_k2p2` read **260.7 ms
+  median / 390.6 ms max — 2.75× the quiet level** — on a machine simultaneously
+  running a full preflight and a second audit. At that level it has 1.02×
+  headroom and looks like a method about to fail; on a quiet host it has 2.8× and
+  did not exceed the cap once in 60 readings. In the same window a `whest run`
+  died outright with `SETUP_TIMEOUT`. **Measure residual on a quiet machine,
+  report the worst MLP as well as the median, and say what else was running.**
+
+- **The carrier's residual budget, concretely.** `k2p2` costs ~95 ms of the 400 ms
+  cap on a quiet host, leaving **~305 ms** for the carrier that Phase 1 is about
+  to build on top of it — before any safety margin, and before whatever the
+  grader's own hardware does to these numbers. Residual is a first-class design
+  constraint for 32,768 propagated directions, not a box to tick afterwards.
 
 - **Weight-METHOD operations are free locally and billed on the grader, unless
   the local MLP is flopscope-backed.** `whestbench.domain.MLP.from_row` builds

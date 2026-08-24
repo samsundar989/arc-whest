@@ -191,6 +191,36 @@ free if the last array is built in float32. Taking it means changing
   Phase 2.
 - **Transfer a local second.** The deployment authority for residual is
   `whest run --runner subprocess`, never the in-process figure.
+- **Enforce the 5-second setup ceiling meaningfully.** `import whestbench` alone
+  is 1.3 s on a quiet host and 4.7–9.1 s under load; our own estimator's setup is
+  0.6 **ms**. The in-process timer measures a strictly smaller window than the
+  grader's subprocess one, so its "419 ms of 5000 ms" is not a transferable
+  margin. Matters directly: the carrier builds its point set in `setup()`.
+
+### The residual budget Phase 1 must design against
+
+300 per-MLP readings on a quiet host, `--runner subprocess` as the authority
+(`experiments/2026-08-24_p2_p0/p2_residual_paths.json`):
+
+| candidate | median | worst MLP | headroom @ worst | over the 0.4 s cap |
+|---|---:|---:|---:|---:|
+| `estimator.py` (shipped K2p1) | 56.6 ms | 83.6 ms | 4.8x | **0/20** |
+| `arm_k2p1` | 55.9 / 59.4 ms | 95.5 ms | 4.2x | **0/20** |
+| `arm_k2p2` — the architecture's reference | 94.6 / 95.1 ms | 140.6 ms | **2.8x** | **0/20** |
+
+Nothing exceeded the cap anywhere. Back-to-back quiet passes agree to 1.01x–1.06x.
+
+**`k2p2` spends ~95 ms of the 400 ms cap, so the carrier's budget is ~305 ms** —
+before any safety margin, and before whatever the grader's hardware does to these
+numbers. That is the Phase-1 design constraint, and it belongs in the contract with
+a falsifier rather than being checked after the carrier exists.
+
+**A residual measurement on a contended host is not evidence.** The same `arm_k2p2`
+read 260.7 ms median / 390.6 ms max — **2.75x high** — on a machine running a full
+preflight and a second audit at the same time; at that level it appears to have
+1.02x headroom and to be a method about to fail. It is not. In the same window a
+`whest run` died with `SETUP_TIMEOUT`. Measure quiet, report the worst MLP, and say
+what else was running.
 
 The paired arithmetic score test, common-random-number design, ground-truth noise
 reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.

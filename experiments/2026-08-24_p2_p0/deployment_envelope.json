@@ -60,34 +60,42 @@
     {
       "constraint": "predict_response_timeout_s",
       "why": "runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint"
-    },
-    {
-      "constraint": "worker_death_restart",
-      "why": "--skip-worker-death was passed"
     }
   ],
   "predict_response_timeout_s": 125.0,
   "memory": {
     "measurement": {
       "baseline": {
-        "working_set": 131239936,
-        "commit": 607469568
+        "working_set": 130691072,
+        "commit": 607010816
       },
       "peak": {
-        "working_set": 461717504,
-        "commit": 962813952
+        "working_set": 462524416,
+        "commit": 962674688
       },
       "weight_bytes": 67108864
     },
     "limit_mb": 8192,
-    "peak_working_set_mb": 440.328125,
-    "peak_commit_mb": 918.2109375,
+    "peak_working_set_mb": 441.09765625,
+    "peak_commit_mb": 918.078125,
     "weights_mb": 64.0,
-    "headroom_upper_bound": 8.921697254341408
+    "headroom_upper_bound": 8.922987899314125
   },
   "worker_death": {
-    "skipped": true
+    "skipped": false,
+    "n_mlps": 3,
+    "n_failed_mlps": 1,
+    "failed_indices": [
+      0
+    ],
+    "failure_breakdown": {
+      "budget_exhausted": 0,
+      "time_exhausted": 0,
+      "residual_wall_time_exhausted": 0,
+      "combined_budget_exhausted": 0,
+      "error": 1
+    }
   },
-  "checks_passed": 11,
-  "checks_total": 11
+  "checks_passed": 14,
+  "checks_total": 14
 }

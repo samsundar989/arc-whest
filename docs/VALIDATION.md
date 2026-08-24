@@ -306,14 +306,49 @@ Two arithmetic hygiene rules, both of which Sprint 4 broke:
    - a local headroom figure is quoted **as local**, with the word LOCAL in the
      sentence;
    - the direction of the local bias is **not assumed, and at this shape it is
-     not even resolvable**. Three runs of 20 MLPs give a lifecycle/subprocess
-     ratio of 1.068×, 0.951×, 1.048× — the sign is not stable, so the three paths
-     agree to within about ±7 % run-to-run variation
-     (`local_sim/p2_residual_paths.py`, artifact
-     `experiments/2026-08-24_p2_p0/p2_residual_paths.json`). A local margin is
-     therefore **not** a safety factor in either direction, and a single reading
-     is not a measurement. Phase 1's ~7× figure was local vs GRADED and has no
-     Phase-2 counterpart, because no graded Phase-2 report exists.
+     not resolvable**: three runs of 20 MLPs give a lifecycle/subprocess ratio of
+     1.068×, 0.951×, 1.048× — the sign is not stable. Phase 1's ~7× figure was
+     local vs GRADED and has no Phase-2 counterpart, because no graded Phase-2
+     report exists.
+
+   - **but an instrument ratio does not bound a level, and only a level clears a
+     cliff.** The first version of this section quoted the ±7 % agreement above as
+     if it characterised headroom. It does not, and an independent Skeptic was
+     right to reject it. What the cliff compares against is the absolute second,
+     so the absolute second is what must be reported, with its variation.
+
+   **The measured law, from 300 per-MLP readings on 2026-08-24**
+   (`local_sim/p2_residual_paths.py`, artifact
+   `experiments/2026-08-24_p2_p0/p2_residual_paths.json`; 5 candidate-passes × 3
+   instruments × 20 MLPs at 1024×16):
+
+   | candidate | subprocess median | worst MLP | worst-case headroom | over the cap |
+   |---|---:|---:|---:|---:|
+   | `estimator.py` (shipped K2p1) | 56.6 ms | 83.6 ms | 4.8× | 0/20 |
+   | `arm_k2p1` | 55.9 / 59.4 ms | 95.5 ms | 4.2× | 0/20 |
+   | `arm_k2p2` — the architecture's reference | 94.6 / 95.1 ms | 140.6 ms | **2.8×** | 0/20 |
+
+   **Nothing exceeded the cap, anywhere, in any instrument.** Back-to-back passes
+   on a quiet host agree to **1.01×–1.06×** on the median.
+
+   **The dominant term is machine contention, not session drift, and it is large.**
+   The same `arm_k2p2` measured **260.7 ms median / 390.6 ms max** on a host that
+   was simultaneously running a full preflight and a second audit — **2.75× the
+   quiet level**, which would have put it at 1.02× headroom and read as a method
+   about to fail. It is not. In the same contended window, a `whest run` of the
+   shipped file died outright with `SETUP_TIMEOUT`.
+
+   **So the rule is not "add a between-session term". It is:**
+
+   > **A residual measurement taken on a contended host is not evidence.** Measure
+   > on a quiet machine, report the worst MLP and not only the median, and state
+   > what else was running. A contended reading can be 2.75× high — enough to
+   > condemn a method that has 2.8× headroom, or to fail a run that would have
+   > scored.
+
+   This is sharper than a variance term and it is checkable: the two contended
+   readings this repository holds are both explainable by what was running beside
+   them, and the quiet readings agree to a few percent.
 
 **Everything that made a Phase-1 cost claim hard is still true of counted FLOPs.**
 Counted compares to counted. Never a bare ratio of means. The freeze must be able
