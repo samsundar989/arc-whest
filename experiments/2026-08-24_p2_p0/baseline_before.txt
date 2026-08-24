@@ -1,0 +1,12 @@
+=== git ===
+e8afcbfc7a59031e4a7860ad36957730d81b0d8a
+=== sha256 ===
+00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec *estimator.py
+00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec *estimator_v2_6_1.py
+0d75557072c23ec8efea3651285137236bddda8720d67680fd8573c5c0ddf828 *pyproject.toml
+25df3a071ff25529937ee5f3c8024f171cf26f4bf977929846efc1b7c4f680f9 *uv.lock
+=== versions (.venv) ===
+whestbench 0.14.0
+flopscope 0.10.0
+numpy 2.2.6
+scipy 1.15.3

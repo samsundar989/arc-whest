@@ -28,3 +28,4 @@ local_sim/_ledger_scan_tmp/
 local_sim/_lifecycle_*_tmp.py
 
 .venv-fs012/
+.venv-fs010/
