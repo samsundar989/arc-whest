@@ -90,24 +90,39 @@
   vault touch.
 
 .PARAMETER Log
-  Write a COMPLETE transcript to this path, verdicts included.
+  Guarantee that this run's VERDICTS reach a file, whatever the caller does.
 
-  Use this rather than redirecting, and the reason is a defect found on
-  2026-08-24: every preflight transcript this repository had ever committed as
-  evidence was MISSING ITS VERDICTS. The step results and the final
-  GREEN/RED/SKIPPED summary are written with `Write-Host`, which in Windows
-  PowerShell 5.1 goes to the information stream -- so `.\preflight.ps1 2>&1 | Out-File`
-  captures every child process's stdout and NONE of the gate's own conclusions.
-  Three committed transcripts contained 900 lines of detail and zero verdict
-  lines, and were cited as evidence of green runs.
+  The reason is a defect found on 2026-08-24: every preflight transcript this
+  repository had ever committed as evidence was MISSING ITS VERDICTS. The step
+  results and the final GREEN/RED/SKIPPED summary are written with `Write-Host`,
+  which in Windows PowerShell 5.1 goes to the information stream -- so
+  `.\preflight.ps1 2>&1 | Out-File` captures every child process's stdout and NONE
+  of the gate's own conclusions. Three committed transcripts contained 900 lines
+  of detail and zero verdict lines, and were cited as evidence of green runs.
 
-  `-Log` uses Start-Transcript, which captures all streams. A caller who wants to
-  redirect manually must use `*>&1`, not `2>&1`.
+  WHAT -Log DOES AND DOES NOT CAPTURE, measured rather than assumed:
+
+    Start-Transcript (what -Log uses)   verdicts YES   child stdout NO
+    .\preflight.ps1 2>&1  | Out-File    verdicts NO    child stdout YES
+    .\preflight.ps1 *>&1  | Tee-Object  verdicts YES   child stdout YES
+
+  In a `-NonInteractive` host with redirected stdio, Start-Transcript records the
+  PowerShell host's own output and NOT the stdout of native child processes, so a
+  `-Log` file carries the sixteen step results and the summary but not the suites'
+  own output. That is the half that was missing and the half that matters for a
+  claim of green.
+
+  FOR A COMPLETE EVIDENCE TRANSCRIPT, use both streams explicitly:
+
+    .\scripts\preflight.ps1 -Full *>&1 | Tee-Object -FilePath <path>
+
+  Never `2>&1` -- it silently drops every verdict.
 
 .EXAMPLE
   .\scripts\preflight.ps1
   .\scripts\preflight.ps1 -Full
-  .\scripts\preflight.ps1 -Full -Log experiments/2026-08-24_p2_p0/preflight.txt
+  .\scripts\preflight.ps1 -Full -Log experiments/2026-08-24_p2_p0/verdicts.txt
+  .\scripts\preflight.ps1 -Full *>&1 | Tee-Object -FilePath evidence.txt   # complete
   .\scripts\preflight.ps1 -Archive estimator_v2_5r.py
 #>
 [CmdletBinding()]

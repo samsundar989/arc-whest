@@ -178,10 +178,23 @@ Raw artifacts: `experiments/2026-08-24_p2_p0/`.*
   Found by an independent Skeptic, who could not locate a witness for a claimed
   "GREEN 16/16".
 
-  **Use `preflight.ps1 -Log <path>`**, which uses `Start-Transcript` and captures
-  all streams. If you must redirect by hand, `*>&1`, never `2>&1`. And when a
-  transcript is committed as evidence, grep it for its own verdict line before
-  believing it.
+  **The three capture forms are not interchangeable, and none of them is obvious.**
+  Measured, not assumed:
+
+  | form | verdicts | child stdout |
+  |---|---|---|
+  | `2>&1 \| Out-File` | **no** | yes |
+  | `-Log <path>` (Start-Transcript) | yes | **no** |
+  | `*>&1 \| Tee-Object` | yes | yes |
+
+  `Start-Transcript` in a `-NonInteractive` host with redirected stdio records the
+  PowerShell host's own output but **not** the stdout of native child processes —
+  so `-Log` guarantees the verdicts, which is the half that was missing, and not
+  the suites' own output. **For a complete evidence transcript use
+  `*>&1 | Tee-Object`.** Never `2>&1`.
+
+  And whatever form you use: **when a transcript is committed as evidence, grep it
+  for its own verdict line before believing it.**
 
 - **A gate cannot catch what it does not look at.** For three days `preflight.ps1`
   reported GREEN 10/12 while running every check against whestbench 0.14 /

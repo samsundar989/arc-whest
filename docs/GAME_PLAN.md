@@ -278,7 +278,33 @@ Design success criteria:
 - exact 16-basis, 32,768-direction leading-cost fingerprint reproduced;
 - zero construction/determinism/moment invariant failures;
 - no code-policy or memory violation;
-- promising matched-cost variance reduction with stable layerwise behavior.
+- promising matched-cost variance reduction with stable layerwise behavior;
+- **inside the residual budget below.**
+
+### The operational budget, measured before the carrier exists (P2-P0, 2026-08-24)
+
+Phase 0 measured what the carrier has to fit inside. These are constraints to
+design against, not checks to run afterwards, and each needs a falsifier in the
+Phase-1 contract.
+
+| constraint | measured | what the carrier gets |
+|---|---|---|
+| residual, per MLP | `k2p2` reference spends **~95 ms** of the **400 ms** cap on a quiet host (worst MLP 140.6 ms, 2.8x headroom, 0/20 over) | **~305 ms**, before any safety margin |
+| counted FLOPs | `k2p2` costs `1.379e11`; the leader's fingerprint is `1.0998e12`, `C/B = 0.51` | ~`9.6e11` before matching the leader's cost |
+| `setup()` | the 5 s ceiling covers **worker spawn + imports + setup**. `import whestbench` alone is 1.3 s quiet, 4.7-9.1 s loaded; our estimator's own setup is **0.6 ms** | build the point set here — it is FREE of FLOPs on the grader — but the wall ceiling is shared with imports we do not control |
+| memory | 8,192 MB, **unenforceable on this host**; shipped file peaks at 918 MB commit (an upper-bound headroom of 8.9x) | 32,768 x 1024 float32 directions is 128 MB if materialised at once — chunk it, and treat memory as accounting |
+
+Two of these are new and neither was available before Phase 0:
+
+- **the ~305 ms residual budget** is the binding operational number for a carrier
+  that must propagate 32,768 directions through sixteen layers;
+- **`setup()` is FLOP-free but not wall-free.** The grader charges nothing for the
+  point set built there, and the 5 s ceiling still applies to a window we mostly do
+  not own.
+
+**Measure residual on a quiet host or not at all.** A contended reading of the same
+arm came in **2.75x high** — enough to condemn a method with 2.8x headroom. See
+`docs/VALIDATION.md` 2b-ii.
 
 ### Phase 2 — decide whether structured carrier is the main backbone
 
