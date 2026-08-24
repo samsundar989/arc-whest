@@ -10208,3 +10208,261 @@ AGENTS.md -> CURRENT_STATE.md -> GAME_PLAN.md -> VALIDATION.md
 historical link continuity. The immediate next action remains the IMPORTANT Phase-0
 evaluator repair, awaiting Samuel's three written predictions. Documentation work
 does not authorize that instrument edit or any later STRATEGIC action.
+
+---
+
+# 2026-08-24 — SLICE CONTRACT P2-P0: make the evaluator Phase-2 truthful  [PRE-REGISTERED, no data yet]
+
+**Class:** IMPORTANT (the instrument). **No seed block is claimed and no seed block
+is touched.** No `estimator.py` edit, no `estimator_v*.py` edit, no vault touch, no
+submission, no promotion statistic. Phase 0 of `docs/GAME_PLAN.md`.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Preregistration commit:** this entry, committed before any repair is made.
+
+## Question
+
+Is the local evaluator a truthful model of the **official Phase-2 deployment**
+(WhestBench 0.16 / flopscope 0.12, round 1429, `1024 x 16`, `B = 2**41`,
+`lambda = 0`, residual cap 0.4 s, wall 120 s, memory 8192 MB, setup 5 s) — and if
+not, exactly where does it lie, by how much, and does repairing it move any number
+this repository has already published?
+
+An instrument that is wrong is not merely imprecise; it is a machine for producing
+confident false results. Nothing downstream of Phase 0 may be believed until this
+is settled, because every later slice's evidence packet is priced by it.
+
+## Evidence
+
+| # | item | status |
+|---|---|---|
+| E1 | Phase 2 is live through 2026-10-17, shape `1024 x 16`, `B = 2**41`, official stack WhestBench 0.16 / flopscope 0.12, `lambda = 0`, residual cap 0.4 s, wall 120 s, memory 8192 MB, setup 5 s | **CONFIRMED** — `docs/PHASE2_LIVE_AUDIT_2026-08-24.md` |
+| E2 | `pyproject.toml` pins `flopscope>=0.10,<0.11` and `whestbench>=0.14,<0.15`; `.venv` has 0.10.0 / 0.14.0 installed | **CONFIRMED** — read directly this session |
+| E3 | `competition_score.LAMBDA_FLOPS_PER_SECOND = 1e11` is the module default and is threaded as `lam=` into every scoring entry point | **CONFIRMED** — `local_sim/competition_score.py:66` |
+| E4 | `lifecycle_eval` defaults are Phase-1: `WALL_TIME_LIMIT_S = 60.0`, `RESIDUAL_WALL_TIME_LIMIT_S = None`, `MEMORY_LIMIT_MB = 65_536`, `DEFAULT_BUDGET = 272e9` | **CONFIRMED** — `local_sim/lifecycle_eval.py:127-131` |
+| E5 | The official runner hands the estimator flopscope-backed weights (`MLP.from_row` does `fnp.array(w)`); `lifecycle_eval` hands it `np.asarray(x)` — raw NumPy | **CONFIRMED** — `whestbench/domain.py:97` vs `local_sim/lifecycle_eval.py:418` |
+| E6 | `estimator.py:868` (`_analytic_only`, the live Phase-2 path) calls `w.astype(fnp.float64)` on every weight — a **weight-method** op, so it is metered on the grader and free locally | **CONFIRMED** — read this session |
+| E7 | Official one-row Phase-2 subprocess anchor: `137,600,326,656` counted FLOPs, score `4.501854e-7`, raw MSE `4.501854e-6`, `C/B = 0.0625734`, residual `0.05368 s`, wall `0.35487 s`, 0 failures | **CONFIRMED** — `docs/CURRENT_STATE.md`, audit |
+| E8 | Local counted total for the same file/shape is `137,562,547,200` (`C/B = 0.06255620392039418`); shortfall `37,779,456` = 0.02746% | **CONFIRMED** — `experiments/2026-08-21_phase2_manifest/p2_price_delta.json` |
+| E9 | flopscope 0.10 -> 0.12 leaves the shipped estimator's counted total **identical** (`estimator_total_identical: true`, `estimator_ops_moved: {}`); four *unused* primitives repriced (`nansum`, `nanmean`, `where(mask, f32, py-scalar)`) | **CONFIRMED** — same artifact |
+| E10 | Official-stack isolated runs: scorer 80/88, lifecycle 33/37; the failures are exactly the stale lambda/wall/residual/memory semantics | **CONFIRMED** — audit |
+| E11 | P2-CP1 ran with the 0.4 s residual failure cliff **disabled**; native 8-GiB memory and worker death/restart are not emulated locally | **CONFIRMED** — audit |
+| E12 | Local in-process residual bills the same file ~7x what the grader billed it (70.85 ms local / 54.47 ms subprocess / 9.84 ms graded, Phase-1 file) | **CONFIRMED** — `docs/GOTCHAS.md` |
+| E13 | `astype f32->f64` is priced at 2 FLOPs/element in both 0.10 and 0.12 (`131,072` for a 65,536-element probe) | **CONFIRMED** — `p2_price_delta.json` primitives table |
+| E14 | With `lambda = 0`, `C = F` exactly, so residual wall time **no longer prices into the multiplier at all** and survives only as the 0.4 s pass/fail cliff | **INFERRED** from E1 + the identity `C = F + lambda*R`; to be verified against installed 0.16 |
+| E15 | The shortfall E8 is caused by E5+E6: 16 weights x 1024x1024 x 2 FLOPs = `33,554,432`, which is 88.8% of `37,779,456`; the remaining `4,225,024` is other weight-method traffic | **SPECULATIVE** — this slice measures it |
+
+## Hypothesis and mechanism
+
+**Hypothesis.** The local evaluator's divergence from the official Phase-2 runtime
+is entirely accounted for by four *nameable* mechanisms, none of which changes the
+current shipped file's **score**:
+
+1. **stale package pins** (E2) — but flopscope 0.10 and 0.12 price every operation
+   the shipped file actually executes identically (E9), so this moves nothing today
+   and is a correctness/faithfulness repair, not a numeric one;
+2. **stale scalar config** (E3, E4) — `lambda`, budget, wall, residual, memory;
+3. **weight representation** (E5, E6) — raw-NumPy weights make weight-method
+   operations invisible to the local meter, which is the entire `37,779,456`
+   shortfall (E15);
+4. **unmodelled operational cliffs** (E11) — the 0.4 s residual cliff, native
+   memory, and worker death.
+
+**Why the score does not move.** Phase 2 sets `lambda = 0`, so `C = F`. The shipped
+file's `C/B = 0.0625734` is far below the `0.1` multiplier floor, and adding the
+missing `37,779,456` FLOPs moves `C/B` to `0.06257` — still below the floor. The
+multiplier is therefore **exactly 0.1 before and after the repair**, and
+`score = MSE x 0.1` identically. Repairing the cost meter changes what we can
+*price*, not what we currently *score*. That is the mechanism behind Samuel's
+`<1%`, and it predicts the magnitude (**exactly 0**), not merely the sign.
+
+**Why it still matters.** The next slice propagates 32,768 directions. At the
+leader's cost `1.099802385e12`, `C/B = 0.5115` — five times the floor and squarely
+in the regime where every counted FLOP is billed linearly into the score. A meter
+that is 0.0275% low today is 0.0275% low there too, and there it is worth
+`~1.4e-11` of adjusted score against a `1.802e-8` leader. More importantly, a meter
+that cannot *see* weight-method operations at all cannot price a carrier that reads
+the weights differently, and that is exactly what Phase 1 builds.
+
+## Intervention
+
+The smallest change set that makes the local instrument agree with the official
+runtime, in the order that each piece can be independently falsified:
+
+1. upgrade and lock `whestbench==0.16.*` / `flopscope==0.12.*` in the main
+   environment, preserving explicitly named Phase-1 replay constants;
+2. add **one** round-aware official configuration authority
+   (`local_sim/official_config.py`) carrying Phase-1 and Phase-2 as named rounds,
+   asserted against the installed package rather than transcribed from memory;
+3. build local MLPs with official immutable flopscope-backed arrays;
+4. add an exact **op-by-op** FLOP regression against the official one-row anchor;
+5. enforce the residual cliff, wall, memory and worker-restart semantics, and
+   label explicitly what only the official subprocess can enforce;
+6. refresh the manifest/checklist and make `preflight.ps1` assert the live stack,
+   the live config, the shape suite, and an official mini smoke with zero failures;
+7. re-label the Phase-2 cost/failure claims that were made with the cliff disabled.
+
+## Numbered predictions (Builder)
+
+Directions and magnitudes, written before any of it is run.
+
+| # | prediction | magnitude |
+|---|---|---|
+| **B1** | Upgrading flopscope 0.10 -> 0.12 changes the shipped file's counted total by **exactly zero**, and no operation in its op dict moves | delta = 0 FLOPs, 0 ops moved |
+| **B2** | Switching local weights to `fnp.array` closes the shortfall **exactly**: local counted total becomes `137,600,326,656`, matching E7 bit-for-bit | residual delta = 0 FLOPs |
+| **B3** | Of the `37,779,456`, at least `33,554,432` (>= 88.8%) is `astype` on weights at `estimator.py:868` | >= 88.8% attributed to one line |
+| **B4** | The remaining `4,225,024` is other weight-method traffic and is fully enumerable op-by-op; **no unexplained residue survives** | unexplained <= 0 FLOPs |
+| **B5** | The **score** of the shipped file is unchanged by the entire repair, because the multiplier stays pinned at the `0.1` floor | delta score = 0.00% (Samuel: `<1%`) |
+| **B6** | With `lambda = 0` the combined-budget failure path becomes FLOPs-only; no local row at our operating point can fail it | 0 combined-budget failures |
+| **B7** | Enabling the 0.4 s residual cliff produces **zero** failures for the shipped file under the official subprocess runner (anchor `0.05368 s`, 7.45x headroom) | 0 failures |
+| **B8** | The **local in-process** residual for the same file exceeds the official subprocess residual, so local headroom against 0.4 s is materially smaller than 7.45x | local/subprocess ratio in `1.2x`-`1.6x` |
+| **B9** | After repair the official-stack suites go green: canonical scorer `88/88`, lifecycle `37/37`; every current failure is a stale-semantics failure and none is a real defect | 8 + 4 failures -> 0 |
+| **B10** | flopscope 0.12 reprices `nansum`/`nanmean`/`where(mask, f32, py-scalar)` (E9) but the shipped file uses **none** of them, so no historical Phase-2 counted-FLOP number is invalidated by the version bump | 0 historical numbers moved |
+
+## Samuel's predictions — recorded 2026-08-24, before any repair was made
+
+| # | question | Samuel's answer |
+|---|---|---|
+| **S1** | Official-stack repair changes the current K2 score by | **`<1%`** |
+| **S2** | Kerdock16 vs matched-row IID at 32,768 directions | **`2.7x`-`20x`** |
+| **S3a** | Raw-MSE gain of faithful recurrent augmented K2 over K2p2, standalone | **`<1.1x`** |
+| **S3b** | Official residual-cap (0.4 s) failure risk | **aug-K2 at risk, carrier safe** |
+
+S2 and S3 are recorded here because they were asked together and must exist on the
+record *before* their slices; they are **not** this slice's gate. They will be
+restated in the Phase-1/Phase-2 and Phase-3 contracts that actually test them.
+
+Note the tension worth watching: S2 (`2.7x`-`20x`) sits **below** the ~74x implied
+by the Puffi fingerprint. If the carrier lands in Samuel's band rather than near
+74x, the fingerprint inference is incomplete and the leader has a second mechanism.
+That is a genuinely informative disagreement and it is registered now.
+
+## Gate
+
+This slice has **no promotion statistic**, spends no seed block, and compares no
+candidate. Its gate is a **knowledge target**, and it is written on the difference
+this slice isolates — the instrument's disagreement with the official runtime, not
+on any total that contains it:
+
+**PASS** requires all of:
+
+- **G1** the official one-row anchor is reproduced **op-by-op**, not merely in
+  total: every operation name, call count and FLOP figure agrees, or each
+  remaining delta is named with its mechanism and its size;
+- **G2** the round-aware config authority returns the Phase-2 values (E1) and each
+  is asserted against the **installed 0.16 package**, not transcribed;
+- **G3** canonical scorer and lifecycle suites green on the official stack, with
+  the denominator unchanged (no test deleted to make a number go up);
+- **G4** the residual cliff, wall, memory, over-budget and worker-restart paths are
+  **provoked**, not asserted — each must be shown to actually fire;
+- **G5** `whest validate` and an official Phase-2 subprocess smoke pass with
+  `n_failed_mlps: 0` on the **unchanged** shipped `estimator.py`;
+- **G6** `scripts/preflight.ps1` and `scripts/verify_portability.py` green, with
+  preflight now asserting the live stack and refusing a stale one;
+- **G7** an independent Skeptic, given raw artifacts and no Builder narrative,
+  returns ACCEPT.
+
+## Falsifier
+
+Any of the following falsifies the hypothesis and the slice must stop and report
+rather than proceed to Phase 1:
+
+- **F1** the op-by-op anchor does **not** reconcile — an unexplained counted-FLOP
+  residue survives after the weight-representation fix (falsifies B2/B4, and means
+  the local meter diverges from the grader by a mechanism we cannot name);
+- **F2** the repair moves the shipped file's **score** by more than 1% (falsifies
+  B5 and S1, and means some published Phase-2 number was wrong for a reason we did
+  not model);
+- **F3** the shipped file fails the 0.4 s residual cliff under the official
+  subprocess runner (falsifies B7 — the cliff is already binding today and every
+  Phase-2 cost claim in the log is provisional in a stronger sense than recorded);
+- **F4** flopscope 0.12 moves an operation the shipped file actually executes
+  (falsifies B1/B10, and retro-invalidates the Phase-2 counted-FLOP artifacts);
+- **F5** a currently-failing scorer/lifecycle test turns out to encode a **real**
+  defect rather than stale semantics (falsifies B9).
+
+F1 and F4 are the two that would invalidate existing recorded evidence. They are
+the reason this slice runs before anything else.
+
+## Baseline and tier
+
+- **Baseline:** the shipped `estimator.py` (v2.6.1), **unmodified**, at `1024 x 16`.
+  It is the control and it must remain byte-identical to `estimator_v2_6_1.py`
+  throughout; `preflight.ps1` step 4 asserts this and is part of the exit gate.
+- **Tier:** none. This slice measures the **instrument**, not a method. Where truth
+  data is needed it uses the official public Phase-2 `mini` split under
+  `whest run --runner subprocess`, which is **CONFIRM tier and read-only**: it
+  selects nothing, fits nothing, and no constant is chosen from it. Counted FLOPs
+  on this path are value-independent, so the anchor reconciliation needs no
+  registered seed at all.
+- **No DESIGN, DECIDE or VAULT data is touched.** P01 keeps 456 free DESIGN seeds.
+  D17 and D19 remain SINGLE_USE and unspent.
+
+## Residual model
+
+**No cost claim about any candidate is made by this slice**, so no candidate
+residual model is frozen. The instrument-level rule this slice *establishes* is
+recorded instead, and it is a simplification worth stating plainly:
+
+> Under Phase 2 `lambda = 0`, `C = F` exactly. Residual wall time no longer enters
+> the multiplier by any path. It survives **only** as a 0.4 s per-MLP pass/fail
+> cliff. The Phase-1 `max(local-ratio-on-graded-anchor, competitor-anchored)`
+> residual pricing model is therefore **inapplicable to Phase-2 scoring** and must
+> not be carried forward as if it were; what replaces it is a *headroom* model
+> against a hard cliff.
+
+E14 marks this INFERRED. **G2 requires it to be verified against the installed
+0.16 package before it is relied on**, and if `lambda` is not zero in the installed
+scorer this contract's residual reasoning is void and the slice reports that as its
+primary finding.
+
+The **deployment authority** for residual is the official subprocess runner, never
+the in-process figure (E12, B8).
+
+## Statistic
+
+None. There is no paired comparison, no bootstrap, no `decide()` call, and no
+promotion boolean in this slice. The evidence is exact arithmetic (counted FLOPs,
+op dicts, config values) and pass/fail suite outcomes. Any later slice that needs a
+promotion boolean gets it from `competition_score.decide()` with its own
+pre-registered gate.
+
+## Confounders and what must not change
+
+**Confounders**
+
+- **C1** the `.venv` upgrade could pull an unrelated transitive change; the lock
+  diff must be inspected and recorded, not assumed;
+- **C2** `local_sim/flopscope` and `local_sim/whestbench` are **numpy shims**. Any
+  measurement that accidentally imports them instead of the real packages produces
+  fictional FLOPs. Every measuring module must keep `sys.path` **appended**, never
+  inserted, and assert it got the real flopscope;
+- **C3** the official anchor E7 was recorded on **one row**. A one-row anchor
+  reconciled op-by-op is strong evidence about a value-independent dense path and
+  weak evidence about anything value-dependent; the reconciliation claim is scoped
+  to the former;
+- **C4** local wall-clock figures are host-specific and ~7x the grader's (E12).
+  No absolute local second may be quoted as a deployment fact;
+- **C5** making weights flopscope-backed will change local wall time as well as
+  counted FLOPs; the two must not be conflated when B8 is read.
+
+**Must not change**
+
+- `estimator.py` and every `estimator_v*.py` — byte-identical throughout;
+- the vault seal, `experiments/vault/manifest.json`, `touch_log.jsonl`;
+- the seed ledger's consumption state; P01, D17, D19;
+- `competition_score.decide()`'s refusal set (percentile, BCa) and its requirement
+  of an explicit gate — the repair adds Phase-2 constants, it does not relax the
+  gate;
+- the three-tier protocol, the public split's read-only status;
+- any historical LOG entry. Re-labelling a Phase-2 claim as provisional is done by
+  **appending** a correction, never by editing the original entry.
+
+## Scope
+
+`pyproject.toml`, `uv.lock`, `local_sim/official_config.py` (new),
+`local_sim/competition_score.py`, `local_sim/lifecycle_eval.py`,
+`local_sim/phase2_manifest.py`, `local_sim/phase2_checklist.py`,
+new tests under `local_sim/`, `scripts/preflight.ps1`,
+`experiments/2026-08-24_p2_p0/` (new artifacts), `experiments/LOG.md`,
+`docs/CURRENT_STATE.md`, `docs/GOTCHAS.md`, `docs/VALIDATION.md`.
