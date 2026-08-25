@@ -151,8 +151,20 @@ INJECTIONS = [
         # `WD_*` strings only section 6 emits -- safety by construction, which is
         # what D1 was. Repointing the witness reproduces D1's exact output line
         # unless the green condition also consults _SECTION_RAN.
+        # BOTH `checks` and `expect_detail` must be repointed. The first version
+        # of this injection replaced only `checks`, and `expect_detail` still
+        # named WD_EXACTLY_ONE -- so `verify_witness` refused on the detail
+        # assertion, `ok` came back False, and the run took the `unprovable`
+        # branch without ever reaching the green branch under test. It reported
+        # UNCAUGHT, correctly: the injection had not landed. An injection that
+        # does not reach its target is a broken test, and it looks exactly like
+        # a broken guard until you check which.
         [("""                    "checks": [WD_SURVIVED, WD_EXACTLY_ONE, WD_INDEX,
-                               WD_CLASSIFIED, WD_LATER_CLEAN, WD_LATER_SCORED],""",
+                               WD_CLASSIFIED, WD_LATER_CLEAN, WD_LATER_SCORED],
+                    "expect_detail": {
+                        WD_EXACTLY_ONE: "n_failed_mlps = 1",
+                        WD_INDEX: "failed indices [0]",
+                    },""",
           """                    "checks": ["the runner waits max(predict_timeout, wall "
                                "+ grace), not predict_timeout"],""")],
         [SUITE, "--no-write", "--skip-worker-death"],

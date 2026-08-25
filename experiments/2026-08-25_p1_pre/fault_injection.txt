@@ -3,7 +3,7 @@ INJECTION A -- D1 -- section 7 reports an UNRUN provocation as green again
 command: test_envelope_readonly.py
 exit code: 1   (CAUGHT)
 FAIL lines: 3
-  FAIL  no check() has a literal truthy condition, in either file        {'test_deployment_envelope.py': [(1625, 'True')]}
+  FAIL  no check() has a literal truthy condition, in either file        {'test_deployment_envelope.py': [(1692, 'True')]}
   FAIL  NO green line CLAIMS worker_death_restart when section 6 is skipped 1: ["  PASS  worker_death_restart: its named provocation RAN and PASSED in THIS suite CHECK NOT FOUND in local_sim/test_deployment_envelope.py: 'the suite SURVIVED a worker that hard-exited mid-run' -- the witness names a provocation the suite does not contain"]
   FAIL  ...through the WITNESS, not only through the skipped section     section 7 adjudicated the deferred witness and refused it
 
@@ -19,7 +19,7 @@ FAIL lines: 3
     PASS  ...and it regenerated nothing, by its own measurement            the mirror of the writing run's non-vacuity check
   
   ====================================================================================================
-  22/25 checks passed
+  25/28 checks passed
 
 ====================================================================================================
 INJECTION B -- D2 -- the resolver ignores the suite it was given (pre-P1-PRE behaviour)
@@ -54,7 +54,7 @@ FAIL lines: 8
   FAIL  with the latch ARMED, suite REGENERATION raises and writes nothing NO REFUSAL RAISED
   FAIL  a resolver built BEFORE the latch was armed still does not regenerate status=MISMATCH regenerated={'probe': True}
   FAIL  the child exited 0                                               exit 1
-  FAIL  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json b4ab29fae17e7b9b -> b98f057b935e1340
+  FAIL  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json 96e126aef3e11c77 -> dd431e03d7134f64
   FAIL  `git status --porcelain` is byte-identical across the run        2 line(s) before, 3 after
   FAIL  the child verified its own read-only claim before printing it    the claim is now conditional on the checks above it
   FAIL  ...and it regenerated nothing, by its own measurement            the mirror of the writing run's non-vacuity check
@@ -71,7 +71,7 @@ FAIL lines: 8
     FAIL  ...and it regenerated nothing, by its own measurement            the mirror of the writing run's non-vacuity check
   
   ====================================================================================================
-  17/25 checks passed
+  20/28 checks passed
 
 ====================================================================================================
 INJECTION D -- a section forgets to record whether it ran
@@ -116,5 +116,61 @@ FAIL lines: 1
     --no-write: NOT VERIFIED. The claim is WITHHELD -- see the failures above.
 
 ====================================================================================================
-suite restored byte-for-byte: sha256 f83e455bf583e9e1730db70d848e71b884b4390a5fb71efc83563d958d9f0d3a
-injections run: ['A', 'B', 'C', 'D', 'E']   uncaught: none
+INJECTION F -- the literal-True defect returns in a spelling the scan used to miss
+command: test_envelope_readonly.py
+exit code: 1   (CAUGHT)
+FAIL lines: 0
+
+--- last 12 lines of the run ---
+  Traceback (most recent call last):
+    File "C:\Users\samsu\Documents\arc-whest\local_sim\test_envelope_readonly.py", line 96, in <module>
+      import test_deployment_envelope as env  # noqa: E402
+    File "C:\Users\samsu\Documents\arc-whest\local_sim\test_deployment_envelope.py", line 1688
+      check(f"{name}: its section RECORDED whether it ran", ok=True,
+           ^
+  SyntaxError: '(' was never closed
+
+====================================================================================================
+INJECTION G -- a witness is repointed at a check that ALWAYS runs (D1's shape returning)
+command: test_deployment_envelope.py --no-write --skip-worker-death
+exit code: 0   (UNCAUGHT -- the defect was reintroduced and NOTHING noticed)
+FAIL lines: 0
+
+--- last 12 lines of the run ---
+    - memory_limit_mb: NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design
+    - predict_response_timeout_s: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
+    - memory_limit_mb (provocation): no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/
+    - worker_death_restart: --skip-worker-death was passed
+    - worker_death_restart (witness): CHECK NOT FOUND for detail assertion: 'EXACTLY one MLP failed -- not zero, not several'
+  
+  NOT PERFORMED IN THIS RUN -- these are checks this INVOCATION
+  declined, not gaps in the evaluator's coverage of the grader. They
+  are named rather than skipped quietly, and they are not passes:
+    - the writer's positive control: the latch was armed before this suite started (--no-write); lowering it here would make the read-only claim conditional on restoring it. Exercised in the writing mode instead.
+  
+    --no-write: VERIFIED -- no tracked evidence file moved and the worktree is unchanged.
+
+====================================================================================================
+INJECTION H -- an envelope constraint is DELETED from the matrix entirely
+command: test_deployment_envelope.py --no-write --skip-worker-death
+exit code: 1   (CAUGHT)
+FAIL lines: 1
+  FAIL  the matrix carries every REQUIRED envelope constraint          7 present; missing ['predict_response_timeout_s']; unpinned extras ['deleted_by_injection_h']
+
+--- last 12 lines of the run ---
+    - memory_limit_mb: NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design
+    - deleted_by_injection_h: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
+    - memory_limit_mb (provocation): no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/
+    - worker_death_restart: --skip-worker-death was passed
+    - worker_death_restart (witness): CHECK NOT FOUND in local_sim/test_deployment_envelope.py: 'the suite SURVIVED a worker that hard-exited mid-run' -- the witness names a provocation the suite does not contain
+  
+  NOT PERFORMED IN THIS RUN -- these are checks this INVOCATION
+  declined, not gaps in the evaluator's coverage of the grader. They
+  are named rather than skipped quietly, and they are not passes:
+    - the writer's positive control: the latch was armed before this suite started (--no-write); lowering it here would make the read-only claim conditional on restoring it. Exercised in the writing mode instead.
+  
+    --no-write: NOT VERIFIED. The claim is WITHHELD -- see the failures above.
+
+====================================================================================================
+suite restored byte-for-byte: sha256 831ab34cc582511534d1ab4d5856d073f8a51ce394bcd1d1e2302acd79608e34
+injections run: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']   uncaught: ['G']
