@@ -21,6 +21,32 @@ narrative record), `docs/GAME_PLAN.md` (the sole active Phase-2 strategy).
 
 ---
 
+## 2026-08-25 (P1-PRE) — a falsification harness must not restore with Git
+
+*Full record and review-5 PROVISIONAL verdict: bottom of `experiments/LOG.md`.*
+
+- **Do not run `local_sim/p1pre_fault_inject.py` at HEAD `0810537`.** It mutates
+  source in the repository and then unconditionally runs `git checkout --` on two
+  tracked evidence artifacts. Its dirty-worktree refusal covers the source files,
+  not those artifacts. The [official Git documentation](https://git-scm.com/docs/git-checkout)
+  is explicit that checkout of a path replaces it from the index and discards
+  unstaged changes. A test
+  harness must never use a destructive version-control operation as cleanup.
+- Run faulted code from temporary copies/scratch inputs. Snapshot repository status
+  and tracked hashes before and after, and refuse any output path that aliases a
+  tracked file. If cleanup is required for a test to be safe, the test is not yet
+  safe enough to run in the shared workspace.
+- A mutation is caught only when the **expected guard/reason** fires. A non-zero
+  process exit can come from syntax damage, an incidental guard, or the harness
+  itself; it is not proof that the intended property was tested.
+- Mutation testing measures whether selected artificial faults are detected. It
+  strengthens a suite but does not prove completeness. Stop after the named
+  properties have independent behavioural oracles; do not recursively build a
+  second framework to prove the first framework against arbitrary multi-edit
+  sabotage.
+
+---
+
 ## 2026-08-24 (P2-P0) — the evaluator was measuring a round that had ended
 
 *Full record, contract and predictions: `experiments/LOG.md` 2026-08-24, P2-P0.

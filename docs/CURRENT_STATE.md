@@ -27,15 +27,21 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   It took four review passes — PROVISIONAL, PROVISIONAL, REJECT, ACCEPT — and the
   first three each found something real, including a gate clause satisfied by a
   check that could not fail.
-- **P1-PRE has LANDED and is awaiting its verdict.** D1, D2 and D3 are closed in
-  code, `PREFLIGHT GREEN — 16/16`, portability 99/0, and **eleven** deliberate
-  fault injections all turn the gate red. **It is not yet accepted:** **four**
-  independent passes have returned **PROVISIONAL**, and every one found a real
-  defect *in the repair rather than in the original defect*. A fifth review of
-  the corrected tree is outstanding. See the P1-PRE entries at the bottom of
-  `experiments/LOG.md`, including two retracted claims.
-- **Immediate next action: obtain that fifth verdict.** Nothing else may start
-  until it reads ACCEPT — in particular Phase 1A does not begin.
+- **P1-PRE is PROVISIONAL after five reviews.** D1, D2 and D3 are closed in
+  code, the last quiet-host run was `PREFLIGHT GREEN — 16/16`, portability is
+  **99/99**, and **eleven** deliberate injections turn a suite red. Review 5
+  nevertheless reproduced the original false-provenance class by repointing the
+  wall witness at a residual check: the suite still exited green. It also found
+  an unbounded platform exemption, two meta-checks that inspect declarations
+  rather than the behaviour they name, an exit-code-only mutation oracle, a
+  non-resolving continuity citation, and an unguarded `git checkout --` that can
+  discard edits to two tracked evidence artifacts. The full verdict and third
+  retraction are at the bottom of `experiments/LOG.md`.
+- **Immediate next action: one terminal P1-PRE closure, then one fresh review.**
+  Close the exact review-5 findings and remove the destructive cleanup path.
+  This is a bounded repair of named guarantees, not a general proof that tests
+  can survive every future simultaneous edit. Phase 1A remains blocked until a
+  fresh Skeptic accepts those bounded guarantees.
 - **Then Phase 1A — construction only.** Build the width-1024 Kerdock/MUB
   generator, independent verifier and dense reference with **no seed block
   claimed, no `estimator.py` edit, and no truth measurement**. Phase 1B (DESIGN
@@ -168,18 +174,23 @@ the old twelve-step gate — is fixed. **D1–D3 are CLOSED IN CODE by P1-PRE
 | D2 — witness `suite` field ignored | resolve the named suite to its own result artifact and refuse unknown/mismatched suites with executable negative tests | **closed** — `WitnessResolver`; also repaired on the artifact-writing path, where it had survived; injection B |
 | D3 — `--no-write` rewrites lifecycle evidence | prevent regeneration and every tracked write; assert before/after hashes and a clean worktree | **closed** — a read-only latch that raises, plus an external proof by child process, sha256 and git; injection C |
 
-**What P1-PRE cost, and it is the durable lesson:** two independent passes
-returned PROVISIONAL, and both found the *repair* re-committing the defect it was
-closing — first a guard whose two sides were the same object
-(`adjudicated == len(deferred)`), then a scan recorded as covering a defect family
-while catching three of its eleven spellings. **Closing an instance of this
-repository's signature failure is a fresh opportunity to create one.** The
-falsification harness is now committed as `local_sim/p1pre_fault_inject.py` and
-carries **eleven** injections. Four review cycles were needed to see that
-pattern, and the construction that has held every time is a **pinned literal**:
-a name or a number written down on purpose, so a guard's two sides come from
-different places. Everything derived from the structure it audits inherits that
-structure's blind spot.
+**What P1-PRE cost, and the durable lesson:** five independent passes found five
+successive instances of the repair re-committing the defect family it was meant
+to close. D1–D3 themselves survived all five attacks; the overclaim was that a
+pinned declaration proves the behaviour named by that declaration. It does not.
+A useful check compares an independent expected property with observed behaviour.
+Mutation probes add evidence that selected faults are detectable; they are not a
+proof that every future edit is safe. The terminal pass therefore pins the exact
+witness semantics and platform classification, measures what files/patterns were
+actually scanned, and requires the named guard—not merely any non-zero exit—to
+fire. It then stops. The repository will not build a second evaluator whose job
+is to formally verify the first evaluator.
+
+**Do not run `local_sim/p1pre_fault_inject.py` at current HEAD `0810537`.** Its
+cleanup unconditionally executes `git checkout --` on two tracked evidence files
+after every injection and its dirty check does not cover those files. Repair it
+to operate entirely on temporary copies (with expected refusal identities)
+before it is executed again.
 
 | # | blocker | state |
 |---|---|---|
@@ -279,8 +290,8 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 | order | slice | class | status |
 |---:|---|---|---|
 | 0 | official-stack/evaluator repair | IMPORTANT | **CLOSED 2026-08-24** — G1–G7 all met, independent ACCEPT recorded |
-| 0H | P1-PRE: D1–D3 evaluator hardening | **IMPORTANT** | **LANDED, VERDICT OUTSTANDING** — code closed, gate green 16/16, 11 injections all caught; four passes returned PROVISIONAL and all were closed, two claims retracted; a fifth review is required before this row reads CLOSED |
-| 1A | Kerdock/MUB mathematical spec, direct generator, independent verifier, dense reference | **IMPORTANT** | **BLOCKED** on 0H ACCEPT; no seed, estimator edit, or truth measurement |
+| 0H | P1-PRE: D1–D3 evaluator hardening | **IMPORTANT** | **TERMINAL CLOSURE NEXT** — D1–D3 hold; five reviews are PROVISIONAL. Close review-5 M1–M4, make each mutation require its named refusal, eliminate destructive tracked-file cleanup, repair continuity semantics, then obtain one fresh bounded-scope ACCEPT |
+| 1A | Kerdock/MUB mathematical spec, direct generator, independent verifier, dense reference | **IMPORTANT** | **BLOCKED** on 0H ACCEPT; no seed, estimator edit, or truth measurement. Read-only primary-source work may proceed while the final review runs |
 | 1B | structured-carrier DESIGN evidence | STRATEGIC | after 1A ACCEPT; contract reviewed before any block is claimed, on a NEW block (P02) |
 | 2 | structured-carrier DECIDE | STRATEGIC | pending; new SINGLE_USE block after design freeze |
 | 3 | recurrent augmented-K2 parity / DESIGN / DECIDE | IMPORTANT then STRATEGIC | pending |

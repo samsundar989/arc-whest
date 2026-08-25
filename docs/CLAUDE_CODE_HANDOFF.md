@@ -1,4 +1,4 @@
-# Claude Code handoff — begin P1-PRE, then Phase 1A
+# Claude Code handoff — terminal P1-PRE closure, then Phase 1A
 
 Copy the prompt below into a new Claude Code session started at the repository root.
 It assumes no chat history. Repository state is authoritative if a SHA or fact has
@@ -23,7 +23,8 @@ Do not rely on prior chat. First read, in this order:
 
 1. `AGENTS.md` — binding operating contract and work classification.
 2. `docs/CURRENT_STATE.md` — current status and immediate action.
-3. `experiments/LOG.md` from the bottom — Phase-0 ACCEPT and carried D1–D3.
+3. `experiments/LOG.md` from the bottom — review-5 PROVISIONAL verdict, third
+   retraction and the open P1-PRE decision.
 4. `docs/GAME_PLAN.md` — sole active architecture and execution plan.
 5. `docs/VALIDATION.md` — binding measurement law.
 6. `docs/GOTCHAS.md` — operational traps.
@@ -52,44 +53,70 @@ state or `estimator.py` during the work authorized below.
   unknown.
 - P01 is DESIGN and already exposed. Do not use it as independent evidence. No
   new block is authorized in this handoff.
-- Phase-0's accepting review carried D1–D3. They do not reopen Phase 0, but they
-  are known evaluator defects and must close before carrier construction.
+- D1–D3 are closed in code and survived five independent review passes. P1-PRE is
+  still PROVISIONAL because review 5 reproduced a false semantic witness, found
+  an unbounded exemption and two declaration-only meta-checks, and found that the
+  fault-injection cleanup can discard edits to tracked evidence.
+- HEAD at this decision is `0810537228f1015c4de19689f8c9954c1355957c`.
+  `estimator.py`, the seed ledger and the vault are untouched across P1-PRE.
+- **Do not run `local_sim/p1pre_fault_inject.py` before repairing it.** Current
+  cleanup unconditionally executes `git checkout --` on two tracked artifacts
+  without first guarding them.
 
-## Start now — P1-PRE evaluator hardening
+## Start now — terminal P1-PRE closure
 
-This is **IMPORTANT** instrument work under `AGENTS.md`, despite using no data.
-Before editing, append a short written prediction/knowledge target to
-`experiments/LOG.md`: each fix should change only refusal/read-only behavior, leave
-all Phase-0 scientific and score evidence unchanged, and add no false-green path.
-Record the baseline HEAD and relevant artifact hashes. Do not claim a seed.
+This is **IMPORTANT** instrument work under `AGENTS.md`; use no data and claim no
+seed. Before editing, append a terminal written prediction/knowledge target to
+`experiments/LOG.md`: the named review-5 faults will be caught by their intended
+guards, the mutation harness will be incapable of changing tracked repository
+state, D1–D3 and all Phase-0 scientific/score evidence will remain unchanged, and
+the pass will add no new general assurance framework. Record baseline HEAD,
+worktree status and relevant hashes. Commit that entry before implementation.
 
-Repair exactly these defects:
+Repair exactly this bounded set:
 
-1. **D1 — literal-True worker-restart witness.** Remove the branch in
-   `local_sim/test_deployment_envelope.py` that calls `check(..., True, ...)` for a
-   `"this file"` witness. Emit a structured worker-restart result from this suite
-   and verify it like every other witness. With `--skip-worker-death`, the witness
-   must be explicitly unprovable/failing; it must never print green.
-2. **D2 — suite resolution.** `verify_witness` must resolve the `suite` named by
-   the witness to that suite's result artifact rather than always loading the
-   lifecycle artifact. Refuse unknown suite, missing results, wrong check ID,
-   failed check and detail mismatch. Keep a positive control. Tests must exercise
-   the public resolver path rather than injecting `results=None` behind it.
-3. **D3 — truthful read-only mode.** `--no-write` must not regenerate
-   `lifecycle_self_test.json`, deployment evidence or any tracked file. Prove this
-   with before/after hashes and a clean `git status`; do not print a read-only
-   claim unless it is mechanically true.
+1. **M4 — semantic witness pin.** Add one independent expected mapping for each
+   locally enforced constraint: constraint name, suite, exact check-ID set and
+   required detail fragments. Compare emitted witnesses with it. Add injection L,
+   which repoints `wall_time_limit_s` at the residual-limit check; require the
+   semantic-witness guard's exact refusal.
+2. **M3a — bound the platform exemption.** Only `memory_limit_mb` may have a
+   platform-dependent enforcement classification. Pin that classification
+   explicitly and add injection M, which tries to relocate `flop_budget` into the
+   exemption. It must fire the classification guard.
+3. **M1/M2 — measure behaviour, not declaration counts.** Accumulate the actual
+   files opened by the scanner and compare that observed set with
+   `REQUIRED_SCANNED`. Pin the distinct names/source identities of `MUST_CATCH`
+   and `KNOWN_BLIND`, not only `(5, 6)`. Add focused mutations for skipped-file and
+   duplicate/substituted-probe cases.
+4. **Mutation oracle.** Every injection declares an expected failing check/reason;
+   `returncode != 0` alone is never `CAUGHT`. A failure for an incidental reason
+   is a harness failure, not evidence.
+5. **No destructive cleanup.** Remove `git checkout --` and all repository-file
+   mutation/restore logic. Execute mutated source against temporary copies or a
+   scratch directory. Prove pre/post `git status` and hashes of the source and
+   tracked evidence are unchanged. Refuse any output path resolving inside a
+   tracked file. Preserve unrelated dirty work instead of requiring it away.
+6. **Truthful continuity/platform wording.** Replace the non-resolving read-only
+   transcript grep rule with a unique resolving identifier. On a host without
+   `resource`, classify `_setrlimit_works_in_child` as DECLINED/NOT PROVABLE rather
+   than adding a green pass from two values descending from the same missing
+   import.
 
-Keep the intervention narrow. Do not refactor unrelated evaluator code or repeat
-the Phase-0 research. Run focused positive and negative tests, then full
-`preflight.ps1 -Full` on a quiet host and `verify_portability.py`. Store a complete
-transcript, append the result and knowledge delta to `experiments/LOG.md`, and
-update `CURRENT_STATE.md` only if the status changes.
+Keep the intervention narrow. Do not refactor unrelated evaluator code and do not
+invent additional meta-properties. Re-run the original D1–D3 focused evidence,
+the new exact mutations, the read-only external proof, and then full
+`preflight.ps1 -Full` on a quiet host plus `verify_portability.py`. Store the raw
+transcripts, append the result and knowledge delta, and reconcile durable docs.
 
-Then launch a **fresh independent Skeptic** that has not seen Builder reasoning.
-Give it the written target, exact diff, raw transcripts/artifacts and
-`docs/SKEPTIC.md`. Require literal ACCEPT, REJECT or PROVISIONAL. Record the verdict.
-Do not begin Phase 1A until P1-PRE is accepted.
+Then launch **one fresh independent Skeptic** that has not seen Builder reasoning.
+Give it the terminal target, exact diff, raw artifacts and `docs/SKEPTIC.md`. Ask
+it to decide the named guarantees, not whether a finite test suite proves every
+possible future multi-edit sabotage. Residual limitations may accompany ACCEPT.
+A demonstrated current false green, evidence-loss path, D1–D3 recurrence or false
+durable claim remains blocking. Record the literal verdict. If one of those
+blocking classes remains, stop and return it to Samuel rather than beginning an
+open-ended seventh repair cycle. Begin Phase 1A only after ACCEPT.
 
 ## Next — Phase 1A mathematical construction, no truth data
 
@@ -102,6 +129,10 @@ The existing `local_sim/carriers.py` construction is length 256: GR(4,7), 65,536
 signs. Width 1024 requires a direct implementation of the known GR(4,9)/real-MUB
 construction. The primary target is a deterministic subset of 1, 2, 4, 8 or 16
 bases, with antipodes, without materialising the full 1,048,576-word Kerdock code.
+The primary mathematical anchor is Calderbank, Cameron, Kantor and Seidel,
+[Z4-Kerdock Codes, Orthogonal Spreads, and Extremal Euclidean
+Line-Sets](https://doi.org/10.1112/S0024611597000403): their real construction
+uses `N = 2^(m+1)` with odd `m`, hence `m=9` for `N=1024`.
 
 Do the work in this order:
 

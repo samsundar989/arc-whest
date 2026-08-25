@@ -269,8 +269,33 @@ Phase 0 closed on the literal independent ACCEPT recorded in commit `7367fdb`.
 
 **Class:** IMPORTANT. No seed block, truth data, vault, or shipped-file change.
 
-Before carrier construction, close the three code defects the accepting review
-carried forward:
+The three original carried defects are now closed in code and have survived five
+independent attacks. P1-PRE remains PROVISIONAL because review 5 found concrete
+holes in the *assurance around the repair*. Finish it with one terminal, bounded
+pass. Do not expand this into a general mutation-testing framework.
+
+The terminal pass closes exactly these items:
+
+1. pin the semantic content of every enforced constraint's witness—constraint,
+   suite, exact check-ID set and any required detail fragment—then add the
+   discriminating mutation that points the wall constraint at the residual check;
+2. replace the unbounded platform-dependent exemption with an exact classification
+   in which only `memory_limit_mb` can be platform-dependent, and exercise the
+   relocation mutation;
+3. make the read-only scanner compare the files it actually opened with the
+   required file set, and pin named probe identities rather than only the two
+   cardinalities;
+4. make every fault injection require its expected failing check/reason, not any
+   non-zero exit;
+5. remove every destructive cleanup of tracked repository files. The harness must
+   run mutations against temporary copies/scratch inputs and prove the repository
+   status and tracked hashes are unchanged. In particular it must never use
+   `git checkout --` to restore evidence;
+6. replace the non-resolving transcript grep rule with one that resolves uniquely,
+   and record a missing `resource` implementation as DECLINED/NOT PROVABLE rather
+   than a green identity comparison.
+
+Preserve and re-demonstrate the original repairs:
 
 1. replace the literal-`True` worker-restart witness with a structured result from
    the deployment-envelope suite itself; skipping the worker-death section must
@@ -281,9 +306,18 @@ carried forward:
 3. make `--no-write` perform no regeneration and no tracked write, proven by
    before/after hashes and a clean worktree.
 
-Exit gate: written prediction/knowledge target, executable negative tests, full
-preflight, LOG knowledge delta, and an independent Skeptic verdict. This is an
-instrument change under `AGENTS.md`; the absence of data does not make it ROUTINE.
+Exit gate: written prediction/knowledge target before this terminal edit; all
+named review-5 mutations caught by the exact expected refusal; repository hashes
+and status unchanged by the mutation harness; original D1–D3 positive/negative
+evidence still green; full preflight and portability green; LOG knowledge delta;
+and one fresh independent Skeptic **ACCEPT** against these named guarantees.
+
+The reviewer may record residual limitations. It must not withhold acceptance
+merely because no finite mutation set proves all possible future multi-edit
+changes. A finding remains blocking only if it demonstrates a current false
+green, possible evidence loss, recurrence of D1–D3, or a false durable claim.
+If such a blocking finding remains after this pass, stop and return it to Samuel;
+do not begin an open-ended seventh hardening cycle.
 
 ### Phase 1A — construct and verify the carrier without truth data
 
@@ -297,6 +331,14 @@ GR(4,7); width 1024 needs the known GR(4,9)/real-MUB construction and a direct w
 to emit a chosen 1/2/4/8/16-basis subset without materialising the full
 1,048,576-word code. This is a new implementation and proof obligation, not an
 invitation to invent an unreferenced design.
+
+Primary-source anchor: Calderbank, Cameron, Kantor and Seidel construct the real
+Kerdock line set in dimension `N = 2^(m+1)` for odd `m`; therefore `N=1024`
+corresponds to `m=9`, while the existing `N=256` code corresponds to `m=7`.
+Use their binary quadratic-form/orthogonal-spread construction or prove an
+equivalent GR(4,9) spelling; do not infer a parameter change from the current
+implementation alone. Source: [Z4-Kerdock Codes, Orthogonal Spreads, and Extremal
+Euclidean Line-Sets](https://doi.org/10.1112/S0024611597000403).
 
 Required construction evidence, before any truth data:
 
@@ -542,11 +584,12 @@ paths are provoked — the memory limit on Linux, where `RLIMIT_AS` exists.
 **The all-of gate G1–G7 is met**, on a literal independent **ACCEPT** at HEAD
 `952bd61`, after four review passes (PROVISIONAL, PROVISIONAL, REJECT, ACCEPT).
 
-**The immediate action is P1-PRE, then Phase 1A.**
+**The immediate action is the terminal P1-PRE closure above, then Phase 1A.**
 
-The accepting review carried D1–D3 without invalidating Phase 0. They are still
-evaluator-instrument defects, so the next session closes them as the short
-IMPORTANT P1-PRE slice above. Phase 1 then runs in two distinct stages:
+D1–D3 are already closed and the fifth review confirmed that fact. What remains
+is the bounded set of review-5 assurance and safety findings. Spend one repair
+pass and one fresh review on them; do not continue inventing meta-checks after the
+named properties are accepted. Phase 1 then runs in two distinct stages:
 
 - **Phase 1A — construction only.** A width-1024 Kerdock/MUB generator emitting
   1/2/4/8/16 bases without materialising the full code, proved against an
