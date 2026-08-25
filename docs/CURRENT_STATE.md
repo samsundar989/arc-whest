@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — read this first
 
-**Snapshot: 2026-08-24. Phase 2 is live.** This file says where execution stands;
+**Snapshot: 2026-08-25. Phase 2 is live.** This file says where execution stands;
 [`GAME_PLAN.md`](GAME_PLAN.md) is the only active architecture/roadmap;
 [`VALIDATION.md`](VALIDATION.md) is binding for measurement; the newest entries at
 the bottom of `experiments/LOG.md` contain the evidence narrative.
@@ -22,14 +22,21 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   not Phase-2-truthful; **P2-P0 repaired the deployment parity** and the local
   meter now reproduces the official runner op by op, to zero.
 - **Phase 0 is CLOSED.** Its all-of gate G1–G7 is met, with a literal independent
-  **ACCEPT** recorded at the bottom of `experiments/LOG.md` (HEAD `952bd61`).
+  **ACCEPT** on reviewed HEAD `952bd61`, recorded in closure commit `7367fdb` at
+  the bottom of `experiments/LOG.md`.
   It took four review passes — PROVISIONAL, PROVISIONAL, REJECT, ACCEPT — and the
   first three each found something real, including a gate clause satisfied by a
   check that could not fail.
-- **Immediate next action: Phase 1A — construction only.** A width-1024
-  Kerdock/MUB generator and its invariants, with **no seed block claimed, no
-  `estimator.py` edit, and no truth measurement**. Phase 1B (DESIGN evidence)
-  begins only after 1A's contract is reviewed and a block is deliberately claimed.
+- **Immediate next action: P1-PRE — close D1–D3 from the accepting review.** This
+  is an **IMPORTANT evaluator-hardening slice**, not ROUTINE: remove the remaining
+  literal-`True` worker-restart check, make witness verification resolve the suite
+  it names, and make `--no-write` genuinely read-only. No seed, truth, vault, or
+  `estimator.py` change. It ends in full preflight and an independent Skeptic.
+- **Then Phase 1A — construction only.** Build the width-1024 Kerdock/MUB
+  generator, independent verifier and dense reference with **no seed block
+  claimed, no `estimator.py` edit, and no truth measurement**. Phase 1B (DESIGN
+  evidence) begins only after 1A is independently accepted and its strategic
+  contract is reviewed.
 
 ## Authoritative document map
 
@@ -140,16 +147,24 @@ only 3.1%, not 50%.
 
 ## Evaluator state — P2-P0 repaired these, and the slice is closed
 
-All nine blockers are resolved, the deployment parity is repaired, and the gate is
-closed on a literal independent ACCEPT. Raw evidence:
+All nine Phase-0 blockers were repaired or explicitly bounded, deployment parity
+is restored within the documented host limits, and the gate is closed on a literal
+independent ACCEPT. Raw evidence:
 `experiments/2026-08-24_p2_p0/`; contract, result, two reviews, a retraction, a
 REJECT and the ACCEPT at the bottom of `experiments/LOG.md`.
 
-**Four defects are carried forward** from the accepting review (D1–D4 in that
-entry). None falsifies a gate clause. D4 — `VALIDATION.md` §7 describing the old
-twelve-step gate — is fixed. **D1–D3 are instrument code and remain untouched**,
-because the reviewed commit stands; they belong to a separate ROUTINE slice and
-should land before the Phase-1 *contract* is written.
+**Four defects were carried forward** from the accepting review (D1–D4 in that
+entry). None falsifies a Phase-0 gate clause. D4 — `VALIDATION.md` §7 describing
+the old twelve-step gate — is fixed. **D1–D3 are evaluator-instrument code and
+remain open.** Under `AGENTS.md`'s “anything changing the instrument” rule, their
+repair is **IMPORTANT**, even though it spends no data. They form P1-PRE and must
+land, pass preflight, and receive an independent verdict before Phase 1A.
+
+| carried defect | required repair |
+|---|---|
+| D1 — literal-`True` worker-restart witness | replace it with a structured result emitted by this suite; `--skip-worker-death` must make the witness fail/unprovable, never green |
+| D2 — witness `suite` field ignored | resolve the named suite to its own result artifact and refuse unknown/mismatched suites with executable negative tests |
+| D3 — `--no-write` rewrites lifecycle evidence | prevent regeneration and every tracked write; assert before/after hashes and a clean worktree |
 
 | # | blocker | state |
 |---|---|---|
@@ -249,17 +264,16 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 | order | slice | class | status |
 |---:|---|---|---|
 | 0 | official-stack/evaluator repair | IMPORTANT | **CLOSED 2026-08-24** — G1–G7 all met, independent ACCEPT recorded |
-| 1A | Kerdock/MUB generator + invariants, no truth seed | ROUTINE/IMPORTANT | **NEXT** — construction only; no seed, no estimator edit, no measurement |
-| 1B | structured-carrier DESIGN evidence | STRATEGIC | after 1A; contract reviewed before any block is claimed, on a NEW block (P02) |
-| 2 | structured carrier DESIGN | STRATEGIC on seed claim | pending |
-| 3 | structured carrier DECIDE | STRATEGIC | pending |
-| 4 | recurrent augmented-K2 parity and DESIGN | IMPORTANT/STRATEGIC | pending |
-| 5 | recurrent augmented-K2 DECIDE | STRATEGIC | pending |
-| 6 | checkpoint response DESIGN/DECIDE | STRATEGIC | pending |
-| 7 | integrated frontier and robustness | STRATEGIC | pending |
-| 8 | public CONFIRM / authorized Phase-2 vault | STRATEGIC | pending |
-| 9 | two frozen submissions and nomination | STRATEGIC | pending |
-| 10 | contribution write-up | STRATEGIC claim review | pending |
+| 0H | P1-PRE: D1–D3 evaluator hardening | **IMPORTANT** | **NEXT** — no data; written prediction, full preflight, knowledge delta, independent Skeptic |
+| 1A | Kerdock/MUB mathematical spec, direct generator, independent verifier, dense reference | **IMPORTANT** | after 0H ACCEPT; no seed, estimator edit, or truth measurement |
+| 1B | structured-carrier DESIGN evidence | STRATEGIC | after 1A ACCEPT; contract reviewed before any block is claimed, on a NEW block (P02) |
+| 2 | structured-carrier DECIDE | STRATEGIC | pending; new SINGLE_USE block after design freeze |
+| 3 | recurrent augmented-K2 parity / DESIGN / DECIDE | IMPORTANT then STRATEGIC | pending |
+| 4 | checkpoint response DESIGN/DECIDE | STRATEGIC | pending |
+| 5 | integrated frontier and robustness | STRATEGIC | pending |
+| 6 | public CONFIRM / authorized Phase-2 vault | STRATEGIC | pending |
+| 7 | two frozen submissions and nomination | STRATEGIC | pending |
+| 8 | contribution write-up | STRATEGIC claim review | pending |
 
 ## Samuel's standing predictions — recorded 2026-08-24, before the data
 

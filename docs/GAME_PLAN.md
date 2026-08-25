@@ -69,9 +69,10 @@ the preregistered gate for each slice.
    third/fourth harmonic and trace state forward.
 5. P01 is a DESIGN block, not a DECIDE block. It has consumed 144/600 seeds and
    cannot support a binding global lane kill.
-6. Local deployment parity is false: the main environment and lifecycle defaults
-   are stale, local weights are not flopscope-backed like the grader, and the old
-   Phase-2 ladder omitted the 0.4-second residual failure cliff.
+6. Phase-0 deployment parity is repaired and independently accepted: the official
+   stack/config is asserted, local weights match the grader representation, the
+   counted-FLOP anchor agrees op by op, and all five failure paths are provoked.
+   Three non-gate instrument defects from that ACCEPT remain scheduled as P1-PRE.
 
 ### Strong inference
 
@@ -141,7 +142,9 @@ Required properties:
 - basis count configurable for research, with 16 bases the primary fingerprint;
 - paired antipodes;
 - radial integral separated from angular design and validated independently;
-- chunked immutable arrays, no single allocation above 4 GiB;
+- a dense/full-batch float32 reference first (32,768 x 1,024 is 128 MiB per
+  point buffer), followed by chunking only if measured memory or residual evidence
+  requires it; no single allocation above 4 GiB;
 - every meaningful operation through flopscope APIs;
 - exact row-count, FLOP, residual, wall, and memory accounting;
 - generator invariants: norms, orthogonality, mutual unbiasedness, uniqueness,
@@ -230,7 +233,7 @@ The deployable candidate must:
 Each slice is completed and synthesized before the next begins. IMPORTANT and
 STRATEGIC requirements in `AGENTS.md` are part of the work, not optional review.
 
-### Phase 0 — make the evaluator Phase-2 truthful
+### Phase 0 — make the evaluator Phase-2 truthful — CLOSED
 
 **Class:** IMPORTANT. **First action.** No seed block.
 
@@ -260,14 +263,69 @@ Exit gate:
 - raw evidence packet in the log;
 - independent Skeptic accepts the instrument.
 
-### Phase 1 — build the carrier without claiming a win
+Phase 0 closed on the literal independent ACCEPT recorded in commit `7367fdb`.
 
-**Class:** ROUTINE/IMPORTANT for generator and invariant tests; STRATEGIC when a
-seed block or estimator is touched.
+### P1-PRE — close the accepting review's instrument defects
 
-Build a standalone width-1024 Kerdock/MUB generator, radial rule, streaming
-propagator, matched IID/orthogonal controls, and cost/memory model. First prove
-small/deterministic mathematical invariants without truth data.
+**Class:** IMPORTANT. No seed block, truth data, vault, or shipped-file change.
+
+Before carrier construction, close the three code defects the accepting review
+carried forward:
+
+1. replace the literal-`True` worker-restart witness with a structured result from
+   the deployment-envelope suite itself; skipping the worker-death section must
+   make that witness unprovable/failing rather than green;
+2. make `verify_witness` resolve the `suite` it names to that suite's result
+   artifact, and add negative tests for unknown suite, missing result, wrong check,
+   failed check and detail mismatch;
+3. make `--no-write` perform no regeneration and no tracked write, proven by
+   before/after hashes and a clean worktree.
+
+Exit gate: written prediction/knowledge target, executable negative tests, full
+preflight, LOG knowledge delta, and an independent Skeptic verdict. This is an
+instrument change under `AGENTS.md`; the absence of data does not make it ROUTINE.
+
+### Phase 1A — construct and verify the carrier without truth data
+
+**Class:** IMPORTANT because it changes a probe's mathematics. No seed block,
+truth measurement, vault touch, or `estimator.py` edit.
+
+Build a standalone width-1024 Kerdock/MUB mathematical specification, direct
+generator, independent verifier, exact-radial rule, dense propagation reference,
+and counted-cost/memory model. The existing length-256 implementation is
+GR(4,7); width 1024 needs the known GR(4,9)/real-MUB construction and a direct way
+to emit a chosen 1/2/4/8/16-basis subset without materialising the full
+1,048,576-word code. This is a new implementation and proof obligation, not an
+invitation to invent an unreferenced design.
+
+Required construction evidence, before any truth data:
+
+1. cite and transcribe the exact algebraic construction, basis indexing and
+   ordering; prove reduced dimensions against a simple reference implementation;
+2. use different logic for generator and verifier so a shared mistake cannot make
+   the suite self-consistent;
+3. prove unit norms, within-basis orthogonality, cross-basis coherence exactly
+   `1/sqrt(1024) = 1/32`, antipodal closure, expected unique row count and
+   deterministic ordering for 1/2/4/8/16 bases;
+4. validate the bias-free ReLU network's positive-homogeneity/radial identity
+   independently;
+5. measure the 16-basis subset's angular degree-4 error rather than calling it an
+   exact spherical degree-4 design;
+6. build the 32,768-direction dense/full-batch float32 reference first and
+   reproduce the leader-cost fingerprint to explained overhead. Compare any later
+   chunked/structured spelling against that reference before trusting it;
+7. account for point buffers, two-layer working storage, weights and temporaries.
+   A point buffer is 128 MiB; chunking is an optimization variable, not a presumed
+   correctness requirement.
+
+Exit gate: zero algebraic/determinism/reference failures, exact explained row and
+counted-cost accounting, full preflight, a LOG knowledge delta and an independent
+Skeptic verdict. No score or variance claim is permitted in Phase 1A.
+
+### Phase 1B — structured-carrier DESIGN evidence
+
+**Class:** STRATEGIC when the new DESIGN block is claimed. The complete contract,
+Samuel's restated S2 prediction and commit must precede the claim.
 
 Use a new Phase-2 DESIGN block for basis count, radial nodes, chunking, checkpoint
 placement, and other tuning. P01 may be used only for clearly labeled reusable
@@ -292,7 +350,7 @@ Phase-1 contract.
 | residual, per MLP | `k2p2` spends **~95 ms** of the **400 ms** cap in the best observed session and **260.7 ms in the worst**, where its own worst MLP sat at **1.02x headroom with no carrier at all**. The level is not reproducible to better than **~2.4x** across runs | **~139 ms**, budgeted off the bad day. Designing against the best day is how a carrier passes here and fails on the grader |
 | counted FLOPs | `k2p2` costs `1.379e11`; the leader's fingerprint is `1.0998e12`, `C/B = 0.51` | ~`9.6e11` before matching the leader's cost |
 | `setup()` | the 5 s ceiling covers **worker spawn + imports + setup**. `import whestbench` alone is 1.3 s quiet, 4.7-9.1 s loaded; our estimator's own setup is **0.6 ms** | build the point set here — it is FREE of FLOPs on the grader — but the wall ceiling is shared with imports we do not control |
-| memory | 8,192 MB, **unenforceable on this host**; shipped file peaks at 918 MB commit (an upper-bound headroom of 8.9x) | 32,768 x 1024 float32 directions is 128 MB if materialised at once — chunk it, and treat memory as accounting |
+| memory | 8,192 MB, **unenforceable on Windows**; shipped file peaks at 918 MB commit (an upper-bound headroom of 8.9x) | one 32,768 x 1024 float32 point buffer is 128 MiB; start with the dense reference and chunk only if measured peak accounting or residual behavior requires it |
 
 Two of these are new and neither was available before Phase 0:
 
@@ -412,8 +470,8 @@ Promote two complementary nominees:
 
 | window | required outcome |
 |---|---|
-| Aug 24–27 | Phase-2 evaluator parity and accepted evidence packet |
-| Aug 27–Sep 3 | Kerdock/MUB generator, radial rule, invariants, and DESIGN evidence |
+| Aug 24–26 | Phase-2 evaluator parity, accepted evidence packet, and P1-PRE hardening |
+| Aug 26–Sep 3 | Kerdock/MUB specification, generator, invariants, then DESIGN evidence |
 | Sep 3–12 | carrier DECIDE; augmented-K2 small-shape parity and DESIGN evidence |
 | Sep 12–24 | augmented-K2 DECIDE and checkpoint-response experiment |
 | Sep 24–Oct 5 | integrated architecture decision and 300–600-network robustness |
@@ -484,15 +542,18 @@ paths are provoked — the memory limit on Linux, where `RLIMIT_AS` exists.
 **The all-of gate G1–G7 is met**, on a literal independent **ACCEPT** at HEAD
 `952bd61`, after four review passes (PROVISIONAL, PROVISIONAL, REJECT, ACCEPT).
 
-**The immediate action is Phase 1A.**
+**The immediate action is P1-PRE, then Phase 1A.**
 
-Phase 1 then runs in two distinct stages:
+The accepting review carried D1–D3 without invalidating Phase 0. They are still
+evaluator-instrument defects, so the next session closes them as the short
+IMPORTANT P1-PRE slice above. Phase 1 then runs in two distinct stages:
 
 - **Phase 1A — construction only.** A width-1024 Kerdock/MUB generator emitting
   1/2/4/8/16 bases without materialising the full code, proved against an
   independent verifier and reduced-dimension references, with the 32,768-forward
-  FLOP fingerprint reproduced by a dense reference first. No truth seed, no
-  estimator change. Ends in preflight and an independent ACCEPT.
+  FLOP fingerprint reproduced by a dense/full-batch reference first and angular
+  degree-4 error measured rather than asserted. No truth seed or estimator change.
+  Ends in preflight and an independent verdict.
 - **Phase 1B — DESIGN evidence.** Contract reviewed before any block is claimed,
   on a **new** block (P02 rather than the already-exposed P01), judged on paired
   arithmetic competition-score differences with measured FLOPs, including a
@@ -500,18 +561,5 @@ Phase 1 then runs in two distinct stages:
   headroom — with the unexplained ~2.35× process-state effect as an explicit
   falsifier.
 
----
-
-### The original Phase-0 prediction requirements, for the record
-
-Before editing the instrument, obtain and record Samuel's predictions for:
-
-1. expected score change from official-stack repair (`<1%`, `1–5%`, `>5%`);
-2. expected Kerdock16 variance reduction versus IID at 32,768 directions
-   (`<2.7x`, `2.7–20x`, `>20x`);
-3. expected raw-MSE gain and official residual-failure risk for recurrent augmented
-   K2.
-
-Then write the IMPORTANT contract/knowledge target, capture the baseline, implement
-Phase 0, run the full verification suite, and hand the raw evidence to a fresh
-independent Skeptic. Only an accepted instrument may produce promotion evidence.
+The original Phase-0 prediction requirements and outcomes remain in
+`experiments/LOG.md`; they are historical evidence, not current instructions.
