@@ -43,18 +43,31 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   none a false green today: the Linux branch and the child-`setrlimit` Linux
   answer have never executed, and the five design observations of the sixth pass
   were deliberately not pursued.
-- **Track 0S is technically safe but procedurally PROVISIONAL.** The frozen K2p1
-  readiness run is complete, but its packet omitted the required ground-truth
-  noise floor (`7.47823932957716e-11`, only 0.001846% of raw MSE). Correct that,
-  preserve a current signed-in account/quota artifact, append and commit the
-  submission contract and Samuel prediction, then obtain a focused independent
-  ACCEPT. Only Samuel may authorize the exact-SHA one-off submission.
-- **Phase 1A is IN PROGRESS, construction only.** The current output passes 23/23
-  property checks and is a genuine 16-basis real-MUB subset, but K6's promised
-  independent reference does not exist: the verifier consumes generator output.
-  Correct K6, preserve the failed mapping as an executable negative control, and
-  complete the strengthened K7--K10 evidence in `GAME_PLAN.md`. **No seed block, no
-  `estimator.py` edit, and no truth measurement.** Phase 1B stays blocked until a
+- **Track 0S is ready for Samuel's decision.** The frozen K2p1 candidate
+  (`00240eb1e60810f5…`, byte-identical to `estimator_v2_6_1.py`) scores
+  `4.050566369642183e-7` adjusted on the official 100-MLP subprocess mini with
+  **zero failures**, fixed `137,600,326,656` FLOPs/MLP and a floor-pinned
+  multiplier. The GT-noise floor is recorded (`7.47823932957716e-11`, 0.001846% of
+  raw MSE, so the result is **54,165× above** the truth's own noise); the
+  account/allowance evidence is preserved with **transcription honestly
+  distinguished from capture**; the submission contract and **Samuel's prediction
+  (`3.6e-7`, no failures, transfers)** are committed *before* any result. Two
+  independent passes have run; the second closed the missing-gate defect. **Only
+  Samuel may authorize the one-off submission, and his approval must name the
+  exact SHA.**
+- **Phase 1A construction is COMPLETE and awaiting its verdict.** 34/34 verifier
+  and 13/13 probe. Exact `1/32` cross-basis coherence; **all 512** phase functions
+  degree 2 and **all 130,816** pairwise differences rank 10; the rejected
+  coordinate mapping is an executable negative control with a raw artifact.
+  **K6 is WITHDRAWN** — the verifier is a property checker, not an independent
+  reference; CCKS Example 9.2 was attempted and abandoned rather than tuned into
+  agreement. **K8 is quantified**: the carrier-aligned fourth moment is exactly
+  **21.6881103515625×** the spherical target while 64 random directions give
+  `[0.968, 1.023]`, so the subset is **not** a 4-design and random probing cannot
+  show it. The official flopscope ledger is `1,099,511,627,776` and its zero
+  overhead is an **identity** — `(2K−1) + 1 = 2K` — so the leader's `+290,757,224`
+  is neither ReLU nor materialisation. **No seed block, no `estimator.py` edit, no
+  truth measurement, and no performance claim.** Phase 1B stays blocked until a
   fresh independent ACCEPT.
 
 ## Authoritative document map
@@ -355,8 +368,14 @@ and worth watching.
 - Do not edit `estimator.py`, claim a seed block, reopen a killed lane, touch a
   vault, change a gate/residual model/protocol, or make a write-up claim without the
   required STRATEGIC sequence.
-- Do not submit without Samuel's explicit approval after official validate and a
-  clean Phase-2 subprocess mini with zero failures.
+- Do not submit without Samuel's explicit approval **naming the exact estimator
+  SHA**, and only after the **six-item operational gate** of the Track-0S
+  submission contract: hash + archive identity, no dirty TRACKED files,
+  `whest validate`, allowance, Samuel's SHA-naming approval, and
+  **`preflight.ps1 -Full` GREEN 16/16 with a committed transcript grepped for
+  its own verdict line**. `VALIDATION.md` §7 always required that last one;
+  the contract first omitted it, and an independent review caught the
+  omission.
 - After every IMPORTANT or STRATEGIC slice, obtain an independent Skeptic verdict
   from raw artifacts before believing or propagating the result.
 - Keep `CURRENT_STATE.md` updated when a lane, baseline, live rule, or next action

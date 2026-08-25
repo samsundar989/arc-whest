@@ -236,6 +236,24 @@ Write-Host "preflight -- arc-whest" -ForegroundColor White
 Write-Host "repo:    $repo"
 Write-Host "shipped: estimator.py   archive: $Archive"
 
+# THE TRANSCRIPT WITNESSES ITS OWN COMMIT.
+#
+# Until 2026-08-25 a transcript recorded no SHA, so "GREEN 16/16 at HEAD <x>" was
+# an assertion the artifact could not support -- an independent reviewer had to
+# reconstruct the HEAD from file mtimes to check it, and a submission gate that
+# names a HEAD is not mechanically checkable without this. Two lines fix it.
+$gitHead = (& git rev-parse HEAD 2>$null)
+$gitDirty = (& git status --porcelain 2>$null)
+Write-Host "HEAD:    $gitHead"
+if ($gitDirty) {
+    Write-Host "worktree: DIRTY at start --" -ForegroundColor Yellow
+    $gitDirty -split "`n" | ForEach-Object { if ($_) { Write-Host "    $_" } }
+    Write-Host "  (steps 15/16 regenerate tracked evidence, so the tree is" -ForegroundColor Yellow
+    Write-Host "   EXPECTED to be dirty at the END of a -Full run)" -ForegroundColor Yellow
+} else {
+    Write-Host "worktree: clean at start"
+}
+
 # --- 1. the OFFICIAL STACK, before anything is measured against it -------------
 # Everything below is a measurement, and a measurement taken under the wrong
 # packages is not a weaker measurement -- it is a different one. Until 2026-08-24
