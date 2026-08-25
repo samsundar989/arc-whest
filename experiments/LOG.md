@@ -14435,3 +14435,166 @@ endings.
 **`estimator.py`:** byte-identical. **Nothing submitted.**
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-25 — RESULT PHASE 1A: the carrier is built, verified, priced and measured — with K6 and K8 corrected [prediction K1–K11 above, unmodified]
+
+*Class IMPORTANT. **No seed claimed, no truth MSE read, no vault touched,
+`estimator.py` byte-identical.** No score, variance or performance claim is made
+or permitted. Everything below characterises a quadrature rule and its cost;
+whether it is *good* is a Phase-1B question this slice does not answer.*
+
+## The construction, and the falsifier that earned its place on day one
+
+Specification written first (`docs/KERDOCK_MUB_SPEC.md`), then the generator —
+and **the first build failed its own sharpest check.** §4 fixed the Gray
+coordinate identification as `2·rank(x) + t`, using the *multiplicative*
+enumeration. That is not `F2`-linear. Measured:
+
+| | first build | after correction |
+|---|---|---|
+| ANF degree of the phase functions | **9** | **2** |
+| pairwise matrix-difference ranks | **{6, 8, 10}** | **{10}** |
+| cross-basis spectrum | **`[0, 4, 8, … 104]`** | **flat `32`** |
+| within-basis orthogonality | **passed perfectly** | passed perfectly |
+
+That last row is the finding. **The weak check passed throughout, exactly as the
+spec predicted it would**, because the quadratic phase cancels there and it holds
+for *any* sign vector including a wrong one. Writing that down before measuring is
+what made a failure legible instead of confusing.
+
+Corrected to the **additive** image of `x` in `R/2R ≅ GF(2^m)`. The rejected
+mapping is preserved as an **executable negative control** with a raw artifact
+(`experiments/2026-08-25_p1a/rejected_mapping_negative_control.txt`), because a
+rejection nobody can re-run is an anecdote.
+
+## Predictions, scored
+
+| # | outcome |
+|---|---|
+| **K1** entries `±1` before scaling | **HIT** |
+| **K2** within-basis orthogonality exact | **HIT** — and *labelled weak*, which is why it caught nothing |
+| **K3** cross-basis correlation exactly `2^((m+1)/2)` in magnitude | **HIT** — exactly 4 / 8 / 16 / 32 at N = 16 / 64 / 256 / 1024 |
+| **K4** 32,768 rows, 16,384 lines, antipodal closure | **HIT** |
+| **K5** distinct rows, deterministic | **HIT** — byte-identical in a fresh process |
+| **K6** generator and verifier are independent code paths | **MISS — WITHDRAWN.** See below |
+| **K7** radial factor validated separately | **HIT** — and the applied-once guard bites |
+| **K8** the subset is NOT an exact 4-design; measure the error | **HIT, and now quantified exactly** |
+| **K9** dense cost `1,099,511,627,776` | **HIT** — and the *official ledger* agrees, for a reason |
+| **K10** 128 MiB point buffer, dense first | **HIT** |
+| **K11** nothing in Phase 0 / P1-PRE moves | **HIT** |
+
+### K6 — withdrawn, not defended
+
+K6 said generator and verifier are "two genuinely different code paths (direct
+emission vs. an independent reference)". **They are not.** The verifier imports
+the generator and checks *properties of its output*. That is a strong independent
+**property checker** — ANF degree, rank over `F2`, a second transform
+implementation, exhaustive integer Gram matrices — and it is **not** an
+independently generated reference object.
+
+**CCKS Example 9.2 was attempted as a true second generator and abandoned**, with
+the reason recorded rather than the attempt buried: the finite-field part is
+additive in the parameter, but the radical-correcting term goes as the inverse
+cube root and is not, so pairwise nonsingularity is not automatic and the
+correction cannot be pinned down from memory. **Building a "reference" and then
+adjusting it until it agreed with the generator would be worse than having none**,
+and it is precisely the circularity the reviewer objected to.
+
+Strengthened instead, in a way independent of *which* 16 bases we chose:
+**all 512 phase functions have ANF degree 2, and all 130,816 pairwise differences
+have rank 10.** The whole Kerdock set, not a lucky prefix. The honest residual
+scope is stated in the file: nothing here would catch a construction wrong in a
+way that still satisfies every property checked — mitigated only by the fact that
+the properties checked *are the definition*.
+
+### K8 — quantified, and random probing shown to be useless for it
+
+| | value |
+|---|---|
+| spherical target, `3/(N(N+2))` | `2.855446e-06` |
+| carrier-aligned fourth moment | `6.192923e-05` |
+| **ratio** | **`21.6881103515625`, exactly** |
+| 64 random directions | ratio in **`[0.9680, 1.0234]`** |
+
+**Random probes would have concluded the carrier was a 4-design.** The aligned
+direction is the extreme case and it is off by a factor of 21.7. The second moment
+*is* exact — the tight-frame identity verified in integer arithmetic, max
+deviation `0` — because a union of orthonormal bases with antipodes is a tight
+frame.
+
+**This is quadrature characterisation, not a performance claim.** Whether a 21.7×
+aligned fourth moment matters depends on the integrand, and that is Phase 1B.
+
+### K9 — the official ledger, and why the overhead is zero
+
+The real `flopscope.BudgetContext` ledger, dense 32,768 × 1024 float32 through 16
+layers:
+
+```text
+matmul   1,098,974,756,864     billed at the FMA count, (2K-1) per output element
+ReLU         536,870,912       billed at 1 per element
+total    1,099,511,627,776  ==  2*M*K*K*depth exactly, because (2K-1) + 1 = 2K
+```
+
+**Our ReLU is not free.** The apparent "zero overhead" is an *identity*, not a
+coincidence and not a forced match. The consequence is the useful part:
+
+> **The leader's `+290,757,224` (+0.0264%) is NOT ReLU and NOT materialisation.**
+> It is something else in an implementation we cannot see. It stays a **clue**,
+> not a target, and we report our own cost as our own.
+
+### K10, setup and memory — fresh subprocess
+
+`construct 0.095 s` of a 5 s ceiling **shared with `import whestbench`** (1.3–9 s),
+`materialise 0.053 s`, `propagate 1.69 s`; peak commit **1,147 MB** against a
+505 MB baseline. **That is an accounting UPPER BOUND on this host, not proof the
+grader's 8,192 MB limit was enforced** — Windows has no `RLIMIT_AS`.
+
+## Live-subset behaviour
+
+`k = 1/2/4/8/16` produce `2·k·1024` rows and are **nested prefixes**;
+`basis_indices` selects and orders arbitrary bases; the float32 carrier is
+`(32768, 1024)`, 128 MiB, entries exactly `±1/32`, unit norms to `0.000e+00`.
+
+**Basis-set choice is explicitly DEFERRED to Phase 1B.** The standard basis is
+excluded and 16 is the emitted default because a cost fingerprint points there —
+**an inference from published arithmetic, not a disclosure** — labelled as such
+everywhere it appears.
+
+## Evidence
+
+- `local_sim/kerdock_mub.py` — generator, ring assertions, negative control
+- `local_sim/test_kerdock_mub.py` — **34/34**
+- `local_sim/p1a_carrier_probe.py` — **13/13**
+- `experiments/2026-08-25_p1a/` — `carrier_probe.json`, `carrier_probe.txt`,
+  `rejected_mapping_negative_control.txt`, `preflight_full_p1a.txt`
+- **`PREFLIGHT GREEN -- 16/16`** at HEAD `0d4a053`, 1,104 lines, grepped for its
+  own verdict line; portability **99/99**
+
+## Knowledge delta
+
+1. **Name the weak check before you run it.** The spec said within-basis
+   orthogonality discriminates almost nothing, *and then it discriminated
+   nothing* while three other checks caught a genuinely broken construction. A
+   check predicted to be uninformative is worth more than one trusted by default.
+2. **A property checker is not a reference implementation**, and calling it one
+   is the claim-wider-than-the-code family again. The fix was to withdraw the
+   claim and strengthen what was actually there — not to build a reference I
+   would have had to tune into agreement.
+3. **Random probing cannot establish a design property.** 64 random directions
+   said 4-design; the aligned direction says 21.7×. Adversarial and aligned
+   probes carry the information about a *structured* rule.
+4. **An apparent zero overhead deserves the same suspicion as an apparent
+   defect.** It was an exact algebraic identity, and finding that out turned "we
+   match the leader's arithmetic" into "the leader's overhead is something we
+   have not identified".
+
+**Seed ledger:** unchanged, nothing claimed. P01 144/600. **Vault:** untouched,
+counter 1 == 1. **`estimator.py`:** byte-identical, `00240eb1e60810f5…`.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Next:** a fresh independent verdict on this bounded closure. Phase 1B remains
+blocked on Samuel's restated S2 prediction, a reviewed contract and a new DESIGN
+block.
