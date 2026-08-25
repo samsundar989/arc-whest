@@ -32,7 +32,7 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   first three each found something real, including a gate clause satisfied by a
   check that could not fail.
 - **P1-PRE is PROVISIONAL after its sixth independent review.** The terminal
-  implementation closes the six named guarantees: all 14 current mutations fire
+  implementation closes the six named guarantees: all 15 current mutations fire
   their named guard, D1-D3 hold, the destructive cleanup is gone, preflight is
   16/16 and portability is 99/99. The review found one remaining behavioural
   defect and three record defects: the harness still overwrites its tracked

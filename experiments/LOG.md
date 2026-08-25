@@ -13724,3 +13724,106 @@ had been removed, which is how a deleted regression test stays invisible.
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
 **Next:** one fresh independent review, bounded to whether these four items are
 closed and the durable record is truthful.
+
+---
+
+# 2026-08-25 — P1-PRE **ACCEPTED**: independent ACCEPT on the four bounded corrections, and the last false green closed
+
+*Seventh independent pass, reviewed HEAD `6d05d77`, bounded by Samuel to one
+question: are the four blocking items closed and is the durable record truthful?
+The five design observations from the sixth pass were declared out of scope and
+were not pursued. **Verdict: ACCEPT.** P1-PRE is closed.*
+
+## Verdict
+
+> ## Skeptic verdict: ACCEPT
+>
+> **Bottom line:** all four items are closed, the durable record is truthful where it matters, the append-only property holds byte-for-byte, no D1-D3 recurrence, and no new false green under any non-adversarial invocation.
+
+**What it verified by running rather than reading:**
+
+- **Item 1** — eight `--out` spellings probed: the old tracked default, an
+  untracked relative name, `.git/probe.txt`, `..` traversal, mixed case, forward
+  slashes — **all refused**; `\?\C:\...` and UNC **fail closed**. A
+  **no-argument** run wrote to `%TEMP%`, reported `inside the repository: False`,
+  all five protected hashes unmoved, exit 0. `LEGACY_OUT` is in the protected
+  set and the measurement is genuinely after the write.
+- **Item 2** — `experiments/LOG.md` at HEAD is a byte-prefix extension of the
+  file at `8e58db0`, `c64bcdb`, `7e81600` **and** `063396d`, verified by `cmp` on
+  truncated copies. It recomputed the arithmetic from the committed artifacts:
+  `42/42 … 0 not performed` at `7e81600`, `43/43 … 1 not performed` at HEAD — so
+  green `42 → 43`, declined `0 → 1`, exactly as the correction states, and the
+  original *"declined 1 → 2, green down by one"* is **wrong in both directions**.
+- **Item 3** — 15/15 caught by their named guard; J fires specifically on
+  `the scan's coverage matches the PINNED claim`. Composition verified against
+  git: 11 at `7e81600`, 14 at `8e58db0`, 15 at HEAD. Every injection letter cited
+  in any docstring now exists.
+- **Item 4** — the HEAD-`0810537` present-tense restriction is gone from both
+  docs that carried it, and the entry does not falsely claim to have edited the
+  two that never did.
+- **Invariants** — `git diff 9e3be80..6d05d77 -- estimator.py seed_ledger.jsonl
+  vault/` empty; `estimator.py` `00240eb1e60810f5…`; vault counter 1 == 1;
+  portability 99/99; anchor delta **+0**, 19 ops, 0 disagreeing; the gate
+  transcript carries its own `PREFLIGHT GREEN -- 16/16`.
+
+## The limitation it recorded, closed here rather than carried
+
+The accepting review found one more spelling and explicitly did **not** withhold
+acceptance for it: `os.path.abspath` does not resolve reparse points, so a Windows
+junction aiming into the repository was accepted. Against a **gitignored** target
+— `experiments/vault/vault_v1.npz`, the one that matters — the write landed inside
+the tree, `git status` saw nothing, the protected set did not cover it, and the
+tail line printed `inside the repository: False`. **A false green on the path that
+would destroy the vault array.**
+
+It costed the fix at one line and it is one line: `abspath` → **`realpath`**.
+Probed after the change, in the real repository:
+
+```text
+--out <junction>\experiments\junction_probe.txt      -> REFUSING
+--out <junction>\experimentsaultault_v1.npz      -> REFUSING
+did anything land?                                    -> False
+```
+
+Also corrected: the module's USAGE text and `docs/GOTCHAS.md` both still stated
+the **tracking-based** criterion this pass repudiated twenty-five lines above, and
+`CURRENT_STATE.md`/`GAME_PLAN.md` still said 14 mutations. All four now say
+containment, and 15.
+
+**This is synthesis of the accepting verdict, not a seventh hardening cycle.** It
+is four text corrections and one line that closes a demonstrated false green on
+the vault path; none of the five out-of-scope observations was touched.
+
+## P1-PRE is CLOSED
+
+| | |
+|---|---|
+| D1 — literal-`True` worker-restart witness | **closed** |
+| D2 — witness `suite` field ignored | **closed**, verification and artifact paths both |
+| D3 — `--no-write` rewrites evidence | **closed**, proved from outside the suite |
+| review-5 findings M4, M3a, M1, M2, oracle, destructive path, continuity | **closed** |
+| review-6 findings T6, the record, injection J, durable docs | **closed** |
+| **verdict** | **ACCEPT**, seventh independent pass |
+
+**Seven passes: PROVISIONAL ×6, then ACCEPT.** Every one of the six found
+something real, and five of those six found it *in the repair rather than in the
+original defect*. That is the durable lesson of this slice and it is recorded in
+`GOTCHAS.md`.
+
+**Still open, and not argued away** — carried as recorded limitations, exactly as
+the accepting reviewer framed them: section 7's Linux branch and the child
+`setrlimit` probe's Linux answer have never executed; whether `setrlimit` can fail
+where `getrlimit` succeeds in the organisers' container is unobservable from here;
+and the five design observations of the sixth pass (`PLATFORM_DEPENDENT_ALLOWED`
+comparing two declarations, M1 measuring the open rather than the audit, a
+constraint's `value` pinned nowhere, `declined()` unbounded, M4 defeatable by two
+coordinated edits). **None is a false green today.** They are deliberately not
+pursued, per instruction.
+
+**Seed ledger:** unchanged; nothing claimed. P01 144/600, 456 free. **Vault:**
+untouched, counter 1 == 1 log line. **`estimator.py`:** byte-identical,
+`00240eb1e60810f5…`.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Next:** Phase 1A construction (no seed, no truth, no `estimator.py`), and in
+parallel a Phase-2 calibration readiness packet for Samuel's explicit approval.

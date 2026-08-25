@@ -273,7 +273,7 @@ Phase 0 closed on the literal independent ACCEPT recorded in commit `7367fdb`.
 
 The three original carried defects are closed in code and survived six independent
 attacks. The terminal implementation also closed all six findings from review 5:
-14 mutations fire their named guards, the scratch mirror cannot destructively
+15 mutations fire their named guards, the scratch mirror cannot destructively
 restore repository files, the behavioural witnesses are pinned, preflight is
 16/16, and portability is 99/99.
 

@@ -64,7 +64,8 @@ USAGE
 Exit 0 means every injection was CAUGHT BY ITS NAMED GUARD. Non-zero means either
 a guarantee is no longer enforced (`UNCAUGHT`) or an injection stopped testing
 what it claims (`HARNESS FAILURE`). Both are findings. `--out` refuses any path
-that resolves inside a git-tracked file.
+that resolves inside the repository -- tracked or not, and through a
+symlink or junction. Containment is the test; tracking status is not.
 
 **It is not part of the gate.** `preflight.ps1` runs the two suites; this runs
 their falsification, and is invoked by hand when the guarantees are re-argued.
@@ -362,7 +363,14 @@ def main() -> int:
     # tool's own tracked default, which is how a tool that must not write the
     # repository came to write it on every invocation. There is no carve-out now:
     # the test is containment, not tracking status.
-    out_abs = os.path.abspath(args.out)
+    # realpath, NOT abspath: `abspath` does not resolve reparse points, so a
+    # Windows junction or a symlink aiming into the repository slipped through
+    # containment. With a gitignored target -- `experiments/vault/vault_v1.npz`
+    # is the spelling that matters -- the write landed inside the tree, `git
+    # status` saw nothing, and the tail line printed `inside the repository:
+    # False`. A false green on the path that would destroy the vault array.
+    # Found by the accepting review and closed here rather than carried.
+    out_abs = os.path.realpath(args.out)
     rel = os.path.relpath(out_abs, _ROOT)
     if not rel.startswith(".." + os.sep) and rel != "..":
         print(f"REFUSING: --out {rel.replace(os.sep, '/')} resolves INSIDE the "

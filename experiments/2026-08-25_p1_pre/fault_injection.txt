@@ -35,7 +35,7 @@ FAIL lines: 8, on target: 1
   FAIL  with the latch ARMED, suite REGENERATION raises and writes nothing NO REFUSAL RAISED
   FAIL  a resolver built BEFORE the latch was armed still does not regenerate status=MISMATCH regenerated={'probe': True}
   FAIL  the child exited 0                                               exit 1
-  FAIL  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json 942214b1f24266c2 -> baa714c4f9f8fef1
+  FAIL  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json 8320d7cfefac67ff -> 187ebbb4c6dbe46c
   FAIL  `git status --porcelain` is byte-identical across the run        6 line(s) before, 7 after
   FAIL  the child verified its own read-only claim before printing it    the claim is now conditional on the checks above it
   FAIL  ...and it regenerated nothing, by its own measurement            the mirror of the writing run's non-vacuity check
@@ -158,10 +158,10 @@ injections run: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'
 REPOSITORY UNTOUCHED -- measured AFTER the transcript was written:
   transcript path: C:\Users\samsu\AppData\Local\Temp\arc_whest_p1pre_fault_injection.txt
   inside the repository: False
-  git status --porcelain identical:  True   (0 line(s) before, 0 after)
+  git status --porcelain identical:  True   (4 line(s) before, 4 after)
   protected files with a moved sha256: none
-    experiments\2026-08-24_p2_p0\deployment_envelope.json  555a819a74810cb7
-    experiments\2026-08-24_p2_p0\lifecycle_self_test.json  942214b1f24266c2
-    experiments\2026-08-25_p1_pre\fault_injection.txt  30d62c09b270c23c
+    experiments\2026-08-24_p2_p0\deployment_envelope.json  f510168c601c9459
+    experiments\2026-08-24_p2_p0\lifecycle_self_test.json  8320d7cfefac67ff
+    experiments\2026-08-25_p1_pre\fault_injection.txt  bcf0a8c652e70194
     local_sim\test_deployment_envelope.py  d7033c4f84267d90
     local_sim\test_envelope_readonly.py  f15ebce893b7c0dd
