@@ -354,6 +354,25 @@ def _rlimit_available() -> bool:
     return hasattr(resource, "RLIMIT_AS")
 
 
+def _rlimit_usable() -> bool:
+    """Independently: can this platform actually READ the limit, not merely name it?
+
+    Deliberately a different question from `_rlimit_available()`, which asks
+    `hasattr`. The matrix's `enforced_locally` is assigned from that one, so
+    comparing the matrix against it is an identity and cannot fail. Comparing it
+    against a call that USES the limit can: an attribute that exists and a
+    `getrlimit` that raises is exactly the state in which the matrix would be
+    claiming enforcement this host does not have.
+    """
+    try:
+        import resource
+
+        resource.getrlimit(resource.RLIMIT_AS)
+        return True
+    except Exception:
+        return False
+
+
 #: Where the lifecycle suite's machine-readable results live. Regenerated on
 #: demand; never trusted stale.
 LIFECYCLE_RESULTS = os.path.join(
@@ -560,6 +579,34 @@ def verify_witness(witness, resolver: "WitnessResolver") -> "tuple[bool, str]":
     return True, (f"{len(names)} named check(s) verified in "
                   f"{witness.get('suite')} "
                   f"[{(results.get('results_sha256') or '')[:12]}]")
+
+
+def _record_witness(c: dict, w, ok: bool, why: str,
+                    resolver: "WitnessResolver") -> None:
+    """Embed the VERIFIED RESULTS in the artifact, not just the claim.
+
+    A committed evidence file that says `provoked_by: <name>` is a pointer; one
+    that carries the named check, its `ok` flag and its detail is evidence. The
+    pre-P2-P0 artifact was the former and its pointer was false.
+
+    The rows are taken from **the suite the witness named**, resolved here the
+    same way `verify_witness` resolves it. An earlier revision of this function
+    read them from a fixed `lifecycle_results` instead, so a witness naming any
+    third suite would have written an empty `witness_results` beside a
+    `witness_verified: true` -- D2's own shape, surviving on the artifact path
+    after being fixed on the verification path. Found by an independent Skeptic.
+    """
+    rows: list = []
+    suite = w.get("suite") if isinstance(w, dict) else None
+    if isinstance(suite, str):
+        status, results = resolver.resolve(suite)
+        if status == "OK":
+            by_name = {x["name"]: x for x in (results or {}).get("checks", [])}
+            rows = [by_name[n] for n in (w.get("checks") or []) if n in by_name]
+    c["witness_verified"] = ok
+    c["witness_reason"] = why
+    c["witness_suite"] = suite
+    c["witness_results"] = rows
 
 
 def enforceability() -> dict:
@@ -1274,26 +1321,31 @@ def main() -> int:
             pending(name, "provoked by this suite, which has not run it yet")
             continue
         ok, why = verify_witness(w, resolver)
-        # Embed the VERIFIED RESULTS in the artifact, not just the claim. A
-        # committed evidence file that says "provoked_by: <name>" is a pointer;
-        # one that carries the named check, its ok flag and its detail is
-        # evidence. The previous artifact was the former, and its pointer was
-        # false.
-        by_name = {x["name"]: x for x in (lifecycle_results or {}).get("checks", [])}
-        c["witness_verified"] = ok
-        c["witness_reason"] = why
-        c["witness_results"] = [by_name[n] for n in (w.get("checks") or [])
-                                if n in by_name]
+        _record_witness(c, w, ok, why, resolver)
         check(f"{name}: its named provocation RAN and PASSED", ok,
               f"{c['value']}  <- {why}")
-    check("the matrix is honest about memory on this platform",
-          enf["constraints"]["memory_limit_mb"]["enforced_locally"]
-          == _rlimit_available(),
-          f"enforced_locally={enf['constraints']['memory_limit_mb']['enforced_locally']}")
-    check("at least one constraint is recorded as NOT provable here",
-          len(_UNPROVABLE) > 0,
-          f"{len(_UNPROVABLE)} unprovable: "
-          f"{[u['constraint'] for u in _UNPROVABLE]}")
+    # NOT `enforced_locally == _rlimit_available()`: `enforced_locally` is
+    # ASSIGNED `bool(rl)` from that same call thirty lines up, so the two sides
+    # could never have disagreed. What is checked instead is the matrix's claim
+    # against an INDEPENDENT probe that USES the limit rather than asking
+    # `hasattr` about it -- those can differ, which is what makes this a check.
+    probe = _rlimit_usable()
+    check("the matrix's memory claim matches an INDEPENDENT probe of the platform",
+          enf["constraints"]["memory_limit_mb"]["enforced_locally"] == probe,
+          f"matrix says {enf['constraints']['memory_limit_mb']['enforced_locally']}, "
+          f"getrlimit(RLIMIT_AS) {'succeeds' if probe else 'is unavailable'}")
+    # NOT `len(_UNPROVABLE) > 0`: `predict_response_timeout_s` is hard-coded
+    # `enforced_locally: False`, so that count can never be zero and the line
+    # could never go red. The property actually worth holding is that the matrix
+    # REPORTED every constraint it marked unenforceable -- a loop that skipped
+    # one would leave a constraint in neither block, and that CAN happen.
+    unenforced = {n for n, c in enf["constraints"].items()
+                  if not c["enforced_locally"]}
+    reported = {u["constraint"] for u in _UNPROVABLE}
+    check("every constraint the matrix marks unenforceable was REPORTED as such",
+          bool(unenforced) and unenforced <= reported,
+          f"{sorted(unenforced)} marked; missing from the report: "
+          f"{sorted(unenforced - reported) or 'none'}")
     # H6. The two halves of the read-only claim, and they are mutually
     # exclusive: exactly one fires per run. Without the writing-mode half,
     # "--no-write changed nothing" could be true because nothing ever writes.
@@ -1551,15 +1603,11 @@ def main() -> int:
     # 0 watches that refusal fire against an empty result set), and a section
     # that did not run is reported NOT PROVABLE, never green.
     head("7. witness closure -- the provocations THIS suite performed")
-    adjudicated = 0
+    adjudicated: set = set()
     for name, c in deferred:
         w = c.get("provoked_by")
         ok, why = verify_witness(w, resolver)
-        by_name = {x["name"]: x for x in own_results()["checks"]}
-        c["witness_verified"] = ok
-        c["witness_reason"] = why
-        c["witness_results"] = [by_name[n] for n in (w.get("checks") or [])
-                                if n in by_name]
+        _record_witness(c, w, ok, why, resolver)
         # Written so that the GREEN line's condition is `ok` and never a
         # literal. `check(name, True, ...)` inside an `if ok:` branch is
         # semantically identical and visually identical to the defect this
@@ -1580,12 +1628,27 @@ def main() -> int:
             # It ran. Green if the witness holds, RED if it does not.
             check(f"{name}: its named provocation RAN and PASSED in THIS suite",
                   ok, why)
-        adjudicated += 1
-    check("every DEFERRED witness was adjudicated in this section",
-          adjudicated == len(deferred),
-          f"{adjudicated} of {len(deferred)} deferred -- a constraint that "
-          f"vanished between the matrix and the closure would be a gap that "
-          f"reads as coverage")
+        adjudicated.add(name)
+    # RECOMPUTED FROM THE MATRIX, not counted off the same list that drove the
+    # loop. The previous spelling was `adjudicated == len(deferred)` with
+    # `adjudicated` incremented once per iteration over `deferred` -- an
+    # identity, and the only guard against the very failure it named: a
+    # constraint dropped in the matrix loop shrinks BOTH sides and the line
+    # still prints green on `0 of 0`. Instance nine of this repository's
+    # signature failure, written inside the section that closes instance eight,
+    # and found by an independent Skeptic.
+    #
+    # This set comes from `enf["constraints"]` and the loop's from `deferred`,
+    # so they CAN disagree, and injection E makes them.
+    expected_self = {n for n, c in enf["constraints"].items()
+                     if c["enforced_locally"]
+                     and isinstance(c.get("provoked_by"), dict)
+                     and c["provoked_by"].get("suite") == SELF_SUITE}
+    check("every SELF-PROVOKED constraint in the matrix reached this section",
+          bool(expected_self) and adjudicated == expected_self,
+          f"adjudicated {sorted(adjudicated)}; the matrix declares "
+          f"{sorted(expected_self)}; missing "
+          f"{sorted(expected_self - adjudicated) or 'none'}")
     enf["self_results_sha256"] = own_results()["results_sha256"]
 
     # ---------------------------------------------------------------- #

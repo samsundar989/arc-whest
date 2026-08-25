@@ -22,10 +22,24 @@ here, in a different process, by different logic -- **a child run, sha256, and
 
 WHAT IT PROVES
 --------------
-1. **Structurally.** Every write-mode `open()` in the suite lives in a function
-   that is either the guarded artifact writer or a writer of gitignored scratch.
-   A new unguarded write to tracked evidence fails this check by construction,
-   which reading the diff would not.
+1. **Structurally.** Every *direct* write call in the suite -- `open()` in a
+   write mode, and the named `os` / `shutil` / `pathlib` write primitives --
+   lives in a function that is either the guarded artifact writer or a writer of
+   gitignored scratch.
+
+   **This scan does not see every way a process can write**, and an earlier
+   revision of this docstring claimed it did ("fails this check by
+   construction"). It cannot see a write performed by a CHILD PROCESS, which is
+   exactly how D3 happened: `regenerate_lifecycle_results` rewrites a committed
+   artifact and contains no write call at all, only a `subprocess.run`. Those
+   paths are covered by the latch (2) and the end-to-end run (3), not by this
+   scan. The scan's value is narrow and real: a newly *added* direct write
+   outside the allow-list turns it red, which reading a diff would not.
+1b. **No check in either file can pass on a constant.** Every `check(name,
+   condition, ...)` is parsed and any condition that is a literal truthy
+   constant fails this suite. That is this repository's signature defect -- nine
+   instances and counting -- and P1-PRE asserted the property in prose while
+   committing no scan that held it. The scan is the assertion.
 2. **Mechanically.** With the latch down the writer writes; with it armed the
    same call raises and leaves no file. A guard nobody has watched refuse is a
    guard nobody has tested.
@@ -66,7 +80,7 @@ import test_deployment_envelope as env  # noqa: E402
 
 SUITE = os.path.join(_HERE, "test_deployment_envelope.py")
 
-#: Functions in the suite that are ALLOWED to open a file for writing, and why.
+#: Functions in the suite that are ALLOWED to write directly, and why.
 #: `write_artifact` is the guarded evidence writer. The other two write throwaway
 #: candidates under `local_sim/_envelope_*_tmp*`, which `.gitignore` covers and
 #: which are removed in a `finally` -- that is what makes `git status
@@ -76,6 +90,19 @@ ALLOWED_WRITERS = {
     "measure_live_shape_memory",
     "provoke_worker_death",
 }
+
+#: Direct write primitives this scan recognises. Not exhaustive of "ways a
+#: process can write" -- see the docstring -- but exhaustive of the ones a new
+#: edit is likely to reach for.
+_WRITE_CALLS = {
+    "replace", "rename", "renames",             # os
+    "copy", "copy2", "copyfile", "copytree", "move",   # shutil
+    "write_text", "write_bytes",                # pathlib.Path
+    "mkstemp", "NamedTemporaryFile",            # tempfile
+}
+
+#: The two files this suite holds to the no-constant-condition rule.
+SCANNED = ("test_deployment_envelope.py", "test_envelope_readonly.py")
 
 _PASS = 0
 _FAIL = 0
@@ -115,7 +142,12 @@ def porcelain() -> "str | None":
 # --------------------------------------------------------------------------- #
 
 def _write_sites(path: str) -> dict:
-    """`{enclosing function name: [line, ...]}` for every write-mode `open()`."""
+    """`{enclosing function name: [line, ...]}` for every DIRECT write call.
+
+    Write-mode `open()` plus `_WRITE_CALLS`. Blind to child-process writes by
+    construction -- see this module's docstring, and note that the write which
+    caused D3 is one of them.
+    """
     with open(path, encoding="utf-8") as fh:
         tree = ast.parse(fh.read())
     sites: dict = {}
@@ -125,6 +157,9 @@ def _write_sites(path: str) -> dict:
             if not isinstance(node, ast.Call):
                 continue
             name = getattr(node.func, "id", None) or getattr(node.func, "attr", None)
+            if name in _WRITE_CALLS:
+                sites.setdefault(fn.name, []).append(node.lineno)
+                continue
             if name != "open":
                 continue
             mode = ""
@@ -136,6 +171,28 @@ def _write_sites(path: str) -> dict:
             if any(ch in mode for ch in ("w", "a", "x", "+")):
                 sites.setdefault(fn.name, []).append(node.lineno)
     return sites
+
+
+def _constant_conditions(path: str) -> list:
+    """Every `check(name, <literal truthy constant>, ...)`: `(line, source)`.
+
+    A literal FALSE condition is a deliberate failure report and is fine -- an
+    error branch calling `check(name, False, detail)` is how this suite records
+    that something went wrong. A literal TRUTHY condition is the defect: it
+    prints green whatever happened, and this repository has now lost NINE checks
+    to it, the ninth written inside the section repairing the eighth.
+    """
+    with open(path, encoding="utf-8") as fh:
+        tree = ast.parse(fh.read())
+    out = []
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Call)
+                and getattr(node.func, "id", None) == "check"
+                and len(node.args) >= 2
+                and isinstance(node.args[1], ast.Constant)
+                and bool(node.args[1].value)):
+            out.append((node.lineno, ast.unparse(node.args[1])))
+    return out
 
 
 def structural_tests() -> None:
@@ -155,6 +212,30 @@ def structural_tests() -> None:
     # passes on an empty set. This repository has lost checks to exactly that.
     check("...and the extractor is not returning an empty set",
           len(sites) >= 3, f"found {len(sites)} functions that write")
+
+    head("1b. STRUCTURAL -- no check() in either file can pass on a constant")
+    offenders = {}
+    for base in SCANNED:
+        found = _constant_conditions(os.path.join(_HERE, base))
+        if found:
+            offenders[base] = found
+        print(f"      {base:<34} {len(found)} literal-truthy condition(s)")
+    check("no check() has a literal truthy condition, in either file",
+          not offenders, "clean" if not offenders else f"{offenders}")
+    # Non-vacuity again, and this one is the interesting half: prove the scanner
+    # FINDS the pattern when it is there, by feeding it the defect verbatim.
+    probe = os.path.join(tempfile.gettempdir(), "arc_whest_const_probe.py")
+    try:
+        with open(probe, "w", encoding="utf-8") as fh:
+            fh.write("def f():\n    check('a literal condition', True, 'x')\n"
+                     "    check('an honest failure report', False, 'y')\n")
+        found = _constant_conditions(probe)
+        check("...and the scanner CATCHES the pattern when it is present",
+              [ln for ln, _ in found] == [2],
+              f"flagged line(s) {[ln for ln, _ in found]} -- the True, not the False")
+    finally:
+        if os.path.exists(probe):
+            os.remove(probe)
 
 
 # --------------------------------------------------------------------------- #
@@ -277,9 +358,18 @@ def child_tests() -> int:
           f"{len((git_after or '').splitlines())} after")
 
     # --- and the D1 skip path, observed in the same child ------------------- #
+    # What is forbidden is a green line CLAIMING this constraint was enforced or
+    # provoked -- either one whose check NAME is about it (the field starts at
+    # column 8), or one whose text asserts it in words. A green line that merely
+    # LISTS the name in a detail is fine and there is now one: section 7's
+    # closure prints the set it adjudicated, and `worker_death_restart` is in
+    # that set precisely because it was adjudicated -- as NOT PROVABLE. The
+    # first version of this check matched any mention and went red on it.
     green = [ln for ln in out.splitlines()
-             if re.match(r"\s*PASS\b", ln) and "worker_death_restart" in ln]
-    check("NO green line mentions worker_death_restart when section 6 is skipped",
+             if re.match(r"\s*PASS\s+worker_death_restart\b", ln)
+             or (re.match(r"\s*PASS\b", ln) and "worker_death_restart" in ln
+                 and ("RAN and PASSED" in ln or "is enforced" in ln))]
+    check("NO green line CLAIMS worker_death_restart when section 6 is skipped",
           not green, "0 such lines" if not green else f"{len(green)}: {green[:2]}")
     check("...and it is reported NOT PROVABLE instead",
           re.search(r"^\s*-\s*worker_death_restart", out, re.M) is not None,

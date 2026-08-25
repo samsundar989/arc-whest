@@ -23,6 +23,7 @@
         },
         "witness_verified": true,
         "witness_reason": "3 named check(s) verified in local_sim/lifecycle_eval.py --self-test [a913c55cbcc2]",
+        "witness_suite": "local_sim/lifecycle_eval.py --self-test",
         "witness_results": [
           {
             "name": "L4: a 1e6 budget exhausts the FLOP budget",
@@ -59,6 +60,7 @@
         },
         "witness_verified": true,
         "witness_reason": "3 named check(s) verified in local_sim/lifecycle_eval.py --self-test [a913c55cbcc2]",
+        "witness_suite": "local_sim/lifecycle_eval.py --self-test",
         "witness_results": [
           {
             "name": "L4: a 1e-9 s WALL limit trips the TIME path",
@@ -92,6 +94,7 @@
         "note": "the LOCAL residual is a different instrument from the graded one; the cliff is modelled faithfully, the seconds are not transferable",
         "witness_verified": true,
         "witness_reason": "3 named check(s) verified in local_sim/lifecycle_eval.py --self-test [a913c55cbcc2]",
+        "witness_suite": "local_sim/lifecycle_eval.py --self-test",
         "witness_results": [
           {
             "name": "L4: a 1e-9 s residual limit trips the residual path",
@@ -123,6 +126,7 @@
         },
         "witness_verified": true,
         "witness_reason": "2 named check(s) verified in local_sim/lifecycle_eval.py --self-test [a913c55cbcc2]",
+        "witness_suite": "local_sim/lifecycle_eval.py --self-test",
         "witness_results": [
           {
             "name": "a 6 s setup RAISES SetupFailure \u2014 no clean objective is produced",
@@ -163,7 +167,8 @@
           }
         },
         "witness_verified": true,
-        "witness_reason": "6 named check(s) verified in local_sim/test_deployment_envelope.py [8ef599e48aba]",
+        "witness_reason": "6 named check(s) verified in local_sim/test_deployment_envelope.py [0cb85705d47e]",
+        "witness_suite": "local_sim/test_deployment_envelope.py",
         "witness_results": [
           {
             "name": "the suite SURVIVED a worker that hard-exited mid-run",
@@ -205,7 +210,7 @@
       }
     },
     "witness_suite_sha256": "a913c55cbcc2434ea5fde5a25524d4081e48a7d08a1710af8b242b9d75ca16d1",
-    "self_results_sha256": "f0bca0ddc218602d851f2e79376d72883a8d0ed0beab48ac2abbcccb50015279"
+    "self_results_sha256": "6dce6837c180159850977ce65c5aa82c746cc28367efd4490c9718132bffdeb3"
   },
   "unprovable_here": [
     {
@@ -226,20 +231,20 @@
   "memory": {
     "measurement": {
       "baseline": {
-        "working_set": 130277376,
-        "commit": 606552064
+        "working_set": 130531328,
+        "commit": 606834688
       },
       "peak": {
-        "working_set": 462376960,
-        "commit": 962486272
+        "working_set": 462090240,
+        "commit": 961966080
       },
       "weight_bytes": 67108864
     },
     "limit_mb": 8192,
-    "peak_working_set_mb": 440.95703125,
-    "peak_commit_mb": 917.8984375,
+    "peak_working_set_mb": 440.68359375,
+    "peak_commit_mb": 917.40234375,
     "weights_mb": 64.0,
-    "headroom_upper_bound": 8.92473466052719
+    "headroom_upper_bound": 8.929560792829617
   },
   "memory_limit_provocation": {
     "provoked_here": false,
