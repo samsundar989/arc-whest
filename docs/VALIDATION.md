@@ -670,7 +670,7 @@ the number has moved.
 | tier | steps run | when |
 |---|---|---|
 | **default** | **12 of 16** — **1** official stack + round configuration (73/73, asserted against the *installed* package), **2** mint provenance (1024×16 first), **3** invariant suite (30/30), **4** `whest validate`, **5** ship-file identity, **6** vault seal, **7** seed ledger (60/60), **8** canonical scorer + the binding gate (98/98), **9** seed-ledger *refusals*, **10** vault integrity, **11** lifecycle evaluator (56/56), **12** counted-FLOP anchor vs the official runner | every change |
-| **`-Full`** | **16 of 16** — adds **13** shape parity (27/27), **14** carrier strength (48/48), **15** deployment envelope (39/39 + what it cannot prove) **and its read-only proof** (20/20, `local_sim/test_envelope_readonly.py`, added by P1-PRE 2026-08-25), **16** official Phase-2 subprocess smoke, zero failures | **required** before any promotion, submission, or vault touch |
+| **`-Full`** | **16 of 16** — adds **13** shape parity (27/27), **14** carrier strength (48/48), **15** deployment envelope (39/39 + what it cannot prove) **and its read-only proof** (25/25, `local_sim/test_envelope_readonly.py`, added by P1-PRE 2026-08-25), **16** official Phase-2 subprocess smoke, zero failures | **required** before any promotion, submission, or vault touch |
 
 **Step 16 is DEPLOYMENT AUTHORITY** — the grader's own subprocess runner on the
 organisers' own `v2-phase2` data — and it is **load-sensitive**: the 5 s setup
