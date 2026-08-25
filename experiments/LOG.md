@@ -14102,3 +14102,88 @@ Line-Sets* (primary construction).
 
 **Reviewers:** two fresh independent Skeptics. Literal verdict on each track:
 **PROVISIONAL**.
+
+---
+
+# 2026-08-25 — TRACK 0S CORRECTION: the noise floor the packet omitted, and three wordings it got wrong
+
+*Append-only correction to `TRACK A: Phase-2 calibration submission READINESS
+PACKET`. That entry is **not altered** — `experiments/LOG.md` is append-only and
+its byte-prefix integrity is what seven reviews have used to prove
+preregistrations were not retro-edited. Nothing is submitted. No seed, no vault,
+no `estimator.py` edit.*
+
+## 1. The ground-truth noise floor, which the packet should never have omitted
+
+`VALIDATION.md` § *Standing rules*: **every measured MSE is reported alongside its
+ground-truth-noise floor.** The packet quoted a raw MSE and no floor. That is the
+defect.
+
+Recomputed here from the organisers' **published parquet rows** — not from the run
+report, because `avg_variance` is a dataset column and not a result field
+(`experiments/2026-08-25_trackA/gt_noise_floor.txt`):
+
+```text
+mean(avg_variance) / 1e9  =  7.47823932957716e-11      <- the floor
+raw final-layer MSE        =  4.050566369642183e-6
+floor / raw MSE            =  0.001846%
+raw MSE / floor            =  54,165x
+```
+
+**The result is not noise-limited**: the measured error is ~54,000× the truth's own
+Monte-Carlo noise, so nothing about this baseline's score is an artifact of truth
+precision.
+
+*One digit of pedantry, recorded because it is the kind of thing that later reads
+as a discrepancy.* Summing element-wise (`mean(v/1e9)`) gives
+`7.478239329577159e-11` — **one ULP** away. `mean(v)/1e9` gives
+`7.47823932957716e-11` exactly, and that is the value recorded. Both round to
+`0.001846%`; nothing depends on it, and the artifact shows both orderings.
+
+## 2. Three wordings the packet got wrong
+
+**(a) "the graded submission runs the organisers' public+private evaluation."**
+**Wrong, and it matters.** The visible submission score is feedback on the **50
+public networks**; the other 50 are withheld until the final result.
+`VALIDATION.md` §6 already records that the private half's *accuracy* is invisible
+in every graded report — only its compute telemetry is — so the packet
+contradicted a standing finding of this repository. **A returned score is a
+50-network feedback number, and any agreement with our 100-network local mini is
+correspondingly weaker evidence than it looks.**
+
+**(b) the board figures were stale.** The packet said "roughly the rank-33 cluster
+of 44". The 2026-08-25 recheck recorded in the DECISION REVIEW shows:
+
+| | recorded 2026-08-25 |
+|---|---|
+| entrants | **46** |
+| rank 1 | Puffi, `1.09e-8` adjusted / `3.55e-8` raw |
+| the `3.93e-7` covariance-propagation tie | about ranks **35–39** |
+| our measured `4.0506e-7` projects to | about **rank 40** |
+| gap to the leader | **37.2x** adjusted, **114.1x** raw |
+
+**(c) the allowance is per UTC day.** "10/team/day" is `10 per team per **UTC**
+day`. The distinction decides whether a second submission is available tonight or
+tomorrow, and the packet elided it.
+
+## 3. The allowance and account evidence, as an artifact rather than prose
+
+`experiments/2026-08-25_trackA/account_and_allowance.md`, and it separates two
+things the packet ran together:
+
+- **what I verified in this repository** — candidate hash, archive identity, the
+  100-row report, zero failures, the FLOP anchor, the residual headroom, the
+  noise floor, the dataset revision;
+- **what I did not and cannot verify from here** — this session has no browser and
+  no AIcrowd credentials, so the zero-submissions state, the 10/UTC-day allowance
+  and the board figures are **transcribed** from the signed-in recheck recorded in
+  the DECISION REVIEW, and are labelled as transcription rather than capture.
+
+A live recheck before submitting is cheap and is Samuel's to run. Nothing in the
+contract depends on the *board* being current — only on the allowance being ≥ 1
+and the account being able to submit.
+
+**Seed ledger:** unchanged, nothing claimed. **Vault:** untouched.
+**`estimator.py`:** byte-identical, `00240eb1e60810f5…`. **Nothing submitted.**
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.

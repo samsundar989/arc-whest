@@ -1,0 +1,24 @@
+source parquet shards (HF cache, organisers' published bytes):
+    mini-00000-of-00007.parquet  sha256 7da858bc60616456
+    mini-00001-of-00007.parquet  sha256 9c65a4c4c8786230
+    mini-00002-of-00007.parquet  sha256 f0fe736bdfddf2eb
+    mini-00003-of-00007.parquet  sha256 7c987422c2ad849f
+    mini-00004-of-00007.parquet  sha256 fedf0d67479eb7b8
+    mini-00005-of-00007.parquet  sha256 6eb84bd50068e8dc
+    mini-00006-of-00007.parquet  sha256 481bf94b30d81c00
+
+rows: 100   truth samples per network: 1,000,000,000
+
+mean(avg_variance)/n / 1e9   = 7.47823932957716e-11   <- the recorded value
+mean(avg_variance/1e9)       = 7.478239329577159e-11
+identical doubles: False   (they differ by ONE ULP; summation order)
+matches the recorded 7.47823932957716e-11: True
+
+RAW final-layer MSE (measured)  4.050566369642183e-06
+GT-noise floor                  7.47823932957716e-11
+floor as a share of raw MSE     0.001846%
+raw MSE / floor                 54,165x
+
+CONCLUSION: the measured MSE is ~54,000x the truth's own Monte-Carlo
+noise, so the score is not noise-limited. Nothing here is tuned to it;
+the public split is CONFIRM tier and read-only (VALIDATION.md 0).
