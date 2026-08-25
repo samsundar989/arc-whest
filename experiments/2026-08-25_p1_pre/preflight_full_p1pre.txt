@@ -238,7 +238,7 @@ with flops.configure(symmetry_warnings=False).
 │ │ └────────┴──────────────────────────┴────────────────┘                  │ │
 │ └─────────────────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
-✓ Validation passed in 25ms
+✓ Validation passed in 27ms
 Next: `whest run --estimator estimator.py --split mini`
   PASS  4. whest validate
 
@@ -648,7 +648,7 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
   L1: setup() was called exactly once on the grader path         ok   
 
 2. L3 — setup() fits inside the grader's 5-second ceiling
-  L3: module load + setup(), plus the measured host cold start, fits ok   231.2 ms + 240 ms = 471 ms of 5000 ms (a PACKAGE DEFAULT, not observed)
+  L3: module load + setup(), plus the measured host cold start, fits ok   186.3 ms + 240 ms = 426 ms of 5000 ms (a PACKAGE DEFAULT, not observed)
   L3: and is therefore not timed out                             ok   
   L3: setup raised nothing                                       ok   clean
 
@@ -669,7 +669,7 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
   L4: a 1e-9 s WALL limit trips the TIME path                    ok   2/2 time_exhausted
   L4: wall-exhausted rows are exactly zeroed at multiplier 1.0   ok   
   L4: ...and the WALL path is distinct from the RESIDUAL path    ok   time_exhausted set, residual_exhausted clear
-  L4: 50 ms of residual at B=1e9 trips the COMBINED budget C=F+lam*R>B ok   C = 5.715e+09 vs B = 1.000e+09
+  L4: 50 ms of residual at B=1e9 trips the COMBINED budget C=F+lam*R>B ok   C = 6.025e+09 vs B = 1.000e+09
   L4: combined-exhausted rows are exactly zeroed at multiplier 1.0 ok   
   L4: and `competition_score` owns that predicate, not this module ok   C = 3.000e+11 vs B = 2.72e11, at the PHASE-1 rate
   L4: ...and under the LIVE round the same row is IN budget, because lambda is 0 ok   C = 2.000e+11 vs B = 2.72e11
@@ -680,7 +680,7 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
   a RAISING setup also refuses                                   ok   SETUP_ERROR
 
 4c. the setup clock starts where the grader's does
-  the timer covers module load, not just setup() (runner.py:144 precedes load_estimator_from_path) ok   measured 231.2 ms + 240 ms host cold start, of 5000 ms
+  the timer covers module load, not just setup() (runner.py:144 precedes load_estimator_from_path) ok   measured 186.3 ms + 240 ms host cold start, of 5000 ms
   the evidence bundle says its residual is a LOCAL-runner figure ok   runner=local (in-process BudgetContext)
 
 5. L6 — evidence rows are content-addressed and reproducible
@@ -703,7 +703,7 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
   L8: C == F, because lambda is 0                                ok   C = 137,600,326,656
   L8: the multiplier is pinned at the 0.1 floor at this operating point ok   C/B = 0.0625734 < floor 0.1
   L8: no failure path fires on the shipped file                  ok   budget=False time=False residual=False combined=False error=''
-  L8: local in-process residual leaves headroom under the 0.4 s cliff ok   53.6 ms local -> 7.46x headroom (LOCAL, in-process; the grader's own figure is the authority)
+  L8: local in-process residual leaves headroom under the 0.4 s cliff ok   42.8 ms local -> 9.35x headroom (LOCAL, in-process; the grader's own figure is the authority)
   L8: the 0.4 s cliff FIRES when provoked (1e-9 s limit)         ok   
   L8: a residual failure is zeroed and priced at multiplier 1.0, not 0.1 ok   mult 1.0
   L8: ...and that run's provenance DECLARES it was not a clean round ok   {'residual_wall_time_limit_s': [1e-09, 0.4]}
@@ -938,8 +938,8 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
 
 0b. NEGATIVE TESTS -- the read-only latch refuses both write paths
 ------------------------------------------------------------------
-  PASS  REFUSED: regenerating a suite's results while the latch is armed --no-write is armed: refusing to regenerate ..\..\AppData\Local\Temp\arc_whest_ro_i3nwzvuj
-  PASS  REFUSED: writing an evidence artifact while the latch is armed --no-write is armed: refusing to write C:\Users\samsu\AppData\Local\Temp\arc_whest_ro_i3nw
+  PASS  REFUSED: regenerating a suite's results while the latch is armed --no-write is armed: refusing to regenerate ..\..\AppData\Local\Temp\arc_whest_ro_gifjl9us
+  PASS  REFUSED: writing an evidence artifact while the latch is armed --no-write is armed: refusing to write C:\Users\samsu\AppData\Local\Temp\arc_whest_ro_gifj
   PASS  ...and with the latch DOWN the same writer DOES write          wrote would_have_been_written.json to a system temp dir
 
 1. the enforceability matrix
@@ -1061,9 +1061,9 @@ READ-ONLY PROOF -- is `test_deployment_envelope.py --no-write` actually read-onl
   PASS  watched path is TRACKED by git: experiments/2026-08-24_p2_p0/lifecycle_self_test.json an 'unchanged' claim about an untracked file proves nothing
   PASS  a git worktree status was obtained before the run                git status --porcelain
   PASS  the child exited 0                                               exit 0
-  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/deployment_envelope.json 555a819a74810cb7 -> 555a819a74810cb7
-  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json 942214b1f24266c2 -> 942214b1f24266c2
-  PASS  `git status --porcelain` is byte-identical across the run        4 line(s) before, 4 after
+  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/deployment_envelope.json f510168c601c9459 -> f510168c601c9459
+  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json 8320d7cfefac67ff -> 8320d7cfefac67ff
+  PASS  `git status --porcelain` is byte-identical across the run        3 line(s) before, 3 after
   PASS  NO green line CLAIMS worker_death_restart when section 6 is skipped 0 such lines
   PASS  ...and it is reported NOT PROVABLE instead                       present in the NOT PROVABLE block
   PASS  ...through the WITNESS, not only through the skipped section     section 7 adjudicated the deferred witness and refused it
@@ -1086,7 +1086,7 @@ READONLY-PROOF-RESULT: 32/32 checks passed, exit 0
   residual cap 0.4s   wall 120.0s
   score        4.778624e-07   raw MSE 4.778624e-06   mult 0.1000
   C/B          0.0625734   failures 0
-  worst residual 0.08512 s of 0.40 s cap  -> 4.7x headroom (GRADED PATH)
+  worst residual 0.07877 s of 0.40 s cap  -> 5.1x headroom (GRADED PATH)
   PASS  16. official Phase-2 subprocess smoke (zero failures)
 
 PREFLIGHT GREEN -- 16/16
