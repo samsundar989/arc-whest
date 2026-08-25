@@ -167,7 +167,7 @@
           }
         },
         "witness_verified": true,
-        "witness_reason": "6 named check(s) verified in local_sim/test_deployment_envelope.py [e7aaad51424d]",
+        "witness_reason": "6 named check(s) verified in local_sim/test_deployment_envelope.py [d91a613e31ac]",
         "witness_suite": "local_sim/test_deployment_envelope.py",
         "witness_results": [
           {
@@ -210,7 +210,7 @@
       }
     },
     "witness_suite_sha256": "a913c55cbcc2434ea5fde5a25524d4081e48a7d08a1710af8b242b9d75ca16d1",
-    "self_results_sha256": "34ca808ae2e1d478fb985bfc107caee5471c87f9dc2c8237c2bfb3b295e1d87d"
+    "self_results_sha256": "383683ac8a0ecb42139974648a658a1bc38ede16572457a7a93cbe1cac75de18"
   },
   "unprovable_here": [
     {
@@ -226,25 +226,30 @@
       "why": "no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/"
     }
   ],
-  "not_performed_in_this_run": [],
+  "not_performed_in_this_run": [
+    {
+      "check": "the memory claim vs a child that applies the real cap",
+      "why": "this host has no `resource`, so the child cannot reach setrlimit(8192 MB) and both sides of the comparison descend from one failed import. The LINUX memory claim is carried by section 5's worker probe ('the worker actually APPLIED the 8 GiB cap'), not by this"
+    }
+  ],
   "predict_response_timeout_s": 125.0,
   "memory": {
     "measurement": {
       "baseline": {
-        "working_set": 130453504,
-        "commit": 606584832
+        "working_set": 130789376,
+        "commit": 607019008
       },
       "peak": {
-        "working_set": 462503936,
-        "commit": 962428928
+        "working_set": 462684160,
+        "commit": 962748416
       },
       "weight_bytes": 67108864
     },
     "limit_mb": 8192,
-    "peak_working_set_mb": 441.078125,
-    "peak_commit_mb": 917.84375,
+    "peak_working_set_mb": 441.25,
+    "peak_commit_mb": 918.1484375,
     "weights_mb": 64.0,
-    "headroom_upper_bound": 8.92526641925709
+    "headroom_upper_bound": 8.922304570169244
   },
   "memory_limit_provocation": {
     "provoked_here": false,
@@ -277,6 +282,6 @@
       "error": 1
     }
   },
-  "checks_passed": 42,
-  "checks_total": 42
+  "checks_passed": 43,
+  "checks_total": 43
 }

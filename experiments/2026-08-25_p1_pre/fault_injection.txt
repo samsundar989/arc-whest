@@ -1,258 +1,153 @@
 ====================================================================================================
 INJECTION A -- D1 -- section 7 reports an UNRUN provocation as green again
-edits:   test_deployment_envelope.py
-command: test_envelope_readonly.py
-exit code: 1   (CAUGHT)
-FAIL lines: 3
-  FAIL  no check() has a literal truthy condition, in any scanned file   {'test_deployment_envelope.py': [(1765, 'True')]}
+edits:    test_deployment_envelope.py   (in a scratch mirror, never the repo)
+command:  test_envelope_readonly.py
+expects:  a FAIL containing 'NO green line CLAIMS worker_death_restart'
+exit 1   (CAUGHT by its named guard)
+FAIL lines: 6, on target: 1
+  FAIL  no check() has a literal truthy condition, in any scanned file   {'test_deployment_envelope.py': [(1919, 'True')]}
+  FAIL  the child exited 0                                               exit 1
+  FAIL  `git status --porcelain` is byte-identical across the run        2 line(s) before, 3 after
   FAIL  NO green line CLAIMS worker_death_restart when section 6 is skipped 1: ["  PASS  worker_death_restart: its named provocation RAN and PASSED in THIS suite CHECK NOT FOUND in local_sim/test_deployment_envelope.py: 'the suite SURVIVED a worker that hard-exited mid-run' -- the witness names a provocation the suite does not contain"]
   FAIL  ...through the WITNESS, not only through the skipped section     section 7 adjudicated the deferred witness and refused it
-
---- last 12 lines of the run ---
-    FAIL  NO green line CLAIMS worker_death_restart when section 6 is skipped 1: ["  PASS  worker_death_restart: its named provocation RAN and PASSED in THIS suite CHECK NOT FOUND in local_sim/test_deployment_envelope.py: 'the suite SURVIVED a worker that hard-exited mid-run' -- the witness names a provocation the suite does not contain"]
-    PASS  ...and it is reported NOT PROVABLE instead                       present in the NOT PROVABLE block
-    FAIL  ...through the WITNESS, not only through the skipped section     section 7 adjudicated the deferred witness and refused it
-    PASS  ...and the refusal names the check the witness could not find    names 'the suite SURVIVED a worker that hard-exited mid-run'
-    PASS  the child verified its own read-only claim before printing it    the claim is now conditional on the checks above it
-    PASS  both closing blocks were parsed and neither is empty             4 NOT PROVABLE, 1 NOT PERFORMED
-    PASS  ...the writer's positive control is filed as NOT PERFORMED       1 line(s) in that block
-    PASS  ...and NOT as a gap in the evaluator's coverage of the grader    4 envelope constraint(s) reported NOT PROVABLE
-    PASS  ...and it regenerated nothing, by its own measurement            the mirror of the writing run's non-vacuity check
-  
-  ====================================================================================================
-  27/30 checks passed
+  FAIL  the child verified its own read-only claim before printing it    the claim is now conditional on the checks above it
 
 ====================================================================================================
-INJECTION B -- D2 -- the resolver ignores the suite it was given (pre-P1-PRE behaviour)
-edits:   test_deployment_envelope.py
-command: test_deployment_envelope.py --no-write --skip-worker-death
-exit code: 1   (CAUGHT)
-FAIL lines: 4
+INJECTION B -- D2 -- the resolver ignores the suite it was given
+edits:    test_deployment_envelope.py   (in a scratch mirror, never the repo)
+command:  test_deployment_envelope.py --no-write --skip-worker-death
+expects:  a FAIL containing 'REFUSED: a witness naming a suite NOBODY REGISTERED'
+exit 1   (CAUGHT by its named guard)
+FAIL lines: 4, on target: 1
   FAIL  REFUSED: a witness naming a suite NOBODY REGISTERED            1 named check(s) verified in local_sim/does_not_exist.py [a913c55cbcc2]
   FAIL  REFUSED: results that resolve but DECLARE A DIFFERENT SUITE    1 named check(s) verified in local_sim/impostor_suite.py [a913c55cbcc2]
   FAIL  REFUSED: THE SELF-WITNESS, against a run in which section 6 never ran SUITE MISMATCH: 'local_sim/test_deployment_envelope.py' resolved to results emitted by 'local_si
   FAIL  ACCEPTED: a LIVE witness against this suite's own emitted results SUITE MISMATCH: 'local_sim/test_deployment_envelope.py' resolved to results emitted by 'local_si
 
---- last 12 lines of the run ---
-    - memory_limit_mb: NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design
-    - predict_response_timeout_s: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
-    - memory_limit_mb (provocation): no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/
-    - worker_death_restart: --skip-worker-death was passed
-    - worker_death_restart (witness): SUITE MISMATCH: 'local_sim/test_deployment_envelope.py' resolved to results emitted by 'local_sim/test_deployment_envelope.py' -- the witness and the evidence are about different suites
-  
-  NOT PERFORMED IN THIS RUN -- these are checks this INVOCATION
-  declined, not gaps in the evaluator's coverage of the grader. They
-  are named rather than skipped quietly, and they are not passes:
-    - the writer's positive control: the latch was armed before this suite started (--no-write); lowering it here would make the read-only claim conditional on restoring it. Exercised in the writing mode instead.
-  
-    --no-write: NOT VERIFIED. The claim is WITHHELD -- see the failures above.
-
 ====================================================================================================
 INJECTION C -- D3 -- the read-only latch stops refusing
-edits:   test_deployment_envelope.py
-command: test_envelope_readonly.py
-exit code: 1   (CAUGHT)
-FAIL lines: 8
+edits:    test_deployment_envelope.py   (in a scratch mirror, never the repo)
+command:  test_envelope_readonly.py
+expects:  a FAIL containing 'with the latch ARMED, the same call RAISES and writes nothing'
+exit 1   (CAUGHT by its named guard)
+FAIL lines: 8, on target: 1
   FAIL  with the latch ARMED, the same call RAISES and writes nothing    NO REFUSAL RAISED
   FAIL  with the latch ARMED, suite REGENERATION raises and writes nothing NO REFUSAL RAISED
   FAIL  a resolver built BEFORE the latch was armed still does not regenerate status=MISMATCH regenerated={'probe': True}
   FAIL  the child exited 0                                               exit 1
-  FAIL  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json ca2e813e66a256ea -> 54729a84de249939
-  FAIL  `git status --porcelain` is byte-identical across the run        1 line(s) before, 2 after
+  FAIL  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json a6ac7180f4c9a0a6 -> a7d449c9af1d4ca0
+  FAIL  `git status --porcelain` is byte-identical across the run        6 line(s) before, 7 after
   FAIL  the child verified its own read-only claim before printing it    the claim is now conditional on the checks above it
   FAIL  ...and it regenerated nothing, by its own measurement            the mirror of the writing run's non-vacuity check
 
---- last 12 lines of the run ---
-    PASS  NO green line CLAIMS worker_death_restart when section 6 is skipped 0 such lines
-    PASS  ...and it is reported NOT PROVABLE instead                       present in the NOT PROVABLE block
-    PASS  ...through the WITNESS, not only through the skipped section     section 7 adjudicated the deferred witness and refused it
-    PASS  ...and the refusal names the check the witness could not find    names 'the suite SURVIVED a worker that hard-exited mid-run'
-    FAIL  the child verified its own read-only claim before printing it    the claim is now conditional on the checks above it
-    PASS  both closing blocks were parsed and neither is empty             5 NOT PROVABLE, 1 NOT PERFORMED
-    PASS  ...the writer's positive control is filed as NOT PERFORMED       1 line(s) in that block
-    PASS  ...and NOT as a gap in the evaluator's coverage of the grader    5 envelope constraint(s) reported NOT PROVABLE
-    FAIL  ...and it regenerated nothing, by its own measurement            the mirror of the writing run's non-vacuity check
-  
-  ====================================================================================================
-  22/30 checks passed
-
 ====================================================================================================
 INJECTION D -- a section forgets to record whether it ran
-edits:   test_deployment_envelope.py
-command: test_deployment_envelope.py --no-write --skip-worker-death
-exit code: 1   (CAUGHT)
-FAIL lines: 1
+edits:    test_deployment_envelope.py   (in a scratch mirror, never the repo)
+command:  test_deployment_envelope.py --no-write --skip-worker-death
+expects:  a FAIL containing 'its section RECORDED whether it ran'
+exit 1   (CAUGHT by its named guard)
+FAIL lines: 1, on target: 1
   FAIL  worker_death_restart: its section RECORDED whether it ran      no entry in _SECTION_RAN, so this refusal cannot be classified as gap-or-failure -- CHECK NOT FOUND in local_sim/test_deployment_envelope.py: 'the suite SURVIVED a worker that hard-exited mid-run' -- the witness names a provocation the suite does not contain
-
---- last 12 lines of the run ---
-  them. They are enforced only on the grader:
-    - memory_limit_mb: NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design
-    - predict_response_timeout_s: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
-    - memory_limit_mb (provocation): no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/
-    - worker_death_restart: --skip-worker-death was passed
-  
-  NOT PERFORMED IN THIS RUN -- these are checks this INVOCATION
-  declined, not gaps in the evaluator's coverage of the grader. They
-  are named rather than skipped quietly, and they are not passes:
-    - the writer's positive control: the latch was armed before this suite started (--no-write); lowering it here would make the read-only claim conditional on restoring it. Exercised in the writing mode instead.
-  
-    --no-write: NOT VERIFIED. The claim is WITHHELD -- see the failures above.
 
 ====================================================================================================
 INJECTION E -- a self-provoked constraint never reaches section 7
-edits:   test_deployment_envelope.py
-command: test_deployment_envelope.py --no-write --skip-worker-death
-exit code: 1   (CAUGHT)
-FAIL lines: 1
+edits:    test_deployment_envelope.py   (in a scratch mirror, never the repo)
+command:  test_deployment_envelope.py --no-write --skip-worker-death
+expects:  a FAIL containing 'every SELF-PROVOKED constraint in the matrix reached this section'
+exit 1   (CAUGHT by its named guard)
+FAIL lines: 1, on target: 1
   FAIL  every SELF-PROVOKED constraint in the matrix reached this section adjudicated []; the matrix declares ['worker_death_restart']; missing ['worker_death_restart']
 
---- last 12 lines of the run ---
-  them. They are enforced only on the grader:
-    - memory_limit_mb: NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design
-    - predict_response_timeout_s: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
-    - memory_limit_mb (provocation): no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/
-    - worker_death_restart: --skip-worker-death was passed
-  
-  NOT PERFORMED IN THIS RUN -- these are checks this INVOCATION
-  declined, not gaps in the evaluator's coverage of the grader. They
-  are named rather than skipped quietly, and they are not passes:
-    - the writer's positive control: the latch was armed before this suite started (--no-write); lowering it here would make the read-only claim conditional on restoring it. Exercised in the writing mode instead.
-  
-    --no-write: NOT VERIFIED. The claim is WITHHELD -- see the failures above.
+====================================================================================================
+INJECTION F -- the literal-True defect returns in `ok=` keyword form
+edits:    test_deployment_envelope.py   (in a scratch mirror, never the repo)
+command:  test_envelope_readonly.py
+expects:  a FAIL containing 'no check() has a literal truthy condition'
+exit 1   (CAUGHT by its named guard)
+FAIL lines: 1, on target: 1
+  FAIL  no check() has a literal truthy condition, in any scanned file   {'test_deployment_envelope.py': [(1560, 'True')]}
 
 ====================================================================================================
-INJECTION F -- the literal-True defect returns in a spelling the scan used to miss
-edits:   test_deployment_envelope.py
-command: test_envelope_readonly.py
-exit code: 1   (CAUGHT)
-FAIL lines: 1
-  FAIL  no check() has a literal truthy condition, in any scanned file   {'test_deployment_envelope.py': [(1439, 'True')]}
-
---- last 12 lines of the run ---
-    PASS  NO green line CLAIMS worker_death_restart when section 6 is skipped 0 such lines
-    PASS  ...and it is reported NOT PROVABLE instead                       present in the NOT PROVABLE block
-    PASS  ...through the WITNESS, not only through the skipped section     section 7 adjudicated the deferred witness and refused it
-    PASS  ...and the refusal names the check the witness could not find    names 'the suite SURVIVED a worker that hard-exited mid-run'
-    PASS  the child verified its own read-only claim before printing it    the claim is now conditional on the checks above it
-    PASS  both closing blocks were parsed and neither is empty             5 NOT PROVABLE, 1 NOT PERFORMED
-    PASS  ...the writer's positive control is filed as NOT PERFORMED       1 line(s) in that block
-    PASS  ...and NOT as a gap in the evaluator's coverage of the grader    5 envelope constraint(s) reported NOT PROVABLE
-    PASS  ...and it regenerated nothing, by its own measurement            the mirror of the writing run's non-vacuity check
-  
-  ====================================================================================================
-  29/30 checks passed
+INJECTION G -- a witness is repointed at a check that ALWAYS runs
+edits:    test_deployment_envelope.py   (in a scratch mirror, never the repo)
+command:  test_deployment_envelope.py --no-write --skip-worker-death
+expects:  a FAIL containing 'emits the witness it is PINNED to'
+exit 1   (CAUGHT by its named guard)
+FAIL lines: 2, on target: 1
+  FAIL  every locally enforced constraint emits the witness it is PINNED to 6 pinned; disagreeing: worker_death_restart: check-ID set differs -- missing ['...and EVERY later MLP is clean -- no traceback, no flag', '...and every one was GENUINELY SCORED, not zeroed', '...and it is MLP 0, the one that killed the worker', '...classified as an ERROR, not as a budget/time exhaustion', 'EXACTLY one MLP failed -- not zero, not several', 'the suite SURVIVED a worker that hard-exited mid-run'], unpinned ['the runner waits max(predict_timeout, wall + grace), not predict_timeout']; worker_death_restart: detail fragments differ -- [('...and it is MLP 0, the one that killed the worker', 'failed indices [0]'), ('EXACTLY one MLP failed -- not zero, not several', 'n_failed_mlps = 1')]
+  FAIL  worker_death_restart: its named provocation RAN and PASSED in THIS suite the witness holds but its section did not run -- _SECTION_RAN['worker_death_restart']=False: 1 named check(s) verified in local_sim/test_deployment_envelope.py [be36a6c3f8dd]
 
 ====================================================================================================
-INJECTION G -- a witness is repointed at a check that ALWAYS runs (D1's shape returning)
-edits:   test_deployment_envelope.py
-command: test_deployment_envelope.py --no-write --skip-worker-death
-exit code: 1   (CAUGHT)
-FAIL lines: 1
-  FAIL  worker_death_restart: its named provocation RAN and PASSED in THIS suite the witness holds but its section did not run -- _SECTION_RAN['worker_death_restart']=False: 1 named check(s) verified in local_sim/test_deployment_envelope.py [6d1c95737d50]
-
---- last 12 lines of the run ---
-  them. They are enforced only on the grader:
-    - memory_limit_mb: NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design
-    - predict_response_timeout_s: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
-    - memory_limit_mb (provocation): no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/
-    - worker_death_restart: --skip-worker-death was passed
-  
-  NOT PERFORMED IN THIS RUN -- these are checks this INVOCATION
-  declined, not gaps in the evaluator's coverage of the grader. They
-  are named rather than skipped quietly, and they are not passes:
-    - the writer's positive control: the latch was armed before this suite started (--no-write); lowering it here would make the read-only claim conditional on restoring it. Exercised in the writing mode instead.
-  
-    --no-write: NOT VERIFIED. The claim is WITHHELD -- see the failures above.
-
-====================================================================================================
-INJECTION H -- an envelope constraint is DELETED from the matrix entirely
-edits:   test_deployment_envelope.py
-command: test_deployment_envelope.py --no-write --skip-worker-death
-exit code: 1   (CAUGHT)
-FAIL lines: 1
+INJECTION H -- an envelope constraint is DELETED from the matrix
+edits:    test_deployment_envelope.py   (in a scratch mirror, never the repo)
+command:  test_deployment_envelope.py --no-write --skip-worker-death
+expects:  a FAIL containing 'the matrix carries EXACTLY the required envelope constraints'
+exit 1   (CAUGHT by its named guard)
+FAIL lines: 1, on target: 1
   FAIL  the matrix carries EXACTLY the required envelope constraints   7 present; missing ['predict_response_timeout_s']; unpinned ['deleted_by_injection_h']
 
---- last 12 lines of the run ---
-    - memory_limit_mb: NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design
-    - deleted_by_injection_h: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
-    - memory_limit_mb (provocation): no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/
-    - worker_death_restart: --skip-worker-death was passed
-    - worker_death_restart (witness): CHECK NOT FOUND in local_sim/test_deployment_envelope.py: 'the suite SURVIVED a worker that hard-exited mid-run' -- the witness names a provocation the suite does not contain
-  
-  NOT PERFORMED IN THIS RUN -- these are checks this INVOCATION
-  declined, not gaps in the evaluator's coverage of the grader. They
-  are named rather than skipped quietly, and they are not passes:
-    - the writer's positive control: the latch was armed before this suite started (--no-write); lowering it here would make the read-only claim conditional on restoring it. Exercised in the writing mode instead.
-  
-    --no-write: NOT VERIFIED. The claim is WITHHELD -- see the failures above.
-
 ====================================================================================================
-INJECTION I -- an envelope constraint is ADDED to the matrix without being pinned
-edits:   test_deployment_envelope.py
-command: test_deployment_envelope.py --no-write --skip-worker-death
-exit code: 1   (CAUGHT)
-FAIL lines: 1
+INJECTION I -- an envelope constraint is ADDED without being pinned
+edits:    test_deployment_envelope.py   (in a scratch mirror, never the repo)
+command:  test_deployment_envelope.py --no-write --skip-worker-death
+expects:  a FAIL containing 'the matrix carries EXACTLY the required envelope constraints'
+exit 1   (CAUGHT by its named guard)
+FAIL lines: 1, on target: 1
   FAIL  the matrix carries EXACTLY the required envelope constraints   8 present; missing none; unpinned ['added_by_injection_i']
-
---- last 12 lines of the run ---
-    - added_by_injection_i: injection I: an unpinned constraint
-    - predict_response_timeout_s: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
-    - memory_limit_mb (provocation): no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/
-    - worker_death_restart: --skip-worker-death was passed
-    - worker_death_restart (witness): CHECK NOT FOUND in local_sim/test_deployment_envelope.py: 'the suite SURVIVED a worker that hard-exited mid-run' -- the witness names a provocation the suite does not contain
-  
-  NOT PERFORMED IN THIS RUN -- these are checks this INVOCATION
-  declined, not gaps in the evaluator's coverage of the grader. They
-  are named rather than skipped quietly, and they are not passes:
-    - the writer's positive control: the latch was armed before this suite started (--no-write); lowering it here would make the read-only claim conditional on restoring it. Exercised in the writing mode instead.
-  
-    --no-write: NOT VERIFIED. The claim is WITHHELD -- see the failures above.
 
 ====================================================================================================
 INJECTION K -- a constraint's ENFORCEMENT claim is flipped, relocating it silently
-edits:   test_deployment_envelope.py
-command: test_deployment_envelope.py --no-write --skip-worker-death
-exit code: 1   (CAUGHT)
-FAIL lines: 1
+edits:    test_deployment_envelope.py   (in a scratch mirror, never the repo)
+command:  test_deployment_envelope.py --no-write --skip-worker-death
+expects:  a FAIL containing 'makes the enforcement claim it is pinned to'
+exit 1   (CAUGHT by its named guard)
+FAIL lines: 1, on target: 1
   FAIL  ...and every one of them makes the enforcement claim it is pinned to 6 pinned; disagreeing: {'flop_budget': False}
 
---- last 12 lines of the run ---
-    - memory_limit_mb: NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design
-    - predict_response_timeout_s: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
-    - memory_limit_mb (provocation): no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/
-    - worker_death_restart: --skip-worker-death was passed
-    - worker_death_restart (witness): CHECK NOT FOUND in local_sim/test_deployment_envelope.py: 'the suite SURVIVED a worker that hard-exited mid-run' -- the witness names a provocation the suite does not contain
-  
-  NOT PERFORMED IN THIS RUN -- these are checks this INVOCATION
-  declined, not gaps in the evaluator's coverage of the grader. They
-  are named rather than skipped quietly, and they are not passes:
-    - the writer's positive control: the latch was armed before this suite started (--no-write); lowering it here would make the read-only claim conditional on restoring it. Exercised in the writing mode instead.
-  
-    --no-write: NOT VERIFIED. The claim is WITHHELD -- see the failures above.
+====================================================================================================
+INJECTION L -- M4 -- the WALL witness is repointed at the RESIDUAL check
+edits:    test_deployment_envelope.py   (in a scratch mirror, never the repo)
+command:  test_deployment_envelope.py --no-write --skip-worker-death
+expects:  a FAIL containing 'emits the witness it is PINNED to'
+exit 1   (CAUGHT by its named guard)
+FAIL lines: 1, on target: 1
+  FAIL  every locally enforced constraint emits the witness it is PINNED to 6 pinned; disagreeing: wall_time_limit_s: check-ID set differs -- missing ['L4: ...and the WALL path is distinct from the RESIDUAL path', 'L4: a 1e-9 s WALL limit trips the TIME path', 'L4: wall-exhausted rows are exactly zeroed at multiplier 1.0'], unpinned ['L4: a 1e-9 s residual limit trips the residual path']; wall_time_limit_s: detail fragments differ -- [('L4: ...and the WALL path is distinct from the RESIDUAL path', 'residual_exhausted clear'), ('L4: a 1e-9 s WALL limit trips the TIME path', '2/2 time_exhausted')]
 
 ====================================================================================================
-INJECTION J -- a documented blind spot is deleted, improving the coverage figure
-edits:   test_envelope_readonly.py
-command: test_envelope_readonly.py
-exit code: 1   (CAUGHT)
-FAIL lines: 1
-  FAIL  the scan's coverage matches the PINNED claim                     measured 5 caught / 5 blind = 5/10; pinned 5/11 -- edit COVERAGE_CLAIM deliberately, or restore the lists
-
---- last 12 lines of the run ---
-    PASS  NO green line CLAIMS worker_death_restart when section 6 is skipped 0 such lines
-    PASS  ...and it is reported NOT PROVABLE instead                       present in the NOT PROVABLE block
-    PASS  ...through the WITNESS, not only through the skipped section     section 7 adjudicated the deferred witness and refused it
-    PASS  ...and the refusal names the check the witness could not find    names 'the suite SURVIVED a worker that hard-exited mid-run'
-    PASS  the child verified its own read-only claim before printing it    the claim is now conditional on the checks above it
-    PASS  both closing blocks were parsed and neither is empty             5 NOT PROVABLE, 1 NOT PERFORMED
-    PASS  ...the writer's positive control is filed as NOT PERFORMED       1 line(s) in that block
-    PASS  ...and NOT as a gap in the evaluator's coverage of the grader    5 envelope constraint(s) reported NOT PROVABLE
-    PASS  ...and it regenerated nothing, by its own measurement            the mirror of the writing run's non-vacuity check
-  
-  ====================================================================================================
-  29/30 checks passed
+INJECTION M -- M3a -- flop_budget is relocated into the platform exemption
+edits:    test_deployment_envelope.py   (in a scratch mirror, never the repo)
+command:  test_deployment_envelope.py --no-write --skip-worker-death
+expects:  a FAIL containing 'only the permitted constraint has a PLATFORM-DEPENDENT classification'
+exit 1   (CAUGHT by its named guard)
+FAIL lines: 1, on target: 1
+  FAIL  only the permitted constraint has a PLATFORM-DEPENDENT classification exempt ['flop_budget', 'memory_limit_mb']; permitted ['memory_limit_mb']
 
 ====================================================================================================
-restored byte-for-byte: test_deployment_envelope.py  sha256 2e183ee7767667b9b5f87fe9f119599bcf66f5bed240ca937d5e8fdd133bd6bf
-restored byte-for-byte: test_envelope_readonly.py  sha256 7e1669b755a76a134428b4a29c624ed6ed3d69b65d0c4cd31963cca40967172b
-injections run: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'J']   uncaught: none
+INJECTION N -- M1 -- a REQUIRED file is never actually opened by the scanner
+edits:    test_envelope_readonly.py   (in a scratch mirror, never the repo)
+command:  test_envelope_readonly.py
+expects:  a FAIL containing 'every REQUIRED file was ACTUALLY OPENED by the scanner'
+exit 1   (CAUGHT by its named guard)
+FAIL lines: 1, on target: 1
+  FAIL  every REQUIRED file was ACTUALLY OPENED by the scanner           opened ['test_deployment_envelope.py', 'test_envelope_readonly.py']; never opened ['lifecycle_eval.py']; unpinned none
+
+====================================================================================================
+INJECTION O -- M2 -- a probe spelling is substituted for a duplicate of another
+edits:    test_envelope_readonly.py   (in a scratch mirror, never the repo)
+command:  test_envelope_readonly.py
+expects:  a FAIL containing 'every probe snippet is DISTINCT'
+exit 1   (CAUGHT by its named guard)
+FAIL lines: 1, on target: 1
+  FAIL  ...and every probe snippet is DISTINCT                           11 snippets, 10 distinct -- a duplicate means a named spelling is not actually being audited
+
+====================================================================================================
+REPOSITORY UNTOUCHED -- measured, not asserted:
+  git status --porcelain identical:  True   (0 line(s) before, 0 after)
+  tracked files with a moved sha256: none
+    experiments\2026-08-24_p2_p0\deployment_envelope.json  1a39cf8c2411bcb9
+    experiments\2026-08-24_p2_p0\lifecycle_self_test.json  a6ac7180f4c9a0a6
+    local_sim\test_deployment_envelope.py  d7033c4f84267d90
+    local_sim\test_envelope_readonly.py  1eaa1a2c09a4945f
+injections run: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O']
+  uncaught:         none
+  harness failures: none
