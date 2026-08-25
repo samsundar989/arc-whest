@@ -12584,3 +12584,183 @@ not run`.
 **Status:** all eight findings closed. **A third independent review of the
 corrected tree is required** before P1-PRE is accepted. Phase 1A does not begin
 until it returns.
+
+---
+
+# 2026-08-25 — P1-PRE REVIEW 3: **PROVISIONAL** a third time — the pattern recurred in both mechanisms that closed review 2
+
+*Third independent pass, reviewed HEAD `290a00e`, in a context that had seen
+neither earlier review nor my replies. **Verdict: PROVISIONAL.** D1, D2 and D3
+confirmed closed and watched closing; all eight injections reproduced with their
+reasons checked one by one; H7 verified from git; the preregistration byte-prefix
+re-derived independently. And the slice's own defect family found a third time,
+in `REQUIRED_CONSTRAINTS` and `_rlimit_usable_in_child()` — the two mechanisms
+added to close review 2's two structural findings.*
+
+## Verdict, verbatim
+
+> **Host state (disclosed):** Windows 11 Home 10.0.26200, 16 logical cores, 61.6 GB RAM (22.1 GB free), CPU ~18 % busy at session start. I quote **no wall time as evidence** anywhere below. Every command I ran was read-only or restored itself; `git status --porcelain` is empty at the end and `local_sim/test_deployment_envelope.py` is `831ab34cc582511534d1ab4d5856d073f8a51ce394bcd1d1e2302acd79608e34`, byte-identical to HEAD. I wrote nothing to the repository and needed no `git checkout`.
+>
+> ## Skeptic verdict: PROVISIONAL
+>
+> **Strongest challenge**
+> The pattern is present a third time, and it is in both mechanisms added to close review 2's two *structural* findings. `REQUIRED_CONSTRAINTS` (F7) and `_rlimit_usable_in_child()` (F2a) each carry, in the code itself, a claim wider than what the code enforces — the same shape as `adjudicated == len(deferred)` and the 3-of-11 scan, one level up again. So the RESULT/REVIEW entries' claim that "all eight findings are closed" is false for **F2a, F5 and F7**. D1, D2 and D3 themselves *are* closed, and I watched them close.
+>
+> **Evidence for it**
+>
+> 1. **`REQUIRED_CONSTRAINTS` enforces half of what its own comment claims, and I measured it.** `local_sim/test_deployment_envelope.py:1381-1386` is `present >= set(REQUIRED_CONSTRAINTS)` — a superset test. The comment pinning the list, at `:344`, says:
+>
+>    > `#: Adding a constraint is a deliberate edit to this tuple. That is the point.`
+>
+>    It is not. Driving the real `enforceability()` from a scratch probe (repo untouched):
+>
+>    ```
+>    A. baseline           present >= REQ -> True
+>    B. ADD unpinned       present >= REQ -> True    extras: ['a_new_constraint_nobody_pinned']
+>    C. DELETE one         present >= REQ -> False
+>    ```
+>
+>    The `unpinned extras` branch at `:1385-1386` enforces nothing at all — it only formats the **detail string of a green line**. Injection H (`p1pre_fault_inject.py:186-194`) tests only direction C; I watched its FAIL line, and it reads `7 present; missing ['predict_response_timeout_s']; unpinned extras ['deleted_by_injection_h']` — the "extras" half printing *inside a line that failed for the other reason*. Consequence: F7's failure mode ("every accounting line is a traversal of `enf["constraints"]`, so deleting an entry shrinks the checker with the checked") is closed for the seven names pinned today and **re-opened for every constraint added after this commit**, while the code asserts the opposite. Deleting an unpinned constraint would be silent on both platforms — which is precisely what F7 was.
+>
+> 2. **`_rlimit_usable_in_child()` is F2a re-spelled, not closed, and its docstring overstates it in three specific ways.** `local_sim/test_deployment_envelope.py:377-410`, used at `:1397-1401` as `claim == probe["usable"]`.
+>    - Its title asks *"Can a CHILD interpreter **apply** the memory cap?"* and its point 3 says the divergence would come from "a different interpreter, a different environment, or a sandbox that blocks the module". The probe launches **`sys.executable`** with `subprocess.run(...)` and no `env=` argument, so it inherits this interpreter and this environment: **none of the three named divergence mechanisms is exercised.**
+>    - It calls **`getrlimit`**, never `setrlimit`. The grader's worker calls `setrlimit`: `.venv/lib/site-packages/whestbench/subprocess_worker.py:177-184`, `_resource.setrlimit(_resource.RLIMIT_AS, (limit_bytes, limit_bytes))` inside `except (ImportError, ValueError, OSError, AttributeError)` which **warns to stderr and continues uncapped**. `setrlimit` can fail (hard limit below 8 GiB → `ValueError`; EPERM → `OSError`) where `getrlimit` succeeds. The probe cannot see the failure its own docstring says it exists to see.
+>    - Measured on this host: `_rlimit_available() -> False`; `_rlimit_usable_in_child() -> {'usable': False, 'why': "ModuleNotFoundError: No module named 'resource'"}`. Both answers descend from the same `import resource`. The **only** reachable red path today is the probe *itself* failing (`usable: None` → `False == None` → FAIL) — an environment condition, not the property. In fairness the safety is delivered elsewhere and I checked: on Linux, section 5's `MEM_CAP_APPLIED` (`:1551-1554`) reads the **worker's own** post-`setrlimit` `getrlimit`, which would catch a failed cap. That is the check doing the work; `_rlimit_usable_in_child()` is not.
+>
+> 3. **The F5 correction is itself stale at reviewed HEAD, and wrong in exactly the way it corrects.** `experiments/LOG.md:12510` (committed `f6f50e4`) says the RESULT entry's two rows "should read **25/25 at line 1054**" and "**worst residual 0.08194 s at line 1064**". Commit **`290a00e` — the reviewed HEAD, the next commit in the same slice — regenerated that transcript.** Measured against `experiments/2026-08-25_p1_pre/preflight_full_p1pre.txt` as it stands at HEAD:
+>
+>    | LOG says | line at HEAD actually reads | truth at HEAD |
+>    |---|---|---|
+>    | 25/25 at 1054 | `PASS ...and NOT as a gap in the evaluator's coverage…` | **28/28 at line 1058** |
+>    | 0.08194 s at 1064 | `shape 1024x16   B = 2,199,023,255,552 …` | **0.07508 s at line 1068** |
+>
+>    The correction is **0-for-2**. The uncorrected RESULT table is likewise 5-for-8 (252, 590, 701, 713, 730 hold; 997 is a separator and the count is **40/40** at 998, not 39/39; 1047 is a different check; 1056-7 is a separator). Two further descriptions in the RESULT entry's raw-evidence paragraph (`:12221-12224`) are uncorrected anywhere: `envelope_full_after.txt` is "39/39" (it is **40/40**) and `fault_injection.txt` holds "four re-introduced defects" (it holds **eight**). `AGENTS.md` says the next session resumes from the LOG; these are its last words.
+>
+> 4. **Secondary — the blind-spot assertion points the wrong way and is wired into the mandatory gate.** `test_envelope_readonly.py:340-345` asserts `not now_caught` over six spellings the scanner is currently blind to. It is an honest coverage measurement — I re-derived 5-of-11 and confirmed the probe asserts all five claimed and spares both `False` forms — but its *direction* is a snapshot: widening `_constant_conditions` to catch `ast.Compare` tautologies, the improvement the retraction, both prior reviews and this file's own docstring all say is needed, turns preflight `-Full` **step 15 RED**, and the only exit is to edit the test. That is the failure class `docs/GOTCHAS.md` (2026-08-20, CP0.1) records by name: *"the first legitimate claim on the reserved promotion block would have turned preflight RED at exactly the moment `-Full` is required, and the only way forward would have been to edit the gate to get past it."* The docstring's "forces the scope claim to be rewritten with it" is convention, not mechanism — it forces one list edit; the prose scope claim is 250 lines away and in the LOG. Also, `SCANNED` is two files: `local_sim/lifecycle_eval.py` — preflight step 11, and the suite **four of the seven witnesses resolve against** — is not scanned. I scanned it with the suite's own predicate: **clean, zero literal-truthy conditions**, so no live defect there. The same predicate does find one live instance elsewhere in the tree, ungated: `local_sim/residual_model.py:278`, `check("extrapolation is reported, not hidden", True, …)`. Pre-existing and outside D1–D3.
+>
+> 5. **Secondary — `docs/VALIDATION.md` §7's `-Full` row is now a two-cell row in a three-column table.** The "when" cell, `**required** before any promotion, submission, or vault touch |`, was orphaned into the blockquote at `docs/VALIDATION.md:682`. Introduced by `4a762b4`, the commit that fixed the previous mis-citation in the same table. The binding doc's gate table no longer states when `-Full` is required.
+>
+> **Evidence for the original claim (steelmanned honestly)**
+> Most of this survived everything I ran, and I ran it rather than read it.
+>
+> - **The preregistration is real, byte-verified independently.** `git show fd5c3d2 --stat` touches only `experiments/LOG.md` and `baseline_d1_d3.txt` — no code. `experiments/LOG.md` at HEAD is a byte-identical prefix extension of the file at `fd5c3d2`: **716,580 bytes, sha256 `bcd2e82c6e4e105de8a0dd50eed751fcea3a4a29843bc88a5819111447a1f07a` on both sides.**
+> - **D1, D2 and D3 are closed.** `--no-write --skip-worker-death`: **34/34**, exit 0, zero green lines claiming `worker_death_restart`, two NOT-PROVABLE entries (the section's and the *witness's*), `git status --porcelain` empty before and after. `test_envelope_readonly.py`: **28/28**. `--no-write` *without* the skip — the load-sensitive path where section 6 really spawns `whest run --runner subprocess`: **41/41, exit 0, both tracked artifacts byte-identical, worktree unchanged**; that independently re-confirms review 2's downgrade of the carried-forward item. D2's artifact path is genuinely fixed: `deployment_envelope.json` at HEAD carries `witness_suite` on all five adjudicated constraints, rows resolved from the named suite (3/3/3/2 from `lifecycle_eval.py --self-test`, 6 from `test_deployment_envelope.py`), and `witness_verified: null` with 0 rows on the two unenforceable ones.
+> - **All eight injections reproduce on my host, and each lands on the guard it names.** I ran the committed harness to a path outside the repo. `injections run: ['A','B','C','D','E','F','G','H']   uncaught: none`, restore hash `831ab34c…` matching HEAD byte-for-byte, tree clean afterwards. My transcript is **identical to the committed one on every headline row and every FAIL line** except the two hash/count lines inside injection C, which vary with tree state by construction. I checked the *reason* of each, which was review 2's own lesson: A → `no check() has a literal truthy condition … [(1692,'True')]` **and** the green-line witness; B → the two resolver refusals accepting an impostor; C → `NO REFUSAL RAISED` twice plus a real sha256 move; D → `no entry in _SECTION_RAN, so this refusal cannot be classified`; E → `adjudicated []; the matrix declares ['worker_death_restart']`; F → the scan at line 1381 (`ok=` keyword form, valid Python — `check(name, ok, detail="")`, so it reaches its target); G → `the witness holds but its section did not run -- _SECTION_RAN['worker_death_restart']=False`; H → `REQUIRED_CONSTRAINTS`.
+> - **Section 7 has no path to green for an unrun provocation, on either platform, and I looked for one.** The condition `ok and _SECTION_RAN.get(name) is True` (`:1706`) is red for `ok=True, name absent`, red for `ok=True, ran=False`, red for `ok=False, ran=True`. On Linux, section 5 sets `_SECTION_RAN["memory_limit_mb"]=True` *before* `provoke_memory_limit()`, so a refused runner yields `ok=False, ran=True` → the `else` branch → **RED, not a gap** — the fail-closed behaviour VALIDATION §7 demands, matching section 6's Windows behaviour I watched. The residual is a name collision between a witness's `checks` and another section's check names; that is bounded by injection G rather than unbounded.
+> - **H7 is exactly true, from git rather than from their table.** `git diff --name-only 9e3be80..290a00e` touches `estimator.py`, `experiments/seed_ledger.jsonl` and `experiments/vault/` **not at all**; all three blobs identical across the range (`9242377a`, `808edca4`, tree `4636307e`). `estimator.py` sha256 `00240eb1e60810f5…` raw / `1caa3752be56e862…` LF-normalised, both matching the entries. `lifecycle_self_test.json` `results_sha256` `a913c55cbcc2434e…` at 56/56 on both commits. I re-ran the anchor: **`137,600,326,656 vs 137,600,326,656, delta +0, 19 operations, 0 disagreeing`**. Vault manifest `touches: 1` == 1 touch-log line. `official_config.py` **73/73**; `verify_portability.py` **99 checks, 0 failed**.
+> - **The gate transcript carries its own verdicts** — the trap this repo fell into: `PREFLIGHT GREEN -- 16/16` at line 1071 of 1,083, zero FAIL/RED.
+> - **The preflight step-15 two-command composition is sound.** I reproduced the `Step` wrapper's semantics in a scratch script: `{first fails → return}` yields `FAIL … exit code 7`, `{first ok, second fails}` yields `FAIL … exit code 3`, both ok yields PASS. `$LASTEXITCODE` survives the `return`, so an injection in either file turns the gate red as claimed.
+> - **F1, F2b, F3, F4, F6 are genuinely closed.** The scan matches name-or-attribute callee and `args[1]`-or-`ok=`; `bool(unenforced)` is gone and `unenforced <= reported` is the half that can fail; the `_SECTION_RAN` conjunct is watched failing by G; the `--no-write` weakness is disclosed in both the docstring and `--help`; `CURRENT_STATE.md` now tells the next agent the slice landed and is blocked on this verdict.
+> - Nothing about the grader, the score, MSE, variance, cost, seeds or the vault is claimed or moved. **No statistical, cost, or data-protocol checklist item applies to this slice.**
+>
+> **Unresolved ambiguity**
+>
+> - **Section 7's Linux branch has still never executed** (self-disclosed, `LOG:12177-12185`). I traced it and believe it is correct and fail-closed, but neither of us can settle it from a Windows host. The same host limit means `_rlimit_usable_in_child()`'s Linux answer is also unobserved.
+> - **Whether a `setrlimit`/`getrlimit` divergence is reachable in the grader's actual container.** I can show the mechanism exists in `subprocess_worker.py`; I cannot show the organisers' sandbox exhibits it, and `memory_limit_mb` remains the constraint with the weakest provenance (`CURRENT_STATE.md` § *What the evaluator still cannot do*).
+> - `--out` can still be pointed at a tracked file in writing mode (`write_artifact(args.out, …)`). Correctly carried forward as pre-existing and outside D1–D3.
+>
+> **Cheapest discriminating follow-up**
+> **No block, no data, no design block — code, two injections, and three LOG/doc lines.** In one pass:
+>
+> 1. Change `:1382` to `present == set(REQUIRED_CONSTRAINTS)` (or make the extras branch its own failing `check`), and add **injection I** that *adds* a constraint to `enforceability()` without pinning it. Today it goes **green**; that is the discriminating test. Either that, or delete the sentence at `:344` — but the code and the comment must stop disagreeing.
+> 2. Make the child probe call **`setrlimit(RLIMIT_AS, (memory_limit_mb·2²⁰,)*2)`** and report, instead of `getrlimit`. Then the probe asks the question its docstring claims, and the divergence it names becomes detectable. If that is judged not worth it, retire `_rlimit_usable_in_child()` and say plainly that the Linux memory claim is verified by section 5's worker probe and by nothing else — which is what is true today.
+> 3. Append a short correction naming the **current** figures (28/28 at line 1058; worst residual 0.07508 s at line 1068; envelope 40/40 at line 998; eight injections, not four) **and stop citing line numbers into a regenerated artifact at all** — cite the grep string. The general defect was already named in the LOG; naming it a third time is not the fix, removing the citation form is.
+> 4. Flip the blind-spot assertion from "these six are still blind" to a lower bound plus a *listed* residual, so widening the scanner cannot turn the mandatory gate red; and add `local_sim/lifecycle_eval.py` to `SCANNED`, since four of seven witnesses resolve against it.
+> 5. Repair the `-Full` row of `docs/VALIDATION.md` §7 so it has three cells again.
+>
+> Until (1) and (2) land I would not propagate the sentence "all eight findings of review 2 are closed", and I would not propagate `REQUIRED_CONSTRAINTS`' comment as a description of what the gate enforces. D1, D2 and D3 are closed and the evaluator is materially better than at `9e3be80`; those two claims are not what the evidence shows.
+>
+> **Checklist items triggered**  **17** (continuity — the LOG's *correction* of a mis-citation mis-cites the transcript committed one commit later at HEAD, in two of two rows, and two further raw-evidence descriptions in the RESULT entry are uncorrected anywhere); **18** (generic: a comment asserting a guarantee the code does not provide, measured; a replaced identity whose docstring names three divergence mechanisms the code exercises none of, and a question — `setrlimit` — it does not ask; a snapshot assertion wired into the mandatory gate that goes red on the improvement the repository says it needs; a binding doc's gate table left with a missing cell by the commit repairing it). **No statistics, cost, or data-protocol item applies** — this slice spends no data and moves no number, and I verified that from git rather than from the entry's table.
+
+## Every finding, and what was done
+
+| # | finding | disposition |
+|---|---|---|
+| **1** | `REQUIRED_CONSTRAINTS` used `>=`, so ADDING an unpinned constraint passed, while the tuple's comment claimed the opposite | **FIXED.** The comparison is `==`. The "unpinned extras" text was formatting inside a green line's detail and enforced nothing; it is now part of a condition. **Injection I** adds an unpinned constraint and the suite goes red: `8 present; missing none; unpinned ['added_by_injection_i']` |
+| **2** | the child probe asked `getrlimit` in an inherited interpreter and environment — three named divergence mechanisms, none exercised, and not the call the grader makes | **FIXED by asking the grader's question.** `_setrlimit_works_in_child()` applies the real cap with **`setrlimit(RLIMIT_AS, (8192 MB,)*2)`** in a child and reports whether the soft limit took. `subprocess_worker.py` catches `ValueError`/`OSError` from that call and **runs on uncapped**, so a hard limit below the cap or a denied request is now visible where `getrlimit` could never have seen it. The docstring enumerates all four versions of the question and says which three were the same one |
+| **3** | the F5 correction was itself stale, 0-for-2, because the next commit regenerated the transcript | **FIXED BY RETIRING THE CITATION FORM.** See below — the figures are restated and line-number citations into regenerated artifacts are abandoned, in this LOG and in `VALIDATION.md` §7 |
+| **4** | the blind-spot assertion turns the mandatory gate RED on the improvement the repo says it needs | **FIXED.** Blind spots are **reported**, not asserted: each is printed, a newly-caught one prints a NOTICE saying to widen the list, and only a regression in the five *claimed* spellings — or a probe that did not run — fails. `lifecycle_eval.py` joins `SCANNED` (four of seven witnesses resolve against it; it scanned clean) |
+| **5** | `VALIDATION.md` §7's `-Full` row lost its third cell to the commit repairing the row | **FIXED** — three cells again, and the suite counts are **removed from that row** rather than corrected a fourth time |
+| — | `residual_model.py:278`, an ungated live literal-`True`, found with this slice's own scanner | **FIXED** — it was a report, not a check, and is now spelled as a `print`. Outside D1–D3 and outside the gate; recorded because finding it was the scanner's doing |
+
+## The citation form is retired, not corrected again
+
+Three entries in this slice have now cited line numbers into
+`preflight_full_p1pre.txt`, and **every one of them was stale within a commit**,
+because that file is regenerated on every gate run. The third review's correction
+of the second was 0-for-2. Naming the hazard a fourth time is not a fix.
+
+**Current figures, by grep string, at this entry's HEAD:**
+
+```text
+grep "PREFLIGHT GREEN"        -> PREFLIGHT GREEN -- 16/16
+grep "checks passed;"          -> 40/40   (deployment envelope)
+grep "checks passed$"          -> 28/28   (read-only proof)
+grep "56/56 checks passed"     -> lifecycle evaluator
+grep "delta +0"                -> 137,600,326,656 vs 137,600,326,656
+grep "operations "             -> 19 compared, 0 disagreeing
+grep "failures "               -> 0       (official Phase-2 subprocess smoke)
+```
+
+And the two uncorrected descriptions the third review found in the RESULT entry's
+raw-evidence paragraph: `envelope_full_after.txt` is **40/40**, not 39/39, and
+`fault_injection.txt` holds **nine** injections, not four. Those entries are not
+edited — `experiments/LOG.md` is append-only, and its byte-prefix integrity is the
+property all three reviews used to prove the preregistration was not rewritten.
+
+## Nine injections, all caught
+
+`uv run python local_sim/p1pre_fault_inject.py`:
+
+| # | defect re-introduced | caught by |
+|---|---|---|
+| A | section 7 reports an UNRUN provocation as green | the external proof |
+| B | the resolver ignores the suite it was given | the suite's negative tests |
+| C | the read-only latch stops refusing | both files |
+| D | a section forgets to record whether it ran | section 7's classifier |
+| E | a self-provoked constraint never reaches section 7 | section 7's closure set |
+| F | the literal-`True` defect returns in `ok=` keyword form | the widened constant scan |
+| G | a witness is repointed at an always-running check | section 7's `_SECTION_RAN` conjunct |
+| H | an envelope constraint is DELETED from the matrix | `REQUIRED_CONSTRAINTS` |
+| **I** | an envelope constraint is ADDED without being pinned | `REQUIRED_CONSTRAINTS`, and it went green before this pass |
+
+`uncaught: none`, suite restored byte-for-byte. **The harness also refused to run
+once, with exit 3**, when injection F's anchor no longer matched the code it
+breaks — the right behaviour, and the reason it is a committed tool rather than
+scratch: a fault injection whose anchor has drifted silently tests nothing.
+
+## Knowledge delta
+
+1. **Three reviews, three instances, and every one was in the fix rather than in
+   the original defect.** The witness was sound; its guard was a tautology. The
+   guard's replacement was sound; the scan asserting it over-claimed by eight
+   spellings. The scan's replacement was sound; the two mechanisms *beside* it
+   claimed guarantees they did not enforce. **Closing an instance of this failure
+   is when the next one gets written**, because attention is on the thing being
+   closed.
+2. **A comment is a claim and nothing tests it.** `#: Adding a constraint is a
+   deliberate edit to this tuple. That is the point.` sat directly above a
+   superset test that permitted exactly that addition. Both prior instances were
+   found by measuring; so was this. The habit worth keeping is *measure the
+   comment*, not *read the code*.
+3. **Ask what call the thing you are modelling actually makes.** Four spellings
+   of the memory question were written here; three asked `getrlimit` or `hasattr`
+   and the grader's worker calls **`setrlimit`**. Three of them agreed with each
+   other perfectly, which is exactly why the identity was invisible — agreement
+   between two wrong questions looks like corroboration.
+4. **A snapshot assertion in a mandatory gate is a trap with a delay fuse.**
+   "These six spellings are still blind" is true today and turns the gate red on
+   the day someone improves the scanner. `GOTCHAS.md` already recorded this class
+   from CP0.1 and it was still written. Assert the direction you want to hold;
+   *report* the direction you want to improve.
+5. **A citation whose target is regenerated is stale by construction.** Three
+   entries, three staleness events, one of them inside the correction of another.
+   The fix is not a more careful citation; it is a different citation form.
+
+**Seed ledger:** unchanged; nothing claimed. **Vault:** untouched, counter
+1 == 1 log line. **`estimator.py`:** byte-identical.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Status:** all five findings closed. **A fourth independent review of the
+corrected tree is required** before P1-PRE is accepted. Phase 1A does not begin
+until it returns.
