@@ -167,7 +167,7 @@
           }
         },
         "witness_verified": true,
-        "witness_reason": "6 named check(s) verified in local_sim/test_deployment_envelope.py [0cb85705d47e]",
+        "witness_reason": "6 named check(s) verified in local_sim/test_deployment_envelope.py [75146b4023a0]",
         "witness_suite": "local_sim/test_deployment_envelope.py",
         "witness_results": [
           {
@@ -210,7 +210,7 @@
       }
     },
     "witness_suite_sha256": "a913c55cbcc2434ea5fde5a25524d4081e48a7d08a1710af8b242b9d75ca16d1",
-    "self_results_sha256": "6dce6837c180159850977ce65c5aa82c746cc28367efd4490c9718132bffdeb3"
+    "self_results_sha256": "cd206b92885232f7f8fd21fa5a3f6b70ab01eb12bed3db23088875092c4205f5"
   },
   "unprovable_here": [
     {
@@ -231,20 +231,20 @@
   "memory": {
     "measurement": {
       "baseline": {
-        "working_set": 130486272,
-        "commit": 606654464
+        "working_set": 130682880,
+        "commit": 606990336
       },
       "peak": {
-        "working_set": 462041088,
-        "commit": 962105344
+        "working_set": 462299136,
+        "commit": 962363392
       },
       "weight_bytes": 67108864
     },
     "limit_mb": 8192,
-    "peak_working_set_mb": 440.63671875,
-    "peak_commit_mb": 917.53515625,
+    "peak_working_set_mb": 440.8828125,
+    "peak_commit_mb": 917.78125,
     "weights_mb": 64.0,
-    "headroom_upper_bound": 8.928268245852296
+    "headroom_upper_bound": 8.925874221117505
   },
   "memory_limit_provocation": {
     "provoked_here": false,
@@ -277,6 +277,6 @@
       "error": 1
     }
   },
-  "checks_passed": 39,
-  "checks_total": 39
+  "checks_passed": 40,
+  "checks_total": 40
 }
