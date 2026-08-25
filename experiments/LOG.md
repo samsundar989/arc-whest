@@ -13120,3 +13120,119 @@ Samuel's decision. The options and their costs are put to him with this entry.
 1 == 1 log line. **`estimator.py`:** byte-identical.
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-25 — P1-PRE TERMINAL CLOSURE [IMPORTANT] — PREDICTION, before the repair
+
+*Class **IMPORTANT** (evaluator instrument, preflight step 15). **No data, no
+seed, no truth measurement, no vault touch, no `estimator.py` edit.** Scope is
+fixed by `docs/CLAUDE_CODE_HANDOFF.md` at `7e81600` and is **terminal**: this
+closes the named review-5 findings and nothing else. Written and committed before
+implementation.*
+
+**Baseline HEAD:** `7e81600`. **Worktree:** clean (`git status --porcelain`
+empty).
+
+| artifact | sha256 at baseline |
+|---|---|
+| `local_sim/test_deployment_envelope.py` | `2e183ee7767667b9…` |
+| `local_sim/test_envelope_readonly.py` | `7e1669b755a76a13…` |
+| `local_sim/p1pre_fault_inject.py` | `e08c6d47d5f711b5…` |
+| `local_sim/lifecycle_eval.py` | `33cf5dbc622e9851…` |
+| `estimator.py` | `00240eb1e60810f5…` |
+| `experiments/2026-08-24_p2_p0/lifecycle_self_test.json` | `a6ac7180f4c9a0a6…` |
+| `experiments/2026-08-24_p2_p0/deployment_envelope.json` | `1a39cf8c2411bcb9…` |
+
+Lifecycle results digest `a913c55cbcc2434e…`, 56/56.
+
+## What is being repaired — the bounded set, and nothing else
+
+Six items, from review 5, as specified:
+
+1. **M4 — semantic witness pin.** One independent expected mapping per locally
+   enforced constraint: name → suite, exact check-ID set, required detail
+   fragments. Compared against the emitted witness.
+2. **M3a — bound the platform exemption.** Only `memory_limit_mb` may carry a
+   platform-dependent enforcement classification, and that is pinned explicitly.
+3. **M1/M2 — measure behaviour, not declarations.** The scanner accumulates the
+   files it actually opened and that observed set is compared with
+   `REQUIRED_SCANNED`; `MUST_CATCH`/`KNOWN_BLIND` are pinned by distinct **names
+   and source identities**, not by the pair `(5, 6)`.
+4. **Mutation oracle.** Every injection declares the check it expects to fail;
+   `returncode != 0` alone is never `CAUGHT`.
+5. **No destructive cleanup.** All repository mutation and `git checkout --`
+   removed from the harness. Mutations execute against a **scratch mirror**.
+6. **Truthful continuity and platform reporting.** A uniquely resolving
+   identifier for the read-only proof's result line, and
+   `_setrlimit_works_in_child` **DECLINED** on a host with no `resource` instead
+   of a green pass built from two values descending from one missing import.
+
+**This pass adds no new general assurance framework**, and it does not claim that
+a finite suite survives arbitrary future multi-edit sabotage. It closes named
+guarantees.
+
+## Predictions, committed before the repair exists
+
+- **T1 — the semantic witness pin catches the review-5 mutation.** Injection **L**
+  repoints `wall_time_limit_s`'s witness at
+  `"L4: a 1e-9 s residual limit trips the residual path"`. At `7e81600` that is
+  **green, 36/36, zero FAIL lines**. After the repair it fails, and the failing
+  check is the semantic-witness guard naming the wrong check-ID set — not some
+  incidental line.
+- **T2 — the exemption is bounded.** Injection **M** relocates `flop_budget` into
+  the platform exemption. At `7e81600` that is green at 35/35. After the repair
+  the classification guard fires.
+- **T3 — the scanner's observed files are what is compared.** Injection **N**
+  truncates the scan loop so a file in `REQUIRED_SCANNED` is never opened. Today
+  that prints `missing none` — a false statement — and passes. After the repair
+  the observed-set guard fires.
+- **T4 — probe identity, not probe count.** Injection **O** substitutes one
+  `MUST_CATCH` entry with a duplicate of another, holding the counts fixed. Today
+  green. After the repair the identity pin fires.
+- **T5 — the oracle grades the reason.** Every injection carries an expected
+  failing-check fragment; an injection that goes red for any other reason is
+  reported as a **HARNESS FAILURE**, not as `CAUGHT`. Injections A–O all satisfy
+  their own expectation.
+- **T6 — the harness cannot change tracked repository state, structurally.** It
+  contains no `git checkout`, no write to any repository path, and refuses an
+  `--out` that resolves inside a tracked file. Mutations run in a scratch mirror.
+  Measured: `git status --porcelain` and the sha256 of both source files and both
+  tracked evidence artifacts are **byte-identical before and after a full run**,
+  and a **deliberately dirtied unrelated file survives untouched** — the previous
+  harness would have discarded it.
+- **T7 — the platform report stops claiming a pass it has not earned.** On this
+  host `_setrlimit_works_in_child` is reported **NOT PERFORMED / DECLINED**, not
+  `PASS`; the envelope's green count drops by exactly one and its declined count
+  rises by exactly one.
+- **T8 — the read-only citation resolves uniquely.** The proof emits one
+  unambiguous result identifier; `grep` for it returns exactly **1** line in the
+  gate transcript.
+- **T9 — D1, D2 and D3 do not regress.** The original focused evidence re-runs:
+  `--skip-worker-death` yields zero green lines claiming `worker_death_restart`
+  and reports it NOT PROVABLE twice; `--no-write` moves no tracked hash and leaves
+  the worktree byte-identical; the twelve resolver refusals still fire with
+  distinct reasons and both positive controls still accept.
+- **T10 — no Phase-0 scientific or score evidence moves.** `estimator.py`
+  `00240eb1…`; lifecycle `results_sha256` `a913c55cbcc2434e…` at 56/56; the
+  counted-FLOP anchor `137,600,326,656`, 19 operations, 0 disagreeing, delta +0;
+  seed ledger unchanged with nothing claimed; vault counter 1 == 1 log line.
+
+**Falsifier.** If closing any item requires weakening an existing refusal, if any
+number in T10 moves, if the harness retains any path that can alter tracked state,
+or if a named injection goes red for a reason other than its declared guard, the
+design is wrong and is reverted rather than documented around.
+
+**Knowledge target.** Five previous cycles each closed their findings and each
+introduced a fresh instance of the same family, every time in a guard *about* a
+guard. This pass tests one specific hypothesis: that a check comparing a pinned
+literal against **observed behaviour** — the files actually opened, the witness
+actually emitted, the reason a mutation actually failed — survives where a check
+comparing two declarations did not. Review 5 retracted the previous form of that
+claim; this is its corrected, narrower successor, and the mutations are what
+decide it.
+
+**Seed ledger:** unchanged, no claim. **Vault:** untouched. **`estimator.py`:**
+not edited.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
