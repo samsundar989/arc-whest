@@ -14187,3 +14187,123 @@ and the account being able to submit.
 **`estimator.py`:** byte-identical, `00240eb1e60810f5…`. **Nothing submitted.**
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-25 — TRACK 0S SUBMISSION CONTRACT: one Phase-2 calibration submission [PRE-REGISTERED, nothing submitted]
+
+*Class **STRATEGIC** — submission changes external state. Written and committed
+**before** any submission exists, so git timestamps prove the predictions
+preceded the result. `AGENTS.md` hard rule 6: never submit without Samuel's
+explicit approval.*
+
+## The candidate, by hash
+
+```text
+estimator.py   sha256  00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec
+               sha256(LF-normalised)  1caa3752be56e8625ddb8b163ff8ffa8
+               byte-identical to estimator_v2_6_1.py
+               version v2.6.1, width-1024 path = _analytic_only -> basic K2p1
+```
+
+**Approval must name that SHA.** If the file changes by one byte before
+submission, this contract is void and a new one is required.
+
+## Question
+
+Does our packaging, contract compliance and zero-failure behaviour survive the
+real AIcrowd submission pipeline, and does a local 100-network mini transfer to
+the 50-network feedback board?
+
+## Evidence, and its tier
+
+| item | value | tier |
+|---|---|---|
+| local official mini, 100 MLPs, subprocess runner | adjusted `4.050566369642183e-7` | CONFIRM — read-only |
+| raw final-layer MSE | `4.050566369642183e-6` | CONFIRM |
+| **GT-noise floor** | **`7.47823932957716e-11`** = 0.001846% of raw MSE | published rows |
+| counted FLOPs / MLP | `137,600,326,656`, delta `+0` vs the anchor | measured |
+| multiplier | `0.1000`, pinned at the floor (`C/B = 0.0625734`) | measured |
+| failures | `0`, all five counters `0` | measured |
+| worst residual | `0.09327980 s` of `0.4 s` → `4.288x` | measured |
+
+The result is **not noise-limited**: measured error is ~54,000× the truth's own
+Monte-Carlo noise.
+
+## Predictions, before the result exists
+
+- **S-1 — zero failed MLPs.** `n_failed_mlps = 0` on the graded run. This is the
+  primary claim; a failed MLP scores as zeros at multiplier 1.0 and would be a
+  packaging or environment defect, not a method defect.
+- **S-2 — the multiplier stays pinned at the floor.** `C/B = 0.0625734 < 0.1`, so
+  the adjusted score is exactly `0.1 ×` the raw MSE. Counted FLOPs are a fixed
+  `137,600,326,656` per MLP — this estimator's cost does not vary with the
+  network — so I predict the graded FLOPs match that figure exactly.
+- **S-3 — the returned feedback score lands in `[3.6e-7, 4.6e-7]`.** Centred on
+  the local `4.05e-7`, ±~13%. **The visible number is feedback on the 50 public
+  networks only**, not 100, so it is a noisier draw than our local mini and the
+  band is wider than local reproducibility alone would justify.
+- **S-4 — rank in the high 30s to low 40s** of ~46 entrants, behind the
+  `3.93e-7` covariance-propagation tie. Roughly **37x** the leader's adjusted
+  score.
+
+**Falsifier.** Any failed MLP, a multiplier above the floor, counted FLOPs
+differing from `137,600,326,656`, or a feedback score outside `[3.0e-7, 5.5e-7]`
+means the local instrument does not predict the grader, and that is a finding
+about the **evaluator** — the thing Phase 0 and P1-PRE spent themselves on — not
+about K2p1.
+
+## What this submission is not
+
+- **Not a nominee.** `GAME_PLAN.md` §7: nothing is nominated because it exists.
+- **Not evidence of improvement.** It is basic K2p1 and it is ~37× behind.
+- **Not a fitting opportunity.** **I will fit no constant, threshold, rank,
+  basis count or cost model to whatever comes back.** The feedback board is
+  CONFIRM tier and read-only (`VALIDATION.md` §0), and the repository has been
+  burned by exactly this once already — a month of decisions steered by the
+  public split.
+- **Not a reason to delay Phase 1A**, which runs in parallel and is not gated on
+  it.
+
+## Operational gate, checked immediately before submitting
+
+1. `estimator.py` sha256 still `00240eb1…` and still identical to its archive;
+2. worktree clean;
+3. `whest validate` passes;
+4. the allowance permits it (10 per team per **UTC** day; this team has zero
+   Phase-2 submissions as of the 2026-08-25 signed-in recheck — **transcribed,
+   not captured by the Builder**, see `account_and_allowance.md`);
+5. Samuel's approval names the exact SHA above.
+
+**The 100-MLP mini is NOT re-run** unless the estimator, the dataset revision or
+the official configuration has changed. None has.
+
+## Samuel's prediction, recorded before the result
+
+Taken 2026-08-25, **before** submission and before any result exists:
+
+| # | question | Samuel | Builder |
+|---|---|---|---|
+| **P1** | feedback score returned | **`3.6e-7`** | `[3.6e-7, 4.6e-7]`, centred `4.05e-7` |
+| **P2** | will any MLP fail? | **no** | no — S-1 |
+| **P3** | does a local 100-network mini transfer to the 50-network board? | **yes** | yes, with wider spread |
+
+**We disagree, and it is registered rather than smoothed.** Samuel's point
+estimate sits on the **bottom edge** of my interval: he expects the graded
+feedback to come back **better than our local measurement**, I expect it centred
+on it. The gap is ~11%.
+
+That disagreement is the only thing in this submission with any information
+content. If the feedback returns near `3.6e-7`, the local 100-network mini is
+*pessimistic* about the 50-network board and Samuel's model of the transfer is
+better than mine. If it returns near `4.05e-7`, the mini transfers ~1:1 as forum
+18199 reports and my centring was right. Either way one of us learns something
+about the instrument, which is the entire scientific value of a baseline
+submission that cannot improve our rank.
+
+**Neither prediction may be revised after the result.** Both are committed here.
+
+**Seed ledger:** unchanged, nothing claimed. **Vault:** untouched.
+**`estimator.py`:** not edited. **Nothing submitted.**
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.

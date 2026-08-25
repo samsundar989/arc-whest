@@ -1,0 +1,39 @@
+{
+  "E_norm": 31.992188454829048,
+  "homogeneity_max_rel_dev": 1.631807025872517e-15,
+  "layer1": {
+    "angular_mean": 0.3818518906836681,
+    "exact": 12.219867109957555,
+    "once_over_exact": 0.9997062601957479,
+    "none_over_exact": 0.03124844871451261,
+    "twice_over_exact": 31.982791075654728
+  },
+  "second_moment_exact": true,
+  "fourth_moment": {
+    "sphere": 2.8554459064327484e-06,
+    "aligned": 6.192922592163086e-05,
+    "aligned_over_sphere": 21.6881103515625,
+    "random_ratio_min": 0.9680138606691104,
+    "random_ratio_max": 1.0234271373112889
+  },
+  "ledger": {
+    "counted": 1099511627776,
+    "dense_matmul_arithmetic": 1099511627776,
+    "overhead": 0,
+    "overhead_pct": 0.0
+  },
+  "memory_mb": {
+    "baseline": 504.71484375,
+    "peak": 1146.625,
+    "after_construct": 569.98828125,
+    "after_weights": 793.41015625
+  },
+  "timing_s": {
+    "construct": 0.09458450006786734,
+    "materialise": 0.05316269991453737,
+    "propagate": 1.69092239998281,
+    "child_wall": 2.3072522999718785
+  },
+  "checks_passed": 13,
+  "checks_total": 13
+}
