@@ -352,6 +352,31 @@ REQUIRED_CONSTRAINTS = (
     "predict_response_timeout_s",
 )
 
+#: What each constraint must CLAIM about local enforcement. Pinned separately
+#: from membership, because `REQUIRED_CONSTRAINTS` pins only which names exist.
+#:
+#: A fourth independent Skeptic measured the gap: flipping `enforced_locally` to
+#: False on `flop_budget`, `wall_time_limit_s`, `residual_wall_time_limit_s` or
+#: `setup_timeout_s` passed every check in this file. The constraint simply
+#: relocated into the NOT-PROVABLE block, under a heading reading "They are
+#: enforced only on the grader" -- making that sentence false, which is the
+#: RESULT entry's own knowledge-delta #5 -- and the suite exited 0. Membership
+#: was pinned; the claim attached to each name was not. Injection K flips one.
+ENFORCEMENT_EXPECTED = {
+    "flop_budget": True,
+    "wall_time_limit_s": True,
+    "residual_wall_time_limit_s": True,
+    "setup_timeout_s": True,
+    "worker_death_restart": True,
+    "predict_response_timeout_s": False,
+}
+
+#: `memory_limit_mb` is the one whose answer is genuinely platform-dependent, so
+#: it is not pinned to a value here -- it is checked against a child that applies
+#: the real cap. Named as a literal so "not pinned" is a deliberate declaration
+#: and the completeness check below can still be exact.
+PLATFORM_DEPENDENT_CONSTRAINTS = ("memory_limit_mb",)
+
 MEM_CAP_APPLIED = "the worker actually APPLIED the 8 GiB cap"
 MEM_CONTROL = "the 256 MiB control mapping SUCCEEDED"
 MEM_REFUSED = "the 9 GiB reservation was REFUSED by the limit"
@@ -400,6 +425,20 @@ def _setrlimit_works_in_child(limit_mb: int) -> dict:
 
     So this applies the real cap, in a child, and reports what happened. The
     child sets its own soft limit and exits; nothing here is affected.
+
+    **AND ON A HOST WITHOUT `resource` IT IS STILL AN IDENTITY, which is the
+    thing the three previous versions failed to say.** On Windows the child dies
+    at `import resource` and never reaches `setrlimit`, so both sides of the
+    comparison in the matrix descend from one failed import exactly as versions
+    1-3 did, and the only reachable red path is the probe itself crashing
+    (`usable: None`) -- an environment condition, wired into the mandatory
+    `-Full` tier. What is genuinely improved is FAITHFULNESS: on a host that has
+    `resource`, this asks the call the grader makes rather than a weaker one.
+    **The Linux memory claim is carried by section 5's worker probe
+    (`MEM_CAP_APPLIED`, which reads the worker's own post-`setrlimit`
+    `getrlimit`), and by this only as a corroborating second opinion.** A fourth
+    independent Skeptic measured that and it is recorded here rather than in a
+    LOG entry, because this is where the next reader will be standing.
     """
     src = ("import json\n"
            "L = %d * 1024 * 1024\n"
@@ -1401,6 +1440,22 @@ def main() -> int:
           present == required,
           f"{len(present)} present; missing {sorted(required - present) or 'none'}; "
           f"unpinned {sorted(present - required) or 'none'}")
+    # Membership is not the claim. Each constraint also asserts whether it is
+    # enforced HERE, and flipping that to False silently relocates it into the
+    # NOT-PROVABLE block rather than failing anything -- pinned separately for
+    # exactly that reason, and completeness of the pin is itself checked so a
+    # constraint cannot escape by being left out of both literals.
+    pinned = set(ENFORCEMENT_EXPECTED) | set(PLATFORM_DEPENDENT_CONSTRAINTS)
+    check("every required constraint's ENFORCEMENT claim is pinned somewhere",
+          pinned == required,
+          f"unpinned {sorted(required - pinned) or 'none'}; "
+          f"pinned-but-absent {sorted(pinned - required) or 'none'}")
+    wrong = {n: c["enforced_locally"] for n, c in enf["constraints"].items()
+             if n in ENFORCEMENT_EXPECTED
+             and c["enforced_locally"] != ENFORCEMENT_EXPECTED[n]}
+    check("...and every one of them makes the enforcement claim it is pinned to",
+          not wrong,
+          f"{len(ENFORCEMENT_EXPECTED)} pinned; disagreeing: {wrong or 'none'}")
     # The matrix's memory claim, checked against a probe run in a CHILD process.
     #
     # It used to read `enforced_locally == _rlimit_available()`, an identity --

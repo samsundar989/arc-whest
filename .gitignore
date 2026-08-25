@@ -34,3 +34,7 @@ local_sim/_envelope_*_tmp*
 
 experiments/2026-08-24_p2_p0/linux/__pycache__/
 local_sim/_envelope_mem_*_tmp*
+
+# transient backups made by local_sim/p1pre_fault_inject.py; removed in a
+# finally, ignored so a hard kill cannot leave one tracked
+local_sim/*.fault_inject_backup

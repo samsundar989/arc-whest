@@ -68,7 +68,8 @@ _ROOT = os.path.dirname(_HERE)
 SUITE = os.path.join(_HERE, "test_deployment_envelope.py")
 READONLY = os.path.join(_HERE, "test_envelope_readonly.py")
 OUT = os.path.join(_ROOT, "experiments", "2026-08-25_p1_pre", "fault_injection.txt")
-BACKUP = SUITE + ".fault_inject_backup"
+#: Backups are per-target: `<file>.fault_inject_backup`, made and removed
+#: by main(). Gitignored so a hard kill cannot leave one tracked.
 
 #: Tracked artifacts a broken build can rewrite. Restored after every injection.
 TRACKED = (
@@ -210,7 +211,49 @@ INJECTIONS = [
             "predict_response_timeout_s": {""")],
         [SUITE, "--no-write", "--skip-worker-death"],
     ),
+    (
+        "K",
+        "a constraint's ENFORCEMENT claim is flipped, relocating it silently",
+        # H and I pin membership. Until 2026-08-25 nothing pinned the CLAIM: set
+        # `enforced_locally: False` on flop_budget and it moved into the
+        # NOT-PROVABLE block -- under a heading reading "they are enforced only
+        # on the grader" -- with every check still green and exit 0. Measured on
+        # four of the seven constraints by a fourth independent Skeptic.
+        [("""            "flop_budget": {
+                "value": r.flop_budget,
+                "enforced_locally": True,""",
+          """            "flop_budget": {
+                "value": r.flop_budget,
+                "enforced_locally": False,""")],
+        [SUITE, "--no-write", "--skip-worker-death"],
+    ),
 ]
+
+#: Injections that break `test_envelope_readonly.py` itself rather than the
+#: suite. `_TARGET` says which file each one edits; everything else is identical,
+#: and the backup/restore/refuse-if-dirty machinery follows the target.
+INJECTIONS += [
+    (
+        "J",
+        "a documented blind spot is deleted, improving the coverage figure",
+        # The guard this breaks was `len(newly) + len(still) == len(KNOWN_BLIND)`
+        # -- a partition of the list compared against the list. Deleting entries
+        # passed green while the printed coverage rose from 5/11 to 5/6. Pinned
+        # against COVERAGE_CLAIM now.
+        [("""        ("truthy call", "check('a', bool(1), 'd')"),
+        ("aliased callee", "c('a', True, 'd')"),""",
+          """        ("truthy call", "check('a', bool(1), 'd')"),""")],
+        [READONLY],
+    ),
+]
+
+
+#: Which file each injection edits. Anything not listed edits the suite.
+_TARGET = {"J": READONLY}
+
+
+def _target_of(tag: str) -> str:
+    return _TARGET.get(tag, SUITE)
 
 
 def _sha(path: str) -> str:
@@ -228,17 +271,6 @@ def main() -> int:
                     help="comma-separated injection tags, e.g. A,E")
     ap.add_argument("--out", default=OUT)
     args = ap.parse_args()
-
-    # A dirty suite would be restored to the WRONG bytes, silently reverting
-    # someone's uncommitted work. Refuse instead.
-    rel = os.path.relpath(SUITE, _ROOT).replace(os.sep, "/")
-    dirty = _git("status", "--porcelain", "--", rel).stdout.strip()
-    if dirty:
-        print(f"REFUSING: {rel} has uncommitted changes ({dirty!r}).")
-        print("This harness restores it from a backup of its CURRENT bytes, but a "
-              "crash mid-run would leave a broken build in your tree. Commit or "
-              "stash first.")
-        return 2
 
     wanted = {t.strip().upper() for t in args.only.split(",") if t.strip()}
     plan = [i for i in INJECTIONS if not wanted or i[0] in wanted]
@@ -275,6 +307,7 @@ def main() -> int:
 
             lines.append("=" * 100)
             lines.append(f"INJECTION {tag} -- {title}")
+            lines.append(f"edits:   {os.path.basename(target)}")
             lines.append(f"command: {' '.join(os.path.basename(a) for a in argv)}")
             verdict = ("CAUGHT" if caught else
                        "UNCAUGHT -- the defect was reintroduced and NOTHING "
@@ -287,18 +320,24 @@ def main() -> int:
             lines.extend("  " + ln for ln in out.splitlines()[-12:])
             lines.append("")
 
-            shutil.copyfile(BACKUP, SUITE)
+            shutil.copyfile(target + ".fault_inject_backup", target)
             _git("checkout", "--", *TRACKED)
     finally:
-        shutil.copyfile(BACKUP, SUITE)
-        os.remove(BACKUP)
+        for t in targets:
+            b = t + ".fault_inject_backup"
+            if os.path.exists(b):
+                shutil.copyfile(b, t)
+                os.remove(b)
 
-    if _sha(SUITE) != original:
-        print("FATAL: the suite was not restored byte-for-byte")
+    bad = [os.path.basename(t) for t in targets if _sha(t) != original[t]]
+    if bad:
+        print(f"FATAL: not restored byte-for-byte: {bad}")
         return 4
 
     lines.append("=" * 100)
-    lines.append(f"suite restored byte-for-byte: sha256 {original}")
+    for t in targets:
+        lines.append(f"restored byte-for-byte: {os.path.basename(t)}  "
+                     f"sha256 {original[t]}")
     lines.append(f"injections run: {[i[0] for i in plan]}   "
                  f"uncaught: {uncaught or 'none'}")
     text = "\n".join(lines)

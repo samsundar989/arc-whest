@@ -137,6 +137,23 @@ _WRITE_CALLS = {
 SCANNED = ("test_deployment_envelope.py", "test_envelope_readonly.py",
            "lifecycle_eval.py")
 
+#: **Pinned literals, and the only reason they exist is that everything else in
+#: this section is a traversal of the lists it audits.**
+#:
+#: A fourth independent Skeptic measured the previous guard across seven
+#: mutations: `len(newly) + len(still) == len(KNOWN_BLIND)` is a partition
+#: identity, so silently deleting entries from `KNOWN_BLIND` passed green while
+#: the printed coverage rose from 5/11 to 5/6. That is `adjudicated ==
+#: len(deferred)` a second time, in the file whose own fix for that class was to
+#: pin a literal elsewhere.
+#:
+#: These are compared against the measured lengths, so the two sides come from
+#: different places. Changing the scan's coverage means editing a number here on
+#: purpose. Injection J deletes a `KNOWN_BLIND` entry and turns this red.
+COVERAGE_CLAIM = (5, 6)          # (spellings CAUGHT, spellings KNOWN-BLIND)
+REQUIRED_SCANNED = ("test_deployment_envelope.py", "test_envelope_readonly.py",
+                    "lifecycle_eval.py")
+
 _PASS = 0
 _FAIL = 0
 
@@ -309,7 +326,17 @@ def structural_tests() -> None:
         if found:
             offenders[base] = found
         print(f"      {base:<34} {len(found)} literal-truthy condition(s)")
-    check(f"no check() has a literal truthy condition, in any of {len(SCANNED)} files",
+    # The check NAME used to be `f"...in any of {len(SCANNED)} files"` -- derived
+    # from the tuple it audits, so dropping a file changed the label and passed.
+    # `REQUIRED_SCANNED` is the literal; the two sides now come from different
+    # places, and removing `lifecycle_eval.py` (added one commit ago on a
+    # Skeptic's point) turns this red instead of relabelling it.
+    check("every REQUIRED file is scanned",
+          set(SCANNED) == set(REQUIRED_SCANNED),
+          f"scanned {sorted(SCANNED)}; missing "
+          f"{sorted(set(REQUIRED_SCANNED) - set(SCANNED)) or 'none'}; "
+          f"unpinned {sorted(set(SCANNED) - set(REQUIRED_SCANNED)) or 'none'}")
+    check("no check() has a literal truthy condition, in any scanned file",
           not offenders, "clean" if not offenders else f"{offenders}")
     # Non-vacuity, and it must MEASURE COVERAGE rather than confirm the one
     # spelling the scanner already handles. The first version of this probe fed
@@ -370,14 +397,26 @@ def structural_tests() -> None:
             print(f"      NOTICE: the scanner now catches {newly} -- widen the "
                   f"KNOWN_BLIND list, this docstring and the LOG scope claim to "
                   f"match. This is an improvement, not a failure.")
-        # Non-vacuity: every documented spelling must actually have been probed,
-        # or the coverage figure above is an opinion. This CAN fail -- a probe
-        # that stopped writing its file, or a KNOWN_BLIND entry that stopped
-        # parsing, lands here.
-        check("every documented spelling was actually probed",
-              len(newly) + len(still) == len(KNOWN_BLIND) and bool(KNOWN_BLIND),
-              f"coverage measured at {len(MUST_CATCH)}/"
-              f"{len(MUST_CATCH) + len(KNOWN_BLIND)} spellings; "
+        # The coverage figure, against a PINNED literal.
+        #
+        # What stood here was `len(newly) + len(still) == len(KNOWN_BLIND)` --
+        # a partition of `KNOWN_BLIND` compared against `KNOWN_BLIND`, so both
+        # sides moved together and deleting documented blind spots passed green
+        # with the printed coverage improving. Measured across seven mutations by
+        # a fourth independent Skeptic; only emptying the list outright failed.
+        # The comment claimed it would catch a probe that stopped writing and a
+        # KNOWN_BLIND entry that stopped parsing: the first passes, the second
+        # raises an uncaught SyntaxError before the check runs. Neither landed.
+        measured = (len(MUST_CATCH), len(KNOWN_BLIND))
+        check("the scan's coverage matches the PINNED claim",
+              measured == COVERAGE_CLAIM,
+              f"measured {measured[0]} caught / {measured[1]} blind "
+              f"= {measured[0]}/{sum(measured)}; pinned "
+              f"{COVERAGE_CLAIM[0]}/{sum(COVERAGE_CLAIM)}"
+              + ("" if measured == COVERAGE_CLAIM else
+                 " -- edit COVERAGE_CLAIM deliberately, or restore the lists"))
+        check("...and every documented spelling was reached by the probe",
+              len(newly) + len(still) == len(KNOWN_BLIND),
               f"{len(still)} still blind, {len(newly)} newly caught")
     finally:
         if os.path.exists(probe):
