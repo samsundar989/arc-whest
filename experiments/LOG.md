@@ -13583,3 +13583,47 @@ recorded, is Samuel's call.
 1 == 1 log line. **`estimator.py`:** byte-identical, `00240eb1e60810f5…`.
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-25 — PLAN DECISION after P1-PRE terminal PROVISIONAL: four corrections, then research and one calibration submission
+
+*ROUTINE review and plan synthesis. No estimator edit, seed claim, truth
+measurement, vault touch or submission.*
+
+A fresh read-only audit of reviewed HEAD `8e58db0` agrees with the terminal
+Skeptic's decision boundary. The six named terminal guarantees and D1–D3 are
+closed. The sole remaining behavioural defect is T6: the harness defaults to a
+tracked transcript, exempts that path from refusal, omits it from protected
+evidence and measures repository state before writing it. T7's arithmetic and
+headline, the missing injection J, and the unreconciled first-read docs are
+durable-record defects. These four items are bounded and directly discriminating;
+the review's five additional meta-design observations are recorded limitations
+and are not added to this gate.
+
+**Decision:** authorize one corrections-only P1-PRE pass and one fresh bounded
+review. Require an external default output, refusal of every in-repo output,
+after-write state/hash evidence covering the former transcript, restored J with
+15/15 named catches, append-only T7/headline corrections, reconciled docs, full
+preflight and portability, and a literal ACCEPT. Do not extend the evaluator
+after those items close.
+
+A read-only check of the signed-in AIcrowd account found zero Phase-2 submissions.
+The 2026-08-25 live board had 44 entrants, a leader at `1.17e-8` adjusted /
+`2.45e-8` raw, and a K2-like cluster around rank 33 at `3.93e-7` adjusted /
+`3.93e-6` raw. The current shipped width-1024 K2p1 path projects to that cluster,
+not to the frontier. The only measured Phase-2 improvement in the repo is K2p2 at
+about 1.052x and it is not integrated into `estimator.py`. Therefore there is no
+materially improved Phase-2 submission candidate yet.
+
+**Post-ACCEPT execution:** start Phase 1A construction immediately and, in
+parallel, prepare the current K2p1 file as a one-time official calibration
+submission. The calibration requires a frozen hash, `whest validate`, a clean
+zero-failure Phase-2 subprocess mini and Samuel's explicit approval before any
+submission. Its purpose is grader/account calibration, not promotion or final
+nomination. The first genuinely improved candidate still comes from the
+structured-carrier Phase 1A/1B/2 path, followed by recurrent augmented K2 and
+checkpoint response only where evidence supports them.
+
+Durable docs updated: `CURRENT_STATE.md`, `GAME_PLAN.md`, `BENCHMARK.md`,
+`GOTCHAS.md`, and `CLAUDE_CODE_HANDOFF.md`.

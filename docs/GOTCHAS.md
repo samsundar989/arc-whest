@@ -23,15 +23,22 @@ narrative record), `docs/GAME_PLAN.md` (the sole active Phase-2 strategy).
 
 ## 2026-08-25 (P1-PRE) — a falsification harness must not restore with Git
 
-*Full record and review-5 PROVISIONAL verdict: bottom of `experiments/LOG.md`.*
+*Full record through the terminal-review PROVISIONAL verdict: bottom of
+`experiments/LOG.md`.*
 
-- **Do not run `local_sim/p1pre_fault_inject.py` at HEAD `0810537`.** It mutates
-  source in the repository and then unconditionally runs `git checkout --` on two
-  tracked evidence artifacts. Its dirty-worktree refusal covers the source files,
-  not those artifacts. The [official Git documentation](https://git-scm.com/docs/git-checkout)
-  is explicit that checkout of a path replaces it from the index and discards
-  unstaged changes. A test
-  harness must never use a destructive version-control operation as cleanup.
+- **Historical warning, resolved after HEAD `0810537`:** the old
+  `local_sim/p1pre_fault_inject.py` mutated repository source and then ran
+  `git checkout --` on tracked evidence. The current implementation runs
+  mutations in a scratch mirror and contains no executable destructive restore.
+  Keep the lesson: a harness must never use version-control restoration as
+  cleanup.
+- **Current temporary restriction at HEAD `8e58db0`:** do not use the harness's
+  default output. Pass an explicit `--out` outside the repository. The default
+  still overwrites its tracked transcript, and the “repository untouched” proof
+  is taken before that write and omits the transcript. P1-PRE is not accepted
+  until the default becomes external, every in-repo output is refused, the old
+  transcript is included in the hash evidence, and the measurement runs after
+  the write.
 - Run faulted code from temporary copies/scratch inputs. Snapshot repository status
   and tracked hashes before and after, and refuse any output path that aliases a
   tracked file. If cleanup is required for a test to be safe, the test is not yet

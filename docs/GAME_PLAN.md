@@ -28,16 +28,18 @@ The official live runtime is WhestBench 0.16 / flopscope 0.12 with lambda zero,
 a 0.4-second residual cap, 120-second total wall cap, 8-GiB solution-memory limit,
 and 5-second setup timeout.
 
-At the 2026-08-24 snapshot:
+At the live 2026-08-25 snapshot:
 
 | system | adjusted score | raw final-layer MSE | counted FLOPs |
 |---|---:|---:|---:|
-| Puffi, rank 1 | `1.802e-8` | `3.603e-8` | `1.099802385e12` |
-| pranav, rank 2 | `1.87e-8` | `3.878e-8` | `~1.06e12` |
+| jamespayor, rank 1 | `1.17e-8` | `2.45e-8` | not captured in this snapshot |
+| pranav, rank 2 | `1.25e-8` | `3.40e-8` | not captured in this snapshot |
 | current repo Phase-2 K2 path | `~3.96e-7` | `~3.95e-6` | `~1.38e11` |
 
-The present gap is about 22x in adjusted score and 100x in raw accuracy. Incremental
-1.05x–1.30x improvements are useful controls but are not a winning strategy.
+There were 44 entrants; the current K2 path projects to the cluster around rank 33.
+The present gap is about 34x in adjusted score and 161x in raw accuracy. The
+account has no Phase-2 submission. Incremental 1.05x–1.30x improvements are useful
+controls but are not a winning strategy.
 
 ### Outcome targets
 
@@ -265,35 +267,31 @@ Exit gate:
 
 Phase 0 closed on the literal independent ACCEPT recorded in commit `7367fdb`.
 
-### P1-PRE — close the accepting review's instrument defects
+### P1-PRE — corrections-only closure of the evaluator instrument
 
 **Class:** IMPORTANT. No seed block, truth data, vault, or shipped-file change.
 
-The three original carried defects are now closed in code and have survived five
-independent attacks. P1-PRE remains PROVISIONAL because review 5 found concrete
-holes in the *assurance around the repair*. Finish it with one terminal, bounded
-pass. Do not expand this into a general mutation-testing framework.
+The three original carried defects are closed in code and survived six independent
+attacks. The terminal implementation also closed all six findings from review 5:
+14 mutations fire their named guards, the scratch mirror cannot destructively
+restore repository files, the behavioural witnesses are pinned, preflight is
+16/16, and portability is 99/99.
 
-The terminal pass closes exactly these items:
+The sixth review remains PROVISIONAL on four bounded corrections. Finish exactly
+these and do not expand the slice into the review's five explicitly non-blocking
+meta-design observations:
 
-1. pin the semantic content of every enforced constraint's witness—constraint,
-   suite, exact check-ID set and any required detail fragment—then add the
-   discriminating mutation that points the wall constraint at the residual check;
-2. replace the unbounded platform-dependent exemption with an exact classification
-   in which only `memory_limit_mb` can be platform-dependent, and exercise the
-   relocation mutation;
-3. make the read-only scanner compare the files it actually opened with the
-   required file set, and pin named probe identities rather than only the two
-   cardinalities;
-4. make every fault injection require its expected failing check/reason, not any
-   non-zero exit;
-5. remove every destructive cleanup of tracked repository files. The harness must
-   run mutations against temporary copies/scratch inputs and prove the repository
-   status and tracked hashes are unchanged. In particular it must never use
-   `git checkout --` to restore evidence;
-6. replace the non-resolving transcript grep rule with one that resolves uniquely,
-   and record a missing `resource` implementation as DECLINED/NOT PROVABLE rather
-   than a green identity comparison.
+1. make the harness's default `--out` resolve outside the repository, reject every
+   in-repository output path with no tracked-transcript carve-out, include the old
+   tracked transcript in the unchanged evidence, and measure repository state
+   **after** the output write;
+2. correct T7's recorded arithmetic and replace the false “ten of ten as written”
+   headline with “nine as written, one corrected”; append corrections—never edit
+   the preregistered text or prior result in place;
+3. restore injection J, whose guard the reviewer independently confirmed still
+   fires, and record the 11-to-15 mutation-set history truthfully;
+4. reconcile `CURRENT_STATE.md`, `GOTCHAS.md` and the handoff so no current
+   instruction describes the removed destructive path.
 
 Preserve and re-demonstrate the original repairs:
 
@@ -306,11 +304,12 @@ Preserve and re-demonstrate the original repairs:
 3. make `--no-write` perform no regeneration and no tracked write, proven by
    before/after hashes and a clean worktree.
 
-Exit gate: written prediction/knowledge target before this terminal edit; all
-named review-5 mutations caught by the exact expected refusal; repository hashes
-and status unchanged by the mutation harness; original D1–D3 positive/negative
-evidence still green; full preflight and portability green; LOG knowledge delta;
-and one fresh independent Skeptic **ACCEPT** against these named guarantees.
+Exit gate: the corrected harness writes only to an external output by default;
+the after-write state/hash proof covers the former tracked transcript; 15/15
+injections are caught by their named guards; original D1–D3 evidence remains
+green; full preflight and portability are green; the LOG contains explicit
+corrections; and one fresh independent Skeptic returns **ACCEPT** against the
+bounded four-item follow-up.
 
 The reviewer may record residual limitations. It must not withhold acceptance
 merely because no finite mutation set proves all possible future multi-edit
@@ -318,6 +317,29 @@ changes. A finding remains blocking only if it demonstrates a current false
 green, possible evidence loss, recurrence of D1–D3, or a false durable claim.
 If such a blocking finding remains after this pass, stop and return it to Samuel;
 do not begin an open-ended seventh hardening cycle.
+
+### Phase 0S — first Phase-2 calibration submission
+
+**Class:** STRATEGIC because it is a submission. It changes no estimator and uses
+no decision seed. It may be prepared alongside Phase 1A after P1-PRE ACCEPT.
+
+The signed-in team/Phase-2 view showed zero submissions on 2026-08-25. Establish
+one official calibration point with the current, frozen K2p1 file before the new
+architecture is ready:
+
+1. record the exact estimator hash and expected result (`~3.93–3.96e-7` adjusted,
+   around the rank-33 cluster), explicitly labeling it a baseline rather than an
+   improvement;
+2. run `whest validate` and a clean `v2-phase2` subprocess mini with zero failures;
+3. verify official stack/config, ship-file identity, clean status and current
+   daily submission allowance;
+4. show Samuel the packet and request explicit approval;
+5. only if approved, submit once and record the official result without fitting
+   any constant to it.
+
+This checkpoint calibrates the grader, confirms account access and gives the team
+a first Phase-2 record. It is not a promotion decision, not a final nominee, and
+must not delay Phase 1A construction once P1-PRE is accepted.
 
 ### Phase 1A — construct and verify the carrier without truth data
 
@@ -512,7 +534,7 @@ Promote two complementary nominees:
 
 | window | required outcome |
 |---|---|
-| Aug 24–26 | Phase-2 evaluator parity, accepted evidence packet, and P1-PRE hardening |
+| Aug 24–26 | evaluator parity; corrections-only P1-PRE ACCEPT; prepare first Phase-2 K2p1 calibration submission and ask Samuel |
 | Aug 26–Sep 3 | Kerdock/MUB specification, generator, invariants, then DESIGN evidence |
 | Sep 3–12 | carrier DECIDE; augmented-K2 small-shape parity and DESIGN evidence |
 | Sep 12–24 | augmented-K2 DECIDE and checkpoint-response experiment |
@@ -584,12 +606,19 @@ paths are provoked — the memory limit on Linux, where `RLIMIT_AS` exists.
 **The all-of gate G1–G7 is met**, on a literal independent **ACCEPT** at HEAD
 `952bd61`, after four review passes (PROVISIONAL, PROVISIONAL, REJECT, ACCEPT).
 
-**The immediate action is the terminal P1-PRE closure above, then Phase 1A.**
+**The immediate action is the corrections-only P1-PRE closure above. After
+ACCEPT, start Phase 1A and prepare the baseline calibration submission in
+parallel.**
 
-D1–D3 are already closed and the fifth review confirmed that fact. What remains
-is the bounded set of review-5 assurance and safety findings. Spend one repair
-pass and one fresh review on them; do not continue inventing meta-checks after the
-named properties are accepted. Phase 1 then runs in two distinct stages:
+D1–D3 and the six terminal guarantees are already closed. The sixth review found
+one actual default-output defect plus three false/stale durable claims. Spend one
+corrections-only pass and one fresh review on those four items; do not pursue the
+five non-blocking meta-design observations in this slice. Once accepted:
+
+- **Phase 0S — calibration only.** Prepare the current K2p1 file, validate it,
+  run a zero-failure Phase-2 subprocess mini, and ask Samuel for explicit approval
+  before one baseline submission. Expect roughly rank 33, not an improvement.
+- Phase 1 then runs in two distinct stages:
 
 - **Phase 1A — construction only.** A width-1024 Kerdock/MUB generator emitting
   1/2/4/8/16 bases without materialising the full code, proved against an
