@@ -149,7 +149,9 @@ SCANNED = ("test_deployment_envelope.py", "test_envelope_readonly.py",
 #:
 #: These are compared against the measured lengths, so the two sides come from
 #: different places. Changing the scan's coverage means editing a number here on
-#: purpose. Injection J deletes a `KNOWN_BLIND` entry and turns this red.
+#: purpose. **Injection J** deletes a `KNOWN_BLIND` entry and turns this red.
+#: (J was dropped when the injection set was rebuilt and this line went on citing
+#: it — a deleted regression test with a live reference. It is restored.)
 COVERAGE_CLAIM = (5, 6)          # (spellings CAUGHT, spellings KNOWN-BLIND)
 REQUIRED_SCANNED = ("test_deployment_envelope.py", "test_envelope_readonly.py",
                     "lifecycle_eval.py")

@@ -23,12 +23,25 @@ silently discarded. That produced no false green; it destroyed evidence, and a
 tool that requires a clean tree in order not to eat your work is a tool with a
 loaded footgun.
 
-**Now: nothing under the repository is written, moved or restored, ever.** A
-scratch MIRROR is built in a system temp directory — `local_sim/`, `estimator.py`
-and the P2-P0 evidence directory, copied out — and made into a throwaway git repo
-so the suites' own `git status` checks have something real to talk to. Mutations are
-written into the mirror. The repository is opened read-only. There is no
-`git checkout` in this file, and unrelated dirty work in your tree is untouched.
+**Now: nothing under the repository is written, moved or restored, ever** — and
+that sentence took two attempts to make true. A scratch MIRROR is built in a
+system temp directory (`local_sim/`, `estimator.py` and the P2-P0 evidence tree,
+copied out) and made into a throwaway git repo so the suites' own `git status`
+checks have something real to talk to. Mutations are written into the mirror. The
+repository is opened read-only. There is no `git checkout` in this file, and
+unrelated dirty work in your tree is untouched.
+
+**The first attempt asserted that sentence while violating it.** The transcript's
+default `--out` was a *tracked* file, the in-repo refusal carved that one path
+out, and the "REPOSITORY UNTOUCHED" measurement ran *before* the write over a
+protected list that omitted it — so the tool's one repository write was invisible
+to its own proof that it made none. A sixth independent Skeptic measured all
+three together. Fixed by making the rule containment rather than tracking status
+(**any** path inside the repository is refused, tracked or not), defaulting the
+transcript to a temp directory, adding the old tracked transcript to the
+protected set, and taking the measurement **after** the write. If you want the
+transcript as committed evidence, copy it in yourself — deliberately, as a human
+act, which is the distinction that was missing.
 
 **2. Its verdict was a state, not a property.** `caught = returncode != 0` counts
 any red run as a catch — including a run that died on a `SyntaxError` the
@@ -72,7 +85,23 @@ _ROOT = os.path.dirname(_HERE)
 
 SUITE_BASE = "test_deployment_envelope.py"
 READONLY_BASE = "test_envelope_readonly.py"
-OUT = os.path.join(_ROOT, "experiments", "2026-08-25_p1_pre", "fault_injection.txt")
+#: The default transcript path, and it is OUTSIDE the repository.
+#:
+#: It used to default to the tracked `experiments/.../fault_injection.txt`, and
+#: the in-repo refusal below carved that one path out — so the tool's one and
+#: only repository write was the one its own refusal permitted, and the module
+#: docstring said "nothing under the repository is written, moved or restored,
+#: ever". A sixth independent Skeptic measured the carve-out and the false
+#: universal together. Writing outside the tree by default is what makes the
+#: sentence true instead of qualified; copy the transcript into `experiments/`
+#: deliberately if you want it as committed evidence.
+OUT = os.path.join(tempfile.gettempdir(), "arc_whest_p1pre_fault_injection.txt")
+
+#: The transcript this tool USED to write. It is tracked, and it is now in the
+#: protected set below precisely because it was the file the old carve-out
+#: allowed the tool to overwrite.
+LEGACY_OUT = os.path.join(_ROOT, "experiments", "2026-08-25_p1_pre",
+                          "fault_injection.txt")
 
 #: What the mirror needs so both suites run exactly as they do in the repository.
 MIRROR_TREES = ("local_sim", os.path.join("experiments", "2026-08-24_p2_p0"))
@@ -192,6 +221,21 @@ INJECTIONS = [
         "the matrix carries EXACTLY the required envelope constraints",
     ),
     (
+        "J", "a documented blind spot is deleted, improving the coverage figure",
+        READONLY_BASE,
+        # RESTORED 2026-08-25. J was dropped when the injection set was rebuilt
+        # for the terminal pass, while a docstring in `test_envelope_readonly.py`
+        # went on citing it as the evidence that `COVERAGE_CLAIM` can fail --
+        # a deleted regression test with a live reference to it. The sixth
+        # independent Skeptic re-ran J against HEAD and it still fires, so the
+        # guarantee was never lost; only its watched-failing evidence was.
+        [("""        ("truthy call", "check('a', bool(1), 'd')"),
+        ("aliased callee", "c('a', True, 'd')"),""",
+          """        ("truthy call", "check('a', bool(1), 'd')"),""")],
+        [READONLY_BASE],
+        "the scan's coverage matches the PINNED claim",
+    ),
+    (
         "K", "a constraint's ENFORCEMENT claim is flipped, relocating it silently",
         SUITE_BASE,
         [("""            "flop_budget": {
@@ -271,7 +315,12 @@ def _git(*args: str, cwd: str = _ROOT) -> subprocess.CompletedProcess:
 
 
 def _tracked_evidence() -> list:
-    """Repository paths whose bytes must be identical before and after."""
+    """Repository paths whose bytes must be identical before and after.
+
+    `LEGACY_OUT` is here because it is the file the old carve-out let this tool
+    overwrite: a protected list that omits the one path the tool actually wrote
+    is a proof that cannot see its own counterexample.
+    """
     return [
         os.path.join(_HERE, SUITE_BASE),
         os.path.join(_HERE, READONLY_BASE),
@@ -279,6 +328,7 @@ def _tracked_evidence() -> list:
                      "lifecycle_self_test.json"),
         os.path.join(_ROOT, "experiments", "2026-08-24_p2_p0",
                      "deployment_envelope.json"),
+        LEGACY_OUT,
     ]
 
 
@@ -307,16 +357,20 @@ def main() -> int:
     ap.add_argument("--out", default=OUT)
     args = ap.parse_args()
 
-    # An --out inside a tracked file would make this tool a writer of repository
-    # evidence, which is the thing it must not be. Refuse rather than warn.
+    # ANY --out inside the repository is refused -- tracked, untracked, existing
+    # or not. The previous rule refused only TRACKED paths and then exempted this
+    # tool's own tracked default, which is how a tool that must not write the
+    # repository came to write it on every invocation. There is no carve-out now:
+    # the test is containment, not tracking status.
     out_abs = os.path.abspath(args.out)
-    rel = os.path.relpath(out_abs, _ROOT).replace(os.sep, "/")
-    if not rel.startswith(".."):
-        tracked = _git("ls-files", "--error-unmatch", rel).returncode == 0
-        if tracked and rel != os.path.relpath(OUT, _ROOT).replace(os.sep, "/"):
-            print(f"REFUSING: --out {rel} is a tracked file other than this "
-                  f"harness's own transcript.")
-            return 2
+    rel = os.path.relpath(out_abs, _ROOT)
+    if not rel.startswith(".." + os.sep) and rel != "..":
+        print(f"REFUSING: --out {rel.replace(os.sep, '/')} resolves INSIDE the "
+              f"repository. This harness does not write the repository at all; "
+              f"point it elsewhere and copy the transcript in yourself if you "
+              f"want it as committed evidence.")
+        print(f"          default: {OUT}")
+        return 2
 
     wanted = {t.strip().upper() for t in args.only.split(",") if t.strip()}
     plan = [i for i in INJECTIONS if not wanted or i[0] in wanted]
@@ -390,27 +444,43 @@ def main() -> int:
     finally:
         shutil.rmtree(mirror, ignore_errors=True)
 
+    lines.append("=" * 100)
+    lines.append(f"injections run: {[i[0] for i in plan]}")
+    lines.append(f"  uncaught:         {uncaught or 'none'}")
+    lines.append(f"  harness failures: {harness_failures or 'none'}")
+
+    # THE TRANSCRIPT IS WRITTEN FIRST, AND THE MEASUREMENT COMES AFTER IT.
+    #
+    # It used to be the other way round: the "REPOSITORY UNTOUCHED" block was
+    # computed before this write, over a protected list that omitted the file
+    # being written. So the tool's single repository write was structurally
+    # invisible to the tool's own proof that it performed none -- a measurement
+    # taken before the event it certifies absent. Measuring afterwards is what
+    # makes it a measurement.
+    text = "\n".join(lines)
+    os.makedirs(os.path.dirname(out_abs) or ".", exist_ok=True)
+    with open(out_abs, "w", encoding="utf-8") as fh:
+        fh.write(text + "\n")
+
     after_status = _git("status", "--porcelain").stdout
     after_hash = {p: _sha(p) for p in _tracked_evidence()}
     moved = [os.path.relpath(p, _ROOT) for p in before_hash
              if before_hash[p] != after_hash[p]]
 
-    lines.append("=" * 100)
-    lines.append("REPOSITORY UNTOUCHED -- measured, not asserted:")
-    lines.append(f"  git status --porcelain identical:  {before_status == after_status}"
-                 f"   ({len(before_status.splitlines())} line(s) before, "
-                 f"{len(after_status.splitlines())} after)")
-    lines.append(f"  tracked files with a moved sha256: {moved or 'none'}")
+    tail = ["=" * 100,
+            "REPOSITORY UNTOUCHED -- measured AFTER the transcript was written:",
+            f"  transcript path: {out_abs}",
+            f"  inside the repository: "
+            f"{not os.path.relpath(out_abs, _ROOT).startswith('..')}",
+            f"  git status --porcelain identical:  {before_status == after_status}"
+            f"   ({len(before_status.splitlines())} line(s) before, "
+            f"{len(after_status.splitlines())} after)",
+            f"  protected files with a moved sha256: {moved or 'none'}"]
     for p in sorted(before_hash):
-        lines.append(f"    {os.path.relpath(p, _ROOT)}  {before_hash[p][:16]}")
-    lines.append(f"injections run: {[i[0] for i in plan]}")
-    lines.append(f"  uncaught:         {uncaught or 'none'}")
-    lines.append(f"  harness failures: {harness_failures or 'none'}")
-
-    text = "\n".join(lines)
-    os.makedirs(os.path.dirname(out_abs) or ".", exist_ok=True)
-    with open(out_abs, "w", encoding="utf-8") as fh:
-        fh.write(text + "\n")
+        tail.append(f"    {os.path.relpath(p, _ROOT)}  {before_hash[p][:16]}")
+    with open(out_abs, "a", encoding="utf-8") as fh:
+        fh.write("\n".join(tail) + "\n")
+    text = text + "\n" + "\n".join(tail)
     print(text)
     print(f"\n  wrote {out_abs}")
 

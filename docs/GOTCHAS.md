@@ -32,13 +32,16 @@ narrative record), `docs/GAME_PLAN.md` (the sole active Phase-2 strategy).
   mutations in a scratch mirror and contains no executable destructive restore.
   Keep the lesson: a harness must never use version-control restoration as
   cleanup.
-- **Current temporary restriction at HEAD `8e58db0`:** do not use the harness's
-  default output. Pass an explicit `--out` outside the repository. The default
-  still overwrites its tracked transcript, and the “repository untouched” proof
-  is taken before that write and omits the transcript. P1-PRE is not accepted
-  until the default becomes external, every in-repo output is refused, the old
-  transcript is included in the hash evidence, and the measurement runs after
-  the write.
+- **Resolved after HEAD `8e58db0`, and the shape of the defect is the lesson.**
+  The harness's default `--out` was a *tracked* file; its in-repo refusal carved
+  that one path out; and the "repository untouched" proof ran **before** the
+  write over a protected list that omitted it. So a tool whose docstring said it
+  never writes the repository wrote it on every invocation, and its own proof
+  could not see the counterexample. **A guard scoped to "tracked files except
+  mine" is not a guard, and a measurement taken before the event it certifies
+  absent is not a measurement.** Now: the default is a temp path, *any* in-repo
+  output is refused, the old transcript is in the protected set, and the
+  measurement runs after the write.
 - Run faulted code from temporary copies/scratch inputs. Snapshot repository status
   and tracked hashes before and after, and refuse any output path that aliases a
   tracked file. If cleanup is required for a test to be safe, the test is not yet

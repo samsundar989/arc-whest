@@ -192,11 +192,14 @@ actually scanned, and requires the named guard—not merely any non-zero exit—
 fire. It then stops. The repository will not build a second evaluator whose job
 is to formally verify the first evaluator.
 
-The historical destructive `git checkout --` path is gone at current HEAD.
-**Until the final T6 correction lands, invoke `local_sim/p1pre_fault_inject.py`
-only with an explicit `--out` outside the repository.** Its mutations are safe in
-a scratch mirror, but its default output still overwrites a tracked transcript
-and its own untouched-repository measurement is taken before that write.
+The historical destructive `git checkout --` path is gone at current HEAD, and
+the T6 correction has landed: `local_sim/p1pre_fault_inject.py` **defaults its
+transcript to a system temp directory, refuses any `--out` resolving inside the
+repository** (tracked or not — the test is containment, not tracking status),
+carries the old tracked transcript in its protected hash set, and takes the
+untouched-repository measurement **after** the write rather than before it. It is
+safe to run with no arguments. Copy its transcript into `experiments/` yourself
+if you want it as committed evidence.
 
 | # | blocker | state |
 |---|---|---|
