@@ -12,16 +12,18 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
 - Shape is `1024 x 16`; budget is `2**41`; multiplier floor is `0.1`.
 - Official stack is WhestBench 0.16 / flopscope 0.12. Lambda is zero; residual cap
   is 0.4 seconds; total wall cap 120 seconds; solution memory 8 GiB.
-- The live Phase-2 board had **44 entrants on 2026-08-25**. Rank 1 was
-  `1.17e-8` adjusted / `2.45e-8` raw; the K2-like cluster was around rank 33 at
-  `3.93e-7` adjusted / `3.93e-6` raw. This is a live-board observation, not a
-  promotion dataset.
+- The live Phase-2 board had **46 entrants on the 2026-08-25 recheck**. Rank 1
+  was Puffi at `1.09e-8` adjusted / `3.55e-8` raw; the K2 covariance-propagation
+  tie occupied roughly ranks 35--39 at `3.93e-7` / `3.93e-6`. This is a
+  live-board observation, not a promotion dataset.
 - The signed-in team/Phase-2 submission view says **no submissions match**. This
   account therefore has **zero Phase-2 submissions** as of 2026-08-25.
-- The current shipped file routes Phase-2 width to basic `k2p1`. Expected Phase-2
-  performance is around `3.96e-7` adjusted / `3.95e-6` raw: approximately the
-  rank-33 cluster, about **34x worse adjusted and 161x worse raw** than the live
-  leader. It is a safe baseline, not a materially improved Phase-2 system.
+- The current shipped file routes Phase-2 width to basic `k2p1`. Its official
+  100-MLP subprocess mini measured `4.050566e-7` adjusted / `4.050566e-6` raw,
+  with 0 failures, fixed `137,600,326,656` FLOPs/MLP and 4.29x worst-case
+  residual headroom. At the current board that projects to about rank 40 and is
+  **37.2x worse adjusted / 114.1x worse raw** than the leader. It is a safe
+  calibration baseline, not a materially improved Phase-2 system.
 - The repo's scientific decision protocol is strong. Its deployment evaluator was
   not Phase-2-truthful; **P2-P0 repaired the deployment parity** and the local
   meter now reproduces the official runner op by op, to zero.
@@ -41,16 +43,19 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   none a false green today: the Linux branch and the child-`setrlimit` Linux
   answer have never executed, and the five design observations of the sixth pass
   were deliberately not pursued.
-- **After ACCEPT, prepare one baseline Phase-2 calibration submission while
-  Phase 1A starts.** Freeze the current K2p1 hash, run official validation and a
-  zero-failure Phase-2 subprocess mini, show Samuel the expected rank-33 result,
-  and ask for explicit approval. The submission is for grader/account calibration,
-  not evidence of improvement and not a final nominee.
-- **Then Phase 1A — construction only.** Build the width-1024 Kerdock/MUB
-  generator, independent verifier and dense reference with **no seed block
-  claimed, no `estimator.py` edit, and no truth measurement**. Phase 1B (DESIGN
-  evidence) begins only after 1A is independently accepted and its strategic
-  contract is reviewed.
+- **Track 0S is technically safe but procedurally PROVISIONAL.** The frozen K2p1
+  readiness run is complete, but its packet omitted the required ground-truth
+  noise floor (`7.47823932957716e-11`, only 0.001846% of raw MSE). Correct that,
+  preserve a current signed-in account/quota artifact, append and commit the
+  submission contract and Samuel prediction, then obtain a focused independent
+  ACCEPT. Only Samuel may authorize the exact-SHA one-off submission.
+- **Phase 1A is IN PROGRESS, construction only.** The current output passes 23/23
+  property checks and is a genuine 16-basis real-MUB subset, but K6's promised
+  independent reference does not exist: the verifier consumes generator output.
+  Correct K6, preserve the failed mapping as an executable negative control, and
+  complete the strengthened K7--K10 evidence in `GAME_PLAN.md`. **No seed block, no
+  `estimator.py` edit, and no truth measurement.** Phase 1B stays blocked until a
+  fresh independent ACCEPT.
 
 ## Authoritative document map
 
@@ -297,9 +302,9 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 | order | slice | class | status |
 |---:|---|---|---|
 | 0 | official-stack/evaluator repair | IMPORTANT | **CLOSED 2026-08-24** — G1–G7 all met, independent ACCEPT recorded |
-| 0H | P1-PRE: D1–D3 evaluator hardening | **IMPORTANT** | **CORRECTIONS-ONLY CLOSURE NEXT** — the six named guarantees and D1–D3 hold. Fix the tracked default output/after-write proof, correct T7 and its headline, restore injection J, reconcile durable docs, then obtain one fresh bounded-scope ACCEPT. Do not expand into the five non-blocking meta-design findings |
-| 0S | first Phase-2 calibration submission | **STRATEGIC** | after 0H ACCEPT, prepare current K2p1 with official validate + zero-failure subprocess mini, freeze its hash and ask Samuel for explicit approval. Expected only around rank 33; calibration baseline, not a promotion or final nominee. May proceed alongside 1A |
-| 1A | Kerdock/MUB mathematical spec, direct generator, independent verifier, dense reference | **IMPORTANT** | **BLOCKED** on 0H ACCEPT; no seed, estimator edit, or truth measurement. Read-only primary-source work may proceed while the final review runs |
+| 0H | P1-PRE: D1–D3 evaluator hardening | **IMPORTANT** | **CLOSED** — seventh independent pass ACCEPT; 15 named mutations and current durable record verified |
+| 0S | first Phase-2 calibration submission | **STRATEGIC** | **PROVISIONAL** — candidate/runtime safe; correct the missing GT-noise floor, preserve live account/quota evidence, commit the full contract + Samuel prediction, obtain focused ACCEPT, then ask for exact-SHA approval. Expected about rank 40; calibration only, never a nominee |
+| 1A | Kerdock/MUB mathematical spec, direct generator, independent reference, dense reference | **IMPORTANT** | **IN PROGRESS / PROVISIONAL** — 23/23 proves a valid MUB subset, not the preregistered independent-reference identity. Complete bounded K6 correction and K7--K10; no seed, estimator edit, or truth measurement |
 | 1B | structured-carrier DESIGN evidence | STRATEGIC | after 1A ACCEPT; contract reviewed before any block is claimed, on a NEW block (P02) |
 | 2 | structured-carrier DECIDE | STRATEGIC | pending; new SINGLE_USE block after design freeze |
 | 3 | recurrent augmented-K2 parity / DESIGN / DECIDE | IMPORTANT then STRATEGIC | pending |

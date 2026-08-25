@@ -1,4 +1,4 @@
-# Claude Code handoff — close P1-PRE, calibrate Phase 2, start Phase 1A
+# Claude Code handoff — close Track 0S and Phase 1A, then stop
 
 Copy the prompt below into a new Claude Code session started at the repository
 root. It assumes no chat history. Repository state is authoritative if a SHA or
@@ -15,143 +15,109 @@ You are the repo-local Builder for Samuel's ARC White-Box Estimation Challenge
 C:\Users\samsu\Documents\arc-whest
 ```
 
-Continue autonomously through safe work, but stop at every Samuel-only prediction,
-vault, submission or material scope-expansion gate. Never submit or touch a vault
-without Samuel's explicit approval.
+Continue autonomously through the bounded safe work below. Stop at every
+Samuel-only prediction, vault, submission, seed-claim, estimator edit, or material
+scope-expansion gate. Never submit or touch a vault without Samuel's explicit
+approval.
 
 First read `AGENTS.md`, then `docs/CURRENT_STATE.md`, the bottom of
 `experiments/LOG.md`, `docs/GAME_PLAN.md`, `docs/VALIDATION.md`,
 `docs/GOTCHAS.md`, and `docs/SKEPTIC.md`. Inspect the worktree and current HEAD
-before editing. At the handoff decision, HEAD was
-`8e58db09a12e054153d0fb9ea6cadf1ef2aafa59`, the tree was clean, and
-`estimator.py`, the seed ledger and the vault were untouched throughout P1-PRE.
+before editing. At this handoff, the reviewed worker HEAD was `7e06cd3`; the tree
+was clean before the plan-review documentation update. `estimator.py`, the seed
+ledger and the vault were untouched.
 
 ## What is true now
 
-- Phase 2 is live at width 1024, depth 16, `B = 2**41`; WhestBench 0.16 /
-  flopscope 0.12; lambda 0; residual cap 0.4 s; wall cap 120 s; memory class
-  default 8192 MB.
-- Phase 0 is CLOSED on a literal independent ACCEPT. The local counted-FLOP
-  meter matches the official runner op by op.
-- The signed-in team/Phase-2 view showed **zero submissions** on 2026-08-25.
-- The shipped width-1024 path is basic K2p1. Its expected score is
-  `~3.93–3.96e-7`, around rank 33 of 44 on the 2026-08-25 board. It is not a
-  materially improved Phase-2 system.
-- The only measured Phase-2 method gain is K2p2 at about 1.052x for about 0.18%
-  extra counted cost; it is not integrated into the submission.
-- P1-PRE's terminal implementation genuinely closes the six named guarantees.
-  The sixth independent review returned PROVISIONAL on one behavioural defect
-  and three false/stale durable claims. Phase 1A has not begun.
+- Phase 0 and P1-PRE are CLOSED on literal independent ACCEPTs. Do not reopen
+  them.
+- Track 0S's frozen K2p1 candidate is technically submission-safe: SHA-256
+  `00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec`,
+  byte-identical to `estimator_v2_6_1.py`; official 100-MLP subprocess mini
+  `4.050566369642183e-7` adjusted / `4.050566369642183e-6` raw, multiplier
+  0.1, fixed `137,600,326,656` FLOPs/MLP, zero failures, worst residual
+  `0.0932798 s` = 4.288x headroom. This is calibration, not improvement.
+- The mini's required mean ground-truth noise floor is
+  `7.47823932957716e-11` (0.001846% of raw MSE); the packet omitted it.
+- The signed-in Phase-2 team view was rechecked on 2026-08-25 and showed zero
+  submissions. The official overview says 10 submissions/team/UTC day. Preserve
+  current raw evidence rather than relying only on prose.
+- The live board recheck had 46 entrants. Puffi led at `1.09e-8` adjusted /
+  `3.55e-8` raw; the `3.93e-7` covariance-propagation tie occupied about ranks
+  35--39. Our measured baseline projects to about rank 40, 37.2x behind adjusted.
+- Phase 1A's corrected generator passes 23/23 and genuinely emits a 16-basis
+  real-MUB subset: exact 1/32 coherence, degree-2 phase functions and rank-10
+  differences for all 120 basis pairs. The earlier coordinate mapping genuinely
+  failed. But Phase 1A is PROVISIONAL: K6 overclaims an independent reference,
+  and K7--K10 remain incomplete.
 
 Do not edit `docs/HUMAN_MODEL.md`, a frozen estimator archive, the seed ledger,
-vault state or `estimator.py` in P1-PRE or Phase 1A.
+vault state, or `estimator.py` in either track.
 
-## Slice 1 — P1-PRE corrections only
+## Track 0S — cheap procedural closure, then Samuel's gate
 
-This is IMPORTANT instrument work. Claim no seed and measure no truth data. Do
-not add a new assurance framework and do not pursue the review's five explicitly
-non-blocking design observations.
+This remains STRATEGIC because submission changes external state. Do not rerun the
+100-MLP mini unless the candidate hash, dataset revision, or official config has
+changed.
 
-Fix exactly four items:
+1. Append (never rewrite) a correction to the readiness packet recording the
+   exact GT-noise floor above and correcting the stale rank/board language.
+2. Preserve a current signed-in artifact showing this team has zero Phase-2
+   submissions and a current official-rule artifact showing the allowance. Record
+   that the visible live score is the 50-network feedback half; the other 50 are
+   withheld for the final result. Do not describe a live score as public+private.
+3. Append and commit the complete submission contract before submission. Include
+   candidate SHA, expected official score band, zero-failure prediction, fixed
+   FLOPs/floor multiplier, operational gate and falsifier, and a promise to fit
+   nothing to the result. Take and record Samuel's prediction before submission.
+4. Give the corrected packet and raw artifacts to a fresh independent Skeptic.
+   Require literal ACCEPT on this bounded correction.
+5. Stop and ask Samuel to authorize exactly one Phase-2 calibration submission of
+   the exact SHA. Only after his explicit approval may you submit once. Preserve
+   the returned ID/report verbatim. It is not a final nominee merely because it
+   exists.
 
-1. **Make T6 true.** Default `local_sim/p1pre_fault_inject.py --out` to a path
-   outside the repository. Remove the tracked-transcript carve-out and reject
-   every output path resolving inside the repo. Include the old tracked
-   `fault_injection.txt` transcript in the protected hash/state evidence. Take
-   the untouched-repository measurement after the output has been written, not
-   before. Correct the module docstring.
-2. **Correct the record append-only.** Do not alter the preregistration or prior
-   result text. Append an explicit correction to `experiments/LOG.md`: T7's
-   substantive property held, but the actual arithmetic was green `42 -> 43`
-   and declined `0 -> 1` for the committed artifact pair. Replace the claimed
-   score in the correction with **nine as written, one corrected** and retract
-   “Ten of ten as written. No correction is owed.”
-3. **Restore injection J.** Its deleted-blind-spot mutation still fires at HEAD,
-   as the reviewer independently demonstrated. Restore it, require its named
-   refusal, and record truthfully that the set went from 11 to 14 by dropping J
-   and adding four, then to 15 when J was restored.
-4. **Reconcile durable docs.** Ensure `CURRENT_STATE.md`, `GAME_PLAN.md`,
-   `GOTCHAS.md` and this handoff describe current behaviour and do not retain the
-   old HEAD-0810537 destructive-cleanup warning as a present-tense instruction.
+## Phase 1A — bounded mathematical/instrument closure, no truth data
 
-Verify the corrected tree with an external default-output run and an explicit
-in-repository-output refusal; prove after-write status and hashes unchanged;
-require 15/15 named mutations; re-run D1-D3 focused evidence; run full quiet-host
-preflight and portability. Preserve raw transcripts and append the result and
-knowledge delta to the LOG.
+Continue Phase 1A; do not restart the valid generator and do not claim a seed.
+Before Phase 1B, close every item below:
 
-Then launch one fresh independent Skeptic that has not seen Builder reasoning.
-Give it the four-item correction scope, exact diff, raw artifacts and
-`docs/SKEPTIC.md`. Ask whether those four items are closed and the durable record
-is truthful. The five disclosed meta-design observations are limitations, not
-this gate. Record the literal verdict.
+1. Correct the stale `sign_vectors` docstring that still describes the rejected
+   multiplicative-rank coordinate mapping. Preserve that bad mapping as an
+   executable negative control with a raw artifact; correct the historical
+   spectrum wording to what the executable test actually reports.
+2. Fulfil K6 with an independently generated finite-field Kerdock-matrix
+   reference following CCKS Example 9.2, rather than a property checker over
+   generator output. Use the finite-field construction on
+   `V=F_(2^m) x F2` and compare reduced dimensions exhaustively and the live
+   chosen phases up to a declared fixed linear/signed equivalence. If that exact
+   reference cannot be completed, append a formal K6 correction and narrow the
+   gate; never retain the false independent-reference claim.
+3. Test nested live `k=1/2/4/8/16` outputs, configurable basis indices,
+   deterministic ordering, float32 dtype and unit norms. Either include the
+   standard basis deliberately or explicitly defer basis-set choice to Phase 1B.
+4. Validate the chi-radial identity separately: stable exact constant, layer-1
+   closed form, every network prefix, positive homogeneity, and a guard proving
+   the factor is applied exactly once.
+5. Prove the exact second moment and report an exact fourth-moment tensor or frame
+   diagnostic. The `N=1024,k=16` carrier-aligned fourth moment is
+   `21.6881103515625x` the spherical target; random probes alone cannot validate
+   K8. This is quadrature characterization, not a performance claim.
+6. Build the dense 32,768 x 1,024 float32 oracle, then implement a submission-legal
+   `fnp` construction/materialisation path. Measure the actual official-flopscope
+   operation ledger and explain this implementation's overhead. Do not force a
+   match to a leader's unknown implementation merely because its total was
+   published.
+7. Measure fresh-subprocess setup time and peak/transient memory including
+   construction, simultaneous point buffers, weights, temporaries and operation
+   history. Windows memory is an accounting upper bound, not proof that the 8-GiB
+   grader limit was enforced.
+8. Run full preflight and portability, preserve raw evidence, append the knowledge
+   delta, and launch a fresh independent Skeptic. Phase 1A closes only on literal
+   ACCEPT.
 
-- If the verdict is ACCEPT, synthesize the docs and continue to both post-accept
-  tracks below.
-- If one of the same four items is still false, stop and report the exact evidence
-  to Samuel. Do not begin another open-ended evaluator-hardening cycle.
-
-## Post-accept track A — prepare one Phase-2 calibration submission
-
-This is STRATEGIC because submission changes external state. It may run alongside
-Phase 1A, but it must not delay Phase 1A.
-
-Prepare, but do not submit autonomously:
-
-1. freeze and record the current `estimator.py` hash and its K2p1 identity;
-2. record the expected baseline result (`~3.93–3.96e-7`, roughly rank 33), making
-   explicit that it is calibration and not a claimed improvement;
-3. run `whest validate` and a clean official `v2-phase2` subprocess mini with
-   zero failed MLPs;
-4. verify official config, ship-file identity, clean worktree and current daily
-   allowance;
-5. present the readiness packet to Samuel and ask for explicit approval.
-
-Only after explicit approval may you append the submission contract, submit once,
-and record the official result. Fit no constant to the public result and do not
-nominate this baseline as a final candidate merely because it exists.
-
-## Post-accept track B — Phase 1A construction, no truth data
-
-Phase 1A is IMPORTANT because it changes probe mathematics. Record its written
-prediction/knowledge target before implementation. Claim no seed, use no truth
-MSE and do not touch `estimator.py`.
-
-Build the width-1024 Kerdock/MUB mathematical specification, direct generator,
-independent verifier, exact-radial rule, dense propagation reference, and
-counted-cost/memory model. The existing length-256 construction is GR(4,7).
-Width 1024 requires the known GR(4,9)/real-MUB construction and a direct way to
-emit 1/2/4/8/16 bases with antipodes without materialising the full 1,048,576-word
-code. Use Calderbank, Cameron, Kantor and Seidel, “Z4-Kerdock Codes, Orthogonal
-Spreads, and Extremal Euclidean Line-Sets” as the primary mathematical anchor.
-
-Required evidence:
-
-1. write the exact algebraic specification, phase/sign convention, basis indexing
-   and deterministic ordering before coding;
-2. implement the efficient generator and a verifier/reference using genuinely
-   different logic, with reduced-dimension exhaustive cases;
-3. prove norms, within-basis orthogonality, cross-basis coherence `1/32`,
-   antipodal closure, uniqueness and determinism for 1/2/4/8/16 bases;
-4. validate positive homogeneity and the Gaussian radial factor separately;
-5. measure degree-4 angular error, including aligned/adversarial probes; do not
-   call the 16-basis subset an exact degree-4 design without proof;
-6. build the dense 32,768 x 1,024 float32 reference first, reproduce the leading
-   32,768-forward FLOP fingerprint with explained overhead, then compare any
-   chunked spelling against it;
-7. account for counted FLOPs and point/weight/temporary memory honestly.
-
-Exit only on zero algebraic/reference/determinism failures, explained row and
-cost accounting, full preflight, portability, raw evidence, LOG knowledge delta,
-and a fresh independent Skeptic verdict. No score or variance claim is permitted
-in Phase 1A.
-
-After Phase 1A ACCEPT, update `CURRENT_STATE.md` and `GAME_PLAN.md`, then stop for
-Samuel's review of the Phase 1B STRATEGIC contract and his restated S2 prediction
-before claiming a new P02 DESIGN block. Later branches remain exactly those in
-`GAME_PLAN.md`: carrier DECIDE, faithful recurrent augmented K2, checkpoint
-response closure, integration/robustness, public CONFIRM, authorized Phase-2
-vault, and up to two frozen final nominees.
-
-At every stop, report exact evidence, current SHA, decision needed, and safe work
-that can continue without crossing the gate.
+Stop after Phase 1A ACCEPT. Phase 1B is STRATEGIC: Samuel's restated S2 prediction,
+a reviewed contract and a fresh DESIGN block must all precede any truth MSE,
+`estimator.py` edit, or performance claim. At each stop report exact evidence,
+current SHA, the decision needed, and safe work that can continue without crossing
+the gate.

@@ -14017,3 +14017,88 @@ submitted otherwise.
 full report, 100 rows), `whest_validate.txt`.
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-25 — DECISION REVIEW: Track 0S and Phase 1A are both PROVISIONAL; bounded closures adopted
+
+*Read-only review plus ROUTINE plan synthesis. No seed claim, truth measurement,
+vault touch, estimator edit or submission. Two fresh Skeptics received raw files
+and diffs rather than the Builder's prose.*
+
+## Track 0S — technically safe, packet not yet procedurally complete
+
+The independent review reproduced all 100 rows of
+`experiments/2026-08-25_trackA/mini_100_subprocess.json`: adjusted score
+`4.050566369642183e-7`, raw MSE `4.050566369642183e-6`, floor multiplier 0.1,
+`C/B=0.0625733840`, fixed `137,600,326,656` FLOPs/MLP, zero failures, median
+residual `0.04791355 s`, worst `0.09327980 s` and `4.288x` headroom. It also
+reproduced estimator/archive identity, validate 4/4, the zero-delta FLOP anchor,
+portability 99/99 and a clean reviewed tree. The candidate is technically safe.
+
+**PROVISIONAL defect:** the packet quoted raw MSE without the binding ground-truth
+noise floor. Averaging the 100 published per-row `avg_variance / 1e9` values gives
+**`7.47823932957716e-11`**, only **0.001846%** of raw MSE. The packet must append
+that value. A current signed-in account/quota capture must also be preserved; prose
+alone is not the durable artifact the submission contract needs. The visible
+submission score is feedback on the 50 public networks; the other 50 are withheld
+for the final result, so the packet must not describe the live result as access to
+public+private truth.
+
+The live 2026-08-25 recheck showed 46 entrants, Puffi first at `1.09e-8` adjusted
+/ `3.55e-8` raw, and the `3.93e-7` K2 tie at roughly ranks 35--39. The measured
+candidate therefore projects to about rank 40, **37.2x** behind in adjusted score
+and **114.1x** in raw MSE. The signed-in team filter still showed zero Phase-2
+submissions. The official overview still states 10 submissions/team/UTC day.
+Forum 18199 reports that the Phase-2 covariance-propagation MSE distribution is
+ordinary rather than tail-dominated and that local full-mini values transfer
+approximately 1:1 to the feedback board; therefore this baseline's scientific
+information value is modest. It remains useful as a cheap account, packaging,
+zero-failure and out-of-sample checkpoint, and must not delay Phase 1A.
+
+**Adopted Track-0S gate:** append the noise-floor/rank correction; preserve live
+account/quota evidence; append and commit the full submission contract plus
+Samuel's prediction; obtain a focused independent ACCEPT; then stop for Samuel's
+approval naming the exact SHA. Do not rerun the 100-MLP mini unless the estimator,
+dataset revision or official config changes. If approved, submit once and never
+nominate this baseline merely because it exists.
+
+## Phase 1A — valid carrier, false independence claim
+
+The independent review reproduced 23/23, including exact 1/32 cross-basis
+coherence, degree-2 Boolean phases and rank-10 differences for all 120 basis
+pairs. It separately reconstructed the rejected coordinate mapping and reproduced
+its qualitative failure. The current generator emits a genuine 16-basis real-MUB
+subset.
+
+**PROVISIONAL defect:** K6 says generator and verifier are independent, but
+`test_kerdock_mub.py` imports the generator and checks properties of its output.
+That is a strong independent property checker, not an independently generated
+reference object. The generator docstring also still names the rejected
+`2*rank(x)+t` mapping; the negative result has no durable raw artifact; and the
+recorded spectrum endpoint is not the full independently reproduced spectrum.
+
+The primary CCKS construction supplies the cheapest independent route: construct
+the finite-field Kerdock matrices from Example 9.2 and compare reduced dimensions
+exhaustively and the live chosen phases up to a declared fixed equivalence. The
+bounded closure also adds: an executable bad-mapping negative control; nested
+`k=1/2/4/8/16`, configurable-basis and float32 checks; all-prefix radial
+homogeneity with a factor-applied-once guard; exact second and fourth moment
+diagnostics; a submission-legal `fnp` materialisation path with a real official
+flopscope ledger; and fresh-process setup/peak-transient-memory evidence. For
+`N=1024,k=16`, the exact carrier-aligned fourth moment is
+**21.6881103515625x** the spherical target, so random probes alone cannot close
+K8. Report our implementation's own cost; the leader's unknown overhead is a
+clue, not a number to force.
+
+**Adopted Phase-1A gate:** continue this bounded no-truth closure. Phase 1B, any
+DESIGN seed, `estimator.py` edit or performance claim remains blocked until the
+raw packet, full preflight/portability and a fresh independent ACCEPT exist.
+
+**External sources used:** AIcrowd official challenge overview and live
+leaderboard/team view (2026-08-25); forum topic 18199; Calderbank, Cameron, Kantor
+and Seidel, *Z4-Kerdock Codes, Orthogonal Spreads, and Extremal Euclidean
+Line-Sets* (primary construction).
+
+**Reviewers:** two fresh independent Skeptics. Literal verdict on each track:
+**PROVISIONAL**.

@@ -32,14 +32,15 @@ At the live 2026-08-25 snapshot:
 
 | system | adjusted score | raw final-layer MSE | counted FLOPs |
 |---|---:|---:|---:|
-| jamespayor, rank 1 | `1.17e-8` | `2.45e-8` | not captured in this snapshot |
-| pranav, rank 2 | `1.25e-8` | `3.40e-8` | not captured in this snapshot |
-| current repo Phase-2 K2 path | `~3.96e-7` | `~3.95e-6` | `~1.38e11` |
+| Puffi, rank 1 | `1.09e-8` | `3.55e-8` | published `~1.10e12` fingerprint |
+| jamespayor, rank 2 | `1.17e-8` | `2.45e-8` | not captured in this snapshot |
+| current repo Phase-2 K2 path, measured mini | `4.050566e-7` | `4.050566e-6` | `137,600,326,656` |
 
-There were 44 entrants; the current K2 path projects to the cluster around rank 33.
-The present gap is about 34x in adjusted score and 161x in raw accuracy. The
-account has no Phase-2 submission. Incremental 1.05x–1.30x improvements are useful
-controls but are not a winning strategy.
+There were 46 entrants at the recheck; the `3.93e-7` K2 tie occupied about ranks
+35--39, so the measured current path projects to about rank 40. The present gap
+is about 37.2x in adjusted score and 114.1x in raw accuracy. The account has no
+Phase-2 submission. Incremental 1.05x–1.30x improvements are useful controls but
+are not a winning strategy.
 
 ### Outcome targets
 
@@ -327,14 +328,19 @@ The signed-in team/Phase-2 view showed zero submissions on 2026-08-25. Establish
 one official calibration point with the current, frozen K2p1 file before the new
 architecture is ready:
 
-1. record the exact estimator hash and expected result (`~3.93–3.96e-7` adjusted,
-   around the rank-33 cluster), explicitly labeling it a baseline rather than an
-   improvement;
+1. record the exact estimator hash and the measured official-subprocess mini
+   result (`4.050566e-7` adjusted, about rank 40 at the current snapshot),
+   explicitly labeling it a baseline rather than an improvement, and report its
+   `7.47823932957716e-11` ground-truth noise floor alongside raw MSE;
 2. run `whest validate` and a clean `v2-phase2` subprocess mini with zero failures;
 3. verify official stack/config, ship-file identity, clean status and current
-   daily submission allowance;
-4. show Samuel the packet and request explicit approval;
-5. only if approved, submit once and record the official result without fitting
+   daily submission allowance; preserve the signed-in account/quota evidence;
+4. append and commit the full STRATEGIC submission contract, including Samuel's
+   prediction and the fact that the live score is the 50-network feedback half,
+   not access to the withheld final half;
+5. obtain one focused independent ACCEPT, then show Samuel the exact-SHA packet
+   and request explicit approval;
+6. only if approved, submit once and record the official result without fitting
    any constant to it.
 
 This checkpoint calibrates the grader, confirms account access and gives the team
@@ -367,20 +373,31 @@ Required construction evidence, before any truth data:
 1. cite and transcribe the exact algebraic construction, basis indexing and
    ordering; prove reduced dimensions against a simple reference implementation;
 2. use different logic for generator and verifier so a shared mistake cannot make
-   the suite self-consistent;
+   the suite self-consistent. Property checks over generator output do not meet
+   this clause: add an independently generated finite-field Kerdock-matrix
+   reference (CCKS Example 9.2) and compare reduced dimensions exhaustively and
+   the live subset up to a declared fixed equivalence;
 3. prove unit norms, within-basis orthogonality, cross-basis coherence exactly
    `1/sqrt(1024) = 1/32`, antipodal closure, expected unique row count and
    deterministic ordering for 1/2/4/8/16 bases;
-4. validate the bias-free ReLU network's positive-homogeneity/radial identity
-   independently;
-5. measure the 16-basis subset's angular degree-4 error rather than calling it an
-   exact spherical degree-4 design;
-6. build the 32,768-direction dense/full-batch float32 reference first and
-   reproduce the leader-cost fingerprint to explained overhead. Compare any later
-   chunked/structured spelling against that reference before trusting it;
-7. account for point buffers, two-layer working storage, weights and temporaries.
-   A point buffer is 128 MiB; chunking is an optimization variable, not a presumed
-   correctness requirement.
+4. preserve the known-bad multiplicative-rank spelling as an executable negative
+   control and raw artifact, and correct the stale generator docstring/spectrum
+   wording; test nested live prefixes `k=1/2/4/8/16`, float32 dtype and norms;
+5. validate the bias-free ReLU network's positive-homogeneity/radial identity
+   independently, including all layer prefixes and a guard that applies the
+   chi-radial factor exactly once;
+6. prove the exact second moment and report an exact degree-4 tensor/frame-potential
+   diagnostic. For `N=1024,k=16`, a carrier-aligned fourth moment is
+   **21.6881103515625x** the spherical target, so random probes are inadequate;
+7. build the 32,768-direction dense/full-batch float32 reference first, then a
+   submission-legal `fnp` construction/materialisation path. Measure its actual
+   official-flopscope operation ledger and own overhead; the leader's unknown
+   implementation is a clue, not an equality target;
+8. measure fresh-subprocess setup time and peak/transient memory including
+   construction, simultaneous point buffers, weights, temporaries and operation
+   history. A point buffer is 128 MiB; Windows memory is accounting evidence, not
+   an 8-GiB-limit test. Parameterize basis indices, or explicitly defer their
+   choice and standard-basis inclusion to preregistered Phase 1B DESIGN.
 
 Exit gate: zero algebraic/determinism/reference failures, exact explained row and
 counted-cost accounting, full preflight, a LOG knowledge delta and an independent
@@ -606,26 +623,21 @@ paths are provoked — the memory limit on Linux, where `RLIMIT_AS` exists.
 **The all-of gate G1–G7 is met**, on a literal independent **ACCEPT** at HEAD
 `952bd61`, after four review passes (PROVISIONAL, PROVISIONAL, REJECT, ACCEPT).
 
-**The immediate action is the corrections-only P1-PRE closure above. After
-ACCEPT, start Phase 1A and prepare the baseline calibration submission in
-parallel.**
+**P1-PRE is CLOSED. The immediate action is the bounded Phase-1A closure while
+Track 0S receives its cheap procedural correction.**
 
-D1–D3 and the six terminal guarantees are already closed. The sixth review found
-one actual default-output defect plus three false/stale durable claims. Spend one
-corrections-only pass and one fresh review on those four items; do not pursue the
-five non-blocking meta-design observations in this slice. Once accepted:
-
-- **Phase 0S — calibration only.** Prepare the current K2p1 file, validate it,
-  run a zero-failure Phase-2 subprocess mini, and ask Samuel for explicit approval
-  before one baseline submission. Expect roughly rank 33, not an improvement.
+- **Phase 0S — calibration only.** The candidate is technically safe: the
+  100-MLP official subprocess mini is zero-failure at `4.050566e-7`. Add the
+  missing GT-noise floor, preserve live account/quota evidence, commit the
+  submission contract + Samuel prediction, and obtain a focused ACCEPT before
+  asking for exact-SHA approval. Expect about rank 40, not an improvement.
 - Phase 1 then runs in two distinct stages:
 
-- **Phase 1A — construction only.** A width-1024 Kerdock/MUB generator emitting
-  1/2/4/8/16 bases without materialising the full code, proved against an
-  independent verifier and reduced-dimension references, with the 32,768-forward
-  FLOP fingerprint reproduced by a dense/full-batch reference first and angular
-  degree-4 error measured rather than asserted. No truth seed or estimator change.
-  Ends in preflight and an independent verdict.
+- **Phase 1A — bounded closure, no truth.** Keep the valid 23/23 carrier, but do
+  not call its property checker an independent reference. Add the finite-field
+  reference, executable failed-mapping control, exact moment/radial evidence,
+  ship-legal flopscope path, fresh-process time and peak/transient memory. No truth
+  seed or estimator change. Ends only in preflight and a fresh independent ACCEPT.
 - **Phase 1B — DESIGN evidence.** Contract reviewed before any block is claimed,
   on a **new** block (P02 rather than the already-exposed P01), judged on paired
   arithmetic competition-score differences with measured FLOPs, including a

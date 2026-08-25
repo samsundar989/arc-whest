@@ -2,9 +2,10 @@
 
 > **Phase-2 status — 2026-08-25.** The body below is the private Phase-1 benchmark
 > record and must not be used as the live target. Current Phase-2 anchors are:
-> leader `1.17e-8` adjusted / `2.45e-8` raw; present repo K2 path
-> `~3.96e-7` adjusted / `~3.95e-6` raw, approximately the rank-33 cluster among
-> 44 entrants. The signed-in team view shows zero Phase-2 submissions. Use
+> leader `1.09e-8` adjusted / `3.55e-8` raw; present repo K2 path measured on
+> the official 100-MLP subprocess mini at `4.050566e-7` adjusted /
+> `4.050566e-6` raw, approximately rank 40 among 46 entrants. The signed-in team
+> view shows zero Phase-2 submissions. Use
 > `CURRENT_STATE.md` and
 > `GAME_PLAN.md`; detailed provenance is in `PHASE2_LIVE_AUDIT_2026-08-24.md`.
 
