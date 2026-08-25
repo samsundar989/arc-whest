@@ -278,21 +278,38 @@ def main() -> int:
         print(f"unknown tag(s): {sorted(wanted - {i[0] for i in plan})}")
         return 2
 
-    original = _sha(SUITE)
-    shutil.copyfile(SUITE, BACKUP)
+    # A dirty target would be restored to the WRONG bytes, silently reverting
+    # someone's uncommitted work. Refuse -- for every file this run will edit,
+    # not just the suite.
+    targets = sorted({_target_of(i[0]) for i in plan})
+    for t in targets:
+        rel = os.path.relpath(t, _ROOT).replace(os.sep, "/")
+        dirty = _git("status", "--porcelain", "--", rel).stdout.strip()
+        if dirty:
+            print(f"REFUSING: {rel} has uncommitted changes ({dirty!r}).")
+            print("This harness restores it from a backup of its CURRENT bytes, "
+                  "but a crash mid-run would leave a broken build in your tree. "
+                  "Commit or stash first.")
+            return 2
+
+    original = {t: _sha(t) for t in targets}
+    for t in targets:
+        shutil.copyfile(t, t + ".fault_inject_backup")
     lines: list = []
     uncaught: list = []
     try:
         for tag, title, subs, argv in plan:
-            with open(SUITE, encoding="utf-8") as fh:
+            target = _target_of(tag)
+            with open(target, encoding="utf-8") as fh:
                 src = fh.read()
             for old, new in subs:
                 if old not in src:
-                    print(f"injection {tag}: ANCHOR NOT FOUND -- the code it "
-                          f"breaks has moved. Update this file.\n{old[:160]}")
+                    print(f"injection {tag}: ANCHOR NOT FOUND in "
+                          f"{os.path.basename(target)} -- the code it breaks has "
+                          f"moved. Update this file.\n{old[:160]}")
                     return 3
                 src = src.replace(old, new, 1)
-            with open(SUITE, "w", encoding="utf-8") as fh:
+            with open(target, "w", encoding="utf-8") as fh:
                 fh.write(src)
 
             p = subprocess.run([sys.executable, *argv], cwd=_ROOT,
