@@ -662,21 +662,35 @@ on every estimator change.
 suites and the vault's own hash verification used to pass ungated, so "preflight
 GREEN" was a weaker claim than the entries quoting it assumed:
 
-| tier | steps run | measured wall time | when |
-|---|---|---|---|
-| **default** | **10 of 12** — the original six, plus **7** canonical scorer + the binding gate (88/88), **8** seed-ledger *refusals* (44/44), **9** vault integrity (array sha256s vs the manifest and the seed→weights reconstruction), **10** lifecycle evaluator (37/37) | **~135–160 s** (n = 2 hosts/runs; a single reading is not a measurement) | every change |
-| **`-Full`** | **12 of 12** — adds **11** shape parity (27/27) and **12** carrier strength (48/48) | **~755 s** (n = 1) | **required** before any promotion, submission, or vault touch |
+**Renumbered to SIXTEEN on 2026-08-24 (P2-P0).** Four steps were added and every
+earlier step shifted by one. The table below is the current gate; where an older
+LOG entry cites "step 6" or "10 of 12" it is describing the pre-2026-08-24 gate and
+the number has moved.
 
-*The 111 s [110, 113] figure recorded earlier describes the **nine**-step tier that
-existed before step 10; it is not comparable with the row above.*
+| tier | steps run | when |
+|---|---|---|
+| **default** | **12 of 16** — **1** official stack + round configuration (73/73, asserted against the *installed* package), **2** mint provenance (1024×16 first), **3** invariant suite (30/30), **4** `whest validate`, **5** ship-file identity, **6** vault seal, **7** seed ledger (60/60), **8** canonical scorer + the binding gate (98/98), **9** seed-ledger *refusals*, **10** vault integrity, **11** lifecycle evaluator (56/56), **12** counted-FLOP anchor vs the official runner | every change |
+| **`-Full`** | **16 of 16** — adds **13** shape parity (27/27), **14** carrier strength (48/48), **15** deployment envelope (29/29 + what it cannot prove), **16** official Phase-2 subprocess smoke, zero failures | **required** before any promotion, submission, or vault touch |
+
+**Step 16 is DEPLOYMENT AUTHORITY** — the grader's own subprocess runner on the
+organisers' own `v2-phase2` data — and it is **load-sensitive**: the 5 s setup
+ceiling covers worker spawn *plus imports*, and `import whestbench` alone is 1.3 s
+on a quiet host and 4.7–9.1 s under load. It has failed twice under contention.
+Run the gate on a quiet machine, and read a `SETUP_TIMEOUT` as an environment
+condition rather than an estimator defect — the gate says so itself, and still
+fails, because a gate that could not verify deployment must not certify it.
+
+*Wall-time figures recorded for earlier tiers (111 s for the nine-step gate,
+~135–160 s for the twelve-step default, ~755 s for its `-Full`) are not comparable
+with the sixteen-step gate and are kept only as history.*
 
 The split is by **cost, not importance**.
 
 **Step names carry no check counts.** A count in a runtime label is a snapshot and goes stale on the next test added; this gate had three such bumps in a single day. The verdict is the script's exit code. The counts in the table above are documentation, updated deliberately.
 
-**The denominator is always 12, and a skipped step is never counted as a pass.**
-A default run reports `GREEN 10/12, 2 SKIPPED` and names the two in a red
-NOT-CHECKED block; if the vault arrays are also absent it reports `9/12, 3
+**The denominator is always 16, and a skipped step is never counted as a pass.**
+A default run reports `GREEN 12/16, 4 SKIPPED` and names the four in a red
+NOT-CHECKED block; if the vault arrays are also absent it reports `11/16, 5
 SKIPPED`. The first build of this gate reported `9/11` as `9/9` and printed step
 9's skip as a green PASS — caught by the independent Skeptic, and it is the same
 failure this repository has lost four separate checks to: **a check that reports a
@@ -691,7 +705,7 @@ state of a fresh clone because the 33 MB array file is gitignored. Step 5 still
 covers the seal in that case, because `manifest.json` and `touch_log.jsonl` *are*
 tracked.
 
-**Step 10 is `local_sim/lifecycle_eval.py`, the canonical grader-lifecycle
+**Step 11 is `local_sim/lifecycle_eval.py`, the canonical grader-lifecycle
 evaluator** (CP0.2). It is the object every candidate comparison is scored
 through: one `Estimator`, `setup()` called once **off-budget** and timed, per-MLP
 `BudgetContext`, all six failure paths **provoked rather than asserted**, float32
@@ -739,8 +753,8 @@ default tier (103.9 s) did not replicate — an independent re-run measured 113.
 and three replications give 111 s [110, 113]. Nothing turns on it against a target
 of ~2 minutes, but a single unreplicated wall time is not a measurement.
 
-Step 9 is not a duplicate of step 7 (steps 6 and 8 before the 2026-08-24
-renumber). Step 7 proves the ledger is *consistent*;
+Step 9 is not a duplicate of step 7 (they were steps 6 and 8 before the
+2026-08-24 renumber). Step 7 proves the ledger is *consistent*;
 step 9 proves its *refusals still fire* — unregistered block, range leaving its
 block, overlap in a DECISION block, a second claim on a SINGLE_USE one, a
 hand-edited ledger, an artifact rewritten after its claim.

@@ -11725,3 +11725,90 @@ not been judged.
 untouched. `estimator.py` byte-identical.
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-24 — P2-P0 GATE CLOSED: independent Skeptic returns **ACCEPT** on G1–G7
+
+*Fourth independent pass, judging the pre-registered all-of gate at HEAD `952bd61`
+(code `d35034e`). The three prior passes returned PROVISIONAL, PROVISIONAL and
+REJECT. The verdict is reproduced verbatim below; it is the gate's G7 clause and
+the slice closes on it.*
+
+## Verdict, verbatim
+
+> ## Skeptic verdict: ACCEPT
+>
+> **Strongest challenge**
+> The best competing explanation available was: *the closure pass replaced one vacuous check with another, and the "provocations" are still assertions dressed up as witnesses — so G4 fails again for the same reason it failed last time.* I attacked that directly and it does not hold. Every one of the five G4 paths fires under a mechanism I reproduced myself, and `verify_witness` refuses on real inputs, not on constants. The residue of that challenge is a genuine but non-load-bearing defect (D1 below).
+>
+> **Evidence for it** (what I did find — none of it falsifies a clause)
+>
+> - **D1. One literal-`True` check survives, in the exact function the previous REJECT was about.** `local_sim/test_deployment_envelope.py:758-763`: the branch `if isinstance(w, dict) and w.get("suite", "").startswith("this file"):` calls `check(f"{name} is enforced here, provoked in this file", True, str(c["value"]))`. It is nine lines below the comment condemning that pattern, it is inside the gate's 29-check denominator, and it is the *only* matrix line covering `worker_death_restart`. With `--skip-worker-death` (line 925) it prints green while section 6 is skipped and the same constraint is simultaneously reported `NOT PROVABLE` — a self-contradictory report. The gate never passes that flag, so no committed evidence is false today, and the artifact honestly records `witness_verified: null` for that constraint. It is a padded check, not a false claim. Fix it anyway; this is instance eight.
+> - **D2. `verify_witness` never resolves the witness's `suite` field.** `_load_suite_results` always loads `experiments/2026-08-24_p2_p0/lifecycle_self_test.json` regardless of what `witness["suite"]` names (`test_deployment_envelope.py:751, 764`). The negative case labelled "a witness whose suite produced no results" achieves its refusal by passing `results=None`, not by naming a suite that does not exist. Today the failure mode is a false *negative*, so nothing is over-claimed — but the docstring promises a suite-resolving mechanism the code does not implement.
+> - **D3. The documented read-only protocol is still not read-only.** Running `local_sim/test_deployment_envelope.py --no-write` rewrote the committed `experiments/2026-08-24_p2_p0/lifecycle_self_test.json` (two subprocess regenerations), then printed `--no-write: the artifact on disk was NOT touched.` I had to `git checkout` it — which is precisely the complaint the second Skeptic filed and this slice claims to have closed. Only timing details moved; `results_sha256` covers `(name, ok)` pairs and is unchanged (`a913c55cbcc2…` before and after), so no evidence was semantically altered.
+> - **D4. `docs/VALIDATION.md` §7 — the binding protocol — still documents a twelve-step gate.** Lines 667, 668, 677-679: "**10 of 12**", scorer "(88/88)", lifecycle "(37/37)", ledger refusals "(44/44)", "**The denominator is always 12**", "`GREEN 10/12, 2 SKIPPED`", and line 694 "Step 10 is `local_sim/lifecycle_eval.py`". The gate is sixteen steps with denominator 16; the suites read 98, 56 and 60; lifecycle is step 11. §7 also contradicts itself — line 667 calls step 9 vault integrity, line 742 calls step 9 the ledger refusals. `AGENTS.md` and `CURRENT_STATE.md` were updated; the doc the repo calls binding, and which is inside this slice's declared Scope, was not.
+>
+> **Evidence for the original claim** (steelmanned — I ran these, I did not read them)
+>
+> - **G1 MET.** `p2_flop_anchor.py --gate`: 19 operations compared, 0 disagreeing, local `137,600,326,656` vs official `137,600,326,656`, delta +0. The official side is parsed per-operation out of `experiments/2026-08-24_p2_p0/official_anchor_1row.json`, which is a real whestbench 0.16.0 report carrying a full `run_config` and dataset sha256 `aab61cf1…`. The anchor is SHA-bound: I recomputed `estimator.py` → `00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec`, identical to `OFFICIAL_REPORT_CANDIDATE_SHA256`. Self-test 14/14, including the non-vacuity check that the package and fallback `materialise_predictions` are two distinct objects.
+> - **G2 MET.** `official_config.py` 73/73. It reads `whestbench.budget.ROUNDS`, `CURRENT_ROUND`, `score_multiplier`, `effective_compute` and `scoring.ContestSpec` from the installed package, refuses the `local_sim` shim, and cross-checks a real `run_config` — including two checks that `memory_limit_mb` and `predict_timeout_s` are **absent** from it, so the weakest constant cannot be re-promoted by accident.
+> - **G3 MET, and I diffed the names rather than the counts.** Lifecycle: **zero** of the original 37 check-name literals removed, 19 added → 56. Scorer: 6 literals disappear, of which 5 reappear verbatim under a `P1: ` prefix and the sixth (`lambda matches the installed package`) is split into two strictly stronger checks (deprecated alias *and* live default, plus "…and it is ZERO, so C == F"); 16 added → 98. The envelope's closure-pass removals (`n_failed_mlps <= 1`, the single-`last`-row check, `_resolve_witness`) are each replaced by strictly stronger successors. Nothing real was dropped.
+> - **G4 MET, all five, verified independently.** Over-budget: real `BudgetExhaustedError`, 2/2. Residual cliff: `1e-9` cap, 2/2, zeroed at multiplier 1.0, provenance declares the deviation. **Wall: I reproduced the mechanism myself** — a `flopscope.BudgetContext(wall_time_limit_s=1e-9)` around a real matmul raises `TimeExhaustedError` from `.venv/lib/site-packages/flopscope` (0.12.0), and L4 asserts `time_exhausted` set with `residual_exhausted` **clear**, so the two constants are shown distinct. Worker restart: I ran section 6 — `n_failed_mlps = 1`, indices `[0]`, `failure_breakdown` `{error: 1}` with all four exhaustion counters `0`, later MLPs clean with **distinct** MSEs `[1.1239, 1.231]`. Memory: `linux/rlimit_as_worker_report.json` records `rlimit_as_soft = 8,589,934,592` (exactly 8192 MB, so whestbench's `setrlimit` *was* applied), a 256 MiB control that succeeded, and a 9 GiB reservation refused with `OSError: [Errno 12]`; the accompanying `memory_gate_report.json` is a real 0.16.0 report on the *same* dataset sha256 as the Windows anchor, with the traceback pointing into `subprocess_worker.py:73`. The Windows suite fails if that artifact is absent (line 877). **`verify_witness` is capable of failing:** I watched all eight refusals emit eight *distinct*, specific reasons (`UNADJUDICABLE`, `NO WITNESS`, `NAMES NO CHECKS`, `SUITE RESULTS MISSING`, `CHECK NOT FOUND`, `PRESENT BUT FAILED` via in-memory fault injection, `DETAIL MISMATCH`, `UNADJUDICABLE`), plus a positive control. The witness hash in `deployment_envelope.json` (`a913c55cbcc2…`) reproduced exactly on my host.
+> - **G5 MET.** Preflight step 4 `whest validate` PASS; step 16 is `whest run … @v2-phase2 --split mini --runner subprocess --n-mlps 2 --json` and refuses on `n_failed_mlps != 0`, a non-phase-2 dataset, λ ≠ 0, cap ≠ 0.4 or a worst residual over cap — recorded `failures 0`. `estimator.py`'s git blob is `9242377a…` at `e8afcbf`, `b706f8e` **and** `952bd61`: byte-identical throughout.
+> - **G6 MET.** `preflight_full_evidence.txt` (1,014 lines) contains `PREFLIGHT GREEN -- 16/16` and all sixteen `PASS N.` step verdicts; I grepped for `FAIL`/`RED` and every hit is inside a check *name*, none is a verdict. I re-ran `verify_portability.py` myself: 99 checks, 0 failed.
+> - **G7:** this verdict.
+> - **Protocol hygiene, all checked:** the pre-registered gate did not move — `experiments/LOG.md` at HEAD is a **strict byte-prefix extension** of the file at `e8afcbf` (626,462 of 694,054 bytes identical), so the G1–G7 text is provably unmodified since preregistration. No seed block claimed (`seed_ledger.jsonl` diff empty across `e8afcbf..HEAD`); vault untouched, `touches: 1` == 1 log line; the public split is used only for a read-only smoke; no `decide()` call and no promotion statistic anywhere in the slice.
+> - **The narrative numbers are honest.** I recomputed from `experiments/2026-08-21_p2_cp1/ladder_frozen.json`: `k2p2` `per_mlp_residual_s`, n=96, median **260.694 ms**, max **390.565 ms**, headroom **1.0242×** — every quoted digit matches, so the retraction of the contention story is arithmetic on a committed artifact, not a re-run. `400 − 260.7 = 139.3 ms` is the carrier budget as stated, and it is the *conservative* framing: it comes from a pre-repair in-process figure. `260.7 / 110.9 = 2.35×` matches `p2_weight_repr_residual.json` (`np` median 0.11091 s). Note the `np` arm reads ~94.7 ms in `p2_residual_version.json` from a different session — using that would give 2.75×, so 2.35× understates the unexplained term rather than inflating it. The docs now label instrument (subprocess vs in-process) on every table, quote memory headroom as an **upper** bound, and say `LOCAL` in the sentence. All four continuity docs agree Phase 0 is unclosed with G7 pending and Phase 1 blocked.
+>
+> **Unresolved ambiguity**
+> Two things neither of us can settle from what exists. (1) **The memory provocation is not reproducible on this host by construction** — I accepted it from a committed WSL2 artifact whose internal consistency (cap read back = 8192 MB, control OK, refusal, matching dataset sha256, real `subprocess_worker.py` traceback) is strong but which I did not re-execute. Re-running it costs a WSL2 VM, which is the exact contention that turned the gate RED once already. (2) **Nothing here says anything about the grader's host.** The 8,192 MB limit remains a `ContestSpec` class default that no `run_config` and no graded report publishes, and there is no graded Phase-2 report at all — so the one constraint this host cannot test is still the one with the weakest provenance. That is stated correctly in the docs; it is not a defect, it is a permanent gap.
+>
+> **Cheapest discriminating follow-up**
+> None is needed to close Phase 0. The one worth doing before Phase 1 costs no block and no seed: make `verify_witness` **resolve the suite it names** — map `witness["suite"]` to the results file rather than always loading the lifecycle artifact — and delete the `startswith("this file")` branch by giving `worker_death_restart` a structured witness against this suite's own emitted results, exactly as the lifecycle constraints have. That kills D1 and D2 in one edit, and it is a **ROUTINE** instrument change on no data at all. Do it together with the `--no-write` fix (D3: gate `_load_suite_results(regenerate=...)` on `not args.no_write`, and stop printing a claim that is false) and the `VALIDATION.md` §7 refresh (D4). None of the four blocks Phase 1A; all four should land before the Phase-1 contract is written, because §7 is what the next agent reads.
+>
+> **Checklist items triggered**
+> 6 (counted-vs-counted — satisfied; the anchor is counted against a counted report), 8 (local absolute residual — satisfied; every second is labelled LOCAL and the subprocess path is named the authority), 10, 11, 12 (block reuse / tier / vault — all clean: no block claimed, public split read-only, counter 1 == 1), 13 (post-hoc gate — refuted by the byte-prefix proof), 14 (which harness — the real flopscope, asserted, not the `local_sim` shim), 17 (continuity — SHAs cited, every named artifact exists on disk), 18 (generic — D1, D2, D3 are implementation defects that happen to favour the claim's *appearance*, none of which changes an outcome).
+>
+> I restored `lifecycle_self_test.json` with `git checkout` after the protocol dirtied it; the working tree is clean at `952bd61`. I wrote nothing.
+
+## Gate: CLOSED
+
+| clause | status |
+|---|---|
+| G1 op-by-op anchor | **MET** — 19 ops, 0 disagreeing, delta +0, SHA-bound |
+| G2 config asserted against the installed package | **MET** — 73/73 |
+| G3 suites green, denominator unchanged | **MET** — zero original check names dropped, verified by name-diff |
+| G4 five paths provoked | **MET** — all five; four reproduced by the reviewer itself |
+| G5 validate + smoke, zero failures, unchanged file | **MET** — blob `9242377a` identical throughout |
+| G6 preflight + portability green | **MET** — `PREFLIGHT GREEN -- 16/16`, portability 99/99 |
+| **G7 independent ACCEPT** | **MET — this verdict** |
+
+**Phase 0 is CLOSED.** Four independent passes: three found real defects that were
+fixed, and this one found four more that do not falsify a clause.
+
+## Carried forward — D1–D4, none blocking
+
+Recorded here rather than fixed, for two reasons: **instrument code must not be
+modified after the reviewed commit**, and the reviewer's own recommendation is
+that these precede the Phase-1 *contract* rather than this slice. They belong to a
+separate ROUTINE instrument slice, on no data and no block.
+
+| # | defect | why it is not a gate failure |
+|---|---|---|
+| **D1** | a literal-`True` check survives at `test_deployment_envelope.py:758-763`, the only matrix line covering `worker_death_restart` | the gate never passes `--skip-worker-death`, so no committed evidence is false, and the artifact records `witness_verified: null` honestly. **Instance eight of the pattern.** |
+| **D2** | `verify_witness` never resolves `witness["suite"]`; `_load_suite_results` always loads the lifecycle artifact | today's failure mode is a false *negative*, so nothing is over-claimed — but the docstring promises a mechanism the code lacks |
+| **D3** | `--no-write` still regenerates `lifecycle_self_test.json`, then prints that it did not | only timing detail moves; `results_sha256` is unchanged, so no evidence is semantically altered. **The same complaint the second pass filed.** |
+| **D4** | `VALIDATION.md` §7 still documents a **twelve**-step gate with the old suite counts, and contradicts itself on step 9 | documentation, not instrument code — and it is what the next agent reads when writing the Phase-1 contract |
+
+D4 is fixed in the same commit as this entry, because it is documentation and
+because leaving the binding protocol describing a gate that no longer exists is a
+live hazard for the Phase-1 contract. **D1–D3 are untouched** — they are
+instrument code, and the reviewed commit stands.
+
+**Seed ledger:** unchanged. P01 144/600, 456 free. D17/D19 SINGLE_USE and unspent.
+**Vault:** untouched, counter 1 == 1 log line. **`estimator.py`:** byte-identical.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Next:** Phase 1A — construction only. No seed block, no `estimator.py` edit, no
+truth measurement.

@@ -21,13 +21,15 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
 - The repo's scientific decision protocol is strong. Its deployment evaluator was
   not Phase-2-truthful; **P2-P0 repaired the deployment parity** and the local
   meter now reproduces the official runner op by op, to zero.
-- **Phase 0 is NOT closed.** Its gate is an all-of, G1–G7. **G1–G6 are met; G7 —
-  an independent Skeptic ACCEPT — is pending.** Three review passes have run and
-  returned PROVISIONAL, PROVISIONAL and REJECT; each found something real, and the
-  last found a gate clause satisfied by a check that could not fail.
-- **Immediate next action:** final Phase-0 evidence and acceptance. **Phase 1 is
-  prohibited until that ACCEPT exists** — no DESIGN seed may be claimed, no
-  `estimator.py` edit made, and no Phase-1 measurement taken.
+- **Phase 0 is CLOSED.** Its all-of gate G1–G7 is met, with a literal independent
+  **ACCEPT** recorded at the bottom of `experiments/LOG.md` (HEAD `952bd61`).
+  It took four review passes — PROVISIONAL, PROVISIONAL, REJECT, ACCEPT — and the
+  first three each found something real, including a gate clause satisfied by a
+  check that could not fail.
+- **Immediate next action: Phase 1A — construction only.** A width-1024
+  Kerdock/MUB generator and its invariants, with **no seed block claimed, no
+  `estimator.py` edit, and no truth measurement**. Phase 1B (DESIGN evidence)
+  begins only after 1A's contract is reviewed and a block is deliberately claimed.
 
 ## Authoritative document map
 
@@ -136,12 +138,18 @@ Coupled residual sampling is deprioritized. Its former 1.305x projection assumed
 float32 K2 cost reduction that the frozen artifact does not show: measured cost fell
 only 3.1%, not 50%.
 
-## Evaluator state — P2-P0 repaired these; the slice itself awaits acceptance
+## Evaluator state — P2-P0 repaired these, and the slice is closed
 
-All nine blockers are resolved and the deployment parity is repaired. **That is
-the technical work, not the gate**: G7 is still open. Raw evidence:
-`experiments/2026-08-24_p2_p0/`; contract, result, two reviews, a retraction and a
-REJECT at the bottom of `experiments/LOG.md`.
+All nine blockers are resolved, the deployment parity is repaired, and the gate is
+closed on a literal independent ACCEPT. Raw evidence:
+`experiments/2026-08-24_p2_p0/`; contract, result, two reviews, a retraction, a
+REJECT and the ACCEPT at the bottom of `experiments/LOG.md`.
+
+**Four defects are carried forward** from the accepting review (D1–D4 in that
+entry). None falsifies a gate clause. D4 — `VALIDATION.md` §7 describing the old
+twelve-step gate — is fixed. **D1–D3 are instrument code and remain untouched**,
+because the reviewed commit stands; they belong to a separate ROUTINE slice and
+should land before the Phase-1 *contract* is written.
 
 | # | blocker | state |
 |---|---|---|
@@ -240,9 +248,9 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 
 | order | slice | class | status |
 |---:|---|---|---|
-| 0 | official-stack/evaluator repair | IMPORTANT | **G1–G6 MET, G7 PENDING** — technical work complete (preflight 16/16, anchor reconciled to zero, all five G4 paths provoked); awaiting a literal independent ACCEPT |
-| 1A | Kerdock/MUB generator + invariants, no truth seed | ROUTINE/IMPORTANT | **BLOCKED** until G7 returns ACCEPT |
-| 1B | structured-carrier DESIGN evidence | STRATEGIC | blocked; contract to be reviewed before any block is claimed |
+| 0 | official-stack/evaluator repair | IMPORTANT | **CLOSED 2026-08-24** — G1–G7 all met, independent ACCEPT recorded |
+| 1A | Kerdock/MUB generator + invariants, no truth seed | ROUTINE/IMPORTANT | **NEXT** — construction only; no seed, no estimator edit, no measurement |
+| 1B | structured-carrier DESIGN evidence | STRATEGIC | after 1A; contract reviewed before any block is claimed, on a NEW block (P02) |
 | 2 | structured carrier DESIGN | STRATEGIC on seed claim | pending |
 | 3 | structured carrier DECIDE | STRATEGIC | pending |
 | 4 | recurrent augmented-K2 parity and DESIGN | IMPORTANT/STRATEGIC | pending |

@@ -475,19 +475,16 @@ verdict. A DESIGN result never becomes a DECIDE result by documentation wording.
 
 ## 8. Immediate next action
 
-**Phase 0's repair is done; Phase 0 is not closed.** Deployment parity was
-repaired on 2026-08-24: the official stack is pinned, one round-aware config
-authority asserts every constant against the installed package, local MLPs are
-flopscope-backed, the counted-FLOP anchor reconciles to the official runner
-**op by op with residue zero**, and all five G4 paths are now provoked — the
-memory limit on Linux, where `RLIMIT_AS` exists.
+**Phase 0 is CLOSED.** Deployment parity was repaired on 2026-08-24: the official
+stack is pinned, one round-aware config authority asserts every constant against
+the installed package, local MLPs are flopscope-backed, the counted-FLOP anchor
+reconciles to the official runner **op by op with residue zero**, and all five G4
+paths are provoked — the memory limit on Linux, where `RLIMIT_AS` exists.
 
-**The gate is an all-of, G1–G7. G1–G6 are met; G7 is pending.** Three independent
-passes returned PROVISIONAL, PROVISIONAL and REJECT. The immediate action is
-**final Phase-0 evidence and acceptance**, and then **Phase 1A**.
+**The all-of gate G1–G7 is met**, on a literal independent **ACCEPT** at HEAD
+`952bd61`, after four review passes (PROVISIONAL, PROVISIONAL, REJECT, ACCEPT).
 
-**Until a literal ACCEPT exists:** no DESIGN seed may be claimed, `estimator.py`
-may not be edited, and no Phase-1 measurement may be taken.
+**The immediate action is Phase 1A.**
 
 Phase 1 then runs in two distinct stages:
 
