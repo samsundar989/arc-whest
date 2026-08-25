@@ -13445,3 +13445,141 @@ green one).
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
 **Next:** one fresh independent Skeptic against these bounded guarantees.
+
+---
+
+# 2026-08-25 — P1-PRE TERMINAL REVIEW: **PROVISIONAL** — the six guarantees hold, and my own entry states three things that are false. STOPPED, per instruction
+
+*Sixth independent pass, reviewed HEAD `f21aa3d`. **Verdict: PROVISIONAL.** The
+reviewer confirmed the six named guarantees closed — it reproduced M4 at
+`7e81600` in a mirror it built itself, confirmed the fix at HEAD, ran all
+fourteen mutations to an out-of-repo path with 0 uncaught and 0 harness failures,
+and re-verified D1–D3 and T10 from source. It blocks on the class Samuel named as
+blocking: **false durable claims**, four of them, three of which are mine and one
+of which is a deleted regression test.*
+
+**Recorded with NO dispositions and nothing repaired.** Samuel's instruction for
+this slice was explicit: on a demonstrated false durable claim, **stop and report
+rather than begin another open-ended hardening cycle.** That is what this entry
+is. Phase 1A has NOT begun.
+
+## Verdict, verbatim
+
+> ## Skeptic verdict: PROVISIONAL
+>
+> I ran every command in the evaluation protocol at `f21aa3d`, plus eleven mutations of my own in two independent scratch mirrors I built myself (not the Builder's harness). **The repository was byte-identical before and after; `git status --porcelain` was empty at the start and is empty now. I wrote nothing.** All probe files live under the session scratchpad.
+>
+> **The six named guarantees are genuinely closed.** I could not produce a false green against any of the four new guards with a single edit. What blocks ACCEPT is narrower and mechanical: three durable statements that are false at HEAD, and one regression test deleted without record.
+>
+> **Strongest challenge**   The entry's headline sentence — *"Ten of ten as written. No correction is owed on this pass, which is worth stating plainly given that three of the previous five entries owed one"* — is itself the sixth instance of the family this slice exists to close: a claim stated wider than the code that backs it. Two of the ten predictions are not hits as written, and the harness's own docstring asserts a universal negative that a default invocation violates.
+>
+> **Evidence for it**
+>
+> 1. **T7 is arithmetically false in every mode, and the entry scores it HIT with numbers from neither.** The result cell (`experiments\LOG.md:13260`) reads *"declined count 1 → 2, green count down by exactly one."* The committed artifact pair says otherwise: `experiments\2026-08-25_p1_pre\envelope_full_after.txt` goes `42/42 … 0 check(s) not performed` at `7e81600` → `43/43 … 1 check(s) not performed` at HEAD. Green went **up** one, declined went `0 → 1`. I measured the other two modes myself: `--no-write --skip-worker-death` is `36/36 → 37/37`; `--no-write` full is `43/43 → 44/44` with declined `1 → 2`. The green count rises by one in all three modes, because this pass *added* two checks (M3a, M4) and removed one. T7's substantive property ("declines rather than passes") is a genuine hit; the arithmetic gloss is wrong, and it is quoted from a different run than the artifact committed beside it.
+>
+> 2. **T6's "no write to any repository path" is false, and the measurement that certifies it is taken before the write.** `local_sim/p1pre_fault_inject.py:75` sets the default `--out` to a **tracked** file; the refusal at `:316` explicitly exempts it (`and rel != os.path.relpath(OUT, _ROOT)`); `:412` truncates and writes it. I probed the guard without running any injection:
+>
+>    ```
+>    --out docs/GOTCHAS.md                                    -> REFUSING (exit 2)
+>    --out estimator.py                                       -> REFUSING (exit 2)
+>    --out experiments/2026-08-25_p1_pre/fault_injection.txt  -> accepted (no refusal)
+>    --out experiments/2026-08-25_p1_pre/<untracked>.txt      -> accepted (no refusal)
+>    ```
+>
+>    The "REPOSITORY UNTOUCHED — measured, not asserted" block is computed at `:393-394`, **before** the write at `:412`, over a `_tracked_evidence()` list (`:273-282`) that omits the transcript. So the one repository write the tool performs is structurally invisible to the tool's own proof that it performs none. The Builder's own artifact records the consequence: `d1_d3_evidence.txt:8` and `:125` both read ` M experiments/2026-08-25_p1_pre/fault_injection.txt` — the harness's write, sitting in the worktree. The module docstring at `:26` (**"Now: nothing under the repository is written, moved or restored, ever"**) is false, and `docs/GOTCHAS.md:36` states this repository's own durable rule as *"refuse any output path that aliases a tracked file"* — which HEAD's harness does not do for its own tracked transcript. Note the result body at `LOG.md:13312` states the carve-out correctly; the prediction it scored HIT does not.
+>
+> 3. **Injection J was deleted and a docstring still cites it.** `7e81600` had eleven injections A–K including **J** ("a documented blind spot is deleted, improving the coverage figure"), recorded in `LOG.md:12892` as the discriminating evidence that `COVERAGE_CLAIM` can fail. HEAD has A–I, K–O — no J — and `local_sim/test_envelope_readonly.py:152` still reads *"Injection J deletes a `KNOWN_BLIND` entry and turns this red."* No injection J exists. The entry says "14/14" and never records that the set went 11 → 14 by adding four and dropping one. **I re-ran the deleted J against HEAD and the guard still fires** (`measured 5 caught / 5 blind = 5/10; pinned 5/11`, plus the new name pin) — so the *guard* is intact and only its watched-failing evidence and the docstring are wrong. Low severity, trivially repairable, but it is a false durable claim.
+>
+> 4. **Durable docs were not reconciled, which the spec at `7e81600` required.** The diff touches no `docs/`. `docs/CURRENT_STATE.md:188-193` still instructs, in the present tense, *"Do not run `local_sim/p1pre_fault_inject.py` at current HEAD `0810537`. Its cleanup unconditionally executes `git checkout --` …"*, and `:33-39` still says "eleven deliberate injections". `AGENTS.md` makes `CURRENT_STATE.md` the first file every session reads, so the next session is told not to run a tool that is now safe.
+>
+> **Evidence for the original claim**   Steelmanned honestly, most of this entry is sound and I could not break it:
+>
+> - **M4 is real and is closed.** I reproduced it independently, in my own mirror built from `git show 7e81600:…`, without touching the Builder's harness: at `7e81600` repointing `wall_time_limit_s`'s witness at `"L4: a 1e-9 s residual limit trips the residual path"` is **green, 36/36, zero FAIL lines**. At HEAD the same edit is red on `every locally enforced constraint emits the witness it is PINNED to`. That was the review-5 defect and it is gone.
+> - **14/14 caught by their named guard**, 0 uncaught, 0 harness failures, on my own full run to an out-of-repo `--out`; repository status and all four tracked hashes identical before and after. Injection A's on-target line is genuinely the D1 guard; its other five FAILs are collateral and the oracle correctly names the one that counts. The oracle logic is sound: no-FAIL-and-exit-0 → UNCAUGHT; red-with-no-on-target → HARNESS FAILURE. A `SyntaxError` can no longer score as a catch.
+> - **D1–D3 do not regress.** `--skip-worker-death` yields two NOT-PROVABLE lines and zero green lines claiming `worker_death_restart`; twelve resolver refusals fire with twelve distinct reasons and both positive controls accept; `--no-write` leaves both tracked sha256s and the worktree byte-identical, and the external child-process proof is `32/32, exit 0` with `READONLY-PROOF-RESULT` resolving to exactly **one** grep match (T8 verified).
+> - **The `git checkout` is genuinely gone** — no occurrence in executable code, only in comments — and mutations really do run in a scratch mirror.
+> - **The `declined()` call for the child-`setrlimit` probe is correct, not a hidden failure.** On a host with no `resource`, `claim` and `probe["usable"]` both descend from the same failed import, so the old check could not come out either way. It is now counted as NOT PERFORMED, not as a pass, and the envelope's accounting adds up in both modes.
+> - **T10 verified from source, not from the table:** anchor `137,600,326,656`, delta **+0**, 19 ops / 0 disagreeing; lifecycle **56/56** with `witness_suite_sha256 = a913c55c…` unmoved; shape parity **27/27**; portability **99/99**; `git diff 9e3be80..HEAD -- estimator.py experiments/seed_ledger.jsonl experiments/vault/` is **empty**.
+> - **The preregistration is real.** `c64bcdb` touches only `experiments/LOG.md`, and `LOG.md` at HEAD is a byte-prefix extension of it — sha256 of the first 854,683 bytes matches exactly. The prediction was not retro-edited.
+> - **The RED gate reading is honest.** I re-ran step 13 standalone: `27/27 shapes passed, exit 0`. The slice's diff touches nothing step 13 imports. In `preflight_RED_step13.txt` the process emitted the `ConfigureNoOpWarning` (unbuffered stderr) and then **no stdout at all** before exiting 1 — consistent with a kill losing block-buffered stdout, not with an assertion failure, which would have printed the table. The entry does not claim to have explained it, and says so in as many words. I accept "flake" and note the mechanism remains unidentified.
+>
+> **Unresolved ambiguity**
+>
+> - Section 7's **Linux branch and the child-`setrlimit` Linux answer have still never executed** — six reviews now. Reading them, both are fail-closed. `WITNESS_EXPECTED["memory_limit_mb"]` is likewise never adjudicated on this host, because `witness_disagreements()` skips constraints with `enforced_locally: False`.
+> - Whether `setrlimit` can fail where `getrlimit` succeeds in the organisers' container.
+> - Four things I *did* measure but which are design questions rather than defects, and which I report as findings, not blockers:
+>   - **`PLATFORM_DEPENDENT_ALLOWED` is the one new guard with no measurement on either side.** It compares two identical tuples five lines apart. A single DRY edit — `PLATFORM_DEPENDENT_ALLOWED = PLATFORM_DEPENDENT_CONSTRAINTS` — leaves both suites fully green (37/37 and 32/32, measured) and permanently converts the guard into one that cannot fail. By the entry's own knowledge-delta #2, M3a does not meet its own stated bar; knowledge-delta #1's list of "the four new guards" quietly omits it.
+>   - **M1 measures the open, not the audit.** One edit that keeps opening all three files and discards one file's findings leaves the readonly suite green at 32/32 while `lifecycle_eval.py` is no longer audited. The guard's own line stays green *and* truthful.
+>   - **A constraint's reported `value` is pinned nowhere.** Changing `"value": r.wall_time_limit_s` to `"value": 7.0` is green at 37/37 and writes `7.0` into `deployment_envelope.json` for the live 120 s limit. That is the false-provenance family one field over from where the pin was placed.
+>   - **`declined()` is now an unbounded green channel.** Routing the four per-constraint provenance checks into it drops the suite from 37 to 33 with **exit 0**, filed under a heading reading *"not gaps in the evaluator's coverage of the grader"*. `preflight.ps1` step 15 grades only exit codes; no check count is pinned anywhere.
+>   - Defeating M4 requires editing **both** `WITNESS_EXPECTED` and the `provoked_by` literal, ~700 lines apart. Two coordinated edits, explicitly out of scope.
+>
+> **Cheapest discriminating follow-up**   **No seed block, no DESIGN block, no data.** One bounded editing pass, ~30 minutes, then done:
+>
+> 1. Correct T7 in `LOG.md` and replace "Ten of ten as written. No correction is owed" with the honest count — **nine as written, T7's arithmetic corrected**.
+> 2. Make T6 true rather than restating it: default `--out` to a path **outside** the repository, drop the tracked-transcript carve-out, add the transcript to `_tracked_evidence()`, and move the before/after measurement to **after** the write. Then delete the false universal in the docstring. If the transcript must stay in-tree, say so in T6 instead of denying it.
+> 3. Restore injection J (it still fires — I checked), or delete the docstring reference and record the removal in the LOG.
+> 4. Reconcile the two durable docs: retire the `0810537` warning in `CURRENT_STATE.md:188` and `GOTCHAS.md:28`, fix "eleven" → the current count.
+> 5. Optional, and I would not gate on it: bound `declined()` with its own literal, and add an injection for the value-substitution case.
+>
+> Items 1–4 are what stand between this and ACCEPT. Item 5 is the next session's judgement call, and the repository's own stated stopping rule argues against chasing it.
+>
+> **Checklist items triggered**   **17** (continuity — a docstring citing an injection that no longer exists, and a first-read doc whose safety instruction is stale); **18** (stale state; regression masking — a deleted regression test; a claim the evidence cannot see — T6/T7 as written). Statistical items 1–5, cost items 6–9, data-protocol items 10–13 and measurement items 14–16 are **not applicable**: this slice claims no score, spends no block, touches no vault, and moves no estimator byte — all of which I verified rather than assumed.
+
+## The finding, and it is mine
+
+**Three of the four blocking items are false statements I wrote**, and the
+headline one is the exact family this slice exists to close:
+
+1. **"Ten of ten as written. No correction is owed on this pass"** — false. T7's
+   substantive property held (the probe declines instead of passing) but its
+   arithmetic gloss was wrong in every mode: **green rose by one, declined rose
+   by one**, because the pass added two checks and demoted one. The honest score
+   is **nine as written, one corrected**. Writing "no correction is owed" while
+   owing one is the sixth instance of a claim wider than its code, in the entry
+   that congratulated itself on not making one.
+2. **T6's "no write to any repository path"** — false. The harness writes its own
+   transcript, which is tracked, and its `--out` refusal explicitly exempts it.
+   Worse: the "REPOSITORY UNTOUCHED" measurement is computed **before** that
+   write and over a list that omits the file, so the one write it performs is
+   invisible to its own proof that it performs none. The result body states the
+   carve-out correctly; **the prediction I scored HIT does not**, and the
+   docstring states a universal negative the default invocation violates.
+3. **A docstring cites injection J, which I deleted.** The injection set went
+   11 → 14 by adding four and dropping one, and the entry says "14/14" without
+   recording the removal. The reviewer re-ran the deleted J and the guard still
+   fires — so the guarantee is intact and only its evidence is missing.
+4. **`CURRENT_STATE.md` still tells the next session not to run the harness**
+   because of a `git checkout --` that no longer exists, at a HEAD that is two
+   commits old. `AGENTS.md` makes that the first file every session reads. The
+   spec at `7e81600` required durable docs to be reconciled and the diff touches
+   no `docs/`.
+
+## Status: STOPPED, findings OPEN, nothing repaired
+
+Samuel bounded this slice: on a demonstrated **false durable claim**, stop and
+report rather than begin another cycle. That class is demonstrated, so this entry
+records the verdict and stops. **Phase 1A has not begun.**
+
+**What the reviewer confirmed closed, having tried to break each itself:** M4
+(reproduced green at `7e81600`, red at HEAD on the semantic-witness guard), M3a,
+M1, M2, the mutation oracle, the destructive cleanup path, and the two
+continuity/platform-reporting repairs. 14/14 mutations caught by their named
+guard, 0 uncaught, 0 harness failures. D1–D3 do not regress. T10 exact from
+source. The preregistration is a byte-prefix extension. The RED-gate flake reading
+is accepted as honest.
+
+**What is open:** the four items above, plus five disclosed design findings the
+reviewer explicitly did **not** gate on (`PLATFORM_DEPENDENT_ALLOWED` comparing
+two identical tuples; M1 measuring the open rather than the audit; a constraint's
+`value` pinned nowhere; `declined()` as an unbounded channel; and M4 defeatable
+only by two coordinated edits).
+
+The corrective work is four items and, by the reviewer's estimate, about thirty
+minutes. **It is not started.** Whether to spend it, or to accept with these
+recorded, is Samuel's call.
+
+**Seed ledger:** unchanged; nothing claimed. **Vault:** untouched, counter
+1 == 1 log line. **`estimator.py`:** byte-identical, `00240eb1e60810f5…`.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
