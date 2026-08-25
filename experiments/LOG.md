@@ -11812,3 +11812,130 @@ instrument code, and the reviewed commit stands.
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
 **Next:** Phase 1A — construction only. No seed block, no `estimator.py` edit, no
 truth measurement.
+
+---
+
+# 2026-08-25 — P1-PRE [IMPORTANT] the accepting review's three instrument defects — PREDICTION, before the fix
+
+*Class: **IMPORTANT**, not ROUTINE. `local_sim/test_deployment_envelope.py` is the
+evaluator's enforceability matrix and it is preflight step 15; changing it changes
+the instrument, and `AGENTS.md` § Work classification puts that class above
+ROUTINE whether or not it spends data. **No seed is claimed, no truth is
+measured, no vault is touched, `estimator.py` is not edited.** Written and
+committed before the change exists.*
+
+**Baseline HEAD:** `9e3be80ba30beb1e8425c168d9f0cdb82919f2a9`.
+
+| artifact | sha256 at baseline |
+|---|---|
+| `local_sim/test_deployment_envelope.py` | `efc12b9d1a4173258519ba31de0444b5850112e9cf20d3f44b64fc65be8f0d24` |
+| `local_sim/lifecycle_eval.py` | `33cf5dbc622e985121d77907df93308bd12882f3501ca7779eb7b402a790feb1` |
+| `experiments/2026-08-24_p2_p0/deployment_envelope.json` | `e3e9ae493a8bc669e6648956ad1735f0a1d144c5141a51034c3bfd648a418559` |
+| `experiments/2026-08-24_p2_p0/lifecycle_self_test.json` | `d33e5592697a037e3d8fd1322743929adc076ffeccd197e5adcd39841e18edc8` |
+| `estimator.py` | `00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec` |
+
+Lifecycle results digest at baseline: `a913c55cbcc2434e…`, 56/56.
+
+## Both defects reproduced first, and the transcript is committed with this entry
+
+`experiments/2026-08-25_p1_pre/baseline_d1_d3.txt`, one invocation,
+`--skip-worker-death --no-write`:
+
+```text
+line 40   PASS  worker_death_restart is enforced here, provoked in this file   None
+line 70   ----  worker_death_restart      NOT PROVABLE HERE: --skip-worker-death was passed
+line 78   --no-write: the artifact on disk was NOT touched.
+
+lifecycle_self_test.json   d33e5592...  ->  6505bb25...      (it WAS touched)
+git status --porcelain     clean        ->   M experiments/.../lifecycle_self_test.json
+```
+
+**D1** is the same constraint reported green and NOT PROVABLE in one run, thirty
+lines apart. **D3** is a read-only claim printed by a run that had already
+rewritten a tracked evidence file. Neither is inference; both are lines 40, 70 and
+78 of a committed transcript.
+
+## What is being changed, and nothing else
+
+1. **D1.** Delete the `w.get("suite", "").startswith("this file")` branch at
+   `test_deployment_envelope.py:758-763`, whose condition is the literal `True`.
+   Sections 5 and 6 of this suite emit **structured results** the same way
+   `lifecycle_eval.py --self-test --emit-json` does, and their constraints get a
+   structured witness verified against those results in a new closure section
+   that runs **after** the provocations, not before them.
+2. **D2.** `verify_witness` stops being handed a results object and instead
+   resolves `witness["suite"]` through a **`WitnessResolver`**: a registry of
+   suite name → results source. Unknown suite, missing results, and an artifact
+   whose own `suite` field disagrees with the name that resolved it are three
+   distinct refusals.
+3. **D3.** `--no-write` arms a module-level read-only latch. Regeneration and
+   every artifact write go through one choke point that **raises** when the latch
+   is armed, so the mode is incapable of writing rather than merely not asked to.
+   The read-only claim is printed only after the run has hashed the tracked
+   evidence before and after and compared `git status --porcelain`.
+
+A new file `local_sim/test_envelope_readonly.py` proves D3 and the D1 skip path
+from **outside** the suite, by different logic — child process, sha256, and git —
+so the suite does not certify its own read-only claim alone. Preflight step 15
+runs both.
+
+## Predictions, committed before the change exists
+
+- **H1 — the skip path can no longer print green.** With `--skip-worker-death`,
+  stdout contains **zero** lines matching `PASS.*worker_death_restart`, the
+  constraint appears in the NOT-PROVABLE block, the artifact records
+  `witness_verified: false` with a refusal reason naming the missing checks, and
+  the suite still exits **0** (an unprovable constraint is not a failure; a green
+  one is a lie).
+- **H2 — the full path verifies against real emitted results.** Without the flag,
+  `worker_death_restart`'s witness resolves to **this suite's own** section-6
+  results, every named check is present with `ok == True`, and the artifact
+  carries those check rows, not a pointer to them.
+- **H3 — the self-witness is capable of failing, demonstrated, not argued.** The
+  same witness verified against a results set lacking section 6 refuses with
+  `CHECK NOT FOUND`. This is the whole risk of the design — a suite verifying its
+  own output is nearer to self-certification than one verifying a foreign suite —
+  and H1/H3 are what stop it being one.
+- **H4 — the resolver refuses on the public path.** At least five negative cases
+  fire *through* `WitnessResolver` rather than by passing `results=None` behind
+  it, each with a **distinct** reason: `UNKNOWN SUITE`, `SUITE RESULTS MISSING`,
+  `SUITE MISMATCH`, `CHECK NOT FOUND`, `PRESENT BUT FAILED`, `DETAIL MISMATCH`.
+  The eight existing refusals keep firing and the positive control still accepts.
+- **H5 — `--no-write` moves nothing.** `lifecycle_self_test.json` and
+  `deployment_envelope.json` keep their sha256 across a `--no-write` run and
+  `git status --porcelain` is byte-identical before and after. Measured by a
+  separate file, not by the suite about itself.
+- **H6 — and that is not vacuous.** In its normal mode the same resolver **does**
+  regenerate the lifecycle artifact; the suite checks that it did. Two mutually
+  exclusive checks, one firing in each mode, so "unchanged" cannot pass because
+  nothing ever writes.
+- **H7 — no Phase-0 scientific or score evidence moves.** `results_sha256` of the
+  lifecycle suite stays `a913c55cbcc2…` at 56/56; the counted-FLOP anchor stays
+  `137,600,326,656` with 19 operations and 0 disagreeing; `estimator.py` stays
+  `00240eb1…`; the seed ledger is unchanged; the vault counter stays 1 == 1
+  against one log line. **Only refusal and read-only behaviour changes.**
+- **H8 — the check denominator goes UP, and by name-diff.** No existing check name
+  is removed except the literal-`True` line
+  `worker_death_restart is enforced here, provoked in this file`, which is the
+  defect. The count is reported by diffing names, never by quoting a total.
+- **H9 — the gate gets faster, incidentally.** `_load_suite_results` regenerates
+  the lifecycle artifact **twice** per run today (negative tests, then the
+  matrix), at ~49 s each. The resolver caches, so one run costs one regeneration:
+  the `--skip-worker-death` suite should fall from ~105 s to ~55 s. Stated because
+  it is a testable consequence of the D2 design, not a goal.
+
+**Falsifier.** If closing any of D1–D3 requires weakening an existing refusal,
+removing a check that tests a property, moving any number in H7, or leaves any
+path on which a skipped or unrun provocation can print green, the design is wrong
+and is reverted rather than documented around.
+
+**Knowledge target.** Whether a suite can verify a provocation it performed
+itself without recreating the vacuity it is repairing. The answer is only
+credible if the self-witness is watched failing (H1, H3) — this repository has
+now lost **eight** checks to conditions that could not go red, and the eighth was
+written in the same slice that fixed the seventh.
+
+**Seed ledger:** unchanged, no claim. **Vault:** untouched. **`estimator.py`:**
+not edited.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
