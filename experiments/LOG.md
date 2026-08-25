@@ -13827,3 +13827,104 @@ untouched, counter 1 == 1 log line. **`estimator.py`:** byte-identical,
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
 **Next:** Phase 1A construction (no seed, no truth, no `estimator.py`), and in
 parallel a Phase-2 calibration readiness packet for Samuel's explicit approval.
+
+---
+
+# 2026-08-25 — PHASE 1A [IMPORTANT] width-1024 Kerdock/MUB construction — PREDICTION, before implementation
+
+*Class **IMPORTANT**: it changes a probe's mathematics. **No seed block claimed,
+no truth MSE measured, no vault touched, `estimator.py` not edited.** No score or
+variance claim is permitted in this slice, and none is made below. Written and
+committed before any generator exists.*
+
+**Baseline HEAD:** `fe7a508` + the CURRENT_STATE synthesis commit. Worktree clean.
+`estimator.py` sha256 `00240eb1e60810f5…`.
+
+## The mathematics I am committing to before writing it
+
+Not a search. The construction is known, and naming it precisely *before* coding
+is what makes the invariants below predictions rather than observations.
+
+**Primary anchor:** Calderbank, Cameron, Kantor and Seidel, *Z4-Kerdock Codes,
+Orthogonal Spreads, and Extremal Euclidean Line-Sets*, Proc. LMS 1997.
+
+| quantity | value, committed now |
+|---|---|
+| ambient dimension | `N = 1024 = 2^(m+1)` with **`m = 9`, odd** — CCKS require odd `m` for the *real* line-sets |
+| Galois ring | **`GR(4, 9)`** = `Z4[x]/(h(x))`, `h` the Hensel lift of a primitive degree-9 binary polynomial |
+| Teichmüller set | `T = {0} ∪ {ξ^i}`, **`|T| = 2^9 = 512`** |
+| Z4-Kerdock code `K(9)` | **`4^10 = 1,048,576` codewords** — the object we must NOT materialise |
+| maximum real MUBs in `R^1024` | **`2^9 + 1 = 513`** (= `N/2 + 1`, the real bound) |
+| bases actually emitted | a **deterministic 16-subset**, ordered by a stated rule |
+| entries | `±1/32` exactly (integer `±1` before scaling) |
+| cross-basis coherence | **exactly `1/sqrt(1024) = 1/32`** |
+
+The existing `local_sim/carriers.py` is the length-256 case, `GR(4,7)`, `m = 7`.
+Width 1024 is `m = 9` — a new implementation, not a parameter change.
+
+**What is inference and not mathematics:** that the leader uses *sixteen* bases.
+That comes from a cost fingerprint, and it is labelled as such everywhere it
+appears. The mathematics above is independent of it; 16 is a subset size we
+choose because the fingerprint points there.
+
+## Predictions
+
+- **K1 — exact algebra, not floating point.** Every generated row has entries in
+  `{+1, -1}` before scaling; unit norm is exact after scaling by `1/32`. Verified
+  on **integer** Walsh correlations, before any float conversion.
+- **K2 — within-basis orthogonality is exact.** For every basis, all `1024·1023/2`
+  distinct pairs have integer correlation **exactly 0**.
+- **K3 — cross-basis coherence is exactly `1/32`.** For every pair of rows drawn
+  from *different* bases, `|integer correlation| = 32` exactly — never 0, never
+  anything else. This is the single sharpest discriminator between a correct
+  construction and a plausible-looking wrong one.
+- **K4 — antipodal closure and row count.** `16 × 1024 × 2 = 32,768` rows,
+  spanning **16,384 distinct lines**; the set is exactly closed under negation.
+- **K5 — uniqueness and determinism.** 32,768 distinct rows; byte-identical output
+  across three runs and across a freshly constructed generator in a new process.
+- **K6 — the verifier disagrees with the generator by construction.** Two
+  genuinely different code paths (direct emission vs. an independent reference),
+  and at reduced dimensions `N = 16, 64, 256` (`m = 3, 5, 7`) the reference is
+  **exhaustive**, not sampled.
+- **K7 — the radial factor is validated separately from the angular one.** A
+  bias-free ReLU MLP is positively homogeneous of degree 1, so the radial and
+  angular integrals factor. I predict the exact Gaussian radial constant and
+  check it against the layer-1 closed form `E[ReLU] = ‖w‖/sqrt(2π)` **without**
+  the carrier, then compose.
+- **K8 — the 16-basis subset is NOT an exact spherical 4-design, and I will
+  measure how far off it is.** I predict a **non-zero** degree-4 angular error,
+  measured on aligned and adversarial probes rather than on random ones. If it
+  came out exactly zero I would suspect the test before believing the claim.
+  **No design-strength claim will be made that the measurement does not support.**
+- **K9 — the cost fingerprint reproduces exactly.** A dense `32,768 × 1024`
+  float32 forward pass through 16 layers costs
+  **`2 × 32,768 × 1024² × 16 = 1,099,511,627,776`** counted FLOPs. The leader's
+  published figure is `1,099,802,385,000`, i.e. **`+290,757,224` = +0.0264%**,
+  and that remainder is what a real estimator spends on everything that is not
+  the propagation. I predict the dense reference lands on `1.0995e12` and that
+  the overhead is explained, not waved at.
+- **K10 — memory is accounted, not assumed.** One `32,768 × 1024` float32 point
+  buffer is **128 MiB**, far below the 4 GiB single-array cap; weights are 64 MB.
+  I predict the dense reference is built first and that chunking is treated as an
+  optimisation variable, not a correctness requirement.
+- **K11 — nothing in Phase 0 or P1-PRE moves.** `estimator.py` byte-identical,
+  seed ledger unchanged with nothing claimed, vault counter 1 == 1, anchor delta
+  +0, preflight 16/16, portability 99/99.
+
+**Falsifier.** If cross-basis coherence is anything other than exactly `1/32`, if
+within-basis orthogonality is not exact, if the reduced-dimension exhaustive
+reference disagrees anywhere, or if the row count is not 32,768 with 16,384
+distinct lines, the construction is wrong and is not patched into agreement — it
+is rebuilt from the specification.
+
+**Knowledge target.** Whether the GR(4,9) real-MUB construction can be emitted
+*directly* for a chosen 16-basis subset without touching the 1,048,576-word code,
+and whether the resulting angular set is good enough — measured, not assumed — to
+be worth a DESIGN block. The honest failure mode I am watching for is the one
+P1-PRE spent seven reviews on: an invariant that cannot fail. Every check above
+is stated as an exact integer identity precisely so that it can.
+
+**Seed ledger:** unchanged, no claim. **Vault:** untouched. **`estimator.py`:**
+not edited. **No truth data is read in this slice.**
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
