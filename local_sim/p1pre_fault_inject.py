@@ -199,9 +199,10 @@ def main() -> int:
             lines.append("=" * 100)
             lines.append(f"INJECTION {tag} -- {title}")
             lines.append(f"command: {' '.join(os.path.basename(a) for a in argv)}")
-            lines.append(f"exit code: {p.returncode}   "
-                         f"({'CAUGHT' if caught else 'UNCAUGHT -- the defect was '
-                            'reintroduced and NOTHING noticed'})")
+            verdict = ("CAUGHT" if caught else
+                       "UNCAUGHT -- the defect was reintroduced and NOTHING "
+                       "noticed")
+            lines.append(f"exit code: {p.returncode}   ({verdict})")
             lines.append(f"FAIL lines: {len(fails)}")
             lines.extend("  " + ln for ln in fails)
             lines.append("")
