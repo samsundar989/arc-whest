@@ -11939,3 +11939,288 @@ written in the same slice that fixed the seventh.
 not edited.
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-25 — RESULT P1-PRE: D1–D3 closed, and the self-witness is watched failing [prediction above, unmodified]
+
+*Class IMPORTANT. Prediction committed at `fd5c3d2` **before** any code moved.
+Implementation `a341468`; three hardenings found while writing this evidence at
+`ea13820`, `6f81833`, `51558b8`. No seed claimed, no truth measured, no vault
+touched, `estimator.py` byte-identical.*
+
+## The three defects, reproduced before the fix
+
+One invocation, `--skip-worker-death --no-write`, transcript committed with the
+prediction as `experiments/2026-08-25_p1_pre/baseline_d1_d3.txt`:
+
+| line | what it said |
+|---|---|
+| 40 | `PASS  worker_death_restart is enforced here, provoked in this file` |
+| 70 | `----  worker_death_restart   NOT PROVABLE HERE: --skip-worker-death was passed` |
+| 78 | `--no-write: the artifact on disk was NOT touched.` |
+
+and during that run `lifecycle_self_test.json` moved `d33e5592…` → `6505bb25…`,
+with `git status --porcelain` going from clean to `M`. One constraint reported
+green and NOT PROVABLE thirty lines apart, and a read-only claim printed by a run
+that had just rewritten committed evidence.
+
+## The repairs
+
+**D1 — the literal `True` is gone, and what replaced it is a witness that can
+fail.** The suite emits its own results (`own_results()`, the payload shape and
+`results_sha256` construction of `lifecycle_eval --emit-json`), the constraints
+it provokes itself are **deferred** out of the enforceability matrix, and a new
+**section 7** verifies them against those results *after* the provocations have
+run. The old branch could not have consulted them under any condition: it
+executed first. Deferral is printed as `....  DEFERRED`, which is neither a pass
+nor a gap, and section 7 asserts that it adjudicated every deferred entry — a
+constraint that vanished between the matrix and the closure would be a gap that
+reads as coverage.
+
+**D2 — `verify_witness` resolves the suite it names.** A `WitnessResolver` holds
+a registry of suite name → results source (`JsonSuite` on disk, `LiveSuite` for
+this process, never cached because `own_results()` grows as the run proceeds).
+Three refusals are new and all reachable through the public path: `UNKNOWN
+SUITE`, `SUITE RESULTS MISSING` for a registered source whose artifact is absent,
+and `SUITE MISMATCH` when the results that come back declare a different suite.
+The old `SUITE RESULTS MISSING` case reached its branch by handing
+`verify_witness` a `None` behind the resolver's back: it exercised the error
+message, and the message was not the part that was missing.
+
+**D3 — `--no-write` is a latch, not a promise.** `arm_read_only()` is set before
+anything else runs. `regenerate_lifecycle_results()` and `write_artifact()` — the
+only two routes to tracked evidence — **raise** `ReadOnlyRefusal` while it is
+armed, and the resolver consults the latch at *resolve* time rather than at
+construction, so arming it after a resolver exists still stops the write. The
+claim is printed only after the run has hashed both watched artifacts before and
+after and compared `git status --porcelain`, and it is **withheld** if either
+check fails.
+
+`local_sim/test_envelope_readonly.py` proves D3 and the D1 skip path from
+**outside** the suite by different logic — an AST scan of every write-mode
+`open()`, a latch exercised with its positive control first, and a real child run
+judged by sha256 and git. Preflight step 15 runs both files.
+
+### Three defects of my own, found while writing this up
+
+1. **A refused self-witness whose section forgot to record itself was classified
+   as a gap** (`ea13820`). Section 7 read `_SECTION_RAN.get(name)`, so a missing
+   entry took the softer branch. A future self-witnessed constraint whose section
+   omitted one bookkeeping line would have had a real failure reported as NOT
+   PROVABLE. An absent record is now a FAILURE, and **fault injection D** deletes
+   that line and watches the suite go red.
+2. **A declined check was filed as a gap in the grader's envelope** (`6f81833`).
+   In `--no-write` the writer's positive control cannot run without lowering the
+   latch, so it is declined — and it was landing in the NOT PROVABLE block, under
+   a heading reading *"they are enforced only on the grader"*, which is true of
+   every other line there and false of that one. Declined checks now have their
+   own list, block and artifact field, and the external proof asserts the control
+   lands in one and not the other.
+3. **Section 7's green line was spelled `check(..., True, why)` inside an
+   `if ok:` branch** (`51558b8`). Semantically identical to `ok`; visually
+   identical to the defect being repaired, which is what the next reader greps
+   for. Restructured so the green condition *is* `ok`. An AST scan now reports
+   **zero literal-`True` check conditions in either file**, and the same commit
+   removed a `not any(x in gaps)` in the external proof that an empty parse would
+   have satisfied, and made `verify_witness`'s resolver argument required — a
+   default-constructed one regenerates the lifecycle suite on first resolve, a
+   ~49 s write to tracked evidence hiding behind an omitted argument.
+
+## Predictions, scored
+
+| # | prediction | outcome |
+|---|---|---|
+| **H1** | `--skip-worker-death`: zero `PASS.*worker_death_restart` lines, NOT PROVABLE instead, `witness_verified: false`, exit 0 | **HIT** — 0 green lines; two NOT-PROVABLE entries, the section's and the *witness's*; exit 0 |
+| **H2** | without the flag, the witness resolves to this suite's own section-6 results | **HIT** — `6 named check(s) verified in local_sim/test_deployment_envelope.py [8ef599e48aba]`, and the artifact carries all six rows with `ok: true` |
+| **H3** | the self-witness refuses against a results set lacking section 6 | **HIT** — negative case `REFUSED: THE SELF-WITNESS, against a run in which section 6 never ran`, refusal `CHECK NOT FOUND` |
+| **H4** | ≥5 distinct refusals through the resolver; the eight existing ones still fire; the positive control still accepts | **HIT** — 12 refusals with 11 distinct reasons, and **two** positive controls: a file-backed suite and a live one |
+| **H5** | `--no-write` moves neither sha256 and leaves `git status --porcelain` byte-identical | **HIT** — measured from outside, 23/23 |
+| **H6** | and that is not vacuous: the writing mode DOES regenerate | **HIT** — two mutually exclusive checks, one per mode; injection C confirms the write path is live |
+| **H7** | no Phase-0 scientific or score evidence moves | **HIT** — table below |
+| **H8** | the denominator goes up; the only removed check name is the defect | **HIT with one correction** — two names were removed, not one; see below |
+| **H9** | the gate gets faster because the resolver caches | **HIT on the mechanism; no wall time is offered as evidence** — see below |
+
+### H7, item by item
+
+| quantity | before | after |
+|---|---|---|
+| lifecycle `results_sha256` | `a913c55cbcc2434e…`, 56/56 | **`a913c55cbcc2434e…`, 56/56** |
+| counted-FLOP anchor | 19 ops, 0 disagreeing, `137,600,326,656`, delta +0 | **unchanged** — preflight step 12 |
+| `estimator.py` sha256 | `00240eb1e60810f5…` | **`00240eb1e60810f5…`** |
+| seed ledger | P01 144/600; D17/D19 unspent | **unchanged; nothing claimed** |
+| vault | counter 1 == 1 log line | **untouched** |
+
+The lifecycle artifact's *file* hash moved, because the writing mode regenerates
+it and the details carry timings. Its `results_sha256` — which covers the
+`(name, ok)` pairs and is the part that means anything — did not, and four lines
+of the file changed.
+
+### H8 — the name diff, and the correction
+
+`ast`, both the `check()`/`unprovable()`/`declined()` name arguments and the
+negative-test case labels, `9e3be80` vs HEAD:
+
+```text
+runtime check names   41 -> 58      removed 2, added 19
+```
+
+**Removed:**
+
+1. `{} is enforced here, provoked in this file` — **the defect**, as predicted.
+2. `REFUSED: a witness whose suite produced no results` — **not predicted, and
+   this is the correction.** It is the case that reached `SUITE RESULTS MISSING`
+   by passing `results=None` past the resolver. It is replaced by two strictly
+   stronger successors that reach that refusal *and* a new one through the public
+   path: `a witness naming a suite NOBODY REGISTERED` and `a REGISTERED suite
+   whose results file does not exist`. H8 said no existing name would be removed
+   except the literal-`True` line. One other was. Recording it rather than
+   rounding it off.
+
+Runtime counts, for context and not as the claim:
+
+| invocation | before | after |
+|---|---|---|
+| full, writing | 29/29, 3 NOT PROVABLE | **39/39**, 3 NOT PROVABLE, 0 NOT PERFORMED |
+| `--no-write --skip-worker-death` | 23/23, 4 NOT PROVABLE | **33/33**, 5 NOT PROVABLE, 1 NOT PERFORMED |
+| `test_envelope_readonly.py` | did not exist | **23/23** |
+
+The `--no-write` run gains one NOT PROVABLE (the skipped section's *witness*,
+which is the D1 repair reporting itself) and one NOT PERFORMED (the writer's
+positive control, which that mode declares it cannot perform rather than skipping
+quietly).
+
+### H9 — the mechanism, and why no wall time is offered
+
+`_load_suite_results` was called **twice** per run — once in the negative tests,
+once in the matrix — and each call re-ran the lifecycle suite. The resolver
+caches file-backed sources and `main()` builds **one** resolver, so a run costs at
+most one regeneration and `--no-write` costs none. That is a code fact.
+
+Wall times are context only: `--no-write --skip-worker-death` fell from **105 s
+to ~3 s** LOCAL because it no longer regenerates at all, and a full writing run
+measured **153 s LOCAL**. **The host was not quiet for part of this session** —
+another of Samuel's projects was running an eight-worker tournament at roughly
+50% CPU, which is why an earlier gate attempt was abandoned mid-run rather than
+recorded. Nothing here rests on a local second; `VALIDATION.md` §2b-ii's rule
+applies to a gate's runtime as much as to a residual.
+
+## The gate
+
+`.\scripts\preflight.ps1 -Full *>&1 | Tee-Object` -- both streams, because
+`2>&1` silently drops every verdict (`docs/GOTCHAS.md`, 2026-08-24).
+
+```text
+PREFLIGHT GREEN -- 16/16          exit 0
+1,072 lines, all 16 step verdicts present, zero FAIL or RED verdict lines
+verify_portability.py             99 checks, 0 failed   (run separately; the gate's
+                                  exit code is the verdict and nothing is chained after it)
+```
+
+Transcript: `experiments/2026-08-25_p1_pre/preflight_full_p1pre.txt`. It carries
+the children's own output as well as the gate's conclusions, so the numbers below
+are quoted from the same file that carries the verdict:
+
+| line | what it says |
+|---:|---|
+| 701, 730 | counted-FLOP anchor `137,600,326,656 vs 137,600,326,656`, **delta +0**, 19 operations compared, 0 disagreeing |
+| 713 | lifecycle evaluator **56/56** |
+| 5 (step 5) | `estimator.py` and `estimator_v2_6_1.py` identical, `sha256(lf) = 1caa3752be56e862…` |
+| 252, 590 | vault manifest touches **1** == **1** log entry |
+| step 7 | seed ledger CONSISTENT, 29 records, 0 hard collisions, **no unrecorded seed literals** |
+| 997 | deployment envelope **39/39**, 3 NOT PROVABLE, 0 NOT PERFORMED |
+| 1047 | read-only proof **23/23** |
+| 1056-7 | official Phase-2 subprocess smoke: `failures 0`, `C/B 0.0625734`, worst residual `0.10641 s` of the `0.40 s` cap |
+
+The residual figure is the graded path's, on this host, on this day, and is quoted
+for completeness rather than as a margin -- §2b-ii's rule about a level from a
+single session stands.
+
+## The negative tests fire — four defects re-introduced on purpose
+
+A check nobody has watched go red is a check nobody has tested, and that is this
+slice's entire subject. `experiments/2026-08-25_p1_pre/fault_injection.txt` holds
+four builds in which one repair is broken and the suite re-run. The driver
+restores the file byte-for-byte and asserts the restoration by sha256.
+
+| # | defect re-introduced | who noticed | FAIL lines | exit |
+|---|---|---|---:|---:|
+| **A** | section 7 reports an UNRUN provocation as green | `test_envelope_readonly.py` | 2 | 1 |
+| **B** | the resolver ignores the suite it was given (pre-P1-PRE behaviour) | the suite's own negative tests | 4 | 1 |
+| **C** | the read-only latch stops refusing | both files — the child rewrote `lifecycle_self_test.json` and git saw it | 8 | 1 |
+| **D** | a section forgets to record whether it ran | section 7's classifier | 1 | 1 |
+
+Injection A matters most: it re-creates D1 in its new clothes, and the file that
+catches it is the *external* one, which is why the external one exists. Injection
+C is the only one that touches tracked evidence, and it does so by demonstrating
+that with the latch removed a `--no-write` run rewrites `lifecycle_self_test.json`
+— the driver restores it.
+
+## What this does NOT establish
+
+- **Nothing about the grader.** This is evaluator hygiene. No score, MSE,
+  variance or cost claim is made or moved, and none of the Phase-2 numbers in
+  `CURRENT_STATE.md` is touched.
+- **The self-witness is still a suite verifying its own output.** What makes that
+  safe is not the design; it is H1, H3 and injections A and D, four independent
+  demonstrations of the refusal firing. If a future edit leaves section 7 unable
+  to go red, the mechanism is the literal `True` again with more machinery
+  around it.
+- **`--no-write` is proved read-only on the `--skip-worker-death` path.** The
+  external proof deliberately skips section 6, because that section drives the
+  official subprocess runner, which is load-sensitive and can be refused with
+  `SETUP_TIMEOUT`; a read-only proof must not be able to fail for that reason.
+  Section 6's own writes are throwaway candidates under
+  `local_sim/_envelope_*_tmp*`, gitignored and removed in a `finally` — which is
+  *why* `git status --porcelain` is a fair witness, and which on that one path is
+  an argument rather than a measurement.
+- **The memory constraint's structured witness has not run on Linux.** Section
+  5's provocation only executes where `RLIMIT_AS` exists. Its witness was
+  converted from prose (`"this file, section 5"`) to a structured claim naming
+  section 5's six checks in the same edit, because prose would have failed once
+  the literal-`True` branch was gone. The Windows path is unaffected —
+  `enforced_locally` is `False` there, so the constraint is NOT PROVABLE and no
+  witness is adjudicated — but **the Linux path's witness is verified by
+  construction and not by execution**, and that is the one thing in this slice a
+  re-run on WSL2 would settle.
+
+## Knowledge delta
+
+1. **A witness verified before its provocation runs is not a witness, and the
+   ordering was the whole bug.** The old branch was not merely lax about
+   `worker_death_restart`; it sat in a loop that executes before section 6
+   exists. No condition written there could have been honest. The repair was to
+   move the verification, not to strengthen the condition.
+2. **When a mechanism is missing, its tests reach the right branch by the wrong
+   door.** The old `SUITE RESULTS MISSING` case passed `results=None` directly,
+   exercising the error message rather than the resolution — and the resolution
+   was the part that did not exist. A negative test that bypasses the mechanism
+   to reach the failure is evidence about the message.
+3. **"Not asked to write" and "unable to write" differ by exactly one bug.** The
+   old `--no-write` threaded a boolean past two call sites and missed both. A
+   latch that raises at the choke point is the same intent expressed where a
+   caller cannot forget it.
+4. **The softer classification is the dangerous default.** Section 7 shipped, for
+   one commit, with "the section did not record itself" collapsing into NOT
+   PROVABLE. Gap and failure must be separated by an observation the section
+   makes about *itself*, and an absent observation must resolve to the harsher
+   verdict.
+5. **Reporting channels carry claims too.** A declined check filed under a
+   heading that says "enforced only on the grader" makes that sentence false, and
+   the sentence is the thing a reader trusts. Two kinds of not-a-pass need two
+   blocks.
+6. **A file may not be the only witness to its own read-only mode.** The suite
+   checks its claim before printing it, and that is still self-certification. The
+   external check is four lines of sha256 and one `git status`, and it is the one
+   that catches injection A.
+
+**Seed ledger:** unchanged; nothing claimed. P01 144/600, 456 free; D17/D19
+SINGLE_USE and unspent. **Vault:** untouched, counter 1 == 1 log line.
+**`estimator.py`:** byte-identical, sha256 `00240eb1e60810f5…`.
+
+**Raw evidence:** `experiments/2026-08-25_p1_pre/` — `baseline_d1_d3.txt` (the
+defects reproduced, committed with the prediction), `envelope_full_after.txt`
+(39/39, writing mode), `fault_injection.txt` (four re-introduced defects, four red
+gates), `preflight_full_p1pre.txt` (the complete gate transcript, both streams).
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
