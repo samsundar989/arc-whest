@@ -130,6 +130,8 @@ uv run python local_sim/official_config.py                # the LIVE round, asse
 uv run python local_sim/p2_flop_anchor.py                 # 3 arms x 2 flopscope versions; needs .venv-fs010
 uv run python local_sim/p2_flop_anchor.py --gate          # op-by-op parity only; ONE venv (what preflight runs)
 uv run python local_sim/test_deployment_envelope.py       # what fails an MLP, AND what this host cannot enforce
+uv run python local_sim/test_deployment_envelope.py --no-write   # ...and this really writes nothing (P1-PRE)
+uv run python local_sim/test_envelope_readonly.py         # proves that --no-write claim from OUTSIDE the suite
 uv run python local_sim/p2_residual_paths.py --n-mlps 20  # 3 residual instruments; QUIET MACHINE ONLY
 uv run python local_sim/phase2_manifest.py                # rebuild the manifest (package parity, live constants)
 uv run python local_sim/seed_blocks.py           # seed-block registry (allocate before any experiment)

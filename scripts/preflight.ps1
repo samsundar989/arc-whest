@@ -53,7 +53,11 @@
                             including the Kerdock fingerprint and the axial identity
    15. deployment envelope - what fails a Phase-2 MLP, AND the two constraints this
                             host cannot enforce at all. It prints those as NOT
-                            PROVABLE rather than passing them.
+                            PROVABLE rather than passing them. Since P1-PRE it also
+                            runs local_sim/test_envelope_readonly.py, which proves
+                            the suite's `--no-write` mode is read-only from OUTSIDE
+                            it (child process, sha256, git) and, in the same run,
+                            that a SKIPPED provocation never prints green.
    16. official Phase-2 smoke - DEPLOYMENT AUTHORITY. The grader's own subprocess
                             runner on the organisers' own v2-phase2 data, with
                             zero failures required and the live config asserted
@@ -418,8 +422,22 @@ if ($Full) {
     # the whole reason it is a step: the 8,192 MB memory limit has no enforcement
     # path on Windows at all, and a gate that stayed silent about that would be
     # certifying a candidate against a limit nothing here measures.
-    Step "15. deployment envelope (+ what it cannot prove)" {
+    # ...and, since P1-PRE (2026-08-25), the proof that its own `--no-write`
+    # mode is read-only -- run from OUTSIDE it, by a child process, sha256 and
+    # `git status --porcelain`. The suite verifies that claim about itself
+    # before printing it; a file that grades its own read-only mode is not
+    # enough, because it was a file grading its own read-only mode that printed
+    # "the artifact on disk was NOT touched" immediately after rewriting a
+    # committed artifact twice. The same child skips section 6, so it also
+    # covers the D1 skip path: a provocation that did not run must never print
+    # green.
+    #
+    # Two commands, one step, and the first one's exit code is honoured -- the
+    # Step wrapper only sees $LASTEXITCODE at the end of the block.
+    Step "15. deployment envelope (+ what it cannot prove, + read-only proof)" {
         uv run python local_sim/test_deployment_envelope.py
+        if ($LASTEXITCODE -ne 0) { return }
+        uv run python local_sim/test_envelope_readonly.py
     }
     # DEPLOYMENT AUTHORITY. Everything else in this gate is a local MODEL of the
     # grader; this is the grader's own runner on the organisers' own Phase-2 data.

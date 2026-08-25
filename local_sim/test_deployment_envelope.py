@@ -68,17 +68,59 @@ WHAT IT ACTUALLY MEASURES
    `max(predict_timeout_s, wall_time_limit_s + grace)`, so under Phase 2's 120 s
    wall the 30 s `predict_timeout_s` is NOT the binding constraint.
 
+WHAT P1-PRE CHANGED, 2026-08-25 (D1-D3 of the Phase-0 accepting review)
+-----------------------------------------------------------------------
+The review that closed Phase 0 carried three defects out of this file. All three
+were the same shape -- a mechanism that could report success without having done
+anything -- and they are closed here:
+
+* **D1.** The matrix loop had one surviving branch whose condition was the literal
+  `True`: a constraint whose witness named "this file" was counted as enforced
+  without any check being consulted. It was the ONLY line covering
+  `worker_death_restart`, and with `--skip-worker-death` it printed green while
+  section 6 was skipped and the same constraint was reported NOT PROVABLE thirty
+  lines later. This suite now EMITS its own results (`own_results()`) exactly as
+  `lifecycle_eval.py --self-test --emit-json` does, and its self-provoked
+  constraints are verified against those results in **section 7**, which runs
+  AFTER the provocations rather than before them. When a provocation did not run,
+  its witness cannot resolve the checks it names and the constraint is reported
+  NOT PROVABLE -- never green.
+* **D2.** `verify_witness` was handed a results object and ignored the `suite`
+  the witness named, so every witness was adjudicated against the lifecycle
+  artifact whatever it claimed. It now resolves the name through a
+  `WitnessResolver` -- a registry of suite name -> results source -- and refuses
+  an unknown suite, a registered suite with no results, and an artifact whose own
+  `suite` field disagrees with the name that resolved it.
+* **D3.** `--no-write` regenerated the lifecycle artifact twice and then printed
+  that nothing had been touched. It now arms a module-level READ-ONLY LATCH:
+  regeneration and every artifact write pass through one choke point that RAISES
+  while the latch is armed, so the mode is incapable of writing rather than
+  merely not asked to. The claim itself is printed only after the run has hashed
+  the tracked evidence before and after and compared `git status --porcelain`.
+  (The latch governs TRACKED evidence. Sections 3 and 6 still write throwaway
+  candidates under `local_sim/_envelope_*_tmp*`, which is gitignored and removed
+  in a `finally` -- which is precisely why `git status --porcelain` is a valid
+  witness for the claim.)
+
+`local_sim/test_envelope_readonly.py` proves the D3 claim and the D1 skip path
+from OUTSIDE this file, by different logic (child process, sha256, git), so this
+suite is not the only thing certifying its own read-only mode.
+
 Run:  uv run python local_sim/test_deployment_envelope.py
+      uv run python local_sim/test_envelope_readonly.py
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import textwrap
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -96,14 +138,34 @@ import official_config  # noqa: E402
 OUT_DIR = os.path.join(_ROOT, "experiments", "2026-08-24_p2_p0")
 OUT = os.path.join(OUT_DIR, "deployment_envelope.json")
 
+#: This suite's identity, as a witness may name it. It is the key under which
+#: `own_results()` is registered with a `WitnessResolver`, and it is the value
+#: `own_results()` stamps into its own payload -- so a witness naming this suite
+#: and a resolver handing back somebody else's artifact is a SUITE MISMATCH and
+#: not a silent success.
+SELF_SUITE = "local_sim/test_deployment_envelope.py"
+
+#: The other suite whose provocations this matrix cites.
+LIFECYCLE_SUITE = "local_sim/lifecycle_eval.py --self-test"
+
 _PASS = 0
 _FAIL = 0
 _UNPROVABLE: list = []
+#: Every check this run has performed, in order, machine-readably. This is what
+#: turns "provoked by this file" from an assertion into something a witness can
+#: be verified against -- the D1 repair. Same shape as `lifecycle_eval._RESULTS`.
+_RESULTS: list = []
+#: Which self-provoked sections ACTUALLY RAN. Set by the sections themselves, so
+#: section 7 distinguishes "the provocation ran and its witness failed" (a
+#: FAILURE) from "the provocation never ran" (NOT PROVABLE) without reading the
+#: command line. A flag is an intention; this is an observation.
+_SECTION_RAN: dict = {}
 
 
 def check(name, ok, detail=""):
     global _PASS, _FAIL
     ok = bool(ok)
+    _RESULTS.append({"name": name, "ok": ok, "detail": str(detail)})
     if ok:
         _PASS += 1
     else:
@@ -118,8 +180,137 @@ def unprovable(name, why):
     print(f"  ----  {name:<62} NOT PROVABLE HERE: {why}")
 
 
+def pending(name, why):
+    """Record a constraint whose provocation has not run YET, in this run.
+
+    Neither a pass nor a gap: section 7 adjudicates every one of these, and it
+    asserts that it adjudicated all of them, so a deferred constraint cannot
+    disappear between the matrix and the closure.
+    """
+    print(f"  ....  {name:<62} DEFERRED to section 7: {why}")
+
+
+def own_results() -> dict:
+    """This run's checks so far, in `lifecycle_eval._emit_results` form.
+
+    The digest covers the `(name, ok)` pairs only -- not the details, which carry
+    timings -- so two honest runs agree and a changed RESULT changes it.
+    """
+    checks = list(_RESULTS)
+    payload = {
+        "artifact": "deployment_envelope_self_results",
+        "artifact_version": 1,
+        "suite": SELF_SUITE,
+        "passed": _PASS,
+        "total": _PASS + _FAIL,
+        "checks": checks,
+    }
+    payload["results_sha256"] = hashlib.sha256(
+        json.dumps([[c["name"], c["ok"]] for c in checks],
+                   sort_keys=False).encode("utf-8")).hexdigest()
+    return payload
+
+
 def head(t):
     print(f"\n{t}\n{'-' * len(t)}")
+
+
+# --------------------------------------------------------------------------- #
+# 0. the READ-ONLY LATCH -- D3
+# --------------------------------------------------------------------------- #
+# `--no-write` used to be a promise made in a print statement. An independent
+# Skeptic followed the documented read-only protocol, and had to `git checkout`
+# the artifact this file had silently regenerated -- twice -- immediately after
+# reading "the artifact on disk was NOT touched".
+#
+# So the mode is no longer a request. It is a latch, and every path in this
+# module that could touch TRACKED evidence asks the latch first and RAISES if it
+# is armed. Being unable to write is a property of the process; not having been
+# asked to write is a property of the caller.
+
+class ReadOnlyRefusal(RuntimeError):
+    """Raised when the read-only latch is armed and something tried to write."""
+
+
+_READ_ONLY = False
+
+
+def arm_read_only(value: bool = True) -> bool:
+    """Arm (or disarm) the latch. Returns the PREVIOUS state.
+
+    The return value exists so the negative tests can arm the latch, watch a
+    write refuse, and restore -- a guard nobody has watched fire is a guard
+    nobody has tested, which is the defect this whole slice repairs.
+    """
+    global _READ_ONLY
+    prev = _READ_ONLY
+    _READ_ONLY = bool(value)
+    return prev
+
+
+def read_only_armed() -> bool:
+    return _READ_ONLY
+
+
+def refuse_if_read_only(what: str) -> None:
+    if _READ_ONLY:
+        raise ReadOnlyRefusal(
+            f"--no-write is armed: refusing to {what}. A read-only run that "
+            f"rewrites committed evidence is the defect this latch closes.")
+
+
+def write_artifact(path: str, payload: dict) -> None:
+    """The ONLY place this module writes an evidence artifact."""
+    refuse_if_read_only(f"write {path}")
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, indent=2)
+
+
+def _sha256_file(path: str) -> "str | None":
+    try:
+        with open(path, "rb") as fh:
+            return hashlib.sha256(fh.read()).hexdigest()
+    except OSError:
+        return None
+
+
+def _git_porcelain() -> "str | None":
+    """`git status --porcelain`, or None where git cannot answer.
+
+    Gitignored scratch does not appear here, which is what makes this a fair
+    witness for the read-only claim: sections 3 and 6 write throwaway candidates
+    under `local_sim/_envelope_*_tmp*`, and `.gitignore` covers them.
+    """
+    try:
+        p = subprocess.run(["git", "status", "--porcelain"], cwd=_ROOT,
+                           capture_output=True, text=True, timeout=120)
+    except Exception:
+        return None
+    return p.stdout if p.returncode == 0 else None
+
+
+# --------------------------------------------------------------------------- #
+# check names, shared between the checks that PRODUCE them and the witnesses
+# that CONSUME them
+# --------------------------------------------------------------------------- #
+# A witness naming a check by a string literal typed a second time is one
+# rename away from `CHECK NOT FOUND`, and one careless "fix" away from a witness
+# quietly pointing at nothing. They are constants, once.
+
+WD_SURVIVED = "the suite SURVIVED a worker that hard-exited mid-run"
+WD_EXACTLY_ONE = "EXACTLY one MLP failed -- not zero, not several"
+WD_INDEX = "...and it is MLP 0, the one that killed the worker"
+WD_CLASSIFIED = "...classified as an ERROR, not as a budget/time exhaustion"
+WD_LATER_CLEAN = "...and EVERY later MLP is clean -- no traceback, no flag"
+WD_LATER_SCORED = "...and every one was GENUINELY SCORED, not zeroed"
+
+MEM_CAP_APPLIED = "the worker actually APPLIED the 8 GiB cap"
+MEM_CONTROL = "the 256 MiB control mapping SUCCEEDED"
+MEM_REFUSED = "the 9 GiB reservation was REFUSED by the limit"
+MEM_UNTOUCHED = "...and it was refused, never filled -- no page was touched"
+MEM_ONE_FAILED = "exactly ONE MLP failed, through the error path"
+MEM_LATER_SCORED = "...and every LATER MLP ran and was scored"
 
 
 # --------------------------------------------------------------------------- #
@@ -141,21 +332,32 @@ def _rlimit_available() -> bool:
 LIFECYCLE_RESULTS = os.path.join(
     _ROOT, "experiments", "2026-08-24_p2_p0", "lifecycle_self_test.json")
 
+#: The TRACKED evidence a `--no-write` run must leave untouched, hashed before
+#: and after. Both were rewritten by the old `--no-write`; `LIFECYCLE_RESULTS`
+#: twice per run.
+READ_ONLY_WITNESS_PATHS = (OUT, LIFECYCLE_RESULTS)
 
-def _load_suite_results(path: str, regenerate: bool = True) -> "dict | None":
-    """Read a suite's emitted results, regenerating them if asked.
 
-    Regeneration is the default because a STALE results file is exactly the
-    failure this witness mechanism exists to prevent: the previous version of
-    this matrix "verified" the wall provocation against a file that existed and
-    contained no such check.
+def regenerate_lifecycle_results(path: str) -> None:
+    """Re-run the lifecycle suite so `path` is this session's results, not last week's.
+
+    Regeneration exists because a STALE results file is exactly the failure this
+    witness mechanism was built to prevent: an earlier matrix "verified" the wall
+    provocation against a file that existed and contained no such check.
+
+    It is also the single most expensive thing this suite does (~49 s), and it is
+    a write to TRACKED evidence -- so it asks the latch first.
     """
-    if regenerate:
-        subprocess.run(
-            [sys.executable, os.path.join(_HERE, "lifecycle_eval.py"),
-             "--self-test", "--emit-json", path],
-            capture_output=True, text=True, cwd=_ROOT,
-            env=dict(os.environ, PYTHONIOENCODING="utf-8"))
+    refuse_if_read_only(f"regenerate {os.path.relpath(path, _ROOT)} by re-running "
+                        f"the lifecycle suite")
+    subprocess.run(
+        [sys.executable, os.path.join(_HERE, "lifecycle_eval.py"),
+         "--self-test", "--emit-json", path],
+        capture_output=True, text=True, cwd=_ROOT,
+        env=dict(os.environ, PYTHONIOENCODING="utf-8"))
+
+
+def _read_json(path: str) -> "dict | None":
     if not os.path.exists(path):
         return None
     try:
@@ -165,7 +367,100 @@ def _load_suite_results(path: str, regenerate: bool = True) -> "dict | None":
         return None
 
 
-def verify_witness(witness, results) -> "tuple[bool, str]":
+def _mtime(path: str):
+    try:
+        return os.stat(path).st_mtime_ns
+    except OSError:
+        return None
+
+
+class JsonSuite:
+    """A suite whose results live in a file, optionally regenerated first."""
+
+    def __init__(self, path: str, regenerate=None):
+        self.path = path
+        self.regenerate = regenerate
+
+
+class LiveSuite:
+    """A suite whose results exist in THIS process -- e.g. our own checks.
+
+    Never cached: `own_results()` grows as the run proceeds, and a resolver that
+    froze it at first use would adjudicate section 6's witness against a snapshot
+    taken before section 6 ran. That is the D1 bug wearing a different hat.
+    """
+
+    def __init__(self, get):
+        self.get = get
+
+
+def default_registry() -> dict:
+    """Every suite a witness in this file is allowed to name."""
+    return {
+        LIFECYCLE_SUITE: JsonSuite(LIFECYCLE_RESULTS, regenerate_lifecycle_results),
+        SELF_SUITE: LiveSuite(own_results),
+    }
+
+
+class WitnessResolver:
+    """Maps a witness's `suite` NAME to that suite's emitted results. D2.
+
+    The mechanism it replaces did not do this. `_load_suite_results` always
+    loaded the lifecycle artifact, whatever the witness claimed, so every witness
+    was adjudicated against one suite's results and the `suite` field was
+    decoration. Today's failure mode was a false NEGATIVE, so nothing was
+    over-claimed -- but the docstring promised a resolving mechanism the code did
+    not implement, and a witness that names one suite and is checked against
+    another is not a witness.
+
+    Four outcomes, three of them refusals:
+
+      OK             the named suite produced results and they ARE that suite's
+      UNKNOWN_SUITE  nothing is registered under that name
+      MISSING        registered, but it produced nothing to verify against
+      MISMATCH       the results resolved, and they declare a DIFFERENT suite
+    """
+
+    def __init__(self, registry=None, allow_regenerate: bool = True):
+        self._registry = dict(default_registry() if registry is None else registry)
+        self._allow_regenerate = bool(allow_regenerate)
+        self._cache: dict = {}
+        #: suite name -> did resolving it actually rewrite its file? Read by the
+        #: caller, so "--no-write regenerated nothing" is a measurement and its
+        #: mirror image ("the normal run DID regenerate") keeps it non-vacuous.
+        self.regenerated: dict = {}
+
+    def known(self) -> list:
+        return sorted(self._registry)
+
+    def resolve(self, suite) -> "tuple[str, dict | None]":
+        src = self._registry.get(suite) if isinstance(suite, str) else None
+        if src is None:
+            return "UNKNOWN_SUITE", None
+        if isinstance(src, LiveSuite):
+            results = src.get()
+        else:
+            if suite not in self._cache:
+                self._cache[suite] = self._load(suite, src)
+            results = self._cache[suite]
+        if results is None:
+            return "MISSING", None
+        declared = results.get("suite")
+        if declared is not None and declared != suite:
+            return "MISMATCH", results
+        return "OK", results
+
+    def _load(self, suite: str, src: JsonSuite) -> "dict | None":
+        before = _mtime(src.path)
+        # The latch is consulted HERE and not only at construction, so arming it
+        # after a resolver exists still stops the write.
+        if self._allow_regenerate and not read_only_armed() and src.regenerate:
+            src.regenerate(src.path)
+        self.regenerated[suite] = (_mtime(src.path) != before)
+        return _read_json(src.path)
+
+
+def verify_witness(witness, resolver: "WitnessResolver | None" = None) -> "tuple[bool, str]":
     """Does `witness` name checks that ACTUALLY RAN and ACTUALLY PASSED?
 
     This is the heart of P2-P0 gate clause G4, and it replaces two weaker
@@ -186,8 +481,14 @@ def verify_witness(witness, results) -> "tuple[bool, str]":
     `ok == True`. A witness that is prose, absent, or names a check that does not
     exist FAILS -- it does not pass unadjudicated.
 
+    The `suite` is RESOLVED (D2): the name is looked up in the resolver's
+    registry and the results that come back must declare themselves to be that
+    same suite. Previously the field was read only to build error messages.
+
     Returns `(ok, reason)`.
     """
+    if resolver is None:
+        resolver = WitnessResolver()
     if witness is None:
         return False, "NO WITNESS: nothing names a provocation"
     if not isinstance(witness, dict):
@@ -196,9 +497,21 @@ def verify_witness(witness, results) -> "tuple[bool, str]":
     names = witness.get("checks") or []
     if not names:
         return False, "WITNESS NAMES NO CHECKS"
-    if results is None:
-        return False, (f"SUITE RESULTS MISSING: {witness.get('suite')!r} produced "
+    suite = witness.get("suite")
+    if not isinstance(suite, str) or not suite:
+        return False, (f"WITNESS NAMES NO SUITE: {suite!r} -- a list of check "
+                       "names with nothing to look them up in")
+    status, results = resolver.resolve(suite)
+    if status == "UNKNOWN_SUITE":
+        return False, (f"UNKNOWN SUITE: {suite!r} is not a registered results "
+                       f"source; known: {resolver.known()}")
+    if status == "MISSING":
+        return False, (f"SUITE RESULTS MISSING: {suite!r} produced "
                        "nothing to verify against")
+    if status == "MISMATCH":
+        return False, (f"SUITE MISMATCH: {suite!r} resolved to results emitted by "
+                       f"{(results or {}).get('suite')!r} -- the witness and the "
+                       "evidence are about different suites")
     by_name = {c["name"]: c for c in results.get("checks", [])}
     missing = [n for n in names if n not in by_name]
     if missing:
@@ -304,10 +617,22 @@ def enforceability() -> dict:
                                   "on this platform, so subprocess_worker.py's "
                                   "setrlimit call is caught and skipped, and "
                                   "--runner local is advisory by design"),
-                "provoked_by": ("this file, section 5" if rl else
-                                "experiments/2026-08-24_p2_p0/linux/ -- provoked on "
-                                "Ubuntu 24.04 under the same official stack, since "
-                                "it cannot be provoked on this platform"),
+                # Where RLIMIT_AS exists this file provokes the limit itself, so
+                # the witness is STRUCTURED and names section 5's own checks --
+                # it used to read "this file, section 5", which is prose, and
+                # prose took the literal-True branch that D1 removed. Where
+                # RLIMIT_AS does NOT exist, `enforced_locally` is False and the
+                # constraint is reported NOT PROVABLE, so the descriptive string
+                # below is never adjudicated as a witness.
+                "provoked_by": ({
+                    "suite": SELF_SUITE,
+                    "checks": [MEM_CAP_APPLIED, MEM_CONTROL, MEM_REFUSED,
+                               MEM_UNTOUCHED, MEM_ONE_FAILED, MEM_LATER_SCORED],
+                    "expect_detail": {MEM_REFUSED: "Cannot allocate memory"},
+                } if rl else
+                    "experiments/2026-08-24_p2_p0/linux/ -- provoked on "
+                    "Ubuntu 24.04 under the same official stack, since "
+                    "it cannot be provoked on this platform"),
                 "accounting_instead": ("peak working set and peak commit, measured "
                                        "below; both are LOWER bounds on the "
                                        "RLIMIT_AS charge, so the headroom they "
@@ -317,7 +642,22 @@ def enforceability() -> dict:
                 "value": None,
                 "enforced_locally": True,
                 "by": "whest run --runner subprocess restarts a dead worker",
-                "provoked_by": {"suite": "this file, section 6"},
+                # D1. This entry used to be `{"suite": "this file, section 6"}`,
+                # which the matrix loop matched with `startswith("this file")`
+                # and then passed with the literal `True` -- the ONLY line
+                # covering this constraint, and green even when section 6 was
+                # skipped. It now names section 6's actual checks against THIS
+                # suite's emitted results, and section 7 verifies them AFTER
+                # section 6 has had its chance to produce them.
+                "provoked_by": {
+                    "suite": SELF_SUITE,
+                    "checks": [WD_SURVIVED, WD_EXACTLY_ONE, WD_INDEX,
+                               WD_CLASSIFIED, WD_LATER_CLEAN, WD_LATER_SCORED],
+                    "expect_detail": {
+                        WD_EXACTLY_ONE: "n_failed_mlps = 1",
+                        WD_INDEX: "failed indices [0]",
+                    },
+                },
             },
             "predict_response_timeout_s": {
                 "value": r.predict_timeout_s,
@@ -620,7 +960,79 @@ def provoke_worker_death(n_mlps: int = 3) -> dict:
 
 # --------------------------------------------------------------------------- #
 
-def witness_negative_tests() -> int:
+def _flipped_lifecycle(results: dict, name: str) -> dict:
+    """A copy of `results` with one check's `ok` turned False. Test fixture."""
+    import copy
+
+    out = copy.deepcopy(results)
+    for c in out.get("checks", []):
+        if c["name"] == name:
+            c["ok"] = False
+    return out
+
+
+def read_only_negative_tests() -> None:
+    """Prove the read-only latch REFUSES, rather than merely not being asked. D3.
+
+    Both write paths in this module are exercised with the latch armed, and each
+    must raise AND leave no file behind. This runs in both modes: in `--no-write`
+    the latch is already armed and these simply re-arm it.
+
+    It writes to a system temp directory, never into the repository, so the test
+    of the read-only mode is itself read-only with respect to the worktree.
+    """
+    head("0b. NEGATIVE TESTS -- the read-only latch refuses both write paths")
+    tmpdir = tempfile.mkdtemp(prefix="arc_whest_ro_")
+    try:
+        target = os.path.join(tmpdir, "would_have_been_written.json")
+        prev = arm_read_only(True)
+        try:
+            raised = ""
+            try:
+                regenerate_lifecycle_results(target)
+            except ReadOnlyRefusal as exc:
+                raised = str(exc)
+            check("REFUSED: regenerating a suite's results while the latch is armed",
+                  bool(raised) and not os.path.exists(target),
+                  raised[:90] or "NO REFUSAL RAISED")
+
+            raised = ""
+            try:
+                write_artifact(target, {"this": "must not reach disk"})
+            except ReadOnlyRefusal as exc:
+                raised = str(exc)
+            check("REFUSED: writing an evidence artifact while the latch is armed",
+                  bool(raised) and not os.path.exists(target),
+                  raised[:90] or "NO REFUSAL RAISED")
+
+            # ...and the latch is not a one-way door that quietly disables the
+            # writer forever: with it DOWN the same call writes. Without this the
+            # two refusals above could pass on a writer that is simply broken.
+            #
+            # In a `--no-write` run the latch was armed BEFORE this function, and
+            # lowering it mid-run -- even to write into a system temp directory --
+            # would make the read-only claim depend on a promise to put it back.
+            # So that run reports the control as NOT PROVABLE and the writing
+            # run performs it. An absent check is declared, never assumed.
+            if prev:
+                unprovable(
+                    "the writer's positive control",
+                    "the latch was armed before this suite started (--no-write); "
+                    "lowering it here would make the read-only claim conditional "
+                    "on restoring it. Exercised in the writing mode instead.")
+            else:
+                arm_read_only(False)
+                write_artifact(target, {"this": "is the positive control"})
+                check("...and with the latch DOWN the same writer DOES write",
+                      os.path.exists(target),
+                      f"wrote {os.path.basename(target)} to a system temp dir")
+        finally:
+            arm_read_only(prev)
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+def witness_negative_tests(resolver: "WitnessResolver | None" = None) -> int:
     """Prove `verify_witness` REFUSES every way a witness can be worthless.
 
     A guard nobody has watched fail is a guard nobody has tested. Both mechanisms
@@ -630,83 +1042,138 @@ def witness_negative_tests() -> int:
     The first case is the exact witness that shipped in
     `deployment_envelope.json` and was false: it named a real file and a real
     suite, and the check it pointed at did not exist.
+
+    P1-PRE (D2): every case now goes through a **`WitnessResolver`**. The
+    previous version reached the `SUITE RESULTS MISSING` and `PRESENT BUT FAILED`
+    branches by handing `verify_witness` a doctored results object behind the
+    resolver's back, which tested the branch and not the mechanism -- and the
+    mechanism was the part that did not exist. Where a case needs unusual
+    results, it supplies them by REGISTERING a source under a suite name, which
+    is the same public path production code uses.
     """
     global _PASS, _FAIL
     head("0. NEGATIVE TESTS -- every way a witness can be worthless, refused")
 
-    results = _load_suite_results(LIFECYCLE_RESULTS)
-    if results is None:
+    if resolver is None:
+        resolver = WitnessResolver()
+    status, results = resolver.resolve(LIFECYCLE_SUITE)
+    if status != "OK":
         check("the lifecycle results are available to test against", False,
-              "could not produce them")
+              f"{status}: could not produce them")
         return 1
 
     real = "L4: a 1e-9 s WALL limit trips the TIME path"
+
+    #: A suite name that is registered but whose artifact does not exist, so
+    #: MISSING is reached through `resolve()` and not by passing None past it.
+    ABSENT = os.path.join(tempfile.gettempdir(), "arc_whest_absent_results.json")
+    missing_resolver = WitnessResolver(
+        registry={LIFECYCLE_SUITE: JsonSuite(ABSENT, regenerate=None)})
+    #: The lifecycle artifact registered under somebody ELSE's name: it resolves,
+    #: and then declares a different suite. That is a MISMATCH, and before P1-PRE
+    #: it was invisible because the `suite` field was never read.
+    IMPOSTOR = "local_sim/impostor_suite.py"
+    mismatch_resolver = WitnessResolver(
+        registry={IMPOSTOR: JsonSuite(LIFECYCLE_RESULTS, regenerate=None)})
+    failed_resolver = WitnessResolver(
+        registry={LIFECYCLE_SUITE:
+                  LiveSuite(lambda: _flipped_lifecycle(results, real))})
+    #: THIS suite's own results, but from a run in which section 6 never
+    #: happened. This is the D1 repair's own falsifier: it is exactly the state
+    #: `--skip-worker-death` produces, and the worker-restart witness must refuse
+    #: it. If this case ever passes, the self-witness has become the literal
+    #: `True` again.
+    empty_self_resolver = WitnessResolver(
+        registry={SELF_SUITE: LiveSuite(
+            lambda: {"suite": SELF_SUITE, "checks": [], "results_sha256": ""})})
+
+    worker_witness = enforceability()["constraints"]["worker_death_restart"]["provoked_by"]
 
     cases = [
         (
             "the ORIGINAL FALSE witness -- prose naming a real file, no check",
             "local_sim/lifecycle_eval.py --self-test (L4)",
-            "UNADJUDICABLE",
+            "UNADJUDICABLE", resolver,
         ),
         (
             "a missing witness (None)",
             None,
-            "NO WITNESS",
+            "NO WITNESS", resolver,
         ),
         (
             "a witness naming NO checks",
-            {"suite": "local_sim/lifecycle_eval.py --self-test", "checks": []},
-            "NAMES NO CHECKS",
+            {"suite": LIFECYCLE_SUITE, "checks": []},
+            "NAMES NO CHECKS", resolver,
         ),
         (
-            "a witness whose suite produced no results",
+            "a witness naming checks but NO suite to look them up in",
+            {"checks": [real]},
+            "NAMES NO SUITE", resolver,
+        ),
+        (
+            "a witness naming a suite NOBODY REGISTERED",
             {"suite": "local_sim/does_not_exist.py", "checks": [real]},
-            "SUITE RESULTS MISSING",
+            "UNKNOWN SUITE", resolver,
+        ),
+        (
+            "a REGISTERED suite whose results file does not exist",
+            {"suite": LIFECYCLE_SUITE, "checks": [real]},
+            "SUITE RESULTS MISSING", missing_resolver,
+        ),
+        (
+            "results that resolve but DECLARE A DIFFERENT SUITE",
+            {"suite": IMPOSTOR, "checks": [real]},
+            "SUITE MISMATCH", mismatch_resolver,
         ),
         (
             "a WRONG check identifier inside a real suite",
-            {"suite": "local_sim/lifecycle_eval.py --self-test",
+            {"suite": LIFECYCLE_SUITE,
              "checks": ["L4: a 1e-9 s WALL limit trips the TIME path (typo)"]},
-            "CHECK NOT FOUND",
+            "CHECK NOT FOUND", resolver,
         ),
         (
             "a real check whose RESULT is false",
-            {"suite": "local_sim/lifecycle_eval.py --self-test", "checks": [real]},
-            "PRESENT BUT FAILED",
+            {"suite": LIFECYCLE_SUITE, "checks": [real]},
+            "PRESENT BUT FAILED", failed_resolver,
         ),
         (
             "a real check whose DETAIL contradicts the claim",
-            {"suite": "local_sim/lifecycle_eval.py --self-test", "checks": [real],
+            {"suite": LIFECYCLE_SUITE, "checks": [real],
              "expect_detail": {real: "7/7 time_exhausted"}},
-            "DETAIL MISMATCH",
+            "DETAIL MISMATCH", resolver,
         ),
         (
             "unadjudicable prose presented as an enforcement witness",
             "it is enforced, trust me",
-            "UNADJUDICABLE",
+            "UNADJUDICABLE", resolver,
+        ),
+        (
+            "THE SELF-WITNESS, against a run in which section 6 never ran",
+            worker_witness,
+            "CHECK NOT FOUND", empty_self_resolver,
         ),
     ]
 
-    for label, witness, expect in cases:
-        res = results
-        if expect == "SUITE RESULTS MISSING":
-            res = None
-        elif expect == "PRESENT BUT FAILED":
-            # flip the recorded result, so a genuine failure is what is judged
-            import copy
-            res = copy.deepcopy(results)
-            for c in res["checks"]:
-                if c["name"] == real:
-                    c["ok"] = False
+    for label, witness, expect, res in cases:
         ok, why = verify_witness(witness, res)
         check(f"REFUSED: {label}", (not ok) and expect in why,
               why[:96] if why else "")
 
-    # ...and the positive control, so this suite cannot pass by refusing everything.
+    # ...and the positive controls, so this suite cannot pass by refusing
+    # everything. Two, because there are now two KINDS of source: a suite whose
+    # results are a file on disk, and one whose results are this process.
     ok, why = verify_witness(
-        {"suite": "local_sim/lifecycle_eval.py --self-test", "checks": [real],
-         "expect_detail": {real: "2/2 time_exhausted"}}, results)
+        {"suite": LIFECYCLE_SUITE, "checks": [real],
+         "expect_detail": {real: "2/2 time_exhausted"}}, resolver)
     check("ACCEPTED: the real wall witness, with its real detail", ok, why[:96])
+
+    ok, why = verify_witness(
+        {"suite": SELF_SUITE,
+         "checks": ["REFUSED: a missing witness (None)"],
+         "expect_detail": {"REFUSED: a missing witness (None)": "NO WITNESS"}},
+        resolver)
+    check("ACCEPTED: a LIVE witness against this suite's own emitted results",
+          ok, why[:96])
     return 0
 
 
@@ -724,11 +1191,23 @@ def main() -> int:
     args = ap.parse_args()
 
     r = official_config.LIVE
+    ro_before: dict = {}
+    ro_git_before = None
+    if args.no_write:
+        # ARM FIRST, before anything can run. The latch is what makes the mode
+        # incapable of writing; the snapshot below is what makes the CLAIM
+        # verifiable rather than asserted.
+        arm_read_only(True)
+        ro_before = {p: _sha256_file(p) for p in READ_ONLY_WITNESS_PATHS}
+        ro_git_before = _git_porcelain()
+
     print("=" * 96)
     print("DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove")
     print("=" * 96)
 
-    witness_negative_tests()
+    resolver = WitnessResolver()
+    witness_negative_tests(resolver)
+    read_only_negative_tests()
 
     head("1. the enforceability matrix")
     enf = enforceability()
@@ -746,28 +1225,33 @@ def main() -> int:
     # repository's signature failure class (docs/GOTCHAS.md).
     #
     # What is checked now is the thing that was being assumed: a constraint
-    # claiming local enforcement must NAME a provocation, and that name must
-    # resolve to a file that exists. A claim with no witness fails here.
-    suite_results = _load_suite_results(LIFECYCLE_RESULTS)
-    enf["witness_suite_sha256"] = (suite_results or {}).get("results_sha256")
+    # claiming local enforcement must NAME a provocation, and that named
+    # provocation must resolve, through the registry, to a check that RAN and
+    # PASSED in the suite the witness names.
+    #
+    # D1: there is no longer an exemption for constraints this file provokes
+    # itself. Their sections have not run yet at this point, so they are
+    # DEFERRED to section 7 -- deferred, not passed, and section 7 asserts that
+    # it adjudicated every one of them.
+    _, lifecycle_results = resolver.resolve(LIFECYCLE_SUITE)
+    enf["witness_suite_sha256"] = (lifecycle_results or {}).get("results_sha256")
+    deferred: list = []
     for name, c in enf["constraints"].items():
         if not c["enforced_locally"]:
             unprovable(name, c["by"])
             continue
         w = c.get("provoked_by")
-        if isinstance(w, dict) and w.get("suite", "").startswith("this file"):
-            # provoked by a section of THIS suite; those sections assert their
-            # own results directly below, so there is nothing to cross-verify.
-            check(f"{name} is enforced here, provoked in this file", True,
-                  str(c["value"]))
+        if isinstance(w, dict) and w.get("suite") == SELF_SUITE:
+            deferred.append((name, c))
+            pending(name, "provoked by this suite, which has not run it yet")
             continue
-        ok, why = verify_witness(w, suite_results)
+        ok, why = verify_witness(w, resolver)
         # Embed the VERIFIED RESULTS in the artifact, not just the claim. A
         # committed evidence file that says "provoked_by: <name>" is a pointer;
         # one that carries the named check, its ok flag and its detail is
         # evidence. The previous artifact was the former, and its pointer was
         # false.
-        by_name = {x["name"]: x for x in (suite_results or {}).get("checks", [])}
+        by_name = {x["name"]: x for x in (lifecycle_results or {}).get("checks", [])}
         c["witness_verified"] = ok
         c["witness_reason"] = why
         c["witness_results"] = [by_name[n] for n in (w.get("checks") or [])
@@ -782,6 +1266,18 @@ def main() -> int:
           len(_UNPROVABLE) > 0,
           f"{len(_UNPROVABLE)} unprovable: "
           f"{[u['constraint'] for u in _UNPROVABLE]}")
+    # H6. The two halves of the read-only claim, and they are mutually
+    # exclusive: exactly one fires per run. Without the writing-mode half,
+    # "--no-write changed nothing" could be true because nothing ever writes.
+    if read_only_armed():
+        check("--no-write: resolving the lifecycle suite regenerated NOTHING",
+              resolver.regenerated.get(LIFECYCLE_SUITE) is False,
+              f"regenerated={resolver.regenerated}")
+    else:
+        check("the lifecycle results WERE regenerated for this run "
+              "(so the --no-write refusal is not vacuous)",
+              resolver.regenerated.get(LIFECYCLE_SUITE) is True,
+              f"regenerated={resolver.regenerated}")
 
     head("2. the timeout arithmetic is not what it looks like")
     from whestbench.runner import ResourceLimits, _predict_response_timeout_s
@@ -877,6 +1373,10 @@ def main() -> int:
             check("Linux evidence for the memory path is present", False,
                   f"missing {os.path.relpath(LINUX_EVIDENCE, _ROOT)}")
     else:
+        # The section RAN. Section 7 reads this to tell "the provocation ran and
+        # its witness failed" (a FAILURE) from "the provocation never ran" (NOT
+        # PROVABLE) -- from an observation, not from the command line.
+        _SECTION_RAN["memory_limit_mb"] = True
         d = provoke_memory_limit()
         if "error" in d:
             check("the official runner produced a report", False,
@@ -896,26 +1396,30 @@ def main() -> int:
                         "failure_breakdown": res.get("failure_breakdown")}
             print(f"      worker saw RLIMIT_AS soft = {w.get('rlimit_as_soft'):,} "
                   f"({w.get('rlimit_as_soft_gib')} GiB)")
-            check("the worker actually APPLIED the 8 GiB cap",
+            # These six names are the CONSTANTS the memory constraint's witness
+            # names. Section 7 verifies that witness against this suite's own
+            # emitted results, so a renamed check here becomes a CHECK NOT FOUND
+            # there rather than a witness quietly pointing at nothing.
+            check(MEM_CAP_APPLIED,
                   w.get("rlimit_as_soft") == r.memory_limit_mb * 1024 * 1024,
                   f"{w.get('rlimit_as_soft'):,} == "
                   f"{r.memory_limit_mb * 1024 * 1024:,}")
-            check("the 256 MiB control mapping SUCCEEDED",
+            check(MEM_CONTROL,
                   w.get("control_mmap") == "OK", str(w.get("control_mmap")))
-            check("the 9 GiB reservation was REFUSED by the limit",
+            check(MEM_REFUSED,
                   bool(w.get("provocation_refused")),
                   str(w.get("provocation_mmap")))
-            check("...and it was refused, never filled -- no page was touched",
+            check(MEM_UNTOUCHED,
                   "Cannot allocate memory" in str(w.get("provocation_mmap"))
                   or "MemoryError" in str(w.get("provocation_mmap")),
                   "address space refused at mmap time")
-            check("exactly ONE MLP failed, through the error path",
+            check(MEM_ONE_FAILED,
                   res["n_failed_mlps"] == 1
                   and (res.get("failure_breakdown") or {}).get("error") == 1,
                   f"n_failed_mlps={res['n_failed_mlps']} "
                   f"breakdown={res.get('failure_breakdown')}")
             later = rows[1:]
-            check("...and every LATER MLP ran and was scored",
+            check(MEM_LATER_SCORED,
                   len(later) >= 1 and all(not m["traceback"] for m in later)
                   and all(m["final_layer_mse"] > 0 for m in later),
                   f"{len(later)} later MLPs, mse "
@@ -927,6 +1431,7 @@ def main() -> int:
         unprovable("worker_death_restart", "--skip-worker-death was passed")
     else:
         head("6. worker death and restart, through the OFFICIAL subprocess runner")
+        _SECTION_RAN["worker_death_restart"] = True
         d = provoke_worker_death(3)
         if "error" in d:
             check("the official runner produced a report", False, d["error"][:300])
@@ -958,19 +1463,25 @@ def main() -> int:
                 "failed_indices": failed,
                 "failure_breakdown": res.get("failure_breakdown"),
             }
-            check("the suite SURVIVED a worker that hard-exited mid-run",
+            # These six names are the CONSTANTS `worker_death_restart`'s witness
+            # names, and section 7 resolves that witness against this suite's own
+            # emitted results. Before P1-PRE this constraint's only matrix line
+            # was `check(..., True, ...)` -- green whether or not any of the six
+            # had run, and green with `--skip-worker-death`, when none of them
+            # had.
+            check(WD_SURVIVED,
                   len(rows) == 3, f"{len(rows)} rows returned")
             # EXACTLY one, at a KNOWN index, with a KNOWN classification.
             # `<= 1` also passes when the sacrifice never fired and nothing
             # failed at all -- which would mean the restart path was never
             # exercised while the check went green. That is the same shape of
             # defect as the literal-True check this suite already lost G4 to.
-            check("EXACTLY one MLP failed -- not zero, not several",
+            check(WD_EXACTLY_ONE,
                   res["n_failed_mlps"] == 1,
                   f"n_failed_mlps = {res['n_failed_mlps']}, indices {failed}")
-            check("...and it is MLP 0, the one that killed the worker",
+            check(WD_INDEX,
                   failed == [0], f"failed indices {failed}")
-            check("...classified as an ERROR, not as a budget/time exhaustion",
+            check(WD_CLASSIFIED,
                   (res.get("failure_breakdown") or {}).get("error") == 1
                   and all((res.get("failure_breakdown") or {}).get(k) == 0
                           for k in ("budget_exhausted", "time_exhausted",
@@ -982,7 +1493,7 @@ def main() -> int:
             # proves nothing. What proves the row ran is that it carries a real
             # MSE and no failure flag of any kind.
             later = rows[1:]
-            check("...and EVERY later MLP is clean -- no traceback, no flag",
+            check(WD_LATER_CLEAN,
                   len(later) == 2 and all(
                       (not m["traceback"]) and not any(
                           m[k] for k in ("budget_exhausted", "time_exhausted",
@@ -990,11 +1501,80 @@ def main() -> int:
                                          "combined_budget_exhausted"))
                       for m in later),
                   f"{len(later)} later MLPs, all clean")
-            check("...and every one was GENUINELY SCORED, not zeroed",
+            check(WD_LATER_SCORED,
                   all(m["final_layer_mse"] > 0.0 for m in later)
                   and len({round(m["final_layer_mse"], 9) for m in later}) == len(later),
                   f"mse {[round(m['final_layer_mse'], 4) for m in later]} -- "
                   f"distinct, so each was scored against its own network")
+
+    # ---------------------------------------------------------------- #
+    # 7. witness closure -- D1
+    # ---------------------------------------------------------------- #
+    # The constraints this suite provokes ITSELF, verified against this suite's
+    # OWN emitted results, and only now that those results exist. The branch
+    # this replaces was `check(name, True, ...)`: it ran BEFORE the provocations
+    # and could not have consulted them even in principle.
+    #
+    # The risk of a suite verifying its own output is that it becomes
+    # self-certifying. Two things stop that, and both are executable: the
+    # witness names SPECIFIC checks that exist only if the section ran (section
+    # 0 watches that refusal fire against an empty result set), and a section
+    # that did not run is reported NOT PROVABLE, never green.
+    head("7. witness closure -- the provocations THIS suite performed")
+    adjudicated = 0
+    for name, c in deferred:
+        w = c.get("provoked_by")
+        ok, why = verify_witness(w, resolver)
+        by_name = {x["name"]: x for x in own_results()["checks"]}
+        c["witness_verified"] = ok
+        c["witness_reason"] = why
+        c["witness_results"] = [by_name[n] for n in (w.get("checks") or [])
+                                if n in by_name]
+        if ok:
+            check(f"{name}: its named provocation RAN and PASSED in THIS suite",
+                  True, why)
+        elif _SECTION_RAN.get(name):
+            # The section ran and the witness still does not hold: that is a
+            # FAILURE, not a gap.
+            check(f"{name}: its named provocation RAN and PASSED in THIS suite",
+                  False, why)
+        else:
+            unprovable(f"{name} (witness)", why)
+        adjudicated += 1
+    check("every DEFERRED witness was adjudicated in this section",
+          adjudicated == len(deferred),
+          f"{adjudicated} of {len(deferred)} deferred -- a constraint that "
+          f"vanished between the matrix and the closure would be a gap that "
+          f"reads as coverage")
+    enf["self_results_sha256"] = own_results()["results_sha256"]
+
+    # ---------------------------------------------------------------- #
+    # 8. the --no-write claim, VERIFIED before it is printed -- D3
+    # ---------------------------------------------------------------- #
+    if args.no_write:
+        head("8. --no-write: the read-only claim, measured rather than announced")
+        after = {p: _sha256_file(p) for p in READ_ONLY_WITNESS_PATHS}
+        moved = [os.path.relpath(p, _ROOT) for p in READ_ONLY_WITNESS_PATHS
+                 if ro_before.get(p) != after.get(p)]
+        for p in READ_ONLY_WITNESS_PATHS:
+            print(f"      {os.path.relpath(p, _ROOT)}\n"
+                  f"        before {str(ro_before.get(p))[:16]}   "
+                  f"after {str(after.get(p))[:16]}")
+        check("--no-write: every tracked evidence artifact has the SAME sha256",
+              not moved,
+              "unchanged: " + ", ".join(
+                  os.path.relpath(p, _ROOT) for p in READ_ONLY_WITNESS_PATHS)
+              if not moved else f"MOVED: {moved}")
+        git_after = _git_porcelain()
+        if ro_git_before is None or git_after is None:
+            unprovable("--no-write worktree cleanliness",
+                       "`git status --porcelain` is unavailable here, so the "
+                       "hash comparison above is the whole of the evidence")
+        else:
+            check("--no-write: `git status --porcelain` is byte-identical",
+                  ro_git_before == git_after,
+                  f"{len(ro_git_before.splitlines())} line(s) before, "
+                  f"{len(git_after.splitlines())} after")
 
     print("\n" + "=" * 96)
     print(f"{_PASS}/{_PASS + _FAIL} checks passed; "
@@ -1007,25 +1587,36 @@ def main() -> int:
             print(f"  - {u['constraint']}: {u['why']}")
 
     if args.no_write:
-        print("\n  --no-write: the artifact on disk was NOT touched.")
+        # The claim is CONDITIONAL on the checks above. The old unconditional
+        # line was printed by a run that had just rewritten a committed
+        # artifact twice.
+        if _FAIL == 0:
+            print("\n  --no-write: VERIFIED -- no tracked evidence file moved and "
+                  "the worktree is unchanged.")
+        else:
+            print("\n  --no-write: NOT VERIFIED. The claim is WITHHELD -- see the "
+                  "failures above.")
         return 0 if _FAIL == 0 else 1
 
-    os.makedirs(os.path.dirname(args.out), exist_ok=True)
-    with open(args.out, "w", encoding="utf-8") as fh:
-        json.dump({
-            "artifact": "deployment_envelope",
-            "artifact_version": 1,
-            "round": r.tag,
-            "enforceability": enf,
-            "unprovable_here": _UNPROVABLE,
-            "predict_response_timeout_s": eff,
-            "memory": mem_report,
-            "memory_limit_provocation": mem_gate,
-            "worker_death": death,
-            "checks_passed": _PASS,
-            "checks_total": _PASS + _FAIL,
-        }, fh, indent=2)
+    before_out = _mtime(args.out)
+    write_artifact(args.out, {
+        "artifact": "deployment_envelope",
+        "artifact_version": 1,
+        "round": r.tag,
+        "enforceability": enf,
+        "unprovable_here": _UNPROVABLE,
+        "predict_response_timeout_s": eff,
+        "memory": mem_report,
+        "memory_limit_provocation": mem_gate,
+        "worker_death": death,
+        "checks_passed": _PASS,
+        "checks_total": _PASS + _FAIL,
+    })
     print(f"\n  wrote {os.path.relpath(args.out, _ROOT)}")
+    # The other half of H6: this mode really does write, so "--no-write changed
+    # nothing" is a fact about the latch and not about a writer that never fires.
+    if _mtime(args.out) == before_out:
+        print("  WARNING: the artifact's mtime did not move")
     return 0 if _FAIL == 0 else 1
 
 
