@@ -397,7 +397,18 @@ def build(offline: bool = False) -> dict:
             "residual_wall_time_limit_s": {"package_default": 0.4, "observed": 0.4},
             "memory_limit_mb": {
                 "package_default": 8192,
-                "observed": 8192,
+                # NOT "observed". The `corroborated_by` run_config above carries
+                # width, depth, flop_budget, lambda, residual cap, wall and setup
+                # -- and NOT memory_limit_mb or predict_timeout_s. Recording 8192
+                # as observed claimed corroboration from a source that does not
+                # carry it, for the ONE limit that cannot be tested on Windows at
+                # all. `official_config.verify()` asserts the key is absent, so
+                # the two would have contradicted each other.
+                "observed": None,
+                "observed_note": (
+                    "ContestSpec class default only; absent from run_config on "
+                    "every platform, and published by no graded report"
+                ),
                 "note": (
                     "RLIMIT_AS under --runner subprocess; the PHASE-1 limit of "
                     "65,536 MB already killed v2.5 at a 3.9 GB peak, and this one "

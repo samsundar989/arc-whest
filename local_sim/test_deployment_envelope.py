@@ -76,6 +76,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import textwrap
@@ -135,6 +136,26 @@ def _rlimit_available() -> bool:
     return hasattr(resource, "RLIMIT_AS")
 
 
+def _resolve_witness(witness):
+    """Does a `provoked_by` string name something that exists?
+
+    Returns True when the named file is present, False when it names a path that
+    is not, and None when the claim is prose this function cannot adjudicate (for
+    example "this file, section 6"). None is treated as acceptable -- the point is
+    to catch a claim pointing at nothing, not to parse English.
+    """
+    if not witness:
+        return False
+    text = str(witness)
+    hits = re.findall(r"[\w./\\-]+\.(?:py|json|txt|md)|experiments/[\w./\\-]+", text)
+    if not hits:
+        return None
+    for h in hits:
+        if not os.path.exists(os.path.join(_ROOT, h.replace("\\", "/").rstrip("/"))):
+            return False
+    return True
+
+
 def enforceability() -> dict:
     """Which envelope constraints this host can actually enforce, and how."""
     r = official_config.LIVE
@@ -153,7 +174,12 @@ def enforceability() -> dict:
                 "value": r.wall_time_limit_s,
                 "enforced_locally": True,
                 "by": "flopscope.BudgetContext wall clock -> TimeExhaustedError",
-                "provoked_by": "local_sim/lifecycle_eval.py --self-test (L4)",
+                # Until 2026-08-24 this named L4 while L4 provoked only the
+                # RESIDUAL limit. The wall provocation now exists beside it --
+                # `dataclasses.replace(spec, wall_time_limit_s=1e-9)` -- and
+                # asserts time_exhausted set with residual_exhausted clear, so
+                # the two paths are shown to be distinct rather than assumed to be.
+                "provoked_by": "local_sim/lifecycle_eval.py --self-test (L4, wall)",
             },
             "residual_wall_time_limit_s": {
                 "value": r.residual_wall_time_limit_s,
@@ -516,11 +542,30 @@ def main() -> int:
     enf = enforceability()
     print(f"  platform {enf['platform']}   RLIMIT_AS available: "
           f"{enf['rlimit_as_available']}")
+    # A CONDITION, not the literal `True`. This loop used to read
+    #     check(f"{name} is enforced here", True, str(c["value"]))
+    # which cannot fail, and it counted FIVE constraints as passing -- including
+    # `wall_time_limit_s`, which at the time was provoked NOWHERE in the
+    # repository, while the artifact recorded `provoked_by:
+    # "local_sim/lifecycle_eval.py --self-test (L4)"`. L4 set a tiny RESIDUAL
+    # limit and never a tiny WALL limit: two different constants, one untested,
+    # and a green line asserting otherwise. Found by a final Skeptic pass after
+    # two earlier reviews of the same slice missed it, and it is this
+    # repository's signature failure class (docs/GOTCHAS.md).
+    #
+    # What is checked now is the thing that was being assumed: a constraint
+    # claiming local enforcement must NAME a provocation, and that name must
+    # resolve to a file that exists. A claim with no witness fails here.
     for name, c in enf["constraints"].items():
-        if c["enforced_locally"]:
-            check(f"{name} is enforced here", True, str(c["value"]))
-        else:
+        if not c["enforced_locally"]:
             unprovable(name, c["by"])
+            continue
+        witness = c.get("provoked_by")
+        resolved = _resolve_witness(witness)
+        check(f"{name} is enforced here, and NAMES its provocation",
+              bool(witness) and resolved is not False,
+              f"{c['value']}  <- {witness or 'NO PROVOCATION NAMED'}"
+              + ("" if resolved is not False else "   *** witness not found ***"))
     check("the matrix is honest about memory on this platform",
           enf["constraints"]["memory_limit_mb"]["enforced_locally"]
           == _rlimit_available(),

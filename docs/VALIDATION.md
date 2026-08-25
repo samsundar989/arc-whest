@@ -329,9 +329,12 @@ Two arithmetic hygiene rules, both of which Sprint 4 broke:
    | `arm_k2p1` | 55.9 / 59.4 ms | 95.5 ms | 0/20 |
    | `arm_k2p2` — the architecture's reference | 94.6 / 95.1 ms | 140.6 ms | 0/20 |
 
-   **Those are best-case numbers and must not be used alone.** The same `arm_k2p2`,
-   through the same instrument, reads **260.7 ms median / 390.6 ms worst** in the
-   frozen P2-CP1 ladder of 2026-08-21 (`experiments/2026-08-21_p2_cp1/ladder_frozen.json`,
+   **Those are best-case numbers and must not be used alone.** The same `arm_k2p2`
+   reads **260.7 ms median / 390.6 ms worst** in the frozen P2-CP1 ladder of
+   2026-08-21 — **that figure is `lifecycle_eval` in-process, not subprocess**, so
+   it is not directly comparable with the table above. The decomposition below IS
+   instrument-matched (lifecycle against lifecycle: 260.7 ms then, 110.9 ms today
+   at the same `np` weights), and that is where the 2.35× is measured (`experiments/2026-08-21_p2_cp1/ladder_frozen.json`,
    `per_mlp_residual_s`) — **1.02× headroom, effectively at the cliff.**
 
    That gap was first written up here as machine contention. **That was wrong, and

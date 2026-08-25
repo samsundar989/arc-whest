@@ -990,6 +990,32 @@ def _self_test() -> int:
               and r.to_row().multiplier(r_spec.lam, r_spec.floor) == 1.0
               for r in r_rows))
 
+    # --- the WALL path, provoked --------------------------------------------
+    # Added 2026-08-24 after a final Skeptic pass found that P2-P0 gate clause G4
+    # names FIVE paths and this repository provoked only four. The wall clause was
+    # recorded as satisfied by a check whose condition was the literal `True`
+    # (`test_deployment_envelope.py`), and the artifact claimed it was provoked
+    # "by lifecycle_eval --self-test (L4)" -- which set a tiny RESIDUAL limit and
+    # never a tiny WALL limit. Two different constants, one of them untested,
+    # and a passing line that could not fail. That is this repository's signature
+    # failure class, and it survived two earlier reviews of the same slice.
+    #
+    # flopscope's BudgetContext enforces the wall clock itself, so a 1e-9 s limit
+    # trips on the first counted operation -- the same shape of provocation the
+    # residual cliff gets three lines above.
+    w_spec = dataclasses.replace(spec, wall_time_limit_s=1e-9)
+    w_rows, _ = evaluate("estimator.py", SEEDS[:2], truth[:2], spec=w_spec)
+    check("L4: a 1e-9 s WALL limit trips the TIME path",
+          all(r.time_exhausted and r.failed for r in w_rows),
+          f"{sum(r.time_exhausted for r in w_rows)}/2 time_exhausted")
+    check("L4: wall-exhausted rows are exactly zeroed at multiplier 1.0",
+          all(r.mse == r.zero_prediction_mse
+              and r.to_row().multiplier(w_spec.lam, w_spec.floor) == 1.0
+              for r in w_rows))
+    check("L4: ...and the WALL path is distinct from the RESIDUAL path",
+          all(r.time_exhausted and not r.residual_exhausted for r in w_rows),
+          "time_exhausted set, residual_exhausted clear")
+
     slow = os.path.join(_HERE, "_lifecycle_slow_tmp.py")
     try:
         with open(slow, "w", encoding="utf-8") as fh:

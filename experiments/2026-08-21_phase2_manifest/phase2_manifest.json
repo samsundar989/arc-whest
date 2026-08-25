@@ -1,7 +1,7 @@
 {
   "artifact": "phase2_manifest",
   "artifact_version": 1,
-  "generated_at_utc": "2026-08-24T20:05:32.127895+00:00",
+  "generated_at_utc": "2026-08-25T01:45:57.656196+00:00",
   "generator": "local_sim/phase2_manifest.py",
   "authority": "The dataset card and metadata.json at the pinned commit are AUTHORITATIVE. The AIcrowd challenge page is known-stale (Phase-1 timeline, a max(0.5, .) worked example) and is not a source here.",
   "dataset": {
@@ -213,7 +213,8 @@
     },
     "memory_limit_mb": {
       "package_default": 8192,
-      "observed": 8192,
+      "observed": null,
+      "observed_note": "ContestSpec class default only; absent from run_config on every platform, and published by no graded report",
       "note": "RLIMIT_AS under --runner subprocess; the PHASE-1 limit of 65,536 MB already killed v2.5 at a 3.9 GB peak, and this one is EIGHT TIMES tighter against sixteen times the weight bytes. It cannot be enforced on Windows at all (no `resource` module), so it is an accounting constraint here, not a test: see experiments/2026-08-24_p2_p0/deployment_envelope.json. At width 1024 a dense float64 covariance is 8.4 MB per layer -- but a K3 tensor would be 8.6 GB, i.e. over the limit on its own."
     },
     "n_scored_public_mlps": {

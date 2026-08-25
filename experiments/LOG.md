@@ -11591,3 +11591,137 @@ verify_portability.py         99 checks, 0 failed
 untouched. `estimator.py` byte-identical.
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-24 — P2-P0 FINAL REVIEW: **REJECT.** G4 failed on a check that could not fail, and I wrote it
+
+*Third independent Skeptic pass, judging G1–G7 only. **Verdict: REJECT**, on one
+clause. G1, G2, G3, G5, G6 verified MET by the reviewer running the suites itself;
+G4 objectively fails; the gate is an all-of, so the slice does not close.*
+
+## The finding, and it is the worst kind
+
+G4 names **five** paths and requires each to be *provoked, not asserted*. The
+**wall-time path was provoked nowhere in this repository** — and the evidence
+packet recorded that it was, through this:
+
+```python
+for name, c in enf["constraints"].items():
+    if c["enforced_locally"]:
+        check(f"{name} is enforced here", True, str(c["value"]))   # <- literal True
+```
+
+`local_sim/test_deployment_envelope.py:521`. The condition is the literal `True`.
+It counted five constraints as PASS, including `wall_time_limit_s`. And
+`deployment_envelope.json` carried a **false provenance claim**:
+
+```json
+"wall_time_limit_s": { "enforced_locally": true,
+  "provoked_by": "local_sim/lifecycle_eval.py --self-test (L4)" }
+```
+
+L4 provokes the FLOP budget, the exception path, prediction validation, the
+**residual** cliff (`residual_wall_time_limit_s=1e-9`) and the combined budget. It
+never sets a small **wall** limit. Two different constants; one of them untested;
+a green line asserting otherwise. `time_exhausted` is `0`/`false` in **every** JSON
+in the packet, on both platforms.
+
+**I wrote that line.** In this same slice I fixed the identical pattern in
+`official_config.py:314` and left a comment explaining why a literal condition is
+worthless. Two earlier reviews of the same slice missed it. And my own GATE STATUS
+entry said *"G4 names five paths and requires each to fire. Four do."* — the
+clause was correctly identified and **the arithmetic beside it was never audited**.
+Three fired on Windows, memory now fires on Linux, wall fired nowhere.
+
+It was never a platform limitation. The mechanism works in one line; the reviewer
+demonstrated `TimeExhaustedError` from a 1e-9 s `BudgetContext` in a read-only probe.
+
+## Fixed
+
+**The provocation now exists** (`lifecycle_eval.py`, L4, beside the residual cliff):
+
+```text
+L4: a 1e-9 s WALL limit trips the TIME path                    ok   2/2 time_exhausted
+L4: wall-exhausted rows are exactly zeroed at multiplier 1.0   ok
+L4: ...and the WALL path is distinct from the RESIDUAL path    ok
+```
+
+Suite **53 → 56**. The third check is the one that matters: it asserts
+`time_exhausted` set with `residual_exhausted` **clear**, so the two paths are
+shown to be distinct rather than assumed to be — which is exactly the assumption
+that let one of them go untested.
+
+**The check that could not fail is gone.** The matrix loop now verifies the thing
+that was being assumed: a constraint claiming local enforcement must **name** a
+provocation, and that name must resolve to a file that exists. Negative-tested in
+both directions — a missing file, a missing directory, and a `None` witness all
+return False; prose the resolver cannot adjudicate returns None and is permitted.
+A check I cannot demonstrate failing is the defect I am fixing, so it is
+demonstrated.
+
+## Three secondary findings, all upheld
+
+1. **The contract templates still mandated the retired Phase-1 residual rule**, and
+   this one would have corrupted the next slice. `AGENTS.md` required *"Report
+   three (§2b), FREEZE one by name"* and `GAME_PLAN.md` *"all three residual-cost
+   models with one frozen by name"* — while §2b-ii, written by this slice, says
+   there is no residual price to freeze under λ = 0. **Those two files are what an
+   agent reads when writing the Phase-1 STRATEGIC contract.** The slice fixed the
+   measurement documents and left the instruction documents on the old rulebook.
+   Both now require a **counted-FLOP** freeze with residual as headroom.
+2. **The manifest over-claimed corroboration on the weakest constant.**
+   `phase2_manifest.json` recorded `memory_limit_mb: {observed: 8192}` under a
+   `corroborated_by: run_config` heading — and `run_config` does not carry
+   `memory_limit_mb`. Its sibling `predict_timeout_s` correctly read `null` on
+   identical provenance. Now `null`, with a note. `official_config.verify()`
+   asserts that key is absent, so the two had been contradicting each other.
+3. **The residual tables mixed instruments without saying so.** 94.6 ms is
+   subprocess; 260.7 ms is `lifecycle_eval` in-process. The decomposition *is*
+   instrument-matched (lifecycle 260.7 → 110.9 at identical `np` weights) and the
+   conclusion survives, but the tables did not show their work. Labelled in all
+   three documents.
+
+## What the reviewer verified MET, by running it
+
+G1: `--gate` 19 ops, 0 disagreeing, delta +0; official side parsed per-op from a
+real report, SHA-bound to the candidate; C3 scoping corroborated by two distinct
+networks giving byte-identical op tables. G2: 73/73, plus direct interrogation of
+the installed package. G3: **check-name diffs across `e8afcbf..HEAD` — zero of the
+original 37 lifecycle and 31 scorer checks removed**; the one 54→53 removal is
+arithmetically implied by the line above it. G5: `estimator.py` git blob identical
+at `e8afcbf`, `5337b96` and HEAD. G6: portability 99/99; verdict lines grepped from
+the transcript rather than taken on trust.
+
+It also tried three ways to break the residual retraction — a changed arm file
+(no: sha256 match `ladder_frozen.json`'s recorded `candidate_sha256`), an
+instrument switch (no: lifecycle-vs-lifecycle), an unreproducible ladder figure
+(no: n=96, every digit matches) — and confirmed **`experiments/LOG.md` at HEAD is a
+strict byte-prefix extension of the file at `e8afcbf`**, so the G1–G7 text is
+provably unmodified since preregistration.
+
+And it judged the **~139 ms carrier budget conservative rather than over-claimed**:
+260.7 ms is a pre-repair in-process figure whose post-repair subprocess equivalent
+is ≈200 ms, so budgeting 139 ms errs toward less allowance — the safe direction.
+
+## Knowledge delta
+
+1. **A check whose condition is a literal cannot fail, and writing one while
+   fixing another is possible.** I did both in one slice. The pattern is not
+   caught by reading; it is caught by asking *what would make this line go red?*
+2. **A `provoked_by` field is a claim and needs a witness.** An artifact asserting
+   its own provenance is worth nothing unless something resolves the name.
+3. **Fix the instruction documents, not only the measurement documents.** §2b-ii
+   was correct and `AGENTS.md` still told the next contract to do the opposite.
+   The next slice reads the templates.
+4. **Audit the arithmetic beside a finding.** "Four do" was written in the same
+   entry that correctly identified the failing clause.
+
+**Gate:** G1, G2, G3, G5, G6 MET. **G4 now met** — the wall provocation exists and
+fires. **G7 remains OPEN**: this pass returned REJECT, and the corrected tree has
+not been judged.
+
+**Seed ledger:** unchanged. P01 144/600, 456 free. D17/D19 unspent. **Vault:**
+untouched. `estimator.py` byte-identical.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.

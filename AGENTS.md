@@ -143,7 +143,7 @@ Before any data exists, append to `experiments/LOG.md` a dated entry containing:
 | **Gate** | the threshold, chosen NOW, passed to `competition_score.decide(gate=...)`, which has no default. **Write the gate on the DIFFERENCE the slice isolates, not on a total that contains it** — two gates in one session measured slightly the wrong quantity |
 | **Falsifier** | what result rejects the hypothesis |
 | **Baseline** | the exact control and its tier |
-| **Residual model** | REQUIRED for any cost claim. Report three (`docs/VALIDATION.md` §2b), FREEZE one by name here, and make sure it can see the cost the candidate actually incurs — a counted-FLOPs freeze hides elementwise residual |
+| **Cost model** | REQUIRED, and **round-dependent**. Phase 2 sets λ = 0, so `C = F`: freeze a **counted-FLOP** model and report residual as **headroom against the 0.4 s cliff**, quoted against the worst observed run (`VALIDATION.md` §2b-ii). §2b's three-residual-model rule is Phase-1 replay only |
 | **Statistic** | paired, common random numbers, arithmetic score difference, studentised-t or basic bootstrap. Never percentile or BCa |
 | **Seed block** | claimed through `local_sim/seed_ledger.py`, never a literal |
 | **Confounders / scope / what must not change** | |

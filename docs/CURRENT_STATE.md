@@ -210,7 +210,9 @@ cell (`experiments/2026-08-24_p2_p0/p2_residual_paths.json`):
 
 **Those are best-case and must not be used alone.** The same `arm_k2p2` reads
 **260.7 ms median / 390.6 ms worst — 1.02x headroom** in the frozen P2-CP1 ladder
-of 2026-08-21. A first write-up blamed machine contention; **that is retracted**.
+of 2026-08-21 — that figure is `lifecycle_eval` **in-process**, against the
+subprocess table above, so the two are not directly comparable; the decomposition
+is instrument-matched. A first write-up blamed machine contention; **that is retracted**.
 Three experiments decompose the 2.35x: the weight-representation repair is a fixed
 **~19 ms**, flopscope 0.10 vs 0.12 is **0.91x** (not the cause), and **~2.35x is
 run/session state and remains unexplained.**

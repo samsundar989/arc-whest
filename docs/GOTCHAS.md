@@ -87,7 +87,10 @@ Raw artifacts: `experiments/2026-08-24_p2_p0/`.*
   | `arm_k2p2` (the architecture's reference) | 94.6 / 95.1 ms | 140.6 ms | 0/20 |
 
   The same `arm_k2p2` reads **260.7 ms median / 390.6 ms worst — 1.02× headroom**
-  in the frozen P2-CP1 ladder of 2026-08-21. **That gap was first attributed to
+  in the frozen P2-CP1 ladder of 2026-08-21. **That figure is `lifecycle_eval`
+  in-process** and the table above is subprocess, so the two are not directly
+  comparable; the decomposition below is instrument-matched (lifecycle vs
+  lifecycle) and that is where the 2.35× lives. **The gap was first attributed to
   machine contention. It is retracted.** Those are committed numbers from another
   day, not a contended re-run. Decomposed by three experiments:
 

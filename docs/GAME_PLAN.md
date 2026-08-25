@@ -439,7 +439,11 @@ Every strategic experiment must contain, before data exists:
 - gate on the isolated paired arithmetic score difference;
 - falsifier;
 - exact control, tier, and seed claim;
-- all three residual-cost models with one frozen by name;
+- the frozen **cost** model. Under Phase 2 that is a **counted-FLOP** model,
+  because λ = 0 makes `C = F`; residual is reported as **headroom against the
+  0.4 s cliff**, quoted against the **worst observed run**. The Phase-1
+  three-residual-model rule (`VALIDATION.md` §2b) applies only to a Phase-1
+  replay — see §2b-ii;
 - confounders and what must not change;
 - commit proving preregistration preceded data.
 
