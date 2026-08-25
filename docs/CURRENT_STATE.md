@@ -18,11 +18,16 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
 - The current shipped file routes Phase-2 width to basic `k2p1`. Expected Phase-2
   performance is around `3.96e-7` adjusted / `3.95e-6` raw: about 22x and 100x
   behind the leader respectively.
-- The repo's scientific decision protocol is strong. Its deployment evaluator
-  **was** not Phase-2-truthful; **P2-P0 repaired it on 2026-08-24** and the local
+- The repo's scientific decision protocol is strong. Its deployment evaluator was
+  not Phase-2-truthful; **P2-P0 repaired the deployment parity** and the local
   meter now reproduces the official runner op by op, to zero.
-- **Immediate next action:** Phase 1 of `GAME_PLAN.md` — the width-1024
-  Kerdock/MUB carrier, its invariants, and a new Phase-2 DESIGN block.
+- **Phase 0 is NOT closed.** Its gate is an all-of, G1–G7. **G1–G6 are met; G7 —
+  an independent Skeptic ACCEPT — is pending.** Three review passes have run and
+  returned PROVISIONAL, PROVISIONAL and REJECT; each found something real, and the
+  last found a gate clause satisfied by a check that could not fail.
+- **Immediate next action:** final Phase-0 evidence and acceptance. **Phase 1 is
+  prohibited until that ACCEPT exists** — no DESIGN seed may be claimed, no
+  `estimator.py` edit made, and no Phase-1 measurement taken.
 
 ## Authoritative document map
 
@@ -131,10 +136,12 @@ Coupled residual sampling is deprioritized. Its former 1.305x projection assumed
 float32 K2 cost reduction that the frozen artifact does not show: measured cost fell
 only 3.1%, not 50%.
 
-## Evaluator state — P2-P0 CLOSED these on 2026-08-24
+## Evaluator state — P2-P0 repaired these; the slice itself awaits acceptance
 
-All nine blockers are resolved. Raw evidence: `experiments/2026-08-24_p2_p0/`;
-contract, result and Skeptic verdict at the bottom of `experiments/LOG.md`.
+All nine blockers are resolved and the deployment parity is repaired. **That is
+the technical work, not the gate**: G7 is still open. Raw evidence:
+`experiments/2026-08-24_p2_p0/`; contract, result, two reviews, a retraction and a
+REJECT at the bottom of `experiments/LOG.md`.
 
 | # | blocker | state |
 |---|---|---|
@@ -233,8 +240,9 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 
 | order | slice | class | status |
 |---:|---|---|---|
-| 0 | official-stack/evaluator repair | IMPORTANT | **DONE 2026-08-24** — preflight 16/16, anchor reconciled to zero |
-| 1 | Kerdock/MUB generator, radial rule, invariants | ROUTINE/IMPORTANT | **NEXT** |
+| 0 | official-stack/evaluator repair | IMPORTANT | **G1–G6 MET, G7 PENDING** — technical work complete (preflight 16/16, anchor reconciled to zero, all five G4 paths provoked); awaiting a literal independent ACCEPT |
+| 1A | Kerdock/MUB generator + invariants, no truth seed | ROUTINE/IMPORTANT | **BLOCKED** until G7 returns ACCEPT |
+| 1B | structured-carrier DESIGN evidence | STRATEGIC | blocked; contract to be reviewed before any block is claimed |
 | 2 | structured carrier DESIGN | STRATEGIC on seed claim | pending |
 | 3 | structured carrier DECIDE | STRATEGIC | pending |
 | 4 | recurrent augmented-K2 parity and DESIGN | IMPORTANT/STRATEGIC | pending |

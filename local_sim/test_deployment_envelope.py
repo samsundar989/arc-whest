@@ -136,24 +136,87 @@ def _rlimit_available() -> bool:
     return hasattr(resource, "RLIMIT_AS")
 
 
-def _resolve_witness(witness):
-    """Does a `provoked_by` string name something that exists?
+#: Where the lifecycle suite's machine-readable results live. Regenerated on
+#: demand; never trusted stale.
+LIFECYCLE_RESULTS = os.path.join(
+    _ROOT, "experiments", "2026-08-24_p2_p0", "lifecycle_self_test.json")
 
-    Returns True when the named file is present, False when it names a path that
-    is not, and None when the claim is prose this function cannot adjudicate (for
-    example "this file, section 6"). None is treated as acceptable -- the point is
-    to catch a claim pointing at nothing, not to parse English.
+
+def _load_suite_results(path: str, regenerate: bool = True) -> "dict | None":
+    """Read a suite's emitted results, regenerating them if asked.
+
+    Regeneration is the default because a STALE results file is exactly the
+    failure this witness mechanism exists to prevent: the previous version of
+    this matrix "verified" the wall provocation against a file that existed and
+    contained no such check.
     """
-    if not witness:
-        return False
-    text = str(witness)
-    hits = re.findall(r"[\w./\\-]+\.(?:py|json|txt|md)|experiments/[\w./\\-]+", text)
-    if not hits:
+    if regenerate:
+        subprocess.run(
+            [sys.executable, os.path.join(_HERE, "lifecycle_eval.py"),
+             "--self-test", "--emit-json", path],
+            capture_output=True, text=True, cwd=_ROOT,
+            env=dict(os.environ, PYTHONIOENCODING="utf-8"))
+    if not os.path.exists(path):
         return None
-    for h in hits:
-        if not os.path.exists(os.path.join(_ROOT, h.replace("\\", "/").rstrip("/"))):
-            return False
-    return True
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+    except Exception:
+        return None
+
+
+def verify_witness(witness, results) -> "tuple[bool, str]":
+    """Does `witness` name checks that ACTUALLY RAN and ACTUALLY PASSED?
+
+    This is the heart of P2-P0 gate clause G4, and it replaces two weaker
+    mechanisms that both failed in this slice:
+
+      1. `check(name, True, ...)` -- a literal condition. It counted the wall
+         limit as enforced while nothing provoked it.
+      2. a filename resolver -- it confirmed `lifecycle_eval.py` exists, which
+         was true and meaningless, because the file contained no wall provocation.
+
+    A witness must now be a STRUCTURED claim:
+
+        {"suite": <a results artifact>,
+         "checks": [<exact check names that must be present and True>],
+         "expect_detail": {<check name>: <substring its detail must contain>}}
+
+    and every named check must be present in that suite's emitted results with
+    `ok == True`. A witness that is prose, absent, or names a check that does not
+    exist FAILS -- it does not pass unadjudicated.
+
+    Returns `(ok, reason)`.
+    """
+    if witness is None:
+        return False, "NO WITNESS: nothing names a provocation"
+    if not isinstance(witness, dict):
+        return False, (f"UNADJUDICABLE WITNESS: {witness!r} is prose, not a "
+                       "structured claim. A sentence is not evidence.")
+    names = witness.get("checks") or []
+    if not names:
+        return False, "WITNESS NAMES NO CHECKS"
+    if results is None:
+        return False, (f"SUITE RESULTS MISSING: {witness.get('suite')!r} produced "
+                       "nothing to verify against")
+    by_name = {c["name"]: c for c in results.get("checks", [])}
+    missing = [n for n in names if n not in by_name]
+    if missing:
+        return False, (f"CHECK NOT FOUND in {witness.get('suite')}: "
+                       f"{missing[0]!r} -- the witness names a provocation the "
+                       "suite does not contain")
+    failed = [n for n in names if not by_name[n]["ok"]]
+    if failed:
+        return False, f"CHECK PRESENT BUT FAILED: {failed[0]!r}"
+    for n, needle in (witness.get("expect_detail") or {}).items():
+        if n not in by_name:
+            return False, f"CHECK NOT FOUND for detail assertion: {n!r}"
+        if needle not in by_name[n]["detail"]:
+            return False, (f"DETAIL MISMATCH on {n!r}: expected {needle!r}, "
+                           f"got {by_name[n]['detail']!r}")
+    return True, (f"{len(names)} named check(s) verified in "
+                  f"{witness.get('suite')} "
+                  f"[{(results.get('results_sha256') or '')[:12]}]")
 
 
 def enforceability() -> dict:
@@ -168,24 +231,55 @@ def enforceability() -> dict:
                 "value": r.flop_budget,
                 "enforced_locally": True,
                 "by": "flopscope.BudgetContext raises BudgetExhaustedError",
-                "provoked_by": "local_sim/lifecycle_eval.py --self-test (L4)",
+                "provoked_by": {
+                    "suite": "local_sim/lifecycle_eval.py --self-test",
+                    "checks": [
+                        "L4: a 1e6 budget exhausts the FLOP budget",
+                        "L4: exhausted rows are FAILED",
+                        "L4: a failure is priced at multiplier EXACTLY 1.0, not the 0.1 floor",
+                    ],
+                    "expect_detail": {
+                        "L4: a 1e6 budget exhausts the FLOP budget": "2/2 exhausted",
+                    },
+                },
             },
             "wall_time_limit_s": {
                 "value": r.wall_time_limit_s,
                 "enforced_locally": True,
                 "by": "flopscope.BudgetContext wall clock -> TimeExhaustedError",
-                # Until 2026-08-24 this named L4 while L4 provoked only the
-                # RESIDUAL limit. The wall provocation now exists beside it --
-                # `dataclasses.replace(spec, wall_time_limit_s=1e-9)` -- and
-                # asserts time_exhausted set with residual_exhausted clear, so
-                # the two paths are shown to be distinct rather than assumed to be.
-                "provoked_by": "local_sim/lifecycle_eval.py --self-test (L4, wall)",
+                # This entry used to read `provoked_by: "lifecycle_eval.py
+                # --self-test (L4)"` while L4 provoked only the RESIDUAL limit --
+                # a false provenance claim that a filename check could not catch,
+                # because the filename was correct. It is now a STRUCTURED claim
+                # naming the exact checks, and `verify_witness` reads that suite's
+                # emitted results and requires each to be present and True.
+                "provoked_by": {
+                    "suite": "local_sim/lifecycle_eval.py --self-test",
+                    "checks": [
+                        "L4: a 1e-9 s WALL limit trips the TIME path",
+                        "L4: wall-exhausted rows are exactly zeroed at multiplier 1.0",
+                        "L4: ...and the WALL path is distinct from the RESIDUAL path",
+                    ],
+                    "expect_detail": {
+                        "L4: a 1e-9 s WALL limit trips the TIME path":
+                            "2/2 time_exhausted",
+                        "L4: ...and the WALL path is distinct from the RESIDUAL path":
+                            "residual_exhausted clear",
+                    },
+                },
             },
             "residual_wall_time_limit_s": {
                 "value": r.residual_wall_time_limit_s,
                 "enforced_locally": True,
                 "by": "post-predict comparison against BudgetContext residual",
-                "provoked_by": "local_sim/lifecycle_eval.py --self-test (L8)",
+                "provoked_by": {
+                    "suite": "local_sim/lifecycle_eval.py --self-test",
+                    "checks": [
+                        "L4: a 1e-9 s residual limit trips the residual path",
+                        "L8: the 0.4 s cliff FIRES when provoked (1e-9 s limit)",
+                        "L8: a residual failure is zeroed and priced at multiplier 1.0, not 0.1",
+                    ],
+                },
                 "note": ("the LOCAL residual is a different instrument from the "
                          "graded one; the cliff is modelled faithfully, the "
                          "seconds are not transferable"),
@@ -194,7 +288,13 @@ def enforceability() -> dict:
                 "value": r.setup_timeout_s,
                 "enforced_locally": True,
                 "by": "timed module load + setup(), plus HOST_COLD_START_S",
-                "provoked_by": "local_sim/lifecycle_eval.py --self-test (4b)",
+                "provoked_by": {
+                    "suite": "local_sim/lifecycle_eval.py --self-test",
+                    "checks": [
+                        "a 6 s setup RAISES SetupFailure \u2014 no clean objective is produced",
+                        "a RAISING setup also refuses",
+                    ],
+                },
             },
             "memory_limit_mb": {
                 "value": r.memory_limit_mb,
@@ -217,7 +317,7 @@ def enforceability() -> dict:
                 "value": None,
                 "enforced_locally": True,
                 "by": "whest run --runner subprocess restarts a dead worker",
-                "provoked_by": "this file, section 6",
+                "provoked_by": {"suite": "this file, section 6"},
             },
             "predict_response_timeout_s": {
                 "value": r.predict_timeout_s,
@@ -520,6 +620,96 @@ def provoke_worker_death(n_mlps: int = 3) -> dict:
 
 # --------------------------------------------------------------------------- #
 
+def witness_negative_tests() -> int:
+    """Prove `verify_witness` REFUSES every way a witness can be worthless.
+
+    A guard nobody has watched fail is a guard nobody has tested. Both mechanisms
+    this one replaces passed happily while the wall-time path was provoked
+    nowhere, so this suite exists to make the refusals visible and permanent.
+
+    The first case is the exact witness that shipped in
+    `deployment_envelope.json` and was false: it named a real file and a real
+    suite, and the check it pointed at did not exist.
+    """
+    global _PASS, _FAIL
+    head("0. NEGATIVE TESTS -- every way a witness can be worthless, refused")
+
+    results = _load_suite_results(LIFECYCLE_RESULTS)
+    if results is None:
+        check("the lifecycle results are available to test against", False,
+              "could not produce them")
+        return 1
+
+    real = "L4: a 1e-9 s WALL limit trips the TIME path"
+
+    cases = [
+        (
+            "the ORIGINAL FALSE witness -- prose naming a real file, no check",
+            "local_sim/lifecycle_eval.py --self-test (L4)",
+            "UNADJUDICABLE",
+        ),
+        (
+            "a missing witness (None)",
+            None,
+            "NO WITNESS",
+        ),
+        (
+            "a witness naming NO checks",
+            {"suite": "local_sim/lifecycle_eval.py --self-test", "checks": []},
+            "NAMES NO CHECKS",
+        ),
+        (
+            "a witness whose suite produced no results",
+            {"suite": "local_sim/does_not_exist.py", "checks": [real]},
+            "SUITE RESULTS MISSING",
+        ),
+        (
+            "a WRONG check identifier inside a real suite",
+            {"suite": "local_sim/lifecycle_eval.py --self-test",
+             "checks": ["L4: a 1e-9 s WALL limit trips the TIME path (typo)"]},
+            "CHECK NOT FOUND",
+        ),
+        (
+            "a real check whose RESULT is false",
+            {"suite": "local_sim/lifecycle_eval.py --self-test", "checks": [real]},
+            "PRESENT BUT FAILED",
+        ),
+        (
+            "a real check whose DETAIL contradicts the claim",
+            {"suite": "local_sim/lifecycle_eval.py --self-test", "checks": [real],
+             "expect_detail": {real: "7/7 time_exhausted"}},
+            "DETAIL MISMATCH",
+        ),
+        (
+            "unadjudicable prose presented as an enforcement witness",
+            "it is enforced, trust me",
+            "UNADJUDICABLE",
+        ),
+    ]
+
+    for label, witness, expect in cases:
+        res = results
+        if expect == "SUITE RESULTS MISSING":
+            res = None
+        elif expect == "PRESENT BUT FAILED":
+            # flip the recorded result, so a genuine failure is what is judged
+            import copy
+            res = copy.deepcopy(results)
+            for c in res["checks"]:
+                if c["name"] == real:
+                    c["ok"] = False
+        ok, why = verify_witness(witness, res)
+        check(f"REFUSED: {label}", (not ok) and expect in why,
+              why[:96] if why else "")
+
+    # ...and the positive control, so this suite cannot pass by refusing everything.
+    ok, why = verify_witness(
+        {"suite": "local_sim/lifecycle_eval.py --self-test", "checks": [real],
+         "expect_detail": {real: "2/2 time_exhausted"}}, results)
+    check("ACCEPTED: the real wall witness, with its real detail", ok, why[:96])
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--skip-worker-death", action="store_true",
@@ -537,6 +727,8 @@ def main() -> int:
     print("=" * 96)
     print("DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove")
     print("=" * 96)
+
+    witness_negative_tests()
 
     head("1. the enforceability matrix")
     enf = enforceability()
@@ -556,16 +748,32 @@ def main() -> int:
     # What is checked now is the thing that was being assumed: a constraint
     # claiming local enforcement must NAME a provocation, and that name must
     # resolve to a file that exists. A claim with no witness fails here.
+    suite_results = _load_suite_results(LIFECYCLE_RESULTS)
+    enf["witness_suite_sha256"] = (suite_results or {}).get("results_sha256")
     for name, c in enf["constraints"].items():
         if not c["enforced_locally"]:
             unprovable(name, c["by"])
             continue
-        witness = c.get("provoked_by")
-        resolved = _resolve_witness(witness)
-        check(f"{name} is enforced here, and NAMES its provocation",
-              bool(witness) and resolved is not False,
-              f"{c['value']}  <- {witness or 'NO PROVOCATION NAMED'}"
-              + ("" if resolved is not False else "   *** witness not found ***"))
+        w = c.get("provoked_by")
+        if isinstance(w, dict) and w.get("suite", "").startswith("this file"):
+            # provoked by a section of THIS suite; those sections assert their
+            # own results directly below, so there is nothing to cross-verify.
+            check(f"{name} is enforced here, provoked in this file", True,
+                  str(c["value"]))
+            continue
+        ok, why = verify_witness(w, suite_results)
+        # Embed the VERIFIED RESULTS in the artifact, not just the claim. A
+        # committed evidence file that says "provoked_by: <name>" is a pointer;
+        # one that carries the named check, its ok flag and its detail is
+        # evidence. The previous artifact was the former, and its pointer was
+        # false.
+        by_name = {x["name"]: x for x in (suite_results or {}).get("checks", [])}
+        c["witness_verified"] = ok
+        c["witness_reason"] = why
+        c["witness_results"] = [by_name[n] for n in (w.get("checks") or [])
+                                if n in by_name]
+        check(f"{name}: its named provocation RAN and PASSED", ok,
+              f"{c['value']}  <- {why}")
     check("the matrix is honest about memory on this platform",
           enf["constraints"]["memory_limit_mb"]["enforced_locally"]
           == _rlimit_available(),
@@ -752,21 +960,41 @@ def main() -> int:
             }
             check("the suite SURVIVED a worker that hard-exited mid-run",
                   len(rows) == 3, f"{len(rows)} rows returned")
-            check("the failure is SCOPED to the MLP that killed the worker",
-                  res["n_failed_mlps"] <= 1,
+            # EXACTLY one, at a KNOWN index, with a KNOWN classification.
+            # `<= 1` also passes when the sacrifice never fired and nothing
+            # failed at all -- which would mean the restart path was never
+            # exercised while the check went green. That is the same shape of
+            # defect as the literal-True check this suite already lost G4 to.
+            check("EXACTLY one MLP failed -- not zero, not several",
+                  res["n_failed_mlps"] == 1,
                   f"n_failed_mlps = {res['n_failed_mlps']}, indices {failed}")
+            check("...and it is MLP 0, the one that killed the worker",
+                  failed == [0], f"failed indices {failed}")
+            check("...classified as an ERROR, not as a budget/time exhaustion",
+                  (res.get("failure_breakdown") or {}).get("error") == 1
+                  and all((res.get("failure_breakdown") or {}).get(k) == 0
+                          for k in ("budget_exhausted", "time_exhausted",
+                                    "residual_wall_time_exhausted",
+                                    "combined_budget_exhausted")),
+                  f"{res.get('failure_breakdown')}")
             # "flops_used" is a weak witness here -- the sacrificial estimator
             # returns fnp.zeros, which costs nothing, so 0 is the CORRECT count and
             # proves nothing. What proves the row ran is that it carries a real
             # MSE and no failure flag of any kind.
-            last = rows[-1]
-            check("...and the MLPs after it were actually SCORED, not zeroed",
-                  len(rows) >= 2 and not last["traceback"]
-                  and not any(last[k] for k in ("budget_exhausted", "time_exhausted",
-                                                "residual_wall_time_exhausted",
-                                                "combined_budget_exhausted"))
-                  and last["final_layer_mse"] > 0.0,
-                  f"last row mse {last['final_layer_mse']:.6e}, no failure flag")
+            later = rows[1:]
+            check("...and EVERY later MLP is clean -- no traceback, no flag",
+                  len(later) == 2 and all(
+                      (not m["traceback"]) and not any(
+                          m[k] for k in ("budget_exhausted", "time_exhausted",
+                                         "residual_wall_time_exhausted",
+                                         "combined_budget_exhausted"))
+                      for m in later),
+                  f"{len(later)} later MLPs, all clean")
+            check("...and every one was GENUINELY SCORED, not zeroed",
+                  all(m["final_layer_mse"] > 0.0 for m in later)
+                  and len({round(m["final_layer_mse"], 9) for m in later}) == len(later),
+                  f"mse {[round(m['final_layer_mse'], 4) for m in later]} -- "
+                  f"distinct, so each was scored against its own network")
 
     print("\n" + "=" * 96)
     print(f"{_PASS}/{_PASS + _FAIL} checks passed; "

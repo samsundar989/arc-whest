@@ -1,0 +1,290 @@
+{
+  "artifact": "lifecycle_eval_self_test",
+  "artifact_version": 1,
+  "suite": "local_sim/lifecycle_eval.py --self-test",
+  "passed": 56,
+  "total": 56,
+  "checks": [
+    {
+      "name": "setup_timeout_s",
+      "ok": true,
+      "detail": "5.0 == 5.0"
+    },
+    {
+      "name": "wall_time_limit_s",
+      "ok": true,
+      "detail": "120.0 == 120.0"
+    },
+    {
+      "name": "residual_wall_time_limit_s",
+      "ok": true,
+      "detail": "0.4"
+    },
+    {
+      "name": "lambda",
+      "ok": true,
+      "detail": "0.000e+00"
+    },
+    {
+      "name": "predict_timeout_s",
+      "ok": true,
+      "detail": "30.0"
+    },
+    {
+      "name": "memory_limit_mb",
+      "ok": true,
+      "detail": "8,192 MB  <- RLIMIT_AS; already killed v2.5"
+    },
+    {
+      "name": "L5: exactly ONE row differs between the two lifecycles",
+      "ok": true,
+      "detail": "1 differ"
+    },
+    {
+      "name": "L5: and it is index 0",
+      "ok": true,
+      "detail": "index 0"
+    },
+    {
+      "name": "L1: rows 1.. are BIT-IDENTICAL across lifecycles",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L1: the old lifecycle over-charges MLP #0, it never under-charges",
+      "ok": true,
+      "detail": "+2.5273e+08 FLOPs"
+    },
+    {
+      "name": "L1: setup() was called exactly once on the grader path",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L3: module load + setup(), plus the measured host cold start, fits",
+      "ok": true,
+      "detail": "210.5 ms + 240 ms = 450 ms of 5000 ms (a PACKAGE DEFAULT, not observed)"
+    },
+    {
+      "name": "L3: and is therefore not timed out",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L3: setup raised nothing",
+      "ok": true,
+      "detail": "clean"
+    },
+    {
+      "name": "L2: score_suite == mean_i mse_i * max(0.1, C_i/B)",
+      "ok": true,
+      "detail": "relative deviation 0.000e+00"
+    },
+    {
+      "name": "L2: no row silently over budget",
+      "ok": true,
+      "detail": "0 failed"
+    },
+    {
+      "name": "L4: a 1e6 budget exhausts the FLOP budget",
+      "ok": true,
+      "detail": "2/2 exhausted"
+    },
+    {
+      "name": "L4: exhausted rows are FAILED",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L4: and their MSE is EXACTLY mean(target^2), i.e. zeroed predictions",
+      "ok": true,
+      "detail": "8.45848843455314636e-02 vs 8.45848843455314636e-02"
+    },
+    {
+      "name": "L4: a failure is priced at multiplier EXACTLY 1.0, not the 0.1 floor",
+      "ok": true,
+      "detail": "[1.0, 1.0]"
+    },
+    {
+      "name": "L4: a raising predict() routes to the exception path",
+      "ok": true,
+      "detail": "['RuntimeError', 'RuntimeError']"
+    },
+    {
+      "name": "L4: exception rows are FAILED and exactly zeroed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L4: a TRANSPOSED prediction is caught by validation, not scored",
+      "ok": true,
+      "detail": "ValueError"
+    },
+    {
+      "name": "L4: a 1e-9 s residual limit trips the residual path",
+      "ok": true,
+      "detail": "2/2"
+    },
+    {
+      "name": "L4: residual-exhausted rows are exactly zeroed at multiplier 1.0",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L4: a 1e-9 s WALL limit trips the TIME path",
+      "ok": true,
+      "detail": "2/2 time_exhausted"
+    },
+    {
+      "name": "L4: wall-exhausted rows are exactly zeroed at multiplier 1.0",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L4: ...and the WALL path is distinct from the RESIDUAL path",
+      "ok": true,
+      "detail": "time_exhausted set, residual_exhausted clear"
+    },
+    {
+      "name": "L4: 50 ms of residual at B=1e9 trips the COMBINED budget C=F+lam*R>B",
+      "ok": true,
+      "detail": "C = 5.791e+09 vs B = 1.000e+09"
+    },
+    {
+      "name": "L4: combined-exhausted rows are exactly zeroed at multiplier 1.0",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L4: and `competition_score` owns that predicate, not this module",
+      "ok": true,
+      "detail": "C = 3.000e+11 vs B = 2.72e11, at the PHASE-1 rate"
+    },
+    {
+      "name": "L4: ...and under the LIVE round the same row is IN budget, because lambda is 0",
+      "ok": true,
+      "detail": "C = 2.000e+11 vs B = 2.72e11"
+    },
+    {
+      "name": "a 6 s setup RAISES SetupFailure \u2014 no clean objective is produced",
+      "ok": true,
+      "detail": "grader: cli.py:2357 -> runner.py:155-172 kills the run"
+    },
+    {
+      "name": "...and the opt-in path marks it, rather than hiding it",
+      "ok": true,
+      "detail": "setup 6.01s + 0.24s cold start > 5.0s"
+    },
+    {
+      "name": "a RAISING setup also refuses",
+      "ok": true,
+      "detail": "SETUP_ERROR"
+    },
+    {
+      "name": "the timer covers module load, not just setup() (runner.py:144 precedes load_estimator_from_path)",
+      "ok": true,
+      "detail": "measured 210.5 ms + 240 ms host cold start, of 5000 ms"
+    },
+    {
+      "name": "the evidence bundle says its residual is a LOCAL-runner figure",
+      "ok": true,
+      "detail": "runner=local (in-process BudgetContext)"
+    },
+    {
+      "name": "L6: rows_hash is stable across two independent runs",
+      "ok": true,
+      "detail": "7ee1615d2b007a1b9a47a8fa..."
+    },
+    {
+      "name": "L6: the two lifecycles have DIFFERENT hashes (it can discriminate)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L6: ...and the hash is stable EVEN THOUGH timings moved between runs",
+      "ok": true,
+      "detail": "timings differed run-to-run, hash did not"
+    },
+    {
+      "name": "L6: EvidenceRow is frozen (an editable row is not evidence)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L7: for_round('v1-phase1') carries ALL SIX Phase-1 constants together",
+      "ok": true,
+      "detail": "B=2.720e+11 lam=1e+11 wall=60.0 residual=None"
+    },
+    {
+      "name": "L7: a clean spec reports NO deviation from the round it names",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "name": "L7: ...and a modified one names exactly what it changed",
+      "ok": true,
+      "detail": "{'flop_budget': [1000000, 272000000000]}"
+    },
+    {
+      "name": "L7: the provenance blob carries the round tag and its deviations",
+      "ok": true,
+      "detail": "v1-phase1, deviations {}"
+    },
+    {
+      "name": "L7: for_round refuses an unknown field rather than ignoring it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L8: the live spec is Phase 2, with the cliff ARMED",
+      "ok": true,
+      "detail": "B=2**41 lam=0.0 residual_cap=0.4s mem=8192 MB"
+    },
+    {
+      "name": "L8: counted FLOPs EXACTLY equal the official one-row subprocess anchor",
+      "ok": true,
+      "detail": "137,600,326,656 vs 137,600,326,656 (delta +0)"
+    },
+    {
+      "name": "L8: C == F, because lambda is 0",
+      "ok": true,
+      "detail": "C = 137,600,326,656"
+    },
+    {
+      "name": "L8: the multiplier is pinned at the 0.1 floor at this operating point",
+      "ok": true,
+      "detail": "C/B = 0.0625734 < floor 0.1"
+    },
+    {
+      "name": "L8: no failure path fires on the shipped file",
+      "ok": true,
+      "detail": "budget=False time=False residual=False combined=False error=''"
+    },
+    {
+      "name": "L8: local in-process residual leaves headroom under the 0.4 s cliff",
+      "ok": true,
+      "detail": "61.3 ms local -> 6.52x headroom (LOCAL, in-process; the grader's own figure is the authority)"
+    },
+    {
+      "name": "L8: the 0.4 s cliff FIRES when provoked (1e-9 s limit)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L8: a residual failure is zeroed and priced at multiplier 1.0, not 0.1",
+      "ok": true,
+      "detail": "mult 1.0"
+    },
+    {
+      "name": "L8: ...and that run's provenance DECLARES it was not a clean round",
+      "ok": true,
+      "detail": "{'residual_wall_time_limit_s': [1e-09, 0.4]}"
+    },
+    {
+      "name": "L8: no amount of residual can trip the combined budget under lambda 0",
+      "ok": true,
+      "detail": "C = 137,600,326,656 vs B = 2,199,023,255,552"
+    }
+  ],
+  "results_sha256": "a913c55cbcc2434ea5fde5a25524d4081e48a7d08a1710af8b242b9d75ca16d1"
+}

@@ -795,9 +795,21 @@ def format_suite(rows: Sequence[EvidenceRow], suite: SuiteScore,
 
 _PASS = _FAIL = 0
 
+#: Every check this suite runs, as (name, ok, detail). Recorded so another suite
+#: can verify a SPECIFIC named result rather than trusting that this file exists.
+#:
+#: The distinction is the whole point of the P2-P0 G4 failure: an enforceability
+#: matrix claimed `provoked_by: "lifecycle_eval.py --self-test (L4)"` for the wall
+#: limit, and the named provocation did not exist. A witness that resolves a
+#: FILENAME cannot catch that. A witness that resolves a CHECK NAME and its RESULT
+#: can, and does.
+_RESULTS: List[Dict[str, Any]] = []
+
 
 def check(name: str, ok: bool, detail: str = "") -> bool:
     global _PASS, _FAIL
+    ok = bool(ok)
+    _RESULTS.append({"name": name, "ok": ok, "detail": str(detail)})
     if ok:
         _PASS += 1
         print(f"  {name:<62} ok   {detail}")
@@ -805,6 +817,33 @@ def check(name: str, ok: bool, detail: str = "") -> bool:
         _FAIL += 1
         print(f"  {name:<62} FAIL {detail}")
     return ok
+
+
+def _emit_results(path: str) -> None:
+    """Write this run's checks, machine-readably, with an evidence hash.
+
+    The hash covers the (name, ok) pairs only -- not the details, which carry
+    timings -- so two honest runs of the same suite produce the same digest and a
+    changed RESULT changes it.
+    """
+    payload = {
+        "artifact": "lifecycle_eval_self_test",
+        "artifact_version": 1,
+        "suite": "local_sim/lifecycle_eval.py --self-test",
+        "passed": _PASS,
+        "total": _PASS + _FAIL,
+        "checks": _RESULTS,
+    }
+    digest = hashlib.sha256(
+        json.dumps([[c["name"], c["ok"]] for c in _RESULTS],
+                   sort_keys=False).encode("utf-8")
+    ).hexdigest()
+    payload["results_sha256"] = digest
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, indent=2)
+    print(f"\n  wrote {os.path.relpath(path, _ROOT)}  "
+          f"({_PASS}/{_PASS + _FAIL}, sha256 {digest[:16]}...)")
 
 
 def head(t: str) -> None:
@@ -1251,10 +1290,18 @@ def _is_frozen(row) -> bool:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--self-test", action="store_true",
-                    help="run the L1-L6 regression suite")
+                    help="run the L1-L8 regression suite")
+    ap.add_argument("--emit-json", default="",
+                    help=("with --self-test, also write every check result and an "
+                          "evidence hash here, so another suite can verify a "
+                          "SPECIFIC named provocation rather than trusting that "
+                          "this file exists"))
     a = ap.parse_args()
     if a.self_test:
-        return _self_test()
+        rc = _self_test()
+        if a.emit_json:
+            _emit_results(os.path.abspath(a.emit_json))
+        return rc
     ap.print_help()
     return 0
 

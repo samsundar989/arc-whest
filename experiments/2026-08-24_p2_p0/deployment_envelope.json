@@ -10,26 +10,131 @@
         "value": 2199023255552,
         "enforced_locally": true,
         "by": "flopscope.BudgetContext raises BudgetExhaustedError",
-        "provoked_by": "local_sim/lifecycle_eval.py --self-test (L4)"
+        "provoked_by": {
+          "suite": "local_sim/lifecycle_eval.py --self-test",
+          "checks": [
+            "L4: a 1e6 budget exhausts the FLOP budget",
+            "L4: exhausted rows are FAILED",
+            "L4: a failure is priced at multiplier EXACTLY 1.0, not the 0.1 floor"
+          ],
+          "expect_detail": {
+            "L4: a 1e6 budget exhausts the FLOP budget": "2/2 exhausted"
+          }
+        },
+        "witness_verified": true,
+        "witness_reason": "3 named check(s) verified in local_sim/lifecycle_eval.py --self-test [a913c55cbcc2]",
+        "witness_results": [
+          {
+            "name": "L4: a 1e6 budget exhausts the FLOP budget",
+            "ok": true,
+            "detail": "2/2 exhausted"
+          },
+          {
+            "name": "L4: exhausted rows are FAILED",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "L4: a failure is priced at multiplier EXACTLY 1.0, not the 0.1 floor",
+            "ok": true,
+            "detail": "[1.0, 1.0]"
+          }
+        ]
       },
       "wall_time_limit_s": {
         "value": 120.0,
         "enforced_locally": true,
         "by": "flopscope.BudgetContext wall clock -> TimeExhaustedError",
-        "provoked_by": "local_sim/lifecycle_eval.py --self-test (L4)"
+        "provoked_by": {
+          "suite": "local_sim/lifecycle_eval.py --self-test",
+          "checks": [
+            "L4: a 1e-9 s WALL limit trips the TIME path",
+            "L4: wall-exhausted rows are exactly zeroed at multiplier 1.0",
+            "L4: ...and the WALL path is distinct from the RESIDUAL path"
+          ],
+          "expect_detail": {
+            "L4: a 1e-9 s WALL limit trips the TIME path": "2/2 time_exhausted",
+            "L4: ...and the WALL path is distinct from the RESIDUAL path": "residual_exhausted clear"
+          }
+        },
+        "witness_verified": true,
+        "witness_reason": "3 named check(s) verified in local_sim/lifecycle_eval.py --self-test [a913c55cbcc2]",
+        "witness_results": [
+          {
+            "name": "L4: a 1e-9 s WALL limit trips the TIME path",
+            "ok": true,
+            "detail": "2/2 time_exhausted"
+          },
+          {
+            "name": "L4: wall-exhausted rows are exactly zeroed at multiplier 1.0",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "L4: ...and the WALL path is distinct from the RESIDUAL path",
+            "ok": true,
+            "detail": "time_exhausted set, residual_exhausted clear"
+          }
+        ]
       },
       "residual_wall_time_limit_s": {
         "value": 0.4,
         "enforced_locally": true,
         "by": "post-predict comparison against BudgetContext residual",
-        "provoked_by": "local_sim/lifecycle_eval.py --self-test (L8)",
-        "note": "the LOCAL residual is a different instrument from the graded one; the cliff is modelled faithfully, the seconds are not transferable"
+        "provoked_by": {
+          "suite": "local_sim/lifecycle_eval.py --self-test",
+          "checks": [
+            "L4: a 1e-9 s residual limit trips the residual path",
+            "L8: the 0.4 s cliff FIRES when provoked (1e-9 s limit)",
+            "L8: a residual failure is zeroed and priced at multiplier 1.0, not 0.1"
+          ]
+        },
+        "note": "the LOCAL residual is a different instrument from the graded one; the cliff is modelled faithfully, the seconds are not transferable",
+        "witness_verified": true,
+        "witness_reason": "3 named check(s) verified in local_sim/lifecycle_eval.py --self-test [a913c55cbcc2]",
+        "witness_results": [
+          {
+            "name": "L4: a 1e-9 s residual limit trips the residual path",
+            "ok": true,
+            "detail": "2/2"
+          },
+          {
+            "name": "L8: the 0.4 s cliff FIRES when provoked (1e-9 s limit)",
+            "ok": true,
+            "detail": ""
+          },
+          {
+            "name": "L8: a residual failure is zeroed and priced at multiplier 1.0, not 0.1",
+            "ok": true,
+            "detail": "mult 1.0"
+          }
+        ]
       },
       "setup_timeout_s": {
         "value": 5.0,
         "enforced_locally": true,
         "by": "timed module load + setup(), plus HOST_COLD_START_S",
-        "provoked_by": "local_sim/lifecycle_eval.py --self-test (4b)"
+        "provoked_by": {
+          "suite": "local_sim/lifecycle_eval.py --self-test",
+          "checks": [
+            "a 6 s setup RAISES SetupFailure \u2014 no clean objective is produced",
+            "a RAISING setup also refuses"
+          ]
+        },
+        "witness_verified": true,
+        "witness_reason": "2 named check(s) verified in local_sim/lifecycle_eval.py --self-test [a913c55cbcc2]",
+        "witness_results": [
+          {
+            "name": "a 6 s setup RAISES SetupFailure \u2014 no clean objective is produced",
+            "ok": true,
+            "detail": "grader: cli.py:2357 -> runner.py:155-172 kills the run"
+          },
+          {
+            "name": "a RAISING setup also refuses",
+            "ok": true,
+            "detail": "SETUP_ERROR"
+          }
+        ]
       },
       "memory_limit_mb": {
         "value": 8192,
@@ -42,7 +147,9 @@
         "value": null,
         "enforced_locally": true,
         "by": "whest run --runner subprocess restarts a dead worker",
-        "provoked_by": "this file, section 6"
+        "provoked_by": {
+          "suite": "this file, section 6"
+        }
       },
       "predict_response_timeout_s": {
         "value": 30.0,
@@ -50,7 +157,8 @@
         "by": "runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint",
         "provoked_by": null
       }
-    }
+    },
+    "witness_suite_sha256": "a913c55cbcc2434ea5fde5a25524d4081e48a7d08a1710af8b242b9d75ca16d1"
   },
   "unprovable_here": [
     {
@@ -70,20 +178,20 @@
   "memory": {
     "measurement": {
       "baseline": {
-        "working_set": 130453504,
-        "commit": 606797824
+        "working_set": 130572288,
+        "commit": 606715904
       },
       "peak": {
-        "working_set": 462229504,
-        "commit": 962457600
+        "working_set": 462315520,
+        "commit": 962256896
       },
       "weight_bytes": 67108864
     },
     "limit_mb": 8192,
-    "peak_working_set_mb": 440.81640625,
-    "peak_commit_mb": 917.87109375,
+    "peak_working_set_mb": 440.8984375,
+    "peak_commit_mb": 917.6796875,
     "weights_mb": 64.0,
-    "headroom_upper_bound": 8.925000531971486
+    "headroom_upper_bound": 8.92686207571746
   },
   "memory_limit_provocation": {
     "provoked_here": false,
@@ -116,6 +224,6 @@
       "error": 1
     }
   },
-  "checks_passed": 17,
-  "checks_total": 17
+  "checks_passed": 29,
+  "checks_total": 29
 }

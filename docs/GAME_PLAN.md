@@ -475,8 +475,39 @@ verdict. A DESIGN result never becomes a DECIDE result by documentation wording.
 
 ## 8. Immediate next action
 
-Run **Phase 0 — evaluator repair**. Before editing the instrument, obtain and record
-Samuel's predictions for:
+**Phase 0's repair is done; Phase 0 is not closed.** Deployment parity was
+repaired on 2026-08-24: the official stack is pinned, one round-aware config
+authority asserts every constant against the installed package, local MLPs are
+flopscope-backed, the counted-FLOP anchor reconciles to the official runner
+**op by op with residue zero**, and all five G4 paths are now provoked — the
+memory limit on Linux, where `RLIMIT_AS` exists.
+
+**The gate is an all-of, G1–G7. G1–G6 are met; G7 is pending.** Three independent
+passes returned PROVISIONAL, PROVISIONAL and REJECT. The immediate action is
+**final Phase-0 evidence and acceptance**, and then **Phase 1A**.
+
+**Until a literal ACCEPT exists:** no DESIGN seed may be claimed, `estimator.py`
+may not be edited, and no Phase-1 measurement may be taken.
+
+Phase 1 then runs in two distinct stages:
+
+- **Phase 1A — construction only.** A width-1024 Kerdock/MUB generator emitting
+  1/2/4/8/16 bases without materialising the full code, proved against an
+  independent verifier and reduced-dimension references, with the 32,768-forward
+  FLOP fingerprint reproduced by a dense reference first. No truth seed, no
+  estimator change. Ends in preflight and an independent ACCEPT.
+- **Phase 1B — DESIGN evidence.** Contract reviewed before any block is claimed,
+  on a **new** block (P02 rather than the already-exposed P01), judged on paired
+  arithmetic competition-score differences with measured FLOPs, including a
+  100-MLP soak reporting warm-up, residual drift, peak memory and worst-case 0.4 s
+  headroom — with the unexplained ~2.35× process-state effect as an explicit
+  falsifier.
+
+---
+
+### The original Phase-0 prediction requirements, for the record
+
+Before editing the instrument, obtain and record Samuel's predictions for:
 
 1. expected score change from official-stack repair (`<1%`, `1–5%`, `>5%`);
 2. expected Kerdock16 variance reduction versus IID at 32,768 directions
