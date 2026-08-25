@@ -89,11 +89,28 @@ Applied coordinatewise to a length-`2^m` `Z4` word it yields a binary vector of
 length `2^(m+1) = N`. This is the classical Gray image under which `φ(K(m))` is
 the binary Kerdock code.
 
-**Coordinate identification — an implementation choice, fixed here.** The `N`
-positions of the Gray image are indexed by pairs `(x, t)`, `x ∈ T`, `t ∈ {0,1}`,
-laid out as `index = 2·rank(x) + t` where `rank(x)` is the position of `x` in the
-fixed Teichmüller enumeration `0, ξ^0, ξ^1, …` of §2. That index is then read as
-an element of `F2^n` by its little-endian binary expansion.
+**Coordinate identification — an implementation choice, and the first version of
+it was WRONG.** The `N` positions of the Gray image are indexed by pairs
+`(x, t)`, `x ∈ T`, `t ∈ {0,1}`, laid out as
+
+```text
+index = 2·ι(x) + t,   ι(x) = the ADDITIVE image of x in R/2R ≅ GF(2^m),
+                             read little-endian as m bits
+```
+
+Reduction mod 2 is a **bijection** `T → GF(2^m)`, and it is the map that respects
+the `F2`-linear structure the Walsh phase `⟨x, y⟩` needs.
+
+> **Corrected 2026-08-25, by the verifier.** This section first specified
+> `index = 2·rank(x) + t`, with `rank` the position of `x` in the *multiplicative*
+> enumeration `0, ξ^0, ξ^1, …`. That is not `F2`-linear in anything. The
+> generator built from it produced Boolean functions of **ANF degree 9 instead of
+> 2**, matrix differences of **rank 6, 8 and 10 instead of 10**, and a cross-basis
+> spectrum of `[0, 4, 8, …, 104]` instead of a flat `32` — while **within-basis
+> orthogonality passed perfectly**, exactly as §5 says a weak check would. V3 and
+> V7c caught it; V2 could not have. The rank-based identification is recorded
+> here rather than deleted, because "the check that would have missed this" is
+> the more useful half of the lesson.
 
 This identification is **not forced by the mathematics** — any linear relabelling
 of `F2^n` gives an equally valid line-set — but a *wrong* one breaks §5's
