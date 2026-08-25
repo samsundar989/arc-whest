@@ -17,7 +17,9 @@ ITEM 4 -- the radial factor, validated apart from the angular carrier
 ITEM 5 -- exact second and fourth moments (quadrature characterisation)
 -----------------------------------------------------------------------
   PASS  second moment is EXACT: (1/M) Σ v vᵀ = I/N, in integer arithmetic max |Σ v vᵀ − 2kN·I| = 0
-  PASS  aligned fourth moment / spherical target is EXACTLY 21.6881103515625 21.6881103515625
+  PASS  aligned fourth moment, MEASURED on the carrier, is 21.6881103515625x 21.6881103515625  (measured, not derived)
+  PASS  ...and the closed form agrees with the measurement               closed 6.192922592163e-05 vs measured 6.192922592163e-05
+  PASS  no probed direction exceeds the carrier-aligned value            9 structured probes, max 21.6881x; standard basis 0.3340x. NOT a proof of global extremality, untested
       spherical target   2.855446e-06
       carrier-aligned    6.192923e-05   = 21.6881103515625x
   PASS  random probes cluster near 1.0 and would MISS the aligned case   64 random directions: ratio in [0.9680, 1.0234]
@@ -38,12 +40,22 @@ ITEMS 6-7 -- real flopscope ledger, setup and memory, fresh subprocess
       cancel. So the leader's +290,757,224 (+0.0264%) is NOT ReLU and
       NOT materialisation; it is something else in an implementation we
       cannot see. It is a CLUE, not a target, and we report ours.
-      construct   0.095 s   materialise 0.053 s   propagate 1.69 s
+      It also has NO raw artifact here -- it is a literal quoted from a
+      board reading, and its trailing zeros suggest rounding, so
+      '+290,757,224' is quoted to more precision than its source
+      supports. The qualitative conclusion survives any rounding.
+  PASS  the dense carrier's counted C/B is EXACTLY 0.5 -> multiplier 0.5 1,099,511,627,776 = 2^40 against B = 2^41
+      C/B = 0.5 -> multiplier 0.5; the
+      shipped k2p1 path sits at C/B 0.0626, multiplier 0.1 (the floor).
+      A DENSE 16-basis carrier therefore costs a 5.0x MULTIPLIER PENALTY before any
+      state or reference cost. Arithmetic on the score identity, not a
+      performance claim -- and what Phase 1B must design against.
+      construct   0.089 s   materialise 0.053 s   propagate 1.26 s
       peak commit 1,147 MB   (baseline 505 MB)
   PASS  peak memory is under the 8,192 MB class default                  1,147 MB -- an ACCOUNTING UPPER BOUND on this host, not proof the grader's limit was enforced
-  PASS  carrier CONSTRUCTION fits the 5 s setup ceiling with room        0.095 s of 5 s, and the ceiling is shared with `import whestbench` (1.3-9 s)
+  PASS  carrier CONSTRUCTION fits the 5 s setup ceiling with room        0.089 s of 5 s, and the ceiling is shared with `import whestbench` (1.3-9 s)
 
 ====================================================================================================
-13/13 checks passed
-CARRIER-PROBE-RESULT: 13/13 checks passed, exit 0
+16/16 checks passed
+CARRIER-PROBE-RESULT: 16/16 checks passed, exit 0
   wrote experiments\2026-08-25_p1a\carrier_probe.json

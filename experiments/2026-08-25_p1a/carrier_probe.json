@@ -22,18 +22,24 @@
     "overhead": 0,
     "overhead_pct": 0.0
   },
+  "cost_identity": {
+    "C_over_B": 0.5,
+    "multiplier": 0.5,
+    "shipped_multiplier": 0.1,
+    "multiplier_penalty": 5.0
+  },
   "memory_mb": {
-    "baseline": 504.71484375,
-    "peak": 1146.625,
-    "after_construct": 569.98828125,
-    "after_weights": 793.41015625
+    "baseline": 504.78515625,
+    "peak": 1146.66796875,
+    "after_construct": 570.05859375,
+    "after_weights": 793.48046875
   },
   "timing_s": {
-    "construct": 0.09458450006786734,
-    "materialise": 0.05316269991453737,
-    "propagate": 1.69092239998281,
-    "child_wall": 2.3072522999718785
+    "construct": 0.08930689992848784,
+    "materialise": 0.05338099994696677,
+    "propagate": 1.2608861000044271,
+    "child_wall": 1.8118089000927284
   },
-  "checks_passed": 13,
-  "checks_total": 13
+  "checks_passed": 16,
+  "checks_total": 16
 }

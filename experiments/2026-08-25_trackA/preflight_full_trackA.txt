@@ -1,6 +1,11 @@
 ﻿preflight -- arc-whest
 repo:    C:\Users\samsu\Documents\arc-whest
 shipped: estimator.py   archive: estimator_v2_6_1.py
+HEAD:    3adf81fd074a5986438718a141fb6b10de8701de
+worktree: DIRTY at start --
+     M experiments/2026-08-25_trackA/preflight_full_trackA.txt
+  (steps 15/16 regenerate tracked evidence, so the tree is
+   EXPECTED to be dirty at the END of a -Full run)
 
 === 1. official stack + round configuration ===
 official_config -- every value asserted against the installed package
@@ -213,7 +218,7 @@ Validating estimator estimator.py
 uv : C:\Users\samsu\Documents\arc-whest\estimator.py:772: SymmetryLossWarning: Symmetry lost along dims (0, 1): 
 multiply — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is 
 symmetric. Suppress with flops.configure(symmetry_warnings=False).
-At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:281 char:5
+At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:299 char:5
 +     uv run whest validate --estimator estimator.py
 +     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (C:\Users\samsu\...arnings=False).:String) [], RemoteException
@@ -238,7 +243,7 @@ with flops.configure(symmetry_warnings=False).
 │ │ └────────┴──────────────────────────┴────────────────┘                  │ │
 │ └─────────────────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
-✓ Validation passed in 30ms
+✓ Validation passed in 27ms
 Next: `whest run --estimator estimator.py --split mini`
   PASS  4. whest validate
 
@@ -271,7 +276,7 @@ seed ledger — static source scan
 uv : C:\Users\samsu\Documents\arc-whest\local_sim\test_competition_score.py:43: ConfigureNoOpWarning: 
 flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the 
 evaluation servers, so these settings will not affect a graded submission.
-At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:352 char:5
+At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:370 char:5
 +     uv run python local_sim/test_competition_score.py
 +     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (C:\Users\samsu\...ded submission.:String) [], RemoteException
@@ -473,7 +478,7 @@ paired, n = 50 MLPs   (v2.4 (324420) vs v2.4.1 (327743))
 === 9. seed-ledger refusals ===
 uv :   NOTE D18 is DESIGN: [30,806,018,000..30,806,018,023] overlaps 'probe_a.py'. Permitted, but the two results are 
 CORRELATED evidence and must not be quoted as independent.
-At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:361 char:5
+At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:379 char:5
 +     uv run python local_sim/test_seed_ledger.py
 +     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (  NOTE D18 is D...as independent.:String) [], RemoteException
@@ -612,7 +617,7 @@ counter and log agree (1).
 uv : C:\Users\samsu\Documents\arc-whest\local_sim\lifecycle_eval.py:484: ConfigureNoOpWarning: flops.configure() 
 configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so 
 these settings will not affect a graded submission.
-At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:386 char:5
+At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:404 char:5
 +     uv run python local_sim/lifecycle_eval.py --self-test
 +     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (C:\Users\samsu\...ded submission.:String) [], RemoteException
@@ -648,7 +653,7 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
   L1: setup() was called exactly once on the grader path         ok   
 
 2. L3 — setup() fits inside the grader's 5-second ceiling
-  L3: module load + setup(), plus the measured host cold start, fits ok   215.3 ms + 240 ms = 455 ms of 5000 ms (a PACKAGE DEFAULT, not observed)
+  L3: module load + setup(), plus the measured host cold start, fits ok   204.4 ms + 240 ms = 444 ms of 5000 ms (a PACKAGE DEFAULT, not observed)
   L3: and is therefore not timed out                             ok   
   L3: setup raised nothing                                       ok   clean
 
@@ -669,18 +674,18 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
   L4: a 1e-9 s WALL limit trips the TIME path                    ok   2/2 time_exhausted
   L4: wall-exhausted rows are exactly zeroed at multiplier 1.0   ok   
   L4: ...and the WALL path is distinct from the RESIDUAL path    ok   time_exhausted set, residual_exhausted clear
-  L4: 50 ms of residual at B=1e9 trips the COMBINED budget C=F+lam*R>B ok   C = 6.225e+09 vs B = 1.000e+09
+  L4: 50 ms of residual at B=1e9 trips the COMBINED budget C=F+lam*R>B ok   C = 5.648e+09 vs B = 1.000e+09
   L4: combined-exhausted rows are exactly zeroed at multiplier 1.0 ok   
   L4: and `competition_score` owns that predicate, not this module ok   C = 3.000e+11 vs B = 2.72e11, at the PHASE-1 rate
   L4: ...and under the LIVE round the same row is IN budget, because lambda is 0 ok   C = 2.000e+11 vs B = 2.72e11
 
 4b. SETUP failure is a REFUSAL, because the grader aborts the whole run
   a 6 s setup RAISES SetupFailure — no clean objective is produced ok   grader: cli.py:2357 -> runner.py:155-172 kills the run
-  ...and the opt-in path marks it, rather than hiding it         ok   setup 6.00s + 0.24s cold start > 5.0s
+  ...and the opt-in path marks it, rather than hiding it         ok   setup 6.01s + 0.24s cold start > 5.0s
   a RAISING setup also refuses                                   ok   SETUP_ERROR
 
 4c. the setup clock starts where the grader's does
-  the timer covers module load, not just setup() (runner.py:144 precedes load_estimator_from_path) ok   measured 215.3 ms + 240 ms host cold start, of 5000 ms
+  the timer covers module load, not just setup() (runner.py:144 precedes load_estimator_from_path) ok   measured 204.4 ms + 240 ms host cold start, of 5000 ms
   the evidence bundle says its residual is a LOCAL-runner figure ok   runner=local (in-process BudgetContext)
 
 5. L6 — evidence rows are content-addressed and reproducible
@@ -703,7 +708,7 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
   L8: C == F, because lambda is 0                                ok   C = 137,600,326,656
   L8: the multiplier is pinned at the 0.1 floor at this operating point ok   C/B = 0.0625734 < floor 0.1
   L8: no failure path fires on the shipped file                  ok   budget=False time=False residual=False combined=False error=''
-  L8: local in-process residual leaves headroom under the 0.4 s cliff ok   52.2 ms local -> 7.67x headroom (LOCAL, in-process; the grader's own figure is the authority)
+  L8: local in-process residual leaves headroom under the 0.4 s cliff ok   43.2 ms local -> 9.27x headroom (LOCAL, in-process; the grader's own figure is the authority)
   L8: the 0.4 s cliff FIRES when provoked (1e-9 s limit)         ok   
   L8: a residual failure is zeroed and priced at multiplier 1.0, not 0.1 ok   mult 1.0
   L8: ...and that run's provenance DECLARES it was not a clean round ok   {'residual_wall_time_limit_s': [1e-09, 0.4]}
@@ -717,7 +722,7 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
 uv : C:\Users\samsu\Documents\arc-whest\local_sim\p2_flop_anchor.py:343: ConfigureNoOpWarning: flops.configure() 
 configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so 
 these settings will not affect a graded submission.
-At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:402 char:5
+At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:420 char:5
 +     uv run python local_sim/p2_flop_anchor.py --gate
 +     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (C:\Users\samsu\...ded submission.:String) [], RemoteException
@@ -737,7 +742,7 @@ At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:402 char:5
 uv : C:\Users\samsu\Documents\arc-whest\local_sim\test_shape_parity.py:45: ConfigureNoOpWarning: flops.configure() 
 configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so 
 these settings will not affect a graded submission.
-At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:413 char:9
+At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:431 char:9
 +         uv run python local_sim/test_shape_parity.py
 +         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: (C:\Users\samsu\...ded submission.:String) [], RemoteException
@@ -938,8 +943,8 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
 
 0b. NEGATIVE TESTS -- the read-only latch refuses both write paths
 ------------------------------------------------------------------
-  PASS  REFUSED: regenerating a suite's results while the latch is armed --no-write is armed: refusing to regenerate ..\..\AppData\Local\Temp\arc_whest_ro_ab3ja7wz
-  PASS  REFUSED: writing an evidence artifact while the latch is armed --no-write is armed: refusing to write C:\Users\samsu\AppData\Local\Temp\arc_whest_ro_ab3j
+  PASS  REFUSED: regenerating a suite's results while the latch is armed --no-write is armed: refusing to regenerate ..\..\AppData\Local\Temp\arc_whest_ro_um2quma1
+  PASS  REFUSED: writing an evidence artifact while the latch is armed --no-write is armed: refusing to write C:\Users\samsu\AppData\Local\Temp\arc_whest_ro_um2q
   PASS  ...and with the latch DOWN the same writer DOES write          wrote would_have_been_written.json to a system temp dir
 
 1. the enforceability matrix
@@ -969,11 +974,11 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
 3. peak memory at the live shape -- accounting, not enforcement
 ---------------------------------------------------------------
   weights alone                  64.0 MB (16 x 1024x1024 float32)
-  peak WORKING SET              441.3 MB   (resident)
-  peak COMMIT                   918.4 MB   (a LOWER bound on the RLIMIT_AS charge)
+  peak WORKING SET              440.7 MB   (resident)
+  peak COMMIT                   917.8 MB   (a LOWER bound on the RLIMIT_AS charge)
   Phase-2 limit                8192.0 MB
   PASS  the shipped file's peak memory fits the Phase-2 limit          at most 8.9x headroom -- an UPPER BOUND, i.e. the most optimistic reading. RLIMIT_AS caps VIRTUAL address space, which exceeds both counters above by an unmeasured amount
-  PASS  ...and the peak is at least as large as the weights alone      918.4 MB > 64.0 MB (a peak below the weights would mean the probe never materialised them)
+  PASS  ...and the peak is at least as large as the weights alone      917.8 MB > 64.0 MB (a peak below the weights would mean the probe never materialised them)
 
 5. the 8 GiB memory limit -- provoked, or explicitly not provable here
 ----------------------------------------------------------------------
@@ -1061,8 +1066,8 @@ READ-ONLY PROOF -- is `test_deployment_envelope.py --no-write` actually read-onl
   PASS  watched path is TRACKED by git: experiments/2026-08-24_p2_p0/lifecycle_self_test.json an 'unchanged' claim about an untracked file proves nothing
   PASS  a git worktree status was obtained before the run                git status --porcelain
   PASS  the child exited 0                                               exit 0
-  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/deployment_envelope.json 6ee881e8ea9346f8 -> 6ee881e8ea9346f8
-  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json 397aa5eb937b15f9 -> 397aa5eb937b15f9
+  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/deployment_envelope.json d52c59f15b8ce8b8 -> d52c59f15b8ce8b8
+  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json 7ae7f1578b887b19 -> 7ae7f1578b887b19
   PASS  `git status --porcelain` is byte-identical across the run        3 line(s) before, 3 after
   PASS  NO green line CLAIMS worker_death_restart when section 6 is skipped 0 such lines
   PASS  ...and it is reported NOT PROVABLE instead                       present in the NOT PROVABLE block
@@ -1086,7 +1091,7 @@ READONLY-PROOF-RESULT: 32/32 checks passed, exit 0
   residual cap 0.4s   wall 120.0s
   score        4.778624e-07   raw MSE 4.778624e-06   mult 0.1000
   C/B          0.0625734   failures 0
-  worst residual 0.07163 s of 0.40 s cap  -> 5.6x headroom (GRADED PATH)
+  worst residual 0.06936 s of 0.40 s cap  -> 5.8x headroom (GRADED PATH)
   PASS  16. official Phase-2 subprocess smoke (zero failures)
 
 PREFLIGHT GREEN -- 16/16

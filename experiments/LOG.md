@@ -14598,3 +14598,135 @@ counter 1 == 1. **`estimator.py`:** byte-identical, `00240eb1e60810f5…`.
 **Next:** a fresh independent verdict on this bounded closure. Phase 1B remains
 blocked on Samuel's restated S2 prediction, a reviewed contract and a new DESIGN
 block.
+
+---
+
+# 2026-08-25 — CORRECTIONS to both tracks: a withdrawn claim that survived in the spec, and the cost consequence I never stated
+
+*Append-only; no prior entry altered. Two independent reviews, one per track, both
+**PROVISIONAL**. Nothing submitted, no seed, no truth, no vault,
+`estimator.py` byte-identical.*
+
+## PHASE 1A — the blocking finding, and it is the same family a fourth time
+
+**K6 was withdrawn in the LOG, in the verifier's docstring and in
+`CURRENT_STATE.md` — and `docs/KERDOCK_MUB_SPEC.md` §7 was missed.** The spec is
+the document this slice designates as written-before-the-generator and as the
+thing the verifier is checked against, and it went on asserting the withdrawn
+claim in its strongest form for two commits:
+
+> *"the reference builds the same object by a different route … so a shared
+> misunderstanding cannot make both agree."*
+
+There is no reference. `exhaustive_gram` consumes the generator's own output and
+imports the generator's own `walsh_matrix`. **Corrected in place with the
+withdrawal recorded beside it**, and the V7 row reworded to what it actually is:
+exhaustive integer Gram matrices, not an independent reference.
+
+That is a withdrawn claim outliving its withdrawal in the one document that
+mattered most. Retracting something in three places and missing the fourth is not
+a different failure from stating it too widely in the first place.
+
+### Four more, all mine, all closed
+
+| # | finding | closed how |
+|---|---|---|
+| **1** | *"all 512 phase functions have ANF degree 2"* — **false for one.** `λ = 0 ∈ T` is the plain Walsh basis, whose phase is **constant, degree 0**. The check was `deg_all <= 2`, which cannot tell the two apart | the check now asserts the exact **distribution `{0: 1, 2: 511}`**. Nothing mathematical moves: all 130,816 differences are still rank 10 |
+| **2** | the negative control does not reproduce the recorded first-build spectrum | see below |
+| **3** | K8's number was **derived by the check that reported it** — a hand-written closed form against a hand-typed literal, with the carrier array never read. **It passed unchanged for the rejected mapping** | now **measured off the carrier**: `a = V[0]/‖V[0]‖; ((V @ a)**4).mean()`, which returns `21.6881103515625` exactly. The closed form is kept as a second, cross-checking line |
+| **4** | *"the aligned direction is the extreme case"* was asserted, nothing tested it | now scoped to what is tested: 9 structured probes, none exceeding the aligned value, standard basis at `0.3340×`, and the line says in terms that this is **not a proof of global extremality, which is untested** |
+
+### The `104` that should have been `144`
+
+The LOG and the spec both record the rejected mapping's spectrum as
+`[0, 4, 8, … 104]`. **The executable negative control reports 36 distinct values
+with maximum 144**, and the commit message of the fix said 144 too. The
+pre-correction generator is not in git, so the original figure **can never be
+reproduced or refuted** — I cannot say which of the two the first build actually
+produced.
+
+The honest statement is the one the artifact supports: **the executable control
+reports max 144**, and `104` is an unreproducible number from a transient build.
+The qualitative claim — not flat, not 32, wildly wrong — is unaffected and is the
+only part that ever mattered.
+
+### The finding worth more than all of the above: `C/B = 0.5000`
+
+The review noticed what I had computed and never stated:
+
+```text
+dense 16-basis carrier   1,099,511,627,776  =  2^40   exactly
+budget B                 2,199,023,255,552  =  2^41
+C/B                                            0.5000
+multiplier  max(0.1, C/B)                      0.5
+shipped k2p1: C/B 0.0626  ->  multiplier 0.1 (the floor)
+```
+
+**A dense 16-basis carrier carries a 5.0× MULTIPLIER PENALTY before any state or
+reference cost is added.** That is arithmetic on the competition's own score
+identity, not a performance claim — and it is the half of the identity Phase 1B
+must design against. It is now an executable check, not a remark.
+
+Related, and carried forward rather than closed: **K1–K11 contained no residual
+prediction and no residual falsifier**, while `CURRENT_STATE.md` says Phase 1's
+contract "needs a falsifier on residual rather than a check performed
+afterwards". The Phase-1B contract must carry one. The construct/materialise/
+propagate seconds reported here are **construction** timings and say nothing
+about per-MLP residual against the 0.4 s cliff.
+
+### And one provenance limit
+
+The leader figure `1,099,802,385,000` has **no raw artifact anywhere under
+`experiments/`** — it is a literal quoted from a board reading, and its three
+trailing zeros suggest rounding. So `+290,757,224 (+0.0264%)` is quoted to more
+precision than its source supports. The qualitative conclusion — that the
+overhead is neither ReLU nor materialisation — survives any plausible rounding,
+and is now recorded with that caveat in the probe's own output.
+
+**What the review verified by recomputing, more broadly than this repository
+had:** every ordered row pair at m = 3, 5, 7 across **all** bases (not the 8 the
+verifier uses); 125,829,120 direct inner products at m = 9 giving `{32}`; all
+130,816 pairwise differences rank 10; K8's exact rational `177669/8192`; the
+flopscope billing rates measured directly against the installed 0.12; the
+byte-prefix chain; `estimator.py` identical across all eight commits; the seed
+ledger and vault untouched; and **no performance or variance claim anywhere in
+the slice** — a regex sweep returned only the disclaimers.
+
+## TRACK 0S — two corrections, both mine
+
+1. **My "two witnesses" were one run.** `preflight_full_trackA.txt` is a
+   **byte-identical copy** of `preflight_full_p1a.txt` (same sha256), committed
+   under two names and presented in the evidence list as two artifacts. It is a
+   *valid* witness for both tracks, because both sit at HEAD `0d4a053` and that
+   HEAD contains every file either track tests — but the copy was not disclosed
+   and should have been. **Stated plainly here.**
+2. **"Four commits touching `local_sim/` landed in between" was wrong.** Six
+   commits landed between the stale witness and the packet; **two** of them
+   touched `local_sim/`. Wider than the evidence, in an entry whose subject was a
+   claim wider than its evidence.
+
+### Gate item 6, reworded because it was circular
+
+As written — *"GREEN 16/16 at the submitting HEAD, transcript committed"* — it
+can never be satisfied: committing the transcript advances HEAD past the HEAD the
+run witnessed, and step 15 rewrites two **tracked** JSONs, so running it
+immediately before submitting necessarily dirties tracked files and breaks item 2.
+
+**Item 6 now reads:**
+
+> `preflight.ps1 -Full` **GREEN 16/16**, with the transcript and any evidence the
+> run regenerates committed **together in one commit**, such that the submitting
+> HEAD differs from the witnessed HEAD **only by that evidence commit** — nothing
+> under `local_sim/`, `scripts/` or `estimator.py` may differ. The transcript is
+> grepped for its own verdict line before being believed.
+
+And the structural fix that makes it checkable at all: **`preflight.ps1` now
+prints `git rev-parse HEAD` and `git status --porcelain` in its header**, so a
+transcript witnesses its own commit instead of requiring reconstruction from file
+mtimes. A reviewer had to do exactly that archaeology to check my claim.
+
+**Seed ledger:** unchanged, nothing claimed. **Vault:** untouched, counter
+1 == 1. **`estimator.py`:** byte-identical, `00240eb1e60810f5…`.
+**Nothing submitted.**
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.

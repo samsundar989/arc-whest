@@ -323,8 +323,18 @@ def main() -> int:
         A, d = quadratic_matrix(anf(g_all[i], 10), 10)
         A_all.append(A)
         deg_all = max(deg_all, d)
-    check("all 512 phase functions have ANF degree <= 2", deg_all <= 2,
-          f"max degree {deg_all}")
+    # The DISTRIBUTION, not the max. `deg_all <= 2` cannot tell "all 512 are
+    # degree 2" from "511 are degree 2 and one is a constant", and the LOG said
+    # the former while the latter is true: lambda = 0 in T gives the all-+1 sign
+    # vector -- the plain Walsh basis -- whose phase function is CONSTANT, degree
+    # 0. An independent review found the wording wider than the check. Nothing
+    # mathematical moves: all 130,816 differences are still rank 10.
+    from collections import Counter
+    dist = Counter(quadratic_matrix(anf(g_all[i], 10), 10)[1] for i in range(512))
+    check("the 512 phase-function ANF degrees are exactly {0: 1, 2: 511}",
+          dict(dist) == {0: 1, 2: 511},
+          f"{dict(sorted(dist.items()))} -- lambda=0 is the plain Walsh basis, "
+          f"a CONSTANT phase")
     Aflat = np.array([A.reshape(-1) for A in A_all], dtype=np.uint8)
     bad = 0
     for i in range(512):

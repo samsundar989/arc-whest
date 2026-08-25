@@ -106,7 +106,7 @@ the `F2`-linear structure the Walsh phase `⟨x, y⟩` needs.
 > enumeration `0, ξ^0, ξ^1, …`. That is not `F2`-linear in anything. The
 > generator built from it produced Boolean functions of **ANF degree 9 instead of
 > 2**, matrix differences of **rank 6, 8 and 10 instead of 10**, and a cross-basis
-> spectrum of `[0, 4, 8, …, 104]` instead of a flat `32` — while **within-basis
+> spectrum of a spectrum wildly unlike a flat `32` (the executable negative control reports 36 distinct values, max **144**; the `104` first recorded here is from a transient build that is not in git and cannot be reproduced) — while **within-basis
 > orthogonality passed perfectly**, exactly as §5 says a weak check would. V3 and
 > V7c caught it; V2 could not have. The rank-based identification is recorded
 > here rather than deleted, because "the check that would have missed this" is
@@ -192,13 +192,28 @@ construction supports 1, 2, 4, 8 or 16 by truncating the same ordered list.
 | V4 | `32,768` rows, `16,384` distinct lines, closed under negation | exact |
 | V5 | rows are pairwise distinct | exact |
 | V6 | byte-identical across runs and a fresh process | exact |
-| V7 | agreement with an **independent** reference at `N = 16, 64, 256` | **exhaustive**, not sampled |
+| V7 | exhaustive integer Gram matrices at `N = 16, 64, 256` (**not** an independent reference — see the correction below) | **exhaustive**, not sampled |
 
-V7 is what makes the rest mean anything: the generator emits directly from the
-ring, and the reference builds the same object by a different route (explicit
-`F2^n` truth tables and an explicit Walsh transform), so a shared misunderstanding
-cannot make both agree. Reduced dimensions are `m = 3, 5, 7` → `N = 16, 64, 256`,
-all with `m` odd as §1 requires.
+> **CORRECTED 2026-08-25 — V7 as written above was never implemented, and the
+> claim it makes is WITHDRAWN.** This section said "the reference builds the same
+> object by a different route … so a shared misunderstanding cannot make both
+> agree." **There is no independent reference.** `exhaustive_gram` consumes the
+> generator's own output and the verifier imports the generator's own
+> `walsh_matrix`. What exists is a strong independent **property checker** — ANF
+> degree, rank over `F2`, a second transform implementation, exhaustive integer
+> Gram matrices — and the honest scope is that it would not catch a construction
+> wrong in a way that satisfies every property checked. The properties checked
+> *are* the definition of a Kerdock set, which is the mitigation, not a proof.
+>
+> The corresponding prediction K6 was withdrawn in `experiments/LOG.md`, the
+> verifier's docstring and `docs/CURRENT_STATE.md` — **and this file was missed**,
+> so the withdrawn claim survived here in its strongest form for two commits. An
+> independent review found it. CCKS Example 9.2 was attempted as a true second
+> generator and abandoned rather than tuned into agreement; the reason is recorded
+> in the verifier's docstring.
+
+Reduced dimensions are `m = 3, 5, 7` → `N = 16, 64, 256`, all with `m` odd as §1
+requires, and at those sizes the Gram matrices are genuinely **exhaustive**.
 
 ---
 

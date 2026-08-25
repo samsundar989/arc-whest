@@ -149,13 +149,31 @@ def moments() -> None:
     # Fourth moment. The sphere's value is 3‖w‖⁴/(N(N+2)); the carrier's depends
     # on direction, and the ALIGNED direction is the extreme case.
     sphere = 3.0 / (N * (N + 2))
-    # aligned: w = a carrier row (unit). Its own basis contributes ±1 twice; the
-    # other 15 bases contribute |⟨·⟩| = 1/32 exactly, 15·1024·2 of them.
-    aligned_num = 2.0 + (k - 1) * N * 2 * (1.0 / N) ** 2
-    aligned = aligned_num / M
+    # MEASURED OFF THE CARRIER, not derived by the check that reports it.
+    #
+    # This was `aligned_num = 2.0 + (k-1)*N*2*(1.0/N)**2` compared against a
+    # hand-typed literal -- a closed form checked against a constant, with the
+    # carrier array never read. It passed unchanged for the REJECTED mapping,
+    # which is the definition of a check that tests nothing. An independent
+    # review caught it. The closed form is kept as a cross-check, second.
+    Vf = carrier_float32(9, k).astype(np.float64)
+    a = Vf[0] / np.linalg.norm(Vf[0])
+    aligned = float(((Vf @ a) ** 4).mean())
     ratio = aligned / sphere
-    check("aligned fourth moment / spherical target is EXACTLY 21.6881103515625",
-          ratio == 21.6881103515625, f"{ratio!r}")
+    closed = (2.0 + (k - 1) * N * 2 * (1.0 / N) ** 2) / M
+    check("aligned fourth moment, MEASURED on the carrier, is 21.6881103515625x",
+          ratio == 21.6881103515625, f"{ratio!r}  (measured, not derived)")
+    check("...and the closed form agrees with the measurement",
+          abs(closed - aligned) < 1e-18,
+          f"closed {closed:.12e} vs measured {aligned:.12e}")
+    probes = [Vf[i] / np.linalg.norm(Vf[i]) for i in range(0, M, M // 8)]
+    e = np.zeros(N); e[0] = 1.0
+    probes.append(e)
+    vals = [float(((Vf @ p) ** 4).mean()) for p in probes]
+    check("no probed direction exceeds the carrier-aligned value",
+          max(vals) <= aligned + 1e-18,
+          f"9 structured probes, max {max(vals) / sphere:.4f}x; standard basis "
+          f"{vals[-1] / sphere:.4f}x. NOT a proof of global extremality, untested")
     _REC["fourth_moment"] = {"sphere": sphere, "aligned": aligned,
                              "aligned_over_sphere": ratio}
     print(f"      spherical target   {sphere:.6e}")
@@ -163,7 +181,6 @@ def moments() -> None:
 
     # A random probe would NOT have found that -- which is the point.
     rng = np.random.default_rng(11)
-    Vf = carrier_float32(9, k).astype(np.float64)
     rr = []
     for _ in range(64):
         w = rng.standard_normal(N)
@@ -271,6 +288,24 @@ def ledger_and_memory() -> None:
     print(f"      cancel. So the leader's +290,757,224 (+0.0264%) is NOT ReLU and")
     print(f"      NOT materialisation; it is something else in an implementation we")
     print(f"      cannot see. It is a CLUE, not a target, and we report ours.")
+    print(f"      It also has NO raw artifact here -- it is a literal quoted from a")
+    print(f"      board reading, and its trailing zeros suggest rounding, so")
+    print(f"      '+290,757,224' is quoted to more precision than its source")
+    print(f"      supports. The qualitative conclusion survives any rounding.")
+    B = 2 ** 41
+    check("the dense carrier's counted C/B is EXACTLY 0.5 -> multiplier 0.5",
+          counted == 2 ** 40 and counted / B == 0.5,
+          f"{counted:,} = 2^40 against B = 2^41")
+    _REC["cost_identity"] = {"C_over_B": counted / B,
+                             "multiplier": max(0.1, counted / B),
+                             "shipped_multiplier": 0.1,
+                             "multiplier_penalty": max(0.1, counted / B) / 0.1}
+    print(f"      C/B = {counted / B} -> multiplier {max(0.1, counted / B)}; the")
+    print(f"      shipped k2p1 path sits at C/B 0.0626, multiplier 0.1 (the floor).")
+    print(f"      A DENSE 16-basis carrier therefore costs a "
+          f"{max(0.1, counted / B) / 0.1:.1f}x MULTIPLIER PENALTY before any")
+    print(f"      state or reference cost. Arithmetic on the score identity, not a")
+    print(f"      performance claim -- and what Phase 1B must design against.")
 
     MB = 1024 * 1024
     base = d["baseline_mem"].get("commit", d["baseline_mem"].get("working_set", 0))

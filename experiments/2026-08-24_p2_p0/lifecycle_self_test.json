@@ -63,7 +63,7 @@
     {
       "name": "L3: module load + setup(), plus the measured host cold start, fits",
       "ok": true,
-      "detail": "191.7 ms + 240 ms = 432 ms of 5000 ms (a PACKAGE DEFAULT, not observed)"
+      "detail": "207.7 ms + 240 ms = 448 ms of 5000 ms (a PACKAGE DEFAULT, not observed)"
     },
     {
       "name": "L3: and is therefore not timed out",
@@ -148,7 +148,7 @@
     {
       "name": "L4: 50 ms of residual at B=1e9 trips the COMBINED budget C=F+lam*R>B",
       "ok": true,
-      "detail": "C = 5.542e+09 vs B = 1.000e+09"
+      "detail": "C = 5.785e+09 vs B = 1.000e+09"
     },
     {
       "name": "L4: combined-exhausted rows are exactly zeroed at multiplier 1.0",
@@ -173,7 +173,7 @@
     {
       "name": "...and the opt-in path marks it, rather than hiding it",
       "ok": true,
-      "detail": "setup 6.02s + 0.24s cold start > 5.0s"
+      "detail": "setup 6.01s + 0.24s cold start > 5.0s"
     },
     {
       "name": "a RAISING setup also refuses",
@@ -183,7 +183,7 @@
     {
       "name": "the timer covers module load, not just setup() (runner.py:144 precedes load_estimator_from_path)",
       "ok": true,
-      "detail": "measured 191.7 ms + 240 ms host cold start, of 5000 ms"
+      "detail": "measured 207.7 ms + 240 ms host cold start, of 5000 ms"
     },
     {
       "name": "the evidence bundle says its residual is a LOCAL-runner figure",
@@ -263,7 +263,7 @@
     {
       "name": "L8: local in-process residual leaves headroom under the 0.4 s cliff",
       "ok": true,
-      "detail": "48.3 ms local -> 8.28x headroom (LOCAL, in-process; the grader's own figure is the authority)"
+      "detail": "48.1 ms local -> 8.32x headroom (LOCAL, in-process; the grader's own figure is the authority)"
     },
     {
       "name": "L8: the 0.4 s cliff FIRES when provoked (1e-9 s limit)",
