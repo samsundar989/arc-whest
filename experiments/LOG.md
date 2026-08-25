@@ -11408,3 +11408,113 @@ untouched. `estimator.py` byte-identical.
 **Next:** provoke the memory path for real on Linux, under the official
 WhestBench 0.16 / flopscope 0.12 subprocess runner where `RLIMIT_AS` exists; then
 re-run the complete gate and submit HEAD, diff and raw evidence for a verdict.
+
+---
+
+# 2026-08-24 — P2-P0 G4 CLOSED: the memory path is provoked, on the platform that has the limit
+
+*Closing the first of the two unmet gate clauses recorded in the REJECT entry
+above. G7 remains open pending a verdict on the corrected tree.*
+
+## What was unmet, restated
+
+G4 requires the residual cliff, wall, **memory**, over-budget and worker-restart
+paths to be **PROVOKED, not asserted**. Four fired. The memory limit did not, and
+could not: Windows has no `resource` module, so
+`whestbench/subprocess_worker.py:172-183` catches the `setrlimit` failure and the
+worker runs uncapped. I recorded that accurately and then treated the accurate
+recording as satisfying a clause that asks for a provocation.
+
+**The fix is not better prose. It is to run it where the limit exists.**
+
+## The provocation
+
+Ubuntu 24.04.1 / WSL2, kernel 6.6.87.2, Python 3.12.3, **whestbench 0.16.0 /
+flopscope 0.12.0 / numpy 2.2.6** — the identical official stack, reusing the
+Windows HF cache so both platforms score the organisers' same `v2-phase2` bytes.
+Runner `subprocess`, the only one that calls `setrlimit`. Shape `1024 x 16`,
+`B = 2**41`, `lambda = 0.0`, residual cap `0.4`, wall `120.0`, memory `8192`.
+
+**Safe by construction.** `RLIMIT_AS` bounds *virtual address space*, not resident
+memory, so the sacrificial estimator requests a **9 GiB anonymous `mmap` against
+the 8 GiB cap and never writes to it**. The kernel refuses the reservation; no page
+is faulted in and 9 GiB is never filled. The host's 30 GiB was never at risk.
+
+**With a control, because a failing `mmap` proves nothing on its own** — it could
+be a broken probe. A **256 MiB** mapping is requested first and must succeed. Only
+then does the refusal mean what it claims.
+
+The worker reads and records its own limit **before** either attempt, so the cap is
+proven applied rather than assumed:
+
+```json
+{ "rlimit_as_soft": 8589934592,          // exactly 8 GiB -- the cap WAS applied
+  "control_mmap": "OK",                   // 256 MiB succeeded: mechanism works
+  "provocation_request_gib": 9.0,
+  "provocation_mmap": "OSError: [Errno 12] Cannot allocate memory",
+  "provocation_refused": true }           // refused at mmap time, never touched
+```
+
+## Classification, and the isolation evidence
+
+```text
+n_failed_mlps = 1
+failure_breakdown = {budget_exhausted: 0, time_exhausted: 0,
+                     residual_wall_time_exhausted: 0,
+                     combined_budget_exhausted: 0, error: 1}
+
+  MLP 0   mse 9.434763e-01   OSError: [Errno 12] Cannot allocate memory
+  MLP 1   mse 1.123911e+00   no error     <- ran and was scored
+  MLP 2   mse 1.230982e+00   no error     <- ran and was scored
+```
+
+`RLIMIT_AS` **refuses an allocation rather than killing the process**, so this
+takes the grader's generic exception path: the MLP is zeroed and priced at
+multiplier 1.0, **the worker survives**, and later MLPs score normally.
+
+**That is a different route from worker death, and both are exercised.** The
+`os._exit(9)` hard-exit test is preserved, not replaced — it kills the worker, the
+runner brings up a replacement, and the remaining MLPs are scored. Two failure
+modes, two mechanisms, two pieces of evidence.
+
+## The suite is now platform-aware, which is the durable part
+
+`local_sim/test_deployment_envelope.py` **provokes** the limit where `RLIMIT_AS`
+exists and reports **NOT PROVABLE** plus a pointer to this evidence where it does
+not — validating the recorded Linux figures either way, so a Windows run still
+checks that the cap was applied, the control succeeded and the reservation was
+refused. Both platforms share **one** sacrificial estimator file, so the transcript
+and the shipped code path cannot drift apart.
+
+| platform | checks | not provable |
+|---|---|---|
+| Windows | 14/14 | 4 — memory among them, **by design** |
+| Linux | **21/21** | 1 — `predict_response_timeout_s`, which never binds under the 120 s wall |
+
+## What this does NOT establish
+
+Nothing about the **grader's** host. It proves whestbench 0.16's enforcement path
+fires when `RLIMIT_AS` exists, on a Linux kernel, at the live shape and
+configuration. The grader's own limit, hardware and headroom remain unobserved —
+no graded Phase-2 report exists.
+
+Peak memory for the shipped estimator measures 479.2 MB on Linux against the
+8,192 MB cap. As on Windows that is a **lower bound on the charged quantity**, so
+the implied headroom is an **upper** bound and never a safety margin.
+
+## Gate status
+
+| gate | status |
+|---|---|
+| G1 op-by-op anchor | MET |
+| G2 config asserted against the installed package | MET |
+| G3 suites green, denominator not reduced | MET |
+| **G4 all five paths provoked** | **MET — memory closed here** |
+| G5 official validate + subprocess smoke, zero failures | MET |
+| G6 preflight + portability green | MET |
+| **G7 independent Skeptic ACCEPT** | **still OPEN** |
+
+**Seed ledger:** unchanged. P01 144/600, 456 free. D17/D19 unspent. **Vault:**
+untouched. `estimator.py` byte-identical.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
