@@ -28,12 +28,13 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   first three each found something real, including a gate clause satisfied by a
   check that could not fail.
 - **P1-PRE has LANDED and is awaiting its verdict.** D1, D2 and D3 are closed in
-  code, `PREFLIGHT GREEN — 16/16`, portability 99/0, and eight deliberate fault
-  injections all turn the gate red. **It is not yet accepted:** two independent
-  passes returned **PROVISIONAL**, each finding a real defect in the repair
-  itself, and a third review of the corrected tree is outstanding. See the
-  P1-PRE entries at the bottom of `experiments/LOG.md`.
-- **Immediate next action: obtain that third verdict.** Nothing else may start
+  code, `PREFLIGHT GREEN — 16/16`, portability 99/0, and **eleven** deliberate
+  fault injections all turn the gate red. **It is not yet accepted:** **four**
+  independent passes have returned **PROVISIONAL**, and every one found a real
+  defect *in the repair rather than in the original defect*. A fifth review of
+  the corrected tree is outstanding. See the P1-PRE entries at the bottom of
+  `experiments/LOG.md`, including two retracted claims.
+- **Immediate next action: obtain that fifth verdict.** Nothing else may start
   until it reads ACCEPT — in particular Phase 1A does not begin.
 - **Then Phase 1A — construction only.** Build the width-1024 Kerdock/MUB
   generator, independent verifier and dense reference with **no seed block
@@ -174,7 +175,11 @@ closing — first a guard whose two sides were the same object
 while catching three of its eleven spellings. **Closing an instance of this
 repository's signature failure is a fresh opportunity to create one.** The
 falsification harness is now committed as `local_sim/p1pre_fault_inject.py` and
-carries eight injections.
+carries **eleven** injections. Four review cycles were needed to see that
+pattern, and the construction that has held every time is a **pinned literal**:
+a name or a number written down on purpose, so a guard's two sides come from
+different places. Everything derived from the structure it audits inherits that
+structure's blind spot.
 
 | # | blocker | state |
 |---|---|---|
@@ -274,7 +279,7 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 | order | slice | class | status |
 |---:|---|---|---|
 | 0 | official-stack/evaluator repair | IMPORTANT | **CLOSED 2026-08-24** — G1–G7 all met, independent ACCEPT recorded |
-| 0H | P1-PRE: D1–D3 evaluator hardening | **IMPORTANT** | **LANDED, VERDICT OUTSTANDING** — code closed, gate green 16/16, 8 injections all caught; two passes returned PROVISIONAL and both were closed; a third review is required before this row reads CLOSED |
+| 0H | P1-PRE: D1–D3 evaluator hardening | **IMPORTANT** | **LANDED, VERDICT OUTSTANDING** — code closed, gate green 16/16, 11 injections all caught; four passes returned PROVISIONAL and all were closed, two claims retracted; a fifth review is required before this row reads CLOSED |
 | 1A | Kerdock/MUB mathematical spec, direct generator, independent verifier, dense reference | **IMPORTANT** | **BLOCKED** on 0H ACCEPT; no seed, estimator edit, or truth measurement |
 | 1B | structured-carrier DESIGN evidence | STRATEGIC | after 1A ACCEPT; contract reviewed before any block is claimed, on a NEW block (P02) |
 | 2 | structured-carrier DECIDE | STRATEGIC | pending; new SINGLE_USE block after design freeze |

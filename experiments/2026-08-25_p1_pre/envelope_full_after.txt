@@ -21,8 +21,8 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
 
 0b. NEGATIVE TESTS -- the read-only latch refuses both write paths
 ------------------------------------------------------------------
-  PASS  REFUSED: regenerating a suite's results while the latch is armed --no-write is armed: refusing to regenerate ..\..\AppData\Local\Temp\arc_whest_ro_d714xh9b
-  PASS  REFUSED: writing an evidence artifact while the latch is armed --no-write is armed: refusing to write C:\Users\samsu\AppData\Local\Temp\arc_whest_ro_d714
+  PASS  REFUSED: regenerating a suite's results while the latch is armed --no-write is armed: refusing to regenerate ..\..\AppData\Local\Temp\arc_whest_ro_ryk56y9t
+  PASS  REFUSED: writing an evidence artifact while the latch is armed --no-write is armed: refusing to write C:\Users\samsu\AppData\Local\Temp\arc_whest_ro_ryk5
   PASS  ...and with the latch DOWN the same writer DOES write          wrote would_have_been_written.json to a system temp dir
 
 1. the enforceability matrix
@@ -36,6 +36,8 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
   ....  worker_death_restart                                           DEFERRED to section 7: provoked by this suite, which has not run it yet
   ----  predict_response_timeout_s                                     NOT PROVABLE HERE: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
   PASS  the matrix carries EXACTLY the required envelope constraints   7 present; missing none; unpinned none
+  PASS  every required constraint's ENFORCEMENT claim is pinned somewhere unpinned none; pinned-but-absent none
+  PASS  ...and every one of them makes the enforcement claim it is pinned to 6 pinned; disagreeing: none
   PASS  the matrix's memory claim matches a child that APPLIES the real cap matrix says False; a child setrlimit(8192 MB) says False (ModuleNotFoundError: No module named 'resource')
   PASS  every constraint the matrix marks unenforceable was REPORTED as such ['memory_limit_mb', 'predict_response_timeout_s'] marked; missing from the report: none
   PASS  the lifecycle results WERE regenerated for this run (so the --no-write refusal is not vacuous) regenerated={'local_sim/lifecycle_eval.py --self-test': True}
@@ -48,11 +50,11 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
 3. peak memory at the live shape -- accounting, not enforcement
 ---------------------------------------------------------------
   weights alone                  64.0 MB (16 x 1024x1024 float32)
-  peak WORKING SET              441.0 MB   (resident)
-  peak COMMIT                   918.0 MB   (a LOWER bound on the RLIMIT_AS charge)
+  peak WORKING SET              441.3 MB   (resident)
+  peak COMMIT                   918.2 MB   (a LOWER bound on the RLIMIT_AS charge)
   Phase-2 limit                8192.0 MB
   PASS  the shipped file's peak memory fits the Phase-2 limit          at most 8.9x headroom -- an UPPER BOUND, i.e. the most optimistic reading. RLIMIT_AS caps VIRTUAL address space, which exceeds both counters above by an unmeasured amount
-  PASS  ...and the peak is at least as large as the weights alone      918.0 MB > 64.0 MB (a peak below the weights would mean the probe never materialised them)
+  PASS  ...and the peak is at least as large as the weights alone      918.2 MB > 64.0 MB (a peak below the weights would mean the probe never materialised them)
 
 5. the 8 GiB memory limit -- provoked, or explicitly not provable here
 ----------------------------------------------------------------------
@@ -74,11 +76,11 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
 
 7. witness closure -- the provocations THIS suite performed
 -----------------------------------------------------------
-  PASS  worker_death_restart: its named provocation RAN and PASSED in THIS suite 6 named check(s) verified in local_sim/test_deployment_envelope.py [d1881defb3f5]
+  PASS  worker_death_restart: its named provocation RAN and PASSED in THIS suite 6 named check(s) verified in local_sim/test_deployment_envelope.py [e7aaad51424d]
   PASS  every SELF-PROVOKED constraint in the matrix reached this section adjudicated ['worker_death_restart']; the matrix declares ['worker_death_restart']; missing none
 
 ================================================================================================
-40/40 checks passed; 3 constraint(s) NOT PROVABLE on this host; 0 check(s) not performed in this run
+42/42 checks passed; 3 constraint(s) NOT PROVABLE on this host; 0 check(s) not performed in this run
 
 NOT PROVABLE HERE -- these are gaps in the local evaluator, and a
 candidate that passes everything above has NOT been shown to satisfy
