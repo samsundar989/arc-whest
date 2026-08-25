@@ -45,8 +45,8 @@ READ-ONLY PROOF -- is `test_deployment_envelope.py --no-write` actually read-onl
   PASS  watched path is TRACKED by git: experiments/2026-08-24_p2_p0/lifecycle_self_test.json an 'unchanged' claim about an untracked file proves nothing
   PASS  a git worktree status was obtained before the run                git status --porcelain
   PASS  the child exited 0                                               exit 0
-  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/deployment_envelope.json 1a39cf8c2411bcb9 -> 1a39cf8c2411bcb9
-  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json a6ac7180f4c9a0a6 -> a6ac7180f4c9a0a6
+  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/deployment_envelope.json 555a819a74810cb7 -> 555a819a74810cb7
+  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json 942214b1f24266c2 -> 942214b1f24266c2
   PASS  `git status --porcelain` is byte-identical across the run        3 line(s) before, 3 after
   PASS  NO green line CLAIMS worker_death_restart when section 6 is skipped 0 such lines
   PASS  ...and it is reported NOT PROVABLE instead                       present in the NOT PROVABLE block

@@ -13627,3 +13627,100 @@ checkpoint response only where evidence supports them.
 
 Durable docs updated: `CURRENT_STATE.md`, `GAME_PLAN.md`, `BENCHMARK.md`,
 `GOTCHAS.md`, and `CLAUDE_CODE_HANDOFF.md`.
+
+---
+
+# 2026-08-25 — P1-PRE CORRECTIONS: the four blocking items, and a retraction of my own score
+
+*Bounded to the four items in `docs/CLAUDE_CODE_HANDOFF.md` at `063396d`. The
+review's five non-blocking design observations are **deliberately not pursued**.
+No seed, no truth, no vault, `estimator.py` untouched. Prior entries are **not
+altered** — `experiments/LOG.md` is append-only and its byte-prefix integrity is
+the property six reviews have used to prove the preregistration was not
+retro-edited. This entry is the correction.*
+
+## RETRACTION — my own score was the sixth instance
+
+**"Ten of ten as written. No correction is owed on this pass, which is worth
+stating plainly given that three of the previous five entries owed one" is
+WITHDRAWN.**
+
+**T7's substantive property held** — the child-`setrlimit` comparison is DECLINED
+on a host with no `resource` rather than contributing a green pass built from two
+values descending from one failed import. That was the repair and it works.
+
+**T7's arithmetic was wrong**, and the entry scored it HIT with numbers from a
+different run than the artifact committed beside it. Measured against the
+committed pair `envelope_full_after.txt` at `7e81600` and at HEAD:
+
+| mode | green | declined |
+|---|---|---|
+| **writing (the committed artifact pair)** | **42 → 43** | **0 → 1** |
+| `--no-write --skip-worker-death` | 36 → 37 | 1 → 2 |
+| `--no-write` (full) | 43 → 44 | 1 → 2 |
+
+I wrote *"declined count 1 → 2, green count down by exactly one."* **Green rose by
+one in all three modes**, because the pass added two checks (M3a, M4) and demoted
+one. The `1 → 2` figure is true of the two `--no-write` modes and not of the
+committed artifact.
+
+**The honest score for the terminal pass is NINE AS WRITTEN, ONE CORRECTED.**
+
+And the shape of it matters more than the arithmetic: this is the **sixth**
+instance in this slice of a claim stated wider than the code behind it, and I
+wrote it in the sentence congratulating the pass on owing no corrections. The
+family does not only live in checks. It lives in prose about checks, and the
+prose has now been wrong more often than the code.
+
+## The four corrections
+
+| # | item | what was false | what is true now |
+|---|---|---|---|
+| **1** | **T6 made true, not restated** | the harness's default `--out` was a **tracked** file; the in-repo refusal carved that one path out; and the "REPOSITORY UNTOUCHED" measurement ran **before** the write over a protected list omitting it | default is a system temp path; **any** path resolving inside the repository is refused, tracked or not — the test is containment, not tracking status; `LEGACY_OUT` is in the protected set precisely because it was the file the carve-out permitted; the measurement runs **after** the write and reports the transcript path and whether it is in-repo |
+| **2** | **the record** | *"Ten of ten as written. No correction is owed."* | retracted above; nine as written, one corrected; prior entries unaltered |
+| **3** | **injection J restored** | J was dropped when the set was rebuilt, while `test_envelope_readonly.py` went on citing it as the evidence that `COVERAGE_CLAIM` can fail — a deleted regression test with a live reference | J is back and fires on `the scan's coverage matches the PINNED claim`; the docstring records that it was dropped and restored |
+| **4** | **durable docs** | `CURRENT_STATE.md` and `GOTCHAS.md` carried present-tense instructions not to use the harness's default output, at a HEAD two commits old | both describe the corrected behaviour; `GOTCHAS.md` keeps the *lesson* rather than the restriction — a guard scoped to "tracked files except mine" is not a guard, and a measurement taken before the event it certifies absent is not a measurement |
+
+**The injection set, stated truthfully rather than as a running total:** eleven at
+`7e81600` (A–K), then **fourteen** for the terminal pass by adding L, M, N, O and
+**dropping J without recording it**, and now **fifteen** with J restored. The
+"14/14" in the previous entry was accurate about what ran and silent about what
+had been removed, which is how a deleted regression test stays invisible.
+
+## Evidence
+
+- **15/15 mutations caught by their named guard**, 0 uncaught, 0 harness failures
+  — including J, whose guard the sixth reviewer had already confirmed still fires.
+- **The default run writes outside the repository.** `git status --porcelain` and
+  all five protected hashes are identical across a full run, measured **after**
+  the transcript is written.
+- **An in-repository `--out` is refused**, tracked or untracked, including the
+  path that used to be the default.
+- **D1–D3 re-verified**: zero green lines claiming `worker_death_restart`, both
+  tracked evidence hashes unmoved, worktree clean.
+- **Gate and portability** green; raw transcripts under
+  `experiments/2026-08-25_p1_pre/`.
+
+## Knowledge delta
+
+1. **A tool's exemption for itself is the exemption that matters.** The refusal
+   list was right about every path except the one the tool actually wrote. Scope
+   a guard by the property (is this inside the repository?), never by an
+   enumeration that can quietly contain "…except mine".
+2. **Order the measurement after the event.** Taking the untouched-repository
+   snapshot before the write was not a small sequencing slip; it made the proof
+   structurally incapable of observing its own counterexample.
+3. **Deleting a test is a change to the record.** The set went 11 → 14 by adding
+   four and dropping one, and nothing said so. A count that only ever goes up
+   hides removals; state the composition, not the total.
+4. **The claim-wider-than-the-code family is not confined to code.** Six
+   instances now, and the last two were sentences: "the answer to every future
+   instance of the family", and "no correction is owed". Prose about assurance
+   decays faster than assurance, and nothing tests it.
+
+**Seed ledger:** unchanged; nothing claimed. **Vault:** untouched, counter
+1 == 1 log line. **`estimator.py`:** byte-identical, `00240eb1e60810f5…`.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Next:** one fresh independent review, bounded to whether these four items are
+closed and the durable record is truthful.
