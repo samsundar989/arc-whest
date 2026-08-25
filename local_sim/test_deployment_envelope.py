@@ -374,34 +374,45 @@ def _rlimit_available() -> bool:
     return hasattr(resource, "RLIMIT_AS")
 
 
-def _rlimit_usable_in_child() -> dict:
-    """Can a CHILD interpreter apply the memory cap? `{"usable": bool, "why": str}`.
+def _setrlimit_works_in_child(limit_mb: int) -> dict:
+    """Can a child interpreter APPLY the cap? `{"usable": bool, "why": str}`.
 
-    Three versions of this question have been asked here and only this one can
-    come out either way:
+    Four versions of this question have been written here. Three were the same
+    question wearing different clothes, and a third independent Skeptic took the
+    trouble to measure that:
 
-      1. `hasattr(resource, "RLIMIT_AS")` -- what `_rlimit_available()` asks, and
-         what `enforced_locally` is assigned from. Comparing the matrix against
+      1. `hasattr(resource, "RLIMIT_AS")` -- what `_rlimit_available()` asks and
+         what `enforced_locally` is ASSIGNED from. Comparing the matrix against
          it is an identity.
-      2. an in-process `getrlimit(RLIMIT_AS)` -- better, and still agrees with
-         (1) on every platform either Skeptic or I could name. An identity with
-         extra steps.
-      3. **this one.** `subprocess_worker.py` calls `setrlimit` in a SEPARATE
-         interpreter, so whether the cap can be applied is a fact about the
-         child, not about us. A child with a different interpreter, a different
-         environment, or a sandbox that blocks the module answers differently
-         from its parent -- and if it ever does, the matrix is claiming
-         enforcement the grader's worker would not get.
+      2. an in-process `getrlimit(RLIMIT_AS)` -- an identity with extra steps:
+         both answers descend from the same `import resource`.
+      3. `getrlimit` in a child launched as `sys.executable` with no `env=`.
+         Its docstring claimed the divergence would come from a different
+         interpreter, a different environment or a sandbox -- and it inherited
+         all three, so it exercised none of them. Still the same question.
+      4. **this one, and it is the question the grader actually asks.**
+         `whestbench/subprocess_worker.py` calls **`setrlimit`**, catches
+         `(ImportError, ValueError, OSError, AttributeError)`, warns to stderr
+         and **runs on uncapped**. `setrlimit` can fail where `getrlimit`
+         succeeds -- a hard limit below the cap raises `ValueError`, a denied
+         request raises `OSError` -- so asking `getrlimit` cannot see the failure
+         the docstring said it existed to see.
+
+    So this applies the real cap, in a child, and reports what happened. The
+    child sets its own soft limit and exits; nothing here is affected.
     """
-    src = ("import json,sys\n"
+    src = ("import json\n"
+           "L = %d * 1024 * 1024\n"
            "try:\n"
            "    import resource\n"
-           "    resource.getrlimit(resource.RLIMIT_AS)\n"
-           "    print(json.dumps({'usable': True, 'why': 'getrlimit(RLIMIT_AS) "
-           "succeeded in the child'}))\n"
+           "    resource.setrlimit(resource.RLIMIT_AS, (L, L))\n"
+           "    soft, _h = resource.getrlimit(resource.RLIMIT_AS)\n"
+           "    print(json.dumps({'usable': soft == L,\n"
+           "                      'why': 'setrlimit applied, soft=%%d' %% soft}))\n"
            "except Exception as e:\n"
-           "    print(json.dumps({'usable': False, 'why': type(e).__name__ + ': '"
-           " + str(e)[:60]}))\n")
+           "    print(json.dumps({'usable': False,\n"
+           "                      'why': type(e).__name__ + ': ' + str(e)[:60]}))\n"
+           % int(limit_mb))
     try:
         p = subprocess.run([sys.executable, "-c", src], capture_output=True,
                            text=True, timeout=60)
@@ -1378,12 +1389,18 @@ def main() -> int:
     # one line here whose right-hand side is not derived from the dict on its
     # left, so it is the only one that survives a constraint being deleted.
     present = set(enf["constraints"])
-    check("the matrix carries every REQUIRED envelope constraint",
-          present >= set(REQUIRED_CONSTRAINTS),
-          f"{len(present)} present; missing "
-          f"{sorted(set(REQUIRED_CONSTRAINTS) - present) or 'none'}"
-          + (f"; unpinned extras {sorted(present - set(REQUIRED_CONSTRAINTS))}"
-             if present - set(REQUIRED_CONSTRAINTS) else ""))
+    required = set(REQUIRED_CONSTRAINTS)
+    # EQUALITY, not `>=`. The superset test closed deletion and left ADDITION
+    # silent, while the tuple's own comment said "adding a constraint is a
+    # deliberate edit to this tuple" -- a comment asserting a guarantee the code
+    # did not provide, which is this slice's own defect family. The "unpinned
+    # extras" text was only ever formatting inside a green line's detail; it
+    # enforced nothing. A third independent Skeptic measured both directions and
+    # found addition passing. Injection I adds an unpinned constraint.
+    check("the matrix carries EXACTLY the required envelope constraints",
+          present == required,
+          f"{len(present)} present; missing {sorted(required - present) or 'none'}; "
+          f"unpinned {sorted(present - required) or 'none'}")
     # The matrix's memory claim, checked against a probe run in a CHILD process.
     #
     # It used to read `enforced_locally == _rlimit_available()`, an identity --
@@ -1394,11 +1411,12 @@ def main() -> int:
     # grader actually asks -- can the WORKER apply the cap? -- because the worker
     # is a separate interpreter, and `subprocess_worker.py` calls `setrlimit`
     # there, not here.
-    probe = _rlimit_usable_in_child()
+    probe = _setrlimit_works_in_child(r.memory_limit_mb)
     claim = enf["constraints"]["memory_limit_mb"]["enforced_locally"]
-    check("the matrix's memory claim matches a probe run in a CHILD interpreter",
+    check("the matrix's memory claim matches a child that APPLIES the real cap",
           claim == probe["usable"],
-          f"matrix says {claim}; child says {probe['usable']} ({probe['why']})")
+          f"matrix says {claim}; a child setrlimit({r.memory_limit_mb} MB) says "
+          f"{probe['usable']} ({probe['why']})")
     # NOT `len(_UNPROVABLE) > 0`, and no longer `bool(unenforced) and ...`:
     # `predict_response_timeout_s` is hard-coded `enforced_locally: False`, so
     # BOTH of those can never be false. That vacuous conjunct was carried into

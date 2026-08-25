@@ -670,16 +670,17 @@ the number has moved.
 | tier | steps run | when |
 |---|---|---|
 | **default** | **12 of 16** — **1** official stack + round configuration (73/73, asserted against the *installed* package), **2** mint provenance (1024×16 first), **3** invariant suite (30/30), **4** `whest validate`, **5** ship-file identity, **6** vault seal, **7** seed ledger (60/60), **8** canonical scorer + the binding gate (98/98), **9** seed-ledger *refusals*, **10** vault integrity, **11** lifecycle evaluator (56/56), **12** counted-FLOP anchor vs the official runner | every change |
-| **`-Full`** | **16 of 16** — adds **13** shape parity (27/27), **14** carrier strength (48/48), **15** deployment envelope (40/40 + what it cannot prove) **and its read-only proof** (28/28, `local_sim/test_envelope_readonly.py`, added by P1-PRE 2026-08-25), **16** official Phase-2 subprocess smoke, zero failures |
+| **`-Full`** | **16 of 16** — adds **13** shape parity, **14** carrier strength, **15** deployment envelope (+ what it cannot prove) **and its read-only proof** (`local_sim/test_envelope_readonly.py`, added by P1-PRE 2026-08-25), **16** official Phase-2 subprocess smoke, zero failures | **required** before any promotion, submission, or vault touch |
 
-> **The suite counts in the row above are a snapshot dated 2026-08-25, not a
-> specification.** They moved three times in two days during P1-PRE, and twice an
-> independent Skeptic found this table contradicting the transcript committed
-> beside it. **The authority is the gate's exit code**, exactly as the paragraph
-> on step names below already says; a count here that disagrees with a current
-> run means this line is stale, never that the run is wrong. The same applies to
-> any LOG entry citing line numbers inside a transcript that is regenerated on
-> every run — those drift by construction. **required** before any promotion, submission, or vault touch |
+> **Suite counts have been removed from the `-Full` row.** They moved three times
+> in two days during P1-PRE and an independent Skeptic caught this table
+> contradicting the transcript committed beside it twice — and then caught the
+> *repair* of that row leaving it with two cells instead of three. **The
+> authority is the gate's exit code**, exactly as the paragraph on step names
+> below already says. The same reasoning retires line-number citations into any
+> transcript that is regenerated on every run: those drift by construction, so
+> cite a grep string instead. Counts survive in the default row because that row
+> has not been the one moving; if it starts, it loses them too.
 
 **Step 16 is DEPLOYMENT AUTHORITY** — the grader's own subprocess runner on the
 organisers' own `v2-phase2` data — and it is **load-sensitive**: the 5 s setup

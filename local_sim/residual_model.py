@@ -275,8 +275,14 @@ def main():
         print("     %s. This is the new load-bearing assumption -- much weaker than"
               % note)
         print("     the old one, but still an assumption.")
-    check("extrapolation is reported, not hidden", True,
-          "calibrated %.0f-%.0f ops; candidates at %s"
+    # This was `check("extrapolation is reported, not hidden", True, ...)`: a
+    # literal condition, so it printed green whether or not anything had been
+    # reported. There is no property here to test -- the block above prints the
+    # extrapolation unconditionally -- so this is a REPORT and is now spelled as
+    # one. Found 2026-08-25 by the third independent P1-PRE review, using that
+    # slice's own literal-condition scanner against the wider tree.
+    print("  extrapolation is reported, not hidden: calibrated %.0f-%.0f ops; "
+          "candidates at %s"
           % (lo_ops, hi_ops, [int(c["ops"]) for c in cand]))
 
     v261 = out_pairs.get("v2.6.1 | fitted line (5 points)")

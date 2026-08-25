@@ -192,6 +192,25 @@ INJECTIONS = [
           """            "deleted_by_injection_h": {""")],
         [SUITE, "--no-write", "--skip-worker-death"],
     ),
+    (
+        "I",
+        "an envelope constraint is ADDED to the matrix without being pinned",
+        # H covers deletion. Addition was silent until 2026-08-25: the check read
+        # `present >= set(REQUIRED_CONSTRAINTS)`, a superset test, while the
+        # tuple's comment claimed "adding a constraint is a deliberate edit to
+        # this tuple". A third independent Skeptic measured both directions and
+        # found this one green. The comparison is `==` now, and this is the test
+        # that says so.
+        [("""            "predict_response_timeout_s": {""",
+          """            "added_by_injection_i": {
+                "value": None,
+                "enforced_locally": False,
+                "by": "injection I: an unpinned constraint",
+                "provoked_by": None,
+            },
+            "predict_response_timeout_s": {""")],
+        [SUITE, "--no-write", "--skip-worker-death"],
+    ),
 ]
 
 
