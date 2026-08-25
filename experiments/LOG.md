@@ -12993,3 +12993,130 @@ than the suite; both files are restored byte-for-byte and verified by sha256.
 **Status:** all ten findings closed and two claims retracted. **A fifth
 independent review is required** before P1-PRE is accepted. Phase 1A does not
 begin until it returns.
+
+---
+
+# 2026-08-25 — P1-PRE REVIEW 5: **PROVISIONAL**. The witness mechanism does not close the false-provenance class — verdict recorded, findings OPEN, decision pending
+
+*Fifth independent pass, reviewed HEAD `6bf5223`. **Verdict: PROVISIONAL.**
+Recorded here with **no dispositions**, because unlike the previous four this one
+reaches the mechanism the whole slice is built around, and whether to open a sixth
+repair cycle is a scope decision for Samuel rather than a judgement call for the
+Builder. The findings below are **OPEN**.*
+
+**What separates this pass from the previous four:** reviews 1–4 each found the
+defect in a guard, or in a guard's guard. This one found it in the **structured
+witness itself** — and demonstrated that the exact defect P2-P0 was created to
+close is reproducible **green, with a single edit**, inside the mechanism built to
+close it.
+
+## Verdict, verbatim
+
+> **Host state (disclosed):** Windows 11 Home 10.0.26200, 16 logical cores, 61.6 GB RAM (~20.2 GB free), CPU ~9 % busy at session start. **I quote no wall time as evidence anywhere below.** Every command I ran was read-only or restored itself. `git status --porcelain` is empty at the end; `local_sim/test_deployment_envelope.py` is `2e183ee7767667b9b5f87fe9f119599bcf66f5bed240ca937d5e8fdd133bd6bf` and `local_sim/test_envelope_readonly.py` is `7e1669b755a76a134428b4a29c624ed6ed3d69b65d0c4cd31963cca40967172b` — byte-identical to HEAD; no `.fault_inject_backup` remains; **I needed no `git checkout`**. All mutation probes exec'd the real module source from memory against **copies** outside the repository, or ran with `--no-write`; the fault-injection harness was run with `--out` outside the tree.
+>
+> ## Skeptic verdict: PROVISIONAL
+>
+> **Strongest challenge**
+> The pattern is present a **fifth** time and it is again in the repair — but this time it is inside the construction the slice nominates as its answer. The LOG's knowledge-delta #3 says *"A pinned literal is the only construction that has held. `REQUIRED_CONSTRAINTS`, `ENFORCEMENT_EXPECTED`, `COVERAGE_CLAIM`, `REQUIRED_SCANNED` — each is a number or a name written down on purpose, and each is the reason its guard can fail."* Measured against the real code under mutation, that is false for two of the four, and a fifth literal (`PLATFORM_DEPENDENT_CONSTRAINTS`) is not a guard at all — it is an **unbounded exemption from a guard**. Worse, the mechanism the whole slice is built around, the **structured witness**, pins nothing about *which* provocation a constraint names: I re-created the exact original P2-P0 defect (`wall_time_limit_s` claiming a provocation that provokes the *residual* limit) with a single edit, and every check stayed green. **D1, D2 and D3 themselves are closed, and I watched them close.**
+>
+> **Evidence for it**
+>
+> 1. **M4 — the witness mechanism does not close the false-provenance class, and no injection covers it.** Driving the real `main()` under mutation (`--no-write --skip-worker-death`, repo untouched): repointing `wall_time_limit_s`'s witness at `local_sim/test_deployment_envelope.py:741-754` from the three WALL checks to the single check `"L4: a 1e-9 s residual limit trips the residual path"` gives **exit 0, 36/36, zero FAIL lines**, and prints
+>    `PASS  wall_time_limit_s: its named provocation RAN and PASSED   120.0  <- 1 named check(s) verified in local_sim/lifecycle_eval.py --self-test`.
+>    That is verbatim the defect the RESULT entry describes at `test_deployment_envelope.py:1391-1400`: *"L4 set a tiny RESIDUAL limit and never a tiny WALL limit: two different constants, one untested, and a green line asserting otherwise."* The repair made the witness *structured*, so it now refuses **prose** and **non-existent** check names. It has no mechanism against **wrong** check names, because nothing pins each constraint's `checks` set the way `ENFORCEMENT_EXPECTED` pins its `enforced_locally` value. Injection G (repointing at an always-running check) is caught only by the `_SECTION_RAN` conjunct, which does not apply to a `JsonSuite` witness.
+>
+> 2. **M3a — `PLATFORM_DEPENDENT_CONSTRAINTS` re-opens exactly the hole `ENFORCEMENT_EXPECTED` was added to close.** Injection K (flip `flop_budget`'s `enforced_locally` to `False`) is correctly RED for me: `FAIL ...and every one of them makes the enforcement claim it is pinned to  6 pinned; disagreeing: {'flop_budget': False}`. Add two more literal edits — delete `"flop_budget": True` from `ENFORCEMENT_EXPECTED` (`:365`) and append `"flop_budget"` to `PLATFORM_DEPENDENT_CONSTRAINTS` (`:378`) — and the result is **exit 0, 35/35, zero FAIL lines**, with `flop_budget` sitting in the NOT-PROVABLE block under the heading *"They are enforced only on the grader"*. The completeness check at `:1448-1452` is `set(ENFORCEMENT_EXPECTED) | set(PLATFORM_DEPENDENT_CONSTRAINTS) == set(REQUIRED_CONSTRAINTS)` — it is blind to **which side of the union** a name is on. The LOG's disposition #6 says *"a completeness check makes it impossible for a constraint to escape by being in neither"*, which is true and is not the escape that exists. Note the list already contains one name (`memory_limit_mb`) whose claim is unfalsifiable on the gating host, and nothing bounds its growth.
+>
+> 3. **M1 — `REQUIRED_SCANNED`'s guard compares two declarations, never the scan.** `local_sim/test_envelope_readonly.py:334-338` reads `check("every REQUIRED file is scanned", set(SCANNED) == set(REQUIRED_SCANNED), ...)`, and the loop above it is `for base in SCANNED:` (`:324`). Changing only the loop to `SCANNED[:2]` leaves **every check green**, prints the detail `scanned ['lifecycle_eval.py', 'test_deployment_envelope.py', 'test_envelope_readonly.py']; missing none` — which is a false statement, `lifecycle_eval.py` was never opened — and a planted literal-`True` `check()` in `lifecycle_eval.py` goes undetected (measured against a control run of the same probe, which is correctly RED: `FAIL ... {'lifecycle_eval.py': [(1314, 'True')]}`). `lifecycle_eval.py` was added to `SCANNED` on review 3's point precisely because *"FOUR of the seven envelope witnesses resolve against its emitted results"*, so this is on the critical path. The one-line fix is to accumulate the basenames the loop actually scans. (The LOG's narrower claim — dropping the file from `SCANNED` turns it red — **is true**; I measured it.)
+>
+> 4. **M2 — `COVERAGE_CLAIM` pins cardinality, not identity, and injection J only tests deletion.** `COVERAGE_CLAIM = (5, 6)` at `:153` is compared against `(len(MUST_CATCH), len(KNOWN_BLIND))` at `:410-417`. Substituting one `MUST_CATCH` entry with a duplicate of another — `("ok= keyword", "check('a', ok=True, detail='d')")` → `("ok= keyword", "check('a', True, 'd')")` — keeps the counts and leaves **every check green**, printing `measured 5 caught / 6 blind = 5/11; pinned 5/11` and `5 spellings; missed none`, while only four distinct spellings are actually audited. Then reverting `_constant_conditions`'s `ok=` keyword branch (`:270-272`) — injection F's exact defect — also leaves **every check green** with a planted `check("planted", ok=True, ...)` in the scanned suite copy, against a control run that is correctly RED. The same substitution works on `KNOWN_BLIND`.
+>
+> 5. **The "resolution rule" that closed review 4's finding #7 does not resolve.** `experiments/LOG.md:12912-12913` retires `checks passed$` (six matches) and offers `grep -A2 "READ-ONLY PROOF" ... or the suite's own last line -> 30/30 read-only proof`. Against the transcript at HEAD, `grep -A2 "READ-ONLY PROOF"` returns the banner, a rule of `=` and a blank line — **no number**; the 30/30 line is 58 lines further on. And "the suite's own last line" is itself ambiguous: `30/30 checks passed` appears **twice** (line 207, the invariant suite; line 1069, the read-only proof). A form that does work is `grep -B1 "PASS  15\."`. The other six forms all resolve correctly at HEAD (`PREFLIGHT GREEN`→1, `checks passed;`→42/42, `56/56 checks passed`→1, `delta +0`→2 consistent, `operations `→1, `failures `→1, `worst residual`→1 at `0.08781 s → 4.6x headroom`). This is the fix for a non-unique citation replaced by a citation that resolves to nothing — the same shape, one entry along.
+>
+> 6. **The falsification harness's own verdict is a state, not a property.** `local_sim/p1pre_fault_inject.py:321` is `caught = p.returncode != 0`; no injection tuple carries an expected FAIL string. REVIEW 2's knowledge-delta #5 says *"Exit codes were not enough; the FAIL line had to be read and matched to the guard the injection targets"* — the remedy adopted was a comment, not a mechanism. Injection A illustrates the exposure: in my run it produced **3** FAIL lines, one of which is the constant scanner catching the literal `True` that the injection text itself writes, i.e. partly caught for a reason incidental to the guard under test.
+>
+> 7. **The harness has an unguarded destructive path on tracked evidence.** `:341` runs `_git("checkout", "--", *TRACKED)` after **every** injection, on `lifecycle_self_test.json` and `deployment_envelope.json`, whether or not that injection touched them. The refuse-on-dirty check at `:284-293` covers only `_target_of(...)` — the two source files it edits — so uncommitted work in either tracked artifact is silently discarded. This produces no false green; it destroys evidence.
+>
+> 8. **The `_setrlimit_works_in_child` disclosure is accurate and complete, and the structure it discloses is unchanged.** I verified the code path and the emitted line: `PASS  the matrix's memory claim matches a child that APPLIES the real cap   matrix says False; a child setrlimit(8192 MB) says False (ModuleNotFoundError: No module named 'resource')`. Both sides descend from one failed import; the only reachable red path here is `usable: None`. It still contributes a green `PASS` to the mandatory `-Full` tier's count. The suite already owns the right channel for this — `declined()` at `:197`, used three functions away for the writer's positive control, and the RESULT entry's own "three defects of my own" #2 is about filing a declined check correctly.
+>
+> **Evidence for the original claim (steelmanned, and most of it survived what I ran)**
+>
+> - **D1, D2 and D3 are closed, watched closing on this host, not read about.** `--no-write --skip-worker-death`: **36/36, exit 0**, zero green lines claiming `worker_death_restart`, two NOT-PROVABLE entries (the section's and the witness's), tree clean before and after. `--no-write` **with** section 6, the load-sensitive path that really spawns `whest run --runner subprocess`: **43/43, exit 0**, both tracked artifacts byte-identical. `local_sim/test_envelope_readonly.py`: **30/30, exit 0**.
+> - **All eleven injections reproduce and each lands on the guard it names.** `injections run: ['A'..'K']   uncaught: none`, both files restored byte-for-byte with sha256 asserted, `git status --porcelain` empty afterwards. I read the FAIL *reason* of each, not the exit code: A→the external proof's green-line test, B→four resolver refusals, C→latch + child sha256 + git, D→`_SECTION_RAN` classifier, E→`expected_self` (`adjudicated []; the matrix declares ['worker_death_restart']`), F→the constant scan, G→the `_SECTION_RAN` conjunct, H/I→`REQUIRED_CONSTRAINTS` in both directions, K→`ENFORCEMENT_EXPECTED`, J→`COVERAGE_CLAIM` (`measured 5/10; pinned 5/11`).
+> - **The preregistration is real, byte-verified independently.** `git show fd5c3d2 --stat` touches only `experiments/LOG.md` and `baseline_d1_d3.txt` — no code. `experiments/LOG.md` at HEAD is a byte-identical prefix extension of the file at `fd5c3d2`: **716,580 bytes, sha256 `bcd2e82c6e4e105de8a0dd50eed751fcea3a4a29843bc88a5819111447a1f07a` on both sides**; the file is now 827,089 bytes.
+> - **H7 is exactly true, verified from git rather than from their table.** `git diff --name-only 9e3be80..6bf5223 -- estimator.py experiments/seed_ledger.jsonl experiments/vault/` is **empty**; `estimator.py` sha256 `00240eb1e60810f5…`; `lifecycle_self_test.json` `results_sha256` `a913c55cbcc2434e…` at **56/56** on both commits; vault manifest `touches: 1` == **1** log line. Re-run by me: anchor **delta +0, 19 operations, 0 disagreeing**; `official_config.py` **73/73**; `lifecycle_eval.py --self-test` **56/56**; `verify_portability.py` **99 checks, 0 failed**. The only movement in the two evidence artifacts is timings and the new witness rows.
+> - **Both retractions are present and complete as far as I can find.** I grepped the repository for both withdrawn sentences; the only surviving occurrences are inside the append-only LOG history and inside `test_envelope_readonly.py`'s docstrings, where they are quoted *as retracted*. No third copy stands unqualified.
+> - **`docs/CURRENT_STATE.md` is current at HEAD** — eleven injections, four PROVISIONAL passes, "obtain that fifth verdict", queue row 0H all correct. F6 is fixed. **`docs/VALIDATION.md` §7 is repaired**: the `-Full` row has three cells and no suite counts, and every surviving default-row count resolves against the committed transcript (73/73, 30/30, 60/60, 98/98, 56/56, plus all sixteen step names).
+> - **Preflight step 15's two-command chaining honours the first exit code.** I reproduced the `Step`/`& $Body`/`return` pattern in Windows PowerShell 5.1: a non-zero first command leaves `$LASTEXITCODE` set and the wrapper throws. The comment at `scripts/preflight.ps1:435-436` is correct.
+> - **Nothing about the grader, the score, MSE, variance, cost, seeds or the vault is claimed or moved**, and I confirmed that from git rather than from the entry's table. **No statistical, cost, or data-protocol checklist item applies.**
+>
+> **Unresolved ambiguity**
+>
+> - **Section 7's Linux branch and `_setrlimit_works_in_child()`'s Linux answer have still never executed.** Reading them they are fail-closed; five reviews have now said so and no WSL2 run has been performed. Neither of us can settle it from a Windows host.
+> - **Whether `setrlimit` can fail where `getrlimit` succeeds in the organisers' actual container.** The mechanism in `subprocess_worker.py` is real; the sandbox is unobservable. `memory_limit_mb` remains the constraint with the weakest provenance.
+> - **Whether M3a/M4 are "plausible edits" or "deliberate sabotage" is a judgement I cannot settle by measurement.** M4 is a one-line edit to a data literal and reproduces a defect this repository actually shipped; M3a is three. Both sit inside the class the slice claims to have closed.
+> - `--out` on the fault-injection harness can still be pointed at a tracked file in writing mode (carried forward, correctly restated at `experiments/LOG.md` "Still open, and not argued away" #3).
+>
+> **Cheapest discriminating follow-up**
+> **No seed block, no data, no design block — one code commit, three injections, two documentation lines.**
+>
+> 1. **Pin the witness content the way `ENFORCEMENT_EXPECTED` pins the claim.** A module-level `WITNESS_EXPECTED = {constraint: frozenset(check names)}` in `local_sim/test_deployment_envelope.py`, compared against each constraint's `provoked_by["checks"]`, with completeness asserted against `REQUIRED_CONSTRAINTS`. Then add **injection L** — repoint `wall_time_limit_s`'s witness at `"L4: a 1e-9 s residual limit trips the residual path"` — and watch it go red. **Today it is green at 36/36; that is the discriminating test.**
+> 2. **Bound the exemption.** Either compare `PLATFORM_DEPENDENT_CONSTRAINTS` against a pinned expectation, or drop it and give `memory_limit_mb` an explicit `enforced_locally: platform` value in `ENFORCEMENT_EXPECTED`. Add **injection M** = M3a and watch it go red.
+> 3. **Make `REQUIRED_SCANNED`'s guard test the scan.** Collect basenames inside the loop and compare *that* set to `REQUIRED_SCANNED`; pin `MUST_CATCH`/`KNOWN_BLIND` by **name set**, not by length, so `COVERAGE_CLAIM` stops being a pair of integers.
+> 4. **Give each injection an `expect_fail` substring** and assert it, so the harness's verdict is "the named guard fired", not "the exit code moved"; and extend refuse-on-dirty to `TRACKED` before any `git checkout --`.
+> 5. **Two lines of continuity:** replace the `grep -A2 "READ-ONLY PROOF"` rule with `grep -B1 "PASS  15\."` (verified unique), and note that `30/30 checks passed` occurs twice in the transcript; convert the `_setrlimit_works_in_child` comparison to `declined()` on a host without `resource`, or say in the LOG why a disclosed identity is allowed to count as a pass in the mandatory tier.
+>
+> Until (1) and (2) land I would **not** propagate *"the findings of reviews 1–4 are closed"*, and I would **not** propagate knowledge-delta #3 (*"a pinned literal … each is the reason its guard can fail"*) — two of the four named literals do not make their guard falsifiable for the property it names, and a fifth literal is an exemption from a guard. **D1, D2 and D3 are closed, H7 is exactly true, all eleven injections land on their named guards, the preregistration is byte-verified, both durable docs are current, and the evaluator is materially better than at `9e3be80`** — those claims survived everything I ran. The claim that the repair did not re-commit its own defect class is the one that does not, for the fifth consecutive pass.
+>
+> **Checklist items triggered**  **17** (continuity — a "resolution rule" committed as the fix for a non-resolving citation is itself non-resolving against the transcript beside it; a durable knowledge-delta sentence enumerating four guards, two of which do not guard what they name), **18** (generic: a check whose two sides are two declarations and neither is the behaviour it names, measured across seven mutations of the real code; a pinned claim that pins cardinality rather than identity; an unbounded exemption list presented as a pin; the original P2-P0 false-provenance defect reproducible green with one edit inside the mechanism built to close it; a falsification harness whose own verdict is an exit code rather than the guard that fired; an unguarded `git checkout --` on two tracked evidence artifacts).
+
+## THIRD RETRACTION, and it is the slice's own conclusion
+
+**Knowledge-delta #3 of `P1-PRE REVIEW 4` — *"A pinned literal is the only
+construction that has held. `REQUIRED_CONSTRAINTS`, `ENFORCEMENT_EXPECTED`,
+`COVERAGE_CLAIM`, `REQUIRED_SCANNED` … each is the reason its guard can fail"* —
+is WITHDRAWN.** Measured against the real code:
+
+| literal | does it make its guard falsifiable for the property it names? |
+|---|---|
+| `REQUIRED_CONSTRAINTS` | **yes** — add, delete and rename all go red (injections H, I) |
+| `ENFORCEMENT_EXPECTED` | **yes for a flipped claim** (injection K), **no** against relocation into the exemption list (M3a) |
+| `COVERAGE_CLAIM` | **no** — pins cardinality, not identity; a substituted spelling keeps the counts and passes (M2) |
+| `REQUIRED_SCANNED` | **no** — compares two declarations, neither of which is the scan the loop performs (M1) |
+| `PLATFORM_DEPENDENT_CONSTRAINTS` | **not a guard** — an unbounded exemption *from* a guard |
+
+Writing a literal down is necessary and it is not sufficient. **The property that
+matters is not "is one side a literal" but "is the other side the BEHAVIOUR, or
+merely a second declaration of the same intent".** `REQUIRED_SCANNED` compares a
+declaration to a declaration; `COVERAGE_CLAIM` compares a number to a length.
+Neither touches what the code did. That is the third claim in this slice about an
+assurance that outlived the assurance, and it was the slice's own headline
+conclusion.
+
+## Status: findings OPEN, decision pending
+
+**No dispositions are recorded above, and nothing has been repaired in response to
+this verdict.** Four repair cycles have now each closed their findings and each
+introduced a fresh instance of the same defect family; a fifth would be started on
+the Builder's judgement alone, and the Builder's judgement is what produced the
+five instances.
+
+**What is not in doubt, across five independent passes:** D1, D2 and D3 are
+closed. H7 is exactly true — `estimator.py`, the seed ledger and the vault are
+untouched across `9e3be80..6bf5223`, the anchor reconciles at delta +0 over 19
+operations, and the lifecycle digest is unmoved at 56/56. Eleven injections land
+on their named guards. The preregistration is byte-verified. Both durable
+documents are current. **The evaluator is materially better than at `9e3be80`.**
+
+**What is in doubt:** whether continued unilateral hardening of this file has
+positive expected value, given that the load-bearing finding here — M4, the
+original P2-P0 false-provenance defect reproducible green with one edit — is a
+gap in the *mechanism*, not in a guard around it, and given that Phase 2 closes
+2026-10-17 with no Phase-2 submission in existence and the carrier unbuilt.
+
+Samuel's decision. The options and their costs are put to him with this entry.
+
+**Seed ledger:** unchanged; nothing claimed. **Vault:** untouched, counter
+1 == 1 log line. **`estimator.py`:** byte-identical.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
