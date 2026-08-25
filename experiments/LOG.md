@@ -12224,3 +12224,176 @@ defects reproduced, committed with the prediction), `envelope_full_after.txt`
 gates), `preflight_full_p1pre.txt` (the complete gate transcript, both streams).
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-25 — P1-PRE REVIEW: independent Skeptic **PROVISIONAL**. The guard I wrote could not fail, and it was the ninth
+
+*Independent pass on reviewed HEAD `053c52f`, judging the P1-PRE contract
+(`fd5c3d2`) and its RESULT entry. **Verdict: PROVISIONAL.** It confirmed D1, D2
+and D3 closed and reproduced H1–H8 on its own host, and it found that the section
+written to replace the literal-`True` contains a new check whose condition cannot
+be false. Reproduced verbatim below; the repairs and the corrected answer to this
+slice's knowledge target follow.*
+
+## Verdict, verbatim
+
+> **Host state (disclosed, because I quote wall times):** Windows 11, 16 logical cores, 63 GB RAM (22.5 GB free), CPU ~20% busy throughout (Chrome + VS Code resident). Not a quiet host. My timings: `--no-write --skip-worker-death` **3.51 s**; full writing run **106.8 s** (the RESULT entry quotes ~3 s and 153 s on a contended host — same order, neither is offered as evidence by either of us).
+>
+> ## Skeptic verdict: PROVISIONAL
+>
+> **Strongest challenge**
+> Section 7 — the mechanism that replaced the literal-`True` — contains a new check whose condition cannot be false, and the slice's own scan was too narrow to see it. `local_sim/test_deployment_envelope.py:1584-1588`:
+>
+> ```python
+>     for name, c in deferred:
+>         ...
+>         adjudicated += 1
+>     check("every DEFERRED witness was adjudicated in this section",
+>           adjudicated == len(deferred),
+>           f"{adjudicated} of {len(deferred)} deferred -- a constraint that "
+>           f"vanished between the matrix and the closure would be a gap that "
+>           f"reads as coverage")
+> ```
+>
+> `adjudicated` is a counter of iterations over `deferred` itself, with no `continue`, `break` or early exit in the loop body (lines 1555-1583). `adjudicated == len(deferred)` is therefore an identity — the two sides could never disagree. It is the only guard against the failure it names, and it cannot detect that failure: if a self-provoked constraint stopped being appended to `deferred` in the matrix loop (line 1272-1274), `len(deferred)` shrinks with it and the line still prints `PASS ... 0 of 0 deferred`. Nothing else in the file counts constraints, so the constraint would vanish from the matrix, from `_UNPROVABLE`, from `_DECLINED` and from the artifact, in silence. This is `docs/GOTCHAS.md`'s own rule ("before quoting an agreement, ask whether the two sides could ever have disagreed") failing inside the section written to close that failure class, and the RESULT entry asserts the protection twice (LOG 11978-11979 and the comment at 1584-1588).
+>
+> **Evidence for it**
+>
+> 1. The tautology above, `local_sim/test_deployment_envelope.py:1554-1588`. I watched it print green in both of my runs (`PASS every DEFERRED witness was adjudicated in this section  1 of 1 deferred`).
+> 2. Two further checks in the same file whose conditions cannot be false — **pre-existing, not introduced by P1-PRE**, but invisible to the slice's assurance: line 1289 `enf[...]["enforced_locally"] == _rlimit_available()`, where `enforced_locally` is literally assigned `bool(rl)` from the same call at line 644; and line 1293 `len(_UNPROVABLE) > 0`, which cannot be 0 because `predict_response_timeout_s` is hardcoded `"enforced_locally": False` at line 694.
+> 3. **The assurance is not durable.** `experiments/LOG.md:12024` claims "An AST scan now reports **zero literal-`True` check conditions in either file**". The claim is *true* — I re-derived it (only literal `False` conditions survive, at lines 1089, 1332, 1402, 1411, 1416, 1467, 1472, 1573, all inside failure branches) — but **no such scan is committed anywhere**, and no artifact in `experiments/2026-08-25_p1_pre/` records it. The scan that *is* committed, `test_envelope_readonly.py::_write_sites`, only finds `open()`.
+> 4. That committed scan also overclaims. `local_sim/test_envelope_readonly.py:25-28` says "A new unguarded write to tracked evidence fails this check by construction." It does not see `os.replace`, `shutil.copy`, `Path.write_text`, module-level writes, or **subprocess writes** — and `regenerate_lifecycle_results` (the exact write that caused D3) contains no `open()` at all, so the single most dangerous write path in the file is invisible to the structural check. The latch and the mechanical/end-to-end tests do cover it; the "by construction" sentence does not.
+> 5. **D2 has a live residual on the artifact path.** Line 1282 builds the embedded evidence from a hard-coded `lifecycle_results`, not from the suite the witness named: `by_name = {x["name"]: x for x in (lifecycle_results or {}).get("checks", [])}`, then `c["witness_results"] = [by_name[n] for n in ... if n in by_name]`. `witness_verified` is correct (it goes through `verify_witness`), but a future non-self witness naming a third suite would write a silently **empty** `witness_results` into `deployment_envelope.json` while the artifact still carries `witness_verified: true`. That is D2's shape — results taken from a fixed suite rather than the resolved one — surviving in the file that is committed as evidence.
+> 6. `docs/VALIDATION.md:673` states the read-only proof is **"(20/20 ...)"**. It is **23/23** — in my run, and in `experiments/2026-08-25_p1_pre/preflight_full_p1pre.txt:1046-1047`, committed in the same commit. A binding doc contradicted by the transcript shipped beside it, in the same §7 table whose staleness was carried defect **D4**.
+> 7. **Continuity.** The four fault injections are the slice's central evidence, and the harness that produced them is not in the repository (`git ls-files | grep -i fault` returns only the transcript). I located it as untracked scratch outside the tree; the next session or a different agent cannot re-run it. Checklist item 17.
+>
+> **Evidence for the original claim (steelmanned honestly)**
+> This is a genuinely good repair and most of it survived everything I threw at it.
+>
+> - **The prediction really did precede the data.** `experiments/LOG.md` at HEAD is a **byte-identical prefix extension** of the file at `fd5c3d2` (716,580 bytes, sha256 `bcd2e82c…` both sides) — the prediction was not edited after the fact. `fd5c3d2` contains only the prediction and `baseline_d1_d3.txt`; all code lands later.
+> - **The baseline defects are real, not inferred.** `baseline_d1_d3.txt` line 40 `PASS worker_death_restart is enforced here, provoked in this file  None` with line 70 `---- worker_death_restart  NOT PROVABLE HERE`, and `--no-write: the artifact on disk was NOT touched.` followed by `M experiments/2026-08-24_p2_p0/lifecycle_self_test.json`.
+> - **H1, H2, H3, H4, H5, H6 reproduce on my host, not just in their transcripts.** `--no-write --skip-worker-death`: 33/33, exit 0, **zero** `PASS` lines mentioning `worker_death_restart`, two NOT-PROVABLE entries (the section's and the witness's), `git status --porcelain` clean before *and* after. Writing mode: 39/39, and the deferred witness resolves against this suite's own results with digest `[8ef599e48aba]` — the exact string in the LOG. All 12 refusals fired with 11 distinct reasons, and both positive controls (file-backed and live) accepted. The external proof: 23/23.
+> - **The negative tests reach their refusals through the public resolver.** `SUITE RESULTS MISSING` now comes from a registered `JsonSuite` pointing at a non-existent path, and `PRESENT BUT FAILED` from a registered `LiveSuite` returning a flipped copy — neither passes `results=None` past the resolver, which was the old defect.
+> - **H7 is exactly true, verified from git, not from their table.** `git diff 9e3be80..053c52f` touches `estimator.py`, `experiments/seed_ledger.jsonl` and `experiments/vault/` **not at all**; `estimator.py` sha256 `1caa3752…` both sides; the lifecycle `results_sha256` is `a913c55cbcc2434e…` at 56/56 on both commits, with only four timing `detail` strings differing. I re-ran the anchor myself: `137,600,326,656 vs 137,600,326,656, delta +0, 19 operations, 0 disagreeing`.
+> - **H8 reproduces exactly** on my own constant-resolving AST diff: 41 → 58 runtime names, **removed 2, added 19**, and the two removals are precisely the ones the entry names. The self-reported correction (the second removal was not predicted) is accurate, and its two successors are strictly stronger.
+> - **The fault injections are honest reversals**, not cosmetic. I read the harness: A replaces the `unprovable` branch with `check(..., True, why)`; B makes `resolve()` fall back to the lifecycle suite; C turns `if _READ_ONLY:` into `if False:` *and* drops the resolver's latch consultation; D deletes the `_SECTION_RAN` line. The restore hash `38b81252a7e3e47e…` in the transcript matches the on-disk file byte-for-byte today, and `local_sim/` did not move between `51558b8` and HEAD.
+> - **The gate transcript carries its own verdicts**, which is the trap this repo fell into: 1,072 lines, 16 step-level `PASS` verdicts, `PREFLIGHT GREEN -- 16/16` at line 1060, zero FAIL/RED. Every line the LOG cites (701, 713, 730, 997, 1047, 1056-7) says what it is quoted as saying. `verify_portability.py` 99/0 and `official_config.py` 73/73 on my run.
+> - Nothing about the grader, the score, MSE, variance or cost is claimed or moved. No statistical checklist item applies.
+>
+> **Unresolved ambiguity**
+>
+> - **The Linux path is verified by construction, not by execution** (self-disclosed at LOG 12177-12185). On a host with `RLIMIT_AS`, `memory_limit_mb` becomes deferred and section 7 adjudicates it; that whole branch has never run since the rewrite. Reading it, it looks correct (a refused runner produces a `check(..., False)` and `_SECTION_RAN=True`, giving a FAILURE not a gap), but neither of us can settle it from a Windows host.
+> - **`--no-write` is proved read-only only on the `--skip-worker-death` path.** The disclosure is honest, and the reason (section 6 drives the load-sensitive official runner) is sound. Whether `whest run --runner subprocess` writes anything inside the worktree is argued, not measured.
+> - Whether the `--out` flag can still be pointed at a tracked file in writing mode (`write_artifact(args.out, ...)`, line 1649) — pre-existing, and the same shape as the `phase2_mint_parity` artifact-shrinking trap in `GOTCHAS.md`, but out of scope for D1–D3.
+>
+> **Cheapest discriminating follow-up**
+> **No seed block, no data, no design block — this is a code change plus one more injection.** Replace line 1584's counter with an independent recomputation, so the two sides *can* disagree:
+>
+> ```python
+> expected = {n for n, c in enf["constraints"].items()
+>             if c["enforced_locally"]
+>             and isinstance(c.get("provoked_by"), dict)
+>             and c["provoked_by"].get("suite") == SELF_SUITE}
+> check("every self-provoked constraint reached section 7",
+>       {n for n, _ in deferred} == expected, ...)
+> ```
+>
+> then add **injection E** — drop one self-provoked constraint from `deferred` in the matrix loop — and watch both files go red, exactly as A–D were. In the same pass: commit the literal-`True` AST scan into `test_envelope_readonly.py` (it already parses the suite with `ast`, so it is ~8 lines) and extend it to reject any `check()` whose condition is any `ast.Constant`, which would also have caught the two pre-existing survivors at lines 1289 and 1293; correct `docs/VALIDATION.md:673` to 23/23; and either widen `_write_sites` beyond `open()` or delete the "by construction" sentence at `test_envelope_readonly.py:27-28`. Committing the fault-injection harness (e.g. `local_sim/p1pre_fault_inject.py`) closes the continuity defect.
+>
+> Until the tautology is replaced I would not propagate the entry's knowledge-delta claim that a suite can self-witness "without recreating the vacuity it is repairing" — D1, D2 and D3 are closed, but that particular sentence is not what the evidence shows.
+>
+> **Checklist items triggered**   17 (continuity — the fault-injection harness lives outside the repository, so the slice's central evidence is not reproducible by the next session), 18 (generic: a check whose condition cannot be false, ×3 with 1 new; a durable doc contradicted by the artifact committed beside it; a structural claim broader than the scan implementing it; a latent re-instance of D2 on the artifact-writing path).
+>
+> **Tree state:** the writing run dirtied `experiments/2026-08-24_p2_p0/deployment_envelope.json` and `lifecycle_self_test.json` (memory counters and timings only — `self_results_sha256`, all witness rows and the whole `worker_death` block were byte-identical). I restored both with `git checkout --`; `git status --porcelain` is empty. I wrote nothing else to the repository.
+
+## The finding is correct, and it is the worst kind
+
+`adjudicated` was incremented once per iteration of `for name, c in deferred:`,
+with no early exit. `adjudicated == len(deferred)` compared a list's length to a
+count of that list's iterations. The two sides could not have disagreed, and the
+line was the **only** protection against the failure it named — a self-provoked
+constraint dropped in the matrix loop shrinks both sides together and the check
+prints green on `0 of 0`.
+
+It is **instance nine** of this repository's signature failure, and it was written
+inside the section that closes instance eight, in a slice whose entire subject is
+that checks must be watched failing. The RESULT entry asserted the protection
+twice.
+
+The pattern is not caught by reading. It is caught by asking *what would make this
+line go red?* — and I asked that question of the witness and did not ask it of the
+guard around the witness.
+
+## Every finding, and what was done
+
+| # | finding | disposition |
+|---|---|---|
+| **1** | `adjudicated == len(deferred)` is an identity | **FIXED.** Section 7 recomputes the expected set from `enf["constraints"]` — a different source from the `deferred` list that drove the loop, so the two **can** disagree. **Injection E** drops a self-provoked constraint in the matrix loop and the check goes red: `adjudicated []; the matrix declares ['worker_death_restart']; missing ['worker_death_restart']` |
+| **2** | two pre-existing identities: `enforced_locally == _rlimit_available()`, and `len(_UNPROVABLE) > 0` | **FIXED, both.** The memory claim is now compared against `_rlimit_usable()`, an independent probe that **calls** `getrlimit(RLIMIT_AS)` rather than asking `hasattr` — a different question from the one `enforced_locally` was assigned from, so it can fail. The count becomes *"every constraint the matrix marks unenforceable was REPORTED as such"*, which a loop that skipped one would fail |
+| **3** | the literal-`True` scan was asserted in prose and committed nowhere | **FIXED.** It is now `test_envelope_readonly.py` section **1b**, over both files, rejecting any `check()` whose condition is a literal **truthy** constant — a literal `False` is an honest failure report and is spared. A probe file containing one of each proves the scanner flags the `True` and not the `False` |
+| **4** | `_write_sites` claimed "by construction" while seeing only `open()` | **FIXED both ways.** Widened to `os.replace/rename`, `shutil.copy*/move`, `Path.write_text/write_bytes`, `tempfile.mkstemp`; and the docstring now says plainly that it **cannot** see a child-process write — *which is exactly how D3 happened*, since `regenerate_lifecycle_results` contains no write call at all, only a `subprocess.run`. Those paths are covered by the latch and the end-to-end run, and the docstring says so |
+| **5** | D2 survived on the artifact path: embedded rows came from a fixed `lifecycle_results` | **FIXED.** One `_record_witness()` used by both the matrix and the closure takes its rows from **the suite the witness named**, resolved through the resolver, and records `witness_suite` in the artifact so the source is visible |
+| **6** | `VALIDATION.md` §7 said the read-only proof is 20/20 | **FIXED** — and it is now **25/25**, because the repairs above added two checks to it. Second staleness in the same table that carried D4; the counts there are documentation and go stale on the next test added |
+| **7** | the fault-injection harness lived outside the repository | **FIXED.** Committed as `local_sim/p1pre_fault_inject.py`, with `--only` for a subset, a refusal to run against a dirty copy of the file it edits, a byte-for-byte restore asserted by sha256, and a **non-zero exit when an injection goes UNCAUGHT** — which is the outcome that matters, because it names a guarantee that has stopped being enforced |
+
+The three items under *unresolved ambiguity* are accepted as stated and not
+closed here: the Linux branch of section 7 is verified by construction and has
+never executed since the rewrite; `--no-write` is proved read-only on the
+`--skip-worker-death` path; and `--out` can still be pointed at a tracked file in
+writing mode, which is pre-existing and outside D1–D3. All three are carried
+forward below rather than argued away.
+
+## Five injections, all caught
+
+`uv run python local_sim/p1pre_fault_inject.py` →
+`experiments/2026-08-25_p1_pre/fault_injection.txt`:
+
+| # | defect re-introduced | who caught it | FAIL lines | exit |
+|---|---|---|---:|---:|
+| **A** | section 7 reports an UNRUN provocation as green | `test_envelope_readonly.py` | 3 | 1 |
+| **B** | the resolver ignores the suite it was given | the suite's own negative tests | 4 | 1 |
+| **C** | the read-only latch stops refusing | both files | 8 | 1 |
+| **D** | a section forgets to record whether it ran | section 7's classifier | 1 | 1 |
+| **E** | a self-provoked constraint never reaches section 7 | section 7's closure check | 1 | 1 |
+
+`injections run: ['A','B','C','D','E']   uncaught: none`, suite restored
+byte-for-byte.
+
+## The knowledge target, answered honestly
+
+The contract asked: *can a suite verify a provocation it performed itself without
+recreating the vacuity it is repairing?*
+
+**On the reviewed commit, the answer was no.** Not in the witness — the witness
+was fine, and four separate demonstrations show it refusing. The vacuity moved
+**one level up**, into the guard that was supposed to prove the witness had been
+consulted at all. That is worth more than the tidy answer would have been:
+
+- **A vacuous check migrates to whatever you are not currently suspicious of.**
+  I asked "what would make this red?" of the witness, of the resolver, and of the
+  latch. I did not ask it of the accounting line I wrote to protect them, because
+  I was thinking of that line as bookkeeping rather than as a check. It was a
+  check.
+- **A guard that counts its own loop is the general form.** `adjudicated += 1`
+  inside `for x in deferred` compared against `len(deferred)`. The tell is not the
+  condition's shape but its *provenance*: **both sides came from the same
+  object**. A check earns its place only when its two sides are computed from
+  different places, and that is now the question to ask.
+- **An assurance that lives only in a LOG sentence is not an assurance.** "An AST
+  scan reports zero literal-`True` conditions" was true when written and had no
+  mechanism keeping it true. It is a committed check now, and it is the answer to
+  every future instance of the family.
+- **A fix on the verification path is not a fix on the evidence path.** D2 was
+  repaired where the boolean is decided and left unrepaired where the artifact is
+  written, so a future witness could have produced `witness_verified: true` beside
+  an empty `witness_results`. When a defect is "this reads from the wrong source",
+  every reader of that source has to be found, not just the one that fails loudly.
+
+**Seed ledger:** unchanged; nothing claimed. **Vault:** untouched, counter
+1 == 1 log line. **`estimator.py`:** byte-identical.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Status:** the PROVISIONAL findings are closed and a **fresh independent review
+of the corrected tree is required** before P1-PRE is called accepted. Phase 1A
+does not begin until it returns.
