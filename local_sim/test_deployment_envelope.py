@@ -159,6 +159,11 @@ _RESULTS: list = []
 #: section 7 distinguishes "the provocation ran and its witness failed" (a
 #: FAILURE) from "the provocation never ran" (NOT PROVABLE) without reading the
 #: command line. A flag is an intention; this is an observation.
+#:
+#: A section MUST record one or the other. An ABSENT entry is a failure in
+#: section 7, not a gap -- otherwise forgetting a bookkeeping line silently
+#: downgrades a real failure into "not provable here", which is the softer
+#: report and therefore the dangerous default.
 _SECTION_RAN: dict = {}
 
 
@@ -1345,6 +1350,7 @@ def main() -> int:
     mem_gate: dict = {}
     head("5. the 8 GiB memory limit -- provoked, or explicitly not provable here")
     if not _rlimit_available():
+        _SECTION_RAN["memory_limit_mb"] = False
         unprovable(
             "memory_limit_mb (provocation)",
             "no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 "
@@ -1428,6 +1434,7 @@ def main() -> int:
     death: dict = {"skipped": True}
     if args.skip_worker_death:
         head("6. worker death and restart -- SKIPPED by request")
+        _SECTION_RAN["worker_death_restart"] = False
         unprovable("worker_death_restart", "--skip-worker-death was passed")
     else:
         head("6. worker death and restart, through the OFFICIAL subprocess runner")
@@ -1533,7 +1540,16 @@ def main() -> int:
         if ok:
             check(f"{name}: its named provocation RAN and PASSED in THIS suite",
                   True, why)
-        elif _SECTION_RAN.get(name):
+        elif name not in _SECTION_RAN:
+            # Its section never recorded whether it ran, so this refusal cannot
+            # be classified -- and the SOFTER classification is the gap. A
+            # failure that gets downgraded to a gap because a bookkeeping line
+            # was forgotten is the same defect family as the one being fixed, so
+            # the missing record is itself a FAILURE.
+            check(f"{name}: its section RECORDED whether it ran", False,
+                  f"no entry in _SECTION_RAN, so this refusal cannot be "
+                  f"classified as gap-or-failure -- {why}")
+        elif _SECTION_RAN[name]:
             # The section ran and the witness still does not hold: that is a
             # FAILURE, not a gap.
             check(f"{name}: its named provocation RAN and PASSED in THIS suite",
