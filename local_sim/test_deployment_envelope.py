@@ -151,6 +151,9 @@ LIFECYCLE_SUITE = "local_sim/lifecycle_eval.py --self-test"
 _PASS = 0
 _FAIL = 0
 _UNPROVABLE: list = []
+#: Checks this INVOCATION declined to perform -- see `declined()`. Never a pass,
+#: and deliberately not mixed with the envelope's own unprovable constraints.
+_DECLINED: list = []
 #: Every check this run has performed, in order, machine-readably. This is what
 #: turns "provoked by this file" from an assertion into something a witness can
 #: be verified against -- the D1 repair. Same shape as `lifecycle_eval._RESULTS`.
@@ -180,9 +183,28 @@ def check(name, ok, detail=""):
 
 
 def unprovable(name, why):
-    """Record a constraint this host CANNOT test. Never counted as a pass."""
+    """Record an envelope CONSTRAINT this run cannot test. Never a pass.
+
+    Reserved for the deployment envelope's own constraints -- the things the
+    grader enforces and this host may not be able to. The closing block says so
+    in those words, so anything else reported here would make that sentence
+    false about at least one line.
+    """
     _UNPROVABLE.append({"constraint": name, "why": why})
     print(f"  ----  {name:<62} NOT PROVABLE HERE: {why}")
+
+
+def declined(name, why):
+    """Record a CHECK this invocation cannot perform. Never a pass either.
+
+    Different from `unprovable` and kept in a different list on purpose: a check
+    the `--no-write` mode declines to run is not a gap in the evaluator's
+    coverage of the grader's envelope, and filing it under a heading that reads
+    "they are enforced only on the grader" would be a small lie of exactly the
+    kind this slice exists to remove.
+    """
+    _DECLINED.append({"check": name, "why": why})
+    print(f"  ~~~~  {name:<62} NOT PERFORMED IN THIS RUN: {why}")
 
 
 def pending(name, why):
@@ -1020,7 +1042,7 @@ def read_only_negative_tests() -> None:
             # So that run reports the control as NOT PROVABLE and the writing
             # run performs it. An absent check is declared, never assumed.
             if prev:
-                unprovable(
+                declined(
                     "the writer's positive control",
                     "the latch was armed before this suite started (--no-write); "
                     "lowering it here would make the read-only claim conditional "
@@ -1583,9 +1605,9 @@ def main() -> int:
               if not moved else f"MOVED: {moved}")
         git_after = _git_porcelain()
         if ro_git_before is None or git_after is None:
-            unprovable("--no-write worktree cleanliness",
-                       "`git status --porcelain` is unavailable here, so the "
-                       "hash comparison above is the whole of the evidence")
+            declined("--no-write worktree cleanliness",
+                     "`git status --porcelain` is unavailable here, so the "
+                     "hash comparison above is the whole of the evidence")
         else:
             check("--no-write: `git status --porcelain` is byte-identical",
                   ro_git_before == git_after,
@@ -1594,13 +1616,20 @@ def main() -> int:
 
     print("\n" + "=" * 96)
     print(f"{_PASS}/{_PASS + _FAIL} checks passed; "
-          f"{len(_UNPROVABLE)} constraint(s) NOT PROVABLE on this host")
+          f"{len(_UNPROVABLE)} constraint(s) NOT PROVABLE on this host; "
+          f"{len(_DECLINED)} check(s) not performed in this run")
     if _UNPROVABLE:
         print("\nNOT PROVABLE HERE -- these are gaps in the local evaluator, and a")
         print("candidate that passes everything above has NOT been shown to satisfy")
         print("them. They are enforced only on the grader:")
         for u in _UNPROVABLE:
             print(f"  - {u['constraint']}: {u['why']}")
+    if _DECLINED:
+        print("\nNOT PERFORMED IN THIS RUN -- these are checks this INVOCATION")
+        print("declined, not gaps in the evaluator's coverage of the grader. They")
+        print("are named rather than skipped quietly, and they are not passes:")
+        for d in _DECLINED:
+            print(f"  - {d['check']}: {d['why']}")
 
     if args.no_write:
         # The claim is CONDITIONAL on the checks above. The old unconditional
@@ -1621,6 +1650,7 @@ def main() -> int:
         "round": r.tag,
         "enforceability": enf,
         "unprovable_here": _UNPROVABLE,
+        "not_performed_in_this_run": _DECLINED,
         "predict_response_timeout_s": eff,
         "memory": mem_report,
         "memory_limit_provocation": mem_gate,

@@ -21,8 +21,8 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
 
 0b. NEGATIVE TESTS -- the read-only latch refuses both write paths
 ------------------------------------------------------------------
-  PASS  REFUSED: regenerating a suite's results while the latch is armed --no-write is armed: refusing to regenerate ..\..\AppData\Local\Temp\arc_whest_ro_hnmack81
-  PASS  REFUSED: writing an evidence artifact while the latch is armed --no-write is armed: refusing to write C:\Users\samsu\AppData\Local\Temp\arc_whest_ro_hnma
+  PASS  REFUSED: regenerating a suite's results while the latch is armed --no-write is armed: refusing to regenerate ..\..\AppData\Local\Temp\arc_whest_ro_s9ktw431
+  PASS  REFUSED: writing an evidence artifact while the latch is armed --no-write is armed: refusing to write C:\Users\samsu\AppData\Local\Temp\arc_whest_ro_s9kt
   PASS  ...and with the latch DOWN the same writer DOES write          wrote would_have_been_written.json to a system temp dir
 
 1. the enforceability matrix
@@ -47,11 +47,11 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
 3. peak memory at the live shape -- accounting, not enforcement
 ---------------------------------------------------------------
   weights alone                  64.0 MB (16 x 1024x1024 float32)
-  peak WORKING SET              441.4 MB   (resident)
-  peak COMMIT                   918.2 MB   (a LOWER bound on the RLIMIT_AS charge)
+  peak WORKING SET              440.9 MB   (resident)
+  peak COMMIT                   917.6 MB   (a LOWER bound on the RLIMIT_AS charge)
   Phase-2 limit                8192.0 MB
   PASS  the shipped file's peak memory fits the Phase-2 limit          at most 8.9x headroom -- an UPPER BOUND, i.e. the most optimistic reading. RLIMIT_AS caps VIRTUAL address space, which exceeds both counters above by an unmeasured amount
-  PASS  ...and the peak is at least as large as the weights alone      918.2 MB > 64.0 MB (a peak below the weights would mean the probe never materialised them)
+  PASS  ...and the peak is at least as large as the weights alone      917.6 MB > 64.0 MB (a peak below the weights would mean the probe never materialised them)
 
 5. the 8 GiB memory limit -- provoked, or explicitly not provable here
 ----------------------------------------------------------------------
@@ -77,7 +77,7 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
   PASS  every DEFERRED witness was adjudicated in this section         1 of 1 deferred -- a constraint that vanished between the matrix and the closure would be a gap that reads as coverage
 
 ================================================================================================
-39/39 checks passed; 3 constraint(s) NOT PROVABLE on this host
+39/39 checks passed; 3 constraint(s) NOT PROVABLE on this host; 0 check(s) not performed in this run
 
 NOT PROVABLE HERE -- these are gaps in the local evaluator, and a
 candidate that passes everything above has NOT been shown to satisfy

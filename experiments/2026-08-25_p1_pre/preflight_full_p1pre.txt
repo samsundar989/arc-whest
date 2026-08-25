@@ -1,0 +1,124 @@
+﻿preflight -- arc-whest
+repo:    C:\Users\samsu\Documents\arc-whest
+shipped: estimator.py   archive: estimator_v2_6_1.py
+
+=== 1. official stack + round configuration ===
+official_config -- every value asserted against the installed package
+  LIVE round: Phase 2 (v2-phase2), AIcrowd round 1429
+
+  PASS  whestbench is the official Phase-2 stack (0.16.x)          0.16.0
+  PASS  flopscope is the official Phase-2 stack (0.12.x)           0.12.0
+  PASS  whestbench is the real package, not the local_sim shim     C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\whestbench
+  PASS  LIVE round tag == whestbench budget.CURRENT_ROUND.tag      v2-phase2 == v2-phase2
+  PASS  every round we know is a round the package knows           ours ['v1-phase1', 'v1-warmup', 'v2-phase2'] <= package ['v1-phase1', 'v1-warmup', 'v2-phase2']
+  PASS  and the package knows no round we have not recorded        package ['v1-phase1', 'v1-warmup', 'v2-phase2'] <= ours ['v1-phase1', 'v1-warmup', 'v2-phase2']
+  PASS  v1-phase1.width                                            256 == 256
+  PASS  v1-phase1.depth                                            32 == 32
+  PASS  v1-phase1.n_samples                                        1000000000 == 1000000000
+  PASS  v1-phase1.flop_budget                                      272000000000 == 272000000000
+  PASS  v1-phase1.lambda                                           100000000000.0 == 100000000000.0
+  PASS  v1-phase1.residual_wall_time_limit_s                       None == None
+  PASS  v1-phase1.wall_time_limit_s                                60.0 == 60.0
+  PASS  v1-phase1.residual_mode                                    'priced' == 'priced'
+  PASS  v1-warmup.width                                            256 == 256
+  PASS  v1-warmup.depth                                            8 == 8
+  PASS  v1-warmup.n_samples                                        1000000000 == 1000000000
+  PASS  v1-warmup.flop_budget                                      68000000000 == 68000000000
+  PASS  v1-warmup.lambda                                           100000000000.0 == 100000000000.0
+  PASS  v1-warmup.residual_wall_time_limit_s                       None == None
+  PASS  v1-warmup.wall_time_limit_s                                60.0 == 60.0
+  PASS  v1-warmup.residual_mode                                    'priced' == 'priced'
+  PASS  v2-phase2.width                                            1024 == 1024
+  PASS  v2-phase2.depth                                            16 == 16
+  PASS  v2-phase2.n_samples                                        1000000000 == 1000000000
+  PASS  v2-phase2.flop_budget                                      2199023255552 == 2199023255552
+  PASS  v2-phase2.lambda                                           0.0 == 0.0
+  PASS  v2-phase2.residual_wall_time_limit_s                       0.4 == 0.4
+  PASS  v2-phase2.wall_time_limit_s                                120.0 == 120.0
+  PASS  v2-phase2.residual_mode                                    'gated' == 'gated'
+  PASS  LIVE.limits_verifiable is set for the round the package grades True
+  PASS  ContestSpec.memory_limit_mb                                8192 == 8192
+  PASS  ContestSpec.setup_timeout_s                                5.0 == 5.0
+  PASS  ContestSpec.predict_timeout_s                              30.0 == 30.0
+  PASS  ContestSpec.wall_time_limit_s                              120.0 == 120.0
+  PASS  ContestSpec.residual_wall_time_limit_s                     0.4 == 0.4
+  PASS  ContestSpec.lambda_flops_per_second                        0.0 == 0.0
+  PASS  ContestSpec.width is REQUIRED, so it carries no stale default no class default
+  PASS  ContestSpec.depth is REQUIRED, so it carries no stale default no class default
+  PASS  ContestSpec.flop_budget is REQUIRED, so it carries no stale default no class default
+  PASS  v1-phase1: ContestSpec-only limits are NOT claimed verifiable read from whestbench 0.14.0, recorded not asserted
+  PASS  v1-warmup: ContestSpec-only limits are NOT claimed verifiable read from whestbench 0.14.0, recorded not asserted
+  PASS  floor: a tiny C is floored at 0.1, by the package          0.1
+  PASS  floor: ...and by us                                        
+  PASS  uncapped above: C = 5B gives 5.0, by the package           5.0
+  PASS  uncapped above: ...and by us                               
+  PASS  failure is priced at 1.0, NOT the 0.1 floor, by the package 1.0
+  PASS  failure is priced at 1.0 ...and by us                      
+  PASS  package effective_compute default: C == F (lambda is 0)    1.000000e+09
+  PASS  our LIVE.effective_compute agrees                          
+  PASS  the DEPRECATED alias LAMBDA_FLOPS_PER_SECOND is still 1e11 -- and is NOT the live rate alias 1e+11, default 0e+00
+  PASS  PHASE1's lambda equals the package's Phase-1 rate          1e+11
+  PASS  Phase 2 gates residual and does not price it               cap 0.4s, lambda 0.0
+  PASS  Phase 1 prices residual and does not gate it               
+  PASS  headroom is a ratio to the cap, not a cost                 7.452x at the recorded anchor residual
+  PASS  an uncapped round has no headroom number to quote          
+  PASS  for_shape(1024, 16) is Phase 2                             
+  PASS  for_shape(256, 32) is Phase 1                              
+  PASS  for_shape refuses an unknown shape rather than guessing    
+  PASS  the report was produced by the official stack              0.16.0
+  PASS  the report is the LIVE round's dataset revision            hf://aicrowd/arc-whestbench-public-2026@v2-phase2
+  PASS  run_config.width (what the runner USED)                    1024 == 1024
+  PASS  run_config.depth (what the runner USED)                    16 == 16
+  PASS  run_config.flop_budget (what the runner USED)              2199023255552 == 2199023255552
+  PASS  run_config.lambda_flops_per_second (what the runner USED)  0.0 == 0.0
+  PASS  run_config.residual_wall_time_limit_s (what the runner USED) 0.4 == 0.4
+  PASS  run_config.wall_time_limit_s (what the runner USED)        120.0 == 120.0
+  PASS  run_config.setup_timeout_s (what the runner USED)          5.0 == 5.0
+  PASS  run_config does NOT carry memory_limit_mb (class default only) absent -- so it is a ContestSpec default, not an observation
+  PASS  run_config does NOT carry predict_timeout_s (class default only) absent -- so it is a ContestSpec default, not an observation
+  PASS  the observed multiplier is the floor, so C/B < floor at this operating point 0.1
+  PASS  OfficialRound is frozen (a mutable config is a variable)   
+  PASS  replace() still produces a modified COPY for what-if analysis 
+
+  73/73
+  PASS  1. official stack + round configuration
+
+=== 2. mint provenance ===
+========================================================================================
+MINT PROVENANCE PROOF — canonical_mint  vs  whestbench.sample_mlp
+========================================================================================
+whestbench   : C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\whestbench\generation.py
+SeedSequence : fnp.random.SeedSequence is np.random.SeedSequence = True
+
+     shape  seeds   weights bit-identical   MLP.seed identical  legacy identical
+----------------------------------------------------------------------------------------
+1024x16         20                   20/20                20/20              0/20
+256x32         20                   20/20                20/20              0/20
+256x8          20                   20/20                20/20              0/20
+128x16         20                   20/20                20/20              0/20
+64x4          20                   20/20                20/20              0/20
+256x2          20                   20/20                20/20              0/20
+----------------------------------------------------------------------------------------
+canonical_mint is bit-identical to whestbench.sample_mlp : True
+legacy harness.gen_mlp ever matched                      : False
+legacy max relative elementwise divergence               : 1.868
+
+DISTRIBUTIONAL CHECK (12 x 256x8 nets, He target std = 0.088388)
+  canonical  mean +2.762e-05   std 0.08841742   std/target 1.000329
+  legacy     mean +9.335e-06   std 0.08839059   std/target 1.000025
+  -> same distribution, different realisation. Past *statistical* results
+     stand; per-seed reproducibility against the grader did not exist.
+
+SEED SEMANTICS
+  input_seed        123456789
+  estimator seed    3367517259   <- what MLP.seed holds on the grader
+  legacy MLP.seed   123456789   <- what our mints used (== the weight seed)
+  The evaluator's estimator seed is an INDEPENDENT substream of the weight
+  seed. Our mints coupled them, so any estimator that derives randomness
+  from mlp.seed (v2.4.1 derives its digital shift from it) had a spurious
+  functional dependence between its point set and the weights it scored.
+
+VERDICT: PROVEN — canonical_mint == whestbench.sample_mlp
+  PASS  2. mint provenance
+
+=== 3. invariant suite ===

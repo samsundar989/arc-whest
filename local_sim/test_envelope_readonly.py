@@ -215,6 +215,27 @@ def latch_tests() -> None:
 # 3. end to end: a real --no-write child, judged by hashes and by git
 # --------------------------------------------------------------------------- #
 
+def _closing_blocks(out: str) -> "tuple[list, list]":
+    """The suite's two closing lists: envelope gaps, and checks it did not run.
+
+    They mean different things and the suite prints them under different
+    headings; this splits them so a line filed under the wrong one is visible.
+    """
+    gaps, not_run, where = [], [], None
+    for ln in out.splitlines():
+        if ln.startswith("NOT PROVABLE HERE"):
+            where = gaps
+        elif ln.startswith("NOT PERFORMED IN THIS RUN"):
+            where = not_run
+        elif where is not None and ln.startswith("  - "):
+            where.append(ln[4:])
+        elif where is not None and ln.strip() and not ln.startswith(("  ", "them",
+                                                                    "candidate",
+                                                                    "declined",
+                                                                    "are named")):
+            where = None
+    return gaps, not_run
+
 def child_tests() -> int:
     head("3. END TO END -- a real `--no-write --skip-worker-death` child run")
 
@@ -272,6 +293,16 @@ def child_tests() -> int:
     check("the child verified its own read-only claim before printing it",
           "--no-write: VERIFIED" in out,
           "the claim is now conditional on the checks above it")
+    # A check this INVOCATION declined is not a gap in the evaluator's coverage
+    # of the grader's envelope, and must not be filed under a heading that says
+    # it is. The writer's positive control is the one such case in this mode.
+    gaps, not_run = _closing_blocks(out)
+    check("...the writer's positive control is filed as NOT PERFORMED",
+          any("writer's positive control" in ln for ln in not_run),
+          f"{len(not_run)} line(s) in that block")
+    check("...and NOT as a gap in the evaluator's coverage of the grader",
+          not any("writer's positive control" in ln for ln in gaps),
+          f"{len(gaps)} envelope constraint(s) reported NOT PROVABLE")
     check("...and it regenerated nothing, by its own measurement",
           re.search(r"PASS\s+--no-write: resolving the lifecycle suite "
                     r"regenerated NOTHING", out) is not None,
