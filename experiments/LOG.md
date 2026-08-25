@@ -11344,3 +11344,67 @@ check passes and the counted-FLOP repair survived two independent attacks. What
 was rejected was the narrative around the residual measurement, and that narrative
 is now retracted and replaced with the decomposition above. **Phase 1 proceeds
 against a ~139 ms residual budget**, with a falsifier on it in the contract.
+
+---
+
+# 2026-08-24 — P2-P0 GATE STATUS: **REJECT.** Two clauses of the pre-registered all-of gate are unmet
+
+*Recorded BEFORE the work that may close them, so the negative exists on the record
+independently of whether it is later fixed.*
+
+The P2-P0 contract's exit gate is **G1–G7, all-of**. Two clauses are unmet, and my
+previous two entries described the slice as "accepted on everything executable",
+which is not what the gate asks. **The gate does not grade on the executable
+subset.** Recording the correct status:
+
+| gate | requirement | status |
+|---|---|---|
+| G1 | official anchor reproduced **op-by-op** | **MET** — 19 operations, 0 disagreeing, delta +0 |
+| G2 | round-aware config asserted against the **installed** package | **MET** — 73/73 |
+| G3 | scorer and lifecycle suites green, denominator not reduced | **MET** — 98/98 and 53/53; counts moved 88→98 and 37→53 with one padded check honestly removed |
+| G4 | residual cliff, wall, memory, over-budget and worker-restart paths **PROVOKED, not asserted** | **UNMET** |
+| G5 | `whest validate` + official Phase-2 subprocess smoke, zero failures | **MET** |
+| G6 | `preflight.ps1` and `verify_portability.py` green | **MET** — `PREFLIGHT GREEN -- 16/16`, portability 99/99 |
+| G7 | an independent Skeptic **ACCEPTS** | **UNMET** |
+
+## G4 — the memory path was never provoked
+
+G4 names five paths and requires each to fire. Four do. **The 8,192 MB memory
+limit does not**, and the deployment-envelope suite says so in its own output:
+`memory_limit_mb ... NOT PROVABLE HERE`.
+
+The reason is real — Windows has no `resource` module, so
+`subprocess_worker.py:172-183` catches the `setrlimit` failure and the worker runs
+with no cap — but **"this host cannot" is not "the path fires".** I recorded the
+limitation honestly and then treated the honest recording as satisfying a clause
+that asks for a provocation. It does not. An unenforceable constraint documented
+as unenforceable is a known gap, not a passed check, and the whole point of G4's
+wording ("PROVOKED, not asserted") was to forbid exactly this substitution.
+
+## G7 — neither review returned ACCEPT
+
+Two independent passes ran. **Both returned PROVISIONAL**, and the second closed
+with "The code I ran, I accept. The story written around it, I do not."
+
+PROVISIONAL is not ACCEPT. I described the outcome as "the instrument is accepted
+by both passes on everything executable", which is a summary I constructed, not a
+verdict either reviewer gave. The gate asks for a verdict, and no reviewer has yet
+been given the corrected tree to judge.
+
+## What this changes
+
+**Phase 0 is not closed.** No DESIGN seed block may be claimed, `estimator.py` may
+not be edited, and no Phase-1 measurement may begin until G1–G7 are all met and a
+fresh independent review returns a literal ACCEPT.
+
+The technical work stands — the anchor reconciles to zero, the retraction is
+recorded, the gate is green. What is missing is one provocation and one verdict,
+and neither is satisfied by describing it well.
+
+**Seed ledger:** unchanged. P01 144/600, 456 free. D17/D19 unspent. **Vault:**
+untouched. `estimator.py` byte-identical.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Next:** provoke the memory path for real on Linux, under the official
+WhestBench 0.16 / flopscope 0.12 subprocess runner where `RLIMIT_AS` exists; then
+re-run the complete gate and submit HEAD, diff and raw evidence for a verdict.
