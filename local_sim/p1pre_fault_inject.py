@@ -147,13 +147,12 @@ INJECTIONS = [
         # with the scan. An injection has to reach its target to mean anything,
         # and "it went red" is not evidence that it went red for the reason
         # claimed.
-        [("""    check("the matrix carries every REQUIRED envelope constraint",
-          present >= set(REQUIRED_CONSTRAINTS),
-          f"{len(present)} present; missing "
-          f"{sorted(set(REQUIRED_CONSTRAINTS) - present) or 'none'}"
-          + (f"; unpinned extras {sorted(present - set(REQUIRED_CONSTRAINTS))}"
-             if present - set(REQUIRED_CONSTRAINTS) else ""))""",
-          """    check("the matrix carries every REQUIRED envelope constraint", ok=True,
+        [("""    check("the matrix carries EXACTLY the required envelope constraints",
+          present == required,
+          f"{len(present)} present; missing {sorted(required - present) or 'none'}; "
+          f"unpinned {sorted(present - required) or 'none'}")""",
+          """    check("the matrix carries EXACTLY the required envelope constraints",
+          ok=True,
           detail="injection F: a literal truthy condition, ok= keyword form")""")],
         [READONLY],
     ),
