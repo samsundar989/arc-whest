@@ -1,0 +1,13 @@
+{
+  "rlimit_as_soft": 8589934592,
+  "rlimit_as_hard": 8589934592,
+  "rlimit_as_soft_gib": 8.0,
+  "rlimit_as_is_infinity": false,
+  "control_request_bytes": 268435456,
+  "provocation_request_bytes": 9663676416,
+  "provocation_request_gib": 9.0,
+  "pid": 47320,
+  "control_mmap": "OK",
+  "provocation_mmap": "OSError: [Errno 12] Cannot allocate memory",
+  "provocation_refused": true
+}

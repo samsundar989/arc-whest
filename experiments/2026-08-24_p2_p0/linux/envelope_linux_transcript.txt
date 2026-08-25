@@ -1,0 +1,67 @@
+﻿==============================================================
+DEPLOYMENT ENVELOPE on Linux -- the memory path FIRES here
+==============================================================
+platform   linux 6.6.87.2-microsoft-standard-WSL2
+python     3.12.3
+whestbench 0.16.0
+flopscope  0.12.0
+numpy      2.2.6
+RLIMIT_AS : True
+
+================================================================================================
+DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
+================================================================================================
+
+1. the enforceability matrix
+----------------------------
+  platform linux   RLIMIT_AS available: True
+  PASS  flop_budget is enforced here                                   2199023255552
+  PASS  wall_time_limit_s is enforced here                             120.0
+  PASS  residual_wall_time_limit_s is enforced here                    0.4
+  PASS  setup_timeout_s is enforced here                               5.0
+  PASS  memory_limit_mb is enforced here                               8192
+  PASS  worker_death_restart is enforced here                          None
+  ----  predict_response_timeout_s                                     NOT PROVABLE HERE: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
+  PASS  the matrix is honest about memory on this platform             enforced_locally=True
+  PASS  at least one constraint is recorded as NOT provable here       1 unprovable: ['predict_response_timeout_s']
+
+2. the timeout arithmetic is not what it looks like
+---------------------------------------------------
+  PASS  the runner waits max(predict_timeout, wall + grace), not predict_timeout 125.0 s effective vs predict_timeout_s 30.0 s
+  PASS  so under Phase 2 the 120 s WALL binds, not the 30 s predict timeout wall 120 s
+
+3. peak memory at the live shape -- accounting, not enforcement
+---------------------------------------------------------------
+  weights alone                  64.0 MB (16 x 1024x1024 float32)
+  peak WORKING SET              479.2 MB   (resident)
+  peak COMMIT                   479.2 MB   (a LOWER bound on the RLIMIT_AS charge)
+  Phase-2 limit                8192.0 MB
+  PASS  the shipped file's peak memory fits the Phase-2 limit          at most 17.1x headroom -- an UPPER BOUND, i.e. the most optimistic reading. RLIMIT_AS caps VIRTUAL address space, which exceeds both counters above by an unmeasured amount
+  PASS  ...and the peak is at least as large as the weights alone      479.2 MB > 64.0 MB (a peak below the weights would mean the probe never materialised them)
+
+5. the 8 GiB memory limit -- provoked, or explicitly not provable here
+----------------------------------------------------------------------
+      worker saw RLIMIT_AS soft = 8,589,934,592 (8.0 GiB)
+  PASS  the worker actually APPLIED the 8 GiB cap                      8,589,934,592 == 8,589,934,592
+  PASS  the 256 MiB control mapping SUCCEEDED                          OK
+  PASS  the 9 GiB reservation was REFUSED by the limit                 OSError: [Errno 12] Cannot allocate memory
+  PASS  ...and it was refused, never filled -- no page was touched     address space refused at mmap time
+  PASS  exactly ONE MLP failed, through the error path                 n_failed_mlps=1 breakdown={'budget_exhausted': 0, 'time_exhausted': 0, 'residual_wall_time_exhausted': 0, 'combined_budget_exhausted': 0, 'error': 1}
+  PASS  ...and every LATER MLP ran and was scored                      2 later MLPs, mse [1.1239, 1.231]
+
+6. worker death and restart, through the OFFICIAL subprocess runner
+-------------------------------------------------------------------
+  PASS  the suite SURVIVED a worker that hard-exited mid-run           3 rows returned
+  PASS  the failure is SCOPED to the MLP that killed the worker        n_failed_mlps = 1, indices [0]
+  PASS  ...and the MLPs after it were actually SCORED, not zeroed      last row mse 1.230982e+00, no failure flag
+
+================================================================================================
+21/21 checks passed; 1 constraint(s) NOT PROVABLE on this host
+
+NOT PROVABLE HERE -- these are gaps in the local evaluator, and a
+candidate that passes everything above has NOT been shown to satisfy
+them. They are enforced only on the grader:
+  - predict_response_timeout_s: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
+
+  --no-write: the artifact on disk was NOT touched.
+envelope exit: 0

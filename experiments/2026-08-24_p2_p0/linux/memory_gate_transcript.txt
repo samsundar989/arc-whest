@@ -1,0 +1,42 @@
+﻿==============================================================
+P2-P0 G4 -- RLIMIT_AS provocation, Ubuntu WSL, official stack
+==============================================================
+--- environment ---
+NAME="Ubuntu"
+VERSION="24.04.1 LTS (Noble Numbat)"
+Linux 6.6.87.2-microsoft-standard-WSL2 x86_64
+python     3.12.3
+whestbench 0.16.0
+flopscope  0.12.0
+numpy      2.2.6
+RLIMIT_AS available: True
+
+--- configuration ---
+  memory_limit_mb (ContestSpec default) : 8192   = 8 GiB
+  provocation request                   : 9663676416 bytes = 9 GiB (NEVER touched)
+  control request                       : 268435456 bytes = 256 MiB (must succeed)
+  runner                                : subprocess (the only one that sets RLIMIT_AS)
+
+--- run ---
+whest exit: 1
+
+--- what the worker saw (written BEFORE either mmap) ---
+{
+  "rlimit_as_soft": 8589934592,
+  "rlimit_as_hard": 8589934592,
+  "rlimit_as_soft_gib": 8.0,
+  "rlimit_as_is_infinity": false,
+  "control_request_bytes": 268435456,
+  "provocation_request_bytes": 9663676416,
+  "provocation_request_gib": 9.0,
+  "pid": 47320,
+  "control_mmap": "OK",
+  "provocation_mmap": "OSError: [Errno 12] Cannot allocate memory",
+  "provocation_refused": true
+}
+--- per-MLP outcome ---
+  whestbench 0.16.0   shape 1024x16
+  n_failed_mlps = 1   failure_breakdown = {'budget_exhausted': 0, 'time_exhausted': 0, 'residual_wall_time_exhausted': 0, 'combined_budget_exhausted': 0, 'error': 1}
+    MLP 0  mse=9.434763e-01  flops=0  flags=none  error=OSError: [Errno 12] Cannot allocate memory
+    MLP 1  mse=1.123911e+00  flops=0  flags=none  error=none
+    MLP 2  mse=1.230982e+00  flops=0  flags=none  error=none

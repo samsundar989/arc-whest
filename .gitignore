@@ -31,3 +31,6 @@ local_sim/_lifecycle_*_tmp.py
 .venv-fs010/
 
 local_sim/_envelope_*_tmp*
+
+experiments/2026-08-24_p2_p0/linux/__pycache__/
+local_sim/_envelope_mem_*_tmp*

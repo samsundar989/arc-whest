@@ -18,12 +18,25 @@ does not have a gap; it has a *hidden* gap, and a hidden gap reads as coverage.
 
 THE FINDING THIS FILE EXISTS TO RECORD
 --------------------------------------
-**This host cannot enforce the memory limit by any route.** `--runner local`
+**Windows cannot enforce the memory limit by any route.** `--runner local`
 enforces nothing (`runner.py:163-167` logs "advisory in --runner local"), and
 `--runner subprocess` enforces it with `resource.setrlimit(RLIMIT_AS, ...)`
 (`subprocess_worker.py:172-183`) -- and the `resource` module **does not exist on
 Windows**. The worker catches the failure and prints a warning; the run then
 proceeds with NO memory cap at all.
+
+**So this file reports differently on the two platforms, and that is the point.**
+Where `RLIMIT_AS` exists it PROVOKES the limit and proves the path fires; where it
+does not, it says NOT PROVABLE and points at the Linux evidence. A gate clause that
+asks for a provocation is not satisfied by documenting why the provocation is
+impossible -- the documentation was honest and it was still not the check.
+
+Provoked on Ubuntu 24.04 / WSL2 under the same official stack, 2026-08-24
+(`experiments/2026-08-24_p2_p0/linux/`): the worker reported
+`RLIMIT_AS soft = 8,589,934,592` (exactly 8 GiB, so the cap really was applied), a
+256 MiB control mapping SUCCEEDED, a 9 GiB anonymous reservation was REFUSED with
+`OSError: [Errno 12] Cannot allocate memory` without a byte being touched, that MLP
+was scored through the error path, and **the next two MLPs ran and were scored**.
 
 So a Phase-2 candidate can be memory-safe on this laptop by construction, because
 nothing here is measuring, and still be killed on the grader. The Phase-1 limit
@@ -165,7 +178,10 @@ def enforceability() -> dict:
                                   "on this platform, so subprocess_worker.py's "
                                   "setrlimit call is caught and skipped, and "
                                   "--runner local is advisory by design"),
-                "provoked_by": None,
+                "provoked_by": ("this file, section 5" if rl else
+                                "experiments/2026-08-24_p2_p0/linux/ -- provoked on "
+                                "Ubuntu 24.04 under the same official stack, since "
+                                "it cannot be provoked on this platform"),
                 "accounting_instead": ("peak working set and peak commit, measured "
                                        "below; both are LOWER bounds on the "
                                        "RLIMIT_AS charge, so the headroom they "
@@ -175,7 +191,7 @@ def enforceability() -> dict:
                 "value": None,
                 "enforced_locally": True,
                 "by": "whest run --runner subprocess restarts a dead worker",
-                "provoked_by": "this file, section 3",
+                "provoked_by": "this file, section 6",
             },
             "predict_response_timeout_s": {
                 "value": r.predict_timeout_s,
@@ -361,6 +377,67 @@ class Estimator(BaseEstimator):
 '''
 
 
+#: The sacrificial estimator that provokes RLIMIT_AS. Kept as a repository FILE
+#: rather than an embedded string so the Linux transcript and this suite run the
+#: byte-identical thing -- two copies of a probe drift, and then the transcript
+#: stops being evidence about the code that ships.
+MEMORY_SACRIFICE = os.path.join(
+    _ROOT, "experiments", "2026-08-24_p2_p0", "linux", "sacrificial_memory.py")
+
+#: Recorded on Ubuntu 24.04 / WSL2, whestbench 0.16.0 / flopscope 0.12.0, 2026-08-24.
+#: Cited on platforms that cannot run the provocation themselves.
+LINUX_EVIDENCE = os.path.join(
+    _ROOT, "experiments", "2026-08-24_p2_p0", "linux",
+    "rlimit_as_worker_report.json")
+
+
+def provoke_memory_limit(n_mlps: int = 3, request_gib: float = 9.0) -> dict:
+    """Reserve `request_gib` of ADDRESS SPACE under the 8 GiB cap, and never touch it.
+
+    `RLIMIT_AS` bounds virtual address space, so the kernel refuses the mapping
+    outright -- no page is faulted in and no memory is filled. Requesting address
+    space is precisely what the limit governs, which makes this the cheapest
+    honest way to exercise it.
+
+    Returns the runner's report plus the worker's own view of its limit, written
+    before either mapping is attempted so the cap is proven applied rather than
+    assumed.
+    """
+    sentinel = os.path.join(_HERE, "_envelope_mem_sentinel_tmp")
+    report = os.path.join(_HERE, "_envelope_mem_report_tmp.json")
+    for f in (sentinel, report):
+        if os.path.exists(f):
+            os.remove(f)
+    env = dict(
+        os.environ,
+        PYTHONIOENCODING="utf-8",
+        ARC_WHEST_MEM_SENTINEL=sentinel,
+        ARC_WHEST_MEM_REPORT=report,
+        ARC_WHEST_MEM_REQUEST=str(int(request_gib * 1024 ** 3)),
+        ARC_WHEST_MEM_CONTROL=str(256 * 1024 ** 2),
+    )
+    try:
+        p = subprocess.run(
+            [_whest_exe(), "run", "--estimator", MEMORY_SACRIFICE,
+             "--dataset", "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
+             "--split", "mini", "--runner", "subprocess",
+             "--n-mlps", str(n_mlps), "--json"],
+            capture_output=True, text=True, cwd=_ROOT, env=env)
+        out: dict = {}
+        i = p.stdout.find("{")
+        if i < 0:
+            return {"error": (p.stderr or p.stdout)[-2000:]}
+        out["report"] = json.loads(p.stdout[i:])
+        if os.path.exists(report):
+            with open(report, encoding="utf-8") as fh:
+                out["worker"] = json.load(fh)
+        return out
+    finally:
+        for f in (sentinel, report):
+            if os.path.exists(f):
+                os.remove(f)
+
+
 def _whest_exe() -> str:
     """The `whest` console script beside the running interpreter."""
     d = os.path.dirname(sys.executable)
@@ -502,12 +579,85 @@ def main() -> int:
               f"{binding_mb:.1f} MB > {weights_mb:.1f} MB (a peak below the "
               f"weights would mean the probe never materialised them)")
 
+    # ---------------------------------------------------------------- #
+    # 5. the memory limit -- PROVOKED where the limit exists
+    # ---------------------------------------------------------------- #
+    mem_gate: dict = {}
+    head("5. the 8 GiB memory limit -- provoked, or explicitly not provable here")
+    if not _rlimit_available():
+        unprovable(
+            "memory_limit_mb (provocation)",
+            "no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 "
+            "under the same official stack -- see "
+            "experiments/2026-08-24_p2_p0/linux/")
+        if os.path.exists(LINUX_EVIDENCE):
+            with open(LINUX_EVIDENCE, encoding="utf-8") as fh:
+                lin = json.load(fh)
+            mem_gate = {"provoked_here": False, "linux_evidence": lin}
+            print(f"      Linux worker saw RLIMIT_AS soft = "
+                  f"{lin.get('rlimit_as_soft'):,} "
+                  f"({lin.get('rlimit_as_soft_gib')} GiB)")
+            print(f"      control {lin.get('control_mmap')}   "
+                  f"9 GiB request -> {lin.get('provocation_mmap')}")
+            check("the Linux evidence shows the cap was actually APPLIED",
+                  lin.get("rlimit_as_soft") == r.memory_limit_mb * 1024 * 1024,
+                  f"{lin.get('rlimit_as_soft'):,} == "
+                  f"{r.memory_limit_mb * 1024 * 1024:,}")
+            check("...the control mapping SUCCEEDED, so the mechanism works",
+                  lin.get("control_mmap") == "OK", str(lin.get("control_mmap")))
+            check("...and the over-limit reservation was REFUSED",
+                  bool(lin.get("provocation_refused")),
+                  str(lin.get("provocation_mmap")))
+        else:
+            mem_gate = {"provoked_here": False, "linux_evidence": None}
+            check("Linux evidence for the memory path is present", False,
+                  f"missing {os.path.relpath(LINUX_EVIDENCE, _ROOT)}")
+    else:
+        d = provoke_memory_limit()
+        if "error" in d:
+            check("the official runner produced a report", False,
+                  d["error"][:300])
+            mem_gate = {"provoked_here": True, "error": d["error"][:2000]}
+        else:
+            res = d["report"]["results"]
+            rows = res["per_mlp"]
+            w = d.get("worker") or {}
+            mem_gate = {"provoked_here": True, "worker": w,
+                        "n_failed_mlps": res["n_failed_mlps"],
+                        "failure_breakdown": res.get("failure_breakdown")}
+            print(f"      worker saw RLIMIT_AS soft = {w.get('rlimit_as_soft'):,} "
+                  f"({w.get('rlimit_as_soft_gib')} GiB)")
+            check("the worker actually APPLIED the 8 GiB cap",
+                  w.get("rlimit_as_soft") == r.memory_limit_mb * 1024 * 1024,
+                  f"{w.get('rlimit_as_soft'):,} == "
+                  f"{r.memory_limit_mb * 1024 * 1024:,}")
+            check("the 256 MiB control mapping SUCCEEDED",
+                  w.get("control_mmap") == "OK", str(w.get("control_mmap")))
+            check("the 9 GiB reservation was REFUSED by the limit",
+                  bool(w.get("provocation_refused")),
+                  str(w.get("provocation_mmap")))
+            check("...and it was refused, never filled -- no page was touched",
+                  "Cannot allocate memory" in str(w.get("provocation_mmap"))
+                  or "MemoryError" in str(w.get("provocation_mmap")),
+                  "address space refused at mmap time")
+            check("exactly ONE MLP failed, through the error path",
+                  res["n_failed_mlps"] == 1
+                  and (res.get("failure_breakdown") or {}).get("error") == 1,
+                  f"n_failed_mlps={res['n_failed_mlps']} "
+                  f"breakdown={res.get('failure_breakdown')}")
+            later = rows[1:]
+            check("...and every LATER MLP ran and was scored",
+                  len(later) >= 1 and all(not m["traceback"] for m in later)
+                  and all(m["final_layer_mse"] > 0 for m in later),
+                  f"{len(later)} later MLPs, mse "
+                  f"{[round(m['final_layer_mse'], 4) for m in later]}")
+
     death: dict = {"skipped": True}
     if args.skip_worker_death:
-        head("4. worker death and restart -- SKIPPED by request")
+        head("6. worker death and restart -- SKIPPED by request")
         unprovable("worker_death_restart", "--skip-worker-death was passed")
     else:
-        head("4. worker death and restart, through the OFFICIAL subprocess runner")
+        head("6. worker death and restart, through the OFFICIAL subprocess runner")
         d = provoke_worker_death(3)
         if "error" in d:
             check("the official runner produced a report", False, d["error"][:300])
@@ -568,6 +718,7 @@ def main() -> int:
             "unprovable_here": _UNPROVABLE,
             "predict_response_timeout_s": eff,
             "memory": mem_report,
+            "memory_limit_provocation": mem_gate,
             "worker_death": death,
             "checks_passed": _PASS,
             "checks_total": _PASS + _FAIL,

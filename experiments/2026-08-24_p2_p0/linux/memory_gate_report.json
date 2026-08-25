@@ -1,0 +1,396 @@
+{
+  "schema_version": "1.1",
+  "mode": "agent",
+  "results": {
+    "adjusted_final_layer_score": 0.3929885347684224,
+    "final_layer_mse": 1.0994563897450764,
+    "all_layers_mse": 0.8294421235720316,
+    "per_layer_mse": [
+      0.3184792697429657,
+      0.48385870456695557,
+      0.5958235859870911,
+      0.6308054327964783,
+      0.7199171185493469,
+      0.7443413734436035,
+      0.8224554657936096,
+      0.8454883694648743,
+      0.8949182629585266,
+      0.9160058498382568,
+      0.9036681652069092,
+      1.0271130800247192,
+      1.1064919233322144,
+      1.1029038429260254,
+      1.0593466758728027,
+      1.0994564294815063
+    ],
+    "best_mlp_adjusted_final_layer_score": 0.11239106655120851,
+    "worst_mlp_adjusted_final_layer_score": 0.9434763193130493,
+    "mean_score_multiplier": 0.39999999999999997,
+    "mean_compute_utilization": 0.0,
+    "n_failed_mlps": 1,
+    "mean_effective_compute": 0.0,
+    "failure_breakdown": {
+      "budget_exhausted": 0,
+      "time_exhausted": 0,
+      "residual_wall_time_exhausted": 0,
+      "combined_budget_exhausted": 0,
+      "error": 1
+    },
+    "per_mlp": [
+      {
+        "mlp_index": 0,
+        "mlp_name": "logan-fitzgerald",
+        "error": "[Errno 12] Cannot allocate memory",
+        "error_code": "PREDICT_ERROR",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/samsu/.venv-whest-p2/lib/python3.12/site-packages/whestbench/subprocess_worker.py\", line 73, in _handle_predict\n    predictions = estimator.predict(mlp, budget)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/mnt/c/Users/samsu/Documents/arc-whest/experiments/2026-08-24_p2_p0/linux/sacrificial_memory.py\", line 110, in predict\n    big = mmap.mmap(-1, _REQUEST)\n          ^^^^^^^^^^^^^^^^^^^^^^^\nOSError: [Errno 12] Cannot allocate memory\n",
+        "final_layer_mse": 0.9434763193130493,
+        "all_layers_mse": 0.7062501907348633,
+        "per_layer_mse": [
+          0.3180968165397644,
+          0.47636178135871887,
+          0.6078811287879944,
+          0.6392258405685425,
+          0.7083872556686401,
+          0.6762359142303467,
+          0.7076292037963867,
+          0.6471665501594543,
+          0.675173282623291,
+          0.7265635132789612,
+          0.7172238826751709,
+          0.7717386484146118,
+          0.8619272708892822,
+          0.911322832107544,
+          0.9115918278694153,
+          0.9434763193130493
+        ],
+        "adjusted_final_layer_score": 0.9434763193130493,
+        "flops_used": 0,
+        "effective_compute": 0.0,
+        "budget_exhausted": false,
+        "time_exhausted": false,
+        "residual_wall_time_exhausted": false,
+        "combined_budget_exhausted": false,
+        "wall_time_s": 0.0,
+        "flopscope_backend_time_s": 0.0,
+        "flopscope_overhead_time_s": 0.0,
+        "residual_wall_time_s": 0.0,
+        "breakdowns": {
+          "estimator": null
+        }
+      },
+      {
+        "mlp_index": 1,
+        "mlp_name": "william-graves",
+        "final_layer_mse": 1.123910665512085,
+        "all_layers_mse": 0.8018853068351746,
+        "per_layer_mse": [
+          0.3186401128768921,
+          0.5227417945861816,
+          0.6175380349159241,
+          0.673511266708374,
+          0.7039758563041687,
+          0.718021035194397,
+          0.8087313771247864,
+          0.8208266496658325,
+          0.802144467830658,
+          0.8053853511810303,
+          0.8453100323677063,
+          0.9582808017730713,
+          1.0036166906356812,
+          1.0518689155578613,
+          1.0556623935699463,
+          1.123910665512085
+        ],
+        "adjusted_final_layer_score": 0.11239106655120851,
+        "flops_used": 0,
+        "effective_compute": 0.0,
+        "budget_exhausted": false,
+        "time_exhausted": false,
+        "residual_wall_time_exhausted": false,
+        "combined_budget_exhausted": false,
+        "wall_time_s": 0.00036246700256015174,
+        "flopscope_backend_time_s": 8.013001206563786e-06,
+        "flopscope_overhead_time_s": 0.00028594000468729064,
+        "residual_wall_time_s": 6.851399666629732e-05,
+        "breakdowns": {
+          "estimator": {
+            "flop_budget": 2199023255552,
+            "flops_used": 0,
+            "flops_remaining": 2199023255552,
+            "wall_time_s": 0.00036246700256015174,
+            "flopscope_backend_time_s": 8.013001206563786e-06,
+            "flopscope_overhead_time_s": 0.00028594000468729064,
+            "residual_wall_time_s": 6.851399666629732e-05,
+            "by_namespace": {
+              "estimator.estimator-client": {
+                "flops_used": 0,
+                "calls": 2,
+                "flopscope_backend_time_s": 8.013001206563786e-06,
+                "flopscope_overhead_time_s": 0.00014184899919200689,
+                "operations": {
+                  "zeros": {
+                    "flop_cost": 0,
+                    "calls": 1,
+                    "flopscope_backend_time_s": 6.731002940796316e-06,
+                    "flopscope_overhead_time_s": 9.662299635238014e-05
+                  },
+                  "asarray": {
+                    "flop_cost": 0,
+                    "calls": 1,
+                    "flopscope_backend_time_s": 1.28199826576747e-06,
+                    "flopscope_overhead_time_s": 4.5226002839626744e-05
+                  }
+                }
+              }
+            }
+          }
+        },
+        "traceback": null
+      },
+      {
+        "mlp_index": 2,
+        "mlp_name": "raymond-barnes",
+        "final_layer_mse": 1.2309821844100952,
+        "all_layers_mse": 0.9801908731460571,
+        "per_layer_mse": [
+          0.318700909614563,
+          0.4524725675582886,
+          0.56205153465271,
+          0.5796791911125183,
+          0.7473883628845215,
+          0.8387670516967773,
+          0.9510058760643005,
+          1.068471908569336,
+          1.2074369192123413,
+          1.2160687446594238,
+          1.1484706401824951,
+          1.3513200283050537,
+          1.4539318084716797,
+          1.345519781112671,
+          1.2107858657836914,
+          1.2309821844100952
+        ],
+        "adjusted_final_layer_score": 0.12309821844100953,
+        "flops_used": 0,
+        "effective_compute": 0.0,
+        "budget_exhausted": false,
+        "time_exhausted": false,
+        "residual_wall_time_exhausted": false,
+        "combined_budget_exhausted": false,
+        "wall_time_s": 0.0002388280008744914,
+        "flopscope_backend_time_s": 6.318998202914372e-06,
+        "flopscope_overhead_time_s": 0.00016617000437690876,
+        "residual_wall_time_s": 6.633899829466827e-05,
+        "breakdowns": {
+          "estimator": {
+            "flop_budget": 2199023255552,
+            "flops_used": 0,
+            "flops_remaining": 2199023255552,
+            "wall_time_s": 0.0002388280008744914,
+            "flopscope_backend_time_s": 6.318998202914372e-06,
+            "flopscope_overhead_time_s": 0.00016617000437690876,
+            "residual_wall_time_s": 6.633899829466827e-05,
+            "by_namespace": {
+              "estimator.estimator-client": {
+                "flops_used": 0,
+                "calls": 2,
+                "flopscope_backend_time_s": 6.318998202914372e-06,
+                "flopscope_overhead_time_s": 0.00010861600458156317,
+                "operations": {
+                  "zeros": {
+                    "flop_cost": 0,
+                    "calls": 1,
+                    "flopscope_backend_time_s": 5.055000656284392e-06,
+                    "flopscope_overhead_time_s": 6.357100210152566e-05
+                  },
+                  "asarray": {
+                    "flop_cost": 0,
+                    "calls": 1,
+                    "flopscope_backend_time_s": 1.2639975466299802e-06,
+                    "flopscope_overhead_time_s": 4.504500248003751e-05
+                  }
+                }
+              }
+            }
+          }
+        },
+        "traceback": null
+      }
+    ],
+    "breakdowns": {
+      "sampling": {
+        "flop_budget": 101022720000420864,
+        "flops_used": 101022720000420864,
+        "flops_remaining": 0,
+        "wall_time_s": 4998.034356324235,
+        "flopscope_backend_time_s": 0.0,
+        "flopscope_overhead_time_s": 0.0,
+        "residual_wall_time_s": 4998.034356324235,
+        "by_namespace": {
+          "sampling.sample_layer_statistics": {
+            "flops_used": 101022720000420864,
+            "calls": 492342,
+            "flopscope_backend_time_s": 0.0,
+            "flopscope_overhead_time_s": 0.0,
+            "operations": {
+              "random.Generator.standard_normal": {
+                "flop_cost": 49152000000000,
+                "calls": 5724,
+                "flopscope_backend_time_s": 0.0,
+                "flopscope_overhead_time_s": 0.0
+              },
+              "array": {
+                "flop_cost": 3072000000000,
+                "calls": 5724,
+                "flopscope_backend_time_s": 0.0,
+                "flopscope_overhead_time_s": 0.0
+              },
+              "matmul": {
+                "flop_cost": 100614144000000000,
+                "calls": 91584,
+                "flopscope_backend_time_s": 0.0,
+                "flopscope_overhead_time_s": 0.0
+              },
+              "maximum": {
+                "flop_cost": 49152000000000,
+                "calls": 91584,
+                "flopscope_backend_time_s": 0.0,
+                "flopscope_overhead_time_s": 0.0
+              },
+              "asarray": {
+                "flop_cost": 104448000104448,
+                "calls": 97314,
+                "flopscope_backend_time_s": 0.0,
+                "flopscope_overhead_time_s": 0.0
+              },
+              "sum": {
+                "flop_cost": 104447800713216,
+                "calls": 97308,
+                "flopscope_backend_time_s": 0.0,
+                "flopscope_overhead_time_s": 0.0
+              },
+              "add": {
+                "flop_cost": 199286784,
+                "calls": 97308,
+                "flopscope_backend_time_s": 0.0,
+                "flopscope_overhead_time_s": 0.0
+              },
+              "power": {
+                "flop_cost": 98304000098304,
+                "calls": 5727,
+                "flopscope_backend_time_s": 0.0,
+                "flopscope_overhead_time_s": 0.0
+              },
+              "zeros": {
+                "flop_cost": 0,
+                "calls": 51,
+                "flopscope_backend_time_s": 0.0,
+                "flopscope_overhead_time_s": 0.0
+              },
+              "stack": {
+                "flop_cost": 98304,
+                "calls": 3,
+                "flopscope_backend_time_s": 0.0,
+                "flopscope_overhead_time_s": 0.0
+              },
+              "true_divide": {
+                "flop_cost": 104448,
+                "calls": 6,
+                "flopscope_backend_time_s": 0.0,
+                "flopscope_overhead_time_s": 0.0
+              },
+              "subtract": {
+                "flop_cost": 6144,
+                "calls": 3,
+                "flopscope_backend_time_s": 0.0,
+                "flopscope_overhead_time_s": 0.0
+              },
+              "mean": {
+                "flop_cost": 6144,
+                "calls": 3,
+                "flopscope_backend_time_s": 0.0,
+                "flopscope_overhead_time_s": 0.0
+              },
+              "copy": {
+                "flop_cost": 3072,
+                "calls": 3,
+                "flopscope_backend_time_s": 0.0,
+                "flopscope_overhead_time_s": 0.0
+              }
+            }
+          }
+        },
+        "time_source": "bake"
+      },
+      "estimator": {
+        "flop_budget": 4398046511104,
+        "flops_used": 0,
+        "flops_remaining": 4398046511104,
+        "wall_time_s": 0.0006012950034346431,
+        "flopscope_backend_time_s": 1.4331999409478158e-05,
+        "flopscope_overhead_time_s": 0.0004521100090641994,
+        "residual_wall_time_s": 0.0001348529949609656,
+        "by_namespace": {
+          "estimator.estimator-client": {
+            "flops_used": 0,
+            "calls": 4,
+            "flopscope_backend_time_s": 1.4331999409478158e-05,
+            "flopscope_overhead_time_s": 0.00025046500377357006,
+            "operations": {
+              "zeros": {
+                "flop_cost": 0,
+                "calls": 2,
+                "flopscope_backend_time_s": 1.1786003597080708e-05,
+                "flopscope_overhead_time_s": 0.0001601939984539058
+              },
+              "asarray": {
+                "flop_cost": 0,
+                "calls": 2,
+                "flopscope_backend_time_s": 2.54599581239745e-06,
+                "flopscope_overhead_time_s": 9.027100531966425e-05
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "run_meta": {
+    "run_started_at_utc": "2026-08-25T00:38:07.890539+00:00",
+    "run_finished_at_utc": "2026-08-25T00:38:07.890574+00:00",
+    "run_duration_s": 36.93191432952881,
+    "host": {
+      "hostname": "SamMegaPC",
+      "os": "Linux",
+      "os_release": "6.6.87.2-microsoft-standard-WSL2",
+      "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+      "machine": "x86_64",
+      "python_version": "3.12.3",
+      "cpu_brand": "x86_64",
+      "cpu_count_logical": 16,
+      "cpu_count_physical": 8,
+      "ram_total_bytes": 32361336832,
+      "ram_available_bytes": null,
+      "numpy_version": "2.2.6",
+      "flopscope_version": "0.12.0"
+    }
+  },
+  "run_config": {
+    "n_mlps": 3,
+    "width": 1024,
+    "depth": 16,
+    "seed": null,
+    "flop_budget": 2199023255552,
+    "setup_timeout_s": 5.0,
+    "wall_time_limit_s": 120.0,
+    "residual_wall_time_limit_s": 0.4,
+    "lambda_flops_per_second": 0.0,
+    "dataset": {
+      "path": "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
+      "sha256": "aab61cf11271d20118e2109065c165a931dfacb493849f0d611f7a2d82a03790",
+      "seed": null,
+      "n_mlps": 100
+    }
+  },
+  "whestbench_version": "0.16.0"
+}
