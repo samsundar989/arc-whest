@@ -13928,3 +13928,92 @@ is stated as an exact integer identity precisely so that it can.
 not edited. **No truth data is read in this slice.**
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-25 — TRACK A: Phase-2 calibration submission READINESS PACKET — awaiting Samuel's explicit approval
+
+*Class **STRATEGIC**, because submission changes external state. **Prepared, not
+submitted.** `AGENTS.md` hard rule 6: never submit without Samuel's explicit
+approval, and the order is `whest validate` -> clean mini with zero failures ->
+ask. That order has been followed and the packet stops here.*
+
+## 1. The candidate, frozen
+
+| | |
+|---|---|
+| file | `estimator.py`, **unmodified** |
+| sha256 (raw bytes) | `00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec` |
+| sha256 (LF-normalised) | `1caa3752be56e8625ddb8b163ff8ffa8` |
+| identical to archive | **yes**, `estimator_v2_6_1.py`, byte-for-byte |
+| last commit touching it | `2df80ced` — nothing in Phase 0, P1-PRE or Phase 1A moved it |
+| version | v2.6.1 |
+| **method at width 1024** | `_analytic_only` -> **basic K2p1**. None of the Phase-1 rotation/Sobol/pruning/Strassen carrier is active at this width |
+
+## 2. What it scores, measured rather than expected
+
+Official runner, `--runner subprocess`, the organisers' own `v2-phase2` data,
+**the full 100-MLP mini split**, dataset sha256 `aab61cf11271d201…`:
+
+| metric | value |
+|---|---|
+| **adjusted score** | **`4.050566e-07`** |
+| raw final-layer MSE | `4.050566e-06` |
+| mean multiplier | `0.1000` — pinned at the floor |
+| `C/B` | `0.0625734` |
+| counted FLOPs / MLP | `137,600,326,656` (identical to the anchor, delta +0) |
+| **`n_failed_mlps`** | **`0`** |
+| failure breakdown | all five counters `0` |
+| residual per MLP | median `0.04800 s`, worst `0.09328 s` -> **4.3x headroom** on the graded path |
+
+**A discrepancy I am flagging rather than smoothing.** `CURRENT_STATE.md` and the
+handoff record the expected score as `~3.93-3.96e-7`. The measured public mini is
+**`4.0506e-7`**, about **2.3-3.1% worse** than that band. The recorded figure was
+an estimate; this is a measurement of the actual public split, and it is the
+number that should be believed. Nothing was tuned to it and nothing may be — the
+public split is **CONFIRM tier, read-only** (`VALIDATION.md` §0).
+
+**It is also not the graded score.** The graded submission runs the organisers'
+own public+private evaluation. This is the best available predictor and it is a
+predictor.
+
+## 3. Gate state at the moment of freezing
+
+| check | result |
+|---|---|
+| `whest validate` | **passed**, 4/4 (class resolved, setup 0.00 s of 5 s cap, shape `(2,4)`, all finite) |
+| official config, from the run's own `run_config` | `1024 x 16`, `B = 2,199,023,255,552`, `lambda = 0.0`, residual cap `0.4 s`, wall `120 s` |
+| ship-file identity | `estimator.py` == `estimator_v2_6_1.py` |
+| preflight `-Full` | **GREEN 16/16** |
+| portability | 99/99 |
+| worktree | clean at the freeze |
+| seed ledger / vault | unchanged; nothing claimed; counter 1 == 1 |
+
+**Submission allowance:** `docs/PHASE2_LIVE_AUDIT_2026-08-24.md` records
+**10 per team per day**. This account has **zero Phase-2 submissions**, so one
+calibration submission spends 1 of 10 and leaves the day's budget essentially
+intact. The `whest` CLI exposes no quota query; that figure is from the recorded
+audit, not from a live check, and is labelled accordingly.
+
+## 4. What this submission is and is not
+
+**Is:** a calibration of the account and the grader path — proof that our
+packaging, our contract compliance and our zero-failure behaviour survive the
+real submission pipeline, on a candidate whose local behaviour is fully
+characterised.
+
+**Is not:** evidence of improvement, and **not a final nominee**. It is basic
+K2p1, roughly the rank-33 cluster on a 44-entrant board. `GAME_PLAN.md` §7
+applies: nothing is nominated merely because it exists. No constant will be
+fitted to whatever comes back.
+
+## 5. The decision, and it is Samuel's
+
+**STOPPED, awaiting explicit approval.** On approval I will append a submission
+contract, submit **once**, and record the official result verbatim. Nothing is
+submitted otherwise.
+
+**Raw evidence:** `experiments/2026-08-25_trackA/mini_100_subprocess.json` (the
+full report, 100 rows), `whest_validate.txt`.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.

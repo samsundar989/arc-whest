@@ -1,0 +1,26 @@
+### TRACK A -- Phase-2 calibration readiness, 2026-08-25T19:44:08Z
+### HEAD 1ea0567a9a63d852ffd303bf4fc6869096b29a28
+
+## 1. whest validate
+Validating estimator estimator.py
+C:\Users\samsu\Documents\arc-whest\estimator.py:772: SymmetryLossWarning: Symmetry lost along dims (0, 1): multiply — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)
+C:\Users\samsu\Documents\arc-whest\estimator.py:772: SymmetryLossWarning: Symmetry lost along dims (0, 1): add — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)
+┌──────────────────────────────── Validation ─────────────────────────────────┐
+│ Command: validate                                                           │
+│ Status: success                                                             │
+│ ┌──────────────────────────────── Checks ─────────────────────────────────┐ │
+│ │ ┌────────┬──────────────────────────┬────────────────┐                  │ │
+│ │ │ Status │ Check                    │ Detail         │                  │ │
+│ │ ├────────┼──────────────────────────┼────────────────┤                  │ │
+│ │ │ OK     │ class resolved           │ Estimator      │                  │ │
+│ │ │ OK     │ setup(context) completed │ 0.00s (cap 5s) │                  │ │
+│ │ │ OK     │ predict() returned shape │ (2, 4)         │                  │ │
+│ │ │ OK     │ values finite            │ all finite     │                  │ │
+│ │ └────────┴──────────────────────────┴────────────────┘                  │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────┘
+✓ Validation passed in 26ms
+Next: `whest run --estimator estimator.py --split mini`
+## validate exit=0
