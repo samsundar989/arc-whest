@@ -332,6 +332,26 @@ WD_CLASSIFIED = "...classified as an ERROR, not as a budget/time exhaustion"
 WD_LATER_CLEAN = "...and EVERY later MLP is clean -- no traceback, no flag"
 WD_LATER_SCORED = "...and every one was GENUINELY SCORED, not zeroed"
 
+#: The envelope constraints this matrix is required to carry, pinned by name.
+#: Without this, a constraint DELETED from `enforceability()` disappears from the
+#: matrix, from `_UNPROVABLE`, from `_DECLINED` and from the artifact in silence:
+#: every other accounting line in this file is a traversal of
+#: `enf["constraints"]`, so removing an entry shrinks the checker along with the
+#: checked. Section 7's `expected_self` has the same blind spot by construction.
+#: A second independent Skeptic named it, and this list is the only thing here
+#: that is not derived from the dict it is checking.
+#:
+#: Adding a constraint is a deliberate edit to this tuple. That is the point.
+REQUIRED_CONSTRAINTS = (
+    "flop_budget",
+    "wall_time_limit_s",
+    "residual_wall_time_limit_s",
+    "setup_timeout_s",
+    "memory_limit_mb",
+    "worker_death_restart",
+    "predict_response_timeout_s",
+)
+
 MEM_CAP_APPLIED = "the worker actually APPLIED the 8 GiB cap"
 MEM_CONTROL = "the 256 MiB control mapping SUCCEEDED"
 MEM_REFUSED = "the 9 GiB reservation was REFUSED by the limit"
@@ -354,23 +374,40 @@ def _rlimit_available() -> bool:
     return hasattr(resource, "RLIMIT_AS")
 
 
-def _rlimit_usable() -> bool:
-    """Independently: can this platform actually READ the limit, not merely name it?
+def _rlimit_usable_in_child() -> dict:
+    """Can a CHILD interpreter apply the memory cap? `{"usable": bool, "why": str}`.
 
-    Deliberately a different question from `_rlimit_available()`, which asks
-    `hasattr`. The matrix's `enforced_locally` is assigned from that one, so
-    comparing the matrix against it is an identity and cannot fail. Comparing it
-    against a call that USES the limit can: an attribute that exists and a
-    `getrlimit` that raises is exactly the state in which the matrix would be
-    claiming enforcement this host does not have.
+    Three versions of this question have been asked here and only this one can
+    come out either way:
+
+      1. `hasattr(resource, "RLIMIT_AS")` -- what `_rlimit_available()` asks, and
+         what `enforced_locally` is assigned from. Comparing the matrix against
+         it is an identity.
+      2. an in-process `getrlimit(RLIMIT_AS)` -- better, and still agrees with
+         (1) on every platform either Skeptic or I could name. An identity with
+         extra steps.
+      3. **this one.** `subprocess_worker.py` calls `setrlimit` in a SEPARATE
+         interpreter, so whether the cap can be applied is a fact about the
+         child, not about us. A child with a different interpreter, a different
+         environment, or a sandbox that blocks the module answers differently
+         from its parent -- and if it ever does, the matrix is claiming
+         enforcement the grader's worker would not get.
     """
+    src = ("import json,sys\n"
+           "try:\n"
+           "    import resource\n"
+           "    resource.getrlimit(resource.RLIMIT_AS)\n"
+           "    print(json.dumps({'usable': True, 'why': 'getrlimit(RLIMIT_AS) "
+           "succeeded in the child'}))\n"
+           "except Exception as e:\n"
+           "    print(json.dumps({'usable': False, 'why': type(e).__name__ + ': '"
+           " + str(e)[:60]}))\n")
     try:
-        import resource
-
-        resource.getrlimit(resource.RLIMIT_AS)
-        return True
-    except Exception:
-        return False
+        p = subprocess.run([sys.executable, "-c", src], capture_output=True,
+                           text=True, timeout=60)
+        return json.loads(p.stdout.strip().splitlines()[-1])
+    except Exception as exc:  # the probe itself failed: say so, never assume
+        return {"usable": None, "why": f"probe failed: {type(exc).__name__}"}
 
 
 #: Where the lifecycle suite's machine-readable results live. Regenerated on
@@ -393,6 +430,14 @@ def regenerate_lifecycle_results(path: str) -> None:
 
     It is also the single most expensive thing this suite does (~49 s), and it is
     a write to TRACKED evidence -- so it asks the latch first.
+
+    **Consequence, and `--no-write` is therefore the WEAKER mode.** Under the
+    latch this does not run, so that mode adjudicates its witnesses against
+    whatever `lifecycle_self_test.json` is committed on disk -- which is exactly
+    the staleness the paragraph above says the witness mechanism exists to
+    prevent. It is the right trade (a read-only audit that rewrites committed
+    evidence is worse), the gate runs the WRITING mode, and a second independent
+    Skeptic was right that nowhere said so. Now it does, here and in `--help`.
     """
     refuse_if_read_only(f"regenerate {os.path.relpath(path, _ROOT)} by re-running "
                         f"the lifecycle suite")
@@ -1262,7 +1307,12 @@ def main() -> int:
                           "this file should not have to `git checkout` the "
                           "committed artifact afterwards -- which is exactly what "
                           "an independent Skeptic had to do, and it is the kind of "
-                          "side effect that makes a read-only protocol untrue."))
+                          "side effect that makes a read-only protocol untrue. "
+                          "NOTE: this is the WEAKER mode. Suppressing the write "
+                          "also suppresses REGENERATION, so witnesses are "
+                          "adjudicated against the lifecycle results committed on "
+                          "disk rather than against this session's. The gate runs "
+                          "the writing mode."))
     args = ap.parse_args()
 
     r = official_config.LIVE
@@ -1324,26 +1374,43 @@ def main() -> int:
         _record_witness(c, w, ok, why, resolver)
         check(f"{name}: its named provocation RAN and PASSED", ok,
               f"{c['value']}  <- {why}")
-    # NOT `enforced_locally == _rlimit_available()`: `enforced_locally` is
-    # ASSIGNED `bool(rl)` from that same call thirty lines up, so the two sides
-    # could never have disagreed. What is checked instead is the matrix's claim
-    # against an INDEPENDENT probe that USES the limit rather than asking
-    # `hasattr` about it -- those can differ, which is what makes this a check.
-    probe = _rlimit_usable()
-    check("the matrix's memory claim matches an INDEPENDENT probe of the platform",
-          enf["constraints"]["memory_limit_mb"]["enforced_locally"] == probe,
-          f"matrix says {enf['constraints']['memory_limit_mb']['enforced_locally']}, "
-          f"getrlimit(RLIMIT_AS) {'succeeds' if probe else 'is unavailable'}")
-    # NOT `len(_UNPROVABLE) > 0`: `predict_response_timeout_s` is hard-coded
-    # `enforced_locally: False`, so that count can never be zero and the line
-    # could never go red. The property actually worth holding is that the matrix
-    # REPORTED every constraint it marked unenforceable -- a loop that skipped
-    # one would leave a constraint in neither block, and that CAN happen.
+    # The matrix carries every constraint it is REQUIRED to carry. This is the
+    # one line here whose right-hand side is not derived from the dict on its
+    # left, so it is the only one that survives a constraint being deleted.
+    present = set(enf["constraints"])
+    check("the matrix carries every REQUIRED envelope constraint",
+          present >= set(REQUIRED_CONSTRAINTS),
+          f"{len(present)} present; missing "
+          f"{sorted(set(REQUIRED_CONSTRAINTS) - present) or 'none'}"
+          + (f"; unpinned extras {sorted(present - set(REQUIRED_CONSTRAINTS))}"
+             if present - set(REQUIRED_CONSTRAINTS) else ""))
+    # The matrix's memory claim, checked against a probe run in a CHILD process.
+    #
+    # It used to read `enforced_locally == _rlimit_available()`, an identity --
+    # `enforced_locally` is assigned `bool(rl)` from that same call. Replacing it
+    # with an in-process `getrlimit` call was better and still had no reachable
+    # falsifier: on either platform both answers agree, as a second Skeptic
+    # pointed out. The question that CAN come out either way is the one the
+    # grader actually asks -- can the WORKER apply the cap? -- because the worker
+    # is a separate interpreter, and `subprocess_worker.py` calls `setrlimit`
+    # there, not here.
+    probe = _rlimit_usable_in_child()
+    claim = enf["constraints"]["memory_limit_mb"]["enforced_locally"]
+    check("the matrix's memory claim matches a probe run in a CHILD interpreter",
+          claim == probe["usable"],
+          f"matrix says {claim}; child says {probe['usable']} ({probe['why']})")
+    # NOT `len(_UNPROVABLE) > 0`, and no longer `bool(unenforced) and ...`:
+    # `predict_response_timeout_s` is hard-coded `enforced_locally: False`, so
+    # BOTH of those can never be false. That vacuous conjunct was carried into
+    # the replacement and a second Skeptic caught it there. What is left is the
+    # half that can fail: a matrix loop that skipped a constraint leaves it in
+    # neither block, and the pinned list above is what proves the constraint was
+    # there to skip.
     unenforced = {n for n, c in enf["constraints"].items()
                   if not c["enforced_locally"]}
     reported = {u["constraint"] for u in _UNPROVABLE}
     check("every constraint the matrix marks unenforceable was REPORTED as such",
-          bool(unenforced) and unenforced <= reported,
+          unenforced <= reported,
           f"{sorted(unenforced)} marked; missing from the report: "
           f"{sorted(unenforced - reported) or 'none'}")
     # H6. The two halves of the read-only claim, and they are mutually
@@ -1625,9 +1692,21 @@ def main() -> int:
             # The section did not run: a gap, not a failure.
             unprovable(f"{name} (witness)", why)
         else:
-            # It ran. Green if the witness holds, RED if it does not.
+            # It ran. Green if the witness holds, RED if it does not -- AND the
+            # section must have recorded that it ran.
+            #
+            # The `_SECTION_RAN` conjunct is not redundant with `ok`. Without it
+            # the green line's only protection is that the witness names check
+            # names section 6 alone emits -- safety BY CONSTRUCTION, which is
+            # what D1 was. Repoint a witness at a check that always runs and the
+            # old defect's exact output line comes back. Injection G does that
+            # and this conjunct is what catches it. A second independent Skeptic
+            # found the hole; it is the same defect one level along.
             check(f"{name}: its named provocation RAN and PASSED in THIS suite",
-                  ok, why)
+                  ok and _SECTION_RAN.get(name) is True,
+                  f"{why}" if _SECTION_RAN.get(name) is True else
+                  f"the witness holds but its section did not run -- "
+                  f"_SECTION_RAN[{name!r}]={_SECTION_RAN.get(name)!r}: {why}")
         adjudicated.add(name)
     # RECOMPUTED FROM THE MATRIX, not counted off the same list that drove the
     # loop. The previous spelling was `adjudicated == len(deferred)` with

@@ -133,6 +133,40 @@ INJECTIONS = [
             continue""")],
         [SUITE, "--no-write", "--skip-worker-death"],
     ),
+    (
+        "F",
+        "the literal-True defect returns in a spelling the scan used to miss",
+        # `ok=` keyword form. Before the second Skeptic pass the scanner read
+        # `args[1]` only, so this exact line went GREEN through a check whose
+        # whole purpose is to forbid it.
+        [("""            check(f"{name}: its section RECORDED whether it ran", False,""",
+          """            check(f"{name}: its section RECORDED whether it ran", ok=True,
+                  detail=(""")],
+        [READONLY],
+    ),
+    (
+        "G",
+        "a witness is repointed at a check that ALWAYS runs (D1's shape returning)",
+        # The green branch's safety used to be entirely that the witness named
+        # `WD_*` strings only section 6 emits -- safety by construction, which is
+        # what D1 was. Repointing the witness reproduces D1's exact output line
+        # unless the green condition also consults _SECTION_RAN.
+        [("""                    "checks": [WD_SURVIVED, WD_EXACTLY_ONE, WD_INDEX,
+                               WD_CLASSIFIED, WD_LATER_CLEAN, WD_LATER_SCORED],""",
+          """                    "checks": ["the runner waits max(predict_timeout, wall "
+                               "+ grace), not predict_timeout"],""")],
+        [SUITE, "--no-write", "--skip-worker-death"],
+    ),
+    (
+        "H",
+        "an envelope constraint is DELETED from the matrix entirely",
+        # Every accounting line in the suite is a traversal of
+        # `enf["constraints"]`, so deleting an entry shrinks the checker along
+        # with the checked. Only the pinned REQUIRED_CONSTRAINTS list notices.
+        [("""            "predict_response_timeout_s": {""",
+          """            "deleted_by_injection_h": {""")],
+        [SUITE, "--no-write", "--skip-worker-death"],
+    ),
 ]
 
 

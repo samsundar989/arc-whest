@@ -35,11 +35,28 @@ WHAT IT PROVES
    paths are covered by the latch (2) and the end-to-end run (3), not by this
    scan. The scan's value is narrow and real: a newly *added* direct write
    outside the allow-list turns it red, which reading a diff would not.
-1b. **No check in either file can pass on a constant.** Every `check(name,
-   condition, ...)` is parsed and any condition that is a literal truthy
-   constant fails this suite. That is this repository's signature defect -- nine
-   instances and counting -- and P1-PRE asserted the property in prose while
-   committing no scan that held it. The scan is the assertion.
+1b. **No check in either file passes on a LITERAL TRUTHY CONSTANT.** Every
+   `check(...)` is parsed -- callee matched as a name or an attribute, condition
+   read from the second positional argument or an `ok=` keyword -- and a literal
+   truthy condition fails this suite.
+
+   **That is the whole of the claim, and it is narrower than it sounds.** The
+   scan does not see a tautology built from a comparison (`a == a`), a folded
+   expression (`1 == 1`, `not False`), a name bound to a constant, or an aliased
+   callee. Every recent real instance in this repository is of the FIRST kind:
+   `adjudicated == len(deferred)`, `enforced_locally == _rlimit_available()`,
+   `len(_UNPROVABLE) > 0`. A previous revision of this file was recorded in the
+   LOG as "the answer to every future instance of the family"; an independent
+   Skeptic measured it at three spellings out of eleven, and that claim is
+   retracted in `experiments/LOG.md`.
+
+   So section 1b now measures its own coverage: it asserts the five spellings it
+   claims, asserts that an honest `check(..., False, ...)` is spared, and
+   asserts that the six documented blind spots are *still blind* -- so closing
+   one turns this red and forces the scope claim to be rewritten with it.
+   Compare-shaped tautologies remain a human-review obligation, and the question
+   that finds them is not a grep: *could these two sides ever have disagreed,
+   and are they computed from different places?*
 2. **Mechanically.** With the latch down the writer writes; with it armed the
    same call raises and leaves no file. A guard nobody has watched refuse is a
    guard nobody has tested.
@@ -174,24 +191,54 @@ def _write_sites(path: str) -> dict:
 
 
 def _constant_conditions(path: str) -> list:
-    """Every `check(name, <literal truthy constant>, ...)`: `(line, source)`.
+    """Every `check(...)` whose condition is a literal truthy constant: `(line, src)`.
 
     A literal FALSE condition is a deliberate failure report and is fine -- an
-    error branch calling `check(name, False, detail)` is how this suite records
+    error branch calling `check(name, False, detail)` is how the suite records
     that something went wrong. A literal TRUTHY condition is the defect: it
     prints green whatever happened, and this repository has now lost NINE checks
     to it, the ninth written inside the section repairing the eighth.
+
+    **What this does NOT catch, stated because the first version of this scan was
+    recorded as "the answer to every future instance of the family" and a second
+    independent Skeptic measured it at three spellings out of eleven:**
+
+      * a condition that is constant only after folding -- `1 == 1`,
+        `True and True`, `not False`;
+      * a NAME bound to a constant -- `ok = True; check(..., ok, ...)`;
+        `check(..., bool(1), ...)`;
+      * **and, the important omission: `ast.Compare` conditions whose two sides
+        cannot differ.** Instance nine (`adjudicated == len(deferred)`) and the
+        two survivors found beside it (`enforced_locally == _rlimit_available()`,
+        `len(_UNPROVABLE) > 0`) are ALL of this shape. Every recent real instance
+        in this repository is in the set this scan cannot see.
+
+    So the honest scope is: **no `check()` in either scanned file passes on a
+    literal truthy constant.** Compare-shaped tautologies remain a human-review
+    obligation, and the question that finds them is not a grep -- it is
+    *could these two sides ever have disagreed, and are they computed from
+    different places?*
+
+    Fixed here after that measurement: the callee is matched as a bare name
+    (`check(...)`) **or** an attribute (`env.check(...)`, the spelling an
+    importing file uses), and the condition is read from the second positional
+    argument **or** from an `ok=` keyword.
     """
     with open(path, encoding="utf-8") as fh:
         tree = ast.parse(fh.read())
     out = []
     for node in ast.walk(tree):
-        if (isinstance(node, ast.Call)
-                and getattr(node.func, "id", None) == "check"
-                and len(node.args) >= 2
-                and isinstance(node.args[1], ast.Constant)
-                and bool(node.args[1].value)):
-            out.append((node.lineno, ast.unparse(node.args[1])))
+        if not isinstance(node, ast.Call):
+            continue
+        callee = getattr(node.func, "id", None) or getattr(node.func, "attr", None)
+        if callee != "check":
+            continue
+        cond = node.args[1] if len(node.args) >= 2 else None
+        for kw in node.keywords:
+            if kw.arg == "ok":
+                cond = kw.value
+        if isinstance(cond, ast.Constant) and bool(cond.value):
+            out.append((node.lineno, ast.unparse(cond)))
     return out
 
 
@@ -212,6 +259,32 @@ def structural_tests() -> None:
     # passes on an empty set. This repository has lost checks to exactly that.
     check("...and the extractor is not returning an empty set",
           len(sites) >= 3, f"found {len(sites)} functions that write")
+    # The suite contains only `open()` writers, so the primitives added to
+    # `_WRITE_CALLS` are unexercised by the scan above -- a widening nobody has
+    # watched fire. A probe file exercises each one.
+    probe = os.path.join(tempfile.gettempdir(), "arc_whest_write_probe.py")
+    try:
+        with open(probe, "w", encoding="utf-8") as fh:
+            fh.write("import os, shutil, tempfile\n"
+                     "from pathlib import Path\n"
+                     "def w():\n"
+                     "    open('a', 'w')\n"
+                     "    os.replace('a', 'b')\n"
+                     "    shutil.copyfile('a', 'b')\n"
+                     "    Path('a').write_text('x')\n"
+                     "    tempfile.mkstemp()\n"
+                     "def r():\n"
+                     "    open('a')\n"
+                     "    open('a', 'r')\n"
+                     "    shutil.rmtree('a')\n")
+        found = _write_sites(probe)
+        check("...and every widened write primitive is actually detected",
+              sorted(found) == ["w"] and len(found.get("w", [])) == 5,
+              f"{ {k: len(v) for k, v in found.items()} } -- 5 writes in w(), "
+              f"and r() (reads plus a delete) is not a writer")
+    finally:
+        if os.path.exists(probe):
+            os.remove(probe)
 
     head("1b. STRUCTURAL -- no check() in either file can pass on a constant")
     offenders = {}
@@ -222,17 +295,54 @@ def structural_tests() -> None:
         print(f"      {base:<34} {len(found)} literal-truthy condition(s)")
     check("no check() has a literal truthy condition, in either file",
           not offenders, "clean" if not offenders else f"{offenders}")
-    # Non-vacuity again, and this one is the interesting half: prove the scanner
-    # FINDS the pattern when it is there, by feeding it the defect verbatim.
+    # Non-vacuity, and it must MEASURE COVERAGE rather than confirm the one
+    # spelling the scanner already handles. The first version of this probe fed
+    # it `check('...', True, 'x')` and asserted the hit -- which proved the
+    # scanner parses, not that it covers, and the LOG then described it as "the
+    # answer to every future instance of the family". A second Skeptic measured
+    # the real figure at 3 of 11. These are the eleven.
+    MUST_CATCH = [                      # every spelling this scan is claimed to see
+        ("positional True", "check('a', True, 'd')"),
+        ("positional 1", "check('a', 1, 'd')"),
+        ("positional truthy str", "check('a', 'yes', 'd')"),
+        ("ok= keyword", "check('a', ok=True, detail='d')"),
+        ("attribute callee", "env.check('a', True, 'd')"),
+    ]
+    MUST_NOT_CATCH = [                  # honest failure reports, never flagged
+        ("positional False", "check('a', False, 'd')"),
+        ("ok= False keyword", "check('a', ok=False, detail='d')"),
+    ]
+    KNOWN_BLIND = [                     # documented gaps -- see the docstring
+        ("folded compare", "check('a', 1 == 1, 'd')"),
+        ("folded boolop", "check('a', True and True, 'd')"),
+        ("folded unary", "check('a', not False, 'd')"),
+        ("name bound to True", "check('a', ok, 'd')"),
+        ("truthy call", "check('a', bool(1), 'd')"),
+        ("aliased callee", "c('a', True, 'd')"),
+    ]
     probe = os.path.join(tempfile.gettempdir(), "arc_whest_const_probe.py")
-    try:
+
+    def _flags(snippet: str) -> bool:
         with open(probe, "w", encoding="utf-8") as fh:
-            fh.write("def f():\n    check('a literal condition', True, 'x')\n"
-                     "    check('an honest failure report', False, 'y')\n")
-        found = _constant_conditions(probe)
-        check("...and the scanner CATCHES the pattern when it is present",
-              [ln for ln, _ in found] == [2],
-              f"flagged line(s) {[ln for ln, _ in found]} -- the True, not the False")
+            fh.write("def f():\n    " + snippet + "\n")
+        return bool(_constant_conditions(probe))
+
+    try:
+        missed = [n for n, s in MUST_CATCH if not _flags(s)]
+        check("the scanner catches every spelling it CLAIMS to catch",
+              not missed, f"{len(MUST_CATCH)} spellings; missed {missed or 'none'}")
+        wrong = [n for n, s in MUST_NOT_CATCH if _flags(s)]
+        check("...and spares an honest check(..., False, ...) failure report",
+              not wrong, f"wrongly flagged {wrong or 'none'}")
+        # The gaps are ASSERTED, not glossed. If a future widening closes one,
+        # this goes red and the docstring and the LOG have to be corrected with
+        # it -- which is the only way a scope claim stays true.
+        now_caught = [n for n, s in KNOWN_BLIND if _flags(s)]
+        check("...and the DOCUMENTED blind spots are still exactly the blind spots",
+              not now_caught,
+              f"{len(KNOWN_BLIND)} known-missed spellings (compare/folded/bound/"
+              f"aliased); newly caught: {now_caught or 'none'} -- if this is "
+              f"non-empty the docstring and LOG scope claim are now understated")
     finally:
         if os.path.exists(probe):
             os.remove(probe)
