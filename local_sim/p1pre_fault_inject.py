@@ -137,11 +137,24 @@ INJECTIONS = [
         "F",
         "the literal-True defect returns in a spelling the scan used to miss",
         # `ok=` keyword form. Before the second Skeptic pass the scanner read
-        # `args[1]` only, so this exact line went GREEN through a check whose
+        # `args[1]` only, so this exact spelling went GREEN through a check whose
         # whole purpose is to forbid it.
-        [("""            check(f"{name}: its section RECORDED whether it ran", False,""",
-          """            check(f"{name}: its section RECORDED whether it ran", ok=True,
-                  detail=(""")],
+        #
+        # The replacement must be VALID PYTHON. A first version spliced
+        # `ok=True, detail=(` in front of the existing positional detail
+        # strings, which is a syntax error -- the child then died on import and
+        # the harness recorded CAUGHT on a non-zero exit that had nothing to do
+        # with the scan. An injection has to reach its target to mean anything,
+        # and "it went red" is not evidence that it went red for the reason
+        # claimed.
+        [("""    check("the matrix carries every REQUIRED envelope constraint",
+          present >= set(REQUIRED_CONSTRAINTS),
+          f"{len(present)} present; missing "
+          f"{sorted(set(REQUIRED_CONSTRAINTS) - present) or 'none'}"
+          + (f"; unpinned extras {sorted(present - set(REQUIRED_CONSTRAINTS))}"
+             if present - set(REQUIRED_CONSTRAINTS) else ""))""",
+          """    check("the matrix carries every REQUIRED envelope constraint", ok=True,
+          detail="injection F: a literal truthy condition, ok= keyword form")""")],
         [READONLY],
     ),
     (
