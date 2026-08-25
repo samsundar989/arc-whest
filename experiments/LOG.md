@@ -11518,3 +11518,76 @@ the implied headroom is an **upper** bound and never a safety margin.
 untouched. `estimator.py` byte-identical.
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-24 — P2-P0 G6 CORRECTION: the gate went RED after the G4 work, and why
+
+*Appended because the G4 entry above claimed "G1–G6 MET" on the strength of a gate
+run that had not finished. The gate then came back **RED**. Recording the failure
+and its two causes before recording the green run that followed.*
+
+## The overstatement
+
+The G4 closure entry listed G6 (preflight + portability green) as MET. At that HEAD
+it was not: `PREFLIGHT RED -- failed: 15. deployment envelope, 16. official Phase-2
+subprocess smoke`. The Linux G4 evidence is unaffected and stands; the gate line
+was wrong.
+
+Compounding it, the invocation chained `verify_portability.py` after
+`preflight.ps1` in one command, so `$LASTEXITCODE` reported **portability's** exit
+code — 0 — and masked preflight's failure. The transcript is what caught it.
+**Do not chain a second command after the gate**; its exit code is the verdict.
+
+## Cause 1 — a real defect, mine
+
+Step 15 died with `KeyError: 'results'`. `provoke_worker_death` handled a run that
+*errored* and a run that *succeeded*, but not one the runner **refused**. When the
+refusal came, the caller read `d["report"]["results"]` and crashed — reporting an
+environment condition as a broken test suite.
+
+Fixed in all three places that drive the official runner: a refusal is returned as
+`{"refused": ...}` and reported as a refusal, with its stage and code.
+
+## Cause 2 — the load sensitivity, biting the gate itself
+
+Both failures were `SETUP_TIMEOUT`. This is precisely the effect measured earlier
+in this slice: the 5 s ceiling covers worker spawn **plus imports**,
+`import whestbench` alone is 1.3 s quiet and **4.7–9.1 s loaded**, and our own
+estimator setup is **0.6 ms** of it.
+
+The load was mine. The WSL2 VM started for the G4 provocation was still resident,
+holding a 30 GiB allocation. **Having spent the afternoon establishing that
+contention corrupts measurements, I then ran the gate with a virtual machine
+running.** Third time this session the same lesson has arrived.
+
+Step 16 now **classifies** the refusal rather than reporting it as an estimator
+defect: it prints that `SETUP_TIMEOUT` is an environment condition, gives the
+import timings, and says why it is still a FAILURE and not a skip — *a gate that
+could not verify deployment must not certify it.*
+
+## The green run
+
+`wsl --shutdown`, 19.4 GB free, then:
+
+```text
+PREFLIGHT GREEN -- 16/16      exit 0, 996 lines, 16 step verdicts, no FAIL lines
+verify_portability.py         99 checks, 0 failed
+```
+
+## Gate status
+
+| gate | status |
+|---|---|
+| G1 op-by-op anchor | MET |
+| G2 config asserted against the installed package | MET |
+| G3 suites green, denominator not reduced | MET |
+| G4 all five paths provoked | MET — memory closed on Linux |
+| G5 official validate + subprocess smoke, zero failures | MET |
+| G6 preflight + portability green | **MET — on the second attempt, and the first is recorded above** |
+| G7 independent Skeptic ACCEPT | **OPEN** |
+
+**Seed ledger:** unchanged. P01 144/600, 456 free. D17/D19 unspent. **Vault:**
+untouched. `estimator.py` byte-identical.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.

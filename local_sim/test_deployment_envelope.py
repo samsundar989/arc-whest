@@ -427,7 +427,10 @@ def provoke_memory_limit(n_mlps: int = 3, request_gib: float = 9.0) -> dict:
         i = p.stdout.find("{")
         if i < 0:
             return {"error": (p.stderr or p.stdout)[-2000:]}
-        out["report"] = json.loads(p.stdout[i:])
+        doc = json.loads(p.stdout[i:])
+        if not doc.get("results"):
+            return {"refused": doc.get("error") or doc}
+        out["report"] = doc
         if os.path.exists(report):
             with open(report, encoding="utf-8") as fh:
                 out["worker"] = json.load(fh)
@@ -474,7 +477,15 @@ def provoke_worker_death(n_mlps: int = 3) -> dict:
         i = out.find("{")
         if i < 0:
             return {"error": (p.stderr or out)[-3000:]}
-        return {"report": json.loads(out[i:])}
+        doc = json.loads(out[i:])
+        if not doc.get("results"):
+            # The runner REFUSED the whole run -- typically SETUP_TIMEOUT, which
+            # is an environment condition and not an estimator defect. Return it
+            # as a refusal rather than a report, because the caller reading
+            # `doc["results"]` would otherwise die with a KeyError and report an
+            # environment hiccup as a crashed test suite. That happened once.
+            return {"refused": doc.get("error") or doc}
+        return {"report": doc}
     finally:
         for p in (cand, sentinel):
             if os.path.exists(p):
@@ -618,6 +629,11 @@ def main() -> int:
             check("the official runner produced a report", False,
                   d["error"][:300])
             mem_gate = {"provoked_here": True, "error": d["error"][:2000]}
+        elif "refused" in d:
+            mem_gate = {"provoked_here": True, "refused": d["refused"]}
+            check("the official runner accepted the run", False,
+                  f"REFUSED: {(d['refused'] or {}).get('code', '?')} -- an "
+                  f"environment condition; re-run on a quiet host")
         else:
             res = d["report"]["results"]
             rows = res["per_mlp"]
@@ -662,6 +678,19 @@ def main() -> int:
         if "error" in d:
             check("the official runner produced a report", False, d["error"][:300])
             death = {"error": d["error"][:2000]}
+        elif "refused" in d:
+            code = (d["refused"] or {}).get("code", "?")
+            death = {"refused": d["refused"]}
+            check("the official runner accepted the run", False,
+                  f"REFUSED at {(d['refused'] or {}).get('stage', '?')}: {code}")
+            if code == "SETUP_TIMEOUT":
+                print("      SETUP_TIMEOUT is an ENVIRONMENT condition, not an")
+                print("      estimator defect: this host's `import whestbench`")
+                print("      alone is 1.3 s quiet and 4.7-9.1 s loaded against a")
+                print("      5 s ceiling, while our own setup is 0.6 ms. Re-run on")
+                print("      a quiet machine. It is reported as a FAILURE and not")
+                print("      a skip because a gate that cannot verify deployment")
+                print("      must not certify it.")
         else:
             res = d["report"]["results"]
             rows = res["per_mlp"]

@@ -35,14 +35,14 @@
         "value": 8192,
         "enforced_locally": false,
         "by": "NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design",
-        "provoked_by": null,
+        "provoked_by": "experiments/2026-08-24_p2_p0/linux/ -- provoked on Ubuntu 24.04 under the same official stack, since it cannot be provoked on this platform",
         "accounting_instead": "peak working set and peak commit, measured below; both are LOWER bounds on the RLIMIT_AS charge, so the headroom they imply is an UPPER bound"
       },
       "worker_death_restart": {
         "value": null,
         "enforced_locally": true,
         "by": "whest run --runner subprocess restarts a dead worker",
-        "provoked_by": "this file, section 3"
+        "provoked_by": "this file, section 6"
       },
       "predict_response_timeout_s": {
         "value": 30.0,
@@ -60,26 +60,46 @@
     {
       "constraint": "predict_response_timeout_s",
       "why": "runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint"
+    },
+    {
+      "constraint": "memory_limit_mb (provocation)",
+      "why": "no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/"
     }
   ],
   "predict_response_timeout_s": 125.0,
   "memory": {
     "measurement": {
       "baseline": {
-        "working_set": 130912256,
-        "commit": 607363072
+        "working_set": 130453504,
+        "commit": 606797824
       },
       "peak": {
-        "working_set": 462749696,
-        "commit": 962985984
+        "working_set": 462229504,
+        "commit": 962457600
       },
       "weight_bytes": 67108864
     },
     "limit_mb": 8192,
-    "peak_working_set_mb": 441.3125,
-    "peak_commit_mb": 918.375,
+    "peak_working_set_mb": 440.81640625,
+    "peak_commit_mb": 917.87109375,
     "weights_mb": 64.0,
-    "headroom_upper_bound": 8.920103443582414
+    "headroom_upper_bound": 8.925000531971486
+  },
+  "memory_limit_provocation": {
+    "provoked_here": false,
+    "linux_evidence": {
+      "rlimit_as_soft": 8589934592,
+      "rlimit_as_hard": 8589934592,
+      "rlimit_as_soft_gib": 8.0,
+      "rlimit_as_is_infinity": false,
+      "control_request_bytes": 268435456,
+      "provocation_request_bytes": 9663676416,
+      "provocation_request_gib": 9.0,
+      "pid": 47320,
+      "control_mmap": "OK",
+      "provocation_mmap": "OSError: [Errno 12] Cannot allocate memory",
+      "provocation_refused": true
+    }
   },
   "worker_death": {
     "skipped": false,
@@ -96,6 +116,6 @@
       "error": 1
     }
   },
-  "checks_passed": 14,
-  "checks_total": 14
+  "checks_passed": 17,
+  "checks_total": 17
 }

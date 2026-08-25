@@ -238,7 +238,7 @@ with flops.configure(symmetry_warnings=False).
 │ │ └────────┴──────────────────────────┴────────────────┘                  │ │
 │ └─────────────────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
-✓ Validation passed in 29ms
+✓ Validation passed in 31ms
 Next: `whest run --estimator estimator.py --split mini`
   PASS  4. whest validate
 
@@ -648,7 +648,7 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
   L1: setup() was called exactly once on the grader path         ok   
 
 2. L3 — setup() fits inside the grader's 5-second ceiling
-  L3: module load + setup(), plus the measured host cold start, fits ok   239.8 ms + 240 ms = 480 ms of 5000 ms (a PACKAGE DEFAULT, not observed)
+  L3: module load + setup(), plus the measured host cold start, fits ok   287.7 ms + 240 ms = 528 ms of 5000 ms (a PACKAGE DEFAULT, not observed)
   L3: and is therefore not timed out                             ok   
   L3: setup raised nothing                                       ok   clean
 
@@ -666,7 +666,7 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
   L4: a TRANSPOSED prediction is caught by validation, not scored ok   ValueError
   L4: a 1e-9 s residual limit trips the residual path            ok   2/2
   L4: residual-exhausted rows are exactly zeroed at multiplier 1.0 ok   
-  L4: 50 ms of residual at B=1e9 trips the COMBINED budget C=F+lam*R>B ok   C = 5.045e+09 vs B = 1.000e+09
+  L4: 50 ms of residual at B=1e9 trips the COMBINED budget C=F+lam*R>B ok   C = 5.386e+09 vs B = 1.000e+09
   L4: combined-exhausted rows are exactly zeroed at multiplier 1.0 ok   
   L4: and `competition_score` owns that predicate, not this module ok   C = 3.000e+11 vs B = 2.72e11, at the PHASE-1 rate
   L4: ...and under the LIVE round the same row is IN budget, because lambda is 0 ok   C = 2.000e+11 vs B = 2.72e11
@@ -677,7 +677,7 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
   a RAISING setup also refuses                                   ok   SETUP_ERROR
 
 4c. the setup clock starts where the grader's does
-  the timer covers module load, not just setup() (runner.py:144 precedes load_estimator_from_path) ok   measured 239.8 ms + 240 ms host cold start, of 5000 ms
+  the timer covers module load, not just setup() (runner.py:144 precedes load_estimator_from_path) ok   measured 287.7 ms + 240 ms host cold start, of 5000 ms
   the evidence bundle says its residual is a LOCAL-runner figure ok   runner=local (in-process BudgetContext)
 
 5. L6 — evidence rows are content-addressed and reproducible
@@ -700,7 +700,7 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
   L8: C == F, because lambda is 0                                ok   C = 137,600,326,656
   L8: the multiplier is pinned at the 0.1 floor at this operating point ok   C/B = 0.0625734 < floor 0.1
   L8: no failure path fires on the shipped file                  ok   budget=False time=False residual=False combined=False error=''
-  L8: local in-process residual leaves headroom under the 0.4 s cliff ok   58.2 ms local -> 6.87x headroom (LOCAL, in-process; the grader's own figure is the authority)
+  L8: local in-process residual leaves headroom under the 0.4 s cliff ok   57.3 ms local -> 6.99x headroom (LOCAL, in-process; the grader's own figure is the authority)
   L8: the 0.4 s cliff FIRES when provoked (1e-9 s limit)         ok   
   L8: a residual failure is zeroed and priced at multiplier 1.0, not 0.1 ok   mult 1.0
   L8: ...and that run's provenance DECLARES it was not a clean round ok   {'residual_wall_time_limit_s': [1e-09, 0.4]}
@@ -937,11 +937,11 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
 3. peak memory at the live shape -- accounting, not enforcement
 ---------------------------------------------------------------
   weights alone                  64.0 MB (16 x 1024x1024 float32)
-  peak WORKING SET              440.6 MB   (resident)
-  peak COMMIT                   917.4 MB   (a LOWER bound on the RLIMIT_AS charge)
+  peak WORKING SET              440.8 MB   (resident)
+  peak COMMIT                   917.9 MB   (a LOWER bound on the RLIMIT_AS charge)
   Phase-2 limit                8192.0 MB
   PASS  the shipped file's peak memory fits the Phase-2 limit          at most 8.9x headroom -- an UPPER BOUND, i.e. the most optimistic reading. RLIMIT_AS caps VIRTUAL address space, which exceeds both counters above by an unmeasured amount
-  PASS  ...and the peak is at least as large as the weights alone      917.4 MB > 64.0 MB (a peak below the weights would mean the probe never materialised them)
+  PASS  ...and the peak is at least as large as the weights alone      917.9 MB > 64.0 MB (a peak below the weights would mean the probe never materialised them)
 
 5. the 8 GiB memory limit -- provoked, or explicitly not provable here
 ----------------------------------------------------------------------
@@ -954,24 +954,43 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
 
 6. worker death and restart, through the OFFICIAL subprocess runner
 -------------------------------------------------------------------
-uv : Traceback (most recent call last):
-At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:422 char:9
-+         uv run python local_sim/test_deployment_envelope.py
-+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
-  File "C:\Users\samsu\Documents\arc-whest\local_sim\test_deployment_envelope.py", line 731, in <module>
-    raise SystemExit(main())
-  File "C:\Users\samsu\Documents\arc-whest\local_sim\test_deployment_envelope.py", line 666, in main
-    res = d["report"]["results"]
-KeyError: 'results'
-  FAIL  15. deployment envelope (+ what it cannot prove) -- exit code 1
+  PASS  the suite SURVIVED a worker that hard-exited mid-run           3 rows returned
+  PASS  the failure is SCOPED to the MLP that killed the worker        n_failed_mlps = 1, indices [0]
+  PASS  ...and the MLPs after it were actually SCORED, not zeroed      last row mse 1.230982e+00, no failure flag
+
+================================================================================================
+17/17 checks passed; 3 constraint(s) NOT PROVABLE on this host
+
+NOT PROVABLE HERE -- these are gaps in the local evaluator, and a
+candidate that passes everything above has NOT been shown to satisfy
+them. They are enforced only on the grader:
+  - memory_limit_mb: NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design
+  - predict_response_timeout_s: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
+  - memory_limit_mb (provocation): no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/
+
+  wrote experiments\2026-08-24_p2_p0\deployment_envelope.json
+  PASS  15. deployment envelope (+ what it cannot prove)
 
 === 16. official Phase-2 subprocess smoke (zero failures) ===
-run REFUSED: {"ok": false, "error": {"stage": "setup", "code": "SETUP_TIMEOUT", "message": "worker setup timed out."}, "whestbench_version": "0.16.0"}
-  FAIL  16. official Phase-2 subprocess smoke (zero failures) -- exit code 1
+  whestbench   0.16.0
+  dataset      hf://aicrowd/arc-whestbench-public-2026@v2-phase2
+  shape        1024x16   B = 2,199,023,255,552   lambda = 0.0
+  residual cap 0.4s   wall 120.0s
+  score        4.778624e-07   raw MSE 4.778624e-06   mult 0.1000
+  C/B          0.0625734   failures 0
+  worst residual 0.08172 s of 0.40 s cap  -> 4.9x headroom (GRADED PATH)
+  PASS  16. official Phase-2 subprocess smoke (zero failures)
 
-PREFLIGHT RED -- failed: 15. deployment envelope (+ what it cannot prove), 16. official Phase-2 subprocess smoke (zero 
-failures)
-Do not promote, do not submit, do not spend a decision block.
+PREFLIGHT GREEN -- 16/16
+
+Not covered by this gate, and still required before promotion:
+  - public Phase-2 mini (CONFIRM, read-only -- FIT NOTHING ON IT):
+      uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split 
+mini --runner subprocess
+    (v1-phase1 is the PHASE-1 split; use it only to replay a Phase-1 artifact)
+  - the 8,192 MB memory limit is UNENFORCEABLE on this host (no RLIMIT_AS on
+    Windows). Step 15 ACCOUNTS for it; nothing here TESTS it.
+  - GPU mirror parity:                     .venv-gpu\Scripts\python.exe local_sim/gpu_parity.py
+  - vault touch (ONE per estimator change): .venv-gpu\Scripts\python.exe local_sim/vault.py evaluate --label <v> 
+--reason estimator-change
+  - Samuel's explicit approval before any submission.

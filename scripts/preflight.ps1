@@ -439,7 +439,19 @@ if i < 0:
     print('no JSON report:', (p.stderr or p.stdout)[-2000:]); sys.exit(1)
 d = json.loads(p.stdout[i:])
 if not d.get('results'):
-    print('run REFUSED:', json.dumps(d)[:2000]); sys.exit(1)
+    err = d.get('error') or {}
+    code = err.get('code', '?')
+    print('  run REFUSED at %s: %s -- %s' % (err.get('stage','?'), code,
+                                             err.get('message','')))
+    if code == 'SETUP_TIMEOUT':
+        print('  This is an ENVIRONMENT condition, not an estimator defect.')
+        print('  The 5 s setup ceiling covers worker spawn + IMPORTS + setup().')
+        print('  On this host `import whestbench` alone is 1.3 s quiet and')
+        print('  4.7-9.1 s under load; our own estimator setup is 0.0006 s.')
+        print('  Re-run on a QUIET machine (close WSL/VMs/browsers).')
+        print('  Reported as a FAILURE and not a skip: a gate that could not')
+        print('  verify deployment must not certify it.')
+    sys.exit(1)
 r, cfg = d['results'], d['run_config']
 print('  whestbench   %s' % d['whestbench_version'])
 print('  dataset      %s' % cfg['dataset']['path'])
