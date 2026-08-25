@@ -1,0 +1,13 @@
+REJECTED coordinate mapping: index = 2*rank(x) + t
+(rank = position in the MULTIPLICATIVE enumeration; not F2-linear)
+
+cross-basis |spectrum| values : [0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 144]
+  -> expected for a valid set : [32]
+ANF degrees                   : [0, 8, 9]
+  -> expected                 : [2]
+pairwise difference ranks     : [6, 8, 10]
+  -> expected                 : [10]
+
+within-basis Gram == N*I      : True
+  -> the weak check passes for the WRONG construction, which is
+     why the spec calls it weak and why V3/V7c exist.

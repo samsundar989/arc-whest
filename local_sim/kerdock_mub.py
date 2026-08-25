@@ -192,18 +192,35 @@ def gray(z: int) -> tuple:
     return hi, hi ^ (z & 1)
 
 
-def sign_vectors(m: int, k: int) -> np.ndarray:
+def sign_vectors(m: int, k: int, basis_indices=None) -> np.ndarray:
     """`s_λ = (−1)^(g_λ)` for the first `k` bases. Shape `(k, N)`, values `±1`.
 
     `g_λ` is the Gray image of the `Z4` word `c_λ(x) = T_R(λ x)`, `x ∈ T`, laid
-    out at `index = 2·rank(x) + t` exactly as the spec fixes in §4.
+    out at `index = 2·ι(x) + t`, where `ι(x)` is the **additive** image of `x` in
+    `R/2R ≅ GF(2^m)` read little-endian — the corrected §4 of the spec.
+
+    **Not `rank(x)`.** This docstring said `2·rank(x) + t` for one commit after
+    the code had already been fixed, which is the stale-claim family this
+    repository keeps losing entries to. `rank` is the position in the
+    *multiplicative* enumeration and is linear in nothing;
+    `bad_mapping_sign_vectors()` below preserves it as an executable negative
+    control so the rejection stays reproducible rather than anecdotal.
 
     Only `k` words are ever formed. The `4^(m+1)`-word code is not enumerated.
     """
     R = GaloisRing(m)
     T = R.teichmuller()
-    if not 1 <= k <= len(T):
-        raise ValueError(f"k must be in 1..{len(T)}; got {k}")
+    if basis_indices is None:
+        if not 1 <= k <= len(T):
+            raise ValueError(f"k must be in 1..{len(T)}; got {k}")
+        basis_indices = list(range(k))
+    else:
+        basis_indices = list(basis_indices)
+        if len(set(basis_indices)) != len(basis_indices):
+            raise ValueError("basis_indices must be distinct")
+        if not all(0 <= b < len(T) for b in basis_indices):
+            raise ValueError(f"basis_indices must lie in 0..{len(T) - 1}")
+        k = len(basis_indices)
     N = R.N
     out = np.empty((k, N), dtype=np.int8)
 
@@ -227,7 +244,7 @@ def sign_vectors(m: int, k: int) -> np.ndarray:
     if len(set(pos.values())) != len(T):
         raise AssertionError("T -> GF(2^m) is not injective; the ring is wrong")
 
-    for bi in range(k):
+    for slot, bi in enumerate(basis_indices):
         lam = T[bi]
         lam_k = None if lam == R.zero else R.pw.index(lam)
         g = np.empty(N, dtype=np.int8)
@@ -241,7 +258,42 @@ def sign_vectors(m: int, k: int) -> np.ndarray:
             base = 2 * pos[x]
             g[base] = hi
             g[base + 1] = lo
-        out[bi] = 1 - 2 * g                  # (-1)^g
+        out[slot] = 1 - 2 * g                # (-1)^g
+    return out
+
+
+def bad_mapping_sign_vectors(m: int, k: int) -> np.ndarray:
+    """**The REJECTED coordinate mapping**, kept executable on purpose.
+
+    Identical to `sign_vectors` except that the Gray-image position is indexed by
+    `rank(x)` — the position of `x` in the *multiplicative* enumeration
+    `0, ξ^0, ξ^1, …` — instead of by its additive image in `GF(2^m)`.
+
+    This is what the specification first said, and it is wrong: `rank` is not
+    `F2`-linear, so the Walsh phase `⟨x, y⟩` is applied against a relabelling
+    that destroys the algebra. It is preserved because a rejection nobody can
+    re-run is an anecdote, and because *which checks failed to notice* is the
+    more useful half: within-basis orthogonality passes here perfectly.
+
+    Used only by `test_kerdock_mub.py`'s negative control. Never by the carrier.
+    """
+    R = GaloisRing(m)
+    T = R.teichmuller()
+    N = R.N
+    out = np.empty((k, N), dtype=np.int8)
+    for bi in range(k):
+        lam = T[bi]
+        lam_k = None if lam == R.zero else R.pw.index(lam)
+        g = np.empty(N, dtype=np.int8)
+        for xi_rank, x in enumerate(T):          # <- rank, the defect
+            if lam == R.zero or x == R.zero:
+                z = 0
+            else:
+                z = R.trace_of_power((lam_k + R.pw.index(x)) % R.order)
+            hi, lo = gray(z)
+            g[2 * xi_rank] = hi
+            g[2 * xi_rank + 1] = lo
+        out[bi] = 1 - 2 * g
     return out
 
 
@@ -269,7 +321,8 @@ def _popcount_parity(v: np.ndarray) -> np.ndarray:
 # the carrier
 # --------------------------------------------------------------------------- #
 
-def carrier_int8(m: int = 9, k: int = 16, antipodes: bool = True) -> np.ndarray:
+def carrier_int8(m: int = 9, k: int = 16, antipodes: bool = True,
+                 basis_indices=None) -> np.ndarray:
     """The unscaled `±1` rows. Shape `(k·N·(2 if antipodes else 1), N)`.
 
     Row order is deterministic and stated: basis-major, then column `y`
@@ -277,7 +330,8 @@ def carrier_int8(m: int = 9, k: int = 16, antipodes: bool = True) -> np.ndarray:
     """
     R = GaloisRing(m)
     N, n = R.N, R.n
-    s = sign_vectors(m, k)
+    s = sign_vectors(m, k, basis_indices)
+    k = s.shape[0]
     W = walsh_matrix(n)
     # basis λ, column y  ->  row  s_λ ⊙ W[:, y].  W is symmetric, so W[:, y] is
     # W[y, :]; taking rows keeps the result C-contiguous.
@@ -290,14 +344,16 @@ def carrier_int8(m: int = 9, k: int = 16, antipodes: bool = True) -> np.ndarray:
     return both
 
 
-def carrier_float32(m: int = 9, k: int = 16, antipodes: bool = True) -> np.ndarray:
+def carrier_float32(m: int = 9, k: int = 16, antipodes: bool = True,
+                    basis_indices=None) -> np.ndarray:
     """The carrier scaled to unit rows: entries `±1/√N`, `float32`.
 
     At `m = 9, k = 16` this is `32,768 × 1024` float32 = **128 MiB**, one
     allocation, far below the 4 GiB single-array cap.
     """
     N = 1 << (m + 1)
-    return (carrier_int8(m, k, antipodes) / np.float32(np.sqrt(N))).astype(np.float32)
+    return (carrier_int8(m, k, antipodes, basis_indices)
+            / np.float32(np.sqrt(N))).astype(np.float32)
 
 
 def main() -> int:

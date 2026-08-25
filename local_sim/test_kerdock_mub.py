@@ -19,6 +19,29 @@ reaches the answer by a route the generator does not use:
 * **direct integer inner products**, exhaustive over every ordered pair of rows,
   at the reduced dimensions where that is affordable.
 
+K6 IS CORRECTED, NOT DEFENDED
+-----------------------------
+The Phase-1A prediction K6 said generator and verifier are "two genuinely
+different code paths (direct emission vs. an independent reference)". **That
+overclaims and is withdrawn.** This file imports the generator and checks
+*properties of its output*. That is a strong independent PROPERTY CHECKER — ANF
+degree, rank over F2, a second transform implementation, exhaustive integer Gram
+matrices — and it is not an independently generated reference object.
+
+The honest scope: **nothing here would catch a construction that is wrong in a
+way that still satisfies every property checked.** What rules that out is that
+the properties checked are the *defining* ones — flat `±2^(n/2)` cross spectrum,
+ANF degree 2, and nonsingular pairwise differences over all C(512,2) pairs — and
+together they are the definition of a Kerdock set, not a sample of its
+consequences.
+
+Reconstructing CCKS Example 9.2 as a true second generator was attempted and
+abandoned: the finite-field part is additive in `λ` but the radical-correcting
+term goes as `λ^(−1/3)` and is not, so pairwise nonsingularity is not automatic
+and the correction cannot be pinned down from memory. Building a "reference" and
+then adjusting it until it agreed with the generator would be worse than having
+none. Recorded as a limitation; the gate is narrowed to match.
+
 THE ONE IDENTITY THIS SUITE LEANS ON, AND HOW IT IS EARNED
 ----------------------------------------------------------
 `⟨B_λ[:,y], B_μ[:,y']⟩` depends only on `y ⊕ y'`, and equals the Walsh coefficient
@@ -48,8 +71,8 @@ for _p in (_HERE, _ROOT):
 
 import numpy as np  # noqa: E402
 
-from kerdock_mub import (GaloisRing, carrier_int8, sign_vectors,  # noqa: E402
-                         walsh_matrix)
+from kerdock_mub import (GaloisRing, carrier_float32, carrier_int8,  # noqa: E402
+                         sign_vectors, walsh_matrix)
 
 _PASS = 0
 _FAIL = 0
@@ -286,6 +309,109 @@ def main() -> int:
     check(f"every pairwise matrix DIFFERENCE is nonsingular (rank {n})",
           all(r == n for r in ranks),
           f"{len(ranks)} pairs, ranks {sorted(set(ranks))} -- the Kerdock property")
+
+    # ------------------------------------------------------------------ #
+    head("V7d -- the FULL Kerdock set, not just the 16 we chose")
+    # Stronger than V7c and independent of the basis subset: build every one of
+    # the 512 phase functions at m=9 and check all C(512,2) = 130,816 pairwise
+    # differences. If the construction only worked for our chosen prefix, this
+    # is where that would show.
+    s_all = sign_vectors(9, 512)
+    g_all = ((1 - s_all) // 2).astype(np.uint8)
+    A_all, deg_all = [], 0
+    for i in range(512):
+        A, d = quadratic_matrix(anf(g_all[i], 10), 10)
+        A_all.append(A)
+        deg_all = max(deg_all, d)
+    check("all 512 phase functions have ANF degree <= 2", deg_all <= 2,
+          f"max degree {deg_all}")
+    Aflat = np.array([A.reshape(-1) for A in A_all], dtype=np.uint8)
+    bad = 0
+    for i in range(512):
+        diffs = Aflat[i + 1:] ^ Aflat[i]
+        for row in diffs:
+            if rank_gf2(row.reshape(10, 10)) != 10:
+                bad += 1
+    check("all C(512,2) = 130,816 pairwise differences are nonsingular",
+          bad == 0, f"{bad} singular -- the WHOLE Kerdock set, not a lucky subset")
+
+    # ------------------------------------------------------------------ #
+    head("NEGATIVE CONTROL -- the rejected coordinate mapping, still failing")
+    # A rejection nobody can re-run is an anecdote. This re-executes the mapping
+    # the spec first specified and records what it actually produces.
+    from kerdock_mub import bad_mapping_sign_vectors
+    sb = bad_mapping_sign_vectors(9, 16)
+    gb = ((1 - sb) // 2).astype(np.uint8)
+    degs_b = [quadratic_matrix(anf(gb[i], 10), 10)[1] for i in range(16)]
+    spec_b = set()
+    ranks_b = set()
+    mats_b = [quadratic_matrix(anf(gb[i], 10), 10)[0] for i in range(16)]
+    for a in range(16):
+        for b in range(a + 1, 16):
+            spec_b |= set(np.unique(np.abs(
+                wht_fast(sb[a].astype(np.int64) * sb[b].astype(np.int64)))).tolist())
+            ranks_b.add(rank_gf2(mats_b[a] ^ mats_b[b]))
+    check("the rejected mapping does NOT give a flat 32 spectrum",
+          spec_b != {32},
+          f"{len(spec_b)} distinct |values|, min {min(spec_b)} max {max(spec_b)}")
+    check("...and does NOT give degree-2 phase functions",
+          max(degs_b) > 2, f"max ANF degree {max(degs_b)}")
+    check("...and does NOT give nonsingular differences",
+          ranks_b != {10}, f"ranks {sorted(ranks_b)}")
+    # the check that would have MISSED it -- the more useful half of the lesson
+    Wb = walsh_matrix(10)
+    bb = (sb[0][:, None] * Wb).astype(np.int64)
+    gb0 = bb.T @ bb
+    check("...while within-basis orthogonality passes for it PERFECTLY",
+          np.array_equal(gb0, 1024 * np.eye(1024, dtype=np.int64)),
+          "V2 could not have caught this, and did not")
+    art = os.path.join(_ROOT, "experiments", "2026-08-25_p1a",
+                       "rejected_mapping_negative_control.txt")
+    os.makedirs(os.path.dirname(art), exist_ok=True)
+    with open(art, "w", encoding="utf-8") as fh:
+        fh.write("REJECTED coordinate mapping: index = 2*rank(x) + t\n")
+        fh.write("(rank = position in the MULTIPLICATIVE enumeration; not F2-linear)\n\n")
+        fh.write(f"cross-basis |spectrum| values : {sorted(spec_b)}\n")
+        fh.write(f"  -> expected for a valid set : [32]\n")
+        fh.write(f"ANF degrees                   : {sorted(set(degs_b))}\n")
+        fh.write(f"  -> expected                 : [2]\n")
+        fh.write(f"pairwise difference ranks     : {sorted(ranks_b)}\n")
+        fh.write(f"  -> expected                 : [10]\n\n")
+        fh.write("within-basis Gram == N*I      : "
+                 f"{np.array_equal(gb0, 1024 * np.eye(1024, dtype=np.int64))}\n")
+        fh.write("  -> the weak check passes for the WRONG construction, which is\n")
+        fh.write("     why the spec calls it weak and why V3/V7c exist.\n")
+    print(f"      wrote {os.path.relpath(art, _ROOT)}")
+
+    # ------------------------------------------------------------------ #
+    head("LIVE SUBSET -- k = 1/2/4/8/16, configurable bases, float32")
+    prev = None
+    nested = True
+    for kk in (1, 2, 4, 8, 16):
+        c = carrier_int8(9, kk)
+        if c.shape != (2 * kk * 1024, 1024):
+            check(f"k={kk} shape", False, f"{c.shape}")
+        if prev is not None and not np.array_equal(c[:prev.shape[0]], prev):
+            nested = False
+        prev = c
+    check("k = 1/2/4/8/16 give 2*k*1024 rows and are NESTED prefixes", nested,
+          "k=8 output is exactly the first half of k=16")
+    s16 = sign_vectors(9, 16)
+    s_pick = sign_vectors(9, 3, basis_indices=[5, 2, 9])
+    check("basis_indices selects and ORDERS the requested bases",
+          np.array_equal(s_pick[0], s16[5]) and np.array_equal(s_pick[1], s16[2]),
+          "explicit indices, in the order given")
+    cf = carrier_float32(9, 16)
+    norms = np.linalg.norm(cf.astype(np.float64), axis=1)
+    check("float32 carrier has dtype float32 and shape (32768, 1024)",
+          cf.dtype == np.float32 and cf.shape == (32768, 1024),
+          f"{cf.dtype}, {cf.shape}, {cf.nbytes / 2**20:.0f} MiB")
+    check("...and every row has unit norm to float32 precision",
+          np.abs(norms - 1.0).max() < 1e-6,
+          f"max |‖v‖ - 1| = {np.abs(norms - 1.0).max():.3e}")
+    check("...entries are exactly +-1/32",
+          set(np.unique(cf).tolist()) == {-1 / 32, 1 / 32},
+          f"{np.unique(cf).tolist()}")
 
     # ------------------------------------------------------------------ #
     head("V6 -- determinism")
