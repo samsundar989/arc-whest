@@ -487,7 +487,7 @@ class WitnessResolver:
         return _read_json(src.path)
 
 
-def verify_witness(witness, resolver: "WitnessResolver | None" = None) -> "tuple[bool, str]":
+def verify_witness(witness, resolver: "WitnessResolver") -> "tuple[bool, str]":
     """Does `witness` name checks that ACTUALLY RAN and ACTUALLY PASSED?
 
     This is the heart of P2-P0 gate clause G4, and it replaces two weaker
@@ -512,10 +512,13 @@ def verify_witness(witness, resolver: "WitnessResolver | None" = None) -> "tuple
     registry and the results that come back must declare themselves to be that
     same suite. Previously the field was read only to build error messages.
 
+    `resolver` is REQUIRED and has no default. A default-constructed one would
+    re-run the lifecycle suite on its first resolve -- a ~49 s write to tracked
+    evidence hiding behind an omitted argument, which is the shape of the defect
+    this slice is closing, one level down.
+
     Returns `(ok, reason)`.
     """
-    if resolver is None:
-        resolver = WitnessResolver()
     if witness is None:
         return False, "NO WITNESS: nothing names a provocation"
     if not isinstance(witness, dict):
@@ -1059,7 +1062,7 @@ def read_only_negative_tests() -> None:
         shutil.rmtree(tmpdir, ignore_errors=True)
 
 
-def witness_negative_tests(resolver: "WitnessResolver | None" = None) -> int:
+def witness_negative_tests(resolver: "WitnessResolver") -> int:
     """Prove `verify_witness` REFUSES every way a witness can be worthless.
 
     A guard nobody has watched fail is a guard nobody has tested. Both mechanisms
@@ -1081,8 +1084,6 @@ def witness_negative_tests(resolver: "WitnessResolver | None" = None) -> int:
     global _PASS, _FAIL
     head("0. NEGATIVE TESTS -- every way a witness can be worthless, refused")
 
-    if resolver is None:
-        resolver = WitnessResolver()
     status, results = resolver.resolve(LIFECYCLE_SUITE)
     if status != "OK":
         check("the lifecycle results are available to test against", False,
@@ -1559,25 +1560,26 @@ def main() -> int:
         c["witness_reason"] = why
         c["witness_results"] = [by_name[n] for n in (w.get("checks") or [])
                                 if n in by_name]
-        if ok:
-            check(f"{name}: its named provocation RAN and PASSED in THIS suite",
-                  True, why)
-        elif name not in _SECTION_RAN:
+        # Written so that the GREEN line's condition is `ok` and never a
+        # literal. `check(name, True, ...)` inside an `if ok:` branch is
+        # semantically identical and visually identical to the defect this
+        # section replaces, and the next reader greps for the shape.
+        if not ok and name not in _SECTION_RAN:
             # Its section never recorded whether it ran, so this refusal cannot
             # be classified -- and the SOFTER classification is the gap. A
-            # failure that gets downgraded to a gap because a bookkeeping line
-            # was forgotten is the same defect family as the one being fixed, so
-            # the missing record is itself a FAILURE.
+            # failure downgraded to a gap because a bookkeeping line was
+            # forgotten is the same defect family as the one being fixed, so the
+            # missing record is itself a FAILURE.
             check(f"{name}: its section RECORDED whether it ran", False,
                   f"no entry in _SECTION_RAN, so this refusal cannot be "
                   f"classified as gap-or-failure -- {why}")
-        elif _SECTION_RAN[name]:
-            # The section ran and the witness still does not hold: that is a
-            # FAILURE, not a gap.
-            check(f"{name}: its named provocation RAN and PASSED in THIS suite",
-                  False, why)
-        else:
+        elif not ok and not _SECTION_RAN[name]:
+            # The section did not run: a gap, not a failure.
             unprovable(f"{name} (witness)", why)
+        else:
+            # It ran. Green if the witness holds, RED if it does not.
+            check(f"{name}: its named provocation RAN and PASSED in THIS suite",
+                  ok, why)
         adjudicated += 1
     check("every DEFERRED witness was adjudicated in this section",
           adjudicated == len(deferred),

@@ -49,6 +49,7 @@ import ast
 import hashlib
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -205,10 +206,10 @@ def latch_tests() -> None:
               f"status={status} regenerated={r.regenerated}")
     finally:
         env.arm_read_only(prev)
-        for f in (target,):
-            if os.path.exists(f):
-                os.remove(f)
-        os.rmdir(tmpdir)
+        # rmtree, not rmdir: a build in which the latch has stopped refusing
+        # leaves files here, and this cleanup must not itself raise while the
+        # checks above are busy reporting exactly that.
+        shutil.rmtree(tmpdir, ignore_errors=True)
 
 
 # --------------------------------------------------------------------------- #
@@ -297,11 +298,19 @@ def child_tests() -> int:
     # of the grader's envelope, and must not be filed under a heading that says
     # it is. The writer's positive control is the one such case in this mode.
     gaps, not_run = _closing_blocks(out)
+    # NON-VACUITY FIRST. `not any(x in gaps)` is satisfied by an empty `gaps`,
+    # so a parser that silently found nothing would make the check below pass
+    # for the worst possible reason. This host always reports at least the three
+    # envelope constraints it cannot enforce, so an empty block means the parser
+    # broke, not that the report is clean.
+    check("both closing blocks were parsed and neither is empty",
+          len(gaps) >= 3 and len(not_run) >= 1,
+          f"{len(gaps)} NOT PROVABLE, {len(not_run)} NOT PERFORMED")
     check("...the writer's positive control is filed as NOT PERFORMED",
           any("writer's positive control" in ln for ln in not_run),
           f"{len(not_run)} line(s) in that block")
     check("...and NOT as a gap in the evaluator's coverage of the grader",
-          not any("writer's positive control" in ln for ln in gaps),
+          gaps and not any("writer's positive control" in ln for ln in gaps),
           f"{len(gaps)} envelope constraint(s) reported NOT PROVABLE")
     check("...and it regenerated nothing, by its own measurement",
           re.search(r"PASS\s+--no-write: resolving the lifecycle suite "

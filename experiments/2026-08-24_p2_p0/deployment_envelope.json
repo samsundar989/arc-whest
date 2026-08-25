@@ -221,24 +221,25 @@
       "why": "no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/"
     }
   ],
+  "not_performed_in_this_run": [],
   "predict_response_timeout_s": 125.0,
   "memory": {
     "measurement": {
       "baseline": {
-        "working_set": 130789376,
-        "commit": 607068160
+        "working_set": 130424832,
+        "commit": 606613504
       },
       "peak": {
-        "working_set": 462888960,
-        "commit": 962781184
+        "working_set": 461955072,
+        "commit": 961900544
       },
       "weight_bytes": 67108864
     },
     "limit_mb": 8192,
-    "peak_working_set_mb": 441.4453125,
-    "peak_commit_mb": 918.1796875,
+    "peak_working_set_mb": 440.5546875,
+    "peak_commit_mb": 917.33984375,
     "weights_mb": 64.0,
-    "headroom_upper_bound": 8.92200090192041
+    "headroom_upper_bound": 8.930169179735904
   },
   "memory_limit_provocation": {
     "provoked_here": false,

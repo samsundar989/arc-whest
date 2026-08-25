@@ -7,18 +7,18 @@ FAIL lines: 2
   FAIL  ...through the WITNESS, not only through the skipped section     section 7 adjudicated the deferred witness and refused it
 
 --- last 12 lines of the run ---
-    PASS  `git status --porcelain` is byte-identical across the run        7 line(s) before, 7 after
     FAIL  NO green line mentions worker_death_restart when section 6 is skipped 1: ["  PASS  worker_death_restart: its named provocation RAN and PASSED in THIS suite CHECK NOT FOUND in local_sim/test_deployment_envelope.py: 'the suite SURVIVED a worker that hard-exited mid-run' -- the witness names a provocation the suite does not contain"]
     PASS  ...and it is reported NOT PROVABLE instead                       present in the NOT PROVABLE block
     FAIL  ...through the WITNESS, not only through the skipped section     section 7 adjudicated the deferred witness and refused it
     PASS  ...and the refusal names the check the witness could not find    names 'the suite SURVIVED a worker that hard-exited mid-run'
     PASS  the child verified its own read-only claim before printing it    the claim is now conditional on the checks above it
+    PASS  both closing blocks were parsed and neither is empty             4 NOT PROVABLE, 1 NOT PERFORMED
     PASS  ...the writer's positive control is filed as NOT PERFORMED       1 line(s) in that block
     PASS  ...and NOT as a gap in the evaluator's coverage of the grader    4 envelope constraint(s) reported NOT PROVABLE
     PASS  ...and it regenerated nothing, by its own measurement            the mirror of the writing run's non-vacuity check
   
   ====================================================================================================
-  20/22 checks passed
+  21/23 checks passed
 
 ====================================================================================================
 INJECTION B -- D2 -- the resolver ignores the suite it was given (pre-P1-PRE behaviour)
@@ -53,24 +53,24 @@ FAIL lines: 8
   FAIL  with the latch ARMED, suite REGENERATION raises and writes nothing NO REFUSAL RAISED
   FAIL  a resolver built BEFORE the latch was armed still does not regenerate status=MISMATCH regenerated={'probe': True}
   FAIL  the child exited 0                                               exit 1
-  FAIL  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json 603bbb847b4e7798 -> 53083f954e7f709f
-  FAIL  `git status --porcelain` is byte-identical across the run        5 line(s) before, 6 after
+  FAIL  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json 603bbb847b4e7798 -> 823776406e2d0111
+  FAIL  `git status --porcelain` is byte-identical across the run        3 line(s) before, 4 after
   FAIL  the child verified its own read-only claim before printing it    the claim is now conditional on the checks above it
   FAIL  ...and it regenerated nothing, by its own measurement            the mirror of the writing run's non-vacuity check
 
 --- last 12 lines of the run ---
-    FAIL  `git status --porcelain` is byte-identical across the run        5 line(s) before, 6 after
     PASS  NO green line mentions worker_death_restart when section 6 is skipped 0 such lines
     PASS  ...and it is reported NOT PROVABLE instead                       present in the NOT PROVABLE block
     PASS  ...through the WITNESS, not only through the skipped section     section 7 adjudicated the deferred witness and refused it
     PASS  ...and the refusal names the check the witness could not find    names 'the suite SURVIVED a worker that hard-exited mid-run'
     FAIL  the child verified its own read-only claim before printing it    the claim is now conditional on the checks above it
+    PASS  both closing blocks were parsed and neither is empty             5 NOT PROVABLE, 1 NOT PERFORMED
     PASS  ...the writer's positive control is filed as NOT PERFORMED       1 line(s) in that block
     PASS  ...and NOT as a gap in the evaluator's coverage of the grader    5 envelope constraint(s) reported NOT PROVABLE
     FAIL  ...and it regenerated nothing, by its own measurement            the mirror of the writing run's non-vacuity check
   
   ====================================================================================================
-  14/22 checks passed
+  15/23 checks passed
 
 ====================================================================================================
 INJECTION D -- section 7's classifier -- a section that forgets to record whether it ran
@@ -94,4 +94,4 @@ FAIL lines: 1
     --no-write: NOT VERIFIED. The claim is WITHHELD -- see the failures above.
 
 ====================================================================================================
-suite restored byte-for-byte: sha256 4980a93bd99054247a6067e0246f2028aad5845d4b58f6356553773d02cd8dcc
+suite restored byte-for-byte: sha256 38b81252a7e3e47ebe2ee7413a6d8a6f6d34467b23a87b68936f94318a721734
