@@ -31,18 +31,16 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   It took four review passes — PROVISIONAL, PROVISIONAL, REJECT, ACCEPT — and the
   first three each found something real, including a gate clause satisfied by a
   check that could not fail.
-- **P1-PRE is PROVISIONAL after its sixth independent review.** The terminal
-  implementation closes the six named guarantees: all 15 current mutations fire
-  their named guard, D1-D3 hold, the destructive cleanup is gone, preflight is
-  16/16 and portability is 99/99. The review found one remaining behavioural
-  defect and three record defects: the harness still overwrites its tracked
-  transcript while claiming it writes nowhere in the repo; T7's arithmetic and
-  headline are false; injection J was dropped without recording it while a
-  docstring still cites it; and these durable docs were not reconciled.
-- **Immediate next action: one corrections-only P1-PRE pass, then a fresh bounded
-  review.** Fix only those four findings. Do not pursue the five additional
-  non-blocking meta-design observations from the review. Phase 1A remains blocked
-  until the corrected tree receives a literal ACCEPT.
+- **P1-PRE is CLOSED on a literal independent ACCEPT** (seventh pass, reviewed
+  HEAD `6d05d77`). D1, D2 and D3 are closed; so are the six review-5 findings and
+  the four review-6 blocking items. 15 mutations fire their named guard, the
+  harness cannot write the repository (containment via `realpath`, measured after
+  the write), preflight is 16/16 and portability 99/99.
+  **Seven passes: PROVISIONAL x6, then ACCEPT — and five of the six found the
+  defect in the repair rather than in the original defect.** Recorded limitations,
+  none a false green today: the Linux branch and the child-`setrlimit` Linux
+  answer have never executed, and the five design observations of the sixth pass
+  were deliberately not pursued.
 - **After ACCEPT, prepare one baseline Phase-2 calibration submission while
   Phase 1A starts.** Freeze the current K2p1 hash, run official validation and a
   zero-failure Phase-2 subprocess mini, show Samuel the expected rank-33 result,
