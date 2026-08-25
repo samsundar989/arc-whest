@@ -317,54 +317,60 @@ Two arithmetic hygiene rules, both of which Sprint 4 broke:
      right to reject it. What the cliff compares against is the absolute second,
      so the absolute second is what must be reported, with its variation.
 
-   **The measured law, from 300 per-MLP readings on 2026-08-24**
-   (`local_sim/p2_residual_paths.py`, artifact
-   `experiments/2026-08-24_p2_p0/p2_residual_paths.json`; 5 candidate-passes × 3
-   instruments × 20 MLPs at 1024×16):
+   **The measured law, and it took three experiments to get right**
+   (`local_sim/p2_residual_paths.py`, `p2_weight_repr_residual.py`,
+   `p2_residual_version.py`; artifacts under `experiments/2026-08-24_p2_p0/`).
 
-   | candidate | subprocess median | worst MLP | worst-case headroom | over the cap |
-   |---|---:|---:|---:|---:|
-   | `estimator.py` (shipped K2p1) | 56.6 ms | 83.6 ms | 4.8× | 0/20 |
-   | `arm_k2p1` | 55.9 / 59.4 ms | 95.5 ms | 4.2× | 0/20 |
-   | `arm_k2p2` — the architecture's reference | 94.6 / 95.1 ms | 140.6 ms | **2.8×** | 0/20 |
+   On one quiet host, one session, `--runner subprocess`, 20 MLPs per cell:
 
-   **Nothing exceeded the cap, anywhere, in any instrument.** Back-to-back passes
-   on a quiet host agree to **1.01×–1.06×** on the median.
+   | candidate | median | worst reading | over the cap |
+   |---|---:|---:|---:|
+   | `estimator.py` (shipped K2p1) | 56.6 ms | 83.6 ms | 0/20 |
+   | `arm_k2p1` | 55.9 / 59.4 ms | 95.5 ms | 0/20 |
+   | `arm_k2p2` — the architecture's reference | 94.6 / 95.1 ms | 140.6 ms | 0/20 |
 
-   **The dominant term is machine contention, not session drift, and it is large.**
-   The same `arm_k2p2` measured **260.7 ms median / 390.6 ms max** on a host that
-   was simultaneously running a full preflight and a second audit — **2.75× the
-   quiet level**, which would have put it at 1.02× headroom and read as a method
-   about to fail. It is not. In the same contended window, a `whest run` of the
-   shipped file died outright with `SETUP_TIMEOUT`.
+   **Those are best-case numbers and must not be used alone.** The same `arm_k2p2`,
+   through the same instrument, reads **260.7 ms median / 390.6 ms worst** in the
+   frozen P2-CP1 ladder of 2026-08-21 (`experiments/2026-08-21_p2_cp1/ladder_frozen.json`,
+   `per_mlp_residual_s`) — **1.02× headroom, effectively at the cliff.**
 
-   **So the rule is not "add a between-session term". It is:**
+   That gap was first written up here as machine contention. **That was wrong, and
+   it is retracted.** The frozen figures are a committed artifact from another day,
+   not a contended re-run. Three experiments decompose the 2.35×:
 
-   > **A residual measurement taken on a contended host is not evidence.** Measure
-   > on a quiet machine, report the worst MLP and not only the median, and state
-   > what else was running. A contended reading can be 2.75× high — enough to
-   > condemn a method that has 2.8× headroom, or to fail a run that would have
-   > scored.
+   | candidate cause | measured | verdict |
+   |---|---|---|
+   | weight representation (`np.asarray` → `fnp.array`) | a fixed **~19 ms** slab, 18.9 / 19.7 ms across two arms | real, but small, and the wrong sign for this gap — both sides here are `np` |
+   | flopscope 0.10 → 0.12 | **0.91×**, interleaved A/B, 3 rounds, one session | **not the cause**; 0.12 is marginally *slower* |
+   | run/session state | **~2.35× unexplained** | **the dominant term** |
 
-   This is sharper than a variance term and it is checkable: the two contended
-   readings this repository holds are both explainable by what was running beside
-   them, and the quiet readings agree to a few percent.
+   The ~19 ms slab is itself a real finding: before P2-P0, sixteen 1024×1024
+   float32→float64 weight conversions per `predict` were invisible to the meter,
+   and since `residual = wall − backend − overhead`, invisible work is **billed to
+   residual**. The repair moved that cost out of residual and into counted FLOPs.
 
-**Everything that made a Phase-1 cost claim hard is still true of counted FLOPs.**
-Counted compares to counted. Never a bare ratio of means. The freeze must be able
-to see the cost the candidate actually incurs — and since 2026-08-24 the local
-meter can finally see all of it: `local_sim/p2_flop_anchor.py` reconciles the
-shipped file to the official runner **op by op, to zero**, after two mechanisms
-worth 37,779,456 FLOPs were found and named (flopscope-backed weights; whestbench
-0.16's own in-window `materialise_predictions`).
+   What remains unexplained is machine/session state and, plausibly, long-run
+   process state — the ladder ran 11 arms × 96 networks in a single process.
+   Nothing on disk separates those two, and neither did any experiment here.
 
-**The 8,192 MB memory limit has no local enforcement at all** on this host —
-Windows has no `resource` module, so the subprocess worker's `RLIMIT_AS` call is
-skipped and `--runner local` is advisory by design. It is an accounting
-constraint here, not a test: `local_sim/test_deployment_envelope.py` measures peak
-commit and reports it as a **lower bound**, because `RLIMIT_AS` caps virtual
-address space and no Windows counter reports that. No green local run may be read
-as evidence that a candidate fits in 8 GiB.
+   **So the rule is the opposite of what was first written:**
+
+   > **A residual level is not reproducible to better than about 2.4× across runs
+   > on this host.** Quote headroom against the **worst observed run**, not the
+   > best, and never from a single session. A best-case reading is not a margin;
+   > it is one draw from a distribution whose spread is larger than most of the
+   > effects being measured.
+
+   Two further cautions from the same data, both found by an independent Skeptic:
+
+   - **The "worst MLP" is often the FIRST MLP, not a heavy network.** In three of
+     five series the maximum is reading #1, and one series decays visibly over
+     ~7 MLPs (`95 82 77 93 94 94 74` → settles near `50`). A warm-up transient
+     still fails an MLP under a cliff, so it must not be discarded — but it must
+     not be attributed to network heaviness either.
+   - **n = 20 is thin for a tail statistic.** The cliff is a maximum, not a median,
+     and a max over 20 draws has a wide sampling distribution. Treat a worst-case
+     headroom from n = 20 as indicative, not as a bound.
 
 ### 2b-i. THE BINDING STATISTIC — arithmetic, adopted 2026-08-20 (CP0.3)
 

@@ -411,6 +411,12 @@ def main() -> int:
     ap.add_argument("--skip-worker-death", action="store_true",
                     help="skip section 3 (it runs the official runner, ~30 s)")
     ap.add_argument("--out", default=OUT)
+    ap.add_argument("--no-write", action="store_true",
+                    help=("run the checks and write NOTHING. An auditor re-running "
+                          "this file should not have to `git checkout` the "
+                          "committed artifact afterwards -- which is exactly what "
+                          "an independent Skeptic had to do, and it is the kind of "
+                          "side effect that makes a read-only protocol untrue."))
     args = ap.parse_args()
 
     r = official_config.LIVE
@@ -547,6 +553,10 @@ def main() -> int:
         print("them. They are enforced only on the grader:")
         for u in _UNPROVABLE:
             print(f"  - {u['constraint']}: {u['why']}")
+
+    if args.no_write:
+        print("\n  --no-write: the artifact on disk was NOT touched.")
+        return 0 if _FAIL == 0 else 1
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as fh:

@@ -232,9 +232,12 @@ def _stub_whestbench() -> bool:
         pass
     else:
         return False
-    if "whestbench" in sys.modules and not isinstance(
-        sys.modules["whestbench"], types.ModuleType
-    ):
+    # A stub built by `types.ModuleType` IS a ModuleType, so an `isinstance`
+    # test here is always False and never short-circuits -- dead code, caught by
+    # an independent Skeptic. Mark the stub explicitly instead, so a second call
+    # returns early rather than rebuilding it.
+    existing = sys.modules.get("whestbench")
+    if existing is not None and getattr(existing, "_arc_whest_stub", False):
         return True
     wb = types.ModuleType("whestbench")
 
@@ -253,6 +256,7 @@ def _stub_whestbench() -> bool:
     wb.MLP = MLP
     wb.BaseEstimator = BaseEstimator
     wb.__path__ = []
+    wb._arc_whest_stub = True
     sys.modules["whestbench"] = wb
     return True
 

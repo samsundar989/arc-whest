@@ -11148,3 +11148,199 @@ SINGLE_USE and unspent. **Vault:** untouched. `estimator.py` byte-identical.
 **Status:** Phase 0 is accepted with the corrections above applied. The residual
 LEVEL question is settled below and carries into the Phase-1 contract as a design
 constraint rather than a check performed afterwards.
+
+---
+
+# 2026-08-24 — P2-P0 REVIEW 2: **RETRACTION.** The contention story was wrong, and the carrier's budget is a third of what I published
+
+*Second independent Skeptic pass, fresh context, auditing the corrections rather
+than repeating the first pass. **Verdict: PROVISIONAL.** Its summary, which is
+fair: "The code I ran, I accept. The story written around it, I do not."*
+
+**This entry retracts a claim I placed into `docs/VALIDATION.md` §2b-ii,
+`GOTCHAS.md`, `CURRENT_STATE.md`, `GAME_PLAN.md` and the evidence README, and
+corrects the operational number Phase 1 was about to be designed against.**
+
+## What I got wrong
+
+The first Skeptic reported `arm_k2p2` at **260.7 ms median / 390.6 ms max →
+1.02× headroom**. I could not find residual data in the frozen P2-CP1 ladder, so I
+concluded its table came from a fresh re-run on a contended machine, and wrote that
+up as a measured law: *a contended reading can be 2.75× high*.
+
+**Both halves were wrong.**
+
+`experiments/2026-08-21_p2_cp1/ladder_frozen.json` **does** carry residual, under
+the key `per_mlp_residual_s`, 96 values per arm. My search looked for
+`residual_wall_time_s`, `resid` and `residual_s`, missed the actual key, and I then
+asserted *"there is no residual column in it, or anywhere else in
+`experiments/2026-08-21_p2_cp1/`"* — a confident negative from an inadequate
+search, used to discount a correct finding. Verified now:
+
+```text
+k2p2  per_mlp_residual_s   n=96   median 0.260694 s   max 0.390565 s
+                                  -> 260.7 ms / 390.6 ms, headroom 1.0242x
+```
+
+Every quoted digit matches. A wall-time re-run cannot reproduce four significant
+figures; this was arithmetic on a committed artifact, exactly as the first Skeptic
+said. **Claim E1 of the previous entry is retracted in full, and the first
+Skeptic's table is reinstated as sound.**
+
+Which means the 2.75× was never contention. It is a comparison across a *stack*, a
+*weight representation*, an *instrument* and *three days* at once — and I labelled
+it with the one cause I had not tested.
+
+## What it actually is — three experiments, because one would not have settled it
+
+The second Skeptic proposed the discriminating test. I ran it, and then a second
+one it did not ask for, because the first came back partial.
+
+**1. Weight representation** (`local_sim/p2_weight_repr_residual.py`) — same host,
+same session, one expression apart:
+
+| candidate | `np.asarray` weights | `fnp.array` weights | drop |
+|---|---:|---:|---:|
+| `arm_k2p2` | 110.9 ms | 92.0 ms | **18.9 ms** (1.21×) |
+| `arm_k2p1` | 70.1 ms | 50.4 ms | **19.7 ms** (1.39×) |
+
+A **fixed ~19 ms slab**, near-identical on both arms — exactly what sixteen
+1024×1024 float32→float64 conversions per `predict` should cost. And the mechanism
+is worth stating on its own:
+
+> `residual = wall − backend − overhead`. **Work the meter cannot see is billed to
+> RESIDUAL, not to nothing.** Before P2-P0 those conversions ran on raw-NumPy
+> weights, invisible to flopscope, and landed in residual. The repair moved
+> ~19 ms out of residual and `37,779,456` FLOPs into counted, simultaneously.
+
+That is contract confounder **C5**, which predicted the weight change would move
+wall time and which nobody had measured. It is now measured.
+
+But ~19 ms does not explain a 150 ms gap. Holding the representation fixed at `np`,
+today still reads **2.35×** faster than 2026-08-21.
+
+**2. The stack** (`local_sim/p2_residual_version.py`) — flopscope 0.10 vs 0.12,
+interleaved A/B, three rounds, one session, so session state is held fixed by
+construction:
+
+```text
+flopscope 0.10   94.7 ms median over 24 readings
+flopscope 0.12  103.7 ms median over 24 readings
+                0.10 / 0.12 = 0.91x
+```
+
+**Not the cause.** If anything 0.12 is marginally slower. Highly reproducible
+(94.0 / 94.5 / 97.3 against 103.8 / 103.8 / 102.8).
+
+**3. What is left.** The full decomposition, `k2p2`, representation held fixed:
+
+| | median |
+|---|---:|
+| 2026-08-21, stack 0.14/0.10, `np` weights | 260.7 ms |
+| 2026-08-24, stack 0.16/0.12, `np` weights | 110.9 ms |
+| 2026-08-24, stack 0.16/0.12, `fnp` weights | 92.0 ms |
+| representation explains | 18.9 ms (1.21×) |
+| stack version explains | **nothing** (0.91×) |
+| **unexplained run/session state** | **~2.35×** |
+
+**A between-run term of ~2.4× is real, and I refused it.** The previous entry said
+in terms: *"the rule is not 'add a between-session variance term'… drift is a few
+percent and load is 2.75×."* Both clauses are now false. The few-percent figure was
+two passes taken minutes apart on one host, which measures almost nothing.
+
+I cannot separate machine state on the day from long-run process state — the ladder
+ran 11 arms × 96 networks in one process, and memory pressure over such a run is a
+plausible mechanism. Nothing on disk distinguishes them, and I am not going to
+guess a second time.
+
+## The number that changes, and it is the one Phase 1 needed
+
+| | `k2p2` median | leaves for the carrier |
+|---|---:|---:|
+| best observed session (what I published) | 94.6 ms | ~305 ms |
+| **worst observed run** | **260.7 ms** | **~139 ms** |
+
+And on that worst run `k2p2`'s own worst MLP sat at **390.6 ms — 1.02× headroom,
+with no carrier at all.**
+
+**The carrier's budget is ~139 ms, not ~305 ms.** Designing a
+32,768-direction carrier against the good day is how a method passes here and fails
+on the grader. `GAME_PLAN.md` now says so, and adds the corollary: if the carrier
+will not fit in ~139 ms, the honest responses are to make it cheaper, to move work
+into `setup()` where the grader charges no FLOPs, or to cut the direction count —
+**not to re-measure until a friendly number appears.**
+
+## Two more measurement criticisms, both upheld
+
+- **The "worst MLP" is frequently the FIRST MLP.** In three of five series the
+  maximum is reading #1, and pass-0 `arm_k2p1` decays visibly over ~7 MLPs:
+  `95 82 77 93 94 94 74` settling near `50`. Under a cliff a warm-up transient
+  still fails an MLP, so it must not be discarded — but calling it a heavy network
+  was wrong, and the pass-0 rows are relabelled as not-quiet.
+- **n = 20 is thin for a maximum.** The cliff is a tail statistic and a max over 20
+  draws has a wide sampling distribution. Worst-case headroom from n = 20 is
+  indicative, never a bound. Both cautions are now in §2b-ii.
+
+## Also fixed from this pass
+
+- `_stub_whestbench`'s new idempotency guard was **dead code** — a stub built by
+  `types.ModuleType` *is* a `ModuleType`, so `not isinstance(...)` never fired.
+  Replaced with an explicit marker attribute.
+- `local_sim/test_deployment_envelope.py` **rewrote a committed artifact** when
+  run, so the auditor had to `git checkout` after following the supplied
+  "read-only" protocol. It now takes `--no-write`. A protocol that is described as
+  read-only and is not is a defect in the instructions as much as the code.
+- `GOTCHAS.md` said `k2p2` cleared the cap "in 60 readings"; the artifact holds
+  **120** for that arm, 300 across all cells.
+
+## What the second pass confirmed rather than broke
+
+Everything executable passed, and it ran the suites itself rather than reading
+them: `official_config` **73/73**, anchor self-test **14/14** with the vacuity
+check now genuinely non-vacuous, `--gate` **19 operations, 0 disagreeing, delta
++0**, the SHA binding **refuses and exits 4** on a different candidate,
+`lifecycle_eval` **53/53**, envelope **14/14 + 2 NOT PROVABLE**, scorer **98/98**,
+portability **99/99**. Both check-count moves are honest — the removed L8 line was
+a tautology given the equality immediately above it. `estimator.py` byte-identical
+across `e8afcbf..HEAD`, seed ledger unchanged, `experiments/vault/` untouched with
+counter 1 == 1 log line. **Claim E2 is upheld**: mint parity at 1024×16 is
+**20/20**, as the gate runs it.
+
+It also disclosed its own limits, which is the standard being applied to everyone
+here: its host was **not** quiet (26% CPU, Chrome and VS Code resident), so it
+deliberately re-measured **no** wall time and took every number from a committed
+artifact or a deterministic suite. That is the right call and it is why its
+findings survive.
+
+## Knowledge delta
+
+1. **A confident negative from an inadequate search is worse than no search.** I
+   grepped three key names, missed the fourth, and used the absence to overturn a
+   correct finding. The fix is not "grep harder" — it is that a negative claim
+   about an artifact must state what was searched for.
+2. **Work the meter cannot see is billed to residual.** `residual = wall − backend
+   − overhead`. An uninstrumented operation is not free; it is charged somewhere
+   nobody is looking. This is why the repair moved ~19 ms *out* of residual while
+   moving 37.8M FLOPs *into* counted.
+3. **A residual level is not reproducible to better than ~2.4× across runs here**,
+   and neither the flopscope release (0.91×) nor the weight representation
+   (~19 ms) explains it. Quote headroom against the worst observed run.
+4. **The carrier budget is ~139 ms, not ~305 ms** — a third of what the best
+   session suggested, and the difference between a design that fits and one that
+   does not.
+5. **A "worst MLP" that is the first MLP is a warm-up transient**, which still
+   fails under a cliff but is not evidence about network tails. And n = 20 does not
+   bound a maximum.
+6. **When a story exonerates your own work, that is when to test it.** Contention
+   was convenient, untested, and wrong. The second Skeptic named it as the thing to
+   attack, and it was right to.
+
+**Seed ledger:** unchanged. P01 144/600 consumed, **456 free**. D17 and D19
+SINGLE_USE and unspent. **Vault:** untouched. `estimator.py` byte-identical.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Status:** Phase 0's *instrument* is accepted by both passes — every executable
+check passes and the counted-FLOP repair survived two independent attacks. What
+was rejected was the narrative around the residual measurement, and that narrative
+is now retracted and replaced with the decomposition above. **Phase 1 proceeds
+against a ~139 ms residual budget**, with a falsifier on it in the contract.

@@ -199,28 +199,30 @@ free if the last array is built in float32. Taking it means changing
 
 ### The residual budget Phase 1 must design against
 
-300 per-MLP readings on a quiet host, `--runner subprocess` as the authority
-(`experiments/2026-08-24_p2_p0/p2_residual_paths.json`):
+Best case, one quiet session, `--runner subprocess` as the authority, 20 MLPs per
+cell (`experiments/2026-08-24_p2_p0/p2_residual_paths.json`):
 
-| candidate | median | worst MLP | headroom @ worst | over the 0.4 s cap |
-|---|---:|---:|---:|---:|
-| `estimator.py` (shipped K2p1) | 56.6 ms | 83.6 ms | 4.8x | **0/20** |
-| `arm_k2p1` | 55.9 / 59.4 ms | 95.5 ms | 4.2x | **0/20** |
-| `arm_k2p2` — the architecture's reference | 94.6 / 95.1 ms | 140.6 ms | **2.8x** | **0/20** |
+| candidate | median | worst reading | over the 0.4 s cap |
+|---|---:|---:|---:|
+| `estimator.py` (shipped K2p1) | 56.6 ms | 83.6 ms | 0/20 |
+| `arm_k2p1` | 55.9 / 59.4 ms | 95.5 ms | 0/20 |
+| `arm_k2p2` — the architecture's reference | 94.6 / 95.1 ms | 140.6 ms | 0/20 |
 
-Nothing exceeded the cap anywhere. Back-to-back quiet passes agree to 1.01x–1.06x.
+**Those are best-case and must not be used alone.** The same `arm_k2p2` reads
+**260.7 ms median / 390.6 ms worst — 1.02x headroom** in the frozen P2-CP1 ladder
+of 2026-08-21. A first write-up blamed machine contention; **that is retracted**.
+Three experiments decompose the 2.35x: the weight-representation repair is a fixed
+**~19 ms**, flopscope 0.10 vs 0.12 is **0.91x** (not the cause), and **~2.35x is
+run/session state and remains unexplained.**
 
-**`k2p2` spends ~95 ms of the 400 ms cap, so the carrier's budget is ~305 ms** —
-before any safety margin, and before whatever the grader's hardware does to these
-numbers. That is the Phase-1 design constraint, and it belongs in the contract with
-a falsifier rather than being checked after the carrier exists.
+**So the carrier's allowance is bounded by the bad day, not the good one:**
+`k2p2` at 260.7 ms leaves **~139 ms**, and that day's worst MLP already sat at
+1.02x headroom **with no carrier at all**. Phase 1 designs against that, and its
+contract needs a falsifier on residual rather than a check performed afterwards.
 
-**A residual measurement on a contended host is not evidence.** The same `arm_k2p2`
-read 260.7 ms median / 390.6 ms max — **2.75x high** — on a machine running a full
-preflight and a second audit at the same time; at that level it appears to have
-1.02x headroom and to be a method about to fail. It is not. In the same window a
-`whest run` died with `SETUP_TIMEOUT`. Measure quiet, report the worst MLP, and say
-what else was running.
+Two cautions on the numbers above, both from an independent Skeptic: the "worst
+MLP" is frequently the **first** MLP (a warm-up transient, which still fails an MLP
+under a cliff but is not network heaviness), and **n = 20 is thin for a maximum**.
 
 The paired arithmetic score test, common-random-number design, ground-truth noise
 reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.

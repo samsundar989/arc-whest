@@ -72,95 +72,54 @@ Raw artifacts: `experiments/2026-08-24_p2_p0/`.*
   context.
 
 - **An instrument ratio does not bound a level, and only a level clears a cliff.**
-  The ±7 % agreement above is real and was briefly used to characterise headroom
-  against the 0.4 s cap. That was wrong, and an independent Skeptic rejected it:
-  ±7 % is intra-session and instrument-to-instrument, while the cap tests an
-  absolute second. Measured properly, 300 per-MLP readings on a quiet host:
+  The ±7 % agreement above is real, and it was briefly used to characterise
+  headroom against the 0.4 s cap. That was wrong: ±7 % is intra-session and
+  instrument-to-instrument, while the cap tests an absolute second.
 
-  | candidate | subprocess median | worst MLP | worst-case headroom | over cap |
-  |---|---:|---:|---:|---:|
-  | `estimator.py` (shipped K2p1) | 56.6 ms | 83.6 ms | 4.8× | 0/20 |
-  | `arm_k2p1` | 55.9 / 59.4 ms | 95.5 ms | 4.2× | 0/20 |
-  | `arm_k2p2` (the architecture's reference) | 94.6 / 95.1 ms | 140.6 ms | **2.8×** | 0/20 |
+- **A residual level is not reproducible to better than ~2.4× across runs on this
+  host, and the first explanation offered for that was wrong.** Best case, one
+  quiet session, `--runner subprocess`, 20 MLPs per cell:
 
-- **A residual measurement taken on a CONTENDED host is not evidence, and the
-  error is big enough to invert a decision.** The same `arm_k2p2` read **260.7 ms
-  median / 390.6 ms max — 2.75× the quiet level** — on a machine simultaneously
-  running a full preflight and a second audit. At that level it has 1.02×
-  headroom and looks like a method about to fail; on a quiet host it has 2.8× and
-  did not exceed the cap once in 60 readings. In the same window a `whest run`
-  died outright with `SETUP_TIMEOUT`. **Measure residual on a quiet machine,
-  report the worst MLP as well as the median, and say what else was running.**
+  | candidate | median | worst reading | over cap |
+  |---|---:|---:|---:|
+  | `estimator.py` (shipped K2p1) | 56.6 ms | 83.6 ms | 0/20 |
+  | `arm_k2p1` | 55.9 / 59.4 ms | 95.5 ms | 0/20 |
+  | `arm_k2p2` (the architecture's reference) | 94.6 / 95.1 ms | 140.6 ms | 0/20 |
 
-- **The carrier's residual budget, concretely.** `k2p2` costs ~95 ms of the 400 ms
-  cap on a quiet host, leaving **~305 ms** for the carrier that Phase 1 is about
-  to build on top of it — before any safety margin, and before whatever the
-  grader's own hardware does to these numbers. Residual is a first-class design
-  constraint for 32,768 propagated directions, not a box to tick afterwards.
+  The same `arm_k2p2` reads **260.7 ms median / 390.6 ms worst — 1.02× headroom**
+  in the frozen P2-CP1 ladder of 2026-08-21. **That gap was first attributed to
+  machine contention. It is retracted.** Those are committed numbers from another
+  day, not a contended re-run. Decomposed by three experiments:
 
-- **Weight-METHOD operations are free locally and billed on the grader, unless
-  the local MLP is flopscope-backed.** `whestbench.domain.MLP.from_row` builds
-  weights with `fnp.array(w)`; every probe in `local_sim/` built them with
-  `np.asarray(w)`. The shipped file's live Phase-2 path opens with
-  `[w.astype(fnp.float64) for w in mlp.weights]` — **33,554,432 FLOPs on the
-  grader, zero here**. That was 33.5M of a 37.8M shortfall nobody could explain
-  for three days. **Build local MLPs the way the runner builds them, or the meter
-  cannot see anything the candidate does *to* a weight.**
+  | candidate cause | measured | verdict |
+  |---|---|---|
+  | weight representation `np.asarray` → `fnp.array` | fixed **~19 ms** (18.9 / 19.7 ms, two arms) | real but small |
+  | flopscope 0.10 → 0.12 | **0.91×** interleaved, 3 rounds, one session | **not the cause** |
+  | run/session state | **~2.35×** | **the dominant term, and unexplained** |
 
-- **whestbench 0.16 bills you for the harness's own output conversion, and its
-  docstring says it does not.** `scoring.materialise_predictions` runs INSIDE the
-  metered window and ends in `fnp.asarray(predictions, dtype=fnp.float32)`. The
-  docstring calls that free; it is free only for an estimator that already returns
-  float32. Returning float64 costs **32,768 FLOPs** at the graded shape
-  (16 × 1024 × 2). Verified both ways: 0 FLOPs on a float32 return, 2
-  FLOPs/element on a float64 one (`p2_flop_anchor.py --self-test`).
-  **A candidate whose final assembly is NATIVELY float32 avoids that 32,768**, at
-  no accuracy cost — the harness casts to float32 regardless. The saving is
-  CONDITIONAL and it is easy to state too strongly: reaching float32 by adding a
-  cast costs the identical 2 FLOPs/element and nets exactly zero. It is only free
-  if the last array is built in float32 to begin with. Not taken yet: changing the
-  shipped file is STRATEGIC and needs its own contract.
+  **Quote headroom against the worst observed run, not the best.**
 
-- **A matching TOTAL with a moved OPERATION is a coincidence, not parity.** The
-  anchor check compares the op table, 19 operations, name by name and call count
-  by call count. It also **refuses** when the official report is missing rather
-  than skipping: an absent comparison is not a pass.
+- **Work the meter cannot see is billed to RESIDUAL, not to nothing.**
+  `residual = wall − backend − overhead`, so before P2-P0 the sixteen 1024×1024
+  float32→float64 weight conversions per `predict` — invisible on raw-NumPy
+  weights — landed in residual. The repair moved that ~19 ms out of residual and
+  into counted FLOPs. An uninstrumented operation is not free; it is merely
+  charged somewhere you were not looking.
 
-- **The 8,192 MB memory limit CANNOT BE ENFORCED ON WINDOWS AT ALL.**
-  `--runner local` is advisory by design (`runner.py:163-167`);
-  `--runner subprocess` uses `resource.setrlimit(RLIMIT_AS, ...)` and **there is
-  no `resource` module on Windows**, so `subprocess_worker.py:172-183` catches the
-  failure, warns, and runs with no cap. The Phase-1 limit was 65,536 MB and it
-  already killed v2.5; Phase 2's is **eight times tighter** against sixteen times
-  the weight bytes. Memory here is an accounting constraint, never a test passed.
-  Measured for the shipped file: weights 64.0 MB, peak working set 440.8 MB, peak
-  commit 918.0 MB against 8,192 MB — **at most 8.9× headroom, and that is an UPPER
-  BOUND**. RLIMIT_AS caps *virtual address space*, which is larger than either
-  counter and which no Windows counter reports, so the real headroom is smaller by
-  an unmeasured factor. Dividing a fixed limit by a LOWER bound on the charge gives
-  an UPPER bound on the margin — the optimistic end, never a safety factor. (This
-  was recorded the wrong way round on first writing and corrected by an independent
-  Skeptic the same day; inverting the sign of the one constraint this host cannot
-  test is the worst available place for a unit error.)
+- **The "worst MLP" is often the FIRST MLP.** In three of five measured series the
+  maximum is reading #1, and one decays visibly over ~7 MLPs
+  (`95 82 77 93 94 94 74` → settles near `50`). Under a cliff a warm-up transient
+  still fails an MLP, so do not discard it — but do not call it a heavy network
+  either. And n = 20 is thin for a maximum: treat a worst-case headroom from 20
+  draws as indicative, never as a bound.
 
-- **The 30 s `predict_timeout_s` is not the binding timeout.** The runner waits
-  `max(predict_timeout_s, wall_time_limit_s + grace)` = **125 s**, so under Phase
-  2's 120 s wall the wall binds and the predict timeout never does.
-
-- **A worker that dies is scoped to its own MLP — and testing that is harder than
-  it looks.** `whest run --runner subprocess` restarts a dead worker and fails
-  only the MLP that killed it. Provoking it with a module-global call counter does
-  NOT work: the replacement worker imports the candidate fresh, its counter starts
-  at zero, and it kills itself on *its* first MLP too — so every MLP dies and the
-  runner looks broken when the fault is in the test. The trigger has to outlive the
-  process; `test_deployment_envelope.py` uses a sentinel file.
-
-- **The estimator is BUDGET-ADAPTIVE, so a shape and a budget are not independent
-  knobs.** `predict(mlp, budget)` sizes its work to the budget it is handed. Running
-  the Phase-1 shape under Phase-2's `2**41` costs ~7× what Phase 1 costs and is a
-  measurement of a rulebook that has never existed. `LifecycleSpec.for_round()`
-  takes all six of a round's constants together for exactly this reason, and
-  records any deviation in the run's provenance.
+- **The carrier's residual budget, and it is much tighter than the best case
+  suggests.** `k2p2` costs ~95 ms of the 400 ms cap in the best observed session
+  and **260.7 ms in the worst**, where its own worst MLP already sat at 1.02×
+  headroom **with no carrier at all**. So the honest allowance for a carrier that
+  must propagate 32,768 directions through sixteen layers is bounded by the bad
+  day, not the good one: **~139 ms**, and near zero on that day's worst MLP.
+  Residual is a first-class design constraint for Phase 1, not a box to tick.
 
 - **Every preflight transcript this repository had ever committed was missing its
   verdicts, and they were cited as evidence of green runs.** `preflight.ps1` writes

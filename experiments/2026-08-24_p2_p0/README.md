@@ -17,7 +17,9 @@ the vault was not touched, and no promotion statistic was computed.
 | `official_anchor_1row_localrunner.json` | the same under `--runner local` | that the 32,768-FLOP `asarray` is charged on **both** runner paths, so it is not an IPC artifact |
 | `p2_flop_anchor.json` | 3 arms × 2 flopscope versions | the reconciliation: `37,746,688` weight representation + `32,768` harness materialisation = `37,779,456`, residue **0** |
 | `deployment_envelope.json` | enforceability matrix, memory accounting, worker death/restart | what this host **cannot** enforce — the 8,192 MB limit has no enforcement path on Windows at all |
-| `p2_residual_paths.json` | 5 candidate-passes × 3 instruments × 20 MLPs | the residual **level** against the 0.4 s cliff, and the between-pass spread. `k2p2` = 94.6/95.1 ms median, 140.6 ms worst, 0/20 over cap |
+| `p2_residual_paths.json` | 5 candidate-passes × 3 instruments × 20 MLPs | the residual **level** in ONE session. `k2p2` = 94.6/95.1 ms median, 140.6 ms worst, 0/20 over cap. Best case; not a bound |
+| `p2_weight_repr_residual.json` | same host, same session, `np.asarray` vs `fnp.array` weights | the repair moved a fixed **~19 ms** out of residual and into counted FLOPs. Uninstrumented work is billed to residual, not to nothing |
+| `p2_residual_version.json` | flopscope 0.10 vs 0.12, interleaved A/B, 3 rounds | **0.91×** — the stack release is NOT the cause of the gap against 2026-08-21 |
 | `gpu_parity_1024x16.txt` | GPU/CPU truth parity at the live shape | generation bit-for-bit 4/4; forward disagreement 2.3e-11 of the decision signal |
 
 ## The preflight transcripts, and why there are several
@@ -50,7 +52,11 @@ exit code 0, nothing skipped.**
 1. **Nothing about the grader's own configuration or seconds.** Every limit here is
    a package fact; `run_config` corroborates seven of them and **not**
    `memory_limit_mb` or `predict_timeout_s`. No graded Phase-2 report exists.
-2. **Nothing measured on a contended host.** The same `arm_k2p2` reads 94.6 ms
-   quiet and 260.7 ms contended — **2.75× high**, enough to condemn a method that
-   has 2.8× headroom. Residual figures here were taken on a quiet machine and any
-   future comparison must be too.
+2. **No residual figure here is a bound.** The same `arm_k2p2` reads 94.6 ms in
+   this session and **260.7 ms** in the frozen P2-CP1 ladder of 2026-08-21
+   (`experiments/2026-08-21_p2_cp1/ladder_frozen.json`, key `per_mlp_residual_s`).
+   An earlier draft of the LOG attributed that to contention; **that was retracted**
+   — the older figures are a committed artifact from another day. Measured causes:
+   weight representation **~19 ms**, flopscope 0.10→0.12 **0.91× (not the cause)**,
+   and **~2.35× unexplained run/session state**. Quote headroom against the worst
+   observed run. See `p2_weight_repr_residual.json` and `p2_residual_version.json`.

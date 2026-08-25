@@ -289,22 +289,31 @@ Phase-1 contract.
 
 | constraint | measured | what the carrier gets |
 |---|---|---|
-| residual, per MLP | `k2p2` reference spends **~95 ms** of the **400 ms** cap on a quiet host (worst MLP 140.6 ms, 2.8x headroom, 0/20 over) | **~305 ms**, before any safety margin |
+| residual, per MLP | `k2p2` spends **~95 ms** of the **400 ms** cap in the best observed session and **260.7 ms in the worst**, where its own worst MLP sat at **1.02x headroom with no carrier at all**. The level is not reproducible to better than **~2.4x** across runs | **~139 ms**, budgeted off the bad day. Designing against the best day is how a carrier passes here and fails on the grader |
 | counted FLOPs | `k2p2` costs `1.379e11`; the leader's fingerprint is `1.0998e12`, `C/B = 0.51` | ~`9.6e11` before matching the leader's cost |
 | `setup()` | the 5 s ceiling covers **worker spawn + imports + setup**. `import whestbench` alone is 1.3 s quiet, 4.7-9.1 s loaded; our estimator's own setup is **0.6 ms** | build the point set here — it is FREE of FLOPs on the grader — but the wall ceiling is shared with imports we do not control |
 | memory | 8,192 MB, **unenforceable on this host**; shipped file peaks at 918 MB commit (an upper-bound headroom of 8.9x) | 32,768 x 1024 float32 directions is 128 MB if materialised at once — chunk it, and treat memory as accounting |
 
 Two of these are new and neither was available before Phase 0:
 
-- **the ~305 ms residual budget** is the binding operational number for a carrier
-  that must propagate 32,768 directions through sixteen layers;
+- **the ~139 ms residual budget** is the binding operational number for a carrier
+  that must propagate 32,768 directions through sixteen layers — and it is roughly
+  a third of what the best-case reading suggested, which is the whole reason the
+  measurement was worth arguing about;
 - **`setup()` is FLOP-free but not wall-free.** The grader charges nothing for the
   point set built there, and the 5 s ceiling still applies to a window we mostly do
-  not own.
+  not own (`import whestbench` alone is 1.3-9 s of it; our own setup is 0.6 ms).
 
-**Measure residual on a quiet host or not at all.** A contended reading of the same
-arm came in **2.75x high** — enough to condemn a method with 2.8x headroom. See
-`docs/VALIDATION.md` 2b-ii.
+**Quote residual against the worst observed run, never the best.** The same arm
+reads 94.6 ms and 260.7 ms on different days, the cause of that 2.35x is measured
+NOT to be the flopscope release and only ~19 ms of it the weight representation,
+and the remainder is unexplained. See `docs/VALIDATION.md` 2b-ii.
+
+**A carrier design that only fits in the best session is not a design.** If the
+32,768-direction carrier cannot be built inside ~139 ms of residual, the honest
+responses are to make it cheaper, to move work into `setup()` where the grader
+charges no FLOPs, or to reduce the direction count -- not to re-measure until a
+friendly number appears.
 
 ### Phase 2 — decide whether structured carrier is the main backbone
 
