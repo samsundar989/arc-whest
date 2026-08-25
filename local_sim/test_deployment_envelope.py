@@ -375,7 +375,19 @@ ENFORCEMENT_EXPECTED = {
 #: it is not pinned to a value here -- it is checked against a child that applies
 #: the real cap. Named as a literal so "not pinned" is a deliberate declaration
 #: and the completeness check below can still be exact.
+#:
+#: **The list is itself pinned, below, to exactly this one name.** A fifth
+#: independent Skeptic showed that without that bound it is not a pin at all but
+#: an unbounded EXEMPTION from one: deleting `flop_budget` from
+#: `ENFORCEMENT_EXPECTED` and appending it here relocated the constraint into the
+#: NOT-PROVABLE block -- under a heading reading "they are enforced only on the
+#: grader" -- at 35/35 with zero FAIL lines. The completeness check is blind to
+#: which side of the union a name sits on; `PLATFORM_DEPENDENT_ALLOWED` is not.
 PLATFORM_DEPENDENT_CONSTRAINTS = ("memory_limit_mb",)
+
+#: The ONLY constraint permitted a platform-dependent classification. Injection M
+#: tries to add a second.
+PLATFORM_DEPENDENT_ALLOWED = ("memory_limit_mb",)
 
 MEM_CAP_APPLIED = "the worker actually APPLIED the 8 GiB cap"
 MEM_CONTROL = "the 256 MiB control mapping SUCCEEDED"
@@ -383,6 +395,115 @@ MEM_REFUSED = "the 9 GiB reservation was REFUSED by the limit"
 MEM_UNTOUCHED = "...and it was refused, never filled -- no page was touched"
 MEM_ONE_FAILED = "exactly ONE MLP failed, through the error path"
 MEM_LATER_SCORED = "...and every LATER MLP ran and was scored"
+
+
+#: **M4 — the semantic witness pin.** For every constraint that can be enforced
+#: locally: which suite must witness it, the exact set of check IDs, and the
+#: detail fragments those checks must carry.
+#:
+#: This is the finding that made review 5 different from the four before it. The
+#: witness mechanism made provenance STRUCTURED, so it refuses prose and refuses
+#: check names that do not exist -- and it had no mechanism against a witness
+#: naming the WRONG checks. Repointing `wall_time_limit_s` at the residual-limit
+#: check reproduced the original P2-P0 false-provenance defect **green, 36/36,
+#: zero FAIL lines, with one edit**: two different constants, one untested, and a
+#: green line asserting otherwise, exactly as in 2026-08-24.
+#:
+#: The two sides come from different places: this literal, and the witness the
+#: matrix actually emits. Injection L is the discriminating test.
+WITNESS_EXPECTED = {
+    "flop_budget": {
+        "suite": LIFECYCLE_SUITE,
+        "checks": frozenset({
+            "L4: a 1e6 budget exhausts the FLOP budget",
+            "L4: exhausted rows are FAILED",
+            "L4: a failure is priced at multiplier EXACTLY 1.0, not the 0.1 floor",
+        }),
+        "details": frozenset({
+            ("L4: a 1e6 budget exhausts the FLOP budget", "2/2 exhausted"),
+        }),
+    },
+    "wall_time_limit_s": {
+        "suite": LIFECYCLE_SUITE,
+        "checks": frozenset({
+            "L4: a 1e-9 s WALL limit trips the TIME path",
+            "L4: wall-exhausted rows are exactly zeroed at multiplier 1.0",
+            "L4: ...and the WALL path is distinct from the RESIDUAL path",
+        }),
+        "details": frozenset({
+            ("L4: a 1e-9 s WALL limit trips the TIME path", "2/2 time_exhausted"),
+            ("L4: ...and the WALL path is distinct from the RESIDUAL path",
+             "residual_exhausted clear"),
+        }),
+    },
+    "residual_wall_time_limit_s": {
+        "suite": LIFECYCLE_SUITE,
+        "checks": frozenset({
+            "L4: a 1e-9 s residual limit trips the residual path",
+            "L8: the 0.4 s cliff FIRES when provoked (1e-9 s limit)",
+            "L8: a residual failure is zeroed and priced at multiplier 1.0, not 0.1",
+        }),
+        "details": frozenset(),
+    },
+    "setup_timeout_s": {
+        "suite": LIFECYCLE_SUITE,
+        "checks": frozenset({
+            "a 6 s setup RAISES SetupFailure — no clean objective is produced",
+            "a RAISING setup also refuses",
+        }),
+        "details": frozenset(),
+    },
+    "worker_death_restart": {
+        "suite": SELF_SUITE,
+        "checks": frozenset({WD_SURVIVED, WD_EXACTLY_ONE, WD_INDEX,
+                             WD_CLASSIFIED, WD_LATER_CLEAN, WD_LATER_SCORED}),
+        "details": frozenset({(WD_EXACTLY_ONE, "n_failed_mlps = 1"),
+                              (WD_INDEX, "failed indices [0]")}),
+    },
+    "memory_limit_mb": {
+        "suite": SELF_SUITE,
+        "checks": frozenset({MEM_CAP_APPLIED, MEM_CONTROL, MEM_REFUSED,
+                             MEM_UNTOUCHED, MEM_ONE_FAILED, MEM_LATER_SCORED}),
+        "details": frozenset({(MEM_REFUSED, "Cannot allocate memory")}),
+    },
+}
+
+
+def witness_disagreements(constraints: dict) -> list:
+    """Where an emitted witness differs from `WITNESS_EXPECTED`. `[]` means agree.
+
+    Compares the SUITE, the exact CHECK-ID SET and the DETAIL FRAGMENTS. Only
+    constraints that are actually enforced locally are adjudicated -- a
+    constraint reported NOT PROVABLE has no witness to disagree with -- but every
+    such constraint must be present in the pin, which is checked separately.
+    """
+    out = []
+    for name, c in constraints.items():
+        if not c.get("enforced_locally"):
+            continue
+        want = WITNESS_EXPECTED.get(name)
+        if want is None:
+            out.append(f"{name}: enforced locally but ABSENT from WITNESS_EXPECTED")
+            continue
+        w = c.get("provoked_by")
+        if not isinstance(w, dict):
+            out.append(f"{name}: witness is not a structured claim")
+            continue
+        if w.get("suite") != want["suite"]:
+            out.append(f"{name}: suite {w.get('suite')!r} != pinned "
+                       f"{want['suite']!r}")
+        got_checks = frozenset(w.get("checks") or ())
+        if got_checks != want["checks"]:
+            missing = sorted(want["checks"] - got_checks)
+            extra = sorted(got_checks - want["checks"])
+            out.append(f"{name}: check-ID set differs -- missing {missing}, "
+                       f"unpinned {extra}")
+        got_details = frozenset((k, v) for k, v in
+                                (w.get("expect_detail") or {}).items())
+        if got_details != want["details"]:
+            out.append(f"{name}: detail fragments differ -- "
+                       f"{sorted(got_details ^ want['details'])}")
+    return out
 
 
 # --------------------------------------------------------------------------- #
@@ -1450,6 +1571,23 @@ def main() -> int:
           pinned == required,
           f"unpinned {sorted(required - pinned) or 'none'}; "
           f"pinned-but-absent {sorted(pinned - required) or 'none'}")
+    # M3a. The completeness check above cannot see WHICH side of the union a name
+    # is on, so the exemption list is bounded by its own literal. Without this,
+    # moving a constraint from ENFORCEMENT_EXPECTED into the exemption relocated
+    # it into the NOT-PROVABLE block with everything green -- measured.
+    check("only the permitted constraint has a PLATFORM-DEPENDENT classification",
+          set(PLATFORM_DEPENDENT_CONSTRAINTS) == set(PLATFORM_DEPENDENT_ALLOWED),
+          f"exempt {sorted(PLATFORM_DEPENDENT_CONSTRAINTS)}; permitted "
+          f"{sorted(PLATFORM_DEPENDENT_ALLOWED)}")
+    # M4. The witness a constraint EMITS, against the witness it is pinned to --
+    # suite, exact check-ID set, and detail fragments. This is the guard that
+    # refuses a witness naming the WRONG provocation, which structured witnesses
+    # alone did not.
+    disagreements = witness_disagreements(enf["constraints"])
+    check("every locally enforced constraint emits the witness it is PINNED to",
+          not disagreements,
+          f"{len(WITNESS_EXPECTED)} pinned; disagreeing: "
+          + ("none" if not disagreements else "; ".join(disagreements)))
     wrong = {n: c["enforced_locally"] for n, c in enf["constraints"].items()
              if n in ENFORCEMENT_EXPECTED
              and c["enforced_locally"] != ENFORCEMENT_EXPECTED[n]}
@@ -1466,12 +1604,28 @@ def main() -> int:
     # grader actually asks -- can the WORKER apply the cap? -- because the worker
     # is a separate interpreter, and `subprocess_worker.py` calls `setrlimit`
     # there, not here.
-    probe = _setrlimit_works_in_child(r.memory_limit_mb)
     claim = enf["constraints"]["memory_limit_mb"]["enforced_locally"]
-    check("the matrix's memory claim matches a child that APPLIES the real cap",
-          claim == probe["usable"],
-          f"matrix says {claim}; a child setrlimit({r.memory_limit_mb} MB) says "
-          f"{probe['usable']} ({probe['why']})")
+    if not _rlimit_available():
+        # DECLINED, not PASS. On a host with no `resource` the child dies at the
+        # import and never reaches `setrlimit`, so both sides of the comparison
+        # descend from one failed import and it cannot come out either way. Three
+        # earlier spellings of this question had the same defect; the fourth is
+        # faithful to the grader's call and is still unfalsifiable HERE. A fifth
+        # independent Skeptic pointed out it was nonetheless contributing a green
+        # PASS to the mandatory tier, and that this file already owns the right
+        # channel for exactly that.
+        declined(
+            "the memory claim vs a child that applies the real cap",
+            f"this host has no `resource`, so the child cannot reach "
+            f"setrlimit({r.memory_limit_mb} MB) and both sides of the comparison "
+            f"descend from one failed import. The LINUX memory claim is carried "
+            f"by section 5's worker probe ({MEM_CAP_APPLIED!r}), not by this")
+    else:
+        probe = _setrlimit_works_in_child(r.memory_limit_mb)
+        check("the matrix's memory claim matches a child that APPLIES the real cap",
+              claim == probe["usable"],
+              f"matrix says {claim}; a child setrlimit({r.memory_limit_mb} MB) "
+              f"says {probe['usable']} ({probe['why']})")
     # NOT `len(_UNPROVABLE) > 0`, and no longer `bool(unenforced) and ...`:
     # `predict_response_timeout_s` is hard-coded `enforced_locally: False`, so
     # BOTH of those can never be false. That vacuous conjunct was carried into

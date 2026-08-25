@@ -154,6 +154,23 @@ COVERAGE_CLAIM = (5, 6)          # (spellings CAUGHT, spellings KNOWN-BLIND)
 REQUIRED_SCANNED = ("test_deployment_envelope.py", "test_envelope_readonly.py",
                     "lifecycle_eval.py")
 
+#: **The spellings themselves, by NAME — because `COVERAGE_CLAIM` pins only how
+#: many.** Substituting one `MUST_CATCH` entry for a duplicate of another holds
+#: both counts fixed and passed green while only four distinct spellings were
+#: audited; reverting the scanner's `ok=` branch then went undetected. Measured
+#: by a fifth independent Skeptic. Injection O is the test.
+#:
+#: The snippets are also required to be DISTINCT, which is the property the
+#: duplicate-substitution mutation actually violates and which no count can see.
+MUST_CATCH_NAMES = frozenset({
+    "positional True", "positional 1", "positional truthy str",
+    "ok= keyword", "attribute callee",
+})
+KNOWN_BLIND_NAMES = frozenset({
+    "folded compare", "folded boolop", "folded unary",
+    "name bound to True", "truthy call", "aliased callee",
+})
+
 _PASS = 0
 _FAIL = 0
 
@@ -223,7 +240,7 @@ def _write_sites(path: str) -> dict:
     return sites
 
 
-def _constant_conditions(path: str) -> list:
+def _constant_conditions(path: str, opened: "list | None" = None) -> list:
     """Every `check(...)` whose condition is a literal truthy constant: `(line, src)`.
 
     A literal FALSE condition is a deliberate failure report and is fine -- an
@@ -259,6 +276,11 @@ def _constant_conditions(path: str) -> list:
     """
     with open(path, encoding="utf-8") as fh:
         tree = ast.parse(fh.read())
+    # Recorded HERE, at the open, so the caller's "every required file was
+    # scanned" check is about a file that was really read rather than about a
+    # tuple that says it should have been.
+    if opened is not None:
+        opened.append(os.path.basename(path))
     out = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
@@ -321,21 +343,28 @@ def structural_tests() -> None:
 
     head("1b. STRUCTURAL -- no check() in any SCANNED file can pass on a constant")
     offenders = {}
+    #: The files the loop ACTUALLY OPENED, recorded by `_constant_conditions`
+    #: itself as it opens them. This is the observed behaviour, and it is what
+    #: `REQUIRED_SCANNED` is compared against -- see below.
+    opened: list = []
     for base in SCANNED:
-        found = _constant_conditions(os.path.join(_HERE, base))
+        found = _constant_conditions(os.path.join(_HERE, base), opened=opened)
         if found:
             offenders[base] = found
         print(f"      {base:<34} {len(found)} literal-truthy condition(s)")
-    # The check NAME used to be `f"...in any of {len(SCANNED)} files"` -- derived
-    # from the tuple it audits, so dropping a file changed the label and passed.
-    # `REQUIRED_SCANNED` is the literal; the two sides now come from different
-    # places, and removing `lifecycle_eval.py` (added one commit ago on a
-    # Skeptic's point) turns this red instead of relabelling it.
-    check("every REQUIRED file is scanned",
-          set(SCANNED) == set(REQUIRED_SCANNED),
-          f"scanned {sorted(SCANNED)}; missing "
-          f"{sorted(set(REQUIRED_SCANNED) - set(SCANNED)) or 'none'}; "
-          f"unpinned {sorted(set(SCANNED) - set(REQUIRED_SCANNED)) or 'none'}")
+    # M1. Compared against what the scanner OPENED, not against `SCANNED`.
+    #
+    # This read `set(SCANNED) == set(REQUIRED_SCANNED)` -- two declarations, and
+    # neither of them the behaviour. Truncating the loop to `SCANNED[:2]` left
+    # every check green while printing `missing none`, which was false:
+    # `lifecycle_eval.py` was never opened, and a planted literal-`True` in it
+    # went undetected. Four of the seven envelope witnesses resolve against that
+    # file. Measured by a fifth independent Skeptic; injection N is the test.
+    check("every REQUIRED file was ACTUALLY OPENED by the scanner",
+          set(opened) == set(REQUIRED_SCANNED),
+          f"opened {sorted(set(opened))}; never opened "
+          f"{sorted(set(REQUIRED_SCANNED) - set(opened)) or 'none'}; "
+          f"unpinned {sorted(set(opened) - set(REQUIRED_SCANNED)) or 'none'}")
     check("no check() has a literal truthy condition, in any scanned file",
           not offenders, "clean" if not offenders else f"{offenders}")
     # Non-vacuity, and it must MEASURE COVERAGE rather than confirm the one
@@ -415,6 +444,19 @@ def structural_tests() -> None:
               f"{COVERAGE_CLAIM[0]}/{sum(COVERAGE_CLAIM)}"
               + ("" if measured == COVERAGE_CLAIM else
                  " -- edit COVERAGE_CLAIM deliberately, or restore the lists"))
+        # M2. Counts are not identities. A substituted duplicate keeps both
+        # counts and silently drops a spelling from the audit.
+        got_names = frozenset(n for n, _ in MUST_CATCH)
+        got_blind = frozenset(n for n, _ in KNOWN_BLIND)
+        snippets = [s for _, s in MUST_CATCH] + [s for _, s in KNOWN_BLIND]
+        check("...and the probe spellings are the PINNED ones, by name",
+              got_names == MUST_CATCH_NAMES and got_blind == KNOWN_BLIND_NAMES,
+              f"caught {sorted(got_names ^ MUST_CATCH_NAMES) or 'as pinned'}; "
+              f"blind {sorted(got_blind ^ KNOWN_BLIND_NAMES) or 'as pinned'}")
+        check("...and every probe snippet is DISTINCT",
+              len(set(snippets)) == len(snippets),
+              f"{len(snippets)} snippets, {len(set(snippets))} distinct -- a "
+              f"duplicate means a named spelling is not actually being audited")
         check("...and every documented spelling was reached by the probe",
               len(newly) + len(still) == len(KNOWN_BLIND),
               f"{len(still)} still blind, {len(newly)} newly caught")
@@ -604,6 +646,16 @@ def main() -> int:
     child_tests()
     print("\n" + "=" * 100)
     print(f"{_PASS}/{_PASS + _FAIL} checks passed")
+    # A UNIQUELY RESOLVING identifier for this suite's result.
+    #
+    # `30/30 checks passed` occurs twice in a gate transcript (the invariant
+    # suite prints the same string), so the LOG's citation rule for this figure
+    # resolved to nothing, and the rule before it resolved to six matches. A
+    # transcript that is regenerated on every run cannot be cited by line number
+    # and must not be cited by an ambiguous string, so the suite emits its own
+    # name beside its own number: `grep "READONLY-PROOF-RESULT"` is one line.
+    print(f"READONLY-PROOF-RESULT: {_PASS}/{_PASS + _FAIL} checks passed, "
+          f"exit {0 if _FAIL == 0 else 1}")
     return 0 if _FAIL == 0 else 1
 
 
