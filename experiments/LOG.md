@@ -14307,3 +14307,131 @@ submission that cannot improve our rank.
 **`estimator.py`:** not edited. **Nothing submitted.**
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-25 — TRACK 0S GATE CORRECTION: I claimed a green gate with no witness, and left it out of the contract
+
+*Append-only. The readiness packet and the submission contract are **not
+altered**. Nothing submitted.*
+
+## The finding, and it is the one this repository is named for
+
+The readiness packet carries the row `| preflight -Full | GREEN 16/16 |`. **No
+transcript on disk witnessed it.** The newest `PREFLIGHT GREEN -- 16/16` anywhere
+in the tree was `experiments/2026-08-25_p1_pre/preflight_full_p1pre.txt`, written
+at 14:21:56 — **an hour before** the packet was committed at 15:21:28 — and four
+commits touching `local_sim/` landed in between, a directory **preflight step 7
+statically scans**.
+
+`docs/GOTCHAS.md` records this exact failure for 2026-08-24: *"a claimed 'GREEN
+16/16'… found by an independent Skeptic, who could not locate a witness."* I did
+it again, in a submission packet.
+
+Worse in one specific way: **the contract's own operational gate omitted
+preflight**. It listed five items — hash, clean worktree, `whest validate`,
+allowance, Samuel's approval — and `docs/VALIDATION.md` §7 makes `-Full`
+**required before any submission**. The gate I wrote to protect the submission
+did not include the check the protocol makes mandatory for it.
+
+**Closed.** A full `-Full` run at HEAD `0d4a053`, transcript committed as
+`experiments/2026-08-25_trackA/preflight_full_trackA.txt` (1,104 lines, all
+sixteen step verdicts, zero FAIL or RED) and **grepped for its own verdict line
+before being believed**:
+
+```text
+$ grep -E "^PREFLIGHT" experiments/2026-08-25_trackA/preflight_full_trackA.txt
+PREFLIGHT GREEN -- 16/16
+```
+
+### The operational gate, AMENDED — this supersedes the contract's five-item list
+
+The contract's gate is hereby extended. All six must hold immediately before
+submitting:
+
+1. `estimator.py` sha256 still `00240eb1e60810f5…` and still identical to
+   `estimator_v2_6_1.py`;
+2. worktree clean **of tracked modifications** — untracked evidence files that
+   this session produced do not block, but no tracked file may be dirty;
+3. `whest validate` passes;
+4. the allowance permits it (10 per team per UTC day);
+5. Samuel's approval names the exact SHA;
+6. **`preflight.ps1 -Full` GREEN 16/16 at the submitting HEAD, transcript
+   committed and grepped for its own verdict line.** `VALIDATION.md` §7 already
+   required this; the contract omitted it, and that omission is the defect this
+   entry closes.
+
+Item 2 is stated more precisely than the original "worktree clean", because the
+review correctly observed that an untracked transcript in the tree failed the
+literal wording while being exactly the evidence the gate wants.
+
+## One sub-point corrected, in the reviewer's favour and against my convenience
+
+The review also reported that `experiments/2026-08-25_p1a/preflight_full_p1a.txt`
+contained **zero** `PREFLIGHT` lines, and read that as the `2>&1` capture trap
+recurring in the adjacent track. **It was not.** That file was being written by a
+run still in progress — 12 of 16 steps at the time — and the invocation was
+`*>&1 | Tee-Object`, the form `GOTCHAS.md` prescribes. The completed transcript
+carries its verdict.
+
+I record this rather than quietly dropping it because the reviewer was reading
+the tree correctly and reached a reasonable conclusion from what was there; the
+lesson is that **a transcript mid-write is indistinguishable from a transcript
+that lost its verdicts**, which is an argument for committing the artifact only
+once the run has finished.
+
+## Four residual limitations the review named, accepted and recorded
+
+None makes submitting unsafe; all were stated wider than the evidence, which is
+this repository's signature defect and mine six times over.
+
+1. **The residual headroom was quoted without the word LOCAL and from a single
+   session.** `VALIDATION.md` §2b-ii mandates both. `4.288x` is **LOCAL**, one
+   session; at the documented ~2.4× run-to-run spread on this host the honest
+   floor is **≥1.79×**. The conclusion survives; the wording did not comply.
+2. **The worst residual is `mlp_index 0` — the first MLP.** That is the warm-up
+   transient `GOTCHAS.md` names, not a heavy network. It still fails an MLP under
+   a cliff, so it is not discarded, but it must not be described as evidence
+   about network tails. The packet neither mentioned nor exploited it.
+3. **The falsifier band is wider than the prediction.** S-3 predicts
+   `[3.6e-7, 4.6e-7]`; the falsifier fires only outside `[3.0e-7, 5.5e-7]`. So
+   **S-3 can be wrong without the contract counting it falsified.** When the
+   result lands, a return of e.g. `3.2e-7` is an S-3 **miss** and must be
+   reported as one, not as a hit because it cleared the wider band.
+4. **S-4 predicts a rank**, which other teams' submissions move. It is close to
+   unfalsifiable in practice and carries no weight; S-1, S-2 and S-3 do the work.
+
+And one cosmetic correction: the packet printed
+`sha256 (LF-normalised) 1caa3752be56e8625ddb8b163ff8ffa8` — a silently truncated
+32-character prefix, beside a full-length raw sha256, with no ellipsis. Not false,
+but it reads like a complete digest of a different algorithm. **The full
+LF-normalised digest begins `1caa3752…` and the authoritative identifier is the
+raw `00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec`.** The
+review also established something better than either: `estimator.py` and
+`estimator_v2_6_1.py` are **byte-identical outright**, not merely modulo line
+endings.
+
+## What the review verified, having recomputed rather than read
+
+- the GT-noise floor reproduces **bit-identically**, `mean(v/1e9)` is 1 ULP away
+  exactly as recorded, and — which nobody had claimed and it checked — the
+  **estimand is right**: the dataset card defines `avg_variance` as the
+  final-layer per-neuron output variance with GT MSE `= avg_variance / N`, and it
+  confirmed `N = 1e9` independently from the bake's own matmul FLOP count;
+- all 100 rows recomputed: score identity to 1 ULP, `C/B` and `flops_used`
+  identical on every row, multiplier exactly `0.1`, zero failures, zero rows over
+  either cap;
+- `LOG.md` is a strict **byte-prefix chain** across five commits — the original
+  packet was not edited by one byte;
+- transcription-vs-capture is drawn honestly in three independent places, with
+  **no** instance of a transcription dressed as a capture;
+- the corrected public/private claim is supported for **Phase 2 specifically**
+  (`PHASE2_LIVE_AUDIT_2026-08-24.md`: 50 public feedback + 50 sealed);
+- and, unprompted, **Phase-2 legality**: at width 1024 `predict` takes
+  `_analytic_only`, which is pure `fnp`; the only stdlib `import array` is
+  unreachable on that path. Nothing routes math around flopscope.
+
+**Seed ledger:** unchanged, nothing claimed. **Vault:** untouched.
+**`estimator.py`:** byte-identical. **Nothing submitted.**
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.

@@ -236,20 +236,20 @@
   "memory": {
     "measurement": {
       "baseline": {
-        "working_set": 130756608,
-        "commit": 606920704
+        "working_set": 131170304,
+        "commit": 607531008
       },
       "peak": {
-        "working_set": 462442496,
-        "commit": 962342912
+        "working_set": 462725120,
+        "commit": 962985984
       },
       "weight_bytes": 67108864
     },
     "limit_mb": 8192,
-    "peak_working_set_mb": 441.01953125,
-    "peak_commit_mb": 917.76171875,
+    "peak_working_set_mb": 441.2890625,
+    "peak_commit_mb": 918.375,
     "weights_mb": 64.0,
-    "headroom_upper_bound": 8.926064176175904
+    "headroom_upper_bound": 8.920103443582414
   },
   "memory_limit_provocation": {
     "provoked_here": false,
