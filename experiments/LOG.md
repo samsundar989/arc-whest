@@ -13236,3 +13236,212 @@ decide it.
 not edited.
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-25 — RESULT P1-PRE TERMINAL: the six named findings closed, and every one is watched failing [prediction above, unmodified]
+
+*Class IMPORTANT. Prediction committed at `c64bcdb` **before** any code moved,
+against baseline `7e81600` with a clean worktree. Implementation `fc47a43` and its
+predecessor. **No seed claimed, no truth measured, no vault touched,
+`estimator.py` byte-identical.** Scope was fixed by
+`docs/CLAUDE_CODE_HANDOFF.md` at `7e81600` and nothing outside it was changed.*
+
+## Predictions, scored
+
+| # | prediction | outcome |
+|---|---|---|
+| **T1** | injection **L** (the review-5 mutation) fires the semantic-witness guard | **HIT** — `every locally enforced constraint emits the witness it is PINNED to` |
+| **T2** | injection **M** fires the classification guard | **HIT** — `only the permitted constraint has a PLATFORM-DEPENDENT classification` |
+| **T3** | injection **N** fires the observed-files guard | **HIT** — `every REQUIRED file was ACTUALLY OPENED by the scanner` |
+| **T4** | injection **O** fires the identity pin | **HIT** — `every probe snippet is DISTINCT` |
+| **T5** | the oracle grades the reason, not the exit code | **HIT** — 14/14 `CAUGHT by its named guard`, `harness failures: none` |
+| **T6** | the harness cannot change tracked state, structurally | **HIT** — see below |
+| **T7** | the platform report declines rather than passes | **HIT** — declined count 1 → 2, green count down by exactly one |
+| **T8** | the read-only citation resolves uniquely | **HIT** — `grep "READONLY-PROOF-RESULT"` returns **1** line |
+| **T9** | D1–D3 do not regress | **HIT** — zero green lines claiming `worker_death_restart`, both tracked hashes unmoved, worktree clean |
+| **T10** | no Phase-0 scientific or score evidence moves | **HIT** — table below |
+
+**Ten of ten as written.** No correction is owed on this pass, which is worth
+stating plainly given that three of the previous five entries owed one.
+
+### T1–T4, the four mutations that decide the named findings
+
+Each was **green** at `7e81600` and is red now, and in every case the failing
+check is the guard that was added for it — not an incidental line:
+
+| # | mutation | at `7e81600` | now fires |
+|---|---|---|---|
+| **L** | the WALL witness repointed at `"L4: a 1e-9 s residual limit trips the residual path"` | green, 36/36, zero FAILs | `emits the witness it is PINNED to` |
+| **M** | `flop_budget` relocated into the platform exemption | green, 35/35 | `only the permitted constraint has a PLATFORM-DEPENDENT classification` |
+| **N** | the scan loop truncated so a required file is never opened | green, printed `missing none` — false | `every REQUIRED file was ACTUALLY OPENED` |
+| **O** | one probe spelling substituted for a duplicate, counts held fixed | green, printed `5/11` | `every probe snippet is DISTINCT` |
+
+**L is the one that mattered.** It reproduced the original P2-P0
+false-provenance defect — a constraint claiming a provocation that provokes a
+*different constant* — inside the mechanism built to close it. Structured
+witnesses refuse prose and refuse names that do not exist; only a pin against the
+emitted witness refuses a name that exists and is **wrong**.
+
+### T5 — the oracle
+
+Every injection now declares the check it expects to fail. `returncode != 0` is
+no longer a catch:
+
+```text
+exit 1   (CAUGHT by its named guard)          14 times
+FAIL lines: 6, on target: 1                   (injection A -- five of its six
+                                               failures are collateral, and the
+                                               oracle names the one that counts)
+uncaught:         none
+harness failures: none
+```
+
+The distinction is not cosmetic. Two earlier injections were found broken — one
+reported UNCAUGHT without reaching its target, one scored a `SyntaxError` as a
+catch — and only reading the FAIL line separated them. That reading is now
+mechanical.
+
+### T6 — the harness cannot touch the repository, measured twice
+
+Structurally: mutations are written into a **scratch git mirror** in a system temp
+directory (`local_sim/`, `estimator.py` and the P2-P0 evidence tree copied out,
+then `git init`/`commit` so the suites' own `git status` checks have something
+real to talk to). The repository is opened read-only. **There is no `git checkout`
+in the file**, and `--out` refuses a path resolving inside any tracked file other
+than the harness's own transcript.
+
+Measured, over a full 14-injection run:
+
+```text
+git status --porcelain identical:  True   (0 line(s) before, 0 after)
+tracked files with a moved sha256: none
+```
+
+And the case the old harness actually failed: `lifecycle_self_test.json` was
+**deliberately dirtied**, an injection run, and the edit **survived
+byte-identical** (`797912c083e80508` before and after). The previous revision ran
+`git checkout --` over that file after every injection and would have discarded
+it. A tool that requires a clean tree in order not to eat your work is a tool
+with a loaded footgun; this one no longer has it.
+
+### T10, item by item — verified from git, not from this table
+
+| quantity | before | after |
+|---|---|---|
+| `git diff --name-only 9e3be80..HEAD -- estimator.py seed_ledger.jsonl vault/` | — | **0 files** |
+| `estimator.py` sha256 | `00240eb1e60810f5…` | **`00240eb1e60810f5…`** |
+| ship-file identity | `1caa3752be56e862…` | **identical to `estimator_v2_6_1.py`** |
+| lifecycle `results_sha256` | `a913c55cbcc2434e…`, 56/56 | **`a913c55cbcc2434e…`, 56/56** |
+| counted-FLOP anchor | `137,600,326,656`, 19 ops, 0 disagreeing | **delta +0** |
+| vault | counter 1 == 1 log line | **untouched** |
+| seed ledger | nothing claimed | **nothing claimed** |
+
+## The gate went RED once, on a step this slice does not touch
+
+Recorded before the green run, because a gate that failed is evidence whatever
+followed it.
+
+```text
+FAIL  13. shape parity -- exit code 1
+PASS  14, 15, 16
+```
+
+Transcript preserved as `experiments/2026-08-25_p1_pre/preflight_RED_step13.txt`.
+Run standalone immediately afterwards the same suite gave **27/27 shapes passed,
+exit 0**; it imports only `harness`, `mint_provenance` and `flopscope`, none of
+which this slice touched, and the step-13 block shows a `NativeCommandError`
+wrapping the benign `ConfigureNoOpWarning` flopscope writes to stderr — the same
+warning present in every previous green run of that step. The re-run on a quiet
+host (~21% CPU, 19.7 GB free) was green 16/16 and step 13 passed.
+
+**This is recorded as a flake, and the word is doing real work:** the evidence is
+that the suite passes standalone and passed on re-run, not that the failure was
+explained. `docs/GOTCHAS.md` already carries two entries about this gate going RED
+under host conditions. If step 13 fails again, that is a regression and not a
+flake, and it belongs to whoever sees it.
+
+## The gate, green
+
+```text
+PREFLIGHT GREEN -- 16/16      1,104 lines, 16 step verdicts, zero FAIL or RED
+verify_portability.py         99 checks, 0 failed   (run separately)
+```
+
+By grep string, since line numbers into a regenerated transcript are stale by
+construction:
+
+```text
+grep "PREFLIGHT GREEN"          -> PREFLIGHT GREEN -- 16/16
+grep "checks passed;"           -> 43/43   deployment envelope
+grep "READONLY-PROOF-RESULT"    -> 32/32, exit 0     (exactly ONE match)
+grep "56/56 checks passed"      -> lifecycle evaluator
+grep "delta +0"                 -> 137,600,326,656 vs 137,600,326,656
+grep "operations "              -> 19 compared, 0 disagreeing
+grep "worst residual"           -> re-measured every run; read it, never cite it
+```
+
+## What is closed, and what is not
+
+**Closed by this pass, each with a mutation that decides it:** M4 (semantic
+witness pin), M3a (bounded exemption), M1 (observed files), M2 (probe identity),
+the mutation oracle, the destructive cleanup path, and the two
+continuity/platform-reporting defects.
+
+**Still open, and not argued away** — unchanged by this pass and restated here
+rather than left inside a quoted verdict:
+
+1. **Section 7's Linux branch has never executed**, and neither has the
+   child-`setrlimit` probe's Linux answer. Reading them, both are fail-closed.
+   Six reviews have now said so and no WSL2 run has been performed.
+2. **Whether `setrlimit` can fail where `getrlimit` succeeds in the organisers'
+   container** is unobservable from here. `memory_limit_mb` remains the
+   constraint with the weakest provenance.
+3. **`--out` on the harness** can no longer target a tracked file — that half is
+   closed — but the *suite's* `--out` in writing mode still can. Pre-existing,
+   outside D1–D3.
+
+**And the boundary of the claim.** This pass closes named guarantees against
+named mutations. It does **not** claim that a finite suite survives arbitrary
+future multi-edit sabotage, and no check here should be read as asserting that.
+Every previous entry in this slice that made a wider claim than its code had to
+retract it — three times.
+
+## Knowledge delta
+
+1. **The corrected hypothesis survived its own test.** Review 5 retracted "a
+   pinned literal is the only construction that has held" because two of four
+   literals compared a declaration to a declaration. The narrower successor —
+   *pin a literal against **observed behaviour*** — is what the four new guards
+   do: the witness the matrix **emitted**, the files the scanner **opened**, the
+   snippets it **ran**, the reason a mutation **actually failed**. All four go
+   red under their mutation. That is one pass of evidence, not a law.
+2. **"Two sides from different places" is necessary and not sufficient.**
+   `REQUIRED_SCANNED` had two different places and still could not fail, because
+   neither place was the behaviour. The question that separates them is not
+   *where do the sides come from* but *is one of them a measurement*.
+3. **An exemption is not a pin.** A list naming what a guard does not cover
+   inverts into a hole the moment it is unbounded, and it reads exactly like a
+   pin while doing so. Bound the exemption with its own literal, or do not have
+   one.
+4. **A falsification harness that can write to the repository will eventually
+   write to the repository.** This one destroyed uncommitted evidence for four
+   revisions and produced no false green while doing it, which is why nobody
+   noticed. Read-only by construction, mutations in a mirror.
+5. **Grading the exit code grades whether something went wrong, not whether the
+   right thing went wrong.** Two of eleven injections were broken while reporting
+   correctly-shaped results.
+
+**Seed ledger:** unchanged; nothing claimed. P01 144/600, 456 free; D17/D19
+SINGLE_USE and unspent. **Vault:** untouched, counter 1 == 1 log line.
+**`estimator.py`:** byte-identical, `00240eb1e60810f5…`.
+
+**Raw evidence:** `experiments/2026-08-25_p1_pre/` — `d1_d3_evidence.txt` (T9,
+with before/after hashes and worktree status), `fault_injection.txt` (fourteen
+mutations, each graded on its named guard, plus the repository-untouched
+measurement), `readonly_proof.txt`, `envelope_full_after.txt`,
+`preflight_RED_step13.txt` (the failed gate), `preflight_full_p1pre.txt` (the
+green one).
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Next:** one fresh independent Skeptic against these bounded guarantees.

@@ -238,7 +238,7 @@ with flops.configure(symmetry_warnings=False).
 │ │ └────────┴──────────────────────────┴────────────────┘                  │ │
 │ └─────────────────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
-✓ Validation passed in 39ms
+✓ Validation passed in 25ms
 Next: `whest run --estimator estimator.py --split mini`
   PASS  4. whest validate
 
@@ -648,7 +648,7 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
   L1: setup() was called exactly once on the grader path         ok   
 
 2. L3 — setup() fits inside the grader's 5-second ceiling
-  L3: module load + setup(), plus the measured host cold start, fits ok   196.9 ms + 240 ms = 437 ms of 5000 ms (a PACKAGE DEFAULT, not observed)
+  L3: module load + setup(), plus the measured host cold start, fits ok   231.2 ms + 240 ms = 471 ms of 5000 ms (a PACKAGE DEFAULT, not observed)
   L3: and is therefore not timed out                             ok   
   L3: setup raised nothing                                       ok   clean
 
@@ -669,18 +669,18 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
   L4: a 1e-9 s WALL limit trips the TIME path                    ok   2/2 time_exhausted
   L4: wall-exhausted rows are exactly zeroed at multiplier 1.0   ok   
   L4: ...and the WALL path is distinct from the RESIDUAL path    ok   time_exhausted set, residual_exhausted clear
-  L4: 50 ms of residual at B=1e9 trips the COMBINED budget C=F+lam*R>B ok   C = 5.677e+09 vs B = 1.000e+09
+  L4: 50 ms of residual at B=1e9 trips the COMBINED budget C=F+lam*R>B ok   C = 5.715e+09 vs B = 1.000e+09
   L4: combined-exhausted rows are exactly zeroed at multiplier 1.0 ok   
   L4: and `competition_score` owns that predicate, not this module ok   C = 3.000e+11 vs B = 2.72e11, at the PHASE-1 rate
   L4: ...and under the LIVE round the same row is IN budget, because lambda is 0 ok   C = 2.000e+11 vs B = 2.72e11
 
 4b. SETUP failure is a REFUSAL, because the grader aborts the whole run
   a 6 s setup RAISES SetupFailure — no clean objective is produced ok   grader: cli.py:2357 -> runner.py:155-172 kills the run
-  ...and the opt-in path marks it, rather than hiding it         ok   setup 6.00s + 0.24s cold start > 5.0s
+  ...and the opt-in path marks it, rather than hiding it         ok   setup 6.01s + 0.24s cold start > 5.0s
   a RAISING setup also refuses                                   ok   SETUP_ERROR
 
 4c. the setup clock starts where the grader's does
-  the timer covers module load, not just setup() (runner.py:144 precedes load_estimator_from_path) ok   measured 196.9 ms + 240 ms host cold start, of 5000 ms
+  the timer covers module load, not just setup() (runner.py:144 precedes load_estimator_from_path) ok   measured 231.2 ms + 240 ms host cold start, of 5000 ms
   the evidence bundle says its residual is a LOCAL-runner figure ok   runner=local (in-process BudgetContext)
 
 5. L6 — evidence rows are content-addressed and reproducible
@@ -703,7 +703,7 @@ LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
   L8: C == F, because lambda is 0                                ok   C = 137,600,326,656
   L8: the multiplier is pinned at the 0.1 floor at this operating point ok   C/B = 0.0625734 < floor 0.1
   L8: no failure path fires on the shipped file                  ok   budget=False time=False residual=False combined=False error=''
-  L8: local in-process residual leaves headroom under the 0.4 s cliff ok   49.0 ms local -> 8.16x headroom (LOCAL, in-process; the grader's own figure is the authority)
+  L8: local in-process residual leaves headroom under the 0.4 s cliff ok   53.6 ms local -> 7.46x headroom (LOCAL, in-process; the grader's own figure is the authority)
   L8: the 0.4 s cliff FIRES when provoked (1e-9 s limit)         ok   
   L8: a residual failure is zeroed and priced at multiplier 1.0, not 0.1 ok   mult 1.0
   L8: ...and that run's provenance DECLARES it was not a clean round ok   {'residual_wall_time_limit_s': [1e-09, 0.4]}
@@ -938,8 +938,8 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
 
 0b. NEGATIVE TESTS -- the read-only latch refuses both write paths
 ------------------------------------------------------------------
-  PASS  REFUSED: regenerating a suite's results while the latch is armed --no-write is armed: refusing to regenerate ..\..\AppData\Local\Temp\arc_whest_ro_pdujrui5
-  PASS  REFUSED: writing an evidence artifact while the latch is armed --no-write is armed: refusing to write C:\Users\samsu\AppData\Local\Temp\arc_whest_ro_pduj
+  PASS  REFUSED: regenerating a suite's results while the latch is armed --no-write is armed: refusing to regenerate ..\..\AppData\Local\Temp\arc_whest_ro_i3nwzvuj
+  PASS  REFUSED: writing an evidence artifact while the latch is armed --no-write is armed: refusing to write C:\Users\samsu\AppData\Local\Temp\arc_whest_ro_i3nw
   PASS  ...and with the latch DOWN the same writer DOES write          wrote would_have_been_written.json to a system temp dir
 
 1. the enforceability matrix
@@ -954,8 +954,10 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
   ----  predict_response_timeout_s                                     NOT PROVABLE HERE: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
   PASS  the matrix carries EXACTLY the required envelope constraints   7 present; missing none; unpinned none
   PASS  every required constraint's ENFORCEMENT claim is pinned somewhere unpinned none; pinned-but-absent none
+  PASS  only the permitted constraint has a PLATFORM-DEPENDENT classification exempt ['memory_limit_mb']; permitted ['memory_limit_mb']
+  PASS  every locally enforced constraint emits the witness it is PINNED to 6 pinned; disagreeing: none
   PASS  ...and every one of them makes the enforcement claim it is pinned to 6 pinned; disagreeing: none
-  PASS  the matrix's memory claim matches a child that APPLIES the real cap matrix says False; a child setrlimit(8192 MB) says False (ModuleNotFoundError: No module named 'resource')
+  ~~~~  the memory claim vs a child that applies the real cap          NOT PERFORMED IN THIS RUN: this host has no `resource`, so the child cannot reach setrlimit(8192 MB) and both sides of the comparison descend from one failed import. The LINUX memory claim is carried by section 5's worker probe ('the worker actually APPLIED the 8 GiB cap'), not by this
   PASS  every constraint the matrix marks unenforceable was REPORTED as such ['memory_limit_mb', 'predict_response_timeout_s'] marked; missing from the report: none
   PASS  the lifecycle results WERE regenerated for this run (so the --no-write refusal is not vacuous) regenerated={'local_sim/lifecycle_eval.py --self-test': True}
 
@@ -967,7 +969,7 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
 3. peak memory at the live shape -- accounting, not enforcement
 ---------------------------------------------------------------
   weights alone                  64.0 MB (16 x 1024x1024 float32)
-  peak WORKING SET              441.1 MB   (resident)
+  peak WORKING SET              441.0 MB   (resident)
   peak COMMIT                   917.8 MB   (a LOWER bound on the RLIMIT_AS charge)
   Phase-2 limit                8192.0 MB
   PASS  the shipped file's peak memory fits the Phase-2 limit          at most 8.9x headroom -- an UPPER BOUND, i.e. the most optimistic reading. RLIMIT_AS caps VIRTUAL address space, which exceeds both counters above by an unmeasured amount
@@ -993,11 +995,11 @@ DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
 
 7. witness closure -- the provocations THIS suite performed
 -----------------------------------------------------------
-  PASS  worker_death_restart: its named provocation RAN and PASSED in THIS suite 6 named check(s) verified in local_sim/test_deployment_envelope.py [e7aaad51424d]
+  PASS  worker_death_restart: its named provocation RAN and PASSED in THIS suite 6 named check(s) verified in local_sim/test_deployment_envelope.py [d91a613e31ac]
   PASS  every SELF-PROVOKED constraint in the matrix reached this section adjudicated ['worker_death_restart']; the matrix declares ['worker_death_restart']; missing none
 
 ================================================================================================
-42/42 checks passed; 3 constraint(s) NOT PROVABLE on this host; 0 check(s) not performed in this run
+43/43 checks passed; 3 constraint(s) NOT PROVABLE on this host; 1 check(s) not performed in this run
 
 NOT PROVABLE HERE -- these are gaps in the local evaluator, and a
 candidate that passes everything above has NOT been shown to satisfy
@@ -1006,6 +1008,11 @@ them. They are enforced only on the grader:
   - predict_response_timeout_s: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
   - memory_limit_mb (provocation): no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/
 
+NOT PERFORMED IN THIS RUN -- these are checks this INVOCATION
+declined, not gaps in the evaluator's coverage of the grader. They
+are named rather than skipped quietly, and they are not passes:
+  - the memory claim vs a child that applies the real cap: this host has no `resource`, so the child cannot reach setrlimit(8192 MB) and both sides of the comparison descend from one failed import. The LINUX memory claim is carried by section 5's worker probe ('the worker actually APPLIED the 8 GiB cap'), not by this
+
   wrote experiments\2026-08-24_p2_p0\deployment_envelope.json
 ====================================================================================================
 READ-ONLY PROOF -- is `test_deployment_envelope.py --no-write` actually read-only?
@@ -1013,8 +1020,8 @@ READ-ONLY PROOF -- is `test_deployment_envelope.py --no-write` actually read-onl
 
 1. STRUCTURAL -- every write-mode open() in the suite, and where it lives
 -------------------------------------------------------------------------
-      measure_live_shape_memory          lines [964]
-      provoke_worker_death               lines [1099]
+      measure_live_shape_memory          lines [1085]
+      provoke_worker_death               lines [1220]
       write_artifact                     lines [293]
   PASS  every write-mode open() is in a function on the allow-list       3 writer(s): ['measure_live_shape_memory', 'provoke_worker_death', 'write_artifact']
   PASS  ...and the guarded evidence writer is one of them                write_artifact is where tracked evidence is written
@@ -1026,7 +1033,7 @@ READ-ONLY PROOF -- is `test_deployment_envelope.py --no-write` actually read-onl
       test_deployment_envelope.py        0 literal-truthy condition(s)
       test_envelope_readonly.py          0 literal-truthy condition(s)
       lifecycle_eval.py                  0 literal-truthy condition(s)
-  PASS  every REQUIRED file is scanned                                   scanned ['lifecycle_eval.py', 'test_deployment_envelope.py', 'test_envelope_readonly.py']; missing none; unpinned none
+  PASS  every REQUIRED file was ACTUALLY OPENED by the scanner           opened ['lifecycle_eval.py', 'test_deployment_envelope.py', 'test_envelope_readonly.py']; never opened none; unpinned none
   PASS  no check() has a literal truthy condition, in any scanned file   clean
   PASS  the scanner catches every spelling it CLAIMS to catch            5 spellings; missed none
   PASS  ...and spares an honest check(..., False, ...) failure report    wrongly flagged none
@@ -1037,6 +1044,8 @@ READ-ONLY PROOF -- is `test_deployment_envelope.py --no-write` actually read-onl
       blind: truthy call
       blind: aliased callee
   PASS  the scan's coverage matches the PINNED claim                     measured 5 caught / 6 blind = 5/11; pinned 5/11
+  PASS  ...and the probe spellings are the PINNED ones, by name          caught as pinned; blind as pinned
+  PASS  ...and every probe snippet is DISTINCT                           11 snippets, 11 distinct -- a duplicate means a named spelling is not actually being audited
   PASS  ...and every documented spelling was reached by the probe        6 still blind, 0 newly caught
 
 2. MECHANICAL -- the latch refuses both write paths, and the writer works
@@ -1052,21 +1061,22 @@ READ-ONLY PROOF -- is `test_deployment_envelope.py --no-write` actually read-onl
   PASS  watched path is TRACKED by git: experiments/2026-08-24_p2_p0/lifecycle_self_test.json an 'unchanged' claim about an untracked file proves nothing
   PASS  a git worktree status was obtained before the run                git status --porcelain
   PASS  the child exited 0                                               exit 0
-  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/deployment_envelope.json 1a39cf8c2411bcb9 -> 1a39cf8c2411bcb9
-  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json a6ac7180f4c9a0a6 -> a6ac7180f4c9a0a6
-  PASS  `git status --porcelain` is byte-identical across the run        3 line(s) before, 3 after
+  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/deployment_envelope.json 555a819a74810cb7 -> 555a819a74810cb7
+  PASS  sha256 UNCHANGED across the run: experiments/2026-08-24_p2_p0/lifecycle_self_test.json 942214b1f24266c2 -> 942214b1f24266c2
+  PASS  `git status --porcelain` is byte-identical across the run        4 line(s) before, 4 after
   PASS  NO green line CLAIMS worker_death_restart when section 6 is skipped 0 such lines
   PASS  ...and it is reported NOT PROVABLE instead                       present in the NOT PROVABLE block
   PASS  ...through the WITNESS, not only through the skipped section     section 7 adjudicated the deferred witness and refused it
   PASS  ...and the refusal names the check the witness could not find    names 'the suite SURVIVED a worker that hard-exited mid-run'
   PASS  the child verified its own read-only claim before printing it    the claim is now conditional on the checks above it
-  PASS  both closing blocks were parsed and neither is empty             5 NOT PROVABLE, 1 NOT PERFORMED
-  PASS  ...the writer's positive control is filed as NOT PERFORMED       1 line(s) in that block
+  PASS  both closing blocks were parsed and neither is empty             5 NOT PROVABLE, 2 NOT PERFORMED
+  PASS  ...the writer's positive control is filed as NOT PERFORMED       2 line(s) in that block
   PASS  ...and NOT as a gap in the evaluator's coverage of the grader    5 envelope constraint(s) reported NOT PROVABLE
   PASS  ...and it regenerated nothing, by its own measurement            the mirror of the writing run's non-vacuity check
 
 ====================================================================================================
-30/30 checks passed
+32/32 checks passed
+READONLY-PROOF-RESULT: 32/32 checks passed, exit 0
   PASS  15. deployment envelope (+ what it cannot prove, + read-only proof)
 
 === 16. official Phase-2 subprocess smoke (zero failures) ===
@@ -1076,7 +1086,7 @@ READ-ONLY PROOF -- is `test_deployment_envelope.py --no-write` actually read-onl
   residual cap 0.4s   wall 120.0s
   score        4.778624e-07   raw MSE 4.778624e-06   mult 0.1000
   C/B          0.0625734   failures 0
-  worst residual 0.08781 s of 0.40 s cap  -> 4.6x headroom (GRADED PATH)
+  worst residual 0.08512 s of 0.40 s cap  -> 4.7x headroom (GRADED PATH)
   PASS  16. official Phase-2 subprocess smoke (zero failures)
 
 PREFLIGHT GREEN -- 16/16
