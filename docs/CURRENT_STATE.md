@@ -55,13 +55,21 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   account/allowance evidence is preserved with **transcription honestly
   distinguished from capture**; the submission contract and **Samuel's prediction
   (`3.6e-7`, no failures, transfers)** are committed *before* any result. Two
-  independent passes ran against an earlier tree. The committed full-preflight
-  witness names `3adf81f`, while current HEAD subsequently changed two
-  `local_sim/` files, which violates the submission contract's own gate. **Do not
-  request approval or submit.** Correct the durable record, run a clean full
-  preflight from the corrected HEAD, commit only its evidence, live-recheck the
-  account, and obtain a focused ACCEPT before asking Samuel to approve an exact
-  SHA.
+  independent passes ran against an earlier tree, and every finding of both is
+  closed.
+  **The stale-witness defect is now FIXED:** `preflight -Full` is
+  **GREEN 16/16 witnessed at HEAD `576ad46`** (transcript
+  `experiments/2026-08-25_trackA/preflight_full_trackA.txt`, which records that
+  SHA in its own header), committed as the single evidence commit `240f8df`, so
+  the submitting HEAD differs from the witnessed HEAD **only by that commit** —
+  nothing under `local_sim/`, `scripts/` or `estimator.py` differs. That is the
+  shape the contract's reworded gate item 6 requires.
+  **Still outstanding before approval may even be requested, and both are
+  blocking:** (1) a **live signed-in recheck** of the account state and the
+  10/team/UTC-day allowance — the committed figures are honestly labelled
+  *transcribed, not captured*, and this session had no browser or credentials;
+  (2) a **focused independent ACCEPT** on the corrected record. **Do not request
+  approval or submit until both exist.**
 - **Phase 1A is mathematically valid but PROVISIONAL.** 34/34 verifier and 16/16
   probe. Exact `1/32` cross-basis coherence; the phase-degree distribution is
   exactly **`{0: 1, 2: 511}`**, and **all 130,816** pairwise differences have rank
