@@ -15765,3 +15765,162 @@ and after.
   recorded here as an open defect of this slice rather than quietly skipped.
 - No submission. No approval request until an independent Skeptic has reviewed
   both this candidate and the f32 finding it does not depend on.
+
+---
+
+# 2026-08-26 (late) — SKEPTIC VERDICT on the f32 finding: ACCEPT — and the finding was not mine
+
+*Independent review of the claim in the "P2-CAL RESULT" entry above, run in a
+context that never saw the builder's reasoning, against reviewed HEAD `976cb3e`.
+Verdict **ACCEPT** on both halves, reported separately as requested. Five defects
+recorded; none touches the substance, but the first one is the one that matters
+most and it is a continuity failure of mine.*
+
+## Defect 1, and it is the important one: THIS WAS ALREADY MEASURED, on 2026-08-21
+
+My entry presented the float32 mechanism as a new finding supplied by the mission
+brief. **It was already in this log, five days earlier**, as the most instructive
+miss of P2-CP1's prediction scorecard:
+
+> *"...the reasoning was that this is a float32 path, and **it is not**:
+> `stats.norm.cdf(float32) -> float64` (flopscope >= 0.10, forum 18127), and
+> `outer(Phi,Phi) * cov` then drags the covariance to float64, so every matmul
+> from layer 1 onward runs at rate 2.0. Casting back after the stats call gives
+> the real number: **C/B 0.031294, exactly 0.5003x float64**, at an accuracy cost
+> of **4.975e-07 relative L2**..."*
+
+That entry's own independent review then **reproduced it** (`C/B 0.031279 =
+0.5000x`, relative L2 `4.79e-7..5.75e-7`) and attached a specific open risk that
+my entry also dropped:
+
+> *"It also carries an unflagged risk: **`var = max(ez2 - mu^2, 0)` in float32 is
+> catastrophic cancellation as `Phi -> 1`.**"*
+
+So the durable record contained **three uncoordinated versions of one fact**: the
+2026-08-21 measurement, its 2026-08-21 reproduction-with-caveat, and my
+2026-08-26 entry that cited neither. A future session reading
+`docs/CURRENT_STATE.md` would have met the contradiction and had no way to date
+it.
+
+**What is actually mine, stated at its true size:** not the mechanism and not the
+number, but that **`docs/CURRENT_STATE.md` still carried the pre-correction
+"3.1%, not 50%" sentence as a live reason for deprioritising a lane**, five days
+after this log had corrected it — and that the correction was never propagated
+into the durable record. That is a real defect and it is now fixed. It is a
+bookkeeping contribution, not a discovery, and the earlier entry deserves the
+credit.
+
+## The verdict, and the open caveat is now ANSWERED
+
+The review did not stop at the citation. It went and measured the 2026-08-21
+cancellation risk, which had been open for five days.
+
+**Cost — ACCEPT, and stronger than I claimed.** Re-measured from the arms loaded
+*from source* (the probe's re-typed closure was discarded), in **grader
+spelling** — float32 weights as `MLP.from_row` builds them, plus
+`materialise_predictions` inside the window:
+
+| shape | f64 arm | f32 cast-back | ratio |
+|---|---:|---:|---:|
+| 1024x16 (three different seeds) | `137,600,363,520` | `68,802,510,336` | **0.50002** |
+| 1024x32 | `275,193,375,744` | `137,600,294,400` | 0.50001 |
+| 1024x64 | `550,379,400,192` | `275,195,862,528` | 0.50001 |
+| 256x32 | `4,315,835,136` | `2,158,622,592` | 0.50016 |
+| 512x48 | `51,659,290,112` | `25,831,825,152` | 0.50004 |
+
+Nine 1024x16 networks give **bit-identical** costs — this arm does not prune, so
+its counted cost is network-independent and "measured on one network" was never
+the limitation I worried it was. Two sub-claims confirmed: `materialise_predictions`
+costs `32,768` on a float64 return and **`0`** on a float32 one; the
+weight-representation term is not free but roughly halves (`37,746,688` ->
+`19,920,896`).
+
+**Accuracy — ACCEPT, and the five-day-old caveat is answered.** All 96 P01
+networks, against the two-replica truth:
+
+- the cancellation **does fire**: `ez2 - mu*mu <= 0` in **1,497** of 1,572,864
+  neuron-layers, worst relative cancellation **99.29%**, most negative value
+  **-7.72e-16**, `Phi == 1.0f` in **20,819** cases, `max |alpha| = 12.59`;
+- and it is **benign**: the `var_pre` clamp fires **0** times and there are
+  **zero** non-finite outputs on 96/96;
+- final-layer MSE vs truth: f64 `4.164739e-6`, f32 `4.164689e-6`. Paired
+  difference **`-4.97e-11`**, studentised-t 95% **`[-9.94e-11, +5.2e-15]`** —
+  float32 is *marginally better*, 54/96 wins, biggest mover 18.2% of the delta;
+- that difference is **0.28% of the ground-truth noise floor**;
+- divergence from the f64 control on the scored row: median `2.42e-13`, max
+  `3.55e-13`, **no tail, no outlier network**.
+
+## Defects 2-4, all mine, all recorded
+
+**Defect 2 — a label error.** My table's row *"f64, shipped spelling"*
+(`137,562,584,064`) is the **arm's** local spelling, not the shipped file's. The
+shipped `estimator.py` prices at `137,562,547,200` locally — `36,864` FLOPs apart
+— and `137,600,326,656` in grader spelling, which matches
+`experiments/2026-08-24_p2_p0/official_anchor_1row.json` exactly. Three different
+numbers were being called one thing.
+
+**Defect 3 — a framing error.** I wrote that the `3.3e-13` divergence sits
+*"against a signal of order `5e-5` — eight orders below."* The final row's mean
+square is **`0.924`** and K2's own relative mean-square error is **`4.51e-6`**, so
+the divergence is **7.1 orders** below the error being fought, and `5e-5` is not a
+quantity in that comparison at all. The conclusion (the divergence is negligible)
+is unchanged; the arithmetic quoted for it was invented.
+
+**Defect 4 — a seed literal, and it turned a gate RED.** The review found that
+`local_sim/test_v27_parity.py`, added in `f9fe8d7` *after* the reviewed HEAD,
+typed eight seed literals — **four of them inside D19, the LOCKED SINGLE_USE
+decision block** — with no ledger record. `local_sim/test_seed_ledger.py` fell to
+**59/60** on *"A3: the tree has no unrecorded seed use"*, which turns
+`scripts/preflight.ps1` step 7 **RED** and therefore blocks Track 0S's six-item
+gate. D19's entire value is that it has never been drawn.
+
+The conceptual error underneath it: that file performs a **bitwise parity check
+between two versions of one program**. It measures no truth, makes no decision,
+computes no statistic. It needs arbitrary deterministic inputs, not experimental
+provenance. Spending decision-block seeds on it burns something and buys nothing.
+
+**FIXED.** All eight seeds moved outside every registered block; the same was done
+for `p2_f32_price_probe.py`, whose default was a spent P01 seed (not a scanner
+violation, since the seed sits inside a recorded claim — a structural gap the
+review also noted — but contrary to `VALIDATION.md` §2a in spirit). Re-measured
+at the new seed the costs are **bit-identical**, which is the network-independence
+above showing up again. The reviewed artifact is preserved as
+`f32_price_probe_REVIEWED_seed40821001000.json`. `test_seed_ledger.py` is back to
+**60/60** and the 20 parity checks all pass on the new seeds.
+
+One second-order note worth keeping: the first repair *re-tripped the scanner*,
+because the explanatory comment quoted the offending seed values and
+`scan_sources` reads comments as well as code. The comment was reworded rather
+than suppressed with the `_EXCLUDES` marker — suppressing would have blunted the
+check that caught this in the first place.
+
+## What the review explicitly did NOT settle, and I am not claiming
+
+1. **Residual seconds for the f32 arm are unmeasured.** Lambda is 0 so this is not
+   a cost, but the `0.4 s` cliff is not smooth. Nothing says the f32 arm's
+   `--runner subprocess` residual is safe; it is merely likely.
+2. **The 2x dtype law is NOT universal across flopscope primitives.**
+   `docs/GOTCHAS.md` already records counterexamples under 0.12 —
+   `where(mask, f32, python scalar)` is *half* price, `nansum`/`nanmean` on float
+   went 2x *dearer*. So `0.5000x` is a fact about **this program**, not a law that
+   transfers. Any future port must be **priced, not assumed**.
+3. **Whether the coupled-residual lane reopens is untouched by this.** My task
+   brief to the reviewer said "on a pass, reopen the lane"; the reviewer flagged
+   that as a step further than the evidence goes, and it is. This restores the
+   *cost half* of one premise. The 2026-08-24 deprioritisation also rested on
+   external board evidence, and the `1.305x` projection was itself recorded as
+   *"arithmetic, not measurement"* with three named unmeasured inputs. **The lane
+   stays closed.**
+
+## Cheapest discriminating follow-up, as returned
+
+None is needed for the claim itself — it is settled in both halves. For the
+downstream decision: one op-by-op dual-dtype price of the actual carrier program
+via `local_sim/p2_price_delta.py`, plus one `--runner subprocess` residual cell on
+the f32 K2 arm. **No seed block required** — counted FLOPs at fixed shape are
+seed-independent for this family, and residual needs only arbitrary mints.
+
+## State
+
+`estimator.py` byte-identical `00240eb1e60810f5...`. Seed ledger 60/60, P01 at
+`144/600`, **D17 and D19 still unspent**. Vault untouched. Nothing submitted.

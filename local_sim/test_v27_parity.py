@@ -46,6 +46,31 @@ from mint_provenance import canonical_mint  # noqa: E402
 
 _FAILED = []
 
+# --------------------------------------------------------------------------
+# Seeds: DELIBERATELY OUTSIDE EVERY REGISTERED BLOCK.
+#
+# The first version of this file typed four seeds drawn from D19 -- a LOCKED
+# SINGLE_USE *decision* block -- and four from the P01 DESIGN block. (Their exact
+# values are deliberately NOT reproduced here: `scan_sources` reads comments as
+# well as code, so quoting them would re-trip the very check that caught them.
+# They are in the LOG entry and in git history.)
+# An independent Skeptic caught it: `local_sim/test_seed_ledger.py`
+# dropped to 59/60 on `A3: the tree has no unrecorded seed use`, which turns
+# `scripts/preflight.ps1` step 7 RED, and D19's entire value is that it has
+# never been drawn.
+#
+# The deeper error was conceptual. This file performs a BITWISE PARITY check
+# between two versions of one program. It needs arbitrary deterministic inputs,
+# not experimental provenance: no truth is measured, no decision is made, no
+# statistic is computed. Spending block seeds on it buys nothing and burns
+# something. These values lie outside every range in `seed_blocks.py`, which is
+# what makes them free to type as literals -- and this comment is here so that a
+# future reader does not "tidy" them back into a block.
+# --------------------------------------------------------------------------
+_S = (90000000001, 90000000002, 90000000003, 90000000004,
+      90000000005, 90000000006, 90000000007, 90000000008)
+
+
 
 def check(name, ok, detail=""):
     print(f"  {'PASS' if ok else 'FAIL'}  {name:<58}{detail}")
@@ -85,8 +110,8 @@ def main():
           bool((np.diff(G) <= 0).all()), "monotone")
 
     print("\nT1  off the analytic path, v2.7 must be v2.6.1 bit for bit")
-    for width, depth, seed in ((256, 32, 30806019001), (256, 8, 30806019002),
-                               (64, 16, 30806019003), (128, 4, 30806019004)):
+    for width, depth, seed in ((256, 32, _S[0]), (256, 8, _S[1]),
+                               (64, 16, _S[2]), (128, 4, _S[3])):
         a, fa = _run(old, width, depth, seed)
         b, fb = _run(new, width, depth, seed)
         same = a.shape == b.shape and np.array_equal(a, b)
@@ -95,7 +120,7 @@ def main():
         check(f"{width}x{depth}: identical counted FLOPs", fa == fb, f"{fa:,} == {fb:,}")
 
     print("\nT2  on the Phase-2 shape, v2.7 == v2.6.1 * _CAL_G, row-wise")
-    for seed in (40821001500, 40821001501):
+    for seed in (_S[4], _S[5]):
         a, fa = _run(old, 1024, 16, seed)
         b, fb = _run(new, 1024, 16, seed)
         want = a * G[:, None]
@@ -107,7 +132,7 @@ def main():
               f"delta {fb-fa:,} FLOPs (f64 billing: 16,384 elements at 2x, plus the table)")
 
     print("\nT3  at an uncovered depth the rows must be UNCALIBRATED, not truncated")
-    for width, depth, seed in ((1024, 8, 40821001502), (1024, 20, 40821001503)):
+    for width, depth, seed in ((1024, 8, _S[6]), (1024, 20, _S[7])):
         a, _ = _run(old, width, depth, seed)
         b, _ = _run(new, width, depth, seed)
         same = np.array_equal(a, b)

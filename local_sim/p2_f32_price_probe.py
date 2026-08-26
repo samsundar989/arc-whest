@@ -103,7 +103,19 @@ def main():
     import warnings
     warnings.filterwarnings("ignore")
 
-    seed = 40821001000
+    # OUTSIDE every registered block, deliberately. The first version used
+    # 40821001000 -- the first P01 seed. That is not a ledger violation (the seed
+    # is inside a recorded claim, so `scan_sources` cannot flag it) but an
+    # independent Skeptic was right that it is contrary to VALIDATION.md 2a in
+    # spirit: it silently re-uses a spent DESIGN network for a measurement that
+    # has nothing to do with that block's experiment.
+    #
+    # It also does not matter numerically, and that is measurable rather than
+    # assumed: this arm does not prune, so its counted cost is INDEPENDENT of the
+    # network. The Skeptic priced nine different 1024x16 networks and got
+    # bit-identical totals. The reviewed artifact at the old seed is preserved as
+    # f32_price_probe_REVIEWED_seed40821001000.json.
+    seed = 90000000009
     w, est_seed, _ = canonical_mint(1024, 16, seed)
     mlp = wb.MLP(width=1024, depth=16, weights=[np.asarray(x) for x in w], seed=est_seed)
 

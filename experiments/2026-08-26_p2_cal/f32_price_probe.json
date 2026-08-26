@@ -1,5 +1,5 @@
 {
- "seed": 40821001000,
+ "seed": 90000000009,
  "budget": 2199023255552,
  "free_flops_at_floor": 219902325555,
  "cases": [
@@ -18,7 +18,7 @@
    "f_over_b": 0.060602376936003566,
    "multiplier": 0.1,
    "state_dtype": "float64",
-   "rel_ms_vs_f64_final_layer": 1.0190200068338393e-16,
+   "rel_ms_vs_f64_final_layer": 6.446896530813133e-17,
    "cost_ratio_vs_f64": 0.9687665954428345
   },
   {
@@ -27,7 +27,7 @@
    "f_over_b": 0.03127870033495128,
    "multiplier": 0.1,
    "state_dtype": "float32",
-   "rel_ms_vs_f64_final_layer": 3.3113388411226403e-13,
+   "rel_ms_vs_f64_final_layer": 2.608006443411054e-13,
    "cost_ratio_vs_f64": 0.5000094314017786
   }
  ]

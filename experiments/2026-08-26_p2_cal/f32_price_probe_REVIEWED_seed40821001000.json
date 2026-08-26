@@ -1,0 +1,34 @@
+{
+ "seed": 40821001000,
+ "budget": 2199023255552,
+ "free_flops_at_floor": 219902325555,
+ "cases": [
+  {
+   "arm": "f64 (the shipped spelling)",
+   "flops": 137562584064,
+   "f_over_b": 0.06255622068420053,
+   "multiplier": 0.1,
+   "state_dtype": "float64",
+   "rel_ms_vs_f64_final_layer": 0.0,
+   "cost_ratio_vs_f64": 1.0
+  },
+  {
+   "arm": "f32, stats NOT cast back (arm_k2p1_f32 as written)",
+   "flops": 133266036224,
+   "f_over_b": 0.060602376936003566,
+   "multiplier": 0.1,
+   "state_dtype": "float64",
+   "rel_ms_vs_f64_final_layer": 1.0190200068338393e-16,
+   "cost_ratio_vs_f64": 0.9687665954428345
+  },
+  {
+   "arm": "f32, stats cast back to f32",
+   "flops": 68782589440,
+   "f_over_b": 0.03127870033495128,
+   "multiplier": 0.1,
+   "state_dtype": "float32",
+   "rel_ms_vs_f64_final_layer": 3.3113388411226403e-13,
+   "cost_ratio_vs_f64": 0.5000094314017786
+  }
+ ]
+}

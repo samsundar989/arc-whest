@@ -255,7 +255,31 @@ Coupled residual sampling is deprioritized. Its former 1.305x projection assumed
 float32 K2 cost reduction that the frozen artifact did not show: measured cost fell
 only 3.1%, not 50%.
 
-**CORRECTED 2026-08-26 — that 3.1% was measured on a mislabelled arm.**
+**CORRECTED 2026-08-26, and the correction was FIRST MADE 2026-08-21 — this
+sentence was simply never updated.** `experiments/LOG.md` (2026-08-21, P2-CP1
+prediction P6) already recorded the mechanism and the number, and that entry's own
+independent review already reproduced it. This durable record contradicted the log
+for five days. Independently re-reviewed and **ACCEPTED** 2026-08-26 (both cost and
+accuracy), which also **answered the open caveat** the 2026-08-21 review had left:
+float32 catastrophic cancellation in `var = max(ez2 - mu^2, 0)` **does** fire —
+1,497 of 1,572,864 neuron-layers over 96 networks, worst relative 99.29%, most
+negative `-7.72e-16` — and is **benign**: the `var_pre` clamp fires 0 times, there
+are zero non-finite outputs on 96/96, and the float32 final-layer MSE against truth
+is *marginally better* than float64 (`4.164689e-6` vs `4.164739e-6`; paired
+`-4.97e-11`, 95% `[-9.94e-11, +5.2e-15]`, i.e. 0.28% of the GT noise floor).
+
+**In grader spelling the ratio is `0.50002x`** (`137,600,363,520` ->
+`68,802,510,336`), stable across five shapes and bit-identical across nine
+networks — this arm does not prune, so its counted cost is network-independent.
+`materialise_predictions` costs `32,768` on a float64 return and **`0`** on a
+float32 one; the weight-representation term roughly halves (`37,746,688` ->
+`19,920,896`).
+
+The local-spelling table below is retained for the mechanism it shows.
+**Label caution:** its "f64, shipped spelling" row is the *arm's* local spelling.
+Three distinct numbers exist and must not be conflated — arm local
+`137,562,584,064`, shipped `estimator.py` local `137,562,547,200`, grader
+`137,600,326,656`.
 `local_sim/p2_arms/arm_k2p1_f32.py` calls `flops.stats.norm.cdf` and `.pdf`, which
 flopscope 0.12 **promotes from float32 to float64** (it emits a `FlopscopeWarning`
 saying so), and the arm never casts back. `Phi`, `phi` and everything downstream of
@@ -272,18 +296,32 @@ float64. The arm is float32 in name only. Measured today
 
 The recorded 3.1% is reproduced **exactly**; two `.astype` calls recover the full
 2x. Divergence from the f64 control on the scored row is `3.3e-13` relative mean
-square, eight orders below the error being fought — **on one network only**;
-across all 96, and against float32 failure modes, nothing is established.
+square. **An earlier version of this paragraph called that "eight orders below a
+signal of order 5e-5"; that arithmetic was invented.** The final row's mean square
+is `0.924` and K2's own relative mean-square error is `4.51e-6`, so the divergence
+is **7.1 orders** below the error being fought. Established across **all 96**
+networks by the 2026-08-26 review, not one.
 
 Consequence for design: the multiplier floor makes the first `219,902,325,555`
 counted FLOPs free, and the shipped path spends `137,600,326,656` of them. At f64
 the free zone holds `~82.3e9` unused FLOPs — **1.2** dense Kerdock/MUB bases, since
 one costs exactly `2**36`. At corrected f32 it holds `~151.1e9` — **2.2** bases.
 
-**The lane is NOT reopened by this.** Reopening requires a STRATEGIC contract with
-a stated reopening condition. What is established is narrower and is all that may
-be quoted: the cost half of the lane's closure premise was measured on an arm that
-was not float32, so the recorded reason no longer stands on its own.
+**The lane is NOT reopened by this**, and the reviewer pushed back on even
+suggesting it. Reopening requires a STRATEGIC contract with a stated reopening
+condition. What is established is narrower and is all that may be quoted: the cost
+half of the lane's closure premise was measured on an arm that was not float32, so
+the recorded reason no longer stands on its own. The 2026-08-24 deprioritisation
+also rested on external board evidence this does not address, and its `1.305x`
+projection was itself recorded as *"arithmetic, not measurement"* with three named
+unmeasured inputs.
+
+**Two things this does NOT license.** (a) The f32 arm's `--runner subprocess`
+residual is **unmeasured** — lambda is 0 so it is not a cost, but the `0.4 s` cliff
+is not smooth. (b) **The 2x dtype law is not universal.** `docs/GOTCHAS.md` records
+flopscope-0.12 counterexamples in both directions — `where(mask, f32, scalar)` is
+*half* price, `nansum`/`nanmean` on float went 2x *dearer*. `0.5000x` is a fact
+about **this program**; any future port must be **priced, not assumed**.
 
 ## Evaluator state — P2-P0 repaired these, and the slice is closed
 
