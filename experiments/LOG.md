@@ -14869,3 +14869,171 @@ committed Rule-1 contract, Samuel's restated predictions, and a fresh DESIGN-blo
 claim. The active plan and copy-ready Builder prompt were updated in
 `docs/GAME_PLAN.md`, `docs/CURRENT_STATE.md`, `docs/BENCHMARK.md`, and
 `docs/CLAUDE_CODE_HANDOFF.md`.
+
+---
+
+# 2026-08-26 — CONTRACT (Rule 1): P2-CAL — does in-loop per-layer calibration of the K2 state repair accumulated drift at 1024x16?
+
+*Pre-registered and committed BEFORE any calibration data exists. DESIGN tier.
+No new seed claim, no `estimator.py` edit, no vault touch, no submission, no
+promotion. Samuel's prediction is NOT yet recorded, therefore **no result of this
+slice may promote anything**; it is a mechanism measurement whose job is to size
+an effect and decide whether a DECIDE block is worth spending.*
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder. HEAD at contract time
+is recorded by the commit that carries this entry.
+
+## Question
+
+At the live Phase-2 shape (1024 x 16), does a small set of **per-layer
+multiplicative corrections applied to the propagated K2 state, inside the
+propagation loop**, reduce final-layer MSE materially — and does the correction
+survive on networks it was not fitted on?
+
+## Why now, and why this before anything else
+
+The Phase-2 score identity is `MSE_final * max(0.1, F / 2**41)`. The shipped
+Phase-2 path (`_analytic_only`, K2p1) measures `137,600,326,656` counted FLOPs,
+which is `F/B = 0.0626`. **The multiplier is pinned at the `0.1` floor with
+`8.2e10` counted FLOPs of headroom that cost nothing.** Any accuracy gained
+strictly inside that headroom is multiplied into the score at rate 1.
+
+An in-loop per-layer scalar costs `width` multiplies per layer:
+`16 * 1024 = 16,384` FLOPs, i.e. `1.2e-7` of the free headroom. To three
+significant figures it is **free**. So the whole question is accuracy.
+
+## Evidence
+
+| # | item | status |
+|---|---|---|
+| E1 | shipped Phase-2 path is `_analytic_only` = K2p1, with **no calibration of any kind at width 1024** (`estimator.py:867`) | **CONFIRMED** — read at HEAD |
+| E2 | that path measures `4.050566e-6` raw / `4.050566e-7` adjusted, 0 failures, `137,600,326,656` FLOPs on the official 100-MLP subprocess mini | **CONFIRMED** — Track 0S record |
+| E3 | P2-CP3R: **94.61% of K2 error is accumulated mean/variance-state drift**, not marginal readout error; marginal third/fourth corrections in the scalar ReLU mean map recovered only 4.47% | **CONFIRMED** — `experiments/2026-08-21_p2_cp3r/oracle.json` |
+| E4 | a Phase-1-era per-layer scalar calibration already existed in this repository for the width-256 architecture | **CONFIRMED** — `local_sim/covprop_bias_model.py` docstring, `local_sim/fit_calibration.py` |
+| E5 | an external benchmark reports a **single global scalar** worth `3.4x` on K2 at this exact shape (`4.42e-6 -> 1.35e-6`, scalar `0.99835`, fit 3 / held out 3) | **SPECULATIVE** — the raw artifact bundle for this claim is **NOT PRESENT** in this repository or on this machine (searched); it is an unreproduced external number and is used here only as a prior, never as evidence |
+| E6 | P01 truth exists for 96 fresh 1024x16 networks with two independent `2**22` replicas and per-network GT noise | **CONFIRMED** — `experiments/2026-08-21_p2_cp1/truth_P01.npz` |
+
+## Hypothesis and mechanism
+
+K2's Gaussian closure is **systematically biased in the propagated state**, not
+merely noisy. The ReLU map's second-moment closure mis-estimates the variance
+carried into the next layer; that error compounds multiplicatively with depth,
+which is exactly the signature E3 measured (94.61% of error is *accumulated
+state* drift). A bias that compounds multiplicatively is removable by a
+multiplicative correction applied *at each layer, inside the loop* — and is
+**not** removable by correcting the output after the fact, because by then the
+16 layers of compounding have already happened and the per-layer factors are
+confounded with the readout.
+
+That distinction is the mechanism, and it is what makes this an experiment rather
+than a curve fit: it predicts a specific ordering between two corrections that
+have almost identical parameter counts.
+
+## Intervention
+
+One change, applied to the K2p1 control: multiply the propagated post-ReLU state
+by a per-layer scalar before it enters the next layer's matmul. Nothing else
+about the closure changes.
+
+Arms, all against the same K2p1 control on the same networks (common random
+numbers):
+
+| arm | correction | free parameters |
+|---|---|---:|
+| `C0` | control, K2p1 as shipped | 0 |
+| `C1` | one **global** scalar, applied in-loop at every layer | 1 |
+| `C2` | **per-layer** scalar, in-loop | 16 |
+| `C3` | per-layer scalar applied to the **mean state** and a second to the **variance state**, in-loop | 32 |
+| `P2` | per-layer scalar applied **post-hoc to the output rows only** (the falsifier's control) | 16 |
+
+## Predictions (numbered, directional, with magnitudes — recorded before the fit)
+
+1. `C2` beats `C0` on held-out networks by **more than 2x** in final-layer MSE.
+2. `C2` beats `C1`, but by **less than 1.5x** — most of the compounding bias is
+   depth-uniform, so a single scalar captures the bulk of it.
+3. `C3` beats `C2` by **less than 1.3x**. The variance state is the mechanism E3
+   names, so the direction is positive, but the mean and variance corrections are
+   strongly confounded at fixed depth.
+4. **`P2` (post-hoc) gains less than `C2` by at least 2x.** This is the mechanism
+   test. If post-hoc output scaling matches in-loop scaling, the "compounding
+   state bias" story is wrong and the effect is a plain readout mis-scaling.
+5. The fitted per-layer scalars lie in `[0.97, 1.01]` and vary **monotonically or
+   near-monotonically** with depth. A ragged, sign-alternating sequence would
+   indicate overfitting to 96 networks rather than a mechanism.
+6. Held-out degradation versus in-fit is **under 1.2x** for `C1` and `C2`. With
+   16 parameters against 96 networks x 1024 neurons this should not overfit; if
+   it does, the parameter count is already too high for the evidence.
+
+## Gate
+
+**There is no promotion gate, because this slice may not promote.** P01 is a
+DESIGN block and Samuel's prediction has not been taken. The gate here is a
+**continuation gate**, and it is chosen now:
+
+> Spend a Phase-2 DECIDE block on calibration only if `C2` (or the best arm)
+> achieves **>= 2.0x** held-out final-layer MSE improvement over `C0`, with the
+> held-out improvement holding on **both** truth replicas independently, and with
+> prediction 4 satisfied (the in-loop / post-hoc separation is real).
+
+Below `2.0x` the effect does not justify a `SINGLE_USE` block against the
+carrier work already queued.
+
+## Falsifier
+
+Any of:
+
+- held-out `C2` improvement below `1.3x`;
+- `P2` matching `C2` within `1.2x` (mechanism refuted — see prediction 4);
+- fitted scalars outside `[0.9, 1.1]` or sign-alternating across depth
+  (prediction 5 refuted; the fit is absorbing something other than drift);
+- held-out gain below half the in-fit gain (overfitting).
+
+## Baseline and tier
+
+Control is `C0` = `local_sim/p2_arms/arm_k2p1.py`, which is bitwise the shipped
+`_analytic_only` spelling. Tier is **DESIGN**, on **already-spent** P01 truth
+(`truth_P01.npz`, 96 networks). No new seeds are claimed and none may be.
+Because the fit and the evaluation both live inside one already-spent DESIGN
+block, the held-out split is an **internal** split and is weaker than a fresh
+block. It is sized to decide whether to spend a real block; it is not evidence
+for a submission and must never be quoted as one.
+
+## Cost model — Phase 2, lambda = 0, so C = F
+
+Counted FLOPs only. The correction adds `depth * width = 16,384` FLOPs for `C1`
+and `C2`, and `32,768` for `C3`, against the control's `137,600,326,656`. The
+multiplier stays pinned at the `0.1` floor for every arm
+(`F/B` moves from `0.0625734` to `0.0625735`). **Residual is not a cost; it is a
+`0.4 s` per-MLP cliff.** In-loop scaling adds `depth` scalar multiplies to the
+Python op count, which is a residual change too small to resolve against the
+recorded `2.35x` session spread — so this slice makes **no residual claim** and
+any candidate built on it must be re-measured on `--runner subprocess` before
+deployment, per `VALIDATION.md` section 2b-ii.
+
+## Statistic
+
+Paired on common random numbers (every arm sees the same 96 networks and the same
+truth). Because no promotion is claimed, `competition_score.decide()` is **not**
+invoked and no gate is passed to it. Reported instead: paired arithmetic
+final-layer MSE difference with a studentised-t interval, the ratio as a
+**stability diagnostic only**, and **every MSE quoted beside its GT noise floor**,
+using the two-replica cross-product estimator `mean_j (p_j - y1_j)(p_j - y2_j)`
+whose expectation is the unbiased MSE.
+
+## Seed block
+
+**None claimed.** This slice reads `truth_P01.npz`, whose 96 seeds were spent by
+P2-CP1 under its own contract. `local_sim/seed_ledger.py` must show P01 unchanged
+at `144/600` before and after.
+
+## Confounders, scope, and what must not change
+
+- The 96 networks were the CP1 arm-comparison set. Fitting on the same networks
+  that selected K2p1 as the control is a mild selection confound; it is bounded
+  by the internal held-out split and by refusing to promote.
+- `estimator.py` must not change. Verified by hash before and after.
+- The vault must not be touched; the seed ledger must not move.
+- Fitting is done in NumPy for speed; the NumPy K2 mirror must be verified
+  against the `fnp` arm to `<= 1e-10` relative on at least two networks before
+  any fitted number is believed. A mirror that is not verified produces fiction.
+- No claim about the grader's residual, memory, or setup window is in scope.
