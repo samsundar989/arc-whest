@@ -15359,3 +15359,130 @@ estimate appears to predate the floor cluster filling in.
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder. Nothing submitted, no
 seed claimed, `estimator.py` byte-identical.
+
+---
+
+# 2026-08-26 — RESULT: P2-CAL part 2. Per-layer scalar calibration is EXHAUSTED at 2.96x
+
+*Completes the contract committed in `99532bf`. DESIGN tier, no seed claimed, no
+`estimator.py` change, nothing promoted. Raw artifacts:
+`experiments/2026-08-26_p2_cal/cal_nc.json`, `run_nc.log`, and the deliberately
+preserved `run_nc_coarse_grid_ABANDONED.log`.*
+
+## What part 1 left open
+
+Part 1 proved the K2 closure is **exactly positively homogeneous of degree 1** in
+its state, so every purely multiplicative state correction is one output rescale
+in disguise, whatever its parameter count. That refuted the contract's mechanism
+prediction but left the real question standing: **do corrections that change
+`alpha = mu_pre / sigma` — which therefore do NOT commute through the closure —
+buy anything on top of the `2.96x` scalar?**
+
+Two of them, fitted sequentially per layer by 1-D scan against the **final-layer**
+error on the fit half:
+
+| arm | correction | registered? |
+|---|---|---|
+| `C3` | per-layer gain on the post-ReLU **variance** (covariance diagonal) | **yes**, in the contract |
+| `C4` | per-layer gain on the post-ReLU **off-diagonal** covariance | **NO — exploratory**, chosen after seeing part 1 |
+
+`C4` is labelled unregistered wherever it appears. The off-diagonal is where the
+Price-order-1 truncation actually lives and is the one part of layer 0's state
+that is not exact, so it is the correction the mechanism points at — but it was
+chosen after seeing results and cannot bear the contract's gate.
+
+## Result: both are nulls
+
+48 networks, fit on 24, evaluated on the **held-out** 24, cross-product estimator,
+paired on common random numbers. GT noise floor `1.784e-8`.
+
+| arm | in-fit | **held-out** | vs `C2` on the same split | paired diff, 95% |
+|---|---:|---:|---:|---|
+| `C2` scalar calibration only | `1.4788e-6` | **`1.4264e-6`** | 1.0000x | — |
+| `C3` + per-layer variance gain | `1.4611e-6` | **`1.4139e-6`** | 1.0088x | `+1.25e-8` `[-3.14e-8, +5.64e-8]` |
+| `C4` + per-layer off-diagonal gain | `1.4694e-6` | **`1.4362e-6`** | **0.9932x — worse** | `-9.79e-9` `[-2.01e-8, +5.3e-10]` |
+
+**Both intervals straddle zero.** Neither arm has a detectable effect. `C3`'s
+apparent 0.9% is inside its own noise; `C4` is nominally *worse* out of sample.
+
+Both fitted about 1% of in-fit improvement (`1.4879e-6 -> 1.4701e-6` for `C3`,
+`-> 1.4785e-6` for `C4`) and **all of it evaporated out of sample**. That is the
+signature of fitting truth-replica noise, not a mechanism.
+
+## The scan is working, and there is an internal proof of it
+
+Both arms selected `g = 0.9700` at **layer 15** while the objective did not move
+at all (`1.4701e-6` and `1.4785e-6`, unchanged to five figures). That is exactly
+right and it is worth stating as a check: **the final layer's covariance is never
+propagated anywhere**, so no gain applied to it can affect the final mean. The
+scan found a provably flat direction and reported it as flat. A scan that had
+manufactured an improvement there would have been fabricating.
+
+The knobs are also confirmed live rather than assumed: a `0.9` variance gain at
+layer 5 moves the scored row by `2.08e-4` relative mean square, against a residual
+error of `1.75e-5` relative — the knob is roughly twelve times more powerful than
+the error it is being asked to remove. A null here is a real null, not a
+disconnected control.
+
+## A grid that was chosen badly, and the run that was thrown away
+
+The first attempt scanned `[0.94 ... 1.06]` with a 1% step near 1.0 and returned
+`g = 1.0000` at every layer it reached. That is a true local null, but 1% is a
+coarse instrument on this objective and cannot see a sub-1% optimum, so the run
+was **abandoned rather than reported** and re-run on
+`[0.97, 0.99, 0.995, 0.998, 0.999, 1.0, 1.001, 1.002, 1.005, 1.01, 1.03]`. The
+abandoned transcript is kept at
+`experiments/2026-08-26_p2_cal/run_nc_coarse_grid_ABANDONED.log` rather than
+deleted, because "we scanned and found nothing" and "we scanned at a resolution
+that could not have found anything" are different claims and the record should
+show which one happened. The finer grid **did** select non-unit gains at several
+layers — and they still did not survive the held-out split.
+
+## Prediction 3, and what the whole contract now scores
+
+| # | prediction | outcome |
+|---|---|---|
+| 3 | `C3` beats `C2` by less than 1.3x | **HIT — but vacuously.** 1.0088x, interval straddling zero. The prediction anticipated a small positive effect; the measurement is no effect |
+
+Full contract scorecard: 1 HIT, 2 HIT (vacuous), 3 HIT (vacuous), **4 REFUTED**,
+5 HIT, 6 HIT. The gate remains **NOT MET** for the reason recorded in part 1, and
+nothing here changes that.
+
+## The durable finding
+
+**Per-layer scalar calibration of the K2 state is exhausted at `2.96x`.**
+
+Three independent knobs — a multiplicative gain on the mean state, on the
+variance state, and on the off-diagonal covariance — were fitted per layer against
+truth. The first is provably identical to a single output rescale and delivers the
+whole `2.96x`. The other two, which genuinely change the closure's trajectory,
+deliver **nothing that survives a held-out split**.
+
+So the `~1.4e-6` residual after calibration is **not a per-layer scalar
+phenomenon**. Whatever structure remains is per-neuron, or lives in a part of the
+state a scalar cannot address, or is simply information the K2 closure does not
+carry. The next correction must therefore either
+
+1. act **per neuron** rather than per layer (a shape correction, not a scale one), or
+2. **add information** — higher cumulants, or sampled directions — rather than
+   re-weight what K2 already computed.
+
+Option 2 is where every competitive entrant on the live board sits, and it costs
+FLOPs by construction. That is consistent with the board forensics entry above,
+and it is the direction the next contract should take.
+
+## Seed, vault, estimator
+
+Seed ledger untouched, P01 unchanged at `144/600`. Vault untouched, counter
+`1 == 1`. `estimator.py` byte-identical, `00240eb1e60810f5...`. Nothing submitted.
+`preflight.ps1` **GREEN 12/16, 4 skipped** at HEAD `8cdf235`, with counted-FLOP
+parity against the official runner **exact, 19 operations, 0 disagreeing**.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+**Rule 2 is OWED and NOT satisfied.** No independent Skeptic has reviewed P2-CAL.
+This session carries an explicit instruction not to launch subagents unless asked,
+which conflicts with the standing requirement in `AGENTS.md`; the conflict is
+surfaced rather than resolved unilaterally. Nothing here is promoted, submitted or
+written up, so no gate is being crossed on unreviewed evidence — but **the float32
+correction in particular must not be acted on until a Skeptic has seen it.**

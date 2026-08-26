@@ -89,6 +89,19 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   with a new gate and Samuel's prediction taken first. The remaining power is in
   corrections that change `alpha` and therefore do not commute — those are the
   live question, not this one.
+- **P2-CAL part 2 closed that follow-on the same day: per-layer scalar
+  calibration is EXHAUSTED at 2.96x.** The two corrections that genuinely change
+  `alpha` and therefore do not commute — a per-layer gain on the post-ReLU
+  **variance** (registered `C3`) and on the **off-diagonal covariance**
+  (exploratory `C4`) — both fitted about 1% in-fit and **lost all of it out of
+  sample**: held-out `1.0088x` and `0.9932x` against the scalar arm, **both
+  intervals straddling zero**. The knobs are confirmed live (a `0.9` variance gain
+  moves the scored row 12x more than the residual error), and both scans correctly
+  reported layer 15 as flat, which it provably is. So the `~1.4e-6` residual is
+  **not a per-layer scalar phenomenon at all**. The next correction must act
+  **per neuron** rather than per layer, or **add information** (higher cumulants,
+  sampled directions) rather than re-weight what K2 already computes — and option
+  two costs FLOPs by construction, which is where the whole live top 12 sits.
 - **Track 0S blocker (1) is half closed.** The account state is now **captured,
   not transcribed**: an authenticated `whoami` + `eligibility` call for
   `neopok919` (id 513543) returned `submissions_allowed: true`,

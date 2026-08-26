@@ -6,3 +6,48 @@ C2 baseline (mean gain only) ...
 
 C4  per-layer OFF-DIAGONAL gain (EXPLORATORY, unregistered) ...
   off layer  0  g = 0.9900   fit-set final MSE 1.4873e-06
+  off layer  1  g = 1.0000   fit-set final MSE 1.4873e-06
+  off layer  2  g = 1.0020   fit-set final MSE 1.4872e-06
+  off layer  3  g = 1.0050   fit-set final MSE 1.4863e-06
+  off layer  4  g = 1.0050   fit-set final MSE 1.4840e-06
+  off layer  5  g = 1.0050   fit-set final MSE 1.4822e-06
+  off layer  6  g = 1.0020   fit-set final MSE 1.4818e-06
+  off layer  7  g = 1.0050   fit-set final MSE 1.4809e-06
+  off layer  8  g = 1.0000   fit-set final MSE 1.4809e-06
+  off layer  9  g = 1.0020   fit-set final MSE 1.4805e-06
+  off layer 10  g = 1.0020   fit-set final MSE 1.4799e-06
+  off layer 11  g = 1.0020   fit-set final MSE 1.4793e-06
+  off layer 12  g = 1.0050   fit-set final MSE 1.4785e-06
+  off layer 13  g = 1.0010   fit-set final MSE 1.4785e-06
+  off layer 14  g = 1.0000   fit-set final MSE 1.4785e-06
+  off layer 15  g = 0.9700   fit-set final MSE 1.4785e-06
+  C4   fit 1.4694e-06  held-out 1.4362e-06
+
+C3  per-layer VARIANCE gain (registered arm) ...
+  var layer  0  g = 1.0000   fit-set final MSE 1.4879e-06
+  var layer  1  g = 1.0000   fit-set final MSE 1.4879e-06
+  var layer  2  g = 1.0000   fit-set final MSE 1.4879e-06
+  var layer  3  g = 0.9990   fit-set final MSE 1.4723e-06
+  var layer  4  g = 1.0000   fit-set final MSE 1.4723e-06
+  var layer  5  g = 0.9990   fit-set final MSE 1.4720e-06
+  var layer  6  g = 1.0000   fit-set final MSE 1.4720e-06
+  var layer  7  g = 1.0000   fit-set final MSE 1.4720e-06
+  var layer  8  g = 1.0000   fit-set final MSE 1.4720e-06
+  var layer  9  g = 1.0000   fit-set final MSE 1.4720e-06
+  var layer 10  g = 0.9990   fit-set final MSE 1.4701e-06
+  var layer 11  g = 1.0000   fit-set final MSE 1.4701e-06
+  var layer 12  g = 1.0000   fit-set final MSE 1.4701e-06
+  var layer 13  g = 1.0000   fit-set final MSE 1.4701e-06
+  var layer 14  g = 1.0000   fit-set final MSE 1.4701e-06
+  var layer 15  g = 0.9700   fit-set final MSE 1.4701e-06
+  C3   fit 1.4611e-06  held-out 1.4139e-06
+
+held-out, versus C2 on the SAME split = 1.4264e-06:
+  C4: 0.9932x   paired diff -9.793e-09  95% [-2.012e-08, 5.336e-10]
+  C3: 1.0088x   paired diff 1.249e-08  95% [-3.144e-08, 5.641e-08]
+
+C0 in cal.json covers a DIFFERENT split (48 networks vs 24); refusing to quote an unpaired ratio.
+
+GT noise floor mean 1.7844e-08
+total 890s
+wrote experiments/2026-08-26_p2_cal/cal_nc.json
