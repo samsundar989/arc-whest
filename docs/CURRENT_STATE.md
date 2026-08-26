@@ -12,17 +12,19 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
 - Shape is `1024 x 16`; budget is `2**41`; multiplier floor is `0.1`.
 - Official stack is WhestBench 0.16 / flopscope 0.12. Lambda is zero; residual cap
   is 0.4 seconds; total wall cap 120 seconds; solution memory 8 GiB.
-- The live Phase-2 board had **46 entrants on the 2026-08-25 recheck**. Rank 1
-  was Puffi at `1.09e-8` adjusted / `3.55e-8` raw; the K2 covariance-propagation
-  tie occupied roughly ranks 35--39 at `3.93e-7` / `3.93e-6`. This is a
+- The live Phase-2 board had **48 entrants on the 2026-08-25 Chicago / 2026-08-26
+  UTC recheck**. Rank 1 was Puffi at `9.50e-9` adjusted / `3.10e-8` raw; the K2
+  covariance-propagation tie occupied roughly ranks 37--41 at `3.93e-7` /
+  `3.93e-6`. This is a
   live-board observation, not a promotion dataset.
 - The signed-in team/Phase-2 submission view says **no submissions match**. This
   account therefore has **zero Phase-2 submissions** as of 2026-08-25.
 - The current shipped file routes Phase-2 width to basic `k2p1`. Its official
   100-MLP subprocess mini measured `4.050566e-7` adjusted / `4.050566e-6` raw,
-  with 0 failures, fixed `137,600,326,656` FLOPs/MLP and 4.29x worst-case
-  residual headroom. At the current board that projects to about rank 40 and is
-  **37.2x worse adjusted / 114.1x worse raw** than the leader. It is a safe
+  with 0 failures, fixed `137,600,326,656` FLOPs/MLP and **4.29x LOCAL,
+  one-session** worst-case residual headroom. At the current board that projects
+  to about rank 42 and is **42.6x worse adjusted / 130.7x worse raw** than the
+  leader. It is a safe
   calibration baseline, not a materially improved Phase-2 system.
 - The repo's scientific decision protocol is strong. Its deployment evaluator was
   not Phase-2-truthful; **P2-P0 repaired the deployment parity** and the local
@@ -43,7 +45,8 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   none a false green today: the Linux branch and the child-`setrlimit` Linux
   answer have never executed, and the five design observations of the sixth pass
   were deliberately not pursued.
-- **Track 0S is ready for Samuel's decision.** The frozen K2p1 candidate
+- **Track 0S is technically safe but procedurally REJECTED at current HEAD.** The
+  frozen K2p1 candidate
   (`00240eb1e60810f5…`, byte-identical to `estimator_v2_6_1.py`) scores
   `4.050566369642183e-7` adjusted on the official 100-MLP subprocess mini with
   **zero failures**, fixed `137,600,326,656` FLOPs/MLP and a floor-pinned
@@ -52,23 +55,31 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   account/allowance evidence is preserved with **transcription honestly
   distinguished from capture**; the submission contract and **Samuel's prediction
   (`3.6e-7`, no failures, transfers)** are committed *before* any result. Two
-  independent passes have run; the second closed the missing-gate defect. **Only
-  Samuel may authorize the one-off submission, and his approval must name the
-  exact SHA.**
-- **Phase 1A construction is COMPLETE and awaiting its verdict.** 34/34 verifier
-  and 13/13 probe. Exact `1/32` cross-basis coherence; **all 512** phase functions
-  degree 2 and **all 130,816** pairwise differences rank 10; the rejected
+  independent passes ran against an earlier tree. The committed full-preflight
+  witness names `3adf81f`, while current HEAD subsequently changed two
+  `local_sim/` files, which violates the submission contract's own gate. **Do not
+  request approval or submit.** Correct the durable record, run a clean full
+  preflight from the corrected HEAD, commit only its evidence, live-recheck the
+  account, and obtain a focused ACCEPT before asking Samuel to approve an exact
+  SHA.
+- **Phase 1A is mathematically valid but PROVISIONAL.** 34/34 verifier and 16/16
+  probe. Exact `1/32` cross-basis coherence; the phase-degree distribution is
+  exactly **`{0: 1, 2: 511}`**, and **all 130,816** pairwise differences have rank
+  10; the rejected
   coordinate mapping is an executable negative control with a raw artifact.
   **K6 is WITHDRAWN** — the verifier is a property checker, not an independent
   reference; CCKS Example 9.2 was attempted and abandoned rather than tuned into
   agreement. **K8 is quantified**: the carrier-aligned fourth moment is exactly
   **21.6881103515625×** the spherical target while 64 random directions give
   `[0.968, 1.023]`, so the subset is **not** a 4-design and random probing cannot
-  show it. The official flopscope ledger is `1,099,511,627,776` and its zero
-  overhead is an **identity** — `(2K−1) + 1 = 2K` — so the leader's `+290,757,224`
-  is neither ReLU nor materialisation. **No seed block, no `estimator.py` edit, no
-  truth measurement, and no performance claim.** Phase 1B stays blocked until a
-  fresh independent ACCEPT.
+  establish it. The dense carrier's official flopscope ledger is exactly
+  `1,099,511,627,776 = 2**40`, hence `C/B = 0.5` and multiplier `0.5` before any
+  analytic/control overhead: a **5x score penalty** relative to K2's `0.1` floor.
+  The unseen leader's overhead is unknown. The current probe wraps a NumPy-built
+  carrier in `fnp`; it is not yet a grader-legal construction path, and its setup
+  and Windows memory checks cannot clear the official boundaries. **No seed
+  block, no `estimator.py` edit, no truth measurement, and no performance claim.**
+  Phase 1B stays blocked until the bounded repair and a fresh independent ACCEPT.
 
 ## Authoritative document map
 
@@ -298,10 +309,12 @@ Three experiments decompose the 2.35x: the weight-representation repair is a fix
 **~19 ms**, flopscope 0.10 vs 0.12 is **0.91x** (not the cause), and **~2.35x is
 run/session state and remains unexplained.**
 
-**So the carrier's allowance is bounded by the bad day, not the good one:**
-`k2p2` at 260.7 ms leaves **~139 ms**, and that day's worst MLP already sat at
-1.02x headroom **with no carrier at all**. Phase 1 designs against that, and its
-contract needs a falsifier on residual rather than a check performed afterwards.
+**There is no trustworthy additive carrier allowance.** Subtracting the 260.7-ms
+median suggests ~139 ms, but the cap applies per MLP and that day's 390.6-ms
+maximum leaves only **9.4 ms** on its row. Residual is not known to add linearly
+between branches. Phase 1 must test the integrated candidate, include the observed
+~2.35x session spread in a preregistered tail falsifier, and reject any design that
+passes only in a friendly session.
 
 Two cautions on the numbers above, both from an independent Skeptic: the "worst
 MLP" is frequently the **first** MLP (a warm-up transient, which still fails an MLP
@@ -316,9 +329,9 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 |---:|---|---|---|
 | 0 | official-stack/evaluator repair | IMPORTANT | **CLOSED 2026-08-24** — G1–G7 all met, independent ACCEPT recorded |
 | 0H | P1-PRE: D1–D3 evaluator hardening | **IMPORTANT** | **CLOSED** — seventh independent pass ACCEPT; 15 named mutations and current durable record verified |
-| 0S | first Phase-2 calibration submission | **STRATEGIC** | **PROVISIONAL** — candidate/runtime safe; correct the missing GT-noise floor, preserve live account/quota evidence, commit the full contract + Samuel prediction, obtain focused ACCEPT, then ask for exact-SHA approval. Expected about rank 40; calibration only, never a nominee |
-| 1A | Kerdock/MUB mathematical spec, direct generator, independent reference, dense reference | **IMPORTANT** | **IN PROGRESS / PROVISIONAL** — 23/23 proves a valid MUB subset, not the preregistered independent-reference identity. Complete bounded K6 correction and K7--K10; no seed, estimator edit, or truth measurement |
-| 1B | structured-carrier DESIGN evidence | STRATEGIC | after 1A ACCEPT; contract reviewed before any block is claimed, on a NEW block (P02) |
+| 0S | first Phase-2 calibration submission | **STRATEGIC** | **REJECTED procedurally at current HEAD** — the candidate is safe, but the full-preflight witness predates later `local_sim/` edits. Correct continuity, produce a clean current-HEAD witness + evidence-only commit, live-recheck account/allowance, obtain focused ACCEPT, then ask for exact-SHA approval. Expected about rank 42; calibration only, never a nominee |
+| 1A | verified Kerdock/MUB carrier + grader-legal construction/deployment evidence | **IMPORTANT** | **PROVISIONAL** — 34/34 + 16/16 prove a valid real-MUB carrier and its exact dense cost. Add a stdlib/`fnp` construction path byte-identical to the NumPy reference; remove the memory/setup false-green; reconcile K6 as formally withdrawn; run current-HEAD full preflight/portability and obtain focused ACCEPT. No seed, estimator edit, or truth measurement |
+| 1B | cost-indexed structured-carrier DESIGN frontier | STRATEGIC | after 1A ACCEPT; contract and Samuel's restated prediction reviewed before claiming a NEW DESIGN block. Primary estimand is adjusted score over basis count and total measured overhead, not reproduction of the 16-basis fingerprint |
 | 2 | structured-carrier DECIDE | STRATEGIC | pending; new SINGLE_USE block after design freeze |
 | 3 | recurrent augmented-K2 parity / DESIGN / DECIDE | IMPORTANT then STRATEGIC | pending |
 | 4 | checkpoint response DESIGN/DECIDE | STRATEGIC | pending |
@@ -340,10 +353,13 @@ that test them, and they must not be edited in the meantime.
 | S3a | raw-MSE gain of faithful recurrent augmented K2 over K2p2, standalone | `<1.1x` | open (Phase 3) |
 | S3b | official 0.4 s residual-cap failure risk | aug-K2 at risk, carrier safe | open |
 
-S2 sits **below** the ~74x implied by the Puffi cost fingerprint. If the carrier
-lands in Samuel's band rather than near 74x, the fingerprint inference is
-incomplete and the leader has a second mechanism. That disagreement is registered
-and worth watching.
+S2 is still a valid historical prediction for **Kerdock16 versus matched-row IID**,
+but it is not a promotion gate. Dense Kerdock16 must improve raw MSE by **more than
+5x versus K2p1 merely to beat the current baseline score**, before adding any
+analytic/control cost; matching the live `9.50e-9` leader would require roughly
+**213x**. The current leader's raw/adjusted row implies multiplier about `0.306`,
+not `0.5`, so the old 16-basis cost fingerprint is evidence for the carrier family,
+not evidence that 16 is the winning basis count.
 
 ## Closed and open lanes
 
@@ -353,7 +369,7 @@ and worth watching.
 | higher Gaussian covariance-map orders | low value | measured plateau near 1.052x |
 | marginal ReLU mean Edgeworth | closed | capped near 1.047x in CP3R |
 | recurrent augmented K2 joint state | **open** | never tested by CP3R |
-| 16-basis Kerdock/MUB + radial | **highest priority** | reopened by external fingerprint |
+| cost-indexed Kerdock/MUB + exact radial | **highest priority** | valid carrier; test the adjusted-score frontier over basis count, with 16 only a diagnostic endpoint |
 | ordinary IID/random orthogonal | control only | tested arms lose |
 | broken two-cycle lattice | closed | does not bound valid QMC/MUB |
 | checkpoint response closure | **open after carrier** | compositional mechanism |

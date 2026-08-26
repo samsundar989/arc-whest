@@ -14730,3 +14730,142 @@ mtimes. A reviewer had to do exactly that archaeology to check my claim.
 **Nothing submitted.**
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-25 — INDEPENDENT DECISION REVIEW: Phase 1A/Track 0S remain blocked; Phase 1B becomes a cost-indexed frontier
+
+*Append-only review entry. No seed block, truth data, vault, submission or
+`estimator.py` change. Builder HEAD reviewed: `f8a2df5`.*
+
+## Question
+
+Do the Phase-1A and Track-0S corrections satisfy their own gates, and does the
+corrected dense-carrier cost change the next scientific experiment?
+
+## Reproduction
+
+Fresh direct reruns at reviewed HEAD reproduced:
+
+- `local_sim/test_kerdock_mub.py`: **34/34**;
+- `local_sim/p1a_carrier_probe.py`: **16/16**;
+- exact phase-degree distribution `{0: 1, 2: 511}`;
+- all 130,816 matrix differences rank 10;
+- exact aligned fourth-moment ratio `21.6881103515625`;
+- exact carrier counted cost `2**40`, hence `C/B=0.5` and multiplier `0.5`;
+- protected diff since `edcf89b` empty for `estimator.py`, seed ledger and vault.
+
+The signed-in Phase-2/team submission view still showed **zero submissions**. The
+live board had 48 entrants; Puffi led at `9.50e-9` adjusted / `3.10e-8` raw. The
+frozen K2p1 mini baseline therefore projects near rank 42 and is 42.6x worse in
+adjusted score. Live board values are external state, not promotion data.
+
+## Independent verdicts
+
+### Track 0S — **REJECT** on provenance, not estimator safety
+
+The committed full-preflight transcript witnesses `3adf81f`. Reviewed HEAD
+`f8a2df5` later changed `local_sim/p1a_carrier_probe.py` and
+`local_sim/test_kerdock_mub.py`. Gate item 6 permits only an evidence commit after
+the witnessed HEAD and explicitly forbids this difference. The estimator hash,
+100-row score/FLOPs/failures, GT-noise calculation, official configuration and
+FLOP anchor all survived independent reproduction.
+
+Cheapest closure: correct stale state and artifact labels; run full preflight from
+a clean corrected HEAD to a system-temp transcript; commit only transcript and
+regenerated evidence; prove no protected-code difference; live-recheck account and
+allowance; obtain focused ACCEPT; only then ask Samuel to approve an exact SHA.
+Nothing was submitted.
+
+### Phase 1A — **PROVISIONAL**
+
+The carrier mathematics is valid, but the exit gate is not met:
+
+1. the “submission-legal” probe imports NumPy, builds with the NumPy generator and
+   only wraps the finished carrier in `fnp.array`; no grader-legal stdlib/`fnp`
+   construction path exists;
+2. peak commit below 8,192 MB is used as a pass even though commit is a lower bound
+   on `RLIMIT_AS`-charged virtual space; 7.14x is at most an upper-bound headroom;
+3. construction after imports is not the official fresh-worker setup boundary;
+4. durable state still contradicted the K6 withdrawal and the corrected 34/34,
+   16/16, `{0:1,2:511}` result;
+5. the full-preflight witness predates the latest verifier/probe corrections.
+
+K6 is formally narrowed: exact Gram properties prove a valid real-MUB carrier;
+they do not prove identity to an independently generated canonical CCKS object.
+Random probes merely missed the aligned fourth-moment defect and cannot establish
+exact design strength. The unseen leader's implementation overhead remains
+unknown.
+
+Cheapest closure: add a stdlib/`fnp` constructor byte-identical to the NumPy
+reference for every supported `k`; remove memory/setup false-greens; reconcile the
+durable record; run a clean current-HEAD full preflight and portability; obtain a
+focused ACCEPT. No truth or DESIGN seed is needed.
+
+## Strategic correction — 16 bases are an endpoint, not the objective
+
+For dense antipodal `k`-basis propagation at width 1024/depth 16, before overhead:
+
+```text
+F_k = k * 2**36
+F_k / B = k / 32
+m_k = max(0.1, k/32)
+```
+
+Against K2p1 raw MSE `4.05056637e-6` and multiplier `0.1`:
+
+| k | multiplier | raw-MSE gain required merely to beat K2p1 |
+|---:|---:|---:|
+| 1 | 0.100 | any strict gain |
+| 2 | 0.100 | any strict gain |
+| 4 | 0.125 | >1.25x |
+| 8 | 0.250 | >2.50x |
+| 16 | 0.500 | >5.00x |
+
+Dense 16 would need roughly **213x** raw-MSE improvement over K2p1 to match the
+live `9.50e-9` adjusted leader before overhead. The leader's live row implies
+multiplier about `0.306`, consistent with roughly 8--10 dense-equivalent bases
+after overhead, not dense 16. This is an inference from score arithmetic, not a
+claim about private code.
+
+Therefore Phase 1B's primary estimand is the paired arithmetic **adjusted-score
+frontier over basis count and total measured overhead**. The old 2.7x-versus-IID
+prediction remains a historical mechanism prediction, not a promotion gate.
+
+Before truth, implement exact dense, first-layer FWHT, and first-layer FWHT plus
+second-layer antipodal-reuse paths and cross-check them. Then on fresh DESIGN-A,
+evaluate nested `k=1..16` from cumulative per-basis sums under a few predeclared
+mechanism-based basis policies; lock and replicate the chosen arm on DESIGN-B.
+Only after the carrier is frozen should shallow analytic checkpoints be tested as
+a separate marginal adjusted-score estimand. A full K2p2 branch raises approximate
+multiplier at `k=8/16` to `0.3127/0.5627`, so it must pay for itself.
+
+Residual has **no trustworthy additive ~139-ms allowance**: the bad-day median
+leaves ~139 ms, but the bad-day maximum leaves only 9.4 ms on its row. The contract
+must test the integrated candidate with three 100-MLP official-subprocess soaks,
+zero cap failures, `2.35 * quiet-session p99 < 0.4 s`, repeated fresh-worker setup,
+and Linux `RLIMIT_AS` enforcement (6-GiB sacrificial cap) before calling it
+deployable.
+
+## Primary-source anchors
+
+- WhestBench 0.16 release and scoring contract:
+  <https://github.com/AIcrowd/whestbench/releases/tag/v0.16.0>
+- Official scoring implementation:
+  <https://github.com/AIcrowd/whestbench/blob/v0.16.0/src/whestbench/scoring.py>
+- Estimator/runtime contract:
+  <https://github.com/AIcrowd/whestbench/blob/main/docs/reference/estimator-contract.md>
+- Puffi Phase-1 report (FWHT, antipodal reuse, shallow checkpoint, bounded
+  workspace):
+  <https://discourse.aicrowd.com/uploads/short-url/iDdUNo66HzI7ovRqhQqpLOFFugI.pdf>
+- CCKS real-Kerdock/MUB geometry:
+  <https://doi.org/10.1112/S0024611597000403>
+
+## Decision and next gate
+
+**Do not submit. Do not claim a Phase-1B seed.** Close the bounded Phase-1A and
+Track-0S evidence defects first. Phase 1B begins only after Phase 1A ACCEPT, a
+committed Rule-1 contract, Samuel's restated predictions, and a fresh DESIGN-block
+claim. The active plan and copy-ready Builder prompt were updated in
+`docs/GAME_PLAN.md`, `docs/CURRENT_STATE.md`, `docs/BENCHMARK.md`, and
+`docs/CLAUDE_CODE_HANDOFF.md`.

@@ -1,8 +1,7 @@
-# Claude Code handoff — close Track 0S and Phase 1A, then stop
+# Claude Code handoff — close Phase 1A/Track 0S, then run a cost-aware Phase 1B
 
 Copy the prompt below into a new Claude Code session started at the repository
-root. It assumes no chat history. Repository state is authoritative if a SHA or
-fact has changed since this handoff was written.
+root. It assumes no chat history. Repository evidence is authoritative.
 
 ---
 
@@ -15,109 +14,188 @@ You are the repo-local Builder for Samuel's ARC White-Box Estimation Challenge
 C:\Users\samsu\Documents\arc-whest
 ```
 
-Continue autonomously through the bounded safe work below. Stop at every
-Samuel-only prediction, vault, submission, seed-claim, estimator edit, or material
-scope-expansion gate. Never submit or touch a vault without Samuel's explicit
-approval.
+Continue autonomously through the bounded work below. Stop at every Samuel-only
+prediction, submission, vault, seed-claim, `estimator.py` edit, or material scope
+expansion. Never submit or touch a vault without Samuel's explicit approval.
 
 First read `AGENTS.md`, then `docs/CURRENT_STATE.md`, the bottom of
 `experiments/LOG.md`, `docs/GAME_PLAN.md`, `docs/VALIDATION.md`,
-`docs/GOTCHAS.md`, and `docs/SKEPTIC.md`. Inspect the worktree and current HEAD
-before editing. At this handoff, the reviewed worker HEAD was `7e06cd3`; the tree
-was clean before the plan-review documentation update. `estimator.py`, the seed
-ledger and the vault were untouched.
+`docs/GOTCHAS.md`, `docs/KERDOCK_MUB_SPEC.md`, and `docs/SKEPTIC.md`. Inspect HEAD
+and the worktree before editing. The pre-review worker HEAD was `f8a2df5`; a later
+documentation-only review commit may now be HEAD. `estimator.py`, the seed ledger
+and the vault were untouched by the review.
 
 ## What is true now
 
 - Phase 0 and P1-PRE are CLOSED on literal independent ACCEPTs. Do not reopen
   them.
-- Track 0S's frozen K2p1 candidate is technically submission-safe: SHA-256
-  `00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec`,
-  byte-identical to `estimator_v2_6_1.py`; official 100-MLP subprocess mini
-  `4.050566369642183e-7` adjusted / `4.050566369642183e-6` raw, multiplier
-  0.1, fixed `137,600,326,656` FLOPs/MLP, zero failures, worst residual
-  `0.0932798 s` = 4.288x headroom. This is calibration, not improvement.
-- The mini's required mean ground-truth noise floor is
-  `7.47823932957716e-11` (0.001846% of raw MSE); the packet omitted it.
-- The signed-in Phase-2 team view was rechecked on 2026-08-25 and showed zero
-  submissions. The official overview says 10 submissions/team/UTC day. Preserve
-  current raw evidence rather than relying only on prose.
-- The live board recheck had 46 entrants. Puffi led at `1.09e-8` adjusted /
-  `3.55e-8` raw; the `3.93e-7` covariance-propagation tie occupied about ranks
-  35--39. Our measured baseline projects to about rank 40, 37.2x behind adjusted.
-- Phase 1A's corrected generator passes 23/23 and genuinely emits a 16-basis
-  real-MUB subset: exact 1/32 coherence, degree-2 phase functions and rank-10
-  differences for all 120 basis pairs. The earlier coordinate mapping genuinely
-  failed. But Phase 1A is PROVISIONAL: K6 overclaims an independent reference,
-  and K7--K10 remain incomplete.
+- No Phase-2 submission has been made. The signed-in team/Phase-2 filter showed
+  zero submissions on the 2026-08-25 Chicago / 2026-08-26 UTC recheck.
+- The frozen K2p1 submission file is operationally safe but not improved:
+  `4.050566369642183e-7` adjusted / `4.050566369642183e-6` raw on the official
+  100-MLP subprocess mini, multiplier `0.1`, `137,600,326,656` FLOPs/MLP, zero
+  failures. Its 4.288x residual headroom is **LOCAL and one-session only**.
+- The live board recheck had 48 entrants. Puffi led at `9.50e-9` adjusted /
+  `3.10e-8` raw. Our baseline projects to about rank 42 and is 42.6x worse in
+  adjusted score. The live leader row implies multiplier about `0.306`.
+- Phase 1A really does emit a valid 16-basis real-MUB carrier. Independent reruns
+  reproduced verifier 34/34 and probe 16/16, exact `1/32` coherence, phase-degree
+  distribution `{0: 1, 2: 511}`, all 130,816 differences rank 10, and the rejected
+  mapping's failure. K8 is exact: the aligned fourth-moment ratio is
+  `21.6881103515625`; 64 random probes merely missed that defect.
+- Dense 16 costs exactly `2**40`, so `C/B=0.5` and its multiplier is `0.5` before
+  analytic/control overhead. It is an experimental endpoint, not the presumed
+  winning architecture. The current leader cost points instead toward roughly an
+  8--10-basis carrier after overhead.
+- Both terminal reviews are PROVISIONAL. Phase 1A lacks a grader-legal carrier
+  construction path and truthful setup/memory clearance. Track 0S's full-preflight
+  witness names `3adf81f`, before later `local_sim/` corrections, so its own gate
+  fails at current HEAD.
 
-Do not edit `docs/HUMAN_MODEL.md`, a frozen estimator archive, the seed ledger,
-vault state, or `estimator.py` in either track.
+Do not edit `docs/HUMAN_MODEL.md`, frozen estimator archives, the seed ledger,
+vault state, or `estimator.py` in the bounded closure below.
 
-## Track 0S — cheap procedural closure, then Samuel's gate
+## A. Close Phase 1A — IMPORTANT, no truth or seed
 
-This remains STRATEGIC because submission changes external state. Do not rerun the
-100-MLP mini unless the candidate hash, dataset revision, or official config has
-changed.
+Do exactly this bounded repair; do not reopen the algebra or start another general
+hardening cycle.
 
-1. Append (never rewrite) a correction to the readiness packet recording the
-   exact GT-noise floor above and correcting the stale rank/board language.
-2. Preserve a current signed-in artifact showing this team has zero Phase-2
-   submissions and a current official-rule artifact showing the allowance. Record
-   that the visible live score is the 50-network feedback half; the other 50 are
-   withheld for the final result. Do not describe a live score as public+private.
-3. Append and commit the complete submission contract before submission. Include
-   candidate SHA, expected official score band, zero-failure prediction, fixed
-   FLOPs/floor multiplier, operational gate and falsifier, and a promise to fit
-   nothing to the result. Take and record Samuel's prediction before submission.
-4. Give the corrected packet and raw artifacts to a fresh independent Skeptic.
-   Require literal ACCEPT on this bounded correction.
-5. Stop and ask Samuel to authorize exactly one Phase-2 calibration submission of
-   the exact SHA. Only after his explicit approval may you submit once. Preserve
-   the returned ID/report verbatim. It is not a final nominee merely because it
-   exists.
+1. Reconcile every durable claim with the formal K6 withdrawal. The claim is only
+   that the emitted object satisfies the defining real-MUB Gram properties; the
+   property checker is not an independent construction. Remove stale 23/23,
+   13/13, “all 512 degree 2,” independent-reference, `104`, global-extremality,
+   and explained-leader-overhead wording. Preserve history by appending a LOG
+   correction rather than rewriting prior LOG entries.
+2. Add a genuinely grader-legal carrier construction/materialisation path using
+   only Python stdlib and `flopscope.numpy as fnp`. The current probe builds with
+   NumPy and wraps the finished array, which does not qualify. Prove the legal
+   path byte-identical to the NumPy reference for `k=1/2/4/8/16`, arbitrary
+   supported basis indices, and deterministic fresh processes.
+3. Replace the memory false-green. Observed Windows peak commit around 1.147 GiB
+   gives at most 7.14x headroom; it cannot prove an 8-GiB `RLIMIT_AS` pass. A check
+   must not pass merely because commit is below 8 GiB. Record largest arrays,
+   commit/RSS/virtual-space limitations, and leave enforcement unproved unless a
+   Linux subprocess actually enforces it.
+4. Do not call an after-import construction timer the official setup boundary.
+   Measure repeated fresh-worker spawn + import + setup if the evaluator exposes
+   that boundary; otherwise explicitly defer setup clearance. Preserve the dense
+   ledger `2**40`, `C/B=0.5`, and say the private leader's remainder is unknown.
+5. Rerun the 34/34 verifier, 16/16 probe, portability, and full preflight. Capture
+   full preflight first to a system-temp file so the transcript header witnesses a
+   clean tree. Commit the transcript/regenerated evidence as the single evidence
+   commit permitted by the gate; prove no `local_sim/`, `scripts/`, or
+   `estimator.py` difference from the witnessed HEAD.
+6. Append the knowledge delta and give the contract, diff, raw artifacts, and
+   current-HEAD transcript to a fresh independent Skeptic. Phase 1A closes only on
+   literal ACCEPT. If the reviewer finds another blocking false durable claim,
+   stop and return it; do not start Phase 1B.
 
-## Phase 1A — bounded mathematical/instrument closure, no truth data
+## B. Close Track 0S — still no submission without Samuel
 
-Continue Phase 1A; do not restart the valid generator and do not claim a seed.
-Before Phase 1B, close every item below:
+This is a calibration baseline, not algorithmic progress.
 
-1. Correct the stale `sign_vectors` docstring that still describes the rejected
-   multiplicative-rank coordinate mapping. Preserve that bad mapping as an
-   executable negative control with a raw artifact; correct the historical
-   spectrum wording to what the executable test actually reports.
-2. Fulfil K6 with an independently generated finite-field Kerdock-matrix
-   reference following CCKS Example 9.2, rather than a property checker over
-   generator output. Use the finite-field construction on
-   `V=F_(2^m) x F2` and compare reduced dimensions exhaustively and the live
-   chosen phases up to a declared fixed linear/signed equivalence. If that exact
-   reference cannot be completed, append a formal K6 correction and narrow the
-   gate; never retain the false independent-reference claim.
-3. Test nested live `k=1/2/4/8/16` outputs, configurable basis indices,
-   deterministic ordering, float32 dtype and unit norms. Either include the
-   standard basis deliberately or explicitly defer basis-set choice to Phase 1B.
-4. Validate the chi-radial identity separately: stable exact constant, layer-1
-   closed form, every network prefix, positive homogeneity, and a guard proving
-   the factor is applied exactly once.
-5. Prove the exact second moment and report an exact fourth-moment tensor or frame
-   diagnostic. The `N=1024,k=16` carrier-aligned fourth moment is
-   `21.6881103515625x` the spherical target; random probes alone cannot validate
-   K8. This is quadrature characterization, not a performance claim.
-6. Build the dense 32,768 x 1,024 float32 oracle, then implement a submission-legal
-   `fnp` construction/materialisation path. Measure the actual official-flopscope
-   operation ledger and explain this implementation's overhead. Do not force a
-   match to a leader's unknown implementation merely because its total was
-   published.
-7. Measure fresh-subprocess setup time and peak/transient memory including
-   construction, simultaneous point buffers, weights, temporaries and operation
-   history. Windows memory is an accounting upper bound, not proof that the 8-GiB
-   grader limit was enforced.
-8. Run full preflight and portability, preserve raw evidence, append the knowledge
-   delta, and launch a fresh independent Skeptic. Phase 1A closes only on literal
-   ACCEPT.
+1. Correct the GT-floor artifact label to `mean(avg_variance) / 1e9`; qualify the
+   4.288x residual number as LOCAL, one-session; anchor the duplicate-transcript
+   disclosure to historical commit `6d3423c` rather than claiming the current
+   files are identical.
+2. Reuse the clean final-HEAD preflight witness only if the Track-0S contract's
+   evidence-only-commit rule is literally met. Otherwise run the gate again.
+3. Live-recheck the signed-in Phase-2 submission count and remaining daily
+   allowance. Preserve capture where possible and label transcription as such.
+4. Obtain a focused independent ACCEPT on the exact candidate SHA and packet.
+5. Stop and ask Samuel to authorize one calibration submission of that exact SHA.
+   Never infer approval. If approved later, submit once and preserve the returned
+   ID/report verbatim; fit nothing to the score and do not call it a nominee.
 
-Stop after Phase 1A ACCEPT. Phase 1B is STRATEGIC: Samuel's restated S2 prediction,
-a reviewed contract and a fresh DESIGN block must all precede any truth MSE,
-`estimator.py` edit, or performance claim. At each stop report exact evidence,
-current SHA, the decision needed, and safe work that can continue without crossing
-the gate.
+Track 0S does not block Phase 1B after Phase 1A is accepted.
+
+## C. Prepare exact fast paths before spending Phase 1B truth
+
+After Phase 1A ACCEPT, but before claiming a DESIGN block, implement three
+algebraically equivalent local paths:
+
+1. dense carrier reference;
+2. FWHT evaluation of layer 0;
+3. FWHT layer 0 plus exact layer-1 antipodal reuse:
+
+```text
+[z]+ W1 + [-z]+ W1 = |z| W1
+[z]+ W1 - [-z]+ W1 = z W1 = x (W0 W1)
+```
+
+Verify small and live shapes against dense, distinguish exact algebra from
+float32 rounding, and record official flopscope 0.12 operation ledgers. The
+leading fast/dense ratio is approximately `29/32 + 1/(32k)` before lower-order
+transforms and assembly. Dense remains the numerical oracle, not the production
+candidate. Do not use truth MSE to choose the spelling.
+
+## D. Phase 1B — STRATEGIC adjusted-score DESIGN frontier
+
+Before any truth exists:
+
+1. Append the full Rule-1 contract to `experiments/LOG.md` and commit it.
+2. Restate Samuel's S2 prediction and take his predictions for the new primary
+   questions: winning basis-count region, raw-MSE gain versus K2p1, and residual
+   safety. Stop for his answers before claiming the new DESIGN block.
+3. Claim a fresh DESIGN block through the ledger. Do not reuse P01 as decision
+   evidence and do not touch a SINGLE_USE DECIDE block.
+
+The primary estimand is paired arithmetic **adjusted score**, using common random
+numbers and `competition_score.decide()` with a preregistered gate. Report every
+MSE with the GT-noise floor. Use studentised-t or basic bootstrap, never percentile
+or BCa. Total counted FLOPs include carrier propagation, casts, means, output
+assembly, and every analytic/control branch.
+
+Dense carrier-only break-even before overhead is:
+
+| bases `k` | `F/B` | multiplier | raw gain versus K2p1 needed to beat K2p1 |
+|---:|---:|---:|---:|
+| 1 | 0.03125 | 0.100 | any strict gain |
+| 2 | 0.06250 | 0.100 | any strict gain |
+| 4 | 0.12500 | 0.125 | >1.25x |
+| 8 | 0.25000 | 0.250 | >2.50x |
+| 16 | 0.50000 | 0.500 | >5.00x |
+
+Evaluate cumulative `k=1..16` prefixes from one full trajectory. Predeclare only
+these mechanism-based nested policies: validated algebraic prefix; MLP-seeded
+uniform nested permutation; identity basis replacing one Kerdock basis. A seeded
+global signed-Walsh input rotation may be one bounded ablation. Do not tune literal
+basis indices. Include matched-row IID and ordinary-orthogonal controls as
+diagnostics, but do not gate on the old 2.7x-versus-IID prediction.
+
+Use two independent truth replicas and the cross-replica/noise-corrected identity.
+If the selected arm's truth-noise floor exceeds 10% of its raw MSE, increase truth
+replicas uniformly before selection. Record layerwise errors, local `k -> 2k` MSE
+elasticity, carrier-versus-K2 checkpoint discrepancies, exact FLOPs, residual,
+memory, setup and failures.
+
+Freeze basis policy, `k`, exact execution spelling and chunking from DESIGN-A;
+replicate them unchanged on locked DESIGN-B. Advance to a later DECIDE block only
+if the replication has at least 1.20x paired adjusted-score gain over K2p1, the
+allowed interval excludes zero, zero failures, and all operational falsifiers
+pass. This is a DESIGN screen, not promotion.
+
+Only after freezing the carrier, test shallow analytic checkpoints (for example
+layers 4/8/12) as a separate marginal estimand against that carrier. Measure actual
+prefix overhead. Prefer a shallow prefix; a full K2p2 branch adds about `1.378e11`
+FLOPs and raises the approximate multipliers at `k=2/4/8/16` to
+`0.1252/0.1877/0.3127/0.5627`. Gate “hybrid minus frozen carrier,” never hybrid
+versus K2 again.
+
+## Binding operational falsifiers
+
+- Three independent 100-MLP official-subprocess soaks. Report first-MLP warm-up
+  separately but never discard it. Zero rows may reach 0.4 seconds, and require
+  `2.35 * quiet-session p99 < 0.4 s` to cover the measured session spread.
+- No setup timeout across repeated fresh workers. The whole subprocess boundary is
+  authoritative, not an after-import timer.
+- Linux subprocess under an actual 6-GiB sacrificial `RLIMIT_AS`: zero
+  `MemoryError`, worker death or restart; record `VmPeak`, RSS, largest array and
+  workspace accounting. Without Linux enforcement, memory remains unproved and
+  the candidate is not deployable.
+- Total integrated counted FLOPs below `2**41`; no failed MLPs; no grader-policy
+  violation.
+
+At each gate, report exact evidence, current SHA, the decision needed, and safe work
+that can continue. Do not edit `estimator.py` or claim a DECIDE seed without a new
+STRATEGIC contract and Samuel's required prediction/approval.

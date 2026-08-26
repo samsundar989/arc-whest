@@ -28,25 +28,25 @@ The official live runtime is WhestBench 0.16 / flopscope 0.12 with lambda zero,
 a 0.4-second residual cap, 120-second total wall cap, 8-GiB solution-memory limit,
 and 5-second setup timeout.
 
-At the live 2026-08-25 snapshot:
+At the live 2026-08-25 Chicago / 2026-08-26 UTC snapshot:
 
 | system | adjusted score | raw final-layer MSE | counted FLOPs |
 |---|---:|---:|---:|
-| Puffi, rank 1 | `1.09e-8` | `3.55e-8` | published `~1.10e12` fingerprint |
+| Puffi, rank 1 | `9.50e-9` | `3.10e-8` | row implies multiplier `~0.306`; exact implementation unknown |
 | jamespayor, rank 2 | `1.17e-8` | `2.45e-8` | not captured in this snapshot |
 | current repo Phase-2 K2 path, measured mini | `4.050566e-7` | `4.050566e-6` | `137,600,326,656` |
 
-There were 46 entrants at the recheck; the `3.93e-7` K2 tie occupied about ranks
-35--39, so the measured current path projects to about rank 40. The present gap
-is about 37.2x in adjusted score and 114.1x in raw accuracy. The account has no
+There were 48 entrants at the recheck; the `3.93e-7` K2 tie occupied about ranks
+37--41, so the measured current path projects to about rank 42. The present gap
+is about 42.6x in adjusted score and 130.7x in raw accuracy. The account has no
 Phase-2 submission. Incremental 1.05x–1.30x improvements are useful controls but
 are not a winning strategy.
 
 ### Outcome targets
 
-- **Competitive milestone:** adjusted score below `5e-8`, zero failures.
-- **Winning target:** adjusted score below `1.7e-8` on honest offline evidence,
-  zero failures, and stable tails.
+- **Competitive milestone:** adjusted score below `3e-8`, zero failures.
+- **Winning target:** adjusted score below `8e-9` on honest offline evidence
+  (a margin below the live `9.50e-9` leader), zero failures, and stable tails.
 - **Robustness target:** both final nominees pass official subprocess evaluation,
   memory/code-policy audit, public CONFIRM, and an authorized Phase-2 vault decision.
 
@@ -77,29 +77,30 @@ the preregistered gate for each slice.
    counted-FLOP anchor agrees op by op, and all five failure paths are provoked.
    Three non-gate instrument defects from that ACCEPT remain scheduled as P1-PRE.
 
-### Strong inference
+### Strong inference, corrected after Phase 1A
 
-Puffi's exact Phase-2 cost is only 0.0264% above the leading dense cost of 32,768
-full propagated directions, and:
+An earlier Puffi operating point was reported near the leading dense cost of
+32,768 full propagated directions, and:
 
 ```text
 32,768 = 16 bases * 1,024 axes * 2 antipodes
 ```
 
 Combined with Puffi's public Phase-1 Kerdock/Walsh mutually-unbiased-basis carrier,
-antipodes, and exact radial integration, the highest-value explanation is a
-16-basis width-1024 structured angular carrier. Phase-2 code is private, so this is
-a mechanism fingerprint, not a claim of disclosure.
+antipodes and exact radial integration, this strongly supports the **carrier
+family**. It does not identify the winning basis count. The live rank-1 row has
+`adjusted/raw ~= 0.306`, materially below the dense-16 multiplier `0.5`; under the
+carrier's leading cost `F/B = k/32`, that is roughly the 8--10-basis region after
+overhead. Phase-2 code is private, so this is a cost inference, not a disclosure.
 
-Its observed raw MSE is roughly 74x below the IID variance estimate at the same row
-count. That external evidence exceeds the repository's own 2.7x condition for
-reopening structured sampling. The earlier random-orthogonal and invalid lattice
-arms do not bound this construction.
+The earlier random-orthogonal and invalid lattice arms do not bound the valid MUB
+construction. Conversely, MUB validity does not imply score optimality: Phase 1A
+measured a carrier-aligned fourth moment `21.6881x` the spherical target.
 
 ### Open questions, in priority order
 
-1. Can a legal 16-basis Kerdock/MUB carrier with antipodes and exact radial
-   integration reproduce the leader's cost and variance scale?
+1. Which basis count and exact execution spelling minimize **adjusted score** once
+   total counted FLOPs and residual failures are included?
 2. Does faithful recurrent augmented K2 materially repair the propagated state at
    Phase-2 shape while staying operationally safe?
 3. Can sampled-versus-analytic checkpoint discrepancies be transported forward by
@@ -329,7 +330,7 @@ one official calibration point with the current, frozen K2p1 file before the new
 architecture is ready:
 
 1. record the exact estimator hash and the measured official-subprocess mini
-   result (`4.050566e-7` adjusted, about rank 40 at the current snapshot),
+   result (`4.050566e-7` adjusted, about rank 42 at the current snapshot),
    explicitly labeling it a baseline rather than an improvement, and report its
    `7.47823932957716e-11` ground-truth noise floor alongside raw MSE;
 2. run `whest validate` and a clean `v2-phase2` subprocess mini with zero failures;
@@ -353,7 +354,7 @@ must not delay Phase 1A construction once P1-PRE is accepted.
 truth measurement, vault touch, or `estimator.py` edit.
 
 Build a standalone width-1024 Kerdock/MUB mathematical specification, direct
-generator, independent verifier, exact-radial rule, dense propagation reference,
+generator, property verifier, exact-radial rule, dense propagation reference,
 and counted-cost/memory model. The existing length-256 implementation is
 GR(4,7); width 1024 needs the known GR(4,9)/real-MUB construction and a direct way
 to emit a chosen 1/2/4/8/16-basis subset without materialising the full
@@ -371,12 +372,12 @@ Euclidean Line-Sets](https://doi.org/10.1112/S0024611597000403).
 Required construction evidence, before any truth data:
 
 1. cite and transcribe the exact algebraic construction, basis indexing and
-   ordering; prove reduced dimensions against a simple reference implementation;
-2. use different logic for generator and verifier so a shared mistake cannot make
-   the suite self-consistent. Property checks over generator output do not meet
-   this clause: add an independently generated finite-field Kerdock-matrix
-   reference (CCKS Example 9.2) and compare reduced dimensions exhaustively and
-   the live subset up to a declared fixed equivalence;
+   ordering. **K6's independent-reference identity is formally withdrawn**: the
+   attempted CCKS Example 9.2 spelling was not a valid independent oracle and must
+   not be tuned into agreement. The narrower claim is that the emitted object is a
+   real-MUB carrier satisfying its defining exact Gram properties;
+2. use independently coded property checks where possible and label their scope.
+   Do not call a checker over generator output an independent construction;
 3. prove unit norms, within-basis orthogonality, cross-basis coherence exactly
    `1/sqrt(1024) = 1/32`, antipodal closure, expected unique row count and
    deterministic ordering for 1/2/4/8/16 bases;
@@ -389,36 +390,65 @@ Required construction evidence, before any truth data:
 6. prove the exact second moment and report an exact degree-4 tensor/frame-potential
    diagnostic. For `N=1024,k=16`, a carrier-aligned fourth moment is
    **21.6881103515625x** the spherical target, so random probes are inadequate;
-7. build the 32,768-direction dense/full-batch float32 reference first, then a
-   submission-legal `fnp` construction/materialisation path. Measure its actual
-   official-flopscope operation ledger and own overhead; the leader's unknown
-   implementation is a clue, not an equality target;
-8. measure fresh-subprocess setup time and peak/transient memory including
-   construction, simultaneous point buffers, weights, temporaries and operation
-   history. A point buffer is 128 MiB; Windows memory is accounting evidence, not
-   an 8-GiB-limit test. Parameterize basis indices, or explicitly defer their
-   choice and standard-basis inclusion to preregistered Phase 1B DESIGN.
+7. retain the NumPy dense/full-batch float32 reference, then add a **grader-legal
+   stdlib/`fnp` construction/materialisation path** and prove byte identity for
+   `k=1/2/4/8/16`. Wrapping a NumPy-built carrier in `fnp.array` does not qualify;
+8. report the official-flopscope ledger as this implementation's cost. Dense 16 is
+   exactly `2**40`, `C/B=0.5`; the unseen leader's remainder is not explained;
+9. replace the Windows memory false-green with observed commit plus explicit
+   upper-bound headroom. Measure the actual fresh-worker setup boundary or leave
+   setup uncleared. A point buffer is 128 MiB; neither Windows commit nor an
+   after-import construction timer proves the 8-GiB/5-second grader limits;
+10. parameterize basis indices, or explicitly defer their choice and standard-basis
+    inclusion to preregistered Phase 1B DESIGN.
 
-Exit gate: zero algebraic/determinism/reference failures, exact explained row and
-counted-cost accounting, full preflight, a LOG knowledge delta and an independent
-Skeptic verdict. No score or variance claim is permitted in Phase 1A.
+Exit gate: 34/34 verifier and 16/16 probe remain green; grader-legal and NumPy
+carriers are byte-identical at every supported `k`; no memory/setup false-green;
+exact row/counted-cost accounting; a clean current-HEAD full-preflight transcript;
+portability; LOG knowledge delta; and a focused independent **ACCEPT**. No score or
+variance claim is permitted in Phase 1A.
 
 ### Phase 1B — structured-carrier DESIGN evidence
 
 **Class:** STRATEGIC when the new DESIGN block is claimed. The complete contract,
 Samuel's restated S2 prediction and commit must precede the claim.
 
-Use a new Phase-2 DESIGN block for basis count, radial nodes, chunking, checkpoint
-placement, and other tuning. P01 may be used only for clearly labeled reusable
-diagnostics consistent with its DESIGN registration; it is not the decision set.
+Use a new Phase-2 DESIGN block for basis count, basis policy, exact execution path,
+chunking and later checkpoint placement. Positive homogeneity already integrates
+radius exactly; do not tune radial nodes unless a later recentered approximation
+breaks that identity. P01 remains reusable diagnostics only, not the decision set.
 
-Design success criteria:
+The primary estimand is the paired arithmetic **adjusted-score** difference, not
+raw MSE versus IID and not reproduction of a 16-basis fingerprint. For a dense
+carrier with `k` bases and no overhead, `F/B = k/32`:
 
-- exact 16-basis, 32,768-direction leading-cost fingerprint reproduced;
-- zero construction/determinism/moment invariant failures;
-- no code-policy or memory violation;
-- promising matched-cost variance reduction with stable layerwise behavior;
-- **inside the residual budget below.**
+| `k` | multiplier | raw-MSE gain over K2p1 needed merely to beat K2p1 |
+|---:|---:|---:|
+| 1 | `0.100` | any strict gain |
+| 2 | `0.100` | any strict gain |
+| 4 | `0.125` | `>1.25x` |
+| 8 | `0.250` | `>2.50x` |
+| 16 | `0.500` | `>5.00x` |
+
+All assembly, casts and analytic/control work add to these thresholds. Adding the
+current full K2p2 cost raises the approximate multipliers to `0.1000, 0.1252,
+0.1877, 0.3127, 0.5627`; therefore shallow analytic checkpoints are favored over
+a full duplicate branch unless their marginal adjusted-score gain pays for itself.
+
+Before truth, implement and cross-check three exact execution paths: dense
+reference, FWHT first layer, and FWHT first layer plus the exact antipodal
+second-layer reuse described in Puffi's Phase-1 report. The latter has a leading
+cost ratio near `29/32 + 1/(32k)` versus dense, before lower-order operations.
+
+On DESIGN-A, retain cumulative per-basis sums so `k=1..16` can be evaluated from
+one trajectory. Predeclare only mechanism-based nested policies: the algebraic
+prefix, an MLP-seeded nested permutation, and an ablation replacing one basis with
+the identity basis; include a seeded signed-Walsh input rotation only as a bounded
+ablation. Do not fit literal basis indices. Freeze the best adjusted-score arm and
+replicate it on locked DESIGN-B before any DECIDE block. Advance only if the locked
+replication shows at least `1.20x` paired arithmetic-score gain over K2p1, its
+studentised-t/basic-bootstrap interval excludes zero, and every operational
+falsifier passes.
 
 ### The operational budget, measured before the carrier exists (P2-P0, 2026-08-24)
 
@@ -428,17 +458,16 @@ Phase-1 contract.
 
 | constraint | measured | what the carrier gets |
 |---|---|---|
-| residual, per MLP | `k2p2` spends **~95 ms** of the **400 ms** cap in the best observed session and **260.7 ms in the worst**, where its own worst MLP sat at **1.02x headroom with no carrier at all**. The level is not reproducible to better than **~2.4x** across runs | **~139 ms**, budgeted off the bad day. Designing against the best day is how a carrier passes here and fails on the grader |
-| counted FLOPs | `k2p2` costs `1.379e11`; the leader's fingerprint is `1.0998e12`, `C/B = 0.51` | ~`9.6e11` before matching the leader's cost |
+| residual, per MLP | the same K2p2 arm varied by about `2.35x`; its bad-day maximum was **390.6 ms**, leaving only 9.4 ms on that row | residual is not safely additive. Only the integrated candidate can clear the cliff |
+| counted FLOPs | dense carrier costs `k*2**36`; dense 16 alone is `2**40`, multiplier `0.5`; full K2p2 adds about `1.378e11` | freeze **total** measured operations. There is no residual FLOP allowance tied to an unknown leader implementation |
 | `setup()` | the 5 s ceiling covers **worker spawn + imports + setup**. `import whestbench` alone is 1.3 s quiet, 4.7-9.1 s loaded; our estimator's own setup is **0.6 ms** | build the point set here — it is FREE of FLOPs on the grader — but the wall ceiling is shared with imports we do not control |
 | memory | 8,192 MB, **unenforceable on Windows**; shipped file peaks at 918 MB commit (an upper-bound headroom of 8.9x) | one 32,768 x 1024 float32 point buffer is 128 MiB; start with the dense reference and chunk only if measured peak accounting or residual behavior requires it |
 
-Two of these are new and neither was available before Phase 0:
+Two constraints are binding:
 
-- **the ~139 ms residual budget** is the binding operational number for a carrier
-  that must propagate 32,768 directions through sixteen layers — and it is roughly
-  a third of what the best-case reading suggested, which is the whole reason the
-  measurement was worth arguing about;
+- **residual has no trustworthy additive allowance.** The old ~139 ms subtraction
+  used medians while the official cap is per MLP; the bad-day maximum leaves only
+  9.4 ms. Run the integrated candidate and judge its tail;
 - **`setup()` is FLOP-free but not wall-free.** The grader charges nothing for the
   point set built there, and the 5 s ceiling still applies to a window we mostly do
   not own (`import whestbench` alone is 1.3-9 s of it; our own setup is 0.6 ms).
@@ -448,11 +477,13 @@ reads 94.6 ms and 260.7 ms on different days, the cause of that 2.35x is measure
 NOT to be the flopscope release and only ~19 ms of it the weight representation,
 and the remainder is unexplained. See `docs/VALIDATION.md` 2b-ii.
 
-**A carrier design that only fits in the best session is not a design.** If the
-32,768-direction carrier cannot be built inside ~139 ms of residual, the honest
-responses are to make it cheaper, to move work into `setup()` where the grader
-charges no FLOPs, or to reduce the direction count -- not to re-measure until a
-friendly number appears.
+**Operational falsifiers for the Phase-1B contract:** three independent 100-MLP
+official-subprocess soaks; report but never discard first-MLP warm-up; zero rows at
+or above 0.4 seconds; require `2.35 * quiet-session p99 < 0.4 s`; no setup timeout
+across repeated fresh workers; total integrated FLOPs below `B`; and a Linux
+subprocess under an actual 6-GiB sacrificial `RLIMIT_AS` with zero memory failure,
+worker death or restart. If Linux enforcement is unavailable, memory remains
+unproven and the candidate cannot be called deployable.
 
 ### Phase 2 — decide whether structured carrier is the main backbone
 
@@ -464,7 +495,6 @@ all design choices before claiming the block.
 
 Proposed falsifiers to freeze in the actual contract after Samuel's prediction:
 
-- less than 2.7x MSE reduction versus IID at matched rows;
 - no positive paired arithmetic-score improvement over K2;
 - confidence interval crosses the registered score gate;
 - residual/memory/failure behavior is not deployable.
@@ -623,27 +653,28 @@ paths are provoked — the memory limit on Linux, where `RLIMIT_AS` exists.
 **The all-of gate G1–G7 is met**, on a literal independent **ACCEPT** at HEAD
 `952bd61`, after four review passes (PROVISIONAL, PROVISIONAL, REJECT, ACCEPT).
 
-**P1-PRE is CLOSED. The immediate action is the bounded Phase-1A closure while
-Track 0S receives its cheap procedural correction.**
+**P1-PRE is CLOSED. Phase 1A and Track 0S are both PROVISIONAL at current HEAD;
+neither may cross its gate yet.**
 
-- **Phase 0S — calibration only.** The candidate is technically safe: the
-  100-MLP official subprocess mini is zero-failure at `4.050566e-7`. Add the
-  missing GT-noise floor, preserve live account/quota evidence, commit the
-  submission contract + Samuel prediction, and obtain a focused ACCEPT before
-  asking for exact-SHA approval. Expect about rank 40, not an improvement.
+- **Phase 0S — calibration only.** The candidate is technically safe, but the
+  committed full-preflight witness predates later `local_sim/` corrections. From
+  the final corrected tree, run full preflight to a system-temp transcript, commit
+  only evidence, prove no protected code differs from the witnessed HEAD,
+  live-recheck the account, and obtain focused ACCEPT before asking for exact-SHA
+  approval. Expect about rank 42, not an improvement.
 - Phase 1 then runs in two distinct stages:
 
-- **Phase 1A — bounded closure, no truth.** Keep the valid 23/23 carrier, but do
-  not call its property checker an independent reference. Add the finite-field
-  reference, executable failed-mapping control, exact moment/radial evidence,
-  ship-legal flopscope path, fresh-process time and peak/transient memory. No truth
-  seed or estimator change. Ends only in preflight and a fresh independent ACCEPT.
-- **Phase 1B — DESIGN evidence.** Contract reviewed before any block is claimed,
-  on a **new** block (P02 rather than the already-exposed P01), judged on paired
-  arithmetic competition-score differences with measured FLOPs, including a
-  100-MLP soak reporting warm-up, residual drift, peak memory and worst-case 0.4 s
-  headroom — with the unexplained ~2.35× process-state effect as an explicit
-  falsifier.
+- **Phase 1A — bounded closure, no truth.** Keep the valid 34/34 + 16/16 carrier
+  and formal K6 withdrawal. Add the grader-legal stdlib/`fnp` constructor; correct
+  memory/setup false-greens and stale claims; run a clean current-HEAD full
+  preflight and portability. No truth seed or estimator change. Ends only in a
+  focused independent ACCEPT.
+- **Phase 1B — adjusted-score frontier, not dense-16 reproduction.** Before any
+  block claim, record Samuel's restated prediction and a reviewed contract on a
+  new DESIGN block. Build exact FWHT/antipodal fast paths before truth; evaluate
+  nested `k=1..16` on total measured score; lock and replicate the selected arm;
+  then test shallow checkpoint controls as a separate marginal estimand. The
+  residual, setup and Linux-memory falsifiers above are binding.
 
 The original Phase-0 prediction requirements and outcomes remain in
 `experiments/LOG.md`; they are historical evidence, not current instructions.
