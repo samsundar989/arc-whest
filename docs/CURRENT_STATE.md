@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — read this first
 
-**Snapshot: 2026-08-25. Phase 2 is live.** This file says where execution stands;
+**Snapshot: 2026-08-26. Phase 2 is live.** This file says where execution stands;
 [`GAME_PLAN.md`](GAME_PLAN.md) is the only active architecture/roadmap;
 [`VALIDATION.md`](VALIDATION.md) is binding for measurement; the newest entries at
 the bottom of `experiments/LOG.md` contain the evidence narrative.
@@ -12,13 +12,15 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
 - Shape is `1024 x 16`; budget is `2**41`; multiplier floor is `0.1`.
 - Official stack is WhestBench 0.16 / flopscope 0.12. Lambda is zero; residual cap
   is 0.4 seconds; total wall cap 120 seconds; solution memory 8 GiB.
-- The live Phase-2 board had **48 entrants on the 2026-08-25 Chicago / 2026-08-26
-  UTC recheck**. Rank 1 was Puffi at `9.50e-9` adjusted / `3.10e-8` raw; the K2
+- The live Phase-2 board had **50 entrants on the 2026-08-26 UTC recheck** (48 the
+  previous day; leader unchanged). Rank 1 was Puffi at `9.50e-9` adjusted / `3.10e-8` raw; the K2
   covariance-propagation tie occupied roughly ranks 37--41 at `3.93e-7` /
   `3.93e-6`. This is a
   live-board observation, not a promotion dataset.
 - The signed-in team/Phase-2 submission view says **no submissions match**. This
-  account therefore has **zero Phase-2 submissions** as of 2026-08-25.
+  account therefore has **zero Phase-2 submissions** as of 2026-08-26; the
+  authenticated eligibility capture of that date is consistent with it but does
+  **not** by itself enumerate submissions.
 - The current shipped file routes Phase-2 width to basic `k2p1`. Its official
   100-MLP subprocess mini measured `4.050566e-7` adjusted / `4.050566e-6` raw,
   with 0 failures, fixed `137,600,326,656` FLOPs/MLP and **4.29x LOCAL,
@@ -70,6 +72,32 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   *transcribed, not captured*, and this session had no browser or credentials;
   (2) a **focused independent ACCEPT** on the corrected record. **Do not request
   approval or submit until both exist.**
+- **P2-CAL (2026-08-26) measured a 2.96x accuracy gain for ~zero FLOPs, and its
+  own falsifier fired.** Calibrating the K2 state improves held-out final-layer
+  MSE from `4.141e-6` to `1.398e-6` on 96 DESIGN networks (two `2**22` replicas,
+  GT noise `1.8e-8`), for `16,384` counted FLOPs against a `2.199e11` free zone —
+  the multiplier stays pinned at the `0.1` floor. **But the in-loop, global and
+  post-hoc arms are identical to twelve significant figures**, because the K2
+  closure is exactly positively homogeneous of degree 1 in its state: scaling
+  `(mu, cov) -> (g*mu, g^2*cov)` leaves `alpha` unchanged, so every downstream
+  mean is scaled by exactly `g` (verified at `1.6e-30`). **Every purely
+  multiplicative state correction is one output rescale in disguise**, whatever
+  its parameter count. The contract's prediction 4 is REFUTED, the pre-registered
+  falsifier fired, and because the continuation gate was conjunctive on it,
+  **the gate is NOT met and no DECIDE block is authorised.** The 2.96x is real
+  and holds on both replicas; turning it into a submission needs a NEW contract
+  with a new gate and Samuel's prediction taken first. The remaining power is in
+  corrections that change `alpha` and therefore do not commute — those are the
+  live question, not this one.
+- **Track 0S blocker (1) is half closed.** The account state is now **captured,
+  not transcribed**: an authenticated `whoami` + `eligibility` call for
+  `neopok919` (id 513543) returned `submissions_allowed: true`,
+  `rules_accepted: true`, `participation_terms_accepted: true`, Phase 2 active
+  until `2026-10-17T23:59Z`
+  (`experiments/2026-08-26_p2_live/account_eligibility_capture.json`).
+  **The `10 per team per UTC day` allowance is STILL NOT captured** — no reachable
+  AIcrowd API exposes a per-day count or balance and the rules page renders
+  client-side, so that half stands and needs a browser session.
 - **Phase 1A is mathematically valid but PROVISIONAL.** 34/34 verifier and 16/16
   probe. Exact `1/32` cross-basis coherence; the phase-degree distribution is
   exactly **`{0: 1, 2: 511}`**, and **all 130,816** pairwise differences have rank
@@ -96,6 +124,7 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
 | current status and next action | this file |
 | target architecture and full execution plan | `docs/GAME_PLAN.md` |
 | live rules/leaderboard/research evidence | `docs/PHASE2_LIVE_AUDIT_2026-08-24.md` |
+| the external Phase-2 mission brief, checked item by item | `docs/PHASE2_BRIEF_RECONCILIATION_2026-08-26.md` |
 | measurement protocol | `docs/VALIDATION.md` |
 | operational traps | `docs/GOTCHAS.md` |
 | contracts, results, Skeptic verdicts | bottom of `experiments/LOG.md` |
@@ -193,8 +222,38 @@ The target architecture is now:
    supported state/response hybrid.
 
 Coupled residual sampling is deprioritized. Its former 1.305x projection assumed a
-float32 K2 cost reduction that the frozen artifact does not show: measured cost fell
+float32 K2 cost reduction that the frozen artifact did not show: measured cost fell
 only 3.1%, not 50%.
+
+**CORRECTED 2026-08-26 — that 3.1% was measured on a mislabelled arm.**
+`local_sim/p2_arms/arm_k2p1_f32.py` calls `flops.stats.norm.cdf` and `.pdf`, which
+flopscope 0.12 **promotes from float32 to float64** (it emits a `FlopscopeWarning`
+saying so), and the arm never casts back. `Phi`, `phi` and everything downstream of
+them — including the covariance accumulator, where nearly all the cost lives — are
+float64. The arm is float32 in name only. Measured today
+(`local_sim/p2_f32_price_probe.py`, artifact
+`experiments/2026-08-26_p2_cal/f32_price_probe.json`), one network:
+
+| arm | counted FLOPs | vs f64 | state dtype |
+|---|---:|---:|---|
+| f64, shipped spelling | `137,562,584,064` | 1.0000x | float64 |
+| f32 as the arm is written | `133,266,036,224` | **0.9688x** | **float64** |
+| f32 with the two stats results cast back | `68,782,589,440` | **0.5000x** | float32 |
+
+The recorded 3.1% is reproduced **exactly**; two `.astype` calls recover the full
+2x. Divergence from the f64 control on the scored row is `3.3e-13` relative mean
+square, eight orders below the error being fought — **on one network only**;
+across all 96, and against float32 failure modes, nothing is established.
+
+Consequence for design: the multiplier floor makes the first `219,902,325,555`
+counted FLOPs free, and the shipped path spends `137,600,326,656` of them. At f64
+the free zone holds `~82.3e9` unused FLOPs — **1.2** dense Kerdock/MUB bases, since
+one costs exactly `2**36`. At corrected f32 it holds `~151.1e9` — **2.2** bases.
+
+**The lane is NOT reopened by this.** Reopening requires a STRATEGIC contract with
+a stated reopening condition. What is established is narrower and is all that may
+be quoted: the cost half of the lane's closure premise was measured on an arm that
+was not float32, so the recorded reason no longer stands on its own.
 
 ## Evaluator state — P2-P0 repaired these, and the slice is closed
 
@@ -338,6 +397,7 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 | 0 | official-stack/evaluator repair | IMPORTANT | **CLOSED 2026-08-24** — G1–G7 all met, independent ACCEPT recorded |
 | 0H | P1-PRE: D1–D3 evaluator hardening | **IMPORTANT** | **CLOSED** — seventh independent pass ACCEPT; 15 named mutations and current durable record verified |
 | 0S | first Phase-2 calibration submission | **STRATEGIC** | **REJECTED procedurally at current HEAD** — the candidate is safe, but the full-preflight witness predates later `local_sim/` edits. Correct continuity, produce a clean current-HEAD witness + evidence-only commit, live-recheck account/allowance, obtain focused ACCEPT, then ask for exact-SHA approval. Expected about rank 42; calibration only, never a nominee |
+| 0C | P2-CAL: K2 state calibration at 1024x16 | **DESIGN measurement** | **GATE NOT MET (falsifier fired), effect real.** 2.96x held-out for 16,384 FLOPs, but all multiplicative arms are provably one output rescale. Needs a NEW contract + Samuel's prediction before it can ship; C3/C4 (non-commuting corrections) are the live follow-on |
 | 1A | verified Kerdock/MUB carrier + grader-legal construction/deployment evidence | **IMPORTANT** | **PROVISIONAL** — 34/34 + 16/16 prove a valid real-MUB carrier and its exact dense cost. Add a stdlib/`fnp` construction path byte-identical to the NumPy reference; remove the memory/setup false-green; reconcile K6 as formally withdrawn; run current-HEAD full preflight/portability and obtain focused ACCEPT. No seed, estimator edit, or truth measurement |
 | 1B | cost-indexed structured-carrier DESIGN frontier | STRATEGIC | after 1A ACCEPT; contract and Samuel's restated prediction reviewed before claiming a NEW DESIGN block. Primary estimand is adjusted score over basis count and total measured overhead, not reproduction of the 16-basis fingerprint |
 | 2 | structured-carrier DECIDE | STRATEGIC | pending; new SINGLE_USE block after design freeze |
