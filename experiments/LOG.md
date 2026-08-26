@@ -15600,3 +15600,168 @@ rank-truncation curve) is not merely the next experiment — it is the whole
 question. The compression factor required is `3.254e12 / 2.199e11 = 14.8x`.
 
 **Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+---
+
+# 2026-08-26 (late) — CONTRACT (Rule 1): P2-SHIP-CAL — a scalar-calibrated K2 candidate, built and measured but NOT submitted
+
+*Pre-registered and committed BEFORE the candidate is built and before any
+measurement of it exists. STRATEGIC: it creates a versioned estimator intended
+for submission. **Nothing is submitted under this contract.** It ends at a
+measured candidate and a request for approval.*
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+## Why a new contract exists at all
+
+P2-CAL's continuation gate **failed** — it was conjunctive on a mechanism
+prediction that turned out to be refuted by exact homogeneity. That failure was
+recorded rather than reinterpreted, which means P2-CAL authorises nothing. The
+`2.96x` effect it measured is nevertheless real, held on both truth replicas, and
+survived a held-out split.
+
+This contract therefore re-asks the shipping question **with a gate written on
+the thing that actually matters** — measured adjusted score on the official
+public split, with zero failures — instead of on a mechanism.
+
+## Two authority facts, stated up front because they bound this slice
+
+1. **The instruction to "SUBMIT TODAY" did not come from Samuel.** It came from a
+   strategy review that refers to Samuel in the third person ("Samuel is
+   downloading...", "Samuel's call, flagged to him"). `AGENTS.md` hard rule 6
+   requires **Samuel's explicit approval naming the exact estimator SHA**. A
+   third party's instruction, however well-reasoned, is not that. **No submission
+   occurs under this contract.**
+2. Track 0S's six-item operational gate still governs any Phase-2 submission:
+   hash + archive identity, no dirty tracked files, `whest validate`, allowance,
+   Samuel's SHA-naming approval, and `preflight.ps1 -Full` GREEN 16/16 with a
+   committed transcript grepped for its own verdict line.
+
+**The allowance item is now CLOSED.** The strategy review supplied two
+independent sources for the 10-per-team-per-UTC-day figure — Rules v14 ("up to 10
+per UTC day in Phase 2... shared across the team; counter resets 00:00:00 UTC")
+and launch post `discourse.aicrowd.com/t/18197`, which additionally records a
+first-week amnesty (failed submissions do not count, up to 10 extra per day,
+expiring ~Aug 29/30). Combined with the authenticated eligibility capture of
+2026-08-26 (`submissions_allowed: true`, terms accepted), Track 0S blocker (1) is
+closed. Blocker (2), a focused independent ACCEPT, is **not**.
+
+## Question
+
+Does a scalar per-layer output calibration of the shipped `_analytic_only` path,
+using constants fitted offline on fresh minted DESIGN networks, improve the
+**measured official adjusted score** on the public 100-MLP mini split, with zero
+failures and the multiplier still pinned at the `0.1` floor?
+
+## Evidence
+
+| # | item | status |
+|---|---|---|
+| E1 | the K2 closure is exactly positively homogeneous of degree 1 in `(mu, cov)`, so a per-layer in-loop gain is identical to multiplying output row `L` by the cumulative product of gains up to `L` | **CONFIRMED** — proved and measured at `1.6e-30` relative mean square (P2-CAL part 1) |
+| E2 | scalar calibration is worth `2.96x` held-out on 96 fresh 1024x16 DESIGN networks, two `2**22` replicas, GT noise `1.8e-8`, and holds on each replica separately (`2.916x`, `2.952x`) | **CONFIRMED** — `experiments/2026-08-26_p2_cal/cal.json` |
+| E3 | per-layer scalar corrections are exhausted at that `2.96x`: variance-gain and off-diagonal-gain arms are both nulls with intervals straddling zero | **CONFIRMED** — `cal_nc.json` |
+| E4 | the frozen K2p1 shipped path measures `4.050566e-7` adjusted / `4.050566e-6` raw, `137,600,326,656` FLOPs, 0 failures on the official 100-MLP subprocess mini | **CONFIRMED** — Track 0S record |
+| E5 | the live board's floor cluster sits at raw `1.008e-6`..`1.446e-6` against the published K2 baseline's `3.933e-6` — a `2.7x`..`3.9x` band that brackets our `2.96x` | **CONFIRMED** — board snapshot, external corroboration |
+| E6 | an independent cloud measurement of the same effect on different MLPs and different GT gives `3.38x` | **INFERRED** — reported by the strategy review; raw artifact not held here |
+| E7 | a scalar output rescale adds `depth * width = 16,384` counted FLOPs, `1.2e-7` of the free zone | **CONFIRMED** — arithmetic, and re-measured in step 3 below |
+
+## Hypothesis and mechanism
+
+The mechanism is settled, not hypothesised: K2 over-estimates the propagated mean
+by a few parts in ten thousand per layer, the bias compounds multiplicatively
+through depth, and by E1 the entire correctable part of it is a single scalar per
+output row. The only open question is whether constants fitted on minted networks
+**transfer** to the organisers' public networks. Both are He-initialised
+`N(0, 2/n)` bias-free 1024x16 MLPs drawn by the same generator, and
+`mint_provenance` is proven bit-identical to `whestbench.sample_mlp`, so transfer
+is expected. This slice measures it rather than assuming it.
+
+## Intervention
+
+Create `estimator_v2_7.py` = `estimator_v2_6_1.py` with **one** change: in
+`_analytic_only`, multiply output row `L` by a literal constant `G[L]`. Sixteen
+float literals, no change to the propagation loop, no new imports, no new Python
+ops in the residual window beyond one array multiply. The shipped `estimator.py`
+is **not** touched by this contract.
+
+Constants: the cumulative products of the P2-CAL `C2` gains **fitted on the first
+48 networks only** — the exact constants whose generalisation was validated on the
+held-out 48. Refitting on all 96 would use marginally more data but would ship an
+artifact that no held-out split ever saw, so it is deliberately refused.
+
+## Predictions (numbered, recorded before the candidate is built or measured)
+
+1. `whest validate` passes; the candidate is contract-legal at 1024x16.
+2. Counted FLOPs land in `[137,600,326,656 + 16,000, 137,600,326,656 + 40,000]`
+   — i.e. the gain costs about `16,384` and nothing else changes.
+3. The multiplier stays exactly `0.1` (floor), so `F/B` stays near `0.0626`.
+4. Official 100-MLP subprocess mini: **0 failures**.
+5. Measured adjusted score in `[1.15e-7, 1.60e-7]`, i.e. between `2.5x` and `3.5x`
+   better than `4.050566e-7`. The point estimate from DESIGN transfer is `1.37e-7`.
+6. Residual per MLP stays inside the `0.4 s` cap on all 100 rows, and its median
+   moves by less than 5 ms versus the frozen K2p1 baseline.
+
+## Gate — written on the outcome, not on a mechanism
+
+All four, and it is executable:
+
+- **G1** `whest validate` passes;
+- **G2** official 100-MLP subprocess mini reports `n_failed_mlps == 0`;
+- **G3** measured adjusted score `<= 2.0e-7` (a `>= 2.03x` improvement on the
+  frozen baseline's `4.050566e-7`, measured on the same split and runner);
+- **G4** multiplier still `0.1` and no residual-cap failure on any row.
+
+Deliberately NOT conjunctive on any mechanism claim. That is the mistake P2-CAL's
+gate made, and it cost that slice its continuation.
+
+## Falsifier
+
+Any failure of G1-G4. In particular: measured improvement below `2.0x` falsifies
+the transfer hypothesis (constants fitted on minted networks do not carry to the
+organisers' networks) even though the DESIGN effect is solid, and would mean the
+minted/public equivalence needs re-establishing at this shape before any fitted
+constant ships.
+
+## Baseline and tier
+
+Control is the frozen `estimator_v2_6_1.py` at its recorded official mini result
+(E4), same split, same runner. Tier is **CONFIRM**: the public mini is read
+**read-only, for measurement only**. No constant is fitted there, and none may
+ever be. The constants come from P01 DESIGN networks that were already spent.
+
+## Cost model — Phase 2, lambda = 0, so C = F
+
+Counted FLOPs only, measured not projected, via the official runner's own report.
+Expected `137,616,710,656 +/- small`, `F/B ~= 0.06258`, multiplier pinned at the
+`0.1` floor. **Residual is not a cost**; it is a `0.4 s` per-MLP cliff, and G4
+tests it directly on all 100 rows rather than by projection.
+
+## Statistic
+
+The official mini's own reported mean adjusted score is the estimand — it is the
+competition's own identity computed by the competition's own code. No promotion
+statistic is invoked, because this contract promotes nothing: it produces a
+measured candidate and a request. `competition_score.decide()` is therefore not
+called and no gate is passed to it.
+
+## Seed block
+
+**None claimed.** The constants derive from `truth_P01.npz`, already spent by
+P2-CP1. `local_sim/seed_ledger.py` must show P01 unchanged at `144/600` before
+and after.
+
+## Confounders, scope, and what must not change
+
+- `estimator.py` must remain byte-identical (`00240eb1e60810f5...`) throughout
+  this contract. It is verified by hash at the end.
+- The vault must not be touched; the seed ledger must not move.
+- The mini split is measurement-only. If any impulse arises to adjust a constant
+  after seeing the mini result, the answer is no — that would fit on CONFIRM data
+  and is the one thing `VALIDATION.md` forbids outright.
+- **Samuel's prediction is REQUIRED and is NOT YET RECORDED.** It must be taken
+  before he is shown the measured result, or this slice's record is incomplete in
+  exactly the way Rule 1 exists to prevent. The measurement may proceed — the gate
+  is pre-registered above and cannot be moved by it — but the prediction gap is
+  recorded here as an open defect of this slice rather than quietly skipped.
+- No submission. No approval request until an independent Skeptic has reviewed
+  both this candidate and the f32 finding it does not depend on.
