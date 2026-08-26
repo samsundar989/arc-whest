@@ -38,3 +38,8 @@ local_sim/_envelope_mem_*_tmp*
 # transient backups made by local_sim/p1pre_fault_inject.py; removed in a
 # finally, ignored so a hard kill cannot leave one tracked
 local_sim/*.fault_inject_backup
+
+# P2-CAL: regenerable float32 weight cache (6.4 GB), rebuilt by
+# local_sim/p2_cal_gpu.py stage_weights() from the seeds in truth_P01.npz.
+# It is a cache, not evidence -- the seeds and the mint are the evidence.
+*.f32

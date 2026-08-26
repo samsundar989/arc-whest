@@ -15037,3 +15037,199 @@ at `144/600` before and after.
   against the `fnp` arm to `<= 1e-10` relative on at least two networks before
   any fitted number is believed. A mirror that is not verified produces fiction.
 - No claim about the grader's residual, memory, or setup window is in scope.
+
+---
+
+# 2026-08-26 — RESULT: P2-CAL. The effect is large, and the pre-registered mechanism is REFUTED
+
+*Result entry for the contract committed earlier today in `99532bf`, before any
+data existed. DESIGN tier. No seed claimed, no `estimator.py` change, no vault
+touch, nothing submitted, and — see the gate section — **nothing promoted**.*
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Raw artifacts:** `experiments/2026-08-26_p2_cal/cal.json`, `run.log`,
+`f32_price_probe.json`. **Executors:** `local_sim/p2_cal_lab.py` (NumPy mirror),
+`local_sim/p2_cal_gpu.py` (batched float64 CUDA).
+
+## The verification chain, run before any fit
+
+Nothing below would be worth reading without this, so it is first:
+
+| link | metric | result |
+|---|---|---|
+| instrumented `fnp` arm (`arm_k2p1.py`, the shipped spelling) -> NumPy mirror | relative mean square on the scored row | `4.1e-30`, `4.4e-30` |
+| NumPy mirror -> batched CUDA float64 closure | same | `2.3e-30`, `2.3e-30` |
+
+Both links are asserted in code and both executors **refuse to fit** if either
+fails. The first draft of the check used a per-element relative error and
+reported FAIL at `9.9e-1`; that metric was wrong, not the mirror. Post-ReLU means
+at depth 16 span six orders of magnitude inside a single layer, so an entry whose
+true value is `6e-06` against a layer RMS near 1 shows relative error of order 1
+for a difference that no scored quantity can see. The scored quantity is a mean
+square over the layer, so the tolerance belongs on the mean square. Recorded
+because the wrong metric nearly discarded a correct mirror.
+
+## Result
+
+96 networks from `truth_P01.npz`, two independent `2**22` replicas, fit on the
+first 48 and evaluated on the **held-out** 48. Every figure is the two-replica
+cross-product estimator `mean_j (p_j - y1_j)(p_j - y2_j)`, which is unbiased for
+the MSE because `E[e1 e2] = 0`.
+
+| arm | in-fit | **held-out** | vs `C0` held-out |
+|---|---:|---:|---:|
+| `C0` control (K2p1, as shipped) | `4.169829e-6` | **`4.141010e-6`** | 1.000x |
+| `C1` one global in-loop gain | `1.452614e-6` | **`1.398204e-6`** | **2.962x** |
+| `C2` per-layer in-loop gain | `1.452614e-6` | **`1.398204e-6`** | **2.962x** |
+| `P2` per-layer post-hoc output gain | `1.452614e-6` | **`1.398204e-6`** | **2.962x** |
+
+Paired arithmetic difference `C0 - C2` on the held-out 48, studentised interval:
+`2.743e-6`, 95% `[2.534e-6, 2.951e-6]`. It holds on each replica separately —
+`2.916x` on r1, `2.952x` on r2.
+
+**Ground-truth noise floor: mean `1.806e-8`, max `2.800e-8`** — `0.44%` of the
+control's signal and `1.29%` of the calibrated result. Both are inside the 10%
+bar `VALIDATION.md` section 3.5 sets, so the separation is not a truth artifact.
+
+Fitted per-layer in-loop gains, layer 0 pinned to 1:
+
+```text
+1.000000 0.999611 0.999732 0.999802 0.999836 0.999876 0.999895 0.999911
+0.999927 0.999941 0.999951 0.999959 0.999946 0.999949 0.999954 0.999959
+```
+
+Best global gain `0.9998833`. K2 **over**-estimates the propagated mean by a few
+parts in ten thousand per layer, and the compounding of that tiny bias over 16
+layers is worth a factor of three.
+
+## The three arms are the same arm, exactly, and that refutes prediction 4
+
+`C1`, `C2` and `P2` agree to **twelve significant figures** — not "closely", but
+`1.398203575242969e-06` against `1.3982035752430813e-06`. The fitted post-hoc
+gains are exactly the running products of the fitted in-loop gains
+(`0.999611 * 0.999732 = 0.999343`, which is `P2`'s layer-2 gain to six places).
+
+The reason is structural, not statistical. **The K2 closure is exactly positively
+homogeneous of degree 1 in its state.** Scaling `(mu, cov) -> (g*mu, g^2*cov)`
+leaves `alpha = mu_pre / sigma` unchanged, therefore leaves `Phi` and `phi`
+unchanged, therefore multiplies every downstream mean by exactly `g`. Verified
+directly by applying a `0.97` gain in-loop at layer 3 and comparing against
+multiplying output rows 3..15 by `0.97`: relative mean square `1.6e-30`.
+
+Contract prediction 4 said post-hoc would lose to in-loop by at least 2x. It
+loses by **1.000x**. The pre-registered falsifier — *"`P2` matching `C2` within
+`1.2x` (mechanism refuted)"* — **has fired.**
+
+What is refuted is precisely the mechanism claim, and nothing wider:
+
+- **Refuted:** that *where* a multiplicative state correction is applied matters.
+  It cannot. Any purely multiplicative correction of the propagated state, given
+  any number of parameters, is one output rescale wearing a disguise.
+- **Not refuted:** the 2.96x itself, which is identical under either reading, and
+  which survives on held-out networks on both replicas.
+- **Not refuted, and still open:** P2-CP3R's finding that 94.61% of K2's error is
+  accumulated state drift. The drift is real; a *scalar* correction fixes its
+  scale and provably cannot touch its shape.
+
+## Prediction scorecard
+
+| # | prediction | outcome |
+|---|---|---|
+| 1 | `C2` beats `C0` held-out by > 2x | **HIT** — 2.962x |
+| 2 | `C2` beats `C1` by < 1.5x | **HIT**, but vacuously: they are the same estimator |
+| 3 | `C3` beats `C2` by < 1.3x | deferred to part 2 (`p2_cal_nc.py`) |
+| 4 | `P2` loses to `C2` by >= 2x | **REFUTED** — 1.000x, exactly |
+| 5 | gains in `[0.97, 1.01]`, near-monotone in depth | **HIT** — all in `[0.9996, 1.0]`, monotone but for a dip at layer 12 |
+| 6 | held-out degradation under 1.2x | **HIT** — held-out is *better* than in-fit (0.96x) |
+
+## The gate is NOT met, and it is not going to be reinterpreted
+
+The pre-registered continuation gate was conjunctive: `>= 2.0x` held-out, holding
+on both replicas, **and prediction 4 satisfied**. The first two clauses pass
+comfortably. The third fails outright.
+
+So **the gate is not met as written, and P2-CAL does not authorise spending a
+DECIDE block.** The third clause was testing a mechanism rather than a value, and
+in hindsight it should not have gated a continuation decision — but noticing that
+*after* seeing the result is exactly the move the pre-registration rule exists to
+prevent. The gate stands as failed. Whether a scalar output calibration is worth a
+DECIDE block is a question for a **new contract with a new gate and Samuel's
+prediction taken first**; it is not a question this entry may answer.
+
+Recording the failure honestly costs one contract. Rescuing it would cost the
+meaning of every gate in this repository.
+
+## What the number would be worth, stated as a projection and not a measurement
+
+The official 100-MLP subprocess mini measured the shipped path at `4.050566e-6`
+raw / `4.050566e-7` adjusted. A 2.962x factor on a different, DESIGN-tier network
+set **projects** to roughly `1.37e-6` raw / `1.37e-7` adjusted. That is a
+projection across network sets, at DESIGN tier, from an internal split of one
+already-spent block. It is not a score, it must not be quoted as one, and the
+only thing that turns it into one is an official subprocess run.
+
+## Cost, and the fact that makes this cheap
+
+`C2` adds `depth * width = 16,384` counted FLOPs to `137,600,326,656`. `F/B`
+moves from `0.0625734` to `0.0625735`; the multiplier stays pinned at the `0.1`
+floor. And because the correction is provably a post-hoc row rescale, the shipping
+form is **16 literal constants multiplying the returned array** — no change to the
+propagation loop, no new Python ops in the residual window, no new failure mode.
+The deployment risk of the *form* is as close to zero as this repository has.
+
+## Two findings from the same session that belong beside this one
+
+### The free zone is half unused, and the float32 record was mislabelled
+
+The multiplier floor makes the first `219,902,325,555` counted FLOPs free. The
+shipped path spends `137,600,326,656` of them.
+
+`docs/CURRENT_STATE.md` records, as the stated reason for deprioritising coupled
+residual sampling, that a float32 K2 arm "measured only 3.1%, not 50%". Measured
+today (`local_sim/p2_f32_price_probe.py`, artifact
+`experiments/2026-08-26_p2_cal/f32_price_probe.json`):
+
+| arm | counted FLOPs | vs f64 | state dtype |
+|---|---:|---:|---|
+| f64, shipped spelling | `137,562,584,064` | 1.0000x | float64 |
+| f32 as `arm_k2p1_f32.py` is written | `133,266,036,224` | **0.9688x** | **float64** |
+| f32 with the two `flops.stats` results cast back | `68,782,589,440` | **0.5000x** | float32 |
+
+The recorded 3.1% is **reproduced exactly**, and explained: flopscope 0.12
+promotes `stats.norm.cdf` / `stats.norm.pdf` float32 input to float64 — it emits
+a `FlopscopeWarning` saying so — and `arm_k2p1_f32.py` never casts back, so
+`Phi`, `phi` and everything they touch, including the covariance accumulator where
+nearly all the cost lives, are float64. The arm is float32 in name only. Two
+`.astype` calls recover the full 2x. Divergence from the f64 control on the scored
+row is `3.3e-13` relative mean square, against a signal of order `5e-5` — eight
+orders below what we are fighting, **on one network**; across all 96, and against
+float32 failure modes, it is **not** established.
+
+Consequence: the free zone would hold `~151.1e9` unused FLOPs instead of
+`~82.3e9` — `2.2` dense Kerdock/MUB bases instead of `1.2`, since a dense
+antipodal basis at width 1024 costs exactly `2**36`.
+
+**This does not reopen the coupled-residual-sampling lane.** Reopening requires a
+contract with a stated reopening condition. What is established is narrower: the
+cost half of that lane's premise was measured on a mislabelled arm, so the reason
+recorded for closing it no longer stands on its own.
+
+### The account state is captured, not transcribed
+
+An authenticated `whoami` + `eligibility` call for `neopok919` (id 513543)
+returned `submissions_allowed: true`, `denied_reason: null`, `rules_accepted:
+true`, `participation_terms_accepted: true`, Phase 2 (round 1429) active until
+`2026-10-17T23:59Z`. Saved verbatim at
+`experiments/2026-08-26_p2_live/account_eligibility_capture.json`. That closes the
+*account-state* half of Track 0S blocker (1).
+
+**The `10 per team per UTC day` allowance is still NOT captured.** No reachable
+AIcrowd API exposes a per-day count or remaining balance, and the challenge rules
+page renders client-side so an unauthenticated fetch returns chrome and no rules
+text. That half of the blocker **stands**, and closing it needs a browser session
+this environment does not have.
+
+## Seed, vault, estimator
+
+Seed ledger untouched — no block claimed; P01 stays at `144/600`. Vault untouched.
+`estimator.py` byte-identical, `00240eb1e60810f5...`. Nothing submitted.

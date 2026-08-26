@@ -1,0 +1,61 @@
+P2-CAL/GPU  1024x16  96 networks  device=cuda  N=4,194,304/replica
+
+staging weights (float32 memmap; system RAM is not used) ...
+  minted 16/96  5s
+  minted 32/96  11s
+  minted 48/96  15s
+  minted 64/96  20s
+  minted 80/96  26s
+  minted 96/96  32s
+
+CHAIN LINK 2->3  torch batched closure vs verified NumPy mirror:
+  net 0 seed 40821001000  rel mean-square final 2.262e-30  all 1.172e-20  PASS
+  net 1 seed 40821001001  rel mean-square final 2.252e-30  all 1.187e-20  PASS
+
+split: fit 48, held out 48
+
+C0 control ...
+  C0   fit 4.1698e-06  held-out 4.1410e-06  (r1 4.1480e-06 r2 4.1733e-06)
+  [11s]
+
+C2 sequential per-layer in-loop gain fit (g_0 pinned to 1) ...
+  layer  1  g = 0.999611
+  layer  2  g = 0.999732
+  layer  3  g = 0.999802
+  layer  4  g = 0.999836
+  layer  5  g = 0.999876
+  layer  6  g = 0.999895
+  layer  7  g = 0.999911
+  layer  8  g = 0.999927
+  layer  9  g = 0.999941
+  layer 10  g = 0.999951
+  layer 11  g = 0.999959
+  layer 12  g = 0.999946
+  layer 13  g = 0.999949
+  layer 14  g = 0.999954
+  layer 15  g = 0.999959
+  C2   fit 1.4526e-06  held-out 1.3982e-06  (r1 1.4224e-06 r2 1.4134e-06)
+
+C1 single global in-loop gain (geometric mean of the C2 gains, then a 1-D refinement scan) ...
+    g=0.995883  fit-set MSE 3.0175e-03
+    g=0.996883  fit-set MSE 1.7218e-03
+    g=0.997883  fit-set MSE 7.7677e-04
+    g=0.998883  fit-set MSE 1.9801e-04
+    g=0.999883  fit-set MSE 1.4614e-06
+    g=1.000883  fit-set MSE 2.0360e-04
+    g=1.001883  fit-set MSE 8.2143e-04
+    g=1.002883  fit-set MSE 1.8725e-03
+    g=1.003883  fit-set MSE 3.3750e-03
+  C1   fit 1.4526e-06  held-out 1.3982e-06  (r1 1.4224e-06 r2 1.4134e-06)
+
+P2 post-hoc per-layer output gain (the mechanism control) ...
+  P2   fit 1.4526e-06  held-out 1.3982e-06  (r1 1.4224e-06 r2 1.4134e-06)
+
+held-out improvement over C0 (cross-product MSE on the scored row):
+  C1: 2.962x   paired diff 2.743e-06  95% [2.534e-06, 2.951e-06]
+  C2: 2.962x   paired diff 2.743e-06  95% [2.534e-06, 2.951e-06]
+  P2: 2.962x   paired diff 2.743e-06  95% [2.534e-06, 2.951e-06]
+
+GT noise floor: mean 1.8063e-08  max 2.7999e-08
+total 136s
+wrote experiments/2026-08-26_p2_cal/cal.json
