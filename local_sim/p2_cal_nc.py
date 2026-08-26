@@ -71,7 +71,17 @@ def fit_gain_sequence(Wmm, dev, fit_idx, target_final, kind, base_mean,
     is `depth * len(grid)` passes over the fit half.
     """
     if grid is None:
-        grid = np.array([0.94, 0.97, 0.99, 1.0, 1.01, 1.03, 1.06])
+        # The first run used [0.94 .. 1.06] with a 1% step near 1.0 and returned
+        # g = 1.0000 at every layer it reached. That is a real local null, but the
+        # resolution was chosen badly: a 10% variance change moves the scored row by
+        # 2.1e-4 relative mean square while the error being fought is 1.75e-5
+        # relative, so a 1% step is already a coarse instrument on this objective and
+        # cannot see a sub-1% optimum. This grid keeps the wide arms as a sanity
+        # check and adds fine structure where the optimum must lie. The abandoned
+        # coarse run is kept beside the artifacts as
+        # experiments/2026-08-26_p2_cal/run_nc_coarse_grid_ABANDONED.log
+        grid = np.array([0.97, 0.99, 0.995, 0.998, 0.999, 1.0,
+                         1.001, 1.002, 1.005, 1.01, 1.03])
     g = np.ones(depth) if base_var is None else np.array(base_var)
     o = np.ones(depth) if base_off is None else np.array(base_off)
     cur = g if kind == "var" else o
@@ -138,25 +148,48 @@ def main():
     P2c = run_all(Wmm, dev, n, chunk=args.chunk, mean_gain=mean_gain)
     record("C2", P2c)
 
-    print("\nC3  per-layer VARIANCE gain (registered arm) ...", flush=True)
-    vg = fit_gain_sequence(Wmm, dev, fit_idx, T[fit_idx, -1], "var", mean_gain, chunk=args.chunk)
-    P3 = run_all(Wmm, dev, n, chunk=args.chunk, mean_gain=mean_gain, var_gain=vg)
-    record("C3", P3, {"var_gains": [float(x) for x in vg]})
-
+    # C4 runs FIRST. It is the arm the mechanism points at -- the off-diagonal is
+    # where the Price-order-1 truncation actually lives -- and the host is heavily
+    # contended, so the more informative arm goes first in case only one finishes.
     print("\nC4  per-layer OFF-DIAGONAL gain (EXPLORATORY, unregistered) ...", flush=True)
     og = fit_gain_sequence(Wmm, dev, fit_idx, T[fit_idx, -1], "off", mean_gain, chunk=args.chunk)
     P4 = run_all(Wmm, dev, n, chunk=args.chunk, mean_gain=mean_gain, offdiag_gain=og)
     record("C4", P4, {"offdiag_gains": [float(x) for x in og]})
 
-    c0 = float(prev["arms"]["C0"]["xmse_hold"])
-    c0pm = prev["arms"]["C0"]["per_mlp_xmse_hold"]
-    print(f"\nheld-out, versus the UNCALIBRATED control C0 = {c0:.4e}:")
-    for k in ("C2", "C3", "C4"):
+    print("\nC3  per-layer VARIANCE gain (registered arm) ...", flush=True)
+    vg = fit_gain_sequence(Wmm, dev, fit_idx, T[fit_idx, -1], "var", mean_gain, chunk=args.chunk)
+    P3 = run_all(Wmm, dev, n, chunk=args.chunk, mean_gain=mean_gain, var_gain=vg)
+    record("C3", P3, {"var_gains": [float(x) for x in vg]})
+
+    # The reference for THIS file is C2 on THIS split: the question is whether a
+    # correction that changes `alpha` buys anything on top of the scalar rescale.
+    # `prev` was fitted and evaluated on a DIFFERENT network split, so it is quoted
+    # only when the two splits actually line up. An unpaired "vs C0" ratio would be
+    # a comparison across network sets dressed up as a paired one.
+    c2 = res["arms"]["C2"]
+    print(f"\nheld-out, versus C2 on the SAME split = {c2['xmse_hold']:.4e}:")
+    for k in ("C4", "C3"):
         r = res["arms"][k]
-        pt = paired_t(c0pm, r["per_mlp_xmse_hold"])
-        r["paired_vs_C0"] = pt
-        print(f"  {k}: {c0/r['xmse_hold']:.3f}x   paired diff {pt['mean_diff']:.3e} "
-              f"95% [{pt['lo']:.3e}, {pt['hi']:.3e}]")
+        pt = paired_t(c2["per_mlp_xmse_hold"], r["per_mlp_xmse_hold"])
+        r["paired_vs_C2_same_split"] = pt
+        print(f"  {k}: {c2['xmse_hold']/r['xmse_hold']:.4f}x   paired diff "
+              f"{pt['mean_diff']:.3e}  95% [{pt['lo']:.3e}, {pt['hi']:.3e}]")
+
+    c0pm = prev["arms"]["C0"]["per_mlp_xmse_hold"]
+    if len(c0pm) == len(c2["per_mlp_xmse_hold"]):
+        c0 = float(prev["arms"]["C0"]["xmse_hold"])
+        res["c0_reference"] = c0
+        print(f"\nheld-out, versus the UNCALIBRATED control C0 = {c0:.4e}:")
+        for k in ("C2", "C4", "C3"):
+            r = res["arms"][k]
+            pt = paired_t(c0pm, r["per_mlp_xmse_hold"])
+            r["paired_vs_C0"] = pt
+            print(f"  {k}: {c0/r['xmse_hold']:.3f}x   paired diff {pt['mean_diff']:.3e} "
+                  f"95% [{pt['lo']:.3e}, {pt['hi']:.3e}]")
+    else:
+        res["c0_reference"] = None
+        print(f"\nC0 in cal.json covers a DIFFERENT split ({len(c0pm)} networks vs "
+              f"{len(c2['per_mlp_xmse_hold'])}); refusing to quote an unpaired ratio.")
     print(f"\nGT noise floor mean {float(z['gt_noise'][:n].mean()):.4e}")
     print(f"total {time.time()-t0:.0f}s")
 

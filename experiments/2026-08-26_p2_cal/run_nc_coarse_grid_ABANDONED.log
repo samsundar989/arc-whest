@@ -1,0 +1,12 @@
+P2-CAL/nc  96 networks, fit 48, held out 48, device=cuda
+mean gains carried over from C2: [1.0, 0.999611, 0.999732, 0.999802, 0.999836, 0.999876, 0.999895, 0.999911, 0.999927, 0.999941, 0.999951, 0.999959, 0.999946, 0.999949, 0.999954, 0.999959]
+
+C2 baseline (mean gain only) ...
+  C2   fit 1.4526e-06  held-out 1.3982e-06
+
+C3  per-layer VARIANCE gain (registered arm) ...
+  var layer  0  g = 1.0000   fit-set final MSE 1.4614e-06
+  var layer  1  g = 1.0000   fit-set final MSE 1.4614e-06
+  var layer  2  g = 1.0000   fit-set final MSE 1.4614e-06
+  var layer  3  g = 1.0000   fit-set final MSE 1.4614e-06
+  var layer  4  g = 1.0000   fit-set final MSE 1.4614e-06

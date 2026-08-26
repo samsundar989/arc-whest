@@ -15233,3 +15233,129 @@ this environment does not have.
 
 Seed ledger untouched — no block claimed; P01 stays at `144/600`. Vault untouched.
 `estimator.py` byte-identical, `00240eb1e60810f5...`. Nothing submitted.
+
+---
+
+# 2026-08-26 — BOARD FORENSICS: the floor is crowded, the leader moved by compressing, and calibration lands mid-pack
+
+*ROUTINE. Live external observation, archived as
+`experiments/board_snapshots/2026-08-26T0749Z_board.json` (+ `.md`). Not a
+promotion dataset and not evidence for any lane; it is the competitive frame the
+next contract has to be written against.*
+
+## The board splits cleanly into two populations
+
+51 entrants, round 1429, 2026-08-26 07:49 UTC. Every row publishes both adjusted
+and raw, so the multiplier is recoverable exactly as `score / score_secondary`.
+
+| population | n | best raw | best adjusted | ranks |
+|---|---:|---:|---:|---|
+| pinned at the `0.100` multiplier floor | **32** | `7.956e-7` | `7.96e-8` | 13 and below |
+| spending real budget (multiplier > 0.15) | **18** | `2.450e-8` | `1.17e-8` | the entire top 12 |
+
+Top of the board, with multipliers derived:
+
+| rank | adjusted | raw | multiplier | entrant |
+|---:|---:|---:|---:|---|
+| 1 | `8.50e-9` | `3.150e-8` | **0.270** | Puffi |
+| 2 | `1.17e-8` | `2.450e-8` | 0.478 | jamespayor |
+| 3 | `1.19e-8` | `3.340e-8` | 0.356 | pranav_devarinti |
+| 4 | `1.24e-8` | `2.790e-8` | 0.444 | fklassen |
+| 8 | `2.28e-8` | `2.940e-8` | 0.776 | mliston |
+| 9 | `2.54e-8` | `1.198e-7` | **0.212** | AndreasHad04 |
+| 13 | `7.96e-8` | `7.956e-7` | **0.100** | latticework_labs — best free-zone entry |
+
+## Three things this settles
+
+### 1. The multiplier floor is a trap, not a shortcut
+
+The first `0.1 * B = 2.199e11` counted FLOPs are free, and 32 of 51 entrants are
+sitting in that free zone. **The best of them is rank 13, `9.4x` off the lead.**
+Free-zone accuracy has a ceiling that nobody has yet broken, and the entire top 12
+is on the other side of it. Every top-12 entrant chose to pay.
+
+What it would take to lead from each operating point, against the live `8.50e-9`:
+
+| multiplier | counted FLOPs | raw final-layer MSE needed |
+|---:|---:|---:|
+| 0.10 (free zone) | `2.199e11` | `< 8.50e-8` |
+| 0.20 | `4.398e11` | `< 4.25e-8` |
+| 0.27 (the leader's own point) | `5.937e11` | `< 3.15e-8` |
+| 0.50 | `1.100e12` | `< 1.70e-8` |
+
+Winning from inside the free zone needs raw `8.5e-8` — **`9.4x` better than the
+best free-zone entry on the board today.** That is not a tuning distance.
+
+### 2. The leader's last move was pure compression, and it is visible
+
+Between the 2026-08-25 and 2026-08-26 snapshots Puffi went:
+
+```text
+2026-08-25   9.50e-9 adjusted   3.10e-8 raw   multiplier 0.3065
+2026-08-26   8.50e-9 adjusted   3.15e-8 raw   multiplier 0.2698
+```
+
+**Their raw accuracy got slightly worse and their score improved 10.5%**, because
+cost fell 12%. jamespayor holds the best raw on the board (`2.450e-8`) and is
+second, purely on multiplier (`0.478`). At Puffi's multiplier that same raw would
+score `6.6e-9` and lead comfortably.
+
+The frontier is being won on cost per unit accuracy, not on accuracy. This is
+live external corroboration of the mission brief's central thesis, and it is
+stronger evidence than the brief's own unreproduced benchmark.
+
+### 3. The board independently corroborates today's P2-CAL measurement
+
+The organiser-published K2 covariance-propagation baseline sits at raw `3.933e-6`
+(four entrants tied, rank 40). The floor cluster immediately above it runs raw
+`1.008e-6` to `1.446e-6` — a `2.7x` to `3.9x` improvement over plain K2, at the
+same pinned `0.100` multiplier.
+
+P2-CAL measured **`2.96x`** for a scalar output calibration costing `16,384`
+FLOPs, on its own fresh DESIGN networks, with no knowledge of these rows. The
+agreement is close enough to treat the floor cluster as *external* corroboration
+that the effect is real and that the cluster is calibrated covariance propagation.
+
+It also says something less comfortable: **that cluster has already done what
+P2-CAL just did.** Seventeen entrants are there.
+
+## Where our numbers actually land
+
+| candidate | raw | adjusted | rank on this board |
+|---|---:|---:|---:|
+| shipped `_analytic_only` K2p1 (measured, official mini) | `4.051e-6` | `4.051e-7` | about **44** of 51 |
+| K2p1 + scalar calibration (**projected**, DESIGN tier) | `1.368e-6` | `1.368e-7` | about **27** of 51 |
+| best free-zone entry on the board | `7.956e-7` | `7.96e-8` | 13 |
+| leader | `3.150e-8` | `8.50e-9` | 1 |
+
+Calibration is worth roughly **17 places**, from 44 to 27 — and lands in the
+single most crowded region of the board, `1.72x` short of the best free-zone
+entry and **`16.1x`** off the lead in adjusted score.
+
+**This corrects the mission brief.** The brief projected calibrated covariance
+propagation at "`1.0-1.5e-7` adjusted, ~top-12" and "immediate top-15". The
+arithmetic is right and the rank is not: `1.0-1.5e-7` is ranks 15-29 on today's
+board, because seventeen entrants already occupy that band. The brief's rank
+estimate appears to predate the floor cluster filling in.
+
+## What this means for the next contract
+
+1. **Calibration is worth shipping and worth nothing strategically.** It is free,
+   it is safe, it is a real `2.96x`, and it moves us from the bottom quartile to
+   the middle. It is a baseline, never a nominee. Ship it, then stop thinking
+   about it.
+2. **The next slice must buy accuracy with FLOPs, deliberately.** The free zone is
+   a solved region. The live question is the shape of the adjusted-score frontier
+   between multiplier `0.10` and `0.35`, which is where every competitive entrant
+   sits and where the leader moved today.
+3. **The `0.5000x` float32 finding is worth more here than it looked.** It halves
+   the analytic backbone's cost, which does not help inside the floor — but the
+   moment we deliberately leave the floor, every FLOP the backbone gives back is a
+   FLOP the accuracy branch can spend at the same multiplier.
+4. **Cost compression is a first-class objective, not an optimisation pass.** The
+   leader demonstrated today that trading a little accuracy for a lot of cost is a
+   winning move under this identity. Any candidate we build needs a cost knob that
+   can be turned *after* accuracy is fixed.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder. Nothing submitted, no
+seed claimed, `estimator.py` byte-identical.
