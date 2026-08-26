@@ -1,0 +1,32 @@
+v2.7 parity vs v2.6.1   |_CAL_G| = 16   G[0] = np.float64(1.0)
+
+  PASS  G[0] is EXACTLY 1.0 (layer 1's mean is exact in closed form)np.float64(1.0)
+  PASS  every constant lies in (0.99, 1.0]                        [0.998251500, 1.000000000]
+  PASS  the table is non-increasing in depth (compounding bias)   monotone
+
+T1  off the analytic path, v2.7 must be v2.6.1 bit for bit
+  PASS  256x32: identical output                                  bitwise equal
+  PASS  256x32: identical counted FLOPs                           319,858,178,691 == 319,858,178,691
+  PASS  256x8: identical output                                   bitwise equal
+  PASS  256x8: identical counted FLOPs                            486,971,107,348 == 486,971,107,348
+  PASS  64x16: identical output                                   bitwise equal
+  PASS  64x16: identical counted FLOPs                            104,463,426,312 == 104,463,426,312
+  PASS  128x4: identical output                                   bitwise equal
+  PASS  128x4: identical counted FLOPs                            152,817,409,204 == 152,817,409,204
+
+T2  on the Phase-2 shape, v2.7 == v2.6.1 * _CAL_G, row-wise
+  PASS  seed 40821001500: rows match the table                    max |diff| 0.00e+00
+  PASS  seed 40821001500: all finite                              finite
+  PASS  seed 40821001500: the rescale is the ONLY cost added      delta 32,832 FLOPs (f64 billing: 16,384 elements at 2x, plus the table)
+  PASS  seed 40821001501: rows match the table                    max |diff| 0.00e+00
+  PASS  seed 40821001501: all finite                              finite
+  PASS  seed 40821001501: the rescale is the ONLY cost added      delta 32,832 FLOPs (f64 billing: 16,384 elements at 2x, plus the table)
+
+T3  at an uncovered depth the rows must be UNCALIBRATED, not truncated
+  PASS  1024x8 (depth != 16): identical output                    bitwise equal -- no table applied
+  PASS  1024x8: and a truncated table would NOT have been a no-op it would have moved rows by 4.910e-03
+  PASS  1024x20 (depth != 16): identical output                   bitwise equal -- no table applied
+
+v2.7 parity: ALL CHECKS PASS
+
+[exited with code 0]
