@@ -102,6 +102,23 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   **per neuron** rather than per layer, or **add information** (higher cumulants,
   sampled directions) rather than re-weight what K2 already computes — and option
   two costs FLOPs by construction, which is where the whole live top 12 sits.
+- **WITHDRAWN, same day: "the free zone is a trap."** A board-forensics entry
+  concluded that the `0.100` multiplier floor cannot be competitive. The
+  measurement was right (33 of 57 entrants are floor-pinned; the best is rank 16)
+  but the inference was wrong, and the strategy review rejected it correctly. That
+  is a fact about today's *population*, not about the score identity. The floor
+  caps **price**, not accuracy: `raw 3.0e-8` delivered at `F <= 0.1B` scores
+  `3.0e-9` and wins outright. The counter-evidence was in the same entry — Puffi
+  moved multiplier `0.3065 -> 0.2698` holding raw flat, i.e. **descending toward
+  the floor**. The floor is the DESTINATION of the compression race.
+  **Winning target, adopted: adjusted `<= 3e-9`** — raw `<= 3e-8` at `<= 0.1B`, or
+  raw `<= 1.5e-8` at `<= 0.2B`. Puffi's own floor-limit, if their raw held, is
+  `3.150e-9` (verified live, 2026-08-26 23:12 UTC).
+  One review figure needed correcting in return: the best **raw** among
+  floor-pinned entries is `7.956e-7` (best adjusted `7.960e-8`), not the `5.95e-8`
+  the review quotes — a raw of `5.95e-8` at the floor would score `5.95e-9` and
+  lead the board. The conclusion is unaffected; the honest distance from today's
+  free-zone population to a winning free-zone entry is **`26.5x` in raw**.
 - **Track 0S blocker (1) is half closed.** The account state is now **captured,
   not transcribed**: an authenticated `whoami` + `eligibility` call for
   `neopok919` (id 513543) returned `submissions_allowed: true`,

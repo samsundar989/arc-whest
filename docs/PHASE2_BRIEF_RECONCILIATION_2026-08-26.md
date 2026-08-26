@@ -31,11 +31,29 @@ package by `local_sim/official_config.py` — all PASS:
 | setup | 5 s | `5.0` |
 | multiplier floor | 0.1 | 0.1 |
 
-**One live constraint the brief omits.** `ContestSpec.predict_timeout_s = 30.0` —
-a **per-MLP** ceiling, distinct from the 120 s total wall the brief quotes. Like
-`memory_limit_mb`, it is a package default that no `run_config` we hold has ever
-echoed, so its provenance is the weakest tier; but a design that plans against
-120 s per MLP is planning against a number that is not the binding one.
+**~~One live constraint the brief omits.~~ WITHDRAWN 2026-08-26 late — this was
+my error, and the repository already had it right.** The first version of this
+section claimed `ContestSpec.predict_timeout_s = 30.0` is a binding per-MLP
+ceiling the brief had omitted. **It does not bind.** `whestbench/runner.py`
+computes the per-MLP response timeout as
+
+```python
+max(limits.predict_timeout_s, limits.wall_time_limit_s + _PREDICT_RESPONSE_GRACE_S)
+```
+
+with `_PREDICT_RESPONSE_GRACE_S = 5.0`, so under Phase 2 it is
+`max(30.0, 120.0 + 5.0) = 125.0 s` and **the 120 s wall is what binds**. Verified
+by calling the function directly. `local_sim/phase2_manifest.py` had already
+recorded exactly this, with the mechanism, and
+`local_sim/p1pre_fault_inject.py` already carries a check asserting it — I quoted
+the class default without reading the code that consumes it.
+
+A strategy review independently reached the same conclusion from graded evidence
+(a Phase-2 submission with COMPLETED per-MLP rows at wall ~78.5 s) and proposed
+raising the local runner's `predict_timeout_s`. **That change should NOT be
+made.** The local runner calls the same package function and already computes
+125 s; raising the local value would move us *away* from grader parity, not
+toward it. Nothing to fix — the correct action is no action.
 
 The brief's leaderboard reading is confirmed. Re-crawled today: **50 entrants**
 (48 at the 2026-08-25 snapshot), leader unchanged at `9.50e-9` adjusted /

@@ -15486,3 +15486,117 @@ which conflicts with the standing requirement in `AGENTS.md`; the conflict is
 surfaced rather than resolved unilaterally. Nothing here is promoted, submitted or
 written up, so no gate is being crossed on unreviewed evidence — but **the float32
 correction in particular must not be acted on until a Skeptic has seen it.**
+
+---
+
+# 2026-08-26 (late) — CORRECTIONS: I drew the wrong conclusion from a right measurement, and a review figure needs fixing
+
+*ROUTINE. Two corrections to the entries above, one against me and one against
+the review that corrected me. No seed, no vault, no `estimator.py` change,
+nothing submitted. Board snapshot
+`experiments/board_snapshots/2026-08-26T2312Z_board.json`.*
+
+## Correction 1 — "THE FREE ZONE IS A TRAP" is WITHDRAWN
+
+The board forensics entry above concluded that the multiplier floor is "a trap,
+not a shortcut". **That conclusion is wrong and is withdrawn.** The strategy
+review rejected it and the rejection is correct.
+
+The measurement it rested on stands: 33 of 57 entrants are pinned at the `0.100`
+floor, the best of them is rank 16, and no free-zone entry is competitive today.
+**The inference from that to "the free zone cannot win" does not follow.** It is a
+fact about the current *population*, not about the *score identity*. The floor is
+not a ceiling on accuracy; it is a ceiling on *price*. Today's floor population is
+covariance-propagation-class because nobody has yet compressed a K3-class core
+below `0.1B` — not because the floor forbids accuracy.
+
+The identity says the opposite of what I concluded:
+
+```text
+score = raw * max(0.1, F / 2**41)
+raw 3.0e-8 delivered at F <= 0.1B  ->  3.0e-9 adjusted  ->  wins outright
+```
+
+And the leader's own behaviour is the counter-evidence, from my own Finding 3 in
+the entry above: Puffi moved `0.3065 -> 0.2698` overnight holding raw roughly
+flat. **They are descending the multiplier toward the floor.** The floor is the
+DESTINATION of the compression race. I reported that and then concluded its
+opposite.
+
+Confirmed on the live board at 2026-08-26 23:12 UTC: Puffi's floor-limit, if
+their raw held all the way down, is **`3.150e-9`**. That sets the target.
+
+**Winning target, adopted:** adjusted `<= 3e-9` — i.e. raw `<= 3e-8` at `<= 0.1B`,
+or raw `<= 1.5e-8` at `<= 0.2B`.
+
+What survives from the withdrawn entry, and is still true: calibration lands
+mid-pack and is a baseline, never a nominee; cost compression is a first-class
+objective rather than an optimisation pass; and the `0.5000x` float32 finding is
+worth more than it first looked — under the corrected framing it is worth *more*
+still, because halving the analytic core's bill is progress along the axis that
+actually decides this competition.
+
+## Correction 2 — the review's floor figure, checked against the live board
+
+The review states "best floor entry raw `5.95e-8`". Measured directly from the
+2026-08-26 23:12 UTC snapshot, 57 entries:
+
+| quantity | live value |
+|---|---:|
+| floor-pinned entries (multiplier within 0.003 of 0.100) | **33 of 57** |
+| best **raw** among floor-pinned entries | **`7.956e-7`** |
+| best **adjusted** among floor-pinned entries | **`7.960e-8`** |
+
+`5.95e-8` is not the best floor raw. A raw of `5.95e-8` at the `0.100` multiplier
+would score `5.95e-9` and be **rank 1 by a wide margin**, which contradicts the
+same review's own statement that Puffi leads at `8.50e-9`. It is most likely an
+adjusted figure read as a raw one, or a stale row.
+
+**This does not touch the review's conclusion**, which is right and which I have
+adopted: `3e-8` raw at the floor scores `3e-9` and wins. It matters only for
+calibrating how far the free-zone population currently is from that — the honest
+distance is `7.956e-7 / 3e-8 = 26.5x` in raw, not `2x`.
+
+Other review figures, verified and correct:
+
+| review claim | live check |
+|---|---|
+| top-13 multiplier band `0.21`–`0.83` | `0.212`–`0.832` — exact |
+| Puffi graded raw `3.15e-8`, floor-limit `3.15e-9` | `3.150e-8` / `3.150e-9` — exact |
+| leader `8.50e-9`, descending multiplier | `8.500e-9`, mult `0.2698` — exact |
+| top-13 raw band `2.45e-8`..`8.05e-8` | `2.450e-8`..`1.155e-7`; the upper end is rank 9's `1.155e-7` at multiplier `0.212`, an outlier that trades raw for cost. `8.05e-8` is rank 13. Both readings are defensible; the band is wider than stated |
+
+## Correction 3 — `predict_timeout_s`: my flag was wrong, and so is the proposed fix
+
+My reconciliation report flagged `ContestSpec.predict_timeout_s = 30.0` as a
+binding per-MLP ceiling the mission brief had omitted. **It does not bind, and
+the repository already knew that.** `whestbench/runner.py` computes the per-MLP
+response timeout as
+
+```python
+max(limits.predict_timeout_s, limits.wall_time_limit_s + _PREDICT_RESPONSE_GRACE_S)
+```
+
+with `_PREDICT_RESPONSE_GRACE_S = 5.0`, so Phase 2 gives
+`max(30.0, 120.0 + 5.0) = 125.0 s`. Verified by calling the function directly.
+`local_sim/phase2_manifest.py` already recorded this with the mechanism, and
+`local_sim/p1pre_fault_inject.py` already carries an executable check for it. I
+quoted a class default without reading the code that consumes it.
+
+The review reached the right conclusion from graded evidence (COMPLETED per-MLP
+rows at wall ~78.5 s) but prescribed the wrong remedy: **do not raise the local
+runner's `predict_timeout_s`.** The local runner calls the same package function
+and already computes 125 s. Raising the local value would move us *away* from
+grader parity. **The correct action is no action**, and the engineering guidance
+that survives is the useful half: target `<= 60 s` per MLP and confirm the true
+cap from our own first graded report.
+
+## What changes in the plan
+
+Nothing in the ordered next actions. The correction *strengthens* them: if K3's
+true raw really is `3.36e-8` (review §"objection answered"), then the entire
+competition reduces to whether it can be compressed to `<= 0.1B`, and Gate G1 (the
+rank-truncation curve) is not merely the next experiment — it is the whole
+question. The compression factor required is `3.254e12 / 2.199e11 = 14.8x`.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
