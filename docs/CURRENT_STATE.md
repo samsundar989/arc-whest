@@ -1,6 +1,7 @@
 # CURRENT_STATE.md — read this first
 
-**Snapshot: 2026-08-26. Phase 2 is live.** This file says where execution stands;
+**Snapshot: 2026-08-27. Phase 2 is live, and this account now has two graded
+submissions.** This file says where execution stands;
 [`GAME_PLAN.md`](GAME_PLAN.md) is the only active architecture/roadmap;
 [`VALIDATION.md`](VALIDATION.md) is binding for measurement; the newest entries at
 the bottom of `experiments/LOG.md` contain the evidence narrative.
@@ -99,7 +100,11 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   none a false green today: the Linux branch and the child-`setrlimit` Linux
   answer have never executed, and the five design observations of the sixth pass
   were deliberately not pursued.
-- **Track 0S is technically safe but procedurally REJECTED at current HEAD.** The
+- **Track 0S is CLOSED — it shipped.** Its candidate is graded submission
+  `328662` at `3.9330104345935976e-07`, zero failures; the gate went GREEN 16/16 at
+  HEAD `4a4f575d` and Samuel's approval named the artifact. The paragraph below is
+  retained as the historical record of how it got there.
+  *(Historical, 2026-08-26:)* The
   frozen K2p1 candidate
   (`00240eb1e60810f5…`, byte-identical to `estimator_v2_6_1.py`) scores
   `4.050566369642183e-7` adjusted on the official 100-MLP subprocess mini with
