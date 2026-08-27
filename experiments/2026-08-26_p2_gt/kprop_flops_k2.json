@@ -1,0 +1,31 @@
+{
+  "check": "upstream fit_flop_polys",
+  "width": 1024,
+  "depth": 16,
+  "k_max": 2,
+  "factor": false,
+  "budget": 2199023255552,
+  "total": 51842859008.00092,
+  "x_budget": 0.023575402796268883,
+  "terms": {
+    "DSTensor constructor": 32768.000001158565,
+    "DSTensor.to_tensor": 33619968.00004913,
+    "DSTower.from_slices": 0.0,
+    "coerce_input": 0.0,
+    "contract_W_basic": 51589939199.99923,
+    "eval_part": 16777215.999941457,
+    "get_mean_var": 0.0,
+    "get_wick_coef": 802816.0003152097,
+    "harmonic contract_W": 0.0,
+    "harmonic diagslice": 33554431.999882914,
+    "is_symmetric": 0.0,
+    "mlp setup": 17826175.99995939,
+    "nonlin_sum": 33685503.99995167,
+    "pK_to_K": 134447103.9997472,
+    "resid": 0.0,
+    "symmetrize": 0.0,
+    "total": 51860685184.000885,
+    "zero_repeated": 0.0
+  },
+  "caveat": "upstream FLOP model, not flopscope 0.12 pricing"
+}

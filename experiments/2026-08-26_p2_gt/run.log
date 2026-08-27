@@ -1,0 +1,16 @@
+==============================================================================
+P2-GT  --  high-resolution A/B ground truth, 1024 x 16
+==============================================================================
+  block            P01
+  networks         24
+  samples/half     2^26 = 67,108,864   (2 independent halves each)
+  total per MLP    134,217,728
+  predicted noise  ~0.087/N = 1.296e-09 per half
+  cross-est SE at MSE=3.0e-08: 2.756e-10  (bar 3.0e-09)
+  host GPU work    1.081e+17 FLOPs
+  device           NVIDIA GeForce RTX 5090   torch 2.13.0+cu130
+  TF32             OFF (precision=highest, measured rel err 2.486e-07)
+
+  RESUMING existing claim P01[40,821,001,144 .. 40,821,001,167] -- shards are reused, not redrawn.
+       1/24   shard present, skipped
+       2/24     160.9s   eta  1769.4s

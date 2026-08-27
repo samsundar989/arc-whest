@@ -223,9 +223,16 @@ def main() -> int:
         sa, sb = _replica_seeds(s)
         mA, vA = _truth_one(w, sa, n, device, a.chunk)
         mB, vB = _truth_one(w, sb, n, device, a.chunk)
-        tmp = path + ".part"
+        # np.savez APPENDS ".npz" to any name that does not already end in it, so
+        # the temp name must carry the suffix or the rename below chases a file
+        # that was never written. That exact bug killed the first run of this
+        # module after network 0 -- silently, because stdout was buffered and the
+        # traceback sat unflushed in a log nobody could read until the process
+        # exited. Run this module with `python -u`.
+        tmp = path + ".part.npz"
         np.savez(tmp, seed=np.int64(s), means_A=mA, var_A=vA,
                  means_B=mB, var_B=vB, n_samples=np.int64(n))
+        assert os.path.exists(tmp), f"np.savez did not write {tmp}"
         os.replace(tmp, path)
         el = time.perf_counter() - t0
         done = i + 1

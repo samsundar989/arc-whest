@@ -16374,3 +16374,425 @@ nothing to do with this project. The bundle, when it lands, becomes the
 cross-check rather than the source.
 
 **Nothing submitted. No `estimator.py` change. Vault untouched.**
+
+---
+
+# 2026-08-27 — SKEPTIC VERDICT on P2-SHIP-CAL: ACCEPT on the accuracy, REJECT on fitness to submit
+
+*Rule 2, discharged. The P2-SHIP-CAL slice (`f9fe8d7`, result `0184d37`) was
+STRATEGIC and had never been independently reviewed; the review that ran on
+2026-08-26 was of the **f32 finding**, which is a different claim. Reviewed HEAD
+`f6d37cb`, in a context that never saw the builder's reasoning, against the raw
+artifacts.*
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Verdict returned:** (a) accuracy **ACCEPT** · (b) fitness to submit **REJECT**,
+in those words: *"The submission should not go out."*
+
+## Every headline statistic was recomputed here, independently, before being believed
+
+A subagent's arithmetic is not evidence until it is reproduced. All of the
+following were recomputed from the two raw per-MLP artifacts
+(`experiments/2026-08-25_trackA/mini_100_subprocess.json`,
+`experiments/2026-08-26_ship_cal/mini_v2_7.json`) and **every figure matched**:
+
+| quantity | value |
+|---|---|
+| dataset sha256 identical across both runs | `aab61cf1…`, 100 rows, **same names in the same order** |
+| **paired arithmetic score difference** (baseline − candidate) | **`2.657583e-07`** |
+| sd / se / t | `7.2202e-08` / `7.2202e-09` / **`t = 36.81`** |
+| studentised-t 95% CI | **`[2.514319e-07, 2.800847e-07]`** |
+| basic bootstrap 95% CI (20,000 resamples) | `[2.516508e-07, 2.797927e-07]` |
+| MLPs improved | **100 / 100. Zero regressions.** |
+| ratio of means (the entry's headline) | `2.9078x` |
+| geometric mean of per-MLP ratios (**diagnostic only**) | `2.8780x`, range `[1.5576, 4.5069]` |
+| **layer-0 control** | **bit-identical on 100/100 rows, max abs diff exactly `0.0`** |
+
+The layer-0 control is the finding the original entry never claimed and it is
+the strongest thing in the record. `_CAL_G[0]` is pinned to 1.0, so layer 0 is
+an untouched control — and it reproduces to the last bit across a 29-hour gap, a
+different session and a differently loaded host. That single fact establishes
+determinism, exact pairing, and environmental stability simultaneously.
+
+**So the 2.9078x is real, and it is now stated in the currency `VALIDATION.md`
+actually requires.** Defect A1 is upheld: the entry reported a **bare ratio of
+means**, which `docs/VALIDATION.md` §2b-i forbids by name, and quoted no interval
+at all. The contract's dodge — "no promotion statistic is invoked, because this
+contract promotes nothing" — does not cover a *reported* comparison. Fixed above.
+
+## The review's B1 is CORRECTED, and the correction matters
+
+The review concluded that `whest submit` ships `estimator.py` and therefore that
+v2.7 cannot be submitted at all without first being promoted into it. **That is
+wrong, and it was checked rather than argued:**
+
+```text
+uv run whest submit --estimator estimator_v2_7.py --dry-run
+  Packaging single file estimator_v2_7.py -> (dry run -- nothing written)
+  flopscope==0.12.0   whestbench==0.16.0
+  Archive would be 35.0 KB (1 file)
+```
+
+`--estimator` takes an arbitrary path and packages that file. **v2.7 is directly
+submittable without touching `estimator.py`.**
+
+**But the second half of the finding stands, and it is the real one.**
+`scripts/preflight.ps1` hardcodes `estimator.py` at lines 299 (`whest validate`),
+309 (ship-file hash), 469 (the Phase-2 subprocess smoke) and in steps 4/12/13/15/16.
+Only `-Archive` is a parameter. Therefore:
+
+> **A GREEN `preflight -Full` 16/16 produced tomorrow would certify v2.6.1, not
+> v2.7.** Track-0S gate item 6 is not merely *unwitnessed* for this candidate —
+> as the gate is written, it is **unsatisfiable** for it.
+
+That is a gate clause satisfied by a check on the wrong file, which is the same
+failure shape a prior review found on a different slice. It has two honest exits
+and no third: either v2.7 is promoted into `estimator.py` under its own STRATEGIC
+contract and certified with `-Archive estimator_v2_7.py`, or `preflight.ps1`
+gains an `-Estimator` parameter so a candidate can be certified in place. **Both
+are changes to the enforcement layer and neither may be done quietly.**
+
+## B3 — the residual cliff. Verified in the grader's own source, and it is the finding that should change the plan
+
+`whestbench/scoring.py:898-912` and `:955-973`, read directly:
+
+```python
+if ... residual_wall_time_s > spec.residual_wall_time_limit_s:
+    predictions = fnp.zeros((spec.depth, spec.width))     # the row is ZEROED
+    residual_wall_time_exhausted = True
+...
+failure_flag = (... or residual_wall_time_exhausted ...)
+adjusted_final_layer_score = _compute_budget_adjusted_score(..., failure=failure_flag)
+```
+
+A failure does **two** things, not one: the prediction becomes zeros, so the row's
+MSE becomes `mean(target^2) ~ 0.92`, **and** the multiplier is forced to `1.0`
+instead of the floor `0.1`. One overrun row therefore scores about `0.92` against
+a normal `1.4e-7`. On a 100-MLP mean that is `+9.2e-3`, taking the reported score
+from `1.393e-7` to about `9.2e-3` — a **~66,000x loss from a single row.**
+
+**This is not a graded penalty. It is total loss of the submission.**
+
+Now the measured margins, recomputed here from the same 100 paired rows:
+
+| | median | p90 | max | rows >150 ms | rows >200 ms | worst-row LOCAL headroom |
+|---|---:|---:|---:|---:|---:|---:|
+| **v2.6.1 (the canary)** | `47.9 ms` | `54.4 ms` | **`93.3 ms`** | 0 | 0 | **`4.29x` LOCAL** |
+| **v2.7 (the candidate)** | `86.9 ms` | `123.2 ms` | **`262.1 ms`** | **6** | **2** | **`1.53x` LOCAL** |
+
+Paired delta: **`+44.3 ms` mean, `+40.3 ms` median, `+212.8 ms` at the worst row —
+`2.81x` at the max on IDENTICAL networks.** And the counted-FLOP delta between
+the two files is `32,832` FLOPs, which is `1.49e-08` of the budget.
+
+**A `1.49e-08` change in counted work cannot cost 40 ms.** So the `+44 ms` is
+either host contention between two sessions a day apart, or something in v2.7
+that the FLOP counter does not see. Those two possibilities have opposite
+consequences and **the existing evidence cannot separate them**, because the two
+runs were never executed back to back. Meanwhile the repository's own documented
+session-to-session residual spread is `2.35x` and this very pair shows `2.81x` at
+the max — so **the margin (`1.53x`) is smaller than the known noise.**
+
+Defect A5 is upheld and applied throughout: every residual figure above carries
+the word **LOCAL**, as `docs/VALIDATION.md` requires and the original entry
+omitted.
+
+## What this changes about the plan, stated plainly
+
+Samuel's CONTRACT 2 orders the canary first and v2.7 second. **That ordering is
+right, and for a stronger reason than the one given.** The canary is not merely a
+known-answer pipeline test — on this evidence it is the **safe** artifact
+(`4.29x` LOCAL headroom, zero rows near the cliff) and v2.7 is the **risky** one
+(`1.53x` LOCAL, six rows past 150 ms), with a failure mode that is not a penalty
+but annihilation.
+
+## Item 4, answered: is a 16-constant calibration degenerate under the homogeneity result?
+
+**Consistent, not degenerate — and the answer strengthens the result.** The
+homogeneity theorem says every in-loop *multiplicative state* correction equals
+*some* output rescale; it does not say sixteen parameters collapse to one. The
+real collapse is sharper and the file states it: **only `G[15]` reaches the
+score.** `experiments/2026-08-26_p2_cal/cal.json` proves it independently — arm
+C1 (one global gain) and arm C2 (sixteen per-layer gains) give held-out
+final-layer MSE `1.3982035752430813e-06` and `1.398203575242969e-06`, identical
+to twelve significant figures. **The scored intervention is one fitted scalar.**
+That is why it transfers so cleanly and why overfitting was never a live risk.
+The other fifteen constants buy the unscored all-layer diagnostic for 15,360
+free-zone FLOPs. `2.9078x` survives the reading intact, as a one-parameter result.
+
+## Item 7, answered: which gate clauses could not fail
+
+Of the four pre-registered clauses, **only G3 carries information.**
+
+- **G4 first half ("multiplier still 0.1") cannot fail.** `C/B = 0.0626`; the
+  intervention adds `2.4e-07` of the budget. Unpinning the floor would need
+  ~1.6x more FLOPs. Prediction 3 is the same non-event.
+- **G4 second half is redundant with G2** — `scoring.py:962-967` already makes
+  `residual_wall_time_exhausted` a component of `n_failed_mlps`.
+- **G1 cannot discriminate the change.** `whest validate` exercises depth 2 and
+  never reaches `_analytic_only`, so it never touches `_CAL_G`. v2.6.1 already
+  passed it.
+
+So *"all four pre-registered gate clauses pass"* overstates what was tested: one
+clause was arithmetically unfailable, one redundant, one blind to the
+intervention. **G3 is the whole gate, G3 is genuine, and G3 passed by a wide
+margin** — the substance survives; the framing did not.
+
+## Leakage: searched hard, found none
+
+`local_sim/p2_cal_gpu.py` reads exactly two inputs — `truth_P01.npz` (P01 DESIGN
+seeds) and weights from `canonical_mint`. No dataset load, no `hf://`, no public
+split anywhere in the fitting path. The sixteen shipped constants match
+`cal.json`'s `arms.P2.post_gains` to 9 dp (max deviation `4.7e-10`, rounding).
+`estimator_v2_7.py` has exactly one commit (`f9fe8d7`, 18:28 local); the mini run
+started ~19:04. **No re-fit after seeing a public result is possible on that
+timeline.**
+
+The review also produced a sharper transfer statement than the entry's: inverting
+the two measured final-layer MSEs for the *organiser-optimal* final-row gain gives
+`0.99828–0.99833`, against the DESIGN-fitted `G[15] = 0.998251500` — within
+`~1e-4` of optimal on the organisers' own networks, leaving 0.06–0.4% of MSE on
+the table. That is arm-independent and much stronger than the quoted "1.9% ratio
+agreement" (defect A3, upheld: the 1.9% conflates two propositions and cannot
+separate them).
+
+## Defects carried forward, all upheld
+
+| # | where | defect | state |
+|---|---|---|---|
+| A1 | `LOG.md:15954`, `CURRENT_STATE.md` | bare ratio of means, no interval | **fixed above** |
+| A2 | same | geometric diagnostic not reported | **fixed above** |
+| A3 | `LOG.md:15996-16000` | "1.9% apart" conflates arm-reproduction with mint-transfer | **superseded above** |
+| A4 | `LOG.md:15983-15989` | prediction 6b scored against a 20-MLP 2026-08-24 cell when a matched 100-row baseline sat in the artifact being used | **fixed above** |
+| A5 | `LOG.md:16023`, `CURRENT_STATE.md` | "1.53x headroom" quoted without **LOCAL** | **fixed above** |
+| A6 | `mini_v2_7.json` | report carries **no estimator hash**; only a PowerShell preamble links sha `96ff522d…` to the measurement | **open** |
+| A7 | `mini_v2_7.json:1-8` | 8 lines of `NativeCommandError` stderr prepended to the JSON; `json.load()` fails, every reader must slice from the first `{` | **open** |
+| B1 | `preflight.ps1:299,309,469` | preflight certifies `estimator.py`, never a candidate | **open — needs a contract** |
+| B2 | gate item 6 | unsatisfiable for v2.7 as written | **open — needs a contract** |
+| B3 | — | residual margin smaller than known noise; failure mode total | **open — needs the quiet-host cell** |
+| B4 | — | setup compliance unwitnessed for the candidate (`setup_timeout_s: 120.0`) | **open** |
+| B5/B6 | — | Samuel's SHA approval and Samuel's prediction | **B5 now SUPPLIED (see next entry); B6 still absent** |
+| D1 | `estimator_v2_7.py:948` | `_calibrate` guards on `depth != len(_CAL_G)` **only**; the constants are (1024,16)-specific but any width > 256 at depth 16 receives them. Contradicts hard rule 7 and the file's own stated principle. Not a Phase-2 risk — the shape is fixed. | **open** |
+| D2 | `seed_ledger.jsonl`, `LOG.md:15926,16091,16180` | **the D19 draw happened.** Four D19 networks were minted and executed on 2026-08-26 by `test_v27_parity.py` before the literals were removed. Information leaked is nil (a bitwise parity of two programs — no truth, no statistic), but the record still asserts "D17 and D19 still unspent" with no note that it occurred. | **recorded here** |
+| D3 | `CURRENT_STATE.md:15-18` vs `:147-148` | two board states presented as current on the same date (50 entrants / leader `9.50e-9` vs "rank 27 of 57" implying `8.50e-9`) | **fixed** |
+
+## The cheapest discriminating follow-up, adopted verbatim and pre-registered NOW
+
+> On a quiet host, back to back in a **single session**, run
+> `whest run --runner subprocess` with **`--setup-timeout 5`** (the official
+> ceiling) over the same mini rows, once against `estimator_v2_6_1.py` and once
+> against `estimator_v2_7.py`.
+
+It settles four open items at once: setup compliance (B4), the paired residual
+delta and whether the `+44 ms` is the candidate or the host (A4, B3), the
+candidate's only honest headroom number, and — over the full 100 — a reproduction
+that pins sha `96ff522d…` to a measurement (A6).
+
+**Decision rule, fixed here before the data exists:**
+
+- candidate worst row **under ~150 ms** on a quiet host → headroom ~`2.7x` LOCAL,
+  B3 stops blocking, v2.7 is a contender-grade fallback;
+- candidate worst row **near 260 ms** → v2.7 sits on a cliff whose failure mode is
+  total loss, and **the fallback nomination is v2.6.1**, whose worst row on the
+  same 100 networks was `93.3 ms`.
+
+No seed block required: the mini is CONFIRM and read-only, and this reads residual
+and setup, not score.
+
+**Nothing submitted. `estimator.py` byte-identical `00240eb1e60810f5…`. Vault
+untouched.**
+
+---
+
+# 2026-08-27 — SAMUEL'S CONTRACT 2: authorisations recorded, and the P2-KPROP bridge is WIRED and PRICED at 1024x16
+
+*Two things in one entry because they arrived together: Samuel's written
+authorisations (which close hard-rule-6 gate item 5) and the first executable
+result of the kprop program those authorisations start. **Nothing submitted.***
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+## Samuel's authorisations, recorded verbatim in effect
+
+Received as "CONTRACT 2 — SHIP THE BEACHHEAD, THEN BUILD THE CONTENDER", sent by
+Samuel in the first person and carrying his own sign-offs.
+
+| # | authorisation | effect on the record |
+|---|---|---|
+| 1 | approves submission of sha `96ff522d6b763497d37a279ddfdef2e49b51b60fc4acc15a8c54fbad6da767e0` (`estimator_v2_7.py`) | **Track 0S gate item 5 is SATISFIED.** Hard rule 6's "Samuel's explicit approval" now exists and names the exact SHA. |
+| 2 | approves **one bare-covprop canary** (the frozen baseline) to go out BEFORE v2.7, expected `~3.9–4.1e-7` adjusted; standing approval for that exact frozen artifact if a SHA is required | **The canary SHA is `00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec`.** It is unambiguous: `estimator.py` and `estimator_v2_6_1.py` are byte-identical and both hash to it, and it is the only "frozen baseline" in the tree. Recorded under his standing approval; no second round trip. |
+| 3 | will quiet the host; **if steps 15–16 are still not green when the amnesty window nears its end (~Aug 29–30), authorises submitting with 15–16 recorded as a host-load artifact** | **Not yet in force — it is 2026-08-27, not Aug 29–30.** Recorded so the exception is visible and dated. His grounds are quoted below. |
+| 4 | launch the Skeptic on the f32 / stats-promotion finding; on a pass the f32 lane reopens and becomes the port default with `.astype(float32)` after every `flops.stats.*` call | **Already discharged on 2026-08-26 with a literal ACCEPT on both halves** (cost `0.50002x`, accuracy benign, cancellation measured and answered). f32 is adopted as the **port default for A1**. Note the accepting reviewer's own caveat, which is not overridden: the `2x` dtype law is **not** universal across flopscope primitives, so the port must be **priced, not assumed**. |
+| 5 | GT pre-generation approved; pre-register and start immediately | **Done** — contract `ca18439`, executor `829c5d8`, draw running. See below. |
+| 6 | `kprop_bench_bundle.zip` to be placed in `experiments\`; if missing, clone upstream directly and do not stall | **Bundle absent at this HEAD. Did not stall.** See the upstream pin below. |
+
+Samuel's grounds for authorisation 3, recorded because the exception must be
+auditable later: steps 1–14 green, every executed file byte-identical to session
+start, counted FLOPs and per-MLP MSE load-invariant, and the launch post's
+amnesty clause — *"For the first week of Phase 2, failed submissions do not count
+against the cap, up to 10 additional submissions per day."* His instruction:
+**record the exception, do not normalise it.**
+
+## The bundle was not there, and that is now a non-issue
+
+`experiments/kprop_bench_bundle.zip` does not exist at this HEAD. Per item 6 the
+upstream repository was fetched directly — and it turned out this repository
+**already had it**, from MOONSHOT G0 on 2026-08-07:
+`C:\Users\samsu\Documents\mlp_cumulant_propagation`, rev `93d091a4`, with
+`local_sim/mlp_kprop_py310.patch` applied (`docs/GOTCHAS.md` records it).
+
+That checkout was **verified rather than trusted**, against a pristine clone of
+the same rev pulled today: it differs by **exactly** the recorded patch — 7
+files, the same 25 changed lines, identical md5 of the changed-line set, nothing
+else. A third-party reference that has been quietly edited would corrupt every
+P-A number while looking entirely normal, so `local_sim/p2_kprop_bridge.py`
+re-runs this check on every invocation and **refuses to run** if it fails.
+
+## The four conventions of Samuel's section 2 — all four independently confirmed, from upstream source
+
+Not taken from the brief. Each was read out of `mlp.py` / `kprop_harmonic.py` and
+is asserted at run time by the bridge:
+
+1. **Weight orientation.** `nn.Linear.weight` is `(out, in)` and computes
+   `x @ weight.T`; our `W` is `(in, out)`; therefore `weight = W.T`. ✔
+2. **Depth.** `MLP(num_layers=17)` builds `len(nonlins) == 16`, so `act0..act15`
+   are exactly our 16 post-ReLU layers and `Ws[16]` is never reached.
+   `up_to_layer='act15'`. ✔
+3. **Init scale 2.0 at every layer.** Upstream's `init_kind='he'` sets
+   `w_var[0] = 1.0`, which is wrong for our networks — Samuel is right. We build
+   with `init_kind='manual', w_var=2.0`. This is **not** cosmetic:
+   `mlp_kprop` reads `mlp.init_scale` as the average-case metric
+   `E[WW^T] = init_scale * I` when `use_avg_metric=True`, so a wrong value
+   silently changes the flow. ✔
+4. **No biases.** `b_var=0, b_mean=0` makes upstream build `bias=False` and pass
+   `bias=None` into `linear_kprop`. ✔
+
+## RESULT 1 — the bridge is wired correctly, to machine precision
+
+Upstream's flow at `k_max=2` against `local_sim/p2_cal_lab.closure` — the NumPy
+mirror that is itself verified to `4e-30` against the instrumented `fnp` arm we
+ship — on our own `canonical_mint` networks at **1024 x 16**:
+
+| probe seed | relative mean square | worst layer |
+|---|---:|---|
+| 1000101 | **`1.270e-30`** | `2.284e-30` (layer 15) |
+| 1000102 | **`1.067e-30`** | `1.325e-30` (layer 13) |
+
+Tolerance `1e-12`. **PASS.** Artifact:
+`experiments/2026-08-26_p2_gt/kprop_wiring_k2.json`.
+
+This is the check that MOONSHOT G0 ran at Phase-1 shape in 2026-08-07 (`8.373e-15`
+there); it now holds at the live Phase-2 shape and against the *current* shipped
+closure. What it proves is **wiring** — orientation, depth, metric, input
+cumulants. It says nothing about whether `k_max=3` is accurate or affordable.
+Those are P-A and P-B, each of which gets its own contract.
+
+Unregistered probe seeds, in `p2_truth.py`'s existing probe namespace. No block
+claimed: this measures no truth, computes no statistic and decides nothing, so it
+needs arbitrary deterministic inputs, not experimental provenance.
+
+## RESULT 2 — the cost structure of Samuel's section 2 reproduces EXACTLY
+
+Upstream's own `fit_flop_polys`, evaluated at `n = 1024, layer = 'act15'`, with
+`'mlp setup'` excluded (it is weight **initialisation** — the grader hands us the
+weights, so we never pay it; this is upstream's own accounting in `get_flops`):
+
+| term | measured here | Samuel's figure | share |
+|---|---:|---:|---:|
+| `FactoredTensor3.get_dslice` | **`1.5560e12`** | `1.556e12` | **47.83%** (his 47.8%) |
+| `FactoredTensor3.contract_W` | **`1.5462e12`** | `1.546e12` | **47.52%** (his 47.5%) |
+| `nonlin_sum 111 factored` | `9.7790e10` | — | 3.01% |
+| `contract_W_basic` | `5.1590e10` | — | 1.59% |
+| **K3 total, factored** | **`3.2537e12` = `1.4796 B`** | `3.254e12` = 1.48 B | |
+| **K2 total** | **`5.1843e10` = `0.0236 B`** | `5.19e10` = 0.024 B | |
+
+Four significant figures on every line. **Samuel's strategy-session cost numbers
+are confirmed independently in this tree.**
+
+**A convention trap was hit and is recorded so nobody repeats it.** Upstream's
+polynomial variable `l` is the **activation index**, not a layer count:
+`_fit_flop_polys` builds `MLP(num_layers=l + 2)` and runs `up_to_layer=f'act{l}'`.
+Evaluating at `l = 16` prices a *seventeen*-layer network and reads **13% high**
+(`3.6764e12 = 1.6718 B`) — a number that looks entirely plausible and is wrong.
+The correct evaluation is `l = 15`. `num_layers` passed in `mlp_kwargs` is
+stripped by upstream with a warning, so it must not be passed at all.
+
+**CAVEAT that governs every number in that table.** This is *upstream's* FLOP
+model in *upstream's* units. It is **not** flopscope 0.12 pricing and it is **not**
+a counted cost for this competition. `docs/GOTCHAS.md` records flopscope
+counterexamples in **both** directions. Any operating point must be priced by
+flopscope before it is believed — the bridge prints this caveat on every run.
+
+## What this already settles about the shape of the problem
+
+`get_dslice` + `contract_W` = **95.35%** of factored-K3 cost, and both scale with
+the factored-`kappa_3` rank. Full rank is `1.4796 B`, so even at Samuel's
+measured raw MSE of `~3.36e-8` the adjusted score would be `~4.97e-8` — **worse
+than today's leader at `8.5e-9`.** Full-rank K3 is not a submission; it is a
+reference point.
+
+**P-B is therefore the decision-maker, exactly as Samuel's brief says**, and the
+arithmetic of the ladder is now concrete: the rank-independent remainder is
+`~0.068 B`, so rank `1/8` lands near `0.245 B` and rank `1/16` near `0.157 B`.
+Reaching Samuel's `<= 0.15 B` operating point needs roughly rank `1/16` to `1/24`.
+None of that is measured yet and none of it is priced in flopscope; it is the
+shape of the search, not a result.
+
+## RESULT 3 — P2-GT is running, and it cost an hour to a bug of mine
+
+The draw claimed `P01[40,821,001,144 .. 40,821,001,167]` (24 seeds, leaving 432)
+and is executing at `2**26` samples per half.
+
+**The first launch died after network 0 and I did not notice for 74 minutes.**
+`np.savez` appends `.npz` to any filename lacking it, so the checkpoint's temp
+file was written as `...npz.part.npz` while `os.replace` chased `...npz.part`,
+and the resulting `FileNotFoundError` sat unflushed in a buffered log. Two
+repairs, both in `local_sim/p2_gt_hires.py`: the temp name now carries the suffix
+and is asserted to exist before the rename, and the module is documented to run
+under `python -u`. The network-0 shard was valid and was recovered rather than
+redrawn; the resume path found the existing claim and skipped it without
+double-claiming, which is what the per-network checkpointing was built for.
+
+The cost was an hour of wall time and no seeds. The lesson is narrower than "test
+first": **a long unattended run whose progress is invisible is not running, it is
+unobserved**, and the fix was one `-u`.
+
+TF32 was asserted OFF at run start and measured, not assumed: `precision=highest`,
+median fp32-vs-fp64 matmul relative error `2.486e-07` (~2x fp32 eps; TF32 would
+be `~9.8e-4`). At the `3e-8` scale this asset is meant to resolve, silent TF32
+would have made every number fiction while looking completely normal.
+
+## Submission status — NOTHING SUBMITTED, and the reasons are now different from yesterday's
+
+| item | state |
+|---|---|
+| Samuel's SHA-naming approval (gate item 5) | **SATISFIED** for v2.7; canary covered by standing approval, SHA stated above |
+| `whest validate` | PASS |
+| allowance | closed |
+| `preflight -Full` 16/16 (gate item 6) | **RED — host load.** See below. |
+| Rule 2 independent Skeptic | **DISCHARGED — and returned REJECT on fitness to submit.** Previous entry. |
+| Samuel's prediction (Rule 1) | still absent for P2-SHIP-CAL; recorded as an open defect of that slice |
+
+**The host is not quiet, and it is now identified precisely rather than described
+as "a 20–23 GB VRAM workload".** Measured at 00:30 local: CPU pinned at **100%**,
+bare `import whestbench` + `import flopscope` at **8.9–15.3 s** against the
+**5.0 s** ceiling — *worse* than yesterday's 3.54–4.35 s. The load is three
+unrelated projects:
+
+- `trace-the-ace` — **two concurrent ModernBERT-large trainings** (folds 2 and 4,
+  bf16). These hold the ~20.7 GB of VRAM and are the heavy ones.
+- `kaggriculture` — `tools/policy_distinct.py` with a **multiprocessing worker
+  fleet**; this is what pins the CPU, and it is what starves the import.
+- `kalshi-bot` — several live market collectors. Light, and presumably not
+  stoppable.
+
+Quieting the first two should be sufficient; the third probably need not stop.
+
+**Two blockers now stand where one did.** Gate item 6 is RED for the host reason
+above, **and** — per the Skeptic — as written it certifies `estimator.py`, so a
+green witness would certify the canary and not v2.7. The canary's gate is
+therefore fully satisfiable the moment the host is quiet; **v2.7's is not, and
+needs a contract before it can be.**
+
+`estimator.py` byte-identical `00240eb1e60810f5…`. Seed ledger P01 at 168/600.
+D17 and D19: **D19 was drawn — see defect D2 in the previous entry.** Vault
+untouched, counter `1 == 1`. Nothing submitted.

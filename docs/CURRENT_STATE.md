@@ -17,6 +17,13 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   covariance-propagation tie occupied roughly ranks 37--41 at `3.93e-7` /
   `3.93e-6`. This is a
   live-board observation, not a promotion dataset.
+  **Board snapshots below are dated, and two of them differ.** The
+  `9.50e-9` / 50-entrant figure above is the 2026-08-26 UTC recheck. The
+  "rank 27 of 57" and `16.4x`-off-the-leader figures further down came from the
+  **2026-08-26 23:12 UTC** snapshot, where the leader was `8.50e-9` and the board
+  had 57 entrants. Both were previously presented as current; neither is wrong,
+  and the later one is the more recent. The board moves daily — **quote a
+  snapshot with its timestamp or not at all.**
 - The signed-in team/Phase-2 submission view says **no submissions match**. This
   account therefore has **zero Phase-2 submissions** as of 2026-08-26; the
   authenticated eligibility capture of that date is consistent with it but does
@@ -133,7 +140,23 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   literal output-row constants. Official 100-MLP subprocess mini:
   **`1.3929833e-7` adjusted / `1.3929833e-6` raw, 0 failures, multiplier `0.1`,
   `137,600,359,488` FLOPs** — a **`2.9078x`** improvement on the frozen K2p1
-  baseline's `4.050566e-7`. All four pre-registered gate clauses pass.
+  baseline's `4.050566e-7`.
+  **The binding statistic, which this entry originally omitted** (a bare ratio of
+  means is what `VALIDATION.md` §2b-i forbids by name): paired arithmetic score
+  difference **`2.657583e-07`**, se `7.2202e-09`, **`t = 36.81`**, studentised-t
+  95% CI **`[2.514319e-07, 2.800847e-07]`**, basic bootstrap
+  `[2.516508e-07, 2.797927e-07]`; **100/100 MLPs improve, zero regressions**;
+  geometric-mean diagnostic `2.8780x`, per-MLP range `[1.5576, 4.5069]`. The
+  **layer-0 control is bit-identical on 100/100 rows** (`_CAL_G[0]` is pinned to
+  1.0), which establishes determinism, exact pairing and environmental stability
+  in one measurement.
+  **"All four pre-registered gate clauses pass" overstated what was tested.** An
+  independent review found that only **G3** carries information: G4's first half
+  cannot fail (the change is `2.4e-07` of budget; unpinning the `0.1` floor would
+  need ~1.6x more FLOPs), G4's second half is redundant with G2, and G1
+  (`whest validate`) exercises depth 2 and never reaches `_analytic_only`, so it
+  is blind to the intervention. **G3 is genuine and passed by a wide margin**, so
+  the substance stands.
   **The transfer hypothesis is confirmed and it is the real result:** the constants
   were fitted on freshly minted DESIGN networks and had never seen an organiser
   network, yet the DESIGN projection (`2.962x`) and the public measurement
@@ -142,18 +165,58 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   `mean_effective_compute == flops_used` exactly, on all 100 rows, with
   `lambda_flops_per_second = 0.0` in `run_config`.
   Residual: median `86.9 ms`, max `262.1 ms`, **0/100 over the `0.4 s` cap**
-  (1.53x headroom at the worst row, on a contended host — thin, and not
-  convertible into a grader second).
-  Lands about **rank 27 of 57** — a baseline and a safe fallback nominee, never a
-  contender; `16.4x` off the leader.
+  (**`1.53x` LOCAL** headroom at the worst row, on a contended host — thin, and
+  not convertible into a grader second).
+  **THE RESIDUAL CLIFF IS WORSE THAN THIS PARAGRAPH USED TO IMPLY, and it is now
+  the top deployment risk.** Read from `whestbench/scoring.py:898-912, 955-973`:
+  an overrun row is **zeroed AND has its multiplier forced to `1.0`**, so it
+  scores `mean(target^2) ~ 0.92` instead of `~1.4e-7`. One such row moves a
+  100-MLP mean from `1.393e-7` to about `9.2e-3` — a **~66,000x loss**. It is not
+  a penalty, it is annihilation of the submission.
+  Against that: the **frozen baseline v2.6.1 is far safer than the candidate** on
+  the same 100 paired networks — median `47.9 ms`, p90 `54.4`, max **`93.3 ms`**
+  (**`4.29x` LOCAL**), zero rows past 150 ms, against the candidate's six rows
+  past 150 ms and two past 200 ms. The paired delta is **`+44.3 ms` mean /
+  `+40.3 ms` median / `2.81x` at the max on identical networks** — from a counted
+  FLOP delta of `1.49e-08` of budget, which **cannot** cost 40 ms. So the `+44 ms`
+  is host contention or something the FLOP counter cannot see, and the two runs
+  were never executed back to back, so **the existing evidence cannot tell those
+  apart.** The margin is smaller than the repository's own documented `2.35x`
+  session-to-session residual spread.
+  Lands about **rank 27 of 57** (2026-08-26 23:12 UTC snapshot, leader `8.50e-9`)
+  — a baseline and a safe fallback nominee, never a contender; `16.4x` off that
+  leader.
   **TWO THINGS IT DOES NOT ESTABLISH.** (a) **Setup compliance is UNTESTED**: the
   first attempt died at `SETUP_TIMEOUT` (bare `import whestbench`+`flopscope`
   measures 3.54–4.35 s here against the 5.0 s ceiling; our own `setup()` is
   0.278 s), so the run used `--setup-timeout 120` and its `run_config` records
   `120.0`. Re-measure at the official 5 s on a quiet host before submitting.
   (b) Nothing about the private re-run.
-  **BLOCKING FOR SUBMISSION, two items.** (i) **Samuel's SHA-naming approval**
-  (hard rule 6) — not supplied by anything received so far. (ii) **A
+  **BLOCKING FOR SUBMISSION — UPDATED 2026-08-27. Item (i) is now CLOSED and two
+  new ones are open; see the SAMUEL'S CONTRACT 2 and SKEPTIC VERDICT entries at
+  the bottom of `experiments/LOG.md`.**
+  (i) **CLOSED.** Samuel supplied written SHA-naming approval for
+  `96ff522d…` (v2.7) and standing approval for the frozen baseline
+  `00240eb1…` (the canary). Hard rule 6 is satisfied for both artifacts.
+  (iii) **NEW, and it makes gate item 6 unsatisfiable for v2.7 as written.**
+  `scripts/preflight.ps1` hardcodes `estimator.py` (lines 299, 309, 469; steps
+  4/12/13/15/16); only `-Archive` is a parameter. **A green 16/16 witness
+  produced tomorrow would certify v2.6.1, not v2.7.** Two honest exits and no
+  third: promote v2.7 into `estimator.py` under its own STRATEGIC contract and
+  certify with `-Archive estimator_v2_7.py`, or give `preflight.ps1` an
+  `-Estimator` parameter. Both touch the enforcement layer. *(The related claim
+  that v2.7 cannot be submitted at all is FALSE and was checked:
+  `whest submit --estimator estimator_v2_7.py --dry-run` packages that file,
+  35.0 KB, 1 file. Submission does not require promotion; **certification does**.)*
+  (iv) **NEW.** The Rule-2 Skeptic returned **REJECT on fitness to submit** —
+  *"the submission should not go out"* — on the residual-cliff evidence above.
+  Its pre-registered discriminating experiment and decision rule are recorded in
+  the LOG entry; run that before v2.7 goes anywhere.
+  **Consequence for ordering: the canary is the artifact whose gate is fully
+  satisfiable** — it *is* `estimator.py`, preflight certifies exactly it, its
+  worst row is `93.3 ms`, and Samuel has approved it. v2.7 is not, and needs a
+  contract first.
+  (ii) **A
   `preflight -Full` 16/16 witness, which CANNOT be produced on this host today**:
   steps 1–14 PASS, steps **15 and 16 FAIL** on `SETUP_TIMEOUT` under contention
   (GPU 63–93% busy on an unrelated workload, RAM 93% loaded; bare
