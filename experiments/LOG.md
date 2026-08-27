@@ -17525,3 +17525,249 @@ allocate). No cost claim: nothing runs inside a flopscope window.
 if the checkout is not the pinned rev plus the recorded patch. **No constant may
 be fitted on this split, now or later, and this entry does not create licence to
 do so.**
+
+---
+
+# 2026-08-27 — SKEPTIC VERDICT on P-A: ACCEPT — and it refuted the one attack that could have killed the result
+
+*Rule 2, discharged on the measurement that drives D1. Reviewed at HEAD
+`698588b` in a context that never saw the builder's reasoning. **Verdict: ACCEPT**,
+in its words: "the 4.0047e-08 figure should be used to make the architecture
+decision", within the scope the entry states. Ten defects, all in the framing and
+the gate design rather than the number. Three of them are corrections to claims I
+made and are withdrawn or restated below.*
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+## The attack it built, and why the refutation is the most valuable thing in this entry
+
+**A common float32 arithmetic bias in the label, invisible to the A/B cross
+estimator by construction.** Both halves run the same fp32 forward, so
+`A = t + b + e_A` and `B = t + b + e_B` with `b` **shared**. Then
+`E[(p-A)(p-B)] = ||p - t - b||^2`, not `||p - t||^2`. **Every check the P2-GT
+asset performs — replica disagreement, half agreement, the `2V/N` ratio —
+differences the two halves and therefore cancels `b` exactly.** A shared bias of
+`||b||^2 ~ 1e-8` would put a floor at ~`4e-8` that no method could beat, and it
+would look exactly like a real result. It even predicted our own anomaly: that
+`4.005e-8` sits 19% above the external session's `3.36e-8`.
+
+**It measured the bias directly and refuted it.** Same samples, fp32-arithmetic
+forward against fp64-arithmetic forward, 6 runs x `2**21` common draws on 3 of
+the 24 networks:
+
+```text
+mean over runs of E_j[b_j^2] = 1.6042e-18      rms(b) ~ 1.27e-09
+```
+
+**Ten orders of magnitude below `4.005e-08`.** There is no fp32 floor.
+
+And it is doubly moot, which is the part worth keeping: **the organisers' own
+truth bake uses the identical convention** — fp32 matmul with fp64 accumulators,
+`whestbench/_simulation_torch.py:96-101` — at `n_samples = 1e9`. Our label's
+numerical character matches the graded target's, and their own label noise is
+`7.75e-11`, `0.19%` of the quantity.
+
+## Three corrections to claims I made. All withdrawn or restated.
+
+**C1 — "the bridge is wired correctly" was overclaimed, and this is the
+gate-that-cannot-fail I was asked to look for.** The `k_max=2` agreement at
+`1.270e-30` certifies the **K2 path**, not the arm under test. At `k_max <= 2`
+the `factor` flag is a **documented no-op** (`kprop_harmonic.py:386`:
+*"nonlin_kprop with factor=True called with k_max<=2. Identical to unfactored."*)
+and `p2_kprop_bridge.py:198` passes `factor=False` there anyway. **The entire
+`factor_k3.py` module — the arm under test — had never been exercised against
+anything in this tree.** I reproduced both facts from source.
+
+The reviewer closed it itself rather than merely reporting it: factored vs
+**unfactored** `k_max=3` at 256x16, two networks, agree to **`3.445e-31`**
+relative mean square, with identical xmse to a Monte-Carlo label. **The
+factorisation is numerically exact at `kind=SIMPLE`.** So it is now a
+documentation defect and not a result defect — but the CONFIRMED line in the P-A
+contract's Evidence claimed more than its evidence supported, and that is the
+error, not the conclusion.
+
+**C2 — "the sign is favourable" on the f32 delta is WITHDRAWN. It was wrong.**
+I reported `-1.307e-12` from 3 networks. The reviewer ran four networks the
+original run did not use: `+1.26e-12, +9.35e-12, +1.47e-11, -1.91e-12`. **Pooled
+over all 7: mean `+2.79e-12`, sd `7.26e-12` — the sign flips.** There is no
+favourable sign; there is a magnitude bound. What is now established on 7
+networks rather than 3 is the bound: worst single network `1.47e-11` = **0.037%**
+of the headline against a 1% pre-registered threshold. **Prediction 2 holds more
+strongly than before, on a claim I should have made in the first place.**
+
+**C3 — "Samuel's prediction HELD" must NOT enter the project's self-model record.**
+His band `[1.5e-8, 8e-8]` is `[0.45x, 2.4x]` around a number he already had
+(`3.36e-8` mean / `3.01e-8` median on 6 MLPs, recorded as the INFERRED item under
+test), and the falsifier at `1.5e-7` is `4.5x` a known answer. **That is a
+replication, not a forecast.** The P-A contract said so; the RESULT scorecard
+dropped the caveat and I repeated it. The canary's `3.9-4.1e-7` call was a real
+forecast and belongs in the record; this one does not.
+
+**And my own prediction 1 (`k3` beats `k2cal` on `>= 22/24`) could not fail.**
+The measured minimum per-network ratio is **`27.8x`**; with a 36x mean separation
+and both arms' spreads under 1.7x, 24/24 was arithmetically forced the moment the
+mean landed in band. It carried zero independent information and I scored it as a
+passed prediction.
+
+## Other defects, recorded
+
+| # | what | state |
+|---|---|---|
+| D2 | **The gate is the wrong shape.** It requires the mean *inside* a two-sided band on an "at any price, can it reach the accuracy?" question. Had K3 come in at `1.0e-8` — better than hoped — **the gate as written FAILS** and refuses to authorise P-B. The falsifier is correctly one-sided; the gate is not. | moot here; **fixed in P-B** |
+| D4 | One cross-instrument comparison: "2.3x better than v2.7" divides a GRADED number by a LOCAL projection. The paired form on identical networks is **`2.44x`**. | corrected |
+| D6 | "float32 is the port default for the K3 lane" generalises a torch-CUDA result to an `fnp`/numpy CPU port that does not exist, with different accumulation order. **It licenses fp32 for RESEARCH runs. Nothing more.** | restated |
+| D7 | The manifest's label SE assumes prediction error and per-neuron variance are uncorrelated; measured ratio is `1.82-1.92`, so true label-induced SE is `~3.3-4.7e-10`, not `2.858e-10`. Immaterial (bar was `3e-9`), but **"42x quieter" should read ~30x**. | corrected |
+| D8 | The CONFIRMED line "float32 89 s / float64 193 s" is **20x stale** — remeasured `3.49 s` and `14.31 s`, and the run's own telemetry says `1.04-4.47 s`. **The memory half reproduces exactly** (`22.34` / `44.64 GiB`), so the 8-GiB scope warning stands. | corrected |
+| D10 | `p2_pa_kprop.py:121` trusts `all_pass` without re-verifying the halves' sha256 against the manifest (checked by hand: both match). `p2_kprop_bridge.py` hashes a **sorted set** of changed lines and diffs only `-- src`, so a line moved between files, or any edit outside `src/`, would pass. The scipy-free `crit` fallback is wrong for most `n` (scipy was present; it did not fire). | recorded |
+
+## D9 — the rank inference, and it is BOTH stronger and weaker than I said
+
+I recorded "get_dslice and contract_W scale with the factored-`kappa_3` rank" as
+an unmeasured inference. **It is structurally true in the source**, and the
+reviewer pinned it exactly:
+
+- `FactoredTensor.contract_W` (`factor_k3.py:181-192`) is literally `W @ factor`
+  for degree-3 factors, so `6n^2 r`;
+- `_factored_get_dslice` (`factor_k3.py:31-54`) is `_unfactor` of `(n, r)`
+  products, `O(n^2 r)`;
+- and the numbers pin the rank: `1546188226559.93 / 16 / (6 * 1024^2) = 15360.0`
+  = **exactly `15n`**. I reproduced this: `15359.999999999303`.
+
+**But rank is not a free knob, and this is the part that changes P-B's design.**
+`r` is produced by `FactoredTensor.__add__` **concatenating factor blocks**
+(`factor_k3.py:153-168`). Capping it needs a **new top-r selector per layer whose
+cost is outside the 95.35% and is priced nowhere.** A norm-sort over 15,360
+columns is cheap (`~3nr ~ 4.7e7`); a genuine low-rank re-approximation is an SVD
+of an `n x r` factor = **`O(n^2 r)`, the same order as the thing being saved.**
+That is the omitted-cost-column shape a previous Skeptic already caught once in
+this repository. **P-B's cost model must carry that column or its ladder will
+report a saving that does not exist.**
+
+**And the floor is not reachable by rank capping alone.** Holding the
+rank-independent K2 core fixed (I reproduced the arithmetic):
+
+| rank | total | multiplier |
+|---|---:|---:|
+| full | `3.2537e12` | `1.4796 B` |
+| 1/4 | `8.5231e11` | `0.3876 B` |
+| 1/8 | `4.5208e11` | `0.2056 B` |
+| 1/16 | `2.5196e11` | **`0.1146 B`** |
+
+Rank `1/16` lands at `0.1146 B`, **above the `0.1` floor.** Reaching the floor
+needs something other than, or in addition to, rank capping.
+
+## What the review confirmed, by independent recomputation
+
+Asset sha256s match the manifest **and** the manifest sha matches the seed-ledger
+`finalize` record — untampered. Label noise `1.155218e-09` recomputed exactly.
+All 48 replica seeds distinct, A-set disjoint from B-set, still distinct after
+torch's `mod 2^63-1` cap, and disjoint from the old P2-CP1 draws. Replica
+disagreement `1.19 sigma` from 1.0; even taking the excess at face value, xmse
+would **understate** MSE by 0.17%. An independent estimator check —
+`E[plain_A - xmse]` must equal `Var(e_A)` — gives ratio `1.110`, `0.6 sigma`.
+`k2`/`k2cal` reproduced at **0.00e+00 relative on all 24 rows**; `k3` reproduced
+**bit-exactly** on three networks by an independent script. Leave-one-out mean
+range `[3.965e-8, 4.050e-8]` — no network drives it; no heavy tail. P01 claims
+strictly contiguous, so **no selection was possible**, and v2.7's constants were
+fitted on `P01[1000..1047]`, **disjoint** from P-A's `[1144..1167]`.
+
+**The single best piece of evidence in the packet is one I had not thought to
+look for: the mechanism predicts the magnitude.** At 256x16, K3 = `2.51e-6`
+against K2 `4.20e-5`; at 1024x16, K3 = `4.00e-8`. Width ratio `4x`, K3 error
+ratio **`~62x ~ 4^3 = 64`**. The method's claimed `O(n^-k_max)` scaling is
+confirmed on the magnitude, not merely the sign. A wiring error does not
+reproduce a cubic law across a 4x width change.
+
+---
+
+# 2026-08-27 — RESULT: P-A-CONFIRM. K3 on ORGANISER networks and ORGANISER labels: 3.9249e-08. All four predictions held.
+
+*The Skeptic's cheapest discriminating follow-up, run against its own
+pre-registered band. Raw artifact:
+`experiments/2026-08-27_pa_confirm/pa_confirm.json`. **CONFIRM tier, read-only,
+nothing fitted or chosen.***
+
+100 organiser MLPs from `v2-phase2@mini`, weights reproduced from their own seeds
+by `canonical_mint` (**bit-identity re-asserted at export**), scored against the
+organisers' baked `1e9`-sample labels:
+
+| arm | mean | median | se | 95% CI |
+|---|---:|---:|---:|---:|
+| `k2` | `4.0506e-06` | `4.1013e-06` | — | — |
+| **`k3` factored, unmodified** | **`3.9249e-08`** | `3.9501e-08` | `5.219e-10` | **`[3.8214e-08, 4.0285e-08]`** |
+
+Spread `1.99x` (min `2.7465e-08`, max `5.4747e-08`).
+
+| # | prediction | measured | verdict |
+|---:|---|---:|---|
+| 1 | **Skeptic's** band `[3.0e-8, 5.5e-8]` | `3.9249e-08` | **HELD** |
+| 2 | **Skeptic's** hard falsifier `> 8.0e-8` | — | **not fired** |
+| 3 | agrees with P-A's `4.0047e-08` within 15% | **`1.99%`** | **HELD** |
+| 4 | `k2` control within 10% of the **graded canary's** `3.933e-06` | **`2.99%`** | **HELD** |
+
+**All three of the reviewer's open ambiguities are closed at once.** Population
+transfer: organiser networks give `3.9249e-08` against DESIGN mints' `4.0047e-08`,
+`1.99%` apart. Label convention: the organisers' own `1e9`-sample label agrees
+with our `2**26`-per-half A/B asset to the same 2%. And the unsourced
+`plain_A - xmse` scatter cannot be doing any work, because an entirely
+independent label reproduces the number.
+
+**K3's accuracy at 1024x16 is `~3.9-4.0e-08` and it is not an artifact of our
+instrument, our population, or our label.**
+
+---
+
+# 2026-08-27 — CORRECTION: there is NO measurable local-to-graded score bias. The "3% parity" was sampling noise between DISJOINT network sets.
+
+*This corrects the canary/v2.7 submission entries above and the parity model I
+built on them. Found while checking prediction 4 of P-A-CONFIRM.*
+
+## The finding
+
+**The graded submission set and the public `mini` split share ZERO networks.**
+
+```text
+graded[0:4]  : natasha-heath, caitlin-kemp, jennifer-jordan, brandon-chen
+public[0:4]  : logan-fitzgerald, william-graves, raymond-barnes, steven-rice
+overlap graded & public mini: 0 of 100
+```
+
+Our local mini runs use the public 100. The grader uses its own, disjoint 100.
+**They are two independent draws from the same distribution, so
+`E[difference] = 0` and any observed gap is sampling variation.**
+
+## The test
+
+| artifact | LOCAL (public 100) | GRADED (disjoint 100) | difference | pooled se | **sigma** |
+|---|---:|---:|---:|---:|---:|
+| canary v2.6.1 | `4.050566e-07` | `3.933010e-07` | `+2.99%` | `1.300e-08` | **`0.90`** |
+| v2.7 | `1.392983e-07` | `1.373807e-07` | `+1.40%` | `3.374e-09` | **`0.57`** |
+
+**`0.90 sigma` and `0.57 sigma`. Neither is a signal.**
+
+Corroborated independently: my numpy K2 closure, written for a different purpose,
+scores the public 100 at `4.0506e-06` — matching the local `whest` mini's
+`4.050566e-06` to five significant figures. **The local instrument reproduces
+exactly; it is the network sample that differs.**
+
+## What must change, and what improves
+
+**WITHDRAWN:** "local reads 3.0% pessimistic", "parity is favourable but not
+constant", and any use of a `1/1.0299` correction factor. **There is no bias to
+correct.** Applying that factor is fitting noise, and it did not even help: my
+v2.7 point prediction of `1.353e-07` was `+1.5%` from the measured
+`1.3738071e-07`, while the **uncorrected** local `1.3929833e-07` would have been
+`+1.4%` — marginally closer. **Prediction 1 landed inside its interval, but the
+correction I applied to reach it was noise, and the interval was doing the work.**
+
+**IMPROVED, and this is the better headline:** the local mini is an **unbiased**
+proxy for the graded score, not a 3%-pessimistic one. Its uncertainty is the
+sampling se of a 100-MLP mean — `7.64e-09` for the canary, `1.80e-09` for v2.7,
+about `1.3-1.8%` of the score. **Quote local projections with that interval and
+apply no correction.** Forum 18199's "local ↔ board ~ 1:1" is confirmed, and the
+mechanism is that the instrument is unbiased rather than that two errors happen
+to cancel.
+
+**The 2.8629x graded improvement is unaffected** — both submissions saw the same
+grader networks, so that comparison is paired and remains the cleanest number in
+the record.

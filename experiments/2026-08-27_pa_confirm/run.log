@@ -1,0 +1,33 @@
+==============================================================================
+P-A-CONFIRM  --  K3 vs ORGANISER networks and ORGANISER labels
+==============================================================================
+  dataset          v2-phase2  split mini  100 MLPs at 1024x16
+  organiser label  n_samples 1e9, mean avg_variance 0.074782
+  -> label noise   7.4782e-11  = 0.19% of the P-A value (an UPWARD bias on plain MSE, reported not corrected)
+  band             [3.0e-08, 5.5e-08]   hard falsifier > 8.0e-08
+  testing          P-A's 4.0047e-08 from 24 DESIGN mints
+  upstream         93d091a4c26c + recorded patch, verified
+
+W0827 12:23:46.429000 57044 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop counting will not work for triton kernels
+      10/100   running mean k3 3.9161e-08     20.9s   eta   188s
+      20/100   running mean k3 3.8281e-08     38.7s   eta   155s
+      30/100   running mean k3 3.8983e-08     58.5s   eta   136s
+      40/100   running mean k3 3.9150e-08     78.2s   eta   117s
+      50/100   running mean k3 3.9453e-08     98.1s   eta    98s
+      60/100   running mean k3 3.8906e-08    117.6s   eta    78s
+      70/100   running mean k3 3.9033e-08    136.6s   eta    59s
+      80/100   running mean k3 3.9305e-08    154.6s   eta    39s
+      90/100   running mean k3 3.9051e-08    173.4s   eta    19s
+     100/100   running mean k3 3.9249e-08    192.2s   eta     0s
+
+  K2  mean 4.0506e-06   median 4.1013e-06
+  K3  mean 3.9249e-08   median 3.9501e-08   se 5.219e-10   95% [3.8214e-08, 4.0285e-08]
+      min 2.7465e-08   max 5.4747e-08   spread 1.99x
+
+  P1 band [3.0e-08, 5.5e-08]           -> 3.9249e-08   HELD
+  P2 hard falsifier > 8.0e-08            -> not fired
+  P3 agrees with P-A within 15%          -> 1.99%   HELD
+  P4 K2 control vs graded canary 3.933e-06 -> 4.0506e-06, 2.99%   HELD
+
+  wrote experiments\2026-08-27_pa_confirm\pa_confirm.json
+==============================================================================
