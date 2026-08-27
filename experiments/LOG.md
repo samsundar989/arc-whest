@@ -17423,3 +17423,105 @@ ladder is interpreted, or the ladder means nothing.
 - **Rule 2 is pending**: an independent Skeptic was launched on this result at the
   same time as this entry was written, and no part of this may be built on until
   it returns.
+
+---
+
+# 2026-08-27 — CONTRACT (Rule 1): P-A-CONFIRM — read K3 against ORGANISER networks and ORGANISER labels
+
+*Committed before any organiser label is loaded. This is the cheapest
+discriminating follow-up returned by the independent Skeptic that ACCEPTed P-A,
+adopted verbatim including its band and falsifier, which are therefore **not
+mine and were not chosen after seeing anything**.*
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+## Question
+
+P-A measured K3 at `4.0047e-08` on 24 **DESIGN mints** against **our own** label.
+Does that reading survive when both the networks and the label are the
+organisers' own?
+
+## Why this is the right single experiment
+
+It collapses three open items at once, which nothing else does:
+
+1. **Population transfer.** Every P-A network is a DESIGN mint. The mint is
+   bit-verified against the published `v2-phase2` weights, and the distributions
+   are identical by construction — but K3's accuracy has never been read against
+   an organiser network.
+2. **Label convention.** Our label is `2**26` samples per half, fp32 forward with
+   fp64 accumulation. The organisers' baked `all_layer_means` is `n_samples =
+   1e9` by the identical convention
+   (`whestbench/_simulation_torch.py:96-101`), giving a label noise of
+   `0.0775/1e9 = 7.75e-11` — **0.19% of the quantity**. If our label convention
+   were subtly wrong, this reads differently.
+3. **A residual scatter the Skeptic could not source.** Per-network
+   `plain_A - xmse` scatters at sd `1.02e-09` against an error model predicting
+   `~5.2e-10`. It cannot bias the headline (the estimator's unbiasedness depends
+   only on `Cov(e_A, e_B)`, bounded at 0.17%), but it is unexplained, and an
+   independent label is the cheapest way to see past it.
+
+## Evidence
+
+- **CONFIRMED.** `canonical_mint` is bit-identical to the organisers' published
+  `v2-phase2` weights, 16/16 (`local_sim/phase2_mint_parity.py`). Re-asserted at
+  run time on the rows actually used, so the weights need not be exported.
+- **CONFIRMED (Skeptic, reproduced by me).** `factor=True` is a **documented
+  no-op at `k_max <= 2`** (`kprop_harmonic.py:386`) and the k_max=2 wiring check
+  passed `factor=False` anyway, so `factor_k3.py` — the arm under test — was
+  never exercised by it. The Skeptic closed this itself: factored vs unfactored
+  at `k_max=3`, 256x16, agree to `3.445e-31` relative mean square. **The
+  factorisation is numerically exact at `kind=SIMPLE`.**
+- **CONFIRMED (Skeptic).** No fp32 shared-bias floor: same-sample fp32-vs-fp64
+  forward gives `mean(b^2) = 1.6042e-18`, ten orders below `4.005e-08`.
+- **CONFIRMED (Skeptic).** The `k2cal` arm is `lab.predict * _CAL_G[:, None]`,
+  the same program as `estimator_v2_7.py::_analytic_only`, and v2.7's constants
+  were fitted on `P01[1000..1047]`, **disjoint** from P-A's `[1144..1167]`.
+
+## Intervention
+
+Load the organisers' **`mini` split** (100 MLPs). For each row take `mlp_seed`
+and the baked `all_layer_means`; mint the weights with `canonical_mint` and
+**assert bit-identity against the row's own stored weights on a sample of rows**;
+run unmodified `mlp_kprop(k_max=3, factor=True)` in float32; report plain MSE
+against the organiser label.
+
+The two-half cross estimator is **not available here** — the organisers ship one
+label — so the estimand is the ordinary MSE, which is biased upward by exactly
+their label noise `7.75e-11`, i.e. `0.19%`. That is quoted, not corrected.
+
+## Predictions
+
+**The Skeptic's, adopted verbatim and one-sided by its design:**
+
+1. `mse_k3` on organiser networks lands in **`[3.0e-08, 5.5e-08]`**.
+2. **Hard falsifier: `> 8.0e-08`.** A reading materially above our `4.005e-08`
+   means the DESIGN population or our label convention is not the graded one, and
+   **puts the whole D1 decision back in play.**
+
+Mine, added:
+
+3. The organiser reading agrees with P-A's `4.0047e-08` to within **15%**.
+4. The `k2` control reproduces the graded canary's final-layer MSE `3.933e-06`
+   to within **10%** — this is a **second negative control**, now against a
+   number measured by the actual grader rather than by us.
+
+## Gate
+
+Passing means P-A's number transfers and **D1 may be decided on it**. It
+authorises no port, no submission and no lane change on its own.
+
+## Tier, seeds, cost
+
+**CONFIRM tier, and legitimately so: the split is READ-ONLY and NOTHING IS FITTED
+OR CHOSEN on it.** This is verification of an already-fixed number, not a
+measurement that selects anything — which is the only use `VALIDATION.md` permits
+for CONFIRM. **No seed block is claimed** (organiser seeds are not ours to
+allocate). No cost claim: nothing runs inside a flopscope window.
+
+## What must not change
+
+`estimator.py` untouched. Vault untouched. Upstream untouched — the run refuses
+if the checkout is not the pinned rev plus the recorded patch. **No constant may
+be fitted on this split, now or later, and this entry does not create licence to
+do so.**
