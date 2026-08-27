@@ -15924,3 +15924,169 @@ seed-independent for this family, and residual needs only arbitrary mints.
 
 `estimator.py` byte-identical `00240eb1e60810f5...`. Seed ledger 60/60, P01 at
 `144/600`, **D17 and D19 still unspent**. Vault untouched. Nothing submitted.
+
+---
+
+# 2026-08-26 (late) — RESULT: P2-SHIP-CAL. Gate MET, 2.9078x measured, and the DESIGN projection held to 1.9%
+
+*Completes the P2-SHIP-CAL contract committed in `7779b49`, before the candidate
+existed. **Nothing submitted.** Raw artifact:
+`experiments/2026-08-26_ship_cal/mini_v2_7.json` (792 KB, all 100 per-MLP rows),
+parity transcript `v27_parity.txt`, setup note `setup_timeout_note.md`.*
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Candidate:** `estimator_v2_7.py`, sha256 `96ff522d6b763497d37a279ddfdef2e49b51b60fc4acc15a8c54fbad6da767e0`.
+
+## The measurement
+
+Official 100-MLP subprocess mini, `hf://aicrowd/arc-whestbench-public-2026@v2-phase2`
+(dataset sha256 `aab61cf1…`), whestbench 0.16.0, run duration 2,818 s.
+
+| quantity | frozen v2.6.1 (recorded) | **v2.7 (measured today)** |
+|---|---:|---:|
+| adjusted final-layer score | `4.050566e-7` | **`1.3929833e-7`** |
+| final-layer MSE | `4.050566e-6` | **`1.3929833e-6`** |
+| all-layer MSE | — | `8.0916679e-7` |
+| mean multiplier | `0.1` | `0.1` (`0.09999999999999981`) |
+| counted FLOPs / MLP | `137,600,326,656` | `137,600,359,488` |
+| `n_failed_mlps` | 0 | **0** |
+
+**Improvement: `2.9078x`.**
+
+Failure breakdown, all zero: `budget_exhausted 0`, `time_exhausted 0`,
+`residual_wall_time_exhausted 0`, `combined_budget_exhausted 0`, `error 0`.
+
+## The gate is MET — all four clauses
+
+| clause | requirement | measured | |
+|---|---|---|---|
+| **G1** | `whest validate` passes | passed, 51 ms | **PASS** |
+| **G2** | `n_failed_mlps == 0` | 0, every category | **PASS** |
+| **G3** | adjusted `<= 2.0e-7` | `1.3929833e-7` | **PASS** |
+| **G4** | multiplier `0.1`, no residual-cap failure | `0.1`, 0/100 over cap | **PASS** |
+
+Unlike P2-CAL's, this gate was written on the outcome rather than on a mechanism,
+and it survived contact with the data.
+
+## Prediction scorecard
+
+| # | prediction | outcome |
+|---|---|---|
+| 1 | `whest validate` passes | **HIT** |
+| 2 | FLOPs in `[baseline+16,000, baseline+40,000]` | **HIT** — delta exactly `32,832` |
+| 3 | multiplier stays exactly `0.1` | **HIT** |
+| 4 | 0 failures | **HIT** |
+| 5 | adjusted in `[1.15e-7, 1.60e-7]`, point estimate `1.37e-7` | **HIT** — `1.393e-7`, **1.7% from the point estimate** |
+| 6a | residual inside the `0.4 s` cap on all 100 rows | **HIT** — 0 over cap |
+| 6b | residual median within 5 ms of the frozen baseline | **NOT TESTABLE** — see below |
+
+**6b is recorded as unresolved rather than scored.** The baseline's `56.6 ms`
+median comes from a different, quiet session; this run measured `86.9 ms` on a host
+whose GPU was 93% busy with an unrelated workload and which had ~1 GB of free RAM.
+`VALIDATION.md` forbids quoting a local absolute wall time, and the repository's own
+record puts session-to-session residual spread at `2.35x`. The two numbers are not
+instrument-matched, so the honest answer is that this run cannot test that clause —
+not that it passed or failed it.
+
+## The transfer hypothesis is CONFIRMED, and that is the real result
+
+The constants were fitted on **freshly minted DESIGN networks** and had never seen
+an organiser network. The open question was whether they would carry.
+
+```text
+DESIGN-tier projection (96 minted networks, held-out half) :  2.962x  ->  1.37e-7
+CONFIRM-tier measurement (100 public networks, official)   :  2.908x  ->  1.393e-7
+                                                    apart :  1.9%
+```
+
+`mint_provenance` being bit-identical to `whestbench.sample_mlp` is now not just a
+verified property but a *load-bearing* one: a constant fitted offline on our own
+mints transfers to the graded distribution to within 2%. That licenses the offline
+fitting loop the whole Phase-2 plan depends on.
+
+## Cost identity, confirmed from the runner's own report
+
+`mean_effective_compute == mean flops_used == 137,600,359,488`, **exactly**, on
+every one of the 100 rows (one unique value — this estimator does not prune, so its
+cost is network-independent). With `lambda_flops_per_second = 0.0` in the run
+config, `C = F` is not an assumption we carry from the manifest; it is now observed
+in a real 100-MLP run. `mean_compute_utilization = 0.0625734`, so the multiplier is
+pinned at the floor with `82.3e9` counted FLOPs still unspent.
+
+The `32,832`-FLOP delta is exactly what `test_v27_parity.py` predicted per network,
+reproduced across all 100 public networks.
+
+## Distributions
+
+| quantity | median | p90 | max | cap |
+|---|---:|---:|---:|---:|
+| residual wall time | `86.9 ms` | `123.2 ms` | `262.1 ms` | `0.4 s` — **1.53x headroom at the worst row** |
+| total wall time | `1.15 s` | — | `8.08 s` | `120 s` |
+| final-layer MSE | `1.3803e-6` | — | `1.9878e-6` (min `9.3620e-7`) | — |
+
+Per-MLP adjusted scores span `9.362e-8` to `1.988e-7` — a `2.1x` spread across
+networks, which is the natural difficulty variation, not instability.
+
+**The worst residual row is not the first row.** Row 0 reads `152.0 ms` against a
+`86.9 ms` median — the warm-up transient the 2026-08-24 Skeptic warned about is
+present and visible — but the `262.1 ms` maximum sits elsewhere, so the tail is
+network/session heaviness rather than a startup artifact. `1.53x` headroom is
+**thin**, and it was measured on a contended host, which cuts both ways: a quiet
+host would likely read better, and the repository has no trustworthy way to
+convert either reading into a grader second.
+
+## Where this lands, and what it is not
+
+On the 2026-08-26 23:12 UTC board (57 entrants), `1.393e-7` sits between rank 26
+(`1.340e-7`) and rank 27 (`1.437e-7`) — **about rank 27**, in the densest part of
+the floor cluster, and **16.4x** off the `8.50e-9` leader.
+
+That is exactly what the board-forensics entry predicted and exactly what the
+corrections entry said it was worth: **a baseline, never a nominee.** It is the
+safe fallback-nomination candidate and the telemetry vehicle. It is not progress
+toward `3e-9`.
+
+## Two things this run does NOT establish
+
+1. **Setup compliance is UNTESTED.** The first attempt at official settings died
+   at `SETUP_TIMEOUT` — host contention, with bare `import whestbench` +
+   `import flopscope` measuring 3.54-4.35 s against the 5.0 s ceiling while our own
+   `setup()` is 0.278 s. The run above therefore used `--setup-timeout 120`. That
+   deviation cannot touch counted FLOPs, per-MLP MSE or residual — setup runs once,
+   off-budget, before any MLP — but `run_config.setup_timeout_s` reads `120.0` in
+   the artifact, and **anyone reading it must not treat setup as validated.** It
+   must be re-measured at the official 5 s on a quiet host before submission.
+   Details: `experiments/2026-08-26_ship_cal/setup_timeout_note.md`.
+2. **Nothing about the private re-run.** 100 public networks, one shape, one day.
+
+## Submission status — PREPARED, NOT SUBMITTED
+
+Track 0S's six-item operational gate:
+
+| # | item | state |
+|---:|---|---|
+| 1 | hash + archive identity | `96ff522d…`; `estimator.py` still byte-identical `00240eb1…` and untouched |
+| 2 | no dirty tracked files | clean at the commit carrying this entry |
+| 3 | `whest validate` | **PASS** |
+| 4 | allowance | **CLOSED** — Rules v14 + launch post 18197, plus the authenticated eligibility capture |
+| 5 | **Samuel's SHA-naming approval** | **MISSING — and this is the blocking item** |
+| 6 | `preflight -Full` GREEN 16/16, transcript committed | **not yet run at this HEAD**; step 7 was RED earlier today and is repaired (ledger 60/60), but the full 16-step witness has not been produced |
+
+**Item 5 is not satisfied by anything received so far.** The instruction to
+"SUBMIT TODAY" came from a strategy review that refers to Samuel in the third
+person. `AGENTS.md` hard rule 6 requires *Samuel's* explicit approval naming the
+exact SHA, and a third party's instruction — however well-reasoned, and this one
+was — is not that.
+
+**Also unsatisfied: Samuel's prediction was never recorded.** The contract flagged
+this as an open defect before the measurement, deliberately, so that the gate could
+not be moved by the result. It stands as a defect of this slice. The gate was
+pre-registered and met on its own terms; the prediction gap does not invalidate the
+measurement, but it does mean this slice contributes nothing to the record of
+whether the project's model of itself is any good.
+
+## State
+
+`estimator.py` byte-identical `00240eb1e60810f5…`. Seed ledger **60/60**, P01 at
+`144/600`, D17 and D19 still unspent. Vault untouched, counter `1 == 1`. Nothing
+submitted.

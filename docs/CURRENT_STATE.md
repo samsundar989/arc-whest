@@ -128,6 +128,35 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   **The `10 per team per UTC day` allowance is STILL NOT captured** — no reachable
   AIcrowd API exposes a per-day count or balance and the rules page renders
   client-side, so that half stands and needs a browser session.
+- **P2-SHIP-CAL: a calibrated candidate is BUILT and MEASURED. Gate MET. Not
+  submitted.** `estimator_v2_7.py` (sha256 `96ff522d…`) = v2.6.1 plus sixteen
+  literal output-row constants. Official 100-MLP subprocess mini:
+  **`1.3929833e-7` adjusted / `1.3929833e-6` raw, 0 failures, multiplier `0.1`,
+  `137,600,359,488` FLOPs** — a **`2.9078x`** improvement on the frozen K2p1
+  baseline's `4.050566e-7`. All four pre-registered gate clauses pass.
+  **The transfer hypothesis is confirmed and it is the real result:** the constants
+  were fitted on freshly minted DESIGN networks and had never seen an organiser
+  network, yet the DESIGN projection (`2.962x`) and the public measurement
+  (`2.908x`) agree to **1.9%**. That licenses the offline fitting loop the whole
+  Phase-2 plan rests on. The runner also confirms `C = F` directly:
+  `mean_effective_compute == flops_used` exactly, on all 100 rows, with
+  `lambda_flops_per_second = 0.0` in `run_config`.
+  Residual: median `86.9 ms`, max `262.1 ms`, **0/100 over the `0.4 s` cap**
+  (1.53x headroom at the worst row, on a contended host — thin, and not
+  convertible into a grader second).
+  Lands about **rank 27 of 57** — a baseline and a safe fallback nominee, never a
+  contender; `16.4x` off the leader.
+  **TWO THINGS IT DOES NOT ESTABLISH.** (a) **Setup compliance is UNTESTED**: the
+  first attempt died at `SETUP_TIMEOUT` (bare `import whestbench`+`flopscope`
+  measures 3.54–4.35 s here against the 5.0 s ceiling; our own `setup()` is
+  0.278 s), so the run used `--setup-timeout 120` and its `run_config` records
+  `120.0`. Re-measure at the official 5 s on a quiet host before submitting.
+  (b) Nothing about the private re-run.
+  **BLOCKING FOR SUBMISSION: Samuel's SHA-naming approval (hard rule 6) — not
+  supplied by anything received so far — and a current-HEAD `preflight -Full`
+  16/16 witness.** Samuel's prediction was also never taken; that is recorded as
+  an open defect of the slice, flagged in the contract *before* the measurement so
+  the gate could not be moved by it.
 - **Phase 1A is mathematically valid but PROVISIONAL.** 34/34 verifier and 16/16
   probe. Exact `1/32` cross-basis coherence; the phase-degree distribution is
   exactly **`{0: 1, 2: 511}`**, and **all 130,816** pairwise differences have rank
