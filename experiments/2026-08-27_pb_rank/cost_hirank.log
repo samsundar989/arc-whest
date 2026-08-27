@@ -1,0 +1,13 @@
+==============================================================================
+P-B RANK INSTRUMENT  --  rank-capped factored K3, priced
+==============================================================================
+  upstream rev    93d091a4c26c  (as pinned)
+  local patch     25 changed lines vs recorded 25  -> IDENTICAL
+
+W0827 15:19:46.138000 12344 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop counting will not work for triton kernels
+    normsort:2*n     r*=2048   total   5.4473e+11 =  0.2477 B   rankcap  3.776e+08 ( 0.07%)   peak  5.98 GiB      3.1s
+    normsort:4*n     r*=4096   total   9.0613e+11 =  0.4121 B   rankcap  5.287e+08 ( 0.06%)   peak  8.12 GiB      1.5s
+    normsort:8*n     r*=8192   total   1.5514e+12 =  0.7055 B   rankcap  7.552e+08 ( 0.05%)   peak 11.94 GiB      1.7s
+    normsort:16*n    r*=16384  total   2.5321e+12 =  1.1515 B   rankcap  9.063e+08 ( 0.04%)   peak 17.80 GiB      1.7s
+  wrote experiments\2026-08-27_pb_rank\cost_hirank.json
+==============================================================================

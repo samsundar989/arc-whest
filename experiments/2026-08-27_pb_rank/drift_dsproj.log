@@ -1,0 +1,27 @@
+==============================================================================
+P-B RANK INSTRUMENT  --  rank-capped factored K3, priced
+==============================================================================
+  upstream rev    93d091a4c26c  (as pinned)
+  local patch     25 changed lines vs recorded 25  -> IDENTICAL
+
+  drift of capped vs UNCAPPED K3, 1024 x 16, dtype=f32
+  anchor MSE_full = 4.0047e-08 (P-A / P-A-CONFIRM; an ASSUMPTION here, measured there)
+
+W0827 15:17:33.384000 61536 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop counting will not work for triton kernels
+    seed 1000201
+      cell                   drift  /MSE_full   MSE_cap lo   MSE_cap hi
+      dsproj:n           9.355e-07     23.360    5.884e-07    1.363e-06
+      normsort:n:d21     2.607e-06     65.107    2.001e-06    3.294e-06
+
+    seed 1000202
+      cell                   drift  /MSE_full   MSE_cap lo   MSE_cap hi
+      dsproj:n           7.896e-07     19.717    4.740e-07    1.185e-06
+      normsort:n:d21     2.722e-06     67.960    2.101e-06    3.422e-06
+
+    seed 1000203
+      cell                   drift  /MSE_full   MSE_cap lo   MSE_cap hi
+      dsproj:n           9.244e-07     23.083    5.796e-07    1.349e-06
+      normsort:n:d21     2.200e-06     54.939    1.647e-06    2.834e-06
+
+  wrote experiments\2026-08-27_pb_rank\drift_dsproj.json
+==============================================================================

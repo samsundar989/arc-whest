@@ -1,0 +1,245 @@
+==============================================================================
+P-B RANK INSTRUMENT  --  rank-capped factored K3, priced
+==============================================================================
+  upstream rev    93d091a4c26c  (as pinned)
+  local patch     25 changed lines vs recorded 25  -> IDENTICAL
+
+W0827 15:11:35.647000 37044 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop counting will not work for triton kernels
+    normsort:n//32   r*=32     total   1.6356e+11 =  0.0744 B   rankcap  2.043e+08 ( 0.12%)   peak  3.74 GiB      2.8s
+    normsort:n//16   r*=64     total   1.6961e+11 =  0.0771 B   rankcap  2.073e+08 ( 0.12%)   peak  3.78 GiB      1.4s
+    normsort:n//8    r*=128    total   1.8171e+11 =  0.0826 B   rankcap  2.132e+08 ( 0.12%)   peak  3.86 GiB      1.4s
+    normsort:n//4    r*=256    total   2.0591e+11 =  0.0936 B   rankcap  2.250e+08 ( 0.11%)   peak  4.01 GiB      1.6s
+    normsort:n//2    r*=512    total   2.5431e+11 =  0.1156 B   rankcap  2.486e+08 ( 0.10%)   peak  4.27 GiB      1.4s
+    normsort:n       r*=1024   total   3.5112e+11 =  0.1597 B   rankcap  2.958e+08 ( 0.08%)   peak  4.84 GiB      1.3s
+    normsort:2*n     r*=2048   total   5.4473e+11 =  0.2477 B   rankcap  3.776e+08 ( 0.07%)   peak  5.98 GiB      1.4s
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+    sketch:n//8      r*=128    total   1.9495e+11 =  0.0887 B   rankcap  1.345e+10 ( 6.90%)   peak  3.86 GiB      1.4s
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+    sketch:n//4      r*=256    total   2.3309e+11 =  0.1060 B   rankcap  2.741e+10 (11.76%)   peak  4.04 GiB      1.4s
+    none             r*=0      total   3.2537e+12 =  1.4796 B   rankcap  0.000e+00 ( 0.00%)   peak 22.34 GiB      4.0s
+  wrote experiments\2026-08-27_pb_rank\cost_ladder.json
+==============================================================================

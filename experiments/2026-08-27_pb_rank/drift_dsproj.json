@@ -1,0 +1,70 @@
+{
+  "check": "capped-vs-uncapped drift bracket",
+  "width": 1024,
+  "depth": 16,
+  "dtype": "f32",
+  "mse_full_anchor": 4.0047e-08,
+  "rows": [
+    {
+      "seed": 1000201,
+      "cell": "dsproj:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 9.355152306811195e-07,
+      "ratio_to_mse_full": 23.360432259123517,
+      "mse_cap_lo": 5.884468554086469e-07,
+      "mse_cap_hi": 1.3626776059535917e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:n:d21",
+      "r_star": 1024,
+      "score": "d21",
+      "drift_final_layer": 2.607354337394655e-06,
+      "ratio_to_mse_full": 65.10735729005057,
+      "mse_cap_lo": 2.0011298181408863e-06,
+      "mse_cap_hi": 3.293672856648424e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "dsproj:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 7.896139024387638e-07,
+      "ratio_to_mse_full": 19.71717987461642,
+      "mse_cap_lo": 4.7401125488676535e-07,
+      "mse_cap_hi": 1.1853105499907623e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:n:d21",
+      "r_star": 1024,
+      "score": "d21",
+      "drift_final_layer": 2.7215837284065845e-06,
+      "ratio_to_mse_full": 67.95974051505941,
+      "mse_cap_lo": 2.1013542300470007e-06,
+      "mse_cap_hi": 3.4219072267661684e-06
+    },
+    {
+      "seed": 1000203,
+      "cell": "dsproj:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 9.243887263365012e-07,
+      "ratio_to_mse_full": 23.082596107985644,
+      "mse_cap_lo": 5.796293057892454e-07,
+      "mse_cap_hi": 1.349242146883757e-06
+    },
+    {
+      "seed": 1000203,
+      "cell": "normsort:n:d21",
+      "r_star": 1024,
+      "score": "d21",
+      "drift_final_layer": 2.2001324090333643e-06,
+      "ratio_to_mse_full": 54.93875718614039,
+      "mse_cap_lo": 1.646517206818808e-06,
+      "mse_cap_hi": 2.83384161124792e-06
+    }
+  ],
+  "caveat": "drift is not an error increment; the bracket is the only truth-free statement available."
+}

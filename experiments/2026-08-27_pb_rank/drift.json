@@ -1,0 +1,226 @@
+{
+  "check": "capped-vs-uncapped drift bracket",
+  "width": 1024,
+  "depth": 16,
+  "dtype": "f32",
+  "mse_full_anchor": 4.0047e-08,
+  "rows": [
+    {
+      "seed": 1000201,
+      "cell": "normsort:n//32",
+      "r_star": 32,
+      "drift_final_layer": 4.552135950578782e-06,
+      "ratio_to_mse_full": 113.6698367063396,
+      "mse_cap_lo": 3.7382523013739925e-06,
+      "mse_cap_hi": 5.446113599783572e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:n//16",
+      "r_star": 64,
+      "drift_final_layer": 4.515231626322857e-06,
+      "ratio_to_mse_full": 112.74831139218561,
+      "mse_cap_lo": 3.7048164438847396e-06,
+      "mse_cap_hi": 5.405740808760974e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:n//8",
+      "r_star": 128,
+      "drift_final_layer": 4.399804443914402e-06,
+      "ratio_to_mse_full": 109.86601852609188,
+      "mse_cap_lo": 3.6003302266353143e-06,
+      "mse_cap_hi": 5.279372661193487e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:n//4",
+      "r_star": 256,
+      "drift_final_layer": 4.1655791637858216e-06,
+      "ratio_to_mse_full": 104.01725881553728,
+      "mse_cap_lo": 3.38875665456876e-06,
+      "mse_cap_hi": 5.022495673002883e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:n//2",
+      "r_star": 512,
+      "drift_final_layer": 3.7065859224622866e-06,
+      "ratio_to_mse_full": 92.5558948850672,
+      "mse_cap_lo": 2.9760807920081632e-06,
+      "mse_cap_hi": 4.51718505291641e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:n",
+      "r_star": 1024,
+      "drift_final_layer": 2.8630778179695546e-06,
+      "ratio_to_mse_full": 71.49294124327801,
+      "mse_cap_lo": 2.2259020263382432e-06,
+      "mse_cap_hi": 3.580347609600866e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "sketch:n//8",
+      "r_star": 128,
+      "drift_final_layer": NaN,
+      "ratio_to_mse_full": NaN,
+      "mse_cap_lo": NaN,
+      "mse_cap_hi": NaN
+    },
+    {
+      "seed": 1000201,
+      "cell": "sketch:n//4",
+      "r_star": 256,
+      "drift_final_layer": NaN,
+      "ratio_to_mse_full": NaN,
+      "mse_cap_lo": NaN,
+      "mse_cap_hi": NaN
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:n//32",
+      "r_star": 32,
+      "drift_final_layer": 4.523494546166403e-06,
+      "ratio_to_mse_full": 112.95464194986899,
+      "mse_cap_lo": 3.71230154219496e-06,
+      "mse_cap_hi": 5.414781550137847e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:n//16",
+      "r_star": 64,
+      "drift_final_layer": 4.573091369614452e-06,
+      "ratio_to_mse_full": 114.19310733923768,
+      "mse_cap_lo": 3.7572444741368652e-06,
+      "mse_cap_hi": 5.46903226509204e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:n//8",
+      "r_star": 128,
+      "drift_final_layer": 4.4648231851491605e-06,
+      "ratio_to_mse_full": 111.48957937296578,
+      "mse_cap_lo": 3.659168644188833e-06,
+      "mse_cap_hi": 5.350571726109489e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:n//4",
+      "r_star": 256,
+      "drift_final_layer": 4.196522713233171e-06,
+      "ratio_to_mse_full": 104.7899396517385,
+      "mse_cap_lo": 3.4166718047180955e-06,
+      "mse_cap_hi": 5.056467621748246e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:n//2",
+      "r_star": 512,
+      "drift_final_layer": 3.4417794626595008e-06,
+      "ratio_to_mse_full": 85.94350295052065,
+      "mse_cap_lo": 2.739309278639831e-06,
+      "mse_cap_hi": 4.224343646679171e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:n",
+      "r_star": 1024,
+      "drift_final_layer": 2.8506360536760937e-06,
+      "ratio_to_mse_full": 71.18226218383633,
+      "mse_cap_lo": 2.2149333306526467e-06,
+      "mse_cap_hi": 3.5664327766995414e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "sketch:n//8",
+      "r_star": 128,
+      "drift_final_layer": NaN,
+      "ratio_to_mse_full": NaN,
+      "mse_cap_lo": NaN,
+      "mse_cap_hi": NaN
+    },
+    {
+      "seed": 1000202,
+      "cell": "sketch:n//4",
+      "r_star": 256,
+      "drift_final_layer": NaN,
+      "ratio_to_mse_full": NaN,
+      "mse_cap_lo": NaN,
+      "mse_cap_hi": NaN
+    },
+    {
+      "seed": 1000203,
+      "cell": "normsort:n//32",
+      "r_star": 32,
+      "drift_final_layer": 2.9708275325633704e-06,
+      "ratio_to_mse_full": 74.1835226749412,
+      "mse_cap_lo": 2.3210260558771772e-06,
+      "mse_cap_hi": 3.700723009249563e-06
+    },
+    {
+      "seed": 1000203,
+      "cell": "normsort:n//16",
+      "r_star": 64,
+      "drift_final_layer": 2.9408822089885932e-06,
+      "ratio_to_mse_full": 73.43576819708326,
+      "mse_cap_lo": 2.294566302580136e-06,
+      "mse_cap_hi": 3.66729211539705e-06
+    },
+    {
+      "seed": 1000203,
+      "cell": "normsort:n//8",
+      "r_star": 128,
+      "drift_final_layer": 2.934172686033412e-06,
+      "ratio_to_mse_full": 73.26822698412894,
+      "mse_cap_lo": 2.288640183546414e-06,
+      "mse_cap_hi": 3.6597991885204104e-06
+    },
+    {
+      "seed": 1000203,
+      "cell": "normsort:n//4",
+      "r_star": 256,
+      "drift_final_layer": 2.8757232939116158e-06,
+      "ratio_to_mse_full": 71.808707116928,
+      "mse_cap_lo": 2.2370535908571577e-06,
+      "mse_cap_hi": 3.594486996966074e-06
+    },
+    {
+      "seed": 1000203,
+      "cell": "normsort:n//2",
+      "r_star": 512,
+      "drift_final_layer": 2.7720702878981616e-06,
+      "ratio_to_mse_full": 69.2204232001938,
+      "mse_cap_lo": 2.1457447229783335e-06,
+      "mse_cap_hi": 3.4784898528179893e-06
+    },
+    {
+      "seed": 1000203,
+      "cell": "normsort:n",
+      "r_star": 1024,
+      "drift_final_layer": 2.4582392181476173e-06,
+      "ratio_to_mse_full": 61.38385442474136,
+      "mse_cap_lo": 1.870766956390155e-06,
+      "mse_cap_hi": 3.125805479905079e-06
+    },
+    {
+      "seed": 1000203,
+      "cell": "sketch:n//8",
+      "r_star": 128,
+      "drift_final_layer": NaN,
+      "ratio_to_mse_full": NaN,
+      "mse_cap_lo": NaN,
+      "mse_cap_hi": NaN
+    },
+    {
+      "seed": 1000203,
+      "cell": "sketch:n//4",
+      "r_star": 256,
+      "drift_final_layer": NaN,
+      "ratio_to_mse_full": NaN,
+      "mse_cap_lo": NaN,
+      "mse_cap_hi": NaN
+    }
+  ],
+  "caveat": "drift is not an error increment; the bracket is the only truth-free statement available."
+}

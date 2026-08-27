@@ -1,0 +1,64 @@
+{
+  "check": "capped-vs-uncapped drift bracket",
+  "width": 1024,
+  "depth": 16,
+  "dtype": "f32",
+  "mse_full_anchor": 4.0047e-08,
+  "rows": [
+    {
+      "seed": 1000201,
+      "cell": "normsort:2*n",
+      "r_star": 2048,
+      "drift_final_layer": 1.7335553423702502e-06,
+      "ratio_to_mse_full": 43.28802013559692,
+      "mse_cap_lo": 1.2466348261193852e-06,
+      "mse_cap_hi": 2.3005698586211146e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:4*n",
+      "r_star": 4096,
+      "drift_final_layer": 8.226703660005399e-07,
+      "ratio_to_mse_full": 20.542621569669137,
+      "mse_cap_lo": 4.996995694823878e-07,
+      "mse_cap_hi": 1.225735162518692e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:8*n",
+      "r_star": 8192,
+      "drift_final_layer": 1.651475143842853e-07,
+      "ratio_to_mse_full": 4.123842344851932,
+      "mse_cap_lo": 4.254565938004651e-08,
+      "mse_cap_hi": 3.678433693885241e-07
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:16*n",
+      "r_star": 16384,
+      "drift_final_layer": 1.287046503627469e-08,
+      "ratio_to_mse_full": 0.32138399970721127,
+      "mse_cap_lo": 7.511583773702876e-09,
+      "mse_cap_hi": 9.832334629884651e-08
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:31*n",
+      "r_star": 31744,
+      "drift_final_layer": 0.0,
+      "ratio_to_mse_full": 0.0,
+      "mse_cap_lo": 4.0047e-08,
+      "mse_cap_hi": 4.0047e-08
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:32*n",
+      "r_star": 32768,
+      "drift_final_layer": 0.0,
+      "ratio_to_mse_full": 0.0,
+      "mse_cap_lo": 4.0047e-08,
+      "mse_cap_hi": 4.0047e-08
+    }
+  ],
+  "caveat": "drift is not an error increment; the bracket is the only truth-free statement available."
+}

@@ -1,0 +1,34 @@
+==============================================================================
+P-B RANK INSTRUMENT  --  rank-capped factored K3, priced
+==============================================================================
+  upstream rev    93d091a4c26c  (as pinned)
+  local patch     25 changed lines vs recorded 25  -> IDENTICAL
+
+  drift of capped vs UNCAPPED K3, 1024 x 16, dtype=f32
+  anchor MSE_full = 4.0047e-08 (P-A / P-A-CONFIRM; an ASSUMPTION here, measured there)
+
+W0827 15:16:12.264000 55060 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop counting will not work for triton kernels
+    seed 1000201
+      cell                   drift  /MSE_full   MSE_cap lo   MSE_cap hi
+      normsort:n//8:frob   4.400e-06    109.866    3.600e-06    5.279e-06
+      normsort:n//8:d3   4.192e-06    104.682    3.413e-06    5.052e-06
+      normsort:n//8:d21   4.163e-06    103.951    3.386e-06    5.020e-06
+      normsort:n:frob    2.863e-06     71.493    2.226e-06    3.580e-06
+      normsort:n:d3      2.781e-06     69.438    2.153e-06    3.488e-06
+      normsort:n:d21     2.607e-06     65.107    2.001e-06    3.294e-06
+      normsort:4*n:d21   9.205e-07     22.985    5.765e-07    1.345e-06
+      normsort:4*n:d3    1.124e-06     28.077    7.401e-07    1.589e-06
+
+    seed 1000202
+      cell                   drift  /MSE_full   MSE_cap lo   MSE_cap hi
+      normsort:n//8:frob   4.465e-06    111.490    3.659e-06    5.351e-06
+      normsort:n//8:d3   4.406e-06    110.015    3.606e-06    5.286e-06
+      normsort:n//8:d21   4.452e-06    111.180    3.648e-06    5.337e-06
+      normsort:n:frob    2.851e-06     71.182    2.215e-06    3.566e-06
+      normsort:n:d3      2.921e-06     72.932    2.277e-06    3.645e-06
+      normsort:n:d21     2.722e-06     67.960    2.101e-06    3.422e-06
+      normsort:4*n:d21   7.543e-07     18.835    4.467e-07    1.142e-06
+      normsort:4*n:d3    9.780e-07     24.422    6.223e-07    1.414e-06
+
+  wrote experiments\2026-08-27_pb_rank\drift_scores.json
+==============================================================================

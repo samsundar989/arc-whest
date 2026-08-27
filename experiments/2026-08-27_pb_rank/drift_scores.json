@@ -1,0 +1,170 @@
+{
+  "check": "capped-vs-uncapped drift bracket",
+  "width": 1024,
+  "depth": 16,
+  "dtype": "f32",
+  "mse_full_anchor": 4.0047e-08,
+  "rows": [
+    {
+      "seed": 1000201,
+      "cell": "normsort:n//8:frob",
+      "r_star": 128,
+      "score": "frob",
+      "drift_final_layer": 4.399804443914402e-06,
+      "ratio_to_mse_full": 109.86601852609188,
+      "mse_cap_lo": 3.6003302266353143e-06,
+      "mse_cap_hi": 5.279372661193487e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:n//8:d3",
+      "r_star": 128,
+      "score": "d3",
+      "drift_final_layer": 4.1921971200056395e-06,
+      "ratio_to_mse_full": 104.68192673622592,
+      "mse_cap_lo": 3.4127688780004503e-06,
+      "mse_cap_hi": 5.051719362010828e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:n//8:d21",
+      "r_star": 128,
+      "score": "d21",
+      "drift_final_layer": 4.162938027921001e-06,
+      "ratio_to_mse_full": 103.95130791122934,
+      "mse_cap_lo": 3.3863745229575835e-06,
+      "mse_cap_hi": 5.01959553288442e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:n:frob",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 2.8630778179695546e-06,
+      "ratio_to_mse_full": 71.49294124327801,
+      "mse_cap_lo": 2.2259020263382432e-06,
+      "mse_cap_hi": 3.580347609600866e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:n:d3",
+      "r_star": 1024,
+      "score": "d3",
+      "drift_final_layer": 2.780764530215737e-06,
+      "ratio_to_mse_full": 69.43752416450013,
+      "mse_cap_lo": 2.1533947874184066e-06,
+      "mse_cap_hi": 3.488228273013068e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:n:d21",
+      "r_star": 1024,
+      "score": "d21",
+      "drift_final_layer": 2.607354337394655e-06,
+      "ratio_to_mse_full": 65.10735729005057,
+      "mse_cap_lo": 2.0011298181408863e-06,
+      "mse_cap_hi": 3.293672856648424e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:4*n:d21",
+      "r_star": 4096,
+      "score": "d21",
+      "drift_final_layer": 9.20465876033491e-07,
+      "ratio_to_mse_full": 22.98463994889732,
+      "mse_cap_lo": 5.765238296401689e-07,
+      "mse_cap_hi": 1.3445019224268131e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:4*n:d3",
+      "r_star": 4096,
+      "score": "d3",
+      "drift_final_layer": 1.1244047367841056e-06,
+      "ratio_to_mse_full": 28.077127794444166,
+      "mse_cap_lo": 7.400508108002285e-07,
+      "mse_cap_hi": 1.5888526627679825e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:n//8:frob",
+      "r_star": 128,
+      "score": "frob",
+      "drift_final_layer": 4.4648231851491605e-06,
+      "ratio_to_mse_full": 111.48957937296578,
+      "mse_cap_lo": 3.659168644188833e-06,
+      "mse_cap_hi": 5.350571726109489e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:n//8:d3",
+      "r_star": 128,
+      "score": "d3",
+      "drift_final_layer": 4.405781582181709e-06,
+      "ratio_to_mse_full": 110.01527161040049,
+      "mse_cap_lo": 3.605737313279024e-06,
+      "mse_cap_hi": 5.285919851084393e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:n//8:d21",
+      "r_star": 128,
+      "score": "d21",
+      "drift_final_layer": 4.4524227925213475e-06,
+      "ratio_to_mse_full": 111.1799333912989,
+      "mse_cap_lo": 3.6479434742290112e-06,
+      "mse_cap_hi": 5.336996110813685e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:n:frob",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 2.8506360536760937e-06,
+      "ratio_to_mse_full": 71.18226218383633,
+      "mse_cap_lo": 2.2149333306526467e-06,
+      "mse_cap_hi": 3.5664327766995414e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:n:d3",
+      "r_star": 1024,
+      "score": "d3",
+      "drift_final_layer": 2.9207003756453e-06,
+      "ratio_to_mse_full": 72.93181450908432,
+      "mse_cap_lo": 2.2767436097390962e-06,
+      "mse_cap_hi": 3.644751141551504e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:n:d21",
+      "r_star": 1024,
+      "score": "d21",
+      "drift_final_layer": 2.7215837284065845e-06,
+      "ratio_to_mse_full": 67.95974051505941,
+      "mse_cap_lo": 2.1013542300470007e-06,
+      "mse_cap_hi": 3.4219072267661684e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:4*n:d21",
+      "r_star": 4096,
+      "score": "d21",
+      "drift_final_layer": 7.542865109130857e-07,
+      "ratio_to_mse_full": 18.835031610684588,
+      "mse_cap_lo": 4.4673079571922335e-07,
+      "mse_cap_hi": 1.141936226106948e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "normsort:4*n:d3",
+      "r_star": 4096,
+      "score": "d3",
+      "drift_final_layer": 9.780209020244166e-07,
+      "ratio_to_mse_full": 24.421826903998216,
+      "mse_cap_lo": 6.22255809923269e-07,
+      "mse_cap_hi": 1.4138799941255637e-06
+    }
+  ],
+  "caveat": "drift is not an error increment; the bracket is the only truth-free statement available."
+}

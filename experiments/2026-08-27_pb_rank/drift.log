@@ -1,0 +1,751 @@
+==============================================================================
+P-B RANK INSTRUMENT  --  rank-capped factored K3, priced
+==============================================================================
+  upstream rev    93d091a4c26c  (as pinned)
+  local patch     25 changed lines vs recorded 25  -> IDENTICAL
+
+  drift of capped vs UNCAPPED K3, 1024 x 16, dtype=f32
+  anchor MSE_full = 4.0047e-08 (P-A / P-A-CONFIRM; an ASSUMPTION here, measured there)
+
+W0827 15:13:28.506000 13672 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop counting will not work for triton kernels
+    seed 1000201
+      cell                   drift  /MSE_full   MSE_cap lo   MSE_cap hi
+      normsort:n//32     4.552e-06    113.670    3.738e-06    5.446e-06
+      normsort:n//16     4.515e-06    112.748    3.705e-06    5.406e-06
+      normsort:n//8      4.400e-06    109.866    3.600e-06    5.279e-06
+      normsort:n//4      4.166e-06    104.017    3.389e-06    5.022e-06
+      normsort:n//2      3.707e-06     92.556    2.976e-06    4.517e-06
+      normsort:n         2.863e-06     71.493    2.226e-06    3.580e-06
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+      sketch:n//8              nan        nan          nan          nan
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+      sketch:n//4              nan        nan          nan          nan
+
+    seed 1000202
+      cell                   drift  /MSE_full   MSE_cap lo   MSE_cap hi
+      normsort:n//32     4.523e-06    112.955    3.712e-06    5.415e-06
+      normsort:n//16     4.573e-06    114.193    3.757e-06    5.469e-06
+      normsort:n//8      4.465e-06    111.490    3.659e-06    5.351e-06
+      normsort:n//4      4.197e-06    104.790    3.417e-06    5.056e-06
+      normsort:n//2      3.442e-06     85.944    2.739e-06    4.224e-06
+      normsort:n         2.851e-06     71.182    2.215e-06    3.566e-06
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+      sketch:n//8              nan        nan          nan          nan
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+      sketch:n//4              nan        nan          nan          nan
+
+    seed 1000203
+      cell                   drift  /MSE_full   MSE_cap lo   MSE_cap hi
+      normsort:n//32     2.971e-06     74.184    2.321e-06    3.701e-06
+      normsort:n//16     2.941e-06     73.436    2.295e-06    3.667e-06
+      normsort:n//8      2.934e-06     73.268    2.289e-06    3.660e-06
+      normsort:n//4      2.876e-06     71.809    2.237e-06    3.594e-06
+      normsort:n//2      2.772e-06     69.220    2.146e-06    3.478e-06
+      normsort:n         2.458e-06     61.384    1.871e-06    3.126e-06
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+      sketch:n//8              nan        nan          nan          nan
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Snapping negative variance to zero
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+Input tensor is not symmetric, symmetrizing.
+      sketch:n//4              nan        nan          nan          nan
+
+  wrote experiments\2026-08-27_pb_rank\drift.json
+==============================================================================

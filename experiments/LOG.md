@@ -17771,3 +17771,214 @@ to cancel.
 **The 2.8629x graded improvement is unaffected** — both submissions saw the same
 grader networks, so that comparison is paired and remains the cleanest number in
 the record.
+
+---
+
+# 2026-08-27 (late) — RESULT: P-B-COST. Rank-capping the factored K3 is PRICED OUT. The compression thesis is refuted, and the cheapest possible experiment refuted it.
+
+*Contract 3 item 1 (the P-B ladder) presupposes that factored K3's accuracy
+survives a ~15x cost reduction. This entry measures the cost side exactly and
+bounds the accuracy side rigorously **without any ground truth and without
+spending a seed block**, and the two together close the question before the
+ladder, the GT asset and the `fnp` port are paid for.*
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Instrument:** `local_sim/p2_pb_rank.py` (new).
+**Artifacts:** `experiments/2026-08-27_pb_rank/{cost_ladder,cost_hirank,cost_dsproj,drift,drift_hirank,drift_scores,drift_dsproj,drift_f64}.json` and the matching `.log` files.
+**Nothing submitted, no `estimator.py` change, no seed block claimed, no truth measured.**
+
+## Rule-1 status, stated plainly rather than glossed
+
+**No prediction was pre-registered for this slice, and that is a defect I am
+recording rather than papering over.** What limits the damage is that the slice
+contains no gate, no promotion and no fitted quantity: every number below is
+either an exact deterministic FLOP count or a deterministic difference between
+two runs of the same code on the same weights. There was nothing for a
+post-hoc-chosen model to flatter. It is a cost-and-structure probe, class
+IMPORTANT (a new probe's math), and its conclusions are the kind that a
+pre-registration would not have changed.
+
+Two things do the load-bearing verification work instead, and both are stronger
+than a prediction would have been:
+
+1. **The null control returns EXACTLY zero.** Capping at `r* = 31n` and `r* = 32n`
+   — at or above the uncapped rank, so the cap cannot bind — gives drift
+   `0.000e+00`, not "small". Any wiring error that manufactured drift would have
+   shown here.
+2. **The uncapped cost reproduces an INDEPENDENT model to 0.000%.** The runtime
+   counter says `3.2537e12`; upstream's own separately-derived FLOP polynomial
+   (recorded in the P-A entry, computed by a different code path) says
+   `3.2537e12`. Two independent instruments, four significant figures.
+
+The re-driven layer loop is also proven to *be* upstream: `--selftest` runs it
+against `kprop_harmonic.mlp_kprop` with capping disabled and gets
+**bit-identical** output on all 16 layers (`worst |ref - ours| = 0.000e+00`).
+The upstream checkout is not edited; the pin check still passes.
+
+## Correction: the rank is NOT "pinned at exactly 15n"
+
+`CURRENT_STATE.md` and the Skeptic's D9 record that the factored-`kappa_3` rank is
+pinned at `15n = 15,360`. **Measured, the rank is not pinned at all.** It grows by
+exactly `2n` per layer:
+
+```text
+layer      0    1    2    3  ...   13    14    15
+rank/n     2    4    6    8  ...   28    30    32
+```
+
+`15n` is the **mean rank over the 16 layers** (`2n * mean(l+1) = 15n`), which is
+what a per-layer cost model consumes — so nothing costed on it was wrong. But the
+distinction matters enormously for the lever: capping every layer at `r*` replaces
+a *mean* rank of `15n`, not a *fixed* rank of `15n`. **`r* = n/8` is a 120x rank
+reduction, not an 8x one**, and Contract 3's adopted cost canon (`1/8 -> 0.206 B`,
+"floor unreachable by rank-capping alone") reads the axis the other way. On the
+measured axis the floor is reachable easily — which turns out not to help, for
+reasons that are the whole point of this entry.
+
+## The cost side: rank-linearity is now MEASURED, not inferred
+
+The P-A entry flagged "both `get_dslice` and `contract_W` scale with the rank" as
+the load-bearing **inference** of the entire P-B plan. It is now measured, and it
+holds almost exactly. Seven cells, `r*` from `32` to `2048`, fitted affine:
+
+```text
+cost(r*) = 1.5751e11 + 1.8908e08 * r*        max |relative residual| 0.0012%
+           ^^^^^^^^^ = 0.0716 B fixed floor
+```
+
+At `r* = 128` the two dominant lines fall by exactly the predicted mechanism —
+`get_dslice` `1.556e12 -> 1.863e10` (**83.5x**), `contract_W` `1.546e12 -> 1.208e10`
+(**128x**) — and the residue is `nonlin_sum 111 factored` (`9.78e10`) plus
+`contract_W_basic` (`5.16e10`), which together are `1.49e11` of the `1.575e11`
+floor. The floor is fully accounted for.
+
+**The selector is cheap, and the Skeptic's D9 pricing worry is answered.** A
+norm-sort cap costs `0.04-0.12%` of total at every rank measured. D9's concern was
+right in general and does not bite here, for a reason worth keeping: capping
+*every layer* means the selector only ever sees a rank of `O(n)`, never `15n`, so
+the `O(nr)` selector stays three orders below the `O(n^2 r)` lines it is protecting.
+
+So the cost half of the thesis is not merely true, it is better than claimed:
+
+| cell | `r*` | counted FLOPs | multiplier | peak (torch) |
+|---|---:|---:|---:|---:|
+| uncapped | 32n final | `3.2537e12` | `1.4796 B` | `22.34 GiB` |
+| `normsort` | `n/8` = 128 | `1.8171e11` | **`0.0826 B`** | `3.86 GiB` |
+| `normsort` | `n` = 1024 | `3.5112e11` | `0.1597 B` | `4.84 GiB` |
+| `normsort` | `4n` | `9.0613e11` | `0.4121 B` | `8.12 GiB` |
+| `normsort` | `16n` | `2.5321e12` | `1.1515 B` | `17.80 GiB` |
+
+**`r* = n/8` sits BELOW the `0.1` multiplier floor.** If accuracy were free, this
+is the `4.00e-09` entry the P-A table imagined.
+
+## The accuracy side: it is not free, and it is not close
+
+Accuracy is bounded here **without ground truth**, which is what makes this slice
+cheap enough to have run before the ladder. Writing `delta = p_cap - p_full`, the
+capped error is `e_full + delta`, so by the triangle inequality in `L2`
+
+```text
+| sqrt(MSE_full) - sqrt(drift) |  <=  sqrt(MSE_cap)  <=  sqrt(MSE_full) + sqrt(drift)
+```
+
+with `drift = mean_i (p_cap - p_full)_i^2` on the **final layer**, which is the only
+layer the competition scores. `MSE_full = 4.0047e-08` is carried from P-A /
+P-A-CONFIRM. Nothing narrower than this bracket is available without a label, and
+the bracket is quoted at both ends so the optimistic end is never read as a result.
+
+Drift, measured on three unregistered probe networks at `1024 x 16`:
+
+| `r*` | `32` | `128` | `1024` | `2048` | `4096` | `8192` | `16384` | `31n`, `32n` |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| drift | `4.55e-6` | `4.40e-6` | `2.86e-6` | `1.73e-6` | `8.23e-7` | `1.65e-7` | `1.29e-8` | **`0.00e+00`** |
+| `/MSE_full` | `114` | `110` | `71` | `43` | `21` | `4.1` | `0.32` | `0` |
+
+**Capping at any rank that saves money moves the prediction 20-114x further than
+the entire uncapped error.** And the curve is the wrong shape for compression: it
+is nearly FLAT from `r* = 32` to `r* = 128` (a 4x rank change buys 3%), then falls
+off a cliff between `8n` and `32n`. The `kappa_3` information is spread across
+essentially all `2n`-per-layer rank-one terms, not concentrated in a few large ones.
+
+**The selector score barely matters, and I checked the one that theory favours.**
+In SIMPLE mode `kappa_3` reaches the scored mean only through its diagonal slices
+`(3,)` and `(2,1)`, so ranking columns by their exact contribution to those slices
+should beat ranking by the term's Frobenius norm. It does — by `<= 5%`, and on one
+network at `r* = 4n` the Frobenius score was *better*. Three scores, same answer.
+
+**One genuinely better compression exists, and it is still not enough.** `dsproj`
+replaces `kappa_3` by `from_dstensor(get_repeated())` — its own diagonal content,
+at rank exactly `n`, **exact** on everything `kappa_3` contributes to the mean at
+that layer and approximate only in its influence on the next layer's `kappa_3`.
+It gives **2.9x less drift than column selection at identical rank** (`7.9e-7` vs
+`2.2e-6`). But `get_repeated()` forces the `(2,1)` slice, so it costs `0.2977 B`
+against column selection's `0.1597 B`, and on score it lands no better.
+
+**The O4 sketch arm is dead as designed.** The unbiased three-point rank-mixing map
+(asymmetric by necessity: any symmetric or Rademacher map has `E[S^3] = 0` and
+collapses the sketch to zero in expectation) produced 192 negative-variance snaps
+at `1024 x 16` and returned **NaN** on every network. Its variance destroys the
+state. Norm selection produced no such warning at any rank.
+
+## The frontier, and the number that ends the lane
+
+Score bracket = MSE bracket x `max(0.1, cost/B)`, using the **smallest** drift over
+the probe networks at each cell (the reading most favourable to compression):
+
+| cell | multiplier | MSE lo | MSE hi | **score lo** | score hi |
+|---|---:|---:|---:|---:|---:|
+| `normsort n/8` | `0.0826` | `2.29e-6` | `3.66e-6` | `2.29e-07` | `3.66e-07` |
+| `normsort n` | `0.1597` | `1.65e-6` | `2.83e-6` | `2.63e-07` | `4.53e-07` |
+| `normsort 2n` | `0.2477` | `1.25e-6` | `2.30e-6` | `3.09e-07` | `5.70e-07` |
+| `dsproj n` | `0.2977` | `4.74e-7` | `1.19e-6` | `1.41e-07` | `3.53e-07` |
+| `normsort 4n` | `0.4121` | `4.47e-7` | `1.14e-6` | `1.84e-07` | `4.71e-07` |
+| `normsort 8n` | `0.7055` | `4.26e-8` | `3.68e-7` | `3.00e-08` | `2.60e-07` |
+| `normsort 16n` | `1.1515` | `7.51e-9` | `9.83e-8` | `8.65e-09` | `1.13e-07` |
+| **uncapped** | `1.4796` | `4.005e-8` | `4.005e-8` | **`5.93e-08`** | `5.93e-08` |
+
+**The best point on the entire lane is the uncapped one, or `r* = 16n` beside it.**
+Compression moves the score the wrong way, monotonically, everywhere it saves
+anything. At `r* = 16n` drift is small against `MSE_full`, so the honest reading is
+`MSE ~ 4e-8` at `1.1515 B` -> **score `~4.6e-8`**, a `1.29x` improvement on
+uncapped for a `22%` cost cut. That is the whole compression dividend.
+
+**Contract 3's diagnosis is therefore refuted at its load-bearing sentence.** It
+says: *"Ship K3-class raw (~4e-8) at ~0.2 B and we are at ~8e-9 = top-3 on today's
+board."* **K3-class raw is not available at `0.2 B`.** At `0.2 B` the measured raw
+is `~2e-6` — fifty times worse — and K3-class raw is available only at
+`1.15-1.48 B`, where it scores `4.6e-8` to `5.9e-8`. Against today's leader
+(`7.70e-9`) that is **6-7.7x short**, and it is reached by an unbuilt `fnp` port.
+
+The lower bound needs no truth and no seed block to state, which is the point:
+**even the most favourable end of a rigorous bracket, at the cheapest cell, is
+`2.29e-07`** — worse than the entry already on the board.
+
+## What this does NOT kill
+
+- **K3 itself is not dead. It is expensive.** Uncapped/lightly-capped K3 at
+  `4.6-5.9e-8` would be a **2.3-3.0x improvement on our best graded entry**
+  (`1.374e-07`) and a mid-board position. It is a real, if unglamorous, target —
+  and its price tag is now known instead of hoped for.
+- **Nothing here touches O1 (fitted projections), O2b (trace-`kappa_4` readout) or
+  O5 (ridge corrector).** None of the three depends on rank capping. By
+  elimination they are now the whole live program, and O1 is unblocked today.
+- **O2a and O3 are undermined but not measured.** Both presuppose rank capping is
+  viable; `k3aug` is `12x B` before any capping and would need the same lever that
+  just failed. P-F (Richardson-in-rank) is separately doubtful because the drift
+  curve is flat then cliff-shaped, not smooth — Richardson cancels a leading term
+  only where one exists. Neither is formally refuted here.
+- **The memory figure is torch's, not the grader's.** Peaks of `3.9-22.3 GiB` are
+  this host's allocator including intermediates; the factors themselves are only
+  `201 MB` at `r* = 16n`. A streaming `fnp` port could plausibly do far better, so
+  **the `8 GiB` limit is NOT established as binding** and must not be quoted as a
+  second kill.
+- **These are upstream's torch-side counted FLOPs, not flopscope 0.12 pricing.**
+  `docs/GOTCHAS.md` records counterexamples in both directions. Any operating point
+  still has to be re-priced by flopscope before it is believed. The conclusion is
+  robust to that: it would take a `>10x` pricing error to change it.
+
+## Scope
+
+Three unregistered probe networks for drift, one for cost. No DESIGN, CONFIRM or
+VAULT tier was touched and no seed block was claimed — deliberately, because the
+truth-free bracket made it unnecessary. **Rule 2 applies: an independent Skeptic
+was launched on this result and no part of it may be built on until it returns.**

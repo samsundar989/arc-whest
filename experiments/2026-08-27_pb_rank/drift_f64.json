@@ -1,0 +1,30 @@
+{
+  "check": "capped-vs-uncapped drift bracket",
+  "width": 1024,
+  "depth": 16,
+  "dtype": "f64",
+  "mse_full_anchor": 4.0047e-08,
+  "rows": [
+    {
+      "seed": 1000201,
+      "cell": "dsproj:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 9.353865659806876e-07,
+      "ratio_to_mse_full": 23.357219416702563,
+      "mse_cap_lo": 5.883448122932233e-07,
+      "mse_cap_hi": 1.362522319668152e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "normsort:n//8",
+      "r_star": 128,
+      "score": "frob",
+      "drift_final_layer": 4.3998004089747295e-06,
+      "ratio_to_mse_full": 109.86591777098732,
+      "mse_cap_lo": 3.6003265766466435e-06,
+      "mse_cap_hi": 5.279368241302817e-06
+    }
+  ],
+  "caveat": "drift is not an error increment; the bracket is the only truth-free statement available."
+}
