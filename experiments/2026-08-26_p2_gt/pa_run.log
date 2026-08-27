@@ -11,3 +11,36 @@ P-A  --  factorized K3 information content at 1024 x 16
 W0827 11:48:04.081000 53644 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop counting will not work for triton kernels
       1/24  seed 40821001144   k2 4.8669e-06   k2cal 2.1230e-06   k3 4.0147e-08   (4s, eta 25m)
       2/24  seed 40821001145   k2 3.8416e-06   k2cal 1.4306e-06   k3 4.6244e-08   (3s, eta 18m)
+      3/24  seed 40821001146   k2 3.8051e-06   k2cal 2.1086e-06   k3 4.4304e-08   (1s, eta 14m)
+      4/24  seed 40821001147   k2 4.3284e-06   k2cal 1.4916e-06   k3 4.0070e-08   (3s, eta 11m)
+      5/24  seed 40821001148   k2 4.3855e-06   k2cal 1.4162e-06   k3 3.5898e-08   (4s, eta 9m)
+      6/24  seed 40821001149   k2 3.4566e-06   k2cal 1.1977e-06   k3 4.0937e-08   (4s, eta 8m)
+      7/24  seed 40821001150   k2 4.3068e-06   k2cal 1.1714e-06   k3 3.3852e-08   (4s, eta 7m)
+      8/24  seed 40821001151   k2 5.0388e-06   k2cal 1.5193e-06   k3 2.9591e-08   (3s, eta 6m)
+      9/24  seed 40821001152   k2 3.0148e-06   k2cal 1.3286e-06   k3 4.3578e-08   (3s, eta 5m)
+     10/24  seed 40821001153   k2 3.6069e-06   k2cal 1.1609e-06   k3 3.9819e-08   (4s, eta 5m)
+     11/24  seed 40821001154   k2 3.4873e-06   k2cal 1.5165e-06   k3 4.6723e-08   (3s, eta 4m)
+     12/24  seed 40821001155   k2 3.6437e-06   k2cal 1.1396e-06   k3 3.4489e-08   (2s, eta 4m)
+     13/24  seed 40821001156   k2 3.5808e-06   k2cal 1.6931e-06   k3 3.8044e-08   (4s, eta 3m)
+     14/24  seed 40821001157   k2 3.2531e-06   k2cal 9.9157e-07   k3 3.5622e-08   (4s, eta 3m)
+     15/24  seed 40821001158   k2 5.9095e-06   k2cal 1.3891e-06   k3 4.3541e-08   (2s, eta 3m)
+     16/24  seed 40821001159   k2 4.9896e-06   k2cal 1.4978e-06   k3 4.2191e-08   (1s, eta 2m)
+     17/24  seed 40821001160   k2 3.7468e-06   k2cal 1.6505e-06   k3 4.3725e-08   (1s, eta 2m)
+     18/24  seed 40821001161   k2 5.2558e-06   k2cal 1.5444e-06   k3 4.3929e-08   (1s, eta 1m)
+     19/24  seed 40821001162   k2 4.7719e-06   k2cal 1.4337e-06   k3 3.8070e-08   (3s, eta 1m)
+     20/24  seed 40821001163   k2 4.3905e-06   k2cal 1.4998e-06   k3 4.1710e-08   (4s, eta 1m)
+     21/24  seed 40821001164   k2 4.7271e-06   k2cal 1.4937e-06   k3 4.9120e-08   (3s, eta 1m)
+     22/24  seed 40821001165   k2 3.7207e-06   k2cal 1.5049e-06   k3 3.8422e-08   (3s, eta 0m)
+     23/24  seed 40821001166   k2 4.5239e-06   k2cal 1.3150e-06   k3 4.1015e-08   (4s, eta 0m)
+     24/24  seed 40821001167   k2 4.0603e-06   k2cal 1.1486e-06   k3 3.0084e-08   (3s, eta 0m)
+
+  K2      mean xmse 4.1963e-06   median 4.1835e-06
+  K2+cal  mean xmse 1.4486e-06   median 1.4626e-06
+  K3      mean xmse 4.0047e-08   median 4.0542e-08   se 1.017e-09   95% [3.7943e-08, 4.2151e-08]
+  paired K2+cal - K3: 1.4086e-06   95% [1.2953e-06, 1.5218e-06]   K3 better on 24/24
+
+  PREDICTION P-A: mean in [1.5e-08, 8.0e-08] -> HELD  (measured 4.0047e-08)
+  FALSIFIER     : mean > 1.5e-07 -> not fired
+  f32 - f64 xmse over 3 networks: mean -1.307e-12 (vs K3 xmse 4.005e-08, i.e. 0.0033% of it)
+  wrote experiments\2026-08-26_p2_gt\pa_k3.json
+==============================================================================

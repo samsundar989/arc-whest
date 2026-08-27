@@ -17294,3 +17294,132 @@ amnesty week.
 `estimator.py` byte-identical `00240eb1e60810f5…` and **unchanged** — v2.7 was
 submitted as a sibling file, not promoted. Seed ledger P01 `168/600`. Vault
 untouched.
+
+---
+
+# 2026-08-27 — RESULT: P-A. Factorized K3 carries the information. Mean true final-layer MSE 4.0047e-08, and it wins 24/24
+
+*Completes the P-A contract, committed before the executor produced any number.
+Samuel's band was fixed even earlier, in `ca18439`, before any kprop run existed
+in this tree. Raw artifact: `experiments/2026-08-26_p2_gt/pa_k3.json` (all 24
+rows), log `pa_run.log`. **Nothing submitted, no `estimator.py` change, no lane
+closed.***
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+## The measurement
+
+24 freshly minted 1024x16 DESIGN networks (`P01[40,821,001,144..167]`), measured
+against the P2-GT two-half asset with the unbiased cross estimator
+`mean_j (p_j - A_j)(p_j - B_j)`, label noise `1.1552e-09` per half:
+
+| arm | mean xmse | median | notes |
+|---|---:|---:|---|
+| `k2` — shipped K2p1 closure | `4.1963e-06` | `4.1835e-06` | the control |
+| `k2cal` — plus v2.7's 16 constants | `1.4486e-06` | `1.4626e-06` | what is on the board today |
+| **`k3` — ARC factored K3, UNMODIFIED** | **`4.0047e-08`** | **`4.0542e-08`** | **the arm under test** |
+
+`k3` standard error `1.017e-09`, studentised-t 95% CI
+**`[3.7943e-08, 4.2151e-08]`**. Paired `k2cal - k3` = `1.4086e-06`, 95%
+`[1.2953e-06, 1.5218e-06]`.
+
+**K3 beats calibrated K2 on 24 of 24 networks.** No exceptions, no tail.
+
+## Prediction scorecard — every one held
+
+| # | prediction | measured | verdict |
+|---:|---|---:|---|
+| **Samuel's** | mean in `[1.5e-8, 8e-8]` | **`4.0047e-08`** | **HELD**, mid-band |
+| **Samuel's** | falsifier `> 1.5e-7` | — | **not fired** |
+| mine 1 | `k3` beats `k2cal` on `>= 22/24` | **`24/24`** | **HELD** |
+| mine 2 | `f32 - f64` below 1% of `xmse_k3` | **`0.0033%`** (`-1.307e-12`) | **HELD, by 300x** |
+| mine 3 | `xmse_k2` within 20% of the recorded `~4.1e-6` | **`4.1963e-06`, `+1.3%`** | **HELD** |
+
+Prediction 3 is the one that matters for trusting everything else: it is a
+**negative control on the new label asset**. The K2 arm is unchanged code, and it
+reproduces the number recorded against the *old* `2**22` label to `1.3%`. The
+asset did not move the control, so it is measuring the arms and not itself.
+
+## A correction to the brief, and it is a favourable one about the INSTRUMENT
+
+Samuel's strategy session reported K3 at mean `3.36e-8` / median `3.01e-8` on 6
+MLPs, per-seed `3.58 / 2.34 / 7.68 / 2.80 / 3.22 / 0.56` (x1e-8) with SE
+`<1.2e-8` each.
+
+Measured here on 24 networks with a label `42x` quieter (SE `2.86e-10`):
+
+- **mean `4.0047e-08` — 19% HIGHER than his figure**, and outside his median;
+- **but the per-network spread collapses.** His six values span a factor of
+  **13.7** (`0.56e-8` to `7.68e-8`). Mine span a factor of **1.66**
+  (`2.96e-08` to `4.91e-08`).
+
+His per-seed SE of `1.2e-8` was **30% of his own mean**, so most of the variation
+he saw was his label's noise rather than real network-to-network variation. The
+`0.56e-8` and `7.68e-8` outliers are what a noisy estimator does around a value
+near `4e-8`. **The method is slightly worse than he thought and much more
+consistent than he thought**, and the second half is the more useful correction:
+K3's accuracy is a stable property of the method, not a lottery over networks.
+
+This is exactly what the P2-GT asset was built to buy, and it paid for itself on
+its first use.
+
+## f32 is licensed for the K3 port, on measurement
+
+`f32 - f64` cross-estimator difference over 3 networks: **`-1.307e-12`**, which is
+**`0.0033%`** of the `4.005e-08` being measured — and the sign is *favourable*.
+Combined with the already-accepted `0.50002x` counted-cost halving, **float32 is
+the port default for the K3 lane**, as Samuel's item 4 directs. Caveats that
+stand: three networks is a thin base, and `docs/GOTCHAS.md`'s rule that flopscope
+pricing must be **measured, not assumed** applies to any new spelling.
+
+## What this means strategically — the arithmetic, stated carefully
+
+Upstream's own FLOP model puts unmodified factored K3 at `3.2537e12` =
+**`1.4796 B`**. Multiplying raw by the multiplier:
+
+| operating point | multiplier | adjusted score | vs today's leader (`8.50e-9`) |
+|---|---:|---:|---:|
+| K3 as shipped, `1.4796 B` | `1.4796` | `5.93e-08` | `7.0x` worse |
+| K3 at `0.35 B` | `0.35` | `1.40e-08` | `1.65x` worse |
+| K3 at `0.15 B` | `0.15` | `6.01e-09` | **`1.41x` BETTER** |
+| K3 at the `0.1 B` floor | `0.1` | **`4.00e-09`** | **`2.1x` BETTER** |
+
+**Read that table with the assumption it hides in plain sight: it assumes
+compression is FREE in accuracy.** It is not, and how much it costs is precisely
+what P-B measures. The honest statement is:
+
+> **The information is there.** At the `0.1` multiplier floor, K3's *current*
+> accuracy would score `4.00e-09` and beat today's leader by `2.1x`. Whether any
+> of that survives a `15x` cost reduction is unmeasured, and is the whole game.
+
+Also worth keeping: **v2.7 is on the board at `1.374e-07` and full-rank K3 is
+`5.93e-08` even paying `1.48x` in multiplier** — so K3 at *full price* is already
+`2.3x` better than our best graded entry. The lane is not speculative any more.
+
+## Cost structure, and one inference that is NOT yet measured
+
+`get_dslice` (`1.5560e12`, 47.83%) + `contract_W` (`1.5462e12`, 47.52%) =
+**95.35%** of factored-K3 cost. The rank-independent remainder is `~0.068 B`, so
+if both terms scaled linearly with the factored-`kappa_3` rank, rank `1/8` would
+land near `0.245 B` and rank `1/16` near `0.157 B`.
+
+**"Both scale with the factored-kappa_3 rank" is carried from Samuel's brief as an
+INFERENCE and has not been measured in this tree.** It is the load-bearing
+assumption of the entire P-B plan. It gets measured first in P-B, before any rank
+ladder is interpreted, or the ladder means nothing.
+
+## Scope — what this does NOT do
+
+- **P01 is a DESIGN block. This closes no lane and promotes nothing.** It
+  authorises P-B and nothing else.
+- No cost claim in competition currency. Upstream's FLOP model is not flopscope
+  0.12 pricing; every operating point must be priced by flopscope before it is
+  believed.
+- No `fnp` port exists. K3 here runs in torch on a GPU; the grader has neither.
+  Nothing about residual, setup or memory at 1024x16 in the participant sandbox is
+  established. The `22.3 GiB` float32 peak measured on this host is **far** above
+  the `8 GiB` solution-memory limit and the port must solve that, not inherit it.
+- 24 networks. The CI is quoted and must be quoted with the mean.
+- **Rule 2 is pending**: an independent Skeptic was launched on this result at the
+  same time as this entry was written, and no part of this may be built on until
+  it returns.
