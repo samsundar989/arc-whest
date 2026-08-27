@@ -1,0 +1,13 @@
+==============================================================================
+P-A  --  factorized K3 information content at 1024 x 16
+==============================================================================
+  asset            experiments/2026-08-26_p2_gt  (24 networks, 67,108,864 samples per half)
+  label noise/half 1.1552e-09
+  cross-est SE     2.858e-10 at MSE 3e-8
+  prediction       mean true final-layer MSE in [1.5e-08, 8.0e-08]   falsifier > 1.5e-07
+
+  upstream         93d091a4c26c + recorded patch, verified
+
+W0827 11:48:04.081000 53644 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop counting will not work for triton kernels
+      1/24  seed 40821001144   k2 4.8669e-06   k2cal 2.1230e-06   k3 4.0147e-08   (4s, eta 25m)
+      2/24  seed 40821001145   k2 3.8416e-06   k2cal 1.4306e-06   k3 4.6244e-08   (3s, eta 18m)

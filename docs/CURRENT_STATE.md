@@ -24,10 +24,47 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   had 57 entrants. Both were previously presented as current; neither is wrong,
   and the later one is the more recent. The board moves daily — **quote a
   snapshot with its timestamp or not at all.**
-- The signed-in team/Phase-2 submission view says **no submissions match**. This
-  account therefore has **zero Phase-2 submissions** as of 2026-08-26; the
-  authenticated eligibility capture of that date is consistent with it but does
-  **not** by itself enumerate submissions.
+- **TWO PHASE-2 SUBMISSIONS EXIST AS OF 2026-08-27, both graded, both with zero
+  failed MLPs.** This supersedes the "zero Phase-2 submissions" line that stood
+  here on 2026-08-26.
+
+  | id | artifact | sha256 | graded score |
+  |---|---|---|---:|
+  | **328662** | `estimator.py` = v2.6.1 (the canary) | `00240eb1…` | **`3.9330104345935976e-07`** |
+  | **328664** | `estimator_v2_7.py` | `96ff522d…` | **`1.373807110667258e-07`** |
+
+  Graded improvement `2.8629x`, against the local paired statistic's `2.9078x` —
+  **agreement to 1.5%, so the offline DESIGN fitting loop is confirmed on the
+  board and not merely in projection.** Reports:
+  `experiments/run_reports/submission_3286{62,64}_*_graded_report.json`.
+
+  **The telemetry these bought is the real prize** (full detail at the bottom of
+  `experiments/LOG.md`):
+  - **cost parity `+0.0122%`** — local `137,600,326,656` vs graded
+    `137,617,103,872` per MLP. `C == F` on all 100 rows on the real grader.
+  - **score parity favourable but NOT constant** — local reads pessimistic by
+    `3.0%` (canary) and `1.4%` (v2.7). Treat as "favourable by roughly 1–3%",
+    never as a four-figure multiplier.
+  - **residual: graded median `6.78`/`7.04 ms`, max `7.06`/`7.31 ms` → `54.7x`
+    headroom** against the `0.4 s` cliff. The grader is `7.06x` faster than this
+    host at the median. **`AGENTS.md` says the old Phase-1 "~7x" has no Phase-2
+    counterpart; it does now.**
+  - **setup `2.66–2.92 ms` across 5 workers, all SUCCESS → `1,712x` headroom.**
+    **`SETUP_TIMEOUT` is a purely LOCAL artifact and was never a grader risk.**
+  - **feedback shape confirmed: 100 telemetry rows, 50 public score rows
+    (indices 0–49), rounded to 3 significant figures.**
+  - `sampling_mse = 1.133e-06` is the organiser's MC reference. v2.7 is within
+    `1.21x` of it; the canary was `3.47x` off.
+- **The residual-cliff worry is RESOLVED, and the answer was this host.** Local
+  measurement said v2.7 cost `+40.3 ms` of residual over the baseline; **the
+  grader says `+0.260 ms`.** 99.4% of the local delta was contention. Local
+  residual **deltas** on this host are untrustworthy, not merely local absolute
+  times.
+- **Open item created by the graded data:** the two files differ by `32,832`
+  counted FLOPs locally and **`32,800` on the grader** — one 32-FLOP op the local
+  meter bills and the grader does not. It is `2.3e-10` of the total and changes no
+  decision, but `AGENTS.md` claims the meters reconcile to zero op for op, so it
+  is owed to `local_sim/p2_flop_anchor.py`.
 - The current shipped file routes Phase-2 width to basic `k2p1`. Its official
   100-MLP subprocess mini measured `4.050566e-7` adjusted / `4.050566e-6` raw,
   with 0 failures, fixed `137,600,326,656` FLOPs/MLP and **4.29x LOCAL,
