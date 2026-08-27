@@ -16090,3 +16090,92 @@ whether the project's model of itself is any good.
 `estimator.py` byte-identical `00240eb1e60810f5…`. Seed ledger **60/60**, P01 at
 `144/600`, D17 and D19 still unspent. Vault untouched, counter `1 == 1`. Nothing
 submitted.
+
+---
+
+# 2026-08-26 (late) — GATE ITEM 6 CANNOT BE WITNESSED ON THIS HOST TODAY
+
+*Operational record. No seed, no vault, no `estimator.py` change, nothing
+submitted. Transcripts: `experiments/2026-08-26_ship_cal/preflight_full_shipcal.txt`,
+`envelope_full.txt`, `envelope_run2.txt`, `envelope_run3.txt`.*
+
+## What happened
+
+`preflight.ps1 -Full` at HEAD `0184d37`: **steps 1-14 PASS, steps 15 and 16 FAIL.**
+
+```text
+PREFLIGHT RED -- failed: 15. deployment envelope, 16. official Phase-2 subprocess smoke
+```
+
+That blocks Track 0S gate item 6, which requires GREEN 16/16.
+
+## It is not a regression, and that was checked rather than assumed
+
+`git diff --name-status 97100e4..HEAD -- local_sim/ scripts/ estimator.py` returns
+**five files, all `A` (added), zero modified.** Every file these two steps execute
+— `test_deployment_envelope.py`, `test_envelope_readonly.py`, `lifecycle_eval.py`,
+`preflight.ps1`, `estimator.py` — is **byte-identical to session start**. The
+executed code path did not change, so the failure cannot originate in this
+session's work.
+
+That is necessary but not sufficient, so the behaviour was measured too.
+
+## It is host contention, and the suite says so itself
+
+Four runs of the envelope suite, same HEAD, same command, within the hour:
+
+| run | outcome | checks |
+|---|---|---|
+| inside `preflight -Full` | FAIL | — |
+| direct #1 | provocation RAN; **3 MLPs failed (0, 1, 2)**, all `error`, where exactly 1 was expected | 38/43 |
+| direct #2 | **`REFUSED at setup: SETUP_TIMEOUT`** — provocation never ran | 36/38 |
+| direct #3 | **`REFUSED at setup: SETUP_TIMEOUT`** — provocation never ran | 36/38 |
+
+**The same command produces different check totals and different failure modes
+run to run.** That non-determinism is the diagnosis: a deterministic defect does
+not sometimes execute 43 checks and sometimes 38.
+
+Host state, measured during the runs: GPU 63-93% busy with an unrelated workload
+holding ~20-23 GB of VRAM, system RAM 93% loaded with 1-3.85 GB free. Bare
+`import whestbench` + `import flopscope` measures **3.54-4.35 s** here against the
+**5.0 s** ceiling; our own `setup()` is 0.278 s.
+
+And the suite had already written the verdict, before any of this:
+
+> *"SETUP_TIMEOUT is an ENVIRONMENT condition, not an estimator defect: this
+> host's `import whestbench` alone is 1.3 s quiet and 4.7-9.1 s loaded against a
+> 5 s ceiling, while our own setup is 0.6 ms. Re-run on a quiet machine. **It is
+> reported as a FAILURE and not a skip because a gate that cannot verify
+> deployment must not certify it.**"*
+
+That design decision is correct and is being respected. The temptation here is to
+call steps 15-16 "environmental" and treat the gate as morally green. **It is
+not green.** A deployment gate that cannot run has not certified deployment, and
+the whole point of the sentence above is that the repository already decided not
+to let a loaded host launder itself into a pass.
+
+## The direct-#1 run deserves its own line
+
+The one run that got past setup then failed differently: the worker-death
+provocation kills the worker on MLP 0 and expects **exactly** MLP 0 to fail with
+the rest clean. Instead MLPs 0, 1 and 2 all failed as `error`. That is the restart
+path degrading under the same load — subsequent workers hitting the same setup
+window — not a different bug. It is recorded because a future reader who sees only
+runs #2 and #3 would think `SETUP_TIMEOUT` is the only failure mode; it is the
+only one that fires *before* the provocation can.
+
+## Consequence
+
+**Track 0S gate item 6 is UNSATISFIED and cannot be satisfied on this host until
+the competing workload ends.** It joins item 5 (Samuel's SHA-naming approval) as
+blocking. Nothing about the P2-SHIP-CAL measurement is invalidated — counted
+FLOPs, per-MLP MSE and the `2.9078x` are unaffected by host load, and the run
+reported `n_failed_mlps = 0` across all 100 rows — but the **deployment** half of
+the evidence does not exist yet.
+
+Re-run `preflight.ps1 -Full` on a quiet machine before requesting approval. If the
+host cannot be quieted, this is the point at which the submission waits.
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder. `estimator.py`
+byte-identical `00240eb1e60810f5…`. Seed ledger 60/60, P01 `144/600`, D17 and D19
+unspent. Vault untouched.

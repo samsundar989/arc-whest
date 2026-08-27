@@ -166,41 +166,10 @@
             "...and it is MLP 0, the one that killed the worker": "failed indices [0]"
           }
         },
-        "witness_verified": true,
-        "witness_reason": "6 named check(s) verified in local_sim/test_deployment_envelope.py [d91a613e31ac]",
+        "witness_verified": false,
+        "witness_reason": "CHECK NOT FOUND in local_sim/test_deployment_envelope.py: 'the suite SURVIVED a worker that hard-exited mid-run' -- the witness names a provocation the suite does not contain",
         "witness_suite": "local_sim/test_deployment_envelope.py",
-        "witness_results": [
-          {
-            "name": "the suite SURVIVED a worker that hard-exited mid-run",
-            "ok": true,
-            "detail": "3 rows returned"
-          },
-          {
-            "name": "EXACTLY one MLP failed -- not zero, not several",
-            "ok": true,
-            "detail": "n_failed_mlps = 1, indices [0]"
-          },
-          {
-            "name": "...and it is MLP 0, the one that killed the worker",
-            "ok": true,
-            "detail": "failed indices [0]"
-          },
-          {
-            "name": "...classified as an ERROR, not as a budget/time exhaustion",
-            "ok": true,
-            "detail": "{'budget_exhausted': 0, 'time_exhausted': 0, 'residual_wall_time_exhausted': 0, 'combined_budget_exhausted': 0, 'error': 1}"
-          },
-          {
-            "name": "...and EVERY later MLP is clean -- no traceback, no flag",
-            "ok": true,
-            "detail": "2 later MLPs, all clean"
-          },
-          {
-            "name": "...and every one was GENUINELY SCORED, not zeroed",
-            "ok": true,
-            "detail": "mse [1.1239, 1.231] -- distinct, so each was scored against its own network"
-          }
-        ]
+        "witness_results": []
       },
       "predict_response_timeout_s": {
         "value": 30.0,
@@ -210,7 +179,7 @@
       }
     },
     "witness_suite_sha256": "a913c55cbcc2434ea5fde5a25524d4081e48a7d08a1710af8b242b9d75ca16d1",
-    "self_results_sha256": "383683ac8a0ecb42139974648a658a1bc38ede16572457a7a93cbe1cac75de18"
+    "self_results_sha256": "d5e283841c600ee265766f068d7d501e30ecf4700f0583eb8db96805f95e2ee4"
   },
   "unprovable_here": [
     {
@@ -236,20 +205,20 @@
   "memory": {
     "measurement": {
       "baseline": {
-        "working_set": 131002368,
-        "commit": 607477760
+        "working_set": 130486272,
+        "commit": 606646272
       },
       "peak": {
-        "working_set": 462442496,
-        "commit": 962543616
+        "working_set": 462077952,
+        "commit": 962121728
       },
       "weight_bytes": 67108864
     },
     "limit_mb": 8192,
-    "peak_working_set_mb": 441.01953125,
-    "peak_commit_mb": 917.953125,
+    "peak_working_set_mb": 440.671875,
+    "peak_commit_mb": 917.55078125,
     "weights_mb": 64.0,
-    "headroom_upper_bound": 8.924202965156853
+    "headroom_upper_bound": 8.928116206102352
   },
   "memory_limit_provocation": {
     "provoked_here": false,
@@ -268,20 +237,12 @@
     }
   },
   "worker_death": {
-    "skipped": false,
-    "n_mlps": 3,
-    "n_failed_mlps": 1,
-    "failed_indices": [
-      0
-    ],
-    "failure_breakdown": {
-      "budget_exhausted": 0,
-      "time_exhausted": 0,
-      "residual_wall_time_exhausted": 0,
-      "combined_budget_exhausted": 0,
-      "error": 1
+    "refused": {
+      "stage": "setup",
+      "code": "SETUP_TIMEOUT",
+      "message": "worker setup timed out."
     }
   },
-  "checks_passed": 43,
-  "checks_total": 43
+  "checks_passed": 36,
+  "checks_total": 38
 }

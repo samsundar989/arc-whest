@@ -152,9 +152,18 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   0.278 s), so the run used `--setup-timeout 120` and its `run_config` records
   `120.0`. Re-measure at the official 5 s on a quiet host before submitting.
   (b) Nothing about the private re-run.
-  **BLOCKING FOR SUBMISSION: Samuel's SHA-naming approval (hard rule 6) — not
-  supplied by anything received so far — and a current-HEAD `preflight -Full`
-  16/16 witness.** Samuel's prediction was also never taken; that is recorded as
+  **BLOCKING FOR SUBMISSION, two items.** (i) **Samuel's SHA-naming approval**
+  (hard rule 6) — not supplied by anything received so far. (ii) **A
+  `preflight -Full` 16/16 witness, which CANNOT be produced on this host today**:
+  steps 1–14 PASS, steps **15 and 16 FAIL** on `SETUP_TIMEOUT` under contention
+  (GPU 63–93% busy on an unrelated workload, RAM 93% loaded; bare
+  `import whestbench`+`flopscope` measures 3.54–4.35 s against the 5.0 s ceiling).
+  Verified not a regression — every executed file is byte-identical to session
+  start, and four runs of the envelope suite gave three different outcomes, which
+  is the diagnosis. The suite reports this as RED **by design** ("a gate that
+  cannot verify deployment must not certify it"), and that is being respected:
+  **the gate is not green and must not be treated as morally green.** Re-run on a
+  quiet machine.** Samuel's prediction was also never taken; that is recorded as
   an open defect of the slice, flagged in the contract *before* the measurement so
   the gate could not be moved by it.
 - **Phase 1A is mathematically valid but PROVISIONAL.** 34/34 verifier and 16/16

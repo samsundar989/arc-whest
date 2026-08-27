@@ -1,0 +1,104 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260826195359
+Username: SAM_MEGA_PC\samsu
+RunAs User: SAM_MEGA_PC\samsu
+Configuration Name: 
+Machine: SAM_MEGA_PC (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command try { $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8' } catch {}; if ($ExecutionContext.SessionState.LanguageMode -eq 'FullLanguage') { try { $OutputEncoding = [System.Text.UTF8Encoding]::new() } catch {}; if ($null -ne $PSStyle) { try { $PSStyle.OutputRendering = 'PlainText' } catch {} } }; $env:PYTHONIOENCODING="utf-8"
+New-Item -ItemType Directory -Force -Path experiments\2026-08-26_ship_cal | Out-Null
+.\scripts\preflight.ps1 -Full -Log experiments\2026-08-26_ship_cal\preflight_full_shipcal.txt
+"exit=$LASTEXITCODE"
+; $_ec = if ($null -ne $LASTEXITCODE) { $LASTEXITCODE } elseif ($?) { 0 } else { 1 }
+; (Get-Location).Path | Out-File -FilePath 'C:\Users\samsu\AppData\Local\Temp\claude\claude-pwd-ps-b75e' -Encoding utf8 -NoNewline
+; if ($ExecutionContext.SessionState.LanguageMode -eq 'FullLanguage') { $host.SetShouldExit($_ec) } else { exit $_ec }
+Process ID: 23712
+PSVersion: 5.1.26100.9168
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9168
+BuildVersion: 10.0.26100.9168
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+preflight -- arc-whest
+repo:    C:\Users\samsu\Documents\arc-whest
+shipped: estimator.py   archive: estimator_v2_6_1.py
+HEAD:    0184d37df0756c1985cfbf076757b15d41b832d7
+worktree: DIRTY at start --
+    ?? experiments/2026-08-26_ship_cal/preflight_full_shipcal.txt
+  (steps 15/16 regenerate tracked evidence, so the tree is
+   EXPECTED to be dirty at the END of a -Full run)
+
+=== 1. official stack + round configuration ===
+
+  PASS  1. official stack + round configuration
+
+=== 2. mint provenance ===
+
+  PASS  2. mint provenance
+
+=== 3. invariant suite ===
+
+  PASS  3. invariant suite
+
+=== 4. whest validate ===
+  child stdout encoding: utf-8
+
+  PASS  4. whest validate
+
+=== 5. ship-file identity vs estimator_v2_6_1.py ===
+
+  PASS  5. ship-file identity vs estimator_v2_6_1.py
+
+=== 6. vault seal (counter vs log) ===
+
+  PASS  6. vault seal (counter vs log)
+
+=== 7. seed ledger (consumption + source scan) ===
+
+  PASS  7. seed ledger (consumption + source scan)
+
+=== 8. canonical scorer + the binding gate ===
+
+  PASS  8. canonical scorer + the binding gate
+
+=== 9. seed-ledger refusals ===
+
+  PASS  9. seed-ledger refusals
+
+=== 10. vault integrity (array hashes + seed->weights) ===
+
+  PASS  10. vault integrity (array hashes + seed->weights)
+
+=== 11. lifecycle evaluator ===
+
+  PASS  11. lifecycle evaluator
+
+=== 12. counted-FLOP anchor vs the official runner ===
+
+  PASS  12. counted-FLOP anchor vs the official runner
+
+=== 13. shape parity ===
+
+  PASS  13. shape parity
+
+=== 14. carrier strength ===
+
+  PASS  14. carrier strength
+
+=== 15. deployment envelope (+ what it cannot prove, + read-only proof) ===
+
+  FAIL  15. deployment envelope (+ what it cannot prove, + read-only proof) -- exit code 1
+
+=== 16. official Phase-2 subprocess smoke (zero failures) ===
+
+  FAIL  16. official Phase-2 subprocess smoke (zero failures) -- exit code 1
+
+PREFLIGHT RED -- failed: 15. deployment envelope (+ what it cannot prove, + read-only proof), 16. official Phase-2 subprocess smoke (zero failures)
+Do not promote, do not submit, do not spend a decision block.
+**********************
+Windows PowerShell transcript end
+End time: 20260826203535
+**********************

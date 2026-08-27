@@ -1,0 +1,101 @@
+================================================================================================
+DEPLOYMENT ENVELOPE -- what fails a Phase-2 MLP, and what this host can prove
+================================================================================================
+
+0. NEGATIVE TESTS -- every way a witness can be worthless, refused
+------------------------------------------------------------------
+  PASS  REFUSED: the ORIGINAL FALSE witness -- prose naming a real file, no check UNADJUDICABLE WITNESS: 'local_sim/lifecycle_eval.py --self-test (L4)' is prose, not a structured
+  PASS  REFUSED: a missing witness (None)                              NO WITNESS: nothing names a provocation
+  PASS  REFUSED: a witness naming NO checks                            WITNESS NAMES NO CHECKS
+  PASS  REFUSED: a witness naming checks but NO suite to look them up in WITNESS NAMES NO SUITE: None -- a list of check names with nothing to look them up in
+  PASS  REFUSED: a witness naming a suite NOBODY REGISTERED            UNKNOWN SUITE: 'local_sim/does_not_exist.py' is not a registered results source; known: ['local_
+  PASS  REFUSED: a REGISTERED suite whose results file does not exist  SUITE RESULTS MISSING: 'local_sim/lifecycle_eval.py --self-test' produced nothing to verify agai
+  PASS  REFUSED: results that resolve but DECLARE A DIFFERENT SUITE    SUITE MISMATCH: 'local_sim/impostor_suite.py' resolved to results emitted by 'local_sim/lifecycl
+  PASS  REFUSED: a WRONG check identifier inside a real suite          CHECK NOT FOUND in local_sim/lifecycle_eval.py --self-test: 'L4: a 1e-9 s WALL limit trips the T
+  PASS  REFUSED: a real check whose RESULT is false                    CHECK PRESENT BUT FAILED: 'L4: a 1e-9 s WALL limit trips the TIME path'
+  PASS  REFUSED: a real check whose DETAIL contradicts the claim       DETAIL MISMATCH on 'L4: a 1e-9 s WALL limit trips the TIME path': expected '7/7 time_exhausted',
+  PASS  REFUSED: unadjudicable prose presented as an enforcement witness UNADJUDICABLE WITNESS: 'it is enforced, trust me' is prose, not a structured claim. A sentence i
+  PASS  REFUSED: THE SELF-WITNESS, against a run in which section 6 never ran CHECK NOT FOUND in local_sim/test_deployment_envelope.py: 'the suite SURVIVED a worker that hard
+  PASS  ACCEPTED: the real wall witness, with its real detail          1 named check(s) verified in local_sim/lifecycle_eval.py --self-test [a913c55cbcc2]
+  PASS  ACCEPTED: a LIVE witness against this suite's own emitted results 1 named check(s) verified in local_sim/test_deployment_envelope.py [112940d1b5be]
+
+0b. NEGATIVE TESTS -- the read-only latch refuses both write paths
+------------------------------------------------------------------
+  PASS  REFUSED: regenerating a suite's results while the latch is armed --no-write is armed: refusing to regenerate ..\..\AppData\Local\Temp\arc_whest_ro_sb2vax9i
+  PASS  REFUSED: writing an evidence artifact while the latch is armed --no-write is armed: refusing to write C:\Users\samsu\AppData\Local\Temp\arc_whest_ro_sb2v
+  PASS  ...and with the latch DOWN the same writer DOES write          wrote would_have_been_written.json to a system temp dir
+
+1. the enforceability matrix
+----------------------------
+  platform win32   RLIMIT_AS available: False
+  PASS  flop_budget: its named provocation RAN and PASSED              2199023255552  <- 3 named check(s) verified in local_sim/lifecycle_eval.py --self-test [a913c55cbcc2]
+  PASS  wall_time_limit_s: its named provocation RAN and PASSED        120.0  <- 3 named check(s) verified in local_sim/lifecycle_eval.py --self-test [a913c55cbcc2]
+  PASS  residual_wall_time_limit_s: its named provocation RAN and PASSED 0.4  <- 3 named check(s) verified in local_sim/lifecycle_eval.py --self-test [a913c55cbcc2]
+  PASS  setup_timeout_s: its named provocation RAN and PASSED          5.0  <- 2 named check(s) verified in local_sim/lifecycle_eval.py --self-test [a913c55cbcc2]
+  ----  memory_limit_mb                                                NOT PROVABLE HERE: NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design
+  ....  worker_death_restart                                           DEFERRED to section 7: provoked by this suite, which has not run it yet
+  ----  predict_response_timeout_s                                     NOT PROVABLE HERE: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
+  PASS  the matrix carries EXACTLY the required envelope constraints   7 present; missing none; unpinned none
+  PASS  every required constraint's ENFORCEMENT claim is pinned somewhere unpinned none; pinned-but-absent none
+  PASS  only the permitted constraint has a PLATFORM-DEPENDENT classification exempt ['memory_limit_mb']; permitted ['memory_limit_mb']
+  PASS  every locally enforced constraint emits the witness it is PINNED to 6 pinned; disagreeing: none
+  PASS  ...and every one of them makes the enforcement claim it is pinned to 6 pinned; disagreeing: none
+  ~~~~  the memory claim vs a child that applies the real cap          NOT PERFORMED IN THIS RUN: this host has no `resource`, so the child cannot reach setrlimit(8192 MB) and both sides of the comparison descend from one failed import. The LINUX memory claim is carried by section 5's worker probe ('the worker actually APPLIED the 8 GiB cap'), not by this
+  PASS  every constraint the matrix marks unenforceable was REPORTED as such ['memory_limit_mb', 'predict_response_timeout_s'] marked; missing from the report: none
+  PASS  the lifecycle results WERE regenerated for this run (so the --no-write refusal is not vacuous) regenerated={'local_sim/lifecycle_eval.py --self-test': True}
+
+2. the timeout arithmetic is not what it looks like
+---------------------------------------------------
+  PASS  the runner waits max(predict_timeout, wall + grace), not predict_timeout 125.0 s effective vs predict_timeout_s 30.0 s
+  PASS  so under Phase 2 the 120 s WALL binds, not the 30 s predict timeout wall 120 s
+
+3. peak memory at the live shape -- accounting, not enforcement
+---------------------------------------------------------------
+  weights alone                  64.0 MB (16 x 1024x1024 float32)
+  peak WORKING SET              440.7 MB   (resident)
+  peak COMMIT                   917.6 MB   (a LOWER bound on the RLIMIT_AS charge)
+  Phase-2 limit                8192.0 MB
+  PASS  the shipped file's peak memory fits the Phase-2 limit          at most 8.9x headroom -- an UPPER BOUND, i.e. the most optimistic reading. RLIMIT_AS caps VIRTUAL address space, which exceeds both counters above by an unmeasured amount
+  PASS  ...and the peak is at least as large as the weights alone      917.6 MB > 64.0 MB (a peak below the weights would mean the probe never materialised them)
+
+5. the 8 GiB memory limit -- provoked, or explicitly not provable here
+----------------------------------------------------------------------
+  ----  memory_limit_mb (provocation)                                  NOT PROVABLE HERE: no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/
+      Linux worker saw RLIMIT_AS soft = 8,589,934,592 (8.0 GiB)
+      control OK   9 GiB request -> OSError: [Errno 12] Cannot allocate memory
+  PASS  the Linux evidence shows the cap was actually APPLIED          8,589,934,592 == 8,589,934,592
+  PASS  ...the control mapping SUCCEEDED, so the mechanism works       OK
+  PASS  ...and the over-limit reservation was REFUSED                  OSError: [Errno 12] Cannot allocate memory
+
+6. worker death and restart, through the OFFICIAL subprocess runner
+-------------------------------------------------------------------
+  FAIL  the official runner accepted the run                           REFUSED at setup: SETUP_TIMEOUT
+      SETUP_TIMEOUT is an ENVIRONMENT condition, not an
+      estimator defect: this host's `import whestbench`
+      alone is 1.3 s quiet and 4.7-9.1 s loaded against a
+      5 s ceiling, while our own setup is 0.6 ms. Re-run on
+      a quiet machine. It is reported as a FAILURE and not
+      a skip because a gate that cannot verify deployment
+      must not certify it.
+
+7. witness closure -- the provocations THIS suite performed
+-----------------------------------------------------------
+  FAIL  worker_death_restart: its named provocation RAN and PASSED in THIS suite CHECK NOT FOUND in local_sim/test_deployment_envelope.py: 'the suite SURVIVED a worker that hard-exited mid-run' -- the witness names a provocation the suite does not contain
+  PASS  every SELF-PROVOKED constraint in the matrix reached this section adjudicated ['worker_death_restart']; the matrix declares ['worker_death_restart']; missing none
+
+================================================================================================
+36/38 checks passed; 3 constraint(s) NOT PROVABLE on this host; 1 check(s) not performed in this run
+
+NOT PROVABLE HERE -- these are gaps in the local evaluator, and a
+candidate that passes everything above has NOT been shown to satisfy
+them. They are enforced only on the grader:
+  - memory_limit_mb: NOTHING -- the `resource` module does not exist on this platform, so subprocess_worker.py's setrlimit call is caught and skipped, and --runner local is advisory by design
+  - predict_response_timeout_s: runner-side wait of max(predict_timeout_s, wall_time_limit_s + grace); under Phase 2's 120 s wall the 30 s predict_timeout is NOT the binding constraint
+  - memory_limit_mb (provocation): no RLIMIT_AS on this platform; provoked instead on Ubuntu 24.04 under the same official stack -- see experiments/2026-08-24_p2_p0/linux/
+
+NOT PERFORMED IN THIS RUN -- these are checks this INVOCATION
+declined, not gaps in the evaluator's coverage of the grader. They
+are named rather than skipped quietly, and they are not passes:
+  - the memory claim vs a child that applies the real cap: this host has no `resource`, so the child cannot reach setrlimit(8192 MB) and both sides of the comparison descend from one failed import. The LINUX memory claim is carried by section 5's worker probe ('the worker actually APPLIED the 8 GiB cap'), not by this
+
+  wrote experiments\2026-08-24_p2_p0\deployment_envelope.json
