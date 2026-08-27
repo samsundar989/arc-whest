@@ -14,3 +14,12 @@ P2-GT  --  high-resolution A/B ground truth, 1024 x 16
   RESUMING existing claim P01[40,821,001,144 .. 40,821,001,167] -- shards are reused, not redrawn.
        1/24   shard present, skipped
        2/24     160.9s   eta  1769.4s
+       3/24     327.4s   eta  2291.5s
+       4/24     634.7s   eta  3173.5s
+       5/24     748.3s   eta  2843.7s
+       6/24     857.8s   eta  2573.4s
+       7/24     967.2s   eta  2348.8s
+       8/24    1076.0s   eta  2151.9s
+       9/24    1182.5s   eta  1970.9s
+      10/24    1288.4s   eta  1803.8s
+      11/24    1394.2s   eta  1647.7s

@@ -16796,3 +16796,142 @@ needs a contract before it can be.**
 `estimator.py` byte-identical `00240eb1e60810f5…`. Seed ledger P01 at 168/600.
 D17 and D19: **D19 was drawn — see defect D2 in the previous entry.** Vault
 untouched, counter `1 == 1`. Nothing submitted.
+
+---
+
+# 2026-08-27 — CONTRACT (Rule 1): P-A — does factorized K3 carry the information at 1024 x 16?
+
+*Committed before the P2-GT asset is finalised and before any kprop accuracy
+number exists. Samuel's prediction for this slice was fixed earlier, in the P2-GT
+contract `ca18439`, **before any kprop run existed in this tree at all** — which
+is what makes this a test and not a description. This entry adds the executable
+gate, the statistic and the scope; it does not restate his band, and it may not
+move it.*
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Executor:** `local_sim/p2_pa_kprop.py` (committed with this entry, before data).
+
+## Question
+
+At the live Phase-2 shape, and **ignoring cost entirely**, how accurate is ARC's
+factorized-K3 cumulant propagation run unmodified? This is an information
+question: can the method reach the board's raw accuracy band at *any* price?
+
+## Evidence
+
+- **CONFIRMED (this tree, 2026-08-27).** The bridge is wired correctly: upstream
+  at `k_max=2` reproduces `p2_cal_lab.closure` to `1.270e-30` relative mean
+  square at 1024x16, and that mirror is itself verified to `4e-30` against the
+  instrumented `fnp` arm we ship. Artifact `kprop_wiring_k2.json`.
+- **CONFIRMED (this tree, 2026-08-27).** The upstream checkout is rev
+  `93d091a4` plus **exactly** the recorded patch — 7 files, 25 changed lines,
+  identical md5 — checked against a pristine clone, and re-checked on every run.
+- **CONFIRMED (this tree, 2026-08-27).** Factored K3 at 1024x16 is *runnable*:
+  float32 `89 s` / `22.3 GiB` peak per network, float64 `193 s` / `44.6 GiB`,
+  final-row mean agreeing to six decimals on the probe network, all finite.
+- **CONFIRMED (this tree, 2026-08-27).** Upstream's own FLOP model reproduces
+  Samuel's cost table to four significant figures: K3 factored `3.2537e12`
+  (`1.4796 B`), K2 `5.1843e10` (`0.0236 B`), `get_dslice` 47.83%, `contract_W`
+  47.52%. **This is upstream's model, NOT flopscope pricing.**
+- **INFERRED, and it is the thing under test.** Samuel's strategy session
+  measured true final-layer MSE mean `3.36e-8` / median `3.01e-8` on 6 minted
+  MLPs. Six networks, elsewhere, on an instrument this tree has not seen.
+- **SPECULATIVE.** That the result transfers to 24 networks drawn from P01.
+
+## Hypothesis and mechanism
+
+K2 tracks mean and covariance and closes the ReLU map on a Gaussian assumption
+that is false after layer 1. P2-CP3R already measured where the error lives:
+**94.61% of K2's error is accumulated mean/variance-state drift**, and P2-CAL
+part 2 then showed that drift is **not a per-layer scalar phenomenon** — two
+corrections that genuinely change `alpha` fitted ~1% in-fit and lost all of it
+out of sample. So the remaining error is either per-neuron structure or missing
+*information*. K3 propagates the third cumulant, which is the cheapest way to add
+information rather than re-weight what K2 already has. If the drift is
+third-cumulant-shaped, K3 should remove most of it; if it is not, K3 will
+disappoint and the pivot is to a readout plus a per-neuron corrector.
+
+## Intervention
+
+Run three arms on the same 24 P2-GT networks, paired on common random numbers by
+construction:
+
+| arm | what |
+|---|---|
+| `k2` | `p2_cal_lab.closure` — the shipped K2p1 mirror. Control. |
+| `k2cal` | the same plus v2.7's sixteen constants, **read from `estimator_v2_7.py`, not retyped**. The control that is actually on the board. |
+| `k3` | upstream `mlp_kprop(k_max=3, factor=True)`, **UNMODIFIED**. The arm under test. |
+
+## Predictions
+
+Samuel's, already fixed in `ca18439` and **not restated or adjusted here**:
+mean true final-layer MSE in **`[1.5e-8, 8e-8]`**; falsifier **`> 1.5e-7`**.
+
+Mine, added now, because a band with no shape is weak:
+
+1. `k3` beats `k2cal` on **at least 22 of 24** networks. The mechanism above says
+   the improvement is structural, not a tail effect; if it wins on only half the
+   networks the mechanism is wrong even if the mean looks good.
+2. The `f32 - f64` difference in `xmse_k3` is **below 1%** of `xmse_k3` itself.
+   If it is not, the f32 port default that Samuel's item 4 adopts does not
+   survive contact with K3 and must be re-decided.
+3. `xmse_k2` reproduces the recorded K2 level of `~4.1e-6` to within 20% —
+   a **negative control on the new label asset**. If the control moves on a
+   quieter label, the label is wrong, not the arm.
+
+## Gate — written on the quantity the slice isolates
+
+`P-A PASSES` iff the mean cross-estimator final-layer MSE of `k3` lands inside
+Samuel's band **and** prediction 1 holds. Passing authorises **P-B, the
+compression question, and nothing else.** It does not authorise a port, an
+`estimator.py` edit, a lane reopening or a submission.
+
+## Falsifier
+
+Mean `xmse_k3 > 1.5e-7`: K3 is not carrying the needed information, and the
+research primary pivots to A0 + Edgeworth readout + per-neuron corrector.
+Prediction 1 failing while the mean holds is a **separate** falsifier of the
+mechanism, and it is the more interesting outcome of the two.
+
+## Baseline and tier
+
+**DESIGN (P01).** The baseline is the `k2` and `k2cal` arms measured in the same
+loop on the same networks. **P01 is a DESIGN block: this measurement orients
+research priority and CANNOT close a lane.** If the falsifier fires, the
+consequence is a change of what we work on next — a planning decision — not a
+lane kill, which would require CONFIRM.
+
+## Cost model — Phase 2, lambda = 0, so C = F
+
+**No cost is claimed by this slice and none may be quoted from it.** P-A is
+deliberately cost-blind. Upstream's `fit_flop_polys` figures recorded earlier are
+*upstream's* model in *upstream's* units; flopscope 0.12 has documented
+counterexamples in both directions, so no operating point is priced until it is
+priced by flopscope. Residual is likewise not a cost here — it is the `0.4 s`
+cliff, and this module never runs inside a grader window.
+
+## Statistic
+
+The **unbiased two-half cross estimator** `mean_j (p_j - A_j)(p_j - B_j)`, whose
+expectation is `MSE(p)` exactly. Plain single-half MSE is reported **beside** it
+so the size of the noise correction is visible. Arm comparisons use the paired
+arithmetic difference with a studentised-t interval. **The halves are never
+averaged** — that would put the `+Var(y)` bias back and is the one thing the
+two-file layout exists to prevent.
+
+## Seed block
+
+**None claimed.** This slice consumes the already-claimed P2-GT asset
+(`P01[40,821,001,144..167]`, claimed under `ca18439`). Re-measuring on the label
+set it was built for is the intended use, not a second draw.
+
+## Confounders, scope, and what must not change
+
+- `estimator.py` is not touched. The vault is not touched. Upstream is not
+  edited — the run refuses if the checkout is not the pinned rev plus the patch.
+- The asset's own fitness checks must have passed; the executor **refuses** to
+  run against a void label rather than reporting a number from one.
+- float32 is the default arm dtype for tractability; the dtype delta is
+  **measured on a subset**, not assumed.
+- 24 networks is a small sample for a band this wide. The interval is reported
+  and must be quoted with the mean.
