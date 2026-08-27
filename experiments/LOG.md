@@ -17982,3 +17982,203 @@ Three unregistered probe networks for drift, one for cost. No DESIGN, CONFIRM or
 VAULT tier was touched and no seed block was claimed — deliberately, because the
 truth-free bracket made it unnecessary. **Rule 2 applies: an independent Skeptic
 was launched on this result and no part of it may be built on until it returns.**
+
+---
+
+# 2026-08-27 (late) — SKEPTIC VERDICT on P-B-COST: ACCEPT — and it destroyed both of my "load-bearing verifications" before agreeing with the conclusion
+
+*Rule 2, on reviewed HEAD `b784b6f`. The verdict is **ACCEPT** on the claim
+"rank-capping the factored K3 is priced out, and the compressed-K3 operating
+point in Contract 3 should not be pursued". It arrived by way of showing that
+neither of the two checks I called load-bearing could have caught a bug, then
+building the checks that could, then replicating the number from an independent
+implementation. Six numbers in my entry are wrong or overstated; all six are
+corrected below and none of them changes the verdict. One is corrected against
+me in the direction that **strengthens** the kill.*
+
+## Both of my "verifications" were worthless, and it proved it rather than asserting it
+
+**1. The null control was a tautology.** I wrote that capping at `r* = 31n` and
+`32n` returning `0.000e+00` drift showed "any wiring error that manufactured
+drift would have shown here". It shows nothing. At `r* = 32n` `cap_factored`
+returns at the `if mode == "none" or r <= r_star` guard **without ever running the
+selector**. At `r* = 31n` the cap binds only at layer 15 — and layer 15's `K[3]`
+is never read, because the loop stores `clone_tower(K, d_max=1)` and breaks. Both
+zeros are true by construction. **A completely broken selector passes that test.**
+
+**2. The "two independent instruments agreeing to 0.000%" were one instrument.**
+`fit_flop_polys` (`flop_utils.py:578-634`) runs the *same* `NamedFlopCounter` over
+the *same* `mlp_kprop`, then extrapolates a polynomial from small `(n, l)`. It is
+one model evaluated two ways. The agreement is still worth keeping — it is exact
+term by term (`get_dslice 1,555,982,991,360` against `1.5560e12`; total
+`3,253,706,193,072` against `3,253,706,193,071.94`) — but what it establishes is
+that **the re-driven loop costs what upstream's `mlp_kprop` costs**, which is a
+statement about my re-drive, not a cross-check of the counter.
+
+So the lane was killed on an instrument nothing had tested. The review then tested
+it, three ways:
+
+- **A binding null control.** Pad a `FactoredTensor` with exactly-zero columns and
+  cap back to the true rank: now the selector runs, sorts and selects, and must
+  reproduce the original exactly. All three scores, relative error `~2e-16` on
+  `to_tensor`, on `get_dslice((3,))` and on `get_dslice((2,1))`; and a
+  deliberately pre-populated `repeated` cache still yields correct slices after
+  the cap. **This is now in the tree as `--nulltest`** and reproduces at
+  `3.285e-16` worst (`experiments/2026-08-27_pb_rank/nulltest.json`). The
+  cache-discard is separately safe because `K[3]` arrives from
+  `FactoredTensor.__add__`, which already discards it (`factor_k3.py:153-168`).
+- **Independent replication of the drift number.** A separate layer loop, a
+  separate truncation (`argsort` + slicing rather than `topk` + `index_select`),
+  and a baseline taken from upstream's own `mlp_kprop` instead of my re-drive:
+  drift `4.3995e-06` at `r* = 128` against my `4.3998e-06`, and `2.8633e-06` at
+  `r* = 1024` against my `2.8631e-06`.
+- **Counter blindness bounded rather than assumed.** `topk`, `index_select`,
+  `cat` and `nonzero` are billed zero by both mappings. At `r* = 16n` the cap
+  moves `~4.0e8` elements; even at flopscope's 4-FLOP gather price that is
+  `<= 0.07%` of the cell. `resid` is exactly `0` in every recorded cell, so
+  nothing else is unattributed. "The selector is cheap" survives.
+
+## The review's own finding, which is better than my argument
+
+It asked what the heavily-capped estimator *is*, by measuring its distance to the
+plain **K2** prediction alongside its drift from K3:
+
+| `r*` | drift-to-K3 | distance-to-K2 | ratio |
+|---:|---:|---:|---:|
+| `32` | `4.5521e-06` | `1.9850e-07` | `0.044` |
+| `128` | `4.3998e-06` | `3.1885e-07` | `0.073` |
+| `1024` | `2.8631e-06` | `1.1347e-06` | `0.396` |
+| `8192` | `1.6515e-07` | `3.8105e-06` | `23.1` |
+| `16384` | `1.2870e-08` | `4.6044e-06` | `357.8` |
+
+**At `r* = n/8` the "compressed K3" is 14x closer to K2 than to K3. It *is* K2, to
+7% in squared distance.** And the mechanism is structural, not statistical: of the
+`2n` columns added per layer, `n` come from `from_dstensor(K_ds[3])`, whose second
+and third legs are literally the identity (`factor_k3.py:257-267`), so column `j`
+is `D[:,j] (x) e_j (x) e_j`. **Capping below `n` deletes whole neurons' `kappa_3`
+diagonal outright — it is coordinate pruning, not compression.** That is exactly
+why the drift curve is flat from `r* = 32` to `128`: those cells differ only in how
+many neurons they silently drop.
+
+The consequence is a cleaner kill than the bracket gives: the cheap end of the
+ladder buys **K2's already-measured `4.05e-6` raw at `0.083-0.094 B`, against the
+shipped K2p1's `0.0625 B`**. It is strictly dominated by an estimator already on
+the board — no bracket, no anchor, no truth required.
+
+## Six corrections, and the first one is against my only positive claim
+
+1. **`r* = 16n` buys NOTHING. My "1.29x dividend" was wrong and I read the
+   optimistic end of a bracket my own entry twice forbids reading.** `drift/MSE_full`
+   at `16n` is `0.23-0.32`, i.e. `sqrt(drift)/sqrt(MSE_full) = 0.48-0.57` — not
+   "small". Measured on all three probes: `1.287e-8`, `1.168e-8`, `9.354e-9`, mean
+   `1.130e-8`. The neutral orthogonal-error reading is
+   `MSE_cap ~ MSE_full + drift = 5.14e-8`, so score `5.91e-8` against uncapped's
+   `5.93e-8`. **A 0.2% wash. The 28% accuracy penalty exactly eats the 22% cost
+   cut.** Correct statement: `16n` is *indistinguishable from* uncapped, bracket
+   `[8.65e-9, 1.13e-7]`, and no point estimate exists without a label. **This
+   strengthens the headline — compression buys nothing anywhere, `16n` included.**
+2. **The lane ceiling is `~5.9e-8`, not "`4.6e-8` to `5.9e-8`".** That makes the
+   improvement over our best graded entry (`1.374e-07`) **`~2.32x`**, not
+   "`2.3-3.0x`". Consequential: anyone budgeting an `fnp` port against `4.6e-8`
+   would be building to a target that does not exist. **I had already propagated
+   the `4.6e-8` figure into `docs/CURRENT_STATE.md`; it is corrected there in the
+   same commit as this entry.**
+3. **"Two independent instruments" is false**, as above. Rephrased to what the
+   agreement actually establishes.
+4. **The null-control paragraph is rewritten** to say it proves the non-binding
+   path is inert — a tautology of `r <= r_star` — and to point at `--nulltest`,
+   which is the control that carries the weight.
+5. **The frontier table's `multiplier` column is mislabelled.** It shows raw
+   `cost/B`; `0.0826` is not a legal multiplier, the floor is `0.1`. The **score**
+   column applies the floor correctly (verified row by row), but the header lied.
+   Also "smallest drift over the probe networks" was in fact the min over networks
+   **and over selector scores** — conservative, but it should say so.
+6. **`7.70e-9` for the leader was unsourced and undated**, against this
+   repository's own rule to quote a snapshot with its timestamp or not at all. It
+   comes from Samuel's Contract 3 board read (2026-08-27 ~19:20 UTC, 63 entries)
+   and is now attributed. The dated in-repo snapshots are `8.50e-9`
+   (2026-08-26 23:12 UTC) and `9.50e-9`. With correction 2, "6-7.7x short" becomes
+   **`~7.7x` short** of `7.70e-9`, or `~7.0x` of the dated `8.50e-9`.
+
+**Plus a latent bug, now fixed.** `cmd_cost` assigned `score` only on the non-`none`
+branch, so `--cost --cells none <anything>` raised `UnboundLocalError`; in the
+recorded runs `none` came last, so the label leaked from the previous cell into the
+`none` row. No measured number was affected. Also fixed: `dsproj` computed a column
+weight and discarded it, billing `2.958e08` of dead work (0.05% of that cell).
+
+## What the review left open, recorded as open
+
+1. **The search is not exhaustive and cannot be made so from here.** Three column
+   scores, one structural projector, one broken sketch. `dsproj` being 2.9x better
+   at identical rank proves the *family* matters. Nothing measured bounds what an
+   optimal rank-`r` compressor could do, so the honest scope is **"priced out for
+   the compressors tried"**, not "for the concept".
+2. **The cross term.** The bracket cannot say where in `[lo, hi]` the truth sits.
+3. **flopscope pricing.** Everything is upstream's torch price model. The kill is
+   robust to uniform mispricing because it is an accuracy statement — reaching
+   `drift <~ MSE_full` needs `r* >= 16n`, i.e. 78% of uncapped cost — but no
+   operating point is priced in competition currency.
+4. **Rule 1.** No pre-registration, and the kill threshold ("worse than what is
+   already on the board") was chosen after the numbers existed. Mitigated because
+   the monotone frontier needs no threshold, and the K2-degeneracy finding needs
+   none either. **Recorded as a defect, not argued away.**
+
+Clean on the rest, checked independently: no seed block claimed and seeds
+`1000201-203` fall in **no** registered range (`local_sim/seed_blocks.py`, all 25);
+no vault touch; `canonical_mint` throughout; upstream pin verifies and the patch is
+semantically inert Python-3.10 type-alias rewrites; `--selftest` reproduces
+`0.000e+00`; f32-vs-f64 drift agrees to `0.014%`.
+
+---
+
+# 2026-08-27 (late) — CONTRACT (Rule 1): P-B-ORACLE — is the kappa_3 information rank-compressible AT ALL, or are our two selectors simply bad?
+
+*The Skeptic's cheapest discriminating follow-up, with **its decision rule adopted
+verbatim and committed before any data exists**. This is the repository's pattern
+after P-A-CONFIRM, and it exists because the reviewer chose the band without
+knowing the answer.*
+
+## Question
+
+P-B-COST establishes that the compressors we tried are priced out. It does **not**
+establish that no rank-`n` compressor could work — open ambiguity 1 above. This
+slice separates those two, and it is the difference between "our selectors are bad"
+(lane reopens, with selector design as the problem) and "the information is not
+rank-`n`-compressible" (lane closes for good).
+
+## Intervention
+
+Per layer, replace the selector with an **oracle** rank-`n` truncation of `K[3]` —
+the best rank-`n` approximation obtainable, computed structurally from the mode-1
+unfolding `A (C (*) B)^T` without materialising the `n^3` tensor. **Its cost is
+deliberately ignored and must never be quoted as an operating point:** it is an
+upper bound on what any rank-`n` compressor could achieve, not a candidate.
+
+## Predictions and the pre-registered decision rule
+
+On the **mean drift over the three probe networks**, adopted verbatim from the
+reviewer:
+
+| outcome | reading |
+|---|---|
+| **>= 4.0e-7** (`>= 10 x MSE_full`) | no rank-`n` compressor of any cost rescues the lane. P-B-COST is upgraded from "these selectors fail" to "the information is not rank-`n`-compressible", and **the lane closes for good** |
+| **< 4.0e-8** (`<= 1 x MSE_full`) | **overturned at rank `n`.** The question becomes selector pricing, and a follow-on slice is authorised |
+| in between | **PROVISIONAL.** Report the bracket, take no decision, build nothing |
+
+My own prediction, recorded before the run: **`>= 4.0e-7`, i.e. the lane closes.**
+Mechanism: the review showed `n` of the `2n` columns added per layer are
+`D[:,j] (x) e_j (x) e_j`, an identity-supported block that is *already* an
+efficient rank-`n` encoding of the `kappa_3` diagonal. If the diagonal alone
+sufficed, `dsproj` — which keeps it exactly — would not have drifted `20x`
+`MSE_full`. So the missing information lives in the all-distinct block, which has
+no small-rank structure to find. **Falsifier: any result below `4.0e-7`.**
+
+## Tier, seeds, cost
+
+**No seed block is claimed and none is required.** The same three unregistered
+probe networks (`1000201-1000203`), width 1024, depth 16, f32, no ground truth,
+no label. `~10` GPU-minutes. Nothing may be promoted, submitted or fitted on the
+result; its only authorised consequence is opening or closing a research lane.
+
+**Samuel's prediction is owed and has NOT been taken.** It is recorded here as
+outstanding *before* the measurement, so the gate cannot be moved by the result.

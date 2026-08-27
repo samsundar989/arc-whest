@@ -149,6 +149,19 @@ def cap_factored(FT, r_star: int, *, mode: str, seed: int, score: str = "frob"):
         return FT
 
     with flop_name("rankcap"):
+        if mode == "dsproj":
+            # Not a selection at all: re-express kappa_3 by its own DIAGONAL
+            # content. `get_repeated()` returns the (3,) and (2, 1) slices --
+            # exactly the slices the flow consumes into the scored mean -- and
+            # `from_dstensor` rebuilds a FactoredTensor carrying them at rank
+            # exactly `n`, discarding only the all-distinct off-diagonal block.
+            # So this is EXACT on everything kappa_3 contributes to the mean at
+            # the current layer, and approximates only kappa_3's influence on
+            # the NEXT layer's kappa_3. `r_star` is ignored: the rank is `n` by
+            # construction, and no column weight is computed -- an earlier
+            # version billed one and threw it away.
+            from mlp_kprop.factor_k3 import FactoredTensor as _FT
+            return _FT.from_dstensor(FT.get_repeated())
         w = _column_weight(factors, score)
         if mode == "normsort":
             keep = torch.topk(w, r_star, sorted=False).indices
@@ -168,19 +181,6 @@ def cap_factored(FT, r_star: int, *, mode: str, seed: int, score: str = "frob"):
                            (F.index_select(1, drop) @ S) * scale], dim=1)
                 for F in factors
             )
-        elif mode == "dsproj":
-            # Not a selection at all: re-express kappa_3 by its own DIAGONAL
-            # content. `get_repeated()` returns the (3,) and (2, 1) slices --
-            # exactly the slices the flow consumes into the scored mean -- and
-            # `from_dstensor` rebuilds a FactoredTensor carrying them at rank
-            # exactly `n`, discarding only the all-distinct off-diagonal block.
-            # So this is EXACT on everything kappa_3 contributes to the mean at
-            # the current layer, and approximates only kappa_3's influence on
-            # the NEXT layer's kappa_3. Column selection, by contrast, is
-            # approximate on both. `r_star` is ignored: the rank is `n` by
-            # construction.
-            from mlp_kprop.factor_k3 import FactoredTensor as _FT
-            return _FT.from_dstensor(FT.get_repeated())
         else:
             raise ValueError(f"unknown cap mode {mode!r}")
 
@@ -307,6 +307,79 @@ def cmd_selftest(a) -> int:
     return 0 if exact else 1
 
 
+def cmd_nulltest(a) -> int:
+    """A null control that actually EXERCISES the cap. The obvious one does not.
+
+    The tempting null -- run with `r*` at or above the uncapped rank and check the
+    output is unchanged -- proves nothing. At `r* >= 32n` `cap_factored` returns
+    at the `r <= r_star` guard without touching the selector, and at `r* = 31n`
+    the cap binds only at layer 15, whose `K[3]` is never read (the loop takes
+    `K[1]` and breaks). Both give exactly zero by construction, so a broken
+    selector would pass. This was a real hole in the first version of this
+    module's evidence and an independent review found it.
+
+    The binding null instead pads a `FactoredTensor` with exactly-zero columns
+    and caps back to its true rank. Now the selector runs, sorts, and selects --
+    and because the discarded columns are identically zero, the result must
+    reproduce the original to floating-point exactness. A selector that kept the
+    wrong columns, mis-indexed, or corrupted the `repeated` cache fails here.
+    """
+    import torch
+    from mlp_kprop.factor_k3 import FactoredTensor
+
+    n, pad = a.width, 12
+    dev, dt = a.device, torch.float64
+    g = torch.Generator(device="cpu").manual_seed(20260827)
+    print(f"  binding null: rank {n} padded with {pad} zero columns, capped back "
+          f"to {n}\n  every score must reproduce the original EXACTLY\n")
+    base = tuple(torch.randn((n, n), generator=g, dtype=dt).to(dev) for _ in range(3))
+    ref = FactoredTensor(n=n, d=3, factors=base, device=dev, dtype=dt)
+    zeros = torch.zeros((n, pad), device=dev, dtype=dt)
+    padded_factors = tuple(torch.cat([F, zeros], dim=1) for F in base)
+
+    def rel(x, y):
+        num = float(torch.linalg.vector_norm(x - y))
+        den = float(torch.linalg.vector_norm(y))
+        return num / max(den, 1e-300)
+
+    worst, rows = 0.0, []
+    for score in ("frob", "d3", "d21"):
+        padded = FactoredTensor(n=n, d=3, factors=padded_factors, device=dev, dtype=dt)
+        got = cap_factored(padded, n, mode="normsort", seed=0, score=score)
+        r_t = rel(got.to_tensor(), ref.to_tensor())
+        r_3 = rel(got.get_dslice((3,)), ref.get_dslice((3,)))
+        r_21 = rel(got.get_dslice((2, 1)), ref.get_dslice((2, 1)))
+        worst = max(worst, r_t, r_3, r_21)
+        rows.append({"score": score, "rel_to_tensor": r_t,
+                     "rel_dslice_3": r_3, "rel_dslice_21": r_21})
+        print(f"    {score:<6} to_tensor {r_t:.3e}   dslice(3,) {r_3:.3e}   "
+              f"dslice(2,1) {r_21:.3e}")
+
+    # The `repeated` cache is discarded when a capped tensor is rebuilt. That is
+    # safe in the real loop -- `K[3]` arrives from `__add__`, which already
+    # discards it -- but check the harder case anyway: a cache deliberately
+    # populated BEFORE the cap must not survive into wrong slices after it.
+    padded = FactoredTensor(n=n, d=3, factors=padded_factors, device=dev, dtype=dt)
+    padded.get_dslice((3,))
+    padded.get_dslice((2, 1))
+    got = cap_factored(padded, n, mode="normsort", seed=0, score="frob")
+    r_cache = max(rel(got.get_dslice((3,)), ref.get_dslice((3,))),
+                  rel(got.get_dslice((2, 1)), ref.get_dslice((2, 1))))
+    worst = max(worst, r_cache)
+    print(f"    {'cache':<6} pre-populated repeated cache, worst slice "
+          f"{r_cache:.3e}")
+
+    ok = worst < a.tol
+    print(f"\n  worst relative error {worst:.3e}   tol {a.tol:.1e}   "
+          f"{'PASS' if ok else 'FAIL'}")
+    if a.out:
+        bridge._dump(a.out, {"check": "binding null control on the cap",
+                             "width": n, "pad": pad, "rows": rows,
+                             "rel_with_prepopulated_cache": r_cache,
+                             "worst": worst, "tol": a.tol, "pass": ok})
+    return 0 if ok else 1
+
+
 def cmd_trace(a) -> int:
     """The rank trajectory, uncapped. Answers 'where does 15n come from?'"""
     import torch
@@ -344,7 +417,10 @@ def cmd_cost(a) -> int:
     cells = []
     for spec in a.cells:
         if spec == "none":
-            mode, r_star = "none", 0
+            # `score` must be bound on BOTH branches: it was previously assigned
+            # only in the else-branch, so a `none` cell either crashed with
+            # UnboundLocalError or silently inherited the previous cell's label.
+            mode, r_star, score = "none", 0, "frob"
         else:
             parts = spec.split(":")
             mode, rs = parts[0], parts[1]
@@ -442,6 +518,8 @@ def cmd_drift(a) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--nulltest", action="store_true")
+    ap.add_argument("--tol", type=float, default=1e-12)
     ap.add_argument("--trace", action="store_true")
     ap.add_argument("--cost", action="store_true")
     ap.add_argument("--drift", action="store_true")
@@ -478,14 +556,17 @@ def main() -> int:
     rc = 0
     if a.selftest:
         rc |= cmd_selftest(a)
+    if a.nulltest:
+        rc |= cmd_nulltest(a)
     if a.trace:
         rc |= cmd_trace(a)
     if a.cost:
         rc |= cmd_cost(a)
     if a.drift:
         rc |= cmd_drift(a)
-    if not (a.selftest or a.trace or a.cost or a.drift):
-        print("  nothing to do; pass --selftest, --trace, --cost and/or --drift")
+    if not (a.selftest or a.nulltest or a.trace or a.cost or a.drift):
+        print("  nothing to do; pass --selftest, --nulltest, --trace, --cost "
+              "and/or --drift")
     print("=" * 78)
     return rc
 

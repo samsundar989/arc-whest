@@ -1,0 +1,29 @@
+{
+  "check": "binding null control on the cap",
+  "width": 1024,
+  "pad": 12,
+  "rows": [
+    {
+      "score": "frob",
+      "rel_to_tensor": 2.5918922414486553e-16,
+      "rel_dslice_3": 2.22651123676682e-16,
+      "rel_dslice_21": 2.4986446240761573e-16
+    },
+    {
+      "score": "d3",
+      "rel_to_tensor": 2.310711088925074e-16,
+      "rel_dslice_3": 2.1715267961980878e-16,
+      "rel_dslice_21": 2.1922667641260136e-16
+    },
+    {
+      "score": "d21",
+      "rel_to_tensor": 3.2849811272331544e-16,
+      "rel_dslice_3": 2.039987902601621e-16,
+      "rel_dslice_21": 3.2010529776906394e-16
+    }
+  ],
+  "rel_with_prepopulated_cache": 2.4986446240761573e-16,
+  "worst": 3.2849811272331544e-16,
+  "tol": 1e-12,
+  "pass": true
+}

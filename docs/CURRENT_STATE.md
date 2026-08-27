@@ -2,8 +2,8 @@
 
 **Snapshot: 2026-08-27 (late). Phase 2 is live, this account has two graded
 submissions, and the compressed-K3 lane that Contract 3 made priority 1 has
-just been measured and priced out (P-B-COST, HEAD `b784b6f`, pending its
-Rule-2 Skeptic).** This file says where execution stands;
+just been measured and priced out (P-B-COST, HEAD `b784b6f`, independent
+Skeptic ACCEPT).** This file says where execution stands;
 [`GAME_PLAN.md`](GAME_PLAN.md) is the only active architecture/roadmap;
 [`VALIDATION.md`](VALIDATION.md) is binding for measurement; the newest entries at
 the bottom of `experiments/LOG.md` contain the evidence narrative.
@@ -321,8 +321,15 @@ For scale: our best graded entry is `1.374e-07` and the leader is `8.50e-9`.
 
 **The whole question was price, not information — and the price has now been
 measured. It is prohibitive.** See P-B-COST at the bottom of `experiments/LOG.md`
-(HEAD `b784b6f`, **PENDING the Rule-2 Skeptic**; nothing below may be built on
-until that verdict lands).
+(HEAD `b784b6f`). **Rule 2 is satisfied: independent verdict ACCEPT**, after it
+showed that both of the checks the entry called load-bearing could not have
+caught a bug, built the ones that could (a binding null control, now in-tree as
+`--nulltest`, exact to `3.3e-16`), and replicated the drift number from an
+independent implementation to 4 significant figures. Six numbers were corrected;
+the two that matter are folded in below. **Open scope, recorded:** this is
+"priced out for the compressors tried", not "for the concept" — P-B-ORACLE is
+pre-registered at the bottom of `experiments/LOG.md` to settle that, and its
+decision rule is committed and awaiting Samuel's prediction.
 
 **Rank-capping the factored K3 is PRICED OUT.** Cost falls with the rank exactly
 as inferred — affine to `0.0012%`, `cost(r*) = 1.5751e11 + 1.8908e08 r*`, so
@@ -339,12 +346,28 @@ inequality on the drift from the uncapped prediction:
 | `normsort 16n` | `1.1515` | `[7.51e-9, 9.83e-8]` | `[8.65e-09, 1.13e-07]` |
 | **uncapped** | `1.4796` | `4.005e-8` (measured) | **`5.93e-08`** |
 
-**The best point on the whole lane is the uncapped one**, with `r* = 16n`
-(`~4.6e-8` at a `22%` cost cut) beside it. Compression moves the score the wrong
-way, monotonically, everywhere it saves anything. **"K3-class raw at `~0.2 B`" is
-refuted: at `0.2 B` the measured raw is `~2e-6`, fifty times worse.** The honest
-ceiling for this lane is **`4.6e-8` to `5.9e-8`** — a `2.3-3.0x` improvement on
-our best graded entry (`1.374e-07`), and `6-7.7x` short of the leader.
+**The best point on the whole lane is the UNCAPPED one, and compression buys
+nothing anywhere — `r* = 16n` included.** Correcting this entry's first version:
+`16n`'s `22%` cost cut is exactly eaten by a `28%` accuracy penalty
+(`MSE ~ MSE_full + drift = 5.14e-8`, score `5.91e-8` against uncapped's
+`5.93e-8`), a `0.2%` wash rather than the `1.29x` I first claimed by reading the
+optimistic end of a bracket. **"K3-class raw at `~0.2 B`" is refuted: at `0.2 B`
+the measured raw is `~2e-6`, fifty times worse.** The honest ceiling for this lane
+is **`~5.9e-8`** — a **`2.32x`** improvement on our best graded entry
+(`1.374e-07`), and `~7.7x` short of the leader (`7.70e-9`, Samuel's Contract 3
+board read, 2026-08-27 ~19:20 UTC, 63 entries; the dated in-repo snapshots are
+`8.50e-9` and `9.50e-9`). **Do not budget an `fnp` port against `4.6e-8` — that
+target does not exist.**
+
+**The independent Skeptic's own finding is a cleaner kill than the bracket.** At
+`r* = n/8` the "compressed K3" is **14x closer to plain K2 than to K3** — it *is*
+K2, to `7%` in squared distance. Structurally so: `n` of the `2n` columns added
+per layer are `D[:,j] (x) e_j (x) e_j` (`factor_k3.py:257-267`), so capping below
+`n` deletes whole neurons' `kappa_3` diagonal. It is **coordinate pruning, not
+compression**, which is why the drift curve is flat from `r* = 32` to `128`. So
+the cheap cells buy K2's `4.05e-6` raw at `0.083-0.094 B` against the shipped
+K2p1's `0.0625 B` — **strictly dominated by what is already on the board**, with
+no bracket or anchor needed.
 
 Three corrections to what this section used to say, all from measurement:
 
