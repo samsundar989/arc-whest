@@ -78,3 +78,25 @@ worktree: DIRTY at start --
   PASS  12. counted-FLOP anchor vs the official runner
 
 === 13. shape parity ===
+
+  PASS  13. shape parity
+
+=== 14. carrier strength ===
+
+  PASS  14. carrier strength
+
+=== 15. deployment envelope (+ what it cannot prove, + read-only proof) ===
+
+
+  PASS  15. deployment envelope (+ what it cannot prove, + read-only proof)
+
+=== 16. official Phase-2 subprocess smoke (zero failures) ===
+
+  PASS  16. official Phase-2 subprocess smoke (zero failures)
+
+PREFLIGHT RED -- failed: 7. seed ledger (consumption + source scan), 9. seed-ledger refusals
+Do not promote, do not submit, do not spend a decision block.
+**********************
+Windows PowerShell transcript end
+End time: 20260827012147
+**********************

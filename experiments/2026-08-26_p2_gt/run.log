@@ -23,3 +23,33 @@ P2-GT  --  high-resolution A/B ground truth, 1024 x 16
        9/24    1182.5s   eta  1970.9s
       10/24    1288.4s   eta  1803.8s
       11/24    1394.2s   eta  1647.7s
+      12/24    1500.0s   eta  1500.0s
+      13/24    1605.8s   eta  1358.7s
+      14/24    1711.0s   eta  1222.1s
+      15/24    1816.2s   eta  1089.7s
+      16/24    1921.3s   eta   960.7s
+      17/24    2026.7s   eta   834.5s
+      18/24    2131.6s   eta   710.5s
+      19/24    2236.4s   eta   588.5s
+      20/24    2341.2s   eta   468.2s
+      21/24    2445.9s   eta   349.4s
+      22/24    2550.7s   eta   231.9s
+      23/24    2655.4s   eta   115.5s
+      24/24    2760.1s   eta     0.0s
+
+  contract predictions, decided by this run:
+    PASS  P1_ratio                     1.0608e+00   bound (0.8, 1.2)
+    PASS  P2_noise                     1.1552e-09   bound (1.1e-09, 1.6e-09)
+    PASS  P3_finite                             0   bound (0, 0)
+    PASS  P4_half_agreement_vs_apriori   9.4525e-01   bound (0.8, 1.2)
+    PASS  GATE_cross_estimator_SE      2.8583e-10   bound (0.0, 3e-09)
+
+  replica disagreement  observed 2.4509e-09  predicted 2V/N 2.3104e-09  ratio 1.0608
+  mean truth noise/half 1.1552e-09
+  wrote  experiments/2026-08-26_p2_gt/gt_halfA.npz  63522c5669aec726
+  wrote  experiments/2026-08-26_p2_gt/gt_halfB.npz  c91265059874f53f
+  wrote  experiments/2026-08-26_p2_gt/gt_manifest.json
+  ledger finalized      yes
+  elapsed               2760.6s
+  VERDICT               ALL PASS
+==============================================================================

@@ -1,0 +1,112 @@
+{
+  "slice": "P2-GT",
+  "contract_commit": "ca18439",
+  "ts": "2026-08-26",
+  "block": "P01",
+  "seeds": [
+    40821001144,
+    40821001145,
+    40821001146,
+    40821001147,
+    40821001148,
+    40821001149,
+    40821001150,
+    40821001151,
+    40821001152,
+    40821001153,
+    40821001154,
+    40821001155,
+    40821001156,
+    40821001157,
+    40821001158,
+    40821001159,
+    40821001160,
+    40821001161,
+    40821001162,
+    40821001163,
+    40821001164,
+    40821001165,
+    40821001166,
+    40821001167
+  ],
+  "n_mlps": 24,
+  "samples_per_half": 67108864,
+  "samples_total_per_mlp": 134217728,
+  "width": 1024,
+  "depth": 16,
+  "dtype_stored": "float64",
+  "halves": {
+    "A": {
+      "path": "experiments/2026-08-26_p2_gt/gt_halfA.npz",
+      "sha256": "63522c5669aec72603b4baec0d3ce1d4d445e86cceebfb408794e956bd4878b2"
+    },
+    "B": {
+      "path": "experiments/2026-08-26_p2_gt/gt_halfB.npz",
+      "sha256": "c91265059874f53f23a20dc722ed1203a6badf0a972ebf9a92ae6de669ca45e1"
+    }
+  },
+  "numerics": {
+    "allow_tf32_matmul": false,
+    "float32_matmul_precision": "highest",
+    "torch": "2.13.0+cu130",
+    "device": "NVIDIA GeForce RTX 5090",
+    "measured_median_rel_err": 2.4860671529269345e-07
+  },
+  "replica_disagreement_observed": 2.450853535550881e-09,
+  "replica_disagreement_predicted_2V_over_N": 2.3104365314580152e-09,
+  "replica_disagreement_ratio": 1.0607750969052825,
+  "gt_noise_per_half_mean": 1.1552182657290076e-09,
+  "gt_noise_per_half_max": 1.3943450340301063e-09,
+  "cross_estimator_se_at_target_mse": {
+    "target_mse": 3e-08,
+    "max_over_mlps": 2.8583195121907127e-10,
+    "mean_over_mlps": 2.5963226898084006e-10,
+    "bar": 3e-09
+  },
+  "nonfinite_values": 0,
+  "checks": {
+    "P1_ratio": {
+      "pass": true,
+      "value": 1.0607750969052825,
+      "bound": [
+        0.8,
+        1.2
+      ]
+    },
+    "P2_noise": {
+      "pass": true,
+      "value": 1.1552182657290076e-09,
+      "bound": [
+        1.1e-09,
+        1.6e-09
+      ]
+    },
+    "P3_finite": {
+      "pass": true,
+      "value": 0,
+      "bound": [
+        0,
+        0
+      ]
+    },
+    "P4_half_agreement_vs_apriori": {
+      "pass": true,
+      "value": 0.9452528540299038,
+      "bound": [
+        0.8,
+        1.2
+      ]
+    },
+    "GATE_cross_estimator_SE": {
+      "pass": true,
+      "value": 2.8583195121907127e-10,
+      "bound": [
+        0.0,
+        3e-09
+      ]
+    }
+  },
+  "all_pass": true,
+  "estimator_note": "Unbiased cross estimator: mean_j (p_j - A_j)(p_j - B_j) has expectation MSE(p) exactly. NEVER average A and B into one label -- that reintroduces the +Var(y) bias these two files exist to remove.",
+  "tier": "DESIGN -- P01. Nothing measured on this asset may close a lane."
+}
