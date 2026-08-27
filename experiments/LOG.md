@@ -16935,3 +16935,217 @@ set it was built for is the intended use, not a second draw.
   **measured on a subset**, not assumed.
 - 24 networks is a small sample for a band this wide. The interval is reported
   and must be quoted with the mean.
+
+---
+
+# 2026-08-27 — SUBMITTED AND GRADED: the canary. Submission 328662, score 3.9330104345935976e-07
+
+*The first Phase-2 submission this account has ever made. Authorised in writing by
+Samuel (CONTRACT 2, item 2: "I approve one bare-covprop canary submission (the
+frozen baseline) to go out BEFORE v2_7, as a known-answer pipeline test"), under
+his standing approval for that exact frozen artifact. Gate green first, submission
+second.*
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Artifact:** `estimator.py` = `estimator_v2_6_1.py`, sha256
+`00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec`.
+**Submission id 328662.** Raw report:
+`experiments/run_reports/submission_328662_328662_graded_report.json` (138,814 B).
+
+## The gate was met before anything was sent
+
+| # | item | state |
+|---:|---|---|
+| 1 | hash + archive identity | **PASS** — preflight step 5, `estimator.py` byte-identical to its archive |
+| 2 | no dirty tracked files | **PASS** — clean at `58602a8` |
+| 3 | `whest validate` | **PASS** — preflight step 4 |
+| 4 | allowance | **CLOSED** |
+| 5 | Samuel's approval | **SUPPLIED** — CONTRACT 2 item 2, standing, artifact named |
+| 6 | `preflight -Full` GREEN 16/16, transcript committed | **PASS** — witnessed at HEAD `4a4f575d`, committed as the single evidence commit `58602a8` |
+
+## Samuel's prediction was right
+
+He predicted **`~3.9–4.1e-7` adjusted**. Measured **`3.9330104345935976e-07`** —
+inside the band, near the middle. This is the first entry in this project's
+record of whether its model of itself is any good, and it is a hit.
+
+## The result
+
+| metric | graded |
+|---|---:|
+| adjusted final-layer score | **`3.933e-07`** |
+| final-layer MSE | `3.933e-06` |
+| all-layers MSE | `2.159e-06` |
+| multiplier | `0.09999999999999996` — **floor-pinned** |
+| compute utilisation | `0.06258101342245936` |
+| **`n_failed_mlps`** | **`0`** |
+| best / worst MLP | `2.168e-07` / `5.407e-07` |
+| `sampling_mse` (organiser MC reference) | **`1.133e-06`** |
+
+Runtime: whestbench `0.16.0`, flopscope `0.12.0` client **and** server,
+participant shim `0.1.0`, numpy `2.2.6`, python `3.10.21`. **Five workers.**
+
+## THE TELEMETRY, which is the real value of this submission
+
+### 1. Local-to-graded score parity: local reads 3.0% PESSIMISTIC
+
+| | value |
+|---|---:|
+| local official 100-MLP subprocess mini | `4.050566e-07` |
+| **graded** | **`3.9330104e-07`** |
+| ratio local / graded | **`1.0299`** |
+
+**Forum 18199's "local ↔ board ≈ 1:1" is CONFIRMED on this data point, to 3%,
+and the sign is favourable** — the local instrument is slightly harsh. One data
+point, one artifact; it is a parity estimate, not a law.
+
+### 2. Cost parity: the local meter and the grader agree to 0.0122%
+
+| | counted FLOPs per MLP |
+|---|---:|
+| local mini | `137,600,326,656` |
+| **graded** | **`137,617,103,872`** |
+| ratio | **`1.000122`, i.e. `+0.0122%`** |
+
+Samuel asked for parity within 2%. It is **164x tighter than that.** Identical on
+all 100 rows, and `effective_compute == flops_used` exactly on every row, with
+`lambda_derived = 0.0` — **`C = F` confirmed on the real grader**, not merely in
+the local `run_config`.
+
+### 3. RESIDUAL — the finding that changes the v2.7 decision
+
+| | median | p90 | max | headroom vs the `0.4 s` cliff |
+|---|---:|---:|---:|---:|
+| **GRADED** | **`6.784 ms`** | `6.921 ms` | **`7.055 ms`** | **`56.7x`** |
+| LOCAL, same file, same 100 networks | `47.9 ms` | `54.4 ms` | `93.3 ms` | `4.29x` LOCAL |
+
+**The grader is `7.06x` faster than this host at the median and `13.22x` at the
+max.** `AGENTS.md` records that the old Phase-1 "~7x" local-vs-graded figure "has
+no Phase-2 counterpart". **It now has one, measured: `7.06x` at the median.**
+
+And the shape matters as much as the size: the graded residual spread is
+`6.784 -> 7.055 ms`, a **4% total spread across 100 MLPs**. This host's spread on
+the same file is roughly `2x`, and its session-to-session spread is `2.35x`. The
+grader is a controlled environment; **our local residual noise does not exist
+there.** That is the specific reason the Skeptic's B3 concern, which was correct
+reasoning about local evidence, does not survive contact with graded data.
+
+### 4. Setup: SETUP_TIMEOUT is a purely LOCAL artifact
+
+`participant_setup_wall_s` = `2.655–2.711 ms` across all **5 workers**, every one
+`SUCCESS`. Against the `5.0 s` cap that is **`1,844x` headroom.**
+
+This closes the Skeptic's B4 outright. Locally, `setup()` is 0.278 s but the bare
+`import whestbench` + `import flopscope` costs 1.4–15 s depending on load, and the
+local runner counts it; the grader measures our `setup()` and it is 2.7 ms. **The
+SETUP_TIMEOUT that killed a local run yesterday, and that steps 15–16 went RED on,
+was never a grader risk.** Keep the ≤0.5 s setup discipline anyway — it costs
+nothing and the measurement is one artifact deep.
+
+### 5. Feedback shape: 50 public, 50 sealed — CONFIRMED
+
+- `per_mlp`: **100** rows, full telemetry (FLOPs, effective compute, predict wall,
+  kernel/overhead split, residual, setup) on every one, all `state: completed`.
+- `public_scores`: **50** rows, indices **0–49**, carrying actual MSE values —
+  and they are **rounded to 3 significant figures** (`3.23e-06`, `1.95e-06`).
+
+So we see *timing and cost* for all 100 and *accuracy* for half, coarsely. The
+public-50 rounded mean is `3.93304e-07` against the reported
+`3.9330104345935976e-07` — agreeing to five significant figures, which is
+**consistent with** the score being taken over all 100 with the visible half
+representative, but does not by itself prove which. Samuel's expectation of the
+shape was right.
+
+### 6. The organiser's own MC reference
+
+`sampling_mse = 1.133e-06`, against our final-layer MSE of `3.933e-06`. **The
+organiser's sampling reference is `3.47x` more accurate than bare K2p1.** That is
+a free anchor for how much of the gap is method rather than budget.
+
+## Where this lands
+
+`3.933e-07` adjusted at the `0.1` multiplier floor. Against the 2026-08-26 23:12
+UTC board (leader `8.50e-9`) that is **`46.3x` off the lead** and mid-forties on
+rank. **It is a beachhead and a calibration point, exactly what it was sent to
+be** — it is not, and was never claimed to be, a competitive entry.
+
+## Consequences, stated as changes to what we believed an hour ago
+
+1. **The pipeline works end to end.** Package, upload, grade, report, parse.
+2. **Our local mini is a trustworthy proxy** for the board, to 3% on score and
+   0.012% on cost. Offline iteration is licensed by measurement now, not by hope.
+3. **Two of the Skeptic's blocking items on v2.7 are answered by graded data**
+   rather than by argument: setup (B4) is closed outright, and residual (B3) is
+   closed to the extent one artifact can close it.
+4. **The residual cliff is not the live risk we thought.** It remains a cliff —
+   `scoring.py` still zeroes the row and forces multiplier 1.0 — but at `56.7x`
+   graded headroom on this file, and a grader `7x` faster with a 4% spread, the
+   margin is real rather than marginal.
+
+---
+
+# 2026-08-27 — PRE-REGISTRATION before submitting v2.7 (Rule 1, and it tests the parity model)
+
+*Committed BEFORE submission 2 is sent. Samuel's SHA-naming approval for
+`96ff522d6b763497d37a279ddfdef2e49b51b60fc4acc15a8c54fbad6da767e0` is on the
+record (CONTRACT 2 item 1). This entry exists because the canary just produced a
+**parity model**, and a model that is not written down before its next use is not
+a model.*
+
+## What is being submitted, and the one thing that is still not gate-shaped
+
+`estimator_v2_7.py`, sha256 `96ff522d…`, via
+`whest submit --estimator estimator_v2_7.py` — verified by dry-run to package
+that file and only that file (35.0 KB, 1 file).
+
+**The open defect, stated plainly rather than waived:** `scripts/preflight.ps1`
+hardcodes `estimator.py`, so the GREEN 16/16 witness at `4a4f575d` certifies
+v2.6.1 and **not** this candidate. v2.7's evidence is of the same *kind* but not
+routed through the gate: `whest validate` PASS, a full official 100-MLP
+subprocess mini with `n_failed_mlps: 0`, byte-identity to its archive, and an
+independent review that returned **ACCEPT on the accuracy**. The two grounds on
+which that review returned REJECT — setup compliance and the residual margin —
+are the two the canary's graded telemetry has just answered.
+
+**This does not repair the gate, and the gate must still be repaired.** Either
+v2.7 is promoted into `estimator.py` under its own STRATEGIC contract, or
+`preflight.ps1` gains an `-Estimator` parameter. Recorded as owed work, not as
+resolved. Submitting during the amnesty week, where a failed submission is free,
+is a deliberate use of a window that closes — not a precedent.
+
+## Predictions, numbered, before the result exists
+
+1. **Graded adjusted score `1.353e-07`**, from the measured parity factor
+   `1/1.0299` applied to the local `1.3929833e-07`. Interval `[1.30e-7, 1.41e-7]`.
+   *This is the real test: it is a prediction of the PARITY MODEL, not of the
+   estimator.*
+2. **`n_failed_mlps = 0`.**
+3. **Graded residual max below `15 ms`** — v2.7's local max was `262.1 ms`; at the
+   canary's measured `13.22x` max-to-max ratio that is `~20 ms`, and at the more
+   conservative `7.06x` median ratio `~37 ms`. Predicting `<15 ms` is the
+   aggressive end and is chosen deliberately so the prediction can fail.
+4. **Graded counted FLOPs `137,617,136,704`** = the canary's graded
+   `137,617,103,872` plus exactly the `32,832` the local runs differ by.
+5. **Multiplier stays floor-pinned at `0.1`.**
+6. **Setup wall below `5 ms`** per worker.
+
+## Falsifiers
+
+- Prediction 1 outside `[1.30e-7, 1.41e-7]`: the parity model is wrong and every
+  offline projection built on it must be re-derived before use.
+- Any failed MLP: the deployment claim is false and v2.7 is withdrawn from
+  nomination pending diagnosis.
+- Prediction 3 above `100 ms`: the local-to-graded residual ratio does not
+  transfer between artifacts, and residual headroom must be measured per
+  candidate rather than inherited.
+
+## Cost model, statistic, tier
+
+Phase 2, `lambda = 0`, `C = F`. No decision block is spent — this is a CONFIRM-tier
+submission against organiser networks, read-only, and **nothing may be fitted on
+its result**. The comparison to the canary is paired only in the sense that both
+ran the same 100 organiser MLPs; the binding promotion statistic was already
+computed on the local pair (`2.657583e-07`, `t = 36.81`) and is not recomputed here.
+
+**Samuel's prediction for this slice was not taken** — he is not reachable in this
+session. That gap is recorded, as it was for P2-SHIP-CAL, rather than skipped.
