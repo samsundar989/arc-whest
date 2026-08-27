@@ -42,9 +42,17 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   `experiments/LOG.md`):
   - **cost parity `+0.0122%`** — local `137,600,326,656` vs graded
     `137,617,103,872` per MLP. `C == F` on all 100 rows on the real grader.
-  - **score parity favourable but NOT constant** — local reads pessimistic by
-    `3.0%` (canary) and `1.4%` (v2.7). Treat as "favourable by roughly 1–3%",
-    never as a four-figure multiplier.
+  - **score parity: there is NO measurable bias. CORRECTED 2026-08-27, and the
+    first version of this line was wrong.** The graded submission set and the
+    public `mini` split share **zero** networks — they are two disjoint 100-MLP
+    draws from the same distribution. The apparent `3.0%` (canary) and `1.4%`
+    (v2.7) gaps are **`0.90 sigma` and `0.57 sigma`** of the pooled sampling
+    error. **The local mini is an UNBIASED proxy for the graded score**; quote it
+    with its sampling se (`1.3–1.8%` of the score) and **apply no correction
+    factor** — doing so is fitting noise. Corroborated: an independent numpy K2
+    closure scores the public 100 at `4.0506e-06`, matching the local `whest`
+    mini's `4.050566e-06` to five significant figures, so the instrument
+    reproduces exactly and only the network sample differs.
   - **residual: graded median `6.78`/`7.04 ms`, max `7.06`/`7.31 ms` → `54.7x`
     headroom** against the `0.4 s` cliff. The grader is `7.06x` faster than this
     host at the median. **`AGENTS.md` says the old Phase-1 "~7x" has no Phase-2
@@ -284,6 +292,57 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   and Windows memory checks cannot clear the official boundaries. **No seed
   block, no `estimator.py` edit, no truth measurement, and no performance claim.**
   Phase 1B stays blocked until the bounded repair and a fresh independent ACCEPT.
+
+## The K3 lane — measured 2026-08-27, independently ACCEPTed, and confirmed on organiser data
+
+**ARC's factorized K3 (`mlp_kprop`, `k_max=3, factor=True`, unmodified) reaches a
+true final-layer MSE of `~3.9-4.0e-08` at 1024x16.** Two independent readings:
+
+| reading | networks | label | mean | 95% CI |
+|---|---|---|---:|---:|
+| **P-A** | 24 DESIGN mints (P01) | our `2**26`/half A/B asset | `4.0047e-08` | `[3.794e-8, 4.215e-8]` |
+| **P-A-CONFIRM** | **100 organiser** (`v2-phase2@mini`) | **organisers' `1e9`-sample** | **`3.9249e-08`** | `[3.821e-8, 4.029e-8]` |
+
+They agree to **`1.99%`**. It is not an artifact of our instrument, our
+population, or our label. Independent Skeptic verdict: **ACCEPT** — *"the
+4.0047e-08 figure should be used to make the architecture decision"* — after it
+built and then refuted by measurement the one attack that could have killed it (a
+**common** fp32 label bias, which an A/B estimator cannot see because both halves
+share it; measured at `1.6e-18`, ten orders below the signal).
+
+For scale: our best graded entry is `1.374e-07` and the leader is `8.50e-9`.
+
+**The whole question is now price, not information.** Upstream's own FLOP model,
+reproduced here to four significant figures:
+
+| rank | total FLOPs | multiplier | score IF accuracy held |
+|---|---:|---:|---:|
+| full | `3.2537e12` | `1.4796 B` | `5.93e-08` |
+| 1/4 | `8.5231e11` | `0.3876 B` | `1.55e-08` |
+| 1/8 | `4.5208e11` | `0.2056 B` | `8.23e-09` |
+| 1/16 | `2.5196e11` | **`0.1146 B`** | **`4.59e-09`** |
+
+**That last column assumes compression is free in accuracy. It is not, and P-B
+measures exactly that.** Three things the Skeptic established that constrain P-B's
+design and must be in its contract:
+
+1. **The rank is pinned at exactly `15n = 15,360`**, and `get_dslice` +
+   `contract_W` = `95.35%` of cost, both `O(n^2 r)` — structurally, in source
+   (`factor_k3.py:31-54, 181-192`), not by inference.
+2. **Rank is NOT a free knob.** `r` is produced by `FactoredTensor.__add__`
+   concatenating factor blocks. Capping needs a **new top-r selector whose cost is
+   priced nowhere** — a norm-sort is cheap (`~3nr`), but an SVD-based truncation
+   is `O(n^2 r)`, **the same order as the saving.** P-B's cost model must carry
+   that column or its ladder reports a saving that does not exist.
+3. **The `0.1` floor is not reachable by rank capping alone** — rank `1/16` lands
+   at `0.1146 B`.
+
+**What does NOT exist yet, and gates everything downstream:** no `fnp` port (K3
+runs in torch on a GPU; the grader has neither), no flopscope price for any
+operating point, no residual or setup measurement, and a **`22.3 GiB` float32
+peak against the grader's `8 GiB` limit.** The port must solve that, not inherit
+it. fp32 is licensed for **research runs only** — worst-network accuracy delta
+`0.037%` over 7 networks — and any `fnp` spelling must be **priced, not assumed**.
 
 ## Authoritative document map
 
