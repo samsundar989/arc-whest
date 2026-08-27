@@ -1,7 +1,9 @@
 # CURRENT_STATE.md — read this first
 
-**Snapshot: 2026-08-27. Phase 2 is live, and this account now has two graded
-submissions.** This file says where execution stands;
+**Snapshot: 2026-08-27 (late). Phase 2 is live, this account has two graded
+submissions, and the compressed-K3 lane that Contract 3 made priority 1 has
+just been measured and priced out (P-B-COST, HEAD `b784b6f`, pending its
+Rule-2 Skeptic).** This file says where execution stands;
 [`GAME_PLAN.md`](GAME_PLAN.md) is the only active architecture/roadmap;
 [`VALIDATION.md`](VALIDATION.md) is binding for measurement; the newest entries at
 the bottom of `experiments/LOG.md` contain the evidence narrative.
@@ -317,37 +319,65 @@ share it; measured at `1.6e-18`, ten orders below the signal).
 
 For scale: our best graded entry is `1.374e-07` and the leader is `8.50e-9`.
 
-**The whole question is now price, not information.** Upstream's own FLOP model,
-reproduced here to four significant figures:
+**The whole question was price, not information — and the price has now been
+measured. It is prohibitive.** See P-B-COST at the bottom of `experiments/LOG.md`
+(HEAD `b784b6f`, **PENDING the Rule-2 Skeptic**; nothing below may be built on
+until that verdict lands).
 
-| rank | total FLOPs | multiplier | score IF accuracy held |
+**Rank-capping the factored K3 is PRICED OUT.** Cost falls with the rank exactly
+as inferred — affine to `0.0012%`, `cost(r*) = 1.5751e11 + 1.8908e08 r*`, so
+`r* = n/8` costs `0.0826 B`, *below* the `0.1` multiplier floor. But accuracy
+falls faster. Bounded with **no ground truth and no seed block** by a triangle
+inequality on the drift from the uncapped prediction:
+
+| cell | multiplier | MSE bracket | **score bracket** |
 |---|---:|---:|---:|
-| full | `3.2537e12` | `1.4796 B` | `5.93e-08` |
-| 1/4 | `8.5231e11` | `0.3876 B` | `1.55e-08` |
-| 1/8 | `4.5208e11` | `0.2056 B` | `8.23e-09` |
-| 1/16 | `2.5196e11` | **`0.1146 B`** | **`4.59e-09`** |
+| `normsort n/8` | `0.0826` | `[2.29e-6, 3.66e-6]` | `[2.29e-07, 3.66e-07]` |
+| `normsort n` | `0.1597` | `[1.65e-6, 2.83e-6]` | `[2.63e-07, 4.53e-07]` |
+| `dsproj n` | `0.2977` | `[4.74e-7, 1.19e-6]` | `[1.41e-07, 3.53e-07]` |
+| `normsort 8n` | `0.7055` | `[4.26e-8, 3.68e-7]` | `[3.00e-08, 2.60e-07]` |
+| `normsort 16n` | `1.1515` | `[7.51e-9, 9.83e-8]` | `[8.65e-09, 1.13e-07]` |
+| **uncapped** | `1.4796` | `4.005e-8` (measured) | **`5.93e-08`** |
 
-**That last column assumes compression is free in accuracy. It is not, and P-B
-measures exactly that.** Three things the Skeptic established that constrain P-B's
-design and must be in its contract:
+**The best point on the whole lane is the uncapped one**, with `r* = 16n`
+(`~4.6e-8` at a `22%` cost cut) beside it. Compression moves the score the wrong
+way, monotonically, everywhere it saves anything. **"K3-class raw at `~0.2 B`" is
+refuted: at `0.2 B` the measured raw is `~2e-6`, fifty times worse.** The honest
+ceiling for this lane is **`4.6e-8` to `5.9e-8`** — a `2.3-3.0x` improvement on
+our best graded entry (`1.374e-07`), and `6-7.7x` short of the leader.
 
-1. **The rank is pinned at exactly `15n = 15,360`**, and `get_dslice` +
-   `contract_W` = `95.35%` of cost, both `O(n^2 r)` — structurally, in source
-   (`factor_k3.py:31-54, 181-192`), not by inference.
-2. **Rank is NOT a free knob.** `r` is produced by `FactoredTensor.__add__`
-   concatenating factor blocks. Capping needs a **new top-r selector whose cost is
-   priced nowhere** — a norm-sort is cheap (`~3nr`), but an SVD-based truncation
-   is `O(n^2 r)`, **the same order as the saving.** P-B's cost model must carry
-   that column or its ladder reports a saving that does not exist.
-3. **The `0.1` floor is not reachable by rank capping alone** — rank `1/16` lands
-   at `0.1146 B`.
+Three corrections to what this section used to say, all from measurement:
+
+1. **The rank is NOT "pinned at exactly `15n`".** It grows by exactly `2n` per
+   layer, `2n` at layer 0 to `32n` at layer 15. `15n` is the *mean* over layers,
+   which is what a per-layer cost model consumes — so nothing costed on it was
+   wrong, but the lever is 120x, not 8x, and the old "1/4, 1/8, 1/16 of `15n`"
+   table above measured a different axis than per-layer capping does.
+2. **The selector-pricing worry (D9) does not bite, and the reason is worth
+   keeping.** Capping *every* layer means the selector only ever sees rank
+   `O(n)`, never `15n`, so an `O(nr)` norm-sort costs `0.04-0.12%` of total.
+   D9 was right in general; it is not the thing that kills the lane.
+3. **The `0.1` floor IS reachable by rank capping** — `r* = n/8` lands at
+   `0.0826 B`. It simply does not help, because the accuracy there is `~3e-6`.
 
 **What does NOT exist yet, and gates everything downstream:** no `fnp` port (K3
 runs in torch on a GPU; the grader has neither), no flopscope price for any
-operating point, no residual or setup measurement, and a **`22.3 GiB` float32
-peak against the grader's `8 GiB` limit.** The port must solve that, not inherit
-it. fp32 is licensed for **research runs only** — worst-network accuracy delta
-`0.037%` over 7 networks — and any `fnp` spelling must be **priced, not assumed**.
+operating point, and no residual or setup measurement. Torch peaks run
+`3.9-22.3 GiB`, but the factors themselves are only `201 MB` at `r* = 16n`, so
+**the `8 GiB` limit is NOT established as binding** and must not be quoted as a
+second kill — a streaming port could plausibly clear it. fp32 is licensed for
+**research runs only** — worst-network accuracy delta `0.037%` over 7 networks,
+and P-B-COST's f64 control reproduced its f32 drift to four significant figures —
+and any `fnp` spelling must be **priced, not assumed**. All P-B-COST FLOPs are
+upstream's torch-side counter, **not flopscope 0.12 pricing**; the conclusion
+would need a `>10x` pricing error to move.
+
+**What survives, and is now the whole live program by elimination:** O1 (fitted
+projection/renormalisation coefficients on the K3 chain), O2b (diagonal/trace
+`kappa_4` readout correction) and O5 (per-neuron ridge corrector on the K3
+residual). None of the three depends on rank capping. O2a (rank-capped `k3aug`)
+and O3 (Richardson-in-rank) both presuppose the lever that just failed and are
+undermined, though neither is formally refuted.
 
 ## Authoritative document map
 
