@@ -17149,3 +17149,148 @@ computed on the local pair (`2.657583e-07`, `t = 36.81`) and is not recomputed h
 
 **Samuel's prediction for this slice was not taken** — he is not reachable in this
 session. That gap is recorded, as it was for P2-SHIP-CAL, rather than skipped.
+
+---
+
+# 2026-08-27 — SUBMITTED AND GRADED: v2.7. Submission 328664, score 1.373807110667258e-07 — and the parity model held
+
+*Second Phase-2 submission. Sent under Samuel's SHA-naming approval (CONTRACT 2
+item 1) after the canary proved the pipeline. Predictions were committed in
+`8583deb` **before** this was sent. Raw report:
+`experiments/run_reports/submission_328664_328664_graded_report.json`.*
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+**Artifact:** `estimator_v2_7.py`, sha256
+`96ff522d6b763497d37a279ddfdef2e49b51b60fc4acc15a8c54fbad6da767e0`.
+
+## Prediction scorecard — 5 of 6 held, and the miss is worth more than the hits
+
+| # | prediction | measured | verdict |
+|---:|---|---:|---|
+| 1 | score in `[1.30e-7, 1.41e-7]`, point `1.353e-7` | **`1.373807110667258e-07`** | **HELD**, `+1.5%` from the point |
+| 2 | `n_failed_mlps = 0` | `0` | **HELD** |
+| 3 | graded residual max `< 15 ms` | **`7.307 ms`** | **HELD** |
+| 4 | graded FLOPs `137,617,136,704` | `137,617,136,672` | **MISSED by 32** |
+| 5 | multiplier floor-pinned `0.1` | `0.09999999999999996` | **HELD** |
+| 6 | setup `< 5 ms` per worker | `2.779–2.920 ms`, 5/5 `SUCCESS` | **HELD** |
+
+**Prediction 1 was a test of the PARITY MODEL, not of the estimator**, and it is
+the one that mattered. The model — measured on the canary an hour earlier, on a
+different artifact — predicted this score to `1.5%` before it existed.
+
+## The miss, prediction 4, and why it is the most interesting line here
+
+Local said the two files differ by `32,832` counted FLOPs (`array` +32,
+`reshape` +32, `multiply` +32,768). **The grader says `32,800`** — that is
+`32,768 + 32`. **One 32-FLOP operation that the local meter bills, the grader does
+not.**
+
+It is `2.3e-10` of the total and changes no decision. But `AGENTS.md` states that
+the local meter "bills what the grader bills, op for op (reconciled to zero
+2026-08-24)", and this is a **submission-to-submission delta measured on the real
+grader** showing a 32-FLOP discrepancy in a difference of ~32.8k. Two graded
+reports now exist to reconcile against instead of one anchor row. **This is
+recorded as an open item for `local_sim/p2_flop_anchor.py`, not waved away** — the
+whole value of that reconciliation is that it was exactly zero.
+
+## The result
+
+| metric | canary (328662) | **v2.7 (328664)** |
+|---|---:|---:|
+| adjusted score | `3.9330104e-07` | **`1.3738071e-07`** |
+| final-layer MSE | `3.933e-06` | **`1.374e-06`** |
+| all-layers MSE | `2.159e-06` | `7.966e-07` |
+| best / worst MLP | `2.168e-7` / `5.407e-7` | `1.02e-7` / `1.98e-7` |
+| multiplier | `0.1` floor | `0.1` floor |
+| `n_failed_mlps` | `0` | **`0`** |
+| counted FLOPs/MLP | `137,617,103,872` | `137,617,136,672` |
+
+**Graded improvement over the canary: `2.8629x`.** The local paired statistic said
+`2.9078x` (`t = 36.81`, CI `[2.514e-7, 2.801e-7]`). **They agree to `1.5%`.**
+
+The offline fitting loop the whole Phase-2 plan rests on is now confirmed *on the
+board*, not merely in projection: sixteen constants fitted on freshly minted
+DESIGN networks, never having seen an organiser network, transferred to the
+organisers' own networks and delivered within `1.5%` of what the local instrument
+projected.
+
+## THE RESIDUAL QUESTION IS SETTLED, and the answer was the host
+
+This was the Skeptic's B3, the one blocking finding that had no resolution from
+local evidence. Both files, same 100 organiser networks, both instruments:
+
+| | LOCAL median | LOCAL max | **GRADED median** | **GRADED max** |
+|---|---:|---:|---:|---:|
+| canary v2.6.1 | `47.9 ms` | `93.3 ms` | **`6.784 ms`** | **`7.055 ms`** |
+| v2.7 | `86.9 ms` | `262.1 ms` | **`7.044 ms`** | **`7.307 ms`** |
+| **delta** | **`+40.3 ms`** | `+168.8 ms` | **`+0.260 ms`** | `+0.252 ms` |
+
+**The local `+40.3 ms` median delta is `+0.260 ms` on the grader.** The
+calibration's true residual cost is a quarter of a millisecond; **99.4% of what
+this host reported was its own noise.** The two local runs were a day apart on a
+contended machine, and that is the entire explanation.
+
+**v2.7's graded headroom against the `0.4 s` cliff is `54.7x`**, not the `1.53x`
+LOCAL that made it look like a coin flip. The cliff is still a cliff — `scoring.py`
+still zeroes the row and forces multiplier `1.0` — but this candidate is nowhere
+near it.
+
+**The lesson is general and belongs in `GOTCHAS.md`:** a local residual number on
+this host is not a weak version of the graded number, it is a **different
+quantity**, dominated by contention that does not exist on the grader. The
+repository already forbade quoting local absolute wall times; this says the
+*deltas* are untrustworthy too.
+
+## Parity is favourable but it is NOT a constant
+
+| artifact | local | graded | local / graded |
+|---|---:|---:|---:|
+| canary v2.6.1 | `4.050566e-07` | `3.9330104e-07` | **`1.0299`** |
+| v2.7 | `1.3929833e-07` | `1.3738071e-07` | **`1.0140`** |
+
+Both favourable — the local instrument reads pessimistic in both cases — but the
+factor moved from `3.0%` to `1.4%` between two artifacts that differ by sixteen
+scalars. **Treat local-to-graded as "favourable by roughly 1–3%", not as a
+multiplier to be applied to four figures.** Two points is not a model.
+
+## Against the organiser's own reference
+
+`sampling_mse = 1.133e-06` on both reports — the organiser's Monte-Carlo
+reference.
+
+- canary final-layer MSE `3.933e-06` → **`3.47x` worse than the MC reference**
+- v2.7 final-layer MSE `1.374e-06` → **`1.21x` worse**
+
+One calibration step took us from "three and a half times worse than plain
+sampling" to "within twenty percent of it", for `32,800` counted FLOPs inside a
+free zone of `2.199e11`. It is also a reminder of the size of the real problem:
+the leader is at `8.50e-9` adjusted, which at the `0.1` floor means a raw of
+`~8.5e-8` — **sixteen times better than the MC reference.**
+
+## Where this lands, honestly
+
+`1.3738071e-07` adjusted, floor-pinned. Against the 2026-08-26 23:12 UTC board
+(leader `8.50e-9`) that is **`16.2x` off the lead**. It is a solid mid-board
+entry and **a credible robust fallback nominee** — zero failures, `54.7x` residual
+headroom, `1,712x` setup headroom, one fitted scalar of exposure. **It is not a
+contender and nothing here suggests otherwise.** The contender has to come from
+the K3 program.
+
+## What remains owed, and is not resolved by this result
+
+1. **`preflight.ps1` still certifies `estimator.py` and not a candidate.** v2.7
+   was submitted on evidence of the same kind (validate PASS, a clean 100-MLP
+   official mini, archive identity, an independent ACCEPT on accuracy) but not
+   routed through the gate. Fix it by promoting v2.7 under its own STRATEGIC
+   contract, or by giving `preflight.ps1` an `-Estimator` parameter. **Owed.**
+2. **The 32-FLOP anchor discrepancy** above. **Owed.**
+3. **Samuel's prediction was not taken for this slice** — he was not reachable.
+   Recorded, as for P2-SHIP-CAL, rather than skipped.
+4. Nothing here says anything about the private re-run.
+
+Two submissions today, both graded, both zero failures. Cap is 10/day during the
+amnesty week.
+
+`estimator.py` byte-identical `00240eb1e60810f5…` and **unchanged** — v2.7 was
+submitted as a sibling file, not promoted. Seed ledger P01 `168/600`. Vault
+untouched.
