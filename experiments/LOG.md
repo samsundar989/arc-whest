@@ -16179,3 +16179,198 @@ host cannot be quieted, this is the point at which the submission waits.
 **Driver:** Claude Opus 5 (1M context), repo-local Builder. `estimator.py`
 byte-identical `00240eb1e60810f5…`. Seed ledger 60/60, P01 `144/600`, D17 and D19
 unspent. Vault untouched.
+
+---
+
+# 2026-08-26 (late) — CONTRACT (Rule 1): P2-GT — high-resolution A/B ground truth at 1024x16, and the pre-registered P-A / P-B / P-C predictions it will be spent on
+
+*Committed BEFORE any seed is claimed and before any sample is drawn. Authorised
+in writing by Samuel (CONTRACT 2, item 5: "GT pre-generation: approved,
+pre-register and start immediately"). This entry covers two things that must be
+separated: (i) the production of a durable label asset, and (ii) the three
+predictions that asset exists to test, recorded here verbatim from Samuel while
+no data exists.*
+
+**Driver:** Claude Opus 5 (1M context), repo-local Builder.
+
+## Question
+
+Two questions, and only the first is answered by this slice.
+
+1. **(asset)** Can we produce a ground-truth label set at 1024x16 whose own
+   Monte-Carlo noise is small enough that a **3e-8** final-layer MSE — the raw
+   accuracy band the live board's leaders occupy — can be measured rather than
+   merely bounded?
+2. **(the reason)** Does ARC's factorized-K3 cumulant propagation carry enough
+   information at 1024x16, and can it be compressed into the free zone? That is
+   P-A / P-B / P-C below, and it is NOT measured by this entry.
+
+## Evidence
+
+- **CONFIRMED.** The repository's existing Phase-2 truth producer
+  (`local_sim/p2_truth.py`) draws **two independent replicas** from the
+  evaluator's own sampling substream `SeedSequence(s).spawn(3)[1]`, spawned again
+  into two children, so `E[e1 e2] = 0` holds by construction. Its mint is
+  `mint_provenance.canonical_mint`, proven bit-identical to the organisers'
+  published `v2-phase2` weights 16/16 (`local_sim/phase2_mint_parity.py`).
+- **CONFIRMED.** That producer's existing asset
+  (`experiments/2026-08-21_p2_cp1/truth_P01.npz`) is `2**22 = 4,194,304` samples
+  per replica, truth noise `~2.1e-8`. **That is the same order as the 3e-8 target
+  MSE.** It was adequate for separating arms at `~4.5e-6`; it is NOT adequate for
+  measuring an arm at `3e-8`. This is the specific reason a new asset is needed.
+- **CONFIRMED, measured today on this host before this contract was committed**
+  (probe, no seed claimed, nothing written):
+  `torch.backends.cuda.matmul.allow_tf32 = False`,
+  `torch.get_float32_matmul_precision() = "highest"`, and the median relative
+  error of an fp32 matmul against the same matmul in fp64 is **`2.482e-07`**,
+  i.e. about 2x fp32 eps. TF32 (eps `9.8e-4`) is **not** silently active. Had it
+  been, every number this asset produces would have been fiction at the `3e-8`
+  scale.
+- **CONFIRMED.** `local_sim/p2_truth.py --smoke 2` on unregistered probe seeds:
+  replica disagreement observed `3.3121e-08` against predicted `2V/N`
+  `3.7976e-08`, ratio `0.8721` — the independence claim survives its own check.
+- **CONFIRMED.** P01 free range is `[40821001144, 40821001599]`, 456 DESIGN seeds.
+  P01 is a **DESIGN** block: tuning is permitted, and **no lane may be closed on
+  it**.
+- **CONFIRMED.** GPU throughput measured today: `1.725e6` samples/s at
+  `chunk = 131072` (57.9 TFLOPS); `chunk = 262144` is *worse* (41.4 TFLOPS) —
+  an unrelated workload holds about 20.7 GB of the 32 GB of VRAM.
+- **INFERRED.** ARC's factorized-K3 at 1024x16 costs `3.254e12` counted FLOPs
+  ("1.48x budget as shipped") with `get_dslice` 47.8% and `contract_W` 47.5%,
+  and reaches true final-layer MSE mean `3.36e-8` / median `3.01e-8` on 6 minted
+  MLPs. **This is Samuel's figure from an external strategy session, reproduced
+  here as the hypothesis to be tested, NOT as a repository measurement.** Nothing
+  in this tree has yet run kprop.
+- **SPECULATIVE.** That the same information survives rank compression into the
+  `0.1`-multiplier free zone (`2.199e11` counted FLOPs).
+
+## Hypothesis and mechanism (asset half)
+
+With `N` samples per half, the label's per-neuron noise variance is
+`Var(y) ~ avg_variance / N ~ 0.087 / N`. At `N = 2**26 = 67,108,864` that is
+`1.30e-9`, **23x below** the `3.0e-8` MSE we intend to measure. Moreover the
+unbiased cross estimator `mean_j (p_j - A_j)(p_j - B_j)` has expectation exactly
+`MSE(p)`, with standard error about
+`sqrt(2 * Var(y) * MSE(p) / n_neurons)`
+`= sqrt(2 * 1.30e-9 * 3e-8 / 1024) = 8.7e-12` per MLP — **3 orders below the
+signal.** The mechanism is that the two halves' errors are independent by
+construction, so `E[e_A e_B] = 0` and the noise term drops out of the
+expectation rather than being subtracted by a model.
+
+## Intervention
+
+Draw `24` freshly minted 1024x16 networks from the free P01 range at
+`2**26 = 67,108,864` samples **per half**, `1.342e8` total per MLP — exceeding
+the `1e8` Samuel specified — and store the halves in **two separate files** so
+that no consumer can average them by accident and lose the estimator. Store
+all-layer post-ReLU means and final-layer variances, in **float64**.
+
+Total work `1.081e17` FLOPs of host GPU time; projected wall about 60 min at the
+measured throughput.
+
+## Predictions (asset half; numbered, recorded before any draw)
+
+1. Replica disagreement ratio `observed / predicted 2V/N` lands in `[0.80, 1.20]`.
+   A ratio outside that says the replicas are not independent or the variance
+   model is wrong, and the asset is void.
+2. Mean truth noise per half lands in `[1.1e-9, 1.6e-9]`.
+3. Zero non-finite values across all `24 x 16 x 1024` stored means.
+4. The two halves' final-layer means agree to a mean squared difference within
+   `[0.8, 1.2] x 2.60e-9`.
+
+## Gate (asset half) — this asset is fit to serve an accuracy gate only if
+
+All four predictions hold **and** the per-MLP cross-estimator standard error,
+computed from the stored variances at an assumed `MSE = 3e-8`, is below
+`3e-9` — one tenth of the quantity every downstream gate will be written on.
+This is a **fitness-of-instrument** gate, not a promotion gate; it authorises no
+lane, closes none, and moves no constant.
+
+## Falsifier (asset half)
+
+Prediction 1 outside `[0.80, 1.20]`, or any non-finite value, voids the asset.
+It is then not repaired in place — the seeds are recorded as spent and a new
+claim is made, because a label set whose independence check failed cannot be
+argued back into validity.
+
+## Baseline and tier
+
+**DESIGN (P01).** The baseline is the existing `2**22` asset
+`experiments/2026-08-21_p2_cp1/truth_P01.npz`, which stays untouched and remains
+the label for every recorded P2-CP1 / P2-CAL number. This asset does not replace
+it and does not re-open anything measured on it.
+
+## Cost model — Phase 2, lambda = 0, so C = F
+
+Not applicable to this slice: no estimator code is changed, nothing is executed
+inside a flopscope window, and no counted-FLOP claim is made. The `1.081e17`
+above is host GPU work, which the competition does not price. **Residual is not
+a cost here either; it is the `0.4 s` per-MLP cliff, and this slice does not
+approach it.**
+
+## Statistic
+
+Paired on common random numbers by construction (both halves see the same
+networks). The asset's own checks are the ratio and the finiteness count. **No
+promotion statistic is computed by this slice.** Every future gate that consumes
+this asset uses the paired arithmetic score difference with a studentised-t or
+basic-bootstrap interval, through `local_sim/competition_score.py::decide()`.
+
+## Seed block
+
+`P01`, claimed through `local_sim/seed_ledger.py` at run time — never a literal.
+24 seeds from the free range `[40821001144, 40821001599]`, leaving 432.
+**P01 is DESIGN. Nothing measured on it may close a lane.**
+
+## Confounders, scope, and what must not change
+
+- TF32 must remain off. It is asserted at run time, not assumed; a run that finds
+  it on must abort rather than downgrade.
+- The unrelated ~20.7 GB VRAM workload is present. It affects **wall time only** —
+  the arithmetic is deterministic given the seeds, and the seeds do not depend on
+  load.
+- `estimator.py` is not touched. The vault is not touched. `p2_truth.py` is not
+  edited; the new executor imports its verified `_truth_one` and `_replica_seeds`
+  rather than re-typing them, so the two assets share one arithmetic path.
+
+---
+
+## The three predictions this asset exists to test — recorded now, verbatim from Samuel, before any of it is measured
+
+*These are Samuel's own pre-registered predictions (CONTRACT 2, section 3),
+supplied before any kprop run exists in this tree. They are recorded here so that
+Rule 1's "the human's prediction precedes the result" is satisfied by the record
+and not by memory. **Each will get its own contract with its own executable gate
+before it is measured**; this entry only fixes the predictions in time.*
+
+- **P-A (information).** Faithful factorized K3, full rank, at 1024x16: mean true
+  final-layer MSE in **`[1.5e-8, 8e-8]`**. *Falsifier:* `> 1.5e-7` means the K3
+  lane is not carrying the needed information, and the primary pivots to
+  A0 + Edgeworth readout + per-neuron corrector.
+- **P-B (compressibility — the decision-maker).** Capping the factored-kappa_3
+  rank per layer (top-r by factor norm) at `r in {full, 1/2, 1/4, 1/8, 1/16}`:
+  total cost `<= 0.35 B` degrades true MSE `<= 1.5x`; `<= 0.15 B` degrades
+  `<= 3x`. *Falsifier:* `<= 0.35 B` costing `> 3x` means norm-capping fails, and
+  the route is P-C selection or a `~0.3 B` operating point.
+- **P-C (differentiator).** At matched `<= 0.15 B`, relevance-scored factor
+  selection — scoring each factor by its propagated contribution to the FINAL
+  layer mean through the remaining layers — beats norm-capping by `>= 1.3x`.
+
+Also to be measured while the asset is hot, each under its own gate: (i) K3-chain
+per-layer / projection-coefficient calibration headroom, (ii) Edgeworth /
+Gram-Charlier readout value using the propagated kappa_3, (iii) the f32-vs-f64 K3
+accuracy delta.
+
+**Upstream pin, recorded so this is reproducible without the bundle.**
+`experiments/kprop_bench_bundle.zip` was not present in the tree at this HEAD, so
+per Samuel's item 6 the upstream repository was cloned directly:
+`github.com/alignment-research-center/mlp_cumulant_propagation`, pinned at
+**`93d091a4c26c042bfffa28f2e76a81bc0aba94bb`** ("Skip kprop metric bookkeeping
+when no radial pieces are tracked", 2026-08-04). It is held **outside** the
+repository tree deliberately — vendoring a third-party source tree inside
+`local_sim/` or `experiments/` would put unregistered seed literals in front of
+`seed_ledger.scan_sources` and turn `preflight` step 7 RED for a reason that has
+nothing to do with this project. The bundle, when it lands, becomes the
+cross-check rather than the source.
+
+**Nothing submitted. No `estimator.py` change. Vault untouched.**
