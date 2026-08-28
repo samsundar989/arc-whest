@@ -402,6 +402,93 @@ residual). None of the three depends on rank capping. O2a (rank-capped `k3aug`)
 and O3 (Richardson-in-rank) both presuppose the lever that just failed and are
 undermined, though neither is formally refuted.
 
+### UPDATE 2026-08-28 — the three oracles ran, and they SPLIT the verdict above
+
+**Rule 2 is NOT yet satisfied for these; an independent Skeptic is in flight.
+Nothing below may be built on, promoted, or quoted outside the repository until
+it returns.** Contracts and results are the four entries at the bottom of
+`experiments/LOG.md` (`7effbc8`, `8549691`, `2fa22dc`, `222db96`, `b5442f8`);
+raw artifacts in `experiments/2026-08-28_pb_oracle/`. `preflight` GREEN 12/16 at
+`b5442f8`.
+
+Mean drift from the uncapped prediction, three probe networks `1000201-203`,
+`1024 x 16`, f32. Costs are **upstream's runtime counter, not flopscope 0.12.**
+
+| cell | out rank | cost | drift | `/MSE_full` |
+|---|---:|---:|---:|---:|
+| `normsort:n` (naive) | `n` | `0.1597 B` | `2.724e-6` | `68.0` |
+| `dsproj:n` (= ORACLE-3) | `n` | `0.2977 B` | `8.832e-7` | `22.1` |
+| `oracle:n` (ORACLE-1) | `n` | `0.1597 B` | `7.531e-7` | `18.8` |
+| `oracle_offdiag:n` (ORACLE-2, **defective**) | `2n` | `0.2477 B` | `3.960e-6` | `98.9` |
+| `oracle_offdiag_exact:n` (ORACLE-2b) | `3n` | `0.3299 B` | `3.013e-7` | `7.52` |
+| `oracle_offdiag_exact:2*n` | `4n` | `0.4121 B` | `1.510e-7` | `3.77` |
+| **`oracle_offdiag_exact:4*n`** | `6n` | `0.5647 B` | **`3.689e-8`** | **`0.92`** |
+
+1. **ORACLE-1 CLOSED the rank-`n` lane for good**, on its pre-registered
+   `>= 4.0e-7` rule committed at `cbfe67f`. The oracle ignores cost, so no
+   selector, score function or engineering recovers it. P-B-COST's honestly
+   recorded open ambiguity — "priced out for the compressors tried, not for the
+   concept" — is closed for the concept, at rank `n`, in this basis.
+   **All three parties predicted PROVISIONAL and all three were wrong.**
+2. **ORACLE-3 needed no GPU time: it is definitionally the `dsproj` cell**, already
+   measured and committed at `b784b6f`. `8.832e-7`. The `< 5e-8` falsifier that
+   would have implied a cheap near-`O(n^2 L)` "K3-diag" estimator **missed by
+   `18x`**. There is no cheap diagonal-only K3. Recorded as a **postdiction** —
+   the data pre-dates the prediction, so it carries no Rule-1 credit.
+3. **The real finding is why compression failed, and it is not "the tensor is
+   incompressible".** The best rank-`n` approximation captures **~75% of the
+   Frobenius norm of a rank-`32n` tensor** at depth. `kappa_3` is substantially
+   compressible; compressing it was still useless, because **the flow reads
+   `kappa_3` only through its `(3,)` and `(2,1)` diagonal slices**, and
+   Frobenius-optimal compression spends rank on the all-distinct bulk — which
+   carries most of the norm and none of the readout — and damages the diagonals on
+   the way. The question was never "is `kappa_3` low-rank" but **"is there a
+   compressor whose error is orthogonal to those two slices"**.
+4. **ORACLE-2 as first specified was DEFECTIVE, not informative.** Keeping the
+   diagonal summand exact does not keep the diagonal of the *sum* exact: the
+   truncated remainder is not diagonal-free and leaked error worth **40% of the
+   true `(2,1)` slice's norm by layer 15**. Confirmed three ways (layerwise
+   measurement, control N4 at small `n`, and a `13.1x` recovery when removed). Its
+   `3.960e-6` stands unamended in the log **and stays in control N4**, so the
+   difference remains visible.
+5. **ORACLE-2b is a WEAK OPEN, and the gate-authorised ladder is the reason this
+   matters.** With the diagonals of the sum held exact (verified `9.65e-17`), at
+   **matched cost `0.4121 B` structure-preserving compression beats naive
+   `normsort` `5.45x`**; at `0.80x` the cost of `normsort:8n` it beats it `4.48x`.
+   At `r* = 4n` the drift falls **below the uncapped model's own error**, at
+   `2.62x` less cost. **So "rank-capping is priced out" is a true statement about
+   selectors blind to the structure, and NOT about the compression axis.**
+6. **Nothing is built and no promotion is claimed, and the reasons are hard.** It
+   is still an ORACLE (ALS, cost ignored, no implementable selector); drift is not
+   an error increment, so every score column is a triangle-inequality **bracket**
+   and **every bracket straddles the uncapped `5.925e-8`**; and the most optimistic
+   honest reading of the best cell (`~4.3e-8`) is still **`5.6x` short of the
+   leader's `7.70e-9`**. This lane, fully realised, does not win alone — it must
+   compose with O1, and **W-EFF remains the centerpiece.**
+
+**The `4.6e-8` warning above still stands and is reinforced**: do not budget an
+`fnp` port against any number in the table, because none of them is a measured MSE
+against a label and none is priced by flopscope.
+
+**Instrument defect found and fixed** (`b5442f8`): `predict()` was building an
+autograd graph in a module that differentiates nothing — `75.21 GiB` live on a
+`31.84 GiB` card. Now under `torch.no_grad()`, asserted **bit-identical** on an
+already-committed cell. This also explains the full-width f64 `--selftest` OOM,
+which was first misread as a host memory limit.
+
+**Correction owed to Samuel's Contract 4 § 1.** Its `c''_3` arithmetic reproduces
+exactly here (`L^2 n^3 = 2.7488e11`; `5.93e11 -> 2.157`; `3.2537e12 -> 11.837`;
+ratio `5.49x`), but `11.8` is upstream's meter and `2.1` is flopscope's. Narrowed
+by source reading rather than assumption: upstream's symmetry discount
+(`flop_utils.slice_factor`, for a kernel its own docstring calls *"theoretical,
+unimplemented"*) misses **both** dominant lines — `get_dslice` and `contract_W`
+are billed at `factor = 1.0`, and only the `3.01%` `nonlin_sum` line carries it.
+So the `5.49x` is probably real, **but it must not enter the write-up until one
+W-EFF operating point is billed by flopscope.** Also, in our favour: in SIMPLE
+mode the two-leg block's middle factor is `torch.eye(n) * 3`, so of the `2n`
+columns added per layer, `n` have **two** one-hot modes and the other `n` have
+**one** — sparse-aware contraction has purchase on all of them, not half.
+
 ## Authoritative document map
 
 | need | source |
