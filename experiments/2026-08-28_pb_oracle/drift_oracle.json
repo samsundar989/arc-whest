@@ -1,0 +1,70 @@
+{
+  "check": "capped-vs-uncapped drift bracket",
+  "width": 1024,
+  "depth": 16,
+  "dtype": "f32",
+  "mse_full_anchor": 4.0047e-08,
+  "rows": [
+    {
+      "seed": 1000201,
+      "cell": "oracle:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 7.87664145403119e-07,
+      "ratio_to_mse_full": 19.668493155620123,
+      "mse_cap_lo": 4.7250086384607457e-07,
+      "mse_cap_hi": 1.1829214269601637e-06
+    },
+    {
+      "seed": 1000201,
+      "cell": "oracle_offdiag:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 3.93220478519511e-06,
+      "ratio_to_mse_full": 98.18974667753164,
+      "mse_cap_lo": 3.17859441571453e-06,
+      "mse_cap_hi": 4.7659091546756896e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "oracle:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 8.027842369339247e-07,
+      "ratio_to_mse_full": 20.046051812468466,
+      "mse_cap_lo": 4.842278329540244e-07,
+      "mse_cap_hi": 1.201434640913825e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "oracle_offdiag:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 3.904635311106132e-06,
+      "ratio_to_mse_full": 97.50131872814772,
+      "mse_cap_lo": 3.153812080780405e-06,
+      "mse_cap_hi": 4.7355525414318595e-06
+    },
+    {
+      "seed": 1000203,
+      "cell": "oracle:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 6.688514875928023e-07,
+      "ratio_to_mse_full": 16.701662736105135,
+      "mse_cap_lo": 3.815729888999632e-07,
+      "mse_cap_hi": 1.0362239862856412e-06
+    },
+    {
+      "seed": 1000203,
+      "cell": "oracle_offdiag:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 4.043918908008921e-06,
+      "ratio_to_mse_full": 100.97932199687669,
+      "mse_cap_lo": 3.2791135724615035e-06,
+      "mse_cap_hi": 4.888818243556338e-06
+    }
+  ],
+  "caveat": "drift is not an error increment; the bracket is the only truth-free statement available."
+}

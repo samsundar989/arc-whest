@@ -1,0 +1,139 @@
+{
+  "check": "ORACLE-2 diagonal-leakage diagnostic",
+  "width": 1024,
+  "depth": 16,
+  "seed": 1000201,
+  "dtype": "f32",
+  "als_iters": 8,
+  "rows": [
+    {
+      "layer": 0,
+      "rank_in": 2048,
+      "fit_oracle1": 0.17898818629715726,
+      "fit_remainder": 0.5129173523544104,
+      "leak3_over_true3": 0.0013563200318089821,
+      "leak21_over_true21": 0.03086648219501817
+    },
+    {
+      "layer": 1,
+      "rank_in": 4096,
+      "fit_oracle1": 0.5437850039452027,
+      "fit_remainder": 0.7605015657826613,
+      "leak3_over_true3": 0.008667105950850613,
+      "leak21_over_true21": 0.08182845711226348
+    },
+    {
+      "layer": 2,
+      "rank_in": 6144,
+      "fit_oracle1": 0.6171659899286449,
+      "fit_remainder": 0.756025474477807,
+      "leak3_over_true3": 0.024728010865531252,
+      "leak21_over_true21": 0.12734592295556305
+    },
+    {
+      "layer": 3,
+      "rank_in": 8192,
+      "fit_oracle1": 0.6086188346338621,
+      "fit_remainder": 0.7156017854265597,
+      "leak3_over_true3": 0.042392176927793984,
+      "leak21_over_true21": 0.16508355680174766
+    },
+    {
+      "layer": 4,
+      "rank_in": 10240,
+      "fit_oracle1": 0.5936730122747765,
+      "fit_remainder": 0.6636402406426183,
+      "leak3_over_true3": 0.05359999316034231,
+      "leak21_over_true21": 0.20305488542818417
+    },
+    {
+      "layer": 5,
+      "rank_in": 12288,
+      "fit_oracle1": 0.5627923605773582,
+      "fit_remainder": 0.6139447312986415,
+      "leak3_over_true3": 0.06112833601661244,
+      "leak21_over_true21": 0.23048007457976621
+    },
+    {
+      "layer": 6,
+      "rank_in": 14336,
+      "fit_oracle1": 0.5265486238108804,
+      "fit_remainder": 0.5632986853786361,
+      "leak3_over_true3": 0.07424494489210562,
+      "leak21_over_true21": 0.26958117202954457
+    },
+    {
+      "layer": 7,
+      "rank_in": 16384,
+      "fit_oracle1": 0.4837786076707553,
+      "fit_remainder": 0.5207542093748787,
+      "leak3_over_true3": 0.09259323590203745,
+      "leak21_over_true21": 0.3007492835061088
+    },
+    {
+      "layer": 8,
+      "rank_in": 18432,
+      "fit_oracle1": 0.440631093295792,
+      "fit_remainder": 0.4821191211371766,
+      "leak3_over_true3": 0.10504188289726221,
+      "leak21_over_true21": 0.3002866061243362
+    },
+    {
+      "layer": 9,
+      "rank_in": 20480,
+      "fit_oracle1": 0.4035917247203478,
+      "fit_remainder": 0.44474190589113016,
+      "leak3_over_true3": 0.10827647434012812,
+      "leak21_over_true21": 0.2973942887583976
+    },
+    {
+      "layer": 10,
+      "rank_in": 22528,
+      "fit_oracle1": 0.3726745085460972,
+      "fit_remainder": 0.4142362927287351,
+      "leak3_over_true3": 0.12894283928410594,
+      "leak21_over_true21": 0.3542650626323833
+    },
+    {
+      "layer": 11,
+      "rank_in": 24576,
+      "fit_oracle1": 0.34265834011748697,
+      "fit_remainder": 0.3848707113248899,
+      "leak3_over_true3": 0.14427753846110683,
+      "leak21_over_true21": 0.3803595012593013
+    },
+    {
+      "layer": 12,
+      "rank_in": 26624,
+      "fit_oracle1": 0.3210739259618373,
+      "fit_remainder": 0.3659375423828491,
+      "leak3_over_true3": 0.15400950579672962,
+      "leak21_over_true21": 0.3795118473969152
+    },
+    {
+      "layer": 13,
+      "rank_in": 28672,
+      "fit_oracle1": 0.2986420253839838,
+      "fit_remainder": 0.3446351815760897,
+      "leak3_over_true3": 0.16401220389207777,
+      "leak21_over_true21": 0.3839162075719527
+    },
+    {
+      "layer": 14,
+      "rank_in": 30720,
+      "fit_oracle1": 0.268890831989472,
+      "fit_remainder": 0.32085966600605026,
+      "leak3_over_true3": 0.16700064619247637,
+      "leak21_over_true21": 0.38476653997912175
+    },
+    {
+      "layer": 15,
+      "rank_in": 32768,
+      "fit_oracle1": 0.2539822828364583,
+      "fit_remainder": 0.30665550657987395,
+      "leak3_over_true3": 0.1778943981465693,
+      "leak21_over_true21": 0.4023891281351479
+    }
+  ],
+  "note": "uncapped flow; each layer's split measured in place. No gate, no seed block, no truth."
+}

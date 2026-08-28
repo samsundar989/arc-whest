@@ -18471,3 +18471,156 @@ loop runs exactly once, with `legs = [(1, 1, WK_11, 1)]` and
 columns added per layer, `n` (from `from_dstensor`) have two one-hot modes and the
 other `n` have one. Sparse-aware contraction has purchase on **all** of them, not
 half. This is a source reading, not a measurement, and is recorded as INFERRED.
+
+---
+
+# 2026-08-28 — RESULT: P-B-ORACLE-1 CLOSES THE LANE, and ORACLE-2 failed in a way that is worth more than a pass
+
+*Contract at HEAD `7effbc8`; Samuel's prediction and the four green controls at
+`8549691`; both committed before any oracle datum existed. Artifacts:
+`experiments/2026-08-28_pb_oracle/{drift_oracle,oracle_nulltest,reg_normsort_n,
+selftest_regression_w256,oracle2_leakage_diag}.json`.*
+
+## The measurement
+
+Mean drift from the uncapped prediction, three probe networks `1000201-203`,
+`1024 x 16`, f32, 8 ALS sweeps. Anchor `MSE_full = 4.0047e-08`.
+
+| cell | output rank | measured cost | mean drift | `/MSE_full` | MSE bracket |
+|---|---:|---:|---:|---:|---:|
+| `normsort:n` | `n` | `0.1597 B` | `2.724e-6` | `68.0` | `[2.10e-6, 3.43e-6]` |
+| `dsproj:n` (= ORACLE-3) | `n` | `0.2977 B` | `8.832e-7` | `22.1` | `[5.47e-7, 1.30e-6]` |
+| **`oracle:n`** (ORACLE-1) | `n` | `0.1597 B` | **`7.531e-7`** | `18.8` | `[4.46e-7, 1.14e-6]` |
+| **`oracle_offdiag:n`** (ORACLE-2) | `2n` | `0.2477 B` | **`3.960e-6`** | `98.9` | `[3.20e-6, 4.80e-6]` |
+
+Per-seed, `oracle:n` `{7.877, 8.028, 6.689}e-7` and `oracle_offdiag:n`
+`{3.932, 3.905, 4.044}e-6` — both tight across networks, so neither number is a
+single-network accident.
+
+## ORACLE-1: the gate fires and the lane CLOSES FOR GOOD
+
+The gated quantity is the achievability bound pre-registered in the contract —
+`min` over the achievable rank-`n` objects `{oracle:n, dsproj:n, normsort:n}` —
+because ALS is Frobenius-optimal and not drift-optimal, so `oracle:n` alone is not
+a sound bound. That minimum is **`7.531e-7`**.
+
+The decision rule committed at HEAD `cbfe67f`, before any of this existed:
+**`>= 4.0e-7` — "no rank-`n` compressor of any cost rescues the lane. P-B-COST is
+upgraded from 'these selectors fail' to 'the information is not
+rank-`n`-compressible', and the lane closes for good."**
+
+`7.531e-7` is **1.9x past that threshold**. The lane closes. Note what this costs
+to say: the oracle ignores cost entirely, so no cheaper selector, no better score
+function, and no amount of engineering recovers it. The open ambiguity that
+P-B-COST honestly recorded — "priced out for the compressors tried, not for the
+concept" — is now closed for the concept, at rank `n`, in this basis.
+
+**Every party predicted PROVISIONAL, and every party was wrong in the same
+direction.** Samuel `4e-8`–`4e-7`; the strategist `[8e-8, 3.5e-7]`, point `1.5e-7`;
+the builder `[1.5e-7, 8e-7]`, point `4e-7`. The measurement is `7.531e-7` — outside
+Samuel's band by `1.9x`, outside the strategist's by `2.2x`, and inside only the
+builder's, at its very top. The shared error is instructive: all three of us
+reasoned about how much *information* rank `n` could carry, and the answer is
+governed instead by *where* the retained information lands. Which is the next
+section.
+
+## ORACLE-2: it went the wrong way by 4.5x, and the diagnostic says why
+
+`oracle_offdiag:n` was supposed to be the strong arm — keep the `n` neuron-diagonal
+blocks exactly, approximate only the off-diagonal remainder. It drifted `3.960e-6`:
+**4.5x worse than `dsproj:n`, which keeps the same diagonals and throws the
+remainder away entirely.** Adding information made the prediction worse. That is
+not a result, it is a symptom, and it has exactly one plausible mechanism:
+
+> the rank-`n` truncation `Rhat` of the all-distinct remainder does **not** have
+> zero diagonal slices, so `FT_diag (+) Rhat` does not carry the exact diagonals at
+> all — it carries exact-plus-leakage, and the flow reads **only** diagonals.
+
+**Measured, layer by layer, on one network** (`oracle2_leakage_diag.json`). `R`'s
+own diagonal slices are exactly zero — control N3 puts them at `1.1e-16` — so every
+nonzero diagonal entry in `Rhat` is pure approximation error injected directly into
+what the flow consumes:
+
+| | layer 0 | layer 15 |
+|---|---:|---:|
+| `\|\|Rhat (3,)\|\| / \|\|true (3,)\|\|` | `0.001` | **`0.178`** |
+| `\|\|Rhat (2,1)\|\| / \|\|true (2,1)\|\|` | `0.031` | **`0.402`** |
+
+The leakage grows monotonically with depth and compounds over sixteen layers. At
+the last layer the truncation is dumping error worth **40% of the true `(2,1)`
+diagonal's norm** onto the one slice the scored mean is built from. `dsproj` has
+zero leakage by construction, which is exactly why the cheaper, less informed
+object wins.
+
+**So the pre-registered ORACLE-2 gate fires — `3.960e-6 >= 8.832e-7`, the lane as
+specified closes — but the falsifier fired against a mis-specified intervention,
+not against Contract 4's hypothesis.** The contract said "keep the diagonal part
+untouched", and the implementation does exactly that to the *summand*; what it
+fails to preserve is the diagonal of the *sum*. That distinction was not visible
+when the contract was written and is visible now only because the result was
+absurd enough to demand a diagnostic.
+
+**Consequence, stated conservatively.** Contract 4's programme item 5 is **NOT
+withdrawn on this evidence**, because this experiment did not test it. It is also
+not confirmed. The corrected construction — re-zero `Rhat`'s own diagonal, so the
+sum's diagonals are exact by construction — is pre-registered separately below as
+ORACLE-2b, with a new gate and a new prediction round, because reporting it against
+this gate would be moving a gate after seeing the answer.
+
+## The finding that is worth more than either gate
+
+Prediction 4 said the ALS fit residual of `oracle:n` on `K[3]` would be large
+(`> 0.5` relative), and it is **REFUTED** — informatively. Relative Frobenius fit
+of the best rank-`n` approximation of a rank-`32n` tensor:
+
+`0.179` at layer 0, peaking at `0.617` at layer 2, then falling **monotonically**
+to `0.254` at layer 15. Mean over layers `0.426`.
+
+At the deep layers a rank-`n` approximation captures about **75% of the Frobenius
+norm of a rank-`32n` tensor**. `K[3]` is genuinely, substantially compressible —
+and compressing it is still useless. Both things are true at once, and the reason
+is the single sentence this slice has actually established:
+
+> **The flow reads `kappa_3` only through its `(3,)` and `(2,1)` diagonal slices.
+> Frobenius-optimal compression is optimal for the wrong objective — it spends its
+> rank on the all-distinct bulk, which carries most of the norm and none of the
+> readout, and it damages the diagonals on the way.**
+
+That reframes the whole compression axis. The question is no longer "is `kappa_3`
+low-rank" (measured: substantially yes) but **"is there a compressor whose error
+is orthogonal to the two diagonal slices"**. `dsproj` is the trivial member of
+that family — exact on the diagonals, zero elsewhere — and it is the best cheap
+cell on the board at `8.832e-7`. ORACLE-2b asks whether a non-trivial member
+exists.
+
+## Prediction scorecard
+
+| # | prediction | outcome |
+|---|---|---|
+| 1 | ORACLE-1 `[1.5e-7, 8e-7]`, point `4e-7` | **HELD**, at `7.531e-7` — the only band of the three that contained the answer, and it contained it at the top |
+| 2 | ORACLE-2 `[1.2e-7, 5e-7]`, point `2.2e-7` | **REFUTED**, and by `8x` in the wrong direction |
+| 3 | ORACLE-2 beats ORACLE-1 — *the slice falsifier* | **REFUTED. It fired.** `3.960e-6` vs `7.531e-7` |
+| 4 | ALS fit residual `> 0.5` | **REFUTED**, and it is the most valuable line in the entry: `0.254` at the last layer |
+| 5a | `oracle:n` beats `normsort:n` by `> 2x` | **HELD**, `3.62x` |
+| 5b | `oracle:n` does **not** beat `dsproj:n` | **REFUTED**, narrowly — `1.17x` better |
+
+Four of six wrong. The two that mattered — the falsifier and the fit residual —
+were both wrong, and both were wrong in ways that produced the finding.
+
+## Scope, and what this does NOT establish
+
+- **No `fnp` port, no flopscope price, no residual, no setup, no memory check.**
+  All costs quoted are upstream's runtime counter, not flopscope 0.12.
+- **No ground truth and no seed block.** Drift is a relative diagnostic; the MSE
+  columns are triangle-inequality brackets, not estimates, and the optimistic end
+  of a bracket is not a result.
+- The leakage diagnostic is **one network, one seed** (`1000201`). Its magnitudes
+  should not be quoted to more than one significant figure across networks; the
+  three-network drift measurement is what carries the gates.
+- ALS sweeps fixed at 8. More sweeps can only tighten an upper bound, so the
+  ORACLE-1 closure is robust to that parameter in the safe direction. The
+  ORACLE-2 *leakage* would likely shrink with more sweeps — which is one more
+  reason ORACLE-2b, not a sweep count, is the right follow-up.
+- This says nothing about **W-EFF**, which is a cost-side rebuild at identical
+  mathematics and is untouched by any accuracy result here. Contract 4's items 2
+  (O1) and 3 (W-EFF) are unaffected.
