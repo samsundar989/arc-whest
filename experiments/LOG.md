@@ -18912,3 +18912,46 @@ was in fact this.
 The next question this poses — and it is **not** authorised by any gate here — is
 whether an implementable diagonal-preserving sketch gets within a constant of the
 oracle, and what it costs once its own selector is billed. That is a new contract.
+
+---
+
+# 2026-08-28 — NOTE (ROUTINE): the dtype checkbox in Contract 4 item 3, answered
+
+*Contract 4 item 3 asks us to "state explicitly what dtype your affine cost model
+was normalized to, and what the uncapped W-EFF cost is when billed f32 under
+flopscope's rates (f64 = 2x f32)". Half of that is answerable now, from source and
+from the committed artifacts, with no new measurement. Recording it so W-EFF does
+not have to rediscover it.*
+
+**Every cost cell in the K3 lane was measured at f32.** Checked in the artifacts
+rather than recalled: `cost_ladder.json`, `cost_hirank.json`, `cost_dsproj.json`
+(`2026-08-27_pb_rank`) and `cost_rank3n.json`, `cost_ladder2b.json`
+(`2026-08-28_pb_oracle`) all carry `"dtype": "f32"`. So the affine model
+`cost(r*) = 1.5751e11 + 1.8908e08 r*` and every `B` figure in the P-B entries is
+f32-measured.
+
+**But upstream's counter is dtype-blind, so that fact is inert.**
+`NamedFlopCounter` wraps torch's `FlopCounterMode`, which attributes by operator
+and shape; there is **no dtype term anywhere in the counting path** of
+`flop_utils.py` — the only `dtype` occurrences in that file are numpy bookkeeping
+inside `Poly2D`'s coefficient padding. Re-running any of those cells at f64 would
+return the identical integer.
+
+Three consequences, and the third is the one that matters for W-EFF:
+
+1. **"Normalised to f32" is true but says nothing about the number.** Nobody should
+   apply an f64-to-f32 correction to any figure in the P-B entries; there is
+   nothing to correct.
+2. **The `f64 = 2x f32` factor is a flopscope-side property only**, not an upstream
+   one. Since a shipped estimator would be f32, that factor is `1` for us — it is a
+   trap only for someone who prices a research run at f64 and forgets that upstream
+   did not.
+3. **The open half of the checkbox is the whole open question, and it is
+   unchanged.** What is unmeasured is not the dtype but *flopscope's own op
+   pricing* on `get_dslice` and `contract_W` — the two lines that are `95.35%` of
+   the cost. Until one W-EFF operating point is billed by flopscope 0.12, every `B`
+   figure in this lane is in upstream's currency, and the `5.49x` "off its own
+   paper" claim stays out of the write-up. See the correction recorded at
+   `7effbc8`.
+
+No seed block, no gate, no decision. Source reading and artifact reading only.
