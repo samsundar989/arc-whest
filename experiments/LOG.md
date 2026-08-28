@@ -19425,3 +19425,248 @@ Rerun alone, it passed provenance, **30/30** invariants, **98/98** scorer,
 **60/60** seed refusals, vault integrity, **56/56** lifecycle and exact
 **19-operation** official-stack parity: **GREEN 12/16 with the same four full-only
 skips**. No full-deployment pass is claimed.
+
+---
+
+# 2026-08-28 — CONTRACT P2-WEFF: does exact sparse-aware factorized K3 fit under flopscope 0.12?
+
+**Classification: IMPORTANT.** Truth-free. No labels, no seed block, no vault, no
+`estimator.py` edit, no promotion. This slice measures a **cost** and proves a
+**parity**; it produces no MSE and no score.
+
+**HEAD at contract time:** `1f16203` (worktree clean). Contract committed BEFORE
+any measurement artifact exists; git timestamps are the proof.
+
+## Samuel's predictions — taken before any data, recorded verbatim
+
+Asked as the three questions required by `docs/CLAUDE_CODE_HANDOFF.md` section 1.
+
+| # | question | Samuel's answer, verbatim |
+|---|---|---|
+| S-W1 | integrated flopscope cost of an exact W-EFF K3 path: `<=0.15 B`, `0.15-0.35 B`, or `>0.35 B`? | **"I don't know"** |
+| S-W2 | smallest final exact-K3 window `m` that imitates full K3 well enough to remain viable: 2, 4, 6, 8, or none? | **"i dont know "** |
+| S-W3 | adopt the minimum bar of `2x` adjusted-score improvement over v2.7 with the paired interval excluding zero? | **"I don't know"** |
+
+"I don't know" is an explicitly valid answer under `AGENTS.md`. **Consequence
+recorded now, before data:** S-W3 not being answered means the `2x` bar is adopted
+as the *stated default* of the handoff, and the STRATEGIC contract in Track 2/D
+will bind it. Samuel did not personally commit to it, and that is recorded rather
+than papered over. S-W1 and S-W2 are un-scoreable this session; the calibration
+record gains nothing from this slice, which is itself a fact worth keeping.
+
+## Question
+
+Can ARC's **exact** factorized-K3 mathematics (`k_max=3, factor=True, kind=SIMPLE`)
+be spelled so that the whole 16-layer, width-1024 tower costs **`<= 0.35 B`**
+counted FLOPs under **flopscope 0.12**, with bit/tolerance-exact parity against the
+unmodified dense reference and zero scalar materializations in the priced path?
+
+The isolated estimand is a **price**, not an accuracy. Nothing in this slice bears
+on MSE.
+
+## Evidence
+
+- **CONFIRMED.** Full factorized K3 reaches raw final-layer MSE `3.9249e-08` on 100
+  organiser networks (GT-noise floor `7.478e-11`), `4.0047e-08` on 24 DESIGN mints
+  (floor `1.155e-9`); the two agree to `1.99%`. Independent Skeptic ACCEPT.
+- **CONFIRMED.** The unmodified implementation costs `3.2537e12` under **upstream's
+  own torch-side counter** = `1.4796 B`. Line attribution
+  (`experiments/2026-08-27_pb_rank/cost_ladder.json`, uncapped cell):
+  `FactoredTensor3.get_dslice` `1.5560e12` (47.83%), `FactoredTensor3.contract_W`
+  `1.5462e12` (47.52%) — **95.35% in two lines**; `nonlin_sum 111 factored`
+  `~9.70e10`; `contract_W_basic` `5.159e10`; rank-independent remainder `~0.068 B`.
+- **CONFIRMED, by source read at rev `93d091a4`, this session.** In `SIMPLE` mode
+  (`augment=False`) each `nonlin` step appends exactly `2n` columns to `K[3]`:
+  - `n` columns from the two-leg diagram, `add_factors_((fac1, torch.eye(n)*3, fac3.T))`
+    — **mode 2 is `3*I`** (`factor_k3.py:400-407`);
+  - `n` columns from `FactoredTensor.from_dstensor(K_ds[3])`, whose factors are
+    `(dense, eye, eye)` — **modes 2 and 3 are both `I`** (`factor_k3.py:262-277`).
+
+  Hence `r_l = 2n*l` entering layer `l`, `32n` at layer 15, mean `15n`. This
+  reproduces the recorded rank trajectory.
+- **CONFIRMED, by source read this session.** `FactoredTensor.contract_W` is
+  literally `W @ factor` for each of the 3 factors (`factor_k3.py:181-192`).
+  `_factored_get_dslice(factors, (2,1))` is 3 block-permutations of
+  `_unfactor([X*Y, Z])`, i.e. **3 matmuls of `(n,r) @ (r,n)`**
+  (`factor_k3.py:31-54`). Both are `Theta(n^2 r)` and both are billed by upstream at
+  `factor = 1.0` (no symmetry discount).
+- **CONFIRMED, by source read this session.** flopscope 0.12 prices a 2D matmul at
+  `2*m*k*n - m*n` (`_flops.py:matmul_cost`, FMA=2, delegating to `einsum_cost`).
+  It is the **same convention** as upstream's counter. flopscope additionally
+  exposes `operand_symmetries` and `identity_pattern` discounts
+  (`_flops.py:einsum_cost`, `flops.as_symmetric`) which upstream's counter has no
+  analogue of; whether the K3 spelling can *legitimately* claim either is an open
+  sub-question this slice measures rather than assumes.
+- **CONFIRMED.** The `5.49x` cross-meter figure in Samuel's Contract 4 section 1 is an
+  **affordability target obtained by comparing two different meters**, not a W-EFF
+  saving (`CURRENT_STATE.md`). It must not be used as a projection.
+- **CONFIRMED.** Local shipped K2p1 costs `137,600,326,656` = `0.0625734 B`,
+  reconciled to zero against the official-package subprocess report over 19
+  operations. The grading server adds an unexplained `+2**24` (`+0.0122%`).
+- **INFERRED.** The exact structure surviving `contract_W` is **mode equality**,
+  not sparsity: `contract_W` and `contract_wick_` apply the *same* operator to
+  every mode, so `from_dstensor`'s `(A, I, I)` becomes `(WA, W, W)` and stays
+  `(., M, M)` at every later layer, and the two-leg block's mode 2 stays exactly
+  `3M` for the same `M`. Identity-ness dies at the first contraction; **equality
+  does not**.
+- **SPECULATIVE.** That flopscope's symmetry/identity discounts can be claimed on
+  the dominant lines. Not assumed anywhere in the predictions below.
+
+## Hypothesis and mechanism
+
+**H-WEFF.** The exact factorized-K3 tower is `Theta(n^3 L^2)` and the only exact
+structure available is a **bounded constant factor**, because at layer `l` the
+`2n` one-hot-supported columns are a vanishing fraction of the `2n*l` present, and
+identity structure does not survive a contraction. Concretely, per lineage
+(the `2n` columns born at one layer) the six `(n,n)` factor matrices collapse to
+**four distinct** ones under mode equality, and the six `(2,1)`-slice matmuls
+collapse to **five**. Therefore:
+
+- `contract_W`: `4/6` of baseline asymptotically, plus a free first advance
+  (`W @ I = W`);
+- `get_dslice`: `5/6` of baseline asymptotically, plus an `O(n^2)` (rather than
+  `O(n^3)`) `(2,1)` slice for the freshly-born two-leg block, whose mode 2 is
+  `3I` so every block-permutation product is diagonal or a row-scale.
+
+No mechanism is available that changes the `Theta(n^3 L^2)` scaling while preserving
+the exact answer. **If there is no mechanism there is no experiment**, and the
+mechanism here predicts a *bounded* win, which is why this slice is a screen and
+not a search.
+
+## Intervention
+
+The smallest change that discriminates: re-spell **only** the two dominant lines
+(`contract_W`, `get_dslice`) sparse/equality-aware in a new research module
+`local_sim/p2_weff.py`, holding the mathematics exactly fixed. The dense `fnp`
+reference and the sparse-aware `fnp` spelling differ in **nothing but the
+spelling**; both are billed by the same flopscope 0.12 meter in the same process.
+
+`local_sim/p2_weff.py` is research-only and is **never** imported by
+`estimator.py`.
+
+## Numbered predictions
+
+Directions and rough magnitudes, fixed before any measurement.
+
+1. **The dense `fnp` spelling of the unmodified algorithm prices within `+/-15%` of
+   upstream's counter**, i.e. integrated **`1.26-1.70 B`**, because both meters use
+   FMA=2 and neither discounts the dominant lines. In particular the `0.27 B` that
+   a `5.49x` cross-meter reading would imply **will not appear**.
+2. **The exact sparse/equality-aware spelling saves `28-42%` of the two dominant
+   lines combined.** Per line: `contract_W` `-30%` to `-40%`
+   (`1.55e12 -> 0.93-1.08e12`); `get_dslice` `-15%` to `-28%`
+   (`1.56e12 -> 1.12-1.32e12`).
+3. **The integrated whole-path W-EFF cost lands in `0.90-1.30 B`, and the
+   `<= 0.35 B` screen therefore FAILS by `2.6-3.7x`.**
+4. **Parity holds exactly.** Sparse-aware vs dense `fnp`, float64, small shapes
+   `n in {8, 12, 16}` and depths `1..4`: max relative deviation `<= 1e-12`. Dense
+   `fnp` vs upstream torch float64: `<= 1e-10`. Retained rank, dtype and the
+   `(3,)`/`(2,1)` slice states match exactly.
+5. **Zero** `__bool__` / `__float__` / `__int__` materializations of a flopscope
+   array inside the priced path, counted by instrumentation, not by inspection.
+6. **Counted cost is network-independent for this arm** (it does not prune): the
+   three probe networks give **bit-identical** integer totals.
+7. **Carried forward, not gated here:** the same billed per-layer model projects a
+   final-`m`-layer W-EFF K3 window at roughly `m^2 / L^2` of the tower —
+   `m=2 -> ~0.02 B`, `m=4 -> ~0.07 B`, `m=6 -> ~0.16 B`, `m=8 -> ~0.28 B` — on top of a
+   `0.0625 B` K2 prefix. This is an input to the Track-2 contract, **not** a result
+   of this one, and it is written down now so that Track 2 cannot claim it
+   afterwards.
+
+## Gate — chosen now
+
+**The preregistered affordability screen: integrated whole-path flopscope-0.12
+counted cost `<= 0.35 B`, where `B = 2**41`, with exact parity (prediction 4) and
+zero materializations (prediction 5) as conjunctive preconditions.**
+
+`local_sim/competition_score.py::decide()` is **not** used and must not be:
+this slice yields no paired score difference and promotes nothing. Its gate is a
+single measured integer compared against a threshold fixed before data. Saying so
+explicitly is deliberate — the repository has twice written a gate on the wrong
+quantity, and a gate that cannot be evaluated by `decide()` must say why.
+
+**PASS** implies the full-tower exact W-EFF port continues today.
+**FAIL** implies the full-tower port is **killed**, and only the preregistered
+late-window diagnostic (Track 2) proceeds. Either way the measured price and the
+parity proof are durable and are reused by Track 2.
+
+## Falsifiers
+
+- **F1.** Integrated measured cost `<= 0.35 B` implies prediction 3 refuted, screen
+  PASSES, full-tower port continues.
+- **F2.** Parity worse than the tolerances in prediction 4 at any tested shape
+  implies the sparse spelling is **wrong**; the slice reports a defect and quotes
+  no price.
+- **F3.** Measured saving on the two dominant lines `> 50%` implies the mechanism
+  model is incomplete; the whole-path projection is void and must be re-derived
+  before any downstream use.
+- **F4.** Any scalar materialization in the priced path implies the spelling is not
+  grader-legal; repair before its price is quoted.
+- **F5.** The three probe networks disagree on the integer total implies prediction
+  6 refuted; the projection must carry a measured range instead of a point.
+
+## Baseline and tier
+
+The unmodified upstream dense spelling, `mlp_kprop(k_max=3, factor=True,
+kind=SIMPLE, use_avg_metric=True)` at rev **`93d091a4`** plus exactly the recorded
+`local_sim/mlp_kprop_py310.patch`, asserted by
+`p2_kprop_bridge.py --verify-upstream` before any number is taken.
+
+**Tier: none.** No DECIDE, no CONFIRM, no VAULT. No seed block is claimed.
+Probe networks are the unregistered seeds **`1000301, 1000302, 1000303`**, checked
+against `experiments/seed_ledger.jsonl` to fall in no registered range. They are
+*fresh* rather than the `1000201-203` triple reused across every previous P-B
+slice — an open item the 2026-08-28 Skeptic recorded and this contract closes.
+
+## Cost model — REQUIRED, Phase-2 form
+
+Phase 2 sets `lambda = 0`, so **`C = F`** and residual is not a cost.
+
+- **Counted FLOPs.** The whole-path figure is
+  `sum_{l=0..15} billed(layer l) + billed(rank-independent remainder)`, where every
+  `billed(.)` is a flopscope 0.12 ledger of the **actually executed** spelling at
+  width 1024 — including casts, factor assembly, slice extraction and
+  materialization. Nothing is modelled that can be executed.
+- **The rank trajectory `r_l = 2n*l` is asserted against upstream**, not assumed;
+  if the assertion fails the projection is void.
+- **Residual** is reported as **headroom** `0.4 / observed` against the worst
+  observed `--runner subprocess` run, never as a cost and never as a bare local
+  wall time. No local second is transferable.
+- **Memory** is accounted in bytes (factor storage `3 * n * r_l * itemsize` plus
+  working set) and explicitly **not** claimed enforced: Windows has no
+  `RLIMIT_AS`.
+- The grading server's observed `+2**24` (`+0.0122%`) offset is noted; at these
+  magnitudes it is irrelevant and is not applied.
+
+## Statistic
+
+**This is a deterministic instrument measurement, not a sampling experiment.**
+FLOP counts are exact integers. No bootstrap, no interval, no `decide()` — and
+that is a property of the estimand, not an exemption. The only variability claim
+made is prediction 6 (network-independence), and it is *tested* by billing three
+networks and requiring bit-identical totals; if they differ, F5 fires and the
+projection carries a measured range.
+
+Parity is reported as **max relative deviation** over all compared entries, per
+shape and per layer, with the comparison basis named.
+
+## Confounders, scope, and what must not change
+
+- **Must not change:** `estimator.py`, `experiments/seed_ledger.jsonl`, the vault
+  and its touch log, `local_sim/competition_score.py`, any gate threshold, any
+  residual model, `docs/HUMAN_MODEL.md`, the two graded submissions.
+- **Confounder — meter mismatch.** Upstream's counter and flopscope must never be
+  compared as if they were one meter. Every quoted number states its meter.
+- **Confounder — the shim.** `local_sim/flopscope` and `local_sim/whestbench` are
+  numpy shims. `sys.path` is **appended**, never inserted, so the real installed
+  packages win. The module asserts the resolved `flopscope.__file__` is under
+  `.venv/` before billing anything.
+- **Confounder — a saving that hides work in uninstrumented arrays.** Any FLOP
+  "saved" by routing through raw numpy is a hard-rule violation, not a saving. The
+  module asserts every intermediate in the priced path is a flopscope array.
+- **Scope.** SIMPLE mode only. AUGMENT is explicitly out of scope: `factor=True`
+  with `kind=AUGMENT` is *not equivalent* to unfactored (upstream drops
+  non-factorable diagrams), and mixing it in would change the mathematics under
+  the guise of changing the spelling.
+- **Scope.** A PASS here would license continuing the port. It would **not** be an
+  accuracy claim, a deployability claim, or a residual/memory clearance.
