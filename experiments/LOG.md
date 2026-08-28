@@ -18397,11 +18397,37 @@ closing a research lane.
 - This slice says **nothing** about an `fnp` port, flopscope pricing, residual,
   setup, or the `8 GiB` memory limit. None of those is measured here.
 
-## Samuel's prediction — OWED, and recorded as outstanding BEFORE the measurement
+## Samuel's prediction — TAKEN 2026-08-28, before any oracle data existed
 
-Two questions, on ORACLE-1 and ORACLE-2 (ORACLE-3 is already measured and is
-excluded from his prediction for that reason). Recorded here before any data
-exists so the gate cannot be moved by the result.
+Two questions, on ORACLE-1 and ORACLE-2 (ORACLE-3 is already measured and was
+excluded from his prediction for that reason). Recorded here, and committed,
+before the measurement ran.
+
+| slice | Samuel | strategist | builder |
+|---|---|---|---|
+| ORACLE-1 `oracle:n` | **`4e-8` – `4e-7`, PROVISIONAL** | `[8e-8, 3.5e-7]`, pt `1.5e-7` | `[1.5e-7, 8e-7]`, pt `4e-7` |
+| ORACLE-2 `oracle_offdiag:n` | **`6e-8` – `8.8e-7`, PROVISIONAL** | **`< 6e-8`** | `[1.2e-7, 5e-7]`, pt `2.2e-7` |
+
+Samuel is with the strategist on -1 and with the builder on -2: he expects the
+structure-preserving arm to help but not to clear the `6e-8` bar that opens the
+lane. **All three parties predicted a PROVISIONAL outcome on -1; only the
+strategist predicted an outright open on -2.** That is the one live disagreement
+in the slice, and the falsifier is prediction 3.
+
+## Control status at the moment of the run — all four GREEN, none of them vacuous
+
+| control | result |
+|---|---|
+| **N1** exact recovery of a genuinely rank-`k` tensor | `3.982e-15` relative, PASS |
+| **N2** ALS monotone against its own `normsort` warm start | PASS |
+| **N3** the diagonal / off-diagonal split is exact | `1.202e-16`, PASS |
+| **REG** `normsort:n` at `1024 x 16` f32 reproduces `b784b6f` | **BIT-IDENTICAL on all three seeds** — `2.8630778179695546e-06`, `2.8506360536760937e-06`, `2.4582392181476173e-06` |
+
+REG is the one that matters most: it is run at the real shape, the real dtype and
+the real seeds, and it proves the oracle edits perturbed neither the uncapped
+baseline nor the existing selector. The P-B-COST review's lesson was that a
+control satisfied by construction is worth nothing; each of these four fails
+loudly under a specific, named defect.
 
 ## Correction to Contract 4 section 1, and it is narrower than "cross-meter"
 
