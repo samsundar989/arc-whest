@@ -534,6 +534,95 @@ mode the two-leg block's middle factor is `torch.eye(n) * 3`, so of the `2n`
 columns added per layer, `n` have **two** one-hot modes and the other `n` have
 **one** — sparse-aware contraction has purchase on all of them, not half.
 
+## W-EFF is MEASURED and the full-tower port is KILLED — 2026-08-28
+
+**The cost question that gated everything is answered.** Contract `08bb4d5`
+(before any data) → result `f461e5c` → independent **PROVISIONAL** whose central
+finding was accepted in full and corrected at `966731b`. A **second** fresh pass
+on that correction is in flight; nothing below may be treated as settled until it
+returns.
+
+- **Exact sparse/equality-aware K3 over the full 16-layer tower costs
+  `1.0723 B` under flopscope 0.12** (whole-path `1.0725 B`), against the
+  preregistered `<= 0.35 B` affordability screen. **FAIL by `3.064x`.** The
+  full-tower W-EFF port is killed. Raw evidence:
+  `experiments/2026-08-28_weff/`.
+- The saving over the dense spelling is `27.8%` and it is a **bounded constant
+  factor**, not a change of order. The mechanism is **mode equality**, not
+  sparsity: identity structure dies at the first `contract_W`, but
+  `from_dstensor`'s `(A, I, I)` becomes `(., M, M)` and the two-leg block's mode
+  2 stays exactly `3M` forever, because `contract_W` and `contract_wick_` apply
+  the same operator to every mode. **The review verified this in upstream's real
+  tower**, not just from source: `||B_D - C_D|| = 0` exactly and
+  `||B_L - 3 B_D|| <= 3.24e-16` at every layer.
+- The mechanism model predicts the saving from lineage counting alone —
+  `contract_W -> 465/720 = 0.6458333`, `get_dslice -> 600/768 = 0.78125` — and the
+  measurement returns **`0.6458333` and `0.78164`**. The saving is what the
+  structure forces.
+- Parity is exact: `5.6e-16` against upstream torch (mediated by an artifact over
+  identical bytes), `5.6e-16` W-EFF against the dense `fnp` reference, and
+  `4.4e-16` / `1.7e-16` on the `contract_W_weff` / `contract_wick_weff`
+  **commutation** test that a review found missing. Zero scalar materializations;
+  zero uninstrumented leaks (hard rule 3 is now *enforced*, not asserted in
+  prose). Eight mutations detected, one recorded invariance not counted.
+- **Two meters, and they now agree.** Once binned the way upstream bins them,
+  `contract_W` `0.99951`, `get_dslice` `0.99884`, `nonlin_sum 111 factored`
+  `0.98941`. The sole divergence is `contract_W_basic` at `+33.1%`, and **that is
+  not recoverable**: flopscope grants no symmetry discount on `W core W^T`
+  (`1.00171x` — declaring the symmetry *costs* `7,340,031` FLOPs).
+- **Corrected, and the first version of this claim was wrong.** The result entry
+  said `~1.0e11` FLOPs of upstream's ledger were "not executed here at all" and
+  quoted a `+6.1%` `get_dslice` divergence. Both were artifacts of a `flop_name`
+  scope boundary — upstream bills the *fresh* two-leg block's `(2,1)` slice to
+  `nonlin_sum 111 factored`, not to `get_dslice`. The genuinely unexecuted
+  remainder is **`488,517,808` = `0.000222 B`**, wrong by a factor of `205`.
+
+### The durable deliverable: the measured late-window cost table
+
+A final-`m`-layer exact-K3 window from a **zero** K3 checkpoint costs exactly the
+first `m` layers of the tower — its rank trajectory inside the window is
+`0, 2n, 4n, ...`, and that trajectory is verified against upstream *from a
+zero-K3 start*, so it is the window's own, not the full tower's.
+
+| `m` | K3 window | `+` K2p1 prefix | multiplier | margin to the `0.1` floor |
+|---:|---:|---:|---:|---:|
+| 2 | `0.0117 B` | `0.0743 B` | `0.1000` | **`25.7%`** |
+| 3 | `0.0303 B` | `0.0929 B` | `0.1000` | **`7.1%`** |
+| 4 | `0.0577 B` | `0.1203 B` | `0.1203` | over |
+| 6 | `0.1388 B` | `0.2014 B` | `0.2014` | over |
+| 8 | `0.2551 B` | `0.3177 B` | `0.3177` | over |
+
+**`m <= 3` is free — but that is a MARGIN, not a category.** `7.1%` at `m = 3`
+(`12.9%` if the acknowledged K2-prefix double count is removed), against an
+un-executed remainder of `0.00004 B`, three orders below it. This replaces the
+plan's `m^2/L^2` hypothesis with a measurement. **It says nothing about
+accuracy** — that is the label-free drift panel of Track 2 (contract `f4461b4`).
+
+### A constraint no document here had paired with the multiplier
+
+Read from the installed package: `residual_wall_time_limit_s = 0.4` (**gated**),
+`wall_time_limit_s = 120.0` (**total**), `predict_timeout_s = 30.0`,
+`memory_limit_mb = 8192`.
+
+**flopscope defines `residual_wall_time_s = wall - backend - overhead`**
+(`_budget.py:1781-1799`). Work inside instrumented ops is *backend* time and is
+**not** charged to the residual — which is why the shipped K2p1 spends
+`137.6e9` counted FLOPs for a graded residual of `~7 ms`. So residual risk is
+about **op count and Python glue**, not total FLOPs. **The constraint that scales
+with FLOPs is the 120-second TOTAL wall cap**, and it bites hardest exactly where
+the multiplier does. Both point the same way: small `m`. Recorded as a design
+pressure and a blocking Track-D item, **not** as a measurement — no local second
+is transferable.
+
+### What this does NOT license
+
+No accuracy claim. No deployability claim — **residual, setup and memory are
+unmeasured for every W-EFF arm**, and there is no `fnp` port of the K3
+recurrence. **A candidate cannot exist without that port**: SIMPLE mode needs 25
+enumerable diagram terms plus the DS/harmonic algebra and the ReLU wick
+coefficients, which is a multi-day IMPORTANT-then-STRATEGIC effort with its own
+parity burden. Nothing here enters the write-up.
+
 ## Authoritative document map
 
 | need | source |
@@ -877,8 +966,8 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 | 0S | Phase-2 canary + calibrated submission | STRATEGIC | **CLOSED — SHIPPED AND GRADED.** #328662 and #328664, zero failures; v2.7 is rank 41/67 at the current snapshot |
 | 0C | K2 scalar calibration | DESIGN | **EXHAUSTED.** 2.96x transfer is real; multiplicative state gains collapse to output scale and non-commuting layer scalars did not transfer |
 | 0D | continuity repair: docs, P01, parity terminology | ROUTINE, then IMPORTANT for enforcement | active/historical docs reconciled 2026-08-28; graded-total fixtures remain open, while today's candidate will be formally promoted into `estimator.py` instead of changing preflight |
-| 1 | W-EFF exact K3 representative price/parity | IMPORTANT | **NEXT.** No truth; exact small-shape reference, one width-1024 flopscope operating point, zero scalar materializations |
-| 2 | late-window / age-window K3 imitation | IMPORTANT | next in parallel after contract; no labels, compare `m={2,4,6,8}` with full K3 and bill every arm |
+| 1 | W-EFF exact K3 representative price/parity | IMPORTANT | **CLOSED 2026-08-28 — MEASURED AND KILLED.** `1.0723 B` against a `<= 0.35 B` screen, FAIL by `3.064x`. Parity exact, zero materializations, zero leaks. Independent PROVISIONAL accepted in full and corrected (`966731b`); a second fresh pass is in flight |
+| 2 | late-window / age-window K3 imitation | IMPORTANT | **IN FLIGHT.** Contract `f4461b4` committed before any arm ran; label-free, no seed block. Arms `late:{0,2,4,6,8}`, `age:4`, matched-rank `normsort:{4096,8192}` on six fresh unregistered probes. GATE-W is executable and one-sided |
 | 3 | deep-ReLU-kernel carrier objective and frozen panel | IMPORTANT then STRATEGIC | pending; Kerdock remains one bounded family, not the presumed backbone |
 | 4 | faithful augmented-K2 parity / DESIGN | IMPORTANT then STRATEGIC | pending; standalone and checkpoint-reference estimands stay separate |
 | 5 | K3 renormalisation, K4 readout, per-neuron response | STRATEGIC | pending after a deployable state path exists |
@@ -912,8 +1001,8 @@ the carrier family, not evidence that 16 is the winning basis count.
 | higher Gaussian covariance-map orders | low value | measured plateau near 1.052x |
 | marginal ReLU mean Edgeworth | closed | capped near 1.047x in CP3R |
 | recurrent augmented K2 joint state | **open** | never tested by CP3R |
-| exact sparse-aware K3 / W-EFF | **highest priority cost question** | exact mathematics; needs one authoritative flopscope operating point |
-| late-window / age-window K3 | **highest priority new hypothesis** | screen against full K3 without labels before any truth block |
+| exact sparse-aware K3 / W-EFF, FULL TOWER | **closed on a measured price** | `1.0723 B`, `3.064x` over its own preregistered screen. The exact operations survive and are reused by the window |
+| late-window / age-window K3 | **the live question** | cost side ANSWERED and measured (`m <= 3` free at a `7.1%` margin); accuracy side is the label-free panel under contract `f4461b4` |
 | cost-indexed Kerdock/MUB + exact radial | **bounded open branch** | valid carrier; select by task-specific proxy and adjusted score, with 16 only a diagnostic endpoint |
 | ordinary IID/random orthogonal | control only | tested arms lose |
 | broken two-cycle lattice | closed | does not bound valid QMC/MUB |
