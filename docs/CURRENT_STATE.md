@@ -543,8 +543,8 @@ on that correction is in flight; nothing below may be treated as settled until i
 returns.
 
 - **Exact sparse/equality-aware K3 over the full 16-layer tower costs
-  `1.0723 B` under flopscope 0.12** (whole-path `1.0725 B`), against the
-  preregistered `<= 0.35 B` affordability screen. **FAIL by `3.064x`.** The
+  `1.0723 B` under flopscope 0.12** (whole-path `1.0732 B`), against the
+  preregistered `<= 0.35 B` affordability screen. **FAIL by `3.0664x`.** The
   full-tower W-EFF port is killed. Raw evidence:
   `experiments/2026-08-28_weff/`.
 - The saving over the dense spelling is `27.8%` and it is a **bounded constant
@@ -568,14 +568,27 @@ returns.
 - **Two meters, and they now agree.** Once binned the way upstream bins them,
   `contract_W` `0.99951`, `get_dslice` `0.99884`, `nonlin_sum 111 factored`
   `0.98941`. The sole divergence is `contract_W_basic` at `+33.1%`, and **that is
-  not recoverable**: flopscope grants no symmetry discount on `W core W^T`
-  (`1.00171x` — declaring the symmetry *costs* `7,340,031` FLOPs).
+  the sole cross-meter divergence. **A fourth pass REFUTED the first reading of
+  it.** `flops.as_symmetric` on the core indeed buys nothing (`1.00171x` —
+  declaring the symmetry *costs* `7,340,031` FLOPs), but flopscope's
+  auto-detected `identity_pattern` **does** grant a discount: an aliased
+  `fnp.einsum('ij,kj->ik', A, A)` is `0.5005x` of `A @ A.T`, and `W core W^T`
+  via `cholesky` + aliased Gram is **`0.8336x`** (relerr `7.65e-07`),
+  conditional on the core being SPD. So `~0.005 B` on the tower **is**
+  recoverable. It does not move the screen; it widens the `m <= 3` window
+  margin, which was the thin part of the table.
 - **Corrected, and the first version of this claim was wrong.** The result entry
   said `~1.0e11` FLOPs of upstream's ledger were "not executed here at all" and
   quoted a `+6.1%` `get_dslice` divergence. Both were artifacts of a `flop_name`
   scope boundary — upstream bills the *fresh* two-leg block's `(2,1)` slice to
   `nonlin_sum 111 factored`, not to `get_dslice`. The genuinely unexecuted
-  remainder is **`488,517,808` = `0.000222 B`**, wrong by a factor of `205`.
+  remainder is **`2,104,414,384` = `0.000957 B`**, wrong by a factor of `47.5`.
+  *(That correction was itself corrected: the first attempt said `0.000222 B`,
+  because upstream's `nonlin_sum 111 factored` bin also carries `contract_wick_`.
+  It is no longer prose — `p2_weff.py --bincheck` proves the binning by
+  measurement (`d(nonlin_sum) - 3n*2nl` constant at `31,072` over four
+  increments) and closes the whole fnp-versus-upstream gap **exactly** at
+  `13,006,070,096`.)*
 
 ### The durable deliverable: the measured late-window cost table
 
@@ -622,6 +635,99 @@ recurrence. **A candidate cannot exist without that port**: SIMPLE mode needs 25
 enumerable diagram terms plus the DS/harmonic algebra and the ReLU wick
 coefficients, which is a multi-day IMPORTANT-then-STRATEGIC effort with its own
 parity burden. Nothing here enters the write-up.
+
+## GATE-W FAILS: the late-window lane is closed, and the reason was retracted — 2026-08-28
+
+Contract `f4461b4` (before any arm ran) → result `f01c3e5` → independent
+**PROVISIONAL** → addendum contract `7ca4285` → corrections at `eb016ac`.
+**Four independent Skeptic passes ran across this session's two slices; all four
+returned PROVISIONAL or REJECT, and all four were accepted.** Preflight
+**GREEN 12/16** at `eb016ac`, worktree clean, same four full-only skips.
+
+**Today's outcome: an evidence-backed kill. No truth block spent, no candidate
+built, NO SUBMISSION.** `estimator.py` remains v2.6.1 (`00240eb1…`),
+byte-identical to its archive. The seed ledger, vault seal and touch log,
+`HUMAN_MODEL.md`, `competition_score.py` and `scripts/` are untouched across
+`1f16203..eb016ac`.
+
+### The verdict, and it is provable
+
+Six fresh unregistered probes `1000401`–`1000406`, common random numbers, f32,
+`1024x16`. `D` is RMS drift of the final-layer prediction from uncapped full K3.
+
+| arm | mean `D` | provable score floor | vs graded v2.7 |
+|---|---:|---:|---:|
+| `late:0` (pure K2) | `2.0706e-03` | `2.901e-07` | **`2.11x` worse** |
+| `late:2` | `2.0630e-03` | `2.874e-07` | **`2.09x` worse** |
+| `late:4` | `2.0186e-03` | `3.215e-07` | **`2.34x` worse** |
+| `late:8` | `1.8229e-03` | `6.387e-07` | **`4.65x` worse** |
+
+**Every window arm PROVABLY CANNOT clear the `2x` bar** — not "was not shown
+to". That is stronger than the result entry first claimed: `bracket()` had
+dropped the `D - RMSE_full` branch of the triangle inequality, zeroing every
+lower bound. Fixed; `p2_pb_rank.py:839` in this repository already had it right.
+
+The gate is not rigged. Re-run maximally in the arm's favour — `MSE_FULL -> 0`
+*and* the multiplier pinned at the floor for every `m`, both physically
+impossible — G1 still fails by `2.20x`–`2.49x`. For `m = 2` to pass, the bar
+would have to be `3.72x` worse than graded v2.7 and `1.26x` worse than the
+shipped canary.
+
+**Instrument validation:** `late:0` is pure K2, so `D^2 + MSE_full` should
+reproduce the known K2 raw MSE. Measured `4.3267e-06` against the organiser
+figure `4.050566e-06` — **`1.068x`**.
+
+### RETRACTED: the reason, and the generalisation
+
+The result entry attributed the failure to *"`kappa_3`'s contribution to the
+final-layer mean is accumulated, not local"* and generalised to *"it equally
+kills any future 'start the expensive machinery late' design on this state —
+which is a family, not a single arm."* **Both are retracted.**
+
+`late:m` changes **two** things at once: it discards `kappa_3` memory **and**
+hands the window a `k_max=2` prefix whose `K[1]`/`K[2]` are already wrong. The
+`k3pre:m` arm isolates them — full-K3 prefix, identical zero checkpoint. Over six
+probes:
+
+| `m` | `D(k3pre)^2 / D(late)^2` | **the prefix explains** |
+|---:|---:|---:|
+| 2 | `0.1079` | **`89.2%`** of `late:2`'s squared drift |
+| 3 | `0.1546` | `84.5%` |
+| 4 | `0.2013` | `79.9%` |
+
+**The window failed mostly because its prefix is bad, not because `kappa_3` is
+non-local.** The binding open question is therefore **the quality of the
+`K[1]`/`K[2]` prefix** — already item 1 of the hypothesis stack below (f32 K2 /
+faithful augmented-K2). This session did not open a lane; it removed a false
+closure from one that was already ranked first.
+
+**Deviation, declared:** `k3pre` ran at **width 256 on CPU, not the live shape**.
+Two live-shape attempts OOM'd the 32 GiB card and other work needed the GPU.
+`late:m` behaves differently across the two widths, so the *window* half does not
+transfer; the *attribution* half holds at both widths over eight networks, which
+is what the retraction rests on. **The live-shape six-network confirmation is
+OPEN** — command recorded at the bottom of `experiments/LOG.md`, needs ~30 GiB
+and a quiet card.
+
+### What is NOT reopened
+
+`normsort:8192` — an ordinary rank cap held across the whole tower — is the best
+arm at `D = 4.36e-04`, `4.2x` better than `late:8`. **This does not reopen the
+rank-capping lane**: it is internal evidence at a cell P-B already priced at
+`0.7055 B` with a straddling bracket, `AGENTS.md` requires *external* evidence to
+reopen, and it costs `~2.3e12` upstream. Its independence was also overstated —
+`p2_window.py` imports `cap_factored` from `p2_pb_rank`, so it is the same
+implementation, not a different code path.
+
+### Still blocking any future windowed or K3 design
+
+Residual against the `0.4 s` cliff (unmeasured for every arm); the **`120 s`
+total wall cap**, which is what actually scales with FLOPs since flopscope's
+residual excludes backend time; the `8,192 MB` limit Windows cannot enforce; and
+the absent `fnp` port of the K3 recurrence — 25 enumerable SIMPLE-mode diagram
+terms plus the DS/harmonic algebra, a multi-day effort with its own parity
+burden. **No same-day candidate was ever reachable**, and a passing gate would
+only have licensed starting that port.
 
 ## Authoritative document map
 
@@ -966,8 +1072,8 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 | 0S | Phase-2 canary + calibrated submission | STRATEGIC | **CLOSED — SHIPPED AND GRADED.** #328662 and #328664, zero failures; v2.7 is rank 41/67 at the current snapshot |
 | 0C | K2 scalar calibration | DESIGN | **EXHAUSTED.** 2.96x transfer is real; multiplicative state gains collapse to output scale and non-commuting layer scalars did not transfer |
 | 0D | continuity repair: docs, P01, parity terminology | ROUTINE, then IMPORTANT for enforcement | active/historical docs reconciled 2026-08-28; graded-total fixtures remain open, while today's candidate will be formally promoted into `estimator.py` instead of changing preflight |
-| 1 | W-EFF exact K3 representative price/parity | IMPORTANT | **CLOSED 2026-08-28 — MEASURED AND KILLED.** `1.0723 B` against a `<= 0.35 B` screen, FAIL by `3.064x`. Parity exact, zero materializations, zero leaks. Independent PROVISIONAL accepted in full and corrected (`966731b`); a second fresh pass is in flight |
-| 2 | late-window / age-window K3 imitation | IMPORTANT | **IN FLIGHT.** Contract `f4461b4` committed before any arm ran; label-free, no seed block. Arms `late:{0,2,4,6,8}`, `age:4`, matched-rank `normsort:{4096,8192}` on six fresh unregistered probes. GATE-W is executable and one-sided |
+| 1 | W-EFF exact K3 representative price/parity | IMPORTANT | **CLOSED 2026-08-28 — MEASURED AND KILLED.** `1.0723 B` measured / `1.0732 B` whole-path against a `<= 0.35 B` screen, FAIL by `3.0664x`. Parity exact, zero materializations, zero leaks, bin reconciliation closes exactly. **Two** independent PROVISIONAL passes, both accepted in full; the second found an error inside the first correction |
+| 2 | late-window / age-window K3 imitation | IMPORTANT | **CLOSED 2026-08-28 — GATE-W FAILS, provably.** Every window arm's score floor is `2.09x`–`4.65x` worse than graded v2.7. Independent PROVISIONAL accepted: the *verdict* stands and is stronger; the *attribution* was retracted |
 | 3 | deep-ReLU-kernel carrier objective and frozen panel | IMPORTANT then STRATEGIC | pending; Kerdock remains one bounded family, not the presumed backbone |
 | 4 | faithful augmented-K2 parity / DESIGN | IMPORTANT then STRATEGIC | pending; standalone and checkpoint-reference estimands stay separate |
 | 5 | K3 renormalisation, K4 readout, per-neuron response | STRATEGIC | pending after a deployable state path exists |
@@ -1001,8 +1107,8 @@ the carrier family, not evidence that 16 is the winning basis count.
 | higher Gaussian covariance-map orders | low value | measured plateau near 1.052x |
 | marginal ReLU mean Edgeworth | closed | capped near 1.047x in CP3R |
 | recurrent augmented K2 joint state | **open** | never tested by CP3R |
-| exact sparse-aware K3 / W-EFF, FULL TOWER | **closed on a measured price** | `1.0723 B`, `3.064x` over its own preregistered screen. The exact operations survive and are reused by the window |
-| late-window / age-window K3 | **the live question** | cost side ANSWERED and measured (`m <= 3` free at a `7.1%` margin); accuracy side is the label-free panel under contract `f4461b4` |
+| exact sparse-aware K3 / W-EFF, FULL TOWER | **closed on a measured price** | `1.0732 B` whole-path, `3.0664x` over its own preregistered screen, after four independent passes. The exact operations survive |
+| late-window / age-window K3 | **closed on a measured negative** | every window arm provably cannot clear the `2x` bar. It failed because its **K2 prefix** is bad (`89.2%` of the drift), not because `kappa_3` is non-local |
 | cost-indexed Kerdock/MUB + exact radial | **bounded open branch** | valid carrier; select by task-specific proxy and adjusted score, with 16 only a diagnostic endpoint |
 | ordinary IID/random orthogonal | control only | tested arms lose |
 | broken two-cycle lattice | closed | does not bound valid QMC/MUB |
