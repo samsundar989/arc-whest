@@ -302,6 +302,16 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
 
 ## The K3 lane — measured 2026-08-27, independently ACCEPTed, and confirmed on organiser data
 
+> **READ THE 2026-08-28 UPDATE AT THE END OF THIS SECTION BEFORE ACTING ON
+> ANYTHING IN IT.** The "PRICED OUT" and "honest ceiling `~5.9e-8`" framing
+> below is the 2026-08-27 state. Three oracle slices ran on 2026-08-28 and an
+> independent Skeptic returned **REJECT** on two of the three readings. The
+> net correction: rank-`n` capping is **not competitive** (a measured
+> negative, and the stronger "closed for good" is retracted), the tensor is
+> `96.7%`-capturable at rank `n` and compressing it is still useless because
+> the flow reads only two diagonal slices, and no affordable mechanism to
+> exploit that is known.
+
 **ARC's factorized K3 (`mlp_kprop`, `k_max=3, factor=True`, unmodified) reaches a
 true final-layer MSE of `~3.9-4.0e-08` at 1024x16.** Two independent readings:
 
@@ -402,11 +412,13 @@ residual). None of the three depends on rank capping. O2a (rank-capped `k3aug`)
 and O3 (Richardson-in-rank) both presuppose the lever that just failed and are
 undermined, though neither is formally refuted.
 
-### UPDATE 2026-08-28 — the three oracles ran, and they SPLIT the verdict above
+### UPDATE 2026-08-28 — the three oracles ran, and an independent Skeptic REJECTED two of the three headline readings
 
-**Rule 2 is NOT yet satisfied for these; an independent Skeptic is in flight.
-Nothing below may be built on, promoted, or quoted outside the repository until
-it returns.** Contracts and results are the four entries at the bottom of
+**Rule 2 IS satisfied and the verdict was REJECT.** The retraction entry at the
+bottom of `experiments/LOG.md` is the record of correction; the two entries above
+it contain claims that are struck there and must not be read on their own. The
+corrected readings are folded in below. Nothing in this lane may enter the
+write-up. Contracts and results are the four entries at the bottom of
 `experiments/LOG.md` (`7effbc8`, `8549691`, `2fa22dc`, `222db96`, `b5442f8`);
 raw artifacts in `experiments/2026-08-28_pb_oracle/`. `preflight` GREEN 12/16 at
 `b5442f8`.
@@ -424,20 +436,31 @@ Mean drift from the uncapped prediction, three probe networks `1000201-203`,
 | `oracle_offdiag_exact:2*n` | `4n` | `0.4121 B` | `1.510e-7` | `3.77` |
 | **`oracle_offdiag_exact:4*n`** | `6n` | `0.5647 B` | **`3.689e-8`** | **`0.92`** |
 
-1. **ORACLE-1 CLOSED the rank-`n` lane for good**, on its pre-registered
-   `>= 4.0e-7` rule committed at `cbfe67f`. The oracle ignores cost, so no
-   selector, score function or engineering recovers it. P-B-COST's honestly
-   recorded open ambiguity — "priced out for the compressors tried, not for the
-   concept" — is closed for the concept, at rank `n`, in this basis.
-   **All three parties predicted PROVISIONAL and all three were wrong.**
+1. **ORACLE-1 did NOT close the lane. That closure is RETRACTED, and the
+   pre-registered rule it rested on was itself unsound.** `min` over *achievable*
+   objects gives `opt <= 7.531e-7`; the gate concluded `opt >= 4.0e-7`. That
+   infers a lower bound from an upper bound and is invalid at any margin — and the
+   rule committed at `cbfe67f` already had the flaw, so pre-registration did not
+   save it. The gated number is also soft: it falls **23%** to `5.789e-7` under a
+   different column score and more sweeps, and drift is **non-monotone** in the
+   sweep count (`6.493e-7` at 64, `6.623e-7` at 128), refuting the entry's own
+   "more sweeps only tighten it" claim.
+   **What stands is a strong measured negative:** the best of six rank-`n` objects
+   drifts `5.789e-7 = 14.5x MSE_full`, so **rank-`n` capping in this basis is not
+   competitive.** Whether *some* rank-`n` compressor beats `4.0e-7` is
+   **unsettled and not settleable from here** — nothing measured is a lower bound.
+   All three parties predicted PROVISIONAL, and PROVISIONAL is what it is.
 2. **ORACLE-3 needed no GPU time: it is definitionally the `dsproj` cell**, already
    measured and committed at `b784b6f`. `8.832e-7`. The `< 5e-8` falsifier that
    would have implied a cheap near-`O(n^2 L)` "K3-diag" estimator **missed by
    `18x`**. There is no cheap diagonal-only K3. Recorded as a **postdiction** —
    the data pre-dates the prediction, so it carries no Rule-1 credit.
 3. **The real finding is why compression failed, and it is not "the tensor is
-   incompressible".** The best rank-`n` approximation captures **~75% of the
-   Frobenius norm of a rank-`32n` tensor** at depth. `kappa_3` is substantially
+   incompressible".** The best rank-`n` approximation captures **96.7% of the
+   Frobenius norm** of a rank-`32n` tensor at depth (`sqrt(1 - 0.254^2)`; an
+   earlier "~75%" here read `1 - 0.254` as a norm fraction, which it is not, and
+   the residual is measurably orthogonal to the approximant). `kappa_3` is
+   substantially
    compressible; compressing it was still useless, because **the flow reads
    `kappa_3` only through its `(3,)` and `(2,1)` diagonal slices**, and
    Frobenius-optimal compression spends rank on the all-distinct bulk — which
@@ -451,20 +474,31 @@ Mean drift from the uncapped prediction, three probe networks `1000201-203`,
    measurement, control N4 at small `n`, and a `13.1x` recovery when removed). Its
    `3.960e-6` stands unamended in the log **and stays in control N4**, so the
    difference remains visible.
-5. **ORACLE-2b is a WEAK OPEN, and the gate-authorised ladder is the reason this
-   matters.** With the diagonals of the sum held exact (verified `9.65e-17`), at
-   **matched cost `0.4121 B` structure-preserving compression beats naive
-   `normsort` `5.45x`**; at `0.80x` the cost of `normsort:8n` it beats it `4.48x`.
-   At `r* = 4n` the drift falls **below the uncapped model's own error**, at
-   `2.62x` less cost. **So "rank-capping is priced out" is a true statement about
-   selectors blind to the structure, and NOT about the compression axis.**
-6. **Nothing is built and no promotion is claimed, and the reasons are hard.** It
-   is still an ORACLE (ALS, cost ignored, no implementable selector); drift is not
-   an error increment, so every score column is a triangle-inequality **bracket**
-   and **every bracket straddles the uncapped `5.925e-8`**; and the most optimistic
-   honest reading of the best cell (`~4.3e-8`) is still **`5.6x` short of the
-   leader's `7.70e-9`**. This lane, fully realised, does not win alone — it must
-   compose with O1, and **W-EFF remains the centerpiece.**
+5. **The "diagonal preservation buys 4.5-5.5x" attribution is REFUTED at matched
+   rank, and that comparison was rank-unmatched in my candidate's favour.** I
+   compared it to `normsort` at matched *cost*; at matched *rank* plain `oracle`
+   is **1.34-1.88x BETTER** than the diagonal-preserving construction (rank `3n`:
+   `1.602e-7` vs `3.013e-7`). **The whole gain was the ALS oracle, not protecting
+   the diagonals** — protecting them costs accuracy. Result-entry prediction 4 is
+   re-scored HELD -> REFUTED.
+   **And the oracle's own price is not ignorable:** measured `22.27 B` for
+   `oracle:3*n` and `7.90 B` for `oracle_offdiag_exact:n`, `92-99%` of it in the
+   selector, against `normsort:3*n`'s `0.0002 B`. Four orders of magnitude, and
+   intrinsic (MTTKRP is `O(n r_in r*)`). Every `B` figure attached to an oracle
+   cell is the price of the **resulting rank if some other mechanism produced
+   it**, and no such mechanism is demonstrated.
+6. **Status: WEAK OPEN, PENDING A MECHANISM — and the cheap half of the search
+   is already negative.** Plain `oracle` reaches `1.204e-8` at rank `8n`, so the
+   information IS recoverable; but better column scores buy nothing above rank `n`
+   (`normsort:8n` with `d21` `1.644e-7` vs `frob` `1.651e-7`), leaving a `13.7x`
+   gap to the oracle that no affordable mechanism closes. The adopted condition on
+   this lane is the Skeptic's follow-up: cap inside `FactoredTensor.__add__` so
+   `r_in` never exceeds `r* + 2n`, and bill the `rankcap`. **If that cannot get
+   under `~0.01 B` while staying within a small constant of the oracle ladder, the
+   lane is retired rather than laddered further.** It needs its own contract.
+   Nothing is built; drift is not an error increment, every score column is a
+   **bracket**, and every bracket straddles the uncapped `5.925e-8`. **W-EFF is
+   unaffected by all of this and remains the centerpiece.**
 
 **The `4.6e-8` warning above still stands and is reinforced**: do not budget an
 `fnp` port against any number in the table, because none of them is a measured MSE
@@ -473,8 +507,13 @@ against a label and none is priced by flopscope.
 **Instrument defect found and fixed** (`b5442f8`): `predict()` was building an
 autograd graph in a module that differentiates nothing — `75.21 GiB` live on a
 `31.84 GiB` card. Now under `torch.no_grad()`, asserted **bit-identical** on an
-already-committed cell. This also explains the full-width f64 `--selftest` OOM,
-which was first misread as a host memory limit.
+already-committed cell, and confirmed a second time independently.
+**The claim that this also explained the full-width f64 `--selftest` OOM is
+RETRACTED**: `cmd_selftest` never enters `predict()`, and it still OOMs at HEAD.
+**The width-1024 self-test remains unproven — only width 256 is** — and that is
+what licenses reading a capped run as "upstream plus a cap".
+**Three of the five null controls (N1, N2, N3) are satisfied by construction** and
+are documented as such in the source; only N4 and REG carry weight.
 
 **Correction owed to Samuel's Contract 4 § 1.** Its `c''_3` arithmetic reproduces
 exactly here (`L^2 n^3 = 2.7488e11`; `5.93e11 -> 2.157`; `3.2537e12 -> 11.837`;

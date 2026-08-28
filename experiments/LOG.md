@@ -18955,3 +18955,201 @@ Three consequences, and the third is the one that matters for W-EFF:
    `7effbc8`.
 
 No seed block, no gate, no decision. Source reading and artifact reading only.
+
+---
+
+# 2026-08-28 — SKEPTIC VERDICT: **REJECT**, and it is correct. The lane closure is RETRACTED and the "diagonal preservation" attribution is REFUTED at matched rank
+
+*Rule 2, on HEAD `dcf61e7`. The verdict is accepted in full. Every load-bearing
+finding below was independently re-measured by me before accepting it — three of
+them at the instrument, not from the review's numbers — and every one reproduced.
+Artifacts of my own re-checks: `experiments/2026-08-28_pb_oracle/
+{skeptic_rankmatched,skeptic_oraclecost}.json`.*
+
+## The finding that matters: I inferred a lower bound from an upper bound
+
+`min{oracle:n, dsproj:n, normsort:n} = 7.531e-7` is a minimum over **achievable**
+objects. It says `opt <= 7.531e-7`. The gate closed the lane by concluding
+`opt >= 4.0e-7`. **That step is invalid at any margin**, and the contract's own
+sentence — *"Each is achievable, so their minimum is a sound achievability
+bound"* — is true and points the other way. I wrote the correct sentence and then
+drew the opposite conclusion from it.
+
+**And the flaw is older than this slice.** The decision rule committed at `cbfe67f`
+already read "`>= 4.0e-7` -> no rank-`n` compressor of any cost rescues the lane".
+That inference needs the measured object to be a **lower** bound on every rank-`n`
+compressor's drift. An ALS oracle is a *particular* rank-`n` compressor, so it can
+only ever be an upper bound. **The pre-registered rule was unsound when it was
+written**, by me and by the reviewer who proposed it, and pre-registering an
+invalid inference does not make it valid. This is the most useful thing this slice
+produced.
+
+**RETRACTED, in terms:** *"the lane closes for good"*, and *"no selector, no score
+function and no amount of engineering recovers it"*. Both are struck.
+
+**What replaces them, and it is still a strong result:** of the six rank-`n`
+objects now measured, the best drifts **`5.789e-7` = `14.5x MSE_full`**
+(`oracle:n` with the `d21` column score at 64 sweeps, the review's measurement).
+**Rank-`n` capping in this basis is not competitive.** That is a measured negative,
+not a proof of impossibility, and it must never again be written as one.
+
+**The bound is also empirically soft, which I asserted the opposite of.** The
+contract and both result entries claim "more sweeps can only tighten it in the safe
+direction". **FALSE, and I re-measured it myself.** Mean drift of `oracle:n` at
+8 / 16 / 32 / 64 / 128 sweeps:
+
+`7.5313e-7`, `6.6683e-7`, `6.6053e-7`, **`6.4930e-7`**, `6.6230e-7` — it turns
+**upward** at 128. ALS is monotone in **Frobenius**; this slice's own headline is
+that Frobenius is not drift, which is precisely why no sweep count bounds drift. I
+contradicted my own central finding inside the same entry. With the `d21` score the
+gated number falls 23% to `5.789e-7`, so the margin to the threshold was `1.45x`,
+not `1.88x`.
+
+## The second finding: "diagonal preservation buys 4.5-5.5x" is REFUTED at matched rank
+
+I compared `oracle_offdiag_exact` against `normsort` at matched **cost** and
+credited the gain to protecting the diagonals. The review compared it against plain
+`oracle` at matched **rank**, which is the comparison I never ran. **I re-ran it
+myself** (`skeptic_rankmatched.json`, same three seeds):
+
+| output rank | `oracle_offdiag_exact` | plain `oracle` | |
+|---|---:|---:|---|
+| `3n` | `3.013e-7` | **`1.602e-7`** | plain oracle **1.88x better** |
+
+**Diagonal preservation does not help. It costs 1.34-1.88x at every matched rank.**
+The entire `4.5-5.5x` was the ALS oracle, which `normsort` does not have. The
+mechanism I asserted — *"Frobenius-optimal compression spends rank on the bulk and
+damages the readout"* — predicts the **opposite** of what the instrument says.
+
+**Result-entry prediction 4 is RE-SCORED from HELD to REFUTED.** It read
+"`oracle_offdiag_exact` beats `oracle:n`" and I called it "the cleanest statement of
+the slice's thesis". It compared **rank `3n` against rank `n`** — a rank-unmatched
+comparison that favoured my own candidate, which is the failure class this
+repository has a checklist item for. At matched rank it is refuted.
+
+**The `4.5-5.5x` row in the summary table is struck**, and so is the claim in
+`b5442f8`'s commit subject. Git history cannot be edited; this entry is the
+correction of record.
+
+## The third finding: the oracle's own price is 4-22 budgets, and I called it unpriced
+
+I wrote *"the `rankcap` line an implementable one would carry is unpriced"*. It is
+priced, by the same counter as everything else, and I never looked. **Measured by me
+at HEAD** (`skeptic_oraclecost.json`):
+
+| cell | total | of which `rankcap` |
+|---|---:|---:|
+| `oracle:3*n` | **`22.27 B`** | `98.52%` |
+| `oracle_offdiag_exact:n` | **`7.90 B`** | `92.29%` |
+| `normsort:3*n` | `0.3299 B` | `0.06%` |
+
+Four orders of magnitude, and it is **intrinsic** — MTTKRP is
+`O(n * r_in * r*)` with `r_in ~ r* + 2n`, so even a single ALS sweep at `4n` costs
+`4.27 B`. Quoting "`5.45x` better at matched cost `0.4121 B`" for an object that
+costs `7.9-22 B` is the counted-versus-effective failure in its purest form. Every
+`B` figure I attached to an oracle cell is **the price of the resulting rank if
+some other mechanism produced it**, and nothing in this lane demonstrates such a
+mechanism exists.
+
+## The null controls: three of five are satisfied by construction
+
+This repository's signature failure, found for the third time, and this time inside
+the controls I said were chosen so each "fails loudly under a specific defect".
+
+- **N1 — satisfied by construction.** The padding columns are *exactly zero*, so
+  their `frob` weight is exactly zero, so `topk` returns exactly the 24 true
+  columns and **the warm start alone already reproduces the reference** (review:
+  `1.493e-16`) — *better* than the `3.982e-15` that 60 ALS sweeps report. **ALS
+  makes it worse, and zero sweeps passes.** My docstring asserts, in terms, that
+  the warm start does *not* pass it. That sentence is false and is being deleted
+  from the source, not just from the log.
+- **N2 — cannot fail.** Exact alternating minimisation is monotone in Frobenius by
+  construction. I re-ran with `--als-iters 0`: fit `0.7399` vs `0.7399`, "`1.00x`
+  better", **PASS**. It also compares two calls to the same `_cp_fit_residual`, so
+  a bug in that metric is invisible to it.
+- **N3 — half by construction.** `rem` is literally `cat([A, -dA])`, so
+  `diag (+) rem == FT` is an algebraic identity. Only the second half — that `R`'s
+  own diagonal slices vanish — carries information.
+- **N4 — genuine**, two-sided, asserts its own discrimination, and would have caught
+  the ORACLE-2 defect. It is the only control here that earned its place.
+- **REG — genuine but narrow, and it was not re-run after `no_grad`** even though
+  the ORACLE-2b contract states all parent controls "are re-run". The review re-ran
+  it: bit-identical. A process defect that happened not to bite.
+
+## What survives, verified rather than assumed
+
+- **The ORACLE-2 leakage diagnosis: ACCEPT**, and now confirmed at **matched rank**,
+  which is stronger than my own evidence: `oracle_offdiag:n` (rank `2n`) `3.960e-6`
+  against plain `oracle:2*n` (rank `2n`) `3.139e-7` — **`12.6x` worse at identical
+  rank.** It is a defect, not a finding, and the correction was legitimate.
+- **No gate was moved.** Ordering confirmed by git and mtimes throughout: contract
+  `7effbc8 21:45:07` -> REG `21:45:30` -> prediction `8549691 21:51:05` ->
+  `drift_oracle.json 21:58:38` -> `2fa22dc 22:07:19`; then `222db96 23:53:48` ->
+  `drift_oracle2b.json 23:58:22` -> ladder `00:07:34`. No gated number pre-dates its
+  gate.
+- **ORACLE-3 is untouched.** `dsproj:n` `8.832e-7`; the `< 5e-8` collapse falsifier
+  missed by `18x`; still a postdiction.
+- **`no_grad` is inert.** Confirmed a second time, independently, bit-identical on
+  all three seeds.
+- The upstream pin verifies (25/25), no seed block is claimed, `1000201-203` fall in
+  no registered range, the vault touch log is unmoved at 1, and every arithmetic
+  figure in both entries reproduces from the JSON.
+
+## Four more numbers corrected
+
+1. **"a rank-`n` approximation captures about 75% of the Frobenius norm" is wrong
+   arithmetic**, in two places. `1 - 0.254` is not a norm fraction. The ALS residual
+   is orthogonal to the approximant (measured: `cross / ||That||^2 = 1.000000`), so
+   a relative fit residual of `0.254` means it captures
+   `sqrt(1 - 0.254^2) = ` **`96.7%`** of the norm, `93.5%` of the energy. The
+   correction runs in my favour and is made anyway.
+2. **"The leakage grows monotonically with depth" is false.** `leak21/true21` reads
+   `0.3007`, `0.3003`, `0.2974` at layers 7, 8, 9. It grows overall; it is not
+   monotone, and I did not check.
+3. **The `--selftest` explanation is RETRACTED.** I claimed `no_grad` explained the
+   full-width f64 OOM. `cmd_selftest` calls `run_kprop_capped` **directly and never
+   enters `predict()`**, so the wrapper cannot touch it; the review re-ran it at
+   HEAD and it still OOMs at `74.73 GiB`. **The width-1024 self-test remains
+   unproven** — only width 256 is — and that is what licenses reading a capped run
+   as "upstream plus a cap".
+4. **`experiments/2026-08-28_pb_oracle/oracle_nulltest.json` was overwritten.** The
+   21:45 contract cites it as "already run and PASS" and `2fa22dc` lists it as an
+   artifact, but the on-disk file was rewritten at `22:08:02` and contains N4, which
+   did not exist for either. Git preserves both versions; this is the 2026-08-21
+   "an evidence file a documented invocation can shrink" trap, and the fix is to
+   write null-control artifacts under a run-specific name.
+
+## Where the compression axis actually stands now
+
+| question | honest answer |
+|---|---|
+| Is rank-`n` capping competitive in this basis? | **No** — best of six measured objects is `5.789e-7 = 14.5x MSE_full`. A measured negative, **not** a closure |
+| Could some rank-`n` compressor still beat `4.0e-7`? | **Unsettled, and not settleable from here.** Nothing measured is a lower bound |
+| Does protecting the diagonals help? | **No.** It costs `1.34-1.88x` at matched rank |
+| Is the information recoverable at higher rank? | **Yes** — plain `oracle` reaches `1.204e-8` at rank `8n`. But the oracle costs `4-22 B` to run |
+| Is there an affordable mechanism that approaches it? | **None known, and the cheap half is already negative:** the review measured `normsort:8*n` with the diagonal-targeted `d21`/`d3` scores at `1.644e-7` / `8.170e-7` against `frob`'s `1.651e-7` — better column scores buy **nothing** above rank `n`, and a `13.7x` gap to the oracle survives |
+
+**The WEAK OPEN is downgraded to WEAK OPEN, PENDING A MECHANISM.** The review's
+cheapest discriminating follow-up — cap inside `FactoredTensor.__add__` so `r_in`
+never exceeds `r* + 2n`, and bill the resulting `rankcap` — is adopted as the
+condition on this lane, and it is **not** run here because it needs its own
+contract. *If it cannot get under `~0.01 B` while staying within a small constant
+of the oracle ladder, the WEAK OPEN is retired rather than laddered further.*
+
+**Nothing in this lane may enter the write-up, and `W-EFF` is unaffected by all of
+it** — W-EFF is a cost-side rebuild at identical mathematics, and no accuracy
+result here bears on it.
+
+## Recorded, not argued away
+
+Three open items the review raised that I am not resolving: (a) all three probe
+networks are the same unregistered triple reused across every P-B slice, and no
+drift figure carries an interval; (b) the `4.0047e-8` anchor's own CI
+`[3.794e-8, 4.215e-8]` is never propagated into the `/MSE_full` ratios or into the
+`10x MSE_full` gate threshold derived from it; (c) there is a 105-minute gap between
+`oracle_offdiag_exact` being unit-tested (22:08) and its contract being committed
+(23:53) on a measurement that takes 4.6 seconds. (c) has no decision consequence —
+the gated artifact post-dates the contract by 4.5 minutes and the ordering is
+confirmed — but it is recorded for the calibration record rather than explained.
+
+**Checklist items triggered: 2, 3, 4, 6, 9, 13, 17, 18 (twice).**

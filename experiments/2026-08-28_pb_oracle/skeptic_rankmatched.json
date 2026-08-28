@@ -1,0 +1,70 @@
+{
+  "check": "capped-vs-uncapped drift bracket",
+  "width": 1024,
+  "depth": 16,
+  "dtype": "f32",
+  "mse_full_anchor": 4.0047e-08,
+  "rows": [
+    {
+      "seed": 1000201,
+      "cell": "oracle:3*n",
+      "r_star": 3072,
+      "score": "frob",
+      "drift_final_layer": 1.8239028451321814e-07,
+      "ratio_to_mse_full": 4.554405686149228,
+      "mse_cap_lo": 5.150824983624061e-08,
+      "mse_cap_hi": 3.933663191901956e-07
+    },
+    {
+      "seed": 1000201,
+      "cell": "oracle_offdiag_exact:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 3.3322868944454484e-07,
+      "ratio_to_mse_full": 8.320940131459157,
+      "mse_cap_lo": 1.422362181312154e-07,
+      "mse_cap_hi": 6.043151607578742e-07
+    },
+    {
+      "seed": 1000202,
+      "cell": "oracle:3*n",
+      "r_star": 3072,
+      "score": "frob",
+      "drift_final_layer": 1.573070512347841e-07,
+      "ratio_to_mse_full": 3.9280608094185356,
+      "mse_cap_lo": 3.861306118118265e-08,
+      "mse_cap_hi": 3.560950412883856e-07
+    },
+    {
+      "seed": 1000202,
+      "cell": "oracle_offdiag_exact:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 2.9294542630925286e-07,
+      "ratio_to_mse_full": 7.315040485161257,
+      "mse_cap_lo": 1.1636753865867237e-07,
+      "mse_cap_hi": 5.496173139598333e-07
+    },
+    {
+      "seed": 1000203,
+      "cell": "oracle:3*n",
+      "r_star": 3072,
+      "score": "frob",
+      "drift_final_layer": 1.4077052425468058e-07,
+      "ratio_to_mse_full": 3.51513282529729,
+      "mse_cap_lo": 3.065178668678937e-08,
+      "mse_cap_hi": 3.3098326182257173e-07
+    },
+    {
+      "seed": 1000203,
+      "cell": "oracle_offdiag_exact:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 2.776626175900427e-07,
+      "ratio_to_mse_full": 6.933418672810515,
+      "mse_cap_lo": 1.0681101781632734e-07,
+      "mse_cap_hi": 5.28608217363758e-07
+    }
+  ],
+  "caveat": "drift is not an error increment; the bracket is the only truth-free statement available."
+}

@@ -153,10 +153,18 @@ def _kr_gram(X, Y):
 def _cp_als_truncate(factors, r_star: int, *, iters: int, warm, ridge=None):
     """Best rank-`r*` CP approximation of `sum_j A_j (x) B_j (x) C_j`.
 
-    **This is an ORACLE. Its cost is deliberately ignored and must never be
-    quoted as an operating point.** It exists to upper-bound what ANY rank-`r*`
-    compressor could achieve, so that "our selectors are bad" can be separated
-    from "the information is not rank-`r*`-compressible".
+    **This is a PARTICULAR rank-`r*` compressor whose cost is ignored, and it is
+    NOT a bound on what any other one could achieve.** A 2026-08-28 independent
+    review (REJECT) showed the claim that used to stand here inverted a bound:
+    ALS is a LOCAL method optimal in FROBENIUS, so its drift is something
+    *achieved*, i.e. an UPPER bound on the optimum. Concluding "no rank-`r*`
+    compressor can do better" from it is invalid, and a lane closure was
+    retracted for exactly that. Measured, not argued: from a random warm start
+    ALS fails to recover an exactly-rank-24 tensor (rel `0.14` at 300 sweeps),
+    and `oracle:n` drift is NON-monotone in the sweep count (`6.493e-7` at 64
+    sweeps, `6.623e-7` at 128). **Its own cost is also NOT ignorable in the way
+    the word "oracle" suggests: measured at `7.9-22.3 B`, i.e. 8-22x the entire
+    competition budget, and intrinsically so.**
 
     Nothing of size `n^3` is ever formed. For a target `T` in CP form with
     factors `(A, B, C)` of shape `(n, r)` and an approximant `That` with factors
@@ -170,9 +178,12 @@ def _cp_als_truncate(factors, r_star: int, *, iters: int, warm, ridge=None):
         `Ah = MTTKRP @ pinv[(Bh^T Bh) o (Ch^T Ch)]`
 
     and the same holds by symmetry for modes 2 and 3. ALS is monotone in the
-    Frobenius fit, so **warm-starting from the `normsort` column subset makes
-    the oracle provably no worse than the cheap selector at the same `r*`** --
-    which is exactly the property that licenses reading it as an upper bound.
+    Frobenius fit, so warm-starting from the `normsort` column subset makes the
+    oracle no worse than the cheap selector at the same `r*` **in FROBENIUS FIT
+    ONLY**. Frobenius fit is not drift -- that is this lane's whole finding -- so
+    the guarantee transfers to no measured drift, and the sentence that used to
+    stand here (that this "licenses reading it as an upper bound") was the error
+    a 2026-08-28 review rejected the lane closure over.
 
     `ridge` is a relative Tikhonov floor on the `(r*, r*)` solve; ALS normal
     matrices go singular when two approximant columns collide, and an unguarded
@@ -334,7 +345,8 @@ def cap_factored(FT, r_star: int, *, mode: str, seed: int, score: str = "frob",
             new = tuple(F.index_select(1, keep) for F in factors)
         elif mode == "oracle":
             # ORACLE-1: the best rank-`r_star` CP approximation reachable, warm
-            # started from `normsort` so it is provably no worse than it.
+            # started from `normsort` so it is no worse than it in Frobenius
+            # fit. That transfers NO guarantee to drift; see `_cp_als_truncate`.
             keep = torch.topk(w, r_star, sorted=False).indices
             warm = tuple(F.index_select(1, keep) for F in factors)
             new = _cp_als_truncate(factors, r_star, iters=als_iters, warm=warm)
@@ -571,21 +583,26 @@ def cmd_oracle_null(a) -> int:
 
     `N1  exact recovery.`  A genuinely rank-`k` tensor, padded with `pad` extra
       EXACTLY-ZERO columns so the `r <= r_star` short circuit cannot fire, must
-      be recovered by the rank-`k` oracle to floating-point exactness. A
-      transposed MTTKRP, a mis-paired Hadamard, or a wrong normal equation all
-      fail here; the warm start alone does NOT pass it, because the padded
-      column set makes `normsort`'s pick exact only if the selection is right AND
-      the solve is a no-op.
+      be recovered by the rank-`k` oracle to floating-point exactness.
+      **WEAK, AND SATISFIED BY CONSTRUCTION -- do not lean on it.** The padding
+      columns are exactly zero, so their `frob` weight is exactly zero, so `topk`
+      returns exactly the `k` true columns and the WARM START ALONE already
+      reproduces the reference (`1.5e-16`) -- better than the `4e-15` that 60 ALS
+      sweeps report. Zero sweeps passes. It checks only that ALS does not DESTROY
+      a fixed point. An earlier version of this docstring claimed the opposite in
+      terms; a 2026-08-28 review disproved it by running it.
 
-    `N2  monotone improvement.`  On a tensor with NO exact rank-`r*` form, the
-      oracle's relative fit must be `<=` the `normsort` warm start's own fit at
-      the same `r*`. ALS is monotone, so a violation means the solve is making
-      the fit worse -- the single most likely symptom of a sign or ridge bug, and
-      the property that licenses reading the oracle as an upper bound at all.
+    `N2  monotone improvement.`  **CANNOT FAIL; retained only as a smoke test.**
+      Exact alternating minimisation is monotone in Frobenius by construction, so
+      this asserts a theorem rather than a property of this code. It also compares
+      two calls to the same `_cp_fit_residual`, so a bug in that metric is
+      invisible to it. With `--als-iters 0` it reports `1.00x` and PASSES. The
+      controls that carry weight here are N4 and REG.
 
-    `N3  the diagonal split is exact.`  `FT = FT_diag (+) R` must reproduce
-      `FT.to_tensor()` to floating-point exactness, and `R`'s own repeated
-      slices -- `(3,)` and `(2, 1)` -- must be zero. If either fails, ORACLE-2 is
+    `N3  the diagonal split is exact.`  **Half of this is an algebraic identity:**
+      `rem` is literally `cat([A, -dA])`, so `diag (+) rem == FT` cannot fail.
+      Only the second half carries information -- `R`'s own repeated slices,
+      `(3,)` and `(2, 1)`, must be zero. If either fails, ORACLE-2 is
       not "diagonals kept exactly, off-diagonal truncated" but something else,
       and its whole reading collapses.
     """

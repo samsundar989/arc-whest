@@ -1,0 +1,40 @@
+{
+  "check": "capped-vs-uncapped drift bracket",
+  "width": 1024,
+  "depth": 16,
+  "dtype": "f32",
+  "mse_full_anchor": 4.0047e-08,
+  "rows": [
+    {
+      "seed": 1000201,
+      "cell": "oracle:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 6.809710188536178e-07,
+      "ratio_to_mse_full": 17.00429542421699,
+      "mse_cap_lo": 3.907402788102971e-07,
+      "mse_cap_hi": 1.0512957588969385e-06
+    },
+    {
+      "seed": 1000202,
+      "cell": "oracle:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 7.248057094432488e-07,
+      "ratio_to_mse_full": 18.09887655612777,
+      "mse_cap_lo": 4.2411061197905944e-07,
+      "mse_cap_hi": 1.105594806907438e-06
+    },
+    {
+      "seed": 1000203,
+      "cell": "oracle:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 5.421346829957e-07,
+      "ratio_to_mse_full": 13.537460558735985,
+      "mse_cap_lo": 2.874895205622291e-07,
+      "mse_cap_hi": 8.768738454291711e-07
+    }
+  ],
+  "caveat": "drift is not an error increment; the bracket is the only truth-free statement available."
+}
