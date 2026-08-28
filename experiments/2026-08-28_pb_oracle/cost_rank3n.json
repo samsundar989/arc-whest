@@ -1,0 +1,48 @@
+{
+  "check": "priced rank-cap cells",
+  "width": 1024,
+  "depth": 16,
+  "dtype": "f32",
+  "budget": 2199023255552,
+  "seed": 1000201,
+  "cells": [
+    {
+      "cell": "normsort:3*n",
+      "mode": "normsort",
+      "r_star": 3072,
+      "score": "frob",
+      "total_flops": 725442807984,
+      "x_budget": 0.32989319515036186,
+      "flops": {
+        "DSTensor constructor": 130048,
+        "DSTensor.to_tensor": 33619968,
+        "DSTower.from_slices": 0,
+        "DS_harmonic_proj": 16793776,
+        "FactoredTensor3.contract_W": 283467841536,
+        "FactoredTensor3.from_dstensor": 50331648,
+        "FactoredTensor3.get_dslice": 290590834688,
+        "clone_tower": 0,
+        "coerce_input": 0,
+        "contract_W_basic": 51589939200,
+        "eval_part": 261218304,
+        "get_wick_coef": 3867648,
+        "harmonic contract_W": 0,
+        "harmonic diagslice": 96530432,
+        "is_symmetric": 0,
+        "nonlin_sum": 583827456,
+        "nonlin_sum 111 factored": 97173727232,
+        "pK_to_K": 1108426752,
+        "rankcap": 465719296,
+        "resid": 0,
+        "setup": 0,
+        "symmetrize": 0,
+        "zero_repeated": 0
+      },
+      "peak_gib": 7.051026821136475,
+      "seconds": 3.5037261999677867,
+      "final_rank": 3072,
+      "mean_of_final_layer": 0.6277142862315934
+    }
+  ],
+  "caveat": "upstream's torch-side runtime FLOP counter, NOT flopscope 0.12 pricing. Any operating point must be re-priced by flopscope."
+}

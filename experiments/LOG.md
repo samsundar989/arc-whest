@@ -18624,3 +18624,163 @@ were both wrong, and both were wrong in ways that produced the finding.
 - This says nothing about **W-EFF**, which is a cost-side rebuild at identical
   mathematics and is untouched by any accuracy result here. Contract 4's items 2
   (O1) and 3 (W-EFF) are unaffected.
+
+---
+
+# 2026-08-28 — CONTRACT (Rule 1): P-B-ORACLE-2b — with the diagonals of the SUM held exact, is the off-diagonal remainder worth carrying at all?
+
+*Forced by measurement, not by preference. ORACLE-2's `3.960e-6` was a defect,
+not an answer: control N4 shows the construction it used misses the true `(3,)`
+and `(2,1)` slices by `67%` and `72%` relative. This contract tests what Contract 4
+item 5 actually proposed, under a new gate, with the result of the broken version
+already committed at `2fa22dc` so it cannot be quietly re-labelled as this one.*
+
+## Question
+
+`dsproj:n` — exact diagonals, off-diagonal dropped entirely — drifts `8.832e-7` at
+rank `n`. Does **adding** a rank-`n` approximation of the off-diagonal remainder,
+with the diagonals of the resulting sum held exact by construction, improve on
+simply dropping it?
+
+This is the only remaining live compression question. ORACLE-1 closed rank-`n`
+compression in this basis for good (`7.531e-7 >= 4.0e-7`, HEAD `2fa22dc`). What it
+did not test is a compressor whose **error is orthogonal to the two slices the flow
+reads** — and `dsproj` proves that family is not empty, because it is its trivial
+member.
+
+## Evidence
+
+- **CONFIRMED, and it is why this contract exists** — control N4
+  (`experiments/2026-08-28_pb_oracle/oracle_nulltest.json`, tol `1e-12`):
+  `oracle_offdiag` reproduces the true `(3,)` slice to only `6.683e-01` and the
+  `(2,1)` slice to `7.209e-01` relative — i.e. it is `67%` and `72%` *wrong* on
+  them — while `oracle_offdiag_exact` reproduces both to `9.653e-17` and
+  `2.598e-16`. The control **discriminates**: it fails loudly on the broken arm
+  and passes on the corrected one, and the run asserts that it does rather than
+  assuming it.
+- **CONFIRMED** — the leakage grows monotonically with depth on the real shape:
+  `||Rhat (2,1)|| / ||true (2,1)||` runs `0.031` at layer 0 to `0.402` at layer 15
+  (`oracle2_leakage_diag.json`, one network).
+- **CONFIRMED** — `R`'s own diagonal slices are exactly zero (`~1.1e-16`, control
+  N3), so every diagonal entry of `Rhat` is pure approximation error.
+- **CONFIRMED** — cost of the resulting rank. ORACLE-2b's output rank is
+  `2n + r* = 3n`, **measured today at `0.3299 B`** (`cost_rank3n.json`, upstream's
+  runtime counter). For reference the live leader Puffi sits at `~0.2698 B`, so
+  this operating rank is `1.22x` the leader's *price*, not a different order.
+- **CONFIRMED** — `K[3]` is substantially Frobenius-compressible: the best rank-`n`
+  approximation captures `~75%` of the norm of the rank-`32n` tensor at layer 15
+  (fit residual `0.254`). The information is there; the previous slices show it
+  lands in the wrong place.
+- **SPECULATIVE** — that the off-diagonal bulk carries flow-relevant signal at all
+  once the diagonals are protected. `dsproj`'s `8.832e-7` residual proves
+  *something* is missing when the off-diagonal is dropped; it does not prove that
+  a rank-`n` slice of it is the missing thing.
+
+## Intervention
+
+One new cap mode, `oracle_offdiag_exact:r*`. Identical to `oracle_offdiag` except
+that the truncated remainder has its **own** repeated part subtracted back off:
+
+    Rhat_free = Rhat - from_dstensor(Rhat.get_repeated())
+    out       = FT_diag  (+)  Rhat_free                      rank 2n + r*
+
+so the diagonals of the **sum** are exact, not merely the diagonals of the summand.
+Cost is still deliberately ignored; the output rank is priced above.
+
+**Weaker in kind than ORACLE-1, and stated so before the result.** ORACLE-1's ALS
+is Frobenius-optimal, which makes it a genuine upper bound and licenses a *closure*.
+`Rhat_free` is **achievable but not optimal** — it is the best rank-`r*` fit to `R`
+with the diagonal projected off afterwards, not the best diagonal-free rank-`r*`
+approximation. So a good result here **opens** a lane legitimately, but a bad result
+**cannot close one**: it would leave open that a diagonal-constrained fit does
+better. The gate below is written asymmetrically to respect that, and this is the
+single most important sentence in the contract.
+
+## Predictions
+
+Mean drift over probe networks `1000201-1000203`, final layer, against uncapped.
+
+| party | prediction |
+|---|---|
+| **Samuel** | **"I don't know"** — taken 2026-08-28 before the run, recorded verbatim as the contract permits |
+| **Strategist** | not re-consulted; his standing ORACLE-2 thesis is `< 6e-8`, and ORACLE-2b is the honest test of it |
+| **Builder** | **`[3.0e-7, 8.8e-7]`, point `6.0e-7`** |
+
+Builder's numbered predictions:
+
+1. **ORACLE-2b beats the broken ORACLE-2 by more than `4x`** — `3.960e-6` down to
+   under `9e-7`. Mechanism: N4 measured the defect directly, so removing it must
+   recover most of the gap. If this fails, the leakage diagnosis is wrong and
+   everything in the `2fa22dc` entry that rests on it must be re-opened.
+2. **ORACLE-2b beats `dsproj:n`'s `8.832e-7`, but by less than `3x`**, landing near
+   `6e-7`. Mechanism: the off-diagonal bulk holds most of the tensor's norm but the
+   flow only ever sees it *indirectly*, through its effect on the next layer's
+   diagonals — a second-order path. A rank-`n` slice of a rank-`33n` remainder that
+   only acts second-order should buy a modest constant, not an order.
+3. **It does not clear `6e-8`.** That would require the off-diagonal's flow-relevant
+   content to be `~15x` more concentrated than its Frobenius spectrum is (measured
+   fit residual on the remainder: `0.31` at layer 15, i.e. rank `n` misses `31%` of
+   its norm).
+4. **`oracle_offdiag_exact` beats `oracle:n`** (`7.531e-7`) — modestly. Protecting
+   the readout is worth more than spending the same rank optimally in the wrong
+   metric. This is the cleanest statement of the slice's thesis, and its failure
+   would say the diagonal-preservation framing is itself wrong.
+
+## Gate
+
+On the mean drift of `oracle_offdiag_exact:n` (output rank `3n`, `0.3299 B`).
+**Deliberately asymmetric**, because the construction is achievable-but-not-optimal
+and therefore can open a lane but must not close one.
+
+| outcome | reading |
+|---|---|
+| **`< 6.0e-8`** | **the structure-preserving lane OPENS.** A follow-on slice is authorised to build the real, non-oracle, diagonal-preserving sketch and price it against `0.3299 B` with a label |
+| **`< 4.4e-7`** (half of `dsproj:n`) but `>= 6.0e-8` | **WEAK OPEN.** The off-diagonal is worth carrying, but not at rank `n`. Authorised consequence: one rank ladder (`r* in {2n, 4n}`) on the same oracle, nothing built |
+| **`>= 4.4e-7`** | **PROVISIONAL-CLOSED, and it must be recorded with that hyphen.** A rank-`n` diagonal-preserving approximation of the off-diagonal is not worth its rank. Contract 4 item 5 is deferred, **not** withdrawn, because a diagonal-*constrained* fit is untested and this construction cannot rule it out |
+
+**No outcome of this slice closes a lane for good.** Only ORACLE-1 did that, and it
+could because its oracle was optimal in its own metric.
+
+## Falsifier
+
+**Prediction 1.** If removing the measured leakage does not recover most of the
+`3.960e-6` gap, then the leakage diagnosis committed at `2fa22dc` is not the
+explanation of ORACLE-2's failure, and that entry's central claim is retracted
+rather than refined.
+
+## Baseline and controls
+
+Baseline is the uncapped run on the identical network in the identical process.
+All controls from the parent contract remain in force and are re-run:
+
+- **N1** exact recovery `3.982e-15`; **N2** ALS monotone; **N3** the split exact
+  `1.202e-16`; **REG** `normsort:n` bit-identical to `b784b6f` on all three seeds.
+- **N4, new and blocking** — the sum's diagonals. `oracle_offdiag_exact` must
+  reproduce the true `(3,)` and `(2,1)` slices to `< 1e-12` relative, **and the run
+  must simultaneously assert that `oracle_offdiag` fails the same check by
+  `> 1e-6`**. The second half is what stops N4 being a control that cannot fail —
+  the specific defect P-B-COST's review found in this repository's evidence twice.
+  Currently `9.65e-17` / `2.60e-16` (pass) against `6.68e-1` / `7.21e-1` (fails
+  loudly). PASS.
+
+## Cost model, statistic, tier, seeds
+
+Cost deliberately ignored, as for every oracle; the output rank is priced at
+**`0.3299 B`** by upstream's runtime counter — **not flopscope 0.12**, which has
+never priced any cell in this lane. `lambda = 0` so `C = F`; no residual claim, an
+oracle has none. Relative diagnostic, **no ground truth, no seed block claimed and
+none required**: the same three unregistered probe networks `1000201-1000203`,
+`1024 x 16`, f32, 8 ALS sweeps. Drift reported with the same triangle-inequality
+bracket. Nothing here may be promoted, submitted, fitted, or used to move a gate.
+
+## Confounders, scope, what must not change
+
+- The upstream checkout is not edited; the pin is asserted at every invocation.
+- **ORACLE-2's committed result stands.** It is not amended, re-labelled, or
+  re-scored against this gate. The broken arm remains in the tree and in N4
+  precisely so the difference stays visible.
+- 8 ALS sweeps, fixed and recorded. Unlike ORACLE-1, more sweeps here do **not**
+  strictly tighten a bound — they reduce `Rhat`'s error, which reduces what the
+  diagonal projection has to remove — so the sweep count is a genuine free
+  parameter and a null result is conditional on it. Recorded as a scope limit.
+- Says nothing about `fnp`, flopscope, residual, setup, memory, O1, or W-EFF.

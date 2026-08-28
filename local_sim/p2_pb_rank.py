@@ -287,6 +287,30 @@ def cap_factored(FT, r_star: int, *, mode: str, seed: int, score: str = "frob",
             # version billed one and threw it away.
             from mlp_kprop.factor_k3 import FactoredTensor as _FT
             return _FT.from_dstensor(FT.get_repeated())
+        if mode == "oracle_offdiag_exact":
+            # ORACLE-2b: as `oracle_offdiag`, but the truncated remainder has its
+            # OWN diagonal subtracted back off, so the diagonals of the SUM are
+            # exact rather than only the diagonals of the summand. The measured
+            # failure of `oracle_offdiag` was entirely this: `Rhat`'s leakage onto
+            # the `(2, 1)` slice reached 40% of that slice's true norm by layer 15,
+            # and the flow reads nothing else. Output rank is `2n + r_star`.
+            diag, rem = _split_diagonal(FT)
+            if rem[0].shape[1] <= r_star:
+                rhat = rem
+            else:
+                wr = _column_weight(rem, score)
+                keep_r = torch.topk(wr, r_star, sorted=False).indices
+                warm_r = tuple(F.index_select(1, keep_r) for F in rem)
+                rhat = _cp_als_truncate(rem, r_star, iters=als_iters, warm=warm_r)
+            rhat_ft = FactoredTensor(n=FT.n, d=FT.d, factors=rhat,
+                                     device=FT.device, dtype=FT.dtype)
+            leak = FactoredTensor.from_dstensor(rhat_ft.get_repeated())
+            lA, lB, lC = leak._factors
+            new = (torch.cat([diag._factors[0], rhat[0], -lA], dim=1),
+                   torch.cat([diag._factors[1], rhat[1], lB], dim=1),
+                   torch.cat([diag._factors[2], rhat[2], lC], dim=1))
+            return FactoredTensor(n=FT.n, d=FT.d, factors=new,
+                                  device=FT.device, dtype=FT.dtype)
         if mode == "oracle_offdiag":
             # ORACLE-2: keep ALL n neuron-diagonal blocks EXACTLY, and oracle-
             # truncate ONLY the all-distinct off-diagonal remainder to `r_star`.
@@ -631,8 +655,32 @@ def cmd_oracle_null(a) -> int:
           f"rem dslice(3,) {n3_r3:.3e}   rem dslice(2,1) {n3_r21:.3e}   "
           f"diag rank {int(diag._factors[0].shape[1])} (= n)")
 
+    # ---- N4: ORACLE-2b keeps the diagonals of the SUM exact -----------------
+    # This is the control the ORACLE-2 failure showed was missing. `oracle_offdiag`
+    # FAILS it by construction (its leakage is the whole defect); ORACLE-2b must
+    # pass it to floating-point exactness or it is not the intervention it claims.
+    n4 = {}
+    for m in ("oracle_offdiag", "oracle_offdiag_exact"):
+        got = cap_factored(FactoredTensor(n=n, d=3, factors=FT._factors,
+                                          device=dev, dtype=dt),
+                           n // 4, mode=m, seed=0, als_iters=a.als_iters)
+        e3 = rel(got.get_dslice((3,)), FT.get_dslice((3,)))
+        e21 = rel(got.get_dslice((2, 1)), FT.get_dslice((2, 1)))
+        n4[m] = {"rel_dslice_3": e3, "rel_dslice_21": e21,
+                 "rank_out": int(got._factors[0].shape[1])}
+        print(f"    N4  {m:<22} dslice(3,) {e3:.3e}  dslice(2,1) {e21:.3e}  "
+              f"rank {int(got._factors[0].shape[1])}")
+    rows["N4_sum_diagonals_exact"] = n4
+    n4_ok = (max(n4["oracle_offdiag_exact"]["rel_dslice_3"],
+                 n4["oracle_offdiag_exact"]["rel_dslice_21"]) < a.tol)
+    n4_discriminates = (max(n4["oracle_offdiag"]["rel_dslice_3"],
+                            n4["oracle_offdiag"]["rel_dslice_21"]) > 1e-6)
+    _leaky = "yes" if n4_discriminates else "NO -- the control is vacuous"
+    print(f"    N4  -> exact arm {'PASS' if n4_ok else 'FAIL'}; "
+          f"leaky arm visibly leaks: {_leaky}")
+
     worst = max(n1, n3_id, n3_r3, n3_r21)
-    ok = (worst < a.tol) and n2_ok
+    ok = (worst < a.tol) and n2_ok and n4_ok and n4_discriminates
     print(f"\n  worst relative error {worst:.3e}   tol {a.tol:.1e}   "
           f"N2 {'PASS' if n2_ok else 'FAIL'}   -> {'PASS' if ok else 'FAIL'}")
     if a.out:

@@ -22,6 +22,18 @@
       "rem_dslice_3": 1.1074244746980765e-16,
       "rem_dslice_21": 1.0980577679590399e-16,
       "diag_rank": 64
+    },
+    "N4_sum_diagonals_exact": {
+      "oracle_offdiag": {
+        "rel_dslice_3": 0.6683205456389519,
+        "rel_dslice_21": 0.7208583226084516,
+        "rank_out": 80
+      },
+      "oracle_offdiag_exact": {
+        "rel_dslice_3": 9.652966273582686e-17,
+        "rel_dslice_21": 2.598333889727403e-16,
+        "rank_out": 144
+      }
     }
   },
   "worst": 3.981812187416538e-15,
