@@ -1,0 +1,45 @@
+{
+ "check": "re-driven loop vs upstream mlp_kprop",
+ "width": 96,
+ "depth": 16,
+ "dtype": "f64",
+ "bit_identical": true,
+ "worst_rel": 0.0,
+ "late_full_window_worst_rel": 0.0,
+ "late_full_window_is_satisfied_by_construction": true,
+ "late_full_window_note": "start == 0 so the checkpoint branch never fires; this is a labelled non-check, not evidence",
+ "composition_check": {
+  "late:2": {
+   "vs_two_unmodified_upstream_calls_worst_rel": 0.0,
+   "bit_identical": true,
+   "drift_from_control": 0.014154829486927003,
+   "differs_from_control": true,
+   "pass": true
+  },
+  "late:4": {
+   "vs_two_unmodified_upstream_calls_worst_rel": 0.0,
+   "bit_identical": true,
+   "drift_from_control": 0.013988516707057632,
+   "differs_from_control": true,
+   "pass": true
+  },
+  "late:8": {
+   "vs_two_unmodified_upstream_calls_worst_rel": 0.0,
+   "bit_identical": true,
+   "drift_from_control": 0.011984110422414363,
+   "differs_from_control": true,
+   "pass": true
+  }
+ },
+ "composition_check_note": "each late:m arm is reproduced by TWO unmodified upstream mlp_kprop calls glued at the checkpoint, and each is required to DIFFER from the control -- an agreement that could not fail would be no check at all",
+ "upstream": {
+  "rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+  "expected_rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+  "changed_lines": 25,
+  "recorded_lines": 25,
+  "changed_md5": "11d296d73c8895668333d21a0cfd5526",
+  "recorded_md5": "11d296d73c8895668333d21a0cfd5526",
+  "pass": true
+ },
+ "pass": true
+}
