@@ -20681,3 +20681,130 @@ were.
 
 **An independent Skeptic on the raw panel is required before this controls
 anything further.**
+
+---
+
+# 2026-08-28 — ADDENDUM CONTRACT P2-WINDOW-B: separate the two things `late:m` changes at once
+
+**Classification: IMPORTANT.** Truth-free, label-free, no seed block, no vault, no
+`estimator.py` edit. Committed **before** the arm runs.
+
+## Why this exists
+
+Two independent Skeptic passes have now returned **PROVISIONAL** on this session's
+work. The P2-WINDOW pass raised a challenge I cannot answer from the panel I ran,
+and it is the challenge that decides what the next session believes:
+
+> `late:m` changes **two** things at once. It discards `kappa_3` memory **and** it
+> hands the window a `k_max=2` prefix whose `K[1]`/`K[2]` are already wrong. The
+> panel cannot separate them.
+
+My result entry attributed the failure entirely to the first — *"`kappa_3`'s
+contribution to the final-layer mean is accumulated, not local"* — and then
+generalised it to *"this equally kills any future 'start the expensive machinery
+late' design on this state — which is a family, not a single arm."* **If the
+second term dominates, that sentence is false and is the most damaging thing in
+the entry**, because it would close a family on a misattribution and it is exactly
+the sentence destined for `CURRENT_STATE.md`.
+
+## Disclosure — data already seen, before this contract
+
+The reviewer built the discriminating arm and ran it on two of the six probes at
+the live shape. **Those numbers are disclosed here in full before the gate is
+written**, exactly as the width-96 selftest numbers were:
+
+| seed | `late:2` | `k3pre:2` | `late:3` | `k3pre:3` | `late:4` | `k3pre:4` |
+|---|---:|---:|---:|---:|---:|---:|
+| 1000401 | `1.9959e-3` | `5.5631e-4` | `1.9890e-3` | `6.5944e-4` | `1.9596e-3` | `7.2586e-4` |
+| 1000402 | `1.9849e-3` | `5.4133e-4` | `1.9722e-3` | `6.7153e-4` | `1.9438e-3` | `7.3955e-4` |
+
+They imply the retraction. **The gate below is therefore written in the knowledge
+of what it will probably say, which is the weakest possible epistemic position,
+and saying so is the only thing that makes it honest.** The reason to run it
+anyway on all six probes is that a two-network reading with no interval is not
+what this repository promotes anything on, and the retraction it forces is a
+retraction of *my own* claim — the direction in which pre-registration matters
+least and honesty matters most.
+
+## Question
+
+Of `late:m`'s drift from full K3, how much is the discarded `kappa_3` memory and
+how much is the `k_max=2` prefix's `K[1]`/`K[2]` error?
+
+## Intervention
+
+One new arm, `k3pre:m`: run **full K3** over layers `0 .. L-m-1`, inject the
+**identical** zero `K[3]`/`K[4]` checkpoint, then exact K3 over the last `m`.
+Same `kappa_3` intervention as `late:m`; correct `K[1]`/`K[2]` state. The
+difference between the two arms is the prefix and nothing else.
+
+**`k3pre` is a diagnostic and can never be a candidate**: its prefix is the
+full-tower W-EFF already killed on price at `1.0723 B`. It bounds a prize; it does
+not supply a mechanism. That is stated before the data so no result can be read as
+reopening the W-EFF lane.
+
+Arms: `k3pre:{2,3,4}`, on the **same six probes** `1000401`–`1000406`, same dtype,
+common random numbers with the existing panel.
+
+## Gate — RETRACTION RULE, chosen now
+
+Adopted verbatim from the review's proposed follow-up:
+
+> **If `k3pre:2`'s corrected two-sided bracket upper end times `0.1` stays below
+> the `6.869036e-08` bar over six networks, the sentence "this equally kills any
+> future 'start the expensive machinery late' design on this state — which is a
+> family, not a single arm" is RETRACTED from `experiments/LOG.md` and must not
+> reach `docs/CURRENT_STATE.md`.**
+
+And the attribution claim itself:
+
+- **If `D(k3pre:2)^2 / D(late:2)^2 < 0.5`**, the majority of `late:2`'s drift is
+  the **prefix**, not the discarded `kappa_3`. The mechanism sentence is
+  **REFUTED as an attribution**, and the binding open question becomes
+  *the quality of the `K[1]`/`K[2]` prefix* — which is item 1 of
+  `CURRENT_STATE.md`'s own hypothesis stack (faithful augmented-K2), not a new
+  lane.
+- **If it is `> 0.5`**, the original attribution stands and the family
+  generalisation survives.
+
+**`GATE-W`'s own FAIL is not reopened by any outcome here.** It failed on drift at
+every `m`, and `k3pre` is not an affordable object. This addendum can change *why*
+the window failed and what the next question is; it cannot change *that* it
+failed, and it produces no candidate.
+
+## Predictions
+
+1. `D(k3pre:2)` mean over six probes lands in `4.5e-4 .. 6.5e-4`.
+2. `D(k3pre:2)^2 / D(late:2)^2 < 0.15` — i.e. **more than 85%** of `late:2`'s
+   squared drift is the prefix. (Two-seed disclosure implies `~7.7%`; the band is
+   widened for the four unseen networks.)
+3. `D(k3pre:m)` **increases** with `m` — the opposite direction to `late:m` —
+   because a longer window means a shorter full-K3 prefix, so the checkpoint is
+   injected earlier and less good state precedes it.
+4. The retraction rule **fires**, and the family sentence is retracted.
+
+## Falsifier
+
+If prediction 2 is wrong and the ratio exceeds `0.5`, the original attribution is
+vindicated and nothing is retracted. If `k3pre` fails its own instrument check —
+the prefix tower must carry `[1, 2, 3, 4]` at the checkpoint, asserted in
+`run_arm` — no number is quoted.
+
+## Also fixed in this commit, and all three were defects, not preferences
+
+1. **`bracket()` omitted the `D - rf` branch of the triangle inequality.** It
+   wrote `max(0, rf - D)`, discarding the lower bound whenever `D > RMSE_full` —
+   which is *every arm in the panel*. `local_sim/p2_pb_rank.py:839` in this same
+   repository already had it right. The consequence runs **against** the arms: a
+   large drift proves a large **floor** on the candidate's error, so the panel
+   can decisively kill rather than merely fail to endorse. Fixed, and
+   `provable_score_floor` now computes that decisive test.
+2. **`G1`'s stated direction was backwards.** As coded, `g1 = (d_hi <= dmax)`
+   tests the bracket's **upper** end: passing would prove the candidate clears
+   the bar, failing proves only *undetermined*. The contract's prose said the
+   reverse. The code was never wrong; the justification was. Corrected in the
+   docstring here and in the correction entry that follows.
+3. **The reported "95% CI" was a z-interval mislabelled as studentised-t.** The
+   summary block used `1.96` in fields named `t95_*`; the gate block itself
+   always used `2.571`, so nothing decided moved, but every CI quoted in the
+   panel table was ~24% too narrow. Fixed to a proper small-`n` `t` table.

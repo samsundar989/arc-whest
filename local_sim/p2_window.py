@@ -141,6 +141,19 @@ def weff_window_cost(m: int) -> dict:
 # the preregistered gate -- executable, and derived from frozen constants only
 # ==========================================================================
 
+
+#: two-sided 95% studentised-t critical values, small n. The panel is n = 6.
+_T95 = {2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776, 6: 2.571, 7: 2.447, 8: 2.365,
+        9: 2.306, 10: 2.262, 12: 2.201, 16: 2.131, 20: 2.093}
+
+
+def _t_crit(n: int) -> float:
+    if n < 2:
+        return float("nan")
+    if n in _T95:
+        return _T95[n]
+    return 1.96 if n > 30 else _T95[min(_T95, key=lambda k: abs(k - n))]
+
 #: The same-day engineering bar: at least `2x` the graded v2.7 adjusted score.
 #: Samuel answered "I don't know" when asked to adopt it, so it stands as the
 #: handoff's stated DEFAULT and is recorded as not personally committed to.
@@ -162,10 +175,13 @@ def d_max_for_m(m: int, bar: float = SHIP_BAR_ADJUSTED) -> float:
 
         D_max(m) = sqrt(bar / mult(m)) - sqrt(MSE_FULL)
 
-    **This is a ONE-SIDED screen and nothing more.** `D <= D_max` says the
-    candidate *could* clear the bar; it never says it does. `D > D_max` says it
-    *cannot* on this population, which is the only direction a bracket can
-    decide. Drift is not an error increment.
+    **The direction, stated correctly.** `D_hi95 <= D_max` tests the bracket's
+    UPPER end, so passing it would prove the candidate clears the bar; failing
+    it proves only **undetermined**. The contract's prose asserted the reverse
+    ("`D > D_max` says it cannot"), and **that sentence was wrong** -- an
+    independent review caught it. The decisive-negative test is the LOWER
+    bracket end, and it lives in `provable_score_floor`. Drift is not an error
+    increment either way.
     """
     mult = weff_window_cost(m)["multiplier"]
     return math.sqrt(bar / mult) - math.sqrt(MSE_FULL)
@@ -199,11 +215,7 @@ def paired_diff(a_vals, b_vals) -> dict:
                 "ci95": None, "excludes_zero": None}
     se = float(d.std(ddof=1) / math.sqrt(n))
     # studentised-t, two-sided 95%
-    try:
-        from statistics import NormalDist
-        tcrit = 2.571 if n == 6 else NormalDist().inv_cdf(0.975)
-    except Exception:                                             # noqa: BLE001
-        tcrit = 2.571
+    tcrit = _t_crit(n)
     lo, hi = float(d.mean() - tcrit * se), float(d.mean() + tcrit * se)
     return {"n": n, "mean": float(d.mean()), "se": se, "t_crit": tcrit,
             "ci95": [lo, hi], "excludes_zero": bool(lo > 0 or hi < 0),
@@ -277,12 +289,19 @@ def run_arm(mlp, K_in, *, arm: str, m: int = 0, r_star: int = 0, seed: int = 0,
     n = K_in[1].shape[0]
     device, dtype = K_in[1].device, K_in[1].dtype
 
-    if arm.startswith("late:"):
+    if arm.startswith("late:") or arm.startswith("k3pre:"):
         start = L - m
     else:
         start = 0
 
     # k_max for the PREFIX; the window always runs k_max=3.
+    #
+    # `late:m`  -- k_max=2 prefix. Changes TWO things at once: it discards the
+    #              kappa_3 memory AND hands the window a K2-quality K[1]/K[2].
+    # `k3pre:m` -- k_max=3 prefix, same zero K3/K4 checkpoint. Changes ONLY the
+    #              kappa_3 memory, so the two effects can be separated. It is a
+    #              DIAGNOSTIC, never a candidate: its prefix is the full-tower
+    #              W-EFF already killed on price at 1.0723 B.
     prefix_k = 2 if arm.startswith("late:") else 3
     K = coerce_input(K_in, k_max=(prefix_k if start > 0 else 3), kind=kind)
 
@@ -296,8 +315,12 @@ def run_arm(mlp, K_in, *, arm: str, m: int = 0, r_star: int = 0, seed: int = 0,
         skip_metric = not metric_needed(k_max, kind)
 
         if l == start and start > 0:
-            # the checkpoint: promote the k_max=2 tower to a k_max=3 one
-            assert sorted(K) == [1, 2], f"prefix tower carried {sorted(K)}"
+            # the checkpoint. Both arms inject the SAME zero K3/K4 state; they
+            # differ only in the quality of the K[1]/K[2] that reaches it.
+            if arm.startswith("late:"):
+                assert sorted(K) == [1, 2], f"prefix tower carried {sorted(K)}"
+            else:
+                assert sorted(K) == [1, 2, 3, 4], f"prefix tower carried {sorted(K)}"
             K3, K4 = _zero_k3_checkpoint(n, device, dtype)
             K = dict(K)
             K[3], K[4] = K3, K4
@@ -523,20 +546,55 @@ def _rms(x) -> float:
 
 
 def bracket(D: float, mse_full: float = MSE_FULL) -> dict:
-    """The ONLY sound use of a drift number, and it is a bracket.
+    """The ONLY sound use of a drift number, and it is a two-sided bracket.
 
-    `max(0, RMSE_full - D) <= RMSE_cand <= RMSE_full + D`. Distribution shift
-    and the anchor's own interval are carried, not dropped. A bracket that
-    straddles the control decides nothing.
+        |RMSE_full - D|  <=  RMSE_cand  <=  RMSE_full + D
+
+    **The first version of this function wrote `max(0, rf - D)` and threw the
+    lower bound away whenever `D > RMSE_full`** -- which is every arm in the
+    P2-WINDOW panel. That is not the triangle inequality; the reverse triangle
+    inequality gives `|rf - D|`, and when the candidate drifts FURTHER than the
+    control's own error the lower bound is `D - rf`, which is large and
+    informative. `local_sim/p2_pb_rank.py:839` in this same repository already
+    had it right (`max(abs(mse_full**0.5 - drift**0.5), 0.0)**2`); this file
+    did not, and an independent review caught it.
+
+    The consequence is not cosmetic and it runs AGAINST the arm: a large `D`
+    proves a large *floor* on the candidate's error, so a drift panel can
+    decisively kill an arm rather than merely fail to endorse it.
     """
     rf = math.sqrt(mse_full)
-    lo, hi = max(0.0, rf - D), rf + D
-    lo_ci = max(0.0, math.sqrt(MSE_FULL_CI[0]) - D)
+    lo, hi = abs(rf - D), rf + D
+    lo_ci = abs(math.sqrt(MSE_FULL_CI[1]) - D)     # widest anchor -> smallest floor
     hi_ci = math.sqrt(MSE_FULL_CI[1]) + D
     return {"D": D, "rmse_full": rf,
             "mse_lo": lo ** 2, "mse_hi": hi ** 2,
             "mse_lo_anchor_ci": lo_ci ** 2, "mse_hi_anchor_ci": hi_ci ** 2,
             "D_over_rmse_full": D / rf}
+
+
+def provable_score_floor(D_lo: float, m: int, mse_full: float = MSE_FULL) -> dict:
+    """The DECISIVE test a drift panel can actually run.
+
+    `G1` as written tests the bracket's UPPER end: passing it would prove the
+    candidate clears the bar, failing it proves only "undetermined". The
+    contract's prose asserted the opposite direction, and that sentence was
+    wrong. The decisive-negative test is the LOWER end:
+
+        score_floor(m) = (|RMSE_full - D_lo95|)^2 * mult(m)
+
+    If that exceeds the bar, the candidate **provably cannot** clear it on this
+    population. Uses the conservative (low) end of `D`'s own interval and the
+    widest anchor CI, so the floor is the smallest one the data supports.
+    """
+    rf = math.sqrt(MSE_FULL_CI[1])
+    mult = weff_window_cost(m)["multiplier"] if m else 0.1
+    floor = (abs(rf - D_lo)) ** 2 * mult
+    return {"m": m, "D_lo": D_lo, "multiplier": mult,
+            "mse_floor": (abs(rf - D_lo)) ** 2, "score_floor": floor,
+            "bar": SHIP_BAR_ADJUSTED,
+            "provably_cannot_clear_bar": bool(floor > SHIP_BAR_ADJUSTED),
+            "x_worse_than_v27": floor / V27_ADJUSTED}
 
 
 def cmd_drift(a) -> int:
@@ -546,6 +604,8 @@ def cmd_drift(a) -> int:
     arms = []
     for m in [int(x) for x in a.windows.split(",")]:
         arms.append(("late:%d" % m, {"arm": "late:%d" % m, "m": m}))
+    for m in [int(x) for x in (a.k3pre or "").split(",") if x]:
+        arms.append(("k3pre:%d" % m, {"arm": "k3pre:%d" % m, "m": m}))
     for m in [int(x) for x in (a.age or "").split(",") if x]:
         arms.append(("age:%d" % m, {"arm": "age:%d" % m, "m": m}))
     for r in [int(x) for x in (a.normsort or "").split(",") if x]:
@@ -608,11 +668,26 @@ def cmd_drift(a) -> int:
         vals = np.array([report["per_seed"][str(s)][name]["D_final_layer"]
                          for s in seeds], dtype=np.float64)
         se = float(vals.std(ddof=1) / math.sqrt(len(vals))) if len(vals) > 1 else float("nan")
+        # studentised-t, as the contract specifies. The first version put a
+        # z-critical 1.96 into fields named `t95_*`, which is a mislabelled
+        # interval ~24% too narrow; the gate block itself always used 2.571,
+        # so nothing decided moved, but the reported CI was wrong.
+        tcrit = _t_crit(len(vals))
         summ[name] = {"n": len(vals), "mean_D": float(vals.mean()), "se_D": se,
+                      "t_crit": tcrit,
                       "min_D": float(vals.min()), "max_D": float(vals.max()),
-                      "t95_lo": float(vals.mean() - 1.96 * se) if len(vals) > 1 else None,
-                      "t95_hi": float(vals.mean() + 1.96 * se) if len(vals) > 1 else None,
-                      "bracket_at_mean_D": bracket(float(vals.mean()))}
+                      "t95_lo": float(vals.mean() - tcrit * se) if len(vals) > 1 else None,
+                      "t95_hi": float(vals.mean() + tcrit * se) if len(vals) > 1 else None,
+                      "bracket_at_mean_D": bracket(float(vals.mean())),
+                      "bracket_at_D_lo95": bracket(
+                          float(vals.mean() - tcrit * se)) if len(vals) > 1 else None}
+    for name, v in summ.items():
+        if v.get("t95_lo") is not None:
+            mm = 0
+            for nm, kw in arms:
+                if nm == name:
+                    mm = kw.get("m", 0)
+            v["provable_score_floor"] = provable_score_floor(v["t95_lo"], mm)
     report["summary"] = summ
     report["gate_table"] = gate_table()
     report["ship_bar_adjusted"] = SHIP_BAR_ADJUSTED
@@ -630,7 +705,7 @@ def cmd_drift(a) -> int:
     have_base = base_name in dict(arms) or base_name in report["arms"]
     for name, kw in arms:
         if not kw.get("arm", "").startswith("late:") or kw.get("m", 0) == 0:
-            continue
+            continue  # k3pre is a diagnostic, never gated as a candidate
         m = kw["m"]
         vals = np.asarray(Ds(name), dtype=np.float64)
         se = float(vals.std(ddof=1) / math.sqrt(len(vals))) if len(vals) > 1 else float("nan")
@@ -699,6 +774,7 @@ def main(argv=None) -> int:
     ap.add_argument("--dtype", default="f32")
     ap.add_argument("--seeds", default="1000401,1000402,1000403,1000404,1000405,1000406")
     ap.add_argument("--windows", default="2,4,6,8")
+    ap.add_argument("--k3pre", default="")
     ap.add_argument("--age", default="")
     ap.add_argument("--normsort", default="")
     ap.add_argument("--out", default=None)
