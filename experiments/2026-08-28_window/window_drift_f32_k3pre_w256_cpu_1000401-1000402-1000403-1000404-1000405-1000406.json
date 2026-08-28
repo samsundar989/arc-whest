@@ -1,0 +1,7899 @@
+{
+ "utc": "2026-08-28T23:12:19Z",
+ "live_shape": false,
+ "device": "cpu",
+ "width": 256,
+ "depth": 16,
+ "dtype": "f32",
+ "seeds": [
+  1000401,
+  1000402,
+  1000403,
+  1000404,
+  1000405,
+  1000406
+ ],
+ "arms": [
+  "late:2",
+  "late:3",
+  "late:4",
+  "k3pre:2",
+  "k3pre:3",
+  "k3pre:4"
+ ],
+ "mse_full_anchor": 3.9249e-08,
+ "mse_full_anchor_ci": [
+  3.821e-08,
+  4.029e-08
+ ],
+ "gt_noise_floor": 7.478e-11,
+ "upstream": {
+  "rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+  "expected_rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+  "changed_lines": 25,
+  "recorded_lines": 25,
+  "changed_md5": "11d296d73c8895668333d21a0cfd5526",
+  "recorded_md5": "11d296d73c8895668333d21a0cfd5526",
+  "pass": true
+ },
+ "labels_read": false,
+ "seed_block_claimed": false,
+ "per_seed": {
+  "1000401": {
+   "control": {
+    "flops": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 32512,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "setup": 0,
+     "eval_part": 16349184,
+     "get_wick_coef": 966912,
+     "nonlin_sum": 36642816,
+     "zero_repeated": 0,
+     "harmonic diagslice": 6044672,
+     "nonlin_sum 111 factored": 1582062080,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 69488640,
+     "FactoredTensor3.get_dslice": 52085727232,
+     "FactoredTensor3.from_dstensor": 3145728,
+     "DSTensor.to_tensor": 2113536,
+     "DS_harmonic_proj": 1052848,
+     "FactoredTensor3.contract_W": 24159191040,
+     "resid": 0
+    },
+    "total_flops": 78771269296.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2560,
+      "rank_retained": 2560
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 3072,
+      "rank_retained": 3072
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 3584,
+      "rank_retained": 3584
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 4096,
+      "rank_retained": 4096
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 4608,
+      "rank_retained": 4608
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 5120,
+      "rank_retained": 5120
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 5632,
+      "rank_retained": 5632
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 6144,
+      "rank_retained": 6144
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 6656,
+      "rank_retained": 6656
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 7168,
+      "rank_retained": 7168
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 7680,
+      "rank_retained": 7680
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 8192,
+      "rank_retained": 8192
+     }
+    ],
+    "seconds": 2.145680800000264
+   },
+   "late:2": {
+    "D_final_layer": 0.007570602273573896,
+    "D_all_layers": 0.006024582336625064,
+    "bracket": {
+     "D": 0.007570602273573896,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 5.435358918633981e-05,
+     "mse_hi": 6.035294638294468e-05,
+     "mse_lo_anchor_ci": 5.4315110326605495e-05,
+     "mse_hi_anchor_ci": 6.0393507242679e-05,
+     "D_over_rmse_full": 38.21343981123647
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 11264,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 3018752,
+     "get_wick_coef": 299520,
+     "nonlin_sum": 6608896,
+     "zero_repeated": 0,
+     "harmonic diagslice": 2623488,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 16076288,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 201326592,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 813171968,
+     "nonlin_sum 111 factored": 204999680,
+     "FactoredTensor3.from_dstensor": 393216,
+     "DS_harmonic_proj": 131606,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 2059226902.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "14": 0.8597919344902039,
+      "15": 0.8201415538787842
+     },
+     "d21": {
+      "14": 0.9304454922676086,
+      "15": 0.8937188982963562
+     }
+    },
+    "seconds": 0.2540889000010793,
+    "weff_flopscope_cost": {
+     "m": 2,
+     "k3_window_flops": 25818573312,
+     "k3_window_budgets": 0.011740927817299962,
+     "total_flops": 163418899968,
+     "total_budgets": 0.07431431184522808,
+     "multiplier": 0.1,
+     "floor_pinned": true,
+     "overestimate_budgets": 0.0039,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "late:3": {
+    "D_final_layer": 0.007591615340511352,
+    "D_all_layers": 0.006026528764900036,
+    "bracket": {
+     "D": 0.007591615340511352,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 5.4663867931150244e-05,
+     "mse_hi": 6.067987702542434e-05,
+     "mse_lo_anchor_ci": 5.462527937955418e-05,
+     "mse_hi_anchor_ci": 6.072054757702041e-05,
+     "D_over_rmse_full": 38.31950555602759
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 12800,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 4003840,
+     "get_wick_coef": 348928,
+     "nonlin_sum": 8848384,
+     "zero_repeated": 0,
+     "harmonic diagslice": 2886656,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 19891456,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 603979776,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 1828849408,
+     "nonlin_sum 111 factored": 308089344,
+     "FactoredTensor3.from_dstensor": 589824,
+     "DS_harmonic_proj": 197409,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 3588263457.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "13": 0.8632527589797974,
+      "14": 0.8584588766098022,
+      "15": 0.8064387440681458
+     },
+     "d21": {
+      "13": 0.9410045146942139,
+      "14": 0.9226657152175903,
+      "15": 0.8725898861885071
+     }
+    },
+    "seconds": 0.286730499999976,
+    "weff_flopscope_cost": {
+     "m": 3,
+     "k3_window_flops": 66670052864,
+     "k3_window_budgets": 0.03031802992336452,
+     "total_flops": 204270379520,
+     "total_budgets": 0.09289141395129263,
+     "multiplier": 0.1,
+     "floor_pinned": true,
+     "overestimate_budgets": 0.005849999999999999,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "late:4": {
+    "D_final_layer": 0.007441956408342331,
+    "D_all_layers": 0.005999964012956878,
+    "bracket": {
+     "D": 0.007441956408342331,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 5.247325857730814e-05,
+     "mse_hi": 5.837066979002683e-05,
+     "mse_lo_anchor_ci": 5.2435451271350605e-05,
+     "mse_hi_anchor_ci": 5.8410559095984365e-05,
+     "D_over_rmse_full": 37.56408579020293
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 14336,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 4988928,
+     "get_wick_coef": 398336,
+     "nonlin_sum": 11087872,
+     "zero_repeated": 0,
+     "harmonic diagslice": 3149824,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 23706624,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 1207959552,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 3250587904,
+     "nonlin_sum 111 factored": 411572224,
+     "FactoredTensor3.from_dstensor": 786432,
+     "DS_harmonic_proj": 263212,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 5725080876.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "12": 0.7490649819374084,
+      "13": 0.7904347777366638,
+      "14": 0.7997827529907227,
+      "15": 0.7602344751358032
+     },
+     "d21": {
+      "12": 0.8929972052574158,
+      "13": 0.8579232096672058,
+      "14": 0.8598243594169617,
+      "15": 0.8218156099319458
+     }
+    },
+    "seconds": 0.38755139999921084,
+    "weff_flopscope_cost": {
+     "m": 4,
+     "k3_window_flops": 126864614912,
+     "k3_window_budgets": 0.05769134755246341,
+     "total_flops": 264464941568,
+     "total_budgets": 0.12026473158039153,
+     "multiplier": 0.12026473158039153,
+     "floor_pinned": false,
+     "overestimate_budgets": 0.0078,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "k3pre:2": {
+    "D_final_layer": 0.0024019937638938087,
+    "D_all_layers": 0.0007736975069281178,
+    "bracket": {
+     "D": 0.0024019937638938087,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 4.8570877601732895e-06,
+     "mse_hi": 6.760558323396203e-06,
+     "mse_lo_anchor_ci": 4.8455899352289245e-06,
+     "mse_hi_anchor_ci": 6.774138148340568e-06,
+     "D_over_rmse_full": 12.124325226266354
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 11042816,
+     "coerce_input": 0,
+     "contract_W_basic": 131744006144,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1867151360,
+     "nonlin_sum": 2162511104,
+     "zero_repeated": 0,
+     "harmonic diagslice": 445805056,
+     "get_wick_coef": 1124608,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 15608390144,
+     "DSTensor.to_tensor": 473717760,
+     "DS_harmonic_proj": 1052932,
+     "FactoredTensor3.contract_W": 201326592,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 813171968,
+     "nonlin_sum 111 factored": 204999680,
+     "FactoredTensor3.from_dstensor": 393216,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 153534693380.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.471927101372785e-08,
+      "1": 1.347486318081792e-07,
+      "2": 1.1848052281493437e-06,
+      "3": 4.1154944483423606e-06,
+      "4": 1.150900061475113e-05,
+      "5": 3.3617729059187695e-05,
+      "6": 1.6630054233246483e-05,
+      "7": 3.0939925636630505e-05,
+      "8": 2.6279738449375145e-05,
+      "9": 2.1809495592606254e-05,
+      "10": 3.770731564145535e-05,
+      "11": 3.381651913514361e-05,
+      "12": 3.228436253266409e-05,
+      "13": 7.4167393904645e-05,
+      "14": 0.8527675271034241,
+      "15": 0.795157253742218
+     },
+     "d21": {
+      "0": 6.5481714273119e-08,
+      "1": 2.1221561041784298e-07,
+      "2": 4.1325452571072674e-07,
+      "3": 5.822672051181144e-07,
+      "4": 8.554973192076432e-07,
+      "5": 1.3100493561069015e-06,
+      "6": 2.2013880425220123e-06,
+      "7": 1.9639974198071286e-06,
+      "8": 2.1424316400953103e-06,
+      "9": 2.164063289455953e-06,
+      "10": 2.3163142941484693e-06,
+      "11": 2.542715719755506e-06,
+      "12": 2.642834488142398e-06,
+      "13": 2.755599325610092e-06,
+      "14": 0.9120025634765625,
+      "15": 0.8594148755073547
+     }
+    },
+    "seconds": 14.723978900001384
+   },
+   "k3pre:3": {
+    "D_final_layer": 0.0029604551893786437,
+    "D_all_layers": 0.0011016910630799568,
+    "bracket": {
+     "D": 0.0029604551893786437,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 7.630531035565259e-06,
+     "mse_hi": 9.976556821072624e-06,
+     "mse_lo_anchor_ci": 7.616117944912217e-06,
+     "mse_hi_anchor_ci": 9.993051911725665e-06,
+     "D_over_rmse_full": 14.94322011711995
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 10256384,
+     "coerce_input": 0,
+     "contract_W_basic": 121672040448,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1732540416,
+     "nonlin_sum": 2006589184,
+     "zero_repeated": 0,
+     "harmonic diagslice": 411987456,
+     "get_wick_coef": 1113344,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 14498468608,
+     "DSTensor.to_tensor": 440031744,
+     "DS_harmonic_proj": 1052926,
+     "FactoredTensor3.contract_W": 603979776,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 1828849408,
+     "nonlin_sum 111 factored": 308089344,
+     "FactoredTensor3.from_dstensor": 589824,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 143515588862.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.471927101372785e-08,
+      "1": 1.347486318081792e-07,
+      "2": 1.1848052281493437e-06,
+      "3": 4.1154944483423606e-06,
+      "4": 1.150900061475113e-05,
+      "5": 3.3617729059187695e-05,
+      "6": 1.6630054233246483e-05,
+      "7": 3.0939925636630505e-05,
+      "8": 2.6279738449375145e-05,
+      "9": 2.1809495592606254e-05,
+      "10": 3.770731564145535e-05,
+      "11": 3.381651913514361e-05,
+      "12": 3.228436253266409e-05,
+      "13": 0.8500639200210571,
+      "14": 0.8351320028305054,
+      "15": 0.7670966386795044
+     },
+     "d21": {
+      "0": 6.5481714273119e-08,
+      "1": 2.1221561041784298e-07,
+      "2": 4.1325452571072674e-07,
+      "3": 5.822672051181144e-07,
+      "4": 8.554973192076432e-07,
+      "5": 1.3100493561069015e-06,
+      "6": 2.2013880425220123e-06,
+      "7": 1.9639974198071286e-06,
+      "8": 2.1424316400953103e-06,
+      "9": 2.164063289455953e-06,
+      "10": 2.3163142941484693e-06,
+      "11": 2.542715719755506e-06,
+      "12": 2.642834488142398e-06,
+      "13": 0.9222176671028137,
+      "14": 0.8900580406188965,
+      "15": 0.8247323036193848
+     }
+    },
+    "seconds": 12.148236999997607
+   },
+   "k3pre:4": {
+    "D_final_layer": 0.0028330980329371105,
+    "D_all_layers": 0.001284629792189616,
+    "bracket": {
+     "D": 0.0028330980329371105,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 6.943142941936319e-06,
+     "mse_hi": 9.18824398652793e-06,
+     "mse_lo_anchor_ci": 6.929394677776183e-06,
+     "mse_hi_anchor_ci": 9.204074250688067e-06,
+     "D_over_rmse_full": 14.300370994112027
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 9469952,
+     "coerce_input": 0,
+     "contract_W_basic": 111600074752,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1597929472,
+     "nonlin_sum": 1850667264,
+     "zero_repeated": 0,
+     "harmonic diagslice": 378169856,
+     "get_wick_coef": 1102080,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 13388547072,
+     "DSTensor.to_tensor": 406345728,
+     "DS_harmonic_proj": 1052920,
+     "FactoredTensor3.contract_W": 1207959552,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 3250587904,
+     "nonlin_sum 111 factored": 411572224,
+     "FactoredTensor3.from_dstensor": 786432,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 134104265208.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.471927101372785e-08,
+      "1": 1.347486318081792e-07,
+      "2": 1.1848052281493437e-06,
+      "3": 4.1154944483423606e-06,
+      "4": 1.150900061475113e-05,
+      "5": 3.3617729059187695e-05,
+      "6": 1.6630054233246483e-05,
+      "7": 3.0939925636630505e-05,
+      "8": 2.6279738449375145e-05,
+      "9": 2.1809495592606254e-05,
+      "10": 3.770731564145535e-05,
+      "11": 3.381651913514361e-05,
+      "12": 0.7368720769882202,
+      "13": 0.7561782598495483,
+      "14": 0.7564550638198853,
+      "15": 0.6994308233261108
+     },
+     "d21": {
+      "0": 6.5481714273119e-08,
+      "1": 2.1221561041784298e-07,
+      "2": 4.1325452571072674e-07,
+      "3": 5.822672051181144e-07,
+      "4": 8.554973192076432e-07,
+      "5": 1.3100493561069015e-06,
+      "6": 2.2013880425220123e-06,
+      "7": 1.9639974198071286e-06,
+      "8": 2.1424316400953103e-06,
+      "9": 2.164063289455953e-06,
+      "10": 2.3163142941484693e-06,
+      "11": 2.542715719755506e-06,
+      "12": 0.8679084181785583,
+      "13": 0.8161407113075256,
+      "14": 0.8068049550056458,
+      "15": 0.755272626876831
+     }
+    },
+    "seconds": 10.793490299998666
+   }
+  },
+  "1000402": {
+   "control": {
+    "flops": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 32512,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "setup": 0,
+     "eval_part": 16349184,
+     "get_wick_coef": 966912,
+     "nonlin_sum": 36642816,
+     "zero_repeated": 0,
+     "harmonic diagslice": 6044672,
+     "nonlin_sum 111 factored": 1582062080,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 69488640,
+     "FactoredTensor3.get_dslice": 52085727232,
+     "FactoredTensor3.from_dstensor": 3145728,
+     "DSTensor.to_tensor": 2113536,
+     "DS_harmonic_proj": 1052848,
+     "FactoredTensor3.contract_W": 24159191040,
+     "resid": 0
+    },
+    "total_flops": 78771269296.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2560,
+      "rank_retained": 2560
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 3072,
+      "rank_retained": 3072
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 3584,
+      "rank_retained": 3584
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 4096,
+      "rank_retained": 4096
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 4608,
+      "rank_retained": 4608
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 5120,
+      "rank_retained": 5120
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 5632,
+      "rank_retained": 5632
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 6144,
+      "rank_retained": 6144
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 6656,
+      "rank_retained": 6656
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 7168,
+      "rank_retained": 7168
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 7680,
+      "rank_retained": 7680
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 8192,
+      "rank_retained": 8192
+     }
+    ],
+    "seconds": 0.900957699999708
+   },
+   "late:2": {
+    "D_final_layer": 0.007743562601794193,
+    "D_all_layers": 0.006347372436312805,
+    "bracket": {
+     "D": 0.007743562601794193,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 5.693380058173619e-05,
+     "mse_hi": 6.307022095407514e-05,
+     "mse_lo_anchor_ci": 5.6894418839025875e-05,
+     "mse_hi_anchor_ci": 6.311168469678545e-05,
+     "D_over_rmse_full": 39.08647591237323
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 11264,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 3018752,
+     "get_wick_coef": 299520,
+     "nonlin_sum": 6608896,
+     "zero_repeated": 0,
+     "harmonic diagslice": 2623488,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 16076288,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 201326592,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 813171968,
+     "nonlin_sum 111 factored": 204999680,
+     "FactoredTensor3.from_dstensor": 393216,
+     "DS_harmonic_proj": 131606,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 2059226902.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "14": 0.8770477771759033,
+      "15": 0.8028788566589355
+     },
+     "d21": {
+      "14": 0.938714325428009,
+      "15": 0.874121367931366
+     }
+    },
+    "seconds": 0.25758979999955045,
+    "weff_flopscope_cost": {
+     "m": 2,
+     "k3_window_flops": 25818573312,
+     "k3_window_budgets": 0.011740927817299962,
+     "total_flops": 163418899968,
+     "total_budgets": 0.07431431184522808,
+     "multiplier": 0.1,
+     "floor_pinned": true,
+     "overestimate_budgets": 0.0039,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "late:3": {
+    "D_final_layer": 0.007682840616391403,
+    "D_all_layers": 0.006339039066855922,
+    "bracket": {
+     "D": 0.007682840616391403,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 5.6021138453416786e-05,
+     "mse_hi": 6.210943942033009e-05,
+     "mse_lo_anchor_ci": 5.598207369002452e-05,
+     "mse_hi_anchor_ci": 6.215058618372235e-05,
+     "D_over_rmse_full": 38.77997507524592
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 12800,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 4003840,
+     "get_wick_coef": 348928,
+     "nonlin_sum": 8848384,
+     "zero_repeated": 0,
+     "harmonic diagslice": 2886656,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 19891456,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 603979776,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 1828849408,
+     "nonlin_sum 111 factored": 308089344,
+     "FactoredTensor3.from_dstensor": 589824,
+     "DS_harmonic_proj": 197409,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 3588263457.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "13": 0.9030060172080994,
+      "14": 0.844477653503418,
+      "15": 0.7791340947151184
+     },
+     "d21": {
+      "13": 0.9510898590087891,
+      "14": 0.9016287326812744,
+      "15": 0.8467887043952942
+     }
+    },
+    "seconds": 0.2824968999993871,
+    "weff_flopscope_cost": {
+     "m": 3,
+     "k3_window_flops": 66670052864,
+     "k3_window_budgets": 0.03031802992336452,
+     "total_flops": 204270379520,
+     "total_budgets": 0.09289141395129263,
+     "multiplier": 0.1,
+     "floor_pinned": true,
+     "overestimate_budgets": 0.005849999999999999,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "late:4": {
+    "D_final_layer": 0.0074992148402533805,
+    "D_all_layers": 0.0063212022386823375,
+    "bracket": {
+     "D": 0.0074992148402533805,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 5.330607926533259e-05,
+     "mse_hi": 5.924886517522048e-05,
+     "mse_lo_anchor_ci": 5.326797306040825e-05,
+     "mse_hi_anchor_ci": 5.928905338014483e-05,
+     "D_over_rmse_full": 37.853103963718176
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 14336,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 4988928,
+     "get_wick_coef": 398336,
+     "nonlin_sum": 11087872,
+     "zero_repeated": 0,
+     "harmonic diagslice": 3149824,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 23706624,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 1207959552,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 3250587904,
+     "nonlin_sum 111 factored": 411572224,
+     "FactoredTensor3.from_dstensor": 786432,
+     "DS_harmonic_proj": 263212,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 5725080876.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "12": 0.8315457701683044,
+      "13": 0.8424839973449707,
+      "14": 0.794325590133667,
+      "15": 0.7179129123687744
+     },
+     "d21": {
+      "12": 0.9179659485816956,
+      "13": 0.8866965770721436,
+      "14": 0.8444720506668091,
+      "15": 0.7960692644119263
+     }
+    },
+    "seconds": 0.3207920999993803,
+    "weff_flopscope_cost": {
+     "m": 4,
+     "k3_window_flops": 126864614912,
+     "k3_window_budgets": 0.05769134755246341,
+     "total_flops": 264464941568,
+     "total_budgets": 0.12026473158039153,
+     "multiplier": 0.12026473158039153,
+     "floor_pinned": false,
+     "overestimate_budgets": 0.0078,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "k3pre:2": {
+    "D_final_layer": 0.0027887603302899997,
+    "D_all_layers": 0.0008936638185804588,
+    "bracket": {
+     "D": 0.0027887603302899997,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 6.711450461612268e-06,
+     "mse_hi": 8.92141589798611e-06,
+     "mse_lo_anchor_ci": 6.697933647966403e-06,
+     "mse_hi_anchor_ci": 8.937014711631974e-06,
+     "D_over_rmse_full": 14.076571609301123
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 11042816,
+     "coerce_input": 0,
+     "contract_W_basic": 131744006144,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1867151360,
+     "nonlin_sum": 2162511104,
+     "zero_repeated": 0,
+     "harmonic diagslice": 445805056,
+     "get_wick_coef": 1124608,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 15608390144,
+     "DSTensor.to_tensor": 473717760,
+     "DS_harmonic_proj": 1052932,
+     "FactoredTensor3.contract_W": 201326592,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 813171968,
+     "nonlin_sum 111 factored": 204999680,
+     "FactoredTensor3.from_dstensor": 393216,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 153534693380.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.445193996753915e-08,
+      "1": 1.0721543475256112e-07,
+      "2": 1.0440606956763077e-06,
+      "3": 4.8011293074523564e-06,
+      "4": 1.0792846296681091e-05,
+      "5": 1.313076245423872e-05,
+      "6": 1.484542644902831e-05,
+      "7": 2.1839132386958227e-05,
+      "8": 2.108844455506187e-05,
+      "9": 3.82526486646384e-05,
+      "10": 1.5207780052151065e-05,
+      "11": 3.043039578187745e-05,
+      "12": 5.6235228839796036e-05,
+      "13": 3.2288709917338565e-05,
+      "14": 0.8679466843605042,
+      "15": 0.7599402666091919
+     },
+     "d21": {
+      "0": 6.615807990328904e-08,
+      "1": 2.142336654742394e-07,
+      "2": 4.618255502464308e-07,
+      "3": 6.449218403759005e-07,
+      "4": 8.522035273017536e-07,
+      "5": 1.1622507827269146e-06,
+      "6": 1.3549756658903789e-06,
+      "7": 1.6070536048573558e-06,
+      "8": 1.790191390682594e-06,
+      "9": 1.8086600448441459e-06,
+      "10": 2.515255800972227e-06,
+      "11": 2.3633831460756483e-06,
+      "12": 2.2664721655019093e-06,
+      "13": 2.980613771796925e-06,
+      "14": 0.9159954190254211,
+      "15": 0.8230383992195129
+     }
+    },
+    "seconds": 12.81340320000163
+   },
+   "k3pre:3": {
+    "D_final_layer": 0.0031088508105689048,
+    "D_all_layers": 0.0011273268917567135,
+    "bracket": {
+     "D": 0.0031088508105689048,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 8.472391087024926e-06,
+     "mse_hi": 1.0936013637724945e-05,
+     "mse_lo_anchor_ci": 8.457203345436239e-06,
+     "mse_hi_anchor_ci": 1.0953283379313633e-05,
+     "D_over_rmse_full": 15.692263183138538
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 10256384,
+     "coerce_input": 0,
+     "contract_W_basic": 121672040448,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1732540416,
+     "nonlin_sum": 2006589184,
+     "zero_repeated": 0,
+     "harmonic diagslice": 411987456,
+     "get_wick_coef": 1113344,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 14498468608,
+     "DSTensor.to_tensor": 440031744,
+     "DS_harmonic_proj": 1052926,
+     "FactoredTensor3.contract_W": 603979776,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 1828849408,
+     "nonlin_sum 111 factored": 308089344,
+     "FactoredTensor3.from_dstensor": 589824,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 143515588862.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.445193996753915e-08,
+      "1": 1.0721543475256112e-07,
+      "2": 1.0440606956763077e-06,
+      "3": 4.8011293074523564e-06,
+      "4": 1.0792846296681091e-05,
+      "5": 1.313076245423872e-05,
+      "6": 1.484542644902831e-05,
+      "7": 2.1839132386958227e-05,
+      "8": 2.108844455506187e-05,
+      "9": 3.82526486646384e-05,
+      "10": 1.5207780052151065e-05,
+      "11": 3.043039578187745e-05,
+      "12": 5.6235228839796036e-05,
+      "13": 0.8960774540901184,
+      "14": 0.8146482110023499,
+      "15": 0.7292218804359436
+     },
+     "d21": {
+      "0": 6.615807990328904e-08,
+      "1": 2.142336654742394e-07,
+      "2": 4.618255502464308e-07,
+      "3": 6.449218403759005e-07,
+      "4": 8.522035273017536e-07,
+      "5": 1.1622507827269146e-06,
+      "6": 1.3549756658903789e-06,
+      "7": 1.6070536048573558e-06,
+      "8": 1.790191390682594e-06,
+      "9": 1.8086600448441459e-06,
+      "10": 2.515255800972227e-06,
+      "11": 2.3633831460756483e-06,
+      "12": 2.2664721655019093e-06,
+      "13": 0.9317577481269836,
+      "14": 0.8571112751960754,
+      "15": 0.7833308577537537
+     }
+    },
+    "seconds": 11.557917399997677
+   },
+   "k3pre:4": {
+    "D_final_layer": 0.003512275732042018,
+    "D_all_layers": 0.0013915033637692444,
+    "bracket": {
+     "D": 0.003512275732042018,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 1.0983670612451376e-05,
+     "mse_hi": 1.3766989023331213e-05,
+     "mse_lo_anchor_ci": 1.0966376922652256e-05,
+     "mse_hi_anchor_ci": 1.3786364713130334e-05,
+     "D_over_rmse_full": 17.728594428392025
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 9469952,
+     "coerce_input": 0,
+     "contract_W_basic": 111600074752,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1597929472,
+     "nonlin_sum": 1850667264,
+     "zero_repeated": 0,
+     "harmonic diagslice": 378169856,
+     "get_wick_coef": 1102080,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 13388547072,
+     "DSTensor.to_tensor": 406345728,
+     "DS_harmonic_proj": 1052920,
+     "FactoredTensor3.contract_W": 1207959552,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 3250587904,
+     "nonlin_sum 111 factored": 411572224,
+     "FactoredTensor3.from_dstensor": 786432,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 134104265208.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.445193996753915e-08,
+      "1": 1.0721543475256112e-07,
+      "2": 1.0440606956763077e-06,
+      "3": 4.8011293074523564e-06,
+      "4": 1.0792846296681091e-05,
+      "5": 1.313076245423872e-05,
+      "6": 1.484542644902831e-05,
+      "7": 2.1839132386958227e-05,
+      "8": 2.108844455506187e-05,
+      "9": 3.82526486646384e-05,
+      "10": 1.5207780052151065e-05,
+      "11": 3.043039578187745e-05,
+      "12": 0.8221821188926697,
+      "13": 0.8239423632621765,
+      "14": 0.7596250176429749,
+      "15": 0.668342113494873
+     },
+     "d21": {
+      "0": 6.615807990328904e-08,
+      "1": 2.142336654742394e-07,
+      "2": 4.618255502464308e-07,
+      "3": 6.449218403759005e-07,
+      "4": 8.522035273017536e-07,
+      "5": 1.1622507827269146e-06,
+      "6": 1.3549756658903789e-06,
+      "7": 1.6070536048573558e-06,
+      "8": 1.790191390682594e-06,
+      "9": 1.8086600448441459e-06,
+      "10": 2.515255800972227e-06,
+      "11": 2.3633831460756483e-06,
+      "12": 0.8958417773246765,
+      "13": 0.8522922396659851,
+      "14": 0.7942260503768921,
+      "15": 0.7331987619400024
+     }
+    },
+    "seconds": 10.943607100001827
+   }
+  },
+  "1000403": {
+   "control": {
+    "flops": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 32512,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "setup": 0,
+     "eval_part": 16349184,
+     "get_wick_coef": 966912,
+     "nonlin_sum": 36642816,
+     "zero_repeated": 0,
+     "harmonic diagslice": 6044672,
+     "nonlin_sum 111 factored": 1582062080,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 69488640,
+     "FactoredTensor3.get_dslice": 52085727232,
+     "FactoredTensor3.from_dstensor": 3145728,
+     "DSTensor.to_tensor": 2113536,
+     "DS_harmonic_proj": 1052848,
+     "FactoredTensor3.contract_W": 24159191040,
+     "resid": 0
+    },
+    "total_flops": 78771269296.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2560,
+      "rank_retained": 2560
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 3072,
+      "rank_retained": 3072
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 3584,
+      "rank_retained": 3584
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 4096,
+      "rank_retained": 4096
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 4608,
+      "rank_retained": 4608
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 5120,
+      "rank_retained": 5120
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 5632,
+      "rank_retained": 5632
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 6144,
+      "rank_retained": 6144
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 6656,
+      "rank_retained": 6656
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 7168,
+      "rank_retained": 7168
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 7680,
+      "rank_retained": 7680
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 8192,
+      "rank_retained": 8192
+     }
+    ],
+    "seconds": 0.9335052000024007
+   },
+   "late:2": {
+    "D_final_layer": 0.008777222913825579,
+    "D_all_layers": 0.006258560718396914,
+    "bracket": {
+     "D": 0.008777222913825579,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 7.360111655382759e-05,
+     "mse_hi": 8.055666560414199e-05,
+     "mse_lo_anchor_ci": 7.355633892462527e-05,
+     "mse_hi_anchor_ci": 8.06035252333443e-05,
+     "D_over_rmse_full": 44.30398895713505
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 11264,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 3018752,
+     "get_wick_coef": 299520,
+     "nonlin_sum": 6608896,
+     "zero_repeated": 0,
+     "harmonic diagslice": 2623488,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 16076288,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 201326592,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 813171968,
+     "nonlin_sum 111 factored": 204999680,
+     "FactoredTensor3.from_dstensor": 393216,
+     "DS_harmonic_proj": 131606,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 2059226902.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "14": 0.8230828642845154,
+      "15": 0.8363870978355408
+     },
+     "d21": {
+      "14": 0.9169591069221497,
+      "15": 0.8971847891807556
+     }
+    },
+    "seconds": 0.26762580000286107,
+    "weff_flopscope_cost": {
+     "m": 2,
+     "k3_window_flops": 25818573312,
+     "k3_window_budgets": 0.011740927817299962,
+     "total_flops": 163418899968,
+     "total_budgets": 0.07431431184522808,
+     "multiplier": 0.1,
+     "floor_pinned": true,
+     "overestimate_budgets": 0.0039,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "late:3": {
+    "D_final_layer": 0.008775607487548777,
+    "D_all_layers": 0.0062567757417847664,
+    "bracket": {
+     "D": 0.008775607487548777,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 7.357340132620761e-05,
+     "mse_hi": 8.05276702248367e-05,
+     "mse_lo_anchor_ci": 7.352863212981124e-05,
+     "mse_hi_anchor_ci": 8.057452142123307e-05,
+     "D_over_rmse_full": 44.295834916998295
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 12800,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 4003840,
+     "get_wick_coef": 348928,
+     "nonlin_sum": 8848384,
+     "zero_repeated": 0,
+     "harmonic diagslice": 2886656,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 19891456,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 603979776,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 1828849408,
+     "nonlin_sum 111 factored": 308089344,
+     "FactoredTensor3.from_dstensor": 589824,
+     "DS_harmonic_proj": 197409,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 3588263457.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "13": 0.7720757126808167,
+      "14": 0.7544965147972107,
+      "15": 0.7895873785018921
+     },
+     "d21": {
+      "13": 0.8673096895217896,
+      "14": 0.8478518128395081,
+      "15": 0.8468168377876282
+     }
+    },
+    "seconds": 0.2957730999987689,
+    "weff_flopscope_cost": {
+     "m": 3,
+     "k3_window_flops": 66670052864,
+     "k3_window_budgets": 0.03031802992336452,
+     "total_flops": 204270379520,
+     "total_budgets": 0.09289141395129263,
+     "multiplier": 0.1,
+     "floor_pinned": true,
+     "overestimate_budgets": 0.005849999999999999,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "late:4": {
+    "D_final_layer": 0.00865476514954247,
+    "D_all_layers": 0.006236611565298986,
+    "bracket": {
+     "D": 0.00865476514954247,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 7.151495536656198e-05,
+     "mse_hi": 7.837346222090783e-05,
+     "mse_lo_anchor_ci": 7.147081698817392e-05,
+     "mse_hi_anchor_ci": 7.841968259929588e-05,
+     "D_over_rmse_full": 43.68587004984736
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 14336,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 4988928,
+     "get_wick_coef": 398336,
+     "nonlin_sum": 11087872,
+     "zero_repeated": 0,
+     "harmonic diagslice": 3149824,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 23706624,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 1207959552,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 3250587904,
+     "nonlin_sum 111 factored": 411572224,
+     "FactoredTensor3.from_dstensor": 786432,
+     "DS_harmonic_proj": 263212,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 5725080876.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "12": 0.7446150779724121,
+      "13": 0.7333980798721313,
+      "14": 0.7163709998130798,
+      "15": 0.7620611190795898
+     },
+     "d21": {
+      "12": 0.879865825176239,
+      "13": 0.8156380653381348,
+      "14": 0.8064877986907959,
+      "15": 0.8196991682052612
+     }
+    },
+    "seconds": 0.32222059999912744,
+    "weff_flopscope_cost": {
+     "m": 4,
+     "k3_window_flops": 126864614912,
+     "k3_window_budgets": 0.05769134755246341,
+     "total_flops": 264464941568,
+     "total_budgets": 0.12026473158039153,
+     "multiplier": 0.12026473158039153,
+     "floor_pinned": false,
+     "overestimate_budgets": 0.0078,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "k3pre:2": {
+    "D_final_layer": 0.002620528485871918,
+    "D_all_layers": 0.000797399299447996,
+    "bracket": {
+     "D": 0.002620528485871918,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 5.8680938610133995e-06,
+     "mse_hi": 7.944743229518933e-06,
+     "mse_lo_anchor_ci": 5.855455246836214e-06,
+     "mse_hi_anchor_ci": 7.959463843696118e-06,
+     "D_over_rmse_full": 13.227403045335759
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 11042816,
+     "coerce_input": 0,
+     "contract_W_basic": 131744006144,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1867151360,
+     "nonlin_sum": 2162511104,
+     "zero_repeated": 0,
+     "harmonic diagslice": 445805056,
+     "get_wick_coef": 1124608,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 15608390144,
+     "DSTensor.to_tensor": 473717760,
+     "DS_harmonic_proj": 1052932,
+     "FactoredTensor3.contract_W": 201326592,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 813171968,
+     "nonlin_sum 111 factored": 204999680,
+     "FactoredTensor3.from_dstensor": 393216,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 153534693380.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.696901273997355e-08,
+      "1": 1.411384573657415e-07,
+      "2": 1.3268642078401172e-06,
+      "3": 3.0299104309960967e-06,
+      "4": 5.0471599024604075e-06,
+      "5": 1.309446815866977e-05,
+      "6": 7.724533134023659e-06,
+      "7": 2.2292153516900726e-05,
+      "8": 2.196747846028302e-05,
+      "9": 2.0683868569904007e-05,
+      "10": 2.3360562408925034e-05,
+      "11": 2.1729993022745475e-05,
+      "12": 5.712934580515139e-05,
+      "13": 3.176776590407826e-05,
+      "14": 0.8095852732658386,
+      "15": 0.7997409701347351
+     },
+     "d21": {
+      "0": 6.527731954975025e-08,
+      "1": 1.838449747992854e-07,
+      "2": 3.9633135884287185e-07,
+      "3": 5.583486881732824e-07,
+      "4": 7.323197905861889e-07,
+      "5": 9.785721886146348e-07,
+      "6": 1.2254095054231584e-06,
+      "7": 1.3755977761320537e-06,
+      "8": 1.6124333797051804e-06,
+      "9": 1.9731501197384205e-06,
+      "10": 2.0794623196707107e-06,
+      "11": 2.3315508315135958e-06,
+      "12": 2.1825219391757855e-06,
+      "13": 3.242906586820027e-06,
+      "14": 0.8909569382667542,
+      "15": 0.8523851037025452
+     }
+    },
+    "seconds": 12.385613599999488
+   },
+   "k3pre:3": {
+    "D_final_layer": 0.0031136138956582384,
+    "D_all_layers": 0.0011053029140681392,
+    "bracket": {
+     "D": 0.0031136138956582384,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 8.50014195198181e-06,
+     "mse_hi": 1.0967539030490333e-05,
+     "mse_lo_anchor_ci": 8.484929346261072e-06,
+     "mse_hi_anchor_ci": 1.0984833636211072e-05,
+     "D_over_rmse_full": 15.716305374076555
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 10256384,
+     "coerce_input": 0,
+     "contract_W_basic": 121672040448,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1732540416,
+     "nonlin_sum": 2006589184,
+     "zero_repeated": 0,
+     "harmonic diagslice": 411987456,
+     "get_wick_coef": 1113344,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 14498468608,
+     "DSTensor.to_tensor": 440031744,
+     "DS_harmonic_proj": 1052926,
+     "FactoredTensor3.contract_W": 603979776,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 1828849408,
+     "nonlin_sum 111 factored": 308089344,
+     "FactoredTensor3.from_dstensor": 589824,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 143515588862.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.696901273997355e-08,
+      "1": 1.411384573657415e-07,
+      "2": 1.3268642078401172e-06,
+      "3": 3.0299104309960967e-06,
+      "4": 5.0471599024604075e-06,
+      "5": 1.309446815866977e-05,
+      "6": 7.724533134023659e-06,
+      "7": 2.2292153516900726e-05,
+      "8": 2.196747846028302e-05,
+      "9": 2.0683868569904007e-05,
+      "10": 2.3360562408925034e-05,
+      "11": 2.1729993022745475e-05,
+      "12": 5.712934580515139e-05,
+      "13": 0.7546787261962891,
+      "14": 0.724102258682251,
+      "15": 0.7341187000274658
+     },
+     "d21": {
+      "0": 6.527731954975025e-08,
+      "1": 1.838449747992854e-07,
+      "2": 3.9633135884287185e-07,
+      "3": 5.583486881732824e-07,
+      "4": 7.323197905861889e-07,
+      "5": 9.785721886146348e-07,
+      "6": 1.2254095054231584e-06,
+      "7": 1.3755977761320537e-06,
+      "8": 1.6124333797051804e-06,
+      "9": 1.9731501197384205e-06,
+      "10": 2.0794623196707107e-06,
+      "11": 2.3315508315135958e-06,
+      "12": 2.1825219391757855e-06,
+      "13": 0.8340941071510315,
+      "14": 0.7983168959617615,
+      "15": 0.7798285484313965
+     }
+    },
+    "seconds": 11.529688800001168
+   },
+   "k3pre:4": {
+    "D_final_layer": 0.003416306396095519,
+    "D_all_layers": 0.0013696086027921845,
+    "bracket": {
+     "D": 0.003416306396095519,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 1.0356764848555396e-05,
+     "mse_hi": 1.3064031935450909e-05,
+     "mse_lo_anchor_ci": 1.0339972135370598e-05,
+     "mse_hi_anchor_ci": 1.3082906648635706e-05,
+     "D_over_rmse_full": 17.244178749111512
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 9469952,
+     "coerce_input": 0,
+     "contract_W_basic": 111600074752,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1597929472,
+     "nonlin_sum": 1850667264,
+     "zero_repeated": 0,
+     "harmonic diagslice": 378169856,
+     "get_wick_coef": 1102080,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 13388547072,
+     "DSTensor.to_tensor": 406345728,
+     "DS_harmonic_proj": 1052920,
+     "FactoredTensor3.contract_W": 1207959552,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 3250587904,
+     "nonlin_sum 111 factored": 411572224,
+     "FactoredTensor3.from_dstensor": 786432,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 134104265208.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.696901273997355e-08,
+      "1": 1.411384573657415e-07,
+      "2": 1.3268642078401172e-06,
+      "3": 3.0299104309960967e-06,
+      "4": 5.0471599024604075e-06,
+      "5": 1.309446815866977e-05,
+      "6": 7.724533134023659e-06,
+      "7": 2.2292153516900726e-05,
+      "8": 2.196747846028302e-05,
+      "9": 2.0683868569904007e-05,
+      "10": 2.3360562408925034e-05,
+      "11": 2.1729993022745475e-05,
+      "12": 0.7219117879867554,
+      "13": 0.6949023604393005,
+      "14": 0.662595808506012,
+      "15": 0.6839759349822998
+     },
+     "d21": {
+      "0": 6.527731954975025e-08,
+      "1": 1.838449747992854e-07,
+      "2": 3.9633135884287185e-07,
+      "3": 5.583486881732824e-07,
+      "4": 7.323197905861889e-07,
+      "5": 9.785721886146348e-07,
+      "6": 1.2254095054231584e-06,
+      "7": 1.3755977761320537e-06,
+      "8": 1.6124333797051804e-06,
+      "9": 1.9731501197384205e-06,
+      "10": 2.0794623196707107e-06,
+      "11": 2.3315508315135958e-06,
+      "12": 0.8405914902687073,
+      "13": 0.7569023370742798,
+      "14": 0.7321964502334595,
+      "15": 0.7291132211685181
+     }
+    },
+    "seconds": 11.0287399000008
+   }
+  },
+  "1000404": {
+   "control": {
+    "flops": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 32512,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "setup": 0,
+     "eval_part": 16349184,
+     "get_wick_coef": 966912,
+     "nonlin_sum": 36642816,
+     "zero_repeated": 0,
+     "harmonic diagslice": 6044672,
+     "nonlin_sum 111 factored": 1582062080,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 69488640,
+     "FactoredTensor3.get_dslice": 52085727232,
+     "FactoredTensor3.from_dstensor": 3145728,
+     "DSTensor.to_tensor": 2113536,
+     "DS_harmonic_proj": 1052848,
+     "FactoredTensor3.contract_W": 24159191040,
+     "resid": 0
+    },
+    "total_flops": 78771269296.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2560,
+      "rank_retained": 2560
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 3072,
+      "rank_retained": 3072
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 3584,
+      "rank_retained": 3584
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 4096,
+      "rank_retained": 4096
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 4608,
+      "rank_retained": 4608
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 5120,
+      "rank_retained": 5120
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 5632,
+      "rank_retained": 5632
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 6144,
+      "rank_retained": 6144
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 6656,
+      "rank_retained": 6656
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 7168,
+      "rank_retained": 7168
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 7680,
+      "rank_retained": 7680
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 8192,
+      "rank_retained": 8192
+     }
+    ],
+    "seconds": 0.9609360000031302
+   },
+   "late:2": {
+    "D_final_layer": 0.00636187831227158,
+    "D_all_layers": 0.005380156034405389,
+    "bracket": {
+     "D": 0.00636187831227158,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 3.799199538173026e-05,
+     "mse_hi": 4.303349393857271e-05,
+     "mse_lo_anchor_ci": 3.795982627116543e-05,
+     "mse_hi_anchor_ci": 4.3067745049137544e-05,
+     "D_over_rmse_full": 32.11227392317292
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 11264,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 3018752,
+     "get_wick_coef": 299520,
+     "nonlin_sum": 6608896,
+     "zero_repeated": 0,
+     "harmonic diagslice": 2623488,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 16076288,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 201326592,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 813171968,
+     "nonlin_sum 111 factored": 204999680,
+     "FactoredTensor3.from_dstensor": 393216,
+     "DS_harmonic_proj": 131606,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 2059226902.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "14": 0.8230229020118713,
+      "15": 0.8721974492073059
+     },
+     "d21": {
+      "14": 0.9194779396057129,
+      "15": 0.902511715888977
+     }
+    },
+    "seconds": 0.273705700001301,
+    "weff_flopscope_cost": {
+     "m": 2,
+     "k3_window_flops": 25818573312,
+     "k3_window_budgets": 0.011740927817299962,
+     "total_flops": 163418899968,
+     "total_budgets": 0.07431431184522808,
+     "multiplier": 0.1,
+     "floor_pinned": true,
+     "overestimate_budgets": 0.0039,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "late:3": {
+    "D_final_layer": 0.00628620803910791,
+    "D_all_layers": 0.005371529646637691,
+    "bracket": {
+     "D": 0.00628620803910791,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 3.706489385355361e-05,
+     "mse_hi": 4.204642716833623e-05,
+     "mse_lo_anchor_ci": 3.7033119754967135e-05,
+     "mse_hi_anchor_ci": 4.20802832669227e-05,
+     "D_over_rmse_full": 31.730319974920583
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 12800,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 4003840,
+     "get_wick_coef": 348928,
+     "nonlin_sum": 8848384,
+     "zero_repeated": 0,
+     "harmonic diagslice": 2886656,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 19891456,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 603979776,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 1828849408,
+     "nonlin_sum 111 factored": 308089344,
+     "FactoredTensor3.from_dstensor": 589824,
+     "DS_harmonic_proj": 197409,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 3588263457.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "13": 0.8261138796806335,
+      "14": 0.7972184419631958,
+      "15": 0.8309371471405029
+     },
+     "d21": {
+      "13": 0.9404336214065552,
+      "14": 0.8895009160041809,
+      "15": 0.8676692247390747
+     }
+    },
+    "seconds": 0.3172904000020935,
+    "weff_flopscope_cost": {
+     "m": 3,
+     "k3_window_flops": 66670052864,
+     "k3_window_budgets": 0.03031802992336452,
+     "total_flops": 204270379520,
+     "total_budgets": 0.09289141395129263,
+     "multiplier": 0.1,
+     "floor_pinned": true,
+     "overestimate_budgets": 0.005849999999999999,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "late:4": {
+    "D_final_layer": 0.006216906380467698,
+    "D_all_layers": 0.005360074636660341,
+    "bracket": {
+     "D": 0.006216906380467698,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 3.622586648879e-05,
+     "mse_hi": 4.115248139820994e-05,
+     "mse_lo_anchor_ci": 3.6194454156907136e-05,
+     "mse_hi_anchor_ci": 4.11859757300928e-05,
+     "D_over_rmse_full": 31.380512302351296
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 14336,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 4988928,
+     "get_wick_coef": 398336,
+     "nonlin_sum": 11087872,
+     "zero_repeated": 0,
+     "harmonic diagslice": 3149824,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 23706624,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 1207959552,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 3250587904,
+     "nonlin_sum 111 factored": 411572224,
+     "FactoredTensor3.from_dstensor": 786432,
+     "DS_harmonic_proj": 263212,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 5725080876.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "12": 0.7867172956466675,
+      "13": 0.7808895111083984,
+      "14": 0.770241916179657,
+      "15": 0.778960645198822
+     },
+     "d21": {
+      "12": 0.9056386947631836,
+      "13": 0.8888968825340271,
+      "14": 0.853333055973053,
+      "15": 0.8236069083213806
+     }
+    },
+    "seconds": 0.4087025000007998,
+    "weff_flopscope_cost": {
+     "m": 4,
+     "k3_window_flops": 126864614912,
+     "k3_window_budgets": 0.05769134755246341,
+     "total_flops": 264464941568,
+     "total_budgets": 0.12026473158039153,
+     "multiplier": 0.12026473158039153,
+     "floor_pinned": false,
+     "overestimate_budgets": 0.0078,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "k3pre:2": {
+    "D_final_layer": 0.002028848080203319,
+    "D_all_layers": 0.0006546858273654553,
+    "bracket": {
+     "D": 0.002028848080203319,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 3.351588723189903e-06,
+     "mse_hi": 4.959358341899484e-06,
+     "mse_lo_anchor_ci": 3.342038783571832e-06,
+     "mse_hi_anchor_ci": 4.970990281517553e-06,
+     "D_over_rmse_full": 10.240831732716627
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 11042816,
+     "coerce_input": 0,
+     "contract_W_basic": 131744006144,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1867151360,
+     "nonlin_sum": 2162511104,
+     "zero_repeated": 0,
+     "harmonic diagslice": 445805056,
+     "get_wick_coef": 1124608,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 15608390144,
+     "DSTensor.to_tensor": 473717760,
+     "DS_harmonic_proj": 1052932,
+     "FactoredTensor3.contract_W": 201326592,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 813171968,
+     "nonlin_sum 111 factored": 204999680,
+     "FactoredTensor3.from_dstensor": 393216,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 153534693380.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.6201406317104556e-08,
+      "1": 2.445871700729185e-07,
+      "2": 2.319227405678248e-06,
+      "3": 2.916198582170182e-06,
+      "4": 6.880800356157124e-06,
+      "5": 7.71754639572464e-06,
+      "6": 8.038183295866475e-06,
+      "7": 8.550235179427546e-06,
+      "8": 1.439020979887573e-05,
+      "9": 1.281277491216315e-05,
+      "10": 2.046460758720059e-05,
+      "11": 3.658809146145359e-05,
+      "12": 3.0192564736353233e-05,
+      "13": 4.089835420018062e-05,
+      "14": 0.8096206188201904,
+      "15": 0.8305162787437439
+     },
+     "d21": {
+      "0": 6.553154463517785e-08,
+      "1": 2.023547835960926e-07,
+      "2": 3.887332411522948e-07,
+      "3": 5.891612886443909e-07,
+      "4": 7.29695898371574e-07,
+      "5": 8.854507882460894e-07,
+      "6": 9.554312327963999e-07,
+      "7": 1.0519518127694027e-06,
+      "8": 1.1577529903661343e-06,
+      "9": 1.3296669294504682e-06,
+      "10": 1.4640934296039632e-06,
+      "11": 1.7831772538556834e-06,
+      "12": 2.5657413971202914e-06,
+      "13": 2.865144324459834e-06,
+      "14": 0.8856263160705566,
+      "15": 0.8486403226852417
+     }
+    },
+    "seconds": 13.774340399999346
+   },
+   "k3pre:3": {
+    "D_final_layer": 0.0024501992849345284,
+    "D_all_layers": 0.000900739905550574,
+    "bracket": {
+     "D": 0.0024501992849345284,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 5.071889915291935e-06,
+     "mse_hi": 7.013561156495414e-06,
+     "mse_lo_anchor_ci": 5.060140449149009e-06,
+     "mse_hi_anchor_ci": 7.027392622638339e-06,
+     "D_over_rmse_full": 12.36764784582714
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 10256384,
+     "coerce_input": 0,
+     "contract_W_basic": 121672040448,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1732540416,
+     "nonlin_sum": 2006589184,
+     "zero_repeated": 0,
+     "harmonic diagslice": 411987456,
+     "get_wick_coef": 1113344,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 14498468608,
+     "DSTensor.to_tensor": 440031744,
+     "DS_harmonic_proj": 1052926,
+     "FactoredTensor3.contract_W": 603979776,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 1828849408,
+     "nonlin_sum 111 factored": 308089344,
+     "FactoredTensor3.from_dstensor": 589824,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 143515588862.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.6201406317104556e-08,
+      "1": 2.445871700729185e-07,
+      "2": 2.319227405678248e-06,
+      "3": 2.916198582170182e-06,
+      "4": 6.880800356157124e-06,
+      "5": 7.71754639572464e-06,
+      "6": 8.038183295866475e-06,
+      "7": 8.550235179427546e-06,
+      "8": 1.439020979887573e-05,
+      "9": 1.281277491216315e-05,
+      "10": 2.046460758720059e-05,
+      "11": 3.658809146145359e-05,
+      "12": 3.0192564736353233e-05,
+      "13": 0.8108057379722595,
+      "14": 0.7562226057052612,
+      "15": 0.7730299830436707
+     },
+     "d21": {
+      "0": 6.553154463517785e-08,
+      "1": 2.023547835960926e-07,
+      "2": 3.887332411522948e-07,
+      "3": 5.891612886443909e-07,
+      "4": 7.29695898371574e-07,
+      "5": 8.854507882460894e-07,
+      "6": 9.554312327963999e-07,
+      "7": 1.0519518127694027e-06,
+      "8": 1.1577529903661343e-06,
+      "9": 1.3296669294504682e-06,
+      "10": 1.4640934296039632e-06,
+      "11": 1.7831772538556834e-06,
+      "12": 2.5657413971202914e-06,
+      "13": 0.9098461866378784,
+      "14": 0.8270752429962158,
+      "15": 0.7916609644889832
+     }
+    },
+    "seconds": 12.809652700001607
+   },
+   "k3pre:4": {
+    "D_final_layer": 0.003047663656888224,
+    "D_all_layers": 0.0013059018609497654,
+    "bracket": {
+     "D": 0.003047663656888224,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 8.1199355052079e-06,
+     "mse_hi": 1.0535070025826703e-05,
+     "mse_lo_anchor_ci": 8.105067171196525e-06,
+     "mse_hi_anchor_ci": 1.0552020359838078e-05,
+     "D_over_rmse_full": 15.38341435844737
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 9469952,
+     "coerce_input": 0,
+     "contract_W_basic": 111600074752,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1597929472,
+     "nonlin_sum": 1850667264,
+     "zero_repeated": 0,
+     "harmonic diagslice": 378169856,
+     "get_wick_coef": 1102080,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 13388547072,
+     "DSTensor.to_tensor": 406345728,
+     "DS_harmonic_proj": 1052920,
+     "FactoredTensor3.contract_W": 1207959552,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 3250587904,
+     "nonlin_sum 111 factored": 411572224,
+     "FactoredTensor3.from_dstensor": 786432,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 134104265208.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.6201406317104556e-08,
+      "1": 2.445871700729185e-07,
+      "2": 2.319227405678248e-06,
+      "3": 2.916198582170182e-06,
+      "4": 6.880800356157124e-06,
+      "5": 7.71754639572464e-06,
+      "6": 8.038183295866475e-06,
+      "7": 8.550235179427546e-06,
+      "8": 1.439020979887573e-05,
+      "9": 1.281277491216315e-05,
+      "10": 2.046460758720059e-05,
+      "11": 3.658809146145359e-05,
+      "12": 0.7691181302070618,
+      "13": 0.7494134306907654,
+      "14": 0.7168092727661133,
+      "15": 0.7137859463691711
+     },
+     "d21": {
+      "0": 6.553154463517785e-08,
+      "1": 2.023547835960926e-07,
+      "2": 3.887332411522948e-07,
+      "3": 5.891612886443909e-07,
+      "4": 7.29695898371574e-07,
+      "5": 8.854507882460894e-07,
+      "6": 9.554312327963999e-07,
+      "7": 1.0519518127694027e-06,
+      "8": 1.1577529903661343e-06,
+      "9": 1.3296669294504682e-06,
+      "10": 1.4640934296039632e-06,
+      "11": 1.7831772538556834e-06,
+      "12": 0.8714959025382996,
+      "13": 0.8353748321533203,
+      "14": 0.7748053669929504,
+      "15": 0.73926842212677
+     }
+    },
+    "seconds": 11.877615299999889
+   }
+  },
+  "1000405": {
+   "control": {
+    "flops": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 32512,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "setup": 0,
+     "eval_part": 16349184,
+     "get_wick_coef": 966912,
+     "nonlin_sum": 36642816,
+     "zero_repeated": 0,
+     "harmonic diagslice": 6044672,
+     "nonlin_sum 111 factored": 1582062080,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 69488640,
+     "FactoredTensor3.get_dslice": 52085727232,
+     "FactoredTensor3.from_dstensor": 3145728,
+     "DSTensor.to_tensor": 2113536,
+     "DS_harmonic_proj": 1052848,
+     "FactoredTensor3.contract_W": 24159191040,
+     "resid": 0
+    },
+    "total_flops": 78771269296.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2560,
+      "rank_retained": 2560
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 3072,
+      "rank_retained": 3072
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 3584,
+      "rank_retained": 3584
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 4096,
+      "rank_retained": 4096
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 4608,
+      "rank_retained": 4608
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 5120,
+      "rank_retained": 5120
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 5632,
+      "rank_retained": 5632
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 6144,
+      "rank_retained": 6144
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 6656,
+      "rank_retained": 6656
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 7168,
+      "rank_retained": 7168
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 7680,
+      "rank_retained": 7680
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 8192,
+      "rank_retained": 8192
+     }
+    ],
+    "seconds": 0.9569147000001976
+   },
+   "late:2": {
+    "D_final_layer": 0.01044799405418447,
+    "D_all_layers": 0.007162551110056538,
+    "bracket": {
+     "D": 0.01044799405418447,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 0.00010506004924772336,
+     "mse_hi": 0.0001133396082648247,
+     "mse_lo_anchor_ci": 0.00010500654990276725,
+     "mse_hi_anchor_ci": 0.00011339518960978082,
+     "D_over_rmse_full": 52.73738832264092
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 11264,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 3018752,
+     "get_wick_coef": 299520,
+     "nonlin_sum": 6608896,
+     "zero_repeated": 0,
+     "harmonic diagslice": 2623488,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 16076288,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 201326592,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 813171968,
+     "nonlin_sum 111 factored": 204999680,
+     "FactoredTensor3.from_dstensor": 393216,
+     "DS_harmonic_proj": 131606,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 2059226902.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "14": 0.9666152596473694,
+      "15": 0.9676126837730408
+     },
+     "d21": {
+      "14": 0.9809573888778687,
+      "15": 0.9751139283180237
+     }
+    },
+    "seconds": 0.31265130000247154,
+    "weff_flopscope_cost": {
+     "m": 2,
+     "k3_window_flops": 25818573312,
+     "k3_window_budgets": 0.011740927817299962,
+     "total_flops": 163418899968,
+     "total_budgets": 0.07431431184522808,
+     "multiplier": 0.1,
+     "floor_pinned": true,
+     "overestimate_budgets": 0.0039,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "late:3": {
+    "D_final_layer": 0.01045425364089138,
+    "D_all_layers": 0.00716229496839579,
+    "bracket": {
+     "D": 0.01045425364089138,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 0.00010518840846097873,
+     "mse_hi": 0.00011347292791520263,
+     "mse_lo_anchor_ci": 0.00010513487643989202,
+     "mse_hi_anchor_ci": 0.00011352854193628934,
+     "D_over_rmse_full": 52.76898426854111
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 12800,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 4003840,
+     "get_wick_coef": 348928,
+     "nonlin_sum": 8848384,
+     "zero_repeated": 0,
+     "harmonic diagslice": 2886656,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 19891456,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 603979776,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 1828849408,
+     "nonlin_sum 111 factored": 308089344,
+     "FactoredTensor3.from_dstensor": 589824,
+     "DS_harmonic_proj": 197409,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 3588263457.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "13": 0.931688129901886,
+      "14": 0.9079615473747253,
+      "15": 0.9098984599113464
+     },
+     "d21": {
+      "13": 0.9613710641860962,
+      "14": 0.9390623569488525,
+      "15": 0.9277750253677368
+     }
+    },
+    "seconds": 0.29171299999870826,
+    "weff_flopscope_cost": {
+     "m": 3,
+     "k3_window_flops": 66670052864,
+     "k3_window_budgets": 0.03031802992336452,
+     "total_flops": 204270379520,
+     "total_budgets": 0.09289141395129263,
+     "multiplier": 0.1,
+     "floor_pinned": true,
+     "overestimate_budgets": 0.005849999999999999,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "late:4": {
+    "D_final_layer": 0.01052372398942411,
+    "D_all_layers": 0.007166547218148833,
+    "bracket": {
+     "D": 0.01052372398942411,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 0.00010661822983626218,
+     "mse_hi": 0.00011495780137489887,
+     "mse_lo_anchor_ci": 0.0001065643351678813,
+     "mse_hi_anchor_ci": 0.00011501377804327975,
+     "D_over_rmse_full": 53.11964342172205
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 14336,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 4988928,
+     "get_wick_coef": 398336,
+     "nonlin_sum": 11087872,
+     "zero_repeated": 0,
+     "harmonic diagslice": 3149824,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 23706624,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 1207959552,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 3250587904,
+     "nonlin_sum 111 factored": 411572224,
+     "FactoredTensor3.from_dstensor": 786432,
+     "DS_harmonic_proj": 263212,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 5725080876.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "12": 0.9143472909927368,
+      "13": 0.9235678911209106,
+      "14": 0.886530876159668,
+      "15": 0.9045767188072205
+     },
+     "d21": {
+      "12": 0.9655705094337463,
+      "13": 0.948174774646759,
+      "14": 0.9207706451416016,
+      "15": 0.9212020039558411
+     }
+    },
+    "seconds": 0.37985979999939445,
+    "weff_flopscope_cost": {
+     "m": 4,
+     "k3_window_flops": 126864614912,
+     "k3_window_budgets": 0.05769134755246341,
+     "total_flops": 264464941568,
+     "total_budgets": 0.12026473158039153,
+     "multiplier": 0.12026473158039153,
+     "floor_pinned": false,
+     "overestimate_budgets": 0.0078,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "k3pre:2": {
+    "D_final_layer": 0.0020241588997243426,
+    "D_all_layers": 0.0006051852817516973,
+    "bracket": {
+     "D": 0.0020241588997243426,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 3.3344414228653372e-06,
+     "mse_hi": 4.9384950798011854e-06,
+     "mse_lo_anchor_ci": 3.3249159615844048e-06,
+     "mse_hi_anchor_ci": 4.9501025410821165e-06,
+     "D_over_rmse_full": 10.217162583351474
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 11042816,
+     "coerce_input": 0,
+     "contract_W_basic": 131744006144,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1867151360,
+     "nonlin_sum": 2162511104,
+     "zero_repeated": 0,
+     "harmonic diagslice": 445805056,
+     "get_wick_coef": 1124608,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 15608390144,
+     "DSTensor.to_tensor": 473717760,
+     "DS_harmonic_proj": 1052932,
+     "FactoredTensor3.contract_W": 201326592,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 813171968,
+     "nonlin_sum 111 factored": 204999680,
+     "FactoredTensor3.from_dstensor": 393216,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 153534693380.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.40992656333583e-08,
+      "1": 1.1042988745657567e-07,
+      "2": 1.984914206332178e-06,
+      "3": 6.830389793321956e-06,
+      "4": 7.419844678224763e-06,
+      "5": 1.8277036360814236e-05,
+      "6": 2.021005275310017e-05,
+      "7": 1.6632980987196788e-05,
+      "8": 3.688986544148065e-05,
+      "9": 2.876304461096879e-05,
+      "10": 2.8286018277867697e-05,
+      "11": 5.5827673349995166e-05,
+      "12": 5.8352805353933945e-05,
+      "13": 7.713466766290367e-05,
+      "14": 0.9635283350944519,
+      "15": 0.9582490921020508
+     },
+     "d21": {
+      "0": 6.577239730631845e-08,
+      "1": 2.017124813846749e-07,
+      "2": 3.9050902955750644e-07,
+      "3": 5.811967298541276e-07,
+      "4": 9.293618745687127e-07,
+      "5": 1.1330769211781444e-06,
+      "6": 1.685948291196837e-06,
+      "7": 1.820270313146466e-06,
+      "8": 1.8731697082330356e-06,
+      "9": 2.516493168513989e-06,
+      "10": 2.386687128819176e-06,
+      "11": 2.3401105408993317e-06,
+      "12": 2.831551228155149e-06,
+      "13": 3.0431028790189885e-06,
+      "14": 0.9712345004081726,
+      "15": 0.9634899497032166
+     }
+    },
+    "seconds": 12.813784999998461
+   },
+   "k3pre:3": {
+    "D_final_layer": 0.002288632572716719,
+    "D_all_layers": 0.0008203363093683334,
+    "bracket": {
+     "D": 0.002288632572716719,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 4.3702695595127214e-06,
+     "mse_hi": 6.183906546287176e-06,
+     "mse_lo_anchor_ci": 4.359363499689907e-06,
+     "mse_hi_anchor_ci": 6.196894606109991e-06,
+     "D_over_rmse_full": 11.552122262824875
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 10256384,
+     "coerce_input": 0,
+     "contract_W_basic": 121672040448,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1732540416,
+     "nonlin_sum": 2006589184,
+     "zero_repeated": 0,
+     "harmonic diagslice": 411987456,
+     "get_wick_coef": 1113344,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 14498468608,
+     "DSTensor.to_tensor": 440031744,
+     "DS_harmonic_proj": 1052926,
+     "FactoredTensor3.contract_W": 603979776,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 1828849408,
+     "nonlin_sum 111 factored": 308089344,
+     "FactoredTensor3.from_dstensor": 589824,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 143515588862.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.40992656333583e-08,
+      "1": 1.1042988745657567e-07,
+      "2": 1.984914206332178e-06,
+      "3": 6.830389793321956e-06,
+      "4": 7.419844678224763e-06,
+      "5": 1.8277036360814236e-05,
+      "6": 2.021005275310017e-05,
+      "7": 1.6632980987196788e-05,
+      "8": 3.688986544148065e-05,
+      "9": 2.876304461096879e-05,
+      "10": 2.8286018277867697e-05,
+      "11": 5.5827673349995166e-05,
+      "12": 5.8352805353933945e-05,
+      "13": 0.9267930388450623,
+      "14": 0.8819605708122253,
+      "15": 0.8803671598434448
+     },
+     "d21": {
+      "0": 6.577239730631845e-08,
+      "1": 2.017124813846749e-07,
+      "2": 3.9050902955750644e-07,
+      "3": 5.811967298541276e-07,
+      "4": 9.293618745687127e-07,
+      "5": 1.1330769211781444e-06,
+      "6": 1.685948291196837e-06,
+      "7": 1.820270313146466e-06,
+      "8": 1.8731697082330356e-06,
+      "9": 2.516493168513989e-06,
+      "10": 2.386687128819176e-06,
+      "11": 2.3401105408993317e-06,
+      "12": 2.831551228155149e-06,
+      "13": 0.947998583316803,
+      "14": 0.9096003174781799,
+      "15": 0.8955538868904114
+     }
+    },
+    "seconds": 12.23820660000274
+   },
+   "k3pre:4": {
+    "D_final_layer": 0.002664284739923608,
+    "D_all_layers": 0.0011203750341127136,
+    "bracket": {
+     "D": 0.002664284739923608,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 6.0820000727814495e-06,
+     "mse_hi": 8.193324277998165e-06,
+     "mse_lo_anchor_ci": 6.0691330433527254e-06,
+     "mse_hi_anchor_ci": 8.208273307426888e-06,
+     "D_over_rmse_full": 13.448267505011051
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 9469952,
+     "coerce_input": 0,
+     "contract_W_basic": 111600074752,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1597929472,
+     "nonlin_sum": 1850667264,
+     "zero_repeated": 0,
+     "harmonic diagslice": 378169856,
+     "get_wick_coef": 1102080,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 13388547072,
+     "DSTensor.to_tensor": 406345728,
+     "DS_harmonic_proj": 1052920,
+     "FactoredTensor3.contract_W": 1207959552,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 3250587904,
+     "nonlin_sum 111 factored": 411572224,
+     "FactoredTensor3.from_dstensor": 786432,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 134104265208.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.40992656333583e-08,
+      "1": 1.1042988745657567e-07,
+      "2": 1.984914206332178e-06,
+      "3": 6.830389793321956e-06,
+      "4": 7.419844678224763e-06,
+      "5": 1.8277036360814236e-05,
+      "6": 2.021005275310017e-05,
+      "7": 1.6632980987196788e-05,
+      "8": 3.688986544148065e-05,
+      "9": 2.876304461096879e-05,
+      "10": 2.8286018277867697e-05,
+      "11": 5.5827673349995166e-05,
+      "12": 0.9065490365028381,
+      "13": 0.905335009098053,
+      "14": 0.8468629121780396,
+      "15": 0.8554481267929077
+     },
+     "d21": {
+      "0": 6.577239730631845e-08,
+      "1": 2.017124813846749e-07,
+      "2": 3.9050902955750644e-07,
+      "3": 5.811967298541276e-07,
+      "4": 9.293618745687127e-07,
+      "5": 1.1330769211781444e-06,
+      "6": 1.685948291196837e-06,
+      "7": 1.820270313146466e-06,
+      "8": 1.8731697082330356e-06,
+      "9": 2.516493168513989e-06,
+      "10": 2.386687128819176e-06,
+      "11": 2.3401105408993317e-06,
+      "12": 0.9497257471084595,
+      "13": 0.9193322062492371,
+      "14": 0.8774628043174744,
+      "15": 0.8709794282913208
+     }
+    },
+    "seconds": 11.24569259999771
+   }
+  },
+  "1000406": {
+   "control": {
+    "flops": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 32512,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "setup": 0,
+     "eval_part": 16349184,
+     "get_wick_coef": 966912,
+     "nonlin_sum": 36642816,
+     "zero_repeated": 0,
+     "harmonic diagslice": 6044672,
+     "nonlin_sum 111 factored": 1582062080,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 69488640,
+     "FactoredTensor3.get_dslice": 52085727232,
+     "FactoredTensor3.from_dstensor": 3145728,
+     "DSTensor.to_tensor": 2113536,
+     "DS_harmonic_proj": 1052848,
+     "FactoredTensor3.contract_W": 24159191040,
+     "resid": 0
+    },
+    "total_flops": 78771269296.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2560,
+      "rank_retained": 2560
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 3072,
+      "rank_retained": 3072
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 3584,
+      "rank_retained": 3584
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 4096,
+      "rank_retained": 4096
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 4608,
+      "rank_retained": 4608
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 5120,
+      "rank_retained": 5120
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 5632,
+      "rank_retained": 5632
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 6144,
+      "rank_retained": 6144
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 6656,
+      "rank_retained": 6656
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 7168,
+      "rank_retained": 7168
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 7680,
+      "rank_retained": 7680
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 8192,
+      "rank_retained": 8192
+     }
+    ],
+    "seconds": 0.9996553000019048
+   },
+   "late:2": {
+    "D_final_layer": 0.005434235208296164,
+    "D_all_layers": 0.0046672502772563745,
+    "bracket": {
+     "D": 0.005434235208296164,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 2.7416969457352262e-05,
+     "mse_hi": 3.1723353140819045e-05,
+     "mse_lo_anchor_ci": 2.7389642805026264e-05,
+     "mse_hi_anchor_ci": 3.175276179314504e-05,
+     "D_over_rmse_full": 27.429894286904066
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 11264,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 3018752,
+     "get_wick_coef": 299520,
+     "nonlin_sum": 6608896,
+     "zero_repeated": 0,
+     "harmonic diagslice": 2623488,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 16076288,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 201326592,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 813171968,
+     "nonlin_sum 111 factored": 204999680,
+     "FactoredTensor3.from_dstensor": 393216,
+     "DS_harmonic_proj": 131606,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 2059226902.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "14": 0.785539984703064,
+      "15": 0.8372223973274231
+     },
+     "d21": {
+      "14": 0.8874317407608032,
+      "15": 0.8894294500350952
+     }
+    },
+    "seconds": 0.2687344000005396,
+    "weff_flopscope_cost": {
+     "m": 2,
+     "k3_window_flops": 25818573312,
+     "k3_window_budgets": 0.011740927817299962,
+     "total_flops": 163418899968,
+     "total_budgets": 0.07431431184522808,
+     "multiplier": 0.1,
+     "floor_pinned": true,
+     "overestimate_budgets": 0.0039,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "late:3": {
+    "D_final_layer": 0.005493283063221719,
+    "D_all_layers": 0.004670842751066893,
+    "bracket": {
+     "D": 0.005493283063221719,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 2.8038819604276447e-05,
+     "mse_hi": 3.2391996021080746e-05,
+     "mse_lo_anchor_ci": 2.8011184711884477e-05,
+     "mse_hi_anchor_ci": 3.2421712913472715e-05,
+     "D_over_rmse_full": 27.72794476804698
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 12800,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 4003840,
+     "get_wick_coef": 348928,
+     "nonlin_sum": 8848384,
+     "zero_repeated": 0,
+     "harmonic diagslice": 2886656,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 19891456,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 603979776,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 1828849408,
+     "nonlin_sum 111 factored": 308089344,
+     "FactoredTensor3.from_dstensor": 589824,
+     "DS_harmonic_proj": 197409,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 3588263457.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "13": 0.8451794385910034,
+      "14": 0.7362459301948547,
+      "15": 0.8065937757492065
+     },
+     "d21": {
+      "13": 0.9218472838401794,
+      "14": 0.8485504388809204,
+      "15": 0.8534786105155945
+     }
+    },
+    "seconds": 0.32099250000101165,
+    "weff_flopscope_cost": {
+     "m": 3,
+     "k3_window_flops": 66670052864,
+     "k3_window_budgets": 0.03031802992336452,
+     "total_flops": 204270379520,
+     "total_budgets": 0.09289141395129263,
+     "multiplier": 0.1,
+     "floor_pinned": true,
+     "overestimate_budgets": 0.005849999999999999,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "late:4": {
+    "D_final_layer": 0.0052052495551460215,
+    "D_all_layers": 0.004633570694477257,
+    "bracket": {
+     "D": 0.0052052495551460215,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 2.5071410435530327e-05,
+     "mse_hi": 2.919633342716538e-05,
+     "mse_lo_anchor_ci": 2.5045279128114372e-05,
+     "mse_hi_anchor_ci": 2.9224546734581338e-05,
+     "D_over_rmse_full": 26.274064254089673
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 14336,
+     "coerce_input": 0,
+     "contract_W_basic": 808452096,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 4988928,
+     "get_wick_coef": 398336,
+     "nonlin_sum": 11087872,
+     "zero_repeated": 0,
+     "harmonic diagslice": 3149824,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 23706624,
+     "DSTensor.to_tensor": 2113536,
+     "FactoredTensor3.contract_W": 1207959552,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 3250587904,
+     "nonlin_sum 111 factored": 411572224,
+     "FactoredTensor3.from_dstensor": 786432,
+     "DS_harmonic_proj": 263212,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 5725080876.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 2,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "12": 0.8125895857810974,
+      "13": 0.7960413098335266,
+      "14": 0.699032187461853,
+      "15": 0.7619491815567017
+     },
+     "d21": {
+      "12": 0.9210759997367859,
+      "13": 0.8755015730857849,
+      "14": 0.8029041290283203,
+      "15": 0.805886447429657
+     }
+    },
+    "seconds": 0.34589150000101654,
+    "weff_flopscope_cost": {
+     "m": 4,
+     "k3_window_flops": 126864614912,
+     "k3_window_budgets": 0.05769134755246341,
+     "total_flops": 264464941568,
+     "total_budgets": 0.12026473158039153,
+     "multiplier": 0.12026473158039153,
+     "floor_pinned": false,
+     "overestimate_budgets": 0.0078,
+     "meter": "flopscope 0.12, W-EFF spelling, measured in P2-WEFF",
+     "lower_bound": true,
+     "note": "P2-WEFF's figure is a lower bound: its un-respelled remainder can only add."
+    }
+   },
+   "k3pre:2": {
+    "D_final_layer": 0.0023596110940621155,
+    "D_all_layers": 0.0007202292453038011,
+    "bracket": {
+     "D": 0.0023596110940621155,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 4.672071400525329e-06,
+     "mse_hi": 6.541955629916698e-06,
+     "mse_lo_anchor_ci": 4.660794820484128e-06,
+     "mse_hi_anchor_ci": 6.555314209957899e-06,
+     "D_over_rmse_full": 11.91039408259681
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 11042816,
+     "coerce_input": 0,
+     "contract_W_basic": 131744006144,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1867151360,
+     "nonlin_sum": 2162511104,
+     "zero_repeated": 0,
+     "harmonic diagslice": 445805056,
+     "get_wick_coef": 1124608,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 15608390144,
+     "DSTensor.to_tensor": 473717760,
+     "DS_harmonic_proj": 1052932,
+     "FactoredTensor3.contract_W": 201326592,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 813171968,
+     "nonlin_sum 111 factored": 204999680,
+     "FactoredTensor3.from_dstensor": 393216,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 153534693380.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.7533105512466136e-08,
+      "1": 1.7949123787275312e-07,
+      "2": 3.1467207008972764e-06,
+      "3": 4.009184067399474e-06,
+      "4": 7.628108050994342e-06,
+      "5": 1.5520348824793473e-05,
+      "6": 7.93295657786075e-06,
+      "7": 9.70939527178416e-06,
+      "8": 8.35350056149764e-06,
+      "9": 1.672142207098659e-05,
+      "10": 1.5028447705844883e-05,
+      "11": 3.419626227696426e-05,
+      "12": 3.3325668482575566e-05,
+      "13": 4.754540350404568e-05,
+      "14": 0.7711907029151917,
+      "15": 0.8075186014175415
+     },
+     "d21": {
+      "0": 6.609067071394747e-08,
+      "1": 2.0615526352685265e-07,
+      "2": 4.0754628116701497e-07,
+      "3": 6.791488544877211e-07,
+      "4": 8.520642040821258e-07,
+      "5": 1.0575096212050994e-06,
+      "6": 1.5546233953500632e-06,
+      "7": 1.5987624237823184e-06,
+      "8": 1.5401986956931069e-06,
+      "9": 1.523414539406076e-06,
+      "10": 1.5367161267931806e-06,
+      "11": 1.5734329963379423e-06,
+      "12": 2.051381443379796e-06,
+      "13": 2.2976973923505284e-06,
+      "14": 0.8566154837608337,
+      "15": 0.8452259302139282
+     }
+    },
+    "seconds": 13.441768099997716
+   },
+   "k3pre:3": {
+    "D_final_layer": 0.002937620088536692,
+    "D_all_layers": 0.0010407773783201388,
+    "bracket": {
+     "D": 0.002937620088536692,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 7.5048957800612865e-06,
+     "mse_hi": 9.832825789087357e-06,
+     "mse_lo_anchor_ci": 7.490601892603668e-06,
+     "mse_hi_anchor_ci": 9.849201676544976e-06,
+     "D_over_rmse_full": 14.8279574576809
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 10256384,
+     "coerce_input": 0,
+     "contract_W_basic": 121672040448,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1732540416,
+     "nonlin_sum": 2006589184,
+     "zero_repeated": 0,
+     "harmonic diagslice": 411987456,
+     "get_wick_coef": 1113344,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 14498468608,
+     "DSTensor.to_tensor": 440031744,
+     "DS_harmonic_proj": 1052926,
+     "FactoredTensor3.contract_W": 603979776,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 1828849408,
+     "nonlin_sum 111 factored": 308089344,
+     "FactoredTensor3.from_dstensor": 589824,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 143515588862.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.7533105512466136e-08,
+      "1": 1.7949123787275312e-07,
+      "2": 3.1467207008972764e-06,
+      "3": 4.009184067399474e-06,
+      "4": 7.628108050994342e-06,
+      "5": 1.5520348824793473e-05,
+      "6": 7.93295657786075e-06,
+      "7": 9.70939527178416e-06,
+      "8": 8.35350056149764e-06,
+      "9": 1.672142207098659e-05,
+      "10": 1.5028447705844883e-05,
+      "11": 3.419626227696426e-05,
+      "12": 3.3325668482575566e-05,
+      "13": 0.8305050134658813,
+      "14": 0.692261815071106,
+      "15": 0.7483654618263245
+     },
+     "d21": {
+      "0": 6.609067071394747e-08,
+      "1": 2.0615526352685265e-07,
+      "2": 4.0754628116701497e-07,
+      "3": 6.791488544877211e-07,
+      "4": 8.520642040821258e-07,
+      "5": 1.0575096212050994e-06,
+      "6": 1.5546233953500632e-06,
+      "7": 1.5987624237823184e-06,
+      "8": 1.5401986956931069e-06,
+      "9": 1.523414539406076e-06,
+      "10": 1.5367161267931806e-06,
+      "11": 1.5734329963379423e-06,
+      "12": 2.051381443379796e-06,
+      "13": 0.890503466129303,
+      "14": 0.7905475497245789,
+      "15": 0.7802594900131226
+     }
+    },
+    "seconds": 12.362850100002106
+   },
+   "k3pre:4": {
+    "D_final_layer": 0.003222727399961044,
+    "D_all_layers": 0.0013432174979283412,
+    "bracket": {
+     "D": 0.003222727399961044,
+     "rmse_full": 0.00019811360377318868,
+     "mse_lo": 9.14828861608991e-06,
+     "mse_hi": 1.1702153172829434e-05,
+     "mse_lo_anchor_ci": 9.132506418911407e-06,
+     "mse_hi_anchor_ci": 1.1720017370007938e-05,
+     "D_over_rmse_full": 16.26706767522436
+    },
+    "flops_upstream_counter": {
+     "is_symmetric": 0,
+     "symmetrize": 0,
+     "DSTensor constructor": 9469952,
+     "coerce_input": 0,
+     "contract_W_basic": 111600074752,
+     "harmonic contract_W": 0,
+     "clone_tower": 0,
+     "get_mean_var": 0,
+     "eval_part": 1597929472,
+     "nonlin_sum": 1850667264,
+     "zero_repeated": 0,
+     "harmonic diagslice": 378169856,
+     "get_wick_coef": 1102080,
+     "DSTower.from_slices": 0,
+     "pK_to_K": 13388547072,
+     "DSTensor.to_tensor": 406345728,
+     "DS_harmonic_proj": 1052920,
+     "FactoredTensor3.contract_W": 1207959552,
+     "setup": 0,
+     "FactoredTensor3.get_dslice": 3250587904,
+     "nonlin_sum 111 factored": 411572224,
+     "FactoredTensor3.from_dstensor": 786432,
+     "resid": 0
+    },
+    "total_flops_upstream_counter": 134104265208.0,
+    "trace": [
+     {
+      "layer": 0,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 1,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 2,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 3,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 4,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 5,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 6,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 7,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 8,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 9,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 10,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 11,
+      "k_max": 3,
+      "in_window": false,
+      "rank_out": null,
+      "rank_retained": null
+     },
+     {
+      "layer": 12,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 512,
+      "rank_retained": 512
+     },
+     {
+      "layer": 13,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1024,
+      "rank_retained": 1024
+     },
+     {
+      "layer": 14,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 1536,
+      "rank_retained": 1536
+     },
+     {
+      "layer": 15,
+      "k_max": 3,
+      "in_window": true,
+      "rank_out": 2048,
+      "rank_retained": 2048
+     }
+    ],
+    "slice_drift_relative": {
+     "d3": {
+      "0": 3.7533105512466136e-08,
+      "1": 1.7949123787275312e-07,
+      "2": 3.1467207008972764e-06,
+      "3": 4.009184067399474e-06,
+      "4": 7.628108050994342e-06,
+      "5": 1.5520348824793473e-05,
+      "6": 7.93295657786075e-06,
+      "7": 9.70939527178416e-06,
+      "8": 8.35350056149764e-06,
+      "9": 1.672142207098659e-05,
+      "10": 1.5028447705844883e-05,
+      "11": 3.419626227696426e-05,
+      "12": 0.794378936290741,
+      "13": 0.7539928555488586,
+      "14": 0.6323094367980957,
+      "15": 0.6763405203819275
+     },
+     "d21": {
+      "0": 6.609067071394747e-08,
+      "1": 2.0615526352685265e-07,
+      "2": 4.0754628116701497e-07,
+      "3": 6.791488544877211e-07,
+      "4": 8.520642040821258e-07,
+      "5": 1.0575096212050994e-06,
+      "6": 1.5546233953500632e-06,
+      "7": 1.5987624237823184e-06,
+      "8": 1.5401986956931069e-06,
+      "9": 1.523414539406076e-06,
+      "10": 1.5367161267931806e-06,
+      "11": 1.5734329963379423e-06,
+      "12": 0.8890915513038635,
+      "13": 0.8159596920013428,
+      "14": 0.7195456624031067,
+      "15": 0.7094050645828247
+     }
+    },
+    "seconds": 11.103415900000982
+   }
+  }
+ },
+ "summary": {
+  "late:2": {
+   "n": 6,
+   "mean_D": 0.007722582560657647,
+   "se_D": 0.0007223046889414037,
+   "t_crit": 2.571,
+   "min_D": 0.005434235208296164,
+   "max_D": 0.01044799405418447,
+   "t95_lo": 0.005865537205389297,
+   "t95_hi": 0.009579627915925995,
+   "bracket_at_mean_D": {
+    "D": 0.007722582560657647,
+    "rmse_full": 0.00019811360377318868,
+    "mse_lo": 5.661763308311789e-05,
+    "mse_hi": 6.273742772922933e-05,
+    "mse_lo_anchor_ci": 5.65783608598689e-05,
+    "mse_hi_anchor_ci": 6.277878195247831e-05,
+    "D_over_rmse_full": 38.98057686891044
+   },
+   "bracket_at_D_lo95": {
+    "D": 0.005865537205389297,
+    "rmse_full": 0.00019811360377318868,
+    "mse_lo": 3.211969028015531e-05,
+    "mse_hi": 3.676786113545687e-05,
+    "mse_lo_anchor_ci": 3.209011215643875e-05,
+    "mse_hi_anchor_ci": 3.679952125917342e-05,
+    "D_over_rmse_full": 29.606938108624213
+   },
+   "provable_score_floor": {
+    "m": 2,
+    "D_lo": 0.005865537205389297,
+    "multiplier": 0.1,
+    "mse_floor": 3.209011215643875e-05,
+    "score_floor": 3.2090112156438753e-06,
+    "bar": 6.86903555333629e-08,
+    "provably_cannot_clear_bar": true,
+    "x_worse_than_v27": 23.358528214963588
+   }
+  },
+  "late:3": {
+   "n": 6,
+   "mean_D": 0.007713968031278756,
+   "se_D": 0.0007216213914247347,
+   "t_crit": 2.571,
+   "min_D": 0.005493283063221719,
+   "max_D": 0.01045425364089138,
+   "t95_lo": 0.005858679433925764,
+   "t95_hi": 0.009569256628631749,
+   "bracket_at_mean_D": {
+    "D": 0.007713968031278756,
+    "rmse_full": 0.00019811360377318868,
+    "mse_lo": 5.6488067775455047e-05,
+    "mse_hi": 6.260103579972625e-05,
+    "mse_lo_anchor_ci": 5.644884052154674e-05,
+    "mse_hi_anchor_ci": 6.264234505363455e-05,
+    "D_over_rmse_full": 38.93709409329674
+   },
+   "bracket_at_D_lo95": {
+    "D": 0.005858679433925764,
+    "rmse_full": 0.00019811360377318868,
+    "mse_lo": 3.204200551749091e-05,
+    "mse_hi": 3.66847419015185e-05,
+    "mse_lo_anchor_ci": 3.2012463192533365e-05,
+    "mse_hi_anchor_ci": 3.671636622647605e-05,
+    "D_over_rmse_full": 29.57232275999129
+   },
+   "provable_score_floor": {
+    "m": 3,
+    "D_lo": 0.005858679433925764,
+    "multiplier": 0.1,
+    "mse_floor": 3.2012463192533365e-05,
+    "score_floor": 3.2012463192533365e-06,
+    "bar": 6.86903555333629e-08,
+    "provably_cannot_clear_bar": true,
+    "x_worse_than_v27": 23.30200720608071
+   }
+  },
+  "late:4": {
+   "n": 6,
+   "mean_D": 0.007590302720529335,
+   "se_D": 0.0007603297605306331,
+   "t_crit": 2.571,
+   "min_D": 0.0052052495551460215,
+   "max_D": 0.01052372398942411,
+   "t95_lo": 0.0056354949062050776,
+   "t95_hi": 0.009545110534853593,
+   "bracket_at_mean_D": {
+    "D": 0.007590302720529335,
+    "rmse_full": 0.00019811360377318868,
+    "mse_lo": 5.464445993788802e-05,
+    "mse_hi": 6.0659428840662034e-05,
+    "mse_lo_anchor_ci": 5.460587823839641e-05,
+    "mse_hi_anchor_ci": 6.070009254015364e-05,
+    "D_over_rmse_full": 38.31287996365525
+   },
+   "bracket_at_D_lo95": {
+    "D": 0.0056354949062050776,
+    "rmse_full": 0.00019811360377318868,
+    "mse_lo": 2.956511542803591e-05,
+    "mse_hi": 3.4030988247690845e-05,
+    "mse_lo_anchor_ci": 2.9536738165105348e-05,
+    "mse_hi_anchor_ci": 3.4061447510621406e-05,
+    "D_over_rmse_full": 28.44577453982868
+   },
+   "provable_score_floor": {
+    "m": 4,
+    "D_lo": 0.0056354949062050776,
+    "multiplier": 0.12026473158039153,
+    "mse_floor": 2.9536738165105348e-05,
+    "score_floor": 3.552227887186701e-06,
+    "bar": 6.86903555333629e-08,
+    "provably_cannot_clear_bar": true,
+    "x_worse_than_v27": 25.856816867554166
+   }
+  },
+  "k3pre:2": {
+   "n": 6,
+   "mean_D": 0.002370650109007584,
+   "se_D": 0.00012586294529143627,
+   "t_crit": 2.571,
+   "min_D": 0.0020241588997243426,
+   "max_D": 0.0027887603302899997,
+   "t95_lo": 0.002047056476663301,
+   "t95_hi": 0.002694243741351867,
+   "bracket_at_mean_D": {
+    "D": 0.002370650109007584,
+    "rmse_full": 0.00019811360377318868,
+    "mse_lo": 4.71991486657608e-06,
+    "mse_hi": 6.59854701209926e-06,
+    "mse_lo_anchor_ci": 4.708580660958143e-06,
+    "mse_hi_anchor_ci": 6.611963217717197e-06,
+    "D_over_rmse_full": 11.966114713261359
+   },
+   "bracket_at_D_lo95": {
+    "D": 0.002047056476663301,
+    "rmse_full": 0.00019811360377318868,
+    "mse_lo": 3.418589747211142e-06,
+    "mse_hi": 5.040788690087194e-06,
+    "mse_lo_anchor_ci": 3.4089447565987005e-06,
+    "mse_hi_anchor_ci": 5.0525156806996344e-06,
+    "D_over_rmse_full": 10.332740597697086
+   },
+   "provable_score_floor": {
+    "m": 2,
+    "D_lo": 0.002047056476663301,
+    "multiplier": 0.1,
+    "mse_floor": 3.4089447565987005e-06,
+    "score_floor": 3.4089447565987007e-07,
+    "bar": 6.86903555333629e-08,
+    "provably_cannot_clear_bar": true,
+    "x_worse_than_v27": 2.4813852906489737
+   }
+  },
+  "k3pre:3": {
+   "n": 6,
+   "mean_D": 0.0028098953069656215,
+   "se_D": 0.00014395570367921781,
+   "t_crit": 2.571,
+   "min_D": 0.002288632572716719,
+   "max_D": 0.0031136138956582384,
+   "t95_lo": 0.0024397851928063524,
+   "t95_hi": 0.0031800054211248907,
+   "bracket_at_mean_D": {
+    "D": 0.0028098953069656215,
+    "rmse_full": 0.00019811360377318868,
+    "mse_lo": 6.821403665130765e-06,
+    "mse_hi": 9.048117607084084e-06,
+    "mse_lo_anchor_ci": 6.807776523233127e-06,
+    "mse_hi_anchor_ci": 9.063826748981722e-06,
+    "D_over_rmse_full": 14.183252706777996
+   },
+   "bracket_at_D_lo95": {
+    "D": 0.0024397851928063524,
+    "rmse_full": 0.00019811360377318868,
+    "mse_lo": 5.025091513078469e-06,
+    "mse_hi": 6.9585100609957914e-06,
+    "mse_lo_anchor_ci": 5.013396410306553e-06,
+    "mse_hi_anchor_ci": 6.972287163767707e-06,
+    "D_over_rmse_full": 12.315081581169723
+   },
+   "provable_score_floor": {
+    "m": 3,
+    "D_lo": 0.0024397851928063524,
+    "multiplier": 0.1,
+    "mse_floor": 5.013396410306553e-06,
+    "score_floor": 5.013396410306553e-07,
+    "bar": 6.86903555333629e-08,
+    "provably_cannot_clear_bar": true,
+    "x_worse_than_v27": 3.6492724279695614
+   }
+  },
+  "k3pre:4": {
+   "n": 6,
+   "mean_D": 0.0031160593263079204,
+   "se_D": 0.00013507518388782857,
+   "t_crit": 2.571,
+   "min_D": 0.002664284739923608,
+   "max_D": 0.003512275732042018,
+   "t95_lo": 0.0027687810285323133,
+   "t95_hi": 0.0034633376240835274,
+   "bracket_at_mean_D": {
+    "D": 0.0031160593263079204,
+    "rmse_full": 0.00019811360377318868,
+    "mse_lo": 8.514407239658737e-06,
+    "mse_hi": 1.0983742210482405e-05,
+    "mse_lo_anchor_ci": 8.49918186836496e-06,
+    "mse_hi_anchor_ci": 1.100104958177618e-05,
+    "D_over_rmse_full": 15.72864895171639
+   },
+   "bracket_at_D_lo95": {
+    "D": 0.0027687810285323133,
+    "rmse_full": 0.00019811360377318868,
+    "mse_lo": 6.608331008717709e-06,
+    "mse_hi": 8.802463759203201e-06,
+    "mse_lo_anchor_ci": 6.594918490499674e-06,
+    "mse_hi_anchor_ci": 8.817958277421235e-06,
+    "D_over_rmse_full": 13.9757239068861
+   },
+   "provable_score_floor": {
+    "m": 4,
+    "D_lo": 0.0027687810285323133,
+    "multiplier": 0.12026473158039153,
+    "mse_floor": 6.594918490499674e-06,
+    "score_floor": 7.931361020545042e-07,
+    "bar": 6.86903555333629e-08,
+    "provably_cannot_clear_bar": true,
+    "x_worse_than_v27": 5.773271195759629
+   }
+  }
+ },
+ "gate_table": [
+  {
+   "m": 2,
+   "multiplier": 0.1,
+   "total_budgets": 0.07431431184522808,
+   "floor_pinned": true,
+   "D_max": 0.0006306828461067737,
+   "bar_adjusted": 6.86903555333629e-08
+  },
+  {
+   "m": 4,
+   "multiplier": 0.12026473158039153,
+   "total_budgets": 0.12026473158039153,
+   "floor_pinned": false,
+   "D_max": 0.0005576374109509626,
+   "bar_adjusted": 6.86903555333629e-08
+  },
+  {
+   "m": 6,
+   "multiplier": 0.2014000134076923,
+   "total_budgets": 0.2014000134076923,
+   "floor_pinned": false,
+   "D_max": 0.0003858935063459437,
+   "bar_adjusted": 6.86903555333629e-08
+  },
+  {
+   "m": 8,
+   "multiplier": 0.31772015732713044,
+   "total_budgets": 0.31772015732713044,
+   "floor_pinned": false,
+   "D_max": 0.0002668570007797671,
+   "bar_adjusted": 6.86903555333629e-08
+  }
+ ],
+ "ship_bar_adjusted": 6.86903555333629e-08,
+ "gate": {
+  "clauses": {
+   "late:2": {
+    "m": 2,
+    "mean_D": 0.007722582560657647,
+    "se_D": 0.0007223046889414037,
+    "D_hi95": 0.009579627915925995,
+    "D_max": 0.0006306828461067737,
+    "G1_could_clear_the_bar": false,
+    "G2_beats_pure_K2": null,
+    "G2_detail": null,
+    "G3_beats_matched_rank_normsort": null,
+    "G3_detail": null,
+    "G3_control": "normsort:1024",
+    "passes_all": false
+   },
+   "late:3": {
+    "m": 3,
+    "mean_D": 0.007713968031278756,
+    "se_D": 0.0007216213914247347,
+    "D_hi95": 0.009569256628631749,
+    "D_max": 0.0006306828461067737,
+    "G1_could_clear_the_bar": false,
+    "G2_beats_pure_K2": null,
+    "G2_detail": null,
+    "G3_beats_matched_rank_normsort": null,
+    "G3_detail": null,
+    "G3_control": "normsort:1536",
+    "passes_all": false
+   },
+   "late:4": {
+    "m": 4,
+    "mean_D": 0.007590302720529335,
+    "se_D": 0.0007603297605306331,
+    "D_hi95": 0.009545110534853593,
+    "D_max": 0.0005576374109509626,
+    "G1_could_clear_the_bar": false,
+    "G2_beats_pure_K2": null,
+    "G2_detail": null,
+    "G3_beats_matched_rank_normsort": null,
+    "G3_detail": null,
+    "G3_control": "normsort:2048",
+    "passes_all": false
+   }
+  },
+  "note": "G1/G2/G3 are conjunctive; m is the SMALLEST window passing all three. There is deliberately no separate cost clause: cost already enters through D_max(m), and a redundant clause that cannot fail is not a gate.",
+  "selected_m": null,
+  "verdict": "FAIL"
+ }
+}

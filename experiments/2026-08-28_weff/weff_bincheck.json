@@ -1,0 +1,99 @@
+{
+ "stack": {
+  "note": "upstream-scoring pass; flopscope deliberately not imported (the torch venv would resolve the shim)"
+ },
+ "host": "Windows-10-10.0.26200-SP0",
+ "utc": "2026-08-28T23:20:16Z",
+ "screen_budgets": 0.35,
+ "budget": 2199023255552,
+ "probe_seeds": [
+  1000301,
+  1000302,
+  1000303
+ ],
+ "bincheck": {
+  "increment_rows": [
+   {
+    "depth": 1,
+    "nonlin_sum_111_factored": 1280
+   },
+   {
+    "depth": 2,
+    "nonlin_sum_111_factored": 33888,
+    "increment": 32608,
+    "wick_term_3n_2nl": 1536,
+    "increment_minus_wick": 31072
+   },
+   {
+    "depth": 3,
+    "nonlin_sum_111_factored": 68032,
+    "increment": 34144,
+    "wick_term_3n_2nl": 3072,
+    "increment_minus_wick": 31072
+   },
+   {
+    "depth": 4,
+    "nonlin_sum_111_factored": 103712,
+    "increment": 35680,
+    "wick_term_3n_2nl": 4608,
+    "increment_minus_wick": 31072
+   },
+   {
+    "depth": 5,
+    "nonlin_sum_111_factored": 140928,
+    "increment": 37216,
+    "wick_term_3n_2nl": 6144,
+    "increment_minus_wick": 31072
+   }
+  ],
+  "increment_minus_wick_constant": true,
+  "increment_minus_wick_values": [
+   31072,
+   31072,
+   31072,
+   31072
+  ],
+  "closure": {
+   "contract_W_basic": {
+    "fnp": 68685922304,
+    "upstream": 51589939200,
+    "delta": 17095983104,
+    "ratio": 1.3313821138211381
+   },
+   "contract_W": {
+    "fnp": 1545433251840,
+    "upstream": 1546188226560,
+    "delta": -754974720,
+    "ratio": 0.99951171875
+   },
+   "get_dslice(aged+L0fresh)": {
+    "fnp": 1554172108800,
+    "upstream": 1555982991360,
+    "delta": -1810882560,
+    "ratio": 0.998836181005798
+   },
+   "nonlin_sum bin": {
+    "fnp": 98370632192,
+    "upstream": 97790289920,
+    "delta": 580342272,
+    "ratio": 1.005934559274492
+   },
+   "from_dstensor": {
+    "fnp": 50348032,
+    "upstream": 50331648,
+    "delta": 16384,
+    "ratio": 1.0003255208333333
+   }
+  },
+  "unexecuted_flops": 2104414384,
+  "unexecuted_budgets": 0.0009569768662913702,
+  "observed_gap": 13006070096,
+  "reconstructed_gap": 13006070096,
+  "closes_exactly": true,
+  "weff_whole_path_flops": 2360064208560,
+  "weff_whole_path_budgets": 1.0732329467646196,
+  "screen_budgets": 0.35,
+  "x_over_screen": 3.0663798478989133,
+  "pass": true
+ }
+}

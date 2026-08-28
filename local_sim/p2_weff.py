@@ -1152,6 +1152,123 @@ def verify_rank_trajectory(n=64, depth=6) -> dict:
     return {"n": n, "observed": ranks, "expected": expected, "pass": bool(ok and ranks)}
 
 
+
+# ==========================================================================
+# 8b. bin reconciliation -- turning the flop_name-scope claim into a TEST
+# ==========================================================================
+
+def bin_reconciliation(artifact: str, n: int = 16, depths=(1, 2, 3, 4, 5)) -> dict:
+    """Prove, by measurement, WHERE upstream bills the fresh two-leg slice.
+
+    Two assertions, both of which a wrong binning story would fail:
+
+    (i) **`contract_wick_` lives inside upstream's `nonlin_sum 111 factored`
+        bin.** Its cost is `3n * r = 3n * 2nl`, which grows with `l`; the fresh
+        two-leg slice is `3 * 2n^3`, which does not. So
+
+            delta_l( nonlin_sum ) - 3n * 2n * l
+
+        must be **constant in `l`**. If it is not, the bin contains something
+        else and every "like for like" ratio built on it is void.
+
+    (ii) At width 1024 the exhaustive bin mapping must close the observed
+        fnp-versus-upstream total gap to **zero**, with a named residual equal
+        to the upstream lines this module genuinely never executes.
+
+    This exists because two successive prose accounts of the same binning were
+    wrong -- the first mis-attributed `~1.0e11` FLOPs, the second mis-stated the
+    remainder by `4.31x` and closed only to `16,384`. A claim this load-bearing
+    should not be an argument.
+    """
+    import torch
+    import p2_kprop_bridge as bridge
+    bridge._src()
+    from mlp_kprop.kprop_harmonic import SIMPLE, mlp_kprop
+    from mlp_kprop.flop_utils import NamedFlopCounter
+
+    rows = []
+    prev = None
+    residuals = []
+    for depth in depths:
+        rng = np.random.default_rng(31337)
+        Ws = [np.asarray(rng.standard_normal((n, n)) * math.sqrt(2.0 / n),
+                         dtype=np.float64) for _ in range(depth)]
+        mlp = bridge.build_mlp(Ws, device="cpu", dtype=torch.float64)
+        K_in = {1: torch.zeros(n, dtype=torch.float64),
+                2: torch.eye(n, dtype=torch.float64)}
+        with torch.no_grad(), NamedFlopCounter() as ctr:
+            mlp_kprop(mlp, K_in, k_max=3, output_all=True, kind=SIMPLE,
+                      use_avg_metric=True, factor=True,
+                      up_to_layer=f"act{depth - 1}", output_d_max=1)
+        fl = ctr.flop_dict()
+        cur = int(fl.get("nonlin_sum 111 factored", 0))
+        row = {"depth": depth, "nonlin_sum_111_factored": cur}
+        if prev is not None:
+            l = depth - 1
+            delta = cur - prev
+            wick = 3 * n * (2 * n * l)
+            row.update({"increment": delta, "wick_term_3n_2nl": wick,
+                        "increment_minus_wick": delta - wick})
+            residuals.append(delta - wick)
+        rows.append(row)
+        prev = cur
+
+    const = len(set(residuals)) == 1 if residuals else False
+
+    # ---- (ii) the width-1024 closure ------------------------------------
+    with open(artifact, "r", encoding="utf-8") as fh:
+        art = json.load(fh)
+    seed = sorted(art["price"]["per_seed"])[0]
+    b = art["price"]["per_seed"][seed]["f32"]
+    D = b["lines_dense"]
+    L0 = b["layers"][0]["lines"]
+    fresh0 = L0["dense/get_dslice_21_fresh"] + L0["dense/get_dslice_3_fresh"]
+    aged = D["dense/get_dslice_21_aged"] + D["dense/get_dslice_3_aged"]
+    fresh = D["dense/get_dslice_21_fresh"] + D["dense/get_dslice_3_fresh"]
+
+    up_path = os.path.join(_ROOT, "experiments", "2026-08-27_pb_rank",
+                           "cost_ladder.json")
+    with open(up_path, "r", encoding="utf-8") as fh:
+        cell = [c for c in json.load(fh)["cells"] if c["cell"] == "none"][0]
+    U, UT = cell["flops"], cell["total_flops"]
+
+    groups = {
+        "contract_W_basic": (D["contract_W_basic"], U["contract_W_basic"]),
+        "contract_W": (D["dense/contract_W"], U["FactoredTensor3.contract_W"]),
+        "get_dslice(aged+L0fresh)": (aged + fresh0,
+                                     U["FactoredTensor3.get_dslice"]),
+        "nonlin_sum bin": ((fresh - fresh0) + D["dense/contract_wick"]
+                           + D["dense/twoleg_assembly"]
+                           + D["dense/add_factors_concat"],
+                           U["nonlin_sum 111 factored"]),
+        "from_dstensor": (D["dense/from_dstensor"],
+                          U["FactoredTensor3.from_dstensor"]),
+    }
+    matched_up = {"contract_W_basic", "FactoredTensor3.contract_W",
+                  "FactoredTensor3.get_dslice", "nonlin_sum 111 factored",
+                  "FactoredTensor3.from_dstensor"}
+    unexecuted = int(sum(v for k, v in U.items() if k not in matched_up))
+    total_delta = sum(f - u for f, u in groups.values()) - unexecuted
+    gap = int(b["dense_total"]) - int(UT)
+
+    return {
+        "increment_rows": rows,
+        "increment_minus_wick_constant": bool(const),
+        "increment_minus_wick_values": residuals,
+        "closure": {k: {"fnp": int(f), "upstream": int(u), "delta": int(f - u),
+                        "ratio": f / u} for k, (f, u) in groups.items()},
+        "unexecuted_flops": unexecuted,
+        "unexecuted_budgets": unexecuted / BUDGET,
+        "observed_gap": gap, "reconstructed_gap": int(total_delta),
+        "closes_exactly": bool(int(total_delta) == gap),
+        "weff_whole_path_flops": int(b["weff_total"]) + unexecuted,
+        "weff_whole_path_budgets": (int(b["weff_total"]) + unexecuted) / BUDGET,
+        "screen_budgets": SCREEN,
+        "x_over_screen": ((int(b["weff_total"]) + unexecuted) / BUDGET) / SCREEN,
+        "pass": bool(const and int(total_delta) == gap),
+    }
+
+
 # ==========================================================================
 # 9. driver
 # ==========================================================================
@@ -1212,6 +1329,7 @@ def main(argv=None) -> int:
     ap.add_argument("--parity", action="store_true")
     ap.add_argument("--parity-upstream", action="store_true")
     ap.add_argument("--symmetry", action="store_true")
+    ap.add_argument("--bincheck", action="store_true")
     ap.add_argument("--mutations", action="store_true")
     ap.add_argument("--verify-rank", action="store_true")
     ap.add_argument("--price", action="store_true")
@@ -1224,11 +1342,11 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
 
     if not any([a.parity, a.parity_upstream, a.mutations, a.verify_rank,
-                a.price, a.symmetry, a.all]):
+                a.price, a.symmetry, a.bincheck, a.all]):
         ap.error("choose at least one of --parity --parity-upstream "
                  "--mutations --verify-rank --price --all")
 
-    _torch_only = (a.parity_upstream or a.verify_rank) and not (
+    _torch_only = (a.parity_upstream or a.verify_rank or a.bincheck) and not (
         a.all or a.parity or a.price or a.mutations or a.symmetry)
     if _torch_only:
         # The torch venv has no real flopscope on its path -- `import
@@ -1243,6 +1361,29 @@ def main(argv=None) -> int:
                     "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                     "screen_budgets": SCREEN, "budget": BUDGET,
                     "probe_seeds": list(PROBE_SEEDS)}
+
+    if a.bincheck:
+        print("\n== bin reconciliation ==")
+        art = os.path.join(_ROOT, "experiments", "2026-08-28_weff",
+                           "weff_price_f32_1000301-1000302-1000303.json")
+        report["bincheck"] = bin_reconciliation(art)
+        bc = report["bincheck"]
+        for r in bc["increment_rows"]:
+            if "increment" in r:
+                print(f"  depth {r['depth']}  d(nonlin_sum) {r['increment']:>10,d}"
+                      f"  - 3n*2nl {r['wick_term_3n_2nl']:>10,d}"
+                      f"  = {r['increment_minus_wick']:>10,d}")
+        print(f"  constant in l                : {bc['increment_minus_wick_constant']}")
+        for k, v in bc["closure"].items():
+            print(f"  {k:26s} fnp {v['fnp']:>18,d}  up {v['upstream']:>18,d}"
+                  f"  ratio {v['ratio']:.5f}")
+        print(f"  genuinely unexecuted         : {bc['unexecuted_flops']:,d}"
+              f" = {bc['unexecuted_budgets']:.6f} B")
+        print(f"  gap closes exactly           : {bc['closes_exactly']}"
+              f"  ({bc['reconstructed_gap']:,d} vs {bc['observed_gap']:,d})")
+        print(f"  W-EFF whole path             : {bc['weff_whole_path_budgets']:.4f} B"
+              f"  = {bc['x_over_screen']:.4f}x the {SCREEN} B screen")
+        print(f"  PASS = {bc['pass']}")
 
     if a.verify_rank:
         print("\n== rank trajectory ==")
@@ -1334,6 +1475,8 @@ def main(argv=None) -> int:
         # two modes share an artifact name.
         if a.parity_upstream:
             name = "weff_upstream.json"
+        elif a.bincheck:
+            name = "weff_bincheck.json"
         elif a.verify_rank:
             name = "weff_rank.json"
         elif a.price and not (a.all or a.parity):

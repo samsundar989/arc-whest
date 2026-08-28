@@ -541,6 +541,25 @@ def cmd_selftest(a) -> int:
 # the drift panel
 # ==========================================================================
 
+
+def _free(device: str) -> None:
+    """Release cached GPU blocks between arms.
+
+    Not cosmetic: the `k3pre` arms carry a full-K3 prefix, so a panel that runs
+    the control plus three of them accumulates past a 31.84 GiB card. Measured,
+    not guessed -- the first attempt OOM'd inside `DS_harmonic_proj`.
+    """
+    import gc
+
+    gc.collect()
+    if str(device).startswith("cuda"):
+        try:
+            import torch
+
+            torch.cuda.empty_cache()
+        except Exception:                                         # noqa: BLE001
+            pass
+
 def _rms(x) -> float:
     return float(np.sqrt(np.mean(np.asarray(x, dtype=np.float64) ** 2)))
 
@@ -613,6 +632,8 @@ def cmd_drift(a) -> int:
 
     dtype = torch.float32 if a.dtype == "f32" else torch.float64
     report = {"utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+              "live_shape": (a.width, a.depth) == (WIDTH, DEPTH),
+              "device": a.device,
               "width": a.width, "depth": a.depth, "dtype": a.dtype,
               "seeds": seeds, "arms": [k for k, _ in arms],
               "mse_full_anchor": MSE_FULL, "mse_full_anchor_ci": MSE_FULL_CI,
@@ -622,12 +643,19 @@ def cmd_drift(a) -> int:
               "per_seed": {}}
 
     for seed in seeds:
-        Ws = bridge._mint(seed)
+        # `bridge._mint` is pinned to the live 1024x16 shape. A reduced-shape
+        # run mints at the requested shape and MUST declare the deviation.
+        if (a.width, a.depth) == (WIDTH, DEPTH):
+            Ws = bridge._mint(seed)
+        else:
+            from mint_provenance import canonical_mint
+            Ws, _e, _s = canonical_mint(a.width, a.depth, seed)
         t0 = time.perf_counter()
         ctrl_trace, ctrl_slices = [], {}
         ctrl, ctrl_flops = predict(Ws, arm="full", dtype=dtype, device=a.device,
                                    count_flops=True, trace=ctrl_trace,
                                    slice_trace=ctrl_slices)
+        _free(a.device)
         row = {"control": {"flops": ctrl_flops,
                            "total_flops": float(sum(ctrl_flops.values())),
                            "trace": ctrl_trace,
@@ -635,6 +663,10 @@ def cmd_drift(a) -> int:
         for name, kw in arms:
             t1 = time.perf_counter()
             tr, sl = [], {}
+            # `k3pre:m` runs FULL K3 over its prefix, so it is nearly as heavy as
+            # the control; three of them on one card OOM'd at 31.84 GiB. Release
+            # the previous arm's allocations before starting the next.
+            _free(a.device)
             got, fl = predict(Ws, dtype=dtype, device=a.device,
                               count_flops=True, trace=tr, slice_trace=sl, **kw)
             D_final = _rms(got[-1] - ctrl[-1])
@@ -655,6 +687,8 @@ def cmd_drift(a) -> int:
             }
             if kw.get("arm", "").startswith("late:"):
                 row[name]["weff_flopscope_cost"] = weff_window_cost(kw["m"])
+            del got, fl, sl, tr
+            _free(a.device)
             print(f"  seed {seed} {name:14s} D_final={D_final:.4e} "
                   f"D/RMSE_full={row[name]['bracket']['D_over_rmse_full']:.3f} "
                   f"upstream_flops={row[name]['total_flops_upstream_counter']:.4e}",
@@ -738,7 +772,11 @@ def cmd_drift(a) -> int:
 
     if a.out:
         os.makedirs(a.out, exist_ok=True)
-        path = os.path.join(a.out, f"window_drift_{a.dtype}_"
+        # Run-specific name. The committed panel must not be overwritable by a
+        # later invocation -- the 2026-08-21 "an evidence file a documented
+        # invocation can shrink" trap.
+        tag = ("_" + a.tag) if a.tag else ""
+        path = os.path.join(a.out, f"window_drift_{a.dtype}{tag}_"
                                    f"{'-'.join(str(s) for s in seeds)}.json")
         with open(path, "w", encoding="utf-8") as fh:
             json.dump(report, fh, indent=1, default=float)
@@ -777,6 +815,7 @@ def main(argv=None) -> int:
     ap.add_argument("--k3pre", default="")
     ap.add_argument("--age", default="")
     ap.add_argument("--normsort", default="")
+    ap.add_argument("--tag", default="")
     ap.add_argument("--out", default=None)
     a = ap.parse_args(argv)
 

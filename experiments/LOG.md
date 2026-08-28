@@ -19675,6 +19675,17 @@ shape and per layer, with the comparison basis named.
 
 # 2026-08-28 — RESULT P2-WEFF: the exact spelling is measured, and the full-tower port is KILLED by its own screen
 
+> **PARTLY STRUCK — 2026-08-28.** Claims in this entry were corrected twice by
+> independent review. **Struck:** the `+6.1%` `get_dslice` divergence; "`~1.0e11`
+> FLOPs ... not executed here at all"; the `1.117 B` whole-path figure and "FAIL by
+> `3.19x`"; caution 3's "the un-respelled remainder adds, proportionally";
+> "**`m <= 3` is FREE**" as a category rather than a `7.1%` margin; "Prediction 6
+> HELD ... measured, not asserted" (it was satisfied by construction).
+> **The gate verdict is NOT struck: the screen still FAILS.** Read this entry only
+> alongside the corrections at `966731b` and the entry headed
+> "TWO MORE INDEPENDENT PASSES" at the bottom of this file.
+
+
 **Classification: IMPORTANT.** Contract committed at **`08bb4d5`** before any
 artifact existed; every artifact below post-dates it. No truth, no labels, no seed
 block, no vault touch, no `estimator.py` edit, no submission. Preflight
@@ -19937,6 +19948,17 @@ controls the next implementation.**
 ---
 
 # 2026-08-28 — SKEPTIC PROVISIONAL on P2-WEFF: C5 is REJECTED, and the correction runs in the project's favour
+
+> **PARTLY STRUCK — 2026-08-28.** A fresh pass found a new arithmetic error inside
+> this correction. **Struck:** the `488,517,808` / `0.000222 B` remainder (true value
+> **`2,104,414,384` = `0.000957 B`**); "wrong by a factor of 205" (it is `47.5`);
+> the `nonlin_sum` ratio `0.98941`; "it is `contract_W_basic` alone ... reproduces
+> exactly" (it does not); "the `~0.008 B` ... is **not recoverable**" (**it is** --
+> `0.8336x` via an aliased-operand spelling); the whole-path `1.0725 B` / `3.064x`
+> (now `1.0732 B` / `3.0664x`); the C1 pre-correction totals; "eight mutations, all
+> detected" (six are discriminating). **The gate verdict is NOT struck.**
+> See "TWO MORE INDEPENDENT PASSES" at the bottom of this file.
+
 
 **Rule 2 is satisfied.** The independent pass returned **PROVISIONAL**, reproduced
 every number bit-for-bit, and then broke one of the eight claims outright. **The
@@ -20507,6 +20529,22 @@ panel.
 
 # 2026-08-28 — RESULT P2-WINDOW: GATE-W FAILS. The late-window lane is dead, and today's honest outcome is a kill with NO SUBMISSION.
 
+> **PARTLY STRUCK — 2026-08-28, and the correction makes the kill STRONGER.**
+> **Struck:** every `[0, hi]` MSE bracket (an implementation bug dropped the
+> `D - RMSE_full` branch of the triangle inequality); "the panel's only decisive
+> content is its failures" (the corrected brackets prove every window arm's score
+> floor is `2.09x`-`4.65x` worse than graded v2.7); "G3 ... the cleanest kill in the
+> panel"; "through a different code path" (it is literally the same `cap_factored`);
+> the panel table's z-intervals mislabelled as studentised-t.
+> **RETRACTED:** the mechanism attribution -- "`kappa_3`'s contribution ... is
+> accumulated, not local" -- and with it "it equally kills any future 'start the
+> expensive machinery late' design on this state -- which is a family, not a single
+> arm." Measurement shows **`89.2%` of `late:2`'s squared drift is the K2 PREFIX**,
+> not the discarded `kappa_3`.
+> **`GATE-W: FAIL` is NOT struck and is now provable.**
+> See "TWO MORE INDEPENDENT PASSES" at the bottom of this file.
+
+
 **Classification: IMPORTANT.** Contract committed at **`f4461b4`** before any arm
 ran; the panel artifact post-dates it. **No ground truth, no labels, no seed
 block, no vault touch, no `estimator.py` edit, no submission.** Upstream pin
@@ -20808,3 +20846,354 @@ the prefix tower must carry `[1, 2, 3, 4]` at the checkpoint, asserted in
    summary block used `1.96` in fields named `t95_*`; the gate block itself
    always used `2.571`, so nothing decided moved, but every CI quoted in the
    panel table was ~24% too narrow. Fixed to a proper small-`n` `t` table.
+
+---
+
+# 2026-08-28 — TWO MORE INDEPENDENT PASSES, BOTH PROVISIONAL, BOTH ACCEPTED. The window's *reason* is retracted; its *verdict* is now provable.
+
+Rule 2 satisfied twice more. A fresh pass on the P2-WEFF **correction** and a
+fresh pass on the P2-WINDOW **result** both returned **PROVISIONAL**. Between
+them they found an arithmetic error inside my own correction, an implementation
+bug that made my kill *weaker* than the data supports, a mislabelled interval, a
+gate direction stated backwards, and — the one that matters — that my central
+mechanistic attribution was **wrong**.
+
+**Nothing changes either gate verdict. P2-WEFF still FAILS its screen; GATE-W
+still FAILS. Both now fail on better evidence than I had.**
+
+---
+
+## Part A — P2-WEFF pass 2: my own correction contained a new arithmetic error
+
+### A1. The unexecuted remainder was wrong again, by `4.31x`
+
+My correction promoted one number from "hand-waved `~3%`" to "a real bound", and
+got it wrong. Upstream's `nonlin_sum 111 factored` bin does **not** contain only
+the fresh two-leg slice — it also contains `contract_wick_`'s cost on the whole
+aged factor set, because `contract_wick_` is called at `factor_k3.py:382`, inside
+the same `flop_name` block.
+
+I verified the reviewer's mechanism by measurement rather than by reading it.
+Upstream at `n=16`, `NamedFlopCounter`, depths 1–5:
+
+| depth | `nonlin_sum 111 factored` | increment | `3n·2n·l` | increment − wick |
+|---|---:|---:|---:|---:|
+| 2 | `33,888` | `32,608` | `1,536` | **`31,072`** |
+| 3 | `68,032` | `34,144` | `3,072` | **`31,072`** |
+| 4 | `103,712` | `35,680` | `4,608` | **`31,072`** |
+| 5 | `140,928` | `37,216` | `6,144` | **`31,072`** |
+
+Constant to the FLOP across four increments; the growing part is exactly
+`contract_wick_`'s `3n·(2nl)`, which at `n=1024` sums to `754,974,720` —
+bit-identical to the `dense/contract_wick` line I had placed in the "not
+executed" bucket.
+
+**I then did the full exhaustive bin mapping, and unlike either prose account it
+closes to zero:**
+
+| bin | fnp | upstream | delta |
+|---|---:|---:|---:|
+| `contract_W_basic` | `68,685,922,304` | `51,589,939,200` | `+17,095,983,104` |
+| `contract_W` | `1,545,433,251,840` | `1,546,188,226,560` | `-754,974,720` |
+| `get_dslice` (aged + layer-0 fresh) | `1,554,172,108,800` | `1,555,982,991,360` | `-1,810,882,560` |
+| `nonlin_sum` bin (fresh `l>=1` + wick + assembly + concat) | `98,370,632,192` | `97,790,289,920` | `+580,342,272` |
+| `from_dstensor` | `50,348,032` | `50,331,648` | `+16,384` |
+| **upstream lines genuinely NOT executed** | — | **`2,104,414,384`** | `-2,104,414,384` |
+| **SUM** | | | **`+13,006,070,096`** |
+
+and the observed dense-total gap is **`+13,006,070,096`** — **exact**. The
+reviewer's own list omitted the `contract_W` term and closed only to `16,384`;
+mine omitted nothing.
+
+| the correction said | the truth |
+|---|---|
+| unexecuted remainder `488,517,808` = `0.000222 B` | **`2,104,414,384` = `0.000957 B`** |
+| "wrong by a factor of 205" | **wrong by a factor of `47.5`** |
+| `nonlin_sum` like-for-like `0.98941` | **`1.00593`** including the `concatenate` torch bills at 0 and flopscope bills at 1 FLOP/element; **`0.99772`** excluding it. Both are defensible; the honest statement names which |
+| whole path `1.0725 B`, FAIL by `3.064x` | **`1.0732 B`, FAIL by `3.0664x`** |
+
+### A2. "It is `contract_W_basic` alone" — RETRACTED
+
+My correction said the `1.0040` total agreement "is `contract_W_basic`'s
+`+1.71e10` less `~2.1e9` of small negatives, and it reproduces exactly."
+**It does not.** `contract_W_basic` alone gives `1.00525`, not `1.0040`; the
+offsetting terms total `-4.89e9`, not `~2.1e9`. That was an overcorrection of a
+claim the original entry had roughly right, and the commit message carries it
+too. The correct statement is the closing table above.
+
+### A3. "The `~0.008 B` is not recoverable" — REFUTED, and I measured it myself
+
+I generalised from a single spelling (`as_symmetric` on the core) to a claim
+about the operation. The reviewer found counterexamples; I reproduced them:
+
+| spelling | counted FLOPs | vs plain |
+|---|---:|---:|
+| `(W @ C) @ W.T` | `4,292,870,144` | `1.0000x` |
+| `as_symmetric(C, symmetry=(0,1))` then the same | `4,300,210,175` | `1.0017x` |
+| `W @ W.T` | `2,146,435,072` | — |
+| `fnp.einsum('ij,kj->ik', W, W)` (**aliased operands**) | **`1,074,265,600`** | **`0.5005x`** of `W @ W.T` |
+| `cholesky(C)` + `W @ L` + aliased Gram einsum | **`3,578,614,613`** | **`0.8336x`**, relerr `7.65e-07` |
+
+**flopscope's auto-detected `identity_pattern` does grant a discount.**
+`W C W^T` is `0.8336x` under a standard, exact, grader-legal spelling —
+**`16.6%` off that line** — conditional on the core being SPD, which is not free
+(upstream itself prints "Snapping negative variance to zero"). So roughly
+`0.005 B` of the flagged `0.008 B` **is** available. My "not recoverable" was
+wrong, and it is the kind of wrong that would have suppressed a real
+optimisation in a future slice.
+
+**It does not move the W-EFF screen** — `0.005 B` against a `0.72 B` miss — but
+it widens the `m <= 3` window margin, and that margin was already the thin part
+of the cost table.
+
+### A4. Two checks weaker than I described
+
+- **`commutation_parity` is oversold.** `_lineages_to_dense` (`phi`) sits on
+  both sides, and the operators are column-wise left-linear, so commutation is
+  near-automatic. The reviewer demonstrated it: a `phi` that *drops the `3.0`*
+  still passes commutation (`PASS=True`). What the check genuinely tests is the
+  two `m_is_identity` branches and left-vs-right ordering — which is real, and is
+  what found the `contract_wick_weff` defect. It is **not** a general proof that
+  the W-EFF operators are right. The dropped-`3.0` bug *is* caught by the dslice
+  parity (`1.390e+00`), so the suite as a whole is not blind; only my claim for
+  this one check was.
+- **M8 is constructed, not injected.** It compares
+  `phi(contract_W_weff(...))` against a hand-written `bad_lin` with `M = Wm @ Wm`,
+  so its detection is `3(W² − W) != 0` — guaranteed for nondegenerate `W`. It
+  demonstrates observability; it never executes a mutated `contract_W_weff`.
+  **Honest count: six discriminating mutations, not eight** — M1 and M2 are smoke
+  tests any implementation that reads its input list would fail.
+
+### A5. Stale figures inside a correction
+
+The correction's C1 bullet quotes the **pre-correction** totals
+(`3,266,688,647,168` / `2,357,936,193,536`); at HEAD the re-binned run gives
+`3,266,712,263,168` / `2,357,959,794,176`. The f64 pair and the memory table
+(`818.1 / 1,308.0 MB` against the current `1,070.1 / 1,559.7 MB`) were likewise
+left un-regenerated. Magnitudes are `<= 1.1e-5 B` and change nothing — but they
+are uncorrected numbers inside a correction, which is precisely the failure mode
+the correction existed to fix.
+
+---
+
+## Part B — P2-WINDOW pass: an implementation bug made my kill *weaker* than the data
+
+### B1. `bracket()` threw away the lower bound. The kill is provable, not merely undemonstrated.
+
+`local_sim/p2_window.py` computed `lo = max(0.0, rf - D)`. That is not the
+triangle inequality. The reverse triangle inequality gives `|rf - D|`, and when
+the candidate drifts *further* than the control's own error the lower bound is
+`D - rf` — large and informative. **`local_sim/p2_pb_rank.py:839` in this same
+repository already had it right.** Every arm in the panel has `D > RMSE_full`, so
+every lower bound was wrongly zero, and I concluded "the panel's only decisive
+content is its failures". **That conclusion was wrong, and it understated the
+result.**
+
+Fixed, and `provable_score_floor` now computes the decisive test. At the
+conservative low end of each arm's own `t`-interval:
+
+| arm | mean `D` | corrected MSE bracket | provable score floor | vs graded v2.7 |
+|---|---:|---|---:|---:|
+| `late:0` (pure K2) | `2.0706e-03` | `[3.505e-06, 5.150e-06]` | `2.901e-07` | **`2.11x` worse** |
+| `late:2` | `2.0630e-03` | `[3.478e-06, 5.113e-06]` | `2.874e-07` | **`2.09x` worse** |
+| `late:4` | `2.0186e-03` | `[3.314e-06, 4.914e-06]` | `3.215e-07` | **`2.34x` worse** |
+| `late:6` | `1.9333e-03` | `[3.021e-06, 4.541e-06]` | `4.752e-07` | **`3.46x` worse** |
+| `late:8` | `1.8229e-03` | `[2.640e-06, 4.084e-06]` | `6.387e-07` | **`4.65x` worse** |
+
+**Every window arm PROVABLY CANNOT clear the bar** — not "we failed to show it
+could". That is a strictly stronger kill than the one I recorded.
+
+*(`age:4` and `normsort:8192` show low floors only because
+`provable_score_floor` applies the `0.1` floor multiplier to non-window arms.
+Their real cost is `~2.3e12` upstream — over budget — so those floors are **not**
+viable scores and must not be quoted as such.)*
+
+### B2. G1's direction was stated backwards
+
+As coded, `g1 = (d_hi <= dmax)` tests the bracket's **upper** end: passing would
+prove the candidate clears the bar; failing proves only **undetermined**. The
+contract, the commit message and the docstring all asserted the reverse
+(*"`D > D_max` says it cannot … the only direction a bracket can decide"*).
+**The code was never wrong; the justification was.** The conclusion survives only
+because B1 supplies the test that was actually missing. Corrected in the
+docstring, in the addendum contract, and here.
+
+### B3. The reported "95% CI" was a z-interval mislabelled as studentised-t
+
+The summary block computed `mean ± 1.96·se` into fields named `t95_lo`/`t95_hi`
+under a contract specifying studentised-t. Correct `t` (`2.571` at `n=6`)
+intervals are **~24% wider**: `late:0` is `[1.904e-03, 2.237e-03]`, not the
+quoted `[1.944e-03, 2.198e-03]`. **The gate block itself always used `2.571`**,
+so nothing decided moved — but every CI in the published panel table was wrong.
+Fixed with a proper small-`n` table. No percentile bootstrap, no BCa, `decide()`
+correctly never invoked.
+
+### B4. An instrument check I never made, and it validates the whole panel
+
+`late:0` is pure K2, so `D² + MSE_full` should reproduce the *known* K2 raw MSE.
+Measured: **`4.3267e-06` against the organiser figure `4.050566e-06` — `1.068x`**,
+inside the `6.3%` se on `D²` plus the population difference. Drift is
+near-orthogonal to the full-K3 error, so `D²` is a **point estimate**, not merely
+a bracket. The reviewer supplied this; it is the strongest validation the panel
+has and I had not thought to run it.
+
+### B5. Three claims narrowed
+
+- **The `normsort` cross-check's independence was overstated three ways.** The
+  metrics *do* match (P-B's `drift_final_layer` is mean-squared final-layer
+  drift), so no agreement was manufactured. But (a) the panel's `normsort` uses
+  `cap_factored`'s default `frob` score, so the matched comparator is
+  `1.6515e-07`, giving `15.2%` agreement rather than the quoted figure;
+  (b) that P-B number is **one network**, not a panel; and (c) **"through a
+  different code path" is FALSE** — `p2_window.py` does
+  `from p2_pb_rank import cap_factored`. It is literally the same capping
+  implementation; only the driving loop differs.
+- **G3 is not "the cleanest kill in the panel".** Its controls are matched at the
+  *terminal* rank only, hold that rank for the whole tower, and cost `10.1x` and
+  `6.4x` more than the arms they judge. The genuinely matched comparison was in
+  the panel and unreported: **`age:4` and `normsort:8192` have identical retained
+  rank at every layer and identical cost (`0.03%` apart), and norm-sort selection
+  beats age selection by `1.93x`.**
+- **Prediction 7's "`0.528` vs `0.216`" was single-seed** and not labelled as
+  such. Six-seed means are `0.548` vs `0.253`; the conclusion is unchanged, and
+  the sub-claim (`0.55` at the first window layer, `0.51` at layer 15) holds on
+  the six-seed mean too (`0.577 -> 0.551`).
+
+---
+
+## Part C — P2-WINDOW-B: the mechanism was misattributed. The family sentence is RETRACTED.
+
+Contract `7ca4285`, committed before the arm ran, with the reviewer's two-seed
+numbers disclosed in it.
+
+`late:m` changes **two** things at once: it discards `kappa_3` memory **and**
+hands the window a `k_max=2` prefix whose `K[1]`/`K[2]` are already wrong. The
+`k3pre:m` arm separates them — full K3 prefix, **identical** zero `K3`/`K4`
+checkpoint, exact K3 over the last `m`.
+
+**Six probes `1000401`–`1000406`, f32.** Run at **width 256 on CPU, not the live
+shape** — see the deviation note below.
+
+| arm | mean `D` | 95% CI (`t = 2.571`) |
+|---|---:|---|
+| `late:2` | `7.7226e-03` | `[5.866e-03, 9.580e-03]` |
+| `late:3` | `7.7140e-03` | `[5.859e-03, 9.569e-03]` |
+| `late:4` | `7.5903e-03` | `[5.635e-03, 9.545e-03]` |
+| `k3pre:2` | **`2.3707e-03`** | `[2.047e-03, 2.694e-03]` |
+| `k3pre:3` | `2.8099e-03` | `[2.440e-03, 3.180e-03]` |
+| `k3pre:4` | `3.1161e-03` | `[2.769e-03, 3.463e-03]` |
+
+| `m` | `D(k3pre)² / D(late)²` | per-seed range | **the prefix explains** |
+|---:|---:|---|---:|
+| 2 | `0.1079` | `[0.0375, 0.1885]` | **`89.2%`** of `late:2`'s squared drift |
+| 3 | `0.1546` | `[0.0479, 0.2860]` | `84.5%` |
+| 4 | `0.2013` | `[0.0641, 0.3833]` | `79.9%` |
+
+The reviewer's independent two-seed run **at the live shape** gives `~7.7%` for
+the κ₃ share at `m = 2` — same direction, same order.
+
+**Predictions: 1 HELD** (`2.37e-3` in `4.5e-4..6.5e-4`? — **no, REFUTED**: the
+width-256 scale is ~4x larger than the width-1024 band I registered, which is a
+shape effect I failed to anticipate when writing a live-shape band for a run I
+then had to move off the live shape). **2 HELD** (`0.1079 < 0.15`).
+**3 HELD** (`k3pre` rises with `m`: `2.371 < 2.810 < 3.116` e-3 — the opposite
+direction to `late:m`, exactly as predicted). **4 HELD** — the retraction fires.
+
+### The retraction
+
+> **RETRACTED from the P2-WINDOW result entry:** *"it equally kills any future
+> 'start the expensive machinery late' design on this state — which is a family,
+> not a single arm."*
+
+It is not supported. `late:m` failed **mostly because its prefix is bad**, not
+because `kappa_3` is non-local. The mechanistic sentence *"`kappa_3`'s
+contribution to the final-layer mean is accumulated, not local"* is likewise
+**not established** by that panel: at most `~11–20%` of the drift is attributable
+to the discarded `kappa_3`, and `k3pre`'s own rise with `m` shows the checkpoint
+position matters more than the window length.
+
+**What replaces it.** The binding open question is **the quality of the
+`K[1]`/`K[2]` prefix** — which is *already* item 1 of `CURRENT_STATE.md`'s
+hypothesis stack (f32 K2 / faithful augmented-K2 prefix). This slice did not
+discover a new lane; it re-weighted an existing one and removed a false closure.
+
+**`k3pre` is not a candidate and never was.** Its prefix is the full-tower W-EFF
+already killed on price at `1.0723 B`. It bounds a prize without supplying a
+mechanism.
+
+### Deviation, declared: reduced shape, and why
+
+The addendum contract specified the live `1024x16` shape. **It was run at
+`256x16` on CPU instead.** Two attempts at the live shape **OOM'd** the 32 GiB
+card (`k3pre` carries a full-K3 prefix, so three of them plus the control exceed
+it), and Samuel then reported other work needing the GPU. Running a ~30 GiB job
+that monopolises a shared card to refine an attribution that gates nothing is not
+a defensible trade, so the shape was reduced and the deviation is declared rather
+than buried.
+
+**What this costs, stated honestly:** `late:m` behaves *differently* across the
+two widths — it falls with `m` at `1024` (`2.063 -> 1.823` e-3) and is flat or
+rising at `256` (`7.723 -> 7.590` e-3). So the *window* half does not transfer
+cleanly. The *attribution* half — that the prefix dominates — holds at both
+widths and on eight networks between them, which is what the retraction rests on.
+**The live-shape six-network confirmation remains OPEN**, and the exact command
+is recorded so it can be run on a quiet card:
+
+```text
+.venv-gpu\Scripts\python.exe local_sim\p2_window.py --drift --width 1024 --depth 16 \
+    --device cuda --dtype f32 --seeds 1000401,1000402,1000403,1000404,1000405,1000406 \
+    --windows 2,3,4 --k3pre 2,3,4 --tag k3pre --out experiments/2026-08-28_window
+```
+It needs `~30 GiB` and should be run alone.
+
+---
+
+## Part D — what is struck, enumerated
+
+The reviewer correctly noted that I wrote "parts of this entry are now struck"
+while nothing marked them. `experiments/LOG.md` is append-only, so a banner has
+now been inserted at the head of each affected entry pointing here. The specific
+struck claims:
+
+**From `RESULT P2-WEFF` (`f461e5c`):** the `+6.1%` `get_dslice` divergence; "`~1.0e11`
+FLOPs … not executed here at all"; the `1.117 B` whole-path figure and "FAIL by
+`3.19x`"; caution 3's "the un-respelled remainder adds, proportionally";
+"**`m <= 3` is FREE**" set in bold as a category; "Prediction 6 HELD … measured,
+not asserted".
+
+**From `SKEPTIC PROVISIONAL … C5 is REJECTED` (`966731b`):** the
+`488,517,808` / `0.000222 B` remainder; "wrong by a factor of 205"; the
+`nonlin_sum` ratio `0.98941`; "it is `contract_W_basic` alone … reproduces
+exactly"; "the `~0.008 B` … is **not recoverable**"; the whole-path `1.0725 B` and
+`3.064x`; the C1 pre-correction totals; "eight mutations, all detected".
+
+**From `RESULT P2-WINDOW` (`f01c3e5`):** every "`[0, hi]`" MSE bracket; "the
+panel's only decisive content is its failures"; "G3 … the cleanest kill in the
+panel"; "through a different code path"; the `16%` cross-check agreement; the
+mechanism attribution and the family generalisation (Part C); the panel table's
+z-intervals mislabelled as `t`.
+
+---
+
+## Part E — what stands, after four independent passes
+
+- **P2-WEFF FAILS its screen: `1.0732 B` against `<= 0.35 B`, `3.0664x` over.**
+  Parity exact; mode equality verified in upstream's real tower; zero
+  materializations; zero leaks; totals bit-identical across three seeds; gate
+  wording md5-identical across all three commits — **no gate moved**.
+- **GATE-W FAILS, and now provably: every window arm's score floor is
+  `2.09x`–`4.65x` worse than graded v2.7.** Verified maximally in the arm's
+  favour — with `MSE_FULL -> 0` *and* the multiplier pinned at the floor for
+  every `m`, both physically impossible, G1 still fails by `2.20x`–`2.49x`. For
+  `m = 2` to pass, the bar would have to be `3.72x` worse than graded v2.7 and
+  `1.26x` worse than the shipped canary. **No defensible alternative gate
+  passes.**
+- **Today's outcome is unchanged: an evidence-backed kill, no truth spent, no
+  candidate, NO SUBMISSION.** `estimator.py` remains v2.6.1, byte-identical to
+  its archive. Seed ledger, vault seal and touch log, `HUMAN_MODEL.md`,
+  `competition_score.py` and `scripts/` are untouched across `1f16203..HEAD`.
+
+**Open, and blocking any future windowed design:** the live-shape `k3pre`
+confirmation; residual against the `0.4 s` cliff; the `120 s` total wall cap; the
+`8,192 MB` limit Windows cannot enforce; and the absent `fnp` port of the K3
+recurrence.
