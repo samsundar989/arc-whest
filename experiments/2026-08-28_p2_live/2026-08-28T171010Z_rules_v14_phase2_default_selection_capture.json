@@ -1,0 +1,16 @@
+{
+  "artifact_kind": "read_only_browser_evidence",
+  "captured_at_utc": "2026-08-28T17:10:10.242Z",
+  "timestamp_source": "Browser runtime new Date().toISOString() immediately after the live page rendered.",
+  "browser": "user Chrome via the Chrome extension",
+  "url_requested": "https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/challenge_rules",
+  "url_final": "https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/challenge_rules",
+  "page_title": "AIcrowd | ARC White-Box Estimation Challenge 2026 | Challenge_rules",
+  "page_version_text": "rules v14",
+  "phase2_section_label": "Phase 2: Final Submission.",
+  "phase2_cross_reference_exact": "if no designation is made, the default-selection rule in §6 applies.",
+  "section_6_label": "Default selection if no designation is made.",
+  "section_6_fallback_exact_fragment": "two best-scoring valid submissions from that Phase on that Phase's public leaderboard",
+  "capture_scope": "Minimal visible-DOM fragments establishing the Phase-2-to-§6 cross-reference and the same-Phase two-best-scoring fallback; no form interaction or account mutation.",
+  "verification_result": "CONFIRMED: Rules v14 explicitly connects a missing Phase-2 designation to §6, whose fallback selects the two best-scoring valid submissions from that Phase's public leaderboard."
+}

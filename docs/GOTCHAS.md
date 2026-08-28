@@ -99,13 +99,12 @@ Raw artifacts: `experiments/2026-08-24_p2_p0/`.*
   taken while `preflight -Full` was on the same CPU and was discarded as
   contaminated before the others were run.
 
-- **Do not carry the Phase-1 ~7× rule of thumb into Phase 2.** That factor was
-  local vs **GRADED** (70.85 ms local / 9.84 ms graded), and there is no graded
-  Phase-2 figure at all. The local-vs-subprocess gap it is often confused with was
-  1.30× in Phase 1 and is ~1.0× here. **The subprocess path remains the deployment
-  authority** — not because it is slower, but because it is the runner the grader
-  uses and the package itself prefers the worker's own stats over the host
-  context.
+- **Do not use a universal ~7× residual rule.** Two Phase-2 graded K2 files ran
+  about 7× faster than this host, but that ratio is evidence only for those exact
+  files and sessions. A structurally different carrier/K3 candidate needs its own
+  official-subprocess soak and graded telemetry when available. **The subprocess
+  path remains the local deployment authority** because it matches the worker
+  boundary, not because it is predictably slower or faster.
 
 - **An instrument ratio does not bound a level, and only a level clears a cliff.**
   The ±7 % agreement above is real, and it was briefly used to characterise
@@ -954,7 +953,7 @@ contract. Skeptic verdict PROVISIONAL; full audit in `experiments/LOG.md`.*
   import and assert on `flops.__file__` (see `local_sim/probe_strassen_carrier.py`),
   exactly as `mint_provenance.py` already does for `whestbench`. Found 2026-08-19
   after it produced an `AttributeError` that looked like a flopscope API change.
-- **Prizes are decided by a private re-run of UP TO TWO designated submissions on FRESH MLPs** (forum 18143, 2026-08-10; default = your top two public entries; the Rules tab still says one and the contradiction is unresolved).** Public-board rank is not a target; judge everything on the local 100-MLP mini split and on ≥1000 fresh minted MLPs (`local_sim/robustness.py`). The tail of the fresh-MLP score distribution is the real risk, not the mean.
+- **Prizes are decided by a private re-run of UP TO TWO designated submissions on FRESH MLPs.** Challenge Rules v14 states this explicitly; if none are designated, §6 selects the two best-scoring valid submissions from that Phase's public board. The old one-versus-two contradiction is resolved. Public-board rank is not a target; decide on fresh canonical mints and use the public mini only for CONFIRM under the binding three-tier protocol. The tail of the fresh-MLP score distribution is the real risk, not the mean.
 - **Score optimisation is closed except Sprint 4's packed-sparsity reproduction**
   (GAME_PLAN rev 9). Sprint 3's static on/kink composition measured 1.0246×, but
   it did **not** test submission 319341's value-dependent cold-column packing,
@@ -967,7 +966,7 @@ contract. Skeptic verdict PROVISIONAL; full audit in `experiments/LOG.md`.*
 - **Fresh-re-run readiness: READY.** 1800 fresh + deformed MLPs, zero non-finite outputs, alive count never below 117/256, degenerate-layer fallback never fired, analytic patch bounded at 6.3e-3, α to ±12.4. Contract + invariant suite `edge_cases.py` **30/30** on the shipped file (zero layer, 1e4 dynamic range, seed 2⁶³−1, widths 64–256, depths 2–64, budget 0, input immutability, exact layer 1, permutation equivariance, budget monotonicity, determinism, seed hygiene, vault-noise floor).
 - **The scored metric has a heavy tail, and it is mostly the metric.** Fresh-MLP adjusted score: median 2.19e-7, mean 3.01e-7, p99 1.65e-6, **max/median 12.9×**; worst 1% of MLPs carry 6.9% of the score. `corr(log per-MLP MSE, log mean(truth²)) = +0.548` — MSE is unnormalised and He draws vary ~5× in activation scale. **At a re-run size R=10 the p90 score is 50% above the median**; at R=100, 13%. Draw variance dwarfs any remaining ~2% estimator gain — which is the quantitative reason score work is closed.
 - Minted MLPs are a faithful stand-in (GPU mirror: 1.6178e-6 fresh vs 1.5962e-6 on real mini, +1.4%) and if anything slightly *harder* in median (1.19e-6 vs 0.97e-6), so fresh-MLP numbers are conservative. The shipped file and the GPU mirror agree to 0.1% in median on the same fresh MLPs.
-- **The public score is the mean over 50 FIXED MLPs (indices 0–49)**, and every submission returns those MLPs' exact per-MLP `final_layer_mse` + a 32-long `per_layer_mse` in `results.public_scores`. Verified bit-for-bit against the aggregates; the suite is identical across all four of our submissions. Consequences: (a) our graded A/B comparisons are **paired re-measurements**, not fresh samples — never read a graded improvement as population evidence; (b) the level carries a fixed 7–20% offset vs the local 100; (c) **decisions stay on the local 100-MLP mini split**, which is the honest proxy for the private re-run that sets the final ranking. Full record + the arithmetic: RESEARCH_NOTES §2g (**private — never the forum**). **We do not use that channel.**
+- **The public score exposes 50 FIXED MLPs (indices 0–49)** with per-MLP feedback. Graded A/B comparisons on that suite are paired re-measurements, not population evidence. **Never decide or fit on it or on the public 100-MLP mini:** decisions use a newly claimed fresh canonical block; the public dataset is CONFIRM-only. Full historical record: RESEARCH_NOTES §2g (**private — never the forum**). **We do not use that channel.**
 - **The `sampling_mse` label-noise bound is WITHDRAWN.** 89 of 200 board entries show a final-layer MSE below 6.4695e-7, so it cannot be additive reference noise. Most likely a reference sampling baseline's MSE. Do not repeat the "nothing honest below 6.47e-8" claim.
 - **Track T (shrinkage-moment tail) is CLOSED** — 0.9998× vs a 1.10× gate. Only `diag(WᵀΣW)` = `mean(z²)−mean(z)²` enters, so there is no covariance to estimate (no MP regime); v̂ is already 1.13% rms accurate and the exact-variance oracle still gives 0.611×. 41% of the analytic tail's error is irreducible model bias; ρ=1.000 with the sample mean in the α≥3 band that carries 76.5% of the MSE. Don't reopen without a new mechanism.
 - **Track P (rank-k deviation propagation) is CLOSED** — 1.093× vs a 1.25× gate, even pricing an oracle Jensen correction at zero. Rank-k propagation *is* a rank-k weight factorisation; shape-based billing breaks even at k = width/2 = 128, which is also the rank truncation needs. (The spectrum result itself is real and write-up-worthy: effective rank 25.9→2.8 over depth, and the closure's own covariance eigenvectors find the subspace for free.)

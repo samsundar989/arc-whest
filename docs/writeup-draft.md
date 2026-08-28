@@ -1,5 +1,12 @@
 # Write-up draft — PRIVATE, structure only
 
+> **STALE DRAFT — DO NOT SUBMIT OR QUOTE.** This manuscript predates Phase 2 and
+> still contains obsolete rules, dates, leaderboard values and method claims,
+> including “one designated submission” in §8. Correcting or adopting any of those
+> claims is STRATEGIC and requires a preregistered claim review plus Samuel's
+> prediction. Current authority is `CURRENT_STATE.md` and
+> `PHASE2_FRONTIER_AUDIT_2026-08-28.md`.
+
 *Started 2026-08-05. **Nothing here is posted anywhere.** Publication is an endgame
 decision, not a default. Do not post to the forum, and do not describe the variance
 anatomy, the common mode, or any point-set work publicly before we decide.*

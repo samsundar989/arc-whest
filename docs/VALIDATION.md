@@ -306,10 +306,10 @@ Two arithmetic hygiene rules, both of which Sprint 4 broke:
    - a local headroom figure is quoted **as local**, with the word LOCAL in the
      sentence;
    - the direction of the local bias is **not assumed, and at this shape it is
-     not resolvable**: three runs of 20 MLPs give a lifecycle/subprocess ratio of
-     1.068×, 0.951×, 1.048× — the sign is not stable. Phase 1's ~7× figure was
-     local vs GRADED and has no Phase-2 counterpart, because no graded Phase-2
-     report exists.
+     not resolvable from the launch-week local runs**: three runs of 20 MLPs give
+     a lifecycle/subprocess ratio of 1.068×, 0.951×, 1.048×. Two later Phase-2
+     graded K2 reports ran about 7× faster than this host, but that is evidence for
+     those exact files, not a transferable safety factor for a new architecture.
 
    - **but an instrument ratio does not bound a level, and only a level clears a
      cliff.** The first version of this section quoted the ±7 % agreement above as
@@ -707,11 +707,11 @@ failure this repository has lost four separate checks to: **a check that reports
 state rather than testing a property.** Quote the tier when citing a green run;
 "preflight GREEN" alone is now ambiguous.
 
-Step 9 reads no candidate predictions and therefore **costs no touch** — verified
+Step 10 reads no candidate predictions and therefore **costs no touch** — verified
 twice over, by counter and log line count (1 → 1) and by the mtime of
 `manifest.json` and `touch_log.jsonl`, both unmoved from 2026-08-06. It degrades to
 a printed SKIP when `experiments/vault/vault_v1.npz` is absent, which is the normal
-state of a fresh clone because the 33 MB array file is gitignored. Step 5 still
+state of a fresh clone because the 33 MB array file is gitignored. Step 6 still
 covers the seal in that case, because `manifest.json` and `touch_log.jsonl` *are*
 tracked.
 

@@ -371,7 +371,7 @@ Step "8. canonical scorer + the binding gate" {
 }
 
 # --- 9. the seed ledger's refusals actually fire --------------------------------
-# Step 6 proves the ledger is CONSISTENT. It cannot prove the guards still refuse.
+# Step 7 proves the ledger is CONSISTENT. It cannot prove the guards still refuse.
 # These are 44 negative tests: unregistered block, range leaving its block, any
 # overlap in a DECISION block, a second claim on a SINGLE_USE one, a hand-edited
 # ledger, an artifact rewritten after its claim.
@@ -380,16 +380,16 @@ Step "9. seed-ledger refusals" {
 }
 
 # --- 10. vault integrity, not merely the counter ---------------------------------
-# Step 5 compares a number to a line count. This re-hashes every stored array
+# Step 6 compares a number to a line count. This re-hashes every stored array
 # against the manifest and reconstructs networks from their seeds to confirm the
 # seed->weights map still holds. It reads no candidate predictions, so it COSTS NO
 # TOUCH. The arrays are gitignored (33 MB), so a fresh clone legitimately has none
-# and must not go red for it -- step 5 still covers the seal there.
+# and must not go red for it -- step 6 still covers the seal there.
 Step "10. vault integrity (array hashes + seed->weights)" {
     if (-not (Test-Path "experiments/vault/vault_v1.npz")) {
         Write-Host "  experiments/vault/vault_v1.npz absent (gitignored)."
         Write-Host "  Run 'uv run python local_sim/vault.py mint' to restore it."
-        $script:StepSkipped = "vault arrays absent (gitignored); step 5 still checked the seal"
+        $script:StepSkipped = "vault arrays absent (gitignored); step 6 still checked the seal"
         return
     }
     uv run python local_sim/vault.py verify

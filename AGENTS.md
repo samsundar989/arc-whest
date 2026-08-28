@@ -19,12 +19,12 @@ stack is WhestBench 0.16 / flopscope 0.12; lambda is zero; residual cap is 0.4 s
 total wall 120 s, solution memory 8 GiB.
 
 **The prize is decided by a private re-run of UP TO TWO designated submissions per
-team on fresh MLPs** (organiser, forum 18143, 2026-08-10; default if you select
-nothing is your two highest-ranked public entries). The challenge Rules tab still
-says "a single submission"; the contradiction was raised on the forum and is
-unresolved, so plan for two and confirm before any selection deadline.** Public board rank is not the target. There is a second, now co-equal
+team on fresh MLPs.** Rules v14 now states this directly; if a team selects none,
+its §6 selects the two best-scoring valid submissions from that Phase's public
+board. **Public board rank is not the target.** There is a second, now co-equal
 objective: the **$20k contribution prize**, whose deliverable is the write-up
-(`docs/writeup-draft.md`).
+(`docs/writeup-draft.md`, currently marked stale/do-not-submit pending a STRATEGIC
+claim review).
 
 Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
 
@@ -32,7 +32,7 @@ Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
 
 | path | what |
 |---|---|
-| `estimator.py` | **THE submission.** Self-contained; `whest submit` ships only this file. Currently **v2.6.1**, byte-identical to `estimator_v2_6_1.py` modulo line endings (`preflight` step 5 asserts it). The **graded Phase-1** file is still v2.4.1. There is no Phase-2 submission; width 1024 currently takes the basic K2p1 analytic fallback. |
+| `estimator.py` | **THE shipped file.** Currently **v2.6.1** and identical to its archive (`preflight` step 5). Phase-2 submissions: v2.6.1 (#328662) and calibrated v2.7 (#328664). Width 1024 still takes basic K2p1. |
 | `estimator_v*.py` | frozen version archive — never edited, only read |
 | `local_sim/` | the offline lab: numpy shims for `flopscope`/`whestbench`, grader-identical mint (`mint_provenance.py`), invariants (`edge_cases.py`), seed registry (`seed_blocks.py`), sealed holdout (`vault.py`), probes |
 | `experiments/` | `LOG.md` (append every experiment), run reports, vault seal, JSON artifacts |
@@ -82,12 +82,14 @@ Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
   per-MLP cliff that FAILS the MLP. Freeze a counted-FLOP model; report *headroom*,
   `0.4 / observed`. `VALIDATION.md` §2b is Phase-1 law, §2b-ii governs Phase 2.
 - **Never quote a local absolute wall time.** Authority is `--runner subprocess`.
-  The old "~7×" is local-vs-GRADED and has no Phase-2 counterpart; locally the
-  three instruments agree to ~7% run-to-run, so a local margin is not a safety
-  factor either way. The shim reads ~18% low for rotation-using estimators.
-- **The local meter bills what the grader bills, op for op** (reconciled to zero
-  2026-08-24; `preflight` step 12 *refuses* rather than skips if the official
-  report is absent). **The 8,192 MB limit is unenforceable here** — Windows has no
+  The two Phase-2 reports ran submitted K2 files about 7× faster than this host,
+  but that observation is not a general safety factor for a different candidate.
+  The shim reads ~18% low for rotation-using estimators.
+- **The local meter matches the stored official-package subprocess report op for
+  op** (`preflight` step 12 refuses if absent). The grading server adds an
+  unexplained `+2**24` FLOPs (`+0.0122%`) and exposes no operation ledger; include
+  that offset near a score boundary and do not claim server op-by-op parity.
+  **The 8,192 MB limit is unenforceable here** — Windows has no
   `RLIMIT_AS` — so it is accounting, never a test passed. `docs/GOTCHAS.md`.
 
 ## Commands
@@ -205,7 +207,7 @@ Everything required to resume lives in the repository:
 | every experiment, contract, result, Skeptic verdict | `experiments/LOG.md` |
 | the binding measurement protocol | `docs/VALIDATION.md` |
 | traps not to rediscover | `docs/GOTCHAS.md` |
-| target architecture and sole active execution plan | `docs/GAME_PLAN.md` |
+| active research program and execution plan | `docs/GAME_PLAN.md` |
 | copy-ready Claude Builder handoff | `docs/CLAUDE_CODE_HANDOFF.md` |
 | the human's own beliefs | `docs/HUMAN_MODEL.md` |
 | raw evidence | JSON under `experiments/` |
@@ -302,7 +304,7 @@ never chat history.
 | `docs/CURRENT_STATE.md` | **first, always.** Baseline, open questions, closed lanes, next action |
 | `docs/VALIDATION.md` | before measuring anything. The protocol and its proofs |
 | `docs/GOTCHAS.md` | before quoting a number, comparing a cost, or trusting an offline path |
-| `docs/GAME_PLAN.md` | **sole active Phase-2 strategy and execution plan** |
+| `docs/GAME_PLAN.md` | **sole active Phase-2 research program and execution plan** |
 | `docs/BENCHMARK.md` | our numbers vs the field. **PRIVATE — never the forum** |
 | `docs/COMPETITION_BRIEF.md` | plain-English explainer of the task and the math |
 | `docs/RESEARCH_NOTES.md` | rules, forum intel, pricing table, links. §2g is **PRIVATE** |

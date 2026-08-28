@@ -19153,3 +19153,222 @@ the gated artifact post-dates the contract by 4.5 minutes and the ordering is
 confirmed — but it is recorded for the calibration record rather than explained.
 
 **Checklist items triggered: 2, 3, 4, 6, 9, 13, 17, 18 (twice).**
+
+---
+
+## 2026-08-28 — ROUTINE Phase-2 frontier, repository and literature reconciliation
+
+**Classification:** ROUTINE documentation/evidence reconciliation. No estimator,
+instrument, gate, seed block, vault, fitted constant or submission changed. This
+entry records external observations and corrects current-facing documentation; it
+does not promote an architecture or create experimental evidence.
+
+### Knowledge delta
+
+- The 2026-08-28 16:40 UTC board snapshot has 67 teams. Puffi leads at displayed
+  `7.4e-9` adjusted / `2.6e-8` raw. Our best entry, v2.7, is rank 41 at
+  `1.374e-7` / `1.374e-6`: an `18.6x` adjusted and `52.9x` raw gap.
+- Rules v14 explicitly permits up to two Phase-2 submissions to be designated for
+  fresh private re-runs. The old one-versus-two contradiction is resolved. The
+  account already has two zero-failure Phase-2 submissions (#328662 and #328664).
+- Latest forum evidence adds a deployment invariant: scalar materialisation or
+  truth-testing of flopscope values inside `predict()` can force a synchronization
+  and consume the 0.4-second residual allowance even when counted mathematics is
+  unchanged. Future candidates require zero mid-predict scalar materialisations.
+- Default preflight is green 12/16, `official_config.py` passes 73/73, the local
+  official-package 19-operation FLOP anchor is exact, and portability passes 99/99.
+  This is local official-package parity, not grading-server op-ledger parity: the
+  server adds `2**24` total FLOPs to v2.6.1 and no server operation ledger exists.
+  Windows still cannot prove the 8-GiB process limit.
+- The seed ledger is authoritative at P01 `168/600` consumed and 432 free. The
+  stale source comment saying 96 consumed was not edited because `seed_blocks.py`
+  is an IMPORTANT instrument.
+- Full factorized K3 supplies the strongest measured raw-accuracy mechanism, but
+  the current implementation is too expensive. The plan therefore starts with
+  `W-EFF` exact-mathematics cost work and a preregistered late-window/layer-age K3
+  diagnostic. A task-specific deep-ReLU-kernel objective is the next carrier
+  screen; Kerdock/MUB is one candidate family rather than a presumed backbone.
+
+### Durable evidence
+
+- `experiments/board_snapshots/2026-08-28T1640Z_phase2_frontier_audit_board.json`
+- `experiments/board_snapshots/2026-08-28T1640Z_phase2_frontier_audit_board.md`
+- `docs/PHASE2_FRONTIER_AUDIT_2026-08-28.md`
+- `docs/GAME_PLAN.md`
+- `docs/CURRENT_STATE.md`
+- grading reports under `experiments/run_reports/submission_3286{62,64}_*`
+- full-K3 evidence under `experiments/2026-08-26_p2_gt/`,
+  `experiments/2026-08-27_pa_confirm/`, and `experiments/2026-08-28_pb_oracle/`
+
+### Boundaries and next decision
+
+The proposed W-EFF, late-window and kernel-carrier claims remain hypotheses. Before
+the next IMPORTANT or STRATEGIC slice, Samuel's predictions and the corresponding
+Rule-1 contract are required. No public score, competitor architecture inference,
+or unregistered probe in this audit licenses an implementation or promotion.
+
+### Independent Skeptic verdict — REJECT; documentation repaired before use
+
+The first independent review rejected the synthesis. Its strongest challenge was
+correct: the docs described an unmeasured hypothesis bundle as the sole architecture
+and mislabeled a `5.49x` cross-meter affordability ratio as a projected W-EFF saving.
+It also caught an instruction in the handoff to reuse an existing truth block for a
+supposedly no-label late-window diagnostic.
+
+Repairs made before any implementation or measurement:
+
+- `GAME_PLAN.md` is the active **research program**, and the hybrid is explicitly a
+  falsifiable candidate architecture rather than an established winner.
+- `5.49x` is now labeled only as a cross-meter affordability target. W-EFF has no
+  measured flopscope saving.
+- late-window imitation uses unregistered label-free probes. Prediction drift is
+  not an error increment; the plan requires the triangle-inequality RMSE bracket,
+  full-K3 anchor interval, and population-transfer qualification.
+- current-facing board values use the precision in the raw snapshot and one
+  `16:40 UTC` timestamp.
+- local/graded residual and setup observations are confined to the two submitted
+  files; their cause is not inferred and they do not clear future candidates.
+- the 32-FLOP local-versus-graded delta is not attributed to an operation because
+  no grading-server operation ledger exists.
+- full-K3 MSE anchors now carry their GT-noise floors: DESIGN `1.155e-9`, organiser
+  CONFIRM `7.478e-11`.
+
+The review also required a durable capture for the updated Rules v14 and forum
+default-designation wording. Those external claims remain pending that capture and
+a second fresh independent review. **The rejected version is not authority for the
+next slice.**
+
+**Capture follow-up:** the pending rules issue is now resolved by read-only Chrome
+artifacts. Rules v14's Phase-2 clause says up to two designations and explicitly
+cross-references §6 when none is made; §6 selects the two best-scoring valid
+submissions from that Phase's public leaderboard. Evidence:
+`experiments/2026-08-28_p2_live/2026-08-28T170620Z_rules_v14_phase2_designation_capture.json`
+and `2026-08-28T171010Z_rules_v14_phase2_default_selection_capture.json`. The
+separate forum capture is retained as historical Phase-1 provenance and is not used
+to infer the Phase-2 fallback.
+
+**Skeptic checklist items:** 4, 6, 8, 10, 11, 14, 17, 18.
+
+### Second fresh Skeptic verdict — REJECT; authority conflicts repaired
+
+The second fresh review accepted the numerical repairs but found six current-facing
+continuity conflicts. Repairs, again before any measurement:
+
+- The label-free late-window diagnostic is consistently **IMPORTANT**, uses no
+  seed block, and becomes STRATEGIC only if labels, model selection or promotion
+  enter scope.
+- `RESEARCH_NOTES.md` now restores the binding DECIDE-on-fresh-mints /
+  CONFIRM-on-public-mini split and attributes the Phase-2 default directly to
+  Rules v14 rather than the historical Phase-1 forum answer.
+- the old v2.7 pre-submission narrative in `CURRENT_STATE.md` is explicitly marked
+  historical; #328664's graded setup/residual/FLOP telemetry is current authority.
+- `VALIDATION.md` now records the two Phase-2 graded residual reports while warning
+  that their host ratio is not transferable to a new architecture.
+- the handoff timestamps moving board numbers and attaches both full-K3 GT-noise
+  floors.
+- the README's Rule-1 summary freezes the Phase-2 counted-FLOP model and reports
+  residual as headroom; it no longer carries the Phase-1 residual-cost rule forward.
+
+**Second-review checklist items:** 4, 7, 8, 11, 14, 17, 18. A third fresh read-only
+consistency review is required before this reconciliation can close.
+
+### Third fresh Skeptic verdict — REJECT; remaining explainer contradictions repaired
+
+The third review accepted the underlying evidence and principal authorities, then
+found two older explainer sections that still leaked obsolete instructions:
+
+- `COMPETITION_BRIEF.md` no longer calls hidden ordinary-grading rows the final
+  rerun. It distinguishes the Rules-v14 fresh rerun, uses one timestamped current
+  board snapshot, current organiser-mini K2/v2.7 anchors, and a scoped
+  `7.478e-11` GT-noise floor rather than a universal value.
+- `GOTCHAS.md` now records the two graded Phase-2 residual reports without turning
+  their ~7x host ratio into a transferable rule, and replaces “decisions stay on
+  the public mini” with the binding fresh-block DECIDE / public CONFIRM protocol.
+
+**Third-review checklist items:** 4, 11, 17, 18. A fourth fresh consistency review
+is required because the previous three contexts have all seen superseded text.
+
+### Fourth fresh Skeptic verdict — REJECT; final navigation defects repaired
+
+The fourth review again accepted the headline evidence and found four continuity
+defects outside the active program:
+
+- `CURRENT_STATE.md` now agrees with `AGENTS.md` about the measured Phase-2 host
+  ratio and its non-transferability.
+- P1-PRE is consistently closed on its seventh-pass ACCEPT.
+- the 2026-08-26 mission-brief reconciliation is labeled historical both in the
+  authoritative map and in a prominent override at the top of that file; it cannot
+  override current Rules, submissions, K3 evidence or research order.
+- `VALIDATION.md`'s explanatory vault step numbers now match its binding table:
+  integrity step 10 and seal step 6.
+
+**Fourth-review checklist items:** 17, 18. One final fresh review remains required.
+
+### Fifth fresh Skeptic verdict — REJECT; IMPORTANT enforcement wording slice preregistered
+
+The fifth review accepted the scientific/competition authority surface and found
+four stale step references inside `scripts/preflight.ps1`. This is an IMPORTANT
+enforcement-layer edit even though the executable checks are correctly ordered.
+
+**Question:** Can the seed-ledger and vault-integrity comments/runtime SKIP message
+be reconciled with the 16-step gate without changing any executed check?
+
+**Prediction:** Four references change: seed-ledger consistency `6 -> 7`, and vault
+seal `5 -> 6` in two comments plus one SKIP message. The PowerShell control flow,
+commands, step names, pass/skip counts and exit code remain byte-for-byte unchanged
+outside those strings. Default preflight remains GREEN 12/16 with the same four
+full-only skips; portability remains 99/99.
+
+**Falsifier:** Any command/control-flow diff, changed executed-stage result, changed
+skip count, nonzero preflight exit, portability failure, vault counter/touch change,
+or any file outside `scripts/preflight.ps1` and this LOG record changed by the
+IMPORTANT slice.
+
+**Baseline and scope:** the just-completed documentation reconciliation; no seed
+block, truth, vault, estimator, gate threshold, residual model or submission. The
+only intervention is numbering text. Verification is `git diff`, targeted stale-step
+grep, default preflight, portability, and a fresh independent Skeptic.
+
+**Result:** prediction held. The script diff contains exactly four wording changes:
+`6 -> 7` for seed-ledger consistency and `5 -> 6` three times for the vault seal.
+No command, control flow, step name or check changed. Default preflight exited zero
+at **GREEN 12/16 with the same four full-only skips**; all executed suites passed,
+including 73/73 official config, 30/30 invariants, 98/98 scorer, 60/60 seed
+refusals, vault integrity, 56/56 lifecycle and exact 19-operation local anchor.
+Vault counter and log remain `1 == 1`. Portability is 99/99; `git diff --check` is
+clean. A fresh independent Skeptic remains required before closing the slice.
+
+### Sixth fresh Skeptic verdict — REJECT on stale reusable artifacts; status-only repair
+
+The reviewer accepted the IMPORTANT preflight slice independently: exact four-string
+diff, GREEN 12/16 with unchanged skips, portability 99/99, and byte-identical
+seed/vault state. It rejected the overall reconciliation because
+`writeup-draft.md` and `email-draft-organizers.md` still presented the obsolete
+one-designation rule as reusable current prose.
+
+The manuscript claim itself was **not changed**: write-up claims are STRATEGIC and
+require Samuel's prediction. A prominent status warning now marks the entire
+manuscript stale/do-not-submit and names the obsolete §8 premise. The August 6 email
+is marked historical/do-not-send and its old “ready” label is withdrawn. The
+authoritative document map and `AGENTS.md` record the required future STRATEGIC
+claim review. This is a safety/status repair, not adoption of a write-up claim.
+
+**Sixth-review checklist items:** 17, 18. One fresh review must decide whether the
+warnings safely remove these artifacts from the current authority surface without
+silently performing the forbidden claim edit.
+
+### Final fresh Skeptic verdict — ACCEPT
+
+The seventh fresh reviewer accepted both the complete authority reconciliation and
+the IMPORTANT enforcement wording slice. It verified that the stale manuscript and
+email bodies are unambiguously quarantined, no write-up claim was silently adopted,
+the preflight diff is exactly the four preregistered strings, independent default
+preflight is GREEN 12/16 with the same skips, portability is 99/99, and seed/vault
+hashes plus touch state are unchanged (`1 == 1`).
+
+**Unresolved scope:** the manuscript's scientific claims remain deliberately
+unreviewed and unusable. Rehabilitating it requires Samuel's prediction and a new
+STRATEGIC claim-review contract. No further follow-up is required for this routine
+frontier audit or the IMPORTANT numbering correction.
+
+**Final-review checklist items:** 17, 18. **Verdict: ACCEPT.**

@@ -1,5 +1,14 @@
 # PHASE2_BRIEF_RECONCILIATION_2026-08-26.md
 
+> **HISTORICAL — superseded by `CURRENT_STATE.md`, `GAME_PLAN.md`, and
+> `PHASE2_FRONTIER_AUDIT_2026-08-28.md`.** Do not execute present-tense actions in
+> this file. Since it was written, Rules v14 resolved the two-designation/default
+> rule, submissions #328662 and #328664 graded with zero failures, full K3 measured
+> `4.0047e-8` on DESIGN (GT-noise `1.155e-9`) and `3.9249e-8` on organiser CONFIRM
+> (GT-noise `7.478e-11`), and the active program became W-EFF price/parity followed
+> by label-free layer-age diagnostics and a task-specific carrier proxy. This file
+> preserves the 2026-08-26 audit trail only.
+
 **A dated evidence report, not a roadmap.** `docs/GAME_PLAN.md` remains the only
 active strategy; `docs/CURRENT_STATE.md` remains the only status snapshot. This
 file records what happened when the externally-produced Phase-2 mission brief of

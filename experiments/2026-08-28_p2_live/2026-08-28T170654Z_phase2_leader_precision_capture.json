@@ -1,0 +1,50 @@
+{
+  "artifact_kind": "read_only_browser_evidence",
+  "browser": "user Chrome via the Chrome extension",
+  "leaderboard_capture": {
+    "captured_at_utc": "2026-08-28T17:06:54.752Z",
+    "timestamp_source": "Browser runtime new Date().toISOString() immediately after the live leaderboard rendered.",
+    "url": "https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/leaderboards?round=phase-2",
+    "page_title": "AIcrowd | ARC White-Box Estimation Challenge 2026 | Leaderboards",
+    "round_text": "Phase 2",
+    "status_text": "LIVE",
+    "refresh_text": "auto-refresh · 60s",
+    "rank": 1,
+    "team": "Puffi",
+    "members": [
+      "Cipo",
+      "lawrence_dam"
+    ],
+    "adjusted_score_display": "7.40e−9",
+    "adjusted_score_normalized": 7.40e-9,
+    "final_layer_mse_display": "2.60e−8",
+    "final_layer_mse_normalized": 2.60e-8,
+    "vs_sampling_display": "162×",
+    "entries": 13,
+    "last_submission_display": "Aug 28, 09:30",
+    "last_submission_relative_display": "7 h ago",
+    "last_submission_timezone_note": "The leaderboard did not label the timezone for this displayed timestamp.",
+    "linked_submission": 328725,
+    "linked_submission_url": "https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/328725"
+  },
+  "submission_detail_capture": {
+    "captured_at_utc": "2026-08-28T17:07:11.088Z",
+    "timestamp_source": "Browser runtime new Date().toISOString() immediately after the live submission-detail page rendered.",
+    "url": "https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/328725",
+    "page_title": "AIcrowd | ARC White-Box Estimation Challenge 2026 | Submissions #328725",
+    "status": "GRADED",
+    "round": "Phase 2",
+    "public_mlps_scored": 50,
+    "public_mlps_failed": 0,
+    "adjusted_score_display": "7.383×10−9",
+    "adjusted_score_normalized": 7.383e-9,
+    "adjusted_score_context": "PUBLIC SPLIT; FINAL-LAYER · LOWER IS BETTER · MEAN OVER 50 PUBLIC MLPS",
+    "final_layer_mse_display": "2.599×10−8",
+    "final_layer_mse_normalized": 2.599e-8,
+    "final_layer_mse_context": "MEAN ACROSS THE SCORED PUBLIC MLPS",
+    "budget_used_display": "28.41%",
+    "mean_effective_compute_display": "6.25e11",
+    "precision_note": "The leaderboard row rounds to 7.40e−9 and 2.60e−8; the linked public submission-detail page exposes 7.383e−9 and 2.599e−8. No finer public precision was visible."
+  },
+  "capture_scope": "Visible-DOM leaderboard row and linked public submission metrics only; no submission or account interaction."
+}

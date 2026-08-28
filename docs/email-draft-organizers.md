@@ -1,10 +1,15 @@
 # Draft email to the organizers — for Samuel to send from his own address
 
+> **HISTORICAL — DO NOT SEND.** This August 6 draft predates Rules v14, the live
+> Phase-2 round and the two graded submissions. Its “one designated submission”
+> premise and several dates/questions are obsolete. Preserve it only as an audit
+> record; any future organizer message must be drafted from current evidence.
+
 **To:** arc-whestbench@aicrowd.com
 **Subject:** Final-ranking mechanics, a scoring-channel issue, and a cost-model ruling request
 
-> **Status: final, revised 2026-08-06 after a forum crawl. Ready for Samuel to
-> send — none of it goes on the forum.**
+> **Historical status at 2026-08-06: it was then marked final. It is not ready to
+> send now, and none of it goes on the forum.**
 >
 > **What changed and why**: the λ / raw-array question was drafted as a request for
 > a ruling, and then the crawl found the organizers had already ruled, twice —

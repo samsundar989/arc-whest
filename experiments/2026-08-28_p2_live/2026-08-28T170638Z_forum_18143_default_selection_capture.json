@@ -1,0 +1,19 @@
+{
+  "artifact_kind": "read_only_browser_evidence",
+  "captured_at_utc": "2026-08-28T17:06:38.283Z",
+  "timestamp_source": "Browser runtime new Date().toISOString() immediately after the live page rendered.",
+  "browser": "user Chrome via the Chrome extension",
+  "url_requested": "https://discourse.aicrowd.com/t/phase-1-submission-selection-phase-2-launch-date/18143",
+  "url_final": "https://discourse.aicrowd.com/t/phase-1-submission-selection-phase-2-launch-date/18143",
+  "post_permalink": "https://discourse.aicrowd.com/t/phase-1-submission-selection-phase-2-launch-date/18143/1",
+  "page_title": "Phase 1 submission selection & Phase 2 Launch date - ARC White-Box Estimation Challenge 2026 - AIcrowd Forum",
+  "visible_author_metadata": {
+    "author": "mohanty",
+    "role": "AIcrowd Team",
+    "moderator_badge_visible": true,
+    "post_date_text": "Aug 9"
+  },
+  "exact_excerpt": "Select nothing and we enter your two highest-ranked submissions on the Phase 1 public leaderboard",
+  "capture_scope": "Minimal visible-DOM excerpt and author metadata needed to verify the organizer's stated default; no forum interaction.",
+  "interpretation": "This organizer post states the Phase-1 fallback in explicit two-highest-ranked terms. Rules v14 separately applies its current default-selection rule to Phase 2."
+}

@@ -12,17 +12,18 @@ https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026
 | Path | What |
 |---|---|
 | `docs/CURRENT_STATE.md` | **Where we stand right now**: baseline, closed lanes, open questions, next actions, the clock. **Start here to work.** |
-| `docs/GAME_PLAN.md` | **The only active strategy:** target architecture, experiment order, gates, timeline, and completion definition. |
+| `docs/GAME_PLAN.md` | **The active research program:** candidate architecture, experiment order, falsifiers, gates, timeline, and completion definition. |
 | `docs/CLAUDE_CODE_HANDOFF.md` | Copy-ready prompt for a new Claude Code Builder to execute the plan. |
-| `docs/PHASE2_LIVE_AUDIT_2026-08-24.md` | Dated live rules, leaderboard, competitor, literature, and evaluator evidence behind the plan. |
+| `docs/PHASE2_FRONTIER_AUDIT_2026-08-28.md` | Current Phase-2 rules, board, discussion, literature, infrastructure verdict, and evidence behind the plan. |
+| `docs/PHASE2_LIVE_AUDIT_2026-08-24.md` | Historical launch-week audit; superseded where the 2026-08-28 audit differs. |
 | `AGENTS.md` | The cross-agent repository operating contract. Any coding agent reads this first; `CLAUDE.md` imports it. |
 | `docs/SKEPTIC.md` | The independent-falsifier brief. `.claude/agents/skeptic.md` and `.codex/agents/skeptic.md` are thin adapters that load it. |
-| `estimator.py` | **The submission** (v0: covariance propagation + offline per-layer calibration). Self-contained; only imports allowed in the grader sandbox. |
+| `estimator.py` | **The shipped submission file** (v2.6.1). Self-contained; only imports allowed in the grader sandbox. Two Phase-2 submissions are already public; neither is a winning architecture. |
 | `docs/COMPETITION_BRIEF.md` | Plain-English explainer: the competition, the math, what to learn. **Start here to understand.** |
 | `docs/VALIDATION.md` | The measurement protocol and its proofs. Binding on anything measured. |
 | `docs/GOTCHAS.md` | Standing operational knowledge — traps that must not be rediscovered. |
 | `docs/HUMAN_MODEL.md` | Samuel's own mental model. Agents read and critique it; agents never write it. |
-| `scripts/preflight.ps1` | The gate that runs on every estimator change (12 checks; 10 by default ~2-3 min, 12 under `-Full`). |
+| `scripts/preflight.ps1` | The gate that runs on every estimator change (16 checks; 12 by default, all 16 under `-Full`). |
 | `scripts/guard_paths.py` | The one implementation of the protected-path / irreversible-action rules. Both agents' hooks and the git pre-commit backstop call it. |
 | `scripts/verify_portability.py` | Checks the harness is still swappable between agents (99 checks). |
 | `docs/RESEARCH_NOTES.md` | Intel: rules, leaderboard, forum threads, papers, open questions. |
@@ -45,9 +46,10 @@ does anyway, and in practice agents read the files rather than invoking them.*
 they are stated directly in `AGENTS.md` § *How work is done*:
 
 1. **Pre-register before you measure.** Question, hypothesis, mechanism, numbered
-   predictions, the gate, the falsifier, the frozen residual model and the seed block
-   — appended to `experiments/LOG.md` **and committed** before any data exists, plus
-   Samuel's prediction before the result.
+   predictions, gate, falsifier, round-specific counted-FLOP model and seed block
+   — appended to `experiments/LOG.md` **and committed** before data exists, plus
+   Samuel's prediction. In Phase 2, residual is reported as headroom against the
+   0.4-second cliff; it is not part of `C`.
 2. **An independent Skeptic** after every IMPORTANT or STRATEGIC slice, launched in a
    context that never saw the builder's reasoning, with raw artifact paths rather than
    a prose summary.
@@ -80,15 +82,20 @@ uv run whest validate --estimator estimator.py
 uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --n-mlps 1 --runner subprocess
 ```
 
-The current preflight/checklist still uses stale package/config assumptions in some
-paths. `GAME_PLAN.md` Phase 0 is the required repair before local results can claim
-grader parity. The old calibration/Phase-1 experiment commands remain documented in
-`SETUP_WINDOWS.md` only as historical lab references.
+The default gate is green: all 12 executed checks pass, including the live official
+package/config assertions, 30 edge cases, scorer/seed/vault invariants, archive
+identity, and the local official-package FLOP anchor. The four `-Full` checks are
+deployment-envelope checks, not evidence already earned. Local operation counts match
+the official package's subprocess report exactly; the grading server currently adds a
+small `2**24` total-FLOP offset, and Windows cannot enforce the 8 GiB process limit.
 
 ## Current method and target
 
-The current Phase-2 path is basic Gaussian K2 propagation and is not competitive.
-The target is a width-1024 Kerdock/MUB structured angular carrier with antipodes
-and exact radial integration, supported by a compositional K2/augmented-K2 analytic
-state and a compact checkpoint response closure. The evidence, module interfaces,
-experiment gates, and two-candidate finish are in `docs/GAME_PLAN.md`.
+The shipped v2.6.1 path is basic Gaussian K2 propagation; the best public v2.7
+adds a final scalar calibration. Neither is competitive. The leading research
+hypothesis is a hybrid: make exact third-cumulant
+propagation affordable (`W-EFF`), retain it only where layer-age tests show it matters,
+and use a task-specific kernel-selected carrier to correct the discarded history.
+Kerdock/MUB carriers remain one candidate family, not the architecture by fiat. The
+evidence, falsifiers, experiment order, and conservative/aggressive
+two-candidate finish are in `docs/GAME_PLAN.md`.

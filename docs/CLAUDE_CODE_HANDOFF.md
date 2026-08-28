@@ -1,4 +1,4 @@
-# Claude Code handoff — close Phase 1A/Track 0S, then run a cost-aware Phase 1B
+# Claude Code handoff — Phase-2 frontier program
 
 Copy the prompt below into a new Claude Code session started at the repository
 root. It assumes no chat history. Repository evidence is authoritative.
@@ -14,188 +14,102 @@ You are the repo-local Builder for Samuel's ARC White-Box Estimation Challenge
 C:\Users\samsu\Documents\arc-whest
 ```
 
-Continue autonomously through the bounded work below. Stop at every Samuel-only
-prediction, submission, vault, seed-claim, `estimator.py` edit, or material scope
-expansion. Never submit or touch a vault without Samuel's explicit approval.
+First read `AGENTS.md`, `docs/CURRENT_STATE.md`, the bottom of
+`experiments/LOG.md`, `docs/GAME_PLAN.md`,
+`docs/PHASE2_FRONTIER_AUDIT_2026-08-28.md`, `docs/VALIDATION.md`,
+`docs/GOTCHAS.md`, and `docs/SKEPTIC.md`. Inspect HEAD and the worktree before
+editing. Do not depend on this prompt where a current repository document differs.
 
-First read `AGENTS.md`, then `docs/CURRENT_STATE.md`, the bottom of
-`experiments/LOG.md`, `docs/GAME_PLAN.md`, `docs/VALIDATION.md`,
-`docs/GOTCHAS.md`, `docs/KERDOCK_MUB_SPEC.md`, and `docs/SKEPTIC.md`. Inspect HEAD
-and the worktree before editing. The pre-review worker HEAD was `f8a2df5`; a later
-documentation-only review commit may now be HEAD. `estimator.py`, the seed ledger
-and the vault were untouched by the review.
+Never edit `docs/HUMAN_MODEL.md`. Never submit, touch a vault, claim a seed block,
+change a gate or residual model, or edit `estimator.py` without the exact approvals
+and preregistration required by `AGENTS.md`. Phase 2 permits up to two designated
+submissions and two public entries already exist; do not create a duplicate
+submission or assume either entry should be designated.
 
-## What is true now
+## Current conclusion
 
-- Phase 0 and P1-PRE are CLOSED on literal independent ACCEPTs. Do not reopen
-  them.
-- No Phase-2 submission has been made. The signed-in team/Phase-2 filter showed
-  zero submissions on the 2026-08-25 Chicago / 2026-08-26 UTC recheck.
-- The frozen K2p1 submission file is operationally safe but not improved:
-  `4.050566369642183e-7` adjusted / `4.050566369642183e-6` raw on the official
-  100-MLP subprocess mini, multiplier `0.1`, `137,600,326,656` FLOPs/MLP, zero
-  failures. Its 4.288x residual headroom is **LOCAL and one-session only**.
-- The live board recheck had 48 entrants. Puffi led at `9.50e-9` adjusted /
-  `3.10e-8` raw. Our baseline projects to about rank 42 and is 42.6x worse in
-  adjusted score. The live leader row implies multiplier about `0.306`.
-- Phase 1A really does emit a valid 16-basis real-MUB carrier. Independent reruns
-  reproduced verifier 34/34 and probe 16/16, exact `1/32` coherence, phase-degree
-  distribution `{0: 1, 2: 511}`, all 130,816 differences rank 10, and the rejected
-  mapping's failure. K8 is exact: the aligned fourth-moment ratio is
-  `21.6881103515625`; 64 random probes merely missed that defect.
-- Dense 16 costs exactly `2**40`, so `C/B=0.5` and its multiplier is `0.5` before
-  analytic/control overhead. It is an experimental endpoint, not the presumed
-  winning architecture. The current leader cost points instead toward roughly an
-  8--10-basis carrier after overhead.
-- Both terminal reviews are PROVISIONAL. Phase 1A lacks a grader-legal carrier
-  construction path and truthful setup/memory clearance. Track 0S's full-preflight
-  witness names `3adf81f`, before later `local_sim/` corrections, so its own gate
-  fails at current HEAD.
+- At the **2026-08-28 16:40 UTC** snapshot, the public Phase-2 frontier was around
+  `7.4e-9` adjusted and `2.3e-8` to
+  `3.5e-8` raw. Our best public entry is about `1.374e-7` adjusted and
+  `1.374e-6` raw. Scalar calibration helped, but it cannot close this gap.
+- The local official-package evaluator is well reconciled. The default preflight
+  is green 12/16 and the local official subprocess FLOP ledger matches exactly.
+  The grading server adds a small `2**24` total-FLOP offset, Windows cannot enforce
+  the 8 GiB process cap, and `preflight.ps1` currently certifies only
+  `estimator.py`.
+- Full third-cumulant propagation measures `4.0047e-8` on DESIGN (GT-noise floor
+  `1.155e-9`) and `3.9249e-8` on organiser CONFIRM (GT-noise floor `7.478e-11`),
+  but not yet at a winning measured cost. The immediate bottleneck is making its
+  exact mathematics cheap, then learning which layer ages need to be retained.
+- Kerdock/MUB carriers are valid candidates, not the architecture by fiat. Carrier
+  policies must be selected with a task-specific deep-ReLU kernel proxy and then
+  tested against independent rotated small blocks, orthogonal, IID and low-discrepancy
+  controls.
 
-Do not edit `docs/HUMAN_MODEL.md`, frozen estimator archives, the seed ledger,
-vault state, or `estimator.py` in the bounded closure below.
+## Execute in this order
 
-## A. Close Phase 1A — IMPORTANT, no truth or seed
+### 1. Track 1: `W-EFF` exact-mathematics cost proof — IMPORTANT
 
-Do exactly this bounded repair; do not reopen the algebra or start another general
-hardening cycle.
+Before implementation, obtain Samuel's written prediction and append a knowledge
+contract to `experiments/LOG.md`. Preserve full-K3 mathematics and outputs exactly.
+Profile the full run, prove representative-layer equality, and produce an official
+flopscope operation ledger for the proposed sparse/block-aware contractions. The
+claim to test is cost only; do not spend truth or choose a model from MSE.
 
-1. Reconcile every durable claim with the formal K6 withdrawal. The claim is only
-   that the emitted object satisfies the defining real-MUB Gram properties; the
-   property checker is not an independent construction. Remove stale 23/23,
-   13/13, “all 512 degree 2,” independent-reference, `104`, global-extremality,
-   and explained-leader-overhead wording. Preserve history by appending a LOG
-   correction rather than rewriting prior LOG entries.
-2. Add a genuinely grader-legal carrier construction/materialisation path using
-   only Python stdlib and `flopscope.numpy as fnp`. The current probe builds with
-   NumPy and wraps the finished array, which does not qualify. Prove the legal
-   path byte-identical to the NumPy reference for `k=1/2/4/8/16`, arbitrary
-   supported basis indices, and deterministic fresh processes.
-3. Replace the memory false-green. Observed Windows peak commit around 1.147 GiB
-   gives at most 7.14x headroom; it cannot prove an 8-GiB `RLIMIT_AS` pass. A check
-   must not pass merely because commit is below 8 GiB. Record largest arrays,
-   commit/RSS/virtual-space limitations, and leave enforcement unproved unless a
-   Linux subprocess actually enforces it.
-4. Do not call an after-import construction timer the official setup boundary.
-   Measure repeated fresh-worker spawn + import + setup if the evaluator exposes
-   that boundary; otherwise explicitly defer setup clearance. Preserve the dense
-   ledger `2**40`, `C/B=0.5`, and say the private leader's remainder is unknown.
-5. Rerun the 34/34 verifier, 16/16 probe, portability, and full preflight. Capture
-   full preflight first to a system-temp file so the transcript header witnesses a
-   clean tree. Commit the transcript/regenerated evidence as the single evidence
-   commit permitted by the gate; prove no `local_sim/`, `scripts/`, or
-   `estimator.py` difference from the witnessed HEAD.
-6. Append the knowledge delta and give the contract, diff, raw artifacts, and
-   current-HEAD transcript to a fresh independent Skeptic. Phase 1A closes only on
-   literal ACCEPT. If the reviewer finds another blocking false durable claim,
-   stop and return it; do not start Phase 1B.
+Stop if exact parity cannot be proved, the projected integrated multiplier remains
+too high, or the saving relies on uninstrumented/raw-array work. Run default
+preflight, portability and the required fresh independent Skeptic before believing
+the result.
 
-## B. Close Track 0S — still no submission without Samuel
+### 2. Track 2: late-window / layer-age K3 diagnostic — IMPORTANT
 
-This is a calibration baseline, not algorithmic progress.
+Only after an IMPORTANT knowledge contract and Samuel's prediction are recorded,
+use **unregistered, label-free probe networks** to compare full K3 with K2-prefix +
+exact-K3 windows `m in {2,4,6,8}`. Include a matched-rank arbitrary-cap control.
+Measure final prediction drift, propagated third-cumulant slice drift, exact FLOPs
+and residual headroom. Drift is not an error increment: carry the full-K3 RMSE
+interval and report the triangle-inequality bracket, with population-transfer
+uncertainty. This is an imitation diagnostic, not a promotion decision and not
+authority to read or spend any truth block.
 
-1. Correct the GT-floor artifact label to `mean(avg_variance) / 1e9`; qualify the
-   4.288x residual number as LOCAL, one-session; anchor the duplicate-transcript
-   disclosure to historical commit `6d3423c` rather than claiming the current
-   files are identical.
-2. Reuse the clean final-HEAD preflight witness only if the Track-0S contract's
-   evidence-only-commit rule is literally met. Otherwise run the gate again.
-3. Live-recheck the signed-in Phase-2 submission count and remaining daily
-   allowance. Preserve capture where possible and label transcription as such.
-4. Obtain a focused independent ACCEPT on the exact candidate SHA and packet.
-5. Stop and ask Samuel to authorize one calibration submission of that exact SHA.
-   Never infer approval. If approved later, submit once and preserve the returned
-   ID/report verbatim; fit nothing to the score and do not call it a nominee.
+No seed-ledger block is claimed for this label-free diagnostic. If its scope changes
+to inspect labels, select a model, or make a promotion claim, stop and restart it as
+STRATEGIC under Rule 1 with a freshly claimed DESIGN block.
 
-Track 0S does not block Phase 1B after Phase 1A is accepted.
+Kill the late-window claim if early third-cumulant blocks materially determine the
+final result, checkpoint initialization dominates the error, or measured cost does
+not fall with retained layer age as predicted.
 
-## C. Prepare exact fast paths before spending Phase 1B truth
+### 3. Track 3: task-specific carrier objective — IMPORTANT, then STRATEGIC
 
-After Phase 1A ACCEPT, but before claiming a DESIGN block, implement three
-algebraically equivalent local paths:
+Implement and verify the prior-average deep-ReLU-kernel quadrature objective from
+the Game Plan. Freeze its recurrence, candidate panel and selection rule before
+looking at MLP truth. First test whether the truth-free kernel energy ranks carrier
+policies in the same direction as finite-width MLP MSE. Global rotations of one
+fixed Gram matrix are a null control; independent rotations between small blocks are
+a genuinely different candidate.
 
-1. dense carrier reference;
-2. FWHT evaluation of layer 0;
-3. FWHT layer 0 plus exact layer-1 antipodal reuse:
+Do not promote a carrier because it is a spherical design or has a good generic
+moment certificate. Promote only if the preregistered kernel proxy transfers to
+the task and the integrated paired adjusted-score gate passes.
 
-```text
-[z]+ W1 + [-z]+ W1 = |z| W1
-[z]+ W1 - [-z]+ W1 = z W1 = x (W0 W1)
-```
+### 4. Integrate only after the modules survive independently
 
-Verify small and live shapes against dense, distinguish exact algebra from
-float32 rounding, and record official flopscope 0.12 operation ledgers. The
-leading fast/dense ratio is approximately `29/32 + 1/(32k)` before lower-order
-transforms and assembly. Dense remains the numerical oracle, not the production
-candidate. Do not use truth MSE to choose the spelling.
+The conservative candidate is float32 K2/augmented-K2 plus a kernel-selected carrier
+checkpoint and frozen response correction. The aggressive candidate is K2 prefix,
+carrier-initialized exact K3 over the final four to six layers, a tiny cross-fitted
+response correction and frozen calibration. Bill all branches together and apply
+the current server-offset fixture near a multiplier boundary.
 
-## D. Phase 1B — STRATEGIC adjusted-score DESIGN frontier
+Promotion requires paired arithmetic adjusted-score improvement on a fresh DECIDE
+block through `competition_score.decide()`, the allowed interval excluding zero,
+reported GT-noise floors, zero failures, server-parity mini validation, deployment
+headroom and an independent Skeptic verdict. Percentile bootstrap, BCa, public-split
+fitting and reused blocks are forbidden.
 
-Before any truth exists:
+## Report back
 
-1. Append the full Rule-1 contract to `experiments/LOG.md` and commit it.
-2. Restate Samuel's S2 prediction and take his predictions for the new primary
-   questions: winning basis-count region, raw-MSE gain versus K2p1, and residual
-   safety. Stop for his answers before claiming the new DESIGN block.
-3. Claim a fresh DESIGN block through the ledger. Do not reuse P01 as decision
-   evidence and do not touch a SINGLE_USE DECIDE block.
-
-The primary estimand is paired arithmetic **adjusted score**, using common random
-numbers and `competition_score.decide()` with a preregistered gate. Report every
-MSE with the GT-noise floor. Use studentised-t or basic bootstrap, never percentile
-or BCa. Total counted FLOPs include carrier propagation, casts, means, output
-assembly, and every analytic/control branch.
-
-Dense carrier-only break-even before overhead is:
-
-| bases `k` | `F/B` | multiplier | raw gain versus K2p1 needed to beat K2p1 |
-|---:|---:|---:|---:|
-| 1 | 0.03125 | 0.100 | any strict gain |
-| 2 | 0.06250 | 0.100 | any strict gain |
-| 4 | 0.12500 | 0.125 | >1.25x |
-| 8 | 0.25000 | 0.250 | >2.50x |
-| 16 | 0.50000 | 0.500 | >5.00x |
-
-Evaluate cumulative `k=1..16` prefixes from one full trajectory. Predeclare only
-these mechanism-based nested policies: validated algebraic prefix; MLP-seeded
-uniform nested permutation; identity basis replacing one Kerdock basis. A seeded
-global signed-Walsh input rotation may be one bounded ablation. Do not tune literal
-basis indices. Include matched-row IID and ordinary-orthogonal controls as
-diagnostics, but do not gate on the old 2.7x-versus-IID prediction.
-
-Use two independent truth replicas and the cross-replica/noise-corrected identity.
-If the selected arm's truth-noise floor exceeds 10% of its raw MSE, increase truth
-replicas uniformly before selection. Record layerwise errors, local `k -> 2k` MSE
-elasticity, carrier-versus-K2 checkpoint discrepancies, exact FLOPs, residual,
-memory, setup and failures.
-
-Freeze basis policy, `k`, exact execution spelling and chunking from DESIGN-A;
-replicate them unchanged on locked DESIGN-B. Advance to a later DECIDE block only
-if the replication has at least 1.20x paired adjusted-score gain over K2p1, the
-allowed interval excludes zero, zero failures, and all operational falsifiers
-pass. This is a DESIGN screen, not promotion.
-
-Only after freezing the carrier, test shallow analytic checkpoints (for example
-layers 4/8/12) as a separate marginal estimand against that carrier. Measure actual
-prefix overhead. Prefer a shallow prefix; a full K2p2 branch adds about `1.378e11`
-FLOPs and raises the approximate multipliers at `k=2/4/8/16` to
-`0.1252/0.1877/0.3127/0.5627`. Gate “hybrid minus frozen carrier,” never hybrid
-versus K2 again.
-
-## Binding operational falsifiers
-
-- Three independent 100-MLP official-subprocess soaks. Report first-MLP warm-up
-  separately but never discard it. Zero rows may reach 0.4 seconds, and require
-  `2.35 * quiet-session p99 < 0.4 s` to cover the measured session spread.
-- No setup timeout across repeated fresh workers. The whole subprocess boundary is
-  authoritative, not an after-import timer.
-- Linux subprocess under an actual 6-GiB sacrificial `RLIMIT_AS`: zero
-  `MemoryError`, worker death or restart; record `VmPeak`, RSS, largest array and
-  workspace accounting. Without Linux enforcement, memory remains unproved and
-  the candidate is not deployable.
-- Total integrated counted FLOPs below `2**41`; no failed MLPs; no grader-policy
-  violation.
-
-At each gate, report exact evidence, current SHA, the decision needed, and safe work
-that can continue. Do not edit `estimator.py` or claim a DECIDE seed without a new
-STRATEGIC contract and Samuel's required prediction/approval.
+At each stop, report the exact contract, current SHA, changed paths, raw artifact
+paths, operation ledger, confidence interval, failure counts, cost multiplier,
+residual headroom, memory status, Skeptic verdict and the next Samuel-only decision.
+Do not silently flow one strategic result into the next implementation.

@@ -1,0 +1,17 @@
+{
+  "artifact_kind": "read_only_browser_evidence",
+  "captured_at_utc": "2026-08-28T17:06:20.432Z",
+  "timestamp_source": "Browser runtime new Date().toISOString() immediately after the live page rendered.",
+  "browser": "user Chrome via the Chrome extension",
+  "url_requested": "https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/challenge_rules",
+  "url_final": "https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/challenge_rules",
+  "page_title": "AIcrowd | ARC White-Box Estimation Challenge 2026 | Challenge_rules",
+  "page_version_text": [
+    "rules v14",
+    "Official Rules · v14"
+  ],
+  "section_label": "Phase 2: Final Submission.",
+  "exact_excerpt": "Before the Phase 2 End, each Participant may designate up to two (2) submissions for the Private Re-evaluation as described in §6.",
+  "capture_scope": "Minimal visible-DOM excerpt needed to verify the two-designation claim; no form interaction or account mutation.",
+  "interpretation": "Rules v14 expressly allows up to two Phase-2 submissions to be designated for private re-evaluation."
+}

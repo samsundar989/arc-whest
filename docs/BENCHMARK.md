@@ -1,13 +1,12 @@
 # BENCHMARK.md — where we actually stand
 
-> **Phase-2 status — rechecked 2026-08-25 Chicago / 2026-08-26 UTC.** The body below is the private Phase-1 benchmark
-> record and must not be used as the live target. Current Phase-2 anchors are:
-> leader `9.50e-9` adjusted / `3.10e-8` raw; present repo K2 path measured on
-> the official 100-MLP subprocess mini at `4.050566e-7` adjusted /
-> `4.050566e-6` raw, approximately rank 42 among 48 entrants. The signed-in team
-> view shows zero Phase-2 submissions. Use
-> `CURRENT_STATE.md` and
-> `GAME_PLAN.md`; detailed provenance is in `PHASE2_LIVE_AUDIT_2026-08-24.md`.
+> **Phase-2 status — rechecked 2026-08-28 16:40 UTC.** The body below is the
+> private Phase-1 benchmark record and must not be used as the live target. The
+> live board has 67 teams: Puffi leads at displayed `7.4e-9` adjusted / `2.6e-8` raw;
+> our best of two zero-failure Phase-2 entries is v2.7 at `1.374e-7` adjusted /
+> `1.374e-6` raw, rank 41. That is an 18.6x adjusted and 52.9x raw gap. Use
+> `CURRENT_STATE.md`, `GAME_PLAN.md`, and
+> `PHASE2_FRONTIER_AUDIT_2026-08-28.md`; the August 24 audit is historical.
 
 > **Update 2026-08-19 (night).** Two numbers changed what this table means.
 > **(a)** v2.6.1's projected score, under the residual line now calibrated on five

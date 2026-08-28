@@ -2,11 +2,12 @@
 
 *Everything we know, with sources. Snapshot dates matter — AIcrowd pages were crawled ~Jul 28–29 and re-checked Aug 3–4, 2026. Update as Phase 2 develops.*
 
-> **Live Phase-2 override — 2026-08-24.** This is a chronological research notebook,
+> **Live Phase-2 override — 2026-08-28.** This is a chronological research notebook,
 > so the Phase-1/pre-launch tables below remain historical rather than being
 > rewritten. Do not use them for live constants or research ordering. Current
 > official facts and forum/leaderboard evidence are in
-> `PHASE2_LIVE_AUDIT_2026-08-24.md`; the sole active strategy is `GAME_PLAN.md`.
+> `PHASE2_FRONTIER_AUDIT_2026-08-28.md`; the sole active research program is
+> `GAME_PLAN.md`.
 > Phase 2 is 1024x16 on WhestBench 0.16 / flopscope 0.12 with `B=2**41`, lambda 0,
 > residual cap 0.4 s, wall cap 120 s, and solution memory 8 GiB.
 
@@ -22,7 +23,7 @@
 | Compute | `C = flopscope FLOPs + 1e11 × residual_wall_seconds`; B = 2.72e11 (Phase 1); warm-up was 6.8e10 (forum; overview said 3.4e10 — unresolved discrepancy, moot now) | scoring-model.md; forum 18026 |
 | Ground truth | MC, **N = 1e9** samples/MLP → GT noise ≈ 2e-10 MSE | ground-truth.md; HF card |
 | Grader | CPU-only, 16 vCPU / 64 GB, no network; only flopscope + whestbench + stdlib importable; arrays immutable; 4 GiB/array cap; hidden per-MLP wall cap (read `admin_config.wall_time_limit_s` in run reports); `setup()` off-budget ≤~5s | forum 17997; stage-5 docs; FAQ |
-| Submission | `whest submit --estimator estimator.py`; 50 MiB / 50 files; `.npz` (no pickle); 50/day/team; graded on ~10 held-out MLPs; final = private re-run of designated submission on fresh MLPs | README; FAQ; townhall |
+| Submission | **Historical Phase-1 row:** `whest submit --estimator estimator.py`; 50 MiB / 50 files; `.npz` (no pickle). **Live Phase 2:** 10/day/team and up to two designated submissions are privately rerun on fresh MLPs | Phase-2 Rules v14; forum 18143 |
 | Seeds | all predict-time randomness from `mlp.seed`; setup-time from `ctx.seed`; violations risk DQ; determinism re-checked on re-grade | 01_random.py; code-patterns.md |
 | Dataset | HF `aicrowd/arc-whestbench-public-2026` — tags `v1-warmup`, `v1-phase1` (mini=100 / full=1,000 MLPs); **no v1-phase2 tag as of Aug 4** | HF API refs |
 | Timeline | Phase 2: Aug 1 – Sep 19 23:59 UTC; private re-runs Sep 20–30; results Oct 1; NeurIPS ws Dec 11–12; contribution write-up due Sep 26 | overview (re-fetched Aug 3); forum 18041 |
@@ -179,33 +180,39 @@ knows the answers has no reason to do. Recorded, not explained away.
    estimator on 50 *fixed* MLPs. Our submission-to-submission comparisons are
    therefore *paired* and cleaner than we assumed — but the level carries a fixed
    7–20% offset versus the public 100 and is never evidence a change helped.
-   Decisions stay on the local 100-MLP split.
-4. On Aug 8, re-run `twin_diff.py --all` after the first Phase-2 graded report to
-   confirm whether round 1429 also uses a fixed suite, whether `sampling_mse` changes
-   (a new value ⇒ new suite; the same 16 digits ⇒ the same reference machinery), and
-   whether `public_scores` still exposes per-MLP values. Snapshot the board daily
-   with `board_snapshot.py` and diff with `--diff`.
+   Decisions use freshly claimed canonical blocks; graded/public data is external
+   calibration and CONFIRM only.
+4. **Historical forensics item, now superseded:** the first Phase-2 graded reports
+   exist and their conclusions are recorded in `CURRENT_STATE.md`. Do not rerun the
+   old fixed-suite investigation as a model-selection loop. Board snapshots remain
+   read-only monitoring artifacts.
 
-## 2h. Evaluation mechanics — what actually decides the prize (confirmed 2026-08-05)
+## 2h. Evaluation mechanics — what actually decides the prize
+
+> **Current correction, 2026-08-28:** Challenge Rules v14 explicitly permits a
+> team to designate **up to two Phase-2 submissions** for fresh private re-runs.
+> If the team designates none, Rules v14 §6 selects the two best-scoring valid
+> submissions from that Phase's public leaderboard. The older one-submission text
+> below is retained as a historical record and is superseded.
 
 > Placeholder for the strategy session's own §2h and
 > `docs/eval-mechanics-and-reconstruction.md`, **neither of which had synced to this
 > repo** when this was written. Merge rather than overwrite.
 
-**The frame, as confirmed:** prizes are decided by a **private re-run of each team's
-one designated submission on fresh MLPs**. The public leaderboard is not the
+**The frame, as currently confirmed:** prizes are decided by a **private re-run of
+up to two designated submissions per team on fresh MLPs**. The public leaderboard is not the
 ranking; combined with §2g (a fixed 50-MLP scored set with exact per-MLP feedback)
 it is a reconstruction game, and rank on it carries no information about how a
 method will do on unseen draws.
 
 **Operational consequences, which is why this section exists:**
 
-1. **Judge everything on fresh-MLP score.** The local 100-MLP mini split (public
-   1e9-sample truth, never used for fitting) and ≥1000 freshly minted He MLPs
-   (`local_sim/robustness.py`) are the decision instruments. A change that helps on
-   the graded 50 and not on those is not a change we want.
-2. **The distribution matters, not the mean.** One designated submission, one fresh
-   draw, and a failed MLP scores as zeros — so p99 and max are first-class metrics.
+1. **Decide on fresh canonical mints; confirm on the public mini.** The public
+   100-MLP mini is CONFIRM-only and is never used for fitting or model choice.
+   Binding decisions use newly claimed single-use blocks under `VALIDATION.md`;
+   robustness soaks run only after the decision.
+2. **The distribution matters, not the mean.** Up to two designated submissions,
+   fresh draws, and a failed MLP scores as zeros — so p99 and max are first-class metrics.
    `local_sim/edge_cases.py` covers the contract failure modes on the shipped file.
 3. **Don't chase published numbers.** 18106's 1.551e-7 is attributed to the
    dead/on/kink family that Sprint 3 measured end-to-end at ~1.02×; either the

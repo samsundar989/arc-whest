@@ -1,7 +1,7 @@
 # The ARC White-Box Estimation Challenge, explained from zero
 
 *Written for Samuel — CS degree, no ML background assumed. Phase-2 facts updated
-2026-08-24. Detailed live provenance is in `PHASE2_LIVE_AUDIT_2026-08-24.md`.*
+2026-08-28. Detailed live provenance is in `PHASE2_FRONTIER_AUDIT_2026-08-28.md`.*
 
 ---
 
@@ -61,9 +61,11 @@ random quantity too. The task:
 Only the **final layer's 1,024 numbers are scored**—the other 15 rows are
 diagnostics, but the complete finite grid is required.
 
-Concretely, the private evaluation has 100 networks: 50 provide public feedback
-and 50 remain sealed for the final re-run. The public dataset has a 100-network
-mini and 1,000-network full split with ground truth.
+An ordinary grading report carries 100 per-network telemetry rows and exposes 50
+public score rows. Those hidden grading rows are **not** the prize-deciding final
+rerun: Rules v14 says the designated submissions are rerun on fresh MLPs after
+Phase 2. Separately, the downloadable public dataset has a 100-network mini and a
+1,000-network full split with ground truth.
 
 ---
 
@@ -73,8 +75,9 @@ mini and 1,000-network full split with ground truth.
 
 **The budget makes the dumb way uncompetitive.** Your code runs under a **FLOP
 accountant** called `flopscope`. Phase 2 allows `2**41 ≈ 2.199×10¹²` FLOPs per
-network, calibrated to roughly 65,536 dense samples. The live leader's raw MSE is
-`3.603e-8`, far below ordinary Monte Carlo at that row count. The strongest public
+network, calibrated to roughly 65,536 dense samples. At the 2026-08-28 16:40 UTC
+snapshot, the leader's displayed raw MSE was `2.6e-8` (its GT-noise floor is not
+published), far below ordinary Monte Carlo at that row count. The strongest public
 evidence points to algebraically structured quadrature, not merely more random
 samples.
 
@@ -94,11 +97,16 @@ Lower is better.
 - **B**: `2**41 = 2,199,023,255,552` FLOPs.
 - **The 0.1 floor**: use less than 10% of the budget and your multiplier stops improving at 0.1. So a method that's cheap *and* accurate gets a 10× score bonus, but no more. (The challenge overview page shows an older `max(0.5, ·)` example — the starter kit docs, FAQ, and the actual leaderboard arithmetic all confirm **0.1** is what's used.)
 - **Failure = zeros**: crash, wrong shape, NaN, or budget overrun on a network ⇒ that network is scored as if you predicted all zeros (MSE ≈ 0.9, multiplier 1.0) — catastrophic but not disqualifying.
-- Ground truth itself has noise ≈ **2×10⁻¹⁰** MSE (a billion samples isn't infinity). That's the physical floor of the game; the leader is within ~100× of it.
+- Ground truth itself has Monte Carlo noise because a billion samples is not
+  infinity. On the Phase-2 organiser mini, the measured average floor used by our
+  K3 CONFIRM evaluation is **`7.478e-11` MSE**; the floor varies with the MLP and
+  must be reported for each evaluation rather than treated as one universal number.
 
-Live reference: our Phase-2 K2 path is around `3.95e-6` raw / `3.96e-7`
-adjusted, while the leader is `3.603e-8` raw / `1.802e-8` adjusted. That is the
-gap the architecture in `GAME_PLAN.md` must close.
+Timestamped reference on the organiser mini (GT-noise floor `7.478e-11`): the
+uncalibrated K2 path is `4.050566e-6` raw / `4.050566e-7` adjusted and v2.7 is
+`1.392983e-6` / `1.392983e-7`. The 2026-08-28 16:40 UTC leader was displayed at
+`2.6e-8` raw / `7.4e-9` adjusted; its truth-noise floor is not public. That is the
+gap the research program in `GAME_PLAN.md` must close.
 
 ---
 
@@ -121,24 +129,30 @@ announced November 15; the algorithmic-contribution write-up is due October 24.
 
 **Prizes**: Phase 2 Best Score $50,000 / $20,000 / $10,000, plus **$20,000 for "Best Algorithmic Contribution"** — judged by ARC on scientific merit, explicitly favoring *mechanistic* (math-based) methods over tuned sampling and "opaque LLM-optimized code". Phase 1 had its own $50k which has already been decided. Winners must open-source their code (OSI license). LLM assistance (e.g., me) is explicitly allowed with disclosure.
 
-**Phase-2 leaderboard snapshot, August 24 (lower is better):**
+**Phase-2 leaderboard snapshot, August 28 at 16:40 UTC (lower is better):**
 
-| Rank | Team | Adjusted score |
-|---|---|---|
-| 1 | Puffi | 1.802e-8 |
-| 2 | pranav | 1.87e-8 |
-| 3 | Activation-Regions | 3.079e-8 |
-| ~19 | K2-like cluster | ~3.93e-7 |
+| Rank | Team | Adjusted | Raw MSE |
+|---:|---|---:|---:|
+| 1 | Puffi | 7.4e-9 | 2.6e-8 |
+| 2 | fklassen | 9.50e-9 | 2.86e-8 |
+| 3 | andrew_epstein | 1.00e-8 | 3.48e-8 |
+| 5 | Activation-Regions | 1.09e-8 | 2.93e-8 |
+| 41 | neopok919 (us) | 1.374e-7 | 1.374e-6 |
 
-The account has no Phase-2 entry. The live board is only public feedback; final
-ranking comes from private re-runs of up to two nominated submissions.
+The account has two zero-failure Phase-2 entries: v2.6.1 at `3.933e-7` adjusted
+and v2.7 at `1.374e-7`. The live board is only public feedback; final ranking
+comes from private re-runs of up to two designated submissions. The Rules v14
+text now states the two-submission rule explicitly.
 
 **Public frontier evidence:** Puffi's Phase-1 system combined Kerdock/Walsh mutually
 unbiased bases, antipodes, exact radial integration, an analytic prefix, and a
-mid-network control variate. Its leading Phase-2 FLOP count almost exactly matches
-16 width-1024 bases with antipodes. That mechanism is inferred because the Phase-2
-code is private. ARC's reference augmented-K2 method separately shows how selected
-joint third/fourth state can be propagated without a full dense K3 object.
+mid-network control variate. But the live Phase-2 leaders use raw MSE around
+`2.3e-8`--`3.5e-8` at multipliers around `0.285`--`0.476`; their code is private,
+so no exact Phase-2 architecture may be inferred from a FLOP row alone. Public
+experiments show useful moment-matched sampling and low-error-correlation blends,
+while our local full-K3 work shows that high-order state is accurate enough if its
+cost can be rebuilt. ARC's reference augmented-K2 method separately shows how
+selected joint third/fourth state can be propagated without a full dense K3 object.
 
 **Clean-compute rule:** meaningful computation must go through flopscope. The old
 wall-time pricing loophole is not a research lane and lambda is now zero. We do not
@@ -161,10 +175,17 @@ the leader in raw MSE.
 that repair the state passed to later layers. This is open and distinct from merely
 adding skew/kurtosis to the final ReLU mean formula.
 
-**Structured angular quadrature**—replace random directions with algebraically
-balanced orthogonal bases, pair every direction with its antipode, and integrate
-the Gaussian radius separately. The primary Phase-2 target is 16 Kerdock/MUB bases,
-not generic IID or ordinary random orthogonal sampling.
+**Exact third-cumulant propagation**—carry the leading non-Gaussian interaction
+through the network. The measured full version reaches roughly frontier raw
+accuracy, but its present implementation costs too much. The first research target
+is identical mathematics with sparse/block-aware contractions, followed by tests of
+whether only the last few layer ages need to remain exact.
+
+**Task-specific structured quadrature**—replace random directions with balanced
+points, pair directions with antipodes, and integrate the Gaussian radius separately.
+Kerdock/MUB bases are one strong family, but the selection objective should be the
+deep-ReLU kernel induced by this task. Independent small-block rotations, ordinary
+orthogonal, IID and low-discrepancy controls keep the certificate honest.
 
 **Compositional hybrids**—run the structured carrier and analytic state in parallel,
 measure their discrepancy at registered checkpoints, and transport a compact
@@ -177,8 +198,9 @@ DESIGN-only data, and improve a preregistered score. Naive final-residual fittin
 already failed.
 
 The deep truth connecting all of these is **state drift through composition**. The
-target architecture measures that drift with a structured carrier and repairs it
-with a mechanistic state/control branch.
+candidate architecture uses a cheap analytic prefix, exact high-order transport only
+over the layer ages that earn their cost, and a kernel-selected carrier/checkpoint
+to repair the history that was discarded.
 
 ---
 

@@ -1,12 +1,15 @@
 # CURRENT_STATE.md — read this first
 
-**Snapshot: 2026-08-27 (late). Phase 2 is live, this account has two graded
-submissions, and the compressed-K3 lane that Contract 3 made priority 1 has
-just been measured and priced out (P-B-COST, HEAD `b784b6f`, independent
-Skeptic ACCEPT).** This file says where execution stands;
+**Snapshot: 2026-08-28 16:40 UTC. Phase 2 is live, this account has two graded
+submissions, full factorized K3 has transferred to organiser data, the latest
+compression claims have been corrected by an independent REJECT, and W-EFF plus
+late-window K3 are now the immediate no-truth questions.** This file says where
+execution stands;
 [`GAME_PLAN.md`](GAME_PLAN.md) is the only active architecture/roadmap;
 [`VALIDATION.md`](VALIDATION.md) is binding for measurement; the newest entries at
-the bottom of `experiments/LOG.md` contain the evidence narrative.
+the bottom of `experiments/LOG.md` contain the evidence narrative. The dated
+competition/repository/literature evidence is
+[`PHASE2_FRONTIER_AUDIT_2026-08-28.md`](PHASE2_FRONTIER_AUDIT_2026-08-28.md).
 
 ## One-minute orientation
 
@@ -15,18 +18,14 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
 - Shape is `1024 x 16`; budget is `2**41`; multiplier floor is `0.1`.
 - Official stack is WhestBench 0.16 / flopscope 0.12. Lambda is zero; residual cap
   is 0.4 seconds; total wall cap 120 seconds; solution memory 8 GiB.
-- The live Phase-2 board had **50 entrants on the 2026-08-26 UTC recheck** (48 the
-  previous day; leader unchanged). Rank 1 was Puffi at `9.50e-9` adjusted / `3.10e-8` raw; the K2
-  covariance-propagation tie occupied roughly ranks 37--41 at `3.93e-7` /
-  `3.93e-6`. This is a
-  live-board observation, not a promotion dataset.
-  **Board snapshots below are dated, and two of them differ.** The
-  `9.50e-9` / 50-entrant figure above is the 2026-08-26 UTC recheck. The
-  "rank 27 of 57" and `16.4x`-off-the-leader figures further down came from the
-  **2026-08-26 23:12 UTC** snapshot, where the leader was `8.50e-9` and the board
-  had 57 entrants. Both were previously presented as current; neither is wrong,
-  and the later one is the more recent. The board moves daily — **quote a
-  snapshot with its timestamp or not at all.**
+- The live Phase-2 board had **67 entrants at 2026-08-28 16:40 UTC**. Puffi led
+  at displayed `7.4e-9` adjusted / `2.6e-8` raw with multiplier about `0.285`.
+  `neopok919` v2.7 was **rank 41/67** at `1.374e-7` / `1.374e-6`: `18.6x`
+  behind in adjusted score and `52.9x` in raw MSE. This is a live-board
+  observation, not a promotion dataset. Raw snapshot:
+  `experiments/board_snapshots/2026-08-28T1640Z_phase2_frontier_audit_board.*`.
+  Older figures below remain dated historical observations; never quote a board
+  number without its timestamp.
 - **TWO PHASE-2 SUBMISSIONS EXIST AS OF 2026-08-27, both graded, both with zero
   failed MLPs.** This supersedes the "zero Phase-2 submissions" line that stood
   here on 2026-08-26.
@@ -43,8 +42,12 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
 
   **The telemetry these bought is the real prize** (full detail at the bottom of
   `experiments/LOG.md`):
-  - **cost parity `+0.0122%`** — local `137,600,326,656` vs graded
+  - **grading-server cost offset `+0.0122%`** — local official-package runner
+    `137,600,326,656` vs graded
     `137,617,103,872` per MLP. `C == F` on all 100 rows on the real grader.
+    The local 19-operation anchor is exact against the stored official-package
+    subprocess report, **not** against the grading server's total; no graded
+    operation ledger exists from which to attribute the `+2**24` offset.
   - **score parity: there is NO measurable bias. CORRECTED 2026-08-27, and the
     first version of this line was wrong.** The graded submission set and the
     public `mini` split share **zero** networks — they are two disjoint 100-MLP
@@ -58,34 +61,35 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
     reproduces exactly and only the network sample differs.
   - **residual: graded median `6.78`/`7.04 ms`, max `7.06`/`7.31 ms` → `54.7x`
     headroom** against the `0.4 s` cliff. The grader is `7.06x` faster than this
-    host at the median. **`AGENTS.md` says the old Phase-1 "~7x" has no Phase-2
-    counterpart; it does now.**
-  - **setup `2.66–2.92 ms` across 5 workers, all SUCCESS → `1,712x` headroom.**
-    **`SETUP_TIMEOUT` is a purely LOCAL artifact and was never a grader risk.**
+    host at the median for these files. `AGENTS.md` records this observation and
+    correctly refuses to use it as a safety factor for a different candidate.
+  - **setup `2.66–2.92 ms` across 5 workers, all SUCCESS → `1,712x` headroom**
+    for these two submitted files. This proves their setup safety; it does not
+    identify the cause of earlier local timeouts or clear a future candidate.
   - **feedback shape confirmed: 100 telemetry rows, 50 public score rows
     (indices 0–49), rounded to 3 significant figures.**
   - `sampling_mse = 1.133e-06` is the organiser's MC reference. v2.7 is within
     `1.21x` of it; the canary was `3.47x` off.
-- **The residual-cliff worry is RESOLVED, and the answer was this host.** Local
-  measurement said v2.7 cost `+40.3 ms` of residual over the baseline; **the
-  grader says `+0.260 ms`.** 99.4% of the local delta was contention. Local
-  residual **deltas** on this host are untrustworthy, not merely local absolute
-  times.
+- **The residual-cliff worry is resolved for the two submitted K2 files.** Local
+  measurement said v2.7 cost `+40.3 ms` over the baseline; the grader measured
+  `+0.260 ms`. The reports do not identify the cause of that disagreement.
+  Local residual deltas on this host are therefore not authoritative for a new
+  architecture.
 - **Open item created by the graded data:** the two files differ by `32,832`
-  counted FLOPs locally and **`32,800` on the grader** — one 32-FLOP op the local
-  meter bills and the grader does not. It is `2.3e-10` of the total and changes no
-  decision, but `AGENTS.md` claims the meters reconcile to zero op for op, so it
-  is owed to `local_sim/p2_flop_anchor.py`.
+  counted FLOPs locally and **`32,800` on the grader**. The 32-FLOP delta
+  discrepancy is observed only in totals; no grading-server operation ledger
+  exists to attribute it to an operation. It is `2.3e-10` of the total and changes
+  no decision, but it belongs in graded-total regression fixtures.
 - The current shipped file routes Phase-2 width to basic `k2p1`. Its official
   100-MLP subprocess mini measured `4.050566e-7` adjusted / `4.050566e-6` raw,
   with 0 failures, fixed `137,600,326,656` FLOPs/MLP and **4.29x LOCAL,
-  one-session** worst-case residual headroom. At the current board that projects
-  to about rank 42 and is **42.6x worse adjusted / 130.7x worse raw** than the
-  leader. It is a safe
+  one-session** worst-case residual headroom. Its graded canary is rank 57 at the
+  current snapshot. It is a safe
   calibration baseline, not a materially improved Phase-2 system.
-- The repo's scientific decision protocol is strong. Its deployment evaluator was
-  not Phase-2-truthful; **P2-P0 repaired the deployment parity** and the local
-  meter now reproduces the official runner op by op, to zero.
+- The repo's scientific decision protocol is strong. P2-P0 repaired local
+  deployment parity: the local meter reproduces the stored official-package
+  subprocess runner op by op, to zero. The grading server still adds the small
+  unexplained offset above; do not conflate those two claims.
 - **Phase 0 is CLOSED.** Its all-of gate G1–G7 is met, with a literal independent
   **ACCEPT** on reviewed HEAD `952bd61`, recorded in closure commit `7367fdb` at
   the bottom of `experiments/LOG.md`.
@@ -187,8 +191,11 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   **The `10 per team per UTC day` allowance is STILL NOT captured** — no reachable
   AIcrowd API exposes a per-day count or balance and the rules page renders
   client-side, so that half stands and needs a browser session.
-- **P2-SHIP-CAL: a calibrated candidate is BUILT and MEASURED. Gate MET. Not
-  submitted.** `estimator_v2_7.py` (sha256 `96ff522d…`) = v2.6.1 plus sixteen
+- **HISTORICAL PRE-SUBMISSION RECORD for P2-SHIP-CAL.** v2.7 has since been
+  submitted as #328664, graded `1.373807110667258e-7`, and completed with zero
+  failures. The remaining indented text records the evidence and blockers as they
+  stood before submission; it is **not a current action list**. `estimator_v2_7.py`
+  (sha256 `96ff522d…`) = v2.6.1 plus sixteen
   literal output-row constants. Official 100-MLP subprocess mini:
   **`1.3929833e-7` adjusted / `1.3929833e-6` raw, 0 failures, multiplier `0.1`,
   `137,600,359,488` FLOPs** — a **`2.9078x`** improvement on the frozen K2p1
@@ -238,15 +245,12 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   Lands about **rank 27 of 57** (2026-08-26 23:12 UTC snapshot, leader `8.50e-9`)
   — a baseline and a safe fallback nominee, never a contender; `16.4x` off that
   leader.
-  **TWO THINGS IT DOES NOT ESTABLISH.** (a) **Setup compliance is UNTESTED**: the
-  first attempt died at `SETUP_TIMEOUT` (bare `import whestbench`+`flopscope`
-  measures 3.54–4.35 s here against the 5.0 s ceiling; our own `setup()` is
-  0.278 s), so the run used `--setup-timeout 120` and its `run_config` records
-  `120.0`. Re-measure at the official 5 s on a quiet host before submitting.
-  (b) Nothing about the private re-run.
-  **BLOCKING FOR SUBMISSION — UPDATED 2026-08-27. Item (i) is now CLOSED and two
-  new ones are open; see the SAMUEL'S CONTRACT 2 and SKEPTIC VERDICT entries at
-  the bottom of `experiments/LOG.md`.**
+  **Historical limitation at that point:** the local run did not establish setup
+  compliance and said nothing about a private rerun. The later grading report now
+  proves setup success and zero failures for exact v2.7; it does not clear a future
+  candidate or predict private-rerun accuracy.
+  **HISTORICAL BLOCKERS — do not execute these as current instructions.** They are
+  retained to preserve the pre-submission audit trail; #328664 is already graded.
   (i) **CLOSED.** Samuel supplied written SHA-naming approval for
   `96ff522d…` (v2.7) and standing approval for the frozen baseline
   `00240eb1…` (the canary). Hard rule 6 is satisfied for both artifacts.
@@ -263,11 +267,11 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
   (iv) **NEW.** The Rule-2 Skeptic returned **REJECT on fitness to submit** —
   *"the submission should not go out"* — on the residual-cliff evidence above.
   Its pre-registered discriminating experiment and decision rule are recorded in
-  the LOG entry; run that before v2.7 goes anywhere.
-  **Consequence for ordering: the canary is the artifact whose gate is fully
-  satisfiable** — it *is* `estimator.py`, preflight certifies exactly it, its
-  worst row is `93.3 ms`, and Samuel has approved it. v2.7 is not, and needs a
-  contract first.
+  the LOG entry. This was a pre-submission finding; the exact file has since graded
+  cleanly as #328664.
+  **Historical ordering at that time:** the canary was the artifact directly
+  certifiable by `preflight.ps1`. The remaining current gap is candidate-selectable
+  certification for future nominees, not permission to resubmit either file.
   (ii) **A
   `preflight -Full` 16/16 witness, which CANNOT be produced on this host today**:
   steps 1–14 PASS, steps **15 and 16 FAIL** on `SETUP_TIMEOUT` under contention
@@ -315,10 +319,10 @@ the bottom of `experiments/LOG.md` contain the evidence narrative.
 **ARC's factorized K3 (`mlp_kprop`, `k_max=3, factor=True`, unmodified) reaches a
 true final-layer MSE of `~3.9-4.0e-08` at 1024x16.** Two independent readings:
 
-| reading | networks | label | mean | 95% CI |
-|---|---|---|---:|---:|
-| **P-A** | 24 DESIGN mints (P01) | our `2**26`/half A/B asset | `4.0047e-08` | `[3.794e-8, 4.215e-8]` |
-| **P-A-CONFIRM** | **100 organiser** (`v2-phase2@mini`) | **organisers' `1e9`-sample** | **`3.9249e-08`** | `[3.821e-8, 4.029e-8]` |
+| reading | networks | label | mean | GT-noise floor | 95% CI |
+|---|---|---|---:|---:|---:|
+| **P-A** | 24 DESIGN mints (P01) | our `2**26`/half A/B asset | `4.0047e-08` | `1.155e-9` | `[3.794e-8, 4.215e-8]` |
+| **P-A-CONFIRM** | **100 organiser** (`v2-phase2@mini`) | **organisers' `1e9`-sample** | **`3.9249e-08`** | `7.478e-11` | `[3.821e-8, 4.029e-8]` |
 
 They agree to **`1.99%`**. It is not an artifact of our instrument, our
 population, or our label. Independent Skeptic verdict: **ACCEPT** — *"the
@@ -327,7 +331,8 @@ built and then refuted by measurement the one attack that could have killed it (
 **common** fp32 label bias, which an A/B estimator cannot see because both halves
 share it; measured at `1.6e-18`, ten orders below the signal).
 
-For scale: our best graded entry is `1.374e-07` and the leader is `8.50e-9`.
+For scale: our best graded entry is `1.374e-07` and the 16:40 UTC leader was
+displayed at `7.4e-9`.
 
 **The whole question was price, not information — and the price has now been
 measured. It is prohibitive.** See P-B-COST at the bottom of `experiments/LOG.md`
@@ -522,8 +527,9 @@ by source reading rather than assumption: upstream's symmetry discount
 (`flop_utils.slice_factor`, for a kernel its own docstring calls *"theoretical,
 unimplemented"*) misses **both** dominant lines — `get_dslice` and `contract_W`
 are billed at `factor = 1.0`, and only the `3.01%` `nonlin_sum` line carries it.
-So the `5.49x` is probably real, **but it must not enter the write-up until one
-W-EFF operating point is billed by flopscope.** Also, in our favour: in SIMPLE
+The `5.49x` is therefore an **affordability target obtained by comparing different
+meters**, not a W-EFF saving. It must not be used as a projection or enter the
+write-up until an exact W-EFF operating point is billed by flopscope. In SIMPLE
 mode the two-leg block's middle factor is `torch.eye(n) * 3`, so of the `2n`
 columns added per layer, `n` have **two** one-hot modes and the other `n` have
 **one** — sparse-aware contraction has purchase on all of them, not half.
@@ -533,15 +539,16 @@ columns added per layer, `n` have **two** one-hot modes and the other `n` have
 | need | source |
 |---|---|
 | current status and next action | this file |
-| target architecture and full execution plan | `docs/GAME_PLAN.md` |
-| live rules/leaderboard/research evidence | `docs/PHASE2_LIVE_AUDIT_2026-08-24.md` |
-| the external Phase-2 mission brief, checked item by item | `docs/PHASE2_BRIEF_RECONCILIATION_2026-08-26.md` |
+| active research hypotheses and execution plan | `docs/GAME_PLAN.md` |
+| current rules/leaderboard/research evidence | `docs/PHASE2_FRONTIER_AUDIT_2026-08-28.md` |
+| launch-week historical audit | `docs/PHASE2_LIVE_AUDIT_2026-08-24.md` |
+| historical 2026-08-26 mission-brief reconciliation, superseded where current docs differ | `docs/PHASE2_BRIEF_RECONCILIATION_2026-08-26.md` |
 | measurement protocol | `docs/VALIDATION.md` |
 | operational traps | `docs/GOTCHAS.md` |
 | contracts, results, Skeptic verdicts | bottom of `experiments/LOG.md` |
 | independent review brief | `docs/SKEPTIC.md` |
 | Claude implementation prompt | `docs/CLAUDE_CODE_HANDOFF.md` |
-| contribution manuscript | `docs/writeup-draft.md` |
+| contribution manuscript | `docs/writeup-draft.md` — STALE/DO NOT SUBMIT until a STRATEGIC claim review |
 
 The old frontier packets and handoffs are superseded. Stub files remain only where
 source comments/tools link to their historical names; they redirect here and must
@@ -598,39 +605,42 @@ joint-state augmented K2 is open.
 
 ### Seed and vault state
 
-- P01 has consumed **144/600** seeds; 456 DESIGN seeds remain.
+- P01 has consumed **168/600** seeds; 432 DESIGN seeds remain. The append-only
+  seed ledger is authoritative; prose counts are only snapshots.
 - P01 is not a DECIDE block.
 - Existing SINGLE_USE Phase-1 blocks keep their recorded state in the ledger.
 - The Phase-1 vault cannot be used as a Phase-2 vault.
 - No Phase-2 vault exists. Creating or touching one requires Samuel's explicit
   authorization and a STRATEGIC preregistration.
 
-## Live frontier and architecture decision
+## Live frontier and research decision
 
-The strongest external clue is Puffi's cost:
+**The sole active research program is the 2026-08-28 `GAME_PLAN.md`.** It orders
+falsifiable hypotheses; it does not establish the hybrid as the winning architecture.
+The earlier
+Kerdock-first ordering is superseded by measured K3 evidence and the live audit.
+Kerdock/MUB remains a bounded structured-carrier family; Phase-2 leader code is
+private and no fixed basis count is confirmed.
 
-```text
-1,099,802,385,000 FLOPs ~= cost of 32,768 full dense directions
-32,768 = 16 Kerdock/MUB bases * 1,024 axes * 2 antipodes
-```
+The evidence-ordered hypothesis stack is:
 
-Puffi publicly used Kerdock/Walsh mutually unbiased bases, antipodes, exact radial
-integration, analytic state, and checkpoint control in Phase 1. Phase-2 code is
-private, so the specific carrier is **inferred**, not confirmed. The factorization
-and roughly 74x improvement over matched-row IID are nevertheless strong enough to
-reopen structured sampling under the repository's own rule.
+1. f32 K2 / faithful augmented-K2 analytic prefix;
+2. exact sparse-aware K3 (W-EFF) as the first authoritative flopscope price/parity
+   question;
+3. late-window or age-window exact K3, screened against full K3 without labels;
+4. a task-specific angular checkpoint whose point sets are screened by deep-ReLU
+   kernel discrepancy before finite-width DESIGN evidence;
+5. a tiny rolled-forward response/K3-calibration layer only after the state path
+   works;
+6. two final nominees: a conservative carrier/state system and an aggressive
+   supported windowed-K3 hybrid.
 
-The target architecture is now:
-
-1. 16-basis width-1024 Kerdock/MUB angular carrier;
-2. antipodes and exact radial integration;
-3. K2p2 analytic state reference;
-4. faithful recurrent augmented-K2 joint state if it passes its own decision;
-5. compact mid-network sampled-versus-analytic checkpoint response;
-6. optional shared-scale/equivariant state correction only if residual diagnostics
-   justify it;
-7. two final nominees: a conservative carrier/reference candidate and an aggressive
-   supported state/response hybrid.
+The immediate barrier is cost truth, not another accuracy oracle. Full factorized
+K3 already transfers at `3.9249e-8` raw MSE with a `7.478e-11` organiser-label
+noise floor. Its upstream `1.4796 B` cost is not a flopscope operating point, and
+the cross-meter `5.49x` ratio is an affordability target rather than a projected
+W-EFF saving. No further truth block is spent until W-EFF or late-window K3 has an
+authoritative cost point.
 
 Coupled residual sampling is deprioritized. Its former 1.305x projection assumed a
 float32 K2 cost reduction that the frozen artifact did not show: measured cost fell
@@ -714,8 +724,8 @@ REJECT and the ACCEPT at the bottom of `experiments/LOG.md`.
 
 **Four defects were carried forward** from the accepting review (D1–D4 in that
 entry). None falsifies a Phase-0 gate clause. D4 — `VALIDATION.md` §7 describing
-the old twelve-step gate — is fixed. **D1–D3 are CLOSED IN CODE by P1-PRE
-(2026-08-25), and P1-PRE is not yet accepted.**
+the old twelve-step gate — is fixed. **D1–D3 are CLOSED IN CODE and P1-PRE is
+CLOSED on an independent ACCEPT** (seventh pass, reviewed HEAD `6d05d77`).
 
 | carried defect | required repair | state |
 |---|---|---|
@@ -795,8 +805,9 @@ free if the last array is built in float32. Taking it means changing
   `setup_timeout_s` — and **not** for `memory_limit_mb` or `predict_timeout_s`,
   which remain `ContestSpec` class defaults only. So the **8,192 MB limit — the one
   constraint this host cannot test at all — is also the one with the weakest
-  provenance**. No graded report publishes any of them, and none exists for
-  Phase 2.
+  provenance**. The two Phase-2 graded reports publish observed setup/residual/
+  FLOP telemetry for their exact files, but not an operation ledger or an
+  enforceable local memory limit.
 - **Transfer a local second.** The deployment authority for residual is
   `whest run --runner subprocess`, never the in-process figure.
 - **Enforce the 5-second setup ceiling meaningfully.** `import whestbench` alone
@@ -805,7 +816,7 @@ free if the last array is built in float32. Taking it means changing
   grader's subprocess one, so its "419 ms of 5000 ms" is not a transferable
   margin. Matters directly: the carrier builds its point set in `setup()`.
 
-### The residual budget Phase 1 must design against
+### Historical launch-week residual measurements
 
 Best case, one quiet session, `--runner subprocess` as the authority, 20 MLPs per
 cell (`experiments/2026-08-24_p2_p0/p2_residual_paths.json`):
@@ -845,16 +856,16 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 |---:|---|---|---|
 | 0 | official-stack/evaluator repair | IMPORTANT | **CLOSED 2026-08-24** — G1–G7 all met, independent ACCEPT recorded |
 | 0H | P1-PRE: D1–D3 evaluator hardening | **IMPORTANT** | **CLOSED** — seventh independent pass ACCEPT; 15 named mutations and current durable record verified |
-| 0S | first Phase-2 calibration submission | **STRATEGIC** | **REJECTED procedurally at current HEAD** — the candidate is safe, but the full-preflight witness predates later `local_sim/` edits. Correct continuity, produce a clean current-HEAD witness + evidence-only commit, live-recheck account/allowance, obtain focused ACCEPT, then ask for exact-SHA approval. Expected about rank 42; calibration only, never a nominee |
-| 0C | P2-CAL: K2 state calibration at 1024x16 | **DESIGN measurement** | **GATE NOT MET (falsifier fired), effect real.** 2.96x held-out for 16,384 FLOPs, but all multiplicative arms are provably one output rescale. Needs a NEW contract + Samuel's prediction before it can ship; C3/C4 (non-commuting corrections) are the live follow-on |
-| 1A | verified Kerdock/MUB carrier + grader-legal construction/deployment evidence | **IMPORTANT** | **PROVISIONAL** — 34/34 + 16/16 prove a valid real-MUB carrier and its exact dense cost. Add a stdlib/`fnp` construction path byte-identical to the NumPy reference; remove the memory/setup false-green; reconcile K6 as formally withdrawn; run current-HEAD full preflight/portability and obtain focused ACCEPT. No seed, estimator edit, or truth measurement |
-| 1B | cost-indexed structured-carrier DESIGN frontier | STRATEGIC | after 1A ACCEPT; contract and Samuel's restated prediction reviewed before claiming a NEW DESIGN block. Primary estimand is adjusted score over basis count and total measured overhead, not reproduction of the 16-basis fingerprint |
-| 2 | structured-carrier DECIDE | STRATEGIC | pending; new SINGLE_USE block after design freeze |
-| 3 | recurrent augmented-K2 parity / DESIGN / DECIDE | IMPORTANT then STRATEGIC | pending |
-| 4 | checkpoint response DESIGN/DECIDE | STRATEGIC | pending |
-| 5 | integrated frontier and robustness | STRATEGIC | pending |
-| 6 | public CONFIRM / authorized Phase-2 vault | STRATEGIC | pending |
-| 7 | two frozen submissions and nomination | STRATEGIC | pending |
+| 0S | Phase-2 canary + calibrated submission | STRATEGIC | **CLOSED — SHIPPED AND GRADED.** #328662 and #328664, zero failures; v2.7 is rank 41/67 at the current snapshot |
+| 0C | K2 scalar calibration | DESIGN | **EXHAUSTED.** 2.96x transfer is real; multiplicative state gains collapse to output scale and non-commuting layer scalars did not transfer |
+| 0D | continuity repair: docs, P01, parity terminology | ROUTINE, then IMPORTANT for enforcement | docs in progress; graded-total fixtures and candidate-selectable preflight require their own prediction/review |
+| 1 | W-EFF exact K3 representative price/parity | IMPORTANT | **NEXT.** No truth; exact small-shape reference, one width-1024 flopscope operating point, zero scalar materializations |
+| 2 | late-window / age-window K3 imitation | IMPORTANT | next in parallel after contract; no labels, compare `m={2,4,6,8}` with full K3 and bill every arm |
+| 3 | deep-ReLU-kernel carrier objective and frozen panel | IMPORTANT then STRATEGIC | pending; Kerdock remains one bounded family, not the presumed backbone |
+| 4 | faithful augmented-K2 parity / DESIGN | IMPORTANT then STRATEGIC | pending; standalone and checkpoint-reference estimands stay separate |
+| 5 | K3 renormalisation, K4 readout, per-neuron response | STRATEGIC | pending after a deployable state path exists |
+| 6 | integrated SINGLE_USE decision and robustness | STRATEGIC | pending |
+| 7 | public CONFIRM / authorised Phase-2 vault / two nominees | STRATEGIC | pending |
 | 8 | contribution write-up | STRATEGIC claim review | pending |
 
 ## Samuel's standing predictions — recorded 2026-08-24, before the data
@@ -871,12 +882,9 @@ that test them, and they must not be edited in the meantime.
 | S3b | official 0.4 s residual-cap failure risk | aug-K2 at risk, carrier safe | open |
 
 S2 is still a valid historical prediction for **Kerdock16 versus matched-row IID**,
-but it is not a promotion gate. Dense Kerdock16 must improve raw MSE by **more than
-5x versus K2p1 merely to beat the current baseline score**, before adding any
-analytic/control cost; matching the live `9.50e-9` leader would require roughly
-**213x**. The current leader's raw/adjusted row implies multiplier about `0.306`,
-not `0.5`, so the old 16-basis cost fingerprint is evidence for the carrier family,
-not evidence that 16 is the winning basis count.
+but it is not a promotion gate. The current leader at 2026-08-28 16:40 UTC implies
+multiplier about `0.285`, not `0.5`; the old 16-basis cost fingerprint is evidence for
+the carrier family, not evidence that 16 is the winning basis count.
 
 ## Closed and open lanes
 
@@ -886,13 +894,16 @@ not evidence that 16 is the winning basis count.
 | higher Gaussian covariance-map orders | low value | measured plateau near 1.052x |
 | marginal ReLU mean Edgeworth | closed | capped near 1.047x in CP3R |
 | recurrent augmented K2 joint state | **open** | never tested by CP3R |
-| cost-indexed Kerdock/MUB + exact radial | **highest priority** | valid carrier; test the adjusted-score frontier over basis count, with 16 only a diagnostic endpoint |
+| exact sparse-aware K3 / W-EFF | **highest priority cost question** | exact mathematics; needs one authoritative flopscope operating point |
+| late-window / age-window K3 | **highest priority new hypothesis** | screen against full K3 without labels before any truth block |
+| cost-indexed Kerdock/MUB + exact radial | **bounded open branch** | valid carrier; select by task-specific proxy and adjusted score, with 16 only a diagnostic endpoint |
 | ordinary IID/random orthogonal | control only | tested arms lose |
 | broken two-cycle lattice | closed | does not bound valid QMC/MUB |
-| checkpoint response closure | **open after carrier** | compositional mechanism |
+| checkpoint response closure | **open after state path** | compositional mechanism; rollout/cross-fit required |
 | shared-scale mixture | conditional | run only on matching residual evidence |
 | equivariant learned state corrector | conditional | rollout/cross-fit required |
-| dense full K3 | deferred | projected multiple budgets |
+| full factorized K3 | accuracy anchor, not deployable | organiser-confirmed `3.9249e-8` raw (GT-noise floor `7.478e-11`); flopscope cost unknown |
+| arbitrary K3 rank capping | strong negative / weak open only with mechanism | rank-`n` measured poor; no impossibility theorem |
 | coupled residual sampler | deprioritized | float32/headroom premise unsupported |
 
 ## Authority boundaries
