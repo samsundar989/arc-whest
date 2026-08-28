@@ -101,15 +101,16 @@ K2P1_FLOPS = 137_600_326_656
 V27_ADJUSTED = 1.373807110667258e-07
 
 #: MEASURED flopscope-0.12 W-EFF cost of layer `l` of the exact K3 tower, f32,
-#: width 1024 -- `experiments/2026-08-28_weff/weff_price_f32_1000301.json`.
+#: width 1024 -- `experiments/2026-08-28_weff/weff_price_f32_1000301-1000302-1000303.json`,
+#: the RE-BINNED run that followed the independent review's C5 correction.
 #: A final-`m`-layer window started from a zero K3 checkpoint costs exactly the
 #: first `m` entries, because its rank trajectory inside the window is
 #: `0, 2n, 4n, ...` by construction.
 WEFF_LAYER_FLOPS_F32 = [
-    4_310_176_256, 21_506_823_680, 40_849_906_176, 60_192_988_672,
-    79_536_071_168, 98_879_153_664, 118_222_236_160, 137_565_318_656,
-    156_908_401_152, 176_251_483_648, 195_594_566_144, 214_937_648_640,
-    234_280_731_136, 253_623_813_632, 272_966_896_128, 292_309_978_624,
+    4_310_176_256, 21_508_397_056, 40_851_479_552, 60_194_562_048,
+    79_537_644_544, 98_880_727_040, 118_223_809_536, 137_566_892_032,
+    156_909_974_528, 176_253_057_024, 195_596_139_520, 214_939_222_016,
+    234_282_304_512, 253_625_387_008, 272_968_469_504, 292_311_552_000
 ]
 
 

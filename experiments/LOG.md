@@ -20202,3 +20202,303 @@ instead of a hand-waved `~3%`.
 
 **A fresh independent pass on this correction is still required** before the
 corrected table is treated as settled.
+
+---
+
+# 2026-08-28 — CONTRACT P2-WINDOW: does a late exact-K3 window imitate full K3 well enough to be worth building?
+
+**Classification: IMPORTANT.** Truth-free and **label-free**. No ground truth is
+read, no seed-ledger block is claimed, no vault is touched, `estimator.py` is not
+edited, and nothing is promoted. The estimand is **drift from full factorized K3
+on identical networks**, which is an imitation diagnostic and **not** an accuracy
+estimate.
+
+This contract is committed **after** the P2-WEFF result and its independent
+review, and **before** any arm has been run at the live shape.
+
+## Rule-1 deviations, declared before the data
+
+1. **Samuel's per-slice prediction was not taken.** The standing instruction for
+   this session is to pause only for the three predictions asked at the start, a
+   failed gate, an unresolved Skeptic finding, or the final exact-SHA approval.
+   Recorded here, before the measurement, as a known deviation so the gate
+   cannot be moved by it — the same way the 2026-08-26 slice recorded its own
+   missing prediction rather than quietly proceeding.
+2. **Data from this instrument has already been seen.** The `--selftest`
+   discrimination check *requires* each `late:m` arm to differ from the control,
+   so it necessarily produced drift numbers: at **width 96**, depth 16, f64, one
+   unregistered network — `late:2` `0.014155`, `late:4` `0.013989`, `late:8`
+   `0.011984` (`experiments/2026-08-28_window/window_selftest.json`, committed at
+   `6965e71`). These are **not** at the live shape and **not** on the probe seeds,
+   but they are data seen before this contract and they are disclosed rather than
+   suppressed. **They are nearly flat in `m`, which if it transferred would mean
+   the window buys almost nothing**; that is stated here so nobody can later claim
+   the gate was set knowing it would pass.
+
+## Question
+
+Does running exact factorized K3 over only the **final `m` layers**, from a zero
+third-cumulant checkpoint, imitate the full 16-layer factorized-K3 prediction
+closely enough that a candidate built on it could clear the `2x` ship bar at the
+**measured** flopscope price of that window?
+
+## Evidence
+
+- **CONFIRMED.** Full factorized K3: raw final-layer MSE `3.9249e-08` on 100
+  organiser networks, GT-noise floor `7.478e-11`, 95% CI
+  `[3.821e-08, 4.029e-08]`; `4.0047e-08` on 24 DESIGN mints. Independent ACCEPT.
+- **CONFIRMED, P2-WEFF as corrected (`f461e5c`, corrected at `966731b` after an
+  independent PROVISIONAL).** The exact W-EFF spelling of the full tower costs
+  **`1.0723 B`** under flopscope 0.12, whole-path **`1.0725 B`**, which **failed**
+  the `<= 0.35 B` screen by **`3.064x`**. Parity to `5.6e-16` against upstream;
+  `contract_W_weff` / `contract_wick_weff` commutation parity `4.4e-16` /
+  `1.7e-16`; rank trajectory `r_l = 2n*l` asserted; zero scalar materializations;
+  zero uninstrumented leaks. **Mode equality was verified in upstream's real
+  tower by the review**, not merely read from source: `||B_D - C_D|| = 0` exactly
+  and `||B_L - 3 B_D|| <= 3.24e-16` at every layer.
+- **CONFIRMED, P2-WEFF as corrected.** The measured per-layer ledger prices a
+  final-`m` window started from a zero K3 checkpoint, because its rank trajectory
+  inside the window is `0, 2n, 4n, ...` by construction — and that trajectory is
+  itself verified against upstream *from a zero-K3 start*, so it is the window's
+  trajectory and not merely the full tower's:
+
+  | `m` | window `B` | `+` K2p1 prefix | multiplier | margin to the `0.1` floor |
+  |---:|---:|---:|---:|---:|
+  | 2 | `0.0117` | `0.0743` | `0.1000` floor-pinned | **`25.7%`** |
+  | 3 | `0.0303` | `0.0929` | `0.1000` floor-pinned | **`7.1%`** |
+  | 4 | `0.0577` | `0.1203` | `0.1203` | over |
+  | 6 | `0.1388` | `0.2014` | `0.2014` | over |
+  | 8 | `0.2551` | `0.3177` | `0.3177` | over |
+
+  **`m <= 3` being "free" is a margin, not a category**, and this contract will
+  not print it in bold as though it were structural. At `m = 3` the slack is
+  `7.1%` (`~1.6e10` FLOPs); removing the acknowledged K2-prefix double count
+  gives `12.9%`. The honest range is **`7.1%`–`12.9%`**.
+- **CONFIRMED, P2-WEFF correction.** The un-respelled remainder is
+  **`0.000222 B` over the whole 16-layer tower**, so an `m`-layer window inherits
+  about `1.4e-5 * m` budgets — three orders below the `m = 3` margin. The first
+  version of that caution said `~3%` and was wrong in the safe direction.
+- **CONFIRMED, P2-WEFF correction.** flopscope grants **no** symmetry discount on
+  `W core W^T` (`1.00171x`; declaring the symmetry *costs* `7,340,031` FLOPs).
+  The `~0.008 B` that might have widened the `m <= 3` margin **is not
+  recoverable**.
+- **OPEN, carried as a real item rather than a rounding error.** The prefix column
+  is the *shipped K2p1*, which does **not** compute ARC's SIMPLE-mode state the
+  window layers consume — `K[1]`/`K[2]` as `HTensor`s, `K[4]` at
+  `DS_harmonic_proj(r_out=2)`, `pK_to_K`, `eval_part`, the wick coefficients. The
+  window's non-K3 work is billed as `contract_W_basic` alone. Upstream prices all
+  of it at `~2.15e9`, but `contract_W_basic` bills `+33%` in `fnp` versus
+  upstream, so "small under upstream's meter" is not "small under flopscope".
+
+- **CONFIRMED, this session.** The instrument `local_sim/p2_window.py` (`6965e71`)
+  reproduces upstream `mlp_kprop` **bit-for-bit** on the `full` arm, and each
+  `late:m` arm is reproduced **bit-for-bit by two entirely unmodified upstream
+  `mlp_kprop` calls** glued at the checkpoint, while being *required* to differ
+  from the control.
+- **CONFIRMED.** Graded v2.7 is `1.373807110667258e-07` adjusted, multiplier
+  `0.1`, raw `1.374e-06`. Shipped K2p1 is `4.050566e-07` adjusted at
+  `0.0625734 B`.
+- **CONFIRMED.** Rank-`n` capping in this basis is a **measured strong negative**
+  (best of six objects drifts `5.789e-7 = 14.5x MSE_full`), and "preserve the
+  diagonal" was refuted at matched rank. Any window arm must therefore beat a
+  **matched-retained-rank** cap or it is rank capping wearing a different hat.
+- **INFERRED.** Late layers dominate the final-layer answer, so third-cumulant
+  memory accumulated early may be largely redundant by layer 15. This is the
+  mechanism; it is exactly what the panel tests.
+- **SPECULATIVE.** That drift falls fast enough in `m` to clear the screen. The
+  width-96 disclosure above is evidence *against*.
+
+## Hypothesis and mechanism
+
+**H-WIN.** The final-layer prediction depends on `kappa_3` mainly through
+third-cumulant structure generated in the last few layers, because each layer's
+`contract_W` mixes and the ReLU readout reads only the `(3,)` and `(2,1)`
+diagonal slices. If so, drift from full K3 falls steeply in `m`, and because the
+measured price of a window is quadratic in `m` while `m <= 3` is *free* at the
+`0.1` multiplier floor, a short window would be a strictly better operating point
+than anything on the rank-capping axis.
+
+If drift is flat in `m`, the opposite is true and the mechanism is wrong: the
+third cumulant's contribution to the final layer is an accumulated quantity, not
+a local one, and no cheap window exists.
+
+## Intervention and frozen arms
+
+Frozen now; nothing is added after the panel is seen.
+
+| arm | what |
+|---|---|
+| `full` | the control: `k_max=3, factor=True, kind=SIMPLE`, uncapped |
+| `late:0` | **pure K2** — the baseline the window must beat |
+| `late:2`, `late:4`, `late:6`, `late:8` | K2 prefix, zero-K3 checkpoint, exact K3 over the last `m` |
+| `age:4` | `k_max=3` throughout, factor columns older than 4 layers dropped |
+| `normsort:4096`, `normsort:8192` | upstream rank cap at `2n*m` for `m = 2, 4` — the **matched-retained-rank** controls |
+
+**Checkpoint initializers.** `GAME_PLAN.md` Track 2 names three. **Only the
+zero-K3 one is run**, and the other two are recorded as unimplemented **with the
+reason** rather than silently dropped: the faithful augmented-K2 trace/harmonic
+state needs `kind=AUGMENT`, whose factored path is provably *not* equivalent to
+the unfactored one (`factor_k3.py:290-299`), and it is Track 4 with no evidence
+path; the structured-checkpoint queries need the carrier, which is Track 3. A
+narrowing of scope, declared, not concealed.
+
+## Numbered predictions
+
+1. `late:0` (pure K2) mean `D` lands in `1.2e-3 .. 2.5e-3` — of order
+   `sqrt(MSE_K2) = 2.01e-3`, reduced by correlation with the K3 answer.
+2. `D` is **monotonically decreasing** in `m`.
+3. `late:4` mean `D` lands in `3e-4 .. 1.2e-3`.
+4. **At least one `m` in `{2, 4}` satisfies G1.** Confidence is deliberately
+   recorded as **low, about 45%**, because of the width-96 disclosure above; the
+   reason to expect non-transfer is that `n = 96` is far from the large-`n`
+   regime the cumulant expansion is built for.
+5. `age:4` drifts **less** than `late:4` (it retains third-cumulant information
+   generated across the whole tower) and costs **more**.
+6. `normsort:8192` drifts **more** than `late:4` at matched retained rank.
+7. Per-layer relative diagonal-slice drift is dominated by the `(2,1)` slice
+   rather than `(3,)`.
+
+## Gate — GATE-W, chosen now and executable
+
+Implemented as `local_sim/p2_window.py::d_max_for_m` / `gate_table`, committed
+with this contract. Three conjunctive clauses, evaluated on the panel of six
+networks with common random numbers:
+
+- **G1 — the window could clear the bar.** The upper 95% studentised-t end of
+  mean `D` satisfies `D_hi95 <= D_max(m)`, where
+
+  ```text
+  D_max(m) = sqrt( bar / mult(m) ) - sqrt(MSE_FULL)
+  bar      = 1.373807110667258e-07 / 2 = 6.869036e-08     (2x graded v2.7)
+  mult(m)  = the MEASURED flopscope multiplier of the m-window (P2-WEFF)
+  ```
+
+  giving `D_max = 6.306828e-04, 5.576374e-04, 3.858935e-04, 2.668570e-04` for
+  `m = 2, 4, 6, 8`, from the **re-binned** cost table at `966731b`.
+
+  **This is one-sided and nothing more.** It comes from
+  `RMSE_cand <= RMSE_full + D`, so passing means the candidate *could* clear the
+  bar; only failing is decisive. Drift is not an error increment and this
+  contract never treats it as one.
+- **G2 — the window beats pure K2.** Paired `D(late:m) < D(late:0)` with the
+  studentised-t 95% interval of the paired difference excluding zero.
+- **G3 — the window beats matched-rank capping.** Paired
+  `D(late:m) < D(normsort:2n*m)` with the interval excluding zero.
+
+**There is deliberately no fourth, cost clause.** Cost already enters through
+`D_max(m)`, and every `m <= 8` is under `0.35 B` by construction, so a cost
+clause could not fail. This repository has now shipped three gate clauses that
+could not fail; this one is refused in advance.
+
+**Selection rule, frozen:** among all `m` passing G1 ∧ G2 ∧ G3, take the
+**smallest**. `m` is not chosen after seeing the panel.
+
+**The gate is the function, not the printed numbers.** The P2-WEFF cost table has
+already been corrected once by an independent review (`966731b`), and `D_max` was
+recomputed by the committed code rather than by hand — the correction moved each
+layer by exactly `+1,573,376` FLOPs and the `m = 3` margin by `0.001` points. A
+**second** fresh pass on that correction is in flight as this contract is
+committed. If it moves the table again, `d_max_for_m` recomputes and this gate
+follows it; the thresholds are therefore fixed as a *rule* before data even
+though one input is still under review, which is the only ordering that keeps the
+gate honest.
+
+## Falsifiers
+
+- **F-W1.** No `m` satisfies G1 → the late-window lane is dead today. Record the
+  negative. No truth block, no candidate, no submission.
+- **F-W2.** Some `m` satisfies G1 but fails G2 → the window adds nothing over
+  plain K2; dead.
+- **F-W3.** Some `m` satisfies G1 and G2 but fails G3 → the window is matched-rank
+  capping in disguise, which is a recorded strong negative; dead.
+- **F-W4.** The `full` arm is not bit-identical to upstream at the panel's own
+  shape → the instrument is not upstream and **no number is quoted at all**.
+- **F-W5.** `D` is non-monotone in `m`, or rises with `m` → prediction 2 refuted
+  and the mechanism is wrong; the panel must be re-read before anything is built
+  on it.
+
+## Baseline and tier
+
+**Tier: none.** No DECIDE, no CONFIRM, no VAULT, no labels, no truth. The control
+is the `full` arm on the same networks.
+
+Probe networks: **six** fresh unregistered seeds `1000401`–`1000406`, checked
+against `experiments/seed_ledger.jsonl` to fall in no registered range. Six rather
+than the three reused across every previous P-B slice, because the 2026-08-28
+Skeptic recorded that **no drift figure had ever carried an interval** — every
+figure here carries one.
+
+## Cost model — Phase-2 form, two meters, never conflated
+
+`lambda = 0`, so `C = F`.
+
+- **flopscope 0.12**: the window's price is the **measured** P2-WEFF per-layer
+  ledger, summed. It is a lower bound (P2-WEFF's un-respelled remainder can only
+  add), and the K2-prefix column over-estimates by at most `m * 1.95e-3 B`.
+- **Upstream's torch counter** bills each arm as it actually runs. It is reported
+  for completeness and is **never** added to, divided by, or compared against a
+  flopscope figure.
+- **Residual: UNMEASURED, and blocking.** No `--runner subprocess` figure exists
+  for any windowed arm because no `fnp` port of it exists. The `0.4 s` cliff is
+  not smooth: an overrun zeroes the row and forces multiplier `1.0`, a ~66,000x
+  loss. No candidate may be offered on this evidence until residual is measured.
+- **Memory: accounted, never enforced.** Windows has no `RLIMIT_AS`.
+
+## A second constraint the plan had not paired with the multiplier
+
+Read from the installed package this session, not assumed:
+`residual_wall_time_limit_s = 0.4` (**gated**), `wall_time_limit_s = 120.0`
+(total), `predict_timeout_s = 30.0`, `memory_limit_mb = 8192`.
+
+**flopscope defines `residual_wall_time_s = wall - backend - overhead`**
+(`flopscope/_budget.py:1781-1799`). The numpy work inside instrumented ops is
+*backend* time and is **not** charged to the residual; the residual is Python
+glue, GC and **un-instrumented** numpy. That is why the shipped K2p1 spends
+`137.6e9` counted FLOPs for a graded residual of `~7 ms`. So a windowed
+candidate's residual risk is about **op-count and Python overhead**, not about
+total FLOPs — a correction to how this repository has been reading the cliff.
+
+**The constraint that does scale with FLOPs is the 120-second TOTAL wall cap**,
+and no document here has paired it with the multiplier. The window's counted work
+relative to the whole shipped K2p1 path is `0.19x` at `m=2`, `0.92x` at
+`m=4`, `2.22x` at `m=6` and `4.08x` at `m=8`. Since `m` is already
+free below the multiplier floor only up to 3, and the wall cap bites hardest
+exactly where the multiplier does, **both constraints point the same way: small
+`m`.**
+
+No local second is quoted, because none is transferable
+(`AGENTS.md`; authority is `--runner subprocess`). This is recorded as a
+**risk and a design pressure, not a measurement**, and it becomes a blocking
+deployment item at Track D alongside residual.
+
+## Statistic
+
+Paired, common random numbers, six networks, all arms on identical weights.
+Mean `D` with its studentised-t 95% interval; paired differences for G2 and G3
+with studentised-t intervals. **Percentile bootstrap and BCa are refused**
+(`VALIDATION.md` §2b-i: measured false-promotion rates 6.8–8.2% and 9.1–11.5%).
+`competition_score.decide()` is **not** used and must not be: there is no score
+difference here, only a drift, and no promotion is available from a label-free
+panel.
+
+## Confounders, scope, and what must not change
+
+- **Must not change:** `estimator.py`, `experiments/seed_ledger.jsonl`, the vault
+  and its touch log, `local_sim/competition_score.py`, any gate threshold,
+  `docs/HUMAN_MODEL.md`, the two graded submissions.
+- **Confounder — the instrument is not upstream.** Refused by F-W4 and by the
+  two-unmodified-call composition check.
+- **Confounder — population transfer.** The full-K3 anchor is measured on
+  organiser networks; these probes are our canonical mint. The two agreed to
+  `1.99%` for full K3, which licenses carrying the anchor across, and that
+  licence is quoted with its own CI, never dropped.
+- **Confounder — drift read as error.** Every score column is a bracket. A
+  bracket that straddles the control decides nothing, and G1 is one-sided for
+  exactly that reason.
+- **Scope.** SIMPLE mode only. AUGMENT is out of scope and stated above.
+- **Scope.** A PASS licenses **building and pricing an `fnp` port**, and nothing
+  else. It is not an accuracy claim, not a deployability claim, and not a
+  submission. **A candidate cannot exist today without that port**, which is a
+  multi-day IMPORTANT-then-STRATEGIC effort with its own parity burden, and that
+  is recorded here before the result so a passing gate cannot be read as
+  "therefore ship something".
