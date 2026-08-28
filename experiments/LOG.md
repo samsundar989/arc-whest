@@ -19933,3 +19933,272 @@ changes what that contract should ask.
 
 **An independent Skeptic on the raw artifacts is required before any of this
 controls the next implementation.**
+
+---
+
+# 2026-08-28 — SKEPTIC PROVISIONAL on P2-WEFF: C5 is REJECTED, and the correction runs in the project's favour
+
+**Rule 2 is satisfied.** The independent pass returned **PROVISIONAL**, reproduced
+every number bit-for-bit, and then broke one of the eight claims outright. **The
+finding is correct, I have verified its mechanism independently, and it is accepted
+in full.** The gate verdict is unchanged — the screen still FAILS — but three
+headline figures were wrong and the cost model Track 2 is about to inherit is now
+**two hundred times tighter** than the entry claimed.
+
+Everything below is measured at HEAD, not argued. Artifacts are regenerated in
+`experiments/2026-08-28_weff/`.
+
+## The defect: a `flop_name` scope boundary, mistaken for a spelling difference
+
+The result entry compared upstream's `FactoredTensor3.get_dslice` against this
+module's `get_dslice`, reported **`+6.1%`**, said **`~1.0e11`** FLOPs of upstream's
+ledger were "**not executed here at all**", and called the `1.0040` total agreement
+"a coincidence of two offsetting differences". **All three are artifacts of where
+upstream draws a billing boundary.**
+
+The mechanism, which I traced independently rather than taking on trust:
+
+1. Section 3.1's `eval_part` calls `diagslice(WK[3], ...)`, which calls
+   `WK[3].get_dslice(...)` and **populates `WK[3].repeated.slices`** — billed to
+   `FactoredTensor3.get_dslice` at rank `2nl`.
+2. `pK_111 = WK[3].clone()` copies that **now-populated** cache
+   (`factor_k3.py:381`).
+3. `add_factors_` therefore takes its non-empty branch and incrementally adds the
+   fresh two-leg block's own `(2,1)` slice,
+   `self.repeated.slices[part] += _factored_get_dslice(tuple(new_factors), part)`
+   (`factor_k3.py:145-146`) — and that call sits **inside**
+   `with flop_name('nonlin_sum 111 factored')` (`factor_k3.py:371`), so
+   `_factored_get_dslice`, a bare module function, inherits the enclosing name.
+4. `get_repeated()` in `pK_to_K` then finds both slices cached and **pays nothing**.
+
+So upstream splits one computation across two ledger lines. This module did it in
+one call on the rank-`(2nl + n)` concatenation. Same arithmetic, different bins.
+
+**The instrument now bills it upstream's way.** `price_layer` splits
+`get_dslice` into **aged** and **fresh** on both spellings.
+
+## The corrected two-meter table
+
+`experiments/2026-08-28_weff/weff_price_f32_1000301-1000302-1000303.json`.
+
+Upstream bins layer 0's fresh block into `get_dslice` rather than `nonlin_sum`,
+because at layer 0 `3 not in WK`, so `pK_111`'s cache is empty and `add_factors_`
+updates nothing. Resolving that boundary explicitly:
+
+| line, binned like for like | upstream counter | this `fnp` spelling | ratio |
+|---|---:|---:|---:|
+| `contract_W` | `1,546,188,226,560` | `1,545,433,251,840` | **`0.99951`** |
+| `get_dslice` (aged, `+` layer-0 fresh) | `1,555,982,991,360` | `1,554,172,108,800` | **`0.99884`** |
+| `nonlin_sum 111 factored` (fresh, `l >= 1`) | `97,790,289,920` | `96,754,752,000` | **`0.98941`** |
+| `contract_W_basic` | `51,589,939,200` | `68,685,922,304` | **`1.33138`** |
+| genuinely not executed here | `2,154,746,032` | `1,666,228,224` | **`488,517,808` = `0.000222 B`** |
+
+**All three dominant lines agree between the two meters to `<= 1.1%`.** The single
+real divergence is `contract_W_basic` at `+33.1%`, and that one is now explained
+below rather than left open.
+
+### The three corrected headline figures
+
+| the entry said | the truth |
+|---|---|
+| `get_dslice` bills `+6.1%` over upstream | **`-0.12%`** once binned like for like |
+| `~1.0e11` FLOPs "not executed here at all" | **`488,517,808` = `0.000222 B`** — wrong by a factor of **205** |
+| whole-path estimate `1.117 B`, "FAIL by `3.19x`" | **`1.0725 B`, FAIL by `3.064x`** — the `+0.0454 B` add-on double-counted a line already inside `1.0723 B` |
+
+The `1.0040` total agreement was **not** a cancellation of two offsetting errors.
+It is `contract_W_basic`'s `+1.71e10` less `~2.1e9` of small negatives, and it
+reproduces exactly.
+
+**The FAIL is untouched and is now better supported**, because the measured figure
+is tight to `0.02%` rather than loose by `4%`.
+
+## The contract's own open sub-question, finally measured
+
+The contract said flopscope's `operand_symmetries` / `identity_pattern` discounts
+were "an open sub-question this slice measures rather than assumes" — and then did
+not measure them. That was an unfulfilled contract item and the review was right
+to say so. Measured now (`symmetry_discount_probe`), on the one line where a
+discount could plausibly be claimed, `W core W^T` with `core` symmetric:
+
+| spelling | counted FLOPs |
+|---|---:|
+| plain `(W @ C) @ W.T` | `4,292,870,144` |
+| `flops.as_symmetric(C, symmetry=(0,1))` then the same | `4,300,210,175` |
+
+**Ratio `1.00171` — declaring the symmetry costs `7,340,031` FLOPs and buys
+nothing.** Values agree exactly (`0.0`). So flopscope grants **no** discount here;
+upstream's `3n^3` versus this spelling's `4n^3` is a difference between the two
+meters, not an optimisation left on the table. **The `~0.008 B` the review flagged
+as possibly recoverable is not recoverable**, which matters because it bears on the
+`m <= 3` window margin. The answer runs against us and is recorded as such.
+
+## The parity hole, closed by measurement
+
+The review found that `parity_emit` builds its dense reference with
+`_lineages_to_dense` **from the already-W-EFF-propagated state**, so
+`contract_W_weff` and `contract_wick_weff` were never compared against
+`contract_W_dense` / `contract_wick_dense`. A bug in either would have propagated
+identically into both sides and been invisible; the `contract_W 1.356e-16` row of
+the parity table tests the **dense** transcription against upstream, not the W-EFF
+one. **That is a check that could not fail, and it is the eighth in this
+repository's collection.**
+
+Repaired in-tree as `commutation_parity`: the claim is that materialising a
+lineage list to dense factors (`phi`) commutes with the operator,
+`phi(weff_op(S)) == dense_op(phi(S))`, tested on every structural case the tower
+produces — aged, freshly-born two-leg (`M == I`), fresh `from_dstensor`
+(`M == I`), and mixed — because the `M == I` branches are exactly the ones that
+skip a matmul.
+
+| operator | worst relative deviation | tolerance |
+|---|---:|---:|
+| `contract_W_weff` | `4.401e-16` | `1e-12` |
+| `contract_wick_weff` | `1.733e-16` | `1e-12` |
+
+**And it immediately earned its place: it found a real defect.**
+`contract_wick_weff` returned `M = None` with `m_is_identity = False` — a corrupt
+lineage — when handed a lineage whose `M` was still symbolically `I`. Unreachable
+in upstream's operator order (`contract_W` always precedes `contract_wick_`, so
+`M` is materialised by then), so no measured number was ever affected; but it was
+a latent trap and it is now implemented exactly (`M == I` scaled by the wick vector
+is `diag(w)`, not the identity) rather than guarded.
+
+A mutation for `contract_W_weff`, which previously had none, is added as **M8**:
+breaking the `W @ I = W` shortcut is detected at `4.239e+00`. Eight mutations, all
+detected; `M3b` remains the one recorded invariance and is still not counted.
+
+## Hard rule 3, enforced instead of asserted
+
+The contract claimed "the module asserts every intermediate in the priced path is a
+flopscope array". **It did not** — only `assert_real_stack` was implemented, and the
+review caught the gap. Now implemented: every value a priced op returns is walked
+and required to be a `FlopscopeArray`; a bare `ndarray` or numpy scalar is recorded
+as a leak. **Measured: `0` leaks across all 16 layers, both spellings, three
+seeds.**
+
+This also partly closes the materialization counter's blind spot the review named:
+`FlopscopeArray` subclasses `ndarray`, and **integer indexing drops the wrapper**
+(`type(a[0])` is `np.float64`), so `float(a[0])` counts **zero**. The counter's `0`
+was true in fact — the review grepped, and the leak check now confirms it
+dynamically — but "counted, not inspected" **overstated** what the counter alone
+can see. Recorded, not smoothed over.
+
+## Two claims of mine that were weaker than stated
+
+1. **Prediction 6 (network-independence) was satisfied by construction, and I did
+   not notice.** The priced path has **no data-dependent branching** — no pruning,
+   no threshold, no clamp — so bit-identical integer totals across seeds were
+   guaranteed before the run. The review is right that this is a seventh member of
+   the family I had just finished congratulating myself for catching in `M3b`.
+   Further: the operands are `default_rng(seed).standard_normal` fills, **not
+   `canonical_mint` MLPs**, so calling them "three probe networks" and the result
+   "measured, not asserted" overstates it twice. The totals *are* bit-identical
+   (`2,357,959,794,176` on all three), and nothing depends on it.
+2. **"the recorded 39-line patch"** — `verify_upstream` reports
+   `changed_lines: 25`; 39 was the `+`/`-` line count of the patch file. Both
+   self-consistent; the word was wrong.
+
+## The late-window cost table, corrected — and it gets BETTER
+
+Caution 3 of the result entry said "every figure is the lower bound of §4 — the
+un-respelled remainder adds, proportionally". **That is wrong in magnitude, in the
+safe direction.** The remainder is `0.000222 B` over the *whole 16-layer tower*, so
+a 3-layer window inherits about `0.00004 B`, not `~3%`. The table is far tighter
+than its own caution admitted.
+
+Two cautions the review added, both adopted:
+
+- **`m <= 3` is a `7.1%` margin, not a category.** `0.0929 B` against the `0.1`
+  floor is `~1.6e10` FLOPs of slack, and the entry set "free" in bold as though it
+  were structural. Removing the acknowledged K2-prefix double count gives
+  `0.0871 B`, a `12.9%` margin. The honest range is **`7.1%`–`12.9%`**, and the
+  un-executed remainder (`0.00004 B`) is three orders below it. It is a real
+  margin, not a comfortable one, and the symmetry probe above confirms there is no
+  `0.008 B` discount waiting to widen it.
+- **A fifth caution the entry lacked.** The prefix column is the *shipped K2p1*,
+  which does **not** compute ARC's SIMPLE-mode state the window layers consume —
+  `K[1]`/`K[2]` as `HTensor`s, `K[4]` at `DS_harmonic_proj(r_out=2)`, `pK_to_K`,
+  `eval_part`, the wick coefficients. The window's non-K3 work is billed as
+  `contract_W_basic` alone. Upstream prices all of that at `~2.15e9`, so the
+  omission is genuinely small — but `contract_W_basic` bills `+33%` in `fnp`
+  versus upstream, so "small under upstream's meter" is not "small under
+  flopscope", and Track 2 carries it as an open item rather than a rounding error.
+- **`price_layer`'s stated reason for excluding operand synthesis was half wrong.**
+  Its docstring says the layer's inputs "are outputs of layer `l-1`, already billed
+  there". True for the factors; **false** for `s3`, `s21`, `w1` and `WK11`, which
+  come from the un-respelled remainder. The exclusion is still correct — those land
+  inside the `0.000222 B` bound — but the reason given was not the reason it is
+  safe.
+
+## Where the saving actually comes from — a better answer than the entry had
+
+With the corrected binning, the `9.09e11` saving decomposes:
+
+| line | dense | W-EFF | saving | share of total |
+|---|---:|---:|---:|---:|
+| `contract_W` | `1,545,433,251,840` | `998,092,308,480` | `35.42%` | `60.2%` |
+| `get_dslice`, aged | `1,547,721,792,000` | `1,290,401,349,120` | `16.63%` | `28.3%` |
+| `get_dslice`, fresh | `103,205,068,800` | `176,218,112` | **`99.83%`** | `11.3%` |
+
+The fresh two-leg block's `(2,1)` slice **essentially disappears** — `M ≡ I` makes
+every block permutation diagonal or a row-scale, `O(n^2)` instead of `O(n^3)`. That
+line alone is `11.3%` of the whole W-EFF saving, and the first entry could not see
+it because it was binned inside a line the entry believed was not executed at all.
+
+## A process finding I own
+
+The result entry ends "An independent Skeptic on the raw artifacts is required
+before any of this controls the next implementation." I then committed
+`local_sim/p2_window.py` at `6965e71` — 592 lines built on this cost table — before
+this pass existed. Its commit message states that no arm has been run and no claim
+is made, and none was, so nothing is contaminated. **But it is exactly the sequence
+the entry itself forbade**, and the review was right to name it. The Track-2
+*contract* has waited for this verdict, which is the part that actually gates.
+
+## Everything that survived the attack
+
+The review independently confirmed, and in two places went beyond what the slice had:
+
+- **C1.** `--price` re-run reproduces `3,266,688,647,168` / `2,357,936,193,536` /
+  `1.0723 B` / `FAIL (3.06x)` / `0` materializations. `SCREEN = 0.35` is a module
+  constant and the gate wording is **byte-identical** between `08bb4d5` and
+  `f461e5c`: **no post-hoc gate movement**. The FAIL survives any plausible pricing
+  correction — even a hypothetical uniform `2x` symmetry discount lands at
+  `0.54 B`.
+- **The structural premise is now MEASURED, not source-read** — and this is the
+  strongest single item in the whole slice, contributed by the review rather than
+  by me. Running `mlp_kprop(k_max=3, factor=True, kind=SIMPLE)` at `n=8`, depth 5,
+  float64 and inspecting `K[3]._factors` at every `act_l`: for every lineage at
+  every layer, `||B_D - C_D|| / ||C_D|| = 0.000e+00` and
+  `||B_L - 3*B_D|| <= 3.24e-16`. **Mode equality holds exactly in upstream's real
+  tower.** The entry asserted it from reading source; it is now a measurement.
+- **C4.** The savings reproduce the lineage counts to the last digit:
+  `contract_W` `465/720 = 0.6458333` against measured `0.6458333`; per-layer too
+  (`l=15`: `75/93 = 0.8065` vs `0.8068`). Checklist 9 (price-table exploitation —
+  the mechanism that killed the packed lane) is **cleared**: W-EFF does strictly
+  fewer matmuls *of the same shapes*, plus `O(n^2)` work where `M == I`.
+- **C8 is worth more than claimed.** `--verify-rank` starts from
+  `K_in = {1: zeros, 2: eye}` with **no `K[3]`** — literally a zero-K3 checkpoint —
+  so it independently verifies the rank trajectory **of the Track-2 window**, not
+  just of the full tower.
+- Contract precedence is clean: `08bb4d5` at `19:25:32Z`, every artifact's recorded
+  `utc` between `19:36:53Z` and `19:42:37Z`. Protected paths untouched across
+  `1f16203..HEAD`: `estimator.py`, `experiments/seed_ledger.jsonl`,
+  `experiments/vault/*` (counter 1, touch log 1 line, mtimes unmoved),
+  `docs/HUMAN_MODEL.md`, `local_sim/competition_score.py`, `scripts/`.
+  Portability `99/99`.
+
+**Review checklist items triggered: 6, 9, 13, 14, 17, 18 (three times).**
+
+## Corrected verdict
+
+**Unchanged: the gate FAILS and the full-tower exact W-EFF port is killed** — at
+**`1.0723 B` measured, `1.0725 B` whole-path, `3.064x` over the `<= 0.35 B`
+screen**. What changed is that the number is now tight rather than loose, the
+saving is attributed line by line, the W-EFF operators have parity coverage they
+did not have, hard rule 3 is enforced rather than asserted, and the late-window
+cost model Track 2 inherits carries a real bound (`0.000222 B` over the tower)
+instead of a hand-waved `~3%`.
+
+**A fresh independent pass on this correction is still required** before the
+corrected table is treated as settled.

@@ -6,7 +6,7 @@
   "fnp_file": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\numpy\\__init__.py"
  },
  "host": "Windows-10-10.0.26200-SP0",
- "utc": "2026-08-28T19:36:53Z",
+ "utc": "2026-08-28T20:10:05Z",
  "screen_budgets": 0.35,
  "budget": 2199023255552,
  "probe_seeds": [
@@ -116,5 +116,85 @@
   "tol_weff": 1e-12,
   "weff_vs_dense_pass": true,
   "rank_matches": true
+ },
+ "commutation": {
+  "rows": [
+   {
+    "n": 8,
+    "case": "aged",
+    "contract_W_commutes": 1.3698665137832444e-16,
+    "contract_wick_commutes": 1.7331368757717397e-16
+   },
+   {
+    "n": 8,
+    "case": "fresh_twoleg",
+    "contract_W_commutes": 0.0,
+    "contract_wick_commutes": 0.0
+   },
+   {
+    "n": 8,
+    "case": "fresh_from_dstensor",
+    "contract_W_commutes": 0.0,
+    "contract_wick_commutes": 0.0
+   },
+   {
+    "n": 8,
+    "case": "mixed",
+    "contract_W_commutes": 4.4008969926140233e-16,
+    "contract_wick_commutes": 1.120542121251498e-16
+   },
+   {
+    "n": 12,
+    "case": "aged",
+    "contract_W_commutes": 2.3393090877895555e-16,
+    "contract_wick_commutes": 8.869982013495501e-17
+   },
+   {
+    "n": 12,
+    "case": "fresh_twoleg",
+    "contract_W_commutes": 0.0,
+    "contract_wick_commutes": 0.0
+   },
+   {
+    "n": 12,
+    "case": "fresh_from_dstensor",
+    "contract_W_commutes": 0.0,
+    "contract_wick_commutes": 0.0
+   },
+   {
+    "n": 12,
+    "case": "mixed",
+    "contract_W_commutes": 1.7070037509784444e-16,
+    "contract_wick_commutes": 1.677270458021814e-16
+   },
+   {
+    "n": 16,
+    "case": "aged",
+    "contract_W_commutes": 1.7610263376876674e-16,
+    "contract_wick_commutes": 1.4061177094556697e-16
+   },
+   {
+    "n": 16,
+    "case": "fresh_twoleg",
+    "contract_W_commutes": 0.0,
+    "contract_wick_commutes": 0.0
+   },
+   {
+    "n": 16,
+    "case": "fresh_from_dstensor",
+    "contract_W_commutes": 0.0,
+    "contract_wick_commutes": 0.0
+   },
+   {
+    "n": 16,
+    "case": "mixed",
+    "contract_W_commutes": 1.9450988267665352e-16,
+    "contract_wick_commutes": 1.2926210452517998e-16
+   }
+  ],
+  "worst_contract_W": 4.4008969926140233e-16,
+  "worst_contract_wick": 1.7331368757717397e-16,
+  "tol": 1e-12,
+  "pass": true
  }
 }

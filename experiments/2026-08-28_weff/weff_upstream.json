@@ -1,9 +1,9 @@
 {
  "stack": {
-  "note": "upstream-scoring pass; flopscope not required here"
+  "note": "upstream-scoring pass; flopscope deliberately not imported (the torch venv would resolve the shim)"
  },
  "host": "Windows-10-10.0.26200-SP0",
- "utc": "2026-08-28T19:37:03Z",
+ "utc": "2026-08-28T20:12:15Z",
  "screen_budgets": 0.35,
  "budget": 2199023255552,
  "probe_seeds": [

@@ -135,6 +135,80 @@ def weff_window_cost(m: int) -> dict:
                     "remainder can only add."}
 
 
+
+# ==========================================================================
+# the preregistered gate -- executable, and derived from frozen constants only
+# ==========================================================================
+
+#: The same-day engineering bar: at least `2x` the graded v2.7 adjusted score.
+#: Samuel answered "I don't know" when asked to adopt it, so it stands as the
+#: handoff's stated DEFAULT and is recorded as not personally committed to.
+SHIP_BAR_ADJUSTED = V27_ADJUSTED / 2.0
+
+
+def d_max_for_m(m: int, bar: float = SHIP_BAR_ADJUSTED) -> float:
+    """The largest drift `D` at which a final-`m` window could still clear the bar.
+
+    Derived from three already-frozen numbers and nothing else:
+
+      * `MSE_FULL = 3.9249e-08`, the organiser-confirmed full-K3 anchor;
+      * the MEASURED flopscope multiplier of the `m`-window (`weff_window_cost`);
+      * the ship bar.
+
+    The triangle inequality gives `RMSE_cand <= RMSE_full + D`, so the best
+    score the candidate could possibly have is `(RMSE_full + D)^2 * mult(m)`.
+    Requiring that to clear the bar and solving for `D`:
+
+        D_max(m) = sqrt(bar / mult(m)) - sqrt(MSE_FULL)
+
+    **This is a ONE-SIDED screen and nothing more.** `D <= D_max` says the
+    candidate *could* clear the bar; it never says it does. `D > D_max` says it
+    *cannot* on this population, which is the only direction a bracket can
+    decide. Drift is not an error increment.
+    """
+    mult = weff_window_cost(m)["multiplier"]
+    return math.sqrt(bar / mult) - math.sqrt(MSE_FULL)
+
+
+def gate_table(ms=(2, 4, 6, 8)) -> list:
+    rows = []
+    for m in ms:
+        c = weff_window_cost(m)
+        rows.append({"m": m, "multiplier": c["multiplier"],
+                     "total_budgets": c["total_budgets"],
+                     "floor_pinned": c["floor_pinned"],
+                     "D_max": d_max_for_m(m),
+                     "bar_adjusted": SHIP_BAR_ADJUSTED})
+    return rows
+
+
+def paired_diff(a_vals, b_vals) -> dict:
+    """Paired difference `b - a` with a studentised-t 95% interval.
+
+    Common random numbers by construction: every arm runs on the same networks.
+    Percentile bootstrap and BCa are refused by `VALIDATION.md` and are not
+    computed here.
+    """
+    a = np.asarray(a_vals, dtype=np.float64)
+    b = np.asarray(b_vals, dtype=np.float64)
+    d = b - a
+    n = len(d)
+    if n < 2:
+        return {"n": n, "mean": float(d.mean()), "se": None,
+                "ci95": None, "excludes_zero": None}
+    se = float(d.std(ddof=1) / math.sqrt(n))
+    # studentised-t, two-sided 95%
+    try:
+        from statistics import NormalDist
+        tcrit = 2.571 if n == 6 else NormalDist().inv_cdf(0.975)
+    except Exception:                                             # noqa: BLE001
+        tcrit = 2.571
+    lo, hi = float(d.mean() - tcrit * se), float(d.mean() + tcrit * se)
+    return {"n": n, "mean": float(d.mean()), "se": se, "t_crit": tcrit,
+            "ci95": [lo, hi], "excludes_zero": bool(lo > 0 or hi < 0),
+            "improves": bool(hi < 0)}
+
+
 # ==========================================================================
 # the re-driven loop -- upstream, with exactly one intervention
 # ==========================================================================
@@ -539,6 +613,52 @@ def cmd_drift(a) -> int:
                       "t95_hi": float(vals.mean() + 1.96 * se) if len(vals) > 1 else None,
                       "bracket_at_mean_D": bracket(float(vals.mean()))}
     report["summary"] = summ
+    report["gate_table"] = gate_table()
+    report["ship_bar_adjusted"] = SHIP_BAR_ADJUSTED
+
+    # ---- GATE-W, evaluated exactly as preregistered ----------------------
+    def Ds(name):
+        return [report["per_seed"][str(s_)][name]["D_final_layer"] for s_ in seeds]
+
+    gate = {"clauses": {}, "note":
+            "G1/G2/G3 are conjunctive; m is the SMALLEST window passing all "
+            "three. There is deliberately no separate cost clause: cost "
+            "already enters through D_max(m), and a redundant clause that "
+            "cannot fail is not a gate."}
+    base_name = "late:0"
+    have_base = base_name in dict(arms) or base_name in report["arms"]
+    for name, kw in arms:
+        if not kw.get("arm", "").startswith("late:") or kw.get("m", 0) == 0:
+            continue
+        m = kw["m"]
+        vals = np.asarray(Ds(name), dtype=np.float64)
+        se = float(vals.std(ddof=1) / math.sqrt(len(vals))) if len(vals) > 1 else float("nan")
+        d_hi = float(vals.mean() + 2.571 * se)
+        dmax = d_max_for_m(m)
+        g1 = bool(d_hi <= dmax)
+        g2 = paired_diff(Ds(base_name), Ds(name)) if have_base else None
+        ctrl_name = "normsort:%d" % (2 * a.width * m)
+        g3 = paired_diff(Ds(ctrl_name), Ds(name)) if ctrl_name in report["arms"] else None
+        gate["clauses"][name] = {
+            "m": m, "mean_D": float(vals.mean()), "se_D": se, "D_hi95": d_hi,
+            "D_max": dmax, "G1_could_clear_the_bar": g1,
+            "G2_beats_pure_K2": (g2 or {}).get("improves"),
+            "G2_detail": g2,
+            "G3_beats_matched_rank_normsort": (g3 or {}).get("improves"),
+            "G3_detail": g3, "G3_control": ctrl_name,
+            "passes_all": bool(g1 and (g2 or {}).get("improves")
+                               and (g3 or {}).get("improves")),
+        }
+    passing = [v["m"] for v in gate["clauses"].values() if v["passes_all"]]
+    gate["selected_m"] = min(passing) if passing else None
+    gate["verdict"] = "PASS" if passing else "FAIL"
+    report["gate"] = gate
+    print("\n  GATE-W:", gate["verdict"],
+          "selected m =", gate["selected_m"])
+    for k, v in gate["clauses"].items():
+        print(f"    {k:10s} mean_D={v['mean_D']:.4e} hi95={v['D_hi95']:.4e} "
+              f"D_max={v['D_max']:.4e}  G1={v['G1_could_clear_the_bar']} "
+              f"G2={v['G2_beats_pure_K2']} G3={v['G3_beats_matched_rank_normsort']}")
 
     if a.out:
         os.makedirs(a.out, exist_ok=True)
@@ -559,6 +679,11 @@ def cmd_cost(a) -> int:
         print(f"{m:>3} {c['k3_window_budgets']:12.4f} {c['total_budgets']:13.4f} "
               f"{c['multiplier']:11.4f} {c['multiplier']/0.1:8.2f}x"
               + ("   FLOOR-PINNED" if c["floor_pinned"] else ""))
+    print(f"\nGATE-W screen, ship bar {SHIP_BAR_ADJUSTED:.6e} adjusted "
+          f"(2x graded v2.7), RMSE_full {math.sqrt(MSE_FULL):.6e}:")
+    print(f"{'m':>3} {'multiplier':>11} {'D_max':>13}")
+    for r in gate_table():
+        print(f"{r['m']:>3} {r['multiplier']:11.6f} {r['D_max']:13.6e}")
     return 0
 
 

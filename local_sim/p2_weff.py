@@ -334,11 +334,24 @@ def contract_wick_weff(fnp, w, lin: Lineage) -> Lineage:
     `(n,n)` array, so `3M` costs nothing beyond `M`.
     """
     col = w[:, None]
+    if lin.m_is_identity:
+        # `M == I` scaled by the wick vector is `diag(w)`, NOT the identity.
+        # Unreachable in upstream's order -- `contract_W` always precedes
+        # `contract_wick_`, so `M` is materialised by then -- but the first
+        # version of this function silently returned `M = None` with
+        # `m_is_identity = False`, which is a corrupt lineage. The commutation
+        # test added after an independent review found it. Implemented exactly
+        # rather than guarded, so the test can exercise the fresh cases too.
+        base = lin.A_D if lin.A_D is not None else lin.A_L
+        n = base.shape[0]
+        M = fnp.eye(n, dtype=base.dtype) * col
+    else:
+        M = (lin.M * col) if lin.M is not None else None
     return Lineage(
         A_D=(lin.A_D * col) if lin.A_D is not None else None,
         A_L=(lin.A_L * col) if lin.A_L is not None else None,
         C_L=(lin.C_L * col) if lin.C_L is not None else None,
-        M=(lin.M * col) if lin.M is not None else None,
+        M=M,
         m_is_identity=False, has_D=lin.has_D, has_L=lin.has_L,
     )
 
@@ -449,11 +462,47 @@ def price_layer(layer: int, n: int, dtype_name: str, rng) -> dict:
     r = _rank_at(n, layer)
     out: dict = {"layer": layer, "n": n, "dtype": dtype_name, "rank_in": r, "lines": {}}
 
+    leaks: list = []
+
+    def _assert_instrumented(tag, obj, depth=0):
+        """Hard rule 3, enforced rather than asserted in prose.
+
+        The contract claimed "the module asserts every intermediate in the
+        priced path is a flopscope array". It did not -- only `assert_real_stack`
+        was implemented. An independent review caught that, and this is the
+        repair. Every value a priced op returns is walked and required to be a
+        `FlopscopeArray`; a bare `np.ndarray` or a numpy scalar means arithmetic
+        escaped the meter, which is a hard-rule violation, not a saving.
+
+        It also closes the materialization counter's known blind spot in the one
+        direction that matters here: integer indexing (`a[0]`) drops the
+        `FlopscopeArray` wrapper and yields a bare `np.float64`, which
+        `MaterializationCounter` cannot see -- but which this check would.
+        """
+        from flopscope._ndarray import FlopscopeArray
+
+        if obj is None or depth > 3:
+            return
+        if isinstance(obj, (tuple, list)):
+            for x in obj:
+                _assert_instrumented(tag, x, depth + 1)
+            return
+        if isinstance(obj, Lineage):
+            for x in (obj.A_D, obj.A_L, obj.C_L, obj.M):
+                _assert_instrumented(tag, x, depth + 1)
+            return
+        if isinstance(obj, FlopscopeArray):
+            return
+        if isinstance(obj, (np.ndarray, np.generic)):
+            leaks.append({"line": tag, "type": type(obj).__name__,
+                          "shape": getattr(obj, "shape", None)})
+
     def bill(tag, fn):
         gc.collect()
         with flops.BudgetContext(flop_budget=BUDGET * 64, quiet=True) as c:
             res = fn()
         out["lines"][tag] = int(c.flops_used)
+        _assert_instrumented(tag, res)
         return res
 
     def setup(fn):
@@ -483,17 +532,37 @@ def price_layer(layer: int, n: int, dtype_name: str, rng) -> dict:
         out["lines"]["dense/contract_wick"] = 0
 
     tl = bill("dense/twoleg_assembly", lambda: twoleg_factors(fnp, w1, WK11))
+
+    # The slice is billed AGED / FRESH separately, because that is exactly how
+    # UPSTREAM bins it and the entry's first version compared the wrong bins.
+    #
+    # `eval_part` in section 3.1 calls `diagslice(WK[3], ...)`, which populates
+    # `WK[3].repeated.slices` -- billed to `FactoredTensor3.get_dslice` at rank
+    # `2nl`. `pK_111 = WK[3].clone()` then copies that POPULATED cache, so
+    # `add_factors_` (`factor_k3.py:145-146`) updates it incrementally with the
+    # fresh two-leg block's own `(2,1)` slice -- and because that call sits
+    # inside `with flop_name('nonlin_sum 111 factored')` (`factor_k3.py:371`),
+    # upstream bills the fresh block to `nonlin_sum`, not to `get_dslice`.
+    # `get_repeated()` later finds both parts cached and pays nothing.
+    #
+    # A single call on the rank-`(2nl + n)` concatenation computes the same
+    # thing; splitting it here makes the two meters comparable bin for bin.
+    # Cost of splitting: one extra `zero_repeated` per call (`3n^2`), which is
+    # counted and negligible, and is why the split total is a few n^2 above the
+    # unsplit one rather than equal to it.
     if wf is not None:
         cat = bill("dense/add_factors_concat",
                    lambda: tuple(fnp.concatenate([wf[i], tl[i]], axis=1) for i in range(3)))
+        bill("dense/get_dslice_21_aged", lambda: dslice_dense(fnp, wf, (2, 1)))
+        bill("dense/get_dslice_3_aged", lambda: dslice_dense(fnp, wf, (3,)))
     else:
         cat = tl
         out["lines"]["dense/add_factors_concat"] = 0
-    del wf, tl
-    gc.collect()
-    bill("dense/get_dslice_3", lambda: dslice_dense(fnp, cat, (3,)))
-    bill("dense/get_dslice_21", lambda: dslice_dense(fnp, cat, (2, 1)))
-    del cat
+        out["lines"]["dense/get_dslice_21_aged"] = 0
+        out["lines"]["dense/get_dslice_3_aged"] = 0
+    bill("dense/get_dslice_21_fresh", lambda: dslice_dense(fnp, tl, (2, 1)))
+    bill("dense/get_dslice_3_fresh", lambda: dslice_dense(fnp, tl, (3,)))
+    del wf, tl, cat
     gc.collect()
     bill("dense/from_dstensor", lambda: from_dstensor_factors(fnp, s3, s21))
 
@@ -518,17 +587,22 @@ def price_layer(layer: int, n: int, dtype_name: str, rng) -> dict:
         out["lines"]["weff/contract_wick"] = 0
 
     tl2 = bill("weff/twoleg_assembly", lambda: _twoleg_lineage(fnp, w1, WK11))
-    allL = lins + [tl2]
     out["lines"]["weff/add_factors_concat"] = 0        # a list append; no arithmetic
     gc.collect()
-    bill("weff/get_dslice_3", lambda: dslice_weff(fnp, allL, n, (3,), dtype))
-    bill("weff/get_dslice_21", lambda: dslice_weff(fnp, allL, n, (2, 1), dtype))
-    del lins, tl2, allL
+    # same AGED / FRESH split, so the saving is attributable line by line
+    bill("weff/get_dslice_21_aged", lambda: dslice_weff(fnp, lins, n, (2, 1), dtype)
+         if lins else None)
+    bill("weff/get_dslice_3_aged", lambda: dslice_weff(fnp, lins, n, (3,), dtype)
+         if lins else None)
+    bill("weff/get_dslice_21_fresh", lambda: dslice_weff(fnp, [tl2], n, (2, 1), dtype))
+    bill("weff/get_dslice_3_fresh", lambda: dslice_weff(fnp, [tl2], n, (3,), dtype))
+    del lins, tl2
     gc.collect()
     bill("weff/from_dstensor", lambda: _from_dstensor_lineage(fnp, s3, s21))
 
     out["dense_total"] = sum(v for k, v in out["lines"].items() if not k.startswith("weff/"))
     out["weff_total"] = sum(v for k, v in out["lines"].items() if not k.startswith("dense/"))
+    out["uninstrumented_leaks"] = leaks
     return out
 
 
@@ -783,6 +857,125 @@ def _relerr(a, b) -> float:
     return float(np.max(np.abs(a - b)) / den)
 
 
+
+def commutation_parity(shapes=((8,), (12,), (16,)), tol=1e-12) -> dict:
+    """Close the hole: is `contract_W_weff` itself right?
+
+    `parity_emit` builds its dense reference with `_lineages_to_dense` from the
+    ALREADY-W-EFF-PROPAGATED state, so `contract_W_weff` and
+    `contract_wick_weff` were never compared against `contract_W_dense` /
+    `contract_wick_dense`. A bug in either would have propagated identically
+    into both sides of that comparison and been invisible -- the `contract_W`
+    row of the parity table tests the DENSE transcription against upstream, not
+    the W-EFF one. An independent review found this; this is the repair.
+
+    The right test is commutation. Materialising a lineage list to dense factors
+    is a map `phi`. The claim is that W-EFF's operator is the same operator:
+
+        phi( weff_op(S) )  ==  dense_op( phi(S) )
+
+    Tested on every structural case the tower actually produces -- an aged
+    lineage, a freshly born two-leg block (`M == I`), a fresh from_dstensor
+    block (`M == I`), and a mixture -- because the `M == I` branches are exactly
+    the ones that skip a matmul and are therefore where a bug would hide.
+    """
+    import flopscope as flops
+    import flopscope.numpy as fnp
+
+    rows = []
+    worst_cw = worst_ck = 0.0
+    for (n,) in shapes:
+        rng = np.random.default_rng(90210 + n)
+        with flops.BudgetContext(flop_budget=10 ** 15, quiet=True):
+            def R(sh):
+                return fnp.array(np.asarray(rng.standard_normal(sh), dtype=np.float64))
+
+            aged = Lineage(A_D=R((n, n)), A_L=R((n, n)), C_L=R((n, n)), M=R((n, n)))
+            fresh_L = _twoleg_lineage(fnp, R(n), R((n, n)))
+            fresh_D = _from_dstensor_lineage(fnp, R(n), R((n, n)))
+            cases = {"aged": [aged], "fresh_twoleg": [fresh_L],
+                     "fresh_from_dstensor": [fresh_D],
+                     "mixed": [aged, fresh_L, fresh_D]}
+
+            for name, S in cases.items():
+                W = R((n, n))
+                w = R(n)
+
+                # contract_W
+                lhs = _lineages_to_dense(
+                    fnp, [contract_W_weff(fnp, W, L) for L in S], n, np.float64)
+                rhs = contract_W_dense(fnp, W, _lineages_to_dense(fnp, S, n, np.float64))
+                e_cw = max(_relerr(np.asarray(a), np.asarray(b))
+                           for a, b in zip(lhs, rhs))
+
+                # contract_wick
+                lhs2 = _lineages_to_dense(
+                    fnp, [contract_wick_weff(fnp, w, L) for L in S], n, np.float64)
+                rhs2 = contract_wick_dense(fnp, w,
+                                           _lineages_to_dense(fnp, S, n, np.float64))
+                e_ck = max(_relerr(np.asarray(a), np.asarray(b))
+                           for a, b in zip(lhs2, rhs2))
+
+                worst_cw = max(worst_cw, e_cw)
+                worst_ck = max(worst_ck, e_ck)
+                rows.append({"n": n, "case": name,
+                             "contract_W_commutes": e_cw,
+                             "contract_wick_commutes": e_ck})
+
+    return {"rows": rows, "worst_contract_W": worst_cw,
+            "worst_contract_wick": worst_ck, "tol": tol,
+            "pass": bool(worst_cw <= tol and worst_ck <= tol)}
+
+
+def symmetry_discount_probe() -> dict:
+    """The contract's own open sub-question, which the first pass never measured.
+
+    The contract said flopscope's `operand_symmetries` / `identity_pattern`
+    discounts were "an open sub-question this slice measures rather than
+    assumes", and then did not measure them. An independent review called that
+    an unfulfilled contract item. This is it.
+
+    `contract_W_basic` computes `W core W^T` with `core` symmetric and the
+    result symmetric. Upstream evidently takes a discount there -- it bills
+    `3 n^3` where this spelling bills `4 n^3`. The question is whether
+    flopscope grants a LEGITIMATE one, i.e. one that reflects real algebraic
+    structure rather than a price-table quirk.
+    """
+    import flopscope as flops
+    import flopscope.numpy as fnp
+
+    n = 1024
+    res = {}
+    with flops.BudgetContext(flop_budget=10 ** 15, quiet=True):
+        rng = np.random.default_rng(5150)
+        Wn = np.asarray(rng.standard_normal((n, n)), dtype=np.float32)
+        Cn = np.asarray(rng.standard_normal((n, n)), dtype=np.float32)
+        Cn = (Cn + Cn.T) / 2.0
+        W, C = fnp.array(Wn), fnp.array(Cn)
+
+    with flops.BudgetContext(flop_budget=10 ** 15, quiet=True) as c1:
+        plain = (W @ C) @ W.T
+    res["plain"] = int(c1.flops_used)
+
+    try:
+        with flops.BudgetContext(flop_budget=10 ** 15, quiet=True) as c2:
+            Cs = flops.as_symmetric(C, symmetry=(0, 1))
+            sym = (W @ Cs) @ W.T
+        res["as_symmetric_core"] = int(c2.flops_used)
+        res["ratio"] = res["as_symmetric_core"] / res["plain"]
+        res["values_agree"] = float(_relerr(np.asarray(sym), np.asarray(plain)))
+        res["available"] = True
+    except Exception as e:                                        # noqa: BLE001
+        res["available"] = False
+        res["error"] = repr(e)
+
+    res["upstream_contract_W_basic"] = 51_589_939_200
+    res["note"] = ("Measured, not assumed. A discount here is worth ~0.008 B on "
+                   "the tower and bears on the m<=3 window margin; it cannot "
+                   "rescue a 3.06x screen miss.")
+    return res
+
+
 # ==========================================================================
 # 7. mutation tests -- the shortcut must break when the block structure breaks
 # ==========================================================================
@@ -867,6 +1060,18 @@ def mutations(n=12) -> dict:
                         has_D=L.has_D, has_L=L.has_L) for L in lins]
         m = _relerr(np.asarray(dslice_weff(fnp, swap, n, (2, 1), np.float64)), ref)
         results["M6_swap_block_roles"] = {"relerr": m, "detected": m > 1e-8}
+
+        # M8 -- break contract_W_weff's identity shortcut: pretend `M == I`
+        # advanced to `W @ M` when it should be `W`. The operator must change.
+        p0 = _twoleg_lineage(fnp, R(n) * 0 + 1.1, R((n, n)))
+        Wm = R((n, n))
+        good = _lineages_to_dense(fnp, [contract_W_weff(fnp, Wm, p0)], n, np.float64)
+        bad_lin = Lineage(A_L=Wm @ p0.A_L, C_L=Wm @ p0.C_L,
+                          M=Wm @ Wm, m_is_identity=False,
+                          has_D=False, has_L=True)
+        bad = _lineages_to_dense(fnp, [bad_lin], n, np.float64)
+        m = max(_relerr(np.asarray(x), np.asarray(y)) for x, y in zip(bad, good))
+        results["M8_break_identity_shortcut"] = {"relerr": m, "detected": m > 1e-8}
 
     results["all_detected"] = all(
         v["detected"] for k, v in results.items()
@@ -1006,6 +1211,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--parity", action="store_true")
     ap.add_argument("--parity-upstream", action="store_true")
+    ap.add_argument("--symmetry", action="store_true")
     ap.add_argument("--mutations", action="store_true")
     ap.add_argument("--verify-rank", action="store_true")
     ap.add_argument("--price", action="store_true")
@@ -1018,12 +1224,12 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
 
     if not any([a.parity, a.parity_upstream, a.mutations, a.verify_rank,
-                a.price, a.all]):
+                a.price, a.symmetry, a.all]):
         ap.error("choose at least one of --parity --parity-upstream "
                  "--mutations --verify-rank --price --all")
 
     _torch_only = (a.parity_upstream or a.verify_rank) and not (
-        a.all or a.parity or a.price or a.mutations)
+        a.all or a.parity or a.price or a.mutations or a.symmetry)
     if _torch_only:
         # The torch venv has no real flopscope on its path -- `import
         # flopscope` there resolves to `local_sim/flopscope`, the numpy
@@ -1072,6 +1278,19 @@ def main(argv=None) -> int:
         print(f"  worst dslice(2,1)     : {pu['worst_dslice21']:.3e}")
         print(f"  worst contract_W      : {pu['worst_contract_W']:.3e}")
         print(f"  PASS = {pu['pass']}")
+
+    if a.all or a.parity:
+        print("\n== commutation parity (contract_W_weff / contract_wick_weff) ==")
+        report["commutation"] = commutation_parity()
+        cm = report["commutation"]
+        print(f"  worst contract_W commutes   : {cm['worst_contract_W']:.3e}")
+        print(f"  worst contract_wick commutes: {cm['worst_contract_wick']:.3e}")
+        print(f"  PASS = {cm['pass']}")
+
+    if a.all or a.symmetry:
+        print("\n== symmetry-discount probe (the contract's open sub-question) ==")
+        report["symmetry"] = symmetry_discount_probe()
+        print(json.dumps(report["symmetry"], indent=1, default=float))
 
     if a.all or a.mutations:
         print("\n== mutations ==")
