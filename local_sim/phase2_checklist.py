@@ -158,7 +158,7 @@ def dataset_tags():
     print("    * `_PRUNE_TAU = -2.5` and `_BASIS_RANK = 32` are Phase-1 constants")
     print("      of a width-256 sampling architecture. Do NOT refit them as the")
     print("      first Phase-2 action -- establish which family owns the frontier")
-    print("      first (docs/PHASE2_FRONTIER_ARCHITECTURE.md, P2-CP1).")
+    print("      first (docs/GAME_PLAN.md; the old frontier packet is archived).")
     print("    * The CP1.1 Kerdock/MUB-129 carrier is a width-256 object. Its")
     print("      width-1024 analogue is 1,050,624 points, ~16 budgets. Dead as a")
     print("      Phase-2 backbone.")

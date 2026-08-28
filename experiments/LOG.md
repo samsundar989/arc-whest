@@ -19372,3 +19372,56 @@ STRATEGIC claim-review contract. No further follow-up is required for this routi
 frontier audit or the IMPORTANT numbering correction.
 
 **Final-review checklist items:** 17, 18. **Verdict: ACCEPT.**
+
+# 2026-08-28 — ROUTINE: same-day execution package and archive-authority cleanup
+
+**Question:** Can the 2026-08-28 frontier program be handed to Claude Code as a
+bounded implementation job for today without turning the deadline into permission
+to skip evidence, force a weak submission, or execute an archived plan?
+
+**Scope:** Documentation and one reconnaissance message only. No estimator,
+measurement instrument, seed block, truth, vault, gate implementation, residual
+model, submission, designation, or write-up claim changed. HEAD before the edit was
+`4c34cd8`.
+
+**Result / knowledge delta:**
+
+1. `GAME_PLAN.md` now contains a same-day critical path with exact stop points:
+   W-EFF parity/cost → independent review → label-free layer-age/window imitation
+   → independent review → one frozen candidate → one paired decision → deployment
+   packet → Samuel's exact-SHA decision. A failed gate explicitly ends in no
+   submission.
+2. The proposed “materially stronger today” engineering bar is at least a `2x`
+   adjusted point improvement over v2.7 with the valid paired interval excluding
+   zero. It is explicitly **not binding** until Samuel accepts it in the later
+   preregistered STRATEGIC contract; `competition_score.decide()` remains the sole
+   promotion authority and was not changed.
+3. `CLAUDE_CODE_HANDOFF.md` is now a completion-oriented Builder prompt: it asks
+   Samuel's mandatory predictions first, implements only independently supported
+   modules, formally promotes a frozen candidate into `estimator.py` for existing
+   certification, spends one fresh paired block only after preregistration, and
+   stops before `whest submit` for exact-SHA approval.
+4. The active/archive boundary is explicit in README. Historical frontier and
+   moonshot filenames remain as redirect stubs because code and experiment records
+   cite them; deleting those names would damage provenance. The August 24 audit is
+   prominently historical, and the Kerdock document is labeled a component spec,
+   not an architecture or submission license.
+5. One stale setup cross-reference and one live checklist message that pointed to
+   the archived Phase-2 packet now point to the active Game Plan. No checklist logic
+   changed.
+
+**Verification planned:** Markdown/link and stale-authority searches,
+`git diff --check`, `scripts/verify_portability.py`, and default preflight. This
+routine documentation package does not claim a research result and does not require
+an independent Skeptic under the classification table.
+
+**Verification result:** local Markdown targets all resolve; the stale-authority
+search leaves obsolete one-designation wording only inside the two explicitly
+quarantined bodies and their warnings; `git diff --check` is clean;
+`phase2_checklist.py` compiles; portability is **99/99**. The first preflight was
+mistakenly launched concurrently with the other checks and went RED when provenance
+and invariants could not allocate 8–32 MiB arrays. That is not an estimator result.
+Rerun alone, it passed provenance, **30/30** invariants, **98/98** scorer,
+**60/60** seed refusals, vault integrity, **56/56** lifecycle and exact
+**19-operation** official-stack parity: **GREEN 12/16 with the same four full-only
+skips**. No full-deployment pass is claimed.

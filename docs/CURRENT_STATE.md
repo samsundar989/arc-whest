@@ -642,6 +642,24 @@ the cross-meter `5.49x` ratio is an affordability target rather than a projected
 W-EFF saving. No further truth block is spent until W-EFF or late-window K3 has an
 authoritative cost point.
 
+### Same-day execution boundary — 2026-08-28
+
+`GAME_PLAN.md` §4 is the bounded handoff for today's attempt. It does **not**
+authorize a rushed submission. The order is W-EFF exact-cost proof → fresh
+independent review → label-free late-window imitation → fresh independent review →
+one frozen candidate → one new SINGLE_USE paired decision → deployment packet →
+Samuel's explicit approval naming the exact SHA. If W-EFF, the late-window screen,
+the paired decision, or deployment fails, today's correct result is a recorded kill
+and no submission.
+
+The carrier, faithful augmented-K2 and response tracks remain part of the target
+architecture, but none is allowed into today's candidate without completing its
+own evidence path. The recommended same-day engineering bar—subject to Samuel
+accepting it in the preregistration before data exists—is at least a `2x` adjusted
+point improvement over v2.7 with the valid paired interval excluding zero. It is a
+minimum “materially stronger” screen, not the winning target; the frontier milestone
+remains `<=1.2e-8`.
+
 Coupled residual sampling is deprioritized. Its former 1.305x projection assumed a
 float32 K2 cost reduction that the frozen artifact did not show: measured cost fell
 only 3.1%, not 50%.
@@ -858,7 +876,7 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 | 0H | P1-PRE: D1–D3 evaluator hardening | **IMPORTANT** | **CLOSED** — seventh independent pass ACCEPT; 15 named mutations and current durable record verified |
 | 0S | Phase-2 canary + calibrated submission | STRATEGIC | **CLOSED — SHIPPED AND GRADED.** #328662 and #328664, zero failures; v2.7 is rank 41/67 at the current snapshot |
 | 0C | K2 scalar calibration | DESIGN | **EXHAUSTED.** 2.96x transfer is real; multiplicative state gains collapse to output scale and non-commuting layer scalars did not transfer |
-| 0D | continuity repair: docs, P01, parity terminology | ROUTINE, then IMPORTANT for enforcement | docs in progress; graded-total fixtures and candidate-selectable preflight require their own prediction/review |
+| 0D | continuity repair: docs, P01, parity terminology | ROUTINE, then IMPORTANT for enforcement | active/historical docs reconciled 2026-08-28; graded-total fixtures remain open, while today's candidate will be formally promoted into `estimator.py` instead of changing preflight |
 | 1 | W-EFF exact K3 representative price/parity | IMPORTANT | **NEXT.** No truth; exact small-shape reference, one width-1024 flopscope operating point, zero scalar materializations |
 | 2 | late-window / age-window K3 imitation | IMPORTANT | next in parallel after contract; no labels, compare `m={2,4,6,8}` with full K3 and bill every arm |
 | 3 | deep-ReLU-kernel carrier objective and frozen panel | IMPORTANT then STRATEGIC | pending; Kerdock remains one bounded family, not the presumed backbone |
@@ -877,8 +895,8 @@ that test them, and they must not be edited in the meantime.
 | # | question | Samuel | outcome |
 |---|---|---|---|
 | S1 | official-stack repair changes the current K2 score by | `<1%` | **HIT** — exactly 0%; the multiplier is pinned at the 0.1 floor before and after |
-| S2 | Kerdock16 vs matched-row IID at 32,768 directions | `2.7x`–`20x` | open (Phase 2 of the plan) |
-| S3a | raw-MSE gain of faithful recurrent augmented K2 over K2p2, standalone | `<1.1x` | open (Phase 3) |
+| S2 | Kerdock16 vs matched-row IID at 32,768 directions | `2.7x`–`20x` | open historical carrier comparison; not today's gate |
+| S3a | raw-MSE gain of faithful recurrent augmented K2 over K2p2, standalone | `<1.1x` | open; current `GAME_PLAN.md` Track 4 |
 | S3b | official 0.4 s residual-cap failure risk | aug-K2 at risk, carrier safe | open |
 
 S2 is still a valid historical prediction for **Kerdock16 versus matched-row IID**,

@@ -31,6 +31,22 @@ https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026
 | `local_sim/` | Offline lab: numpy shims for `flopscope`/`whestbench` so the *exact* `estimator.py` runs anywhere; MLP generator; MC ground truth; calibration fitting; held-out validation. |
 | `experiments/` | Results log + fitted calibration data. |
 
+### Document authority
+
+Only three files direct current work: `CURRENT_STATE.md` for status,
+`GAME_PLAN.md` for the architecture and decision order, and
+`CLAUDE_CODE_HANDOFF.md` for the same-day Builder prompt. Dated audits are evidence
+snapshots, not action plans. `FRONTIER_ARCHITECTURE_PROPOSAL.md`,
+`PHASE2_FRONTIER_ARCHITECTURE.md`, and `MOONSHOT.md` are archive redirect stubs kept
+only because historical code and experiment records cite those filenames.
+`PHASE2_BRIEF_RECONCILIATION_2026-08-26.md` and
+`PHASE2_LIVE_AUDIT_2026-08-24.md` are superseded dated evidence. The write-up and
+organizer-email drafts are quarantined and must not be quoted or sent.
+
+Old files are not silently deleted: their names are part of the experiment audit
+trail. If an archive file conflicts with an active file, the active file wins and
+the conflict is a documentation defect to repair.
+
 ## Working on this project
 
 **Read `docs/CURRENT_STATE.md`, then `experiments/LOG.md` from the bottom.** That is

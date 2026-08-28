@@ -1,6 +1,7 @@
 # Archived Phase-2 frontier packet
 
-**Superseded 2026-08-24. Do not execute this packet.**
+**Superseded first on 2026-08-24 and fully replaced on 2026-08-28. Do not execute
+this packet.**
 
 The pre-launch packet proposed an augmented-K2 → goal-directed-K3 → coupled-sampler
 sequence under unknown runtime constants. The official Phase-2 stack and live
@@ -11,10 +12,13 @@ that external evidence reopened structured Kerdock/MUB sampling.
 Use:
 
 - [`CURRENT_STATE.md`](CURRENT_STATE.md) for current status;
-- [`GAME_PLAN.md`](GAME_PLAN.md) for the sole active architecture and roadmap;
+- [`GAME_PLAN.md`](GAME_PLAN.md) for the sole active architecture, same-day path,
+  and full roadmap;
 - [`CLAUDE_CODE_HANDOFF.md`](CLAUDE_CODE_HANDOFF.md) for implementation;
-- [`PHASE2_LIVE_AUDIT_2026-08-24.md`](PHASE2_LIVE_AUDIT_2026-08-24.md) for the
-  evidence that caused the replacement.
+- [`PHASE2_FRONTIER_AUDIT_2026-08-28.md`](PHASE2_FRONTIER_AUDIT_2026-08-28.md) for
+  current external and repository evidence;
+- [`PHASE2_LIVE_AUDIT_2026-08-24.md`](PHASE2_LIVE_AUDIT_2026-08-24.md) only for the
+  historical launch-week evidence that caused the first replacement.
 
 The original packet remains recoverable in git history. Historical experiment
 contracts/results that cite it remain unchanged in `experiments/LOG.md`.

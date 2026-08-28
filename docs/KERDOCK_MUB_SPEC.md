@@ -5,6 +5,11 @@ answers is in `experiments/LOG.md` under `PHASE 1A ... PREDICTION`. This file is
 the specification the implementation is built from and the verifier is checked
 against. Where a choice is free, it says so and fixes it.*
 
+> **COMPONENT SPEC, NOT AN ACTIVE PLAN.** The fixed 16-basis family is a bounded
+> carrier candidate and diagnostic endpoint. It is not the current architecture,
+> not a proven spherical 4-design, and not licensed for a submission by this file.
+> Selection and integration are governed only by `GAME_PLAN.md`.
+
 **Nothing here is a score, variance or design-strength claim.** Phase 1A permits
 none, and none is made.
 

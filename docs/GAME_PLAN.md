@@ -193,7 +193,111 @@ rows, preserve exact layer 1, mutate no grader arrays, perform all numerical wor
 through flopscope, create no scalar synchronization inside `predict`, avoid budget
 summaries, and fall back safely on instability.
 
-## 4. Execution order
+## 4. Same-day critical path — 2026-08-28
+
+The goal for today is an **evidence-backed submission candidate**, not a forced
+submission. The clock does not relax the measurement law. “Done today” means one
+of two honest outcomes:
+
+1. a materially stronger frozen candidate reaches the approval gate below and is
+   handed to Samuel with its exact SHA and full evidence packet; or
+2. the highest-value path is killed by its preregistered falsifier, the result is
+   recorded, and no weaker candidate is submitted merely to meet the date.
+
+The same-day path deliberately narrows the full research program. It answers the
+cost question first, then the layer-age question, and builds only the K3 module
+those answers support. The carrier and augmented-K2 tracks remain part of the ideal
+architecture, but they are not rushed into today's candidate without their own
+evidence.
+
+### Today A — orient, contract, and get Samuel's predictions
+
+- Confirm HEAD, worktree cleanliness, official package versions, current public
+  entries and the unspent seed ledger without touching data.
+- Write and commit the W-EFF IMPORTANT contract before profiling or benchmarking.
+- Ask Samuel for the three short predictions required by `AGENTS.md`: expected
+  W-EFF cost, the smallest plausible K3 window, and the minimum improvement that
+  would make a third public submission worthwhile.
+- Do not combine truth-free engineering and a later truth-bearing decision under
+  one contract. They are separate estimands and separate stop points.
+
+### Today B — W-EFF go/no-go, then independent review
+
+Use `local_sim/p2_pb_rank.py` and the ARC/upstream factorized-K3 implementation as
+the reference, not a rewritten mathematical surrogate. Prove small-shape parity
+for fresh symbolic blocks and bill one representative width-1024 layer through
+flopscope 0.12. Include casts, assembly and slice extraction. Require zero
+`__bool__`, `__float__` and `__int__` materializations inside the priced path.
+
+Continue only if the measured spelling supports an integrated `<=0.35 B` path.
+That is an affordability screen, not a claim that `0.35 B` wins. If it fails, stop
+the full-tower port immediately. Run default preflight, portability where relevant,
+and a fresh independent Skeptic before its result controls Today C.
+
+### Today C — late-window imitation without labels
+
+Freeze `m={2,4,6,8}`, checkpoint initializers and drift/cost thresholds before the
+probe. Compare each arm with uncapped full K3 on common networks, report the
+triangle-inequality error bracket, and bill each arm. Do not claim a seed-ledger
+block and do not read labels in this stage.
+
+Proceed only when a window meets the preregistered drift threshold and has a
+credible official-stack cost below the full-tower option. If no window survives,
+stop: neither scalar calibration nor arbitrary K3 rank capping is an acceptable
+same-day fallback. Finish the IMPORTANT synthesis and fresh Skeptic review before
+building a submission candidate.
+
+### Today D — freeze one candidate, then spend truth once
+
+Implement the narrowest supported design in a research arm first. Only after its
+math, shape and cost tests pass, write and commit a STRATEGIC promotion contract,
+create a new version archive, and promote it into `estimator.py` so the existing
+preflight certifies the actual ship file. Do not expand candidate-selectable
+preflight during this time-box unless the current route is genuinely blocked; that
+would be a separate IMPORTANT instrument slice.
+
+Then claim one fresh SINGLE_USE Phase-2 DECIDE block through the ledger and compare
+the frozen candidate with the exact v2.7 control on common random networks. Use
+only `competition_score.decide()` for promotion. Report the paired arithmetic
+adjusted-score difference, valid interval, raw MSE with ground-truth noise, counted
+FLOPs, multiplier, failures, residual headroom and memory accounting.
+
+The recommended same-day **engineering bar to put to Samuel before data exists**
+is at least a `2x` adjusted-score point improvement over v2.7 with the valid paired
+interval excluding zero. It is not binding until Samuel accepts it in the
+preregistered contract. The frontier milestone remains `<=1.2e-8`; a candidate
+that merely clears `2x` is stronger, not yet a winning architecture.
+
+### Today E — deployment packet and human-only submission decision
+
+If the decision gate passes, obtain the required independent Skeptic verdict, run
+the full official deployment sequence on the promoted file, archive the exact
+candidate, and produce one approval packet containing:
+
+- estimator version, commit and SHA-256;
+- paired score result and GT-noise floor;
+- full counted-FLOP ledger and observed server-offset treatment;
+- subprocess residual p50/p99/max and failure counts;
+- memory evidence and remaining uncertainty;
+- `whest validate`, clean mini run, and `preflight.ps1 -Full` transcript with its
+  own `GREEN 16/16` verdict line;
+- Skeptic verdict and the exact existing submissions this candidate would join.
+
+Stop and ask Samuel to approve or refuse **that exact SHA**. Never call
+`whest submit` from the handoff prompt and never interpret today's implementation
+request as submission permission.
+
+### Same-day fallback tree
+
+| observation | action today |
+|---|---|
+| W-EFF cannot preserve exact K3 or implies `>0.35 B` integrated | kill full-tower port; test only the preregistered late-window spelling |
+| no late window clears its drift/cost screen | record the negative; do not spend truth or ship another calibrated-K2 variant |
+| candidate loses its fresh paired DECIDE gate | freeze it as a research artifact; do not use public feedback to tune it |
+| score passes but deployment/memory/residual gate fails | repair the operational defect under a new contract; do not submit |
+| every gate passes | hand Samuel the exact-SHA approval packet; wait for explicit submission approval |
+
+## 5. Full execution order
 
 Each IMPORTANT or STRATEGIC slice ends in synthesis and an independent Skeptic
 before the next implementation consumes its result.
@@ -292,7 +396,7 @@ hybrid.
 6. Certify exact candidate hashes with full preflight and archive identity.
 7. Submit and designate up to two entries only after explicit hash-naming approval.
 
-## 5. Validation contract
+## 6. Validation contract
 
 Every strategic experiment contains, before data exists:
 
@@ -311,7 +415,7 @@ Every result reports the raw artifact, ground-truth noise, paired arithmetic
 studentised/basic-bootstrap interval, total FLOPs including assembly, residual,
 wall, memory accounting, failures, tails and the independent Skeptic verdict.
 
-## 6. Kill and pivot rules
+## 7. Kill and pivot rules
 
 - More Price/Hermite orders inside the same Gaussian covariance map stay low value.
 - Marginal Edgeworth readout stays closed as a replacement for recurrent state.
@@ -325,10 +429,10 @@ wall, memory accounting, failures, tails and the independent Skeptic verdict.
   this dimension absent new external evidence.
 - Broad learned correctors wait until the mechanistic state path is fixed.
 
-## 7. Immediate next action
+## 8. Immediate next action
 
-Finish Track 0 documentation reconciliation, then preregister **one representative
-W-EFF layer price/parity slice** and take Samuel's prediction. In parallel, write
-the no-label contract for factor-block age attribution and late-window K3. Do not
-spend another truth block until one of those paths has an authoritative flopscope
-operating point.
+Use the same-day critical path above. Preregister **one representative W-EFF layer
+price/parity slice** and take Samuel's prediction. Prepare—but do not yet execute—
+the no-label factor-block-age/late-window contract. Do not spend another truth block
+until one path has an authoritative flopscope operating point and its fresh
+independent review is complete.

@@ -70,8 +70,8 @@ candidate on the public mini split.
 Do not keep a copy-paste submission command in the quick-start path. Submission
 requires full preflight, official Phase-2 validate, a clean subprocess mini with
 zero failures, a frozen candidate hash/evidence packet, and Samuel's explicit
-approval. Follow `AGENTS.md` and `docs/GAME_PLAN.md` Phase 6. This setup guide is
-not submission authorization.
+approval. Follow `AGENTS.md` and `docs/GAME_PLAN.md` §4 Today E plus the full
+deployment track. This setup guide is not submission authorization.
 
 ## 6. Optional but recommended
 

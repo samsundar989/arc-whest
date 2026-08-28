@@ -1,11 +1,14 @@
 # Phase 2 live competition and research audit — 2026-08-24
 
-This dated report is the external/repository evidence behind the current strategy.
-It is not a second action plan. Use `CURRENT_STATE.md` for status and
-`GAME_PLAN.md` for the sole active architecture and execution sequence. Historical
-experiment results remain authoritative within their recorded scope; historical
-claims about live rules, package versions, leaderboard state, and research ordering
-do not.
+> **HISTORICAL LAUNCH-WEEK SNAPSHOT.** This report is superseded by
+> `PHASE2_FRONTIER_AUDIT_2026-08-28.md`. Do not execute its present-tense actions or
+> use its leaderboard, submission, rules, package, or research-order claims as
+> current. Use `CURRENT_STATE.md`, `GAME_PLAN.md`, and
+> `CLAUDE_CODE_HANDOFF.md`.
+
+This dated report preserves the external/repository evidence available on
+2026-08-24. It is not a second action plan. Historical experiment results remain
+authoritative within their recorded scope; live-state claims do not.
 
 Evidence labels used below:
 
