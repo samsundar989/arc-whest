@@ -19670,3 +19670,266 @@ shape and per layer, with the comparison basis named.
   the guise of changing the spelling.
 - **Scope.** A PASS here would license continuing the port. It would **not** be an
   accuracy claim, a deployability claim, or a residual/memory clearance.
+
+---
+
+# 2026-08-28 — RESULT P2-WEFF: the exact spelling is measured, and the full-tower port is KILLED by its own screen
+
+**Classification: IMPORTANT.** Contract committed at **`08bb4d5`** before any
+artifact existed; every artifact below post-dates it. No truth, no labels, no seed
+block, no vault touch, no `estimator.py` edit, no submission. Preflight
+**GREEN 12/16** with the same four full-only skips; portability **99/99**; vault
+counter and touch log unmoved; seed ledger byte-identical.
+
+**Verdict on the preregistered gate: FAIL. The full-tower exact W-EFF port is
+killed. Track 2 (late-window K3) proceeds, and it now has an authoritative cost
+model instead of an `m^2/L^2` hypothesis.**
+
+## Instrument
+
+`local_sim/p2_weff.py`, sha256
+`d166b144233147ca55113f1d04e8d8b73d7fb6501d34d2dc935bb5789b89d119`.
+Research-only; never imported by `estimator.py`. Artifacts in
+`experiments/2026-08-28_weff/`:
+
+| file | sha256[:16] | what |
+|---|---|---|
+| `weff.json` | `62fa2a35c93b6fe9` | W-EFF-vs-dense parity + mutation panel |
+| `parity_fnp.npz` | `a780d141732f4455` | the emitted factors and slices |
+| `parity_upstream.json` / `weff_upstream.json` | `3add52d0d5ef96f6` / `e648fb0a9ce63dc9` | upstream torch scoring the identical bytes |
+| `weff_rank.json` | `aab60d541ea6218a` | rank-trajectory assertion |
+| `weff_price_f32_1000301.json` | `b8902341b8658dda` | width-1024 ledger, f32, seed 1 |
+| `weff_price_f32_1000302-1000303.json` | `a02584058147cd63` | seeds 2 and 3 |
+| `weff_price_f64_1000301.json` | `b1e484eca0c0e3de` | the f64 arm |
+
+Artifact names are run-specific by construction, so no documented invocation can
+overwrite another run's evidence. That is the 2026-08-21 trap, closed in code.
+
+## 1. Parity — exact, and mediated by an artifact rather than by trust
+
+flopscope and torch do not coexist in one environment here (`.venv` has flopscope
+and no torch; `.venv-gpu` has torch and **resolves `flopscope` to the numpy
+shim** — the module's guard refused that import out loud, which is the guard
+doing its job). Parity is therefore run in two processes over the *identical
+bytes*: the `fnp` side emits every factor and every slice, and upstream's own
+`FactoredTensor.contract_W` and `_factored_get_dslice` score them.
+
+| comparison | worst relative deviation | tolerance | verdict |
+|---|---:|---:|---|
+| dense `fnp` vs **upstream torch**, `get_dslice((3,))` | `3.532e-16` | `1e-10` | PASS |
+| dense `fnp` vs **upstream torch**, `get_dslice((2,1))` | `5.597e-16` | `1e-10` | PASS |
+| dense `fnp` vs **upstream torch**, `contract_W` | `1.356e-16` | `1e-10` | PASS |
+| **W-EFF vs dense `fnp`** | `5.550e-16` | `1e-12` | PASS |
+
+Shapes `n in {8, 12, 16}`, depths 3–4, **every layer compared**, float64.
+Lineage rank equals dense rank on every row. Upstream pin verified: rev
+`93d091a4` plus exactly the recorded 39-line patch. **Prediction 4 HELD**, four
+to six orders inside its stated tolerance.
+
+## 2. The rank trajectory is asserted, not assumed
+
+Run through upstream at `n = 64`, depth 6, `k_max=3, factor=True, kind=SIMPLE`:
+observed rank after `act_l` is `2n(l+1)` on all six layers, exactly. So the rank
+entering layer `l` is `r_l = 2n*l`, `32n` at layer 15, mean `15n`. The projection
+rests on a measurement.
+
+## 3. The mutation panel — six real detections, and one control that had to be thrown away
+
+Baseline W-EFF-vs-dense `2.448e-16`.
+
+| mutation | rel. err | detected |
+|---|---:|---|
+| M1 drop a lineage block | `2.756e-01` | yes |
+| M2 duplicate a lineage block | `4.054e-01` | yes |
+| M3 permute the columns of one mode | `6.421e-01` | yes |
+| M4 forget the scalar `3` on the two-leg middle mode | `5.816e-01` | yes |
+| M5 count the D block's coincident permutation once, not twice | `8.747e-02` | yes |
+| M6 swap the D and L blocks' roles | `1.143e+00` | yes |
+| M7 transpose the shared mode matrix `M` | `6.287e-01` | yes |
+
+**The control I wrote first could not fail, and it is recorded rather than
+quietly replaced.** "Permute the modes of a lineage (swap `A_L` and `C_L`)"
+returns `2.448e-16` — *exactly* the baseline. That is not a weak test, it is a
+**true invariance**: `_factored_get_dslice` sums over every block permutation, so
+the slice of a symmetric tensor cannot depend on mode order. It is kept in the
+panel as `M3b_mode_swap_is_an_invariance`, is explicitly **not** counted as a
+detection, and the discriminating column permutation replaced it. This
+repository has found "a control satisfied by construction" four times now; this
+is the fifth, caught before it was believed.
+
+## 4. The price — measured at width 1024, all 16 layers, both spellings
+
+flopscope 0.12, `matmul_cost = 2mkn - mn` (FMA=2), dtype rate `float32 = 1.0`,
+`float64 = 2.0` (read from `flopscope/data/default_weights.json`). `B = 2**41`.
+
+### Line ledger, f32, seed `1000301`
+
+| line | dense `fnp` | W-EFF `fnp` | saving |
+|---|---:|---:|---:|
+| `contract_W` | `1,545,433,251,840` | `998,092,308,480` | **`-35.42%`** |
+| `get_dslice (2,1)` | `1,650,097,938,432` | `1,289,798,836,224` | **`-21.84%`** |
+| `get_dslice (3,)` | `805,306,368` | `755,130,368` | `-6.23%` |
+| `contract_W_basic` (K2 level) | `68,685,922,304` | identical | — |
+| `contract_wick` | `754,974,720` | `503,316,480` | `-33.33%` |
+| `add_factors` concat | `802,160,640` | `0` | (a list append) |
+| two-leg assembly | `58,744,832` | `50,331,648` | |
+| `from_dstensor` assembly | `50,348,032` | `50,348,032` | |
+| **dominant lines only** | **`3,196,336,496,640`** | **`2,288,646,275,072`** | **`-28.40%`** |
+| **total executed** | **`3,266,688,647,168`** = `1.4855 B` | **`2,357,936,193,536`** = **`1.0723 B`** | `-27.82%` |
+
+### The mechanism model reproduces the measurement to four significant figures
+
+The contract's mechanism predicted, from lineage counting alone,
+`contract_W -> 930/1440 = 0.64583` and `get_dslice -> 1200/1536 = 0.78125` of
+baseline. **Measured: `0.64583` and `0.78164`.** The saving is not a number that
+happened; it is the number the structure forces, and that is the strongest thing
+in this entry.
+
+### Two meters, and they must not be conflated
+
+Upstream's torch-side counter for the same uncapped run
+(`experiments/2026-08-27_pb_rank/cost_ladder.json`, cell `none`):
+
+| line | upstream counter | this fnp spelling | ratio |
+|---|---:|---:|---:|
+| `contract_W` | `1,546,188,226,560` | `1,545,433,251,840` | **`0.99951`** |
+| `get_dslice` | `1,555,982,991,360` | `1,650,903,244,800` | **`1.0610`** |
+| `contract_W_basic` | `51,589,939,200` | `68,685,922,304` | `1.3314` |
+| `nonlin_sum 111 factored` | `97,790,289,920` | **not re-spelled** | — |
+| everything else | `~2.1e9` | **not executed** | — |
+| **total** | `3,253,706,193,072` = `1.4796 B` | `3,266,688,647,168` = `1.4855 B` | `1.0040` |
+
+**The `1.0040` total agreement is a coincidence of two offsetting differences and
+is NOT meter parity.** The honest statements are: `contract_W` agrees line for
+line to **`0.05%`**; this immutable `fnp` `get_dslice` bills **`6.1%` more** than
+upstream's torch spelling of identical mathematics; `contract_W_basic` bills
+**`33%` more**, because upstream evidently takes a symmetry discount on
+`W core W^T` that this spelling does not claim; and roughly `1.0e11` FLOPs of
+upstream's ledger (`nonlin_sum 111 factored` and the small remainder) are **not
+executed here at all**. Those cancel to `0.4%` by accident.
+
+**Consequence, stated as a bound rather than a point:** `1.0723 B` is a **lower
+bound** on the integrated W-EFF path, because the un-respelled remainder can only
+add. Carrying upstream's figure for that remainder gives a whole-path estimate of
+about **`1.117 B`**. **Prediction 1 HELD** (`1.4855 B` inside `1.26–1.70 B`; the
+`0.27 B` that a `5.49x` cross-meter reading would have implied did not appear,
+and the `5.49x` affordability target is now dead as a projection).
+**Prediction 3 HELD** (`1.0723 B` inside `0.90–1.30 B`).
+
+### The gate
+
+**`1.0723 B` against a `<= 0.35 B` screen: FAIL by `3.06x`** — and by `3.19x` on
+the whole-path estimate. Predicted `2.6–3.7x`. **Prediction 2 HELD**, though the
+combined dominant-line saving `28.40%` sits at the very bottom edge of its
+`28–42%` band and that is recorded as a near-miss, not a comfortable hit;
+the per-line predictions (`-30..-40%` and `-15..-28%`) were both comfortable.
+
+**No falsifier fired.** F1 no (cost is not `<= 0.35 B`), F2 no (parity exact),
+F3 no (saving `28.4%`, well under the `50%` that would have voided the model),
+F4 no (zero materializations), F5 no (totals bit-identical).
+
+### Determinism and dtype
+
+- **Prediction 6 HELD.** Probe seeds `1000301`, `1000302`, `1000303` give
+  **bit-identical** integer totals: dense `3,266,688,647,168`, W-EFF
+  `2,357,936,193,536`, on all three. The arm does not prune, so its counted cost
+  is network-independent — measured, not asserted.
+- **f64 is exactly `2.000000x` f32** on both spellings (`6,533,377,294,336` /
+  `4,715,872,387,072`). The `float64 = 2.0` billing rate applies cleanly to this
+  program. `GOTCHAS.md`'s warning that "the 2x dtype law is not universal" is not
+  contradicted: this is a measurement about *this* program, and it is the reason
+  every figure above is quoted at f32.
+- **Prediction 5 HELD: zero scalar materializations.**
+  `__bool__ = __float__ = __int__ = __index__ = 0`, counted by instrumenting
+  `FlopscopeArray` itself for the whole priced path, in every arm.
+
+### Memory — accounted, never claimed enforced
+
+| arm | peak working set | peak commit | upper-bound headroom of 8,192 MB |
+|---|---:|---:|---:|
+| f32 | `818.1 MB` | `1,308.0 MB` | `6.26x` |
+| f64 | `1,576.2 MB` | `2,069.6 MB` | `3.96x` |
+
+Both processes hold **both** spellings' operands, so a single-spelling candidate
+would be lower. Exact factor storage at the peak layer (`r = 30,720`): dense
+`372.0 MB`, W-EFF `248.0 MB` at f32. **Windows has no `RLIMIT_AS`, so none of
+this is a test passed.** `RLIMIT_AS` caps virtual address space, which exceeds
+both counters by an amount no Windows counter reports, so the true headroom is
+smaller than the figures above by an unmeasured factor.
+
+### Residual — not measured, and it does not matter here
+
+No `--runner subprocess` residual exists for any W-EFF arm. The full tower is
+killed on cost, so its residual is moot. **For the Track-2 window candidate the
+`0.4 s` cliff is completely untested and is a blocking deployment item**, not a
+footnote: a residual overrun is not a penalty, it zeroes the row and forces
+multiplier `1.0`.
+
+## 5. The durable deliverable: the late-window cost table, measured
+
+This is what the slice was actually worth. Per-layer W-EFF costs are measured, so
+a **final-`m`-layer exact-K3 window started from a zero K3 checkpoint** costs
+exactly the first `m` layers of the tower (the rank trajectory inside the window
+is `0, 2n, 4n, ...` by construction).
+
+| `m` | exact-K3 window (f32) | window `B` | `+` K2p1 prefix | multiplier | vs the `0.1` floor |
+|---:|---:|---:|---:|---:|---:|
+| 1 | `4,310,176,256` | `0.0020` | `0.0645` | `0.1000` | **free** |
+| 2 | `25,816,999,936` | `0.0117` | `0.0743` | `0.1000` | **free** |
+| 3 | `66,666,906,112` | `0.0303` | `0.0929` | `0.1000` | **free** |
+| 4 | `126,859,894,784` | `0.0577` | `0.1203` | `0.1203` | `1.20x` |
+| 5 | `206,395,965,952` | `0.0939` | `0.1564` | `0.1564` | `1.56x` |
+| 6 | `305,275,119,616` | `0.1388` | `0.2014` | `0.2014` | `2.01x` |
+| 8 | `561,062,674,432` | `0.2551` | `0.3177` | `0.3177` | `3.18x` |
+| 16 | `2,357,936,193,536` | `1.0723` | `1.1348` | `1.1348` | `11.35x` |
+
+**`m <= 3` is FREE.** The multiplier stays pinned at the `0.1` floor, so an exact
+K3 window over the last three layers costs *nothing at all* in score terms. That
+is a materially different situation from the `m^2/L^2` hypothesis the plan
+carried, and it is measured rather than argued.
+
+Four cautions, all load-bearing:
+
+1. The prefix column adds the shipped K2p1's **whole-tower** `0.0625734 B`, while
+   the per-layer figures already include their own `contract_W_basic`. The sum is
+   therefore an **over**-estimate by at most `m * 1.95e-3 B` (`0.008 B` at
+   `m = 4`). Conservative in the safe direction.
+2. It assumes a **zero** K3 checkpoint. An augmented-K2 or query-estimated
+   checkpoint starts the window at rank `> 0` and costs more; each initializer
+   must be billed separately in Track 2.
+3. Every figure is the **lower bound** of §4 — the un-respelled remainder adds,
+   proportionally.
+4. **This table says nothing about accuracy.** Whether any window imitates full
+   K3 is exactly what Track 2's label-free drift diagnostic must answer, and
+   drift is not an error increment.
+
+**Prediction 7 HELD**: projected `~0.02 / 0.07 / 0.16 / 0.28 B` for
+`m = 2/4/6/8`, measured `0.0117 / 0.0577 / 0.1388 / 0.2551 B` — right direction,
+right magnitude, uniformly a little cheaper than projected.
+
+## 6. Samuel's predictions — scored
+
+All three answers were **"I don't know"**, so none is scoreable. The calibration
+record gains nothing from this slice. Recorded, not glossed: **S-W1's answer
+would have been `>0.35 B`**, and the `2x` ship bar of S-W3 remains the handoff's
+stated default rather than Samuel's own commitment.
+
+## 7. What this does and does not license
+
+**Licensed.** Killing the full-tower W-EFF port. Using the measured per-layer
+ledger as Track 2's cost model. Quoting `contract_W` line parity between the two
+meters to `0.05%`.
+
+**Not licensed.** Any accuracy claim. Any deployability claim (no residual, no
+setup, no subprocess run, no memory enforcement). Any statement that the two
+meters agree overall — they agree by cancellation. Anything entering the
+write-up. And the W-EFF spelling is **not** a candidate: it is a cost proof and a
+reusable set of exact operations for the window.
+
+**Next, and it needs its own contract:** Track 2, the label-free late-window
+drift diagnostic, with `m` frozen to `{2, 4, 6, 8}`, the checkpoint initializers
+frozen, and the drift/cost thresholds written before data. `m <= 3` being free
+changes what that contract should ask.
+
+**An independent Skeptic on the raw artifacts is required before any of this
+controls the next implementation.**

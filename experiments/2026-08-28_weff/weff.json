@@ -1,0 +1,120 @@
+{
+ "stack": {
+  "flopscope_version": "0.12.0+np2.2.6",
+  "flopscope_file": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\__init__.py",
+  "numpy_version": "2.2.6",
+  "fnp_file": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\numpy\\__init__.py"
+ },
+ "host": "Windows-10-10.0.26200-SP0",
+ "utc": "2026-08-28T19:36:53Z",
+ "screen_budgets": 0.35,
+ "budget": 2199023255552,
+ "probe_seeds": [
+  1000301,
+  1000302,
+  1000303
+ ],
+ "parity_emit": {
+  "npz": "experiments/2026-08-28_weff\\parity_fnp.npz",
+  "rows": [
+   {
+    "n": 8,
+    "layer": 0,
+    "rank_dense": 40,
+    "rank_lineage": 40,
+    "weff_vs_dense_dslice3": 4.6154859254210575e-17,
+    "weff_vs_dense_dslice21": 1.6673118610493904e-16
+   },
+   {
+    "n": 8,
+    "layer": 1,
+    "rank_dense": 56,
+    "rank_lineage": 56,
+    "weff_vs_dense_dslice3": 3.6194547819333534e-16,
+    "weff_vs_dense_dslice21": 2.644276301758798e-16
+   },
+   {
+    "n": 8,
+    "layer": 2,
+    "rank_dense": 72,
+    "rank_lineage": 72,
+    "weff_vs_dense_dslice3": 1.2130338649320478e-16,
+    "weff_vs_dense_dslice21": 2.900609358923232e-16
+   },
+   {
+    "n": 12,
+    "layer": 0,
+    "rank_dense": 60,
+    "rank_lineage": 60,
+    "weff_vs_dense_dslice3": 3.4172061148411503e-16,
+    "weff_vs_dense_dslice21": 1.3641511947968566e-16
+   },
+   {
+    "n": 12,
+    "layer": 1,
+    "rank_dense": 84,
+    "rank_lineage": 84,
+    "weff_vs_dense_dslice3": 3.068229830027258e-16,
+    "weff_vs_dense_dslice21": 2.879301446631333e-16
+   },
+   {
+    "n": 12,
+    "layer": 2,
+    "rank_dense": 108,
+    "rank_lineage": 108,
+    "weff_vs_dense_dslice3": 2.853788649915682e-16,
+    "weff_vs_dense_dslice21": 5.409702164561121e-16
+   },
+   {
+    "n": 16,
+    "layer": 0,
+    "rank_dense": 80,
+    "rank_lineage": 80,
+    "weff_vs_dense_dslice3": 5.550105702866325e-16,
+    "weff_vs_dense_dslice21": 2.131303696572267e-16
+   },
+   {
+    "n": 16,
+    "layer": 1,
+    "rank_dense": 112,
+    "rank_lineage": 112,
+    "weff_vs_dense_dslice3": 7.083938092569918e-17,
+    "weff_vs_dense_dslice21": 2.4477496500998755e-16
+   },
+   {
+    "n": 16,
+    "layer": 2,
+    "rank_dense": 144,
+    "rank_lineage": 144,
+    "weff_vs_dense_dslice3": 3.192996462936227e-16,
+    "weff_vs_dense_dslice21": 3.25716670226782e-16
+   },
+   {
+    "n": 16,
+    "layer": 3,
+    "rank_dense": 176,
+    "rank_lineage": 176,
+    "weff_vs_dense_dslice3": 1.9823169031293006e-16,
+    "weff_vs_dense_dslice21": 2.798423355353563e-16
+   }
+  ],
+  "shapes": [
+   [
+    8,
+    3
+   ],
+   [
+    12,
+    3
+   ],
+   [
+    16,
+    4
+   ]
+  ],
+  "worst_weff_vs_dense": 5.550105702866325e-16,
+  "tol_weff": 1e-12,
+  "weff_vs_dense_pass": true,
+  "rank_matches": true
+ }
+}

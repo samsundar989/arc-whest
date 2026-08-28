@@ -1,0 +1,494 @@
+{
+ "stack": {
+  "flopscope_version": "0.12.0+np2.2.6",
+  "flopscope_file": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\__init__.py",
+  "numpy_version": "2.2.6",
+  "fnp_file": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\numpy\\__init__.py"
+ },
+ "host": "Windows-10-10.0.26200-SP0",
+ "utc": "2026-08-28T19:42:06Z",
+ "screen_budgets": 0.35,
+ "budget": 2199023255552,
+ "probe_seeds": [
+  1000301,
+  1000302,
+  1000303
+ ],
+ "price": {
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "screen_budgets": 0.35,
+  "per_seed": {
+   "1000301": {
+    "f32": {
+     "layers": [
+      {
+       "layer": 0,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 0,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 0,
+        "dense/contract_wick": 0,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 0,
+        "dense/get_dslice_3": 3145728,
+        "dense/get_dslice_21": 6447171072,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 0,
+        "weff/contract_wick": 0,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 2048,
+        "weff/get_dslice_21": 11011584,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 10750005248,
+       "weff_total": 4310176256
+      },
+      {
+       "layer": 1,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 2048,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 12878610432,
+        "dense/contract_wick": 6291456,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 9437184,
+        "dense/get_dslice_3": 9437184,
+        "dense/get_dslice_21": 19338364416,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 6439305216,
+        "weff/contract_wick": 4194304,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 6294528,
+        "weff/get_dslice_21": 10757867008,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 36541829120,
+       "weff_total": 21506823680
+      },
+      {
+       "layer": 2,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 4096,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 25757220864,
+        "dense/contract_wick": 12582912,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 15728640,
+        "dense/get_dslice_3": 15728640,
+        "dense/get_dslice_21": 32229557760,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 15025045504,
+        "weff/contract_wick": 8388608,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 12587008,
+        "weff/get_dslice_21": 21504722432,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 62330507264,
+       "weff_total": 40849906176
+      },
+      {
+       "layer": 3,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 6144,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 38635831296,
+        "dense/contract_wick": 18874368,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 22020096,
+        "dense/get_dslice_3": 22020096,
+        "dense/get_dslice_21": 45120751104,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 23610785792,
+        "weff/contract_wick": 12582912,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 18879488,
+        "weff/get_dslice_21": 32251577856,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 88119185408,
+       "weff_total": 60192988672
+      },
+      {
+       "layer": 4,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 8192,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 51514441728,
+        "dense/contract_wick": 25165824,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 28311552,
+        "dense/get_dslice_3": 28311552,
+        "dense/get_dslice_21": 58011944448,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 32196526080,
+        "weff/contract_wick": 16777216,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 25171968,
+        "weff/get_dslice_21": 42998433280,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 113907863552,
+       "weff_total": 79536071168
+      },
+      {
+       "layer": 5,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 10240,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 64393052160,
+        "dense/contract_wick": 31457280,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 34603008,
+        "dense/get_dslice_3": 34603008,
+        "dense/get_dslice_21": 70903137792,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 40782266368,
+        "weff/contract_wick": 20971520,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 31464448,
+        "weff/get_dslice_21": 53745288704,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 139696541696,
+       "weff_total": 98879153664
+      },
+      {
+       "layer": 6,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 12288,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 77271662592,
+        "dense/contract_wick": 37748736,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 40894464,
+        "dense/get_dslice_3": 40894464,
+        "dense/get_dslice_21": 83794331136,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 49368006656,
+        "weff/contract_wick": 25165824,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 37756928,
+        "weff/get_dslice_21": 64492144128,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 165485219840,
+       "weff_total": 118222236160
+      },
+      {
+       "layer": 7,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 14336,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 90150273024,
+        "dense/contract_wick": 44040192,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 47185920,
+        "dense/get_dslice_3": 47185920,
+        "dense/get_dslice_21": 96685524480,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 57953746944,
+        "weff/contract_wick": 29360128,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 44049408,
+        "weff/get_dslice_21": 75238999552,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 191273897984,
+       "weff_total": 137565318656
+      },
+      {
+       "layer": 8,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 16384,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 103028883456,
+        "dense/contract_wick": 50331648,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 53477376,
+        "dense/get_dslice_3": 53477376,
+        "dense/get_dslice_21": 109576717824,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 66539487232,
+        "weff/contract_wick": 33554432,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 50341888,
+        "weff/get_dslice_21": 85985854976,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 217062576128,
+       "weff_total": 156908401152
+      },
+      {
+       "layer": 9,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 18432,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 115907493888,
+        "dense/contract_wick": 56623104,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 59768832,
+        "dense/get_dslice_3": 59768832,
+        "dense/get_dslice_21": 122467911168,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 75125227520,
+        "weff/contract_wick": 37748736,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 56634368,
+        "weff/get_dslice_21": 96732710400,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 242851254272,
+       "weff_total": 176251483648
+      },
+      {
+       "layer": 10,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 20480,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 128786104320,
+        "dense/contract_wick": 62914560,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 66060288,
+        "dense/get_dslice_3": 66060288,
+        "dense/get_dslice_21": 135359104512,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 83710967808,
+        "weff/contract_wick": 41943040,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 62926848,
+        "weff/get_dslice_21": 107479565824,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 268639932416,
+       "weff_total": 195594566144
+      },
+      {
+       "layer": 11,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 22528,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 141664714752,
+        "dense/contract_wick": 69206016,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 72351744,
+        "dense/get_dslice_3": 72351744,
+        "dense/get_dslice_21": 148250297856,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 92296708096,
+        "weff/contract_wick": 46137344,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 69219328,
+        "weff/get_dslice_21": 118226421248,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 294428610560,
+       "weff_total": 214937648640
+      },
+      {
+       "layer": 12,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 24576,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 154543325184,
+        "dense/contract_wick": 75497472,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 78643200,
+        "dense/get_dslice_3": 78643200,
+        "dense/get_dslice_21": 161141491200,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 100882448384,
+        "weff/contract_wick": 50331648,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 75511808,
+        "weff/get_dslice_21": 128973276672,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 320217288704,
+       "weff_total": 234280731136
+      },
+      {
+       "layer": 13,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 26624,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 167421935616,
+        "dense/contract_wick": 81788928,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 84934656,
+        "dense/get_dslice_3": 84934656,
+        "dense/get_dslice_21": 174032684544,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 109468188672,
+        "weff/contract_wick": 54525952,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 81804288,
+        "weff/get_dslice_21": 139720132096,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 346005966848,
+       "weff_total": 253623813632
+      },
+      {
+       "layer": 14,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 28672,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 180300546048,
+        "dense/contract_wick": 88080384,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 91226112,
+        "dense/get_dslice_3": 91226112,
+        "dense/get_dslice_21": 186923877888,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 118053928960,
+        "weff/contract_wick": 58720256,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 88096768,
+        "weff/get_dslice_21": 150466987520,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 371794644992,
+       "weff_total": 272966896128
+      },
+      {
+       "layer": 15,
+       "n": 1024,
+       "dtype": "f32",
+       "rank_in": 30720,
+       "lines": {
+        "contract_W_basic": 4292870144,
+        "dense/contract_W": 193179156480,
+        "dense/contract_wick": 94371840,
+        "dense/twoleg_assembly": 3671552,
+        "dense/add_factors_concat": 97517568,
+        "dense/get_dslice_3": 97517568,
+        "dense/get_dslice_21": 199815071232,
+        "dense/from_dstensor": 3146752,
+        "weff/contract_W": 126639669248,
+        "weff/contract_wick": 62914560,
+        "weff/twoleg_assembly": 3145728,
+        "weff/add_factors_concat": 0,
+        "weff/get_dslice_3": 94389248,
+        "weff/get_dslice_21": 161213842944,
+        "weff/from_dstensor": 3146752
+       },
+       "dense_total": 397583323136,
+       "weff_total": 292309978624
+      }
+     ],
+     "dense_total": 3266688647168,
+     "weff_total": 2357936193536,
+     "dense_budgets": 1.4855180084705353,
+     "weff_budgets": 1.072265237569809,
+     "saving_fraction": 0.2781876547738419,
+     "lines_dense": {
+      "contract_W_basic": 68685922304,
+      "dense/contract_W": 1545433251840,
+      "dense/contract_wick": 754974720,
+      "dense/twoleg_assembly": 58744832,
+      "dense/add_factors_concat": 802160640,
+      "dense/get_dslice_3": 805306368,
+      "dense/get_dslice_21": 1650097938432,
+      "dense/from_dstensor": 50348032
+     },
+     "lines_weff": {
+      "weff/contract_W": 998092308480,
+      "weff/contract_wick": 503316480,
+      "weff/twoleg_assembly": 50331648,
+      "weff/add_factors_concat": 0,
+      "weff/get_dslice_3": 755130368,
+      "weff/get_dslice_21": 1289798836224,
+      "weff/from_dstensor": 50348032
+     },
+     "materializations": {
+      "__bool__": 0,
+      "__float__": 0,
+      "__int__": 0,
+      "__index__": 0
+     },
+     "materializations_total": 0,
+     "seconds": 21.549425500001234
+    }
+   }
+  },
+  "network_independence": {
+   "f32": {
+    "weff_identical": true,
+    "dense_identical": true,
+    "weff_values": [
+     2357936193536
+    ],
+    "dense_values": [
+     3266688647168
+    ]
+   }
+  },
+  "memory": {
+   "available": true,
+   "peak_working_set_mb": 818.109375,
+   "peak_commit_mb": 1307.99609375,
+   "limit_mb": 8192,
+   "upper_bound_headroom_x": 6.263015645951733,
+   "enforced": false,
+   "note": "Windows has no RLIMIT_AS; this is accounting, not a test."
+  },
+  "factor_storage": {
+   "f32": {
+    "peak_layer": 15,
+    "rank_at_peak": 30720,
+    "dense_factor_bytes": 390070272,
+    "weff_factor_bytes": 260046848,
+    "dense_factor_mb": 372.0,
+    "weff_factor_mb": 248.0
+   }
+  }
+ }
+}

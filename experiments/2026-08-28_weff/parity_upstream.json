@@ -1,0 +1,89 @@
+{
+ "rows": [
+  {
+   "tag": "n12_l0",
+   "rank": 60,
+   "dslice3": 5.3393845544392974e-17,
+   "dslice21": 1.1487589008815637e-16,
+   "contract_W": 0.0
+  },
+  {
+   "tag": "n12_l1",
+   "rank": 84,
+   "dslice3": 1.9176436437670358e-16,
+   "dslice21": 3.599126808289166e-16,
+   "contract_W": 0.0
+  },
+  {
+   "tag": "n12_l2",
+   "rank": 108,
+   "dslice3": 2.853788649915681e-16,
+   "dslice21": 3.7867915151927834e-16,
+   "contract_W": 0.0
+  },
+  {
+   "tag": "n16_l0",
+   "rank": 80,
+   "dslice3": 3.5318854472785703e-16,
+   "dslice21": 3.1969555448584e-16,
+   "contract_W": 1.3558884440509883e-16
+  },
+  {
+   "tag": "n16_l1",
+   "rank": 112,
+   "dslice3": 1.4167876185139836e-16,
+   "dslice21": 3.263666200133167e-16,
+   "contract_W": 1.1316258196000245e-16
+  },
+  {
+   "tag": "n16_l2",
+   "rank": 144,
+   "dslice3": 1.5964982314681134e-16,
+   "dslice21": 3.25716670226782e-16,
+   "contract_W": 0.0
+  },
+  {
+   "tag": "n16_l3",
+   "rank": 176,
+   "dslice3": 4.9557922578232516e-17,
+   "dslice21": 5.596846710707126e-16,
+   "contract_W": 5.2976443628104984e-17
+  },
+  {
+   "tag": "n8_l0",
+   "rank": 40,
+   "dslice3": 1.8461943701684228e-16,
+   "dslice21": 3.3346237220987803e-16,
+   "contract_W": 8.187284384510727e-17
+  },
+  {
+   "tag": "n8_l1",
+   "rank": 56,
+   "dslice3": 2.4129698546222363e-16,
+   "dslice21": 2.6442763017587977e-16,
+   "contract_W": 9.053277820672065e-17
+  },
+  {
+   "tag": "n8_l2",
+   "rank": 72,
+   "dslice3": 2.4260677298640955e-17,
+   "dslice21": 1.4503046794616159e-16,
+   "contract_W": 0.0
+  }
+ ],
+ "worst_dslice3": 3.5318854472785703e-16,
+ "worst_dslice21": 5.596846710707126e-16,
+ "worst_contract_W": 1.3558884440509883e-16,
+ "worst_fnp_vs_upstream": 5.596846710707126e-16,
+ "tol_upstream": 1e-10,
+ "pass": true,
+ "upstream": {
+  "rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+  "expected_rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+  "changed_lines": 25,
+  "recorded_lines": 25,
+  "changed_md5": "11d296d73c8895668333d21a0cfd5526",
+  "recorded_md5": "11d296d73c8895668333d21a0cfd5526",
+  "pass": true
+ }
+}

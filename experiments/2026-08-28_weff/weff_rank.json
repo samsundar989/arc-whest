@@ -1,0 +1,43 @@
+{
+ "stack": {
+  "note": "upstream-scoring pass; flopscope deliberately not imported (the torch venv would resolve the shim)"
+ },
+ "host": "Windows-10-10.0.26200-SP0",
+ "utc": "2026-08-28T19:38:01Z",
+ "screen_budgets": 0.35,
+ "budget": 2199023255552,
+ "probe_seeds": [
+  1000301,
+  1000302,
+  1000303
+ ],
+ "upstream": {
+  "rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+  "expected_rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+  "changed_lines": 25,
+  "recorded_lines": 25,
+  "changed_md5": "11d296d73c8895668333d21a0cfd5526",
+  "recorded_md5": "11d296d73c8895668333d21a0cfd5526",
+  "pass": true
+ },
+ "rank_trajectory": {
+  "n": 64,
+  "observed": {
+   "act0": 128,
+   "act1": 256,
+   "act2": 384,
+   "act3": 512,
+   "act4": 640,
+   "act5": 768
+  },
+  "expected": {
+   "act0": 128,
+   "act1": 256,
+   "act2": 384,
+   "act3": 512,
+   "act4": 640,
+   "act5": 768
+  },
+  "pass": true
+ }
+}
