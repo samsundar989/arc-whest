@@ -1,0 +1,20 @@
+{
+  "check": "capped-vs-uncapped drift bracket",
+  "width": 1024,
+  "depth": 16,
+  "dtype": "f32",
+  "mse_full_anchor": 4.0047e-08,
+  "rows": [
+    {
+      "seed": 1000201,
+      "cell": "oracle_offdiag_exact:n",
+      "r_star": 1024,
+      "score": "frob",
+      "drift_final_layer": 3.3322868944454484e-07,
+      "ratio_to_mse_full": 8.320940131459157,
+      "mse_cap_lo": 1.422362181312154e-07,
+      "mse_cap_hi": 6.043151607578742e-07
+    }
+  ],
+  "caveat": "drift is not an error increment; the bracket is the only truth-free statement available."
+}

@@ -18784,3 +18784,131 @@ bracket. Nothing here may be promoted, submitted, fitted, or used to move a gate
   diagonal projection has to remove — so the sweep count is a genuine free
   parameter and a null result is conditional on it. Recorded as a scope limit.
 - Says nothing about `fnp`, flopscope, residual, setup, memory, O1, or W-EFF.
+
+---
+
+# 2026-08-28 — RESULT: P-B-ORACLE-2b is a WEAK OPEN, the leakage diagnosis is confirmed at 13x, and the gate-authorised ladder says the compression axis is alive after all
+
+*Contract at HEAD `222db96`, committed before the run. Artifacts:
+`experiments/2026-08-28_pb_oracle/{drift_oracle2b,drift_oracle2b_ladder,
+cost_rank3n,cost_ladder2b,nograd_bitcheck,oracle_nulltest}.json`.*
+
+## The gated measurement
+
+`oracle_offdiag_exact:n`, output rank `3n`, priced today at `0.3299 B`. Mean drift
+over `1000201-203`: **`3.0128e-07`** (per-seed `{3.332, 2.929, 2.777}e-7`).
+
+| gate band | result |
+|---|---|
+| `< 6.0e-8` — lane OPENS | not met |
+| **`< 4.4e-7` — WEAK OPEN** | **MET.** `3.013e-7` |
+| `>= 4.4e-7` — provisional-closed | not reached |
+
+**WEAK OPEN.** The pre-registered consequence is exactly one rank ladder
+(`r* in {2n, 4n}`) on the same oracle and **nothing built**. That ladder is below.
+
+## The falsifier did not fire, and the diagnosis is confirmed at 13x
+
+Prediction 1 was the slice falsifier: if removing the measured leakage did not
+recover most of the broken ORACLE-2's `3.960e-6`, the leakage diagnosis committed
+at `2fa22dc` would have been **retracted**, not refined.
+
+`3.960e-6 -> 3.013e-7` is **13.1x**, against a predicted "more than `4x`". The
+diagnosis stands, and it now has three independent confirmations: the layerwise
+leakage measurement (`0.402` of the true `(2,1)` norm by layer 15), control N4 at
+small `n` (`6.68e-1` and `7.21e-1` wrong on the two slices, against `9.65e-17` and
+`2.60e-16` for the corrected arm), and this 13x recovery on the real shape.
+
+## Prediction scorecard — 4 of 4 held, and the band held at its floor
+
+| # | prediction | outcome |
+|---|---|---|
+| 1 | beats broken ORACLE-2 by `> 4x` — *the falsifier* | **HELD**, `13.1x` |
+| 2 | beats `dsproj:n` `8.832e-7` by `< 3x` | **HELD**, `2.93x` — and barely |
+| 3 | does not clear `6e-8` | **HELD** |
+| 4 | beats `oracle:n` `7.531e-7` | **HELD**, `2.50x` |
+
+Band `[3.0e-7, 8.8e-7]`: the measurement is `3.0128e-7`, inside by `0.4%` of the
+lower edge. The point estimate `6.0e-7` was **2x pessimistic**. Samuel answered
+**"I don't know"**, taken and recorded before the run. The strategist's standing
+`< 6e-8` is not reached at rank `n` — but see the ladder before reading that as a
+refutation of his thesis, because it is not one.
+
+## The ladder, and it is the reason this entry matters
+
+Pre-authorised by the gate, run after it, on the same three networks. Costs are
+measured cells (`cost_rank3n.json`, `cost_ladder2b.json`), upstream's runtime
+counter, **not flopscope**.
+
+| cell | out rank | cost | drift | `/MSE_full` | score bracket |
+|---|---:|---:|---:|---:|---:|
+| `oracle_offdiag_exact:n` | `3n` | `0.3299 B` | `3.013e-7` | `7.52` | `[4.01e-8, 1.85e-7]` |
+| `oracle_offdiag_exact:2*n` | `4n` | `0.4121 B` | `1.510e-7` | `3.77` | `[1.46e-8, 1.43e-7]` |
+| **`oracle_offdiag_exact:4*n`** | `6n` | `0.5647 B` | **`3.689e-8`** | **`0.92`** | `[3.67e-11, 8.69e-8]` |
+| *uncapped, for reference* | `32n` | `1.4796 B` | `0` | `0` | `5.925e-8` exact |
+
+**At `r* = 4n` the drift falls BELOW the uncapped model's own error** — the
+compressed prediction differs from full K3 by less than full K3 differs from the
+truth — at **`2.62x` less cost**.
+
+The comparison that carries it is against naive rank capping at **matched cost**:
+
+| cost | naive `normsort` | `oracle_offdiag_exact` | ratio |
+|---:|---:|---:|---:|
+| `0.4121 B` | `8.227e-7` | **`1.510e-7`** | **`5.45x` better, identical price** |
+| `0.5647` vs `0.7055 B` | `1.651e-7` | **`3.689e-8`** | **`4.48x` better at `0.80x` the cost** |
+
+P-B-COST priced out compression using selectors that did not know about the
+structure. **With the neuron-diagonals held exact and only the off-diagonal
+compressed, the same axis buys `4.5-5.5x` at the same price.** That is the
+strategist's Contract 4 thesis, and the ladder supports it — it simply needs rank
+`4n` in the off-diagonal rather than rank `n`.
+
+## What this does NOT establish, and the temptation to resist
+
+- **It is still an ORACLE.** ALS with cost ignored. No implementable selector
+  achieves this, and the `rankcap` line an implementable one would carry is
+  unpriced. Nothing may be built on it; the gate said so and it still says so.
+- **Drift is not an error increment.** The score column is a triangle-inequality
+  **bracket**, and every bracket here **straddles the uncapped `5.925e-8`**. The
+  additive point estimates (`1.13e-7`, `7.87e-8`, **`4.34e-8`**) are the
+  *unlicensed* reading `MSE ~ MSE_full + drift`; `VALIDATION.md` forbids quoting
+  them as results and they are shown only so nobody re-derives them privately and
+  believes them. **No promotion claim is made, and none is available without a
+  label.**
+- Even the most optimistic honest reading of the best cell — `~4.3e-8` — is
+  **`5.6x` short of the live leader's `7.70e-9`.** This lane, fully realised, does
+  not win on its own. It has to compose with O1, exactly as Contract 4 orders it,
+  and W-EFF remains the centerpiece rather than this.
+- Three networks, no ground truth, no seed block, f32, 8 ALS sweeps. Unlike
+  ORACLE-1, more sweeps here do not strictly tighten a bound (contract, scope), so
+  the ladder is conditional on that parameter.
+
+## One instrument defect found and fixed, and it was silent
+
+The ladder OOM'd at `75.21 GiB` of live allocations on a `31.84 GiB` card.
+`build_mlp` wraps the weights in `nn.Linear`, so they arrive with
+`requires_grad=True` and the whole 16-layer flow was **building an autograd graph
+and retaining every intermediate** — in a module that differentiates nothing.
+`predict()` now runs under `torch.no_grad()`.
+
+**It is asserted numerically inert, not assumed to be**: re-running the already
+committed `oracle_offdiag_exact:n` cell on seed `1000201` returns
+`3.3322868944454484e-07`, **bit-identical** to the value committed at `222db96`
+(`nograd_bitcheck.json`). This also explains the full-width f64 `--selftest` OOM
+recorded in the parent contract, which was read there as a host memory limit and
+was in fact this.
+
+## Where the three oracles leave the compression axis
+
+| question | answer |
+|---|---|
+| Is `kappa_3` rank-`n` compressible in the current basis? | **No, closed for good.** ORACLE-1, `7.531e-7 >= 4.0e-7` |
+| Is the diagonal alone enough? | **No.** ORACLE-3 / `dsproj:n`, `8.832e-7`, and the `< 5e-8` collapse falsifier missed by `18x` |
+| Is `kappa_3` compressible at all in Frobenius terms? | **Yes, substantially** — rank `n` captures `~75%` of a rank-`32n` tensor at depth |
+| Then why did compression fail? | **The flow reads only the `(3,)` and `(2,1)` diagonal slices.** Frobenius-optimal compression spends rank on the bulk and damages the readout |
+| Does protecting the readout fix it? | **Yes, and by `4.5-5.5x` at matched cost.** But it needs rank `4n` off-diagonal, not `n`, and it is still an oracle |
+
+The next question this poses — and it is **not** authorised by any gate here — is
+whether an implementable diagonal-preserving sketch gets within a constant of the
+oracle, and what it costs once its own selector is billed. That is a new contract.

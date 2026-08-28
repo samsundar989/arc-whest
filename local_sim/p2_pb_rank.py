@@ -430,13 +430,21 @@ def predict(weights, *, cap="none", r_star=0, seed=0, score="frob", dtype=None,
               cap=cap, r_star=r_star, seed=seed, score=score,
               als_iters=als_iters, trace=trace)
 
+    # `build_mlp` wraps the weights in `nn.Linear`, so they arrive with
+    # `requires_grad=True` and the ENTIRE 16-layer flow silently builds an
+    # autograd graph that retains every intermediate. At `r* = 2n` that reached
+    # `75.21 GiB` of live allocations on a `31.84 GiB` card and OOM'd. Nothing
+    # here differentiates anything; `no_grad` is a pure memory fix and is
+    # asserted bit-identical against the already-committed `oracle_offdiag_exact:n`
+    # cell rather than assumed to be.
     flops = None
-    if count_flops:
-        with NamedFlopCounter() as ctr:
+    with torch.no_grad():
+        if count_flops:
+            with NamedFlopCounter() as ctr:
+                out = run_kprop_capped(mlp, K_in, **kw)
+            flops = ctr.flop_dict()
+        else:
             out = run_kprop_capped(mlp, K_in, **kw)
-        flops = ctr.flop_dict()
-    else:
-        out = run_kprop_capped(mlp, K_in, **kw)
     means = np.stack([bridge._degree1(out[f"act{l}"][1]) for l in range(depth)], axis=0)
     return means, flops
 

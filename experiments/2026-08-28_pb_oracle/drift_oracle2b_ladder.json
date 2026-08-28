@@ -1,0 +1,70 @@
+{
+  "check": "capped-vs-uncapped drift bracket",
+  "width": 1024,
+  "depth": 16,
+  "dtype": "f32",
+  "mse_full_anchor": 4.0047e-08,
+  "rows": [
+    {
+      "seed": 1000201,
+      "cell": "oracle_offdiag_exact:2*n",
+      "r_star": 2048,
+      "score": "frob",
+      "drift_final_layer": 1.5355108486386673e-07,
+      "ratio_to_mse_full": 3.834271852170368,
+      "mse_cap_lo": 3.67636461006503e-08,
+      "mse_cap_hi": 3.504325236270831e-07
+    },
+    {
+      "seed": 1000201,
+      "cell": "oracle_offdiag_exact:4*n",
+      "r_star": 4096,
+      "score": "frob",
+      "drift_final_layer": 3.821941857035873e-08,
+      "ratio_to_mse_full": 0.9543640864573808,
+      "mse_cap_lo": 2.134062964335206e-11,
+      "mse_cap_hi": 1.5651149651107407e-07
+    },
+    {
+      "seed": 1000202,
+      "cell": "oracle_offdiag_exact:2*n",
+      "r_star": 2048,
+      "score": "frob",
+      "drift_final_layer": 1.6286923396899815e-07,
+      "ratio_to_mse_full": 4.066952180412969,
+      "mse_cap_lo": 4.139318034808038e-08,
+      "mse_cap_hi": 3.6443928758991584e-07
+    },
+    {
+      "seed": 1000202,
+      "cell": "oracle_offdiag_exact:4*n",
+      "r_star": 4096,
+      "score": "frob",
+      "drift_final_layer": 3.5105527239893e-08,
+      "ratio_to_mse_full": 0.8766081664018028,
+      "mse_cap_lo": 1.62633270745531e-10,
+      "mse_cap_hi": 1.501424212090405e-07
+    },
+    {
+      "seed": 1000203,
+      "cell": "oracle_offdiag_exact:2*n",
+      "r_star": 2048,
+      "score": "frob",
+      "drift_final_layer": 1.3642369652828536e-07,
+      "ratio_to_mse_full": 3.406589670344479,
+      "mse_cap_lo": 2.8641609067552605e-08,
+      "mse_cap_hi": 3.2429978398901813e-07
+    },
+    {
+      "seed": 1000203,
+      "cell": "oracle_offdiag_exact:4*n",
+      "r_star": 4096,
+      "score": "frob",
+      "drift_final_layer": 3.733222549191327e-08,
+      "ratio_to_mse_full": 0.9322102902068387,
+      "mse_cap_lo": 4.763726886820049e-11,
+      "mse_cap_hi": 1.5471081371495835e-07
+    }
+  ],
+  "caveat": "drift is not an error increment; the bracket is the only truth-free statement available."
+}
