@@ -1,0 +1,30 @@
+{
+  "check": "binding null controls on the ORACLE modes",
+  "width": 64,
+  "dtype": "f64",
+  "als_iters": 8,
+  "rows": {
+    "N1_exact_recovery": {
+      "rel": 3.981812187416538e-15,
+      "rank_out": 24,
+      "k": 24,
+      "pad": 11,
+      "als_iters": 60
+    },
+    "N2_monotone": {
+      "fit_normsort": 0.7398676694139361,
+      "fit_oracle": 0.7304319132771898,
+      "improved_by": 1.0129180502182762,
+      "pass": true
+    },
+    "N3_split": {
+      "rel_identity": 1.201882001567745e-16,
+      "rem_dslice_3": 1.1074244746980765e-16,
+      "rem_dslice_21": 1.0980577679590399e-16,
+      "diag_rank": 64
+    }
+  },
+  "worst": 3.981812187416538e-15,
+  "tol": 1e-12,
+  "pass": true
+}

@@ -1,0 +1,7 @@
+{
+  "check": "re-driven loop vs mlp_kprop",
+  "width": 256,
+  "depth": 16,
+  "worst_abs": 0.0,
+  "bit_identical": true
+}

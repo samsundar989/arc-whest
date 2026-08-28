@@ -137,8 +137,133 @@ def _column_weight(factors, score: str = "frob"):
     raise ValueError(f"unknown score {score!r}")
 
 
-def cap_factored(FT, r_star: int, *, mode: str, seed: int, score: str = "frob"):
-    """Return a degree-3 `FactoredTensor` of rank <= `r_star`, priced in place."""
+# --------------------------------------------------------------------------
+# the ORACLE: the best rank-`r*` CP approximation, cost deliberately ignored
+# --------------------------------------------------------------------------
+
+def _kr_gram(X, Y):
+    """`(X (*) ...)^T (Y (*) ...)` factor: plain `X^T Y`, shape `(rx, ry)`.
+
+    Named because every Khatri-Rao identity below is built from these and the
+    Hadamard product, and never from a materialised `n^2` or `n^3` object.
+    """
+    return X.transpose(0, 1) @ Y
+
+
+def _cp_als_truncate(factors, r_star: int, *, iters: int, warm, ridge=None):
+    """Best rank-`r*` CP approximation of `sum_j A_j (x) B_j (x) C_j`.
+
+    **This is an ORACLE. Its cost is deliberately ignored and must never be
+    quoted as an operating point.** It exists to upper-bound what ANY rank-`r*`
+    compressor could achieve, so that "our selectors are bad" can be separated
+    from "the information is not rank-`r*`-compressible".
+
+    Nothing of size `n^3` is ever formed. For a target `T` in CP form with
+    factors `(A, B, C)` of shape `(n, r)` and an approximant `That` with factors
+    `(Ah, Bh, Ch)` of shape `(n, r*)`, the Khatri-Rao identity
+
+        `(C (*) B)^T (Ch (*) Bh) = (C^T Ch) o (B^T Bh)`        (`o` = Hadamard)
+
+    turns the mode-1 MTTKRP `T_(1) (Ch (*) Bh)` into `A [(B^T Bh) o (C^T Ch)]`,
+    an `(n, r) @ (r, r*)` product. The mode-1 normal equation is then
+
+        `Ah = MTTKRP @ pinv[(Bh^T Bh) o (Ch^T Ch)]`
+
+    and the same holds by symmetry for modes 2 and 3. ALS is monotone in the
+    Frobenius fit, so **warm-starting from the `normsort` column subset makes
+    the oracle provably no worse than the cheap selector at the same `r*`** --
+    which is exactly the property that licenses reading it as an upper bound.
+
+    `ridge` is a relative Tikhonov floor on the `(r*, r*)` solve; ALS normal
+    matrices go singular when two approximant columns collide, and an unguarded
+    `linalg.solve` then returns garbage rather than raising. **It is also the
+    accuracy floor of the whole oracle** -- the null control `N1` recovers an
+    exactly-rank-`k` tensor only to about `ridge`, and setting it to a fixed
+    `1e-10` capped `N1` at `1.7e-10` no matter how many sweeps were spent. It is
+    therefore scaled to the working precision rather than fixed.
+    """
+    import torch
+
+    A, B, C = factors
+    if ridge is None:
+        ridge = 10.0 * float(torch.finfo(A.dtype).eps)
+    r = A.shape[1]
+    if r <= r_star:
+        return factors
+    F = [f.contiguous() for f in (warm[0], warm[1], warm[2])]
+    T = [A, B, C]
+    eye = torch.eye(r_star, device=A.device, dtype=A.dtype)
+    for _ in range(max(int(iters), 0)):
+        for m in range(3):
+            o1, o2 = (m + 1) % 3, (m + 2) % 3
+            g1 = _kr_gram(T[o1], F[o1])            # (r, r*)
+            g2 = _kr_gram(T[o2], F[o2])            # (r, r*)
+            mttkrp = T[m] @ (g1 * g2)              # (n, r*)
+            h1 = _kr_gram(F[o1], F[o1])            # (r*, r*)
+            h2 = _kr_gram(F[o2], F[o2])
+            H = h1 * h2
+            lam = ridge * float(torch.diagonal(H).abs().max().clamp_min(1e-300))
+            F[m] = torch.linalg.solve(H + lam * eye, mttkrp.transpose(0, 1)).transpose(0, 1)
+    return tuple(F)
+
+
+def _cp_fit_residual(target, approx, *, chunk: int = 4096):
+    """Relative Frobenius fit `||T - That||_F / ||T||_F`, computed in CP algebra.
+
+    `||T||^2 = 1^T [(A^T A) o (B^T B) o (C^T C)] 1` needs an `(r, r)` object,
+    which is `4.3 GB` at `r = 32n` in f32, so the outer index is chunked. The
+    cross term and `||That||^2` are `(r, r*)` and `(r*, r*)` and are not.
+
+    This is the honest tensor-level diagnostic: a small flow drift with a large
+    fit residual would mean the flow is insensitive, not that the oracle worked.
+    """
+    import torch
+
+    A, B, C = target
+    Ah, Bh, Ch = approx
+    cross = float((_kr_gram(A, Ah) * _kr_gram(B, Bh) * _kr_gram(C, Ch)).sum())
+    n_hat = float((_kr_gram(Ah, Ah) * _kr_gram(Bh, Bh) * _kr_gram(Ch, Ch)).sum())
+    r = A.shape[1]
+    n_t = 0.0
+    for s in range(0, r, chunk):
+        e = min(s + chunk, r)
+        blk = (_kr_gram(A[:, s:e], A) * _kr_gram(B[:, s:e], B)
+               * _kr_gram(C[:, s:e], C))
+        n_t += float(blk.sum())
+    sq = max(n_t - 2.0 * cross + n_hat, 0.0)
+    return (sq ** 0.5) / max(n_t ** 0.5, 1e-300)
+
+
+def _split_diagonal(FT):
+    """`FT = FT_diag (+) R` where `FT_diag` carries EXACTLY the repeated slices.
+
+    `FT_diag = from_dstensor(get_repeated())` is rank `n` by construction and its
+    three factors are `(D, I, I)` -- the `D[:, j] (x) e_j (x) e_j` neuron-diagonal
+    blocks the P-B-COST review identified. `R` is `FT` minus that, i.e. the
+    all-distinct off-diagonal block, carried at rank `r + n` with the sign on the
+    first mode only. `--oracle-nulltest` checks the identity and that `R`'s own
+    repeated slices vanish.
+    """
+    import torch
+    from mlp_kprop.factor_k3 import FactoredTensor
+
+    diag = FactoredTensor.from_dstensor(FT.get_repeated())
+    dA, dB, dC = diag._factors
+    A, B, C = FT._factors
+    rem = (torch.cat([A, -dA], dim=1),
+           torch.cat([B, dB], dim=1),
+           torch.cat([C, dC], dim=1))
+    return diag, rem
+
+
+def cap_factored(FT, r_star: int, *, mode: str, seed: int, score: str = "frob",
+                 als_iters: int = 8):
+    """Return a degree-3 `FactoredTensor` of rank <= `r_star`, priced in place.
+
+    The `oracle*` modes are the exception to "priced in place": their cost is
+    deliberately ignored (they are upper bounds on achievable accuracy, never
+    candidate operating points), and the `rankcap` line they bill is meaningless.
+    """
     import torch
     from mlp_kprop.factor_k3 import FactoredTensor
     from mlp_kprop.flop_utils import flop_name
@@ -162,10 +287,33 @@ def cap_factored(FT, r_star: int, *, mode: str, seed: int, score: str = "frob"):
             # version billed one and threw it away.
             from mlp_kprop.factor_k3 import FactoredTensor as _FT
             return _FT.from_dstensor(FT.get_repeated())
+        if mode == "oracle_offdiag":
+            # ORACLE-2: keep ALL n neuron-diagonal blocks EXACTLY, and oracle-
+            # truncate ONLY the all-distinct off-diagonal remainder to `r_star`.
+            # Output rank is `n + r_star`, not `r_star` -- the diagonal half is
+            # never spent against the budget of the truncation.
+            diag, rem = _split_diagonal(FT)
+            if rem[0].shape[1] <= r_star:
+                new_rem = rem
+            else:
+                wr = _column_weight(rem, score)
+                keep_r = torch.topk(wr, r_star, sorted=False).indices
+                warm_r = tuple(F.index_select(1, keep_r) for F in rem)
+                new_rem = _cp_als_truncate(rem, r_star, iters=als_iters, warm=warm_r)
+            new = tuple(torch.cat([d, t], dim=1)
+                        for d, t in zip(diag._factors, new_rem))
+            return FactoredTensor(n=FT.n, d=FT.d, factors=new,
+                                  device=FT.device, dtype=FT.dtype)
         w = _column_weight(factors, score)
         if mode == "normsort":
             keep = torch.topk(w, r_star, sorted=False).indices
             new = tuple(F.index_select(1, keep) for F in factors)
+        elif mode == "oracle":
+            # ORACLE-1: the best rank-`r_star` CP approximation reachable, warm
+            # started from `normsort` so it is provably no worse than it.
+            keep = torch.topk(w, r_star, sorted=False).indices
+            warm = tuple(F.index_select(1, keep) for F in factors)
+            new = _cp_als_truncate(factors, r_star, iters=als_iters, warm=warm)
         elif mode == "sketch":
             k = r_star // 2
             slots = r_star - k
@@ -197,7 +345,7 @@ def cap_factored(FT, r_star: int, *, mode: str, seed: int, score: str = "frob"):
 
 def run_kprop_capped(mlp, K_in, *, k_max=3, factor=True, use_avg_metric=True,
                      up_to_layer=None, output_d_max=1, cap="none", r_star=0,
-                     seed=0, score="frob", trace=None):
+                     seed=0, score="frob", als_iters=8, trace=None):
     """`mlp_kprop(output_all=True)` with a cap applied to `K[3]` after each layer.
 
     Mirrors `kprop_harmonic.mlp_kprop` rev 93d091a4 exactly; `--selftest` proves it.
@@ -233,7 +381,7 @@ def run_kprop_capped(mlp, K_in, *, k_max=3, factor=True, use_avg_metric=True,
                 trace.append({"layer": l, "rank_out": int(K[3]._factors[0].shape[1])})
             if cap != "none" and 3 in K and hasattr(K[3], "_factors"):
                 K[3] = cap_factored(K[3], r_star, mode=cap, seed=seed + l,
-                                    score=score)
+                                    score=score, als_iters=als_iters)
                 if trace is not None:
                     trace[-1]["rank_capped"] = int(K[3]._factors[0].shape[1])
             out[f"act{l}"] = clone_tower(K, d_max=output_d_max)
@@ -243,7 +391,7 @@ def run_kprop_capped(mlp, K_in, *, k_max=3, factor=True, use_avg_metric=True,
 
 
 def predict(weights, *, cap="none", r_star=0, seed=0, score="frob", dtype=None,
-            device="cuda", count_flops=False, trace=None):
+            device="cuda", count_flops=False, als_iters=8, trace=None):
     """`(depth, width)` predicted post-ReLU means, plus cost if asked."""
     import torch
     from mlp_kprop.flop_utils import NamedFlopCounter
@@ -255,7 +403,8 @@ def predict(weights, *, cap="none", r_star=0, seed=0, score="frob", dtype=None,
             2: torch.eye(width, device=device, dtype=dtype)}
     kw = dict(k_max=3, factor=True, use_avg_metric=True,
               up_to_layer=f"act{depth - 1}", output_d_max=1,
-              cap=cap, r_star=r_star, seed=seed, score=score, trace=trace)
+              cap=cap, r_star=r_star, seed=seed, score=score,
+              als_iters=als_iters, trace=trace)
 
     flops = None
     if count_flops:
@@ -380,6 +529,120 @@ def cmd_nulltest(a) -> int:
     return 0 if ok else 1
 
 
+def cmd_oracle_null(a) -> int:
+    """Three BINDING null controls on the oracle modes, at small `n` so the
+    `n^3` tensor can be materialised and the algebra checked against it directly.
+
+    The P-B-COST review's lesson was that both of that entry's "verifications"
+    were satisfied by construction and could not have caught a bug. These are
+    chosen so that each ONE fails loudly under a specific defect:
+
+    `N1  exact recovery.`  A genuinely rank-`k` tensor, padded with `pad` extra
+      EXACTLY-ZERO columns so the `r <= r_star` short circuit cannot fire, must
+      be recovered by the rank-`k` oracle to floating-point exactness. A
+      transposed MTTKRP, a mis-paired Hadamard, or a wrong normal equation all
+      fail here; the warm start alone does NOT pass it, because the padded
+      column set makes `normsort`'s pick exact only if the selection is right AND
+      the solve is a no-op.
+
+    `N2  monotone improvement.`  On a tensor with NO exact rank-`r*` form, the
+      oracle's relative fit must be `<=` the `normsort` warm start's own fit at
+      the same `r*`. ALS is monotone, so a violation means the solve is making
+      the fit worse -- the single most likely symptom of a sign or ridge bug, and
+      the property that licenses reading the oracle as an upper bound at all.
+
+    `N3  the diagonal split is exact.`  `FT = FT_diag (+) R` must reproduce
+      `FT.to_tensor()` to floating-point exactness, and `R`'s own repeated
+      slices -- `(3,)` and `(2, 1)` -- must be zero. If either fails, ORACLE-2 is
+      not "diagonals kept exactly, off-diagonal truncated" but something else,
+      and its whole reading collapses.
+    """
+    import torch
+    from mlp_kprop.factor_k3 import FactoredTensor
+
+    n = a.width if a.width <= 128 else 64
+    # `torch.device("cuda") != torch.device("cuda:0")`, and upstream's DSTensor
+    # asserts equality against the slices' own device. Resolve the INDEX here.
+    dev, dt = torch.zeros(1, device=a.device).device, torch.float64
+    g = torch.Generator(device="cpu").manual_seed(20260828)
+
+    def rnd(*shape):
+        return torch.randn(shape, generator=g, dtype=dt).to(dev)
+
+    def rel(x, y):
+        return float(torch.linalg.vector_norm(x - y)) / max(
+            float(torch.linalg.vector_norm(y)), 1e-300)
+
+    print(f"  oracle null controls at n={n}, float64, device={dev}, "
+          f"als_iters={a.als_iters}\n")
+    rows = {}
+
+    # ---- N1: exact recovery of a genuinely rank-k tensor -------------------
+    k, pad = 24, 11
+    base = tuple(rnd(n, k) for _ in range(3))
+    zeros = torch.zeros((n, pad), device=dev, dtype=dt)
+    padded = tuple(torch.cat([F, zeros], dim=1) for F in base)
+    ref = FactoredTensor(n=n, d=3, factors=base, device=dev, dtype=dt)
+    got = cap_factored(FactoredTensor(n=n, d=3, factors=padded, device=dev, dtype=dt),
+                       k, mode="oracle", seed=0,
+                       als_iters=max(a.als_iters, 60))
+    n1 = rel(got.to_tensor(), ref.to_tensor())
+    n1_rank = int(got._factors[0].shape[1])
+    rows["N1_exact_recovery"] = {"rel": n1, "rank_out": n1_rank, "k": k,
+                                 "pad": pad, "als_iters": max(a.als_iters, 60)}
+    print(f"    N1  rank-{k} padded to {k + pad}, oracle back to {k}: "
+          f"rel {n1:.3e}   rank_out {n1_rank}")
+
+    # ---- N2: the oracle never loses to its own warm start -------------------
+    r_full, r_star = 96, 32
+    tgt = tuple(rnd(n, r_full) for _ in range(3))
+    w = _column_weight(tgt, "frob")
+    keep = torch.topk(w, r_star, sorted=False).indices
+    warm = tuple(F.index_select(1, keep) for F in tgt)
+    fit_warm = _cp_fit_residual(tgt, warm)
+    orc = _cp_als_truncate(tgt, r_star, iters=a.als_iters, warm=warm)
+    fit_orc = _cp_fit_residual(tgt, orc)
+    n2_ok = fit_orc <= fit_warm * (1.0 + 1e-9)
+    rows["N2_monotone"] = {"fit_normsort": fit_warm, "fit_oracle": fit_orc,
+                           "improved_by": fit_warm / max(fit_orc, 1e-300),
+                           "pass": bool(n2_ok)}
+    print(f"    N2  rank {r_full} -> {r_star}: normsort fit {fit_warm:.4f}, "
+          f"oracle fit {fit_orc:.4f}  ({fit_warm / max(fit_orc, 1e-300):.2f}x "
+          f"better)   {'PASS' if n2_ok else 'FAIL'}")
+
+    # ---- N3: the diagonal / off-diagonal split is exact ---------------------
+    FT = FactoredTensor(n=n, d=3, factors=tuple(rnd(n, 40) for _ in range(3)),
+                        device=dev, dtype=dt)
+    diag, rem = _split_diagonal(FT)
+    recon = FactoredTensor(
+        n=n, d=3,
+        factors=tuple(torch.cat([d_, r_], dim=1) for d_, r_ in zip(diag._factors, rem)),
+        device=dev, dtype=dt)
+    n3_id = rel(recon.to_tensor(), FT.to_tensor())
+    remFT = FactoredTensor(n=n, d=3, factors=rem, device=dev, dtype=dt)
+    scale3 = max(float(torch.linalg.vector_norm(FT.get_dslice((3,)))), 1e-300)
+    scale21 = max(float(torch.linalg.vector_norm(FT.get_dslice((2, 1)))), 1e-300)
+    n3_r3 = float(torch.linalg.vector_norm(remFT.get_dslice((3,)))) / scale3
+    n3_r21 = float(torch.linalg.vector_norm(remFT.get_dslice((2, 1)))) / scale21
+    rows["N3_split"] = {"rel_identity": n3_id, "rem_dslice_3": n3_r3,
+                        "rem_dslice_21": n3_r21,
+                        "diag_rank": int(diag._factors[0].shape[1])}
+    print(f"    N3  (diag (+) rem) vs FT: rel {n3_id:.3e}   "
+          f"rem dslice(3,) {n3_r3:.3e}   rem dslice(2,1) {n3_r21:.3e}   "
+          f"diag rank {int(diag._factors[0].shape[1])} (= n)")
+
+    worst = max(n1, n3_id, n3_r3, n3_r21)
+    ok = (worst < a.tol) and n2_ok
+    print(f"\n  worst relative error {worst:.3e}   tol {a.tol:.1e}   "
+          f"N2 {'PASS' if n2_ok else 'FAIL'}   -> {'PASS' if ok else 'FAIL'}")
+    if a.out:
+        bridge._dump(a.out, {"check": "binding null controls on the ORACLE modes",
+                             "width": n, "dtype": "f64",
+                             "als_iters": a.als_iters, "rows": rows,
+                             "worst": worst, "tol": a.tol, "pass": bool(ok)})
+    return 0 if ok else 1
+
+
 def cmd_trace(a) -> int:
     """The rank trajectory, uncapped. Answers 'where does 15n come from?'"""
     import torch
@@ -431,7 +694,8 @@ def cmd_cost(a) -> int:
         t0 = time.perf_counter()
         means, flops = predict(w, cap=mode, r_star=r_star, seed=a.seeds[0],
                                score=score, dtype=dtype, device=a.device,
-                               count_flops=True, trace=trace)
+                               count_flops=True, als_iters=a.als_iters,
+                               trace=trace)
         el = time.perf_counter() - t0
         peak = (torch.cuda.max_memory_allocated() / 2 ** 30) if a.device == "cuda" else float("nan")
         total = sum(v for k, v in flops.items())
@@ -495,7 +759,8 @@ def cmd_drift(a) -> int:
             score = parts[2] if len(parts) > 2 else "frob"
             r_star = int(eval(rs, {"n": a.width}))  # noqa: S307
             p, _f = predict(w, cap=mode, r_star=r_star, seed=seed, score=score,
-                            dtype=dtype, device=a.device)
+                            dtype=dtype, device=a.device,
+                            als_iters=a.als_iters)
             drift = float(((p[-1] - base[-1]) ** 2).mean())
             lo = max(abs(mse_full ** 0.5 - drift ** 0.5), 0.0) ** 2
             hi = (mse_full ** 0.5 + drift ** 0.5) ** 2
@@ -530,6 +795,10 @@ def main() -> int:
     ap.add_argument("--width", type=int, default=WIDTH)
     ap.add_argument("--depth", type=int, default=DEPTH)
     ap.add_argument("--dtype", choices=["f32", "f64"], default="f32")
+    ap.add_argument("--als-iters", type=int, default=8,
+                    help="ALS sweeps for the oracle* modes (cost is ignored; "
+                         "more sweeps only tighten the upper bound)")
+    ap.add_argument("--oracle-nulltest", action="store_true")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--seeds", type=int, nargs="*", default=[1_000_201],
                     help="UNREGISTERED probe seeds. This command measures no "
@@ -558,6 +827,8 @@ def main() -> int:
         rc |= cmd_selftest(a)
     if a.nulltest:
         rc |= cmd_nulltest(a)
+    if a.oracle_nulltest:
+        rc |= cmd_oracle_null(a)
     if a.trace:
         rc |= cmd_trace(a)
     if a.cost:

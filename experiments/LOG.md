@@ -18182,3 +18182,266 @@ result; its only authorised consequence is opening or closing a research lane.
 
 **Samuel's prediction is owed and has NOT been taken.** It is recorded here as
 outstanding *before* the measurement, so the gate cannot be moved by the result.
+
+---
+
+# 2026-08-28 — CONTRACT (Rule 1): P-B-ORACLE-2 and -3 — is the kappa_3 information compressible when the compression RESPECTS its structure?
+
+*Samuel's Contract 4 (strategy session, 2026-08-27/28) accepts P-B-COST in full and
+adds two structure-aware oracles alongside the already-committed P-B-ORACLE. This
+entry pre-registers those two, records the strategist's predictions verbatim
+**before any data exists for -2**, and reports that **-3 is already measured** and
+therefore is a postdiction, not a prediction. It also corrects one arithmetic claim
+in Contract 4 section 1.*
+
+## Question
+
+P-B-ORACLE (committed, HEAD `cbfe67f`) asks whether an oracle rank-`n` truncation
+in the CURRENT basis rescues the lane. The Skeptic's structural finding says that
+question is loaded: `n` of the `2n` columns added per layer are
+`D[:, j] (x) e_j (x) e_j` neuron-diagonals, so *any* rank-`n` cap in that basis is
+partly coordinate pruning. The two questions that are NOT loaded:
+
+- **ORACLE-2** — if the `n` neuron-diagonal blocks are kept **exactly** and only the
+  all-distinct off-diagonal remainder is oracle-truncated to rank `n`, does the
+  information survive? Output rank `2n`.
+- **ORACLE-3** — how much of K3's `~100x` win over K2 is per-neuron skewness alone,
+  i.e. the diagonals with the off-diagonal **dropped entirely**? Output rank `n`.
+
+## Evidence
+
+- **CONFIRMED** — uncapped factored K3 reaches true final-layer MSE `4.0047e-08`
+  (P-A, 24 DESIGN mints) and `3.9249e-08` (P-A-CONFIRM, 100 organiser networks),
+  agreeing to `1.99%`. The anchor used below is `4.0047e-08`.
+- **CONFIRMED** — measured drift of every cap tried, mean over probe networks
+  `1000201-203` (`experiments/2026-08-27_pb_rank/drift*.json`):
+  `normsort:n//32` `4.016e-6`; `normsort:n` `2.724e-6`; `normsort:n:d21` `2.510e-6`;
+  **`dsproj:n` `8.832e-7`**; `normsort:2*n` `1.734e-6`; `normsort:4*n` `8.227e-7`;
+  `normsort:8*n` `1.651e-7`; `normsort:16*n` `1.287e-8`; `normsort:31*n` and
+  `32*n` exactly `0.000e+00`.
+- **CONFIRMED** — measured cost of each resulting rank, upstream's runtime counter
+  (`cost_*.json`): rank `n` `0.1597 B`, rank `2n` **`0.2477 B`**, rank `4n`
+  `0.4121 B`, rank `8n` `0.7055 B`, rank `16n` `1.1515 B`, uncapped (`32n`)
+  `1.4796 B`. `dsproj:n` is `0.2977 B` — it lands at rank `n` but pays
+  `from_dstensor` every layer.
+- **CONFIRMED, and it is why ORACLE-2 is the decision-relevant one of the three** —
+  rank `2n` costs `0.2477 B`. The live leader Puffi sits at multiplier `0.2698`,
+  i.e. `~0.2698 B`. **ORACLE-2's operating rank is already priced in the leader's
+  own cost region**, so unlike every cell in P-B-COST its accuracy is the only
+  open variable, not its price.
+- **CONFIRMED** — the diagonal/off-diagonal split is exact:
+  `FT = from_dstensor(get_repeated()) (+) R` reproduces `FT.to_tensor()` to
+  `1.202e-16` relative and `R`'s own `(3,)` and `(2, 1)` slices vanish to
+  `~1.1e-16` (`--oracle-nulltest` control N3, artifact
+  `experiments/2026-08-28_pb_oracle/oracle_nulltest.json`).
+- **INFERRED** — the flow consumes `kappa_3` into the scored mean only through its
+  `(3,)` and `(2, 1)` diagonal slices (`factor_k3.py:173-179`, read, not measured).
+  This is the mechanism behind ORACLE-3 and behind the oracle's stated limitation.
+- **SPECULATIVE** — that the off-diagonal remainder is low-rank-ish. This is the
+  strategist's mechanism for ORACLE-2 and it is exactly what the slice tests.
+
+## Intervention
+
+Two new cap modes in `local_sim/p2_pb_rank.py`, both **cost-ignored oracles that
+must never be quoted as operating points**:
+
+- `oracle:r*` — best rank-`r*` CP approximation of `K[3]` by ALS on the factored
+  form. Nothing of size `n^3` is formed: the mode-`m` MTTKRP is computed via the
+  Khatri-Rao identity `(C (*) B)^T (Ch (*) Bh) = (C^T Ch) o (B^T Bh)`, an
+  `(n, r) @ (r, r*)` product. **Warm-started from the `normsort` column subset**,
+  and ALS is monotone in Frobenius fit, so the oracle is provably no worse than the
+  cheap selector at the same `r*`.
+- `oracle_offdiag:r*` — split `FT` into the exact rank-`n` neuron-diagonal part and
+  the all-distinct remainder, keep the diagonal part **untouched**, oracle-truncate
+  only the remainder to rank `r*`. Output rank `n + r*`.
+
+**The load-bearing limitation, stated before the result.** ALS is optimal in the
+**Frobenius** metric on the whole tensor. The flow reads only the two diagonal
+slices. A Frobenius-optimal truncation is therefore **not** guaranteed to be
+drift-optimal, and can in principle be beaten by `dsproj`, which is exactly
+optimal on the slices the flow reads and discards everything else. Consequently
+the quantity gated below is **the minimum drift over the achievable rank-`n`
+objects `{oracle:n, dsproj:n, normsort:n}`**, not `oracle:n` alone. Each is
+achievable, so their minimum is a sound achievability bound; `oracle:n` alone is
+not, and reading it as one would be the same class of error P-B-COST's first
+version made in reading the optimistic end of a bracket.
+
+## Predictions
+
+Mean drift over probe networks `1000201-1000203`, final layer, against uncapped.
+
+**Strategist (Samuel's Contract 4, recorded verbatim, before -2's data exists):**
+
+| slice | strategist's prediction |
+|---|---|
+| ORACLE-1 (`oracle:n`) | `[8e-8, 3.5e-7]`, point `1.5e-7` — "the intermediate zone" |
+| **ORACLE-2** (`oracle_offdiag:n`) | **`< 6e-8`** — "structure-preserving compression works" |
+| ORACLE-3 (`dsproj:n`) | `[1e-7, 1e-6]`; falsifier that "would delight me": `< 5e-8` |
+
+**Builder's, and it disagrees with the strategist on -2:**
+
+1. **ORACLE-1: `[1.5e-7, 8e-7]`, point `4e-7`.** Mechanism: the measured
+   normsort drift curve is flat from `n/32` to `n` and only falls steeply above
+   `4n`, which says the flow-relevant content is spread across the rank, not
+   concentrated. An optimal rank-`n` pick should buy roughly what normsort buys at
+   `4n`–`8n`, i.e. `1.6e-7`–`8.2e-7`.
+2. **ORACLE-2: `[1.2e-7, 5e-7]`, point `2.2e-7`** — a `~4x` improvement on
+   `dsproj:n`'s `8.832e-7`, not the `15x` the strategist expects. Mechanism:
+   `dsproj` keeps the diagonals *exactly* and still drifts `8.83e-7`, so the
+   off-diagonal carries at least that much flow-relevant signal; reaching `6e-8`
+   requires a rank-`n` approximation to capture `~93%` of it in `1/33` of its
+   rank, which needs a very steep off-diagonal spectrum. The reported ALS fit
+   residual is the diagnostic that will say whether that spectrum exists.
+3. **ORACLE-2 beats ORACLE-1** on drift, at `2x` the output rank and `1.55x` the
+   cost. If this fails — if keeping the diagonals exactly does not help — the
+   structural finding does not have the operational consequence Contract 4 assigns
+   it.
+4. The ALS fit residual of `oracle:n` on `K[3]` will be **large** (`> 0.5`
+   relative). A small drift together with a large fit residual would mean the flow
+   is insensitive to most of the tensor, which is a different and more useful
+   finding than compressibility.
+5. `oracle:n` beats `normsort:n` (`2.724e-6`) by construction and by more than
+   `2x` in practice; it does **not** beat `dsproj:n` (`8.832e-7`).
+
+## Gate
+
+Written on the **drift the slice isolates**, not on a total containing it. Adopted
+before any `oracle_offdiag` data exists.
+
+**ORACLE-1** — the decision rule committed at HEAD `cbfe67f` stands unchanged,
+except that the gated quantity is the achievability bound defined above
+(`min` over `{oracle:n, dsproj:n, normsort:n}`) rather than `oracle:n` alone.
+`>= 4.0e-7` closes the lane for good; `< 4.0e-8` reopens it as a selector-pricing
+problem; in between is PROVISIONAL, report the bracket and build nothing.
+
+**ORACLE-2** — on the mean drift of `oracle_offdiag:n` (output rank `2n`):
+
+| outcome | reading |
+|---|---|
+| **`< 6.0e-8`** | **the structure-preserving lane OPENS.** At rank `2n` the price is already measured at `0.2477 B`, so a follow-on slice is authorised to price the real (non-oracle) off-diagonal sketch against that cell and to check the bracket against a label |
+| **`>= 8.832e-7`** (no better than `dsproj:n`, which is cheaper in rank) | the lane closes: keeping the diagonals exactly and paying `2x` the rank buys nothing |
+| in between | **PROVISIONAL.** Report the bracket and the fit residual, take no decision, build nothing. Contract 4's programme item 5 does not start |
+
+**ORACLE-3 — already measured, and this is a POSTDICTION, not a prediction.**
+Contract 4's ORACLE-3 ("diagonal blocks only, drop all off-diagonal") is
+*definitionally* the `dsproj` cell: `from_dstensor(get_repeated())` is the exact
+rank-`n` object whose three factors are `(D, I, I)`. It was measured in P-B-COST
+and committed at `b784b6f`, i.e. **before Contract 4 was written**, on the same
+three probe networks and the same protocol. Mean drift **`8.832e-7`**
+(`9.355e-7`, `7.896e-7`, `9.244e-7`).
+
+- The strategist's `[1e-7, 1e-6]` band **holds**, at the upper end.
+- The `< 5e-8` falsifier — the one that would have implied a near-`O(n^2 L)`
+  "K3-diag" estimator and collapsed the whole cost problem — **did not fire, by a
+  factor of 18**. There is no cheap diagonal-only K3.
+- Because the data pre-dates the prediction, this is recorded as a postdiction and
+  **carries no Rule-1 credit for either party**. No GPU time is spent on it.
+
+## Falsifier
+
+For the slice as a whole: **prediction 3.** If `oracle_offdiag:n` does not beat
+`oracle:n`, then keeping the neuron-diagonals exactly is not the lever the
+structural finding was read to imply, and Contract 4's programme item 5 is
+withdrawn rather than deferred.
+
+## Baseline and controls
+
+Baseline is the **uncapped** run on the identical network, in the identical
+process, as `cmd_drift` already does. Three pre-registered controls, all of which
+must pass before any oracle number is read:
+
+- **N1 / N2 / N3** — `--oracle-nulltest`, already run and **PASS** at tol `1e-12`
+  (`experiments/2026-08-28_pb_oracle/oracle_nulltest.json`): exact recovery of a
+  genuinely rank-`k` tensor padded with zero columns (`3.982e-15`); ALS monotone
+  against its own warm start; the diagonal split exact (`1.202e-16`).
+- **REG** — the full-width regression control. `normsort:n` at `1024 x 16`, f32,
+  seeds `1000201-203` must **reproduce the committed drift values of `b784b6f` to
+  the digit**. This is the check that the oracle edits did not perturb the uncapped
+  path or the existing selector at the real shape and the real dtype. It is
+  pre-registered as **blocking**.
+  *(Why not `--selftest` at full width: it needs two f64 towers at rank `32n` and
+  OOMs on this 32 GiB card today, with the GPU otherwise idle at 1.1 GiB. It is
+  **BIT-IDENTICAL at width 256** — `worst |ref - ours| = 0.000e+00`,
+  `experiments/2026-08-28_pb_oracle/selftest_regression_w256.json` — and REG covers
+  the full shape and the real dtype.)*
+
+## Cost model
+
+**Deliberately none, and that is the point.** Both oracles ignore cost by
+construction. Their output *ranks* — `n` and `2n` — are already priced in
+`cost_ladder.json` / `cost_hirank.json` at `0.1597 B` and `0.2477 B` (upstream's
+runtime counter, **not flopscope 0.12**; any operating point must be re-priced).
+Phase 2 sets `lambda = 0` so `C = F`; no residual claim is made here, because an
+oracle has no deployable residual.
+
+## Statistic, tier, seeds
+
+Relative diagnostic, no ground truth, **no seed block claimed and none required**
+— the same three unregistered probe networks as P-B-COST (`1000201-1000203`,
+width 1024, depth 16, f32). Drift is reported with the same triangle-inequality
+bracket `[|sqrt(MSE_full) - sqrt(drift)|^2, (sqrt(MSE_full) + sqrt(drift))^2]`,
+because drift is not an error increment. Nothing here may be promoted, submitted,
+fitted, or used to move a gate; the only authorised consequence is opening or
+closing a research lane.
+
+## Confounders, scope, what must not change
+
+- The upstream checkout is not edited; the pin (`93d091a4` + the recorded 25-line
+  patch) is asserted at every invocation and would refuse the run.
+- f32 is licensed for research runs only (worst-network delta `0.037%`, and
+  P-B-COST's f64 control reproduced its f32 drift to four significant figures).
+- ALS sweeps are a free parameter. Fixed at **8** for the measurement and recorded;
+  the null control uses 60 and shows the accuracy floor is the ridge, not the
+  sweep count. More sweeps can only tighten the bound, never loosen it, so a
+  reported drift is an upper bound on the oracle's own drift.
+- This slice says **nothing** about an `fnp` port, flopscope pricing, residual,
+  setup, or the `8 GiB` memory limit. None of those is measured here.
+
+## Samuel's prediction — OWED, and recorded as outstanding BEFORE the measurement
+
+Two questions, on ORACLE-1 and ORACLE-2 (ORACLE-3 is already measured and is
+excluded from his prediction for that reason). Recorded here before any data
+exists so the gate cannot be moved by the result.
+
+## Correction to Contract 4 section 1, and it is narrower than "cross-meter"
+
+Contract 4 section 1 derives `c''_3 ~ 2.1` for the leaders from Puffi's `5.9e11`,
+and `c''_3 ~ 11.8` for the shipped repo from `3.25e12`, and concludes the repo is
+`~6x` off its own paper. **Every arithmetic step reproduces here**: `L^2 n^3` at
+`16 x 1024` is `2.7488e11`; `5.93e11 / 2.7488e11 = 2.157`;
+`3.2537e12 / 2.7488e11 = 11.837`; ratio `5.49x`. Puffi's implied `F` also checks
+out: multiplier `0.2698` times `2^41` is `5.933e11`.
+
+But the two constants are **billed by different meters**. `3.2537e12` is
+upstream's own runtime counter; `5.93e11` is flopscope 0.12, the competition's
+currency, and `docs/GOTCHAS.md` records flopscope counterexamples in *both*
+directions. Two things narrow the damage, and both were checked in the source
+rather than assumed:
+
+1. Upstream's counter applies a **symmetry discount** — `flop_utils.slice_factor`
+   returns `prod comb(n+c-1, c) / n^c`, which is `~1/2` for a repeated pair and
+   `~1/6` for a repeated triple — for a kernel its own docstring calls
+   *"theoretical, unimplemented"*. flopscope will not honour a discount for a
+   kernel that does not exist.
+2. **The discount does not touch the dominant lines.** `get_dslice` (47.83%) and
+   `contract_W` (47.52%) are billed at `factor = 1.0`. Only `nonlin_sum`
+   (3.01%) carries it.
+
+So `c''_3 ~ 11.8` is defensible for the 95% that matters, the `5.49x` is probably
+real, and the residual uncertainty is flopscope's own op pricing on those two
+lines — **which is unmeasured**. The consequence is a scope limit, not a
+retraction: **the "6x off its own paper" claim must not enter the write-up until
+one W-EFF operating point is billed by flopscope**, and Contract 4's own item-3
+checkbox (state the dtype the affine cost model was normalised to, and re-bill f32
+under flopscope) is the right place to close it. The structural basis for W-EFF —
+95.35% of the cost in two lines, both with one-hot modes to exploit — is
+meter-independent and is unaffected.
+
+**One refinement to Contract 4 section 1 item 2, in our favour.** Contract 4 says
+half the blocks per layer have two one-hot modes. Read at
+`factor_k3.py:398-408`: in SIMPLE mode (`augment=False`, `budget=2`) the two-leg
+loop runs exactly once, with `legs = [(1, 1, WK_11, 1)]` and
+`fac2 = torch.eye(n) * 3`. **Its middle mode is one-hot too.** So of the `2n`
+columns added per layer, `n` (from `from_dstensor`) have two one-hot modes and the
+other `n` have one. Sparse-aware contraction has purchase on **all** of them, not
+half. This is a source reading, not a measurement, and is recorded as INFERRED.
