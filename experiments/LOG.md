@@ -20502,3 +20502,182 @@ panel.
   multi-day IMPORTANT-then-STRATEGIC effort with its own parity burden, and that
   is recorded here before the result so a passing gate cannot be read as
   "therefore ship something".
+
+---
+
+# 2026-08-28 — RESULT P2-WINDOW: GATE-W FAILS. The late-window lane is dead, and today's honest outcome is a kill with NO SUBMISSION.
+
+**Classification: IMPORTANT.** Contract committed at **`f4461b4`** before any arm
+ran; the panel artifact post-dates it. **No ground truth, no labels, no seed
+block, no vault touch, no `estimator.py` edit, no submission.** Upstream pin
+verified. Artifact:
+`experiments/2026-08-28_window/window_drift_f32_1000401-1000402-1000403-1000404-1000405-1000406.json`.
+
+**Verdict: `GATE-W: FAIL`, `selected_m = None`.** Two preregistered falsifiers
+fired — **F-W1** (no `m` satisfies G1) and **F-W3** (the matched-retained-rank
+control beats the window). Per the contract and `GAME_PLAN.md`'s fallback tree,
+the correct action is to **record the negative, spend no truth block, build no
+candidate, and ship nothing**.
+
+## The panel — six fresh unregistered probes, common random numbers, f32
+
+`D` is the RMS drift of the final-layer prediction from uncapped full factorized
+K3 on the same network. `RMSE_full = sqrt(3.9249e-08) = 1.981136e-04`.
+
+| arm | mean `D` | se | 95% CI | `D / RMSE_full` | `D_max` | **G1** |
+|---|---:|---:|---|---:|---:|:--:|
+| `late:0` (**pure K2**) | `2.0706e-03` | `6.5e-05` | `[1.944e-03, 2.198e-03]` | `10.45` | — | — |
+| `late:2` | `2.0630e-03` | `6.5e-05` | `[1.936e-03, 2.190e-03]` | `10.41` | `6.307e-04` | **False** |
+| `late:4` | `2.0186e-03` | `7.1e-05` | `[1.879e-03, 2.158e-03]` | `10.19` | `5.576e-04` | **False** |
+| `late:6` | `1.9333e-03` | `7.7e-05` | `[1.783e-03, 2.083e-03]` | `9.76` | `3.859e-04` | **False** |
+| `late:8` | `1.8229e-03` | `8.0e-05` | `[1.667e-03, 1.979e-03]` | `9.20` | `2.669e-04` | **False** |
+| `age:4` | `8.4318e-04` | `2.1e-05` | `[8.019e-04, 8.844e-04]` | `4.26` | — | — |
+| `normsort:4096` | `9.3739e-04` | `2.3e-05` | `[8.929e-04, 9.818e-04]` | `4.73` | — | — |
+| **`normsort:8192`** | **`4.3621e-04`** | `1.2e-05` | `[4.123e-04, 4.601e-04]` | **`2.20`** | — | — |
+
+**G1 fails by `3.5x` to `7.6x`** on the upper 95% end, at every window. It is not
+close, and the margin grows with `m` because `D_max` shrinks faster than `D` does.
+
+**G2 passes everywhere — and that is the interesting part.** The window *does*
+beat pure K2, with every paired interval excluding zero:
+
+| arm | paired `D` difference vs `late:0` | 95% CI | fraction of the K2 → full-K3 gap closed |
+|---|---:|---|---:|
+| `late:2` | `-7.649e-06` | `[-1.285e-05, -2.445e-06]` | **`0.37%`** |
+| `late:4` | `-5.200e-05` | `[-7.391e-05, -3.010e-05]` | `2.5%` |
+| `late:6` | `-1.373e-04` | `[-1.836e-04, -9.096e-05]` | `6.6%` |
+| `late:8` | `-2.477e-04` | `[-3.292e-04, -1.663e-04]` | **`12.0%`** |
+
+**G3 fails decisively**, and this is the cleanest kill in the panel:
+
+| window | matched-rank control | paired difference | 95% CI | control is |
+|---|---|---:|---|---:|
+| `late:2` (rank `2n`) | `normsort:4096` (`4n`) | `+1.126e-03` | `[+9.919e-04, +1.259e-03]` | **`2.2x` better** |
+| `late:4` (rank `4n`) | `normsort:8192` (`8n`) | `+1.582e-03` | `[+1.417e-03, +1.748e-03]` | **`4.6x` better** |
+
+*(`G3` is `None` for `m = 6, 8`: the contract froze matched controls only at
+`4096` and `8192`. G1 already fails there, so the gate is decided either way, and
+the missing cells are recorded rather than back-filled after the fact.)*
+
+## The mechanism is REFUTED, and the contract said what that would mean
+
+**H-WIN** claimed the final layer depends on `kappa_3` mainly through structure
+generated in the last few layers. **Running EXACT K3 over the last HALF of the
+tower recovers `12%` of the drift gap between pure K2 and full K3.** Over the
+last two layers it recovers `0.37%`.
+
+The contract wrote the alternative down in advance: *"If drift is flat in `m`,
+the opposite is true and the mechanism is wrong: the third cumulant's
+contribution to the final layer is an accumulated quantity, not a local one, and
+no cheap window exists."* **That is what the data says.** `kappa_3`'s influence on
+the final-layer mean is accumulated across the whole tower, and a checkpoint that
+discards it cannot be repaired by any affordable amount of exact late computation.
+
+The per-layer diagonal-slice drift says the same thing from inside the state: at
+`late:8`, relative drift on the `(2,1)` slice is `0.55` at the first window layer
+and still `0.51` at layer 15 — **eight layers of exact K3 barely erode the error
+the checkpoint injected.** The window does not converge onto the full-K3
+trajectory; it runs parallel to it.
+
+## Predictions scored
+
+| # | prediction | outcome |
+|---|---|---|
+| 1 | `late:0` mean `D` in `1.2e-3 .. 2.5e-3` | **HELD** — `2.0706e-03` |
+| 2 | `D` monotonically decreasing in `m` | **HELD** — strictly, `2.0706 > 2.0630 > 2.0186 > 1.9333 > 1.8229` (e-3) |
+| 3 | `late:4` mean `D` in `3e-4 .. 1.2e-3` | **REFUTED** — `2.0186e-03`, `1.7x` above the top of the band |
+| 4 | some `m` in `{2,4}` satisfies G1 (stated at **~45%**) | **REFUTED** |
+| 5 | `age:4` drifts less than `late:4` and costs more | **HELD** — `2.4x` less drift, `6.3x` more cost |
+| 6 | `normsort:8192` drifts **more** than `late:4` | **REFUTED — and it is the most informative result in the panel.** It drifts `4.6x` **LESS** |
+| 7 | slice drift dominated by `(2,1)` over `(3,)` | **HELD** in every arm — e.g. `late:8`: `0.528` vs `0.216` |
+
+**The low confidence on prediction 4 was earned, not lucky.** The contract
+disclosed the width-96 selftest numbers, noted they were nearly flat in `m`, and
+recorded `~45%` for exactly that reason. They transferred.
+
+## The secondary result, and why it does NOT reopen a closed lane
+
+`normsort:8192` — an ordinary rank cap at `8n` maintained across the *whole*
+tower — is the best arm in the panel at `D = 4.36e-04`, **`4.2x` better than
+`late:8`**. Keeping a low-rank summary of the entire tower's `kappa_3` beats
+keeping the exact `kappa_3` of half of it. That is the window hypothesis
+inverted.
+
+**It reproduces the existing P-B measurement independently.** P-B (2026-08-28)
+recorded `normsort:8n` drift `1.644e-07` in its squared metric; this panel gives
+`D^2 = 1.9028e-07` on different networks through a different code path —
+**agreement to `16%`**.
+
+**This does not reopen the rank-capping lane, and must not be read as doing so.**
+`AGENTS.md`: closed lanes stay closed unless new *external* evidence reopens them.
+This is new *internal* evidence at a cell P-B already priced, and P-B's own
+figures kill it on cost: `normsort:8n` costs `0.7055 B` with a score bracket
+`[3.00e-08, 2.60e-07]` that straddles the uncapped point. This panel's upstream
+counter agrees — `2.3004e+12`, `44x` the pure-K2 arm. **A cheaper mechanism that
+reaches that accuracy remains the WEAK OPEN, PENDING A MECHANISM, exactly as
+recorded on 2026-08-28, and nothing here supplies one.**
+
+## What the brackets can and cannot say
+
+Every arm's triangle bracket has lower end **exactly zero**, because `D` exceeds
+`RMSE_full` everywhere:
+
+| arm | MSE bracket | with the anchor's own CI |
+|---|---|---|
+| `late:0` | `[0, 5.147e-06]` | `[0, 5.159e-06]` |
+| `late:8` | `[0, 4.084e-06]` | `[0, 4.095e-06]` |
+| `age:4` | `[0, 1.084e-06]` | `[0, 1.090e-06]` |
+| `normsort:8192` | `[0, 4.024e-07]` | `[0, 4.057e-07]` |
+
+**So the panel's only decisive content is its failures**, which is precisely why
+G1 was written one-sided and why drift was never allowed to be an error
+increment. No arm here is shown to be *good*; four arms are shown not to be able
+to clear the bar. That asymmetry was preregistered and it is what the result
+respects.
+
+## Cost, in both meters, never conflated
+
+Upstream torch counter, per MLP: `late:0` `5.18e10`, `late:2` `1.30e11`,
+`late:4` `3.62e11`, `late:6` `7.50e11`, `late:8` `1.29e12`, `age:4` `2.30e12`,
+`normsort:4096` `1.31e12`, `normsort:8192` `2.30e12`, `full` `5.01e12`.
+
+flopscope 0.12 prices for the window arms come from P2-WEFF's measured ledger and
+are unchanged: `0.0743 B` at `m=2`, `0.0929 B` at `m=3` (both floor-pinned, at a
+`7.1%` margin), `0.1203 B` at `m=4`. **They are now moot: the accuracy side
+failed, so the cheap price buys nothing.** Recording it plainly, because the cost
+table was the previous slice's deliverable and it would be easy to keep quoting a
+number whose purpose has evaporated.
+
+**Residual, setup and memory remain unmeasured for every arm here**, and no `fnp`
+port of the K3 recurrence exists. None of that was reached, because the gate
+failed first.
+
+## Consequence for today
+
+`GAME_PLAN.md`'s fallback tree: *"no late window clears its drift/cost screen →
+record the negative; do not spend truth or ship another calibrated-K2 variant."*
+`docs/CLAUDE_CODE_HANDOFF.md` §3: *"If no window clears the screen, stop today's
+candidate path and record the negative. Do not fall back to arbitrary K3 rank
+capping, another scalar K2 calibration, or public-board tuning."*
+
+**Today's outcome is completion path 2: an evidence-backed kill at the first
+failed gate, fully recorded, with no weak submission made for the sake of the
+date.** No DECIDE block was claimed. `estimator.py` is untouched and remains
+v2.6.1, byte-identical to its archive. The two graded submissions stand as they
+were.
+
+## What survives
+
+- **The W-EFF exact operations and the measured cost table**, which are reusable
+  for any future K3 work and cost nothing to keep.
+- **A sharp mechanistic fact worth more than the lane it killed:** `kappa_3`'s
+  contribution to the final-layer mean is **accumulated, not local**. That kills
+  late-window K3, and it equally kills any future "start the expensive machinery
+  late" design on this state — which is a family, not a single arm.
+- **The rank axis is confirmed as the only place the information survives
+  cheaply-in-rank**, and confirmed *again* as unaffordable in cost. The open
+  question is unchanged and unmoved: is there a compressor whose error is
+  orthogonal to the two diagonal slices the flow actually reads?
+
+**An independent Skeptic on the raw panel is required before this controls
+anything further.**
