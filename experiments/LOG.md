@@ -21960,3 +21960,143 @@ counts are *true*, not that the checks they count are *good* — a suite of 60
 vacuous checks would satisfy it. Section C tests two guards out of the gate's
 sixteen steps: the two whose stated coverage moved. The other fourteen are
 unchanged and untested by this slice.
+
+---
+
+# 2026-08-31 — CONTRACT WP0C+WP0D: certify a CANDIDATE without touching the shipped file, and enforce 8 GiB where it can actually be enforced
+
+**Class:** IMPORTANT (instrument / enforcement). `GAME_PLAN.md` § WP0.3 and
+§ WP0.4. No estimator byte, seed block, gate threshold, residual model, vault,
+protected human file, or submission is touched. No truth is read.
+
+## Question
+
+Two blockers, contracted together because the second is one section of the
+first's report.
+
+**WP0C.** `scripts/preflight.ps1` hardcodes `estimator.py` (steps 4, 12, 13, 15,
+16); only `-Archive` is a parameter. A green 16/16 today certifies **v2.6.1**,
+whatever candidate is being developed — the defect that made gate item 6 of the
+Track-0S submission contract unsatisfiable for v2.7. Every WP1–WP5 research
+candidate will need pricing and deployment evidence *before* it is promoted.
+Can a candidate be certified **without modifying the shipped file and without
+weakening the ship-file gate**?
+
+**WP0D.** The `8,192 MB` limit has never been enforced anywhere in this
+repository. `docs/CURRENT_STATE.md` records it as *"the one constraint this host
+cannot test at all"* and simultaneously *"the one with the weakest provenance"*.
+Windows has no `resource` module, so `whestbench/subprocess_worker.py`'s
+`setrlimit(RLIMIT_AS, …)` is skipped and `--runner local` is advisory by design.
+Is a real Linux enforcement path reachable from this machine?
+
+## Evidence
+
+- **CONFIRMED** — `scripts/preflight.ps1` names `estimator.py` literally at
+  lines 299, 309, 469 (pre-WP0A numbering); `-Archive` selects only what step 5
+  compares *against*.
+- **CONFIRMED** — the pieces already exist and are already candidate-parameterised:
+  `local_sim/lifecycle_eval.py::evaluate(candidate, seeds, truth_final, spec=…)`
+  returns per-MLP `EvidenceRow`s carrying `flops_used`, `n_ops`,
+  `residual_wall_time_s`, `wall_time_s` and all five failure flags;
+  `local_sim/edge_cases.py::load(path)` takes a path; `p2_flop_anchor.py` has
+  `--candidate`; `p2_weff.py::MaterializationCounter` instruments
+  `FlopscopeArray.__bool__/__float__/__int__/__index__`;
+  `test_deployment_envelope.py` has `peak_memory_bytes()` and
+  `measure_live_shape_memory()`. **Nothing composes them for an arbitrary file.**
+- **CONFIRMED, measured this session** — WSL2 is installed and usable:
+  `Ubuntu`, kernel `6.6.87.2-microsoft-standard-WSL2`, Python `3.12.3`,
+  `resource.RLIMIT_AS` present and readable `(-1, -1)`, the repository visible at
+  `/mnt/c/Users/samsu/Documents/arc-whest`, 30 GiB RAM, 16 cores, `uv` on PATH.
+  **So WP0D's "if no Linux execution environment exists" branch does not apply
+  here, and a real enforcement run is owed rather than a deferral.**
+- **CONFIRMED** — `whestbench/subprocess_worker.py` calls `setrlimit`, catches
+  `(ImportError, ValueError, OSError, AttributeError)`, warns to stderr and
+  **runs on uncapped**. So "no exception" is not evidence the cap applied; the
+  applied soft limit must be read back.
+
+## Hypothesis and mechanism
+
+Certification is not one property; it is a battery, and every element of it
+already takes a candidate path or can be made to. The reason no candidate can be
+certified today is **composition**, not capability. A separate read-only command
+that composes them cannot weaken the ship-file gate, because it adds no path
+through `preflight.ps1` and writes nothing the gate reads.
+
+For memory: a limit that is never applied is a number in a document. Applying
+`RLIMIT_AS` in a Linux child and **reading back the soft limit** turns it into a
+measurement — and a deliberate over-allocation in the same child turns *that*
+into a test that can fail.
+
+## Intervention
+
+1. `local_sim/certify_candidate.py` (new) — `--candidate <path>`, **required, no
+   default**. A defaulted path would let a certification of the shipped file be
+   mistaken for a certification of a candidate, which is the exact confusion this
+   slice exists to remove. Sections:
+
+   | § | what | why it can fail |
+   |---|---|---|
+   | 1 | official `whest validate --estimator <cand>` | the grader contract |
+   | 2 | package/config identity vs the installed stack | a measurement under the wrong packages is a different measurement |
+   | 3 | shape matrix incl. `1024x16` FIRST, and the **exact layer-1 closed form** `E[ReLU(w·x)] = ‖w‖/√(2π)` | catches a wrong first layer that is finite and plausible |
+   | 4 | determinism: repeat in-process, and a **fresh worker** (child process) | seed coupling, module-level state |
+   | 5 | grader arrays are **not mutated** | hard rule 1 |
+   | 6 | flopscope operation totals, `n_ops`, and the **multiplier** | the cost half of the score |
+   | 7 | residual and per-MLP wall telemetry against the `0.4 s` / `120 s` limits | the cliff |
+   | 8 | **zero scalar materializations** during `predict` | forum-reported; counted, not asserted |
+   | 9 | peak and single-array memory accounting | the `4 GiB` array cap and the `8 GiB` total |
+   | 10 | clean official `--runner subprocess` smoke, zero failures | deployment authority |
+   | 11 | **deliberate mutations** — a battery that cannot fail is not a battery | see below |
+
+2. `local_sim/linux_memory_gate.py` (new) — the real 8-GiB enforcement. Detects
+   a Linux execution environment (native or WSL), runs the candidate's `predict`
+   at `1024x16` in a child that has applied `setrlimit(RLIMIT_AS, 8192 MiB)`,
+   **reads the applied soft limit back**, and reports peak RSS. Includes a
+   **negative control**: a child under the same cap that deliberately requests
+   more than 8 GiB must die. Without it, "passed" is indistinguishable from
+   "the cap was never applied".
+
+3. `local_sim/test_certify_candidate.py` (new) — mutations proving each section
+   can fail, run against *synthetic* candidate files in a temp directory, never
+   against `estimator.py`.
+
+## Numbered predictions, before the code exists
+
+| # | prediction |
+|---|---|
+| **C1** | The shipped v2.6.1, certified through the new command, passes every section, and its counted FLOPs at `1024x16` reproduce the anchor `137,600,326,656` exactly (the number `p2_flop_anchor --gate` already agrees with the official runner on). |
+| **C2** | Its multiplier is pinned at the `0.1` floor, i.e. `C/B = 0.0625734 < 0.1`. |
+| **C3** | Scalar materializations during `predict` are **0** for v2.6.1. This is a prediction, not a restatement: nothing in this repository has ever counted them for the shipped file. |
+| **C4** | Every deliberate mutation is caught **by its named section**, not merely by a non-zero exit. A mutation that reddens the wrong section is a HARNESS FAILURE. |
+| **C5** | Certification writes nothing under the repository except its own evidence file, and `estimator.py` is byte-identical before and after — proven by sha256 taken **after** the run, not before. |
+| **C6** | The Linux child reports the applied `RLIMIT_AS` soft limit **equal to** `8192 * 1024 * 1024`, not merely "no exception". |
+| **C7** | The negative control — requesting more than 8 GiB under the same cap — **dies**, with `MemoryError` or a non-zero exit. If it survives, the cap is not applied and every WP0D pass is withdrawn. |
+| **C8** | v2.6.1's `predict` at `1024x16` completes under the real 8-GiB cap, and its peak RSS is recorded. **I do not predict the value**; the repository's Windows accounting says at most `440.8 MB` working set / `918.0 MB` commit, and explicitly says the true `RLIMIT_AS` figure is LARGER by an unmeasured amount. |
+| **C9** | Default preflight stays GREEN 12/16 and portability 99/99. The ship-file gate is unchanged: `preflight.ps1` still certifies `estimator.py` and nothing about that path is relaxed. |
+
+## Falsifiers
+
+- If any mutation is not caught by its named section, that section is decorative
+  and must be removed or repaired before the battery is reported as coverage.
+- If the negative control (C7) survives, **every WP0D memory claim is withdrawn**
+  and the constraint returns to "accounting, never a test passed".
+- If certification requires editing `estimator.py`, `preflight.ps1`'s gate, or
+  any threshold, the design is wrong and must be redone as a parameter with a
+  shipped-file default instead.
+
+## Scope — what must not change
+
+`preflight.ps1`'s existing sixteen steps keep their meaning and their subject.
+No gate threshold, seed block, ledger byte, vault state, residual model or
+estimator byte moves. Certification reads no truth: where the lifecycle
+evaluator needs a reference it is given **zeros**, and the resulting `mse` column
+is labelled *not a certification quantity* rather than quietly reported as
+accuracy.
+
+## Verification plan
+
+`certify_candidate.py --candidate estimator.py` green (v2.6.1 as the known-good
+subject) · `test_certify_candidate.py` green including every mutation ·
+`linux_memory_gate.py` run for real in WSL with its negative control · default
+`preflight.ps1` GREEN 12/16 · `verify_portability.py` 99/99 · `git diff --check`
+clean · a fresh independent Skeptic.
