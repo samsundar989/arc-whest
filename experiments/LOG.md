@@ -21197,3 +21197,114 @@ z-intervals mislabelled as `t`.
 confirmation; residual against the `0.4 s` cliff; the `120 s` total wall cap; the
 `8,192 MB` limit Windows cannot enforce; and the absent `fnp` port of the K3
 recurrence.
+
+---
+
+# 2026-08-31 — ROUTINE multi-agent Phase-2 frontier and evaluator audit
+
+**Class:** ROUTINE. Read-only competition/repository/literature research plus
+continuity-document repair. No estimator, instrument implementation, seed-ledger
+block, truth block, vault, gate, protected human file, submission, designation, or
+forum post was touched. The historical results above remain append-only.
+
+## Scope and evidence
+
+Three independent exploration lanes audited repository architecture, validation
+authority, and direct-match literature. The Builder separately inspected the live
+AIcrowd challenge, Phase-1 and Phase-2 boards, individual reports, resources,
+insights, and recent discussion threads in Samuel's Chrome session, first at
+`2026-08-31 06:10 UTC` and refreshed after crash recovery at `14:57 UTC`. Manual
+board/report transcriptions with source links are preserved at:
+
+- `experiments/board_snapshots/2026-08-31T0610Z_phase2_frontier_audit_board.md`
+- `experiments/board_snapshots/2026-08-31T1457Z_phase2_frontier_board.md`
+- `experiments/board_snapshots/2026-08-31T1457Z_phase2_frontier_submission_reports.md`
+- `docs/PHASE2_FRONTIER_AUDIT_2026-08-31.md`
+
+The validator lane ran the installed official configuration checks (`73/73`),
+width-1024 mint parity (`20/20`), canonical scorer tests (`98/98`), lifecycle tests
+(`56/56`), the 19-operation FLOP anchor (exact at `137,600,326,656`), and default
+preflight (**GREEN 12/16**). The four full-only stages were not rerun; the last
+stored full transcript remains the 2026-08-27 evidence, not a current pass.
+
+## Knowledge delta
+
+1. **Live position:** v2.7 is rank `53/83` at `1.374e-7` adjusted / `1.374e-6`
+   raw. J2W leads at displayed `5.60e-9` / `2.25e-8`: gaps `24.6x` adjusted and
+   about `61x` raw. The median position displays `1.13e-7` adjusted.
+2. **Telemetry is an envelope, not attribution:** several leaders spend about
+   `5.45e11`–`5.73e11` counted FLOPs, close to 16,384 dense forward rows. Eight
+   antipodal MUB bases match that leading term, but so do Sobol, lattice,
+   orthogonal, and other 16k-point methods. Current leader code is private.
+3. **Wall semantics corrected:** installed WhestBench constructs a fresh budget
+   inside the per-MLP evaluation loop, and the worker enforces the limit around one
+   `predict()` call. Its `120 s` default is per MLP, not a 100-network-suite
+   allowance. Public graded ledgers prove only that at least `104.766 s/MLP` passes;
+   they do not expose the exact server ceiling. The installed `0.4 s` residual
+   cliff remains separate. The final sentence of the preceding historical entry
+   saying “`120 s` total wall cap” is therefore superseded.
+4. **Forum deployment invariant:** scalar materialisation/synchronisation inside
+   `predict` can consume residual catastrophically even with unchanged FLOPs.
+   Future candidates require zero `bool`/`float`/`int` array materialisations.
+5. **Dataset tag drift:** `v2-phase2` moved from `ce926b7…` to `6a416f…`. A
+   read-only comparison found all 70 source `data/*.parquet` LFS objects and sizes
+   identical and the README Git blob unchanged; 153 prepared files were added and
+   top-level metadata gained `prepared_splits`. The exact old/new rows and canonical
+   digest `3cb3e819...` are durable at
+   `experiments/2026-08-31_phase2_tag_drift/source_manifest.tsv`. Existing truth
+   bytes remain valid, but `phase2_checklist.py`'s manifest repair is a future
+   IMPORTANT slice, not a routine edit.
+6. **Validation is strong but not a frontier oracle:** Windows still cannot enforce
+   8 GiB, server billing still adds an unexplained `+2**24`, preflight certifies
+   only the active ship file, no Phase-2 SINGLE_USE/vault exists, and the 24-network
+   `2**26` truth set needs a preregistered power analysis before a frontier-scale
+   decision.
+7. **Architecture decision:** keep full K3 as the accuracy oracle; keep W-EFF and
+   late-window K3 closed. Open two complementary nominee paths: (A) a grader-legal
+   exact-radial structured carrier with a frozen nested carrier objective/panel;
+   (B) corrected-f32 K2 / faithful AUGMENT plus a query-directed adjoint K3
+   response. The latter is a mechanism-backed hypothesis from cumulant/linear-
+   response literature and must pass small-shape exact-oracle and price falsifiers.
+
+## Continuity changes
+
+Updated `AGENTS.md`, `README.md`, `docs/CURRENT_STATE.md`, `docs/GAME_PLAN.md`,
+`docs/GOTCHAS.md`, `docs/RESEARCH_NOTES.md`, `docs/COMPETITION_BRIEF.md`,
+`docs/KERDOCK_MUB_SPEC.md`, `docs/BENCHMARK.md`,
+`docs/PHASE2_FRONTIER_ARCHITECTURE.md`, and `docs/CLAUDE_CODE_HANDOFF.md`; marked the
+2026-08-28 frontier audit superseded; added the dated 2026-08-31 audit and board
+snapshot. No executable research or scoring instrument was changed.
+
+## Next gated work
+
+The first candidate-producing slice is **IMPORTANT and truth-free**: write and
+commit the carrier deployment-legality contract/prediction, then implement a
+stdlib/`fnp` constructor byte-identical to the frozen NumPy reference, with setup,
+materialisation, propagation, billing, and memory evidence. It requires default
+preflight and a fresh independent Skeptic before its result may feed the carrier
+objective. AUGMENT parity and the adjoint-K3 prototype are separate later contracts.
+After truth-free gates fix a power plan and before any labels, a separate IMPORTANT
+instrument slice must register a disjoint Phase-2 DESIGN-replication block and a
+distinct SINGLE_USE DECIDE block. P01 cannot serve as its own replication and no
+Phase-2 decision block currently exists. The required order is DESIGN selection ->
+disjoint DESIGN replication -> synthesis/Skeptic -> total freeze -> SINGLE_USE.
+
+## Recovery verification and independent challenge
+
+After the documentation changes, default `scripts/preflight.ps1` was **GREEN
+12/16**; the four full-only stages were skipped, not passed. Portability was
+**99/99** and `git diff --check` was clean at that checkpoint. The fresh independent
+Skeptic returned **PROVISIONAL**: the board/report envelope, closed-lane decisions,
+and two-path architecture stood, while it required the evidence-block sequence,
+durable tag manifest, wall-source qualification, and Phase-1 table repair recorded
+above. Those are continuity corrections, not evidence that either unmeasured
+candidate works.
+
+After those four corrections, the same independent context re-read the raw tree,
+recomputed the 70-row manifest digest, and returned **ACCEPT**: none of its five
+blockers survived. A final default preflight was **GREEN 12/16** with four explicit
+skips; final portability was **99/99**; `git diff --check` was clean. The first
+portability retry had found `AGENTS.md` 43 bytes over its 20-KiB discovery budget;
+the wall-source sentence was shortened without changing meaning before the final
+pass. No full preflight was run, so the last current full-only evidence remains the
+stored 2026-08-27 transcript.

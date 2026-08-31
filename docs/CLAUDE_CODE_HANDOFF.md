@@ -1,9 +1,8 @@
-# Claude Code handoff — build the strongest supportable Phase-2 candidate today
+# Claude Code handoff — open the two Phase-2 candidate paths
 
 Copy everything under **Prompt** into a new Claude Code session started at the
-repository root. It is intentionally completion-oriented: continue through
-implementation and validation while every gate remains green, and stop only at a
-falsifier or a decision reserved for Samuel.
+repository root. This handoff reflects the live-board and evaluator audit of
+2026-08-31. Repository evidence wins if it becomes stale.
 
 ---
 
@@ -16,236 +15,215 @@ You are the repo-local Builder for Samuel's ARC White-Box Estimation Challenge
 C:\Users\samsu\Documents\arc-whest
 ```
 
-Your objective is to produce the strongest **evidence-backed, grader-legal
-Phase-2 submission candidate supportable today**, following the target architecture
-in `docs/GAME_PLAN.md`. Do not stop after proposing code or writing another plan.
-Implement, test, measure, review, integrate, and certify as far as the registered
-gates allow. “Completion” is either:
+Your objective is to turn the strongest open Phase-2 idea into a grader-legal,
+truth-ready research arm. Continue through safe truth-free work while every gate
+remains green. Do not spend a seed block, touch the vault, change `estimator.py`,
+or submit unless the repository contract and Samuel's explicit approvals permit
+that later step.
 
-1. a materially stronger frozen candidate plus an exact-SHA approval packet for
-   Samuel; or
-2. an evidence-backed kill at the first failed gate, fully recorded, with no weak
-   submission made for the sake of the date.
+You do **not** have permission to call `whest submit`, designate entries, touch the
+vault, or edit `docs/HUMAN_MODEL.md`.
 
-You do **not** have permission to submit. Never call `whest submit`. If every gate
-passes, stop with a concise request for Samuel to approve or refuse the exact
-candidate SHA.
+### 0. Orient from durable state
 
-### 0. Load the repository contract and establish the starting point
-
-First read, in this order:
+Read, in order:
 
 1. `AGENTS.md` and `CLAUDE.md`;
 2. `docs/CURRENT_STATE.md`;
-3. the bottom of `experiments/LOG.md` far enough to understand the latest contract,
-   result, corrections, and independent review;
-4. `docs/GAME_PLAN.md`, especially §4;
-5. `docs/PHASE2_FRONTIER_AUDIT_2026-08-28.md`;
-6. `docs/VALIDATION.md`, `docs/GOTCHAS.md`, and `docs/SKEPTIC.md`.
+3. the bottom of `experiments/LOG.md` far enough to understand the latest results,
+   corrections and independent reviews;
+4. `docs/GAME_PLAN.md`;
+5. `docs/PHASE2_FRONTIER_AUDIT_2026-08-31.md`;
+6. `docs/VALIDATION.md`, `docs/GOTCHAS.md`, `docs/KERDOCK_MUB_SPEC.md`, and
+   `docs/SKEPTIC.md`.
 
-Inspect the current branch, HEAD, worktree, version archives, installed official
-stack, seed ledger, public submissions, and current estimator/archive identity.
-Repository evidence wins if any sentence in this prompt has become stale. Preserve
-unrelated user changes. Never edit `docs/HUMAN_MODEL.md`.
+Inspect the current branch, HEAD, worktree, version archives, official installed
+stack, seed ledger, public submission records and ship/archive identity. Preserve
+unrelated user changes.
 
-Do not treat archive stubs or the 2026-08-24/26 reports as action plans. The only
-active status/strategy files are `CURRENT_STATE.md` and `GAME_PLAN.md`.
+The current evaluator fact that must not regress is: the installed official stack
+sets `wall_time_limit_s = 120` and applies it **per MLP/predict call**, not over the
+100-network suite. This exact ceiling is not exposed in a graded config field;
+public ledgers prove that at least `104.766 s/MLP` passes, consistent with the
+installed value. The installed residual cliff is `0.4 s` per MLP. Continue to
+report both provenance and headroom, and never claim that Windows enforces 8 GiB.
 
-### 1. Mandatory first interaction: capture Samuel's predictions
+### 1. Respect the closed lanes
 
-Before profiling, benchmarking, minting networks, or generating result data, ask
-Samuel these three short questions and accept “I don't know” as an answer:
+Do not reopen either lane without new external evidence that changes its mechanism:
 
-1. At what integrated flopscope cost do you expect an exact W-EFF K3 path to land:
-   `<=0.15 B`, `0.15–0.35 B`, or `>0.35 B`?
-2. What is the smallest final exact-K3 window you expect to imitate full K3 well
-   enough to remain viable: `m=2`, `4`, `6`, `8`, or none?
-3. Will you adopt today's proposed minimum submission-candidate bar: at least a
-   `2x` adjusted-score point improvement over v2.7 with the valid paired interval
-   excluding zero? If not, ask him to state the bar now.
+- full-tower exact K3/W-EFF was measured at about `1.0732 B` FLOPs and failed its
+  own `<=0.35 B` affordability screen;
+- late-window/age-window K3 has provable adjusted-score floors `2.09x`–`4.65x`
+  worse than v2.7 because its K2 prefix is already too inaccurate.
 
-Append the answers verbatim to the first contract. Do not edit
-`docs/HUMAN_MODEL.md`.
+The optional live-shape `k3pre` rerun is attribution cleanup, not a blocker and not
+a candidate. Do not let it delay the open paths.
 
-### 2. W-EFF exact-K3 cost proof — IMPORTANT, truth-free
+### 2. First slice — grader-legal carrier construction (IMPORTANT, truth-free)
 
-Write the complete Rule-1 contract in `experiments/LOG.md` and commit it **before
-result data exists**. The isolated question is whether the exact factorized-K3
-mathematics can be spelled cheaply enough under flopscope 0.12. This is not an MSE
-selection experiment and spends no truth block.
+The current P1A Kerdock/MUB mathematics is a research reference, not deployable
+code: its probe constructs arrays with NumPy before wrapping them in `fnp`. The
+first bounded task is to close that legality and deployment gap without labels.
 
-Use `local_sim/p2_pa_kprop.py`, `local_sim/p2_pb_rank.py`, the upstream ARC
-factorized implementation they load, and the frozen P-A/P-B artifacts as the
-reference. Identify the two operations responsible for the measured `95.35%` cost.
-Keep fresh identity/one-hot factor modes symbolic; replace transformations of
-identity with reuse/indexed operations; fuse factor transforms with the exact
-diagonal-slice queries where algebra permits; separate fresh sparse blocks from
-dense aged blocks.
+Before generating result data:
+
+1. write a complete IMPORTANT contract and prediction in `experiments/LOG.md`;
+2. commit the contract so its timestamp precedes the evidence;
+3. state explicitly that no seed-ledger block, public truth or vault is involved.
+
+Implement a deterministic stdlib/`flopscope.numpy` constructor for the frozen
+Kerdock/MUB object. It may use `setup(context)` where appropriate, but every array
+used by `predict` must be legal in the official sandbox. Preserve the component
+specification; do not silently change basis ordering, Gray convention, scaling,
+antipodes or radial normalisation.
 
 Required evidence:
 
-- exact or explicitly tolerance-bounded layerwise parity with the unmodified dense
-  reference at several small shapes and depths;
-- parity of final predictions, retained factor rank, dtype and checkpoint state;
-- an official flopscope 0.12 operation ledger for one representative width-1024
-  layer and a defensible whole-path projection including casts, assembly and
-  materialization;
-- zero `__bool__`, `__float__`, or `__int__` array materializations inside the
-  priced path;
-- counted-FLOP total and multiplier, subprocess residual headroom against the
-  worst observed run, and memory accounting without claiming Windows enforcement;
-- focused tests that would fail if the sparse shortcut dropped, duplicated, or
-  permuted a factor block.
+- byte-identical carrier rows versus the frozen NumPy reference at supported small
+  sizes and the live width;
+- exact exhaustive integer properties already required by
+  `docs/KERDOCK_MUB_SPEC.md` at reduced sizes;
+- deterministic bytes across repeated runs and a fresh process;
+- exact or tolerance-frozen live propagation parity with the research reference;
+- zero `__bool__`, `__float__` and `__int__` array materialisations in `predict`;
+- official flopscope operation ledger, counted total and multiplier;
+- `setup` duration/headroom, first-predict warm-up, subprocess residual headroom,
+  and explicit peak/single-array memory accounting;
+- focused tests for row order, antipodal pairing, chunk boundaries, dtype and
+  radial scaling;
+- shape-generic behaviour rather than width/depth constants in candidate code.
 
-The preregistered affordability screen is an integrated `<=0.35 B` path. Preserve
-the exact K3 output; an approximate result belongs to the next slice. If parity
-fails, the saving uses uninstrumented arrays, or the measured spelling cannot
-plausibly meet that screen, kill the full-tower W-EFF port and move only to the
-late-window diagnostic below.
+Avoid the unresolved large stacked-array failure mode reported on the forum until
+a smaller spelling has official-subprocess evidence. Do not infer the leaders'
+private sampler from their FLOP totals: roughly `5.5e11` FLOPs identifies an
+operating envelope shared by several possible 16k-row methods.
 
-Run the default preflight and portability check. Then launch a **fresh independent
-Skeptic context that has never seen your reasoning**, using `docs/SKEPTIC.md` and
-giving it the contract, diff, protocol, commands, and raw artifacts—not a prose
-summary. Record and resolve its verdict before today's next implementation consumes
-the result.
+Run the default preflight and portability check. Then launch a fresh independent
+Skeptic context that has never seen the Builder's reasoning. Give it the contract,
+diff, protocol, commands and raw artifact paths—not a prose summary. Resolve and
+record its verdict before consuming this result.
 
-### 3. Layer-age and late-window K3 — IMPORTANT, label-free
+### 3. Second carrier slice — objective and frozen panel (IMPORTANT, truth-free)
 
-Write and commit a separate IMPORTANT contract after the W-EFF synthesis and
-review. Freeze these arms before running them:
+Only after the construction slice is synthesised, write a separate contract for
+the selection objective. Implement the deep-ReLU kernel energy proposed in
+`GAME_PLAN.md` and validate its algebraic nulls, including global-rotation
+invariance.
 
-- full uncapped factorized K3 control;
-- K2 prefix followed by exact K3 for `m in {2,4,6,8}`;
-- zero, faithful augmented-K2 trace/harmonic, and any already-supported structured
-  checkpoint initializers;
-- a matched-retained-rank arbitrary-cap control.
+Before any labels, freeze:
 
-Use unregistered probe networks and no labels. Do not claim a seed-ledger block.
-Attribute full-K3 output and diagonal-slice state by factor-block age before
-truncating. For every arm report final prediction RMS drift `D`, layerwise
-diagonal-slice drift, retained rank, flopscope cost, memory, and residual. Compare
-`D` with the frozen full-K3 RMSE interval only through the valid triangle bracket:
+- the ordered nested Kerdock/MUB basis/sample counts;
+- independent rotations or scrambles, if any;
+- IID antithetic, ordinary orthogonal and scrambled-low-discrepancy controls;
+- row counts and counted-cost matching;
+- the deterministic rule that maps the proxy to one policy;
+- the later paired adjusted-score gate and falsifier.
+
+This IMPORTANT slice proves the instrument only. A later STRATEGIC contract,
+Samuel prediction, preregistered DESIGN selection sample, and disjoint DESIGN
+replication are required to learn whether the proxy predicts finite-network MSE.
+Never fit basis indices, weights or blends on the public mini.
+
+### 4. Parallel analytic proofs — separate contracts, no labels
+
+After the first carrier slice is stable, two bounded analytic investigations may
+run independently. Do not combine them into one contract or let one result tune
+the other.
+
+**AUGMENT parity and price.** Port ARC's unfactored AUGMENT recurrence at small
+shape and compare every retained state component at every layer. Freeze the exact
+upstream parity target first: `factor=True, kind=AUGMENT` drops diagrams and is not
+equivalent. Only after parity, price the actual f32 spelling and its checkpoint
+use. Standalone AUGMENT and checkpoint initialization are separate estimands.
+
+**Query-directed/adjoint K3.** At small shape, linearise the final means with
+respect to layer-local third-cumulant sources. Backpropagate final-output adjoints
+and contract each local K3 source directly into those queries instead of storing
+the recurrent K3 tower. Compare with exact K3 for layerwise source contributions,
+final drift explained, cosine/sign agreement, source-scaling linearity, adjoint
+rank growth, FLOPs and memory. Kill the lane if covariance feedback or adjoint rank
+restores the full-tower scaling.
+
+Each is IMPORTANT instrument/probe work: contract and prediction first, default
+preflight green, knowledge delta in `LOG.md`, and a fresh independent Skeptic
+before belief. Neither consumes truth until its truth-free mechanism, parity and
+cost gate pass.
+
+### 5. Strategic decision only after a truth-free path passes
+
+No suitable later blocks currently exist: P01 is DESIGN with 432 unused seeds, but
+it is neither an independent replica nor a decision block. After the truth-free
+gates determine the power requirement and **before any new labels**, run a separate
+IMPORTANT instrument slice to register at least one disjoint Phase-2
+DESIGN-replication block and one distinct Phase-2 SINGLE_USE DECIDE block in
+`seed_blocks.py`. Take Samuel's prediction first, test the ledger mutations, run
+default preflight, record the knowledge delta, and require an independent Skeptic.
+Do not invent identifiers or sizes in advance of that contract.
+
+Next, under a STRATEGIC DESIGN contract, use a preregistered selection sample and
+require the frozen policy to reproduce on the new disjoint DESIGN block. Synthesize
+that result and obtain an independent Skeptic before it can feed a decision.
+
+Do not claim the SINGLE_USE block merely because code runs or because DESIGN
+passes. First freeze the complete candidate, control, coefficients, carrier policy,
+cost model, fallbacks and exact estimand in a Rule-1 STRATEGIC contract; obtain
+Samuel's three short predictions; commit the contract; only then claim the already
+registered Phase-2 SINGLE_USE block through `local_sim/seed_ledger.py`.
+
+Compare against exact v2.7 with common random networks. Promotion authority is
+only `local_sim/competition_score.py::decide(gate=...)`, using the paired
+arithmetic adjusted-score difference and a studentised-t or basic-bootstrap
+interval. Percentile bootstrap and BCa are forbidden. Every MSE must carry its
+ground-truth noise floor. The current 24-network `2**26` Phase-2 truth set has an
+average floor near `1.3e-9`; write an explicit power plan before deciding whether
+it is sufficient for a frontier-scale gate.
+
+Report counted FLOPs including assembly and the server `+2**24` offset near a
+boundary, per-MLP residual headroom, per-MLP wall headroom, failures, tails and
+memory accounting. The downloadable public split is CONFIRM only and may fit no
+constant. Obtain the required fresh independent Skeptic verdict from raw artifacts
+before promotion or synthesis.
+
+### 6. Candidate architecture and nomination discipline
+
+The two intended nominee families are deliberately different:
 
 ```text
-max(0, RMSE_full - D) <= RMSE_candidate <= RMSE_full + D
+Nominee A: grader-legal structured angular carrier
+           + exact radial integration
+           + frozen deterministic policy/calibration
+
+Nominee B: corrected-f32 K2 / faithful AUGMENT prefix
+           + supported query-directed K3 response
+           + tiny neuron-specific shape correction only if separately reproduced
 ```
 
-Carry population-transfer and anchor uncertainty. Do not call drift an MSE
-increment. Use the drift/cost thresholds frozen in the contract; do not choose `m`
-after seeing the panel unless the contract's deterministic rule does so.
+A hybrid is allowed only if its interaction and diversity cost were preregistered;
+do not collapse the two nominees into correlated variants by default. Never add a
+module because it is attractive on paper. Every shipped module needs its own green
+evidence path.
 
-If no window clears the screen, stop today's candidate path and record the negative.
-Do not fall back to arbitrary K3 rank capping, another scalar K2 calibration, or
-public-board tuning. If one survives, complete a fresh independent Skeptic review
-before building on it.
+Only after formal promotion may you create a new immutable `estimator_v*.py`
+archive and place identical bytes in `estimator.py`. Then require exact archive
+identity, official validation, default and full preflight with a durable `GREEN
+16/16` transcript, clean official Phase-2 mini with zero failures, three
+official-subprocess 100-MLP soaks, zero scalar materialisations, and real Linux
+8-GiB enforcement or an explicit deployment blocker.
 
-### 4. Build the narrowest supported submission architecture — STRATEGIC
+Stop with an exact-SHA approval packet containing git commit, estimator SHA-256,
+FLOPs/multiplier, decision artifact and interval, ground-truth noise, per-MLP wall
+and residual headroom, memory status, failure counts, Skeptic verdict and existing
+submission IDs `#328662` and `#328664`. Ask Samuel to approve or refuse that exact
+hash. Never submit without his explicit active-session approval.
 
-The ideal long-run architecture remains:
+### 7. Continuity
 
-```text
-f32 K2 / faithful augmented-K2 prefix
-  -> task-specific angular checkpoint
-  -> exact sparse-aware K3 over the supported final layer window
-  -> tiny rolled-forward response correction
-  -> frozen calibration and safe fallback
-```
+At every stop, update `experiments/LOG.md` and `docs/CURRENT_STATE.md` with the raw
+artifact paths, exact result, changed paths, cost/memory/failure evidence, Skeptic
+verdict and next action. Never allow one IMPORTANT or STRATEGIC result to flow into
+the next implementation without synthesis.
 
-For today's candidate, include **only modules whose own evidence path is already
-green**. Do not rush the kernel-carrier, augmented-K2, K4, or learned-response tracks
-into the ship file just because they are part of the ideal design. The likely
-same-day candidate is the supported K2-prefix plus exact final-window K3 path; the
-diagnostic, not this prompt, determines its window and checkpoint.
-
-Implement first as a research arm with tests. Before touching `estimator.py` or a
-truth block, write a complete STRATEGIC promotion/decision contract in
-`experiments/LOG.md`, obtain Samuel's prediction, and commit the contract. Then:
-
-- keep the implementation shape-generic in width and depth;
-- use only stdlib, `flopscope`, `flopscope.numpy as fnp`, and `whestbench` in the
-  eventual ship file;
-- use immutable array construction—no item assignment or in-place array mutation;
-- route every numerical operation through flopscope and never exploit raw-array
-  work;
-- derive any randomness only from `mlp.seed`/`context.seed` as appropriate;
-- preserve the exact first-layer answer and return every row
-  (`len(mlp.weights)`, which is 16 in the live round);
-- avoid budget-summary calls and all scalar synchronization in `predict`;
-- include deterministic finite/shape/instability fallbacks whose own cost and
-  behavior are tested;
-- stay under the single-array and total-memory limits with explicit accounting.
-
-Create a new immutable `estimator_v*.py` archive only after the candidate is frozen.
-Formally promote the same bytes into `estimator.py` so the current preflight
-certifies the actual ship file. Update version/status docs and archive-identity
-checks together. Do not spend today's clock rewriting preflight to accept arbitrary
-candidates unless formal promotion is genuinely impossible; that would be a
-separate IMPORTANT instrument slice with its own prediction and review.
-
-### 5. One fresh paired decision — STRATEGIC
-
-Only after the candidate is frozen and the contract commit precedes data, claim one
-fresh SINGLE_USE Phase-2 DECIDE block through `local_sim/seed_ledger.py`. Never type
-a literal seed and never reuse a block. Compare the candidate against the exact v2.7
-control using common random networks.
-
-Promotion authority is only `local_sim/competition_score.py::decide()` with the
-gate recorded before data. Use the paired arithmetic adjusted-score difference and
-a studentised-t or basic-bootstrap interval. Percentile bootstrap and BCa are
-forbidden. Report:
-
-- per-arm raw final-layer MSE and its GT-noise floor;
-- paired adjusted-score difference, interval, and promotion boolean;
-- counted FLOPs, `F/2**41`, multiplier, and the observed `+2**24` grading-server
-  offset treatment near any boundary;
-- zero/nonzero failures and their priced effect;
-- subprocess residual headroom from the worst observed run, never a bare local
-  wall time;
-- memory accounting and what remains untested on Windows.
-
-The candidate proceeds only if `decide()` promotes it **and** it clears Samuel's
-preregistered materially-stronger bar. If it loses, freeze the artifact and stop.
-Do not inspect public feedback to revise the same decision.
-
-Obtain the required fresh independent Skeptic verdict from the raw packet before
-changing `CURRENT_STATE.md` or treating the candidate as supported.
-
-### 6. Deployment certification and approval packet
-
-For a promoted candidate, run and preserve evidence for:
-
-1. exact archive/ship-file identity and clean tracked tree;
-2. `uv run whest validate --estimator estimator.py`;
-3. default preflight, then `preflight.ps1 -Full -Log <durable transcript path>`,
-   followed by committing the final transcript with the candidate packet;
-4. a clean official Phase-2 mini run under `--runner subprocess` with
-   `n_failed_mlps: 0`;
-5. the required official-subprocess soak/tail checks, including first-MLP warm-up,
-   p50, p99 and max;
-6. zero scalar materializations in `predict`;
-7. Linux/WSL memory-limit evidence or a clearly stated unresolved deployment block;
-8. the exact estimator SHA-256, git commit, total FLOPs, multiplier, residual
-   headroom, memory status, decision artifact, GT-noise floor, Skeptic verdict, and
-   existing submission IDs `#328662` and `#328664`.
-
-The full transcript must contain its own `GREEN 16/16` verdict line; do not infer
-that from an exit code or a partial transcript. If any deployment item fails, repair
-it under the appropriate new contract and do not submit.
-
-When every item is green, stop and show Samuel a compact exact-SHA approval packet.
-Ask: “Do you explicitly approve submitting estimator SHA `<sha>`?” Do not submit
-until he answers yes to that exact hash in the active session.
-
-### 7. Continuity requirements
-
-At every stop point, update `experiments/LOG.md` and `docs/CURRENT_STATE.md` with the
-actual result, raw artifact paths, current SHA, changed paths, operation ledger,
-confidence interval, cost multiplier, residual headroom, memory status, failure
-counts, Skeptic verdict, and the next Samuel-only decision. Never allow one
-IMPORTANT or STRATEGIC result to flow silently into the next implementation.
-
-Do not modify the quarantined write-up or organizer-email draft during this build.
-Do not touch a vault. Do not designate submissions. Do not publish private benchmark
-or discussion intelligence. Continue autonomously through all safe steps; pause only
-for the required prediction answers, a failed preregistered gate, the independent
-review's unresolved blocker, or Samuel's exact-SHA submission decision.
+Do not modify the quarantined write-up, publish private benchmark intelligence,
+post to the discussion board, touch a vault, designate submissions or force a
+third public entry. A failed preregistered gate is a valid completion state.

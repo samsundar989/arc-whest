@@ -14,7 +14,8 @@ https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026
 | `docs/CURRENT_STATE.md` | **Where we stand right now**: baseline, closed lanes, open questions, next actions, the clock. **Start here to work.** |
 | `docs/GAME_PLAN.md` | **The active research program:** candidate architecture, experiment order, falsifiers, gates, timeline, and completion definition. |
 | `docs/CLAUDE_CODE_HANDOFF.md` | Copy-ready prompt for a new Claude Code Builder to execute the plan. |
-| `docs/PHASE2_FRONTIER_AUDIT_2026-08-28.md` | Current Phase-2 rules, board, discussion, literature, infrastructure verdict, and evidence behind the plan. |
+| `docs/PHASE2_FRONTIER_AUDIT_2026-08-31.md` | Current Phase-2 rules, board, discussion, literature, infrastructure verdict, and evidence behind the plan. |
+| `docs/PHASE2_FRONTIER_AUDIT_2026-08-28.md` | Historical pre-W-EFF/window snapshot; superseded where the 2026-08-31 audit differs. |
 | `docs/PHASE2_LIVE_AUDIT_2026-08-24.md` | Historical launch-week audit; superseded where the 2026-08-28 audit differs. |
 | `AGENTS.md` | The cross-agent repository operating contract. Any coding agent reads this first; `CLAUDE.md` imports it. |
 | `docs/SKEPTIC.md` | The independent-falsifier brief. `.claude/agents/skeptic.md` and `.codex/agents/skeptic.md` are thin adapters that load it. |
@@ -104,14 +105,16 @@ identity, and the local official-package FLOP anchor. The four `-Full` checks ar
 deployment-envelope checks, not evidence already earned. Local operation counts match
 the official package's subprocess report exactly; the grading server currently adds a
 small `2**24` total-FLOP offset, and Windows cannot enforce the 8 GiB process limit.
+The live `v2-phase2` tag has moved to a metadata/prepared-files commit while all 70
+source Parquet files remain byte-identical; the checklist pin is stale and requires
+a separate IMPORTANT repair before it can be called current.
 
 ## Current method and target
 
 The shipped v2.6.1 path is basic Gaussian K2 propagation; the best public v2.7
-adds a final scalar calibration. Neither is competitive. The leading research
-hypothesis is a hybrid: make exact third-cumulant
-propagation affordable (`W-EFF`), retain it only where layer-age tests show it matters,
-and use a task-specific kernel-selected carrier to correct the discarded history.
-Kerdock/MUB carriers remain one candidate family, not the architecture by fiat. The
-evidence, falsifiers, experiment order, and conservative/aggressive
-two-candidate finish are in `docs/GAME_PLAN.md`.
+adds a final scalar calibration. Neither is competitive. Full-tower exact W-EFF
+and K2-prefix late-window K3 have both been measured and killed. The active program
+develops two different nominees: (1) an exact-radial structured angular carrier in
+the live board's roughly 16k-direction operating envelope, and (2) corrected f32
+K2 plus faithful augmented K2 and a query-directed K3 response. The evidence,
+falsifiers, and execution order are in `docs/GAME_PLAN.md`.

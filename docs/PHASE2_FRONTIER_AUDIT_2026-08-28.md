@@ -1,5 +1,12 @@
 # Phase-2 frontier audit — 2026-08-28
 
+> **SUPERSEDED 2026-08-31.** Use
+> [`PHASE2_FRONTIER_AUDIT_2026-08-31.md`](PHASE2_FRONTIER_AUDIT_2026-08-31.md)
+> for current board, forum, evaluator, literature, and execution evidence. In
+> particular, W-EFF and late-window K3 have since been killed, and the 120-second
+> participant wall limit is per MLP rather than shared across the suite. This file
+> remains a dated evidence record, not an action plan.
+
 This is the dated evidence report behind the current `GAME_PLAN.md`. It is not a
 second roadmap. Competition observations are timestamped; research proposals are
 labelled as hypotheses; no public or organiser data was used to fit a constant.

@@ -181,9 +181,12 @@ other magnitude here, and nothing else in the suite would notice.
 - **Antipodes:** each row `v` is emitted with `−v`.
 - **Total:** `16 × 1024 × 2 = 32,768` rows spanning **16,384 distinct lines**.
 
-*That the leader uses sixteen bases is an **inference** from a cost fingerprint
-(`docs/CURRENT_STATE.md`), not a disclosure and not mathematics.* The
-construction supports 1, 2, 4, 8 or 16 by truncating the same ordered list.
+The fixed sixteen-basis object is a **component choice**, not a claim about any
+leader. Current Phase-2 frontier totals near `5.5e11` FLOPs are compatible with
+about 16,384 dense rows—eight antipodal bases in this spelling—but equally with
+Sobol, lattice, orthogonal or other carriers at the same row count. The verified
+nested policies currently use 1, 2, 4, 8 or 16 bases by truncating the same ordered
+list; any intermediate panel must be frozen and tested before use.
 
 ---
 
@@ -249,10 +252,12 @@ Dense propagation of all rows through all layers:
 2 × 32,768 × 1024 × 1024 × 16 = 1,099,511,627,776 counted FLOPs
 ```
 
-The leader's published figure is `1,099,802,385,000` — **`+290,757,224`,
-`+0.0264%`**. That remainder is whatever a real estimator spends besides the
-propagation, and Phase 1A's job is to reproduce the `1.0995e12` and *explain* the
-overhead, not to wave at it.
+The `1,099,802,385,000` public figure that motivated this calculation was a
+**historical Phase-1 fingerprint**: **`+290,757,224` (`+0.0264%`)** above the dense
+propagation term. It remains a useful arithmetic check, not evidence about the
+current Phase-2 leaders. The 2026-08-31 leader reports about `5.45e11` mean counted
+FLOPs, close to half this row count, but the report has no operation ledger and
+does not identify a carrier.
 
 Memory: one `32,768 × 1024` float32 point buffer is **128 MiB**; weights are
 `16 × 1024² × 4 B = 64 MiB`. Both far below the 4 GiB single-array cap. **The
@@ -274,6 +279,7 @@ polynomial `x^9 + x^4 + 1`; the Teichmüller enumeration order; the Gray
 convention; the coordinate identification of §4; taking the first 16 `λ`;
 excluding the standard basis.
 
-**Inference, and labelled as such wherever it appears**: that the leader uses
-sixteen bases, `32,768` directions and antipodes. That comes from arithmetic on a
-published FLOP count and is not a disclosure.
+**Historical inference, now withdrawn as an active frontier claim**: mapping a
+Phase-1 published FLOP total to sixteen bases, `32,768` directions and antipodes.
+The arithmetic is reproducible, but a FLOP total does not identify a private
+algorithm. Current Phase-2 telemetry is used only to bound an operating envelope.

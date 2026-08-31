@@ -2,16 +2,18 @@
 
 *Everything we know, with sources. Snapshot dates matter — AIcrowd pages were crawled ~Jul 28–29 and re-checked Aug 3–4, 2026. Update as Phase 2 develops.*
 
-> **Live Phase-2 override — 2026-08-28.** This is a chronological research notebook,
+> **Live Phase-2 override — 2026-08-31.** This is a chronological research notebook,
 > so the Phase-1/pre-launch tables below remain historical rather than being
 > rewritten. Do not use them for live constants or research ordering. Current
 > official facts and forum/leaderboard evidence are in
-> `PHASE2_FRONTIER_AUDIT_2026-08-28.md`; the sole active research program is
+> `PHASE2_FRONTIER_AUDIT_2026-08-31.md`; the sole active research program is
 > `GAME_PLAN.md`.
 > Phase 2 is 1024x16 on WhestBench 0.16 / flopscope 0.12 with `B=2**41`, lambda 0,
-> residual cap 0.4 s, wall cap 120 s, and solution memory 8 GiB.
+> an installed residual cap of 0.4 s/MLP, an installed participant wall default of
+> 120 s/MLP (public graded ledgers prove only that `>=104.766 s/MLP` passes), and
+> solution memory 8 GiB.
 
-## 1. Confirmed competition spec (Phase 1; Phase 2 assumed same until run report proves otherwise)
+## 1. Historical confirmed Phase-1 competition spec
 
 | Item | Value | Source |
 |---|---|---|

@@ -1,13 +1,35 @@
 # GAME_PLAN.md — Phase-2 frontier research program
 
-**Authoritative from 2026-08-28.** This is the sole active research roadmap. Its
-hybrid is a falsifiable candidate architecture, not an established winner.
+**Authoritative from 2026-08-31.** This is the sole active research roadmap. Its
+two nominee architectures are falsifiable candidates, not established winners.
 `CURRENT_STATE.md` says what has happened; `VALIDATION.md` governs every
-measurement; `PHASE2_FRONTIER_AUDIT_2026-08-28.md` is the dated competition,
+measurement; `PHASE2_FRONTIER_AUDIT_2026-08-31.md` is the dated competition,
 repository and literature evidence behind this revision. Older Kerdock-first and
 pre-launch plans are historical.
 
-> ## STATUS 2026-08-28 — Tracks 1 and 2 are CLOSED, both on measured negatives
+> ## STATUS 2026-08-31 — carrier first; analytic response in parallel
+>
+> **Nothing new was shipped or submitted. `estimator.py` remains v2.6.1 and the
+> best graded entry remains #328664 (v2.7) at `1.373807110667258e-07`, now rank
+> 53/83.** The public leader is `5.60e-9` adjusted / `2.25e-8` raw.
+>
+> Four leading reports occupy a dense-forward cost envelope near 16,384 rows.
+> Eight antipodal MUB bases have that leading cost, but so do Sobol, lattice,
+> orthogonal, and other 16k-point systems. The clue promotes the **nested carrier
+> frontier**, not a private-method claim or a fixed basis count.
+>
+> Installed WhestBench 0.16 proves its 120-second participant wall default is
+> **per MLP**, not shared across the 100-MLP suite. Public ledgers show up to
+> `104.766 s/MLP` passing, consistent with that default but not exposing the exact
+> graded ceiling. The separate installed 0.4-second residual cliff remains.
+>
+> Therefore Track 3 begins with the missing submission-legal Kerdock/MUB constructor
+> and deployment closure, followed by the frozen carrier objective and nested
+> basis/sample frontier. Track 4 runs faithful AUGMENT-K2 parity and a truth-free
+> query-directed/adjoint K3 prototype in parallel. The live-shape `k3pre`
+> confirmation is useful, but no longer blocks candidate-producing work.
+
+> ## HISTORICAL STATUS 2026-08-28 — Tracks 1 and 2 CLOSED on measured negatives
 >
 > **Nothing was shipped. `estimator.py` is unchanged at v2.6.1; the best graded
 > entry remains #328664 (v2.7) at `1.373807110667258e-07`.** Two IMPORTANT
@@ -57,28 +79,32 @@ For each random no-bias `1024 x 16` ReLU MLP, predict all post-ReLU means under
 mean_MLP[final_layer_MSE * max(0.1, FLOPs / 2**41)]
 ```
 
-WhestBench 0.16 / flopscope 0.12 is live. Lambda is zero, residual time is a
-hard `0.4 s/MLP` cliff, total wall is 120 seconds, setup is 5 seconds and the
-solution-memory limit is 8 GiB.
+WhestBench 0.16 / flopscope 0.12 is live. Lambda is zero. Installed/run-config
+defaults are a hard `0.4 s/MLP` residual cliff, 120-second `predict()` wall per
+MLP, 5-second setup and 8-GiB memory; graded config does not expose these exact
+fields, while public wall telemetry proves `>=104.766 s/MLP` passes.
 
-Live board snapshot at **2026-08-28 16:40 UTC** (display precision):
+Live board snapshot at **2026-08-31 14:57 UTC** (display precision):
 
 | system | adjusted | raw final MSE | multiplier | status |
 |---|---:|---:|---:|---|
-| Puffi, rank 1 | `7.4e-9` | `2.6e-8` | `~0.285` | public feedback |
-| best raw, jamespayor | `1.11e-8` | `2.33e-8` | `~0.476` | public feedback |
-| neopok919 v2.7, rank 41/67 | `1.374e-7` | `1.374e-6` | `0.1` | graded, zero failures |
-| exact factorized K3 | projected only | `3.9249e-8` | flopscope cost unknown | organiser mini; GT-noise floor `7.478e-11`; not deployable |
+| J2W, rank 1 | `5.60e-9` | `2.25e-8` | `~0.248` | public feedback |
+| Puffi, rank 2 | `5.90e-9` | `2.26e-8` | `~0.260` | public feedback |
+| marius_binner, rank 4 / best raw among top four | `7.70e-9` | `1.83e-8` | `~0.420` | public feedback |
+| neopok919 v2.7, rank 53/83 | `1.374e-7` | `1.374e-6` | `0.1` | graded, zero failures |
+| exact factorized K3 | `~4.21e-8` projected | `3.9249e-8` | `1.0732` from `1.0732 × B` | organiser mini; GT-noise floor `7.478e-11`; priced oracle, not deployable |
 
-The public gap is `18.6x` adjusted and `52.9x` raw. v2.7 is already floor-pinned;
-cheap calibration alone cannot win. The top group shares raw MSE around
-`2.3e-8`–`3.5e-8` and trades it against cost.
+Here and below, cost notation such as `1.0732 B` means `1.0732 ×` the competition
+budget `B = 2**41`, not 1.0732 billion FLOPs. The public gap is `24.6x` adjusted
+and about `61x` raw. v2.7 is already
+floor-pinned; cheap calibration alone cannot win. The top group shares raw MSE
+around `1.8e-8`–`3.4e-8` and trades it against cost.
 
 ### Outcome targets
 
 - **Frontier milestone:** honest adjusted score `<=1.2e-8`, zero failures.
-- **Winning target:** `<=6e-9` on fresh offline evidence, leaving margin below the
-  current moving board.
+- **Winning target:** `<=3e-9` on fresh offline evidence, leaving private-rerun
+  margin below the moving public board.
 - **Nominee target:** two complementary frozen candidates, both clean under the
   official subprocess, Linux memory enforcement, public CONFIRM and the final
   operational gate.
@@ -138,7 +164,8 @@ arithmetic score difference returned by `competition_score.decide()`.
 8. **MEASURED, instrument.** flopscope's residual is
    `wall - backend - overhead`, so the `0.4 s` cliff is about **op count and
    Python glue, not total FLOPs**; the constraint that scales with FLOPs is the
-   **`120 s` total wall cap**. And flopscope grants an **aliased-operand
+   installed **`120 s` per-MLP participant wall cap** (public grader evidence only
+   proves `>=104.766 s`). And flopscope grants an **aliased-operand
    discount**: `fnp.einsum('ij,kj->ik', A, A)` is `0.5005x` of `A @ A.T`, and
    `W core W^T` via `cholesky` + aliased Gram is `0.8336x` (relerr `7.65e-07`,
    SPD core required). Worth nothing at a floor-pinned operating point; worth
@@ -152,7 +179,10 @@ arithmetic score difference returned by `competition_score.decide()`.
    moment is `21.6881x` the spherical target.
 3. Public Phase-1 evidence supports Kerdock/MUB, antipodes, exact radial
    integration and checkpoint control. Phase-2 leader code remains private.
-4. Ordinary IID and random-orthogonal arms lose locally, but they do not bound a
+4. Current Phase-2 leader telemetry clusters near the cost of 16,384 dense forward
+   rows. Eight antipodal MUB bases are one matching construction, but the cost alone
+   cannot distinguish MUB from Sobol, lattice, orthogonal, or another sampler.
+5. Ordinary IID and random-orthogonal arms lose locally, but they do not bound a
    task-specific structured carrier.
 
 ### Evaluator
@@ -165,37 +195,69 @@ arithmetic score difference returned by `competition_score.decide()`.
    grading server charged an unexplained `+2**24`; include that observed offset
    near a multiplier boundary until it is explained.
 4. Windows cannot enforce the 8-GiB virtual-address-space limit.
-5. P01 is DESIGN, **168/600 consumed**, 432 free. No Phase-2 vault exists.
+5. P01 is DESIGN, **168/600 consumed**, 432 free. It is not an independent
+   replication block. No Phase-2 SINGLE_USE decision block or vault exists.
 
 ## 3. Candidate architecture hypothesis
 
-The program tests a **mechanistic analytic prefix plus a task-specific
-checkpoint and a higher-order final window**. Sampling and analytic propagation
-may be complementary; each module must survive its own falsifier before integration.
+The program develops **two genuinely different nominees**. Sampling and analytic
+propagation may later be complementary, but each module must survive its own
+falsifier before integration.
 
 ```text
-weights
-  |
-  +--> f32 analytic prefix
-  |      K2p1 -> faithful augmented K2 if supported
-  |
-  +--> task-specific angular checkpoint
-  |      kernel-screened MUB/orthogonal blocks + antipodes
-  |      -> mean / diagonal variance / selected K3 queries
-  |
-  +--> final-window state engine
-         sparse-aware exact K3 for the final m layers
-         -> tiny rolled-forward response correction
-         -> frozen output calibration
+Nominee A: exact-radial structured carrier
+  stdlib/fnp point construction in setup
+    -> nested structured angular propagation
+    -> per-layer sample means
+    -> optional frozen low-correlation analytic blend
+
+Nominee B: compact analytic response
+  corrected f32 K2
+    -> faithful unfactorized AUGMENT-K2
+    -> query-directed/adjoint K3 response
+    -> optional neuron-specific mixture / rolled-forward correction
 ```
 
-### A. Analytic prefix
+### A. Structured angular carrier — primary candidate-producing track
+
+Positive homogeneity integrates the Gaussian radius exactly. The current
+width-1024 Kerdock/MUB object has valid defining Gram properties, but the only
+materialization probe builds it with NumPy and wraps the finished array in `fnp`.
+It is **not yet grader-legal**.
+
+First close byte-identical stdlib/`fnp` construction, fresh-worker setup, scalar
+materialization, memory-accounting, and dense propagation parity. Then freeze a
+nested carrier panel including:
+
+- Kerdock/MUB basis counts spanning at least `4, 6, 8, 10, 12`;
+- randomized signed-permutation/Hadamard orientations;
+- matched-row high-dimensional scrambled Sobol;
+- matched-row random orthogonal and IID controls;
+- antipodal and non-antipodal variants only where the contract isolates them.
+
+Select by paired **adjusted score**, including all auxiliary work. Eight bases is a
+live-telemetry clue, not the selected answer. A deep-ReLU kernel discrepancy may
+screen the panel only after it demonstrably ranks finite-width MSE; a global
+rotation is a Gram-preserving null for that proxy.
+
+### B. Analytic state and query response
 
 Use f32 K2 as the stable reference. Port faithful recurrent augmented K2 only after
 small-shape state parity with ARC's reference. Do not represent it with the old
 marginal Edgeworth oracle.
 
-### B. Exact sparse-aware K3 (W-EFF)
+In parallel, prototype a **query-directed/adjoint K3 response**. Linearize around
+the K2/AUGMENT trajectory, back-propagate adjoints for all final outputs or a fixed
+hard-neuron subset, and contract each layer's locally born K3 source directly into
+those queries. Do not transport the complete K3 tensor.
+
+The first test is truth-free at small width: compare layerwise response with exact
+full K3, measure explained squared drift and cosine, scale the injected source
+toward zero to test first-order convergence, and price the actual flopscope
+spelling. Kill it if the response is diffuse, the adjoint rank expands to the full
+state, or the source-scaling falsifier fails.
+
+### C. Exact sparse-aware K3 (W-EFF) — closed accuracy oracle
 
 Keep fresh identity-supported blocks symbolic, replace `W @ I` with reuse/indexed
 operations, fuse factor transforms with diagonal-slice reads, and separate sparse
@@ -206,7 +268,7 @@ fresh blocks from dense aged blocks. Exact parity comes before cost claims.
 operations survive as reusable code (`local_sim/p2_weff.py`) and the per-layer
 ledger survives as the cost model for anything windowed; the *lane* does not.
 
-### C. Late-window or age-window K3
+### D. Late-window or age-window K3 — closed candidate lane
 
 Run K2 through the prefix and start exact K3 only for the final `m` layers, or
 retain complete layer-generated blocks by age. Candidate `m` is frozen to
@@ -227,32 +289,15 @@ initializer was implementable, and it is responsible for `89.2%` of the error.
 Read §D of the Track-2 entry in `experiments/LOG.md` before reopening anything
 here.
 
-### D. Task-specific angular carrier
-
-Positive homogeneity integrates the Gaussian radius exactly. Use kernel
-discrepancy under the deep ReLU NNGP as a truth-free screening proxy for angular
-point sets.
-
-Frozen panel:
-
-- current Kerdock prefixes;
-- independently rotated small MUB blocks;
-- one rigid MUB family;
-- ordinary orthogonal controls;
-- bounded scrambled-Sobol control after exact radial separation.
-
-A single global rotation is a null intervention because it preserves the Gram
-matrix. Multiple independent block rotations change cross-block correlations and
-are a real design. Before using the proxy, test whether it ranks finite-width
-carrier MSE on a frozen DESIGN panel. Kill the proxy if rank correlation is weak.
-
-### E. Response and calibration
+### E. Mixture, response, and calibration
 
 Only after the state engine works, test separately:
 
-1. K3-chain projection/renormalisation coefficients;
+1. a two-component neuron-specific skew mixture driven by supported AUGMENT trace
+   state—never a positive global-scale mixture, which homogeneity collapses;
 2. diagonal/trace K4 readout correction;
-3. a tiny shared permutation-equivariant per-neuron residual model.
+3. a tiny shared permutation-equivariant per-neuron residual model;
+4. a fixed low-correlation blend of a supported carrier and analytic state.
 
 Every fitted map uses disjoint DESIGN fit/evaluation networks and is evaluated on
 its own rolled-forward trajectory. Teacher-forced one-step improvements do not
@@ -337,8 +382,16 @@ preflight certifies the actual ship file. Do not expand candidate-selectable
 preflight during this time-box unless the current route is genuinely blocked; that
 would be a separate IMPORTANT instrument slice.
 
-Then claim one fresh SINGLE_USE Phase-2 DECIDE block through the ledger and compare
-the frozen candidate with the exact v2.7 control on common random networks. Use
+Before that decision can exist, complete a separate **IMPORTANT seed-instrument
+allocation slice**: freeze the power plan, obtain Samuel's prediction, register at
+least one disjoint Phase-2 DESIGN-replication block and one distinct Phase-2
+SINGLE_USE DECIDE block, extend the ledger tests, run preflight, and obtain a fresh
+Skeptic review. P01's unused range may support preregistered DESIGN development,
+but it cannot stand in for the disjoint replica or the final decision block.
+
+Then claim the newly registered SINGLE_USE Phase-2 DECIDE block through the ledger
+and compare the frozen candidate with the exact v2.7 control on common random
+networks. Use
 only `competition_score.decide()` for promotion. Report the paired arithmetic
 adjusted-score difference, valid interval, raw MSE with ground-truth noise, counted
 FLOPs, multiplier, failures, residual headroom and memory accounting.
@@ -397,6 +450,13 @@ formal promotion into `estimator.py` before certification. If parameterized,
 thread the selected estimator through validation, identity, lifecycle, anchor,
 shape, deployment and smoke steps and attack it with focused mutations.
 
+**0D, IMPORTANT, before any new truth:** after the truth-free carrier and analytic
+gates fix the required power, register a disjoint Phase-2 DESIGN-replication block
+and a separate SINGLE_USE DECIDE block in the seed registry/ledger. This is an
+instrument change: prediction first, focused tests, default preflight, knowledge
+delta, and an independent Skeptic are mandatory. Do not allocate arbitrary sizes
+before the power analysis, and do not treat P01 as an independent replication.
+
 ### Track 1 — W-EFF price and parity, no truth — **CLOSED 2026-08-28, killed on price**
 
 1. Write the IMPORTANT prediction and smallest representative layer contract.
@@ -431,47 +491,74 @@ in the panel. With it restored, the panel decisively **kills** rather than merel
 failing to endorse: provable score floors `2.09x`–`4.65x` worse than graded v2.7.
 No DESIGN contract follows.
 
-### Track 3 — kernel carrier objective
+### Track 3 — submission-legal structured carrier — **FIRST CANDIDATE PATH**
 
-**IMPORTANT, truth-free:** implement the deep-ReLU kernel energy and validate
-algebraic nulls, including invariance to a global rotation.
+The public evidence supports the *operating envelope*, not a private method:
+several leaders spend about `5.45e11`–`5.73e11` counted FLOPs, close to propagating
+`16,384` dense rows (or eight antipodal 1,024-row bases). Sobol, lattice,
+orthogonal and MUB/Kerdock carriers can all occupy that envelope. Do not turn a
+FLOP row into a disclosure claim.
 
-**STRATEGIC, DESIGN:** freeze the carrier panel and test whether the proxy predicts
-finite-width MSE ranking. Basis indices and weights may not be fitted on the public
-mini. Only after proxy validation may a new single-use decision compare adjusted
-scores.
+**IMPORTANT-A, truth-free deployment closure:** replace the NumPy-built P1A probe
+with a stdlib/`fnp` constructor that is byte-identical to the frozen reference.
+Verify deterministic setup, zero in-predict scalar materialisations, live-shape
+propagation parity, flopscope billing, first-call behaviour and explicit 8-GiB
+memory accounting. Until this passes, the current carrier is a research artifact,
+not grader-legal evidence.
 
-### Track 4 — faithful augmented K2 — **NOW THE BINDING QUESTION**
+**IMPORTANT-B, truth-free objective:** implement the deep-ReLU kernel energy and
+validate algebraic nulls, including global-rotation invariance. Freeze the nested
+basis/sample panel and all controls before labels. The existing fixed 16-basis
+family is a component specification, not the selected policy.
 
-Port ARC's recurrence at small shape, compare every retained state component and
-layer, then price the actual f32 spelling. Decide standalone and as checkpoint
-initialization/reference; those are separate estimands.
+**STRATEGIC, DESIGN:** test whether the frozen proxy predicts finite-width paired
+MSE ranking on a preregistered DESIGN selection sample, then lock and reproduce the
+choice on the newly registered, disjoint DESIGN-replication block. Only after
+synthesis, independent review, and a complete freeze may the work advance to the
+separate SINGLE_USE decision block. Basis count, indices, weights and blending
+coefficients may never be fitted on the public mini.
 
-**Why this is now first.** Track 2 measured that `89.2%` of a late window's error
-is its `k_max=2` prefix, not the third cumulant it discards, and the `k3pre`
-diagnostic bounds the prize at roughly `13x` in squared drift at `m = 2`. That
-diagnostic is **not a candidate** — its prefix is the full-tower W-EFF already
-killed on price — so it bounds a prize without supplying a mechanism. Supplying
-one is exactly Track 4. **Caution recorded before any work starts:** `factor=True`
-with `kind=AUGMENT` is *not* equivalent to the unfactored recurrence (upstream
-drops the diagrams it cannot factor, `factor_k3.py:290-299`), so the parity
-target must be chosen and stated before porting, not after.
+### Track 4 — faithful augmented K2 and query-directed K3 — **PARALLEL ANALYTIC PATH**
 
-### Track 5 — K3 calibration and response
+First port ARC's AUGMENT recurrence at small shape, compare every retained state
+component and layer, then price the actual f32 spelling. Decide standalone and as
+checkpoint initialization/reference; those are separate estimands.
 
-Run projection/renormalisation, K4 readout and per-neuron response as separate
-DESIGN arms. Advance only effects that reproduce on a locked replica with the
-paired arithmetic score interval excluding zero and with total measured cost.
+In a separate truth-free prototype, linearise final-mean error with respect to
+layer-local third-cumulant sources and propagate final-output adjoints backwards.
+Contract each local K3 source directly into those queries instead of materialising
+the full recurrent K3 tower. At small shape compare against exact K3 for explained
+drift, cosine/sign agreement, source-scaling linearity and counted price. This is a
+mechanism-changing route around the measured `Theta(n^3 L^2)` full-tower cost, not
+another constant-factor rewrite of W-EFF.
+
+**Why these are open.** Track 2 measured that `89.2%` of a late window's error is
+its `k_max=2` prefix, while the full recurrent K3 oracle is accurate but priced out.
+AUGMENT asks whether a better compact prefix exists; the adjoint asks whether only
+the final-layer-relevant K3 contractions can be retained. **Caution before work:**
+`factor=True` with `kind=AUGMENT` is *not* equivalent to the unfactored recurrence
+(upstream drops diagrams it cannot factor, `factor_k3.py:290-299`), so the parity
+target must be frozen before porting.
+
+### Track 5 — bounded response and mixture corrections
+
+Run per-neuron skew-mixture response, projection/renormalisation and K4 readout as
+separate DESIGN arms only after their analytic prefix or carrier is supported.
+A global scale mixture is useless in a bias-free degree-one homogeneous network;
+any mixture must change neuron-specific shape, not merely radius. Advance only
+effects that reproduce on a locked replica with the paired arithmetic score
+interval excluding zero and with total measured cost.
 
 ### Track 6 — integrated decision
 
-On a new SINGLE_USE Phase-2 block compare:
+Only after Track 0D has registered it, and after the selected policy reproduced on
+the disjoint DESIGN-replication block, claim the new SINGLE_USE Phase-2 block and
+compare:
 
 - v2.7 control;
-- exact W-EFF K3 if deployable;
-- late-window K3;
-- supported carrier + augmented K2;
-- supported hybrid.
+- the best frozen, grader-legal carrier policy;
+- supported AUGMENT or query-directed K3, if either cleared its own gates;
+- a supported carrier/analytic hybrid, if its interaction was preregistered.
 
 Freeze architecture, coefficients, checkpoints and fallbacks before the block.
 Run 300–600 fresh networks for robustness after the decision. Promote two diverse
@@ -532,30 +619,34 @@ wall, memory accounting, failures, tails and the independent Skeptic verdict.
   this dimension absent new external evidence.
 - Broad learned correctors wait until the mechanistic state path is fixed.
 
-## 8. Immediate next action — revised 2026-08-28 after two kills
+## 8. Immediate next action — revised 2026-08-31 after live-board and evaluator audit
 
-Tracks 1 and 2 are closed. **Do not re-run either, and do not treat §4 as a plan.**
+Tracks 1 and 2 are closed. **Do not re-run W-EFF or late-window K3, and do not
+treat §4's historical checkpoints as an active plan.**
 
-1. **Close the one loose end cheaply.** The `k3pre` attribution was confirmed at
-   width `256` on CPU, not the live shape, because two live-shape attempts OOM'd
-   a shared 32 GiB card. `late:m` behaves differently across the two widths, so
-   the *window* half does not transfer; the *attribution* half holds at both.
-   Re-run at the live shape on a quiet card — command at the bottom of
-   `experiments/LOG.md`, needs `~30 GiB`, truth-free and label-free, no block of
-   any tier.
-2. **Then Track 4, as an IMPORTANT truth-free parity slice first.** Port ARC's
-   augmented-K2 recurrence at small shape and prove state parity component by
-   component *before* pricing anything, and state the parity target in the
-   contract given the AUGMENT/factored non-equivalence above.
-3. **Only then price it.** The question that decides the entry is whether a
-   better `K[1]`/`K[2]` prefix exists that stays at or near the `0.1` multiplier
-   floor. The unused free zone is `0.0374 B`; at corrected f32 the K2 path itself
-   roughly halves, which would widen that to `~0.069 B`. **Nothing measured so
-   far is worth putting in it** — a 2-layer exact-K3 window fits and improves
-   plain K2 by `0.37%`.
+1. **Close carrier deployment legality first (IMPORTANT, truth-free).** Write the
+   contract and prediction, then build a stdlib/`fnp` Kerdock/MUB constructor that
+   is byte-identical to the frozen NumPy reference. Prove setup determinism,
+   live-shape propagation parity, zero scalar synchronisations, official billing,
+   first-call safety and memory accounting before requesting any labels.
+2. **Freeze the carrier objective and panel separately.** Implement the deep-ReLU
+   kernel proxy and preregister nested basis/sample counts plus IID, orthogonal,
+   scrambled-low-discrepancy and rotation controls.
+3. **In parallel, run two bounded analytic proofs, each under its own IMPORTANT
+   contract and independent review:** faithful AUGMENT small-shape parity/price,
+   and a small-shape query-directed/adjoint K3 prototype against the exact oracle.
+   Neither may consume truth until its mechanism and price are credible.
+4. **Allocate the missing Phase-2 evidence blocks before labels (IMPORTANT).** Once
+   the truth-free gates determine a power plan, register a disjoint DESIGN-replica
+   and a distinct SINGLE_USE DECIDE block, test the ledger changes, run preflight,
+   and require a fresh Skeptic. Only the DESIGN sequence may establish transfer;
+   only the frozen later SINGLE_USE comparison may decide promotion.
+5. **Treat the live-shape `k3pre` rerun as optional attribution cleanup, not a
+   blocker.** It cannot reopen the killed window without a better prefix and it
+   must not delay the two candidate-producing paths above.
 
 **Do not spend a truth block, claim a seed block, touch a vault, or build a
-submission candidate until Track 4 has small-shape parity and an authoritative
-flopscope price, each with its own fresh independent review.** The Phase-2
-deadline is `2026-10-17 23:59 UTC`; there is time to do this properly and no
-reason to force a third submission.
+submission candidate until the relevant truth-free legality/parity and cost gates
+have passed with fresh independent review.** The Phase-2 deadline is
+`2026-10-17 23:59 UTC`; there is time to select two genuinely different nominees
+instead of forcing a third public submission.

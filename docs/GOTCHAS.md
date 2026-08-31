@@ -27,17 +27,21 @@ Two IMPORTANT slices, four independent Skeptic passes, and both lanes closed on
 measured negatives. These are the operational lessons, not the results
 (`CURRENT_STATE.md` has those).
 
-- **The `0.4 s` residual cliff and the `120 s` TOTAL wall cap are different
+- **The installed `0.4 s` residual cliff and `120 s` PER-MLP wall cap are different
   constraints, and no document here had paired them.** flopscope defines
   `residual = wall − backend − overhead`, so work inside instrumented ops is
   *backend* time and is **not** charged to the residual — which is why the
   shipped K2p1 spends `137.6e9` counted FLOPs for a graded residual of `~7 ms`.
   **Residual risk therefore scales with op count and Python glue, not with
-  FLOPs.** The constraint that scales with FLOPs is `wall_time_limit_s = 120.0`,
-  **total across all 100 MLPs** — about `1.2 s` per MLP on average, against a
-  shipped path that uses `~0.355 s`. A design can be comfortably inside the
-  residual cliff and still blow the wall cap, and the two bite hardest at the
-  same place: large `m`, large rank, large everything. Check both.
+  FLOPs.** **CORRECTED 2026-08-31:** installed `wall_time_limit_s = 120.0` is enforced
+  separately around each MLP's `predict()` call. It is not divided across the
+  100-MLP suite. Installed `scoring.py` constructs a fresh `BudgetContext` inside
+  `for i, mlp`; the subprocess worker enforces the same per-call limit. The old
+  `~1.2 s/MLP` planning constraint was false. Public graded ledgers prove that
+  `104.766 s/MLP` passes, consistent with the installed ceiling but not exposing
+  its exact server value. A design can still be inside the residual cliff and
+  exceed 120 seconds on one local official-runner MLP, so check both, but dense
+  backend-heavy candidates have far more wall headroom than the old record implied.
 
 - **flopscope grants an ALIASED-OPERAND discount, and it is easy to leave on the
   table.** `flops.as_symmetric(C, symmetry=(0,1))` buys **nothing** — it costs

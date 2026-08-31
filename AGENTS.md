@@ -15,8 +15,9 @@ Given a random He-init ReLU MLP (live Phase 2: 1024 wide × 16 deep, no biases),
 predict every neuron's expected post-ReLU activation under x ~ N(0, I) as a
 `(depth, width)` array. Score = mean over MLPs of
 `final_layer_MSE × max(0.1, FLOPs/2**41)`, lower is better. The official Phase-2
-stack is WhestBench 0.16 / flopscope 0.12; lambda is zero; residual cap is 0.4 s,
-total wall 120 s, solution memory 8 GiB.
+stack is WhestBench 0.16 / flopscope 0.12; lambda is zero; installed caps are
+residual 0.4 s/MLP, wall default 120 s/MLP, and memory 8 GiB. Graded ledgers only
+prove that at least 104.766 s/MLP passes.
 
 **The prize is decided by a private re-run of UP TO TWO designated submissions per
 team on fresh MLPs.** Rules v14 now states this directly; if a team selects none,

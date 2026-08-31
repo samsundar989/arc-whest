@@ -1,7 +1,7 @@
 # The ARC White-Box Estimation Challenge, explained from zero
 
 *Written for Samuel — CS degree, no ML background assumed. Phase-2 facts updated
-2026-08-28. Detailed live provenance is in `PHASE2_FRONTIER_AUDIT_2026-08-28.md`.*
+2026-08-31. Detailed live provenance is in `PHASE2_FRONTIER_AUDIT_2026-08-31.md`.*
 
 ---
 
@@ -75,11 +75,11 @@ Phase 2. Separately, the downloadable public dataset has a 100-network mini and 
 
 **The budget makes the dumb way uncompetitive.** Your code runs under a **FLOP
 accountant** called `flopscope`. Phase 2 allows `2**41 ≈ 2.199×10¹²` FLOPs per
-network, calibrated to roughly 65,536 dense samples. At the 2026-08-28 16:40 UTC
-snapshot, the leader's displayed raw MSE was `2.6e-8` (its GT-noise floor is not
-published), far below ordinary Monte Carlo at that row count. The strongest public
-evidence points to algebraically structured quadrature, not merely more random
-samples.
+network, calibrated to roughly 65,536 dense samples. At the 2026-08-31 14:57 UTC
+snapshot, the leader's displayed raw MSE was `2.25e-8` (its GT-noise floor is not
+published), far below ordinary Monte Carlo at that row count. Several leaders use
+roughly `5.5e11` counted FLOPs, consistent with about 16,384 dense directions, but
+that cost fits multiple samplers and does not disclose their private method.
 
 **The math way, in one idea.** Random inputs are Gaussians. A weighted sum of Gaussians is Gaussian—so the *first* layer's pre-activations are *exactly* Gaussian, and the average of ReLU(Gaussian) has a closed form. At layer 2, ReLU has made the state non-Gaussian. Covariance propagation pretends a Gaussian state remains adequate and carries mean/covariance forward. Its small state error compounds through all 16 Phase-2 layers; winning methods need a better structured measurement or a compositional correction to that state.
 
@@ -104,8 +104,8 @@ Lower is better.
 
 Timestamped reference on the organiser mini (GT-noise floor `7.478e-11`): the
 uncalibrated K2 path is `4.050566e-6` raw / `4.050566e-7` adjusted and v2.7 is
-`1.392983e-6` / `1.392983e-7`. The 2026-08-28 16:40 UTC leader was displayed at
-`2.6e-8` raw / `7.4e-9` adjusted; its truth-noise floor is not public. That is the
+`1.392983e-6` / `1.392983e-7`. The 2026-08-31 14:57 UTC leader was displayed at
+`2.25e-8` raw / `5.60e-9` adjusted; its truth-noise floor is not public. That is the
 gap the research program in `GAME_PLAN.md` must close.
 
 ---
@@ -117,7 +117,11 @@ gap the research program in `GAME_PLAN.md` must close.
 - Your class must be named `Estimator`, subclass `BaseEstimator`, and implement `predict(mlp, budget) -> (depth, width) array`. Optional `setup(context)` runs once, off-budget, ≤~5s — you can load precomputed files you shipped (up to 50 MiB / 50 files per submission). **Offline precomputation is legal and unmetered**: you can train models at home for a week and ship the resulting numbers.
 - Any randomness must be seeded from `mlp.seed` / `context.seed` (grader-provided). Unseeded or self-seeded randomness risks disqualification; determinism is re-checked when they re-grade.
 - **10 submissions per team per UTC day.** Up to two nominated submissions are privately re-run on fresh networks after the public round.
-- Arrays are immutable, single arrays are capped at 4 GiB, residual is capped at 0.4 seconds, total wall at 120 seconds, setup at 5 seconds, and solution memory at 8 GiB.
+- Arrays are immutable and single arrays are capped at 4 GiB. The installed
+  official stack/run config uses 0.4-second residual and 120-second wall limits per
+  MLP, 5-second setup, and 8-GiB memory. Public graded ledgers prove at least
+  `104.766 s/MLP` passes but do not expose the exact server ceiling. An outer
+  AIcrowd job timeout may also exist and is a separate constraint.
 
 ---
 
@@ -129,15 +133,15 @@ announced November 15; the algorithmic-contribution write-up is due October 24.
 
 **Prizes**: Phase 2 Best Score $50,000 / $20,000 / $10,000, plus **$20,000 for "Best Algorithmic Contribution"** — judged by ARC on scientific merit, explicitly favoring *mechanistic* (math-based) methods over tuned sampling and "opaque LLM-optimized code". Phase 1 had its own $50k which has already been decided. Winners must open-source their code (OSI license). LLM assistance (e.g., me) is explicitly allowed with disclosure.
 
-**Phase-2 leaderboard snapshot, August 28 at 16:40 UTC (lower is better):**
+**Phase-2 leaderboard snapshot, August 31 at 14:57 UTC (lower is better):**
 
 | Rank | Team | Adjusted | Raw MSE |
 |---:|---|---:|---:|
-| 1 | Puffi | 7.4e-9 | 2.6e-8 |
-| 2 | fklassen | 9.50e-9 | 2.86e-8 |
-| 3 | andrew_epstein | 1.00e-8 | 3.48e-8 |
-| 5 | Activation-Regions | 1.09e-8 | 2.93e-8 |
-| 41 | neopok919 (us) | 1.374e-7 | 1.374e-6 |
+| 1 | J2W | 5.60e-9 | 2.25e-8 |
+| 2 | Puffi | 5.90e-9 | 2.26e-8 |
+| 3 | Activation-Regions | 7.40e-9 | 2.93e-8 |
+| 4 | marius | 7.70e-9 | 1.83e-8 |
+| 53 | neopok919 (us) | 1.374e-7 | 1.374e-6 |
 
 The account has two zero-failure Phase-2 entries: v2.6.1 at `3.933e-7` adjusted
 and v2.7 at `1.374e-7`. The live board is only public feedback; final ranking
@@ -153,6 +157,8 @@ experiments show useful moment-matched sampling and low-error-correlation blends
 while our local full-K3 work shows that high-order state is accurate enough if its
 cost can be rebuilt. ARC's reference augmented-K2 method separately shows how
 selected joint third/fourth state can be propagated without a full dense K3 object.
+The current leaders' code is private: their telemetry is an envelope and must not
+be represented as evidence for Kerdock, Sobol, or any other specific carrier.
 
 **Clean-compute rule:** meaningful computation must go through flopscope. The old
 wall-time pricing loophole is not a research lane and lambda is now zero. We do not
@@ -168,8 +174,8 @@ It is a cheap sanity baseline, not a competitive method.
 
 **K2 covariance propagation**—also track how every *pair* of 1,024 neurons
 co-varies. Linear layers transform this state exactly; ReLU uses Gaussian formulas.
-This is our current Phase-2 fallback. It is stable and cheap but about 100x behind
-the leader in raw MSE.
+This is our current Phase-2 fallback. It is stable and cheap but about `61x` behind
+the 2026-08-31 leader in displayed raw MSE (`24.6x` in adjusted score).
 
 **Augmented K2**—track only selected joint third/fourth-order harmonic/trace pieces
 that repair the state passed to later layers. This is open and distinct from merely
@@ -177,15 +183,19 @@ adding skew/kurtosis to the final ReLU mean formula.
 
 **Exact third-cumulant propagation**—carry the leading non-Gaussian interaction
 through the network. The measured full version reaches roughly frontier raw
-accuracy, but its present implementation costs too much. The first research target
-is identical mathematics with sparse/block-aware contractions, followed by tests of
-whether only the last few layer ages need to remain exact.
+accuracy, but its best exact W-EFF spelling costs `1.0732 B` FLOPs and is closed on
+price. Keeping only the last few layer ages is also closed: its K2 prefix already
+makes every tested window noncompetitive. The open analytic route is
+*query-directed K3*: backpropagate which layer-local K3 contractions affect the
+final means, without materialising the full recurrent tower.
 
 **Task-specific structured quadrature**—replace random directions with balanced
 points, pair directions with antipodes, and integrate the Gaussian radius separately.
-Kerdock/MUB bases are one strong family, but the selection objective should be the
-deep-ReLU kernel induced by this task. Independent small-block rotations, ordinary
-orthogonal, IID and low-discrepancy controls keep the certificate honest.
+Kerdock/MUB bases are one bounded family, but the selection objective should be the
+deep-ReLU kernel induced by this task. The next engineering gate is a submission-
+legal stdlib/`fnp` constructor; the current NumPy-built probe cannot ship.
+Independent rotations, ordinary orthogonal, IID and low-discrepancy controls keep
+the certificate honest.
 
 **Compositional hybrids**—run the structured carrier and analytic state in parallel,
 measure their discrepancy at registered checkpoints, and transport a compact
