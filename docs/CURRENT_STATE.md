@@ -817,35 +817,57 @@ Kerdock-first ordering is superseded by measured K3 evidence and the live audit.
 Kerdock/MUB remains a bounded structured-carrier family; Phase-2 leader code is
 private and no fixed basis count is confirmed.
 
-The evidence-ordered hypothesis stack is:
+The evidence-ordered hypothesis stack, **re-weighted 2026-08-28 after two
+measured kills**:
 
-1. f32 K2 / faithful augmented-K2 analytic prefix;
-2. exact sparse-aware K3 (W-EFF) as the first authoritative flopscope price/parity
-   question;
-3. late-window or age-window exact K3, screened against full K3 without labels;
+1. **f32 K2 / faithful augmented-K2 analytic prefix — NOW THE BINDING QUESTION.**
+   Promoted from "first in the list" to "the thing the evidence points at":
+   Track 2 measured that `89.2%` of a late window's error is its `k_max=2`
+   prefix, not the third cumulant it discards.
+2. ~~exact sparse-aware K3 (W-EFF)~~ — **CLOSED, killed on a measured price:
+   `1.0732 B` against its own `<= 0.35 B` screen, `3.0664x` over.**
+3. ~~late-window or age-window exact K3~~ — **CLOSED, killed on a measured
+   negative: every window arm's provable score floor is `2.09x`–`4.65x` worse
+   than graded v2.7.**
 4. a task-specific angular checkpoint whose point sets are screened by deep-ReLU
    kernel discrepancy before finite-width DESIGN evidence;
 5. a tiny rolled-forward response/K3-calibration layer only after the state path
    works;
-6. two final nominees: a conservative carrier/state system and an aggressive
-   supported windowed-K3 hybrid.
+6. two final nominees: a conservative carrier/state system and — now that the
+   windowed-K3 hybrid is dead — whatever the prefix question supports.
 
-The immediate barrier is cost truth, not another accuracy oracle. Full factorized
-K3 already transfers at `3.9249e-8` raw MSE with a `7.478e-11` organiser-label
-noise floor. Its upstream `1.4796 B` cost is not a flopscope operating point, and
-the cross-meter `5.49x` ratio is an affordability target rather than a projected
-W-EFF saving. No further truth block is spent until W-EFF or late-window K3 has an
-authoritative cost point.
+**The immediate barrier was cost truth, and it has been paid.** Full factorized
+K3 transfers at `3.9249e-8` raw MSE with a `7.478e-11` organiser-label noise
+floor, and its exact W-EFF spelling is now **measured** at `1.0732 B` under
+flopscope 0.12. The cross-meter `5.49x` "affordability target" is **dead** — it
+compared two different meters and was never a saving.
 
-### Same-day execution boundary — 2026-08-28
+**The whole problem, in one line.** Full K3 delivered at the `0.1` multiplier
+floor would score `3.92e-09`, against the leader's `7.4e-09` — it would lead this
+board. It costs **`10.7x` too much**, and W-EFF, the best exact-spelling idea
+available, bought `1.38x` of that. Its raw accuracy is `1.51x` *worse* than the
+leader's (`3.92e-8` vs `2.6e-8`); it would still win at the floor, because the
+leader pays multiplier `0.285` and we would pay `0.1`. **The game is price, not
+accuracy.**
 
-`GAME_PLAN.md` §4 is the bounded handoff for today's attempt. It does **not**
-authorize a rushed submission. The order is W-EFF exact-cost proof → fresh
-independent review → label-free late-window imitation → fresh independent review →
-one frozen candidate → one new SINGLE_USE paired decision → deployment packet →
-Samuel's explicit approval naming the exact SHA. If W-EFF, the late-window screen,
-the paired decision, or deployment fails, today's correct result is a recorded kill
-and no submission.
+The unused free zone is `0.0374 B` (`82,301,998,899` FLOPs), and at corrected f32
+the K2 path itself roughly halves, which would widen it to `~0.069 B`.
+**Nothing measured so far is worth putting in it**: a 2-layer exact-K3 window
+fits at `0.0117 B` and improves plain K2 by `0.37%`.
+
+### Same-day execution boundary — 2026-08-28 (HISTORICAL: it ran, and it ended in a kill)
+
+`GAME_PLAN.md` §4 was the bounded handoff for that attempt and is **not an
+instruction now**. It named two honest outcomes and produced the second: W-EFF
+failed its cost screen, the late-window screen failed its drift gate, so the
+frozen candidate, the paired decision and the deployment packet never began.
+**No truth block was spent, no seed block claimed, no candidate built, nothing
+submitted.**
+
+**The next action is `GAME_PLAN.md` §8 as revised**, not this paragraph: close
+the live-shape `k3pre` confirmation on a quiet card, then Track 4 (faithful
+augmented-K2) as an IMPORTANT truth-free parity slice before anything is priced
+or promoted.
 
 The carrier, faithful augmented-K2 and response tracks remain part of the target
 architecture, but none is allowed into today's candidate without completing its

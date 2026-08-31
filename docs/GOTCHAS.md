@@ -21,6 +21,73 @@ narrative record), `docs/GAME_PLAN.md` (the sole active Phase-2 strategy).
 
 ---
 
+## 2026-08-28 (P2-WEFF / P2-WINDOW) — four traps, three of which I walked into
+
+Two IMPORTANT slices, four independent Skeptic passes, and both lanes closed on
+measured negatives. These are the operational lessons, not the results
+(`CURRENT_STATE.md` has those).
+
+- **The `0.4 s` residual cliff and the `120 s` TOTAL wall cap are different
+  constraints, and no document here had paired them.** flopscope defines
+  `residual = wall − backend − overhead`, so work inside instrumented ops is
+  *backend* time and is **not** charged to the residual — which is why the
+  shipped K2p1 spends `137.6e9` counted FLOPs for a graded residual of `~7 ms`.
+  **Residual risk therefore scales with op count and Python glue, not with
+  FLOPs.** The constraint that scales with FLOPs is `wall_time_limit_s = 120.0`,
+  **total across all 100 MLPs** — about `1.2 s` per MLP on average, against a
+  shipped path that uses `~0.355 s`. A design can be comfortably inside the
+  residual cliff and still blow the wall cap, and the two bite hardest at the
+  same place: large `m`, large rank, large everything. Check both.
+
+- **flopscope grants an ALIASED-OPERAND discount, and it is easy to leave on the
+  table.** `flops.as_symmetric(C, symmetry=(0,1))` buys **nothing** — it costs
+  `7,340,031` FLOPs to declare and prices the product at `1.00171x`. But
+  flopscope's auto-detected `identity_pattern` is real: `fnp.einsum('ij,kj->ik',
+  A, A)` bills **`0.5005x`** of `A @ A.T`, and `W core W^T` spelled as
+  `cholesky(core)` + `W @ L` + aliased Gram bills **`0.8336x`** (relerr
+  `7.65e-07`, requires an SPD core — upstream itself prints "Snapping negative
+  variance to zero", so that is not free). **Worth nothing at a floor-pinned
+  operating point; worth `~0.005 B` to anything that is not.** I first recorded
+  "no discount is recoverable" after testing *one* spelling. A review found the
+  others. **Do not generalise a pricing claim from a single spelling.**
+
+- **`max(0, RMSE_full − D)` is not the triangle inequality, and the error is
+  self-serving in the worst way.** The reverse triangle inequality gives
+  `|RMSE_full − D|`. Writing `max(0, ...)` discards the lower bound exactly when
+  `D > RMSE_full` — i.e. whenever the candidate is bad — so a drift panel loses
+  the only direction in which it can decide anything, and a decisive kill
+  degrades into "undetermined". `local_sim/p2_pb_rank.py:839` already had it
+  right; `p2_window.py` did not, and the entry built on it concluded "the panel's
+  only decisive content is its failures", which was false. **A drift panel can
+  kill decisively. Use the absolute value.**
+
+- **Comparing two meters means comparing the same BINS, and a `flop_name` scope
+  can silently move work between them.** Upstream bills the fresh two-leg block's
+  `(2,1)` slice to `nonlin_sum 111 factored`, not to `get_dslice`, because
+  `eval_part` populates `WK[3]`'s slice cache, `clone()` copies it, and
+  `add_factors_` then takes its *incremental* branch inside
+  `with flop_name('nonlin_sum 111 factored')` — where a bare module-level
+  `_factored_get_dslice` inherits the enclosing name. `contract_wick_` is in that
+  same bin. **Two successive prose accounts of this binning were wrong** — the
+  first mis-attributed `~1.0e11` FLOPs, the second mis-stated the remainder by
+  `4.31x` — and both looked completely reasonable. The fix was to stop arguing:
+  `p2_weff.py --bincheck` proves the binning by measurement
+  (`Δ(nonlin_sum) − 3n·2nl` constant to the FLOP across four increments) and
+  closes the whole cross-meter gap **exactly**. **If a cross-meter claim matters,
+  make it an assertion that closes to zero, not a table.**
+
+- **A "control" that a symmetric object satisfies by construction is not a
+  control** — the repository's signature failure, found twice more here.
+  Permuting the *modes* of a lineage cannot change a symmetric tensor's diagonal
+  slice (measured: `2.448e-16`, exactly the baseline), so it was relabelled an
+  invariance and replaced by a *column* permutation. Separately, `late:16 == full`
+  degenerates to the control (the checkpoint branch never fires) and is recorded
+  as a labelled non-check. And prediction "counted cost is network-independent"
+  was guaranteed before it ran, because the priced path has no data-dependent
+  branching. **Before counting a check as evidence, ask what could make it fail.**
+
+---
+
 ## 2026-08-25 (P1-PRE) — a falsification harness must not restore with Git
 
 *Full record through the terminal-review PROVISIONAL verdict: bottom of

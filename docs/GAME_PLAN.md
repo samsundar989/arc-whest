@@ -7,6 +7,44 @@ measurement; `PHASE2_FRONTIER_AUDIT_2026-08-28.md` is the dated competition,
 repository and literature evidence behind this revision. Older Kerdock-first and
 pre-launch plans are historical.
 
+> ## STATUS 2026-08-28 — Tracks 1 and 2 are CLOSED, both on measured negatives
+>
+> **Nothing was shipped. `estimator.py` is unchanged at v2.6.1; the best graded
+> entry remains #328664 (v2.7) at `1.373807110667258e-07`.** Two IMPORTANT
+> slices ran under Rule-1 contracts and both failed their own preregistered
+> gates. Four independent Skeptic passes reviewed them; all four returned
+> PROVISIONAL or REJECT and all four were accepted.
+>
+> - **Track 1 (W-EFF) — CLOSED, killed on price.** Exact sparse/equality-aware
+>   factorized K3 over the full tower costs **`1.0732 B`** under flopscope 0.12,
+>   against its own `<= 0.35 B` screen: **`3.0664x` over**. The saving over the
+>   dense spelling is `27.8%` and is a bounded constant factor, not a change of
+>   order. **The `5.49x` cross-meter "affordability target" that shaped §2 and
+>   §3B is DEAD** — it compared two different meters and never existed as a
+>   saving.
+> - **Track 2 (late-window K3) — CLOSED, killed on accuracy, provably.** Every
+>   window arm's *provable* score floor is `2.09x`–`4.65x` **worse** than graded
+>   v2.7. The gate is not rigged: with `MSE_FULL -> 0` *and* the multiplier
+>   pinned at the floor — both physically impossible — it still fails by
+>   `2.20x`–`2.49x`.
+> - **The reason the window failed was RETRACTED and replaced.** It is not that
+>   `kappa_3` is non-local. **`89.2%` of the drift is the bad `k_max=2` prefix**,
+>   measured by an arm that isolates the two effects. §3C's `m^2/L^2` cost
+>   hypothesis is likewise superseded by a measured per-layer table.
+> - **Consequence for this plan: the ordering in §3 is unchanged but the weights
+>   are.** Track 4 (faithful augmented-K2 prefix) moves from "pending" to **the
+>   binding question**, because the prefix is where the measured error is.
+>
+> **The one number that frames everything below:** full factorized K3 has the
+> accuracy to lead this board — delivered at the `0.1` multiplier floor it would
+> score `3.92e-09` against the leader's `7.4e-09` — and it costs **`10.7x` too
+> much**. W-EFF, the best exact-spelling idea available, bought `1.38x` of that.
+> **The whole game is price.**
+>
+> `docs/CURRENT_STATE.md` carries the full evidence; the contracts, results,
+> corrections and four Skeptic verdicts are at the bottom of
+> `experiments/LOG.md`.
+
 ## 1. Objective and current score geometry
 
 Win Phase 2 while obeying the intended flopscope computation rules and preserve a
@@ -73,10 +111,38 @@ arithmetic score difference returned by `competition_score.decide()`.
 4. Frobenius-optimal CP approximation does not target the diagonal-slice queries
    the recurrence consumes. “Preserve the diagonal” was refuted at matched rank,
    and the ALS oracle itself costs 7.9–22 budgets.
-5. About `95.35%` of upstream K3 cost is in two operations. Fresh blocks have one
-   or two identity/one-hot factor modes. W-EFF is an exact cost-side hypothesis.
-   The `5.49x` number is a cross-meter affordability target, not a projected saving;
-   no W-EFF operating point has been measured under flopscope.
+5. **MEASURED 2026-08-28, and this supersedes the hypothesis it replaces.**
+   `95.35%` of upstream K3 cost is in two operations, and the exact structure
+   available is **mode equality**, not sparsity — identity dies at the first
+   `contract_W`, but `from_dstensor`'s `(A, I, I)` stays `(., M, M)` and the
+   two-leg block's mode 2 stays exactly `3M` forever (verified in upstream's own
+   tower: `||B_D - C_D|| = 0`, `||B_L - 3 B_D|| <= 3.24e-16` at every layer).
+   That collapses six `(n,n)` matrices per lineage to four and six slice matmuls
+   to five — a **bounded constant factor**. Measured: **`1.0723 B`** for the
+   dominant lines, **`1.0732 B`** whole-path, `27.8%` under the dense spelling,
+   **`3.0664x` over the `<= 0.35 B` screen**. Parity `5.6e-16`; zero scalar
+   materializations; zero uninstrumented leaks; bin reconciliation against
+   upstream closes **exactly**. **The `5.49x` figure is dead**: it compared
+   flopscope against upstream's torch counter and was never a saving.
+6. **MEASURED.** A final-`m`-layer exact-K3 window from a zero checkpoint costs
+   exactly the first `m` layers of the tower. `m <= 3` stays pinned at the `0.1`
+   multiplier floor — but at a `7.1%`–`12.9%` **margin**, not as a category.
+   `m = 4` costs `1.20x`, `m = 6` `2.01x`, `m = 8` `3.18x`. This replaces the
+   `m^2/L^2` argument with a measurement.
+7. **MEASURED.** Late-window K3 does not work, and not for the reason first
+   recorded. Exact K3 over the last half of the tower recovers `12%` of the
+   drift gap to full K3; over the last two layers, `0.37%`. An arm that isolates
+   the two interventions shows **`89.2%` of `late:2`'s squared drift is the
+   `k_max=2` prefix**, not the discarded `kappa_3`. Every window arm's provable
+   score floor is `2.09x`–`4.65x` worse than graded v2.7.
+8. **MEASURED, instrument.** flopscope's residual is
+   `wall - backend - overhead`, so the `0.4 s` cliff is about **op count and
+   Python glue, not total FLOPs**; the constraint that scales with FLOPs is the
+   **`120 s` total wall cap**. And flopscope grants an **aliased-operand
+   discount**: `fnp.einsum('ij,kj->ik', A, A)` is `0.5005x` of `A @ A.T`, and
+   `W core W^T` via `cholesky` + aliased Gram is `0.8336x` (relerr `7.65e-07`,
+   SPD core required). Worth nothing at a floor-pinned operating point; worth
+   `~0.005 B` to anything that is not.
 
 ### Structured sampling
 
@@ -135,9 +201,10 @@ Keep fresh identity-supported blocks symbolic, replace `W @ I` with reuse/indexe
 operations, fuse factor transforms with diagonal-slice reads, and separate sparse
 fresh blocks from dense aged blocks. Exact parity comes before cost claims.
 
-The first operating-point gate is a representative width-1024 layer billed by
-flopscope 0.12 with zero mid-computation scalar materializations. If the integrated
-full path cannot plausibly reach `<=0.35 B`, do not port the full tower blindly.
+**ANSWERED AND CLOSED, 2026-08-28.** The gate ran: `1.0732 B` whole-path,
+`3.0664x` over the `<= 0.35 B` screen. **Do not port the full tower.** The exact
+operations survive as reusable code (`local_sim/p2_weff.py`) and the per-layer
+ledger survives as the cost model for anything windowed; the *lane* does not.
 
 ### C. Late-window or age-window K3
 
@@ -151,9 +218,14 @@ Checkpoint initializations:
 - augmented-K2 trace/harmonic state;
 - selected K3 diagonal queries estimated by the structured checkpoint.
 
-Compare with full K3 on identical networks without target labels: prediction
-drift, diagonal-slice drift, age contribution, retained rank, flopscope cost and
-memory. The `m^2/L^2` cost argument is a hypothesis, not a result.
+**ANSWERED AND CLOSED, 2026-08-28.** The panel ran on six fresh unregistered
+probes with common random numbers. Every window arm provably cannot clear the
+`2x` bar, and the matched-retained-rank control beats the window by `2.2x`–`4.6x`.
+The `m^2/L^2` argument is superseded by a measured per-layer table. **The
+checkpoint initializer, not the window length, is what mattered**: only the zero
+initializer was implementable, and it is responsible for `89.2%` of the error.
+Read §D of the Track-2 entry in `experiments/LOG.md` before reopening anything
+here.
 
 ### D. Task-specific angular carrier
 
@@ -193,7 +265,16 @@ rows, preserve exact layer 1, mutate no grader arrays, perform all numerical wor
 through flopscope, create no scalar synchronization inside `predict`, avoid budget
 summaries, and fall back safely on instability.
 
-## 4. Same-day critical path — 2026-08-28
+## 4. Same-day critical path — 2026-08-28 (HISTORICAL — it ran, and it ended in a kill)
+
+> **This section is the record of what was attempted on 2026-08-28, not an
+> instruction.** Outcome: honest outcome **2** of the two it named — "the
+> highest-value path is killed by its preregistered falsifier, the result is
+> recorded, and no weaker candidate is submitted merely to meet the date."
+> Both Today B and Today C failed their gates, so Today D and Today E never
+> began. No truth block was spent, no candidate was built, nothing was
+> submitted. **Do not execute this section.**
+
 
 The goal for today is an **evidence-backed submission candidate**, not a forced
 submission. The clock does not relax the measurement law. “Done today” means one
@@ -316,7 +397,7 @@ formal promotion into `estimator.py` before certification. If parameterized,
 thread the selected estimator through validation, identity, lifecycle, anchor,
 shape, deployment and smoke steps and attack it with focused mutations.
 
-### Track 1 — W-EFF price and parity, no truth
+### Track 1 — W-EFF price and parity, no truth — **CLOSED 2026-08-28, killed on price**
 
 1. Write the IMPORTANT prediction and smallest representative layer contract.
 2. Build an exact small-shape dense reference.
@@ -326,10 +407,13 @@ shape, deployment and smoke steps and attack it with focused mutations.
 6. Count `__bool__`, `__float__`, `__int__` materializations and require zero.
 7. Account for residual and memory without claiming Windows enforcement.
 
-Exit only if the measured price supports an integrated `<=0.35 B` path and no
-operational falsifier fires.
+**All seven steps ran. The measured price is `1.0732 B` — `3.0664x` over the
+screen — so the exit condition was not met and the lane is closed.** Every
+sub-result survives and is reusable: the exact sparse/equality-aware operations,
+the width-1024 per-layer ledger, the commutation parity, the mutation panel, the
+bin reconciliation, and the enforced hard-rule-3 leak check.
 
-### Track 2 — late-window K3 imitation, no labels
+### Track 2 — late-window K3 imitation, no labels — **CLOSED 2026-08-28, killed on accuracy**
 
 1. Freeze `m={2,4,6,8}`, checkpoint initializers and the full-K3 control.
 2. Attribute full-K3 output by factor-block age before truncating anything.
@@ -339,13 +423,13 @@ operational falsifier fires.
    at matched retained rank.
 5. Bill every arm under flopscope before requesting truth.
 
-This no-label stage is an imitation diagnostic, not an accuracy estimate. Register
-the RMS prediction drift `D` from full K3 and compare it with the full-K3 RMSE anchor
-and its interval. The triangle inequality gives only a bracket on a same-population
-candidate RMSE, `max(0, RMSE_full-D) <= RMSE_candidate <= RMSE_full+D`; distribution
-shift and anchor uncertainty must be carried explicitly. Continue to a later DESIGN
-contract only if the registered drift and cost thresholds pass. The thresholds must
-be written with Samuel before data exists.
+**It ran and it failed.** Note the bracket above is written wrongly here and was
+written wrongly in the code: the reverse triangle inequality gives
+`|RMSE_full - D| <= RMSE_candidate <= RMSE_full + D`, and the `|.|` matters —
+dropping it discards the lower bound whenever `D > RMSE_full`, which is every arm
+in the panel. With it restored, the panel decisively **kills** rather than merely
+failing to endorse: provable score floors `2.09x`–`4.65x` worse than graded v2.7.
+No DESIGN contract follows.
 
 ### Track 3 — kernel carrier objective
 
@@ -357,11 +441,21 @@ finite-width MSE ranking. Basis indices and weights may not be fitted on the pub
 mini. Only after proxy validation may a new single-use decision compare adjusted
 scores.
 
-### Track 4 — faithful augmented K2
+### Track 4 — faithful augmented K2 — **NOW THE BINDING QUESTION**
 
 Port ARC's recurrence at small shape, compare every retained state component and
 layer, then price the actual f32 spelling. Decide standalone and as checkpoint
 initialization/reference; those are separate estimands.
+
+**Why this is now first.** Track 2 measured that `89.2%` of a late window's error
+is its `k_max=2` prefix, not the third cumulant it discards, and the `k3pre`
+diagnostic bounds the prize at roughly `13x` in squared drift at `m = 2`. That
+diagnostic is **not a candidate** — its prefix is the full-tower W-EFF already
+killed on price — so it bounds a prize without supplying a mechanism. Supplying
+one is exactly Track 4. **Caution recorded before any work starts:** `factor=True`
+with `kind=AUGMENT` is *not* equivalent to the unfactored recurrence (upstream
+drops the diagrams it cannot factor, `factor_k3.py:290-299`), so the parity
+target must be chosen and stated before porting, not after.
 
 ### Track 5 — K3 calibration and response
 
@@ -422,6 +516,15 @@ wall, memory accounting, failures, tails and the independent Skeptic verdict.
 - Generic CP/Tucker/TT compression stays closed unless its objective preserves the
   future diagonal-slice queries.
 - Rank-`n` capping in the current K3 basis is a strong negative, not a theorem.
+- **Exact sparse-aware K3 over the full tower is CLOSED on a measured price.**
+  Reopening needs a mechanism that changes the `Theta(n^3 L^2)` scaling, not a
+  better constant — mode equality is already exploited and is worth `1.38x`.
+- **Late-window / age-window K3 is CLOSED on a measured negative.** Reopening
+  needs a *better prefix*, not a different window; the window length was never
+  the binding variable.
+- **A drift panel can kill decisively.** Use `|RMSE_full - D|` for the lower
+  bracket end. Never write `max(0, RMSE_full - D)` — it silently discards the
+  only decisive direction the panel has.
 - K3 compression is weak-open only when a cheap mechanism exists; do not ladder
   another expensive oracle.
 - Kerdock/MUB remains a bounded carrier family, not a presumed winner.
@@ -429,10 +532,30 @@ wall, memory accounting, failures, tails and the independent Skeptic verdict.
   this dimension absent new external evidence.
 - Broad learned correctors wait until the mechanistic state path is fixed.
 
-## 8. Immediate next action
+## 8. Immediate next action — revised 2026-08-28 after two kills
 
-Use the same-day critical path above. Preregister **one representative W-EFF layer
-price/parity slice** and take Samuel's prediction. Prepare—but do not yet execute—
-the no-label factor-block-age/late-window contract. Do not spend another truth block
-until one path has an authoritative flopscope operating point and its fresh
-independent review is complete.
+Tracks 1 and 2 are closed. **Do not re-run either, and do not treat §4 as a plan.**
+
+1. **Close the one loose end cheaply.** The `k3pre` attribution was confirmed at
+   width `256` on CPU, not the live shape, because two live-shape attempts OOM'd
+   a shared 32 GiB card. `late:m` behaves differently across the two widths, so
+   the *window* half does not transfer; the *attribution* half holds at both.
+   Re-run at the live shape on a quiet card — command at the bottom of
+   `experiments/LOG.md`, needs `~30 GiB`, truth-free and label-free, no block of
+   any tier.
+2. **Then Track 4, as an IMPORTANT truth-free parity slice first.** Port ARC's
+   augmented-K2 recurrence at small shape and prove state parity component by
+   component *before* pricing anything, and state the parity target in the
+   contract given the AUGMENT/factored non-equivalence above.
+3. **Only then price it.** The question that decides the entry is whether a
+   better `K[1]`/`K[2]` prefix exists that stays at or near the `0.1` multiplier
+   floor. The unused free zone is `0.0374 B`; at corrected f32 the K2 path itself
+   roughly halves, which would widen that to `~0.069 B`. **Nothing measured so
+   far is worth putting in it** — a 2-layer exact-K3 window fits and improves
+   plain K2 by `0.37%`.
+
+**Do not spend a truth block, claim a seed block, touch a vault, or build a
+submission candidate until Track 4 has small-shape parity and an authoritative
+flopscope price, each with its own fresh independent review.** The Phase-2
+deadline is `2026-10-17 23:59 UTC`; there is time to do this properly and no
+reason to force a third submission.
