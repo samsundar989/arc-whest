@@ -21861,3 +21861,102 @@ running the regression · `scripts/verify_portability.py` **99/99**.
    takes **without any signal**. No guard here can see that.
 3. The next tag move needs its own read-only capture. Until it has one it is
    `UNKNOWN`, which is the alarm — by design.
+
+---
+
+# 2026-08-31 — RESULT WP0B: three gate labels were false, and a count is now a property under test
+
+**Class:** IMPORTANT (instrument / enforcement descriptions). Contract
+`b39b9d0`, committed before this code existed. Shipped in `a4cae61` alongside
+the WP0A repair; the two are separately contracted and separately scored, and
+neither touches the other's files.
+
+## Predictions scored
+
+| # | prediction | outcome |
+|---|---|---|
+| P1 | with the labels corrected, `0` mismatches across both documents | **HELD** — `test_enforcement_labels.py` **44/44** |
+| P2 | reverting any single label makes the checker complain, naming it | **HELD** — four label mutations plus the exact step-7 mis-attachment, all detected |
+| P3 | neutering the `SINGLE_USE` second-claim refusal fails the **named** check | **HELD** — `rc=1`, 3 FAIL lines, and *"a SECOND claim on D17 is refused even on disjoint seeds"* is among them |
+| P4 | neutering the residual-cliff condition fails its **named** check | **HELD** — `rc=1`, 6 FAIL lines, including *"L4: a 1e-9 s residual limit trips the residual path"* |
+| P5 | the unmutated mirror reproduces the repository's own counts | **HELD** — `60/60` and `56/56` in the mirror, equal to the repository, so a mutation's red is attributable to the mutation |
+| P6 | nothing executable moves | **HELD** — preflight GREEN 12/16, official config 73/73, invariants 30/30, scorer 98/98, anchor delta 0, portability 99/99 |
+
+## What was false
+
+| claim | where | truth |
+|---|---|---|
+| step 9 `44/44` | `preflight.ps1` header | `60/60` |
+| step 11 `54/54` | `preflight.ps1` header | `56/56` |
+| step 8 `71/71` | `preflight.ps1:365` comment | `98/98` (its own header already said 98) |
+| step 7 `(60/60)` | `VALIDATION.md` §7 | step 7 reports **no count**; `60/60` is step **9**'s |
+
+Steps 1 (`73/73`), 3 (`30/30`), 13 (`27/27`) and 14 (`48/48`) were correct and
+were measured this session rather than assumed.
+
+Two instrument docstrings were also stale, and both had a correct implementation
+beside them:
+
+- `competition_score.py::paired_comparison` said the geometric mean was *"the
+  binding gate"*. It has not been since 2026-08-20, and `Verdict` **115 lines
+  below in the same file** says the arithmetic difference binds. One file, two
+  answers to *which statistic decides a promotion*. No behaviour ever matched
+  the stale sentence.
+- `p2_window.py`'s module docstring stated `max(0, RMSE_full - D)`. Its own
+  `bracket()` was corrected to the reverse triangle inequality `|RMSE_full - D|`
+  three days earlier — the repair that made GATE-W's kill *provable*. No number
+  in this LOG was computed from the wrong form.
+
+## The repair that matters is not the four corrected numbers
+
+`VALIDATION.md` §7 already said *"a count in a runtime label is a snapshot and
+goes stale on the next test added"* — and then carried four of them. **Prose
+cannot enforce prose.** `local_sim/test_enforcement_labels.py` now:
+
+- **A** — parses every `N/N` out of `scripts/preflight.ps1` and
+  `docs/VALIDATION.md` §7, runs the suite each one names, and compares. It also
+  refuses a count attached to a step that reports none, and refuses a suite that
+  no document claims (which would be an unguarded label).
+- **B** — mutates the parsed documents in memory and requires the checker to
+  complain, including reintroducing the exact step-7 defect. A checker that
+  cannot fail is worth less than no checker.
+- **C** — builds a scratch mirror **outside the repository**, neuters one real
+  guard at a time, and requires the **named** check to be the one that fails.
+  An exit code alone is not a catch: `p1pre_fault_inject.py` learned that after
+  an injection died on its own `SyntaxError` and was recorded as evidence. The
+  mirror is verified to reproduce the repository's counts first, and restored to
+  green after each injection.
+
+Two defects were found in the checker by running it, not by reading it: the
+FAIL-line scanner matched `lifecycle_eval.py`'s `FAIL` but not
+`test_seed_ledger.py`'s `FAILED`, so a genuinely caught guard reported
+*"0 FAIL lines"* and scored as a HARNESS FAILURE; and the mirror lacked
+`estimator.py`, which `lifecycle_eval --self-test` loads. Both are exactly the
+class of thing section C exists to expose.
+
+## Knowledge delta
+
+- **Three of the gate's own coverage statements were false and nothing could
+  see it.** The gate was never weaker than claimed — the suites had *grown* —
+  but a label that drifts upward this time drifts downward the next.
+- **A count in a document is now a property under test.** `preflight.ps1` and
+  `VALIDATION.md` both say so where the counts live, so the next person to add a
+  test finds a red suite rather than a silent inconsistency.
+- **A file can contradict itself about which statistic binds a promotion, for
+  eleven days, with the correct answer 115 lines away.** Neither docstring is
+  executable, which is why neither was caught by any suite.
+
+## Raw artifacts
+
+| what | path |
+|---|---|
+| label-suite transcript, 44/44 | `experiments/2026-08-31_wp0b_labels/test_enforcement_labels.txt` |
+| preflight after the repair, GREEN 12/16 | `experiments/2026-08-31_wp0a_manifest/preflight_default_wp0a_fix.txt` |
+
+## What this does NOT establish
+
+Nothing about accuracy, cost, or any candidate. Section A proves the documented
+counts are *true*, not that the checks they count are *good* — a suite of 60
+vacuous checks would satisfy it. Section C tests two guards out of the gate's
+sixteen steps: the two whose stated coverage moved. The other fourteen are
+unchanged and untested by this slice.
