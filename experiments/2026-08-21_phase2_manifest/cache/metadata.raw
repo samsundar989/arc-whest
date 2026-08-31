@@ -292,5 +292,15 @@
         "e0afa0f8588f"
       ]
     }
-  ]
+  ],
+  "prepared_splits": {
+    "mini": {
+      "path": "prepared/mini",
+      "format": "save_to_disk"
+    },
+    "full": {
+      "path": "prepared/full",
+      "format": "save_to_disk"
+    }
+  }
 }

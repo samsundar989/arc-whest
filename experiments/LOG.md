@@ -21465,3 +21465,125 @@ restructured; only its verdict logic gains the source/metadata distinction.
 default `scripts/preflight.ps1` GREEN 12/16 · `scripts/verify_portability.py`
 99/99 · `git diff --check` clean · a fresh independent Skeptic given this
 contract, the diff, the commands, and the raw TSV path.
+
+---
+
+# 2026-08-31 — RESULT WP0A: the tag moved, NO SOURCE BYTE did, and the pin now says which
+
+**Class:** IMPORTANT (instrument). Contract `43b8f23`, committed before this
+code existed. No estimator, seed block, gate, residual model, vault, protected
+human file, or submission changed. No truth was read.
+
+## Verdict
+
+**The hypothesis holds and the old verdict was wrong.** All 70
+`data/*.parquet` source objects are byte-identical across
+`ce926b7d…` to `6a416fa5…`; the move added 153 prepared/metadata objects and
+removed none. Stored Phase-2 mint and CONFIRM bytes remain valid. Only the
+executable pin was stale, and that is bookkeeping.
+
+## Predictions scored
+
+| # | prediction | outcome |
+|---|---|---|
+| P1 | canonical digest recomputes to `3cb3e819…` | **HELD** (postdiction, declared) — 64/64 hex characters |
+| P2 | differing source rows `= 0` | **HELD** (postdiction, declared) — `0 of 70` |
+| P3 | live `6a416f…` classifies `SOURCE_EQUIVALENT` | **HELD** — confirmed against the live HF refs API, not a fixture |
+| P4 | an unrecorded commit returns `UNKNOWN` | **HELD** — six distinct unrecorded inputs, all `UNKNOWN`, all `evidence_valid = False` |
+| P5 | a mutated row flips to `SOURCE_CHANGED` **and** breaks the digest | **HELD** — and with the header digest re-stamped to hide the tamper, the verdict is still `SOURCE_CHANGED` |
+| P6 | no executable measurement moves | **HELD** — preflight GREEN 12/16; official config 73/73; anchor delta 0; invariants 30/30; scorer 98/98; ledger 60/60; lifecycle 56/56 |
+
+## The functional confirmation, which is stronger than the hash record
+
+`local_sim/phase2_mint_parity.py` reads its shard at whatever commit the
+manifest pins. After the repin it read shard 1 **at `6a416fa5`** and reproduced
+the stored 2026-08-21 row taken at `ce926b7d` on every field: weights
+**bit-identical to canonical_mint output, 4/4**, shape contract 4/4,
+layer-1 worst relative error `1.845e-04`, rms `z` `1.0110`, worst `|z|` `4.34`
+(exact `P = 0.057`), GT-noise floor `6.720835e-11`, verdict `PROVEN` both times.
+
+The evidence-immutability guard then **correctly refused** to overwrite the
+stored row, because that row differs in its recorded revision and in a
+`package_parity_at_check_time` stamp that read `BLOCKED` in August and reads
+`ACHIEVED` now. That refusal is the guard working, not a defect. The comparison
+is preserved separately at
+`experiments/2026-08-31_wp0a_manifest/mint_parity_source_equivalence.json`,
+with tolerances derived from the **print format** of `phase2_mint_parity.py`
+rather than from what happened to pass. Scope: 4 of 16 rows of 1 of 7 mini
+shards — it corroborates the 70-object comparison functionally on a sample; it
+does not re-derive it.
+
+## Changes
+
+1. **`local_sim/p2_tag_drift.py`** (new) — the single shared policy. Parses the
+   durable TSV, **recomputes** the canonical digest instead of trusting the
+   header, and returns `PINNED` / `SOURCE_EQUIVALENT` / `SOURCE_CHANGED` /
+   `UNKNOWN`. A record whose digest does not reproduce licenses **nothing**:
+   every classification degrades to `UNKNOWN`. The record covers exactly one
+   transition, so the reverse move is `UNKNOWN` too.
+2. **`local_sim/phase2_manifest.py`** — `dataset.commit_lineage` now carries
+   **both** commit IDs, the canonical digest, `source_objects` /
+   `source_objects_changed` and `added_count` / `removed_count` as separate
+   fields, and the evidence path. The blanket re-bake refusal in `main` became
+   the source/metadata distinction; an **unmeasured** move still refuses. New
+   `--refresh-lineage` writes only that block and polls nothing, so refreshing
+   it cannot masquerade as a fresh network poll. Its guard requires the pin to
+   be one of the record two endpoints.
+3. **`local_sim/phase2_checklist.py`** — reads the same policy. `SOURCE_EQUIVALENT`
+   now reports *stale pin, valid evidence* instead of *re-bake, re-check
+   everything*; an unrecorded commit still gets the original alarm.
+4. **The manifest is repinned** to `6a416fa5…` with the old commit preserved in
+   the lineage. The rebake diff was inspected field by field: `width`, `depth`,
+   `flop_budget`, `multiplier_floor`, `schema_version`, `seed_protocol`,
+   `backend`, `partials_count`, both split sizes, the truth protocol and the
+   bake/installed stacks are **all unchanged**. The `metadata.json` hash moved
+   (the `prepared_splits` addition) while every constant parsed out of it did
+   not — an independent corroboration that the change is additive.
+5. **`local_sim/test_p2_tag_drift.py`** (new) — **52/52**, including six
+   mutations (M1 to M6) that each break something: a flipped source hash, a
+   *forged header digest*, a dropped row, a smuggled non-`data/` path, three
+   structural corruptions, and a duplicated path.
+
+## Knowledge delta
+
+- **A moved dataset tag is not evidence that anything we measured moved.** The
+  binding object is the set of 70 `data/*.parquet` sources; file counts,
+  prepared splits and `metadata.json` are not. The old check conflated them,
+  and its false alarm would have condemned every stored Phase-2 result.
+- **`SOURCE_EQUIVALENT` is falsifiable by construction.** Six unrecorded inputs
+  return `UNKNOWN`, and an attacker who repairs the header digest after
+  tampering still gets `SOURCE_CHANGED`. The guard can fail — which is the
+  clause this repository has shipped without before.
+- **NEW AND UNRELATED TO THIS SLICE, found in the rebake diff: whestbench
+  `0.16.1` and flopscope `0.12.1` are now published on PyPI.** Installed here is
+  still `0.16.0 / 0.12.0`, which is the bake stack, so `package_parity` remains
+  `ACHIEVED` and nothing about this repository measurements changes. It is
+  recorded because the grading server upgrading is a live risk the discussion
+  board has already raised, and because `whestbench 0.16.1` now pins
+  `flopscope<0.13.0,>=0.12.1`. **Nothing was upgraded.** Deciding whether to
+  track the new stack is a separate IMPORTANT slice with its own contract.
+
+## Raw artifacts
+
+| what | path |
+|---|---|
+| durable read-only tree comparison (input, unmodified) | `experiments/2026-08-31_phase2_tag_drift/source_manifest.tsv` |
+| classification report | `experiments/2026-08-31_wp0a_manifest/p2_tag_drift_report.txt` |
+| regression transcript, 52/52 | `experiments/2026-08-31_wp0a_manifest/test_p2_tag_drift.txt` |
+| mint parity re-run at the new commit | `experiments/2026-08-31_wp0a_manifest/mint_parity_shard1_rows4_at_6a416fa5.txt` |
+| field-by-field equivalence record and its generator | `experiments/2026-08-31_wp0a_manifest/mint_parity_source_equivalence.json`, `make_source_equivalence.py` |
+| default preflight, GREEN 12/16 | `experiments/2026-08-31_wp0a_manifest/preflight_default_wp0a.txt` |
+
+## Verification run
+
+`test_p2_tag_drift.py` **52/52** · `phase2_checklist.py` section 2 against the
+live HF refs API · `phase2_mint_parity.py --shard 1 --max-rows 4` at the new
+commit · default `preflight.ps1` **GREEN 12/16**, four named skips ·
+`verify_portability.py` **99/99** · `git diff --check` clean.
+
+## What this does NOT establish
+
+Nothing about accuracy, cost, or any candidate. The four full-only deployment
+stages were skipped, not passed. The functional confirmation is a 4-row sample.
+And the record describes exactly one tag transition: the next move needs its own
+read-only capture before it can be classified as anything but `UNKNOWN`.

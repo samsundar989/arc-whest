@@ -1,0 +1,30 @@
+==============================================================================
+PHASE-2 MINT PARITY  --  canonical_mint  vs  the PUBLISHED v2-phase2 weights
+==============================================================================
+  dataset      aicrowd/arc-whestbench-public-2026@6a416fa5fb45  shard 1
+  shape        1024 x 16     rows checked: 4 of 16
+  bake stack   whestbench 0.16.0 / flopscope 0.12.0   (installed 0.16.0 / 0.12.0)
+  parity       ACHIEVED -- this check does NOT need the
+               packages, only the organisers' published bytes
+
+    id mlp_name               weights bitwise  L1 max|z|  L1 rms z
+  ----------------------------------------------------------------------------
+    16 adam-morrison                      YES       3.49     1.002
+    17 william-simmons                    YES       3.04     1.012
+    18 william-bryant                     YES       3.04     0.992
+    19 angela-hancock                     YES       4.34     1.038
+  ----------------------------------------------------------------------------
+  weights bit-identical to the published Phase-2 bytes : 4/4
+  shape contract (no biases, no output layer)          : 4/4
+  layer-1 closed form, worst max relative error        : 1.845e-04
+  layer-1 residual, rms z   [bar 0.9, 1.1]         : 1.0110   PASS
+  layer-1 worst |z| over 4,096 neurons        : 4.34   exact P(max >= z) = 0.057   PASS
+  widest published mlp_seed                            : 63 bits
+  ground-truth noise floor, EXACT (avg_variance / N)   : 6.720835e-11
+
+  MINT PARITY WITH THE PHASE-2 STACK IS PROVEN.
+  It did not need whestbench 0.16.0: the published weights ARE
+  0.16.0's output, and our reimplementation reproduces them exactly.
+  This closes the MINT half of the parity blocker. The COST half
+  (flopscope 0.12 pricing) stays open -- it is not testable from data.
+REFUSED: experiments\2026-08-21_phase2_manifest\phase2_mint_parity_shard1_rows4.json exists with different content. Evidence rows are immutable. Delete it deliberately, or run a different shard/row count.

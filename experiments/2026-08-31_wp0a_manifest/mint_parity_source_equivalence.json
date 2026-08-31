@@ -1,0 +1,88 @@
+{
+  "artifact": "wp0a_mint_parity_source_equivalence",
+  "artifact_version": 1,
+  "question": "Does reading the SAME published shard at the NEW v2-phase2 commit reproduce the SAME mint-parity result as the stored 2026-08-21 evidence row taken at the old commit?",
+  "stored_evidence": "experiments/2026-08-21_phase2_manifest/phase2_mint_parity_shard1_rows4.json",
+  "rerun_transcript": "experiments/2026-08-31_wp0a_manifest/mint_parity_shard1_rows4_at_6a416fa5.txt",
+  "stored_revision": "ce926b7d1ced65faa668c01b94a43f8c4f43783d",
+  "rerun_revision_prefix": "6a416fa5fb45",
+  "shard": "data/mini-00001-of-00007.parquet",
+  "comparisons": [
+    {
+      "field": "n_rows_checked",
+      "stored_at_ce926b7d": 4,
+      "rerun_at_6a416fa5": 4,
+      "rel_diff": 0.0,
+      "printed_precision_tolerance": 0,
+      "agrees": true
+    },
+    {
+      "field": "weights_bit_identical",
+      "stored_at_ce926b7d": 4,
+      "rerun_at_6a416fa5": 4,
+      "rel_diff": 0.0,
+      "printed_precision_tolerance": 0,
+      "agrees": true
+    },
+    {
+      "field": "shape_contract_ok",
+      "stored_at_ce926b7d": 4,
+      "rerun_at_6a416fa5": 4,
+      "rel_diff": 0.0,
+      "printed_precision_tolerance": 0,
+      "agrees": true
+    },
+    {
+      "field": "max_published_seed_bits",
+      "stored_at_ce926b7d": 63,
+      "rerun_at_6a416fa5": 63,
+      "rel_diff": 0.0,
+      "printed_precision_tolerance": 0,
+      "agrees": true
+    },
+    {
+      "field": "layer1_closed_form_max_rel",
+      "stored_at_ce926b7d": 0.0001845053358680343,
+      "rerun_at_6a416fa5": 0.0001845,
+      "rel_diff": 2.8919857570401622e-05,
+      "printed_precision_tolerance": 0.001,
+      "agrees": true
+    },
+    {
+      "field": "layer1_z_rms_mean",
+      "stored_at_ce926b7d": 1.0110045177745746,
+      "rerun_at_6a416fa5": 1.011,
+      "rel_diff": 4.468599788859878e-06,
+      "printed_precision_tolerance": 0.0001,
+      "agrees": true
+    },
+    {
+      "field": "layer1_z_abs_max",
+      "stored_at_ce926b7d": 4.338940458745836,
+      "rerun_at_6a416fa5": 4.34,
+      "rel_diff": 0.00024419354546066126,
+      "printed_precision_tolerance": 0.01,
+      "agrees": true
+    },
+    {
+      "field": "layer1_z_max_pvalue_exact",
+      "stored_at_ce926b7d": 0.05695698762892501,
+      "rerun_at_6a416fa5": 0.057,
+      "rel_diff": 0.0007551728570200716,
+      "printed_precision_tolerance": 0.01,
+      "agrees": true
+    },
+    {
+      "field": "gt_noise_floor_exact",
+      "stored_at_ce926b7d": 6.72083484294002e-11,
+      "rerun_at_6a416fa5": 6.720835e-11,
+      "rel_diff": 2.3369117505991767e-08,
+      "printed_precision_tolerance": 1e-06,
+      "agrees": true
+    }
+  ],
+  "all_agree": true,
+  "verdicts_agree": true,
+  "scope": "Numeric fields are compared at the PRINTED precision of the rerun transcript, not bitwise: the rerun's own JSON row was correctly REFUSED by the immutability guard because the stored row differs in its recorded revision and in its package-parity stamp, which were BLOCKED on 2026-08-21 and are ACHIEVED now. The weights themselves are compared bitwise BY THE CHECK ITSELF ('weights bit-identical to the published Phase-2 bytes: 4/4'), against canonical_mint's output.",
+  "what_this_does_not_show": "4 of 16 rows of 1 of 7 mini shards. It corroborates the 70-object hash comparison functionally on a sample; it does not re-derive it."
+}

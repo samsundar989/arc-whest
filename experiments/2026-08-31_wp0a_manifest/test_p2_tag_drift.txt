@@ -1,0 +1,69 @@
+WP0A — Phase-2 tag-drift record, verdicts, and their mutations
+
+P1/P2  the durable record reproduces its own digest, and no source moved
+  PASS  P1: canonical digest recomputes from the rows                   3cb3e81907069725662edc01
+  PASS  P1: recomputed digest equals the recorded header digest         header 3cb3e81907069725662edc01
+  PASS  P2: source objects that changed bytes                           0 of 70
+  PASS  record covers the expected object count                         70 rows
+  PASS  every row is a data/ SOURCE object                              prepared/metadata objects are excluded by construction
+  PASS  commits recorded are the two known ones                         ce926b7d -> 6a416fa5
+  PASS  the file-count delta is prepared-only, nothing removed          73 -> 226, +153
+  PASS  prose comment lines do not become header fields                 8 header keys: ['added_count', 'canonical_data_manifest_sha256', 'new_commit']...
+
+P3  the live commit classifies as SOURCE_EQUIVALENT, and evidence holds
+  PASS  P3: live 6a416f… against pinned ce926b7… is SOURCE_EQUIVALENT   SOURCE_EQUIVALENT
+  PASS  P3: shape-dependent evidence stays valid                        all 70 source objects are byte-identical; 153 object
+  PASS  P3: and the executable pin is nonetheless reported STALE        bookkeeping, separate from evidence validity
+  PASS  no-move classifies PINNED, not SOURCE_EQUIVALENT                PINNED
+
+P4  an unrecorded commit can NEVER obtain SOURCE_EQUIVALENT
+  PASS  P4: an arbitrary unrecorded commit -> UNKNOWN                   UNKNOWN
+  PASS  P4: an arbitrary unrecorded commit -> evidence NOT asserted validUNKNOWN is not a pass
+  PASS  P4: the OLD commit presented as live against the NEW pin -> UNKNOWNUNKNOWN
+  PASS  P4: the OLD commit presented as live against the NEW pin -> evidence NOT asserted validUNKNOWN is not a pass
+  PASS  P4: a third commit against the recorded pin -> UNKNOWN          UNKNOWN
+  PASS  P4: a third commit against the recorded pin -> evidence NOT asserted validUNKNOWN is not a pass
+  PASS  P4: empty live commit -> UNKNOWN                                UNKNOWN
+  PASS  P4: empty live commit -> evidence NOT asserted valid            UNKNOWN is not a pass
+  PASS  P4: live is right but the manifest pin is not the recorded old commit -> UNKNOWNUNKNOWN
+  PASS  P4: live is right but the manifest pin is not the recorded old commit -> evidence NOT asserted validUNKNOWN is not a pass
+  PASS  P4: a prefix of the real commit is not the real commit -> UNKNOWNUNKNOWN
+  PASS  P4: a prefix of the real commit is not the real commit -> evidence NOT asserted validUNKNOWN is not a pass
+  PASS  the record licenses exactly ONE transition                      direction matters; a reverse move is unmeasured
+
+P5/M  mutations of an in-memory copy must each break something
+  PASS  M1: one flipped new_lfs_sha256 -> digest no longer reproduces   ab64ba0e972ad576
+  PASS  M1: ...and one differing source row is seen                     1 rows differ
+  PASS  M1: with the header digest ALSO repaired, the verdict is SOURCE_CHANGEDan attacker who fixes the digest still cannot get SOURCE_EQUIVALENT
+  PASS  M2: a forged header digest is refused, not trusted              recomputation is the authority
+  PASS  M2: ...and every classification degrades to UNKNOWN             an untrusted record licenses nothing
+  PASS  M3: a dropped source row breaks the digest                      69 rows
+  PASS  M3: ...and is visible as a count change                         69
+  PASS  M3: even with a repaired digest, the coverage claim is now falsethe suite pins 70; a silent shrink fails here
+  PASS  M4: a non-data/ path in the record is refused                   the record is defined over SOURCE objects only
+  PASS  M5: a row with the wrong column count is refused                DriftRecordError: <M5>: row 0 has 3 columns, expected 4
+  PASS  M5: a renamed column header is refused                          DriftRecordError: <M5b>: column header is 'path\tsize\tsha\tsha2', expected 'p
+  PASS  M5: a truncated sha256 is refused                               DriftRecordError: <M5c>: row 0 bad sha256 '948908f79ba7163304af945efab1f8f6501
+  PASS  M6: a duplicated source path is refused                         DriftRecordError: <M6>: duplicate source paths in the record
+
+L  the manifest lineage block preserves BOTH commits
+  PASS  L: pinned commit preserved                                      ce926b7d1ced65fa
+  PASS  L: source-equivalent commit recorded                            6a416fa5fb45cade
+  PASS  L: canonical digest carried                                     3cb3e81907069725
+  PASS  L: status is SOURCE_EQUIVALENT                                  SOURCE_EQUIVALENT
+  PASS  L: source vs prepared counts are separate fields                70 source, +153 prepared
+  PASS  L: evidence path exists on disk                                 experiments/2026-08-31_phase2_tag_drift/source_manifest.tsv
+  PASS  L: the block is JSON-serialisable                               round-trips
+
+D  the manifest on disk is pinned at a RECORDED endpoint
+  PASS  D: the manifest carries dataset.commit_lineage                  both commit IDs survive a rebuild
+  PASS  D: the pin is one of the record's two endpoints                 pinned at 6a416fa5fb45
+  PASS  D: the lineage preserves the OLD commit our stored evidence usedprovenance of every pre-2026-08-31 CONFIRM/mint byte
+  PASS  D: the lineage carries the canonical 70-row digest              3cb3e81907069725
+  PASS  D: source objects and prepared additions are SEPARATE fields    70 source unchanged, 153 prepared added
+  PASS  D: shape and budget are unchanged by the repin                  1024x16, B = 2**41, floor 0.1
+
+R  the durable record was not modified by this suite
+  PASS  R: source_manifest.tsv sha256 unchanged                         01da901df7af3128
+
+52/52 checks passed

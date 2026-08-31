@@ -8,8 +8,11 @@ infers one from the other.
 
   1. Which rounds exist, and is 1429 actually LIVE?
   2. Which dataset revisions exist, and does `v2-phase2` still point at the
-     commit the manifest was built against? (drift there is a re-bake, and it
-     invalidates every shape-dependent result)
+     commit the manifest was built against? A moved tag is NOT automatically a
+     re-bake: shape-dependent evidence depends on the `data/*.parquet` SOURCE
+     objects only, so the verdict comes from `local_sim/p2_tag_drift.py`, which
+     compares all 70 of them. An UNMEASURED move is still treated as
+     invalidating.
   3. Fresh leaderboard snapshot for every round.
   4. What is still unknown, and what would settle it.
 
@@ -35,6 +38,13 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
 sys.path = [p for p in sys.path if os.path.abspath(p or ".") != _HERE]
 
+for _p in (_HERE, _ROOT):
+    if _p not in sys.path:
+        sys.path.append(_p)
+
+from p2_tag_drift import (  # noqa: E402
+    PINNED, SOURCE_EQUIVALENT, classify_live_commit,
+)
 from whestbench import aicrowd_config  # noqa: E402
 
 SLUG = "arc-white-box-estimation-challenge-2026"
@@ -130,15 +140,46 @@ def dataset_tags():
         f"floor {b['multiplier_floor']}, "
         f"{b['effective_naive_samples']:,} naive samples"
     )
-    if d["commit"] != commits.get(PHASE2_TAG):
+    # A MOVED TAG IS NOT AUTOMATICALLY A RE-BAKE, and until 2026-08-31 this
+    # branch said it was. Every shape-dependent Phase-2 result here is a
+    # function of the `data/*.parquet` SOURCE objects and of the installed
+    # package -- never of the repo's file count, its prepared-split artifacts,
+    # or `metadata.json`'s split index. The classification lives in
+    # `local_sim/p2_tag_drift.py` (one shared policy, offline-testable) and
+    # rests on a durable content-addressed comparison of all 70 source objects.
+    #
+    # An UNMEASURED move still raises the original alarm. That is what keeps
+    # SOURCE_EQUIVALENT falsifiable: an arbitrary commit cannot obtain it.
+    live = commits.get(PHASE2_TAG)
+    verdict = classify_live_commit(live or "", d["commit"])
+    for line in verdict.report_lines():
+        print(line)
+    if verdict.status == PINNED:
+        print("  commit matches the manifest -- no re-bake since it was built.")
+    elif verdict.status == SOURCE_EQUIVALENT:
+        print("  *** THE EXECUTABLE PIN IS STALE (bookkeeping), and stored")
+        print("      Phase-2 mint/CONFIRM bytes REMAIN VALID (evidence). Repin")
+        print("      with:  uv run python local_sim/phase2_manifest.py"
+              " --allow-rebake ***")
+    else:
         print("  *** COMMIT DRIFT -- the manifest was built against")
         print(f"      {d['commit']}")
         print(f"      but {PHASE2_TAG} now points at")
-        print(f"      {commits.get(PHASE2_TAG)}")
-        print("      The dataset was re-baked or re-tagged. Rebuild the manifest")
-        print("      and re-check every shape-dependent result. ***")
+        print(f"      {live}")
+        print("      This move is NOT covered by a source comparison. Treat it")
+        print("      as a re-bake: rebuild the manifest, capture a fresh")
+        print("      read-only tree comparison, and re-check every")
+        print("      shape-dependent result. ***")
+
+    lin = d.get("commit_lineage")
+    if lin:
+        print(f"  lineage: pinned {lin['pinned_commit'][:12]} -> recorded "
+              f"{str(lin['source_equivalent_commit'])[:12]} "
+              f"({lin['status']}, {lin['source_objects']} source objects, "
+              f"{lin['source_objects_changed']} changed)")
     else:
-        print("  commit matches the manifest -- no re-bake since it was built.")
+        print("  !! the manifest carries no dataset.commit_lineage. Refresh it:")
+        print("       uv run python local_sim/phase2_manifest.py --refresh-lineage")
 
     par = man["package_parity"]
     print(

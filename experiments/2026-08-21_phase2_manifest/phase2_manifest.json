@@ -1,13 +1,28 @@
 {
   "artifact": "phase2_manifest",
   "artifact_version": 1,
-  "generated_at_utc": "2026-08-25T01:45:57.656196+00:00",
+  "generated_at_utc": "2026-08-31T17:03:43.280073+00:00",
   "generator": "local_sim/phase2_manifest.py",
   "authority": "The dataset card and metadata.json at the pinned commit are AUTHORITATIVE. The AIcrowd challenge page is known-stale (Phase-1 timeline, a max(0.5, .) worked example) and is not a source here.",
   "dataset": {
     "repo": "aicrowd/arc-whestbench-public-2026",
     "revision_tag": "v2-phase2",
-    "commit": "ce926b7d1ced65faa668c01b94a43f8c4f43783d",
+    "commit": "6a416fa5fb45cade1e9ad34320204853f5d4a5f6",
+    "commit_lineage": {
+      "pinned_commit": "ce926b7d1ced65faa668c01b94a43f8c4f43783d",
+      "source_equivalent_commit": "6a416fa5fb45cade1e9ad34320204853f5d4a5f6",
+      "status": "SOURCE_EQUIVALENT",
+      "source_objects": 70,
+      "source_objects_changed": 0,
+      "canonical_data_manifest_sha256": "3cb3e81907069725662edc011638b095b399dafe42d35b97ea5456ece0cb8c66",
+      "canonical_digest_reproduces_header": true,
+      "old_file_count": 73,
+      "new_file_count": 226,
+      "added_count": 153,
+      "removed_count": 0,
+      "evidence_path": "experiments/2026-08-31_phase2_tag_drift/source_manifest.tsv",
+      "meaning": "Shape-dependent Phase-2 evidence depends only on the data/*.parquet source objects. This block records a measured, content-addressed comparison of all of them across the tag move. A commit that is not named here is UNKNOWN and must be treated as invalidating."
+    },
     "created_at_utc": "2026-08-13T15:11:58.709376+00:00",
     "schema_version": "3.0",
     "seed_protocol": {
@@ -96,7 +111,7 @@
     },
     "pypi": {
       "whestbench": {
-        "latest": "0.16.0",
+        "latest": "0.16.1",
         "all_releases": [
           "0.4.0",
           "0.5.0",
@@ -117,12 +132,13 @@
           "0.13.0",
           "0.14.0",
           "0.15.0",
-          "0.16.0"
+          "0.16.0",
+          "0.16.1"
         ],
         "requires_dist": [
           "datasets>=2.20",
           "faker~=37.0",
-          "flopscope<0.13.0,>=0.12.0",
+          "flopscope<0.13.0,>=0.12.1",
           "httpx>=0.27",
           "huggingface-hub>=0.24",
           "jinja2>=3.1",
@@ -138,7 +154,7 @@
         "bake_version_public": true
       },
       "flopscope": {
-        "latest": "0.12.0",
+        "latest": "0.12.1",
         "all_releases": [
           "0.2.0",
           "0.3.0",
@@ -159,7 +175,8 @@
           "0.9.1",
           "0.10.0",
           "0.11.0",
-          "0.12.0"
+          "0.12.0",
+          "0.12.1"
         ],
         "requires_dist": [
           "numpy<2.5.0,>=2.0.0",
@@ -175,13 +192,13 @@
           "ruff>=0.4; extra == \"dev\"",
           "scipy>=1.10; extra == \"dev\"",
           "numpydoc>=1.10; extra == \"docs\"",
-          "flopscope-server==0.12.0; extra == \"server\"",
+          "flopscope-server==0.12.1; extra == \"server\"",
           "sympy>=1.11; extra == \"sympy\""
         ],
         "bake_version_public": true
       }
     },
-    "public_whestbench_flopscope_pin": "flopscope<0.13.0,>=0.12.0",
+    "public_whestbench_flopscope_pin": "flopscope<0.13.0,>=0.12.1",
     "blockers": [],
     "limitation_stamp": null
   },
@@ -230,11 +247,11 @@
     "note": "polled separately by local_sim/phase2_checklist.py; dataset publication and round activation are SEPARATE events."
   },
   "source_hashes": {
-    "metadata": "aab61cf11271d20118e2109065c165a931dfacb493849f0d611f7a2d82a03790",
+    "metadata": "264fa1f416d16a40821fb5e8e94f5d2da4698a201d40da999616225b38b464f1",
     "card": "c13c62eaecfcee1fd696e0f63d0c04b2a96d63747517b4977b3e1a7722d361ee",
-    "refs": "d7ac680c5f430d7a0a6e4e369099510bd9751285778252383df773c8140ab39e",
-    "pypi_whestbench": "7dfab5b6bc85c8b88c126fc744b394b60d00d29b1b8d35c8f650b470f0213b42",
-    "pypi_flopscope": "5c81b4ab09b5ac1905e4cbf2ef7e23bd415015662edba36176b0401a15dde460"
+    "refs": "b784c6677c4aff1719bf4727c3a6828080ec1e5af2fefe719bd50552b9d0329a",
+    "pypi_whestbench": "2c6bd655fd5c3e09027778fb6355f8341411cfc13aa562b5a06ad3eaae0a1a5b",
+    "pypi_flopscope": "81499fbaddcad3ce516deca6b375d801ed148846bb78278fedde24b3f8363608"
   },
   "source_urls": {
     "metadata": "https://huggingface.co/datasets/aicrowd/arc-whestbench-public-2026/resolve/v2-phase2/metadata.json",

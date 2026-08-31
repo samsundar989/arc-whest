@@ -42,6 +42,10 @@ for _p in (_HERE, _ROOT):
     if _p not in sys.path:
         sys.path.append(_p)
 
+from p2_tag_drift import (  # noqa: E402
+    SOURCE_EQUIVALENT, classify_live_commit, lineage_block,
+)
+
 OUT_DIR = os.path.join(_ROOT, "experiments", "2026-08-21_phase2_manifest")
 CACHE = os.path.join(OUT_DIR, "cache")
 OUT = os.path.join(OUT_DIR, "phase2_manifest.json")
@@ -59,6 +63,8 @@ SOURCES = {
 
 # The two package versions the Phase-2 bake reports in `hardware_fingerprints`.
 BAKE_STACK = {"whestbench": "0.16.0", "flopscope": "0.12.0"}
+
+NL = chr(10)
 
 
 _SUP = {"\u2070": "0", "\u00b9": "1", "\u00b2": "2", "\u00b3": "3",
@@ -296,7 +302,13 @@ def build(offline: bool = False) -> dict:
         "dataset": {
             "repo": REPO,
             "revision_tag": TAG,
+            # `commit` is the commit THIS MANIFEST WAS BUILT AGAINST -- a
+            # provenance fact about the bytes parsed above, never a claim
+            # about where the tag points today. `commit_lineage` carries the
+            # MEASURED relationship between that commit and a later one; see
+            # `local_sim/p2_tag_drift.py`.
             "commit": commit,
+            "commit_lineage": lineage_block(),
             "created_at_utc": meta.get("created_at_utc"),
             "schema_version": meta.get("schema_version"),
             "seed_protocol": meta.get("seed_protocol"),
@@ -454,6 +466,49 @@ def load() -> dict:
         return json.load(fh)
 
 
+def _refresh_lineage() -> int:
+    """Rewrite ONLY `dataset.commit_lineage`, from the durable comparison.
+
+    `generated_at_utc`, the source hashes and every polled constant are left
+    exactly as they were: this path fetches nothing, so it must not be able to
+    stamp the manifest as freshly polled. `commit_lineage.refreshed_at_utc`
+    records when the block itself was written, and nothing else moves.
+    """
+    if not os.path.exists(OUT):
+        raise SystemExit("no manifest at %s; build it first" % OUT)
+    with open(OUT, encoding="utf-8") as fh:
+        m = json.load(fh)
+    block = lineage_block()
+    block["refreshed_at_utc"] = _dt.datetime.now(_dt.timezone.utc).isoformat()
+    pinned = m["dataset"]["commit"]
+    # The record describes ONE transition. It is the right lineage for this
+    # manifest only if the manifest sits at one of its two endpoints -- before
+    # the repin, or after it. Any other pin means the record is about a
+    # different move and must not be attached.
+    endpoints = (block["pinned_commit"], block["source_equivalent_commit"])
+    if pinned not in endpoints:
+        raise SystemExit(
+            "REFUSED: this manifest is pinned at %s, which is neither endpoint "
+            "of the durable record (%s -> %s). The record does not describe "
+            "this manifest's lineage." % (pinned, endpoints[0], endpoints[1])
+        )
+    m["dataset"]["commit_lineage"] = block
+    with open(OUT, "w", encoding="utf-8") as fh:
+        fh.write(json.dumps(m, indent=2) + NL)
+    print("dataset.commit_lineage refreshed in %s"
+          % os.path.relpath(OUT, _ROOT))
+    print("  pinned            %s" % block["pinned_commit"])
+    print("  source-equivalent %s" % block["source_equivalent_commit"])
+    print("  status            %s" % block["status"])
+    print("  source objects    %d (changed %d)"
+          % (block["source_objects"], block["source_objects_changed"]))
+    print("  prepared/metadata +%s added, -%s removed"
+          % (block["added_count"], block["removed_count"]))
+    print("  canonical digest  %s" % block["canonical_data_manifest_sha256"])
+    print("  NOTHING was polled. Every other manifest field is untouched.")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument(
@@ -466,7 +521,16 @@ def main() -> int:
         action="store_true",
         help="accept that the v2-phase2 tag now points at a different commit",
     )
+    ap.add_argument(
+        "--refresh-lineage",
+        action="store_true",
+        help=("update ONLY dataset.commit_lineage in the manifest on disk, "
+              "from the durable read-only tree comparison. Polls nothing."),
+    )
     a = ap.parse_args()
+
+    if a.refresh_lineage:
+        return _refresh_lineage()
 
     m = build(offline=a.offline)
     os.makedirs(OUT_DIR, exist_ok=True)
@@ -480,15 +544,36 @@ def main() -> int:
         with open(OUT, encoding="utf-8") as fh:
             old = json.load(fh)
         if old["dataset"]["commit"] != m["dataset"]["commit"]:
-            raise SystemExit(
-                "REFUSED: the v2-phase2 tag has MOVED.\n"
-                f"  manifest on disk : {old['dataset']['commit']}\n"
-                f"  live tag now     : {m['dataset']['commit']}\n"
-                "The dataset was re-baked or re-tagged. Every 1024 x 16 result "
-                "in this repository was measured against the old commit and "
-                "must be re-checked. Rerun with --allow-rebake once that is a "
-                "deliberate decision, and record it in experiments/LOG.md."
-            )
+            # A MOVED TAG IS NOT AUTOMATICALLY A RE-BAKE.
+            #
+            # Every 1024 x 16 result in this repository is a function of the
+            # `data/*.parquet` SOURCE objects and of the installed package --
+            # never of the repo file count, its prepared-split artifacts, or
+            # `metadata.json`'s split index. Until 2026-08-31 this branch
+            # compared one scalar and declared every move a re-bake, which is
+            # the "reports a state instead of testing a property" defect this
+            # repository has lost four checks to. It now consults the durable
+            # content-addressed comparison and refuses only when the SOURCE
+            # bytes moved -- or when the move is UNMEASURED, which is still
+            # treated as invalidating.
+            v = classify_live_commit(m["dataset"]["commit"],
+                                     old["dataset"]["commit"])
+            for line in v.report_lines():
+                print(line)
+            if v.status != SOURCE_EQUIVALENT:
+                raise SystemExit(
+                    "REFUSED: the v2-phase2 tag has MOVED and the move is "
+                    f"{v.status}." + NL +
+                    f"  manifest on disk : {old['dataset']['commit']}" + NL +
+                    f"  live tag now     : {m['dataset']['commit']}" + NL +
+                    f"  {v.reason}" + NL +
+                    "Every 1024 x 16 result in this repository was measured "
+                    "against the old commit and must be re-checked. Rerun "
+                    "with --allow-rebake once that is a deliberate decision, "
+                    "and record it in experiments/LOG.md."
+                )
+            print("  the tag moved but NO SOURCE BYTE did -- repinning is "
+                  "bookkeeping; stored Phase-2 evidence stays valid.")
     with open(OUT, "w", encoding="utf-8") as fh:
         fh.write(json.dumps(m, indent=2) + "\n")
 

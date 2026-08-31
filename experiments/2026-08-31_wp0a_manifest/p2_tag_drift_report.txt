@@ -1,0 +1,16 @@
+Phase-2 dataset tag drift
+  record          experiments/2026-08-31_phase2_tag_drift/source_manifest.tsv
+  old commit      ce926b7d1ced65faa668c01b94a43f8c4f43783d
+  new commit      6a416fa5fb45cade1e9ad34320204853f5d4a5f6
+  source objects  70   (changed 0)
+  files           73 -> 226   (+153 / -0)
+  digest recomputed 3cb3e81907069725662edc011638b095b399dafe42d35b97ea5456ece0cb8c66
+  digest recorded   3cb3e81907069725662edc011638b095b399dafe42d35b97ea5456ece0cb8c66
+  digest reproduces True
+
+  tag-drift verdict: SOURCE_EQUIVALENT  (source objects 70, changed 0)
+    all 70 source objects are byte-identical; 153 objects were added and 0 removed
+    evidence at the pinned commit remains valid: YES
+    canonical source digest 3cb3e81907069725
+    record: experiments/2026-08-31_phase2_tag_drift/source_manifest.tsv
+    NOTE: only the executable pin is stale. Prepared/metadata objects were added (73 -> 226 files); no source byte moved.
