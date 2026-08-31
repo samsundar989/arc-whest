@@ -119,8 +119,18 @@ def main():
         width, depth, flop_budget, seed = 256, 32, BUDGET, 0
 
     est.setup(Ctx())
-    print(f"shipped estimator: tau={est_mod._PRUNE_TAU}  target C/B={est_mod._TARGET_CB}  "
-          f"chunk={est_mod._CHUNK}\n")
+    # A BANNER, not a check. It used to read `est_mod._PRUNE_TAU` directly, and
+    # those three constants are v2.x sampling-architecture internals: any
+    # candidate that does not happen to define them died here with an
+    # `AttributeError` before a single invariant ran. WP0C's own positive
+    # control -- a pure wrapper around the shipped file -- was the thing that
+    # exposed it, and a research candidate from `p2_candidate_architecture.py`
+    # would have hit it too. Reading them defensively changes no invariant and
+    # no verdict; it only stops the banner from gating the suite.
+    _b = {k: getattr(est_mod, k, "n/a")
+          for k in ("_PRUNE_TAU", "_TARGET_CB", "_CHUNK")}
+    print(f"candidate: tau={_b['_PRUNE_TAU']}  target C/B={_b['_TARGET_CB']}  "
+          f"chunk={_b['_CHUNK']}\n")
 
     results = []
 
@@ -264,24 +274,50 @@ def inv_budget_monotone(est, est_mod):
     m = canon(32, 256, 30_806_006_021)
     ladder = [0, 1, 10**6, 10**7, 10**8, 10**9, 10**10, 27_200_000_000,
               272_000_000_000, 2_720_000_000_000]
+    # TWO invariants live here, and only one of them is universal:
+    #
+    #   (a) every rung DEGRADES rather than throws, and returns a valid array;
+    #   (b) more budget never buys FEWER samples.
+    #
+    # (b) needs `est._log2_samples`, a v2.x sampling-architecture internal. This
+    # loop used to call it unconditionally, so any candidate that does not
+    # define it -- including every research candidate from
+    # `p2_candidate_architecture.py`, and WP0C's own positive control -- failed
+    # (a) as well, with ten `AttributeError`s that said nothing about the
+    # candidate. (a) is now measured for everyone; (b) is measured where it is
+    # measurable and reported NOT PROVABLE where it is not. A skip is not a pass
+    # and is printed as such.
+    has_ladder = callable(getattr(est, "_log2_samples", None)) and \
+        hasattr(est_mod, "_MIN_LOG2_N")
     prev_n, ok, rows = -2, True, []
     for b in ladder:
+        log2n = None
         try:
-            log2n = est._log2_samples(256, 32, b)
+            if has_ladder:
+                log2n = est._log2_samples(256, 32, b)
             out = np.asarray(est.predict(m, b), dtype=np.float64)
             fin = bool(np.isfinite(out).all()) and out.shape == (32, 256) and (out >= 0).all()
         except Exception as e:
             print(f"  budget {b:>16,}  RAISED {type(e).__name__}: {e}")
             ok = False
             continue
-        mono = log2n >= prev_n
+        if has_ladder:
+            mono = log2n >= prev_n
+            mode = "analytic" if log2n < est_mod._MIN_LOG2_N else f"N=2^{log2n}"
+            prev_n = log2n
+        else:
+            mono, mode = True, "n/a"
         ok &= fin and mono
-        mode = "analytic" if log2n < est_mod._MIN_LOG2_N else f"N=2^{log2n}"
         rows.append((b, mode, fin, mono))
-        prev_n = log2n
     for b, mode, fin, mono in rows:
         print(f"  budget {b:>16,}  {mode:<10} valid={fin}  non-decreasing={mono}")
-    print(f"  {'ladder monotone and total':<34} {'ok' if ok else 'FAILED'}")
+    if has_ladder:
+        print(f"  {'ladder monotone and total':<34} {'ok' if ok else 'FAILED'}")
+    else:
+        print(f"  {'every rung degrades, none throws':<34} "
+              f"{'ok' if ok else 'FAILED'}")
+        print(f"  {'sample-count monotonicity':<34} NOT PROVABLE -- this "
+              "candidate exposes no _log2_samples")
     return [ok]
 
 

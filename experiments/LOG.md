@@ -22229,3 +22229,152 @@ rows, matching `metadata.json`'s `mini.n_mlps = 100`.
 2. `_try_load_prepared_split` swallows every exception and falls back to parquet
    silently. Neither of us can see that from here.
 3. The two-API resolution above, if a future move separates them.
+
+---
+
+# 2026-08-31 — RESULT WP0C+WP0D: a candidate can be certified without touching the shipped file, and 8 GiB is ENFORCED for the first time
+
+**Class:** IMPORTANT (instrument / enforcement). Contract `71bf62b`, committed
+before this code existed. No estimator byte, seed block, gate threshold,
+residual model, vault, protected human file, or submission changed. No truth was
+read.
+
+## Verdict
+
+Both blockers are closed, and one of them produced a number this repository has
+never had.
+
+**WP0D — the `8,192 MB` limit is no longer accounting.** `docs/CURRENT_STATE.md`
+called it *"the one constraint this host cannot test at all"* and, in the same
+paragraph, *"the one with the weakest provenance"*. It is now enforced for real,
+in a Linux child, with controls.
+
+## Predictions scored
+
+| # | prediction | outcome |
+|---|---|---|
+| C1 | v2.6.1 passes every section; counted FLOPs reproduce the anchor `137,600,326,656` | **HELD** — and see the correction below: the first run read `137,600,293,888`, exactly `32,768` low, because the child omitted the harness's in-window `materialise_predictions`. Adding it closed the gap **to zero, across two operating systems and two numpy versions** |
+| C2 | the multiplier is pinned at the `0.1` floor | **HELD** — `C/B = 0.0625734` |
+| C3 | scalar materializations during `predict` are `0` | **HELD** — counted through `__bool__`/`__float__`/`__int__`/`__index__`. Nothing here had ever counted them for the shipped file |
+| C4 | every mutation is caught **by its named section** | **HELD** — 10/10, `25/25` checks. Two of them exposed defects in the harness rather than in the certifier (below) |
+| C5 | certification writes nothing; `estimator.py` byte-identical, hashed **after** | **HELD** — `00240eb1e60810f5…` before and after |
+| C6 | the Linux child reports the applied soft limit **equal to** `8589934592` | **HELD** — read back with `getrlimit`, not inferred from "no exception" |
+| C7 | the negative control **dies** under the cap | **HELD** — `MemoryError`. The positive control (same allocation, no cap) **survives**, so the death is the cap and not the machine |
+| C8 | v2.6.1 completes under the real cap; peak recorded, value not predicted | **HELD** — and the number matters, see below |
+| C9 | default preflight GREEN 12/16, portability 99/99 | **HELD** — preflight GREEN 12/16; portability is now **103/103**, four checks having been added by the Skeptic repair in the same commit |
+
+## The number WP0D bought
+
+| quantity | value |
+|---|---:|
+| applied `RLIMIT_AS` soft limit | `8,589,934,592` bytes = exactly 8192 MB |
+| **VmPeak (address space — what `RLIMIT_AS` caps)** | **2,345.4 MB** |
+| VmHWM / peak RSS | 477.5 MB |
+| **headroom against the real cap** | **3.49x** |
+| counted FLOPs | `137,600,326,656` — equal to the Windows anchor |
+| largest returned array | 0.062 MB, against a 4 GiB cap |
+
+**This corrects a standing figure.** `CURRENT_STATE.md` recorded *"at most 8.9x
+headroom, an UPPER BOUND"* from Windows working-set and commit counters, and
+honestly added that the true `RLIMIT_AS` headroom is *"SMALLER by an unmeasured
+factor"*. The factor is now measured: **8.9x was optimistic by 2.55x, and the
+real headroom is 3.49x.** The caution in that paragraph was correct and is now
+quantified rather than asserted.
+
+Scope, stated: a WSL2 kernel applying the installed package's own default is not
+the grading server, whose `memory_limit_mb` appears in no `run_config` and no
+graded report this repository holds. No absolute second measured there transfers
+either.
+
+## What was built
+
+1. **`local_sim/certify_candidate.py`** — `--candidate` **required, no default**.
+   A default of `estimator.py` would let a certification of the shipped file be
+   mistaken for a certification of a candidate, which is the confusion the
+   command exists to remove. Eleven sections: `whest validate`; package/round
+   identity; the 30 invariants incl. the exact layer-1 closed form and
+   permutation equivariance; determinism in-process **and in two fresh
+   interpreters**; grader-array immutability by sha256; counted FLOPs, operation
+   count and multiplier; residual and per-MLP wall telemetry; **zero scalar
+   materializations**; memory accounting plus the Linux enforcement report; the
+   official `--runner subprocess` smoke; and a read-only proof taken **after**
+   the run.
+
+   It **cannot weaken the ship-file gate**: it adds no path through
+   `preflight.ps1` and writes nothing the gate reads. `preflight.ps1` still
+   certifies `estimator.py`, unchanged. This is the third exit the Track-0S
+   contract could not see when it recorded *"two honest exits and no third"*.
+
+2. **`local_sim/linux_memory_gate.py`** — applies `setrlimit(RLIMIT_AS, …)`
+   exactly as `whestbench/subprocess_worker.py` does, **reads the soft limit
+   back**, runs the candidate's own `predict` at `1024x16` under it, and reports
+   VmPeak/VmHWM. `subprocess_worker` catches four exception types, warns to
+   stderr and *runs on uncapped*, so "no exception" is not evidence — hence the
+   read-back and the two controls. `scripts/linux_stack_setup.sh` builds the
+   Linux venv (whestbench 0.16.0 / flopscope 0.12.0, the `pyproject.toml` pins).
+
+3. **`local_sim/test_certify_candidate.py`** — **25/25**. Ten mutations, each
+   declaring the check it expects to fail; a red run for any other reason is a
+   HARNESS FAILURE, the distinction `p1pre_fault_inject.py` was forced to learn
+   after an injection died on its own `SyntaxError` and was recorded as evidence.
+
+## Three defects the work found in itself, none of them in the thing under test
+
+- **The certifier demanded exact non-negativity.** v2.6.1 returns 7 of 65,536
+  entries at `-9.1e-17` against row means near `0.46` — about one ULP, `2.0e-17`
+  relative. A post-ReLU mean cannot be negative as a *quantity*, but a float64
+  sum landing on a near-zero neuron can round below it. The bar is now scaled to
+  the row and sits four orders above the observed noise; mutation **M4**
+  (`out - 0.05`) proves it still catches a structural sign error. This is a
+  previously unrecorded fact about the shipped file.
+- **`edge_cases.py` could not certify any candidate but v2.x.** It read
+  `est_mod._PRUNE_TAU` for a *banner* and `est._log2_samples` for the budget
+  ladder. WP0C's own positive control — a pure wrapper around the shipped file —
+  died on the first with an `AttributeError` before a single invariant ran, and
+  then failed the second with ten of them. Both are v2.x sampling-architecture
+  internals that **no `p2_candidate_architecture.py` candidate will have.** The
+  banner is now defensive; the ladder splits its two invariants, measuring
+  *"every rung degrades rather than throws"* for everyone and reporting
+  *"sample-count monotonicity"* as **NOT PROVABLE** where it is not measurable.
+  A skip is not a pass and is printed as such. `edge_cases.py` remains **30/30**
+  on the shipped file, and the wrapper now also reaches **30/30**.
+- **The first M9 injection never reached its target.** It added 64 matmuls
+  (~`4.1e11`) against a `2.2e12` budget and did not exhaust anything, so its
+  "the battery goes RED" was scored on two unrelated failures. It is now driven
+  by a tiny `--budget`, where the shipped path's fixed `~1.376e11` exhausts
+  immediately. Exactly the HARNESS FAILURE class the oracle exists to grade.
+
+## Raw artifacts
+
+| what | path |
+|---|---|
+| Linux 8-GiB enforcement report | `experiments/2026-08-31_wp0cd_certify/linux_memory_gate_v261.json` |
+| certification of the shipped file, **CERTIFIED 36/36** incl. the official subprocess smoke | `experiments/2026-08-31_wp0cd_certify/certify_v261_full.{json,txt}` |
+| the same without the smoke (32 passed, 1 named skip) | `experiments/2026-08-31_wp0cd_certify/certify_v261_nosmoke.{json,txt}` |
+| mutation suite, 25/25 | `experiments/2026-08-31_wp0cd_certify/test_certify_candidate.txt` |
+| default preflight, GREEN 12/16 | `experiments/2026-08-31_wp0cd_certify/preflight_default_wp0cd.txt` |
+
+## The end-to-end run, and what the smoke incidentally proved
+
+`certify_candidate.py --candidate estimator.py` returns **CANDIDATE CERTIFIED --
+36/36**, section 10 included. That smoke is the first official
+`--runner subprocess` run this repository has taken **since the dataset tag
+moved**, so it is also the first execution of the prepared-Arrow route WP0A-FIX
+discovered:
+
+- zero failed MLPs; live config `1024x16`, `lambda 0.0`, residual cap `0.4 s`;
+- worst graded-path residual `71.13 ms` -> **5.6x** headroom;
+- counted FLOPs `137,600,326,656`, multiplier `0.1000`, `C/B = 0.0625734`.
+
+Operationally it is not free: the run pulled the `prepared/mini` tree and took
+the local Hugging Face cache for this dataset from about 10 GB to **12 GB**. A
+CONFIRM is now a 6.26 GiB download the first time, where the parquet route
+fetched shards on demand. That is a cost to plan for, not a defect.
+
+## What this does NOT establish
+
+Nothing about accuracy, cost-effectiveness, or any candidate's score. A
+certification is **one input to promotion, not promotion** — `GAME_PLAN.md` § 6
+lists the rest, and this runs neither `preflight -Full`, nor a vault touch, nor
+a CONFIRM, nor a submission. The battery proves a candidate is *deployable*, not
+that it is *good*.

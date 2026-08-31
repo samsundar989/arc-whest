@@ -1,0 +1,35 @@
+WP0C - every certification section must be able to FAIL
+
+B  a CORRECT minimal candidate is not rejected by the battery
+  PASS  B: the correct minimal candidate is not REFUSED                 rc=3, 0 FAIL line(s)
+  PASS  B: ...and it produced no FAIL line at all                       clean
+  PASS  B: the certifier REFUSES to call its skips a pass               rc=3
+
+M  each mutation must fail its NAMED check
+  PASS  M[M1] (§4): output depends on wall-clock, not on mlp.seed -- the battery goes REDrc=1, 3 FAIL line(s)
+  PASS  M[M1]: ...and the NAMED check 'FRESH interpreters agree b' is one of themcaught
+  PASS  M[M2] (§3/4/5): returns (depth-1, width) -- the battery goes REDrc=1, 5 FAIL line(s)
+  PASS  M[M2]: ...and the NAMED check 'shape' is one of them            caught
+  PASS  M[M3] (§5): returns NaN in the first row -- the battery goes REDrc=1, 2 FAIL line(s)
+  PASS  M[M3]: ...and the NAMED check 'finite' is one of them           caught
+  PASS  M[M4] (§5): returns a large negative value, not float noise -- the battery goes REDrc=1, 2 FAIL line(s)
+  PASS  M[M4]: ...and the NAMED check 'negative beyond float roun' is one of themcaught
+  PASS  M[M5] (§5): writes into mlp.weights before predicting -- the battery goes REDrc=1, 2 FAIL line(s)
+  PASS  M[M5]: ...and the NAMED check 'UNCHANGED after predict' is one of themcaught
+  PASS  M[M6] (§8): calls float() on a flopscope value inside predict -- the battery goes REDrc=1, 2 FAIL line(s)
+  PASS  M[M6]: ...and the NAMED check 'ZERO scalar materializatio' is one of themcaught
+  PASS  M[M7] (§5): setup() raises -- the battery goes RED              rc=1, 4 FAIL line(s)
+  PASS  M[M7]: ...and the NAMED check 'setup() raised nothing' is one of themcaught
+  PASS  M[M8] (§5): predict() raises -- the battery goes RED            rc=1, 6 FAIL line(s)
+  PASS  M[M8]: ...and the NAMED check 'no run raised' is one of them    caught
+  PASS  M[M9] (§5): spends more than the budget it was handed -- the battery goes REDrc=1, 5 FAIL line(s)
+  PASS  M[M9]: ...and the NAMED check 'no run raised' is one of them    caught
+  PASS  M[M10] (§3): layer 1 scaled by 1/sqrt(2) -- finite, positive, and wrong -- the battery goes REDrc=1, 1 FAIL line(s)
+  PASS  M[M10]: ...and the NAMED check 'invariant suite passes on ' is one of themcaught
+
+R  the repository was not modified
+  PASS  R: estimator.py sha256 unchanged                                00240eb1e60810f5
+  PASS  R: the mutant directory is gone                                 C:\Users\samsu\AppData\Local\Temp\wp0c_mutants_icoqv6q2
+
+25/25 checks passed
+EXIT=0

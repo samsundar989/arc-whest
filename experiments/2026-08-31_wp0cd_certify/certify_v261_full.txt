@@ -1,0 +1,72 @@
+C:\Users\samsu\Documents\arc-whest\local_sim\certify_candidate.py:301: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+candidate certification -- READ-ONLY, TRUTH-FREE
+  candidate   estimator.py
+  sha256      00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec
+  shape       1024x16   B = 2,199,023,255,552
+  NOTE: this is NOT preflight and NOT a promotion. The ship-file gate is untouched;
+        `scripts/preflight.ps1` still certifies estimator.py.
+  (the subject IS the shipped file -- a known-good control run)
+
+1  the official grader contract
+  PASS  1: `whest validate` accepts the candidate                     Next: `whest run --estimator estimator.py --split mini`
+
+2  package and round identity
+  PASS  2: the LIVE round matches the INSTALLED package, field by field  73/73
+  PASS  2: whestbench is the real package, not local_sim's shim       env\lib\site-packages\whestbench\__init__.py
+  PASS  2: flopscope is the real package, not local_sim's shim        venv\lib\site-packages\flopscope\__init__.py
+
+3  shape generality, the exact layer-1 closed form, and equivariance
+  PASS  3: the invariant suite passes on THIS candidate               30/30 checks passed
+
+4  determinism, in-process and in a FRESH worker
+  PASS  4: two FRESH interpreters agree bitwise on seed 90000000201   6bcb98209b85d53f pid 38040 vs 11040
+  PASS  4: ...and bill identical FLOPs on seed 90000000201            137,600,293,888
+  PASS  4: the shape is (16, 1024) on seed 90000000201                [16, 1024]
+  PASS  4: two FRESH interpreters agree bitwise on seed 90000000202   2e316876931b9362 pid 43528 vs 52656
+  PASS  4: ...and bill identical FLOPs on seed 90000000202            137,600,293,888
+  PASS  4: the shape is (16, 1024) on seed 90000000202                [16, 1024]
+
+5-8  one metered run: immutability, cost, telemetry, scalar sync
+  PASS  5: setup() raised nothing                                     0.0000 s
+  PASS  5: setup is inside the 5 s ceiling (LOCAL, in-process -- the grader's window is larger)0.0000 s of 5.0 s
+  PASS  5: no run raised                                              clean
+  PASS  5: the grader's weight arrays are UNCHANGED after predict     sha256 before == after
+  PASS  5: every output has shape (depth, width)                      [16, 1024]
+  PASS  5: every output is finite                                     
+  PASS  5: no output is negative beyond float rounding (bar -4.6e-12, scaled to the row)most negative -9.126e-17, 7 entr(ies) of 65536, 2.0e-17 relative
+  PASS  5: no returned array approaches the 4 GiB single-array cap    0.062 MB
+  PASS  6: counted FLOPs are network-INDEPENDENT or explained         137,600,326,656
+  PASS  6: the multiplier is the score's own identity max(0.1, F/B)   0.100000  (C/B = 0.0625734, PINNED at the floor)
+  PASS  6: the operation ledger is non-empty                          443 ops
+  PASS  7: worst residual is under the 0.4 s cliff (LOCAL -- the authority is --runner subprocess)52.7 ms -> 7.59x LOCAL headroom
+  PASS  7: worst per-MLP wall is under the installed 120 s limit      0.353 s -> 340x
+  PASS  8: ZERO scalar materializations during predict (__bool__/__float__/__int__/__index__)counted, not asserted
+
+9  memory: accounting here, ENFORCEMENT only on Linux
+      peak working set 444.4 MB, peak commit 920.9 MB (test_deployment_envelope.peak_memory_bytes)
+      RLIMIT_AS caps ADDRESS SPACE, which exceeds both counters by an amount
+      no Windows counter reports. These are accounting, and a headroom computed
+      from them is an UPPER BOUND, never a margin.
+  PASS  9: a Linux 8-GiB enforcement report exists FOR THIS CANDIDATE experiments\2026-08-31_wp0cd_certify\linux_memory_gate_v261.json
+  PASS  9: the cap was APPLIED in that run (soft == requested)        8589934592
+  PASS  9: the negative control DIED under the cap                    a gate whose cap is not in force proves nothing
+  PASS  9: predict completed under the real cap                       VmPeak 2345.4 MB of 8192 MB
+
+10  the official subprocess runner -- DEPLOYMENT AUTHORITY
+  PASS  10: the official runner produced a report                     
+  PASS  10: zero failed MLPs                                          0 failed
+  PASS  10: the live config is the Phase-2 round                      1024x16, lambda 0.0, cap 0.4 s
+  PASS  10: worst GRADED-PATH residual is under the cliff             71.13 ms -> 5.6x
+      counted FLOPs 137,600,326,656   multiplier 0.1000   C/B 0.0625734
+
+R  the repository was not modified
+  PASS  R: the candidate file is byte-identical                       00240eb1e60810f5
+  PASS  R: estimator.py is byte-identical                             00240eb1e60810f5
+  PASS  R: no tracked source under estimator.py/scripts/local_sim is dirty because of this runinformational: M local_sim/edge_cases.py; ?? local_sim/certify_candidat
+
+  report -> experiments/2026-08-31_wp0cd_certify/certify_v261_full.json
+
+CANDIDATE CERTIFIED -- 36/36 checks passed
+  This is one input to promotion, not promotion. See GAME_PLAN.md section 6.
+EXIT=0
