@@ -14,7 +14,11 @@
                             flopscope 0.10 while the competition graded on
                             0.16 / 0.12 -- and nothing in it looked.
     2. mint provenance    - our MLPs are still bit-identical to the grader's, at
-                            the LIVE 1024x16 shape first
+                            the LIVE 1024x16 shape first, AND (WP0A, 2026-08-31)
+                            local_sim/test_p2_tag_drift.py: the v2-phase2 pin
+                            still describes the dataset those bytes came from,
+                            and the loader still takes the route we compared.
+                            Two commands, one step -- the denominator stays 16.
     3. invariant suite    - 30/30 on the SHIPPED file, not on a candidate
     4. whest validate     - the grader contract, run with the child's text
                             encoding OWNED by this gate and ASSERTED, not
@@ -28,10 +32,10 @@
                             THE gate -- still refuses percentile/BCa, still
                             requires a pre-registered threshold, and still
                             follows arithmetic when the estimands disagree
-    9. seed-ledger refusals - 44/44 negative tests: every guard still FIRES
+    9. seed-ledger refusals - 60/60 negative tests: every guard still FIRES
    10. vault integrity    - array sha256s vs the manifest and the seed->weights
                             map, not merely the counter. Costs no touch.
-   11. lifecycle evaluator - 54/54. The canonical grader lifecycle (one Estimator,
+   11. lifecycle evaluator - 56/56. The canonical grader lifecycle (one Estimator,
                             setup() once OFF-budget and TIMED), all six failure
                             paths PROVOKED not asserted, setup failure treated as
                             a run-level refusal the way the grader treats it, the
@@ -66,6 +70,13 @@
   The split is by COST, not by importance. Steps 13-14 are ~594 s of the total
   and cannot fire unless estimator.py or carriers.py moved; a 10-minute
   unconditional gate is a gate people learn to skip.
+
+  THE COUNTS ABOVE ARE UNDER TEST. `local_sim/test_enforcement_labels.py` parses
+  every "N/N" in this docstring and in docs/VALIDATION.md section 7, runs the
+  suite each one describes, and fails if they disagree. Three of them were wrong
+  on 2026-08-31 -- steps 9 (44 vs 60), 11 (54 vs 56) and the step-8 comment
+  (71 vs 98) -- and an audit had to find that by hand. Prose cannot enforce
+  prose; that suite can. Update a count here and it is checked, not trusted.
 
   ACCOUNTING: the denominator is always SIXTEEN, and every step that did not run
   is named in a red NOT-CHECKED block. A default run therefore reports
@@ -273,7 +284,18 @@ Step "1. official stack + round configuration" {
 }
 
 # --- 2. provenance: are our mints still the grader's mints? -------------------
-Step "2. mint provenance" { uv run python local_sim/mint_provenance.py }
+# Two commands, one step, because they answer the same question from opposite
+# ends. mint_provenance asks "do WE still produce the grader's bytes"; the
+# tag-drift regression asks "is the DATASET still the one those bytes came
+# from" -- and, since 2026-08-31, "does the loader still take the route we
+# compared". The second was added by WP0A after an independent Skeptic pointed
+# out that a 70-object comparison nothing in the gate enforced is a comparison
+# nobody re-runs. The denominator stays SIXTEEN; this is not a new step.
+Step "2. mint provenance + dataset pin" {
+    uv run python local_sim/mint_provenance.py
+    if ($LASTEXITCODE -ne 0) { return }
+    uv run python local_sim/test_p2_tag_drift.py
+}
 
 # --- 3. invariants on the SHIPPED file ----------------------------------------
 Step "3. invariant suite" { uv run python local_sim/edge_cases.py }
@@ -362,7 +384,7 @@ Step "7. seed ledger (consumption + source scan)" {
 
 # --- 8. the canonical competition scorer ---------------------------------------
 # local_sim/competition_score.py is the ONE place the grader's identity lives, and
-# every gate downstream reads its numbers. 71/71 asserts it is still bitwise equal
+# every gate downstream reads its numbers. 98/98 asserts it is still bitwise equal
 # to the installed whestbench on the scalar primitives, on the aggregate, and on
 # the real scoring loop INCLUDING both failure paths -- and carries the graded
 # fixture where the arithmetic and geometric estimands pick opposite winners.

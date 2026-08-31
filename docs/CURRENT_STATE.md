@@ -29,14 +29,27 @@ competition/repository/literature evidence is
   `experiments/board_snapshots/2026-08-31T1457Z_phase2_frontier_board.md`.
   Older figures below remain dated historical observations; never quote a board
   number without its timestamp.
-- **The `v2-phase2` tag moved from `ce926b7...` to `6a416f...`.** Read-only
-   comparison found all 70 source Parquet files and the README byte-identical; 153
-   prepared files were added and top-level metadata gained `prepared_splits`.
-   The content-addressed comparison is preserved at
-   `experiments/2026-08-31_phase2_tag_drift/source_manifest.tsv` (canonical source
-   manifest SHA-256 `3cb3e819...`). Existing Phase-2 CONFIRM bytes remain valid,
-   but `phase2_checklist.py` and its pinned manifest are stale. Repair
-  is IMPORTANT instrument work and is queued separately rather than hidden here.
+- **The `v2-phase2` tag moved from `ce926b7...` to `6a416f...`, and WP0A closed
+   it on 2026-08-31.** A read-only comparison of **all 226 objects at both
+   commits** shows: 70 source Parquet **unchanged**, README and `.gitattributes`
+   unchanged, **`metadata.json` changed**, **153 `prepared/` objects added**,
+   **nothing removed**. Both records are content-addressed and pinned in code
+   (`experiments/2026-08-31_phase2_tag_drift/{source,loader}_manifest.tsv`,
+   digests `3cb3e819...` and `29664dbb...`). The manifest is repinned to
+   `6a416f...` with the old commit preserved in `dataset.commit_lineage`, and
+   `local_sim/test_p2_tag_drift.py` now runs inside preflight step 2.
+   **THE LOADER ROUTE MOVED, and the first version of this entry did not know
+   it.** `whestbench 0.16.0` PREFERS a `prepared/<split>` Arrow tree over
+   `data/*.parquet` whenever `metadata.json` advertises `prepared_splits`
+   (`dataset.py:479-491`, `dataset_io.py:61-68`), and `whest run` is
+   non-streaming by default — so **an official Phase-2 CONFIRM today reads the
+   prepared tree, not the parquet**. On the one shard compared
+   (`experiments/2026-08-31_wp0a_manifest/prepared_vs_parquet.json`) the two
+   routes agree exactly: same schema, same 8 rows in the same order, `weights`
+   and `all_layer_means` **bitwise identical**. **13 of 14 `mini` shards and the
+   whole `full` split are still unverified.** Stored Phase-2 CONFIRM bytes were
+   produced from the parquet path before the prepared tree existed and remain
+   valid; a *new* CONFIRM takes the other route.
 - **TWO PHASE-2 SUBMISSIONS EXIST AS OF 2026-08-27, both graded, both with zero
   failed MLPs.** This supersedes the "zero Phase-2 submissions" line that stood
   here on 2026-08-26.

@@ -21687,3 +21687,177 @@ is opened read-only, exactly as `p1pre_fault_inject.py` was forced to do.
 re-run and its count recorded · default `preflight.ps1` GREEN 12/16 ·
 `verify_portability.py` 99/99 · `git diff --check` clean · a fresh independent
 Skeptic with this contract, the diff, the commands and the raw transcripts.
+
+---
+
+# 2026-08-31 — SKEPTIC PROVISIONAL on WP0A, ACCEPTED IN FULL: `data/` is NOT the whole input set
+
+**Verdict: PROVISIONAL.** Its central finding is correct, I reproduced it from
+the installed package, and the mechanism sentence WP0A rested on is **retracted**.
+Its second finding — that `SOURCE_EQUIVALENT` was reachable four ways it should
+not have been — is also correct and is now closed in code. Both repairs are in
+this entry; the WP0A headline survives, its **scope** does not.
+
+## Finding 1 — the premise was false, and the tag move added exactly the thing it called inert
+
+WP0A's mechanism was: *"every byte a mint, a CONFIRM score, or any
+shape-dependent result depends on is a function of the `data/*.parquet` objects
+and of the installed package — **never** of the repository's file count, its
+prepared-split artifacts, or the `prepared_splits` key in `metadata.json`."*
+
+**That is false for whestbench 0.16.0, and I verified it by reading the
+installed package rather than accepting the report:**
+
+- `whestbench/dataset_io.py:61-68` — *"Optional sibling tree of pre-prepared
+  HuggingFace Arrow artifacts. When present, `whestbench.load_dataset` **prefers
+  it over the parquet path**…"*
+- `whestbench/dataset.py:468, 479-491` — reads `md.get("prepared_splits")`, and
+  when `not streaming and split in prepared_splits` calls
+  `_try_load_prepared_split(...)` and **returns without ever touching `data/`**,
+  with a silent `except Exception: return None` fallback and no cross-check.
+- `whest run` is non-streaming by default (`cli.py:3127-3131`).
+
+**So an official Phase-2 CONFIRM run today reads `prepared/mini`, not
+`data/mini-*.parquet`** — 6.26 GiB of Arrow that WP0A's 70-row record does not
+cover. `SOURCE_PREFIX = "data/"` and the old mutation M4, which *refused* a
+`prepared/` path into the record, hard-coded the wrong boundary.
+
+### What was done about it, in the order it matters
+
+**1. The full tree was captured, read-only, at both commits — all 226 objects,
+not 70.** `experiments/2026-08-31_phase2_tag_drift/loader_manifest.tsv`
+(generator beside it), canonical digest
+`29664dbb64a02b8d8e26a213fcf741ee19d308a338520dbcea6c5b7d91901f2d`:
+
+| kind | status | count |
+|---|---|---:|
+| `data/**` source parquet | unchanged | **70** |
+| `README.md` | unchanged | 1 |
+| `.gitattributes` | unchanged | 1 |
+| `metadata.json` | **changed** | 1 |
+| `prepared/**` | **added** | **153** |
+| anything | removed | **0** |
+
+**2. The two routes were compared on real bytes, not reasoned about.**
+`prepared/mini/data-00000-of-00014.arrow` (538 MB, downloaded) against
+`data/mini-00000-of-00007.parquet`:
+
+- identical schema, no column added or missing;
+- the arrow shard holds the first **8** rows of the parquet shard, **in order**;
+- `mlp_id`, `mlp_name`, `mlp_seed`, `avg_variance` identical **in order** — row
+  order decides which 50 rows are publicly scored, so as-sets would not do;
+- `weights` and `all_layer_means` **bitwise identical on 8/8 rows,
+  `max|diff| = 0.0`**.
+
+Artifact `experiments/2026-08-31_wp0a_manifest/prepared_vs_parquet.json`,
+probe beside it. **Scope, stated rather than glossed: one of fourteen prepared
+shards against one of seven parquet shards. Thirteen `mini` shards and the whole
+`full` split are UNVERIFIED.**
+
+**3. The verdict now separates the two facts.** `SOURCE_EQUIVALENT` says the
+bytes did not move; a new `loader_path_changed` field says the *route to them*
+did, and the report prints the package line numbers and the functional check
+beside it. They are no longer one sentence.
+
+**Net effect on the WP0A conclusion:** stored Phase-2 mint/CONFIRM bytes were
+produced from the parquet path before the prepared tree existed, so they are
+untouched — the headline holds. A **future** CONFIRM takes the other route, and
+that is now a stated, measured, partially-verified condition instead of an
+unnoticed one.
+
+## Finding 2 — SOURCE_EQUIVALENT was reachable four ways it should not have been
+
+The old check recomputed a digest from a file's rows and compared it to **that
+same file's header**. A record certifying itself proves nothing. Four
+constructed tampers obtained `SOURCE_EQUIVALENT`:
+
+| tamper | old | now |
+|---|---|---|
+| rewrite one header line (`# new_commit:`) | SOURCE_EQUIVALENT | **UNKNOWN** |
+| forge BOTH hash columns of a row identically, re-stamp the digest | SOURCE_EQUIVALENT | **UNKNOWN** |
+| truncate to 5 of 70 rows, re-stamp the digest | SOURCE_EQUIVALENT | **UNKNOWN** |
+| `# removed_count: 999` | SOURCE_EQUIVALENT (and it *printed* "999 removed") | **UNKNOWN** |
+
+The fix is structural rather than a longer list: the expected digests, commit
+pair, row counts, object counts and kind/status census are **pinned in
+`p2_tag_drift.py`**, and `classify()` refuses on any violation. The old LOG
+sentence *"an attacker who repairs the header digest after tampering still gets
+`SOURCE_CHANGED`"* was true only of the single asymmetric shape M1 tested; it is
+**struck**, and the general claim is now what the code actually enforces. All
+four tampers are section **T** of `test_p2_tag_drift.py`, plus two more on the
+loader record.
+
+## Finding 3 — the coverage claim was enforced by a test literal nobody ran
+
+`test_p2_tag_drift.py` caught a truncated record only by comparing to its own
+`EXPECTED_ROWS = 70`, and the suite **was wired into neither
+`scripts/preflight.ps1` nor `scripts/verify_portability.py`**. Both halves are
+closed: coverage is enforced inside `classify()`, and the suite now runs inside
+**preflight step 2**, as a second command in the existing step so the
+denominator stays SIXTEEN. Step 2 is now *"mint provenance + dataset pin"* —
+`mint_provenance` asks whether we still produce the grader's bytes; this asks
+whether the dataset is still the one those bytes came from.
+
+## Finding 4 — a field named pinned_commit that was not the pin
+
+After the repin, `commit_lineage.pinned_commit` (`ce926b7d…`) no longer equalled
+`dataset.commit` (`6a416fa5…`), because it was hard-coded to the record's OLD
+endpoint. Renamed to `record_old_commit` / `record_new_commit`, with a separate
+`manifest_pin` the manifest writer fills — and a check that it equals
+`dataset.commit`.
+
+## Finding 5 — the "functional confirmation" was weaker, not stronger
+
+Accepted. `phase2_mint_parity.py` downloads `data/mini-00001-of-00007.parquet`,
+whose LFS sha256 is identical at both commits — **given P2, that check could not
+have failed.** It is one genuine touch of the new revision and no more. The
+prepared-vs-parquet comparison above is the check that could have failed, and
+did not.
+
+## What the Skeptic independently confirmed, and it matters
+
+It **re-queried Hugging Face itself**, paginated, at both commits, and
+re-derived the whole comparison from scratch: 70 `data/` objects at each commit
+(63 `full` + 7 `mini`), path sets identical, **zero differing hashes**, zero
+removed, 153 added, all under `prepared/`; README blob `37de9d91…` identical at
+both; counts 73 to 226; every row of `source_manifest.tsv` matching live in both
+hash columns **and** in size; the canonical digest recomputing to `3cb3e819…`.
+So the durable artifact nobody had re-checked **is now re-checked against the
+live tree by a context that did not build it.** It also re-ran
+`official_config` 73/73, `edge_cases` 30/30, `verify_portability` 99/99, and
+verified by git that `estimator.py` (`00240eb1…`), `competition_score.py`,
+`seed_blocks.py`, `seed_ledger.py`, `experiments/seed_ledger.jsonl`,
+`experiments/vault/` (touch log still one line), `docs/HUMAN_MODEL.md` and all of
+`scripts/` were byte-identical across `23b2ed3..79ec305`, and that contract
+`43b8f23` genuinely precedes result `79ec305`. It judged the mint-parity
+tolerances honest.
+
+## Verification after the repair
+
+`local_sim/test_p2_tag_drift.py` **74/74** (was 52) — including the four tampers,
+two loader-record tampers, seven structural refusals, and the functional
+prepared-vs-parquet section · `local_sim/p2_tag_drift.py` integrity **OK against
+the pinned constants** for both records · `phase2_checklist.py` section 2 against
+the live HF API · default `scripts/preflight.ps1` **GREEN 12/16** with step 2 now
+running the regression · `scripts/verify_portability.py` **99/99**.
+
+## Raw artifacts
+
+| what | path |
+|---|---|
+| full-tree comparison, 226 rows, and its generator | `experiments/2026-08-31_phase2_tag_drift/loader_manifest.tsv`, `capture_loader_manifest.py` |
+| prepared-vs-parquet functional comparison and probe | `experiments/2026-08-31_wp0a_manifest/prepared_vs_parquet.json`, `prepared_vs_parquet_probe.py` |
+| classification report | `experiments/2026-08-31_wp0a_manifest/p2_tag_drift_report.txt` |
+| regression transcript, 74/74 | `experiments/2026-08-31_wp0a_manifest/test_p2_tag_drift.txt` |
+| preflight after the repair | `experiments/2026-08-31_wp0a_manifest/preflight_default_wp0a_fix.txt` |
+
+## Still open, and stated rather than closed by assertion
+
+1. **Thirteen of fourteen `prepared/mini` shards and the whole `prepared/full`
+   tree are unverified.** Verifying `mini` completely costs a 6.26 GiB download;
+   `full` costs 62.6 GiB. Not done, not claimed.
+2. `_try_load_prepared_split` swallows every exception and falls back to parquet
+   silently, so a partially corrupt prepared tree would change which route a run
+   takes **without any signal**. No guard here can see that.
+3. The next tag move needs its own read-only capture. Until it has one it is
+   `UNKNOWN`, which is the alarm — by design.

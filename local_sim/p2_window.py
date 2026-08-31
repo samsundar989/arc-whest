@@ -12,13 +12,21 @@ is **drift from the full factorized-K3 prediction on identical networks**:
     D = sqrt( mean_i ( pred_arm[i] - pred_full[i] )^2 )   over the final layer
 
 Drift is **not** an error increment. The only sound thing to do with it is the
-triangle bracket on a same-population candidate RMSE,
+**reverse** triangle bracket on a same-population candidate RMSE,
 
-    max(0, RMSE_full - D)  <=  RMSE_cand  <=  RMSE_full + D
+    |RMSE_full - D|  <=  RMSE_cand  <=  RMSE_full + D
 
 carried with the full-K3 anchor's own interval and an explicit
 population-transfer caveat. Every score column this module prints is a
 **bracket**, and a bracket that straddles the control decides nothing.
+
+**Corrected 2026-08-31 (WP0B), and this docstring carried the refuted form for
+three days after the code was fixed.** It said `max(0, RMSE_full - D)`, which
+throws the lower bound away whenever `D > RMSE_full` -- true of every arm in
+this module's own panel. `bracket()` below was repaired to `|RMSE_full - D|`
+after an independent review found it, and that repair is what made GATE-W's
+kill *provable* rather than merely unendorsed. Only the prose was stale; no
+number in `experiments/LOG.md` was computed from the wrong form.
 
 ## The arms
 

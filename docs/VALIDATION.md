@@ -669,7 +669,7 @@ the number has moved.
 
 | tier | steps run | when |
 |---|---|---|
-| **default** | **12 of 16** — **1** official stack + round configuration (73/73, asserted against the *installed* package), **2** mint provenance (1024×16 first), **3** invariant suite (30/30), **4** `whest validate`, **5** ship-file identity, **6** vault seal, **7** seed ledger (60/60), **8** canonical scorer + the binding gate (98/98), **9** seed-ledger *refusals*, **10** vault integrity, **11** lifecycle evaluator (56/56), **12** counted-FLOP anchor vs the official runner | every change |
+| **default** | **12 of 16** — **1** official stack + round configuration (73/73, asserted against the *installed* package), **2** mint provenance (1024×16 first) **+ the dataset pin** (`local_sim/test_p2_tag_drift.py`, added 2026-08-31 by WP0A; two commands, one step, so the denominator stays 16), **3** invariant suite (30/30), **4** `whest validate`, **5** ship-file identity, **6** vault seal, **7** seed ledger consumption + source scan (no count; it reports CONSISTENT or refuses), **8** canonical scorer + the binding gate (98/98), **9** seed-ledger *refusals* (60/60), **10** vault integrity, **11** lifecycle evaluator (56/56), **12** counted-FLOP anchor vs the official runner | every change |
 | **`-Full`** | **16 of 16** — adds **13** shape parity, **14** carrier strength, **15** deployment envelope (+ what it cannot prove) **and its read-only proof** (`local_sim/test_envelope_readonly.py`, added by P1-PRE 2026-08-25), **16** official Phase-2 subprocess smoke, zero failures | **required** before any promotion, submission, or vault touch |
 
 > **Suite counts have been removed from the `-Full` row.** They moved three times
@@ -696,7 +696,14 @@ with the sixteen-step gate and are kept only as history.*
 
 The split is by **cost, not importance**.
 
-**Step names carry no check counts.** A count in a runtime label is a snapshot and goes stale on the next test added; this gate had three such bumps in a single day. The verdict is the script's exit code. The counts in the table above are documentation, updated deliberately.
+**Step names carry no check counts.** A count in a runtime label is a snapshot and goes stale on the next test added; this gate had three such bumps in a single day. The verdict is the script's exit code.
+
+**The counts in the table above are UNDER TEST, not merely documentation.**
+`local_sim/test_enforcement_labels.py` parses every `N/N` in this row and in
+`scripts/preflight.ps1`'s header, runs the suite each describes, and fails on a
+disagreement. Added 2026-08-31 (WP0B) because three counts were stale and this
+row also attached step 9's `60/60` to step **7**, which reports no count at all.
+Correcting the numbers alone would have left the next drift equally invisible.
 
 **The denominator is always 16, and a skipped step is never counted as a pass.**
 A default run reports `GREEN 12/16, 4 SKIPPED` and names the four in a red

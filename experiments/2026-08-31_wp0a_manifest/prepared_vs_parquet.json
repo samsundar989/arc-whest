@@ -1,0 +1,87 @@
+{
+  "artifact": "wp0a_prepared_vs_parquet",
+  "artifact_version": 1,
+  "question": "whestbench 0.16.0 prefers prepared/<split> Arrow over data/*.parquet whenever metadata.json advertises prepared_splits (dataset.py:479-491, dataset_io.py:61-68). The v2-phase2 tag move ADDED that tree. Do the two paths materialise the same rows, in the same order?",
+  "revision": "v2-phase2",
+  "arrow_shard": "prepared/mini/data-00000-of-00014.arrow",
+  "parquet_shard": "data/mini-00000-of-00007.parquet",
+  "arrow_rows": 8,
+  "parquet_rows": 16,
+  "rows_compared": 8,
+  "arrow_columns": [
+    "mlp_id",
+    "mlp_name",
+    "mlp_seed",
+    "weights",
+    "all_layer_means",
+    "final_means",
+    "avg_variance",
+    "sampling_budget_breakdown"
+  ],
+  "parquet_columns": [
+    "mlp_id",
+    "mlp_name",
+    "mlp_seed",
+    "weights",
+    "all_layer_means",
+    "final_means",
+    "avg_variance",
+    "sampling_budget_breakdown"
+  ],
+  "columns_added_by_prepared": [],
+  "columns_missing_from_prepared": [],
+  "scalar_columns": {
+    "mlp_id": {
+      "present": true,
+      "identical_in_order": true,
+      "identical_as_sets": true,
+      "first_arrow": "0",
+      "first_parquet": "0"
+    },
+    "mlp_name": {
+      "present": true,
+      "identical_in_order": true,
+      "identical_as_sets": true,
+      "first_arrow": "logan-fitzgerald",
+      "first_parquet": "logan-fitzgerald"
+    },
+    "mlp_seed": {
+      "present": true,
+      "identical_in_order": true,
+      "identical_as_sets": true,
+      "first_arrow": "6319981554997072999",
+      "first_parquet": "6319981554997072999"
+    },
+    "avg_variance": {
+      "present": true,
+      "identical_in_order": true,
+      "identical_as_sets": true,
+      "first_arrow": "0.07867601418567388",
+      "first_parquet": "0.07867601418567388"
+    }
+  },
+  "array_columns": {
+    "weights": {
+      "present": true,
+      "rows": 8,
+      "bitwise_identical_rows": 8,
+      "max_abs_difference": 0.0,
+      "first_row_digests_arrow_vs_parquet": [
+        "74eee9d1435b5b76",
+        "74eee9d1435b5b76"
+      ]
+    },
+    "all_layer_means": {
+      "present": true,
+      "rows": 8,
+      "bitwise_identical_rows": 8,
+      "max_abs_difference": 0.0,
+      "first_row_digests_arrow_vs_parquet": [
+        "1c7ab118bdd1830d",
+        "1c7ab118bdd1830d"
+      ]
+    }
+  },
+  "verdict": "PREPARED_MATCHES_PARQUET",
+  "scope": "One of 14 prepared shards against one of 7 parquet shards. It settles whether the two paths agree on the rows they share; it does not verify the other 13 shards, nor the `full` split, nor that a future re-bake of the prepared tree would still agree."
+}

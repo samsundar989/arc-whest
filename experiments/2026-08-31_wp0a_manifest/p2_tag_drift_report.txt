@@ -1,16 +1,22 @@
 Phase-2 dataset tag drift
-  record          experiments/2026-08-31_phase2_tag_drift/source_manifest.tsv
+  source record   experiments/2026-08-31_phase2_tag_drift/source_manifest.tsv
+  loader record   experiments/2026-08-31_phase2_tag_drift/loader_manifest.tsv
   old commit      ce926b7d1ced65faa668c01b94a43f8c4f43783d
   new commit      6a416fa5fb45cade1e9ad34320204853f5d4a5f6
   source objects  70   (changed 0)
   files           73 -> 226   (+153 / -0)
-  digest recomputed 3cb3e81907069725662edc011638b095b399dafe42d35b97ea5456ece0cb8c66
-  digest recorded   3cb3e81907069725662edc011638b095b399dafe42d35b97ea5456ece0cb8c66
-  digest reproduces True
+  source digest   3cb3e81907069725662edc011638b095b399dafe42d35b97ea5456ece0cb8c66
+  integrity       OK against the pinned constants
+  loader digest   29664dbb64a02b8d8e26a213fcf741ee19d308a338520dbcea6c5b7d91901f2d
+  loader census   metadata:changed=1, other:unchanged=1, prepared:added=153, readme:unchanged=1, source:unchanged=70
+  loader integ.   OK against the pinned constants
 
   tag-drift verdict: SOURCE_EQUIVALENT  (source objects 70, changed 0)
-    all 70 source objects are byte-identical; 153 objects were added and 0 removed
+    all 70 source objects are byte-identical and nothing was removed
     evidence at the pinned commit remains valid: YES
     canonical source digest 3cb3e81907069725
     record: experiments/2026-08-31_phase2_tag_drift/source_manifest.tsv
-    NOTE: only the executable pin is stale. Prepared/metadata objects were added (73 -> 226 files); no source byte moved.
+    loader census: metadata:changed=1, other:unchanged=1, prepared:added=153, readme:unchanged=1, source:unchanged=70
+    *** THE LOADER ROUTE MOVED. metadata.json now advertises prepared_splits, and whestbench 0.16.0 PREFERS prepared/<split> Arrow over data/*.parquet (dataset.py:479-491). Source bytes are unchanged; the path to them is not. ***
+    functional check on one shard: PREPARED_MATCHES_PARQUET (all_layer_means 8/8 bitwise, weights 8/8 bitwise; One of 14 prepared shards against one of 7 parquet shards. I)
+    NOTE: the executable pin is stale (bookkeeping). Prepared/metadata objects were added (73 -> 226); no source byte moved and nothing was removed.

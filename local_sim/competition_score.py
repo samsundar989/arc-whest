@@ -562,9 +562,17 @@ def paired_compare(
     """Paired comparison of two per-MLP score vectors on the same MLPs.
 
     Primary statistic: the paired ARITHMETIC score difference with a paired
-    bootstrap over MLPs. The geometric gain is returned too, because
-    `docs/VALIDATION.md` 2b still makes it the binding gate and because a
-    disagreement between the two is itself information.
+    bootstrap over MLPs. The geometric gain is returned too, as a **stability
+    DIAGNOSTIC with no authority over an outcome**, because a disagreement
+    between the two estimands is itself information.
+
+    **Corrected 2026-08-31 (WP0B).** This docstring said the geometric gain was
+    returned "because `docs/VALIDATION.md` 2b still makes it the binding gate".
+    That stopped being true on 2026-08-20: §2b-i binds the paired arithmetic
+    difference, and `Verdict` below says so explicitly. One file asserting two
+    different binding statistics about a promotion is exactly the drift this
+    repository keeps losing entries to, and no behaviour here ever matched the
+    stale sentence -- `decide()` has always read the arithmetic difference.
 
     WHICH INTERVAL TO READ — measured, not assumed. `local_sim/coverage_lab.py`
     ran 192 fresh 256x32 networks (block D18, GT 2^22), four real estimator arms

@@ -1,0 +1,55 @@
+WP0B - the enforcement layer's stated coverage, under test
+
+A  every documented N/N matches the suite it names
+  PASS  A: suite 'official_config' runs green and reports a count         73/73, rc=0
+  PASS  A: suite 'edge_cases' runs green and reports a count              30/30, rc=0
+  PASS  A: suite 'competition_score' runs green and reports a count       98/98, rc=0
+  PASS  A: suite 'seed_ledger_refusals' runs green and reports a count    60/60, rc=0
+  PASS  A: suite 'lifecycle' runs green and reports a count               56/56, rc=0
+  PASS  A: preflight.ps1 claims edge_cases = 30/30                        suite reports 30/30
+  PASS  A: preflight.ps1 claims competition_score = 98/98                 suite reports 98/98
+  PASS  A: preflight.ps1 claims competition_score = 98/98                 suite reports 98/98
+  PASS  A: preflight.ps1 claims seed_ledger_refusals = 60/60              suite reports 60/60
+  PASS  A: preflight.ps1 claims lifecycle = 56/56                         suite reports 56/56
+  PASS  A: preflight.ps1 claims shape_parity = 27/27 (not measured this run)slow suite; run with --full to check it
+  PASS  A: preflight.ps1 claims carriers = 48/48 (not measured this run)  slow suite; run with --full to check it
+  PASS  A: VALIDATION.md claims official_config = 73/73                   suite reports 73/73
+  PASS  A: VALIDATION.md claims edge_cases = 30/30                        suite reports 30/30
+  PASS  A: VALIDATION.md claims competition_score = 98/98                 suite reports 98/98
+  PASS  A: VALIDATION.md claims seed_ledger_refusals = 60/60              suite reports 60/60
+  PASS  A: VALIDATION.md claims lifecycle = 56/56                         suite reports 56/56
+  PASS  A: VALIDATION.md claims edge_cases = 30/30                        suite reports 30/30
+  PASS  A: VALIDATION.md carries no count where none exists               step 7 (consumption + source scan) reports no count; a number there is step 9's, mis-attached
+  PASS  A: preflight.ps1 carries no count where none exists               step 7 reports no count
+  PASS  A: 'official_config' is claimed by at least one document          otherwise the label is unguarded
+  PASS  A: 'edge_cases' is claimed by at least one document               otherwise the label is unguarded
+  PASS  A: 'competition_score' is claimed by at least one document        otherwise the label is unguarded
+  PASS  A: 'seed_ledger_refusals' is claimed by at least one document     otherwise the label is unguarded
+  PASS  A: 'lifecycle' is claimed by at least one document                otherwise the label is unguarded
+
+B  the label checker is not vacuous -- mutate a label, it must complain
+  PASS  B: a wrong count at preflight step 9 is DETECTED                  60/60 -> 61/61, mismatch seen: True
+  PASS  B: a wrong count at preflight step 11 is DETECTED                 56/56 -> 57/57, mismatch seen: True
+  PASS  B: a wrong count at VALIDATION step 8 is DETECTED                 98/98 -> 99/99, mismatch seen: True
+  PASS  B: a wrong count at VALIDATION step 9 is DETECTED                 60/60 -> 61/61, mismatch seen: True
+  PASS  B: reintroducing the step-7 mis-attachment is DETECTED            the exact 2026-08-31 defect, put back on purpose
+  PASS  B: ...and the mutation actually changed the document              a no-op mutation would make the check above vacuous
+
+C  the two guards whose stated coverage moved still FIRE when removed
+  PASS  C: the UNMUTATED mirror reproduces 'seed_ledger_refusals' exactly mirror 60/60 vs repo 60/60
+  PASS  C: the UNMUTATED mirror reproduces 'lifecycle' exactly            mirror 56/56 vs repo 56/56
+  PASS  C[S1]: the injection has a unique target to edit                  1/1 edits applied in local_sim\seed_ledger.py
+  PASS  C[S1]: step 9 -- the SINGLE_USE second-claim refusal is neutered -- the suite goes REDrc=1, 3 FAIL line(s)
+  PASS  C[S1]: ...and the NAMED guard is the one that fails               'a SECOND claim on D17 is refused even on dis...'
+  PASS  C[S1]: the mirror is restored to green after the injection        60/60
+  PASS  C[L1]: the injection has a unique target to edit                  1/1 edits applied in local_sim\lifecycle_eval.py
+  PASS  C[L1]: step 11 -- the residual-cliff failure path stops firing -- the suite goes REDrc=1, 6 FAIL line(s)
+  PASS  C[L1]: ...and the NAMED guard is the one that fails               'L4: a 1e-9 s residual limit trips the residu...'
+  PASS  C[L1]: the mirror is restored to green after the injection        56/56
+  PASS  C: the scratch mirror is removed                                  C:\Users\samsu\AppData\Local\Temp\wp0b_guard_mirror_vw3t219f
+
+R  the two documents were opened read-only
+  PASS  R: preflight.ps1 sha256 unchanged                                 6722b89c1540acfd
+  PASS  R: VALIDATION.md sha256 unchanged                                 ad0932f1c25fd8d5
+
+44/44 checks passed

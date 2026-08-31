@@ -308,7 +308,7 @@ def build(offline: bool = False) -> dict:
             # MEASURED relationship between that commit and a later one; see
             # `local_sim/p2_tag_drift.py`.
             "commit": commit,
-            "commit_lineage": lineage_block(),
+            "commit_lineage": dict(lineage_block(), manifest_pin=commit),
             "created_at_utc": meta.get("created_at_utc"),
             "schema_version": meta.get("schema_version"),
             "seed_protocol": meta.get("seed_protocol"),
@@ -481,11 +481,12 @@ def _refresh_lineage() -> int:
     block = lineage_block()
     block["refreshed_at_utc"] = _dt.datetime.now(_dt.timezone.utc).isoformat()
     pinned = m["dataset"]["commit"]
+    block["manifest_pin"] = pinned
     # The record describes ONE transition. It is the right lineage for this
     # manifest only if the manifest sits at one of its two endpoints -- before
     # the repin, or after it. Any other pin means the record is about a
     # different move and must not be attached.
-    endpoints = (block["pinned_commit"], block["source_equivalent_commit"])
+    endpoints = (block["record_old_commit"], block["record_new_commit"])
     if pinned not in endpoints:
         raise SystemExit(
             "REFUSED: this manifest is pinned at %s, which is neither endpoint "
@@ -497,8 +498,9 @@ def _refresh_lineage() -> int:
         fh.write(json.dumps(m, indent=2) + NL)
     print("dataset.commit_lineage refreshed in %s"
           % os.path.relpath(OUT, _ROOT))
-    print("  pinned            %s" % block["pinned_commit"])
-    print("  source-equivalent %s" % block["source_equivalent_commit"])
+    print("  manifest pin      %s" % block["manifest_pin"])
+    print("  record old commit %s" % block["record_old_commit"])
+    print("  record new commit %s" % block["record_new_commit"])
     print("  status            %s" % block["status"])
     print("  source objects    %d (changed %d)"
           % (block["source_objects"], block["source_objects_changed"]))

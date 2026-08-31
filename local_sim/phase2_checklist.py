@@ -173,10 +173,20 @@ def dataset_tags():
 
     lin = d.get("commit_lineage")
     if lin:
-        print(f"  lineage: pinned {lin['pinned_commit'][:12]} -> recorded "
-              f"{str(lin['source_equivalent_commit'])[:12]} "
+        print(f"  lineage: record {str(lin.get('record_old_commit'))[:12]} -> "
+              f"{str(lin.get('record_new_commit'))[:12]}, manifest pinned at "
+              f"{str(lin.get('manifest_pin'))[:12]} "
               f"({lin['status']}, {lin['source_objects']} source objects, "
               f"{lin['source_objects_changed']} changed)")
+        ldr = lin.get("loader")
+        if ldr:
+            print(f"  loader:  {ldr['objects_compared']} objects compared; "
+                  f"route changed = {ldr['loader_path_changed']}; "
+                  f"functional check {ldr['functional_check']}")
+        else:
+            print("  !! no LOADER record in the lineage. data/ is NOT the whole")
+            print("     input set: whestbench prefers prepared/<split> Arrow when")
+            print("     metadata.json advertises prepared_splits.")
     else:
         print("  !! the manifest carries no dataset.commit_lineage. Refresh it:")
         print("       uv run python local_sim/phase2_manifest.py --refresh-lineage")
