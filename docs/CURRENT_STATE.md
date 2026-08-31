@@ -5,7 +5,7 @@ graded submissions, v2.7 is rank 53/83, full factorized K3 remains the accuracy
 oracle, W-EFF and late-window K3 are closed, and the immediate candidate-producing
 questions are a submission-legal structured carrier plus faithful augmented-K2 /
 query-directed K3 response.** This file says where execution stands;
-[`GAME_PLAN.md`](GAME_PLAN.md) is the only active architecture/roadmap;
+[`GAME_PLAN.md`](GAME_PLAN.md) is the only active architecture and implementation plan;
 [`VALIDATION.md`](VALIDATION.md) is binding for measurement; the newest entries at
 the bottom of `experiments/LOG.md` contain the evidence narrative. The dated
 competition/repository/literature evidence is
@@ -751,7 +751,7 @@ only have licensed starting that port.
 | need | source |
 |---|---|
 | current status and next action | this file |
-| active research hypotheses and execution plan | `docs/GAME_PLAN.md` |
+| active architecture, modules, work packages, tests, and decision sequence | `docs/GAME_PLAN.md` |
 | current rules/leaderboard/research evidence | `docs/PHASE2_FRONTIER_AUDIT_2026-08-31.md` |
 | historical pre-W-EFF/window frontier audit | `docs/PHASE2_FRONTIER_AUDIT_2026-08-28.md` |
 | launch-week historical audit | `docs/PHASE2_LIVE_AUDIT_2026-08-24.md` |
@@ -760,12 +760,13 @@ only have licensed starting that port.
 | operational traps | `docs/GOTCHAS.md` |
 | contracts, results, Skeptic verdicts | bottom of `experiments/LOG.md` |
 | independent review brief | `docs/SKEPTIC.md` |
-| Claude implementation prompt | `docs/CLAUDE_CODE_HANDOFF.md` |
+| completion-oriented Claude implementation prompt | `docs/CLAUDE_CODE_HANDOFF.md` |
 | contribution manuscript | `docs/writeup-draft.md` — STALE/DO NOT SUBMIT until a STRATEGIC claim review |
 
-The old frontier packets and handoffs are superseded. Stub files remain only where
-source comments/tools link to their historical names; they redirect here and must
-not be treated as plans.
+The old frontier packets and handoffs are superseded. The redundant Phase-2
+frontier redirect was removed on 2026-08-31. Minimal stubs remain only where source
+comments/tools link to their historical names; they redirect here and must not be
+treated as plans.
 
 ## Current deployed and research state
 
@@ -832,8 +833,9 @@ joint-state augmented K2 is open.
 
 ## Live frontier and research decision
 
-**The sole active research program is the 2026-08-31 `GAME_PLAN.md`.** It orders
-falsifiable hypotheses; it does not establish either nominee as a winning
+**The sole active implementation program is the 2026-08-31 `GAME_PLAN.md`.** It
+specifies module boundaries, work packages, tests, and falsifiable hypotheses; it
+does not establish either nominee as a winning
 architecture. Phase-2 leader code is private and no fixed basis count is confirmed.
 The current cost cluster is consistent with roughly 16,384 dense forward
 directions; eight antipodal MUB bases are one exact realization of that envelope,
@@ -877,20 +879,18 @@ the K2 path itself roughly halves, which would widen it to `~0.069 B`.
 **Nothing measured so far is worth putting in it**: a 2-layer exact-K3 window
 fits at `0.0117 B` and improves plain K2 by `0.37%`.
 
-### Same-day execution boundary — 2026-08-28 (HISTORICAL: it ran, and it ended in a kill)
+### Closed 2026-08-28 attempt
 
-`GAME_PLAN.md` §4 was the bounded handoff for that attempt and is **not an
-instruction now**. It named two honest outcomes and produced the second: W-EFF
-failed its cost screen, the late-window screen failed its drift gate, so the
-frozen candidate, the paired decision and the deployment packet never began.
-**No truth block was spent, no seed block claimed, no candidate built, nothing
-submitted.**
+The W-EFF and late-window attempt ended in the two kills above. No truth block was
+spent, no seed block claimed, no candidate built, and nothing submitted. Its
+same-day execution plan has been removed from the active `GAME_PLAN.md`; the
+contracts and results remain in `experiments/LOG.md` and git history.
 
-**The next action is `GAME_PLAN.md` §8 as revised**, not this paragraph: close the
-grader-legal carrier constructor/deployment gap, then freeze the carrier objective
-and nested basis panel; run faithful augmented-K2 parity and a truth-free adjoint-K3
-prototype in parallel. The live-shape `k3pre` confirmation is useful but no longer
-blocks candidate-producing work.
+**The next action is `GAME_PLAN.md` §8, *Session execution order and completion
+definition*:** remove the systems blockers, close the grader-legal carrier path,
+freeze its objective/panel, implement faithful AUGMENT and a truth-free adjoint-K3
+prototype, then deliver the integrated live-shape research architecture. The
+optional `k3pre` confirmation must not delay candidate-producing work.
 
 The carrier, faithful augmented-K2 and response tracks remain part of the target
 architecture, but none is allowed into a candidate without completing its own
@@ -1116,13 +1116,14 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 | 0H | P1-PRE: D1–D3 evaluator hardening | **IMPORTANT** | **CLOSED** — seventh independent pass ACCEPT; 15 named mutations and current durable record verified |
 | 0S | Phase-2 canary + calibrated submission | STRATEGIC | **CLOSED — SHIPPED AND GRADED.** #328662 and #328664, zero failures; v2.7 is rank 53/83 at the current snapshot |
 | 0C | K2 scalar calibration | DESIGN | **EXHAUSTED.** 2.96x transfer is real; multiplicative state gains collapse to output scale and non-commuting layer scalars did not transfer |
-| 0D | continuity repair: docs, board, wall semantics | ROUTINE, then IMPORTANT for enforcement | 2026-08-31 audit refreshed the active docs and corrected the per-MLP wall model; graded-total fixtures, two stale instrument docstrings, stale preflight count labels (`44/44`, `54/54` vs actual `60/60`, `56/56`), and the VALIDATION step-number mapping remain separate IMPORTANT work |
-| 0E | Phase-2 manifest/tag-drift repair | IMPORTANT | pending under a fresh contract; the durable old/new LFS manifest proves all 70 source Parquet objects unchanged, so old CONFIRM results remain valid while the executable pin stays stale |
-| 0F | Phase-2 evidence-block allocation | IMPORTANT | pending after truth-free power analysis and before labels; register a disjoint DESIGN-replication block and a distinct SINGLE_USE DECIDE block, then test, preflight, and obtain an independent Skeptic |
+| WP0A | Phase-2 manifest/tag-drift repair | IMPORTANT | pending under a fresh contract; the durable old/new LFS manifest proves all 70 source Parquet objects unchanged, so old CONFIRM results remain valid while the executable pin stays stale |
+| WP0B–D | test-label repair, candidate-selectable certification, Linux 8-GiB enforcement | IMPORTANT, separately contracted | pending; complete before candidate engineering needs them, while preserving the existing ship-file gate |
+| WP0E | Phase-2 evidence-block allocation | IMPORTANT | pending only after truth-free power analysis and before labels; register a disjoint DESIGN-replication block and a distinct SINGLE_USE DECIDE block, then test, preflight, and obtain an independent Skeptic |
 | 1 | W-EFF exact K3 representative price/parity | IMPORTANT | **CLOSED 2026-08-28 — MEASURED AND KILLED.** `1.0723 B` measured / `1.0732 B` whole-path against a `<= 0.35 B` screen, FAIL by `3.0664x`. Parity exact, zero materializations, zero leaks, bin reconciliation closes exactly. **Two** independent PROVISIONAL passes, both accepted in full; the second found an error inside the first correction |
 | 2 | late-window / age-window K3 imitation | IMPORTANT | **CLOSED 2026-08-28 — GATE-W FAILS, provably.** Every window arm's score floor is `2.09x`–`4.65x` worse than graded v2.7. Independent PROVISIONAL accepted: the *verdict* stands and is stronger; the *attribution* was retracted |
-| 3 | grader-legal carrier constructor, objective, nested panel | IMPORTANT then STRATEGIC | **highest priority open path**; close byte parity/setup/scalar-sync/memory first, then select by paired adjusted score, not the 8-basis fingerprint |
-| 4 | faithful augmented-K2 plus query-directed K3 response | IMPORTANT then STRATEGIC | pending in parallel; standalone state, adjoint-response, and checkpoint-reference estimands stay separate |
+| WP1–2 | grader-legal carrier constructor, objective, nested panel | IMPORTANT then STRATEGIC | **highest priority candidate path after WP0**; close byte parity/setup/scalar-sync/memory first, then select by paired adjusted score, not the 8-basis fingerprint |
+| WP3–4 | faithful augmented-K2 plus query-directed K3 response | IMPORTANT then STRATEGIC | pending in parallel after WP0; standalone state, adjoint-response, and checkpoint-reference estimands stay separate |
+| WP5 | integrated live-shape research architecture | IMPORTANT | pending; at least one surviving branch must run end to end and pass candidate certification before labels |
 | 5 | neuron-specific mixture / rolled-forward correction | STRATEGIC | pending after a deployable carrier or state path exists |
 | 6 | integrated SINGLE_USE decision and robustness | STRATEGIC | pending |
 | 7 | public CONFIRM / authorised Phase-2 vault / two nominees | STRATEGIC | pending |

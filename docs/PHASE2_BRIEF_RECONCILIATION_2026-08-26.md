@@ -1,7 +1,7 @@
 # PHASE2_BRIEF_RECONCILIATION_2026-08-26.md
 
 > **HISTORICAL — superseded by `CURRENT_STATE.md`, `GAME_PLAN.md`, and
-> `PHASE2_FRONTIER_AUDIT_2026-08-28.md`.** Do not execute present-tense actions in
+> `PHASE2_FRONTIER_AUDIT_2026-08-31.md`.** Do not execute present-tense actions in
 > this file. Since it was written, Rules v14 resolved the two-designation/default
 > rule, submissions #328662 and #328664 graded with zero failures, full K3 measured
 > `4.0047e-8` on DESIGN (GT-noise `1.155e-9`) and `3.9249e-8` on organiser CONFIRM

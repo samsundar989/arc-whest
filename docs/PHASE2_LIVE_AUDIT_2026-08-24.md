@@ -1,7 +1,7 @@
 # Phase 2 live competition and research audit — 2026-08-24
 
 > **HISTORICAL LAUNCH-WEEK SNAPSHOT.** This report is superseded by
-> `PHASE2_FRONTIER_AUDIT_2026-08-28.md`. Do not execute its present-tense actions or
+> `PHASE2_FRONTIER_AUDIT_2026-08-31.md`. Do not execute its present-tense actions or
 > use its leaderboard, submission, rules, package, or research-order claims as
 > current. Use `CURRENT_STATE.md`, `GAME_PLAN.md`, and
 > `CLAUDE_CODE_HANDOFF.md`.

@@ -12,11 +12,9 @@ https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026
 | Path | What |
 |---|---|
 | `docs/CURRENT_STATE.md` | **Where we stand right now**: baseline, closed lanes, open questions, next actions, the clock. **Start here to work.** |
-| `docs/GAME_PLAN.md` | **The active research program:** candidate architecture, experiment order, falsifiers, gates, timeline, and completion definition. |
-| `docs/CLAUDE_CODE_HANDOFF.md` | Copy-ready prompt for a new Claude Code Builder to execute the plan. |
+| `docs/GAME_PLAN.md` | **The active implementation plan:** ideal architecture, module boundaries, work packages, tests, evidence sequence, kill rules, and completion definition. |
+| `docs/CLAUDE_CODE_HANDOFF.md` | Copy-ready completion prompt for Claude Code to build every safe truth-free component and a runnable live-shape candidate. |
 | `docs/PHASE2_FRONTIER_AUDIT_2026-08-31.md` | Current Phase-2 rules, board, discussion, literature, infrastructure verdict, and evidence behind the plan. |
-| `docs/PHASE2_FRONTIER_AUDIT_2026-08-28.md` | Historical pre-W-EFF/window snapshot; superseded where the 2026-08-31 audit differs. |
-| `docs/PHASE2_LIVE_AUDIT_2026-08-24.md` | Historical launch-week audit; superseded where the 2026-08-28 audit differs. |
 | `AGENTS.md` | The cross-agent repository operating contract. Any coding agent reads this first; `CLAUDE.md` imports it. |
 | `docs/SKEPTIC.md` | The independent-falsifier brief. `.claude/agents/skeptic.md` and `.codex/agents/skeptic.md` are thin adapters that load it. |
 | `estimator.py` | **The shipped submission file** (v2.6.1). Self-contained; only imports allowed in the grader sandbox. Two Phase-2 submissions are already public; neither is a winning architecture. |
@@ -35,11 +33,13 @@ https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026
 ### Document authority
 
 Only three files direct current work: `CURRENT_STATE.md` for status,
-`GAME_PLAN.md` for the architecture and decision order, and
-`CLAUDE_CODE_HANDOFF.md` for the same-day Builder prompt. Dated audits are evidence
-snapshots, not action plans. `FRONTIER_ARCHITECTURE_PROPOSAL.md`,
-`PHASE2_FRONTIER_ARCHITECTURE.md`, and `MOONSHOT.md` are archive redirect stubs kept
-only because historical code and experiment records cite those filenames.
+`GAME_PLAN.md` for the architecture and implementation order, and
+`CLAUDE_CODE_HANDOFF.md` for the completion-oriented Builder prompt. Dated audits
+are evidence snapshots, not action plans. `FRONTIER_ARCHITECTURE_PROPOSAL.md` and
+`MOONSHOT.md` remain minimal archive redirects only because historical code and
+experiment records cite those filenames. The redundant
+`PHASE2_FRONTIER_ARCHITECTURE.md` redirect was removed on 2026-08-31; its original
+content remains in git history.
 `PHASE2_BRIEF_RECONCILIATION_2026-08-26.md` and
 `PHASE2_LIVE_AUDIT_2026-08-24.md` are superseded dated evidence. The write-up and
 organizer-email drafts are quarantined and must not be quoted or sent.
@@ -113,8 +113,9 @@ a separate IMPORTANT repair before it can be called current.
 
 The shipped v2.6.1 path is basic Gaussian K2 propagation; the best public v2.7
 adds a final scalar calibration. Neither is competitive. Full-tower exact W-EFF
-and K2-prefix late-window K3 have both been measured and killed. The active program
-develops two different nominees: (1) an exact-radial structured angular carrier in
+and K2-prefix late-window K3 have both been measured and killed. The active plan
+builds two different nominees: (1) an exact-radial structured angular carrier in
 the live board's roughly 16k-direction operating envelope, and (2) corrected f32
-K2 plus faithful augmented K2 and a query-directed K3 response. The evidence,
-falsifiers, and execution order are in `docs/GAME_PLAN.md`.
+K2 plus faithful augmented K2 and a query-directed K3 response. The exact module
+boundaries, work packages, tests, falsifiers, decision order, and definition of
+done are in `docs/GAME_PLAN.md`.

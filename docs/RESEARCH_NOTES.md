@@ -6,8 +6,8 @@
 > so the Phase-1/pre-launch tables below remain historical rather than being
 > rewritten. Do not use them for live constants or research ordering. Current
 > official facts and forum/leaderboard evidence are in
-> `PHASE2_FRONTIER_AUDIT_2026-08-31.md`; the sole active research program is
-> `GAME_PLAN.md`.
+> `PHASE2_FRONTIER_AUDIT_2026-08-31.md`; the sole active architecture and
+> implementation plan is `GAME_PLAN.md`.
 > Phase 2 is 1024x16 on WhestBench 0.16 / flopscope 0.12 with `B=2**41`, lambda 0,
 > an installed residual cap of 0.4 s/MLP, an installed participant wall default of
 > 120 s/MLP (public graded ledgers prove only that `>=104.766 s/MLP` passes), and

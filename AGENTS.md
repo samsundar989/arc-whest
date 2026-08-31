@@ -208,7 +208,7 @@ Everything required to resume lives in the repository:
 | every experiment, contract, result, Skeptic verdict | `experiments/LOG.md` |
 | the binding measurement protocol | `docs/VALIDATION.md` |
 | traps not to rediscover | `docs/GOTCHAS.md` |
-| active research program and execution plan | `docs/GAME_PLAN.md` |
+| active implementation plan and target architecture | `docs/GAME_PLAN.md` |
 | copy-ready Claude Builder handoff | `docs/CLAUDE_CODE_HANDOFF.md` |
 | the human's own beliefs | `docs/HUMAN_MODEL.md` |
 | raw evidence | JSON under `experiments/` |
@@ -305,7 +305,7 @@ never chat history.
 | `docs/CURRENT_STATE.md` | **first, always.** Baseline, open questions, closed lanes, next action |
 | `docs/VALIDATION.md` | before measuring anything. The protocol and its proofs |
 | `docs/GOTCHAS.md` | before quoting a number, comparing a cost, or trusting an offline path |
-| `docs/GAME_PLAN.md` | **sole active Phase-2 research program and execution plan** |
+| `docs/GAME_PLAN.md` | **sole active Phase-2 implementation plan and target architecture** |
 | `docs/BENCHMARK.md` | our numbers vs the field. **PRIVATE — never the forum** |
 | `docs/COMPETITION_BRIEF.md` | plain-English explainer of the task and the math |
 | `docs/RESEARCH_NOTES.md` | rules, forum intel, pricing table, links. §2g is **PRIVATE** |

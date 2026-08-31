@@ -21308,3 +21308,57 @@ portability retry had found `AGENTS.md` 43 bytes over its 20-KiB discovery budge
 the wall-source sentence was shortened without changing meaning before the final
 pass. No full preflight was run, so the last current full-only evidence remains the
 stored 2026-08-27 transcript.
+
+---
+
+# 2026-08-31 — ROUTINE: consolidate the implementation plan and Claude completion handoff
+
+**Class:** ROUTINE documentation/continuity work. No estimator, research
+instrument implementation, seed registry/ledger, truth block, gate, vault,
+protected human file, submission, or external message changed.
+
+## Question
+
+Can a fresh Claude Code Builder implement the ideal architecture without first
+reconstructing which plan is active, discovering systems/tests only after candidate
+work, or stopping at another truth-ready proposal?
+
+## Knowledge delta and changes
+
+1. `docs/GAME_PLAN.md` is now the sole completion-oriented implementation plan. It
+   specifies the ideal two-nominee architecture, expected module boundaries, WP0–WP5,
+   exact test obligations, evidence-block sequence, promotion packet, kill rules,
+   session order, and definition of done. The failed 2026-08-28 same-day program
+   was removed from the active file; its evidence remains in this LOG and git.
+2. WP0 now explicitly removes the known systems blockers first: manifest drift,
+   stale enforcement descriptions, candidate-selectable certification, and real
+   Linux 8-GiB enforcement. WP5 requires at least one runnable, fully metered
+   `1024 x 16` research candidate before labels.
+3. `docs/CLAUDE_CODE_HANDOFF.md` is a copy-ready implementation prompt, not a plan
+   request. It instructs the Builder to continue through all safe truth-free work,
+   repair failing tests, use bounded parallel contexts, integrate surviving
+   branches, commit coherent slices, and stop only at genuine strategic/human
+   boundaries.
+4. The redundant `docs/PHASE2_FRONTIER_ARCHITECTURE.md` redirect was removed. The
+   two small archive stubs that remain—`FRONTIER_ARCHITECTURE_PROPOSAL.md` and
+   `MOONSHOT.md`—are retained only because executable historical source comments
+   and seed-block descriptions cite those filenames. Dated audits remain evidence,
+   not plans, and their headers now point directly to the 2026-08-31 authority.
+5. README, `CURRENT_STATE.md`, `AGENTS.md`, setup/submission guidance, research-note
+   authority, and the quarantined write-up banner now agree on the active plan and
+   handoff. No archived experiment result was rewritten.
+
+## Verification
+
+- local Markdown target scan: **21/21 files, no missing local target**;
+- active-authority search: only the README sentence recording the removed redirect
+  names it; no active plan or source points to it;
+- `git diff --check`: clean apart from Windows line-ending notices;
+- `scripts/verify_portability.py`: **99/99, PORTABLE**;
+- default `scripts/preflight.ps1`: **GREEN 12/16**, with official config `73/73`,
+  mint parity, invariants `30/30`, scorer `98/98`, seed tests `60/60`, lifecycle
+  `56/56`, ship/archive identity, vault-seal verification, and exact 19-operation
+  FLOP anchor.
+
+The four full-only deployment stages were skipped, not passed. No full preflight,
+truth evaluation, vault evaluation, or submission occurred.

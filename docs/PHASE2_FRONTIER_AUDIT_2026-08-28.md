@@ -7,8 +7,8 @@
 > participant wall limit is per MLP rather than shared across the suite. This file
 > remains a dated evidence record, not an action plan.
 
-This is the dated evidence report behind the current `GAME_PLAN.md`. It is not a
-second roadmap. Competition observations are timestamped; research proposals are
+This is a superseded dated evidence report, not the evidence behind the current
+`GAME_PLAN.md` and not a second roadmap. Competition observations are timestamped; research proposals are
 labelled as hypotheses; no public or organiser data was used to fit a constant.
 
 No decision block or vault was touched for this audit. New live artifacts are the
