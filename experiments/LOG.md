@@ -21362,3 +21362,106 @@ work, or stopping at another truth-ready proposal?
 
 The four full-only deployment stages were skipped, not passed. No full preflight,
 truth evaluation, vault evaluation, or submission occurred.
+
+---
+
+# 2026-08-31 — CONTRACT WP0A: the Phase-2 dataset pin must tell a metadata-only tag move apart from a source-byte change
+
+**Class:** IMPORTANT (instrument). `GAME_PLAN.md` § WP0.1. No estimator, seed
+block, gate, residual model, vault, protected human file, or submission is
+touched. No truth is read.
+
+## Question
+
+`v2-phase2` moved from `ce926b7d1ced65faa668c01b94a43f8c4f43783d` to
+`6a416fa5fb45cade1e9ad34320204853f5d4a5f6`. `local_sim/phase2_checklist.py`
+compares one field and prints *"COMMIT DRIFT ... The dataset was re-baked or
+re-tagged. Rebuild the manifest and re-check every shape-dependent result."*
+Is that verdict correct, and can the executable pin distinguish a **source-byte**
+change (which does invalidate shape-dependent evidence) from a **metadata /
+prepared-artifact-only** addition (which cannot)?
+
+## Evidence
+
+- **CONFIRMED** — a durable read-only content comparison exists at
+  `experiments/2026-08-31_phase2_tag_drift/source_manifest.tsv`: 11 comment
+  lines, one column header, 70 `data/*.parquet` rows carrying
+  `path / size / old_lfs_sha256 / new_lfs_sha256`; header records
+  `old_file_count 73`, `new_file_count 226`, `added_count 153`,
+  `removed_count 0`, an identical README git blob at both commits, and
+  `canonical_data_manifest_sha256 = 3cb3e819...`.
+- **CONFIRMED** — `experiments/2026-08-21_phase2_manifest/phase2_manifest.json`
+  pins `dataset.commit` as a single scalar. There is no place in it to record a
+  second, source-equivalent commit.
+- **CONFIRMED** — `phase2_checklist.py:dataset_tags()` branches solely on
+  `d["commit"] != commits.get(PHASE2_TAG)`.
+- **INFERRED** — the 153 added objects are prepared-split artifacts and
+  top-level `metadata.json` gained a `prepared_splits` key
+  (`docs/CURRENT_STATE.md`, 2026-08-31 audit).
+
+## Hypothesis and mechanism
+
+WhestBench materialises MLP rows from the `data/*.parquet` source objects. Every
+byte a mint, a CONFIRM score, or any shape-dependent result depends on is a
+function of **those objects** and of the installed package — never of the repo's
+file count, its prepared artifacts, or its `metadata.json` split index. So a tag
+move whose 70 source objects are byte-identical **cannot** change any of them.
+The checklist's binary commit comparison conflates *the tag moved* with *the
+bytes moved*, which is the same class of defect this repository has lost four
+checks to: reporting a state instead of testing a property.
+
+## Intervention — the smallest change that discriminates
+
+1. `local_sim/p2_tag_drift.py` — a new offline module that parses the durable
+   TSV, **recomputes** the canonical digest from its 70 rows, counts differing
+   rows, and classifies any live commit as `PINNED`, `SOURCE_EQUIVALENT`,
+   `SOURCE_CHANGED`, or `UNKNOWN`. It is the single policy implementation.
+2. `local_sim/phase2_manifest.py` — writes `dataset.commit_lineage`, preserving
+   **both** commit IDs, the canonical digest, the object counts, the
+   source/prepared split, and the evidence path. `dataset.commit` keeps its
+   meaning (the commit the manifest was built against) and is not overwritten.
+3. `local_sim/phase2_checklist.py` — consults the module. A recorded
+   source-equivalent commit reports SOURCE-EQUIVALENT with its evidence; an
+   unrecorded commit still shouts the invalidating message.
+4. `local_sim/test_p2_tag_drift.py` — the regression.
+
+## Numbered predictions, before the new code exists
+
+| # | prediction |
+|---|---|
+| **P1** | The canonical digest recomputed from the 70 data rows, joined by LF with no trailing LF, reproduces `3cb3e819...` in all 64 hex characters. |
+| **P2** | The count of rows whose `old_lfs_sha256 != new_lfs_sha256` is exactly `0`. |
+| **P3** | Classifying the live commit `6a416f...` against the record returns `SOURCE_EQUIVALENT`, and the checklist stops printing the invalidating message for it. |
+| **P4** | Classifying an arbitrary unrecorded commit returns `UNKNOWN`, never `SOURCE_EQUIVALENT`. The guard is therefore not satisfiable by an arbitrary commit — it can fail. |
+| **P5** | Mutating a single `new_lfs_sha256` character in an in-memory copy of the record flips the classification of `6a416f...` to `SOURCE_CHANGED` **and** breaks the digest check. Both, not either. |
+| **P6** | No executable measurement moves: `official_config.py` stays `73/73`, `mint_provenance.py` unchanged, `p2_flop_anchor.py --gate` delta stays `0`, `edge_cases.py` `30/30`. |
+
+**Rule-1 deviation, declared before the result.** P1 and P2 are properties of an
+artifact that was already committed at `23b2ed3`, and I recomputed the digest
+while establishing the file's format *before* writing this contract. They are
+**postdictions** and carry no pre-registration credit; they are recorded so the
+regression's expected values are stated rather than fitted to whatever the code
+happens to emit. P3–P6 are genuine predictions about code that does not exist.
+
+## Falsifier
+
+If any of the 70 rows differ, or the recomputed digest is not `3cb3e819...`, the
+hypothesis is refuted: the checklist keeps the invalidating message unchanged and
+existing Phase-2 CONFIRM bytes must be re-derived rather than trusted.
+
+If the new classification returns `SOURCE_EQUIVALENT` for a commit that is not in
+the record, the guard is vacuous and must be rewritten before it is relied on.
+
+## Scope — what must not change
+
+No gate threshold, no residual model, no seed block or ledger entry, no vault, no
+`estimator.py`, no score, no truth. The checklist's live network polling is not
+restructured; only its verdict logic gains the source/metadata distinction.
+
+## Verification plan
+
+`local_sim/test_p2_tag_drift.py` green with every prediction as a named check ·
+`phase2_manifest.py` regenerating without network for the lineage block ·
+default `scripts/preflight.ps1` GREEN 12/16 · `scripts/verify_portability.py`
+99/99 · `git diff --check` clean · a fresh independent Skeptic given this
+contract, the diff, the commands, and the raw TSV path.
