@@ -199,7 +199,7 @@ guards D08/D09/D10 — declares that with a `# seed-ledger: excludes ...` pragma
 Tiers govern strictness: **VAULT**, **SINGLE_USE** (one claim ever), **DECISION**
 (overlap is a hard error), **DESIGN** (overlap permitted, always reported),
 **INFRA**, **LEGACY**. `local_sim/test_seed_ledger.py` drives every refusal and
-asserts it fires: **39/39**.
+asserts it fires: **60/60**.
 
 **Corrected block status, 2026-08-19.** D16 is **DESIGN, part-spent**: 270 seeds
 drawn, 330 free in four gaps. D17 is **LOCKED SINGLE-USE** and verified never
@@ -669,7 +669,7 @@ the number has moved.
 
 | tier | steps run | when |
 |---|---|---|
-| **default** | **12 of 16** — **1** official stack + round configuration (73/73, asserted against the *installed* package), **2** mint provenance (1024×16 first) **+ the dataset pin** (`local_sim/test_p2_tag_drift.py`, added 2026-08-31 by WP0A; two commands, one step, so the denominator stays 16), **3** invariant suite (30/30), **4** `whest validate`, **5** ship-file identity, **6** vault seal, **7** seed ledger consumption + source scan (no count; it reports CONSISTENT or refuses), **8** canonical scorer + the binding gate (98/98), **9** seed-ledger *refusals* (60/60), **10** vault integrity, **11** lifecycle evaluator (56/56), **12** counted-FLOP anchor vs the official runner | every change |
+| **default** | **12 of 16** — **1** official stack + round configuration (73/73, asserted against the *installed* package), **2** mint provenance (1024×16 first) **+ the dataset pin** (`local_sim/test_p2_tag_drift.py`, added 2026-08-31 by WP0A; two commands, one step, so the denominator stays 16), **3** invariant suite (30/30), **4** `whest validate`, **5** ship-file identity, **6** vault seal, **7** seed ledger consumption + source scan (no count; it reports CONSISTENT or refuses) **+ the enforcement labels** (`local_sim/test_enforcement_labels.py --labels-only`, added 2026-08-31 by WP0B; two commands, one step, so the denominator stays 16), **8** canonical scorer + the binding gate (98/98), **9** seed-ledger *refusals* (60/60), **10** vault integrity, **11** lifecycle evaluator (56/56), **12** counted-FLOP anchor vs the official runner | every change |
 | **`-Full`** | **16 of 16** — adds **13** shape parity, **14** carrier strength, **15** deployment envelope (+ what it cannot prove) **and its read-only proof** (`local_sim/test_envelope_readonly.py`, added by P1-PRE 2026-08-25), **16** official Phase-2 subprocess smoke, zero failures | **required** before any promotion, submission, or vault touch |
 
 > **Suite counts have been removed from the `-Full` row.** They moved three times
@@ -698,12 +698,22 @@ The split is by **cost, not importance**.
 
 **Step names carry no check counts.** A count in a runtime label is a snapshot and goes stale on the next test added; this gate had three such bumps in a single day. The verdict is the script's exit code.
 
-**The counts in the table above are UNDER TEST, not merely documentation.**
-`local_sim/test_enforcement_labels.py` parses every `N/N` in this row and in
-`scripts/preflight.ps1`'s header, runs the suite each describes, and fails on a
-disagreement. Added 2026-08-31 (WP0B) because three counts were stale and this
-row also attached step 9's `60/60` to step **7**, which reports no count at all.
-Correcting the numbers alone would have left the next drift equally invisible.
+**The counts in the table above are UNDER TEST, not merely documentation,
+and the test RUNS IN THE GATE** — `scripts/preflight.ps1` step 7, second command.
+`local_sim/test_enforcement_labels.py` runs the suite each count describes and
+fails on a disagreement. Added 2026-08-31 (WP0B) because three counts were stale
+and this row attached step 9's `60/60` to step **7**, which reports no count at
+all.
+
+It scans **exhaustively**, not from a hand-list. Every `N/N` and every prose
+count (`60 negative tests`) anywhere in this file or in `preflight.ps1` must be
+either matched by a checked claim or named in `ALLOWED_COUNTS` with a written
+reason — step denominators, the mint-provenance table, quoted historical values.
+The first version used an anchored hand-list and an independent Skeptic found
+two counts it structurally could not see: `preflight.ps1`'s step-9 body comment
+(*"44 negative tests"*, prose, no `N/N` to anchor on) and §2a's *"asserts it
+fires: **39/39**"*, both against a suite that reports 60. A pattern that stops
+matching is now a failure rather than a silent `continue`.
 
 **The denominator is always 16, and a skipped step is never counted as a pass.**
 A default run reports `GREEN 12/16, 4 SKIPPED` and names the four in a red

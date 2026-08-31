@@ -26,7 +26,11 @@
     5. ship-file identity - estimator.py matches its version archive
     6. vault seal         - touch counter still agrees with the log
     7. seed ledger        - consumption is recorded, and no source file draws
-                            seeds the ledger has never heard of
+                            seeds the ledger has never heard of, AND (WP0B,
+                            2026-08-31) local_sim/test_enforcement_labels.py
+                            --labels-only: every coverage count stated in THIS
+                            docstring and in VALIDATION.md section 7 is checked
+                            against the suite it names. Two commands, one step.
     8. canonical scorer   - 98/98, the competition identity is still bitwise
                             equal to the installed whestbench, AND decide() --
                             THE gate -- still refuses percentile/BCa, still
@@ -378,8 +382,20 @@ print('  seal consistent')
 # ended up measuring two "independent" kills on the same 24 networks. This step
 # re-validates the consumption ledger and statically scans the tree for seed
 # literals and seeds() calls that the ledger does not record.
-Step "7. seed ledger (consumption + source scan)" {
+Step "7. seed ledger (consumption + source scan) + enforcement labels" {
     uv run python local_sim/seed_ledger.py --check --scan
+    if ($LASTEXITCODE -ne 0) { return }
+    # WP0B built local_sim/test_enforcement_labels.py so a stale coverage label
+    # in THIS docstring or in VALIDATION.md section 7 is a red test rather than
+    # documentation drift -- and then wired it into nothing, which is the exact
+    # defect it was built to fix, on itself. An independent Skeptic pointed that
+    # out and found two labels still false. It runs here now, as a second
+    # command in an existing step, so the denominator stays SIXTEEN.
+    #
+    # --labels-only: the guard-mutation mirror (its section C) costs ~4 minutes
+    # and rebuilds two suites in scratch. It is not gate-cheap. Run the full
+    # suite deliberately: uv run python local_sim/test_enforcement_labels.py
+    uv run python local_sim/test_enforcement_labels.py --labels-only
 }
 
 # --- 8. the canonical competition scorer ---------------------------------------
@@ -394,7 +410,7 @@ Step "8. canonical scorer + the binding gate" {
 
 # --- 9. the seed ledger's refusals actually fire --------------------------------
 # Step 7 proves the ledger is CONSISTENT. It cannot prove the guards still refuse.
-# These are 44 negative tests: unregistered block, range leaving its block, any
+# These are 60 negative tests: unregistered block, range leaving its block, any
 # overlap in a DECISION block, a second claim on a SINGLE_USE one, a hand-edited
 # ledger, an artifact rewritten after its claim.
 Step "9. seed-ledger refusals" {

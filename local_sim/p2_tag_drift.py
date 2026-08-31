@@ -116,6 +116,26 @@ _EVIDENCE_VALID = (PINNED, SOURCE_EQUIVALENT)
 EXPECTED_OLD_COMMIT = "ce926b7d1ced65faa668c01b94a43f8c4f43783d"
 EXPECTED_NEW_COMMIT = "6a416fa5fb45cade1e9ad34320204853f5d4a5f6"
 
+#: TWO HUGGING FACE APIS RESOLVE `v2-phase2` TO DIFFERENT COMMIT IDS, and this
+#: module (and `phase2_checklist.py`) consult only the first:
+#:
+#:   list_repo_refs().tags      -> 6a416fa5...   <- what is pinned here
+#:   repo_info(revision=TAG).sha -> aa99830f...  (branch `main`,
+#:                                  "Advertise prepared/ in metadata.json")
+#:
+#: An independent Skeptic found this and checked the consequence: the two trees
+#: are **object-identical on all 226 paths** -- same size, same LFS sha256, same
+#: blob id -- so nothing is wrong today and no number depends on which one is
+#: read. It is recorded because a future move could separate them, and a drift
+#: detector that consults one of two authorities should say so rather than
+#: appear to consult the only one.
+ALT_TAG_RESOLUTION = {
+    "list_repo_refs_tags": EXPECTED_NEW_COMMIT,
+    "repo_info_sha": "aa99830fdc09fad15407b10e8e3459d3e18bba0a",
+    "trees_object_identical_2026_08_31": True,
+    "consulted_here": "list_repo_refs_tags",
+}
+
 EXPECTED_SOURCE_ROWS = 70
 EXPECTED_SOURCE_DIGEST = (
     "3cb3e81907069725662edc011638b095b399dafe42d35b97ea5456ece0cb8c66")
@@ -284,7 +304,24 @@ class DriftRecord:
         live = (live_commit or "").strip().lower()
         pinned = (pinned_commit or "").strip().lower()
         viol = self.integrity()
-        if loader is not None:
+        # AN ABSENT LOADER RECORD IS A VIOLATION, NOT SILENCE.
+        #
+        # This branch used to read `if loader is not None:` and skip every
+        # loader clause when the file was missing -- so DELETING
+        # `loader_manifest.tsv` returned SOURCE_EQUIVALENT with
+        # `evidence_valid=True`, dropped the "THE LOADER ROUTE MOVED" warning,
+        # and exited 0. An independent Skeptic constructed exactly that as a
+        # fifth path to a false pass. It is the repository's signature failure:
+        # a check that could not run reporting a pass. The loader record is now
+        # REQUIRED, and its absence is named.
+        if loader is None:
+            viol.append(
+                "the loader record is ABSENT (%s). data/ is not the whole input "
+                "set: whestbench 0.16.0 prefers prepared/<split> Arrow whenever "
+                "metadata.json advertises prepared_splits, so a source-only "
+                "comparison cannot license anything."
+                % _rel(LOADER_RECORD_PATH))
+        else:
             viol += ["loader record: " + x for x in loader.integrity()]
         if viol:
             return DriftVerdict(
@@ -602,7 +639,16 @@ def main() -> int:
     v = rec.classify(EXPECTED_NEW_COMMIT, EXPECTED_OLD_COMMIT, loader)
     for line in v.report_lines():
         print(line)
-    ok = not rec.integrity() and (loader is None or not loader.integrity())
+    # `loader is None` used to make this expression TRUE, so a missing
+    # loader record exited 0. It is a refusal now, matching classify().
+    ok = (not rec.integrity() and loader is not None
+          and not loader.integrity()
+          and v.status in (PINNED, SOURCE_EQUIVALENT))
+    if loader is None:
+        print()
+        print('  REFUSED: the loader record is absent. Regenerate it with')
+        print('    uv run python experiments/2026-08-31_phase2_tag_drift/'
+              'capture_loader_manifest.py')
     return 0 if ok else 1
 
 

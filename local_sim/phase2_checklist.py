@@ -141,12 +141,21 @@ def dataset_tags():
         f"{b['effective_naive_samples']:,} naive samples"
     )
     # A MOVED TAG IS NOT AUTOMATICALLY A RE-BAKE, and until 2026-08-31 this
-    # branch said it was. Every shape-dependent Phase-2 result here is a
-    # function of the `data/*.parquet` SOURCE objects and of the installed
-    # package -- never of the repo's file count, its prepared-split artifacts,
-    # or `metadata.json`'s split index. The classification lives in
-    # `local_sim/p2_tag_drift.py` (one shared policy, offline-testable) and
-    # rests on a durable content-addressed comparison of all 70 source objects.
+    # branch said it was. The classification lives in `local_sim/p2_tag_drift.py`
+    # (one shared policy, offline-testable), over TWO durable content-addressed
+    # comparisons: the 70 `data/*.parquet` source objects, and the FULL 226-object
+    # tree.
+    #
+    # The full tree is not optional. An earlier version of this comment said
+    # every shape-dependent result is a function of the source parquet "never of
+    # the repo's file count, its prepared-split artifacts, or `metadata.json`'s
+    # split index". **That is false and is retracted**: whestbench 0.16.0 PREFERS
+    # a `prepared/<split>` Arrow tree over the parquet path whenever
+    # `metadata.json` advertises `prepared_splits` (`dataset.py:479-491`,
+    # `dataset_io.py:61-68`), `whest run` is non-streaming by default, and this
+    # very tag move added that tree. So the loader-visible input set is
+    # `data/**` + `metadata.json` + `prepared/**`, and a source-only comparison
+    # licenses nothing -- an absent loader record is now an integrity violation.
     #
     # An UNMEASURED move still raises the original alarm. That is what keeps
     # SOURCE_EQUIVALENT falsifiable: an arbitrary commit cannot obtain it.

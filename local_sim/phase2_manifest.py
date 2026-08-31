@@ -548,16 +548,22 @@ def main() -> int:
         if old["dataset"]["commit"] != m["dataset"]["commit"]:
             # A MOVED TAG IS NOT AUTOMATICALLY A RE-BAKE.
             #
-            # Every 1024 x 16 result in this repository is a function of the
-            # `data/*.parquet` SOURCE objects and of the installed package --
-            # never of the repo file count, its prepared-split artifacts, or
-            # `metadata.json`'s split index. Until 2026-08-31 this branch
-            # compared one scalar and declared every move a re-bake, which is
-            # the "reports a state instead of testing a property" defect this
-            # repository has lost four checks to. It now consults the durable
-            # content-addressed comparison and refuses only when the SOURCE
-            # bytes moved -- or when the move is UNMEASURED, which is still
-            # treated as invalidating.
+            # Until 2026-08-31 this branch compared one scalar and declared
+            # every move a re-bake -- the "reports a state instead of testing a
+            # property" defect this repository has lost four checks to. It now
+            # consults `p2_tag_drift`, which refuses unless the SOURCE bytes are
+            # unchanged AND the full-tree record is present and intact. An
+            # UNMEASURED move is still treated as invalidating.
+            #
+            # **RETRACTED, and this comment carried the retracted sentence for
+            # one commit:** the first version said a result is a function of the
+            # source parquet "never of the repo file count, its prepared-split
+            # artifacts, or `metadata.json`'s split index". whestbench 0.16.0
+            # PREFERS a `prepared/<split>` Arrow tree over the parquet whenever
+            # `metadata.json` advertises `prepared_splits`
+            # (`dataset.py:479-491`), and this move added that tree. The
+            # loader-visible input set is `data/**` + `metadata.json` +
+            # `prepared/**`; see `local_sim/p2_tag_drift.py`.
             v = classify_live_commit(m["dataset"]["commit"],
                                      old["dataset"]["commit"])
             for line in v.report_lines():

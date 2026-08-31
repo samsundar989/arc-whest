@@ -22100,3 +22100,132 @@ subject) · `test_certify_candidate.py` green including every mutation ·
 `linux_memory_gate.py` run for real in WSL with its negative control · default
 `preflight.ps1` GREEN 12/16 · `verify_portability.py` 99/99 · `git diff --check`
 clean · a fresh independent Skeptic.
+
+---
+
+# 2026-08-31 — SECOND SKEPTIC PASS ON WP0A-FIX + WP0B: PROVISIONAL, ACCEPTED IN FULL, and its pre-registered prediction HELD EXACTLY
+
+**Verdict: PROVISIONAL.** Every finding is correct and every one is now closed
+in code. The headline of both slices survives; three claims about *coverage* did
+not.
+
+## The central finding: I repeated, on my own repair, the defect I had just written up
+
+WP0A Finding 3 was *"the coverage claim was enforced by a test literal nobody
+ran"*. WP0B then built `test_enforcement_labels.py` so a stale label would be a
+red test — **and wired it into nothing.** The same pass that recorded the lesson
+reproduced it one commit later.
+
+It also showed the checker was structurally blind to the class of defect it was
+built for. `CLAIMS` was a hand-maintained list of anchored patterns, and
+`section_a` silently `continue`d on a pattern that stopped matching. Two live
+counterexamples, both false at `dfdf6a3`:
+
+| where | said | truth |
+|---|---|---|
+| `scripts/preflight.ps1:397` (step-9 body comment) | *"These are **44** negative tests"* | 60 |
+| `docs/VALIDATION.md:202` (§2a) | *"asserts it fires: **39/39**"* | 60/60 |
+
+The first is prose with no `N/N` to anchor on; the second is outside §7, where
+the hand-list looked. So `preflight.ps1`'s own new header sentence — *"parses
+every N/N in this docstring"* — was itself an overstatement.
+
+### Its prediction, pre-registered, and the score
+
+The Skeptic committed to a falsifiable prediction before I built the fix:
+*"an exhaustive scan goes red immediately on exactly two lines,
+`preflight.ps1:397` and `VALIDATION.md:202`. If it goes red on more, section A
+was blinder than either of us thinks; if it goes green, my reading of the parser
+is wrong and this finding collapses."*
+
+**It went red on exactly those two — plus one more: `VALIDATION.md:441`,
+`30/30 passing`, which is TRUE but was unclaimed**, so nothing would have
+noticed it going stale. The prediction holds on its own terms (two stale
+labels), and the third hit is the scan doing more than predicted rather than
+less. It is now a checked claim, not an exemption.
+
+### What replaced the hand-list
+
+Every `\d+/\d+` **and** every prose count (`60 negative tests`) anywhere in
+either document must be either matched by a checked claim or named in
+`ALLOWED_COUNTS` **with a written reason** — step denominators, the
+mint-provenance table, quoted historical values. There is no third option. A
+pattern that stops matching is now a **failure**, not a silent `continue`. And
+the suite runs in `preflight.ps1` **step 7**, as a second command in an existing
+step, so the denominator stays SIXTEEN. `verify_portability.py` gained four
+checks asserting that both enforcement suites exist **and that preflight names
+them** — presence is not wiring.
+
+## Finding 2 — a fifth path to `SOURCE_EQUIVALENT`, and it was the repository's signature failure
+
+`load_loader_record()` returned `None` on `FileNotFoundError` and
+`DriftRecord.classify(loader=None)` skipped every loader clause. So **deleting**
+`loader_manifest.tsv` returned `SOURCE_EQUIVALENT`, `evidence_valid=True`,
+dropped the *"THE LOADER ROUTE MOVED"* warning entirely, and exited 0. A check
+that could not run, reporting a pass.
+
+An absent loader record is now an **integrity violation** naming itself, so the
+verdict is `UNKNOWN` and `main()` refuses. Verified by moving the file aside:
+`status UNKNOWN | evidence_valid False`, exit 1; restored, exit 0.
+
+## Finding 3 — the retracted premise survived verbatim in two live modules
+
+The sentence WP0A-FIX explicitly retracted — *"never of the repo's file count,
+its prepared-split artifacts, or `metadata.json`'s split index"* — was corrected
+in `p2_tag_drift.py` and **left standing** in `phase2_checklist.py:143-149` and
+in `phase2_manifest.py:549-560`, the latter being the comment that justifies the
+manifest's re-bake refusal. Both now carry the correction and point at the
+package line numbers. This is the fourth time this repository has recorded a
+retraction in one place and not another.
+
+## Finding 4 — the label suite's own read-only claim was false
+
+Its docstring said *"Nothing under the repository is written."* It **runs**
+`test_seed_ledger.py`, which creates `local_sim/_ledger_scan_tmp/` to prove the
+source scan catches a real literal in a real file. Gitignored and removed in a
+`finally` — but section R hashed only the two documents, so its own proof could
+not see the counterexample. The docstring now names the exception and section R
+checks that path.
+
+## Finding 5 — the two Hugging Face APIs, recorded rather than fixed
+
+`list_repo_refs().tags` resolves `v2-phase2` to `6a416fa5…`; `repo_info(revision
+=TAG).sha` resolves it to `aa99830f…` (branch `main`, *"Advertise prepared/ in
+metadata.json"*). The Skeptic checked the consequence: **the two trees are
+object-identical on all 226 paths** — size, LFS sha256 and blob id — so nothing
+is wrong today and no number depends on which is read. Recorded as
+`ALT_TAG_RESOLUTION` in `p2_tag_drift.py` because a future move could separate
+them and a detector consulting one of two authorities should say so.
+
+## Finding 6 — the green witness named the wrong HEAD
+
+`preflight_default_wp0a_fix.txt` records `HEAD: b39b9d0`, the **contract**
+commit, with a dirty tree whose listed files are exactly `a4cae61`'s changed
+set. Substantively honest, but the witness cannot prove the executed bytes were
+the committed bytes. No `-Full`, no promotion, no vault touch, so no gate rule
+was broken. A fresh serial transcript is stored beside this slice's work.
+
+## What the Skeptic verified independently, and it matters
+
+It re-derived the entire 226-object comparison from scratch against the live HF
+API at both commits and reproduced **both canonical digests bit for bit**
+(`29664dbb…`, `3cb3e819…`) and the exact census. It read
+`whestbench/dataset_io.py:60-68`, `dataset.py:468,479-491` and `cli.py:1247`
+itself rather than trusting the report. It refuted my worry about preflight's
+two-command steps by exercising the `Step` wrapper directly in PowerShell —
+`{fail; if($LASTEXITCODE -ne 0){return}; ok}` → `3`, `{ok; …; fail}` → `5`,
+both-pass → `0`, so neither command's failure is masked. It confirmed by git
+that nothing protected moved. And it corroborated the prepared-shard alignment
+independently: sizes `2 x 537,980,1xx + 12 x 470,732,9xx` = `2x8 + 12x7 = 100`
+rows, matching `metadata.json`'s `mini.n_mlps = 100`.
+
+## Still open, and stated rather than closed
+
+1. **Thirteen of fourteen `prepared/mini` shards and all of `prepared/full`
+   remain unverified**, and the Skeptic sharpened the risk: even with every
+   shard internally correct, a *permuted* re-shard would change the global row
+   order that selects the public 50. Settling `mini` costs 6.26 GiB, `full`
+   62.6 GiB. Not done, not claimed. No current number depends on it.
+2. `_try_load_prepared_split` swallows every exception and falls back to parquet
+   silently. Neither of us can see that from here.
+3. The two-API resolution above, if a future move separates them.

@@ -21,6 +21,30 @@ narrative record), `docs/GAME_PLAN.md` (the sole active Phase-2 strategy).
 
 ---
 
+
+## Do not read a suite result taken under heavy concurrent load
+
+**Observed 2026-08-31 (WP0C).** `local_sim/test_enforcement_labels.py` ran while
+`local_sim/test_certify_candidate.py` was executing eleven full candidate
+certifications in the background. It reported `edge_cases.py` at **29/30** and
+then flagged two documents as carrying STALE labels, because a documented
+`30/30` no longer matched what the suite had just returned.
+
+Run serially, `edge_cases.py` returns **30/30**, and the label suite returns
+**39/39**. Three concurrent copies of `edge_cases.py` alone also return 30/30
+each, so the trigger is heavier than simple parallelism and **the specific
+check that flaked was not isolated**.
+
+The trap is not the flake, it is the shape of the report: a label checker that
+reads a suite's live output will call a *correct* document stale whenever the
+suite under-reports for any reason. Two of the repository's four historical
+lost checks were "a check reporting a state rather than testing a property";
+this is the mirror image, a check reporting a *transient* as a defect.
+
+**Rule: a gate verdict is only a verdict when the gate had the machine.** Run
+`scripts/preflight.ps1` and the enforcement suites serially, on a quiet host,
+exactly as `VALIDATION.md` §7 already requires for step 16's `SETUP_TIMEOUT`.
+
 ## 2026-08-28 (P2-WEFF / P2-WINDOW) — four traps, three of which I walked into
 
 Two IMPORTANT slices, four independent Skeptic passes, and both lanes closed on

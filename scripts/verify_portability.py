@@ -108,6 +108,24 @@ def check_sources_of_truth() -> None:
                 "scripts/preflight.ps1"]:
         check((REPO / doc).exists(), "durable source present: %s" % doc)
 
+    # THE GATE MUST ACTUALLY INVOKE ITS ENFORCEMENT SUITES.
+    #
+    # Presence is not wiring. WP0A shipped a 70-object coverage claim enforced
+    # only by a test literal that no gate ran, and WP0B then shipped a
+    # label checker with the same defect -- both found by an independent
+    # Skeptic, the second one after the first had been written up as a lesson.
+    # These two assert the property that was missing: the file exists AND
+    # preflight names it.
+    pre = read(REPO / "scripts/preflight.ps1") if (REPO / "scripts/preflight.ps1").exists() else ""
+    for suite, why in [
+        ("local_sim/test_p2_tag_drift.py",
+         "the Phase-2 dataset pin: source bytes, loader route, and their tampers"),
+        ("local_sim/test_enforcement_labels.py",
+         "every coverage count the gate states is checked against its suite"),
+    ]:
+        if check((REPO / suite).exists(), "enforcement suite present: %s" % suite):
+            check(suite in pre, "...and preflight.ps1 RUNS it", why)
+
     claude_md = REPO / "CLAUDE.md"
     if check(claude_md.exists(), "CLAUDE.md exists"):
         ct = read(claude_md)

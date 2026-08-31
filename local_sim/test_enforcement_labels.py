@@ -27,11 +27,19 @@ reason is a HARNESS FAILURE, not a catch — the distinction
 `local_sim/p1pre_fault_inject.py` was forced to learn after an injection died on
 its own `SyntaxError` and was recorded as evidence.
 
-READ-ONLY
----------
-Nothing under the repository is written. The mirror is built in a system temp
-directory and removed; the two documents are opened for reading and mutated only
-as strings.
+READ-ONLY — WITH ONE EXCEPTION, NAMED
+-------------------------------------
+This suite writes nothing itself. The mirror is built in a system temp directory
+and removed; the two documents are opened for reading and mutated only as
+strings.
+
+**But it RUNS other suites, and one of them writes.** `test_seed_ledger.py`
+creates `local_sim/_ledger_scan_tmp/` to prove the source scan catches a real
+seed literal in a real file, and removes it in a `finally`. That is a write
+under the repository, and the first version of this docstring said there were
+none — while section R hashed only the two documents, so its own proof could not
+see the counterexample. An independent Skeptic measured it. Section R now checks
+that path too, which is the difference between a claim and a check.
 
 Run:  uv run python local_sim/test_enforcement_labels.py
       uv run python local_sim/test_enforcement_labels.py --full     # + 27/27, 48/48
@@ -113,6 +121,13 @@ CLAIMS = [
     ("seed_ledger_refusals", VALIDATION, r"seed-ledger \*refusals\* \((\d+)/(\d+)\)", None),
     ("lifecycle", VALIDATION, r"lifecycle evaluator \((\d+)/(\d+)\)", None),
     ("edge_cases", VALIDATION, r"edge_cases\.py\s+# 2\. invariants, (\d+)/(\d+)", None),
+    # Found by the exhaustive scan below, not by the hand-list: this one was
+    # TRUE but unclaimed, so nothing would have noticed it going stale.
+    ("edge_cases", VALIDATION, r"\*\*(\d+)/(\d+) passing\*\* as of 2026-08-06", None),
+    ("seed_ledger_refusals", VALIDATION,
+     r"drives every refusal and\s*\n?asserts it fires: \*\*(\d+)/(\d+)\*\*", None),
+    ("seed_ledger_refusals", PREFLIGHT,
+     r"These are (\d+) negative tests", "single"),
 ]
 
 #: Claims that must NOT exist: a count attached to a step that reports none.
@@ -124,6 +139,60 @@ FORBIDDEN_CLAIMS = [
      "step 9's, mis-attached"),
     (PREFLIGHT, r"7\. seed ledger\s+- \d+/\d+",
      "step 7 reports no count"),
+]
+
+# --------------------------------------------------------------------------- #
+# THE EXHAUSTIVE SCAN — added after an independent Skeptic showed the hand-list
+# above is structurally blind
+# --------------------------------------------------------------------------- #
+#
+# `CLAIMS` is a hand-maintained list of anchored patterns. That means a count
+# it does not happen to name is INVISIBLE, and `section_a` silently `continue`s
+# on a pattern that stops matching. The Skeptic demonstrated both with two live
+# counterexamples that had been false since WP0B's own repair:
+#
+#   * `scripts/preflight.ps1:397` -- "These are 44 negative tests" (prose, so no
+#     `N/N` to anchor on) against a suite that reports 60;
+#   * `docs/VALIDATION.md:202` -- "asserts it fires: **39/39**" for the same
+#     suite, outside section 7 where the hand-list looks.
+#
+# So the header of `preflight.ps1` claiming this suite "parses every N/N in this
+# docstring" was itself an overstatement. It is true now: every occurrence of a
+# count in either document must be either MATCHED by a `CLAIMS` entry or listed
+# in `ALLOWED_COUNTS` with a written reason. There is no third option, and a new
+# unexplained count is a red test.
+_COUNT_RE = re.compile(
+    r"\d+/\d+|\b\d+ (?:negative tests|checks|invariants|shapes|tests)\b")
+
+#: Occurrences that are NOT a suite's pass count. Each carries the reason it is
+#: exempt; "it is inconvenient" is not one.
+ALLOWED_COUNTS = [
+    (PREFLIGHT, r"GREEN 12/16", "step denominator, not a suite count"),
+    (PREFLIGHT, r'never "12/12"', "the anti-pattern this gate names on purpose"),
+    (PREFLIGHT, r'report "12/12"', "the same anti-pattern, in the accounting note"),
+    (PREFLIGHT, r"GREEN 16/16 at HEAD", "step denominator in a transcript example"),
+    (PREFLIGHT, r"steps 15/16 regenerate", "a step RANGE, not a count"),
+    (PREFLIGHT, r"7 of 17 shapes", "the v2.6 odd-width defect, a historical fact"),
+    (VALIDATION, r"\| \*\*20/20\*\* \| 20/20 \| 0/20 \|",
+     "the mint-provenance table: 20 seeds per shape, not a suite count"),
+    (VALIDATION, r"6/6 lossless float32 round-trips",
+     "a float round-trip count, not a suite"),
+    (VALIDATION, r"\| 0/20 \|", "residual rows over the 0.4 s cap, per 20 MLPs"),
+    (VALIDATION, r"was 24/24", "explicitly labelled as the historical value"),
+    (VALIDATION, r"GREEN 12/16", "step denominator"),
+    (VALIDATION, r"11/16, 5", "step denominator with the vault absent"),
+    (VALIDATION, r"`9/11` as `9/9`", "the first build's accounting bug, quoted"),
+    (VALIDATION, r"step 9's `60/60` to step \*\*7\*\*",
+     "the WP0B defect, quoted in its own correction note"),
+    # The note describing this very scan quotes the counts it was built to
+    # catch. Each exemption is anchored on its surrounding prose, so it cannot
+    # drift onto a live claim elsewhere in the file.
+    (VALIDATION, r"count \(`\d+ negative tests`\)",
+     "an EXAMPLE of the prose form the scan matches, inside its own note"),
+    (VALIDATION, r'\*"\d+ negative tests"\*, prose, no `N/N` to anchor on',
+     "the stale value quoted in the correction that fixed it"),
+    (VALIDATION, r'fires: \*\*39/39\*\*"\*, both against a suite',
+     "the stale value quoted in the correction that fixed it"),
 ]
 
 
@@ -167,13 +236,25 @@ def section_a(run_slow: bool):
               f"{passed}/{total}, rc={rc}")
 
     seen = set()
-    for key, doc, pat, _ in CLAIMS:
+    for key, doc, pat, kind in CLAIMS:
         m = re.search(pat, docs[doc], re.M)
-        label = f"{os.path.basename(doc)}:{key}:{pat[:26]}"
-        if m is None or m.lastindex is None:
+        # A CLAIM THAT STOPS MATCHING USED TO BE INVISIBLE. `continue` here
+        # silently dropped it, and the only guard was "is this key claimed
+        # somewhere" -- so for a key with two claims, one regex breaking left no
+        # trace. A non-matching pattern is now a failure of THIS suite.
+        if m is None:
+            check(f"A: the claim pattern for {key} in "
+                  f"{os.path.basename(doc)} still matches", False,
+                  f"pattern {pat[:44]!r} matched nothing -- the label is "
+                  "unguarded, not absent")
+            continue
+        if m.lastindex is None:
             continue                      # a claim with no numeric group
         seen.add(key)
-        claimed = (int(m.group(1)), int(m.group(2)))
+        # A prose claim ("These are 60 negative tests") carries one number, not
+        # a pair. It is compared against the suite's PASSED count.
+        claimed = ((int(m.group(1)), int(m.group(1))) if kind == "single"
+                   else (int(m.group(1)), int(m.group(2))))
         if key not in measured:
             check(f"A: {os.path.basename(doc)} claims {key} = "
                   f"{claimed[0]}/{claimed[1]} (not measured this run)",
@@ -185,6 +266,29 @@ def section_a(run_slow: bool):
               claimed == (passed, total),
               f"suite reports {passed}/{total}"
               + ("" if claimed == (passed, total) else "   <-- STALE LABEL"))
+
+    # ---- the exhaustive scan: no count may be invisible to this suite ----
+    for doc in (PREFLIGHT, VALIDATION):
+        text = docs[doc]
+        covered = []
+        for _k, d, pat, _ in CLAIMS:
+            if d != doc:
+                continue
+            for m in re.finditer(pat, text, re.M):
+                covered.append((m.start(), m.end()))
+        for pat, _why in [(p, w) for d, p, w in ALLOWED_COUNTS if d == doc]:
+            for m in re.finditer(pat, text, re.M):
+                covered.append((m.start(), m.end()))
+        orphans = []
+        for m in _COUNT_RE.finditer(text):
+            if not any(s <= m.start() and m.end() <= e for s, e in covered):
+                line = text.count("\n", 0, m.start()) + 1
+                orphans.append(f"{os.path.basename(doc)}:{line} {m.group(0)!r}")
+        check(f"A: every count in {os.path.basename(doc)} is claimed or "
+              "explicitly exempt",
+              not orphans,
+              "; ".join(orphans[:4]) if orphans else
+              f"{len(covered)} spans cover every occurrence")
 
     for doc, pat, why in FORBIDDEN_CLAIMS:
         check(f"A: {os.path.basename(doc)} carries no count where none exists",
@@ -227,6 +331,14 @@ def section_b(measured):
                   "pattern did not match; the checker would silently skip it")
             continue
         passed, total, _ = measured[key]
+        if passed is None:
+            # Section A already failed this suite. Crashing here with a
+            # TypeError turns one named failure into a traceback that hides
+            # every remaining check -- which is how a red run stops being
+            # readable. Report and continue.
+            check(f"B: a wrong count at {label} is DETECTED", False,
+                  f"cannot mutate: suite '{key}' reported no count in section A")
+            continue
         bad = str(passed + 1)
         mutated = text[:m.start(1)] + bad + text[m.end(1):m.start(2)] \
             + bad + text[m.end(2):]
@@ -394,10 +506,18 @@ def main():
     if not a.labels_only:
         section_c()
 
-    print("\nR  the two documents were opened read-only")
+    print("\nR  the two documents were opened read-only, and the one repository")
+    print("   write any child makes is left clean")
     for p, h in before.items():
         now = hashlib.sha256(open(p, "rb").read()).hexdigest()
         check(f"R: {os.path.basename(p)} sha256 unchanged", now == h, h[:16])
+    # `test_seed_ledger.py` writes here to prove the source scan catches a real
+    # literal in a real file, and removes it in a `finally`. Checking the
+    # residue is what lets the docstring above make a claim it can support.
+    scan_tmp = os.path.join(_HERE, "_ledger_scan_tmp")
+    check("R: local_sim/_ledger_scan_tmp/ left by no child",
+          not os.path.exists(scan_tmp),
+          "the one repository write this suite's children make, cleaned up")
 
     print()
     if _FAILED:
