@@ -21587,3 +21587,103 @@ Nothing about accuracy, cost, or any candidate. The four full-only deployment
 stages were skipped, not passed. The functional confirmation is a 4-row sample.
 And the record describes exactly one tag transition: the next move needs its own
 read-only capture before it can be classified as anything but `UNKNOWN`.
+
+---
+
+# 2026-08-31 — CONTRACT WP0B: the enforcement layer's stated coverage must be executable, not typed
+
+**Class:** IMPORTANT (instrument / enforcement descriptions). `GAME_PLAN.md`
+§ WP0.2. No executable gate semantics, threshold, seed block, residual model,
+vault, estimator, or protected human file is touched. No truth is read.
+
+## Question
+
+`scripts/preflight.ps1` and `docs/VALIDATION.md` state how much each gate step
+checks. Several of those statements are false today. Can the statements be made
+**executable**, so a stale label is a RED test rather than documentation drift
+an audit has to find by hand?
+
+## Evidence — measured this session, before the repair
+
+| claim | where | measured |
+|---|---|---|
+| step 9 seed-ledger refusals **44/44** | `preflight.ps1:31` | `test_seed_ledger.py` reports **60/60** |
+| step 11 lifecycle evaluator **54/54** | `preflight.ps1:34` | `lifecycle_eval.py --self-test` reports **56/56** |
+| step 8 canonical scorer **71/71** | `preflight.ps1:365` comment | `test_competition_score.py` reports **98/98** (the header at `:26` already says 98) |
+| step 7 seed ledger **(60/60)** | `VALIDATION.md` §7 default row | step 7 is `seed_ledger.py --check --scan`, which reports **no count at all**; `60/60` is step **9**'s output |
+| step 13 shape parity **27/27** | `preflight.ps1:48` | **27/27** — correct |
+| step 14 carrier strength **48/48** | `preflight.ps1:52` | **48/48** — correct |
+| step 1 official stack **73/73**, step 3 invariants **30/30** | both files | **73/73**, **30/30** — correct |
+
+Two instrument docstrings are also stale, both CONFIRMED by reading the code
+beside them:
+
+- `local_sim/competition_score.py`, `paired_comparison()`: *"the geometric gain
+  is returned too, because `docs/VALIDATION.md` 2b still makes it the binding
+  gate"*. It has not since 2026-08-20; §2b-i binds the paired **arithmetic**
+  difference, and the `Verdict` docstring 115 lines below in the same file says
+  so explicitly. **One file contradicts itself about which statistic decides a
+  promotion.**
+- `local_sim/p2_window.py`, module docstring: states the bracket as
+  `max(0, RMSE_full - D) <= RMSE_cand <= RMSE_full + D`. Its own `bracket()`
+  function was corrected to the **reverse triangle inequality**,
+  `|RMSE_full - D|`, after an independent review found that dropping that branch
+  zeroed every lower bound — the correction that made GATE-W's kill *provable*.
+  The docstring still carries the refuted form.
+
+## Hypothesis and mechanism
+
+A count typed into a comment is a snapshot; the suite it describes grows. This
+repository has already bumped these labels three times in one day and then let
+them go stale for a week, and `VALIDATION.md` §7 says so in its own prose
+(*"Step names carry no check counts"*) while its table carries four. Prose
+cannot enforce prose. If the documented counts are **parsed out of the two
+documents and compared against the suites' actual output**, the label becomes a
+property under test and cannot silently drift again.
+
+## Intervention — the smallest change that discriminates
+
+1. Correct the four false labels above and the two stale docstrings. **No
+   executable semantics change**: no threshold, no condition, no control flow.
+2. `local_sim/test_enforcement_labels.py` (new) — parses the counts out of
+   `scripts/preflight.ps1` and `docs/VALIDATION.md`, runs the suites, and
+   compares. Cheap suites by default; `--full` adds shape parity and carriers.
+3. The same file mutation-tests **the label checker itself** and the two guards
+   whose stated coverage moves, in a scratch mirror outside the repository, in
+   the style of `local_sim/p1pre_fault_inject.py`: every injection declares the
+   **named check** it expects to fail, so a red run for any other reason is a
+   HARNESS FAILURE and not a catch.
+
+## Numbered predictions, before the checker exists
+
+| # | prediction |
+|---|---|
+| **P1** | With the labels corrected, the checker finds `0` mismatches across every documented count in both files. |
+| **P2** | Reverting any single label in an in-memory copy makes the checker report exactly `1` mismatch, naming that label. It is therefore not vacuous. |
+| **P3** | Neutering the `SINGLE_USE` second-claim refusal (`seed_ledger.py`, `if tier == "SINGLE_USE" and mine:`) in a scratch mirror makes `test_seed_ledger.py` fail **the named check** *"a SECOND claim on D17 is refused even on disjoint seeds"*, not merely exit non-zero. |
+| **P4** | Neutering the residual-exhaustion condition (`lifecycle_eval.py`, `residual_s > spec.residual_wall_time_limit_s`) in a scratch mirror makes `--self-test` fail the named check *"L4: a 1e-9 s residual limit trips the residual path"*. |
+| **P5** | The unmutated mirror reproduces the repository's own counts exactly — `60/60` and `56/56` — so a mutation's red is attributable to the mutation and not to the mirror. |
+| **P6** | Nothing executable moves: default preflight stays GREEN 12/16 with the same twelve PASS lines, `official_config` `73/73`, `edge_cases` `30/30`, `test_competition_score` `98/98`, the FLOP anchor delta `0`, and `verify_portability` `99/99`. |
+
+## Falsifier
+
+If the mirror cannot reproduce the repository's counts (P5), the mutation
+evidence is worthless and must be withdrawn rather than reported. If P2 fails,
+the checker is vacuous and must not be added. If correcting a docstring changes
+any suite's output, the change was not descriptive and this slice is the wrong
+class for it.
+
+## Scope — what must not change
+
+No gate threshold, no `decide()` behaviour, no residual model, no seed block or
+ledger byte, no vault, no `estimator.py`, no score, no truth. `p2_window.py`'s
+`bracket()` is **already correct** and is not touched; only the docstring above
+it is. The scratch mirror is built in a system temp directory and the repository
+is opened read-only, exactly as `p1pre_fault_inject.py` was forced to do.
+
+## Verification plan
+
+`test_enforcement_labels.py` green including its mutations · every named suite
+re-run and its count recorded · default `preflight.ps1` GREEN 12/16 ·
+`verify_portability.py` 99/99 · `git diff --check` clean · a fresh independent
+Skeptic with this contract, the diff, the commands and the raw transcripts.
