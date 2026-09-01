@@ -23984,3 +23984,111 @@ read-only with respect to the repository and must not add a path through
 
 **Waived by Samuel (solo), 2026-09-01.** Falsification runs against my own
 numbered predictions above.
+
+---
+
+# 2026-09-01 — OPEN: the corrector's training set is NOT the dataset the brief names, and the named one is CONFIRM
+
+**Recorded before any corrector is built**, because the answer changes where
+Rung 1's highest-EV lever gets its labels, and building first would have meant
+fitting on the split this repository forbids fitting on.
+
+## What the brief says
+
+The 2026-09-01 implementation brief, § 8 *Public-source harvest*, directs:
+
+> take freely from public sources: keenanpepper's HF datasets
+> `aicrowd/arc-whestbench-public-2026` (500k MLPs w/ per-layer means; 10k w/
+> 4th moments) for corrector training
+
+and its § 4 makes that corrector (**N2**) the *highest expected value* lever in
+the whole program, on the grounds that offline compute is unmetered.
+
+## What that dataset actually is
+
+I read the cached copy rather than trusting the citation
+(`~/.cache/huggingface/hub/datasets--aicrowd--arc-whestbench-public-2026`,
+16 GB, pinned at `6a416fa5…`, the commit `WP0A` repinned to):
+
+| field | value |
+|---|---|
+| configs | exactly two — `default` -> `data/mini-*.parquet`, `full` -> `data/full-*.parquet` |
+| `size_categories` | **`1K<n<10K`** |
+| `splits.mini.n_mlps` | **`100`** |
+| `n_samples` | `1_000_000_000` per MLP |
+| license / homepage | `cc-by-4.0`, the challenge page |
+
+**It is the competition's own public evaluation data — 100 MLPs in `mini` — and
+it is the CONFIRM tier.** It is not a 500k-MLP corpus and contains no separate
+training corpus. `README.md` and `metadata.json` both agree.
+
+## Why this is a blocker as written, not a detail
+
+The same brief's § 6 says, in its own words:
+
+> public-mini split is **CONFIRM-only** (fit no basis/coefficient/rank/threshold
+> on it)
+
+and `AGENTS.md` § *Measurement law* says the public split is *"read-only; no
+constant may ever be fitted there."* Training a corrector on
+`aicrowd/arc-whestbench-public-2026` is **exactly** fitting coefficients on
+CONFIRM. Followed literally, § 8 instructs the violation that § 6 forbids, and
+the reason is a citation error, not a change of policy: nothing anywhere else in
+the brief or the repository proposes relaxing the tier rule.
+
+I could not confirm that a 500k-MLP dataset exists under any owner. One targeted
+search returned nothing matching. **Absence of evidence here is weak** — it may
+exist on the Hub under a personal namespace, and Samuel, who wrote the brief,
+may simply know the right path.
+
+## What to do instead, and it is strictly better
+
+**Mint our own training set.** The corrector needs
+`(cumulant-trajectory features -> truth - prediction)` pairs. This repository
+already mints grader-identical `1024x16` networks (`local_sim/mint_provenance.py`)
+and computes their truth (`local_sim/p2_truth.py`, `gpu_mint.py`). Offline
+compute is unmetered, so the only cost is GPU wall time, which goes through
+`gpuq`.
+
+Own mints are better than the public data for this purpose on three counts, not
+merely equal:
+
+1. **Disjoint from CONFIRM by construction**, so the tier law is satisfied
+   rather than argued around;
+2. **exactly the live shape**, whereas any public corpus would be whatever shape
+   its author chose;
+3. **truth precision is ours to set** — and every MSE this project quotes must
+   carry its GT-noise floor, which is only knowable for truth we generated.
+
+The cost is real and should not be waved away: the public route would have been
+free labels, and minting is GPU time we now have to spend.
+
+## Binding conditions when the corrector is built
+
+- Training networks come from **`P02`** (DESIGN, allocated 2026-09-01, 96 seeds,
+  `40,901,002,000..40,901,002,095`), never from `mini`, `full`, or `P01`'s
+  already-spent range.
+- **Leave-networks-out** validation, not leave-rows-out: rows within one MLP are
+  not independent, and a corrector that memorises a network is worthless on a
+  fresh suite. The brief says this and it is right.
+- Whatever `P02` selects is replicated on **`P03`** before it is reported.
+- The `>= 0.3` held-out `R^2` gate is fixed in the Rule-1 contract before data
+  exists, and it is scored on **`P03`**, not `P02`.
+- Prediction clamped at `+/- k sigma`, `k` fixed in the contract, so a corrector
+  that extrapolates badly on a hard MLP degrades instead of exploding.
+- The Phase-1 *"correctors don't work"* kill was measured at `L/n = 1/8`; live is
+  `1/64`. It does not transfer, and the contract should say so rather than
+  quietly ignoring it.
+
+## What Samuel is owed
+
+One question, and it does not block the work — I proceed on own mints either
+way:
+
+> **Is there a real 500k-MLP public dataset, and if so what is its actual path?**
+> If it exists and is disjoint from `mini`/`full`, it is free labels at a scale
+> we cannot mint cheaply, and N2 gets substantially stronger. If it does not,
+> nothing changes; own mints were already the plan.
+
+Until answered, treat the § 8 line as a **citation error against a CONFIRM-tier
+dataset** and do not fit on it.

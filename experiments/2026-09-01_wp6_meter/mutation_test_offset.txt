@@ -1,0 +1,15 @@
+PASS  offset set to zero (pretend the server agrees with us)
+        -> 3 check(s) failed; named guard fired: True
+        first: for_shape(1024, 16) is Phase 2
+PASS  offset set to the MINIMUM observed (unsafe direction)
+        -> 3 check(s) failed; named guard fired: True
+        first: for_shape(1024, 16) is Phase 2
+PASS  range collapsed to a single value (hides the estimator dependence)
+        -> 3 check(s) failed; named guard fired: True
+        first: for_shape(1024, 16) is Phase 2
+PASS  range widened to bracket nothing real
+        -> 3 check(s) failed; named guard fired: True
+        first: for_shape(1024, 16) is Phase 2
+PASS  provenance blanked (offset silently becomes 'unmeasured')
+        -> 2 check(s) failed; named guard fired: True
+        first: for_shape(1024, 16) is Phase 2

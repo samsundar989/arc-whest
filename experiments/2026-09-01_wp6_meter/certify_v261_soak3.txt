@@ -1,0 +1,10 @@
+﻿uv : C:\Users\samsu\Documents\arc-whest\local_sim\certify_candidate.py:335: ConfigureNoOpWarning: flops.configure() 
+configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so 
+these settings will not affect a graded submission.
+At line:1 char:302
++ ... tch {} } }; uv run python local_sim/certify_candidate.py --candidate  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\samsu\...ded submission.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  flops.configure(symmetry_warnings=False)

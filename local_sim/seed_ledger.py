@@ -78,6 +78,12 @@ TIERS: Dict[str, str] = {
     "D19": "SINGLE_USE",
     # ---- Phase 2, 1024 x 16 ----
     "P01": "DESIGN",
+    # Allocated 2026-09-01. P02 selects, P03 replicates what P02 selected, P04
+    # decides ONCE. Claiming P03 for selection collapses the pair into one
+    # DESIGN block and is the failure this split exists to prevent.
+    "P02": "DESIGN",
+    "P03": "DESIGN",
+    "P04": "SINGLE_USE",
 }
 
 

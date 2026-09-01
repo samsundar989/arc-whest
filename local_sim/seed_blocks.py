@@ -108,6 +108,37 @@ DECISION_BLOCKS = [
                                  "remaining 504 are held for a DISJOINT P2-CP2 "
                                  "draw so the deployment gate is not measured on "
                                  "the networks that chose the candidate."),
+    # ---- PHASE 2 evidence blocks, allocated 2026-09-01 under WP0E's structure
+    # (LOG 2026-08-31) but NOT its stated purpose. WP0E framed P02/P03 around
+    # carrier basis-count selection; the WP2 slice, independently ACCEPTed on
+    # 2026-09-01, then measured the carrier's advantage over random orthogonal
+    # blocks at LIVE WIDTH as 0.155%, which demotes the carrier to a support arm
+    # and makes basis-count selection a poor use of 96 fresh networks. The
+    # allocation is kept, the purpose is restated. Samuel's sign-off on the
+    # allocation is WAIVED (solo, 2026-09-01); the Rule-1 contract per slice is
+    # NOT waived.
+    ("P02", 40_901_002_000, 96,  "PHASE-2 DESIGN block. Selection over the Rung-1 "
+                                 "state/corrector architecture: the offline learned "
+                                 "cumulant-feature corrector and the AUGMENT-K2 "
+                                 "diagonal-cumulant state. Tuning, hyper-parameters "
+                                 "and implementation choices are PERMITTED here; NO "
+                                 "promotion gate is decided on it, and nothing "
+                                 "selected here may be reported without P03."),
+    ("P03", 40_901_003_000, 96,  "PHASE-2 DESIGN block, DISJOINT from P02 by "
+                                 "construction. Holds the independent replication of "
+                                 "whatever P02 selects, so a selected configuration "
+                                 "is never reported on the networks that chose it. "
+                                 "Claiming P03 for selection instead of replication "
+                                 "defeats the only reason it exists."),
+    ("P04", 40_901_004_000, 100, "PHASE-2 DECIDE block, LOCKED SINGLE-USE. The one "
+                                 "paired arithmetic comparison of the final candidate "
+                                 "against graded v2.7, through "
+                                 "competition_score.decide(gate=...) with a gate "
+                                 "fixed in a committed contract BEFORE the block is "
+                                 "touched. One claim, ever. Spending it on a "
+                                 "rehearsal, a debug run, or a configuration still "
+                                 "under selection destroys the only clean Phase-2 "
+                                 "decision this project has."),
 ]
 
 # --- single-use blocks -------------------------------------------------------
@@ -119,6 +150,7 @@ SINGLE_USE_BLOCKS = {
     "D14": "Sprint 5 / packed-carrier paired decision (GAME_PLAN rev 11) — SPENT 2026-08-06",
     "D17": "reserved single-shot gate — allocated 2026-08-10, never drawn, LOCKED 2026-08-19",
     "D19": "v2.6 promotion gate once the Phase-2 shape is known — allocated 2026-08-19, unspent",
+    "P04": "the one Phase-2 DECIDE comparison against graded v2.7 — allocated 2026-09-01, unspent",
 }
 
 # Consumption — as opposed to allocation — is recorded in `seed_ledger.py` and

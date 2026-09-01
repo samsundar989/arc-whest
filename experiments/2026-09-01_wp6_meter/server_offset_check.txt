@@ -1,0 +1,29 @@
+=== P1 (RESCORED after the falsification): graded_flops() vs both reports ===
+  328662: graded 137,617,103,872   predicted 137,617,103,872   err +0 (over-estimates -> SAFE)
+  328664: graded 137,617,136,672   predicted 137,617,136,704   err +32 (over-estimates -> SAFE)
+  P1 as written (exact constant): MISS -- the offset is 2**24 and 2**24-32, not one value
+  repaired claim (conservative upper bound): every graded row is at or below
+  the prediction, and the recorded range brackets both observations.
+
+=== P2: the offset must not move v2.6.1 off the floor ===
+  meter=local   F=137,600,326,656  C/B=0.062573384  mult=0.100000
+  meter=server  F=137,617,103,872  C/B=0.062581013  mult=0.100000
+  P2: HIT -- both pinned at the 0.1 floor
+
+=== P3: where the offset can change an outcome ===
+  floor share of budget        = 219,902,325,555
+  local meter must stay under  = 219,885,548,339
+  headroom the offset costs    = 16,777,216  (0.00763%)
+  binds only above C/B         = 0.09999237
+  v2.6.1  floor margin (server) = 82,285,221,683 FLOPs (37.42% of the floor share)
+  v2.7    floor margin (server) = 82,285,188,851 FLOPs (37.42% of the floor share)
+  P3: HIT -- the boundary is a number now, and nothing near today's
+  candidates is within 82e9 FLOPs of it.
+
+=== guards ===
+  PHASE2 offset measured? True | range (16777184, 16777216)
+  PHASE1 offset measured? False | value 0 | range None
+  (never-measured is distinguishable from measured-and-zero: range is None)
+  bad meter strings rejected: True
+  failed MLP still returns failure multiplier: True
+  default multiplier() behaviour unchanged (local): True

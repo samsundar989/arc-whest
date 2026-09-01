@@ -52,6 +52,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import importlib.util
+import math
 import json
 import os
 import subprocess
@@ -199,7 +200,21 @@ def main() -> int:
                     help="skip the network-dependent sections (1 whest validate "
                          "is local, 10 subprocess smoke needs the dataset)")
     ap.add_argument("--skip-smoke", action="store_true")
+    ap.add_argument("--residual-soak", type=int, default=0, metavar="N",
+                    help="run the official subprocess mini split N times and "
+                         "pool the residuals into a TAIL (worst / p99 / median) "
+                         "instead of the 2-MLP anecdote section 10 gives. "
+                         "0 (default) skips it, and a skipped soak is NOT a "
+                         "pass. Rung-3 hardening wants N=3. Costs roughly "
+                         "N x 100 subprocess MLPs of wall time. READS "
+                         "CONFIRM-TIER TRUTH, like section 10.")
+    ap.add_argument("--soak-n-mlps", type=int, default=100, metavar="M",
+                    help="MLPs per soak repetition (default 100, the full mini "
+                         "split). Lower it only to rehearse the plumbing.")
     a = ap.parse_args()
+    if a.residual_soak < 0:
+        print("--residual-soak must be >= 0")
+        return 2
 
     cand = os.path.abspath(a.candidate)
     if not os.path.exists(cand):
@@ -558,6 +573,47 @@ def main() -> int:
                   f"multiplier {smoke['multiplier']:.4f}   "
                   f"C/B {smoke['c_over_b']:.7f}")
 
+    # --------------------------------------------------------------- 11 ----
+    head("11  residual TAIL -- the soak, not the anecdote")
+    if not a.residual_soak:
+        skip("11: residual soak over repeated official subprocess runs",
+             "--residual-soak 0 (default). Section 10 decided residual on TWO "
+             "MLPs, ONCE; two rows cannot see a p99. A skipped soak is NOT a "
+             "pass, and Rung-3 hardening requires N=3.")
+    else:
+        print(f"      *** READS CONFIRM-TIER TRUTH, exactly as section 10 does.")
+        print(f"      {a.residual_soak} x {a.soak_n_mlps} MLPs on the official "
+              f"subprocess runner.")
+        soak = _residual_soak(rel, reps=a.residual_soak, n_mlps=a.soak_n_mlps)
+        report["sections"]["residual_soak"] = soak
+        check("11: every soak repetition produced a report",
+              soak["ok"], soak.get("why", "")[:70])
+        if soak["ok"]:
+            cap = soak["residual_cap"]
+            check("11: zero failed MLPs across every repetition",
+                  soak["n_failed_mlps"] == 0,
+                  f"{soak['n_failed_mlps']} failed of {soak['n_rows']} rows")
+            check("11: the WORST pooled residual clears the cliff",
+                  soak["worst"] < cap,
+                  f"worst {soak['worst']*1000:.2f} ms of a {cap*1000:.0f} ms "
+                  f"cap -> {soak['headroom_worst']:.2f}x headroom")
+            # The number that matters is the WORST, not the mean: the cap is a
+            # cliff and one MLP over it FAILS that MLP. The mean is recorded
+            # because a mean far below a wild worst is itself a finding.
+            print(f"      pooled over {soak['n_rows']} rows from "
+                  f"{soak['reps']} run(s):")
+            print(f"        median {soak['median']*1000:8.3f} ms")
+            print(f"        p99    {soak['p99']*1000:8.3f} ms")
+            print(f"        worst  {soak['worst']*1000:8.3f} ms   "
+                  f"-> headroom {soak['headroom_worst']:.2f}x")
+            print(f"        worst/median dispersion {soak['worst_over_median']:.2f}x")
+            print(f"      LOCAL HOST ONLY. `AGENTS.md` forbids quoting a local "
+                  f"absolute wall time as")
+            print(f"      a grader prediction; the two submitted files ran "
+                  f"~7x faster on the grader,")
+            print(f"      and that is an observation about THOSE files, not a "
+                  f"safety factor for this one.")
+
     # ---------------------------------------------------------------- R ----
     head("R  the repository was not modified")
     # Taken AFTER the run, deliberately: a hash captured before a write cannot
@@ -648,6 +704,88 @@ def _host_memory() -> dict:
             "source": "test_deployment_envelope.peak_memory_bytes",
             "peak_wset_bytes": int(m["working_set"]),
             "peak_pagefile_bytes": int(m.get("commit") or 0)}
+
+
+def _residual_soak(rel, reps, n_mlps, timeout=5400):
+    """Pool per-MLP residuals across `reps` official subprocess runs.
+
+    Section 10 measures residual on two MLPs, once. Residual under Phase 2 is a
+    CLIFF, not a price: one MLP over 0.4 s fails that MLP outright. What decides
+    safety is therefore the TAIL, and a two-row sample has none. This runs the
+    official runner repeatedly and reports the pooled worst / p99 / median.
+
+    Every row is kept. Nothing here is fitted, selected, or averaged into a
+    score; the split's labels are read by the runner and deliberately not
+    returned, because a soak is a residual instrument and must not become an
+    accuracy one.
+    """
+    exe = os.path.join(os.path.dirname(sys.executable), "whest")
+    env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1")
+    res, per_rep, failed, cap = [], [], 0, None
+    for i in range(reps):
+        cmd = [exe, "run", "--estimator", rel,
+               "--dataset", "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
+               "--split", "mini", "--runner", "subprocess",
+               "--n-mlps", str(n_mlps), "--json"]
+        try:
+            p = _run(cmd, timeout=timeout, env=env)
+        except subprocess.TimeoutExpired:
+            return {"ok": False, "why": f"rep {i+1} timed out after {timeout}s",
+                    "reps_completed": i}
+        j = (p.stdout or "").find("{")
+        if j < 0:
+            return {"ok": False, "reps_completed": i,
+                    "why": f"rep {i+1}: {(p.stderr or p.stdout or '')[-160:]}"}
+        try:
+            d = json.loads(p.stdout[j:])
+        except ValueError as exc:
+            return {"ok": False, "reps_completed": i,
+                    "why": f"rep {i+1}: unparseable report: {exc}"}
+        if not d.get("results"):
+            err = d.get("error") or {}
+            return {"ok": False, "reps_completed": i,
+                    "why": (f"rep {i+1} REFUSED at {err.get('stage')}: "
+                            f"{err.get('code')} {err.get('message','')[:70]}")}
+        r = d["results"]
+        cap = d["run_config"]["residual_wall_time_limit_s"]
+        rows = [float(m["residual_wall_time_s"]) for m in r["per_mlp"]]
+        res.extend(rows)
+        failed += int(r["n_failed_mlps"])
+        per_rep.append({"rep": i + 1, "n": len(rows),
+                        "worst": max(rows), "median": _pctile(rows, 50)})
+    if not res:
+        return {"ok": False, "why": "no residual rows were produced",
+                "reps_completed": 0}
+    worst, med = max(res), _pctile(res, 50)
+    return {
+        "ok": True, "reps": reps, "n_mlps_per_rep": n_mlps, "n_rows": len(res),
+        "n_failed_mlps": failed, "residual_cap": cap,
+        "worst": worst, "p99": _pctile(res, 99), "median": med,
+        "worst_over_median": (worst / med) if med > 0 else float("inf"),
+        # Per VALIDATION.md 2b-ii: residual is reported as HEADROOM against the
+        # cliff, quoted on the WORST observed row, never as a cost.
+        "headroom_worst": (cap / worst) if worst > 0 else float("inf"),
+        "per_rep": per_rep,
+        "meter_caveat": ("LOCAL HOST. Not a grader prediction. The two graded "
+                         "K2 submissions ran ~7x faster on the grading server "
+                         "than on this host, and AGENTS.md refuses that as a "
+                         "general safety factor for a different candidate."),
+    }
+
+
+def _pctile(xs, q):
+    """Nearest-rank percentile: rank = ceil(q/100 * N), value = s[rank-1].
+
+    No numpy -- this module must import anywhere. Written with `round(...)` the
+    first time, which put p99 of 1..100 at 100 and p1 at 2; the unit test caught
+    it. An off-by-one in a tail statistic is exactly the kind of thing that
+    reads plausibly and reports the wrong cliff margin.
+    """
+    s = sorted(xs)
+    if not s:
+        raise ValueError("empty sample")
+    k = max(0, min(len(s) - 1, math.ceil((q / 100.0) * len(s)) - 1))
+    return s[k]
 
 
 def _smoke(rel, timeout=2400):

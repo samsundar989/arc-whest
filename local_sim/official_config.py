@@ -127,6 +127,30 @@ class OfficialRound:
     limits_verifiable: bool
     note: str
 
+    # --- the grading server's own accounting --------------------------------
+    #: FLOPs the GRADING SERVER bills per MLP on top of what the local
+    #: official-package subprocess runner counts.
+    #:
+    #: THIS IS A CONSERVATIVE UPPER BOUND, NOT A CONSTANT, and the distinction
+    #: is load-bearing. It was preregistered as a constant on 2026-09-01 and
+    #: the preregistered check FALSIFIED that: the two graded submissions show
+    #: offsets of 2**24 and 2**24 - 32, so the offset is weakly
+    #: estimator-dependent. The MAXIMUM observed is carried here deliberately --
+    #: over-estimating what the server bills is the safe direction for a
+    #: floor-margin check.
+    #:
+    #: It is measured, never derived: no graded operation ledger exists, so the
+    #: offset is attributed to no operation. Read `server_flop_offset_provenance`
+    #: before quoting it, and never claim server op-by-op parity from it.
+    server_flop_offset_per_mlp: int = 0
+    #: (min, max) offsets actually observed, in FLOPs. `None` where unmeasured.
+    #: A range whose endpoints differ is proof the offset is not a constant.
+    server_flop_offset_observed_range: Optional[Tuple[int, int]] = None
+    #: Where the offset came from, and how much evidence stands behind it.
+    #: Empty string means it has never been measured for this round -- which is
+    #: NOT the same as measured-and-zero, and the two must not be conflated.
+    server_flop_offset_provenance: str = ""
+
     # ---------------------------------------------------------------------- #
 
     @property
@@ -141,13 +165,59 @@ class OfficialRound:
         """C_m = F_m + lambda * R_m, under THIS round's lambda."""
         return float(flops_used) + self.lambda_flops_per_second * float(residual_wall_time_s)
 
+    @property
+    def server_offset_is_measured(self) -> bool:
+        """True only where the offset was actually observed on graded reports."""
+        return bool(self.server_flop_offset_provenance)
+
+    def graded_flops(self, flops_used: float) -> float:
+        """What the GRADING SERVER will bill, given what the LOCAL meter counted.
+
+        Adds this round's measured per-MLP offset. Where no offset has been
+        measured this returns `flops_used` unchanged -- which is an admission of
+        ignorance, not a claim that the server agrees with the local meter.
+        """
+        return float(flops_used) + float(self.server_flop_offset_per_mlp)
+
     def multiplier(self, flops_used: float, residual_wall_time_s: float, *,
-                   failed: bool) -> float:
-        """max(floor, C/B), or the failure multiplier. Uncapped above."""
+                   failed: bool, meter: str = "local") -> float:
+        """max(floor, C/B), or the failure multiplier. Uncapped above.
+
+        `meter="local"` prices what the local official-package runner counted.
+        `meter="server"` adds `server_flop_offset_per_mlp` first, which is the
+        number that decides the outcome. They differ only near a boundary; see
+        `floor_margin`.
+        """
+        if meter not in ("local", "server"):
+            raise ValueError("meter must be 'local' or 'server', not %r" % (meter,))
         if failed or self.flop_budget <= 0:
             return self.failure_multiplier
-        c = self.effective_compute(flops_used, residual_wall_time_s)
+        f = self.graded_flops(flops_used) if meter == "server" else float(flops_used)
+        c = self.effective_compute(f, residual_wall_time_s)
         return max(self.multiplier_floor, c / float(self.flop_budget))
+
+    def floor_flops(self, *, meter: str = "local") -> float:
+        """The largest per-MLP FLOP count that still prices at the floor.
+
+        At `meter="server"` this is the budget's floor share MINUS the offset:
+        the local meter must come in that much under, because the server will
+        add the offset back before dividing. This is the only place the offset
+        can change an outcome, and it is a hard edge, not a gradient.
+        """
+        share = self.multiplier_floor * float(self.flop_budget)
+        if meter == "server":
+            return share - float(self.server_flop_offset_per_mlp)
+        if meter != "local":
+            raise ValueError("meter must be 'local' or 'server', not %r" % (meter,))
+        return share
+
+    def floor_margin(self, flops_used: float, *, meter: str = "server") -> float:
+        """How many FLOPs of headroom remain before the multiplier leaves the floor.
+
+        Negative means this candidate is ALREADY off the floor at that meter.
+        Default is the server meter deliberately: the local one flatters.
+        """
+        return self.floor_flops(meter=meter) - float(flops_used)
 
     def residual_headroom(self, residual_wall_time_s: float) -> Optional[float]:
         """How many times the observed residual fits under the cap. None if uncapped.
@@ -230,6 +300,30 @@ PHASE2 = OfficialRound(
     limits_verifiable=True,
     note=("Wider and shallower. lambda is 0 and residual is capped at 0.4 s "
           "instead, so C == F and the FLOP budget means what it says."),
+    server_flop_offset_per_mlp=2 ** 24,       # 16,777,216 -- the MAXIMUM observed
+    server_flop_offset_observed_range=(2 ** 24 - 32, 2 ** 24),
+    server_flop_offset_provenance=(
+        "MEASURED, NOT DERIVED, AND NOT A CONSTANT. Two graded submissions, "
+        "100 MLPs each, every row within a submission identical:\n"
+        "  328662 (v2.6.1): local 137,600,326,656 -> graded 137,617,103,872   "
+        "offset 16,777,216 = 2**24 exactly\n"
+        "  328664 (v2.7)  : local 137,600,359,488 -> graded 137,617,136,672   "
+        "offset 16,777,184 = 2**24 - 32\n"
+        "So the offset is weakly ESTIMATOR-DEPENDENT. This was preregistered on "
+        "2026-09-01 as a bit-identical constant and the preregistered check "
+        "FALSIFIED that reading; the claim was corrected rather than kept. "
+        "Equivalently: the two files differ by 32,832 counted FLOPs locally but "
+        "only 32,800 on the grader -- the server bills the extra calibration "
+        "work 32 FLOPs cheaper than the local meter does. "
+        "`server_flop_offset_per_mlp` therefore carries the MAXIMUM of the two, "
+        "so `graded_flops()` over-estimates rather than under-estimates the "
+        "server bill; that is the safe direction for a floor-margin check and "
+        "the wrong direction for claiming parity. n = 2 submissions, one round, "
+        "one package version, and the variation between them (32 FLOPs) is "
+        "1.9e-9 of the offset and 1.5e-11 of the budget. NO GRADED OPERATION "
+        "LEDGER EXISTS, so none of this is attributed to an operation and none "
+        "of it is a claim of server op-by-op parity. Reports: "
+        "experiments/run_reports/submission_3286{62,64}_*_graded_report.json"),
 )
 
 ROUNDS: Dict[str, OfficialRound] = {r.tag: r for r in (WARMUP, PHASE1, PHASE2)}
@@ -499,7 +593,65 @@ def verify() -> Tuple[List[Tuple[str, bool, str]], bool]:
           replace(LIVE, flop_budget=1).flop_budget == 1
           and LIVE.flop_budget == 2 ** 41)
 
+    # --- the grading server's offset ---------------------------------------
+    # These are asserted against the STORED GRADED REPORTS, not against the
+    # installed package -- the package cannot see the grading server. WP0B's
+    # lesson: a constant no gate scans is a constant nobody has checked.
+    _GRADED = {  # submission id -> (local official-package count, graded count)
+        "328662": (137_600_326_656, 137_617_103_872),
+        "328664": (137_600_359_488, 137_617_136_672),
+    }
+    check("the Phase-2 server offset is recorded as MEASURED, with a range",
+          PHASE2.server_offset_is_measured
+          and PHASE2.server_flop_offset_observed_range is not None,
+          f"range {PHASE2.server_flop_offset_observed_range}")
+    check("graded_flops() never UNDER-estimates a stored graded total",
+          all(PHASE2.graded_flops(loc) >= g for loc, g in _GRADED.values()),
+          "errors " + ", ".join(
+              f"{PHASE2.graded_flops(loc) - g:+,}" for loc, g in _GRADED.values()))
+    check("the offset is NOT a constant, and the range says so",
+          (PHASE2.server_flop_offset_observed_range[0]
+           != PHASE2.server_flop_offset_observed_range[1]),
+          "2**24 on 328662 and 2**24-32 on 328664; the preregistered "
+          "'bit-identical constant' reading was falsified 2026-09-01")
+    check("every stored graded offset lies inside the recorded range",
+          all(PHASE2.server_flop_offset_observed_range[0] <= g - loc
+              <= PHASE2.server_flop_offset_observed_range[1]
+              for loc, g in _GRADED.values()))
+    check("the carried offset is the MAXIMUM observed (conservative direction)",
+          PHASE2.server_flop_offset_per_mlp
+          == max(g - loc for loc, g in _GRADED.values())
+          == PHASE2.server_flop_offset_observed_range[1],
+          f"{PHASE2.server_flop_offset_per_mlp:,}")
+    check("a round with no measured offset is distinguishable from offset-zero",
+          PHASE1.server_flop_offset_per_mlp == 0
+          and PHASE1.server_flop_offset_observed_range is None
+          and not PHASE1.server_offset_is_measured,
+          "Phase 1 never measured; that is NOT measured-and-zero")
+    check("meter='server' costs exactly the offset in floor headroom",
+          (PHASE2.floor_flops(meter="local") - PHASE2.floor_flops(meter="server"))
+          == PHASE2.server_flop_offset_per_mlp,
+          f"{PHASE2.floor_flops(meter='server'):,.0f} FLOPs is the local ceiling "
+          f"for a floor-pinned candidate")
+    check("multiplier() defaults to the LOCAL meter and rejects any other name",
+          PHASE2.multiplier(1e11, 0.0, failed=False)
+          == PHASE2.multiplier(1e11, 0.0, failed=False, meter="local")
+          and _raises(lambda: PHASE2.multiplier(1e11, 0.0, failed=False,
+                                                meter="grader")))
+    check("the offset cannot rescue a FAILED MLP",
+          PHASE2.multiplier(1e9, 0.0, failed=True, meter="server")
+          == PHASE2.failure_multiplier)
+
     return checks, all(c[1] for c in checks)
+
+
+def _raises(fn) -> bool:
+    """True if `fn()` raises ValueError. A guard that cannot fire is not a guard."""
+    try:
+        fn()
+    except ValueError:
+        return True
+    return False
 
 
 def main() -> int:
