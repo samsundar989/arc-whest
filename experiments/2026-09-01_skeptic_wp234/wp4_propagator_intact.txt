@@ -1,0 +1,20 @@
+﻿python.exe : W0901 16:02:27.918000 57504 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop 
+counting will not work for triton kernels
+At line:1 char:302
++ ... tch {} } }; & ".\.venv-gpu\Scripts\python.exe" "experiments\2026-09-0 ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (W0901 16:02:27.... triton kernels:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+n=32 L=6 seed=90000000801
+   Q3 (single source, FULL background): worst dev over layers = 0.1720  [per-layer 0.102 0.172 0.131 0.086 0.000 0.000]
+   Q4 (leave-one-out, transport intact): explained = -0.8071   cosine = 0.8627
+n=32 L=6 seed=90000000802
+   Q3 (single source, FULL background): worst dev over layers = 0.0859  [per-layer 0.033 0.086 0.085 0.070 0.000 0.000]
+   Q4 (leave-one-out, transport intact): explained = 0.1914   cosine = 0.9495
+n=32 L=10 seed=90000000801
+   Q3 (single source, FULL background): worst dev over layers = 0.9282  [per-layer 0.554 0.654 0.667 0.928 0.794 0.814 0.814 0.531 0.000 0.000]
+   Q4 (leave-one-out, transport intact): explained = -18.7369   cosine = 0.9276
+n=32 L=10 seed=90000000802
+   Q3 (single source, FULL background): worst dev over layers = 0.2622  [per-layer 0.066 0.195 0.115 0.158 0.262 0.256 0.109 0.125 0.000 0.000]
+   Q4 (leave-one-out, transport intact): explained = -4.3350   cosine = 0.8428

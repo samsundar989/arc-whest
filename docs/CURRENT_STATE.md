@@ -1,5 +1,26 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-01 — THE RULE-2 GAP IS CLOSED, AND IT OVERTURNED A CLOSED LANE.**
+> The pending WP2/WP3/WP4 Skeptic ran in the foreground and returned
+> **ACCEPT / PROVISIONAL / REJECT**. That is the fourth of four passes this
+> session to find a real defect.
+>
+> - **WP4's adjoint-K3 KILL is RETRACTED.** Its linearity statistic **kills a
+>   provably linear system at every depth** — the arm applies `eps` after every
+>   layer, making the tangent deviation a degree-`L` polynomial regardless of
+>   physics. The lane is **open again**, unproven, with a broken instrument.
+>   Do not cite it as closed.
+> - **WP3's PORT is PROVISIONAL.** The `1.03723x` price reproduces exactly and
+>   gets *stronger* once its depth confound is corrected, but the contract froze
+>   **no residual model** — and AUGMENT costs `4.38x` the op count and `1.26x`
+>   the in-process wall. It authorises only the cheapest `fnp` probe.
+> - **WP2 is ACCEPTed**, and its negative is *stronger*: at live width Kerdock
+>   buys **`0.155%`** over random orthogonal blocks. The carrier stays demoted.
+>
+> Details, every number, and the repaired-instrument evidence: the last entry in
+> `experiments/LOG.md`. The body below is the 2026-08-31 snapshot, corrected in
+> place where these verdicts touch it.
+
 **Snapshot: 2026-08-31, updated after the WP0/WP1/WP5 engineering session.
 Phase 2 is live, this account has two clean graded submissions, v2.7 is rank
 53/83, full factorized K3 remains the accuracy oracle, and W-EFF and late-window
@@ -936,22 +957,41 @@ spent, no seed block claimed, no candidate built, and nothing submitted. Its
 same-day execution plan has been removed from the active `GAME_PLAN.md`; the
 contracts and results remain in `experiments/LOG.md` and git history.
 
-> **OPEN RULE-2 GAP, recorded 2026-09-01. WP2, WP3 and WP4 have NOT been
-> independently reviewed.** `AGENTS.md` Rule 2 requires a fresh Skeptic after
-> every IMPORTANT slice before its result is believed or propagated. WP0A, WP0B
-> and WP1+WP5 each got one, and **all three returned PROVISIONAL and each found
-> a real defect** — including a flatly false *"no truth was read"* claim that
-> had to be struck. The WP2/WP3/WP4 review was launched twice and killed twice
-> by editor crashes before reporting.
+> **RULE-2 GAP CLOSED 2026-09-01 — and the review overturned one of the three.**
+> The WP2/WP3/WP4 Skeptic finally ran in the foreground (the two background
+> attempts died with the editor). Verdicts are **per slice**, and this was the
+> **fourth of four** passes this session to find a real defect:
 >
-> So the three NEWEST findings are the LEAST verified: the `MMD²` objective and
-> its orthogonality-not-Kerdock negative, the AUGMENT **PORT** verdict at
-> `1.03723x`, and the adjoint-K3 **KILL**. Treat all three as provisional until
-> that review lands. The relaunch prompt is in the LOG entry for this gap.
+> | slice | verdict | consequence |
+> |---|---|---|
+> | **WP2** (`3bae94b`) | **ACCEPT** | the `MMD² ∝ 1/k` law is **algebra, not measurement** (exact closed form `C1/k + C0`, reproduced to float roundoff). The orthogonality-not-Kerdock negative **survives and strengthens**: re-run on a fresh seed family and extended to live width, Kerdock buys **`0.155%`** over random orthogonal blocks at `n = 1024` (`1248 σ` outside draw spread), down from `2.6%` at `n = 64` |
+> | **WP3** (`a480ab6`) | **PROVISIONAL** | `1.03723x` reproduces to the digit and the depth confound, once corrected, **strengthens** it (matched `L = 16`: `1.14748 → 1.07423 → 1.03723`, halving to `0.15%`). But **the contract has no residual half at all**, which `VALIDATION.md` §2b-ii makes mandatory — and that is the axis where AUGMENT is expensive: `4.38x` the `aten` op count and `1.26x` the in-process wall, with **355 extra `_local_scalar_dense` readbacks** from a data-dependent branch in `mlp_kprop/wick.py:105` |
+> | **WP4** (`18c5fa3`) | **REJECT — the KILL is retracted** | see below |
+>
+> **WP4's instrument cannot measure what it was named for.** `scale:eps`
+> multiplies `K[3]` by `eps` after **every** layer
+> (`p2_adjoint_k3.py:139-143`), so a source at layer `l` arrives attenuated by
+> `eps^(L-1-l)` and `m(eps) - m(0)` is a degree-`L` polynomial *even in a
+> perfectly linear system*. A **provably linear, provably additive** state-space
+> null control, driven through WP4's exact arms and scored with WP4's exact
+> statistics, is **KILLed at every depth** — `0.4325` at `L = 3` rising to
+> `0.8786` at `L = 16`, the same range and the same monotone depth trend WP4
+> attributed to physics. Three further record defects: all five kills came from
+> the Q3 branch (so *"two kill rules fired"* is false — `verdict()` returns on
+> `lin > 0.25` first), Q6's quoted `0.34–0.42` is `0.42–0.70` on disk, and the
+> `32x10` "catastrophic" cell is **one draw** whose sibling sits *above* the bar.
+>
+> **The lane is retracted, not exonerated.** With the propagator kept intact on
+> a full background, direction is fine everywhere (cosine `0.84–0.95`) and
+> linearity is good at `L = 6` (`0.086–0.172`), but at `L = 10` it is
+> **seed-dependent by 3.5x** (`0.262` vs `0.928`) and leave-one-out additivity
+> over-sums badly (`-18.7`) — a double-counting signature, not a physics result.
+> The adjoint lane returns to **open, speculative, with a known-broken
+> instrument**. Full verdict and every number: bottom of `experiments/LOG.md`.
 
 **The next action, updated 2026-08-31 after WP0–WP5.** Every truth-free package
 in `GAME_PLAN.md` §8 is now closed: WP0A–D (systems), WP1 (carrier), WP2
-(objective + frozen panel), WP3 (AUGMENT, PORT), WP4 (adjoint K3, KILLED), WP5
+(objective + frozen panel, ACCEPT), WP3 (AUGMENT, PORT — PROVISIONAL), WP4 (adjoint K3, kill **RETRACTED**), WP5
 (integrated candidate, certified). **The remaining steps all read truth and
 therefore all need Samuel.**
 
@@ -961,7 +1001,7 @@ therefore all need Samuel.**
 |---|---:|---|---|
 | carrier k=8 | `0.2501` | **`2.501x` just to break even** | one `n=2` organiser datum says `1.42x` **worse** adjusted |
 | **AUGMENT** | **`0.1`, pinned** | **nothing — it is free** | moves the scored row `1.8%` at `n=64`; sign unmeasured |
-| adjoint K3 | — | — | **DEAD** (WP4) |
+| adjoint K3 | — | — | **NOT dead.** The WP4 kill was **retracted 2026-09-01** on a REJECT; the lane is open and unproven, and its instrument must be repaired before it is re-measured |
 
 1. **The cheapest discriminator, and it needs no new allocation.** Score the
    carrier candidate against shipped v2.6.1 on **24–32 fresh mints from P01's
@@ -971,9 +1011,19 @@ therefore all need Samuel.**
    a Rule-1 contract and Samuel's prediction. It must NOT be answered by
    extending the `whest run` mini smoke past 2 MLPs — that turns a read-only
    CONFIRM tier into a selection tier.**
-2. **The `fnp` port of AUGMENT**, now that its price is known and it is free at
-   the floor. IMPORTANT, with its own parity burden (the harmonic/DS algebra and
-   the Wick coefficients).
+2. **The cheapest `fnp` AUGMENT probe — NOT the full port.** The 2026-09-01
+   Skeptic left WP3 PROVISIONAL precisely because the residual axis was never
+   in its contract, and AUGMENT is `4.38x` the op count there. So build **only**
+   the degree-3 `(n,)` and degree-4 scalar update on top of the shipped K2p1,
+   with arbitrary uncalibrated coefficients, and run `whest validate` plus a
+   small `--runner subprocess` job. That converts a *projection* into a
+   flopscope **price** and yields `0.4 / observed` residual headroom on the
+   deployment-authoritative instrument, in one artifact, reading no truth and
+   claiming no seed block. **Decision rule, fixed before the data:** PORT stands
+   only if counted FLOPs stay at or below `2.199e11` **and** subprocess residual
+   headroom is within a stated factor of frozen v2.6.1's. IMPORTANT, with its own
+   parity burden (the harmonic/DS algebra, the Wick coefficients, and upstream's
+   negative-variance clamp, which fires for AUGMENT and not for BASE).
 3. **WP0E**, prepared at `ea4b8fc` and awaiting Samuel's three answers.
 
 The optional `k3pre` confirmation must not delay candidate-producing work.
@@ -1228,9 +1278,9 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 | 1 | W-EFF exact K3 representative price/parity | IMPORTANT | **CLOSED 2026-08-28 — MEASURED AND KILLED.** `1.0723 B` measured / `1.0732 B` whole-path against a `<= 0.35 B` screen, FAIL by `3.0664x`. Parity exact, zero materializations, zero leaks, bin reconciliation closes exactly. **Two** independent PROVISIONAL passes, both accepted in full; the second found an error inside the first correction |
 | 2 | late-window / age-window K3 imitation | IMPORTANT | **CLOSED 2026-08-28 — GATE-W FAILS, provably.** Every window arm's score floor is `2.09x`–`4.65x` worse than graded v2.7. Independent PROVISIONAL accepted: the *verdict* stands and is stronger; the *attribution* was retracted |
 | WP1 | grader-legal carrier constructor | IMPORTANT | **CLOSED 2026-08-31** (`292fbab`). `p2_carrier_fnp.py` is stdlib + `fnp`, no numpy, **byte-identical to the frozen `kerdock_mub.py` at width 1024**. 117/117 |
-| WP2 | truth-free carrier objective and frozen nested panel | IMPORTANT | **CLOSED 2026-08-31** (`3bae94b`). Deep-ReLU MMD² objective, 74/74 incl. live width. Panel frozen and content-addressed at `a9bd32a1…` with its rule, DESIGN falsifier and proposed gate inside the digest. **The finding runs against Kerdock:** `MMD² ∝ 1/k` (the plain Monte-Carlo rate, so structure buys a constant not a rate), and at matched rows random orthogonal blocks are only `1.026x`/`1.006x` worse while IID is `1.52–1.56x` worse — the advantage is mostly ORTHOGONALITY, and Kerdock adds `0.6–2.6%` shrinking with width |
-| WP3 | faithful AUGMENT | IMPORTANT | **CLOSED 2026-08-31 — VERDICT PORT** (`a480ab6`). Unfactored AUGMENT costs **`1.03723x`** plain K2 at `1024x16`, `+3.72%`, **free at the `0.1` multiplier floor**. The excess halves per doubling of `n` — `Θ(n²)` on a `Θ(n³)` base. State: degree-3 is an `(n,)` VECTOR and degree-4 a SCALAR, `1,025` numbers on K2's `1,049,600`. 33/33. **No `fnp` port exists yet; the verdict is that one is worth building** |
-| WP4 | query-directed / adjoint K3 | IMPORTANT | **CLOSED 2026-08-31 — KILLED on its own preregistered falsifier** (`18c5fa3`). The K3→mean response is neither linear nor additive: two kill rules fired at five shapes and it worsens with **DEPTH** (`0.277` at `32x3` → `0.938` at `32x10`; live depth is 16). Locality HELD — `kappa_3` IS local, the response to it is nonlinear |
+| WP2 | truth-free carrier objective and frozen nested panel | IMPORTANT | **CLOSED 2026-08-31** (`3bae94b`). Deep-ReLU MMD² objective, 74/74 incl. live width. Panel frozen and content-addressed at `a9bd32a1…` with its rule, DESIGN falsifier and proposed gate inside the digest. **The finding runs against Kerdock:** `MMD² ∝ 1/k` (the plain Monte-Carlo rate, so structure buys a constant not a rate), and at matched rows random orthogonal blocks are only `1.026x`/`1.006x` worse while IID is `1.52–1.56x` worse — the advantage is mostly ORTHOGONALITY, and Kerdock adds `0.6–2.6%` shrinking with width. **Skeptic ACCEPT 2026-09-01**, with two corrections: the `1/k` law is an exact algebraic identity of the closed-form census, not a measurement; and at **live width the Kerdock margin is `0.155%`**, `1248 σ` outside draw spread — real, and smaller than recorded |
+| WP3 | faithful AUGMENT | IMPORTANT | **CLOSED 2026-08-31 — VERDICT PORT** (`a480ab6`). Unfactored AUGMENT costs **`1.03723x`** plain K2 at `1024x16`, `+3.72%`, **free at the `0.1` multiplier floor**. The excess halves per doubling of `n` — `Θ(n²)` on a `Θ(n³)` base. State: degree-3 is an `(n,)` VECTOR and degree-4 a SCALAR, `1,025` numbers on K2's `1,049,600`. 33/33. **No `fnp` port exists yet.** **Skeptic PROVISIONAL 2026-09-01:** the price reproduces to the digit and the depth confound in the trend table, once corrected, *strengthens* it — but **the contract froze no residual model**, which `VALIDATION.md` §2b-ii requires, and AUGMENT costs `4.38x` the `aten` op count with **355 extra scalar readbacks**. PORT authorises only the cheapest `fnp` probe, not a full port |
+| WP4 | query-directed / adjoint K3 | IMPORTANT | **REOPENED 2026-09-01 — the KILL was RETRACTED on an independent REJECT.** The 2026-08-31 kill (`18c5fa3`) fired on a statistic that **kills a provably linear system at every depth**: `scale:eps` applies `eps` at every layer, so the tangent deviation is a degree-`L` polynomial regardless of physics. All five kills came from the Q3 branch alone; Q6's quoted range was wrong; the worst cell was one draw. Repaired-instrument evidence is mixed and seed-dependent. **Lane state: open, speculative, instrument broken.** Locality still HELD |
 | WP5 | integrated live-shape research architecture | IMPORTANT | **CLOSED 2026-08-31** (`292fbab`). `p2_candidate_architecture.py` + `p2_build_candidate.py`: a self-contained single file **CERTIFIED 36/36 at `1024 x 16`**, official subprocess smoke included, 0 failed MLPs. 50/50 integration tests |
 | 5 | neuron-specific mixture / rolled-forward correction | STRATEGIC | pending after a deployable carrier or state path exists |
 | 6 | integrated SINGLE_USE decision and robustness | STRATEGIC | pending |

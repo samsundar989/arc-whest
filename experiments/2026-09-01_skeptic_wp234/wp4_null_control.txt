@@ -1,0 +1,5 @@
+  L   Q3 worst_lin_dev   Q4 explained  Q5 cosine  Q6 maxshare  verdict-by-WP4-rules
+  3             0.4325         0.7872     0.8974       0.6674  KILL(lin)
+  6             0.6381         0.5667     0.7528       0.3707  KILL(lin)
+ 10             0.7669         0.3953     0.6299       0.2237  KILL(lin)
+ 16             0.8786         0.2080     0.4771       0.1269  KILL(lin)

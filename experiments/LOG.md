@@ -23645,3 +23645,241 @@ closing the lane in `docs/CURRENT_STATE.md`'s "closed lanes" sense, until an
 independent context has attacked both. Nothing has been promoted, submitted or
 spent on them, so the gap costs nothing so long as it is not forgotten — which
 is what this entry exists to prevent.
+
+---
+
+# 2026-09-01 — SKEPTIC PASS ON WP2 / WP3 / WP4: ACCEPT / PROVISIONAL / **REJECT**. The WP4 KILL is retracted.
+
+The gap recorded above is closed. An independent context ran in the **foreground**
+(the two prior background attempts died with the editor) against the contracts,
+the diffs, and the raw artifacts — never a prose summary. Verdicts are **per
+slice**. Reviewed HEAD `057f833`.
+
+**Four for four.** Every Skeptic pass this session has found a real defect, and
+this one found the largest: a lane was closed by a statistic that cannot measure
+the thing it was named for.
+
+## Verdicts
+
+| slice | commit | verdict | what it costs |
+|---|---|---|---|
+| **WP2** | `3bae94b` | **ACCEPT** | two record corrections; the negative finding gets *stronger* |
+| **WP3** | `a480ab6` | **PROVISIONAL** | PORT survives on the multiplier axis; the **residual axis was never in the contract** |
+| **WP4** | `18c5fa3` | **REJECT** | the KILL is retracted. The adjoint lane returns to **OPEN** |
+
+## I re-verified every load-bearing code claim myself
+
+Not taken on the reviewer's word. Each was read at the cited line and each held:
+
+| claim | file:line | verified |
+|---|---|---|
+| `scale:eps` multiplies `K[3]` by `eps` after **every** layer | `local_sim/p2_adjoint_k3.py:139-143` — `apply_here = (at_layer is None) or (l == at_layer)`, `factor = eps if apply_here else 0.0` | **yes** |
+| every WP4 KILL came from the Q3 branch, which returns first | `p2_adjoint_k3.py:341-347`; all five artifacts' `verdict.why` begin `linearity deviation` | **yes** |
+| the sweep aggregates by `max`/`min` over networks | `p2_adjoint_k3.py:309-317` | **yes** |
+| the WP3 meter sums `ctr._accum`, not `flop_dict()` | `local_sim/p2_augment.py:205-212` | **yes** |
+| the WP3 trend table mixes depths | `local_sim/test_p2_augment.py:184` — `L = 16 if (a.live and n == 1024) else 4` | **yes** |
+
+## WP4 — why the KILL cannot stand
+
+`scale:eps` applies `eps` at *every* layer, so a `kappa_3` source generated at
+layer `l` reaches the output attenuated by `eps^(L-1-l)`. Even in a **perfectly
+linear, perfectly additive** system, `m(eps) - m(0)` is then a degree-`L`
+polynomial whose deviation from the `eps -> 0` tangent rises monotonically with
+depth. That is the entire observed effect.
+
+**The binding null control.** A state-space system `s_next = A s + F k`,
+`k_next = C k + D s` — linear everywhere, no nonlinearity of any kind — driven
+through WP4's exact interventions and scored with WP4's exact statistics
+(`experiments/2026-09-01_skeptic_wp234/probes/wp4_null.py`, re-run by me,
+transcript `wp4_null_control.txt`):
+
+| `L` | Q3 worst_lin_dev | Q4 explained | Q5 cosine | verdict **by WP4's own rules** |
+|---:|---:|---:|---:|---|
+| 3 | `0.4325` | `0.7872` | `0.8974` | **KILL(lin)** |
+| 6 | `0.6381` | `0.5667` | `0.7528` | **KILL(lin)** |
+| 10 | `0.7669` | `0.3953` | `0.6299` | **KILL(lin)** |
+| 16 | `0.8786` | `0.2080` | `0.4771` | **KILL(lin)** |
+
+against WP4's measured `0.277` (32x3), `0.754` (32x6), `0.938` (32x10). Same
+range, same monotone depth trend. **A provably linear system is killed at every
+depth, including the live `L = 16`.** The statistic has no discriminating power,
+so its firing is not evidence about linearity.
+
+**The Q4/Q5 arm deletes the propagator it is testing.** `scale_at:l:1` zeroes
+`K[3]` at every layer other than `l`, so `m(scale_at:l:1) - m(0)` is not
+`J_(L<-l) S_l^(3)` — `J_(L<-l)` *is* the transport of `kappa_3` through layers
+`l+1 .. L-1`, and the arm destroys it. The missing paths are **linear
+transport**, not cross-layer products. Additivity was never testable as spelled.
+
+### Three further record defects, each confirmed against the JSON on disk
+
+1. **"Two kill rules fired at five shapes" is false.** `verdict()` returns on
+   `lin > 0.25` first; all five artifacts' `why` strings are the linearity
+   branch. Q4 was never reached.
+2. **Q6's quoted range is wrong.** The entry says *"max single-layer share
+   `0.34`-`0.42`"*. On disk: `0.5691`, `0.7011`, `0.4229`, `0.4491`, `0.5932`
+   — i.e. **`0.42`-`0.70`**. Q6's *conclusion* survives (all below `0.80`), but
+   the number in the record is not the number in the artifact.
+3. **"Width barely moves it" is contradicted by its own table.** `16x3` gives
+   `lin = 0.495` and `32x3` gives `0.277`; both 32-wide networks sit below both
+   16-wide ones. Width *halves* it at `L = 3`.
+
+Also: the "catastrophic" `32x10` cell is **one draw**. Its two networks give
+`explained = 0.1038` and `0.5467` — the second is *above* the `0.50` bar. An
+extremum aggregate additionally gets monotonically worse as networks are added,
+so its false-kill rate **grows** with sample size.
+
+### But the lane is NOT exonerated, and the reviewer's own summary overstated this
+
+The Skeptic headlined *"the physical response is linear in the source at every
+depth probed"* from `wp4_probe.py`. **That probe uses WP4's zeroed background**
+(`scale_at`, factor `0.0` elsewhere), so it measures an isolated source with all
+transport deleted — the easier and less relevant question. Its own better probe,
+`wp4_fair.py`, keeps the propagator intact (`factor = eps if l == at_layer else
+1.0`) on a **full background**. I ran it
+(`experiments/2026-09-01_skeptic_wp234/wp4_propagator_intact.txt`):
+
+| shape | seed | Q3 worst dev over layers | Q4 explained | Q5 cosine |
+|---|---:|---:|---:|---:|
+| 32x6 | `...801` | `0.1720` | `-0.8071` | `0.8627` |
+| 32x6 | `...802` | `0.0859` | `0.1914` | `0.9495` |
+| 32x10 | `...801` | **`0.9282`** | `-18.7369` | `0.9276` |
+| 32x10 | `...802` | `0.2622` | `-4.3350` | `0.8428` |
+
+So with the confound removed: direction is fine everywhere (cosine `0.84`-`0.95`,
+far above the `0.5` bar); linearity is good at `L = 6` (`0.086`-`0.172`) but at
+`L = 10` it is **seed-dependent by 3.5x** and one draw is `0.93`; and
+leave-one-out additivity **massively over-sums** (`-18.7`), which is a
+double-counting signature — leave-one-out is not the first-order object, a
+derivative decomposition is.
+
+**Net position: the kill is retracted, not reversed.** WP4 does not establish
+that the adjoint lane is dead, and this pass does not establish that it is
+alive. It returns to *open, speculative*, with a known-broken instrument.
+
+## WP3 — PORT survives the multiplier axis and dies on the axis nobody measured
+
+The headline reproduces to the digit (`51,842,859,008 / 53,773,142,224 =
+1.0372333`), and three challenges resolved **in the claim's favour**:
+
+- **The meter's asymmetry errs conservatively.** `_accum` applies upstream's
+  `slice_factor`/`contract_factor` discount unevenly — the shared K2 base is
+  discounted `25.2%`, the AUGMENT extras only `11.9%`. Raw-op ratio is
+  `1.031605`; the *reported* `1.037233` is the pessimistic one. The dropped
+  `resid` bin is `17,825,792` and **bit-identical in both arms**, so it is
+  unbiased.
+- **Correcting the depth confound strengthens the result.** At matched `L = 16`:
+  `n=256 -> 1.14748`, `n=512 -> 1.07423`, `n=1024 -> 1.03723`; halving factors
+  `1.9868` and `1.9938`. The `Theta(n^2)`-on-`Theta(n^3)` mechanism is exact to
+  `0.15%`, and the raw per-layer excess is `130.7 n^2` across two doublings.
+- **Unmapped ops cannot hide an `n^3` term** — everything torch's mapping misses
+  (`erf`, Hermite) is `O(n)` per call.
+
+**What kills the word "free".** `VALIDATION.md` §2b-ii makes the residual half
+mandatory: report `0.4 / observed` as headroom. **WP3's contract contains no
+residual half at all**, and that is the axis where AUGMENT is expensive:
+
+| meter | BASE | AUGMENT | ratio |
+|---|---:|---:|---:|
+| counted FLOPs (the entry's number) | — | — | **`1.0372`** |
+| `aten` op invocations at `1024x16` | `3,903` | `17,087` | **`4.3779`** |
+| wall, same process, median of 3 | `1.315 s` | `1.663 s` | **`1.2643`** |
+
+`aten._local_scalar_dense` fires **355 extra times** — a tensor-to-Python
+readback per call, from the data-dependent `(var < 1e-10).any()` branch in
+`mlp_kprop/wick.py:105`. This is precisely the pattern `CURRENT_STATE` warns
+about (*"residual risk is about op count and Python glue, not total FLOPs"*) and
+that the handoff bans in `predict`. The wall figure is quoted **only as a
+within-process ratio between two arms**, never as an absolute and never as a
+residual measurement; its sole job is to show the two meters disagree ~7x on the
+excess.
+
+Two more, both real: the artifact's `price` array holds widths
+**`32/64/128/256/512`** with **no `1024` row and no per-row `depth` field**,
+while the LOG table publishes `1024` and omits `512` — so the `1.03723x` that
+authorises the port lives only in a test transcript. And upstream's *"Snapping
+negative variance to zero"* clamp fires **32 times for AUGMENT and 0 for BASE**
+at `32x16` (0 times at live shape); an `fnp` port must reproduce it or it is not
+parity.
+
+**Unresolved and nothing on disk settles it:** the projection's denominator is
+*our* K2p1 (`8.0 n^3 L` in flopscope); the ratio's denominator is *upstream's*
+K2 (`4.0 n^3 L` raw torch). If a faithful port needs upstream's machinery, the
+base changes and the ratio does not transfer.
+
+## WP2 — ACCEPT, and the negative is stronger than recorded
+
+The `MMD^2` proportional-to-`1/k` law is **algebra, not measurement**.
+Substituting the closed-form census into the definition gives exactly
+`MMD^2(k) = C1/k + C0`, and the reviewer reproduced it to float roundoff
+(`rel resid <= 3.2e-11` at `k = 1,8,16`). The `0.78%` spread that P5 celebrates
+*is* `16|C0|/C1 = 0.83%`. The strategic conclusion — plain MC rate, doubling `k`
+is a wash — is correct and required no experiment. P5's stated mechanism is also
+not the operative one: the `1/k` is a `1/R` inside an `R^2` normalisation, true
+for **any** antipodal union of `k` orthonormal bases at constant cross-basis
+coherence.
+
+**Attack point 1 is refuted, and this is the useful part.** P7 re-run on a
+**fresh seed family** (7000-7015, 16 draws), extended to the live width the
+slice never tested:
+
+| `m` | `n` | carrier vs orthogonal | ortho sd | gap / sd |
+|---:|---:|---:|---:|---:|
+| 5 | 64 | `1.02626x` | `2.92e-08` | `72` |
+| 7 | 256 | `1.00627x` | `3.38e-10` | `382` |
+| **9** | **1024** | **`1.00155x`** | `6.44e-12` | `1248` |
+
+The `1.006x` is `382` sigma outside draw-to-draw spread — real, not noise. And
+**at the shipping width Kerdock structure buys `0.155%` over random orthogonal
+blocks**, down from `2.6%` at `n = 64`. The demotion of the carrier to a support
+arm is now supported at live width, not extrapolated.
+
+Two corrections owed to the record: `C0 < 0`, so the closed form returns a
+**negative** `MMD^2` for `k` above about `1938` (P1's own falsifier), outside the
+admissible MUB range at `n = 1024` and cancelling exactly in every comparison the
+slice makes — but the absolute `MMD^2` carries a `~1.1e-8` systematic term. And
+the suite's `1500`-vs-`6000`-node check tests **convergence, not correctness**, so
+it cannot tell a genuine `k -> inf` property from a `c_L` quadrature bias.
+
+## The cross-cutting defect, and it is the same one twice
+
+**Two of three slices publish a headline number that is not in the committed
+content-addressed artifact** — WP3's `1024` row, WP2's P6/P7 control table. Both
+live only in a test transcript; both are the number that steers the next
+decision. `AGENTS.md` § *Continuity* requires the repository to carry what a
+successor needs. Emitting the comparison into the digested JSON rather than
+stdout is the fix, and it is cheap.
+
+## What this changes, immediately
+
+1. **WP4 is not a closed lane.** `docs/CURRENT_STATE.md` is corrected in the same
+   commit. The repaired instrument (single-source sweep on a *full* background;
+   a derivative rather than leave-one-out decomposition; at least 8 networks per
+   cell with a studentised-t interval on the **mean**, not the worst draw) is the
+   cheapest discriminator, and it is worth running when Rung 2 designs the
+   relevance sketch — "which `kappa_3` components does the readout actually
+   read" is the same question.
+2. **WP3 does not yet authorise an `fnp` port.** It authorises the *cheapest
+   possible* port: the degree-3 `(n,)` and degree-4 scalar update alone, on top
+   of the shipped K2p1, with arbitrary uncalibrated coefficients, priced by
+   **flopscope** and residual-soaked on the **subprocess** runner. That converts
+   a projection into a price and yields `0.4 / observed` in one artifact. The
+   decision rule, fixed now: PORT stands only if counted FLOPs stay at or below
+   `2.199e11` **and** subprocess residual headroom is within a stated factor of
+   frozen v2.6.1's.
+3. **WP2 stands**, with the carrier demoted at live width on measured evidence.
+4. **The null control is promoted to a permanent instrument check.** Any
+   linearity statistic this repository writes must kill nothing on
+   `wp4_null.py`. A statistic that kills a linear system is not measuring
+   linearity.
+
+## Raw artifacts
+
+| what | path |
+|---|---|
+| the reviewer's probes, preserved verbatim | `experiments/2026-09-01_skeptic_wp234/probes/` |
+| linear null control, re-run by me | `experiments/2026-09-01_skeptic_wp234/wp4_null_control.txt` |
+| WP4 with the propagator intact, re-run by me | `experiments/2026-09-01_skeptic_wp234/wp4_propagator_intact.txt` |
+
+Nothing was promoted, submitted, or spent. No seed block was drawn. No file
+under `local_sim/`, `scripts/` or `estimator.py` was modified by this pass.
