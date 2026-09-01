@@ -23250,3 +23250,123 @@ the artifact itself, because `docs/CURRENT_STATE.md` records a `5.49x`
 |---|---|
 | frozen unfactored target + the five-width price | `experiments/2026-08-31_wp3_augment/augment_target_and_price.json` |
 | suite transcript, 33/33 incl. the live price | `experiments/2026-08-31_wp3_augment/test_p2_augment.txt` |
+
+---
+
+# 2026-08-31 — CONTRACT WP4: is the K3 → final-mean response LINEAR and ADDITIVE? Kill the lane if not.
+
+**Class:** IMPORTANT (research instrument). `GAME_PLAN.md` § WP4. No
+`estimator.py`, seed block, gate threshold, residual model, vault, protected
+human file, or submission. **No truth is read**: every comparison is between two
+*predictions* of the same flow.
+
+Written **before** any linearity measurement. The only design work that preceded
+it is declared below, and it establishes that the intervention is
+*constructible*, not what it shows.
+
+## Question
+
+`GAME_PLAN.md` § 3C proposes linearising the final-layer means around the
+K2/AUGMENT trajectory,
+
+```
+delta m_L  ~=  sum_l  J_(L <- l)  S_l^(3)
+```
+
+so that layer-local third-cumulant sources are contracted straight into
+backward-propagated output queries, instead of transporting the whole recurrent
+`kappa_3` tower. **That formulation is worth nothing unless the response really
+is linear in the source and additive across layers.** Is it?
+
+## Evidence
+
+- **CONFIRMED** — full factorized K3 reaches `3.9249e-08` raw on organiser
+  networks and is the accuracy oracle; its best exact spelling costs `1.0732 B`
+  against a `<= 0.35 B` screen, so **transporting the tower is closed on price**
+  (W-EFF, `f461e5c`). The information is worth having; the transport is not.
+- **CONFIRMED** — the late-window lane is closed, and its retraction is the
+  reason this slice exists: the failure was attributed to `kappa_3` being
+  "accumulated, not local", and that attribution was **withdrawn**. `k3pre:m`
+  showed the prefix explains `89.2%` of the drift. So locality was never
+  measured, and this slice measures it.
+- **CONFIRMED, measured during design** — the intervention is constructible.
+  At `k_max=3, kind=SIMPLE, factor=False`, `K[3]` is a dense upstream `HTensor`
+  with `r = 0` and core `(n, n, n)`, and it can be rescaled while preserving
+  upstream's own type. At `n = 16` its core norm grows `4.71 → 5.01 → 5.56` over
+  three layers. **Nothing about linearity was measured.**
+- **CONFIRMED** — `p2_window.run_arm` already re-drives upstream's layer loop
+  with one intervention and proves the untouched arm bit-identical to
+  `mlp_kprop`. This slice uses the same discipline and its own loop; it does not
+  modify `p2_window.py`, which is a closed-lane artifact.
+
+## Hypothesis and mechanism
+
+The nonlinear step maps `(K1, K2, K3, K4) -> (K1', K2', K3', K4')`. If the
+`kappa_3` contribution to `K1'` is **small**, then to first order the final mean
+depends on each layer's `K3` through a product of Jacobians and the total drift
+is a sum of independent per-layer responses. **Mechanism:** `kappa_3` enters the
+ReLU Wick expansion multiplied by a third-derivative coefficient and divided by
+`sigma^3`, so its effect on the mean is `O(kappa_3 / sigma^3)` — a perturbation,
+not a leading term. If that is right, scaling a source scales its response, and
+sources at different layers superpose.
+
+**If it is wrong, the adjoint formulation cannot be repaired by better
+engineering, and the lane must die here rather than after a port.**
+
+## Intervention
+
+`local_sim/p2_adjoint_k3.py` — its own layer loop mirroring `mlp_kprop` at rev
+`93d091a4`, with exactly one intervention: **rescale `K[3]` by `eps` after the
+nonlinear step**, either at every layer (`scale:eps`) or at one layer
+(`scale_at:l:eps`). Arms:
+
+| arm | meaning |
+|---|---|
+| `full` | no intervention — must be bit-identical to `mlp_kprop` |
+| `scale:0` | every layer's `kappa_3` memory zeroed; the no-K3-transport baseline |
+| `scale:eps` | the response curve in the source amplitude |
+| `scale_at:l:1` | only layer `l` keeps its `kappa_3`; the per-layer source response |
+
+## Numbered predictions, before any linearity measurement
+
+| # | prediction |
+|---|---|
+| **Q1** | the untouched `full` arm is **bit-identical** to `mlp_kprop(k_max=3, SIMPLE, factor=False)`. Without this every other arm is my re-derivation, not upstream with one intervention |
+| **Q2** | `scale:0` differs from `full`, and lies much closer to `k_max=2` than to `full` — confirming the intervention actually removes the `kappa_3` transport it claims to |
+| **Q3 — LINEARITY** | `m(eps) - m(0)` is affine in `eps` over `eps ∈ [0, 1]`: the worst relative deviation from the straight line through `eps = 0` and the small-`eps` slope is **`< 10%`** |
+| **Q4 — ADDITIVITY** | `sum_l [m(scale_at:l:1) - m(0)]` explains **`> 70%`** of the squared total drift `m(1) - m(0)` |
+| **Q5 — DIRECTION** | the cosine between the summed per-layer response and the true drift is **`> 0.9`** |
+| **Q6 — LOCALITY** | the per-layer responses are **not** dominated by a single layer: no one layer carries `> 80%` of the summed squared response. If one does, "layer-local sources" is the wrong description even if the algebra works |
+
+## The kill rules, chosen NOW
+
+- **Q3 deviation `> 25%`** → the linearisation is invalid. **KILL**, with the
+  smallest discriminating artifact.
+- **Q4 explained squared drift `< 50%`** → the response is not additive across
+  layers, so `sum_l J S_l` is the wrong object. **KILL.**
+- **Q5 cosine `< 0.5`** → the predicted response points the wrong way. **KILL.**
+- **Any arm requiring the full `O(n^3 L)` tower to compute its own response** →
+  the formulation has reconstructed what it was supposed to avoid. **KILL**, per
+  `GAME_PLAN.md` § 7: *"adjoint rank/cost reconstructs the full tower -> kill"*.
+
+Between the falsifier and the kill bar (`10%–25%` on Q3, `50%–70%` on Q4) the
+result is **CONDITIONAL**: recorded, not built on, and needing a mechanism
+before any port.
+
+**No post-hoc rank choice is permitted.** `GAME_PLAN.md` § WP4 says so and this
+slice fits nothing: `eps` is a swept control, not a fitted parameter, and no
+coefficient is estimated from the drift it is compared against.
+
+## Scope
+
+Small shapes on CPU (`n <= 64`); nothing needs a GPU, so nothing goes through
+`gpuq`. The upstream checkout is **read-only**. `p2_window.py` and
+`p2_pb_rank.py` are closed-lane artifacts and are not modified. This slice does
+**not** reopen W-EFF or the late window: it measures a property of the flow that
+the window retraction left explicitly unmeasured.
+
+## Verification plan
+
+`test_p2_adjoint_k3.py` green with every prediction as a named check, including
+the Q1 bit-identity self-test · the response curve emitted as an artifact ·
+a stated cost/rank formula · a fresh independent Skeptic.
