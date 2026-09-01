@@ -1,0 +1,144 @@
+C:\Users\samsu\Documents\arc-whest\local_sim\test_p2_carrier_fnp.py:52: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+WP1 - the fnp carrier against the frozen NumPy reference
+
+R  the ring, the trace and the Gray map agree with the reference
+  PASS  R: m=3 Hensel lift identical                                      [3, 1, 2, 1]
+  PASS  R: m=3 Teichmuller enumeration identical                          |T| = 8
+  PASS  R: m=3 the idx dict equals the reference's pw.index               the setup-time speed fix moves no byte
+  PASS  R: m=3 trace_of_power agrees on 7 exponents                       pure Python, no arrays
+  PASS  R: m=5 Hensel lift identical                                      [3, 2, 3, 0, 0, 1]
+  PASS  R: m=5 Teichmuller enumeration identical                          |T| = 32
+  PASS  R: m=5 the idx dict equals the reference's pw.index               the setup-time speed fix moves no byte
+  PASS  R: m=5 trace_of_power agrees on 31 exponents                      pure Python, no arrays
+  PASS  R: m=7 Hensel lift identical                                      [3, 1, 0, 0, 2, 0, 0, 1]
+  PASS  R: m=7 Teichmuller enumeration identical                          |T| = 128
+  PASS  R: m=7 the idx dict equals the reference's pw.index               the setup-time speed fix moves no byte
+  PASS  R: m=7 trace_of_power agrees on 43 exponents                      pure Python, no arrays
+  PASS  R: m=9 Hensel lift identical                                      [3, 0, 2, 0, 3, 0, 0, 0, 0, 1]
+  PASS  R: m=9 Teichmuller enumeration identical                          |T| = 512
+  PASS  R: m=9 the idx dict equals the reference's pw.index               the setup-time speed fix moves no byte
+  PASS  R: m=9 trace_of_power agrees on 40 exponents                      pure Python, no arrays
+  PASS  R: the Gray map is the standard convention                        phi(0)=(0,0) phi(1)=(0,1) phi(2)=(1,1) phi(3)=(1,0)
+  PASS  R: PRIMITIVE is identical to the reference's                      a divergence would build another object
+
+S  the sign vectors are byte-identical, without NumPy
+  PASS  S: m=3 k=8 sign vectors byte-identical                            8 x 16, values in [1]
+  PASS  S: m=3 entries are exactly +/-1                                   integers
+  PASS  S: m=5 k=16 sign vectors byte-identical                           16 x 64, values in [1]
+  PASS  S: m=5 entries are exactly +/-1                                   integers
+  PASS  S: m=7 k=16 sign vectors byte-identical                           16 x 256, values in [1]
+  PASS  S: m=7 entries are exactly +/-1                                   integers
+  PASS  S: m=9 k=16 sign vectors byte-identical                           16 x 1024, values in [1]
+  PASS  S: m=9 entries are exactly +/-1                                   integers
+
+W  the Walsh matrix, by Sylvester recursion in fnp
+  PASS  W: n=4 Walsh matrix byte-identical to the reference               (16, 16)
+  PASS  W: n=4 W is symmetric and W @ W = N I                             the defining Hadamard property
+  PASS  W: n=6 Walsh matrix byte-identical to the reference               (64, 64)
+  PASS  W: n=6 W is symmetric and W @ W = N I                             the defining Hadamard property
+  PASS  W: n=8 Walsh matrix byte-identical to the reference               (256, 256)
+  PASS  W: n=8 W is symmetric and W @ W = N I                             the defining Hadamard property
+  PASS  W: n=10 Walsh matrix byte-identical to the reference              (1024, 1024)
+  PASS  W: n=10 W is symmetric and W @ W = N I                            the defining Hadamard property
+
+C  the carrier itself, byte-identical, in both scalings
+  PASS  C: m=3 k=8 antipodes=False raw +/-1 carrier identical             (128, 16)
+  PASS  C: m=3 k=8 antipodes=True raw +/-1 carrier identical              (256, 16)
+  PASS  C: m=3 k=8 scaled float32 carrier BYTE-identical                  sha256 9d9581c747b751ed
+  PASS  C: m=5 k=16 antipodes=False raw +/-1 carrier identical            (1024, 64)
+  PASS  C: m=5 k=16 antipodes=True raw +/-1 carrier identical             (2048, 64)
+  PASS  C: m=5 k=16 scaled float32 carrier BYTE-identical                 sha256 f3f2897a5727edc3
+  PASS  C: m=7 k=16 antipodes=False raw +/-1 carrier identical            (4096, 256)
+  PASS  C: m=7 k=16 antipodes=True raw +/-1 carrier identical             (8192, 256)
+  PASS  C: m=7 k=16 scaled float32 carrier BYTE-identical                 sha256 8a15e7d07624bd18
+  PASS  C: m=9 k=16 antipodes=False raw +/-1 carrier identical            (16384, 1024)
+  PASS  C: m=9 k=16 antipodes=True raw +/-1 carrier identical             (32768, 1024)
+  PASS  C: m=9 k=16 scaled float32 carrier BYTE-identical                 sha256 ca44995baafcbe9c
+
+V  the DEFINING properties, exhaustively, at reduced sizes
+  PASS  V1: m=3 every entry is +/-1 before scaling                        exact integers
+  PASS  V2: m=3 within-basis orthogonality (WEAK -- holds for a WRONG sign vector too)necessary, not discriminating
+  PASS  V3: m=3 EVERY cross-basis |correlation| is exactly 4              max deviation 0.0, zeros 0  <- THE discriminator
+  PASS  V4: m=3 row count is k*N*2                                        256
+  PASS  V4: m=3 closed under negation, +v immediately before -v           row order is pinned
+  PASS  V5: m=3 all 256 rows are pairwise distinct                        256 distinct
+  PASS  V1: m=5 every entry is +/-1 before scaling                        exact integers
+  PASS  V2: m=5 within-basis orthogonality (WEAK -- holds for a WRONG sign vector too)necessary, not discriminating
+  PASS  V3: m=5 EVERY cross-basis |correlation| is exactly 8              max deviation 0.0, zeros 0  <- THE discriminator
+  PASS  V4: m=5 row count is k*N*2                                        1024
+  PASS  V4: m=5 closed under negation, +v immediately before -v           row order is pinned
+  PASS  V5: m=5 all 1024 rows are pairwise distinct                       1024 distinct
+  PASS  V1: m=7 every entry is +/-1 before scaling                        exact integers
+  PASS  V2: m=7 within-basis orthogonality (WEAK -- holds for a WRONG sign vector too)necessary, not discriminating
+  PASS  V3: m=7 EVERY cross-basis |correlation| is exactly 16             max deviation 0.0, zeros 0  <- THE discriminator
+  PASS  V4: m=7 row count is k*N*2                                        4096
+  PASS  V4: m=7 closed under negation, +v immediately before -v           row order is pinned
+  PASS  V5: m=7 all 4096 rows are pairwise distinct                       4096 distinct
+
+N  the REJECTED coordinate mapping must FAIL the discriminator
+  PASS  N: the rejected mapping PASSES within-basis orthogonality         which is exactly why V2 cannot be the discriminator
+  PASS  N: ...and FAILS the cross-basis identity                          max deviation 16.0, 6272 zero entries
+  PASS  N: the good mapping and the rejected one really differ            otherwise this control is vacuous
+
+D  determinism: repeated calls, and a FRESH interpreter
+  PASS  D: two calls in one process agree bitwise                         9b8ed32e3b2e997c
+  PASS  D: a FRESH interpreter agrees bitwise                             9b8ed32e3b2e997c vs 9b8ed32e3b2e997c
+  PASS  D: no seed is involved anywhere in construction                   the basis subset is a fixed enumeration, not a draw
+
+P  propagation: parity with a dense reference, and chunk edges
+  PASS  P: 16x3 unchunked matches a dense NumPy reference                 max|rel| 1.57e-07 (float32 vs float64 association)
+  PASS  P: 16x3 chunk 128 (tail 0) matches unchunked                      max|diff| 0.000e+00 of a 6.428e-06 float32-association bound
+  PASS  P: 16x3 chunk 64 (tail 0) matches unchunked                       max|diff| 1.788e-07 of a 6.428e-06 float32-association bound
+  PASS  P: 16x3 chunk 32 (tail 0) matches unchunked                       max|diff| 2.384e-07 of a 6.428e-06 float32-association bound
+  PASS  P: 16x3 chunk 1 (tail 0) matches unchunked                        max|diff| 0.000e+00 of a 6.428e-06 float32-association bound
+  PASS  P: 16x3 PM -- DROPPING the tail chunk is detected                 a dropped tail moves it 3.656e-02, far above the 6.428e-06 bound
+  PASS  P: 16x3 exact_layer1 replaces ROW 0 and nothing else              rows 1.. bitwise unchanged; row 0 moved to the closed form
+  PASS  P: 16x3 ...and row 0 IS the closed form                           ||w|| / sqrt(2 pi), in float64
+  PASS  P: 16x3 in float64 the SAME partition agrees to 1e-12             max|diff| 0.000e+00 -- association, not a bug
+  PASS  P: 64x4 unchunked matches a dense NumPy reference                 max|rel| 8.27e-07 (float32 vs float64 association)
+  PASS  P: 64x4 chunk 512 (tail 0) matches unchunked                      max|diff| 0.000e+00 of a 2.388e-05 float32-association bound
+  PASS  P: 64x4 chunk 256 (tail 0) matches unchunked                      max|diff| 1.907e-06 of a 2.388e-05 float32-association bound
+  PASS  P: 64x4 chunk 128 (tail 0) matches unchunked                      max|diff| 2.146e-06 of a 2.388e-05 float32-association bound
+  PASS  P: 64x4 chunk 1 (tail 0) matches unchunked                        max|diff| 2.384e-07 of a 2.388e-05 float32-association bound
+  PASS  P: 64x4 PM -- DROPPING the tail chunk is detected                 a dropped tail moves it 2.932e-02, far above the 2.388e-05 bound
+  PASS  P: 64x4 exact_layer1 replaces ROW 0 and nothing else              rows 1.. bitwise unchanged; row 0 moved to the closed form
+  PASS  P: 64x4 ...and row 0 IS the closed form                           ||w|| / sqrt(2 pi), in float64
+  PASS  P: 64x4 in float64 the SAME partition agrees to 1e-12             max|diff| 0.000e+00 -- association, not a bug
+  PASS  P: 256x5 unchunked matches a dense NumPy reference                max|rel| 7.95e-07 (float32 vs float64 association)
+  PASS  P: 256x5 chunk 2048 (tail 0) matches unchunked                    max|diff| 0.000e+00 of a 8.758e-05 float32-association bound
+  PASS  P: 256x5 chunk 1024 (tail 0) matches unchunked                    max|diff| 3.934e-06 of a 8.758e-05 float32-association bound
+  PASS  P: 256x5 chunk 512 (tail 0) matches unchunked                     max|diff| 4.292e-06 of a 8.758e-05 float32-association bound
+  PASS  P: 256x5 chunk 1000 (tail 48) matches unchunked                   max|diff| 3.695e-06 of a 8.758e-05 float32-association bound  <- ODD/TAIL chunk
+  PASS  P: 256x5 chunk 997 (tail 54) matches unchunked                    max|diff| 3.695e-06 of a 8.758e-05 float32-association bound  <- ODD/TAIL chunk
+  PASS  P: 256x5 chunk 1 (tail 0) matches unchunked                       max|diff| 9.537e-07 of a 8.758e-05 float32-association bound
+  PASS  P: 256x5 PM -- DROPPING the tail chunk is detected                a dropped tail moves it 2.093e-02, far above the 8.758e-05 bound
+  PASS  P: 256x5 exact_layer1 replaces ROW 0 and nothing else             rows 1.. bitwise unchanged; row 0 moved to the closed form
+  PASS  P: 256x5 ...and row 0 IS the closed form                          ||w|| / sqrt(2 pi), in float64
+  PASS  P: 256x5 in float64 the SAME partition agrees to 1e-12            max|diff| 9.770e-15 -- association, not a bug
+
+L  the exact layer-1 identity, which the radial factor must earn
+  PASS  L: width 64 WITH the radial factor, layer-1 rms error is small    k=1:2.95e-02  k=2:2.49e-02  k=4:1.81e-02  k=8:1.14e-02
+  PASS  L: width 64 WITHOUT it, layer-1 is wrong by ~90%                  0.877 -- a 77x separation; E||x|| is not decoration
+  PASS  L: width 64 the error DECREASES with more bases                   k=1:2.95e-02  k=2:2.49e-02  k=4:1.81e-02  k=8:1.14e-02   (truth-free: a closed form, not a label)
+  PASS  L: width 256 WITH the radial factor, layer-1 rms error is small   k=1:1.76e-02  k=2:1.16e-02  k=4:7.96e-03  k=8:5.71e-03
+  PASS  L: width 256 WITHOUT it, layer-1 is wrong by ~90%                 0.938 -- a 164x separation; E||x|| is not decoration
+  PASS  L: width 256 the error DECREASES with more bases                  k=1:1.76e-02  k=2:1.16e-02  k=4:7.96e-03  k=8:5.71e-03   (truth-free: a closed form, not a label)
+  PASS  L: the radial factor matches a direct lgamma evaluation           E||x|| at N=1024 = 31.99218845
+  PASS  L: ...and is below sqrt(N), as Jensen requires                    E||x|| < sqrt(E||x||^2) = sqrt(N)
+
+M  mutations: each must break a NAMED property
+  PASS  M: M1 scaling: 1/N instead of 1/sqrt(N)                           detected
+  PASS  M: M2 order: swapping two bases changes the object                detected
+  PASS  M: M3 antipode: -v BEFORE +v is a different row order             detected
+  PASS  M: M4 dtype: float32 and float64 carriers differ in bytes         detected
+  PASS  M: M5 one flipped entry breaks the cross-basis identity           detected
+
+X  the LIVE width, 1024
+  PASS  X: 8 antipodal bases give 16,384 rows and 8,192 lines             16384 rows
+  PASS  X: the carrier is 64 MiB in float32                               one allocation
+  PASS  X: forward FLOPs at depth 16 are exactly 2**39                    549,755,813,888 -> multiplier 0.2500
+  PASS  X: the radial factor is 1/32-exact at N=1024                      31.99218845
+  PASS  X: BYTE-identical to the frozen reference at the live width       sha256 65b752c18f076641
+
+117/117 checks passed

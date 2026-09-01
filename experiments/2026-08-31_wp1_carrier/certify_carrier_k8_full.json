@@ -1,0 +1,192 @@
+{
+  "artifact": "candidate_certification",
+  "artifact_version": 1,
+  "candidate": "experiments/2026-08-31_wp1_carrier/candidate_carrier_k8.py",
+  "candidate_sha256": "9a0da257687d1ca3dc6a6dfece321ca4c2eecebd07359ba404eda72d7fc778e3",
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "truth_free": true,
+  "is_shipped_file": false,
+  "sections": {
+    "validate": {
+      "returncode": 0
+    },
+    "package_identity": {
+      "whestbench": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\whestbench\\__init__.py",
+      "flopscope": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\__init__.py",
+      "official_config_rc": 0
+    },
+    "invariants": {
+      "returncode": 0,
+      "tail": "30/30 checks passed"
+    },
+    "determinism": {
+      "fresh_worker": [
+        {
+          "sha256": "83efc231e45875d361d9db9ad92a7f3e9c77587a6418f7951398e633b0206b41",
+          "shape": [
+            16,
+            1024
+          ],
+          "flops_used": 550030643201.0,
+          "pid": 54008
+        },
+        {
+          "sha256": "4eb3de494cf47d66511aeddf42dcbef7da21c876e307490be2f337fabfa4e7b3",
+          "shape": [
+            16,
+            1024
+          ],
+          "flops_used": 550030643201.0,
+          "pid": 41752
+        }
+      ]
+    },
+    "metered_runs": [
+      {
+        "seed": 90000000201,
+        "error": "",
+        "flops_used": 550030675969.0,
+        "n_ops": 209,
+        "multiplier": 0.2501249928031939,
+        "residual_wall_time_s": 0.07069999999657739,
+        "wall_time_s": 0.7567630000012286,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.388324737548828,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.4749640332330055
+      },
+      {
+        "seed": 90000000202,
+        "error": "",
+        "flops_used": 550030675969.0,
+        "n_ops": 209,
+        "multiplier": 0.2501249928031939,
+        "residual_wall_time_s": 0.07348109999657026,
+        "wall_time_s": 0.7863208999988274,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.544529438018799,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.7014363583839295
+      },
+      {
+        "seed": 90000000203,
+        "error": "",
+        "flops_used": 550030675969.0,
+        "n_ops": 209,
+        "multiplier": 0.2501249928031939,
+        "residual_wall_time_s": 0.07126229995628819,
+        "wall_time_s": 0.7107926999997289,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.459118843078613,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.7449735229469625
+      },
+      {
+        "seed": 90000000204,
+        "error": "",
+        "flops_used": 550030675969.0,
+        "n_ops": 209,
+        "multiplier": 0.2501249928031939,
+        "residual_wall_time_s": 0.07441470001504058,
+        "wall_time_s": 0.7179552000015974,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.278647422790527,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.6247852934914694
+      }
+    ],
+    "setup_s_local": 0.07735349999711616,
+    "linux_memory_gate": "experiments\\2026-08-31_wp1_carrier\\linux_memory_gate_candidate_carrier_k8.json",
+    "windows_memory_accounting": {
+      "available": true,
+      "source": "test_deployment_envelope.peak_memory_bytes",
+      "peak_wset_bytes": 432955392,
+      "peak_pagefile_bytes": 928329728
+    },
+    "subprocess_smoke": {
+      "ok_report": true,
+      "n_failed_mlps": 0,
+      "dataset": "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
+      "width": 1024,
+      "depth": 16,
+      "lambda": 0.0,
+      "residual_cap": 0.4,
+      "wall_limit": 120.0,
+      "worst_residual": 0.07663149998188601,
+      "flops_per_mlp": 550030675969,
+      "multiplier": 0.2501249928031939,
+      "c_over_b": 0.2501249928031939,
+      "final_layer_mse_CONFIRM_ONLY": 2.710315015974629e-06
+    }
+  },
+  "checks_total": 36,
+  "checks_failed": [],
+  "checks_skipped": [],
+  "verdict": "CERTIFIED"
+}

@@ -455,31 +455,38 @@ def main() -> int:
         # measurement. Say it is unavailable.
         skip("9: host memory accounting", peak.get("why", "unavailable"))
 
+    # WHERE THE ENFORCEMENT REPORT LIVES.
+    #
+    # Beside the candidate first -- a research candidate under
+    # `experiments/<slice>/` keeps its own evidence in that slice -- then the
+    # WP0C/D directory for the shipped file. The match is on the report's own
+    # `candidate` field, never on the filename, so a report for a DIFFERENT file
+    # can never be read as this one's.
     lg_path = None
-    for c in (os.path.join(_ROOT, "experiments", "2026-08-31_wp0cd_certify",
-                           "linux_memory_gate_%s.json"
-                           % os.path.splitext(os.path.basename(cand))[0]),
+    cand_dir = os.path.dirname(cand)
+    stem = os.path.splitext(os.path.basename(cand))[0]
+    for c in (os.path.join(cand_dir, "linux_memory_gate_%s.json" % stem),
+              os.path.join(_ROOT, "experiments", "2026-08-31_wp0cd_certify",
+                           "linux_memory_gate_%s.json" % stem),
               os.path.join(_ROOT, "experiments", "2026-08-31_wp0cd_certify",
                            "linux_memory_gate_v261.json")):
         if os.path.exists(c):
-            lg_path = c
-            break
+            try:
+                with open(c, encoding="utf-8") as fh:
+                    if json.load(fh).get("candidate") == rel:
+                        lg_path = c
+                        break
+            except (OSError, ValueError):
+                continue
+    if lg_path is None:
+        skip("9: the real 8-GiB enforcement",
+             "no linux_memory_gate report FOR THIS CANDIDATE. Run: uv run "
+             "python local_sim/linux_memory_gate.py --candidate %s --json "
+             "<dir>/linux_memory_gate_%s.json" % (rel, stem))
     lg = None
     if lg_path is not None:
         with open(lg_path, encoding="utf-8") as fh:
             lg = json.load(fh)
-        if lg.get("candidate") != rel:
-            # A report for a DIFFERENT file is not evidence about this one. It
-            # is also not a failure of this candidate -- the run simply has not
-            # happened. SKIP says that; FAIL would blame the candidate for a
-            # missing measurement.
-            lg = None
-            skip("9: the real 8-GiB enforcement",
-                 f"the only report on disk is for {json.load(open(lg_path, encoding='utf-8')).get('candidate')}")
-    if lg is None and lg_path is None:
-        skip("9: the real 8-GiB enforcement", "no linux_memory_gate report for "
-             "this candidate. Run: uv run python local_sim/linux_memory_gate.py "
-             "--candidate <f> --json <path>")
     if lg is not None:
         check("9: a Linux 8-GiB enforcement report exists FOR THIS CANDIDATE",
               True, os.path.relpath(lg_path, _ROOT))

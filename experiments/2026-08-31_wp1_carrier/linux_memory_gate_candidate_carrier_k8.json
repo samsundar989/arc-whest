@@ -1,0 +1,63 @@
+{
+  "artifact": "linux_memory_gate",
+  "artifact_version": 1,
+  "candidate": "experiments/2026-08-31_wp1_carrier/candidate_carrier_k8.py",
+  "limit_mb": 8192,
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "seed": 90000000101,
+  "host_platform": "win32",
+  "linux_kind": "wsl",
+  "linux_note": "WSL2 Ubuntu, official stack in $HOME/.arcwhest-linux",
+  "negative_control": {
+    "limit_mb": 8192,
+    "request_gib": 9.0,
+    "cap_applied": true,
+    "allocated": false,
+    "survived": false,
+    "error": "MemoryError: "
+  },
+  "positive_control": {
+    "limit_mb": 0,
+    "request_gib": 9.0,
+    "cap_applied": false,
+    "allocated": true,
+    "survived": true
+  },
+  "candidate_run": {
+    "stage": "done",
+    "limit_mb": 8192,
+    "setrlimit_raised": null,
+    "soft_limit_bytes": 8589934592,
+    "hard_limit_bytes": 8589934592,
+    "cap_requested_bytes": 8589934592,
+    "cap_applied": true,
+    "whestbench_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/whestbench/__init__.py",
+    "flopscope_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/flopscope/__init__.py",
+    "numpy_version": "2.4.6",
+    "setup_raised": null,
+    "setup_s": 0.09107522200000062,
+    "predict_s": 2.4888935959999987,
+    "predict_error": "",
+    "flops_used": 550030675969.0,
+    "residual_wall_time_s": 0.013289273000015811,
+    "wall_time_s": 2.4888967309999988,
+    "multiplier": 0.2501249928031939,
+    "shape": [
+      16,
+      1024
+    ],
+    "finite": true,
+    "dtype": "float32",
+    "largest_array_bytes": 65536,
+    "peak_rss_bytes": 448897024,
+    "vm_peak_bytes": 2392281088,
+    "vm_hwm_bytes": 448897024,
+    "ok": true
+  },
+  "child_stderr_tail": "/bin/bash: line 1: setrlimit: command not found\n/bin/bash: line 1: with: command not found\n<string>:57: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.\n",
+  "status": "PASS",
+  "checks_total": 13,
+  "checks_failed": []
+}

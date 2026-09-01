@@ -1,0 +1,181 @@
+{
+  "artifact": "candidate_certification",
+  "artifact_version": 1,
+  "candidate": "experiments/2026-08-31_wp1_carrier/candidate_carrier_k8.py",
+  "candidate_sha256": "1ead2c2deff1924847c0f8c7d1ce7bf576a84616a499104f8028930aa0377510",
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "truth_free": true,
+  "is_shipped_file": false,
+  "sections": {
+    "validate": {
+      "returncode": 1
+    },
+    "package_identity": {
+      "whestbench": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\whestbench\\__init__.py",
+      "flopscope": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\__init__.py",
+      "official_config_rc": 0
+    },
+    "invariants": {
+      "returncode": 0,
+      "tail": "30/30 checks passed"
+    },
+    "determinism": {
+      "fresh_worker": [
+        {
+          "sha256": "83efc231e45875d361d9db9ad92a7f3e9c77587a6418f7951398e633b0206b41",
+          "shape": [
+            16,
+            1024
+          ],
+          "flops_used": 550030643201.0,
+          "pid": 52788
+        },
+        {
+          "sha256": "4eb3de494cf47d66511aeddf42dcbef7da21c876e307490be2f337fabfa4e7b3",
+          "shape": [
+            16,
+            1024
+          ],
+          "flops_used": 550030643201.0,
+          "pid": 46676
+        }
+      ]
+    },
+    "metered_runs": [
+      {
+        "seed": 90000000201,
+        "error": "",
+        "flops_used": 550030675969.0,
+        "n_ops": 209,
+        "multiplier": 0.2501249928031939,
+        "residual_wall_time_s": 0.0784154999855673,
+        "wall_time_s": 0.7240047999985109,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.388324737548828,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.4749640332330055
+      },
+      {
+        "seed": 90000000202,
+        "error": "",
+        "flops_used": 550030675969.0,
+        "n_ops": 209,
+        "multiplier": 0.2501249928031939,
+        "residual_wall_time_s": 0.07122180001533707,
+        "wall_time_s": 0.8224691999967035,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.544529438018799,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.7014363583839295
+      },
+      {
+        "seed": 90000000203,
+        "error": "",
+        "flops_used": 550030675969.0,
+        "n_ops": 209,
+        "multiplier": 0.2501249928031939,
+        "residual_wall_time_s": 0.07451729999593226,
+        "wall_time_s": 0.7681139000014809,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.459118843078613,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.7449735229469625
+      },
+      {
+        "seed": 90000000204,
+        "error": "",
+        "flops_used": 550030675969.0,
+        "n_ops": 209,
+        "multiplier": 0.2501249928031939,
+        "residual_wall_time_s": 0.07625760000155424,
+        "wall_time_s": 0.7943008999973244,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.278647422790527,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.6247852934914694
+      }
+    ],
+    "setup_s_local": 0.07587449999846285,
+    "windows_memory_accounting": {
+      "available": true,
+      "source": "test_deployment_envelope.peak_memory_bytes",
+      "peak_wset_bytes": 431910912,
+      "peak_pagefile_bytes": 927264768
+    }
+  },
+  "checks_total": 28,
+  "checks_failed": [
+    "[1] 1: `whest validate` accepts the candidate"
+  ],
+  "checks_skipped": [
+    "[9] 9: the real 8-GiB enforcement -- the only report on disk is for estimator.py",
+    "[10] 10: official Phase-2 subprocess smoke -- --quick/--skip-smoke; a skipped deployment check is NOT a pass"
+  ],
+  "verdict": "REFUSED"
+}

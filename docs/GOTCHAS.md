@@ -32,8 +32,45 @@ then flagged two documents as carrying STALE labels, because a documented
 
 Run serially, `edge_cases.py` returns **30/30**, and the label suite returns
 **39/39**. Three concurrent copies of `edge_cases.py` alone also return 30/30
-each, so the trigger is heavier than simple parallelism and **the specific
-check that flaked was not isolated**.
+each, so the trigger is heavier than simple parallelism.
+
+**The cause was isolated later the same day, and it is not a check at all.**
+Six consecutive runs gave `rc=1, rc=1, rc=0, rc=0, rc=1, rc=1` with
+
+```
+numpy._core._exceptions._ArrayMemoryError:
+    Unable to allocate 4.00 MiB for an array with shape (8192, 128) ...
+```
+
+A **4 MiB** allocation failing is the tell: it is not the suite's working set.
+Windows was at **72,241 MB committed against an 89,333 MB commit limit** with
+35 GB of physical RAM still free — NumPy fails on *commit*, not on free
+physical. It later reached **95,734 MB of a 95,801 MB limit: 67 MB of commit
+headroom.**
+
+**And the pressure was NOT this repository's.** A first reading blamed this
+session's own load (a WSL2 VM, a 6.26 GiB Hugging Face download, several
+certifications) and that was wrong. `Get-CimInstance Win32_Process` named the
+holders: **other projects on this shared machine** — a `kalshi-bot` BTC
+collector/replica report at 20,672 MB and a `biohub` `celltrack train` run at
+13,459 MB whose own `--notes` read *"requeued after host OOM; resumable"*. This
+repository's processes were not in the top six. Between the two readings a
+single probe here allocated **12,800 MiB** without failing and `edge_cases.py`
+returned 30/30 three times running, which is what a quiet window looks like.
+
+Two consequences, and the second is the important one:
+
+1. `~/.claude/CLAUDE.md` coordinates **GPU** work through `gpuq`. Host **commit**
+   is an equally shared resource and is coordinated by nothing. A heavy suite
+   here can push a neighbour's training job over the edge, and one had already
+   gone over once.
+2. **Do not kill what you did not start.** The obvious "fix" is to free 34 GB by
+   terminating two processes. They are someone's live trading collector and a
+   resumable training run.
+
+So the label suite was reporting a TRUE fact — the suite really did return
+29/30 — about a transient it had no way to name. `_ArrayMemoryError` is the
+string to grep for.
 
 The trap is not the flake, it is the shape of the report: a label checker that
 reads a suite's live output will call a *correct* document stale whenever the
@@ -44,6 +81,8 @@ this is the mirror image, a check reporting a *transient* as a defect.
 **Rule: a gate verdict is only a verdict when the gate had the machine.** Run
 `scripts/preflight.ps1` and the enforcement suites serially, on a quiet host,
 exactly as `VALIDATION.md` §7 already requires for step 16's `SETUP_TIMEOUT`.
+Check `Get-CimInstance Win32_OperatingSystem` for committed-vs-limit before
+believing a memory-shaped failure, and re-run before recording one.
 
 ## 2026-08-28 (P2-WEFF / P2-WINDOW) — four traps, three of which I walked into
 

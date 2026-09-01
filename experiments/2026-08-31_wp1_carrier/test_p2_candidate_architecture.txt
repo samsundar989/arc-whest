@@ -1,0 +1,78 @@
+C:\Users\samsu\Documents\arc-whest\local_sim\test_p2_candidate_architecture.py:45: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\local_sim\p2_candidate_architecture.py:125: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(a)
+C:\Users\samsu\Documents\arc-whest\local_sim\p2_candidate_architecture.py:126: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(a)
+WP5 - the integration layer
+
+S  the LIVE shape first, then smaller shape-generic cases
+  PASS  S: carrier at 1024x16 returns a finite non-negative (16, 1024)    (16, 1024), final-row mean 0.499415, min 0.00e+00
+  PASS  S: k2_diag at 1024x16 returns a finite non-negative (16, 1024)    (16, 1024), final-row mean 0.501476, min -8.07e-17
+  PASS  S: carrier at 1024x16 layer 1 is the CLOSED FORM                  max rel 1.820e-16
+  PASS  S: k2_diag at 1024x16 layer 1 is the CLOSED FORM                  max rel 1.820e-16
+  PASS  S: carrier at 256x8 returns a finite non-negative (8, 256)        (8, 256), final-row mean 0.507071, min 0.00e+00
+  PASS  S: k2_diag at 256x8 returns a finite non-negative (8, 256)        (8, 256), final-row mean 0.513594, min 3.08e-09
+  PASS  S: carrier at 256x8 layer 1 is the CLOSED FORM                    max rel 1.789e-16
+  PASS  S: k2_diag at 256x8 layer 1 is the CLOSED FORM                    max rel 1.789e-16
+  PASS  S: carrier at 64x4 returns a finite non-negative (4, 64)          (4, 64), final-row mean 0.460637, min 1.42e-04
+  PASS  S: k2_diag at 64x4 returns a finite non-negative (4, 64)          (4, 64), final-row mean 0.462351, min 1.12e-03
+  PASS  S: carrier at 64x4 layer 1 is the CLOSED FORM                     max rel 1.549e-16
+  PASS  S: k2_diag at 64x4 layer 1 is the CLOSED FORM                     max rel 1.549e-16
+
+E  hidden-layer permutation equivariance
+  PASS  E: 256x8 permuting layer 3 PERMUTES row 3                         0.000e+00
+  PASS  E: 256x8 ...and moves the other rows only by float association    7.153e-07
+  PASS  E: 64x4 permuting layer 1 PERMUTES row 1                          0.000e+00
+  PASS  E: 64x4 ...and moves the other rows only by float association     2.384e-07
+
+B  branch ISOLATION and the zero-weight blend IDENTITY
+  PASS  B: the two branches produce DIFFERENT answers                     max rel 2.545e-02 -- otherwise isolation is untestable
+  PASS  B: blend=0.0 is EXACTLY the carrier branch                        an identity, bitwise
+  PASS  B: blend=1.0 is EXACTLY the analytic branch                       the other end of the same identity
+  PASS  B: an intermediate blend is the stated convex combination         carrier*(1-w) + analytic*w
+
+R  the refusals, which are the point of the placeholders
+  PASS  R: 'carrier_k2_frozen' with NO coefficient REFUSES                config 'carrier_k2_frozen' has NO coefficient. GAME_PLAN
+  PASS  R: 'augment' REFUSES (WP3 not implemented)                        config 'augment' is declared but NOT IMPLEMENTED (GAME_P
+  PASS  R: 'augment_k3' REFUSES (WP4 not implemented)                     config 'augment_k3' is declared but NOT IMPLEMENTED (GAM
+  PASS  R: ...but WITH an explicit coefficient it proceeds                so the refusal is about provenance, not a broken branch
+  PASS  R: an unknown config is rejected at construction                  unknown config 'nope'; known: k2_diag, carrier, carrier_
+
+F  the fallback is LOUD, and strict mode refuses it
+  PASS  F: an unsupported width falls back and RECORDS why                no Kerdock construction at width 300 (carrier width 
+  PASS  F: strict=True turns the same fallback into a REFUSAL             strict=True and no Kerdock construction at width 300 (ca
+  PASS  F: width 128 (m=6, EVEN) also falls back -- odd m is required     no Kerdock construction at width 128 (no Kerdock con
+  PASS  F: ...and the fallback still returns a valid answer               a loud fallback, not a crash
+  PASS  F: a 256-carrier is NOT applied to a width-64 network             the width guard routes it to the analytic branch
+
+D  determinism and first-call behaviour
+  PASS  D: three calls on ONE instance are bitwise identical              e84c4bc19563de55
+  PASS  D: a FRESH instance agrees -- no setup state leaks between MLPs   e84c4bc19563de55
+  PASS  D: the FIRST call equals the third (no warm-up transient in the VALUES)a warm-up would change timing, not bytes
+
+P  pathological and degenerate networks
+  PASS  P: all-zero layer 2 -> finite, non-negative, right shape          final mean 0.000e+00
+  PASS  P: one layer scaled 1e-6 -> finite, non-negative, right shape     final mean 5.409e-07
+  PASS  P: one layer scaled 1e3 -> finite, non-negative, right shape      final mean 5.409e+02
+  PASS  P: a rank-1 layer -> finite, non-negative, right shape            final mean 3.701e-02
+
+C  the cost model, and it must be able to disagree with reality
+  PASS  C: 1024x16 k=8 carrier FLOPs = 2*R*n^2*L                          549,755,813,888 (R=16384)
+  PASS  C: 1024x16 k=8 the measured excess is the row reduction           measured 550,030,643,201, model 549,755,813,888, +0.050%; R*n*L = 268,435,456
+  PASS  C: 1024x16 k=4 carrier FLOPs = 2*R*n^2*L                          274,877,906,944 (R=8192)
+  PASS  C: 1024x16 k=4 the measured excess is the row reduction           measured 275,018,485,761, model 274,877,906,944, +0.051%; R*n*L = 134,217,728
+  PASS  C: 256x8 k=8 carrier FLOPs = 2*R*n^2*L                            4,294,967,296 (R=4096)
+  PASS  C: 256x8 k=8 the measured excess is the row reduction             measured 4,303,756,289, model 4,294,967,296, +0.205%; R*n*L = 8,388,608
+  PASS  C: the model DECLARES itself inexact when the analytic branch runsan order estimate is labelled as one
+
+X  the single-file conversion is real, not asserted
+  PASS  X: both sources exist                                             p2_carrier_fnp.py, p2_candidate_architecture.py
+  PASS  X: the built file's ONLY imports are the four legal ones          5 import lines, 33,358 bytes
+  PASS  X: and none of them names local_sim or a research module          the property the single-file conversion exists to demonstrate
+  PASS  X: it subclasses whestbench.BaseEstimator                         whest validate refuses anything else
+  PASS  X: it compiles                                                    syntactically valid Python
+  PASS  X: it carries the sha256 of every source it was built from        so a built artifact names its inputs
+
+50/50 checks passed
+EXIT=0
