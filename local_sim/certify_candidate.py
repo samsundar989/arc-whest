@@ -576,15 +576,24 @@ def main() -> int:
     # --------------------------------------------------------------- 11 ----
     head("11  residual TAIL -- the soak, not the anecdote")
     if not a.residual_soak:
-        skip("11: residual soak over repeated official subprocess runs",
-             "--residual-soak 0 (default). Section 10 decided residual on TWO "
-             "MLPs, ONCE; two rows cannot see a p99. A skipped soak is NOT a "
-             "pass, and Rung-3 hardening requires N=3.")
+        # NOT a skip(). `skip()` is for a check that would otherwise have run
+        # and was suppressed -- it downgrades the verdict to INCOMPLETE, which
+        # is right for `--quick` and wrong here: the soak is an opt-in
+        # DEEPENING, and counting its absence as a skip would flip every
+        # existing caller's CERTIFIED to INCOMPLETE for asking nothing new.
+        # The report still records that no tail was measured, so a certificate
+        # cannot be mistaken for one that carries a p99.
+        report["sections"]["residual_soak"] = {"requested": False}
+        print("      not requested (--residual-soak 0, the default).")
+        print("      Section 10 measured residual on TWO MLPs, ONCE. That is an")
+        print("      anecdote, not a tail, and this certificate does NOT carry a")
+        print("      p99. Rung-3 hardening requires --residual-soak 3.")
     else:
         print(f"      *** READS CONFIRM-TIER TRUTH, exactly as section 10 does.")
         print(f"      {a.residual_soak} x {a.soak_n_mlps} MLPs on the official "
               f"subprocess runner.")
         soak = _residual_soak(rel, reps=a.residual_soak, n_mlps=a.soak_n_mlps)
+        soak["requested"] = True
         report["sections"]["residual_soak"] = soak
         check("11: every soak repetition produced a report",
               soak["ok"], soak.get("why", "")[:70])

@@ -893,10 +893,23 @@ joint-state augmented K2 is open.
 - P01 has consumed **168/600** seeds; 432 DESIGN seeds remain. The append-only
   seed ledger is authoritative; prose counts are only snapshots.
 - P01 is not a DECIDE block and cannot serve as its own independent replication.
-- No disjoint Phase-2 DESIGN-replication block or Phase-2 SINGLE_USE DECIDE block
-  is registered. After the truth-free paths fix a power plan, allocating both is a
-  separate IMPORTANT instrument slice with prediction, tests, preflight, knowledge
-  delta, and independent review before any labels.
+- **ALLOCATED 2026-09-01, all three unspent (0 seeds drawn).** The gap below is
+  closed; Samuel's sign-off on the *allocation* is waived (solo), the Rule-1
+  contract per slice is **not**.
+
+  | block | tier | n | span | purpose |
+  |---|---|---:|---|---|
+  | **P02** | DESIGN | 96 | `40,901,002,000..095` | selection over the Rung-1 corrector + AUGMENT state |
+  | **P03** | DESIGN | 96 | `40,901,003,000..095` | **disjoint replication** of whatever P02 selects |
+  | **P04** | SINGLE_USE | 100 | `40,901,004,000..099` | the ONE paired DECIDE against graded v2.7 |
+
+  Spans are provably disjoint from each other, from P01 and from every Phase-1
+  block; ledger `60/60`, `PROBLEMS: NONE`. WP0E's *structure* was kept and its
+  *stated purpose* replaced — it framed P02/P03 around carrier basis-count
+  selection, and WP2's independently ACCEPTed finding then put the carrier's
+  live-width margin at `0.155%`, which makes basis-count selection a poor use of
+  96 fresh networks. **Claiming P03 for selection collapses the pair into one
+  DESIGN block and defeats the only reason it exists.**
 - Existing SINGLE_USE Phase-1 blocks keep their recorded state in the ledger.
 - The Phase-1 vault cannot be used as a Phase-2 vault.
 - No Phase-2 vault exists. Creating or touching one requires Samuel's explicit
@@ -1282,6 +1295,8 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 | WP3 | faithful AUGMENT | IMPORTANT | **CLOSED 2026-08-31 — VERDICT PORT** (`a480ab6`). Unfactored AUGMENT costs **`1.03723x`** plain K2 at `1024x16`, `+3.72%`, **free at the `0.1` multiplier floor**. The excess halves per doubling of `n` — `Θ(n²)` on a `Θ(n³)` base. State: degree-3 is an `(n,)` VECTOR and degree-4 a SCALAR, `1,025` numbers on K2's `1,049,600`. 33/33. **No `fnp` port exists yet.** **Skeptic PROVISIONAL 2026-09-01:** the price reproduces to the digit and the depth confound in the trend table, once corrected, *strengthens* it — but **the contract froze no residual model**, which `VALIDATION.md` §2b-ii requires, and AUGMENT costs `4.38x` the `aten` op count with **355 extra scalar readbacks**. PORT authorises only the cheapest `fnp` probe, not a full port |
 | WP4 | query-directed / adjoint K3 | IMPORTANT | **REOPENED 2026-09-01 — the KILL was RETRACTED on an independent REJECT.** The 2026-08-31 kill (`18c5fa3`) fired on a statistic that **kills a provably linear system at every depth**: `scale:eps` applies `eps` at every layer, so the tangent deviation is a degree-`L` polynomial regardless of physics. All five kills came from the Q3 branch alone; Q6's quoted range was wrong; the worst cell was one draw. Repaired-instrument evidence is mixed and seed-dependent. **Lane state: open, speculative, instrument broken.** Locality still HELD |
 | WP5 | integrated live-shape research architecture | IMPORTANT | **CLOSED 2026-08-31** (`292fbab`). `p2_candidate_architecture.py` + `p2_build_candidate.py`: a self-contained single file **CERTIFIED 36/36 at `1024 x 16`**, official subprocess smoke included, 0 failed MLPs. 50/50 integration tests |
+| WP6 | grader-meter pricing + residual soak | IMPORTANT | **CLOSED 2026-09-01.** `official_config` models the grading server's per-MLP offset and `certify_candidate --residual-soak N` pools N official subprocess runs into a worst/p99/median tail. **The preregistered check FALSIFIED its own hypothesis:** the offset is *not* a bit-identical constant — `2**24` on 328662 and `2**24 - 32` on 328664 — so the MAXIMUM observed is carried as a conservative upper bound and the claim was corrected rather than kept. It costs `16,777,216` FLOPs of floor headroom and binds only above `C/B = 0.09999237`; v2.6.1 sits `82.3e9` FLOPs clear. 9 new checks against the STORED GRADED REPORTS, 5/5 mutations fire their named guard, `official_config` 82/82 |
+| WP7 | corrector training-data source | ROUTINE | **OPEN QUESTION FOR SAMUEL, work not blocked.** The brief's § 8 names `aicrowd/arc-whestbench-public-2026` as a 500k-MLP training corpus. It is not: it has two configs (`mini`/`full`), `size_categories 1K<n<10K`, `n_mlps: 100` in mini, and **it IS the CONFIRM tier** — so fitting on it is exactly what § 6 of the same brief and `AGENTS.md` forbid. Proceeding on **own mints from P02** instead, which is disjoint from CONFIRM by construction, at the live shape, and with a GT-noise floor we can actually quote |
 | 5 | neuron-specific mixture / rolled-forward correction | STRATEGIC | pending after a deployable carrier or state path exists |
 | 6 | integrated SINGLE_USE decision and robustness | STRATEGIC | pending |
 | 7 | public CONFIRM / authorised Phase-2 vault / two nominees | STRATEGIC | pending |
