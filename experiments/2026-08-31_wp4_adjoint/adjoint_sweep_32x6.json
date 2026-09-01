@@ -1,0 +1,278 @@
+{
+  "artifact": "p2_adjoint_k3_sweep",
+  "artifact_version": 1,
+  "width": 32,
+  "depth": 6,
+  "networks": [
+    {
+      "seed": 90000000801,
+      "response_curve": {
+        "ladder": [
+          0.0,
+          0.0625,
+          0.125,
+          0.25,
+          0.5,
+          0.75,
+          1.0
+        ],
+        "rows": [
+          {
+            "eps": 0.0,
+            "drift_norm": 0.0,
+            "linear_pred_norm": 0.0,
+            "abs_dev": 0.0,
+            "rel_dev": 0.0
+          },
+          {
+            "eps": 0.0625,
+            "drift_norm": 0.006663285131649769,
+            "linear_pred_norm": 0.006663285131649769,
+            "abs_dev": 0.0,
+            "rel_dev": 0.0
+          },
+          {
+            "eps": 0.125,
+            "drift_norm": 0.01316938408626856,
+            "linear_pred_norm": 0.013326570263299538,
+            "abs_dev": 0.0006513310345077862,
+            "rel_dev": 0.04945797238816319
+          },
+          {
+            "eps": 0.25,
+            "drift_norm": 0.02587198869874133,
+            "linear_pred_norm": 0.026653140526599076,
+            "abs_dev": 0.003911578203129099,
+            "rel_dev": 0.151189699743468
+          },
+          {
+            "eps": 0.5,
+            "drift_norm": 0.05153048304598592,
+            "linear_pred_norm": 0.05330628105319815,
+            "abs_dev": 0.018663712018478038,
+            "rel_dev": 0.3621877947820225
+          },
+          {
+            "eps": 0.75,
+            "drift_norm": 0.08199551965228549,
+            "linear_pred_norm": 0.07995942157979723,
+            "abs_dev": 0.046805494601731785,
+            "rel_dev": 0.5708299038803294
+          },
+          {
+            "eps": 1.0,
+            "drift_norm": 0.1269513877190269,
+            "linear_pred_norm": 0.1066125621063963,
+            "abs_dev": 0.09574478907259111,
+            "rel_dev": 0.7541846591271355
+          }
+        ],
+        "worst_rel_dev_from_tangent": 0.7541846591271355,
+        "tangent_from_eps": 0.0625
+      },
+      "per_layer": {
+        "n_layers": 6,
+        "total_drift_norm": 0.1269513877190269,
+        "summed_response_norm": 0.10874213858753735,
+        "explained_squared_drift": 0.36959390220693566,
+        "cosine": 0.6440244342229945,
+        "per_layer_sq_share": [
+          0.11858787884670988,
+          0.3394733415906865,
+          0.19638847805300583,
+          0.20130479021707628,
+          0.14424551129252164,
+          0.0
+        ],
+        "max_single_layer_share": 0.3394733415906865
+      }
+    },
+    {
+      "seed": 90000000802,
+      "response_curve": {
+        "ladder": [
+          0.0,
+          0.0625,
+          0.125,
+          0.25,
+          0.5,
+          0.75,
+          1.0
+        ],
+        "rows": [
+          {
+            "eps": 0.0,
+            "drift_norm": 0.0,
+            "linear_pred_norm": 0.0,
+            "abs_dev": 0.0,
+            "rel_dev": 0.0
+          },
+          {
+            "eps": 0.0625,
+            "drift_norm": 0.011502823366450879,
+            "linear_pred_norm": 0.011502823366450879,
+            "abs_dev": 0.0,
+            "rel_dev": 0.0
+          },
+          {
+            "eps": 0.125,
+            "drift_norm": 0.023440815525203846,
+            "linear_pred_norm": 0.023005646732901758,
+            "abs_dev": 0.0006329927074564681,
+            "rel_dev": 0.027003868819148666
+          },
+          {
+            "eps": 0.25,
+            "drift_norm": 0.04879107367299998,
+            "linear_pred_norm": 0.046011293465803516,
+            "abs_dev": 0.004062238823200033,
+            "rel_dev": 0.08325782806964536
+          },
+          {
+            "eps": 0.5,
+            "drift_norm": 0.10722554930363831,
+            "linear_pred_norm": 0.09202258693160703,
+            "abs_dev": 0.022150495814112596,
+            "rel_dev": 0.20657852496877813
+          },
+          {
+            "eps": 0.75,
+            "drift_norm": 0.1820435886903397,
+            "linear_pred_norm": 0.13803388039741055,
+            "abs_dev": 0.0626392335286267,
+            "rel_dev": 0.3440892040157342
+          },
+          {
+            "eps": 1.0,
+            "drift_norm": 0.286588202870409,
+            "linear_pred_norm": 0.18404517386321406,
+            "abs_dev": 0.14010066813888292,
+            "rel_dev": 0.4888570664656228
+          }
+        ],
+        "worst_rel_dev_from_tangent": 0.4888570664656228,
+        "tangent_from_eps": 0.0625
+      },
+      "per_layer": {
+        "n_layers": 6,
+        "total_drift_norm": 0.286588202870409,
+        "summed_response_norm": 0.18132586296642653,
+        "explained_squared_drift": 0.7385059414081954,
+        "cosine": 0.8999623997651545,
+        "per_layer_sq_share": [
+          0.23871250602859462,
+          0.4228792677012581,
+          0.16146196712303293,
+          0.10686299324143608,
+          0.07008326590567829,
+          0.0
+        ],
+        "max_single_layer_share": 0.4228792677012581
+      }
+    },
+    {
+      "seed": 90000000803,
+      "response_curve": {
+        "ladder": [
+          0.0,
+          0.0625,
+          0.125,
+          0.25,
+          0.5,
+          0.75,
+          1.0
+        ],
+        "rows": [
+          {
+            "eps": 0.0,
+            "drift_norm": 0.0,
+            "linear_pred_norm": 0.0,
+            "abs_dev": 0.0,
+            "rel_dev": 0.0
+          },
+          {
+            "eps": 0.0625,
+            "drift_norm": 0.009001714376203125,
+            "linear_pred_norm": 0.009001714376203125,
+            "abs_dev": 0.0,
+            "rel_dev": 0.0
+          },
+          {
+            "eps": 0.125,
+            "drift_norm": 0.01806267457814982,
+            "linear_pred_norm": 0.01800342875240625,
+            "abs_dev": 0.0006520079811725665,
+            "rel_dev": 0.0360969787919056
+          },
+          {
+            "eps": 0.25,
+            "drift_norm": 0.03647927901889496,
+            "linear_pred_norm": 0.0360068575048125,
+            "abs_dev": 0.003968408978128472,
+            "rel_dev": 0.10878529085163603
+          },
+          {
+            "eps": 0.5,
+            "drift_norm": 0.07560156853722153,
+            "linear_pred_norm": 0.072013715009625,
+            "abs_dev": 0.019567383774714255,
+            "rel_dev": 0.25882245769914797
+          },
+          {
+            "eps": 0.75,
+            "drift_norm": 0.12131847639444023,
+            "linear_pred_norm": 0.1080205725144375,
+            "abs_dev": 0.050902673053963184,
+            "rel_dev": 0.4195789014730484
+          },
+          {
+            "eps": 1.0,
+            "drift_norm": 0.1824034241877328,
+            "linear_pred_norm": 0.14402743001925,
+            "abs_dev": 0.10756440299471205,
+            "rel_dev": 0.5897060511539788
+          }
+        ],
+        "worst_rel_dev_from_tangent": 0.5897060511539788,
+        "tangent_from_eps": 0.0625
+      },
+      "per_layer": {
+        "n_layers": 6,
+        "total_drift_norm": 0.1824034241877328,
+        "summed_response_norm": 0.14426986459034064,
+        "explained_squared_drift": 0.6141121285939015,
+        "cosine": 0.7836866186804202,
+        "per_layer_sq_share": [
+          0.13615354622060274,
+          0.10648182602746938,
+          0.229103250405899,
+          0.37759479914956656,
+          0.15066657819646237,
+          0.0
+        ],
+        "max_single_layer_share": 0.37759479914956656
+      }
+    }
+  ],
+  "cost_model": {
+    "width": 32,
+    "depth": 6,
+    "query_rank": 32,
+    "full_tower_state_per_layer": 32768,
+    "full_tower_transport_flops": 12582912,
+    "adjoint_query_state": 6144,
+    "adjoint_contraction_flops_IF_source_is_factored": 393216,
+    "adjoint_contraction_flops_IF_source_is_dense": 12582912,
+    "verdict_rule": "if the local source must be materialised dense to be contracted, the n^3 term returns and GAME_PLAN section 7 kills the lane"
+  },
+  "aggregate": {
+    "worst_linearity_dev": 0.7541846591271355,
+    "min_explained_squared_drift": 0.36959390220693566,
+    "min_cosine": 0.6440244342229945,
+    "max_single_layer_share": 0.4228792677012581
+  },
+  "verdict": {
+    "verdict": "KILL",
+    "why": "linearity deviation 0.754 > 0.25; the linearisation is invalid and no engineering repairs it"
+  }
+}

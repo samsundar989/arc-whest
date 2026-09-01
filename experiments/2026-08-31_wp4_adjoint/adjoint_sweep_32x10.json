@@ -1,0 +1,203 @@
+{
+  "artifact": "p2_adjoint_k3_sweep",
+  "artifact_version": 1,
+  "width": 32,
+  "depth": 10,
+  "networks": [
+    {
+      "seed": 90000000801,
+      "response_curve": {
+        "ladder": [
+          0.0,
+          0.0625,
+          0.125,
+          0.25,
+          0.5,
+          0.75,
+          1.0
+        ],
+        "rows": [
+          {
+            "eps": 0.0,
+            "drift_norm": 0.0,
+            "linear_pred_norm": 0.0,
+            "abs_dev": 0.0,
+            "rel_dev": 0.0
+          },
+          {
+            "eps": 0.0625,
+            "drift_norm": 0.013599453366362904,
+            "linear_pred_norm": 0.013599453366362904,
+            "abs_dev": 0.0,
+            "rel_dev": 0.0
+          },
+          {
+            "eps": 0.125,
+            "drift_norm": 0.02732779842081065,
+            "linear_pred_norm": 0.02719890673272581,
+            "abs_dev": 0.0012903741943465735,
+            "rel_dev": 0.047218373557817536
+          },
+          {
+            "eps": 0.25,
+            "drift_norm": 0.05612587572984206,
+            "linear_pred_norm": 0.05439781346545162,
+            "abs_dev": 0.008677537835092295,
+            "rel_dev": 0.15460850672265694
+          },
+          {
+            "eps": 0.5,
+            "drift_norm": 0.13163692266100466,
+            "linear_pred_norm": 0.10879562693090324,
+            "abs_dev": 0.053684824703165164,
+            "rel_dev": 0.4078249750749334
+          },
+          {
+            "eps": 0.75,
+            "drift_norm": 0.28368813477453547,
+            "linear_pred_norm": 0.16319344039635486,
+            "abs_dev": 0.18610256979254916,
+            "rel_dev": 0.656011115658596
+          },
+          {
+            "eps": 1.0,
+            "drift_norm": 0.9113917643270888,
+            "linear_pred_norm": 0.21759125386180647,
+            "abs_dev": 0.8550905922523514,
+            "rel_dev": 0.9382250594328044
+          }
+        ],
+        "worst_rel_dev_from_tangent": 0.9382250594328044,
+        "tangent_from_eps": 0.0625
+      },
+      "per_layer": {
+        "n_layers": 10,
+        "total_drift_norm": 0.9113917643270888,
+        "summed_response_norm": 0.22029275917835908,
+        "explained_squared_drift": 0.10380590106036158,
+        "cosine": 0.33558721703438316,
+        "per_layer_sq_share": [
+          0.0547301806601699,
+          0.160059351416107,
+          0.10300025583535606,
+          0.16078502100277928,
+          0.0787661090374592,
+          0.15487859540673804,
+          0.16837208860656816,
+          0.09601287361854963,
+          0.02339552441627259,
+          0.0
+        ],
+        "max_single_layer_share": 0.16837208860656816
+      }
+    },
+    {
+      "seed": 90000000802,
+      "response_curve": {
+        "ladder": [
+          0.0,
+          0.0625,
+          0.125,
+          0.25,
+          0.5,
+          0.75,
+          1.0
+        ],
+        "rows": [
+          {
+            "eps": 0.0,
+            "drift_norm": 0.0,
+            "linear_pred_norm": 0.0,
+            "abs_dev": 0.0,
+            "rel_dev": 0.0
+          },
+          {
+            "eps": 0.0625,
+            "drift_norm": 0.0132080146598014,
+            "linear_pred_norm": 0.0132080146598014,
+            "abs_dev": 0.0,
+            "rel_dev": 0.0
+          },
+          {
+            "eps": 0.125,
+            "drift_norm": 0.026572861481321337,
+            "linear_pred_norm": 0.0264160293196028,
+            "abs_dev": 0.0009895455566141876,
+            "rel_dev": 0.037238953633569404
+          },
+          {
+            "eps": 0.25,
+            "drift_norm": 0.05390523862744264,
+            "linear_pred_norm": 0.0528320586392056,
+            "abs_dev": 0.005860889653528037,
+            "rel_dev": 0.10872578997441473
+          },
+          {
+            "eps": 0.5,
+            "drift_norm": 0.11238824794248538,
+            "linear_pred_norm": 0.1056641172784112,
+            "abs_dev": 0.027317680440155485,
+            "rel_dev": 0.24306527542039175
+          },
+          {
+            "eps": 0.75,
+            "drift_norm": 0.1839049296504164,
+            "linear_pred_norm": 0.1584961759176168,
+            "abs_dev": 0.07275553867127305,
+            "rel_dev": 0.39561494523052504
+          },
+          {
+            "eps": 1.0,
+            "drift_norm": 0.3171023817503925,
+            "linear_pred_norm": 0.2113282345568224,
+            "abs_dev": 0.2045225053513111,
+            "rel_dev": 0.6449730974026592
+          }
+        ],
+        "worst_rel_dev_from_tangent": 0.6449730974026592,
+        "tangent_from_eps": 0.0625
+      },
+      "per_layer": {
+        "n_layers": 10,
+        "total_drift_norm": 0.3171023817503925,
+        "summed_response_norm": 0.21353296468091693,
+        "explained_squared_drift": 0.546735766288359,
+        "cosine": 0.7426529381701331,
+        "per_layer_sq_share": [
+          0.12163705831639243,
+          0.449080868176732,
+          0.21106549088450108,
+          0.07382732286796578,
+          0.05255088472022974,
+          0.04457467275341528,
+          0.025016281522562456,
+          0.01371416979959145,
+          0.008533250958610092,
+          0.0
+        ],
+        "max_single_layer_share": 0.449080868176732
+      }
+    }
+  ],
+  "cost_model": {
+    "width": 32,
+    "depth": 10,
+    "query_rank": 32,
+    "full_tower_state_per_layer": 32768,
+    "full_tower_transport_flops": 20971520,
+    "adjoint_query_state": 10240,
+    "adjoint_contraction_flops_IF_source_is_factored": 655360,
+    "adjoint_contraction_flops_IF_source_is_dense": 20971520,
+    "verdict_rule": "if the local source must be materialised dense to be contracted, the n^3 term returns and GAME_PLAN section 7 kills the lane"
+  },
+  "aggregate": {
+    "worst_linearity_dev": 0.9382250594328044,
+    "min_explained_squared_drift": 0.10380590106036158,
+    "min_cosine": 0.33558721703438316,
+    "max_single_layer_share": 0.449080868176732
+  },
+  "verdict": {
+    "verdict": "KILL",
+    "why": "linearity deviation 0.938 > 0.25; the linearisation is invalid and no engineering repairs it"
+  }
+}

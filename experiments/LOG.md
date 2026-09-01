@@ -23370,3 +23370,105 @@ the window retraction left explicitly unmeasured.
 `test_p2_adjoint_k3.py` green with every prediction as a named check, including
 the Q1 bit-identity self-test · the response curve emitted as an artifact ·
 a stated cost/rank formula · a fresh independent Skeptic.
+
+---
+
+# 2026-08-31 — RESULT WP4: KILLED on its own preregistered falsifier. The K3 response is not linear, and it decays with DEPTH.
+
+**Class:** IMPORTANT (research instrument). Contract `98b0973`, committed
+**before any linearity measurement**. No `estimator.py`, seed block, gate
+threshold, residual model, vault, protected human file, or submission. **No
+truth was read** — every arm is a prediction of the same flow, and the
+comparison is between arms.
+
+## Verdict: KILL
+
+Two of the four preregistered kill rules fired **independently**, at every shape
+tested, and the failure **worsens sharply with depth** — toward the live shape,
+not away from it.
+
+`GAME_PLAN.md` § 7: *"adjoint K3 has weak exact-oracle agreement -> kill; do not
+fit labels to conceal a wrong response model."* Nothing was fitted: `eps` is a
+swept control and no coefficient was estimated from the drift it was compared
+against.
+
+## Predictions scored
+
+| # | prediction | outcome |
+|---|---|---|
+| **Q1** | the untouched arm is **bit-identical** to `mlp_kprop` | **HELD** — `max|diff| = 0.000e+00` at `16x3` and `32x4`. Every arm below is upstream with ONE intervention |
+| Q2 | `scale:0` removes the transport it claims to | **HELD** — the sweep's `eps = 0` arm is the no-K3-memory baseline and every drift is measured from it |
+| **Q3 — LINEARITY** | deviation from the tangent `< 10%`; **kill above 25%** | **REFUTED, KILL** — `0.277` to `0.938` |
+| **Q4 — ADDITIVITY** | explains `> 70%` of squared drift; **kill below 50%** | **REFUTED, KILL** — down to `0.104` |
+| Q5 — DIRECTION | cosine `> 0.9`; kill below `0.5` | **REFUTED at depth** — `0.959` at `L=3`, `0.336` at `L=10` |
+| **Q6 — LOCALITY** | no layer carries `> 80%` of the response | **HELD** — max single-layer share `0.34`–`0.42`. **Locality was never the problem** |
+
+## The discriminating artifact: it is DEPTH, not width
+
+| shape | linearity deviation | explained squared drift | cosine | verdict |
+|---|---:|---:|---:|---|
+| `16 x 3` | `0.495` | `0.716` | `0.846` | KILL |
+| **`32 x 3`** | **`0.277`** | `0.912` | `0.959` | KILL (marginal) |
+| `32 x 6` | `0.754` | `0.370` | `0.644` | KILL |
+| **`32 x 10`** | **`0.938`** | **`0.104`** | **`0.336`** | KILL (catastrophic) |
+| `64 x 6` | `0.579` | `0.644` | `0.817` | KILL |
+
+At `L = 3` the additive model still explains `91%` of the drift and points
+almost exactly the right way — it *nearly* works. By `L = 10` it explains
+**10%** and is nearly orthogonal to the truth. **Width moves it very little**
+(`32 x 6` = `0.754` vs `64 x 6` = `0.579`; `16 x 3` = `0.495` vs `32 x 3` =
+`0.277`, and that pair moves the *wrong* way for a width story).
+
+**The live shape is `L = 16`, deeper than anything measured here, and the trend
+is monotone against it.** There is no operating point in this family where a
+first-order adjoint sum represents the response.
+
+### The mechanism, and it is the honest reading
+
+`kappa_3` enters the ReLU Wick expansion as a perturbation, so the response
+*is* nearly linear over one layer — which is what `L = 3` shows. But each
+layer's perturbed state feeds the next layer's **nonlinear** map, and the
+first-order terms compound multiplicatively. A sum of per-layer responses omits
+every cross-layer product, and by depth 10 those products carry `90%` of the
+drift.
+
+This is **not** the late-window finding and does not reopen it. That lane failed
+because its `k_max=2` prefix was bad (`89.2%` of the drift), and its
+"`kappa_3` is non-local" attribution was **withdrawn**. WP4 measures the thing
+that withdrawal left open and finds: **`kappa_3` IS local — Q6 holds — and the
+response to it is nonlinear.** Those are different facts, and the second one
+kills the adjoint formulation on its own.
+
+## What this closes, and what it does not
+
+- **CLOSED: query-directed / adjoint K3** as `delta m_L ~= sum_l J S_l`. No
+  rank truncation, query subset or better contraction repairs a response that is
+  not first-order. The lane dies before a multi-day port, not after one.
+- **NOT closed: that third-order information is valuable.** Full factorized K3
+  still reaches `3.9249e-08` raw on organiser networks. WP4 says the *cheap
+  linear route to it* does not exist; it says nothing about the information.
+- **NOT reopened:** W-EFF (`1.0732 B` against a `<= 0.35 B` screen) and the late
+  window remain closed on their own measured negatives.
+
+## The cost formula, recorded although the lane is dead
+
+`cost_model()` states it explicitly so a future attempt inherits the arithmetic
+rather than rederiving it: an adjoint carries `q x n x L` of query state and
+contracts each source in `2 q n^2 L` **if the source is factored**, but
+`2 q n^3 L` **if it must be materialised dense** — in which case the `n^3` term
+returns and `GAME_PLAN.md` § 7 kills it for that reason instead. The lane did
+not reach this test; it failed on linearity first.
+
+## What this does NOT establish
+
+Small shapes only (`n <= 64`, `L <= 10`), 2–3 networks per cell, one kernel
+family, upstream's `SIMPLE` at `k_max=3` unfactored. The trend is monotone and
+consistent across five cells, and the live depth lies beyond the worst of them —
+but no measurement here was taken at `1024 x 16`, and none was taken against a
+label.
+
+## Raw artifacts
+
+| what | path |
+|---|---|
+| the sweeps, five shapes | `experiments/2026-08-31_wp4_adjoint/adjoint_sweep_{32x6,16x3,32x3,32x10,64x6}.json` |
