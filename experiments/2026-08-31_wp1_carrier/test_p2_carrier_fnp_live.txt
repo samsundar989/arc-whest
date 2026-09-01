@@ -128,10 +128,10 @@ L  the exact layer-1 identity, which the radial factor must earn
   PASS  L: ...and is below sqrt(N), as Jensen requires                    E||x|| < sqrt(E||x||^2) = sqrt(N)
 
 M  mutations: each must break a NAMED property
-  PASS  M: M1 scaling: 1/N instead of 1/sqrt(N)                           detected
-  PASS  M: M2 order: swapping two bases changes the object                detected
-  PASS  M: M3 antipode: -v BEFORE +v is a different row order             detected
-  PASS  M: M4 dtype: float32 and float64 carriers differ in bytes         detected
+  PASS  M: M1 scaling: 1/N instead of 1/sqrt(N) breaks unit rows          detected
+  PASS  M: M2 duplicate basis: within-basis still passes, cross-basis failsdetected
+  PASS  M: M3 antipode: block-appended -v is the same SET, a different ORDERdetected
+  PASS  M: M4 dtype: float32 and float64 carriers agree in VALUE (1/sqrt(N) is exact at 2^n)detected
   PASS  M: M5 one flipped entry breaks the cross-basis identity           detected
 
 X  the LIVE width, 1024
@@ -139,6 +139,8 @@ X  the LIVE width, 1024
   PASS  X: the carrier is 64 MiB in float32                               one allocation
   PASS  X: forward FLOPs at depth 16 are exactly 2**39                    549,755,813,888 -> multiplier 0.2500
   PASS  X: the radial factor is 1/32-exact at N=1024                      31.99218845
+  PASS  X: EVERY cross-basis |correlation| at N=1024 is exactly 32        28 pairs, max deviation 0.0, zeros 0  <- verifiable WITHOUT the reference
+  PASS  X: within-basis orthogonality at N=1024 (weak, for completeness)  exact integers
   PASS  X: BYTE-identical to the frozen reference at the live width       sha256 65b752c18f076641
 
-117/117 checks passed
+119/119 checks passed

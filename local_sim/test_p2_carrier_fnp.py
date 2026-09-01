@@ -417,27 +417,60 @@ def main():
     good = _np(C.carrier_fnp(fnp, m=m, k=k, antipodes=False, dtype="float64",
                              unit_norm=False)).reshape(k, N, N)
     muts = []
-    # M1 wrong scaling
-    muts.append(("M1 scaling: 1/N instead of 1/sqrt(N)",
-                 lambda: not np.array_equal(
-                     _np(C.carrier_fnp(fnp, m=m, k=k, dtype="float64")),
-                     _np(C.carrier_fnp(fnp, m=m, k=k, antipodes=True,
-                                       dtype="float64", unit_norm=False)) / N)))
-    # M2 row order
-    sw = good.copy()
-    sw[[0, 1]] = sw[[1, 0]]
-    muts.append(("M2 order: swapping two bases changes the object",
-                 lambda: not np.array_equal(sw, good)))
-    # M3 antipode convention
+    # M2/M3/M4 USED TO BE VACUOUS, and an independent Skeptic measured it:
+    # "swapping two DISTINCT bases changes the object", "+v differs from -v on a
+    # negation-paired array" and "float32 bytes differ from float64 bytes" are
+    # all true by construction, so they could not fail. Each is replaced by a
+    # mutation of the CONSTRUCTION whose named property then breaks.
+    target = 2 ** (n / 2)
+
+    def cross_ok(B):
+        """Does this k x N x N stack satisfy the cross-basis identity?"""
+        for i, j in itertools.combinations(range(B.shape[0]), 2):
+            G = np.abs(B[i] @ B[j].T)
+            if float(np.abs(G - target).max()) > 0 or int((G == 0).sum()):
+                return False
+        return True
+
+    # M1 wrong scaling -- the unit-row property breaks
+    muts.append(("M1 scaling: 1/N instead of 1/sqrt(N) breaks unit rows",
+                 lambda: not np.allclose(
+                     np.linalg.norm(_np(C.carrier_fnp(
+                         fnp, m=m, k=k, antipodes=False, dtype="float64",
+                         unit_norm=False)) / N, axis=1), 1.0)))
+    # M2 the SIGN VECTOR of one basis replaced by another's: the object still
+    # has k bases, still passes within-basis orthogonality, and FAILS the
+    # cross-basis identity because two bases are now equal.
+    def m2():
+        B = good.copy()
+        B[1] = B[0]
+        within = all(np.array_equal(B[i] @ B[i].T, N * np.eye(N))
+                     for i in range(k))
+        return within and not cross_ok(B)
+    muts.append(("M2 duplicate basis: within-basis still passes, cross-basis "
+                 "fails", m2))
+    # M3 the antipodal PAIRING: appending -rows in a block instead of
+    # interleaving gives the same SET of rows and a different ORDER, which the
+    # spec pins. A set comparison cannot see it; the pinned order can.
     full = _np(C.carrier_fnp(fnp, m=m, k=k, antipodes=True, dtype="float64",
                              unit_norm=False))
-    muts.append(("M3 antipode: -v BEFORE +v is a different row order",
-                 lambda: not np.array_equal(full[0::2], full[1::2])))
-    # M4 dtype
-    muts.append(("M4 dtype: float32 and float64 carriers differ in bytes",
-                 lambda: _np(C.carrier_fnp(fnp, m=m, k=k, dtype="float32")
-                             ).tobytes()
-                 != _np(C.carrier_fnp(fnp, m=m, k=k, dtype="float64")).tobytes()))
+    plain = _np(C.carrier_fnp(fnp, m=m, k=k, antipodes=False, dtype="float64",
+                              unit_norm=False))
+    blocked = np.concatenate([plain, -plain], axis=0)
+    muts.append(("M3 antipode: block-appended -v is the same SET, a different "
+                 "ORDER",
+                 lambda: (sorted(map(bytes, full)) == sorted(map(bytes, blocked))
+                          and not np.array_equal(full, blocked))))
+    # M4 dtype: the SCALED float32 carrier must still be exactly representable,
+    # so float32 and float64 must agree in VALUE even though they differ in
+    # bytes. At a power-of-two N, 1/sqrt(N) is exact -- a width where it were
+    # not would break this.
+    muts.append(("M4 dtype: float32 and float64 carriers agree in VALUE "
+                 "(1/sqrt(N) is exact at 2^n)",
+                 lambda: np.array_equal(
+                     _np(C.carrier_fnp(fnp, m=m, k=k, dtype="float32")
+                         ).astype(np.float64),
+                     _np(C.carrier_fnp(fnp, m=m, k=k, dtype="float64")))))
     # M5 a flipped sign in one position breaks the cross-basis identity
     def m5():
         b = good.copy()
@@ -469,6 +502,28 @@ def main():
         check("X: the radial factor is 1/32-exact at N=1024",
               abs(plan.radial - C.radial_factor(1024)) == 0.0,
               f"{plan.radial:.8f}")
+        # THE DISCRIMINATOR, AT THE LIVE WIDTH. Section V runs it exhaustively
+        # at m=3,5,7 only, so the strongest property of the object we actually
+        # ship was checked at every size except the one that ships. An
+        # independent Skeptic ran it separately and it cost 0.6 s, so there was
+        # never a reason not to. It is also the check that does NOT depend on
+        # the frozen reference: it is verifiable from the output alone, which is
+        # what makes it more than self-consistency.
+        Bl = _np(C.carrier_fnp(fnp, m=9, k=8, antipodes=False, dtype="float64",
+                               unit_norm=False)).reshape(8, 1024, 1024)
+        tgt, worst, zeros, pairs = 32.0, 0.0, 0, 0
+        for i, j in itertools.combinations(range(8), 2):
+            G = np.abs(Bl[i] @ Bl[j].T)
+            worst = max(worst, float(np.abs(G - tgt).max()))
+            zeros += int((G == 0).sum())
+            pairs += 1
+        check("X: EVERY cross-basis |correlation| at N=1024 is exactly 32",
+              worst == 0.0 and zeros == 0,
+              f"{pairs} pairs, max deviation {worst}, zeros {zeros}  "
+              "<- verifiable WITHOUT the reference")
+        check("X: within-basis orthogonality at N=1024 (weak, for completeness)",
+              all(np.array_equal(Bl[i] @ Bl[i].T, 1024 * np.eye(1024))
+                  for i in range(8)), "exact integers")
         ref_f = REF.carrier_float32(9, 8, antipodes=True)
         check("X: BYTE-identical to the frozen reference at the live width",
               _np(plan.carrier).tobytes() == ref_f.tobytes(),

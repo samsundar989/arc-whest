@@ -23,10 +23,16 @@ candidate, which is precisely the confusion this command exists to remove.
 
 WHAT IT DOES NOT DO
 -------------------
-* **It reads no truth and reports no accuracy.** Where the lifecycle evaluator
-  needs a reference it is handed **zeros**, so its `mse` column is
-  `mean(prediction^2)` — a magnitude, not an error. It is labelled that way and
-  never compared to anything.
+* **Sections 1-9 read no truth.** Where the lifecycle evaluator needs a
+  reference it is handed **zeros**, so its `mse` column is `mean(prediction^2)`
+  — a magnitude, not an error.
+* **SECTION 10 DOES READ TRUTH, and the first version of this docstring denied
+  it.** The official subprocess smoke runs the organisers' `v2-phase2` mini
+  split; its `final_layer_mse_CONFIRM_ONLY` is a real error against real labels.
+  That is legitimate **CONFIRM-tier** use — a deployment check — but CONFIRM is
+  read-only and may CHOOSE nothing. The report's `truth_free` field is now
+  COMPUTED from whether section 10 ran, and `confirm_tier_read` records it
+  positively. Use `--skip-smoke` for a genuinely truth-free run.
 * **It is not a promotion.** `GAME_PLAN.md` § 6 lists what promotion requires;
   this is one input to it, not a substitute. It does not run `preflight -Full`,
   it does not touch a vault or a seed block, and it does not submit.
@@ -204,6 +210,9 @@ def main() -> int:
 
     sha_before = _sha(cand)
     ship_sha_before = _sha(os.path.join(_ROOT, "estimator.py"))
+    git_dirty_before = ((_run(["git", "status", "--porcelain", "--",
+                               "estimator.py", "scripts", "local_sim"],
+                              timeout=180).stdout) or "").strip()
 
     print("candidate certification -- READ-ONLY, TRUTH-FREE")
     print(f"  candidate   {rel}")
@@ -218,7 +227,17 @@ def main() -> int:
     report = {"artifact": "candidate_certification", "artifact_version": 1,
               "candidate": rel, "candidate_sha256": sha_before,
               "width": a.width, "depth": a.depth, "budget": a.budget,
-              "truth_free": True, "is_shipped_file": is_ship,
+              # COMPUTED, NOT DECLARED. This was hardcoded `True` while
+              # section 10 ran `whest run --split mini` against the ORGANISERS'
+              # data and stored the resulting `final_layer_mse_CONFIRM_ONLY` in
+              # the same report. An independent Skeptic caught the
+              # contradiction. The smoke is a deployment check and reading it is
+              # legitimate CONFIRM-tier use -- but a report that says
+              # `truth_free: true` beside a real MSE is a false label, and a LOG
+              # entry that repeats it inherits the falsehood.
+              "truth_free": bool(a.quick or a.skip_smoke),
+              "confirm_tier_read": not bool(a.quick or a.skip_smoke),
+              "is_shipped_file": is_ship,
               "sections": {}}
 
     # ---------------------------------------------------------------- 1 ----
@@ -506,6 +525,14 @@ def main() -> int:
 
     # --------------------------------------------------------------- 10 ----
     head("10  the official subprocess runner -- DEPLOYMENT AUTHORITY")
+    if not (a.quick or a.skip_smoke):
+        print("      *** THIS SECTION READS CONFIRM-TIER TRUTH. It runs the")
+        print("      organisers' v2-phase2 mini split, so the report's")
+        print("      `final_layer_mse_CONFIRM_ONLY` is a REAL error against REAL")
+        print("      labels. CONFIRM is read-only: it may CHECK a decision made")
+        print("      on mints and may CHOOSE nothing. Do not select a basis")
+        print("      count, a blend, a rank or a threshold on it, and do not")
+        print("      describe a run that includes this section as truth-free.")
     if a.quick or a.skip_smoke:
         skip("10: official Phase-2 subprocess smoke",
              "--quick/--skip-smoke; a skipped deployment check is NOT a pass")
@@ -540,12 +567,28 @@ def main() -> int:
     check("R: estimator.py is byte-identical",
           _sha(os.path.join(_ROOT, "estimator.py")) == ship_sha_before,
           ship_sha_before[:16])
-    g = _run(["git", "status", "--porcelain", "--", "estimator.py",
-              "scripts", "local_sim"], timeout=180)
-    check("R: no tracked source under estimator.py/scripts/local_sim is dirty "
-          "because of this run",
-          True, "informational: " +
-          ((g.stdout or "").strip().replace("\n", "; ")[:56] or "clean"))
+    # THIS CHECK'S CONDITION USED TO BE THE LITERAL `True`, with the git output
+    # relegated to an "informational:" detail string -- so it printed PASS while
+    # its own detail listed modified files. That is `docs/GOTCHAS.md`'s named
+    # failure: a check reporting a state rather than testing a property, and an
+    # independent Skeptic found it inside a claimed 36/36.
+    #
+    # The property that is actually this run's business is narrow and is now the
+    # condition: THIS RUN wrote nothing. Files already dirty when it started are
+    # the caller's business, so they are compared BEFORE and AFTER rather than
+    # required to be absent.
+    g_after = ((_run(["git", "status", "--porcelain", "--", "estimator.py",
+                      "scripts", "local_sim"], timeout=180).stdout) or "").strip()
+    check("R: this run changed no tracked source under "
+          "estimator.py/scripts/local_sim",
+          g_after == git_dirty_before,
+          "unchanged since start"
+          + (f" (already dirty at start: {len(git_dirty_before.splitlines())} "
+             f"file(s), not this run's doing)" if git_dirty_before else "")
+          if g_after == git_dirty_before
+          else "THIS RUN DIRTIED: "
+               + "; ".join(sorted(set(g_after.splitlines())
+                                  - set(git_dirty_before.splitlines())))[:70])
 
     report["checks_total"] = _TOTAL[0]
     report["checks_failed"] = list(_FAILED)

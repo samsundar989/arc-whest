@@ -17,12 +17,29 @@ reference at width 1024**, plugs into one shape-generic candidate API and builds
 to a self-contained single file that is **CERTIFIED 36/36 at `1024 x 16`** with
 zero failed MLPs on the official subprocess runner.
 
-**NO ACCURACY WAS MEASURED. Nothing this session read a label.** The carrier
-branch runs at multiplier `0.2501` against the shipped file's floor-pinned
-`0.1`, so it must be **2.5x more accurate just to break even**, and whether it is
-is precisely the open question. **The next gate is WP2** — the truth-free
-objective and the frozen nested basis panel — because `k = 8` is one frozen
-panel point, not a selection.
+**The one accuracy datum that exists points AGAINST the branch, and an earlier
+version of this paragraph wrongly said none existed.** The certification's
+deployment smoke reads the organisers' `v2-phase2` mini split, so a real MSE was
+produced. On the **same two organiser networks**, paired:
+
+| | raw final MSE | multiplier | **adjusted** |
+|---|---:|---:|---:|
+| shipped v2.6.1 canary | `4.778624e-06` | `0.100000` | `4.778624e-07` |
+| **carrier k=8** | `2.710315e-06` | `0.250125` | **`6.779175e-07`** |
+
+Raw the carrier is **`1.763x` better**; break-even needs **`2.501x`**; adjusted
+it is **`1.42x` WORSE than the canary**. **`n = 2` decides nothing** — max/median
+over fresh MLPs is ~`12.9x` — and no GT-noise floor is quoted, so this is
+neither a kill nor a signal. Nothing was selected on it; CONFIRM stays read-only.
+It is recorded because the alternative is a durable record that says the question
+is unmeasured while the first measurement sits in a committed artifact.
+
+**The next gate is WP2**, the truth-free objective and the frozen nested basis
+panel, because `k = 8` is one frozen panel point and not a selection. The
+Skeptic's recommended discriminator for the break-even question is a paired
+DESIGN panel on 24–32 fresh mints (P01 has 432 seeds left) through
+`competition_score.decide()` — **STRATEGIC, needs a Rule-1 contract and Samuel's
+prediction, and explicitly NOT more mini rows.**
 
 This file says where execution stands;
 [`GAME_PLAN.md`](GAME_PLAN.md) is the only active architecture and implementation plan;

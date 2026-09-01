@@ -1,4 +1,4 @@
-C:\Users\samsu\Documents\arc-whest\local_sim\certify_candidate.py:301: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+C:\Users\samsu\Documents\arc-whest\local_sim\certify_candidate.py:320: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
   flops.configure(symmetry_warnings=False)
 candidate certification -- READ-ONLY, TRUTH-FREE
   candidate   estimator.py
@@ -20,10 +20,10 @@ candidate certification -- READ-ONLY, TRUTH-FREE
   PASS  3: the invariant suite passes on THIS candidate               30/30 checks passed
 
 4  determinism, in-process and in a FRESH worker
-  PASS  4: two FRESH interpreters agree bitwise on seed 90000000201   6bcb98209b85d53f pid 38040 vs 11040
+  PASS  4: two FRESH interpreters agree bitwise on seed 90000000201   6bcb98209b85d53f pid 50932 vs 54972
   PASS  4: ...and bill identical FLOPs on seed 90000000201            137,600,293,888
   PASS  4: the shape is (16, 1024) on seed 90000000201                [16, 1024]
-  PASS  4: two FRESH interpreters agree bitwise on seed 90000000202   2e316876931b9362 pid 43528 vs 52656
+  PASS  4: two FRESH interpreters agree bitwise on seed 90000000202   2e316876931b9362 pid 50740 vs 16464
   PASS  4: ...and bill identical FLOPs on seed 90000000202            137,600,293,888
   PASS  4: the shape is (16, 1024) on seed 90000000202                [16, 1024]
 
@@ -39,12 +39,12 @@ candidate certification -- READ-ONLY, TRUTH-FREE
   PASS  6: counted FLOPs are network-INDEPENDENT or explained         137,600,326,656
   PASS  6: the multiplier is the score's own identity max(0.1, F/B)   0.100000  (C/B = 0.0625734, PINNED at the floor)
   PASS  6: the operation ledger is non-empty                          443 ops
-  PASS  7: worst residual is under the 0.4 s cliff (LOCAL -- the authority is --runner subprocess)52.7 ms -> 7.59x LOCAL headroom
-  PASS  7: worst per-MLP wall is under the installed 120 s limit      0.353 s -> 340x
+  PASS  7: worst residual is under the 0.4 s cliff (LOCAL -- the authority is --runner subprocess)80.5 ms -> 4.97x LOCAL headroom
+  PASS  7: worst per-MLP wall is under the installed 120 s limit      0.487 s -> 246x
   PASS  8: ZERO scalar materializations during predict (__bool__/__float__/__int__/__index__)counted, not asserted
 
 9  memory: accounting here, ENFORCEMENT only on Linux
-      peak working set 444.4 MB, peak commit 920.9 MB (test_deployment_envelope.peak_memory_bytes)
+      peak working set 444.7 MB, peak commit 921.2 MB (test_deployment_envelope.peak_memory_bytes)
       RLIMIT_AS caps ADDRESS SPACE, which exceeds both counters by an amount
       no Windows counter reports. These are accounting, and a headroom computed
       from them is an UPPER BOUND, never a margin.
@@ -54,19 +54,25 @@ candidate certification -- READ-ONLY, TRUTH-FREE
   PASS  9: predict completed under the real cap                       VmPeak 2345.4 MB of 8192 MB
 
 10  the official subprocess runner -- DEPLOYMENT AUTHORITY
+      *** THIS SECTION READS CONFIRM-TIER TRUTH. It runs the
+      organisers' v2-phase2 mini split, so the report's
+      `final_layer_mse_CONFIRM_ONLY` is a REAL error against REAL
+      labels. CONFIRM is read-only: it may CHECK a decision made
+      on mints and may CHOOSE nothing. Do not select a basis
+      count, a blend, a rank or a threshold on it, and do not
+      describe a run that includes this section as truth-free.
   PASS  10: the official runner produced a report                     
   PASS  10: zero failed MLPs                                          0 failed
   PASS  10: the live config is the Phase-2 round                      1024x16, lambda 0.0, cap 0.4 s
-  PASS  10: worst GRADED-PATH residual is under the cliff             71.13 ms -> 5.6x
+  PASS  10: worst GRADED-PATH residual is under the cliff             91.06 ms -> 4.4x
       counted FLOPs 137,600,326,656   multiplier 0.1000   C/B 0.0625734
 
 R  the repository was not modified
   PASS  R: the candidate file is byte-identical                       00240eb1e60810f5
   PASS  R: estimator.py is byte-identical                             00240eb1e60810f5
-  PASS  R: no tracked source under estimator.py/scripts/local_sim is dirty because of this runinformational: M local_sim/edge_cases.py; ?? local_sim/certify_candidat
+  PASS  R: this run changed no tracked source under estimator.py/scripts/local_simunchanged since start (already dirty at start: 4 file(s), not this run's doing)
 
   report -> experiments/2026-08-31_wp0cd_certify/certify_v261_full.json
 
 CANDIDATE CERTIFIED -- 36/36 checks passed
   This is one input to promotion, not promotion. See GAME_PLAN.md section 6.
-EXIT=0

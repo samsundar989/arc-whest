@@ -1,8 +1,8 @@
-C:\Users\samsu\Documents\arc-whest\local_sim\certify_candidate.py:301: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+C:\Users\samsu\Documents\arc-whest\local_sim\certify_candidate.py:320: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
   flops.configure(symmetry_warnings=False)
 candidate certification -- READ-ONLY, TRUTH-FREE
   candidate   experiments/2026-08-31_wp1_carrier/candidate_carrier_k8.py
-  sha256      9a0da257687d1ca3dc6a6dfece321ca4c2eecebd07359ba404eda72d7fc778e3
+  sha256      e0a7f4582ef5b9e96dc51af1485bd89109d40e0d2447c95beb51272f4b4622d0
   shape       1024x16   B = 2,199,023,255,552
   NOTE: this is NOT preflight and NOT a promotion. The ship-file gate is untouched;
         `scripts/preflight.ps1` still certifies estimator.py.
@@ -19,16 +19,16 @@ candidate certification -- READ-ONLY, TRUTH-FREE
   PASS  3: the invariant suite passes on THIS candidate               30/30 checks passed
 
 4  determinism, in-process and in a FRESH worker
-  PASS  4: two FRESH interpreters agree bitwise on seed 90000000201   83efc231e45875d3 pid 54008 vs 34844
+  PASS  4: two FRESH interpreters agree bitwise on seed 90000000201   83efc231e45875d3 pid 47676 vs 52872
   PASS  4: ...and bill identical FLOPs on seed 90000000201            550,030,643,201
   PASS  4: the shape is (16, 1024) on seed 90000000201                [16, 1024]
-  PASS  4: two FRESH interpreters agree bitwise on seed 90000000202   4eb3de494cf47d66 pid 41752 vs 45436
+  PASS  4: two FRESH interpreters agree bitwise on seed 90000000202   4eb3de494cf47d66 pid 47652 vs 53224
   PASS  4: ...and bill identical FLOPs on seed 90000000202            550,030,643,201
   PASS  4: the shape is (16, 1024) on seed 90000000202                [16, 1024]
 
 5-8  one metered run: immutability, cost, telemetry, scalar sync
-  PASS  5: setup() raised nothing                                     0.0774 s
-  PASS  5: setup is inside the 5 s ceiling (LOCAL, in-process -- the grader's window is larger)0.0774 s of 5.0 s
+  PASS  5: setup() raised nothing                                     0.0741 s
+  PASS  5: setup is inside the 5 s ceiling (LOCAL, in-process -- the grader's window is larger)0.0741 s of 5.0 s
   PASS  5: no run raised                                              clean
   PASS  5: the grader's weight arrays are UNCHANGED after predict     sha256 before == after
   PASS  5: every output has shape (depth, width)                      [16, 1024]
@@ -38,12 +38,12 @@ candidate certification -- READ-ONLY, TRUTH-FREE
   PASS  6: counted FLOPs are network-INDEPENDENT or explained         550,030,675,969
   PASS  6: the multiplier is the score's own identity max(0.1, F/B)   0.250125  (C/B = 0.2501250)
   PASS  6: the operation ledger is non-empty                          209 ops
-  PASS  7: worst residual is under the 0.4 s cliff (LOCAL -- the authority is --runner subprocess)74.4 ms -> 5.38x LOCAL headroom
-  PASS  7: worst per-MLP wall is under the installed 120 s limit      0.786 s -> 153x
+  PASS  7: worst residual is under the 0.4 s cliff (LOCAL -- the authority is --runner subprocess)74.9 ms -> 5.34x LOCAL headroom
+  PASS  7: worst per-MLP wall is under the installed 120 s limit      0.765 s -> 157x
   PASS  8: ZERO scalar materializations during predict (__bool__/__float__/__int__/__index__)counted, not asserted
 
 9  memory: accounting here, ENFORCEMENT only on Linux
-      peak working set 412.9 MB, peak commit 885.3 MB (test_deployment_envelope.peak_memory_bytes)
+      peak working set 412.1 MB, peak commit 884.5 MB (test_deployment_envelope.peak_memory_bytes)
       RLIMIT_AS caps ADDRESS SPACE, which exceeds both counters by an amount
       no Windows counter reports. These are accounting, and a headroom computed
       from them is an UPPER BOUND, never a margin.
@@ -53,19 +53,25 @@ candidate certification -- READ-ONLY, TRUTH-FREE
   PASS  9: predict completed under the real cap                       VmPeak 2281.5 MB of 8192 MB
 
 10  the official subprocess runner -- DEPLOYMENT AUTHORITY
+      *** THIS SECTION READS CONFIRM-TIER TRUTH. It runs the
+      organisers' v2-phase2 mini split, so the report's
+      `final_layer_mse_CONFIRM_ONLY` is a REAL error against REAL
+      labels. CONFIRM is read-only: it may CHECK a decision made
+      on mints and may CHOOSE nothing. Do not select a basis
+      count, a blend, a rank or a threshold on it, and do not
+      describe a run that includes this section as truth-free.
   PASS  10: the official runner produced a report                     
   PASS  10: zero failed MLPs                                          0 failed
   PASS  10: the live config is the Phase-2 round                      1024x16, lambda 0.0, cap 0.4 s
-  PASS  10: worst GRADED-PATH residual is under the cliff             76.63 ms -> 5.2x
+  PASS  10: worst GRADED-PATH residual is under the cliff             78.78 ms -> 5.1x
       counted FLOPs 550,030,675,969   multiplier 0.2501   C/B 0.2501250
 
 R  the repository was not modified
-  PASS  R: the candidate file is byte-identical                       9a0da257687d1ca3
+  PASS  R: the candidate file is byte-identical                       e0a7f4582ef5b9e9
   PASS  R: estimator.py is byte-identical                             00240eb1e60810f5
-  PASS  R: no tracked source under estimator.py/scripts/local_sim is dirty because of this runinformational: M local_sim/certify_candidate.py;  M local_sim/p2_carrie
+  PASS  R: this run changed no tracked source under estimator.py/scripts/local_simunchanged since start (already dirty at start: 4 file(s), not this run's doing)
 
   report -> experiments/2026-08-31_wp1_carrier/certify_carrier_k8_full.json
 
 CANDIDATE CERTIFIED -- 36/36 checks passed
   This is one input to promotion, not promotion. See GAME_PLAN.md section 6.
-EXIT=0

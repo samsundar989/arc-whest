@@ -179,6 +179,23 @@ class ResearchCandidate:
                 "config %r is declared but NOT IMPLEMENTED (GAME_PLAN WP3/WP4). "
                 "It refuses rather than silently returning another branch's "
                 "answer." % self.config)
+        # THE REFUSAL IS ABOUT THE PROPERTY, NOT THE CONFIG NAME.
+        #
+        # It used to be scoped to `carrier_k2_frozen` alone, so
+        # `carrier_k2_zero` with `blend=0.7` produced a hybrid carrying an
+        # unregistered coefficient with no refusal and no `fallback_reason` --
+        # an independent Skeptic constructed it. `carrier_k2_zero` exists to
+        # test the two ENDPOINT identities (`blend=0` is exactly the carrier,
+        # `blend=1` exactly the analytic branch); an interior coefficient there
+        # is a design choice wearing a test's name.
+        if (self.config == "carrier_k2_zero" and self.blend is not None
+                and self.blend not in (0.0, 1.0)):
+            raise CandidateRefusal(
+                "config 'carrier_k2_zero' takes blend 0.0 or 1.0 only -- it "
+                "exists to test the endpoint identities. blend=%r is an "
+                "interior mixing coefficient, and GAME_PLAN section 3D requires "
+                "a frozen hybrid's interaction to be preregistered. Use "
+                "'carrier_k2_frozen' with an explicit contract." % (self.blend,))
         if self.config == "carrier_k2_frozen" and self.blend is None:
             raise CandidateRefusal(
                 "config 'carrier_k2_frozen' has NO coefficient. GAME_PLAN "
@@ -201,9 +218,24 @@ class ResearchCandidate:
                     raise CandidateRefusal(
                         "strict=True and " + self.fallback_reason) from exc
                 self.plan = None
+        self._setup_done = True
         return self
 
+    #: Set by `setup()`. `predict()` before `setup()` used to fall through to
+    #: the analytic branch and return the `k2_diag` answer bit-identically --
+    #: "operational failure silently selects a different mathematical
+    #: estimator", which this module's own docstring forbids and an independent
+    #: Skeptic demonstrated. The grader always calls `setup()`, so it never bit
+    #: in deployment; it bit every research caller who forgot.
+    _setup_done = False
+
     def predict(self, mlp, flop_budget):
+        if not self._setup_done:
+            raise CandidateRefusal(
+                "predict() called before setup(). The grader calls setup() once, "
+                "off-budget, and the carrier is built there -- without it this "
+                "would silently return the ANALYTIC branch's answer under a "
+                "carrier config.")
         fnp, flops = _fnp(), _flops()
         weights = mlp.weights
         depth = len(weights)

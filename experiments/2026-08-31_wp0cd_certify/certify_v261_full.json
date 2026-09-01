@@ -6,7 +6,8 @@
   "width": 1024,
   "depth": 16,
   "budget": 2199023255552,
-  "truth_free": true,
+  "truth_free": false,
+  "confirm_tier_read": true,
   "is_shipped_file": true,
   "sections": {
     "validate": {
@@ -30,7 +31,7 @@
             1024
           ],
           "flops_used": 137600293888.0,
-          "pid": 38040
+          "pid": 50932
         },
         {
           "sha256": "2e316876931b936205c7dd0d98cbb66a6ddc5c5b13baf8f82871c571f2b7f55b",
@@ -39,7 +40,7 @@
             1024
           ],
           "flops_used": 137600293888.0,
-          "pid": 43528
+          "pid": 50740
         }
       ]
     },
@@ -50,8 +51,8 @@
         "flops_used": 137600326656.0,
         "n_ops": 443,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.05267019999155309,
-        "wall_time_s": 0.3532290999974066,
+        "residual_wall_time_s": 0.08052510002744384,
+        "wall_time_s": 0.4869602000035229,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -79,8 +80,8 @@
         "flops_used": 137600326656.0,
         "n_ops": 443,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.04621480004789191,
-        "wall_time_s": 0.3465734999990673,
+        "residual_wall_time_s": 0.057970700043370016,
+        "wall_time_s": 0.4726096000013058,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -108,8 +109,8 @@
         "flops_used": 137600326656.0,
         "n_ops": 443,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.04544620001252042,
-        "wall_time_s": 0.31741949999923236,
+        "residual_wall_time_s": 0.057554499959223904,
+        "wall_time_s": 0.44934709999506595,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -137,8 +138,8 @@
         "flops_used": 137600326656.0,
         "n_ops": 443,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.0485364000305708,
-        "wall_time_s": 0.3168678000001819,
+        "residual_wall_time_s": 0.07117600001947721,
+        "wall_time_s": 0.45445489999838173,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -161,13 +162,13 @@
         "mean_square_final_row": 0.6267320037662821
       }
     ],
-    "setup_s_local": 8.600000001024455e-06,
+    "setup_s_local": 1.189999602502212e-05,
     "linux_memory_gate": "experiments\\2026-08-31_wp0cd_certify\\linux_memory_gate_v261.json",
     "windows_memory_accounting": {
       "available": true,
       "source": "test_deployment_envelope.peak_memory_bytes",
-      "peak_wset_bytes": 465989632,
-      "peak_pagefile_bytes": 965599232
+      "peak_wset_bytes": 466329600,
+      "peak_pagefile_bytes": 965943296
     },
     "subprocess_smoke": {
       "ok_report": true,
@@ -178,7 +179,7 @@
       "lambda": 0.0,
       "residual_cap": 0.4,
       "wall_limit": 120.0,
-      "worst_residual": 0.07113409997691633,
+      "worst_residual": 0.09106100007193163,
       "flops_per_mlp": 137600326656,
       "multiplier": 0.1,
       "c_over_b": 0.06257338402792811,

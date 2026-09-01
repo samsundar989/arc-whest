@@ -38,6 +38,10 @@ R  the refusals, which are the point of the placeholders
   PASS  R: 'augment_k3' REFUSES (WP4 not implemented)                     config 'augment_k3' is declared but NOT IMPLEMENTED (GAM
   PASS  R: ...but WITH an explicit coefficient it proceeds                so the refusal is about provenance, not a broken branch
   PASS  R: an unknown config is rejected at construction                  unknown config 'nope'; known: k2_diag, carrier, carrier_
+  PASS  R: 'carrier_k2_zero' with an INTERIOR blend REFUSES               the refusal is scoped to the PROPERTY, not the config name
+  PASS  R: ...but the ENDPOINT blend=0.0 is allowed                       it is what the identity test needs
+  PASS  R: ...but the ENDPOINT blend=1.0 is allowed                       it is what the identity test needs
+  PASS  R: predict() BEFORE setup() REFUSES                               it used to silently return the ANALYTIC branch's answer
 
 F  the fallback is LOUD, and strict mode refuses it
   PASS  F: an unsupported width falls back and RECORDS why                no Kerdock construction at width 300 (carrier width 
@@ -68,11 +72,10 @@ C  the cost model, and it must be able to disagree with reality
 
 X  the single-file conversion is real, not asserted
   PASS  X: both sources exist                                             p2_carrier_fnp.py, p2_candidate_architecture.py
-  PASS  X: the built file's ONLY imports are the four legal ones          5 import lines, 33,358 bytes
+  PASS  X: the built file's ONLY imports are the four legal ones          5 import lines, 35,340 bytes
   PASS  X: and none of them names local_sim or a research module          the property the single-file conversion exists to demonstrate
   PASS  X: it subclasses whestbench.BaseEstimator                         whest validate refuses anything else
   PASS  X: it compiles                                                    syntactically valid Python
   PASS  X: it carries the sha256 of every source it was built from        so a built artifact names its inputs
 
-50/50 checks passed
-EXIT=0
+54/54 checks passed

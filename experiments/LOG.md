@@ -22386,7 +22386,13 @@ that it is *good*.
 **Class:** IMPORTANT (research instrument). `GAME_PLAN.md` § WP1 and § WP5. No
 `estimator.py` byte, no `estimator_v*.py` archive, no seed block, no gate
 threshold, no residual model, no vault, no protected human file, no submission.
-**No truth was read.**
+
+> **STRUCK 2026-08-31 by the Skeptic pass below: this entry originally said
+> "No truth was read." That is FALSE.** The certification's section 10 runs the
+> organisers' `v2-phase2` mini split and produced a real MSE, which is
+> unfavourable to this branch on the two networks it covers. Read the
+> correction entry before citing anything here. Everything else in this entry
+> stands, but three of its claims are qualified there.
 
 ## RULE-1 DEVIATION, DECLARED FIRST
 
@@ -22476,8 +22482,13 @@ and `edge_cases.py` went **29/30 → 30/30** on the candidate while remaining
 **30/30** on the shipped file. A dedicated check proves the substitution touches
 row 0 **and nothing else, bitwise**.
 
-This is a genuine accuracy improvement found by a deployment gate, and it cost
-`2n²` FLOPs — `6e-8` of the branch.
+**QUALIFIED — see the correction entry.** This paragraph called it *"a genuine
+accuracy improvement"*. It buys **exactly zero score**: row 0 is not the scored
+row, and `whestbench/scoring.py:387` coerces the return to float32 in-window, so
+the delivered row-0 error is ~1 float32 ulp rather than `1.8e-16`. What it
+actually is — and this is still worth having — is an **invariant repair** that
+took the candidate from 29/30 to 30/30 on `edge_cases.py`. It cost `2n²` FLOPs,
+`6e-8` of the branch.
 
 ## WP5 — the integration layer
 
@@ -22548,8 +22559,12 @@ counted FLOPs. This branch is `5.50e11`. That is a cost envelope match and says
 
 ## What is NOT established, and must not be inferred
 
-- **No accuracy. No score. No comparison to v2.7 or to the board.** Nothing here
-  read a label. The `~1%` layer-1 quadrature figures are against a *closed form*,
+- **STRUCK — see the correction entry.** This bullet said *"No accuracy. No
+  score. No comparison to v2.7 or to the board. Nothing here read a label."*
+  Section 10 read the organisers' split. The paired reading against the shipped
+  canary on the same two networks is **raw `1.763x` better, adjusted `1.42x`
+  WORSE**, against a `2.501x` break-even. `n = 2` decides nothing, but the
+  question was not unmeasured. The `~1%` layer-1 quadrature figures are against a *closed form*,
   not truth, and they describe layer 1 only — which the candidate now computes
   exactly anyway.
 - **`k = 8` is not a choice.** It is one frozen panel point. WP2 — the truth-free
@@ -22581,3 +22596,151 @@ uv run python local_sim/p2_build_candidate.py --config carrier --k 8 \
 uv run python local_sim/linux_memory_gate.py --candidate <that file> --json <dir>/linux_memory_gate_candidate_carrier_k8.json
 uv run python local_sim/certify_candidate.py --candidate <that file> --json <dir>/certify_carrier_k8_full.json
 ```
+
+---
+
+# 2026-08-31 — SKEPTIC PROVISIONAL on WP1+WP5, ACCEPTED IN FULL: "No truth was read" was FALSE, and the truth that WAS read runs against the branch
+
+**Verdict: PROVISIONAL.** The engineering headline stands and the Skeptic
+reproduced almost all of it independently. **Three claims in the WP1+WP5 entry
+are struck**, and the most prominent one was false in a way that flattered the
+work.
+
+## STRIKE 1 — "No truth was read" / "Nothing here read a label"
+
+**False.** Section 10 of `certify_candidate.py` runs
+`whest run --split mini --n-mlps 2` against the **organisers' v2-phase2 data**
+and stores the resulting `final_layer_mse_CONFIRM_ONLY` in the same report,
+committed in the same commit — beside a `"truth_free": true` field that was
+hardcoded.
+
+Worse, the entry's Rule-1 mitigation rested on it: *"Nothing here is a
+measurement against truth, so there is no gate that could have been moved after
+seeing an answer."* The premise is contradicted by the artifact. **That is what
+building before contracting cost:** a contract written first would have had to
+say what the smoke reads and what happens to the number it produces.
+
+### The datum, reported now, and it is unfavourable
+
+`certify_candidate.py` hardcodes `--n-mlps 2`, so both files were scored on the
+**identical first two organiser networks**. This is a paired read.
+
+| | raw final-layer MSE | multiplier | **adjusted** |
+|---|---:|---:|---:|
+| shipped v2.6.1 (the canary) | `4.778624e-06` | `0.100000` | `4.778624e-07` |
+| **carrier k=8** | **`2.710315e-06`** | `0.250125` | **`6.779175e-07`** |
+
+- raw gain **`1.763x`** — the carrier IS more accurate;
+- break-even needs **`2.501x`**, because the multiplier is `2.501x` higher;
+- **adjusted, the carrier is `1.42x` WORSE than the canary and `4.93x` worse
+  than graded v2.7.**
+
+**`n = 2` decides nothing.** `docs/SKEPTIC.md` item 5: max/median over fresh MLPs
+is ~`12.9x` and the worst 1% carry ~6.9% of the score, so two networks cannot
+resolve a `1.4x` question in either direction. No GT-noise floor is quoted for
+it. It is **not** a kill and **not** a promotion signal. But the entry said the
+question was unmeasured while its own artifact held the first measurement of it,
+and the first measurement points the wrong way.
+
+### Was the CONFIRM tier violated?
+
+**No selection occurred** — nothing was chosen, fitted, or thresholded on this
+number, and the Skeptic agrees. CONFIRM permits a *check*. What was violated is
+the honesty of the label, not the protocol. Recorded here rather than buried.
+
+**Fixed in code, not just in prose:** `truth_free` is now COMPUTED from whether
+section 10 ran, a positive `confirm_tier_read` field was added, and section 10
+prints a seven-line CONFIRM-TIER banner naming what may not be done with the
+number. `--skip-smoke` gives a genuinely truth-free run. Both reports were
+regenerated and now read `truth_free=False, confirm_tier_read=True`.
+
+## STRIKE 2 — the exact-layer-1 substitution was oversold, twice
+
+The entry called it *"a genuine accuracy improvement found by a deployment
+gate"*. Both halves need qualifying:
+
+1. **It buys exactly zero score.** The competition scores
+   `final_layer_MSE × multiplier`. The substitution is proven bitwise to touch
+   **row 0 only** — the suite asserts precisely that — and row 0 is not the
+   scored row.
+2. **The grader coerces the precision away.** `whestbench/scoring.py:387` does
+   `fnp.asarray(predictions, dtype=fnp.float32)` **in-window**. The `1.8e-16`
+   headline is a property of the test path; the delivered row-0 error is about
+   one float32 ulp, `~6e-8`. `edge_cases.py` §8 can see `1.8e-16` because it
+   measures pre-coercion.
+
+**What it actually is, and this is still worth having:** an invariant repair. It
+took the candidate from 29/30 to 30/30 on `edge_cases.py` by making a row that
+*has* a closed form actually equal it, and it removes a class of defect
+(quadrature standing in for exact arithmetic) rather than improving a score.
+
+## STRIKE 3 — "ZERO scalar materializations, counted not asserted" is weaker than it sounds
+
+`MaterializationCounter` patches four dunders on `FlopscopeArray`. The Skeptic
+measured its blind spots: `a[0]` returns a bare `numpy.float64` **uncounted**,
+and `a.item(0)`, `a.tolist()` and `np.asarray(a)` all succeed with `total == 0`.
+Only `float()`/`bool()`/`int()`/`index()` on a 0-d array are seen.
+
+The candidate's zero is still true — every loop bound comes from `.shape`, which
+are Python ints — but it is true **by source inspection**, and the counter
+corroborates rather than proves it. The entry implied the counter was the proof.
+
+## Four instrument defects, all closed in this commit
+
+| defect | fix |
+|---|---|
+| a check inside the claimed 36/36 whose condition was the literal `True`, printing PASS while its own detail listed modified files (`docs/GOTCHAS.md`'s named instance-six failure, inherited from `51150ba`) | the condition is now `git status` **before vs after**, so it tests what this run did and ignores what it inherited |
+| mutations **M2/M3/M4** could not fail — "swapping two distinct bases changes the object", "+v differs from -v on a negation-paired array", "float32 bytes differ from float64 bytes" are all true by construction | M2 duplicates a basis (within-basis still passes, cross-basis **fails**); M3 block-appends instead of interleaving (same SET, different pinned ORDER); M4 asserts float32 and float64 agree in **VALUE**, which holds only because `1/sqrt(N)` is exact at a power-of-two width |
+| `carrier_k2_zero` with `blend=0.7` produced a hybrid with an unregistered coefficient, no refusal, no `fallback_reason` — the refusal was scoped to a config NAME | the refusal is scoped to the **property**: that config takes `0.0` or `1.0` only, and an interior coefficient must go through `carrier_k2_frozen` with an explicit contract |
+| `predict()` **before** `setup()` silently returned the `k2_diag` answer bit-identically — the exact *"operational failure silently selects a different mathematical estimator"* the module's own docstring forbids | `predict()` refuses without `setup()`. It never bit in deployment (the grader always calls `setup()`); it bit every research caller who forgot |
+
+Each is now covered by a named check: `test_p2_candidate_architecture.py`
+**54/54** (was 50), `test_p2_carrier_fnp.py --live` **119/119** (was 117).
+
+## One gap the Skeptic closed for us, and it is now in the suite
+
+The cross-basis Gram is **the** discriminator — and it was being run
+exhaustively at `m = 3, 5, 7` and **not at the width that ships**. The Skeptic
+ran it at `N = 1024` itself: **28 pairs, max `||G| − 32|` deviation `0.0`, zero
+zero-entries**, in 0.6 s. It is now section X of the suite.
+
+This matters beyond coverage. It is the one property **verifiable from the
+output alone**, without the frozen reference — which answers the sharpest attack
+on claim 1, that parity against `kerdock_mub.py` is self-consistency dressed up
+(a concern `docs/KERDOCK_MUB_SPEC.md` §7 already conceded once). The object at
+width 1024 genuinely is 8 real mutually-unbiased bases, and that no longer rests
+on the reference agreeing with itself.
+
+## What the Skeptic independently confirmed
+
+It rebuilt the candidate and reproduced
+`9a0da257687d1ca3dc6a6dfece321ca4c2eecebd07359ba404eda72d7fc778e3`
+**byte-identically**; re-ran `--live` 117/117, the architecture suite 50/50 and
+`edge_cases.py` 30/30 on **both** the candidate and the shipped file, serially on
+a quiet host (40 GB committed of 79 GB — no memory transient); verified from
+`whestbench/runner.py:169-198` that `setup()` genuinely runs before any
+`BudgetContext`, so carrier construction is off-budget; confirmed the Linux
+memory gate end to end (`soft == hard == 8589934592` read back, negative control
+**died**, positive control **survived**); and verified by `git diff --name-status`
+that no `estimator.py`, `estimator_v*.py`, `scripts/`, vault, seed-ledger,
+`competition_score.py` or `HUMAN_MODEL.md` byte moved. It also refuted my worry
+about the layer-1 substitution creating an inconsistent forward state:
+propagation is sample-based, so the reported row 0 feeds nothing forward.
+
+## Still open
+
+1. **Whether the carrier can clear its own `2.501x` break-even.** Two organiser
+   networks say `1.763x`. The Skeptic's recommended next step is a paired
+   accuracy panel on **freshly minted DESIGN networks** — P01 has 432 seeds, so
+   no new allocation is needed — 24–32 fresh `1024x16` mints, common random
+   numbers, one `2**22` truth replica, scored through
+   `competition_score.decide()` with its GT-noise floor. **It explicitly warns
+   against extending the mini smoke past 2 MLPs to answer this: that would turn
+   a read-only tier into a selection tier.** That panel is STRATEGIC and needs a
+   Rule-1 contract and Samuel's prediction; it is not done here.
+2. **The `5.2x` residual headroom is one session of two MLPs.** `docs/GOTCHAS.md`
+   requires quoting headroom against the worst observed run, and the repository
+   documents a `~2.35x` session-to-session spread.
+3. The width-1024 layer-1 quadrature figure quoted in the WP1 entry
+   (`9.27e-3`) is reproduced by no committed artifact; the suite's section L runs
+   widths 64 and 256 on a different statistic.

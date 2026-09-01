@@ -171,7 +171,12 @@ def main():
     one, _, _ = run("carrier_k2_zero", width, depth, SEEDS[0], blend=1.0)
     check("B: blend=1.0 is EXACTLY the analytic branch",
           np.array_equal(one, k2), "the other end of the same identity")
-    half, _, _ = run("carrier_k2_zero", width, depth, SEEDS[0], blend=0.25)
+    # An INTERIOR coefficient belongs to `carrier_k2_frozen`, which demands one
+    # explicitly. `carrier_k2_zero` now refuses it -- see section R -- so this
+    # check uses the config whose contract permits it. `0.25` here is a test
+    # value for an arithmetic identity, not a design choice: nothing selects it
+    # and nothing downstream reads it.
+    half, _, _ = run("carrier_k2_frozen", width, depth, SEEDS[0], blend=0.25)
     check("B: an intermediate blend is the stated convex combination",
           np.allclose(half, car * 0.75 + k2 * 0.25, rtol=1e-12, atol=0),
           "carrier*(1-w) + analytic*w")
@@ -192,6 +197,20 @@ def main():
           "so the refusal is about provenance, not a broken branch")
     raises("R: an unknown config is rejected at construction",
            lambda: A.ResearchCandidate(config="nope"), exc=ValueError)
+    # Two holes an independent Skeptic constructed, both now closed.
+    raises("R: 'carrier_k2_zero' with an INTERIOR blend REFUSES",
+           lambda: A.ResearchCandidate(config="carrier_k2_zero", blend=0.7)
+           .setup(Ctx(256, 8)),
+           detail="the refusal is scoped to the PROPERTY, not the config name")
+    for endpoint in (0.0, 1.0):
+        c_ep = A.ResearchCandidate(config="carrier_k2_zero", blend=endpoint)
+        c_ep.setup(Ctx(256, 8))
+        check(f"R: ...but the ENDPOINT blend={endpoint} is allowed",
+              c_ep.plan is not None, "it is what the identity test needs")
+    raises("R: predict() BEFORE setup() REFUSES",
+           lambda: A.ResearchCandidate(config="carrier")
+           .predict(mlp_of(256, 8, SEEDS[0])[0], 2 ** 41),
+           detail="it used to silently return the ANALYTIC branch's answer")
 
     # ------------------------------------------------------------------ F --
     print("\nF  the fallback is LOUD, and strict mode refuses it")
