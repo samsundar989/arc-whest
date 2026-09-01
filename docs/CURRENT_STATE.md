@@ -936,6 +936,19 @@ spent, no seed block claimed, no candidate built, and nothing submitted. Its
 same-day execution plan has been removed from the active `GAME_PLAN.md`; the
 contracts and results remain in `experiments/LOG.md` and git history.
 
+> **OPEN RULE-2 GAP, recorded 2026-09-01. WP2, WP3 and WP4 have NOT been
+> independently reviewed.** `AGENTS.md` Rule 2 requires a fresh Skeptic after
+> every IMPORTANT slice before its result is believed or propagated. WP0A, WP0B
+> and WP1+WP5 each got one, and **all three returned PROVISIONAL and each found
+> a real defect** — including a flatly false *"no truth was read"* claim that
+> had to be struck. The WP2/WP3/WP4 review was launched twice and killed twice
+> by editor crashes before reporting.
+>
+> So the three NEWEST findings are the LEAST verified: the `MMD²` objective and
+> its orthogonality-not-Kerdock negative, the AUGMENT **PORT** verdict at
+> `1.03723x`, and the adjoint-K3 **KILL**. Treat all three as provisional until
+> that review lands. The relaunch prompt is in the LOG entry for this gap.
+
 **The next action, updated 2026-08-31 after WP0–WP5.** Every truth-free package
 in `GAME_PLAN.md` §8 is now closed: WP0A–D (systems), WP1 (carrier), WP2
 (objective + frozen panel), WP3 (AUGMENT, PORT), WP4 (adjoint K3, KILLED), WP5

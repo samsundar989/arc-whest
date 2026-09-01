@@ -23573,3 +23573,75 @@ The WP2 panel is frozen and content-addressed at
 policies, costs, the deterministic selection rule, the DESIGN falsifier and the
 proposed score gate. A DESIGN block spends seeds on **that table**, and
 `GAME_PLAN.md` § 7 discards the proxy if the DESIGN ranking disagrees with it.
+
+---
+
+# 2026-09-01 — OPEN: WP2, WP3 and WP4 have NO independent Skeptic verdict
+
+**This is a recorded GAP, not a result.** `AGENTS.md` Rule 2 is binding after
+every IMPORTANT slice, *before any promotion, submission, or write-up claim*.
+Three slices from 2026-08-31 do not have it.
+
+## What is unreviewed
+
+| slice | commit | the claim that is unverified |
+|---|---|---|
+| **WP2** | `3bae94b` | the `MMD²` objective, the frozen panel `a9bd32a1…`, and the negative finding that the carrier's advantage is **orthogonality rather than Kerdock** (orthogonal blocks only `1.026x`/`1.006x` worse) |
+| **WP3** | `a480ab6` | AUGMENT costs `1.03723x` plain K2 at `1024x16` and is **free at the `0.1` floor** — verdict **PORT** |
+| **WP4** | `18c5fa3` | the K3→mean response is neither linear nor additive — verdict **KILL** |
+
+## Why this matters more than usual here
+
+Every Skeptic pass this session returned **PROVISIONAL and found a real
+defect**:
+
+- WP0A — the premise *"only `data/*.parquet` feeds a measurement"* was **false**;
+  whestbench prefers a `prepared/` Arrow tree, and four constructed tampers
+  obtained a false `SOURCE_EQUIVALENT`.
+- WP0B — the label checker was structurally blind to the defect class it was
+  built for, and was wired into no gate: **the same lesson repeated one commit
+  after writing it up**.
+- WP1+WP5 — *"No truth was read"* was **false**, and the truth that had been
+  read runs **against** the carrier (`1.42x` worse adjusted on `n = 2`).
+
+Three for three. The base rate on this session's self-assessment is poor, and
+**WP3's PORT verdict is the one now steering strategy** — it is the claim most
+worth attacking, and the least examined.
+
+## What the review must attack
+
+Carried forward so the next attempt does not have to reconstruct it:
+
+1. **WP2's P7 is load-bearing.** 8 draws, one seed family, and the
+   carrier-vs-orthogonal gap is `1.006x` at `m = 7`. Is that larger than the
+   draw-to-draw spread? If not, the honest statement is that they are
+   **indistinguishable**, which strengthens the entry's own negative.
+2. **WP2's `1/k` law** — does it fall trivially out of the closed-form census,
+   making it arithmetic rather than a finding?
+3. **WP3's meter.** Upstream's torch counter must cover BOTH arms equally; a
+   ratio is only meter-independent if it does. Check `flop_utils` for unmapped
+   ops and for anything AUGMENT uses that BASE does not.
+4. **WP3's trend table confounds depth with width** — small widths ran `L = 4`,
+   the 1024 point ran `L = 16`. Re-measure `1024` at `L = 4` or `256` at
+   `L = 16` and say whether the trend survives.
+5. **WP4's tangent** is taken at `eps = 0.0625`; is the linearity deviation an
+   artifact of that choice? And `scale_at:l:1` **zeroes** other layers, which
+   moves the trajectory those layers see — if so, per-layer responses are not
+   comparable and additivity was never testable.
+6. **WP4's width claim** is contradicted by its own table: `16x3 = 0.495` vs
+   `32x3 = 0.277` moves the wrong way for "width barely matters".
+
+## Why it has not landed
+
+Launched twice as a background agent; the editor crashed both times before it
+reported, and a background agent does not survive the host process. **Run it in
+the foreground**, or accept that the next crash loses it again.
+
+## Until it lands
+
+WP2, WP3 and WP4 are **provisional**. In particular: do not let the WP3 PORT
+verdict authorise an `fnp` port of AUGMENT, and do not treat the WP4 kill as
+closing the lane in `docs/CURRENT_STATE.md`'s "closed lanes" sense, until an
+independent context has attacked both. Nothing has been promoted, submitted or
+spent on them, so the gap costs nothing so long as it is not forgotten — which
+is what this entry exists to prevent.
