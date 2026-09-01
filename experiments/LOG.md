@@ -22988,3 +22988,135 @@ the expectation that Kerdock structure per se is where the gain lives.
 |---|---|
 | the frozen panel, digest `a9bd32a1…` | `experiments/2026-08-31_wp2_objective/carrier_panel_1024x16.json` |
 | suite transcript, 74/74 incl. live width | `experiments/2026-08-31_wp2_objective/test_p2_carrier_objective.txt` |
+
+---
+
+# 2026-08-31 — CONTRACT WP3: freeze the unfactored AUGMENT target, then PRICE it before porting anything
+
+**Class:** IMPORTANT (research instrument). `GAME_PLAN.md` § WP3. No
+`estimator.py`, seed block, gate threshold, residual model, vault, protected
+human file, or submission. **No truth is read**: every comparison here is
+between two *predictions*, never against a label.
+
+Written **before** the code. The evidence below was gathered while establishing
+whether the slice was feasible at all, and carries no predictive credit.
+
+## Question
+
+`docs/CURRENT_STATE.md` lists *"recurrent augmented K2 joint state"* as **open —
+never tested by CP3R**. Is a faithful, deployable AUGMENT branch affordable, and
+what exactly does it retain?
+
+## Evidence — measured during design, all of it declared
+
+- **CONFIRMED** — the upstream reference is genuinely the pinned object:
+  `p2_kprop_bridge.verify_upstream()` returns `pass: true` at rev
+  `93d091a4c26c042bfffa28f2e76a81bc0aba94bb`, with the working tree's 25 changed
+  lines matching the recorded Python-3.10 patch md5 `11d296d7…` exactly. The
+  three "modified" files are that patch and nothing else.
+- **CONFIRMED** — upstream's own docstring: *"factor=True with kind=AUGMENT
+  drops the augmented diagrams that do not factor, so it is NOT equivalent to
+  factor=False"* (`kprop_harmonic.py:538`). So the parity target must be
+  `factor=False`, exactly as `GAME_PLAN.md` § WP3 requires.
+- **CONFIRMED** — `get_d_max(2, AUGMENT) = 4` and
+  `get_r_x = {1:0, 2:0, 3:1, 4:2}`, so "augmented K2" tracks degrees 1–4 with
+  the top two at reduced harmonic rank.
+- **CONFIRMED, and it is the finding that motivates the slice** — the retained
+  state at `n = 16`, run unfactored on CPU:
+
+  | degree | `r` | core shape | numbers at `n = 1024` |
+  |---:|---:|---|---:|
+  | 1 | 0 | `(n,)` | 1,024 |
+  | 2 | 0 | `(n, n)` | 1,048,576 |
+  | **3** | **1** | **`(n,)`** | **1,024** |
+  | **4** | **2** | **`()`** | **1** |
+
+  **AUGMENT adds 1,025 numbers to K2's 1,049,600 — a `0.098%` state
+  increase.** Whatever kills this lane, it will not be memory.
+
+## Hypothesis and mechanism
+
+Because the degree-3 and degree-4 pieces are carried at reduced harmonic rank
+(`d − 2r` free indices: one and zero respectively), the AUGMENT recurrence
+should cost **a small constant factor** over K2 rather than a factor of `n`.
+K2's cost is dominated by `W K2 Wᵀ`, which is `Θ(n³)` per layer; a vector and a
+scalar cannot add an `n³` term unless the diagram algebra contracts them against
+the full covariance in a way that reintroduces one. **That is the whole
+question, and it is a cost question, not an accuracy question.**
+
+## Intervention — price first, port second, and the order is deliberate
+
+`docs/CURRENT_STATE.md` records that the K3 `fnp` port is *"a multi-day
+IMPORTANT-then-STRATEGIC effort with its own parity burden"*, and that W-EFF was
+correctly killed on a **measured price before any port existed**. The same
+discipline applies here.
+
+1. `local_sim/p2_augment.py` — drive upstream **unfactored** `kind=AUGMENT`,
+   capture every retained state component at every layer, and freeze it as a
+   content-addressed parity target at small shapes.
+2. Measure the **cost RATIO** `AUGMENT / BASE` inside **one meter** (upstream's
+   torch counter, both sides), at several widths, and project the flopscope
+   price by multiplying that ratio into the known flopscope K2 anchor.
+3. Decide on the preregistered screen below: port, or kill with the smallest
+   discriminating artifact.
+4. `local_sim/test_p2_augment.py` — parity of the frozen target across dtypes,
+   determinism, the `factor=True` non-equivalence, and the state inventory.
+
+## Numbered predictions, before the code exists
+
+| # | prediction |
+|---|---|
+| **A1** | the unfactored AUGMENT state inventory at every layer and every tested width is exactly `{1: (n,), 2: (n,n), 3: (n,) at r=1, 4: () at r=2}` |
+| **A2** | `factor=True, kind=AUGMENT` **differs** from `factor=False` on the degree-1 output at `k_max=2`, confirming upstream's warning empirically rather than by quotation. If they agree, the warning does not bite at this `k_max` and the cheaper form is admissible |
+| **A3** | AUGMENT's degree-1 output **differs** from BASE/SIMPLE (`k_max=2`, plain K2) by a relative amount `> 1e-6` — i.e. the augmentation actually changes the prediction. If it does not, the lane is pointless and dies here |
+| **A4** | the upstream-meter cost ratio `AUGMENT / BASE` at `k_max=2` is **`< 3x`**, and roughly width-independent |
+| **A5** | float64 and float32 runs of the same configuration agree to `< 1e-5` relative on the degree-1 output |
+| **A6** | the frozen target is reproducible: a fresh process gives bitwise-identical state |
+
+## The screen, chosen NOW
+
+**AFFORDABILITY: the projected flopscope price of AUGMENT at `1024 x 16` must
+leave the multiplier at or below `0.1` — i.e. `<= 2.199e11` counted FLOPs.**
+
+The shipped K2p1 spends `1.376e11`, so the screen permits a ratio of up to
+**`1.60x`** over it before the multiplier leaves the floor. A branch that leaves
+the floor must instead beat the accuracy it buys, which is a DESIGN question
+this slice may not answer.
+
+- **ratio ≤ 1.60x** → PORT. AUGMENT is free at the floor and the `fnp` port is
+  the next IMPORTANT slice, with its price already known.
+- **1.60x < ratio ≤ 3x** → CONDITIONAL. Record the price, do NOT port; the port
+  needs a DESIGN result showing the accuracy is worth leaving the floor.
+- **ratio > 3x** → KILL on price, with the smallest discriminating artifact,
+  exactly as W-EFF was killed.
+
+## Falsifiers
+
+- **A3 fails** (AUGMENT ≡ K2 to `1e-6`) → the lane is dead regardless of price,
+  and no port may be attempted.
+- **A1 fails** → the state inventory is not what the design rests on and the
+  cost reasoning must be redone.
+- **A4 fails** → the "small constant factor" mechanism is wrong; report the
+  measured ratio and apply the screen to it rather than to the hypothesis.
+
+## The meter caution, stated before the number exists
+
+Upstream's counter is **torch's**, not flopscope's.
+`docs/CURRENT_STATE.md` records the exact trap: a `5.49x` "affordability target"
+that turned out to compare two different meters and *"must not be used as a
+projection"*. So this slice quotes a **RATIO measured inside one meter**, with
+both arms run identically, and any absolute flopscope figure is a **projection**
+and is labelled one until an `fnp` spelling is billed.
+
+## Scope
+
+No `estimator.py`, no seed block, no vault, no gate. The upstream checkout at
+`C:\Users\samsu\Documents\mlp_cumulant_propagation` is **read-only** — it is a
+separate project and this slice does not modify it. Small shapes run on CPU;
+nothing here needs the GPU, so nothing goes through `gpuq`.
+
+## Verification plan
+
+`test_p2_augment.py` green with every prediction as a named check · the frozen
+target emitted with a sha256 · the cost ratio measured at ≥ 2 widths · default
+`preflight.ps1` GREEN 12/16 · a fresh independent Skeptic.
