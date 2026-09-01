@@ -78,11 +78,37 @@ suite under-reports for any reason. Two of the repository's four historical
 lost checks were "a check reporting a state rather than testing a property";
 this is the mirror image, a check reporting a *transient* as a defect.
 
+### A SECOND contention mechanism, and memory does not explain it
+
+Later the same day, with **23,649 MB of commit headroom** — no memory pressure
+at all — a preflight run went **RED at step 7** while an independent Skeptic was
+running the same suites concurrently:
+
+```
+lifecycle_eval.py --self-test   49/56      (serially: 56/56)
+edge_cases.py                   crashed    (serially: 30/30)
+```
+
+Both are green when run alone, immediately before and after. So this is **not**
+the `_ArrayMemoryError` mechanism above.
+
+**The specific mechanism was NOT isolated**, and this note says so rather than
+inventing one. The most likely candidate is that `lifecycle_eval --self-test`
+PROVOKES its failure paths with real timers — a `1e-9 s` residual limit, a wall
+limit, a 6-second setup refusal — and a contended CPU can flip a timing-provoked
+check in either direction. That is the same family as the step-16
+`SETUP_TIMEOUT` sensitivity `VALIDATION.md` §7 already documents. It is a
+hypothesis; `--self-test` writes no shared file (`lifecycle_self_test.json` is
+written only under `--emit-json`, and its mtime did not move), so a file
+collision is ruled out and nothing else is confirmed.
+
 **Rule: a gate verdict is only a verdict when the gate had the machine.** Run
 `scripts/preflight.ps1` and the enforcement suites serially, on a quiet host,
 exactly as `VALIDATION.md` §7 already requires for step 16's `SETUP_TIMEOUT`.
 Check `Get-CimInstance Win32_OperatingSystem` for committed-vs-limit before
-believing a memory-shaped failure, and re-run before recording one.
+believing a memory-shaped failure — and note that **ample headroom does not
+clear a run of contention**, because the second mechanism is CPU, not RAM.
+Re-run serially before recording either.
 
 ## 2026-08-28 (P2-WEFF / P2-WINDOW) — four traps, three of which I walked into
 
