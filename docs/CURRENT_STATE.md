@@ -1,10 +1,30 @@
 # CURRENT_STATE.md — read this first
 
-**Snapshot: 2026-08-31 14:57 UTC. Phase 2 is live, this account has two clean
-graded submissions, v2.7 is rank 53/83, full factorized K3 remains the accuracy
-oracle, W-EFF and late-window K3 are closed, and the immediate candidate-producing
-questions are a submission-legal structured carrier plus faithful augmented-K2 /
-query-directed K3 response.** This file says where execution stands;
+**Snapshot: 2026-08-31, updated after the WP0/WP1/WP5 engineering session.
+Phase 2 is live, this account has two clean graded submissions, v2.7 is rank
+53/83, full factorized K3 remains the accuracy oracle, and W-EFF and late-window
+K3 are closed.**
+
+**What changed this session, and it is all truth-free engineering.** WP0A–WP0D
+are closed: the dataset pin now distinguishes a source-byte change from a
+metadata-only tag move (and knows the loader prefers a `prepared/` Arrow tree),
+the gate's stated coverage is scanned exhaustively and runs inside preflight,
+any candidate file can be certified read-only without touching `estimator.py`,
+and **the 8,192 MB limit is enforced for real on Linux for the first time —
+`3.49x` headroom, not the `8.9x` Windows accounting suggested.** WP1 and WP5 are
+closed: a **grader-legal Kerdock/MUB carrier, byte-identical to the frozen
+reference at width 1024**, plugs into one shape-generic candidate API and builds
+to a self-contained single file that is **CERTIFIED 36/36 at `1024 x 16`** with
+zero failed MLPs on the official subprocess runner.
+
+**NO ACCURACY WAS MEASURED. Nothing this session read a label.** The carrier
+branch runs at multiplier `0.2501` against the shipped file's floor-pinned
+`0.1`, so it must be **2.5x more accurate just to break even**, and whether it is
+is precisely the open question. **The next gate is WP2** — the truth-free
+objective and the frozen nested basis panel — because `k = 8` is one frozen
+panel point, not a selection.
+
+This file says where execution stands;
 [`GAME_PLAN.md`](GAME_PLAN.md) is the only active architecture and implementation plan;
 [`VALIDATION.md`](VALIDATION.md) is binding for measurement; the newest entries at
 the bottom of `experiments/LOG.md` contain the evidence narrative. The dated
@@ -899,11 +919,24 @@ spent, no seed block claimed, no candidate built, and nothing submitted. Its
 same-day execution plan has been removed from the active `GAME_PLAN.md`; the
 contracts and results remain in `experiments/LOG.md` and git history.
 
-**The next action is `GAME_PLAN.md` §8, *Session execution order and completion
-definition*:** remove the systems blockers, close the grader-legal carrier path,
-freeze its objective/panel, implement faithful AUGMENT and a truth-free adjoint-K3
-prototype, then deliver the integrated live-shape research architecture. The
-optional `k3pre` confirmation must not delay candidate-producing work.
+**The next action, updated 2026-08-31.** `GAME_PLAN.md` §8 steps 1, 2 and 5 are
+DONE: the systems blockers are removed (WP0A–D), the grader-legal carrier path is
+closed (WP1), and the integrated live-shape architecture exists and certifies
+(WP5). What remains, in order:
+
+1. **WP2 — the truth-free carrier objective and the frozen nested panel.** This
+   is the gate. `local_sim/p2_carrier_objective.py` does not exist. Until the
+   deep-ReLU kernel discrepancy, the 4/6/8/10/12 nested policies, the matched
+   controls (equal-row IID antithetic, orthogonal, scrambled low-discrepancy,
+   randomized orientation), the row/cost matching and the deterministic
+   proxy-to-policy rule are frozen and content-addressed, **no basis count may
+   be selected** — choosing `k` from anything measured afterwards is fitting.
+2. **WP3 / WP4 — faithful AUGMENT and query-directed adjoint K3.** Not built.
+   Both configurations exist in the candidate API only as refusals.
+3. **WP0E — the evidence-block allocation**, only after a truth-free power
+   analysis, and only as its own IMPORTANT contract.
+
+The optional `k3pre` confirmation must not delay candidate-producing work.
 
 The carrier, faithful augmented-K2 and response tracks remain part of the target
 architecture, but none is allowed into a candidate without completing its own
@@ -1062,13 +1095,31 @@ free if the last array is built in float32. Taking it means changing
 
 ### What the evaluator still cannot do
 
-- **Enforce the 8,192 MB memory limit.** Windows has no `resource` module, so the
-  subprocess worker's `RLIMIT_AS` call is skipped and `--runner local` is advisory
-  by design. Measured accounting for the shipped file: weights 64.0 MB, peak
-  working set 440.8 MB, peak commit 918.0 MB -> **at most 8.9x headroom, an UPPER
-  BOUND**. RLIMIT_AS caps virtual address space, which exceeds both counters by an
-  amount no Windows counter reports, so the true headroom is SMALLER than 8.9x by
-  an unmeasured factor. This is the optimistic reading, not a safety margin.
+- **Enforce the 8,192 MB memory limit — SUPERSEDED 2026-08-31 (WP0D). IT IS NOW
+  ENFORCED, and the old figure was optimistic by 2.55x.**
+  *Windows still cannot do it:* no `resource` module, so the subprocess worker's
+  `RLIMIT_AS` call is skipped and `--runner local` is advisory by design. Windows
+  accounting gave weights 64.0 MB, peak working set 440.8 MB, peak commit
+  918.0 MB -> "at most 8.9x headroom, an UPPER BOUND", with the honest caveat
+  that the true `RLIMIT_AS` headroom is smaller by an unmeasured factor.
+  **The factor is now measured.** `local_sim/linux_memory_gate.py` applies
+  `setrlimit(RLIMIT_AS, 8192 MB)` in a WSL2 Linux child exactly as
+  `whestbench/subprocess_worker.py` does, **reads the soft limit back** (that
+  worker catches four exception types and runs on uncapped, so "no exception" is
+  not evidence), and runs the candidate's own `predict` at `1024 x 16` under it.
+  A **negative control** requesting 9 GiB under the same cap dies with
+  `MemoryError`; a **positive control** with no cap survives, so the death is the
+  cap and not the machine.
+
+  | file | VmPeak (what RLIMIT_AS caps) | headroom |
+  |---|---:|---:|
+  | `estimator.py` (v2.6.1) | `2,345.4 MB` | **`3.49x`** |
+  | the WP1 carrier candidate, k=8 | `2,281.5 MB` | **`3.59x`** |
+
+  Counted FLOPs matched Windows **exactly** in both cases, across two operating
+  systems and two numpy versions. **Scope:** a WSL2 kernel applying the installed
+  package's own default is not the grading server, whose `memory_limit_mb`
+  appears in no `run_config` and no graded report this repository holds.
 - **Observe the grader's own configuration.** Every limit above is a PACKAGE fact,
   and they are not equally well corroborated. A real `whest run --json`
   `run_config` records what the runner USED for `width`, `depth`, `flop_budget`,
@@ -1129,14 +1180,17 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 | 0H | P1-PRE: D1–D3 evaluator hardening | **IMPORTANT** | **CLOSED** — seventh independent pass ACCEPT; 15 named mutations and current durable record verified |
 | 0S | Phase-2 canary + calibrated submission | STRATEGIC | **CLOSED — SHIPPED AND GRADED.** #328662 and #328664, zero failures; v2.7 is rank 53/83 at the current snapshot |
 | 0C | K2 scalar calibration | DESIGN | **EXHAUSTED.** 2.96x transfer is real; multiplicative state gains collapse to output scale and non-commuting layer scalars did not transfer |
-| WP0A | Phase-2 manifest/tag-drift repair | IMPORTANT | pending under a fresh contract; the durable old/new LFS manifest proves all 70 source Parquet objects unchanged, so old CONFIRM results remain valid while the executable pin stays stale |
-| WP0B–D | test-label repair, candidate-selectable certification, Linux 8-GiB enforcement | IMPORTANT, separately contracted | pending; complete before candidate engineering needs them, while preserving the existing ship-file gate |
+| WP0A | Phase-2 manifest/tag-drift repair | IMPORTANT | **CLOSED 2026-08-31** (`79ec305`, repaired at `a4cae61`). Manifest repinned with both commits in `dataset.commit_lineage`; `p2_tag_drift.py` is the shared policy and runs in preflight step 2. Skeptic PROVISIONAL accepted in full: `data/` is NOT the whole input set — whestbench prefers `prepared/<split>` Arrow — so a 226-object loader record was added and four false-pass tampers closed |
+| WP0B | enforcement-label repair | IMPORTANT | **CLOSED 2026-08-31** (`a4cae61`/`dfdf6a3`, repaired at `79b9fba`). Three gate labels were false; counts are now scanned EXHAUSTIVELY and the suite runs in preflight step 7. Skeptic PROVISIONAL accepted: its pre-registered prediction named the two remaining stale lines exactly |
+| WP0C | candidate-selectable certification | IMPORTANT | **CLOSED 2026-08-31** (`51150ba`). `local_sim/certify_candidate.py --candidate <f>` certifies any file read-only in 11 sections; adds no path through `preflight.ps1`, so the ship-file gate is untouched. `test_certify_candidate.py` 25/25, ten mutations each failing its NAMED check |
+| WP0D | real Linux 8-GiB enforcement | IMPORTANT | **CLOSED 2026-08-31 — ENFORCED FOR THE FIRST TIME** (`51150ba`). See the corrected memory figure below |
 | WP0E | Phase-2 evidence-block allocation | IMPORTANT | pending only after truth-free power analysis and before labels; register a disjoint DESIGN-replication block and a distinct SINGLE_USE DECIDE block, then test, preflight, and obtain an independent Skeptic |
 | 1 | W-EFF exact K3 representative price/parity | IMPORTANT | **CLOSED 2026-08-28 — MEASURED AND KILLED.** `1.0723 B` measured / `1.0732 B` whole-path against a `<= 0.35 B` screen, FAIL by `3.0664x`. Parity exact, zero materializations, zero leaks, bin reconciliation closes exactly. **Two** independent PROVISIONAL passes, both accepted in full; the second found an error inside the first correction |
 | 2 | late-window / age-window K3 imitation | IMPORTANT | **CLOSED 2026-08-28 — GATE-W FAILS, provably.** Every window arm's score floor is `2.09x`–`4.65x` worse than graded v2.7. Independent PROVISIONAL accepted: the *verdict* stands and is stronger; the *attribution* was retracted |
-| WP1–2 | grader-legal carrier constructor, objective, nested panel | IMPORTANT then STRATEGIC | **highest priority candidate path after WP0**; close byte parity/setup/scalar-sync/memory first, then select by paired adjusted score, not the 8-basis fingerprint |
+| WP1 | grader-legal carrier constructor | IMPORTANT | **CLOSED 2026-08-31** (`292fbab`). `p2_carrier_fnp.py` is stdlib + `fnp`, no numpy, **byte-identical to the frozen `kerdock_mub.py` at width 1024**. 117/117 |
+| WP2 | truth-free carrier objective and frozen nested panel | IMPORTANT | **NOT BUILT — this is the next gate.** `k = 8` is one frozen panel point, not a choice. No basis count may be selected until the objective, the 4/6/8/10/12 panel, the matched controls and the deterministic proxy-to-policy rule are frozen and content-addressed |
 | WP3–4 | faithful augmented-K2 plus query-directed K3 response | IMPORTANT then STRATEGIC | pending in parallel after WP0; standalone state, adjoint-response, and checkpoint-reference estimands stay separate |
-| WP5 | integrated live-shape research architecture | IMPORTANT | pending; at least one surviving branch must run end to end and pass candidate certification before labels |
+| WP5 | integrated live-shape research architecture | IMPORTANT | **CLOSED 2026-08-31** (`292fbab`). `p2_candidate_architecture.py` + `p2_build_candidate.py`: a self-contained single file **CERTIFIED 36/36 at `1024 x 16`**, official subprocess smoke included, 0 failed MLPs. 50/50 integration tests |
 | 5 | neuron-specific mixture / rolled-forward correction | STRATEGIC | pending after a deployable carrier or state path exists |
 | 6 | integrated SINGLE_USE decision and robustness | STRATEGIC | pending |
 | 7 | public CONFIRM / authorised Phase-2 vault / two nominees | STRATEGIC | pending |
