@@ -23120,3 +23120,133 @@ nothing here needs the GPU, so nothing goes through `gpuq`.
 `test_p2_augment.py` green with every prediction as a named check · the frozen
 target emitted with a sha256 · the cost ratio measured at ≥ 2 widths · default
 `preflight.ps1` GREEN 12/16 · a fresh independent Skeptic.
+
+---
+
+# 2026-08-31 — RESULT WP3: faithful AUGMENT costs +3.7% and is FREE at the multiplier floor. Verdict PORT.
+
+**Class:** IMPORTANT (research instrument). Contract `35b8477`, committed
+**before** this code existed. No `estimator.py`, seed block, gate threshold,
+residual model, vault, protected human file, or submission. **No truth was
+read** — every comparison here is between two *predictions*, never a label.
+
+## Verdict
+
+**PORT.** At the live shape the faithful, unfactored AUGMENT recurrence costs
+**`1.03723x`** plain K2 — a `3.72%` excess — against a screen that permitted
+`1.5981x`. The projected multiplier stays **pinned at the `0.1` floor**, so on
+this branch *any* accuracy the augmentation buys is free.
+
+`test_p2_augment.py --live`: **33/33**.
+
+## Predictions scored
+
+| # | prediction | outcome |
+|---|---|---|
+| A1 | state is `{1:(n,), 2:(n,n), 3:(n,) r=1, 4:() r=2}` | **HELD** at every layer, `n = 16, 32, 64` |
+| **A2** | `factor=True` **differs** from `factor=False` | **REFUTED — in the direction the contract anticipated** |
+| A3 | AUGMENT differs from plain K2 by `> 1e-6` | **HELD** — `6.17e-2` at `n=32`, `1.80e-2` at `n=64`, **on the scored row** |
+| **A4** | ratio `< 3x` and roughly **width-independent** | **HELD on the bound, REFUTED on width-independence — favourably** |
+| A5 | float32 vs float64 agree to `< 1e-5` | **HELD** — `1.2e-7`, `1.5e-7` |
+| A6 | fresh-process reproducibility | **HELD** after a harness repair (below) |
+
+### A2 — refuted, with the mechanism, not just the observation
+
+`factor=True` and `factor=False` agree **exactly** (`max rel 0.0`) at
+`k_max = 2`. The contract's own escape clause covered this: *"If they agree, the
+warning does not bite at this k_max and the cheaper form is admissible."*
+
+The check now tests the **mechanism** rather than the coincidence: upstream's
+own source says it — `kprop_harmonic.py:386`, *"nonlin_kprop with factor=True
+called with k_max<=2. Identical to unfactored"* — and factoring is *"Only
+supported for k_max=3 or 4"*. The flag is inert here. **The frozen target
+remains `factor=False` anyway**, because that is the form that stays correct if
+the lane ever moves to `k_max = 3`, where the warning does bite.
+
+### A4 — the bound held; "width-independent" was wrong, and wrong in our favour
+
+| width | BASE (upstream meter) | AUGMENT | ratio | **excess** |
+|---:|---:|---:|---:|---:|
+| 32 | `476,800` | `955,636` | `2.0043` | `100.4%` |
+| 64 | `3,460,352` | `5,302,708` | `1.5324` | `53.2%` |
+| 128 | `26,384,896` | `33,608,500` | `1.2738` | `27.4%` |
+| 256 | `206,124,032` | `234,726,964` | `1.1388` | `13.9%` |
+| **1024** | `51,842,859,008` | `53,773,142,224` | **`1.03723`** | **`3.72%`** |
+
+**Every doubling of `n` halves the excess.** The augmented terms are `Θ(n²)` on
+a `Θ(n³)` base — which is exactly what an `(n,)` vector and a scalar should cost,
+and could not have been true if the diagram algebra had contracted them back
+against the full covariance. The mechanism predicted the *sign*; the measurement
+supplied the *rate*.
+
+At `n = 32` the ratio is `2.0`, which would have read CONDITIONAL. **A slice
+that had priced only at a small shape would have reached the opposite verdict.**
+
+## What AUGMENT actually retains — the finding behind the price
+
+| degree | `r` | core shape | numbers at `n = 1024` |
+|---:|---:|---|---:|
+| 1 | 0 | `(n,)` | 1,024 |
+| 2 | 0 | `(n, n)` | 1,048,576 |
+| **3** | **1** | **`(n,)`** | **1,024** |
+| **4** | **2** | **`()`** | **1** |
+
+`get_d_max(2, AUGMENT) = 4` with `get_r_x = {1:0, 2:0, 3:1, 4:2}`, and an
+HTensor of degree `d` at radial order `r` carries `d − 2r` free indices. So
+degree 3 is a **vector**, not an `n³` tensor, and degree 4 is a **scalar**.
+
+**AUGMENT adds 1,025 numbers to K2's 1,049,600 — a `0.098%` state increase.**
+`docs/CURRENT_STATE.md` listed *"recurrent augmented K2 joint state"* as **open,
+never tested by CP3R**. It is now measured, and it is cheap.
+
+## Why this matters more than the carrier
+
+Two branches now have a measured cost, and they are shaped very differently:
+
+| branch | multiplier | must be how much more accurate to break even? |
+|---|---:|---|
+| carrier, k=8 | `0.2501` | **`2.501x`** — and the one `n=2` datum says it is currently `1.42x` *worse* adjusted |
+| **AUGMENT** | **`0.1` (pinned)** | **`1.0x` — nothing. It is free.** |
+
+The carrier has to buy its cost back before it can win. AUGMENT does not: it
+sits inside the free zone, and it already **changes the scored row by `1.8%` at
+`n = 64`**. Whether that change is an *improvement* is the DESIGN question, and
+this slice may not answer it.
+
+## Two harness defects the work found in itself
+
+- **The screen scored a verdict on a broken measurement.** `measure_flops` read
+  a `total_flops` attribute that does not exist on `NamedFlopCounter`, returned
+  a silent `0`, and `ratio = nan` was then classified **KILL** — an instrument
+  failure condemning a lane. `measure_flops` now RAISES on a non-positive count
+  and `screen()` REFUSES a non-finite ratio; four named checks cover
+  `nan / 0 / -1 / inf`.
+- **A6's child process failed with `No module named 'mlp_kprop'`** and was
+  reported as a reproducibility failure. It was a missing `_ensure_upstream()`
+  in the child — a harness failure wearing a reproducibility failure's clothes.
+
+## The meter caution, honoured
+
+Every ratio above is measured in **upstream's torch counter, both arms
+identically**. It is **not** flopscope. The projected `142,723,647,517` flopscope
+FLOPs is the K2p1 anchor times that ratio and is **labelled a PROJECTION** in
+the artifact itself, because `docs/CURRENT_STATE.md` records a `5.49x`
+"affordability target" that compared two meters and had to be retracted. Only an
+`fnp` spelling billed by flopscope is a price.
+
+## What this does NOT establish
+
+- **No accuracy claim.** AUGMENT *differs* from K2 by `1.8%` on the scored row;
+  nothing here says which is closer to truth. That needs a DESIGN block.
+- **No `fnp` port exists.** The verdict is that one is *worth building*. The
+  port carries its own parity burden — the harmonic/DS algebra and the Wick
+  coefficients — and is the next IMPORTANT slice, now with its price known.
+- The upstream reference is verified at rev `93d091a4` plus the recorded
+  Python-3.10 patch (md5 exact), and was never modified by this slice.
+
+## Raw artifacts
+
+| what | path |
+|---|---|
+| frozen unfactored target + the five-width price | `experiments/2026-08-31_wp3_augment/augment_target_and_price.json` |
+| suite transcript, 33/33 incl. the live price | `experiments/2026-08-31_wp3_augment/test_p2_augment.txt` |

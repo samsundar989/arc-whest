@@ -1,0 +1,293 @@
+{
+  "artifact": "p2_augment_unfactored_target",
+  "artifact_version": 1,
+  "upstream": {
+    "rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+    "expected_rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+    "changed_lines": 25,
+    "recorded_lines": 25,
+    "changed_md5": "11d296d73c8895668333d21a0cfd5526",
+    "recorded_md5": "11d296d73c8895668333d21a0cfd5526",
+    "pass": true
+  },
+  "k_max": 2,
+  "kind": "AUGMENT",
+  "factor": false,
+  "width": 128,
+  "depth": 4,
+  "dtype": "torch.float64",
+  "state_inventory": {
+    "1": {
+      "r": 0,
+      "shape": [
+        128
+      ],
+      "numel": 128
+    },
+    "2": {
+      "r": 0,
+      "shape": [
+        128,
+        128
+      ],
+      "numel": 16384
+    },
+    "3": {
+      "r": 1,
+      "shape": [
+        128
+      ],
+      "numel": 128
+    },
+    "4": {
+      "r": 2,
+      "shape": [],
+      "numel": 1
+    }
+  },
+  "layers": {
+    "act0": {
+      "1": {
+        "r": 0,
+        "shape": [
+          128
+        ],
+        "sha256": "6f8dace5f014019f51791da25d5d18c653cda72e14c24ed72998f4cb2f09bf7c",
+        "sum": 71.67676920416366,
+        "absmax": 0.6428785227666677,
+        "rms": 0.5610662411144748
+      },
+      "2": {
+        "r": 0,
+        "shape": [
+          128,
+          128
+        ],
+        "sha256": "10ec070bf21147a5da09340a16af8c53c10859636a8fbd1b46eb16e532f4777a",
+        "sum": 119.3256168596238,
+        "absmax": 0.8851048136278042,
+        "rms": 0.07389832138143188
+      },
+      "3": {
+        "r": 1,
+        "shape": [
+          128
+        ],
+        "sha256": "2439f74e487e3c147d0ed84c9e61df7344c112d8f6716b236ea04fb26f8209a4",
+        "sum": 4.123941308207342,
+        "absmax": 0.06906791179371323,
+        "rms": 0.035337888362196805
+      },
+      "4": {
+        "r": 2,
+        "shape": [
+          1
+        ],
+        "sha256": "160a86bd6c8210efe1bc272745b0b0f975b2631fd6616df1d14039adfe54a213",
+        "sum": 0.037944235924853645,
+        "absmax": 0.037944235924853645,
+        "rms": 0.037944235924853645
+      }
+    },
+    "act1": {
+      "1": {
+        "r": 0,
+        "shape": [
+          128
+        ],
+        "sha256": "41aaabf863f9625bc1a6cd5e6cdf6751ad9f1ad532182b75de82187c0ea030a0",
+        "sum": 70.81345795712998,
+        "absmax": 2.1501202607802847,
+        "rms": 0.6633289814226965
+      },
+      "2": {
+        "r": 0,
+        "shape": [
+          128,
+          128
+        ],
+        "sha256": "013a4638d623c8e0029207df3d9609ccc94a692b040ad80529ae0720f5f6c38d",
+        "sum": 130.88278132444992,
+        "absmax": 1.3832447168576705,
+        "rms": 0.06683162826063906
+      },
+      "3": {
+        "r": 1,
+        "shape": [
+          128
+        ],
+        "sha256": "70fc3a694d3e59c18973ae55775dcf69b8303c4a15456e6d8396e7fdf1d9aefc",
+        "sum": 4.096971741074139,
+        "absmax": 0.10933332449730004,
+        "rms": 0.03926401135059055
+      },
+      "4": {
+        "r": 2,
+        "shape": [
+          1
+        ],
+        "sha256": "a8e8ff1c5bb3dce7df64eda8efa9bbff8c4a16363f227fa42e755972afd04937",
+        "sum": 0.03477560257022693,
+        "absmax": 0.03477560257022693,
+        "rms": 0.03477560257022693
+      }
+    },
+    "act2": {
+      "1": {
+        "r": 0,
+        "shape": [
+          128
+        ],
+        "sha256": "f8808633a08ef5e6ce6d746ab28358901d2c5712084ae74b78004625e04617bd",
+        "sum": 57.54283321086866,
+        "absmax": 2.0557376503998332,
+        "rms": 0.6522783676380565
+      },
+      "2": {
+        "r": 0,
+        "shape": [
+          128,
+          128
+        ],
+        "sha256": "718a3485bb30e585c14e7e85c5be78a1bcbc8c54851ec19fcfc01833bb5a6abc",
+        "sum": 110.73300039616842,
+        "absmax": 1.2951326933528295,
+        "rms": 0.05367065825405492
+      },
+      "3": {
+        "r": 1,
+        "shape": [
+          128
+        ],
+        "sha256": "910208713bd0f6cfe24894c31e40cca47cf757123f9a70072bfafc9fdafc29f1",
+        "sum": 2.8927213754816465,
+        "absmax": 0.07956261939192,
+        "rms": 0.03019199738352189
+      },
+      "4": {
+        "r": 2,
+        "shape": [
+          1
+        ],
+        "sha256": "7d640e309bcbac5d025851ac94b23e0f0f12dc269d56fd2362b8ccd2463ce4ad",
+        "sum": 0.021226389062264407,
+        "absmax": 0.021226389062264407,
+        "rms": 0.021226389062264407
+      }
+    },
+    "act3": {
+      "1": {
+        "r": 0,
+        "shape": [
+          128
+        ],
+        "sha256": "9fa06a93917ccf53dd2ba0e5877554d512495cc7f86abc34f36b4df396d48dae",
+        "sum": 53.5511516228109,
+        "absmax": 2.272354045127314,
+        "rms": 0.6097941340084461
+      },
+      "2": {
+        "r": 0,
+        "shape": [
+          128,
+          128
+        ],
+        "sha256": "db6bb591dc76429ebf34c09ae274d17000582c71c66a1b1ffaf45d18ad7785cf",
+        "sum": 109.08907387083056,
+        "absmax": 0.8191092307895294,
+        "rms": 0.04495410267351525
+      },
+      "3": {
+        "r": 1,
+        "shape": [
+          128
+        ],
+        "sha256": "75264e49d2eb0ae4622c24bfcfd18a22c7539d946544415ccba1097c0a3eb8d8",
+        "sum": 2.402989404718201,
+        "absmax": 0.07174011127135445,
+        "rms": 0.025763277331829468
+      },
+      "4": {
+        "r": 2,
+        "shape": [
+          1
+        ],
+        "sha256": "074f4f61981a63caed5d81978b452753253b9597de99f5e946c04b5b8971bf99",
+        "sum": 0.013724003581886572,
+        "absmax": 0.013724003581886572,
+        "rms": 0.013724003581886572
+      }
+    }
+  },
+  "means_sha256": "995d937bde2e03e984c34bef6e9c82632e59a8d470b11b9b89e70a0a1ae2b61e",
+  "means_final_row_rms": 0.6097941340084461,
+  "why_unfactored": "kprop_harmonic.py:538 -- factor=True with kind=AUGMENT drops the augmented diagrams that do not factor, so it is NOT equivalent. A target built from it would be parity against a different estimator.",
+  "price": [
+    {
+      "base_upstream_flops": 476800,
+      "augment_upstream_flops": 955636,
+      "ratio": 2.004270134228188,
+      "meter": "upstream torch NamedFlopCounter -- NOT flopscope",
+      "width": 32,
+      "affordable_ratio_bar": 1.598123572081006,
+      "projected_flopscope_flops": 275788225176.66364,
+      "projected_multiplier": 0.12541396480476744,
+      "verdict": "CONDITIONAL",
+      "why": "affordable only if a DESIGN result shows the accuracy is worth leaving the floor; DO NOT port yet",
+      "PROJECTION_CAVEAT": "projected_flopscope_flops is the K2p1 flopscope anchor times a ratio measured in UPSTREAM'S meter. It is a PROJECTION, not a price. CURRENT_STATE records a 5.49x figure that compared two meters and had to be retracted. Only an fnp spelling billed by flopscope is a price."
+    },
+    {
+      "base_upstream_flops": 3460352,
+      "augment_upstream_flops": 5302708,
+      "ratio": 1.5324186672338536,
+      "meter": "upstream torch NamedFlopCounter -- NOT flopscope",
+      "width": 64,
+      "affordable_ratio_bar": 1.598123572081006,
+      "projected_flopscope_flops": 210861309185.1304,
+      "projected_multiplier": 0.1,
+      "verdict": "PORT",
+      "why": "the projected price keeps the multiplier pinned at the 0.1 floor",
+      "PROJECTION_CAVEAT": "projected_flopscope_flops is the K2p1 flopscope anchor times a ratio measured in UPSTREAM'S meter. It is a PROJECTION, not a price. CURRENT_STATE records a 5.49x figure that compared two meters and had to be retracted. Only an fnp spelling billed by flopscope is a price."
+    },
+    {
+      "base_upstream_flops": 26384896,
+      "augment_upstream_flops": 33608500,
+      "ratio": 1.273777997836338,
+      "meter": "upstream torch NamedFlopCounter -- NOT flopscope",
+      "width": 128,
+      "affordable_ratio_bar": 1.598123572081006,
+      "projected_flopscope_flops": 175272268589.50577,
+      "projected_multiplier": 0.1,
+      "verdict": "PORT",
+      "why": "the projected price keeps the multiplier pinned at the 0.1 floor",
+      "PROJECTION_CAVEAT": "projected_flopscope_flops is the K2p1 flopscope anchor times a ratio measured in UPSTREAM'S meter. It is a PROJECTION, not a price. CURRENT_STATE records a 5.49x figure that compared two meters and had to be retracted. Only an fnp spelling billed by flopscope is a price."
+    },
+    {
+      "base_upstream_flops": 206124032,
+      "augment_upstream_flops": 234726964,
+      "ratio": 1.1387656340819103,
+      "meter": "upstream torch NamedFlopCounter -- NOT flopscope",
+      "width": 256,
+      "affordable_ratio_bar": 1.598123572081006,
+      "projected_flopscope_flops": 156694523234.29782,
+      "projected_multiplier": 0.1,
+      "verdict": "PORT",
+      "why": "the projected price keeps the multiplier pinned at the 0.1 floor",
+      "PROJECTION_CAVEAT": "projected_flopscope_flops is the K2p1 flopscope anchor times a ratio measured in UPSTREAM'S meter. It is a PROJECTION, not a price. CURRENT_STATE records a 5.49x figure that compared two meters and had to be retracted. Only an fnp spelling billed by flopscope is a price."
+    },
+    {
+      "base_upstream_flops": 1629644800,
+      "augment_upstream_flops": 1743473716,
+      "ratio": 1.0698489118610386,
+      "meter": "upstream torch NamedFlopCounter -- NOT flopscope",
+      "width": 512,
+      "affordable_ratio_bar": 1.598123572081006,
+      "projected_flopscope_flops": 147211559744.64505,
+      "projected_multiplier": 0.1,
+      "verdict": "PORT",
+      "why": "the projected price keeps the multiplier pinned at the 0.1 floor",
+      "PROJECTION_CAVEAT": "projected_flopscope_flops is the K2p1 flopscope anchor times a ratio measured in UPSTREAM'S meter. It is a PROJECTION, not a price. CURRENT_STATE records a 5.49x figure that compared two meters and had to be retracted. Only an fnp spelling billed by flopscope is a price."
+    }
+  ],
+  "digest": "cee2b7274fc7d273d3cc3b2b3026cfeac0463d736dfcbecd51d009fa0692068f"
+}

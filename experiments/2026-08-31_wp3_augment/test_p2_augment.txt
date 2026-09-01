@@ -1,0 +1,51 @@
+W0831 23:40:11.643000 56260 Lib\site-packages\torch\utils\flop_counter.py:29] triton not found; flop counting will not work for triton kernels
+WP3 - the unfactored AUGMENT target
+
+U  the reference is the pinned object, or nothing below means anything
+  PASS  U: upstream is rev 93d091a4 plus exactly the recorded patch     rev 93d091a4c26c, diff md5 11d296d7 == 11d296d7
+  PASS  U: the recorded patch is the ONLY difference                    25 changed lines, 25 recorded
+
+A1  the state inventory is {1:(n,), 2:(n,n), 3:(n,) r=1, 4:() r=2}
+  PASS  A1: n=16 L=3 inventory at the LAST layer                        deg3 is a VECTOR and deg4 a SCALAR
+  PASS  A1: n=16 AUGMENT adds 17 numbers to K2's 272                    6.250% state increase -- memory cannot kill this lane
+  PASS  A1: n=32 L=4 inventory at the LAST layer                        deg3 is a VECTOR and deg4 a SCALAR
+  PASS  A1: n=32 AUGMENT adds 33 numbers to K2's 1056                   3.125% state increase -- memory cannot kill this lane
+  PASS  A1: n=64 L=4 inventory at the LAST layer                        deg3 is a VECTOR and deg4 a SCALAR
+  PASS  A1: n=64 AUGMENT adds 65 numbers to K2's 4160                   1.562% state increase -- memory cannot kill this lane
+
+A3  AUGMENT actually CHANGES the prediction (else the lane is dead)
+  PASS  A3: n=32 AUGMENT differs from BASE (plain K2) by > 1e-6         max rel 6.1661e-02 over all rows, 6.1661e-02 on the SCORED row
+  PASS  A3: n=64 AUGMENT differs from BASE (plain K2) by > 1e-6         max rel 1.7959e-02 over all rows, 1.7959e-02 on the SCORED row
+
+A2  factor=True at k_max=2 -- REFUTED as contracted, and here is why
+  PASS  A2: upstream SOURCE says the flag is inert at k_max<=2          kprop_harmonic.py:386 -- the mechanism, not a coincidence
+  PASS  A2: ...and factoring is only implemented for k_max 3 or 4       so k_max=2 cannot be affected by it
+  PASS  A2: n=32 the two agree EXACTLY at k_max=2                       max rel 0.0000e+00 -- the warning does not bite here
+  PASS  A2: n=64 the two agree EXACTLY at k_max=2                       max rel 0.0000e+00 -- the warning does not bite here
+  PASS  A2: the frozen target is factor=False regardless                the form that stays correct if the lane moves to k_max=3
+
+A5  float32 and float64 agree on the scored quantity
+  PASS  A5: n=32 float32 vs float64 agree to < 1e-5                     max rel 1.188e-07
+  PASS  A5: n=64 float32 vs float64 agree to < 1e-5                     max rel 1.527e-07
+
+A6  the frozen target is reproducible in a FRESH process
+  PASS  A6: a fresh process reproduces the target digest                ba61f19c67bede5a vs ba61f19c67bede5a
+  PASS  A6: ...and a second in-process build agrees                     ba61f19c67bede5a
+
+A4  the price, as a RATIO inside one meter
+  PASS  A4: n=32    ratio 2.00427 <= 3x                                 excess 100.43%  -> CONDITIONAL
+  PASS  A4: n=64    ratio 1.53242 <= 3x                                 excess 53.24%  -> PORT
+  PASS  A4: n=128   ratio 1.27378 <= 3x                                 excess 27.38%  -> PORT
+  PASS  A4: n=256   ratio 1.13877 <= 3x                                 excess 13.88%  -> PORT
+  PASS  A4: n=1024  ratio 1.03723 <= 3x                                 excess 3.72%  -> PORT
+  PASS  A4: the EXCESS falls ~1/n -- REFUTES 'width-independent', favourablyn=32:100.43%  n=64:53.24%  n=128:27.38%  n=256:13.88%  n=1024:3.72%
+  PASS  A4: ...so the augmented terms are Theta(n^2) on a Theta(n^3) basean n-vector and a scalar cannot add an n^3 term
+  PASS  A4: screen(nan) REFUSES rather than scoring KILL                a broken measurement is not an expensive arm
+  PASS  A4: screen(0.0) REFUSES rather than scoring KILL                a broken measurement is not an expensive arm
+  PASS  A4: screen(-1.0) REFUSES rather than scoring KILL               a broken measurement is not an expensive arm
+  PASS  A4: screen(inf) REFUSES rather than scoring KILL                a broken measurement is not an expensive arm
+  PASS  A4: at 1024 the projected multiplier stays PINNED at the floor  projected 142,723,647,517 FLOPs of a 219,902,325,555 free zone
+  PASS  A4: ...and the verdict is PORT                                  ratio 1.03723 vs a 1.5981 bar
+  PASS  A4: the projection is LABELLED a projection                     upstream's meter is not flopscope
+
+33/33 checks passed
