@@ -22744,3 +22744,142 @@ propagation is sample-based, so the reported row 0 feeds nothing forward.
 3. The width-1024 layer-1 quadrature figure quoted in the WP1 entry
    (`9.27e-3`) is reproduced by no committed artifact; the suite's section L runs
    widths 64 and 256 on a different statistic.
+
+---
+
+# 2026-08-31 — CONTRACT WP2: a truth-free objective that can rank point sets, and a panel frozen before any label
+
+**Class:** IMPORTANT (research instrument). `GAME_PLAN.md` § WP2. No
+`estimator.py`, no seed block, no gate threshold, no residual model, no vault,
+no protected human file, no submission. **This slice reads no truth and must
+not**: its whole purpose is to rank carriers *without* labels, and a number
+fitted on labels would defeat it.
+
+**Written before the code, unlike WP1+WP5.** The design work that preceded it —
+verifying the kernel's endpoints and that a closed form for the structured
+carrier reproduces a direct Gram — is declared under *Evidence* and carries no
+predictive credit.
+
+## Question
+
+Can a point set be ranked **before** any label is read, well enough to freeze a
+basis-count policy that a later DESIGN block merely confirms? And can the panel
+of policies and controls be frozen and content-addressed now, so that the choice
+of `k` cannot be made after seeing an answer?
+
+## Evidence
+
+- **CONFIRMED** — WP1 ships a byte-exact carrier at width 1024 whose entire Gram
+  spectrum is `{±1, 0, ±1/32}`, verified exhaustively (`119/119`, 28 cross-basis
+  pairs at N=1024, max deviation `0.0`).
+- **CONFIRMED, measured during design** — the arc-cosine (NNGP) kernel for a
+  bias-free He-init ReLU layer on unit vectors,
+  `κ(ρ) = (√(1−ρ²) + ρ(π − arccos ρ))/π`, satisfies `κ(1) = 1`, `κ(0) = 1/π`,
+  `κ(−1) = 0`, so depth composes as `κ^L` and preserves the unit sphere.
+- **CONFIRMED, measured during design** — for two uniform unit vectors in `R^n`,
+  `sd(ρ) = 1/√n` exactly. At the live width that is `1/32`, **exactly the
+  carrier's cross-basis coherence**. The MUB property places every cross-basis
+  angle at one standard deviation of a random one.
+- **CONFIRMED, measured during design** — a closed form for the structured
+  carrier reproduces a direct `O(R²)` Gram computation to `≤1.5e-8` relative at
+  `(m,k,L) ∈ {(3,4,1),(3,4,2),(3,8,16),(5,4,16),(7,8,16),(7,16,16)}`, once
+  `κ^L(−1)` is evaluated rather than assumed zero (it is `0` only at `L = 1`;
+  at `L ≥ 2` it is `κ(0) = 1/π`). **My first attempt assumed it and produced
+  negative "squared discrepancies", which is how the error announced itself.**
+- **CONFIRMED** — `docs/CURRENT_STATE.md`: the carrier-aligned fourth moment is
+  `21.688x` the spherical target, so the 16-basis subset is **provably not a
+  spherical 4-design**. Any objective that reports it as perfect is wrong.
+- **INFERRED** — kernel quadrature turns prior-averaged squared integration
+  error into a kernel discrepancy (Briol et al.; `PHASE2_FRONTIER_AUDIT`
+  § Literature 4). **An infinite-width kernel cannot certify finite-width,
+  network-specific ranking** — that limitation is inherent and is the reason
+  this slice ends in a *panel*, not a choice.
+
+## Hypothesis and mechanism
+
+For a zonal kernel on the sphere the worst-case squared integration error over
+the RKHS unit ball is the maximum mean discrepancy, and against the uniform
+measure it collapses to
+
+```
+MMD^2(U) = (1/R^2) * sum_{i,j} kappa^L(<u_i, u_j>)  -  c_L(n)
+c_L(n)   = E[kappa^L(rho)],  rho ~ inner product of two uniform unit vectors
+```
+
+because `E_v[κ^L(u·v)]` is the same for every unit `u` by rotational symmetry.
+**Mechanism:** `MMD²` is a squared RKHS norm, so it is `≥ 0`, and expanding
+`κ^L` in Gegenbauer polynomials makes it a non-negative sum over harmonic
+degrees. A point set that integrates degree-`t` harmonics exactly zeroes those
+terms. So `MMD²` measures *exactly* the thing a carrier is for — how well a
+finite point set stands in for the sphere — under the kernel of the network
+family being integrated. It is computable from the point set alone.
+
+## Intervention
+
+1. `local_sim/p2_carrier_objective.py` — `κ`, `κ^L`, `c_L(n)` by Gauss–Legendre
+   against the exact `(1−ρ²)^((n−3)/2)` density, a **chunked general** `O(R²)`
+   path for arbitrary point sets, and a **closed form** for the structured
+   carrier from its `{±1, 0, ±1/√N}` census. The two must agree.
+2. The **frozen panel**, content-addressed by sha256 before any label:
+   nested `k ∈ {4, 6, 8, 10, 12}` (plus 1, 2, 16 as endpoints), and the
+   controls — equal-row IID antithetic, random orthogonal blocks, scrambled
+   low-discrepancy, and a randomized carrier orientation — at **matched row
+   count and matched counted cost**.
+3. A **deterministic proxy-to-policy rule**, written now: the policy is the
+   `k` minimising `MMD²` subject to the counted-FLOP ceiling, ties broken by
+   smaller `k`. No discretion at selection time.
+4. `local_sim/test_p2_carrier_objective.py` — the properties below.
+
+## Numbered predictions, before the code exists
+
+| # | prediction |
+|---|---|
+| **P1** | `MMD² > 0` and finite for every point set tested. A negative value falsifies the implementation, not the carrier. |
+| **P2** | the closed form agrees with the chunked general path to `≤ 1e-7` relative at every supported `(m, k, L)`, **including the live width** |
+| **P3** | global rotation invariance: `MMD²(QU) = MMD²(U)` for random orthogonal `Q`, to `≤ 1e-10` relative |
+| **P4** | permutation invariance: reordering rows changes it by `0.0` **exactly** |
+| **P5** | `MMD²` **strictly decreases** in `k` over `1, 2, 4, 6, 8, 10, 12, 16`, and roughly as `1/k` — because a nested union of MUBs adds independent angular coverage |
+| **P6** | the **rejected `rank(x)` mapping** scores strictly WORSE than the correct carrier at matched `(m, k)`. It is a valid unit-norm point set, so nothing but the objective can tell them apart |
+| **P7** | at matched row count the Kerdock carrier beats an IID-antithetic control **in the mean over ≥ 8 draws**, and beats a random-orthogonal-block control. Direction predicted; I do **not** predict the factor |
+| **P8** | two EXACT algebraic nulls hold to float precision: `Σ_ij ⟨u_i,u_j⟩^odd = 0` (antipodal), and `Σ_ij ⟨u_i,u_j⟩² = R²/N` **exactly** (the union of `k` orthonormal bases with antipodes is a unit-norm tight frame) |
+| **P9** | the objective **reports the carrier as imperfect** — `MMD² > 0` at every `k` — consistent with the recorded fact that it is not a 4-design. An objective that returned `0` would be measuring nothing |
+
+## Falsifiers
+
+- **P1 fails** → the implementation is wrong; nothing may be ranked with it.
+- **P2 fails** → the closed form and the general path disagree, so one of them is
+  wrong and neither may be quoted.
+- **P5 fails** (non-monotone in `k`) → the nesting assumption is wrong and the
+  panel must not be described as nested.
+- **P6 fails** → the objective **cannot distinguish a known-bad carrier from a
+  good one**, and is therefore useless for selection. This is the single most
+  important falsifier in the slice: it is the executable version of "does the
+  proxy see anything at all".
+- **P7 fails** → the structured carrier has no truth-free advantage over IID at
+  matched cost, which would remove the mechanism's whole motivation and must be
+  reported as such rather than explained away.
+
+## The limitation this slice cannot fix, stated now
+
+**An infinite-width NNGP kernel cannot certify finite-width, network-specific
+ranking.** `MMD²` measures prior-averaged integration error for the wrong object
+by exactly the amount the finite network departs from its infinite-width
+kernel. So a good `MMD²` is **necessary, not sufficient**, and
+`GAME_PLAN.md` § 7 already says what happens if the proxy does not predict
+DESIGN ranking: *discard the proxy; do not optimize it harder*. Nothing in this
+slice may promote a policy. It freezes a panel and a rule, and the panel is what
+a later DESIGN block spends seeds on.
+
+## Scope — what must not change
+
+No gate threshold, no seed block, no ledger byte, no vault, no `estimator.py`,
+no residual model. `local_sim/kerdock_mub.py` stays frozen. **No label is read.**
+The proxy-to-policy rule is written before any panel number exists and is
+content-addressed with the panel.
+
+## Verification plan
+
+`test_p2_carrier_objective.py` green with every prediction as a named check ·
+the panel emitted with a sha256 over its canonical serialisation · default
+`preflight.ps1` GREEN 12/16 on a quiet host · `verify_portability.py` green ·
+a fresh independent Skeptic.
