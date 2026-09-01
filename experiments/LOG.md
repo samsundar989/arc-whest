@@ -23472,3 +23472,104 @@ label.
 | what | path |
 |---|---|
 | the sweeps, five shapes | `experiments/2026-08-31_wp4_adjoint/adjoint_sweep_{32x6,16x3,32x3,32x10,64x6}.json` |
+
+---
+
+# 2026-08-31 — WP0E: the Phase-2 block-allocation contract, PREPARED AND NOT EXECUTED
+
+**Status: DRAFT AWAITING SAMUEL. Nothing in this entry has been run, no block
+has been registered, no seed has been drawn, and `experiments/seed_ledger.jsonl`
+is byte-identical to session start.** It is written now, before any label, so
+that the power requirement is fixed by the truth-free work rather than by the
+first answer anyone sees.
+
+`GAME_PLAN.md` § 5 requires this allocation to be *"a separate IMPORTANT
+instrument contract"* run *"after truth-free work fixes the power requirement
+and before labels"*. The truth-free work is now done. The allocation is not
+mine to execute: it consumes seeds, and my authority for this session
+explicitly excludes claiming or consuming any seed/truth block.
+
+## Why an allocation is needed at all
+
+- **No Phase-2 SINGLE_USE DECIDE block exists.**
+- **No disjoint Phase-2 DESIGN-replication block exists.**
+- P01 is DESIGN with **432 of 600 seeds unused**, but `GAME_PLAN.md` § 5 and
+  `docs/CURRENT_STATE.md` both state it **cannot serve as its own independent
+  replica**. Selecting on P01 and replicating on P01 is one experiment reported
+  twice.
+
+## What the session's results changed about the power requirement
+
+Three measured facts now constrain the design, and none existed this morning:
+
+1. **The carrier must clear `2.501x` just to break even** (multiplier `0.2501`
+   against the shipped floor-pinned `0.1`). A panel that cannot resolve `2.5x`
+   is not worth running.
+2. **AUGMENT must clear `1.0x`** — it is free at the floor (`+3.72%`). A panel
+   for AUGMENT must resolve a *much smaller* effect to be useful, so **the two
+   branches need different sample sizes** and should not share one block by
+   default.
+3. **The adjoint-K3 arm is dead** (WP4), so the DESIGN matrix is smaller than
+   `GAME_PLAN.md` § 5 assumed: no `augment_k3` cell.
+
+## The proposed allocation, for Samuel to accept, amend or refuse
+
+| block | tier | n | purpose |
+|---|---|---:|---|
+| **P02** | DESIGN | 96 | carrier basis-count selection over the frozen WP2 panel |
+| **P03** | DESIGN | 96 | **disjoint replication** of whatever P02 selects |
+| **P04** | SINGLE_USE | 100 | the one DECIDE comparison against exact v2.7 |
+
+Disjoint from each other, from P01, and from every Phase-1 block, allocated
+through `local_sim/seed_ledger.py` — never as literals.
+
+## The three questions Samuel is owed BEFORE any of this runs
+
+`AGENTS.md` Rule 1 requires his prediction recorded before the result exists.
+Two minutes, and *"I don't know"* is a valid answer to any of them:
+
+1. **Does the 8-basis carrier beat graded v2.7 on adjusted score?** The one
+   `n = 2` organiser datum says it is currently **`1.42x` worse** adjusted
+   (raw `1.763x` better, but it costs `2.501x`).
+2. **Does faithful AUGMENT beat plain K2 on raw MSE, and by how much?** It is
+   free at the floor, so any gain is profit. It already moves the scored row by
+   `1.8%` at `n = 64`; the sign of that movement is unmeasured.
+3. **Which of the two branches, if either, reaches the `<= 3e-9` adopted winning
+   target?** Neither may; that is a legitimate answer and would redirect the
+   whole program.
+
+## The cheaper thing to do first, and it is not this
+
+An independent Skeptic recommended, and I agree, that the **carrier break-even
+question is answerable on P01's existing 432 unused DESIGN seeds** — 24–32 fresh
+`1024x16` mints, common random numbers, one `2**22` truth replica, scored
+through `competition_score.decide()` with its GT-noise floor. That needs **no
+new allocation**, answers the `2.5x` question before WP2's panel is spent on,
+and is still STRATEGIC: it reads truth, so it needs a Rule-1 contract and
+Samuel's prediction.
+
+**It must not be answered by extending the `whest run` mini smoke past 2 MLPs.**
+That would turn a read-only CONFIRM tier into a selection tier, and
+`docs/VALIDATION.md` § 0 forbids it in those words.
+
+## Binding conditions on whatever is eventually run
+
+- the statistic is the paired **arithmetic** adjusted-score difference with a
+  **studentised-t or basic-bootstrap** interval, through
+  `local_sim/competition_score.py::decide(gate=...)`, which has no default gate;
+- **percentile bootstrap and BCa are refused** — measured false-promotion rates
+  `6.8–8.2%` and `9.1–11.5%` against a nominal `5%`;
+- every MSE is quoted with its **ground-truth noise floor**;
+- common random numbers across arms;
+- the public mini stays **CONFIRM only** and may fit no basis, coefficient,
+  rank, checkpoint, mixture, calibration or threshold;
+- a Phase-2 vault may be created or touched **only** with explicit
+  authorisation and its own STRATEGIC contract.
+
+## What exists to be spent on
+
+The WP2 panel is frozen and content-addressed at
+`a9bd32a172925e41c614a250c433bc782d2f93752cc72b768c5d283037f492f2`, carrying its
+policies, costs, the deterministic selection rule, the DESIGN falsifier and the
+proposed score gate. A DESIGN block spends seeds on **that table**, and
+`GAME_PLAN.md` § 7 discards the proxy if the DESIGN ranking disagrees with it.
