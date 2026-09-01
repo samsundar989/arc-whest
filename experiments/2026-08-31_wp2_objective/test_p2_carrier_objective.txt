@@ -1,0 +1,97 @@
+WP2 - the truth-free carrier objective
+
+K  the kernel's endpoints and its composition
+  PASS  K: kappa(1) = 1 exactly (the sphere is preserved)               1.0
+  PASS  K: kappa(0) = 1/pi                                              0.318309886184
+  PASS  K: kappa(-1) = 0                                                0.00e+00
+  PASS  K: kappa^L(-1) is 0 only at L=1; at L>=2 it is kappa(0)         assuming 0 gave NEGATIVE squared discrepancies
+  PASS  K: kappa maps [-1,1] into [0,1] and is non-decreasing           a valid zonal kernel on the sphere
+  PASS  K: kappa^L(1) = 1 at every depth                                depth cannot shrink the diagonal
+  PASS  K: c_L(n=64) is converged in the quadrature degree              1500 vs 6000 nodes: 1.11e-16
+  PASS  K: c_L(n=1024) is converged in the quadrature degree            1500 vs 6000 nodes: 0.00e+00
+  PASS  K: c_L -> kappa^L(0) as n grows (rho concentrates at 0)         the uniform measure's inner product has sd 1/sqrt(n)
+
+P1/P2  non-negativity, and the closed form against the general path
+  PASS  P1: m=3 k=2  MMD^2 > 0 and finite                               6.061537e-04
+  PASS  P2: m=3 k=2  closed form == chunked general path                rel 0.00e+00  (closed 6.061537e-04)
+  PASS  P1: m=3 k=4  MMD^2 > 0 and finite                               2.794606e-04
+  PASS  P2: m=3 k=4  closed form == chunked general path                rel 7.95e-13  (closed 2.794606e-04)
+  PASS  P1: m=3 k=8  MMD^2 > 0 and finite                               1.161141e-04
+  PASS  P2: m=3 k=8  closed form == chunked general path                rel 9.56e-13  (closed 1.161141e-04)
+  PASS  P1: m=5 k=4  MMD^2 > 0 and finite                               7.995794e-05
+  PASS  P2: m=5 k=4  closed form == chunked general path                rel 4.17e-12  (closed 7.995794e-05)
+  PASS  P1: m=5 k=8  MMD^2 > 0 and finite                               3.858197e-05
+  PASS  P2: m=5 k=8  closed form == chunked general path                rel 6.33e-11  (closed 3.858197e-05)
+  PASS  P1: m=7 k=4  MMD^2 > 0 and finite                               2.058088e-05
+  PASS  P2: m=7 k=4  closed form == chunked general path                rel 3.34e-10  (closed 2.058088e-05)
+  PASS  P1: m=7 k=8  MMD^2 > 0 and finite                               1.020439e-05
+  PASS  P2: m=7 k=8  closed form == chunked general path                rel 2.52e-09  (closed 1.020439e-05)
+  PASS  P1: m=7 k=16 MMD^2 > 0 and finite                               5.016148e-06
+  PASS  P2: m=7 k=16 closed form == chunked general path                rel 6.37e-09  (closed 5.016148e-06)
+  PASS  P2: m=3 k=4 the Gram census is EXACT, not assumed               5 distinct values, counts match
+  PASS  P2: m=7 k=8 the Gram census is EXACT, not assumed               5 distinct values, counts match
+
+P3/P4  rotation and permutation invariance
+  PASS  P3: m=3 k=4 rotation invariant                                  rel 0.00e+00
+  PASS  P4: m=3 k=4 permutation invariant to summation order            rel 7.95e-13 -- vs a 6e-3 separation to resolve
+  PASS  P3: m=5 k=4 rotation invariant                                  rel 0.00e+00
+  PASS  P4: m=5 k=4 permutation invariant to summation order            bitwise identical -- vs a 6e-3 separation to resolve
+  PASS  P3: the randomized-orientation control scores as the carrier    a NULL control: if it differed, every ranking would be suspect
+
+P8  the two EXACT algebraic nulls
+  PASS  P8: m=3 k=4 sum <u_i,u_j>^1 = 0 (antipodal)                     0.000e+00 over 16384 pairs
+  PASS  P8: m=3 k=4 sum <u_i,u_j>^3 = 0 (antipodal)                     0.000e+00 over 16384 pairs
+  PASS  P8: m=3 k=4 sum <u_i,u_j>^5 = 0 (antipodal)                     0.000e+00 over 16384 pairs
+  PASS  P8: m=3 k=4 sum <u_i,u_j>^2 = R^2/N (tight frame)               1024.000000 vs 1024.000000
+  PASS  P8: m=5 k=8 sum <u_i,u_j>^1 = 0 (antipodal)                     0.000e+00 over 1048576 pairs
+  PASS  P8: m=5 k=8 sum <u_i,u_j>^3 = 0 (antipodal)                     0.000e+00 over 1048576 pairs
+  PASS  P8: m=5 k=8 sum <u_i,u_j>^5 = 0 (antipodal)                     0.000e+00 over 1048576 pairs
+  PASS  P8: m=5 k=8 sum <u_i,u_j>^2 = R^2/N (tight frame)               16384.000000 vs 16384.000000
+  PASS  P8: m=7 k=4 sum <u_i,u_j>^1 = 0 (antipodal)                     0.000e+00 over 4194304 pairs
+  PASS  P8: m=7 k=4 sum <u_i,u_j>^3 = 0 (antipodal)                     0.000e+00 over 4194304 pairs
+  PASS  P8: m=7 k=4 sum <u_i,u_j>^5 = 0 (antipodal)                     0.000e+00 over 4194304 pairs
+  PASS  P8: m=7 k=4 sum <u_i,u_j>^2 = R^2/N (tight frame)               16384.000000 vs 16384.000000
+
+P5  MMD^2 strictly decreases in k, and roughly as 1/k
+  PASS  P5: strictly decreasing over k = 1, 2, 4, 6, 8, 10, 12, 16      2.076e-05 > 1.037e-05 > 5.182e-06 > 3.451e-06 > ...
+  PASS  P5: k * MMD^2 is constant to <1% -- an almost exact 1/k law     spread 1.00780, k*MMD^2 ~ 2.0758e-05
+
+P6  THE DECISIVE CHECK: can it see a known-bad carrier?
+  PASS  P6: m=3 k=4 the REJECTED rank(x) mapping scores WORSE           bad 3.098258e-04 vs good 2.794606e-04  (1.109x)
+  PASS  P6: m=3 k=4 ...and the bad set is a VALID unit-norm set         same shape, unit rows -- only the mapping differs
+  PASS  P6: m=5 k=4 the REJECTED rank(x) mapping scores WORSE           bad 8.202662e-05 vs good 7.995794e-05  (1.026x)
+  PASS  P6: m=5 k=4 ...and the bad set is a VALID unit-norm set         same shape, unit rows -- only the mapping differs
+  PASS  P6: m=5 k=8 the REJECTED rank(x) mapping scores WORSE           bad 4.120611e-05 vs good 3.858197e-05  (1.068x)
+  PASS  P6: m=5 k=8 ...and the bad set is a VALID unit-norm set         same shape, unit rows -- only the mapping differs
+  PASS  P6: m=7 k=4 the REJECTED rank(x) mapping scores WORSE           bad 2.070884e-05 vs good 2.058088e-05  (1.006x)
+  PASS  P6: m=7 k=4 ...and the bad set is a VALID unit-norm set         same shape, unit rows -- only the mapping differs
+
+P7  the carrier against matched-row controls
+  PASS  P7: m=5 k=4 carrier beats 'iid_antithetic' in the mean of 8 drawscarrier 7.9958e-05 vs 1.2472e-04  (1.560x better)  [min 1.2267e-04]
+  PASS  P7: m=5 k=4 carrier beats 'random_orthogonal' in the mean of 8 drawscarrier 7.9958e-05 vs 8.2024e-05  (1.026x better)  [min 8.1952e-05]
+  PASS  P7: m=5 k=4 carrier beats 'scrambled_lowdisc' in the mean of 8 drawscarrier 7.9958e-05 vs 8.6022e-05  (1.076x better)  [min 8.5952e-05]
+  PASS  P7: m=7 k=4 carrier beats 'iid_antithetic' in the mean of 8 drawscarrier 2.0581e-05 vs 3.1216e-05  (1.517x better)  [min 3.1131e-05]
+  PASS  P7: m=7 k=4 carrier beats 'random_orthogonal' in the mean of 8 drawscarrier 2.0581e-05 vs 2.0710e-05  (1.006x better)  [min 2.0709e-05]
+  PASS  P7: m=7 k=4 carrier beats 'scrambled_lowdisc' in the mean of 8 drawscarrier 2.0581e-05 vs 2.0955e-05  (1.018x better)  [min 2.0954e-05]
+
+P9  the objective reports the carrier as IMPERFECT
+  PASS  P9: MMD^2 > 0 at every panel k -- it is not a spherical design  consistent with the recorded 21.688x fourth-moment excess
+  PASS  P9: ...and an objective returning 0 would be measuring nothing  smallest panel value 1.287e-06
+
+F  the panel is FROZEN, content-addressed, and its rule is total
+  PASS  F: the panel digest is deterministic                            a9bd32a172925e41
+  PASS  F: ...and moves if ANY policy number moves                      content-addressed, not name-addressed
+  PASS  F: ...and moves if the RULE moves                               the rule is inside the digest
+  PASS  F: the rule picks k=16 at a 1.00B ceiling                       k=16, MMD^2 1.2874e-06
+  PASS  F: the rule picks k=8 at a 0.25B ceiling                        k=8, MMD^2 2.5854e-06
+  PASS  F: the rule picks k=2 at a 0.10B ceiling                        k=2, MMD^2 1.0374e-05
+  PASS  F: the rule REFUSES when nothing fits                           no panel policy fits a 1-FLOP ceiling; the rule REFU
+  PASS  F: the panel carries its 'design_falsifier' in the digested contentThe proxy is DISCARDED, not re-tuned, if the D...
+  PASS  F: the panel carries its 'proposed_score_gate' in the digested contentA carrier policy is promotable only if the pai...
+  PASS  F: the panel carries its 'limitation' in the digested content   An infinite-width NNGP kernel cannot certify f...
+
+X  the LIVE width: the general path must confirm the closed form
+  PASS  X: N=1024 k=2 closed form == chunked general path               gen 1.03738243e-05  closed 1.03738243e-05  rel 3.85e-10
+  PASS  X: N=1024 k=2 sum <u_i,u_j>^2 = R^2/N exactly                   the tight-frame identity at the shipping width
+
+74/74 checks passed

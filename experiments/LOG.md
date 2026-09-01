@@ -22883,3 +22883,108 @@ content-addressed with the panel.
 the panel emitted with a sha256 over its canonical serialisation · default
 `preflight.ps1` GREEN 12/16 on a quiet host · `verify_portability.py` green ·
 a fresh independent Skeptic.
+
+---
+
+# 2026-08-31 — RESULT WP2: the objective can see, the panel is frozen, and most of the carrier's advantage is ORTHOGONALITY rather than Kerdock
+
+**Class:** IMPORTANT (research instrument). Contract `6059c2c`, committed
+**before** this code existed. No `estimator.py`, seed block, gate threshold,
+residual model, vault, protected human file, or submission. **No truth was
+read** — and unlike the WP1 entry, that is checkable here: this slice runs no
+`whest run`, touches no organiser split, and its suite spawns no subprocess.
+
+## Predictions scored
+
+| # | prediction | outcome |
+|---|---|---|
+| P1 | `MMD² > 0` and finite everywhere | **HELD** — 8 configurations |
+| P2 | closed form == chunked general path to `1e-7` | **HELD** — worst `3.9e-10`, **including the live width** |
+| P3 | rotation invariance to `1e-10` | **HELD**, and the randomized-orientation null control is indistinguishable |
+| **P4** | permutation invariance **exactly (bitwise)** | **REFUTED AS STATED.** See below |
+| P5 | strictly decreasing in `k`, roughly `1/k` | **HELD, and stronger than predicted** — `k · MMD²` is constant to **`<1%`** |
+| **P6** | the rejected `rank(x)` mapping scores WORSE | **HELD** — but the margin is thin, see below |
+| P7 | carrier beats matched-row controls | **HELD** — for all three, at both widths |
+| P8 | two exact algebraic nulls | **HELD** — `Σ⟨⟩^{1,3,5} = 0`; `Σ⟨⟩² = R²/N` to `<1e-12`, live width included |
+| P9 | reports the carrier as imperfect | **HELD** — `MMD² > 0` at every `k` |
+
+`test_p2_carrier_objective.py --live`: **74/74**.
+
+### P4 — refuted, and the prediction was wrong rather than the code
+
+Reordering rows moves the result by **one ULP**: `2.22e-16` absolute,
+`7.9e-13` relative, *identically at `chunk = R`*, so it is NumPy's pairwise
+summation reassociating, not the chunking. Predicting *bitwise* was simply
+wrong. The check now uses a bar set by **the resolution the objective needs**,
+not by what passes: the tightest separation it must call is `6e-3` relative
+(P6 below), and `7.9e-13` is ten orders under it, so it cannot flip a ranking.
+
+## The panel, frozen and content-addressed
+
+`experiments/2026-08-31_wp2_objective/carrier_panel_1024x16.json`,
+digest **`a9bd32a172925e41c614a250c433bc782d2f93752cc72b768c5d283037f492f2`**.
+
+| k | rows | propagation FLOPs | multiplier | `MMD²` | `k · MMD²` |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 2,048 | `6.87e10` | `0.1000` | `2.0758e-05` | `2.076e-05` |
+| 2 | 4,096 | `1.37e11` | `0.1000` | `1.0374e-05` | `2.075e-05` |
+| 4 | 8,192 | `2.75e11` | `0.1250` | `5.1816e-06` | `2.073e-05` |
+| 6 | 12,288 | `4.12e11` | `0.1875` | `3.4508e-06` | `2.070e-05` |
+| **8** | 16,384 | `5.50e11` | `0.2500` | `2.5854e-06` | `2.068e-05` |
+| 10 | 20,480 | `6.87e11` | `0.3125` | `2.0662e-06` | `2.066e-05` |
+| 12 | 24,576 | `8.25e11` | `0.3750` | `1.7200e-06` | `2.064e-05` |
+| 16 | 32,768 | `1.10e12` | `0.5000` | `1.2874e-06` | `2.060e-05` |
+
+The digest covers the policies, the costs, the **rule**, the **DESIGN
+falsifier**, the **proposed score gate** and the stated limitation. Moving any
+one of them moves the digest — asserted by two mutations.
+
+The rule is deterministic and total: smallest `MMD²` subject to the cost
+ceiling, ties to smaller `k`, and it **REFUSES** when nothing fits. Exercised at
+three ceilings (`k = 16 / 8 / 2`) and on the refusal path.
+
+## The finding that matters, and it runs against Kerdock specifically
+
+**`MMD² ∝ 1/k` to better than 1%.** That is `∝ 1/R` — the plain Monte-Carlo
+rate. The structured carrier buys a better *constant*, not a better *rate*. So
+the panel cannot be read as "more bases eventually win"; doubling `k` halves
+`MMD²` and doubles the cost, which at a floor-pinned multiplier is exactly a
+wash and above the floor is a straight loss.
+
+**And the constant is mostly orthogonality, not mutual unbiasedness.** At
+matched row count (mean of 8 draws):
+
+| control | m=5 k=4 | m=7 k=4 |
+|---|---:|---:|
+| IID antithetic | `1.559x` worse than the carrier | `1.519x` |
+| **random orthogonal blocks** | **`1.026x`** | **`1.006x`** |
+| scrambled low-discrepancy | `1.076x` | `1.018x` |
+
+Orthogonal blocks capture essentially the whole `~1.5x` gap to IID; Kerdock adds
+**`0.6%`–`2.6%`** on top, and the margin *shrinks* with width. The same is true
+of P6: the rejected `rank(x)` mapping — a genuinely wrong construction — scores
+only `1.006x` worse at `m = 7`. **The objective can see the difference, but what
+it sees is small and getting smaller.**
+
+This is a negative result about the *mechanism*, obtained truth-free and before
+any seed was spent. It does not kill the carrier — the branch's real question is
+finite-width accuracy, which this kernel provably cannot see — but it removes
+the expectation that Kerdock structure per se is where the gain lives.
+
+## What this does NOT license
+
+- **No selection.** The panel selects nothing; `GAME_PLAN.md` § 7 discards the
+  proxy if it fails to predict DESIGN ranking, and that is now the digested
+  `design_falsifier`.
+- **No accuracy claim.** An infinite-width NNGP kernel cannot certify
+  finite-width, network-specific ranking. `MMD²` is **necessary, not
+  sufficient**, and the whole panel could rank correctly while the DESIGN
+  ordering differs.
+- **`k = 8` is still not chosen.** It is one row of a frozen table.
+
+## Raw artifacts
+
+| what | path |
+|---|---|
+| the frozen panel, digest `a9bd32a1…` | `experiments/2026-08-31_wp2_objective/carrier_panel_1024x16.json` |
+| suite transcript, 74/74 incl. live width | `experiments/2026-08-31_wp2_objective/test_p2_carrier_objective.txt` |

@@ -1,0 +1,82 @@
+{
+  "artifact": "p2_carrier_panel",
+  "artifact_version": 1,
+  "width": 1024,
+  "depth": 16,
+  "kernel": "arccos degree-1 (NNGP), composed L times, unit sphere",
+  "c_L": 0.9294668665249521,
+  "budget": 2199023255552,
+  "cost_ceiling": null,
+  "policy_rule": "Among panel policies whose counted propagation cost is <= `cost_ceiling`, choose the one with the smallest MMD^2. Ties (relative difference < 1e-12) break toward the SMALLER k, because a smaller k is cheaper and the tie says the objective cannot separate them. If no policy fits the ceiling, the rule REFUSES rather than returning the cheapest.",
+  "design_falsifier": "The proxy is DISCARDED, not re-tuned, if the DESIGN ranking of the panel by paired adjusted score does not agree with the MMD^2 ranking in its top-3 ordering (Spearman over the panel <= 0). GAME_PLAN section 7: 'carrier proxy does not predict DESIGN ranking -> discard the proxy; do not optimize it harder.'",
+  "proposed_score_gate": "A carrier policy is promotable only if the paired ARITHMETIC adjusted-score difference against exact v2.7, with a studentised-t or basic-bootstrap 95% interval excluding zero, shows >= 2x improvement on a fresh DESIGN block, replicated on a disjoint DESIGN block. Percentile bootstrap and BCa are refused. Every MSE carries its ground-truth noise floor.",
+  "nested": true,
+  "policies": [
+    {
+      "k": 1,
+      "rows": 2048,
+      "distinct_lines": 1024,
+      "propagation_flops": 68719476736,
+      "multiplier": 0.1,
+      "mmd2": 2.0758364939754692e-05
+    },
+    {
+      "k": 2,
+      "rows": 4096,
+      "distinct_lines": 2048,
+      "propagation_flops": 137438953472,
+      "multiplier": 0.1,
+      "mmd2": 1.0373824261167286e-05
+    },
+    {
+      "k": 4,
+      "rows": 8192,
+      "distinct_lines": 4096,
+      "propagation_flops": 274877906944,
+      "multiplier": 0.125,
+      "mmd2": 5.181553921929094e-06
+    },
+    {
+      "k": 6,
+      "rows": 12288,
+      "distinct_lines": 6144,
+      "propagation_flops": 412316860416,
+      "multiplier": 0.1875,
+      "mmd2": 3.4507971420350003e-06
+    },
+    {
+      "k": 8,
+      "rows": 16384,
+      "distinct_lines": 8192,
+      "propagation_flops": 549755813888,
+      "multiplier": 0.25,
+      "mmd2": 2.5854187521989758e-06
+    },
+    {
+      "k": 10,
+      "rows": 20480,
+      "distinct_lines": 10240,
+      "propagation_flops": 687194767360,
+      "multiplier": 0.3125,
+      "mmd2": 2.066191718386179e-06
+    },
+    {
+      "k": 12,
+      "rows": 24576,
+      "distinct_lines": 12288,
+      "propagation_flops": 824633720832,
+      "multiplier": 0.375,
+      "mmd2": 1.720040362251929e-06
+    },
+    {
+      "k": 16,
+      "rows": 32768,
+      "distinct_lines": 16384,
+      "propagation_flops": 1099511627776,
+      "multiplier": 0.5,
+      "mmd2": 1.287351167444939e-06
+    }
+  ],
+  "limitation": "An infinite-width NNGP kernel cannot certify finite-width, network-specific ranking. A good MMD^2 is NECESSARY, NOT SUFFICIENT. This panel selects nothing; a DESIGN block does.",
+  "digest": "a9bd32a172925e41c614a250c433bc782d2f93752cc72b768c5d283037f492f2"
+}
