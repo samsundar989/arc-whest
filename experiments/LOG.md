@@ -23883,3 +23883,104 @@ stdout is the fix, and it is cheap.
 
 Nothing was promoted, submitted, or spent. No seed block was drawn. No file
 under `local_sim/`, `scripts/` or `estimator.py` was modified by this pass.
+
+---
+
+# 2026-09-01 — CONTRACT WP6: price at the GRADER's meter, and soak the residual 300 times instead of twice
+
+**IMPORTANT** (the instrument, not the estimator). Written **before** any code.
+Two defects in the evaluator, both surfaced by evidence this repository already
+holds and neither yet executable.
+
+## Question
+
+1. The grading server bills more FLOPs than the local official-package runner
+   does. Can a candidate be priced at *the grader's* meter, so a design that
+   sits near the `0.1` multiplier boundary is not promoted on a local number
+   that the server will exceed?
+2. `certify_candidate` decides residual safety on **2 organiser MLPs, once**.
+   The 2026-09-01 Skeptic left WP3 PROVISIONAL precisely because a candidate's
+   residual behaviour was never measured on the deployment-authoritative
+   instrument. Can the certificate carry a **tail**, not an anecdote?
+
+## Evidence
+
+| item | status |
+|---|---|
+| local official-package subprocess: `137,600,326,656` FLOPs/MLP; graded: `137,617,103,872` | **CONFIRMED** — `experiments/run_reports/submission_3286{62,64}_*_graded_report.json` |
+| the difference is `16,777,216` = `2**24` **exactly**, on both submissions | **CONFIRMED** — I verified the arithmetic this session |
+| no graded operation ledger exists, so the offset cannot be attributed to an operation | **CONFIRMED** — `AGENTS.md` and `CURRENT_STATE.md` both say so |
+| the local 19-operation anchor is exact against the stored official-package report, and **not** against the server total | **CONFIRMED** |
+| Phase 2 sets `lambda = 0`, so residual is a **cliff at `0.4 s`**, not a price | **CONFIRMED** — `official_config.PHASE2` |
+| graded residual for the two submitted K2 files: median `6.78`/`7.04 ms`, max `7.06`/`7.31 ms` | **CONFIRMED** |
+| this host is ~`7x` slower than the grader for those files, and that is **not** a general safety factor | **CONFIRMED** — `AGENTS.md` refuses it explicitly |
+| AUGMENT costs `4.38x` the `aten` op count of BASE with 355 extra scalar readbacks | **CONFIRMED** — 2026-09-01 Skeptic |
+
+## Hypothesis and mechanism
+
+**H1.** The `+2**24` offset is a **fixed per-MLP additive constant** of the
+grading harness, not a function of the estimator. Mechanism: it is exactly
+`2**24` on two files that differ by `32,800` graded FLOPs and by a whole
+calibration stage. A quantity that survives that unchanged is overhead — a
+harness-side accounting term — not estimator work. *If it were proportional to
+estimator work it could not be bit-identical across two different estimators.*
+
+**H2.** A 300-row residual soak has a materially heavier tail than a 2-row
+smoke, because residual is dominated by per-MLP Python/dispatch glue whose
+distribution is right-skewed and whose maximum grows with sample size. Two rows
+cannot see a p99.
+
+## Intervention
+
+The smallest change that discriminates, and it touches no estimator:
+
+- `official_config.OfficialRound` gains `server_flop_offset_per_mlp` (`2**24`
+  for Phase 2, `0` and explicitly *unmeasured* elsewhere) plus
+  `graded_flops()`, `multiplier(..., meter=)` and `floor_margin()`.
+  The offset is recorded as an **empirical, unattributed** constant with its
+  provenance and its `n = 2 submissions` inline. It is never silently applied.
+- `certify_candidate` gains `--residual-soak N` (**off by default**; a skipped
+  soak prints as a skip and is *not* a pass), which runs the official
+  `--runner subprocess` mini split `N` times and reports worst / median / p99
+  residual **pooled across all runs**, with `0.4 / worst` as headroom.
+
+## Numbered predictions, recorded before the code runs
+
+| # | prediction | direction / magnitude |
+|---|---|---|
+| **P1** | `graded_flops(137,600,326,656)` for Phase 2 equals the graded total `137,617,103,872` **exactly**, for both submissions | exact, or the offset is not a constant |
+| **P2** | applying the offset changes the shipped v2.6.1 multiplier by **nothing at all** — it stays pinned at the `0.1` floor | `0.0625734` -> `0.0625742` C/B; both far under `0.1` |
+| **P3** | the offset only matters above `C/B ≈ 0.09992`; below that it cannot move a multiplier | a boundary, quoted as a number |
+| **P4** | the 3x100 soak's **worst** residual exceeds the 2-MLP smoke's worst by at least `1.3x` | right-skewed tail; if it is `< 1.1x` the smoke was already adequate and H2 is wrong |
+| **P5** | v2.6.1's pooled 300-row worst residual still clears the `0.4 s` cliff with `> 3x` headroom **on this host** | it had `4.29x` on one local session |
+| **P6** | the soak costs `10`–`35` minutes of wall for 300 subprocess MLPs | budget check, not a claim |
+
+## Falsifier
+
+- **H1 is rejected** if `graded_flops()` does not reproduce both graded totals
+  exactly — then the offset is estimator-dependent, the constant is wrong, and
+  it must be removed rather than carried as a model.
+- **H2 is rejected** if P4 fails (`worst_soak / worst_smoke < 1.1x`). Then the
+  2-MLP smoke was already sufficient and the soak is ceremony; I will say so
+  and keep it off by default for cost reasons alone.
+
+## Cost model
+
+Phase 2, `lambda = 0`, so `C = F`. This slice changes **no estimator** and
+therefore changes **no counted FLOP**. Its own cost is wall time only. The
+residual figure it produces is reported as **headroom `0.4 / observed`** against
+the worst observed row, per `VALIDATION.md` §2b-ii — never as a price, and never
+as an absolute wall time claimed to transfer to the grader.
+
+## What must not change
+
+`estimator.py` (byte-identical to its archive), the ship-file gate, any seed
+block, the vault, the three-tier protocol. `certify_candidate` must remain
+read-only with respect to the repository and must not add a path through
+`preflight.ps1`. The soak reads the organisers' mini split, so it is
+**CONFIRM-tier**: it may CHECK and may CHOOSE nothing.
+
+## Human prediction
+
+**Waived by Samuel (solo), 2026-09-01.** Falsification runs against my own
+numbered predictions above.
