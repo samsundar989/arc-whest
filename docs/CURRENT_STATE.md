@@ -936,22 +936,32 @@ spent, no seed block claimed, no candidate built, and nothing submitted. Its
 same-day execution plan has been removed from the active `GAME_PLAN.md`; the
 contracts and results remain in `experiments/LOG.md` and git history.
 
-**The next action, updated 2026-08-31.** `GAME_PLAN.md` §8 steps 1, 2 and 5 are
-DONE: the systems blockers are removed (WP0A–D), the grader-legal carrier path is
-closed (WP1), and the integrated live-shape architecture exists and certifies
-(WP5). What remains, in order:
+**The next action, updated 2026-08-31 after WP0–WP5.** Every truth-free package
+in `GAME_PLAN.md` §8 is now closed: WP0A–D (systems), WP1 (carrier), WP2
+(objective + frozen panel), WP3 (AUGMENT, PORT), WP4 (adjoint K3, KILLED), WP5
+(integrated candidate, certified). **The remaining steps all read truth and
+therefore all need Samuel.**
 
-1. **WP2 — the truth-free carrier objective and the frozen nested panel.** This
-   is the gate. `local_sim/p2_carrier_objective.py` does not exist. Until the
-   deep-ReLU kernel discrepancy, the 4/6/8/10/12 nested policies, the matched
-   controls (equal-row IID antithetic, orthogonal, scrambled low-discrepancy,
-   randomized orientation), the row/cost matching and the deterministic
-   proxy-to-policy rule are frozen and content-addressed, **no basis count may
-   be selected** — choosing `k` from anything measured afterwards is fitting.
-2. **WP3 / WP4 — faithful AUGMENT and query-directed adjoint K3.** Not built.
-   Both configurations exist in the candidate API only as refusals.
-3. **WP0E — the evidence-block allocation**, only after a truth-free power
-   analysis, and only as its own IMPORTANT contract.
+**The single next decision, and the branches are no longer symmetric:**
+
+| branch | multiplier | must beat v2.7 by | what is measured |
+|---|---:|---|---|
+| carrier k=8 | `0.2501` | **`2.501x` just to break even** | one `n=2` organiser datum says `1.42x` **worse** adjusted |
+| **AUGMENT** | **`0.1`, pinned** | **nothing — it is free** | moves the scored row `1.8%` at `n=64`; sign unmeasured |
+| adjoint K3 | — | — | **DEAD** (WP4) |
+
+1. **The cheapest discriminator, and it needs no new allocation.** Score the
+   carrier candidate against shipped v2.6.1 on **24–32 fresh mints from P01's
+   432 unused DESIGN seeds**, common random numbers, one `2**22` truth replica,
+   through `competition_score.decide()` with its GT-noise floor. It answers the
+   `2.5x` break-even question before WP2's panel is spent on. **STRATEGIC: needs
+   a Rule-1 contract and Samuel's prediction. It must NOT be answered by
+   extending the `whest run` mini smoke past 2 MLPs — that turns a read-only
+   CONFIRM tier into a selection tier.**
+2. **The `fnp` port of AUGMENT**, now that its price is known and it is free at
+   the floor. IMPORTANT, with its own parity burden (the harmonic/DS algebra and
+   the Wick coefficients).
+3. **WP0E**, prepared at `ea4b8fc` and awaiting Samuel's three answers.
 
 The optional `k3pre` confirmation must not delay candidate-producing work.
 
@@ -1201,12 +1211,13 @@ reporting, seed ledger, public-CONFIRM rule, and vault discipline remain sound.
 | WP0B | enforcement-label repair | IMPORTANT | **CLOSED 2026-08-31** (`a4cae61`/`dfdf6a3`, repaired at `79b9fba`). Three gate labels were false; counts are now scanned EXHAUSTIVELY and the suite runs in preflight step 7. Skeptic PROVISIONAL accepted: its pre-registered prediction named the two remaining stale lines exactly |
 | WP0C | candidate-selectable certification | IMPORTANT | **CLOSED 2026-08-31** (`51150ba`). `local_sim/certify_candidate.py --candidate <f>` certifies any file read-only in 11 sections; adds no path through `preflight.ps1`, so the ship-file gate is untouched. `test_certify_candidate.py` 25/25, ten mutations each failing its NAMED check |
 | WP0D | real Linux 8-GiB enforcement | IMPORTANT | **CLOSED 2026-08-31 — ENFORCED FOR THE FIRST TIME** (`51150ba`). See the corrected memory figure below |
-| WP0E | Phase-2 evidence-block allocation | IMPORTANT | pending only after truth-free power analysis and before labels; register a disjoint DESIGN-replication block and a distinct SINGLE_USE DECIDE block, then test, preflight, and obtain an independent Skeptic |
+| WP0E | Phase-2 evidence-block allocation | IMPORTANT | **PREPARED, NOT EXECUTED** (`ea4b8fc`). No block registered, no seed drawn. Proposes P02/P03 DESIGN (96 each, disjoint) + P04 SINGLE_USE (100), and records the three questions Samuel is owed first. **A cheaper first step exists:** the carrier break-even question fits on P01's 432 unused DESIGN seeds with no new allocation |
 | 1 | W-EFF exact K3 representative price/parity | IMPORTANT | **CLOSED 2026-08-28 — MEASURED AND KILLED.** `1.0723 B` measured / `1.0732 B` whole-path against a `<= 0.35 B` screen, FAIL by `3.0664x`. Parity exact, zero materializations, zero leaks, bin reconciliation closes exactly. **Two** independent PROVISIONAL passes, both accepted in full; the second found an error inside the first correction |
 | 2 | late-window / age-window K3 imitation | IMPORTANT | **CLOSED 2026-08-28 — GATE-W FAILS, provably.** Every window arm's score floor is `2.09x`–`4.65x` worse than graded v2.7. Independent PROVISIONAL accepted: the *verdict* stands and is stronger; the *attribution* was retracted |
 | WP1 | grader-legal carrier constructor | IMPORTANT | **CLOSED 2026-08-31** (`292fbab`). `p2_carrier_fnp.py` is stdlib + `fnp`, no numpy, **byte-identical to the frozen `kerdock_mub.py` at width 1024**. 117/117 |
-| WP2 | truth-free carrier objective and frozen nested panel | IMPORTANT | **NOT BUILT — this is the next gate.** `k = 8` is one frozen panel point, not a choice. No basis count may be selected until the objective, the 4/6/8/10/12 panel, the matched controls and the deterministic proxy-to-policy rule are frozen and content-addressed |
-| WP3–4 | faithful augmented-K2 plus query-directed K3 response | IMPORTANT then STRATEGIC | pending in parallel after WP0; standalone state, adjoint-response, and checkpoint-reference estimands stay separate |
+| WP2 | truth-free carrier objective and frozen nested panel | IMPORTANT | **CLOSED 2026-08-31** (`3bae94b`). Deep-ReLU MMD² objective, 74/74 incl. live width. Panel frozen and content-addressed at `a9bd32a1…` with its rule, DESIGN falsifier and proposed gate inside the digest. **The finding runs against Kerdock:** `MMD² ∝ 1/k` (the plain Monte-Carlo rate, so structure buys a constant not a rate), and at matched rows random orthogonal blocks are only `1.026x`/`1.006x` worse while IID is `1.52–1.56x` worse — the advantage is mostly ORTHOGONALITY, and Kerdock adds `0.6–2.6%` shrinking with width |
+| WP3 | faithful AUGMENT | IMPORTANT | **CLOSED 2026-08-31 — VERDICT PORT** (`a480ab6`). Unfactored AUGMENT costs **`1.03723x`** plain K2 at `1024x16`, `+3.72%`, **free at the `0.1` multiplier floor**. The excess halves per doubling of `n` — `Θ(n²)` on a `Θ(n³)` base. State: degree-3 is an `(n,)` VECTOR and degree-4 a SCALAR, `1,025` numbers on K2's `1,049,600`. 33/33. **No `fnp` port exists yet; the verdict is that one is worth building** |
+| WP4 | query-directed / adjoint K3 | IMPORTANT | **CLOSED 2026-08-31 — KILLED on its own preregistered falsifier** (`18c5fa3`). The K3→mean response is neither linear nor additive: two kill rules fired at five shapes and it worsens with **DEPTH** (`0.277` at `32x3` → `0.938` at `32x10`; live depth is 16). Locality HELD — `kappa_3` IS local, the response to it is nonlinear |
 | WP5 | integrated live-shape research architecture | IMPORTANT | **CLOSED 2026-08-31** (`292fbab`). `p2_candidate_architecture.py` + `p2_build_candidate.py`: a self-contained single file **CERTIFIED 36/36 at `1024 x 16`**, official subprocess smoke included, 0 failed MLPs. 50/50 integration tests |
 | 5 | neuron-specific mixture / rolled-forward correction | STRATEGIC | pending after a deployable carrier or state path exists |
 | 6 | integrated SINGLE_USE decision and robustness | STRATEGIC | pending |
