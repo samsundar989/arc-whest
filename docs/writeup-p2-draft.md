@@ -25,7 +25,7 @@
 | 3. The amplification law | **populated, evidence complete** | — |
 | 4. Where the error actually is | **populated, evidence complete** | — |
 | 5. Compressing the third cumulant | **populated, evidence complete** | — |
-| 6. What an estimator may spend | **populated, evidence complete** (new, 2026-09-02) | — |
+| 6. What an estimator may spend, and the two levers | **populated, evidence complete** (new, 2026-09-02) | — |
 | 7. The off-diagonal lane | **PENDING** | WP13 `E0-TOL`/`E1`/`E2`, `gpuq` 112 |
 | 8. Method and protocol | **populated** | — |
 | 9. What we got wrong | **populated, and this list grows** | — |
@@ -268,6 +268,43 @@ tensor from its slices produces factors `(diag(S3) + 3 S21^T, I, I)` in which
 leg is free and a diagonal leg collapses a slice einsum to a row scaling, so a
 generic implementation pays six matmuls a layer for what three do — a measured
 `2.08x`, found by reading the reference implementation rather than by searching.
+
+### The two levers on the multiplier, both measured
+
+`5.0` matmuls a layer is `0.153 B`, i.e. a multiplier of `0.153` when `0.100` was
+available — **53% of the cost buying nothing.** Two levers were available and
+exactly one works.
+
+**Symmetry does not help.** The covariance is symmetric and its congruence
+`W^T Sigma W` is two of the five matmuls, so a symmetry-aware meter looked like a
+free discount. Tagging the operand as symmetric bills the *identical*
+`8,585,740,288` — ratio exactly `1.0000` — and the tagging call itself costs
+`0.0137 n^3`. **A symmetric operand is not a cheaper operand.**
+
+**Strassen does.** Measured under the same meter:
+
+| levels | vs a plain matmul | flow's `F / B` | multiplier | leaf matmuls | array ops |
+|---:|---:|---:|---:|---:|---:|
+| 0 | `1.0000` | `0.1527` | `0.1527` | 1 | 1 |
+| 1 | `0.8777` | `0.1341` | `0.1341` | 7 | 36 |
+| 2 | `0.7732` | `0.1181` | `0.1181` | 49 | 281 |
+| 3 | `0.6861` | `0.1048` | `0.1048` | 343 | 1,996 |
+| **4** | `0.6174` | `0.0943` | **`0.1000`** | 2,401 | 14,001 |
+
+**At four levels the flow pins the multiplier floor**, with `5.7%` of the free
+zone unused. A 1969 algorithm and one structural reading of a reference
+implementation together move a third-order method from `0.153` to `0.100` — which
+is the difference between a ceiling of `6.1e-9` and one of `4.0e-9`.
+
+**And the paper must say why that table is not a recommendation.** The scored
+budget is not the only budget: the runtime also enforces a per-MLP *residual wall
+time* that tracks the **number of operations** and the size of the temporaries
+they free, not FLOPs — and an overrun is not a penalty, it zeroes the prediction
+*and* forces the multiplier to `1.0`, turning a `1e-7` row into a `~0.92` row, a
+`~66,000x` loss. The `array ops` column is the warning label. `L = 2` — `281`
+operations for `4.7e-9` — is very likely the honest operating point, and no level
+is authorised until it has been soaked at scale. Strassen's own numerical error
+is a second unmeasured cost.
 
 ---
 
