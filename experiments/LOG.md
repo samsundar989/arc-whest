@@ -26575,3 +26575,292 @@ mechanism exists and was not used.
 claimed 2026-09-02 before the first cell ran, DESIGN tier, contiguous with the
 prior claim and non-overlapping. What is unbound is only the *file*-to-*seed*
 link, and only mechanically.
+
+---
+
+# 2026-09-02 — CONTRACT (Rule 1): WP14 — one object, two uses: Sigma's dominant range as both the free selector and the cost lever
+
+**STRATEGIC.** Pre-registered before any data exists, at HEAD `36312c3`. Samuel's
+prediction slot is **waived by Samuel (solo)**, per his standing instruction; my
+own numbered predictions are below and were written before any cell ran.
+
+*Five cells in a cheap-to-expensive ladder with early kill points: `C0` (no gate —
+truth mint, `fnp` port start, and a cost re-pricing), `C1` (containment fraction),
+`C2` (oracle-in-range end-to-end — the one that matters), `C3` (deployable
+coefficients, conditional on `C1`+`C2`), `C4` (low-rank-Sigma backbone at depth,
+independent and parallel). Promotion of anything into `estimator.py` is NOT
+authorised by this contract and needs its own.*
+
+## Question
+
+`SKEPTIC WP13` left exactly one live question, and the strategist has turned it
+into one object with two uses.
+
+`E2` measured that the information a regenerating K3 flow discards — the `n x n`
+matrix `E21` at the next layer — is **low rank and collapses with depth**
+(`r90` `264 -> 78`), is **affordable to carry** (`r = 512` costs a `9%` multiplier
+penalty, `r = 128` fits inside the floor), and that **no column-weight selector can
+find it**: all five are `1.45x`–`2.10x` *worse than not correcting at all*. Route A
+is closed on measurement. What was never asked is whether the subspace is one the
+flow **already holds**.
+
+The covariance's own effective rank collapses over the same 16 layers, harder
+(`r90(Sigma)` `237 -> 26`). Build `Q_l`, an orthonormal basis for `Sigma_l`'s
+dominant range, by a randomized range-finder. Then:
+
+1. **Use 1 — the free selector.** If `E21`'s leading left-singular subspace lies
+   substantially inside `span(Q_l)`, the correction `S21 + U V^T` with `U = Q_l`
+   needs no probe, no adjoint and no oracle: the flow holds `U` already.
+2. **Use 2 — the cost lever to the floor.** At deep layers
+   `W^T Sigma W = (W^T Q) Lambda (W^T Q)^T` costs `~8 n^2 r` instead of `~8 n^3`.
+   This is the honest route under `0.10 B` that Strassen cannot supply, because
+   Strassen `L = 4` is **not an operating point** (`~1.1 M` array ops/MLP against
+   the `0.4 s` residual cliff).
+
+And one arithmetic question that must be answered before any cost gate is written,
+because it is the currency every gate is quoted in:
+
+3. **Does WP13's whole cost table apply at the dtype a candidate would actually
+   run?** `p2_slice_cost.py` builds every array from
+   `np.random.default_rng(...).standard_normal(...)`, which is **float64**.
+   flopscope's packaged weights (`flopscope/_weights.py`, `_ACTIVE_DTYPE_RATES`)
+   bill `float64` at rate **`2.0`** and `float32` at **`1.0`**. Read this session,
+   and it means the standing "flopscope bills a dense matmul at `4 n^3`" is a
+   **float64** statement; the same matmul at `float32` is the textbook `2 n^3`. If
+   that survives execution, the regenerating flow's price is not `0.15272 B`.
+
+## Evidence
+
+| item | status | source |
+|---|---|---|
+| `FactoredTensor.from_dstensor` returns `(diag(S3) + 3 S21^T, I, I)` — two legs are the identity; a regenerating flow is 3 matmuls/layer | **CONFIRMED** | `factor_k3.py:252-274`; WP13 E0-COST |
+| Regenerating K3 third-order increment `198,233,321,472` counted flopscope FLOPs; total with the K2 anchor `335,833,648,128` = `0.15272 B` | **CONFIRMED — but at float64** | `experiments/2026-09-02_wp13_slice/e0_cost.json` |
+| flopscope 0.12 packaged `dtype_rates`: `float64 = 2.0`, `float32 = 1.0`, so an `(n,n)@(n,n)` matmul bills `4 n^3` at f64 and `2 n^3` at f32 | **CONFIRMED** — read from `flopscope/_weights.py` and re-measured this session: `4,292,870,144` vs `2,146,435,072` at `n = 1024` | this session |
+| Every WP13 accuracy number (`drift 8.4822e-07`, `rel_E21 ~ 0.4626`, the spectra) was measured in **torch float32** | **CONFIRMED** | `p2_slice_lab.py` — `dtype=torch.float32` hardcoded in `cmd_tol`/`cmd_struct` |
+| `E21` is low rank and collapsing: `r90` `264 -> 78`, `r90(Sigma)` `237 -> 26`, monotone on 8/8 seeds, below an iid-Gaussian baseline (`r90 = 523`) at every layer | **CONFIRMED** | WP13 E2 + `SKEPTIC WP13`'s independent baseline |
+| An **SVD-oracle** rank-512 truncation of `E21` leaves `rel` `0.0547` (L1) to `0.0171` (L14), i.e. it removes `98.7%`–`99.87%` of `E21`'s energy | **CONFIRMED** | `e2_residual.json`, aggregated this session |
+| `r90(E21)/r90(Sigma)` grows `1.11 -> 2.94`, so **total** containment is impossible at depth | **CONFIRMED** | `SKEPTIC WP13` finding (3) |
+| Every column-weight selector is worse than doing nothing (`1.45x`–`2.10x`) | **CONFIRMED** | WP13 E1, re-scored in `rescore.json` |
+| Rank is nearly free: `r = 128` correction `8,053,063,680` FLOPs, `r = 512` `32,212,254,720`, one matmul per layer | **CONFIRMED (at f64)** | `rescore.json` |
+| The `eps^2` **exponent** transfers across two perturbation structures; the **amplitude** over-predicts structured drift by `32x` | **CONFIRMED (exponent) / REFUTED (amplitude)** | WP13 + Skeptic |
+| Strassen `L = 4` costs `~1.1 M` array ops/MLP and is not an operating point; `L = 1` is the default, `L = 2` needs `>= 3x` brokered-soak headroom | **CONFIRMED** | `e0_cost_levers.json`, WP11 |
+| The shipped `_closure` propagates `cov_pre = w.T @ cov @ w` (2 dense matmuls per layer) and the post-ReLU step is `outer(Phi,Phi) * cov_pre * off_mask + diag(var)` | **CONFIRMED** | `estimator.py:755-777` |
+| `outer(Phi,Phi) * X` is `D_Phi X D_Phi`, so the K2 nonlinear step **preserves rank exactly** up to a diagonal correction | **CONFIRMED — algebra, this session** | derivation in H2 below |
+| The uncorrected regenerating flow's raw MSE brackets `[5.20e-07, 1.26e-06]` | **CONFIRMED as a bracket; the value is UNMEASURED** — no truth was minted | WP13 |
+| `E21`'s leading subspace lies inside `Sigma`'s dominant range | **SPECULATIVE — this contract's subject** | — |
+| A rank-`r` in-flight correction is not destructive (WP10's variance channel was) | **SPECULATIVE** — nothing has ever been run end-to-end with one | WP10; WP13 scope |
+
+## Hypothesis + mechanism
+
+**H1 (the free selector).** `E21 = (B1.B2)B3^T + ...` with `B_m = W^T A_m`, and
+every `A_m` in the regenerating flow is itself built from `Sigma`-driven wick
+scalings of `W`-contracted objects. The same weight matrices and the same
+per-neuron wick coefficients shape both `Sigma_l` and `E21`, so their dominant
+directions should be **correlated but not identical**. *Mechanism:* `Sigma`'s range
+is where the network's signal energy is, and a third-order object built by Hadamard
+products of `Sigma`-shaped factors concentrates in the same directions — but
+Hadamard products **spread** spectrum (the Hadamard product of two rank-`k`
+matrices has rank up to `k^2`), which is exactly why `r90(E21)/r90(Sigma)` grows to
+`2.94`. So I expect **partial containment that improves with depth**, far above a
+random subspace and below total.
+
+**H2 (the cost lever, and why it is not just a truncation).** In the shipped
+closure `cov = outer(Phi,Phi) * cov_pre * off_mask + diag(var)`, the Hadamard
+factor `outer(Phi,Phi)` is `D_Phi (.) D_Phi` — a two-sided diagonal congruence —
+which is **exactly rank-preserving**. So if `cov_pre = A A^T + D` (low rank plus
+diagonal), then `cov = (D_Phi A)(D_Phi A)^T + D'` with `D'` diagonal, and **no
+approximation has been made**. The whole approximation is concentrated in one
+place: propagating the diagonal part through the next linear step, `W^T D W`, whose
+**diagonal** is `(W . W)^T d` and therefore free at `O(n^2)`, but whose
+**off-diagonal** is full rank. *Mechanism:* the low-rank structure is not something
+we impose on `Sigma` and hope survives — it is preserved by the nonlinearity in
+closed form, and the only thing discarded is the off-diagonal of a diagonal
+congruence. That is a much smaller and much better-localised approximation than
+"truncate `Sigma`", and it is why this lane is worth a gate after eleven closed
+ones.
+
+**H3 (the currency).** flopscope's cost is dtype-weighted by an official packaged
+table. WP13 priced a flow in `float64` and compared it against a `0.1` floor whose
+accuracy evidence was gathered in `float32`. *Mechanism:* nothing subtle — a units
+error, of exactly the class `SKEPTIC WP13` caught in `G-RANK`. If it holds, the
+regenerating flow is already within `~8%` of the floor with **no** Strassen and
+**no** low-rank backbone, and `C4` becomes a margin lever rather than the only
+route. **This must be executed, not halved on paper**: `_third_order_layer` uses
+`np.float64(3.0)` scalars, which under NEP-50 are *concrete*, not weak, and would
+silently promote an f32 arm straight back to f64 billing.
+
+## Intervention — the smallest change that discriminates
+
+Nothing in `estimator.py`. Nothing in the upstream checkout. Nothing that touches a
+closed lane.
+
+- `local_sim/p2_range_lab.py` **(new)** — `C1` and `C2`. Re-drives the same
+  `run_flow` that `p2_slice_lab.py` already proves bit-identical to upstream, with
+  a hook added **after the linear step** — where the object lives in the next
+  layer's index space and where `Sigma_pre` is already held — rather than after the
+  nonlinearity. Contains the randomized range-finder (`Q = orth(Sigma Omega)`,
+  `Omega ~ N(0,1)` `n x r` seeded from `mlp.seed`, 1–2 power iterations, matmuls
+  plus one thin `qr`; **no `eigh`**, and only the projector `Q Q^T` is ever used, so
+  basis ambiguity cannot matter).
+- `local_sim/p2_lowrank_backbone.py` **(new)** — `C4`. A numpy accuracy arm against
+  the `p2_cal_lab` closure mirror plus a flopscope-metered cost arm. No torch, no
+  GPU, no seed draw beyond the same eight networks.
+- `local_sim/p2_slice_cost.py` — `--dtype {f64,f32}` for `C0-iii`. The f32 arm must
+  replace every `np.float64(k)` scalar with a Python scalar and **assert the billed
+  dtype**, not assume it.
+- `local_sim/p2_truth.py` — `--seed-start` and `--already-claimed`, so `C0-i` can
+  mint truth on the **eight P01 networks WP13 already claimed** instead of spending
+  new seeds. The claim is made on the host by `claim_range` with `artifact=` named
+  **at claim time** (`SKEPTIC WP13`'s process fix), and the deliberate DESIGN-tier
+  overlap is printed by the ledger and recorded here.
+- `local_sim/p2_k3_fnp.py` **(new, no gate in this contract)** — the `fnp` port of
+  the regenerating K3 flow. It is the chassis for every branch and on the critical
+  path regardless of how `C1`–`C4` land.
+
+## Predictions (mine; Samuel's slot waived, solo — written before any cell ran)
+
+| # | prediction | direction / magnitude |
+|---|---|---|
+| **P1** | `C0-iii`: the regenerating spelling re-priced in **float32** lands at **`99,116,660,736 +/- 2%`** counted FLOPs (exactly half the f64 figure), giving a projected total of **`236,716,987,392` = `0.10765 B`** — i.e. **`8%` above the floor with no Strassen at all** | I am confident in the rate table and much less confident that the spelling survives an f32 pass without a hidden f64 promotion; if it does not, the total lands nearer `0.15 B` than `0.11 B` |
+| **P2** | `C0-i`: raw final-layer MSE of the uncorrected regenerating flow on the 8 P01 nets lands in **`[7.5e-07, 1.0e-06]`**, point **`8.9e-07`** — the *orthogonal-error* point `MSE_full + drift = 4.0e-08 + 8.48e-07`, not the bracket's midpoint. Adjusted at a `0.1077` multiplier that is **`9.6e-08`**, i.e. **`1.43x` better than graded v2.7's `1.374e-07`** | the bracket `[5.2e-08, 1.26e-07]` collapses toward its middle; a real but unspectacular improvement |
+| **P3** | `C1`: containment of `E21`'s `r90`-energy by `Q_l` at `r = 512` is **monotone increasing with depth**, `[0.55, 0.80]` at layer 1 (point `0.66`) and `[0.82, 0.96]` at layer 14 (point `0.90`) | H1's Hadamard-spreading argument applied to the measured `r90(E21)/r90(Sigma)` growth |
+| **P4** | `C1`: the **random-orthonormal null** lands at `r/n +/- 0.03` at every layer and every `r` — `0.125` at `r = 128`, `0.500` at `r = 512` | if it does not, the containment statistic is not measuring what its name says and `C1` is void |
+| **P5** | `C1`: the **cross-network null** (`Q` built from a *different* network's `Sigma` at the same layer, identical code path) is **indistinguishable from the random-orthonormal null**, within `0.05` | this is the control separating "`Sigma`'s range" from "any smooth basis". If the cross-network null scores high, containment is a property of the architecture and not of the network — a different, and much cheaper, finding |
+| **P6** | `C1`: **`G-CONTAIN` FAILS at layers 1–4** and passes at layers `>= 10`. The gate's `>= 1.5x` null clause at `r = 512` means `>= 0.75`, which is *above* its own `>= 0.6` clause, and my P3 point for layer 1 is `0.66` | I am predicting my own primary gate fails on its early layers. Stated plainly so that a pass is informative |
+| **P7** | `C2`: the **positive control** — injecting the *exact* `E21` **and** `E3` at every layer — reproduces the uncapped flow to `<= 1e-12` relative final-layer MSE. If it does not, the flow's state carries more than its two read-slices, the premise of `C2`/`C3` is wrong, and **this contract's `C2` and `C3` are VOID pending re-derivation** | this is the null-control debt discharged with a control that differs in **code path**, and it is a genuine falsifier of the whole lane |
+| **P8** | `C2`: the projected injection is **NOT destructive** — drift falls monotonically in `r` at every `r` on the grid, unlike WP10's variance channel | mechanism: this corrects the *same* object the closure truncates, in the direction of the exact flow, whereas WP10 made one marginal exact while its partner stayed truncated |
+| **P9** | `C2`: end-to-end drift at `r = 512` falls **`3.0x`–`4.5x`**, point **`3.6x`**, from the paired uncorrected drift — i.e. **`G-E2E` FAILS its `>= 5x` clause and clears its `< 2x` falsifier**. On the `eps^2` exponent a `5x` fall needs `>= 0.80` *total*-energy containment, and my P3 layer-1 point of `0.66` on `r90`-energy does not support it | I expect the most useful outcome available: a real, large, insufficient gain — which points at `C3`'s cheap `E3` leg rather than at a bigger `r` |
+| **P10** | `C2`: the **free `E3` arm** — carrying the discarded `(3,)`-slice residual exactly, an `n`-vector at `O(n)` per layer — buys **`>= 1.3x`** drift reduction on its own, at a counted cost below `1e8` FLOPs total (`< 0.00005 B`) | `rel_E3` is `0.28`–`0.33`, a third of the discarded energy, and it is a vector. If this holds it is the cheapest accuracy in the project's history |
+| **P11** | `C4`: the low-rank backbone at `r = 128`, `l0 = 7`, Strassen `L = 1`, **including the range-finder's own cost**, saves **`[0.020, 0.038] B`** (point `0.029 B` = `63,780,000,000` FLOPs) against the dense backbone — **less than the naive `8x` contraction saving**, because the range finder is itself `~3` matmul-equivalents of `n^2 r` per layer | the strategist's `~8x` prices the contraction and not the basis; the honest figure includes it |
+| **P12** | `C4`: `G-FLOOR` **PASSES** — total `<= 219,885,548,339` counted FLOPs (so `total + 2^24 <= 0.10 B`) at Strassen `L <= 1` with drift `<= 1.5x` dense — **only if P1 holds**. Conditional on P1 failing, `G-FLOOR` fails and the floor needs Strassen `L = 2`, which needs a brokered soak | the two cells are coupled and I am saying so before either runs |
+
+**Three of these twelve predict failure of a gate in this contract (P6, P9, and
+P12 conditionally), and P7 is written so that it can void two of my own cells.**
+
+## Gates — every threshold in the unit it will be scored in, in the same sentence
+
+| gate | cell | threshold, in its scoring unit |
+|---|---|---|
+| **G-CONTAIN** | `C1` | The mean-over-8-networks containment fraction of `E21`'s `r90`-energy in `span(Q_l)` at **`r = 512`** is **`>= 0.60` at layers 1–4**, **`>= 0.80` at layers `>= 10`**, **and `>= 1.5x` the random-orthonormal null at every layer** (the null's expectation is `r/n = 0.500` at `r = 512`, so this third clause means **`>= 0.75`** and is the binding one). Scored **per layer**, on the paired difference `d_i = c_i - max(threshold, 1.5 * null_i)` with a studentised-`t` lower bound `> 0`; the per-network minimum is reported beside it. |
+| **G-E2E** | `C2` | Paired per-network final-layer drift against the uncapped full-K3 flow, `r = 512`, injected in flight: **`drift_corrected <= drift_uncorrected / 5`**, i.e. the studentised-`t` lower bound of `mean_i(drift_unc_i - 5 * drift_corr_i)` is `> 0`. Against WP13's committed anchor that is **`<= 1.70e-07`** absolute. |
+| **G-POS** | `C2` | Positive control: exact `E21` + `E3` injection reproduces the uncapped flow to **relative final-layer MSE `<= 1e-12`**. **A FAILURE VOIDS `C2` AND `C3`.** |
+| **G-DEPLOY** | `C3` | Retains **`>= 60%`** of `C2`'s measured drift reduction — studentised-`t` lower bound `> 0` on `d_i = (drift_unc_i - drift_C3_i) - 0.6 * (drift_unc_i - drift_C2_i)` — **and** total counted flopscope FLOPs **`<= 263,882,790,666`** (`= 0.12 B`) at Strassen `L <= 2`. |
+| **G-FLOOR** | `C4` | Total counted flopscope FLOPs **`<= 219,885,548,339`**, so that `total + 2^24 <= 219,902,325,555` (`= 0.10 B`), at Strassen `L <= 1`, **and** final-layer MSE against `C0-i`'s minted truth **`<= 1.5x`** the dense-backbone arm's MSE on the same eight networks (paired, studentised-`t` lower bound of `mean_i(1.5 * mse_dense_i - mse_lowrank_i) > 0`). |
+
+**No gate in this contract is scored on an upstream torch-side counter, on a
+composed excess through the `eps^2` amplitude, or on a local wall time.** The
+`eps^2` law appears in P9 as a *prediction*, never as a gate.
+
+## Falsifiers
+
+- `C1`: containment at or below the random-orthonormal null at any `r` → **the free
+  selector is dead**, `C2`/`C3` are not run, and only `C4` proceeds.
+- `C2`: drift falls **`< 2x`**, or rises at any `r` → freeze at the uncorrected
+  regenerating flow and stop spending on accuracy.
+- `C2` `G-POS` fails → `C2` and `C3` are VOID; the premise that the flow reads
+  `kappa_3` through exactly two slices is wrong and must be re-derived.
+- `C4`: the amplified accuracy cost exceeds the multiplier gain (the paired
+  `mse * multiplier` score is not improved) → settle at Strassen `L = 1`–`2` and
+  stop.
+- `C0-iii`: the f32 spelling does not bill at half → P1 refuted, every cost
+  statement in this contract reverts to the f64 table, and `G-FLOOR` almost
+  certainly fails.
+
+## Baseline, and the null controls — each differs in CODE PATH, not in a parameter
+
+`SKEPTIC WP13`'s binding process rule, and this repository's fifth consecutive
+attempt to satisfy it.
+
+| control | what it is | why it is code-path-distinct |
+|---|---|---|
+| **N-RAND** (`C1`) | containment against `Q = orth(G)`, `G ~ N(0,1)` `n x r` | the basis never touches `Sigma`; a different matrix is factorised, not the same call with a changed argument |
+| **N-XLAYER** (`C1`) | containment against `Q` built from a **different network's** `Sigma` at the same layer, identical range-finder code | same code, genuinely different data — separates "`Sigma`'s range" from "any basis this code produces" |
+| **S-POS** (`C2`) | exact `E21` + `E3` injection (`G-POS`) | a positive control that must reproduce a *different* flow (the uncapped one) through a different execution path |
+| **N-ZERO** (`C2`) | `r = 0` — the projector is empty, so the corrected flow must be bit-identical to the uncapped regenerating arm and to `p2_pb_rank.predict(cap="dsproj")` | this one IS the same call with a changed parameter, and is recorded as a **determinism check, not a null control**, per WP13's finding (4) |
+| **S2-1024** (`C2`) | `p2_slice_lab.py`'s load-bearing null, re-established at **`1024 x 16`** for the new insertion point | WP13 left it run only at `256 x 4`; this discharges the narrowed debt at the shape every number is quoted at |
+| **DTYPE-F64** (`C1`) | the whole `C1` containment sweep re-run in **float64** on 2 networks x layers `{1, 7, 14}` | the f64 control that does not exist anywhere in the repository — `p2_slice_lab.py` has no f64 path at all |
+
+Baselines: `C1` — the two nulls above. `C2`/`C3` — the paired uncorrected
+regenerating arm on the same eight networks (DESIGN tier). `C4` — the dense
+`w.T @ cov @ w` backbone on the same eight networks, and `C0-i`'s minted truth.
+
+## Cost model — REQUIRED, and round-dependent
+
+**Phase 2 sets `lambda = 0`, so `C = F` and residual is not a cost.** Every cost
+figure in this contract is **counted flopscope 0.12 FLOPs**, executed and metered,
+never modelled, never an upstream torch-side counter, and always with its **dtype
+named** — which is the whole point of `C0-iii`. The budget is
+`2^41 = 2,199,023,255,552`; `0.10 B = 219,902,325,555`; the K2 backbone anchor is
+the shipped file's official one-row subprocess figure `137,600,326,656`. The
+grading server's unexplained `+2^24` is added to any total within `0.5%` of the
+floor.
+
+Residual is reported as **headroom against the `0.4 s` per-MLP cliff**,
+`0.4 / observed`, quoted against the **worst** observed row of a brokered `gpuq`
+soak, per `VALIDATION.md` §2b-ii. §2b's three-residual-model rule is Phase-1 replay
+and does not apply here. **No local absolute wall time is quoted as authority.**
+Strassen levels are counted as **array operations** as well as FLOPs, because
+`L = 4`'s `~1.1 M` ops/MLP is the thing that fails the cliff.
+
+## Statistic
+
+Paired, common random numbers, **arithmetic differences**, studentised-`t` or
+basic-bootstrap intervals via `competition_score.paired_diff_ci(d, method="t")` and
+`method="basic"`. **Percentile and BCa are refused** (measured false-promotion
+rates `6.8–8.2%` and `9.1–11.5%` against a nominal `5%`). Every ratio gate above is
+written as a **linear contrast**, so no bare ratio of means is ever quoted. `n = 8`
+networks throughout, which is the floor `SKEPTIC WP13` set and not a population;
+every interval is reported with its width, and no result is promoted on `n = 8`
+alone.
+
+## Seed block
+
+**No new seeds.** `C0-i`, `C1`, `C2`, `C3` and `C4` all run on
+`P01[40,821,001,168 .. 40,821,001,175]` — the eight DESIGN networks WP13 already
+claimed. `C0-i` records a **deliberate DESIGN-tier overlap** through
+`seed_ledger.claim_range(..., artifact=...)` with the artifact named **at claim
+time**, so `finalize()` can close it; the ledger prints the overlap and it is
+recorded here. Because these are the same networks WP13 measured `E2` on,
+**`C1`'s containment result and WP13's spectra are CORRELATED evidence and must
+never be quoted as independent.** `P04` is not touched. The vault is not touched.
+
+## Confounders, scope, and what must not change
+
+- **`f32` risk.** Every WP13 spectrum and every number here is `float32` unless the
+  `DTYPE-F64` control says otherwise. That control covers `C1` only; `C2`'s
+  end-to-end arm remains `f32`, and that is stated as a limitation, not waved away.
+- **The range finder is not free unless `C4` is adopted.** Building `Q_l` costs
+  `~8`–`12 n^2 r` per layer, which at `r = 512` is `~0.044 B` — comparable to the
+  correction it enables. `C1`/`C2` are therefore **oracle-side** experiments about
+  *information*, and `C3` is the only cell that may claim deployability. If `C4` is
+  adopted the basis is already paid for and the selector really is free; that
+  coupling is asserted here **before** either result exists so that it cannot be
+  claimed afterwards.
+- **`C2` uses the corrected flow's own `Sigma`**, not the reference flow's, so the
+  selector is one a deployed estimator could actually build.
+- **`E21` is defined post-`contract_W`**, in the next layer's index space. The
+  injection hook therefore runs **after the linear step**, not after the
+  nonlinearity where `p2_slice_lab.py`'s hook runs. This is a different insertion
+  point, and `S2-1024` must be re-established for it.
+- **The true residual comes from a reference uncapped flow run in lockstep**, not
+  from the corrected flow's own next layer. Both flows are driven on identical
+  inputs and identical weights.
+- **`n = 8`.** Enough for a monotone trend and a paired interval; not a population.
+- **Must not change:** `estimator.py`, the vault, `competition_score.py`,
+  `seed_blocks.py`, `seed_ledger.py`, `p2_pb_rank.py`, `p2_slice_lab.py`'s measured
+  cells, and every closed lane (AUGMENT, the carrier, the learned output corrector,
+  W-EFF, late-window K3, global scale mixtures, Route A, Route B's selector).
+  Nothing here reopens one.
+- **No submission is authorised by this contract.** The next canary is the `fnp`
+  port at Strassen `L = 1` after `certify_candidate` and a brokered residual soak,
+  presented to Samuel with its `submission.tar.gz` and SHA. `whest submit` is never
+  run by an agent, and no nomination is designated by one.
+
+## Kill lines
+
+`C0`/`C1`/`C2` answered by **2026-09-06**. `C3`/`C4`, the certified `fnp` port and
+the first canary by **2026-09-13**. If by **2026-09-16** neither `C2` (the subspace
+is sufficient) nor `C4` (the floor is reachable) has passed, accuracy and cost work
+**freeze**: nominate the uncorrected regenerating flow at `L = 1` — if and only if
+`C0-i`'s minted truth confirms it beats v2.7 — plus v2.7 as the diverse pair, and
+go all-in on `docs/writeup-p2-draft.md` (due 2026-10-24).
