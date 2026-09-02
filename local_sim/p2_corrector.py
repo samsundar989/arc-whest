@@ -658,11 +658,27 @@ def selftest():
     chk("S6: null control N1 makes c_m constant across neurons",
         spread < 1e-12, f"spread {spread:.3e}")
 
-    # S7 -- features are scale-invariant, which is what S2 rests on.
-    a = t.randn(WIDTH, dtype=dt, device=dev)
-    fa, fb = features(t, a, 5, DEPTH), features(t, a * 1.0, 5, DEPTH)
-    chk("S7: the feature block is deterministic",
-        float((fa - fb).abs().max()) == 0.0, "identical")
+    # S7 -- THE FEATURE BLOCK IS SCALE-INVARIANT.
+    #
+    # The first version of this compared `features(a)` with `features(a * 1.0)`
+    # -- identical arguments -- under a comment claiming it tested scale
+    # invariance. It could not fail, and an independent review said so.
+    #
+    # The property that actually matters: scaling the network's weights by `g`
+    # leaves every `alpha` fixed (P2-CAL's homogeneity), so the feature block
+    # must be IDENTICAL between a network and its rescaled twin. That is what
+    # S2's result rests on, and it is tested here on the real rollout rather
+    # than on a synthetic vector.
+    _, ra = k2_rollout(t, w, corrector=None, calibrate=False)
+    _, rb = k2_rollout(t, [x * 2.5 for x in w], corrector=None,
+                       calibrate=False)
+    worst = 0.0
+    for k in (1, 7, DEPTH - 1):
+        fa = features(t, ra[k]["alpha"], k, DEPTH)
+        fb = features(t, rb[k]["alpha"], k, DEPTH)
+        worst = max(worst, float((fa - fb).abs().max()))
+    chk("S7: the feature block is invariant under a weight rescale",
+        worst < 1e-12, f"max |df| over layers 1/7/15 = {worst:.3e}")
 
     # S9 -- the calibration rule. The BASELINE is the shipped calibrated file
     # (v2.7, graded #328664) and a CORRECTED arm is not calibrated on top,
@@ -990,6 +1006,12 @@ def diagnose_readout(a):
            "contract": "experiments/LOG.md CONTRACT WP9, commit 9c961ce",
            "truth": os.path.relpath(a.truth, _ROOT).replace("\\", "/"),
            "n_mlps": int(n_all), "folds": int(a.folds), "per_fold": rows,
+           # An independent review could not tell which corrector produced this
+           # artifact, because it recorded no hyperparameters -- and the first
+           # run used `--rounds 1` while the study used `--rounds 3`, so the two
+           # were NOT the same fit and must not be compared across artifacts.
+           "rounds": int(a.rounds), "epochs": int(a.epochs),
+           "seed": int(a.seed), "device": device,
            "r2_unweighted_mean": float(np.mean([r["r2_unweighted"] for r in rows])),
            "r2_weighted_mean": float(np.mean([r["r2_sigma2_weighted"] for r in rows])),
            "SCOPE": ("A DIAGNOSTIC of an already-measured negative, computed on "

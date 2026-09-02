@@ -24892,3 +24892,187 @@ multiplicative walk that amplifies whatever it gets wrong.
    state method must be gated on rollout, and the contract that insisted on
    that is the reason this slice produced a usable answer instead of a
    `1.07x` "improvement".
+
+---
+
+# 2026-09-02 — SKEPTIC WP9: PROVISIONAL, accepted in full. THE HEADLINE CONCLUSION IS RETRACTED — the per-neuron lane is NOT empty
+
+Independent pass on `9c961ce` … `ad5a82d` from the raw artifacts. Verdict
+**PROVISIONAL**. Sixth independent pass this project, sixth to find something
+real — and this one **overturns the slice's central conclusion**, which no
+previous pass had done to a negative.
+
+## THE RETRACTION
+
+`RESULT WP9` concluded:
+
+> *"WP9 now measures the per-neuron half of that fork and it is empty."*
+
+**That is wrong, and it is wrong because arm B bundled two channels with
+opposite signs.** The review built an independent numpy reimplementation of the
+closure — which reproduces my `per_mlp_raw_mse["B0"]` **on all 96 networks to a
+maximum relative `5.4e-13`** — and ran the **oracle** cells I never ran: the
+in-flight state replaced by TRUTH, at zero fit error, layers 1–14, on 24 `P02`
+networks.
+
+| in-flight correction, layers 1..14, ZERO fit error | final-layer MSE | vs `B0` |
+|---|---:|---:|
+| none (uncalibrated closure) | `3.879877e-06` | `0.35x` |
+| **truth in the MEAN channel only (`c_v ≡ 0`)** | **`2.090489e-07`** | **`6.42x`** |
+| truth in the VARIANCE channel only | `2.227758e-05` | `0.060x` |
+| truth in BOTH — **arm B's channel set** | `2.392114e-06` | `0.56x` |
+| the same with `CLAMP_CV = 0.5` applied | `2.392168e-06` | `0.56x` |
+
+Read the third row twice. **Correcting the post-ReLU variance to its TRUE value
+makes the estimator `5.7x` worse than doing nothing**, and combined with the
+mean channel it destroys an `18.6x` improvement down to `0.56x`.
+
+So:
+
+1. **The mean channel in flight has an oracle ceiling of `6.42x` over the
+   shipped file** — `4.3x` clear of gate clause G1's `1.5x`. **This lane is
+   open, not closed.** The one arm whose ceiling clears the gate is the one arm
+   the study never ran.
+2. **My stated mechanism for arm B's divergence is REFUTED.** `RESULT WP9`
+   says *"`var <- var * (1 + c_v)` at fifteen layers is a multiplicative walk
+   that amplifies whatever it gets wrong."* It amplifies even when it gets it
+   exactly **right**. The clamp is exonerated: oracle-with-clamp and
+   oracle-without agree to five significant figures.
+3. The mean-only oracle recovers **`94.2%`** of K2's error against P2-CP3R's
+   independently measured **`94.61%`** — so the instrument is confirmed, and
+   CP3R's oracle is reproduced by a different implementation five days later.
+
+**Corrected conclusion:** the fork P2-CAL left — *per neuron, or add
+information* — has **not** been resolved. The per-neuron **mean** branch is
+unmeasured with a fitted corrector and has a `6.42x` ceiling. What WP9 actually
+established is narrower and still worth having:
+
+- the **readout** corrector is exhausted by v2.7's sixteen constants
+  (confirmed and **strengthened** below);
+- correcting the marginal post-ReLU **variance** toward truth is
+  **destructive**, at zero fit error, which is a genuinely new mechanistic
+  fact and explains arm B without any appeal to fit error.
+
+## The other finding that matters: P02 was spent with NO LEDGER RECORD
+
+`experiments/seed_ledger.jsonl` contained **no `P02` claim and no `P02`
+finalize**. `consumed_seeds('P02') -> 0`, `free_ranges('P02') ->
+[(40901002000, 40901002095)]`, and `check_ledger()` returned clean — because it
+cannot see an absent record. Meanwhile `RESULT WP9` says *"ledger finalised."*
+
+**The cause is my own documented trap applied to a file nobody noticed is
+one.** `docs/SETUP_WINDOWS.md` § 7.1 warns that an artifact written to a
+relative path inside a `gpuq` job is lost with the snapshot. `p2_truth.py:307-317`
+calls `claim()` and `finalize()` exactly as it should — and both wrote into the
+**snapshot's** `experiments/seed_ledger.jsonl`. 96 seeds were really drawn while
+the live ledger reported them **FREE**, which is exactly the D16 failure
+`docs/VALIDATION.md` § 2 exists to prevent: a later experiment could re-draw the
+same networks and quote them as independent.
+
+**Repaired two ways** (`6d1a6da`):
+
+- **Backfilled** with `backfilled: true`, the consumer, and
+  `artifact_sha256 = d21f81ad…` for `truth_P02.npz`. `P02` now reads 96
+  consumed, 0 free; `check_ledger()` clean.
+- **Made mechanical.** `seed_ledger._append()` now **refuses** to write a
+  ledger whose path lies under a `gpuq`/`workerq` snapshot. A silent loss
+  becomes a loud failure, which is the difference between a rule and a
+  sentence. Verified: the live path is not flagged, a snapshot path is, and the
+  write raises.
+
+## Four numbers in the entry that were wrong
+
+| claim | as written | correct |
+|---|---|---|
+| arm B's divergence | *"a factor of `191`"* | **`136.92x`** arithmetic (`131.45x` geometric, `130.0x` median). `191` appears in no artifact; the same entry says `136x` five paragraphs later |
+| arm A's outcome | *"P1 REFUTED at the lower bound, by `0.55%`"* | **UNRESOLVED.** `t` 95% CI on the paired difference is `[-1.7238e-08, +1.7762e-09]` — it **straddles zero**; sign test `p = 0.610`; `45/96` networks better. `0.9945x` is a draw, and I refuted my own prediction on a difference the data cannot resolve |
+| *"the corrector lands 9% short"* | cross-artifact | **Not comparable.** `readout_decomp.json` was produced with `--rounds 1`; `study_P02.json` used `--rounds 3`. Different, differently-converged correctors. The decomposition's **internal** comparison (calibration vs *that* corrector) is sound; the number must not be attached to the `0.9945x` arm. Study's own per-fold `A/B0` is `1.007, 1.015, 0.992, 1.007` against the decomposition's `1.089, 1.122, 1.040, 1.147` |
+| `0.918x` | quoted as the mean | it is **fold 0**; the fold mean is `0.909` |
+
+`readout_decomp.json` also recorded no `rounds`/`epochs`/`seed`, so it could not
+be reconstructed. Fixed — the artifact now carries them.
+
+## Two clauses that could not fail, and one falsifier I reinterpreted
+
+- **G2 could not fail.** The corrector adds `36,433,980` FLOPs against
+  `8.23e10` of unused free zone — `0.044%`. Nothing in this family could have
+  unpinned the `0.1` floor. It is the same shape as the v2.7 `G4` finding
+  already recorded in `CURRENT_STATE.md`. The price measurement is still
+  correct and still worth having; it is simply not a *test*.
+- **S7 could not fail.** It compared `features(a)` with `features(a * 1.0)` —
+  identical arguments — under a comment claiming it tested scale invariance.
+  **Fixed:** it now rolls out a network and its `2.5x`-rescaled twin and
+  compares the feature blocks at layers 1, 7 and 15. Measured max `|df|` =
+  `1.599e-14`.
+- **Checklist 13, and it is mine.** The contract says the slice is *"VOID — not
+  negative, void — if N1 fails to collapse."* N1 was refuted and I voided arm B
+  only, keeping arm A. The review accepts the argument as transparently made
+  and notes arm A's negative survives independently — but by the contract's
+  letter that is post-hoc movement, and it is recorded as such.
+
+## What the review CONFIRMED, and it strengthened the surviving half
+
+- **B0 is genuinely v2.7-equivalent**, verified three ways: `CAL_G` byte-equal
+  to `_CAL_G` by AST compare (16/16); `estimator_v2_7.py:594-595` routes
+  `width > 256` to `_analytic_only`, so at `1024x16` v2.7 **is** the calibrated
+  analytic closure; and an independent numpy reimplementation reproduces all 96
+  per-MLP `B0` values to `5.4e-13`.
+- **The decomposition's algebra is correct.** `halpha = F[…,0]*F[…,1] + F[…,2]`
+  really is `a·Φ + φ` given the stack order; `c_cal = (g−1)h(α)` is exactly
+  v2.7's row gain. `mse_uncal` and `mse_cal` reproduced per fold to 6–7
+  significant figures. The `α` clip at `±8` touches `1000 of 98,304` neurons
+  and moves `mse_cal` by `<= 0.17%`, in the conservative direction.
+- **The central mechanistic claim is CONFIRMED and UNDERSTATED.** Measuring
+  v2.7's *single* per-layer constant as a predictor of `c_m` at layer 15:
+  **`R^2 = +0.5097` unweighted, `+0.5254` σ²-weighted**, `corr(c, h(α)) =
+  +0.716` — matching the 354-parameter corrector's held-out `0.499–0.522` and
+  **beating** the decomposition run's `0.456–0.475`. One number per layer does
+  what 354 parameters do.
+- Paired statistics reproduce exactly through `competition_score.decide`; the
+  gate is identical in contract and artifact (**no gate movement**); GT-noise
+  floor quoted; unbiased two-replica cross-MSE; `canonical_mint`; **no
+  `mini`/`full` read anywhere**; **no `P03`/`P04` seed in any file**; Rule-1
+  ordering clean by timestamp; round selection verified to be on training
+  networks only, **no held-out leakage**; self-test 12/12.
+- Arm B's divergence is broad, not an outlier: `0/96` better, sign `p = 0.000`.
+
+## The adopted follow-up
+
+The review's own recommendation, adopted verbatim as the next slice's core:
+
+> **`c_v ≡ 0`, fit `c_m` only, in flight, rolled out, on the post-calibration
+> residual target `c_m* = (truth − g·mu_raw)/σ`** — the corrector *on top of*
+> the calibration rather than replacing it.
+
+It removes the channel now proven destructive, stops the corrector spending its
+capacity relearning a curve it provably contains, and measures the actual
+question — *is there structure beyond the one constant?* — with far more power
+than WP9's design had. **`P02` re-analysis is DESIGN-tier and permitted with
+the overlap reported; `P03` stays untouched for replication if it passes.**
+
+`--oracles` is in-tree (`6d1a6da`) and reproduces the ceiling/null pair as a
+pre-registered fixture, so this cannot happen twice. It is **queued as `gpuq`
+job 89** behind the WP8 `3x100` soak; **as of this commit it has not run, and
+the numbers above are the review's, not mine.** *(That sentence is written this
+way deliberately: the WP8 entry claimed a job was pending 34 minutes after I
+cancelled it, and the previous Skeptic caught it.)*
+
+## Knowledge delta
+
+1. **A ceiling/null oracle pair costs one rollout per cell and would have
+   changed this slice's conclusion.** Run it BEFORE fitting anything. WP9 spent
+   96 fresh networks and four folds of training to reach a conclusion that two
+   label-reading rollouts overturn.
+2. **Never bundle two correction channels in one arm without separating them
+   first.** The mean channel is worth `6.42x`; the variance channel is worth
+   `0.060x`; together `0.56x`. An arm that moves both measures neither.
+3. **Correcting a closure's marginal variance toward truth can be
+   DESTRUCTIVE.** The Gaussian closure is an internally consistent
+   approximation, not a set of independently improvable marginals: making one
+   moment exact while its partners stay approximate breaks a cancellation. This
+   is new, it is measured at zero fit error, and it should be assumed to
+   generalise to any future in-flight state method until shown otherwise.
+4. **A tracked file written by a queued job is lost exactly like an untracked
+   one.** The snapshot contains it, so nothing errors. The seed ledger is such
+   a file, and the guarantee it provides is the one this repository can least
+   afford to lose silently.
