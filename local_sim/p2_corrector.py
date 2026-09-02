@@ -143,7 +143,8 @@ def features(t, alpha, layer, depth):
 
 
 def k2_rollout(t, w, corrector=None, mode="full", clamp_cm=None,
-               calibrate=None, mean_only=False):
+               calibrate=None, mean_only=False, perturb=None, pseed=0,
+               keep_cov=False):
     """K2p1, optionally corrected in flight. Returns the per-layer record.
 
     `mode`:
@@ -241,9 +242,38 @@ def k2_rollout(t, w, corrector=None, mode="full", clamp_cm=None,
         else:
             mu_new, var_new = mu_raw, var_raw
 
-        recs.append({"alpha": alpha, "sig": sig, "mu_raw": mu_raw,
-                     "var_raw": var_raw, "layer": k})
-        cov = t.outer(Phi, Phi) * cov_pre * off + t.diag(var_new)
+        rec = {"alpha": alpha, "sig": sig, "mu_raw": mu_raw,
+               "var_raw": var_raw, "layer": k}
+        if keep_cov:
+            # Off by default: an (n, n) float64 per layer is 8 MB at width
+            # 1024, so keeping all sixteen would be 134 MB per network for a
+            # quantity almost nothing needs.
+            rec["cov_pre"] = cov_pre
+        recs.append(rec)
+        acc = t.outer(Phi, Phi) * cov_pre * off
+        if perturb and 0 < k < depth - 1:
+            # WP11. RELATIVE noise, injected channel by channel, so the three
+            # channels are measured on ONE scale and their tolerances can be
+            # compared. Deterministic in (network seed, layer) so a cell is
+            # reproducible and the channels see independent draws.
+            g = t.Generator(device="cpu").manual_seed(pseed * 1000 + k)
+            sm = perturb.get("mean", 0.0)
+            sv = perturb.get("var", 0.0)
+            so = perturb.get("offdiag", 0.0)
+            if sm:
+                e = (t.randn(n, generator=g, dtype=t.float64) * sm
+                     ).to(dtype=dt, device=dev)
+                mu_new = mu_new * (1.0 + e)
+            if sv:
+                e = (t.randn(n, generator=g, dtype=t.float64) * sv
+                     ).to(dtype=dt, device=dev)
+                var_new = (var_new * (1.0 + e)).clamp(min=0.0)
+            if so:
+                e = (t.randn(n, n, generator=g, dtype=t.float64) * so
+                     ).to(dtype=dt, device=dev)
+                e = 0.5 * (e + e.T)      # a covariance perturbation is symmetric
+                acc = acc * (1.0 + e) * off
+        cov = acc + t.diag(var_new)
         mu = mu_new
         rows.append(mu)
     out = t.stack(rows, dim=0)
@@ -1544,6 +1574,165 @@ def run_sensitivity(a):
     return 0
 
 
+def run_state_budget(a):
+    """WP11 -- the K2 state error budget: TOLERANCE against ACTUAL ERROR.
+
+    WP10 turned an oracle ceiling into an accuracy requirement and closed a
+    lane in one job. This does the same thing for the whole state at once, and
+    it is the screen that should have preceded WP9.
+
+    For each of K2's three propagated channels -- the post-ReLU mean, its
+    variance, and the off-diagonal covariance -- it measures two numbers on
+    ONE scale (relative perturbation):
+
+      TOLERANCE   inject independent relative noise of RMS `s` into that
+                  channel alone, in flight at layers 1..L-2, and find where the
+                  final-layer score stops matching the shipped file.
+
+      ACTUAL      how wrong that channel really is. For the mean and the
+                  variance this is measured against `truth_P02`. The
+                  off-diagonal has NO label -- `p2_truth.py` produces means and
+                  variances -- so its known-fixable part is bounded below by
+                  the Price order-1 -> order-2 change, which is a real, exactly
+                  computable term this repository already ships as `k2p2`.
+
+    The ratio ACTUAL / TOLERANCE is the whole point. A channel far above 1 is
+    where the error lives and is worth attacking; a channel far below 1 cannot
+    pay whatever is spent on it.
+    """
+    t = _torch()
+    device = "cuda" if t.cuda.is_available() else "cpu"
+    dtype = t.float64
+    truth = load_truth(a.truth)
+    seeds = np.asarray(truth["seeds"])
+    n = min(a.n_mlps or 12, len(seeds))
+    seeds = seeds[:n]
+    m1, m2 = truth["means_r1"], truth["means_r2"]
+    av1, av2 = truth["allvar_r1"], truth["allvar_r2"]
+
+    print("=" * 78)
+    print("WP11 -- the K2 state error budget: tolerance vs actual, per channel")
+    print("=" * 78)
+    print(f"  {n} networks, perturbing layers 1..L-2, float64, {device}")
+    print()
+
+    b0 = np.zeros(n)
+    with t.no_grad():
+        for i in range(n):
+            w = weights_for(t, seeds[i], device, dtype)
+            o, _ = k2_rollout(t, w, corrector=None)
+            b0[i] = cross_mse(o[-1].cpu().numpy().astype(np.float64),
+                              m1[i, -1].astype(np.float64),
+                              m2[i, -1].astype(np.float64))
+    print(f"  B0 (shipped calibrated K2)  {b0.mean():.6e}")
+
+    # ---- 1. tolerance -------------------------------------------------
+    grid = [1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2]
+    tol = {}
+    print()
+    print(f"  {'channel':<12}{'rel. RMS noise':>16}{'final MSE':>15}{'vs B0':>10}")
+    for ch in ("mean", "var", "offdiag"):
+        rows = []
+        for sd in grid:
+            per = np.zeros(n)
+            with t.no_grad():
+                for i in range(n):
+                    w = weights_for(t, seeds[i], device, dtype)
+                    o, _ = k2_rollout(t, w, corrector=None,
+                                      perturb={ch: sd}, pseed=i + 1)
+                    per[i] = cross_mse(o[-1].cpu().numpy().astype(np.float64),
+                                       m1[i, -1].astype(np.float64),
+                                       m2[i, -1].astype(np.float64))
+            r = float(per.mean() / b0.mean())
+            rows.append({"rel_rms": sd, "final_mse": float(per.mean()),
+                         "ratio_to_B0": r})
+            print(f"  {ch:<12}{sd:>16.5f}{per.mean():>15.6e}{r:>9.2f}x")
+            if r > 2.0:
+                break
+        # the largest tested noise that still keeps the score within 10% of B0
+        ok = [x["rel_rms"] for x in rows if x["ratio_to_B0"] <= 1.10]
+        tol[ch] = {"grid": rows, "tolerance_10pct": (max(ok) if ok else None)}
+        print(f"  {'':12}-> tolerance (within 10% of B0): "
+              f"{tol[ch]['tolerance_10pct']}")
+        print()
+
+    # ---- 2. the actual error in each channel --------------------------
+    print("  ACTUAL relative error of K2's own state, RMS over neurons and")
+    print("  layers 1..L-2:")
+    em, ev, eo = [], [], []
+    with t.no_grad():
+        for i in range(n):
+            w = weights_for(t, seeds[i], device, dtype)
+            _o, recs = k2_rollout(t, w, corrector=None, keep_cov=True)
+            tm = (m1[i] + m2[i]) * 0.5
+            tv = (av1[i] + av2[i]) * 0.5
+            for r in recs:
+                k = r["layer"]
+                if not (0 < k < DEPTH - 1):
+                    continue
+                mk = r["mu_raw"].cpu().numpy().astype(np.float64)
+                vk = r["var_raw"].cpu().numpy().astype(np.float64)
+                em.append(float(np.sqrt(np.mean(((mk - tm[k]) / tm[k]) ** 2))))
+                ev.append(float(np.sqrt(np.mean(((vk - tv[k]) / np.maximum(tv[k], 1e-30)) ** 2))))
+                # The off-diagonal has no label -- `p2_truth.py` produces
+                # means and variances. So its known-fixable part is measured
+                # EXACTLY rather than assumed: the Price order-2 term this
+                # repository already ships in `arm_k2p2`,
+                #     order1 = outer(Phi, Phi) * c
+                #     order2 = (c^2 / (s_i s_j) / 2) * outer(phi, phi)
+                # as an elementwise RELATIVE size |order2| / |order1| over the
+                # true off-diagonal entries. It is a LOWER BOUND on the
+                # truncation error, since orders 3+ are dropped.
+                sg, al = r["sig"], r["alpha"]
+                phi, Phi = _phi_Phi(t, al)
+                cpre = r["cov_pre"]
+                offm = 1.0 - t.eye(cpre.shape[0], dtype=cpre.dtype,
+                                   device=cpre.device)
+                c = cpre * offm
+                o1 = t.outer(Phi, Phi) * c
+                o2 = (c * c * t.outer(1.0 / sg, 1.0 / sg) / 2.0) * t.outer(phi, phi)
+                num = float(t.sqrt((o2 * o2).sum()))
+                den = float(t.sqrt((o1 * o1).sum()))
+                eo.append(num / den if den > 0 else float("nan"))
+    print(f"    mean      {np.mean(em):.5f}   (RMS relative)")
+    print(f"    var       {np.mean(ev):.5f}")
+    print(f"    offdiag   {np.mean(eo):.5f}   "
+          f"(Frobenius |order2|/|order1|, EXACT; a LOWER bound on the "
+          f"truncation)")
+
+    print()
+    print(f"  {'channel':<12}{'actual':>12}{'tolerance':>12}{'actual/tol':>13}")
+    act = {"mean": float(np.mean(em)), "var": float(np.mean(ev)),
+           "offdiag": float(np.mean(eo))}
+    verdict = {}
+    for ch in ("mean", "var", "offdiag"):
+        tv_ = tol[ch]["tolerance_10pct"]
+        r = (act[ch] / tv_) if tv_ else float("inf")
+        verdict[ch] = r
+        print(f"  {ch:<12}{act[ch]:>12.5f}{(tv_ if tv_ else 0):>12.5f}{r:>13.1f}")
+    print()
+    print("  A channel far ABOVE 1 is where the error lives. A channel far")
+    print("  BELOW 1 cannot repay whatever is spent fixing it.")
+
+    rep = {"artifact": "wp11_state_error_budget", "artifact_version": 1,
+           "truth": os.path.relpath(a.truth, _ROOT).replace("\\", "/"),
+           "n_mlps": int(n), "b0_mean": float(b0.mean()),
+           "tolerance": tol, "actual_relative_error": act,
+           "actual_over_tolerance": verdict,
+           "SCOPE": ("A SCREEN. Perturbation tolerances are measured, not "
+                     "fitted; the mean and variance actuals are against "
+                     "truth_P02; the off-diagonal actual is a LOWER BOUND from "
+                     "the exactly-computable Price order-2 term, because no "
+                     "off-diagonal label exists. Nothing here is a candidate.")}
+    if a.json:
+        os.makedirs(os.path.dirname(os.path.abspath(a.json)), exist_ok=True)
+        with open(a.json, "w", encoding="utf-8") as fh:
+            json.dump(rep, fh, indent=1)
+        print(f"\n  wrote {os.path.relpath(a.json, _ROOT)}")
+    print("=" * 78)
+    return 0
+
+
 def _subset(truth, idx):
     """A view of the truth arrays restricted to `idx`, same keys."""
     out = {}
@@ -1582,6 +1771,9 @@ def main():
     ap.add_argument("--gate", type=float, required=False, default=None)
     ap.add_argument("--json", default="")
     ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--state-budget", action="store_true",
+                    help="WP11: tolerance vs actual error for each of K2's "
+                         "three propagated channels, on one scale")
     ap.add_argument("--sensitivity", action="store_true",
                     help="sweep a CONSTANT in-flight c_m and report the score "
                          "cost -- the discriminator for WP10's VOID clause")
@@ -1598,6 +1790,10 @@ def main():
     a = ap.parse_args()
     if a.selftest:
         return selftest()
+    if a.state_budget:
+        if not a.truth:
+            ap.error("--truth is required")
+        return run_state_budget(a)
     if a.sensitivity:
         if not a.truth:
             ap.error("--truth is required")
