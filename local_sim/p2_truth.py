@@ -177,6 +177,19 @@ def main() -> int:
     ap.add_argument("--consumer", default="local_sim/p2_truth.py")
     ap.add_argument("--note", default="")
     ap.add_argument("--chunk", type=int, default=1 << 16)
+    ap.add_argument("--seed-start", type=int, default=0,
+                    help="claim EXACTLY block[start .. start+n-1] instead of the "
+                         "next free contiguous run. Use when truth must be minted "
+                         "on networks a previous slice already selected.")
+    ap.add_argument("--already-claimed", action="store_true",
+                    help="the seeds are ALREADY recorded in the ledger by some "
+                         "consumer; verify that and draw nothing new. Writes NO "
+                         "ledger record, so this is the only mode safe to run "
+                         "inside a gpuq snapshot -- seed_ledger refuses to write "
+                         "there, and a claim written into a snapshot is discarded "
+                         "with it while the live ledger never hears about it "
+                         "(the WP9 defect). Requires --seed-start. finalize() is "
+                         "skipped and the sha256 is printed for the host to bind.")
     ap.add_argument("--plan", action="store_true",
                     help="print the plan and the cost; claim nothing, draw nothing")
     ap.add_argument("--check-allvar", type=int, default=0, metavar="N",
@@ -311,11 +324,47 @@ def main() -> int:
           + (f"  {torch.cuda.get_device_name(0)}" if device == "cuda" else ""))
     print()
 
-    # Claim FIRST, so an interrupted run leaves a claim rather than a silent draw.
-    seeds = sl.claim(a.block, a.n_mlps, a.consumer, ts=a.ts,
-                     artifact=os.path.relpath(a.out, _ROOT).replace("\\", "/"),
-                     note=a.note or f"P2-CP1 truth, 2 replicas x 2^{a.log2_samples}")
-    print(f"  claimed         {a.block}[{seeds[0]:,} .. {seeds[-1]:,}]")
+    rel_out = os.path.relpath(a.out, _ROOT).replace("\\", "/")
+
+    if a.already_claimed:
+        # Draw nothing, record nothing. Verify instead that every seed we are
+        # about to mint truth for is ALREADY inside a recorded claim, and say
+        # whose. This is what lets a truth mint run inside a gpuq snapshot at
+        # all: `seed_ledger` refuses to write there, correctly, so the only
+        # safe queued mode is one that writes nothing.
+        if not a.seed_start:
+            raise SystemExit("--already-claimed requires --seed-start")
+        seeds = [a.seed_start + i for i in range(a.n_mlps)]
+        recorded = [c for c in sl.claims() if c.block == a.block]
+        covered = {}
+        for c in recorded:
+            for x in range(c.start, c.start + c.n):
+                covered.setdefault(x, c.consumer)
+        missing = [x for x in seeds if x not in covered]
+        if missing:
+            raise SystemExit(
+                f"REFUSED: --already-claimed, but {len(missing)} of {len(seeds)} "
+                f"seeds have NO ledger record (first {missing[0]:,}). Minting truth "
+                f"on an unrecorded seed is exactly the consumption the ledger "
+                f"exists to prevent. Claim them on the HOST first.")
+        owners = sorted({covered[x] for x in seeds})
+        print(f"  verified        {a.block}[{seeds[0]:,} .. {seeds[-1]:,}] already "
+              f"claimed by {', '.join(owners)}")
+        print(f"  ledger          NOT written (--already-claimed); finalize on the host")
+    elif a.seed_start:
+        # An EXACT range rather than the next free run. On a DESIGN block an
+        # overlap is permitted and the ledger PRINTS it; on DECISION/SINGLE_USE
+        # it raises. Either way the decision is the ledger's, not this file's.
+        seeds = sl.claim_range(a.block, a.seed_start, a.n_mlps, a.consumer,
+                               ts=a.ts, artifact=rel_out,
+                               note=a.note or f"truth, 2 replicas x 2^{a.log2_samples}")
+        print(f"  claimed EXACT   {a.block}[{seeds[0]:,} .. {seeds[-1]:,}]")
+    else:
+        # Claim FIRST, so an interrupted run leaves a claim rather than a silent draw.
+        seeds = sl.claim(a.block, a.n_mlps, a.consumer, ts=a.ts,
+                         artifact=rel_out,
+                         note=a.note or f"P2-CP1 truth, 2 replicas x 2^{a.log2_samples}")
+        print(f"  claimed         {a.block}[{seeds[0]:,} .. {seeds[-1]:,}]")
 
     t0 = time.perf_counter()
     m1 = np.zeros((a.n_mlps, DEPTH, WIDTH), dtype=np.float64)
@@ -363,8 +412,15 @@ def main() -> int:
         width=np.int64(WIDTH), depth=np.int64(DEPTH),
     )
     sha = hashlib.sha256(open(a.out, "rb").read()).hexdigest()
-    rel = os.path.relpath(a.out, _ROOT).replace("\\", "/")
-    sl.finalize(a.consumer, rel, ts=a.ts, note="truth written")
+    rel = rel_out
+    if a.already_claimed:
+        # No claim of ours to close, and `finalize()` correctly refuses to
+        # manufacture provenance for an artifact no claim named. The host binds
+        # it against the claim it made before submitting.
+        print("  ledger finalize SKIPPED (--already-claimed); bind on the host with")
+        print(f"    seed_ledger.finalize(<the claiming consumer>, '{rel}', ts=...)")
+    else:
+        sl.finalize(a.consumer, rel, ts=a.ts, note="truth written")
 
     print()
     print(f"  replica disagreement  observed {obs:.4e}   predicted 2*V/N "
@@ -374,7 +430,7 @@ def main() -> int:
     print(f"  mean truth noise      {float(gt_noise.mean()):.4e}")
     print(f"  wrote                 {rel}")
     print(f"  sha256                {sha}")
-    print(f"  ledger finalized      yes")
+    print(f"  ledger finalized      {'no (--already-claimed)' if a.already_claimed else 'yes'}")
     print(f"  elapsed               {time.perf_counter() - t0:.1f}s")
     print("=" * 78)
     return 0

@@ -26982,3 +26982,101 @@ measuring.
 3. **`SKEPTIC WP13`'s rule paid immediately.** *"Write every threshold in the unit
    the gate will be scored in, and say so in the same sentence"* is what forced
    `C0-iii` into the contract at all, four days after the rule was written.
+
+---
+
+# 2026-09-02 — WP14 instrument note: a self-test changed C2's mechanism BEFORE any C2 data existed
+
+Contract `d915f83`. Instrument `local_sim/p2_range_lab.py`; self-test artifact
+`experiments/2026-09-02_wp14_range/selftest_cpu128.json`. Recorded here, and
+committed before the `gpuq` job was submitted, so the change is provably not a
+response to a result.
+
+## What the self-test found
+
+`C2` was first written to inject its correction by rebuilding the tower from its
+own repeated slices — `K[3] = from_dstensor(K[3].get_repeated())` with the slices
+modified — at the linear step. **S-IDEM** asks the prior question: is that rebuild
+a no-op when nothing is modified? At `128 x 4`, in the UNCAPPED flow, it is not:
+
+    relative divergence of the final-layer means:  3.056e-03
+
+The mechanism is `factor_k3.py:381`. `factored_nonlin_kprop_k3` starts with
+`pK_111 = WK[3].clone()` and carries the **incoming** `kappa_3`'s entire factored
+tensor forward as the outgoing one, all-distinct block included. It only ever
+*reads* the two repeated slices, but it *propagates* everything. So a rebuild at
+the linear point does not preserve the flow: it kills a block that would otherwise
+have reached the **next** layer's slices, applying a second truncation on top of
+the one under test. Every `C2` cell would have been measuring the sum of two
+approximations while reporting one.
+
+## What it did NOT refute, and this distinction is the whole point
+
+It refutes *"a rebuild is a no-op"*. It does **not** refute *"the final means read
+`kappa_3` only through its two slices"* — which is the premise `C2`, `C3` and
+`G-POS` actually rest on. That premise is now demonstrated end to end rather than
+argued: with the corrected mechanism, the `exact` cell — both slices forced to the
+reference flow's values at every layer — reproduces the uncapped flow's final means
+to **`1.5e-15`** absolute drift against an uncorrected `5.4e-06`, a factor of
+`3.7e+09`, on both smoke networks. **`G-POS` stands exactly as pre-registered** and
+is not amended; `1024 x 16` is where it will be scored.
+
+## The corrected mechanism
+
+The correction is **added, never rebuilt**. For a diagonal-free `(2,1)` correction
+`Delta` and a `(3,)` correction `delta`,
+
+    K[3] <- K[3].add_factors( (diag(delta) + 3 Delta^T, I, I) )
+
+which is the same `(M, I, I)` form `from_dstensor` itself produces. Working through
+`_factored_get_dslice` for `d = 3`: the `(3,)` slice of `(M, I, I)` is `diag(M)`,
+and its `(2,1)` slice is `M^T / 3` with the diagonal zeroed. So the block adds
+exactly `delta` to one slice and exactly `Delta` to the other and nothing else to
+either. **S-SLICE executes that claim in flight** rather than leaving it in this
+paragraph: measured `0.0` and `5.0e-08` relative on the two slices.
+
+Two details that would each have been a silent defect:
+
+- **`Delta`'s diagonal must be zeroed explicitly.** `E21` is diagonal-free, but
+  `Q Q^T E21` is not, and `(M, I, I)` routes `diag(M)` into the `(3,)` slice — so
+  an unzeroed projection would have leaked `3 * Delta_ii` into a slice the cell was
+  not correcting.
+- **The added block creates an all-distinct block of its own**, which then
+  propagates. That is a property of the deployable operation, not an error, and
+  `C2` measures what it costs rather than assuming it away.
+
+## Self-tests now standing, at `128 x 4` on CPU
+
+| check | result |
+|---|---|
+| **S1** hookless two-hook re-drive `==` `p2_pb_rank(cap="none")` | **BIT-IDENTICAL** |
+| **S2** regeneration hook `==` `p2_pb_rank(cap="dsproj")` | **BIT-IDENTICAL** |
+| **S-IDEM** rebuild at the linear point (diagnostic, not a gate) | `3.056e-03` — expected, mechanism above |
+| **S-SLICE** `add_factors` moves `(3,)` by exactly `delta` | `0.0` |
+| **S-SLICE** `add_factors` moves `(2,1)` by exactly `Delta` | `5.028e-08` |
+| **S-ADDZERO** a zero factor block is a numerical no-op | `9.837e-08` — a **determinism check, not a null control** |
+| **S-RF** `Q^T Q - I` max abs error, `r = 32 / 64` | `2.7e-07` / `3.6e-07` |
+| **S-CONT** containment inside `span(Q)` / in its complement | `1.000000014` / `3.6e-14` |
+
+**S2 still runs at a small shape here.** The contract's `S2-1024` — the load-bearing
+null at the shape every reported number is taken at, which `SKEPTIC WP13` recorded
+as an outstanding debt — runs inside the submitted job, not on this host.
+
+## And a warning the smoke is entitled to give
+
+At `128 x 4`, containment of `E21` by `Sigma`'s range is `0.24`–`0.28` at `r = 32`
+against a random-orthonormal null of `0.25`: **indistinguishable from noise**, and
+`proj:32` buys `1.03x`–`1.09x` against `svd:32`'s `1.5x`–`2.0x`. That is exactly
+the shape of a `C1` falsifier.
+
+It is **not evidence**, and it is recorded as not evidence: `128 x 4` is a depth at
+which none of the collapse this contract is built on has happened yet
+(`r90(Sigma)` falls `237 -> 26` over *sixteen* layers, and there are four here).
+The whole hypothesis is that containment improves with depth. A smoke at depth 4
+tests the instrument and cannot test the claim — but it does mean **P6 and the `C1`
+falsifier are live possibilities and not rhetorical ones**, and it is written down
+before the real numbers arrive so that a failure cannot be reported as a surprise.
+
+Free `E3` is the other thing the smoke hints at: `2.0x`–`2.3x` drift reduction from
+correcting the `(3,)` slice alone, an `n`-vector at `O(n)` per layer. **P10
+predicted `>= 1.3x`.** Also not evidence, also at the wrong shape.

@@ -1,0 +1,22 @@
+{
+ "check": "WP14 selftests",
+ "width": 128,
+ "depth": 4,
+ "seed": 40821001168,
+ "results": {
+  "S1_redrive_bit_identical": true,
+  "S2_regen_is_dsproj": true,
+  "S2_width": 128,
+  "S2_depth": 4,
+  "S_IDEM_linear_rebuild_is_noop": false,
+  "S_IDEM_rel_divergence": 0.003055776651162233,
+  "S_SLICE_rel_err_s3": 0.0,
+  "S_SLICE_rel_err_s21": 5.028482895968758e-08,
+  "S_ADDZERO_rel": 9.836520552855201e-08,
+  "S_RF_orthonormal_r32": 2.6708740907821493e-07,
+  "S_RF_orthonormal_r64": 3.55265907803215e-07,
+  "S_CONT_inside_span": 1.0000000144930208,
+  "S_CONT_orthogonal_complement": 3.573396229727376e-14,
+  "ALL_PASS": true
+ }
+}
