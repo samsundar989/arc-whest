@@ -1,5 +1,69 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-02 (WP13 — the strategist's answer, and the COST HALF IS SOLVED) —
+> A REGENERATING K3 FLOW PINS THE MULTIPLIER FLOOR.** The strategist's return
+> named one root cause behind both open questions — the readout-relevant
+> off-diagonal third-order structure — and set the target: **K3-class raw
+> accuracy at `F <= 0.1 B`**, a place no entrant occupies (best live multiplier
+> `0.216`). `CONTRACT WP13` (`8b46574`) pre-registers four experiments with nine
+> numbered predictions, **four of which predict the lane fails**, all committed
+> before any data. Samuel's prediction slot is **waived by Samuel (solo)**.
+>
+> **The load-bearing fact was found by reading the reference implementation, not
+> by searching.** `FactoredTensor.from_dstensor` returns factors
+> `(diag(S3) + 3 S21^T, I, I)` — **two of the three legs are exactly the
+> identity**. A flow that *regenerates* `kappa_3` from its own two read-slices
+> every layer therefore costs three matmuls a layer, not six, where every one of
+> the eleven closed lanes had been trying to *compress* the tensor instead.
+>
+> **`E0-COST`: G-COST PASSES at `0.1527 B`** (`e0_cost.json`), executed at
+> `1024 x 16` in `flopscope.numpy` inside a real `BudgetContext` — measured, not
+> modelled. `P1` HELD (both figures inside their pre-registered bands);
+> **`P2` REFUTED** — the structured saving is `2.081x`, not the `>= 2.5x` I
+> predicted.
+>
+> **`E0-COST` addendum: symmetry is dead, Strassen pins the floor**
+> (`e0_cost_levers.json`). `as_symmetric` on `W^T Sigma W` bills the *identical*
+> `8,585,740,288` — ratio exactly `1.0000`, and the tagging costs `0.0137 n^3`.
+> Strassen bills `0.878 / 0.773 / 0.686 / 0.617` of a plain matmul at 1–4 levels,
+> so the regenerating flow runs `0.1527 -> 0.134 -> 0.118 -> 0.105 -> 0.0943`,
+> and **at `L = 4` the multiplier is `0.10000`** with `5.7%` of the free zone
+> unused. The lane's ceiling moves from `6.12e-09` to **`4.005e-09`**, ahead of
+> the live leader.
+>
+> **THE COST HALF OF THE TARGET IS REACHABLE. THE LANE'S REMAINING QUESTION IS
+> ENTIRELY ACCURACY** — the uncorrected regenerating flow is `dsproj`, whose raw
+> brackets around `6.9e-07` (`6.9e-08` at the floor), so `170x` separates it from
+> the ceiling. That gap is exactly what `E1`/`E2` are pre-registered to measure.
+>
+> **Two caveats, and the first could still kill it.** (1) **Residual wall time
+> tracks OPERATION COUNT, not FLOPs** (GOTCHAS; forum 18101) and `L = 4` is
+> `2,401` leaf matmuls and `~14,001` array operations *per matmul*, against a
+> `0.4 s` cliff that **annihilates** rather than penalises. **No Strassen level is
+> authorised by a FLOP count**; `L = 2` (`281` ops, `4.73e-09`) may be the honest
+> operating point, and every level must be soaked through `gpuq`. (2) Strassen's
+> numerical error is unmeasured; `4.0047e-08` is the accuracy of a flow that did
+> not use it.
+>
+> **New standing cost model, and it replaces every hand estimate in this
+> repository:** flopscope bills a dense `(n, n) @ (n, n)` matmul at **`4 n^3`**,
+> twice the textbook figure. Restated — **at the `0.1` floor an entire
+> `1024 x 16` estimator is allowed `3.2` dense matmuls per layer.** The shipped
+> file spends `2.00` (that is `W^T Sigma W` and essentially nothing else); a
+> regenerating K3 flow spends `5.0`, or `3.1` with `L = 4` Strassen.
+> `docs/GOTCHAS.md` carries it.
+>
+> **Pending:** `E0-TOL` / `E1` / `E2` on `gpuq` 112, seed block
+> `P01[40,821,001,168..175]` (claimed on the host before submission — the WP9
+> snapshot defect). Four self-tests are green, including **S2: the regenerating
+> hook at `eps = 0` is BIT-IDENTICAL to the already-committed `dsproj` cell**, so
+> the amplification law is measured around a point whose drift is already on the
+> record and cannot be quietly moved.
+>
+> **Track 2 is running in parallel:** `docs/writeup-p2-draft.md` is a new
+> Phase-2 write-up draft with six of ten sections evidence-complete.
+> `docs/writeup-draft.md` (Phase 1) stays stale and untouched.
+
 > **2026-09-02 — THE SOAK'S FIRST REAL RUN REFUSED THE SHIPPED FILE, AND THE
 > INSTRUMENT COULD NOT SAY WHY.** WP6's `--residual-soak` ran for the first
 > time, on **v2.6.1 — the exact file the grading server ran with ZERO failures**
