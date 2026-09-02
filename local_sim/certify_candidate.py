@@ -565,10 +565,18 @@ def main() -> int:
                   and smoke["residual_cap"] == 0.4,
                   f"{smoke['width']}x{smoke['depth']}, lambda "
                   f"{smoke['lambda']}, cap {smoke['residual_cap']} s")
+            # `worst_residual` is 0.0 when EVERY smoke row took the exception
+            # path (the runner zeroes it there). The headroom division was
+            # unguarded, so the certifier died with a ZeroDivisionError before
+            # writing its JSON or printing a verdict -- on a host where a 15%
+            # per-row failure rate had just been observed, a ~2% event.
+            _wr = smoke["worst_residual"]
             check("10: worst GRADED-PATH residual is under the cliff",
-                  smoke["worst_residual"] < smoke["residual_cap"],
-                  f"{smoke['worst_residual'] * 1000:.2f} ms -> "
-                  f"{smoke['residual_cap'] / smoke['worst_residual']:.1f}x")
+                  0.0 < _wr < smoke["residual_cap"],
+                  (f"{_wr * 1000:.2f} ms -> "
+                   f"{smoke['residual_cap'] / _wr:.1f}x") if _wr > 0 else
+                  "0.00 ms -- every smoke row FAILED before it was timed; "
+                  "this is not a pass")
             print(f"      counted FLOPs {smoke['flops_per_mlp']:,.0f}   "
                   f"multiplier {smoke['multiplier']:.4f}   "
                   f"C/B {smoke['c_over_b']:.7f}")
@@ -632,6 +640,11 @@ def main() -> int:
                           "LOCATION, not an exoneration.")
                 print(f"      residual rows excluded as never-executed: "
                       f"{soak['residual_rows_excluded_failed']}")
+            check("11: counted FLOPs are identical on every executed row",
+                  soak["flops_executed_constant"] is True,
+                  f"{soak['flops_executed_min']:,} .. "
+                  f"{soak['flops_executed_max']:,}"
+                  if soak["flops_executed_min"] is not None else "no rows")
             check("11: the WORST pooled residual clears the cliff",
                   soak["worst"] < cap,
                   f"worst {soak['worst']*1000:.2f} ms of a {cap*1000:.0f} ms "
@@ -647,11 +660,25 @@ def main() -> int:
                   f"-> headroom {soak['headroom_worst']:.2f}x")
             print(f"        worst/median dispersion {soak['worst_over_median']:.2f}x")
             print(f"      over {soak['n_rows_executed']} EXECUTED rows of "
-                  f"{soak['n_rows']}. A failed row carries residual 0.0 from")
-            print(f"      the runner's exception path; pooling it would report "
-                  f"a median of "
-                  f"{soak['median_all_rows']*1000:.3f} ms instead of "
-                  f"{soak['median']*1000:.3f} ms.")
+                  f"{soak['n_rows']}.")
+            if soak["residual_rows_excluded_failed"]:
+                # Only the EXCEPTION path zeroes the residual. The four
+                # exhaustion paths leave a real -- and possibly over-cap --
+                # number, so excluding them makes `worst` LESS conservative and
+                # the contaminated figure must be shown next to it.
+                print(f"      pooling the {soak['residual_rows_excluded_failed']}"
+                      f" failed rows would report median "
+                      f"{soak['median_all_rows']*1000:.3f} ms (vs "
+                      f"{soak['median']*1000:.3f}) and worst "
+                      f"{soak['worst_all_rows']*1000:.3f} ms (vs "
+                      f"{soak['worst']*1000:.3f}).")
+                print(f"      A row that FAILED ON THE CLIFF keeps its real, "
+                      f"over-cap residual, so the")
+                print(f"      contaminated worst "
+                      f"({soak['headroom_worst_all_rows']:.2f}x headroom) is "
+                      f"the CONSERVATIVE one. Check 11's")
+                print(f"      zero-failure clause is what guards that, not "
+                      f"the headroom number.")
             print(f"      LOCAL HOST ONLY. `AGENTS.md` forbids quoting a local "
                   f"absolute wall time as")
             print(f"      a grader prediction; the two submitted files ran "
@@ -773,22 +800,66 @@ def _row_failed(m):
                                             for k in _FAILURE_FLAGS)
 
 
-def _failure_record(rep, m):
+def _candidate_frame(tb_lines, candidate):
+    """The deepest traceback frame that is the CANDIDATE'S OWN FILE.
+
+    Not "a file under the repository root": the four virtualenvs live under
+    that root, so the installed `whestbench` and `flopscope` are under it too,
+    and matching the root makes every harness fault look like ours.
+
+    `candidate` may be None (older callers), in which case no frame is claimed
+    -- refusing to answer is correct here, and is much better than answering
+    "the candidate" for a harness fault.
+    """
+    if not candidate:
+        return None
+    target = os.path.normcase(os.path.abspath(candidate))
+    for ln in reversed(tb_lines):
+        if not ln.strip().startswith("File "):
+            continue                       # a source line, not a frame
+        i, j = ln.find('"'), ln.rfind('"')
+        if i < 0 or j <= i:
+            continue
+        path = os.path.normcase(os.path.abspath(ln[i + 1:j]))
+        parts = path.replace("\\", "/").split("/")
+        if any(seg.startswith(".venv") or seg == "site-packages"
+               for seg in parts):
+            continue                       # an installed package, not ours
+        if path == target:
+            return ln.strip()
+    return None
+
+
+def _failure_record(rep, m, candidate=None):
     """Why one MLP failed, small enough to live in a committed artifact.
 
     The traceback's LAST line is kept, not the first: the first line is always
     `Traceback (most recent call last):`, and the last is the exception that
-    actually fired. The deepest repository frame is kept separately, because
-    the question a failure has to answer here is whether the fault is in the
-    harness/host or in the candidate's own math -- and those two live in
-    different files.
+    actually fired.
+
+    `deepest_candidate_frame` answers the only question a failure has to answer
+    here: is the fault in the harness/host, or in the candidate's own math?
+
+    THE FIRST VERSION OF THIS GOT IT EXACTLY BACKWARDS, and an independent
+    review caught it. It matched the substrings `"estimator"` or `"arc-whest"`
+    anywhere in a line. But `.venv/` lives INSIDE
+    `C:/Users/samsu/Documents/arc-whest/`, so every absolute path
+    `traceback.format_exc()` emits for a `whestbench` or `flopscope` frame
+    contains `arc-whest` -- and `scoring.py`'s own source line
+    `raw_predictions = estimator.predict(...)` contains `estimator`. A pure
+    harness fault was therefore reported as a candidate fault, loudly. The one
+    test guarding that direction passed only because its fixture used a
+    RELATIVE path, which `format_exc()` never produces.
+
+    So the match is now on the candidate file's own absolute path, with every
+    virtualenv prefix excluded explicitly. `candidate` is threaded in from
+    `main()`, which already holds it.
     """
     err = m.get("error")
     if isinstance(err, dict):
         err = err.get("message", "")
     tb = (m.get("traceback") or "").strip().splitlines()
-    repo_frame = next((ln.strip() for ln in reversed(tb)
-                       if "estimator" in ln or "arc-whest" in ln), None)
+    repo_frame = _candidate_frame(tb, candidate)
     return {
         "rep": rep,
         "mlp_index": m.get("mlp_index"),
@@ -797,7 +868,7 @@ def _failure_record(rep, m):
         "error": str(err)[:200] if err else None,
         "flags": [k for k in _FAILURE_FLAGS if m.get(k)],
         "traceback_last_line": tb[-1][:200] if tb else None,
-        "deepest_repo_frame": repo_frame[:200] if repo_frame else None,
+        "deepest_candidate_frame": repo_frame[:200] if repo_frame else None,
         "residual_wall_time_s": m.get("residual_wall_time_s"),
         "flops_used": m.get("flops_used"),
     }
@@ -861,10 +932,10 @@ def _residual_soak(rel, reps, n_mlps, timeout=5400):
                     "why": (f"rep {i+1} REFUSED at {err.get('stage')}: "
                             f"{err.get('code')} {err.get('message','')[:70]}")}
         reports.append(d)
-    return _pool_residual(reports, reps, n_mlps)
+    return _pool_residual(reports, reps, n_mlps, rel)
 
 
-def _pool_residual(reports, reps, n_mlps):
+def _pool_residual(reports, reps, n_mlps, candidate=None):
     """The arithmetic half of the soak, separated so it can be TESTED.
 
     It was fused with the subprocess loop, which meant the only way to exercise
@@ -875,7 +946,7 @@ def _pool_residual(reports, reps, n_mlps):
     Takes parsed official reports, returns the pooled residual tail. Pure: no
     subprocess, no clock, no filesystem.
     """
-    res, res_all, per_rep, failures = [], [], [], []
+    res, res_all, per_rep, failures, fl = [], [], [], [], []
     failed, cap, breakdown = 0, None, {}
     for i, d in enumerate(reports):
         r = d["results"]
@@ -886,6 +957,15 @@ def _pool_residual(reports, reps, n_mlps):
         # so the two can never drift apart.
         rows = [float(m["residual_wall_time_s"]) for m in r["per_mlp"]
                 if not _row_failed(m)]
+        # Per-row counted FLOPs across EXECUTED rows. CONTRACT WP8's
+        # prediction P5 was "counted FLOPs on every executed row remain
+        # exactly 137,600,326,656" -- and the soak stored no such thing, so
+        # the prediction was unanswerable from its own artifact. Section 10's
+        # figure is a max over TWO smoke rows, which is not "every executed
+        # row". A spread of zero is the claim; recording min and max is what
+        # makes it checkable.
+        fl += [int(m.get("flops_used", 0)) for m in r["per_mlp"]
+               if not _row_failed(m)]
         res.extend(rows)
         res_all.extend(rows_all)
         failed += int(r["n_failed_mlps"])
@@ -894,7 +974,7 @@ def _pool_residual(reports, reps, n_mlps):
         for m in r["per_mlp"]:
             if not _row_failed(m) or len(failures) >= _MAX_FAILURE_RECORDS:
                 continue
-            failures.append(_failure_record(i + 1, m))
+            failures.append(_failure_record(i + 1, m, candidate))
         per_rep.append({
             "rep": i + 1, "n_rows": len(rows_all), "n_executed": len(rows),
             "n_failed": int(r["n_failed_mlps"]),
@@ -933,6 +1013,19 @@ def _pool_residual(reports, reps, n_mlps):
         "headroom_worst": (cap / worst) if worst > 0 else float("inf"),
         # The contaminated figures, kept so the correction is visible and a
         # reader can see how much the zeros were moving the tail.
+        # The contaminated WORST matters more than the contaminated median, and
+        # the first version of this kept the median and dropped the worst --
+        # exactly backwards. The four exhaustion paths do NOT zero the
+        # residual: `residual_wall_time_exhausted` is set on a row whose
+        # residual is ABOVE the cap. So excluding failed rows makes `worst`
+        # LESS conservative, and without this field a reader sees a comfortable
+        # headroom with no counterpart beside it.
+        "flops_executed_min": (min(fl) if fl else None),
+        "flops_executed_max": (max(fl) if fl else None),
+        "flops_executed_constant": (len(set(fl)) == 1 if fl else None),
+        "worst_all_rows": max(res_all),
+        "headroom_worst_all_rows": ((cap / max(res_all)) if max(res_all) > 0
+                                    else float("inf")),
         "median_all_rows": med_all,
         "p99_all_rows": _pctile(res_all, 99),
         "median_bias_from_failed_rows": (med / med_all) if med_all > 0 else None,
@@ -990,7 +1083,7 @@ def _smoke(rel, timeout=2400):
         # Same attribution as the soak. A two-row smoke that fails silently is
         # exactly as unhelpful as a 300-row one that does.
         "failure_breakdown": r.get("failure_breakdown") or {},
-        "failures": [_failure_record(1, m) for m in r["per_mlp"]
+        "failures": [_failure_record(1, m, rel) for m in r["per_mlp"]
                      if _row_failed(m)],
         "dataset": str(cfg["dataset"]["path"]),
         "width": cfg["width"], "depth": cfg["depth"],

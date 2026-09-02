@@ -263,9 +263,20 @@ def _failed_lines(stdout):
 # failed row with `residual_wall_time_s = 0.0`). `_pool_residual` is now pure,
 # so both are checkable in milliseconds.
 
+# A REAL `traceback.format_exc()` shape: absolute paths, and the installed
+# package living UNDER the repository root because `.venv/` is inside it. The
+# first version of this fixture used the relative path "whestbench/runner.py",
+# which `format_exc()` never emits -- and that is the only reason the broken
+# substring heuristic passed U3. The source line is included too, because
+# `scoring.py`'s own line reads `raw_predictions = estimator.predict(...)` and
+# contains the word `estimator`.
 _TB_HOST = (
     "Traceback (most recent call last):\n"
-    '  File "whestbench/runner.py", line 451, in _call\n'
+    '  File "C:/Users/samsu/Documents/arc-whest/.venv/lib/site-packages/'
+    'whestbench/scoring.py", line 716, in score_estimator\n'
+    "    raw_predictions = estimator.predict(mlp, budget)\n"
+    '  File "C:/Users/samsu/Documents/arc-whest/.venv/lib/site-packages/'
+    'whestbench/runner.py", line 451, in _call\n'
     "RunnerError: worker died"
 )
 _TB_OURS = (
@@ -307,21 +318,31 @@ def unit_tests():
     # Copied constants rot. This asserts the copy against the installed
     # package, so a whestbench change breaks a test instead of silently making
     # the soak's failure count disagree with the runner's own.
+    # THE FIRST VERSION OF THIS TEST WAS INVERTED, and an independent review
+    # caught it. It built the "package" tuple by FILTERING a hardcoded
+    # four-name literal in this file, so `pkg` was a subset of those four by
+    # construction: a whestbench release ADDING a fifth flag -- the only drift
+    # that would make our failure count disagree with the runner's, which is
+    # the stated purpose -- left `pkg` equal to the four and the test PASSED.
+    # It also scored its own skip as a pass, which `docs/VALIDATION.md` forbids
+    # by name. Now it PARSES the package's actual `flag_keys` tuple, and an
+    # unreadable package is a FAIL, not a green skip.
+    import ast as _ast
+    import inspect
     try:
-        import inspect
         from whestbench import scoring as _sc
         src = inspect.getsource(_sc)
         i = src.find("flag_keys = (")
-        pkg = tuple(f for f in ("budget_exhausted", "time_exhausted",
-                                "residual_wall_time_exhausted",
-                                "combined_budget_exhausted")
-                    if i >= 0 and ('"%s"' % f) in src[i:i + 400])
-        check("U1: _FAILURE_FLAGS matches the installed whestbench",
-              pkg == cc._FAILURE_FLAGS,
-              "package %s vs ours %s" % (pkg, cc._FAILURE_FLAGS))
-    except Exception as exc:  # the suite must run with nothing installed
-        check("U1: _FAILURE_FLAGS matches the installed whestbench", True,
-              "SKIPPED, whestbench unreadable: %s" % type(exc).__name__)
+        j = src.find(")", i)
+        pkg = tuple(_ast.literal_eval(src[i + len("flag_keys = "):j + 1]))
+        readable, why = True, ""
+    except Exception as exc:
+        pkg, readable = (), False
+        why = "%s: %s" % (type(exc).__name__, str(exc)[:40])
+    check("U1: _FAILURE_FLAGS is the installed whestbench's own flag_keys",
+          readable and pkg == cc._FAILURE_FLAGS,
+          ("package %s vs ours %s" % (pkg, cc._FAILURE_FLAGS)) if readable
+          else "COULD NOT READ THE PACKAGE -- not a pass: " + why)
 
     # -- U2: the exclusion arithmetic, on the shape that actually bit -------
     # 15 rows, 5 of them failed-with-zero -- the committed 45/300 in miniature.
@@ -362,23 +383,47 @@ def unit_tests():
           len(out["failures"]) == 5
           and all(f["error_code"] == "RunnerError" for f in out["failures"]),
           "%d records" % len(out["failures"]))
+    if not out["failures"]:
+        # Without this, a mutation that stops recording failures kills the
+        # suite with IndexError three lines down -- and this file's own
+        # docstring calls a red run for another reason a HARNESS FAILURE, not
+        # a catch. An independent review found exactly that (mutation MU3).
+        out["failures"] = [{"error_code": None, "traceback_last_line": None,
+                            "deepest_candidate_frame": None, "flags": []}]
     check("U3: the traceback's LAST line is kept, not its first",
-          out["failures"][0]["traceback_last_line"] == "RunnerError: worker died",
-          repr(out["failures"][0]["traceback_last_line"])[:50])
-    check("U3: a harness-side failure reports NO repository frame",
-          out["failures"][0]["deepest_repo_frame"] is None,
-          repr(out["failures"][0]["deepest_repo_frame"]))
+          len(out["failures"]) > 0
+          and out["failures"][0]["traceback_last_line"] == "RunnerError: worker died",
+          repr(out["failures"][0]["traceback_last_line"] if out["failures"]
+               else "NO RECORDS")[:50])
+    # The claim that would have been FALSE before the repair: this traceback
+    # has no participant code in it at all, yet every frame's absolute path
+    # contains "arc-whest" and one source line contains "estimator".
+    check("U3: a harness fault UNDER the repo root claims no candidate frame",
+          out["failures"][0]["deepest_candidate_frame"] is None,
+          repr(out["failures"][0]["deepest_candidate_frame"]))
 
     # -- U4: a fault in the CANDIDATE is distinguishable from a host fault --
     # The whole point of the attribution: P2 of the WP8 contract turns on
     # whether the failing frame is ours. It must not read as host contention.
     bad = _row(0, 0.0, "error")
     bad["traceback"] = _TB_OURS
-    rec = cc._failure_record(1, bad)
-    check("U4: a fault inside the candidate names a repository frame",
-          rec["deepest_repo_frame"] is not None
-          and "estimator.py" in rec["deepest_repo_frame"],
-          (rec["deepest_repo_frame"] or "none")[-44:])
+    cand = os.path.join(_ROOT, "estimator.py")
+    rec = cc._failure_record(1, bad, cand)
+    check("U4: a fault inside the candidate names the candidate's frame",
+          rec["deepest_candidate_frame"] is not None
+          and "estimator.py" in rec["deepest_candidate_frame"],
+          (rec["deepest_candidate_frame"] or "none")[-44:])
+    # U4b: the SAME traceback, asked about a DIFFERENT candidate, must not be
+    # claimed. Without this, a match on any repository file would still pass.
+    other = cc._failure_record(1, bad, os.path.join(_ROOT, "estimator_v1.py"))
+    check("U4b: ...and it is not claimed for a different candidate file",
+          other["deepest_candidate_frame"] is None,
+          repr(other["deepest_candidate_frame"]))
+    # U4c: the real host traceback, run through the real helper, against a
+    # real candidate path. This is the case the broken heuristic failed.
+    host = cc._candidate_frame(_TB_HOST.splitlines(), cand)
+    check("U4c: an installed-package frame under the repo root is EXCLUDED",
+          host is None, repr(host))
 
     # -- U5: an exhaustion failure is NOT reported as an error --------------
     # If the cliff is ever the mechanism, the soak has to say so -- that is the
@@ -398,8 +443,9 @@ def unit_tests():
           and out5["n_failed_mlps"] == 2,
           repr(out5["dominant_failure_mode"]))
     check("U5: ...and its flags survive into the record",
-          out5["failures"][0]["flags"] == ["residual_wall_time_exhausted"],
-          str(out5["failures"][0]["flags"]))
+          len(out5["failures"]) > 0
+          and out5["failures"][0]["flags"] == ["residual_wall_time_exhausted"],
+          str([f["flags"] for f in out5["failures"][:2]]) or "NO RECORDS")
     # An over-cliff row is excluded from the tail like any other failure, so
     # the reported worst is 50 ms, not 420. That is deliberate, and it is why
     # check 11 tests `n_failed_mlps == 0` SEPARATELY from the headroom: a soak
@@ -409,6 +455,21 @@ def unit_tests():
           abs(out5["worst"] - 0.05) < 1e-12 and out5["n_failed_mlps"] == 2,
           "worst %.0f ms, %d failed" % (out5["worst"] * 1000,
                                         out5["n_failed_mlps"]))
+
+    # -- U8: the CONTAMINATED worst is kept, and it is the conservative one --
+    # An independent review found that the repair kept `median_all_rows` and
+    # `p99_all_rows` but dropped the contaminated WORST -- exactly backwards.
+    # Only the exception path zeroes the residual; the four exhaustion paths
+    # leave a real, possibly OVER-CAP number. So excluding failed rows makes
+    # `worst` LESS conservative, and out5 is the proof: two rows blew a 0.4 s
+    # cap and the executed-only worst is 50 ms.
+    check("U8: an over-cap failed row is retained in worst_all_rows",
+          abs(out5["worst_all_rows"] - 0.42) < 1e-12
+          and out5["headroom_worst_all_rows"] < 1.0,
+          "worst_all_rows %.0f ms, headroom %.3fx (executed-only says %.0f ms,"
+          " %.1fx)" % (out5["worst_all_rows"] * 1000,
+                       out5["headroom_worst_all_rows"],
+                       out5["worst"] * 1000, out5["headroom_worst"]))
 
     # -- U6: all rows failed -> refuse, do not invent a tail from zeros -----
     out6 = cc._pool_residual(

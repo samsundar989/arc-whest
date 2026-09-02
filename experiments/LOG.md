@@ -24485,3 +24485,206 @@ discriminating experiment is a `1 x 100` attributed run: under a `15%` rate,
    recomputation from rows that were never stored; P4 picked a sample size that
    could not distinguish its own hypothesis from chance. Both were written
    carefully and neither was executable as intended.
+
+---
+
+# 2026-09-02 — SKEPTIC WP8: PROVISIONAL, accepted in full. The attribution half was broken, and I moved one of my own pre-registered predictions
+
+Independent pass on `d22d0cb` / `e7b83c2` / `229488f` / `9efda91`, from the raw
+artifacts. Verdict **PROVISIONAL**. Every finding is accepted; the two that
+matter most are defects in *my record*, not in the code.
+
+## What it confirmed (steelmanned, and it tried)
+
+- **The source reading is exactly right.** `scoring.py:790-857` is the generic
+  exception handler; `"residual_wall_time_s": 0.0` at **line 849**,
+  `"flops_used": 0` at 840, `error_code` at 809/812, `continue` at 857.
+- **The bias direction and magnitude reproduce.** Nearest-rank `k =
+  ceil(0.5*300) - 1 = 149`, the 105th smallest of 255 executed rows — the
+  **41.18th percentile**. U2's `1.667x` reproduces exactly.
+- **The 45 failures MUST have been exception-path**, by elimination:
+  `residual_wall_time_exhausted` would have put a row above `0.4 s` and the
+  artifact's worst is `0.09022`; `budget_exhausted` is impossible at a fixed
+  `137,600,326,656` against `2**41`; `time_exhausted` needs `> 120 s` and
+  leaves a real residual. **This is stronger than anything I established** —
+  my own entry called P1 untestable, and the Skeptic settled it by argument
+  from the artifact.
+- `_row_failed` is verbatim `_is_failed_entry` (`certify_candidate.py:772-773`
+  vs `scoring.py:1043-1044`); no row can be counted and not excluded.
+- **The unit tests are load-bearing:** 12 mutations driven, **10 caught by a
+  specifically named check**, baseline 16/16 clean.
+- Rule-1 ordering is clean and was verified by timestamp and by md5: the
+  contract precedes the repair, and the run used the repaired bytes.
+
+## Finding 1 — the attribution half was BROKEN, and its guard test could not fail
+
+`deepest_repo_frame` matched the substrings `"estimator"` or `"arc-whest"`.
+**`.venv/` lives inside `C:/Users/samsu/Documents/arc-whest/`**, so every
+absolute path `traceback.format_exc()` emits for a `whestbench` or `flopscope`
+frame contains `arc-whest` — and `scoring.py:716`'s own source line
+`raw_predictions = estimator.predict(...)` contains `estimator`. Driven against
+a **real** `format_exc()` raised inside the installed package, with no
+participant code anywhere in the stack, it returned
+
+```
+'File "C:\\...\\arc-whest\\.venv\\lib\\site-packages\\whestbench\\scoring.py", line 421, ...'
+```
+
+and the certifier printed `*** A FAILING FRAME IS IN THIS REPOSITORY. This is
+NOT host contention:`. **The field that prediction P2 turns on answered "the
+candidate" for a pure harness fault.**
+
+It is worse than a false positive in the abstract. `runner.py:190-196` raises
+`SETUP_TIMEOUT` from a worker restart with `traceback=None`, so `scoring.py:800`
+falls back to the *host's* `format_exc()` — meaning the single most likely
+cause of 45 contention-driven failures on this documented `SETUP_TIMEOUT`-prone
+host is exactly the case that would have been misreported.
+
+**My guard test passed only because its fixture lied.** `_TB_HOST` used the
+relative path `File "whestbench/runner.py"`, which `format_exc()` never
+produces.
+
+**Repaired.** `_candidate_frame()` matches the **candidate file's own absolute
+path**, threaded in from `main()`, and skips any path segment starting
+`.venv` or equal to `site-packages`. The field is renamed
+`deepest_candidate_frame`. Three tests now cover it, and the fixture is a real
+`format_exc()` shape with absolute paths under the repository root:
+**U3** (a harness fault under the repo root claims no candidate frame),
+**U4b** (the same traceback asked about a *different* candidate file is not
+claimed), **U4c** (an installed-package frame under the repo root is excluded).
+The review's mutation MU12 — narrowing the heuristic to `"arc-whest"` alone —
+survived the old battery with zero named failures; it cannot now.
+
+## Finding 2 — I SWAPPED A PRE-REGISTERED PREDICTION. Checklist 13, and it is mine
+
+The contract (`LOG.md`, CONTRACT WP8) fixed:
+
+> **P5** — counted FLOPs on every executed row remain exactly
+> `137,600,326,656`
+
+The result scored:
+
+> **P5** — worst pooled residual clears the cliff with `> 3x` headroom — HELD,
+> `5.71x`
+
+**These are not the same proposition.** The one I scored is **WP6's** P5; I
+carried it across from the previous contract and reported it as though it were
+this one's. The contract's actual P5 is reported nowhere, and — worse — the
+soak stored **no per-row `flops_used` for executed rows**, so `diag_12.json`
+cannot answer it either. Section 10's `flops_per_mlp` is a `max` over **two**
+smoke rows, which is not "every executed row".
+
+So: **the contract's P5 is UNSCORED.** Not held, not refuted — unscored,
+because I substituted a different question and because the instrument recorded
+nothing that could answer the real one.
+
+**Repaired so it is answerable next time:** `_pool_residual` now records
+`flops_executed_min`, `flops_executed_max` and `flops_executed_constant` across
+executed rows, and check 11 gained *"counted FLOPs are identical on every
+executed row"*. The proposition P5 makes is that the spread is zero; that is
+now a check that can fail.
+
+The scored-instead proposition stands on its own terms and is retained as what
+it is — a residual-headroom observation, `5.71x` on **12** executed rows in one
+quiet session — with the caveat the review added: section 10 of that same
+artifact reports a worse row at `83.29 ms` → `4.80x`, and the `4.43x` from the
+300-row run is not comparable with either.
+
+## Finding 3 — "It is submitted and pending" was FALSE when I committed it
+
+`gpuq show 72`: the `1x100` discriminator started `05:12:51Z` and was
+**CANCELLED at `05:13:37Z`**, 46 seconds in — **by me**, to unblock the WP9
+lane at concurrency 1. Commit `9efda91` is dated `05:48:02Z`, **34 minutes
+later**, and asserts the job is pending. `diag_100.json` does not exist.
+
+That is a false statement about the state of the world in the durable record,
+and continuity is the one thing this repository cannot get wrong. **Corrected
+here: the `1x100` discriminator is CANCELLED, not pending.** It is re-queued as
+part of this entry's follow-up, and per the review's recommendation it goes
+back as **`3 x 100`** so the re-measurement matches the original's shape rather
+than differing from it on three axes at once (rows, run length,
+queued-versus-direct).
+
+## Finding 4 — the contaminated WORST was dropped, and it is the conservative one
+
+The repair kept `median_all_rows` and `p99_all_rows` and dropped the
+contaminated `worst`. **Exactly backwards.** Only the *exception* path zeroes
+the residual; the four exhaustion paths fall through to the real timing read
+(`scoring.py:859-886`), and `scoring.py:898-912` sets
+`residual_wall_time_exhausted` on a row whose residual is **above** the cap.
+So excluding failed rows makes `worst` **less** conservative.
+
+The review's demonstration is now a test. **U8**: two rows at `0.41`/`0.42 s`
+against a `0.4 s` cap give `worst_all_rows = 420 ms` (**`0.952x` headroom** —
+over the cliff) while the executed-only `worst` is `50 ms` (`8.0x`).
+`worst_all_rows` and `headroom_worst_all_rows` are now recorded, and the
+printout says which of the two is conservative and that **check 11's
+zero-failure clause, not the headroom number, is what guards it.**
+
+## Findings 5-8, all repaired
+
+- The printout asserted *"A failed row carries residual 0.0 from the runner's
+  exception path"* **unconditionally**, which is false for all four exhaustion
+  modes. Now printed only when rows were excluded, and it names both figures.
+- `certify_candidate.py:571` divided by `smoke["worst_residual"]` unguarded. If
+  both smoke rows take the exception path that is `0.0` and the certifier dies
+  with `ZeroDivisionError` **before writing its JSON or printing a verdict** —
+  a `~2%` event at the observed `15%` per-row rate. Guarded, and a zero is now
+  reported as *"every smoke row FAILED before it was timed; this is not a
+  pass"*.
+- Mutation **MU3** (drop the four flags from `_row_failed`) killed the suite
+  with `IndexError` instead of failing a named check — which this suite's own
+  docstring calls a HARNESS FAILURE, not a catch. The three indexing sites are
+  guarded.
+- **U1 was INVERTED.** It built the "package" tuple by *filtering a hardcoded
+  four-name literal in the test file*, so a whestbench release **adding** a
+  fifth flag — the only drift that would make our failure count disagree with
+  the runner's, which is the stated purpose — left it equal to the four and
+  **passed**. Its `except: check(..., True, "SKIPPED")` also scored a skip as a
+  pass, which `docs/VALIDATION.md` forbids by name. It now `literal_eval`s the
+  package's actual `flag_keys` tuple, and an unreadable package is a FAIL.
+
+Unit suite: **19/19**, up from 16, with three of the new ones covering
+attack surfaces the review opened.
+
+## What the review left genuinely unresolved, and I am not closing it
+
+- **Nothing on disk pins the host state during the WP6 soak.** The `gpuq` store
+  shows the queue largely idle in that window, which is *weak evidence against*
+  the brokered-neighbour story — but `docs/GOTCHAS.md` records that the heavy
+  neighbours previously ran **outside** the queue and drove Windows to 67 MB of
+  commit headroom, and the queue cannot see those. H1 stays a hypothesis with a
+  motive and no measurement.
+- **Whether the 45 were clustered is unknown and may break the null.**
+  `runner.py:42-44, 377-387` makes a worker-death cascade structurally likely
+  (`PREDICT_TIMEOUT` → `_mark_worker_dead` → restart → `setup` under the same
+  load). The pre-repair artifact recorded no per-rep failure counts, so the
+  i.i.d.-Bernoulli model behind my `P(0 of 12 | 15%) = 0.142` **may not be the
+  right null at all**. `per_rep` now carries `n_failed`; the original run's
+  distribution is gone for good.
+- P3 was scored slightly **too harshly**: the magnitude is unrecoverable, but
+  the *sign* is provable from the artifact alone — with 45 zeros present,
+  executed rank 128 ≥ pooled rank 105, so the executed median is provably
+  `>= 47.432 ms`.
+
+## Standing consequence, and it binds WP9
+
+> **WP9's gate clause G3 currently has nothing behind it but 12 rows**, and
+> `deepest_candidate_frame` may not be read as evidence for or against
+> prediction P2 on any artifact produced before this entry.
+
+## Knowledge delta
+
+1. **A repository that contains its own virtualenvs cannot use its own root as
+   an "is this our code" test.** Every installed package is under it. Match the
+   file, not the tree.
+2. **A guard test whose fixture is not the shape the real system emits is not a
+   guard.** `_TB_HOST` used a relative path; `format_exc()` only ever emits
+   absolute ones. That single detail is the whole reason a broken discriminator
+   shipped green.
+3. **A test that filters a hardcoded list cannot detect an addition to the
+   thing it mirrors.** Parse the source of truth; do not intersect with your
+   own copy of it.
+4. **Carrying a prediction across from the previous contract is the same defect
+   as writing one after the data**, and it is easier to do by accident. The
+   fifth prediction of two adjacent contracts is exactly where it happens.
