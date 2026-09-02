@@ -24092,3 +24092,111 @@ way:
 
 Until answered, treat the § 8 line as a **citation error against a CONFIRM-tier
 dataset** and do not fit on it.
+
+---
+
+# 2026-09-01 — CONTRACT WP8: the soak counted 45 failures and cannot say why, and its median is computed over rows that never ran
+
+**IMPORTANT.** Instrument repair on `local_sim/certify_candidate.py`. Reads
+CONFIRM-tier truth (the organisers' `mini` split) for residual only; selects
+nothing, fits nothing, claims no accuracy. No seed block, no vault touch, no
+`estimator.py` edit.
+
+## Question
+
+WP6's `--residual-soak` ran for the first time, on the **shipped v2.6.1 canary**
+-- the exact file the grading server ran with **zero** failed MLPs -- and
+returned `n_failed_mlps = 45` of `300` rows, verdict **REFUSED**
+(`experiments/2026-09-01_wp6_meter/certify_v261_soak3.json`, committed at
+`d22d0cb`). Two questions follow, and the second was not visible until I read
+the package:
+
+1. **Why did 45 MLPs fail?** The soak records the count and discards the reason.
+2. **Is the pooled residual tail it reports even a tail of executed work?**
+
+## Evidence
+
+| item | status |
+|---|---|
+| graded #328662 = this exact file, `n_failed_mlps: 0` on 100 organiser MLPs | **CONFIRMED** -- `experiments/run_reports/submission_328662_*_graded_report.json` |
+| the same file's prior local official mini run: `4.050566e-7`, **0 failures** | **CONFIRMED** -- `CURRENT_STATE.md` section on the shipped estimator |
+| the soak's own worst residual is `90.2 ms` against a `400 ms` cap (`4.43x`) | **CONFIRMED** -- no row is near the cliff, so **residual exhaustion is not the failure mode** |
+| `whestbench/scoring.py:1059-1075` builds a `failure_breakdown` splitting failures into `budget_exhausted` / `time_exhausted` / `residual_wall_time_exhausted` / `combined_budget_exhausted` / `error` | **CONFIRMED** -- the soak reads `n_failed_mlps` and **never reads this** |
+| `whestbench/scoring.py:790-850` -- on the **exception** path a failed row is appended with `"residual_wall_time_s": 0.0` | **CONFIRMED by source reading** |
+| host peak working set for one official mini run is `14.32 GiB` | **CONFIRMED** -- measured 2026-09-01, `docs/SETUP_WINDOWS.md` 7.1 |
+| this host has a documented `SETUP_TIMEOUT`-under-contention failure history (preflight 15/16) and a `2.35x` session-to-session residual spread | **CONFIRMED** |
+
+## Hypothesis and mechanism
+
+**H1 -- the failures are exceptions, not cap exhaustions, and they are
+host-side.** Mechanism: no row is within `4.4x` of the residual cap and the
+counted FLOP total is fixed and network-independent for this file
+(`137,600,326,656`), so neither the FLOP budget nor the residual cliff can
+discriminate 45 rows from the other 255. What differs between rows is only *the
+host at that moment*. The soak run is a `14.32 GiB` process repeated three
+times on a box that brokers concurrent agents, and this repository has already
+recorded one contention-induced failure class on exactly this instrument.
+
+**H2 -- the soak's pooled median is computed over rows that never executed, and
+is therefore biased LOW.** Mechanism, from source, not inference: the exception
+path sets `residual_wall_time_s = 0.0`. Those 45 zeros enter the pooled sample
+and sort to the bottom. The reported "median" at sorted rank `150/300` is
+therefore the `105`th of `255` real rows -- the **41st percentile** of executed
+work wearing the label `median`. `worst` is unaffected (a max ignores zeros),
+which is precisely why the defect is invisible in the number a reader checks.
+
+## Intervention
+
+The smallest change that discriminates. `_residual_soak` and `_smoke` gain:
+
+- **`failure_breakdown`** -- the runner's own five-way split, summed across reps.
+- **`failures`** -- per failed MLP, its `mlp_index`, `mlp_name`, `error_code`
+  and the first line of `error`. Capped at 40 records so a pathological run
+  cannot produce an unbounded artifact.
+- **`residual_rows_excluded_failed`** and a residual sample taken over
+  **executed rows only**, with the contaminated figures kept alongside as
+  `*_all_rows` so the correction is visible rather than silently applied.
+
+Check 11 gains a clause naming the dominant failure mode, so a future REFUSED
+carries its reason in the transcript instead of in a later investigation.
+
+## Numbered predictions, recorded before the repaired instrument runs
+
+*Human prediction slot: **waived by Samuel (solo), 2026-09-01**. Falsification
+runs against these.*
+
+| # | prediction | direction / magnitude |
+|---|---|---|
+| **P1** | the repaired soak attributes the failures to **`error`**, not to any of the four exhaustion flags | `failure_breakdown["error"]` carries at least `90%` of the failures |
+| **P2** | the `error_code` is a **worker/runner-level** code (a `RunnerError` code or a process-death class), not an exception raised inside the shipped file's own math | if the traceback lands in `estimator.py`, H1 is wrong and the shipped file has a real live-shape bug |
+| **P3** | recomputing the **committed** soak's median over executed rows only raises it | at least `1.05x` above the reported `47.432 ms`; `worst` is **unchanged** at `90.224 ms` |
+| **P4** | a fresh small diagnostic run (`1 x 12` MLPs) submitted to `gpuq` with the footprint declared shows a **materially lower** failure rate than `45/300 = 15%` | at most `1/12`; if it reproduces at `~15%` the cause is not transient contention and H1 needs a second mechanism |
+| **P5** | counted FLOPs on every executed row remain exactly `137,600,326,656` | this file does not prune; a different number means the arm is not the arm |
+
+## Falsifier
+
+- **H1 is rejected** if `failure_breakdown` attributes the failures to
+  `time_exhausted` or `residual_wall_time_exhausted` (then the cliff *is* the
+  mechanism and every residual claim in this repository needs re-examination),
+  or if P2's traceback lands inside `estimator.py` (then the shipped file has a
+  live-shape defect and the graded zero-failure result needs explaining).
+- **H2 is rejected** if excluding the failed rows leaves the median within
+  `1.005x` -- then the zeros are not where I claim and the source reading is
+  wrong.
+
+## Cost model
+
+Phase 2, `lambda = 0`, `C = F`. This slice changes **no estimator** and
+therefore **no counted FLOP**. Its own cost is wall time on the local host,
+submitted through `gpuq` at the declared `--ram 20 --cpus 6` footprint. The
+residual figure it produces is reported as **headroom `0.4 / observed`** on the
+worst **executed** row, per `VALIDATION.md` 2b-ii -- never as a price, never as
+a grader prediction.
+
+## What must not change
+
+`estimator.py` (byte-identical to its archive), the ship-file gate,
+`preflight.ps1`, any seed block, the vault, the three-tier protocol.
+`certify_candidate` stays read-only with respect to the repository. The soak
+remains a **residual** instrument: it may read the split's labels and must
+return no accuracy statistic.
