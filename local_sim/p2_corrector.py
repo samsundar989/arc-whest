@@ -143,7 +143,7 @@ def features(t, alpha, layer, depth):
 
 
 def k2_rollout(t, w, corrector=None, mode="full", clamp_cm=None,
-               calibrate=None):
+               calibrate=None, mean_only=False):
     """K2p1, optionally corrected in flight. Returns the per-layer record.
 
     `mode`:
@@ -175,6 +175,13 @@ def k2_rollout(t, w, corrector=None, mode="full", clamp_cm=None,
     # a corrector means the corrector does that job.
     if calibrate is None:
         calibrate = corrector is None
+    if mean_only:
+        # Arm C KEEPS v2.7's readout calibration -- it is the shipped baseline
+        # plus an in-flight state correction, not a replacement for it. Arm A
+        # already established that a corrector AT the readout is a draw with
+        # the calibration (t CI straddling zero), so there is nothing to be won
+        # by displacing it and a proven baseline to be lost.
+        calibrate = True
     n = w[0].shape[0]
     depth = len(w)
     dt = w[0].dtype
@@ -200,14 +207,38 @@ def k2_rollout(t, w, corrector=None, mode="full", clamp_cm=None,
         if use:
             f = features(t, alpha, k, depth)
             c = corrector(f)
-            cm, cv = c[..., 0], c[..., 1]
+            cm = c[..., 0]
             if clamp_cm is not None:
                 cm = cm.clamp(-clamp_cm, clamp_cm)
-            cv = cv.clamp(-CLAMP_CV, CLAMP_CV)
-            mu_new = mu_raw + sig * cm
-            var_new = (var_raw * (1.0 + cv)).clamp(min=0.0)
+            if mean_only:
+                # WP10 arm C: the MEAN channel only, applied to the propagated
+                # state, with the variance path left exactly as the closure
+                # computes it.
+                #
+                # Truth in the variance channel, at ZERO fit error, is 16x
+                # WORSE than no correction at all (WP9 Skeptic). The Gaussian
+                # closure is an internally consistent approximation, not a set
+                # of independently improvable marginals: making `var` exact
+                # while the off-diagonal stays truncated at Price order 1
+                # breaks a cancellation. So the channel is removed, not merely
+                # left unfitted.
+                #
+                # THE CONTRACT'S FIRST FORMULATION WAS WRONG AND S10 MEASURED
+                # IT. It said `mu <- g * mu_raw + sigma * c_m`, putting v2.7's
+                # gain INSIDE the tower. But v2.7 calibrates OUTPUT ROWS and
+                # leaves the propagated state alone, and scaling `mu` in flight
+                # without also scaling the covariance by `g^2` breaks the
+                # degree-1 homogeneity P2-CAL verified to 1.6e-30. A zero
+                # corrector then differed from the shipped baseline by a
+                # relative 1.424 on the scored row. The calibration is a
+                # readout gain; it is applied as one.
+                mu_new = mu_raw + sig * cm
+                var_new = var_raw
+            else:
+                cv = c[..., 1].clamp(-CLAMP_CV, CLAMP_CV)
+                mu_new = mu_raw + sig * cm
+                var_new = (var_raw * (1.0 + cv)).clamp(min=0.0)
         else:
-            cm = cv = None
             mu_new, var_new = mu_raw, var_raw
 
         recs.append({"alpha": alpha, "sig": sig, "mu_raw": mu_raw,
@@ -337,14 +368,23 @@ def cross_mse(pred, y1, y2):
 def _corrects(mode, k, depth):
     """Is layer `k` corrected under `mode`? ONE definition, used by both the
     rollout and the collector, so the fit can never be on a different set of
-    layers than the deployment."""
+    layers than the deployment.
+
+    `"inflight"` is WP10's arm C: layers 1 .. L-2. The FINAL layer is left to
+    v2.7's calibration, because arm A measured a corrector there to be a draw
+    with it (t CI `[-1.72e-08, +1.78e-09]`, straddling zero) -- and because
+    that is exactly the cell the `6.42x` oracle was computed on, so the arm and
+    its ceiling describe the same intervention.
+    """
     if k == 0:
         return False                 # exactly Gaussian; see k2_rollout
+    if mode == "inflight":
+        return k < depth - 1
     return mode == "full" or (mode == "last" and k == depth - 1)
 
 
 def collect(t, seeds, truth, corrector, mode, device, dtype, max_nets=None,
-            clamp_cm=None):
+            clamp_cm=None, mean_only=False):
     """Roll out each network and record (features, targets) at every layer.
 
     The targets are read off the trajectory the CURRENT corrector actually
@@ -379,7 +419,7 @@ def collect(t, seeds, truth, corrector, mode, device, dtype, max_nets=None,
             # propagated state, so the per-layer records this reads are
             # identical either way. Left on for consistency with evaluation.
             _out, recs = k2_rollout(t, w, corrector=corrector, mode=mode,
-                                    clamp_cm=clamp_cm)
+                                    clamp_cm=clamp_cm, mean_only=mean_only)
             tm = t.from_numpy(np.ascontiguousarray(
                 (m1[i] + m2[i]) * 0.5)).to(device=device, dtype=dtype)
             tv = t.from_numpy(np.ascontiguousarray(
@@ -396,6 +436,15 @@ def collect(t, seeds, truth, corrector, mode, device, dtype, max_nets=None,
                 if not _corrects(mode, k, DEPTH):
                     continue
                 f = features(t, r["alpha"], k, DEPTH)
+                # THE RAW residual, and the contract's "post-calibration"
+                # target was a mistake that followed from the same confusion
+                # S10 caught. v2.7 calibrates OUTPUT ROWS and leaves the
+                # PROPAGATED STATE uncalibrated, so in flight there is no
+                # calibration to be on top of: the state's error against truth
+                # is the whole raw residual. The "capacity spent relearning
+                # (g-1)h(alpha)" argument is a fact about the READOUT, where
+                # the gain is actually applied, and arm A already measured it
+                # there.
                 cm = (tm[k] - r["mu_raw"]) / r["sig"]
                 # Clip the TARGET to the same range the correction can
                 # express. An unreachable target does not merely fail to be
@@ -449,7 +498,8 @@ def fit(t, corrector, F, T, epochs=60, lr=3e-3, batch=1 << 16, seed=0,
 
 
 def evaluate(t, seeds, truth, corrector, mode, device, dtype, max_nets=None,
-             clamp_cm=None, shuffle_features=False, shuffle_seed=0):
+             clamp_cm=None, shuffle_features=False, shuffle_seed=0,
+             mean_only=False):
     """Per-network final-layer MSE by FULL ROLLOUT, unbiased by two replicas.
 
     `shuffle_features` is null control N2: the per-neuron feature rows are
@@ -469,7 +519,7 @@ def evaluate(t, seeds, truth, corrector, mode, device, dtype, max_nets=None,
         for i in range(n):
             w = weights_for(t, seeds[i], device, dtype)
             out, _ = k2_rollout(t, w, corrector=corr, mode=mode,
-                                clamp_cm=clamp_cm)
+                                clamp_cm=clamp_cm, mean_only=mean_only)
             p = out[-1].detach().cpu().numpy().astype(np.float64)
             per.append(cross_mse(p, m1[i, -1].astype(np.float64),
                                  m2[i, -1].astype(np.float64)))
@@ -525,7 +575,8 @@ def held_out_r2(t, corrector, F, T, clamp_cm=None):
 
 
 def train_arm(t, seeds, truth, mode, device, dtype, rounds=3, epochs=60,
-              seed=0, constant_cm=False, max_nets=None, verbose=True):
+              seed=0, constant_cm=False, max_nets=None, verbose=True,
+              mean_only=False):
     """DAgger: fit, roll out with what was fitted, refit on what that produced."""
     corr = Corrector(t, seed=seed, dtype=dtype, device=device,
                      constant_cm=constant_cm)
@@ -535,7 +586,7 @@ def train_arm(t, seeds, truth, mode, device, dtype, rounds=3, epochs=60,
     for r in range(rounds):
         src = None if r == 0 else corr
         F, T = collect(t, seeds, truth, src, mode, device, dtype, max_nets,
-                       clamp_cm=clamp)
+                       clamp_cm=clamp, mean_only=mean_only)
         st = fit(t, corr, F, T, epochs=epochs, seed=seed + r, verbose=verbose)
         # The clamp promised in the contract: 3 training sigmas on c_m, frozen
         # from the FIRST round's targets so a later round cannot widen it.
@@ -558,7 +609,7 @@ def train_arm(t, seeds, truth, mode, device, dtype, rounds=3, epochs=60,
         # selection is on the training networks' own rollout: legitimate model
         # selection on training data, and it leaves the held-out fold untouched.
         tr, _ = evaluate(t, seeds, truth, corr, mode, device, dtype, max_nets,
-                         clamp_cm=clamp)
+                         clamp_cm=clamp, mean_only=mean_only)
         st["round"] = r
         st["train_rollout_mse"] = float(tr.mean())
         info.append(st)
@@ -697,6 +748,31 @@ def selftest():
     chk("S9: ...and a CORRECTED arm is NOT calibrated on top of it",
         float((cc_ - base).abs().max()) == 0.0,
         "identical to the uncalibrated closure")
+
+    # S10 -- WP10 arm C. A ZERO mean-only corrector must be EXACTLY the
+    # shipped calibrated baseline: it applies CAL_G[k] in flight instead of as
+    # a post-hoc row gain, and P2-CAL proved (to 1.6e-30) that a multiplicative
+    # state scaling and an output rescale are the same thing for this closure.
+    # If they differ, the in-tower calibration is not the shipped one and every
+    # arm-C gain is measured against a baseline that does not exist.
+    zc = Corrector(t, seed=5, dtype=dt, device=dev)
+    with t.no_grad():
+        for q in zc.params():
+            q.zero_()
+    pc, _ = k2_rollout(t, w, corrector=zc, mode="inflight", clamp_cm=1.0,
+                       mean_only=True)
+    rel = float(((pc[-1] - cal[-1]) / cal[-1]).abs().max())
+    chk("S10: a ZERO arm-C corrector IS the shipped calibrated baseline",
+        rel < 1e-12, f"max relative difference on the scored row {rel:.3e}")
+
+    # S11 -- arm C must leave the SCORED row to the calibration, and touch
+    # every layer between the first and the last. This is the cell the 6.42x
+    # oracle was computed on; if the arm and its ceiling disagree about which
+    # layers they correct, the ceiling is not a ceiling for the arm.
+    got = {k for k in range(DEPTH) if _corrects("inflight", k, DEPTH)}
+    chk("S11: arm C corrects layers 1..L-2 and leaves the scored row alone",
+        got == set(range(1, DEPTH - 1)),
+        f"{min(got)}..{max(got)}, final layer excluded")
 
     # S8 -- the fit and the deployment must agree on WHICH layers are
     # corrected. They did not: `collect` pooled targets from every layer
@@ -1172,6 +1248,126 @@ def run_oracles(a):
     return 0
 
 
+def run_wp10(a):
+    """CONTRACT WP10: arm C -- mean channel only, post-calibration, rolled out.
+
+    Three arms and nothing else:
+
+        C        the corrector, one output channel, on top of the calibration
+        C0       the same with `c_m` constant across neurons -- the null that
+                 WP9 got wrong. This one shares NO channel with a divergent
+                 arm, so a failure to collapse really is a harness leak.
+        C-shuf   the same corrector with feature rows permuted within a layer.
+                 WP9 computed this for its in-flight arm only; the readout arm
+                 had no null control of its own and the review said so.
+
+    Scored against B0, the shipped calibrated file, by full ROLLOUT.
+    """
+    import competition_score as CS
+
+    t = _torch()
+    device = "cuda" if t.cuda.is_available() else "cpu"
+    dtype = t.float64
+    truth = load_truth(a.truth)
+    seeds = np.asarray(truth["seeds"])
+    n_all = len(seeds) if not a.n_mlps else min(a.n_mlps, len(seeds))
+    seeds = seeds[:n_all]
+
+    print("=" * 78)
+    print("WP10 -- the mean channel alone, in flight, post-calibration")
+    print("=" * 78)
+    print(f"  {n_all} networks, {a.folds}-fold LEAVE-NETWORKS-OUT, "
+          f"{a.rounds} DAgger rounds, gate {a.gate}x")
+    print("  P02 is a SPENT DESIGN block re-analysed with the overlap declared."
+          )
+    print("  P03 is untouched and is the replication if this passes.")
+    print()
+
+    per = {}
+    per["B0"], gt = evaluate(t, seeds, truth, None, "none", device, dtype)
+    print(f"  B0 (shipped calibrated K2 = v2.7)   {per['B0'].mean():.6e}   "
+          f"GT-noise floor {gt.mean():.4e} "
+          f"({100 * gt.mean() / per['B0'].mean():.4f}%)")
+
+    for k in ("C", "C0", "C_shuf"):
+        per[k] = np.zeros(n_all)
+    info = {}
+    for fi, held in enumerate(folds(n_all, a.folds, seed=a.seed)):
+        keep = np.setdiff1d(np.arange(n_all), held)
+        sub_fit, sub_out = _subset(truth, keep), _subset(truth, held)
+        print(f"\n  fold {fi + 1}/{a.folds}: fit {len(keep)}, score "
+              f"{len(held)} HELD OUT")
+        for name, const in (("C", False), ("C0", True)):
+            corr, clamp, rounds = train_arm(
+                t, seeds[keep], sub_fit, "inflight", device, dtype,
+                rounds=a.rounds, epochs=a.epochs, seed=a.seed + fi,
+                constant_cm=const, verbose=a.verbose, mean_only=True)
+            p, _ = evaluate(t, seeds[held], sub_out, corr, "inflight", device,
+                            dtype, clamp_cm=clamp, mean_only=True)
+            per[name][held] = p
+            F, T = collect(t, seeds[held], sub_out, corr, "inflight", device,
+                           dtype, clamp_cm=clamp, mean_only=True)
+            r2 = held_out_r2(t, corr, F, T, clamp)
+            del F, T
+            if device == "cuda":
+                t.cuda.empty_cache()
+            info.setdefault(name, []).append(
+                {"fold": fi, "clamp_cm": clamp, "rounds": rounds,
+                 "held_out_r2_cm": r2[0],
+                 "n_params": corr.n_params()})
+            print(f"      {name:<7} {p.mean():.6e}   "
+                  f"({per['B0'][held].mean() / p.mean():.4f}x over B0)   "
+                  f"R2(c_m) {r2[0]:+.4f}")
+            if name == "C":
+                ps, _ = evaluate(t, seeds[held], sub_out, corr, "inflight",
+                                 device,
+                                 dtype, clamp_cm=clamp, shuffle_features=True,
+                                 shuffle_seed=a.seed + fi, mean_only=True)
+                per["C_shuf"][held] = ps
+                print(f"      C-shuf  {ps.mean():.6e}   "
+                      f"({per['B0'][held].mean() / ps.mean():.4f}x over B0) "
+                      f"[null control]")
+
+    print("\n" + "=" * 78)
+    print("  PAIRED ARITHMETIC SCORE DIFFERENCES -- studentised-t, one-sided")
+    print("=" * 78)
+    verdicts = {}
+    for name in ("C", "C0", "C_shuf"):
+        v = CS.decide(per["B0"], per[name], gate=a.gate)
+        verdicts[name] = {"gain": float(v.gain), "passed": bool(v.passed),
+                          "mean_candidate": float(per[name].mean()),
+                          "mean_control": float(per["B0"].mean())}
+        for f in ("t_ci_difference", "mean_difference", "t_stat"):
+            if hasattr(v, f):
+                verdicts[name][f] = _jsonable(getattr(v, f))
+        tag = "[null control -- MUST be ~1.0]" if name != "C" else ""
+        print(f"  {name:<7} gain {v.gain:8.4f}x   "
+              f"{'PASS' if v.passed else 'no pass'}   {tag}")
+
+    rep = {"artifact": "wp10_mean_channel", "artifact_version": 1,
+           "contract": "experiments/LOG.md CONTRACT WP10 (2026-09-02)",
+           "truth": os.path.relpath(a.truth, _ROOT).replace("\\", "/"),
+           "n_mlps": int(n_all), "folds": int(a.folds), "rounds": int(a.rounds),
+           "epochs": int(a.epochs), "seed": int(a.seed), "gate": float(a.gate),
+           "device": device,
+           "gt_noise_mean": float(gt.mean()),
+           "raw_mse_mean": {k: float(v.mean()) for k, v in per.items()},
+           "per_mlp_raw_mse": {k: v.tolist() for k, v in per.items()},
+           "verdicts": verdicts, "fit": info,
+           "SCOPE": ("P02 is a SPENT DESIGN block, re-analysed. Arm C's number "
+                     "here is NOT independent of the design choices WP9's "
+                     "failure informed. P03 is the independent replication and "
+                     "is untouched. Passing G1 authorises a replication "
+                     "contract and nothing else.")}
+    if a.json:
+        os.makedirs(os.path.dirname(os.path.abspath(a.json)), exist_ok=True)
+        with open(a.json, "w", encoding="utf-8") as fh:
+            json.dump(rep, fh, indent=1)
+        print(f"\n  wrote {os.path.relpath(a.json, _ROOT)}")
+    print("=" * 78)
+    return 0
+
+
 def _subset(truth, idx):
     """A view of the truth arrays restricted to `idx`, same keys."""
     out = {}
@@ -1210,6 +1406,9 @@ def main():
     ap.add_argument("--gate", type=float, required=False, default=None)
     ap.add_argument("--json", default="")
     ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--wp10", action="store_true",
+                    help="CONTRACT WP10: arm C -- mean channel only, on the "
+                         "post-calibration residual, scored on rollout")
     ap.add_argument("--oracles", action="store_true",
                     help="the in-flight ceiling/null pair: truth in the mean "
                          "channel, the variance channel, and both. Reads "
@@ -1220,6 +1419,13 @@ def main():
     a = ap.parse_args()
     if a.selftest:
         return selftest()
+    if a.wp10:
+        if not a.truth:
+            ap.error("--truth is required")
+        if a.gate is None:
+            ap.error("--gate is REQUIRED. CONTRACT WP10 fixed G1 at 1.5 before "
+                     "any data existed.")
+        return run_wp10(a)
     if a.oracles:
         if not a.truth:
             ap.error("--truth is required")

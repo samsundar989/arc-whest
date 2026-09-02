@@ -25218,3 +25218,55 @@ gated. Residual: not claimed, per the G3 note above.
 the vault, **`P03`**, **`P04`**, `HUMAN_MODEL.md`, and the three-tier protocol.
 No `mini`/`full` read. The oracle cells are labelled oracles and are never
 quoted as achievable.
+
+---
+
+# 2026-09-02 — WP10 ADDENDUM, before any arm C is fitted: the contract's own formulation was internally inconsistent, and a self-test measured it
+
+`CONTRACT WP10` (`30ce479`) specified arm C as
+
+> the target is the post-calibration residual `c_m* = (truth - g_l * mu_raw)/sigma`
+> … and the correction is applied **on top of** the calibration:
+> `mu <- g_l * mu_raw + sigma * c_m`
+
+**That is wrong, and self-test S10 measured how wrong before any data was
+touched.** A ZERO arm-C corrector — which must by construction be exactly the
+shipped baseline — differed from it by a **relative `1.424` on the scored
+row**.
+
+**Why.** v2.7 calibrates **output rows**; it leaves the **propagated state**
+alone (`estimator_v2_7.py:940-950`). Putting `g` inside the tower scales `mu`
+while leaving the covariance untouched, which breaks the degree-1 homogeneity
+P2-CAL verified to `1.6e-30` — `alpha = mu/sigma` shifts, and the error
+compounds over fifteen layers. The per-layer gains also **multiply**, so row 15
+would carry `prod_k g_k` instead of `g_15`.
+
+**Corrected formulation, and it is now the one the `6.42x` oracle actually
+describes:**
+
+| | contract as written | corrected |
+|---|---|---|
+| state update | `mu <- g_l * mu_raw + sigma * c_m` | `mu <- mu_raw + sigma * c_m` |
+| variance | untouched | untouched (unchanged) |
+| readout | corrector replaces the calibration | **v2.7's row gain is KEPT** |
+| target | `(truth - g_l * mu_raw)/sigma` | `(truth - mu_raw)/sigma`, the **raw** residual |
+| layers corrected | 1..L-1 | **1..L-2** — the scored row is left to the calibration |
+
+**The "capacity spent relearning `(g-1)h(alpha)`" argument is not lost — it was
+just misapplied.** It is a fact about the **readout**, where the gain is
+actually applied, and arm A already measured it there: a fitted readout
+corrector is a *draw* with v2.7's single constant (`t` CI
+`[-1.7238e-08, +1.7762e-09]`, straddling zero). In flight there is no
+calibration to sit on top of, because the state is uncalibrated, so the state's
+error against truth **is** the whole raw residual.
+
+Correcting layers `1..L-2` and leaving the scored row alone also makes the arm
+and its ceiling describe the **same intervention**: that is exactly the cell
+the review's `6.42x` oracle was computed on. Self-test **S11** pins it, and
+**S10** now passes at `0.000e+00`.
+
+**Nothing else in the contract moves.** The gate stays `1.5x`, G2 stays
+dropped, G3 stays unclaimed, `P03` and `P04` stay untouched, and predictions
+Q1–Q6 stand as written — Q2's "post-calibration `R^2`" is read as the held-out
+`R^2` of the in-flight target, which is the quantity that arm actually fits.
+No data existed when this was written.
