@@ -177,7 +177,43 @@ def ledger(path: str = LEDGER_PATH) -> List[Claim]:
     return out
 
 
+#: Set to "1" to allow a ledger write from inside a job-queue snapshot.
+#: There is no legitimate use; it exists so the refusal can be exercised.
+_SNAPSHOT_OVERRIDE = "ARC_WHEST_LEDGER_ALLOW_SNAPSHOT"
+
+
+def _in_job_snapshot(path: str) -> bool:
+    """Is this ledger inside a `gpuq`/`workerq` job snapshot, not the repo?
+
+    A queued job runs in a FROZEN GIT WORKTREE under the queue's state
+    directory. `experiments/seed_ledger.jsonl` is tracked, so it exists
+    inside that snapshot -- and a claim written there is deleted with the
+    snapshot while the live ledger never hears about it.
+
+    THIS ALREADY HAPPENED. On 2026-09-02 the WP9 truth run was submitted to
+    `gpuq`; `p2_truth.py` called `claim()` and `finalize()` exactly as it
+    should, both wrote into the snapshot, and 96 `P02` seeds were really
+    drawn while the live ledger still reported them FREE. An independent
+    review found it. The failure is silent, it defeats the one guarantee
+    this module exists to provide -- that no two experiments share networks
+    -- and `docs/SETUP_WINDOWS.md` 7.1 had warned about exactly this class
+    of loss for ARTIFACTS without anyone noticing the ledger is one.
+    """
+    norm = os.path.normcase(os.path.abspath(path)).replace("\\", "/")
+    return "/gpuq/snapshots/" in norm or "/workerq/snapshots/" in norm
+
+
 def _append(claim: Claim, path: str = LEDGER_PATH) -> None:
+    if _in_job_snapshot(path) and os.environ.get(_SNAPSHOT_OVERRIDE) != "1":
+        raise RuntimeError(
+            "REFUSED: this ledger is inside a job-queue SNAPSHOT\n"
+            f"  {path}\n"
+            "A claim written here is discarded with the snapshot, while the "
+            "seeds are really drawn -- so the live ledger reports them FREE "
+            "and a later experiment can silently reuse the same networks.\n"
+            "Claim seeds in the live repository BEFORE submitting, and pass "
+            "the explicit seed range to the queued job."
+        )
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "a", encoding="utf-8") as fh:
         fh.write(json.dumps(asdict(claim), sort_keys=True) + "\n")

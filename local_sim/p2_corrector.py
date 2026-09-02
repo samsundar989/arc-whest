@@ -1004,6 +1004,152 @@ def diagnose_readout(a):
     return 0
 
 
+# ---------------------------------------------------------------------------
+# the oracle ceiling/null pair -- one rollout each, and they would have caught
+# WP9's error before a single parameter was fitted
+# ---------------------------------------------------------------------------
+
+def oracle_rollout(t, w, tm, tv, channels, device, dtype, upto=None):
+    """K2 with the state replaced by TRUTH in the named channels, in flight.
+
+    `channels` is a subset of {"m", "v"}. This is not an estimator -- it reads
+    the labels -- it is the CEILING of an in-flight corrector that acts on
+    those channels, at ZERO fit error. The final layer is never corrected, so
+    the number it returns is what a perfect in-flight correction of layers
+    1..L-2 buys at the readout.
+
+    WP9 needed this and did not run it. Its arm B applied a FITTED correction
+    to the mean and the variance TOGETHER, diverged by 137x, and concluded the
+    per-neuron family was empty. The independent review ran exactly this and
+    found the two channels have opposite signs: the mean channel is worth
+    multiples, the variance channel is destructive AT ZERO FIT ERROR. A
+    ceiling/null pair costs one rollout and would have separated them before
+    anything was fitted.
+    """
+    n = w[0].shape[0]
+    depth = len(w)
+    dt, dev = w[0].dtype, w[0].device
+    last = (depth - 1) if upto is None else upto
+    mu = t.zeros(n, dtype=dt, device=dev)
+    cov = t.eye(n, dtype=dt, device=dev)
+    off = 1.0 - t.eye(n, dtype=dt, device=dev)
+    rows = []
+    with t.no_grad():
+        for k in range(depth):
+            wk = w[k]
+            mu_pre = wk.T @ mu
+            cov_pre = wk.T @ cov @ wk
+            var_pre = t.diagonal(cov_pre).clamp(min=1e-12)
+            sig = t.sqrt(var_pre)
+            alpha = mu_pre / sig
+            phi, Phi = _phi_Phi(t, alpha)
+            mu_raw = mu_pre * Phi + sig * phi
+            ez2 = (mu_pre * mu_pre + var_pre) * Phi + mu_pre * sig * phi
+            var_raw = (ez2 - mu_raw * mu_raw).clamp(min=0.0)
+            mu_new, var_new = mu_raw, var_raw
+            if 0 < k < last:
+                if "m" in channels:
+                    mu_new = tm[k]
+                if "v" in channels:
+                    var_new = tv[k]
+            cov = t.outer(Phi, Phi) * cov_pre * off + t.diag(var_new)
+            mu = mu_new
+            rows.append(mu)
+        out = t.stack(rows, dim=0)
+        var0 = (w[0] * w[0]).sum(dim=0)
+        out = t.cat([(t.sqrt(var0) * 0.3989422804014327).reshape(1, n).to(out.dtype),
+                     out[1:]], dim=0)
+    return out
+
+
+def run_oracles(a):
+    """The ceiling/null pair, plus the c_v-free fitted arm (arm C).
+
+    Four in-flight cells on the same networks, common random numbers:
+
+        none      the uncalibrated closure
+        m         truth in the MEAN channel only     -- the ceiling
+        v         truth in the VARIANCE channel only -- the null
+        m+v       both, which is arm B's channel set at zero fit error
+
+    plus arm B0 (the shipped calibrated file) as the control everything is
+    scored against.
+    """
+    import competition_score as CS
+
+    t = _torch()
+    device = "cuda" if t.cuda.is_available() else "cpu"
+    dtype = t.float64
+    truth = load_truth(a.truth)
+    seeds = np.asarray(truth["seeds"])
+    n_all = len(seeds) if not a.n_mlps else min(a.n_mlps, len(seeds))
+    seeds = seeds[:n_all]
+    m1, m2 = truth["means_r1"], truth["means_r2"]
+    av1, av2 = truth["allvar_r1"], truth["allvar_r2"]
+
+    print("=" * 78)
+    print("WP10 -- the in-flight ORACLE ceiling/null pair")
+    print("=" * 78)
+    print(f"  {n_all} networks, common random numbers, float64, {device}")
+    print("  Reads the LABELS by construction: these are ceilings, not")
+    print("  estimators, and none of them is submittable.")
+    print()
+
+    cells = {k: np.zeros(n_all) for k in ("B0", "none", "m", "v", "mv")}
+    for i in range(n_all):
+        w = weights_for(t, seeds[i], device, dtype)
+        tm = t.from_numpy(np.ascontiguousarray((m1[i] + m2[i]) * 0.5)
+                          ).to(device=device, dtype=dtype)
+        tv = t.from_numpy(np.ascontiguousarray((av1[i] + av2[i]) * 0.5)
+                          ).to(device=device, dtype=dtype)
+        y1 = m1[i, -1].astype(np.float64)
+        y2 = m2[i, -1].astype(np.float64)
+        with t.no_grad():
+            b0, _ = k2_rollout(t, w, corrector=None)          # calibrated
+        cells["B0"][i] = cross_mse(b0[-1].cpu().numpy().astype(np.float64), y1, y2)
+        for key, ch in (("none", ""), ("m", "m"), ("v", "v"), ("mv", "mv")):
+            o = oracle_rollout(t, w, tm, tv, ch, device, dtype)
+            cells[key][i] = cross_mse(o[-1].cpu().numpy().astype(np.float64),
+                                      y1, y2)
+        if device == "cuda":
+            t.cuda.empty_cache()
+
+    names = {"none": "uncalibrated closure, no correction",
+             "m": "truth in the MEAN channel only",
+             "v": "truth in the VARIANCE channel only",
+             "mv": "truth in BOTH (arm B's channel set)"}
+    print(f"  B0 (shipped calibrated K2)          {cells['B0'].mean():.6e}")
+    print()
+    print(f"  {'in-flight oracle cell':<40}{'final MSE':>14}{'vs B0':>10}")
+    for k in ("none", "m", "v", "mv"):
+        g = cells["B0"].mean() / cells[k].mean()
+        print(f"  {names[k]:<40}{cells[k].mean():>14.6e}{g:>9.3f}x")
+    print()
+    for k in ("m", "v", "mv"):
+        v = CS.decide(cells["B0"], cells[k], gate=a.gate)
+        print(f"  {k:<4} paired gain {v.gain:8.4f}x   "
+              f"{'clears' if v.passed else 'does not clear'} the {a.gate}x gate")
+
+    rep = {"artifact": "wp10_inflight_oracles", "artifact_version": 1,
+           "truth": os.path.relpath(a.truth, _ROOT).replace("\\", "/"),
+           "n_mlps": int(n_all), "gate": float(a.gate),
+           "mean_final_mse": {k: float(v.mean()) for k, v in cells.items()},
+           "gain_vs_B0": {k: float(cells["B0"].mean() / cells[k].mean())
+                          for k in ("none", "m", "v", "mv")},
+           "per_mlp_final_mse": {k: v.tolist() for k, v in cells.items()},
+           "SCOPE": ("ORACLE cells: they read the labels and are NOT estimators "
+                     "or candidates. They bound what a perfect in-flight "
+                     "correction of each channel could buy. A fitted arm can "
+                     "only be worse.")}
+    if a.json:
+        os.makedirs(os.path.dirname(os.path.abspath(a.json)), exist_ok=True)
+        with open(a.json, "w", encoding="utf-8") as fh:
+            json.dump(rep, fh, indent=1)
+        print(f"\n  wrote {os.path.relpath(a.json, _ROOT)}")
+    print("=" * 78)
+    return 0
+
+
 def _subset(truth, idx):
     """A view of the truth arrays restricted to `idx`, same keys."""
     out = {}
@@ -1042,12 +1188,22 @@ def main():
     ap.add_argument("--gate", type=float, required=False, default=None)
     ap.add_argument("--json", default="")
     ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--oracles", action="store_true",
+                    help="the in-flight ceiling/null pair: truth in the mean "
+                         "channel, the variance channel, and both. Reads "
+                         "labels; bounds a fitted arm, is not one.")
     ap.add_argument("--diagnose-readout", action="store_true",
                     help="decompose the final-layer error: why does an R^2 of "
                          "0.50 buy nothing? Diagnostic only, selects nothing.")
     a = ap.parse_args()
     if a.selftest:
         return selftest()
+    if a.oracles:
+        if not a.truth:
+            ap.error("--truth is required")
+        if a.gate is None:
+            ap.error("--gate is REQUIRED")
+        return run_oracles(a)
     if a.diagnose_readout:
         if not a.truth:
             ap.error("--truth is required")
