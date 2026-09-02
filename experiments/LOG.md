@@ -27554,3 +27554,43 @@ multiplier.** That is the next action, ahead of the rest of the port.
    to `32x`. Neither channel's marginal value is visible while the other is
    wrong — which is exactly the shape of WP10's finding about the mean and
    variance channels, now seen a second time in a different pair.
+
+---
+
+# 2026-09-02 — WP14 / C0-i re-scored PAIRED, per SKEPTIC WP14 defect (6)
+
+`experiments/2026-09-02_wp14_range/c0i_truth_score_paired.json`, `gpuq` 133, the
+same eight `P01` networks, same truth mint, common random numbers.
+
+The review's finding was that *"`1.61x` better than graded v2.7"* is an
+**unpaired, cross-sample, cross-instrument ratio of means** while a paired
+statistic was available from the same artifact. It is now paired. `v27proxy` is
+our K2p1 closure multiplied row-by-row by `estimator_v2_7.py::_CAL_G`'s sixteen
+literal gains — **a proxy for the shipped file, not the shipped file**, which also
+prunes dead neurons and rotates the input basis.
+
+| | raw final-layer MSE (cross-product) |
+|---|---:|
+| `v27proxy` on these 8 networks | `1.3931e-06` |
+| **graded v2.7 on the organisers' data** | **`1.3738e-06`** |
+| `regen` on these 8 networks | `8.5075e-07` |
+
+**The proxy lands within `1.4%` of the graded number it stands in for**, which is
+the check that licenses using it at all and which was not available before.
+
+> **Paired arithmetic difference (`v27proxy - regen`): `5.4232e-07`.**
+> Studentised-`t` 95% `[3.5149e-07, 7.3316e-07]`; basic bootstrap 95%
+> `[3.8574e-07, 6.7958e-07]`. **The regenerating flow wins on 8 of 8 networks.**
+> Point ratio `1.637x`.
+
+Both intervals exclude zero and neither method is percentile or BCa. The paired
+figure `1.637x` is slightly **stronger** than the unpaired `1.61x` it replaces,
+and stronger than the review's own reconstruction (`1.542x`, which used the
+measured `2.9078x` mean calibration gain as its proxy rather than the sixteen
+constants). **The defect was in the statistic's form, not in the direction of the
+result, and repairing it did not soften the claim.**
+
+Standing caveats, unchanged: `n = 8`; the adjusted score depends on `CLAIM A`'s
+composed multiplier, which `SKEPTIC WP14` rated PROVISIONAL — at WP13's `0.15272
+B` the same raw scores `1.30e-07`, i.e. **parity** with v2.7, not `1.6x`. The
+graded `1.3738e-07` remains the authority for what v2.7 actually scores.
