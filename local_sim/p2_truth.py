@@ -87,17 +87,19 @@ def _replica_seeds(input_seed: int):
             int.from_bytes(b.generate_state(2).tobytes(), "little"))
 
 
-def _truth_one(weights, seed64, n_samples, device, chunk):
-    """All-layer post-ReLU means and the final-layer variance, on the GPU.
+def _truth_one_final_only_LEGACY(weights, seed64, n_samples, device, chunk):
+    """The pre-WP9 accumulation, kept ONLY as a bit-identity reference.
 
-    float64 accumulation, float32 arithmetic -- the same choice the organisers'
-    bake documents, so the label's numerical character matches theirs.
+    Never called by the label path. `--check-allvar` runs it beside the current
+    function on the same seed and asserts the final-layer variance agrees
+    BITWISE -- which is the claim the WP9 docstring makes, and a claim of
+    bit-identity that nothing executes is just a sentence.
     """
     import torch
 
     w = [torch.from_numpy(np.ascontiguousarray(x)).to(device) for x in weights]
     gen = torch.Generator(device=device)
-    gen.manual_seed(seed64 % (2 ** 63 - 1))          # torch caps at int64
+    gen.manual_seed(seed64 % (2 ** 63 - 1))
     acc = [torch.zeros(WIDTH, dtype=torch.float64, device=device)
            for _ in range(DEPTH)]
     acc_sq = torch.zeros(WIDTH, dtype=torch.float64, device=device)
@@ -117,6 +119,54 @@ def _truth_one(weights, seed64, n_samples, device, chunk):
     return means.astype(np.float64), var.astype(np.float64)
 
 
+def _truth_one(weights, seed64, n_samples, device, chunk):
+    """All-layer post-ReLU means AND all-layer post-ReLU variances, on the GPU.
+
+    float64 accumulation, float32 arithmetic -- the same choice the organisers'
+    bake documents, so the label's numerical character matches theirs.
+
+    EXTENDED 2026-09-01 under CONTRACT WP9. This used to accumulate the second
+    moment at the FINAL layer only, because the only consumer was a
+    final-layer-MSE noise floor. An in-flight state corrector needs the true
+    post-ReLU variance at EVERY layer: `alpha = mu_pre / sig` is what indexes
+    the correction, `sig` comes from the propagated covariance, and the
+    post-ReLU variance is the diagonal that feeds it. Without the intermediate
+    variances the corrector can only touch the mean, which is half the state.
+
+    The extra work is one square-and-sum per layer per chunk -- `m * n` against
+    the layer's `m * n^2` matmul, so `1/n` = 0.1% at width 1024. The returned
+    final-layer variance is BIT-IDENTICAL to what this function returned
+    before: it is still `acc_sq[-1]/N - means[-1]^2`, the same accumulator in
+    the same order, and `--check-allvar` asserts exactly that.
+    """
+    import torch
+
+    w = [torch.from_numpy(np.ascontiguousarray(x)).to(device) for x in weights]
+    gen = torch.Generator(device=device)
+    gen.manual_seed(seed64 % (2 ** 63 - 1))          # torch caps at int64
+    acc = [torch.zeros(WIDTH, dtype=torch.float64, device=device)
+           for _ in range(DEPTH)]
+    acc_sq = [torch.zeros(WIDTH, dtype=torch.float64, device=device)
+              for _ in range(DEPTH)]
+    done = 0
+    while done < n_samples:
+        m = min(chunk, n_samples - done)
+        h = torch.randn((m, WIDTH), generator=gen, device=device,
+                        dtype=torch.float32)
+        for k in range(DEPTH):
+            h = torch.relu(h @ w[k])
+            acc[k] += h.sum(dim=0, dtype=torch.float64)
+            acc_sq[k] += (h.to(torch.float64) ** 2).sum(dim=0)
+        done += m
+    means = np.stack([(a / n_samples).cpu().numpy() for a in acc])
+    ez2 = np.stack([(a / n_samples).cpu().numpy() for a in acc_sq])
+    allvar = np.maximum(ez2 - means ** 2, 0.0)
+    # The final-layer variance keeps its own name and its own shape, so every
+    # existing consumer and every stored P01 truth file still reads correctly.
+    return (means.astype(np.float64), allvar[-1].astype(np.float64),
+            allvar.astype(np.float64))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--block", required=True, help="seed block to claim from")
@@ -129,6 +179,10 @@ def main() -> int:
     ap.add_argument("--chunk", type=int, default=1 << 16)
     ap.add_argument("--plan", action="store_true",
                     help="print the plan and the cost; claim nothing, draw nothing")
+    ap.add_argument("--check-allvar", type=int, default=0, metavar="N",
+                    help="prove the all-layer accumulator left the final-layer "
+                         "variance BITWISE unchanged, on N probe networks; "
+                         "claims nothing, writes nothing")
     ap.add_argument("--smoke", type=int, default=0,
                     help="time the path and CHECK REPLICA INDEPENDENCE on N "
                          "networks minted from an unregistered probe seed. "
@@ -149,6 +203,36 @@ def main() -> int:
     print(f"  total work      {flops_total:.3e} FLOPs")
     print(f"  out             {a.out or '(none -- --plan)'}")
 
+    if a.check_allvar:
+        import torch
+
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        print(f"  device          {device}")
+        print()
+        print("  BIT-IDENTITY CHECK: unregistered probe seeds, nothing "
+              "claimed, nothing written.")
+        base, ok = 1_000_051, True
+        for i in range(a.check_allvar):
+            w, _e, _s = canonical_mint(WIDTH, DEPTH, base + i)
+            sa, _sb = _replica_seeds(base + i)
+            m_new, v_new, av = _truth_one(w, sa, n_samples, device, a.chunk)
+            m_old, v_old = _truth_one_final_only_LEGACY(
+                w, sa, n_samples, device, a.chunk)
+            same_m = np.array_equal(m_new, m_old)
+            same_v = np.array_equal(v_new, v_old)
+            same_last = np.array_equal(av[-1], v_old)
+            ok = ok and same_m and same_v and same_last
+            print(f"    net {i}  means bitwise {same_m}   final var bitwise "
+                  f"{same_v}   allvar[-1]==var {same_last}")
+            print(f"           allvar shape {av.shape}, layer-0 mean var "
+                  f"{av[0].mean():.6e}, final {av[-1].mean():.6e}")
+        print()
+        print(f"  {'PASS' if ok else 'FAIL'} -- the all-layer accumulator "
+              f"{'left' if ok else 'CHANGED'} the existing labels "
+              f"{'unchanged' if ok else '!!'}")
+        print("=" * 78)
+        return 0 if ok else 1
+
     if a.smoke:
         import torch
 
@@ -162,11 +246,13 @@ def main() -> int:
         t0 = time.perf_counter()
         obs_l, pred_l = [], []
         pm1, pm2, pv1, pv2 = [], [], [], []
+        pav1, pav2 = [], []
         for i in range(a.smoke):
             w, _e, _s = canonical_mint(WIDTH, DEPTH, base + i)
             sa, sb = _replica_seeds(base + i)
-            m1, v1 = _truth_one(w, sa, n_samples, device, a.chunk)
-            m2, v2 = _truth_one(w, sb, n_samples, device, a.chunk)
+            m1, v1, av1 = _truth_one(w, sa, n_samples, device, a.chunk)
+            m2, v2, av2 = _truth_one(w, sb, n_samples, device, a.chunk)
+            pav1.append(av1); pav2.append(av2)
             d = m1[-1] - m2[-1]
             obs_l.append(float((d ** 2).mean()))
             pred_l.append(float((v1.mean() + v2.mean()) / n_samples))
@@ -191,6 +277,7 @@ def main() -> int:
                 means_r1=np.stack(pm1).astype(np.float32),
                 means_r2=np.stack(pm2).astype(np.float32),
                 var_r1=np.stack(pv1), var_r2=np.stack(pv2),
+                allvar_r1=np.stack(pav1), allvar_r2=np.stack(pav2),
                 gt_noise=np.asarray(
                     [(x.mean() + y.mean()) / 2.0 / n_samples
                      for x, y in zip(pv1, pv2)], dtype=np.float64),
@@ -235,11 +322,22 @@ def main() -> int:
     m2 = np.zeros_like(m1)
     v1 = np.zeros((a.n_mlps, WIDTH), dtype=np.float64)
     v2 = np.zeros_like(v1)
+    # All-layer post-ReLU variance, added under CONTRACT WP9. Same shape as the
+    # means, so the two index identically: [network, layer, neuron].
+    av1 = np.zeros((a.n_mlps, DEPTH, WIDTH), dtype=np.float64)
+    av2 = np.zeros_like(av1)
     for i, s in enumerate(seeds):
         w, _est, _ss = canonical_mint(WIDTH, DEPTH, s)
         sa, sb = _replica_seeds(s)
-        m1[i], v1[i] = _truth_one(w, sa, n_samples, device, a.chunk)
-        m2[i], v2[i] = _truth_one(w, sb, n_samples, device, a.chunk)
+        m1[i], v1[i], av1[i] = _truth_one(w, sa, n_samples, device, a.chunk)
+        m2[i], v2[i], av2[i] = _truth_one(w, sb, n_samples, device, a.chunk)
+        # The final-layer variance must be exactly the last row of the
+        # all-layer one -- the same accumulator read two ways. Asserted per
+        # network rather than trusted, because a silent divergence here would
+        # put a corrector's variance target and its noise floor on different
+        # quantities.
+        assert np.array_equal(v1[i], av1[i, -1]), f"allvar/var mismatch at {i}"
+        assert np.array_equal(v2[i], av2[i, -1]), f"allvar/var mismatch at {i}"
         if (i + 1) % 4 == 0 or i + 1 == a.n_mlps:
             el = time.perf_counter() - t0
             print(f"    {i + 1:>4}/{a.n_mlps}   {el:7.1f}s   "
@@ -259,6 +357,7 @@ def main() -> int:
         seeds=np.asarray(seeds, dtype=np.int64),
         means_r1=m1.astype(np.float32), means_r2=m2.astype(np.float32),
         var_r1=v1.astype(np.float64), var_r2=v2.astype(np.float64),
+        allvar_r1=av1.astype(np.float64), allvar_r2=av2.astype(np.float64),
         gt_noise=gt_noise.astype(np.float64),
         n_samples=np.int64(n_samples),
         width=np.int64(WIDTH), depth=np.int64(DEPTH),
