@@ -22,6 +22,46 @@ narrative record), `docs/GAME_PLAN.md` (the sole active Phase-2 strategy).
 ---
 
 
+## 2026-09-02 (WP13) — a `gpuq` job submitted with ABSOLUTE paths does not run the snapshot
+
+`CLAUDE.md` and `AGENTS.md` both record, correctly, that *"a queued job runs the
+source exactly as it was at submission time, so you may keep editing the
+repository immediately after submitting."* **That guarantee is conditional on the
+command being snapshot-relative, and nothing enforces it.**
+
+Job 112 was submitted as
+
+    workerq submit ... -- C:/.../arc-whest/.venv-gpu/Scripts/python.exe \
+                          C:/.../arc-whest/local_sim/p2_slice_lab.py --all
+
+Its log shows `cwd=C:\Users\samsu\.local\state\gpuq\snapshots\112\job-112` and
+`snapshot=git b54a4d2` — the snapshot was made, and the job ignored it, because
+the interpreter and the script were both named by **absolute paths into the live
+working tree**. The module then derives `_ROOT` from `__file__`, so its outputs
+and its `seed_ledger` reads also went to the live tree.
+
+For job 112 this was harmless and was **checked, not assumed**: the snapshot copy
+and the live file are byte-identical after CRLF normalisation
+(`sha256 0cbd45da...` both sides). That was luck. Had the file been edited in the
+19 minutes it sat in the queue, the run would have silently executed the edited
+version while its log advertised a snapshot commit — the worst shape a provenance
+defect can take, because the record would look right.
+
+**The rule.** Either
+
+- submit a snapshot-relative command (`python local_sim/foo.py`, resolved against
+  the snapshot `cwd`), and the standing guarantee applies; or
+- submit absolute paths and treat the repository as **frozen for that file until
+  the job finishes**, and verify the hash afterwards.
+
+There is a real reason to prefer absolute paths — artifacts land in the live
+`experiments/` tree instead of being discarded with the snapshot, which is
+exactly the WP9 defect where `P02` was drawn while the live ledger reported the
+seeds FREE. So this is not "always use relative". It is: **know which one you
+chose, and hash-check the file afterwards if you chose absolute.**
+
+---
+
 ## 2026-09-02 (WP13 / E0-COST) — flopscope bills a dense matmul at `4 n^3`, not `2 n^3`
 
 Measured, not modelled, at the live width in `flopscope 0.12+np2.2.6` inside a
