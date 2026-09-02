@@ -26010,3 +26010,91 @@ pre-registered to answer, and it is now quantified rather than assumed.
    compress `kappa_3`. The thing that actually moved the cost was reading
    `from_dstensor` and noticing two of its three legs are the identity — which
    cost one file read and no seeds.
+
+---
+
+# 2026-09-02 — WP13 / E0-COST ADDENDUM: one lever is dead, the other reaches the floor
+
+**Moves no gate.** G-COST was scored at `0.1527 B` by `p2_slice_cost.py` and
+stands. This answers the follow-on the E0-COST entry recorded as *"noticed while
+reading the meter, not measured"*. Instrument `local_sim/p2_cost_levers.py`,
+artifact `experiments/2026-09-02_wp13_slice/e0_cost_levers.json`. No seed block,
+no GPU, no truth.
+
+## Lever 1 — symmetry tagging is DEAD
+
+`Sigma` is symmetric and `W^T Sigma W` is two of the five matmuls a regenerating
+K3 flow spends, so flopscope's `as_symmetric` looked like a free discount.
+
+| | counted FLOPs |
+|---|---:|
+| `(W.T @ S) @ W`, plain | `8,585,740,288` |
+| `(W.T @ as_symmetric(S, symmetry=(0,1))) @ W` | `8,585,740,288` |
+| the tagging call itself | `14,680,062` (`0.0137 n^3`) |
+
+**Ratio exactly `1.0000`. A symmetric operand is not a cheaper operand**, and
+tagging one costs a little. Do not budget a symmetry discount on a matmul.
+
+## Lever 2 — Strassen pays, and it pays enough
+
+| levels | counted FLOPs | `/n^3` | vs plain | leaf matmuls | array ops |
+|---:|---:|---:|---:|---:|---:|
+| plain | `4,292,870,144` | `3.998` | `1.0000` | 1 | 1 |
+| 1 | `3,768,057,856` | `3.509` | `0.8777` | 7 | 36 |
+| 2 | `3,319,398,400` | `3.091` | `0.7732` | 49 | 281 |
+| 3 | `2,945,286,144` | `2.743` | `0.6861` | 343 | 1,996 |
+| 4 | `2,650,251,264` | `2.468` | **`0.6174`** | 2,401 | 14,001 |
+
+Applied to the regenerating flow's `335,833,648,128`:
+
+| levels | projected FLOPs | `x budget` | multiplier | score at K3-class raw `4.0047e-08` |
+|---:|---:|---:|---:|---:|
+| 0 | `335,833,648,128` | `0.15272` | `0.15272` | `6.116e-09` |
+| 1 | `294,777,287,383` | `0.13405` | `0.13405` | `5.368e-09` |
+| 2 | `259,678,405,558` | `0.11809` | `0.11809` | `4.729e-09` |
+| 3 | `230,411,393,157` | `0.10478` | `0.10478` | `4.196e-09` |
+| **4** | `207,330,648,398` | `0.09428` | **`0.10000`** | **`4.005e-09`** |
+
+**At four Strassen levels the regenerating K3 flow pins the multiplier floor.**
+The `+2**24` server offset is applied automatically to any row inside `0.5%` of
+the floor; at `L = 4` the row is `5.7%` below it, so the offset does not bind and
+the multiplier is `0.1` with `5.7%` of the free zone unused.
+
+## What this changes about the lane, and what it does not
+
+**Changes.** The cost half of the strategist's target — *K3-class raw accuracy at
+`F <= 0.1 B`* — is **reachable**, and the ladder above says exactly what each
+Strassen level is worth. Before this, `0.1527 B` capped the lane's ceiling at
+`6.12e-09`; it is now `4.00e-09`, which is ahead of the live leader. **The lane's
+remaining question is entirely accuracy**, and that is precisely what `E0-TOL`,
+`E1` and `E2` were pre-registered to answer (`gpuq` 112).
+
+**Does not change.** Four things, and the first is the one that could still kill
+this:
+
+1. **Residual wall time tracks OPERATION COUNT, not FLOPs** (`docs/GOTCHAS.md`;
+   forum 18101), which is the whole reason `estimator.py` v2.4 was re-engineered.
+   `L = 4` is **2,401 leaf matmuls and about 14,001 array operations per
+   matmul**, against a `0.4 s` per-MLP cliff that **annihilates** a submission
+   (an overrun row scores `~0.92` instead of `~1e-7`, a `~66,000x` loss). **No
+   Strassen level is authorised by a FLOP count.** Each must be soaked through
+   `gpuq` at a declared footprint, and `L = 2` — `281` ops for `4.73e-09` — may
+   well be the honest operating point.
+2. **Strassen's numerical error is unmeasured here.** It is not backward stable
+   in the way plain matmul is, and the error grows with level. `4.0047e-08` is
+   the accuracy of a flow that did NOT use it.
+3. **The `0.1527 B` base is itself a projection** — a measured third-order
+   increment summed onto the shipped K2 anchor, not an end-to-end run.
+4. **`4.005e-09` is a CEILING conditional on reaching full-K3 raw accuracy**, and
+   the uncorrected regenerating flow's raw is bracketed around `6.9e-07`, which
+   at the floor is `6.9e-08`. The whole `170x` between those two numbers is what
+   `E2` is measuring.
+
+## Knowledge delta
+
+**The cost side of this competition has one lever and it is Strassen.** Symmetry
+buys nothing. Rank compression bought nothing across eleven closed lanes. What
+moved the multiplier from `0.153` to `0.100` was reading the reference
+implementation for structure (two identity legs, `2.08x`) and then applying a
+1969 algorithm (`1.62x`) — neither of which is a search, and both of which cost
+one afternoon and zero seeds.

@@ -1,0 +1,102 @@
+{
+  "check": "WP13 E0-COST addendum: symmetry and Strassen levers",
+  "contract": "LOG 2026-09-02 CONTRACT WP13, HEAD 8b46574",
+  "moves_no_gate": true,
+  "width": 1024,
+  "budget": 2199023255552,
+  "regen_total_flops": 335833648128,
+  "measurements": {
+    "width": 1024,
+    "plain_matmul_flops": 4292870144.0,
+    "plain_matmul_over_n3": 3.998046875,
+    "symmetry": {
+      "tag_cost": 14680062.0,
+      "tag_cost_over_n3": 0.01367187313735485,
+      "congruence_plain": 8585740288.0,
+      "congruence_tagged": 8585740288.0,
+      "discount": 1.0,
+      "verdict": "NO DISCOUNT"
+    },
+    "strassen": [
+      {
+        "levels": 1,
+        "flops": 3768057856.0,
+        "over_n3": 3.50927734375,
+        "ratio_to_plain": 0.8777479237909135,
+        "leaf_matmuls": 7,
+        "array_ops": 36,
+        "ops_vs_plain": 36
+      },
+      {
+        "levels": 2,
+        "flops": 3319398400.0,
+        "over_n3": 3.0914306640625,
+        "ratio_to_plain": 0.7732352222765022,
+        "leaf_matmuls": 49,
+        "array_ops": 281,
+        "ops_vs_plain": 281
+      },
+      {
+        "levels": 3,
+        "flops": 2945286144.0,
+        "over_n3": 2.743011474609375,
+        "ratio_to_plain": 0.6860878724963361,
+        "leaf_matmuls": 343,
+        "array_ops": 1996,
+        "ops_vs_plain": 1996
+      },
+      {
+        "levels": 4,
+        "flops": 2650251264.0,
+        "over_n3": 2.4682388305664062,
+        "ratio_to_plain": 0.6173611535173424,
+        "leaf_matmuls": 2401,
+        "array_ops": 14001,
+        "ops_vs_plain": 14001
+      }
+    ]
+  },
+  "projection": [
+    {
+      "levels": 0,
+      "flops": 335833648128.0,
+      "x_budget": 0.15271946182474494,
+      "server_offset_applied": false,
+      "multiplier": 0.15271946182474494,
+      "score_at_k3_raw": 6.115956287695561e-09
+    },
+    {
+      "levels": 1,
+      "flops": 294777287383.4802,
+      "x_budget": 0.13404919053913555,
+      "server_offset_applied": false,
+      "multiplier": 0.13404919053913555,
+      "score_at_k3_raw": 5.368267933520761e-09
+    },
+    {
+      "levels": 2,
+      "flops": 259678405558.1827,
+      "x_budget": 0.11808806701000445,
+      "server_offset_applied": false,
+      "multiplier": 0.11808806701000445,
+      "score_at_k3_raw": 4.729072819549648e-09
+    },
+    {
+      "levels": 3,
+      "flops": 230411393156.82266,
+      "x_budget": 0.10477897065212467,
+      "server_offset_applied": false,
+      "multiplier": 0.10477897065212467,
+      "score_at_k3_raw": 4.196083437705637e-09
+    },
+    {
+      "levels": 4,
+      "flops": 207330648398.23938,
+      "x_budget": 0.09428306311667228,
+      "server_offset_applied": false,
+      "multiplier": 0.1,
+      "score_at_k3_raw": 4.0047000000000005e-09
+    }
+  ],
+  "caveat": "counted-FLOP ceiling only; residual wall time tracks operation count and is unmeasured for every Strassen level here, as is Strassen's numerical error"
+}
