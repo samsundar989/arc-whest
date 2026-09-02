@@ -243,68 +243,121 @@ corrected cell is the one tabled above.
 
 ---
 
-## 6. What an estimator may actually spend *(new, 2026-09-02)*
+## 6. What an estimator may actually spend *(new 2026-09-02; **materially corrected the same day** — see 9.4)*
 
-**Evidence: CONFIRMED.** `experiments/2026-09-02_wp13_slice/e0_cost.json`,
-executed in the official metering package inside a real budget context.
+**Evidence: CONFIRMED.** `experiments/2026-09-02_wp14_range/e0_cost_f64.json` and
+`e0_cost_f32.json`, executed in the official metering package inside a real budget
+context, at both dtypes.
 
-The metering package bills a dense `(n, n) @ (n, n)` matmul at **`4 n^3`**, twice
-the textbook `2 n^3`; elementwise operations and transposes are `O(n^2)` or free.
-Restating the budget in that unit is the single most useful thing we did for
-design:
+### 6.1 A FLOP count is not well-formed without its dtype
 
-> At the multiplier floor, an entire `1024 x 16` estimator is allowed
-> **3.2 dense matmuls per layer.**
+We first wrote this section around a sentence we had measured and believed:
 
-- A calibrated second-order closure spends **2.00** — that is `W^T Sigma W` and
-  essentially nothing else. It is `0.063 B`, and it is what we shipped.
+> *"The metering package bills a dense `(n, n) @ (n, n)` matmul at `4 n^3`, twice
+> the textbook `2 n^3`."*
+
+**That sentence is false, and the way it is false is the most transferable thing
+in this paper.** The meter bills the textbook `2 n^3` and then scales *every*
+operation by a per-dtype rate taken from its own packaged weight table:
+
+    float64 = 2.0    int64 = 2.0    complex128 = 2.0
+    float32 = 1.0    float16 = 1.0  int32 = 1.0    complex64 = 1.0
+
+Our probe built its arrays with a generator that returns `float64` by default. So
+we had measured the f64 column and written it down as a property of matrix
+multiplication — and then compared it against accuracy evidence gathered, in a
+different tool, in `float32`. Measured at `n = 1024`: `4,292,870,144` FLOPs at f64
+against `2,146,435,072` at f32.
+
+> **The rule we would give anyone doing this: write the dtype in the same sentence
+> as the price, every time. "This costs `X` FLOPs" is not a complete statement.**
+
+A related trap sits one level down. Under NEP-50 a *numpy* scalar such as
+`np.float64(3.0)` is **concrete**, not weak, so a single one anywhere in an f32
+expression promotes the whole downstream chain and the meter bills all of it at
+rate `2.0`. A **Python** `3.0` stays weak and bills f32. Our cost probe contained
+three of them. The instrument now asserts the dtype of its own carried state and
+refuses rather than reporting a silently promoted number.
+
+### 6.2 The budget, restated correctly
+
+At the multiplier floor, an entire `1024 x 16` estimator is allowed
+
+> **6.4 dense float32 matmuls per layer, or 3.2 float64 ones.**
+
+- A calibrated second-order closure spends `W^T Sigma W` and essentially nothing
+  else: **`137,600,326,656`** FLOPs at f64 (`0.0626 B`), **`68,802,510,336`** at
+  f32 (`0.0313 B`). The f32 ratio is `0.50002`, stable across five shapes and
+  bit-identical across nine networks.
 - A third-order flow that **regenerates** its cumulant from its own two read
   slices every layer — so the carried rank never exceeds `2n` instead of growing
-  to `32n` — spends **5.0**, i.e. `0.153 B`.
+  to `32n` — adds **`198,233,321,472`** at f64 and **`99,116,660,736`** at f32.
 
-The structural fact that gets it to 5.0 rather than 10: rebuilding the degree-3
-tensor from its slices produces factors `(diag(S3) + 3 S21^T, I, I)` in which
-**two of the three legs are exactly the identity**. Contraction on an identity
-leg is free and a diagonal leg collapses a slice einsum to a row scaling, so a
-generic implementation pays six matmuls a layer for what three do — a measured
-`2.08x`, found by reading the reference implementation rather than by searching.
+The structural fact that keeps the third-order increment to about three matmuls a
+layer rather than six: rebuilding the degree-3 tensor from its slices produces
+factors `(diag(S3) + 3 S21^T, I, I)` in which **two of the three legs are exactly
+the identity**. Contraction on an identity leg is free, and a diagonal leg
+collapses a slice contraction to a row scaling, so a generic implementation pays
+six matmuls a layer for what three do — a measured `2.08x`, found by reading the
+reference implementation rather than by searching.
 
-### The two levers on the multiplier, both measured
+### 6.3 Composing the two halves, which is where the answer was
 
-`5.0` matmuls a layer is `0.153 B`, i.e. a multiplier of `0.153` when `0.100` was
-available — **53% of the cost buying nothing.** Two levers were available and
-exactly one works.
+| composition | second order | third order | total | `F / B` | multiplier |
+|---|---:|---:|---:|---:|---:|
+| all float64 | `137,600,326,656` | `198,233,321,472` | `335,833,648,128` | `0.1527` | `0.1527` |
+| third order f32 only | `137,600,326,656` | `99,116,660,736` | `236,716,987,392` | `0.1076` | `0.1076` |
+| **both float32** | `68,802,510,336` | `99,116,660,736` | **`167,919,171,072`** | **`0.0764`** | **`0.1000`** |
 
-**Symmetry does not help.** The covariance is symmetric and its congruence
-`W^T Sigma W` is two of the five matmuls, so a symmetry-aware meter looked like a
-free discount. Tagging the operand as symmetric bills the *identical*
+> **A regenerating third-order flow reaches the multiplier floor with `24%` of the
+> free zone unspent, in plain float32, with no fast matrix multiplication and no
+> rank cap.**
+
+Both halves of that composition were measured, independently reviewed, and already
+in our own repository. The f32 second-order figure had been reviewed six days
+earlier — including the question a reader should ask, whether float32 breaks the
+closure numerically: catastrophic cancellation in `var = max(E[z^2] - mu^2, 0)`
+fires on `1,497` of `1,572,864` neuron-layers across 96 networks, the variance
+clamp fires **zero** times, there are zero non-finite outputs, and the float32
+final-layer error against ground truth is *marginally better* than float64. The
+third-order figure was measured the day this section was written. **Nobody had
+added them.** The cost lane was never short of measurement; it was short of one
+addition, and a units error was hiding the reason to try.
+
+### 6.4 The lever we thought we needed, and no longer do
+
+Before the dtype correction, the flow priced at `0.153 B` and the gap to the floor
+looked like it needed fast matrix multiplication. Measured under the same meter:
+
+| Strassen levels | vs a plain matmul | flow `F / B` (f64) | leaf matmuls | array ops |
+|---:|---:|---:|---:|---:|
+| 0 | `1.0000` | `0.1527` | 1 | 1 |
+| 1 | `0.8777` | `0.1341` | 7 | 36 |
+| 2 | `0.7732` | `0.1181` | 49 | 281 |
+| 3 | `0.6861` | `0.1048` | 343 | 1,996 |
+| 4 | `0.6174` | `0.0943` | 2,401 | 14,001 |
+
+**Symmetry, the other candidate lever, buys exactly nothing.** The covariance is
+symmetric and its congruence is two of the flow's matmuls, so a symmetry-aware
+meter looked like a free discount. Tagging the operand bills the *identical*
 `8,585,740,288` — ratio exactly `1.0000` — and the tagging call itself costs
-`0.0137 n^3`. **A symmetric operand is not a cheaper operand.**
+`0.0137 n^3`. A symmetric operand is not a cheaper operand.
 
-**Strassen does.** Measured under the same meter:
+**And the paper must say why the Strassen table was never a recommendation.** The
+scored budget is not the only budget: the runtime also enforces a per-MLP
+*residual wall time* that tracks the **number of operations** and the temporaries
+they free, not FLOPs — and an overrun does not cost a penalty, it zeroes the
+prediction *and* forces the multiplier to its maximum, turning a `1e-7` row into a
+`~0.92` row, a `~66,000x` loss. The `array ops` column is the warning label:
+`14,001` operations per MLP against a `0.4 s` cliff is not an operating point, it
+is a table entry.
 
-| levels | vs a plain matmul | flow's `F / B` | multiplier | leaf matmuls | array ops |
-|---:|---:|---:|---:|---:|---:|
-| 0 | `1.0000` | `0.1527` | `0.1527` | 1 | 1 |
-| 1 | `0.8777` | `0.1341` | `0.1341` | 7 | 36 |
-| 2 | `0.7732` | `0.1181` | `0.1181` | 49 | 281 |
-| 3 | `0.6861` | `0.1048` | `0.1048` | 343 | 1,996 |
-| **4** | `0.6174` | `0.0943` | **`0.1000`** | 2,401 | 14,001 |
-
-**At four levels the flow pins the multiplier floor**, with `5.7%` of the free
-zone unused. A 1969 algorithm and one structural reading of a reference
-implementation together move a third-order method from `0.153` to `0.100` — which
-is the difference between a ceiling of `6.1e-9` and one of `4.0e-9`.
-
-**And the paper must say why that table is not a recommendation.** The scored
-budget is not the only budget: the runtime also enforces a per-MLP *residual wall
-time* that tracks the **number of operations** and the size of the temporaries
-they free, not FLOPs — and an overrun is not a penalty, it zeroes the prediction
-*and* forces the multiplier to `1.0`, turning a `1e-7` row into a `~0.92` row, a
-`~66,000x` loss. The `array ops` column is the warning label. `L = 2` — `281`
-operations for `4.7e-9` — is very likely the honest operating point, and no level
-is authorised until it has been soaked at scale. Strassen's own numerical error
-is a second unmeasured cost.
+> **The general lesson, and it is worth more than the table: we nearly bought a
+> `1.6x` cost reduction with a 1969 algorithm, `14,001` array operations per MLP
+> and an unquantified numerical risk, when a `2x` reduction was available from
+> declaring the right dtype. Check your units before you optimise. The cheapest
+> lever is usually the one hidden inside a number you have already measured and
+> mislabelled.**
 
 ---
 

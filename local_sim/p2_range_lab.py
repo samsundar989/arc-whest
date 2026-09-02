@@ -350,6 +350,14 @@ def _correct_hook_lin(ref, *, mode: str, r: int, seed: int, power_iters: int,
       `svd`    the rank-`r` SVD truncation of `E21`. The best any rank-`r`
                subspace can do; an upper bound on `proj`, never an operating
                point.
+      `e3svd`  the exact `(3,)` residual AND the rank-`r` SVD truncation of
+               `E21`. **This is the ceiling the whole correction lane is
+               chasing** and the first C2 run omitted it: `svd` alone leaves the
+               `(3,)` slice wrong and `e3proj` uses a subspace C1 has now shown
+               to be no better than random, so neither answers "is a rank-`r`
+               correction of BOTH slices sufficient?". Added 2026-09-02 after
+               C1/C2 landed, as a diagnostic. It carries no pre-registered gate
+               and none is invented for it.
       `exact`  `E21` and `E3` in full. **This is no longer a positive control
                that must reproduce the uncapped flow** -- S-IDEM refuted that
                premise. It now measures the one thing that decides this lane:
@@ -391,11 +399,11 @@ def _correct_hook_lin(ref, *, mode: str, r: int, seed: int, power_iters: int,
             d3 = E3
         elif mode == "exact":
             d3, d21 = E3, E21
-        elif mode in ("proj", "e3proj", "svd"):
-            if mode == "e3proj":
+        elif mode in ("proj", "e3proj", "svd", "e3svd"):
+            if mode in ("e3proj", "e3svd"):
                 d3 = E3
             if r > 0:
-                if mode == "svd":
+                if mode in ("svd", "e3svd"):
                     U, sv, Vh = torch.linalg.svd(E21.double(), full_matrices=False)
                     k = min(r, int(sv.shape[0]))
                     d21 = ((U[:, :k] * sv[:k]) @ Vh[:k]).to(s21.dtype)
