@@ -1,0 +1,130 @@
+{
+ "artifact": "wp11_state_error_budget",
+ "artifact_version": 1,
+ "truth": "../../../../../../Documents/arc-whest/experiments/2026-09-01_wp9_corrector/truth_P02.npz",
+ "n_mlps": 12,
+ "b0_mean": 1.3697002584956844e-06,
+ "tolerance": {
+  "mean": {
+   "grid": [
+    {
+     "rel_rms": 1e-05,
+     "final_mse": 1.3705777338173642e-06,
+     "ratio_to_B0": 1.0006406330992765
+    },
+    {
+     "rel_rms": 3e-05,
+     "final_mse": 1.3744629816284245e-06,
+     "ratio_to_B0": 1.0034772010176671
+    },
+    {
+     "rel_rms": 0.0001,
+     "final_mse": 1.4104284166805182e-06,
+     "ratio_to_B0": 1.0297350883393748
+    },
+    {
+     "rel_rms": 0.0003,
+     "final_mse": 1.7048785293047192e-06,
+     "ratio_to_B0": 1.2447092119097318
+    },
+    {
+     "rel_rms": 0.001,
+     "final_mse": 4.97086443560422e-06,
+     "ratio_to_B0": 3.6291622234660488
+    }
+   ],
+   "tolerance_10pct": 0.0001
+  },
+  "var": {
+   "grid": [
+    {
+     "rel_rms": 1e-05,
+     "final_mse": 1.369720307069521e-06,
+     "ratio_to_B0": 1.0000146371979652
+    },
+    {
+     "rel_rms": 3e-05,
+     "final_mse": 1.3697606576206398e-06,
+     "ratio_to_B0": 1.0000440966003918
+    },
+    {
+     "rel_rms": 0.0001,
+     "final_mse": 1.3699045452890274e-06,
+     "ratio_to_B0": 1.0001491470794985
+    },
+    {
+     "rel_rms": 0.0003,
+     "final_mse": 1.370338459334655e-06,
+     "ratio_to_B0": 1.000465941971619
+    },
+    {
+     "rel_rms": 0.001,
+     "final_mse": 1.3721232367291024e-06,
+     "ratio_to_B0": 1.0017689842857145
+    },
+    {
+     "rel_rms": 0.003,
+     "final_mse": 1.3795033566740207e-06,
+     "ratio_to_B0": 1.0071571120159553
+    },
+    {
+     "rel_rms": 0.01,
+     "final_mse": 1.4319459971797163e-06,
+     "ratio_to_B0": 1.0454447885936704
+    }
+   ],
+   "tolerance_10pct": 0.01
+  },
+  "offdiag": {
+   "grid": [
+    {
+     "rel_rms": 1e-05,
+     "final_mse": 1.3697100395605021e-06,
+     "ratio_to_B0": 1.0000071410257514
+    },
+    {
+     "rel_rms": 3e-05,
+     "final_mse": 1.3697298318635296e-06,
+     "ratio_to_B0": 1.0000215911237964
+    },
+    {
+     "rel_rms": 0.0001,
+     "final_mse": 1.3698015217583873e-06,
+     "ratio_to_B0": 1.000073930965607
+    },
+    {
+     "rel_rms": 0.0003,
+     "final_mse": 1.370027066067602e-06,
+     "ratio_to_B0": 1.0002385978756232
+    },
+    {
+     "rel_rms": 0.001,
+     "final_mse": 1.3710581708951052e-06,
+     "ratio_to_B0": 1.0009913938403663
+    },
+    {
+     "rel_rms": 0.003,
+     "final_mse": 1.3760762413040096e-06,
+     "ratio_to_B0": 1.0046550205191083
+    },
+    {
+     "rel_rms": 0.01,
+     "final_mse": 1.4178296269979722e-06,
+     "ratio_to_B0": 1.0351386138709993
+    }
+   ],
+   "tolerance_10pct": 0.01
+  }
+ },
+ "actual_relative_error": {
+  "mean": Infinity,
+  "var": 2.4771307076862938e+20,
+  "offdiag": 0.009146805395092938
+ },
+ "actual_over_tolerance": {
+  "mean": Infinity,
+  "var": 2.4771307076862937e+22,
+  "offdiag": 0.9146805395092938
+ },
+ "SCOPE": "A SCREEN. Perturbation tolerances are measured, not fitted; the mean and variance actuals are against truth_P02; the off-diagonal actual is a LOWER BOUND from the exactly-computable Price order-2 term, because no off-diagonal label exists. Nothing here is a candidate."
+}
