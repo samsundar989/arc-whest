@@ -25450,3 +25450,84 @@ needs either true covariances or an end-to-end gradient through the rollout.
 4. A `c^2` scaling law measured across three decades, with an exact positive
    control at `c = 0`, is worth more than any number of fitted arms: it turned
    an unexplained `133x` divergence into a stated entry price in one job.
+
+---
+
+# 2026-09-02 — CLOSURE WP8: the `3x100` discriminator returned 0 of 300, and the contract's REAL P5 is finally scored
+
+Contract `e7b83c2`, repair `229488f`, Skeptic `c701e67`. Artifact:
+`experiments/2026-09-01_wp8_soak/diag_3x100.json`, verdict **`CERTIFIED`**,
+39 checks, 0 failed.
+
+**The same shape as the run that started this**: three repetitions of the
+official `--runner subprocess` mini split, 100 MLPs each, on the shipped
+v2.6.1, submitted through `gpuq` at the declared `--ram 20 --cpus 6` footprint.
+
+| | original (`certify_v261_soak3.json`) | this run |
+|---|---:|---:|
+| failed MLPs | **`45` of `300`** | **`0` of `300`** |
+| `failure_breakdown` | *not recorded* | all five categories `0` |
+| rows excluded as never-executed | *not recorded* | `0` |
+| worst executed residual | `90.22 ms` | `69.46 ms` |
+| p99 / median | `71.66` / `47.43 ms` (contaminated) | `66.64` / `40.32 ms` |
+| headroom on the worst row | `4.43x` | **`5.76x`** |
+| verdict | `REFUSED` | **`CERTIFIED`** |
+
+**Under an i.i.d. `15%` per-row failure rate, `P(0 of 300) = 0.85^300 ≈ 1e-21`.**
+The `45` failures are conclusively **not** a property of the file, the
+workload, or the organisers' data. The one controlled difference between the
+two runs is that **this one went through the queue with a declared `20 GiB`
+footprint and the original does not appear in the `gpuq` job history at all**,
+on a host whose measured peak working set for this job is `14.32 GiB`.
+
+**That is a strong circumstantial case, and it is still not a measurement.**
+Nothing on disk pins the host state during the original run, `docs/GOTCHAS.md`
+records that the heavy neighbours have previously run *outside* the queue where
+the queue cannot see them, and the Skeptic's point stands that a worker-death
+cascade (`runner.py:42-44, 377-387`) would break the i.i.d. model the `1e-21`
+rests on. **Recorded as: environmental, cause unmeasured, non-reproducing under
+brokered submission.**
+
+## The contract's REAL P5, scored at last
+
+`SKEPTIC WP8` recorded that I had scored WP6's P5 in place of this contract's.
+The real one:
+
+> **P5** — counted FLOPs on every executed row remain exactly
+> `137,600,326,656`; *this file does not prune; a different number means the
+> arm is not the arm*
+
+| | |
+|---|---|
+| `flops_executed_min` | `137,600,326,656` |
+| `flops_executed_max` | `137,600,326,656` |
+| `flops_executed_constant` | **`True`**, over all 300 executed rows |
+
+**HELD, exactly.** The instrument that could not answer it now does, because
+the Skeptic's finding put `flops_executed_*` into `_pool_residual` and a check
+into section 11.
+
+## The other predictions, revisited on real data
+
+- **P1 / P2** stay **NOT TESTABLE** — there were again no failures to
+  attribute. The Skeptic settled P1 by argument from the original artifact
+  instead (exception-path by elimination), and that remains the only evidence
+  about *which* category the 45 fell into.
+- **P3's** correction is confirmed **inert when it should be**:
+  `median_all_rows == median` and `residual_rows_excluded_failed = 0`, so the
+  exclusion changes nothing on a clean run. It is not a silent adjustment.
+- **P5 (as mis-scored)** — the residual-headroom proposition — also holds on
+  the honest sample: `5.76x` on the worst of **300 executed rows**, against
+  `4.29x` on one earlier local session and `4.43x` on the contaminated
+  original.
+
+## What this licenses, and what it does not
+
+**Licensed.** The WP8 standing consequence is lifted for **the shipped file on
+this host**: a residual tail now exists over 300 rows with zero failures,
+attributed, and with the executed/contaminated figures separated.
+
+**Not licensed.** It certifies no other candidate — `AGENTS.md` refuses a local
+residual as a grader prediction and refuses one file's headroom as a safety
+factor for another. And it does not explain the original failures; it shows
+they do not reproduce.
