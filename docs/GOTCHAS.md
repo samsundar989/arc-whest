@@ -61,9 +61,14 @@ returned 30/30 three times running, which is what a quiet window looks like.
 Two consequences, and the second is the important one:
 
 1. `~/.claude/CLAUDE.md` coordinates **GPU** work through `gpuq`. Host **commit**
-   is an equally shared resource and is coordinated by nothing. A heavy suite
+   is an equally shared resource and *was* coordinated by nothing. A heavy suite
    here can push a neighbour's training job over the edge, and one had already
-   gone over once.
+   gone over once. **Fixed 2026-09-01:** `gpuq` now gates on host RAM and CPU as
+   well as VRAM, and this repository declares a footprint for every heavy
+   workload — `docs/SETUP_WINDOWS.md` § 7.1, wiring in `.gpuq.toml`. The trap
+   that remains is *under-declaring*: an undeclared job is charged a 4 GiB
+   default and is admitted when it should have waited, which reproduces exactly
+   the failure described here.
 2. **Do not kill what you did not start.** The obvious "fix" is to free 34 GB by
    terminating two processes. They are someone's live trading collector and a
    resumable training run.

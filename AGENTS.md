@@ -111,18 +111,18 @@ uv run python scripts/verify_portability.py               # the harness is still
 python scripts/install_git_hooks.py                       # install the agent-independent pre-commit backstop
 ```
 
-Full reference (GPU venv, probes, dead-lane commands): `docs/SETUP_WINDOWS.md` §7.
+Full reference, plus **every heavy workload's `gpuq` submit line and declared
+RAM/VRAM/CPU footprint**: `docs/SETUP_WINDOWS.md` §7. Heavy work here is
+**submitted to `gpuq`, never launched** — host RAM binds first, and the queue
+bypasses `guard_paths.py`, so `whest submit` and `vault.py evaluate` stay off it.
 **Run `whest` from PowerShell**, or set `PYTHONIOENCODING=utf-8` in a POSIX shell — the
 CLI's box-drawing output kills a cp1252 console inside its own error printer.
 
 ## How work is done
 
-*The six slash-command workflows (`session-start`, `next-slice`, `review-slice`,
-`cold-start`, `routine`, `session-close`) and the `slice-contract` primitive were
-removed on 2026-08-21. They were ceremony that described what a careful agent does
-anyway, and in practice agents read the files rather than invoking them. **What
-they wrapped was never the ceremony — it was two rules, and those are now stated
-here directly and are still binding.***
+*The six slash-command workflows and the `slice-contract` primitive were removed
+on 2026-08-21. What they wrapped was never the ceremony — it was the two rules
+below, stated here directly and still binding.*
 
 **Start a session by reading `docs/CURRENT_STATE.md`.** It is the snapshot: where
 we stand, what is open, which lanes are closed, and what to do next. Then
@@ -270,8 +270,7 @@ disadvantaged here; an agent that uses them is deviating from the contract.
 | Claude Code | `CLAUDE.md` (imports this file) | `.claude/agents/skeptic.md` | `.claude/settings.json` → `.claude/hooks/` |
 | Codex | `AGENTS.md` directly | `.codex/agents/skeptic.md` | `.codex/hooks/` (see `.codex/hooks/README.md`) |
 
-*There is no skills layer. The six workflow commands were removed 2026-08-21; what
-they enforced is Rules 1 and 2 above.*
+*No skills layer; Rules 1 and 2 are what the removed workflows enforced.*
 
 **Working-directory assumption: every agent is started from the repository root**
 (`c:\Users\samsu\Documents\arc-whest`). All paths in this file and in

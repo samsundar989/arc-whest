@@ -163,3 +163,157 @@ $env:MLP_KPROP_SRC="C:\Users\samsu\Documents\mlp_cumulant_propagation\src"
 .venv-gpu\Scripts\python.exe local_sim/moonshot_g0.py --mlps 8 --depth 8 --flow --flow-kmax 2,3,4 --flow-rank 8
 .venv-gpu\Scripts\python.exe local_sim/lowrank_cumulant_flow.py --smoke --rank 4 --width 16
 ```
+
+---
+
+### 7.1 Heavy work goes through `gpuq` — the submit lines and declared footprints
+
+*Added 2026-09-01. `~/.claude/CLAUDE.md` is the machine-wide policy; this is what
+it means in this repository. Wiring lives in `.gpuq.toml` at the repo root, and
+`AGENTS.md` § Commands carries the one-paragraph version.*
+
+This box brokers expensive work across concurrent agents through `gpuq`, which
+gates on **host RAM and CPU as well as VRAM**. Here RAM binds long before VRAM
+does: the organisers' `mini` split is **~6.9 GB of float32 weights** across seven
+parquet shards (100 MLPs x 16 x 1024 x 1024 x 4 B), and the residual soak reads
+it three times. Submit heavy work and **keep working** — submission returns a job
+id immediately, and a queued job runs the source exactly as it was at submission
+time, so the tree can be edited straight away.
+
+#### Three traps that are specific to this repository
+
+1. **An artifact written to a relative path is LOST.** A queued job runs in a
+   frozen git worktree under the gpuq state directory. `experiments/<slice>/` is
+   tracked, so it exists *inside the snapshot*, and a report written there is
+   deleted when `gpuq cleanup` expires the snapshot — while `experiments/LOG.md`
+   in the live tree cites a path that never existed. **Always give a heavy job an
+   absolute output path**, e.g.
+   `--json C:/Users/samsu/Documents/arc-whest/experiments/<slice>/<name>.json`.
+2. **`whest submit` and `vault.py evaluate` are NEVER submitted to the queue.**
+   Their confirmation guards in `scripts/guard_paths.py` are wired into the agent
+   tool layer (`.claude/hooks/`, `.codex/hooks/`) and into `pre-commit`. A gpuq
+   job spawns processes outside all three, so the queue is a hole straight
+   through the enforcement layer — and a vault touch written into a snapshot
+   **spends the touch without recording it in the live touch log**, which
+   `preflight.ps1` #6 then reads as a counter/log mismatch. Both are STRATEGIC,
+   both need Samuel, and neither is heavy. Run them directly.
+3. **Gitignored paths are invisible to a job unless `.gpuq.toml` lists them.**
+   All four venvs (`.venv-gpu` is ignored by its own uv-written `.gitignore`),
+   `local_sim/sobol_dirnum.npz`, the 3.2 GB `weights_P01.f32` cache and every
+   truth `*.npz` are gitignored, and `local_sim` scripts resolve them from
+   `_ROOT` — which is the *snapshot* root. **Add any new one to `.gpuq.toml`**,
+   or the job dies with "No such file or directory". A passthrough is a junction
+   to the LIVE path, so a job that writes through one writes into the real
+   repository. A directory entry whose destination already exists in the snapshot
+   is silently skipped, which is why the `experiments/` entries are per-file. The
+   16 GB HuggingFace cache is outside the repo and needs no entry.
+
+#### Declared footprints
+
+`--ram`/`--vram` are **peak GiB, estimated high on purpose**: an under-declared
+job is admitted when it should have waited, which is how this box falls over.
+Over-declaring only makes a job wait slightly longer.
+
+| workload | `--ram` | `--vram` | `--cpus` | basis |
+|---|---:|---:|---:|---|
+| `certify_candidate.py --residual-soak 3` | 20 | 0 | 6 | 3 x the row below, sequentially; ~3 h at the measured 37.7 s/MLP |
+| `whest run --split mini --runner subprocess` | 20 | 0 | 6 | **MEASURED 2026-09-01**: harness `PeakWorkingSet64` **14.32 GiB** + a ~1.67 GiB estimator worker = ~16 GiB. See below |
+| `linux_memory_gate.py` | 12 | 0 | 2 | **deliberately** requests 9 GiB in a WSL child to prove the 8,192 MB cap is in force |
+| `p2_truth.py` | 8 | 6 | 4 | chunk `2**16` x 1024: fp32 draw + matmul + fp64 cast ~1.1 GiB, plus CUDA context |
+| `p2_cal_gpu.py` | 8 | 8 | 4 | 3.2 GB fp32 memmap streamed a layer at a time in fp64 |
+| `gpu_mint.py --mint 50000 --samples 65536` | 16 | 8 | 4 | writes a 497 MB npz; large host-side accumulation |
+| `gpu_train_probe.py --data <npz>` | 12 | 6 | 4 | loads that 497 MB npz and trains on it |
+| `robustness.py --mlps 1200 --truth 4194304` | 12 | 8 | 4 | 1200 fresh MLPs with `2**22`-sample ground truth |
+| `vault.py mint --samples 33554432` | 8 | 6 | 4 | 500 MLPs x 256x32, `2**25` samples each |
+| other GPU labs (below) | 8 | 6 | 4 | same 256x32 / 1024x16 chunked shape |
+
+The mini-run figure is the one number here that was measured rather than
+derived, because it was the one I could not read off the code — and it landed
+well above a naive estimate. Three things it settled:
+
+* **The dataset load is not the cost.** 6.3 GB and 100 MLPs resolve from the HF
+  cache in **1.3 s**. The RAM is the harness holding scored state, not parquet.
+* **Peak is reached in the first minutes and then flat** (13.29 GiB working set
+  at MLP 18 and again at MLP 25; peak 14.32 GiB). So a future re-measurement
+  wants `--n-mlps 5`, not a full split — the run measuring this was cancelled at
+  25/100 once `PeakWorkingSet64` had stopped moving, because the remaining ~50
+  minutes of a concurrency-1 queue would have bought nothing.
+* **An 8 GiB declaration would have been badly wrong**, and the undeclared
+  default of 4 GiB catastrophically so. That is the `docs/GOTCHAS.md` § host-commit
+  trap reproducing itself exactly.
+
+Local cost is **37.7 s/MLP** on this host with the official subprocess runner
+(measured over 25 MLPs), which is what makes the soak a ~3-hour job.
+
+"Other GPU labs" is `coverage_lab.py`, `bias_floor_lab.py`, `audit_constants.py`,
+`packed_truth.py`, `track_t_mint.py`, `track_p_spectrum.py`, `sprint3_probe.py`,
+`moonshot_g0.py`. Raise `--vram` to 8 when `--n-gt` goes above `2**22`.
+
+#### The submit lines
+
+```powershell
+# The residual soak: 3 x 100 MLPs on the organisers' data. Rung-3 hardening.
+gpuq submit --project arc-whest --ram 20 --vram 0 --gpus 0 --cpus 6 -- `
+  C:/Users/samsu/Documents/arc-whest/.venv/Scripts/python.exe local_sim/certify_candidate.py `
+  --candidate estimator_v2_7.py --residual-soak 3 `
+  --json C:/Users/samsu/Documents/arc-whest/experiments/<slice>/certify.json
+
+# One full official mini run. CONFIRM tier: it may CHECK, it may CHOOSE nothing.
+gpuq submit --project arc-whest --ram 20 --vram 0 --gpus 0 --cpus 6 -- `
+  C:/Users/samsu/Documents/arc-whest/.venv/Scripts/whest.exe run `
+  --estimator estimator.py `
+  --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 `
+  --split mini --runner subprocess
+
+# The 8,192 MB enforcement gate (WSL).
+gpuq submit --project arc-whest --ram 12 --vram 0 --gpus 0 --cpus 2 -- `
+  C:/Users/samsu/Documents/arc-whest/.venv/Scripts/python.exe local_sim/linux_memory_gate.py `
+  --candidate estimator.py `
+  --json C:/Users/samsu/Documents/arc-whest/experiments/<slice>/linux_memory_gate.json
+
+# Phase-2 truth at 1024x16, two independent replicas. CLAIMS SEEDS.
+gpuq submit --project arc-whest --ram 8 --vram 6 --cpus 4 -- `
+  C:/Users/samsu/Documents/arc-whest/.venv-gpu/Scripts/python.exe local_sim/p2_truth.py `
+  --block P02 --n-mlps 48 `
+  --out C:/Users/samsu/Documents/arc-whest/experiments/<slice>/truth_P02.npz
+
+# In-loop K2 calibration fit; streams the 3.2 GB float32 weight memmap.
+gpuq submit --project arc-whest --ram 8 --vram 8 --cpus 4 -- `
+  C:/Users/samsu/Documents/arc-whest/.venv-gpu/Scripts/python.exe local_sim/p2_cal_gpu.py
+
+# B3 mint and its learnability probe.
+gpuq submit --project arc-whest --ram 16 --vram 8 --cpus 4 -- `
+  C:/Users/samsu/Documents/arc-whest/.venv-gpu/Scripts/python.exe local_sim/gpu_mint.py `
+  --mint 50000 --samples 65536
+
+# Fresh-MLP score distribution.
+gpuq submit --project arc-whest --ram 12 --vram 8 --cpus 4 -- `
+  C:/Users/samsu/Documents/arc-whest/.venv-gpu/Scripts/python.exe local_sim/robustness.py `
+  --mlps 1200 --truth 4194304
+```
+
+Absolute interpreter paths are used throughout: a relative one would resolve through the snapshot's
+`.venv` junction, which works only if the passthrough succeeded — a needless
+dependency for the one thing that must always start.
+
+#### What still runs directly
+
+`preflight.ps1` and `preflight.ps1 -Full`: step 16's official smoke is
+`--n-mlps 2`, not the full split, and the whole `-Full` gate is ~11 minutes well
+under 4 GiB. Also `whest validate`, `official_config.py`,
+`p2_flop_anchor.py --gate`, `seed_blocks.py`, `vault.py verify`, the `local_sim`
+`test_*.py` files, `edge_cases.py`, and every doc/figure/board script — plus the
+two commands trap 2 keeps off the queue.
+
+#### Inspecting
+
+`gpuq status` (`--json` to parse) · `gpuq top` · `gpuq show <id>` ·
+`gpuq logs <id> [--follow]` · `gpuq report` · `gpuq cancel <id>`.
+
+A QUEUED job is usually waiting deliberately and `gpuq status` prints the reason.
+**Queue concurrency is 1 on this box**, so a long foreign job delays ours even
+when ours needs no GPU. That is the design, not a fault: never work around it by
+running the command directly, and never bypass the queue because `nvidia-smi`
+looks idle — host RAM is the binding constraint and the queue is the only thing
+that sees the whole machine. If a submission fails, it failed on purpose: report
+it, run `gpuq doctor`, do not run the command yourself instead.

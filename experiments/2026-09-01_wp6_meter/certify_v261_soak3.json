@@ -1,0 +1,230 @@
+{
+  "artifact": "candidate_certification",
+  "artifact_version": 1,
+  "candidate": "estimator.py",
+  "candidate_sha256": "00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec",
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "truth_free": false,
+  "confirm_tier_read": true,
+  "is_shipped_file": true,
+  "sections": {
+    "validate": {
+      "returncode": 0
+    },
+    "package_identity": {
+      "whestbench": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\whestbench\\__init__.py",
+      "flopscope": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\__init__.py",
+      "official_config_rc": 0
+    },
+    "invariants": {
+      "returncode": 0,
+      "tail": "30/30 checks passed"
+    },
+    "determinism": {
+      "fresh_worker": [
+        {
+          "sha256": "6bcb98209b85d53f007c51b6c014e4dbc5b363162404de7103d614dca92dc442",
+          "shape": [
+            16,
+            1024
+          ],
+          "flops_used": 137600293888.0,
+          "pid": 54292
+        },
+        {
+          "sha256": "2e316876931b936205c7dd0d98cbb66a6ddc5c5b13baf8f82871c571f2b7f55b",
+          "shape": [
+            16,
+            1024
+          ],
+          "flops_used": 137600293888.0,
+          "pid": 53056
+        }
+      ]
+    },
+    "metered_runs": [
+      {
+        "seed": 90000000201,
+        "error": "",
+        "flops_used": 137600326656.0,
+        "n_ops": 443,
+        "multiplier": 0.1,
+        "residual_wall_time_s": 0.0609629998652963,
+        "wall_time_s": 0.3830489999963902,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": -6.135579106387581e-17,
+        "max_value": 4.387931823730469,
+        "n_negative": 4,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.47657851759466213
+      },
+      {
+        "seed": 90000000202,
+        "error": "",
+        "flops_used": 137600326656.0,
+        "n_ops": 443,
+        "multiplier": 0.1,
+        "residual_wall_time_s": 0.047550999763188884,
+        "wall_time_s": 0.36498529999516904,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": -4.827165989274883e-17,
+        "max_value": 4.550899028778076,
+        "n_negative": 1,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.7042026127439911
+      },
+      {
+        "seed": 90000000203,
+        "error": "",
+        "flops_used": 137600326656.0,
+        "n_ops": 443,
+        "multiplier": 0.1,
+        "residual_wall_time_s": 0.05376650017569773,
+        "wall_time_s": 0.3926835000020219,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": -9.126476265944157e-17,
+        "max_value": 4.4674973487854,
+        "n_negative": 2,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.7480793096848641
+      },
+      {
+        "seed": 90000000204,
+        "error": "",
+        "flops_used": 137600326656.0,
+        "n_ops": 443,
+        "multiplier": 0.1,
+        "residual_wall_time_s": 0.046865700074704364,
+        "wall_time_s": 0.3351159000012558,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 8.37279136545124e-24,
+        "max_value": 4.285720348358154,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.6267320037662821
+      }
+    ],
+    "setup_s_local": 9.700001101009548e-06,
+    "linux_memory_gate": "experiments\\2026-08-31_wp0cd_certify\\linux_memory_gate_v261.json",
+    "windows_memory_accounting": {
+      "available": true,
+      "source": "test_deployment_envelope.peak_memory_bytes",
+      "peak_wset_bytes": 466374656,
+      "peak_pagefile_bytes": 965935104
+    },
+    "subprocess_smoke": {
+      "ok_report": true,
+      "n_failed_mlps": 0,
+      "dataset": "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
+      "width": 1024,
+      "depth": 16,
+      "lambda": 0.0,
+      "residual_cap": 0.4,
+      "wall_limit": 120.0,
+      "worst_residual": 0.06685059986193664,
+      "flops_per_mlp": 137600326656,
+      "multiplier": 0.1,
+      "c_over_b": 0.06257338402792811,
+      "final_layer_mse_CONFIRM_ONLY": 4.778624088430661e-06
+    },
+    "residual_soak": {
+      "ok": true,
+      "reps": 3,
+      "n_mlps_per_rep": 100,
+      "n_rows": 300,
+      "n_failed_mlps": 45,
+      "residual_cap": 0.4,
+      "worst": 0.09022379991074558,
+      "p99": 0.0716617000871338,
+      "median": 0.047432500126888044,
+      "worst_over_median": 1.9021514714464829,
+      "headroom_worst": 4.433420011080251,
+      "per_rep": [
+        {
+          "rep": 1,
+          "n": 100,
+          "worst": 0.08575529979134444,
+          "median": 0.049527099923579954
+        },
+        {
+          "rep": 2,
+          "n": 100,
+          "worst": 0.07368530007079244,
+          "median": 0.04376189998583868
+        },
+        {
+          "rep": 3,
+          "n": 100,
+          "worst": 0.09022379991074558,
+          "median": 0.047913099857396446
+        }
+      ],
+      "meter_caveat": "LOCAL HOST. Not a grader prediction. The two graded K2 submissions ran ~7x faster on the grading server than on this host, and AGENTS.md refuses that as a general safety factor for a different candidate."
+    }
+  },
+  "checks_total": 39,
+  "checks_failed": [
+    "[11] 11: zero failed MLPs across every repetition",
+    "[R] R: this run changed no tracked source under estimator.py/scripts/local_sim"
+  ],
+  "checks_skipped": [],
+  "verdict": "REFUSED"
+}
