@@ -27080,3 +27080,258 @@ before the real numbers arrive so that a failure cannot be reported as a surpris
 Free `E3` is the other thing the smoke hints at: `2.0x`–`2.3x` drift reduction from
 correcting the `(3,)` slice alone, an `n`-vector at `O(n)` per layer. **P10
 predicted `>= 1.3x`.** Also not evidence, also at the wrong shape.
+
+---
+
+# 2026-09-02 — WP14 RESULT: cost is solved and accuracy is not. The free selector does not exist, and `Sigma`'s range is EXACTLY a random subspace.
+
+Contract `d915f83`, committed before any cell ran. Instruments
+`local_sim/p2_slice_cost.py` (`--dtype`), `local_sim/p2_truth.py`
+(`--seed-start`/`--already-claimed`), `local_sim/p2_range_lab.py`,
+`local_sim/p2_truth_score.py`, `local_sim/p2_k3_fnp.py`. Artifacts in
+`experiments/2026-09-02_wp14_range/` and `experiments/2026-09-02_wp14_fnp/`.
+`gpuq` jobs 121, 122, 124, 131, 132. Seeds: the eight `P01` networks WP13 already
+claimed, **no new draw**, deliberate DESIGN-tier overlap recorded in the ledger
+with the artifact named at claim time.
+
+**Two results, and they point in opposite directions.**
+
+## 1. `C0-iii` — the multiplier floor is reached, and it was reached by a units fix
+
+Full entry above (`3b38796`). In one table:
+
+| composition | K2 backbone | K3 increment | total | `x budget` | multiplier |
+|---|---:|---:|---:|---:|---:|
+| all f64 — WP13's record | `137,600,326,656` | `198,233,321,472` | `335,833,648,128` | `0.15272` | `0.15272` |
+| **both f32** | `68,802,510,336` | `99,116,660,736` | **`167,919,171,072`** | **`0.07636`** | **`0.10000`** |
+
+flopscope bills the textbook `2 n^3` for a matmul and scales by a per-dtype rate
+(`float64 = 2.0`, `float32 = 1.0`). WP13's `4 n^3` was the f64 column read as a
+property of matmul. **P1 HELD to the FLOP.** A regenerating K3 flow reaches the
+`0.1` floor with `0.02364 B` — `51,983,154,483` FLOPs, `24.2` f32 matmuls — to
+spare, with no Strassen and no rank cap. `docs/GOTCHAS.md` is corrected and
+write-up §6 is rewritten.
+
+## 2. `C0-i` — the fallback is real, measured, and modest. P2 HELD.
+
+Truth minted on the eight WP13 networks (`gpuq` 121, `2^22` samples x 2
+independent replicas, sha256 `a3c27a7d...`, ledger finalised on the host). Scored
+with the **cross-product** estimator, whose expectation is `MSE(p)` exactly
+because the replicas share no state.
+
+| arm | raw final-layer MSE | adjusted at `0.1` | vs graded v2.7 |
+|---|---:|---:|---:|
+| uncapped full K3 | `3.7179e-08` | `3.718e-09` | `36.9x` |
+| **regenerating flow, uncorrected** | **`8.5075e-07`** | **`8.508e-08`** | **`1.61x`** |
+| our K2p1 closure, uncalibrated | `3.8137e-06` | `3.814e-07` | `0.36x` |
+| drift, regen vs uncapped | `8.7545e-07` | — | — |
+
+**P2 HELD**: pre-registered `[7.5e-07, 1.0e-06]`, point `8.9e-07` (the
+*orthogonal-error* point `MSE_full + drift`); measured `8.5075e-07`. WP13's
+`2.4x`-wide bracket `[5.2e-08, 1.26e-07]` collapses to a number, and it is
+**`1.61x` better than graded v2.7** — real, and not close to the board.
+
+*Noise discipline*: GT noise is `1.72e-08` per replica at `2^22`, `2%` of the
+regenerating arm and **`43%` of full K3's own MSE**. The `uncapped` row is a
+diagnostic, not a re-measurement of P-A's `4.0047e-08` (with which it is
+consistent). Stated in the module before the run, not after.
+
+## 3. `C1` — **G-CONTAIN FAILS**, and the manner of the failure is the finding
+
+`E21`'s leading subspace is contained in `Sigma`'s dominant range **exactly as
+much as it is contained in a random subspace of the same dimension**, at every
+depth and every rank, on all 8 networks.
+
+| layer | `r90(E21)` | `r=128` | `r=256` | `r=512` | `r=768` | ratio to the random null at `r=512` |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 263.6 | `0.1272` | `0.2517` | `0.5020` | `0.7511` | `1.003` |
+| 4 | 189.4 | `0.1273` | `0.2518` | `0.5006` | `0.7511` | `1.001` |
+| 7 | 144.4 | `0.1269` | `0.2503` | `0.5000` | `0.7499` | **`0.997`** |
+| 10 | 107.0 | `0.1288` | `0.2520` | `0.5036` | `0.7508` | `1.015` |
+| 13 | 80.6 | `0.1262` | `0.2501` | `0.4978` | `0.7503` | **`0.993`** |
+| 14 | 73.6 | `0.1262` | `0.2523` | `0.4980` | `0.7488` | `0.997` |
+
+Every entry is `r / n` to three decimals. The paired contrast against the
+random-orthonormal null, studentised-`t`:
+
+| `r` | `mean(contain - null)` | 95% `t` interval |
+|---:|---:|---|
+| 128 | `+0.00216` | `[+0.00040, +0.00392]` |
+| 256 | `+0.00184` | `[-0.00019, +0.00387]` |
+| 512 | `+0.00056` | `[-0.00143, +0.00255]` |
+| 768 | `+0.00066` | `[-0.00115, +0.00248]` |
+
+At `r = 128` the excess over random is **two tenths of one percentage point** —
+detectable at `n = 8` and worth nothing. Everywhere else it is indistinguishable
+from zero, and at three cells it is **below** the null.
+
+**`G-CONTAIN` FAILS at every gated layer** (`t`-lower bounds `-0.25` to `-0.31`),
+and **the contract's falsifier — *"containment at or below the random-orthonormal
+null at any `r`"* — FIRED.** By the pre-registered rule the free selector is dead
+and `C3` is not built.
+
+**The suspicious cleanliness was checked, not assumed.** A containment of exactly
+`r/n` is what a *broken* range finder would also produce, and the most plausible
+break was real: WP13 measured `r90(Sigma)` collapsing `237 -> 26` on the
+**post-ReLU** covariance, while this hook builds `Q` at the **linear** step from
+`cov_pre = W^T Sigma W`, and `W^T (.) W` might have re-spread the spectrum. I
+measured it, in pure K2 on CPU, before believing the result:
+
+| layer | `r90(cov_post)` | `r90(cov_pre)` | `r99(cov_post)` | `r99(cov_pre)` |
+|---:|---:|---:|---:|---:|
+| 1 | 239 | 246 | 581 | 482 |
+| 7 | 60 | 64 | 174 | 174 |
+| 14 | 30 | 32 | 90 | 92 |
+
+**The hypothesis was wrong and the instrument is clean.** `cov_pre` is as
+rank-collapsed as `cov_post`. The range finder was fed a genuinely low-rank
+covariance and still found nothing. Independent support: `S-RF` orthonormality
+`3.8e-07`, `S-CONT` returns `1.000000005` inside `span(Q)` and `1.7e-15` in its
+complement, `r = 1024` returns exactly `1.0000`, and the **cross-network null**
+(`Q` from a *different* network's `Sigma`, identical code path) is
+indistinguishable from the random one at every cell.
+
+> **The finding, stated as strongly as the data allows:** `E21` is strongly low
+> rank (`r90` `264 -> 74`) and `Sigma` is strongly low rank (`r90` `239 -> 30`),
+> both in the same flow, at the same layers, driven by the same weights — and
+> **their subspaces are related no more than chance.** Two structured objects,
+> orthogonally structured.
+
+## 4. `C2` — **G-E2E FAILS and its falsifier FIRES**; `G-POS` PASSES
+
+The first end-to-end run of a rank-`r` in-flight correction this project has ever
+done. Paired drift against the uncapped flow, 8 networks, `f32`.
+
+| cell | mean drift | `x` better | `t`-lower on the `x`-fold contrast |
+|---|---:|---:|---:|
+| `none` (uncorrected regenerating arm) | `8.7545e-07` | `1.000` | — |
+| `proj:0` (determinism check) | `8.7545e-07` | `1.000` | bit-identical |
+| `e3` — exact `(3,)` residual, an `n`-VECTOR | `5.6458e-07` | **`1.551`** | `1.48` |
+| `proj:128` | `8.1895e-07` | `1.069` | `1.04` |
+| `proj:512` | `6.3328e-07` | `1.382` | `1.31` |
+| `proj:1024` (= exact `E21`, no `E3`) | `3.4546e-07` | `2.534` | `2.39` |
+| `svd:512` (best possible rank-512 subspace) | `3.4804e-07` | `2.515` | `2.36` |
+| `e3proj:512` | `3.1506e-07` | `2.779` | `2.58` |
+| `exact` (both slices) | `8.5335e-14` | `1.0e+07` | — |
+
+- **`G-E2E` FAILS.** `d_i = drift_none - 5 * drift_proj512` has mean `-2.29e-06`,
+  95% `t` `[-2.48e-06, -2.10e-06]`. **The `< 2x` falsifier FIRED**: `proj:512`
+  buys `1.382x`.
+- **`G-POS` PASSES**, exactly as pre-registered. Exact injection of both slices
+  reproduces the uncapped flow to drift `8.53e-14` against a final-layer mean
+  square of `0.7914` — **relative `1.08e-13`**, inside the `<= 1e-12` clause.
+  **P7 HELD.** So the premise the whole lane rests on — that the scored means read
+  `kappa_3` only through its two repeated slices — is now *demonstrated end to end
+  at the live shape*, not argued.
+- **`S2-1024` PASSES BIT-IDENTICAL.** The load-bearing null `SKEPTIC WP13`
+  recorded as outstanding — it had only ever run at `256 x 4` — now runs at
+  `1024 x 16`. **That debt is discharged.**
+- **P8 HELD.** Drift falls monotonically in `r` (`1.069, 1.169, 1.382, 1.765,
+  2.534`) and never rises. **The injection is not destructive**, unlike WP10's
+  variance channel — the mechanism I gave (correcting the same object the closure
+  truncates, toward the exact flow) survives.
+- **P10 HELD.** The `(3,)`-slice residual alone buys `1.551x` (predicted
+  `>= 1.3x`) and it is an `n`-vector: in a regenerating flow it is a vector added
+  to `S3` before `M = diag(S3) + 3 S21^T` is rebuilt, `O(n)` per layer, far below
+  the `1e8`-FLOP clause. **It is the cheapest accuracy this project has found.**
+  It is still an ORACLE — nothing here predicts `E3` from the flow's own state.
+
+**And the decomposition, which is the part worth carrying forward.** Correcting
+`(2,1)` exactly and leaving `(3,)` wrong gives `2.53x`; correcting `(3,)` exactly
+and leaving `(2,1)` wrong gives `1.55x`. The two residual drifts are roughly
+additive (`3.45e-07 + 5.65e-07 = 9.1e-07` against a total `8.75e-07`), so **about
+`40%` of the regenerating flow's error enters through the `(3,)` slice and about
+`60%` through `(2,1)`.** Both must be corrected; neither alone gets past `2.5x`.
+
+`svd:512` (`2.515x`) and `proj:1024` (`2.534x`, exact `E21`) agree to `0.8%`, so
+**`E21` really is rank-512-sufficient** — the residual after the best rank-512
+truncation contributes almost nothing. That is WP13's `E2` confirmed end to end
+and without the `eps^2` model. **What is missing is only the ability to FIND that
+subspace**, and `C1` has now closed the last cheap candidate for it.
+
+## 5. Every prediction, scored
+
+| # | prediction | outcome |
+|---|---|---|
+| P1 | f32 increment `99,116,660,736 +/- 2%`, total `0.10765 B` | **HELD** — exact to the FLOP |
+| P2 | regen raw in `[7.5e-07, 1.0e-06]`, point `8.9e-07` | **HELD** — `8.5075e-07` |
+| P3 | containment `0.66` at L1 rising to `0.90` at L14 | **REFUTED** — flat at `r/n`, no depth trend |
+| P4 | random null `= r/n +/- 0.03` | **HELD** — to `+/-0.003` |
+| P5 | cross-network null indistinguishable from random | **HELD** |
+| P6 | `G-CONTAIN` fails at L1-4, passes at L>=10 | **REFUTED on the second clause** — it fails everywhere |
+| P7 | exact injection reproduces the uncapped flow to `<= 1e-12` | **HELD** — `1.08e-13` |
+| P8 | drift falls monotonically in `r`, not destructive | **HELD** |
+| P9 | `G-E2E` fails its `5x` clause, clears its `2x` falsifier, `3.0`-`4.5x` at `r=512` | **REFUTED, and worse than I predicted** — `1.382x`; the falsifier FIRED |
+| P10 | free `E3` arm buys `>= 1.3x` under `1e8` FLOPs | **HELD** — `1.551x` |
+| P11, P12 | `C4` cost and `G-FLOOR` | **NOT RUN** — `C0-iii` settled the floor before `C4` was needed; see below |
+
+**Six held, three refuted, two not run.** Every refutation is in the *pessimistic*
+direction on accuracy and the one exact hit (P1) is on cost. That asymmetry is
+itself the slice's summary.
+
+## 6. What this does to the plan
+
+**`C4` is not run, and this is a decision, not an omission.** Its gate `G-FLOOR`
+required total `<= 219,885,548,339` counted FLOPs; `C0-iii` measured
+`167,919,171,072` before `C4` existed. The low-rank backbone was the route to the
+floor and the floor is already reached, so building it would buy headroom for a
+correction that `C1` and `C2` have just shown we cannot construct. The gate stands
+as written, unscored, and `C4` is re-opened only if a correction is ever found
+that needs the room. **P11 and P12 are recorded NOT RUN rather than quietly
+dropped.**
+
+**What is CLOSED, on measurement:** the free selector — `Sigma`'s dominant range
+does not contain `E21`'s. Together with WP13's five column-weight selectors, the
+two cheapest families of selector are now both measured dead.
+
+**What is OPEN and must not be recorded as closed:** `E21` is rank-512-sufficient
+end to end, the `(3,)` residual is an `n`-vector worth `1.55x` for free, and the
+two slices are the *only* channel to the scored means (`G-POS`, `1.08e-13`). The
+information is there and it is cheap to carry. **No known map from the flow's own
+state to it.**
+
+**Where we stand against the board.** At the `0.1` floor the score is `raw / 10`:
+
+| | raw | adjusted | vs Puffi `4.5e-09` |
+|---|---:|---:|---:|
+| board leader (Puffi) | — | `4.5e-09` | `1.00x` |
+| full factorized K3 **if it fit the floor** | `3.9e-08` | `3.9e-09` | **`1.15x` better** |
+| full K3 at its own measured f32 price (`1.0723 B`) | `3.9e-08` | `4.2e-08` | `9.3x` worse |
+| **regenerating flow at the floor** | `8.5e-07` | `8.5e-08` | `19x` worse |
+| graded v2.7 (shipped) | `1.37e-06` | `1.37e-07` | `31x` worse |
+
+*(The `1.0723 B` W-EFF figure was checked before being used here and is **already
+an f32 measurement** — `experiments/2026-08-28_weff/weff_price_f32_*.json`, f64
+`2.1446 B`. It does not halve again, and W-EFF stays closed on its own screen.)*
+
+> **The whole competition, for us, is now one sentence: full-K3 accuracy is worth
+> first place, and it costs `10.7x` the floor. The regenerating flow buys the cost
+> and loses `21x` of the accuracy. Everything since WP11 has been an attempt to
+> bridge that gap, and WP13 and WP14 have between them closed both cheap bridges
+> on measurements.**
+
+## 7. Knowledge delta
+
+1. **Two low-rank objects in the same computation need not share a subspace.** It
+   is tempting — and this contract's whole hypothesis — to reason that if `Sigma`
+   collapses and `E21` collapses and both are driven by the same weights, the
+   collapses must be aligned. They are related no more than chance, at every depth.
+   The mechanism offered in H1 (Hadamard products spread spectrum) predicted
+   *partial* alignment and was too generous by exactly the alignment.
+2. **A result that is too clean deserves a cheap independent check before it is
+   believed, and the check should be able to come back either way.** Containment
+   of exactly `r/n` is what a broken range finder returns. The discriminator —
+   `r90(cov_pre)` against `r90(cov_post)` — cost fifteen seconds of CPU, was chosen
+   because it would have exposed a real bug, and refuted my own suspicion.
+3. **The `(3,)` slice was never examined and carries `40%` of the error.** Eleven
+   closed lanes and two contracts all went after the `n x n` off-diagonal object.
+   The `n`-vector beside it is `1.55x` for `O(n)`, and it was never a cell in any
+   experiment until this one.
+4. **A self-test can be worth a whole slice.** `S-IDEM` cost two minutes on CPU and
+   changed `C2`'s mechanism before a single GPU-hour was spent; without it every
+   cell would have measured two truncations while reporting one.
+5. **`SKEPTIC WP13`'s process rules were binding and all four paid.** Thresholds in
+   the scoring unit forced `C0-iii` into existence, which is the best result here.
+   Code-path-distinct nulls gave `C1` the random and cross-network bases that make
+   its negative unambiguous. `>= 8` nets and `artifact=` at claim time both held.
+   The `f64` control is the one still in flight.
