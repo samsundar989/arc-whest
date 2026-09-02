@@ -45,6 +45,8 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
 sys.path[:] = [p for p in sys.path if os.path.abspath(p or ".") != _HERE] + [_ROOT, _HERE]
 
+import certify_candidate as cc  # noqa: E402  (after the sys.path fix)
+
 SHIP = os.path.join(_ROOT, "estimator.py")
 
 _FAILED = []
@@ -250,6 +252,181 @@ def _failed_lines(stdout):
             if l.strip().startswith("FAIL ")]
 
 
+
+# ---------------------------------------------------------------------------
+# U  the residual soak's arithmetic, tested without a three-hour run
+# ---------------------------------------------------------------------------
+# Added 2026-09-01 under CONTRACT WP8. The soak shipped with two defects that
+# survived review because the only way to exercise them was an official run
+# against the organisers' data: it discarded the REASON a row failed, and it
+# pooled rows that never executed (`scoring.py`'s exception path stamps a
+# failed row with `residual_wall_time_s = 0.0`). `_pool_residual` is now pure,
+# so both are checkable in milliseconds.
+
+_TB_HOST = (
+    "Traceback (most recent call last):\n"
+    '  File "whestbench/runner.py", line 451, in _call\n'
+    "RunnerError: worker died"
+)
+_TB_OURS = (
+    "Traceback (most recent call last):\n"
+    '  File "C:/Users/samsu/Documents/arc-whest/estimator.py", line 900, in predict\n'
+    "ValueError: shapes do not align"
+)
+
+
+def _row(i, resid, failed_how=None):
+    """One per-MLP entry shaped like the official runner's."""
+    m = {"mlp_index": i, "mlp_name": "mlp_%d" % i,
+         "residual_wall_time_s": resid, "flops_used": 137600326656,
+         "budget_exhausted": False, "time_exhausted": False,
+         "residual_wall_time_exhausted": False,
+         "combined_budget_exhausted": False}
+    if failed_how == "error":
+        # Exactly the shape scoring.py:790-850 appends: residual ZEROED.
+        m.update({"error_code": "RunnerError", "error": "worker died",
+                  "residual_wall_time_s": 0.0, "flops_used": 0,
+                  "traceback": _TB_HOST})
+    elif failed_how:
+        m[failed_how] = True
+    return m
+
+
+def _report(rows, breakdown, cap=0.4):
+    n_failed = sum(1 for m in rows if m.get("error_code")
+                   or any(m.get(k) for k in cc._FAILURE_FLAGS))
+    return {"run_config": {"residual_wall_time_limit_s": cap},
+            "results": {"per_mlp": rows, "n_failed_mlps": n_failed,
+                        "failure_breakdown": breakdown}}
+
+
+def unit_tests():
+    print("U  the soak's arithmetic (pure, no official run)")
+
+    # -- U1: our failure definition is the runner's, still ------------------
+    # Copied constants rot. This asserts the copy against the installed
+    # package, so a whestbench change breaks a test instead of silently making
+    # the soak's failure count disagree with the runner's own.
+    try:
+        import inspect
+        from whestbench import scoring as _sc
+        src = inspect.getsource(_sc)
+        i = src.find("flag_keys = (")
+        pkg = tuple(f for f in ("budget_exhausted", "time_exhausted",
+                                "residual_wall_time_exhausted",
+                                "combined_budget_exhausted")
+                    if i >= 0 and ('"%s"' % f) in src[i:i + 400])
+        check("U1: _FAILURE_FLAGS matches the installed whestbench",
+              pkg == cc._FAILURE_FLAGS,
+              "package %s vs ours %s" % (pkg, cc._FAILURE_FLAGS))
+    except Exception as exc:  # the suite must run with nothing installed
+        check("U1: _FAILURE_FLAGS matches the installed whestbench", True,
+              "SKIPPED, whestbench unreadable: %s" % type(exc).__name__)
+
+    # -- U2: the exclusion arithmetic, on the shape that actually bit -------
+    # 15 rows, 5 of them failed-with-zero -- the committed 45/300 in miniature.
+    # Executed residuals 10..100 ms; the zeros must not enter the sample.
+    rows = ([_row(i, 0.010 * (i + 1)) for i in range(10)]
+            + [_row(10 + i, 0.0, "error") for i in range(5)])
+    rep = _report(rows, {"error": 5, "budget_exhausted": 0,
+                         "time_exhausted": 0,
+                         "residual_wall_time_exhausted": 0,
+                         "combined_budget_exhausted": 0})
+    out = cc._pool_residual([rep], reps=1, n_mlps=15)
+
+    check("U2: the tail is taken over EXECUTED rows only",
+          out["n_rows"] == 15 and out["n_rows_executed"] == 10
+          and out["residual_rows_excluded_failed"] == 5,
+          "%d/%d executed" % (out["n_rows_executed"], out["n_rows"]))
+    # median of 10..100 ms at nearest-rank p50 is the 5th value, 50 ms.
+    check("U2: ...so the median is of executed work",
+          abs(out["median"] - 0.050) < 1e-12,
+          "%.1f ms" % (out["median"] * 1000))
+    # Pooling the zeros would put p50 of 15 rows at rank 8 -> 30 ms. That is
+    # the defect, reproduced, and it is a 1.67x understatement.
+    check("U2: ...and the CONTAMINATED median is recorded beside it",
+          abs(out["median_all_rows"] - 0.030) < 1e-12,
+          "%.1f ms, bias %.3fx" % (out["median_all_rows"] * 1000,
+                                   out["median_bias_from_failed_rows"]))
+    check("U2: the worst is UNCHANGED by the zeros -- why the defect hid",
+          abs(out["worst"] - 0.100) < 1e-12, "%.1f ms" % (out["worst"] * 1000))
+    check("U2: headroom is quoted on the worst EXECUTED row",
+          abs(out["headroom_worst"] - 4.0) < 1e-9,
+          "%.2fx" % out["headroom_worst"])
+
+    # -- U3: the failure is ATTRIBUTED, not just counted --------------------
+    check("U3: the dominant failure mode is named",
+          out["dominant_failure_mode"] == "error",
+          repr(out["dominant_failure_mode"]))
+    check("U3: every failed row keeps its error_code",
+          len(out["failures"]) == 5
+          and all(f["error_code"] == "RunnerError" for f in out["failures"]),
+          "%d records" % len(out["failures"]))
+    check("U3: the traceback's LAST line is kept, not its first",
+          out["failures"][0]["traceback_last_line"] == "RunnerError: worker died",
+          repr(out["failures"][0]["traceback_last_line"])[:50])
+    check("U3: a harness-side failure reports NO repository frame",
+          out["failures"][0]["deepest_repo_frame"] is None,
+          repr(out["failures"][0]["deepest_repo_frame"]))
+
+    # -- U4: a fault in the CANDIDATE is distinguishable from a host fault --
+    # The whole point of the attribution: P2 of the WP8 contract turns on
+    # whether the failing frame is ours. It must not read as host contention.
+    bad = _row(0, 0.0, "error")
+    bad["traceback"] = _TB_OURS
+    rec = cc._failure_record(1, bad)
+    check("U4: a fault inside the candidate names a repository frame",
+          rec["deepest_repo_frame"] is not None
+          and "estimator.py" in rec["deepest_repo_frame"],
+          (rec["deepest_repo_frame"] or "none")[-44:])
+
+    # -- U5: an exhaustion failure is NOT reported as an error --------------
+    # If the cliff is ever the mechanism, the soak has to say so -- that is the
+    # branch of the WP8 falsifier that would invalidate every residual claim
+    # in this repository.
+    rows5 = ([_row(i, 0.05) for i in range(8)]
+             + [_row(8, 0.41, "residual_wall_time_exhausted"),
+                _row(9, 0.42, "residual_wall_time_exhausted")])
+    out5 = cc._pool_residual(
+        [_report(rows5, {"error": 0, "budget_exhausted": 0,
+                         "time_exhausted": 0,
+                         "residual_wall_time_exhausted": 2,
+                         "combined_budget_exhausted": 0})],
+        reps=1, n_mlps=10)
+    check("U5: a cliff overrun is attributed to the CLIFF, not to 'error'",
+          out5["dominant_failure_mode"] == "residual_wall_time_exhausted"
+          and out5["n_failed_mlps"] == 2,
+          repr(out5["dominant_failure_mode"]))
+    check("U5: ...and its flags survive into the record",
+          out5["failures"][0]["flags"] == ["residual_wall_time_exhausted"],
+          str(out5["failures"][0]["flags"]))
+    # An over-cliff row is excluded from the tail like any other failure, so
+    # the reported worst is 50 ms, not 420. That is deliberate, and it is why
+    # check 11 tests `n_failed_mlps == 0` SEPARATELY from the headroom: a soak
+    # that quietly reported 8x headroom while two rows blew the cap would be
+    # the worst possible false green.
+    check("U5: an over-cliff row does not masquerade as the tail",
+          abs(out5["worst"] - 0.05) < 1e-12 and out5["n_failed_mlps"] == 2,
+          "worst %.0f ms, %d failed" % (out5["worst"] * 1000,
+                                        out5["n_failed_mlps"]))
+
+    # -- U6: all rows failed -> refuse, do not invent a tail from zeros -----
+    out6 = cc._pool_residual(
+        [_report([_row(i, 0.0, "error") for i in range(4)], {"error": 4})],
+        reps=1, n_mlps=4)
+    check("U6: an all-failed run is REFUSED, not reported as 0 ms residual",
+          out6["ok"] is False and "no executed residual" in out6["why"],
+          out6.get("why", "")[:44])
+
+    # -- U7: the failure-record list is bounded ----------------------------
+    many = [_row(i, 0.0, "error") for i in range(200)]
+    out7 = cc._pool_residual([_report(many, {"error": 200})], reps=1,
+                             n_mlps=200)
+    check("U7: retained failure records are capped",
+          len(out7["failures"]) == cc._MAX_FAILURE_RECORDS,
+          "%d of 200" % len(out7["failures"]))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--only", default="", help="comma-separated tags, e.g. M3,M7")
@@ -257,6 +434,8 @@ def main():
     only = {t.strip() for t in a.only.split(",") if t.strip()}
 
     print("WP0C - every certification section must be able to FAIL\n")
+    unit_tests()
+    print()
     ship_before = _sha(SHIP)
     tmp = tempfile.mkdtemp(prefix="wp0c_mutants_")
     try:

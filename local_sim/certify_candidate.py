@@ -601,7 +601,37 @@ def main() -> int:
             cap = soak["residual_cap"]
             check("11: zero failed MLPs across every repetition",
                   soak["n_failed_mlps"] == 0,
-                  f"{soak['n_failed_mlps']} failed of {soak['n_rows']} rows")
+                  f"{soak['n_failed_mlps']} failed of {soak['n_rows']} rows"
+                  + (f", dominant mode {soak['dominant_failure_mode']!r}"
+                     if soak.get("dominant_failure_mode") else ""))
+            if soak["n_failed_mlps"]:
+                # A REFUSED verdict must carry its reason in the transcript.
+                # The first run of this instrument reported 45 failures and no
+                # cause, which cost a whole investigation to recover.
+                print("      FAILURE ATTRIBUTION -- "
+                      f"{soak['n_failed_mlps']} of {soak['n_rows']} rows:")
+                for k, v in sorted(soak["failure_breakdown"].items(),
+                                   key=lambda kv: -kv[1]):
+                    if v:
+                        print(f"        {k:32s} {v}")
+                seen = {}
+                for f in soak["failures"]:
+                    seen[f["error_code"]] = seen.get(f["error_code"], 0) + 1
+                for code, n in sorted(seen.items(), key=lambda kv: -kv[1]):
+                    print(f"        error_code {code!r}: {n}")
+                bad = [f for f in soak["failures"] if f["deepest_repo_frame"]]
+                if bad:
+                    print("      *** A FAILING FRAME IS IN THIS REPOSITORY. "
+                          "This is NOT host contention:")
+                    print(f"        {bad[0]['deepest_repo_frame']}")
+                    print(f"        {bad[0]['traceback_last_line']}")
+                else:
+                    print("      no failing frame lies in this repository, so "
+                          "the fault is harness- or host-side,")
+                    print("      not in the candidate's own math. That is a "
+                          "LOCATION, not an exoneration.")
+                print(f"      residual rows excluded as never-executed: "
+                      f"{soak['residual_rows_excluded_failed']}")
             check("11: the WORST pooled residual clears the cliff",
                   soak["worst"] < cap,
                   f"worst {soak['worst']*1000:.2f} ms of a {cap*1000:.0f} ms "
@@ -616,6 +646,12 @@ def main() -> int:
             print(f"        worst  {soak['worst']*1000:8.3f} ms   "
                   f"-> headroom {soak['headroom_worst']:.2f}x")
             print(f"        worst/median dispersion {soak['worst_over_median']:.2f}x")
+            print(f"      over {soak['n_rows_executed']} EXECUTED rows of "
+                  f"{soak['n_rows']}. A failed row carries residual 0.0 from")
+            print(f"      the runner's exception path; pooling it would report "
+                  f"a median of "
+                  f"{soak['median_all_rows']*1000:.3f} ms instead of "
+                  f"{soak['median']*1000:.3f} ms.")
             print(f"      LOCAL HOST ONLY. `AGENTS.md` forbids quoting a local "
                   f"absolute wall time as")
             print(f"      a grader prediction; the two submitted files ran "
@@ -715,6 +751,58 @@ def _host_memory() -> dict:
             "peak_pagefile_bytes": int(m.get("commit") or 0)}
 
 
+# The four exhaustion flags plus `error_code`, exactly as
+# `whestbench/scoring.py:1036-1044` defines a failed entry. Copied rather than
+# imported because `certify_candidate` must import with nothing installed --
+# but copied VERBATIM, and `test_certify_candidate.py` asserts the two lists
+# still agree against the installed package, so a package change breaks a test
+# instead of silently making this module's failure count disagree with the
+# runner's.
+_FAILURE_FLAGS = ("budget_exhausted", "time_exhausted",
+                  "residual_wall_time_exhausted", "combined_budget_exhausted")
+
+# A cap on retained failure records. 45 of 300 rows failed the first time this
+# instrument ran; an unbounded list would put a traceback per row into a
+# committed artifact.
+_MAX_FAILURE_RECORDS = 40
+
+
+def _row_failed(m):
+    """The runner's own definition of a failed per-MLP entry."""
+    return bool(m.get("error_code")) or any(bool(m.get(k))
+                                            for k in _FAILURE_FLAGS)
+
+
+def _failure_record(rep, m):
+    """Why one MLP failed, small enough to live in a committed artifact.
+
+    The traceback's LAST line is kept, not the first: the first line is always
+    `Traceback (most recent call last):`, and the last is the exception that
+    actually fired. The deepest repository frame is kept separately, because
+    the question a failure has to answer here is whether the fault is in the
+    harness/host or in the candidate's own math -- and those two live in
+    different files.
+    """
+    err = m.get("error")
+    if isinstance(err, dict):
+        err = err.get("message", "")
+    tb = (m.get("traceback") or "").strip().splitlines()
+    repo_frame = next((ln.strip() for ln in reversed(tb)
+                       if "estimator" in ln or "arc-whest" in ln), None)
+    return {
+        "rep": rep,
+        "mlp_index": m.get("mlp_index"),
+        "mlp_name": m.get("mlp_name"),
+        "error_code": m.get("error_code"),
+        "error": str(err)[:200] if err else None,
+        "flags": [k for k in _FAILURE_FLAGS if m.get(k)],
+        "traceback_last_line": tb[-1][:200] if tb else None,
+        "deepest_repo_frame": repo_frame[:200] if repo_frame else None,
+        "residual_wall_time_s": m.get("residual_wall_time_s"),
+        "flops_used": m.get("flops_used"),
+    }
+
+
 def _residual_soak(rel, reps, n_mlps, timeout=5400):
     """Pool per-MLP residuals across `reps` official subprocess runs.
 
@@ -723,14 +811,31 @@ def _residual_soak(rel, reps, n_mlps, timeout=5400):
     safety is therefore the TAIL, and a two-row sample has none. This runs the
     official runner repeatedly and reports the pooled worst / p99 / median.
 
-    Every row is kept. Nothing here is fitted, selected, or averaged into a
-    score; the split's labels are read by the runner and deliberately not
-    returned, because a soak is a residual instrument and must not become an
-    accuracy one.
+    Nothing here is fitted, selected, or averaged into a score; the split's
+    labels are read by the runner and deliberately not returned, because a soak
+    is a residual instrument and must not become an accuracy one.
+
+    TWO THINGS THIS FUNCTION USED TO GET WRONG, both found on its first real
+    run (45 failed MLPs of 300 on the shipped v2.6.1 canary, `d22d0cb`):
+
+    1. It counted failures and discarded the REASON. The runner already
+       computes a five-way `failure_breakdown` and stamps every failed row with
+       an `error_code` and a traceback; none of it was read, so a REFUSED
+       certificate said only that something went wrong.
+    2. It pooled the residual of rows THAT NEVER EXECUTED. `scoring.py`'s
+       exception path appends a failed row carrying
+       `"residual_wall_time_s": 0.0`. Those zeros sort to the bottom of the
+       pooled sample, so a "median" at rank 150/300 with 45 failures is really
+       the 41st percentile of executed work. `worst` is a max and is immune,
+       which is exactly why the defect survives the number a reader checks.
+
+    So the tail is now computed over EXECUTED rows only, and the contaminated
+    figures are kept beside it as `*_all_rows` -- the correction is shown, not
+    silently applied.
     """
     exe = os.path.join(os.path.dirname(sys.executable), "whest")
     env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1")
-    res, per_rep, failed, cap = [], [], 0, None
+    reports = []
     for i in range(reps):
         cmd = [exe, "run", "--estimator", rel,
                "--dataset", "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
@@ -755,25 +860,82 @@ def _residual_soak(rel, reps, n_mlps, timeout=5400):
             return {"ok": False, "reps_completed": i,
                     "why": (f"rep {i+1} REFUSED at {err.get('stage')}: "
                             f"{err.get('code')} {err.get('message','')[:70]}")}
+        reports.append(d)
+    return _pool_residual(reports, reps, n_mlps)
+
+
+def _pool_residual(reports, reps, n_mlps):
+    """The arithmetic half of the soak, separated so it can be TESTED.
+
+    It was fused with the subprocess loop, which meant the only way to exercise
+    the exclusion arithmetic was a three-hour run against the organisers' data
+    -- so in practice it was never exercised at all, and shipped with the
+    never-executed rows in the sample.
+
+    Takes parsed official reports, returns the pooled residual tail. Pure: no
+    subprocess, no clock, no filesystem.
+    """
+    res, res_all, per_rep, failures = [], [], [], []
+    failed, cap, breakdown = 0, None, {}
+    for i, d in enumerate(reports):
         r = d["results"]
         cap = d["run_config"]["residual_wall_time_limit_s"]
-        rows = [float(m["residual_wall_time_s"]) for m in r["per_mlp"]]
+        rows_all = [float(m["residual_wall_time_s"]) for m in r["per_mlp"]]
+        # A row is EXECUTED unless the runner marked it failed. `_row_failed`
+        # applies the runner's own definition rather than a second one of ours,
+        # so the two can never drift apart.
+        rows = [float(m["residual_wall_time_s"]) for m in r["per_mlp"]
+                if not _row_failed(m)]
         res.extend(rows)
+        res_all.extend(rows_all)
         failed += int(r["n_failed_mlps"])
-        per_rep.append({"rep": i + 1, "n": len(rows),
-                        "worst": max(rows), "median": _pctile(rows, 50)})
-    if not res:
+        for k, v in (r.get("failure_breakdown") or {}).items():
+            breakdown[k] = breakdown.get(k, 0) + int(v)
+        for m in r["per_mlp"]:
+            if not _row_failed(m) or len(failures) >= _MAX_FAILURE_RECORDS:
+                continue
+            failures.append(_failure_record(i + 1, m))
+        per_rep.append({
+            "rep": i + 1, "n_rows": len(rows_all), "n_executed": len(rows),
+            "n_failed": int(r["n_failed_mlps"]),
+            "worst": max(rows) if rows else None,
+            "median": _pctile(rows, 50) if rows else None})
+    if not res_all:
         return {"ok": False, "why": "no residual rows were produced",
                 "reps_completed": 0}
+    if not res:
+        # Every row failed. There is no tail of executed work to report, and
+        # inventing one from zeros would be worse than saying so.
+        return {"ok": False, "reps_completed": reps,
+                "why": f"all {len(res_all)} rows failed; no executed residual",
+                "n_failed_mlps": failed, "failure_breakdown": breakdown,
+                "failures": failures}
     worst, med = max(res), _pctile(res, 50)
+    med_all = _pctile(res_all, 50)
     return {
-        "ok": True, "reps": reps, "n_mlps_per_rep": n_mlps, "n_rows": len(res),
-        "n_failed_mlps": failed, "residual_cap": cap,
+        "ok": True, "reps": reps, "n_mlps_per_rep": n_mlps,
+        "n_rows": len(res_all), "n_rows_executed": len(res),
+        "residual_rows_excluded_failed": len(res_all) - len(res),
+        "n_failed_mlps": failed,
+        "failure_breakdown": breakdown,
+        "dominant_failure_mode": (max(breakdown.items(), key=lambda kv: kv[1])[0]
+                                  if failed and breakdown else None),
+        "failures": failures,
+        "failures_truncated": failed > len(failures),
+        "residual_cap": cap,
+        # EXECUTED ROWS ONLY. A failed row carries residual 0.0 from
+        # scoring.py's exception path; pooling it understates every percentile
+        # and leaves the max untouched, which is the worst of both.
         "worst": worst, "p99": _pctile(res, 99), "median": med,
         "worst_over_median": (worst / med) if med > 0 else float("inf"),
         # Per VALIDATION.md 2b-ii: residual is reported as HEADROOM against the
         # cliff, quoted on the WORST observed row, never as a cost.
         "headroom_worst": (cap / worst) if worst > 0 else float("inf"),
+        # The contaminated figures, kept so the correction is visible and a
+        # reader can see how much the zeros were moving the tail.
+        "median_all_rows": med_all,
+        "p99_all_rows": _pctile(res_all, 99),
+        "median_bias_from_failed_rows": (med / med_all) if med_all > 0 else None,
         "per_rep": per_rep,
         "meter_caveat": ("LOCAL HOST. Not a grader prediction. The two graded "
                          "K2 submissions ran ~7x faster on the grading server "
@@ -825,6 +987,11 @@ def _smoke(rel, timeout=2400):
     return {
         "ok_report": True,
         "n_failed_mlps": r["n_failed_mlps"],
+        # Same attribution as the soak. A two-row smoke that fails silently is
+        # exactly as unhelpful as a 300-row one that does.
+        "failure_breakdown": r.get("failure_breakdown") or {},
+        "failures": [_failure_record(1, m) for m in r["per_mlp"]
+                     if _row_failed(m)],
         "dataset": str(cfg["dataset"]["path"]),
         "width": cfg["width"], "depth": cfg["depth"],
         "lambda": cfg["lambda_flops_per_second"],
