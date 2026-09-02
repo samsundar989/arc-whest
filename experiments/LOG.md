@@ -24392,3 +24392,96 @@ per-MLP cliff. **Frozen now, before any data:**
 - **`P03` is touched once.** If I look at `P03` and then change anything, `P03`
   has become a DESIGN block and the slice has no replication left — that is a
   spent block and a failed slice, and it gets recorded as one.
+
+---
+
+# 2026-09-02 — RESULT WP8: the instrument is repaired, the 45 failures did NOT reproduce, and one of my own predictions was not executable
+
+Contract: *CONTRACT WP8* above, committed at `e7b83c2` **before the repair**.
+Repair at `229488f`. Artifacts: `experiments/2026-09-01_wp8_soak/diag_12.json`
+(attributed, `CERTIFIED`) beside the original
+`experiments/2026-09-01_wp6_meter/certify_v261_soak3.json` (`REFUSED`).
+
+## What was repaired, and it is the durable part
+
+| defect | before | after |
+|---|---|---|
+| failures counted, never attributed | `n_failed_mlps: 45` and nothing else | the runner's five-way `failure_breakdown`, a per-row `error_code`, the traceback's **last** line, and **the deepest failing frame that lies in this repository** |
+| the pooled tail included rows that never ran | `scoring.py`'s exception path stamps a failed row `residual_wall_time_s = 0.0`; those zeros sorted to the bottom of the sample | tail over **executed rows only**, with the contaminated figures kept beside it as `*_all_rows` and an explicit `median_bias_from_failed_rows` |
+| the arithmetic could only be exercised by a three-hour official run | so in practice it never was | `_pool_residual` is **pure**; 16 unit tests run in milliseconds |
+
+The unit tests are the part that will still be paying rent in a month. **U2**
+reproduces the 45/300 shape in miniature and measures the bias at **`1.667x`**;
+**U4** proves a fault inside the candidate is distinguishable from a host
+fault; **U5** proves a cliff overrun is attributed to the cliff and **cannot
+masquerade as the tail**; **U6** refuses an all-failed run rather than
+reporting `0 ms` residual; **U1** asserts our copied `_FAILURE_FLAGS` against
+the installed `whestbench`, so a package change breaks a test instead of
+silently making our failure count disagree with the runner's.
+
+## The re-measurement
+
+`certify_candidate --candidate estimator.py --residual-soak 1 --soak-n-mlps 12`,
+submitted through `gpuq` at the declared `--ram 20 --cpus 6` footprint:
+
+| | value |
+|---|---:|
+| failed MLPs | **`0` of `12`** |
+| `failure_breakdown` | all five categories `0` |
+| rows excluded as never-executed | `0` |
+| worst executed residual | `70.10 ms` |
+| p99 / median | `70.10` / `51.90 ms` |
+| headroom on the worst row | **`5.71x`** |
+| verdict | **`CERTIFIED`**, 39 checks, 0 failed |
+
+## Scoring my own predictions
+
+| # | prediction | outcome |
+|---|---|---|
+| **P1** | failures attribute to `error`, not to an exhaustion flag | **NOT TESTABLE.** There were no failures to attribute. The machinery works — the breakdown is read, summed and printed — but this run carries no evidence about *which* category the original 45 fell into, and I will not infer one |
+| **P2** | the failing frame is harness-side, not inside `estimator.py` | **NOT TESTABLE**, same reason. The discriminator (`deepest_repo_frame`) exists and is unit-tested (U4); it has not yet met a real failure |
+| **P3** | recomputing the committed soak's median over executed rows raises it by `>= 1.05x` | **NOT EXECUTABLE, AND THAT IS A DEFECT IN MY OWN CONTRACT.** The committed artifact stored `worst`, `p99` and `median` — **not the rows** — so there is nothing to recompute. I wrote a prediction about data the artifact had already thrown away, and only found out by trying to run it. The *mechanism* is confirmed instead, by U2, at `1.667x` on a synthetic 5-of-15 case; the *specific* `45/300` bias is unrecoverable and stays unknown |
+| **P4** | a fresh `1 x 12` run shows a failure rate materially below `45/300 = 15%` | **THRESHOLD MET, INFERENCE WEAK, and the threshold was the wrong one to pick.** `0/12` satisfies "`<= 1/12`", but under a true `15%` rate `P(0 of 12) = 0.85^12 = 0.142`. A `14%` event is not evidence. I chose a sample size that could not answer the question I asked it |
+| **P5** | worst pooled residual clears the cliff with `> 3x` headroom | **HELD**, `5.71x` — but on **12** executed rows in one quiet session, not on 300. `AGENTS.md` refuses a local absolute wall time as a grader prediction and this changes nothing about that |
+
+Two of five untestable, one unexecutable, one met on a threshold I now think
+was badly chosen. The contract's *value* was that the repair had to be
+specified before the data arrived; its *predictions* were mostly aimed at a
+failure this run did not produce.
+
+## What is still open, and it is the whole question
+
+**The 45 failures are UNEXPLAINED.** What is now known:
+
+- they were **not** residual-cliff overruns — the worst row in that very run
+  was `90.2 ms` against a `400 ms` cap;
+- they were **not** budget exhaustion — this file's counted FLOP total is fixed
+  and network-independent at `137,600,326,656`;
+- the same file graded **`0/100`** on the real server (#328662) and had
+  previously run a local official mini at **`0` failures**;
+- they did **not** reproduce in a 12-row run submitted through `gpuq` with a
+  declared `20 GiB` footprint — and the original soak does **not** appear in
+  the `gpuq` job history, so it was very likely run directly, on a box that
+  brokers concurrent agents, at a measured `14.32 GiB` peak working set.
+
+That last point is a *hypothesis with a motive*, not a finding. **The
+discriminating experiment is a `1 x 100` attributed run: under a `15%` rate,
+`P(0 of 100) ~ 1e-7`.** It is submitted and pending. Until it returns:
+
+> **No certification produced by the pre-`229488f` soak may be quoted, and no
+> candidate may be certified on a soak whose failures are unattributed.**
+
+## Knowledge delta
+
+1. A residual instrument that pools failed rows reports a **median it has no
+   right to** while leaving `worst` — the number a reader checks — untouched.
+   That asymmetry is why the defect survived; it is now a named field and a
+   unit test.
+2. `whestbench` already computes a `failure_breakdown` and a per-row
+   `error_code` and traceback. Two of this repository's instruments were
+   discarding all of it. Read what the package returns before adding a
+   diagnostic of your own.
+3. **Write predictions the artifact can actually answer.** P3 asked for a
+   recomputation from rows that were never stored; P4 picked a sample size that
+   could not distinguish its own hypothesis from chance. Both were written
+   carefully and neither was executable as intended.
