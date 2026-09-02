@@ -1,5 +1,122 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-02 (WP14 — CLOSED) — WE ARE AT THE MULTIPLIER FLOOR, AND WE GOT
+> THERE BY FIXING A UNIT. THE FREE SELECTOR DOES NOT EXIST: `Sigma`'s DOMINANT
+> RANGE CONTAINS `E21` EXACTLY AS MUCH AS A RANDOM SUBSPACE DOES.**
+> Contract `d915f83` (twelve predictions, three of them predicting a gate in the
+> contract failing, committed before any data); results `9b36521`. Six held,
+> three refuted, two not run.
+>
+> **THE COST HALF IS SOLVED.** flopscope does not bill a matmul at `4 n^3`. It
+> bills the textbook `2 n^3` and scales every operation by a **per-dtype rate**
+> from its own packaged table — `float64 = 2.0`, `float32 = 1.0`. WP13 built its
+> probe arrays with a generator that returns f64, read that column, and wrote it
+> down as a property of matmul; every cost statement in that slice is therefore a
+> **float64** statement, quoted against accuracy evidence gathered in **float32**.
+> Re-executed at f32 (not halved on paper — `np.float64(3.0)` scalars are
+> *concrete* under NEP-50 and would have promoted the arm straight back):
+>
+> | composition | K2 backbone | K3 increment | total | `x budget` | multiplier |
+> |---|---:|---:|---:|---:|---:|
+> | all f64 — WP13's record | `137,600,326,656` | `198,233,321,472` | `335,833,648,128` | `0.15272` | `0.15272` |
+> | **both f32** | `68,802,510,336` | `99,116,660,736` | **`167,919,171,072`** | **`0.07636`** | **`0.10000`** |
+>
+> **A regenerating full-K3 flow reaches the `0.1` floor with `0.02364 B`
+> (`51,983,154,483` FLOPs, `24.2` f32 matmuls) to spare — no Strassen, no rank
+> cap.** Both halves were already measured and independently reviewed in this
+> repository; the f32 K2 figure had sat in this very file for six days. **Nobody
+> had added them.** Strassen is no longer needed for the floor and `L = 4`'s
+> `14,001` array ops/MLP stays what it always was: a table entry, not an
+> operating point. **This is a PROJECTION** — two spellings that have never been
+> executed as one program. `local_sim/p2_k3_fnp.py` exists to make it a
+> measurement.
+>
+> **THE ACCURACY HALF IS NOT, AND BOTH CHEAP BRIDGES ARE NOW MEASURED DEAD.**
+> `G-CONTAIN` FAILS at every gated layer and its falsifier FIRED. Containment of
+> `E21`'s `r90`-energy by `Q_l` is `r/n` **to three decimals** at every depth and
+> rank — `0.127 / 0.252 / 0.501 / 0.751` at `r = 128/256/512/768` — matching the
+> random-orthonormal null (`t`-interval on the difference straddles zero from
+> `r = 256` up) and the cross-network null, and falling **below** the null at
+> three cells. `G-E2E` fails too, and its own `< 2x` falsifier fires: the
+> projected correction buys `1.382x` where `5x` was required.
+>
+> **The suspicious cleanliness was checked before it was believed.** Exactly
+> `r/n` is also what a broken range finder returns, and the plausible break was
+> real — WP13 measured the rank collapse on the **post-ReLU** covariance while
+> this hook builds `Q` from `cov_pre = W^T Sigma W`. Fifteen seconds of CPU
+> (`local_sim/p2_cov_spectra.py`) refuted my own suspicion: `r90(cov_pre)` is
+> `246 / 64 / 32` against `cov_post`'s `239 / 60 / 30` at layers `1 / 7 / 14`.
+> The range finder was fed a genuinely low-rank covariance and found nothing.
+>
+> > **Two strongly low-rank objects, in the same flow, at the same layers, driven
+> > by the same weights — and their subspaces are related no more than chance.**
+>
+> **WHAT PASSED, AND ONE OF IT CLEARS A STANDING DEBT.** `G-POS` holds at
+> `1.08e-13` relative: injecting both true slices reproduces the uncapped flow, so
+> the premise the whole lane rests on — **the scored means read `kappa_3` only
+> through its two repeated slices** — is now demonstrated end to end at
+> `1024 x 16` rather than argued. **`S2-1024` is BIT-IDENTICAL**, discharging the
+> null-control debt `SKEPTIC WP13` left standing (it had only ever run at
+> `256 x 4`). And **P8 held**: the in-flight injection is monotone in `r` and
+> **not destructive**, unlike WP10's variance channel.
+>
+> **THE THING NOBODY HAD LOOKED AT.** Eleven closed lanes and two contracts all
+> chased the `n x n` off-diagonal object. The `(3,)` slice beside it carries
+> **~40%** of the regenerating flow's error, is an **`n`-vector**, and correcting
+> it alone buys **`1.551x`** at `O(n)` per layer — a vector added to `S3` before
+> `M = diag(S3) + 3 S21^T` is rebuilt. It is still an **oracle**: nothing predicts
+> it from the flow's own state. It is the cheapest accuracy this project has
+> found and it has never had a contract.
+>
+> **THE FALLBACK IS NOW A NUMBER, NOT A BRACKET.** Truth minted on the eight
+> already-claimed `P01` networks (`gpuq` 121, `2^22` x 2 independent replicas,
+> cross-product estimator, ledger finalised). **P2 HELD**: raw
+> **`8.5075e-07`** against a pre-registered `[7.5e-07, 1.0e-06]`, so adjusted
+> **`8.508e-08`** — **`1.61x` better than graded v2.7's `1.374e-07`**. WP13's
+> `2.4x`-wide bracket collapses. GT noise is `1.72e-08`, `2%` of this arm and
+> `43%` of full K3's own MSE, so the `uncapped` row (`3.7179e-08`) is a
+> diagnostic and not a re-measurement of P-A.
+>
+> **WHERE WE ACTUALLY STAND.** At the floor the score is `raw / 10`:
+>
+> | | raw | adjusted | vs Puffi `4.5e-09` |
+> |---|---:|---:|---:|
+> | full factorized K3 **if it fit the floor** | `3.9e-08` | `3.9e-09` | **`1.15x` better** |
+> | full K3 at its own measured f32 price (`1.0723 B`) | `3.9e-08` | `4.2e-08` | `9.3x` worse |
+> | **regenerating flow at the floor** | `8.5e-07` | `8.5e-08` | `19x` worse |
+> | graded v2.7 (shipped) | `1.37e-06` | `1.37e-07` | `31x` worse |
+>
+> *(The `1.0723 B` W-EFF price was checked before use and is **already an f32
+> measurement** — f64 is `2.1446 B`. It does not halve again and W-EFF stays
+> closed.)*
+>
+> > **Full-K3 accuracy is worth first place and costs `10.7x` the floor. The
+> > regenerating flow buys the cost and loses `21x` of the accuracy. WP13 and
+> > WP14 have between them closed both cheap bridges on measurements.**
+>
+> **`C4` (the low-rank-`Sigma` backbone) is NOT RUN, and that is a decision.**
+> Its gate `G-FLOOR` required `<= 219,885,548,339` FLOPs; `C0-iii` measured
+> `167,919,171,072` before `C4` existed. It was the route to the floor and the
+> floor is reached. P11/P12 are recorded **NOT RUN**, not dropped.
+>
+> **NEXT ACTION — the `fnp` port, and it is now the only thing on the critical
+> path.** `local_sim/p2_k3_fnp.py`. The port is **bounded**: upstream's term list
+> depends on nothing but `(k_max, d_max, augment)`, so it is enumerated once and
+> frozen — **35 terms, 25 kept in SIMPLE mode**, artifact
+> `experiments/2026-09-02_wp14_fnp/k3_terms_simple.json`, `--check-terms`
+> re-enumerates against the live checkout and refuses on drift. The **K2 half is
+> finished and verified at the live shape** (`137,562,575,872` f64 /
+> `68,782,549,504` f32, ratio `0.50001`, against the NumPy mirror to `2.2e-15`
+> and `5.6e-07`). What remains is listed by name in the module's `NOT_DONE`.
+> **Trap recorded there: `p2_slice_cost.py`'s spelling is cost-correct and
+> numerically WRONG** (it uses `w1` for both wick factors where upstream uses
+> `w(1)` and `w(2) * w(1)`), so it must not be promoted by copying.
+>
+> **Open, and needing a contract before anyone acts on it:** the `(3,)`-slice
+> corrector (`1.55x`, `O(n)`, oracle-only today); and whether any closed lane was
+> closed on a **float64** cost that a float32 re-pricing would reopen — the W-EFF
+> screen was checked and is unaffected, the rest have not been.
+
 > **2026-09-02 (WP13 — CLOSED, E3 NO-GO) — THE INFORMATION IS LOW RANK,
 > COLLAPSING WITH DEPTH, AND AFFORDABLE TO CARRY. NO SELECTOR CAN FIND IT, AND
 > EVERY SELECTOR TRIED IS WORSE THAN DOING NOTHING.** The strategist's
