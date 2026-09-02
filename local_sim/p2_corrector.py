@@ -73,6 +73,27 @@ N_FEATURES = 8
 #: Hidden width. The contract committed to `H <= 32`.
 HIDDEN = 32
 
+#: v2.7's sixteen per-layer output constants, verbatim from
+#: `estimator_v2_7.py:557-562`. THE BASELINE IS THE SHIPPED FILE, NOT THE
+#: UNCALIBRATED CLOSURE.
+#:
+#: The first version of this module scored arm B0 as UNCORRECTED K2, which is
+#: not what CONTRACT WP9 specifies ("shipped calibrated K2, v2.7-equivalent")
+#: and which would have inflated every reported gain by the 2.8629x that is
+#: ALREADY ON THE BOARD as graded submission #328664. A corrector measured
+#: against a baseline the project has already beaten is measuring the wrong
+#: difference.
+#:
+#: It also sharpens null control N1: calibration IS a per-layer scalar, so a
+#: constant-c_m corrector must now collapse onto the BASELINE rather than onto
+#: something better than it.
+CAL_G = (
+    1.000000000, 0.999610691, 0.999343144, 0.999145174,
+    0.998981471, 0.998857839, 0.998752746, 0.998663998,
+    0.998591212, 0.998532269, 0.998483726, 0.998442611,
+    0.998388713, 0.998337791, 0.998292060, 0.998251500,
+)
+
 #: Clamps, FIXED IN THE CONTRACT before any data existed. A corrector that
 #: extrapolates on a hard MLP must degrade, not explode.
 CLAMP_CV = 0.5
@@ -121,7 +142,8 @@ def features(t, alpha, layer, depth):
                    dim=-1)
 
 
-def k2_rollout(t, w, corrector=None, mode="full", clamp_cm=None):
+def k2_rollout(t, w, corrector=None, mode="full", clamp_cm=None,
+               calibrate=None):
     """K2p1, optionally corrected in flight. Returns the per-layer record.
 
     `mode`:
@@ -139,6 +161,20 @@ def k2_rollout(t, w, corrector=None, mode="full", clamp_cm=None):
     that is constant across neurons would train `c_m` toward the very
     global-rescale degeneracy N1 exists to detect.
     """
+    # THE CORRECTOR REPLACES THE CALIBRATION; it does not stack on it.
+    #
+    # v2.7's calibration is a multiplicative row gain, `mu * g`. Since
+    # `mu_raw = sigma * h(alpha)`, that is `sigma * g * h(alpha)` -- i.e.
+    # exactly `c_m = (g - 1) * h(alpha)`, and `h(alpha)` is a function of
+    # `alpha`, which is IN THE CORRECTOR'S FEATURE SPAN. So a corrected arm can
+    # express the calibration itself, and applying both would double-correct a
+    # 0.17% bias that is the same order as the entire residual being chased.
+    #
+    # Hence the rule, and it is a rule rather than a caller's choice: no
+    # corrector means the SHIPPED CALIBRATED BASELINE (v2.7, graded #328664);
+    # a corrector means the corrector does that job.
+    if calibrate is None:
+        calibrate = corrector is None
     n = w[0].shape[0]
     depth = len(w)
     dt = w[0].dtype
@@ -187,6 +223,14 @@ def k2_rollout(t, w, corrector=None, mode="full", clamp_cm=None):
     var0 = (w[0] * w[0]).sum(dim=0)
     exact = t.sqrt(var0) * 0.3989422804014327
     out = t.cat([exact.reshape(1, n).to(out.dtype), out[1:]], dim=0)
+    if calibrate:
+        # `estimator_v2_7.py:940-950`: multiply output row L by CAL_G[L].
+        # Applied AFTER the rollout, so it changes no propagated state -- which
+        # is exactly why P2-CAL found the in-loop, global and post-hoc arms
+        # identical to twelve significant figures.
+        g = t.tensor(CAL_G[:depth], dtype=out.dtype,
+                     device=out.device).reshape(depth, 1)
+        out = out * g
     return out, recs
 
 
@@ -331,6 +375,9 @@ def collect(t, seeds, truth, corrector, mode, device, dtype, max_nets=None,
             # unclamped here while evaluating clamped trains the corrector on
             # states it will never see, and an unclamped correction compounding
             # over 15 layers is exactly how the first probe run blew up.
+            # `calibrate` changes only the RETURNED rows, never the
+            # propagated state, so the per-layer records this reads are
+            # identical either way. Left on for consistency with evaluation.
             _out, recs = k2_rollout(t, w, corrector=corrector, mode=mode,
                                     clamp_cm=clamp_cm)
             tm = t.from_numpy(np.ascontiguousarray(
@@ -550,7 +597,12 @@ def selftest():
     w = weights_for(t, 1_000_601, dev, dt)
 
     # S1 -- the uncorrected rollout reproduces the frozen arm's spelling.
-    base, _ = k2_rollout(t, w, corrector=None)
+    # `calibrate=False` throughout S1-S5: these compare the CLOSURE against
+    # itself, and `k2_rollout`'s default now applies v2.7's calibration to an
+    # uncorrected arm. Comparing a calibrated baseline with an uncalibrated
+    # corrected arm would measure the calibration, not the correction -- which
+    # is exactly what S9 exists to pin.
+    base, _ = k2_rollout(t, w, corrector=None, calibrate=False)
     chk("S1: uncorrected rollout is finite", bool(t.isfinite(base).all()),
         f"final-row mean {float(base[-1].mean()):.6f}")
 
@@ -563,8 +615,10 @@ def selftest():
     corr = Corrector(t, seed=7, dtype=dt, device=dev)
     g = 1.7
     wg = [x * g for x in w]
-    p0, _ = k2_rollout(t, w, corrector=corr, mode="full", clamp_cm=1.0)
-    p1, _ = k2_rollout(t, wg, corrector=corr, mode="full", clamp_cm=1.0)
+    p0, _ = k2_rollout(t, w, corrector=corr, mode="full", clamp_cm=1.0,
+                       calibrate=False)
+    p1, _ = k2_rollout(t, wg, corrector=corr, mode="full", clamp_cm=1.0,
+                       calibrate=False)
     ratio = (p1[-1] / p0[-1]).detach()
     rel = float((ratio / (g ** DEPTH) - 1.0).abs().max())
     chk("S2: the CORRECTED estimator is still degree-1 homogeneous", rel < 1e-9,
@@ -576,18 +630,21 @@ def selftest():
     with t.no_grad():
         for p in zero.params():
             p.zero_()
-    pz, _ = k2_rollout(t, w, corrector=zero, mode="full", clamp_cm=1.0)
+    pz, _ = k2_rollout(t, w, corrector=zero, mode="full", clamp_cm=1.0,
+                       calibrate=False)
     d = float((pz - base).abs().max())
     chk("S3: a zero corrector is bit-identical to the baseline", d == 0.0,
         f"max abs difference {d:.3e}")
 
     # S4 -- layer 0 is never corrected, in any mode.
-    pf, _ = k2_rollout(t, w, corrector=corr, mode="full", clamp_cm=1.0)
+    pf, _ = k2_rollout(t, w, corrector=corr, mode="full", clamp_cm=1.0,
+                       calibrate=False)
     chk("S4: layer 0 is untouched by any correction",
         float((pf[0] - base[0]).abs().max()) == 0.0, "row 0 identical")
 
     # S5 -- arm A touches ONLY the final row.
-    pa, _ = k2_rollout(t, w, corrector=corr, mode="last", clamp_cm=1.0)
+    pa, _ = k2_rollout(t, w, corrector=corr, mode="last", clamp_cm=1.0,
+                       calibrate=False)
     head = float((pa[:-1] - base[:-1]).abs().max())
     tail = float((pa[-1] - base[-1]).abs().max())
     chk("S5: arm A (readout-only) moves the final row and nothing above it",
@@ -606,6 +663,24 @@ def selftest():
     fa, fb = features(t, a, 5, DEPTH), features(t, a * 1.0, 5, DEPTH)
     chk("S7: the feature block is deterministic",
         float((fa - fb).abs().max()) == 0.0, "identical")
+
+    # S9 -- the calibration rule. The BASELINE is the shipped calibrated file
+    # (v2.7, graded #328664) and a CORRECTED arm is not calibrated on top,
+    # because the corrector can express the calibration itself: v2.7 multiplies
+    # row L by g, `mu_raw = sigma*h(alpha)`, so `mu*g` is exactly
+    # `c_m = (g-1)*h(alpha)` and `h(alpha)` is in the feature span. Stacking
+    # both would double-correct a 0.17% bias -- the same order as the entire
+    # residual this slice is chasing.
+    cal, _ = k2_rollout(t, w, corrector=None)          # default: calibrated
+    ratio = (cal[-1] / base[-1]).detach()
+    chk("S9: an UNCORRECTED arm is the shipped CALIBRATED baseline",
+        float((ratio - CAL_G[DEPTH - 1]).abs().max()) < 1e-12,
+        f"row 15 gain {float(ratio.mean()):.9f} vs CAL_G[15] "
+        f"{CAL_G[DEPTH - 1]:.9f}")
+    cc_, _ = k2_rollout(t, w, corrector=zero, mode="full", clamp_cm=1.0)
+    chk("S9: ...and a CORRECTED arm is NOT calibrated on top of it",
+        float((cc_ - base).abs().max()) == 0.0,
+        "identical to the uncalibrated closure")
 
     # S8 -- the fit and the deployment must agree on WHICH layers are
     # corrected. They did not: `collect` pooled targets from every layer
@@ -686,9 +761,14 @@ def run_study(a):
     print()
 
     # ---- arm B0, the control ------------------------------------------
+    # CONTRACT WP9 names this "shipped calibrated K2 (v2.7-equivalent)". An
+    # earlier version of this file scored UNCORRECTED K2 instead, which would
+    # have credited the corrector with the 2.8629x that is already on the
+    # board. `k2_rollout` applies CAL_G whenever no corrector is present.
     per = {}
     per["B0"], gt_noise = evaluate(t, seeds, truth, None, "none", device, dtype)
-    print(f"  B0 (uncorrected K2)   mean raw MSE {per['B0'].mean():.6e}   "
+    print(f"  B0 (SHIPPED calibrated K2 = v2.7, graded #328664)")
+    print(f"     mean raw MSE {per['B0'].mean():.6e}   "
           f"GT-noise floor {gt_noise.mean():.4e} "
           f"({100 * gt_noise.mean() / per['B0'].mean():.4f}% of it)")
 
