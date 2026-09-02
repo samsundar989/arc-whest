@@ -1,12 +1,12 @@
 {
   "check": "WP13 self-tests",
-  "width": 128,
+  "width": 256,
   "seed": 40821001168,
   "results": {
     "S1_redrive_bit_identical": true,
     "S2_regen_is_dsproj": true,
     "S3_rel_slice3": 0.0,
-    "S3_rel_slice21": 2.7158190913925865e-16,
+    "S3_rel_slice21": 9.335784085731625e-17,
     "S3_pass": true,
     "S4_full_k_exact_worst": 0.0,
     "S4_pass": true,

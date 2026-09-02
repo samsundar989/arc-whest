@@ -26098,3 +26098,239 @@ moved the multiplier from `0.153` to `0.100` was reading the reference
 implementation for structure (two identity legs, `2.08x`) and then applying a
 1969 algorithm (`1.62x`) — neither of which is a search, and both of which cost
 one afternoon and zero seeds.
+
+---
+
+# 2026-09-02 — RESULT: WP13 / E0-TOL + E1 + E2 — the information IS low rank and collapsing, and NO affordable selector finds it. **E3 is NO-GO.**
+
+Contract `8b46574`, committed before any data. `gpuq` 112, seed block
+`P01[40,821,001,168..175]`, 8 DESIGN networks, `1024 x 16`, `f32` flow with every
+SVD upcast to `f64`. Artifacts:
+`experiments/2026-09-02_wp13_slice/{e0_tol,e1_selector,e2_residual,selftest}.json`.
+Preflight GREEN 12/16 at `55b7c8f`.
+
+## The four gates
+
+| gate | threshold, fixed before any data | measured | verdict |
+|---|---|---|---|
+| **G-COST** | minimal flopscope total `<= 0.20 B` | `0.1527 B`, and `0.0943 B` at four Strassen levels — the floor | **PASS** |
+| **G-TOL** | `eps = 0` bit-identical; `eps^2` law `R^2 >= 0.95` over `>= 2` decades | bit-identical; slope `2.0675`, `R^2 = 0.99790`, **three** decades | **PASS** |
+| **G-SEL** | best selector at `k = 330` gives composed excess `<= 1e-8` | best is `3.6e-06`, at **every** layer. Off by `360x` | **FAIL** |
+| **G-RANK** | some `r <= 330` gives `<= 1e-8` at every layer, and `r90` non-increasing late | `r90` non-increasing **PASSES**; no `r <= 330` does — layer 1 needs `> 512` | **FAIL** |
+
+**The gates are conjunctive and two of four failed. `E3` IS NOT AUTHORISED.** The
+pre-registered falsifier `P9` fired.
+
+## Self-tests, first, because nothing below means anything without them
+
+| | |
+|---|---|
+| **S1** hookless re-drive `==` `p2_pb_rank.predict(cap="none")` | **BIT-IDENTICAL** |
+| **S2** regenerating hook at `eps = 0` `==` `p2_pb_rank.predict(cap="dsproj")` | **BIT-IDENTICAL** |
+| **S3** `slices_of` vs upstream `_factored_get_dslice` | `0.0` and `2.7e-16` |
+| **S4** every selector at `k >= R` is exact | `0.0` |
+| **positive control** regeneration reproduces both slices at the current layer | `6.1e-08` (f32 flow) |
+
+S2 is the one that matters: **the arm this slice perturbs is bit-identical to a
+cell whose drift was committed to this repository on 2026-08-28**, so the
+amplification law is anchored on a number that cannot be quietly moved. And the
+drift itself replicated on 8 fresh DESIGN networks — `8.4657e-07`, `8.0379e-07`,
+`8.9430e-07`, mean **`8.4822e-07`** against the committed `8.832e-07` on
+different, unregistered probe seeds: **agreement to `4.0%`.**
+
+## E0-TOL — the amplification law, and the null control is finally NULL
+
+Perturbing both read-slices by `(1 + eps)` at every layer, against the
+unperturbed regenerating arm:
+
+| `eps` | excess final MSE (coherent) | (incoherent) |
+|---:|---:|---:|
+| `0` | **`0.000000e+00`** | **`0.000000e+00`** |
+| `1e-4` | `8.348e-13` | `9.763e-14` |
+| `1e-3` | `7.289e-11` | `4.824e-13` |
+| `1e-2` | `7.803e-09` | `4.463e-11` |
+| `1e-1` | `1.504e-06` | `4.486e-09` |
+
+**coherent:** `excess = 1.3493e-04 * eps^2.0675`, `R^2 = 0.99790`, local slopes
+`2.03 / 2.02 / 2.04 / 2.13` across the clean range.
+**incoherent:** `excess = 1.0036e-07 * eps^1.6219`, `R^2 = 0.96676` — and the
+sub-quadratic exponent is an **artifact of the fit range**, not a finding: the
+local slopes are `1.97 / 1.96 / 2.00 / 2.00` from `1e-3` up and only
+`0.29 / 1.06` below it, where the excess is at the `f32` noise floor. Quoted
+honestly: the law is `eps^2` in both regimes over the range where it is
+measurable, and the pooled incoherent fit is contaminated by three floor points.
+
+**The coherent/incoherent gap is `78x` in excess, `8.8x` in amplitude** —
+larger than WP10's `4.3x` on the state channel. Using the coherent (worse) gain
+for every gate, as the contract required, was the right call.
+
+> **`eps* = 1.0055e-02`.** The two read-slices need about **`1%` relative
+> accuracy** to hold the end-to-end excess at `1e-8`.
+
+**P3 HELD.** **P4 REFUTED, at the edge and in the FORGIVING direction:** I
+pre-registered `[1e-3, 1e-2]`, point `3e-3`; the answer is `1.0055e-2`, outside
+the band's top by `0.55%`. I am recording it as refuted rather than rounding it
+in, because a band I chose is a band I am scored against.
+
+## E2 — the residual IS low rank, and its rank COLLAPSES with depth
+
+The `n x n` matrix `E21 = S21_true - S21_regenerated` at the next layer, i.e.
+exactly what regeneration discards, over 8 networks:
+
+| layer | rank `R` carried | `rel_E21` | `r50` | `r90` | `r99` | `r90(Sigma)` | `r99(Sigma)` |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 4,096 | `0.4793` | 65 | **264** | 540 | 237 | 579 |
+| 4 | 10,240 | `0.4577` | 32 | 191 | 464 | 95 | 266 |
+| 7 | 16,384 | `0.4455` | 19 | **147** | 410 | 57 | 167 |
+| 10 | 22,528 | `0.4516` | 11 | 111 | 362 | 40 | 119 |
+| 13 | 28,672 | `0.4686` | 7 | 85 | 322 | 28 | 90 |
+| 14 | 30,720 | `0.4727` | 6 | **78** | 311 | 26 | 85 |
+
+**`P7` is REFUTED on both of its clauses, and this is the slice's real finding.**
+I predicted `r90(layer 7)` in `[200, 600]`, point `400`, and **growing** with
+depth. It is `147` — below the band — and it **falls monotonically**, `264 -> 78`,
+a `3.4x` collapse. The strategist's mechanism was right and mine was wrong.
+
+**`P8` HELD, and strongly.** The covariance's own effective rank collapses
+`237 -> 26`, a **`9.1x`** fall against my predicted `>= 3x`. The two collapses
+track each other layer for layer, which is the mechanism: `E21` inherits the
+covariance's alignment.
+
+So the discarded information is **genuinely compressible, and most compressible
+exactly where the network is deepest** — the opposite of what eleven closed lanes
+would have led anyone to guess.
+
+### And it still does not fit in the budget
+
+Anchoring the `eps^2` law on the flow's **own structured error** rather than on
+the multiplicative sweep's constant — `drift 8.4822e-07` at `rel_E21 ~ 0.4626`,
+so an excess of `1e-8` admits `rel <= 0.1086 x rel_0`:
+
+| layer | `rel` after an oracle rank-330 correction | composed excess | smallest `r` on the grid that passes |
+|---:|---:|---:|---:|
+| 1 | `0.1173` | `5.09e-08` | **`> 512`** |
+| 4 | `0.0824` | `2.75e-08` | 512 |
+| 7 | `0.0640` | `1.75e-08` | 512 |
+| 10 | `0.0523` | `1.14e-08` | 512 |
+| 13 | `0.0451` | `7.86e-09` | 330 |
+| 14 | `0.0431` | `7.06e-09` | 330 |
+
+**The binding layers are the EARLY ones**, which is where `r90` is largest and
+where the covariance has not yet collapsed. `G-RANK`'s rank clause **fails**; its
+monotonicity clause **passes**.
+
+## E1 — Route A is dead, and the reason is that there was no wrong norm to fix
+
+Relative error of the `(2, 1)` read-slice at `k = 330`, mean over 8 networks and
+6 layers. **A value above `1.0` means the estimate is further from the truth than
+simply predicting zero.**
+
+| selector | rel error at `k = 330` |
+|---|---:|
+| `top_slice` (slice-targeted weight, deterministic) | **`0.9294`** |
+| `top_frob` (Frobenius weight, deterministic) | `0.9312` |
+| `dkm_slice` (importance sampling, slice weight) | `2.3060` |
+| `dkm_frob` (importance sampling, Frobenius weight) | `2.3227` |
+| `uniform` (uniform sampling) | `3.4007` |
+
+**`P5` REFUTED.** The slice-targeted weight beats the Frobenius weight by
+**`1.0019x`** — two parts in a thousand — against my predicted `1.3x`-`3x`. The
+two weights rank the columns essentially identically, so **the Dharangutte-Musco
+thesis has nothing to bite on here**: the rank-capping lane was not minimising the
+wrong norm, because on this factorisation the slice functional's norm and the
+Frobenius norm are collinear.
+
+**`P6` HELD, and it was written against the strategist's Route A before the
+data.** Randomised importance sampling is **`2.48x` WORSE** than deterministic
+truncation, inside my predicted `[1.5x, 4x]`. Mechanism: DKM's `1/(k p_r)`
+rescaling is unbiased but its variance dominates, and the column-weight
+distribution is not heavy-tailed enough for that trade to pay. Uniform sampling
+is worse still. **All three sampled arms score `rel > 1`** — they are worse than
+returning zero.
+
+**Even the best selector is off by `360x` in composed excess.** `G-SEL` fails at
+every layer by two and a half orders of magnitude.
+
+## Every prediction, scored
+
+| # | prediction | outcome |
+|---|---|---|
+| P1 | increment `[0.04, 0.11] B`, total `[0.10, 0.18] B` | **HELD** — `0.0901` / `0.1527` |
+| P2 | structured spelling `>= 2.5x` cheaper than generic | **REFUTED** — `2.081x` |
+| P3 | `eps^2` over `>= 2` decades, `R^2 >= 0.99`, null bit-identical | **HELD** — `2.0675`, `0.99790`, three decades, exact null |
+| P4 | `eps*` in `[1e-3, 1e-2]`, point `3e-3` | **REFUTED** by `0.55%` — `1.0055e-2`, and looser than I thought |
+| P5 | slice weight beats Frobenius `1.3x`-`3x` | **REFUTED** — `1.0019x` |
+| P6 | sampling `1.5x`-`4x` WORSE than truncation | **HELD** — `2.48x` |
+| P7 | `r90(L7)` in `[200, 600]`, growing with depth | **REFUTED on both** — `147`, and collapsing `264 -> 78` |
+| P8 | `r90(Sigma)` falls `>= 3x` over depth | **HELD** — `9.1x` |
+| P9 | no `r <= 330` closes the gap — *the lane's falsifier* | **HELD. IT FIRED.** |
+
+**Four held, four refuted, one held that killed the lane.** I was wrong about the
+structure (P7) and wrong about the selector (P5) in *opposite* directions: the
+information is more compressible than I predicted and less findable.
+
+## The decision
+
+**`E3` is NO-GO**, on the pre-registered conjunctive gate. The kill line in the
+standing plan is met early and deliberately: the project does not build the
+off-diagonal corrector.
+
+**What closes.** Route A (importance-sampled slice probing) is **closed on a
+measurement** — not merely unproven. Route B as specified (a rank-`r` `Delta
+Sigma` recovered by an affordable selector) is closed *at the selector*, not at
+the information.
+
+**What does NOT close, and must not be recorded as closed.** The residual is low
+rank and collapsing. That fact is new, it is the opposite of what this repository
+believed this morning, and it is untouched by this slice's failure. What has been
+measured is that **five column-weight selectors cannot find the subspace**, which
+is a statement about those five.
+
+## The cheapest discriminating follow-up, named and NOT run
+
+`E2` measured two collapses that track each other layer for layer: `r90(E21)`
+`264 -> 78` and `r90(Sigma)` `237 -> 26`. **If `E21`'s leading left-singular
+subspace lies in the span of `Sigma`'s top eigenvectors, the selector is free** —
+the flow already holds `Sigma`, and no probe, adjoint or oracle is needed.
+
+That is one number: the principal angles between the two subspaces, per layer,
+computable from artifacts of the same kind this slice already produced, in one
+`gpuq` job on the seeds already claimed. **It is a NEW question raised by this
+slice's data, not a reopening of a closed lane**, and it needs its own contract
+and its own gate. It is recorded here so that it is not lost, and it is
+deliberately not run inside a contract whose gates have already fired.
+
+## The fallback that survives, stated with its bracket and not oversold
+
+The regenerating flow needs **no correction at all** to be a candidate. At the
+multiplier floor (Strassen `L = 4`), the triangle bracket on its raw MSE from a
+measured drift of `8.4822e-07` against `MSE_full = 4.0047e-08` is
+`[5.20e-07, 1.26e-06]`, so adjusted `[5.2e-08, 1.26e-07]` against graded v2.7's
+`1.374e-07` — **between `1.1x` and `2.6x` better.**
+
+**That bracket is too wide to justify a multi-day `fnp` port**, its low end is
+barely an improvement, and it is a drift bracket rather than a measurement: no
+truth was minted in this slice. Sharpening it costs one truth mint on the eight
+`P01` networks already claimed. **It is a candidate for a future contract, not a
+recommendation, and it is emphatically not a nomination.**
+
+## Scope
+
+- `f32` flow. Every SVD upcast to `f64`. The `f64` end-to-end dtype control the
+  contract required **was not run** — `--all` does not include it — so the
+  spectra carry an unquantified `f32` risk. Recorded as an open defect of this
+  slice, not waved away. P-B-COST's `f64` control reproduced its `f32` drift to
+  four significant figures, which is reassurance about *drift*, not about a
+  singular spectrum.
+- `G-RANK` is written **per layer**; if per-layer excesses add, the true budget
+  is `~15x` tighter and the gate is *more* generous than it should be. It failed
+  anyway, so the looseness did not decide anything — but the formulation is a
+  defect and a Skeptic should say so.
+- The oracle rank-`r` correction is an **upper bound on achievable accuracy**.
+  WP10's finding that injecting truth in flight can be destructive was not
+  re-tested here; nothing was run end-to-end with a rank-`r` correction applied.
+- The composed-excess mapping inverts a law measured with **uniform
+  multiplicative** perturbation and applies it to a **structured** residual. It is
+  anchored on the flow's own operating point, which is the best available
+  calibration, and it is still a model.
+- Eight networks. Enough for a spectrum and a monotone trend; not a population.
