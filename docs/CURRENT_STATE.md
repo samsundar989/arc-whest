@@ -44,6 +44,61 @@
 > accumulation beside the current one and returned **bitwise-equal means and
 > final-layer variance on both probe networks**.
 
+> **2026-09-02 (later) — THE WP8 SKEPTIC RETURNED PROVISIONAL, AND TWO OF ITS
+> FINDINGS ARE DEFECTS IN THE RECORD RATHER THAN IN THE CODE.** Fifth
+> independent pass this project, fifth to find something real. Accepted in
+> full; repairs and every number at the bottom of `experiments/LOG.md`.
+>
+> - **The attribution half was BROKEN.** `deepest_repo_frame` matched the
+>   substrings `"estimator"` or `"arc-whest"` — and **`.venv/` lives inside
+>   `C:/Users/samsu/Documents/arc-whest/`**, so every absolute path a real
+>   `traceback.format_exc()` emits for a `whestbench` frame contains
+>   `arc-whest`. A pure harness fault was reported as a candidate fault,
+>   loudly. My guard test passed only because its fixture used a **relative**
+>   path, which `format_exc()` never produces. Now `_candidate_frame()` matches
+>   the candidate file's own absolute path with `.venv`/`site-packages`
+>   segments excluded; three tests cover it.
+> - **I SWAPPED A PRE-REGISTERED PREDICTION.** The contract's P5 was *"counted
+>   FLOPs on every executed row remain exactly `137,600,326,656`"*; I scored a
+>   residual-headroom proposition instead — **WP6's** P5, carried across. The
+>   contract's P5 is **UNSCORED**, and the soak stored no per-row `flops_used`
+>   so the artifact could not have answered it. It is answerable now
+>   (`flops_executed_min/max/constant` plus a check-11 clause).
+> - **"It is submitted and pending" was FALSE when committed.** The `1x100`
+>   discriminator was cancelled — by me, to unblock WP9 at concurrency 1 — 34
+>   minutes before the entry claiming it was pending. Re-queued as **`3x100`**
+>   so it matches the original's shape.
+> - `worst_all_rows` had been dropped while `median_all_rows` was kept, which
+>   is backwards: only the *exception* path zeroes a residual, so excluding
+>   failed rows makes `worst` **less** conservative. Also repaired: a
+>   `ZeroDivisionError` that would kill the certifier before it wrote its JSON,
+>   three `IndexError` sites that turned a mutation into a harness failure, and
+>   **U1, which was inverted** and could not detect `whestbench` *adding* a
+>   flag. Unit suite **19/19**, up from 16.
+>
+> **The Skeptic also settled something I had called untestable:** the 45
+> failures **must** have been exception-path, by elimination —
+> `residual_wall_time_exhausted` would have put a row above `0.4 s` and the
+> artifact's worst is `0.09022`; `budget_exhausted` is impossible at a fixed
+> `137,600,326,656` against `2**41`; `time_exhausted` needs `> 120 s` and
+> leaves a real residual. **Why** they happened is still unmeasured, and the
+> `gpuq` store showing an idle queue in that window is weak evidence *against*
+> the brokered-neighbour story.
+>
+> **Binding until the `3x100` returns: WP9's gate clause G3 has nothing behind
+> it but 12 rows**, and `deepest_candidate_frame` may not be read as evidence
+> about prediction P2 on any artifact produced before this correction.
+>
+> **WP9 had the same class of defect and it is fixed.** Arm B0 was being scored
+> as *uncorrected* K2, where the contract says **shipped calibrated K2
+> (v2.7-equivalent)** — which would have credited the corrector with the
+> `2.8629x` already on the board. On probe data that made arm A read `2.40x`
+> when it is nearer parity with the shipped file. Corrected, and with it a
+> structural rule: **the corrector REPLACES the calibration rather than
+> stacking on it**, because `mu*g = sigma*g*h(alpha)` is exactly
+> `c_m = (g-1)*h(alpha)` and `h(alpha)` is in the corrector's feature span.
+> Self-test S9 pins both halves.
+
 > **2026-09-01 — THE RULE-2 GAP IS CLOSED, AND IT OVERTURNED A CLOSED LANE.**
 > The pending WP2/WP3/WP4 Skeptic ran in the foreground and returned
 > **ACCEPT / PROVISIONAL / REJECT**. That is the fourth of four passes this
