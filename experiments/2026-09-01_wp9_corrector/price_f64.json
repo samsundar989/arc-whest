@@ -1,0 +1,30 @@
+{
+ "artifact": "wp9_corrector_price",
+ "artifact_version": 1,
+ "contract": "experiments/LOG.md CONTRACT WP9, commit 9c961ce",
+ "meter": "flopscope (the grader's meter), NOT torch",
+ "width": 1024,
+ "depth": 16,
+ "dtype": "float64",
+ "budget": 2199023255552,
+ "floor_flops": 219902325555,
+ "server_offset_per_mlp": 16777216,
+ "n_features": 8,
+ "hidden": 32,
+ "flops": {
+  "B0_uncorrected": 137562608640.0,
+  "A_final_layer_only": 137565037572.0,
+  "B_every_layer": 137599042620.0
+ },
+ "delta": {
+  "A": 2428932.0,
+  "B": 36433980.0,
+  "B_per_corrected_layer": 2428932.0
+ },
+ "graded_flops_arm_B": 137615819836.0,
+ "c_over_b_arm_B": 0.06258042951048992,
+ "multiplier_arm_B": 0.1,
+ "P6_corrector_under_5e8": true,
+ "G2_multiplier_pinned_at_floor": true,
+ "SCOPE": "A PRICE, not an accuracy claim. The corrector weights here are arbitrary: flopscope bills shapes and dtypes, not values. Fitted weights change no counted FLOP."
+}
