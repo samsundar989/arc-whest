@@ -484,6 +484,7 @@ def train_arm(t, seeds, truth, mode, device, dtype, rounds=3, epochs=60,
                      constant_cm=constant_cm)
     clamp = None
     info = []
+    best = (float("inf"), None, -1)
     for r in range(rounds):
         src = None if r == 0 else corr
         F, T = collect(t, seeds, truth, src, mode, device, dtype, max_nets,
@@ -493,14 +494,41 @@ def train_arm(t, seeds, truth, mode, device, dtype, rounds=3, epochs=60,
         # from the FIRST round's targets so a later round cannot widen it.
         if clamp is None:
             clamp = CLAMP_CM_SIGMAS * st["cm_target_sd"]
-        st["round"] = r
-        info.append(st)
-        if verbose:
-            print(f"    round {r}: {st['n_rows']:,} rows, loss "
-                  f"{st['loss_first']:.5f} -> {st['loss_last']:.5f}")
         del F, T
         if device == "cuda":
             t.cuda.empty_cache()
+
+        # ROUND SELECTION, on the TRAINING networks and nothing else.
+        #
+        # DAgger has no guarantee that the last round is the best one, and this
+        # system can diverge: `var <- var * (1 + c_v)` at fifteen layers is a
+        # multiplicative walk, so even unbiased error in `c_v` inflates the
+        # variance in expectation. On six probe networks round 1 ran away and
+        # rounds 2-3 then fitted a trajectory that was already 1000x wrong.
+        #
+        # Selecting on the HELD-OUT rollout would fix that by spending the
+        # held-out set, which is the one thing this study cannot afford. So the
+        # selection is on the training networks' own rollout: legitimate model
+        # selection on training data, and it leaves the held-out fold untouched.
+        tr, _ = evaluate(t, seeds, truth, corr, mode, device, dtype, max_nets,
+                         clamp_cm=clamp)
+        st["round"] = r
+        st["train_rollout_mse"] = float(tr.mean())
+        info.append(st)
+        if st["train_rollout_mse"] < best[0]:
+            best = (st["train_rollout_mse"],
+                    [q.detach().clone() for q in corr.params()], r)
+        if verbose:
+            print(f"    round {r}: {st['n_rows']:,} rows, loss "
+                  f"{st['loss_first']:.5f} -> {st['loss_last']:.5f}, "
+                  f"train rollout {st['train_rollout_mse']:.4e}")
+
+    if best[1] is not None:
+        with t.no_grad():
+            for q, v in zip(corr.params(), best[1]):
+                q.copy_(v)
+    for st in info:
+        st["selected"] = (st["round"] == best[2])
     return corr, clamp, info
 
 # ---------------------------------------------------------------------------
