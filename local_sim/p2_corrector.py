@@ -279,6 +279,175 @@ def cross_mse(pred, y1, y2):
     return float(np.mean((pred - y1) * (pred - y2)))
 
 
+
+# ---------------------------------------------------------------------------
+# collection, fitting, rollout evaluation
+# ---------------------------------------------------------------------------
+# EVERY rollout in this section runs under `torch.no_grad()`. `p2_pb_rank`
+# learned this the expensive way -- `predict()` built an autograd graph in a
+# module that differentiates nothing and put 75.21 GiB live on a 31.84 GiB
+# card. Nothing here differentiates through the tower: the corrector is fitted
+# by regression on COLLECTED targets, so the graph would be pure waste even if
+# it fitted.
+
+
+def collect(t, seeds, truth, corrector, mode, device, dtype, max_nets=None):
+    """Roll out each network and record (features, targets) at every layer.
+
+    The targets are read off the trajectory the CURRENT corrector actually
+    produces, which is what makes the outer loop DAgger rather than one-shot
+    teacher forcing: round 0 sees the uncorrected trajectory, round k sees its
+    own. A corrector fitted once on the uncorrected trajectory is being asked,
+    at deployment, about states it never saw.
+
+    Targets, from the definition of the correction:
+
+        c_m* = (true_mean[l] - mu_raw) / sig      so mu_raw + sig*c_m* == truth
+        c_v* = true_var[l] / var_raw - 1          so var_raw*(1+c_v*) == truth
+
+    The two replicas are AVERAGED for the target -- halving the label noise is
+    worth more than keeping them apart, and they are kept apart where it
+    actually matters, in the unbiased cross-product MSE that scores the result.
+    """
+    m1 = truth["means_r1"]
+    m2 = truth["means_r2"]
+    av1 = truth["allvar_r1"]
+    av2 = truth["allvar_r2"]
+    n = len(seeds) if max_nets is None else min(max_nets, len(seeds))
+    F, T = [], []
+    with t.no_grad():
+        for i in range(n):
+            w = weights_for(t, seeds[i], device, dtype)
+            _out, recs = k2_rollout(t, w, corrector=corrector, mode=mode)
+            tm = t.from_numpy(np.ascontiguousarray(
+                (m1[i] + m2[i]) * 0.5)).to(device=device, dtype=dtype)
+            tv = t.from_numpy(np.ascontiguousarray(
+                (av1[i] + av2[i]) * 0.5)).to(device=device, dtype=dtype)
+            for r in recs:
+                k = r["layer"]
+                if k == 0:          # never corrected; see k2_rollout
+                    continue
+                f = features(t, r["alpha"], k, DEPTH)
+                cm = (tm[k] - r["mu_raw"]) / r["sig"]
+                cv = tv[k] / r["var_raw"].clamp(min=1e-30) - 1.0
+                F.append(f)
+                T.append(t.stack([cm, cv], dim=-1))
+    return t.cat(F, dim=0), t.cat(T, dim=0)
+
+
+def fit(t, corrector, F, T, epochs=60, lr=3e-3, batch=1 << 16, seed=0,
+        verbose=False):
+    """Regression of (c_m*, c_v*) on the feature block. Plain Adam.
+
+    The two targets live on very different scales, so each is standardised by
+    its own training spread and the loss is on the standardised residual --
+    otherwise `c_v`, which is order 1, would drown `c_m`, which is order 1e-2,
+    and the fit would optimise the half that matters least for the scored row.
+    """
+    tt = T.detach()
+    mu = tt.mean(dim=0, keepdim=True)
+    sd = tt.std(dim=0, keepdim=True).clamp(min=1e-12)
+    # Robust guard: a handful of neurons with var_raw ~ 0 can make c_v* huge.
+    # Clip the TARGETS at 8 standardised units so the fit is not dragged by a
+    # dozen rows out of a million and a half.
+    z = ((tt - mu) / sd).clamp(-8.0, 8.0)
+    opt = t.optim.Adam(corrector.params(), lr=lr)
+    n = F.shape[0]
+    g = t.Generator(device="cpu").manual_seed(seed)
+    hist = []
+    for ep in range(epochs):
+        perm = t.randperm(n, generator=g).to(F.device)
+        tot, nb = 0.0, 0
+        for i in range(0, n, batch):
+            idx = perm[i:i + batch]
+            out = corrector(F[idx])
+            loss = (((out - mu) / sd - z[idx]) ** 2).mean()
+            opt.zero_grad(set_to_none=True)
+            loss.backward()
+            opt.step()
+            tot += float(loss.detach())
+            nb += 1
+        hist.append(tot / max(nb, 1))
+        if verbose and (ep % 10 == 0 or ep == epochs - 1):
+            print(f"      epoch {ep:>3}  loss {hist[-1]:.6f}")
+    return {"loss_first": hist[0], "loss_last": hist[-1],
+            "cm_target_sd": float(sd[0, 0]), "cv_target_sd": float(sd[0, 1]),
+            "n_rows": int(n)}
+
+
+def evaluate(t, seeds, truth, corrector, mode, device, dtype, max_nets=None,
+             clamp_cm=None, shuffle_features=False, shuffle_seed=0):
+    """Per-network final-layer MSE by FULL ROLLOUT, unbiased by two replicas.
+
+    `shuffle_features` is null control N2: the per-neuron feature rows are
+    permuted within each layer, which destroys the neuron-to-correction
+    correspondence while leaving every marginal distribution of the features,
+    and of the corrections, exactly as it was. If a corrector still helps under
+    that, it is not using per-neuron information and the result means something
+    other than what it claims.
+    """
+    m1, m2 = truth["means_r1"], truth["means_r2"]
+    n = len(seeds) if max_nets is None else min(max_nets, len(seeds))
+    per, noise = [], []
+    corr = corrector
+    if shuffle_features and corrector is not None:
+        corr = _ShuffleWrap(t, corrector, shuffle_seed)
+    with t.no_grad():
+        for i in range(n):
+            w = weights_for(t, seeds[i], device, dtype)
+            out, _ = k2_rollout(t, w, corrector=corr, mode=mode,
+                                clamp_cm=clamp_cm)
+            p = out[-1].detach().cpu().numpy().astype(np.float64)
+            per.append(cross_mse(p, m1[i, -1].astype(np.float64),
+                                 m2[i, -1].astype(np.float64)))
+            noise.append(float(truth["gt_noise"][i]))
+    return np.asarray(per, dtype=np.float64), np.asarray(noise, dtype=np.float64)
+
+
+class _ShuffleWrap:
+    """Null control N2: permute the feature ROWS within a layer.
+
+    Deliberately a wrapper rather than a flag inside `k2_rollout`: the control
+    must not be able to change anything about the rollout except which neuron
+    each correction lands on.
+    """
+
+    def __init__(self, t, inner, seed):
+        self.t, self.inner, self.seed, self.calls = t, inner, seed, 0
+
+    def __call__(self, f):
+        t = self.t
+        g = t.Generator(device="cpu").manual_seed(self.seed + self.calls)
+        self.calls += 1
+        idx = t.randperm(f.shape[0], generator=g).to(f.device)
+        return self.inner(f[idx])
+
+
+def train_arm(t, seeds, truth, mode, device, dtype, rounds=3, epochs=60,
+              seed=0, constant_cm=False, max_nets=None, verbose=True):
+    """DAgger: fit, roll out with what was fitted, refit on what that produced."""
+    corr = Corrector(t, seed=seed, dtype=dtype, device=device,
+                     constant_cm=constant_cm)
+    clamp = None
+    info = []
+    for r in range(rounds):
+        src = None if r == 0 else corr
+        F, T = collect(t, seeds, truth, src, mode, device, dtype, max_nets)
+        st = fit(t, corr, F, T, epochs=epochs, seed=seed + r, verbose=verbose)
+        # The clamp promised in the contract: 3 training sigmas on c_m, frozen
+        # from the FIRST round's targets so a later round cannot widen it.
+        if clamp is None:
+            clamp = CLAMP_CM_SIGMAS * st["cm_target_sd"]
+        st["round"] = r
+        info.append(st)
+        if verbose:
+            print(f"    round {r}: {st['n_rows']:,} rows, loss "
+                  f"{st['loss_first']:.5f} -> {st['loss_last']:.5f}")
+        del F, T
+        if device == "cuda":
+            t.cuda.empty_cache()
+    return corr, clamp, info
+
 # ---------------------------------------------------------------------------
 # self-test: the invariants that must hold before any number is believed
 # ---------------------------------------------------------------------------
@@ -360,13 +529,222 @@ def selftest():
     return 0 if ok[0] else 1
 
 
+# ---------------------------------------------------------------------------
+# the study
+# ---------------------------------------------------------------------------
+
+def onestep_final_mse(t, seeds, truth, corrector, device, dtype, clamp_cm,
+                      max_nets=None):
+    """The TEACHER-FORCED diagnostic, and it is a diagnostic, not a result.
+
+    Applies `c_m` at the final layer of the UNCORRECTED trajectory: one step,
+    no compounding, exactly the situation the round-0 targets were computed in.
+    CONTRACT WP9's prediction P2 says this will flatter the corrector by at
+    least 1.5x relative to a full rollout, and the contract forbids quoting it
+    as an outcome. It is here so that gap is measured rather than assumed.
+    """
+    m1, m2 = truth["means_r1"], truth["means_r2"]
+    n = len(seeds) if max_nets is None else min(max_nets, len(seeds))
+    per = []
+    with t.no_grad():
+        for i in range(n):
+            w = weights_for(t, seeds[i], device, dtype)
+            _out, recs = k2_rollout(t, w, corrector=None)     # uncorrected
+            r = recs[-1]
+            f = features(t, r["alpha"], DEPTH - 1, DEPTH)
+            cm = corrector(f)[..., 0]
+            if clamp_cm is not None:
+                cm = cm.clamp(-clamp_cm, clamp_cm)
+            p = (r["mu_raw"] + r["sig"] * cm).cpu().numpy().astype(np.float64)
+            per.append(cross_mse(p, m1[i, -1].astype(np.float64),
+                                 m2[i, -1].astype(np.float64)))
+    return np.asarray(per, dtype=np.float64)
+
+
+def folds(n, k, seed=0):
+    """Leave-NETWORKS-out folds. Rows within one MLP are not independent."""
+    rng = np.random.default_rng(seed)
+    idx = rng.permutation(n)
+    return [np.sort(idx[i::k]) for i in range(k)]
+
+
+def run_study(a):
+    import competition_score as CS
+
+    t = _torch()
+    device = "cuda" if t.cuda.is_available() else "cpu"
+    dtype = t.float64
+    truth = load_truth(a.truth)
+    seeds = np.asarray(truth["seeds"])
+    n_all = len(seeds) if not a.n_mlps else min(a.n_mlps, len(seeds))
+    seeds = seeds[:n_all]
+
+    print("=" * 78)
+    print("WP9 -- per-neuron in-flight state corrector")
+    print("=" * 78)
+    print(f"  truth           {os.path.relpath(a.truth, _ROOT)}")
+    print(f"  networks        {n_all}")
+    print(f"  device          {device}   dtype float64")
+    print(f"  folds           {a.folds} (LEAVE-NETWORKS-OUT)")
+    print(f"  DAgger rounds   {a.rounds}")
+    print()
+
+    # ---- arm B0, the control ------------------------------------------
+    per = {}
+    per["B0"], gt_noise = evaluate(t, seeds, truth, None, "none", device, dtype)
+    print(f"  B0 (uncorrected K2)   mean raw MSE {per['B0'].mean():.6e}   "
+          f"GT-noise floor {gt_noise.mean():.4e} "
+          f"({100 * gt_noise.mean() / per['B0'].mean():.4f}% of it)")
+
+    # ---- the fitted arms, scored OUT OF FOLD --------------------------
+    fold_ix = folds(n_all, a.folds, seed=a.seed)
+    specs = [("A", "last", False), ("B", "full", False), ("N1", "full", True)]
+    outs = {k: np.zeros(n_all) for k, _m, _c in specs}
+    outs["N2"] = np.zeros(n_all)
+    outs["B_tf"] = np.zeros(n_all)
+    fitinfo = {}
+    for fi, held in enumerate(fold_ix):
+        keep = np.setdiff1d(np.arange(n_all), held)
+        s_fit, s_out = seeds[keep], seeds[held]
+        print(f"\n  fold {fi + 1}/{a.folds}: fit on {len(keep)}, "
+              f"score {len(held)} HELD-OUT networks")
+        for name, mode, const in specs:
+            corr, clamp, info = train_arm(
+                t, s_fit, _subset(truth, keep), mode, device, dtype,
+                rounds=a.rounds, epochs=a.epochs, seed=a.seed + fi,
+                constant_cm=const, verbose=a.verbose)
+            sub = _subset(truth, held)
+            p, _ = evaluate(t, s_out, sub, corr, mode, device, dtype,
+                            clamp_cm=clamp)
+            outs[name][held] = p
+            fitinfo.setdefault(name, []).append(
+                {"fold": fi, "clamp_cm": clamp, "rounds": info,
+                 "n_params": corr.n_params()})
+            print(f"      {name:<3} held-out raw MSE {p.mean():.6e}   "
+                  f"({per['B0'][held].mean() / p.mean():.4f}x over B0)")
+            if name == "B":
+                # N2: the SAME corrector, features permuted across neurons.
+                pn, _ = evaluate(t, s_out, sub, corr, mode, device, dtype,
+                                 clamp_cm=clamp, shuffle_features=True,
+                                 shuffle_seed=a.seed + fi)
+                outs["N2"][held] = pn
+                outs["B_tf"][held] = onestep_final_mse(
+                    t, s_out, sub, corr, device, dtype, clamp)
+                print(f"      N2  held-out raw MSE {pn.mean():.6e}   "
+                      f"({per['B0'][held].mean() / pn.mean():.4f}x over B0) "
+                      f"[null control]")
+                print(f"      B-tf teacher-forced  {outs['B_tf'][held].mean():.6e}"
+                      f"   ({per['B0'][held].mean() / outs['B_tf'][held].mean():.4f}x)"
+                      f" [DIAGNOSTIC, not a result]")
+    per.update(outs)
+
+    # ---- the paired statistics ----------------------------------------
+    # Phase 2: adjusted = raw * max(0.1, C/B). Every arm here is projected to
+    # sit at the 0.1 floor -- the corrector's own cost model in CONTRACT WP9 is
+    # <= 5e8 against 8.23e10 of unused free zone. That is a PROJECTION until
+    # gate clause G2 measures an fnp spelling under flopscope, and the artifact
+    # says so rather than quietly multiplying by 0.1.
+    print("\n" + "=" * 78)
+    print("  PAIRED ARITHMETIC SCORE DIFFERENCES -- studentised-t, one-sided")
+    print("=" * 78)
+    verdicts = {}
+    for name in ("A", "B", "N1", "N2", "B_tf"):
+        v = CS.decide(per["B0"], per[name], gate=a.gate)
+        verdicts[name] = {
+            "gain": float(v.gain), "passed": bool(v.passed),
+            "gate": float(a.gate),
+            "mean_control": float(per["B0"].mean()),
+            "mean_candidate": float(per[name].mean()),
+            "reasons": list(getattr(v, "reasons", []) or []),
+        }
+        for f in ("t_ci_difference", "mean_difference", "t_stat"):
+            if hasattr(v, f):
+                verdicts[name][f] = _jsonable(getattr(v, f))
+        tag = ("[null control -- MUST be ~1.0]" if name in ("N1", "N2")
+               else "[DIAGNOSTIC, not a result]" if name == "B_tf" else "")
+        print(f"  {name:<5} gain {v.gain:8.4f}x   "
+              f"{'PASS' if v.passed else 'no pass'}   {tag}")
+
+    report = {
+        "artifact": "wp9_corrector_design", "artifact_version": 1,
+        "contract": "experiments/LOG.md CONTRACT WP9 (2026-09-01), commit 9c961ce",
+        "truth": os.path.relpath(a.truth, _ROOT).replace("\\", "/"),
+        "is_probe_truth": bool(int(truth.get("probe", 0))),
+        "n_mlps": int(n_all), "folds": int(a.folds), "rounds": int(a.rounds),
+        "epochs": int(a.epochs), "seed": int(a.seed), "gate": float(a.gate),
+        "width": WIDTH, "depth": DEPTH,
+        "n_features": N_FEATURES, "hidden": HIDDEN,
+        "clamp_cv": CLAMP_CV, "clamp_cm_sigmas": CLAMP_CM_SIGMAS,
+        "gt_noise_mean": float(gt_noise.mean()),
+        "gt_noise_frac_of_B0": float(gt_noise.mean() / per["B0"].mean()),
+        "raw_mse_mean": {k: float(v.mean()) for k, v in per.items()},
+        "per_mlp_raw_mse": {k: v.tolist() for k, v in per.items()},
+        "verdicts": verdicts,
+        "fit": fitinfo,
+        "SCOPE": (
+            "DESIGN tier, leave-networks-out within one block. Selection only. "
+            "The multiplier is PROJECTED at the 0.1 floor for every arm and is "
+            "not measured here; CONTRACT WP9 gate clause G2 requires a "
+            "flopscope price of an fnp spelling before any adjusted score from "
+            "this file may be quoted. Nothing here is a promotion."),
+    }
+    if a.json:
+        os.makedirs(os.path.dirname(os.path.abspath(a.json)), exist_ok=True)
+        with open(a.json, "w", encoding="utf-8") as fh:
+            json.dump(report, fh, indent=1)
+        print(f"\n  wrote {os.path.relpath(a.json, _ROOT)}")
+    print("=" * 78)
+    return 0
+
+
+def _subset(truth, idx):
+    """A view of the truth arrays restricted to `idx`, same keys."""
+    out = {}
+    for k in ("means_r1", "means_r2", "allvar_r1", "allvar_r2", "gt_noise",
+              "seeds"):
+        if k in truth:
+            out[k] = np.asarray(truth[k])[idx]
+    for k in ("n_samples", "width", "depth", "probe"):
+        if k in truth:
+            out[k] = truth[k]
+    return out
+
+
+def _jsonable(x):
+    if isinstance(x, (list, tuple)):
+        return [float(v) for v in x]
+    try:
+        return float(x)
+    except (TypeError, ValueError):
+        return str(x)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--selftest", action="store_true")
+    ap.add_argument("--truth", default="", help="truth npz from p2_truth.py")
+    ap.add_argument("--n-mlps", type=int, default=0, help="0 = all")
+    ap.add_argument("--folds", type=int, default=4,
+                    help="leave-NETWORKS-out folds")
+    ap.add_argument("--rounds", type=int, default=3, help="DAgger rounds")
+    ap.add_argument("--epochs", type=int, default=60)
+    ap.add_argument("--seed", type=int, default=0)
+    # No default. CONTRACT WP9's G1 is 1.5x and a gate must not be suppliable
+    # after the data is visible, which is why `competition_score.decide` has no
+    # default either.
+    ap.add_argument("--gate", type=float, required=False, default=None)
+    ap.add_argument("--json", default="")
+    ap.add_argument("--verbose", action="store_true")
     a = ap.parse_args()
     if a.selftest:
         return selftest()
-    ap.error("nothing to do; pass --selftest (fitting lands with the truth file)")
+    if not a.truth:
+        ap.error("--truth is required (or pass --selftest)")
+    if a.gate is None:
+        ap.error("--gate is REQUIRED. CONTRACT WP9 fixed it at 1.5 before any "
+                 "data existed; passing it explicitly is what makes that "
+                 "visible in the command line and in the artifact.")
+    return run_study(a)
 
 
 if __name__ == "__main__":
