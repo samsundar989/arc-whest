@@ -449,6 +449,34 @@ class _ShuffleWrap:
         return self.inner(f[idx])
 
 
+def held_out_r2(t, corrector, F, T, clamp_cm=None):
+    """Held-out R^2 per channel, on the trajectory the corrector produces.
+
+    This separates two very different failure modes that a rollout score alone
+    cannot tell apart:
+
+      * R^2 ~ 0  -- the per-neuron residual is NOT a function of the
+        scale-invariant features. Hypothesis H1 is dead, and no amount of
+        rollout machinery rescues it.
+      * R^2 healthy but the rollout does not improve -- the signal is real and
+        COMPOUNDING is what destroys it. That is a different problem with
+        different fixes, and it would be prediction P2 biting hard.
+
+    The 2026-09-01 implementation brief proposed `R^2 >= 0.3` as its own gate.
+    It is NOT the gate here -- CONTRACT WP9's G1 is a paired rollout score --
+    but it is exactly the right diagnostic, so it is reported beside it.
+    """
+    with t.no_grad():
+        out = corrector(F)
+        if clamp_cm is not None:
+            out = t.stack([out[..., 0].clamp(-clamp_cm, clamp_cm),
+                           out[..., 1].clamp(-CLAMP_CV, CLAMP_CV)], dim=-1)
+        ss_res = ((out - T) ** 2).sum(dim=0)
+        ss_tot = ((T - T.mean(dim=0, keepdim=True)) ** 2).sum(dim=0)
+        r2 = 1.0 - ss_res / ss_tot.clamp(min=1e-30)
+    return [float(r2[0]), float(r2[1])]
+
+
 def train_arm(t, seeds, truth, mode, device, dtype, rounds=3, epochs=60,
               seed=0, constant_cm=False, max_nets=None, verbose=True):
     """DAgger: fit, roll out with what was fitted, refit on what that produced."""
@@ -657,11 +685,19 @@ def run_study(a):
             p, _ = evaluate(t, s_out, sub, corr, mode, device, dtype,
                             clamp_cm=clamp)
             outs[name][held] = p
+            Fh, Th = collect(t, s_out, sub, corr, mode, device, dtype,
+                             clamp_cm=clamp)
+            r2 = held_out_r2(t, corr, Fh, Th, clamp)
+            del Fh, Th
+            if device == "cuda":
+                t.cuda.empty_cache()
             fitinfo.setdefault(name, []).append(
                 {"fold": fi, "clamp_cm": clamp, "rounds": info,
-                 "n_params": corr.n_params()})
+                 "n_params": corr.n_params(), "held_out_r2_cm": r2[0],
+                 "held_out_r2_cv": r2[1]})
             print(f"      {name:<3} held-out raw MSE {p.mean():.6e}   "
-                  f"({per['B0'][held].mean() / p.mean():.4f}x over B0)")
+                  f"({per['B0'][held].mean() / p.mean():.4f}x over B0)   "
+                  f"R2 c_m {r2[0]:+.3f} / c_v {r2[1]:+.3f}")
             if name == "B":
                 # N2: the SAME corrector, features permuted across neurons.
                 pn, _ = evaluate(t, s_out, sub, corr, mode, device, dtype,
