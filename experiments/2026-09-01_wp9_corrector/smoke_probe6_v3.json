@@ -1,0 +1,347 @@
+{
+ "artifact": "wp9_corrector_design",
+ "artifact_version": 1,
+ "contract": "experiments/LOG.md CONTRACT WP9 (2026-09-01), commit 9c961ce",
+ "truth": "../../../../../../Documents/arc-whest/experiments/2026-09-01_wp9_corrector/probe_truth_6.npz",
+ "is_probe_truth": true,
+ "n_mlps": 6,
+ "folds": 2,
+ "rounds": 3,
+ "epochs": 40,
+ "seed": 0,
+ "gate": 1.5,
+ "width": 1024,
+ "depth": 16,
+ "n_features": 8,
+ "hidden": 32,
+ "clamp_cv": 0.5,
+ "clamp_cm_sigmas": 3.0,
+ "gt_noise_mean": 7.204915591330376e-08,
+ "gt_noise_frac_of_B0": 0.015306236785459908,
+ "raw_mse_mean": {
+  "B0": 4.7071763571400214e-06,
+  "A": 3.972685357653289e-06,
+  "B": 0.01436817546228985,
+  "N1": 0.017263465515224653,
+  "N2": 0.017582512604544732,
+  "B_tf": 7.825981595376219e-06
+ },
+ "per_mlp_raw_mse": {
+  "B0": [
+   5.9664355351346605e-06,
+   4.330180154350055e-06,
+   4.470005909885746e-06,
+   5.421059509678887e-06,
+   3.6171301216830304e-06,
+   4.4382469121077486e-06
+  ],
+  "A": [
+   5.211259796625666e-06,
+   3.829834076729238e-06,
+   2.7878284542292455e-06,
+   4.213208031066134e-06,
+   2.8538472836263565e-06,
+   4.9401345036430935e-06
+  ],
+  "B": [
+   0.017928759080800966,
+   0.009278918632647338,
+   0.013148384101099305,
+   0.01607178381762275,
+   0.011268798280942367,
+   0.01851240886062637
+  ],
+  "N1": [
+   0.019668175938127787,
+   0.011949705294939668,
+   0.016417333446069257,
+   0.018744146473148614,
+   0.014223788851440513,
+   0.022577643087622074
+  ],
+  "N2": [
+   0.018021225468115253,
+   0.014141189218651654,
+   0.020700655835381093,
+   0.01641367495649031,
+   0.016935353315492573,
+   0.01928297683313751
+  ],
+  "B_tf": [
+   9.1093818664253e-06,
+   7.549798372520197e-06,
+   6.57341976863939e-06,
+   7.089484273499182e-06,
+   7.458950395092744e-06,
+   9.174854896080499e-06
+  ]
+ },
+ "verdicts": {
+  "A": {
+   "gain": 1.184885268618556,
+   "passed": false,
+   "gate": 1.5,
+   "mean_control": 4.7071763571400214e-06,
+   "mean_candidate": 3.972685357653289e-06,
+   "reasons": [
+    "arithmetic gain 1.1849x is below the pre-registered gate 1.5000x",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-3.7793e-08, +1.5068e-06]"
+   ]
+  },
+  "B": {
+   "gain": 0.00032761128018615114,
+   "passed": false,
+   "gate": 1.5,
+   "mean_control": 4.7071763571400214e-06,
+   "mean_candidate": 0.01436817546228985,
+   "reasons": [
+    "arithmetic gain 0.0003x is below the pre-registered gate 1.5000x",
+    "the candidate is WORSE than the control (0.0003x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-1.8283e-02, -1.0444e-02]"
+   ]
+  },
+  "N1": {
+   "gain": 0.0002726669423928099,
+   "passed": false,
+   "gate": 1.5,
+   "mean_control": 4.7071763571400214e-06,
+   "mean_candidate": 0.017263465515224653,
+   "reasons": [
+    "arithmetic gain 0.0003x is below the pre-registered gate 1.5000x",
+    "the candidate is WORSE than the control (0.0003x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-2.1307e-02, -1.3210e-02]"
+   ]
+  },
+  "N2": {
+   "gain": 0.00026771920845507083,
+   "passed": false,
+   "gate": 1.5,
+   "mean_control": 4.7071763571400214e-06,
+   "mean_candidate": 0.017582512604544732,
+   "reasons": [
+    "arithmetic gain 0.0003x is below the pre-registered gate 1.5000x",
+    "the candidate is WORSE than the control (0.0003x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-1.9991e-02, -1.5164e-02]"
+   ]
+  },
+  "B_tf": {
+   "gain": 0.6014806321447441,
+   "passed": false,
+   "gate": 1.5,
+   "mean_control": 4.7071763571400214e-06,
+   "mean_candidate": 7.825981595376219e-06,
+   "reasons": [
+    "arithmetic gain 0.6015x is below the pre-registered gate 1.5000x",
+    "the candidate is WORSE than the control (0.6015x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-4.2956e-06, -1.9420e-06]"
+   ]
+  }
+ },
+ "fit": {
+  "A": [
+   {
+    "fold": 0,
+    "clamp_cm": 0.01377333114039981,
+    "rounds": [
+     {
+      "loss_first": 2.711057060340233,
+      "loss_last": 1.0437179292417085,
+      "cm_target_sd": 0.00459111038013327,
+      "cv_target_sd": 0.192127495830799,
+      "n_rows": 3072,
+      "round": 0
+     },
+     {
+      "loss_first": 1.0386040494514455,
+      "loss_last": 0.765327701109614,
+      "cm_target_sd": 0.00459111038013327,
+      "cv_target_sd": 0.192127495830799,
+      "n_rows": 3072,
+      "round": 1
+     },
+     {
+      "loss_first": 0.9214229614464886,
+      "loss_last": 0.7522746381786931,
+      "cm_target_sd": 0.00459111038013327,
+      "cv_target_sd": 0.192127495830799,
+      "n_rows": 3072,
+      "round": 2
+     }
+    ],
+    "n_params": 354,
+    "held_out_r2_cm": -0.3023321159581933,
+    "held_out_r2_cv": 0.6939328122803619
+   },
+   {
+    "fold": 1,
+    "clamp_cm": 0.0137422584374827,
+    "rounds": [
+     {
+      "loss_first": 237.19906293095278,
+      "loss_last": 1.9721293463398157,
+      "cm_target_sd": 0.004580752812494233,
+      "cv_target_sd": 0.2102029658224908,
+      "n_rows": 3072,
+      "round": 0
+     },
+     {
+      "loss_first": 1.1547323290829055,
+      "loss_last": 0.6955055938523573,
+      "cm_target_sd": 0.004580752812494233,
+      "cv_target_sd": 0.2102029658224908,
+      "n_rows": 3072,
+      "round": 1
+     },
+     {
+      "loss_first": 0.45060455217013057,
+      "loss_last": 0.445421454002609,
+      "cm_target_sd": 0.004580752812494233,
+      "cv_target_sd": 0.2102029658224908,
+      "n_rows": 3072,
+      "round": 2
+     }
+    ],
+    "n_params": 354,
+    "held_out_r2_cm": -0.07418225942328238,
+    "held_out_r2_cv": 0.6808884245935033
+   }
+  ],
+  "B": [
+   {
+    "fold": 0,
+    "clamp_cm": 0.008651701791836792,
+    "rounds": [
+     {
+      "loss_first": 6.415832622468669,
+      "loss_last": 1.2656437109624046,
+      "cm_target_sd": 0.0028839005972789307,
+      "cv_target_sd": 0.12871705678274578,
+      "n_rows": 46080,
+      "round": 0
+     },
+     {
+      "loss_first": 0.9662770794241452,
+      "loss_last": 0.22933672368641908,
+      "cm_target_sd": 0.030184531903924523,
+      "cv_target_sd": 0.17677545554061994,
+      "n_rows": 46080,
+      "round": 1
+     },
+     {
+      "loss_first": 2.0733889011483218,
+      "loss_last": 0.38376937198540867,
+      "cm_target_sd": 0.0972152591427572,
+      "cv_target_sd": 0.24006094653550958,
+      "n_rows": 46080,
+      "round": 2
+     }
+    ],
+    "n_params": 354,
+    "held_out_r2_cm": -0.474391230622907,
+    "held_out_r2_cv": -1.3935564027120666
+   },
+   {
+    "fold": 1,
+    "clamp_cm": 0.008633628826003784,
+    "rounds": [
+     {
+      "loss_first": 399.1079390704123,
+      "loss_last": 1.379782252322479,
+      "cm_target_sd": 0.0028778762753345947,
+      "cv_target_sd": 0.13211704887405012,
+      "n_rows": 46080,
+      "round": 0
+     },
+     {
+      "loss_first": 0.9643819720036069,
+      "loss_last": 0.19459076042019288,
+      "cm_target_sd": 0.03495263060536266,
+      "cv_target_sd": 0.18420322152295265,
+      "n_rows": 46080,
+      "round": 1
+     },
+     {
+      "loss_first": 2.0749697022302156,
+      "loss_last": 0.4331866262052068,
+      "cm_target_sd": 0.09493934931045571,
+      "cv_target_sd": 0.19400847118423287,
+      "n_rows": 46080,
+      "round": 2
+     }
+    ],
+    "n_params": 354,
+    "held_out_r2_cm": -0.43041882153166156,
+    "held_out_r2_cv": -5.442460568012269
+   }
+  ],
+  "N1": [
+   {
+    "fold": 0,
+    "clamp_cm": 0.008651701791836792,
+    "rounds": [
+     {
+      "loss_first": 2.234994810817383,
+      "loss_last": 1.2845229261046076,
+      "cm_target_sd": 0.0028839005972789307,
+      "cv_target_sd": 0.12871705678274578,
+      "n_rows": 46080,
+      "round": 0
+     },
+     {
+      "loss_first": 0.908264804605708,
+      "loss_last": 0.6277706463843936,
+      "cm_target_sd": 0.023712462110310868,
+      "cv_target_sd": 0.17461505572664482,
+      "n_rows": 46080,
+      "round": 1
+     },
+     {
+      "loss_first": 1.6497920608858898,
+      "loss_last": 0.8745234967210781,
+      "cm_target_sd": 0.10493882033772754,
+      "cv_target_sd": 0.17711833000909755,
+      "n_rows": 46080,
+      "round": 2
+     }
+    ],
+    "n_params": 354,
+    "held_out_r2_cm": -0.43338600387902493,
+    "held_out_r2_cv": -4.879666117120214
+   },
+   {
+    "fold": 1,
+    "clamp_cm": 0.008633628826003784,
+    "rounds": [
+     {
+      "loss_first": 329.1380551315496,
+      "loss_last": 0.7843814131958254,
+      "cm_target_sd": 0.0028778762753345947,
+      "cv_target_sd": 0.13211704887405012,
+      "n_rows": 46080,
+      "round": 0
+     },
+     {
+      "loss_first": 0.8951834448744485,
+      "loss_last": 0.5822586021971867,
+      "cm_target_sd": 0.035900788905135705,
+      "cv_target_sd": 0.1844198686100826,
+      "n_rows": 46080,
+      "round": 1
+     },
+     {
+      "loss_first": 1.6059451911662666,
+      "loss_last": 0.8695855159459097,
+      "cm_target_sd": 0.10134030215306028,
+      "cv_target_sd": 0.2122117280587989,
+      "n_rows": 46080,
+      "round": 2
+     }
+    ],
+    "n_params": 354,
+    "held_out_r2_cm": -0.4545703658309601,
+    "held_out_r2_cv": -5.478963057526464
+   }
+  ]
+ },
+ "SCOPE": "DESIGN tier, leave-networks-out within one block. Selection only. The multiplier is PROJECTED at the 0.1 floor for every arm and is not measured here; CONTRACT WP9 gate clause G2 requires a flopscope price of an fnp spelling before any adjusted score from this file may be quoted. Nothing here is a promotion."
+}

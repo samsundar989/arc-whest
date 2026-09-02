@@ -1,0 +1,380 @@
+{
+ "artifact": "wp9_corrector_design",
+ "artifact_version": 1,
+ "contract": "experiments/LOG.md CONTRACT WP9 (2026-09-01), commit 9c961ce",
+ "truth": "../../../../../../Documents/arc-whest/experiments/2026-09-01_wp9_corrector/probe_truth_6.npz",
+ "is_probe_truth": true,
+ "n_mlps": 6,
+ "folds": 2,
+ "rounds": 3,
+ "epochs": 25,
+ "seed": 0,
+ "gate": 1.5,
+ "width": 1024,
+ "depth": 16,
+ "n_features": 8,
+ "hidden": 32,
+ "clamp_cv": 0.5,
+ "clamp_cm_sigmas": 3.0,
+ "gt_noise_mean": 7.204915591330376e-08,
+ "gt_noise_frac_of_B0": 0.015306236785459908,
+ "raw_mse_mean": {
+  "B0": 4.7071763571400214e-06,
+  "A": 1.9614168110703724e-06,
+  "B": 0.001124437612976266,
+  "N1": 0.0013174312164998061,
+  "N2": 0.001363816339933637,
+  "B_tf": 5.42977015770024e-06
+ },
+ "per_mlp_raw_mse": {
+  "B0": [
+   5.9664355351346605e-06,
+   4.330180154350055e-06,
+   4.470005909885746e-06,
+   5.421059509678887e-06,
+   3.6171301216830304e-06,
+   4.4382469121077486e-06
+  ],
+  "A": [
+   2.0146972632492952e-06,
+   2.0861569864617508e-06,
+   1.676834572084295e-06,
+   1.9039452037169353e-06,
+   1.6056621836185705e-06,
+   2.4812046572913864e-06
+  ],
+  "B": [
+   0.0016947724567449775,
+   0.0008653438618235377,
+   0.0006827031645215496,
+   0.0012200138186888548,
+   0.0007931178653116943,
+   0.0014906745107669823
+  ],
+  "N1": [
+   0.00121965331315257,
+   0.0020394829025010682,
+   0.001389193887160121,
+   0.000781830660710916,
+   0.0014993812557416864,
+   0.0009750452797324745
+  ],
+  "N2": [
+   0.0015271051305289756,
+   0.0010537736820396175,
+   0.0011885596725532263,
+   0.0016287139412837462,
+   0.001113741180815224,
+   0.0016710044323810323
+  ],
+  "B_tf": [
+   5.633040483617374e-06,
+   5.5828336095519245e-06,
+   5.285833499794648e-06,
+   4.824848444334657e-06,
+   4.852958617944621e-06,
+   6.39910629095821e-06
+  ]
+ },
+ "verdicts": {
+  "A": {
+   "gain": 2.3998858022284666,
+   "passed": true,
+   "gate": 1.5,
+   "mean_control": 4.7071763571400214e-06,
+   "mean_candidate": 1.9614168110703724e-06,
+   "reasons": []
+  },
+  "B": {
+   "gain": 0.004186249466238175,
+   "passed": false,
+   "gate": 1.5,
+   "mean_control": 4.7071763571400214e-06,
+   "mean_candidate": 0.001124437612976266,
+   "reasons": [
+    "arithmetic gain 0.0042x is below the pre-registered gate 1.5000x",
+    "the candidate is WORSE than the control (0.0042x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-1.5494e-03, -6.9001e-04]"
+   ]
+  },
+  "N1": {
+   "gain": 0.003572995916740306,
+   "passed": false,
+   "gate": 1.5,
+   "mean_control": 4.7071763571400214e-06,
+   "mean_candidate": 0.0013174312164998061,
+   "reasons": [
+    "arithmetic gain 0.0036x is below the pre-registered gate 1.5000x",
+    "the candidate is WORSE than the control (0.0036x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-1.7762e-03, -8.4921e-04]"
+   ]
+  },
+  "N2": {
+   "gain": 0.0034514737940220543,
+   "passed": false,
+   "gate": 1.5,
+   "mean_control": 4.7071763571400214e-06,
+   "mean_candidate": 0.001363816339933637,
+   "reasons": [
+    "arithmetic gain 0.0035x is below the pre-registered gate 1.5000x",
+    "the candidate is WORSE than the control (0.0035x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-1.6481e-03, -1.0701e-03]"
+   ]
+  },
+  "B_tf": {
+   "gain": 0.8669200022149243,
+   "passed": false,
+   "gate": 1.5,
+   "mean_control": 4.7071763571400214e-06,
+   "mean_candidate": 5.42977015770024e-06,
+   "reasons": [
+    "arithmetic gain 0.8669x is below the pre-registered gate 1.5000x",
+    "the candidate is WORSE than the control (0.8669x)",
+    "the t 95% interval on the paired difference does not lie strictly above zero [-1.7660e-06, +3.2077e-07]"
+   ]
+  }
+ },
+ "fit": {
+  "A": [
+   {
+    "fold": 0,
+    "clamp_cm": 0.01377333114039981,
+    "rounds": [
+     {
+      "loss_first": 2.711057060340233,
+      "loss_last": 1.1883496288863924,
+      "cm_target_sd": 0.00459111038013327,
+      "cv_target_sd": 0.192127495830799,
+      "n_rows": 3072,
+      "round": 0,
+      "train_rollout_mse": 3.3869908927559425e-06,
+      "selected": false
+     },
+     {
+      "loss_first": 0.7368117332706678,
+      "loss_last": 0.9284135500191564,
+      "cm_target_sd": 0.00459111038013327,
+      "cv_target_sd": 0.192127495830799,
+      "n_rows": 3072,
+      "round": 1,
+      "train_rollout_mse": 2.0363716651727326e-06,
+      "selected": false
+     },
+     {
+      "loss_first": 0.5022828552263645,
+      "loss_last": 1.4955051745664627,
+      "cm_target_sd": 0.00459111038013327,
+      "cv_target_sd": 0.192127495830799,
+      "n_rows": 3072,
+      "round": 2,
+      "train_rollout_mse": 1.737796786289215e-06,
+      "selected": true
+     }
+    ],
+    "n_params": 354,
+    "held_out_r2_cm": 0.3982892073676543,
+    "held_out_r2_cv": 0.7012772851319606
+   },
+   {
+    "fold": 1,
+    "clamp_cm": 0.0137422584374827,
+    "rounds": [
+     {
+      "loss_first": 237.19906293095278,
+      "loss_last": 2.9883957301021926,
+      "cm_target_sd": 0.004580752812494233,
+      "cv_target_sd": 0.2102029658224908,
+      "n_rows": 3072,
+      "round": 0,
+      "train_rollout_mse": 3.808809727585243e-06,
+      "selected": false
+     },
+     {
+      "loss_first": 0.7889869967850041,
+      "loss_last": 0.6479267221887857,
+      "cm_target_sd": 0.004580752812494233,
+      "cv_target_sd": 0.2102029658224908,
+      "n_rows": 3072,
+      "round": 1,
+      "train_rollout_mse": 3.3918418904341645e-06,
+      "selected": false
+     },
+     {
+      "loss_first": 0.6159567900873301,
+      "loss_last": 0.6895726784767575,
+      "cm_target_sd": 0.004580752812494233,
+      "cv_target_sd": 0.2102029658224908,
+      "n_rows": 3072,
+      "round": 2,
+      "train_rollout_mse": 2.3725450228262677e-06,
+      "selected": true
+     }
+    ],
+    "n_params": 354,
+    "held_out_r2_cm": 0.38659640874766754,
+    "held_out_r2_cv": 0.6812130718610062
+   }
+  ],
+  "B": [
+   {
+    "fold": 0,
+    "clamp_cm": 0.008651701791836792,
+    "rounds": [
+     {
+      "loss_first": 6.415832622468669,
+      "loss_last": 1.108411772009384,
+      "cm_target_sd": 0.0028839005972789307,
+      "cv_target_sd": 0.12871705678274578,
+      "n_rows": 46080,
+      "round": 0,
+      "train_rollout_mse": 0.0010884949652337442,
+      "selected": true
+     },
+     {
+      "loss_first": 1.1057995981225828,
+      "loss_last": 0.21568799501665023,
+      "cm_target_sd": 0.04185024040904917,
+      "cv_target_sd": 0.18171600557556034,
+      "n_rows": 46080,
+      "round": 1,
+      "train_rollout_mse": 0.0025714658915865587,
+      "selected": false
+     },
+     {
+      "loss_first": 2.7453052806670146,
+      "loss_last": 0.6174369120472473,
+      "cm_target_sd": 0.086233390622416,
+      "cv_target_sd": 0.2897200183719136,
+      "n_rows": 46080,
+      "round": 2,
+      "train_rollout_mse": 0.007583453947715831,
+      "selected": false
+     }
+    ],
+    "n_params": 354,
+    "held_out_r2_cm": -0.25832081656979056,
+    "held_out_r2_cv": 0.14567970985406564
+   },
+   {
+    "fold": 1,
+    "clamp_cm": 0.008633628826003784,
+    "rounds": [
+     {
+      "loss_first": 399.1079390704123,
+      "loss_last": 1.2133327727200571,
+      "cm_target_sd": 0.0028778762753345947,
+      "cv_target_sd": 0.13211704887405012,
+      "n_rows": 46080,
+      "round": 0,
+      "train_rollout_mse": 0.0011030647508869695,
+      "selected": true
+     },
+     {
+      "loss_first": 1.1549282652887518,
+      "loss_last": 0.5171940782494386,
+      "cm_target_sd": 0.03130987356856995,
+      "cv_target_sd": 0.18516539308542057,
+      "n_rows": 46080,
+      "round": 1,
+      "train_rollout_mse": 0.006047709544507832,
+      "selected": false
+     },
+     {
+      "loss_first": 2.72852922357428,
+      "loss_last": 0.41770414160218033,
+      "cm_target_sd": 1232.1665487157577,
+      "cv_target_sd": 0.25680199400299986,
+      "n_rows": 46080,
+      "round": 2,
+      "train_rollout_mse": 0.13489683206430095,
+      "selected": false
+     }
+    ],
+    "n_params": 354,
+    "held_out_r2_cm": -0.18309924100202934,
+    "held_out_r2_cv": -0.018848703087711582
+   }
+  ],
+  "N1": [
+   {
+    "fold": 0,
+    "clamp_cm": 0.008651701791836792,
+    "rounds": [
+     {
+      "loss_first": 2.234994810817383,
+      "loss_last": 0.822376870872275,
+      "cm_target_sd": 0.0028839005972789307,
+      "cv_target_sd": 0.12871705678274578,
+      "n_rows": 46080,
+      "round": 0,
+      "train_rollout_mse": 0.0008149181488163546,
+      "selected": true
+     },
+     {
+      "loss_first": 0.9942475280430105,
+      "loss_last": 0.5999437241565714,
+      "cm_target_sd": 0.03710761885736564,
+      "cv_target_sd": 0.17927628128884762,
+      "n_rows": 46080,
+      "round": 1,
+      "train_rollout_mse": 0.0034787608743764016,
+      "selected": false
+     },
+     {
+      "loss_first": 2.2133323901870217,
+      "loss_last": 0.8844251952128305,
+      "cm_target_sd": 0.10013057142260183,
+      "cv_target_sd": 0.26896075858271506,
+      "n_rows": 46080,
+      "round": 2,
+      "train_rollout_mse": 0.005840629480139016,
+      "selected": false
+     }
+    ],
+    "n_params": 354,
+    "held_out_r2_cm": -0.23514030155353982,
+    "held_out_r2_cv": 0.21563763145184278
+   },
+   {
+    "fold": 1,
+    "clamp_cm": 0.008633628826003784,
+    "rounds": [
+     {
+      "loss_first": 329.1380551315496,
+      "loss_last": 0.789955200036125,
+      "cm_target_sd": 0.0028778762753345947,
+      "cv_target_sd": 0.13211704887405012,
+      "n_rows": 46080,
+      "round": 0,
+      "train_rollout_mse": 0.002264698832266467,
+      "selected": true
+     },
+     {
+      "loss_first": 1.1631506438523855,
+      "loss_last": 0.5973646393094902,
+      "cm_target_sd": 0.039786005756470476,
+      "cv_target_sd": 0.18550271601861168,
+      "n_rows": 46080,
+      "round": 1,
+      "train_rollout_mse": 0.008531169810584337,
+      "selected": false
+     },
+     {
+      "loss_first": 2.260732582919048,
+      "loss_last": 0.380454176252454,
+      "cm_target_sd": 1193.1970172221506,
+      "cv_target_sd": 0.2732220205360407,
+      "n_rows": 46080,
+      "round": 2,
+      "train_rollout_mse": 0.22108466744012487,
+      "selected": false
+     }
+    ],
+    "n_params": 354,
+    "held_out_r2_cm": -0.1737970792439012,
+    "held_out_r2_cv": -0.06168702013232741
+   }
+  ]
+ },
+ "SCOPE": "DESIGN tier, leave-networks-out within one block. Selection only. The multiplier is PROJECTED at the 0.1 floor for every arm and is not measured here; CONTRACT WP9 gate clause G2 requires a flopscope price of an fnp spelling before any adjusted score from this file may be quoted. Nothing here is a promotion."
+}
