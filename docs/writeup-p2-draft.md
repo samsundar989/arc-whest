@@ -28,7 +28,7 @@
 | 6. What an estimator may spend, and the two levers | **populated, evidence complete** (new, 2026-09-02) | — |
 | 7. The off-diagonal lane | **populated** — the lane is closed on a measurement | — |
 | 8. Method and protocol | **populated** | — |
-| 9. What we got wrong | **populated, and this list grows** | — |
+| 9. What we got wrong | **populated — nine entries, and this list grows** | — |
 | 10. Result and nomination | **PENDING** | end of Phase 2; Samuel's gate |
 
 ---
@@ -416,6 +416,23 @@ their effective ranks grows to `2.94` — so the question is a containment
   not say why**, because it counted failures and discarded the reason, and
   because its own median was computed over rows that never executed. Both are
   now unit-tested in milliseconds. The failures did not reproduce.
+- **We scored a gate in a currency our own contract forbade.** The rank
+  threshold in §7's pre-registration was inherited from a reference
+  implementation's runtime counter, while the contract said in terms that no gate
+  may be scored on that counter. Re-priced in the metering package that actually
+  bills, the quantity we had called unaffordable costs a `9%` penalty. The
+  conclusion survived — a different gate failed, decisively — but **the reason we
+  published for it was wrong**, and an independent pass caught it. This is the
+  *second* time in a week: the previous one swapped a prediction between slices.
+  The lesson is narrow and mechanical: **write every threshold in the unit the
+  gate will be scored in, in the same sentence.**
+- **Four consecutive null controls could not do their job.** The most recent
+  compares a deterministic call with itself: the perturbation branch is skipped
+  when the perturbation is zero, so the control returns exactly zero and *cannot*
+  fail. It is a determinism check wearing a control's name. We had previously
+  written the rule as "verify that a null control is null"; that is not strong
+  enough, and the form we now use is: **a null control must differ from the
+  treatment in code path, not only in parameter value.**
 
 ---
 
