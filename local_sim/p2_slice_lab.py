@@ -70,9 +70,14 @@ P01_SLICE_SEEDS = [40_821_001_168 + i for i in range(8)]
 MSE_FULL_ANCHOR = 4.0047e-08
 GT_NOISE_FLOOR = 1.155e-09
 
-#: The committed `dsproj` drift, `experiments/2026-08-28_pb_oracle/drift_oracle.json`,
-#: f32, seeds 1000201-203. Used as a REGRESSION check, not as a gate.
-DSPROJ_DRIFT_REF = 8.832e-07
+#: The committed `dsproj` drift. CORRECTED 2026-09-02 by `SKEPTIC WP13`: the
+#: source is `experiments/2026-08-27_pb_rank/drift_dsproj.json` (rows
+#: 9.355e-07 / 7.896e-07 / 9.244e-07, mean 8.8317e-07), NOT
+#: `2026-08-28_pb_oracle/drift_oracle.json`, which contains no `dsproj` row at
+#: all -- its cells are `oracle:n` and `oracle_offdiag:n`. f32, seeds
+#: 1000201-203. Used as a REGRESSION check, not as a gate, and note it is an
+#: n = 3 sample of DIFFERENT networks from the ones this module runs.
+DSPROJ_DRIFT_REF = 8.8317e-07
 
 
 # ==========================================================================
@@ -258,8 +263,19 @@ def _regen_hook(eps: float, mode: str, base_seed: int):
 
     `eps = 0` is the `dsproj` arm exactly, which is the point: this hook's null
     is a cell whose drift is already committed to the repository
-    (`8.832e-07`), so a regression check exists that no fresh measurement can
+    (`8.8317e-07`), so a regression check exists that no fresh measurement can
     quietly move.
+
+    **`eps = 0` IS NOT A NULL CONTROL, and `SKEPTIC WP13` was right to say so.**
+    `cmd_tol` computes `base` and the `eps = 0` row with the same deterministic
+    call and the same arguments -- the `if eps != 0.0` branch skips the
+    perturbation entirely -- so `excess = 0.0` cannot fail except under GPU
+    nondeterminism. It is a determinism check, and it should be described as
+    one. The load-bearing null is **S2** in `cmd_selftest`, which compares this
+    hook against `p2_pb_rank.predict(cap="dsproj")` through an independent code
+    path; S2 has only ever run at `256 x 4`, not at the `1024 x 16` shape every
+    reported number was taken at. Do not quote the standing null-control debt as
+    discharged on the strength of this function.
 
     `mode="incoherent"` multiplies both slices elementwise by `1 + eps * z`,
     `z ~ N(0, 1)` fresh per layer. `mode="coherent"` applies the SAME relative

@@ -26,7 +26,7 @@
 | 4. Where the error actually is | **populated, evidence complete** | — |
 | 5. Compressing the third cumulant | **populated, evidence complete** | — |
 | 6. What an estimator may spend, and the two levers | **populated, evidence complete** (new, 2026-09-02) | — |
-| 7. The off-diagonal lane | **PENDING** | WP13 `E0-TOL`/`E1`/`E2`, `gpuq` 112 |
+| 7. The off-diagonal lane | **populated** — the lane is closed on a measurement | — |
 | 8. Method and protocol | **populated** | — |
 | 9. What we got wrong | **populated, and this list grows** | — |
 | 10. Result and nomination | **PENDING** | end of Phase 2; Samuel's gate |
@@ -308,30 +308,60 @@ is a second unmeasured cost.
 
 ---
 
-## 7. The off-diagonal lane *(PENDING — `gpuq` 112)*
+## 7. The off-diagonal lane: the information is findable in principle and not in practice
 
-Pre-registered as `CONTRACT WP13`, `experiments/LOG.md` 2026-09-02, HEAD
-`8b46574`, with nine numbered predictions committed before any data existed —
-**four of which predict the lane fails.**
+**Evidence: CONFIRMED**, pre-registered as `CONTRACT WP13` with nine numbered
+predictions committed before any data — four of which predicted the lane would
+fail — and reviewed by an independent falsifier that **retracted our stated
+reason for the kill** while leaving the kill standing.
 
-The question, in one sentence: *the second-order closure's first approximation is
-the Price order-1 truncation of the post-ReLU off-diagonal covariance; is what a
-regenerating third-order flow discards low rank **in the slice metric**, and can
-an affordable selector recover it?*
+The second-order closure's first approximation is the Price order-1 truncation of
+the post-ReLU off-diagonal covariance. A third-order flow that regenerates its
+cumulant from its own read-slices (§6) discards one object: the all-distinct
+block, worth `22x` the reference method's own MSE in drift. We asked three
+questions about it.
 
-Three cells, all scored against the pre-registered gates:
+**How accurate must the slices be?** Perturbing both read-slices by `(1 + eps)` at
+every layer gives `excess = 1.35e-4 * eps^2.07`, `R^2 = 0.998` over three decades,
+so **about `1%` relative accuracy holds the end-to-end excess at `1e-8`**. The
+coherent regime is `8.8x` worse in amplitude than the incoherent one.
 
-- **`E0-TOL`** — the slice-error amplification law, i.e. §3's method applied
-  *prospectively* to a lane before it is built. Null control: the unperturbed arm
-  is bit-identical to an already-committed reference cell.
-- **`E1`** — a slice-targeted selector against a Frobenius selector at equal
-  cost, and importance sampling against deterministic truncation.
-- **`E2`** — the singular spectrum of the residual that regeneration discards,
-  and of the covariance itself, layer by layer.
+**Is the discarded information low rank?** **Yes, and increasingly so with
+depth** — the finding we did not expect. The `n x n` residual's `r90` falls
+`264 -> 78` across sixteen layers while the covariance's own `r90` falls
+`237 -> 26`. Against an iid-Gaussian baseline of `r90 = 523` it is below isotropic
+at the first layer and `6.7x` below at the last, monotone on 8 of 8 networks. And
+it is **cheap to carry**: correcting the slice directly is one matmul per layer,
+so a rank-512 correction costs a `9%` multiplier penalty and a rank-128 one is
+free at the floor.
 
-*Whatever this returns is the section. A falsifier firing is a result: the
-paper's spine is eleven closed lanes with mechanisms, and a twelfth closed on a
-pre-registered number is worth more than an unfalsifiable positive.*
+**Can an affordable selector find it?** **No, and this is the result.** Five
+`O(nR)` column-weight selectors — Frobenius-weighted and slice-weighted
+truncation, and three importance-sampling variants — were tested at equal cost.
+At every budget, **every one of them is `1.45x` to `2.10x` worse than not
+correcting at all.** Two sub-results explain why:
+
+- The slice-targeted weight beats the Frobenius weight by **`1.0019x`**. On this
+  factorisation the two are collinear, so **there was no wrong norm to fix** — the
+  hypothesis that the compression lane had been minimising the wrong objective is
+  refuted, not confirmed.
+- Randomised importance sampling is **`2.48x` worse** than deterministic
+  truncation. The unbiased `1/(k p_r)` rescaling has variance that dominates,
+  because the column-weight distribution is not heavy-tailed enough for that trade
+  to pay.
+
+So the lane closes, and it closes in an unusual place: **not at the information,
+not at the budget, but at the search.** The oracle that finds the subspace costs
+orders of magnitude more than the object it selects — which is the same wall the
+norm-optimal compression hit, now measured on the readout functional instead of
+the Frobenius norm, where it was supposed not to exist.
+
+**What we would tell the next person.** The open question this leaves is sharp
+and cheap: the residual's rank collapse tracks the covariance's, which the flow
+already holds for free. If even part of the residual's leading subspace lies in
+the covariance's, the selector is free. It cannot be all of it — the ratio of
+their effective ranks grows to `2.94` — so the question is a containment
+*fraction*, and it is the one experiment we would run next.
 
 ---
 

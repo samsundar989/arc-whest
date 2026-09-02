@@ -1,68 +1,87 @@
 # CURRENT_STATE.md — read this first
 
-> **2026-09-02 (WP13 — the strategist's answer, and the COST HALF IS SOLVED) —
-> A REGENERATING K3 FLOW PINS THE MULTIPLIER FLOOR.** The strategist's return
-> named one root cause behind both open questions — the readout-relevant
-> off-diagonal third-order structure — and set the target: **K3-class raw
-> accuracy at `F <= 0.1 B`**, a place no entrant occupies (best live multiplier
-> `0.216`). `CONTRACT WP13` (`8b46574`) pre-registers four experiments with nine
-> numbered predictions, **four of which predict the lane fails**, all committed
-> before any data. Samuel's prediction slot is **waived by Samuel (solo)**.
+> **2026-09-02 (WP13 — CLOSED, E3 NO-GO) — THE INFORMATION IS LOW RANK,
+> COLLAPSING WITH DEPTH, AND AFFORDABLE TO CARRY. NO SELECTOR CAN FIND IT, AND
+> EVERY SELECTOR TRIED IS WORSE THAN DOING NOTHING.** The strategist's
+> off-diagonal lane is answered on pre-registered numbers. Contract `8b46574`
+> (nine predictions, four of them predicting failure, committed before any data);
+> results `4561d32`; **`SKEPTIC WP13` PROVISIONAL, accepted in full**, with a
+> re-score that **retracted my stated reason for the kill**.
 >
-> **The load-bearing fact was found by reading the reference implementation, not
-> by searching.** `FactoredTensor.from_dstensor` returns factors
-> `(diag(S3) + 3 S21^T, I, I)` — **two of the three legs are exactly the
-> identity**. A flow that *regenerates* `kappa_3` from its own two read-slices
-> every layer therefore costs three matmuls a layer, not six, where every one of
-> the eleven closed lanes had been trying to *compress* the tensor instead.
+> **The cost half is SOLVED, and this part stands.** `FactoredTensor.from_dstensor`
+> returns factors `(diag(S3) + 3 S21^T, I, I)` — **two of three legs are the
+> identity** — so a flow that *regenerates* `kappa_3` from its own two read-slices
+> costs three matmuls a layer, not six. Measured in flopscope at `1024 x 16`:
+> **`0.1527 B`**, and **`0.0943 B` at four Strassen levels, which pins the `0.1`
+> multiplier floor**. Symmetry tagging buys exactly nothing (ratio `1.0000`).
+> **G-COST PASS. G-TOL PASS.**
 >
-> **`E0-COST`: G-COST PASSES at `0.1527 B`** (`e0_cost.json`), executed at
-> `1024 x 16` in `flopscope.numpy` inside a real `BudgetContext` — measured, not
-> modelled. `P1` HELD (both figures inside their pre-registered bands);
-> **`P2` REFUTED** — the structured saving is `2.081x`, not the `>= 2.5x` I
-> predicted.
+> **`E1` kills the lane, and it is the one result no model can rescue.** At every
+> budget `k`, the best of five selectors leaves a `(2, 1)`-slice error **`1.45x`
+> to `2.10x` WORSE than not correcting at all**. The slice-targeted weight beats
+> the Frobenius weight by `1.0019x` — two parts in a thousand — so **there was no
+> wrong norm to fix**: on this factorisation the two are collinear and the
+> Dharangutte–Musco thesis has nothing to bite on. Randomised importance sampling
+> is `2.48x` **worse** than deterministic truncation (`P6`, written against the
+> strategist's Route A before the data, HELD). **G-SEL FAIL.**
 >
-> **`E0-COST` addendum: symmetry is dead, Strassen pins the floor**
-> (`e0_cost_levers.json`). `as_symmetric` on `W^T Sigma W` bills the *identical*
-> `8,585,740,288` — ratio exactly `1.0000`, and the tagging costs `0.0137 n^3`.
-> Strassen bills `0.878 / 0.773 / 0.686 / 0.617` of a plain matmul at 1–4 levels,
-> so the regenerating flow runs `0.1527 -> 0.134 -> 0.118 -> 0.105 -> 0.0943`,
-> and **at `L = 4` the multiplier is `0.10000`** with `5.7%` of the free zone
-> unused. The lane's ceiling moves from `6.12e-09` to **`4.005e-09`**, ahead of
-> the live leader.
+> **`E2` refuted MY prediction and vindicated the strategist's mechanism.** The
+> residual regeneration discards has `r90` falling `264 -> 78` over depth, while
+> the covariance's own `r90` falls `237 -> 26`. Against an iid-Gaussian baseline
+> of `r90 = 523` it is below isotropic even at layer 1 and `6.7x` below by layer
+> 14, monotone on **8 of 8 seeds**. I had predicted `r90(L7)` in `[200, 600]` and
+> **growing**; it is `147` and falling.
 >
-> **THE COST HALF OF THE TARGET IS REACHABLE. THE LANE'S REMAINING QUESTION IS
-> ENTIRELY ACCURACY** — the uncorrected regenerating flow is `dsproj`, whose raw
-> brackets around `6.9e-07` (`6.9e-08` at the floor), so `170x` separates it from
-> the ceiling. That gap is exactly what `E1`/`E2` are pre-registered to measure.
+> **RETRACTED, on the Skeptic's finding:** *"it still does not fit in the
+> budget."* `G-RANK`'s threshold `r <= 330` came from **upstream's torch-side
+> counter — which the contract's own cost-model section forbids scoring a gate
+> on.** That is the WP8 failure class repeating in a contract written to avoid it.
+> Re-priced in flopscope, an oracle rank-`r` correction costs **one matmul per
+> layer** (`S21 + U V^T`), so `r = 128` is still inside the floor and `r = 512`
+> costs a `9%` multiplier penalty. At `r = 512` the composed excess is
+> `3.92e-09` layer-averaged (**PASS**) and `1.10e-08` worst-layer. **`G-RANK` does
+> not robustly fail.** `E3` is NO-GO on **`G-SEL` alone**.
 >
-> **Two caveats, and the first could still kill it.** (1) **Residual wall time
-> tracks OPERATION COUNT, not FLOPs** (GOTCHAS; forum 18101) and `L = 4` is
-> `2,401` leaf matmuls and `~14,001` array operations *per matmul*, against a
-> `0.4 s` cliff that **annihilates** rather than penalises. **No Strassen level is
-> authorised by a FLOP count**; `L = 2` (`281` ops, `4.73e-09`) may be the honest
-> operating point, and every level must be soaked through `gpuq`. (2) Strassen's
-> numerical error is unmeasured; `4.0047e-08` is the accuracy of a flow that did
-> not use it.
+> **Standing corrections to the record, all from the Skeptic and all verified:**
+> `E0-TOL` ran on **3** networks, not the 8 I wrote (`E1`/`E2` used 8); the
+> `8.832e-07` `dsproj` reference is in `2026-08-27_pb_rank/drift_dsproj.json`, NOT
+> `2026-08-28_pb_oracle/drift_oracle.json`, which has no such row; the two
+> collapses do **not** "track each other layer for layer" — the ratio grows
+> `1.11 -> 2.94`; and **`eps = 0` is a determinism check, not a null control**
+> (same deterministic call compared with itself). **The standing null-control debt
+> is NOT discharged** — that is four consecutive slices — and the load-bearing
+> null, S2, has only run at `256 x 4`.
 >
-> **New standing cost model, and it replaces every hand estimate in this
-> repository:** flopscope bills a dense `(n, n) @ (n, n)` matmul at **`4 n^3`**,
-> twice the textbook figure. Restated — **at the `0.1` floor an entire
-> `1024 x 16` estimator is allowed `3.2` dense matmuls per layer.** The shipped
-> file spends `2.00` (that is `W^T Sigma W` and essentially nothing else); a
-> regenerating K3 flow spends `5.0`, or `3.1` with `L = 4` Strassen.
-> `docs/GOTCHAS.md` carries it.
+> **What is CLOSED:** Route A (importance-sampled slice probing) and Route B's
+> selector, both on measurements. **What is OPEN and must not be recorded as
+> closed:** the residual's low-rank, depth-collapsing structure is real, new, and
+> affordable to exploit *if* it can be found.
 >
-> **Pending:** `E0-TOL` / `E1` / `E2` on `gpuq` 112, seed block
-> `P01[40,821,001,168..175]` (claimed on the host before submission — the WP9
-> snapshot defect). Four self-tests are green, including **S2: the regenerating
-> hook at `eps = 0` is BIT-IDENTICAL to the already-committed `dsproj` cell**, so
-> the amplification law is measured around a point whose drift is already on the
-> record and cannot be quietly moved.
+> **NEXT GATE — the one open question worth a contract.** `E21`'s leading subspace
+> versus `Sigma`'s, which the flow already holds for free. It must be
+> pre-registered as a **partial containment fraction**, not a yes/no, because
+> `r90(E21) / r90(Sigma)` reaching `2.94` proves total containment is impossible
+> at depth. One `gpuq` job on the **already-claimed** `P01` seeds; the composition
+> rule (worst-layer or layer-averaged) named **before** running.
 >
-> **Track 2 is running in parallel:** `docs/writeup-p2-draft.md` is a new
-> Phase-2 write-up draft with six of ten sections evidence-complete.
-> `docs/writeup-draft.md` (Phase 1) stays stale and untouched.
+> **The fallback, bracketed and NOT a nomination.** The regenerating flow needs no
+> correction to be a candidate: at the floor its raw MSE brackets
+> `[5.20e-07, 1.26e-06]` (GT-noise floor `1.155e-09`, so `450x` below the bracket's
+> low end), i.e. adjusted `[5.2e-08, 1.26e-07]` against graded v2.7's `1.374e-07`
+> — **`1.1x` to `2.6x` better.** The bracket is too wide to justify a multi-day
+> `fnp` port, its low end is barely an improvement, and it is a drift bracket, not
+> a measurement: **no truth was minted.** Sharpening it costs one truth mint on
+> the eight `P01` networks already claimed.
+>
+> **Standing cost model, and it replaces every hand estimate here:** flopscope
+> bills a dense `(n, n) @ (n, n)` matmul at **`4 n^3`**, twice the textbook figure
+> — so **at the `0.1` floor an entire `1024 x 16` estimator gets `3.2` dense
+> matmuls per layer.** The shipped file spends `2.00`. `docs/GOTCHAS.md` carries
+> it, along with the finding that a `gpuq` job submitted with **absolute paths does
+> not run its snapshot**.
+>
+> **Track 2 is live:** `docs/writeup-p2-draft.md`, seven of ten sections
+> evidence-complete. `docs/writeup-draft.md` (Phase 1) stays stale and untouched.
 
 > **2026-09-02 — THE SOAK'S FIRST REAL RUN REFUSED THE SHIPPED FILE, AND THE
 > INSTRUMENT COULD NOT SAY WHY.** WP6's `--residual-soak` ran for the first

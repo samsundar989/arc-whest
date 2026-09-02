@@ -1,0 +1,42 @@
+  L8: a residual failure is zeroed and priced at multiplier 1.0, not 0.1 ok   mult 1.0
+  L8: ...and that run's provenance DECLARES it was not a clean round ok   {'residual_wall_time_limit_s': [1e-09, 0.4]}
+  L8: no amount of residual can trip the combined budget under lambda 0 ok   C = 137,600,326,656 vs B = 2,199,023,255,552
+
+========================================================================================================
+56/56 checks passed
+  PASS  11. lifecycle evaluator
+
+=== 12. counted-FLOP anchor vs the official runner ===
+C:\Users\samsu\Documents\arc-whest\local_sim\p2_flop_anchor.py:343: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+  candidate         estimator.py
+  official report   experiments/2026-08-24_p2_p0/official_anchor_1row.json (whestbench 0.16.0)
+  official total         137,600,326,656
+  local total            137,600,326,656   delta +0
+  operations        19 compared, 0 disagreeing
+
+  op-by-op parity with the official runner: EXACT
+  PASS  12. counted-FLOP anchor vs the official runner
+
+PREFLIGHT GREEN -- 12/16, 4 SKIPPED
+
+NOT CHECKED by this run. A skipped step is NOT a pass.
+Clear every line below before promoting, submitting, or
+spending a vault touch:
+  - 13. shape parity              -- not run without -Full (~480 s)
+  - 14. carrier strength         -- not run without -Full (~130 s)
+  - 15. deployment envelope      -- not run without -Full (~40 s)
+  - 16. official Phase-2 smoke   -- not run without -Full (~30 s), and it is DEPLOYMENT AUTHORITY
+  .\scripts\preflight.ps1 -Full
+
+Not covered by this gate, and still required before promotion:
+  - public Phase-2 mini (CONFIRM, read-only -- FIT NOTHING ON IT):
+      uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --runner subprocess
+    (v1-phase1 is the PHASE-1 split; use it only to replay a Phase-1 artifact)
+  - the 8,192 MB memory limit is UNENFORCEABLE on this host (no RLIMIT_AS on
+    Windows). Step 15 ACCOUNTS for it; nothing here TESTS it.
+  - GPU mirror parity:                     .venv-gpu\Scripts\python.exe local_sim/gpu_parity.py
+  - vault touch (ONE per estimator change): .venv-gpu\Scripts\python.exe local_sim/vault.py evaluate --label <v> --reason estimator-change
+  - Samuel's explicit approval before any submission.
+
+[exited with code 0]

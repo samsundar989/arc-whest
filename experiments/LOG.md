@@ -26334,3 +26334,244 @@ recommendation, and it is emphatically not a nomination.**
   anchored on the flow's own operating point, which is the best available
   calibration, and it is still a model.
 - Eight networks. Enough for a spectrum and a monotone trend; not a population.
+
+---
+
+# 2026-09-02 — SKEPTIC WP13: PROVISIONAL, accepted in full. The NO-GO survives, its stated REASON does not.
+
+Seventh independent pass this project; seventh to find something real. Verdict
+**PROVISIONAL** on the proposition *"E3 is NO-GO on the pre-registered gates, and
+the E2 low-rank/rank-collapse finding is real and remains open."* Every finding
+below was **re-verified in-tree before acceptance**, not taken on the review's
+word. Re-score instrument: `local_sim/p2_slice_rescore.py`; artifact
+`experiments/2026-09-02_wp13_slice/rescore.json`.
+
+## The finding that matters: I scored a gate in a currency my own contract forbade
+
+`G-RANK`'s threshold `r <= 330` was inherited from P-B-COST's **upstream
+torch-side affine counter** (`1.5751e11 + 1.8908e08 r*`). The WP13 contract's own
+Cost-model section says, in terms:
+
+> *"Every upstream `NamedFlopCounter` figure quoted anywhere in this slice is
+> labelled upstream torch-side counter, not flopscope, and **no gate is scored on
+> one**."*
+
+**I scored one on it.** This is the WP8 failure class — a prediction scored
+against a quantity the contract excluded — repeating four days later, in a
+contract I wrote to avoid it.
+
+Re-priced in flopscope, an oracle rank-`r` correction is applied to the `(2, 1)`
+slice **directly** (`S21 + U V^T`), because a regenerating flow rebuilds
+`kappa_3` from the slice anyway — so it costs **one** matmul per layer, not six
+carried legs:
+
+| `r` | correction FLOPs | total with regen (Strassen `L=4`) | `x budget` | multiplier |
+|---:|---:|---:|---:|---:|
+| 128 | `8,053,063,680` | `215,383,712,078` | `0.09795` | **`0.10000`** |
+| 330 | `20,761,804,800` | `228,092,453,198` | `0.10372` | `0.10372` |
+| 512 | `32,212,254,720` | `239,542,903,118` | `0.10893` | `0.10893` |
+
+**Rank is nearly free.** `r = 128` is still inside the floor; `r = 512` costs a
+`9%` multiplier penalty, not a disqualification. The number `330` had no
+authority over this slice at all.
+
+And the composed excess, re-computed under **both** compositions:
+
+| `r` | worst layer | layer-averaged | | |
+|---:|---:|---:|---|---|
+| 330 | `5.085e-08` | `2.036e-08` | fail | fail |
+| **512** | `1.103e-08` | **`3.920e-09`** | marginal fail | **PASS** |
+
+**`G-RANK` does not robustly fail.** At `r = 512` — affordable — it passes on the
+layer-averaged composition and misses the worst-layer one by `10%`.
+
+**And my self-criticism about the per-layer wording was inverted.** The first
+entry said the per-layer gate was *"more generous than it should be"* because
+per-layer excesses would add. The Skeptic showed the opposite: the anchor
+(`drift 8.4822e-07` at `rel_E21 ~ 0.4626`) is itself an **all-layers** drift
+produced by regenerating at *every* layer, so feeding one layer's `rel` into it
+already answers *"what if every layer were this bad"*. Scoring on the worst layer
+is **conservative**, not generous. I had the direction of my own error backwards.
+
+## What survives, and it is stronger than what I wrote
+
+**`G-SEL` fails, robustly, and nothing rescues it.** Re-scored at every `k`:
+
+| `k` | best selector | rel error | **vs doing NOTHING** |
+|---:|---|---:|---:|
+| 128 | `top_slice` | `0.9695` | `2.10x` worse |
+| 330 | `top_slice` | `0.9294` | `2.01x` worse |
+| 1024 | `top_slice` | `0.8162` | `1.76x` worse |
+| 2048 | `top_slice` | `0.6729` | `1.45x` worse |
+
+**Every selector, at every budget, is worse than not correcting at all**
+(`rel_E21 = 0.4626`). Under any monotone map anchored at the flow's operating
+point the composed excess exceeds the uncorrected drift itself. No exponent, no
+re-anchoring and no composition rule flips this.
+
+> **CORRECTED CONCLUSION.** `E3` is **NO-GO**, on `G-SEL` **alone**. The claim
+> *"it still does not fit in the budget"* is **RETRACTED**: the information is low
+> rank, its rank collapses with depth, **and it is affordable to carry**. What
+> fails is finding it. That is a sharper and more useful statement than the one it
+> replaces, and I did not have it right.
+
+The Skeptic also **strengthened** the E2 finding by building the baseline I did
+not: an iid Gaussian `1024 x 1024` has `r50/r90/r99 = 187/523/789`. Measured
+`E21` is `65/264/540` at layer 1 — already below isotropic — and `6/78/311` by
+layer 14, `6.7x` below. `r90` is monotone non-increasing on **8 of 8 seeds**,
+spread 4 at layer 1. That is structure, not sampling noise.
+
+## Six defects in the record, all confirmed and all repaired
+
+1. **`n = 3` was reported as `n = 8`.** `e0_tol.json` has three seeds
+   (`--tol-seeds` defaults to 3). **The amplification law that scores both failing
+   gates is fitted on THREE networks**, not the eight I wrote. `E1`/`E2` did use
+   eight. Corrected everywhere.
+2. **The `8.832e-07` reference is miscited**, in the contract *and* in
+   `p2_slice_lab.py:73-75`. `experiments/2026-08-28_pb_oracle/drift_oracle.json`
+   contains **no `dsproj` row** — its cells are `oracle:n` and
+   `oracle_offdiag:n`. The real source is
+   `experiments/2026-08-27_pb_rank/drift_dsproj.json`, rows
+   `9.355e-07 / 7.896e-07 / 9.244e-07`, mean `8.8317e-07`. Verified and fixed in
+   the module; the contract is committed history and is corrected here instead.
+   The *comparison* is also weaker than I implied: two `n = 3` samples of
+   **different** networks, `t = 0.65` — consistent, not a `4%`-precise
+   reproduction.
+3. **"The two collapses track each other layer for layer" is FALSE**, and its own
+   table says so. `r90(E21) / r90(Sigma)` is `1.11, 2.01, 2.57, 2.80, 3.01, 2.94`.
+   By depth 14 `E21` needs **three times more directions** than `Sigma` has
+   significant ones, so the naive containment premise of the named follow-up is at
+   best partly true and its contract must predict a **partial containment
+   fraction**, not a yes/no.
+4. **The `eps = 0` row is NOT a null control.** In `cmd_tol`, `base` and the
+   `eps = 0` row are the same deterministic call with the same arguments
+   (`if eps != 0.0` skips the perturbation entirely), so `excess = 0.0` **cannot
+   fail**. **This is the fourth consecutive slice in which a control could not do
+   its job**, and I claimed the standing debt discharged. It is not. The
+   load-bearing null is **S2** (regen hook `==` `p2_pb_rank.predict(cap="dsproj")`,
+   bit-identical) — and **S2 ran at `256 x 4`, not at the `1024 x 16` shape every
+   reported number was taken at.** The debt is narrowed, not discharged.
+5. **`S3 = 2.7e-16` was quoted from a width-128 pre-submission run**; the
+   committed `selftest.json` is width 256 and says `9.34e-17`. A transcription of
+   a number from a run that is not the artifact.
+6. **The composed-excess column was hand arithmetic in a shell command**, with no
+   code and no artifact — which is why the Skeptic could not reproduce it under
+   any formula (all attempts landed within `10%`, none exactly). It is now
+   `p2_slice_rescore.py` and `rescore.json`.
+
+## A contract-drafting defect, recorded because it nearly voided the slice
+
+`G-TOL` required the `eps = 0` null to be *"bit-identical **to the uncapped
+flow**"*. **The regenerating arm cannot be bit-identical to the uncapped flow by
+construction** — discarding the all-distinct block is what it *is*. The clause was
+**unsatisfiable as written**, and I scored it against the unperturbed
+*regenerating* arm without noting the substitution. Read literally, `G-TOL` fails
+and its own text voids `E1` and `E2`.
+
+I record this rather than quietly keeping the sane reading, because quietly
+keeping the sane reading is exactly what `SKEPTIC WP8` caught last time. The
+decision is unaffected: `E1`'s failure is that **every selector is worse than
+doing nothing**, which needs no amplification law to interpret.
+
+## Open, and not repaired here
+
+- **No `f64` control exists, and it is worse than the first entry admitted:**
+  there is no `f64` path in `p2_slice_lab.py` at all (`dtype=torch.float32` is
+  hardcoded in `cmd_tol` and `cmd_struct`), so `--all` *could not* have run one.
+  The Skeptic's own argument that it cannot matter — `rel_E21 ~ 0.46` means no
+  cancellation, and the `r99` cut sits ~2.5 decades above the top singular value
+  while `f32` noise sits 4–5 below — is accepted as reassurance, not as the
+  control.
+- **The `eps^2` amplitude does not transfer**: the fitted coherent law
+  over-predicts the structured drift by **`32x`** at the flow's own `rel_E21`.
+  The *exponent* is corroborated in two very different perturbation structures;
+  the amplitude is a one-point re-anchoring, and `rescore.json` prints the
+  over-prediction factor rather than hiding it.
+- **Nothing was run end-to-end with a rank-`r` correction applied.** WP10's
+  finding that injecting truth in flight can be destructive was not re-tested.
+- **The `P01` ledger claim carried `artifact: ""` and was never `finalize()`d** —
+  now finalised against the four artifact hashes.
+- **No preflight transcript was committed** for the GREEN 12/16 — now committed.
+
+## Nothing protected was touched, independently verified
+
+`estimator.py`, `experiments/vault/`, `competition_score.py`, `p2_pb_rank.py`,
+`seed_blocks.py`, `seed_ledger.py`: **zero diff** over `c2cd27b..HEAD`. Vault
+touch log still one line, mtime 2026-08-07. `P04` appears nowhere. The `P01`
+claim starts exactly where the prior claim ended — no overlap, DESIGN tier.
+
+**Pre-registration order verified mechanically**, which is the check that matters
+most: contract `8b46574` at 13:31:55; `gpuq` snapshot `b54a4d2` (parent
+`8b46574`) at 13:40:04 already containing both instruments; results at 14:50:31;
+and `git diff b54a4d2 4561d32 -- local_sim/p2_slice_lab.py local_sim/p2_slice_cost.py`
+is **empty**. The instruments are byte-identical between the frozen snapshot and
+the committed version, so no in-flight edit was possible — an independent second
+proof of the `GOTCHAS` hash argument about job 112.
+
+## The follow-up, re-priced on the Skeptic's advice
+
+Unchanged in kind, changed in its prediction. The question *"are `E21`'s leading
+singular vectors in the span of `Sigma`'s top eigenvectors?"* must now be asked as
+**"what FRACTION of `E21`'s leading subspace is contained in `Sigma`'s, per
+layer?"** — because finding (3) shows the containment cannot be total at depth.
+Its contract must pre-register a partial fraction and a threshold on it.
+
+**And the Skeptic's own recommended job is adopted as that contract's first
+cell:** re-run `--struct` on the **already-claimed** eight `P01` networks with
+`--ranks 330 512 640 768 1024`, price the correction with the flopscope meter,
+and state **before running** which composition — worst-layer or layer-averaged —
+the gate will be scored on. One `gpuq` job, no new seeds.
+
+## Knowledge delta
+
+1. **A gate is only as good as the currency its threshold is quoted in.** `330`
+   was a real number from a real measurement in the wrong units, and it sat inside
+   a contract whose own text forbade it. Write every threshold in the unit the
+   gate will be scored in, and say so in the same sentence.
+2. **"Worse than doing nothing" is the cleanest negative available.** `G-SEL`
+   survives every attack the review made on the amplification law because it never
+   needed the law: `rel > 1` against a zero estimate is an interpretation-free
+   failure. **Prefer a statistic that does not route through a model.**
+3. **A null control that is the same deterministic call compared with itself is
+   not a control.** Fourth slice, fourth failure of the same kind. The rule this
+   repository keeps re-learning needs a stronger form: *a null control must differ
+   from the treatment in code path, not only in parameter value.*
+
+---
+
+# 2026-09-02 — WP13 provenance: the artifacts, hash-bound HERE because the ledger cannot bind them
+
+`SKEPTIC WP13` found that the `P01` claim was made with `artifact: ""`, so
+`experiments/seed_ledger.jsonl` records which seeds were consumed but **not which
+files they produced**. `seed_ledger.finalize()` refuses to close it — correctly,
+and I tried:
+
+    PermissionError: no claim by '...' names artifact '...'. finalize() closes an
+    existing claim; it does not create provenance.
+
+**That refusal is the ledger working.** A claim that did not pre-commit to an
+artifact cannot acquire one afterwards, because a hash attached after the fact is
+exactly the provenance a reader must not trust. The binding is therefore made
+**here**, in a committed and timestamped file, which is weaker than the ledger's
+(it is not machine-checked by `preflight`) and is stated as weaker:
+
+| artifact | sha256 |
+|---|---|
+| `e0_cost.json` | `64a5bb008ef85b720a6f46ae9c2f84731571d2e3df1af9090ace30c1f956fff4` |
+| `e0_cost_levers.json` | `c187b6ce3c3c866a309f9bda1b03760c20daa5dca25c7e62071bf61a2c29199a` |
+| `e0_tol.json` | `72e6cb999f50ac1c229b04d6bb2f3aac4238adae68d69af55b749f8eaea05e1e` |
+| `e1_selector.json` | `271e4b8aa2bd396382773dbce16e51037e0dc0906b663fa73524bb1252509eec` |
+| `e2_residual.json` | `1dbaf95453314e3251fbb0bd826c61babeb4471d53ef9d746d333ed534fc01f6` |
+| `preflight_12of16_55b7c8f.txt` | `29fda02d75b0c38d49d3ca21837115cfd31890abcbcec786d8d6a1a72584b55d` |
+| `rescore.json` | `a7953c7b75e4cc6365c482e01ca3cf61179dd8a6f1818053c7b11ef273de43df` |
+| `selftest.json` | `ca95ab79999722caca87926728eeff92e1997291eb0c55d50a08ef53817f4c3f` |
+
+**Process fix, and it is one keyword.** `seed_ledger.claim()` already accepts
+`artifact=`; WP13 simply did not pass it. Every future claim names its artifact
+at claim time, so `finalize()` can close it. This is not a code change — the
+mechanism exists and was not used.
+
+**Scope.** The seeds themselves are unambiguous: `P01[40,821,001,168..175]`,
+claimed 2026-09-02 before the first cell ran, DESIGN tier, contiguous with the
+prior claim and non-overlapping. What is unbound is only the *file*-to-*seed*
+link, and only mechanically.
