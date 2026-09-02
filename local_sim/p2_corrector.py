@@ -160,8 +160,7 @@ def k2_rollout(t, w, corrector=None, mode="full", clamp_cm=None):
         ez2 = (mu_pre * mu_pre + var_pre) * Phi + mu_pre * sig * phi
         var_raw = (ez2 - mu_raw * mu_raw).clamp(min=0.0)
 
-        use = (corrector is not None and k > 0
-               and (mode == "full" or (mode == "last" and k == depth - 1)))
+        use = corrector is not None and _corrects(mode, k, depth)
         if use:
             f = features(t, alpha, k, depth)
             c = corrector(f)
@@ -291,7 +290,17 @@ def cross_mse(pred, y1, y2):
 # it fitted.
 
 
-def collect(t, seeds, truth, corrector, mode, device, dtype, max_nets=None):
+def _corrects(mode, k, depth):
+    """Is layer `k` corrected under `mode`? ONE definition, used by both the
+    rollout and the collector, so the fit can never be on a different set of
+    layers than the deployment."""
+    if k == 0:
+        return False                 # exactly Gaussian; see k2_rollout
+    return mode == "full" or (mode == "last" and k == depth - 1)
+
+
+def collect(t, seeds, truth, corrector, mode, device, dtype, max_nets=None,
+            clamp_cm=None):
     """Roll out each network and record (features, targets) at every layer.
 
     The targets are read off the trajectory the CURRENT corrector actually
@@ -318,18 +327,35 @@ def collect(t, seeds, truth, corrector, mode, device, dtype, max_nets=None):
     with t.no_grad():
         for i in range(n):
             w = weights_for(t, seeds[i], device, dtype)
-            _out, recs = k2_rollout(t, w, corrector=corrector, mode=mode)
+            # The DAgger trajectory must be the DEPLOYED one. Rolling out
+            # unclamped here while evaluating clamped trains the corrector on
+            # states it will never see, and an unclamped correction compounding
+            # over 15 layers is exactly how the first probe run blew up.
+            _out, recs = k2_rollout(t, w, corrector=corrector, mode=mode,
+                                    clamp_cm=clamp_cm)
             tm = t.from_numpy(np.ascontiguousarray(
                 (m1[i] + m2[i]) * 0.5)).to(device=device, dtype=dtype)
             tv = t.from_numpy(np.ascontiguousarray(
                 (av1[i] + av2[i]) * 0.5)).to(device=device, dtype=dtype)
             for r in recs:
                 k = r["layer"]
-                if k == 0:          # never corrected; see k2_rollout
+                # Collect ONLY the layers this arm actually corrects. Pooling
+                # every layer's targets and then applying the result at one
+                # layer fits the wrong distribution: the drift grows with
+                # depth, so a pooled target is systematically wrong at both
+                # ends. Arm A was 2x WORSE than no correction at all because
+                # of this, on an intervention that by construction cannot be
+                # worse if it is fitted to the layer it is applied to.
+                if not _corrects(mode, k, DEPTH):
                     continue
                 f = features(t, r["alpha"], k, DEPTH)
                 cm = (tm[k] - r["mu_raw"]) / r["sig"]
-                cv = tv[k] / r["var_raw"].clamp(min=1e-30) - 1.0
+                # Clip the TARGET to the same range the correction can
+                # express. An unreachable target does not merely fail to be
+                # reached: it drags the shared trunk, so an out-of-range `c_v`
+                # corrupts `c_m` as well.
+                cv = (tv[k] / r["var_raw"].clamp(min=1e-30) - 1.0
+                      ).clamp(-CLAMP_CV, CLAMP_CV)
                 F.append(f)
                 T.append(t.stack([cm, cv], dim=-1))
     return t.cat(F, dim=0), t.cat(T, dim=0)
@@ -432,7 +458,8 @@ def train_arm(t, seeds, truth, mode, device, dtype, rounds=3, epochs=60,
     info = []
     for r in range(rounds):
         src = None if r == 0 else corr
-        F, T = collect(t, seeds, truth, src, mode, device, dtype, max_nets)
+        F, T = collect(t, seeds, truth, src, mode, device, dtype, max_nets,
+                       clamp_cm=clamp)
         st = fit(t, corr, F, T, epochs=epochs, seed=seed + r, verbose=verbose)
         # The clamp promised in the contract: 3 training sigmas on c_m, frozen
         # from the FIRST round's targets so a later round cannot widen it.
@@ -523,6 +550,19 @@ def selftest():
     fa, fb = features(t, a, 5, DEPTH), features(t, a * 1.0, 5, DEPTH)
     chk("S7: the feature block is deterministic",
         float((fa - fb).abs().max()) == 0.0, "identical")
+
+    # S8 -- the fit and the deployment must agree on WHICH layers are
+    # corrected. They did not: `collect` pooled targets from every layer
+    # regardless of mode, so arm A was fitted on 15 layers' drift and applied
+    # at one. It came out 2x WORSE than no correction at all, on an
+    # intervention that cannot be worse if it is fitted to the layer it acts
+    # on. One predicate now answers the question for both.
+    for mode, want in (("full", set(range(1, DEPTH))),
+                       ("last", {DEPTH - 1}), ("none", set())):
+        got = {k for k in range(DEPTH) if _corrects(mode, k, DEPTH)}
+        chk(f"S8: mode {mode!r} corrects exactly the layers it fits",
+            got == (want if mode != "none" else set()),
+            f"{sorted(got)[:3]}{'...' if len(got) > 3 else ''}")
 
     print()
     print("SELF-TEST PASSED" if ok[0] else "SELF-TEST FAILED")
