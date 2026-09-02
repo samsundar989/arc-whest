@@ -1368,6 +1368,182 @@ def run_wp10(a):
     return 0
 
 
+class _NoiseCM:
+    """A corrector that emits INDEPENDENT N(0, s) noise per neuron per layer.
+
+    The constant sweep measures a COHERENT perturbation -- the same shift at
+    every layer, which accumulates in one direction and is the worst case. A
+    fitted corrector's residual error is not coherent, so on its own the
+    constant sweep only bounds the tolerance from below.
+
+    This is the other end: pure incoherent error at a known RMS. Together they
+    bracket what a real fitted corrector faces, and the bracket is what turns
+    "arm C failed" into a stated accuracy requirement.
+    """
+
+    def __init__(self, t, s, dtype, device, seed=0):
+        self.t, self.s = t, s
+        self.dtype, self.device, self.seed, self.calls = dtype, device, seed, 0
+
+    def __call__(self, f):
+        t = self.t
+        n = f.shape[0]
+        g = t.Generator(device="cpu").manual_seed(self.seed + self.calls)
+        self.calls += 1
+        z = (t.randn(n, 1, generator=g, dtype=t.float64) * self.s
+             ).to(dtype=self.dtype, device=self.device)
+        return t.cat([z, t.zeros((n, 1), dtype=self.dtype,
+                                 device=self.device)], dim=-1)
+
+
+class _ConstCM:
+    """A corrector that emits one fixed `c_m` for every neuron and layer.
+
+    Not a model. It is the simplest possible in-flight mean perturbation, and
+    it is what turns "arm C diverged" into a number: if a CONSTANT shift of the
+    same magnitude as the fitted clamp reproduces the divergence, the system is
+    knife-edge and the failure is physics. If it does not, the fitted arm is
+    doing something the clamp says it cannot, and the harness leaks.
+    """
+
+    def __init__(self, t, c, dtype, device):
+        self.t, self.c = t, c
+        self.dtype, self.device = dtype, device
+
+    def __call__(self, f):
+        t = self.t
+        n = f.shape[0]
+        z = t.full((n, 1), float(self.c), dtype=self.dtype, device=self.device)
+        return t.cat([z, t.zeros((n, 1), dtype=self.dtype,
+                                 device=self.device)], dim=-1)
+
+
+def run_sensitivity(a):
+    """How much final-layer error does a CONSTANT in-flight mean shift cause?
+
+    CONTRACT WP10's falsifier says the slice is VOID if null control C0 fails
+    to collapse. It did -- `0.0124x`, an 80x regression from a correction the
+    clamp bounds at `|c_m| <= 0.0077`, which is a ~0.4% shift of a mean whose
+    own value is `sigma * h(alpha)`. Naive compounding over 14 layers gives
+    `1.004^14 = 1.06`, nowhere near 80x.
+
+    So one of two things is true, and this sweep separates them at the cost of
+    a handful of rollouts:
+
+      * the closure amplifies in-flight mean error superlinearly, and the
+        `6.87x` mean-channel oracle sits on a knife edge that no fitted arm can
+        stand on -- a real, reportable physical result; or
+      * it does not, and something in the fitting or evaluation path is moving
+        the state further than the clamp permits -- a harness leak, exactly
+        what C0 was placed there to detect.
+
+    `c = 0` must reproduce B0 exactly (self-test S10), so the sweep carries its
+    own positive control.
+    """
+    t = _torch()
+    device = "cuda" if t.cuda.is_available() else "cpu"
+    dtype = t.float64
+    truth = load_truth(a.truth)
+    seeds = np.asarray(truth["seeds"])
+    n = min(a.n_mlps or 16, len(seeds))
+    seeds = seeds[:n]
+    m1, m2 = truth["means_r1"], truth["means_r2"]
+
+    grid = [0.0, 1e-4, 3e-4, 1e-3, 3e-3, 7.7e-3, 2e-2]
+    grid = sorted(set([-g for g in grid if g] + grid))
+
+    print("=" * 78)
+    print("WP10 -- how far does a CONSTANT in-flight mean shift move the score?")
+    print("=" * 78)
+    print(f"  {n} networks, layers 1..L-2 corrected, float64, {device}")
+    print(f"  the fitted arm's clamp was |c_m| <= 0.0077")
+    print()
+
+    b0 = np.zeros(n)
+    with t.no_grad():
+        for i in range(n):
+            w = weights_for(t, seeds[i], device, dtype)
+            o, _ = k2_rollout(t, w, corrector=None)
+            b0[i] = cross_mse(o[-1].cpu().numpy().astype(np.float64),
+                              m1[i, -1].astype(np.float64),
+                              m2[i, -1].astype(np.float64))
+    print(f"  B0 (shipped calibrated K2)  {b0.mean():.6e}")
+    print()
+    print(f"  {'constant c_m':>14}{'final MSE':>16}{'vs B0':>12}")
+    rows = []
+    for c in grid:
+        corr = _ConstCM(t, c, dtype, device)
+        per = np.zeros(n)
+        with t.no_grad():
+            for i in range(n):
+                w = weights_for(t, seeds[i], device, dtype)
+                o, _ = k2_rollout(t, w, corrector=corr, mode="inflight",
+                                  clamp_cm=None, mean_only=True)
+                per[i] = cross_mse(o[-1].cpu().numpy().astype(np.float64),
+                                   m1[i, -1].astype(np.float64),
+                                   m2[i, -1].astype(np.float64))
+        rows.append({"c_m": c, "final_mse": float(per.mean()),
+                     "ratio_to_B0": float(per.mean() / b0.mean())})
+        print(f"  {c:>14.5f}{per.mean():>16.6e}{per.mean() / b0.mean():>11.2f}x")
+
+    # ---- the incoherent half of the bracket ---------------------------
+    print()
+    print(f"  {'INDEPENDENT N(0,s) c_m':>24}{'final MSE':>16}{'vs B0':>12}")
+    nrows = []
+    for sd in (1e-4, 3e-4, 1e-3, 3e-3, 7.7e-3, 2e-2):
+        per = np.zeros(n)
+        with t.no_grad():
+            for i in range(n):
+                w = weights_for(t, seeds[i], device, dtype)
+                corr = _NoiseCM(t, sd, dtype, device, seed=1000 + i)
+                o, _ = k2_rollout(t, w, corrector=corr, mode="inflight",
+                                  clamp_cm=None, mean_only=True)
+                per[i] = cross_mse(o[-1].cpu().numpy().astype(np.float64),
+                                   m1[i, -1].astype(np.float64),
+                                   m2[i, -1].astype(np.float64))
+        nrows.append({"sd": sd, "final_mse": float(per.mean()),
+                      "ratio_to_B0": float(per.mean() / b0.mean())})
+        print(f"  {sd:>24.5f}{per.mean():>16.6e}"
+              f"{per.mean() / b0.mean():>11.2f}x")
+
+    # The number the lane turns on: what RMS error in `c_m` still breaks even?
+    tol = None
+    for r in nrows:
+        if r["ratio_to_B0"] <= 1.0:
+            tol = r["sd"]
+    print()
+    print("  BREAK-EVEN: the largest tested INCOHERENT RMS c_m error that "
+          "still matches B0")
+    print(f"    {tol if tol is not None else '< 1e-4'}")
+
+    z = [r for r in rows if r["c_m"] == 0.0][0]
+    print()
+    print(f"  POSITIVE CONTROL: c_m = 0 reproduces B0 to "
+          f"{abs(z['ratio_to_B0'] - 1.0):.3e} relative")
+    worst = max(r["ratio_to_B0"] for r in rows if abs(r["c_m"]) <= 7.7e-3)
+    print(f"  Within the fitted arm's own clamp (|c_m| <= 0.0077) the WORST "
+          f"constant shift costs {worst:.2f}x.")
+    print(f"  Arm C measured 133x and null control C0 measured 81x.")
+    print(f"  -> {'PHYSICS: the clamp permits the observed blowup' if worst > 20 else 'HARNESS LEAK: the clamp does NOT permit it'}")
+
+    rep = {"artifact": "wp10_constant_cm_sensitivity", "artifact_version": 1,
+           "truth": os.path.relpath(a.truth, _ROOT).replace("\\", "/"),
+           "n_mlps": int(n), "b0_mean": float(b0.mean()), "grid": rows, "noise_grid": nrows,
+           "worst_within_clamp": float(worst),
+           "clamp_used_by_fitted_arm": 0.0077,
+           "SCOPE": ("A DISCRIMINATOR for CONTRACT WP10's VOID clause, not an "
+                     "estimator and not a candidate. It asks only whether the "
+                     "observed divergence is reachable within the clamp the "
+                     "fitted arm actually used.")}
+    if a.json:
+        os.makedirs(os.path.dirname(os.path.abspath(a.json)), exist_ok=True)
+        with open(a.json, "w", encoding="utf-8") as fh:
+            json.dump(rep, fh, indent=1)
+        print(f"\n  wrote {os.path.relpath(a.json, _ROOT)}")
+    print("=" * 78)
+    return 0
+
+
 def _subset(truth, idx):
     """A view of the truth arrays restricted to `idx`, same keys."""
     out = {}
@@ -1406,6 +1582,9 @@ def main():
     ap.add_argument("--gate", type=float, required=False, default=None)
     ap.add_argument("--json", default="")
     ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--sensitivity", action="store_true",
+                    help="sweep a CONSTANT in-flight c_m and report the score "
+                         "cost -- the discriminator for WP10's VOID clause")
     ap.add_argument("--wp10", action="store_true",
                     help="CONTRACT WP10: arm C -- mean channel only, on the "
                          "post-calibration residual, scored on rollout")
@@ -1419,6 +1598,10 @@ def main():
     a = ap.parse_args()
     if a.selftest:
         return selftest()
+    if a.sensitivity:
+        if not a.truth:
+            ap.error("--truth is required")
+        return run_sensitivity(a)
     if a.wp10:
         if not a.truth:
             ap.error("--truth is required")

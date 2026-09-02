@@ -25270,3 +25270,183 @@ dropped, G3 stays unclaimed, `P03` and `P04` stay untouched, and predictions
 Q1–Q6 stand as written — Q2's "post-calibration `R^2`" is read as the held-out
 `R^2` of the in-flight target, which is the quantity that arm actually fits.
 No data existed when this was written.
+
+---
+
+# 2026-09-02 — RESULT WP10: the in-flight mean lane is CLOSED, on a number — a corrector needs held-out `R^2 >= 99.85%` just to break even
+
+Contract `30ce479`, addendum `a8ec186`, both committed **before** any arm C was
+fitted. Re-analysis of the spent `P02` DESIGN block, overlap declared.
+**`P03` and `P04` untouched.** CONFIRM read for nothing.
+
+Artifacts: `experiments/2026-09-01_wp9_corrector/{oracles_P02.json,
+wp10_armC_P02.json, sensitivity_cm.json}`.
+
+## 1. The oracle reproduces, in this repository's own instrument, on all 96
+
+The WP9 review's finding was measured on 24 networks in an independent numpy
+reimplementation. Here it is on **96**, in-tree:
+
+| in-flight oracle cell, layers 1..L-2, **zero** fit error | final MSE | vs B0 |
+|---|---:|---:|
+| uncalibrated closure, no correction | `4.044277e-06` | `0.344x` |
+| **truth in the MEAN channel only** | `2.026539e-07` | **`6.872x`** |
+| truth in the VARIANCE channel only | `2.365590e-05` | `0.059x` |
+| truth in BOTH (WP9's arm B channel set) | `2.546072e-06` | `0.547x` |
+
+Against the review's `6.42x / 0.060x / 0.56x` on 24 networks. **The channels
+have opposite signs, and the WP9 retraction stands.**
+
+## 2. The fitted arm diverges — and so do BOTH null controls
+
+96 networks, 4-fold leave-networks-out, 3 DAgger rounds, gate `1.5x`:
+
+| arm | held-out gain vs B0 | held-out `R^2` of `c_m` |
+|---|---:|---|
+| **C** — mean channel, fitted, in flight | **`0.0075x`** | `-0.531, -0.526, -0.323, -0.523` |
+| **C0** — `c_m` constant across neurons | `0.0124x` | `-0.471, -0.362, -0.382, -0.027` |
+| **C-shuf** — features permuted across neurons | `0.0285x` | — |
+
+**The contract's VOID clause fired**: *"the slice is VOID if C0 fails to
+collapse … these controls share no channel with a divergent arm, so a failure
+really would mean the harness leaks."* It did not collapse. So the first thing
+to do was find out whether the harness leaks.
+
+## 3. It does not. The discriminator, and it settles the lane
+
+`--sensitivity` injects a **known** `c_m` in flight and measures the cost. Two
+regimes, because a fitted corrector's error is neither purely one nor the
+other. 16 networks, layers 1..L-2, `B0 = 1.345128e-06`.
+
+**Coherent — the same constant at every layer:**
+
+| constant `c_m` | final MSE | vs B0 |
+|---:|---:|---:|
+| `0` | `1.345128e-06` | **`1.00x` — positive control, reproduces B0 to `0.000e+00`** |
+| `±1e-4` | `1.59e-06` | `1.18x` |
+| `±3e-4` | `3.61e-06` | `2.69x` |
+| `±1e-3` | `2.66e-05` | `19.7x` |
+| `±3e-3` | `2.28e-04` | `169x` |
+| `±7.7e-3` **(the fitted arm's own clamp)** | `1.52e-03` | **`1129x`** |
+| `±2e-2` | `1.05e-02` | `7811x` |
+
+**Incoherent — independent `N(0, s)` per neuron per layer:**
+
+| RMS `s` | final MSE | vs B0 | implied `R^2` needed to reach it |
+|---:|---:|---:|---:|
+| `1e-4` | `1.367e-06` | **`1.016x`** | **`0.99849`** |
+| `3e-4` | `1.488e-06` | `1.106x` | `0.98642` |
+| `1e-3` | `2.717e-06` | `2.02x` | `0.84913` |
+| `3e-3` | `1.314e-05` | `9.77x` | `-0.358` |
+| `7.7e-3` | `7.800e-05` | `58.0x` | `-7.94` |
+| `2e-2` | `5.176e-04` | `385x` | `-59.3` |
+
+**The verdict is PHYSICS, not a leak.** A constant shift *inside the clamp the
+fitted arm actually used* costs `1129x` on its own; arm C measured `133x` and
+C0 `81x`, both comfortably **within** what the clamp permits. The positive
+control is exact. Nothing is leaking.
+
+Two structural facts fall out, and they are the durable result:
+
+- **Excess MSE scales as `c^2`** across three decades in both regimes, so the
+  final-layer error is **linear** in the in-flight perturbation. The tower is
+  an amplifier, not a chaotic system.
+- **The amplification is `~18x` coherent and `~4.2x` incoherent** in absolute
+  terms (`sigma_final ~ 0.28`, so `c_m = 1e-3` is a `2.8e-4` absolute shift
+  producing `5.03e-3` and `1.17e-3` of final RMS error respectively). Their
+  ratio, `4.3`, is close to `sqrt(14)` — coherent accumulation over 14
+  corrected layers, exactly as it should be.
+
+## 4. What that means, and it is the number the lane closes on
+
+The target `c_m` has training spread `sd = 0.0025746`. Break-even against the
+**shipped file** needs an incoherent RMS error below `1e-4`, so
+
+> **an in-flight mean corrector must reach held-out `R^2 >= 99.85%` on `c_m`
+> merely to MATCH v2.7 — before buying a single multiple of improvement.**
+
+Measured held-out `R^2` for arm C: **`-0.53, -0.53, -0.32, -0.52`**. WP9's
+readout corrector, on the easier raw target, reached `+0.50`. The gap between
+`0.50` and `0.9985` is not a tuning gap; `(1 - R^2)` has to fall by a factor of
+**330**.
+
+This also explains the `6.872x` oracle without any tension: the oracle's `R^2`
+is exactly `1`. **The mean channel's ceiling is real and it sits on a knife
+edge that no fitted corrector on these features can stand on.**
+
+## 5. Scoring the predictions
+
+| # | prediction | outcome |
+|---|---|---|
+| **Q1** | arm C on rollout beats B0 by `>= 1.3x` (point estimate `1.8x`) | **REFUTED.** `0.0075x` — `133x` worse |
+| **Q2** | the in-flight target's held-out `R^2` is `<= 0.25` | **HELD**, and far below: `-0.32` to `-0.53`. But it held for a reason I did not anticipate — not "little signal left" but "the fitted arm makes the trajectory worse than the mean predictor does" |
+| **Q3** | arm C does **not** diverge; stays within `3x` of B0 in every fold and round | **REFUTED.** Every fold diverged; the best training round was already `1.6e-04` against B0's `1.39e-06` |
+| **Q4** | null control C0 collapses onto B0 within `1.05x` | **REFUTED — and the CONTROL was mis-specified, for the second contract running.** See below |
+| **Q5** | null control C-shuf recovers nothing, within `1.05x` | **REFUTED**, `0.0285x`, same cause |
+| **Q6** | the fitted arm reaches well under its own oracle, `C_gain / 6.42 <= 0.5` | **HELD** — vacuously and embarrassingly: `0.0075 / 6.87 = 0.0011` |
+
+### The VOID clause, and my second mis-specified null control
+
+The clause fired. Applying it honestly: **the slice is not void, because the
+premise the clause rested on is false.** I wrote that C0 *"shares no channel
+with a divergent arm, so a failure really would mean the harness leaks."* The
+sensitivity sweep shows C0 is **not a benign null at all** — a constant `c_m`
+across neurons is a *large coherent perturbation*, the single most damaging
+shape in the whole grid, costing `1129x` at the clamp boundary.
+
+So for the second contract in a row I built a null control that could not do
+its job. WP9's N1 shared the divergent channel; WP10's C0 **is itself a
+maximal-damage perturbation**. The only valid null for this family is
+`c_m = 0`, which self-test **S10** already pins at `0.000e+00` against the
+shipped baseline, and which the sensitivity sweep re-confirms as its positive
+control.
+
+**Lesson, and it is the third time this family of mistake has cost a slice:**
+a null control must be *verified to be null* — by measurement, not by
+argument — before its failure is allowed to mean anything.
+
+## 6. The gate
+
+- **G1 (accuracy).** `0.0075x` against a `1.5x` bar. **FAILS**, decisively.
+- **G2** was deliberately dropped as untestable (`0.044%` of the free zone).
+  Price still reported: unchanged at `<= 36,433,980` counted FLOPs, multiplier
+  pinned at `0.1`.
+- **G3** was explicitly not claimed while the WP8 standing consequence holds.
+
+**No replication contract is authorised. `P03` stays untouched. `P04` stays
+unspent.** `estimator.py` is byte-identical to its archive.
+
+## 7. Lane status after WP9 + WP10
+
+| branch of P2-CAL's fork | status |
+|---|---|
+| per-neuron correction **at the readout** | **CLOSED.** Exhausted by v2.7's sixteen constants; its single per-layer number predicts `c_m` at `R^2 = +0.51`, matching a 354-parameter network |
+| per-neuron correction **of the in-flight variance** | **CLOSED, and destructive.** Truth in that channel, at zero fit error, is `17x` worse than no correction at all |
+| per-neuron correction **of the in-flight mean** | **CLOSED on a requirement, not on a ceiling.** Ceiling `6.872x`; entry price `R^2 >= 99.85%`; best achieved `0.50` on an easier target |
+| **add information** (off-diagonal, third cumulant) | **the only branch left open** |
+
+The fork P2-CAL left in 2026-08-26 — *"act per neuron, or add information"* —
+is now resolved: **per neuron is closed on all three channels, with a measured
+reason for each.** What remains is *add information*, and the specific missing
+information is already named in `RESULT WP9`: the Price order-1 truncation of
+the post-ReLU **off-diagonal**, which enters the next layer through
+`diag(W^T Sigma W)`. `p2_truth.py` produces no off-diagonal label, so that lane
+needs either true covariances or an end-to-end gradient through the rollout.
+
+## Knowledge delta
+
+1. **The K2 tower is a linear amplifier of in-flight state error**, with gain
+   `~18x` coherent and `~4.2x` incoherent over 14 layers, and excess MSE
+   scaling as `c^2` across three decades. That is a reusable property of this
+   estimator, not a fact about correctors.
+2. **A high oracle ceiling is not evidence that a lane is reachable.** `6.872x`
+   and `R^2 >= 99.85%` are the same measurement seen from two ends. **Always
+   convert a ceiling into an accuracy requirement before building the arm** —
+   it costs one sensitivity sweep and it would have retired this lane before
+   `P02` was ever spent.
+3. **Verify that a null control is null.** Three slices, three controls that
+   could not do their job. C0 was not merely uninformative; it was the *worst*
+   perturbation in the grid, presented as a null.
+4. A `c^2` scaling law measured across three decades, with an exact positive
+   control at `c = 0`, is worth more than any number of fitted arms: it turned
+   an unexplained `133x` divergence into a stated entry price in one job.

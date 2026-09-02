@@ -1,0 +1,109 @@
+{
+ "artifact": "wp10_constant_cm_sensitivity",
+ "artifact_version": 1,
+ "truth": "../../../../../../Documents/arc-whest/experiments/2026-09-01_wp9_corrector/truth_P02.npz",
+ "n_mlps": 16,
+ "b0_mean": 1.3451279075826915e-06,
+ "grid": [
+  {
+   "c_m": -0.02,
+   "final_mse": 0.009601917437731766,
+   "ratio_to_B0": 7138.2932311524355
+  },
+  {
+   "c_m": -0.0077,
+   "final_mse": 0.0014659643684048033,
+   "ratio_to_B0": 1089.8326918510413
+  },
+  {
+   "c_m": -0.003,
+   "final_mse": 0.00022596774666589886,
+   "ratio_to_B0": 167.98978401390985
+  },
+  {
+   "c_m": -0.001,
+   "final_mse": 2.6378557291338054e-05,
+   "ratio_to_B0": 19.610445328387062
+  },
+  {
+   "c_m": -0.0003,
+   "final_mse": 3.5897935317312942e-06,
+   "ratio_to_B0": 2.6687376802570815
+  },
+  {
+   "c_m": -0.0001,
+   "final_mse": 1.5908699563089082e-06,
+   "ratio_to_B0": 1.182690469315915
+  },
+  {
+   "c_m": 0.0,
+   "final_mse": 1.3451279075826915e-06,
+   "ratio_to_B0": 1.0
+  },
+  {
+   "c_m": 0.0001,
+   "final_mse": 1.6023172320820116e-06,
+   "ratio_to_B0": 1.1912006457151805
+  },
+  {
+   "c_m": 0.0003,
+   "final_mse": 3.6268441448904398e-06,
+   "ratio_to_B0": 2.696281985114847
+  },
+  {
+   "c_m": 0.001,
+   "final_mse": 2.6604767430239984e-05,
+   "ratio_to_B0": 19.778615312540055
+  },
+  {
+   "c_m": 0.003,
+   "final_mse": 0.0002293551537664095,
+   "ratio_to_B0": 170.50806281952777
+  },
+  {
+   "c_m": 0.0077,
+   "final_mse": 0.0015183631640945526,
+   "ratio_to_B0": 1128.7871997416064
+  },
+  {
+   "c_m": 0.02,
+   "final_mse": 0.010506988592984916,
+   "ratio_to_B0": 7811.144601011857
+  }
+ ],
+ "noise_grid": [
+  {
+   "sd": 0.0001,
+   "final_mse": 1.3671731517695418e-06,
+   "ratio_to_B0": 1.016388957557551
+  },
+  {
+   "sd": 0.0003,
+   "final_mse": 1.4880170172077698e-06,
+   "ratio_to_B0": 1.1062271541758895
+  },
+  {
+   "sd": 0.001,
+   "final_mse": 2.716981771408566e-06,
+   "ratio_to_B0": 2.0198687099513175
+  },
+  {
+   "sd": 0.003,
+   "final_mse": 1.3139934650888617e-05,
+   "ratio_to_B0": 9.768539167774899
+  },
+  {
+   "sd": 0.0077,
+   "final_mse": 7.799990147551427e-05,
+   "ratio_to_B0": 57.986977324473685
+  },
+  {
+   "sd": 0.02,
+   "final_mse": 0.0005175632802196125,
+   "ratio_to_B0": 384.7688218362203
+  }
+ ],
+ "worst_within_clamp": 1128.7871997416064,
+ "clamp_used_by_fitted_arm": 0.0077,
+ "SCOPE": "A DISCRIMINATOR for CONTRACT WP10's VOID clause, not an estimator and not a candidate. It asks only whether the observed divergence is reachable within the clamp the fitted arm actually used."
+}
