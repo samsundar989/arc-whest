@@ -25531,3 +25531,105 @@ attributed, and with the executed/contaminated figures separated.
 residual as a grader prediction and refuses one file's headroom as a safety
 factor for another. And it does not explain the original failures; it shows
 they do not reproduce.
+
+---
+
+# 2026-09-02 — SCREEN WP12: the carrier break-even is answerable WITHOUT spending a seed, and the answer is that the family is FLAT
+
+**ROUTINE by cost, STRATEGIC by consequence.** No seed block claimed, no truth
+minted, no CONFIRM read. This is arithmetic on an **already-committed,
+independently-ACCEPTed artifact**:
+`experiments/2026-08-31_wp2_objective/carrier_panel_1024x16.json`, frozen and
+content-addressed by WP2 (`3bae94b`) with its rule and gate inside the digest.
+
+## Why this replaces the planned measurement
+
+`CURRENT_STATE.md` carried, as the cheapest open discriminator, *"score the
+carrier candidate against shipped v2.6.1 on 24-32 fresh mints from P01's 432
+unused DESIGN seeds"* — a STRATEGIC slice needing a contract, a truth mint and
+a decision block. **It is not needed.** The frozen panel already contains the
+answer, exactly, and the argument is structural rather than sampled.
+
+## The panel, with the score identity applied
+
+`multiplier = max(0.1, F / 2**41)`, and the adjusted score is
+`error x multiplier`. Reading the panel's own `mmd2` as the error proxy WP2
+pre-registered it as:
+
+| `k` | rows | carrier FLOPs | `F/B` | multiplier | `MMD2` | **`MMD2 x multiplier`** |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 2,048 | `68,719,476,736` | `0.0312` | `0.1000` | `2.0758e-05` | `2.0758e-06` |
+| 2 | 4,096 | `137,438,953,472` | `0.0625` | `0.1000` | `1.0374e-05` | `1.0374e-06` |
+| 4 | 8,192 | `274,877,906,944` | `0.1250` | `0.1250` | `5.1816e-06` | **`6.4769e-07`** |
+| 6 | 12,288 | `412,316,860,416` | `0.1875` | `0.1875` | `3.4508e-06` | **`6.4702e-07`** |
+| 8 | 16,384 | `549,755,813,888` | `0.2500` | `0.2500` | `2.5854e-06` | **`6.4635e-07`** |
+| 10 | 20,480 | `687,194,767,360` | `0.3125` | `0.3125` | `2.0662e-06` | **`6.4568e-07`** |
+| 12 | 24,576 | `824,633,720,832` | `0.3750` | `0.3750` | `1.7200e-06` | **`6.4502e-07`** |
+| 16 | 32,768 | `1,099,511,627,776` | `0.5000` | `0.5000` | `1.2874e-06` | **`6.4368e-07`** |
+
+**Above the multiplier floor the adjusted score is FLAT: `6.4769e-07` down to
+`6.4368e-07` across `k = 4..16`, a spread of `0.62%` over a `4x` range in
+cost.**
+
+## Why it is flat, and why that is exact rather than empirical
+
+`MMD2 x k` is constant to `0.8%` across the whole panel (`2.0758e-05` at `k=1`
+to `2.0598e-05` at `k=16`), which is the `MMD2 = C1/k + C0` law with a small
+`C0`. **WP2's independent Skeptic established that this law is an exact
+algebraic identity of the closed-form census, not a measurement** — a
+correction that made the finding stronger, and it is what turns this screen
+from a curve fit into a proof:
+
+    above the floor,  multiplier = F/B  and  F is proportional to k
+    so  adjusted ~ (C1/k) x (c*k) = C1*c  —  independent of k.
+
+**A pure quadrature carrier cannot buy adjusted score with FLOPs.** Its error
+falls at exactly the Monte-Carlo rate its cost rises at, and the two cancel by
+construction. The `0.62%` residual drift is the `C0` term.
+
+## The three consequences
+
+1. **The `k = 8` operating point WP1 built is not even this family's best**, and
+   nothing is. `k = 4` is `0.2%` better, `k = 16` `0.6%` better, and a
+   floor-pinned `k = 2` is `1.61x` **worse** because it leaves free FLOPs
+   unspent. Every point is the same point.
+2. **Choosing a basis count was never a real decision.** WP0E originally framed
+   `P02`/`P03` around exactly that selection; WP2's `0.155%` Kerdock margin at
+   live width already made it a poor use of 96 fresh networks, and this makes
+   it a null one. That reframing is retrospectively vindicated.
+3. **The only lever left in the family is the constant `C1*c`** — and WP2
+   measured the structured-versus-random part of it at **`0.155%`** at width
+   1024 (`1248 sigma` outside draw spread: real, and negligible). The one
+   measurement linking the family to real MSE — the `n = 2` organiser datum —
+   puts the `k = 8` carrier `1.42x` **worse adjusted** than the canary, hence
+   roughly `4.1x` worse than graded v2.7.
+
+## Verdict
+
+**The carrier is CLOSED as a standalone accuracy nominee**, on a structural
+argument rather than a thin sample, and at zero cost in seeds, truth or GPU
+time. `P01`'s 432 DESIGN seeds are **not** spent and remain available.
+
+## Scope — three things this does NOT close
+
+- **`MMD2` is a truth-free proxy.** The flatness is exact *in `MMD2` units*;
+  the step to final-layer MSE is WP2's own pre-registered assumption that the
+  objective is monotone in the error. If that link fails, so does this.
+- **The panel's FLOPs are carrier propagation only.** A deployed candidate adds
+  the analytic chain; WP1's built `k = 8` candidate measured multiplier
+  `0.2501` against the panel's `0.2500`, so the overhead is `~0.04%` and
+  changes nothing here.
+- **The carrier's SUPPORT roles are untouched.** A control variate whose mean
+  the analytic chain supplies, a cheap per-network cumulant estimate, or
+  adaptive per-MLP refinement do not depend on the carrier's own adjusted
+  score, and none of them is closed by this.
+
+## Knowledge delta
+
+**Any estimator whose error falls at the Monte-Carlo rate in its own cost has
+an adjusted score independent of that cost, above the floor.** That is the
+score identity's central structural fact and it is worth stating once, plainly:
+sampling cannot climb this leaderboard, it can only choose a constant. It also
+explains the frontier observation the 2026-09-01 brief opens with — that the
+leaders' raw error is flat across their budgets — as the same identity seen
+from outside.
