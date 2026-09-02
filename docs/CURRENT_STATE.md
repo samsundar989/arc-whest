@@ -44,6 +44,63 @@
 > accumulation beside the current one and returned **bitwise-equal means and
 > final-layer variance on both probe networks**.
 
+> **2026-09-02 (WP10 + WP8 closure) — THE PER-NEURON FORK IS RESOLVED, AND THE
+> SOAK MYSTERY DOES NOT REPRODUCE.**
+>
+> **WP8 is CLOSED.** The `3x100` discriminator — the same shape as the run that
+> reported `45` failures, but submitted through `gpuq` at the declared `20 GiB`
+> footprint — returned **`0` failed MLPs of `300`**, all five breakdown
+> categories zero, worst executed residual `69.46 ms`, **`5.76x` headroom**,
+> verdict `CERTIFIED`. Under an i.i.d. `15%` rate `P(0 of 300) ≈ 1e-21`, so the
+> `45` are **not** a property of the file, the workload or the organisers'
+> data. The one controlled difference is that the original does not appear in
+> the `gpuq` history at all. **Recorded as environmental, cause unmeasured,
+> non-reproducing under brokered submission** — it is circumstantial, not a
+> measurement. The contract's *real* P5 (the one the Skeptic caught me swapping
+> away) is now **HELD exactly**: counted FLOPs are `137,600,326,656` on all 300
+> executed rows. **The standing consequence on G3 is lifted for the shipped
+> file on this host, and for nothing else.**
+>
+> **WP10 CLOSES the in-flight mean lane on a number, not on a failure.** The
+> oracle reproduced in-tree on all 96 networks (mean-only **`6.872x`**,
+> variance-only `0.059x`, both `0.547x`). The fitted arm diverged `133x` — and
+> so did both null controls, firing the contract's VOID clause. So the first
+> job was to find out whether the harness leaks. **It does not:**
+> `--sensitivity` injects a *known* `c_m`, the positive control at `c = 0`
+> reproduces the baseline to `0.000e+00`, and a constant shift **at the fitted
+> arm's own clamp** costs `1129x` on its own — arm C's `133x` is comfortably
+> *inside* what the clamp permits.
+>
+> Excess MSE scales as **`c^2` across three decades** in both the coherent and
+> incoherent regimes, so **the K2 tower is a linear amplifier of in-flight
+> state error** — gain `~18x` coherent, `~4.2x` incoherent over 14 layers,
+> ratio `4.3 ≈ sqrt(14)`. That converts the ceiling into an entry price:
+>
+> > **an in-flight mean corrector must reach held-out `R^2 >= 99.85%` on `c_m`
+> > merely to MATCH the shipped file.** Arm C measured `-0.53`; WP9's readout
+> > arm reached `+0.50` on an easier target. `(1 - R^2)` must fall `330x`.
+>
+> **P2-CAL's 2026-08-26 fork — *"act per neuron, or add information"* — is now
+> resolved. Per neuron is CLOSED on all three channels, each with a measured
+> reason:** the readout is exhausted by v2.7's sixteen constants (its single
+> per-layer number predicts `c_m` at `R^2 = +0.51`, matching a 354-parameter
+> network); the in-flight **variance** is *destructive* at zero fit error; the
+> in-flight **mean** has a real `6.872x` ceiling behind a `99.85%` entry price.
+> **Only "add information" remains** — the Price order-1 truncation of the
+> post-ReLU **off-diagonal**, which has no label in `p2_truth.py` and needs
+> either true covariances or an end-to-end gradient through the rollout.
+>
+> **A methodological debt, three slices running: every null control I have
+> built has failed to do its job.** WP9's N1 shared the divergent channel;
+> WP10's C0 turned out to be *the most damaging perturbation in the grid*
+> presented as a null. **A null control must be verified to be null by
+> measurement before its failure is allowed to mean anything.** The one valid
+> null here is `c_m = 0`, pinned by self-test S10 at `0.000e+00`.
+>
+> **And the cheap lesson worth the most:** converting an oracle ceiling into an
+> accuracy requirement costs **one sensitivity sweep** and would have retired
+> this lane before `P02` was ever spent.
+
 > **2026-09-02 (WP9/WP10) — A NEGATIVE CONCLUSION WAS RETRACTED, AND THE LANE
 > IS OPEN.** WP9 spent `P02` on a per-neuron state corrector and I concluded
 > *"the per-neuron half of that fork is empty."* **The sixth independent
@@ -1487,6 +1544,9 @@ evidence for an operating envelope, not evidence that the leader uses Kerdock.
 | higher Gaussian covariance-map orders | low value | measured plateau near 1.052x |
 | marginal ReLU mean Edgeworth | closed | capped near 1.047x in CP3R |
 | recurrent augmented K2 joint state | **open** | never tested by CP3R |
+| per-neuron correction at the READOUT | **closed 2026-09-02 (WP9)** | exhausted by v2.7's sixteen constants; its single per-layer number predicts the residual at `R^2 = +0.51`, matching a 354-parameter network |
+| per-neuron correction of the in-flight VARIANCE | **closed 2026-09-02 (WP9/WP10)** | destructive at ZERO fit error: truth in that channel is `17x` worse than no correction at all |
+| per-neuron correction of the in-flight MEAN | **closed 2026-09-02 (WP10) on an entry price** | ceiling `6.872x` is real; break-even needs held-out `R^2 >= 99.85%`; best achieved `+0.50` on an easier target |
 | exact sparse-aware K3 / W-EFF, FULL TOWER | **closed on a measured price** | `1.0732 B` whole-path, `3.0664x` over its own preregistered screen, after four independent passes. The exact operations survive |
 | late-window / age-window K3 | **closed on a measured negative** | every window arm provably cannot clear the `2x` bar. It failed because its **K2 prefix** is bad (`89.2%` of the drift), not because `kappa_3` is non-local |
 | cost-indexed structured carrier + exact radial | **highest-priority open branch** | Kerdock/MUB is valid but not yet grader-legal; select a frozen carrier/sample frontier by task-specific evidence and adjusted score, with 8 a telemetry clue and 16 a diagnostic endpoint |
