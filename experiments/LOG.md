@@ -27335,3 +27335,222 @@ an f32 measurement** — `experiments/2026-08-28_weff/weff_price_f32_*.json`, f6
    Code-path-distinct nulls gave `C1` the random and cross-network bases that make
    its negative unambiguous. `>= 8` nets and `artifact=` at claim time both held.
    The `f64` control is the one still in flight.
+
+---
+
+# 2026-09-02 — WP14 diagnostics that landed after the result entry: the oracle ceiling, and the f64 control
+
+Two `gpuq` jobs finished after `9b36521` was written. Neither carries a
+pre-registered gate and none is invented for them.
+
+## The `e3svd` ceiling — the number this lane is actually worth
+
+`C2`'s first run omitted the cell that matters: `svd:r` leaves the `(3,)` slice
+wrong, and `e3proj:r` uses a subspace `C1` has now measured to be no better than
+random, so neither answers *"is a rank-`r` correction of BOTH slices enough?"*.
+Added as `e3svd` and run on the same 8 networks
+(`experiments/2026-09-02_wp14_range/c2_e2e_oracle_rank.json`, `gpuq` 131):
+
+| cell | mean drift | `x` better than uncorrected |
+|---|---:|---:|
+| `none` | `8.7545e-07` | `1.000` |
+| `e3` | `5.6458e-07` | `1.551` |
+| `svd:128` (only the `(2,1)` slice) | `4.0957e-07` | `2.137` |
+| `svd:256` (only the `(2,1)` slice) | `3.6838e-07` | `2.376` |
+| **`e3svd:64`** | `1.5804e-07` | **`5.539`** |
+| **`e3svd:128`** | `7.8885e-08` | **`11.098`** |
+| **`e3svd:256`** | `2.7177e-08` | **`32.212`** |
+| **`e3svd:512`** | **`2.6228e-09`** | **`333.8`** |
+| `exact` (`G-POS`) | `8.5335e-14` | `1.0e+07` |
+
+**Correcting only one slice saturates at `2.4x` no matter how good the
+correction; correcting both at rank 128 gives `11x` and at rank 512 gives
+`334x`.** This is the sharpest statement of the lane available, and it inverts
+the emphasis of the entry above: the problem was never that the information is
+spread out. It is rank-128-sufficient.
+
+Carrying that through to a score, at the `0.1` floor and with drift added to
+`MSE_full` as an orthogonal error:
+
+| oracle correction | drift | implied raw | adjusted at `0.1` | vs Puffi `4.5e-09` |
+|---|---:|---:|---:|---:|
+| none (the measured fallback) | `8.75e-07` | `8.51e-07` | `8.5e-08` | `19x` worse |
+| `e3svd:128` | `7.89e-08` | `~1.19e-07` | `~1.2e-08` | `2.6x` worse |
+| **`e3svd:512`** | `2.62e-09` | `~4.3e-08` | **`~4.3e-09`** | **`1.05x` BETTER** |
+
+A rank-512 slice correction costs `16,106,127,360` counted f32 FLOPs — `0.0073 B`
+— and the composed f32 flow leaves `0.0236 B` unspent, so **it fits `3.2x`
+over.**
+
+> **The ceiling of this lane is a board-leading score, and it is affordable. The
+> entire remaining problem is a MAP from the flow's own state to `(E3, rank-512
+> E21)`.** WP13 killed five column-weight selectors; WP14 killed `Sigma`'s
+> dominant range. Nothing has yet been tried that *learns* the map, which is
+> `C3`'s named backup and now the only live route.
+
+**This is an ORACLE and it is the ceiling, not a result.** `E3` and `E21` are
+taken from a reference uncapped flow. A deployable estimator has neither.
+
+## The `DTYPE-F64` control — the contract's own, and it agrees
+
+`experiments/2026-09-02_wp14_range/c1_containment_f64.json` (`gpuq` 132), 2
+networks x layers `{1, 7, 14}` x `r` in `{128, 512}`, the entire flow in
+`float64`:
+
+| layer | `r = 128` contain / rand | `r = 512` contain / rand |
+|---:|---|---|
+| 1 | `0.1269` / `0.1236`, `0.1271` / `0.1249` | `0.4998` / `0.4998`, `0.5035` / `0.5010` |
+| 7 | `0.1266` / `0.1267`, `0.1301` / `0.1258` | `0.4967` / `0.5002`, `0.5030` / `0.5014` |
+| 14 | `0.1321` / `0.1303`, `0.1239` / `0.1308` | `0.4999` / `0.5019`, `0.5001` / `0.4982` |
+
+Identical to the f32 sweep. **The `f64` control the repository has never had, and
+which `SKEPTIC WP13` recorded as an open defect of WP13, now exists and it
+changes nothing.** `C1`'s negative carries no dtype risk.
+
+---
+
+# 2026-09-02 — SKEPTIC WP14: CLAIM A **PROVISIONAL**, CLAIM B **ACCEPT**
+
+Eighth independent pass this project; eighth to find something real. Every
+finding below was re-verified in-tree before acceptance.
+
+## What it verified, independently and by its own instruments
+
+- **Pre-registration order, mechanically.** `d915f83` touches **one file**,
+  `experiments/LOG.md`, `+289` lines, nothing else; every result commit is later;
+  every instrument first appears after the contract; **no gate moved** — the
+  scorer applies `0.60 / 0.80 / 1.5x null`, the `5x` contrast, the `2x` falsifier
+  and the `1e-12` clause exactly as written.
+- **Protected paths: zero functional diff** over `36312c3..HEAD` on
+  `estimator.py`, `experiments/vault/`, `competition_score.py`, `seed_blocks.py`,
+  `seed_ledger.py`, `p2_pb_rank.py`, `p2_slice_lab.py`, `HUMAN_MODEL.md`.
+  `seed_ledger --check` exits 0; the truth sha256 matches the ledger record byte
+  for byte; the DESIGN overlap is recorded with its correlated-evidence warning.
+- **The dtype rate table and both cost arms**, re-executed to a scratch path:
+  `198,233,321,472` / `99,116,660,736`, **to the FLOP**.
+- **The injection algebra**, derived by hand from `_factored_get_dslice` — the
+  `(2,1)` block-perms, the `zero_repeated` kill, the `1/3` coefficient, and the
+  necessity of zeroing `d21`'s diagonal. All confirmed.
+
+## CLAIM B (accuracy) — ACCEPT, and it built the control I should have built
+
+**`range_finder` was never tested against the property its name asserts.** `S-RF`
+tests only orthonormality and **`S-CONT` uses `random_basis`, not
+`range_finder`** — so nothing anywhere checked that `Q` spans `Sigma`'s dominant
+range. The review wrote that positive control and ran it at the live shape:
+
+| pre-layer | `r90(Sigma)` | `Q` at `r=128` | `r=256` | `r=512` |
+|---:|---:|---:|---:|---:|
+| 2 (L1) | 187 | `0.99993` | `0.99754` | `0.9999994` |
+| 8 (L7) | 55 | `0.9999248` | `0.99999997` | `0.9999999` |
+| 15 (L14) | 25 | `0.9999999` | `0.9999999` | `1.0000000` |
+
+`range_finder` returns `Sigma`'s dominant range essentially exactly. **So `r/n` is
+a property of `E21`, not of a degenerate basis.** It also refuted the "wrong
+matrix" hypothesis by a different route than mine (`K[2]` is an `HTensor` with
+`r = 0`, `max|Sigma - Sigma^T| = 0.0` exactly, eigenvalues `[2.04e-05, 8.02]`),
+and **independently re-implemented the whole containment statistic at `256 x 16`**
+— a width nobody had measured — in f32 and f64, reproducing `r/n` with the
+positive control at `1.0` in the same run.
+
+**This is the check I did not run.** Mine (`p2_cov_spectra.py`) asked whether the
+covariance was the right *object*; it never asked whether `Q` was the right
+*basis*. The lesson is narrow: **when a negative rests on an instrument, test the
+instrument against the property it is named for, not against a nearby one.**
+
+## CLAIM A (cost) — PROVISIONAL, and the challenge is fair
+
+The review priced what upstream's **real** regenerating flow costs, by torch
+dispatch census and by upstream's own `NamedFlopCounter` bins, at `512 x 16`:
+**`19.4` n^3-matmul-equivalents per layer**, against the projection's `2.00` (K2)
+`+ 2.89` (K3) `= 4.89`. It then **derived the structural argument independently
+and confirmed it** — no cross-block terms in the concatenated-factor Hadamard,
+`A2 == A3` collapsing three block permutations to two, the `3I` middle leg making
+the two-leg block `O(n^2)`, the identity legs making `contract_W` one matmul — and
+found the other 24 kept terms really are `0.13` matmul-equivalents/layer total.
+
+**But it has never executed**, and the margin is `1.51` matmuls/layer: *one*
+un-reducible extra `n^3` op per layer fits inside the `51.98e9` spare, **two do
+not.** Two named live traps the projection does not price: flopscope promotes
+`stats.norm.cdf/pdf` from f32 to f64 (it cost `2x` on the K2 arm before two
+`.astype` calls fixed it), and `p2_slice_cost.py`'s spelling is admitted
+numerically wrong, so "cost-correct" is asserted rather than tested against a
+correct implementation.
+
+**Accepted in full.** `docs/CURRENT_STATE.md` led with *"THE COST HALF IS
+SOLVED"* three lines above its own PROJECTION paragraph; it now reads **"SOLVED
+ON ARITHMETIC AND NOT YET ON EXECUTION"** and points at this verdict.
+
+## Six defects, all confirmed and all repaired
+
+1. **`p2_range_lab.py` contradicted itself in one committed file.** Line 55 said
+   `G-POS` is *"unchanged from the contract"*; line 361 said the `exact` cell
+   *"is no longer a positive control"*. Both landed in `aa01fdd` — my `patch2.py`
+   fixed one site and not the other. **Repaired**; the durable record now says one
+   thing.
+2. **`G-POS`'s normaliser was unpinned, and the two readings disagree on the
+   verdict.** `drift / mean_square` gives `1.078e-13` (**PASS**, `9x` margin);
+   the RMS reading this same file uses for `S-IDEM` gives `3.28e-07` (**FAIL** —
+   and a `G-POS` failure voids `C2` and `C3`). The MSE reading is the literal one
+   and `3.28e-07` is about 3 ulps of f32, but a gate that can void two cells must
+   not rest on an unstated convention. **Repaired**: `p2_wp14_score.py` now loads
+   the truth, computes `mean(truth_final^2) = 0.791444`, prints `1.0782e-13
+   PASS`, and prints the RMS reading beside it.
+3. **The committed scorer did not reproduce the LOG's `G-POS` number** — it
+   printed a bare ratio to the uncorrected arm and the word `"see note"`.
+   Repaired with (2).
+4. **`24.2` f32 matmuls is `1.51` per layer, not `1.61`.** I divided by 15 layers
+   where there are 16. Corrected in `p2_k3_fnp.py` (with the reason in a comment)
+   and in `CURRENT_STATE.md`.
+5. **`68,802,510,336` exists in no artifact on disk** — only in prose, in three
+   documents. Its provenance is real (a 2026-08-26 grader-spelling measurement,
+   five shapes, nine networks bit-identical, independently ACCEPTed) and it is
+   the **largest** of the three nearby figures, so the direction is conservative.
+   Recorded as an open provenance gap; the `fnp` port is what closes it.
+6. **"1.61x better than v2.7" is an unpaired, cross-sample, cross-instrument
+   ratio of means**, when a paired statistic was available from the same
+   artifact. The review's paired reconstruction gives **`1.542x`**, paired
+   arithmetic difference `4.608e-08`, t95 `[2.409e-08, 6.807e-08]`, **8/8 wins**.
+   **Repaired**: `p2_truth_score.py` gains a `v27proxy` arm (our closure x v2.7's
+   sixteen gains, labelled a proxy) and reports the paired arithmetic difference
+   with both a studentised-`t` and a basic-bootstrap interval; re-run submitted.
+
+## What it did not overturn
+
+`C4` not run is **defensible**, not a dropped gate: `G-FLOOR`'s FLOP clause was
+met before `C4` existed, the gate is left unscored rather than moved, `P11`/`P12`
+are recorded NOT RUN, and nothing anywhere depends on `C4`. The `2^22` truth
+resolution is adequate (cross-product sampling sd ~`0.9%` of the regen arm). The
+alignment worry (point 4) is structurally impossible here — `ref` and `got` are
+keyed on the same loop index in two runs of the same `run_flow` on the same
+object, and `Sigma` is captured in the *same hook call* as `own_s21`.
+
+## The cheapest discriminating follow-up, named and NOT run
+
+**For CLAIM A, and it is scoped far smaller than finishing the port:** execute
+**one layer** of the regenerating K3 step in `fnp` at `n = 1024` — the `(1,1,1)`
+block, all 25 kept `pK` terms and the harmonic projection at `d = 3, 4` — inside
+a real `BudgetContext` at float32, with the `.astype(float32)` cast-back after
+every `flops.stats.*` call, and read the meter. No seeds, no truth, no GPU,
+seconds of CPU. **It converts the load-bearing `2.89`-matmuls-per-layer
+structural argument into a measurement and either confirms the floor or moves the
+multiplier.** That is the next action, ahead of the rest of the port.
+
+## Knowledge delta
+
+1. **Test an instrument against the property it is NAMED for.** `S-RF` checked
+   orthonormality and `S-CONT` checked the containment statistic using a
+   *different* basis constructor, so between them they left the one claim
+   `range_finder` exists to make — that `Q` spans `Sigma`'s dominant range —
+   unchecked. The negative happened to survive. It did not have to.
+2. **A number that lives only in prose is not evidence, however well reviewed.**
+   `68,802,510,336` was measured, reviewed and accepted, and is in no artifact.
+   Half the headline rests on it.
+3. **A gate needs its normaliser written down.** `G-POS` PASSES by `9x` under one
+   reading of "relative final-layer MSE" and FAILS under another, and a failure
+   would have voided two cells.
+4. **Correcting one of two coupled channels saturates.** `svd:256` on the `(2,1)`
+   slice alone caps at `2.4x`; adding the free `(3,)` vector takes the same rank
+   to `32x`. Neither channel's marginal value is visible while the other is
+   wrong — which is exactly the shape of WP10's finding about the mean and
+   variance channels, now seen a second time in a different pair.

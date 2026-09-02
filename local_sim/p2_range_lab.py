@@ -358,12 +358,14 @@ def _correct_hook_lin(ref, *, mode: str, r: int, seed: int, power_iters: int,
                correction of BOTH slices sufficient?". Added 2026-09-02 after
                C1/C2 landed, as a diagnostic. It carries no pre-registered gate
                and none is invented for it.
-      `exact`  `E21` and `E3` in full. **This is no longer a positive control
-               that must reproduce the uncapped flow** -- S-IDEM refuted that
-               premise. It now measures the one thing that decides this lane:
-               how much of the regenerating flow's drift is carried by the two
-               read-slices, and how much by the all-distinct block that no slice
-               correction can reach.
+      `exact`  `E21` and `E3` in full. **This IS `G-POS`, unchanged from the
+               contract**, and it must reproduce the uncapped flow to relative
+               final-layer MSE `<= 1e-12`. An earlier revision of this docstring
+               said the premise had been withdrawn; that was wrong and
+               `SKEPTIC WP14` caught the file contradicting itself. S-IDEM
+               refuted *"a rebuild is a no-op"*, NOT *"the scored means read
+               `kappa_3` only through its two slices"* -- and this cell is what
+               tests the latter. See the module docstring.
 
     The correction is applied by `add_factors`, NOT by rebuilding from
     `from_dstensor`, because the nonlinear step propagates the incoming

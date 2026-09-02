@@ -299,8 +299,10 @@ def cmd_price(a) -> int:
     print()
     print(f"  headroom under the floor at f32           {head:>18,}  "
           f"= {head / BUDGET:.5f} B")
+    # 16 layers, not 15. SKEPTIC WP14 caught this dividing by 15 and reporting
+    # 1.61 matmuls/layer of headroom where the figure is 1.51.
     print(f"  in f32 dense 1024-matmuls                 {head / 2_146_435_072:>18.2f}"
-          f"   ({head / 2_146_435_072 / 15:.2f} per layer)")
+          f"   ({head / 2_146_435_072 / 16:.2f} per layer, over 16 layers)")
     print()
     print("  CAVEAT, and it is the reason this module exists: the two halves are")
     print("  measured in DIFFERENT spellings and their sum has never been executed")

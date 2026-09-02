@@ -106,9 +106,23 @@ lo2, _ = paired_diff_ci(fal, method="t")
 print(f"  falsifier (< 2x): {'CLEARED' if lo2 > 0 else 'FIRED'}")
 
 ex = np.array([drift[(s, "exact")] for s in seeds])
+# G-POS's normaliser, PINNED. The contract says "relative final-layer MSE
+# <= 1e-12" and does not say relative to what; SKEPTIC WP14 showed the two
+# readings disagree on the verdict (MSE/mean-square PASSES with 9x of margin,
+# the RMS reading FAILS, and a G-POS failure voids C2 and C3). The convention
+# adopted, stated here so it is never re-argued: an MSE is normalised by a mean
+# SQUARE, so G-POS is drift / mean(truth_final^2). The RMS figure is printed
+# beside it rather than hidden.
+TRUTH = os.path.join(D, "truth_P01_wp13nets.npz")
+mean_sq = float((np.load(TRUTH)["means_r1"][:, -1, :].astype(np.float64) ** 2).mean())
+rel_mse = ex.mean() / mean_sq
 print(f"\n  G-POS  exact-injection drift mean {ex.mean():.4e}, max {ex.max():.4e}")
-print(f"         relative to the uncorrected arm: {ex.mean()/base.mean():.3e}   "
-      f"{'PASS' if ex.mean()/base.mean() <= 1e-12 else 'see note'}")
+print(f"         final-layer truth mean square      {mean_sq:.6f}")
+print(f"         relative final-layer MSE           {rel_mse:.4e}   "
+      f"{'PASS' if rel_mse <= 1e-12 else 'FAIL -- THIS VOIDS C2 AND C3'}")
+print(f"         (RMS reading, for completeness     {np.sqrt(rel_mse):.4e}; the gate "
+      f"is the MSE one)")
+print(f"         vs the uncorrected arm             {ex.mean()/base.mean():.3e}")
 z = np.array([drift[(s, "proj:0")] for s in seeds])
 print(f"  determinism  proj:0 == none exactly on all seeds: "
       f"{bool(np.array_equal(z, base))}")

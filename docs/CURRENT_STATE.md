@@ -7,7 +7,9 @@
 > contract failing, committed before any data); results `9b36521`. Six held,
 > three refuted, two not run.
 >
-> **THE COST HALF IS SOLVED.** flopscope does not bill a matmul at `4 n^3`. It
+> **THE COST HALF IS SOLVED ON ARITHMETIC AND NOT YET ON EXECUTION** — see the
+> PROJECTION paragraph below, and `SKEPTIC WP14`, which rated this claim
+> PROVISIONAL for exactly that reason. flopscope does not bill a matmul at `4 n^3`. It
 > bills the textbook `2 n^3` and scales every operation by a **per-dtype rate**
 > from its own packaged table — `float64 = 2.0`, `float32 = 1.0`. WP13 built its
 > probe arrays with a generator that returns f64, read that column, and wrote it
@@ -22,8 +24,8 @@
 > | **both f32** | `68,802,510,336` | `99,116,660,736` | **`167,919,171,072`** | **`0.07636`** | **`0.10000`** |
 >
 > **A regenerating full-K3 flow reaches the `0.1` floor with `0.02364 B`
-> (`51,983,154,483` FLOPs, `24.2` f32 matmuls) to spare — no Strassen, no rank
-> cap.** Both halves were already measured and independently reviewed in this
+> (`51,983,154,483` FLOPs, `24.2` f32 matmuls, `1.51` per layer over 16) to
+> spare — no Strassen, no rank cap.** Both halves were already measured and independently reviewed in this
 > repository; the f32 K2 figure had sat in this very file for six days. **Nobody
 > had added them.** Strassen is no longer needed for the floor and `L = 4`'s
 > `14,001` array ops/MLP stays what it always was: a table entry, not an
@@ -112,10 +114,37 @@
 > numerically WRONG** (it uses `w1` for both wick factors where upstream uses
 > `w(1)` and `w(2) * w(1)`), so it must not be promoted by copying.
 >
-> **Open, and needing a contract before anyone acts on it:** the `(3,)`-slice
-> corrector (`1.55x`, `O(n)`, oracle-only today); and whether any closed lane was
-> closed on a **float64** cost that a float32 re-pricing would reopen — the W-EFF
-> screen was checked and is unaffected, the rest have not been.
+> **THE CEILING OF THE CORRECTION LANE IS A BOARD-LEADING SCORE, AND IT IS
+> AFFORDABLE.** The `e3svd` cell the first `C2` run omitted (`gpuq` 131,
+> `c2_e2e_oracle_rank.json`) corrects BOTH slices at an oracle rank `r`:
+>
+> | oracle correction | drift | implied raw | adjusted at `0.1` | vs Puffi `4.5e-09` |
+> |---|---:|---:|---:|---:|
+> | none (the measured fallback) | `8.75e-07` | `8.51e-07` | `8.5e-08` | `19x` worse |
+> | `e3svd:128` | `7.89e-08` | `~1.19e-07` | `~1.2e-08` | `2.6x` worse |
+> | **`e3svd:512`** | `2.62e-09` | `~4.3e-08` | **`~4.3e-09`** | **`1.05x` BETTER** |
+>
+> Correcting only ONE slice saturates at `2.4x` however good the correction
+> (`svd:256` = `2.376x`); correcting both at rank 128 gives `11.1x` and at rank
+> 512 gives `333.8x`. A rank-512 correction costs `16,106,127,360` counted f32
+> FLOPs (`0.0073 B`) against `0.0236 B` unspent — **it fits `3.2x` over.**
+>
+> > **The entire remaining problem is a MAP from the flow's own state to
+> > `(E3, rank-512 E21)`.** WP13 killed five column-weight selectors; WP14 killed
+> > `Sigma`'s dominant range. **Nothing has yet been tried that LEARNS the map**,
+> > which was `C3`'s named backup and is now the only live route. It is an ORACLE
+> > ceiling, not a result, and it needs its own contract.
+>
+> The contract's own **`DTYPE-F64` control landed** (`gpuq` 132) and changes
+> nothing: containment `0.127 / 0.128 / 0.128` at `r = 128` and `0.500` at
+> `r = 512`, identical to f32. The f64 control this repository has never had now
+> exists, and `SKEPTIC WP13`'s open defect on that point is discharged.
+>
+> **Open, and needing a contract before anyone acts on it:** the learned map
+> above; the `(3,)`-slice corrector (`1.55x`, `O(n)`, oracle-only today); and
+> whether any closed lane was closed on a **float64** cost that a float32
+> re-pricing would reopen — the W-EFF screen was checked and is unaffected, the
+> rest have not been.
 
 > **2026-09-02 (WP13 — CLOSED, E3 NO-GO) — THE INFORMATION IS LOW RANK,
 > COLLAPSING WITH DEPTH, AND AFFORDABLE TO CARRY. NO SELECTOR CAN FIND IT, AND

@@ -81,6 +81,21 @@ V27_GRADED_RAW = 1.3738e-06
 #: P-A's full-K3 raw on 24 DESIGN mints, for orientation only.
 MSE_FULL_ANCHOR = 4.0047e-08
 
+#: v2.7's sixteen cumulative-product output gains, copied verbatim from
+#: `estimator_v2_7.py::_CAL_G`. Applying them to our K2p1 closure gives a
+#: **PROXY** for the shipped file on these eight networks, not the shipped file:
+#: v2.7 also prunes dead neurons and uses an aligned input basis. It exists so
+#: the comparison against v2.7 can be made PAIRED on common networks instead of
+#: as a cross-sample ratio against a graded number -- `SKEPTIC WP14`'s finding
+#: that "1.61x better than v2.7" was an unpaired cross-instrument ratio of means
+#: when a paired statistic was available from the same artifact.
+V27_CAL_G = (
+    1.000000000, 0.999610691, 0.999343144, 0.999145174,
+    0.998981471, 0.998857839, 0.998752746, 0.998663998,
+    0.998591212, 0.998532269, 0.998483726, 0.998442611,
+    0.998388713, 0.998337791, 0.998292060, 0.998251500,
+)
+
 
 def _mse_pair(p, y1, y2):
     """Ordinary MSE against each replica, and the UNBIASED cross-product."""
@@ -104,7 +119,7 @@ def main() -> int:
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--dtype", choices=["f32", "f64"], default="f32")
     ap.add_argument("--arms", nargs="*",
-                    default=["regen", "uncapped", "k2p1"])
+                    default=["regen", "uncapped", "k2p1", "v27proxy"])
     a = ap.parse_args()
 
     src = bridge._src()
@@ -145,8 +160,13 @@ def main() -> int:
         if "regen" in a.arms:
             preds["regen"] = rlab.means_of(w, hook_nl=rlab._regen_hook_nl(),
                                            dtype=dtype, device=a.device)
-        if "k2p1" in a.arms:
-            preds["k2p1"] = cal.closure(w)
+        if "k2p1" in a.arms or "v27proxy" in a.arms:
+            k2 = cal.closure(w)
+            if "k2p1" in a.arms:
+                preds["k2p1"] = k2
+            if "v27proxy" in a.arms:
+                g = np.asarray(V27_CAL_G, dtype=np.float64)[: k2.shape[0]]
+                preds["v27proxy"] = k2 * g[:, None]
         for arm, p in preds.items():
             r = _mse_pair(p[-1], m1[i, -1], m2[i, -1])
             r.update({"seed": seed, "arm": arm,
@@ -183,6 +203,32 @@ def main() -> int:
     print(f"  graded v2.7      raw {V27_GRADED_RAW:.4e}   adjusted "
           f"{V27_GRADED_ADJUSTED:.4e}   -- the number to beat, from the board")
     print()
+    if "regen" in summary and "v27proxy" in summary:
+        import competition_score as cs
+        rg = np.array(summary["regen"]["per_net"])
+        v7 = np.array(summary["v27proxy"]["per_net"])
+        d_arith = v7 - rg                     # positive means regen is BETTER
+        lo, hi = cs.paired_diff_ci(d_arith, method="t")
+        lo_b, hi_b = cs.paired_diff_ci(d_arith, method="basic")
+        print()
+        print("  PAIRED, on common random numbers -- the binding form. The v2.7 arm")
+        print("  here is a PROXY (our closure x v2.7's sixteen gains), not the")
+        print("  shipped file, and the graded number stays the authority for v2.7.")
+        print(f"    paired arithmetic difference (v27proxy - regen)  {d_arith.mean():.4e}")
+        print(f"    studentised-t 95%   [{lo:.4e}, {hi:.4e}]")
+        print(f"    basic bootstrap 95% [{lo_b:.4e}, {hi_b:.4e}]")
+        print(f"    networks where regen wins: {int((d_arith > 0).sum())}/{len(d_arith)}")
+        print(f"    point ratio v27proxy/regen: {v7.mean() / rg.mean():.3f}x")
+        summary["_paired_regen_vs_v27proxy"] = {
+            "mean_arith_diff": float(d_arith.mean()),
+            "t95": [lo, hi], "basic95": [lo_b, hi_b],
+            "wins": int((d_arith > 0).sum()), "n": len(d_arith),
+            "point_ratio": float(v7.mean() / rg.mean()),
+            "caveat": "v27proxy is our K2p1 closure times v2.7's sixteen output "
+                      "gains; the shipped v2.7 also prunes and rotates. The GRADED "
+                      "1.3738e-07 remains the authority for v2.7's actual score.",
+        }
+        print()
     print("  P2 (pre-registered): raw in [7.5e-07, 1.0e-06], point 8.9e-07")
     if "regen" in summary:
         got = summary["regen"]["mean_cross"]
