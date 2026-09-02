@@ -1,5 +1,49 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-02 — THE SOAK'S FIRST REAL RUN REFUSED THE SHIPPED FILE, AND THE
+> INSTRUMENT COULD NOT SAY WHY.** WP6's `--residual-soak` ran for the first
+> time, on **v2.6.1 — the exact file the grading server ran with ZERO failures**
+> — and reported **45 failed MLPs of 300**, verdict `REFUSED`. Residual is not
+> the cause: the worst row was `90.2 ms` against a `400 ms` cap, `4.43x`
+> headroom. Two defects, both now repaired under **CONTRACT WP8** (`e7b83c2`,
+> committed before the repair):
+>
+> 1. **The soak counted failures and discarded the reason.** The runner already
+>    computes a five-way `failure_breakdown` and stamps every failed row with an
+>    `error_code` and a traceback; none of it was read. It now is, including
+>    **the deepest failing frame that lies in this repository** — the field that
+>    separates "the host fell over" from "the candidate's own math raised".
+> 2. **The pooled tail included rows that never executed.** `scoring.py`'s
+>    exception path appends a failed row carrying `residual_wall_time_s = 0.0`.
+>    Those zeros sort to the bottom, so the reported "median" at rank `150/300`
+>    was the **41st percentile of executed work**. `worst` is a max and is
+>    immune — which is exactly why the defect survived the number a reader
+>    checks. The tail is now over executed rows only, with the contaminated
+>    figures kept beside it and an explicit `median_bias_from_failed_rows`.
+>
+> **Why it survived review:** the arithmetic was fused with the subprocess loop,
+> so the only way to exercise it was a three-hour official run — which means in
+> practice it was never exercised. `_pool_residual` is now pure and 16 unit
+> tests run in milliseconds. **The attributed re-measurement is in flight; until
+> it returns, the 45 failures are UNEXPLAINED and no certification that used the
+> old soak may be quoted.**
+>
+> **WP9 is open and pre-registered** (`9c961ce`): a per-neuron,
+> scale-equivariant **in-flight state corrector**, gated on **rollout** and not
+> on fit. **Its price is already MEASURED and the news is good** (`d004ed1`):
+> correcting at *every* layer costs **36,433,980** counted flopscope FLOPs —
+> `0.017%` of the free zone — leaving the multiplier pinned at `0.1` with
+> `37.42%` of the free zone unused. Gate clause **G2 PASSES** and prediction
+> **P6 HELD** with `13.7x` of margin. **Accuracy is now the only open question
+> on this lane.** `P02` is being minted for it.
+>
+> **`p2_truth.py` recorded the post-ReLU variance at the FINAL LAYER ONLY**, so
+> it could not have supplied an in-flight variance target at all. Now recorded
+> at every layer, and the claim that the existing labels are bitwise unchanged
+> is executed rather than asserted: `--check-allvar` ran the pre-WP9
+> accumulation beside the current one and returned **bitwise-equal means and
+> final-layer variance on both probe networks**.
+
 > **2026-09-01 — THE RULE-2 GAP IS CLOSED, AND IT OVERTURNED A CLOSED LANE.**
 > The pending WP2/WP3/WP4 Skeptic ran in the foreground and returned
 > **ACCEPT / PROVISIONAL / REJECT**. That is the fourth of four passes this
