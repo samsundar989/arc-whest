@@ -1,0 +1,97 @@
+{
+  "check": "WP13 E0-COST: flopscope-priced regenerating K3 third-order increment",
+  "contract": "experiments/LOG.md 2026-09-02 CONTRACT WP14 C0-iii, HEAD d915f83 (re-pricing of CONTRACT WP13 E0-COST, HEAD 8b46574)",
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "dtype": "f64",
+  "dtype_rates": {
+    "bool": 1.0,
+    "complex128": 2.0,
+    "complex192": 3.0,
+    "complex256": 4.0,
+    "complex64": 1.0,
+    "float128": 4.0,
+    "float16": 1.0,
+    "float32": 1.0,
+    "float64": 2.0,
+    "float96": 3.0,
+    "int16": 1.0,
+    "int32": 1.0,
+    "int64": 2.0,
+    "int8": 1.0,
+    "uint16": 1.0,
+    "uint32": 1.0,
+    "uint64": 2.0,
+    "uint8": 1.0
+  },
+  "flopscope_version": "0.12.0+np2.2.6",
+  "spellings": {
+    "regen": {
+      "spelling": "regen",
+      "width": 1024,
+      "depth": 16,
+      "flops": 198233321472.0,
+      "dtype": "f64",
+      "billed_dtype": "float64",
+      "x_budget": 0.09014607779681683,
+      "per_layer": 12389582592.0,
+      "per_layer_over_n3": 11.538697957992554
+    },
+    "generic": {
+      "spelling": "generic",
+      "width": 1024,
+      "depth": 16,
+      "flops": 412585295872.0,
+      "dtype": "f64",
+      "billed_dtype": "float64",
+      "x_budget": 0.1876220703125,
+      "per_layer": 25786580992.0,
+      "per_layer_over_n3": 24.015625
+    }
+  },
+  "value_invariance": {
+    "seed_11": 43085991936.0,
+    "seed_97": 43085991936.0,
+    "identical": true
+  },
+  "primitive_prices": {
+    "width": 1024,
+    "dtype": "f64",
+    "flops": {
+      "matmul_nn": 4292870144.0,
+      "matmul_T_nn": 4292870144.0,
+      "hadamard_nn": 2097152.0,
+      "rowsum_nn": 4192256.0,
+      "transpose_nn": 0.0,
+      "diag_from_vec": 2048.0,
+      "diag_of_mat": 0.0,
+      "add_nn": 2097152.0,
+      "rowscale_nn": 2097152.0
+    },
+    "over_n3": {
+      "matmul_nn": 3.998046875,
+      "matmul_T_nn": 3.998046875,
+      "hadamard_nn": 0.001953125,
+      "rowsum_nn": 0.0039043426513671875,
+      "transpose_nn": 0.0,
+      "diag_from_vec": 1.9073486328125e-06,
+      "diag_of_mat": 0.0,
+      "add_nn": 0.001953125,
+      "rowscale_nn": 0.001953125
+    },
+    "matmul_price_n3": 3.998046875
+  },
+  "k2_anchor_flops": 137600326656,
+  "projected_total_flops": 335833648128.0,
+  "projected_x_budget": 0.15271946182474494,
+  "server_offset_applied": false,
+  "projected_x_budget_with_server_offset": 0.15271946182474494,
+  "multiplier": 0.15271946182474494,
+  "upstream_dsproj_x_budget": 0.2977,
+  "upstream_caveat": "upstream torch-side counter, NOT flopscope; ratios within itself only",
+  "gate_g_cost_pass_at": 0.2,
+  "gate_g_cost_close_at": 0.35,
+  "verdict": "PASS",
+  "caveat": "the increment is MEASURED; the total is a PROJECTION onto the shipped K2 anchor"
+}

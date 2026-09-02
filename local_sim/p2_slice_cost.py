@@ -148,7 +148,11 @@ def _third_order_layer(fnp, W, M, w1, Sig_off, *, last_layer: bool):
     # permutation is a row scaling. Executed at full width so the meter judges it.
     fac1 = Sig_off * w1[:, None]
     fac3 = Sig_off * w1[None, :]
-    S21 = S21 + (fac1 * np.float64(3.0)) + (fac1 * fac3) * np.float64(3.0) + fac3 * np.float64(3.0)
+    # Python scalars, NOT `np.float64(3.0)`: under NEP-50 a numpy scalar is
+    # CONCRETE and promotes an f32 array back to f64, so flopscope would bill
+    # the whole f32 arm at the f64 rate 2.0 and CONTRACT WP14's P1 would be
+    # scored on a silently-promoted flow. A Python float stays weak.
+    S21 = S21 + (fac1 * 3.0) + (fac1 * fac3) * 3.0 + fac3 * 3.0
     S3_z = S3_z + (fac1 * fac3).sum(axis=1)
 
     # zero the diagonal: the (2, 1) slice is defined with repeated indices removed.
@@ -159,7 +163,7 @@ def _third_order_layer(fnp, W, M, w1, Sig_off, *, last_layer: bool):
 
 def _rebuild_M(fnp, S3, S21):
     """`from_dstensor`'s own reconstruction: `M = diag(S3) + 3 * S21^T`. O(n^2)."""
-    return fnp.diag(S3) + np.float64(3.0) * S21.T
+    return fnp.diag(S3) + 3.0 * S21.T
 
 
 def _generic_third_order_layer(fnp, W, A1, A2, A3, w1):
@@ -180,8 +184,21 @@ def _generic_third_order_layer(fnp, W, A1, A2, A3, w1):
 # drivers
 # --------------------------------------------------------------------------
 
-def measure(width: int, depth: int, *, spelling: str, seed: int = 1_000_003) -> dict:
-    """Counted flopscope FLOPs for `depth` layers of the third-order increment."""
+def measure(width: int, depth: int, *, spelling: str, seed: int = 1_000_003,
+            dtype: str = "f64") -> dict:
+    """Counted flopscope FLOPs for `depth` layers of the third-order increment.
+
+    `dtype` is NOT decoration. flopscope 0.12's packaged weights
+    (`flopscope/_weights.py`, `_ACTIVE_DTYPE_RATES`) bill `float64` at rate
+    **2.0** and `float32` at **1.0**, so the same dense `(n, n) @ (n, n)`
+    matmul costs `4 n^3` at f64 and `2 n^3` at f32. WP13 measured this flow at
+    f64 -- `np.random.default_rng().standard_normal()` returns f64 -- while
+    every WP13 ACCURACY number was taken in torch float32. CONTRACT WP14 / P1.
+
+    The billed dtype is ASSERTED below rather than assumed, because a single
+    concrete numpy scalar anywhere in the spelling silently promotes the whole
+    arm and would make an f32 measurement a fiction.
+    """
     import flopscope as flops
     import flopscope.numpy as fnp
 
@@ -189,14 +206,22 @@ def measure(width: int, depth: int, *, spelling: str, seed: int = 1_000_003) -> 
 
     rng = np.random.default_rng(seed)
     n = width
+    npdt = {"f64": np.float64, "f32": np.float32}[dtype]
+    def _mk(x):
+        return fnp.array(np.asarray(x, dtype=npdt))
 
     # Built OUTSIDE the BudgetContext, exactly as the grader builds weights
     # (`MLP.from_row` runs during dataset load, not during `predict`).
-    Ws = [fnp.array(rng.standard_normal((n, n)) * (2.0 / n) ** 0.5) for _ in range(depth)]
-    M0 = fnp.array(rng.standard_normal((n, n)) * 1e-3)
-    w1 = fnp.array(np.abs(rng.standard_normal(n)))
-    Sig = fnp.array(rng.standard_normal((n, n)) * 1e-3)
-    A0 = [fnp.array(rng.standard_normal((n, n)) * 1e-3) for _ in range(3)]
+    Ws = [_mk(rng.standard_normal((n, n)) * (2.0 / n) ** 0.5) for _ in range(depth)]
+    M0 = _mk(rng.standard_normal((n, n)) * 1e-3)
+    w1 = _mk(np.abs(rng.standard_normal(n)))
+    Sig = _mk(rng.standard_normal((n, n)) * 1e-3)
+    A0 = [_mk(rng.standard_normal((n, n)) * 1e-3) for _ in range(3)]
+    for _a in [M0, w1, Sig, *Ws, *A0]:
+        if np.dtype(_a.dtype) != np.dtype(npdt):
+            raise RuntimeError(
+                f"REFUSED: an input array is {_a.dtype}, not {np.dtype(npdt)}; "
+                "the counted FLOPs below would be billed at the wrong dtype rate.")
 
     with flops.BudgetContext(flop_budget=10 * BUDGET, quiet=True) as ctx:
         if spelling == "regen":
@@ -206,30 +231,47 @@ def measure(width: int, depth: int, *, spelling: str, seed: int = 1_000_003) -> 
                     fnp, Ws[l], M, w1, Sig, last_layer=(l == depth - 1))
                 if S21 is not None:
                     M = _rebuild_M(fnp, S3, S21)
+            _carried = M
         elif spelling == "generic":
             A1, A2, A3 = A0
             for l in range(depth):
                 S3, S21 = _generic_third_order_layer(fnp, Ws[l], A1, A2, A3, w1)
                 A1 = _rebuild_M(fnp, S3, S21)
                 A2, A3 = Ws[l].T, Ws[l].T
+            _carried = A1
         else:
             raise ValueError(spelling)
         used = float(ctx.flops_used) if hasattr(ctx, "flops_used") else None
 
     if used is None:
         used = float(getattr(ctx, "used", getattr(ctx, "total", float("nan"))))
+    # The billed dtype is what the LAST carried state actually is: if any step
+    # promoted, `M` (regen) / `A1` (generic) comes back wider than requested and
+    # the whole measurement was billed at the wrong rate.
+    out_dtype = str(np.dtype(_carried.dtype))
+    if np.dtype(_carried.dtype) != np.dtype(npdt):
+        raise RuntimeError(
+            f"REFUSED: the {spelling} spelling requested {np.dtype(npdt)} but its "
+            f"carried state came back {out_dtype} -- something promoted, and every "
+            "counted FLOP above was billed at the wrong dtype rate.")
     return {"spelling": spelling, "width": n, "depth": depth, "flops": used,
+            "dtype": dtype, "billed_dtype": out_dtype,
             "x_budget": used / BUDGET, "per_layer": used / depth,
             "per_layer_over_n3": used / depth / n ** 3}
 
 
-def primitive_prices(width: int) -> dict:
+def primitive_prices(width: int, dtype: str = "f64") -> dict:
     """flopscope 0.12's price for each primitive, so the total is ATTRIBUTED.
 
-    The finding this exists to record: flopscope bills an `(n, n) @ (n, n)`
-    matmul at **`4 n^3`**, not the textbook `2 n^3`. Every hand cost model in
-    this repository that assumed `2 n^3` was a factor of two optimistic, and the
-    whole third-order increment below is exactly three such matmuls per layer.
+    The finding this exists to record, CORRECTED under CONTRACT WP14 / C0-iii:
+    flopscope bills an `(n, n) @ (n, n)` matmul at **`4 n^3` in float64** and at
+    the textbook **`2 n^3` in float32**. The factor of two is not a property of
+    matmul at all -- it is flopscope's packaged per-dtype billing rate
+    (`float64 = 2.0`, `float32 = 1.0`, `_weights.py::_ACTIVE_DTYPE_RATES`).
+    WP13 read the f64 column and recorded it as the price of a matmul, which
+    made every cost statement in that slice a float64 statement compared against
+    accuracy evidence gathered in float32. Quote the dtype in the same sentence
+    as the price, always.
     """
     import flopscope as flops
     import flopscope.numpy as fnp
@@ -237,9 +279,10 @@ def primitive_prices(width: int) -> dict:
     _require_real_flopscope(flops)
     n = width
     rng = np.random.default_rng(5)
-    A = fnp.array(rng.standard_normal((n, n)))
-    B = fnp.array(rng.standard_normal((n, n)))
-    v = fnp.array(rng.standard_normal(n))
+    npdt = {"f64": np.float64, "f32": np.float32}[dtype]
+    A = fnp.array(np.asarray(rng.standard_normal((n, n)), dtype=npdt))
+    B = fnp.array(np.asarray(rng.standard_normal((n, n)), dtype=npdt))
+    v = fnp.array(np.asarray(rng.standard_normal(n), dtype=npdt))
 
     def price(fn):
         with flops.BudgetContext(flop_budget=10 ** 14, quiet=True) as c:
@@ -257,15 +300,15 @@ def primitive_prices(width: int) -> dict:
         "add_nn": price(lambda: A + B),
         "rowscale_nn": price(lambda: A * v[:, None]),
     }
-    return {"width": n, "flops": ops,
+    return {"width": n, "dtype": dtype, "flops": ops,
             "over_n3": {k: v_ / n ** 3 for k, v_ in ops.items()},
             "matmul_price_n3": ops["matmul_nn"] / n ** 3}
 
 
-def value_invariance(width: int, depth: int) -> dict:
+def value_invariance(width: int, depth: int, dtype: str = "f64") -> dict:
     """The counted total does not depend on the VALUES. Measured, not assumed."""
-    a = measure(width, depth, spelling="regen", seed=11)
-    b = measure(width, depth, spelling="regen", seed=97)
+    a = measure(width, depth, spelling="regen", seed=11, dtype=dtype)
+    b = measure(width, depth, spelling="regen", seed=97, dtype=dtype)
     return {"seed_11": a["flops"], "seed_97": b["flops"],
             "identical": a["flops"] == b["flops"]}
 
@@ -276,15 +319,35 @@ def main() -> int:
     ap.add_argument("--depth", type=int, default=DEPTH)
     ap.add_argument("--out", default="experiments/2026-09-02_wp13_slice/e0_cost.json")
     ap.add_argument("--skip-generic", action="store_true")
+    ap.add_argument("--dtype", choices=["f64", "f32", "both"], default="f64",
+                    help="the dtype the spelling is EXECUTED and billed in. "
+                         "flopscope rates float64 at 2.0 and float32 at 1.0, so "
+                         "this halves or doubles every number below. WP13 ran f64; "
+                         "CONTRACT WP14 / C0-iii asks for f32.")
     a = ap.parse_args()
+    if a.dtype == "both":
+        rc = 0
+        for dt in ("f64", "f32"):
+            import copy
+            sub = copy.copy(a)
+            sub.dtype = dt
+            sub.out = (a.out.replace(".json", f"_{dt}.json") if a.out else "")
+            rc |= _run(sub)
+        return rc
+    return _run(a)
+
+
+def _run(a) -> int:
 
     print("=" * 78)
-    print("WP13 / E0-COST  --  regenerating K3 flow, priced in flopscope 0.12")
+    print("E0-COST / WP14 C0-iii  --  regenerating K3 flow, priced in flopscope 0.12")
     print("=" * 78)
     print(f"  shape {a.width} x {a.depth}    budget 2**41 = {BUDGET:,}")
+    print(f"  dtype {a.dtype}   flopscope dtype rate: float64 = 2.0, float32 = 1.0,")
+    print( "                    so every counted FLOP below is scaled by it")
     print()
 
-    regen = measure(a.width, a.depth, spelling="regen")
+    regen = measure(a.width, a.depth, spelling="regen", dtype=a.dtype)
     print(f"  third-order increment, STRUCTURED spelling")
     print(f"    counted FLOPs      {regen['flops']:>20,.0f}")
     print(f"    x budget           {regen['x_budget']:>20.6f}")
@@ -293,7 +356,7 @@ def main() -> int:
 
     rows = {"regen": regen}
     if not a.skip_generic:
-        gen = measure(a.width, a.depth, spelling="generic")
+        gen = measure(a.width, a.depth, spelling="generic", dtype=a.dtype)
         rows["generic"] = gen
         print(f"  third-order increment, GENERIC spelling (three real legs)")
         print(f"    counted FLOPs      {gen['flops']:>20,.0f}")
@@ -302,17 +365,18 @@ def main() -> int:
         print(f"    structured saving  {gen['flops'] / regen['flops']:>20.3f}x")
         print()
 
-    prices = primitive_prices(a.width)
+    prices = primitive_prices(a.width, dtype=a.dtype)
     print("  primitive prices, flopscope 0.12, measured at this width")
     for k, v_ in sorted(prices["over_n3"].items(), key=lambda kv: -kv[1]):
         print(f"    {k:<18} {prices['flops'][k]:>16,.0f}   = {v_:8.4f} n^3")
-    print(f"    -> a dense (n,n)@(n,n) matmul costs {prices['matmul_price_n3']:.2f} n^3, "
-          "NOT the textbook 2 n^3")
+    print(f"    -> a dense (n,n)@(n,n) matmul costs {prices['matmul_price_n3']:.2f} n^3 "
+          f"at {a.dtype}; the textbook figure is 2 n^3 and flopscope reaches 4 n^3 "
+          "ONLY through the float64 dtype rate of 2.0")
     print(f"    -> the structured spelling is {regen['per_layer_over_n3']:.2f} n^3/layer "
           f"= {regen['per_layer_over_n3'] / prices['matmul_price_n3']:.2f} matmuls/layer")
     print()
 
-    vi = value_invariance(a.width, min(a.depth, 4))
+    vi = value_invariance(a.width, min(a.depth, 4), dtype=a.dtype)
     print(f"  value invariance   two different random draws, same op sequence")
     print(f"    identical counts   {vi['identical']}")
     print()
@@ -352,8 +416,10 @@ def main() -> int:
 
     doc = {
         "check": "WP13 E0-COST: flopscope-priced regenerating K3 third-order increment",
-        "contract": "experiments/LOG.md 2026-09-02 CONTRACT WP13, HEAD 8b46574",
-        "width": a.width, "depth": a.depth, "budget": BUDGET,
+        "contract": "experiments/LOG.md 2026-09-02 CONTRACT WP14 C0-iii, HEAD d915f83 "
+                    "(re-pricing of CONTRACT WP13 E0-COST, HEAD 8b46574)",
+        "width": a.width, "depth": a.depth, "budget": BUDGET, "dtype": a.dtype,
+        "dtype_rates": _dtype_rates(),
         "flopscope_version": _fs_version(),
         "spellings": rows,
         "value_invariance": vi,
@@ -377,6 +443,19 @@ def main() -> int:
         json.dump(doc, fh, indent=2)
     print(f"  wrote {os.path.relpath(out, _ROOT)}")
     return 0
+
+
+def _dtype_rates() -> dict:
+    """flopscope's ACTIVE per-dtype billing rates, read from the package.
+
+    Recorded in every artifact because it is the currency: `float64 = 2.0`
+    and `float32 = 1.0` is the whole of CONTRACT WP14 / P1.
+    """
+    try:
+        from flopscope._weights import _ACTIVE_DTYPE_RATES
+        return {k: float(v) for k, v in sorted(_ACTIVE_DTYPE_RATES.items())}
+    except Exception as exc:  # a private name; record the failure, never guess
+        return {"UNREADABLE": str(exc)}
 
 
 def _fs_version() -> str:

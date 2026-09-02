@@ -62,7 +62,42 @@ chose, and hash-check the file afterwards if you chose absolute.**
 
 ---
 
-## 2026-09-02 (WP13 / E0-COST) — flopscope bills a dense matmul at `4 n^3`, not `2 n^3`
+## 2026-09-02 (WP14 / C0-iii) — a flopscope price is not well-formed without its DTYPE
+
+**CORRECTS the WP13 entry that stood here for one day.** flopscope 0.12 does
+not bill a dense `(n, n) @ (n, n)` matmul at `4 n^3`. It bills the textbook
+`2 n^3` and then scales **every** operation by a per-dtype rate from its own
+packaged weights, `flopscope/_weights.py::_ACTIVE_DTYPE_RATES`:
+
+    float64 = 2.0   int64 = 2.0   uint64 = 2.0   complex128 = 2.0
+    float32 = 1.0   float16 = 1.0   int32 = 1.0   complex64 = 1.0
+
+Measured at `n = 1024`: `4,292,870,144` FLOPs at f64, `2,146,435,072` at f32.
+WP13 read the f64 column because `np.random.default_rng().standard_normal()`
+returns float64, and recorded it as a property of matmul. Every cost figure in
+that slice is therefore a **float64** figure, quoted against accuracy evidence
+gathered in **float32**.
+
+**Three consequences.**
+
+1. **Always name the dtype in the same sentence as the price.** "The floor
+   affords 3.2 matmuls per layer" is true at f64 and wrong at f32, where it is
+   6.4. `p2_slice_cost.py` now takes `--dtype` and stamps the billed dtype and
+   the whole rate table into every artifact.
+2. **`np.float64(3.0)` is a trap.** Under NEP-50 a numpy scalar is *concrete*,
+   not weak, so one of them anywhere in an f32 expression promotes the result
+   and flopscope bills the whole downstream chain at rate 2.0. A **Python**
+   `3.0` stays weak and bills f32. `measure()` now asserts the carried state's
+   dtype and refuses rather than reporting a silently-promoted number.
+3. **This does NOT reopen the `f16`/`int8` note further down this file.** Those
+   are rate `1.0`, the *same* as f32: there is no dtype trick below f32. The
+   only dtype saving available is f64 -> f32, it is worth exactly `2x`, and for
+   the K2 closure it was measured accuracy-neutral on 96/96 networks on
+   2026-08-26.
+
+*(Retained for the record: the WP13 heading read "flopscope bills a dense
+matmul at `4 n^3`, not `2 n^3`". It was right about the number it saw and
+wrong about what the number was.)*
 
 Measured, not modelled, at the live width in `flopscope 0.12+np2.2.6` inside a
 real `BudgetContext` (`local_sim/p2_slice_cost.py --> experiments/2026-09-02_wp13_slice/e0_cost.json`):

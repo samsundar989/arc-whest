@@ -26864,3 +26864,121 @@ is sufficient) nor `C4` (the floor is reachable) has passed, accuracy and cost w
 **freeze**: nominate the uncorrected regenerating flow at `L = 1` — if and only if
 `C0-i`'s minted truth confirms it beats v2.7 — plus v2.7 as the diverse pair, and
 go all-in on `docs/writeup-p2-draft.md` (due 2026-10-24).
+
+---
+
+# 2026-09-02 — WP14 / C0-iii RESULT: the cost half of this project was priced in the wrong dtype, and at the right one the multiplier is AT THE FLOOR
+
+Contract `d915f83`, committed before this ran. Instrument
+`local_sim/p2_slice_cost.py --dtype {f64,f32,both}`; artifacts
+`experiments/2026-09-02_wp14_range/e0_cost_f64.json` and `e0_cost_f32.json`.
+No seeds, no GPU, no networks: the counted total is value-invariant and
+`--dtype f64` reproduces WP13's committed figure exactly.
+
+## What was wrong
+
+flopscope 0.12 does not price a matmul at `4 n^3`. It prices it at the textbook
+`2 n^3` and then scales every operation by a **per-dtype billing rate** from its
+own packaged weights (`flopscope/_weights.py::_ACTIVE_DTYPE_RATES`):
+
+    float64 = 2.0   float32 = 1.0   float16 = 1.0   int64 = 2.0   complex128 = 2.0
+
+`p2_slice_cost.py` built every array from `np.random.default_rng().standard_normal()`,
+which returns **float64**. So WP13's entire cost table — `0.15272 B`, "the floor
+affords `3.2` matmuls per layer", "Strassen `L = 4` is needed to reach `0.1`" — is
+a **float64** statement, and it was compared against accuracy evidence that
+`p2_slice_lab.py` gathered in **torch float32**. This is the `G-RANK` failure class
+from `SKEPTIC WP13` again — a threshold quoted in a currency the measurement was
+not taken in — caught this time before the gate was written rather than after.
+
+## P1 HELD, to the FLOP
+
+| arm | third-order increment | matmul price | total with the K2 anchor | `x budget` |
+|---|---:|---:|---:|---:|
+| `--dtype f64` (WP13's arm, reproduced) | `198,233,321,472` | `4.00 n^3` | `335,833,648,128` | `0.152719` |
+| `--dtype f32` | **`99,116,660,736`** | `2.00 n^3` | `236,716,987,392` | **`0.107646`** |
+
+Predicted `99,116,660,736 +/- 2%` and `0.10765 B`. Measured `99,116,660,736` and
+`0.107646 B` — exactly half, exactly as the rate table says. Per-layer cost is
+`5.77 n^3` at f32 against `11.54 n^3` at f64; **`2.89` matmuls per layer in both**,
+which is the invariant that proves only the currency changed and not the spelling.
+
+The f64 arm reproducing `198,233,321,472` **after** the edit is the regression that
+matters: `np.float64(3.0)` was replaced by a Python `3.0` throughout, because under
+NEP-50 a numpy scalar is *concrete* and would have promoted the f32 arm straight
+back to f64 billing. `measure()` now asserts the carried state's dtype and refuses
+rather than reporting a silently-promoted number.
+
+## And composing it with a figure this repository already had changes the answer
+
+The K2 backbone half was measured and independently reviewed on **2026-08-26**, and
+sat in `docs/CURRENT_STATE.md` unconnected to any K3 number:
+
+> **In grader spelling the ratio is `0.50002x`** (`137,600,363,520 -> 68,802,510,336`),
+> stable across five shapes and bit-identical across nine networks. Divergence from
+> the f64 control is `3.3e-13` relative mean square — **7.1 orders** below K2's own
+> error. `1,497` of `1,572,864` neuron-layers hit float32 cancellation in
+> `var = max(ez2 - mu^2, 0)`; the `var_pre` clamp fires **zero** times, there are
+> zero non-finite outputs on 96/96 networks, and the float32 final-layer MSE against
+> truth is *marginally better* than float64.
+
+Composing the two **measured** halves:
+
+| composition | K2 backbone | K3 increment | total | `x budget` | multiplier |
+|---|---:|---:|---:|---:|---:|
+| all f64 — WP13's record | `137,600,326,656` | `198,233,321,472` | `335,833,648,128` | `0.15272` | `0.15272` |
+| K3 f32 only | `137,600,326,656` | `99,116,660,736` | `236,716,987,392` | `0.10765` | `0.10765` |
+| **both f32** | `68,802,510,336` | `99,116,660,736` | **`167,919,171,072`** | **`0.07636`** | **`0.10000`** |
+
+> **A regenerating full-K3 flow reaches the `0.1` multiplier floor with `0.02364 B`
+> to spare, with NO Strassen, NO low-rank backbone and NO rank cap.** That spare is
+> `51,983,154,483` counted FLOPs — `24.2` dense f32 matmuls, `1.61` per layer — and
+> a rank-`512` slice correction at f32 costs `16,106,127,360`, so it fits **`3.2`
+> times over**.
+
+**This is a PROJECTION and is labelled one.** The two halves are measured in
+different spellings — the K2 figure is a grader-spelling arm, the K3 figure is a
+hand spelling metered locally — and their sum has never been executed as one
+program. It implies nothing about `whest validate`, the `4 GiB` single-array rule,
+the `8 GiB` memory cap or the `0.4 s` residual cliff. The `fnp` port exists to turn
+it into a measurement.
+
+## What this does to WP14 and to the standing plan
+
+**P12's conditional resolves in the favourable direction, and `C4` changes job.**
+The contract said: *"if P1 holds, `C4` becomes a margin lever rather than the only
+route."* P1 held. `G-FLOOR`'s `<= 219,885,548,339` clause is met by
+`167,919,171,072` before `C4` runs at all, so `C4` is no longer the route to the
+floor — it is now a way of **buying accuracy headroom**, and it is de-prioritised
+behind `C1`/`C2`/`C3` accordingly. Its gate stands as written and will be scored if
+it runs; nothing is retro-fitted.
+
+**Cost is no longer the binding constraint. Accuracy is, and it is the only thing
+left.** At the floor the score is `raw / 10`:
+
+| arm | raw final-layer MSE | adjusted at `0.1` |
+|---|---:|---:|
+| full factorized K3 (measured, 24 DESIGN mints) | `4.0047e-08` | **`4.005e-09`** |
+| regenerating flow, uncorrected (P2's point, UNMEASURED) | `~8.9e-07` | `~8.9e-08` |
+| board leader Puffi | — | `4.5e-09` |
+| graded v2.7 | `1.374e-06` | `1.374e-07` |
+
+The leader needs raw `4.5e-08`; full K3 is `4.0e-08`. **So the whole competition,
+for us, has collapsed onto one number: how much of the `22x` gap between the
+regenerating flow and full K3 can `C1`/`C2`/`C3` close inside `0.0236 B`.** That is
+exactly what the rest of this contract measures, and it is now the only thing worth
+measuring.
+
+## Knowledge delta
+
+1. **A dtype is part of a price, not a detail of it.** flopscope's cost is
+   dtype-weighted by an official table, so "this costs `X` FLOPs" is not a
+   well-formed sentence without the dtype. WP13's `4 n^3` was never a fact about
+   matmul. `docs/GOTCHAS.md` is corrected.
+2. **Two measured halves nobody had added.** Both numbers in the winning
+   composition were already in this repository, both independently reviewed, and
+   the gap between them was six days and one page of `CURRENT_STATE.md`. The cost
+   lane was not short of measurement; it was short of one addition.
+3. **`SKEPTIC WP13`'s rule paid immediately.** *"Write every threshold in the unit
+   the gate will be scored in, and say so in the same sentence"* is what forced
+   `C0-iii` into the contract at all, four days after the rule was written.
