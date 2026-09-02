@@ -1,0 +1,49 @@
+{
+ "artifact": "wp9_readout_decomposition",
+ "artifact_version": 1,
+ "contract": "experiments/LOG.md CONTRACT WP9, commit 9c961ce",
+ "truth": "../../../../../../Documents/arc-whest/experiments/2026-09-01_wp9_corrector/truth_P02.npz",
+ "n_mlps": 96,
+ "folds": 4,
+ "per_fold": [
+  {
+   "fold": 0,
+   "mse_uncal": 2.673677136420641e-05,
+   "mse_cal": 9.250736126244336e-06,
+   "mse_pred": 1.0073668110689465e-05,
+   "r2_unweighted": 0.4703961652096277,
+   "r2_sigma2_weighted": 0.48780037585808533,
+   "pred_over_cal": 1.0889585405112217
+  },
+  {
+   "fold": 1,
+   "mse_uncal": 2.7046075736288445e-05,
+   "mse_cal": 9.233916360366586e-06,
+   "mse_pred": 1.0361953827186799e-05,
+   "r2_unweighted": 0.4591832006594878,
+   "r2_sigma2_weighted": 0.4778569219246618,
+   "pred_over_cal": 1.1221624089711193
+  },
+  {
+   "fold": 2,
+   "mse_uncal": 2.5758169856301926e-05,
+   "mse_cal": 9.284182800163657e-06,
+   "mse_pred": 9.658859306117432e-06,
+   "r2_unweighted": 0.4753579152023558,
+   "r2_sigma2_weighted": 0.4920979577317437,
+   "pred_over_cal": 1.0403564335190782
+  },
+  {
+   "fold": 3,
+   "mse_uncal": 2.648390271724921e-05,
+   "mse_cal": 8.912100312653095e-06,
+   "mse_pred": 1.0222681761480652e-05,
+   "r2_unweighted": 0.4556109027069607,
+   "r2_sigma2_weighted": 0.47318717570452495,
+   "pred_over_cal": 1.1470564067784155
+  }
+ ],
+ "r2_unweighted_mean": 0.46513704594460803,
+ "r2_weighted_mean": 0.48273560780475394,
+ "SCOPE": "A DIAGNOSTIC of an already-measured negative, computed on the block that produced it. It selects nothing, changes no verdict, and is not a promotion statistic."
+}

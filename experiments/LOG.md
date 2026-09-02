@@ -24688,3 +24688,207 @@ attack surfaces the review opened.
 4. **Carrying a prediction across from the previous contract is the same defect
    as writing one after the data**, and it is easier to do by accident. The
    fifth prediction of two adjacent contracts is exactly where it happens.
+
+---
+
+# 2026-09-02 — RESULT WP9: the in-flight corrector DIVERGES, the readout corrector is already exhausted by v2.7's sixteen constants, and my explanation for why was wrong
+
+Contract: *CONTRACT WP9*, committed `9c961ce` **before any data existed**.
+Block **`P02`** spent (96 DESIGN seeds, `40,901,002,000..095`, ledger finalised).
+**`P03` was NOT touched** — correctly, because nothing passed `P02` to
+replicate. `P04` untouched. CONFIRM read for nothing.
+
+Artifacts: `experiments/2026-09-01_wp9_corrector/{truth_P02.npz,
+study_P02.json, readout_decomp.json, price_f64.json}`.
+Code: `local_sim/p2_corrector.py`, `local_sim/p2_corrector_price.py`.
+
+## The instrument validated itself twice, on data it had never seen
+
+Before any verdict: **arm B0 — the shipped calibrated K2, rebuilt from scratch
+in torch — scores `1.392700e-06` raw MSE on 96 freshly minted networks.**
+v2.7's official 100-MLP subprocess mini measured `1.3929833e-06`. **Agreement
+to four significant figures on a disjoint draw**, with a GT-noise floor of
+`1.7417e-08` (`1.25%` of the signal). And the readout decomposition
+independently recovers the calibration's own gain as **`2.89x`** over the
+uncalibrated closure, against P2-CAL's `2.96x` and the graded `2.8629x`.
+
+Neither number was fitted to. They are two different computations landing on
+quantities this project already knows.
+
+## The result
+
+96 networks, 4-fold **leave-networks-out**, 3 DAgger rounds, gate `1.5x`.
+Gains are `control / candidate`, so `> 1` is better.
+
+| arm | what | held-out gain vs B0 | held-out `R^2` of `c_m` (4 folds) |
+|---|---|---:|---|
+| **B0** | shipped calibrated K2 (v2.7) | — | — |
+| **A** | corrector at the **readout only** | **`0.9945x`** | `+0.506, +0.506, +0.499, +0.522` |
+| **B** | corrector at **every layer**, rolled out | **`0.0073x`** | `-0.127, -0.091, -0.128, -0.096` |
+| **N1** | arm B, `c_m` constant across neurons | `0.0068x` | `-0.173, -0.106, -0.202, -0.465` |
+| **N2** | arm B, features shuffled across neurons | `0.0018x` | — |
+| **B-tf** | *diagnostic:* one-step, no compounding | `0.9311x` | — |
+
+**Arm B diverges by a factor of `191`.** Round selection chose **round 0 in
+every fold**, so this is not a DAgger artifact: a single teacher-forced fit,
+applied in flight, blows the tower up on the first try, and every subsequent
+round was worse.
+
+**`B-tf / B = 127x`.** Prediction P2 committed to `>= 1.5x` before any data.
+
+## Why the readout arm buys nothing — and MY EXPLANATION WAS WRONG
+
+Arm A explains `R^2 = 0.50` of the per-neuron final-layer residual, stable to
+`+/-0.012` across four folds, and changes the scored MSE by **nothing**. My
+first explanation was a weighting argument: the error is `sigma * c_m`, so the
+MSE is `sigma^2`-weighted while `R^2` is not, and the predictable part might
+sit where `sigma` is small.
+
+**Measured, and refuted.** `--diagnose-readout` on the same block:
+
+| | unweighted | `sigma^2`-weighted |
+|---|---:|---:|
+| `R^2` of `c_m`, mean over 4 folds | `+0.4651` | `+0.4827` |
+
+They agree to `0.018`. **Weighting is not the mechanism** and that hypothesis
+is dead.
+
+The decomposition says what is, in `sigma^2`-weighted mean square of the
+residual, mean over folds:
+
+| correction applied | weighted mean square | vs none |
+|---|---:|---:|
+| none | `2.6506e-05` | `1.00x` |
+| **v2.7's sixteen per-layer constants** | **`9.1702e-06`** | **`2.89x`** |
+| the fitted 354-parameter per-neuron corrector | `1.0079e-05` | `2.63x` |
+
+**The corrector is `0.918x` of the calibration — about 9% WORSE.**
+
+And the reason is now obvious in hindsight, which is why it is worth stating
+plainly: **v2.7's calibration is already an `alpha`-dependent per-neuron
+correction.** A multiplicative row gain `mu * g` is exactly
+`c_m = (g - 1) * h(alpha)` with `h(alpha) = alpha Phi(alpha) + phi(alpha)`,
+because `mu_raw = sigma * h(alpha)`. It is not a constant offset; it is a
+specific curve in `alpha`, fitted once, with **one** free parameter per layer.
+A 354-parameter network with eight features, fitted on 72 networks, **relearns
+that same curve and lands slightly short of it.**
+
+So the `R^2 = 0.50` is real and is almost entirely the calibration's own shape.
+The per-neuron, `alpha`-indexed structure **beyond** the single multiplicative
+constant is, on this evidence, worth nothing.
+
+## Scoring the predictions
+
+| # | prediction | outcome |
+|---|---|---|
+| **P1** | arm A recovers little: `1.00x`–`1.10x` | **REFUTED at the lower bound, by `0.55%`.** Measured `0.9945x`. The direction I predicted — "little" — is right and the interval I wrote excluded the true value. A prediction that is right in spirit and wrong as written is refuted |
+| **P2** | teacher-forced flatters rollout by `>= 1.5x` | **HELD, and by two orders of magnitude: `127x`** |
+| **P3** | arm B on rollout beats B0 by `>= 1.5x`, point estimate `2.5x` | **REFUTED catastrophically.** `0.0073x` — `191x` WORSE, not `2.5x` better |
+| **P4** | N1 collapses onto a per-layer scalar arm to `<= 1e-6` relative | **REFUTED — but the control is MIS-SPECIFIED and the refutation is uninformative.** See below |
+| **P5** | N2 recovers `<= 1.05x` | falsifier did not fire (`0.0018x`), and is **equally uninformative**, same reason |
+| **P6** | corrector costs `<= 5e8` counted FLOPs | **HELD with `13.7x` of margin: `36,433,980`**, measured under flopscope at `d004ed1` |
+| **P7** | `P02 -> P03` transfer within `1.3x` | **NOT TESTED.** Nothing passed `P02`, so `P03` was correctly never touched |
+
+### The null controls are mis-specified, and that is my error
+
+**N1 constrains only `c_m`.** `c_v` stays per-neuron. So N1 is not "a per-layer
+scalar arm" at all — it is "constant `c_m` **plus** a free per-neuron variance
+correction", and it therefore inherits arm B's divergence through the exact
+channel that causes it. Its measured `0.0068x` is arm B's failure wearing a
+different hat.
+
+The contract says the slice is **VOID** if N1 fails to collapse, on the
+reasoning that such a failure means the harness is leaking. That inference does
+not hold here: N1's failure has a known cause that is not a leak. But I cannot
+have it both ways — a control that cannot discriminate the two is a control
+that failed to control. So:
+
+> **Arm B's numbers are NOT certifiable.** The control that would have detected
+> a harness leak in the in-flight arm cannot distinguish a leak from the
+> divergence it shares. Arm B's `0.0073x` is recorded as *observed*, not as
+> *established*.
+
+**Arm A does not depend on N1** — it does not diverge, its `R^2` is stable to
+`+/-0.012` across four disjoint folds, and the decomposition reproduces v2.7's
+known `2.89x` from an independent computation. Its negative stands. It is,
+however, the arm with **no null control of its own**: N2 was computed for arm B
+only. A feature-shuffled arm A would have cost nothing and is missing.
+
+## The gate
+
+| clause | outcome |
+|---|---|
+| **G1** accuracy: `>= 1.5x` paired arithmetic gain on `P03`, interval above zero | **NOT MET**, and `P03` was never reached. The best arm on `P02` is `0.9945x` |
+| **G2** price: multiplier pinned at `0.1` including `+2**24` | **PASSED** — `C/B = 0.0625804`, `37.42%` of the free zone still unused |
+| **G3** deployability: zero failures, residual within `2x` of v2.6.1 | **UNSUPPORTED.** The WP8 Skeptic's standing consequence: G3 has nothing behind it but 12 rows |
+
+Conjunctive. **The gate FAILS. No promotion contract is authorised, and `P04`
+stays unspent.**
+
+## The falsifiers fired, both of them
+
+- **H1 is REJECTED for this feature set.** Arm B on rollout is far below
+  `1.2x`. Per the contract, *"the honest next question is whether the missing
+  information is in the off-diagonal or in a third cumulant — not a wider
+  corrector."*
+- **H2 is REJECTED.** Arm A (`0.9945x`) beats arm B (`0.0073x`) by `136x`.
+  Acting at every layer is not better than acting at the readout; it is
+  catastrophically worse.
+
+## What this closes, and what it opens
+
+Put beside what the repository already knew, this is a sharp result rather than
+a null one:
+
+- P2-CP3R: **`94.61%`** of K2's error is accumulated `(mu, sigma)` state drift.
+- P2-CAL: per-**layer** scalar calibration is exhausted at `2.96x`, and its own
+  conclusion was *"the next correction must act per neuron, or add
+  information."*
+- **WP9 now measures the per-neuron half of that fork and it is empty.** The
+  scale-invariant per-neuron state `(alpha, Phi, phi, layer summaries)`
+  contains, beyond the single multiplicative constant v2.7 already ships,
+  **nothing that reduces the scored error** — at the readout it is `0.918x` of
+  the calibration, and in flight it diverges.
+
+So the fork collapses to its other branch: **add information.** And the
+specific missing information is now named rather than guessed. K2's first
+approximation at width 1024 is the Price order-1 truncation of the post-ReLU
+**off-diagonal** covariance, `c_ij Phi_i Phi_j`; that error enters the next
+layer's `var_pre = diag(W^T Sigma W)`, which sums over **all** of `Sigma`. A
+diagonal-only correction is trying to compensate downstream for an error
+generated off-diagonal.
+
+**And that is not reachable by the scheme in this file, for a concrete reason
+worth recording:** there is **no off-diagonal label**. `p2_truth.py` produces
+per-layer means and per-layer variances — the diagonal — and nothing about the
+true post-ReLU covariance. A `c_o` channel could not be fitted by regression
+on a target because the target does not exist. It would need either true
+covariances (a `1024 x 1024 x 16` label per network) or an **end-to-end
+gradient through the rollout**, which is a different and larger build.
+
+That is the next contract, not this one. It also explains, in retrospect, why
+correcting the diagonal in flight diverges rather than merely failing: the
+corrector is asked to absorb an off-diagonal error through a channel that
+cannot represent it, and `var <- var * (1 + c_v)` at fifteen layers is a
+multiplicative walk that amplifies whatever it gets wrong.
+
+## Knowledge delta
+
+1. **v2.7's sixteen constants are not a per-layer offset — they are a fitted
+   `alpha`-dependent per-neuron curve with one parameter per layer**, because
+   `mu * g` is `sigma * g * h(alpha)`. Any future "per-neuron corrector" must
+   be measured against that, and a 354-parameter network fitted on 72 networks
+   does not beat it.
+2. **An `R^2` of `0.50` on a residual can be worth exactly zero**, and not for
+   a weighting reason — I predicted weighting and measured it wrong
+   (`0.4651` unweighted vs `0.4827` weighted). It was worth zero because the
+   explained half was already being explained by the shipped baseline.
+   **Always decompose against the baseline's own correction, not against no
+   correction at all.**
+3. **A null control that shares the failing channel with the arm it is
+   controlling is not a control.** N1 constrained `c_m` and left `c_v` free,
+   which is the channel that diverges.
+4. **Teacher-forced and rolled-out differ by `127x` here.** Any future in-flight
+   state method must be gated on rollout, and the contract that insisted on
+   that is the reason this slice produced a usable answer instead of a
+   `1.07x` "improvement".
