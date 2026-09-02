@@ -25633,3 +25633,256 @@ sampling cannot climb this leaderboard, it can only choose a constant. It also
 explains the frontier observation the 2026-09-01 brief opens with — that the
 leaders' raw error is flat across their budgets — as the same identity seen
 from outside.
+
+---
+
+# 2026-09-02 — CONTRACT (Rule 1): WP13 — the off-diagonal third-order lane, priced before it is built
+
+**STRATEGIC.** Pre-registered before any data exists, at HEAD `c2cd27b`. Samuel's
+prediction slot is **waived by Samuel (solo)**, per his standing instruction of
+this date; my own numbered predictions are below and were written before any cell
+ran.
+
+*This contract carries FOUR experiments in a deliberate cheap-to-expensive ladder
+with early kill points: `E0-COST` (arithmetic, no GPU, no seeds), `E0-TOL`
+(amplification calibration), `E1` (selector at equal cost), `E2` (residual
+spectrum). `E3` — the build — is NOT authorised by this contract and needs its
+own.*
+
+## Question
+
+The strategist's 2026-09-02 return names one root cause behind both open
+questions: **the readout-relevant off-diagonal third-order structure**. Full
+factorized K3 reaches raw `3.92e-8` (organiser data, independently ACCEPTed)
+because it carries an off-diagonal block that K2's Price-order-1 pair map
+truncates. Every compression of that block tried so far has failed. The target is
+not "match the leaders' method" — it is **K3-class raw accuracy at `F <= 0.1 B`**,
+which no entrant currently occupies (the best live multiplier is J2W's `0.216`).
+
+Four questions, in the order that kills cheapest:
+
+1. **`E0-COST`** — what does a K3 flow that *regenerates* its `kappa_3` from its
+   own read-slices every layer (rank never exceeds `2n`, never `32n`) cost when
+   priced in **flopscope 0.12**, in a spelling that exploits the two identity
+   factors `from_dstensor` produces? Upstream's own counter says `0.2977 B` for
+   the generic spelling; upstream's counter is not flopscope and `docs/GOTCHAS.md`
+   records counterexamples in both directions.
+2. **`E0-TOL`** — how much final-layer error does a *relative* error `eps` in the
+   two read-slices, injected at every layer, produce? This converts every
+   downstream accuracy claim into a budget, and it is the WP10 lesson
+   (*"convert a ceiling into an accuracy requirement before building the arm"*)
+   applied **prospectively** for the first time.
+3. **`E1`** — at equal cost `k`, does a **slice-targeted** selector beat a
+   **Frobenius** selector on the two read-slices? The whole rank-capping lane was
+   priced on Frobenius column weight; the strategist's thesis (Dharangutte–Musco
+   2208.03268) is that the error of a diagonal-slice functional is controlled by
+   off-diagonal mass, not Frobenius norm, so the wrong norm was minimised.
+4. **`E2`** — is the residual that regeneration discards **low rank in the slice
+   metric**? `oracle_offdiag_exact` needed `r* = 4n` to close the gap, but it
+   truncated the `n^3` remainder in Frobenius. The object that actually matters
+   is the `n x n` matrix `E21 = S21_true - S21_regen`, and its spectrum has never
+   been looked at.
+
+## Evidence
+
+| item | status | source |
+|---|---|---|
+| Full factorized K3 raw `4.0047e-08` (24 DESIGN mints) / `3.9249e-08` (100 organiser) | **CONFIRMED** | P-A, P-A-CONFIRM, Skeptic ACCEPT |
+| Shipped K2p1 raw `4.050566e-06`; graded v2.7 `1.3738e-07` adjusted | **CONFIRMED** | run reports, graded #328662/#328664 |
+| The flow reads `kappa_3` through **exactly two** diagonal slices, `(3,)` and `(2,1)` | **CONFIRMED** | `factor_k3.py` — `get_dslice` is called with no other partition; `FactoredTensor.from_dstensor` rebuilds the whole tensor from those two |
+| `dsproj` — drop the all-distinct block, keep both slices exact, rank `n` — drifts `8.832e-07` (`22.1 x MSE_full`) at `0.2977 B` | **CONFIRMED** | `experiments/2026-08-28_pb_oracle/drift_oracle.json` |
+| `oracle_offdiag_exact` needs `r* = 4n` (`0.5647 B`) to reach `0.92 x MSE_full` | **CONFIRMED** | `drift_oracle2b_ladder.json` |
+| Rank-cap cost is affine, `1.5751e11 + 1.8908e08 r*` (upstream counter) → the `0.1 B` floor affords `r* ~ 330` | **CONFIRMED** | P-B-COST |
+| The K2 tower amplifies in-flight **state** error linearly, gain `~18x` coherent / `~4.2x` incoherent, excess MSE `~ c^2` | **CONFIRMED** | WP10 |
+| `from_dstensor` returns factors `(S3*I + 3*S21^T, I, I)` — **two of the three legs are the identity** | **CONFIRMED** | `factor_k3.py:252-274`, read this session |
+| The slice-functional residual is low rank | **SPECULATIVE** — never measured | — |
+| Importance sampling beats Frobenius truncation on a diagonal-slice functional | **SPECULATIVE** — literature, not measured here | Dharangutte–Musco; DKM |
+| Upstream's FLOP counter is within `~2x` of flopscope for these operations | **SPECULATIVE** | `docs/GOTCHAS.md` refuses the assumption in both directions |
+
+## Hypothesis + mechanism
+
+**H1 (cost).** The generic `0.2977 B` is dominated by two `O(n^2 r)` einsums
+(`contract_W`, `get_dslice`) executed at a rank that a regenerating flow already
+holds at `<= 2n`. Because `from_dstensor`'s second and third legs are **exactly
+the identity**, `contract_W` on them is `W` itself and needs no matmul, and the
+`(2,1)` slice collapses from three general `(n x R)(R x n)` products to
+Hadamard-and-matmul forms in `W` and one dense `n x n` matrix. **Mechanism:** the
+generic spelling pays for structure it is not told about. A hand-written spelling
+should land near `6 n^3` per layer for the third-order part rather than `12 n^3`.
+
+**H2 (tolerance).** Because the tower is a linear amplifier of state error
+(WP10, measured), a relative slice error `eps` injected at every layer produces a
+final-layer excess `~ A eps^2` with `A` a per-network constant, and the coherent
+`A` exceeds the incoherent `A` by roughly `sqrt(L)`. **Mechanism:** identical to
+WP10's — the closure is homogeneous and its Jacobian composes.
+
+**H3 (selector).** The `(2,1)` slice is a *contraction*, not a norm. A column of
+the factored `kappa_3` contributes to it through `||A1_r . A2_r|| ||A3_r||`, which
+is bounded by but not proportional to the Frobenius weight
+`||A1_r|| ||A2_r|| ||A3_r||`. **Mechanism:** the two weights differ exactly by the
+alignment of `A1_r` and `A2_r`; if that alignment is spread across columns, the
+Frobenius ranking is measurably wrong for this functional.
+
+**H4 (residual rank).** The discarded all-distinct block reaches the readout only
+through the next layer's `n x n` slice `E21`. ARC's theory makes non-Gaussianity
+an `O(L/n)` effect that grows with depth, and this repository has never checked
+whether the covariance's effective rank collapses over the same 16 layers. If it
+does, `E21` inherits the collapse and a rank-`r` correction with `r << n`
+suffices. **Mechanism:** `E21 = (B1 . B2) B3^T + ...` with `B_m = W A_m`; its rank
+is bounded by `n` regardless, so the question is purely spectral.
+
+## Intervention — the smallest change that discriminates
+
+Nothing in `estimator.py`. Nothing in the upstream checkout. One new
+research-only module, `local_sim/p2_slice_lab.py`, which re-drives
+`p2_pb_rank.run_kprop_capped` (already proven bit-identical to `mlp_kprop`) with
+three additions:
+
+- a **capture hook** that returns the `FactoredTensor` at a chosen layer;
+- a **noise hook** that scales the two read-slices by `(1 + eps * z)` at every
+  layer, with `z` isotropic (incoherent) or a fixed unit direction (coherent);
+- **offline analysis only** for `E1`/`E2`: selectors and SVDs are applied to
+  captured factors, never inside the flow, so no cell can perturb another.
+
+`E0-COST` touches no GPU and no network: it is a flopscope op-count of a written
+spelling, checked against `local_sim/p2_flop_anchor.py`'s pricing.
+
+## Predictions (mine; Samuel's slot waived, solo)
+
+| # | prediction | direction / magnitude |
+|---|---|---|
+| **P1** | `E0-COST`: the minimal flopscope-priced spelling of a regenerate-every-layer K3 flow, third-order part only, lands in **`[0.04 B, 0.11 B]`**, point **`0.065 B`**; with the K2 backbone's `0.0625 B` the total lands in **`[0.10 B, 0.18 B]`**, point **`0.13 B`** | I expect the floor to be MISSED but by less than `2x` |
+| **P2** | `E0-COST`: the generic-spelling saving is real — the hand spelling is **`>= 2.5x`** cheaper than upstream's `0.2977 B` converted at parity | the identity legs are the whole story |
+| **P3** | `E0-TOL`: excess final MSE scales as `eps^2` over at least two decades, `R^2 >= 0.99` on a log-log fit, and the `eps = 0` control is **bit-identical** | this is a re-measurement of a law WP10 already established on a different channel; if it fails, my model of this estimator is wrong |
+| **P4** | `E0-TOL`: the relative slice error tolerated for a final-layer excess of `1e-8` is **`eps* in [1e-3, 1e-2]`**, point **`3e-3`**, on the coherent (worse) gain | |
+| **P5** | `E1`: the slice-targeted weight beats the Frobenius weight on `(2,1)` relative error at equal `k`, by **`1.3x` to `3x`**, point `1.8x` | I believe H3 but expect it modest |
+| **P6** | `E1`: **random importance sampling does NOT beat deterministic top-`k`** in the slice metric at `k <= n`. Point estimate: sampling is `1.5x` to `4x` *worse* | the variance of an unbiased estimator costs more than the bias of truncation on a heavy-tailed weight distribution. **This prediction is against the strategist's Route A and is written before the data** |
+| **P7** | `E2`: the residual `E21` is **NOT** low rank. `r90(layer 7)` in `[200, 600]`, point `400`; `r90` **grows** with depth rather than shrinking | the factors are `W`-mixed and near-isotropic; I expect a Marchenko–Pastur-flat spectrum |
+| **P8** | `E2`: the post-ReLU covariance's own effective rank **does** collapse with depth (`r90(Sigma)` falls by `>= 3x` from layer 1 to layer 15) | the standard deep-ReLU alignment phenomenon; if it holds while P7 also holds, the two facts together are the interesting result |
+| **P9** | composed: **no `r <= 330` closes the `dsproj` gap to `<= 1e-8` excess** | this is the falsifier of the whole lane, and I expect it to fire |
+
+**Stated plainly: I predict this lane fails, and I am running it because the
+cost of finding out is four cheap cells and because P7/P9 are exactly the kind
+of prediction this project has been wrong about before (WP9's negative was
+retracted by the Skeptic on 2026-08-21).**
+
+## Gates — chosen now, before any data
+
+All four gates are **conjunctive**: the lane continues to `E3` only if all pass.
+Each is evaluated by `local_sim/competition_score.decide(gate=...)` where a paired
+score difference is involved, and by the stated arithmetic otherwise.
+
+- **G-COST.** The minimal flopscope-priced total (K2 backbone + regenerated
+  third order + readout) is **`<= 0.20 B`**. *If it exceeds `0.35 B`, both routes
+  are dead as floor plays and the lane closes here* — at `0.35 B` even a raw of
+  `3.92e-8` scores `1.37e-8`, worse than three current leaders, so nothing
+  downstream could rescue it.
+- **G-TOL.** The `eps = 0` null control is **bit-identical** to the uncapped
+  flow (this is the standing null-control debt: a control must be *measured*
+  null), and the `eps^2` law holds with `R^2 >= 0.95` over `>= 2` decades.
+  *A failure here voids `E1` and `E2`'s gates, because both are scored through
+  this law.*
+- **G-SEL.** At `k = 330` (the rank the `0.1 B` floor affords), the best selector
+  reaches a `(2,1)` relative error whose composed excess, via `E0-TOL`'s coherent
+  law, is **`<= 1e-8`** — i.e. end-to-end raw `<= 5e-8`.
+- **G-RANK.** There exists `r <= 330` such that, at **every** layer, the rank-`r`
+  truncation of `E21` leaves a residual whose composed excess, via the same law,
+  is **`<= 1e-8`**; and `r90(E21)` is non-increasing over the last third of depth.
+
+## Falsifiers
+
+- **G-COST > 0.35 B** → the lane closes for good, on arithmetic, with no seeds
+  spent. This is the outcome I consider most likely to arrive first.
+- **`eps = 0` not bit-identical** → the instrument leaks; every number in `E1`
+  and `E2` is void and the slice is abandoned, not repaired in flight.
+- **P6 confirmed AND P5 refuted** → Route A is dead: neither the selector's norm
+  nor its randomisation buys anything, which is the same wall the Frobenius
+  rank-cap already hit.
+- **P7 confirmed AND no `r <= 330` meets G-RANK** → Route B is dead as specified.
+- **G-SEL and G-RANK both fail** → `E3` is NOT built. Per the standing kill line,
+  the project freezes the lane and goes all-in on consolidation (v2.7 nomination)
+  plus the write-up.
+
+## Baseline and tier
+
+- **Baseline:** the uncapped factorized K3 flow, `k_max=3`, `factor=True`,
+  `SIMPLE`, `use_avg_metric=True`, on the same networks, same dtype, same
+  process. Every number in `E1`/`E2` is a **drift from that baseline**, which is
+  P-B's established and independently-ACCEPTed instrument — not a truth
+  measurement.
+- **Anchor:** `MSE_full = 4.0047e-08` (P-A, DESIGN) is quoted with its GT-noise
+  floor `1.155e-09` wherever a drift is converted to an MSE bracket.
+- **Tier:** DESIGN. `E0-COST` needs no networks at all. `E0-TOL`, `E1` and `E2`
+  run on freshly minted DESIGN networks claimed from **`P01`** through
+  `seed_ledger.claim()` (432 free; `CURRENT_STATE.md` records them unspent after
+  WP12 retired the carrier panel that had been framed around them).
+  **`P04`, the single Phase-2 DECIDE block, is NOT touched by this contract and
+  must not be.** No CONFIRM read. No vault touch.
+
+## Cost model — Phase 2, lambda = 0, so `C = F`
+
+`VALIDATION.md` §2b-ii governs. The frozen cost model for this slice is a
+**counted-FLOP** model:
+
+- `E0-COST` is priced in **flopscope 0.12**, the only currency that binds, and
+  cross-checked against `local_sim/p2_flop_anchor.py`'s 19-operation anchor.
+- Every upstream `NamedFlopCounter` figure quoted anywhere in this slice is
+  labelled *upstream torch-side counter, not flopscope*, and **no gate is scored
+  on one**. Upstream's counter is used only for *ratios within itself*
+  (P2's `>= 2.5x`).
+- **Residual is not a cost in Phase 2** — it is the `0.4 s` per-MLP cliff. This
+  contract builds no candidate and therefore measures no residual; `E3` must, and
+  through `gpuq` at a declared footprint, because a non-brokered soak is not
+  authoritative here (WP8).
+- The grading server's `+2**24` offset (`+0.0122%`) is **material at this
+  boundary** — an operating point at `0.0999 B` and one at `0.1001 B` differ by
+  the floor — and is therefore added to any candidate cost within `0.5%` of
+  `0.1 B` before the multiplier is taken.
+
+## Statistic
+
+Paired on common random numbers, always the **arithmetic** difference, with the
+studentised-t or basic-bootstrap interval. Never percentile, never BCa. `E1` and
+`E2` are per-layer diagnostics on the same networks, so their pairing is exact by
+construction. The geometric mean of ratios may appear as a **stability
+diagnostic** only and decides nothing.
+
+## Seed block
+
+Claimed through `local_sim/seed_ledger.claim("P01", 8, ...)` — never a literal —
+and recorded in `experiments/seed_ledger.jsonl` **before** the first cell runs.
+Eight networks: `E0-TOL` needs a law, not a population, and `E1`/`E2` are
+per-layer structural measurements with `16 x 8 = 128` paired observations each.
+`seed_ledger._append()` refuses to write under a `gpuq` snapshot (the WP9 defect),
+so the claim is made **on this host, before submission**, and the job reads the
+seeds from the artifact rather than re-claiming them.
+
+## Confounders, scope, and what must not change
+
+- **dtype.** The flow runs `f32`, licensed for research runs only (P-B-COST's
+  `f64` control reproduced its `f32` drift to four significant figures). Every
+  SVD is done in `f64` after upcast, and **one network at one layer is repeated
+  end-to-end in `f64`** as a dtype control. A spectrum is exactly the kind of
+  object `f32` could distort, so this control is not optional.
+- **`E0-COST` is an op count, not a candidate.** It licenses no submission and no
+  residual claim. A spelling that is cheap on paper can still fail
+  `whest validate`, the `4 GiB` single-array limit, or the residual cliff.
+- **The oracle framing.** `E2`'s rank-`r` correction is computed from the true
+  residual. It is an **upper bound on achievable accuracy**, never an operating
+  point: no selector that a deployed estimator could run is being proposed here.
+  WP10's finding that injecting a moment's truth in flight can be *destructive*
+  applies, and if the oracle correction ever makes drift **worse**, that is a
+  real result and is reported as one, not tuned away.
+- **Closed lanes stay closed.** The eleven lanes in
+  `docs/STRATEGIST_PACKET_2026-09-02.md` are not reopened. In particular this
+  slice does **not** revive rank-capping (ORACLE-1 closed it), late-window K3,
+  W-EFF, the standalone carrier (WP12), the learned readout corrector (WP10), or
+  per-neuron in-flight variance correction (WP9/WP10). `dsproj` is re-used only
+  as a **baseline whose number is already on the board**, not as a candidate.
+- **`AUGMENT-K2` is deprioritised** on the strategist's instruction: it tracks
+  trace-carrying third/fourth order, not the off-diagonal slices this contract
+  isolates, and an independent review flagged `4.4x` op count. It is not in this
+  slice and no `fnp` port is authorised.
+- **What must not change while this runs:** `estimator.py`, the upstream
+  checkout, `local_sim/p2_pb_rank.py`'s cap modes, `competition_score.py`, and
+  the seed ledger's already-recorded claims.
