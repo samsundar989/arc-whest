@@ -25076,3 +25076,145 @@ cancelled it, and the previous Skeptic caught it.)*
    one.** The snapshot contains it, so nothing errors. The seed ledger is such
    a file, and the guarantee it provides is the one this repository can least
    afford to lose silently.
+
+---
+
+# 2026-09-02 — CONTRACT WP10: the mean channel alone, in flight, on the post-calibration residual
+
+**STRATEGIC.** Re-analysis of the **already-spent `P02`** block (DESIGN tier,
+overlap declared below). **`P03` stays untouched** and is reserved for
+replication if and only if this passes. `P04` untouched. CONFIRM read for
+nothing. Pre-registered before the arm is fitted.
+
+## Question
+
+WP9's arm B moved the mean and the variance channel together, diverged `136.92x`,
+and I concluded the per-neuron lane was empty. The independent review's oracle
+showed the two channels have **opposite signs**: mean-only `6.42x` **better**
+than the shipped file, variance-only `0.060x` — `16x` worse than doing nothing —
+and both together `0.56x`.
+
+**So: with the destructive channel removed, does a FITTED per-neuron mean
+correction, applied in flight and scored on ROLLOUT, reach any part of that
+`6.42x`?**
+
+## Evidence
+
+| item | status |
+|---|---|
+| mean-only in-flight oracle = `6.42x` over B0; variance-only = `0.060x`; both = `0.56x` | **CONFIRMED** by the independent review on 24 `P02` networks, at zero fit error, in a numpy reimplementation that reproduces this repository's `B0` on all 96 networks to `5.4e-13` |
+| the clamp is not the cause: oracle-with-`CLAMP_CV` and oracle-without agree to 5 s.f. | **CONFIRMED**, same source |
+| the mean-only oracle recovers `94.2%` of K2's error, against P2-CP3R's independently measured `94.61%` | **CONFIRMED** — two implementations, five days apart |
+| the READOUT corrector is exhausted: v2.7's **single** per-layer constant predicts `c_m` at `R^2 = +0.5097`, matching a 354-parameter network's `0.499–0.522` | **CONFIRMED** — WP9 + review |
+| arm A's `0.9945x` is a DRAW, not a loss: `t` 95% CI `[-1.7238e-08, +1.7762e-09]` straddles zero, sign `p = 0.610` | **CONFIRMED** |
+| the corrector is free: `36,433,980` counted flopscope FLOPs, `0.044%` of the unused free zone | **CONFIRMED** — `d004ed1`. **And G2 therefore cannot fail, so it is NOT carried as a gate clause here** |
+| there is **no off-diagonal label** — `p2_truth.py` produces means and variances only | **CONFIRMED by source** |
+
+## Hypothesis and mechanism
+
+**H1 — the mean channel carries most of the recoverable in-flight signal, and
+the variance channel was what destroyed arm B.** Mechanism, and it is now
+measured rather than argued: the Gaussian closure is an **internally consistent
+approximation, not a set of independently improvable marginals.** Making the
+post-ReLU variance exact while its partners — the off-diagonal covariance,
+which K2 truncates at Price order 1 — stay approximate **breaks a
+cancellation**. That is why truth in the variance channel is `16x` worse than
+no correction at all. The mean does not participate in that cancellation the
+same way: it enters the next layer only through `mu_pre = W^T mu`, linearly,
+while the variance enters through `diag(W^T Sigma W)` where it is summed
+against the very off-diagonal terms that are wrong.
+
+**H2 — fitting on the POST-calibration residual is strictly better than
+fitting on the raw one.** Mechanism: WP9 measured that `R^2 = 0.50` of the raw
+`c_m` **is** v2.7's `(g-1)h(alpha)` curve, so a corrector fitted on the raw
+residual spends most of its capacity relearning a curve the baseline already
+contains — and lands short of it. Targeting `c_m* = (truth - g*mu_raw)/sigma`
+removes that and leaves only the structure the baseline does **not** have,
+which is the actual question.
+
+## Intervention
+
+Arm **C**: identical to WP9's arm B except for exactly three things, all
+forced by the evidence above.
+
+1. **`c_v` is not merely unfitted — it is REMOVED.** The corrector emits one
+   channel. The variance path is the uncorrected closure's.
+2. **The target is the post-calibration residual**
+   `c_m* = (truth - g_l * mu_raw) / sigma`, with `g_l = CAL_G[l]`, and the
+   correction is applied **on top of** the calibration:
+   `mu <- g_l * mu_raw + sigma * c_m`.
+3. Everything else is held: the same eight scale-invariant features, the same
+   `<= 32` hidden units, the same DAgger rounds with round selection on
+   **training** rollout, the same leave-networks-out folds, the same clamp rule
+   (`3 * sigma_train(c_m)` frozen from round 0).
+
+**Arm C0** is the same corrector with `c_m` forced constant across neurons —
+the null control WP9 got wrong. **This time it shares no channel with anything
+that diverges**, so if it fails to collapse onto the calibrated baseline, that
+IS a harness leak and the slice is void.
+
+**Arm C-shuf** is arm C with the per-neuron feature rows permuted within a
+layer. WP9 computed this for arm B only; arm A had no null control of its own
+and the review said so.
+
+## Numbered predictions, before the arm is fitted
+
+*Human prediction slot: **waived by Samuel (solo), 2026-09-01**.*
+
+| # | prediction | direction / magnitude |
+|---|---|---|
+| **Q1** | arm C on **rollout**, held out, beats B0 | `>= 1.3x`. My point estimate is `1.8x`, well below the `6.42x` oracle, because the oracle has zero fit error and the fitted `R^2` on the *post-calibration* residual will be far below `0.5` — that residual is what is left after the easy half is gone |
+| **Q2** | the held-out `R^2` of the **post-calibration** `c_m` target is much lower than WP9's raw-residual `0.50` | `<= 0.25`. **If it is near zero, H2's premise survives but there is nothing left to fit, and Q1 must fail** |
+| **Q3** | arm C does **not** diverge | its rollout MSE stays within `3x` of B0 in every fold, in every DAgger round. WP9's arm B was `136.92x` |
+| **Q4** | null control **C0** collapses onto the calibrated baseline | within `1.05x` of B0. This one is a real test now: C0 shares no channel with a divergent arm |
+| **Q5** | null control **C-shuf** recovers nothing | within `1.05x` of B0, interval straddling zero |
+| **Q6** | the fitted arm reaches **well under** its own oracle | `C_gain / 6.42 <= 0.5`. A fitted arm that matched an oracle would mean the oracle is not one |
+
+## Gate
+
+`local_sim/competition_score.decide(gate=1.5)`, one clause, and **G2 is
+deliberately dropped** because the review showed it cannot fail — the corrector
+is `0.044%` of the free zone and nothing in this family could unpin the floor.
+Price is still **reported**; it is not a test.
+
+- **G1.** On `P02`, leave-networks-out, the paired **arithmetic** adjusted-score
+  difference of arm C against B0, common random numbers, studentised-t or basic
+  bootstrap 95% interval **excluding zero**, point improvement **`>= 1.5x`**.
+- **G3** (deployability) is **explicitly NOT claimed** in this slice: the WP8
+  Skeptic's standing consequence is that G3 has nothing behind it but 12 rows,
+  and the `3x100` soak has not returned.
+
+Passing G1 authorises **one** thing: a replication contract on `P03`. It does
+not authorise a promotion, a `P04` spend, or a submission.
+
+**Tier note, declared before the data:** `P02` has already been used to fit and
+score WP9's arms, so this is a **re-analysis of a spent DESIGN block**. That is
+permitted — DESIGN is reusable within its tier — but it means arm C's number on
+`P02` is **not** independent of the design choices WP9's failure informed. The
+independent replication is `P03`, and it is why `P03` must stay untouched here.
+
+## Falsifier
+
+- **H1 is rejected** if arm C on rollout is below `1.3x` (Q1) — then the mean
+  channel's `6.42x` oracle is not reachable by a fitted corrector on these
+  features, and the honest next step is the off-diagonal, not a bigger network.
+- **H2 is rejected** if the post-calibration `R^2` (Q2) is not materially below
+  the raw `0.50` — that would mean the calibration was not explaining what WP9
+  measured it to explain.
+- **The slice is VOID** if C0 fails to collapse (Q4) or C-shuf beats `1.05x`
+  (Q5). Unlike WP9's N1, these controls share no channel with a divergent arm,
+  so a failure really would mean the harness leaks.
+
+## Cost model
+
+Phase 2, `lambda = 0`, `C = F`. Arm C emits **one** output channel instead of
+two, so its counted cost is at or below WP9's measured `36,433,980` FLOPs —
+`<= 0.044%` of the unused free zone, multiplier pinned at `0.1`. Reported, not
+gated. Residual: not claimed, per the G3 note above.
+
+## What must not change
+
+`estimator.py`, the ship-file gate, `preflight.ps1`, `competition_score.py`,
+the vault, **`P03`**, **`P04`**, `HUMAN_MODEL.md`, and the three-tier protocol.
+No `mini`/`full` read. The oracle cells are labelled oracles and are never
+quoted as achievable.
