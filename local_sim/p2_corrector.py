@@ -881,6 +881,129 @@ def run_study(a):
     return 0
 
 
+def diagnose_readout(a):
+    """WHY does an R^2 of 0.50 buy nothing? Decompose the final-layer error.
+
+    The P02 study measured two numbers that look contradictory:
+
+      * the held-out R^2 of `c_m` at the final layer is **+0.50**, stable to
+        +/-0.012 across four leave-networks-out folds -- so half the variance
+        of the per-neuron residual IS a function of scale-invariant features;
+      * and applying it changes the final-layer MSE by **nothing** (0.9945x
+        against the shipped calibrated baseline).
+
+    Both cannot be describing the same quantity, and the reason is a weighting.
+    The error is `sigma * c_m`, so the MSE is `E[sigma^2 c_m^2]` -- weighted by
+    `sigma^2`, which varies by orders of magnitude across neurons. R^2 is
+    unweighted. If the predictable part of `c_m` sits where `sigma` is small,
+    explaining half the unweighted variance can explain nearly none of the
+    error that is actually scored.
+
+    This measures that directly, in one place, in units that add up:
+
+        MSE_uncal  = mean( sigma^2 c^2 )          no correction at all
+        MSE_cal    = mean( sigma^2 (c - c_cal)^2 )  v2.7's per-layer gain
+        MSE_pred   = mean( sigma^2 (c - c_hat)^2 )  the fitted corrector
+        R2_unw     = 1 - SS(c - c_hat) / SS(c - mean c)
+        R2_w       = 1 - SUM sigma^2 (c - c_hat)^2 / SUM sigma^2 (c - c_w)^2
+
+    A DIAGNOSTIC of an already-measured negative, on the block that produced
+    it. It selects nothing and changes no verdict.
+    """
+    t = _torch()
+    device = "cuda" if t.cuda.is_available() else "cpu"
+    dtype = t.float64
+    truth = load_truth(a.truth)
+    seeds = np.asarray(truth["seeds"])
+    n_all = len(seeds) if not a.n_mlps else min(a.n_mlps, len(seeds))
+    seeds = seeds[:n_all]
+
+    print("=" * 78)
+    print("WP9 -- why an R^2 of 0.50 at the readout buys nothing")
+    print("=" * 78)
+
+    fold_ix = folds(n_all, a.folds, seed=a.seed)
+    rows = []
+    for fi, held in enumerate(fold_ix):
+        keep = np.setdiff1d(np.arange(n_all), held)
+        corr, clamp, _info = train_arm(
+            t, seeds[keep], _subset(truth, keep), "last", device, dtype,
+            rounds=a.rounds, epochs=a.epochs, seed=a.seed + fi, verbose=False)
+        F, T = collect(t, seeds[held], _subset(truth, held), corr, "last",
+                       device, dtype, clamp_cm=clamp)
+        # `collect` returns rows in layer order per network; for mode "last"
+        # there is exactly one layer, so re-deriving sigma means one more
+        # rollout. Cheap, and it keeps `collect` a single-purpose function.
+        sig = []
+        with t.no_grad():
+            for sd in seeds[held]:
+                w = weights_for(t, sd, device, dtype)
+                _o, recs = k2_rollout(t, w, corrector=corr, mode="last",
+                                      clamp_cm=clamp)
+                sig.append(recs[-1]["sig"])
+        sig = t.cat(sig, dim=0)
+        with t.no_grad():
+            chat = corr(F)[..., 0].clamp(-clamp, clamp)
+        c = T[..., 0]
+        w2 = sig * sig
+        # v2.7's calibration expressed in the same units: mu*g means
+        # c_cal = (g - 1) * h(alpha), and h(alpha) = mu_raw/sigma.
+        halpha = F[..., 0] * F[..., 1] + F[..., 2]      # a*Phi + phi
+        c_cal = (CAL_G[DEPTH - 1] - 1.0) * halpha
+
+        def wmse(x):
+            return float((w2 * x * x).sum() / w2.sum())
+
+        mse_unc, mse_cal, mse_pred = wmse(c), wmse(c - c_cal), wmse(c - chat)
+        r2_unw = 1.0 - float(((c - chat) ** 2).sum()
+                             / ((c - c.mean()) ** 2).sum())
+        cw = float((w2 * c).sum() / w2.sum())
+        r2_w = 1.0 - float((w2 * (c - chat) ** 2).sum()
+                           / (w2 * (c - cw) ** 2).sum())
+        rows.append({"fold": fi, "mse_uncal": mse_unc, "mse_cal": mse_cal,
+                     "mse_pred": mse_pred, "r2_unweighted": r2_unw,
+                     "r2_sigma2_weighted": r2_w,
+                     "pred_over_cal": mse_pred / mse_cal})
+        print(f"  fold {fi + 1}/{a.folds}   R2 unweighted {r2_unw:+.4f}   "
+              f"R2 sigma^2-weighted {r2_w:+.4f}")
+        print(f"      sigma^2-weighted mean square of the residual:")
+        print(f"        no correction   {mse_unc:.6e}")
+        print(f"        v2.7 calibration{mse_cal:.6e}   "
+              f"({mse_unc / mse_cal:.4f}x better than none)")
+        print(f"        the corrector   {mse_pred:.6e}   "
+              f"({mse_cal / mse_pred:.4f}x vs calibration)")
+        del F, T, sig
+        if device == "cuda":
+            t.cuda.empty_cache()
+
+    print()
+    print(f"  MEAN over {a.folds} folds:")
+    print(f"    R2 unweighted        {np.mean([r['r2_unweighted'] for r in rows]):+.4f}")
+    print(f"    R2 sigma^2-weighted  {np.mean([r['r2_sigma2_weighted'] for r in rows]):+.4f}")
+    print(f"    corrector / calibration  "
+          f"{np.mean([r['pred_over_cal'] for r in rows]):.4f}x")
+    print()
+    print("  The scored error is sigma^2-weighted and R^2 is not. Where those")
+    print("  two disagree, the unweighted number is the one that means less.")
+
+    rep = {"artifact": "wp9_readout_decomposition", "artifact_version": 1,
+           "contract": "experiments/LOG.md CONTRACT WP9, commit 9c961ce",
+           "truth": os.path.relpath(a.truth, _ROOT).replace("\\", "/"),
+           "n_mlps": int(n_all), "folds": int(a.folds), "per_fold": rows,
+           "r2_unweighted_mean": float(np.mean([r["r2_unweighted"] for r in rows])),
+           "r2_weighted_mean": float(np.mean([r["r2_sigma2_weighted"] for r in rows])),
+           "SCOPE": ("A DIAGNOSTIC of an already-measured negative, computed on "
+                     "the block that produced it. It selects nothing, changes "
+                     "no verdict, and is not a promotion statistic.")}
+    if a.json:
+        os.makedirs(os.path.dirname(os.path.abspath(a.json)), exist_ok=True)
+        with open(a.json, "w", encoding="utf-8") as fh:
+            json.dump(rep, fh, indent=1)
+        print(f"\n  wrote {os.path.relpath(a.json, _ROOT)}")
+    print("=" * 78)
+    return 0
+
+
 def _subset(truth, idx):
     """A view of the truth arrays restricted to `idx`, same keys."""
     out = {}
@@ -919,9 +1042,16 @@ def main():
     ap.add_argument("--gate", type=float, required=False, default=None)
     ap.add_argument("--json", default="")
     ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--diagnose-readout", action="store_true",
+                    help="decompose the final-layer error: why does an R^2 of "
+                         "0.50 buy nothing? Diagnostic only, selects nothing.")
     a = ap.parse_args()
     if a.selftest:
         return selftest()
+    if a.diagnose_readout:
+        if not a.truth:
+            ap.error("--truth is required")
+        return diagnose_readout(a)
     if not a.truth:
         ap.error("--truth is required (or pass --selftest)")
     if a.gate is None:
