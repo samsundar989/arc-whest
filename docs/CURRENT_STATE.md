@@ -74,8 +74,14 @@
 > already-claimed `P01` networks (`gpuq` 121, `2^22` x 2 independent replicas,
 > cross-product estimator, ledger finalised). **P2 HELD**: raw
 > **`8.5075e-07`** against a pre-registered `[7.5e-07, 1.0e-06]`, so adjusted
-> **`8.508e-08`** — **`1.61x` better than graded v2.7's `1.374e-07`**. WP13's
-> `2.4x`-wide bracket collapses. GT noise is `1.72e-08`, `2%` of this arm and
+> **`8.508e-08`**. WP13's `2.4x`-wide bracket collapses. Against v2.7 the
+> comparison is now **PAIRED** on common networks (`SKEPTIC WP14` defect 6):
+> arithmetic difference `5.4232e-07`, `t` 95% `[3.51e-07, 7.33e-07]`, basic
+> bootstrap `[3.86e-07, 6.80e-07]`, **8 of 8 networks**, point **`1.637x`** —
+> and the v2.7 proxy used lands within `1.4%` of the graded number it stands
+> in for (`1.3931e-06` vs `1.3738e-06`). **The adjusted figure is contingent
+> on the cost claim above, which `SKEPTIC WP14` rated PROVISIONAL: at WP13's
+> `0.15272 B` the same raw scores `1.30e-07`, i.e. PARITY with v2.7.** GT noise is `1.72e-08`, `2%` of this arm and
 > `43%` of full K3's own MSE, so the `uncapped` row (`3.7179e-08`) is a
 > diagnostic and not a re-measurement of P-A.
 >
