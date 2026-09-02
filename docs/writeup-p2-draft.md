@@ -369,8 +369,40 @@ organisers' published weights, an append-only seed ledger, an executable
 promotion gate, and a certification battery. *(Decision pending on what is
 open-sourced and when — `RESEARCH_NOTES.md` §2g is private.)*
 
-## Appendix B — the eleven closed lanes, one line each
+## Appendix B — the eleven closed lanes, with the measured reason for each
 
-*(Table to be lifted from `docs/STRATEGIST_PACKET_2026-09-02.md` §3, with each
-line carrying its artifact path. Held here rather than inlined so §§4-5 stay
-readable.)*
+Every row was closed on a measurement, not on intuition, and every row's number
+is reproducible from the artifact named. Three of the eleven were closed *twice*,
+because the first closure was wrong and an independent pass caught it — those are
+marked, because the correction is the more useful record.
+
+| # | lane | measured reason it closed | evidence |
+|---|---|---|---|
+| 1 | per-neuron **readout** corrector | exhausted by sixteen literal per-layer constants. A 354-parameter network on eight scale-invariant features, trained on 72 networks, ties the *single* per-layer constant (`R^2 0.499-0.522` vs `0.5097`) and does not beat it: `0.9945x`, `t` CI straddling zero | WP9, `experiments/2026-09-01_wp9_corrector/` |
+| 2 | per-neuron **in-flight variance** corrector | **destructive**: injecting the *true* variance at **zero** fit error is `16x` worse than doing nothing. Mechanism: it breaks a cancellation against the Price-order-1 off-diagonal (§4) | WP9/WP10 |
+| 3 | per-neuron **in-flight mean** corrector | real `6.872x` oracle ceiling, but the amplification law prices break-even at held-out `R^2 >= 99.85%`. Best achieved `+0.50` on an easier target; `(1 - R^2)` had to fall `330x` | WP10 |
+| 4 | per-layer **scalar** calibration | exhausted at `2.96x` (and shipped). Any purely multiplicative state correction is provably one output rescale in disguise: the closure is positively homogeneous of degree 1, verified to `1.6e-30` | P2-CAL |
+| 5 | higher **Price/Hermite orders** in the covariance map | plateau at `1.05x` | P2-CAL part 2 |
+| 6 | marginal **Edgeworth** correction of the final ReLU map | capped at `1.047x` | P2-CAL part 2 |
+| 7 | **quadrature / sampling carriers** (Kerdock, MUB, orthogonal blocks) | closed on the score identity itself (§1): adjusted score flat to `0.62%` over a `4x` cost range, and the flatness is an algebraic identity rather than a fit. The structured-over-random advantage at width 1024 is `0.155%` | WP2, WP12, `carrier_panel_1024x16.json` |
+| 8 | plain **IID and random-orthogonal** direction sets | lose to the second-order closure outright | Phase-1 sprints |
+| 9 | **exact sparse / equality-aware K3** ("W-EFF") | `1.073 B` under the official meter against a pre-registered `<= 0.35 B` screen — fails by `3.07x` | `experiments/2026-08-28_weff/` |
+| 10 | **rank-capping** the factored third cumulant | accuracy falls faster than cost; at rank `n` the object is `14x` closer to the second-order closure than to the third-order one. It is coordinate pruning, not compression (§5). **Closed twice** — the first closure claimed "for good" and was softened to a measured negative | P-B, ORACLE-1/2/2b |
+| 11 | **late / age-windowed K3** | every window arm's provable score floor is `2.1x`-`4.7x` worse than the shipped file, and `89%` of a window's error is its cheap prefix, not the missing memory | `experiments/2026-08-28_window/` |
+
+Two further lanes are *not* in this table because they are not closed, and saying
+so is part of the honesty: **query-directed / adjoint K3** had its kill
+**retracted** when its linearity statistic was shown to kill a provably linear
+system at every depth (the instrument is broken, the lane is unproven), and
+**faithful augmented-K2** is measured free at the floor (`1.037x`) but its
+accuracy at the live width is unmeasured — even its sign.
+
+### The one sentence we would keep
+
+**`kappa_3` is compressible and that is not the problem.** A rank-`n`
+approximation captures `96.7%` of its Frobenius norm. But the flow reads it
+through **two diagonal slices and nothing else**, and norm-optimal compression
+spends its rank on the all-distinct bulk that carries most of the norm and none
+of the readout. The question was never *"is it low rank"*; it is *"is there a
+compressor whose error is orthogonal to those two slices"* — and §§6-7 are our
+attempt to answer it by not compressing at all.
