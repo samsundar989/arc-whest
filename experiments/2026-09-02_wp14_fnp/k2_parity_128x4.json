@@ -1,0 +1,22 @@
+{
+ "check": "WP14 C0-ii: fnp K2 backbone parity and price",
+ "contract": "LOG 2026-09-02 CONTRACT WP14, HEAD d915f83",
+ "width": 128,
+ "depth": 4,
+ "seed": 1000921,
+ "rows": [
+  {
+   "dtype": "f64",
+   "flops": 67712128.0,
+   "x_budget": 3.079191083088517e-05,
+   "rel_rms_vs_mirror": 8.023459567402285e-16
+  },
+  {
+   "dtype": "f32",
+   "flops": 33895488.0,
+   "x_budget": 1.5413883375003934e-05,
+   "rel_rms_vs_mirror": 1.377824947480145e-07
+  }
+ ],
+ "reference": "local_sim/p2_cal_lab.closure (NumPy mirror)"
+}
