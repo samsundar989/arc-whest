@@ -25886,3 +25886,127 @@ seeds from the artifact rather than re-claiming them.
 - **What must not change while this runs:** `estimator.py`, the upstream
   checkout, `local_sim/p2_pb_rank.py`'s cap modes, `competition_score.py`, and
   the seed ledger's already-recorded claims.
+
+---
+
+# 2026-09-02 — RESULT: WP13 / E0-COST — G-COST PASSES at `0.1527 B`, and flopscope bills a matmul at `4 n^3`
+
+Contract `8b46574` (committed before this ran). Artifact
+`experiments/2026-09-02_wp13_slice/e0_cost.json`. Instrument
+`local_sim/p2_slice_cost.py`. **No seed block, no GPU, no truth, no CONFIRM
+read** — this is executed arithmetic in flopscope 0.12.
+
+## The measurement
+
+The third-order increment of a **regenerating** K3 flow — one that rebuilds
+`kappa_3` from its own two read-slices every layer, so the carried rank never
+exceeds `2n` instead of growing to `32n` — was **executed at the live
+`1024 x 16` shape in `flopscope.numpy`, inside a real `BudgetContext`**. Nothing
+below is a hand-derived `2 n^3`.
+
+| | counted flopscope FLOPs | `x budget` | per layer / `n^3` |
+|---|---:|---:|---:|
+| third-order increment, **structured** spelling | `198,233,321,472` | **`0.090146`** | `11.539` |
+| third-order increment, generic spelling (three real legs) | `412,585,295,872` | `0.187622` | `24.016` |
+| K2 backbone (shipped v2.6.1, official subprocess anchor) | `137,600,326,656` | `0.062574` | — |
+| **projected total** | **`335,833,648,128`** | **`0.152719`** | — |
+
+**GATE G-COST: `0.1527 B <= 0.20 B` → PASS.** The lane does not close here. The
+`0.35 B` close-the-lane threshold is not approached.
+
+## Why the structured spelling is cheaper, and the fact that made it findable
+
+`factor_k3.py:252-274`, read this session:
+
+    FactoredTensor.from_dstensor(ds) -> factors ( diag(S3) + 3*S21^T ,  I ,  I )
+
+**Two of the three legs are exactly the identity.** `contract_W` on an identity
+leg returns `W` and needs no matmul; a `3 I` leg inside a diagonal-slice einsum
+degenerates every block permutation to a row scaling. The structured spelling
+therefore executes **three** `(n, n) @ (n, n)` matmuls per layer where the generic
+one executes six, and the whole newly-generated two-leg block — which the generic
+spelling bills at `O(n^2 r)` — costs `O(n^2)`.
+
+The per-layer figure `11.539 n^3` attributes exactly: `15/16` of the layers pay
+three matmuls and the last pays one (nothing downstream reads the `(2, 1)` slice
+at layer 15), so `(15 * 3 + 1) / 16 = 2.875` matmuls per layer, times the price
+below.
+
+## The finding that generalises: flopscope prices a matmul at `4 n^3`
+
+Measured at `n = 1024`, in the artifact:
+
+| primitive | counted FLOPs | `/ n^3` |
+|---|---:|---:|
+| `A @ B` | `4,292,870,144` | **`3.998`** |
+| `A.T @ B` | `4,292,870,144` | `3.998` |
+| `(A * B).sum(axis=1)` | `4,192,256` | `0.0039` |
+| `A * B`, `A + B`, `A * v[:, None]` | `2,097,152` | `0.0020` |
+| `A.T`, `fnp.diag(A)` | `0` | `0` |
+
+**A dense `(n, n) @ (n, n)` matmul is billed `4 n^3`, twice the textbook
+`2 n^3`.** Every hand cost model in this repository that assumed `2 n^3` was a
+factor of two optimistic. This is exactly the class of thing `docs/GOTCHAS.md`
+exists for and it is recorded there.
+
+It also explains the shipped file: `137,600,326,656 / 16 = 8.60e9` per layer
+`= 8.01 n^3` `= 2.00` matmuls — which is `W^T Sigma W`, and essentially nothing
+else. The K2 backbone is two matmuls a layer, the third order adds three.
+
+## Predictions, scored
+
+| # | prediction | outcome |
+|---|---|---|
+| **P1** | increment in `[0.04, 0.11] B`, point `0.065`; total in `[0.10, 0.18] B`, point `0.13` | **HELD.** `0.0901` and `0.1527`, both inside, both above my point estimate |
+| **P2** | the structured spelling is `>= 2.5x` cheaper than the generic | **REFUTED.** Measured `2.081x` (and `1.95x` against upstream's `0.2977 B`). The saving is real and it is not as large as I said |
+
+## What this buys, stated as scores
+
+At multiplier `0.152719`:
+
+| raw MSE | source | adjusted |
+|---|---|---:|
+| `4.0047e-08` | full factorized K3, measured on 24 DESIGN mints | **`6.116e-09`** |
+| `6.9e-07` | `dsproj` bracket midpoint (regeneration with NO correction) | `1.054e-07` |
+| `4.050566e-06` | shipped K2p1 | `6.186e-07` |
+
+So **the whole lane is worth `6.1e-09` if and only if the regenerating flow can be
+corrected back to K3-class raw accuracy**, and worth roughly a wash with graded
+v2.7 (`1.374e-07`) if it cannot. That is exactly the question `E1` and `E2` were
+pre-registered to answer, and it is now quantified rather than assumed.
+
+## Scope — five things this does NOT establish
+
+1. **It is a projection, not a candidate.** The increment is measured; the sum
+   with the K2 anchor is not an end-to-end run of anything. A real candidate may
+   share intermediates (cheaper) or need casts and temporaries (dearer).
+2. **No residual, no memory, no contract.** A FLOP count says nothing about the
+   `0.4 s` cliff, the `8,192 MB` limit, or `whest validate`. WP8 is explicit that
+   a local residual is not a grader prediction and that a non-brokered soak is
+   not authoritative.
+3. **`0.1527 B` misses the floor.** The multiplier is `0.153`, not `0.100`, so
+   `53%` of the cost buys nothing at all if accuracy is held fixed. Two untried
+   levers exist and are recorded here, not pursued: flopscope's **symmetry
+   tagging** (`as_symmetric()`; `Sigma` is symmetric and `W^T Sigma W` is two of
+   the five matmuls) and the shipped file's existing **Strassen** path. Reaching
+   `0.10 B` needs the five matmuls per layer down to about `3.2`.
+4. **Values are arbitrary** — counted FLOPs on this dense path are
+   value-independent, re-measured here (two different random draws, identical
+   counts) rather than inherited from `p2_flop_anchor.py`.
+5. **Upstream's `0.2977 B` is not comparable.** It is upstream's torch-side
+   runtime counter; it appears above only as a ratio within itself, and no gate
+   is scored on it.
+
+## Knowledge delta
+
+1. **flopscope 0.12 bills a dense `(n, n) @ (n, n)` matmul at `4 n^3`.** Halve
+   every hand estimate this repository has ever made in the optimistic direction.
+2. **The shipped K2p1 is two matmuls a layer and nothing else that counts.** That
+   is a far more useful cost model than `137,600,326,656`, because it says what a
+   new architecture may spend: at the `0.1` floor the whole estimator gets
+   **`3.2` matmuls per layer**, and a K3 flow that regenerates its slices needs
+   `5`.
+3. **A structural fact beats a compression search.** Eleven closed lanes tried to
+   compress `kappa_3`. The thing that actually moved the cost was reading
+   `from_dstensor` and noticing two of its three legs are the identity — which
+   cost one file read and no seeds.

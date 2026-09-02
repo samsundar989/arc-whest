@@ -22,6 +22,45 @@ narrative record), `docs/GAME_PLAN.md` (the sole active Phase-2 strategy).
 ---
 
 
+## 2026-09-02 (WP13 / E0-COST) — flopscope bills a dense matmul at `4 n^3`, not `2 n^3`
+
+Measured, not modelled, at the live width in `flopscope 0.12+np2.2.6` inside a
+real `BudgetContext` (`local_sim/p2_slice_cost.py --> experiments/2026-09-02_wp13_slice/e0_cost.json`):
+
+| primitive at `n = 1024` | counted FLOPs | `/ n^3` |
+|---|---:|---:|
+| `A @ B`, `A.T @ B` for `(n, n)` | `4,292,870,144` | **`3.998`** |
+| `(A * B).sum(axis=1)` | `4,192,256` | `0.0039` |
+| `A * B`, `A + B`, `A * v[:, None]` | `2,097,152` | `0.0020` |
+| `A.T`, `fnp.diag(A)` | `0` | `0` |
+
+**Every hand cost model that assumed the textbook `2 n^3` was a factor of two
+optimistic.** Before quoting the price of a proposed architecture, count its
+matmuls, not its multiply-adds.
+
+The corollary is the more useful form, and it is the one to carry:
+
+> The shipped `estimator.py` bills `137,600,326,656 / 16 = 8.60e9` per layer
+> `= 2.00` matmuls — that is `W^T Sigma W` and essentially nothing else. At the
+> `0.1` multiplier floor a `1024 x 16` estimator's ENTIRE budget is
+> **`3.2` dense matmuls per layer.** A K3 flow that regenerates `kappa_3` from
+> its two read-slices needs `5`, hence `0.1527 B`.
+
+Two levers on that number exist and are untried: flopscope's **symmetry tagging**
+(`as_symmetric()` — `Sigma` is symmetric and `W^T Sigma W` is two of the five)
+and the shipped file's existing **Strassen** path. Neither is priced. Do not
+assume either works; both were noticed while reading the meter, not measured.
+
+Unrelated to pricing but found in the same read, and load-bearing for anything
+touching `kappa_3`: `FactoredTensor.from_dstensor` returns factors
+`(diag(S3) + 3 S21^T, I, I)` — **two of the three legs are exactly the
+identity**. A generic `O(n^2 r)` spelling pays six matmuls a layer for what
+three do. That single structural fact is worth `2.08x` and it cost one file
+read and no seeds, after eleven closed lanes had tried to compress the tensor
+instead.
+
+---
+
 ## Do not read a suite result taken under heavy concurrent load
 
 **Observed 2026-08-31 (WP0C).** `local_sim/test_enforcement_labels.py` ran while
