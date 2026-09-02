@@ -44,6 +44,64 @@
 > accumulation beside the current one and returned **bitwise-equal means and
 > final-layer variance on both probe networks**.
 
+> **2026-09-02 (WP9/WP10) — A NEGATIVE CONCLUSION WAS RETRACTED, AND THE LANE
+> IS OPEN.** WP9 spent `P02` on a per-neuron state corrector and I concluded
+> *"the per-neuron half of that fork is empty."* **The sixth independent
+> Skeptic pass overturned it** — the first pass this project to overturn a
+> *negative*. Full entry at the bottom of `experiments/LOG.md`.
+>
+> WP9's in-flight arm moved the **mean** and the **variance** channel together,
+> diverged `136.92x`, and I killed the family. The review reimplemented the
+> closure independently — reproducing this repository's `B0` on **all 96
+> networks to `5.4e-13`** — and ran the **oracle** cells I never ran, at
+> **zero** fit error, layers 1–14:
+>
+> | in-flight correction, ZERO fit error | vs the shipped file |
+> |---|---:|
+> | truth in the **MEAN** channel only | **`6.42x` BETTER** |
+> | truth in the **VARIANCE** channel only | `0.060x` — `16x` worse than doing nothing |
+> | truth in **both** (WP9's arm B) | `0.56x` |
+>
+> **The two channels have opposite signs.** The mean channel's ceiling clears
+> the `1.5x` gate by `4.3x` and is the one arm the study never ran. My stated
+> mechanism is refuted too: I wrote that the variance walk *"amplifies whatever
+> it gets wrong"* — it amplifies even when it gets it exactly **right**, and
+> the clamp is exonerated to five significant figures.
+>
+> **New mechanistic fact, and assume it generalises:** correcting a closure's
+> marginal variance *toward truth* is **destructive**. The Gaussian closure is
+> an internally consistent approximation, not a set of independently improvable
+> marginals — making `var` exact while the off-diagonal stays truncated at
+> Price order 1 breaks a cancellation.
+>
+> **What WP9 did establish, confirmed and strengthened:** the **readout**
+> corrector is exhausted by v2.7's sixteen constants. v2.7's *single* per-layer
+> constant predicts the per-neuron residual at `R^2 = +0.5097`, matching a
+> 354-parameter network's `0.499–0.522`. Arm A's `0.9945x` is a **draw**
+> (`t` CI `[-1.7238e-08, +1.7762e-09]` straddles zero, sign `p = 0.610`), not
+> the refutation the first write-up claimed.
+>
+> **`P02` WAS SPENT WITH NO LEDGER RECORD**, while the entry said *"ledger
+> finalised."* A queued job runs in a frozen worktree and
+> `experiments/seed_ledger.jsonl` is **tracked**, so `p2_truth.py`'s
+> `claim()`/`finalize()` — called correctly — wrote into the **snapshot** and
+> were discarded with it. 96 seeds were really drawn while the live ledger
+> reported them FREE. **Backfilled** with the artifact sha256, and made
+> mechanical: `seed_ledger._append()` now **refuses** to write a ledger under a
+> `gpuq`/`workerq` snapshot.
+>
+> **`CONTRACT WP10` is open** (`30ce479`, addendum `a8ec186`): arm C, the
+> **mean channel only**, in flight at layers 1..L-2, scored on rollout against
+> the shipped file, with both null controls now sharing no channel with a
+> divergent arm. Its own addendum records that the contract's first formulation
+> was internally inconsistent — it put v2.7's gain inside the tower, which
+> breaks homogeneity — and that **self-test S10 measured the damage at a
+> relative `1.424` before any data was touched.**
+>
+> **Queued, not run** (`gpuq` 89, 90), behind the WP8 `3x100` soak. Until that
+> soak returns, **G3 has nothing behind it but 12 rows** and no candidate may
+> be certified on it.
+
 > **2026-09-02 (later) — THE WP8 SKEPTIC RETURNED PROVISIONAL, AND TWO OF ITS
 > FINDINGS ARE DEFECTS IN THE RECORD RATHER THAN IN THE CODE.** Fifth
 > independent pass this project, fifth to find something real. Accepted in
@@ -989,7 +1047,8 @@ joint-state augmented K2 is open.
 
 ### Seed and vault state
 
-- P01 has consumed **168/600** seeds; 432 DESIGN seeds remain. The append-only
+- P01 has consumed **168/600** seeds; 432 DESIGN seeds remain. **P02 is now
+  fully consumed (96/96)**; P03 and P04 remain untouched. The append-only
   seed ledger is authoritative; prose counts are only snapshots.
 - P01 is not a DECIDE block and cannot serve as its own independent replication.
 - **ALLOCATED 2026-09-01, all three unspent (0 seeds drawn).** The gap below is
@@ -998,7 +1057,7 @@ joint-state augmented K2 is open.
 
   | block | tier | n | span | purpose |
   |---|---|---:|---|---|
-  | **P02** | DESIGN | 96 | `40,901,002,000..095` | selection over the Rung-1 corrector + AUGMENT state |
+  | **P02** | DESIGN | 96 | `40,901,002,000..095` | **SPENT 2026-09-02** on WP9/WP10 (truth `d21f81ad…`, ledger backfilled). Re-analysable within DESIGN; not independent |
   | **P03** | DESIGN | 96 | `40,901,003,000..095` | **disjoint replication** of whatever P02 selects |
   | **P04** | SINGLE_USE | 100 | `40,901,004,000..099` | the ONE paired DECIDE against graded v2.7 |
 
