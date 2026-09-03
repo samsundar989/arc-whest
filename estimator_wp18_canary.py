@@ -107,16 +107,36 @@ _TABLES = None
 #: `alpha**4` is `inf` while `phi(alpha)` is exactly `0`, and `inf * 0` is the
 #: NaN that fails the MLP.
 #:
-#: `1e6` puts `alpha**4` at `1e24`, which is `3.4e14` below the float32 ceiling,
-#: so the downstream `sigma**d` factors have room too. And it is `1.1e5` times
-#: the worst `|alpha|` the UNCAPPED flow reaches on He-init networks at the live
-#: shape -- `9.04`, measured over 8 mints by `p2_wp18_price.py --alpha-range`.
+#: **AND THEN `1e6` WAS MEASURED, AND IT LOST.** `SKEPTIC WP18-C` scored the two
+#: candidate caps on the quantity the competition actually scores, which neither
+#: the `40` derivation nor the `1e6` derivation had ever done. On
+#: `edge_cases`' own `depth 32 x width 64` He network -- clean, unperturbed --
 #:
-#: **The honest statement, which the `40` version did not make: this cap is inert
-#: wherever the flow is numerically sound, and lossy exactly where the flow would
-#: otherwise return NaN.** It converts "fails the MLP, scores as zeros" into
-#: "answers badly", which is the right trade and is not the same as robustness.
-ALPHA_CAP = 1.0e6
+#:     cap 40   ->  range [0.000e+00, 4.317e+00]   final-row mean 0.2103
+#:     cap 1e6  ->  range [0.000e+00, 9.182e+09]   final-row mean 0.0000
+#:
+#: because at `1e6` the flow overflows downstream and the output guard zeroes
+#: **all 64 entries of the scored row** -- exactly the zeros a FAILED MLP would
+#: score. Against Monte-Carlo truth the final-layer MSE goes `1.755e-02` ->
+#: `5.522e-02`. Over 14 fresh He mints at `64 x 32` the PAIRED ARITHMETIC MEAN
+#: MSE -- the competition's own estimand, and the statistic
+#: `competition_score.decide()` enforces -- is `20.4` for `40` against `10,957`
+#: for `1e6`. (The median and the win-count favour `1e6`; the mean does not, and
+#: the mean is the estimand.)
+#:
+#: So the value is **`40`, chosen empirically on the binding statistic**, and the
+#: `alpha**4` overflow bound is retained only as the constraint a cap may not
+#: EXCEED, never as the rule for choosing one. The `1e6` derivation optimised for
+#: "does not overflow" when what is scored is "produces a good answer", and those
+#: are different objectives that happened to point in opposite directions.
+#:
+#: **Reverting is free where it matters**: at `1024x16`, `1024x32`, `512x16` and
+#: `256x32`, `40` and `1e6` give BIT-IDENTICAL output and an identical metered
+#: price on every seed tried. The cap binds only where the flow is already
+#: producing nonsense, and it is a SATURATION there -- lossy, not limit-
+#: preserving. Which of the two is "right" for a genuinely saturated neuron is
+#: not settled by anything here; `40` is simply the one that measured better.
+ALPHA_CAP = 40.0
 
 #: `1 / sqrt(2 pi)` in float64. Row 0's closed form is the ONLY consumer.
 _INV_SQRT_2PI = 0.3989422804014326779399460599343818684758586311649346576659
@@ -336,9 +356,11 @@ def _layer(W, state, table, dtype, const, init_scale, last_layer):
     # is the warning `edge_cases` printed at `(alpha * alpha - 1.0) * phi`.
     # A NaN output FAILS the MLP and a failed MLP scores as zeros.
     #
-    # `ALPHA_CAP` is set from the float32 overflow bound on `alpha**4` and sits
-    # `1.1e5` above anything the live distribution produces. See its definition:
-    # it is a SATURATION and it is lossy where it binds. ONE operation a layer.
+    # `ALPHA_CAP` is `40`, chosen by MEASUREMENT on the paired arithmetic mean
+    # MSE rather than derived, and it sits ~4.4x above anything the live
+    # distribution produces (worst `|alpha|` `9.04` over 8 mints at `1024x16`).
+    # See its definition: it is a SATURATION, lossy where it binds, and a larger
+    # cap measured WORSE. ONE operation a layer.
     alpha = fnp.clip(mu_pre / sigma, dtype(-ALPHA_CAP), dtype(ALPHA_CAP))
     w = _wick(mu_pre, sigma, alpha, table, dtype, const["wick"])
 
@@ -550,11 +572,31 @@ class Estimator(BaseEstimator):
         # declined the fix on the grounds that returning float64 would be "an
         # interface the grader has never seen from us". **That was false.** The
         # shipped `estimator.py` returns float64 and has done so on every
-        # submission this project has made, #328662 and #328664 included. The
-        # objection cost nothing to retire and should never have been raised.
+        # submission this project has made, #328662 and #328664 included.
+        #
+        # **AND `SKEPTIC WP18-C` BOUNDED WHAT IT BUYS.**
+        # `whestbench.scoring.materialise_predictions` does
+        # `fnp.asarray(predictions, dtype=fnp.float32)` INSIDE the metered
+        # window, so the float64 array is coerced before anything is scored --
+        # `certify_guarded.json` records `dtype: float32, nbytes: 65536` for this
+        # very file. Row 0's `1.826e-16` is therefore the accuracy of an array
+        # the SCORER NEVER SEES; after coercion the delivered gain is about
+        # `3e-07 -> 6e-08`, five-fold at the float32 scale, not sixteen orders.
+        # And row 0 is not the scored row at all -- the score is the FINAL
+        # layer's MSE. So this buys an invariant and a more accurate unscored
+        # row, and NOTHING on the board. It is kept because the shipped
+        # `estimator.py` does exactly this, so it is consistency with the
+        # incumbent rather than a special case invented to pass a test.
         exact0 = fnp.sqrt((w64_0 * w64_0).sum(axis=0)) * _INV_SQRT_2PI
-        out = fnp.concatenate([fnp.reshape(exact0, (1, width)),
-                               fnp.stack(mus[1:]).astype(fnp.float64)], axis=0)
+        row0 = fnp.reshape(exact0, (1, width))
+        # `depth == 1` makes `mus[1:]` empty and `fnp.stack([])` RAISES -- which
+        # on the grader is a failed MLP scoring zeros. `SKEPTIC WP18-C` found it;
+        # the graded canary and the shipped `estimator.py` both handle depth 1,
+        # so this regression was introduced by the row-0 substitution itself.
+        # `depth` is a Python int, so the branch materialises no flopscope value
+        # and costs nothing (hard rule: no scalar materialisation in `predict`).
+        out = row0 if depth == 1 else fnp.concatenate(
+            [row0, fnp.stack(mus[1:]).astype(fnp.float64)], axis=0)
         # TWO GUARDS ON THE WHOLE ANSWER, THREE OPERATIONS, AND THEY ARE THE
         # DIFFERENCE BETWEEN A SCORED MLP AND A FAILED ONE.
         #

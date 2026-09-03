@@ -84,10 +84,30 @@ def _load(path):
 
 
 def _mint(seed, width, depth):
+    """Weights as **flopscope arrays**, which is what the grader hands over.
+
+    `SKEPTIC WP18-C` caught this returning raw numpy. `certify_candidate.py:358`
+    and `whestbench.scoring` both pass `fnp.array(x)`, and the difference is not
+    cosmetic: the estimator's `astype` guard and the first layer's f64 cast are
+    METERED on flopscope arrays and INVISIBLE on numpy ones. Measured on the same
+    four networks, steady state:
+
+        weights as numpy : graded 2,627 ops / 168,612,483,174 FLOPs
+        weights as fnp   : graded 2,642 ops / 168,628,211,814 FLOPs
+
+    -- a gap of exactly `15 n^2`, which is the "two absolute totals differing by
+    15 n^2" that two prior audits left as an instrument mystery. It was not a
+    mystery; it was un-metered work, and it made this probe's FLOP deltas
+    understate the truth by `4.36x`. Counted compares to counted only if both
+    sides are counted the same way.
+    """
+    import flopscope.numpy as fnp
+
     from mint_provenance import canonical_mint
 
     w, _e, _s = canonical_mint(width, depth, seed)
-    return [np.ascontiguousarray(np.asarray(x, dtype=np.float32)) for x in w]
+    return [fnp.array(np.ascontiguousarray(np.asarray(x, dtype=np.float32)))
+            for x in w]
 
 
 class _Ctx:
@@ -220,7 +240,7 @@ def cmd_pair(a) -> int:
     # and it said so with `1,024` unexplained changes the first time this ran.
     # That is the predicate doing its job on an intentional change, so the
     # intentional change gets its OWN check rather than a widened predicate.
-    w0 = _mint(SEEDS[0], a.width, a.depth)[0].astype(np.float64)
+    w0 = np.asarray(_mint(SEEDS[0], a.width, a.depth)[0], dtype=np.float64)
     exact0 = np.sqrt((w0 * w0).sum(axis=0)) / np.sqrt(2.0 * np.pi)
     sc0 = max(float(np.abs(exact0).max()), 1e-300)
     rel_A0 = float(np.abs(pa[0] - exact0).max()) / sc0

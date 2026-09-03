@@ -9,68 +9,68 @@
  "candidate": "estimator_wp18_canary.py",
  "price": {
   "estimator_wp15_k3_canary.py": {
-   "flops": 168614058598,
-   "n_ops": 2631,
+   "flops": 168629787238,
+   "n_ops": 2646,
    "flop_independent": false,
    "per_seed": [
     {
      "seed": 90000000401,
-     "flops": 168614058598,
-     "n_ops": 2631
+     "flops": 168629787238,
+     "n_ops": 2646
     },
     {
      "seed": 90000000402,
-     "flops": 168612483174,
-     "n_ops": 2627
+     "flops": 168628211814,
+     "n_ops": 2642
     },
     {
      "seed": 90000000403,
-     "flops": 168612483174,
-     "n_ops": 2627
+     "flops": 168628211814,
+     "n_ops": 2642
     },
     {
      "seed": 90000000404,
-     "flops": 168612483174,
-     "n_ops": 2627
+     "flops": 168628211814,
+     "n_ops": 2642
     }
    ],
-   "flops_steady_state": 168612483174,
-   "n_ops_steady_state": 2627,
-   "x": 0.07667679646965553,
-   "x_with_server_offset": 0.07668442586418678,
+   "flops_steady_state": 168628211814,
+   "n_ops_steady_state": 2642,
+   "x": 0.07668394902702858,
+   "x_with_server_offset": 0.07669157842155983,
    "multiplier": 0.1,
    "multiplier_with_server_offset": 0.1
   },
   "estimator_wp18_canary.py": {
-   "flops": 168614356582,
-   "n_ops": 2655,
+   "flops": 168636374630,
+   "n_ops": 2673,
    "flop_independent": true,
    "per_seed": [
     {
      "seed": 90000000401,
-     "flops": 168614356582,
-     "n_ops": 2655
+     "flops": 168636374630,
+     "n_ops": 2673
     },
     {
      "seed": 90000000402,
-     "flops": 168614356582,
-     "n_ops": 2655
+     "flops": 168636374630,
+     "n_ops": 2673
     },
     {
      "seed": 90000000403,
-     "flops": 168614356582,
-     "n_ops": 2655
+     "flops": 168636374630,
+     "n_ops": 2673
     },
     {
      "seed": 90000000404,
-     "flops": 168614356582,
-     "n_ops": 2655
+     "flops": 168636374630,
+     "n_ops": 2673
     }
    ],
-   "flops_steady_state": 168614356582,
-   "n_ops_steady_state": 2655,
-   "x": 0.07667693197709013,
-   "x_with_server_offset": 0.07668456137162138,
+   "flops_steady_state": 168636374630,
+   "n_ops_steady_state": 2673,
+   "x": 0.07668694462608983,
+   "x_with_server_offset": 0.07669457402062108,
    "multiplier": 0.1,
    "multiplier_with_server_offset": 0.1
   }
@@ -189,8 +189,8 @@
    "n_negative_in_A": 151
   }
  ],
- "steady_state_delta_ops": 28,
- "steady_state_delta_flops": 1873408,
+ "steady_state_delta_ops": 31,
+ "steady_state_delta_flops": 8162816,
  "row0_rel_baseline": 2.9643416898126257e-07,
  "row0_rel_candidate": 1.8261228325893804e-16,
  "row0_exact_pass": true,
