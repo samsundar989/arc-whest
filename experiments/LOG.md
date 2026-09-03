@@ -28622,3 +28622,162 @@ than fabricated: the brief directed this to run today, and this slice is a
 deterministic correctness check that spends no fresh seeds and promotes nothing.
 His prediction is being taken instead on the question that follows it — whether
 the fix closes the `3.3x` end to end — **before** that data exists.
+
+---
+
+# 2026-09-03 — WP16 RESULTS: **the `3.31x` was ONE LINE, and G-PARITY passes both clauses**
+
+Contract `7169392`, committed before any data existed. Results here. Every number
+below is f64 unless said otherwise, on the eight `P01` networks
+`[40,821,001,168 .. 40,821,001,175]` — the same eight WP13 E2 and WP14 C0-i used,
+declared as a third deliberate overlap and therefore **CORRELATED EVIDENCE with
+both, never a third independent result.**
+
+## The verdict
+
+| | |
+|---|---|
+| **G-PARITY clause 1** | worst end-to-end drift **`1.692e-11`** vs gate `1e-2`, **8/8 nets**. **PASS** |
+| **G-PARITY clause 2** | raw MSE **`8.5075e-07`** vs band `[7.0e-07, 1.1e-06]`. **PASS** — the reference figure to 4 s.f., ratio `1.000x` |
+| the defect, kept as a control | **`2.6890e-06`**, ratio `3.161x` — where the grader measured `3.314x` on twenty other rows |
+
+**H1 is confirmed and it is the whole gap.** `p2_k3_fnp.k3_layer` regenerated `M`
+from `K[(3,)] - p111_3` and `K[(2,1)] - p111_21`. Upstream subtracts
+`pK_111.get_repeated()` from the **stored DS part only**, then returns
+`K_out[3] = pK_111 + FactoredTensor.from_dstensor(K_ds[3])` — and `__add__`
+**discards the repeated cache**, so the regeneration hook's `get_repeated()`
+recomputes from the concatenated factors and recovers `K_ds3` un-subtracted.
+
+**Measured, not argued.** At layer 0, net 0, the two port arms against each other:
+
+| quantity | sub vs nosub |
+|---|---:|
+| `K[(3,)]`, `K[(2,1)]` (upstream of the branch) | `0.000e+00` |
+| `S3` | `0.000e+00` — because `p111_3` is **exactly zero** there |
+| `S21` | `2.698e-02` |
+| `M` — diagonal | `0.000e+00` |
+| `M` — off-diagonal | `1.4605e+00`, and `3 x ||p111_21||` is `1.4605e+00`. **Ratio `1.000000`** |
+
+## A correction to my own contract, made by the data
+
+The contract said the port's `M_out` is *"wrong by `2 x rep(pK_111)`"*. **It is
+wrong by `1 x`.** The measured ratio is `1.000000`, not `2`. My reasoning slipped
+between two cases — if upstream *added* the repeated part the error would be
+doubled; upstream nets out to *neither* adding nor subtracting, so a single
+subtraction is a single error. The mechanism, the location and the sign were all
+right; the factor was not.
+
+## Predictions, scored
+
+| # | prediction | outcome |
+|---|---|---|
+| P1 | `> 10%` end-to-end drift at `128x4` under `sub` | **REFUTED.** `2.377e-03` and `2.555e-03` — `0.24%`, not `>10%` |
+| P2 | `<= 1e-10` under `nosub` at `128x4` | **HELD.** `2.653e-12`, `3.617e-12` |
+| P3 | first divergence at the **nonlinear** point, not the linear one | **HELD in substance, REFUTED as written.** Layer 0: every linear component `0` or `6.9e-17`, and `M` is the first thing that moves. But I wrote "layers 0 **and 1**", and at layer 1 the `sub` arm's linear slices have already inherited the layer-0 error (`1.6e-01`). I predicted the localisation and forgot the propagation |
+| P4 | at layer 0 the `(3,)` slice agrees under both modes and the `(2,1)` does not | **HELD, to six digits.** See the table above |
+| P5 | the transpose orientation is **already correct** | **HELD.** Direct comparison `9.5e-16`, transposed `3.2e-02` at `1024`. The brief named it a suspect; it was not one |
+| P6 | the factor `3` and the sign are correct | **HELD.** Parity to `1.7e-11`, and the battery now kills both `rebuild_3_to_2` and `rebuild_no_transpose` |
+| P7 | f32 within `1e-4` of the f64 reference | **HELD with margin.** `4.1e-07` worst; raw MSE `8.5072e-07` against f64's `8.5075e-07`. **H2 is dead: precision is not the explanation, and f32 costs `0.004%` of the MSE** |
+| P8 | the fix strictly **decreases** counted FLOPs | **HELD, direction right and magnitude small.** `10,837,935,618 -> 10,828,494,338` per layer; arrays `56 -> 49`. All of it is `O(n^2)`, so the matmul count barely moves (`5.047 -> 5.042`) |
+| P9 | `<= 1%` end to end at `1024x16` on all 8 | **HELD by nine orders.** `1.692e-11` |
+| P10 | raw MSE inside `[7.0e-07, 1.1e-06]` | **HELD.** `8.5075e-07` |
+| P11 | `--layer-k2` still passes, unchanged | **HELD.** `kappa3 1.067e-14`, identical. It was blind to this and must never be quoted as evidence the fix is right |
+
+Nine held, one refuted, one half-refuted. **The refuted one matters most** — see
+the knowledge delta.
+
+## The re-metered price. Every earlier figure is SUPERSEDED
+
+| | before | after |
+|---|---:|---:|
+| one layer, f32, `n = 1024` | `10,837,935,618` | **`10,828,494,338`** |
+| whole flow, 16 layers | `173,381,273,195` | **`173,230,212,715`** |
+| `x` budget | `0.078845` | **`0.078776`** |
+| multiplier | `0.10000` | **`0.10000`** — unchanged, still at the floor |
+| flopscope **operations** | `5,327` | **`5,119`** (`320`/layer) |
+| arrays the dtype audit sees | `56` | **`49`** |
+
+The residual reading from the same run is **not usable**: it was taken on a host
+with another project's job running, and `AGENTS.md` forbids quoting a local
+absolute second anyway. Only the op count is deterministic.
+
+## The mutation battery: 0 of 7 becomes 9 of 9 on the live path
+
+`SKEPTIC WP14-FOLLOWUP` built a battery of seven value-destroying mutations and
+measured **0 killed**, which was the strongest available warning that the port
+was unverified. WP16 adds a second detector that needs **no torch at run time**:
+a 46 KB committed, hashed golden dump of upstream's own answer at `128x4` f64
+(`golden_ref_128x4.npz`), plus five new mutations on the live path.
+
+| detector | killed |
+|---|---:|
+| `--layer-k2` (the `kappa_3 = 0` closed forms) | `1 / 12` |
+| golden parity against upstream | `9 / 12` |
+| ... restricted to the **live** code path | **`9 / 9`** |
+
+The three survivors are exactly the three that edit the `regen_mode="sub"`
+branch, and each reports drift `3.617e-12` — the f64 baseline. That is not a gap;
+**it is the proof that the branch is inert.**
+
+## The structural finding, which outlives the bug
+
+> **In a regenerating flow the entire `(1,1,1)` block is dead work.**
+
+Its all-distinct part is discarded by `from_dstensor` at the rebuild, and its
+repeated part cancels exactly against the subtraction upstream makes from the DS
+part. So `p111_3`, `p111_21`, `fac1`, `fac3` and `w1_sq` were not merely
+mis-signed — **they compute nothing the answer depends on.** Removing them is
+what the `9,441,280` FLOPs and `208` operations are.
+
+This does not change `CONTRACT WP15`'s premise, it sharpens it. WP15 says the
+regenerating flow's error *is* the discarded all-distinct block; the block being
+wholly dead is the same statement, made exactly.
+
+## Knowledge delta
+
+1. **A `0.12%` drift in the means is a `3.2x` miss in the score, and the gate the
+   brief specified could not see it.** The defect's end-to-end drift at
+   `1024 x 16` is `1.199e-03` — it **passes** a `<= 1%` drift gate comfortably,
+   at both shapes. Only clause 2, against minted truth, catches it. **Relative
+   drift in the means is a bad proxy for MSE**, because the means are `O(1)` and
+   the error we are chasing is `O(1e-3)` RMS; a perturbation that is negligible
+   against the signal is enormous against the residual. Had the contract not
+   insisted that "two programs agreeing is not evidence that either is right",
+   this slice would have declared the broken port fine. **P1's refutation is the
+   same fact seen from the other side**: I expected a big drift because I was
+   thinking in score units, and drift is not score units.
+2. **A check that cannot see a defect is not weak, it may be checking dead code.**
+   Three of `SKEPTIC WP14-FOLLOWUP`'s seven mutations survived because they
+   mutated work the correct program does not do. "0 of 7 killed" read as *"the
+   checks are weak"*; part of it was *"the program does more than it needs to"*.
+   Both were true and only one had been named.
+3. **The cheapest possible reference is a committed golden file.** Parity needed
+   torch, upstream's checkout, and a second venv — once. After that, 46 KB of
+   `.npz` gives every future run of `--mutation-coverage` a real oracle in the
+   grader's own venv. The battery went from `0/7` to `9/9` for the cost of one
+   CPU minute and one file.
+4. **The gpuq snapshot is built from git, so `.gitignore` is part of the test
+   harness.** `*.npz` is blanket-ignored here, so the golden file the new
+   detector hashes went uncommitted and every brokered run of that check would
+   have died on a missing file — the third instance of *"a check that cannot run
+   reads as a check that passed"* in this repository.
+5. **The change gate caught its own new hole immediately.** Claiming `P01` with
+   an artifact name and not finalising it turned steps 7 and 9 RED within the
+   hour. That is `SKEPTIC WP13`'s process fix doing exactly its job on the very
+   next slice that could have skipped it.
+
+## What this does and does NOT license
+
+- **Every accuracy claim that rested on `8.5075e-07` is restored**, including
+  WP14 C0-i's paired `1.637x`-better-than-v2.7 comparison, because the file that
+  can be graded now reproduces the torch figure to four significant figures.
+- **The `334x` two-slice oracle inherits the same restoration.** Its PROVISIONAL
+  was conditional on exactly this, and the condition is met.
+- **Nothing has been re-graded.** The canary that scored `2.8192e-06` is
+  **retired**, not amended, and no board number exists for the fixed file.
+- **`estimator.py` is untouched and remains v2.6.1.** Nothing is submitted,
+  nothing is designated, and the `mini` split was not re-read.
+- **The residual is still the blocker.** `1.21x` headroom on the deployment
+  authority was measured on the retired file; the fix removes `208` of `5,327`
+  operations, which is `3.9%` and nowhere near the `>= 4x` the soak requires.
+  Blocker B is unchanged in substance and is next.

@@ -28,16 +28,23 @@ Five n^3-class operations per layer, and no more:
     cov_pre = W.T @ cov @ W        two   (the K2 backbone)
     P       = W.T @ M              one   (contract_W; legs 2 and 3 are I)
     (P.Q) @ Q.T  and  (Q.Q) @ P.T  two   (the (2,1) slice's block perms)
-Measured: 10,837,935,618 counted f32 FLOPs per layer at 1024, 0.07886 x budget
-over 16 layers (`experiments/2026-09-02_wp14_fnp/layer_price_1024.json`).
+Measured after WP16 removed the dead `(1,1,1)` block: 10,828,494,338 counted f32
+FLOPs per layer at 1024, 173,230,212,715 over 16 layers = 0.078776 x budget,
+multiplier 0.10000 (`experiments/2026-09-03_wp16_parity/flow_price_nosub.json`).
+The pre-WP16 figures 10,837,935,618 / 173,381,273,195 are SUPERSEDED.
 
 WHAT IS NOT ESTABLISHED, AND MUST BE READ BESIDE ANY NUMBER THIS PRODUCES
 ------------------------------------------------------------------------
-The VALUES are not yet checked against upstream at non-zero kappa_3
-(`local_sim/p2_k3_fnp.py::NOT_DONE` step 6). The three closed-form checks that
-do exist kill 0 of 7 targeted mutations. **So this file is a residual and
-failure-count probe, not an accuracy claim**, and its accuracy must not be
-quoted from this run.
+The VALUES ARE checked against upstream at non-zero kappa_3 as of 2026-09-03
+(`local_sim/p2_k3_parity.py`; `NOT_DONE` step 6 CLOSED): end-to-end f64 drift
+`1.692e-11` on 8/8 P01 nets at 1024x16, raw MSE `8.5075e-07` against minted
+truth. **THE VERSION OF THIS FILE THE GRADER SCORED AT `2.8192e-06` IS RETIRED**
+-- it carried the `(1,1,1)` repeated-part subtraction WP16 removed, worth
+`3.31x`. Nothing here has been re-graded. The three closed-form checks that
+do exist still kill only 1 of 12 targeted mutations; the golden-parity detector
+WP16 added kills 9 of 9 on the live code path. **This file has not been graded
+since the fix**, so its accuracy is established against upstream and against
+minted truth, and NOT against the grader.
 
 The frozen combinatorial tables are embedded below because the grader sandbox has
 no `experiments/`. `local_sim/p2_k3_candidate_parity.py` asserts this file agrees
@@ -211,14 +218,15 @@ def _layer(W, state, table, dtype, off_mask, init_scale, last_layer):
         if len(ip) == 2 and ip[0] == ip[1]:
             pK[ip] = (pK[ip] + pK[ip].T) * 0.5
 
-    # The (1,1,1) block. NOTE the asymmetry between w(1) and w(2)*w(1); using w1
-    # for both is cost-correct and numerically wrong.
-    w1, w2 = w[(1, 1)], w[(2, 1)]
-    fac1 = w1[:, None] * C11
-    fac3 = (w2[:, None] * w1[None, :] * C11).T
-    w1_sq = w1 * w1
-    p111_3 = w1_sq * w1 * D3
-    p111_21 = (w1_sq[:, None] * w1[None, :]) * D21 + (fac1 * fac3) * off_mask
+    # WP16 (2026-09-03): the (1,1,1) block USED to be computed here and its
+    # repeated part subtracted below. Both are gone, because in a REGENERATING
+    # flow the block is dead: `from_dstensor` discards its all-distinct part at
+    # the rebuild, and upstream's subtraction of its repeated part from the DS
+    # part is undone by adding the block straight back into `K_out[3]` -- whose
+    # `__add__` drops the repeated cache, so the regeneration hook reads the
+    # UN-subtracted slices. Removing it is worth `4,726,784` FLOPs and 112
+    # operations per 256-layer, and it is the whole of the `3.31x` the graded
+    # canary missed by. Parity: `local_sim/p2_k3_parity.py`, contract WP16.
 
     K = {}
     for ip_key, rows in table["pK_to_K"].items():
@@ -236,9 +244,7 @@ def _layer(W, state, table, dtype, off_mask, init_scale, last_layer):
 
     mu_out = K[(1,)]
     cov_out = fnp.diag(K[(2,)]) + K[(1, 1)]
-    S3 = K[(3,)] - p111_3
-    S21 = K[(2, 1)] - p111_21
-    M_out = M if last_layer else (fnp.diag(S3) + 3.0 * S21.T)
+    M_out = M if last_layer else (fnp.diag(K[(3,)]) + 3.0 * K[(2, 1)].T)
     lap = table["lap2_d4"]
     c4_out = _proj_coef_d4_r2(n) * (
         float(lap["(4,)"]["terms"][0]["coef"])

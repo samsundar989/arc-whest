@@ -1,0 +1,278 @@
+{
+ "check": "WP16 Blocker A: fnp port vs upstream torch reference, component ladder at two points per layer",
+ "contract": "experiments/LOG.md 2026-09-03 CONTRACT WP16, HEAD 7169392",
+ "A": {
+  "side": "port",
+  "regen_mode": "nosub",
+  "dtype": "f32",
+  "per_net": [
+   {
+    "net": 0,
+    "seed": 40821001168,
+    "flops": 173230212715.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 1,
+    "seed": 40821001169,
+    "flops": 173230212715.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 2,
+    "seed": 40821001170,
+    "flops": 173230212715.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 3,
+    "seed": 40821001171,
+    "flops": 173230212715.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 4,
+    "seed": 40821001172,
+    "flops": 173230212715.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 5,
+    "seed": 40821001173,
+    "flops": 173230212715.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 6,
+    "seed": 40821001174,
+    "flops": 173230212715.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 7,
+    "seed": 40821001175,
+    "flops": 173230212715.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   }
+  ],
+  "width": 1024,
+  "depth": 16,
+  "n_nets": 8,
+  "seeds": [
+   40821001168,
+   40821001169,
+   40821001170,
+   40821001171,
+   40821001172,
+   40821001173,
+   40821001174,
+   40821001175
+  ],
+  "seed_note": "P01[40,821,001,168..40,821,001,175]",
+  "weights_sha256": "6bb3a4957d501a77931139473c59e44b47d3073eef7dcebdbb65e3b72025986f",
+  "full_layers": [
+   0,
+   1
+  ]
+ },
+ "B": {
+  "side": "ref",
+  "regen_mode": "dsproj (upstream regen hook)",
+  "dtype": "f64",
+  "device": "cpu",
+  "width": 1024,
+  "depth": 16,
+  "n_nets": 8,
+  "seeds": [
+   40821001168,
+   40821001169,
+   40821001170,
+   40821001171,
+   40821001172,
+   40821001173,
+   40821001174,
+   40821001175
+  ],
+  "seed_note": "P01[40,821,001,168..40,821,001,175]",
+  "weights_sha256": "6bb3a4957d501a77931139473c59e44b47d3073eef7dcebdbb65e3b72025986f",
+  "full_layers": [
+   0,
+   1
+  ]
+ },
+ "e2e_rel_per_net": [
+  4.1092031901601133e-07,
+  3.8811099341130395e-07,
+  3.8546206221061996e-07,
+  3.947516632429199e-07,
+  3.8145996353916845e-07,
+  4.198490506232111e-07,
+  3.9987324410384964e-07,
+  3.8210593946340634e-07
+ ],
+ "final_layer_rel_per_net": [
+  5.489609047532378e-07,
+  4.93020150867258e-07,
+  4.902002471646618e-07,
+  5.81417229861745e-07,
+  5.397193174611315e-07,
+  5.358636670745053e-07,
+  5.072455407434336e-07,
+  5.408031285517243e-07
+ ],
+ "e2e_worst": 4.198490506232111e-07,
+ "e2e_best": 3.8145996353916845e-07,
+ "gate": 0.0001,
+ "gate_clause1_pass": true,
+ "ladder_net0": [
+  {
+   "layer": 0,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 0.0,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 0,
+   "point": "lin",
+   "component": "cov_pre",
+   "rel": 2.6946819780103304e-07,
+   "rel_vs_transpose": 2.6946819780103304e-07
+  },
+  {
+   "layer": 0,
+   "point": "lin",
+   "component": "s3",
+   "rel": 0.0,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 0,
+   "point": "lin",
+   "component": "s21",
+   "rel": 0.0,
+   "rel_vs_transpose": 0.0
+  },
+  {
+   "layer": 0,
+   "point": "nl",
+   "component": "mu",
+   "rel": 9.65150105768258e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 0,
+   "point": "nl",
+   "component": "cov",
+   "rel": 2.5661924154914197e-07,
+   "rel_vs_transpose": 2.5661924154914197e-07
+  },
+  {
+   "layer": 0,
+   "point": "nl",
+   "component": "K3",
+   "rel": 2.991402169703559e-07,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 0,
+   "point": "nl",
+   "component": "K21",
+   "rel": 3.6394901901977156e-07,
+   "rel_vs_transpose": 0.03168080113098547
+  },
+  {
+   "layer": 0,
+   "point": "nl",
+   "component": "M",
+   "rel": 3.5097950237029695e-07,
+   "rel_vs_transpose": 0.0277940764524925
+  },
+  {
+   "layer": 0,
+   "point": "nl",
+   "component": "c4",
+   "rel": 1.7654684008061731e-07,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 1,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 2.2829511115219244e-07,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 1,
+   "point": "lin",
+   "component": "cov_pre",
+   "rel": 4.408023336676996e-07,
+   "rel_vs_transpose": 4.408023336676996e-07
+  },
+  {
+   "layer": 1,
+   "point": "lin",
+   "component": "s3",
+   "rel": 4.221046229699344e-07,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 1,
+   "point": "lin",
+   "component": "s21",
+   "rel": 4.967921915033194e-07,
+   "rel_vs_transpose": 1.412439132879876
+  },
+  {
+   "layer": 1,
+   "point": "nl",
+   "component": "mu",
+   "rel": 1.7207197014940952e-07,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 1,
+   "point": "nl",
+   "component": "cov",
+   "rel": 3.8234371627842995e-07,
+   "rel_vs_transpose": 3.8234371627842995e-07
+  },
+  {
+   "layer": 1,
+   "point": "nl",
+   "component": "K3",
+   "rel": 1.088640406362155e-06,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 1,
+   "point": "nl",
+   "component": "K21",
+   "rel": 1.2938367345519123e-06,
+   "rel_vs_transpose": 0.443233313177416
+  },
+  {
+   "layer": 1,
+   "point": "nl",
+   "component": "M",
+   "rel": 1.2646413867920678e-06,
+   "rel_vs_transpose": 0.40767770999662123
+  },
+  {
+   "layer": 1,
+   "point": "nl",
+   "component": "c4",
+   "rel": 2.34332580420414e-07,
+   "rel_vs_transpose": NaN
+  }
+ ],
+ "caveat": "Clause 1 only. Two programs agreeing is not proof either is correct; clause 2 ties the port to minted truth."
+}

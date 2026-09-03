@@ -137,8 +137,10 @@ run on zeros.
 
 ### The regenerating K3 flow's measured per-layer price, and it supersedes the projection
 
-**The VALUES below are not yet checked against upstream at non-zero `kappa_3`**
-(`p2_k3_fnp.NOT_DONE` step 6). This is a price, and the checks that license it
+**The VALUES below ARE checked against upstream at non-zero `kappa_3`** as of
+2026-09-03 (`p2_k3_parity.py`; `NOT_DONE` step 6 CLOSED). The FLOP figures in
+this section predate that check and are superseded downward — one layer at f32
+is `10,828,494,338`, the flow `173,230,212,715`. This is a price, and the checks that license it
 kill nothing (previous section). Quote it as a cost and not as a method.
 
 Measured, one program, one layer, at `1024` inside a real `BudgetContext`

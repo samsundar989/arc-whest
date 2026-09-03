@@ -222,8 +222,10 @@ def k2_closure(fnp, w, width: int, depth: int, dtype):
 # ---------------------------------------
 # Counted FLOPs on this path are value-independent (`p2_slice_cost.py
 # --value-invariance`), so the meter reading is a fact about the op sequence, not
-# about the numbers flowing through it. **The numbers are NOT yet checked against
-# upstream** -- that is step 6 of `NOT_DONE` and no accuracy claim may rest on
+# about the numbers flowing through it. **The numbers ARE now checked against
+# upstream** -- `NOT_DONE` step 6, CLOSED 2026-09-03 by `p2_k3_parity.py`:
+# worst end-to-end f64 drift `1.692e-11` on the 8 P01 nets at 1024x16, and raw
+# MSE `8.5075e-07` against minted truth. The old caveat on
 # this module until it passes. What is settled here is the price.
 
 _COEFS_ARTIFACT = os.path.join(_ROOT, "experiments", "2026-09-02_wp14_fnp",
@@ -644,7 +646,8 @@ def _relu_cumulants_quad(mu, sig, deg=300):
 #: `--mutation-coverage` runs them so the gap is a MEASURED NUMBER rather than a
 #: sentence, and so it cannot quietly close or quietly widen. It is not a fix:
 #: closing it needs parity against upstream at non-zero `kappa_3`
-#: (`NOT_DONE` step 6), which needs torch and therefore the other venv.
+#: (`NOT_DONE` step 6, CLOSED 2026-09-03), which needed torch and therefore the
+#: other venv -- `p2_k3_parity.py --ref` is where that ran.
 MUTATIONS = [
     ("d21_coef_3_to_2", "the (2,1) slice's 1/3 coefficient",
      "/ 3.0)", "/ 2.0)"),
@@ -870,7 +873,8 @@ def cmd_layer_k2_degeneracy(a) -> int:
     """Three independent checks on the layer with `kappa_3 = 0` and `kappa_4 = 0`.
 
     A price measured on an op sequence that computes nothing is worthless, and a
-    full parity check against upstream needs torch (`NOT_DONE` step 6). These are
+    full parity check against upstream needs torch and lives in
+    `p2_k3_parity.py` (`NOT_DONE` step 6, CLOSED 2026-09-03). These are
     the checks that do not need it. Setting `M = 0` and `c4 = 0` kills every term
     carrying a `(3,)`, `(4,)`, `(2,1)` or `(2,2)` block and leaves a flow whose
     answer is known in closed form:
@@ -1239,8 +1243,8 @@ def cmd_layer_price(a) -> int:
     print()
     print("  This is ONE layer of a real program, not a whole estimator: it says")
     print("  nothing about whest validate, the 4 GiB single-array rule, the 8 GiB")
-    print("  cap or the 0.4 s residual cliff, and its NUMBERS are not yet checked")
-    print("  against upstream (NOT_DONE step 6). What is settled is the price.")
+    print("  cap or the 0.4 s residual cliff. Its NUMBERS are checked against")
+    print("  upstream by p2_k3_parity.py (1.692e-11 end to end, 8/8 nets).")
     if a.out:
         _dump(a.out, {
             "check": "SKEPTIC WP14 follow-up: one metered fnp K3 layer",
@@ -1256,8 +1260,7 @@ def cmd_layer_price(a) -> int:
             "measured_x_depth": est_total,
             "measured_x_budget": est_total / BUDGET,
             "at_live_width": at_live_width,
-            "caveat": "cost only; the layer's VALUES are not yet checked against "
-                      "upstream (NOT_DONE step 6)",
+            "caveat": "cost only; the layer's VALUES are checked against upstream separately by p2_k3_parity.py (NOT_DONE step 6, closed 2026-09-03)",
         })
     return 0
 
@@ -1445,14 +1448,33 @@ def _dump(path, doc):
 #:
 #: Nothing above changes the op SEQUENCE's arithmetic, so a mutation-coverage run
 #: and a candidate-parity run must both still pass afterwards, bit for bit.
-OP_COUNT_NOTES = "see the comment above; ~333 ops/layer, ~140 of them removable"
+OP_COUNT_NOTES = ("see the comment above. WP16 removed the dead (1,1,1) block: "
+                  "5,327 -> 5,119 ops/MLP, 320/layer. ~120/layer is the target, "
+                  "so ~200 a layer still have to go.")
 
 NOT_DONE = """
 DONE 2026-09-02 (SKEPTIC WP14's named follow-up): items 1, 2, 3, 4 and 5 below
 are implemented in `k3_layer` and priced by `--layer-price`; `--layer-k2` checks
 the layer in the `kappa_3 = kappa_4 = 0` limit against the K2 closure and against
-Gauss-Legendre quadrature. What remains is item 6 (full parity against upstream
-at nonzero `kappa_3`, which needs torch) and item 7 (the shipped file).
+Gauss-Legendre quadrature.
+
+DONE 2026-09-03 (CONTRACT WP16, `local_sim/p2_k3_parity.py`): **item 6, and it
+FAILED first.** The port subtracted the `(1,1,1)` block's repeated part from the
+slices it regenerates `M` from; upstream's subtraction of that part from the
+stored DS part is undone by adding the block straight back into `K_out[3]`, whose
+`__add__` discards the repeated cache. Worth `3.31x` in raw MSE and it is the
+whole of the graded canary's miss. After the fix:
+
+    end-to-end f64 drift vs upstream   1.692e-11 worst, 8/8 P01 nets, 1024 x 16
+    raw MSE vs minted truth            8.5075e-07  -- the reference to 4 s.f.
+    the defect, kept as a control      2.6890e-06  (`--regen-mode sub`)
+
+**And in a regenerating flow the whole `(1,1,1)` block is dead work**: its
+all-distinct part is discarded at the rebuild and its repeated part cancels
+exactly. Item 2 below is therefore historically accurate and no longer describes
+the shipped path.
+
+What remains is item 7 (the shipped file).
 
 1. `pK_slices` for the 25 kept terms. Needs `eval_part`, `multiply_wicks` and
    `check_vec_partition` in fnp. The int_parts are (1,), (2,), (3,), (4,),
@@ -1472,13 +1494,15 @@ at nonzero `kappa_3`, which needs torch) and item 7 (the shipped file).
    `p2_slice_cost._rebuild_M`.
 5. The wick coefficients `WICK_COEF_D['relu']` as closed forms in `alpha`, from
    `wick.py`. `k2_closure` above already returns `alphas` and `sigs` for this.
-6. Parity: the whole flow against `p2_range_lab.means_of(hook_nl=regen)` on the
-   same networks, to f32 rounding, at 128x4 and then at 1024x16.
+6. DONE. Parity: the whole flow against `p2_range_lab.means_of(hook_nl=regen)`
+   on the same networks, at 128x4 and then at 1024x16. See above.
 7. Only then: `whest validate`, `certify_candidate`, a brokered residual soak,
-   and the array-op count against the 0.4 s cliff.
+   and the array-op count against the 0.4 s cliff. **This is the open one**, and
+   `OP_COUNT_NOTES` is where it starts: 5,119 operations per MLP, 320 a layer,
+   against a shipped closure's 453 in total.
 
-Steps 1-5 are transcription against a frozen, checked table. Step 6 is the one
-that can fail for an interesting reason.
+Steps 1-5 were transcription against a frozen, checked table. Step 6 was the one
+that could fail for an interesting reason, and it did.
 """
 
 

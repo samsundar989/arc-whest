@@ -22,7 +22,8 @@ either file:
 
 WHAT THIS DOES *NOT* ESTABLISH, and it is the same gap the lab flow has:
 neither program's values are checked against upstream at non-zero `kappa_3`
-(`p2_k3_fnp.NOT_DONE` step 6). Two spellings agreeing with each other says the
+(`p2_k3_fnp.NOT_DONE` step 6, CLOSED 2026-09-03 by `p2_k3_parity.py`). Two
+spellings agreeing with each other still says only the
 transcription did not drift; it says nothing about whether the transcription was
 right in the first place.
 
@@ -143,7 +144,8 @@ def main() -> int:
     print()
     print("  This says the transcription did not drift. It does NOT say the")
     print("  transcription was right: neither program's values are checked")
-    print("  against upstream at non-zero kappa_3 (p2_k3_fnp.NOT_DONE step 6).")
+    print("  against upstream at non-zero kappa_3 -- that is p2_k3_parity.py,")
+    print("  which measured 1.692e-11 end to end on 8/8 P01 nets on 2026-09-03.")
     print("=" * 78)
 
     if a.out:

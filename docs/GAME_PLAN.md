@@ -22,8 +22,9 @@
 >
 > **1. Finish the `fnp` port and present a canary.** `local_sim/p2_k3_fnp.py`.
 > The layer exists, is metered and passes three closed-form checks; what remains
-> is named in that module's `NOT_DONE` — parity against upstream at non-zero
-> `kappa_3` (step 6, the one that can fail for an interesting reason), then an
+> was named in that module's `NOT_DONE` — parity against upstream at non-zero
+> `kappa_3` (step 6, **CLOSED 2026-09-03**: it did fail, for an interesting
+> reason, and `CONTRACT WP16` is the record), then an
 > actual `Estimator` at live shape, then `certify_candidate` → a `gpuq`-brokered
 > residual soak (worst run, `>= 4x` headroom) → the Linux memory gate → full-suite
 > metered FLOPs including the `+2**24` server offset → an exact

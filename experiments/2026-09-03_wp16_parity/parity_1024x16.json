@@ -1,0 +1,768 @@
+{
+ "check": "WP16 Blocker A: fnp port vs upstream torch reference, component ladder at two points per layer",
+ "contract": "experiments/LOG.md 2026-09-03 CONTRACT WP16, HEAD 7169392",
+ "A": {
+  "side": "port",
+  "regen_mode": "nosub",
+  "dtype": "f64",
+  "per_net": [
+   {
+    "net": 0,
+    "seed": 40821001168,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 1,
+    "seed": 40821001169,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 2,
+    "seed": 40821001170,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 3,
+    "seed": 40821001171,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 4,
+    "seed": 40821001172,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 5,
+    "seed": 40821001173,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 6,
+    "seed": 40821001174,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 7,
+    "seed": 40821001175,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   }
+  ],
+  "width": 1024,
+  "depth": 16,
+  "n_nets": 8,
+  "seeds": [
+   40821001168,
+   40821001169,
+   40821001170,
+   40821001171,
+   40821001172,
+   40821001173,
+   40821001174,
+   40821001175
+  ],
+  "seed_note": "P01[40,821,001,168..40,821,001,175]",
+  "weights_sha256": "6bb3a4957d501a77931139473c59e44b47d3073eef7dcebdbb65e3b72025986f",
+  "full_layers": [
+   0,
+   1
+  ]
+ },
+ "B": {
+  "side": "ref",
+  "regen_mode": "dsproj (upstream regen hook)",
+  "dtype": "f64",
+  "device": "cpu",
+  "width": 1024,
+  "depth": 16,
+  "n_nets": 8,
+  "seeds": [
+   40821001168,
+   40821001169,
+   40821001170,
+   40821001171,
+   40821001172,
+   40821001173,
+   40821001174,
+   40821001175
+  ],
+  "seed_note": "P01[40,821,001,168..40,821,001,175]",
+  "weights_sha256": "6bb3a4957d501a77931139473c59e44b47d3073eef7dcebdbb65e3b72025986f",
+  "full_layers": [
+   0,
+   1
+  ]
+ },
+ "e2e_rel_per_net": [
+  1.4940443204183456e-11,
+  1.3223197471328416e-11,
+  1.47777501617062e-11,
+  1.6918227451369586e-11,
+  1.3714611516941499e-11,
+  1.437960706201713e-11,
+  1.5213382575228435e-11,
+  1.5978503053464264e-11
+ ],
+ "final_layer_rel_per_net": [
+  2.4923140780467474e-11,
+  2.2362269775016967e-11,
+  2.4851499229718767e-11,
+  3.3516618842546704e-11,
+  2.1596074327720167e-11,
+  2.268938265632805e-11,
+  2.561051083429262e-11,
+  3.1687584296458524e-11
+ ],
+ "e2e_worst": 1.6918227451369586e-11,
+ "e2e_best": 1.3223197471328416e-11,
+ "gate": 0.01,
+ "gate_clause1_pass": true,
+ "ladder_net0": [
+  {
+   "layer": 0,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 0.0,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 0,
+   "point": "lin",
+   "component": "cov_pre",
+   "rel": 8.735680957168968e-16,
+   "rel_vs_transpose": 8.735680957168968e-16
+  },
+  {
+   "layer": 0,
+   "point": "lin",
+   "component": "s3",
+   "rel": 0.0,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 0,
+   "point": "lin",
+   "component": "s21",
+   "rel": 0.0,
+   "rel_vs_transpose": 0.0
+  },
+  {
+   "layer": 0,
+   "point": "nl",
+   "component": "mu",
+   "rel": 4.687468123097371e-16,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 0,
+   "point": "nl",
+   "component": "cov",
+   "rel": 9.09665279794958e-16,
+   "rel_vs_transpose": 9.09665279794958e-16
+  },
+  {
+   "layer": 0,
+   "point": "nl",
+   "component": "K3",
+   "rel": 1.4341656524618708e-15,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 0,
+   "point": "nl",
+   "component": "K21",
+   "rel": 9.536456695223094e-16,
+   "rel_vs_transpose": 0.031680798919905974
+  },
+  {
+   "layer": 0,
+   "point": "nl",
+   "component": "M",
+   "rel": 1.0867478499129955e-15,
+   "rel_vs_transpose": 0.027794074426552202
+  },
+  {
+   "layer": 0,
+   "point": "nl",
+   "component": "c4",
+   "rel": 7.450581392169575e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 1,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 1.031961428770832e-15,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 1,
+   "point": "lin",
+   "component": "cov_pre",
+   "rel": 1.4011167692339624e-15,
+   "rel_vs_transpose": 1.4011167692339624e-15
+  },
+  {
+   "layer": 1,
+   "point": "lin",
+   "component": "s3",
+   "rel": 1.463893490861037e-15,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 1,
+   "point": "lin",
+   "component": "s21",
+   "rel": 1.717612922526719e-15,
+   "rel_vs_transpose": 1.4124391092661344
+  },
+  {
+   "layer": 1,
+   "point": "nl",
+   "component": "mu",
+   "rel": 1.4261256839660969e-12,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 1,
+   "point": "nl",
+   "component": "cov",
+   "rel": 3.818706406494506e-11,
+   "rel_vs_transpose": 3.818706406494506e-11
+  },
+  {
+   "layer": 1,
+   "point": "nl",
+   "component": "K3",
+   "rel": 2.4165392648999412e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 1,
+   "point": "nl",
+   "component": "K21",
+   "rel": 2.0563825762654798e-10,
+   "rel_vs_transpose": 0.44323329657975835
+  },
+  {
+   "layer": 1,
+   "point": "nl",
+   "component": "M",
+   "rel": 1.8937981101492492e-10,
+   "rel_vs_transpose": 0.4076776947419517
+  },
+  {
+   "layer": 1,
+   "point": "nl",
+   "component": "c4",
+   "rel": 1.1429956265988662e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 2,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 1.449096854376925e-12,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 2,
+   "point": "lin",
+   "component": "s3",
+   "rel": 1.2741930137680365e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 2,
+   "point": "nl",
+   "component": "mu",
+   "rel": 2.668498282194671e-12,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 2,
+   "point": "nl",
+   "component": "K3",
+   "rel": 8.352428971778913e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 2,
+   "point": "nl",
+   "component": "c4",
+   "rel": 1.515810916455523e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 3,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 2.7174983831538577e-12,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 3,
+   "point": "lin",
+   "component": "s3",
+   "rel": 2.205415554247951e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 3,
+   "point": "nl",
+   "component": "mu",
+   "rel": 4.147124298632264e-12,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 3,
+   "point": "nl",
+   "component": "K3",
+   "rel": 1.769018059148835e-10,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 3,
+   "point": "nl",
+   "component": "c4",
+   "rel": 1.8469283709620188e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 4,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 4.025362286937475e-12,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 4,
+   "point": "lin",
+   "component": "s3",
+   "rel": 2.958891400268674e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 4,
+   "point": "nl",
+   "component": "mu",
+   "rel": 5.4032556475681714e-12,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 4,
+   "point": "nl",
+   "component": "K3",
+   "rel": 3.1245088800112537e-10,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 4,
+   "point": "nl",
+   "component": "c4",
+   "rel": 2.1702908802094547e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 5,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 5.2731360514052595e-12,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 5,
+   "point": "lin",
+   "component": "s3",
+   "rel": 3.4233254328579567e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 5,
+   "point": "nl",
+   "component": "mu",
+   "rel": 6.833054627457445e-12,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 5,
+   "point": "nl",
+   "component": "K3",
+   "rel": 4.5768785526453397e-10,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 5,
+   "point": "nl",
+   "component": "c4",
+   "rel": 2.483764883019174e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 6,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 6.743610557315714e-12,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 6,
+   "point": "lin",
+   "component": "s3",
+   "rel": 4.037685578563676e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 6,
+   "point": "nl",
+   "component": "mu",
+   "rel": 8.612221550782007e-12,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 6,
+   "point": "nl",
+   "component": "K3",
+   "rel": 6.299632266818109e-10,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 6,
+   "point": "nl",
+   "component": "c4",
+   "rel": 2.7563071994258096e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 7,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 8.606238343796638e-12,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 7,
+   "point": "lin",
+   "component": "s3",
+   "rel": 4.716386451810555e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 7,
+   "point": "nl",
+   "component": "mu",
+   "rel": 1.0544472404128827e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 7,
+   "point": "nl",
+   "component": "K3",
+   "rel": 8.366289302274018e-10,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 7,
+   "point": "nl",
+   "component": "c4",
+   "rel": 3.021415947178584e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 8,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 1.0364821017702426e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 8,
+   "point": "lin",
+   "component": "s3",
+   "rel": 5.012951334171032e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 8,
+   "point": "nl",
+   "component": "mu",
+   "rel": 1.2148598352429534e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 8,
+   "point": "nl",
+   "component": "K3",
+   "rel": 1.076363822848052e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 8,
+   "point": "nl",
+   "component": "c4",
+   "rel": 3.3215381993337655e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 9,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 1.2645797883461238e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 9,
+   "point": "lin",
+   "component": "s3",
+   "rel": 5.515427806481178e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 9,
+   "point": "nl",
+   "component": "mu",
+   "rel": 1.3799218413621298e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 9,
+   "point": "nl",
+   "component": "K3",
+   "rel": 1.3359306668312566e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 9,
+   "point": "nl",
+   "component": "c4",
+   "rel": 3.609544961148218e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 10,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 1.3916831581521491e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 10,
+   "point": "lin",
+   "component": "s3",
+   "rel": 5.440004369651115e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 10,
+   "point": "nl",
+   "component": "mu",
+   "rel": 1.5132490999320417e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 10,
+   "point": "nl",
+   "component": "K3",
+   "rel": 1.5086916383096992e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 10,
+   "point": "nl",
+   "component": "c4",
+   "rel": 3.879603147868457e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 11,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 1.5809573640721014e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 11,
+   "point": "lin",
+   "component": "s3",
+   "rel": 5.690496976670025e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 11,
+   "point": "nl",
+   "component": "mu",
+   "rel": 1.840469971276812e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 11,
+   "point": "nl",
+   "component": "K3",
+   "rel": 1.851149202865147e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 11,
+   "point": "nl",
+   "component": "c4",
+   "rel": 4.1981529924959e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 12,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 1.8663136525244174e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 12,
+   "point": "lin",
+   "component": "s3",
+   "rel": 6.120333863677684e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 12,
+   "point": "nl",
+   "component": "mu",
+   "rel": 1.907125824029946e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 12,
+   "point": "nl",
+   "component": "K3",
+   "rel": 2.120553885590332e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 12,
+   "point": "nl",
+   "component": "c4",
+   "rel": 4.478815204135842e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 13,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 1.9787280138965174e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 13,
+   "point": "lin",
+   "component": "s3",
+   "rel": 6.244032186881974e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 13,
+   "point": "nl",
+   "component": "mu",
+   "rel": 2.100630422596974e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 13,
+   "point": "nl",
+   "component": "K3",
+   "rel": 2.4182847801579537e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 13,
+   "point": "nl",
+   "component": "c4",
+   "rel": 4.864839252924954e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 14,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 2.1405853595185164e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 14,
+   "point": "lin",
+   "component": "s3",
+   "rel": 6.318486751764409e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 14,
+   "point": "nl",
+   "component": "mu",
+   "rel": 2.4481734147428334e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 14,
+   "point": "nl",
+   "component": "K3",
+   "rel": 2.4559989652445055e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 14,
+   "point": "nl",
+   "component": "c4",
+   "rel": 5.117963424438495e-08,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 15,
+   "point": "lin",
+   "component": "mu_pre",
+   "rel": 2.239945679694766e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 15,
+   "point": "lin",
+   "component": "s3",
+   "rel": 6.416896460746108e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 15,
+   "point": "nl",
+   "component": "mu",
+   "rel": 2.4923140780467474e-11,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 15,
+   "point": "nl",
+   "component": "K3",
+   "rel": 2.790575505768598e-09,
+   "rel_vs_transpose": NaN
+  },
+  {
+   "layer": 15,
+   "point": "nl",
+   "component": "c4",
+   "rel": 5.357857055030746e-08,
+   "rel_vs_transpose": NaN
+  }
+ ],
+ "caveat": "Clause 1 only. Two programs agreeing is not proof either is correct; clause 2 ties the port to minted truth."
+}
