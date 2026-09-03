@@ -243,7 +243,7 @@ corrected cell is the one tabled above.
 
 ---
 
-## 6. What an estimator may actually spend *(new 2026-09-02; **materially corrected the same day** — see 9.4; **executed rather than projected** — see 6.5; **and then found to be measuring the free half of the objective** — see 6.6, 6.7)*
+## 6. What an estimator may actually spend *(new 2026-09-02; **materially corrected the same day** — see 9.4; **executed rather than projected** — see 6.5; **found to be measuring the free half of the objective** — see 6.6, 6.7; **and confirmed on 100 graded networks, which then moved the binding constraint again** — see 6.8)*
 
 **Evidence: CONFIRMED.** `experiments/2026-09-02_wp14_range/e0_cost_f64.json` and
 `e0_cost_f32.json`, executed in the official metering package inside a real budget
@@ -525,6 +525,82 @@ operations out of every network, and left the answer correct.
 
 ---
 
+### 6.8 The evaluator confirmed the fix on 100 of its own networks — and then told us the binding cost was somewhere else entirely *(new 2026-09-03)*
+
+**Evidence: CONFIRMED**, on the organisers' own labels, with a matched control in
+the same run.
+
+§6.7's fix was verified against our own minted ground truth. That leaves one risk
+a self-check cannot bound: a defect shared by *all three* of our programs — the
+reference implementation, the flow driver, and the network builder — would be
+invisible to every comparison among them. So we ran the fixed port on the
+evaluator, on 100 networks, with our shipped file as a control in the same run.
+
+| 100 graded networks | raw MSE | adjusted | failed |
+|---|---:|---:|---:|
+| shipped second-order file (control) | `4.05e-06` | `4.05e-07` | 0 / 100 |
+| **fixed third-order flow** | **`8.75e-07`** | **`8.75e-08`** | **0 / 100** |
+| | **`4.63x` better** | | |
+
+The control reproduced the figure we had carried for it since August **to
+`0.01%`**, which is what licenses reading the other row. And the defective port
+had scored `2.8192e-06` on twenty networks; the fixed one scores `8.75e-07` on a
+hundred — `3.22x`, against the `3.16x` our offline paired measurement predicted.
+**The shared-defect risk is now bounded everywhere, not just where our own
+oracle could see, because the grader's labels are independent of all three of our
+programs.**
+
+**Then the same run told us something we had been measuring wrongly for weeks.**
+Phase 2's residual limit is not a cost — it is a `0.4 s` per-network cliff that
+*fails* the network. We had set ourselves a safety bar of `4x` headroom against
+it. That bar was calibrated on a run-to-run spread of about `2.4x`, measured on
+our own workstation.
+
+On the evaluator, the per-network spread across 100 rows is **`1.20x` from
+minimum to maximum**, with the worst network `13%` above the 99th percentile.
+
+| per-network residual, 100 graded rows | seconds |
+|---|---:|
+| minimum | `0.1493` |
+| median | `0.1537` |
+| 99th percentile | `0.1593` |
+| **maximum** | **`0.1797`** |
+| headroom against the `0.4 s` cliff | **`2.23x`** |
+
+**The bar was calibrated against noise the evaluator does not have.** Two things
+follow, and they point in opposite directions, which is why we are writing both
+down.
+
+- The safety margin we demanded was set by *our* measurement noise rather than by
+  the *evaluator's* dispersion. A `2.23x` margin against a distribution whose
+  observed spread is `1.20x` is a different proposition from a `2.23x` margin
+  against a `2.4x` spread, and we had been treating them as the same.
+- **But our own instrument is worse than we thought, in exactly the direction
+  that makes local measurement useless here.** Two runs of the *same* evaluator,
+  on files differing by `2.3%` in operation count, reported mean residuals
+  differing by **`31%`**. An operation count cannot do that. The runner is
+  sensitive to host load, and the only defensible statement is the narrow one:
+  *the evaluator is the only thing that can fail a network, and it failed none.*
+
+**The lesson, and it is the one we would most want a reader to take from §6 as a
+whole.** We spent weeks reducing a FLOP count that turned out to be free — the
+score multiplier was already pinned at its floor, so arithmetic was not being
+charged at the margin (§6.6). We then spent days measuring a wall-clock residual
+on a machine that cannot measure it. **The quantity that actually binds is the
+number of array *operations* per network**, and the evidence for that is the one
+clean coefficient this project owns: the evaluator's mean-residual ratio between
+our two files was `5.82x` where their local *operation* ratio was `5.98x` —
+agreement to `3%`, where every attempt to establish the same thing from local
+timings had been contaminated. **Count the operations, not the arithmetic, and
+take the timing from the deployment authority or not at all.**
+
+> **A `raw` report does not print the number a tail gate is written on.** Our
+> requirement was on the *worst* network. The first graded run gave us an
+> aggregate, and four hours of local residual measurement went into trying to
+> reconstruct what one command-line flag (`--detail full`) returned directly.
+
+---
+
 ## 7. The off-diagonal lane: the information is findable in principle and not in practice
 
 **Evidence: CONFIRMED**, pre-registered as `CONTRACT WP13` with nine numbered
@@ -573,12 +649,84 @@ orders of magnitude more than the object it selects — which is the same wall t
 norm-optimal compression hit, now measured on the readout functional instead of
 the Frobenius norm, where it was supposed not to exist.
 
-**What we would tell the next person.** The open question this leaves is sharp
-and cheap: the residual's rank collapse tracks the covariance's, which the flow
-already holds for free. If even part of the residual's leading subspace lies in
-the covariance's, the selector is free. It cannot be all of it — the ratio of
-their effective ranks grows to `2.94` — so the question is a containment
-*fraction*, and it is the one experiment we would run next.
+**What we would tell the next person.** The open question this left was sharp and
+cheap — the residual's rank collapse tracks the covariance's, which the flow
+already holds for free, so if any of the residual's leading subspace lay inside
+the covariance's, the selector would be free. **We ran it, and the answer is
+exactly nothing.** The containment fraction equals `r/n` to three decimal places
+at every depth, every rank, in both single and double precision, with a positive
+control at `1.000` — that is, the covariance's dominant range contains the
+residual's leading subspace *exactly as much as a random subspace of the same
+dimension does*. Six selectors are now dead: five column-weight rules and the one
+free subspace the flow already carries.
+
+**So we stopped looking for a selector and asked whether the discarded object can
+be REGENERATED.** A selector can only choose a subspace of something the flow
+already holds, and the flow does not hold this object at all — it is created and
+destroyed within a single layer. That is a different question, and it has a
+mechanism: the discarded block's leading term is a specific quadratic Hadamard
+form in the covariance under diagonal rescalings by functions of the mean and
+standard deviation, both of which the flow *does* carry.
+
+### 7.1 How deep is the discarded object's memory? *(new 2026-09-03)*
+
+**Evidence: CONFIRMED**, pre-registered, and **the gate FAILED**.
+
+The object discarded at layer `l` is a superposition of blocks generated at
+`l-1, l-2, …`, propagated forward. If that sum is dominated by its youngest
+terms, it can be rebuilt from a short window and carried cheaply. We measured the
+fraction of its Frobenius energy that a `k`-generation memory recovers — as an
+`R²`, so a window that recovered something orthogonal would get no credit — on 16
+networks at the live shape, layer-averaged over the layers whose slice is
+actually read downstream, with a double-precision control on two of them.
+
+| generations kept | fraction of the discarded energy recovered |
+|---|---:|
+| 1 (age `l-1`) | `0.338` |
+| **2 (ages `l-1`, `l-2`)** | **`0.573`** |
+| 3 | `0.732` |
+
+Per-network spread at two generations is `0.553`–`0.593`, so this is not a
+sampling accident, and single and double precision agree to `1.6%`, so it is not
+a precision artifact.
+
+**Our pre-registered prediction said one generation would explain `≥ 50%` and two
+would explain `≥ 70%`. Both halves are wrong**, and the direction came from an
+earlier locality result whose single-layer share we had read as `0.42`–`0.70`; the
+true single-layer share is `0.34`, half of what that range suggested.
+
+**The gate was written on two generations and two generations give `0.573`. It
+fails.** Three generations give `0.732`, which clears the number — and *moving the
+gate to three because three passes is the exact post-hoc adjustment we had
+already caught ourselves making once*, so we refused it in writing and recorded
+the refusal in the same commit as the result.
+
+**What the failure costs, in arithmetic rather than in evidence.** Carrying one
+extra generation exactly doubles the rank of the carried tensor, which costs two
+extra full matrix products per layer and breaks a symmetry collapse that saves a
+third — about **five extra matrix products per layer against a margin of
+`1.35`**. Three generations is worse. A low-rank sketch replaces each product
+with a thin one at `r/n` of the cost, and the affordability horizon is `r ≤ 192`,
+not the `512` we had assumed. So the mechanistic route survives only as *a
+rank-`≤192` sketch of three generations recovering `~73%` of one of the two
+discarded slices* — and **`73%` of that slice is about `44%` of the flow's total
+error**, because the other discarded slice carries roughly `40%` of it and this
+measurement says nothing about that one.
+
+**We killed the route on that arithmetic, not on the measurement.** Either
+discarded slice, corrected *exactly*, saturates at about `2.4x` end-to-end
+improvement — we measured `2.53x` for one and `1.55x` for the other — so a route
+that adds operations on the axis that is currently binding the whole submission
+(§6.8) to recover a fraction of one of them is not a trade available to us. Its
+closed-form generating terms survive as *features* of the supervised map that
+replaced it, where they cost what an elementwise term costs rather than what a
+carried generation costs.
+
+> **The most useful thing this measurement did was fail.** It was designed so
+> that a specific arithmetic consequence followed from a specific number, and the
+> number came in where the consequence was fatal. That is worth more than a
+> passing gate on a route we would then have had to price under pressure.
+
 
 ---
 
