@@ -28431,3 +28431,194 @@ a predicted `8.5075e-07`, with a matched control transferring to `3.2%`. So:
 
 `CONTRACT WP15`'s gates are unchanged and no threshold moved; this adds a
 qualification to one evidence row, before any data exists for either arm.
+
+---
+
+# 2026-09-03 — CONTRACT (Rule 1): **WP16 — BLOCKER A, port parity against upstream at non-zero `kappa_3`**
+
+**Class: STRATEGIC.** It decides whether the K3 flow this project would ship
+computes the same function whose accuracy (`8.5075e-07`) was measured on the
+torch side, and every WP15 gate is written against that flow. Pre-registered
+**before any data exists**; HEAD at write time `5fedb4c`; `preflight.ps1` GREEN
+12/12 at that HEAD. Directing brief: strategist review of the 2026-09-02
+stopping-point audit (parity -> op count -> WP15 arms, in that order).
+
+## Question
+
+`p2_k3_fnp.k3_flow` (the `fnp` port, the thing the grader can run) and
+`p2_range_lab.means_of(hook_nl=_regen_hook_nl())` (the torch reference, the thing
+`8.5075e-07` was measured on) are supposed to be the same function. The canary
+says they are not: the port scored `2.8192e-06` on 20 official rows where the
+reference predicted `8.5075e-07`, a **`3.31x` miss**, while the matched v2.6.1
+control transferred to `3.2%`. **Where do they diverge, and is it spelling or
+precision?**
+
+## Evidence
+
+| # | item | status |
+|---|---|---|
+| E1 | canary raw MSE `2.8192e-06` on the official `mini` split, `0/20` failed, FLOP parity exact | **CONFIRMED** (grader, 2026-09-02) |
+| E2 | v2.6.1 control transfers to `3.2%` on the same 20 rows -> split/networks/instrument are fine | **CONFIRMED** (same run) |
+| E3 | reference raw `8.5075e-07` on 8 `P01` nets, torch, f32 | **CONFIRMED** (WP14 C0-i, `gpuq` 121) |
+| E4 | `--layer-k2` passes at `kappa_3 = kappa_4 = 0` (mean `0.00`, cov `5.1e-16`, third-cumulant **diagonal** `1.07e-14`) | **CONFIRMED** — and it never tests the `(2,1)` slice |
+| E5 | 7 of 7 value-destroying mutations survive all three existing checks | **CONFIRMED** (`mutation_coverage.json`) |
+| E6 | counted FLOPs on this path are value-independent | **CONFIRMED** (`p2_slice_cost.py --value-invariance`) |
+
+## Hypothesis + mechanism
+
+**H1 (primary): the port subtracts the `(1,1,1)` block's repeated part from the
+slices it regenerates `M` from, and upstream does not.** Derived from upstream
+rev `93d091a4`, by hand, before any run:
+
+1. `factor_k3.py` does `K_ds[3] -= pK_111.get_repeated()` — it removes the
+   factored block's repeated part **from the stored DS part only**, so that the
+   sum does not double count.
+2. It then returns `K_out[3] = pK_111 + FactoredTensor.from_dstensor(K_ds[3])`,
+   and `FactoredTensor.__add__` **discards the repeated cache** (its own TODO says
+   so). So `K_out[3].get_repeated()` recomputes from the concatenated factors.
+3. `_factored_get_dslice` is additive over the concatenated `r`-blocks (the
+   elementwise products never mix `r` indices), so
+   `rep(K_out[3]) = rep(pK_111) + rep(from_dstensor(K_ds[3]))`.
+4. `from_dstensor` is an exact right inverse of `get_repeated`: with
+   `A = diag(D3) + 3 D21^T` and `D21` diagonal-free, the `(3,)` slice comes back
+   as `diag(A) = D3` and the `(2,1)` slice as `(1/3) A^T` off-diagonal `= D21`.
+   Checked by hand for both surviving block permutations.
+5. Therefore `rep(K_out[3]) = rep(pK_111) + (K_ds3_orig - rep(pK_111)) = K_ds3_orig`
+   — **the un-subtracted pK->K output.** The regeneration hook rebuilds `M` from
+   *that*.
+
+`p2_k3_fnp.k3_layer` instead computes `S3 = K[(3,)] - p111_3`,
+`S21 = K[(2,1)] - p111_21` and rebuilds from those. The port's `p111_3` and
+`p111_21` were re-derived here and **are exactly `rep(pK_111)`** (block 1 gives
+`w1^3 D3` and `w1_i^2 w1_j D21`; block 2's `(3,)` slice is zero on `C11`'s zero
+diagonal and its `(2,1)` slice is `(fac1 . fac3) off_mask` from the single
+surviving `({0,2},{1})` block permutation). So the port's `M_out` is wrong by
+**`2 x rep(pK_111)`** — it subtracts where upstream effectively adds nothing.
+
+**Why every existing check is blind to it.** At `kappa_3 = 0` we have `M = 0`,
+hence `D3 = D21 = 0` and `p111_3 = 0` — so the `(3,)` slice, which is all
+`--layer-k2` tests at third order, is **exactly right in the degenerate limit**.
+`p111_21` is *not* zero there (it is `fac1 . fac3`, built from the covariance),
+but no check reads the `(2,1)` slice. This is the same blind spot `SKEPTIC
+WP14-FOLLOWUP` measured as 0-of-7 mutations killed.
+
+**H2 (alternative): f32 precision in a cancelling sum.** Kept live because the
+brief names it and because H1 must be shown to be the *whole* gap, not part of it.
+
+## Intervention
+
+The smallest change that discriminates: **run both programs on the same networks
+in f64 and compare, layer by layer, at two points per layer.** No fitting, no
+selection, no tuning. Then flip exactly one line (`- p111` -> no subtraction)
+behind a flag and re-run.
+
+New instrument `local_sim/p2_k3_parity.py`; `k3_layer`/`k3_flow` gain a
+`probe=None` callback and a `regen_mode` switch, both no-ops at their defaults.
+
+## Predictions (numbered, before the data)
+
+1. **P1.** End-to-end f64 drift of the port vs the reference at `128 x 4`,
+   `regen_mode="sub"` (today's shipped spelling): **> 10%** relative on the final
+   layer's means. *(Falsifies H1 if it comes back < 1%.)*
+2. **P2.** With `regen_mode="nosub"`: **<= 1e-10** relative at `128 x 4` in f64 —
+   i.e. agreement to f64 round-off, not merely "closer".
+3. **P3.** The ladder localizes it to the **`(2,1)` slice at the nonlinear point**,
+   not the linear point: `mu_pre`, `cov_pre`, `s3_pre`, `s21_pre` all agree to
+   `<= 1e-12` at **layer 0 and layer 1** under both modes.
+4. **P4.** At **layer 0** the `(3,)` slice agrees under both modes (`p111_3 = 0`
+   there) and the `(2,1)` slice does **not** under `"sub"`. This is the exact
+   signature that explains why `--layer-k2` passed.
+5. **P5.** The transpose orientation is **already correct** (`S21[i,j] = k3[i,i,j]`,
+   rebuilt as `3 S21^T`): the transposed comparison will be *worse*, not better,
+   at every layer. *(Named as a suspect by the brief; I predict it is not one.)*
+6. **P6.** The factor `3` and the sign in `diag(S3) + 3 S21^T` are **correct**.
+7. **P7.** Repeating the fixed port at **f32** vs the f64 reference gives
+   `<= 1e-4` relative — i.e. precision is a *second-order* effect here and H2 is
+   **not** the explanation for `3.3x`.
+8. **P8.** Fixing H1 **removes** operations and FLOPs: `p111_3`, `p111_21`,
+   `fac1`, `fac3` and `w1_sq` become dead. I predict a **strict decrease** in
+   counted FLOPs per layer, so the `10,837,935,618` floor figure is **superseded
+   downward** and must be re-metered before any price is quoted again.
+9. **P9.** At `1024 x 16` in f64 the fixed port reproduces the reference to
+   `<= 1%` end-to-end on all 8 `P01` networks.
+10. **P10 (the one that matters).** The raw MSE of the fixed port against minted
+    truth on those 8 networks lands inside **`[7.0e-07, 1.1e-06]`**, i.e. it
+    reproduces `8.5075e-07` within noise, rather than `2.8192e-06`.
+11. **P11.** I predict the `--layer-k2` degeneracy check still **passes
+    unchanged** after the fix (it is blind to the change), so it must not be
+    quoted as evidence the fix is right.
+
+## Gate
+
+Set now, from the brief, and passed to nothing that has a default:
+
+> **G-PARITY.** End-to-end relative drift of `k3_flow` (f64) against
+> `means_of(hook_nl=regen)` (f64) `<= 1%` on all 8 `P01` networks at `1024 x 16`,
+> **and** the fixed port's raw MSE against the existing minted truth reproducing
+> `8.5075e-07` within its noise band `[7.0e-07, 1.1e-06]`.
+
+A pass on the first clause alone is **not** a pass: two programs can agree with
+each other and both be the wrong function. The second clause is what ties the
+port back to the number the write-up quotes.
+
+## Falsifier
+
+H1 is rejected if `regen_mode="nosub"` does **not** close the gap at `128 x 4` in
+f64 (P2 fails), or if the ladder shows the first divergence **before** the
+nonlinear step (P3 fails) — in which case the defect is in the linear step or in
+the frozen coefficient tables, and the `(1,1,1)` derivation above is wrong.
+
+## Baseline and tier
+
+Control is the **torch reference on the same weights**, `hook_nl=_regen_hook_nl()`,
+which `p2_range_lab --selftest` S2 has already shown is bit-identical to
+`p2_pb_rank.predict(cap="dsproj")` at `1024 x 16`. Tier: **DESIGN**, `P01`
+`[40,821,001,168 .. 40,821,001,175]` — the *same eight networks* WP13 E2 and
+WP14 C0-i used. **This is a deliberate third overlap on that range and it must be
+declared as such**: the whole point is to re-drive the networks whose truth is
+already minted, and no new statistical claim is made on them. Nothing here reads
+the public split; nothing is fitted anywhere.
+
+## Cost model
+
+**Phase 2, `lambda = 0`, so `C = F`** (`VALIDATION.md` section 2b-ii). This slice
+quotes **no** cost claim: it changes values, so it changes the price, and P8 says
+the price goes **down**. The standing `10,837,935,618`/layer and
+`173,381,273,195`/MLP figures are **frozen as superseded** the moment the fix
+lands, and Blocker B re-meters from scratch. Residual is reported only as
+**headroom against the `0.4 s` cliff**, and never as a local absolute second.
+
+## Statistic
+
+**Deterministic parity, not a statistic.** Relative Frobenius drift per network,
+reported for **all 8 individually** with min/max — never a mean, never a ratio of
+means. No bootstrap, no interval: there is no sampling here. The only place a
+statistic appears is P10's raw-MSE comparison against already-minted truth, which
+is a **paired** re-read of an existing artifact and is quoted with its GT noise
+floor (`1.72e-08`).
+
+## Seed block
+
+`P01[40,821,001,168 .. 40,821,001,175]`, claimed through `local_sim/seed_ledger.py`
+by consumer `local_sim/p2_k3_parity.py`, with a `declare_pair` naming all three
+consumers of that range. **No fresh seeds are spent.** `P05`/`P06` remain
+untouched for WP15.
+
+## Confounders / scope / what must not change
+
+- **Two venvs.** The port runs in `.venv` (real flopscope, no torch); the
+  reference runs in `.venv-gpu` (torch, no flopscope). They exchange `.npz` files
+  and a **sha256 of the weights**, so "same networks" is proved, not assumed.
+- `estimator.py` is not touched. Nothing is submitted. No board is read.
+- The `mini` split is **not** re-read; the `3.3x` is diagnosed off the public data.
+- `init_scale = 2.0` at every layer (convention 3) on **both** sides.
+- If the fix lands, `--mutation-coverage`, `--layer-k2`, `--layer-price`,
+  `--flow-price` and `p2_k3_candidate_parity.py` are all re-run, and the
+  candidate `estimator_wp15_k3_canary.py` must be regenerated — the canary that
+  scored `2.8192e-06` is **retired**, not amended.
+
+**Samuel's prediction: NOT TAKEN for this contract.** Recorded honestly rather
+than fabricated: the brief directed this to run today, and this slice is a
+deterministic correctness check that spends no fresh seeds and promotes nothing.
+His prediction is being taken instead on the question that follows it — whether
+the fix closes the `3.3x` end to end — **before** that data exists.
