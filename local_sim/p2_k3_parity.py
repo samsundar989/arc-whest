@@ -39,7 +39,9 @@ carry the SAME sha256 over the minted weights. "Same networks" is proved here,
 not assumed.
 
     uv run python local_sim/p2_k3_parity.py --port --width 128 --depth 4 --nets 2 \
-        --dtype f64 --regen-mode sub   --out experiments/.../port_sub.npz
+        --dtype f64 --out experiments/.../port.npz            # regen-mode nosub
+    uv run python local_sim/p2_k3_parity.py --port --width 128 --depth 4 --nets 2 \
+        --dtype f64 --regen-mode sub --out experiments/.../port_sub.npz  # the DEFECT
     .venv-gpu\\Scripts\\python.exe local_sim/p2_k3_parity.py --ref --width 128 \
         --depth 4 --nets 2 --dtype f64 --device cpu --out experiments/.../ref.npz
     uv run python local_sim/p2_k3_parity.py --compare experiments/.../port_sub.npz \

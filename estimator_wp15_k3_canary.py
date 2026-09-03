@@ -343,14 +343,24 @@ def _layer(W, state, table, dtype, const, init_scale, last_layer):
         # The same block product appears in several int_parts -- `C11*C11` in all
         # three two-dimensional slices, `D22` likewise -- and was recomputed each
         # time. Memoised on the block tuple: a reuse, not a reassociation.
-        bkey = tuple(tuple(blk["vec"]) for blk in row["blocks"])
+        scalar = float(row["scalar"])
+        # Keyed on (blocks, SCALAR), not blocks alone: `0.5 C11^2` appears in all
+        # three two-dimensional slices and `0.25 D22` likewise, so the scaled
+        # product is what repeats. Still a reuse of an identical expression, so
+        # still bit-exact -- and it removes a `(n, n) x scalar` from each repeat,
+        # which at 1024 is 4 MB of traffic apiece.
+        bkey = (tuple(tuple(blk["vec"]) for blk in row["blocks"]), scalar)
         term = blocks_seen.get(bkey)
-        if term is None and bkey:
+        if term is None and bkey[0]:
             for blk in row["blocks"]:
                 f = S[tuple(blk["vec"])]
                 term = f if term is None else term * f
+            if scalar != 1.0:
+                term = term * scalar
             blocks_seen[bkey] = term
-        scalar = float(row["scalar"])
+            scalar = 1.0
+        elif term is not None:
+            scalar = 1.0
         if term is None:
             # The empty vec_part is the all-ones tensor; starting from the
             # scalar is the same value for fewer operations. Every such term in
