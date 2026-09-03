@@ -14,6 +14,13 @@ _to_delete/
 !experiments/run_reports/
 !experiments/run_reports/**
 
+# WP16's GOLDEN REFERENCE is load-bearing, not a cache: `p2_k3_fnp.py` hashes it
+# and `--mutation-coverage` cannot run without it. 46 KB. An untracked file that a
+# check depends on is the fail-open class this repository has been bitten by
+# twice, and the gpuq snapshot is built from git -- an ignored file would make
+# every brokered run of that check die.
+!experiments/2026-09-03_wp16_parity/golden_ref_128x4.npz
+
 # large intermediate npz caches live in the scratchpad, not the repo
 experiments/sprint3_robustness/*.npy
 
