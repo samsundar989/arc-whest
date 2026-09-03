@@ -29554,3 +29554,188 @@ and a fresh contract.
 **Samuel's prediction: TO BE TAKEN BEFORE THE RESULTS EXIST**, on § A's gate and
 on B2/B3. Recorded in the next entry; "I don't know" is a valid answer and a blank
 is not.
+
+---
+
+# 2026-09-03 — **WP18 § A EVIDENCE PACKET: the canary was REFUSED at 5/30 invariants, the guarded file is 28/30, and the two that remain are float32 against a float64 threshold**
+
+`gpuq` 189 (certify, graded file), 190 and 192 (Linux memory gate), 194 (certify,
+guarded file). Artifacts in `experiments/2026-09-03_wp18_canary/` and
+`experiments/2026-08-31_wp0cd_certify/linux_memory_gate_estimator_wp18_canary.json`.
+Pinned commit for a Skeptic audit: **`85f3055`** (the guards and their price) and
+**`49e2e42`** (the contract, which precedes every number below).
+
+## The predictions, scored
+
+| # | prediction | outcome |
+|---|---|---|
+| **A1** | `certify_candidate` passes on every section | **REFUTED, and not marginally.** `CANDIDATE REFUSED — 3 failed` on `estimator_wp15_k3_canary.py`, and the invariant suite scored it **5 of 30**. My stated reason — "the file has been through `whest validate`, the 30 invariants and a 100-row official run" — was **false on its second clause**: the 30 invariants had never been run on this file at all. I asserted a check had happened because a *different* file had passed it |
+| **A2** | Linux memory gate passes with headroom `>= 4x` | **HALF HELD.** The gate PASSES `13/13`. Headroom is **`3.63x`** (`VmPeak 2258.8 MB` of `8192 MB`), not `>= 4x`. The magnitude is refuted and is recorded as refuted rather than rounded up |
+| **A3** | negative control DIES, positive control SURVIVES | **HELD.** `requesting 9.0 GiB under a 8192 MB cap DIES  MemoryError`, and the same allocation with no cap succeeds. So the cap was in force and the pass means something |
+| **A4** | the packaged archive validates and its FLOP preview reproduces `x = 0.076684` to `< 0.1%` | **HELD.** `validate_package -> ok=True, issues=[]`; members `estimator.py`, `manifest.json`. Certify measured `C/B = 0.0766840` |
+
+## What was actually wrong with the graded canary, root cause first
+
+**1. NON-FINITE OUTPUT on degenerate networks.** `alpha = mu / sigma` is
+unbounded. With `var` floored at `1e-12`, `sigma` bottoms out at `1e-6`, so a
+layer whose weights are scaled by `1e-3` still has an `O(1)` mean and `alpha`
+reaches `1e6`. Then the batched Horner overflows to `inf` while `phi(alpha)`
+underflows to exactly `0`, and `inf * 0` is **NaN** — which is precisely the
+warning `edge_cases` printed at `(alpha * alpha - 1.0) * phi`. `edge_cases`
+counted `4,352` / `6,400` / `6,144` non-finite entries on three degenerate cases
+and `-4.037e+08` at `32 x 64`. **A NaN output fails the MLP and a failed MLP
+scores as zeros**, so this is the most expensive class of defect the contract has.
+
+**2. NEGATIVE MEANS, on the SCORED row.** `151` of `1024` final-layer entries
+were negative at the live shape, worst `-2.831e-06`.
+
+**3. ORDER-DEPENDENT FLOPS.** The width constants were cached on the instance, so
+the FIRST MLP of a run paid `1,575,424` FLOPs for the off-diagonal mask and every
+later one paid none: **`168,614,058,598` then `168,612,483,174`, `168,612,483,174`,
+`168,612,483,174`**.
+
+## The fixes, and their measured price
+
+| fix | mechanism |
+|---|---|
+| `ALPHA_CAP = 40` | `fnp.clip(mu_pre / sigma, -40, 40)`, one operation a layer. Not slop: `phi` is a float32 zero beyond `13.2` and `Phi` is exactly `0` or `1` there, so every Wick coefficient has already reached its limit; and `40**4 = 2.56e6` cannot overflow float32, which is the property that removes the `inf * 0` |
+| non-negativity | `fnp.maximum(out, 0)` on the assembled answer, one operation for the whole MLP |
+| finite substitution | `fnp.where(fnp.isfinite(out), out, 0)`, two operations for the whole MLP |
+| network-independent price | the constants cache removed; the mask is rebuilt every `predict` |
+
+**`ALPHA_CAP` is measured, not asserted.** `p2_wp18_price.py --alpha-range` reads
+`|alpha|` out of the **uncapped** file — the one the grader scored, which has no
+cap — over 8 He-init networks at `1024 x 16`: worst `9.0400`, so the cap has a
+**`4.4x` margin** and is never approached on the live distribution.
+Artifact `alpha_range_1024x16.json`.
+
+| | graded file | guarded file | delta |
+|---|---:|---:|---:|
+| counted f32 FLOPs (certify, § 6) | `168,629,787,238` | `168,629,918,310` | `+131,072` |
+| `C/B` | `0.0766836` | `0.0766840` | both **PINNED at the `0.1` floor**, and still pinned with the `+2**24` server offset |
+| flopscope **operations** | `2,647` | `2,666` | **`+19`, `+0.72%`** |
+| FLOPs equal across 4 networks in ONE process | **NO** | **YES** | the § 6 check |
+| invariant suite | **5 / 30** | **28 / 30** | |
+| Linux `8,192 MB` gate | `13/13`, `3.63x` | `13/13`, `3.63x` | |
+
+**Operations are the axis that binds** (see the previous entry's `5.98x` op ratio
+against `5.82x` official mean-residual ratio), so `+0.72%` on operations is the
+real price. Applied to the graded worst row it moves headroom `2.23x -> 2.215x`,
+which is still above the CANARY bar's `>= 1.5x` and well below the NOMINATION
+bar's `>= 4x`.
+
+**Every value change is accounted for.** `guard_price_1024x16.json`: `643` entries
+differ between the two files, **all `643` were negative or non-finite in the
+graded file, and `0` changes are unexplained**. On the scored final layer, `151`
+of `1024` entries changed and every one of them was negative. Layers 0-4 are
+bit-identical.
+
+**The non-negativity clamp is a range guarantee, not a score win, and the
+distinction matters.** For `p < 0 <= y`, `(0 - y)^2 < (p - y)^2`, so clamping
+cannot increase the squared error against any non-negative truth — it is free
+accuracy in the mathematical sense. But the MSE it recovers is `~1e-13` against
+the `8.75e-07` this file scores: **`~1e-7` relative, i.e. nothing.** Three
+operations bought validity, not accuracy, and saying otherwise would be
+overselling them.
+
+## The probe caught itself being vacuous, which is worth more than the number it produced
+
+The first version of `p2_wp18_price.py` built a fresh `Estimator` per seed and
+called `setup` before each `predict`. The old canary's `setup` did
+`self._const = {}` — so re-running it **cleared the very cache the check exists to
+detect**, and the probe duly reported the graded file's FLOPs as
+network-INDEPENDENT: the exact opposite of what `certify_candidate` had just
+measured. One instance, set up once, outside the metered region, is what the
+grader actually does. **A check that agrees with your candidate is not evidence
+until you have made it disagree with something.**
+
+## WHAT IS STILL RED, and it is one item
+
+`certify_candidate` on the guarded file: **`CANDIDATE REFUSED — 1 failed`**,
+`[3] the invariant suite passes on THIS candidate: 28/30`. Sections 1, 2, 4,
+5-8, 9 and 10 are green, including `0 failed` MLPs, the multiplier at the floor,
+zero scalar materialisations, unchanged grader arrays, and the real `8 GiB`
+enforcement with both controls behaving.
+
+The two remaining invariants are **the same failure twice: float32 measured
+against a float64 threshold.**
+
+| invariant | threshold | v2.6.1 | the canary | why |
+|---|---|---:|---:|---|
+| **8, layer-1 closed form** — row 0 must equal `\|\|W1[:,j]\|\| / sqrt(2 pi)` | `rel < 1e-12` | `1.7e-16` | `2.0e-07` to `4.4e-07` | row 0 comes out of a float32 `W^T W`, whose diagonal carries `~2e-7` relative error, and it is returned in a float32 array which cannot represent `1e-12` relative at all |
+| **9, permutation equivariance** — relabelling layer `k` must permute row `k` | `d_k / scale < 1e-6` **and** `implied MSE < 1.4e-8` | `2.2e-15` | `d_k/scale ~ 1.1e-6`, **`implied MSE 1.4e-13`** | float32 accumulation reorders inside every downstream matmul. **The invariant's own second clause passes by five orders of magnitude**, and its docstring says the deviation is reported "as a share of the `~1.4e-6` MSE we make decisions on" for exactly this reason |
+
+**And the candidate cannot be float64.** A float64 flow bills at twice the rate:
+`168.6e9 -> 337.3e9`, `x = 0.0767 -> 0.153`, so the multiplier **leaves the `0.1`
+floor** and the score is `1.53x` worse — `8.75e-08` adjusted becomes `1.34e-07`,
+which throws away the entire `4.63x` advantage over the shipped file and lands
+level with `v2.7`. So this is not a choice between precisions; it is a structural
+conflict between a repository invariant and Phase 2's own cost model.
+
+**The narrow fix, priced, and NOT applied.** Invariant 8 alone could be met by
+computing layer 1's variance as `(W*W).sum(axis=0)` in float64 — at layer 1 the
+input covariance is exactly `I`, so that is the exact column norm — and returning
+a float64 output array. Cost: `~4` operations and `~6e6` FLOPs, i.e. nothing.
+**I did not do it today**, and the reason is `§6.7` of the write-up: it changes
+the submission's *output dtype*, an interface the grader has never seen from us,
+on the day the file ships. It would take the suite to `29/30` and would not touch
+invariant 9, so it narrows the open question without closing it. It is offered as
+a priced option, not taken.
+
+**Whether to qualify thresholds 8 and 9 by dtype is not the decision of the agent
+whose candidate fails them.** It is stated here with both numbers and the cost of
+the alternative, and it goes to Samuel — exactly as the `>= 4x` residual bar did
+one entry ago, and for the same reason.
+
+## THE CANARY IS NOT PRESENTED AS GATE-GREEN
+
+`CONTRACT WP18` § A says, in terms: *"ALL of ... Any one red and the canary is not
+presented. No partial credit and no 'advisory' pass."* One is red. **The
+pre-registration binds when it is inconvenient or it was never worth writing**,
+and this is the inconvenient case: the strategist's Ruling 1 ordered a canary
+today, and my own gate says not yet.
+
+What is handed to Samuel instead is the complete state and the decision:
+
+| | |
+|---|---|
+| archive | `experiments/2026-09-03_wp18_canary/submission_wp18_canary.tar.gz`, `11,364` bytes |
+| archive sha256 | `fd57cebf7c9856b7c54a53845caae5fb01c62006bb2f5a05828cb17d975fc33e` |
+| `estimator.py` inside it | `estimator_wp18_canary.py`, sha256 `d3accc63045fe2e643d83a95b15c2b2ac06ffa2134d44d90d56c366f08d7fae3` |
+| `validate_package` | `ok=True, issues=[]` |
+| label | **residual-measurement canary — NOT a nomination** |
+| gate state | `28/30` invariants; every other certify section green; memory gate `13/13` with both controls behaving |
+
+**Nothing was submitted. `whest submit` was not run and will not be run by an
+agent. Nothing was designated.** `estimator.py` is untouched at v2.6.1 and
+`estimator_wp15_k3_canary.py` is left **byte-identical** so the graded `8.75e-07`
+keeps naming an exact file.
+
+## Knowledge delta
+
+1. **A file that scores well on the graded distribution can be a research
+   artifact with no deployment robustness at all, and nothing in an accuracy
+   measurement will tell you.** `8.75e-07` on 100 graded rows and `0/100`
+   failures coexisted with `5/30` invariants and NaN output on three of four
+   degenerate cases. The graded distribution is He-init `1024 x 16` and never
+   produces the inputs that break it — which is exactly why the invariant suite
+   exists and exactly why running it on *the candidate* rather than on *the
+   shipped file* is not optional.
+2. **The binding cost of a robustness guard is operations, and it is small.**
+   Four guards, `+19` operations, `+0.72%`, `+131,072` FLOPs, multiplier
+   unchanged at the floor. Every guard this project declined to add on cost
+   grounds was declined against the wrong cost model.
+3. **A cached constant is a network-dependent price.** Caching on the instance
+   makes MLP 1 pay and MLP 2..100 not pay, and a per-MLP cost that depends on
+   evaluation order cannot be predicted from the file. `1.5 n^2` FLOPs and three
+   operations is the entire price of removing that, and under `lambda = 0` an
+   unpredictable multiplier is a far larger risk.
+4. **Two of this repository's 30 invariants encode a float64 expectation**, and
+   Phase 2's cost model forbids float64. That is a real conflict and it has been
+   latent since the round changed; it surfaced only because a candidate was
+   certified rather than assumed.
+5. **`certify_candidate` § 9 matches the memory-gate report on the report's own
+   `candidate` field but FINDS it by filename** — `linux_memory_gate_<stem>.json`
+   beside the candidate or in `experiments/2026-08-31_wp0cd_certify/`. A report
+   written anywhere else is SKIPPED, not failed, and § 9 silently stays advisory.
+   That cost one wasted certify run and is now in `SETUP_WINDOWS.md` § 7.

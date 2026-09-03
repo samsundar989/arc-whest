@@ -217,8 +217,10 @@ Over-declaring only makes a job wait slightly longer.
 | workload | `--ram` | `--vram` | `--cpus` | basis |
 |---|---:|---:|---:|---|
 | `certify_candidate.py --residual-soak 3` | 20 | 0 | 6 | 3 x the row below, sequentially; ~3 h at the measured 37.7 s/MLP |
+| `certify_candidate.py` (**no soak**, the default) | 3 | 0 | 2 | **MEASURED 2026-09-03**: `workerq` reports `< 0.1 GiB` over three runs. Its § 10 smoke runs TWO MLPs, not a split, so it never reaches the row below. A 20 GiB declaration held a queue slot for nothing |
 | `whest run --split mini --runner subprocess` | 20 | 0 | 6 | **MEASURED 2026-09-01**: harness `PeakWorkingSet64` **14.32 GiB** + a ~1.67 GiB estimator worker = ~16 GiB. See below |
 | `linux_memory_gate.py` | 12 | 0 | 2 | **deliberately** requests 9 GiB in a WSL child to prove the 8,192 MB cap is in force |
+| `p2_wp18_labels.py --labels --nets 128` | 16 | 10 | 4 | 1024x16 f32: the uncapped full-K3 flow plus a 16-layer snapshot tower, two `n x n` slices per pre-layer and an SVD of one of them |
 | `p2_truth.py` | 8 | 6 | 4 | chunk `2**16` x 1024: fp32 draw + matmul + fp64 cast ~1.1 GiB, plus CUDA context |
 | `p2_cal_gpu.py` | 8 | 8 | 4 | 3.2 GB fp32 memmap streamed a layer at a time in fp64 |
 | `gpu_mint.py --mint 50000 --samples 65536` | 16 | 8 | 4 | writes a 497 MB npz; large host-side accumulation |
@@ -270,6 +272,24 @@ gpuq submit --project arc-whest --ram 12 --vram 0 --gpus 0 --cpus 2 -- `
   C:/Users/samsu/Documents/arc-whest/.venv/Scripts/python.exe local_sim/linux_memory_gate.py `
   --candidate estimator.py `
   --json C:/Users/samsu/Documents/arc-whest/experiments/<slice>/linux_memory_gate.json
+
+# The same gate for a CANDIDATE. The report's filename matters: `certify_candidate`
+# § 9 looks for `linux_memory_gate_<candidate stem>.json` beside the candidate or
+# in `experiments/2026-08-31_wp0cd_certify/`, and matches on the report's own
+# `candidate` field -- so a report written anywhere else is SKIPPED, not failed,
+# and § 9 silently stays advisory. That cost one wasted certify run on 2026-09-03.
+gpuq submit --project arc-whest --ram 12 --vram 0 --gpus 0 --cpus 2 -- `
+  C:/Users/samsu/Documents/arc-whest/.venv/Scripts/python.exe local_sim/linux_memory_gate.py `
+  --candidate estimator_wp18_canary.py `
+  --json C:/Users/samsu/Documents/arc-whest/experiments/2026-08-31_wp0cd_certify/linux_memory_gate_estimator_wp18_canary.json
+
+# WP18 Arm L: the oracle (E3, E21) labels. CLAIMS SEEDS -- claim on the HOST first
+# (`seed_ledger` refuses to write under a gpuq snapshot) and pass `--already-claimed`.
+gpuq submit --project arc-whest --ram 16 --vram 10 --cpus 4 -- `
+  C:/Users/samsu/Documents/arc-whest/.venv-gpu/Scripts/python.exe local_sim/p2_wp18_labels.py `
+  --labels --width 1024 --depth 16 --nets 128 --dtype f32 --device cuda `
+  --already-claimed --seed 40902005000 `
+  --out C:/Users/samsu/Documents/arc-whest/experiments/2026-09-03_wp18_armL/labels_P05.npz
 
 # Phase-2 truth at 1024x16, two independent replicas. CLAIMS SEEDS.
 gpuq submit --project arc-whest --ram 8 --vram 6 --cpus 4 -- `

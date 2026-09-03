@@ -1,5 +1,116 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-03 (WP18) — THE STRATEGIST RULED, THE CANARY WAS CERTIFIED FOR THE
+> FIRST TIME, AND IT FAILED 25 OF 30 INVARIANTS. THE GUARDED FILE IS 28/30 AND
+> WAITING ON ONE DECISION THAT IS NOT AN AGENT'S.**
+>
+> `estimator.py` untouched at v2.6.1. Nothing submitted, nothing designated.
+> `estimator_wp15_k3_canary.py` left **byte-identical** so the graded `8.75e-07`
+> keeps naming an exact file. Contract `49e2e42`, guards + price `85f3055`.
+>
+> ## The three questions came back answered
+>
+> | ruling | what it says |
+> |---|---|
+> | **1** | **the `>= 4x` residual bar SPLITS.** A **canary** needs certify green, the Linux memory gate, `0/100` local failures, the FLOP floor with `+2**24`, and worst-row headroom `>= 1.5x`. The `>= 4x` moves to the **nomination** bar and is scored on the grader's own per-row telemetry, which is the only instrument that can settle it. The `3 x 100` soak is ruled OFF the canary path |
+> | **2** | **Arm M is KILLED as a standalone.** `G-M-DEPTH` failed as written and the contract is honoured, not re-argued. Its three-generation closed forms survive as **Arm L features** |
+> | **3** | **floor nominee and Arm L run in PARALLEL**, and Arm L starts with **`E3`**, which nothing in this project has ever targeted |
+>
+> Kill line moves to **~2026-09-24**. Designate explicitly by **Oct 10**, close
+> **Oct 17**, due **Oct 24**.
+>
+> ## What running `certify_candidate` on the canary actually found
+>
+> **It had never been run on that file.** `CONTRACT WP18`'s prediction A1 said it
+> would pass everything; it returned `CANDIDATE REFUSED — 3 failed` and the
+> 30-invariant suite scored **5 of 30**.
+>
+> | defect | evidence |
+> |---|---|
+> | **NaN / non-finite output** on degenerate networks | `4,352` / `6,400` / `6,144` non-finite entries; `-4.037e+08` at `32 x 64`. Root cause: `alpha = mu/sigma` unbounded → Horner overflows to `inf` while `phi(alpha)` underflows to `0` → `inf * 0`. **A NaN fails the MLP and a failed MLP scores as zeros** |
+> | **negative means on the SCORED row** | `151` of `1024` final-layer entries, worst `-2.831e-06` |
+> | **order-dependent FLOPs** | the width-constant cache made MLP 1 pay `1,575,424` FLOPs and MLP 2..n pay none |
+>
+> Fixed in a **new** file `estimator_wp18_canary.py`: `ALPHA_CAP = 40`
+> (`fnp.clip`), `fnp.where(isfinite)`, `fnp.maximum(out, 0)`, cache removed.
+> The cap is **measured** — the uncapped file's worst `|alpha|` over 8 He-init
+> nets at the live shape is `9.0400`, a `4.4x` margin (`alpha_range_1024x16.json`).
+>
+> | | graded file | guarded file |
+> |---|---:|---:|
+> | invariant suite | **5 / 30** | **28 / 30** |
+> | counted f32 FLOPs | `168,629,787,238` | `168,629,918,310` (`+131,072`) |
+> | `C/B` / multiplier | `0.0766836` / `0.1` | `0.0766840` / `0.1` — **floor, with `+2**24`** |
+> | flopscope **operations** | `2,647` | `2,666` (**`+19`, `+0.72%`**) |
+> | FLOPs equal on 4 nets in ONE process | **NO** | **YES** |
+> | Linux `8,192 MB` gate | not run | **`13/13`**, `VmPeak 2258.8 MB`, `3.63x` |
+>
+> All `643` changed values were negative or non-finite in the graded file; **`0`
+> unexplained**. Headroom moves `2.23x -> 2.215x`, still above the canary bar's
+> `1.5x`.
+>
+> ## THE ONE THING BLOCKING THE CANARY, AND IT IS SAMUEL'S CALL
+>
+> `28/30`. **Both remaining invariants are float32 measured against a float64
+> threshold**, and the candidate cannot be float64 — an f64 flow bills at twice
+> the rate, `x = 0.0767 -> 0.153`, the multiplier leaves the `0.1` floor, and the
+> score is `1.53x` worse, which throws away the whole `4.63x` advantage and lands
+> level with `v2.7`.
+>
+> | invariant | threshold | v2.6.1 | canary |
+> |---|---|---:|---:|
+> | **8** layer-1 closed form | `rel < 1e-12` | `1.7e-16` | `2.0e-07`–`4.4e-07` |
+> | **9** permutation equivariance | `d_k/scale < 1e-6` **and** implied MSE `< 1.4e-8` | `2.2e-15` | `1.1e-6`, **implied MSE `1.4e-13`** |
+>
+> Invariant 9's own second clause passes by **five orders of magnitude**.
+> Invariant 8 could be met alone by computing layer 1's variance in f64 (`~4`
+> operations) — but that requires the returned array to become float64, an
+> interface the grader has never seen from us, and **it was deliberately not done
+> on the day the file ships** (`writeup` §6.7 is exactly that lesson). It would
+> give `29/30` and would not touch invariant 9.
+>
+> **THE ARCHIVE IS BUILT AND WAITING.** `validate_package -> ok=True, issues=[]`.
+>
+> | | |
+> |---|---|
+> | archive | `experiments/2026-09-03_wp18_canary/submission_wp18_canary.tar.gz`, `11,364` bytes |
+> | sha256 | `fd57cebf7c9856b7c54a53845caae5fb01c62006bb2f5a05828cb17d975fc33e` |
+> | inner `estimator.py` sha256 | `d3accc63045fe2e643d83a95b15c2b2ac06ffa2134d44d90d56c366f08d7fae3` |
+> | label | **residual-measurement canary — NOT a nomination** |
+>
+> ## NEXT ACTIONS, in order
+>
+> 1. **Samuel decides** whether `28/30` with those two float32 invariants is
+>    submittable as an undesignated canary, or whether the f64 layer-1 row goes in
+>    first (`29/30`), or whether thresholds 8 and 9 get qualified by dtype. **No
+>    agent moves a threshold to make its own candidate pass.**
+> 2. On submission: read the graded per-row residual against the **nomination**
+>    bar (`>= 4x` worst-row headroom). If `2.5x`–`4x`, reassociate to that target
+>    and re-canary; if `< 2.5x`, cut operations hard. Sizing waits for the graded
+>    number and is not guessed from the local one.
+> 3. **Arm L, in parallel and already moving.** `gpuq` 191 is queued: the oracle
+>    `(E3, E21)` labels on **128 `P05` nets** (`40,902,005,000..127`, claimed).
+>    `p2_wp18_labels.py` selftest is `3/3` at `128 x 4` in **both** f64 and f32,
+>    including a permutation-equivariance check through the WEIGHTS that caught
+>    its own first version using the wrong index convention. `p2_wp18_fit.py` is
+>    written with all five fitting choices declared **before the labels exist**.
+> 4. `G-L-FIT` is **SPLIT**: `G-L-FIT-E3` and `G-L-FIT-E21`, both `>= 0.90`
+>    held-out, leave-networks-out. That is a tightening — the old gate could pass
+>    while `E3`, ~40% of the error, went untested. First held-out `R^2` on record
+>    by ~**Sep 13**.
+> 5. `E21`'s Gram/moment pass is deliberately SECOND: declaring the basis and
+>    then computing its moments cannot be reversed into a basis chosen after
+>    seeing the target.
+>
+> ## Write-up is current
+>
+> `docs/writeup-p2-draft.md` gained **§6.8** (the 100-row graded confirmation and
+> the residual-dispersion finding) and **§7.1** (Arm M's memory depth,
+> `0.338/0.573/0.732`, the gate failing, and why `73%` of one slice is `~44%` of
+> the error). §7's stale closing paragraph — *"the one experiment we would run
+> next"* — is replaced: it was run, and the answer is `r/n` to three decimals.
+
+
 > **2026-09-03 (END OF SESSION) — THE FIX IS CONFIRMED ON THE DEPLOYMENT
 > AUTHORITY. THE RESIDUAL BAR IS THE ONLY THING BETWEEN US AND A NOMINATION, AND
 > IT DOES NOT CLEAR.**
