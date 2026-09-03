@@ -30514,3 +30514,213 @@ Deliberately **not** `P01[..168..175]`, which `C2` already spent, and deliberate
   still the thing that decides whether any of it is reachable.
 
 **Samuel's prediction to be taken on C2 and C3 before the results exist.**
+
+---
+
+# 2026-09-03 — **SKEPTIC WP18-C: PROVISIONAL. The cap fix CREATED the failure it claimed to prevent, and the price was metered on an array type the grader never uses.**
+
+Launched on the changed candidate bytes, in a context that had never seen this
+session's reasoning, because the previous audit ran on `aba7b4d` and **the
+candidate then changed in response to it** — so the bytes that would ship had
+been audited by nobody. That was the whole reason for the run, and it paid.
+
+**Every finding below I reproduced myself before acting on it.**
+
+## 1. `ALPHA_CAP = 1e6` MADE THE ANSWER WORSE, AND THE FILE ASSERTED THE OPPOSITE
+
+`SKEPTIC WP18` disproved the *justification* for `ALPHA_CAP = 40` and I raised the
+cap to `1e6` on a float32-overflow derivation. **Neither derivation ever scored
+the two candidates on the quantity the competition scores.** The Skeptic did.
+
+On `edge_cases`' own `depth 32 x width 64` He network — clean, unperturbed, one
+of the shapes the invariant suite already runs — reproduced by me at both
+revisions:
+
+| | range | final-row mean |
+|---|---|---:|
+| cap `40` | `[0.000e+00, 4.317e+00]` | **`0.2103`** |
+| cap `1e6` | `[0.000e+00, 9.182e+09]` | **`0.0000`** |
+
+At `1e6` the flow overflows downstream, and the output guard zeroes **all 64
+entries of the scored row** — precisely the zeros a FAILED MLP scores. Against
+Monte-Carlo truth the Skeptic measured final-layer MSE `1.755e-02 -> 5.522e-02`,
+and over 14 fresh He mints at `64 x 32` the **paired arithmetic mean MSE** — the
+competition's own estimand and the statistic `competition_score.decide()`
+enforces — is **`20.4` for `40` against `10,957` for `1e6`**. (Median and
+win-count favour `1e6`; the mean does not, and the mean is the estimand.)
+
+**And the shipped file contained a sentence saying the opposite**: *"this cap is
+inert wherever the flow is numerically sound, and lossy exactly where the flow
+would otherwise return NaN… it converts 'fails the MLP, scores as zeros' into
+'answers badly'."* On that network the flow at `40` is numerically sound and
+`1e6` makes the whole scored row unusable. **The conversion ran the other way.**
+
+**This is `SKEPTIC WP18` finding 2 recurring one revision later, inside the fix
+for it** — a false justification written into a submission file's comment. The
+first time it was "every Wick coefficient has reached its limit". The second time
+it was "inert wherever the flow is sound". Both were confident, both were about
+the same six lines, and neither had been measured.
+
+**Reverted to `40`, and the reasoning is now empirical.** The `alpha**4` overflow
+bound (`4.295e9`) is retained as **the constraint a cap may not exceed, never the
+rule for choosing one**. The `1e6` derivation optimised for *"does not overflow"*
+when what is scored is *"produces a good answer"*, and those pointed opposite ways.
+
+**The revert is free where it matters, and my first check of that was wrong.** I
+initially compared HEAD against `aba7b4d`'s file and got `1.8e-07` differences —
+but that file also lacks the row-0 fix, so I was measuring the wrong thing.
+Isolating the constant:
+
+| shape | bit-identical output AND identical metered price, 3 seeds |
+|---|---|
+| `1024 x 16` (live) | **True** |
+| `1024 x 32` | **True** |
+| `512 x 16` | **True** |
+| `256 x 32` | **True** |
+
+## 2. DEPTH-1 NETWORKS NOW RAISE — a hard-rule-7 regression the row-0 fix introduced
+
+`fnp.stack(mus[1:])` on a depth-1 MLP stacks an empty list:
+
+```
+depth-1: graded canary        OK  shape (1, 256)
+depth-1: aba7b4d              OK  shape (1, 256)
+depth-1: HEAD                 RAISED ValueError: need at least one array to stack
+depth-1: shipped estimator.py OK  shape (1, 256)
+```
+
+A raise on the grader is a zero-scored MLP. Unreachable at Phase 2's depth 16,
+but it breaks `AGENTS.md` hard rule 7 (*keep `estimator.py` shape-generic*), the
+graded canary and the shipped file both handle it, and **nothing covered it** —
+`edge_cases` starts at depth 2 and `whest validate` uses depth 2. It also
+falsifies my "the diff changes nothing else".
+
+Guarded with a Python-`int` branch on `depth`, which materialises no flopscope
+value (hard rule: no scalar materialisation in `predict`). Verified at depths 1,
+2 and 16.
+
+## 3. THE PRICE WAS METERED ON RAW NUMPY WEIGHTS — and this resolves the `15 n^2` mystery
+
+`p2_wp18_price.py` built weights as `np.asarray(..., float32)`. The grader and
+`certify_candidate.py:358` pass **`fnp.array(x)`**. The difference is not
+cosmetic: the estimator's `astype` guard and the first layer's f64 cast are
+**metered on flopscope arrays and invisible on numpy ones**. Measured by me, same
+four networks, steady state:
+
+| weights passed as | graded canary | HEAD | delta |
+|---|---:|---:|---:|
+| **numpy** (what the probe did) | `2,627` / `168,612,483,174` | `2,655` / `168,614,356,582` | `+28` / `+1,873,408` |
+| **`fnp`** (what the grader does) | `2,642` / `168,628,211,814` | `2,673` / `168,636,374,630` | **`+31`** / **`+8,162,816`** |
+
+**The corrected price is `+31` operations (`+1.17%`) and `+8,162,816` FLOPs.** The
+FLOP delta was understated **`4.36x`**.
+
+**And the gap is exactly `15 n^2`** for the graded file — which is the *"two
+absolute totals for the same file at the same shape, differing by exactly
+`15,728,640`"* that `SKEPTIC WP18` and I both left open as an instrument mystery.
+**It was not a mystery. It was un-metered work.** It also refutes that audit's
+consolation that *"both instruments agree on every delta"* — they did not.
+**Counted compares to counted only if both sides are counted the same way.**
+
+## 4. `1.826e-16` DESCRIBES AN ARRAY THE SCORER NEVER SEES
+
+`whestbench.scoring.materialise_predictions` is, verbatim, *"Coerce an
+estimator's return value to a concrete float32 array"* —
+`fnp.asarray(predictions, dtype=fnp.float32)`, **inside the metered window**.
+`certify_guarded.json` records `dtype: float32, nbytes: 65536` for a file that
+returns float64, which is the coercion showing up in our own artifact.
+
+So row 0's `1.826e-16` is **pre-coercion**. After coercion the delivered gain is
+about `3e-07 -> 6e-08` — five-fold at the float32 scale, not sixteen orders. And
+**row 0 is not the scored row**; the score is the final layer's MSE.
+
+**The fix is KEPT**, because the shipped `estimator.py` does exactly this, so it
+is consistency with the incumbent rather than a special case invented to pass a
+test — and it does make an output row more accurate. But the comment and every
+document now say plainly that it buys **an invariant and an unscored row, and
+nothing on the board**. `edge_cases`' invariant 8 reads `predict()` directly
+without coercion, so it too is scored on the pre-coercion array.
+
+## The state after all four corrections
+
+| | graded canary | **post-WP18-C canary** |
+|---|---:|---:|
+| invariants | `5 / 30` | **`29 / 30`** |
+| `depth 32 x width 64` final-row mean | `0.2103` | **`0.2103`** — restored |
+| depth-1 MLP | OK | **OK** — guarded |
+| counted f32 FLOPs (certify) | `168,629,787,238` | `168,636,407,398` |
+| `C/B` / multiplier | `0.0766836` / `0.1` | `0.0766870` / `0.1` — **floor, with `+2**24`** |
+| **steady state, grader-type arrays** | `2,642` ops / `168,628,211,814` | `2,673` ops / `168,636,374,630` |
+| **price** | | **`+31` ops (`+1.17%`), `+8,162,816` FLOPs (`+0.00484%`)** |
+| FLOPs network-independent | **NO** | **YES** |
+| Linux `8,192 MB` gate | not run | **`13/13`**, `VmPeak 2266.8 MB`, `3.61x`, both controls |
+| official smoke | `0 failed` | `0 failed`, worst residual `245.52 ms` |
+
+**THE ARCHIVE, rebuilt**
+
+| | |
+|---|---|
+| `experiments/2026-09-03_wp18_canary/submission_wp18_canary.tar.gz` | `13,858` bytes |
+| archive sha256 | `e40f6b4de6a10cdcef74b729cc8dbc5eae9a930976e53ba37bee78904fb99960` |
+| inner `estimator.py`, **LF** (the shipped bytes) | `252c3c947f130e75b71bdb976293af964ed93a377bfeb7fa8403e5e76a4acddc` |
+| the same content **CRLF**, which is what `certify_guarded.json` names | `3faf21b3c816d72c…` |
+| `validate_package` | `ok=True, issues=[]` |
+
+## What the Skeptic confirmed, including one thing it checked better than we had
+
+- **The archive is exactly what it says**, all four hash claims reproduced, and
+  running the estimator *from the extracted archive* at `1024 x 16` on three
+  seeds gives identical FLOPs on every network, `x = 0.0766769`, multiplier
+  pinned with ~30% margin.
+- **The row-0 substitution is not hiding a defect.** It ran the *pre-substitution*
+  flow forced to float64: its own row 0 agrees with the closed form to
+  `2.1e-16`–`3.0e-15` across widths 64→2048, against `2.2e-07`–`4.1e-07` in f32
+  and a `sqrt(n)*eps32` bound of `9.5e-07`–`5.4e-06`. **The f32 error is pure
+  rounding; the flow and the closed form agree in exact arithmetic.**
+- **Invariant 9 really is float32 precision**, verified by a method this
+  repository had not used: the same flow on the same networks, f32 against f64,
+  gives `d_k/scale` `2.116e-06 -> 2.365e-15`, `1.693e-06 -> 3.153e-15`,
+  `8.325e-07 -> 2.326e-15`. **A ratio of `~1e9` is the eps ratio, not an index
+  bug.** The refusal to move the `1e-6` threshold is correct.
+- The frozen table's highest power of `alpha` is indeed 4, at `w(0,4)`,
+  `P2 = [3,0,6,0,1]`; `_INV_SQRT_2PI` is bit-exactly `1/sqrt(2 pi)` in float64.
+- The shape-scoping correction from the previous audit landed: `scope_caveat` in
+  the artifact, a SCOPE paragraph in the probe, and *"at `1024 x 16`"* in both
+  documents.
+
+## Where it disagrees with me, and where it agrees against itself
+
+It says the bytes are **operationally safe to submit** — nothing it found changes
+what the grader computes at `1024 x 16` — but that it **would not ship these
+bytes**, because reverting the cap and guarding depth-1 are bit-identical at the
+live shape and therefore cost nothing, while removing a demonstrably false
+sentence from a submitted file and a crash the incumbent does not have. **Both
+are now done**, so that objection is discharged.
+
+It also notes, correctly, that the pre-registered gate still reads **REFUSED**
+(`29/30`), so submitting remains a human override of a gate — Samuel's call, not
+an agent's. And it flags that `CURRENT_STATE`'s *"invariant 9 is unmeetable by any
+competitive Phase-2 candidate"* is a universal the evidence cannot reach; it
+confirmed the mechanism, not the universal. **Softened accordingly.**
+
+## Knowledge delta
+
+1. **A derivation is not a measurement, and a cap is a scored quantity.** Both
+   `40` and `1e6` were argued from float32 arithmetic; neither was scored until
+   an outsider did it, and the scored answer disagreed with the better-argued
+   one. **When a constant affects the output, price it on the binding statistic
+   before defending it in a comment.**
+2. **The same six lines produced a false justification twice, one revision
+   apart.** Fixing a wrong reason is not the same as establishing a right one,
+   and I did the first while believing I had done the second.
+3. **`counted compares to counted` includes the ARRAY TYPE.** Metering an
+   estimator on raw numpy hides every operation the grader bills on its own array
+   wrapper — here `15 n^2` — and two audits called the resulting discrepancy a
+   mystery rather than a defect in the probe.
+4. **`materialise_predictions` coerces to float32 inside the metered window.**
+   Any accuracy figure taken from `predict()`'s return value, including
+   `edge_cases`' invariant 8, describes an array the scorer never sees.
+5. **A guard can mask the regression it causes.** `edge_cases.check` tests
+   finiteness, and the output guard makes the array finite — so a network whose
+   entire scored row had become zeros still printed `ok`, and `29/30` was
+   unchanged by it. **An invariant count is not a quality measurement.**

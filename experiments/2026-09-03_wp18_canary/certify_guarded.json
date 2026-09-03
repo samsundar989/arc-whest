@@ -2,7 +2,7 @@
   "artifact": "candidate_certification",
   "artifact_version": 1,
   "candidate": "estimator_wp18_canary.py",
-  "candidate_sha256": "3d29e2d5a3e0f986dd9cb101aef4352bce94424851faf636ea874b098a2261f9",
+  "candidate_sha256": "3faf21b3c816d72ce7c9efd8dc0223a0924cdc0d2e11a9f907d3a6fa69475312",
   "width": 1024,
   "depth": 16,
   "budget": 2199023255552,
@@ -31,7 +31,7 @@
             1024
           ],
           "flops_used": 168636374630.0,
-          "pid": 19744
+          "pid": 45352
         },
         {
           "sha256": "ffdd750219e093a019c7881f8ed65313a44c2be7dee56437389ead30f7ef0765",
@@ -40,7 +40,7 @@
             1024
           ],
           "flops_used": 168636374630.0,
-          "pid": 48668
+          "pid": 47224
         }
       ]
     },
@@ -51,8 +51,8 @@
         "flops_used": 168636407398.0,
         "n_ops": 2674,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.18930539978464367,
-        "wall_time_s": 1.700000100005127,
+        "residual_wall_time_s": 0.23553649993846193,
+        "wall_time_s": 1.9597672000018065,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -80,8 +80,8 @@
         "flops_used": 168636407398.0,
         "n_ops": 2674,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.19661570017342456,
-        "wall_time_s": 1.7775720999998157,
+        "residual_wall_time_s": 0.22251699990738416,
+        "wall_time_s": 1.935084699995059,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -109,8 +109,8 @@
         "flops_used": 168636407398.0,
         "n_ops": 2674,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.22120560016628588,
-        "wall_time_s": 1.9883205000005546,
+        "residual_wall_time_s": 0.2048053000253276,
+        "wall_time_s": 1.723392400002922,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -138,8 +138,8 @@
         "flops_used": 168636407398.0,
         "n_ops": 2674,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.199446199760132,
-        "wall_time_s": 1.8235189999977592,
+        "residual_wall_time_s": 0.20508560014422983,
+        "wall_time_s": 1.834742200000619,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -162,13 +162,13 @@
         "mean_square_final_row": 0.6244963636674716
       }
     ],
-    "setup_s_local": 0.0004045999958179891,
+    "setup_s_local": 0.0006967000008444302,
     "linux_memory_gate": "experiments\\2026-08-31_wp0cd_certify\\linux_memory_gate_estimator_wp18_canary.json",
     "windows_memory_accounting": {
       "available": true,
       "source": "test_deployment_envelope.peak_memory_bytes",
-      "peak_wset_bytes": 388587520,
-      "peak_pagefile_bytes": 889630720
+      "peak_wset_bytes": 388161536,
+      "peak_pagefile_bytes": 889204736
     },
     "subprocess_smoke": {
       "ok_report": true,
@@ -187,7 +187,7 @@
       "lambda": 0.0,
       "residual_cap": 0.4,
       "wall_limit": 120.0,
-      "worst_residual": 0.20724399987375364,
+      "worst_residual": 0.24551649990462465,
       "flops_per_mlp": 168636407398,
       "multiplier": 0.1,
       "c_over_b": 0.07668695952725102,
