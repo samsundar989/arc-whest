@@ -28382,3 +28382,52 @@ drift-and-truth analysis put its raw MSE at `8.5075e-07`; the grader says
    `2.8192e-06` against a predicted `8.5075e-07` could have been the split, the
    networks, the instrument or the port. With a control that transfers to `3%`,
    it is the port.
+
+---
+
+# 2026-09-02 — the prerequisite check the brief required before WP15 builds on `334x`: **CONFIRMED, and now carrying a caveat it did not have**
+
+The directing brief said, in terms: *"Confirm before building on it that the
+`334x` is an in-flight end-to-end oracle, not a per-layer composed figure."*
+**I wrote `CONTRACT WP15` citing it as CONFIRMED evidence without running that
+check.** Run now, against `experiments/2026-09-02_wp14_range/c2_e2e_oracle_rank.json`.
+
+**It is in-flight and end-to-end.** The artifact's own `check` field reads
+*"end-to-end drift with the projected residual injected in flight"*; every row
+carries a per-layer `slice_probe` recording `rel_err_s3` / `rel_err_s21` at the
+gated layers, which only exists because the correction is applied inside the
+flow layer by layer; and the reported quantity is `drift_final_layer`, the
+final-layer drift of the whole run against full K3. **It is not a composed
+per-layer excess** — which matters, because the `eps^2` composed-excess model
+over-predicts by `32x` and is refused as a statistic by both this contract and
+`VALIDATION.md`.
+
+**And it is 8 of 8, not a ratio of means hiding a spread:**
+
+| statistic | value |
+|---|---:|
+| per-seed `none / e3svd:512` | `334, 322, 331, 373, 352, 340, 302, 320` |
+| min / max | `302.4` / `373.4` |
+| mean of the per-seed ratios | `334.5` |
+| ratio of the means (the figure quoted) | **`333.8`** |
+| the same at rank 128 | **`11.10`** |
+
+Every network is between `302x` and `373x`. Both the `333.8x` and the `11.1x`
+in `CONTRACT WP15`'s evidence table are exactly what the artifact supports.
+
+## The caveat this check did NOT have this morning, and now must carry
+
+**Those drifts are measured against the TORCH implementation's own full-K3
+reference, inside the torch flow.** Tonight's canary showed the `fnp` port does
+not reproduce the torch `regen` arm's accuracy — `2.8192e-06` officially against
+a predicted `8.5075e-07`, with a matched control transferring to `3.2%`. So:
+
+> **The `334x` oracle ceiling is a property of the torch flow. Whether it is a
+> property of the flow we would ship depends on `NOT_DONE` step 6.** WP15's
+> `G-M-E2E` and `G-L-E2E` are both written as end-to-end drift reductions
+> against the uncorrected regenerating flow, so they remain well-posed either
+> way — but the *headline* "a map is worth first place" inherits the same
+> PROVISIONAL as every other claim resting on the torch-side accuracy.
+
+`CONTRACT WP15`'s gates are unchanged and no threshold moved; this adds a
+qualification to one evidence row, before any data exists for either arm.
