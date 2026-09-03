@@ -243,7 +243,7 @@ corrected cell is the one tabled above.
 
 ---
 
-## 6. What an estimator may actually spend *(new 2026-09-02; **materially corrected the same day** — see 9.4)*
+## 6. What an estimator may actually spend *(new 2026-09-02; **materially corrected the same day** — see 9.4; **and then executed rather than projected** — see 6.5)*
 
 **Evidence: CONFIRMED.** `experiments/2026-09-02_wp14_range/e0_cost_f64.json` and
 `e0_cost_f32.json`, executed in the official metering package inside a real budget
@@ -359,6 +359,61 @@ is a table entry.
 > lever is usually the one hidden inside a number you have already measured and
 > mislabelled.**
 
+### 6.5 And then we executed it, because a sum of two measurements is not a measurement
+
+An independent review of §6.3 accepted the arithmetic and refused the conclusion,
+for one reason: **the two halves had never been executed as one program.** Its
+own dispatch census of the reference implementation put a real regenerating layer
+at `19.4` matmul-equivalents, four times our composed `4.89`, and it named two
+live traps our projection could not price — the metering package's promotion of
+Gaussian CDF/PDF inputs to `float64`, and the fact that our cost probe's spelling
+was admitted to be numerically wrong while being cost-correct.
+
+So we wrote the layer properly and metered it. One layer at `n = 1024`, in
+`float32`, as one program, inside a real budget context:
+
+| | counted FLOPs | dense `1024`-matmuls | `x 16` layers | `F / B` |
+|---|---:|---:|---:|---:|
+| `float64` | `21,675,713,540` | `5.047` | `346,811,416,640` | `0.15773` |
+| **`float32`** | **`10,837,935,618`** | **`5.047`** | `173,406,969,888` | **`0.07886`** |
+| the §6.3 projection | | `4.89` | `167,919,171,072` | `0.07636` |
+
+**The conclusion survives and the number moves.** `0.07886` against `0.07636`:
+the projection was **3.3% optimistic**, the floor still holds, and the free zone
+under it is `0.02114` of budget — `1.35` float32 matmuls per layer rather than
+`1.51`.
+
+The missing `0.157` matmuls per layer are not a mystery and are worth naming,
+because they are the part a composed estimate structurally cannot see: the 25
+diagram terms, the 16 Wick coefficients, the power-cumulant-to-cumulant
+conversion, the degree-4 harmonic projection, the rebuild of the carried tensor
+and the diagonal masks. Every one is `O(n^2)`. **A sum of two `n^3` measurements
+omits exactly the `O(n^2)` glue that joining them requires**, and at `n = 1024`
+that glue was 3.3% — small, but the same order as the margin we were reasoning
+about.
+
+Two details that make the number trustworthy, and that we would insist on from
+anyone reporting one:
+
+- **The `float32 / float64` ratio is `0.50000` exactly.** That is the check that
+  no operation silently promoted. The Gaussian CDF and PDF *do* return `float64`
+  from a `float32` input — we recorded both calls doing it — and a single
+  un-cast result would have re-promoted the whole graph and billed it at rate
+  `2.0`. An audit of all 56 intermediate arrays reported zero dtype violations.
+- **The price is a price of something.** Setting the third and fourth cumulants
+  to zero collapses the layer to a case with a closed-form answer, and we checked
+  three: the mean and variance reproduce the second-order closure exactly
+  (`0` and `4.9e-16`); the covariance reproduces it **plus one term the
+  second-order closure does not have** (`5.1e-16`, and the check requires that
+  term to be present — it is `0.55%` of the covariance, and a layer matching the
+  plain closure exactly would be *wrong*); and the third-cumulant diagonal
+  matches independent numerical integration to `1.1e-14`.
+
+> **A projection is a hypothesis about a program you have not written. Ours was
+> right to 3.3%, which is a good projection and still not a measurement — and the
+> 3.3% lived entirely in the category of work neither half could have charged
+> for.**
+
 ---
 
 ## 7. The off-diagonal lane: the information is findable in principle and not in practice
@@ -463,8 +518,29 @@ their effective ranks grows to `2.94` — so the question is a containment
 - **A prediction was swapped after the fact.** We scored a different slice's
   prediction in place of the contract's, and an independent pass caught it. The
   real prediction was then answerable, and held exactly. (§8.1)
-- **A cost model assumed `2 n^3` per matmul.** It is `4 n^3`. Every hand estimate
-  we had made was a factor of two optimistic. (§6)
+- **A cost model assumed `2 n^3` per matmul, and we "corrected" it to `4 n^3`.**
+  **Both statements are incomplete and the correction was itself wrong.** The
+  meter bills `2 n^3` and scales by a per-dtype rate, so the price is `4 n^3` in
+  `float64` and `2 n^3` in `float32`; we had measured the `float64` column and
+  written it down as a property of matrix multiplication, then compared it
+  against accuracy evidence gathered in `float32`. **Two errors in two days on
+  the same number, in opposite directions**, and the second one is the one that
+  nearly bought us a 1969 algorithm we did not need. (§6.1)
+- **A composed cost projection was 3.3% optimistic, and we called it a solved
+  problem before executing it.** An independent review refused the conclusion on
+  exactly that ground — two spellings never run as one program — and it was
+  right to. Writing the program moved `0.07636` to `0.07886` and the free margin
+  from `1.51` to `1.35` matmuls per layer. **The conclusion survived; the
+  entitlement to state it did not exist yet.** (§6.5)
+- **A NaN reference passed a threshold gate, and the gate printed PASS.** The
+  quadrature we checked one component against overflows past a certain degree and
+  returns NaN weights; `nan > tolerance` is `False`, so three failed comparisons
+  reported success. Separately, the same reference was the *wrong quadrature
+  rule* — Gauss-Hermite converges only algebraically against a kinked integrand,
+  and at moderate degree it disagreed with an exact closed form by a thousand
+  times the tolerance, which reads exactly like a bug in the thing under test.
+  **Two lessons: reject non-finite input explicitly before comparing, and when a
+  check fails, ask whether the reference is what is wrong.** (§6.5)
 - **A three-hour certification suite reported `45` failures of `300` and could
   not say why**, because it counted failures and discarded the reason, and
   because its own median was computed over rows that never executed. Both are

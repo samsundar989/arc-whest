@@ -1,5 +1,105 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-02 (SKEPTIC WP14's FOLLOW-UP — DONE) — THE FLOOR SURVIVES ITS OWN
+> EXECUTION TEST. `0.07886 B` MEASURED, `1.35` f32 MATMULS/LAYER OF HEADROOM.**
+> One K3 layer at `1024`, f32, executed as ONE program in `fnp` inside a real
+> `BudgetContext`, is **`10,837,935,618` counted FLOPs = `5.047` dense f32
+> `1024`-matmuls**. Sixteen of them are `173,406,969,888` = **`0.07886 B`**,
+> against a floor of `0.1` — **headroom `46,495,355,667` = `0.02114 B` =
+> `1.35` matmuls per layer.** `f32 / f64 = 0.50000` exactly, so nothing
+> promoted; the dtype audit checked **56 arrays, 0 violations**, and recorded
+> both `flops.stats.*` calls returning `float64` from a `float32` input and
+> being cast back. `experiments/2026-09-02_wp14_fnp/layer_price_1024.json`.
+>
+> **`SKEPTIC WP14`'s PROVISIONAL on CLAIM A is discharged for the per-layer
+> arithmetic and for nothing else.** `whest validate`, the Linux memory gate, a
+> `gpuq`-brokered residual soak and an end-to-end candidate are all still ahead,
+> and the layer's NUMBERS are still unchecked against upstream at non-zero
+> `kappa_3` (`NOT_DONE` step 6).
+>
+> **The projection was 3.3% optimistic, and the missing `0.157` matmuls/layer
+> have a name.** `5.047` measured against `4.89` projected (`2.00` K2 `+ 2.89`
+> K3) is the `O(n^2)` work that neither separately-measured half could charge
+> for: the 25 `pK` terms, the 16 Wick coefficients, `pK -> K`, the `d = 4`
+> harmonic projection, the `M = diag(S3) + 3 S21^T` rebuild and the diagonal
+> masks. The review estimated that residue structurally at `0.13`. **It is
+> `0.157`.** The margin narrows from `1.51` to `1.35`, and the oracle rank-512
+> correction (`0.0073 B`) now fits `2.9x` over rather than `3.2x`.
+>
+> **THE PRICE IS A PRICE OF SOMETHING** — `p2_k3_fnp.py --layer-k2`, three
+> checks at `kappa_3 = kappa_4 = 0`, where the answer is known in closed form:
+> mean and variance against the shipped K2 closure (`0.00` / `4.9e-16`);
+> covariance against K2 **plus the `k_max=3` edge term K2 does not have**
+> (`5.1e-16`, and the check requires that term to be PRESENT — it is `5.49e-03`
+> of the K2 covariance, and a layer reproducing bare K2 would be wrong); and the
+> third-cumulant diagonal against independent Gauss-Legendre quadrature
+> (**`1.07e-14`**).
+>
+> **THE MECHANISM WP15 RESTS ON IS NOW WRITTEN DOWN, NOT ARGUED.** Each layer
+> the nonlinearity generates a fresh all-distinct `kappa_3` block as a rank-`n`
+> factored tensor whose **middle leg is a multiple of the identity**, so its
+> entire contribution to the next `(2,1)` slice is
+> **`w(1)_i^2 w(2)_j C_ij^2`** — a Hadamard of the covariance with itself under
+> two diagonal scalings, with **no `n^3` object in it**. The regenerating flow
+> keeps it for one layer and discards the factored block at the rebuild. *That
+> is the `E21` it is missing*, and it is why a MAP can exist where a selector
+> cannot: a selector can only choose a subspace of something the flow already
+> holds, and the flow does not hold this at all.
+>
+> **`K[4]` in this flow is ONE SCALAR per layer.** `r_x(4, 3, SIMPLE) = 2` and
+> `4 - 2*2 = 0`, so the fourth cumulant's core is order zero; the `(3,1)` and
+> `(2,1,1)` slices contribute exactly nothing to the `r = 2` projection, so the
+> `n^3` object upstream materialises is never formed. Any design that budgeted
+> for a fourth-order `n^2` or `n^3` object was budgeting for something that does
+> not exist here.
+>
+> **THE PORT IS BOUNDED AND NOW HAS ITS COEFFICIENTS.**
+> `local_sim/p2_k3_coefs.py` freezes, from upstream rev `93d091a4`, the four
+> tables that were the open-ended part: the 25-term program with its scalars and
+> per-axis Wick indices, `DS_part_sum`'s 19 vector partitions with their folded
+> `pK -> K` coefficients, the two `d = 4` Laplacian coefficients, and the
+> `_relu_wick_poly` polynomials for the 16 `(k, p)` pairs. `proj_coef(n, 4, 2)`
+> is deliberately NOT frozen — it is a closed form in `n` and is evaluated.
+>
+> **TWO DEFECTS IN THIS SESSION'S OWN INSTRUMENT, FOUND BEFORE IT WAS
+> BELIEVED.** (1) A **NaN reference passed a `>` gate silently** — `hermgauss`
+> overflows past degree ~200 and `nan > tol` is `False`, so all three quadrature
+> checks printed `nan` and the verdict printed PASS. *Second time this class has
+> appeared here*; WP8's soak sorted never-executed rows to the bottom of a
+> median. (2) **Gauss-Hermite is the wrong rule for a ReLU expectation** and it
+> failed as the REFERENCE: the kink makes it converge algebraically, and at
+> degree 160 it disagreed with the exact `sigma phi + mu Phi` by `1.1e-03` — an
+> error that reads exactly like a bug in the port.
+>
+> **AND THE CHANGE GATE HAD BEEN RED SINCE `3b38796`, THROUGH FOUR COMMITS,
+> WITH NOTHING WRONG WITH THE LEDGER.** WP14 C0-i recorded a deliberate seed
+> overlap in its prose `note` and left **`paired_with` — the field the
+> enforcement layer reads — empty**, and the check that caught it was a *count*
+> of a growing record rather than a property. Repaired: `seed_ledger` gains a
+> `"pair"` record kind (append-only; `declare_pair()` refuses to license an
+> overlap that does not exist), the overlap report prints the declaring record's
+> **own reason** instead of one of two canned tags (the P01 case is **both**
+> deliberate and correlated, and a canned "one experiment, two roles" would have
+> erased the warning), and `A1` becomes a property with a named accident list.
+> `62/62`. **Nothing enforces "preflight was green" at commit time — that hole
+> is real, is NOT repaired, and is recorded as open.**
+>
+> **NEXT — `CONTRACT WP15` is pre-registered and committed (`1b6ac04`), before
+> any data and before `P05`/`P06` are touched.** Two arms on the one remaining
+> question, *is there a map from `(mu, Sigma, S3, S21)` to the rank-`r`
+> correction of BOTH read-slices*: **Arm M** measures `E21`'s memory depth by
+> age-selected exact injection and, if short, builds the closed-form generator
+> plus a rank-`r` sketch; **Arm L** fits a permutation-equivariant
+> polynomial-in-matrices map (<= 50 coefficients) on `P05`, leave-networks-out,
+> and validates end to end in flight on `P06`. Seven gates, all thresholds fixed
+> in the contract; twelve predictions, **five of which predict a gate in the
+> contract failing**. Two disagreements with the strategist recorded before the
+> data: **rank `512` is not affordable for a carried sketch** (`3.0`
+> matmuls/layer against `1.35`; the horizon is `r <= 192`), and the `>= 90%`
+> held-out `R^2` gate is not the binding constraint — the end-to-end requirement
+> will bite first. Kill line **~2026-09-20**.
+
+
 > **2026-09-02 (WP14 — CLOSED) — WE ARE AT THE MULTIPLIER FLOOR, AND WE GOT
 > THERE BY FIXING A UNIT. THE FREE SELECTOR DOES NOT EXIST: `Sigma`'s DOMINANT
 > RANGE CONTAINS `E21` EXACTLY AS MUCH AS A RANDOM SUBSPACE DOES.**

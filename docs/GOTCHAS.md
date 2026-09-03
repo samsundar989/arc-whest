@@ -62,6 +62,89 @@ chose, and hash-check the file afterwards if you chose absolute.**
 
 ---
 
+---
+
+## 2026-09-02 (SKEPTIC WP14 follow-up) — three traps, two of them in a REFERENCE
+
+### `nan > tol` is `False`, so a NaN reference PASSES a threshold check
+
+The correctness check built for the `fnp` K3 layer compared it against
+Gauss-Hermite quadrature. `numpy.polynomial.hermite.hermgauss` **overflows past
+about degree 200 and returns NaN weights**; the comparison printed `nan` for all
+three cumulants and the verdict printed **PASS**.
+
+> **A `>` comparison is not a check. It silently admits the one value it cannot
+> order.** Every threshold gate in this repository must reject non-finite input
+> explicitly, before comparing.
+
+Second appearance of this class: WP8's residual soak sorted never-executed rows
+(`residual_wall_time_s = 0.0`) to the bottom of a pooled median, so the reported
+"median at rank 150/300" was the 41st percentile of executed work. Both survived
+because the *number a reader checks* looked normal.
+
+### Gauss-Hermite is the wrong quadrature for a ReLU expectation
+
+`max(z, 0)` has a kink at the origin, so Gauss-Hermite — which integrates over
+the whole line against `exp(-t^2)` — converges **algebraically**, not spectrally.
+At degree 160 it disagreed with the exact `sigma phi(alpha) + mu Phi(alpha)` by
+`1.1e-03`, which reads exactly like a bug in the thing under test.
+
+**Split the integral at the kink and use Gauss-Legendre** on
+`[max(mu, 0), max(mu, 0) + 14 sigma]`: the integrand is analytic there, the
+discarded tail is below `1e-42` of the mass, and agreement goes to `3e-15`.
+
+> When a check fails, ask whether the REFERENCE is the thing that is wrong. Here
+> the reference was wrong by a thousand times the tolerance.
+
+### The regenerating K3 flow's measured per-layer price, and it supersedes the projection
+
+Measured, one program, one layer, at `1024` inside a real `BudgetContext`
+(`local_sim/p2_k3_fnp.py --layer-price`):
+
+| | counted FLOPs | dense `1024`-matmuls | `x 16` layers | `x budget` |
+|---|---:|---:|---:|---:|
+| `f64` | `21,675,713,540` | `5.047` | `346,811,416,640` | `0.15773` |
+| **`f32`** | **`10,837,935,618`** | **`5.047`** | `173,406,969,888` | **`0.07886`** |
+
+The `f32 / f64` ratio is `0.50000` **exactly**, which is how you know nothing
+promoted. The five `n^3`-class operations per layer are `W.T @ cov @ W` (two),
+`W.T @ M` (one) and the `(2,1)` slice's two surviving block permutations. The
+remaining `0.047` matmuls/layer is every `O(n^2)` thing in the layer put
+together.
+
+> **Carry `5.047` f32 matmuls per layer, not `4.89`.** The composed projection
+> `0.07636 B` was 3.3% optimistic; the margin under the `0.1` floor is
+> `0.02114 B` = **`1.35` f32 matmuls per layer**, not `1.51`. One un-reducible
+> extra `n^3` op per layer still fits. Two still do not.
+
+And two structural facts worth not rediscovering:
+
+- **`K[4]` in the SIMPLE `k_max = 3` flow is one SCALAR per layer.**
+  `r_x(4, 3, SIMPLE) = 2` and `4 - 2*2 = 0`, so its core is order zero. The
+  `(3,1)` and `(2,1,1)` slices contribute exactly nothing to the `r = 2`
+  projection (`_lap_m_dslice` admits no multigraph meeting their arity
+  condition), so the `n^3` object `(2,1,1)` that upstream materialises need never
+  be formed.
+- **The freshly generated all-distinct block's contribution to the next `(2,1)`
+  slice is `w(1)_i^2 w(2)_j C_ij^2`** — its middle leg is a multiple of the
+  identity, so every block permutation degenerates to a row scaling. No `n^3`
+  object appears anywhere in generating it.
+
+### Intent recorded in prose is not recorded
+
+`seed_ledger` claims carry both a free-text `note` and a machine-readable
+`paired_with`. WP14 C0-i wrote "DELIBERATE DESIGN-tier overlap" in the note and
+left `paired_with` empty, and **preflight steps 7 and 9 were RED for four
+commits** over a ledger that was substantively correct.
+
+> If a rule is machine-checked, its exception must be machine-declared. Use
+> `seed_ledger.declare_pair(...)` — a `"pair"` record — not a sentence.
+
+And **nothing enforces "preflight was green" at commit time.** The pre-commit
+hook guards protected paths, not the gate. That hole is open.
+
+---
+
 ## 2026-09-02 (WP14 / C0-iii) — a flopscope price is not well-formed without its DTYPE
 
 **CORRECTS the WP13 entry that stood here for one day.** flopscope 0.12 does

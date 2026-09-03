@@ -1,0 +1,132 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260902215734
+Username: SAM_MEGA_PC\samsu
+RunAs User: SAM_MEGA_PC\samsu
+Configuration Name: 
+Machine: SAM_MEGA_PC (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command try { $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8' } catch {}; if ($ExecutionContext.SessionState.LanguageMode -eq 'FullLanguage') { try { $OutputEncoding = [System.Text.UTF8Encoding]::new() } catch {}; if ($null -ne $PSStyle) { try { $PSStyle.OutputRendering = 'PlainText' } catch {} } }; .\scripts\preflight.ps1 -Log experiments/2026-09-02_wp14_fnp/preflight_after_wp15_contract.log 2>&1 | Select-String -Pattern "^\s+(PASS|FAIL)|PREFLIGHT" | Select-Object -Last 20
+; $_ec = if ($null -ne $LASTEXITCODE) { $LASTEXITCODE } elseif ($?) { 0 } else { 1 }
+; (Get-Location).Path | Out-File -FilePath 'C:\Users\samsu\AppData\Local\Temp\claude\claude-pwd-ps-a8b0' -Encoding utf8 -NoNewline
+; if ($ExecutionContext.SessionState.LanguageMode -eq 'FullLanguage') { $host.SetShouldExit($_ec) } else { exit $_ec }
+Process ID: 45612
+PSVersion: 5.1.26100.9168
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9168
+BuildVersion: 10.0.26100.9168
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+preflight -- arc-whest
+repo:    C:\Users\samsu\Documents\arc-whest
+shipped: estimator.py   archive: estimator_v2_6_1.py
+HEAD:    1b6ac04aae7f4fb5b0b286bb1f6d3b08d48ffcf9
+worktree: DIRTY at start --
+    ?? experiments/2026-09-02_wp14_fnp/preflight_after_wp15_contract.log
+  (steps 15/16 regenerate tracked evidence, so the tree is
+   EXPECTED to be dirty at the END of a -Full run)
+
+=== 1. official stack + round configuration ===
+  PASS  1. official stack + round configuration
+
+=== 2. mint provenance + dataset pin ===
+  PASS  2. mint provenance + dataset pin
+
+=== 3. invariant suite ===
+  PASS  3. invariant suite
+
+=== 4. whest validate ===
+  child stdout encoding: utf-8
+uv : C:\Users\samsu\Documents\arc-whest\estimator.py:772: SymmetryLossWarning: Symmetry lost along dims (0, 1): 
+multiply — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is 
+symmetric. Suppress with flops.configure(symmetry_warnings=False).
+At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:325 char:5
++     uv run whest validate --estimator estimator.py
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\samsu\...arnings=False).:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)
+C:\Users\samsu\Documents\arc-whest\estimator.py:772: SymmetryLossWarning: Symmetry lost along dims (0, 1): add — no 
+symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress 
+with flops.configure(symmetry_warnings=False).
+  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)
+  PASS  4. whest validate
+
+=== 5. ship-file identity vs estimator_v2_6_1.py ===
+  PASS  5. ship-file identity vs estimator_v2_6_1.py
+
+=== 6. vault seal (counter vs log) ===
+  PASS  6. vault seal (counter vs log)
+
+=== 7. seed ledger (consumption + source scan) + enforcement labels ===
+  FAIL  7. seed ledger (consumption + source scan) + enforcement labels -- exit code 1
+
+=== 8. canonical scorer + the binding gate ===
+uv : C:\Users\samsu\Documents\arc-whest\local_sim\test_competition_score.py:43: ConfigureNoOpWarning: flops.configure() 
+configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so 
+these settings will not affect a graded submission.
+At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:408 char:5
++     uv run python local_sim/test_competition_score.py
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\samsu\...ded submission.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\local_sim\test_competition_score.py:290: BudgetExhaustionWarning: MLP 0 (depth=4, 
+width=16) exhausted FLOP budget after 200,000 FLOPs (budget=200,000); estimator output set to zeros.
+  res = evaluate_estimator(estimator, data)
+C:\Users\samsu\Documents\arc-whest\local_sim\test_competition_score.py:290: BudgetExhaustionWarning: MLP 1 (depth=4, 
+width=16) exhausted FLOP budget after 200,000 FLOPs (budget=200,000); estimator output set to zeros.
+  res = evaluate_estimator(estimator, data)
+C:\Users\samsu\Documents\arc-whest\local_sim\test_competition_score.py:290: BudgetExhaustionWarning: MLP 2 (depth=4, 
+width=16) exhausted FLOP budget after 200,000 FLOPs (budget=200,000); estimator output set to zeros.
+  res = evaluate_estimator(estimator, data)
+C:\Users\samsu\Documents\arc-whest\local_sim\test_competition_score.py:290: BudgetExhaustionWarning: MLP 3 (depth=4, 
+width=16) exhausted FLOP budget after 200,000 FLOPs (budget=200,000); estimator output set to zeros.
+  res = evaluate_estimator(estimator, data)
+  PASS  8. canonical scorer + the binding gate
+
+=== 9. seed-ledger refusals ===
+uv :   NOTE D18 is DESIGN: [30,806,018,000..30,806,018,023] overlaps 'probe_a.py'. Permitted, but the two results are 
+CORRELATED evidence and must not be quoted as independent.
+At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:417 char:5
++     uv run python local_sim/test_seed_ledger.py
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (  NOTE D18 is D...as independent.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+  PASS  9. seed-ledger refusals
+
+=== 10. vault integrity (array hashes + seed->weights) ===
+  PASS  10. vault integrity (array hashes + seed->weights)
+
+=== 11. lifecycle evaluator ===
+uv : C:\Users\samsu\Documents\arc-whest\local_sim\lifecycle_eval.py:484: ConfigureNoOpWarning: flops.configure() 
+configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so 
+these settings will not affect a graded submission.
+At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:442 char:5
++     uv run python local_sim/lifecycle_eval.py --self-test
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\samsu\...ded submission.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+  flops.configure(symmetry_warnings=False)
+  PASS  11. lifecycle evaluator
+
+=== 12. counted-FLOP anchor vs the official runner ===
+uv : C:\Users\samsu\Documents\arc-whest\local_sim\p2_flop_anchor.py:343: ConfigureNoOpWarning: flops.configure() 
+configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so 
+these settings will not affect a graded submission.
+At C:\Users\samsu\Documents\arc-whest\scripts\preflight.ps1:458 char:5
++     uv run python local_sim/p2_flop_anchor.py --gate
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\samsu\...ded submission.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+  flops.configure(symmetry_warnings=False)
+  PASS  12. counted-FLOP anchor vs the official runner
+
+PREFLIGHT RED -- failed: 7. seed ledger (consumption + source scan) + enforcement labels
+Do not promote, do not submit, do not spend a decision block.
+**********************
+Windows PowerShell transcript end
+End time: 20260902220320
+**********************

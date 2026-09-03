@@ -410,7 +410,7 @@ Step "8. canonical scorer + the binding gate" {
 
 # --- 9. the seed ledger's refusals actually fire --------------------------------
 # Step 7 proves the ledger is CONSISTENT. It cannot prove the guards still refuse.
-# These are 60 negative tests: unregistered block, range leaving its block, any
+# These are 62 negative tests: unregistered block, range leaving its block, any
 # overlap in a DECISION block, a second claim on a SINGLE_USE one, a hand-edited
 # ledger, an artifact rewritten after its claim.
 Step "9. seed-ledger refusals" {
