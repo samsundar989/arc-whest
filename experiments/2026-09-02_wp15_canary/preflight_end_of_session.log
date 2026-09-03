@@ -1,0 +1,111 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260902231143
+Username: SAM_MEGA_PC\samsu
+RunAs User: SAM_MEGA_PC\samsu
+Configuration Name: 
+Machine: SAM_MEGA_PC (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command try { $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8' } catch {}; if ($ExecutionContext.SessionState.LanguageMode -eq 'FullLanguage') { try { $OutputEncoding = [System.Text.UTF8Encoding]::new() } catch {}; if ($null -ne $PSStyle) { try { $PSStyle.OutputRendering = 'PlainText' } catch {} } }; .\scripts\preflight.ps1 -Log experiments/2026-09-02_wp15_canary/preflight_end_of_session.log | Select-String -Pattern "PREFLIGHT|FAIL " ; "EXIT=$LASTEXITCODE"
+; $_ec = if ($null -ne $LASTEXITCODE) { $LASTEXITCODE } elseif ($?) { 0 } else { 1 }
+; (Get-Location).Path | Out-File -FilePath 'C:\Users\samsu\AppData\Local\Temp\claude\claude-pwd-ps-44a2' -Encoding utf8 -NoNewline
+; if ($ExecutionContext.SessionState.LanguageMode -eq 'FullLanguage') { $host.SetShouldExit($_ec) } else { exit $_ec }
+Process ID: 17920
+PSVersion: 5.1.26100.9168
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9168
+BuildVersion: 10.0.26100.9168
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+preflight -- arc-whest
+repo:    C:\Users\samsu\Documents\arc-whest
+shipped: estimator.py   archive: estimator_v2_6_1.py
+HEAD:    18e88aa621f791a21510e5680fdf3e762c8139c9
+worktree: DIRTY at start --
+     M docs/VALIDATION.md
+     M experiments/seed_ledger.jsonl
+     M local_sim/seed_ledger.py
+     M scripts/preflight.ps1
+    ?? experiments/2026-09-02_wp15_canary/preflight_end_of_session.log
+  (steps 15/16 regenerate tracked evidence, so the tree is
+   EXPECTED to be dirty at the END of a -Full run)
+
+=== 1. official stack + round configuration ===
+  PASS  1. official stack + round configuration
+
+=== 2. mint provenance + dataset pin ===
+  PASS  2. mint provenance + dataset pin
+
+=== 3. invariant suite ===
+  PASS  3. invariant suite
+
+=== 4. whest validate ===
+  child stdout encoding: utf-8
+  PASS  4. whest validate
+
+=== 5. ship-file identity vs estimator_v2_6_1.py ===
+  PASS  5. ship-file identity vs estimator_v2_6_1.py
+
+=== 6. vault seal (counter vs log) ===
+  PASS  6. vault seal (counter vs log)
+
+=== 7. seed ledger (consumption + source scan) + enforcement labels ===
+
+  PASS  A: preflight.ps1 claims edge_cases = 30/30                        suite reports 30/30
+  PASS  A: preflight.ps1 claims competition_score = 98/98                 suite reports 98/98
+  PASS  A: preflight.ps1 claims competition_score = 98/98                 suite reports 98/98
+  PASS  A: preflight.ps1 claims seed_ledger_refusals = 66/66              suite reports 66/66
+  PASS  A: preflight.ps1 claims lifecycle = 56/56                         suite reports 56/56
+  PASS  A: preflight.ps1 claims shape_parity = 27/27 (not measured this run)slow suite; run with --full to check it
+  PASS  A: preflight.ps1 claims carriers = 48/48 (not measured this run)  slow suite; run with --full to check it
+  PASS  A: preflight.ps1 claims seed_ledger_refusals = 66/66              suite reports 66/66
+  PASS  A: every count in preflight.ps1 is claimed or explicitly exempt   15 spans cover every occurrence
+  PASS  A: preflight.ps1 carries no count where none exists               step 7 reports no count
+  PASS  B: a wrong count at preflight step 9 is DETECTED                  66/66 -> 67/67, mismatch seen: True
+  PASS  B: a wrong count at preflight step 11 is DETECTED                 56/56 -> 57/57, mismatch seen: True
+  PASS  R: preflight.ps1 sha256 unchanged                                 0eb20aa99ef1d6ac
+  PASS  7. seed ledger (consumption + source scan) + enforcement labels
+
+=== 8. canonical scorer + the binding gate ===
+  P1: the grader itself would fail that row                  ok   C = 1.500e+11 vs B = 1.000e+11
+  PASS  8. canonical scorer + the binding gate
+
+=== 9. seed-ledger refusals ===
+  an ABSENT finalized artifact does not fail the gate            ok
+  PASS  9. seed-ledger refusals
+
+=== 10. vault integrity (array hashes + seed->weights) ===
+  PASS  10. vault integrity (array hashes + seed->weights)
+
+=== 11. lifecycle evaluator ===
+  PASS  11. lifecycle evaluator
+
+=== 12. counted-FLOP anchor vs the official runner ===
+  PASS  12. counted-FLOP anchor vs the official runner
+
+PREFLIGHT GREEN -- 12/16, 4 SKIPPED
+
+NOT CHECKED by this run. A skipped step is NOT a pass.
+Clear every line below before promoting, submitting, or
+spending a vault touch:
+  - 13. shape parity              -- not run without -Full (~480 s)
+  - 14. carrier strength         -- not run without -Full (~130 s)
+  - 15. deployment envelope      -- not run without -Full (~40 s)
+  - 16. official Phase-2 smoke   -- not run without -Full (~30 s), and it is DEPLOYMENT AUTHORITY
+  .\scripts\preflight.ps1 -Full
+
+Not covered by this gate, and still required before promotion:
+  - public Phase-2 mini (CONFIRM, read-only -- FIT NOTHING ON IT):
+      uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --runner subprocess
+    (v1-phase1 is the PHASE-1 split; use it only to replay a Phase-1 artifact)
+  - the 8,192 MB memory limit is UNENFORCEABLE on this host (no RLIMIT_AS on
+    Windows). Step 15 ACCOUNTS for it; nothing here TESTS it.
+  - GPU mirror parity:                     .venv-gpu\Scripts\python.exe local_sim/gpu_parity.py
+  - vault touch (ONE per estimator change): .venv-gpu\Scripts\python.exe local_sim/vault.py evaluate --label <v> --reason estimator-change
+  - Samuel's explicit approval before any submission.
+**********************
+Windows PowerShell transcript end
+End time: 20260902231719
+**********************

@@ -319,14 +319,21 @@ def pairing_reason(a: Claim, b: Claim, path: str = LEDGER_PATH) -> str:
     """
     if (b.consumer in a.paired_with) or (a.consumer in b.paired_with):
         return "SAME NETWORKS BY DESIGN (one experiment, two roles)"
+    found = ""
     lo, hi = max(a.start, b.start), min(a.end, b.end)
     for p in pairings(path):
         if p.block != a.block or p.start > lo or p.end < hi:
             continue
         named = [x.strip() for x in p.consumer.split("|") if x.strip()]
         if a.consumer in named and b.consumer in named:
-            return "DECLARED DELIBERATE: " + (p.note or "no reason recorded")
-    return ""
+            found = "DECLARED DELIBERATE: " + (p.note or "no reason recorded")
+    # The LAST matching declaration wins. The ledger is append-only, so a pair
+    # note that turns out to be WRONG cannot be edited -- it can only be
+    # superseded by a later one. The first P01 note asserted a red-gate window
+    # that `SKEPTIC WP14-FOLLOWUP` then disproved from git, and this is how that
+    # correction reaches a reader without rewriting history.
+    return found
+
 
 
 def declare_pair(block: str, start: int, n: int, consumers: List[str], *,
