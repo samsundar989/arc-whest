@@ -1,5 +1,88 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-03 (END OF SESSION) — THE FIX IS CONFIRMED ON THE DEPLOYMENT
+> AUTHORITY. THE RESIDUAL BAR IS THE ONLY THING BETWEEN US AND A NOMINATION, AND
+> IT DOES NOT CLEAR.**
+>
+> `preflight.ps1` **GREEN 12/12** at `0358765`. `verify_portability` 103/103.
+> Nothing submitted, nothing designated, `estimator.py` untouched at v2.6.1.
+>
+> ## The graded result, on 100 official rows with a matched control
+>
+> | | raw MSE | adjusted | utilization | failed |
+> |---|---:|---:|---:|---:|
+> | v2.6.1 (shipped), control | `4.05e-06` | `4.05e-07` | `0.06257` | 0/100 |
+> | **fixed K3 canary** | **`8.75e-07`** | **`8.75e-08`** | `0.07668` | **0/100** |
+> | | **`4.63x` better** | | multiplier `0.10000` both | |
+>
+> The control reproduces the `4.050566e-06` this repository has carried since
+> August **to `0.01%`**. The retired canary scored `2.8192e-06`; this is `3.22x`
+> better on five times the rows. **Every accuracy claim in this project now has
+> graded backing.**
+>
+> ## The blocker, with its number
+>
+> | | |
+> |---|---|
+> | worst-MLP residual (100 rows, `--detail full`) | `0.1797 s` |
+> | **worst-run headroom vs the `0.4 s` cliff** | **`2.23x`** |
+> | standing soak requirement | **`>= 4x` on the worst of `3 x 100`** |
+> | verdict | **DOES NOT CLEAR** |
+>
+> Operations are the right lever and now have a clean coefficient: the official
+> mean-residual ratio to the control is `5.82x` where the local **operation**
+> ratio is `5.98x`. Reaching `4x` needs worst `<= 0.1 s`, i.e. **`~1,470`
+> operations per MLP (`~92` a layer) against today's `2,646` / `165`**.
+>
+> **The remaining reductions are not IEEE identities.** Everything done so far
+> was byte-exact and verified as such; what is left — factoring
+> `0.5 C11^2 X + 0.25 D22 X`, batching the thirteen two-dimensional terms through
+> a 3-D stack — reassociates, and the stack materialises `54 MB` at `n = 1024`
+> which forum 18101 says costs residual. Each needs a measured drift check.
+>
+> **AND THE `4x` BAR WAS CALIBRATED AGAINST NOISE THE AUTHORITY DOES NOT HAVE.**
+> It was set when `VALIDATION.md` §2b-ii put run-to-run spread at `~2.4x` — a
+> LOCAL figure from a contended host. On the authority the per-MLP spread across
+> 100 rows is **`1.20x` min-to-max**, with the worst MLP `13%` above `p99`.
+> **This is flagged and deliberately NOT acted on**: relaxing a standing policy
+> is Samuel's decision and the strategist's, not the decision of the agent that
+> would benefit from the answer.
+>
+> ## `G-M-DEPTH` FAILED
+>
+> `1024 x 16`, 16 `P01` nets, f32, f64 control agreeing to `1.6%`. One / two /
+> three un-regenerated layers recover **`0.34` / `0.57` / `0.73`** of `E21`; the
+> gate is written on two ages needing `0.70`. **Prediction P1 refuted** (it said
+> `0.50` and `0.70`). **Arm M is not killed** — the falsifier is "`< 70%` at all
+> three ages" and three give `0.73` — but `E21`'s memory is **three generations
+> deep, not two**, and that is a cost case the arm did not previously need.
+> Moving the gate to `k = 3` because `k = 3` passes is refused in writing.
+>
+> ## What is DONE, and what is NOT
+>
+> | the session's own definition of done | state |
+> |---|---|
+> | parity gate passed | **DONE** — both clauses, `SKEPTIC WP16` ACCEPT, and confirmed on graded data |
+> | op count reduced and re-metered | **DONE** — `5,327 -> 2,646`, bit-exact, every figure artifact-backed |
+> | `>= 4x` brokered soak | **NOT DONE, and now known to FAIL at `2.23x`.** The `3 x 100` soak was not run: a single official read already shows the bar is not met, and three runs cannot rescue a worst-case that fails on one |
+> | canary presented | **NOT DONE, correctly.** Gated on the bar above |
+> | both arm instruments built, first numbers on record | **PARTIAL.** Arm M built, ladder exact, `G-M-DEPTH` measured and FAILED. **Arm L not started** |
+> | LOG / CURRENT_STATE current with the next gate | **DONE** |
+>
+> ## The three questions that are not the agent's to answer
+>
+> 1. **Is `>= 4x` still the right bar**, given it was calibrated on local noise
+>    of `~2.4x` and the authority shows `1.20x` across 100 rows with `0/100`
+>    failures? At `2.23x` the file is `2.2x` inside a cliff whose measured
+>    dispersion is `1.2x`.
+> 2. **Is Arm M worth a cost case** for a rank-`r <= 192` sketch of THREE
+>    generations recovering `~73%` of `E21` only (and `E21` is not the whole
+>    error — `E3` carries ~40%)?
+> 3. **Where does the remaining time go** — into the reassociating op-count work
+>    that is on the critical path to a nomination, or into Arm L, which is
+>    upside on a file that already scores `4.63x` better than the shipped one?
+
+
 > **2026-09-03 (LATE) — WHERE THIS STANDS, AND THE ONE NUMBER THAT DECIDES THE
 > NEXT MOVE.**
 >
