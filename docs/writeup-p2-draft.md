@@ -26,7 +26,7 @@
 | 4. Where the error actually is | **populated, evidence complete** | — |
 | 5. Compressing the third cumulant | **populated, evidence complete** | — |
 | 6. What an estimator may spend, and the two levers | **populated, evidence complete** (new 2026-09-02; §6.6-6.7 new 2026-09-03) | — |
-| 7. The off-diagonal lane | **populated** — six selectors dead, and §7.2 closes the cheap half of the regeneration route at a CEILING (new 2026-09-03) | — |
+| 7. The off-diagonal lane | **populated, and the lane is CLOSED four ways on measured ceilings** — §7.1 memory depth, §7.2 the vector ceiling, §7.3 the matrix ceiling plus the sensitivity that explains all of it (new 2026-09-03) | — |
 | 8. Method and protocol | **populated** | — |
 | 9. What we got wrong | **populated — fifteen entries, and this list grows** | — |
 | 10. Result and nomination | **PENDING** | end of Phase 2; Samuel's gate |
@@ -858,6 +858,98 @@ degenerate-limit check passed a defective port because the defect vanished in th
 limit. Here a component table was read one row off. Both times the correct
 information was already in a file we owned. **Verification is not only about
 building the right check — it is about reading the check you already built.**
+
+
+---
+
+### 7.3 The lane, closed four ways — and the sensitivity that explains why it was never close *(new 2026-09-03)*
+
+**Evidence: CONFIRMED**, pre-registered, and **the falsifier fired.**
+
+§7.2 closed one route. Two more measurements closed the rest, and together they
+turn "we could not make it work" into something a reader can use: **the state
+this class of flow carries does not determine what it discards, and here is the
+ceiling on each of the four ways we tried to get it back.**
+
+**Can the matrix be predicted from the carried state?** We fit it over 29
+permutation-equivariant terms — Hadamard powers of the covariance, diagonal
+rescalings by the ReLU Wick coefficients, the carried third-order slice, outer
+products, and six matrix-product terms — on 128 networks, leave-networks-out, the
+basis committed to version control before a single inner product with the target
+was computed.
+
+| | layer-averaged, held out |
+|---|---:|
+| the fit | **`0.14`** |
+| the basis's own in-sample ceiling | **`0.17`** |
+
+The fit is within `0.03` of the most any map built from those terms could
+achieve. **The shortfall is representational, not statistical.** We checked the
+ceiling was not an artifact of the solver — three methods and five truncation
+settings agree to six decimals, and the design matrix is full rank.
+
+**And the expensive half of the basis buys nothing.** Our compute budget permits
+at most one matrix-product term per layer; each costs a full `2n³` while a
+Hadamard or diagonal term costs about a hundredth of that. So we ran the fit
+eight ways. **At full precision the eight answers differ in the sixth decimal,
+and two of the six expensive terms make it worse.** They correlate 0.23–0.91
+with cheap terms already in the basis — they are not new directions. We had
+spent real effort deriving how many expensive terms we could afford; the answer
+turned out not to matter.
+
+**Why none of it was ever close.** The decisive number is a sensitivity, measured
+on 8 networks at the live shape with the *matrix* correction held at oracle:
+
+| quality of the vector correction | end-to-end improvement |
+|---|---:|
+| absent | `2.2×` |
+| the best free route we found (`R² = 0.45`) | `3.7×` |
+| exact | `18.9×` |
+
+**Going from a 0.45-quality vector correction to an exact one multiplies the
+end-to-end gain by five.** The curve is steeply convex: the last half of that
+object's variance is worth four times the first half. A `10×` end-to-end
+requirement therefore needs *both* pieces near-exact — and we can predict neither
+above `0.15`.
+
+That is the whole story, and it is why the four ceilings matter more than the
+four failures:
+
+| route | outcome |
+|---|---|
+| select a subspace of what the flow already holds (5 rules) | **1.45×–2.10× worse than not correcting** |
+| select using the covariance's dominant range | containment equals `r/n` to three decimals — **chance** |
+| predict the vector pointwise from carried per-neuron scalars | held out `0.10`, **ceiling `0.26`** |
+| predict the matrix from 29 equivariant terms | held out `0.14`, **ceiling `0.17`** |
+
+**One thing that did work, and should not be lost.** The two discarded objects are
+the diagonal and the zeroed off-diagonal of a single tensor. Reading the diagonal
+off a rank-192 reconstruction of the off-diagonal — **one fitted scalar, no new
+features, on an object the matrix correction has already materialised** —
+recovers `R² = 0.45`, with a fitted scale of `1.019`, i.e. essentially unbiased.
+It is also non-destructive: better than no correction on **8 of 8 networks at
+three ranks**, which mattered because an earlier experiment of ours had found
+that injecting exact information mid-flow can make things *worse*. That component
+is free and correct. It is unusable only because it needs the matrix we cannot
+predict.
+
+**What we would tell the next person.** Three things, in order of how much they
+cost us:
+
+1. **Measure the ceiling, not just the fit.** Both of our learned components died
+   at a ceiling, and a ceiling is a claim about the problem where a poor
+   held-out score is only a claim about your effort. Ours came almost free: for a
+   basis linear in its coefficients you never need to store the target, only its
+   Gram matrix and moments, and the ceiling is then a closed form.
+2. **A negative result needs a sensitivity to be worth reading.** "Our map got
+   0.14" is not useful. "The end-to-end requirement needs both pieces near-exact,
+   and here is the measured curve showing how fast quality converts into result"
+   is a thing someone else can plan against.
+3. **Check which half of your cost model is binding before you optimise it.** We
+   derived an elaborate constraint on how many expensive terms we could afford.
+   The expensive terms turned out to contribute nothing, twice over — the same
+   shape of error as §6.6, where we spent weeks reducing a FLOP count that the
+   score was not charging us for.
 
 
 ---

@@ -1,5 +1,128 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-03 (END OF SESSION) — ARM L IS DEAD ON ITS OWN FALSIFIER. THE
+> CORRECTION LANE IS CLOSED FOUR WAYS ON MEASURED CEILINGS. THE CANARY IS
+> `29/30` AND PACKAGED. THE KILL LINE'S CONDITION IS MET THREE WEEKS EARLY, AND
+> WHAT REMAINS IS A PORTFOLIO DECISION — WHICH IS THE STRATEGIST'S.**
+>
+> `estimator.py` untouched at v2.6.1. **Nothing submitted, nothing designated.**
+> `P06[..000..127]` **released untouched** — its gate's falsifier fired upstream.
+> Contract `49e2e42` precedes every number here.
+>
+> ## 1. ARM L IS DEAD, BY THE CONTRACT IT WAS WRITTEN UNDER
+>
+> `CONTRACT WP18` § B's falsifier: *"`R^2 < 0.90` on BOTH legs held out."*
+>
+> | leg | held-out `R^2` | **in-sample ceiling** | null |
+> |---|---:|---:|---:|
+> | `E3` — pointwise map on carried per-neuron scalars | **`0.1002`** | **`0.2575`** | `-2.01` |
+> | `E21` — 29-term equivariant matrix basis | **`0.1436`** | **`0.1665`** | `-221,237` |
+>
+> **Both below `0.90`. The falsifier fires. No threshold was moved.** Each fit
+> sits within `0.03`–`0.16` of its basis's own ceiling, so the shortfall is
+> **representational, not statistical** — and both ceilings were verified against
+> solver artifacts (E21: three solvers and five `rcond` settings agree to six
+> decimals, Gram full rank `29/29`).
+>
+> **The other falsifier clauses did NOT fire**, which says where the failure is
+> not: `G-DIAG-NOTWORSE` passed `0/8` at three ranks (the injection is **not**
+> destructive — WP10's precedent does not recur), and both nulls are clean by
+> enormous margins. The maps are not accidentally right and not harmful. They are
+> not there.
+>
+> ## 2. The lane, closed four ways, with a ceiling on each
+>
+> | route | outcome | where |
+> |---|---|---|
+> | **select** a subspace of what the flow holds (5 column-weight rules) | `1.45x`–`2.10x` **worse** than not correcting | WP13 |
+> | **select** by `Sigma`'s dominant range | containment `= r/n` to three decimals — **chance** | WP14 |
+> | **predict `E3`** pointwise from carried scalars | held out `0.1002`, ceiling **`0.2575`** | WP18 § B |
+> | **predict `E21`** from 29 equivariant terms | held out `0.1436`, ceiling **`0.1665`** | this session |
+>
+> **And the sensitivity that explains all of it** (WP19, 8 nets, live shape,
+> `E21` held at **oracle**, `r = 192`):
+>
+> | `E3` quality | end-to-end |
+> |---|---:|
+> | absent | `2.223x` |
+> | best free route (`R^2 = 0.453`) | `3.727x` |
+> | exact | `18.873x` |
+>
+> **`10x` needs BOTH legs near-exact. Neither can be predicted above `0.15`.**
+>
+> ## 3. WP19: the one component that works, and why it is still unusable
+>
+> `E3` and `E21` are the **diagonal** and the **zeroed off-diagonal of one
+> tensor**. Reading `E3` off a rank-192 reconstruction of `E21` — one fitted
+> scalar, no new features, on an object already materialised — gives `R^2 = 0.4529`
+> with `c = 1.019` (essentially **unbiased**), and is non-destructive on `8/8`
+> nets at three ranks. **Both its gates still failed as written**: `G-DIAG-R2`
+> `0.4529 < 0.50`, `G-DIAG-E2E` `3.727x < 5x`. `r = 256` would clear `5x` at
+> `5.748x` and is **beyond the affordability horizon**; moving the gate there is
+> refused in writing. The component is free and correct; it needs an `E21` we
+> cannot produce.
+>
+> ## 4. The canary: `29/30`, packaged, awaiting a human decision
+>
+> | | |
+> |---|---|
+> | archive | `experiments/2026-09-03_wp18_canary/submission_wp18_canary.tar.gz`, `13,858` bytes |
+> | archive sha256 | `e40f6b4de6a10cdcef74b729cc8dbc5eae9a930976e53ba37bee78904fb99960` |
+> | inner `estimator.py` **LF** (shipped bytes) | `252c3c947f130e75b71bdb976293af964ed93a377bfeb7fa8403e5e76a4acddc` |
+> | same content **CRLF** (what `certify_guarded.json` names) | `3faf21b3c816d72c…` |
+> | multiplier | `0.100000` at the floor, `C/B = 0.0766870`, with `+2**24` |
+> | steady-state price of the guards | `+31` ops (`+1.17%`), `+8,162,816` FLOPs |
+> | Linux `8,192 MB` gate | `13/13`, `VmPeak 2266.8 MB`, `3.61x`, both controls behaving |
+> | official smoke | `0 failed`, worst residual `245.52 ms` |
+> | **the one red item** | invariant 9, permutation equivariance — float32 precision, verified at a `1e9` f32/f64 ratio |
+>
+> **`CONTRACT WP18` § A: any red item means it is not presented as gate-green.
+> Submitting is a human override — Samuel's, not an agent's.** All three canary
+> Skeptics say the bytes are operationally safe at `1024 x 16`.
+>
+> ## 5. Three Skeptics ran and all three returned PROVISIONAL
+>
+> Between them: the price quoted against the wrong row; **two false
+> justifications written into a submission file's comment**, one revision apart;
+> a claim true only at `1024 x 16` stated unqualified; a stated blocker that was
+> false; an oracle table read one row off; **an endpoint check that was `1 - x/x`
+> and inverted**; a price metered on the wrong array type (which resolved the
+> `15 n^2` mystery two audits had left open); a guard that masked the regression
+> it caused; and an accuracy figure describing an array the scorer never sees.
+> **All fixed and recorded.** `SKEPTIC WP18`, `WP18-B`, `WP18-C` in
+> `experiments/LOG.md`.
+>
+> ## 6. THE DECISION THAT IS NOT AN AGENT'S
+>
+> The `~Sep 24` kill line's condition — *no `>= 10x` end-to-end drift reduction
+> on fresh nets* — **is met, three weeks early, on evidence rather than
+> schedule.** The standing instruction on that condition is: freeze Arm L,
+> nominate the canaried uncorrected flow (only if graded worst-row headroom
+> `>= 4x`, else after a sized op cut) plus `v2.7` as the diverse pair, finish the
+> write-up.
+>
+> **Two things now need a decision that repository evidence cannot make**, and a
+> **Strategist Packet is drafted** (`docs/STRATEGIST_PACKET_2026-09-03.md`):
+>
+> 1. **Where do the remaining ~3 weeks go?** Op-count reduction is the only
+>    remaining lever on the nomination and it is gated on a graded number we do
+>    not have. The write-up is now the co-equal `$20k` objective and has a
+>    complete four-ceiling negative result to carry.
+> 2. **Does the canary go out at `29/30`**, given the one red item is a float32
+>    property the graded distribution cannot observe, and given that the graded
+>    per-row residual is the only instrument that can settle the nomination bar?
+>
+> ## 7. Next actions
+>
+> 1. **Samuel: the canary decision.** Everything else on the nomination path is
+>    downstream of the graded per-row residual it would buy.
+> 2. **Strategist packet** — drafted, awaiting hand-off.
+> 3. Write-up is current: **§6.8, §7.1, §7.2, §7.3**. §7's status row now reads
+>    *closed four ways on measured ceilings*.
+> 4. `P06` is unspent and stays that way unless a lane reopens on **external**
+>    evidence.
+
+
 > **2026-09-03 (WP18, END OF SESSION) — THE CANARY IS `29/30`, REPACKAGED AFTER
 > THREE INDEPENDENT AUDITS, AND WAITING ON ONE HUMAN DECISION. ARM L'S FIRST
 > ROUTE DIED AT A CEILING; A CHEAPER ONE IT NEVER TRIED IS NOW THE NEXT
