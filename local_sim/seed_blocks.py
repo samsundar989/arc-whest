@@ -139,6 +139,28 @@ DECISION_BLOCKS = [
                                  "rehearsal, a debug run, or a configuration still "
                                  "under selection destroys the only clean Phase-2 "
                                  "decision this project has."),
+    # --- CONTRACT WP15, allocated 2026-09-02 BEFORE any WP15 data exists ------
+    # The remaining Phase-2 problem is a MAP from the regenerating flow's own
+    # carried state to the rank-r correction of both kappa_3 read-slices. Two
+    # arms need three disjoint roles, and conflating any two of them is the
+    # failure this repository has already paid for: a map fitted and validated on
+    # the same networks is not evidence, and two arms scored on one validation
+    # set is one number quoted twice.
+    ("P05", 40_902_005_000, 160, "PHASE-2 DESIGN block, allocated 2026-09-02 for "
+                                 "CONTRACT WP15 Arm L: the SUPERVISED FIT of the "
+                                 "state -> correction map, leave-networks-out. "
+                                 "Tuning, basis selection, coefficient counts and "
+                                 "regularisation are PERMITTED here and NOWHERE "
+                                 "else. No gate is decided on it, and nothing "
+                                 "fitted here may be reported without P06."),
+    ("P06", 40_902_006_000, 128, "PHASE-2 DESIGN block, allocated 2026-09-02 for "
+                                 "CONTRACT WP15: the end-to-end validation of BOTH "
+                                 "arms on networks neither arm was built on. "
+                                 "DISJOINT from P05 by construction and to be "
+                                 "claimed in TWO disjoint halves of 64 -- "
+                                 "P06[..000..063] for Arm M, P06[..064..127] for "
+                                 "Arm L -- so the two arms are never scored on the "
+                                 "same networks. No tuning of any kind here."),
 ]
 
 # --- single-use blocks -------------------------------------------------------

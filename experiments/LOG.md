@@ -27835,3 +27835,238 @@ Two separate defects, and the second is the one that matters:
    gate. That is a real hole and it is NOT repaired here; it is recorded as open.
    The cheapest fix is a `preflight --since <commit>` marker the pre-commit hook
    can read, and it needs its own slice.
+
+---
+
+# 2026-09-02 — CONTRACT (Rule 1): **WP15 — THE MAP**. STRATEGIC. Pre-registered before any data exists.
+
+*Committed before any WP15 instrument is run and before `P05` or `P06` is
+touched. Twelve numbered predictions, five of which predict a gate in this
+contract failing. **The human prediction slot is WAIVED** — Samuel is solo and
+the strategist directing this arc has already recorded its own position, which
+is quoted below and which I disagree with in two places.*
+
+## Question
+
+**Is there a map from the regenerating flow's own carried state `(mu, Sigma, S3,
+S21)` to the rank-`r` correction of BOTH `kappa_3` read-slices?**
+
+That is the whole of what is left. Everything else about this lane is measured:
+the correction is worth first place, it is affordable, and nothing that merely
+*selects* a subspace can find it.
+
+## Evidence
+
+| | status | source |
+|---|---|---|
+| Correcting **both** slices at oracle rank 512 gives **`333.8x`** end-to-end drift reduction; rank 128 gives `11.1x` | CONFIRMED | `gpuq` 131, `experiments/.../c2_e2e_oracle_rank.json` |
+| Correcting **one** slice saturates at `2.4x` however good the correction | CONFIRMED | same |
+| A rank-512 correction costs `16,106,127,360` counted f32 FLOPs = `0.0073 B` | CONFIRMED | WP14 C2 pricing |
+| The regenerating flow, executed as ONE `fnp` program, costs `5.047` f32 `1024`-matmuls/layer = `0.07886 B` over 16 layers; **margin `0.02114 B` = `1.35` matmuls/layer** | CONFIRMED | today, `layer_price_1024.json` |
+| `Sigma`'s dominant range contains `E21` exactly as much as a random subspace does (`r/n` to three decimals, every depth, every rank, f32 and f64, positive control at `1.0`) | CONFIRMED | WP14 C1 + `SKEPTIC WP14` |
+| Five column-weight selectors are each `1.45x`-`2.10x` **worse** than not correcting | CONFIRMED | WP13 E1 |
+| `kappa_3` locality: the single-layer share of the residual is `0.42`-`0.70` | CONFIRMED | WP4 |
+| The uncorrected flow is raw `8.5075e-07`, `1.637x` better than the v2.7 proxy, 8 of 8 networks | CONFIRMED | WP14 C0-i paired |
+| **The freshly generated all-distinct block's own contribution to the next `(2,1)` slice is `w(1)_i^2 w(2)_j (C_ij)^2`** — an `n x n` Hadamard of the covariance with itself under two diagonal scalings, with **no `n^3` object anywhere in it** | CONFIRMED **today**, in code | `p2_k3_fnp.k3_layer`, block 2; `factor_k3.py:378-403` |
+| Composed-excess models over-predict the end-to-end effect by ~`32x` | CONFIRMED | WP10 |
+| A map has never been tried. WP13 killed selectors on the carried tensor; WP14 killed `Sigma`'s range | CONFIRMED | both |
+
+## Hypothesis and mechanism
+
+**The information the regenerating flow throws away is generated, each layer, by
+a closed-form function of `(mu, Sigma)` — and that function is a Hadamard, not a
+contraction.**
+
+The mechanism is now written down rather than argued. At each layer the
+nonlinearity creates a fresh all-distinct `kappa_3` block as a rank-`n` factored
+tensor `(fac1, 3 I, fac3^T)` with
+
+    fac1 = w(1)[:, None] * C ,   fac3 = (w(2)[:, None] * w(1)[None, :] * C).T
+
+where `C` is the zero-diagonal pre-activation covariance and `w(k)` are the ReLU
+Wick coefficients the flow already computes. Its **middle leg is a multiple of
+the identity**, so every block permutation of its `(2,1)` slice degenerates to a
+row scaling and the whole contribution is `fac1 . fac3 = w(1)_i^2 w(2)_j C_ij^2`.
+The regenerating flow keeps that contribution for one layer and then **discards
+the factored block at the `from_dstensor` rebuild** — which is exactly the
+`E21` it is missing.
+
+So the missing correction is not an arbitrary function of the state. Its leading
+term is a **specific quadratic Hadamard in `Sigma` under diagonal scalings by
+functions of `(mu, sigma)`** — and that is a member of Arm L's proposed basis by
+construction, and Arm M's object by construction. **That is why a map can exist
+where a selector cannot: a selector can only choose a subspace of something the
+flow already holds, and the flow does not hold this at all.**
+
+Two arms discriminate the two ways that could be true.
+
+## Arm M — mechanistic. How deep is `E21`'s memory?
+
+**Intervention.** Inject, into the regenerating flow, the EXACT all-distinct
+contribution taken from the torch reference and selected BY AGE: the block
+generated at `l-1` only; then `l-1` and `l-2`; then `l-1..l-3`. Report the
+fraction of `E21`'s Frobenius energy explained per age, layer-averaged over
+layers 4..14, on 16 networks from `P01`'s free range (DESIGN, structure only, no
+gate scored on it).
+
+**If short:** build "generate the fresh block from `(mu, Sigma)` in closed form,
+contract it into the next slices, and carry a rank-`r` sketch (`r <= 128`) for
+the residual memory". No fitting anywhere in it.
+
+**The cost is the binding constraint and it is already computable.** Carrying the
+fresh block EXACTLY for one extra layer turns `K[3]` into rank `2n`, which costs
+`contract_W` two extra `n x n` matmuls and breaks the `A2 == A3` collapse in the
+`(2,1)` slice (three distinct block permutations instead of two) — about **5
+extra matmuls/layer against a margin of `1.35`. Exact carry is dead on
+arithmetic before it is built.** A rank-`r` sketch replaces each of those with an
+`(n x n)(n x r)` product costing `r / n` of a matmul; at `r = 128` the six of
+them are `0.75` matmuls/layer and fit. **`r <= 192` is the affordability
+horizon**, not `512`.
+
+**Falsifier.** Memory is deep or diffuse — three ages together explain `< 70%` —
+and Arm M is dead.
+
+## Arm L — learned, supervised on the oracle
+
+**Intervention.** The oracle correction `(E21, E3)` is a computable label from
+full-K3 runs on minted networks. Fit
+
+    E21 ~= sum_t c_t T_t(mu, Sigma, S21, sigma) ,   E3 ~= sum_t d_t v_t(mu, sigma, S3)
+
+over a permutation-**equivariant** basis of at most **50 scalar coefficients** —
+`Sigma . Sigma`, `Sigma . diag(g(mu, sigma)) . Sigma`, `S21 . D`, `diag(a) Sigma
+diag(b)`, and the terms above — on `>= 128` networks from `P05`,
+leave-networks-out. Then validate end to end **in flight** (the WP10 destructive-
+injection check) on `P06`'s second half, and price it.
+
+**Equivariance is not decoration.** The map must commute with a permutation of
+the neurons, because the estimator's own answer does; a map that does not is
+fitting neuron identities that do not survive to a fresh network, and that is the
+mechanism by which every held-out score in this project has previously
+evaporated.
+
+**The learned component lives ONLY here.** The output/readout corrector stays
+closed and this contract does not reopen it.
+
+**Falsifier.** No transfer to fresh networks, or the in-flight injection is
+destructive, and Arm L is dead.
+
+## Gates — every threshold in flopscope FLOPs or in a paired statistic, fixed now
+
+| gate | arm | threshold, fixed here |
+|---|---|---|
+| **G-M-DEPTH** | M | ages `{l-1, l-2}` explain **`>= 70%`** of `E21`'s Frobenius energy, layer-averaged over layers 4..14, on 16 networks. `< 70%` at all three ages **kills Arm M** |
+| **G-M-COST** | M | the built arm's incremental counted **f32 flopscope** FLOPs over 16 layers at `1024` is **`<= 46,495,355,667`** (`0.02114 B`), MEASURED by `p2_k3_fnp`-style metering inside a real `BudgetContext`, never modelled |
+| **G-M-E2E** | M | **`>= 10x`** end-to-end drift reduction vs the uncorrected regenerating flow on `P06[..000..063]`, paired arithmetic difference, studentised-`t` or basic-bootstrap 95% interval **excluding zero** |
+| **G-L-FIT** | L | held-out `R^2` on `E21` **`>= 0.90`**, layer-averaged, leave-networks-out on `P05` |
+| **G-L-COST** | L | identical to **G-M-COST**: `<= 46,495,355,667` f32 FLOPs. A basis of Hadamard-and-diagonal terms costs `~0.01` matmuls/layer; **each dense matmul-class term costs a full `2 n^3 = 2,146,435,072` FLOPs per layer**, so at most **ONE** such term fits |
+| **G-L-E2E** | L | **`>= 10x`**, as G-M-E2E, on `P06[..064..127]` |
+| **G-NULL** | both | a **permuted-coefficient** map and an **equal-rank random-basis** correction each give **`< 1.5x`** end to end. A null at `>= 1.5x` **voids that arm's measurement** rather than reducing it |
+
+**Composition rule, named now:** `G-M-DEPTH` is **layer-averaged over layers
+4..14**, not worst-layer and not all-layers. Layers 1-3 are excluded because the
+flow has barely accumulated a `kappa_3` there and would flatter any short-memory
+hypothesis; layer 15 is excluded because nothing downstream reads its `(2,1)`
+slice.
+
+## Statistic
+
+Paired, on common random numbers, **arithmetic difference** in end-to-end drift
+against full K3 and in final-layer MSE against minted truth, with a studentised-
+`t` or basic-bootstrap 95% interval. **Never percentile, never BCa**
+(measured false-promotion rates `6.8-8.2%` and `9.1-11.5%` against a nominal
+`5%`). **Never a composed-excess model** — the `eps^2` amplitude over-predicts by
+`32x`, and the only admissible statistic is the end-to-end one. `>= 8` networks
+for a structure claim, `>= 100` for a fitting claim.
+
+## Cost model — Phase 2, `lambda = 0`, so `C = F`
+
+Counted **f32** flopscope FLOPs, MEASURED, in the same sentence as the dtype
+(`float64 = 2.0`, `float32 = 1.0`). Residual is **not** a cost: it is a `0.4 s`
+per-MLP cliff, reported as headroom `0.4 / observed` against the **worst**
+observed run, from a **`gpuq`-brokered** soak, never a local absolute wall time.
+The baseline the increments are measured against is today's
+`173,406,969,888` f32 FLOPs (`0.07886 B`), and the `+2**24` server offset is
+applied to any operating point within `0.5%` of the `0.1` floor.
+
+**An f32 flow with an f64 control.** Every accuracy number is taken in both, as
+WP14's `DTYPE-F64` control was, because this repository has already compared an
+f64 cost to f32 accuracy once.
+
+## Seed blocks — claimed through `seed_ledger`, never as literals
+
+| role | block | tier | rule |
+|---|---|---|---|
+| Arm M memory-depth structure | `P01` free range, 16 | DESIGN | no gate; structure only |
+| Arm L fit | **`P05`** (160, allocated today) | DESIGN | tuning PERMITTED here and nowhere else |
+| Arm M end-to-end validation | **`P06[..000..063]`** | DESIGN | no tuning; read once |
+| Arm L end-to-end validation | **`P06[..064..127]`** | DESIGN | no tuning; read once; DISJOINT from Arm M's half |
+| the final comparison against v2.7 | `P04` | SINGLE_USE | **not touched by this contract** |
+
+`artifact=` is named at `seed_ledger.claim()` time and closed with `finalize()`,
+per `SKEPTIC WP13`'s process fix. **A deliberate overlap must set `paired_with`
+or append a `pair` record** — the field, not a prose note. That is today's
+finding and it is binding on this contract.
+
+## Null controls — each differs in CODE PATH, not in a parameter
+
+Binding, from both Skeptics: `eps = 0` is a determinism check, not a null.
+
+1. **Permuted-coefficient map.** The fitted coefficients `c_t` are permuted
+   across basis terms. Same arithmetic, same cost, same magnitudes, wrong
+   assignment.
+2. **Equal-rank random-basis correction.** A rank-`r` correction built from a
+   random orthonormal basis with the oracle's own singular values, so it matches
+   the real correction in rank and in energy and differs only in direction.
+3. **Cross-network map.** The map fitted on network `i` applied to network `j`.
+
+## Predictions — mine, numbered, with directions and magnitudes
+
+| # | prediction |
+|---|---|
+| **P1** | `G-M-DEPTH`: age `l-1` alone explains **`>= 50%`** of `E21`; `{l-1, l-2}` **`>= 70%`**. Direction from WP4's `0.42-0.70` single-layer share. Refuted if `l-1` alone is `< 30%` |
+| **P2** | The exact age-`(l-1)` contribution equals `w(1)_i^2 w(2)_j C_ij^2` (up to the rebuild's factor 3) with correlation **`>= 0.99`** against the injected reference. This is the mechanism check, and if it fails my reading of `factor_k3.py` is wrong and both arms rest on nothing. Refuted below `0.8` |
+| **P3** | `G-M-COST`: a rank-128 one-step sketch costs **`<= 0.80`** f32 `1024`-matmuls/layer (`<= 0.0125 B` over 16 layers), inside the `0.02114 B` margin |
+| **P4** | **`G-M-E2E` FAILS.** Arm M reaches `>= 5x` but `< 10x`. The oracle itself is only `11.1x` at rank 128 and a closed-form sketch is worse than an oracle. I put `~40%` on it clearing `10x` |
+| **P5** | `G-L-FIT` per-layer: `R^2 >= 0.90` held out at layers 1-4, **`< 0.70`** at layers 10-14, and **layer-averaged `< 0.90`** — so **`G-L-FIT` FAILS as written**. The residual's rank collapses `264 -> 78` with depth while the covariance's collapses faster, so the map has less to work with exactly where the error accumulates |
+| **P6** | **A per-layer `R^2` of `0.90` will NOT buy `10x` end to end.** Errors compound and the composed model over-predicts `32x`. Refuted if `>= 10x` is reached at layer-averaged `R^2 <= 0.90` |
+| **P7** | All three nulls come in **`< 1.2x`**; `G-NULL` passes |
+| **P8** | In-flight injection of the best fitted map is **monotone in `r` and NOT destructive**, unlike WP10's variance channel — as WP14's `P8` found for the oracle |
+| **P9** | A Hadamard-and-diagonal-only basis costs **`<= 0.05`** matmuls/layer; each dense matmul term adds `1.00` |
+| **P10** | **The `E3` half is the cheap half and will be fitted better than `E21`.** `E3` is an `n`-vector, correcting it alone already buys `1.551x` at `O(n)`, and I expect held-out `R^2 >= 0.95` on `E3` at every depth |
+| **P11** | **Neither arm clears `10x` by the Sep 20 kill line.** `~55%`. If so we freeze and nominate the uncorrected regenerating flow plus v2.7 as the diverse pair |
+| **P12** | The `f64` control changes nothing anywhere in WP15, as it changed nothing in WP14 (`0.127 / 0.128 / 0.128` identical to f32) |
+
+**Where I disagree with the strategist, on the record and before the data.** The
+brief says a rank-`128`-`512` sketch. **`512` is not affordable** — at `r = 512`
+the sketch's extra products are `3.0` matmuls/layer against a `1.35` margin, and
+the affordability horizon is `r <= 192`. And the brief's `>= 90%` held-out `R^2`
+gate is, I predict, *not* the binding constraint: `P6` says the end-to-end
+requirement will bite first, at an `R^2` the fit can reach.
+
+## Baseline and control
+
+The uncorrected regenerating flow at today's measured price, on the same
+networks, common random numbers. Full K3 is the accuracy ceiling and the drift
+reference. `v2.7` enters only through `P04`, which this contract does not touch.
+
+## Confounders, scope, and what must not change
+
+- `estimator.py` is not touched.
+- `local_sim/p2_k3_fnp.py::k3_layer` is the chassis and **its price is frozen at
+  today's measurement**; if either arm needs to change it, the baseline is
+  re-measured and re-recorded before anything is compared to it.
+- No CONFIRM read. No vault touch.
+- Every soak goes through `gpuq`; nothing heavy is launched directly.
+- Closed lanes stay closed: AUGMENT deprioritised, the carrier closed, W-EFF
+  closed, Route A and Route B's selector closed, `Sigma`-range selection closed.
+  **No result in WP15 reopens any of them**; the reopening condition remains new
+  *external* evidence.
+- Every preflight transcript is committed.
+
+## Kill line
+
+**~2026-09-20.** If neither arm reaches `>= 10x` end-to-end drift reduction on
+fresh networks, freeze: nominate the canary-confirmed uncorrected regenerating
+flow and `v2.7` as the diverse pair, and finish the write-up (due Oct 24, closing
+Oct 17).
