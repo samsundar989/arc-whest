@@ -84,6 +84,17 @@ TIERS: Dict[str, str] = {
     "P02": "DESIGN",
     "P03": "DESIGN",
     "P04": "SINGLE_USE",
+    # Allocated 2026-09-02 with CONTRACT WP15. P05 FITS the state->correction
+    # map (tuning permitted); P06 validates BOTH arms on networks neither was
+    # built on, in two disjoint halves of 64 so the arms never share a network.
+    #
+    # These two are here because SKEPTIC WP14-FOLLOWUP found them registered in
+    # `seed_blocks.py` and NOT here: `block_span('P05')` worked, `tier_of('P05')`
+    # raised, and WP15's first instrument run would have died on its first claim.
+    # `test_seed_ledger.py` now asserts the two registries agree in BOTH
+    # directions, so a block can never again exist in one and not the other.
+    "P05": "DESIGN",
+    "P06": "DESIGN",
 }
 
 
@@ -624,9 +635,17 @@ def check_ledger(path: str = LEDGER_PATH, *, verbose: bool = True) -> List[str]:
         )
 
     if verbose:
+        # The breakdown must SUM to the total, or a reader silently loses a
+        # category. It stopped summing the moment "pair" became a third kind --
+        # SKEPTIC WP14-FOLLOWUP caught it in the same pass that added the kind.
         print(f"  ledger records                     {len(recs)}"
               f"  ({sum(1 for c in recs if c.kind == 'claim')} claims, "
-              f"{sum(1 for c in recs if c.kind == 'finalize')} finalizations)")
+              f"{sum(1 for c in recs if c.kind == 'finalize')} finalizations, "
+              f"{sum(1 for c in recs if c.kind == 'pair')} pairings)")
+        _kinds = {c.kind for c in recs}
+        if _kinds - {"claim", "finalize", "pair"}:
+            errors.append(f"unknown ledger record kind(s): "
+                          f"{sorted(_kinds - {'claim', 'finalize', 'pair'})}")
         print(f"  claims naming an artifact          "
               f"{sum(1 for c in recs if c.kind == 'claim' and c.artifact)}"
               f"  ({len(absent)} absent on this host, hash recorded)")

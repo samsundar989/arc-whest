@@ -1,20 +1,66 @@
 # CURRENT_STATE.md — read this first
 
-> **2026-09-02 (SKEPTIC WP14's FOLLOW-UP — DONE) — THE FLOOR SURVIVES ITS OWN
-> EXECUTION TEST. `0.07886 B` MEASURED, `1.35` f32 MATMULS/LAYER OF HEADROOM.**
+> **2026-09-02 (SKEPTIC WP14-FOLLOWUP — CLAIM A *PROVISIONAL*) — THE FLOP HALF
+> SURVIVES EXECUTION AT `0.07886 B`. THE HALF THAT CAN ACTUALLY FAIL AN MLP WAS
+> NOT MEASURED, AND IT IS CLOSE TO THE CLIFF.**
+>
+> > **λ = 0 MAKES FLOPs FREE BELOW THE FLOOR. I SPENT THE DAY MEASURING THE FREE
+> > AXIS.** The flow issues **~5,300 flopscope operations per MLP** against the
+> > shipped K2 closure's **453**, and its local in-process residual reads
+> > `0.29`–`0.44 s` against the **`0.4 s` per-MLP cliff — over it on 2 of 6
+> > readings**. `GOTCHAS.md` already said why: residual tracks **op count and
+> > Python glue, not FLOPs**. A residual excursion does not cost score, it
+> > **fails the MLP and zeroes the prediction** — a `1e-7` row becomes `~0.92`.
+> > The transferable form is the ratio to a matched control in the same process:
+> > **`10`–`16x` on residual, `~11.6x` on operations.** `--flow-price` measures
+> > all three together now and refuses to quote the absolute second.
+> > **This is upstream of every WP15 gate**: a flow that fails MLPs makes
+> > `G-M-E2E` and `G-L-E2E` unmeasurable. Next action, and it needs no seed
+> > block: wrap the flow as a candidate and read the OFFICIAL per-MLP residual
+> > and `n_failed_mlps` from `whest run --runner subprocess` on the `mini` split.
+>
+> **AND THE THREE CORRECTNESS CHECKS KILL NOTHING.** Seven targeted
+> value-destroying mutations — the `(2,1)` coefficient, a dropped block
+> permutation (**one matmul cheaper**), the `w(2)/w(1)` asymmetry that is the
+> *exact* defect this module's docstring warns about, the rebuild's factor 3, the
+> whole `(1,1,1)` block WP15 rests on, a sign, and the `(3,)` slice — **all seven
+> pass all three checks identically. 0 of 7 killed**
+> (`mutation_coverage.json`). At `M = 0` we have `P = Wᵀ M = 0`, so the two
+> `(2,1)`-slice matmuls **execute on zeros** and the off-diagonal of `M_out` is
+> never read: **the degenerate limit exercises the cheap half and prices the
+> expensive half.** A `4.046`-matmul mutant (`0.06322 B`) passes everything the
+> `5.047`-matmul original passes, so *"the price is a price of something"* was
+> true of the checks and false of the program. Parity against upstream at
+> non-zero `κ₃` (`NOT_DONE` step 6) is still the only thing that closes it.
+>
+> **THE FLOP MEASUREMENT ITSELF STANDS, AND ALMOST EVERYTHING ELSE SURVIVED THE
+> ATTACK** — all three lean-but-exact choices re-derived from upstream by hand,
+> all 16 Wick pairs to `≤ 1.3e-16`, `proj_coef` at `n = 4…4096` (the port is the
+> *more* accurate of the two), all four frozen tables byte-identical on live
+> re-enumeration, and the `(1,1,1)` block algebra confirmed — **so the mechanism
+> `CONTRACT WP15` rests on is correct.**
 > One K3 layer at `1024`, f32, executed as ONE program in `fnp` inside a real
 > `BudgetContext`, is **`10,837,935,618` counted FLOPs = `5.047` dense f32
 > `1024`-matmuls**. Sixteen of them are `173,406,969,888` = **`0.07886 B`**,
 > against a floor of `0.1` — **headroom `46,495,355,667` = `0.02114 B` =
-> `1.35` matmuls per layer.** `f32 / f64 = 0.50000` exactly, so nothing
-> promoted; the dtype audit checked **56 arrays, 0 violations**, and recorded
-> both `flops.stats.*` calls returning `float64` from a `float32` input and
-> being cast back. `experiments/2026-09-02_wp14_fnp/layer_price_1024.json`.
+> `1.35` matmuls per layer.** The dtype audit checked **56 arrays, 0
+> violations**, and recorded both `flops.stats.*` calls returning `float64` from
+> a `float32` input and being cast back.
+> `experiments/2026-09-02_wp14_fnp/layer_price_1024.json`.
 >
-> **`SKEPTIC WP14`'s PROVISIONAL on CLAIM A is discharged for the per-layer
-> arithmetic and for nothing else.** `whest validate`, the Linux memory gate, a
-> `gpuq`-brokered residual soak and an end-to-end candidate are all still ahead,
-> and the layer's NUMBERS are still unchecked against upstream at non-zero
+> **CORRECTED: `f32 / f64` is `0.5000036376`, not "exactly `0.50000`", and I had
+> the inference backwards.** The `78,848`-FLOP excess over half is *precisely*
+> the two `flops.stats.*` calls, which are computed in `float64` in **both** arms
+> and therefore billed at rate `2.0` in both and do not halve. **A ratio slightly
+> ABOVE `0.5` is the signature OF the promotion**, not proof of its absence; I
+> quoted a print-rounded figure as evidence for the opposite of what it shows.
+> The 56-array audit is what actually carries "nothing promoted".
+>
+> **`SKEPTIC WP14`'s PROVISIONAL on CLAIM A is discharged for the per-layer FLOP
+> arithmetic and for nothing else — and `SKEPTIC WP14-FOLLOWUP` re-issued
+> PROVISIONAL on the axis that decides.** `whest validate`, the Linux memory
+> gate, an OFFICIAL residual reading and an end-to-end candidate are all still
+> ahead, and the layer's NUMBERS are still unchecked against upstream at non-zero
 > `kappa_3` (`NOT_DONE` step 6).
 >
 > **The projection was 3.3% optimistic, and the missing `0.157` matmuls/layer
@@ -61,6 +107,15 @@
 > `_relu_wick_poly` polynomials for the 16 `(k, p)` pairs. `proj_coef(n, 4, 2)`
 > is deliberately NOT frozen — it is a closed form in `n` and is evaluated.
 >
+> **THE `x 16` IS STILL AN UPPER BOUND, FOR ONE REASON AND NOT THE THREE I
+> GAVE.** Layer 0 costs `10,837,936,642` — *more* than steady state, because
+> nothing branches on `cov = I` or `M = 0` — and the last layer saves
+> `2,098,176` FLOPs (`0.001` matmul), since `last_layer=True` skips only the `M`
+> rebuild and **not** the two `(2,1)`-slice matmuls, which the `(2,1)` `pK` terms
+> need at every layer. Only the `off_mask` amortisation was real. The real
+> 16-layer flow measures `173,381,273,195` = `0.07884 B`, `25.7 M` FLOPs below
+> the extrapolation, and `--flow-price` now runs it rather than extrapolating.
+>
 > **TWO DEFECTS IN THIS SESSION'S OWN INSTRUMENT, FOUND BEFORE IT WAS
 > BELIEVED.** (1) A **NaN reference passed a `>` gate silently** — `hermgauss`
 > overflows past degree ~200 and `nan > tol` is `False`, so all three quadrature
@@ -71,8 +126,17 @@
 > degree 160 it disagreed with the exact `sigma phi + mu Phi` by `1.1e-03` — an
 > error that reads exactly like a bug in the port.
 >
-> **AND THE CHANGE GATE HAD BEEN RED SINCE `3b38796`, THROUGH FOUR COMMITS,
-> WITH NOTHING WRONG WITH THE LEDGER.** WP14 C0-i recorded a deliberate seed
+> **AND THE CHANGE GATE HAD BEEN RED SINCE `aa01fdd`, THROUGH NINE COMMITS —
+> AND FOR THE FIRST TWO OF THEM SOMETHING *WAS* WRONG WITH THE LEDGER.**
+> *(Corrected by `SKEPTIC WP14-FOLLOWUP`, which reconstructed the window from
+> git rather than taking my word: I first wrote "since `3b38796`, four commits,
+> nothing wrong with the ledger" and all three numbers were wrong. `3b38796`'s
+> committed ledger passes both checks. Step 9 was red for nine commits. Step 7's
+> red was a **different** defect — a truth artifact claimed with no hash, exactly
+> the fail-open `SKEPTIC WP13` made us close — which lasted two commits and
+> **self-healed** at `3084a7c` when `finalize()` was recorded, i.e. it was fixed
+> by accident rather than by anyone reading the gate.)*
+> WP14 C0-i recorded a deliberate seed
 > overlap in its prose `note` and left **`paired_with` — the field the
 > enforcement layer reads — empty**, and the check that caught it was a *count*
 > of a growing record rather than a property. Repaired: `seed_ledger` gains a
@@ -81,8 +145,20 @@
 > **own reason** instead of one of two canned tags (the P01 case is **both**
 > deliberate and correlated, and a canned "one experiment, two roles" would have
 > erased the warning), and `A1` becomes a property with a named accident list.
-> `62/62`. **Nothing enforces "preflight was green" at commit time — that hole
-> is real, is NOT repaired, and is recorded as open.**
+> `66/66`. **This repair LOOSENS an invariant and that must be said**: the rule
+> moves from *"a deliberate overlap must be pre-declared"* to *"…must be
+> acknowledged, possibly afterwards"*, and `declare_pair` cannot distinguish
+> intent from retroactive rationalisation. **Nothing enforces "preflight was
+> green" at commit time — that hole is real, is NOT repaired, and is recorded as
+> open.**
+>
+> **`P05`/`P06` COULD NOT HAVE BEEN CLAIMED.** `1b6ac04` registered them in
+> `seed_blocks.py` and not in `seed_ledger.TIERS`, so `block_span` worked and
+> `tier_of` raised — **WP15's first instrument run would have died on its first
+> claim.** Repaired, and the two registries are now asserted to agree in both
+> directions. Likewise `k3_coefs_simple.json` was load-bearing with **no hash and
+> no re-enumeration check**, unlike the term table beside it; it now has both,
+> and its generator refuses to overwrite the committed path.
 >
 > **NEXT — `CONTRACT WP15` is pre-registered and committed (`1b6ac04`), before
 > any data and before `P05`/`P06` are touched.** Two arms on the one remaining

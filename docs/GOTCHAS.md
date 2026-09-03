@@ -96,7 +96,50 @@ discarded tail is below `1e-42` of the mass, and agreement goes to `3e-15`.
 > When a check fails, ask whether the REFERENCE is the thing that is wrong. Here
 > the reference was wrong by a thousand times the tolerance.
 
+### Under `lambda = 0` the FLOP budget is not the binding constraint — the OP COUNT is
+
+**Read this before quoting any Phase-2 cost number, including the one in the next
+section.** A FLOP below the `0.1` floor costs **nothing**: the multiplier is
+already at its minimum. What can still ruin a run is the **`0.4 s` per-MLP
+residual cliff**, and residual tracks **operation count and Python glue, not
+FLOPs** — and an excursion does not cost score, it **fails the MLP and zeroes the
+prediction**, turning a `1e-7` row into `~0.92`.
+
+Measured with a matched control in the same process, same host, same run
+(`local_sim/p2_k3_fnp.py --flow-price`):
+
+| | counted FLOPs | flopscope **operations** | local residual |
+|---|---:|---:|---:|
+| shipped K2 closure | `68.8 B` | **`453`** | `0.018`-`0.034 s` |
+| regenerating K3 flow | `173.4 B` | **`~5,300`** | **`0.29`-`0.44 s`** |
+
+`2.5x` the FLOPs, **`11.6x` the operations, `10`-`16x` the residual** — and over
+the `0.4 s` cliff on 2 of 6 readings.
+
+> **Quote counted FLOPs, operation count and residual headroom in the same table,
+> or you are measuring the axis that is free.** The absolute second is NOT
+> quotable (authority is `--runner subprocess`); the RATIO to a matched control
+> is what transfers.
+
+This is the mechanism that killed the packed lane, seen again.
+
+### A correctness check is scored by what it KILLS, not by what it passes
+
+The three closed-form checks on the `fnp` K3 layer agree to `1e-14` and kill
+**0 of 7** targeted value-destroying mutations — including one that is **a whole
+matmul cheaper**, and including the exact `w(2)`-for-`w(1)` defect the module's
+own docstring warns about. At `kappa_3 = kappa_4 = 0` the expensive operations
+run on zeros.
+
+> **The limit that makes an answer analytic is usually the limit that switches
+> off the part you are trying to price.** Run a mutation battery beside any check
+> that licenses a number; `p2_k3_fnp.py --mutation-coverage` is the pattern.
+
 ### The regenerating K3 flow's measured per-layer price, and it supersedes the projection
+
+**The VALUES below are not yet checked against upstream at non-zero `kappa_3`**
+(`p2_k3_fnp.NOT_DONE` step 6). This is a price, and the checks that license it
+kill nothing (previous section). Quote it as a cost and not as a method.
 
 Measured, one program, one layer, at `1024` inside a real `BudgetContext`
 (`local_sim/p2_k3_fnp.py --layer-price`):
@@ -106,8 +149,12 @@ Measured, one program, one layer, at `1024` inside a real `BudgetContext`
 | `f64` | `21,675,713,540` | `5.047` | `346,811,416,640` | `0.15773` |
 | **`f32`** | **`10,837,935,618`** | **`5.047`** | `173,406,969,888` | **`0.07886`** |
 
-The `f32 / f64` ratio is `0.50000` **exactly**, which is how you know nothing
-promoted. The five `n^3`-class operations per layer are `W.T @ cov @ W` (two),
+The `f32 / f64` ratio is `0.5000036376`. **The excess over half is the tell, not
+the halving**: it is exactly `78,848` FLOPs, precisely the two `flops.stats.*`
+calls, which are computed in `float64` in BOTH arms and so are billed at rate
+`2.0` in both and do not halve. A ratio slightly *above* `0.5` is the signature
+**of** the promotion; what says nothing promoted downstream is the per-array
+dtype audit. The five `n^3`-class operations per layer are `W.T @ cov @ W` (two),
 `W.T @ M` (one) and the `(2,1)` slice's two surviving block permutations. The
 remaining `0.047` matmuls/layer is every `O(n^2)` thing in the layer put
 together.
@@ -139,6 +186,18 @@ commits** over a ledger that was substantively correct.
 
 > If a rule is machine-checked, its exception must be machine-declared. Use
 > `seed_ledger.declare_pair(...)` — a `"pair"` record — not a sentence.
+
+**And say so when a repair loosens an invariant.** The pair record moves the rule
+from *"a deliberate overlap must be pre-declared"* to *"…must be acknowledged,
+possibly afterwards"*. `declare_pair` refuses to license an overlap that does not
+exist, but it cannot distinguish intent from retroactive rationalisation.
+
+*(Corrected 2026-09-02 by `SKEPTIC WP14-FOLLOWUP`: the window began at
+`aa01fdd`, not `3b38796`, and ran **nine** commits, not four. Step 7's red was a
+**different** defect — an artifact claimed with no hash — which lasted two
+commits and self-healed. "Nothing was wrong with the ledger" was false for those
+two. **Do not assert a git-reconstructible fact without reconstructing it**, least
+of all inside a finding whose point is that prose is not evidence.)*
 
 And **nothing enforces "preflight was green" at commit time.** The pre-commit
 hook guards protected paths, not the gate. That hole is open.

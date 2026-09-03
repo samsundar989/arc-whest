@@ -28070,3 +28070,188 @@ reference. `v2.7` enters only through `P04`, which this contract does not touch.
 fresh networks, freeze: nominate the canary-confirmed uncorrected regenerating
 flow and `v2.7` as the diverse pair, and finish the write-up (due Oct 24, closing
 Oct 17).
+
+---
+
+# 2026-09-02 — SKEPTIC WP14-FOLLOWUP: **CLAIM A PROVISIONAL, CLAIM B PROVISIONAL**. Accepted in full.
+
+Ninth independent pass; ninth to find something real, and the first to find that
+**the axis I measured was not the axis that decides.** Every finding below was
+re-verified in-tree before acceptance. Verdict and repairs; the raw probe paths
+are named per finding.
+
+## THE FINDING THAT MATTERS: λ = 0 MAKES FLOPs FREE, AND I MEASURED THE FREE ONE
+
+> **The flow issues ~5,300 flopscope operations per MLP against the shipped K2
+> closure's 453, and its local in-process residual read `0.29`–`0.44 s` against
+> the `0.4 s` per-MLP cliff — over the cliff on 2 of 6 readings.**
+
+`docs/GOTCHAS.md` already states the mechanism, and I read past it: *"residual
+risk scales with op count and Python glue, not with FLOPs."* Under `λ = 0` a FLOP
+below the floor costs **nothing**; a residual excursion does not cost score
+either — **it fails the MLP and zeroes the prediction**, turning a `1e-7` row into
+a `~0.92` row. So *"the composed cost floor survives execution"* is **true of
+counted FLOPs and unestablished of execution**, which is the same sentence
+`SKEPTIC WP14` wrote about the projection, one axis over. The review's own
+control makes the number transferable: the ratio K3/K2 is `10`–`16x` on residual
+and `~11.6x` on operation count, measured in the same process on the same host.
+
+`local_sim/p2_k3_fnp.py --flow-price` now measures FLOPs, **operation count** and
+residual against a matched K2 control in one run, and refuses to quote the
+absolute second (`AGENTS.md`: the authority is `--runner subprocess`).
+
+**This is upstream of every WP15 gate.** A flow that fails MLPs makes `G-M-E2E`
+and `G-L-E2E` unmeasurable, so it is answered before either arm runs.
+
+## CLAIM B HAD ALMOST NO POWER, AND NOW THAT IS A NUMBER
+
+The review ran seven targeted value-destroying mutations against `--layer-k2`.
+**All seven passed all three checks identically, one of them 20% cheaper.**
+Reproduced in-tree, `--mutation-coverage`,
+`experiments/2026-09-02_wp14_fnp/mutation_coverage.json`:
+
+| mutation | what it breaks | result |
+|---|---|---|
+| `(2,1)` slice `/3` → `/2` | the slice coefficient | **SURVIVES** |
+| `2(P∘Q)Qᵀ + (Q∘Q)Pᵀ` → `3(P∘Q)Qᵀ` | a block permutation — **one matmul cheaper** | **SURVIVES** |
+| `fac3`'s `w(2)` → `w(1)` | **the exact `p2_slice_cost.py` defect this module's docstring warns about** | **SURVIVES** |
+| `diag(S3) + 3 S21ᵀ` → `+ 2 S21ᵀ` | the `from_dstensor` rebuild | **SURVIVES** |
+| drop the `(1,1,1)` two-leg block | **the mechanism WP15 rests on** | **SURVIVES** |
+| sign of the repeated-part subtraction | `S21 = K(2,1) − p111_21` | **SURVIVES** |
+| `D3` → `0.5 D3` | the `(3,)` slice | **SURVIVES** |
+
+**0 of 7 killed.** The reason is structural: at `M = 0`, `P = Wᵀ M = 0`, so `D3`
+and `D21` are identically zero, **the two `(2,1)`-slice matmuls execute on
+zeros**, and `S21`'s diagonal is zero so `diag(M_out) = S3` and the whole
+off-diagonal of `M_out` is never read. Ten of 25 terms survive the limit and only
+five are pinned; `c4_out` is printed and compared to nothing.
+
+> **The `κ₃ = κ₄ = 0` limit exercises the cheap half and prices the expensive
+> half.** So *"the price is a price OF SOMETHING"* was true of the checks that
+> exist and false of the program that is priced — a **4.046**-matmul mutant
+> (`0.06322 B`) passes every check the **5.047**-matmul original passes.
+
+The gap is now a measured number that cannot quietly close or quietly widen.
+Closing it still needs parity against upstream at non-zero `κ₃` — `NOT_DONE`
+step 6, unchanged and still the one that can fail for an interesting reason.
+
+## MY ACCOUNT OF THE RED GATE WAS WRONG ON ALL THREE COUNTS
+
+Re-derived from git rather than from my say-so, by evaluating the *old* `A1`
+predicate and `check_ledger` against every historical `experiments/seed_ledger.jsonl`
+in the window (`scratchpad/led/`):
+
+| commit | old `A1` | `check_ledger` errors |
+|---|---|---|
+| `36312c3`, `d915f83`, **`3b38796`** | **PASS** | 0 |
+| **`aa01fdd`**, `bb6e65d` | FAIL | **1 — a truth artifact claimed with no hash** |
+| `3084a7c` … `d0080c5` (7 more) | FAIL | 0 |
+
+- **The window begins at `aa01fdd`, not `3b38796`.** `3b38796`'s committed ledger
+  passes both checks; the claim that broke `A1` is in `aa01fdd`.
+- **Step 9 was red for NINE commits, not four.**
+- **Step 7's red is a different defect entirely** — `p2_truth.py` named
+  `truth_P01_wp13nets.npz` and no hash was ever recorded, which is exactly the
+  fail-open `SKEPTIC WP13` made us close. It lasted **two** commits and
+  **self-healed** at `3084a7c` when `finalize()` was recorded.
+- So **"nothing was wrong with the ledger" is false** for the first two commits
+  of the window. Something was wrong, the gate said so, and it was fixed by
+  accident rather than by anyone reading the gate.
+
+`experiments/LOG.md`, `docs/CURRENT_STATE.md` and `docs/GOTCHAS.md` corrected.
+**I asserted a git-reconstructible fact without reconstructing it**, and the
+correction makes the finding worse, not better.
+
+## Six more, all confirmed and all repaired
+
+1. **`P05`/`P06` could not be claimed through the sanctioned path.** `1b6ac04`
+   registered them in `seed_blocks.py` and **not** in `seed_ledger.TIERS`:
+   `block_span('P05')` worked, `tier_of('P05')` raised, and **WP15's first
+   instrument run would have died on its first claim.** Repaired, and
+   `test_seed_ledger.py` now asserts the two registries agree **in both
+   directions** — reading `seed_blocks._all()` directly, with a guard against the
+   fallback that would make the check compare a set with itself.
+2. **No drift guard on the load-bearing coefficient table.**
+   `k3_terms_simple.json` has a pinned sha256 and `--check-terms`;
+   `k3_coefs_simple.json` had **neither**, and its generator wrote straight over
+   the committed path. Repaired: `COEFS_SHA256` is pinned and `load_coefs()`
+   refuses on drift; `p2_k3_coefs.py` refuses to overwrite without `--force` and
+   gains `--check`, which re-enumerates against the live upstream checkout and
+   reports drift without writing. Verified identical today.
+3. **`f32/f64` is `0.5000036376`, not "exactly `0.50000`", and my inference ran
+   backwards.** The excess over half is `78,848` FLOPs — *precisely* the two
+   `flops.stats.*` calls, which are computed in `float64` in **both** arms and so
+   are billed at rate `2.0` in both and do not halve. **A ratio slightly ABOVE
+   `0.5` is the signature OF the promotion**, not proof of its absence; I quoted
+   a print-rounded figure as evidence for the opposite of what it shows. The
+   dtype audit — 56 arrays, 0 violations — is what actually carries that claim.
+4. **Two of the three ways I called the `×16` conservative are not real.**
+   Layer 0 costs `10,837,936,642`, *more* than steady state, because nothing in
+   the port branches on `cov = I` or `M = 0`; and the last layer saves
+   `2,098,176` FLOPs (`0.001` matmul), because `last_layer=True` skips only the
+   `M` rebuild — the two `(2,1)`-slice matmuls are needed by the `(2,1)` `pK`
+   terms at every layer. **Only the `off_mask` amortisation was real.** The `×16`
+   is still an upper bound; it is an upper bound for one reason, not three, and
+   `--flow-price` now measures the real flow instead of extrapolating it.
+5. **`docs/GOTCHAS.md` carried the `5.047` price without the "values unchecked"
+   caveat** that the LOG, `CURRENT_STATE.md` and the artifact all carry — and
+   GOTCHAS is the file you are told to read *before quoting a number*. Repaired.
+6. **The pair record loosens an invariant, and that was not stated.** It moves
+   the rule from *"a deliberate overlap must be pre-declared"* to *"…must be
+   acknowledged, possibly afterwards"*. `declare_pair` refuses to license an
+   overlap that does not exist, but it **cannot distinguish intent from
+   retroactive rationalisation** and nothing makes it. Recorded as a known
+   weakening rather than presented as a strict repair. Also: `check_ledger`'s
+   verbose breakdown stopped summing to its own total the moment `"pair"` became
+   a third kind — fixed, with an error on any unknown kind.
+
+## One raised and NOT a defect, recorded so it is not raised a third time
+
+`k3_layer` hardcodes `init_scale = 2.0` at every layer where upstream's
+`init_kind='he'` gives `init_scale[0] = 1.0`. **The organisers' Phase-2 MLPs are
+scale 2.0 at every layer**, which is why `p2_kprop_bridge.py` (convention 3,
+verified against upstream source) runs the reference with
+`init_kind='manual', w_var=2.0`. For `W` with entries `~N(0, 2/n)`,
+`E[W Wᵀ] = 2 I`. The note is now in the code.
+
+## What it attacked and could not break
+
+Almost everything. All three "lean but exact" choices were re-derived from
+upstream `93d091a4` by hand and confirmed: the `(2,1)` slice's three block
+permutations with `A2 == A3` and coefficient `2!·1!/3!` reproduce
+`p2_k3_fnp.py:417-418` character for character; `contract_W` on an identity leg
+is `Wᵀ`; and `_lap_m_dslice(2, ·, part)` returns **exactly `0.0`** for `(3,1)`,
+`(2,1,1)` **and** `(1,1,1,1)` on random input while `(4,)` and `(2,2)` do not.
+`_proj_coef_n_d4_r2` matches upstream at `n = 4…4096` to `≤ 3e-8` — *and the port
+is the more accurate of the two*, because upstream returns float32. All **16**
+Wick `(k,p)` pairs match `relu_wick_coef` to `≤ 1.3e-16`, including the
+`(−1)^{k−2}` sign and the `factorial(p)·w(k−p+1,1)` reduce branch. A live
+re-derivation of all four frozen tables is byte-identical. The `(1,1,1)` block
+algebra is right against `factor_k3.py:371-407`, so **the mechanism `CONTRACT
+WP15` rests on is correct.** And the review built the real 16-layer flow and got
+`173,381,273,195 = 0.07884 B` — `25.7 M` FLOPs *below* the extrapolation, finite
+output, 0 dtype violations. `62/62`, `P04` untouched, `P05`/`P06` unclaimed, no
+gate moved, and the `+2**24` arithmetic checks out. WP15's disputed arithmetic is
+internally consistent (`3.0` and `0.75` are both exactly `6r/n`), and `r ≤ 192`
+is conservative against its own bound of `r ≤ 230`.
+
+## Knowledge delta
+
+1. **Under `λ = 0` the FLOP budget is not the binding constraint, and I spent a
+   day measuring it.** The binding constraint is a `0.4 s` residual cliff that
+   tracks operation count and Python glue. **Every future cost claim in Phase 2
+   must quote counted FLOPs, operation count and residual headroom in the same
+   table**, or it is measuring the free axis. `--flow-price` enforces the shape.
+2. **A correctness check must be scored by what it KILLS, not by what it
+   passes.** Three checks agreeing to `1e-14` looked like strong evidence and
+   killed **0 of 7** targeted mutations, including one that is cheaper — so the
+   checks could not certify that the measured price was the price of the intended
+   algorithm. Mutation coverage is cheap and belongs beside any check that
+   licenses a number.
+3. **A degenerate limit is a weak test exactly where the expensive work lives.**
+   Setting the high cumulants to zero made the `n³` operations run on zeros. The
+   limit that makes an answer analytic is usually the limit that switches off the
+   part you are trying to price.
+4. **Do not assert a git-reconstructible fact without reconstructing it.** Three
+   numbers in one sentence, all wrong, in a finding whose whole point was that
+   prose is not evidence.

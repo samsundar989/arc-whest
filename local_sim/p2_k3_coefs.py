@@ -46,6 +46,8 @@ from mlp_kprop.partitions import (
 #: The int_parts the SIMPLE factored tower actually holds, by degree.
 TOWER = {1: [(1,)], 2: [(2,), (1, 1)], 3: [(3,), (2, 1)], 4: [(4,), (2, 2)]}
 
+_ARGS = None   # set in __main__; see the write guard in main()
+
 
 def pk_to_k_table() -> dict:
     out = {}
@@ -161,8 +163,38 @@ def main() -> int:
         "proj_coef_formula": "harmonic.proj_coef(n, d, r); evaluated by the port, not frozen",
     }
     here = os.path.dirname(os.path.abspath(__file__))
-    out = os.path.join(os.path.dirname(here), "experiments", "2026-09-02_wp14_fnp",
-                       "k3_coefs_simple.json")
+    committed = os.path.join(os.path.dirname(here), "experiments",
+                             "2026-09-02_wp14_fnp", "k3_coefs_simple.json")
+    if _ARGS.check:
+        # The analogue of `p2_k3_fnp.py --check-terms`: re-enumerate against the
+        # LIVE upstream checkout and refuse on drift, without writing anything.
+        # `SKEPTIC WP14-FOLLOWUP` found this table frozen with no such check.
+        import hashlib
+        with open(committed, encoding="utf-8") as fh:
+            old_doc = json.load(fh)
+        same = all(old_doc.get(k) == doc.get(k) for k in
+                   ("terms", "wick", "pK_to_K", "lap2_d4", "int_partition_coef",
+                    "tower"))
+        sha = hashlib.sha256(open(committed, "rb").read()).hexdigest()
+        print(f"  artifact   {os.path.relpath(committed)}")
+        print(f"  sha256     {sha}")
+        print(f"  upstream re-enumeration identical to the frozen table: {same}")
+        if not same:
+            for k in ("terms", "wick", "pK_to_K", "lap2_d4", "int_partition_coef"):
+                if old_doc.get(k) != doc.get(k):
+                    print(f"  DRIFTED: {k}")
+        return 0 if same else 1
+    out = _ARGS.out or os.path.join(
+        os.path.dirname(here), "experiments", "2026-09-02_wp14_fnp",
+        "k3_coefs_simple.json")
+    # A generator that silently overwrites the artifact its consumer pins by
+    # hash is how a frozen table rots. Overwriting the committed path now needs
+    # `--force`, and `--out` sends a re-enumeration to scratch instead.
+    if os.path.exists(out) and not _ARGS.force:
+        raise SystemExit(
+            f"REFUSED: {out} exists. Re-enumerating over it would invalidate "
+            "p2_k3_fnp.COEFS_SHA256 silently. Use --out <scratch> to compare, "
+            "or --force and update COEFS_SHA256 in the same commit.")
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w", encoding="utf-8") as fh:
         json.dump(doc, fh, indent=1)
@@ -195,4 +227,16 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    import argparse
+
+    _ap = argparse.ArgumentParser()
+    _ap.add_argument("--check", action="store_true",
+                     help="re-enumerate against the live upstream checkout and "
+                          "refuse on drift; writes nothing")
+    _ap.add_argument("--out", default="", help="write here instead of the "
+                                              "committed artifact path")
+    _ap.add_argument("--force", action="store_true",
+                     help="overwrite the committed artifact (then update "
+                          "p2_k3_fnp.COEFS_SHA256 in the same commit)")
+    _ARGS = _ap.parse_args()
     raise SystemExit(main())

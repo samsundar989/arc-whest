@@ -84,6 +84,7 @@ Run:
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import math
 import os
@@ -227,11 +228,29 @@ def k2_closure(fnp, w, width: int, depth: int, dtype):
 
 _COEFS_ARTIFACT = os.path.join(_ROOT, "experiments", "2026-09-02_wp14_fnp",
                                "k3_coefs_simple.json")
+#: sha256 of the frozen coefficient table. `SKEPTIC WP14-FOLLOWUP` found this
+#: table load-bearing for BOTH the op sequence and the values, with no hash and
+#: no re-enumeration check -- unlike the term table beside it, which has both.
+#: A frozen table nobody checks is a liability the moment anything writes to it,
+#: and `p2_k3_coefs.py` writes straight over this path.
+COEFS_SHA256 = "894185e450533765f633312b36345ab7a29bfb4219a9ab5ee0c36a12d5988fa7"
 
 
-def load_coefs() -> dict:
-    with open(_COEFS_ARTIFACT, encoding="utf-8") as fh:
-        return json.load(fh)
+def load_coefs(*, verify: bool = True) -> dict:
+    """The frozen combinatorial tables, REFUSED if they have moved on disk."""
+    import hashlib
+
+    raw = open(_COEFS_ARTIFACT, "rb").read()
+    if verify:
+        got = hashlib.sha256(raw).hexdigest()
+        if got != COEFS_SHA256:
+            raise RuntimeError(
+                f"REFUSED: {os.path.relpath(_COEFS_ARTIFACT, _ROOT)} has changed "
+                f"on disk (sha256 {got[:12]} != {COEFS_SHA256[:12]}). Every "
+                "coefficient below would be unverified. Re-enumerate with "
+                "`.venv-gpu\\Scripts\\python.exe local_sim/p2_k3_coefs.py` and "
+                "update COEFS_SHA256 in the same commit as the new table.")
+    return json.loads(raw.decode("utf-8"))
 
 
 class DtypeAudit:
@@ -399,8 +418,15 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
     cov_pre = audit.check("cov_pre", W.T @ cov @ W)          # 2 matmuls
     P = audit.check("P", W.T @ M)                            # 1 matmul
     Q = W.T                                                  # the identity legs
-    # `set_metric = mlp.init_scale[l]`: the average-case metric E[W W^T] = 2 I.
-    # A Python float, so it stays weak under NEP-50.
+    # `set_metric = mlp.init_scale[l]`: the average-case metric E[W W^T].
+    # 2.0 AT EVERY LAYER IS CORRECT FOR OUR NETWORKS AND NOT FOR UPSTREAM'S.
+    # Upstream's `init_kind='he'` sets `w_var[0] = 1.0` and `w_var[1:] = 2.0`;
+    # the organisers' Phase-2 MLPs are scale 2.0 at EVERY layer, which is why
+    # `p2_kprop_bridge.py` (convention 3, verified against upstream source) runs
+    # the reference with `init_kind='manual', w_var=2.0`. For W with entries
+    # ~ N(0, 2/n), E[W W^T] = 2 I. Raised by `SKEPTIC WP14-FOLLOWUP` as a
+    # possible defect; it is not one, and it is recorded here so it is not
+    # raised a third time. A Python float, so it stays weak under NEP-50.
     metric = float(init_scale)
 
     # ---- the nonlinearity's Gaussian anchor --------------------------------
@@ -539,6 +565,128 @@ def _relu_cumulants_quad(mu, sig, deg=300):
     m2 = (z ** 2 * dens * jac).sum(1)
     m3 = (z ** 3 * dens * jac).sum(1)
     return m1, m2 - m1 ** 2, m3 - 3 * m1 * m2 + 2 * m1 ** 3
+
+
+#: The mutations `SKEPTIC WP14-FOLLOWUP` ran against `--layer-k2`, and the
+#: coverage number they produce. **Seven targeted value-destroying edits all
+#: passed all three checks identically, one of them 20% cheaper** -- so the
+#: sentence "the price is a price OF SOMETHING" was true of the checks that
+#: exist and false of the program that is priced.
+#:
+#: The reason is structural and worth stating: at `M = 0` we have
+#: `P = W.T @ M = 0`, so `D3` and `D21` are identically zero, the two
+#: `(2,1)`-slice matmuls execute on zeros, and `S21`'s diagonal is zero -- so
+#: `diag(M_out) = S3` and the whole off-diagonal of `M_out` is never read.
+#: **The `kappa_3 = kappa_4 = 0` limit exercises the cheap half and prices the
+#: expensive half.**
+#:
+#: `--mutation-coverage` runs them so the gap is a MEASURED NUMBER rather than a
+#: sentence, and so it cannot quietly close or quietly widen. It is not a fix:
+#: closing it needs parity against upstream at non-zero `kappa_3`
+#: (`NOT_DONE` step 6), which needs torch and therefore the other venv.
+MUTATIONS = [
+    ("d21_coef_3_to_2", "the (2,1) slice's 1/3 coefficient",
+     "/ 3.0)", "/ 2.0)"),
+    ("d21_drop_block_perm", "one of the two surviving block permutations "
+                            "-- ONE MATMUL CHEAPER",
+     "D21 = (2.0 * (PQ @ Q.T) + ((Q * Q) @ P.T)) / 3.0",
+     "D21 = (3.0 * (PQ @ Q.T)) / 3.0"),
+    ("fac3_w2_to_w1", "the w(2)/w(1) asymmetry -- the exact p2_slice_cost.py "
+                      "defect this module's docstring warns about",
+     'audit.check("fac3", (w2[:, None] * w1[None, :] * C11).T)',
+     'audit.check("fac3", (w1[:, None] * w1[None, :] * C11).T)'),
+    ("rebuild_3_to_2", "from_dstensor's `diag(S3) + 3 S21^T` rebuild",
+     '"M_out", fnp.diag(S3) + 3.0 * S21.T)',
+     '"M_out", fnp.diag(S3) + 2.0 * S21.T)'),
+    ("drop_block2", "the (1,1,1) two-leg block -- the mechanism WP15 rests on",
+     'p111_21 + (fac1 * fac3) * off_mask)',
+     'p111_21 + (fac1 * fac3) * off_mask * 0.0)'),
+    ("s21_sign", "the sign of the repeated-part subtraction",
+     'audit.check("S21", K[(2, 1)] - p111_21)',
+     'audit.check("S21", K[(2, 1)] + p111_21)'),
+    ("d3_half", "the (3,) slice",
+     'audit.check("D3", (PQ * Q).sum(axis=1))',
+     'audit.check("D3", 0.5 * (PQ * Q).sum(axis=1))'),
+]
+
+
+def cmd_mutation_coverage(a) -> int:
+    """How much of the layer do the `--layer-k2` checks actually pin? Measured.
+
+    Each mutation is applied to a SCRATCH COPY of this module, which is imported
+    under its own name; the repository file is never written. A mutation that
+    still passes is a hole, named.
+    """
+    import importlib.util
+    import shutil
+    import tempfile
+
+    with open(os.path.abspath(__file__), encoding="utf-8") as fh:
+        src = fh.read()
+    # Each anchor appears TWICE in this file -- once in `k3_layer`, where it is
+    # code, and once in `MUTATIONS` above, where it is data. Mutate only the
+    # region before the table, or every anchor is ambiguous and nothing runs.
+    split = src.index("MUTATIONS = [")
+    head, tail = src[:split], src[split:]
+
+    rows = []
+    tmp = tempfile.mkdtemp(prefix="k3mut_")
+    try:
+        for name, what, old, new in MUTATIONS:
+            if head.count(old) != 1:
+                rows.append({"mutation": name, "target": what,
+                             "applied": False, "detected": None,
+                             "note": f"anchor matched {head.count(old)} times "
+                                     "in the code region"})
+                continue
+            path = os.path.join(tmp, f"mut_{name}.py")
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write(head.replace(old, new, 1) + tail)
+            spec = importlib.util.spec_from_file_location(f"mut_{name}", path)
+            mod = importlib.util.module_from_spec(spec)
+            sys.modules[spec.name] = mod
+            spec.loader.exec_module(mod)
+            # The mutant lives in a temp directory, so its own `_HERE` / `_ROOT`
+            # point there and it would look for the frozen tables under %TEMP%.
+            # Repoint it at the real repository: we are mutating the MATH, not
+            # the file layout.
+            mod._HERE, mod._ROOT = _HERE, _ROOT
+            mod._COEFS_ARTIFACT = _COEFS_ARTIFACT
+            mod.TERMS_ARTIFACT = TERMS_ARTIFACT
+            args = argparse.Namespace(width=a.width, seed=a.seed, out="",
+                                      depth=DEPTH)
+            import contextlib
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = mod.cmd_layer_k2_degeneracy(args)
+            detected = (rc != 0)
+            rows.append({"mutation": name, "target": what, "applied": True,
+                         "detected": detected})
+            print(f"  {name:<22} {'DETECTED' if detected else 'SURVIVES '}  {what}")
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+    live = [r for r in rows if r.get("applied")]
+    killed = [r for r in live if r["detected"]]
+    print()
+    print(f"  mutation coverage of --layer-k2:  {len(killed)} / {len(live)} killed")
+    if len(killed) < len(live):
+        print("  The surviving mutations are the measure of what the")
+        print("  kappa_3 = kappa_4 = 0 limit CANNOT see. Closing it needs parity")
+        print("  against upstream at non-zero kappa_3 -- NOT_DONE step 6.")
+    if a.out:
+        _dump(a.out, {
+            "check": "mutation coverage of the --layer-k2 closed-form checks",
+            "origin": "SKEPTIC WP14-FOLLOWUP; seven mutations, all surviving",
+            "width": a.width, "seed": a.seed, "rows": rows,
+            "killed": len(killed), "live": len(live),
+            "interpretation": "a SURVIVING mutation is a hole in CLAIM B, not a "
+                              "pass; the number is reported so it cannot quietly "
+                              "close or quietly widen",
+        })
+    # This command REPORTS coverage; it does not fail on a low number, because
+    # the number is known to be low and the fix is elsewhere.
+    return 0
 
 
 def cmd_layer_k2_degeneracy(a) -> int:
@@ -685,6 +833,140 @@ def cmd_layer_k2_degeneracy(a) -> int:
                       "tolerances": tol, "tolerances_quadrature": tol_quad,
                       "failures": [list(b) for b in bad], "pass": not bad})
     return 0 if not bad else 1
+
+
+def k3_flow(fnp, flops, weights, table, dtype, audit, depth=None):
+    """The WHOLE regenerating flow: `depth` layers, one program, one context.
+
+    Input cumulants for `x ~ N(0, I)`: `K[1] = 0`, `K[2] = I`, `K[3] = 0`,
+    `K[4] = 0`. Returns the `(depth, width)` array of post-ReLU means, which is
+    exactly what the grader asks for.
+
+    This exists because `SKEPTIC WP14-FOLLOWUP` refused to take `16 x` one layer
+    on trust and built it. Three of the things that extrapolation asserted are
+    wrong or backwards, and the flow is what says so:
+
+    * **layer 0 is not cheaper, it is dearer.** Nothing branches on `cov = I` or
+      `M = 0`, so it pays the same matmuls plus the `off_mask` build.
+    * **the last layer saves almost nothing** -- `last_layer=True` skips the `M`
+      rebuild (`2,098,176` FLOPs, `0.001` matmul) and NOT the two `(2,1)`-slice
+      matmuls, which the `(2,1)` pK terms need at every layer.
+    * the `off_mask` build is amortised over `depth`, which is the one place the
+      extrapolation really was conservative.
+
+    Net, the flow comes in BELOW `16 x` the steady-state layer -- so `0.07886 B`
+    was an upper bound, but for one reason rather than three.
+    """
+    n = weights[0].shape[0]
+    depth = len(weights) if depth is None else depth
+    off_mask = fnp.ones((n, n), dtype=dtype) - fnp.eye(n, dtype=dtype)
+    state = {"mu": fnp.zeros(n, dtype=dtype),
+             "cov": fnp.eye(n, dtype=dtype),
+             "M": fnp.zeros((n, n), dtype=dtype),
+             "c4": 0.0}
+    mus = []
+    for l in range(depth):
+        state = k3_layer(fnp, flops, weights[l], state, table, dtype, off_mask,
+                         audit, last_layer=(l == depth - 1))
+        mus.append(state["mu"])
+    return fnp.stack(mus), state
+
+
+def cmd_flow_price(a) -> int:
+    """The whole flow, metered -- FLOPs, operation count and residual.
+
+    **The operation count and the residual are the point, not the FLOPs.**
+    Phase 2 sets `lambda = 0`, so FLOPs below the floor are free and the `0.4 s`
+    per-MLP residual cliff is the only cost that can still fail an MLP -- and it
+    tracks the NUMBER of operations and their Python glue, not FLOPs
+    (`docs/GOTCHAS.md`). `SKEPTIC WP14-FOLLOWUP` measured this flow at ~5,300
+    operations against the shipped closure's 453, with a local in-process
+    residual that crossed `0.4 s` on 2 of 6 readings, and that is the finding
+    this command exists to keep in front of anyone reading a FLOP number.
+
+    **The absolute second is NOT quotable** (`AGENTS.md`: authority is
+    `--runner subprocess`; the shim and this host are not the grader). What
+    transfers is the RATIO to a matched control measured in the same process on
+    the same host in the same run, so the K2 closure is run beside it every
+    time and both are reported.
+    """
+    import numpy as np
+
+    import flopscope as flops
+    import flopscope.numpy as fnp
+
+    _require_real_flopscope(flops)
+    table = load_coefs()
+    n, d = a.width, a.depth
+    from mint_provenance import canonical_mint
+    w_np, _e, _s = canonical_mint(n, d, a.seed)
+
+    rows = []
+    for rep in range(a.reps):
+        for arm in ("k2", "k3"):
+            audit = DtypeAudit(str(np.dtype(np.float32)))
+            w = [fnp.array(np.asarray(x, dtype=np.float32)) for x in w_np]
+            with flops.BudgetContext(flop_budget=10 * BUDGET, quiet=True) as ctx:
+                if arm == "k2":
+                    out = k2_closure(fnp, w, n, d, fnp.float32)
+                    final = out["mus"][-1]
+                else:
+                    stacked, st = k3_flow(fnp, flops, w, table, fnp.float32,
+                                          audit)
+                    final = st["mu"]
+            used = float(ctx.flops_used)
+            ops = len(getattr(ctx, "op_log", []) or [])
+            resid = float(getattr(ctx, "residual_wall_time_s", float("nan")))
+            finite = bool(np.isfinite(np.asarray(final, dtype=np.float64)).all())
+            rows.append({"rep": rep, "arm": arm, "flops": used, "ops": ops,
+                         "residual_wall_time_s": resid, "finite_output": finite,
+                         "dtype_violations": len(audit.summary()["violations"])})
+
+    def agg(arm, key, fn):
+        return fn([r[key] for r in rows if r["arm"] == arm])
+
+    k3f = agg("k3", "flops", max)
+    k2f = agg("k2", "flops", max)
+    k3ops, k2ops = agg("k3", "ops", max), agg("k2", "ops", max)
+    k3r, k2r = agg("k3", "residual_wall_time_s", max), agg("k2", "residual_wall_time_s", max)
+    matmul = 2.0 * n ** 3
+    print(f"  {a.reps} reps, {n} x {d}, float32, real canonical weights\n")
+    print(f"  {'':<26}{'K2 closure':>18}{'K3 flow':>18}{'ratio':>10}")
+    print(f"  {'counted FLOPs':<26}{k2f:>18,.0f}{k3f:>18,.0f}{k3f / k2f:>10.2f}")
+    print(f"  {'flopscope operations':<26}{k2ops:>18,}{k3ops:>18,}{k3ops / max(k2ops, 1):>10.2f}")
+    print(f"  {'residual (worst, LOCAL)':<26}{k2r:>18.4f}{k3r:>18.4f}{k3r / max(k2r, 1e-9):>10.2f}")
+    print(f"  {'headroom vs the 0.4 s cliff':<26}{0.4 / max(k2r, 1e-9):>17.1f}x"
+          f"{0.4 / max(k3r, 1e-9):>17.1f}x")
+    print()
+    print(f"  K3 flow x budget          {k3f / BUDGET:.6f}     multiplier "
+          f"{max(0.1, k3f / BUDGET):.5f}")
+    print(f"  K3 flow / layer           {k3f / d:>18,.0f} = {k3f / d / matmul:.3f}"
+          f" dense f32 {n}-matmuls")
+    print(f"  vs 16 x the steady-state layer ({DEPTH} x 10,837,935,618 = "
+          f"173,406,969,888): {k3f - 173_406_969_888:+,.0f}")
+    print()
+    print("  THE ABSOLUTE RESIDUAL SECOND IS NOT QUOTABLE. Authority is")
+    print("  `whest run --runner subprocess`. What transfers is the RATIO to the")
+    print("  K2 control above, measured in the same process, same host, same run.")
+    if a.out:
+        _dump(a.out, {
+            "check": "the whole regenerating K3 flow: FLOPs, OPERATION COUNT and "
+                     "local residual, against a matched K2 control",
+            "origin": "SKEPTIC WP14-FOLLOWUP: the op count and the 0.4 s cliff, "
+                      "not the FLOPs, are what can still fail an MLP at lambda=0",
+            "width": n, "depth": d, "seed": a.seed, "reps": a.reps,
+            "rows": rows,
+            "k3_flops": k3f, "k2_flops": k2f,
+            "k3_ops": k3ops, "k2_ops": k2ops,
+            "k3_residual_worst_local_s": k3r, "k2_residual_worst_local_s": k2r,
+            "residual_ratio_k3_over_k2": k3r / max(k2r, 1e-9),
+            "k3_x_budget": k3f / BUDGET,
+            "extrapolation_16x_one_layer": 173_406_969_888,
+            "caveat": "LOCAL in-process residual. Not quotable as an absolute; "
+                      "the authority is --runner subprocess. The RATIO to the "
+                      "matched K2 control is what transfers.",
+        })
+    return 0
 
 
 def cmd_layer_price(a) -> int:
@@ -1000,6 +1282,9 @@ def main() -> int:
     ap.add_argument("--price", action="store_true")
     ap.add_argument("--layer-price", action="store_true")
     ap.add_argument("--layer-k2", action="store_true")
+    ap.add_argument("--mutation-coverage", action="store_true")
+    ap.add_argument("--flow-price", action="store_true")
+    ap.add_argument("--reps", type=int, default=3)
     ap.add_argument("--todo", action="store_true")
     ap.add_argument("--width", type=int, default=WIDTH)
     ap.add_argument("--depth", type=int, default=DEPTH)
@@ -1017,9 +1302,15 @@ def main() -> int:
     if a.k2_parity:
         print(f"\n-- K2 backbone parity and price, {a.width} x {a.depth} ------------")
         rc |= cmd_k2_parity(a)
+    if a.mutation_coverage:
+        print("\n-- what do the closed-form checks actually PIN? ---------------")
+        rc |= cmd_mutation_coverage(a)
     if a.layer_k2:
         print("\n-- the K3 layer must collapse to the K2 closure --------------")
         rc |= cmd_layer_k2_degeneracy(a)
+    if a.flow_price:
+        print("\n-- the WHOLE flow: FLOPs, OPERATIONS and residual -------------")
+        rc |= cmd_flow_price(a)
     if a.layer_price:
         print("\n-- ONE metered K3 layer, both dtypes -------------------------")
         rc |= cmd_layer_price(a)
@@ -1027,7 +1318,8 @@ def main() -> int:
         print("\n-- where the composed projection stands ----------------------")
         rc |= cmd_price(a)
     if a.todo or not any((a.check_terms, a.k2_parity, a.price,
-                          a.layer_price, a.layer_k2)):
+                          a.layer_price, a.layer_k2,
+                          a.mutation_coverage, a.flow_price)):
         print("\n-- NOT DONE, by name -----------------------------------------")
         print(NOT_DONE)
     print("=" * 78)

@@ -359,6 +359,36 @@ def t_real_ledger_readonly():
     check("the committed ledger is consistent", errs == [], f"{len(errs)} error(s)")
     check("allocations are still disjoint (invariant 12)", check_disjoint())
 
+    # The two registries are separate files and drifted: CONTRACT WP15 added
+    # P05/P06 to seed_blocks.py and not to seed_ledger.TIERS, so block_span()
+    # worked and tier_of() raised -- WP15's first claim would have died. Assert
+    # agreement in BOTH directions so the drift cannot recur silently.
+    import seed_blocks as SB
+    # `_all()` is the registry: VAULT + LEGACY + DECISION. Read it directly and
+    # let an AttributeError be loud -- a fallback to `SL.TIERS` here would make
+    # both checks below compare a set with itself and pass vacuously, which is
+    # the failure class this file exists to catch.
+    reg = {b[0] for b in SB._all()}
+    legacy = {b[0] for b in SB.LEGACY_BLOCKS}
+    check("the block registry is non-empty and was really read", len(reg) > 20,
+          f"{len(reg)} blocks")
+    # Legacy blocks predate the ledger and are deliberately untiered.
+    reg = reg - legacy
+    check(
+        "every registered block has a tier in seed_ledger.TIERS",
+        not (reg - set(SL.TIERS)),
+        f"missing: {sorted(reg - set(SL.TIERS))}",
+    )
+    check(
+        "and every tier names a registered block",
+        not (set(SL.TIERS) - reg),
+        f"orphaned: {sorted(set(SL.TIERS) - reg)}",
+    )
+    check(
+        "a tier lookup succeeds for every registered block",
+        all(SL.tier_of(b) for b in sorted(reg)),
+    )
+
     cols = SL.collisions()
     # An overlap is UNDECLARED when neither claim named the other at claim time
     # and no later `pair` record declares it. Counting undeclared overlaps was

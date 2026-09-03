@@ -1,0 +1,28 @@
+{
+ "check": "estimator_wp15_k3_canary.py vs p2_k3_fnp.k3_flow",
+ "width": 256,
+ "depth": 8,
+ "seed": 1000921,
+ "embedded_tables_identical": true,
+ "coefs_sha256": "894185e450533765f633312b36345ab7a29bfb4219a9ab5ee0c36a12d5988fa7",
+ "shape_ok": true,
+ "per_layer_rel_rms": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "worst_rel_rms": 0.0,
+ "tolerance": 1e-06,
+ "lab_flops": 1392183731.0,
+ "candidate_flops": 1392183731.0,
+ "lab_ops": 2663,
+ "candidate_ops": 2671,
+ "finite": true,
+ "pass": true,
+ "caveat": "agreement between two spellings; NOT parity against upstream at non-zero kappa_3"
+}
