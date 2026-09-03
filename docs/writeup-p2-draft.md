@@ -25,10 +25,10 @@
 | 3. The amplification law | **populated, evidence complete** | — |
 | 4. Where the error actually is | **populated, evidence complete** | — |
 | 5. Compressing the third cumulant | **populated, evidence complete** | — |
-| 6. What an estimator may spend, and the two levers | **populated, evidence complete** (new, 2026-09-02) | — |
+| 6. What an estimator may spend, and the two levers | **populated, evidence complete** (new 2026-09-02; §6.6-6.7 new 2026-09-03) | — |
 | 7. The off-diagonal lane | **populated** — the lane is closed on a measurement | — |
 | 8. Method and protocol | **populated** | — |
-| 9. What we got wrong | **populated — nine entries, and this list grows** | — |
+| 9. What we got wrong | **populated — fifteen entries, and this list grows** | — |
 | 10. Result and nomination | **PENDING** | end of Phase 2; Samuel's gate |
 
 ---
@@ -243,7 +243,7 @@ corrected cell is the one tabled above.
 
 ---
 
-## 6. What an estimator may actually spend *(new 2026-09-02; **materially corrected the same day** — see 9.4; **and then executed rather than projected** — see 6.5)*
+## 6. What an estimator may actually spend *(new 2026-09-02; **materially corrected the same day** — see 9.4; **executed rather than projected** — see 6.5; **and then found to be measuring the free half of the objective** — see 6.6, 6.7)*
 
 **Evidence: CONFIRMED.** `experiments/2026-09-02_wp14_range/e0_cost_f64.json` and
 `e0_cost_f32.json`, executed in the official metering package inside a real budget
@@ -416,6 +416,103 @@ anyone reporting one:
 
 ---
 
+### 6.6 The cost we were measuring was free, and the cost that could kill us was an operation count *(new 2026-09-03)*
+
+Everything in §6.1–6.5 is about FLOPs, and for this Phase FLOPs below the floor
+**cost nothing at all**. The round sets the cost exponent to zero, so the score
+is `MSE x max(0.1, F/B)` and any estimator under `0.1 B` pays the same
+multiplier as one at zero. We reached that floor and then kept optimising the
+half of the objective that had already stopped mattering.
+
+**What can still ruin a run is the residual wall-time cliff.** The harness
+measures the time your estimator spends outside the metered operations —
+interpreter overhead, allocation, the glue between array calls — and if it
+exceeds `0.4 s` for a single network, that network does not merely score badly:
+**it fails, and its prediction is replaced by zeros.** One failed network out of
+a hundred moves a `1e-7` score to roughly `9e-3`.
+
+That number does not track FLOPs. It tracks **how many array operations you
+issue**, because each one carries a fixed Python-side cost that the FLOP meter
+does not see. Measured on the same host, in the same process, in the same run:
+
+| | counted FLOPs | array **operations** | residual, relative to the control |
+|---|---:|---:|---:|
+| our shipped second-order closure | `68,782,549,504` | **`453`** | `1.0x` |
+| the third-order flow | `173,230,212,715` | **`5,119`** | `~12x` |
+| ratio | `2.5x` | **`11.3x`** | |
+
+**`2.5x` the arithmetic, `11.3x` the operations.** The third-order flow is not
+expensive because it computes more; it is expensive because it computes in more
+*pieces*. Its arithmetic is dominated by five matrix products per layer, and its
+operation count by roughly three hundred small elementwise steps around them.
+
+We learned this the expensive way: on the deployment authority the flow ran with
+**`1.21x`** margin against the cliff where the shipped file has `6.8x`, and our
+own local measurement had said `1.4x` while a matched control in the same process
+said the local reading was optimistic by a factor we could not have predicted.
+
+> **Under a zero cost exponent, "how much arithmetic" is the wrong question and
+> "how many operations" is the right one. They are not proportional, and only one
+> of them can fail your submission.**
+
+### 6.7 Two programs, one of them scored: the parity check we had deferred *(new 2026-09-03)*
+
+Our third-order flow existed twice. A research implementation in PyTorch, where
+every accuracy number was measured; and a port into the restricted dialect the
+grader accepts, which has no PyTorch and no scientific stack. We checked the port
+three ways — a degenerate limit with a closed-form answer, independent numerical
+integration, and agreement between two independently written copies — and all
+three passed. **We never checked it against the implementation whose accuracy we
+were quoting**, because that required both frameworks in one process and we kept
+deferring it.
+
+Then we ran the port on the real evaluator, and it scored **`3.3x` worse than the
+research implementation had predicted**. A control submitted in the same run —
+our shipped file, whose score we already knew — transferred to `3.2%`, so the
+data, the networks and the harness were all fine. The discrepancy was ours.
+
+**It was one line.** The reference implementation removes a correction term from
+one stored component to avoid double-counting, and then adds the whole object
+back in a way that silently discards the correction. Net, the term is neither
+added nor subtracted. Our port subtracted it. On eight networks the fixed port
+reproduces the reference's error to four significant figures (`8.5075e-07`
+against `8.5075e-07`) where the defective one gives `2.6890e-06` — `3.16x`,
+against the `3.31x` the evaluator measured on twenty different networks.
+
+Three things we would tell anyone porting a research implementation:
+
+- **A degenerate limit tests the part of the program the degenerate limit
+  reaches.** Ours set the third cumulant to zero, which made the defective term
+  vanish from the one component the check inspected. Seven deliberately
+  value-destroying mutations of the port all passed all three checks: **0 of 7**.
+  That number was available months before the failure and we read it as a
+  curiosity rather than a warning.
+- **Agreement between two copies of your own transcription is not verification.**
+  Both copies were wrong in the same way, and the check comparing them stayed
+  green throughout.
+- **Relative agreement in the output is not agreement in the score.** The
+  defective port's predictions differ from the correct ones by `0.12%`. Had we
+  gated on end-to-end drift with a `1%` tolerance — which is what we would
+  naturally have chosen — the bug would have passed the gate at every network
+  size we tried. **The predictions are `O(1)` and the error being chased is
+  `O(1e-3)`; a difference invisible against the signal is enormous against the
+  residual.** The gate that caught it compares the port against independently
+  minted ground truth, not against another program.
+
+The fix costs nothing and saves a little: the discarded term was, in a flow that
+rebuilds its carried tensor each layer, **dead work** — the object it corrects is
+thrown away at the rebuild. Removing it took `9,441,280` FLOPs and 208 array
+operations out of every network, and left the answer correct.
+
+> **The cheapest verification we now own is a 46 KB file: the reference
+> implementation's own output on two small networks, committed and hashed. It
+> turns every future run of the mutation battery into a real oracle inside the
+> restricted environment, and it took the kill rate from 0 of 7 to 9 of 9 on the
+> live code path. The framework barrier we had treated as a reason not to check
+> only had to be crossed once.**
+
+---
+
 ## 7. The off-diagonal lane: the information is findable in principle and not in practice
 
 **Evidence: CONFIRMED**, pre-registered as `CONTRACT WP13` with nine numbered
@@ -532,6 +629,34 @@ their effective ranks grows to `2.94` — so the question is a containment
   right to. Writing the program moved `0.07636` to `0.07886` and the free margin
   from `1.51` to `1.35` matmuls per layer. **The conclusion survived; the
   entitlement to state it did not exist yet.** (§6.5)
+- **We optimised the free half of the objective for a day.** The cost exponent
+  is zero this Phase, so FLOPs below the floor are worth nothing, and the only
+  cost that can still ruin a run is a wall-time residual that tracks **operation
+  count** rather than arithmetic. Our flow does `2.5x` the arithmetic of our
+  shipped file and `11.3x` the operations, and it reached the real evaluator with
+  `1.21x` margin against a cliff that zeroes a network's prediction. Every FLOP
+  number in §6 is correct and most of them did not matter. (§6.6)
+- **We shipped a port to the evaluator that we had never compared against the
+  implementation whose accuracy we were quoting.** It scored `3.3x` worse. The
+  cause was one line, in code that a rebuild makes dead. Three checks passed
+  throughout, and a mutation battery had already reported that **0 of 7**
+  deliberate value-destroying edits were detectable — a warning we filed rather
+  than acted on. The barrier was that the two implementations need different
+  Python environments; crossing it once, and committing 46 KB of the reference's
+  output, took the battery to **9 of 9** on the live code path. (§6.7)
+- **We wrote a verification gate on the wrong quantity, and only a second clause
+  saved it.** The natural gate — "the two programs' predictions agree to `1%`" —
+  passes the defective port at every network size we tried, because the
+  predictions differ by `0.12%` while the score differs by `3.2x`. The gate that
+  worked compares against independently minted ground truth. **When the residual
+  error is orders below the signal, agreement in the output is not agreement in
+  the objective.** (§6.7)
+- **Our own written mechanism was off by a factor of two, and the measurement
+  corrected it.** The pre-registered hypothesis said the defect made one carried
+  object wrong by twice a named quantity; it is wrong by exactly once, measured
+  to six digits. Location, mechanism and sign were right, the factor was not —
+  which is an argument for pre-registering the *mechanism* and then measuring the
+  *magnitude*, rather than trusting either alone. (§6.7)
 - **A NaN reference passed a threshold gate, and the gate printed PASS.** The
   quadrature we checked one component against overflows past a certain degree and
   returns NaN weights; `nan > tolerance` is `False`, so three failed comparisons

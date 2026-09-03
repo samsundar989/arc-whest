@@ -1,5 +1,91 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-03 — THE `3.31x` WAS ONE LINE. `NOT_DONE` STEP 6 IS CLOSED, AND
+> G-PARITY PASSES BOTH CLAUSES.**
+> `CONTRACT WP16` (`7169392`, committed before any data existed), results
+> `1e4d0f8`. Eight `P01` networks, f64, `1024 x 16`, against upstream rev
+> `93d091a4`'s own regenerating flow.
+>
+> | | |
+> |---|---|
+> | **clause 1** — end-to-end drift vs the torch reference | **`1.692e-11`** worst, **8/8 nets**, gate `1e-2`. **PASS** |
+> | **clause 2** — raw MSE vs already-minted truth | **`8.5075e-07`**, band `[7.0e-07, 1.1e-06]`. **PASS** — the WP14 C0-i figure to 4 s.f. |
+> | the defect, kept as a named control (`--regen-mode sub`) | **`2.6890e-06`** = `3.161x`, where the grader measured `3.314x` on twenty other rows |
+>
+> **The defect.** `k3_layer` regenerated `M` from `K[(3,)] - p111_3` and
+> `K[(2,1)] - p111_21`. Upstream subtracts `pK_111.get_repeated()` from the
+> **stored DS part only**, then returns `K_out[3] = pK_111 + from_dstensor(K_ds[3])`
+> — and `FactoredTensor.__add__` **discards the repeated cache** (its own TODO
+> says so), so the regeneration hook's `get_repeated()` recomputes from the
+> concatenated factors and recovers `K_ds3` **un-subtracted**. Measured at layer
+> 0: `M(sub) - M(nosub)` is exactly `3 p111_21^T`, ratio **`1.000000`**, diagonal
+> untouched because `p111_3` is exactly zero there. *That* is why `--layer-k2`,
+> which only ever read the `(3,)` slice, passed throughout.
+>
+> **THE GATE THE BRIEF SPECIFIED WOULD HAVE PASSED THE BUG.** The defect's
+> end-to-end drift is `1.199e-03` at `1024 x 16` and `2.4e-03` at `128 x 4` —
+> it clears a `<= 1%` drift gate at both shapes. **Only clause 2, against minted
+> truth, catches it.** A `0.12%` drift in the means is a `3.2x` miss in the
+> score, because the means are `O(1)` and the error being chased is `O(1e-3)`
+> RMS. **Relative drift in the means is not a proxy for score**, and any future
+> gate written on drift alone is a gate that cannot see a `3x` regression.
+>
+> **THE STRUCTURAL FINDING: in a regenerating flow the whole `(1,1,1)` block is
+> DEAD WORK.** Its all-distinct part is discarded by `from_dstensor` at the
+> rebuild; its repeated part cancels exactly. `p111_3`, `p111_21`, `fac1`,
+> `fac3`, `w1_sq` compute nothing the answer depends on. This sharpens rather
+> than changes `CONTRACT WP15`'s premise: the regenerating flow's error *is* the
+> discarded block, stated exactly.
+>
+> **PRECISION WAS NEVER THE EXPLANATION.** The fixed port at **f32** sits
+> `4.1e-07` from the f64 reference and its raw MSE is `8.5072e-07` against f64's
+> `8.5075e-07` — `0.004%`. Shipping f32 costs nothing in accuracy, which is the
+> assumption the whole `0.1`-floor plan rests on.
+>
+> **THE PRICE, RE-METERED. EVERY EARLIER FIGURE IS SUPERSEDED.**
+>
+> | | before | after |
+> |---|---:|---:|
+> | one layer, f32, `n = 1024` | `10,837,935,618` | **`10,828,494,338`** |
+> | whole flow, 16 layers | `173,381,273,195` | **`173,230,212,715`** |
+> | `x` budget / multiplier | `0.078845` / `0.10000` | **`0.078776`** / **`0.10000`** |
+> | flopscope **operations** | `5,327` | **`5,119`** (`320`/layer) |
+>
+> We are still at the floor. **The residual is still the blocker**: `3.9%` fewer
+> operations is nowhere near the `>= 4x` headroom the soak requires, against the
+> `1.21x` the deployment authority measured on the now-retired file.
+>
+> **THE MUTATION BATTERY: `0/7` -> `9/9` ON THE LIVE PATH.** A second detector
+> that needs **no torch at run time** — a 46 KB committed, hashed golden dump of
+> upstream's own answer at `128 x 4` (`golden_ref_128x4.npz`) — plus five new
+> live-path mutations. `--layer-k2` alone still kills only `1/12`. The three
+> survivors are exactly the three editing the dead `sub` branch, and each reports
+> drift `3.617e-12`, the f64 baseline: not a gap, *proof the branch is inert*.
+>
+> **WHAT IS RESTORED, AND WHAT IS NOT.** Every accuracy claim resting on
+> `8.5075e-07` is restored, including WP14 C0-i's paired `1.637x`-better-than-v2.7
+> comparison and the `334x` two-slice oracle ceiling, whose PROVISIONAL was
+> conditional on exactly this. **Nothing has been re-graded**: the canary that
+> scored `2.8192e-06` is **RETIRED**, not amended, and no board number exists for
+> the fixed file. `estimator.py` is untouched and remains v2.6.1. Nothing is
+> submitted, nothing is designated, and the `mini` split was not re-read.
+>
+> **NEXT, unchanged in order: Blocker B.** `5,119` operations must come down
+> toward `~1,920` (`~120`/layer): fuse elementwise chains, hoist MLP-independent
+> constants into `setup()`, stack per-layer matmuls on concatenated operands,
+> avoid materialising large temporaries, skip the `(2,1)` slice at layer 15.
+> Then re-meter (never adjust), brokered `3 x 100`-MLP soak at `>= 4x` worst-run
+> headroom, Linux memory gate, `certify_candidate`, and only then present a
+> canary for Samuel to submit. Then WP15's two arms.
+
+
+> *(**SUPERSEDED IN ITS DIAGNOSIS, NOT IN ITS MEASUREMENTS**, by the WP16 block
+> above. Everything this block MEASURED stands — the grader numbers, the FLOP
+> parity, `0/20` failed, the `1.21x` headroom, the `1.19x`-slower finding. What
+> it left open, the `3.3x`, is answered: one line in `k3_layer`. The `1.21x`
+> headroom and the `2.8192e-06` belong to a file that is now RETIRED, so both
+> must be re-measured on the fixed file before either is quoted again.)*
+>
 > **2026-09-02 (LATE) — THE CANARY RAN ON THE DEPLOYMENT AUTHORITY. ZERO FAILED
 > MLPs, `1.21x` RESIDUAL HEADROOM, FLOP PARITY TO THE FLOP — AND THE ACCURACY IS
 > `3.3x` OFF ITS OWN PREDICTION.**
