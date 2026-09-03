@@ -29072,3 +29072,125 @@ regenerated canary through `whest run --runner subprocess` on the same 20 rows,
 **with v2.6.1 as a matched control in the same session** — which my queued run
 did not have until the Skeptic said so. Band `[7.5e-07, 1.15e-06]`; above
 `~1.3e-06` falsifies "one line was the whole of it".
+
+---
+
+# 2026-09-03 (LATE) — **THE DEPLOYMENT AUTHORITY CONFIRMS THE FIX: `8.75e-07` RAW, `0` OF `100` FAILED — AND `G-M-DEPTH` FAILS**
+
+Two results, from `gpuq` 174/178 (official runner) and 176/177 (Arm M).
+
+## 1. The official read — every pre-registered prediction HELD
+
+Pre-registration: this LOG, "PRE-REGISTRATION: the official read", committed at
+`574b767` **while job 174 was still QUEUED**. `--split mini`,
+`--runner subprocess`, `hf://aicrowd/arc-whestbench-public-2026@v2-phase2`. Both
+arms read **100 MLPs**, not the 20 the 2026-09-02 run read.
+
+| on 100 official rows | raw MSE | adjusted | utilization | multiplier | failed |
+|---|---:|---:|---:|---:|---:|
+| v2.6.1 (shipped), matched control | `4.05e-06` | `4.05e-07` | `0.06257338` | `0.10000` | **0/100** |
+| **the fixed K3 canary** | **`8.75e-07`** | **`8.75e-08`** | `0.07670470` | `0.10000` | **0/100** |
+| ratio | **`4.63x` better** | | | | |
+
+| # | prediction | outcome |
+|---|---|---|
+| **Q1** | raw MSE in `[7.5e-07, 1.15e-06]` | **HELD.** `8.75e-07`, comfortably inside. `SKEPTIC WP16`'s transfer inference said `~8.9-9.3e-07`; the truth came in slightly better than that |
+| **Q2** | `n_failed_mlps = 0` | **HELD.** `0 of 100` |
+| **Q3** | worst-MLP headroom `> 1.21x` and `< 4x` | **partially readable.** Mean residual `0.2233 s/MLP` (`22.326228 s / 100`) → mean headroom `1.79x`. `0/100` failed proves every MLP was under `0.4 s`. **The `raw` report format does not print a worst-MLP residual**, and the `>= 4x` decision is written on the worst. Re-queued with `--detail full --format json` |
+| **Q4** | the control reproduces its own figure within `1%` | **HELD to `0.01%`.** `4.05e-06` against the `4.050566e-06` this repository has carried for the shipped K2p1 since August |
+
+> **THE `3.31x` IS FULLY ACCOUNTED FOR ON GRADED DATA.** The retired canary
+> scored `2.8192e-06`; the fixed one scores `8.75e-07` on five times as many
+> rows. **`3.22x` better, on the evaluator, with a control that transfers to
+> `0.01%`.** The offline paired figure was `3.161x`. `SKEPTIC WP16`'s one
+> unresolved ambiguity — whether the fix delivers on graded data — is now
+> resolved, and with it the risk it could not bound: a defect shared by upstream,
+> `run_flow` and `build_mlp` would have shown up here, because the grader's
+> labels are independent of all three.
+
+**What this licenses and what it does not.** It licenses the accuracy claim: the
+regenerating K3 flow, at the multiplier floor, is **`4.63x` better than the
+shipped file on the organisers' own data**. It does **not** license nomination:
+the `>= 4x` residual soak has not run, `certify_candidate` has not run, the Linux
+memory gate has not run, and **nothing may be fitted or selected on these rows** —
+this is a CONFIRM read and both arms were run to measure, not to choose.
+
+**Which file this measured.** Job 174's snapshot is commit **`ae44369`**,
+`2,708` operations — not HEAD's `2,646`. Every change since is bit-exact, so the
+**accuracy figure is identical** to HEAD's and the **residual figure is a
+conservative upper bound**. The `62`-operation difference is not re-measured and
+is not claimed.
+
+**And the residual did not fall the way the op count did.** Ratio of mean
+residual to the control: `0.2233 / 0.0384 = 5.82x`, against a local operation
+ratio of `5.98x` — those agree closely, which is the first clean confirmation
+that **operations predict residual**. But the retired file's OFFICIAL worst was
+`0.3314 s` at `5,327` operations, and halving the operations moved the MEAN to
+`0.2233 s`. Mean-then and worst-now are not comparable, which is exactly why the
+worst-MLP figure is being re-read rather than inferred.
+
+## 2. `G-M-DEPTH` FAILS — Arm M's cheap version is not viable
+
+`1024 x 16`, f32, **16 `P01` networks** `[..176..191]` (disjoint from the eight
+WP13/WP14/WP16 share), layer-averaged over layers 4..14 exactly as
+`CONTRACT WP15`'s composition rule specifies. f64 control on 2 of them.
+
+| `k` un-regenerated layers | f32, 16 nets | f64 control, 2 nets | gate |
+|---|---:|---:|---|
+| 0 (the regenerating flow) | `0.0000` | `0.0000` | — |
+| 1 (age `l-1`) | `0.3381` | `0.3461` | |
+| **2 (ages `l-1, l-2`)** | **`0.5734`** | **`0.5829`** | **`< 0.70` — FAILS** |
+| 3 | `0.7322` | `0.7414` | `>= 0.70`, but not the gate that was written |
+
+Per-network spread at `k = 2` is `0.5532-0.5933` — tight, so this is not a
+sampling accident. f32 and f64 agree to `1.6%`, so it is not a precision
+artifact.
+
+**Prediction P1 is REFUTED.** It said *"age `l-1` alone explains `>= 50%`;
+`{l-1, l-2}` `>= 70%`. Refuted if `l-1` alone is `< 30%`."* Measured: `l-1`
+alone is `0.3381` — above the `30%` refutation trigger but well below `50%` — and
+`{l-1, l-2}` is `0.5734`, not `>= 70%`. The direction came from WP4's
+`0.42-0.70` single-layer share, and the true single-layer share is `0.34`.
+
+**Arm M is NOT killed, and that distinction is the contract's own.** The
+falsifier is *"three ages together explain `< 70%`"*, and three ages explain
+`0.7322`. So the falsifier does **not** fire. What fails is the gate as written,
+and the consequence is a cost one: `E21`'s memory is **three generations deep,
+not two**.
+
+**Why that is close to fatal on arithmetic rather than on evidence.** The
+contract already priced this: carrying one extra generation exactly turns `K[3]`
+into rank `2n`, costs two extra `contract_W` matmuls and breaks the `A2 == A3`
+collapse in the `(2,1)` slice — **~5 extra matmuls a layer against a margin of
+`1.36`**. Three generations is worse. A rank-`r` sketch replaces each with an
+`(n x n)(n x r)` product at `r/n` of a matmul, and the affordability horizon is
+`r <= 192`. So Arm M survives only as **a rank-`r <= 192` sketch of three
+generations recovering `~73%` of `E21`** — and `73%` of `E21` is not `73%` of the
+error, because `E3` carries ~40% of the regenerating flow's error and this
+measures only the `(2,1)` slice.
+
+**What must NOT be concluded**: that `k = 3` "clears the gate". The gate was
+written on `k = 2` before the data existed, and moving it to `k = 3` after seeing
+that `k = 3` passes is exactly the post-hoc gate move `VALIDATION.md` forbids and
+that `SKEPTIC WP14` caught once already. The honest statement is: **the gate
+failed, the falsifier did not fire, and the arm now needs a cost case it did not
+need before.**
+
+## Knowledge delta
+
+1. **Operations predict residual, and now there is a clean number for it.** The
+   official mean-residual ratio to a matched control is `5.82x` where the local
+   operation ratio is `5.98x`. Every earlier attempt to establish this was
+   contaminated by host load; the deployment authority, running both arms on 100
+   rows, is not.
+2. **A `raw` report does not print what a residual gate is written on.** The
+   `>= 4x` requirement is on the worst MLP; `--detail raw` gives an aggregate.
+   Four hours of local residual measurement, all of it unusable, and the number
+   that decides was one CLI flag away.
+3. **`E21`'s memory is three deep, not two, and the difference is a cost case.**
+   `0.34 / 0.57 / 0.73` for one, two and three generations. WP4's locality
+   result pointed the right way and was quantitatively optimistic — the
+   single-layer share is half what its range suggested.
+4. **The fix is confirmed by an instrument independent of every program in the
+   chain.** `SKEPTIC WP16` could bound the shared-defect risk at layer 1 only.
+   `8.75e-07` on the grader's own labels bounds it everywhere.
