@@ -391,7 +391,7 @@ def _get_pk_block(pK, b, d):
 
 
 def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
-             init_scale=2.0, last_layer=False):
+             init_scale=2.0, last_layer=False, regen_mode="sub", probe=None):
     """ONE full layer -- linear step then nonlinear step -- of the regenerating
     k_max=3 SIMPLE flow, in `fnp`, at the declared dtype.
 
@@ -409,6 +409,28 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
         P       = W.T @ M              one   (contract_W, leg 1 only)
         (P.Q) @ Q.T  and  (Q.Q) @ P.T  two   (the (2,1) slice's block perms)
     Everything else below is O(n^2) or less, and the meter is what says so.
+
+    `regen_mode` -- WP16 / Blocker A, `CONTRACT WP16` (2026-09-03). Which slices
+    the regenerated `M_out` is built from, and it is the ONE line the parity
+    check discriminates on:
+
+      "sub"    `S3 = K[(3,)] - p111_3`, `S21 = K[(2,1)] - p111_21`. The spelling
+               the `2.8192e-06` canary shipped with.
+      "nosub"  `S3 = K[(3,)]`, `S21 = K[(2,1)]` -- and `p111_3`, `p111_21`,
+               `fac1`, `fac3`, `w1_sq` are then never computed at all.
+
+    Upstream (`factor_k3.py`) subtracts `pK_111.get_repeated()` from the STORED
+    DS part so that `pK_111 + from_dstensor(K_ds[3])` does not double count --
+    but `FactoredTensor.__add__` discards the repeated cache, so the regeneration
+    hook's `get_repeated()` recomputes from the concatenated factors and gets
+    `rep(pK_111) + (K_ds3 - rep(pK_111)) = K_ds3`, i.e. the UN-subtracted slices.
+    `"nosub"` is that. `"sub"` remains the default so no existing artifact's
+    provenance changes by importing this module.
+
+    `probe(tag, mapping)` -- optional, called with `tag in {"lin", "nl"}`. It is
+    a pure observer: at `None` (the default) not one operation is issued for it,
+    so the meter reads identically with and without it. `--layer-price` before
+    and after this change is the check that says so.
     """
     n = W.shape[0]
     mu, cov, M, c4 = state["mu"], state["cov"], state["M"], state["c4"]
@@ -454,6 +476,16 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
     S = {(1,): mu_pre, (2,): var, (1, 1): C11, (2, 1): D21, (1, 2): D21.T,
          (3,): D3, (4,): D4, (2, 2): D22}
 
+    if probe is not None:
+        # The INCOMING tower as the reference sees it at `hook_lin`: mu and cov
+        # after `linear_kprop`, and kappa_3's two repeated slices after
+        # `contract_W`. `D3`/`D21` are `_factored_get_dslice((P, Q, Q), part)`
+        # re-derived: (3,) is `(P.Q.Q).sum(1)` at coef 1, and (2,1) is
+        # `(2 (P.Q) Q^T + (Q.Q) P^T) / 3` diagonal-killed -- both checked against
+        # upstream's block-permutation enumeration by hand in CONTRACT WP16.
+        probe("lin", {"mu_pre": mu_pre, "cov_pre": cov_pre,
+                      "s3": D3, "s21": D21, "c4_in": c4})
+
     # ---- the 25 kept pK terms ---------------------------------------------
     pK = {}
     for row in table["terms"]:
@@ -482,20 +514,29 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
     # same single entry (factor_k3.py:378-403). NOTE the asymmetry between w(1)
     # and w(2) * w(1) -- p2_slice_cost.py uses w1 for both and is numerically
     # wrong while being cost-correct.
-    w1, w2 = w[(1, 1)], w[(2, 1)]
-    fac1 = audit.check("fac1", w1[:, None] * C11)
-    fac3 = audit.check("fac3", (w2[:, None] * w1[None, :] * C11).T)
-    # Block 1 -- factors (w1.P, w1.Q, w1.Q). The Wick scaling is a rank-1
-    # rescale of the UNSCALED slices already computed, so no new matmul is
-    # issued: (3,) -> w1^3 . D3 ; (2,1) -> w1_i^2 w1_j . D21.
-    w1_sq = w1 * w1
-    p111_3 = audit.check("p111_(3,)", w1_sq * w1 * D3)
-    p111_21 = audit.check("p111_(2,1)", (w1_sq[:, None] * w1[None, :]) * D21)
-    # Block 2 -- factors (fac1, 3 I, fac3^T). The middle leg is a multiple of the
-    # identity, so every block permutation degenerates to a row scaling or dies
-    # on C11's zero diagonal. Its (3,) slice is identically zero; its (2,1)
-    # slice is fac1 . fac3 with the diagonal killed.
-    p111_21 = audit.check("p111_(2,1)+blk2", p111_21 + (fac1 * fac3) * off_mask)
+    #
+    # WP16: this whole block is `rep(pK_111)`, and under `regen_mode="nosub"`
+    # NOTHING reads it -- upstream's subtraction of it from the DS part is undone
+    # by adding `pK_111` back into `K_out[3]`, so the regeneration hook rebuilds
+    # from the un-subtracted slices. It is then dead work, and skipped.
+    if regen_mode == "sub":
+        w1, w2 = w[(1, 1)], w[(2, 1)]
+        fac1 = audit.check("fac1", w1[:, None] * C11)
+        fac3 = audit.check("fac3", (w2[:, None] * w1[None, :] * C11).T)
+        # Block 1 -- factors (w1.P, w1.Q, w1.Q). The Wick scaling is a rank-1
+        # rescale of the UNSCALED slices already computed, so no new matmul is
+        # issued: (3,) -> w1^3 . D3 ; (2,1) -> w1_i^2 w1_j . D21.
+        w1_sq = w1 * w1
+        p111_3 = audit.check("p111_(3,)", w1_sq * w1 * D3)
+        p111_21 = audit.check("p111_(2,1)", (w1_sq[:, None] * w1[None, :]) * D21)
+        # Block 2 -- factors (fac1, 3 I, fac3^T). The middle leg is a multiple of
+        # the identity, so every block permutation degenerates to a row scaling or
+        # dies on C11's zero diagonal. Its (3,) slice is identically zero; its
+        # (2,1) slice is fac1 . fac3 with the diagonal killed.
+        p111_21 = audit.check("p111_(2,1)+blk2",
+                              p111_21 + (fac1 * fac3) * off_mask)
+    else:
+        p111_3 = p111_21 = None
 
     # ---- pK -> K, per diagonal slice (the frozen vector-partition table) ----
     K = {}
@@ -515,10 +556,15 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
     # ---- the outputs -------------------------------------------------------
     mu_out = audit.check("mu_out", K[(1,)])
     cov_out = audit.check("cov_out", fnp.diag(K[(2,)]) + K[(1, 1)])
-    # K[3]: subtract the (1,1,1) block's own repeated part, then REGENERATE --
-    # `from_dstensor` returns factors (diag(S3) + 3 S21^T, I, I).
-    S3 = audit.check("S3", K[(3,)] - p111_3)
-    S21 = audit.check("S21", K[(2, 1)] - p111_21)
+    # K[3]: REGENERATE -- `from_dstensor` returns factors (diag(S3) + 3 S21^T, I, I).
+    # WHICH slices feed it is `regen_mode`; see the docstring and CONTRACT WP16.
+    if regen_mode == "sub":
+        S3 = audit.check("S3", K[(3,)] - p111_3)
+        S21 = audit.check("S21", K[(2, 1)] - p111_21)
+    elif regen_mode == "nosub":
+        S3, S21 = K[(3,)], K[(2, 1)]
+    else:
+        raise ValueError(f"regen_mode must be 'sub' or 'nosub', got {regen_mode!r}")
     M_out = None if last_layer else audit.check(
         "M_out", fnp.diag(S3) + 3.0 * S21.T)
     # K[4]: DS_harmonic_proj(., r_out=2). Both surviving Laplacian multigraphs
@@ -529,6 +575,16 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
         * float(lap["(4,)"]["int_partition_coef"]) * K[(4,)].sum()
         + float(lap["(2, 2)"]["terms"][0]["coef"])
         * float(lap["(2, 2)"]["int_partition_coef"]) * K[(2, 2)].sum())
+
+    if probe is not None:
+        # The OUTGOING tower as the reference sees it at `hook_nl`, BEFORE
+        # regeneration. `K3` / `K21` are what `get_repeated()` returns there
+        # under H1; `S3` / `S21` are what this port actually rebuilds from. Both
+        # are handed over so the comparison discriminates rather than assumes.
+        probe("nl", {"mu": mu_out, "cov": cov_out,
+                     "K3": K[(3,)], "K21": K[(2, 1)],
+                     "S3": S3, "S21": S21, "M": M_out, "c4": c4_out,
+                     "p111_3": p111_3, "p111_21": p111_21})
 
     return {"mu": mu_out, "cov": cov_out, "M": M_out, "c4": c4_out}
 
@@ -835,7 +891,8 @@ def cmd_layer_k2_degeneracy(a) -> int:
     return 0 if not bad else 1
 
 
-def k3_flow(fnp, flops, weights, table, dtype, audit, depth=None):
+def k3_flow(fnp, flops, weights, table, dtype, audit, depth=None,
+            regen_mode="sub", probe=None):
     """The WHOLE regenerating flow: `depth` layers, one program, one context.
 
     Input cumulants for `x ~ N(0, I)`: `K[1] = 0`, `K[2] = I`, `K[3] = 0`,
@@ -866,8 +923,10 @@ def k3_flow(fnp, flops, weights, table, dtype, audit, depth=None):
              "c4": 0.0}
     mus = []
     for l in range(depth):
+        lp = None if probe is None else (lambda tag, d, _l=l: probe(_l, tag, d))
         state = k3_layer(fnp, flops, weights[l], state, table, dtype, off_mask,
-                         audit, last_layer=(l == depth - 1))
+                         audit, last_layer=(l == depth - 1),
+                         regen_mode=regen_mode, probe=lp)
         mus.append(state["mu"])
     return fnp.stack(mus), state
 

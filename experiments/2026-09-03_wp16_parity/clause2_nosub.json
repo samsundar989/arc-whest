@@ -1,0 +1,117 @@
+{
+ "check": "WP16 G-PARITY clause 2: the port's final-layer means against WP14 C0-i's minted truth, cross-product estimator",
+ "contract": "experiments/LOG.md 2026-09-03 CONTRACT WP16, HEAD 7169392",
+ "preds": {
+  "side": "port",
+  "regen_mode": "nosub",
+  "dtype": "f64",
+  "per_net": [
+   {
+    "net": 0,
+    "seed": 40821001168,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 1,
+    "seed": 40821001169,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 2,
+    "seed": 40821001170,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 3,
+    "seed": 40821001171,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 4,
+    "seed": 40821001172,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 5,
+    "seed": 40821001173,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 6,
+    "seed": 40821001174,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   },
+   {
+    "net": 7,
+    "seed": 40821001175,
+    "flops": 346457902294.0,
+    "ops": 5119,
+    "dtype_violations": 0
+   }
+  ],
+  "width": 1024,
+  "depth": 16,
+  "n_nets": 8,
+  "seeds": [
+   40821001168,
+   40821001169,
+   40821001170,
+   40821001171,
+   40821001172,
+   40821001173,
+   40821001174,
+   40821001175
+  ],
+  "seed_note": "P01[40,821,001,168..40,821,001,175]",
+  "weights_sha256": "6bb3a4957d501a77931139473c59e44b47d3073eef7dcebdbb65e3b72025986f",
+  "full_layers": [
+   0,
+   1
+  ]
+ },
+ "truth": "experiments\\2026-09-02_wp14_range\\truth_P01_wp13nets.npz",
+ "seeds": [
+  40821001168,
+  40821001169,
+  40821001170,
+  40821001171,
+  40821001172,
+  40821001173,
+  40821001174,
+  40821001175
+ ],
+ "mse_cross_per_net": [
+  7.895177673284135e-07,
+  7.975333787928464e-07,
+  8.762622683207831e-07,
+  8.809363741202135e-07,
+  8.125928604972764e-07,
+  1.089013312704478e-06,
+  8.616934484284838e-07,
+  6.984570227194272e-07
+ ],
+ "mse_cross_mean": 8.507508041139902e-07,
+ "reference_wp14_c0i": 8.5075e-07,
+ "band": [
+  7e-07,
+  1.1e-06
+ ],
+ "pass": true,
+ "gt_noise_mean": 1.7171568125047995e-08,
+ "graded_canary_raw_mse": 2.8192e-06,
+ "caveat": "DESIGN tier, and CORRELATED with WP13 E2 and WP14 C0-i -- the same eight networks. Not an independent confirmation."
+}
