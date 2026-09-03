@@ -399,7 +399,7 @@ Two arithmetic hygiene rules, both of which Sprint 4 broke:
    >
    > | | counted FLOPs | flopscope **operations** | headroom |
    > |---|---:|---:|---:|
-   > | regenerating K3 flow | `168.68 B` | **2,708** | *see below* |
+   > | regenerating K3 flow | `168.63 B` | **2,646** | *see below* |
    > | ratio to the K2 closure | `2.45×` | **`5.98×`** | |
    >
    > **The residual column is deliberately left blank, and that is the new law

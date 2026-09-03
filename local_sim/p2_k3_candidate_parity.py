@@ -57,12 +57,19 @@ BUDGET = 2 ** 41
 
 
 #: How many flopscope operations the CANDIDATE is allowed above the lab flow.
-#: It legitimately pays a few the lab flow does not -- the per-width constant
-#: build (`off_mask`, the ones vector) and the weight `astype` inside `predict`,
-#: both once per MLP rather than once per layer. Anything beyond that is the
-#: shipped file drifting on the axis that fails MLPs, and `SKEPTIC WP16` found
-#: this check gating counted FLOPs exactly while merely PRINTING this number.
-OP_SLACK = 16
+#: It legitimately pays a couple the lab flow does not -- building `off_mask` and
+#: the ones vector for a width it has not seen before, once per run rather than
+#: once per MLP. Anything beyond that is the shipped file drifting on the axis
+#: that fails MLPs, and `SKEPTIC WP16` found this check gating counted FLOPs
+#: exactly while merely PRINTING this number.
+#:
+#: It was 16, and 16 was exactly the delta at `1024 x 16` -- because the weight
+#: `astype` was metered once per LAYER, so the slack a depth-16 network needed
+#: was the slack a depth-17 network would have failed on. A slack that scales
+#: with the thing it is bounding is not a bound. The cast is now guarded by a
+#: Python `dtype` comparison, the delta is depth-independent, and the slack is
+#: small again.
+OP_SLACK = 4
 
 def _load_candidate():
     import importlib.util

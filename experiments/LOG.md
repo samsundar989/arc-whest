@@ -28678,7 +28678,7 @@ right; the factor was not.
 | P5 | the transpose orientation is **already correct** | **HELD.** Direct comparison `9.5e-16`, transposed `3.2e-02` at `1024`. The brief named it a suspect; it was not one |
 | P6 | the factor `3` and the sign are correct | **HELD.** Parity to `1.7e-11`, and the battery now kills both `rebuild_3_to_2` and `rebuild_no_transpose` |
 | P7 | f32 within `1e-4` of the f64 reference | **HELD with margin.** `4.1e-07` worst; raw MSE `8.5072e-07` against f64's `8.5075e-07`. **H2 is dead: precision is not the explanation, and f32 costs `0.004%` of the MSE** |
-| P8 | the fix strictly **decreases** counted FLOPs | **HELD, direction right and magnitude small.** `10,837,935,618 -> 10,828,494,338` per layer; arrays `56 -> 49`. All of it is `O(n^2)`, so the matmul count barely moves (`5.047 -> 5.042`) |
+| P8 | the fix strictly **decreases** counted FLOPs | **HELD, direction right and magnitude small.** `10,837,935,618 -> 10,828,494,338` per layer; arrays `56 -> 49`. All of it is `O(n^2)`, so the matmul count barely moves (`5.047 -> 5.042`). *(WP17's op-count work later took the same figure to `10,813,796,920` / `5.036`; artifact `layer_price_wp17.json`.)* |
 | P9 | `<= 1%` end to end at `1024x16` on all 8 | **HELD by nine orders.** `1.692e-11` |
 | P10 | raw MSE inside `[7.0e-07, 1.1e-06]` | **HELD.** `8.5075e-07` |
 | P11 | `--layer-k2` still passes, unchanged | **HELD.** `kappa3 1.067e-14`, identical. It was blind to this and must never be quoted as evidence the fix is right |
@@ -28690,7 +28690,7 @@ the knowledge delta.
 
 | | before | after |
 |---|---:|---:|
-| one layer, f32, `n = 1024` | `10,837,935,618` | **`10,828,494,338`** |
+| one layer, f32, `n = 1024` | `10,837,935,618` | **`10,813,796,920`** |
 | whole flow, 16 layers | `173,381,273,195` | **`173,230,212,715`** |
 | `x` budget | `0.078845` | **`0.078776`** |
 | multiplier | `0.10000` | **`0.10000`** — unchanged, still at the floor |
@@ -28815,14 +28815,14 @@ operations, and `1.21x` headroom where the shipped file has `6.78x`.
 
 | | before | after |
 |---|---:|---:|
-| flopscope **operations** per MLP | `5,327` | **`~2,650`** (`2,708` at the committed measurement) |
+| flopscope **operations** per MLP | `5,327` | **`2,646`** |
 | ... per layer | `333` | **`169`** normal, **`59`** last |
-| counted FLOPs | `173,381,273,195` | **`168,676,988,572`** |
-| `x` budget | `0.078845` | **`0.076705`** |
+| counted FLOPs | `173,381,273,195` | **`168,629,787,238`** |
+| `x` budget | `0.078845` | **`0.076684`** |
 | multiplier | `0.10000` | **`0.10000`** — still at the floor |
 | output, both dtypes | | **BITWISE IDENTICAL**, `maxdiff 0.000e+00` |
 
-**The prediction holds on all three counts**: `2,708` is inside `[2000, 3000]`,
+**The prediction holds on all three counts**: `2,646` is inside `[2000, 3000]`,
 FLOPs moved `-2.7%`, and every change is an identity.
 
 ## The six reductions, and why each is exact
@@ -28897,7 +28897,7 @@ cheap is that its wrong answer had already been given a name.**
   transfers only on a quiet host. The authority is
   `whest run --runner subprocess`, and that run is queued.
 - **Halving the operations does not obviously buy `4x`.** If the residual were
-  purely per-operation, `2,708 / 5,327` would take the graded `1.21x` to about
+  purely per-operation, `2,646 / 5,327` would take the graded `1.21x` to about
   `2.4x`. The soak requires `>= 4x` on the worst run. **On the arithmetic
   available, this is not yet enough**, and the remaining exact reductions are
   nearly exhausted at ~165 operations a layer against a `~120` target.
@@ -29027,12 +29027,14 @@ updated the prose faster than I updated the things the prose is about.**
 | A | `p2_k3_fnp` docstring said `"sub" remains the default` — the **opposite of the code** since `57a4df3` | yes |
 | B | `p2_k3_parity` still defaulted `--regen-mode` to `sub`; `--port` with no flag dumped the defect | yes, at `08eefa0`, before the Skeptic reported |
 | C | `--flow-price` hard-coded the superseded `16 x 10,837,935,618` extrapolation, so its own new artifact carried a wrong reference and printed a wrong shortfall | yes — it now extrapolates from the run's own measured layer |
-| D | P8's headline `10,828,494,338`/layer had **no committed artifact**, prose only, in four documents | queued (`--layer-price --out`) |
+| D | P8's headline per-layer FLOP figure had **no committed artifact**, prose only, in four documents | yes — `layer_price_wp17.json`, and the figure is now `10,813,796,920` |
 | E | `docs/VALIDATION.md` §2b-ii — **binding law** — still carried `173.38 B`, `5,327`, `0.2774 s`, `1.4x` | yes, with a superseding block |
 | F | `docs/GOTCHAS.md` and write-up §6.5 carried superseded FLOP tables | yes |
 | G | `CURRENT_STATE.md`'s `SKEPTIC WP14-FOLLOWUP` block still said the port was "still unchecked against upstream" | yes |
 | H | `1.199e-03` was quoted as the defect's drift — it is **net 0's**, not the worst (`1.3046e-03`), and my own contract says min/max, never a mean | yes |
 | I | write-up §6.6 published a `~12x` residual taken from the very run the LOG calls unusable | yes — the residual column is gone and the reason is stated |
+| K | `p2_k3_candidate_parity` had never run at `1024 x 16` | yes — `candidate_parity_1024x16.json`: values `0.000e+00`, FLOPs identical, **operations identical** |
+| L | the new op-count gate's slack of 16 was exactly the delta at depth 16, because the weight `astype` was metered **once per layer** — a slack that scales with what it bounds is not a bound | yes — the cast is guarded by a Python `dtype` comparison, the delta is now `+0`, and the slack is `4` |
 | J | write-up §6.6 put `5,119` ops and the retired file's `1.21x` in one breath without the word "retired" | yes |
 
 **Two corrections to my own numbers.** Clause 2 is **nearly redundant with

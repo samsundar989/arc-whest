@@ -140,7 +140,7 @@ run on zeros.
 **The VALUES below ARE checked against upstream at non-zero `kappa_3`** as of
 2026-09-03 (`p2_k3_parity.py`; `NOT_DONE` step 6 CLOSED). The FLOP figures in
 this section predate that check and are superseded downward — one layer at f32
-is `10,828,494,338`, the flow `173,230,212,715`. This is a price, and the checks that license it
+is `10,813,796,920`, the flow `168,629,787,238`. This is a price, and the checks that license it
 kill nothing (previous section). Quote it as a cost and not as a method.
 
 Measured, one program, one layer, at `1024` inside a real `BudgetContext`
@@ -149,13 +149,16 @@ Measured, one program, one layer, at `1024` inside a real `BudgetContext`
 | | counted FLOPs | dense `1024`-matmuls | `x 16` layers | `x budget` |
 |---|---:|---:|---:|---:|
 | `f64` | `21,675,713,540` | `5.047` | `346,811,416,640` | `0.15773` |
-| **`f32`** | ~~`10,837,935,618`~~ **`10,828,494,338`** | ~~`5.047`~~ **`5.042`** | ~~`173,406,969,888`~~ **`168,676,988,572`** | ~~`0.07886`~~ **`0.076705`** |
+| **`f32`** | ~~`10,837,935,618`~~ **`10,813,796,920`** | ~~`5.047`~~ **`5.036`** | ~~`173,406,969,888`~~ **`168,629,787,238`** | ~~`0.07886`~~ **`0.076684`** |
 
 > **SUPERSEDED 2026-09-03 (WP16/WP17).** The struck figures were measured on a
 > layer that computed the `(1,1,1)` block, which WP16 showed is DEAD in a
 > regenerating flow, and before WP17's operation-count reduction. The bold
-> figures are current; `experiments/2026-09-03_wp16_parity/flow_price_wp17b.json`
-> is the artifact. The multiplier is `0.10000` either way.
+> figures are current, and each has a committed artifact:
+> `layer_price_wp17.json` for the per-layer figure and
+> `candidate_parity_1024x16.json` for the whole flow, both under
+> `experiments/2026-09-03_wp16_parity/`. Operations per MLP: **`2,646`**,
+> lab and shipped candidate identical. The multiplier is `0.10000` either way.
 
 
 The `f32 / f64` ratio is `0.5000036376`. **The excess over half is the tell, not

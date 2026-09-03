@@ -460,7 +460,7 @@ it, and the only reading with authority is the evaluator's own.
 The reading that does have authority: on the official runner, the flow as first
 written had **`1.21x`** margin against the cliff where our shipped file has
 `6.8x`. That version has since been retired for an unrelated reason (§6.7) and
-its successor's operation count is `2,708`; neither number has been re-measured
+its successor's operation count is `2,646`; neither number has been re-measured
 on the evaluator at the time of writing.
 
 > **Under a zero cost exponent, "how much arithmetic" is the wrong question and

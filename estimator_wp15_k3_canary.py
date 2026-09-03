@@ -28,10 +28,13 @@ Five n^3-class operations per layer, and no more:
     cov_pre = W.T @ cov @ W        two   (the K2 backbone)
     P       = W.T @ M              one   (contract_W; legs 2 and 3 are I)
     (P.Q) @ Q.T  and  (Q.Q) @ P.T  two   (the (2,1) slice's block perms)
-Measured after WP16 removed the dead `(1,1,1)` block: 10,828,494,338 counted f32
-FLOPs per layer at 1024, 173,230,212,715 over 16 layers = 0.078776 x budget,
-multiplier 0.10000 (`experiments/2026-09-03_wp16_parity/flow_price_nosub.json`).
-The pre-WP16 figures 10,837,935,618 / 173,381,273,195 are SUPERSEDED.
+Measured after WP16 removed the dead `(1,1,1)` block and WP17 halved the
+operation count: 10,813,796,920 counted f32 FLOPs per steady-state layer at
+1024, 168,629,787,238 over 16 layers = 0.076684 x budget, multiplier 0.10000,
+and 2,646 flopscope OPERATIONS -- which under lambda = 0 is the number that
+matters. Artifacts: `experiments/2026-09-03_wp16_parity/layer_price_wp17.json`
+and `candidate_parity_1024x16.json`. The pre-WP16 figures 10,837,935,618 /
+173,381,273,195 / 5,327 ops are SUPERSEDED.
 
 WHAT IS NOT ESTABLISHED, AND MUST BE READ BESIDE ANY NUMBER THIS PRODUCES
 ------------------------------------------------------------------------
@@ -458,13 +461,16 @@ class Estimator(BaseEstimator):
         width = mlp.width
         depth = len(mlp.weights)
         dtype = fnp.float32
-        # `copy=False` so an ALREADY-float32 weight costs nothing: the grader's
-        # Phase-2 weights are float32, and a plain `.astype` bills n^2 per layer
-        # for a cast that does nothing (measured: 65,536 FLOPs at n = 256, 0 with
-        # copy=False). The cast must still be here unconditionally -- if a round
-        # ever handed float64 weights, flopscope would bill this entire flow at
-        # the float64 rate 2.0 and the price would silently double.
-        w = [x.astype(dtype, copy=False) for x in mlp.weights]
+        # `copy=False` already made an already-float32 cast free in FLOPs (it
+        # bills `n^2` otherwise -- measured 65,536 at n = 256). It is NOT free in
+        # OPERATIONS: flopscope meters one per call, so a 16-layer MLP paid 16
+        # operations for sixteen casts that do nothing. Under `lambda = 0` that
+        # is the axis that matters, so the guard is a Python `dtype` comparison,
+        # which costs none. The cast must remain reachable -- if a round ever
+        # handed float64 weights, flopscope would bill this entire flow at the
+        # float64 rate 2.0 and the price would silently double.
+        w = [x if x.dtype == dtype else x.astype(dtype, copy=False)
+             for x in mlp.weights]
         const = self._constants(width, dtype)
         state = (fnp.zeros(width, dtype=dtype),
                  fnp.eye(width, dtype=dtype),
