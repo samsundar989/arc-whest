@@ -1,5 +1,109 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-03 (LATE) — WHERE THIS STANDS, AND THE ONE NUMBER THAT DECIDES THE
+> NEXT MOVE.**
+>
+> **Blocker A is CLOSED.** `NOT_DONE` step 6 ran, the port was wrong, the cause
+> was one line, and `SKEPTIC WP16` returned **ACCEPT** — see the block below.
+>
+> **Blocker B is half done and its verdict is pending.** The operation count is
+> `5,327 -> 2,646` per MLP, every float bit-identical, every FLOP figure now
+> artifact-backed. **The residual has not been measured on anything that counts.**
+>
+> | | value | artifact |
+> |---|---:|---|
+> | per steady-state layer, f32, `n = 1024` | `10,813,796,920` | `layer_price_wp17.json` |
+> | whole flow, 16 layers | `168,629,787,238` | `candidate_parity_1024x16.json` |
+> | `x` budget / multiplier | `0.076684` / `0.10000` | same |
+> | **flopscope operations** | **`2,646`** — lab and shipped candidate IDENTICAL | same |
+> | end-to-end drift vs upstream, f64 | `1.692e-11` worst, 8/8 | `parity_1024x16.json` |
+> | raw MSE vs minted truth | `8.5075e-07` (ratio `1.000x`) | `clause2_nosub.json` |
+>
+> **THE OPEN QUESTION, AND IT IS THE ONLY ONE THAT MATTERS THIS WEEK.**
+> The retired canary had `1.21x` official residual headroom at `5,327`
+> operations. The soak requires **`>= 4x` on the worst run**. If the residual
+> were purely per-operation, `2,646 / 5,327` would buy about `2.4x` — **not
+> enough**, and the remaining *exact* reductions are close to exhausted at ~165
+> operations a layer against a `~120` target. **A pre-registered official read is
+> queued** (`experiments/LOG.md`, "PRE-REGISTRATION: the official read"), with
+> v2.6.1 as a matched control in the same split, band `[7.5e-07, 1.15e-06]`.
+>
+> **That run measures commit `ae44369` (`2,708` operations), not HEAD.** Every
+> change since is bit-exact, so its **accuracy reading is identical** to the
+> current file's, and its **residual reading is a conservative upper bound** —
+> the current file is `62` operations cheaper. Stated here so the number is never
+> quoted as HEAD's.
+>
+> **NEXT, in order.**
+> 1. Read the official run: `n_failed_mlps`, worst per-MLP residual, raw MSE.
+> 2. If headroom `>= 4x`: Linux memory gate -> `certify_candidate` -> brokered
+>    `3 x 100`-MLP soak -> present the canary for **Samuel** to submit. Never
+>    `whest submit`, never designate.
+> 3. If not: the next reductions require **reassociation** (factoring
+>    `0.5 C11^2 X + 0.25 D22 X`, batching the 13 two-dimensional terms through a
+>    3-D stack). Those are not identities, so each needs a measured drift check
+>    against the golden reference and a note in the LOG — and the 3-D stack
+>    materialises `54 MB` at `n = 1024`, which forum 18101 says costs residual.
+>    **Deliberately left undone** so far: a change that is merely "small" needs a
+>    measurement, a change that is an identity needs only a comparison.
+> 4. `G-M-DEPTH` at `1024 x 16` is queued (16 `P01` nets + an f64 control). The
+>    instrument is built and its ladder is exact; a smoke at the wrong shape gave
+>    `k=1 0.41`, `k=2 0.66`, `k=3 0.82`, so **`k = 2` sits just under the `0.70`
+>    gate** and Arm M may be killed by its own contract.
+> 5. Arm L's instrument is **not built**. It needs `>= 128` minted networks on
+>    `P05`, a permutation-equivariant basis of `<= 50` coefficients, and
+>    leave-networks-out. Nothing about it has been started.
+>
+> **THE CHANGE GATE IS RED, AND FOR A KNOWN REASON**: `p2_wp15_depth.py` claimed
+> `P01[..176..191]` naming `gm_depth.json`, and that artifact is still in the
+> queue. Steps 7 and 9 go green the moment it lands and is `finalize`d. This is
+> the claim-then-finalize protocol working, not a defect — but it is also the
+> exact state that stayed red for nine commits in August, so it is written here
+> rather than left to be rediscovered.
+
+> **2026-09-03 — SKEPTIC WP16: ACCEPT. The `3.31x` was one line, and the Skeptic
+> proved more than the slice did.**
+>
+> It re-derived `H1` from `factor_k3.py` by hand, and then went past it:
+> **the FLOP delta reconciles in closed form** (`sub - nosub` is exactly
+> `9n^2 + 4n` per layer, which at `n = 1024` is the claimed `9,441,280` to the
+> FLOP, with an op delta of exactly `13`/layer and `56 - 49 = 7` audited arrays);
+> **the reference is bitwise genuine upstream** and observing it through the
+> caching accessor does not perturb it; and **the minted truth is not circular** —
+> checked against the layer-1 closed form `||W1[:,j]| / sqrt(2 pi)` at rms-z
+> `0.93-1.05`, which is the only check anyone has that is independent of *both*
+> programs.
+>
+> **It also found one real gate defect and ten stale numbers, all now fixed.**
+> `p2_k3_candidate_parity` gated counted FLOPs *exactly* and merely **printed**
+> the operation count — it gated the axis `lambda = 0` makes free and left the
+> axis that fails MLPs unguarded. It is a gate now, and running it at the live
+> shape immediately exposed that its slack of `16` was exactly the delta at depth
+> 16, because the weight `astype` was metered once per **layer**. Guarded by a
+> Python `dtype` comparison; delta now `+0`; slack `4`.
+>
+> **Two corrections to my own numbers.** Clause 2 is **nearly redundant** with
+> clause 1 — the torch dump scores `8.507508e-07` against the same truth, so
+> `1.000x` is arithmetically forced once clause 1 passes, and I presented it as
+> independent corroboration. And **`3.314x` is a cross-sample ratio** (20 graded
+> rows over 8 offline networks); the paired figure is `3.161x`.
+>
+> **And a process hazard that is mine.** The Skeptic measured five different op
+> counts for one command before realising I was **committing into the tree while
+> it audited**. A `workerq` job it launched picked up a half-optimised snapshot
+> and correctly FAILED the price check. *Any measurement taken on this repository
+> without pinning a commit is unattributable*, and launching a Skeptic and then
+> continuing to commit is a defect in how the slice was run.
+>
+> **What it could not settle, in its words:** whether the fix delivers
+> `8.5075e-07` **on graded data**. The transfer inference is `~8.9-9.3e-07` from
+> two estimators on 8 against 20 networks with no interval. And neither of us can
+> rule out a defect shared by upstream, `run_flow` and `build_mlp` — golden parity
+> is blind to it by construction, and clause 2's band came from the same program.
+> The layer-1 closed form bounds that risk **at layer 1 only**. The queued
+> official read is what would bound it at every layer.
+
+
 > **2026-09-03 — THE `3.31x` WAS ONE LINE. `NOT_DONE` STEP 6 IS CLOSED, AND
 > G-PARITY PASSES BOTH CLAUSES.**
 > `CONTRACT WP16` (`7169392`, committed before any data existed), results
