@@ -140,6 +140,72 @@ E3_FEATURES = (
     "sd3",             # sd_i^3, the natural scale of a third cumulant
 )
 
+#: `E21`'s basis, DECLARED AND FROZEN HERE **before its moments are computed**.
+#: That order is the whole point: declaring a basis and then measuring its inner
+#: products with the target cannot be reversed into a basis chosen after seeing
+#: the target. `CONTRACT WP18` § B named the families -- `Sigma . Sigma`,
+#: `Sigma diag(g) Sigma`, `S21 . D`, `diag(a) Sigma diag(b)` -- and `CONTRACT
+#: WP19` adds Arm M's closed-form generator, which Ruling 2 demoted from an
+#: architecture to a feature.
+#:
+#: Every term is an `n x n` matrix built from state the flow ALREADY CARRIES
+#: (`mu`, `Sigma`, `S3`, `S21`) by permutation-equivariant operations only:
+#: Hadamard products, diagonal scalings, matmuls of equivariant matrices, and
+#: outer products of equivariant vectors. **Every term is off-diagonal-masked**,
+#: because `E21` is diagonal-free by the DS convention and a term with a
+#: diagonal would be fitting a component the target cannot have.
+#:
+#: `C = zero_repeated(Sigma)`, `w_k = relu_wick_coef(mu, var, k, 1)`,
+#: `sd = sqrt(diag(Sigma))`, `alpha = mu / sd`.
+#:
+#: **COST, and it is why the matmul terms are marked.** `G-L-COST` allows
+#: `46,495,355,667` incremental f32 FLOPs over 16 layers, i.e. ~`1.35` matmuls a
+#: layer. A Hadamard-or-diagonal term costs `~0.01` matmuls; **each `@` term
+#: costs a full `2 n^3`**. So AT MOST ONE `@` term is deployable, and the ones
+#: below are included to learn whether they matter, not because they all fit.
+#: `p2_wp18_fit.py` reports the fit with and without them.
+E21_BASIS = (
+    # -- pure Hadamard in the carried covariance ------------------------------
+    "C",                 # the off-diagonal covariance itself
+    "C2",                # C . C
+    "C3",                # C . C . C
+    # -- diagonal rescalings by the Wick coefficients -------------------------
+    "w1_C",              # diag(w1) C
+    "C_w1",              # C diag(w1)
+    "w1_C_w1",
+    "w2_C_w1",
+    "w1_C_w2",
+    "w1sq_C_w2",         # ARM M's generator: fac1 = w1 . C, fac3 = (w2 (x) w1 . C)^T
+    "w1_C2_w2",          # the same shape on the Hadamard square
+    # -- rescalings by the other carried scalars ------------------------------
+    "mu_C_mu",
+    "alpha_C_alpha",
+    "sd_C_sd",
+    "S3_C",              # diag(S3) C
+    "C_S3",
+    # -- the carried (2,1) slice itself ---------------------------------------
+    "S21",
+    "w1_S21",
+    "S21_w1",
+    "C_had_S21",         # C . S21
+    # -- outer products of carried vectors, masked ----------------------------
+    "outer_w1_w1",
+    "outer_mu_mu",
+    "outer_S3_ones",
+    "outer_ones_S3",
+    # -- MATMUL-CLASS: 2 n^3 each. At most ONE of these is deployable. --------
+    "MM_C_C",            # C @ C
+    "MM_C_w1_C",         # C diag(w1) C
+    "MM_C_w2_C",
+    "MM_C2_C",           # (C . C) @ C
+    "MM_C_C2",
+    "MM_had_C_CC",       # C . (C @ C)
+)
+
+#: Which of the above cost a full `2 n^3` per layer. `p2_wp18_fit.py` refuses to
+#: report a deployable fit using more than one of them.
+E21_MATMUL_TERMS = tuple(t for t in E21_BASIS if t.startswith("MM_"))
+
 #: How many singular values of `E21` to keep as a DIAGNOSTIC. Not a fit target:
 #: `CONTRACT WP15` fixed Arm M's affordability horizon at `r <= 192`, so 256 is
 #: enough to see whether the deployable rank captures the energy.
@@ -242,6 +308,154 @@ def e3_features(mu, Sig, S3, S21):
             f"feature set drifted from the frozen declaration: "
             f"missing {sorted(missing)}, extra {sorted(extra)}")
     return torch.stack([cols[name] for name in E3_FEATURES], dim=1)
+
+
+def e21_terms(mu, Sig, S3, S21):
+    """The frozen `E21_BASIS`, as a list of `n x n` float64 tensors.
+
+    Off-diagonal-masked throughout: `E21` is diagonal-free by the DS convention
+    (`_factored_get_dslice(., (2,1)) == zero_repeated(T_iij)`), so a term
+    carrying a diagonal would be fitting a component the target cannot have.
+    """
+    import torch
+    from mlp_kprop.diagslice import zero_repeated
+    from mlp_kprop.wick import relu_wick_coef
+
+    var = Sig.diagonal()
+    w1 = relu_wick_coef(mean=mu, var=var, k=1, p=1).double()
+    w2 = relu_wick_coef(mean=mu, var=var, k=2, p=1).double()
+    mu = mu.double()
+    S3, S21 = S3.double(), S21.double()
+    C = zero_repeated(Sig).double()
+    n = C.shape[0]
+    sd = var.double().clamp_min(1e-300).sqrt()
+    alpha = mu / sd
+    ones = torch.ones_like(mu)
+    C2 = C * C
+    CC = C @ C
+
+    def D(v, M):        # diag(v) @ M
+        return v[:, None] * M
+
+    def Dr(M, v):       # M @ diag(v)
+        return M * v[None, :]
+
+    t = {
+        "C": C,
+        "C2": C2,
+        "C3": C2 * C,
+        "w1_C": D(w1, C),
+        "C_w1": Dr(C, w1),
+        "w1_C_w1": Dr(D(w1, C), w1),
+        "w2_C_w1": Dr(D(w2, C), w1),
+        "w1_C_w2": Dr(D(w1, C), w2),
+        "w1sq_C_w2": Dr(D(w1 * w1, C), w2),
+        "w1_C2_w2": Dr(D(w1, C2), w2),
+        "mu_C_mu": Dr(D(mu, C), mu),
+        "alpha_C_alpha": Dr(D(alpha, C), alpha),
+        "sd_C_sd": Dr(D(sd, C), sd),
+        "S3_C": D(S3, C),
+        "C_S3": Dr(C, S3),
+        "S21": S21,
+        "w1_S21": D(w1, S21),
+        "S21_w1": Dr(S21, w1),
+        "C_had_S21": C * S21,
+        "outer_w1_w1": torch.outer(w1, w1),
+        "outer_mu_mu": torch.outer(mu, mu),
+        "outer_S3_ones": torch.outer(S3, ones),
+        "outer_ones_S3": torch.outer(ones, S3),
+        "MM_C_C": CC,
+        "MM_C_w1_C": (C * w1[None, :]) @ C,   # C diag(w1) C
+        "MM_C_w2_C": (C * w2[None, :]) @ C,
+        "MM_C2_C": C2 @ C,
+        "MM_C_C2": C @ C2,
+        "MM_had_C_CC": C * CC,
+    }
+    missing = set(E21_BASIS) - set(t)
+    extra = set(t) - set(E21_BASIS)
+    if missing or extra:
+        raise AssertionError(
+            f"E21 basis drifted from the frozen declaration: missing "
+            f"{sorted(missing)}, extra {sorted(extra)}")
+    eye = torch.eye(n, device=C.device, dtype=C.dtype)
+    off = 1.0 - eye
+    return [t[name] * off for name in E21_BASIS]
+
+
+# ==========================================================================
+# --e21-moments
+# ==========================================================================
+
+def cmd_e21_moments(a) -> int:
+    """Gram matrix, moment vector and `||E21||^2` per `(net, pre-layer)`.
+
+    For a basis LINEAR in its coefficients, ridge needs nothing else: the
+    residual of coefficients `c` is `||E21||^2 - 2 c.b + c^T G c`, exactly. So a
+    `4.6 GB` dense target reduces to `~8 KB` a block, the fit is exact rather
+    than approximate, and held-out `R^2` is computable in closed form.
+    """
+    import torch
+
+    import p2_wp15_depth as wp15
+
+    dtype = torch.float64 if a.dtype == "f64" else torch.float32
+    pre = sorted({l + 1 for l in GATE_LAYERS if l + 1 <= a.depth - 1})
+    nt = len(E21_BASIS)
+    G = np.zeros((len(a.seeds), len(pre), nt, nt), dtype=np.float64)
+    B = np.zeros((len(a.seeds), len(pre), nt), dtype=np.float64)
+    Y = np.zeros((len(a.seeds), len(pre)), dtype=np.float64)
+    prog = os.environ.get("WORKERQ_PROGRESS")
+
+    for i, seed in enumerate(a.seeds):
+        t0 = time.perf_counter()
+        mlp, K_in = wp15._build(seed, a.width, a.depth, a.device, dtype)
+        unc = wp15.uncapped_slices(mlp, K_in, a.depth, pre)
+        snap = wp15.regen_snapshots(mlp, K_in, a.depth)
+        for j, p in enumerate(pre):
+            r21 = unc[p][1].double()
+            s3, s21, mu, Sig = regen_state(mlp, snap, p)
+            e21 = r21 - s21.double()
+            T = e21_terms(mu, Sig, s3, s21)
+            M = torch.stack([x.reshape(-1) for x in T])       # (nt, n*n)
+            G[i, j] = (M @ M.T).cpu().numpy()
+            B[i, j] = (M @ e21.reshape(-1)).cpu().numpy()
+            Y[i, j] = float((e21 * e21).sum())
+            del T, M
+        del mlp, unc, snap
+        if a.device.startswith("cuda"):
+            torch.cuda.empty_cache()
+        print(f"    net {i + 1:>4}/{len(a.seeds)}  seed {seed}  "
+              f"[{time.perf_counter() - t0:.1f}s]", flush=True)
+        if prog:
+            try:
+                with open(prog, "w") as fh:
+                    fh.write(str((i + 1) / len(a.seeds)))
+            except OSError:
+                pass
+
+    # A term that is identically zero, or duplicated, would make the Gram
+    # singular and the fit meaningless -- report it rather than let ridge hide it.
+    d = np.sqrt(np.maximum(np.einsum("ijtt->ijt", G), 0.0))
+    dead = [E21_BASIS[k] for k in range(nt) if float(d[..., k].max()) == 0.0]
+    print()
+    print(f"  {len(a.seeds)} nets x {len(pre)} pre-layers, {nt} basis terms")
+    print(f"  identically-zero terms: {dead if dead else 'none'}")
+    print(f"  matmul-class terms ({len(E21_MATMUL_TERMS)}): "
+          f"{', '.join(E21_MATMUL_TERMS)}")
+    if a.out:
+        os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
+        np.savez_compressed(
+            a.out, seeds=np.asarray(a.seeds, dtype=np.int64),
+            pre_layers=np.asarray(pre, dtype=np.int64),
+            term_names=np.asarray(E21_BASIS),
+            matmul_terms=np.asarray(E21_MATMUL_TERMS),
+            GRAM=G, MOM=B, E21_SQ=Y,
+            width=a.width, depth=a.depth, dtype=a.dtype,
+            contract=np.asarray(["experiments/LOG.md CONTRACT WP18 § B + "
+                                 "WP19; basis frozen before moments"]))
+        print(f"  wrote {os.path.relpath(a.out, _ROOT)} "
+              f"({os.path.getsize(a.out) / 2**20:.2f} MiB)")
+    return 0
 
 
 # ==========================================================================
@@ -520,6 +734,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--labels", action="store_true")
+    ap.add_argument("--e21-moments", dest="e21_moments", action="store_true")
     ap.add_argument("--width", type=int, default=WIDTH)
     ap.add_argument("--depth", type=int, default=DEPTH)
     ap.add_argument("--dtype", choices=("f64", "f32"), default="f32")
@@ -562,7 +777,15 @@ def main() -> int:
             print(f"  claimed {a.seeds[0]:,}..{a.seeds[-1]:,} from {a.block}")
         print("\n-- uncapped minus regenerating, at every gate pre-layer -----")
         return cmd_labels(a)
-    ap.error("one of --selftest / --labels")
+    if a.e21_moments:
+        if not a.seed:
+            ap.error("--e21-moments needs --seed (the labels' own seeds)")
+        a.seeds = [a.seed + i for i in range(a.nets)]
+        print(f"  seeds {a.seeds[0]:,}..{a.seeds[-1]:,} "
+              f"(the SAME networks the labels used -- no new draw)")
+        print("\n-- Gram, moments and ||E21||^2 over the FROZEN basis --------")
+        return cmd_e21_moments(a)
+    ap.error("one of --selftest / --labels / --e21-moments")
 
 
 if __name__ == "__main__":
