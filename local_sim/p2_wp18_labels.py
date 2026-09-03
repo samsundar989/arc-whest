@@ -18,13 +18,29 @@ pre-layer `p`, is exactly
 
 and both are computed here by the SAME window machinery `G-M-DEPTH` used, whose
 `--selftest` S1/S2 assert that `k = 0` is the regenerating flow and `k >= p` is
-the uncapped one. This module re-asserts both endpoints per run rather than
-trusting them (`--endpoint-check`), because `CONTRACT WP18`'s prediction B1 is
-written on them and a labeller that is silently computing something else would
-produce a beautiful `R^2` for the wrong target.
+the uncapped one. This module re-asserts them per run rather than trusting them
+(`--endpoint-check`), because `CONTRACT WP18`'s prediction B1 is written on them
+and a labeller that is silently computing something else would produce a
+beautiful `R^2` for the wrong target.
 
-WHY `E3` IS THE CHEAP LEG, AND ONE MECHANISTIC FACT THAT SHAPES ITS FEATURES
----------------------------------------------------------------------------
+**The first version of that assertion could not fail**, and `SKEPTIC WP18-B`
+proved it: two of its three clauses were `1 - x/x` and a same-function
+determinism check, and all three read the `(2,1)` slice, so none of them touched
+the `(3,)` path `E3` is made of. It is now a CROSS-PATH comparison on BOTH slices
+against `p2_range_lab.run_flow` driven by a per-layer regeneration hook -- a
+different route to the same state. See the comment at the check itself.
+
+WHY `E3` LOOKED LIKE THE CHEAP LEG -- AND THE FACT THAT SHOULD HAVE WARNED US
+-----------------------------------------------------------------------------
+**Read this whole section as SUPERSEDED reasoning kept for the record.** The
+argument below is why `E3` was attempted first; `G-L-FIT-E3` then failed at
+`0.1002` with an in-sample ceiling of `0.2575`, and `SKEPTIC WP18-B` showed the
+framing itself was wrong: `E3` is not a separate cheap leg at all, it is the
+DIAGONAL of the same discarded 3-tensor whose zeroed off-diagonal is `E21`, and
+one fitted scalar on `diag(rank-r E21)` recovers `0.61`-`0.66` of it -- 2.5x
+better than the entire 24-column pointwise basis below. The features stay frozen
+because the gate was scored on them; the framing does not.
+
 `E3` is an `n`-vector, so a *pointwise* map -- neuron `i`'s correction from
 neuron `i`'s own carried scalars -- is permutation-equivariant **by
 construction**. Equivariance is free rather than imposed, which is the whole
@@ -274,19 +290,61 @@ def cmd_labels(a) -> int:
             sv = torch.linalg.svdvals(e21)[:SV.shape[2]]
             SV[i, j, :sv.numel()] = sv.cpu().numpy()
 
-            # -- B1's endpoint check, on the FIRST net only (it is a form check
-            #    on the labeller, not a per-net property, and it costs a full
-            #    extra window flow per layer).
+            # -- B1's endpoint check, on the FIRST net only (a form check on the
+            #    labeller, not a per-net property).
+            #
+            #    THE FIRST VERSION OF THIS CHECK COULD NOT FAIL, and SKEPTIC
+            #    WP18-B proved it. It computed
+            #
+            #        den = max(||r21 - w0||^2, 1e-300)
+            #        explained_k0 = 1 - ||r21 - w0||^2 / den
+            #
+            #    which is `1 - x/x` and is therefore 0.0 for EVERY x. Worse, it
+            #    was INVERTED: had the labeller been perfect (r21 == w0), x would
+            #    be 0, the guarded denominator would be 1e-300, and the check
+            #    would have printed 1.0 and FAILED. Its companion,
+            #    `regen_matches_window0_rel`, compared `regen_state` against
+            #    `slices_window(..., k=0)` -- the SAME function on the same
+            #    snapshot -- so it was a determinism check wearing a correctness
+            #    check's name. And all three clauses read index [1], the (2,1)
+            #    slice, so NOTHING TESTED THE (3,) PATH THAT E3 IS MADE OF, which
+            #    is the label this module exists to produce.
+            #
+            #    What replaces it is a genuine CROSS-PATH assertion on BOTH
+            #    slices. `p2_range_lab.run_flow` with `_regen_hook_nl` computes
+            #    the regenerating flow by a completely different route from the
+            #    snapshot-restart used above: one forward pass with a per-layer
+            #    hook, rather than clone-and-continue. They must agree. That
+            #    comparison CAN fail, and it is the one that would have caught a
+            #    mis-specified target.
             if i == 0 and a.endpoint_check:
-                w0 = wp15.slices_window(mlp, snap, p, 0)[1].double()
+                import p2_range_lab as rl
+
+                store = {}
+                with torch.no_grad():
+                    rl.run_flow(mlp, K_in,
+                                hook_lin=rl._capture_hook(store, set(pre)),
+                                hook_nl=rl._regen_hook_nl(),
+                                up_to_layer="act%d" % (a.depth - 1),
+                                output_d_max=1)
+                g3, g21 = store[p][0].double(), store[p][1].double()
                 wfull = wp15.slices_window(mlp, snap, p, a.depth)[1].double()
-                den = max(float((r21 - w0).norm() ** 2), 1e-300)
                 endpoints.append({
                     "pre_layer": p,
-                    "explained_k0": 1.0 - float((r21 - w0).norm() ** 2) / den,
-                    "explained_kdepth": 1.0 - float((r21 - wfull).norm() ** 2) / den,
-                    "regen_matches_window0_rel": float((s21.double() - w0).norm()
-                                                       / max(float(w0.norm()), 1e-300)),
+                    # (3,) -- the E3 path, untested until now
+                    "regen3_crosspath_rel": float((s3.double() - g3).norm()
+                                                  / max(float(g3.norm()), 1e-300)),
+                    # (2,1) -- the E21 path
+                    "regen21_crosspath_rel": float((s21.double() - g21).norm()
+                                                   / max(float(g21.norm()), 1e-300)),
+                    # the one clause of the original that was real: window-depth
+                    # must reproduce the UNCAPPED flow, captured by a third path
+                    "uncapped21_crosspath_rel": float((r21 - wfull).norm()
+                                                      / max(float(r21.norm()), 1e-300)),
+                    # and the labels must not be trivially zero, or every
+                    # relative comparison above is vacuous too
+                    "norm_E3": float((r3 - s3.double()).norm()),
+                    "norm_E21": float((r21 - s21.double()).norm()),
                 })
 
         del mlp, unc, snap
@@ -304,16 +362,25 @@ def cmd_labels(a) -> int:
     # ---- the endpoint verdict, which is B1 -------------------------------
     ep_ok = True
     if endpoints:
-        worst_k0 = max(abs(r["explained_k0"]) for r in endpoints)
-        worst_kd = max(abs(1.0 - r["explained_kdepth"]) for r in endpoints)
-        worst_id = max(r["regen_matches_window0_rel"] for r in endpoints)
-        ep_ok = (worst_k0 < 1e-12) and (worst_kd < 1e-12) and (worst_id < 1e-12)
+        w3 = max(r["regen3_crosspath_rel"] for r in endpoints)
+        w21 = max(r["regen21_crosspath_rel"] for r in endpoints)
+        wu = max(r["uncapped21_crosspath_rel"] for r in endpoints)
+        min3 = min(r["norm_E3"] for r in endpoints)
+        min21 = min(r["norm_E21"] for r in endpoints)
+        ep_ok = (w3 < 1e-10 and w21 < 1e-10 and wu < 1e-10
+                 and min3 > 0.0 and min21 > 0.0)
         print()
-        print("  B1 endpoint check on the first net")
-        print(f"    |explained(k=0)|        worst {worst_k0:.3e}   (must be 0)")
-        print(f"    |1 - explained(k=depth)| worst {worst_kd:.3e}   (must be 0)")
-        print(f"    regen state vs window-0  worst rel {worst_id:.3e}")
-        print(f"    -> {'PASS' if ep_ok else 'FAIL -- the labeller is not computing E21'}")
+        print("  B1 CROSS-PATH endpoint check on the first net")
+        print("    regen (3,)  snapshot-restart vs run_flow+regen_hook  "
+              "worst rel %.3e" % w3)
+        print("    regen (2,1) snapshot-restart vs run_flow+regen_hook  "
+              "worst rel %.3e" % w21)
+        print("    uncapped (2,1) capture-hook vs window-depth          "
+              "worst rel %.3e" % wu)
+        print("    smallest ||E3|| / ||E21|| (labels must be non-trivial)  "
+              "%.3e / %.3e" % (min3, min21))
+        print("    -> %s" % ("PASS" if ep_ok else
+                             "FAIL -- the labeller is not computing what it claims"))
 
     rel3 = float(np.mean(np.sqrt(E3_SQ / np.maximum(REF3_SQ, 1e-300))))
     rel21 = float(np.mean(np.sqrt(E21_SQ / np.maximum(REF21_SQ, 1e-300))))

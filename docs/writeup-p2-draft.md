@@ -809,16 +809,55 @@ Three things worth carrying out of this:
   with the missing information being weight-history that the carried state slowly
   accumulates.
 
-**What this costs the plan, stated plainly.** The vector was the cheap leg and the
-reason to start there. What remains is the matrix leg, which is the expensive one,
-and our own pre-registered prediction is that it fails at depth for a
-independently-argued reason. A fitted map cannot beat its own oracle; the two
-oracles are `2.53×` and `1.55×`; and the vector's fittable share is capped at
-`0.26` of the smaller one. **We therefore expect the end-to-end requirement to go
-unmet, and we are saying so before the measurement rather than after it.** The
-result we expect to publish is a mechanised negative: *the discarded third-cumulant
-mass is not a function of the state this class of flow carries, and here is the
-algebra that says why.*
+**What this costs the plan — and a correction we published for four hours.**
+
+The first version of this section closed by predicting the end-to-end
+requirement would go unmet, on the argument that *"a fitted map cannot beat its
+own oracle; the two oracles are `2.53×` and `1.55×`."* **That arithmetic was
+wrong, and our own measurement table said so before we wrote it.** Those two
+figures are the *single-slice* oracles — correcting the matrix alone, or the
+vector alone. The cell that matters is the one where **both** are corrected:
+
+| oracle correction, 8 networks, paired | end-to-end improvement | per-network range |
+|---|---:|---|
+| vector only, exact | `1.55×` | 1.42–1.65 |
+| matrix only, rank 256 | `2.38×` | 2.14–2.67 |
+| **both, rank 128** | **`11.1×`** | **9.86–12.63** |
+| both, rank 256 | `32.2×` | 28.0–37.1 |
+| both, rank 512 | `334×` | 302–373 |
+
+**Correcting either piece alone saturates near `2.4×` however good the
+correction; correcting both at rank 128 gives `11×`.** We had written exactly
+that sentence in our own log a day earlier, and then contradicted it by reading
+a single-slice row as if it were the joint one. An independent reviewer caught
+it. It is left in the record rather than quietly fixed, because the failure mode
+is the interesting part: **a component ablation whose parts do not sum to the
+headline is a signal that you have mis-read your own table**, and the arithmetic
+was load-bearing for a decision about whether to keep going.
+
+So the honest position is narrower than either version. What is measured:
+
+- the **joint** oracle clears a `10×` requirement at rank 128, on 8 of 8
+  networks, with the affordable rank;
+- a **pointwise map** from the flow's carried per-neuron scalars to the vector
+  reaches an in-sample ceiling of `0.26`;
+- and — the reviewer's finding, not ours — **the vector is the diagonal of the
+  same discarded object whose zeroed off-diagonal is the matrix**. Reading the
+  diagonal off a rank-192 reconstruction of the matrix, with *one* fitted scalar,
+  recovers `0.61`–`0.66` of the vector: **2.5× better than our entire
+  24-feature basis, at no extra cost, using no new features.**
+
+What is **not** measured, and what we will not predict again without measuring:
+what an *imperfect* matrix correction does to that `11.1×` joint cell. Every
+number above is an oracle. The one experiment that settles it is cheap and
+specified: correct the matrix with its rank-`r` truncation and the vector with
+the **diagonal of that same reconstruction**, and read the end-to-end result.
+
+**The lesson we would hand over is the one we needed twice.** In §6.7 a
+degenerate-limit check passed a defective port because the defect vanished in the
+limit. Here a component table was read one row off. Both times the correct
+information was already in a file we owned. **Verification is not only about
+building the right check — it is about reading the check you already built.**
 
 
 ---

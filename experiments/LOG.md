@@ -30126,6 +30126,15 @@ own oracle, and the oracles are `2.534x` and `1.551x` — **the honest reading i
 that `G-L-E2E`'s `10x` is very unlikely to be reached, and the ~Sep 24 kill line
 is now the expected outcome rather than the contingency.**
 
+> **RETRACTED THE SAME DAY — see `SKEPTIC WP18-B` below.** The paragraph above
+> cites SINGLE-SLICE oracle cells (`e3` `1.551x`, `svd:*` `2.1`-`2.4x`) as if
+> they bounded the JOINT correction. They do not: `e3svd:128` is **`11.098x`**,
+> `9.86`-`12.63` on 8 of 8 networks, **above `G-L-E2E`'s gate at the affordable
+> rank** — and this LOG said so on 2026-09-02. Everything in this entry about
+> `10x` being unlikely, and about the kill line being the expected outcome, is
+> **withdrawn**. The `E3` ceiling itself is unaffected and was independently
+> verified five ways.
+
 That is worth stating plainly now rather than discovering on Sep 24: the write-up
 gets a clean, mechanised negative — *the discarded third-cumulant mass is not a
 function of the state the flow carries, and here is the algebra that says why* —
@@ -30149,3 +30158,359 @@ and the nomination is the canaried uncorrected flow plus `v2.7`.
 5. **A ceiling is worth more than a gate.** `G-L-FIT-E3` failing at `0.1002` is
    compatible with "fit it better"; a `0.2575` in-sample ceiling is not, and it
    cost one extra command on data that already existed.
+
+---
+
+# 2026-09-03 — **SKEPTIC WP18-B: PROVISIONAL. The ceiling is real; the conclusion I built on it was not, and my own LOG contradicted me a day earlier.**
+
+Launched on pinned commit `763a1af` in a context that had never seen this
+session's reasoning, with the contract, the artifacts and the protocol. It
+verified the ceiling five independent ways and then took apart the thing the
+ceiling was being used to argue.
+
+## 1. THE `10x` ARGUMENT CITED THE WRONG CELLS, AND THE RIGHT ONES CLEAR THE GATE
+
+`CONTRACT WP18` B5 says *"the honest ceiling for `E3 + E21` at the oracle is
+`~3x` (WP14's `svd:512` was `2.515x` with exact `E21`)"*. Two errors in one
+parenthesis: **there is no `svd:512` cell**, and the whole `svd:*` family is
+`(2,1)`-**only**, with no `E3` correction at all.
+
+I recomputed every cell from `experiments/2026-09-02_wp14_range/c2_e2e_oracle_rank.json`,
+paired against the `none` baseline on the same 8 networks:
+
+| cell | mean drift | x better | per-net min | max |
+|---|---:|---:|---:|---:|
+| `none` | `8.7545e-07` | `1.000` | | |
+| `e3` — the `(3,)` slice alone, exact | `5.6458e-07` | `1.551` | 1.42 | 1.65 |
+| `svd:128` — `(2,1)` alone | `4.0957e-07` | `2.137` | 1.92 | 2.36 |
+| `svd:256` — `(2,1)` alone | `3.6838e-07` | `2.376` | 2.14 | 2.67 |
+| `e3svd:64` — **both** | `1.5804e-07` | `5.539` | 4.74 | 6.17 |
+| **`e3svd:128` — both, at the affordable rank** | **`7.8885e-08`** | **`11.098`** | **9.86** | **12.63** |
+| `e3svd:256` — both | `2.7177e-08` | `32.212` | 28.0 | 37.1 |
+| `e3svd:512` — both | `2.6228e-09` | `333.777` | 302 | 373 |
+| `exact` (`G-POS`) | `8.5335e-14` | `1.03e+07` | | |
+
+**The joint oracle CLEARS `G-L-E2E`'s `10x` at rank 128, on 8 of 8 networks, at
+`CONTRACT WP15`'s own affordability horizon.**
+
+**And this repository already knew.** `experiments/LOG.md` (2026-09-02) says, in
+these words: *"Correcting only one slice saturates at `2.4x` no matter how good
+the correction; correcting both at rank 128 gives `11x` and at rank 512 gives
+`334x`. This is the sharpest statement of the lane available."* I wrote a
+contradicting arithmetic a day later, from a misread of the same artifact, and
+then propagated it into `CURRENT_STATE.md` and **published it in
+`docs/writeup-p2-draft.md` § 7.2**.
+
+**WITHDRAWN, in all three places**: *"a fitted map cannot beat its own oracle, and
+the oracles are `2.534x` and `1.551x`"*, and everything derived from it —
+including *"`G-L-E2E`'s `10x` is very unlikely"* and *"the ~Sep 24 kill line is
+now the expected outcome rather than the contingency."* **That was mood presented
+as arithmetic.** The corrected position is in § 5 below.
+
+## 2. `E3` IS NOT A SEPARATE LEG. IT IS THE DIAGONAL OF `E21`'s OWN TENSOR — AND ONE SCALAR BEATS MY WHOLE BASIS
+
+Verified by the Skeptic against upstream's `factor_k3` at `n = 8`, f64, not from
+the algebra as written:
+
+- the fresh block's `(3,)` slice is **exactly `0.0`** — my claim confirmed;
+- the transported `(3,)` slice matches the closed form
+  `3 * sum_j W_aj w2_j A_aj^2` with `A = W diag(w1) C` to **rel `1.67e-16`** — the
+  "triple Hadamard of three differently `W`-transformed matrices" is exactly right;
+- **`_factored_get_dslice(., (3,)) == diag(T)`** to `0.0`, and
+  **`_factored_get_dslice(., (2,1)) == zero_repeated(T_iij)`** to `1.4e-17`, with
+  `T_iij|_{j=i} == T_iii` to `0.0`.
+
+**So the two "legs" are the diagonal and the zeroed off-diagonal of ONE object**,
+and the diagonal is recoverable from the off-diagonal's low-rank reconstruction.
+Taking the exact `E21`, SVD-truncating at rank `r`, reading the diagonal of that
+reconstruction, and fitting **one scalar**:
+
+| shape | r=64 | r=128 | r=192 | r=256 | full rank |
+|---|---:|---:|---:|---:|---:|
+| 256x12, 3 nets | **`0.614`** | `0.603` | — | `0.029` | `0.029` |
+| 512x16, 3 nets | `0.359` | `0.542` | **`0.659`** | `0.626` | `0.021` |
+
+**One fitted scalar recovers `0.61`-`0.66` of `E3` — `2.5x` better than my entire
+24-column pointwise basis, with no new features and no new cost.** Full rank
+collapses to `~0` precisely because the stored `(2,1)` slice has its diagonal
+zeroed by the DS convention, which is the mechanism.
+
+`r = 192` is `CONTRACT WP15`'s affordability horizon. This route was never tried
+because `CONTRACT WP18` § B framed `E3` as a separate cheap leg with its own
+feature basis — a framing that is now refuted at the level of the algebra.
+
+## 3. MY B1 ENDPOINT CHECK COULD NOT FAIL, AND IT WAS INVERTED
+
+`p2_wp18_labels.py` computed
+
+    den = max(||r21 - w0||^2, 1e-300)
+    explained_k0 = 1.0 - ||r21 - w0||^2 / den
+
+which is `1 - x/x` and is **`0.0` for every `x`**. Worse: had the labeller been
+*perfect* (`r21 == w0`), `x` would be `0`, the guarded denominator `1e-300`, and
+the check would have printed `1.0` and **FAILED**. Its companion,
+`regen_matches_window0_rel`, compared `regen_state` against
+`slices_window(..., k=0)` — the **same function on the same snapshot** — so it was
+a determinism check wearing a correctness check's name. And **all three clauses
+read index `[1]`, the `(2,1)` slice, so nothing tested the `(3,)` path that `E3`
+is made of** — the label the module exists to produce.
+
+`docs/writeup-p2-draft.md` § 7.2 said *"the labeller asserts both endpoints (`0`
+and `1`) to the last bit on every run"*. One of those two was a tautology.
+
+**FIXED, and the fix is itself tested.** The check is now a CROSS-PATH comparison
+on **both** slices against `p2_range_lab.run_flow` driven by `_regen_hook_nl` — a
+single forward pass with a per-layer hook, a different route from
+clone-and-continue. `local_sim/test_wp18_labels.py` is a **mutation battery** that
+proves it can fail:
+
+| mutation | rel `(3,)` | rel `(2,1)` | |
+|---|---:|---:|---|
+| baseline, unmutated | `0.000e+00` | `0.000e+00` | |
+| M1 the flow never regenerates | `3.292e-01` | `5.821e-01` | **CAUGHT** |
+| M2 restarts one layer early | `1.283e+00` | `1.280e+00` | **CAUGHT** |
+| M3 `(3,)` taken from `diag((2,1))` | `1.000e+00` | `0.000e+00` | **CAUGHT** |
+| M4 `1e-6` **relative** perturbation | `1.000e-06` | `1.000e-06` | **CAUGHT** |
+
+**4 of 4 at tolerance `1e-10`**, including a `1e-6` perturbation — which matters
+because WP16's whole lesson was a `0.12%` output difference hiding a `3.3x` score
+defect. A fifth mutation was written and **dropped**: "make the single-layer
+restart regenerate" is a no-op, because `_run_layers` with `read_pre=p` returns
+after the linear step and never reaches the regeneration branch. A mutation that
+does not mutate tests the mutant, not the check, and the reason is recorded in the
+test file so it is not re-added.
+
+**The labels themselves are FINE.** The new check passes at `0.000e+00` on all
+three clauses, and the Skeptic independently cross-validated both legs at
+`256 x 12` on 3 networks by different code paths, also at `0.000e+00`. **The
+result stands; the assurance behind it did not.**
+
+## 4. WHAT THE SKEPTIC CONFIRMED — and the ceiling is stronger than I claimed
+
+- **The `0.2575` ceiling reproduces by five independent routes**: per-block
+  unscaled QR projection over all 1,408 blocks gives `0.257472` against my
+  `0.25747225673791624`; plus `lstsq(rcond=None)`, `lstsq(rcond=1e-15)`, explicit
+  SVD projection, and normal equations — all to 6 s.f. **Rank 24/24 on every
+  block sampled, no silent `rcond` truncation**, condition numbers `1.3e3`-`5e4`.
+  Adjusted for 24 columns on 1,024 rows it is **`0.2397`**, i.e. if anything I
+  *over*stated it.
+- **The uncentered `R^2` does not flatter the negative**: `|mean(E3)|/std(E3)` is
+  `0.023`-`0.028` per block at every pre-layer, so centered and uncentered
+  coincide, exactly as I read it.
+- **My per-block weighting mildly FLATTERED the fit**: removing it gives `0.0944`
+  instead of `0.1002`.
+- **The basis is genuinely the constraint, not linearity.** It added all 300
+  pairwise products (worse at pre-layers 5 and 10, marginally better at 15) and
+  ten new row contractions of the carried state including the natural third-order
+  pairings `sum_j S21_ij C_ij`, `sum_j C_ij^3 w1_j`, `sum_j C_ij^2 w1_j w2_j` —
+  honest CV moves `0.292 -> 0.306` at `512 x 16`. **"One or two extra pointwise
+  columns" does not rescue it**, so the pointwise claim holds.
+- **No post-hoc gate movement.** `git diff` shows `cmd_diagnose` is purely
+  additive; `G_L_FIT_E3`, `LAMBDAS`, `N_FOLDS` and `cmd_fit` byte-identical.
+  `p2_wp18_labels.py` has exactly one commit, `85f3055` at 11:28; the npz was
+  written at 12:00; the contract is `49e2e42` at 11:07. **The feature set was
+  frozen before any label existed.**
+- **Seed and tier hygiene clean.** `P05[..000..127]` DESIGN, claimed at `49e2e42`,
+  finalized at `aba7b4d` to `effdc7a3…`, npz re-hashed and **matching**;
+  `test_seed_ledger` `66/66`; `P06` has no ledger record; vault still 1 touch; no
+  CONFIRM read anywhere in § B.
+
+## 5. THE CORRECTED POSITION, stated narrowly
+
+**Supported**: *a pointwise map from the flow's carried per-neuron scalars to
+`E3` cannot work, and a `0.2575` in-sample ceiling proves it rather than the fit
+suggesting it.* That is the strongest form of the result and it stands.
+
+**Overstated and withdrawn**: *"Arm L's cheap leg is dead."* What died is **one
+route** to it. A cheaper route exists, was never tried, and beats the dead one by
+`2.5x`: read `E3` off the diagonal of the rank-`r` `E21` reconstruction.
+
+**Withdrawn entirely**: the forward-looking claim that `G-L-E2E` will fail and the
+kill line is the expected outcome. The measured joint oracle at the affordable
+rank is `11.098x`, *above* the gate. A corrected derivation may still land on
+"unlikely" — a `10%`-recovered `E3` plausibly drags the joint back toward the
+`2.4x` single-slice saturation — **but that is a measurement nobody has taken, and
+it will not be asserted again before it is.**
+
+## 6. The follow-up, which is now the next thing Arm L does
+
+The Skeptic's cheapest discriminating experiment, adopted:
+
+> **`e3diag_svd:r`** — one new cell in the existing `p2_range_lab` in-flight
+> oracle harness. Correct `(2,1)` with the rank-`r` SVD of `E21`, and correct
+> `(3,)` with **the diagonal of that same rank-`r` reconstruction** times one
+> fitted scalar. Read end-to-end drift at `r in {128, 192, 256}` on 8 networks at
+> `1024 x 16`.
+
+It settles three things at once: whether the `0.61`-`0.66` diagonal recovery
+survives at the live shape; whether `10x` is reachable **with no `E3` map at
+all**; and what an imperfect `E3` costs the `e3svd:128 = 11.098x` cell. Seeds:
+`P05[40902005128..159]`, the unused tail of an already-claimed DESIGN block where
+tuning is permitted — it avoids re-serving `P01[..168..175]`, which `C2` already
+spent. **A contract for it is pre-registered before it runs.**
+
+## Knowledge delta
+
+1. **A component ablation whose parts do not sum to the headline means you have
+   mis-read your own table.** `1.551` and `2.376` are single-slice cells;
+   `e3svd:128` is `11.098`. The joint is not the max of the parts and it is not
+   their product, and I treated a single-slice row as the joint one.
+2. **The right answer was already in this LOG, in plain words, one day earlier.**
+   No new measurement was needed to avoid this — only reading what we had written.
+3. **`E3` and `E21` are one object.** The diagonal and the zeroed off-diagonal of
+   the same discarded 3-tensor. Treating them as two legs with separate bases was
+   the error that made the whole `E3` feature exercise the wrong experiment, and
+   the algebra saying so was verifiable against upstream in minutes.
+4. **A check that reports `0.000e+00` deserves suspicion, not comfort.** Two of
+   my three endpoint clauses were arithmetically incapable of anything else. The
+   fix is a mutation battery, and it is now a committed test rather than a habit.
+
+---
+
+# 2026-09-03 — **PRE-REGISTRATION (Rule 1): CONTRACT WP19 — `e3diag_svd`, the cell that decides whether Arm L still has a target**
+
+**Committed before the cell is built and before any of its data exists.** This is
+`SKEPTIC WP18-B`'s cheapest discriminating follow-up, adopted verbatim as to
+design and made a contract as to gate.
+
+## Question
+
+The regenerating flow discards one object. Its **diagonal** is `E3` and its
+**zeroed off-diagonal** is `E21` — one tensor, not two legs, as
+`SKEPTIC WP18-B` verified against upstream (`_factored_get_dslice(., (3,)) ==
+diag(T)` to `0.0`; `(2,1) == zero_repeated(T_iij)` to `1.4e-17`).
+
+So: **if you correct `(2,1)` with a rank-`r` reconstruction you have already paid
+for, does reading `(3,)` off the DIAGONAL of that same reconstruction — one
+fitted scalar, no new features, no new arithmetic — deliver the joint correction
+end to end?**
+
+Equivalently, and this is what makes it decisive: **is `>= 10x` reachable with no
+`E3` map at all?**
+
+## Evidence
+
+| item | status |
+|---|---|
+| the joint oracle `e3svd:128` is `11.098x`, `9.86`-`12.63` on 8 of 8 nets, at the affordable rank | **CONFIRMED** — `c2_e2e_oracle_rank.json`, recomputed paired against `none` |
+| single-slice corrections saturate: `e3` alone `1.551x`, `svd:256` alone `2.376x` | **CONFIRMED** — same artifact |
+| `E3` and `E21` are the diagonal and zeroed off-diagonal of ONE object | **CONFIRMED** — `SKEPTIC WP18-B` against upstream `factor_k3` at `n = 8`, f64 |
+| `diag(rank-r E21)` with one fitted scalar recovers `0.61`-`0.66` of `E3` | **INFERRED** — Skeptic probe, 3 nets at `256 x 12` and `512 x 16`, f32, **not the live shape** |
+| a pointwise map on the flow's per-neuron scalars reaches an in-sample ceiling of `0.2575` on `E3` | **CONFIRMED** — WP18 § B, five independent routes |
+| `E21` is rank-512-sufficient, `r90` collapsing `264 -> 78` with depth | **CONFIRMED** — WP13 E2 |
+| the affordability horizon is `r <= 192` | **CONFIRMED** — `CONTRACT WP15`'s cost derivation |
+| the diagonal recovery survives at `1024 x 16` | **SPECULATIVE — this contract's subject** |
+
+## Hypothesis + mechanism
+
+The DS convention stores the `(2,1)` slice with its diagonal **zeroed**, so a
+rank-`r` reconstruction of `E21` carries information about the diagonal that the
+stored slice itself throws away. The full-rank recovery collapsing to `~0.02`
+while rank-64 gives `0.61` is exactly that signature: the truncation is not
+approximating the diagonal, it is *reconstructing* it from the off-diagonal's
+low-rank structure, and adding the discarded high-rank residual back destroys it.
+
+If that holds at the live shape, then **`E3` costs nothing to correct** — it is a
+diagonal read plus one scalar multiply on an object the `(2,1)` correction has
+already materialised — and the whole `E3` feature-map exercise was the wrong
+experiment, not a hard problem.
+
+## Intervention — the smallest thing that discriminates
+
+One new cell in the **existing** `p2_range_lab` in-flight oracle harness, the same
+machinery that produced `c2_e2e_oracle_rank.json`. No new instrument.
+
+> **`e3diag_svd:r`** — correct `(2,1)` with the rank-`r` SVD of the exact `E21`;
+> correct `(3,)` with `c * diag(that same rank-r reconstruction)`, `c` a single
+> scalar fitted per network by least squares against the true `E3`. Read
+> end-to-end final-layer drift at `r in {128, 192, 256}`, `1024 x 16`, f32, 8
+> networks, paired on common random numbers against the same `none` baseline the
+> existing cells use.
+
+Run beside three cells that already exist, in the same job, so the comparison is
+within-run: `none`, `svd:r` (`(2,1)` only), `e3svd:r` (both, oracular `E3`).
+
+## Predictions — mine, numbered, before the data
+
+| # | prediction |
+|---|---|
+| **C1** | The diagonal recovery survives at `1024 x 16`: `R^2` of `c * diag(rank-192 E21)` against true `E3` is **`>= 0.50`**, layer-averaged. The Skeptic measured `0.659` at `512 x 16`; I discount for width because `r/n` falls from `0.375` to `0.1875` |
+| **C2** | **`e3diag_svd:192` lands between `svd:192` and `e3svd:192`**, strictly. It cannot beat the oracular-`E3` cell (it approximates `E3`) and it should beat the no-`E3` cell (it adds real information). If it lands *below* `svd:r`, the diagonal read is **destructive** and this lane closes today — that is the WP10 injection lesson and it is a live possibility |
+| **C3** | **`e3diag_svd:192 >= 5x`.** The joint oracle at 192 sits between `11.1x` (r=128) and `32.2x` (r=256); a `~0.6`-quality `E3` should retain a large fraction. I put **`45%`** on it clearing `10x` outright |
+| **C4** | The `r` ordering is monotone for `e3diag_svd` as it is for `e3svd` (`5.5 -> 11.1 -> 32.2`). Refuted if `r = 256` is worse than `r = 128`, which would mean the diagonal reconstruction degrades with rank exactly where the off-diagonal improves — the Skeptic's `256 x 12` row (`0.614` at `r=64`, `0.029` at `r=256`) says that is possible and it is the single most likely way C3 fails |
+| **C5** | The fitted scalar `c` is **within `20%` of `1.0`** — i.e. the diagonal of the truncation is close to unbiased for `E3`, not merely correlated with it. If `c` is far from 1, the recovery is a correlation being rescaled and will transfer worse |
+
+## Gate — fixed now
+
+| gate | threshold |
+|---|---|
+| **G-DIAG-R2** | `R^2` of `c * diag(rank-192 reconstruction)` against true `E3`, layer-averaged over pre-layers `5..15`, **`>= 0.50`**, with the per-layer minimum reported |
+| **G-DIAG-E2E** | `e3diag_svd:192` end-to-end drift reduction vs `none`, paired arithmetic difference on common random numbers, studentised-`t` or basic-bootstrap 95% interval excluding zero, **`>= 5x`** point estimate. **This is NOT `G-L-E2E`** — `G-L-E2E` remains `>= 10x` on `P06[..064..127]` and is untouched by this contract |
+| **G-DIAG-NOTWORSE** | `e3diag_svd:r >= svd:r` at every `r`. **A violation means the diagonal injection is DESTRUCTIVE**, which closes the route regardless of the other two |
+
+**No threshold moves after the data exists.** `G-M-DEPTH`'s refused post-hoc move
+is the precedent, and `SKEPTIC WP18-B` has just demonstrated what happens when a
+number gets re-read to suit a conclusion.
+
+## Falsifier
+
+`G-DIAG-NOTWORSE` violated at any `r` (destructive injection), **or** `G-DIAG-R2`
+below `0.50` at the live shape — the Skeptic's `0.61`-`0.66` was 3 networks at
+half the width, and a failure to transfer is the honest outcome.
+
+## Baseline and control
+
+`none` — the uncorrected regenerating flow — in the same run, same networks,
+common random numbers. `svd:r` and `e3svd:r` in the same run as the two brackets
+`e3diag_svd:r` must fall between. **`e3svd:r` is the oracle and is not an
+operating point**: nothing here proposes a deployable `E3`.
+
+## Cost model — Phase 2, `lambda = 0`, so `C = F`
+
+This contract measures **accuracy only** and proposes no deployed change, so it
+prices nothing new. The relevant standing figures: the deployed budget is
+`46,495,355,667` incremental f32 FLOPs (`0.02114 B`) over 16 layers, and a
+rank-`r` correction costs `r/n` of a matmul per product — which is why `r <= 192`
+is the horizon. **A diagonal read of an already-materialised reconstruction is
+`O(n)` and one scalar multiply**, so if this works it is free at the margin in
+FLOPs; its OPERATION count (the binding axis, WP17) is `+2` per layer and must be
+re-metered before any deployment claim, not here.
+
+## Statistic
+
+Paired, common random numbers, **arithmetic difference** in end-to-end
+final-layer drift, studentised-`t` or basic-bootstrap 95% interval. Never
+percentile, never BCa. Ratios of means are reported as a **diagnostic** beside the
+paired figure, never as the decision. `R^2` for `G-DIAG-R2` is **uncentered
+against zero**, matching `gm_depth`'s `explained` and WP18 § B.
+
+## Seed block
+
+**`P05[40,902,005,128 .. 40,902,005,159]`** — the unused 32-seed tail of the block
+already claimed for WP18 § B, DESIGN tier, where `CONTRACT WP18` permits tuning.
+Claimed through `seed_ledger` on the host with `artifact=` named, finalized after.
+Deliberately **not** `P01[..168..175]`, which `C2` already spent, and deliberately
+**not** `P06`, which is reserved for `G-L-E2E` and stays untouched.
+
+## Nulls — differing in CODE PATH
+
+1. **Diagonal of an equal-rank RANDOM reconstruction** carrying `E21`'s own
+   singular values — matches rank and energy, differs only in direction.
+2. **Cross-network diagonal**: the scalar `c` and the reconstruction taken from
+   network `i`, applied to network `j`.
+
+`eps = 0` is a determinism check and is not a null.
+
+## Confounders / scope / what must not change
+
+- `estimator.py` untouched. The canary untouched. No submission, no designation.
+- No CONFIRM read, no vault touch, `P06` untouched.
+- **This measures the TORCH flow, not the `fnp` port that would ship.** WP16 is
+  the reason that caveat is compulsory, and `SKEPTIC WP18-B` re-applied it to the
+  oracle cells this contract builds on. Any deployment claim needs the port.
+- **Everything here is an ORACLE.** `E21` is taken exactly and truncated; nothing
+  in this contract predicts `E21` from the flow's own state, and a result here is
+  a **ceiling**, not an operating point. `G-L-FIT-E21` is still unmeasured and is
+  still the thing that decides whether any of it is reachable.
+
+**Samuel's prediction to be taken on C2 and C3 before the results exist.**

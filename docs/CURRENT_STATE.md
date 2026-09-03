@@ -90,6 +90,7 @@
 > | | |
 > |---|---|
 > | **`G-L-FIT-E3` layer-averaged held-out `R^2`** | **`0.1002` vs `0.90` — FAIL** |
+> | **`SKEPTIC WP18-B`** | **PROVISIONAL.** Ceiling verified five ways and if anything understated (`0.2397` df-adjusted). But `E3` is the DIAGONAL of `E21`'s own tensor, and `diag(rank-192 E21)` with ONE fitted scalar recovers `0.61`–`0.66` of it — **`2.5x` better than the whole 24-column basis, free**. *"Arm L's cheap leg is dead"* is **overstated**: one route died |
 > | worst pre-layer | `-0.0134` — worse than predicting zero |
 > | per-layer, leave-networks-out | `0.1595` |
 > | **per-block ceiling, IN SAMPLE** | **`0.2575`** |
@@ -112,6 +113,16 @@
 > What is closed is "a pointwise map on the flow's own per-neuron scalars", closed
 > at a ceiling rather than at a fit.
 >
+> **AND MY B1 ENDPOINT CHECK COULD NOT FAIL.** `explained_k0` was `1 - x/x`, and
+> inverted — a *perfect* labeller would have printed `1.0` and FAILED. Its
+> companion compared a function to itself. All three clauses read the `(2,1)`
+> slice, so **nothing tested the `(3,)` path `E3` is made of.** Replaced with a
+> CROSS-PATH comparison on both slices, and `local_sim/test_wp18_labels.py` is a
+> mutation battery proving it fires: **4 of 4 caught at `1e-10`**, including a
+> `1e-6` relative perturbation. **The labels are fine** — the new check passes at
+> `0.000e+00` and the Skeptic cross-validated both legs independently. The result
+> stands; the assurance behind it did not.
+>
 > ## 5. NEXT ACTIONS, in order
 >
 > 1. **Samuel decides on the canary** (`29/30`, invariant 9 only). On submission,
@@ -121,11 +132,15 @@
 > 2. **`E21`'s Gram/moment pass** — the second labeller pass, over a basis declared
 >    *before* its moments are computed. It is now the whole of Arm L. `CONTRACT
 >    WP15`'s `P5` and this session's `B3` both predict it fails at depth.
-> 3. **Say plainly what the arithmetic now implies.** A fitted map cannot beat its
->    own oracle; the oracles are `2.534x` (`E21`) and `1.551x` (`E3`); `E3`'s
->    fittable share is capped at `0.26`. **`G-L-E2E`'s `10x` is very unlikely, and
->    the ~Sep 24 kill line is the expected outcome rather than the contingency.**
->    Plan for the write-up to carry a clean mechanised negative.
+> 3. **`e3diag_svd:r` — the next Arm L measurement, and it replaces a claim I got
+>    wrong.** `SKEPTIC WP18-B` showed my `10x` arithmetic cited SINGLE-SLICE
+>    oracle cells. The joint cell is `e3svd:128 = 11.098x` (9.86–12.63 on 8 of 8
+>    nets), **above the gate, at the affordable rank** — and this LOG had said so
+>    in plain words a day earlier. The new cell corrects `(2,1)` with its rank-`r`
+>    SVD and `(3,)` with **the diagonal of that same reconstruction** times one
+>    fitted scalar, at `r in {128, 192, 256}`, `1024 x 16`, 8 nets, seeds
+>    `P05[40902005128..159]`. It settles whether `10x` is reachable with **no
+>    `E3` map at all**.
 > 4. Re-run the Linux memory gate **whenever the candidate changes** — § 9 finds
 >    its report by FILENAME, so a stale report for the same filename is still read.
 >
