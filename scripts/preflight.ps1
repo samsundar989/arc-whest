@@ -36,7 +36,7 @@
                             THE gate -- still refuses percentile/BCa, still
                             requires a pre-registered threshold, and still
                             follows arithmetic when the estimands disagree
-    9. seed-ledger refusals - 60/60 negative tests: every guard still FIRES
+    9. seed-ledger refusals - 62/62 negative tests: every guard still FIRES
    10. vault integrity    - array sha256s vs the manifest and the seed->weights
                             map, not merely the counter. Costs no touch.
    11. lifecycle evaluator - 56/56. The canonical grader lifecycle (one Estimator,

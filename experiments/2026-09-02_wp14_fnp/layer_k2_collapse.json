@@ -1,0 +1,83 @@
+{
+ "check": "fnp K3 layer with kappa_3 = kappa_4 = 0: K2 collapse, the k_max=3 edge term, and Gauss-Hermite cumulants",
+ "width": 256,
+ "seed": 1000921,
+ "rows": [
+  {
+   "dtype": "f64",
+   "A_rel_rms_mu_vs_k2": 0.0,
+   "A_rel_rms_var_vs_k2": 4.938726259643226e-16,
+   "B_rel_rms_cov_vs_k2_plus_edge": 5.133038435064594e-16,
+   "B_rel_rms_cov_vs_bare_k2": 0.010443379204475802,
+   "B_edge_term_relative_size": 0.005486142299686976,
+   "C_rel_rms_S3_vs_quadrature": 1.066783030353475e-14,
+   "C_rel_rms_mu_vs_quadrature": 2.8916247619545427e-15,
+   "C_rel_rms_var_vs_quadrature": 5.9433837246900495e-15,
+   "c4_out": 0.013715001102139185,
+   "audit": {
+    "requested_dtype": "float64",
+    "arrays_checked": 53,
+    "violations": [],
+    "stats_calls": [
+     {
+      "call": "stats.norm.cdf(alpha)",
+      "returned": "float64",
+      "after_astype": "float64",
+      "promoted": false
+     },
+     {
+      "call": "stats.norm.pdf(alpha)",
+      "returned": "float64",
+      "after_astype": "float64",
+      "promoted": false
+     }
+    ],
+    "flopscope_warnings": [],
+    "clean": true
+   }
+  },
+  {
+   "dtype": "f32",
+   "A_rel_rms_mu_vs_k2": 0.0,
+   "A_rel_rms_var_vs_k2": 2.407356311751423e-07,
+   "B_rel_rms_cov_vs_k2_plus_edge": 2.584679675731926e-07,
+   "B_rel_rms_cov_vs_bare_k2": 0.010443379098975174,
+   "B_edge_term_relative_size": 0.005486142414071068,
+   "C_rel_rms_S3_vs_quadrature": 1.4282749039522089e-06,
+   "C_rel_rms_mu_vs_quadrature": 4.6215202121651685e-08,
+   "C_rel_rms_var_vs_quadrature": 2.1354230103114543e-07,
+   "c4_out": 0.013714979402720928,
+   "audit": {
+    "requested_dtype": "float32",
+    "arrays_checked": 53,
+    "violations": [],
+    "stats_calls": [
+     {
+      "call": "stats.norm.cdf(alpha)",
+      "returned": "float64",
+      "after_astype": "float32",
+      "promoted": true
+     },
+     {
+      "call": "stats.norm.pdf(alpha)",
+      "returned": "float64",
+      "after_astype": "float32",
+      "promoted": true
+     }
+    ],
+    "flopscope_warnings": [],
+    "clean": true
+   }
+  }
+ ],
+ "tolerances": {
+  "f64": 1e-11,
+  "f32": 2e-05
+ },
+ "tolerances_quadrature": {
+  "f64": 1e-09,
+  "f32": 2e-05
+ },
+ "failures": [],
+ "pass": true
+}

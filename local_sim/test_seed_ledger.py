@@ -343,6 +343,15 @@ def t_scan_catches_a_new_literal():
     check("the temporary probe is gone", not os.path.exists(tmp_dir))
 
 
+def _refuses(fn) -> bool:
+    """True when `fn` raises. A guard that does not fire is not a guard."""
+    try:
+        fn()
+    except Exception:
+        return True
+    return False
+
+
 def t_real_ledger_readonly():
     head("9. the REAL ledger — read-only assertions (predictions A1, A2, A6)")
     before = os.path.getsize(SL.LEDGER_PATH)
@@ -351,24 +360,57 @@ def t_real_ledger_readonly():
     check("allocations are still disjoint (invariant 12)", check_disjoint())
 
     cols = SL.collisions()
-    accidental = [
-        (a, b) for a, b in cols
-        if not ((b.consumer in a.paired_with) or (a.consumer in b.paired_with))
-    ]
+    # An overlap is UNDECLARED when neither claim named the other at claim time
+    # and no later `pair` record declares it. Counting undeclared overlaps was
+    # the original assertion here and it was a SNAPSHOT: the record legitimately
+    # grew a second one (P01, WP14 C0-i) whose intent lived only in a prose note,
+    # and preflight steps 7 and 9 went RED for four commits with nothing wrong
+    # with the ledger except an unset field. The test now asserts the PROPERTY --
+    # every undeclared overlap is on a named list, with its reason -- so a new
+    # accident still fires and a newly DECLARED overlap does not.
+    accidental = [(a, b) for a, b in cols if not SL.is_paired(a, b)]
+    KNOWN_UNDECLARED = {
+        ("D16", frozenset({"local_sim/probe_whitening.py",
+                           "local_sim/probe_design_carrier.py"})):
+            "2026-08-10, found 2026-08-19: two probes drew the same 24 D16 "
+            "networks by accident. Both kills are CORRELATED evidence.",
+    }
+    unknown = [(a, b) for a, b in accidental
+               if (a.block, frozenset({a.consumer, b.consumer}))
+               not in KNOWN_UNDECLARED]
     check(
-        "A1: exactly ONE accidental collision in the whole record",
-        len(accidental) == 1,
-        "; ".join(f"{a.block} {a.consumer} vs {b.consumer}" for a, b in accidental),
+        "A1: every UNDECLARED overlap is one of the known accidents",
+        not unknown,
+        "; ".join(f"{a.block} {a.consumer} vs {b.consumer}" for a, b in unknown),
     )
     check(
-        "A1: and probe_whitening vs probe_design_carrier on D16 is AMONG them",
-        any(
-            a.block == "D16"
+        "A1: and the D16 accident is still in the record, not quietly resolved",
+        any(a.block == "D16"
             and {a.consumer, b.consumer}
             == {"local_sim/probe_whitening.py", "local_sim/probe_design_carrier.py"}
-            for a, b in accidental
-        ),
-        f"{len(accidental)} reported overlap(s)",
+            for a, b in accidental),
+        f"{len(accidental)} undeclared overlap(s)",
+    )
+    check(
+        "A1: the P01 WP13/WP14 overlap is DECLARED, and its reason still warns "
+        "that the evidence is correlated",
+        any(a.block == "P01"
+            and "CORRELATED" in SL.pairing_reason(a, b).upper()
+            for a, b in cols
+            if {a.consumer, b.consumer}
+            == {"local_sim/p2_slice_lab.py::WP13 E0-TOL/E1/E2",
+                "local_sim/p2_truth.py"}),
+    )
+    check(
+        "A1: a pairing cannot be declared for an overlap that does not exist",
+        # The start is READ from the registry, never written as a literal: a
+        # seed-shaped constant in this file is exactly what the source scan is
+        # for, and widening the exclusion pragma to silence it would blunt the
+        # scan to make a test pass.
+        _refuses(lambda: SL.declare_pair(
+            "P03", SL.block_span("P03")[0], 4,
+            ["local_sim/p2_truth.py", "local_sim/p2_slice_lab.py"],
+            note="fabricated", ts="2026-09-02", path=SL.LEDGER_PATH)),
     )
     # D17 and D19 are SINGLE_USE and currently unspent. Asserting "zero
     # consumption" is a SNAPSHOT, and D19 exists precisely in order to be spent

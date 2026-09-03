@@ -1,0 +1,113 @@
+{
+ "check": "SKEPTIC WP14 follow-up: one metered fnp K3 layer",
+ "contract": "LOG 2026-09-02 CONTRACT WP14, HEAD d915f83; SKEPTIC WP14 'cheapest discriminating follow-up'",
+ "width": 1024,
+ "seed": 1000921,
+ "depth_for_projection": 16,
+ "flopscope_version": "0.12.0+np2.2.6",
+ "dtype_rates": {
+  "bool": 1.0,
+  "complex128": 2.0,
+  "complex192": 3.0,
+  "complex256": 4.0,
+  "complex64": 1.0,
+  "float128": 4.0,
+  "float16": 1.0,
+  "float32": 1.0,
+  "float64": 2.0,
+  "float96": 3.0,
+  "int16": 1.0,
+  "int32": 1.0,
+  "int64": 2.0,
+  "int8": 1.0,
+  "uint16": 1.0,
+  "uint32": 1.0,
+  "uint64": 2.0,
+  "uint8": 1.0
+ },
+ "rows": [
+  {
+   "dtype": "f64",
+   "width": 1024,
+   "flops_one_layer": 21675713540.0,
+   "n3_matmul_equivalents": 5.046770335175097,
+   "over_n3": 20.187081340700388,
+   "audit": {
+    "requested_dtype": "float64",
+    "arrays_checked": 56,
+    "violations": [],
+    "stats_calls": [
+     {
+      "call": "stats.norm.cdf(alpha)",
+      "returned": "float64",
+      "after_astype": "float64",
+      "promoted": false
+     },
+     {
+      "call": "stats.norm.pdf(alpha)",
+      "returned": "float64",
+      "after_astype": "float64",
+      "promoted": false
+     }
+    ],
+    "flopscope_warnings": [
+     "Symmetry lost along dims (0, 1): multiply \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppre",
+     "Symmetry lost along dims (0, 1): multiply \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppre",
+     "Symmetry lost along dims (0, 1): multiply \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppre",
+     "Symmetry lost along dims (0, 1): multiply \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppre",
+     "Symmetry lost along dims (0, 1): multiply \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppre",
+     "Symmetry lost along dims (0, 1): multiply \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppre",
+     "Symmetry lost along dims (0, 1): add \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress wi",
+     "Symmetry lost along dims (0, 1): add \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress wi"
+    ],
+    "clean": true
+   }
+  },
+  {
+   "dtype": "f32",
+   "width": 1024,
+   "flops_one_layer": 10837935618.0,
+   "n3_matmul_equivalents": 5.046807051636279,
+   "over_n3": 10.093614103272557,
+   "audit": {
+    "requested_dtype": "float32",
+    "arrays_checked": 56,
+    "violations": [],
+    "stats_calls": [
+     {
+      "call": "stats.norm.cdf(alpha)",
+      "returned": "float64",
+      "after_astype": "float32",
+      "promoted": true
+     },
+     {
+      "call": "stats.norm.pdf(alpha)",
+      "returned": "float64",
+      "after_astype": "float32",
+      "promoted": true
+     }
+    ],
+    "flopscope_warnings": [
+     "stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float3",
+     "stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float3",
+     "Symmetry lost along dims (0, 1): multiply \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppre",
+     "Symmetry lost along dims (0, 1): multiply \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppre",
+     "Symmetry lost along dims (0, 1): multiply \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppre",
+     "Symmetry lost along dims (0, 1): multiply \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppre",
+     "Symmetry lost along dims (0, 1): multiply \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppre",
+     "Symmetry lost along dims (0, 1): multiply \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppre",
+     "Symmetry lost along dims (0, 1): add \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress wi",
+     "Symmetry lost along dims (0, 1): add \u2014 no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress wi"
+    ],
+    "clean": true
+   }
+  }
+ ],
+ "k2_anchor_f32": 68802510336,
+ "k3_increment_f32": 99116660736,
+ "projection_per_layer_f32": 10494948192.0,
+ "measured_x_depth": 173406969888.0,
+ "measured_x_budget": 0.07885636018181685,
+ "at_live_width": true,
+ "caveat": "cost only; the layer's VALUES are not yet checked against upstream (NOT_DONE step 6)"
+}

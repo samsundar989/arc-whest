@@ -27594,3 +27594,244 @@ Standing caveats, unchanged: `n = 8`; the adjusted score depends on `CLAIM A`'s
 composed multiplier, which `SKEPTIC WP14` rated PROVISIONAL — at WP13's `0.15272
 B` the same raw scores `1.30e-07`, i.e. **parity** with v2.7, not `1.6x`. The
 graded `1.3738e-07` remains the authority for what v2.7 actually scores.
+
+---
+
+# 2026-09-02 — SKEPTIC WP14's FOLLOW-UP EXECUTED: **THE FLOOR SURVIVES EXECUTION**, and the projection was 3.3% optimistic
+
+`SKEPTIC WP14` rated CLAIM A (the `0.07636 B` floor) **PROVISIONAL** for one
+stated reason — *"two spellings that have never been executed as one program"* —
+and named the cheapest discriminating follow-up by hand:
+
+> execute **one layer** of the regenerating K3 step in `fnp` at `n = 1024` — the
+> `(1,1,1)` block, all 25 kept `pK` terms and the harmonic projection at
+> `d = 3, 4` — inside a real `BudgetContext` at float32, with the
+> `.astype(float32)` cast-back after every `flops.stats.*` call, and read the
+> meter.
+
+That is now done, exactly as specified. **No seed block was drawn, no truth was
+minted, no gate is scored on it, and no accuracy claim rests on it.** It is a
+price, and it moves a number that was arithmetic into a number that is a
+measurement.
+
+## The instrument
+
+`local_sim/p2_k3_fnp.py --layer-price` and `--layer-k2`, with the port's
+combinatorics frozen out of upstream by a new generator
+`local_sim/p2_k3_coefs.py` → `experiments/2026-09-02_wp14_fnp/k3_coefs_simple.json`.
+The same bounded-port discipline as the term table: **every table in it depends
+on nothing but the partition combinatorics** — not on `n`, not on the weights,
+not on the data — so it is enumerated once against upstream rev `93d091a4` and
+re-checkable. Four tables:
+
+| table | what | size |
+|---|---|---|
+| `terms` | the 25 kept SIMPLE terms as an executable program: which slices multiply, the folded scalar, the per-axis Wick indices | 25 rows |
+| `pK_to_K` | `DS_part_sum`'s vector partitions with `vec_part_coef * _pK_to_K_coef` already folded | 19 rows over 7 slices |
+| `lap2_d4` | `_lap_m_dslice(m=2)` for the two `d = 4` slices | 2 rows |
+| `wick` | the 16 `(k, p)` ReLU Wick coefficients, split into the three `relu_wick_coef` branches, with `_relu_wick_poly`'s polynomials frozen | 16 rows |
+
+`proj_coef(n, 4, 2)` is deliberately **not** frozen — it is a closed form in `n`
+and is evaluated, so a width change cannot silently invalidate it.
+
+**One structural fact the port makes concrete, and it is why `K[4]` is nearly
+free:** `get_r_x(4, k_max=3, SIMPLE) = 2`, so `K[4]` is an `HTensor` with radial
+index 2 and a core of order `4 - 2*2 = 0`. **The fourth cumulant this flow
+carries is one scalar per network per layer.** Both surviving Laplacian
+multigraphs cap every leg; the `(3,1)` and `(2,1,1)` slices admit no multigraph
+meeting their arity condition and contribute exactly zero, so the `n^3` object
+`(2,1,1)` that upstream materialises is not formed here at all.
+
+## THE MEASUREMENT — `experiments/2026-09-02_wp14_fnp/layer_price_1024.json`
+
+One full layer (linear step **and** nonlinear step) at `1024`, executed as ONE
+program, metered:
+
+| | counted FLOPs | dense `1024`-matmuls | `/ n^3` |
+|---|---:|---:|---:|
+| `f64` | `21,675,713,540` | `5.047` | `20.187` |
+| **`f32`** | **`10,837,935,618`** | **`5.047`** | `10.094` |
+
+> **`f32 / f64 = 0.50000` exactly.** Nothing promoted. The dtype audit checked
+> **56 arrays**, found **0 violations**, and recorded both `flops.stats.*` calls
+> returning `float64` from a `float32` input and being cast back — the trap
+> `SKEPTIC WP14` named, instrumented rather than asserted.
+
+| | FLOPs | `x budget` |
+|---|---:|---:|
+| this layer `x 16` | `173,406,969,888` | **`0.07886 B`** |
+| the projection it replaces (`68,802,510,336 + 99,116,660,736`) | `167,919,171,072` | `0.07636 B` |
+| ratio measured / projected | | **`1.0327`** |
+| the `0.1` floor | `219,902,325,555` | `0.1` |
+| **headroom** | `46,495,355,667` | **`0.02114 B`** = `1.35` f32 matmuls/layer |
+
+**The floor holds.** `CLAIM A`'s conclusion survives its own execution test. But
+the projection was **3.3% optimistic** and the margin narrows from `1.51` to
+`1.35` f32 matmuls per layer.
+
+**Where the 3.3% went, and it is the honest answer to the one thing the two
+separately-measured halves could not charge for.** `5.047` measured against
+`4.89` projected (`2.00` K2 + `2.89` K3) is `0.157` dense matmuls per layer of
+`O(n^2)` work that neither half ever paid: the 25 `pK` terms, the 16 Wick
+coefficients, the `pK -> K` conversion, the `d = 4` harmonic projection, the
+`M = diag(S3) + 3 S21^T` rebuild and the diagonal masks. `SKEPTIC WP14` estimated
+that residue structurally at `0.13` matmul-equivalents per layer. **It is
+`0.157`.** The structural argument was right and slightly generous to itself.
+
+**What the `x 16` is, precisely.** It replicates a STEADY-STATE layer sixteen
+times, which is conservative in three named ways and incomplete in three others.
+Conservative: layer 0 enters with `cov = I` and `M = 0` and a real estimator
+skips work there; the last layer needs neither the two `(2,1)`-slice matmuls nor
+the `M` rebuild; and the `off_mask` build is charged once per layer here where a
+flow builds it once. Incomplete: it excludes the readout and assembly of the
+`(depth, width)` answer, any calibration, and `setup()`. It also says nothing
+about `whest validate`, the 4 GiB single-array rule, the 8 GiB cap or the 0.4 s
+residual cliff. The `+2**24` server offset is not applied because `0.0789` is not
+within `0.5%` of the floor; adding it anyway moves nothing (`0.078863`).
+
+## The price is a price OF SOMETHING — three checks, `--layer-k2`
+
+A FLOP count on an op sequence that computes nothing is worthless, and full
+parity against upstream needs torch (`NOT_DONE` step 6, still open). These are
+the checks that do not. Set `M = 0` and `c4 = 0`: every term carrying a `(3,)`,
+`(4,)`, `(2,1)` or `(2,2)` block dies and the answer is known in closed form.
+`experiments/2026-09-02_wp14_fnp/layer_k2_collapse.json`, at `256`:
+
+| check | `f64` | `f32` |
+|---|---:|---:|
+| **A** mean vs the shipped K2 closure | `0.000e+00` | `0.000e+00` |
+| **A** variance vs the K2 closure | `4.94e-16` | `2.41e-07` |
+| **B** covariance vs K2 **plus the `k_max=3` edge term** | `5.13e-16` | `2.59e-07` |
+| **C** `kappa_1` vs Gauss-Legendre quadrature | `2.89e-15` | `4.62e-08` |
+| **C** `kappa_2` vs quadrature | `5.94e-15` | `2.14e-07` |
+| **C** `kappa_3` diagonal vs quadrature | **`1.07e-14`** | `1.43e-06` |
+
+**B is the check that would have caught a silently dropped term.** The
+`k_max = 3` covariance is *not* the K2 covariance: `pK(1,1)` keeps two live
+blocks, `Phi_i Phi_j C_ij` **and** `0.5 w(2)_i w(2)_j C_ij^2`. The second is
+`5.49e-03` of the first here, and the check requires it to be **present** —
+a layer that reproduced bare K2 exactly would be wrong, and would have passed a
+naive "does it match K2" test. It agrees with K2-plus-that-term to `5e-16`.
+
+**C is independent of the port's own machinery**: numerical integration rather
+than the Wick/Hermite closed forms, exercising the `p = 1, 2, 3` polynomial
+branches, the 25-term loop, the frozen scalars, the `pK -> K` coefficients
+`(+2, -3, +1)` and the `M` rebuild in one shot. Agreement to `1.07e-14`.
+
+## Two defects found in this session's own instrument, before it was believed
+
+1. **A NaN reference passed a `>` gate silently.** The first version of check C
+   used `numpy.polynomial.hermite.hermgauss(400)`, whose weights **overflow to
+   NaN** past degree ~200. `nan > tol` is `False`, so all three quadrature
+   comparisons printed `nan` and the verdict printed **PASS**. Repaired: any
+   non-finite value is a failure, and the quadrature refuses rather than
+   returning non-finite nodes. *This is the second time this exact class has
+   appeared here* — WP8's residual soak sorted never-executed rows to the bottom
+   of a median. **A comparison operator is not a check; it silently admits the
+   one value it cannot order.**
+2. **Gauss-Hermite is the wrong rule for a ReLU expectation, and it failed as a
+   REFERENCE, not as the thing under test.** `max(z, 0)` has a kink at the
+   origin, so Gauss-Hermite converges algebraically: at degree 160 it disagreed
+   with the exact `sigma phi(alpha) + mu Phi(alpha)` by `1.1e-03` — an error that
+   reads exactly like a bug in the port. Splitting the integral at the kink and
+   using Gauss-Legendre on `[max(mu, 0), max(mu, 0) + 14 sigma]` leaves an
+   analytic integrand and lands at `3e-15`. Recorded in `docs/GOTCHAS.md`.
+
+## Knowledge delta
+
+1. **The composed floor survives execution: `0.07886 B` measured against
+   `0.07636 B` projected, `1.0327x`.** `SKEPTIC WP14`'s PROVISIONAL on CLAIM A is
+   discharged for the per-layer arithmetic, and NOT for the rest of what it
+   named — `whest validate`, the memory gate, the residual soak and an
+   end-to-end candidate are all still ahead.
+2. **The margin is `1.35` f32 matmuls per layer, not `1.51`.** One un-reducible
+   extra `n^3` op per layer still fits; two still do not. The oracle rank-512
+   correction (`16,106,127,360` f32 FLOPs = `0.0073 B`) fits `2.9x` over inside
+   the new margin, down from `3.2x`.
+3. **`K[4]` in this flow is one scalar per layer.** `r = 2` with an order-0 core.
+   Any design that budgeted for a fourth-order `n^2` or `n^3` object was
+   budgeting for something that does not exist here.
+4. **A number that lives only in prose is now in an artifact.** `SKEPTIC WP14`
+   defect (5) recorded that `68,802,510,336` appears in no file on disk. It is
+   now superseded by a metered end-to-end figure that does.
+
+---
+
+# 2026-09-02 — **THE CHANGE GATE HAS BEEN RED SINCE `3b28796`, AND NOTHING WAS WRONG WITH THE LEDGER**
+
+Found while running `scripts/preflight.ps1` before today's port work. Steps **7**
+and **9** both **FAIL**, and they have failed since commit `3b38796` — through
+the WP14 results commit, the Skeptic pass, the paired re-score and two
+`CURRENT_STATE` updates. **Four commits were made on a red gate.** IMPORTANT.
+
+## The cause, and it is one unset field
+
+`SKEPTIC WP13` required that a claim name its artifact at claim time. WP14 C0-i
+did that, and its claim note says, in words:
+
+> *"DELIBERATE DESIGN-tier overlap with the p2_slice_lab.py claim of the same
+> range — C1's containment result and WP13's spectra are CORRELATED evidence and
+> must never be quoted as independent."*
+
+**The intent went into `note`. The field the enforcement layer reads is
+`paired_with`, and it was left empty.** So `test_seed_ledger.py`'s check *"A1:
+exactly ONE accidental collision in the whole record"* correctly saw two,
+correctly refused, and correctly turned the gate red — about a ledger that is,
+substantively, entirely correct.
+
+Two separate defects, and the second is the one that matters:
+
+1. **`paired_with` can only be set at claim time, and the second consumer of a
+   deliberate overlap is not known when the first claims.** There was no way to
+   declare an overlap deliberate after the fact except to edit an append-only
+   record. So the only available spelling of the truth was prose, and prose is
+   invisible to the gate.
+2. **The check was a SNAPSHOT wearing the clothes of a property.** *"Exactly ONE
+   accidental collision"* is a count of a growing record, and the file's own
+   comment fourteen lines below it makes exactly this argument about a different
+   assertion — that a snapshot *"would have turned preflight RED at the exact
+   moment the block was used as designed, and the only way forward would have
+   been to edit the gate."* **That is what happened, to the assertion sitting
+   directly above the warning.**
+
+## The repair
+
+- **`seed_ledger.py` gains a third record kind, `"pair"`** — a machine-readable,
+  append-only declaration that two consumers on a range overlapped deliberately,
+  carrying its own reason. It is not a consumption and is excluded from overlap
+  and SINGLE_USE accounting exactly as `finalize` is. `declare_pair()` **refuses
+  to license an overlap that does not exist in the record**, so it cannot be used
+  to pre-authorise anything.
+- **The report no longer picks between two canned tags.** The old binary printed
+  either *"SAME NETWORKS BY DESIGN"* or *"CORRELATED EVIDENCE"* — and the P01
+  case is **both**: reusing WP13's eight networks was a choice, and the two
+  results still must never be quoted as independent. A canned *"one experiment,
+  two roles"* would have erased the warning. **A pair record's own note is now
+  the tag**, so the ledger says what the person who declared it said.
+- **The P01 pairing is declared**, with the correlation warning inside it.
+- **`test_seed_ledger.py`'s A1 becomes a property**: every *undeclared* overlap
+  must be on a named list with its reason (today: the one D16 accident of
+  2026-08-10). A new accident still fires; a newly *declared* overlap does not.
+  Two checks added: that the P01 declaration still carries the word CORRELATED,
+  and that `declare_pair` refuses a fabricated pairing. **62/62.**
+- The `P03` seed constant that second check needs is **read from the registry,
+  not written as a literal** — a seed-shaped constant in that file is exactly
+  what the source scan exists for, and widening the exclusion pragma to silence
+  it would have blunted the scan to make a test pass.
+- `preflight.ps1` and `VALIDATION.md` §7 relabelled `60/60 -> 62/62`, which is
+  `test_enforcement_labels.py` doing its job.
+
+## Knowledge delta
+
+1. **Intent recorded in prose is not recorded.** The WP14 C0-i claim said
+   "DELIBERATE" in English and "accidental" in the schema, and the schema is what
+   runs. **If a rule is machine-checked, the exception has to be machine-declared
+   too** — otherwise the only way past the check is to weaken it.
+2. **A count of a growing record is never a property.** This is the fifth check
+   this repository has lost to that pattern and the first where the warning was
+   already written in the same function.
+3. **A red gate did not stop four commits.** Nothing enforces "preflight was
+   green" at commit time — the pre-commit hook guards protected paths, not the
+   gate. That is a real hole and it is NOT repaired here; it is recorded as open.
+   The cheapest fix is a `preflight --since <commit>` marker the pre-commit hook
+   can read, and it needs its own slice.

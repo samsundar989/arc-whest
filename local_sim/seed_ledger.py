@@ -104,7 +104,7 @@ class Claim:
     #: Truth labelling and the probe that scores against it are one experiment,
     #: not two correlated ones, and the overlap report must say so.
     paired_with: str = ""
-    #: "claim" (the default, and every historical record) or "finalize".
+    #: "claim" (the default, and every historical record), "finalize", or "pair".
     #:
     #: A claim necessarily records its artifact PATH before the artifact exists,
     #: so its `artifact_sha256` is necessarily blank at claim time -- and nothing
@@ -114,6 +114,15 @@ class Claim:
     #: after the file is written. Finalize records are NOT consumptions: they are
     #: excluded from overlap and SINGLE_USE accounting, so closing a claim can
     #: never look like a second claim on the same block.
+    #:
+    #: A "pair" record declares, AFTER the fact, that two consumers drawing the
+    #: same range did so deliberately. `paired_with` can only be set at claim
+    #: time, and the second consumer of a deliberate overlap is by definition not
+    #: known when the first claims -- so a deliberate overlap whose intent was
+    #: recorded only in prose reads to the machine as an accident. That is
+    #: exactly what happened to `P01[40,821,001,168..175]` on 2026-09-02, and it
+    #: held `preflight` RED for four commits. Pair records are NOT consumptions
+    #: and are excluded from every accounting the same way finalizations are.
     kind: str = "claim"
 
     @property
@@ -260,6 +269,81 @@ def claims(path: str = LEDGER_PATH) -> List[Claim]:
 
 def finalizations(path: str = LEDGER_PATH) -> List[Claim]:
     return [c for c in ledger(path) if c.kind == "finalize"]
+
+
+def pairings(path: str = LEDGER_PATH) -> List[Claim]:
+    """Records declaring an overlap deliberate. Not consumptions."""
+    return [c for c in ledger(path) if c.kind == "pair"]
+
+
+def is_paired(a: Claim, b: Claim, path: str = LEDGER_PATH) -> bool:
+    """Is this overlap DECLARED deliberate -- at claim time or afterwards?
+
+    Two routes, and both are explicit machine-readable declarations rather than
+    prose in a `note`:
+      * either claim named the other in `paired_with` when it was written; or
+      * a later `kind == "pair"` record names both consumers on a range covering
+        the overlap.
+    """
+    if (b.consumer in a.paired_with) or (a.consumer in b.paired_with):
+        return True
+    lo, hi = max(a.start, b.start), min(a.end, b.end)
+    for p in pairings(path):
+        if p.block != a.block or p.start > lo or p.end < hi:
+            continue
+        named = [x.strip() for x in p.consumer.split("|") if x.strip()]
+        if a.consumer in named and b.consumer in named:
+            return True
+    return False
+
+
+def pairing_reason(a: Claim, b: Claim, path: str = LEDGER_PATH) -> str:
+    """WHY this overlap is deliberate, in the words of the record that says so.
+
+    A binary deliberate/accidental tag was not enough and the P01 case is why:
+    that overlap is BOTH deliberate AND correlated -- reusing WP13's eight
+    networks to mint truth was a choice, and the two results still must never be
+    quoted as independent. A canned "one experiment, two roles" would have
+    erased the warning. So a `pair` record's own note is the tag.
+    """
+    if (b.consumer in a.paired_with) or (a.consumer in b.paired_with):
+        return "SAME NETWORKS BY DESIGN (one experiment, two roles)"
+    lo, hi = max(a.start, b.start), min(a.end, b.end)
+    for p in pairings(path):
+        if p.block != a.block or p.start > lo or p.end < hi:
+            continue
+        named = [x.strip() for x in p.consumer.split("|") if x.strip()]
+        if a.consumer in named and b.consumer in named:
+            return "DECLARED DELIBERATE: " + (p.note or "no reason recorded")
+    return ""
+
+
+def declare_pair(block: str, start: int, n: int, consumers: List[str], *,
+                 note: str, ts: str, path: str = LEDGER_PATH) -> None:
+    """Append a `pair` record. Refuses unless the overlap it describes is REAL.
+
+    A pairing that does not correspond to an actual overlap in the record would
+    be a licence issued against nothing, so the overlap is checked first.
+    """
+    if len(consumers) < 2:
+        raise ValueError("a pairing names at least two consumers")
+    tier = tier_of(block)
+    lo, hi = block_span(block)
+    end = start + n - 1
+    if start < lo or end > hi:
+        raise ValueError(f"pair {block}[{start:,}..{end:,}] leaves its block")
+    real = [(a, b) for a, b in collisions(path)
+            if a.block == block and a.consumer in consumers
+            and b.consumer in consumers
+            and max(a.start, b.start) >= start and min(a.end, b.end) <= end]
+    if not real:
+        raise ValueError(
+            f"REFUSED: no recorded overlap on {block}[{start:,}..{end:,}] between "
+            f"{consumers}. A pairing declares an existing overlap deliberate; it "
+            "cannot license one that does not exist.")
+    rec = Claim(block=block, start=start, n=n, consumer=" | ".join(consumers),
+                tier=tier, ts=ts, note=note, commit=_git_commit(), kind="pair")
+    _append(rec, path)
 
 
 def consumed_seeds(block: str, path: str = LEDGER_PATH) -> int:
@@ -551,9 +635,8 @@ def check_ledger(path: str = LEDGER_PATH, *, verbose: bool = True) -> List[str]:
         print(f"  hard collisions (DECISION/VAULT)   {len(hard)}")
         print(f"  permitted overlaps (DESIGN)        {len(permitted)}")
         for a, b in permitted:
-            intended = (b.consumer in a.paired_with) or (a.consumer in b.paired_with)
-            tag = ("<- SAME NETWORKS BY DESIGN (one experiment, two roles)"
-                   if intended else
+            why = pairing_reason(a, b, path)
+            tag = ("<- " + why if why else
                    "<- CORRELATED EVIDENCE, never quote as two independent results")
             print(
                 f"    - {a.block}[{a.start:,}..{a.end:,}]  {a.consumer}  vs  {b.consumer}"
