@@ -135,8 +135,11 @@
 > the residual-dispersion finding) and **§7.1** (Arm M's memory depth,
 > `0.338/0.573/0.732`, its gate failing, and why `73%` of one slice is `~44%` of
 > the error). §7's stale *"the one experiment we would run next"* is replaced — it
-> was run, and the answer is `r/n` to three decimals. **Still to add: the `E3`
-> ceiling, which is the strongest negative this project has measured.**
+> was run, and the answer is `r/n` to three decimals. **§7.2 is now in too**: the
+> `E3` ceiling, with the mechanism, the three-row ceiling table, and the three
+> transferable lessons (equivariance is not sufficiency; measure the ceiling
+> before tuning the fit; the fit gets better with depth). The section-7 status
+> row is updated.
 
 
 > **2026-09-03 (WP18) — THE STRATEGIST RULED, THE CANARY WAS CERTIFIED FOR THE

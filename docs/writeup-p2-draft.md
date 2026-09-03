@@ -26,7 +26,7 @@
 | 4. Where the error actually is | **populated, evidence complete** | — |
 | 5. Compressing the third cumulant | **populated, evidence complete** | — |
 | 6. What an estimator may spend, and the two levers | **populated, evidence complete** (new 2026-09-02; §6.6-6.7 new 2026-09-03) | — |
-| 7. The off-diagonal lane | **populated** — the lane is closed on a measurement | — |
+| 7. The off-diagonal lane | **populated** — six selectors dead, and §7.2 closes the cheap half of the regeneration route at a CEILING (new 2026-09-03) | — |
 | 8. Method and protocol | **populated** | — |
 | 9. What we got wrong | **populated — fifteen entries, and this list grows** | — |
 | 10. Result and nomination | **PENDING** | end of Phase 2; Samuel's gate |
@@ -726,6 +726,99 @@ carried generation costs.
 > that a specific arithmetic consequence followed from a specific number, and the
 > number came in where the consequence was fatal. That is worth more than a
 > passing gate on a route we would then have had to price under pressure.
+
+
+---
+
+### 7.2 Can the discarded object be REGENERATED from what the flow carries? Not the cheap half, and a ceiling says so *(new 2026-09-03)*
+
+**Evidence: CONFIRMED**, pre-registered, and **the gate FAILED** — at a ceiling
+rather than at a fit, which is the stronger form of failure.
+
+§7 and §7.1 close the *selection* route: six ways of choosing a subspace of what
+the flow already holds, all dead. That leaves a different question. The flow does
+not merely mis-select the discarded object — it never holds it at all; the object
+is created and destroyed inside a single layer. So: can it be **rebuilt** from the
+state the flow does carry?
+
+There are two discarded pieces. One is an `n × n` matrix carrying roughly 60% of
+the error; the other is an **`n`-vector** carrying roughly 40%. We started with the
+vector, for three reasons that all looked good: it is `O(n)` so it is free in
+arithmetic; correcting it *exactly* is already known to buy `1.55×`; and a
+per-neuron map — neuron `i`'s correction from neuron `i`'s own carried scalars —
+is **permutation-equivariant by construction**, which is the property every
+previous learned component in this project died without.
+
+We fit it properly. 128 freshly minted networks at the live shape, 11 layers,
+1,024 neurons each — **1,441,792 labelled rows against 24 features**. Ridge, one
+coefficient vector across all layers, leave-networks-out over 8 folds, the
+regularisation strength chosen by an *inner* split on the training folds only, and
+all five fitting choices written into the code's docstring before the labels
+existed. The labels themselves are exact — they are the difference between two of
+our own flows, and the labeller asserts both endpoints (`0` and `1`) to the last
+bit on every run.
+
+**Held-out `R²`: `0.10`, against a pre-registered bar of `0.90`.** Negative at the
+shallowest layer — worse than predicting zero. Our written prediction had been
+`≥ 0.95`.
+
+A failed fit has two very different explanations, and the gate cannot tell them
+apart: the features do not explain the target, or they explain it *within* a layer
+and one fixed coefficient vector cannot span the layers. The second would be
+cheaply fixable. So we measured the ceiling — a coefficient vector fitted **on the
+very block it is then scored on**. In-sample by construction, so it is not a
+result; it is the most any map built from these features could ever achieve.
+
+| | layer-averaged |
+|---|---:|
+| held-out, one vector for all layers (**the gate**) | `0.10` |
+| held-out, one vector per layer | `0.16` |
+| **in-sample ceiling of the 24-feature basis** | **`0.26`** |
+
+**The basis is the problem, not the fit.** No amount of per-layer freedom,
+regularisation, or data reaches `0.90` from a ceiling of `0.26`.
+
+**And the mechanism was already written down, one run earlier, in the right
+words.** The discarded block's own contribution to the vector slice is **exactly
+zero**: its three factors are built from the off-diagonal covariance, whose
+diagonal is zero by definition, and the slice reads exactly that diagonal. So the
+discarded mass does not appear in the vector at the layer that generates it — **it
+arrives there only after a linear step mixes the indices**, as a triple Hadamard
+product of three *differently* weight-transformed matrices. That is a third-order
+functional of the weight row against the previous layer's covariance, and the
+covariance the flow carries at that point does not determine it. Two networks can
+agree on everything the flow holds and disagree on the correction.
+
+We had recorded that zero in the module docstring as a hint about *where to take
+the features from*. It was in fact a statement that **the pointwise information is
+insufficient in principle**, and we read it as the weaker thing.
+
+Three things worth carrying out of this:
+
+- **Equivariance being free is not the same as the feature set being
+  sufficient.** Our argument went "the target is a vector, so a per-neuron map is
+  equivariant by construction, so a per-neuron map is the right object". The first
+  two clauses are true and the third does not follow. Equivariance is a constraint
+  a map must satisfy, not evidence that a map exists.
+- **Measure the ceiling before you tune the fit.** One extra command on data we
+  already had converted "our fit is bad" into "no fit built from these features
+  can work", which is a claim about the problem rather than about our effort. It
+  is also the only version of the result that is worth writing down.
+- **The fit gets BETTER with depth** — `0.045` at the shallowest layer to `0.28` at
+  the deepest — which is the opposite of the usual intuition and is consistent
+  with the missing information being weight-history that the carried state slowly
+  accumulates.
+
+**What this costs the plan, stated plainly.** The vector was the cheap leg and the
+reason to start there. What remains is the matrix leg, which is the expensive one,
+and our own pre-registered prediction is that it fails at depth for a
+independently-argued reason. A fitted map cannot beat its own oracle; the two
+oracles are `2.53×` and `1.55×`; and the vector's fittable share is capped at
+`0.26` of the smaller one. **We therefore expect the end-to-end requirement to go
+unmet, and we are saying so before the measurement rather than after it.** The
+result we expect to publish is a mechanised negative: *the discarded third-cumulant
+mass is not a function of the state this class of flow carries, and here is the
+algebra that says why.*
 
 
 ---
