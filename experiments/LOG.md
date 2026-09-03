@@ -29194,3 +29194,63 @@ need before.**
 4. **The fix is confirmed by an instrument independent of every program in the
    chain.** `SKEPTIC WP16` could bound the shared-defect risk at layer 1 only.
    `8.75e-07` on the grader's own labels bounds it everywhere.
+
+---
+
+# 2026-09-03 (LATE) — the WORST-MLP residual: **`2.23x`. Blocker B does not clear.**
+
+`gpuq` 182, `--detail full --format json`, snapshot `22db10a` whose canary is
+**byte-identical to HEAD** (`git diff` empty), so this is the `2,646`-operation
+file and not a stale one. Artifact
+`experiments/2026-09-03_wp17_official/official_residual.json`.
+
+| per-MLP residual, 100 official rows | s |
+|---|---:|
+| min | `0.1493` |
+| p50 | `0.1537` |
+| p90 | `0.1575` |
+| p99 | `0.1593` |
+| **max** | **`0.1797`** |
+
+| | |
+|---|---|
+| **worst-run headroom vs the `0.4 s` cliff** | **`2.23x`** |
+| mean headroom | `2.60x` |
+| `n_failed_mlps` / residual-exhausted flags | `0` / `0` |
+| standing soak requirement | **`>= 4x` on the worst run of `3 x 100`** |
+| **verdict** | **DOES NOT CLEAR** |
+
+**The distribution is remarkably tight, and that is a real finding.** `p99` is
+`0.1593` and the maximum is `0.1797` — the worst MLP is **13% above the 99th
+percentile**, and the whole 100-row spread is `1.20x` from min to max. When the
+`>= 4x` bar was written, `VALIDATION.md` §2b-ii put run-to-run spread at
+`~2.4x` — that figure came from the LOCAL instrument on a contended host. **On
+the deployment authority the per-MLP spread is `1.20x`, not `2.4x`.** The bar was
+calibrated against noise the authority does not have.
+
+**That is an observation, not a licence to move the bar.** The `>= 4x`
+requirement is a standing policy and this entry does not change it. It is flagged
+because the evidence the policy was written on has been superseded by better
+evidence, and **that is a decision for Samuel and the strategist, not for the
+agent that would benefit from the answer.**
+
+**What `4x` would take.** Worst must be `<= 0.1 s`, from `0.1797` — a `1.8x`
+residual reduction. The official mean-residual ratio to the matched control
+(`5.82x`) tracked the local operation ratio (`5.98x`) to within 3%, so
+operations are the right lever: `~1,470` operations per MLP, `~92` a layer,
+against today's `2,646` / `165`. **That is essentially the brief's own `~120`
+per-layer target, and it needs the reassociating changes deliberately left
+undone** — factoring `0.5 C11^2 X + 0.25 D22 X`, and batching the thirteen
+two-dimensional terms through a 3-D stack that materialises `54 MB` at
+`n = 1024`, which forum 18101 says costs residual. Neither is an IEEE identity,
+so each needs a measured drift check rather than a byte comparison.
+
+**And one host-load caveat, because it cuts against my own earlier number.**
+Job 174 (`ae44369`, `2,708` operations) reported a mean residual of `0.2233 s`;
+this run reports `0.1541 s` for a file `62` operations cheaper. A `2.3%`
+operation change cannot produce a `31%` residual change: **the official runner is
+itself sensitive to host load**, and the two readings differ by contention. The
+conservative reading is job 174's. Both fail `>= 4x`, so the conclusion is
+unchanged, but *"the authority is immune to host load"* is not a claim this
+repository may make — only *"the authority is the only thing that can fail an
+MLP, and it failed none."*
