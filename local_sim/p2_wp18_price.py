@@ -156,11 +156,24 @@ def cmd_pair(a) -> int:
         preds[path] = first_pred
         flops0 = per_seed[0]["flops"]
         indep = len({r["flops"] for r in per_seed}) == 1
+        # THE STEADY-STATE ROW, and it is the one a per-MLP price must be quoted
+        # against. `SKEPTIC WP18` caught the first version of this packet
+        # comparing the guarded file to the baseline's FIRST MLP -- the single
+        # most expensive row the baseline ever produces, because MLP 1 pays for
+        # the constants cache and MLP 2..100 do not. Against the row that 99 of
+        # 100 graded MLPs actually see, the price is larger. The modal row is
+        # the steady state; for an order-independent file it equals row 0.
+        _fv = [r["flops"] for r in per_seed]
+        _ov = [r["n_ops"] for r in per_seed]
+        steady = max(set(_fv), key=_fv.count)
+        steady_ops = max(set(_ov), key=_ov.count)
         mult = max(FLOOR, flops0 / a.budget)
         mult_off = max(FLOOR, (flops0 + SERVER_OFFSET) / a.budget)
         prices[path] = {"flops": flops0, "n_ops": per_seed[0]["n_ops"],
                         "flop_independent": indep,
                         "per_seed": per_seed,
+                        "flops_steady_state": steady,
+                        "n_ops_steady_state": steady_ops,
                         "x": flops0 / a.budget,
                         "x_with_server_offset": (flops0 + SERVER_OFFSET) / a.budget,
                         "multiplier": mult,
@@ -178,6 +191,8 @@ def cmd_pair(a) -> int:
         spread = "YES" if indep else "NO -- " + ", ".join(
             f"{r['flops']:,}" for r in per_seed)
         print(f"    FLOPs equal on {len(SEEDS)} networks in ONE process   {spread}")
+        print(f"    STEADY-STATE FLOPs / operations   {steady:,} / {steady_ops:,}"
+              f"{'   <- the row 99 of 100 graded MLPs see' if not indep else ''}")
         print()
 
     A, B = a.pair[0], a.pair[1]
@@ -198,14 +213,36 @@ def cmd_pair(a) -> int:
         print(f"    {l:>6}{np.abs(d[l]).max():>14.3e}"
               f"{np.abs(d[l]).max() / scale:>12.3e}{chg:>11}"
               f"{int(neg_a[l].sum()):>12}")
-    # THE claim: every change is a clamped negative or a substituted non-finite.
-    changed = d != 0.0
+    # ROW 0 IS CHECKED AGAINST THE CLOSED FORM, NOT AGAINST THE BASELINE.
+    # The candidate replaces row 0 with `||W[:, j]|| / sqrt(2 pi)` in float64, so
+    # every one of its `n` entries differs from the baseline BY DESIGN and the
+    # negative-or-non-finite predicate cannot explain them -- which it did not,
+    # and it said so with `1,024` unexplained changes the first time this ran.
+    # That is the predicate doing its job on an intentional change, so the
+    # intentional change gets its OWN check rather than a widened predicate.
+    w0 = _mint(SEEDS[0], a.width, a.depth)[0].astype(np.float64)
+    exact0 = np.sqrt((w0 * w0).sum(axis=0)) / np.sqrt(2.0 * np.pi)
+    sc0 = max(float(np.abs(exact0).max()), 1e-300)
+    rel_A0 = float(np.abs(pa[0] - exact0).max()) / sc0
+    rel_B0 = float(np.abs(pb[0] - exact0).max()) / sc0
+    row0_ok = (rel_B0 < 1e-12) and (rel_B0 < rel_A0)
+    print()
+    print("    row 0 against the exact closed form ||W[:,j]|| / sqrt(2 pi)")
+    print(f"      baseline  rel {rel_A0:.3e}")
+    print(f"      candidate rel {rel_B0:.3e}   "
+          f"{'STRICTLY BETTER and inside 1e-12' if row0_ok else 'NOT better'}")
+
+    # THE claim, for rows 1.. : every change is a clamped negative or a
+    # substituted non-finite.
+    changed = (d != 0.0)
+    changed[0] = False
     explained = changed & (neg_a | ~np.isfinite(pa))
     unexplained = int((changed & ~explained).sum())
     print()
-    print(f"    entries changed                        {int(changed.sum()):,}")
-    print(f"    of which were negative or non-finite   {int(explained.sum()):,}")
-    print(f"    UNEXPLAINED changes                    {unexplained:,}"
+    print(f"    rows 1..{pa.shape[0] - 1}:")
+    print(f"      entries changed                        {int(changed.sum()):,}")
+    print(f"      of which were negative or non-finite   {int(explained.sum()):,}")
+    print(f"      UNEXPLAINED changes                    {unexplained:,}"
           f"   {'<- must be 0' if unexplained else '(none)'}")
     fl = pa.shape[0] - 1
     print(f"    scored final layer: worst |d| {np.abs(d[fl]).max():.3e}, "
@@ -213,9 +250,26 @@ def cmd_pair(a) -> int:
           f"all of them negative in {A}: "
           f"{bool(np.all(neg_a[fl][d[fl] != 0.0])) if (d[fl] != 0.0).any() else True}")
 
-    ok = (unexplained == 0) and prices[B]["flop_independent"]
-    print(f"\n  -> {'PASS' if ok else 'FAIL'}   "
-          f"(no unexplained value change, and B's FLOPs are network-independent)")
+    dops = prices[B]["n_ops_steady_state"] - prices[A]["n_ops_steady_state"]
+    dfl = prices[B]["flops_steady_state"] - prices[A]["flops_steady_state"]
+    print()
+    print("  PRICE, STEADY STATE against STEADY STATE -- the honest comparison")
+    print(f"    operations  {prices[A]['n_ops_steady_state']:,} -> "
+          f"{prices[B]['n_ops_steady_state']:,}   {dops:+,}   "
+          f"({dops / max(prices[A]['n_ops_steady_state'], 1) * 100:+.2f}%)")
+    print(f"    f32 FLOPs   {prices[A]['flops_steady_state']:,} -> "
+          f"{prices[B]['flops_steady_state']:,}   {dfl:+,}   "
+          f"({dfl / max(prices[A]['flops_steady_state'], 1) * 100:+.5f}%)")
+
+    ok = (unexplained == 0) and prices[B]["flop_independent"] and row0_ok
+    print()
+    print(f"  -> {'PASS' if ok else 'FAIL'}   (row 0 exact; no unexplained "
+          f"change in rows 1.., AT THIS SHAPE; B order-independent)")
+    print("     SCOPE: 'no unexplained change' is a claim about THIS shape. The")
+    print("     alpha cap binds where the flow is ALREADY numerically broken --")
+    print("     SKEPTIC WP18 measured 311 unexplained changes at 64x32, where")
+    print("     the uncapped |alpha| reaches 2.4e14. That is the guard working,")
+    print("     and it is a LOSS there rather than a no-op.")
     if a.out:
         _dump(a.out, {"check": "WP18 § A: the guarded canary's price and its "
                                "value difference from the graded file",
@@ -225,6 +279,12 @@ def cmd_pair(a) -> int:
                       "server_offset": SERVER_OFFSET,
                       "baseline": A, "candidate": B,
                       "price": prices, "per_layer": per_layer,
+                      "steady_state_delta_ops": int(dops),
+                      "steady_state_delta_flops": int(dfl),
+                      "row0_rel_baseline": rel_A0,
+                      "row0_rel_candidate": rel_B0,
+                      "row0_exact_pass": bool(row0_ok),
+                      "scope_caveat": "unexplained == 0 is a claim about THIS shape only. The alpha cap binds where the flow is already numerically broken; SKEPTIC WP18 measured 311 unexplained changes at 64x32.",
                       "entries_changed": int(changed.sum()),
                       "entries_explained": int(explained.sum()),
                       "unexplained": unexplained,

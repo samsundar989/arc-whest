@@ -1,5 +1,144 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-03 (WP18, END OF SESSION) — THE CANARY IS `29/30` AND PACKAGED;
+> `SKEPTIC WP18` FOUND THREE OF MY CLAIMS WRONG AND THE FIX TOOK IT FROM `28/30`;
+> AND ARM L'S CHEAP LEG IS DEAD AT A CEILING, NOT AT A FIT.**
+>
+> `estimator.py` untouched at v2.6.1. **Nothing submitted, nothing designated.**
+> `estimator_wp15_k3_canary.py` left byte-identical so the graded `8.75e-07`
+> keeps naming an exact file. Contract `49e2e42` precedes every number here.
+>
+> ## 1. The strategist's three rulings, in force
+>
+> | | |
+> |---|---|
+> | **1** | the `>= 4x` residual bar **SPLITS**. A **canary** needs certify green, the Linux memory gate, `0/100` local failures, the FLOP floor with `+2**24`, worst-row headroom `>= 1.5x`. `>= 4x` moves to the **nomination** bar and is scored on the grader's per-row telemetry. The `3 x 100` soak is OFF the canary path |
+> | **2** | **Arm M killed** as a standalone; its three-generation closed forms survive as Arm L features |
+> | **3** | floor nominee and Arm L in **parallel**; Arm L starts with `E3` |
+>
+> Kill line **~2026-09-24**. Designate by **Oct 10**, close **Oct 17**, due **Oct 24**.
+>
+> ## 2. The canary: `29/30`, packaged, and NOT presented as gate-green
+>
+> Running `certify_candidate` on the canary **for the first time** returned
+> `REFUSED` and **5 of 30** invariants: NaN output on degenerate networks
+> (unbounded `alpha` → `inf * 0`), `151` of `1024` **scored-row** entries
+> negative, and order-dependent FLOPs from a constants cache. Fixed in a new file
+> `estimator_wp18_canary.py`.
+>
+> | | graded canary | **post-Skeptic canary** |
+> |---|---:|---:|
+> | **invariants** | `5 / 30` | **`29 / 30`** |
+> | counted f32 FLOPs (certify) | `168,629,787,238` | `168,636,407,398` |
+> | `C/B` / multiplier | `0.0766836` / `0.1` | `0.0766870` / `0.1` — **floor, with `+2**24`** |
+> | **steady state → steady state** | `2,627` ops | `2,655` ops |
+> | **price of the guards** | | **`+28` ops (`+1.07%`), `+1,873,408` FLOPs (`+0.00111%`)** |
+> | FLOPs network-independent | **NO** | **YES** |
+> | row 0 vs the exact closed form | `2.964e-07` | **`1.826e-16`** |
+> | unexplained value changes, rows 1.., **at `1024 x 16`** | — | **`0`** of `643` |
+> | worst `\|alpha\|` / cap / margin | — | `9.04` / `1e6` / **`1.1e5x`** |
+> | Linux `8,192 MB` gate | not run | **`13/13`**, `VmPeak 2266.8 MB`, `3.61x`, both controls behaving |
+> | official smoke | `0 failed` | `0 failed`, worst graded-path residual `207.24 ms` |
+>
+> **THE ARCHIVE**
+>
+> | | |
+> |---|---|
+> | `experiments/2026-09-03_wp18_canary/submission_wp18_canary.tar.gz` | `12,665` bytes |
+> | archive sha256 | `87d47aefae7b9c4359384b5ee1355ebd63535a7d8e3fa4fc26f4d23e0a52c15f` |
+> | inner `estimator.py`, **LF** (the shipped bytes) | `3536cda3183ab4290883e7a6bf5c8d7cdc6dce77ebb43830ba31375eef7c3056` |
+> | the same content **CRLF**, which is what `certify_guarded.json` names | `3d29e2d5a3e0f986…` |
+> | `validate_package` | `ok=True, issues=[]` |
+> | verified from the ARCHIVE at `1024 x 16` | dtype `float64`, min `0.0`, all finite, row 0 rel `1.84e-16`, `x = 0.07669` |
+> | label | **residual-measurement canary — NOT a nomination** |
+>
+> **The one red item: invariant 9, permutation equivariance.** `d_k/scale ~ 1.1e-6`
+> against a `1e-6` bar, while the same invariant's implied-MSE clause passes by
+> five orders of magnitude (`1.4e-13` against `1.4e-8`). It is `sqrt(256) *
+> eps_f32` BLAS-blocking noise out of `W^T cov W` and the only cure is float64 in
+> the covariance backbone — measured at exactly `2.0x` billing, which moves
+> `x = 0.0767 -> 0.153`, off the `0.1` floor, for a `1.53x` worse score.
+> **Invariant 9 is unmeetable by any competitive Phase-2 candidate.** `SKEPTIC
+> WP18` agrees, and separately says the canary **should** go out at `28/30`.
+>
+> **Samuel decides.** `CONTRACT WP18` § A says any red item means it is not
+> presented as gate-green, and that binds. No agent moves a threshold to make its
+> own candidate pass.
+>
+> ## 3. `SKEPTIC WP18`: PROVISIONAL, and it was right three times
+>
+> | finding | what changed |
+> |---|---|
+> | the price was quoted against the graded file's **first MLP**, the one most expensive row | the probe now computes a **steady state** and prints it; `+19` → **`+28`** ops |
+> | `ALPHA_CAP = 40`'s justification was **mathematically false** — `w(0,1) = sigma(phi + alpha*Phi)` is `E[ReLU]` and grows linearly forever; nothing saturates | comment rewritten to say it is a **lossy saturation**; cap moved to **`1e6`**, set from the real constraint (`alpha^4` finite in f32, bound `4.295e9`) |
+> | "every value changed was negative or non-finite" is true at `1024 x 16` and **false off it** — `311` unexplained at `64 x 32` | every statement now carries the shape; the probe prints a SCOPE paragraph; `scope_caveat` in the artifact |
+> | invariant 8's stated blocker was **false**: `estimator.py` already returns `float64` and already contains the exact fix (`_exact_first_layer`) | fix applied; **`28/30 -> 29/30`** |
+>
+> It also **withdrew `2.215x`**: three instruments here disagree about the guards'
+> residual price *in sign* (`+18.6%` in-process, `-5%` official subprocess), and
+> `official_residual.json` is the **LOCAL official runner, not graded telemetry**.
+> The conservative reading puts the worst row at `0.2604 s` → **`1.536x`**, which
+> clears the canary bar's `1.5x` by `2%`, not by `48%`.
+>
+> ## 4. ARM L: `G-L-FIT-E3` FAILS at `0.1002`, and the BASIS is the problem
+>
+> `gpuq` 191. `128` `P05` nets (`40,902,005,000..127`, claimed and **finalized**,
+> ledger `66/66`), `1,441,792` labelled rows, `24` frozen features.
+> **B1 held exactly**: `explained(0) = 0` and `explained(depth) = 1`, both to
+> `0.000e+00`.
+>
+> | | |
+> |---|---|
+> | **`G-L-FIT-E3` layer-averaged held-out `R^2`** | **`0.1002` vs `0.90` — FAIL** |
+> | worst pre-layer | `-0.0134` — worse than predicting zero |
+> | per-layer, leave-networks-out | `0.1595` |
+> | **per-block ceiling, IN SAMPLE** | **`0.2575`** |
+> | permuted-coefficient null | `-2.0117` — `G-NULL` clean |
+>
+> **Prediction B2 said `>= 0.95`. Badly refuted**, and it restated `CONTRACT
+> WP15`'s `P10`, so this overturns a belief held since WP15.
+>
+> **The ceiling is the finding.** Fitted *on the very block it is scored on*, these
+> 24 pointwise features explain `26%` of `E3`. Layer-dependent scalars cannot
+> rescue a ceiling. **Mechanism**: the fresh block's `(3,)` slice is *exactly zero*
+> (`3 w1^2 w2 C_ii^2`, and `C`'s diagonal is zero), so `E3` reaches `(3,)` only
+> after a linear step, as `sum_j (WA)_ij (WB)_ij (WD)_ij` — a triple Hadamard of
+> three differently `W`-transformed matrices, which the post-linear `Sigma` does
+> **not** determine. Equivariance was free; **sufficiency was assumed and is
+> false**. And `R^2` *rises* with depth (`0.045 -> 0.28`), the opposite of the
+> shallow-is-easy intuition.
+>
+> **§ B's falsifier has NOT fired** — it needs both legs, and `E21` is unfitted.
+> What is closed is "a pointwise map on the flow's own per-neuron scalars", closed
+> at a ceiling rather than at a fit.
+>
+> ## 5. NEXT ACTIONS, in order
+>
+> 1. **Samuel decides on the canary** (`29/30`, invariant 9 only). On submission,
+>    read the graded per-row residual against the **nomination** bar (`>= 4x`).
+>    If `2.5x`–`4x`, reassociate to that target and re-canary; if `< 2.5x`, cut
+>    operations hard. **Sizing waits for the graded number.**
+> 2. **`E21`'s Gram/moment pass** — the second labeller pass, over a basis declared
+>    *before* its moments are computed. It is now the whole of Arm L. `CONTRACT
+>    WP15`'s `P5` and this session's `B3` both predict it fails at depth.
+> 3. **Say plainly what the arithmetic now implies.** A fitted map cannot beat its
+>    own oracle; the oracles are `2.534x` (`E21`) and `1.551x` (`E3`); `E3`'s
+>    fittable share is capped at `0.26`. **`G-L-E2E`'s `10x` is very unlikely, and
+>    the ~Sep 24 kill line is the expected outcome rather than the contingency.**
+>    Plan for the write-up to carry a clean mechanised negative.
+> 4. Re-run the Linux memory gate **whenever the candidate changes** — § 9 finds
+>    its report by FILENAME, so a stale report for the same filename is still read.
+>
+> ## 6. Write-up is current
+>
+> `docs/writeup-p2-draft.md` gained **§6.8** (the 100-row graded confirmation and
+> the residual-dispersion finding) and **§7.1** (Arm M's memory depth,
+> `0.338/0.573/0.732`, its gate failing, and why `73%` of one slice is `~44%` of
+> the error). §7's stale *"the one experiment we would run next"* is replaced — it
+> was run, and the answer is `r/n` to three decimals. **Still to add: the `E3`
+> ceiling, which is the strongest negative this project has measured.**
+
+
 > **2026-09-03 (WP18) — THE STRATEGIST RULED, THE CANARY WAS CERTIFIED FOR THE
 > FIRST TIME, AND IT FAILED 25 OF 30 INVARIANTS. THE GUARDED FILE IS 28/30 AND
 > WAITING ON ONE DECISION THAT IS NOT AN AGENT'S.**

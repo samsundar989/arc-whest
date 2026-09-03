@@ -29739,3 +29739,413 @@ keeps naming an exact file.
    beside the candidate or in `experiments/2026-08-31_wp0cd_certify/`. A report
    written anywhere else is SKIPPED, not failed, and § 9 silently stays advisory.
    That cost one wasted certify run and is now in `SETUP_WINDOWS.md` § 7.
+
+---
+
+# 2026-09-03 — **SKEPTIC WP18: PROVISIONAL. Three of my supporting claims were wrong, one of them was a stated REASON that was false, and the fix it forced took the file from 28/30 to 29/30.**
+
+Launched in a context that had never seen this session's reasoning, on pinned
+commits `49e2e42` / `85f3055` / `aba7b4d`, with the contract, the diff, the
+protocol and the raw artifact paths. Verdict **PROVISIONAL**. It reproduced every
+gate outcome and endorsed the deployment conclusion, and then took apart three
+things I had written down.
+
+## Its four findings, and what I did about each
+
+### 1. THE PRICE WAS QUOTED AGAINST THE WRONG ROW, and the artifact contained the right one
+
+I reported `+19` operations by comparing the guarded file to the graded file's
+**first MLP** — the single most expensive row that file ever produces, because
+MLP 1 pays for the constants cache and MLP 2..100 do not. Against the row **99 of
+100 graded MLPs actually see**, the price is larger. `guard_price_1024x16.json`
+had both rows in `price.per_seed`; my summary read the wrong one.
+
+It reproduced the decomposition exactly (`19 = 16` clips `+ isfinite + where +
+maximum`; the missing `4` = `ones`, `eye`, subtract, `ones_n`) and on three fresh
+`1024 x 16` mints of its own.
+
+**Acted on.** `p2_wp18_price.py` now computes a **steady-state** row explicitly
+and prints *"PRICE, STEADY STATE against STEADY STATE — the honest comparison"*,
+with the comment naming this finding so the mistake cannot be made silently
+again. **Corrected figure below.**
+
+### 2. `ALPHA_CAP = 40`'s JUSTIFICATION WAS MATHEMATICALLY FALSE, and it was written into a submission file's comment
+
+I wrote — in the estimator, and in the LOG — that *"`phi` is a float32 zero
+beyond `13.2` and `Phi` is exactly `0` or `1`, so every Wick coefficient has
+already reached its limit; beyond the cap the arithmetic is choosing between two
+spellings of the same limit."*
+
+The Skeptic decoded the embedded table and disproved it. `w(0,1)` has
+`P2 = [0.0, 1.0]`, i.e. `sigma * (phi(alpha) + alpha * Phi(alpha))` — which is
+`E[ReLU]`, and it grows **linearly in `alpha` without bound**, as it must, because
+a neuron that is always on has mean `mu`. `w(0,2)` grows as `alpha^2` and `w(0,4)`
+as `alpha^4`. **Nothing saturates.** I confirmed it directly: at `sigma = 1e-6`,
+`w(0,1)` is `1.32e-05` at `alpha = 13.2`, `4e-05` at `40`, `0.01` at `1e4` and
+`1` at `1e6`.
+
+So the cap is a **lossy saturation**, not a limit-preserving rewrite: it caps a
+saturated neuron's predicted mean at `ALPHA_CAP * sigma`. And the Skeptic noted
+that my own overflow criterion permits far more — so `40` was eight orders more
+conservative than the constraint it was justified by, chosen on an argument that
+does not hold.
+
+**Acted on, in two ways.**
+
+- **The comment is rewritten to say what is true**, including that the previous
+  version was false and who disproved it. It now states plainly: *the cap is
+  inert wherever the flow is numerically sound, and lossy exactly where the flow
+  would otherwise return NaN. It converts "fails the MLP, scores as zeros" into
+  "answers badly", which is the right trade and is not the same as robustness.*
+- **The cap is moved to `1e6`, set from the one constraint that is real.**
+  Decoding the frozen table, the highest degree in `alpha` is **4** (at `w(0,4)`,
+  `P2 = [3, 0, 6, 0, 1]`), so `alpha**4` must stay finite in float32: the hard
+  bound is `3.4028e38 ** 0.25 = 4.295e9`. `1e6` puts `alpha**4` at `1e24`, i.e.
+  `3.4e14` below the ceiling so the downstream `sigma**d` factors have room, and
+  it is **`1.1e5` times** the worst `|alpha|` the uncapped flow reaches at the
+  live shape (`9.04`, re-measured). The cap now fires only where the flow is
+  already producing nonsense, which is 25,000 times later than `40` did.
+
+### 3. "EVERY VALUE IT CHANGES WAS NEGATIVE OR NON-FINITE" IS TRUE AT `1024 x 16` AND FALSE OFF IT
+
+The Skeptic re-ran the pair probe at other shapes and on `edge_cases`' own
+degenerate networks:
+
+| case | worst uncapped `\|alpha\|` | cap binds | unexplained changes |
+|---|---:|---|---:|
+| minted `1024 x 16`, 3 fresh seeds | `8.49`–`8.81` | no | **0** |
+| minted `256 x 64` | `5.09` | no | **0** |
+| `he 256x32` clean | `5.46` | no | **0** |
+| **`he 64x32`** | **`2.4e14`** | **yes** | **311** |
+| `he 256x32`, layer 12 x `1e-3` | `3.1e12` | yes | 127 |
+| `he 256x32`, layer 5 x `0.02` | `4.3e10` | yes | 1,251 |
+
+**This is the answer to the question I most wanted attacked: the "0 unexplained"
+predicate is capable of failing, and the Skeptic made it fail.** The claim was
+honestly scoped in the artifact's filename and unscoped in my prose.
+
+**Acted on.** The probe now prints an explicit SCOPE paragraph naming this
+finding and its numbers, and `guard_price_1024x16.json` carries a
+`scope_caveat` field. Every statement of the claim from here carries "at
+`1024 x 16`".
+
+### 4. INVARIANT 8 WAS FOUR OPERATIONS AWAY, AND MY STATED BLOCKER WAS FALSE
+
+I declined the narrow fix because *"it changes the submission's output dtype, an
+interface the grader has never seen from us."* The Skeptic checked. **The shipped
+`estimator.py` returns `float64`**, and `estimator.py:864` already contains
+`var = (w0 * w0).sum(axis=0, dtype=fnp.float64)` — *which is the proposed fix* —
+in a method called `_exact_first_layer`. The grader has seen that interface on
+every submission this project has ever made, #328662 and #328664 included.
+
+I verified it myself before acting: `np.asarray(estimator.py's output).dtype` is
+`float64`.
+
+**The cost half of my argument does survive** — the Skeptic measured flopscope
+0.12 billing float64 at exactly `2.0x` (matmul `268,173,312 -> 536,346,624`), so
+a **full**-f64 flow really does push `x` from `0.0767` to `0.153` and off the
+`0.1` floor. But nobody proposed a full-f64 flow. **The `1.53x` penalty does not
+apply to the fix I declined**, and I attached it to that fix anyway.
+
+**Acted on. The fix is in**, and the estimator comment records why it should never
+have been declined. At layer 1 the input is exactly `N(0, I)`, so `mu_pre = 0`,
+`alpha = 0`, `cov_pre = W^T W`, and the third-order corrections vanish because the
+carried `M` and `c4` are still zero — row 0 is exactly `||W[:, j]|| / sqrt(2 pi)`
+and the flow is not needed to produce it.
+
+## The corrected numbers, and the file is now 29/30
+
+| | graded canary | **post-Skeptic canary** |
+|---|---:|---:|
+| **invariant suite** | `5 / 30` | **`29 / 30`** |
+| counted f32 FLOPs (certify) | `168,629,787,238` | `168,636,407,398` |
+| `C/B` | `0.0766836` | `0.0766870` — **floor, with `+2**24`** |
+| flopscope operations (certify) | `2,647` | `2,674` |
+| **steady state -> steady state (the honest comparison)** | `2,627` ops / `168,612,483,174` | `2,655` ops / `168,614,356,582` |
+| **the price** | | **`+28` operations (`+1.07%`), `+1,873,408` FLOPs (`+0.00111%`)** |
+| FLOPs network-independent | **NO** | **YES** |
+| row 0 vs the exact closed form | `2.964e-07` | **`1.826e-16`** |
+| rows 1.. : unexplained changes at `1024 x 16` | — | **`0`** of `643` |
+| worst `|alpha|` / cap / margin | — | `9.04` / `1e6` / **`1.1e5x`** |
+| official smoke | `0 failed` | `0 failed`, worst graded-path residual `207.24 ms` |
+
+**The row-0 check is new and it is not the negative-or-non-finite predicate
+widened.** Replacing row 0 changes all `1,024` of its entries by design, and the
+predicate correctly refused to explain them — it reported `1,024` unexplained
+changes the first time it ran against the new file. **That is the check working
+on an intentional change**, so the intentional change got its own test (row 0
+against the closed form, required to be both inside `1e-12` and strictly better
+than the baseline) rather than a loosened predicate.
+
+## The one that remains, and the Skeptic agrees it is irreducible
+
+**Invariant 9, permutation equivariance.** `d_k = 7.15e-07` on width-256 rows of
+`O(0.5)` is `sqrt(256) * eps_f32` BLAS-blocking noise out of `W^T cov W`, and the
+only cure is float64 in the covariance backbone — which is the `1.53x` penalty
+that genuinely does apply. The Skeptic's own words: *"the `1e-12` / `1e-6`
+thresholds were plainly calibrated beside an incumbent delivering `1e-16` /
+`1e-15`, so they do encode an f64 expectation in the sense that matters."*
+
+So *"two invariants a float32 estimator cannot meet"* was **half right**, and the
+half that was wrong cost four operations to fix.
+
+## Two provenance items it found, both real
+
+**The certification does not name the archived bytes.** `certify_guarded.json`
+records `candidate_sha256 = 3d29e2d5a3e0f986…`; the file on disk and inside the
+archive hashes to `3536cda3183ab429…`. The Skeptic resolved it by inference; I
+**confirmed it by construction**: `sha256(bytes.replace(b"\n", b"\r\n"))` is
+exactly `3d29e2d5a3e0f986…`. `gpuq` runs from a git checkout under
+`~/.local/state/gpuq/snapshots/<id>/`, where `core.autocrlf` renders CRLF.
+**Same content, two renderings, and nothing in the repository said so.** It is
+said here, and both hashes are carried below.
+
+**Two absolute FLOP totals for the same file at the same shape**, differing by
+exactly `15 n^2 = 15,728,640`: `p2_wp18_price.py` against `certify_candidate.py`
+and the official runner. Both instruments agree on every *delta*. Neither of us
+found the cause. It changes no decision — the multiplier is pinned with 30%
+margin — but **`guard_price_1024x16.json`'s absolute column does not reproduce
+the grader's, only its differences**, and it must not be quoted as if it did.
+
+## What the Skeptic confirmed, including one thing better than I claimed
+
+- **The diff is only the four changes.** Line by line, no moved constant, no
+  changed coefficient, no reordered accumulation.
+- **The metering matches the grader exactly.** It read the installed package:
+  `whestbench/runner.py:175` and `subprocess_worker.py:207` call `setup` **once,
+  outside any `BudgetContext`**, and `scoring.py:709` opens a **fresh
+  `BudgetContext` per predict** on one shared `Estimator`. So `setup`'s FLOPs are
+  billed nowhere and the probe's design is right. The self-caught vacuity is real.
+- **The order-dependence is visible in the GRADER's own telemetry, from an
+  instrument I never used for it.** `official_residual.json`'s
+  `mean_effective_compute` is `168,628,227,568`, which is
+  `168,628,211,814 + 1,575,424/100` **to the byte** — one row of 100 paying the
+  mask build. Independent confirmation that fix 3 was fixing something real.
+- **The clamp's sign and size are confirmed on CONFIRM tier.**
+  `final_layer_mse_CONFIRM_ONLY` goes `9.144722525888938e-07 ->
+  9.144720536369277e-07`: lower by `1.99e-13`, exactly the `~1e-13` claimed, and
+  strictly non-increasing as the `(0-y)^2 < (p-y)^2` argument requires.
+- **Question 7 is clean.** No seed block drawn in § A; every seed outside the
+  registry; `ALPHA_CAP` set from a probe on minted networks with no truth read;
+  nothing selected on CONFIRM.
+- It **endorsed the refusal to move a threshold**: *"moving `1e-12` because an f32
+  file misses it is exactly the failure this repository has a rule against."*
+
+## Where it disagrees with me, and I am not overruling it
+
+**It says the canary should be submitted at `28/30`**, and would not have gated
+that on the invariant-8 fix: nothing it found touches the live distribution, an
+undesignated canary carries no prize risk under Rules v14 §6, and the file exists
+to buy the one number no local instrument can produce. It is now `29/30` anyway.
+
+**But it also refused the number `2.215x`, and it is right.** Three instruments in
+these same artifacts disagree about the guards' residual price **in sign**:
+certify's in-process meter says `+18.6%`, the official subprocess runner says
+`-5%` (i.e. the guarded file is *better*), and the WSL gate says `0.1076 s`.
+Dividing a worst-row headroom by `1.0072` is theatre against that. **And
+`official_residual.json` is the LOCAL official runner, not graded telemetry** —
+the contract's own evidence table says "local worst-row headroom" and my packet
+called it "the graded worst row". **`2.215x` is withdrawn and the label is
+corrected.** The repository's conservative reading (job 174 against 182) puts the
+worst row at `0.2604 s` → **`1.536x`**, which clears the CANARY bar's `>= 1.5x`
+by `2%`, not by the `48%` that `2.23x` suggests. The `>= 1.5x` item passes on
+every reading either of us can construct, and that is the whole claim.
+
+## The archive, rebuilt on the post-Skeptic file
+
+| | |
+|---|---|
+| archive | `experiments/2026-09-03_wp18_canary/submission_wp18_canary.tar.gz`, `12,665` bytes |
+| archive sha256 | `87d47aefae7b9c4359384b5ee1355ebd63535a7d8e3fa4fc26f4d23e0a52c15f` |
+| `estimator.py` inside it, **LF** (the shipped bytes) | `3536cda3183ab4290883e7a6bf5c8d7cdc6dce77ebb43830ba31375eef7c3056` |
+| the same content **CRLF**, which is what `certify_guarded.json` names | `3d29e2d5a3e0f986…` |
+| `validate_package` | `ok=True, issues=[]` |
+| gate | `29/30`; invariant 9 only |
+
+## Knowledge delta
+
+1. **A justification can be false while its conclusion is right, and the false
+   justification is the dangerous half.** `ALPHA_CAP` needed to exist; the reason
+   I gave for its value was wrong, and it made me pick a value 25,000 times more
+   aggressive than necessary. It shipped inside a submission file's comment,
+   where it would have been read as settled.
+2. **Quote a per-MLP price against the steady state, never against MLP 1.** A
+   cached constant makes the first row unrepresentative of 99% of the run, and
+   the artifact will contain both numbers for you to pick the flattering one.
+3. **Check what the incumbent already does before declaring an interface novel.**
+   `estimator.py` had shipped the exact fix I called an untested interface
+   change, twice, to the grader.
+4. **`gpuq` snapshots render CRLF.** Every hash a brokered job reports is the
+   CRLF rendering; every hash taken on the working tree is LF. Both are now in
+   `docs/GOTCHAS.md`.
+
+---
+
+# 2026-09-03 — **WP18 § B FIRST RESULT: `G-L-FIT-E3` FAILS AT `0.1002` AGAINST A `0.90` GATE — and the ceiling says the BASIS is wrong, not the fit**
+
+`gpuq` 191. `128` `P05` networks (`40,902,005,000..127`, claimed on the host and
+finalized to sha256 `effdc7a30bee0159…`), `1024 x 16`, f32, 11 pre-layers
+`5..15`, `1024` neurons each — `1,441,792` labelled rows against `24` frozen
+features. Artifacts `experiments/2026-09-03_wp18_armL/labels_P05.npz` (233.5 MiB),
+`fit_e3.json`, `fit_e3_null.json`, `fit_e3_diagnose.json`.
+
+## B1 held exactly
+
+| check | required | measured |
+|---|---|---|
+| `explained(k = 0)` | `0` | **`0.000e+00`** |
+| `explained(k = depth)` | `1` | **`1` to `0.000e+00`** |
+| `regen_state` vs `slices_window(k=0)` | identical | **`0.000e+00` relative** |
+
+So the labeller is computing `E21` and `E3`, not something adjacent. Prediction
+**B1 HELD**. Sanity: `mean rel_E3 = 0.2905` and `mean rel_E21 = 0.4593`, both
+consistent with WP13/WP14's independently measured shares.
+
+The labeller's `--selftest` also passes a **permutation-equivariance check
+through the WEIGHT MATRICES** at `128 x 4` in both f64 and f32 — `E3` relative
+`0.000e+00`, features `3.4e-16`. It failed the first time it ran, at relative
+`0.97`, because the mint's convention is `(in, out)` and I permuted rows instead
+of columns. A check that cannot fail is not a check; this one failed first.
+
+## `G-L-FIT-E3`: FAIL, and my prediction B2 is badly refuted
+
+Ridge, leave-networks-out over 8 folds of 16 networks, one coefficient vector
+across all pre-layers, per-block weighting `1/||E3||^2`, column scale from
+training folds only, `lambda` from an inner leave-networks-out split — all five
+choices declared in `p2_wp18_fit.py`'s docstring **before the labels existed**.
+
+| pre-layer | held-out `R^2` (uncentered) | worst net | centered |
+|---:|---:|---:|---:|
+| 5 | **`-0.0134`** | `-0.1127` | `-0.0142` |
+| 6 | `0.0125` | `-0.0896` | `0.0117` |
+| 7 | `0.0437` | `-0.0109` | `0.0429` |
+| 8 | `0.0656` | `0.0157` | `0.0645` |
+| 9 | `0.0891` | `-0.0042` | `0.0882` |
+| 10 | `0.1122` | `0.0245` | `0.1110` |
+| 11 | `0.1201` | `0.0250` | `0.1193` |
+| 12 | `0.1448` | `-0.0442` | `0.1441` |
+| 13 | `0.1602` | `-0.1555` | `0.1596` |
+| 14 | `0.1773` | `-0.2378` | `0.1765` |
+| 15 | `0.1906` | `-0.2522` | `0.1897` |
+
+| | |
+|---|---|
+| **`G-L-FIT-E3`: layer-averaged `0.1002` vs `0.90`** | **FAIL** |
+| worst pre-layer | `-0.0134` — *worse than predicting zero* |
+| fold spread | `0.0905`–`0.1070` over 8 folds. Not a sampling accident |
+| chosen `lambda` | `0` or `1e-6` in every fold — the fit is not regularisation-starved and not overfitting; `1.44 M` rows against `24` columns |
+
+**Prediction B2 said `>= 0.95` layer-averaged and `>= 0.90` at every layer.
+Measured `0.1002`, and negative at the shallowest.** It restated `CONTRACT
+WP15`'s `P10`, which had the same expectation, so this refutes a belief this
+project has held since WP15 was written — that `E3` is *"the cheap half and will
+be fitted better than `E21`"*.
+
+`G-NULL` on this leg: the permuted-coefficient map scores **`-2.0117`**, i.e.
+enormously worse than nothing. The null is clean and nowhere near the `1.5x`
+that would void the measurement.
+
+## THE DIAGNOSTIC, and it is the finding
+
+A failed pooled fit has two very different explanations and the gate cannot tell
+them apart: the features do not explain `E3`, or they explain it *within* a layer
+and one fixed vector cannot span the layers. The second would be **fixable** —
+a handful of layer-dependent scalars fits easily inside the 50-coefficient cap.
+So three ceilings, each strictly above the last:
+
+| pre-layer | per-layer, leave-networks-out | **per-block ceiling (IN SAMPLE)** |
+|---:|---:|---:|
+| 5 | `0.0449` | `0.0874` |
+| 8 | `0.1084` | `0.1832` |
+| 11 | `0.1725` | `0.2864` |
+| 15 | `0.2807` | **`0.4280`** |
+| **layer-averaged** | **`0.1595`** | **`0.2575`** |
+
+The right-hand column is a coefficient vector fitted **on the very block it is
+scored on** — in-sample by construction, so it is not a result, it is the
+**ceiling of the 24-column basis itself**. It is `0.2575`.
+
+> **The basis is the problem, not the pooling.** Even fitted on the block it is
+> scored on, these 24 pointwise features explain **26%** of `E3`. Layer-dependent
+> scalars cannot rescue a ceiling. Nothing built from this feature set can reach
+> `0.90`, and no amount of fitting discipline was ever going to be the binding
+> constraint.
+
+## Why, mechanistically — and this is the part that transfers
+
+`CONTRACT WP18` § B argued that `E3` should be the easy leg because *"the `(3,)`
+slice is an `n`-vector, so `E3_i` depends on neuron `i`'s own `(mu_i, sigma_i)`
+and on contractions of `Sigma`'s row `i`, so a per-neuron map is pointwise
+equivariant by construction."* **Equivariance was free. Sufficiency was assumed,
+and it is false.**
+
+The labeller's own docstring recorded the fact that should have warned me. The
+fresh all-distinct block's `(3,)` slice is **exactly zero**: with factors
+`(w1 . C, 3 I, (w2 (x) w1 . C)^T)` and `C = zero_repeated(Sigma)`,
+
+    slice3_i = sum_j (w1_i C_ij)(3 delta_ij)(w2_j w1_i C_ji) = 3 w1_i^2 w2_i C_ii^2 = 0
+
+because `C`'s diagonal is zero by definition. **So `E3` is not generated at the
+`(3,)` slice at all — it arrives there only after a linear step mixes the
+indices**, as `sum_j (WA)_ij (WB)_ij (WD)_ij`: a triple Hadamard product of three
+*differently* `W`-transformed matrices. That is a third-order functional of `W`'s
+row `i` against the previous layer's off-diagonal covariance, and **the
+post-linear `Sigma` does not determine it.** Two networks can agree on
+`(mu, Sigma, S3, S21)` at pre-layer `p` and disagree on `E3`.
+
+I read that zero as a *hint about where to take the features from* — the
+post-linear state rather than the pre-nonlinearity one — and it was in fact a
+statement that the pointwise information is insufficient in principle. It was in
+the module docstring, in the right words, a run before the fit that needed it.
+
+**And the trend runs the wrong way for the cheap story.** `R^2` climbs
+monotonically with depth, `0.045 -> 0.28`; the map does *better* deeper, where the
+carried state has accumulated more of `W`'s history. That is the opposite of my
+`B3` expectation for `E21` and it says the missing information is exactly the
+history the pointwise features throw away.
+
+## What this does and does not close
+
+**It does not fire `CONTRACT WP18` § B's falsifier.** That reads *"`R^2 < 0.90`
+on BOTH legs held out"*, and `E21` has not been fitted — its Gram/moment pass is
+deliberately second, so that declaring the basis and then computing its moments
+cannot be reversed into a basis chosen after seeing the target. Arm L is not
+dead; **its cheap leg is.**
+
+**What is closed** is *"a pointwise map on the flow's own per-neuron scalars"*, and
+it is closed at a ceiling rather than at a fit, which is the stronger form. The
+`E3` correction is worth `1.551x` end to end **when supplied exactly**; a map that
+reaches `0.26` of it in sample is worth a small fraction of that, and there is no
+version of these features that does better.
+
+**What it costs the plan.** `E3` was the leg that was free in FLOPs and nearly
+free in operations, and it was the reason to start here. `E21` is now the whole of
+Arm L, it is the expensive leg, and `CONTRACT WP15`'s `P5` and this session's `B3`
+both predict it fails at depth. Combined with `B5` — a fitted map cannot beat its
+own oracle, and the oracles are `2.534x` and `1.551x` — **the honest reading is
+that `G-L-E2E`'s `10x` is very unlikely to be reached, and the ~Sep 24 kill line
+is now the expected outcome rather than the contingency.**
+
+That is worth stating plainly now rather than discovering on Sep 24: the write-up
+gets a clean, mechanised negative — *the discarded third-cumulant mass is not a
+function of the state the flow carries, and here is the algebra that says why* —
+and the nomination is the canaried uncorrected flow plus `v2.7`.
+
+## Knowledge delta
+
+1. **`E3` is not a pointwise function of the flow's carried per-neuron state, and
+   the ceiling proves it rather than the fit suggesting it.** `0.2575` in sample
+   over 24 equivariant features on `1.44 M` rows.
+2. **Equivariance being free is not the same as the feature set being
+   sufficient.** The contract argued from the first to the second and the step
+   does not hold. `E3_i`'s generator is a triple Hadamard of three
+   `W`-transformed matrices; the post-linear `Sigma` does not determine it.
+3. **The fresh block's `(3,)` slice is exactly zero**, so `E3` reaches the `(3,)`
+   slice only through a linear step. This was written down, correctly, in the
+   labeller's docstring one run before the fit it should have stopped.
+4. **Fit quality on `E3` IMPROVES with depth** (`0.045 -> 0.28`), the opposite of
+   the shallow-is-easy intuition, and consistent with the missing information
+   being `W`-history that the carried state accumulates.
+5. **A ceiling is worth more than a gate.** `G-L-FIT-E3` failing at `0.1002` is
+   compatible with "fit it better"; a `0.2575` in-sample ceiling is not, and it
+   cost one extra command on data that already existed.

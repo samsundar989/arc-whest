@@ -275,6 +275,105 @@ def cmd_fit(a) -> int:
     return 0 if passed else 1
 
 
+def cmd_diagnose(a) -> int:
+    """WHY the pooled fit failed. DIAGNOSTIC ONLY -- it scores no gate.
+
+    `G-L-FIT-E3` is written on ONE coefficient vector across all pre-layers,
+    because that is the deployable object and because eleven per-layer vectors
+    over 24 features would be 264 coefficients against a cap of 50. It failed at
+    `0.1002`. There are two very different worlds behind that number and the gate
+    cannot tell them apart:
+
+      * the features do not explain `E3` at all -- in which case the cheap leg of
+        Arm L is dead and no amount of per-layer freedom helps; or
+      * they explain it well *within* a layer, and a single fixed vector cannot
+        span the layers' different regimes -- in which case a handful of
+        layer-dependent scalars would fit inside the coefficient cap and the
+        gate failed for a reason that is fixable.
+
+    Three ceilings, each strictly above the last, all held out where that is
+    meaningful:
+
+      `pooled`      the gate itself, reproduced here for comparison.
+      `per-layer`   one coefficient vector PER pre-layer, still leave-networks-out.
+                    Not deployable as-is; an upper bound on what layer-dependent
+                    scaling could buy.
+      `per-block`   one vector fitted ON each `(net, layer)` block and scored on
+                    THAT SAME block. **In-sample by construction, so it is not a
+                    result** -- it is the ceiling of the 24-column basis itself.
+                    If this is low, nothing built from these features can work,
+                    and that is the finding.
+    """
+    z = np.load(a.labels, allow_pickle=False)
+    FEAT, E3 = z["FEAT"], z["E3"]
+    pre = [int(x) for x in z["pre_layers"]]
+    names = [str(x) for x in z["feature_names"]]
+    blocks = _blocks(FEAT, E3)
+    all_idx = list(range(len(blocks)))
+    n_lay = FEAT.shape[1]
+
+    print("  DIAGNOSTIC ONLY. G-L-FIT-E3 is written on the pooled fit and it")
+    print("  FAILED; nothing here changes that. This asks WHY.")
+    print()
+    print(f"    {'pre-layer':>10}{'per-layer LNO':>16}{'per-block ceiling':>20}")
+    rows = []
+    for j in range(n_lay):
+        idx = [k for k in all_idx if blocks[k][1] == j]
+        # --- per-layer, leave-networks-out
+        held = []
+        for f in range(N_FOLDS):
+            te = [k for k in idx if (blocks[k][0] % N_FOLDS) == f]
+            tr = [k for k in idx if (blocks[k][0] % N_FOLDS) != f]
+            Xtr = np.concatenate([blocks[k][2] for k in tr], axis=0)
+            sc = np.sqrt((Xtr * Xtr).mean(axis=0))
+            sc = np.where(sc > 0, sc, 1.0)
+            G, b, _s, _d = _weighted_normal_equations(blocks, tr, sc)
+            c = _solve(G, b, 1e-8)
+            held += [r["r2_uncentered"] for r in _score(blocks, te, c, sc)]
+        # --- per-block ceiling, IN SAMPLE by construction
+        ceil = []
+        for k in idx:
+            _i, _j, X, y = blocks[k]
+            sc = np.sqrt((X * X).mean(axis=0))
+            sc = np.where(sc > 0, sc, 1.0)
+            Xs = X / sc
+            c, *_ = np.linalg.lstsq(Xs, y, rcond=None)
+            r = y - Xs @ c
+            ceil.append(1.0 - float(r @ r) / max(float(y @ y), 1e-300))
+        rows.append({"pre_layer": pre[j],
+                     "per_layer_lno": float(np.mean(held)),
+                     "per_block_ceiling_in_sample": float(np.mean(ceil))})
+        print(f"    {pre[j]:>10}{np.mean(held):>16.4f}{np.mean(ceil):>20.4f}")
+
+    pl = float(np.mean([r["per_layer_lno"] for r in rows]))
+    pb = float(np.mean([r["per_block_ceiling_in_sample"] for r in rows]))
+    print()
+    print(f"    per-layer LNO, layer-averaged          {pl:.4f}")
+    print(f"    per-block ceiling (IN SAMPLE, not a result) {pb:.4f}")
+    print()
+    if pb < 0.5:
+        print("    -> THE BASIS IS THE PROBLEM, not the pooling. Even fitted ON")
+        print("       the block it is scored on, these 24 features explain less")
+        print("       than half of E3. Layer-dependent scalars cannot rescue a")
+        print("       ceiling; the feature set is missing the mechanism.")
+    elif pl < 0.5 <= pb:
+        print("    -> TRANSFER is the problem: the basis can fit a block it has")
+        print("       seen and cannot predict a network it has not.")
+    else:
+        print("    -> POOLING is the problem: within a layer the map transfers,")
+        print("       and a layer-independent coefficient vector cannot span the")
+        print("       layers. Layer-dependent scalars would fit inside the cap.")
+    if a.out:
+        _dump(a.out, {"check": "WP18 Arm L: WHY the pooled E3 fit failed",
+                      "note": "DIAGNOSTIC ONLY -- scores no gate. G-L-FIT-E3 is "
+                              "the pooled fit and it FAILED at 0.1002.",
+                      "labels": os.path.relpath(a.labels, _ROOT),
+                      "feature_names": names, "per_layer": rows,
+                      "per_layer_lno_mean": pl,
+                      "per_block_ceiling_in_sample_mean": pb})
+    return 0
+
+
 def _dump(path, doc):
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     with open(path, "w", encoding="utf-8") as fh:
@@ -286,11 +385,14 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--labels", required=True)
     ap.add_argument("--null", choices=("permute-coefficients",), default=None)
+    ap.add_argument("--diagnose", action="store_true")
     ap.add_argument("--out", default="")
     a = ap.parse_args()
     print("=" * 78)
     print("WP18 / Arm L  --  step B2: the E3 map, and G-L-FIT-E3")
     print("=" * 78)
+    if a.diagnose:
+        return cmd_diagnose(a)
     return cmd_fit(a)
 
 

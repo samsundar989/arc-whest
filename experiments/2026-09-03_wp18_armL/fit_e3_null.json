@@ -1,0 +1,211 @@
+{
+ "check": "WP18 Arm L step B2: the E3 map, ridge, leave-networks-out",
+ "contract": "experiments/LOG.md 2026-09-03 CONTRACT WP18 \u00a7 B, HEAD 49e2e42",
+ "labels": "experiments\\2026-09-03_wp18_armL\\labels_P05.npz",
+ "gate": "G-L-FIT-E3",
+ "threshold": 0.9,
+ "null": "permute-coefficients",
+ "n_nets": 128,
+ "pre_layers": [
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15
+ ],
+ "feature_names": [
+  "one",
+  "mu",
+  "sd",
+  "alpha",
+  "S3",
+  "w1",
+  "w2",
+  "w3",
+  "rowC2",
+  "rowC3",
+  "rowC2w1",
+  "rowC2w2",
+  "rowC2sd",
+  "rowC2alpha",
+  "rowS21",
+  "colS21",
+  "w1_rowC2",
+  "w2_rowC2",
+  "w1sq_rowC2",
+  "w1w2_rowC2",
+  "alpha_rowC2",
+  "alphasq_rowC2",
+  "S3_w1",
+  "sd3"
+ ],
+ "n_folds": 8,
+ "lambda_ladder": [
+  0.0,
+  1e-12,
+  1e-10,
+  1e-08,
+  1e-06,
+  0.0001,
+  0.01,
+  1.0
+ ],
+ "fold_lambdas": [
+  {
+   "fold": 0,
+   "lambda": 1e-06,
+   "inner_r2": 0.0968263808075112
+  },
+  {
+   "fold": 1,
+   "lambda": 0.0,
+   "inner_r2": 0.09882556889391184
+  },
+  {
+   "fold": 2,
+   "lambda": 0.0,
+   "inner_r2": 0.09224399928177486
+  },
+  {
+   "fold": 3,
+   "lambda": 0.0,
+   "inner_r2": 0.09211667904658412
+  },
+  {
+   "fold": 4,
+   "lambda": 0.0,
+   "inner_r2": 0.09917076502327815
+  },
+  {
+   "fold": 5,
+   "lambda": 0.0,
+   "inner_r2": 0.09967890277573449
+  },
+  {
+   "fold": 6,
+   "lambda": 1e-06,
+   "inner_r2": 0.09998889773349827
+  },
+  {
+   "fold": 7,
+   "lambda": 1e-06,
+   "inner_r2": 0.09923618110043171
+  }
+ ],
+ "per_layer": [
+  {
+   "pre_layer": 5,
+   "n": 128,
+   "r2_uncentered_mean": -1.6129392140640881,
+   "r2_uncentered_min": -5.119853574617878,
+   "r2_centered_mean": -1.6151459450620353
+  },
+  {
+   "pre_layer": 6,
+   "n": 128,
+   "r2_uncentered_mean": -1.5114758786215778,
+   "r2_uncentered_min": -7.145053981748566,
+   "r2_centered_mean": -1.513422954474974
+  },
+  {
+   "pre_layer": 7,
+   "n": 128,
+   "r2_uncentered_mean": -1.5783385651072401,
+   "r2_uncentered_min": -9.118848508346312,
+   "r2_centered_mean": -1.5804814742641407
+  },
+  {
+   "pre_layer": 8,
+   "n": 128,
+   "r2_uncentered_mean": -1.4639517502023156,
+   "r2_uncentered_min": -6.34824760393848,
+   "r2_centered_mean": -1.4668062126903703
+  },
+  {
+   "pre_layer": 9,
+   "n": 128,
+   "r2_uncentered_mean": -1.5887073220180272,
+   "r2_uncentered_min": -4.826759022591112,
+   "r2_centered_mean": -1.5909103982967814
+  },
+  {
+   "pre_layer": 10,
+   "n": 128,
+   "r2_uncentered_mean": -1.700605746245221,
+   "r2_uncentered_min": -7.295317323343088,
+   "r2_centered_mean": -1.703810049066716
+  },
+  {
+   "pre_layer": 11,
+   "n": 128,
+   "r2_uncentered_mean": -1.9380896791308442,
+   "r2_uncentered_min": -7.421097213810203,
+   "r2_centered_mean": -1.9406575665102364
+  },
+  {
+   "pre_layer": 12,
+   "n": 128,
+   "r2_uncentered_mean": -2.2147566083352723,
+   "r2_uncentered_min": -8.118524492371673,
+   "r2_centered_mean": -2.2175552822740983
+  },
+  {
+   "pre_layer": 13,
+   "n": 128,
+   "r2_uncentered_mean": -2.3941120793034294,
+   "r2_uncentered_min": -9.720203456585331,
+   "r2_centered_mean": -2.396747886299715
+  },
+  {
+   "pre_layer": 14,
+   "n": 128,
+   "r2_uncentered_mean": -2.867204561806633,
+   "r2_uncentered_min": -13.433305315309713,
+   "r2_centered_mean": -2.8709420523773463
+  },
+  {
+   "pre_layer": 15,
+   "n": 128,
+   "r2_uncentered_mean": -3.258724505565306,
+   "r2_uncentered_min": -14.86080044277762,
+   "r2_centered_mean": -3.262477090927655
+  }
+ ],
+ "layer_averaged_r2": -2.011718719127269,
+ "worst_layer_r2": -3.258724505565306,
+ "pass": false,
+ "full_refit_lambda": 0.0,
+ "full_refit_coefficients": {
+  "one": 0.0001298160459974627,
+  "mu": 0.0017577071425669407,
+  "sd": 8.445378052194487e-05,
+  "alpha": -0.0018719533267974068,
+  "S3": -0.0006727289156513125,
+  "w1": -0.00024665587004105166,
+  "w2": -3.722946824749488e-06,
+  "w3": -0.00015454862065416983,
+  "rowC2": -0.0024337455615403565,
+  "rowC3": -8.192152054822952e-06,
+  "rowC2w1": 6.008441744277649e-05,
+  "rowC2w2": -3.235441719076129e-05,
+  "rowC2sd": -1.592282699246906e-05,
+  "rowC2alpha": -6.2206196138978135e-06,
+  "rowS21": 5.57500552889015e-06,
+  "colS21": -0.0016139253150810225,
+  "w1_rowC2": 0.0029912532653326514,
+  "w2_rowC2": 0.001083407816335298,
+  "w1sq_rowC2": 0.00012027732659133198,
+  "w1w2_rowC2": -0.001140384837681147,
+  "alpha_rowC2": 0.0010788198443790484,
+  "alphasq_rowC2": -9.367226799420002e-06,
+  "S3_w1": 3.8891266634488764e-05,
+  "sd3": -2.7241007999210966e-05
+ },
+ "caveat": "DESIGN tier on P05, where CONTRACT WP18 permits tuning. G-L-FIT is a FIT gate, not an outcome gate: the outcome gate is G-L-E2E, in flight, on P06[..064..127]."
+}

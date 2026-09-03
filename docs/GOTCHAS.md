@@ -22,6 +22,77 @@ narrative record), `docs/GAME_PLAN.md` (the sole active Phase-2 strategy).
 ---
 
 
+## 2026-09-03 (WP18 / SKEPTIC WP18) — five traps, and three of them were in things I had already written down
+
+**1. A `gpuq` job reports the CRLF hash. The working tree and the archive are LF.**
+`certify_guarded.json` records `candidate_sha256 = 3d29e2d5a3e0f986…` for a file
+that hashes to `3536cda3183ab429…` on disk and inside `submission.tar.gz`.
+Confirmed by construction: `sha256(bytes.replace(b"\n", b"\r\n"))` is exactly the
+certify hash. `gpuq` runs from a git checkout under
+`~/.local/state/gpuq/snapshots/<id>/`, where `core.autocrlf` renders CRLF. **Same
+content, two renderings.** So a certification hash never equals the archive hash,
+and the chain from "certified" to "packaged" has to be joined by hand. Carry both
+whenever a candidate is presented, or the provenance is not followable.
+
+**2. `certify_candidate` § 9 MATCHES the memory-gate report on the report's own
+`candidate` field, but FINDS it by filename.** It looks for
+`linux_memory_gate_<candidate stem>.json` beside the candidate or in
+`experiments/2026-08-31_wp0cd_certify/`. A report written anywhere else is
+**SKIPPED, not failed**, and § 9 silently stays advisory while the run still says
+`CANDIDATE REFUSED` for other reasons — so the missing enforcement is easy to
+miss in the noise. It also matches on the FILENAME, not the content hash, so a
+report generated for an earlier revision of the same filename is still read: re-run
+the gate whenever the candidate changes.
+
+**3. Quote a per-MLP price against the STEADY STATE, never against MLP 1.** Any
+constant cached on the `Estimator` instance is paid by the first MLP of a run and
+by none of the others, so the file has two prices and the artifact will contain
+both. `SKEPTIC WP18` caught this packet quoting `+19` operations against the
+baseline's first row when the honest figure against the row 99 of 100 graded MLPs
+see is `+28`. The grader constructs ONE `Estimator`, calls `setup` **once, outside
+any `BudgetContext`** (`whestbench/runner.py:175`, `subprocess_worker.py:207`),
+and opens a **fresh `BudgetContext` per predict** (`scoring.py:709`). A probe that
+builds a fresh instance per seed, or calls `setup` inside the meter, cannot see
+the effect at all — and if `setup` resets the cache it will report the exact
+opposite of the truth.
+
+**4. `alpha = mu / sigma` is UNBOUNDED, and no Wick coefficient saturates in it.**
+`w(0,1)` is `sigma * (phi(alpha) + alpha * Phi(alpha))` — that is `E[ReLU]`, and it
+grows **linearly** in `alpha` forever, because a neuron that is always on has mean
+`mu`. `w(0,2)` grows as `alpha^2`, `w(0,4)` as `alpha^4`. I wrote the opposite into
+a submission file's comment ("every Wick coefficient has already reached its
+limit beyond `13.2`") and used it to justify a cap 25,000 times more aggressive
+than the real constraint. **The real constraint is float32 overflow of the highest
+power the frozen table contains, `alpha^4`, i.e. `|alpha| < 4.295e9`**; past it
+`alpha^4` is `inf` while `phi(alpha)` is exactly `0`, and `inf * 0` is the NaN that
+fails the MLP. A clamp on `alpha` is a **lossy saturation**, not a limit-preserving
+rewrite, and it must be described that way.
+
+**5. An estimator's accuracy on the graded distribution says nothing about its
+robustness, and the invariant suite must be run on THE CANDIDATE.** The K3 canary
+scored `8.75e-07` with `0/100` failures on 100 graded rows *and* scored **5 of 30**
+on `local_sim/edge_cases.py`, returning NaN on three of four degenerate cases and
+`-4.037e+08` at `32 x 64`. It had never been run on that file — a certification of
+`estimator.py` had been read as a property of the candidate. Run
+`edge_cases.py <candidate>` before believing anything about a candidate's
+deployment behaviour, and note that its guards convert *"fails the MLP"* into
+*"answers absurdly"* on degenerate inputs, which is the right trade and is **not
+the same as robustness**.
+
+**And one methodological trap worth the same weight.** `local_sim/edge_cases.py`
+invariants **8** (layer-1 closed form, `rel < 1e-12`) and **9** (permutation
+equivariance, `d_k/scale < 1e-6`) were calibrated beside an incumbent delivering
+`1.7e-16` and `2.2e-15` — they encode a **float64** expectation. Phase 2 bills
+float64 at exactly `2.0x` (measured: matmul `268,173,312 -> 536,346,624`), so a
+full-f64 flow pushes `x` from `0.0767` to `0.153`, the multiplier leaves the `0.1`
+floor, and the score is `1.53x` worse. **Invariant 9 is therefore unmeetable by any
+competitive Phase-2 candidate.** Invariant 8 is NOT: row 0 has a closed form and
+`estimator.py` has met the bar since v2.4 with three lines (`_exact_first_layer`),
+at about four operations. Do not attach the `1.53x` full-flow penalty to a narrow
+fix — that argument was made here and it was wrong.
+
+---
+
 ## 2026-09-02 (WP13) — a `gpuq` job submitted with ABSOLUTE paths does not run the snapshot
 
 `CLAUDE.md` and `AGENTS.md` both record, correctly, that *"a queued job runs the

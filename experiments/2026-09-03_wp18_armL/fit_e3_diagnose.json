@@ -1,0 +1,90 @@
+{
+ "check": "WP18 Arm L: WHY the pooled E3 fit failed",
+ "note": "DIAGNOSTIC ONLY -- scores no gate. G-L-FIT-E3 is the pooled fit and it FAILED at 0.1002.",
+ "labels": "experiments\\2026-09-03_wp18_armL\\labels_P05.npz",
+ "feature_names": [
+  "one",
+  "mu",
+  "sd",
+  "alpha",
+  "S3",
+  "w1",
+  "w2",
+  "w3",
+  "rowC2",
+  "rowC3",
+  "rowC2w1",
+  "rowC2w2",
+  "rowC2sd",
+  "rowC2alpha",
+  "rowS21",
+  "colS21",
+  "w1_rowC2",
+  "w2_rowC2",
+  "w1sq_rowC2",
+  "w1w2_rowC2",
+  "alpha_rowC2",
+  "alphasq_rowC2",
+  "S3_w1",
+  "sd3"
+ ],
+ "per_layer": [
+  {
+   "pre_layer": 5,
+   "per_layer_lno": 0.04492607770197521,
+   "per_block_ceiling_in_sample": 0.08736960439335811
+  },
+  {
+   "pre_layer": 6,
+   "per_layer_lno": 0.06343295652217426,
+   "per_block_ceiling_in_sample": 0.11854163397148719
+  },
+  {
+   "pre_layer": 7,
+   "per_layer_lno": 0.08600213468091443,
+   "per_block_ceiling_in_sample": 0.1528916907006973
+  },
+  {
+   "pre_layer": 8,
+   "per_layer_lno": 0.10838702077703796,
+   "per_block_ceiling_in_sample": 0.18323320599839607
+  },
+  {
+   "pre_layer": 9,
+   "per_layer_lno": 0.13331680943061305,
+   "per_block_ceiling_in_sample": 0.2235824199662781
+  },
+  {
+   "pre_layer": 10,
+   "per_layer_lno": 0.16102845470387325,
+   "per_block_ceiling_in_sample": 0.2640440914539265
+  },
+  {
+   "pre_layer": 11,
+   "per_layer_lno": 0.17251850198142687,
+   "per_block_ceiling_in_sample": 0.28635588405469264
+  },
+  {
+   "pre_layer": 12,
+   "per_layer_lno": 0.21067695292557462,
+   "per_block_ceiling_in_sample": 0.3278151587592761
+  },
+  {
+   "pre_layer": 13,
+   "per_layer_lno": 0.2346638132441239,
+   "per_block_ceiling_in_sample": 0.361783189207525
+  },
+  {
+   "pre_layer": 14,
+   "per_layer_lno": 0.2589823092226909,
+   "per_block_ceiling_in_sample": 0.3985279998622975
+  },
+  {
+   "pre_layer": 15,
+   "per_layer_lno": 0.28070544874093706,
+   "per_block_ceiling_in_sample": 0.42804994574914457
+  }
+ ],
+ "per_layer_lno_mean": 0.1595127709028492,
+ "per_block_ceiling_in_sample_mean": 0.25747225673791624
+}

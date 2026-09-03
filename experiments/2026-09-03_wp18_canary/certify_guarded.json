@@ -2,7 +2,7 @@
   "artifact": "candidate_certification",
   "artifact_version": 1,
   "candidate": "estimator_wp18_canary.py",
-  "candidate_sha256": "4dcd31d4777cd6712cd165f90b97d762e05f1615103d009c408c4f481b99ef6d",
+  "candidate_sha256": "3d29e2d5a3e0f986dd9cb101aef4352bce94424851faf636ea874b098a2261f9",
   "width": 1024,
   "depth": 16,
   "budget": 2199023255552,
@@ -20,27 +20,27 @@
     },
     "invariants": {
       "returncode": 1,
-      "tail": "28/30 checks passed"
+      "tail": "29/30 checks passed"
     },
     "determinism": {
       "fresh_worker": [
         {
-          "sha256": "65e6de75bbaabb29de7b2f6dd0b778fb09e5b820277835b5ea12ec85e19abfbe",
+          "sha256": "b0c8fe7a21d7a2313734ca293b977ea86d921b7366796705ce722ad0a24b42d1",
           "shape": [
             16,
             1024
           ],
-          "flops_used": 168629918310.0,
-          "pid": 49224
+          "flops_used": 168636374630.0,
+          "pid": 19744
         },
         {
-          "sha256": "5f0c27cf670641b4e08766db5df0ec81eebd7aa2960edf30c11b1727cdda4257",
+          "sha256": "ffdd750219e093a019c7881f8ed65313a44c2be7dee56437389ead30f7ef0765",
           "shape": [
             16,
             1024
           ],
-          "flops_used": 168629918310.0,
-          "pid": 23856
+          "flops_used": 168636374630.0,
+          "pid": 48668
         }
       ]
     },
@@ -48,11 +48,11 @@
       {
         "seed": 90000000201,
         "error": "",
-        "flops_used": 168629918310.0,
-        "n_ops": 2666,
+        "flops_used": 168636407398.0,
+        "n_ops": 2674,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.24813300005189376,
-        "wall_time_s": 2.481882300002326,
+        "residual_wall_time_s": 0.18930539978464367,
+        "wall_time_s": 1.700000100005127,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -77,11 +77,11 @@
       {
         "seed": 90000000202,
         "error": "",
-        "flops_used": 168629918310.0,
-        "n_ops": 2666,
+        "flops_used": 168636407398.0,
+        "n_ops": 2674,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.24786539996421197,
-        "wall_time_s": 2.209152700001141,
+        "residual_wall_time_s": 0.19661570017342456,
+        "wall_time_s": 1.7775720999998157,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -106,11 +106,11 @@
       {
         "seed": 90000000203,
         "error": "",
-        "flops_used": 168629918310.0,
-        "n_ops": 2666,
+        "flops_used": 168636407398.0,
+        "n_ops": 2674,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.23523079988808604,
-        "wall_time_s": 2.0079833999989205,
+        "residual_wall_time_s": 0.22120560016628588,
+        "wall_time_s": 1.9883205000005546,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -135,11 +135,11 @@
       {
         "seed": 90000000204,
         "error": "",
-        "flops_used": 168629918310.0,
-        "n_ops": 2666,
+        "flops_used": 168636407398.0,
+        "n_ops": 2674,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.23603039994486608,
-        "wall_time_s": 2.134015499999805,
+        "residual_wall_time_s": 0.199446199760132,
+        "wall_time_s": 1.8235189999977592,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -162,13 +162,13 @@
         "mean_square_final_row": 0.6244963636674716
       }
     ],
-    "setup_s_local": 0.0005393999963416718,
+    "setup_s_local": 0.0004045999958179891,
     "linux_memory_gate": "experiments\\2026-08-31_wp0cd_certify\\linux_memory_gate_estimator_wp18_canary.json",
     "windows_memory_accounting": {
       "available": true,
       "source": "test_deployment_envelope.peak_memory_bytes",
-      "peak_wset_bytes": 379006976,
-      "peak_pagefile_bytes": 880066560
+      "peak_wset_bytes": 388587520,
+      "peak_pagefile_bytes": 889630720
     },
     "subprocess_smoke": {
       "ok_report": true,
@@ -187,10 +187,10 @@
       "lambda": 0.0,
       "residual_cap": 0.4,
       "wall_limit": 120.0,
-      "worst_residual": 0.21212949987238972,
-      "flops_per_mlp": 168629918310,
+      "worst_residual": 0.20724399987375364,
+      "flops_per_mlp": 168636407398,
       "multiplier": 0.1,
-      "c_over_b": 0.07668400863167335,
+      "c_over_b": 0.07668695952725102,
       "final_layer_mse_CONFIRM_ONLY": 9.144720536369277e-07
     },
     "residual_soak": {

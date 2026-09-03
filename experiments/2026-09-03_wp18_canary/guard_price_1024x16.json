@@ -34,39 +34,43 @@
      "n_ops": 2627
     }
    ],
+   "flops_steady_state": 168612483174,
+   "n_ops_steady_state": 2627,
    "x": 0.07667679646965553,
    "x_with_server_offset": 0.07668442586418678,
    "multiplier": 0.1,
    "multiplier_with_server_offset": 0.1
   },
   "estimator_wp18_canary.py": {
-   "flops": 168614189670,
-   "n_ops": 2650,
+   "flops": 168614356582,
+   "n_ops": 2655,
    "flop_independent": true,
    "per_seed": [
     {
      "seed": 90000000401,
-     "flops": 168614189670,
-     "n_ops": 2650
+     "flops": 168614356582,
+     "n_ops": 2655
     },
     {
      "seed": 90000000402,
-     "flops": 168614189670,
-     "n_ops": 2650
+     "flops": 168614356582,
+     "n_ops": 2655
     },
     {
      "seed": 90000000403,
-     "flops": 168614189670,
-     "n_ops": 2650
+     "flops": 168614356582,
+     "n_ops": 2655
     },
     {
      "seed": 90000000404,
-     "flops": 168614189670,
-     "n_ops": 2650
+     "flops": 168614356582,
+     "n_ops": 2655
     }
    ],
-   "x": 0.0766768560743003,
-   "x_with_server_offset": 0.07668448546883155,
+   "flops_steady_state": 168614356582,
+   "n_ops_steady_state": 2655,
+   "x": 0.07667693197709013,
+   "x_with_server_offset": 0.07668456137162138,
    "multiplier": 0.1,
    "multiplier_with_server_offset": 0.1
   }
@@ -74,9 +78,9 @@
  "per_layer": [
   {
    "layer": 0,
-   "worst_abs": 0.0,
-   "rel": 0.0,
-   "n_changed": 0,
+   "worst_abs": 1.8022229053560324e-07,
+   "rel": 3.4593855013729996e-08,
+   "n_changed": 1024,
    "n_negative_in_A": 0
   },
   {
@@ -185,6 +189,12 @@
    "n_negative_in_A": 151
   }
  ],
+ "steady_state_delta_ops": 28,
+ "steady_state_delta_flops": 1873408,
+ "row0_rel_baseline": 2.9643416898126257e-07,
+ "row0_rel_candidate": 1.8261228325893804e-16,
+ "row0_exact_pass": true,
+ "scope_caveat": "unexplained == 0 is a claim about THIS shape only. The alpha cap binds where the flow is already numerically broken; SKEPTIC WP18 measured 311 unexplained changes at 64x32.",
  "entries_changed": 643,
  "entries_explained": 643,
  "unexplained": 0,

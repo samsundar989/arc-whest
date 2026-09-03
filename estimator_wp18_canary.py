@@ -87,13 +87,39 @@ _TABLES_B64 = (
 
 _TABLES = None
 
-#: The cap on `|mu / sigma|`. `phi` is a float32 zero beyond `13.2` and `Phi` is
-#: exactly `0` or `1`, so `40` is far outside the region where any Wick
-#: coefficient still varies -- and `40**4 = 2.56e6` cannot overflow float32,
-#: which is the property that removes the `inf * 0` NaN. On He-init networks at
-#: the live shape the cap is never approached; `p2_wp18_price.py --alpha-range`
-#: measures the worst `|alpha|` the flow actually reaches and reports the margin.
-ALPHA_CAP = 40.0
+#: The cap on `|mu / sigma|`, and it is a SATURATION, not a limit.
+#:
+#: An earlier value of `40` was justified in this comment by the claim that
+#: "`phi` is a float32 zero beyond `13.2` and `Phi` is exactly `0` or `1`, so
+#: every Wick coefficient has already reached its limit". **That claim is false**
+#: and `SKEPTIC WP18` disproved it by decoding the frozen table: `w(0,1)` has
+#: `P2 = [0, 1]`, i.e. `sigma * (phi(alpha) + alpha * Phi(alpha))` -- which is
+#: `E[ReLU]` and therefore grows LINEARLY in `alpha` without bound, as it must,
+#: because a neuron that is always on has mean `mu`. `w(0,2)` grows as
+#: `alpha^2` and `w(0,4)` as `alpha^4`. Nothing saturates. Capping `alpha` caps a
+#: saturated neuron's predicted mean at `ALPHA_CAP * sigma`, and that is a real
+#: loss wherever the cap binds.
+#:
+#: So the cap is set from the ONE constraint that is real, and set as late as
+#: that constraint allows. The frozen table's highest degree in `alpha` is **4**
+#: (attained at `w(0,4)`, `P2 = [3, 0, 6, 0, 1]`), so `alpha**4` must stay finite
+#: in float32: the hard bound is `3.4028e38 ** 0.25 = 4.295e9`. Past it,
+#: `alpha**4` is `inf` while `phi(alpha)` is exactly `0`, and `inf * 0` is the
+#: NaN that fails the MLP.
+#:
+#: `1e6` puts `alpha**4` at `1e24`, which is `3.4e14` below the float32 ceiling,
+#: so the downstream `sigma**d` factors have room too. And it is `1.1e5` times
+#: the worst `|alpha|` the UNCAPPED flow reaches on He-init networks at the live
+#: shape -- `9.04`, measured over 8 mints by `p2_wp18_price.py --alpha-range`.
+#:
+#: **The honest statement, which the `40` version did not make: this cap is inert
+#: wherever the flow is numerically sound, and lossy exactly where the flow would
+#: otherwise return NaN.** It converts "fails the MLP, scores as zeros" into
+#: "answers badly", which is the right trade and is not the same as robustness.
+ALPHA_CAP = 1.0e6
+
+#: `1 / sqrt(2 pi)` in float64. Row 0's closed form is the ONLY consumer.
+_INV_SQRT_2PI = 0.3989422804014326779399460599343818684758586311649346576659
 
 
 def _tables():
@@ -310,11 +336,9 @@ def _layer(W, state, table, dtype, const, init_scale, last_layer):
     # is the warning `edge_cases` printed at `(alpha * alpha - 1.0) * phi`.
     # A NaN output FAILS the MLP and a failed MLP scores as zeros.
     #
-    # Capping `|alpha|` at `ALPHA_CAP` is not slop: `phi` is a float32 zero for
-    # `|alpha| > 13.2` (`exp(-x^2/2)` underflows at `x^2/2 = 87.4`) and `Phi` is
-    # exactly `0` or `1` there, so every Wick coefficient has already reached its
-    # limit. Beyond the cap the arithmetic is choosing between two spellings of
-    # the same limit, and only one of them is finite. ONE operation a layer.
+    # `ALPHA_CAP` is set from the float32 overflow bound on `alpha**4` and sits
+    # `1.1e5` above anything the live distribution produces. See its definition:
+    # it is a SATURATION and it is lossy where it binds. ONE operation a layer.
     alpha = fnp.clip(mu_pre / sigma, dtype(-ALPHA_CAP), dtype(ALPHA_CAP))
     w = _wick(mu_pre, sigma, alpha, table, dtype, const["wick"])
 
@@ -498,6 +522,10 @@ class Estimator(BaseEstimator):
         w = [x if x.dtype == dtype else x.astype(dtype, copy=False)
              for x in mlp.weights]
         const = self._constants(width, dtype)
+        # The only float64 array in the flow, and it exists solely for row 0's
+        # closed form. `n^2` cast plus a squared column sum: `~6.3e6` FLOPs of
+        # `168.6e9`, i.e. `0.004%`.
+        w64_0 = w[0].astype(fnp.float64)
         state = (fnp.zeros(width, dtype=dtype),
                  fnp.eye(width, dtype=dtype),
                  fnp.zeros((width, width), dtype=dtype),
@@ -507,7 +535,26 @@ class Estimator(BaseEstimator):
             state = _layer(w[l], state, table, dtype, const, 2.0,
                            last_layer=(l == depth - 1))
             mus.append(state[0])
-        out = fnp.stack(mus)
+        # ROW 0 HAS A CLOSED FORM AND THE FLOW GETS IT TO FLOAT32 ONLY.
+        #
+        # At layer 1 the input is exactly `N(0, I)`, so `mu_pre = 0`, `alpha = 0`
+        # and `cov_pre = W^T W`; the third-order corrections vanish because the
+        # carried `M` and `c4` are still zero. So row 0 is EXACTLY
+        # `||W[:, j]||_2 / sqrt(2 pi)` and nothing about the flow is needed to
+        # produce it. Taken through the float32 `W^T W` it carries `~2e-7`
+        # relative error, which `local_sim/edge_cases.py::inv_layer1` fails at
+        # its `1e-12` bar -- and `estimator.py` has met that bar since v2.4 with
+        # the same three lines, `_exact_first_layer`.
+        #
+        # `SKEPTIC WP18` is why this is here: the first version of this file
+        # declined the fix on the grounds that returning float64 would be "an
+        # interface the grader has never seen from us". **That was false.** The
+        # shipped `estimator.py` returns float64 and has done so on every
+        # submission this project has made, #328662 and #328664 included. The
+        # objection cost nothing to retire and should never have been raised.
+        exact0 = fnp.sqrt((w64_0 * w64_0).sum(axis=0)) * _INV_SQRT_2PI
+        out = fnp.concatenate([fnp.reshape(exact0, (1, width)),
+                               fnp.stack(mus[1:]).astype(fnp.float64)], axis=0)
         # TWO GUARDS ON THE WHOLE ANSWER, THREE OPERATIONS, AND THEY ARE THE
         # DIFFERENCE BETWEEN A SCORED MLP AND A FAILED ONE.
         #
@@ -529,5 +576,5 @@ class Estimator(BaseEstimator):
         #    MSE it recovers is `~1e-11`, five orders below the `8.75e-07` the
         #    file scores. It is in for the range guarantee, not for the score,
         #    and saying otherwise would be overselling three operations.
-        out = fnp.where(fnp.isfinite(out), out, dtype(0.0))
-        return fnp.maximum(out, dtype(0.0))
+        out = fnp.where(fnp.isfinite(out), out, fnp.float64(0.0))
+        return fnp.maximum(out, fnp.float64(0.0))
