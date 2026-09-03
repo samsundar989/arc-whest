@@ -374,6 +374,174 @@ def cmd_diagnose(a) -> int:
     return 0
 
 
+# ==========================================================================
+# --e21: the matrix leg, from the Gram/moment reduction
+# ==========================================================================
+
+#: `G-L-FIT-E21`, fixed in `CONTRACT WP18` § B before any moment existed.
+G_L_FIT_E21 = 0.90
+
+
+def _e21_r2(Y, b, G, c):
+    """Exact uncentered `R^2` from the reduction. No dense `E21` is needed.
+
+    For a basis linear in its coefficients the residual is exactly
+    `||E21||^2 - 2 c.b + c^T G c`, so `R^2 = 1 - that / ||E21||^2` is closed
+    form -- which is why the labeller stores `(G, b, ||E21||^2)` and not a
+    `4.6 GB` target.
+    """
+    return 1.0 - (Y - 2.0 * float(c @ b) + float(c @ (G @ c))) / max(Y, 1e-300)
+
+
+def _e21_ceiling(Y, b, G, rcond=1e-10):
+    """The in-sample ceiling of the basis on ONE block: `b^T G^+ b / ||E21||^2`.
+
+    The least-squares optimum over the whole basis, fitted on the block it is
+    scored on. It is not a result -- it is the most any map built from these 29
+    terms could achieve there. `SKEPTIC WP18-B` showed on the `E3` leg that this
+    number is worth more than the gate, because a low ceiling closes a route
+    where a low held-out score only means "fit it better".
+    """
+    return float(b @ np.linalg.pinv(G, rcond=rcond) @ b) / max(Y, 1e-300)
+
+
+def _e21_solve(G, b, lam):
+    n = G.shape[0]
+    tr = float(np.trace(G)) / max(n, 1)
+    return np.linalg.solve(G + lam * max(tr, 1e-300) * np.eye(n), b)
+
+
+def cmd_e21(a) -> int:
+    z = np.load(a.e21, allow_pickle=False)
+    G, B, Y = z["GRAM"], z["MOM"], z["E21_SQ"]
+    names = [str(x) for x in z["term_names"]]
+    mm = {str(x) for x in z["matmul_terms"]}
+    pre = [int(x) for x in z["pre_layers"]]
+    n_nets, n_lay, nt, _ = G.shape
+    print(f"  moments   {os.path.relpath(a.e21, _ROOT)}")
+    print(f"  shape     {n_nets} nets x {n_lay} pre-layers {pre[0]}..{pre[-1]}"
+          f" x {nt} frozen basis terms ({len(mm)} matmul-class)")
+
+    idx = [(i, j) for i in range(n_nets) for j in range(n_lay)]
+
+    def fit(train, cols, lam):
+        w = np.array([1.0 / max(Y[i, j], 1e-300) for (i, j) in train])
+        Gs = sum(wi * G[i, j][np.ix_(cols, cols)]
+                 for wi, (i, j) in zip(w, train))
+        bs = sum(wi * B[i, j][cols] for wi, (i, j) in zip(w, train))
+        d = np.sqrt(np.maximum(np.diag(Gs), 0.0))
+        d = np.where(d > 0, d, 1.0)
+        c = _e21_solve(Gs / np.outer(d, d), bs / d, lam)
+        return c / d
+
+    def score(blocks, cols, c):
+        return [_e21_r2(Y[i, j], B[i, j][cols], G[i, j][np.ix_(cols, cols)], c)
+                for (i, j) in blocks]
+
+    all_cols = list(range(nt))
+    folds = [[k for k in idx if (k[0] % N_FOLDS) == f] for f in range(N_FOLDS)]
+
+    def run(cols, label):
+        held, chosen = [], []
+        for f in range(N_FOLDS):
+            te = folds[f]
+            tr = [k for k in idx if (k[0] % N_FOLDS) != f]
+            inner_hold = set(sorted({k[0] for k in tr})[::N_FOLDS])
+            itr = [k for k in tr if k[0] not in inner_hold]
+            ite = [k for k in tr if k[0] in inner_hold]
+            best, best_lam = -np.inf, LAMBDAS[0]
+            for lam in LAMBDAS:
+                try:
+                    ci = fit(itr, cols, lam)
+                except np.linalg.LinAlgError:
+                    continue
+                m = float(np.mean(score(ite, cols, ci)))
+                if m > best:
+                    best, best_lam = m, lam
+            c = fit(tr, cols, best_lam)
+            if a.null == "permute-coefficients":
+                rng = np.random.default_rng(20260903 + f)
+                c = c[rng.permutation(c.size)]
+            chosen.append({"fold": f, "lambda": best_lam})
+            for k, r2 in zip(te, score(te, cols, c)):
+                held.append({"net": k[0], "layer_index": k[1], "r2": r2, "fold": f})
+        per_layer = []
+        for j, pl in enumerate(pre):
+            v = [h["r2"] for h in held if h["layer_index"] == j]
+            per_layer.append({"pre_layer": pl, "r2_mean": float(np.mean(v)),
+                              "r2_min": float(np.min(v))})
+        lay = float(np.mean([r["r2_mean"] for r in per_layer]))
+        print(f"    {label:<34} layer-averaged held-out R^2 {lay:+.4f}")
+        return lay, per_layer, chosen
+
+    print()
+    print("  held-out R^2 on E21, leave-networks-out")
+    full_lay, full_pl, chosen = run(all_cols, "ALL 29 terms")
+
+    # G-L-COST: at most ONE matmul-class term is deployable.
+    non_mm = [i for i, n in enumerate(names) if n not in mm]
+    best_one, best_name, best_pl = None, None, None
+    lay_nomm, pl_nomm, _ = run(non_mm, "Hadamard/diagonal only (0 matmuls)")
+    for i, n in enumerate(names):
+        if n not in mm:
+            continue
+        lay_i, pl_i, _ = run(non_mm + [i], f"  + one matmul term: {n}")
+        if best_one is None or lay_i > best_one:
+            best_one, best_name, best_pl = lay_i, n, pl_i
+
+    print()
+    print(f"    {'pre-layer':>10}{'R^2 mean':>11}{'worst net':>12}")
+    for r in best_pl:
+        print(f"    {r['pre_layer']:>10}{r['r2_mean']:>11.4f}{r['r2_min']:>12.4f}")
+
+    # the ceiling, exact and nearly free from the reduction
+    ceil = {}
+    for j in range(n_lay):
+        v = [_e21_ceiling(Y[i, j], B[i, j], G[i, j]) for i in range(n_nets)]
+        ceil[pre[j]] = float(np.mean(v))
+    ceil_mean = float(np.mean(list(ceil.values())))
+
+    passed = bool(best_one is not None and best_one >= G_L_FIT_E21)
+    print()
+    print(f"  DEPLOYABLE fit (Hadamard/diagonal + at most ONE matmul term, "
+          f"the best being {best_name})")
+    print(f"  G-L-FIT-E21: layer-averaged {best_one:.4f} vs {G_L_FIT_E21:.2f}"
+          f"   {'PASS' if passed else 'FAIL'}"
+          + ("   [NULL RUN -- not a result]" if a.null else ""))
+    print(f"  unrestricted (all 29, NOT deployable): {full_lay:.4f}")
+    print(f"  IN-SAMPLE CEILING of the 29-term basis: {ceil_mean:.4f}"
+          f"   (per layer {min(ceil.values()):.4f}..{max(ceil.values()):.4f})")
+    if ceil_mean < 0.5:
+        print("    -> THE BASIS IS THE LIMIT, not the fit. Fitted ON the block")
+        print("       it is scored on, these terms cannot reach the gate.")
+
+    if a.out:
+        _dump(a.out, {
+            "check": "WP18 Arm L: the E21 map, ridge on the Gram/moment "
+                     "reduction, leave-networks-out",
+            "contract": "experiments/LOG.md CONTRACT WP18 § B; basis frozen "
+                        "before moments (CONTRACT WP19 commit)",
+            "moments": os.path.relpath(a.e21, _ROOT),
+            "gate": "G-L-FIT-E21", "threshold": G_L_FIT_E21,
+            "null": a.null or "none",
+            "n_nets": int(n_nets), "pre_layers": pre, "term_names": names,
+            "matmul_terms": sorted(mm), "n_folds": N_FOLDS,
+            "deployable_best_matmul_term": best_name,
+            "deployable_layer_averaged_r2": best_one,
+            "deployable_per_layer": best_pl,
+            "no_matmul_layer_averaged_r2": lay_nomm,
+            "unrestricted_all_terms_r2": full_lay,
+            "in_sample_ceiling_mean": ceil_mean,
+            "in_sample_ceiling_per_layer": ceil,
+            "fold_lambdas": chosen, "pass": passed,
+            "caveat": "DESIGN tier on P05. G-L-FIT is a FIT gate; the outcome "
+                      "gate is G-L-E2E, in flight, on P06[..064..127]. Terms "
+                      "marked matmul-class cost 2 n^3 a layer each and at most "
+                      "ONE fits inside G-L-COST.",
+        })
+    return 0 if passed else 1
+
+
 def _dump(path, doc):
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     with open(path, "w", encoding="utf-8") as fh:
@@ -383,14 +551,19 @@ def _dump(path, doc):
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--labels", required=True)
+    ap.add_argument("--labels")
+    ap.add_argument("--e21", help="the Gram/moment npz for the E21 leg")
     ap.add_argument("--null", choices=("permute-coefficients",), default=None)
     ap.add_argument("--diagnose", action="store_true")
     ap.add_argument("--out", default="")
     a = ap.parse_args()
     print("=" * 78)
-    print("WP18 / Arm L  --  step B2: the E3 map, and G-L-FIT-E3")
+    print("WP18 / Arm L  --  the fitted maps, and G-L-FIT")
     print("=" * 78)
+    if a.e21:
+        return cmd_e21(a)
+    if not a.labels:
+        ap.error("one of --labels / --e21")
     if a.diagnose:
         return cmd_diagnose(a)
     return cmd_fit(a)

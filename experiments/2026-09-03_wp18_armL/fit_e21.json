@@ -1,0 +1,173 @@
+{
+ "check": "WP18 Arm L: the E21 map, ridge on the Gram/moment reduction, leave-networks-out",
+ "contract": "experiments/LOG.md CONTRACT WP18 \u00a7 B; basis frozen before moments (CONTRACT WP19 commit)",
+ "moments": "experiments\\2026-09-03_wp18_armL\\e21_moments_P05.npz",
+ "gate": "G-L-FIT-E21",
+ "threshold": 0.9,
+ "null": "none",
+ "n_nets": 128,
+ "pre_layers": [
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15
+ ],
+ "term_names": [
+  "C",
+  "C2",
+  "C3",
+  "w1_C",
+  "C_w1",
+  "w1_C_w1",
+  "w2_C_w1",
+  "w1_C_w2",
+  "w1sq_C_w2",
+  "w1_C2_w2",
+  "mu_C_mu",
+  "alpha_C_alpha",
+  "sd_C_sd",
+  "S3_C",
+  "C_S3",
+  "S21",
+  "w1_S21",
+  "S21_w1",
+  "C_had_S21",
+  "outer_w1_w1",
+  "outer_mu_mu",
+  "outer_S3_ones",
+  "outer_ones_S3",
+  "MM_C_C",
+  "MM_C_w1_C",
+  "MM_C_w2_C",
+  "MM_C2_C",
+  "MM_C_C2",
+  "MM_had_C_CC"
+ ],
+ "matmul_terms": [
+  "MM_C2_C",
+  "MM_C_C",
+  "MM_C_C2",
+  "MM_C_w1_C",
+  "MM_C_w2_C",
+  "MM_had_C_CC"
+ ],
+ "n_folds": 8,
+ "deployable_best_matmul_term": "MM_C_C2",
+ "deployable_layer_averaged_r2": 0.14362474025763278,
+ "deployable_per_layer": [
+  {
+   "pre_layer": 5,
+   "r2_mean": -0.012739880287300897,
+   "r2_min": -0.036345170181453
+  },
+  {
+   "pre_layer": 6,
+   "r2_mean": 0.03171842891888252,
+   "r2_min": 0.009067229399844612
+  },
+  {
+   "pre_layer": 7,
+   "r2_mean": 0.07201636460983699,
+   "r2_min": 0.048107205398481456
+  },
+  {
+   "pre_layer": 8,
+   "r2_mean": 0.10525177065738565,
+   "r2_min": 0.07324324171654606
+  },
+  {
+   "pre_layer": 9,
+   "r2_mean": 0.1339225656171841,
+   "r2_min": 0.093123182063371
+  },
+  {
+   "pre_layer": 10,
+   "r2_mean": 0.16017437891098724,
+   "r2_min": 0.11923136709024473
+  },
+  {
+   "pre_layer": 11,
+   "r2_mean": 0.17913346151201287,
+   "r2_min": 0.12545812573120818
+  },
+  {
+   "pre_layer": 12,
+   "r2_mean": 0.20142056368917322,
+   "r2_min": 0.13472333023074134
+  },
+  {
+   "pre_layer": 13,
+   "r2_mean": 0.21987392838463718,
+   "r2_min": 0.13036588616489742
+  },
+  {
+   "pre_layer": 14,
+   "r2_mean": 0.23741682309236095,
+   "r2_min": 0.1618153102265577
+  },
+  {
+   "pre_layer": 15,
+   "r2_mean": 0.2516837377288005,
+   "r2_min": 0.16388688789315087
+  }
+ ],
+ "no_matmul_layer_averaged_r2": 0.14362474442830103,
+ "unrestricted_all_terms_r2": 0.14362177011813893,
+ "in_sample_ceiling_mean": 0.16646854852953827,
+ "in_sample_ceiling_per_layer": {
+  "5": 0.04020626291602661,
+  "6": 0.06104048584582104,
+  "7": 0.08611698011347968,
+  "8": 0.1113276487186439,
+  "9": 0.13767647170722763,
+  "10": 0.16602722713908818,
+  "11": 0.18922565282421622,
+  "12": 0.21893372693699964,
+  "13": 0.24634851018805848,
+  "14": 0.27446458400882656,
+  "15": 0.2997864834265329
+ },
+ "fold_lambdas": [
+  {
+   "fold": 0,
+   "lambda": 0.0001
+  },
+  {
+   "fold": 1,
+   "lambda": 0.0001
+  },
+  {
+   "fold": 2,
+   "lambda": 0.0001
+  },
+  {
+   "fold": 3,
+   "lambda": 0.0001
+  },
+  {
+   "fold": 4,
+   "lambda": 0.0001
+  },
+  {
+   "fold": 5,
+   "lambda": 0.0001
+  },
+  {
+   "fold": 6,
+   "lambda": 0.0001
+  },
+  {
+   "fold": 7,
+   "lambda": 0.0001
+  }
+ ],
+ "pass": false,
+ "caveat": "DESIGN tier on P05. G-L-FIT is a FIT gate; the outcome gate is G-L-E2E, in flight, on P06[..064..127]. Terms marked matmul-class cost 2 n^3 a layer each and at most ONE fits inside G-L-COST."
+}

@@ -30724,3 +30724,291 @@ confirmed the mechanism, not the universal. **Softened accordingly.**
    finiteness, and the output guard makes the array finite — so a network whose
    entire scored row had become zeros still printed `ok`, and `29/30` was
    unchanged by it. **An invariant count is not a quality measurement.**
+
+---
+
+# 2026-09-03 — **WP19 RESULT: both scored gates FAIL, the injection is NOT destructive, and the sensitivity nobody had measured is now measured**
+
+`gpuq` 203, `1024 x 16`, f32, **8 `P05` networks** `[40,902,005,128..135]` — the
+unused DESIGN tail claimed and named at claim time. Eleven cells in one run so
+every comparison is within-run and paired on common random numbers. Artifact
+`experiments/2026-09-03_wp19/c2_e3diag.json`. `112 s` a network.
+
+## The table
+
+| cell | mean drift | x better (paired) | per-net min | max |
+|---|---:|---:|---:|---:|
+| `none` — the uncorrected regenerating flow | `9.3446e-07` | `1.000` | | |
+| `e3` — exact `(3,)`, no `(2,1)` | `6.4077e-07` | `1.458` | 1.34 | 1.59 |
+| `svd:128` — `(2,1)` only | `4.5101e-07` | `2.072` | 1.72 | 2.30 |
+| `svd:192` — `(2,1)` only | `4.2044e-07` | `2.223` | 1.85 | 2.56 |
+| `svd:256` — `(2,1)` only | `3.9620e-07` | `2.359` | 1.98 | 2.68 |
+| **`e3diag_svd:128`** | `3.4858e-07` | **`2.681`** | 2.12 | 3.30 |
+| **`e3diag_svd:192`** | `2.5073e-07` | **`3.727`** | 2.82 | 4.57 |
+| **`e3diag_svd:256`** | `1.6259e-07` | **`5.748`** | 4.39 | 7.40 |
+| `e3svd:128` — both, oracular `E3` | `8.8404e-08` | `10.570` | 8.81 | 12.98 |
+| `e3svd:192` — both, oracular `E3` | `4.9512e-08` | `18.873` | 15.71 | 22.85 |
+| `e3svd:256` — both, oracular `E3` | `2.9087e-08` | `32.127` | 24.66 | 40.06 |
+
+## The gates, scored through `competition_score.decide()`
+
+| gate | threshold | measured | verdict |
+|---|---|---:|---|
+| **G-DIAG-R2** | `R^2` of `c * diag(rank-192 recon)` vs true `E3`, layer-averaged `>= 0.50` | **`0.4529`** (worst layer `0.2873`) | **FAIL** |
+| **G-DIAG-E2E** | `e3diag_svd:192` end-to-end `>= 5x`, paired arithmetic | **`3.727`** | **FAIL** |
+| **G-DIAG-NOTWORSE** | `e3diag_svd:r >= svd:r` at every `r` | `0/8` nets worse at `r = 128`, `192`, `256` | **PASS** |
+
+`decide(base, cell, gate=5.0, interval="t")` returns `passed: False` at `r = 192`.
+
+**`r = 256` would clear `5x` (`5.748`, `passed: True`). The gate was written on
+`r = 192`, which is `CONTRACT WP15`'s measured affordability horizon, and moving
+it to `256` because `256` passes is exactly the post-hoc move `G-M-DEPTH` refused
+and `SKEPTIC WP14` caught once already. REFUSED, in writing, again.** `r = 256`
+is recorded as a diagnostic and scores nothing.
+
+## Predictions
+
+| # | prediction | outcome |
+|---|---|---|
+| **C1** | `R^2 >= 0.50` at `r = 192` | **REFUTED**, narrowly: `0.4529`. I discounted the Skeptic's `0.659` at `512 x 16` for the fall in `r/n` and still landed high |
+| **C2** | `e3diag_svd:192` lands **strictly between** `svd:192` and `e3svd:192` | **HELD.** `2.223 < 3.727 < 18.873`, and on all 8 networks individually |
+| **C3** | `e3diag_svd:192 >= 5x`; `45%` on clearing `10x` | **REFUTED.** `3.727`, and nowhere near `10x` |
+| **C4** | monotone in `r` | **HELD.** `2.681 -> 3.727 -> 5.748` |
+| **C5** | the fitted scalar `c` within `20%` of `1.0` | **HELD, and sharply.** `c = 1.019` at `r = 192` — the diagonal of the rank-192 truncation is essentially **unbiased** for `E3`, not merely correlated with it. (It is `0.703` at `r = 128` and `1.505` at `r = 256`, so `r = 192` is where the truncation's diagonal is the right size as well as the right shape — a coincidence worth noting and not worth theorising about on one measurement) |
+
+## THE FINDING, and it is the one the Skeptic said nobody had measured
+
+`SKEPTIC WP18-B` closed with: *"what is NOT measured, and what we will not
+predict again without measuring: what an imperfect matrix correction does to that
+`11.1x` joint cell."* The `e3diag` row measures the adjacent and more useful
+thing — **what an imperfect `E3` does to it, with the `E21` correction held at
+oracle.** At `r = 192`:
+
+| `E3` quality | end-to-end |
+|---|---:|
+| absent (`R^2 = 0`) | `2.223x` |
+| **the diagonal read (`R^2 = 0.453`)** | **`3.727x`** |
+| exact (`R^2 = 1.000`) | `18.873x` |
+
+**Going from `R^2 = 0.453` to `1.000` on `E3` alone multiplies the end-to-end
+gain by `5.06x`.** The joint result is violently sensitive to `E3`'s quality, and
+the curve is steeply convex: the last half of `E3`'s variance is worth four times
+what the first half is.
+
+**That bounds Arm L, and this time from a measurement rather than from a
+misread.** To reach `10x` at the affordable rank with an *oracle* `E21` you need
+`E3` quality far above `0.45` — and the only two routes anyone has tried are
+
+- a pointwise map on the flow's carried per-neuron scalars: **in-sample ceiling
+  `0.2575`** (WP18 § B, verified five ways), and
+- the diagonal of the rank-`r` `E21` reconstruction: **`0.4529`** (here).
+
+Neither is close. And every number above uses an **oracle `E21`**; a *predicted*
+`E21` can only be worse.
+
+**So the honest, evidence-backed statement — which is NOT the one I withdrew this
+afternoon — is:** the free-`E3` route cannot reach `10x` at any affordable rank
+even with an oracle `E21`, and `10x` therefore requires a high-quality `E3` map
+that no route on the table can supply. `G-L-E2E` remains unrun and its falsifier
+unfired; what has changed is that the ceiling is now bracketed by measurement on
+8 networks at the live shape rather than asserted.
+
+## What is genuinely good news here, and it should not be lost
+
+1. **`G-DIAG-NOTWORSE` passes cleanly: `0` of `8` networks worse, at every rank.**
+   WP10 found that injecting truth in flight can be *destructive*; this injection
+   is not, on any network, at any rank. That is a real property and it was a live
+   possibility the contract named in advance.
+2. **One fitted scalar buys `2.223x -> 3.727x`**, a `1.68x` multiplier on the
+   matrix correction, at `O(n)` cost and **no new features** — because it reads a
+   diagonal off an object the `(2,1)` correction has already materialised. As a
+   *component* that is excellent value; it is simply not enough on its own.
+3. **`c = 1.019`** says the truncation's diagonal is an unbiased estimate of `E3`
+   at `r = 192`, which is a cleaner mechanistic result than "correlated".
+4. The whole cell was **~10 lines inside an existing harness**, not a new
+   instrument, and it ran the day it was designed.
+
+## Cost, and it is not the binding thing here
+
+Neither `e3diag_svd` nor `svd` is deployable as measured — both take the TRUE
+`E21` and truncate it, so both are oracles. The deployable question is
+`G-L-FIT-E21`, and its moments pass is queued (`gpuq` 205) over a **29-term basis
+frozen and committed before a single moment was computed**. What this run does
+settle about cost is negative and worth stating: **the `E3` half is free** (a
+diagonal read plus one scalar multiply on an already-materialised
+reconstruction, `O(n)` FLOPs and `+2` operations a layer), so **no part of Arm
+L's shortfall is attributable to the `(3,)` slice's price.**
+
+## Scope, and the caveats that must travel with these numbers
+
+- **Everything here is an ORACLE.** `E21` is taken exactly and SVD-truncated;
+  nothing in this run predicts `E21` from the flow's own state. These are
+  ceilings, not operating points.
+- **This is the torch flow, not the `fnp` port that would ship.** WP16 is why
+  that caveat is compulsory.
+- 8 networks, DESIGN tier, `P05`'s tail. `P06` remains untouched for `G-L-E2E`.
+- The `e3` cell here reads `1.458x` where WP14's artifact reads `1.551x` — a
+  different 8 networks at the same shape, and the per-net range (`1.34`-`1.59`)
+  covers it. Consistent, not identical, and quoted separately rather than merged.
+
+## Knowledge delta
+
+1. **The joint correction's value is dominated by `E3`'s quality, not `E21`'s
+   rank.** At the affordable rank, going from a `0.45`-quality `E3` to an exact
+   one is worth `5.06x`; going from `r = 128` to `r = 256` on `E21` with `E3`
+   held at `0.45` is worth `2.14x`. **The cheap-looking slice is the one that
+   controls the outcome**, which inverts the intuition that started Arm L.
+2. **The diagonal of a rank-`r` truncation is an unbiased estimator of the
+   discarded diagonal at `r = 192`** (`c = 1.019`), and biased at `r = 128`
+   (`0.703`) and `r = 256` (`1.505`). One measurement; not theorised.
+3. **A non-destructive in-flight injection is not a given and this one is
+   non-destructive** — `0/8` at three ranks, against WP10's precedent.
+4. **A gate written on the affordable rank refuses the passing rank.** `r = 256`
+   clears `G-DIAG-E2E` and is unaffordable; the gate was `r = 192` and it failed.
+   Recording that as a failure rather than as a qualified pass is the whole
+   value of having written it down first.
+
+---
+
+# 2026-09-03 — **`G-L-FIT-E21` FAILS AT `0.1436`. BOTH LEGS ARE NOW BELOW `0.90` HELD OUT, SO `CONTRACT WP18` § B's FALSIFIER FIRES AND ARM L IS DEAD BY ITS OWN CONTRACT.**
+
+`gpuq` 205, the **same 128 `P05` networks** the labels used (`--seed 40902005000`,
+no new draw), `1024 x 16`, f32, 11 pre-layers. Basis frozen and **committed
+before a single moment was computed**. Artifacts
+`experiments/2026-09-03_wp18_armL/e21_moments_P05.npz` (4.98 MiB),
+`fit_e21.json`, `fit_e21_null.json`.
+
+## The result
+
+| | |
+|---|---|
+| **`G-L-FIT-E21`, layer-averaged held-out `R^2`** | **`0.1436` vs `0.90` — FAIL** |
+| worst pre-layer | `-0.0127` at pre-layer 5 — worse than predicting zero |
+| best pre-layer | `0.2517` at pre-layer 15 |
+| **in-sample ceiling of the 29-term basis** | **`0.1665`** (per layer `0.0402`–`0.2998`) |
+| permuted-coefficient null | `-221,237` — `G-NULL` clean by any margin one cares to name |
+
+**The fit is within `0.023` of the basis's own in-sample ceiling.** There is
+essentially nothing left on the table for a better fit to find: the terms
+themselves cannot represent `E21`.
+
+**The ceiling is not a solver artifact**, and it was checked because
+`SKEPTIC WP18-B` caught exactly that class of error on the `E3` leg. Over
+`rcond` from `1e-6` to `1e-15` it converges monotonically to `0.150106` on a
+subsample and stops moving below `1e-10`; `pinv`, `lstsq` and a scaled
+Cholesky-with-ridge agree to **six decimals**. The Gram is **full rank, 29 of
+29**, condition `7.5e9`. Nothing is being silently truncated away.
+
+## THE EXPENSIVE HALF OF THE BASIS CONTRIBUTES NOTHING
+
+`G-L-COST` permits at most ONE matmul-class term (`~1.35` matmuls a layer;
+each `@` term costs `2 n^3`). So the fit was run in eight variants. At full
+precision, fold 0, `lambda = 1e-8`:
+
+| variant | held-out `R^2` |
+|---|---:|
+| Hadamard/diagonal only, 23 terms, **0 matmuls** | `0.1403788549` |
+| all 29 terms | `0.1403788513` |
+| `+ MM_C_C` | `0.1403783160` |
+| `+ MM_C_w1_C` | `0.1403783224` |
+| `+ MM_C_w2_C` | `0.1403788547` |
+| `+ MM_C2_C` | `0.1403793744` |
+| `+ MM_C_C2` | `0.1403788623` |
+| `+ MM_had_C_CC` | `0.1403786609` |
+
+**Every matmul term changes the answer in the sixth decimal, and two of them
+make it worse.** The entire fit is carried by terms that are nearly free, and
+the only terms that would have cost anything are the ones that buy nothing. My
+first reading of this table was that a bug was pinning the variants together;
+they genuinely differ, by `~1e-6`.
+
+The reason is visible in the Gram: the matmul terms correlate `0.23`–`0.91` with
+Hadamard/diagonal terms already present (`MM_had_C_CC` with `mu_C_mu` at `0.907`,
+`MM_C_w2_C` with `C` at `0.874`). **They are not new directions.** The terms that
+actually point at `E21` are `S3_C` (moment alignment `0.729`), `w1_C` (`0.393`),
+`w1_C_w1` (`0.291`) and Arm M's own generator `w1sq_C_w2` (`0.285`) — all cheap,
+all insufficient.
+
+## § B's FALSIFIER FIRES
+
+`CONTRACT WP18` § B: *"**Falsifier.** `R^2 < 0.90` on BOTH legs held out, or an
+in-flight injection that is destructive, or a null at `>= 1.5x`. Arm L is then
+dead and the Sep 24 kill line fires on schedule."*
+
+| leg | held-out `R^2` | in-sample ceiling |
+|---|---:|---:|
+| `E3` — pointwise map on carried per-neuron scalars | **`0.1002`** | `0.2575` |
+| `E21` — 29-term equivariant matrix basis | **`0.1436`** | `0.1665` |
+
+**Both below `0.90`. The falsifier fires. Arm L is dead, by the contract it was
+written under, and no threshold was moved to get here.**
+
+The other two falsifier clauses did *not* fire, and that is worth recording
+because it says where the failure is not: **`G-DIAG-NOTWORSE` passed `0/8` at
+three ranks** (the injection is not destructive — WP10's precedent does not
+recur), and **both nulls are clean by enormous margins** (`-2.01` on `E3`,
+`-221,237` on `E21`). The maps are not accidentally right and they are not
+harmful. They are simply not there.
+
+## WHAT IS NOW CLOSED, AND HOW COMPLETELY
+
+Putting WP13, WP14, WP18 and WP19 together, the correction lane has been
+attacked four ways and every one is measured shut:
+
+| route | result |
+|---|---|
+| **select** a subspace of what the flow already holds (5 column-weight rules) | `1.45x`–`2.10x` **worse** than not correcting — WP13 |
+| **select** using `Sigma`'s dominant range | containment `= r/n` to three decimals, i.e. **chance** — WP14 |
+| **predict `E3`** pointwise from carried per-neuron scalars | held out `0.1002`, ceiling **`0.2575`** — WP18 § B |
+| **predict `E21`** from a 29-term equivariant basis on carried state | held out `0.1436`, ceiling **`0.1665`** — here |
+| **read `E3` off `E21`'s own diagonal** (free, one scalar, non-destructive) | `R^2 = 0.4529`, end-to-end `3.727x` against a `5x` gate — WP19 |
+
+And the sensitivity that ties it together, measured on 8 networks at the live
+shape (WP19): with `E21` held at **oracle**, moving `E3` from `R^2 = 0.453` to
+exact multiplies the end-to-end gain by **`5.06x`** (`3.727x -> 18.873x`). **The
+`10x` gate needs both legs near-exact. We can predict neither leg above `0.15`.**
+
+**So the closure is not "we could not fit it well enough". It is: the state the
+regenerating flow carries does not determine what it discards, and we have now
+measured that from four independent directions with a ceiling on each.**
+
+## What this does NOT close
+
+- **`G-L-E2E` is unrun and stays unrun.** Its falsifier fired upstream of it;
+  running an end-to-end gate on maps that explain `14%` of their target would
+  spend `P06` to confirm arithmetic. **`P06[..000..127]` is released untouched.**
+- **The `E3`-from-`E21`-diagonal result stands on its own merits** — `c = 1.019`,
+  unbiased at `r = 192`, non-destructive, free. It is dead only because it needs
+  an `E21` we cannot produce. If a future route ever supplies `E21`, the `(3,)`
+  correction comes with it at `O(n)` and should not be re-derived.
+- **Nothing here touches the canary**, which is a different lane and is
+  `29/30` and packaged.
+
+## Knowledge delta
+
+1. **`E21` is not a function of `(mu, Sigma, S3, S21)` through any of 29
+   equivariant terms**, and the fit reaches within `0.023` of the basis's own
+   ceiling, so the shortfall is representational, not statistical.
+2. **The expensive terms buy nothing.** Six matmul-class terms, each `2 n^3` a
+   layer, move held-out `R^2` by `~1e-6` and two of them negatively. The cost
+   constraint `G-L-COST` was never going to be the binding one — a fact that
+   would have been worth knowing before the basis was priced.
+3. **A ceiling computed from a Gram/moment reduction is exact and nearly free**,
+   and it converged identically under three solvers and five `rcond` settings.
+   Storing `(G, b, ||y||^2)` instead of a `4.6 GB` target made the decisive
+   diagnostic a one-line closed form rather than a second experiment.
+4. **Both of this project's learned-component attempts died at a CEILING, not at
+   a fit.** That is the strongest form of negative result available and it is
+   what the write-up should carry.
+
+## One process note, because the enforcement worked
+
+`seed_ledger.finalize()` **refused** to hash `e21_moments_P05.npz` against the
+`P05` claim: *"no claim by `local_sim/p2_wp18_labels.py` names artifact ... ;
+finalize() closes an existing claim, it does not create provenance."* That is
+correct and it should not be worked around. The moments pass **drew no seeds** —
+it re-read the same 128 networks the labels used, passed in by `--seed`, with no
+`claim()` call — so its provenance is the existing `P05[..000..127]` claim,
+already finalized to `labels_P05.npz`'s hash. One claim, one artifact hash, and a
+second derived artifact does not get to acquire the authority of a fresh draw.
+`test_seed_ledger` is `66/66`.
