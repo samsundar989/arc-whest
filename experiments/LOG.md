@@ -28922,3 +28922,49 @@ cheap is that its wrong answer had already been given a name.**
    reassociation — factoring `0.5 C11^2 X + 0.25 D22 X` — were **left undone**,
    because a change that is merely "small" needs a measurement and a change that
    is an identity needs only a comparison.
+
+---
+
+# 2026-09-03 — PRE-REGISTRATION: the official read of the fixed canary (SKEPTIC WP16's named follow-up)
+
+`SKEPTIC WP16` returned **ACCEPT** and named the cheapest discriminating
+follow-up: re-run the regenerated canary through
+`whest run --runner subprocess` on the same 20 `v2-phase2 mini` rows the retired
+canary was scored on, **with v2.6.1 as a matched control in the same session**.
+Registered here **before the run completes** — job `174` was still QUEUED when
+this was written, and the control had not been submitted at all.
+
+**Tier: CONFIRM, read-only.** No seed block is drawn, nothing is fitted, nothing
+is selected, and the rows have already been read. This measures three things and
+no others: the official per-MLP **residual**, `n_failed_mlps`, and the raw MSE.
+
+## The prediction, taken from SKEPTIC WP16 and adopted unchanged
+
+| # | prediction |
+|---|---|
+| **Q1** | raw MSE lands in **`[7.5e-07, 1.15e-06]`**. Above `~1.3e-06` **falsifies** "one line was the whole of the `3.31x`" and says something else is also wrong |
+| **Q2** | `n_failed_mlps` is **0** |
+| **Q3** | worst-MLP residual headroom is **`> 1.21x`** (the retired file's) and **`< 4x`** (the soak requirement). My point estimate is `2.0–2.8x`, from `2,708 / 5,327` applied to the retired file's `0.3314 s` |
+| **Q4** | the v2.6.1 control reproduces its own `4.1805e-06` to within `1%`, since it is the identical file on identical rows |
+
+**Why Q4 is not decoration.** The 2026-09-02 run is what made a disappointing
+number a *diagnosis* rather than an ambiguity, and it did so only because a
+control transferred to `3.2%`. Without it, a surprising MSE here could be the
+split, the harness, the host or the fix.
+
+**Why the band is `[7.5e-07, 1.15e-06]` and not centred on `8.5075e-07`.**
+`SKEPTIC WP16` measured the P01-to-official transfer ratio for two estimators —
+`1.048x` for the defective K3, `1.096x` for the K2 closure — predicting
+`~8.9-9.3e-07` officially. That is an inference from two estimators on 8 against
+20 networks with no interval, so the band is wider than the point estimate and is
+**not** the `[7.0e-07, 1.1e-06]` band `CONTRACT WP16` clause 2 used offline.
+
+## What this run CANNOT settle, stated now
+
+Neither this nor anything offline can rule out a defect shared by upstream,
+`p2_range_lab.run_flow` and `bridge.build_mlp`: golden parity is blind to it by
+construction, and clause 2's band was set from the same program. `SKEPTIC WP16`
+bounded that risk at **layer 1 only**, by checking the minted truth against the
+closed form `||W1[:,j]|| / sqrt(2 pi)` (rms-z `0.93-1.05` on 8 networks x 2
+replicas). **An official raw MSE near `9e-07` would bound it at every layer**,
+because the grader's own labels are independent of all three.
