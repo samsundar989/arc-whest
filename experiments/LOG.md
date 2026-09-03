@@ -29254,3 +29254,303 @@ conservative reading is job 174's. Both fail `>= 4x`, so the conclusion is
 unchanged, but *"the authority is immune to host load"* is not a claim this
 repository may make — only *"the authority is the only thing that can fail an
 MLP, and it failed none."*
+
+---
+
+# 2026-09-03 — **THE STRATEGIST RULES ON THE THREE QUESTIONS. Arm M dies, the `4x` bar splits, and the canary goes out today.**
+
+The previous entry closed with three questions it declared were not the agent's to
+answer. They were escalated and a ruling came back. **It is recorded here in
+substance before any of it is acted on**, because two of the three rulings relax
+something this repository had written down, and a relaxation must be traceable to
+the authority that granted it rather than to the agent that benefits from it.
+
+## Ruling 1 — the `>= 4x` bar is SPLIT. It protects nominations, not canaries.
+
+**Rationale as given.** Local residual cannot settle the question: the official
+runner swings `31%` with host load for a `2.3%` operation change (this LOG,
+previous entry), and per-MLP dispersion *within* a run is `1.20x`. Only the
+grader's per-row telemetry can settle it, and **a canary returns that telemetry
+for all 100 rows**. The cost of being wrong is bounded and asymmetric: an
+undesignated public submission has no prize consequence — the private rerun grades
+only designated entries, and Rules v14 §6's default would never pick a
+residual-failed canary over `v2.7` — while an overrun costs one daily submission.
+
+| bar | threshold | applies to |
+|---|---|---|
+| **CANARY** | `certify_candidate` green · Linux memory gate · `0/100` failures on the local official run · FLOPs at the `0.1` floor with `+2**24` margin · local worst-row headroom **`>= 1.5x`** | presenting a public, **undesignated** submission whose purpose is to buy graded telemetry |
+| **NOMINATION** | on the canary's **graded** telemetry: worst-row residual headroom **`>= 4x`** · `0/100` graded failures · floor with `+2**24` · explicit designation before close | designating an entry for the private rerun |
+
+**The canary bar is already met on the evidence that exists**: `0/100` (jobs 174
+and 182), floor with margin (`x = 0.076684`, multiplier `0.10000`), worst-row
+headroom `2.23x >= 1.5x` (`official_residual.json`). What is NOT yet met, and is
+the subject of § A below: `certify_candidate` and the Linux memory gate, neither
+of which has ever been run against `estimator_wp15_k3_canary.py`.
+
+**Explicitly ruled OUT for the canary: the `3 x 100` soak.** It is not on the
+canary path at all. It was the instrument for a question the grader answers
+better.
+
+**Order of work, as ruled:** canary first; then size the op-count work **to the
+graded worst row**, not to the local one. If graded lands at `2.5x`-`4x`,
+reassociate to that target and re-canary; if `< 2.5x`, cut hard. Reassociation may
+proceed in parallel but **must not delay the submission**, and every reassociating
+change takes WP16's parity gate (drift vs the golden reference `<= 1%`, raw within
+noise) plus a re-metered price.
+
+## Ruling 2 — Arm M is KILLED as a standalone. No separate cost case.
+
+`G-M-DEPTH` failed as written (`0.5734` against `0.70`); the ruling is to **honour
+the contract** rather than to re-argue it. The arithmetic behind the ruling:
+`E21` is ~60% of the regenerating flow's error and `E3` ~40%; **either slice alone
+saturates at ~`2.4x`** end to end (WP14: `proj:1024` = exact `E21`, no `E3`, is
+`2.534x`; free exact `E3` alone is `1.551x`), and Arm M adds operations on the axis
+that is currently binding the whole project. A `~73%`-of-`E21` recovery bought with
+`~5` extra matmuls a layer is not a trade this project can make while the residual
+is the blocker.
+
+**What survives:** Arm M's three-generation closed-form terms (rank `<= 192`)
+become **Arm L features**. They are a basis, not an architecture, and as features
+they cost what a Hadamard-and-diagonal term costs rather than what a carried
+generation costs.
+
+**Recorded here and in the write-up:** three generations explain `0.7322` of
+`E21`'s Frobenius energy, i.e. a **`~73%` explained fraction** — and `73%` of
+`E21` is `~44%` of the flow's error, not `73%` of it.
+
+## Ruling 3 — the floor nominee and Arm L run in PARALLEL.
+
+Not sequenced. Today: (a) certify + memory gate + package → present the canary;
+(b) queue Arm L's oracle-label job **now**. While those run, build the
+equivariant feature library — **`E3` first**, because it is a per-neuron map on
+`(mu, sigma, alpha = mu/sigma, S3)` at near-zero FLOPs and near-zero operations,
+and **nothing in the project currently targets it at all**.
+
+## Process constraints restated, and they bind everything below
+
+Thresholds in flopscope FLOPs · nulls differ in **code path** · a pinned commit
+for any Skeptic audit · committed preflight transcripts · soaks only through
+`gpuq` · **the local official runner's residual is never a gate on its own.**
+
+## The kill line moves to ~2026-09-24
+
+If no `>= 10x` end-to-end drift reduction on fresh networks by then: freeze Arm L,
+nominate the canaried uncorrected flow (only if graded worst-row headroom `>= 4x`,
+else after a sized op cut) plus `v2.7` as the diverse pair, and finish the
+write-up (due Oct 24; close Oct 17; **designate explicitly by Oct 10**).
+Unchanged: AUGMENT deprioritised; the carrier lane and every other closed lane
+stay closed.
+
+---
+
+# 2026-09-03 — **PRE-REGISTRATION (Rule 1): CONTRACT WP18 — the canary, and Arm L's first two numbers**
+
+**Committed before `certify_candidate`, before the memory gate, before the label
+job, and before any feature is fitted.** Two parts. § A is a deployment
+certification with a fixed pass/fail list and no free parameters; § B is the first
+measurement slice of Arm L and carries the predictions.
+
+## § A — the canary: certify, enforce, package, present
+
+**Question.** Does `estimator_wp15_k3_canary.py` — the regenerating K3 flow,
+`2,646` operations, byte-identical to the file job 182 measured — pass every
+CANARY-bar item that has not yet been run against it?
+
+**Evidence.**
+
+| item | status |
+|---|---|
+| `0/100` failures, two independent official runs (174 at `2,708` ops, 182 at `2,646`) | **CONFIRMED** — `official_residual.json`, and job 174's report |
+| raw MSE `8.75e-07`, `4.63x` better than shipped v2.6.1, matched control reproducing to `0.01%` | **CONFIRMED** — 100 graded rows |
+| FLOPs at the `0.1` multiplier floor: `x = 0.076684`, `168,629,787,238` f32 FLOPs over 16 layers | **CONFIRMED** — `candidate_parity_1024x16.json` |
+| `+2**24` server offset leaves the floor intact (`x` would have to exceed `0.1`; the offset is `+0.0122%`) | **CONFIRMED** — arithmetic on the above |
+| local worst-row headroom `2.23x >= 1.5x` | **CONFIRMED** — `official_residual.json` |
+| `certify_candidate` on this file | **NEVER RUN** |
+| Linux memory gate (`RLIMIT_AS`, WSL, with both controls) on this file | **NEVER RUN** |
+| `whest validate` on this file as a certification at live shape | **NEVER RUN as a certification** |
+
+**Intervention.** Run exactly two commands against the canary, both read-only
+with respect to `estimator.py`, both brokered through `gpuq`:
+
+1. `certify_candidate.py --candidate estimator_wp15_k3_canary.py` with **no
+   residual soak** (the soak is ruled off the canary path) →
+   `experiments/2026-09-03_wp18_canary/certify_canary.json`
+2. `linux_memory_gate.py --candidate estimator_wp15_k3_canary.py` →
+   `experiments/2026-09-03_wp18_canary/linux_memory_gate.json`
+
+Then `whest package` the file, record its sha256, and **present it to Samuel**.
+
+**Predictions — § A.**
+
+| # | prediction |
+|---|---|
+| **A1** | `certify_candidate` returns `pass: true` on every section. The file has been through `whest validate`, the 30 invariants and a 100-row official run; a certification failure now would mean `certify_candidate` tests something none of those do |
+| **A2** | The Linux memory gate PASSES with headroom `>= 4x` against `8,192 MB`. The flow's largest live object is `O(n^2)` at `n = 1024` f32 (`4 MB`) plus the factored `K[3]` at rank `<= 2n` (`~25 MB`); the one real risk is the *interpreter and package* import footprint, not the estimator's arrays |
+| **A3** | The negative control DIES (over-allocation under the cap is killed) and the positive control SURVIVES. **If the negative control survives, every memory pass in this repository is withdrawn**, including this one, and § A stops |
+| **A4** | The packaged archive validates and its FLOP preview reproduces `x = 0.076684` to `< 0.1%` |
+
+**Gate — § A, fixed now, no free parameters.** ALL of: `certify_canary.json`
+`pass == true`; `linux_memory_gate.json` `pass == true` **with both controls
+behaving**; `whest validate` on the packaged archive clean. **Any one red and the
+canary is not presented.** No partial credit and no "advisory" pass: § A is a
+checklist, and the only judgement in it is the decision Ruling 1 already made.
+
+**Falsifier — § A.** Any of the four gate items red. In particular a memory-gate
+negative control that survives falsifies not this slice but every memory claim in
+the repository, and that is the outcome it exists to be able to produce.
+
+**Baseline.** `estimator.py` at v2.6.1, unchanged and untouched.
+`certify_candidate` is read-only by construction and adds no path through
+`preflight.ps1`.
+
+**Cost model.** Phase 2, `lambda = 0`, `C = F`. `168,629,787,238` f32 counted
+FLOPs, `x = 0.076684`, multiplier `0.10000` — the floor, so **the score is the raw
+MSE over ten** and FLOPs are free at the margin. Residual is not a cost: it is the
+`0.4 s` cliff, and the number that governs it is the **graded** worst row, which
+this submission exists to obtain. The `+2**24` offset is applied and does not move
+the multiplier.
+
+**Statistic.** None. § A scores no comparison; it is a pass/fail certification.
+The one number it will later produce — the graded worst-row residual — is read,
+not chosen, and nothing may be fitted on it.
+
+**Seed block.** NONE, deliberately: `certify_candidate` uses `90000000201..204`
+and the memory gate `90000000101`, both outside every registered block, because
+they measure deployment properties. `certify_candidate` § 10's official smoke IS
+a CONFIRM-tier truth read; it may check and it may choose nothing.
+
+**Confounders / what must not change.** `estimator.py` stays v2.6.1. No vault
+touch. No designation. **`whest submit` is never run by an agent** — the archive
+and its SHA are handed to Samuel, who submits. The submission is labelled a
+**residual-measurement canary, not a nomination**, in the paragraph presented with
+it, because Rules v14 §6's default selection reads the public board and the label
+is the only thing that records intent for a human reading it later.
+
+## § B — Arm L, first slice: the oracle labels and the `E3` map
+
+**This AMENDS `CONTRACT WP15`'s Arm L; it does not replace it.** `G-L-COST`,
+`G-L-E2E` and `G-NULL` are unchanged and still binding. What changes: Arm M's
+three-generation closed forms enter the basis, and **`G-L-FIT` is now scored
+separately on `E3` and on `E21`** rather than on `E21` alone — the strategist's
+Ruling 3, and it is a *tightening*, because the old gate could be passed while
+`E3` (~40% of the error) went untested.
+
+**Question.** Is there a permutation-equivariant map from the regenerating flow's
+own carried state `(mu, Sigma, S3, S21)` to the correction `(E3, E21)` it
+discards, that transfers to networks it was not fitted on?
+
+**Evidence.**
+
+| item | status |
+|---|---|
+| `E21` and `E3` are exactly computable as `uncapped - regenerating` at each pre-layer, with a ladder check that fires on a wrong reconstruction | **CONFIRMED** — `p2_wp15_depth.py` `--selftest` S1/S2, and `gm_depth.json` |
+| exact `E21` alone is `2.534x` end to end; free exact `E3` alone is `1.551x`; **neither alone reaches `10x`** | **CONFIRMED** — WP14 `e2_residual` / `drift_oracle`, `P10` HELD |
+| three generations explain `0.7322` of `E21`'s Frobenius energy; one explains `0.3381` | **CONFIRMED** — `gm_depth.json`, `gm_depth_f64.json` |
+| `E21` is rank-512-sufficient and low rank, `r90` collapsing `264 -> 78` with depth | **CONFIRMED** — WP13 E2 + `SKEPTIC WP13` |
+| every *selector* on the flow's existing state is `1.45x`-`2.10x` **worse** than not correcting | **CONFIRMED** — WP13 E1, WP14 C1 |
+| a *generative* map can exist where a selector cannot, because the flow does not hold the discarded block at all | **INFERRED** — `CONTRACT WP15`'s H-argument, from `factor_k3.py` |
+| `E3` is fittable at `R^2 >= 0.95` | **SPECULATIVE — this slice's subject** |
+
+**Hypothesis + mechanism.** The discarded all-distinct block's leading term is a
+specific quadratic Hadamard in `Sigma` under diagonal scalings by functions of
+`(mu, sigma)`: `fac1 = w1 . zero_repeated(Sigma)`,
+`fac3 = (w2 (x) w1 . zero_repeated(Sigma))^T`, with
+`w_k = relu_wick_coef(mu, var, k, 1)`. Both legs are **functions of state the flow
+already carries**, so the correction is not an arbitrary function of the network:
+it is a fixed algebraic form whose only unknowns are how the propagated older
+generations superpose. That is why a *fit over an equivariant basis containing
+that form* is a different object from a *selector on the flow's subspaces*, and
+why WP13/WP14's five selector deaths do not predict this outcome. **For `E3` the
+mechanism is stronger**: the `(3,)` slice is an `n`-vector, `E3_i` depends on
+neuron `i`'s own `(mu_i, sigma_i)` and on contractions of `Sigma`'s row `i`, so a
+per-neuron map on `(mu, sigma, alpha = mu/sigma, S3, row-contractions)` is
+*pointwise equivariant by construction* — equivariance is free rather than
+imposed.
+
+**Intervention — the smallest thing that discriminates, in two steps.**
+
+*B1, the labels.* On `>= 100` freshly minted `1024 x 16` networks from **`P05`**,
+run the uncapped full-K3 flow and the regenerating flow on common random numbers
+and store, per pre-layer `p` in `4..14`:
+
+- `E3_p = uncapped(3,)_p - regen(3,)_p`, an `n`-vector;
+- `E21_p = uncapped(2,1)_p - regen(2,1)_p`, `n x n`, stored as a rank-`<= 192`
+  SVD sketch plus its Frobenius norm — 100 nets x 11 layers x `1024^2` f32 is
+  `4.6 GB` dense and the fit does not need it dense;
+- the regenerating flow's own state at that point: `mu`, `diag(Sigma)`, `S3`, and
+  the `Sigma`-contractions the basis needs.
+
+*B2, the `E3` map.* Fit `E3 ~= sum_t d_t v_t(mu, sigma, alpha, S3, ...)` by
+**ridge**, leave-networks-out, and report held-out `R^2` per layer and
+layer-averaged. **`E3` first and alone**, before a single `E21` term is written,
+because it is near-free in both FLOPs and operations and because a null result on
+the cheap leg is worth more than a partial result on both.
+
+**Predictions — § B. Mine, numbered, before the labels exist.**
+
+| # | prediction |
+|---|---|
+| **B1** | The labeller's own endpoint checks hold on a fresh `P05` network: `explained(0) = 0` and `explained(depth) = 1` exactly (a *form* check, not a value check — these are different networks from `gm_depth`'s). If either drifts, the labeller is not computing `E21` and § B stops |
+| **B2** | **Held-out `R^2` on `E3` `>= 0.95` layer-averaged, and `>= 0.90` at EVERY layer `4..14`.** `CONTRACT WP15`'s `P10` restated with the layer clause added. Mechanism: pointwise equivariance is exact, and the target is an `n`-vector with `n = 1024` rows per network per layer — `~1.1 M` rows against `<= 15` coefficients |
+| **B3** | **Held-out `R^2` on `E21` `< 0.90` layer-averaged**, with the shortfall at DEPTH: `>= 0.85` at layers 4-6, `< 0.70` at layers 12-14. `CONTRACT WP15`'s `P5` said exactly this and nothing since has moved it |
+| **B4** | The `E3` fit's leading coefficient sits on the `alpha = mu/sigma` channel rather than on `S3` — the discarded `(3,)` mass is governed by the Wick coefficients' argument, not by the third cumulant the flow already carries. Refuted if `S3`-only explains `>= 0.90` on its own, which would mean the flow already holds what it discards and the lane is mis-specified |
+| **B5** | **A per-layer `R^2` of `0.95` on `E3` will NOT buy `10x` end to end on its own.** Exact `E3` is `1.551x` and a fitted map cannot beat its own oracle. The honest ceiling for `E3 + E21` at the oracle is `~3x` (WP14's `svd:512` was `2.515x` with exact `E21`). **I predict `G-L-E2E` FAILS at `>= 10x`, `~70%`** — and if so the Sep 24 kill line fires and the write-up gets a clean negative with an explained mechanism, which is a result and not a failure of the slice |
+| **B6** | The permuted-coefficient null comes in `< 1.2x` on `E3`: a permuted `d_t` on a pointwise map is a *different pointwise map*, visibly wrong rather than accidentally right |
+| **B7** | The `E3` map's deployed price is `< 1e8` counted f32 FLOPs over 16 layers (`< 0.00005 B`) and **`<= 6` extra flopscope operations per layer**. The operation count is the binding one now, not the FLOP count, and it is the number I am least sure of |
+
+**Gate — § B, fixed now.** `G-L-FIT` is **split**, as ruled:
+
+| gate | threshold |
+|---|---|
+| **G-L-FIT-E3** | held-out `R^2` on `E3` **`>= 0.90`** layer-averaged over `4..14`, leave-networks-out on `P05`, per-layer minimum reported beside it |
+| **G-L-FIT-E21** | held-out `R^2` on `E21` **`>= 0.90`** layer-averaged over `4..14`, same protocol |
+| **G-L-COST** | unchanged from `CONTRACT WP15`: incremental counted f32 FLOPs `<= 46,495,355,667` (`0.02114 B`) over 16 layers, MEASURED inside a real `BudgetContext`. **Plus, new and binding because the residual is the live blocker: the deployed map's incremental flopscope OPERATIONS must not push the worst graded row above the `0.4 s` cliff at the headroom the canary measures** |
+| **G-L-E2E** | unchanged: **`>= 10x`** end-to-end drift reduction vs the uncorrected regenerating flow, `P06[..064..127]`, paired arithmetic difference, studentised-`t` or basic-bootstrap 95% interval excluding zero, **in flight** (the WP10 destructive-injection check) |
+| **G-NULL** | unchanged: permuted-coefficient map and equal-rank random-basis correction each `< 1.5x`. A null at `>= 1.5x` **voids** the measurement |
+
+**A gate is passed or failed as written. Neither `0.90` moves after the data
+exists**, and `G-M-DEPTH`'s refused post-hoc move is the precedent.
+
+**Falsifier — § B.** `R^2 < 0.90` on BOTH legs held out, or an in-flight injection
+that is destructive, or a null at `>= 1.5x`. Arm L is then dead and the Sep 24
+kill line fires on schedule.
+
+**Baseline.** The uncorrected regenerating flow at its frozen measured price
+(`168,629,787,238` f32 FLOPs, `2,646` operations), on the same networks, common
+random numbers. Full K3 is the drift reference and the accuracy ceiling.
+
+**Cost model.** Phase 2, `lambda = 0`, `C = F`. Counted **f32** flopscope FLOPs,
+measured never modelled, quoted with the dtype in the same sentence. Residual
+reported as headroom `0.4 / observed` against the **worst** row of a
+`gpuq`-brokered official run, and from this slice forward against the **graded**
+worst row once the canary returns one. Never a local absolute wall time.
+
+**Statistic.** Held-out `R^2`, leave-networks-out, layer-averaged over `4..14`
+with the per-layer minimum reported. End-to-end: paired arithmetic difference on
+common random numbers with a studentised-`t` or basic-bootstrap 95% interval.
+Never percentile, never BCa, never a composed-excess model (`eps^2` over-predicts
+by `32x`).
+
+**Seed blocks — claimed through `seed_ledger`, `artifact=` named at claim time.**
+
+| role | block | tier | rule |
+|---|---|---|---|
+| Arm L labels + fit | **`P05`**, 128 of 160 | DESIGN | tuning PERMITTED here and nowhere else in the project |
+| Arm L end-to-end validation | `P06[..064..127]` | DESIGN | **not claimed by this slice**; read once, later, no tuning |
+| Arm M's half of `P06` | `P06[..000..063]` | DESIGN | **released** — Arm M is killed; those seeds are not consumed and stay free |
+
+**Nulls — each differs in CODE PATH.** Permuted-coefficient map; equal-rank
+random-basis correction carrying the oracle's own singular values; cross-network
+map. `eps = 0` is a determinism check and is not a null.
+
+**Confounders / scope / what must not change.** `estimator.py` untouched.
+`p2_k3_fnp.py::k3_layer`'s price stays frozen; if the map needs to change it, the
+baseline is re-measured before anything is compared to it. No CONFIRM read in § B,
+no vault touch. The `E3` and `E21` legs are fitted and reported **separately** and
+a combined number may not be quoted without both. Arm M's closed forms enter as
+features only — reopening Arm M as an architecture requires new external evidence
+and a fresh contract.
+
+**Samuel's prediction: TO BE TAKEN BEFORE THE RESULTS EXIST**, on § A's gate and
+on B2/B3. Recorded in the next entry; "I don't know" is a valid answer and a blank
+is not.
