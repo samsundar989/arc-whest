@@ -1,0 +1,310 @@
+{
+ "check": "WP14 C2: end-to-end drift with the projected residual injected in flight",
+ "contract": "LOG 2026-09-02 CONTRACT WP14, HEAD d915f83",
+ "seed_block": "P01",
+ "seeds": [
+  90000000951,
+  90000000952
+ ],
+ "dtype": "f64",
+ "width": 128,
+ "depth": 6,
+ "cells": [
+  "none",
+  "e3",
+  "svd:32",
+  "e3svd:32",
+  "e3diag_svd:32"
+ ],
+ "power_iters": 1,
+ "mse_full_anchor": 4.0047e-08,
+ "gt_noise_floor": 1.155e-09,
+ "regen_drift_reference": 8.4822e-07,
+ "baseline_cell": "none",
+ "gate": "G-E2E: studentised-t lower bound of mean(drift_none - 5*drift_proj512) > 0",
+ "positive_control": "G-POS, unchanged from the contract: cell 'exact' must reproduce the UNCAPPED flow to relative final-layer MSE <= 1e-12. A failure VOIDS C2 and C3. Note what selftest S-IDEM did and did NOT refute: the MEAN reads kappa_3 only through its two repeated slices, and that premise stands; what fails is that REBUILDING from those slices is a no-op, because factor_k3.py:381 propagates the incoming tensor whole and a rebuild kills an all-distinct block that would have reached the NEXT layer's slices. C2 therefore ADDS factors rather than rebuilding.",
+ "slice_algebra_check": "S-SLICE, in flight: add_factors((diag(d3)+3 d21^T, I, I)) moves (3,) by exactly d3 and (2,1) by exactly d21 -- see 'slice_probe' on every row",
+ "determinism_check": "cell 'proj:0' must equal cell 'none' exactly; this is NOT a null control (SKEPTIC WP13 finding 4)",
+ "rows": [
+  {
+   "seed": 90000000951,
+   "cell": "none",
+   "mode": "none",
+   "r": 0,
+   "dtype": "f64",
+   "drift_final_layer": 1.0806740187883352e-05,
+   "ratio_to_mse_full": 269.85142926769424,
+   "slice_probe": []
+  },
+  {
+   "seed": 90000000951,
+   "cell": "e3",
+   "mode": "e3",
+   "r": 0,
+   "dtype": "f64",
+   "drift_final_layer": 5.308455907320289e-06,
+   "ratio_to_mse_full": 132.5556448003668,
+   "slice_probe": [
+    {
+     "pre_layer": 1,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 0.0
+    },
+    {
+     "pre_layer": 2,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 0.0
+    }
+   ]
+  },
+  {
+   "seed": 90000000951,
+   "cell": "svd:32",
+   "mode": "svd",
+   "r": 32,
+   "dtype": "f64",
+   "drift_final_layer": 6.64723795553826e-06,
+   "ratio_to_mse_full": 165.98591543781706,
+   "slice_probe": [
+    {
+     "pre_layer": 1,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 3.707100722438276e-17
+    },
+    {
+     "pre_layer": 2,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 5.700329921794063e-17
+    }
+   ]
+  },
+  {
+   "seed": 90000000951,
+   "cell": "e3svd:32",
+   "mode": "e3svd",
+   "r": 32,
+   "dtype": "f64",
+   "drift_final_layer": 6.909960212799998e-07,
+   "ratio_to_mse_full": 17.25462634604339,
+   "slice_probe": [
+    {
+     "pre_layer": 1,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 3.707100722438276e-17
+    },
+    {
+     "pre_layer": 2,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 5.580830163725638e-17
+    }
+   ]
+  },
+  {
+   "seed": 90000000951,
+   "cell": "e3diag_svd:32",
+   "mode": "e3diag_svd",
+   "r": 32,
+   "dtype": "f64",
+   "drift_final_layer": 2.1620085688870573e-06,
+   "ratio_to_mse_full": 53.98677975596318,
+   "slice_probe": [
+    {
+     "pre_layer": 1,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 3.707100722438276e-17
+    },
+    {
+     "pre_layer": 2,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 5.442556668602414e-17
+    }
+   ]
+  },
+  {
+   "seed": 90000000952,
+   "cell": "none",
+   "mode": "none",
+   "r": 0,
+   "dtype": "f64",
+   "drift_final_layer": 1.541134044810059e-05,
+   "ratio_to_mse_full": 384.83133438461283,
+   "slice_probe": []
+  },
+  {
+   "seed": 90000000952,
+   "cell": "e3",
+   "mode": "e3",
+   "r": 0,
+   "dtype": "f64",
+   "drift_final_layer": 9.725056817185406e-06,
+   "ratio_to_mse_full": 242.84108215809937,
+   "slice_probe": [
+    {
+     "pre_layer": 1,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 0.0
+    },
+    {
+     "pre_layer": 2,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 0.0
+    }
+   ]
+  },
+  {
+   "seed": 90000000952,
+   "cell": "svd:32",
+   "mode": "svd",
+   "r": 32,
+   "dtype": "f64",
+   "drift_final_layer": 7.657682791259221e-06,
+   "ratio_to_mse_full": 191.21738934899545,
+   "slice_probe": [
+    {
+     "pre_layer": 1,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 3.792662182426232e-17
+    },
+    {
+     "pre_layer": 2,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 5.51361627854674e-17
+    }
+   ]
+  },
+  {
+   "seed": 90000000952,
+   "cell": "e3svd:32",
+   "mode": "e3svd",
+   "r": 32,
+   "dtype": "f64",
+   "drift_final_layer": 8.154092789578924e-07,
+   "ratio_to_mse_full": 20.361307437708,
+   "slice_probe": [
+    {
+     "pre_layer": 1,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 3.792662182426232e-17
+    },
+    {
+     "pre_layer": 2,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 5.548645848632954e-17
+    }
+   ]
+  },
+  {
+   "seed": 90000000952,
+   "cell": "e3diag_svd:32",
+   "mode": "e3diag_svd",
+   "r": 32,
+   "dtype": "f64",
+   "drift_final_layer": 2.384348249602599e-06,
+   "ratio_to_mse_full": 59.53874821091714,
+   "slice_probe": [
+    {
+     "pre_layer": 1,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 3.792662182426232e-17
+    },
+    {
+     "pre_layer": 2,
+     "rel_err_s3": 0.0,
+     "rel_err_s21": 5.503480715614572e-17
+    }
+   ]
+  }
+ ],
+ "selector_cost": [
+  {
+   "seed": 90000000951,
+   "cell": "e3diag_svd:32",
+   "layers_corrected": 5,
+   "diag_scalar_c_mean": 2.1776734667768824,
+   "diag_r2_mean": 0.6616738628806411,
+   "diag_r2_min": 0.6413224822596699,
+   "diag_per_layer": [
+    {
+     "pre_layer": 1,
+     "layer": 0,
+     "r": 32,
+     "diag_scalar_c": 1.930877056748426,
+     "diag_r2_uncentered": 0.6641994492865348
+    },
+    {
+     "pre_layer": 2,
+     "layer": 1,
+     "r": 32,
+     "diag_scalar_c": 2.0746256271981722,
+     "diag_r2_uncentered": 0.6794887416587445
+    },
+    {
+     "pre_layer": 3,
+     "layer": 2,
+     "r": 32,
+     "diag_scalar_c": 2.1256421837315314,
+     "diag_r2_uncentered": 0.6413224822596699
+    },
+    {
+     "pre_layer": 4,
+     "layer": 3,
+     "r": 32,
+     "diag_scalar_c": 2.4456204348102633,
+     "diag_r2_uncentered": 0.6784139661801025
+    },
+    {
+     "pre_layer": 5,
+     "layer": 4,
+     "r": 32,
+     "diag_scalar_c": 2.311602031396019,
+     "diag_r2_uncentered": 0.6449446750181539
+    }
+   ]
+  },
+  {
+   "seed": 90000000952,
+   "cell": "e3diag_svd:32",
+   "layers_corrected": 5,
+   "diag_scalar_c_mean": 2.1731604251054915,
+   "diag_r2_mean": 0.6978496072824455,
+   "diag_r2_min": 0.5746732193401771,
+   "diag_per_layer": [
+    {
+     "pre_layer": 1,
+     "layer": 0,
+     "r": 32,
+     "diag_scalar_c": 2.2016311365313723,
+     "diag_r2_uncentered": 0.5746732193401771
+    },
+    {
+     "pre_layer": 2,
+     "layer": 1,
+     "r": 32,
+     "diag_scalar_c": 2.267044583772049,
+     "diag_r2_uncentered": 0.6870184733953654
+    },
+    {
+     "pre_layer": 3,
+     "layer": 2,
+     "r": 32,
+     "diag_scalar_c": 2.1547111786188826,
+     "diag_r2_uncentered": 0.7670048398980285
+    },
+    {
+     "pre_layer": 4,
+     "layer": 3,
+     "r": 32,
+     "diag_scalar_c": 2.2362563631525645,
+     "diag_r2_uncentered": 0.7552599843996226
+    },
+    {
+     "pre_layer": 5,
+     "layer": 4,
+     "r": 32,
+     "diag_scalar_c": 2.006158863452589,
+     "diag_r2_uncentered": 0.7052915193790334
+    }
+   ]
+  }
+ ]
+}

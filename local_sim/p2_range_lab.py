@@ -350,6 +350,14 @@ def _correct_hook_lin(ref, *, mode: str, r: int, seed: int, power_iters: int,
       `svd`    the rank-`r` SVD truncation of `E21`. The best any rank-`r`
                subspace can do; an upper bound on `proj`, never an operating
                point.
+      `e3diag_svd`
+               the rank-`r` SVD truncation of `E21` for the `(2,1)` slice, AND
+               `(3,)` taken as `c * diag(that same reconstruction)` with one
+               scalar `c` fitted per layer against the true `E3`. `CONTRACT
+               WP19`, and it exists because `E3` and `E21` are the diagonal and
+               the zeroed off-diagonal of ONE tensor -- so this asks whether the
+               `(3,)` correction is FREE once the `(2,1)` one is paid for.
+               Gates `G-DIAG-R2`, `G-DIAG-E2E`, `G-DIAG-NOTWORSE`.
       `e3svd`  the exact `(3,)` residual AND the rank-`r` SVD truncation of
                `E21`. **This is the ceiling the whole correction lane is
                chasing** and the first C2 run omitted it: `svd` alone leaves the
@@ -401,6 +409,32 @@ def _correct_hook_lin(ref, *, mode: str, r: int, seed: int, power_iters: int,
             d3 = E3
         elif mode == "exact":
             d3, d21 = E3, E21
+        elif mode == "e3diag_svd":
+            # WP19. `E3` and `E21` are the DIAGONAL and the zeroed off-diagonal
+            # of ONE discarded tensor -- `SKEPTIC WP18-B` verified that against
+            # upstream (`_factored_get_dslice(., (3,)) == diag(T)` to `0.0`).
+            # So a rank-`r` reconstruction of `E21` already carries information
+            # about the diagonal that the STORED `(2,1)` slice throws away, and
+            # `(3,)` may be readable off it for one scalar instead of a fitted
+            # feature map. `CONTRACT WP19`.
+            #
+            # `c` is fitted against the TRUE `E3`, so this is an ORACLE and a
+            # CEILING, never an operating point -- exactly as `e3svd` is.
+            if r > 0:
+                U, sv, Vh = torch.linalg.svd(E21.double(), full_matrices=False)
+                k = min(r, int(sv.shape[0]))
+                rec = ((U[:, :k] * sv[:k]) @ Vh[:k])
+                d21 = rec.to(s21.dtype)
+                dg = rec.diagonal()
+                den = float((dg * dg).sum())
+                c = (float((E3.double() * dg).sum()) / den) if den > 0.0 else 0.0
+                d3 = (c * dg).to(s3.dtype)
+                if record is not None:
+                    record.append({"pre_layer": p, "layer": p - 1, "r": r,
+                                   "diag_scalar_c": c,
+                                   "diag_r2_uncentered": 1.0 - float(
+                                       ((E3.double() - c * dg) ** 2).sum())
+                                   / max(float((E3.double() ** 2).sum()), 1e-300)})
         elif mode in ("proj", "e3proj", "svd", "e3svd"):
             if mode in ("e3proj", "e3svd"):
                 d3 = E3
@@ -650,10 +684,22 @@ def cmd_e2e(a) -> int:
                          "ratio_to_mse_full": drift / MSE_FULL_ANCHOR,
                          "slice_probe": prb[:2]})
             if rec:
-                cost_rows.append({"seed": seed, "cell": spec,
-                                  "layers_corrected": len(rec),
-                                  "sigma_applications_per_layer":
-                                      rec[0]["sigma_applications"]})
+                row = {"seed": seed, "cell": spec, "layers_corrected": len(rec)}
+                # `proj` records its Sigma applications; `e3diag_svd` records the
+                # fitted diagonal scalar and its R^2 instead. Neither mode should
+                # have to know about the other's fields, and the first version of
+                # this line assumed every record carried `sigma_applications`.
+                if "sigma_applications" in rec[0]:
+                    row["sigma_applications_per_layer"] = rec[0]["sigma_applications"]
+                if "diag_scalar_c" in rec[0]:
+                    row["diag_scalar_c_mean"] = float(
+                        sum(x["diag_scalar_c"] for x in rec) / len(rec))
+                    row["diag_r2_mean"] = float(
+                        sum(x["diag_r2_uncentered"] for x in rec) / len(rec))
+                    row["diag_r2_min"] = float(
+                        min(x["diag_r2_uncentered"] for x in rec))
+                    row["diag_per_layer"] = rec
+                cost_rows.append(row)
             print(f"      seed {seed}  {spec:<14} drift {drift:.6e}"
                   f"   ({drift / MSE_FULL_ANCHOR:7.2f} x MSE_full)")
         unc = per_cell.get("none")
