@@ -1,0 +1,74 @@
+{
+ "check": "the whole regenerating K3 flow: FLOPs, OPERATION COUNT and local residual, against a matched K2 control",
+ "origin": "SKEPTIC WP14-FOLLOWUP: the op count and the 0.4 s cliff, not the FLOPs, are what can still fail an MLP at lambda=0",
+ "width": 1024,
+ "depth": 16,
+ "seed": 1000921,
+ "reps": 3,
+ "rows": [
+  {
+   "rep": 0,
+   "arm": "k2",
+   "flops": 68782549504.0,
+   "ops": 453,
+   "residual_wall_time_s": 0.03398109999943699,
+   "finite_output": true,
+   "dtype_violations": 0
+  },
+  {
+   "rep": 0,
+   "arm": "k3",
+   "flops": 168676988572.0,
+   "ops": 2708,
+   "residual_wall_time_s": 0.24753120001241768,
+   "finite_output": true,
+   "dtype_violations": 0
+  },
+  {
+   "rep": 1,
+   "arm": "k2",
+   "flops": 68782549504.0,
+   "ops": 453,
+   "residual_wall_time_s": 0.02283700000907629,
+   "finite_output": true,
+   "dtype_violations": 0
+  },
+  {
+   "rep": 1,
+   "arm": "k3",
+   "flops": 168676988572.0,
+   "ops": 2708,
+   "residual_wall_time_s": 0.23493559998769342,
+   "finite_output": true,
+   "dtype_violations": 0
+  },
+  {
+   "rep": 2,
+   "arm": "k2",
+   "flops": 68782549504.0,
+   "ops": 453,
+   "residual_wall_time_s": 0.02699449999636272,
+   "finite_output": true,
+   "dtype_violations": 0
+  },
+  {
+   "rep": 2,
+   "arm": "k3",
+   "flops": 168676988572.0,
+   "ops": 2708,
+   "residual_wall_time_s": 0.2318634000230304,
+   "finite_output": true,
+   "dtype_violations": 0
+  }
+ ],
+ "k3_flops": 168676988572.0,
+ "k2_flops": 68782549504.0,
+ "k3_ops": 2708,
+ "k2_ops": 453,
+ "k3_residual_worst_local_s": 0.24753120001241768,
+ "k2_residual_worst_local_s": 0.03398109999943699,
+ "residual_ratio_k3_over_k2": 7.28437866980524,
+ "k3_x_budget": 0.07670541370862338,
+ "extrapolation_16x_one_layer": 173406969888,
+ "caveat": "LOCAL in-process residual. Not quotable as an absolute; the authority is --runner subprocess. The RATIO to the matched K2 control is what transfers."
+}

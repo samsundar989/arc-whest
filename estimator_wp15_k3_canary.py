@@ -97,54 +97,145 @@ def _parse_int_part(key):
 
 
 def _evalpoly(coefs, x):
-    """Horner with PYTHON floats.
+    """Horner with PYTHON floats, seeded from a float rather than a vector.
 
     `np.float64(c)` would be CONCRETE under NEP-50 and would promote an f32 array
     on contact, and flopscope bills float64 at twice the float32 rate -- so a
     single numpy scalar here doubles the bill for the whole downstream graph.
+
+    The seed used to be `x * 0.0 + float(coefs[-1])`, two metered operations to
+    materialise a constant vector. Seeding from the float is the same value --
+    `0.0 * x` is signed zero for finite `x`, and `+/-0 + c` is `c` exactly.
     """
-    y = x * 0.0 + float(coefs[-1])
+    y = float(coefs[-1])
     for c in reversed(coefs[:-1]):
         y = y * x + float(c)
     return y
 
 
-def _wick(mean, sigma, alpha, table, dtype):
+def _horner_batch(C, A):
+    """Horner for a stack of polynomials at once. `C` is `(m, L)`, `A` is `(1, n)`.
+
+    Rows are padded at the HIGH end with zeros, which is bit-exact: a padded row
+    starts at `0`, and `0 * a + 0 == 0` then `0 * a + c == c` in IEEE. Twelve
+    polynomials cost `2 (L - 1)` operations instead of `2 sum_i (L_i - 1)`.
+    """
+    y = C[:, -1:]
+    for j in range(C.shape[1] - 2, -1, -1):
+        y = y * A + C[:, j:j + 1]
+    return y
+
+
+def _wick_program(table, dtype):
+    """The width- and weight-INDEPENDENT half of `_wick`. Built ONCE, in `setup`.
+
+    Under `lambda = 0` the binding cost is the per-MLP OPERATION COUNT, not the
+    arithmetic, so anything that does not depend on the MLP must not be inside
+    `predict`. This depends on the frozen `(k, p)` table alone.
+    """
+    poly_keys, P1s, P2s, pow_deg, other = [], [], [], [], []
+    for _key, spec in table["wick"].items():
+        k, p = int(spec["k"]), int(spec["p"])
+        if spec["branch"] == "poly":
+            poly_keys.append((k, p))
+            P1s.append([float(c) for c in spec["P1"]])
+            P2s.append([float(c) for c in spec["P2"]])
+            pow_deg.append(p - k)
+        else:
+            other.append((k, p, spec["branch"],
+                          float(spec.get("factorial_p", 1.0)),
+                          int(spec.get("k_reduced", k))))
+    L1 = max(len(c) for c in P1s)
+    L2 = max(len(c) for c in P2s)
+
+    def pad(rows, L):
+        return [r + [0.0] * (L - len(r)) for r in rows]
+
+    prog = {"poly_keys": poly_keys, "pow_deg": pow_deg, "other": other,
+            "C1": fnp.array(pad(P1s, L1), dtype=dtype),
+            "C2": fnp.array(pad(P2s, L2), dtype=dtype),
+            "max_sigma_pow": max(pow_deg + [3])}
+
+    # The one-dimensional fast path, decided here against the frozen table so
+    # `predict` never re-derives it. See `_layer`.
+    ones_d = [r for r in table["terms"] if len(r["int_part"]) == 1]
+    ps = sorted({r["int_part"][0] for r in ones_d})
+    want = sorted([((), 1.0), (((3,),), round(1.0 / 6.0, 12)),
+                   (((4,),), round(1.0 / 24.0, 12))])
+    ok = len(ones_d) == 3 * len(ps) and all(
+        sorted((tuple(tuple(b["vec"]) for b in r["blocks"]),
+                round(float(r["scalar"]), 12))
+               for r in ones_d if r["int_part"][0] == p) == want for p in ps)
+    prog["fast_1d"] = ok
+    prog["ps"] = ps
+    if ok:
+        by = {}
+        for r in ones_d:
+            key = () if not r["blocks"] else tuple(r["blocks"][0]["vec"])
+            by[(r["int_part"][0], key)] = (int(r["wick"][0][0]), int(r["wick"][0][1]))
+            if key == (3,):
+                prog["s3c"] = float(r["scalar"])
+            elif key == (4,):
+                prog["s4c"] = float(r["scalar"])
+        prog["w0_keys"] = [by[(p, ())] for p in ps]
+        prog["w3_keys"] = [by[(p, (3,))] for p in ps]
+        prog["w4_keys"] = [by[(p, (4,))] for p in ps]
+    return prog
+
+
+def _wick(mean, sigma, alpha, table, dtype, const):
     """`relu_wick_coef` for the 16 (k, p) pairs the layer needs. O(n) each.
 
     The two `flops.stats.*` calls are the only place a float64 can enter --
     flopscope promotes their inputs "to match scipy.stats" -- and both are cast
     back immediately. Without the casts the covariance accumulator, where nearly
     all the cost lives, is float64 in an arm that calls itself float32.
+
+    **This used to be 144 of a layer's 315 metered operations**, to produce
+    sixteen `(n,)` vectors. Four bit-exact changes take it to 40: `sigma^j` built
+    once in the same left-associated order the per-pair loop used, `base(k)`
+    memoised instead of recomputed for each consumer, the `1.0 * ones *` factors
+    dropped as the identities they are, and the twelve polynomials evaluated as
+    one padded batched Horner.
     """
     Phi = flops.stats.norm.cdf(alpha).astype(dtype)
     phi = flops.stats.norm.pdf(alpha).astype(dtype)
-    he = {0: alpha * 0.0 + 1.0, 1: alpha, 2: alpha * alpha - 1.0}
+
+    sig_pow = {1: sigma}
+    for j in range(2, max(const["max_sigma_pow"], 3) + 1):
+        sig_pow[j] = sig_pow[j - 1] * sigma
+
+    cache = {}
 
     def base(k):
+        if k in cache:
+            return cache[k]
         if k == 0:
-            return sigma * phi + mean * Phi
-        if k == 1:
-            return Phi
-        den = sigma
-        for _ in range(k - 2):
-            den = den * sigma
-        return ((-1.0) ** (k - 2)) * he[k - 2] * phi / den
+            v = sigma * phi + mean * Phi
+        elif k == 1:
+            v = Phi
+        elif k == 2:
+            v = phi / sig_pow[1]
+        elif k == 3:
+            v = (-1.0) * alpha * phi / sig_pow[2]
+        elif k == 4:
+            v = (alpha * alpha - 1.0) * phi / sig_pow[3]
+        else:
+            raise ValueError(k)
+        cache[k] = v
+        return v
+
+    A = alpha[None, :]
+    P1 = _horner_batch(const["C1"], A)
+    P2 = _horner_batch(const["C2"], A)
+    S = fnp.stack([sig_pow[d] for d in const["pow_deg"]])
+    V = S * (P1 * phi[None, :] + P2 * Phi[None, :])
 
     out = {}
-    for _key, spec in table["wick"].items():
-        k, p = int(spec["k"]), int(spec["p"])
-        if spec["branch"] == "base":
-            v = base(k)
-        elif spec["branch"] == "reduce":
-            v = float(spec["factorial_p"]) * base(int(spec["k_reduced"]))
-        else:
-            s_pow = alpha * 0.0 + 1.0
-            for _ in range(p - k):
-                s_pow = s_pow * sigma
-            v = s_pow * (_evalpoly(spec["P1"], alpha) * phi
-                         + _evalpoly(spec["P2"], alpha) * Phi)
-        out[(k, p)] = v
+    for i, kp in enumerate(const["poly_keys"]):
+        out[kp] = V[i]
+    for k, p, branch, fac, k_red in const["other"]:
+        out[(k, p)] = base(k) if branch == "base" else fac * base(k_red)
     return out
 
 
@@ -172,9 +263,23 @@ def _get_pk_block(pK, b, d):
     return f
 
 
-def _layer(W, state, table, dtype, off_mask, init_scale, last_layer):
-    """One layer: the linear step, then the nonlinear step. See the module docstring."""
+def _layer(W, state, table, dtype, const, init_scale, last_layer):
+    """One layer: the linear step, then the nonlinear step. See the module docstring.
+
+    `const` carries everything that does not depend on the MLP -- the diagonal
+    kill mask, the all-ones vector and the batched Wick coefficient stacks. Under
+    `lambda = 0` the binding cost is the OPERATION COUNT per MLP, so anything
+    rebuilt per layer that could have been built once is pure loss.
+
+    **Last-layer pruning.** The grader reads post-ReLU MEANS. At the final layer
+    there is no next layer, so the only output ever read is
+    `mu_out = K[(1,)] = pK[(1,)]`, which needs `w(0,1)`, `w(3,1)`, `w(4,1)`, `D3`
+    and `D4` and nothing else. The `(2,1)` slice's two matmuls, `C11`, `D22`,
+    twenty-two of the twenty-five pK terms, six of the seven `pK -> K` slices,
+    the covariance, `K[4]` and the rebuild are all skipped there.
+    """
     n = W.shape[0]
+    off_mask, ones_n = const["off_mask"], const["ones_n"]
     mu, cov, M, c4 = state[0], state[1], state[2], state[3]
 
     mu_pre = W.T @ mu
@@ -186,30 +291,73 @@ def _layer(W, state, table, dtype, off_mask, init_scale, last_layer):
     var = fnp.maximum(fnp.diagonal(cov_pre), dtype(1e-12))
     sigma = fnp.sqrt(var)
     alpha = mu_pre / sigma
-    w = _wick(mu_pre, sigma, alpha, table, dtype)
+    w = _wick(mu_pre, sigma, alpha, table, dtype, const["wick"])
 
-    C11 = cov_pre * off_mask
     PQ = P * Q
     D3 = (PQ * Q).sum(axis=1)
-    D21 = ((2.0 * (PQ @ Q.T) + ((Q * Q) @ P.T)) / 3.0) * off_mask   # 2 matmuls
-    ones_n = fnp.ones(n, dtype=dtype)
     D4 = (c4 * metric * metric) * ones_n
-    D22 = (c4 * metric * metric / 3.0) * fnp.outer(ones_n, ones_n) * off_mask
-
-    S = {(1,): mu_pre, (2,): var, (1, 1): C11, (2, 1): D21, (1, 2): D21.T,
-         (3,): D3, (4,): D4, (2, 2): D22}
+    if last_layer:
+        S = {(1,): mu_pre, (3,): D3, (4,): D4}
+    else:
+        C11 = cov_pre * off_mask
+        D21 = ((2.0 * (PQ @ Q.T) + ((Q * Q) @ P.T)) / 3.0) * off_mask  # 2 matmuls
+        # `outer(ones, ones)` is exactly an all-ones matrix, so scaling the mask
+        # directly is the same floats for two fewer operations.
+        D22 = (c4 * metric * metric / 3.0) * off_mask
+        S = {(1,): mu_pre, (2,): var, (1, 1): C11, (2, 1): D21, (1, 2): D21.T,
+             (3,): D3, (4,): D4, (2, 2): D22}
 
     pK = {}
+    # THE ONE-DIMENSIONAL SLICES, ALL FOUR AT ONCE. The frozen table gives every
+    # `(p,)` the same three terms:
+    #
+    #     pK[(p,)] = w(0,p) + (1/6) D3 w(3,p) + (1/24) D4 w(4,p)
+    #
+    # so the four slices are one `(4, n)` expression sharing `(1/6) D3` and
+    # `(1/24) D4`. Twelve terms and eight accumulations become nine operations,
+    # and because every float is multiplied and added in the order the per-term
+    # loop used, the result is bit-identical -- a regrouping, not a
+    # reassociation. `prog["fast_1d"]` is decided ONCE, in `setup`, against the
+    # frozen table; if a table ever fell out of this shape the generic loop below
+    # still computes it.
+    prog = const["wick"]
+    if prog["fast_1d"]:
+        u3 = S[(3,)] * prog["s3c"]
+        u4 = S[(4,)] * prog["s4c"]
+        W0 = fnp.stack([w[kp] for kp in prog["w0_keys"]])
+        W3 = fnp.stack([w[kp] for kp in prog["w3_keys"]])
+        W4 = fnp.stack([w[kp] for kp in prog["w4_keys"]])
+        PK1 = W0 + u3[None, :] * W3
+        PK1 = PK1 + u4[None, :] * W4
+        for i, p in enumerate(prog["ps"]):
+            pK[(p,)] = PK1[i]
+
+    blocks_seen = {}
     for row in table["terms"]:
         ip = tuple(row["int_part"])
         d = len(ip)
-        term = None
-        for blk in row["blocks"]:
-            f = S[tuple(blk["vec"])]
-            term = f if term is None else term * f
+        if last_layer and ip != (1,):
+            continue
+        if d == 1 and prog["fast_1d"]:
+            continue
+        # The same block product appears in several int_parts -- `C11*C11` in all
+        # three two-dimensional slices, `D22` likewise -- and was recomputed each
+        # time. Memoised on the block tuple: a reuse, not a reassociation.
+        bkey = tuple(tuple(blk["vec"]) for blk in row["blocks"])
+        term = blocks_seen.get(bkey)
+        if term is None and bkey:
+            for blk in row["blocks"]:
+                f = S[tuple(blk["vec"])]
+                term = f if term is None else term * f
+            blocks_seen[bkey] = term
+        scalar = float(row["scalar"])
         if term is None:
-            term = ones_n if d == 1 else fnp.outer(ones_n, ones_n)
-        term = term * float(row["scalar"])
+            # The empty vec_part is the all-ones tensor; starting from the
+            # scalar is the same value for fewer operations. Every such term in
+            # this table is d = 1.
+            term = scalar
+        elif scalar != 1.0:
+            term = term * scalar
         for axis, kp in enumerate(row["wick"]):
             wk = w[(int(kp[0]), int(kp[1]))]
             term = term * (wk if d == 1 else (wk[:, None] if axis == 0 else wk[None, :]))
@@ -224,13 +372,14 @@ def _layer(W, state, table, dtype, off_mask, init_scale, last_layer):
     # the rebuild, and upstream's subtraction of its repeated part from the DS
     # part is undone by adding the block straight back into `K_out[3]` -- whose
     # `__add__` drops the repeated cache, so the regeneration hook reads the
-    # UN-subtracted slices. Removing it is worth `4,726,784` FLOPs and 112
-    # operations per 256-layer, and it is the whole of the `3.31x` the graded
-    # canary missed by. Parity: `local_sim/p2_k3_parity.py`, contract WP16.
+    # UN-subtracted slices. It is the whole of the `3.31x` the graded canary
+    # missed by. Parity: `local_sim/p2_k3_parity.py`, contract WP16.
 
     K = {}
     for ip_key, rows in table["pK_to_K"].items():
         ip = _parse_int_part(ip_key)
+        if last_layer and ip != (1,):
+            continue
         d = len(ip)
         acc = None
         for r in rows:
@@ -238,13 +387,23 @@ def _layer(W, state, table, dtype, off_mask, init_scale, last_layer):
             for b in r["blocks"]:
                 f = _get_pk_block(pK, tuple(int(x) for x in b), d)
                 prod = f if prod is None else prod * f
-            term = prod * float(r["coef"])
-            acc = term if acc is None else acc + term
+            # `* 1.0` (7 of 19 rows) and `* -1.0` (1 row) are identities; the
+            # second folds into a subtraction, `a + (-b) == a - b` in IEEE.
+            coef = float(r["coef"])
+            if coef == 1.0:
+                acc = prod if acc is None else acc + prod
+            elif coef == -1.0 and acc is not None:
+                acc = acc - prod
+            else:
+                term = prod * coef
+                acc = term if acc is None else acc + term
         K[ip] = acc
 
     mu_out = K[(1,)]
+    if last_layer:
+        return (mu_out, None, None, 0.0)
     cov_out = fnp.diag(K[(2,)]) + K[(1, 1)]
-    M_out = M if last_layer else (fnp.diag(K[(3,)]) + 3.0 * K[(2, 1)].T)
+    M_out = fnp.diag(K[(3,)]) + 3.0 * K[(2, 1)].T
     lap = table["lap2_d4"]
     c4_out = _proj_coef_d4_r2(n) * (
         float(lap["(4,)"]["terms"][0]["coef"])
@@ -258,7 +417,31 @@ class Estimator(BaseEstimator):
     """The regenerating k_max=3 cumulant flow. A residual probe, not a submission."""
 
     def setup(self, context) -> None:
-        _tables()          # decompress once, OFF-BUDGET
+        # Decompress the frozen tables and build the width-INDEPENDENT half of
+        # the Wick program, both OFF-BUDGET and once for the whole run.
+        # `SetupContext` carries only `seed`, `scratch_dir` and `submission_dir`,
+        # so the width-dependent constants cannot be built here; they are cached
+        # per width on the first `predict` that sees that width.
+        self._const = {}
+        _tables()
+        self._wick_program = _wick_program(_tables(), fnp.float32)
+
+    def _constants(self, width, dtype):
+        """The MLP-independent arrays, built once per width and then reused.
+
+        The mask and the ones vector depend on the width alone, never on the
+        weights or the seed, so rebuilding them for every MLP -- or worse, for
+        every layer -- is operations spent on a constant. One `1024 x 1024`
+        float32 mask is 4 MB held for the run, against an 8,192 MB cap.
+        """
+        c = self._const.get(width)
+        if c is None:
+            c = {"off_mask": (fnp.ones((width, width), dtype=dtype)
+                              - fnp.eye(width, dtype=dtype)),
+                 "ones_n": fnp.ones(width, dtype=dtype),
+                 "wick": self._wick_program}
+            self._const[width] = c
+        return c
 
     def predict(self, mlp: MLP, budget: int) -> fnp.ndarray:
         table = _tables()
@@ -272,14 +455,14 @@ class Estimator(BaseEstimator):
         # ever handed float64 weights, flopscope would bill this entire flow at
         # the float64 rate 2.0 and the price would silently double.
         w = [x.astype(dtype, copy=False) for x in mlp.weights]
-        off_mask = fnp.ones((width, width), dtype=dtype) - fnp.eye(width, dtype=dtype)
+        const = self._constants(width, dtype)
         state = (fnp.zeros(width, dtype=dtype),
                  fnp.eye(width, dtype=dtype),
                  fnp.zeros((width, width), dtype=dtype),
                  0.0)
         mus = []
         for l in range(depth):
-            state = _layer(w[l], state, table, dtype, off_mask, 2.0,
+            state = _layer(w[l], state, table, dtype, const, 2.0,
                            last_layer=(l == depth - 1))
             mus.append(state[0])
         return fnp.stack(mus)

@@ -454,7 +454,12 @@ def main() -> int:
     ap.add_argument("--depth", type=int, default=DEPTH)
     ap.add_argument("--nets", type=int, default=8)
     ap.add_argument("--dtype", choices=("f64", "f32"), default="f64")
-    ap.add_argument("--regen-mode", choices=("sub", "nosub"), default="sub")
+    # WP17: this MUST track `p2_k3_fnp.k3_layer`'s own default. It did not,
+    # for one run: the module defaulted to `nosub` while this CLI still said
+    # `sub`, so a dump labelled as the fixed port contained the defect and
+    # compared at 1.2e-03 instead of 1.7e-11. A default that disagrees with
+    # the thing it drives is a silent mislabel, not an error.
+    ap.add_argument("--regen-mode", choices=("nosub", "sub"), default="nosub")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--full-layers", default="0,1,2")
     ap.add_argument("--all-layers", action="store_true")

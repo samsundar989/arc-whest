@@ -307,49 +307,147 @@ def _evalpoly(coefs, x):
     `np.float64(c)` would be a CONCRETE scalar under NEP-50 and would promote an
     f32 array on contact; a Python float stays weak. This is the same trap
     `p2_slice_cost.py` records in a comment, in a second place.
+
+    **WP17: the seed no longer costs two operations.** It used to be
+    `y = x * 0.0 + float(coefs[-1])`, which materialises a constant vector in two
+    metered ops before Horner even starts. Seeding from the Python float is
+    bit-identical -- `0.0 * x` is `+/-0` for finite `x` and `+/-0 + c` is `c`
+    exactly -- and a length-1 polynomial now costs nothing at all. Kept for the
+    scalar callers; the six `poly`-branch pairs go through `_horner_batch`.
     """
-    y = x * 0.0 + float(coefs[-1])
+    y = float(coefs[-1])
     for c in reversed(coefs[:-1]):
         y = y * x + float(c)
     return y
 
 
-def wick_coefs(fnp, flops, mean, sigma, alpha, table, dtype, audit):
+def _horner_batch(fnp, C, A):
+    """Horner for a WHOLE STACK of polynomials at once.
+
+    `C` is `(m, L)` -- `m` polynomials, coefficients low order first, padded at
+    the HIGH end with zeros so every row has the same length. `A` is `(1, n)`.
+    Returns `(m, n)`.
+
+    **The padding is bit-exact, and that is the whole reason this is allowed.**
+    A row padded with high-order zeros starts its Horner at `0`, and
+    `0 * alpha + 0 == 0` then `0 * alpha + c == c` exactly in IEEE arithmetic, so
+    the shortest polynomial's evaluation sequence is byte for byte what it was
+    when it ran alone. Cost falls from `2 * sum_i (L_i - 1)` operations to
+    `2 * (L - 1)`: for this layer's twelve polynomials, 36 operations become 14.
+    """
+    y = C[:, -1:]
+    for j in range(C.shape[1] - 2, -1, -1):
+        y = y * A + C[:, j:j + 1]
+    return y
+
+
+def wick_program(fnp, table, dtype):
+    """The MLP-INDEPENDENT half of `wick_coefs`, built ONCE.
+
+    Nothing here depends on the weights, the width or the data -- only on the
+    frozen `(k, p)` table -- so under `lambda = 0`, where the binding cost is the
+    OPERATION COUNT and not the arithmetic, it belongs outside `predict`
+    entirely. `k3_flow` builds it once per MLP; a shipped estimator builds it
+    once in `setup()` and pays zero operations per MLP for it.
+
+    Returns the two padded coefficient stacks, the sigma power each `poly` pair
+    needs, and the `base`/`reduce` pairs left to evaluate one at a time.
+    """
+    import numpy as np
+
+    np_dt = np.float64 if "64" in str(dtype) else np.float32
+    poly_keys, P1s, P2s, pow_deg, other = [], [], [], [], []
+    for _key, spec in table["wick"].items():
+        k, p = int(spec["k"]), int(spec["p"])
+        if spec["branch"] == "poly":
+            poly_keys.append((k, p))
+            P1s.append([float(c) for c in spec["P1"]])
+            P2s.append([float(c) for c in spec["P2"]])
+            pow_deg.append(p - k)
+        else:
+            other.append((k, p, spec["branch"],
+                          float(spec.get("factorial_p", 1.0)),
+                          int(spec.get("k_reduced", k))))
+    L1 = max(len(c) for c in P1s)
+    L2 = max(len(c) for c in P2s)
+
+    def pad(rows, L):
+        return np.array([r + [0.0] * (L - len(r)) for r in rows], dtype=np_dt)
+
+    return {"poly_keys": poly_keys, "pow_deg": pow_deg, "other": other,
+            "C1": fnp.array(pad(P1s, L1)), "C2": fnp.array(pad(P2s, L2)),
+            "max_sigma_pow": max(pow_deg + [3])}
+
+
+def wick_coefs(fnp, flops, mean, sigma, alpha, table, dtype, audit, const=None):
     """`wick.relu_wick_coef` for every `(k, p)` the layer needs. O(n) each.
 
     The two `flops.stats.*` calls below are the only place a float64 can enter,
     and both are cast back immediately and recorded by the audit.
+
+    **WP17 rewrote this and it is where the operation count was.** It cost 144 of
+    a layer's 315 metered operations -- 46% -- to produce sixteen `(n,)` vectors,
+    because it evaluated twelve polynomials one coefficient at a time, rebuilt
+    `sigma^j` from scratch for every pair, and recomputed `base(k)` for every
+    consumer. Every reduction below is BIT-EXACT, not an approximation:
+
+      * `sigma^1..4` are built once, left-associated in exactly the order the
+        per-pair loop built them, so `s_pow` and the `base` denominators are the
+        same floats they always were;
+      * `base(k)` is memoised -- it was recomputed 2x for k = 2, 3 and 4;
+      * `1.0 * ones * phi / sigma` is spelled `phi / sigma`, and
+        `1.0 * he2 * phi / s3` as `he2 * phi / s3`, both identities in IEEE;
+      * the twelve polynomials run as one padded batched Horner.
+
+    `--mutation-coverage`'s golden-parity detector is what holds this honest: it
+    compares against upstream's own committed answer, and any of these that was
+    not in fact an identity would move it off the f64 baseline.
     """
+    const = wick_program(fnp, table, dtype) if const is None else const
+
     Phi_raw = flops.stats.norm.cdf(alpha)
     Phi = audit.stats("stats.norm.cdf(alpha)", Phi_raw, Phi_raw.astype(dtype))
     phi_raw = flops.stats.norm.pdf(alpha)
     phi = audit.stats("stats.norm.pdf(alpha)", phi_raw, phi_raw.astype(dtype))
 
-    he = {0: alpha * 0.0 + 1.0, 1: alpha, 2: alpha * alpha - 1.0}
+    # sigma^1..max, LEFT-ASSOCIATED exactly as the old per-pair loop built them:
+    # `s_pow` started at ones and multiplied by sigma (p - k) times, and
+    # `den` started at sigma and multiplied (k - 2) times. Both reduce to this.
+    sig_pow = {1: sigma}
+    for j in range(2, max(const["max_sigma_pow"], 3) + 1):
+        sig_pow[j] = sig_pow[j - 1] * sigma
+
+    cache = {}
 
     def base(k):
+        if k in cache:
+            return cache[k]
         if k == 0:
-            return sigma * phi + mean * Phi
-        if k == 1:
-            return Phi
-        den = sigma
-        for _ in range(k - 2):
-            den = den * sigma
-        return ((-1.0) ** (k - 2)) * he[k - 2] * phi / den
+            v = sigma * phi + mean * Phi
+        elif k == 1:
+            v = Phi
+        elif k == 2:
+            v = phi / sig_pow[1]
+        elif k == 3:
+            v = (-1.0) * alpha * phi / sig_pow[2]
+        elif k == 4:
+            v = (alpha * alpha - 1.0) * phi / sig_pow[3]
+        else:
+            raise ValueError(f"no closed form for base({k})")
+        cache[k] = v
+        return v
+
+    A = alpha[None, :]
+    P1 = _horner_batch(fnp, const["C1"], A)
+    P2 = _horner_batch(fnp, const["C2"], A)
+    S = fnp.stack([sig_pow[d] for d in const["pow_deg"]])
+    V = S * (P1 * phi[None, :] + P2 * Phi[None, :])
 
     out = {}
-    for _key, spec in table["wick"].items():
-        k, p = int(spec["k"]), int(spec["p"])
-        if spec["branch"] == "base":
-            v = base(k)
-        elif spec["branch"] == "reduce":
-            v = float(spec["factorial_p"]) * base(int(spec["k_reduced"]))
-        else:
-            s_pow = alpha * 0.0 + 1.0
-            for _ in range(p - k):
-                s_pow = s_pow * sigma
-            v = s_pow * (_evalpoly(spec["P1"], alpha) * phi
-                         + _evalpoly(spec["P2"], alpha) * Phi)
+    for i, (k, p) in enumerate(const["poly_keys"]):
+        out[(k, p)] = audit.check("wick(%d,%d)" % (k, p), V[i])
+    for k, p, branch, fac, k_red in const["other"]:
+        v = base(k) if branch == "base" else fac * base(k_red)
         out[(k, p)] = audit.check("wick(%d,%d)" % (k, p), v)
     return out
 
@@ -393,7 +491,8 @@ def _get_pk_block(pK, b, d):
 
 
 def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
-             init_scale=2.0, last_layer=False, regen_mode="nosub", probe=None):
+             init_scale=2.0, last_layer=False, regen_mode="nosub", probe=None,
+             wick_const=None, ones_n=None):
     """ONE full layer -- linear step then nonlinear step -- of the regenerating
     k_max=3 SIMPLE flow, in `fnp`, at the declared dtype.
 
@@ -440,6 +539,8 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
     and after this change is the check that says so.
     """
     n = W.shape[0]
+    if ones_n is None:
+        ones_n = fnp.ones(n, dtype=dtype)
     mu, cov, M, c4 = state["mu"], state["cov"], state["M"], state["c4"]
 
     # ---- linear step -------------------------------------------------------
@@ -462,26 +563,44 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
     var = audit.check("var", fnp.maximum(fnp.diagonal(cov_pre), dtype(1e-12)))
     sigma = audit.check("sigma", fnp.sqrt(var))
     alpha = audit.check("alpha", mu_pre / sigma)
-    w = wick_coefs(fnp, flops, mu_pre, sigma, alpha, table, dtype, audit)
+    w = wick_coefs(fnp, flops, mu_pre, sigma, alpha, table, dtype, audit,
+                   const=wick_const)
 
     # ---- diagonal slices of the incoming tower -----------------------------
     # `zero_repeated` is a diagonal kill; `off_mask` is that kill, built once.
-    C11 = audit.check("C11", cov_pre * off_mask)
+    #
+    # WP17 -- LAST-LAYER PRUNING. The grader reads post-ReLU MEANS. At the final
+    # layer nothing downstream exists, so the only output that is ever read is
+    # `mu_out = K[(1,)] = pK[(1,)]`, which needs exactly `w(0,1)`, `w(3,1)`,
+    # `w(4,1)`, `D3` and `D4`. Everything below guarded by `not last_layer` is
+    # work whose only consumer is a layer that does not exist: the `(2,1)`
+    # slice's TWO matmuls, `C11`, `D22`, twenty-two of the twenty-five pK terms,
+    # six of the seven `pK -> K` slices, `cov_out`, `c4_out` and the rebuild.
+    # `last_layer` previously skipped only the rebuild, worth 0.001 of a matmul.
     PQ = P * Q
     D3 = audit.check("D3", (PQ * Q).sum(axis=1))
-    D21 = (2.0 * (PQ @ Q.T) + ((Q * Q) @ P.T)) / 3.0         # 2 matmuls
-    D21 = audit.check("D21", D21 * off_mask)
-    # K[4] = Sym(c4 (x) metric^(x)2) with a DIAGONAL metric: the (4,) slice is
-    # c4 * m^2 and the (2,2) slice is c4 * m^2 / 3 off the diagonal. Both are
-    # constant here, and both are materialised at full width anyway so the meter
-    # charges what a spelling that did NOT know they were constant would pay.
-    ones_n = fnp.ones(n, dtype=dtype)
+    # `fnp.full(n, c4 * ...)` would be one operation instead of two, but `c4`
+    # is a metered 0-d array after layer 0 (`K[(4,)].sum()`), and flopscope
+    # 0.12 raises `FlopscopeArray reached numpy.copyto` from inside its own
+    # wrapper when the fill value is one. So the all-ones vector stays -- but
+    # HOISTED, like `off_mask`, since it depends only on n and the dtype.
     D4 = audit.check("D4", (c4 * metric * metric) * ones_n)
-    D22 = audit.check("D22", (c4 * metric * metric / 3.0)
-                      * fnp.outer(ones_n, ones_n) * off_mask)
-
-    S = {(1,): mu_pre, (2,): var, (1, 1): C11, (2, 1): D21, (1, 2): D21.T,
-         (3,): D3, (4,): D4, (2, 2): D22}
+    if last_layer:
+        S = {(1,): mu_pre, (3,): D3, (4,): D4}
+    else:
+        C11 = audit.check("C11", cov_pre * off_mask)
+        D21 = (2.0 * (PQ @ Q.T) + ((Q * Q) @ P.T)) / 3.0     # 2 matmuls
+        D21 = audit.check("D21", D21 * off_mask)
+        # K[4] = Sym(c4 (x) metric^(x)2) with a DIAGONAL metric: the (4,) slice
+        # is c4 * m^2 and the (2,2) slice is c4 * m^2 / 3 off the diagonal. Both
+        # are constant. `outer(ones, ones)` used to be materialised here so the
+        # meter would charge a spelling that did not know that; it is exactly an
+        # all-ones matrix, so `scalar * off_mask` is the same floats for two
+        # fewer operations, and the FLOPs it was "honestly" paying are free
+        # under lambda = 0 anyway.
+        D22 = audit.check("D22", (c4 * metric * metric / 3.0) * off_mask)
+        S = {(1,): mu_pre, (2,): var, (1, 1): C11, (2, 1): D21, (1, 2): D21.T,
+             (3,): D3, (4,): D4, (2, 2): D22}
 
     if probe is not None:
         # The INCOMING tower as the reference sees it at `hook_lin`: mu and cov
@@ -490,21 +609,86 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
         # re-derived: (3,) is `(P.Q.Q).sum(1)` at coef 1, and (2,1) is
         # `(2 (P.Q) Q^T + (Q.Q) P^T) / 3` diagonal-killed -- both checked against
         # upstream's block-permutation enumeration by hand in CONTRACT WP16.
-        probe("lin", {"mu_pre": mu_pre, "cov_pre": cov_pre,
-                      "s3": D3, "s21": D21, "c4_in": c4})
+        probe("lin", {"mu_pre": mu_pre, "cov_pre": cov_pre, "s3": D3,
+                      "s21": None if last_layer else D21, "c4_in": c4})
 
     # ---- the 25 kept pK terms ---------------------------------------------
+    # WP17: `* 1.0` is skipped where the frozen table says the scalar is exactly
+    # one (9 of 25 terms), and a term with no blocks starts from its Wick vector
+    # rather than from an all-ones array. Both are identities in IEEE arithmetic,
+    # so the values are unchanged bit for bit; only the operation count moves.
     pK = {}
+    # WP17 -- THE ONE-DIMENSIONAL SLICES, ALL FOUR AT ONCE. The frozen table has
+    # the same three terms for every `(p,)`:
+    #
+    #     pK[(p,)] = w(0,p) + (1/6) D3 w(3,p) + (1/24) D4 w(4,p)
+    #
+    # so the four slices are one `(4, n)` expression sharing `(1/6) D3` and
+    # `(1/24) D4`, in the same left-to-right order the per-term loop used. Twelve
+    # terms and eight accumulations become nine operations. `stack` puts the four
+    # Wick vectors of each family side by side; everything after is elementwise.
+    #
+    # This is a REGROUPING, not a reassociation: every float below is multiplied
+    # and added in the order it was before, so the result is bit-identical. The
+    # generic loop underneath still runs for the two-dimensional slices, and the
+    # assertion is what stops a future table silently falling out of this shape.
+    ones_d = [row for row in table["terms"] if len(row["int_part"]) == 1]
+    ps = sorted({row["int_part"][0] for row in ones_d})
+    _want = sorted([((), 1.0), (((3,),), round(1.0 / 6.0, 12)),
+                    (((4,),), round(1.0 / 24.0, 12))])
+    fast_1d = (len(ones_d) == 3 * len(ps) and all(
+        sorted((tuple(tuple(b["vec"]) for b in r["blocks"]),
+                round(float(r["scalar"]), 12))
+               for r in ones_d if r["int_part"][0] == p) == _want for p in ps))
+    if fast_1d:
+        sc3 = {round(float(r["scalar"]), 12): float(r["scalar"]) for r in ones_d}
+        s3c = sc3[round(1.0 / 6.0, 12)]
+        s4c = sc3[round(1.0 / 24.0, 12)]
+        u3 = S[(3,)] * s3c
+        u4 = S[(4,)] * s4c
+        wk_of = {}
+        for r in ones_d:
+            p = r["int_part"][0]
+            key = () if not r["blocks"] else tuple(r["blocks"][0]["vec"])
+            wk_of[(p, key)] = w[(int(r["wick"][0][0]), int(r["wick"][0][1]))]
+        W0 = fnp.stack([wk_of[(p, ())] for p in ps])
+        W3 = fnp.stack([wk_of[(p, (3,))] for p in ps])
+        W4 = fnp.stack([wk_of[(p, (4,))] for p in ps])
+        PK1 = W0 + u3[None, :] * W3
+        PK1 = PK1 + u4[None, :] * W4
+        for i, p in enumerate(ps):
+            pK[(p,)] = PK1[i]
+
+    blocks_seen = {}
     for row in table["terms"]:
         ip = tuple(row["int_part"])
         d = len(ip)
-        term = None
-        for blk in row["blocks"]:
-            f = S[tuple(blk["vec"])]
-            term = f if term is None else term * f
-        if term is None:                  # the empty vec_part: the all-ones tensor
-            term = ones_n if d == 1 else fnp.outer(ones_n, ones_n)
-        term = term * float(row["scalar"])
+        if last_layer and ip != (1,):
+            continue
+        if d == 1 and fast_1d:
+            continue
+        # WP17: the SAME block product appears in several int_parts -- `C11*C11`
+        # in all three two-dimensional slices, `D22` likewise -- and was
+        # recomputed each time. Memoised on the block tuple, which is a reuse and
+        # not a reassociation, so the floats are unchanged.
+        bkey = tuple(tuple(blk["vec"]) for blk in row["blocks"])
+        term = blocks_seen.get(bkey)
+        if term is None and bkey:
+            for blk in row["blocks"]:
+                f = S[tuple(blk["vec"])]
+                term = f if term is None else term * f
+            blocks_seen[bkey] = term
+        scalar = float(row["scalar"])
+        if term is None:
+            # The empty vec_part is the all-ones tensor. Materialising it and
+            # multiplying is `x * 1 * s`; starting from the scalar is the same
+            # value for one or two fewer operations. Every such term here is
+            # d = 1 (the table has no d = 2 empty vec_part), and the assert says
+            # so rather than leaving a silent shape bug for a future table.
+            assert d == 1, f"empty vec_part at d={d} needs an all-ones matrix"
+            term = scalar
+        elif scalar != 1.0:
+            term = term * scalar
         for axis, kp in enumerate(row["wick"]):
             wk = w[(int(kp[0]), int(kp[1]))]
             term = term * (wk if d == 1 else (wk[:, None] if axis == 0 else wk[None, :]))
@@ -526,7 +710,7 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
     # NOTHING reads it -- upstream's subtraction of it from the DS part is undone
     # by adding `pK_111` back into `K_out[3]`, so the regeneration hook rebuilds
     # from the un-subtracted slices. It is then dead work, and skipped.
-    if regen_mode == "sub":
+    if regen_mode == "sub" and not last_layer:
         w1, w2 = w[(1, 1)], w[(2, 1)]
         fac1 = audit.check("fac1", w1[:, None] * C11)
         fac3 = audit.check("fac3", (w2[:, None] * w1[None, :] * C11).T)
@@ -549,6 +733,8 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
     K = {}
     for ip_key, rows in table["pK_to_K"].items():
         ip = _parse_int_part(ip_key)
+        if last_layer and ip != (1,):
+            continue
         d = len(ip)
         acc = None
         for r in rows:
@@ -556,32 +742,49 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
             for b in r["blocks"]:
                 f = _get_pk_block(pK, tuple(int(x) for x in b), d)
                 prod = f if prod is None else prod * f
-            term = prod * float(r["coef"])
-            acc = term if acc is None else acc + term
+            # WP17: `* 1.0` (7 of the 19 rows) and `* -1.0` (1 row) are
+            # identities -- the second folded into a subtraction, since
+            # `a + (-b)` and `a - b` are the same IEEE float.
+            coef = float(r["coef"])
+            if coef == 1.0:
+                acc = prod if acc is None else acc + prod
+            elif coef == -1.0 and acc is not None:
+                acc = acc - prod
+            else:
+                term = prod * coef
+                acc = term if acc is None else acc + term
         K[ip] = audit.check("K%s" % (ip,), acc)
 
     # ---- the outputs -------------------------------------------------------
     mu_out = audit.check("mu_out", K[(1,)])
-    cov_out = audit.check("cov_out", fnp.diag(K[(2,)]) + K[(1, 1)])
-    # K[3]: REGENERATE -- `from_dstensor` returns factors (diag(S3) + 3 S21^T, I, I).
-    # WHICH slices feed it is `regen_mode`; see the docstring and CONTRACT WP16.
-    if regen_mode == "sub":
-        S3 = audit.check("S3", K[(3,)] - p111_3)
-        S21 = audit.check("S21", K[(2, 1)] - p111_21)
-    elif regen_mode == "nosub":
-        S3, S21 = K[(3,)], K[(2, 1)]
+    if last_layer:
+        # Nothing reads a final layer's covariance, third cumulant or K[4]:
+        # the grader asks for post-ReLU MEANS and there is no layer after this
+        # one to propagate them into. `p111_*` is likewise never built.
+        cov_out = M_out = None
+        c4_out = 0.0
+        S3 = S21 = None
     else:
-        raise ValueError(f"regen_mode must be 'sub' or 'nosub', got {regen_mode!r}")
-    M_out = None if last_layer else audit.check(
-        "M_out", fnp.diag(S3) + 3.0 * S21.T)
-    # K[4]: DS_harmonic_proj(., r_out=2). Both surviving Laplacian multigraphs
-    # cap every leg, so the core really is a scalar.
-    lap = table["lap2_d4"]
-    c4_out = _proj_coef_n_d4_r2(n) * (
-        float(lap["(4,)"]["terms"][0]["coef"])
-        * float(lap["(4,)"]["int_partition_coef"]) * K[(4,)].sum()
-        + float(lap["(2, 2)"]["terms"][0]["coef"])
-        * float(lap["(2, 2)"]["int_partition_coef"]) * K[(2, 2)].sum())
+        cov_out = audit.check("cov_out", fnp.diag(K[(2,)]) + K[(1, 1)])
+        # K[3]: REGENERATE -- `from_dstensor` returns (diag(S3) + 3 S21^T, I, I).
+        # WHICH slices feed it is `regen_mode`; see the docstring and CONTRACT WP16.
+        if regen_mode == "sub":
+            S3 = audit.check("S3", K[(3,)] - p111_3)
+            S21 = audit.check("S21", K[(2, 1)] - p111_21)
+        elif regen_mode == "nosub":
+            S3, S21 = K[(3,)], K[(2, 1)]
+        else:
+            raise ValueError(
+                f"regen_mode must be 'sub' or 'nosub', got {regen_mode!r}")
+        M_out = audit.check("M_out", fnp.diag(S3) + 3.0 * S21.T)
+        # K[4]: DS_harmonic_proj(., r_out=2). Both surviving Laplacian
+        # multigraphs cap every leg, so the core really is a scalar.
+        lap = table["lap2_d4"]
+        c4_out = _proj_coef_n_d4_r2(n) * (
+            float(lap["(4,)"]["terms"][0]["coef"])
+            * float(lap["(4,)"]["int_partition_coef"]) * K[(4,)].sum()
+            + float(lap["(2, 2)"]["terms"][0]["coef"])
+            * float(lap["(2, 2)"]["int_partition_coef"]) * K[(2, 2)].sum())
 
     if probe is not None:
         # The OUTGOING tower as the reference sees it at `hook_nl`, BEFORE
@@ -589,7 +792,7 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
         # under H1; `S3` / `S21` are what this port actually rebuilds from. Both
         # are handed over so the comparison discriminates rather than assumes.
         probe("nl", {"mu": mu_out, "cov": cov_out,
-                     "K3": K[(3,)], "K21": K[(2, 1)],
+                     "K3": K.get((3,)), "K21": K.get((2, 1)),
                      "S3": S3, "S21": S21, "M": M_out, "c4": c4_out,
                      "p111_3": p111_3, "p111_21": p111_21})
 
@@ -1017,7 +1220,7 @@ def cmd_layer_k2_degeneracy(a) -> int:
 
 
 def k3_flow(fnp, flops, weights, table, dtype, audit, depth=None,
-            regen_mode="nosub", probe=None):
+            regen_mode="nosub", probe=None, wick_const=None):
     """The WHOLE regenerating flow: `depth` layers, one program, one context.
 
     Input cumulants for `x ~ N(0, I)`: `K[1] = 0`, `K[2] = I`, `K[3] = 0`,
@@ -1041,7 +1244,17 @@ def k3_flow(fnp, flops, weights, table, dtype, audit, depth=None,
     """
     n = weights[0].shape[0]
     depth = len(weights) if depth is None else depth
+    # MLP-INDEPENDENT, so built once per flow rather than once per layer. In a
+    # shipped estimator both of these belong in `setup()` and cost zero
+    # operations per MLP; here they cost three, once.
     off_mask = fnp.ones((n, n), dtype=dtype) - fnp.eye(n, dtype=dtype)
+    ones_n = fnp.ones(n, dtype=dtype)
+    # A shipped estimator builds this in `setup()`, OFF the per-MLP budget --
+    # it depends on the frozen table alone. Accepting it from the caller is
+    # what lets `p2_k3_candidate_parity.py` weigh both spellings on the same
+    # scales instead of charging this one for a constant the other hoisted.
+    if wick_const is None:
+        wick_const = wick_program(fnp, table, dtype)
     state = {"mu": fnp.zeros(n, dtype=dtype),
              "cov": fnp.eye(n, dtype=dtype),
              "M": fnp.zeros((n, n), dtype=dtype),
@@ -1051,7 +1264,8 @@ def k3_flow(fnp, flops, weights, table, dtype, audit, depth=None,
         lp = None if probe is None else (lambda tag, d, _l=l: probe(_l, tag, d))
         state = k3_layer(fnp, flops, weights[l], state, table, dtype, off_mask,
                          audit, last_layer=(l == depth - 1),
-                         regen_mode=regen_mode, probe=lp)
+                         regen_mode=regen_mode, probe=lp,
+                         wick_const=wick_const, ones_n=ones_n)
         mus.append(state["mu"])
     return fnp.stack(mus), state
 

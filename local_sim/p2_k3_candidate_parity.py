@@ -102,8 +102,15 @@ def main() -> int:
 
     audit = lab.DtypeAudit("float32")
     w = [fnp.array(np.asarray(x, dtype=np.float32)) for x in w_np]
+    # WP17: the candidate builds its Wick coefficient stacks in `setup()`, which
+    # is OFF the per-MLP budget, so the lab arm is handed the same constant
+    # rather than being charged 54 FLOPs the candidate legitimately does not pay.
+    # Comparing a hoisted spelling against an un-hoisted one measures the hoist,
+    # not the transcription.
+    wick_const = lab.wick_program(fnp, frozen, dt)
     with flops.BudgetContext(flop_budget=10 * BUDGET, quiet=True) as c1:
-        lab_out, _st = lab.k3_flow(fnp, flops, w, frozen, dt, audit)
+        lab_out, _st = lab.k3_flow(fnp, flops, w, frozen, dt, audit,
+                                   wick_const=wick_const)
     lab_flops, lab_ops = float(c1.flops_used), len(getattr(c1, "op_log", []) or [])
 
     class _MLP:
