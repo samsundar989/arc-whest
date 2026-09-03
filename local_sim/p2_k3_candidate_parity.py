@@ -55,6 +55,15 @@ CANDIDATE = os.path.join(_ROOT, "estimator_wp15_k3_canary.py")
 BUDGET = 2 ** 41
 
 
+
+#: How many flopscope operations the CANDIDATE is allowed above the lab flow.
+#: It legitimately pays a few the lab flow does not -- the per-width constant
+#: build (`off_mask`, the ones vector) and the weight `astype` inside `predict`,
+#: both once per MLP rather than once per layer. Anything beyond that is the
+#: shipped file drifting on the axis that fails MLPs, and `SKEPTIC WP16` found
+#: this check gating counted FLOPs exactly while merely PRINTING this number.
+OP_SLACK = 16
+
 def _load_candidate():
     import importlib.util
 
@@ -140,13 +149,27 @@ def main() -> int:
           " layers, not just the scored one)")
     print(f"  counted FLOPs               lab {lab_flops:,.0f}   candidate"
           f" {can_flops:,.0f}   delta {can_flops - lab_flops:+,.0f}")
-    print(f"  flopscope operations        lab {lab_ops:,}   candidate {can_ops:,}")
+    # WP17 / SKEPTIC WP16 finding: this check gated counted FLOPs EXACTLY and
+    # merely PRINTED the operation count -- i.e. it gated the axis `lambda = 0`
+    # makes free and left the axis that can fail an MLP unguarded.
+    # `VALIDATION.md` §2b-ii makes operation count the binding Phase-2 predictor,
+    # so it is a gate here now. The candidate is allowed a small POSITIVE excess
+    # and no more: it legitimately pays a few operations the lab flow does not --
+    # the per-width constant build and the weight `astype` inside `predict` --
+    # and those are paid once per MLP, not once per layer.
+    op_slack = OP_SLACK
+    op_delta = can_ops - lab_ops
+    op_ok = 0 <= op_delta <= op_slack
+    print(f"  flopscope operations        lab {lab_ops:,}   candidate {can_ops:,}"
+          f"   delta {op_delta:+,}  (allowed 0..{op_slack})")
     print(f"  finite output               {bool(np.isfinite(C).all())}")
 
     tol = 1e-6
     ok = (same_tables and shape_ok and worst <= tol
-          and can_flops == lab_flops and bool(np.isfinite(C).all()))
-    print(f"\n  tolerance {tol:.0e} relative RMS, and FLOPs must match EXACTLY")
+          and can_flops == lab_flops and op_ok and bool(np.isfinite(C).all()))
+    print(f"\n  tolerance {tol:.0e} relative RMS; FLOPs must match EXACTLY; and the")
+    print(f"  OPERATION COUNT -- the axis that can fail an MLP -- must not exceed")
+    print(f"  the lab flow's by more than {op_slack}.")
     print(f"  VERDICT  {'PASS' if ok else 'FAIL'}")
     print()
     print("  This says the transcription did not drift. It does NOT say the")
@@ -164,6 +187,8 @@ def main() -> int:
                "worst_rel_rms": worst, "tolerance": tol,
                "lab_flops": lab_flops, "candidate_flops": can_flops,
                "lab_ops": lab_ops, "candidate_ops": can_ops,
+               "op_delta": op_delta, "op_slack": op_slack,
+               "op_ok": op_ok,
                "finite": bool(np.isfinite(C).all()), "pass": ok,
                "caveat": "agreement between two spellings; NOT parity against "
                          "upstream at non-zero kappa_3"}

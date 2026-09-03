@@ -530,8 +530,10 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
     but `FactoredTensor.__add__` discards the repeated cache, so the regeneration
     hook's `get_repeated()` recomputes from the concatenated factors and gets
     `rep(pK_111) + (K_ds3 - rep(pK_111)) = K_ds3`, i.e. the UN-subtracted slices.
-    `"nosub"` is that. `"sub"` remains the default so no existing artifact's
-    provenance changes by importing this module.
+    `"nosub"` is that, and it became the DEFAULT at `57a4df3` -- the docstring
+    said otherwise for a while and `SKEPTIC WP16` caught it saying the opposite
+    of the code. Anything measured before that commit was measured with `"sub"`
+    and is a measurement of the defect.
 
     `probe(tag, mapping)` -- optional, called with `tag in {"lin", "nl"}`. It is
     a pure observer: at `None` (the default) not one operation is issued for it,
@@ -1350,8 +1352,17 @@ def cmd_flow_price(a) -> int:
           f"{max(0.1, k3f / BUDGET):.5f}")
     print(f"  K3 flow / layer           {k3f / d:>18,.0f} = {k3f / d / matmul:.3f}"
           f" dense f32 {n}-matmuls")
-    print(f"  vs 16 x the steady-state layer ({DEPTH} x 10,837,935,618 = "
-          f"173,406,969,888): {k3f - 173_406_969_888:+,.0f}")
+    # The reference extrapolation is the CURRENT steady-state layer, read from
+    # `--layer-price` rather than frozen: it was hard-coded at the pre-WP16
+    # `10,837,935,618`, so this line kept reporting a shortfall against a layer
+    # the program no longer runs (`SKEPTIC WP16`). The measured per-layer figure
+    # is what the extrapolation must be built from.
+    per_layer = k3f / d
+    print(f"  vs {d} x this run's own steady-state layer "
+          f"({per_layer:,.0f} x {d} = {per_layer * d:,.0f}): "
+          f"{k3f - per_layer * d:+,.0f}")
+    print(f"  (the pre-WP16 extrapolation was {DEPTH} x 10,837,935,618 = "
+          f"173,406,969,888 and is SUPERSEDED)")
     print()
     print("  THE ABSOLUTE RESIDUAL SECOND IS NOT QUOTABLE. Authority is")
     print("  `whest run --runner subprocess`. What transfers is the RATIO to the")
@@ -1369,7 +1380,8 @@ def cmd_flow_price(a) -> int:
             "k3_residual_worst_local_s": k3r, "k2_residual_worst_local_s": k2r,
             "residual_ratio_k3_over_k2": k3r / max(k2r, 1e-9),
             "k3_x_budget": k3f / BUDGET,
-            "extrapolation_16x_one_layer": 173_406_969_888,
+            "extrapolation_depth_x_measured_layer": k3f,
+            "superseded_pre_wp16_extrapolation": 173_406_969_888,
             "caveat": "LOCAL in-process residual. Not quotable as an absolute; "
                       "the authority is --runner subprocess. The RATIO to the "
                       "matched K2 control is what transfers.",

@@ -28737,7 +28737,8 @@ wholly dead is the same statement, made exactly.
 
 1. **A `0.12%` drift in the means is a `3.2x` miss in the score, and the gate the
    brief specified could not see it.** The defect's end-to-end drift at
-   `1024 x 16` is `1.199e-03` — it **passes** a `<= 1%` drift gate comfortably,
+   `1024 x 16` is **`1.3046e-03` worst** of the eight (`1.064e-03` best) — it
+   **passes** a `<= 1%` drift gate comfortably,
    at both shapes. Only clause 2, against minted truth, catches it. **Relative
    drift in the means is a bad proxy for MSE**, because the means are `O(1)` and
    the error we are chasing is `O(1e-3)` RMS; a perturbation that is negligible
@@ -28968,3 +28969,104 @@ bounded that risk at **layer 1 only**, by checking the minted truth against the
 closed form `||W1[:,j]|| / sqrt(2 pi)` (rms-z `0.93-1.05` on 8 networks x 2
 replicas). **An official raw MSE near `9e-07` would bound it at every layer**,
 because the grader's own labels are independent of all three.
+
+---
+
+# 2026-09-03 — SKEPTIC WP16: **ACCEPT**, with eleven documentation defects and one gate pointed at the wrong axis
+
+Audited at `82f798e`. Verdict **ACCEPT** on the parity claim. The Skeptic did not
+take the derivation on trust — it re-derived `H1` from `factor_k3.py` by hand,
+evaluated both block-permutation sums itself, and confirmed the mechanism in the
+raw `.npz` dumps rather than in the prose.
+
+## What it independently established, and it is more than the slice claimed
+
+1. **The reference really is upstream, and observing it does not perturb it.**
+   The worry was real — `get_dslice` writes into `self.repeated.slices`, so the
+   observer could have populated a cache the regeneration then consumed. It ran
+   `p2_range_lab.means_of(hook_nl=_regen_hook_nl())` against
+   `p2_k3_parity.run_ref` on the same weights: **bitwise identical**, as are an
+   observe-only hook and a no-op hook, and the committed golden file. Mechanism:
+   `factored_nonlin_kprop_k3`'s own term loop already calls `get_dslice` on
+   `WK[3]` before `pK_111 = WK[3].clone()`, so the cache is populated whether or
+   not anyone looks.
+2. **The FLOP delta reconciles EXACTLY, and in closed form.** `sub - nosub` at
+   `n = 128`, depths 1-4, is **`147,968` per layer `= 9n^2 + 4n`** — which at
+   `n = 1024` is exactly the claimed `9,441,280`. Op delta exactly `13`/layer
+   → `208` at depth 16; `56 - 49 = 7` audited arrays = the 7 removed
+   `audit.check` names. **Nothing else is gone.** This is a much sharper check
+   than "the number went down" and it is the one I did not do.
+3. **The minted truth is not circular.** It checked
+   `truth_P01_wp13nets.npz` against the exact layer-1 closed form
+   `||W1[:,j]|| / sqrt(2 pi)`: **rms-z `0.93-1.05`** on 8 networks x 2 replicas.
+   Weights, orientation, input distribution and Monte-Carlo scale are all
+   confirmed independently of both programs, and the artifact's sha256 matches
+   the ledger's `finalize` record — not re-minted.
+4. `M_sub - M_nosub = -3 p111_21^T` to **`3.2e-15`** relative, magnitude ratio
+   `0.9999999999999999`, and `||p111_3|| = 0.0` exactly.
+5. `git show 18e88aa:estimator_wp15_k3_canary.py` computes, line for line, what
+   `--regen-mode sub` computes today — so the control really is the graded
+   spelling.
+
+## What it found wrong, and all of it is now fixed
+
+**One is a real gate defect, not hygiene.** `p2_k3_candidate_parity.py` gated
+counted **FLOPs** exactly and merely *printed* the operation count — **it gated
+the axis `lambda = 0` makes free and left the axis that can fail an MLP
+unguarded.** Repaired: the op delta is now a gate with a stated slack of 16 for
+the operations the candidate legitimately pays and the lab flow does not (the
+per-width constant build and the weight `astype`, both once per MLP). And the
+check had **never been run at `1024 x 16`** — it is the only thing tying the
+shippable file to the price every document quotes. Queued.
+
+The rest are stale numbers, and the list is embarrassing in a specific way: **I
+updated the prose faster than I updated the things the prose is about.**
+
+| # | defect | fixed |
+|---|---|---|
+| A | `p2_k3_fnp` docstring said `"sub" remains the default` — the **opposite of the code** since `57a4df3` | yes |
+| B | `p2_k3_parity` still defaulted `--regen-mode` to `sub`; `--port` with no flag dumped the defect | yes, at `08eefa0`, before the Skeptic reported |
+| C | `--flow-price` hard-coded the superseded `16 x 10,837,935,618` extrapolation, so its own new artifact carried a wrong reference and printed a wrong shortfall | yes — it now extrapolates from the run's own measured layer |
+| D | P8's headline `10,828,494,338`/layer had **no committed artifact**, prose only, in four documents | queued (`--layer-price --out`) |
+| E | `docs/VALIDATION.md` §2b-ii — **binding law** — still carried `173.38 B`, `5,327`, `0.2774 s`, `1.4x` | yes, with a superseding block |
+| F | `docs/GOTCHAS.md` and write-up §6.5 carried superseded FLOP tables | yes |
+| G | `CURRENT_STATE.md`'s `SKEPTIC WP14-FOLLOWUP` block still said the port was "still unchecked against upstream" | yes |
+| H | `1.199e-03` was quoted as the defect's drift — it is **net 0's**, not the worst (`1.3046e-03`), and my own contract says min/max, never a mean | yes |
+| I | write-up §6.6 published a `~12x` residual taken from the very run the LOG calls unusable | yes — the residual column is gone and the reason is stated |
+| J | write-up §6.6 put `5,119` ops and the retired file's `1.21x` in one breath without the word "retired" | yes |
+
+**Two corrections to my own numbers.** Clause 2 is **nearly redundant with
+clause 1**: the Skeptic scored the *torch* dump against the same truth and also
+got `8.507508e-07`, so `1.000x` is arithmetically forced once clause 1 passes at
+`1.7e-11` — it ties the port to truth, but it is not independent corroboration of
+the value, and I presented it as if it were. And **`3.314x` is a cross-sample
+ratio** (20 graded rows over 8 offline networks); the paired figure is `3.161x`.
+
+## The process hazard it hit, which is mine
+
+It first measured **five different FLOP/op counts for one command** and was ready
+to report flopscope non-determinism. **It was me, committing `ae44369` into the
+tree while its audit ran.** It recovered by pinning to `82f798e` with
+`git archive`. Worse: a `workerq` job it submitted picked up a git snapshot with
+`p2_k3_fnp.py` half-optimised and the canary not, and **correctly FAILED** the
+price check — the check doing its job, and also proof that **any measurement
+taken on this repository today without pinning a commit is unattributable.**
+Launching a Skeptic and then continuing to commit is a defect in how I ran the
+slice, not in the slice.
+
+## The unresolved ambiguity, in its own words
+
+Whether the fix delivers `8.5075e-07` **on graded data** is not settled by
+anything here and cannot be. The only transfer evidence is that the
+P01-to-official ratio is `1.048x` for the defective K3 and `1.096x` for the K2
+closure, predicting `~8.9-9.3e-07` officially — an inference from two estimators
+on 8 against 20 networks with no interval. Separately, **neither of us can rule
+out a defect shared by upstream, `run_flow` and `build_mlp`**: golden parity is
+blind to it by construction and clause 2's band came from the same program. The
+layer-1 closed-form check bounds that risk **at layer 1 only**.
+
+**Its cheapest discriminating follow-up is pre-registered above and queued**: the
+regenerated canary through `whest run --runner subprocess` on the same 20 rows,
+**with v2.6.1 as a matched control in the same session** — which my queued run
+did not have until the Skeptic said so. Band `[7.5e-07, 1.15e-06]`; above
+`~1.3e-06` falsifies "one line was the whole of it".

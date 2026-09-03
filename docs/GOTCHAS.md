@@ -149,7 +149,14 @@ Measured, one program, one layer, at `1024` inside a real `BudgetContext`
 | | counted FLOPs | dense `1024`-matmuls | `x 16` layers | `x budget` |
 |---|---:|---:|---:|---:|
 | `f64` | `21,675,713,540` | `5.047` | `346,811,416,640` | `0.15773` |
-| **`f32`** | **`10,837,935,618`** | **`5.047`** | `173,406,969,888` | **`0.07886`** |
+| **`f32`** | ~~`10,837,935,618`~~ **`10,828,494,338`** | ~~`5.047`~~ **`5.042`** | ~~`173,406,969,888`~~ **`168,676,988,572`** | ~~`0.07886`~~ **`0.076705`** |
+
+> **SUPERSEDED 2026-09-03 (WP16/WP17).** The struck figures were measured on a
+> layer that computed the `(1,1,1)` block, which WP16 showed is DEAD in a
+> regenerating flow, and before WP17's operation-count reduction. The bold
+> figures are current; `experiments/2026-09-03_wp16_parity/flow_price_wp17b.json`
+> is the artifact. The multiplier is `0.10000` either way.
+
 
 The `f32 / f64` ratio is `0.5000036376`. **The excess over half is the tell, not
 the halving**: it is exactly `78,848` FLOPs, precisely the two `flops.stats.*`

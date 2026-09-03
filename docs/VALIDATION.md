@@ -391,6 +391,30 @@ Two arithmetic hygiene rules, both of which Sprint 4 broke:
    | regenerating K3 flow | `173.38 B` | **5,327** | `0.2774 s` | **`1.4×`** |
    | ratio | `2.52×` | **`11.76×`** | **`10.02×`** | |
 
+   > **SUPERSEDED IN ITS NUMBERS, NOT IN ITS LAW (2026-09-03, WP16/WP17).** The
+   > K3 row above was measured on a flow that computed the `(1,1,1)` block —
+   > which WP16 showed is **dead work** in a regenerating flow — and before
+   > WP17's operation-count reduction. Current, same command,
+   > `experiments/2026-09-03_wp16_parity/flow_price_wp17b.json`:
+   >
+   > | | counted FLOPs | flopscope **operations** | headroom |
+   > |---|---:|---:|---:|
+   > | regenerating K3 flow | `168.68 B` | **2,708** | *see below* |
+   > | ratio to the K2 closure | `2.45×` | **`5.98×`** | |
+   >
+   > **The residual column is deliberately left blank, and that is the new law
+   > here.** Four readings of the *matched K2 control* on this host on 2026-09-03
+   > came back `0.0277`, `0.0322`, `0.0430` and `0.0340 s` — a 55% spread driven
+   > by another project's jobs — and the K3/K2 **ratio moved with it** (`10.02`,
+   > `11.98`, `12.76`, `7.28`). This section offered the ratio to a matched
+   > control in the same process as the transferable quantity. **It transfers
+   > only on a quiet host.** A local residual reading taken while anything else
+   > is running is not evidence of either a level or a ratio, and the authority
+   > remains `whest run --runner subprocess`.
+
+   The paragraph below is unchanged and still correct: what tracks the residual
+   is the operation count, and that is what a Phase-2 design must minimise.
+
    **`2.5×` the FLOPs buys `11.8×` the operations and `10×` the residual.** The
    two ratios that matter track each other and neither tracks the FLOPs. This is
    the same mechanism that killed the packed lane (`14,001` array ops per MLP)

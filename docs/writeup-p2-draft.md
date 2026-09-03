@@ -378,6 +378,11 @@ So we wrote the layer properly and metered it. One layer at `n = 1024`, in
 | **`float32`** | **`10,837,935,618`** | **`5.047`** | `173,406,969,888` | **`0.07886`** |
 | the §6.3 projection | | `4.89` | `167,919,171,072` | `0.07636` |
 
+*(These are the figures as measured at the time. §6.6 and §6.7 supersede them
+downward — the layer was computing a block that turns out to be dead work — but
+the reasoning in this section is about the gap between a projection and an
+execution, and re-stating it with later numbers would destroy the point.)*
+
 **The conclusion survives and the number moves.** `0.07886` against `0.07636`:
 the projection was **3.3% optimistic**, the floor still holds, and the free zone
 under it is `0.02114` of budget — `1.35` float32 matmuls per layer rather than
@@ -435,21 +440,28 @@ That number does not track FLOPs. It tracks **how many array operations you
 issue**, because each one carries a fixed Python-side cost that the FLOP meter
 does not see. Measured on the same host, in the same process, in the same run:
 
-| | counted FLOPs | array **operations** | residual, relative to the control |
-|---|---:|---:|---:|
-| our shipped second-order closure | `68,782,549,504` | **`453`** | `1.0x` |
-| the third-order flow | `173,230,212,715` | **`5,119`** | `~12x` |
-| ratio | `2.5x` | **`11.3x`** | |
+| | counted FLOPs | array **operations** |
+|---|---:|---:|
+| our shipped second-order closure | `68,782,549,504` | **`453`** |
+| the third-order flow, as first written | `173,381,273,195` | **`5,327`** |
+| ratio | `2.5x` | **`11.8x`** |
 
-**`2.5x` the arithmetic, `11.3x` the operations.** The third-order flow is not
+**`2.5x` the arithmetic, `11.8x` the operations.** The third-order flow is not
 expensive because it computes more; it is expensive because it computes in more
 *pieces*. Its arithmetic is dominated by five matrix products per layer, and its
 operation count by roughly three hundred small elementwise steps around them.
 
-We learned this the expensive way: on the deployment authority the flow ran with
-**`1.21x`** margin against the cliff where the shipped file has `6.8x`, and our
-own local measurement had said `1.4x` while a matched control in the same process
-said the local reading was optimistic by a factor we could not have predicted.
+**We deliberately do not put a residual column in that table.** We measured one
+four times on the same machine on the same day and the *control* moved by 55%
+between readings, because other work was running; the ratio between the two arms
+moved with it. A wall-time residual is a property of the machine that measured
+it, and the only reading with authority is the evaluator's own.
+
+The reading that does have authority: on the official runner, the flow as first
+written had **`1.21x`** margin against the cliff where our shipped file has
+`6.8x`. That version has since been retired for an unrelated reason (§6.7) and
+its successor's operation count is `2,708`; neither number has been re-measured
+on the evaluator at the time of writing.
 
 > **Under a zero cost exponent, "how much arithmetic" is the wrong question and
 > "how many operations" is the right one. They are not proportional, and only one
@@ -634,8 +646,10 @@ their effective ranks grows to `2.94` — so the question is a containment
   cost that can still ruin a run is a wall-time residual that tracks **operation
   count** rather than arithmetic. Our flow does `2.5x` the arithmetic of our
   shipped file and `11.3x` the operations, and it reached the real evaluator with
-  `1.21x` margin against a cliff that zeroes a network's prediction. Every FLOP
-  number in §6 is correct and most of them did not matter. (§6.6)
+  `1.21x` margin against a cliff that zeroes a network's prediction — and the
+  local measurements we took to reason about it moved by 55% depending on what
+  else the machine was doing. Every FLOP number in §6 is correct and most of
+  them did not matter. (§6.6)
 - **We shipped a port to the evaluator that we had never compared against the
   implementation whose accuracy we were quoting.** It scored `3.3x` worse. The
   cause was one line, in code that a rebuild makes dead. Three checks passed

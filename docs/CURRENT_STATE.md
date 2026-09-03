@@ -23,7 +23,8 @@
 > which only ever read the `(3,)` slice, passed throughout.
 >
 > **THE GATE THE BRIEF SPECIFIED WOULD HAVE PASSED THE BUG.** The defect's
-> end-to-end drift is `1.199e-03` at `1024 x 16` and `2.4e-03` at `128 x 4` —
+> end-to-end drift is **`1.3046e-03` worst** (`1.064e-03` best) at `1024 x 16`
+> and `2.6e-03` worst at `128 x 4` —
 > it clears a `<= 1%` drift gate at both shapes. **Only clause 2, against minted
 > truth, catches it.** A `0.12%` drift in the means is a `3.2x` miss in the
 > score, because the means are `O(1)` and the error being chased is `O(1e-3)`
@@ -208,11 +209,16 @@
 > quoted a print-rounded figure as evidence for the opposite of what it shows.
 > The 56-array audit is what actually carries "nothing promoted".
 >
+> *(**CLOSED 2026-09-03**: `NOT_DONE` step 6 ran, the numbers were NOT right,
+> and the fix is the block at the top of this file. `SKEPTIC WP16` returned
+> ACCEPT on the parity claim. Everything below is the state as it stood before
+> that, kept because the reasoning is what led to the check.)*
+>
 > **`SKEPTIC WP14`'s PROVISIONAL on CLAIM A is discharged for the per-layer FLOP
 > arithmetic and for nothing else — and `SKEPTIC WP14-FOLLOWUP` re-issued
 > PROVISIONAL on the axis that decides.** `whest validate`, the Linux memory
 > gate, an OFFICIAL residual reading and an end-to-end candidate are all still
-> ahead, and the layer's NUMBERS are still unchecked against upstream at non-zero
+> ahead, and the layer's NUMBERS were then unchecked against upstream at non-zero
 > `kappa_3` (`NOT_DONE` step 6).
 >
 > **The projection was 3.3% optimistic, and the missing `0.157` matmuls/layer
