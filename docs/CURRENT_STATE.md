@@ -1,5 +1,60 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-02 (LATE) — THE CANARY RAN ON THE DEPLOYMENT AUTHORITY. ZERO FAILED
+> MLPs, `1.21x` RESIDUAL HEADROOM, FLOP PARITY TO THE FLOP — AND THE ACCURACY IS
+> `3.3x` OFF ITS OWN PREDICTION.**
+> `gpuq` 145/148, 20 rows of the public `v2-phase2 mini` split,
+> `--runner subprocess`, matched control in the same session.
+> **A CONFIRM read: nothing was fitted, nothing selected, no seed block drawn,
+> and nothing may now be tuned against those 20 rows.** `estimator.py` is
+> untouched and remains v2.6.1; nothing was submitted.
+>
+> | on the same 20 official rows | raw MSE | adjusted | FLOPs | worst residual | headroom | failed |
+> |---|---:|---:|---:|---:|---:|---:|
+> | v2.6.1 (shipped), control | `4.1805e-06` | `4.1805e-07` | `137,600,326,656` | `0.0590 s` | `6.78x` | 0/20 |
+> | **K3 canary** | **`2.8192e-06`** | **`2.8192e-07`** | `173,381,273,195` | `0.3314 s` | **`1.21x`** | **0/20** |
+>
+> **THE RESIDUAL QUESTION IS ANSWERED: it does not fail MLPs**, so WP15's
+> end-to-end gates are measurable. **But `1.21x` is not a margin** — the soak
+> requirement is `>= 4x`, `VALIDATION.md` §2b-ii puts run-to-run spread at
+> `~2.4x`, and `n = 20` is thin for a maximum. **Not nominable as it stands.**
+> The `~140` removable operations per layer (`p2_k3_fnp.OP_COUNT_NOTES`) are now
+> on the critical path, not a tidy-up.
+>
+> **AND THE LOCAL READING WAS OPTIMISTIC.** Local worst `0.2774 s` against
+> official `0.3314 s`: **the grader is `1.19x` SLOWER for this file, not faster.**
+> The local RATIO over-predicted too — `10.02x` locally, `5.62x` officially —
+> because the subprocess runner costs the small K2 file proportionally more.
+> The `~7x`-faster observation from two graded K2 reports transfers to nothing.
+>
+> **FLOP PARITY IS EXACT.** `mean_effective_compute = 173,381,273,195`, identical
+> to the local meter; utilization `0.0788446747`. Every FLOP claim made today is
+> confirmed by the deployment authority.
+>
+> **THE `3.3x` ACCURACY MISS, AND THE CONTROL MAKES IT A DIAGNOSIS.** WP14 C0-i
+> put the regenerating flow's raw MSE at `8.5075e-07`; the grader says
+> `2.8192e-06`. The control transfers to **`3.2%`** (`4.1805e-06` measured
+> against the `4.050566e-06` this repository carries for the shipped K2p1), so
+> the split, the networks and the instrument are all fine.
+> **The discrepancy is in the K3 flow itself.**
+>
+> > **`NOT_DONE` step 6 — parity against upstream at non-zero `kappa_3` — stops
+> > being hygiene and becomes the explanation for a `3.3x` gap.** `SKEPTIC
+> > WP14-FOLLOWUP` named it: *"the priced program and the scored program have
+> > never been shown equal"*, and its mutation battery had already shown that no
+> > existing check could tell.
+>
+> **Every adjusted-score claim resting on `8.5075e-07` is therefore PROVISIONAL,
+> including the `1.637x`-better-than-v2.7 paired comparison.** What can be said
+> is narrow and true: **the canary beats the shipped uncalibrated file by
+> `1.483x` on 20 official rows.** The v2.7 comparison must NOT be re-derived from
+> these rows — v2.7 is calibrated and both files here are not.
+>
+> **NEXT, in order: (1)** `NOT_DONE` step 6 against upstream in the GPU venv —
+> this is the `3.3x`; **(2)** the op-count reduction, then re-measure residual on
+> the authority, with `--mutation-coverage` and `p2_k3_candidate_parity.py` still
+> passing bit for bit; **(3)** only then WP15's two arms.
+
 > **2026-09-02 (SKEPTIC WP14-FOLLOWUP — CLAIM A *PROVISIONAL*) — THE FLOP HALF
 > SURVIVES EXECUTION AT `0.07886 B`. THE HALF THAT CAN ACTUALLY FAIL AN MLP WAS
 > NOT MEASURED, AND IT IS CLOSE TO THE CLIFF.**
@@ -8,7 +63,18 @@
 > > AXIS.** The flow issues **~5,300 flopscope operations per MLP** against the
 > > shipped K2 closure's **453**, and its local in-process residual reads
 > > `0.29`–`0.44 s` against the **`0.4 s` per-MLP cliff — over it on 2 of 6
-> > readings**. `GOTCHAS.md` already said why: residual tracks **op count and
+> > readings**. **Reproduced in-tree on a `gpuq`-brokered quiet host**
+> > (`flow_price_1024.json`, job 144, 3 reps, real canonical weights):
+> >
+> > | | counted FLOPs | flopscope **operations** | worst LOCAL residual | headroom vs `0.4 s` |
+> > |---|---:|---:|---:|---:|
+> > | shipped K2 closure | `68,782,549,504` | **`453`** | `0.0277 s` | **`14.4x`** |
+> > | regenerating K3 flow | `173,381,273,195` | **`5,327`** | `0.2774 s` | **`1.4x`** |
+> > | ratio | `2.52` | **`11.76`** | **`10.02`** | |
+> >
+> > It did not cross the cliff on that quiet run. **`1.4x` headroom is where the
+> > shipped file has `14.4x`, and the standing soak requirement is `>= 4x` on the
+> > worst run.** `GOTCHAS.md` already said why: residual tracks **op count and
 > > Python glue, not FLOPs**. A residual excursion does not cost score, it
 > > **fails the MLP and zeroes the prediction** — a `1e-7` row becomes `~0.92`.
 > > The transferable form is the ratio to a matched control in the same process:
@@ -115,6 +181,8 @@
 > need at every layer. Only the `off_mask` amortisation was real. The real
 > 16-layer flow measures `173,381,273,195` = `0.07884 B`, `25.7 M` FLOPs below
 > the extrapolation, and `--flow-price` now runs it rather than extrapolating.
+> **Confirmed in-tree: `173,381,273,195` = `0.078845 B`, `25,696,693` FLOPs below
+> the extrapolation, to the FLOP of the review's independent build.**
 >
 > **TWO DEFECTS IN THIS SESSION'S OWN INSTRUMENT, FOUND BEFORE IT WAS
 > BELIEVED.** (1) A **NaN reference passed a `>` gate silently** — `hermgauss`

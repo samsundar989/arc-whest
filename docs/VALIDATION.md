@@ -375,6 +375,37 @@ Two arithmetic hygiene rules, both of which Sprint 4 broke:
      and a max over 20 draws has a wide sampling distribution. Treat a worst-case
      headroom from n = 20 as indicative, not as a bound.
 
+   **ADDED 2026-09-02 (SKEPTIC WP14-FOLLOWUP) — the predictor is the OPERATION
+   COUNT, and it must be reported in the same table as the FLOPs.**
+
+   Everything above tells you how to *measure* residual. It does not tell you
+   what *drives* it, and a whole slice was spent measuring the wrong axis because
+   of that. Under `λ = 0` a FLOP below the floor costs **nothing**, so a cost
+   table that contains only FLOPs is a table of the free variable. Measured with
+   a matched control in one process, one host, one run
+   (`local_sim/p2_k3_fnp.py --flow-price`, `gpuq` 144):
+
+   | | counted FLOPs | flopscope **operations** | worst LOCAL residual | headroom |
+   |---|---:|---:|---:|---:|
+   | shipped K2 closure | `68.78 B` | **453** | `0.0277 s` | `14.4×` |
+   | regenerating K3 flow | `173.38 B` | **5,327** | `0.2774 s` | **`1.4×`** |
+   | ratio | `2.52×` | **`11.76×`** | **`10.02×`** | |
+
+   **`2.5×` the FLOPs buys `11.8×` the operations and `10×` the residual.** The
+   two ratios that matter track each other and neither tracks the FLOPs. This is
+   the same mechanism that killed the packed lane (`14,001` array ops per MLP)
+   and the same one behind the `budget_summary_dict` ban.
+
+   > **BINDING: every Phase-2 cost claim quotes counted FLOPs, flopscope
+   > operation count and residual headroom against the worst observed run, in the
+   > same table.** A claim with only the first is measuring the axis `λ = 0` made
+   > free. `--flow-price` is the shape; `len(ctx.op_log)` is the count.
+
+   The ratio to a matched control measured in the **same process, same host, same
+   run** is the transferable form, because §2b-ii's own `2.4×` run-to-run spread
+   applies to both arms at once and largely cancels. The absolute second still
+   obeys every rule above: LOCAL, worst run, and never the deployment authority.
+
 ### 2b-i. THE BINDING STATISTIC — arithmetic, adopted 2026-08-20 (CP0.3)
 
 **The primary promotion statistic is the paired ARITHMETIC score difference, with

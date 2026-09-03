@@ -1240,6 +1240,32 @@ def _dump(path, doc):
 # WHAT IS NOT DONE -- by name, so the next session does not have to guess
 # ==========================================================================
 
+#: Where the ~333 flopscope operations per layer actually go, and the reductions
+#: that do not change a single counted FLOP. Written down BEFORE any of them is
+#: applied, because applying one invalidates `layer_price_1024.json` and the
+#: measurement must be re-taken, not adjusted.
+#:
+#: Under `lambda = 0` this is the only list that matters: FLOPs below the floor
+#: are free and the `0.4 s` residual cliff tracks OP COUNT. The shipped K2
+#: closure runs at ~28 ops/layer with `14.4x` headroom; this flow runs at ~333
+#: with `1.4x`.
+#:
+#:   ~100  the 25-term loop: each term is 1-2 block Hadamards, 1-2 per-axis Wick
+#:         multiplies and a scalar multiply. **The scalar can be folded into one
+#:         of the Wick vectors at zero FLOP cost** (both are O(n) row scalings),
+#:         saving ~25 ops. Terms sharing an int_part and a Wick pair can be
+#:         summed before the Wick multiply rather than after: another ~15.
+#:    ~64  the 16 Wick coefficients. Six are `factorial(p) * base(k')` on a base
+#:         already computed; those six are pure scalar rescales of an existing
+#:         vector and can be deferred into the terms that use them.
+#:    ~40  `pK -> K`: 19 vector partitions, each a product plus an accumulate.
+#:    ~50  the diagonal slices, the (1,1,1) block and the rebuild. Little here.
+#:    ~30  masks, transposes, reshapes.
+#:
+#: Nothing above changes the op SEQUENCE's arithmetic, so a mutation-coverage run
+#: and a candidate-parity run must both still pass afterwards, bit for bit.
+OP_COUNT_NOTES = "see the comment above; ~333 ops/layer, ~140 of them removable"
+
 NOT_DONE = """
 DONE 2026-09-02 (SKEPTIC WP14's named follow-up): items 1, 2, 3, 4 and 5 below
 are implemented in `k3_layer` and priced by `--layer-price`; `--layer-k2` checks

@@ -28255,3 +28255,130 @@ is conservative against its own bound of `r ≤ 230`.
 4. **Do not assert a git-reconstructible fact without reconstructing it.** Three
    numbers in one sentence, all wrong, in a finding whose whole point was that
    prose is not evidence.
+
+---
+
+# 2026-09-02 — **THE CANARY RAN ON THE DEPLOYMENT AUTHORITY.** Zero failures, `1.21x` residual headroom, and the accuracy is `3.3x` off its own prediction
+
+`SKEPTIC WP14-FOLLOWUP`'s named cheapest discriminating follow-up, executed
+exactly as specified: wrap the flow as a candidate and read the **official**
+per-MLP residual and `n_failed_mlps` from `whest run --runner subprocess`.
+`gpuq` 145 (canary) and 148 (control), 20 rows of the public `v2-phase2 mini`
+split, subprocess runner, same session, `--detail full --json`. Artifacts
+`experiments/2026-09-02_wp15_canary/official_mini20_k3canary.json` and
+`official_mini20_v261_control.json`.
+
+**THIS IS A CONFIRM READ AND IT IS RECORDED AS ONE.** The `mini` split is
+read-only; **no constant was fitted, nothing was selected, no seed block was
+drawn, and nothing may now be tuned against these 20 rows.** The candidate is
+`estimator_wp15_k3_canary.py`; **`estimator.py` is untouched and remains v2.6.1**,
+nothing was submitted, and no nomination is implied.
+
+## The residual question is ANSWERED, and the answer is "clean, but thin"
+
+| | counted FLOPs | `x budget` | worst residual | median | headroom vs `0.4 s` | failed MLPs |
+|---|---:|---:|---:|---:|---:|---:|
+| **v2.6.1 (shipped), control** | `137,600,326,656` | `0.06257` | `0.0590 s` | `0.0501 s` | **`6.78x`** | **0 / 20** |
+| **K3 canary** | `173,381,273,195` | `0.07884` | `0.3314 s` | `0.2781 s` | **`1.21x`** | **0 / 20** |
+
+> **`n_failed_mlps = 0`, `residual_wall_time_exhausted = 0`.** The flow does not
+> fail MLPs on the official runner at the live shape. `SKEPTIC
+> WP14-FOLLOWUP`'s worry that WP15's end-to-end gates would be unmeasurable is
+> **discharged**.
+
+**But `1.21x` is not a margin.** The standing requirement for a nomination soak
+is `>= 4x` on the worst run, `VALIDATION.md` §2b-ii says a residual level is not
+reproducible to better than `~2.4x` across runs on this host, and it warns that
+`n = 20` is thin for a maximum. **A `1.21x` worst-case headroom over 20 rows is
+inside the run-to-run spread of the cliff itself.** This candidate is not
+nominable as it stands; the `~140` removable operations per layer recorded in
+`p2_k3_fnp.OP_COUNT_NOTES` are now on the critical path rather than a tidy-up.
+
+**And the local reading was OPTIMISTIC, in the direction nobody hoped.** Local
+worst `0.2774 s` against official `0.3314 s`: **the grader is `1.19x` SLOWER than
+this host for this file**, not faster. The two Phase-2 graded K2 reports that ran
+`~7x` faster than this host are evidence about those exact files and about
+nothing else — `AGENTS.md` and `GOTCHAS.md` both say so, and this is the
+measurement that shows why. **The local RATIO over-predicted too**: `10.02x`
+locally against `5.62x` officially, because the subprocess runner costs the small
+K2 file proportionally more (`2.1x` slower official-vs-local) than the large K3
+one (`1.19x`).
+
+## The FLOP meter is EXACT against the grader, to the FLOP
+
+`mean_effective_compute = 173,381,273,195`, identical to the local
+`--flow-price` figure. `mean_compute_utilization = 0.0788446747`, matching
+`0.078845`. The `+2**24` server offset does not appear at this operating point.
+**Every FLOP claim made today is confirmed by the deployment authority.**
+
+## THE ACCURACY IS `3.3x` OFF ITS OWN PREDICTION, AND THE CONTROL SAYS THAT IS THE PORT
+
+| on the same 20 rows | raw final-layer MSE | adjusted | multiplier |
+|---|---:|---:|---:|
+| v2.6.1 (shipped, uncalibrated K2p1) | `4.1805e-06` | `4.1805e-07` | `0.1` |
+| **K3 canary (uncalibrated)** | **`2.8192e-06`** | **`2.8192e-07`** | `0.1` |
+| ratio | **`1.483x` better** | | |
+
+So the canary **does** beat the shipped file, by `1.483x`, measured on the
+deployment authority with a matched control in the same session. That is a real
+result and it is the first time this architecture has been scored by the grader
+at all.
+
+**And it is `3.3x` worse than WP14 C0-i predicted.** The regenerating flow's
+drift-and-truth analysis put its raw MSE at `8.5075e-07`; the grader says
+`2.8192e-06`. The control is what makes that diagnostic rather than ambiguous:
+
+- v2.6.1 measured `4.1805e-06` here against the `4.050566e-06` this repository
+  has carried for the shipped K2p1 — **`3.2%` apart.** The split, the networks
+  and the instrument all transfer.
+- The canary measured `3.31x` its prediction on the same split, in the same run.
+
+> **A `3%` transfer for the control and a `3.3x` miss for the arm isolates the
+> discrepancy to the K3 flow itself.** Either the `fnp` port computes a
+> different function from the torch `regen` hook whose `8.5075e-07` was measured,
+> or that figure does not transfer. **`NOT_DONE` step 6 — parity against upstream
+> at non-zero `kappa_3` — stops being hygiene and becomes the explanation for a
+> `3.3x` gap.** `SKEPTIC WP14-FOLLOWUP` named exactly this as unresolved: *"the
+> priced program and the scored program have never been shown equal"*, and the
+> mutation battery had already shown that no existing check could tell.
+
+**Consequences, stated plainly:**
+
+1. **Every adjusted-score claim resting on `8.5075e-07` is now PROVISIONAL**,
+   including the `1.637x`-better-than-v2.7 paired comparison. It was a
+   measurement of the torch reference, and the file the grader runs does not
+   reproduce it.
+2. The comparison against **v2.7** is unchanged in method and must not be
+   re-derived from these 20 rows: v2.7 is *calibrated*, both files here are not,
+   and a calibrated-vs-uncalibrated ratio on a read-only split is not a
+   comparison this contract permits. What can be said is narrow and true: **the
+   canary beats the shipped uncalibrated file by `1.483x` on 20 official rows.**
+3. **Nothing may be fitted on the mini split** to close the `3.3x`. The gap is
+   diagnosed against upstream, off the public data.
+
+## Next, and it is now a short ordered list
+
+1. **`NOT_DONE` step 6.** Run `p2_k3_fnp.k3_flow` against upstream's `regen` hook
+   on the same networks at non-zero `kappa_3`, in the GPU venv. This is the
+   `3.3x`.
+2. **The op-count reduction** (`OP_COUNT_NOTES`, `~140` of `~333` per layer),
+   then re-measure residual on the authority. `1.21x` must become `>= 4x` before
+   this file is nominable, and it must not change a counted FLOP or a value --
+   `--mutation-coverage` and `p2_k3_candidate_parity.py` both have to still pass
+   bit for bit.
+3. Only then WP15's two arms, whose gates are all end-to-end against this flow.
+
+## Knowledge delta
+
+1. **The deployment authority answered in seven minutes what a day of local
+   measurement could not.** The residual question, the FLOP parity question and
+   the accuracy-transfer question were all settled by one 20-row subprocess run
+   that needed no seed block, no truth mint and no GPU.
+2. **The grader is not faster. For this file it is `1.19x` slower**, and the
+   local ratio to a matched control over-predicted the official ratio by `1.8x`.
+   A local instrument ratio does not bound a level, and only a level clears a
+   cliff — `VALIDATION.md` §2b-ii said so and this is the confirming case.
+3. **A control is what turns a disappointing number into a diagnosis.** Alone,
+   `2.8192e-06` against a predicted `8.5075e-07` could have been the split, the
+   networks, the instrument or the port. With a control that transfers to `3%`,
+   it is the port.
