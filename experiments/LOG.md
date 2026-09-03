@@ -28781,3 +28781,144 @@ wholly dead is the same statement, made exactly.
   authority was measured on the retired file; the fix removes `208` of `5,327`
   operations, which is `3.9%` and nowhere near the `>= 4x` the soak requires.
   Blocker B is unchanged in substance and is next.
+
+---
+
+# 2026-09-03 — WP17: **Blocker B, the operation count. `5,327` -> `~2,650` per MLP, and every float bit-identical**
+
+Class: **IMPORTANT** (the instrument and the candidate file, not a gate and not a
+seed block). Written prediction first, `preflight.ps1` GREEN at `f2b0e6a` before
+the work, LOG entry with a knowledge delta below. No decision block is spent, no
+public data is fitted, and `estimator.py` is untouched.
+
+## Why this is the half that matters
+
+Phase 2 sets `lambda = 0`. FLOPs below the `0.1` floor are worth **nothing**, and
+the only cost that can still ruin a run is the `0.4 s` per-MLP residual, which
+**fails** the MLP and zeroes its prediction. `docs/GOTCHAS.md` records that the
+residual tracks **operation count and Python glue, not FLOPs**, and the graded
+canary confirmed it: `2.5x` the shipped file's arithmetic, `11.8x` its
+operations, and `1.21x` headroom where the shipped file has `6.78x`.
+
+## The prediction, written before the work
+
+> Most of the operation count is in `wick_coefs` and the per-term loop, and the
+> reductions in `OP_COUNT_NOTES` are worth roughly half of the `333`/layer. I
+> predict the total lands between `2,000` and `3,000` per MLP, that counted FLOPs
+> move by **less than 5%** in either direction, and that **every reduction can be
+> made an IEEE identity** rather than an approximation — i.e. that the output is
+> bit-identical, not merely close. I do **not** predict this is enough for `4x`
+> headroom.
+
+## Result
+
+| | before | after |
+|---|---:|---:|
+| flopscope **operations** per MLP | `5,327` | **`~2,650`** (`2,708` at the committed measurement) |
+| ... per layer | `333` | **`169`** normal, **`59`** last |
+| counted FLOPs | `173,381,273,195` | **`168,676,988,572`** |
+| `x` budget | `0.078845` | **`0.076705`** |
+| multiplier | `0.10000` | **`0.10000`** — still at the floor |
+| output, both dtypes | | **BITWISE IDENTICAL**, `maxdiff 0.000e+00` |
+
+**The prediction holds on all three counts**: `2,708` is inside `[2000, 3000]`,
+FLOPs moved `-2.7%`, and every change is an identity.
+
+## The six reductions, and why each is exact
+
+1. **`wick_coefs` was 144 of a layer's 315 operations** — 46% — to produce
+   sixteen `(n,)` vectors. Now **40**. `sigma^j` is built once, left-associated
+   in exactly the order the per-pair loop built it; `base(k)` is memoised
+   (recomputed twice for `k = 2, 3, 4`); `1.0 * ones * phi / sigma` is spelled
+   `phi / sigma`; and the twelve polynomials run as **one padded batched
+   Horner**. The padding is exact because `0 * a + 0 == 0` and `0 * a + c == c`.
+2. **Last-layer pruning.** The grader reads post-ReLU **means**. At layer 15
+   there is no next layer, so the only output ever read is
+   `mu_out = K[(1,)] = pK[(1,)]`, which needs `w(0,1)`, `w(3,1)`, `w(4,1)`, `D3`
+   and `D4`. **Two of the five matmuls**, `C11`, `D22`, 22 of 25 pK terms, 6 of 7
+   `pK -> K` slices, the covariance, `K[4]` and the rebuild are skipped. That
+   layer costs **59** operations against 192. `last_layer` previously skipped
+   only the rebuild — `0.001` of a matmul.
+3. **The four one-dimensional slices as one `(4, n)` expression.** The frozen
+   table gives every `(p,)` the same three terms
+   (`w(0,p) + (1/6) D3 w(3,p) + (1/24) D4 w(4,p)`), so twelve terms and eight
+   accumulations become nine operations. A **regrouping, not a reassociation** —
+   every float is multiplied and added in the order it was.
+4. **Scaled block products memoised.** `0.5 C11^2` appears in all three
+   two-dimensional slices and `0.25 D22` likewise; both were recomputed each
+   time. The memo key is `(blocks, scalar)`, not blocks alone, because the scaled
+   product is what repeats.
+5. **`* 1.0` skipped** where the frozen table says so — 9 of 25 terms, 7 of 19
+   `pK -> K` rows — and the single `* -1.0` folded into a subtraction, since
+   `a + (-b)` and `a - b` are the same IEEE float.
+6. **Constants hoisted.** `off_mask`, the ones vector and the Wick coefficient
+   stacks leave the per-layer path entirely; in the candidate they leave
+   `predict` for `setup`, which is off the per-MLP budget. `outer(ones, ones)`
+   was an all-ones matrix materialised so the meter would charge a spelling that
+   did not know it was constant — under `lambda = 0` that honesty was costing
+   operations to save FLOPs that are free.
+
+## How "bit-identical" was established, since it is the whole licence
+
+The pre-change module was checked out to a scratch path, imported beside the new
+one, and both were run on the same minted network in the same process. The
+outputs were compared **as raw bytes**, in `float32` and in `float64`:
+
+    f32:  BITWISE IDENTICAL = True   maxdiff 0.000e+00
+    f64:  BITWISE IDENTICAL = True   maxdiff 0.000e+00
+
+and at the live shape the parity artifacts are unchanged to every digit printed:
+`1.692e-11` worst end-to-end drift against upstream on 8/8 `P01` nets, raw MSE
+`8.5075e-07`, ratio `1.000x`. `--layer-k2` is unchanged (`kappa3 1.067e-14`), the
+golden-parity battery still kills `9/9` on the live path, `whest validate`
+passes, and `p2_k3_candidate_parity.py` is green with **counted FLOPs matching
+exactly and `rel-rms 0.000e+00`**.
+
+## A defect in my own instrument, found by disbelieving a number
+
+`p2_k3_parity.py` kept `--regen-mode` defaulting to `"sub"` after
+`p2_k3_fnp.k3_layer`'s default became `"nosub"`. One dump named
+`port_wp17_1024.npz` therefore contained **the defect**, and compared at
+`1.199e-03` where the fixed port compares at `1.692e-11`. Nothing errored; the
+file was simply mislabelled. It was caught because `1.199e-03` was recognisable
+as the defect's own number from four hours earlier. **A default that disagrees
+with the thing it drives is a silent mislabel, and the only reason this one was
+cheap is that its wrong answer had already been given a name.**
+
+## What is NOT established
+
+- **The residual is not measured.** Four local readings today put the matched K2
+  control at `0.0277`, `0.0322`, `0.0430` and `0.0340 s` on the same host — a
+  55% spread driven by another project's jobs — and the K3/K2 **ratio** moved
+  with it (`10.02`, `11.98`, `12.76`, `7.28`). **Under contention even the ratio
+  to a matched control in the same process is not stable**, which is a new fact:
+  `VALIDATION.md` §2b-ii offered the ratio as the transferable quantity, and it
+  transfers only on a quiet host. The authority is
+  `whest run --runner subprocess`, and that run is queued.
+- **Halving the operations does not obviously buy `4x`.** If the residual were
+  purely per-operation, `2,708 / 5,327` would take the graded `1.21x` to about
+  `2.4x`. The soak requires `>= 4x` on the worst run. **On the arithmetic
+  available, this is not yet enough**, and the remaining exact reductions are
+  nearly exhausted at ~165 operations a layer against a `~120` target.
+- Nothing has been graded, submitted or designated. `estimator.py` remains
+  v2.6.1.
+
+## Knowledge delta
+
+1. **Half of a "third-order cumulant flow" was polynomial evaluation.** 144 of
+   315 operations a layer went on sixteen `O(n)` vectors, in a program whose
+   headline cost is five `n^3` matmuls. Under a cost model that charges
+   arithmetic, that work is invisible — it is `0.001%` of the FLOPs. Under one
+   that charges **operations**, it was the largest single item. Which half of the
+   objective is free decides where the code's problems are.
+2. **"Charge honestly for a spelling that does not know a value is constant" is a
+   FLOP-era instinct that costs operations.** `outer(ones, ones)` existed so the
+   meter would not be flattered. Under `lambda = 0` it bought nothing and cost
+   two operations a layer, on the axis that can fail an MLP.
+3. **Bit-exactness is available far further than expected.** Batched Horner over
+   zero-padded coefficients, memoised sub-expressions, skipping `* 1.0`, folding
+   `* -1.0` into a subtraction, and stacking four slices that share their
+   arithmetic order are all IEEE identities. The reductions that would require
+   reassociation — factoring `0.5 C11^2 X + 0.25 D22 X` — were **left undone**,
+   because a change that is merely "small" needs a measurement and a change that
+   is an identity needs only a comparison.
