@@ -1,5 +1,69 @@
 # GAME_PLAN.md — Phase-2 implementation plan and target architecture
 
+> ## AMENDMENT, 2026-09-02 — read this before anything below it
+>
+> **This plan is dated 2026-08-31 and four slices have run since (WP13, WP14,
+> `SKEPTIC WP14`, and today's follow-up). Sections 3 and 4 below no longer
+> describe the live architecture, and a Builder who executed section 8's order
+> literally would spend days on closed lanes.** The plan is amended here rather
+> than rewritten, so the reasoning that produced it stays legible.
+>
+> ### What is now CLOSED or deprioritised, on measurements
+>
+> | package | status | measured reason |
+> |---|---|---|
+> | **WP1 / WP2** — the legal carrier constructor, objective and frozen panel | **CLOSED** | the carrier lane is closed; see `CURRENT_STATE.md` and Appendix B of the write-up |
+> | **WP3** — faithful AUGMENT | **DEPRIORITISED** | not on the critical path; the SIMPLE tower reaches the floor without it |
+> | the two-candidate ambition of the objective statement (a *structured angular-integration system* plus a compact analytic one) | **superseded** | the live pair is the regenerating K3 flow and shipped `v2.7`, chosen for diversity, not two new builds |
+> | five column-weight selectors (WP13 `E1`), `Sigma`'s dominant range as a selector (WP14 `C1`) | **CLOSED** | every selector is `1.45x`-`2.10x` **worse** than not correcting; containment is `r/n` to three decimals, i.e. chance |
+> | Strassen, symmetry tagging, `W-EFF` | **CLOSED / not needed** | the floor is reached in plain f32 with no fast matmul; symmetry tagging bills the identical figure |
+>
+> ### What actually directs work now
+>
+> **1. Finish the `fnp` port and present a canary.** `local_sim/p2_k3_fnp.py`.
+> The layer exists, is metered and passes three closed-form checks; what remains
+> is named in that module's `NOT_DONE` — parity against upstream at non-zero
+> `kappa_3` (step 6, the one that can fail for an interesting reason), then an
+> actual `Estimator` at live shape, then `certify_candidate` → a `gpuq`-brokered
+> residual soak (worst run, `>= 4x` headroom) → the Linux memory gate → full-suite
+> metered FLOPs including the `+2**24` server offset → an exact
+> `submission.tar.gz` with its sha256 and a one-paragraph recommendation for
+> **Samuel** to submit. **Never run `whest submit`, and never designate a
+> submission.**
+>
+> **2. `CONTRACT WP15` (`experiments/LOG.md`, commit `1b6ac04`).** Two arms on the
+> one remaining question — is there a MAP from the carried state
+> `(mu, Sigma, S3, S21)` to the rank-`r` correction of BOTH `kappa_3` read
+> slices. Arm M is mechanistic (measure `E21`'s memory depth, then a closed-form
+> generator plus a rank-`r <= 192` sketch); Arm M's affordability horizon is
+> `r <= 192`, **not** `512`. Arm L is a supervised permutation-equivariant map on
+> `P05`, validated on `P06`. Seven gates, all thresholds already fixed.
+>
+> **3. The budget every design must now be priced against.** Measured, not
+> projected: **`5.047` f32 `1024`-matmuls per layer**, `0.07886 B` over 16 layers,
+> leaving **`0.02114 B` = `1.35` f32 matmuls per layer**. A design costing two
+> extra `n^3` operations per layer does not fit and does not need measuring.
+>
+> **Kill line ~2026-09-20**: if neither WP15 arm reaches `>= 10x` end-to-end drift
+> reduction on fresh networks, freeze, nominate the canary-confirmed uncorrected
+> regenerating flow plus `v2.7`, and finish `docs/writeup-p2-draft.md`
+> (due Oct 24, closing Oct 17).
+>
+> ### What in this plan is still exactly right, and should not be diluted
+>
+> Section 4's opening rule — *"each IMPORTANT or STRATEGIC package ends with
+> synthesis and a fresh independent Skeptic before its output can feed the next
+> implementation"* — and section 8's completion definition, especially its last
+> paragraph: **a falsifier may legitimately kill a branch, and the required
+> outcome is a clean evidence path, not a forced positive result.** WP13, WP14
+> and WP15's own contract each predicted gates in themselves failing, and several
+> did.
+>
+> **`WP0.2` is DONE and was still live today**: the stale preflight subtest
+> labels it names were `60/60` in two places, and correcting them was part of
+> repairing a change gate that had been RED for four commits.
+
+
 **Authoritative from 2026-08-31. This is the sole active architecture and
 implementation plan.** `CURRENT_STATE.md` records status, `VALIDATION.md` governs
 measurement, and `PHASE2_FRONTIER_AUDIT_2026-08-31.md` contains the dated external
