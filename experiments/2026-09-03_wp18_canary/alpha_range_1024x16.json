@@ -1,0 +1,53 @@
+{
+ "check": "WP18 \u00a7 A: the worst |mu/sigma| the UNCAPPED flow reaches at the live shape",
+ "contract": "experiments/LOG.md 2026-09-03 CONTRACT WP18 \u00a7 A, HEAD 49e2e42",
+ "measured_on": "estimator_wp15_k3_canary.py",
+ "cap_from": "estimator_wp18_canary.py",
+ "width": 1024,
+ "depth": 16,
+ "rows": [
+  {
+   "seed": 90000000500,
+   "n_layers_seen": 16,
+   "worst_abs_alpha": 8.438060760498047
+  },
+  {
+   "seed": 90000000501,
+   "n_layers_seen": 16,
+   "worst_abs_alpha": 8.66458797454834
+  },
+  {
+   "seed": 90000000502,
+   "n_layers_seen": 16,
+   "worst_abs_alpha": 8.356222152709961
+  },
+  {
+   "seed": 90000000503,
+   "n_layers_seen": 16,
+   "worst_abs_alpha": 9.040029525756836
+  },
+  {
+   "seed": 90000000504,
+   "n_layers_seen": 16,
+   "worst_abs_alpha": 8.369397163391113
+  },
+  {
+   "seed": 90000000505,
+   "n_layers_seen": 16,
+   "worst_abs_alpha": 8.061236381530762
+  },
+  {
+   "seed": 90000000506,
+   "n_layers_seen": 16,
+   "worst_abs_alpha": 8.44489574432373
+  },
+  {
+   "seed": 90000000507,
+   "n_layers_seen": 16,
+   "worst_abs_alpha": 8.616756439208984
+  }
+ ],
+ "worst_abs_alpha": 9.040029525756836,
+ "alpha_cap": 40.0,
+ "margin": 4.42476430923506
+}

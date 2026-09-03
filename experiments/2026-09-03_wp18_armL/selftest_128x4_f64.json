@@ -1,0 +1,24 @@
+{
+ "check": "WP18 Arm L labeller selftest",
+ "width": 128,
+ "depth": 4,
+ "dtype": "f64",
+ "pre_layer": 2,
+ "S1_regen_vs_window0": {
+  "d3": 0.0,
+  "d21": 0.0,
+  "pass": true
+ },
+ "S2_endpoints": {
+  "explained_k0": 0.0,
+  "explained_kdepth": 1.0,
+  "pass": true
+ },
+ "S3_equivariance": {
+  "E3_rel": 0.0,
+  "feat_rel": 3.3885167494755645e-16,
+  "tol": 1e-09,
+  "pass": true
+ },
+ "pass": true
+}

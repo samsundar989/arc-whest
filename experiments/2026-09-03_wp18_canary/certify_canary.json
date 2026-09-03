@@ -1,0 +1,209 @@
+{
+  "artifact": "candidate_certification",
+  "artifact_version": 1,
+  "candidate": "estimator_wp15_k3_canary.py",
+  "candidate_sha256": "e3b3bc96617571118afd0b521f825b4aef830d326145084208bc5d48280b1983",
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "truth_free": false,
+  "confirm_tier_read": true,
+  "is_shipped_file": false,
+  "sections": {
+    "validate": {
+      "returncode": 0
+    },
+    "package_identity": {
+      "whestbench": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\whestbench\\__init__.py",
+      "flopscope": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\__init__.py",
+      "official_config_rc": 0
+    },
+    "invariants": {
+      "returncode": 1,
+      "tail": "5/30 checks passed"
+    },
+    "determinism": {
+      "fresh_worker": [
+        {
+          "sha256": "c629d8550c3d5b565e08aa0e751978d7bd8514e023b57721787946be27aa8f0b",
+          "shape": [
+            16,
+            1024
+          ],
+          "flops_used": 168629787238.0,
+          "pid": 11244
+        },
+        {
+          "sha256": "444aa07dde9738fe8dd6a572775d32f85a438fe5238b3bc7aa67781d19f8ce04",
+          "shape": [
+            16,
+            1024
+          ],
+          "flops_used": 168629787238.0,
+          "pid": 51980
+        }
+      ]
+    },
+    "metered_runs": [
+      {
+        "seed": 90000000201,
+        "error": "",
+        "flops_used": 168629787238.0,
+        "n_ops": 2647,
+        "multiplier": 0.1,
+        "residual_wall_time_s": 0.2964659000208485,
+        "wall_time_s": 2.1199058999991394,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": -7.927923434181139e-06,
+        "max_value": 4.3823652267456055,
+        "n_negative": 529,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.47486943896304323
+      },
+      {
+        "seed": 90000000202,
+        "error": "",
+        "flops_used": 168628211814.0,
+        "n_ops": 2643,
+        "multiplier": 0.1,
+        "residual_wall_time_s": 0.21150780003517866,
+        "wall_time_s": 1.6702529000031063,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": -1.080637866834877e-05,
+        "max_value": 4.543602466583252,
+        "n_negative": 590,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.7017540446989855
+      },
+      {
+        "seed": 90000000203,
+        "error": "",
+        "flops_used": 168628211814.0,
+        "n_ops": 2643,
+        "multiplier": 0.1,
+        "residual_wall_time_s": 0.19854239997948753,
+        "wall_time_s": 1.6590432000011788,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": -4.822696610062849e-06,
+        "max_value": 4.459685325622559,
+        "n_negative": 503,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.7453407456884954
+      },
+      {
+        "seed": 90000000204,
+        "error": "",
+        "flops_used": 168628211814.0,
+        "n_ops": 2643,
+        "multiplier": 0.1,
+        "residual_wall_time_s": 0.2014092002355028,
+        "wall_time_s": 1.6979282999964198,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": -4.452598659554496e-06,
+        "max_value": 4.281308174133301,
+        "n_negative": 507,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.6244963636675669
+      }
+    ],
+    "setup_s_local": 0.0005626999991363846,
+    "windows_memory_accounting": {
+      "available": true,
+      "source": "test_deployment_envelope.peak_memory_bytes",
+      "peak_wset_bytes": 379977728,
+      "peak_pagefile_bytes": 881053696
+    },
+    "subprocess_smoke": {
+      "ok_report": true,
+      "n_failed_mlps": 0,
+      "failure_breakdown": {
+        "budget_exhausted": 0,
+        "time_exhausted": 0,
+        "residual_wall_time_exhausted": 0,
+        "combined_budget_exhausted": 0,
+        "error": 0
+      },
+      "failures": [],
+      "dataset": "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
+      "width": 1024,
+      "depth": 16,
+      "lambda": 0.0,
+      "residual_cap": 0.4,
+      "wall_limit": 120.0,
+      "worst_residual": 0.2232714001002023,
+      "flops_per_mlp": 168629787238,
+      "multiplier": 0.1,
+      "c_over_b": 0.07668359081708331,
+      "final_layer_mse_CONFIRM_ONLY": 9.144722525888938e-07
+    },
+    "residual_soak": {
+      "requested": false
+    }
+  },
+  "checks_total": 32,
+  "checks_failed": [
+    "[3] 3: the invariant suite passes on THIS candidate",
+    "[5-8] 5: no output is negative beyond float rounding (bar -4.5e-12, scaled to the row)",
+    "[5-8] 6: counted FLOPs are network-INDEPENDENT or explained"
+  ],
+  "checks_skipped": [
+    "[9] 9: the real 8-GiB enforcement -- no linux_memory_gate report FOR THIS CANDIDATE. Run: uv run python local_sim/linux_memory_gate.py --candidate estimator_wp15_k3_canary.py --json <dir>/linux_memory_gate_estimator_wp15_k3_canary.json"
+  ],
+  "verdict": "REFUSED"
+}

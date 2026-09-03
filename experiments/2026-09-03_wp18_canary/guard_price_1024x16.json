@@ -1,0 +1,192 @@
+{
+ "check": "WP18 \u00a7 A: the guarded canary's price and its value difference from the graded file",
+ "contract": "experiments/LOG.md 2026-09-03 CONTRACT WP18 \u00a7 A, HEAD 49e2e42",
+ "width": 1024,
+ "depth": 16,
+ "budget": 2199023255552,
+ "server_offset": 16777216,
+ "baseline": "estimator_wp15_k3_canary.py",
+ "candidate": "estimator_wp18_canary.py",
+ "price": {
+  "estimator_wp15_k3_canary.py": {
+   "flops": 168614058598,
+   "n_ops": 2631,
+   "flop_independent": false,
+   "per_seed": [
+    {
+     "seed": 90000000401,
+     "flops": 168614058598,
+     "n_ops": 2631
+    },
+    {
+     "seed": 90000000402,
+     "flops": 168612483174,
+     "n_ops": 2627
+    },
+    {
+     "seed": 90000000403,
+     "flops": 168612483174,
+     "n_ops": 2627
+    },
+    {
+     "seed": 90000000404,
+     "flops": 168612483174,
+     "n_ops": 2627
+    }
+   ],
+   "x": 0.07667679646965553,
+   "x_with_server_offset": 0.07668442586418678,
+   "multiplier": 0.1,
+   "multiplier_with_server_offset": 0.1
+  },
+  "estimator_wp18_canary.py": {
+   "flops": 168614189670,
+   "n_ops": 2650,
+   "flop_independent": true,
+   "per_seed": [
+    {
+     "seed": 90000000401,
+     "flops": 168614189670,
+     "n_ops": 2650
+    },
+    {
+     "seed": 90000000402,
+     "flops": 168614189670,
+     "n_ops": 2650
+    },
+    {
+     "seed": 90000000403,
+     "flops": 168614189670,
+     "n_ops": 2650
+    },
+    {
+     "seed": 90000000404,
+     "flops": 168614189670,
+     "n_ops": 2650
+    }
+   ],
+   "x": 0.0766768560743003,
+   "x_with_server_offset": 0.07668448546883155,
+   "multiplier": 0.1,
+   "multiplier_with_server_offset": 0.1
+  }
+ },
+ "per_layer": [
+  {
+   "layer": 0,
+   "worst_abs": 0.0,
+   "rel": 0.0,
+   "n_changed": 0,
+   "n_negative_in_A": 0
+  },
+  {
+   "layer": 1,
+   "worst_abs": 0.0,
+   "rel": 0.0,
+   "n_changed": 0,
+   "n_negative_in_A": 0
+  },
+  {
+   "layer": 2,
+   "worst_abs": 0.0,
+   "rel": 0.0,
+   "n_changed": 0,
+   "n_negative_in_A": 0
+  },
+  {
+   "layer": 3,
+   "worst_abs": 0.0,
+   "rel": 0.0,
+   "n_changed": 0,
+   "n_negative_in_A": 0
+  },
+  {
+   "layer": 4,
+   "worst_abs": 0.0,
+   "rel": 0.0,
+   "n_changed": 0,
+   "n_negative_in_A": 0
+  },
+  {
+   "layer": 5,
+   "worst_abs": 2.861985137769807e-08,
+   "rel": 5.493610064172374e-09,
+   "n_changed": 2,
+   "n_negative_in_A": 2
+  },
+  {
+   "layer": 6,
+   "worst_abs": 3.9989333799894666e-07,
+   "rel": 7.675993970878526e-08,
+   "n_changed": 11,
+   "n_negative_in_A": 11
+  },
+  {
+   "layer": 7,
+   "worst_abs": 3.711587055477139e-07,
+   "rel": 7.124429729886708e-08,
+   "n_changed": 19,
+   "n_negative_in_A": 19
+  },
+  {
+   "layer": 8,
+   "worst_abs": 5.61963020118128e-07,
+   "rel": 1.0786938276763191e-07,
+   "n_changed": 29,
+   "n_negative_in_A": 29
+  },
+  {
+   "layer": 9,
+   "worst_abs": 1.3321032383828424e-06,
+   "rel": 2.5569859396960976e-07,
+   "n_changed": 47,
+   "n_negative_in_A": 47
+  },
+  {
+   "layer": 10,
+   "worst_abs": 8.228930710174609e-07,
+   "rel": 1.5795517583302132e-07,
+   "n_changed": 42,
+   "n_negative_in_A": 42
+  },
+  {
+   "layer": 11,
+   "worst_abs": 8.070254580161418e-07,
+   "rel": 1.5490937111069609e-07,
+   "n_changed": 64,
+   "n_negative_in_A": 64
+  },
+  {
+   "layer": 12,
+   "worst_abs": 1.1196692639714456e-06,
+   "rel": 2.149216729298314e-07,
+   "n_changed": 87,
+   "n_negative_in_A": 87
+  },
+  {
+   "layer": 13,
+   "worst_abs": 1.9104704733763356e-06,
+   "rel": 3.6671678274412317e-07,
+   "n_changed": 100,
+   "n_negative_in_A": 100
+  },
+  {
+   "layer": 14,
+   "worst_abs": 2.81567463389365e-06,
+   "rel": 5.404716573142858e-07,
+   "n_changed": 91,
+   "n_negative_in_A": 91
+  },
+  {
+   "layer": 15,
+   "worst_abs": 2.8311283131188247e-06,
+   "rel": 5.434380070202828e-07,
+   "n_changed": 151,
+   "n_negative_in_A": 151
+  }
+ ],
+ "entries_changed": 643,
+ "entries_explained": 643,
+ "unexplained": 0,
+ "pass": true
+}
