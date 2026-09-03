@@ -1,0 +1,138 @@
+{
+ "check": "mutation coverage: the --layer-k2 closed forms AND golden parity against upstream",
+ "origin": "SKEPTIC WP14-FOLLOWUP built the battery (7 mutations, 0 killed); WP16 added the golden-parity detector and five live-path mutations, and marked the three that edit the now-dead `sub` branch",
+ "width": 128,
+ "seed": 1000921,
+ "regen_mode": "nosub",
+ "golden_ref": "experiments\\2026-09-03_wp16_parity\\golden_ref_128x4.npz",
+ "golden_ref_sha256": "6aaa1c7648855a31e60f52002bd9d737c70c8844a7b31af4a94650d217ba5a17",
+ "golden_tol": 1e-08,
+ "rows": [
+  {
+   "mutation": "d21_coef_3_to_2",
+   "target": "the (2,1) slice's 1/3 coefficient",
+   "applied": true,
+   "detected_layer_k2": false,
+   "detected_golden": true,
+   "golden_drift": 0.001186930369472778,
+   "on_control_branch": false,
+   "detected": true
+  },
+  {
+   "mutation": "d21_drop_block_perm",
+   "target": "one of the two surviving block permutations -- ONE MATMUL CHEAPER",
+   "applied": true,
+   "detected_layer_k2": false,
+   "detected_golden": true,
+   "golden_drift": 0.0018764422157816728,
+   "on_control_branch": false,
+   "detected": true
+  },
+  {
+   "mutation": "fac3_w2_to_w1",
+   "target": "the w(2)/w(1) asymmetry -- the exact p2_slice_cost.py defect this module's docstring warns about",
+   "applied": true,
+   "detected_layer_k2": false,
+   "detected_golden": false,
+   "golden_drift": 3.616838026276607e-12,
+   "on_control_branch": true,
+   "detected": false
+  },
+  {
+   "mutation": "rebuild_3_to_2",
+   "target": "from_dstensor's `diag(S3) + 3 S21^T` rebuild",
+   "applied": true,
+   "detected_layer_k2": false,
+   "detected_golden": true,
+   "golden_drift": 0.0016297262765956845,
+   "on_control_branch": false,
+   "detected": true
+  },
+  {
+   "mutation": "drop_block2",
+   "target": "the (1,1,1) two-leg block -- the mechanism WP15 rests on",
+   "applied": true,
+   "detected_layer_k2": false,
+   "detected_golden": false,
+   "golden_drift": 3.616838026276607e-12,
+   "on_control_branch": true,
+   "detected": false
+  },
+  {
+   "mutation": "s21_sign",
+   "target": "the sign of the repeated-part subtraction",
+   "applied": true,
+   "detected_layer_k2": false,
+   "detected_golden": false,
+   "golden_drift": 3.616838026276607e-12,
+   "on_control_branch": true,
+   "detected": false
+  },
+  {
+   "mutation": "d3_half",
+   "target": "the (3,) slice",
+   "applied": true,
+   "detected_layer_k2": false,
+   "detected_golden": true,
+   "golden_drift": 0.002689666611568457,
+   "on_control_branch": false,
+   "detected": true
+  },
+  {
+   "mutation": "d21_transpose",
+   "target": "the (2,1) slice's ORIENTATION -- kappa_3[i,i,j] vs [i,j,j]",
+   "applied": true,
+   "detected_layer_k2": false,
+   "detected_golden": true,
+   "golden_drift": 0.0029471088306806457,
+   "on_control_branch": false,
+   "detected": true
+  },
+  {
+   "mutation": "rebuild_no_transpose",
+   "target": "from_dstensor's transpose on the (2,1) slice",
+   "applied": true,
+   "detected_layer_k2": false,
+   "detected_golden": true,
+   "golden_drift": 0.0013244170655089995,
+   "on_control_branch": false,
+   "detected": true
+  },
+  {
+   "mutation": "cov_out_drop_offdiag",
+   "target": "the covariance's off-diagonal block",
+   "applied": true,
+   "detected_layer_k2": true,
+   "detected_golden": true,
+   "golden_drift": 0.02979786268178326,
+   "on_control_branch": false,
+   "detected": true
+  },
+  {
+   "mutation": "metric_1_not_2",
+   "target": "convention 3 -- init_scale is 2.0 at EVERY layer here",
+   "applied": true,
+   "detected_layer_k2": false,
+   "detected_golden": true,
+   "golden_drift": 0.0020776731129643336,
+   "on_control_branch": false,
+   "detected": true
+  },
+  {
+   "mutation": "pk_no_symmetrise",
+   "target": "the within-Wick-class symmetrisation of each pK slice",
+   "applied": true,
+   "detected_layer_k2": false,
+   "detected_golden": true,
+   "golden_drift": 0.0015911295072097067,
+   "on_control_branch": false,
+   "detected": true
+  }
+ ],
+ "killed_layer_k2": 1,
+ "killed_golden": 9,
+ "live": 12,
+ "on_live_path": 9,
+ "killed_golden_on_live_path": 9,
+ "interpretation": "a mutation of the LIVE path surviving BOTH checks is a hole; a mutation of the `sub` control branch surviving is expected, because that branch is dead"
+}

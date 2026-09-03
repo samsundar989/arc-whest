@@ -391,7 +391,7 @@ def _get_pk_block(pK, b, d):
 
 
 def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
-             init_scale=2.0, last_layer=False, regen_mode="sub", probe=None):
+             init_scale=2.0, last_layer=False, regen_mode="nosub", probe=None):
     """ONE full layer -- linear step then nonlinear step -- of the regenerating
     k_max=3 SIMPLE flow, in `fnp`, at the declared dtype.
 
@@ -414,10 +414,15 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
     the regenerated `M_out` is built from, and it is the ONE line the parity
     check discriminates on:
 
+      "nosub"  DEFAULT, and the one that is CORRECT. `S3 = K[(3,)]`,
+               `S21 = K[(2,1)]` -- and `p111_3`, `p111_21`, `fac1`, `fac3`,
+               `w1_sq` are then never computed at all, because nothing reads them.
       "sub"    `S3 = K[(3,)] - p111_3`, `S21 = K[(2,1)] - p111_21`. The spelling
-               the `2.8192e-06` canary shipped with.
-      "nosub"  `S3 = K[(3,)]`, `S21 = K[(2,1)]` -- and `p111_3`, `p111_21`,
-               `fac1`, `fac3`, `w1_sq` are then never computed at all.
+               the `2.8192e-06` canary shipped with. **Retained as a named
+               control, not as an option**: on the eight `P01` networks it scores
+               `2.6890e-06` against the fix's `8.5075e-07` (`3.161x` worse, where
+               the grader measured `3.314x` on twenty other rows). Anything
+               measured with it is a measurement of the defect.
 
     Upstream (`factor_k3.py`) subtracts `pK_111.get_repeated()` from the STORED
     DS part so that `pK_111 + from_dstensor(K_ds[3])` does not double count --
@@ -663,7 +668,85 @@ MUTATIONS = [
     ("d3_half", "the (3,) slice",
      'audit.check("D3", (PQ * Q).sum(axis=1))',
      'audit.check("D3", 0.5 * (PQ * Q).sum(axis=1))'),
+    # ---- WP16: five more, all on the path the DEFAULT `nosub` mode executes.
+    # The five above that touch `p111_*` / `fac3` are on the `sub` control branch
+    # and are DEAD under the default -- see `_CONTROL_BRANCH_MUTATIONS`.
+    ("d21_transpose", "the (2,1) slice's ORIENTATION -- kappa_3[i,i,j] vs [i,j,j]",
+     'D21 = audit.check("D21", D21 * off_mask)',
+     'D21 = audit.check("D21", D21.T * off_mask)'),
+    ("rebuild_no_transpose", "from_dstensor's transpose on the (2,1) slice",
+     '"M_out", fnp.diag(S3) + 3.0 * S21.T)',
+     '"M_out", fnp.diag(S3) + 3.0 * S21)'),
+    ("cov_out_drop_offdiag", "the covariance's off-diagonal block",
+     'cov_out = audit.check("cov_out", fnp.diag(K[(2,)]) + K[(1, 1)])',
+     'cov_out = audit.check("cov_out", fnp.diag(K[(2,)]) + K[(1, 1)] * 0.0)'),
+    ("metric_1_not_2", "convention 3 -- init_scale is 2.0 at EVERY layer here",
+     "metric = float(init_scale)",
+     "metric = float(1.0)"),
+    ("pk_no_symmetrise", "the within-Wick-class symmetrisation of each pK slice",
+     "pK[ip] = (pK[ip] + pK[ip].T) * 0.5",
+     "pK[ip] = pK[ip] * 1.0"),
 ]
+
+#: Mutations that edit the `regen_mode == "sub"` branch. WP16 showed that branch
+#: is not merely wrong but DEAD in a regenerating flow -- the `(1,1,1)` block's
+#: all-distinct part is discarded at the rebuild and its repeated part cancels
+#: exactly -- so under the default these mutate code that never runs. They are
+#: kept, and labelled, because deleting them would erase the record of why
+#: `SKEPTIC WP14-FOLLOWUP` measured 0 of 7: three of its seven were mutations of
+#: work the correct program does not do at all.
+_CONTROL_BRANCH_MUTATIONS = {"fac3_w2_to_w1", "drop_block2", "s21_sign"}
+
+#: The golden reference: upstream's own torch flow at `128 x 4`, f64, on two
+#: networks, dumped by `p2_k3_parity.py --ref`. 46 KB, committed, hashed. This
+#: is what turns the battery from "what does the degenerate limit see?" into
+#: "what does PARITY WITH UPSTREAM see?" -- and parity needs torch only ONCE, at
+#: the moment the file is made.
+GOLDEN_REF = os.path.join(_ROOT, "experiments", "2026-09-03_wp16_parity",
+                          "golden_ref_128x4.npz")
+GOLDEN_REF_SHA256 = "6aaa1c7648855a31e60f52002bd9d737c70c8844a7b31af4a94650d217ba5a17"
+GOLDEN_REF_TOL = 1e-8
+
+
+def golden_drift(mod, *, tol_report=True) -> float:
+    """Worst end-to-end relative drift of `mod.k3_flow` against the golden file.
+
+    `mod` is normally this module; in `--mutation-coverage` it is a mutant copy.
+    Runs at the golden's own shape, dtype and seeds, so the comparison cannot
+    drift by being asked a different question.
+    """
+    import hashlib
+
+    import numpy as np
+
+    import flopscope as flops
+    import flopscope.numpy as fnp
+
+    raw = open(GOLDEN_REF, "rb").read()
+    got = hashlib.sha256(raw).hexdigest()
+    if got != GOLDEN_REF_SHA256:
+        raise RuntimeError(
+            f"REFUSED: the golden reference has changed on disk (sha256 "
+            f"{got[:12]} != {GOLDEN_REF_SHA256[:12]}). Regenerate it with "
+            "`p2_k3_parity.py --ref` and update GOLDEN_REF_SHA256 in the same "
+            "commit as the new file.")
+    g = np.load(GOLDEN_REF, allow_pickle=False)
+    meta = json.loads(str(g["__meta__"]))
+    from mint_provenance import canonical_mint
+
+    table = mod.load_coefs()
+    worst = 0.0
+    for i, s in enumerate(meta["seeds"]):
+        w_np, _e, _ss = canonical_mint(meta["width"], meta["depth"], int(s))
+        audit = mod.DtypeAudit(str(np.dtype(np.float64)))
+        w = [fnp.array(np.asarray(x, dtype=np.float64)) for x in w_np]
+        with flops.BudgetContext(flop_budget=100 * BUDGET, quiet=True):
+            stacked, _st = mod.k3_flow(fnp, flops, w, table, fnp.float64, audit)
+        p = np.asarray(stacked, dtype=np.float64)
+        ref = np.asarray(g[f"n{i}_means"], dtype=np.float64)
+        worst = max(worst, float(np.linalg.norm(p - ref)
+                                 / max(np.linalg.norm(ref), 1e-300)))
+    return worst
 
 
 def cmd_mutation_coverage(a) -> int:
@@ -710,35 +793,73 @@ def cmd_mutation_coverage(a) -> int:
             mod._COEFS_ARTIFACT = _COEFS_ARTIFACT
             mod.TERMS_ARTIFACT = TERMS_ARTIFACT
             args = argparse.Namespace(width=a.width, seed=a.seed, out="",
-                                      depth=DEPTH)
+                                      depth=DEPTH, regen_mode=a.regen_mode)
             import contextlib
             buf = io.StringIO()
             with contextlib.redirect_stdout(buf):
                 rc = mod.cmd_layer_k2_degeneracy(args)
             detected = (rc != 0)
+            # WP16's second detector: parity against upstream's own answer, via
+            # a committed golden file, so it needs no torch at run time.
+            try:
+                with contextlib.redirect_stdout(io.StringIO()):
+                    drift = golden_drift(mod)
+                gold = bool(drift > GOLDEN_REF_TOL)
+            except Exception as exc:                # a mutant that cannot run
+                drift, gold = float("nan"), True    # counts as detected
+                buf.write(f"golden_drift raised {exc!r}")
+            dead = name in _CONTROL_BRANCH_MUTATIONS
             rows.append({"mutation": name, "target": what, "applied": True,
-                         "detected": detected})
-            print(f"  {name:<22} {'DETECTED' if detected else 'SURVIVES '}  {what}")
+                         "detected_layer_k2": detected,
+                         "detected_golden": gold, "golden_drift": drift,
+                         "on_control_branch": dead,
+                         "detected": bool(detected or gold)})
+            tag = f"{'K' if detected else '.'}{'K' if gold else '.'}"
+            print(f"  {name:<22} {tag}  {drift:>10.3e}  "
+                  f"{'[sub-branch, DEAD by default] ' if dead else ''}{what}")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
     live = [r for r in rows if r.get("applied")]
-    killed = [r for r in live if r["detected"]]
-    print()
-    print(f"  mutation coverage of --layer-k2:  {len(killed)} / {len(live)} killed")
-    if len(killed) < len(live):
-        print("  The surviving mutations are the measure of what the")
-        print("  kappa_3 = kappa_4 = 0 limit CANNOT see. Closing it needs parity")
-        print("  against upstream at non-zero kappa_3 -- NOT_DONE step 6.")
+    on_path = [r for r in live if not r["on_control_branch"]]
+    k_k2 = [r for r in live if r["detected_layer_k2"]]
+    k_gold = [r for r in live if r["detected_golden"]]
+    k_gold_path = [r for r in on_path if r["detected_golden"]]
+    print("\n  columns: first K = killed by --layer-k2, second = killed by "
+          "golden parity")
+    print(f"  --layer-k2 (kappa_3 = 0 closed forms)     "
+          f"{len(k_k2):>2} / {len(live)} killed")
+    print(f"  golden parity vs upstream at 128 x 4      "
+          f"{len(k_gold):>2} / {len(live)} killed")
+    print(f"  ... restricted to the LIVE code path      "
+          f"{len(k_gold_path):>2} / {len(on_path)} killed")
+    if len(k_gold_path) < len(on_path):
+        print("  A mutation of the live path that BOTH checks survive is a real")
+        print("  hole and is named above.")
+    if len(k_gold) < len(live):
+        print("  The mutations marked [sub-branch] edit the `regen_mode='sub'`")
+        print("  control. WP16 showed that branch is DEAD in a regenerating flow,")
+        print("  so surviving there is correct behaviour, not a gap.")
     if a.out:
         _dump(a.out, {
-            "check": "mutation coverage of the --layer-k2 closed-form checks",
-            "origin": "SKEPTIC WP14-FOLLOWUP; seven mutations, all surviving",
-            "width": a.width, "seed": a.seed, "rows": rows,
-            "killed": len(killed), "live": len(live),
-            "interpretation": "a SURVIVING mutation is a hole in CLAIM B, not a "
-                              "pass; the number is reported so it cannot quietly "
-                              "close or quietly widen",
+            "check": "mutation coverage: the --layer-k2 closed forms AND golden "
+                     "parity against upstream",
+            "origin": "SKEPTIC WP14-FOLLOWUP built the battery (7 mutations, 0 "
+                      "killed); WP16 added the golden-parity detector and five "
+                      "live-path mutations, and marked the three that edit the "
+                      "now-dead `sub` branch",
+            "width": a.width, "seed": a.seed, "regen_mode": a.regen_mode,
+            "golden_ref": os.path.relpath(GOLDEN_REF, _ROOT),
+            "golden_ref_sha256": GOLDEN_REF_SHA256,
+            "golden_tol": GOLDEN_REF_TOL,
+            "rows": rows,
+            "killed_layer_k2": len(k_k2), "killed_golden": len(k_gold),
+            "live": len(live),
+            "on_live_path": len(on_path),
+            "killed_golden_on_live_path": len(k_gold_path),
+            "interpretation": "a mutation of the LIVE path surviving BOTH checks "
+                              "is a hole; a mutation of the `sub` control branch "
+                              "surviving is expected, because that branch is dead",
         })
     # This command REPORTS coverage; it does not fail on a low number, because
     # the number is known to be low and the fix is elsewhere.
@@ -892,7 +1013,7 @@ def cmd_layer_k2_degeneracy(a) -> int:
 
 
 def k3_flow(fnp, flops, weights, table, dtype, audit, depth=None,
-            regen_mode="sub", probe=None):
+            regen_mode="nosub", probe=None):
     """The WHOLE regenerating flow: `depth` layers, one program, one context.
 
     Input cumulants for `x ~ N(0, I)`: `K[1] = 0`, `K[2] = I`, `K[3] = 0`,
@@ -971,7 +1092,7 @@ def cmd_flow_price(a) -> int:
                     final = out["mus"][-1]
                 else:
                     stacked, st = k3_flow(fnp, flops, w, table, fnp.float32,
-                                          audit)
+                                          audit, regen_mode=a.regen_mode)
                     final = st["mu"]
             used = float(ctx.flops_used)
             ops = len(getattr(ctx, "op_log", []) or [])
@@ -1059,7 +1180,8 @@ def cmd_layer_price(a) -> int:
             warnings.simplefilter("always")
             with flops.BudgetContext(flop_budget=10 * BUDGET, quiet=True) as ctx:
                 off_mask = fnp.ones((n, n), dtype=dt) - fnp.eye(n, dtype=dt)
-                out = k3_layer(fnp, flops, W, state, table, dt, off_mask, audit)
+                out = k3_layer(fnp, flops, W, state, table, dt, off_mask,
+                               audit, regen_mode=a.regen_mode)
             used = float(ctx.flops_used)
         audit.warnings = [str(x.message)[:160] for x in caught]
         for key in ("mu", "cov", "M"):
@@ -1370,6 +1492,10 @@ def main() -> int:
     ap.add_argument("--mutation-coverage", action="store_true")
     ap.add_argument("--flow-price", action="store_true")
     ap.add_argument("--reps", type=int, default=3)
+    # WP16: the defect is reachable by name so it can be MEASURED, and the
+    # correct function is what you get by default.
+    ap.add_argument("--regen-mode", choices=("nosub", "sub"), default="nosub",
+                    dest="regen_mode")
     ap.add_argument("--todo", action="store_true")
     ap.add_argument("--width", type=int, default=WIDTH)
     ap.add_argument("--depth", type=int, default=DEPTH)
