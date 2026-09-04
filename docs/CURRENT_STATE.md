@@ -1,5 +1,132 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-04 (LATE) — THE STRATEGIST HAS RULED. NO NEW RESEARCH CONTRACTS.
+> THE `3.330x` CELL WAS PRICED AND IT DOES NOT FIT — IT IS DROPPED. THE PROGRAMME
+> IS NOW CONSOLIDATION, AND THE WRITE-UP IS PRIMARY WORK.**
+>
+> `estimator.py` untouched at **v2.6.1**. **Nothing submitted, nothing
+> designated.** `P06[..064..127]` **UNSPENT, and now permanently so.** No seed
+> block was drawn today.
+>
+> ## 1. THE ONE THING THAT IS BLOCKED ON A HUMAN
+>
+> **Samuel: the canary.** It is certified `37/37`, packaged, presented, and
+> **waiting to be submitted**. Everything downstream of it — the nomination, the
+> op work, the whole of § 3's decision tree — is downstream of one graded number.
+>
+> **Do not re-open, re-certify or modify it while it waits.** If asked what it
+> is: *public, undesignated, zero prize consequence, moves the public board from
+> about `#57` to about `#33`, and buys the per-row residual measurement that
+> everything else needs.*
+>
+> ## 2. The ruling, and what it closes
+>
+> | # | question | ruling |
+> |---|---|---|
+> | **1** | second research contract on the carried-sketch lane? | **NO.** The `3.874x` exact-both-slices ceiling settles it. Carve-out, **deployment not research**: the `3.330x` cell as built could be shipped only under a promotion-class deployment contract, and **only if priced first at the multiplier floor with `+2**24`** |
+> | **2** | `P06[..064..127]`? | **unspent** unless that deployment contract opens |
+> | **3** | `P06`'s tier | **recorded as ACTUALLY USED. Never relabelled.** `seed_blocks.py:156` registers `P06` as **DESIGN**; `CONTRACT WP20` said DECIDE; the registry is the authority and the contract's label was the defect |
+>
+> **NEW STANDING RULE, effective now — the pre-run instrument check.** Before any
+> job that scores a gate or spends a seed block: an **adversarial read that
+> traces what the code does with each object the contract names**, confirming the
+> cell answers the contract's question and not a narrower one. **It is distinct
+> from the post-run Skeptic and does not replace it.** It exists because
+> `SKEPTIC WP20` found a cell where *nothing was broken* and every correctness
+> check passed on the wrong construction. Its first binding application is the
+> next contract; today's pricing was ROUTINE-by-the-table (no gate, no block) and
+> took the post-run Skeptic instead.
+>
+> ## 3. THE `3.330x` CELL IS PRICED, AND IT IS DROPPED
+>
+> Instrument `local_sim/p2_wp20_price.py`; artifact
+> `experiments/2026-09-04_wp20_price/wp20_price.json`. Executed arithmetic,
+> flopscope 0.12, **f32**, real `BudgetContext`, live `1024 x 16`. Bar:
+> `max(0.1, (168,636,407,398 + added + 2**24) / 2**41) == 0.1`, headroom
+> **`51,249,140,941`** FLOPs — the module refuses to run if that disagrees with
+> `CONTRACT WP20`'s own figure.
+>
+> | spelling | added FLOPs | `x headroom` | |
+> |---|---:|---:|---|
+> | **`carry3_full`** — the object that measured `3.330x` | `579,970,045,440` | **`11.317`** | **OVER** |
+> | `carry3_r` — rank `192`, propagating truncated state (already less accurate) | `151,418,672,640` | **`2.955`** | **OVER** |
+> | **`floor_r`** — 3 blocks, rank `192`, `contract_W` ONLY; no slice read, no injection. **An unachievable lower bound** | `54,331,637,760` | **`1.060`** | **OVER** |
+>
+> **Largest carried rank that stays at the floor: `64`.** The ranks whose
+> accuracy was measured are `128` (`3.047x`) and `192` (`3.330x`).
+>
+> **It does not fit. Per the ruling it is DROPPED and no further contract opens.**
+> The lower bound being over is what makes this independent of implementation
+> skill: **the gap is arithmetic, not engineering.**
+>
+> **The cause is structural.** `from_dstensor` returns `(diag(S3) + 3 S21^T, I,
+> I)` — two identity legs, which is the regenerating flow's entire saving. One
+> `contract_W` on a *carried* block leaves `(W A1, 3W, W A3)`, three real
+> matrices. **Carrying is not a knob with a cost; it is a different price regime,
+> entered on the first hop.**
+>
+> **The op axis is NOT what killed it** — `+885` ops, `1.331x` the canary — which
+> is the mirror image of the residual-is-op-count finding and is why both axes
+> are metered from now on.
+>
+> **Control:** the regenerating layer bills `92.310 n^3` at f32, **exactly half**
+> WP13's published f64 `184.62 n^3`, and reconciles the canary's metered total to
+> `+1.0%`. Two numbers the module never fitted to.
+>
+> **Rule 2 is RUNNING**: an independent Skeptic was launched against the pinned
+> commit `af465fc` on this claim. **The verdict is not in as this was written.**
+> Read `experiments/LOG.md` for it before quoting anything in § 3.
+>
+> ## 4. The write-up is now PRIMARY WORK
+>
+> `docs/writeup-p2-draft.md`. **Near-final by Oct 3, final by Oct 20, due Oct 24**
+> (exactly one graded submission ID). Today:
+>
+> - **§ 7.6 is new** — the fifth route closes a *second* time, on cost, for a
+>   structural reason. It is the most transferable thing in § 7.
+> - **The abstract's cost bullet was STALE and self-contradicting** — it still
+>   stated *"a dense matmul at `4 n^3`, twice the textbook figure"*, the exact
+>   claim § 9 already lists as retracted. Replaced with the dtype-correct table in
+>   one consistent unit (f32 matmuls/layer): floor allows `6.40`, second-order
+>   `2.00`, `+` regenerating K3 `4.91`, `+` the three-generation memory `6.49`.
+> - Appendix B has a **twelfth** closed lane, the only one closed on cost.
+> - §§ 8 and 9 carry the two new process lessons.
+>
+> ## 5. Next actions, in order
+>
+> 1. **Samuel: submit the canary** (or decline). Nothing else moves until it is
+>    graded.
+> 2. **When graded, read EVERY row's residual** and apply § 6's table below.
+> 3. **Write-up** — continuous, and now the default use of a session.
+> 4. **Hardening, after the draft**: `1000+` fresh mints through the exact
+>    nominee files, determinism twin runs, the Linux memory gate, brokered `gpuq`
+>    soaks — **for both nominees**.
+> 5. **Nominations by Oct 10**, explicitly designated, never the Rules v14
+>    default. **A** = the regenerating flow (the `3.330x` cell is NOT part of it);
+>    **B** = `v2.7`. Present both to Samuel with SHAs and one paragraph each;
+>    **Samuel designates.** Buffer Oct 10–17; close **Oct 17**.
+>
+> ## 6. The graded-residual decision table, unchanged and still binding
+>
+> | graded worst-row headroom | action |
+> |---|---|
+> | **`>= 4x`** | **stop. No op work.** The uncorrected flow is nominee A as-is |
+> | **`2.5x`–`4x`** | reassociate to reach `4x`, **time-boxed `<= 4 days`**, WP16 parity gate (drift `<= 1%`, raw within noise) and a re-metered price on **every** change, then re-canary |
+> | **`< 2.5x`** | **one** time-boxed round. If a `> 40%` op cut cannot be reached without drift, **abandon the flow as a nominee** and fall back to `v2.7` + a `v2.6.1`-class diverse pair |
+>
+> **The `3.330x` branch of that table is now dead** — it was conditional on the
+> cell fitting, and it does not.
+>
+> ## 7. Standing watch, and it is the only one
+>
+> **Phase-1 winner code (`ednacob`), 30-day window closes ~Sep 30.** If it drops,
+> **cite it in the write-up's related work. Do not build on it.**
+>
+> Unchanged: AUGMENT deprioritised; carrier, output corrector, Arm L, Arm
+> M-standalone and every closed lane stay closed; thresholds in flopscope FLOPs;
+> nulls differ in **code path**, not parameter value; `artifact=` at every claim;
+> committed preflight transcripts; soaks only through `gpuq`.
+
 > **2026-09-04 — WP20 IS ANSWERED. THE CORRECTED CONSTRUCTION GIVES `3.330x`,
 > THE `k = 3` CARRY FAMILY'S CEILING IS `3.874x`, AND THE RESULT LANDS IN THE
 > PRE-REGISTERED `3`–`4x` NO-ACTION BAND. THE LANE IS NEITHER CLOSED NOR
