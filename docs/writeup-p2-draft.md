@@ -26,7 +26,7 @@
 | 4. Where the error actually is | **populated, evidence complete** | — |
 | 5. Compressing the third cumulant | **populated, evidence complete** | — |
 | 6. What an estimator may spend, and the two levers | **populated, evidence complete** (new 2026-09-02; §6.6-6.7 new 2026-09-03) | — |
-| 7. The off-diagonal lane | **populated. FIVE routes, five measured ceilings** — §7.1 memory depth, §7.2 the vector ceiling, §7.3 the matrix ceiling plus the sensitivity, §7.4 the mechanistic result and the joint `11.1x` oracle, §7.5 the carried route at `3.33x` against a family ceiling of `3.87x` (new 2026-09-04, independently audited and the audit changed the answer) | — |
+| 7. The off-diagonal lane | **populated. FIVE routes, five measured ceilings** — §7.1 memory depth, §7.2 the vector ceiling, §7.3 the matrix ceiling plus the sensitivity, §7.4 the mechanistic result and the joint `11.1x` oracle, §7.5 the carried route at `3.33x` against a family ceiling of `3.87x` (new 2026-09-04, independently audited and the audit changed the answer), §7.6 the deployment price — the only route that works is also the one the budget forbids, structurally (new 2026-09-04) | — |
 | 8. Method and protocol | **populated** | — |
 | 9. What we got wrong | **populated — fifteen entries, and this list grows** | — |
 | 10. Result and nomination | **PENDING** | end of Phase 2; Samuel's gate |
@@ -36,10 +36,12 @@
 ## Working title
 
 *What a compute-metered leaderboard actually rewards: a score identity, an
-amplification law, and eleven closed lanes in white-box activation estimation*
+amplification law, and twelve closed lanes in white-box activation estimation*
 
-**Alternative, if §7 lands positively:** *Regenerating the third cumulant from its
-own read-slices: K3-class accuracy at the multiplier floor*
+**Alternative, and the one we currently prefer** — it names the positive result
+and the negative one in the same breath, which is what the paper actually is:
+*Regenerating the third cumulant from its own read-slices: a floor-resident
+estimator, and why the memory it would need cannot be bought*
 
 ---
 
@@ -66,12 +68,27 @@ lanes we closed with a measured reason for each.
    consequence is a method: **convert a lane's oracle ceiling into an accuracy
    requirement before building the lane.** One sensitivity sweep does it, and it
    would have retired two of our lanes before we spent 96 fresh networks on them.
-3. **A cost budget in the only unit that matters.** The metering package bills a
-   dense `(n, n) @ (n, n)` matmul at `4 n^3`, twice the textbook figure. Restated:
-   at the multiplier floor, an entire `1024 x 16` estimator is allowed
-   **3.2 dense matmuls per layer**. A second-order Gaussian closure spends 2.0. A
-   third-order flow that regenerates its cumulant from its own read-slices spends
-   5.0. That single sentence prices the whole design space.
+3. **A cost budget in the only unit that matters — and that unit includes the
+   dtype.** A counted-FLOP figure is not well-formed without the precision it was
+   counted in: the metering package bills the textbook `2 n^3` for a dense
+   `(n, n) @ (n, n)` matmul and then scales every operation by a per-dtype rate,
+   `2.0` at `float64` and `1.0` at `float32`. We got this wrong twice in two days
+   in opposite directions (§9) before measuring the rate table itself. Restated
+   in one consistent unit — dense `float32` matmuls per layer, all four rows
+   measured on the meter rather than modelled:
+
+   | | matmuls/layer |
+   |---|---:|
+   | what the multiplier floor allows a `1024 x 16` estimator | **`6.40`** |
+   | a second-order Gaussian closure, `float32` | `2.00` |
+   | + regenerating the third cumulant from its own two read-slices | `4.91` |
+   | + *keeping* three generations of what that flow discards | `6.49` — **over** |
+
+   **The third order is affordable and the second order was never the cheap
+   option it looked like**; the memory that would make the third order accurate
+   is not affordable, by `1.06x`, and §7.6 shows the reason is structural. That
+   table prices the whole design space, and none of it was true until the dtype
+   was in the unit.
 
 We also report a negative that we think is the most useful thing in the paper: a
 Gaussian closure is an *internally consistent approximation, not a set of
@@ -1127,6 +1144,84 @@ verification can see that — only an adversarial reader who asks what the code
 does with each object it was handed. We now write the check into the protocol.
 
 
+### 7.6 And the route that works is the one we cannot afford — a structural reason, not an engineering one *(new 2026-09-04)*
+
+**Evidence: CONFIRMED.** `local_sim/p2_wp20_price.py` →
+`experiments/2026-09-04_wp20_price/wp20_price.json`; executed arithmetic in the
+metering package at `float32`, inside a real budget context, at the live
+`1024 × 16` shape. No fitted constants, no seeds, no held-out data — a price.
+
+§7.5 closed on accuracy: the carried route reaches `3.87×` against a `10×`
+requirement. That would have been the end of it. But the `3.33×` operating point
+was close enough to a decision boundary that we priced it before dropping it,
+and the price turned out to say something the accuracy number does not.
+
+**The measured cell is a ceiling in cost as well as in accuracy, and we had not
+noticed.** It reads the three-generation memory from a *separate offline
+computation* and hands it to the flow. A shipped estimator has no offline
+computation. It has to carry those three generations through its own forward
+pass, and the carrying is the cost.
+
+**What makes the regenerating flow cheap is a structural accident, and it does
+not survive being carried.** §6 established that at the multiplier floor an
+entire estimator is allowed about `6.4` dense matmuls per layer at `float32`, and
+that a flow which regenerates the third cumulant from its own two read-slices
+spends about `5`. The reason it is only `5` is that the regenerated object's
+three tensor legs are `(M, I, I)` — **two of them are exactly the identity**.
+Contracting with the layer's weight matrix is free on an identity leg, and the
+slice read has two distinct block permutations instead of three.
+
+A *kept* block does not have that shape. The block a layer generates is
+`(A₁, 3I, A₃)`; after a single contraction with the weight matrix it is
+`(W A₁, 3W, W A₃)` — three ordinary matrices, no identity left. **The saving is
+not reduced by carrying. It is gone, permanently, after one layer.** Carrying is
+not a knob with a cost; it is a different price regime, entered on the first hop,
+at twice the contraction cost and one-and-a-half times every slice read, for each
+generation carried.
+
+| what is priced | added counted FLOPs | × the spare budget |
+|---|---:|---:|
+| the object that measured `3.33×`, carried honestly | `579,970,045,440` | **`11.32×`** |
+| the same at rank 192, propagating compressed state *(already less accurate)* | `151,418,672,640` | **`2.96×`** |
+| **three generations, contraction only — no slice read, no injection, an implementation that could not work** | `54,331,637,760` | **`1.06×`** |
+
+That third row is the one that settles it. It prices an implementation that does
+not exist and could not function — it propagates the memory and never reads it —
+and it is *still over budget*. **The gap is arithmetic, not engineering.** There
+was no cleverer spelling left for us to find: concatenating the three generations
+into one wider tensor bills identically, and sharing the weight contraction
+across them bills identically.
+
+Sweeping the carried rank puts a number on how far away it is: the largest rank
+that stays at the multiplier floor is **64**, and the two ranks whose accuracy we
+actually measured are `128` (`3.05×`) and `192` (`3.33×`). Everything affordable
+is less accurate than something that had already failed.
+
+**Two things in this generalise past our benchmark.**
+
+**One: price against the headroom, not against the budget.** Our own standing
+notes record that a thin SVD of a `1024 × 1024` matrix costs `26 n³`, which we
+had written down as `0.16%` of the budget — a number that reads like nothing. But
+an estimator sitting *at* the multiplier floor has only `2.3%` of the budget left
+to spend, and against that the same call is **`54.5%` of everything it has**. A
+rate quoted against the total is smallest exactly where it is fatal. Every price
+in a promotion decision belongs in units of what is actually free.
+
+**Two: which cost axis binds is a property of the design, not of the
+competition.** §6.6 is the story of us discovering that under this Phase's scoring
+the arithmetic is free and the thing that can actually kill a submission is an
+*operation count*, because that is what the wall-time cliff is paid in. Within a
+day that had hardened into an assumption. The carried design is killed by
+arithmetic while adding only `33%` more operations — a load the wall-time margin
+would have absorbed comfortably. Had we metered only the axis that bit us last
+time, this would have read as affordable, and we would have built it.
+
+So the fifth route closes twice, on two independent walls, and the second wall is
+the more interesting one: **the only correction that recovers what the flow
+throws away is unaffordable for the same structural reason that makes the flow
+cheap in the first place.** The identity legs that buy us a third-order flow at
+second-order prices are exactly what a memory cannot have.
+
 ---
 
 ## 8. Method and protocol — what we would tell someone starting this task
@@ -1157,6 +1252,23 @@ does with each object it was handed. We now write the check into the protocol.
 7. **Independent falsification, in a context that never saw the builder's
    reasoning.** Six passes; six found something real; one *retracted a negative*
    and reopened a lane we had closed on a measurement of the wrong method.
+8. **And a second, different check, *before* the run rather than after it: an
+   adversarial read that walks the contract's own nouns against the code.** Not
+   "is this correct" — every correctness check we had passed on the cell that
+   cost us a lane (§7.5) — but "does this code manipulate the object the
+   hypothesis names?" It is the only check that can see a correct implementation
+   of the wrong construction, and it costs minutes. We adopted it as a standing
+   rule the day after it would have saved us sixty-four networks.
+9. **Meter every cost axis the scoring rule contains, every time, even the one
+   that did not bind last time.** Which axis binds is a property of the design,
+   not of the competition (§7.6). We learned that the wall-time axis was the
+   dangerous one, and eleven days later were nearly wrong-footed by a design that
+   the wall-time axis would have waved through and the arithmetic axis killed
+   by `11x`.
+10. **Quote every price against the budget that is actually free.** A cost that
+   is `0.16%` of the total allowance is `54.5%` of what an estimator sitting at
+   the multiplier floor has left. Rates quoted against the total read smallest
+   exactly where they are fatal.
 
 ---
 
@@ -1241,6 +1353,19 @@ does with each object it was handed. We now write the check into the protocol.
   *second* time in a week: the previous one swapped a prediction between slices.
   The lesson is narrow and mechanical: **write every threshold in the unit the
   gate will be scored in, in the same sentence.**
+- **We priced a design against the wrong denominator for a month and did not
+  notice, because the number looked harmless.** Our standing notes recorded a
+  thin `1024 x 1024` SVD at `0.16%` of the FLOP budget. It is `54.5%` of the
+  spare budget of an estimator that is already sitting on the multiplier floor,
+  which is the only kind of estimator we would ever have considered adding it to.
+  We caught it while writing §7.6 and only because the decision happened to land
+  on a boundary. **A rate quoted against the total is smallest exactly where it
+  is fatal.** (§7.6)
+- **We generalised "the binding cost is the operation count" from one design to
+  the project, in a day.** It is a property of the design. The carried memory in
+  §7.6 is killed by arithmetic at `11.3x` while adding `33%` operations — a
+  wall-time load our margin would have absorbed. Had we metered only the axis
+  that bit us last time, we would have built it. (§7.6)
 - **Four consecutive null controls could not do their job.** The most recent
   compares a deterministic call with itself: the perturbation branch is skipped
   when the perturbation is zero, so the control returns exactly zero and *cannot*
@@ -1268,12 +1393,14 @@ organisers' published weights, an append-only seed ledger, an executable
 promotion gate, and a certification battery. *(Decision pending on what is
 open-sourced and when — `RESEARCH_NOTES.md` §2g is private.)*
 
-## Appendix B — the eleven closed lanes, with the measured reason for each
+## Appendix B — the twelve closed lanes, with the measured reason for each
 
 Every row was closed on a measurement, not on intuition, and every row's number
-is reproducible from the artifact named. Three of the eleven were closed *twice*,
+is reproducible from the artifact named. Three of the twelve were closed *twice*,
 because the first closure was wrong and an independent pass caught it — those are
-marked, because the correction is the more useful record.
+marked, because the correction is the more useful record. The twelfth is the only
+one closed on **cost** rather than on accuracy, and it is the one we would send a
+reader to first.
 
 | # | lane | measured reason it closed | evidence |
 |---|---|---|---|
@@ -1288,6 +1415,7 @@ marked, because the correction is the more useful record.
 | 9 | **exact sparse / equality-aware K3** ("W-EFF") | `1.073 B` under the official meter against a pre-registered `<= 0.35 B` screen — fails by `3.07x` | `experiments/2026-08-28_weff/` |
 | 10 | **rank-capping** the factored third cumulant | accuracy falls faster than cost; at rank `n` the object is `14x` closer to the second-order closure than to the third-order one. It is coordinate pruning, not compression (§5). **Closed twice** — the first closure claimed "for good" and was softened to a measured negative | P-B, ORACLE-1/2/2b |
 | 11 | **late / age-windowed K3** | every window arm's provable score floor is `2.1x`-`4.7x` worse than the shipped file, and `89%` of a window's error is its cheap prefix, not the missing memory | `experiments/2026-08-28_window/` |
+| 12 | **carrying** the discarded third-cumulant block for three generations | closed **twice, on two independent walls**. Accuracy: keeping both halves *exactly* — the ceiling on the whole family — is `3.87x` against a `10x` requirement, and the operating point is `3.33x` (§7.5). Cost: carried honestly it needs `11.3x` the estimator's entire spare budget, and even a deliberately unachievable lower bound that propagates the memory and never reads it is `1.06x` over (§7.6). The largest carried rank the budget allows is `64`; the ranks we measured are `128` and `192` | WP20, `experiments/2026-09-03_wp20/c2_carry3_hybrid_P05.json`, `experiments/2026-09-04_wp20_price/wp20_price.json` |
 
 Two further lanes are *not* in this table because they are not closed, and saying
 so is part of the honesty: **query-directed / adjoint K3** had its kill
