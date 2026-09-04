@@ -1,5 +1,29 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-04 (INTERIM MARKER — WP20 HAS RUN AND ITS CONCLUSION IS SUSPENDED.
+> Read `experiments/LOG.md` from the bottom before acting on anything below
+> this block, which predates it.)**
+>
+> `estimator.py` untouched at **v2.6.1**. **Nothing submitted, nothing
+> designated.** `P06[..064..127]` **UNSPENT.**
+>
+> | | |
+> |---|---|
+> | `CONTRACT WP20` scored cells, 64 `P06` nets | `carry3_sketch:192` = **`2.003x`**, `carry3_sketch:128` = `1.799x`, both `passed False` through `decide(gate=4.0)` |
+> | the untruncated `k = 3` carry (a selftest-verified ceiling) | **`3.659x`** |
+> | **`SKEPTIC WP20`** | **PROVISIONAL.** The scored cell **never used the carried `(3,)` slice** — it re-derived the diagonal from truncation leakage while `D3` sat unused. The cell is a **mis-operationalisation** of the contract's own hypothesis |
+> | **status of "the accuracy lane is closed"** | **SUSPENDED.** The falsifier fired on a handicapped cell. *"Below `3.0x` by a deductive argument"* is **WITHDRAWN** — the sketch family is non-monotone in rank |
+> | pending | `gpuq 238`: `carry3_hybrid` (keep `D3`, truncate only `D21`) at the live shape, 16 `P05` nets, **DESIGN tier, scores no gate** |
+>
+> **Every measured number stands** and was reproduced by the Skeptic from raw
+> rows; what is withdrawn is the conclusion drawn from them. **The allocation
+> does not change either way**: the kill line is `>= 10x` and the ceiling is
+> `3.659x`.
+>
+> **DO NOT propagate WP20 wording into `docs/writeup-p2-draft.md` until `238`
+> lands and the mechanism is restated.** The write-up's § 7.4 currently names
+> WP20 as a pre-registered open question, which is still accurate.
+
 > **2026-09-03 (LATE) — THE CANARY IS `30/30`, CERTIFIED `36/36`, AND
 > PRESENTED. THE STRATEGIST'S TWO RULINGS ARE IN FORCE, THE ALLOCATION TO
 > OCT 10 IS FIXED, AND `CONTRACT WP20` — THE LAST ACCURACY QUESTION THIS
