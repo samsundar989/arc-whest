@@ -1,28 +1,70 @@
 # CURRENT_STATE.md — read this first
 
-> **2026-09-04 (INTERIM MARKER — WP20 HAS RUN AND ITS CONCLUSION IS SUSPENDED.
-> Read `experiments/LOG.md` from the bottom before acting on anything below
-> this block, which predates it.)**
+> **2026-09-04 — WP20 IS ANSWERED. THE CORRECTED CONSTRUCTION GIVES `3.330x`,
+> THE `k = 3` CARRY FAMILY'S CEILING IS `3.874x`, AND THE RESULT LANDS IN THE
+> PRE-REGISTERED `3`–`4x` NO-ACTION BAND. THE LANE IS NEITHER CLOSED NOR
+> REOPENED.**
 >
 > `estimator.py` untouched at **v2.6.1**. **Nothing submitted, nothing
 > designated.** `P06[..064..127]` **UNSPENT.**
 >
-> | | |
+> ## 1. The disposition, which `CONTRACT WP20` wrote down in advance
+>
+> | | threshold | measured | verdict |
+> |---|---:|---:|---|
+> | gate `G-WP20-E2E` | `>= 4.0x` | `2.003x` scored (`P06`), `3.330x` corrected (`P05`) | **FAIL, both** |
+> | falsifier | `< 3.0x` | `3.330x` corrected | **does NOT fire** |
+>
+> > *"The gate fails and the falsifier does not fire. Pre-registered
+> > disposition: nothing is promoted, no op work is spent on it, and the lane is
+> > not reopened by me. It becomes a strategist decision with a measured number
+> > attached."*
+>
+> **The earlier "closed for good" is formally WITHDRAWN.** So is *"below `3.0x`
+> by a deductive argument"*. Both are recorded as errata in `experiments/LOG.md`
+> rather than edited away.
+>
+> ## 2. What the audit changed, and why it mattered
+>
+> `SKEPTIC WP20` found the scored cell **never used the carried `(3,)` slice** —
+> it re-derived the diagonal from truncation leakage while `D3` sat unused two
+> lines above. That mechanism came from WP19, where the diagonal genuinely was
+> not available. **Keeping it is worth `2.154x -> 3.330x`, paired `t = -20.59`,
+> better on `16/16` networks**, and costs an `n`-vector the run had already
+> computed. The Skeptic's response surface predicted `3.18x`; measured `3.330x`.
+>
+> ## 3. What is ESTABLISHED, and it is stronger than the closure would have been
+>
+> **No member of the `k = 3` carry family reaches `4x`.** The untruncated
+> carry — both slices exact, a selftest-verified ceiling — is **`3.874x`** on 16
+> fresh networks at the live shape. **The kill line is `>= 10x`.**
+>
+> | route | measured ceiling |
 > |---|---|
-> | `CONTRACT WP20` scored cells, 64 `P06` nets | `carry3_sketch:192` = **`2.003x`**, `carry3_sketch:128` = `1.799x`, both `passed False` through `decide(gate=4.0)` |
-> | the untruncated `k = 3` carry (a selftest-verified ceiling) | **`3.659x`** |
-> | **`SKEPTIC WP20`** | **PROVISIONAL.** The scored cell **never used the carried `(3,)` slice** — it re-derived the diagonal from truncation leakage while `D3` sat unused. The cell is a **mis-operationalisation** of the contract's own hypothesis |
-> | **status of "the accuracy lane is closed"** | **SUSPENDED.** The falsifier fired on a handicapped cell. *"Below `3.0x` by a deductive argument"* is **WITHDRAWN** — the sketch family is non-monotone in rank |
-> | pending | `gpuq 238`: `carry3_hybrid` (keep `D3`, truncate only `D21`) at the live shape, 16 `P05` nets, **DESIGN tier, scores no gate** |
+> | select a subspace of what the flow holds | `1.45`–`2.10x` **worse** |
+> | select by `Sigma`'s dominant range | `= r/n` — **chance** |
+> | **predict** `E3` from carried scalars | held out `0.1002`, ceiling `0.2575` |
+> | **predict** `E21` from 29 equivariant terms | held out `0.1436`, ceiling `0.1665` |
+> | **carry** three generations, both slices exact | **`3.874x`** |
 >
-> **Every measured number stands** and was reproduced by the Skeptic from raw
-> rows; what is withdrawn is the conclusion drawn from them. **The allocation
-> does not change either way**: the kill line is `>= 10x` and the ceiling is
-> `3.659x`.
+> The carried route is **the only one that recovers `E3` at all** (`0.79` against
+> `0.10` and `0.14`). **The limit is the DEPTH OF THE MEMORY** — not the
+> compression, not the predictability. Three generations of exact memory buys
+> under `4x` against a `10x` requirement.
 >
-> **DO NOT propagate WP20 wording into `docs/writeup-p2-draft.md` until `238`
-> lands and the mechanism is restated.** The write-up's § 7.4 currently names
-> WP20 as a pre-registered open question, which is still accurate.
+> **And `carry3_msketch` is DESTRUCTIVE** — `0.781x`, worse than not correcting,
+> `E3` recovery `-1.702`. Two slices read separately must be carried separately.
+> WP10's precedent recurring in a place nobody had looked.
+>
+> ## 4. Next actions
+>
+> 1. **Samuel: the canary.** Still the highest-value item on the board — the
+>    nomination, the op work and Ruling 2(a)'s whole decision tree are
+>    downstream of one graded number.
+> 2. **A Strategist Packet is drafted** (`docs/STRATEGIST_PACKET_2026-09-04.md`)
+>    on three questions this session cannot answer for itself.
+> 3. Write-up § 7.5 carries the carried-route result.
+> 4. `P06[..064..127]` stays unspent unless the strategist says otherwise.
 
 > **2026-09-03 (LATE) — THE CANARY IS `30/30`, CERTIFIED `36/36`, AND
 > PRESENTED. THE STRATEGIST'S TWO RULINGS ARE IN FORCE, THE ALLOCATION TO

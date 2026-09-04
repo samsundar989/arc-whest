@@ -32173,3 +32173,165 @@ has to be right.
 4. **An artifact must state its own provenance or it will state someone
    else's.** Four hardcoded strings made a 64-network `P06` lane closure
    self-describe as a `P01`/WP14 run.
+
+---
+
+# 2026-09-04 — **WP20-B: the corrected construction gives `3.330x`. The lane does NOT close — it lands in the pre-registered `3`–`4x` NO-ACTION BAND. And no member of the family reaches `4x`.**
+
+`gpuq 238`, **16 nets `P05[..144..159]`**, `1024 x 16`, f32, seven cells, one
+paired run. Artifact `experiments/2026-09-03_wp20/c2_carry3_hybrid_P05.json` —
+**the first run in this module whose JSON states its own provenance**, because
+the four hardcoded WP14/P01 literals the Skeptic found are now parameters.
+
+**DESIGN tier. This run SCORES NO GATE.** It is a construction diagnostic on
+`P05`, the block where construction questions belong. `decide()` appears below
+as a diagnostic and its `passed` field carries no authority here.
+
+## The table
+
+| cell | mean drift | paired `x` | min | max | `E21` rec | `E3` rec |
+|---|---:|---:|---:|---:|---:|---:|
+| `none` | `9.4593e-07` | `1.000` | | | | |
+| `carry3_null:192` | `8.8567e-07` | `1.068` | 0.98 | 1.20 | `0.151` | `-0.038` |
+| **`carry3_msketch:192`** — truncate `M` itself | `1.2114e-06` | **`0.781`** | 0.52 | 0.95 | `0.719` | **`-1.702`** |
+| `carry3_sketch:192` — **the WP20 scored cell** | `4.3905e-07` | `2.154` | 1.73 | 2.59 | `0.718` | `0.312` |
+| **`carry3_hybrid:128`** — keep `D3` | `3.1049e-07` | **`3.047`** | 2.41 | 3.57 | `0.664` | `0.794` |
+| **`carry3_hybrid:192`** — keep `D3` | `2.8407e-07` | **`3.330`** | 2.72 | 3.92 | `0.718` | `0.793` |
+| `carry3_exact` — untruncated | `2.4415e-07` | **`3.874`** | 3.22 | 4.29 | `0.799` | `0.792` |
+
+`mse_full_anchor = 4.0047e-08`; `carry3_hybrid:192` leaves drift at **`7.09x`**
+the uncapped flow's own error. GT-noise floor `1.155e-09`.
+
+**The scored cell reads `2.154x` on these 16 `P05` nets against `2.003x` on the
+64 `P06` nets** — the same cell, two disjoint blocks, `7%` apart. That is the
+cross-block consistency check, and it passes.
+
+## The Skeptic was right, and its prediction was nearly exact
+
+| | |
+|---|---|
+| `SKEPTIC WP20`'s response-surface prediction for the diagonal-preserving cell | **`3.18x`** |
+| measured | **`3.330x`** |
+
+**Keeping the carried diagonal is worth `2.154x -> 3.330x`, paired `t = -20.59`,
+better on `16/16` networks.** It costs `n` numbers a layer — an object the run
+had already computed and the scored cell threw away.
+
+**And the recovery table shows exactly where it came from.** The hybrid's `E3`
+recovery is `0.7931`, effectively the untruncated carry's own `0.7919`: keeping
+`D3` recovers `E3` **to the carry's ceiling**, while the handicapped cell got
+`0.312`. `E21` is unchanged at `0.718` in both, because both truncate `D21`
+identically. **The `E3` collapse was never truncation. It was the cell.**
+
+## `carry3_msketch` is DESTRUCTIVE, and that is a finding
+
+Truncating `M = diag(D3) + 3 D21^T` itself — the construction that looks most
+like "sketch the carried tensor at rank `r`" — gives **`0.781x`**, i.e. **worse
+than not correcting at all**, with `E3` recovery **`-1.702`**. `M` is dominated
+by its off-diagonal, so a rank-`r` truncation of it spends its budget on `D21`
+and returns a diagonal that is actively wrong.
+
+**This is WP10's precedent recurring** — injecting truth in flight *can* be
+destructive — in a place nobody had looked, and it is the second time this
+project has measured it. It also settles the Skeptic's question 3: of the three
+constructions, the faithful-looking one is the worst, and **the right way to
+carry a tensor whose two slices are read separately is to carry them
+separately.**
+
+## THE DISPOSITION, and it is the one the contract pre-registered
+
+| `CONTRACT WP20` | threshold | scored cells (`P06`, DECIDE) | corrected cell (`P05`, DESIGN) |
+|---|---:|---:|---:|
+| gate `G-WP20-E2E` | `>= 4.0x` | `2.003x` — **FAIL** | `3.330x` — **would also fail** |
+| falsifier | `< 3.0x` | `2.003x` — **fires** | `3.330x` — **does NOT fire** |
+
+**The contract wrote this exact case down in advance:**
+
+> *"The `3.0x`–`4.0x` band, stated in advance so it cannot be argued afterwards.
+> The gate fails and the falsifier does not fire. Pre-registered disposition:
+> **nothing is promoted, no op work is spent on it, and the lane is not reopened
+> by me.** It becomes a strategist decision with a measured number attached."*
+
+**That is the disposition. The accuracy lane is NOT closed for good** — the
+earlier closure is formally withdrawn — **and it is also not reopened. Nothing
+is promoted. No op work follows from it.**
+
+## What IS established, and it is stronger than the closure would have been
+
+**No member of the `k = 3` carry family reaches `4x`.** The untruncated carry —
+`D3` and `D21` both exact, a selftest-verified ceiling on the whole family — is
+**`3.874x`** on 16 fresh networks at the live shape. Every cheaper member is
+below it. **The kill line is `>= 10x`.**
+
+| route | measured ceiling |
+|---|---|
+| select a subspace of what the flow holds (5 rules) | `1.45`–`2.10x` **worse** than not correcting |
+| select by `Sigma`'s dominant range | containment `= r/n` — **chance** |
+| **predict** `E3` pointwise from carried scalars | held out `0.1002`, **ceiling `0.2575`** |
+| **predict** `E21` from 29 equivariant terms | held out `0.1436`, **ceiling `0.1665`** |
+| **carry** three generations, exactly, both slices | **`3.874x`** |
+| what `10x` needs (WP19, oracle `E21` at `r = 192`) | `E3` near-exact -> `18.873x` |
+
+**That is a better negative result than "the falsifier fired."** It says the
+carried route *works* — it is the only route that recovers `E3` at all
+(`0.79` against `0.10` and `0.14` for the learned maps) — **and that three
+generations of exact memory still buys under `4x` against a `10x` requirement.**
+The limit is the depth of the memory, not the compression and not the
+predictability.
+
+## Corrections to the WP20 result entry, carried here rather than edited there
+
+The entry two above stands as the record of what was measured. These are its
+errata:
+
+1. *"The accuracy lane is CLOSED FOR GOOD"* — **WITHDRAWN.** The disposition is
+   the `3`–`4x` band's.
+2. *"below `3.0x` by a deductive argument"* — **WITHDRAWN**, as recorded in
+   `SKEPTIC WP20`.
+3. Knowledge delta #2, *"low-rank truncation is not slice-neutral… a statement
+   about linear algebra rather than about this flow"* — **REPLACED**: the `E3`
+   collapse was the cell discarding `D3`. The true statement is *"a rank-`r`
+   truncation of a diagonal-free matrix cannot recover the diagonal that was
+   removed from it, so a carried tensor whose slices are read separately must
+   carry them separately — and truncating the combined `M` is worse than either
+   (`0.781x`, destructive)."*
+4. *"the one route that gets `E3` right cannot be compressed"* — **WRONG.** It
+   compresses fine: `E21` at rank `192` costs `0.08` of recovery, and `E3` is an
+   `n`-vector that needs no compression at all. What it cannot do is reach `4x`.
+
+## Predictions
+
+`SKEPTIC WP20` predicted `3.18x` from a response surface fitted to 512
+observations; measured `3.330x`, an error of `4.7%`. **I made no numbered
+prediction for this run** — it was written and queued in the twenty minutes
+after the audit landed, as a direct follow-up to a finding, and inventing
+predictions after seeing the smoke that motivated it would have been
+theatre. **The smoke (`256 x 6`, `carry3_hybrid:64` at `12.485x`) is disclosed
+in `SKEPTIC WP20` and it is why this run exists.** This run scores no gate,
+which is what makes that acceptable.
+
+## Scope
+
+* **`P05`, DESIGN tier, 16 nets. It scores no gate and cannot.** The gate is
+  written on `P06` with pre-registered cells, and `carry3_hybrid` was not one.
+* **`P06[..064..127]` IS NOT TOUCHED**, and is not spent to re-score this.
+  Whether it should be is a strategist question, not mine — I built the cell.
+* Torch lab, not the `fnp` port. `1024 x 16` only. Ceilings, not operating
+  points: `carry3_exact` still truncates after exact propagation.
+* **No cost was measured.** `G-WP20-FLOP` and `G-WP20-OPS` remain **NOT
+  REACHED**.
+
+## Knowledge delta
+
+1. **Keeping a carried `n`-vector is worth `1.55x` end-to-end** (`2.154 ->
+   3.330`, `16/16`, `t = -20.59`). The cheapest thing in the design was the
+   thing being thrown away.
+2. **The `k = 3` carry family's ceiling is `3.874x`**, measured on 16 fresh
+   networks with both slices exact. Against a `10x` requirement that is the
+   number that matters, and it does not depend on any compression choice.
+3. **Truncating the combined `M` is destructive** (`0.781x`, `E3` recovery
+   `-1.702`). Two slices read separately must be carried separately.
+4. **A response surface fitted to a slice's own cells predicted an unmeasured
+   cell to `4.7%`.** That is a cheap and underused way to ask "what would the
+   adjacent construction have done?" before spending a job on it — and here it
+   was an auditor, not the builder, who thought to.

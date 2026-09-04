@@ -26,7 +26,7 @@
 | 4. Where the error actually is | **populated, evidence complete** | — |
 | 5. Compressing the third cumulant | **populated, evidence complete** | — |
 | 6. What an estimator may spend, and the two levers | **populated, evidence complete** (new 2026-09-02; §6.6-6.7 new 2026-09-03) | — |
-| 7. The off-diagonal lane | **populated, and the lane is CLOSED four ways on measured ceilings** — §7.1 memory depth, §7.2 the vector ceiling, §7.3 the matrix ceiling plus the sensitivity that explains all of it, §7.4 the complete mechanistic result and the joint `11.1x` oracle (new 2026-09-03) | one pre-registered open question, §7.4's last paragraph, reported either way |
+| 7. The off-diagonal lane | **populated. FIVE routes, five measured ceilings** — §7.1 memory depth, §7.2 the vector ceiling, §7.3 the matrix ceiling plus the sensitivity, §7.4 the mechanistic result and the joint `11.1x` oracle, §7.5 the carried route at `3.33x` against a family ceiling of `3.87x` (new 2026-09-04, independently audited and the audit changed the answer) | — |
 | 8. Method and protocol | **populated** | — |
 | 9. What we got wrong | **populated — fifteen entries, and this list grows** | — |
 | 10. Result and nomination | **PENDING** | end of Phase 2; Samuel's gate |
@@ -1018,22 +1018,113 @@ truncation. We also checked the failure is not a *harmful* correction rather
 than an absent one: the injection is better than no correction on `8/8` networks
 at three ranks, so what we built is not wrong, it is not there.
 
-**What this predicts, and what we are testing next.** If the information is
+**What this predicts, and what we did about it.** If the information is
 destroyed rather than hidden, then the only way to have it is to **keep** it —
 and keeping is a different problem from predicting, with a different cost. We
 measured how deep the memory runs (§7.1): three generations of the discarded
 block carry `0.73` of its energy at the live shape, and the increments
-(`0.34 / 0.23 / 0.16`) say the tail is diffuse rather than long. Whether a
-rank-limited *carried* sketch of those three generations clears the same bar is
-a pre-registered open question at the time of writing, with its gate, its
-falsifier and its predictions committed before the data exists. **We report it
-either way**, and if it fails, the sentence above is the paper's result.
+(`0.34 / 0.23 / 0.16`) say the tail is diffuse rather than long. **§7.5 builds
+that flow and measures it.** It is the only one of our five routes that
+recovers the vector half at all — and it reaches `3.87×` where we needed `10×`.
 
 **The one caveat that travels with all of it.** Every joint number in this
 section uses an *oracle*: the true slices, truncated. They are ceilings, not
 operating points, and we have been careful throughout not to quote a ceiling as
 a result — an earlier draft of ours did exactly that, cited a single-slice cell
 as if it were the joint one, and had to be withdrawn (§9).
+
+
+
+### 7.5 The fifth route: *keeping* what the flow discards, and the ceiling that closes the section *(new 2026-09-04)*
+
+**Evidence: CONFIRMED**, pre-registered, and independently audited — the audit
+changed the answer, which is why it is reported here in full.
+
+§7.4 ended on an open question: if the carried state does not *determine* the
+discarded object, the only way to have it is to **keep** it. Keeping is a
+different problem from predicting, with a different cost, and §7.1 had measured
+that three generations of the discarded block carry `0.73` of its energy.
+
+So we built it: a flow that keeps the last three generations, compresses the
+matrix half to rank 192 of 1024, and injects both halves back. Pre-registered
+with its gate, its falsifier and its predictions committed before any data
+existed, and with one commitment that turned out to matter — **we said we would
+report it either way.**
+
+**The first answer was wrong, and an independent auditor found out why.** Our
+scored cell reconstructed the *vector* half from leakage in the compressed
+*matrix* half, rather than simply keeping the vector — a mechanism we had
+imported from an earlier experiment where the vector genuinely was unavailable.
+Here it costs `n` numbers and we already had it. The auditor spotted that the
+carried vector sat unused two lines above the code that discarded it, fitted a
+response surface to the run's own cells to predict what the corrected version
+would give (`3.18×`), and told us not to publish until we had measured it.
+
+| construction, rank 192 of 1024 | end-to-end |
+|---|---:|
+| no correction | `1.00×` |
+| a random rank-192 sketch (null) | `1.07×` |
+| **compress the combined object and read both halves back off it** | **`0.78×` — worse than nothing** |
+| reconstruct the vector from the matrix's leakage *(our first answer)* | `2.15×` |
+| **keep the vector, compress only the matrix** | **`3.33×`** |
+| keep both exactly — the ceiling on the whole family | **`3.87×`** |
+
+Measured `3.33×` against the auditor's predicted `3.18×`. Keeping the vector is
+worth `2.15× → 3.33×`, better on **16 of 16** networks, `t = −20.6`, for an
+object that costs `n` numbers a layer.
+
+**Three things in that table are worth more than the headline.**
+
+**One: the compression is not the problem.** Compressing the matrix half to
+one-eighth rank costs `0.08` of its recovery. The vector needs no compression at
+all. Our first answer looked like a story about low-rank approximation destroying
+a diagonal, and it was a story about our own cell throwing that diagonal away.
+
+**Two: the obvious construction is actively harmful.** Compressing the *combined*
+object — the thing that most deserves the name "a rank-`r` sketch of what we
+discarded" — lands at `0.78×`, **worse than making no correction at all**, with
+the vector half recovered at `R² = −1.70`. The combined object is dominated by
+its matrix part, so a rank-`r` budget spends itself there and returns a vector
+that is confidently wrong. Two quantities that are read separately must be
+carried separately. This is the second time in this project that injecting
+*correct* information mid-flow has made the answer worse, and we would not have
+believed it the first time either.
+
+**Three, and it is the section's real conclusion: the ceiling is `3.87×`, and it
+is a ceiling on the whole family.** That cell keeps both halves *exactly* — no
+compression, no estimation, no fit. It is what a three-generation memory can
+possibly be worth. Our requirement was `10×`.
+
+So the carried route is the only one of the five that **works** — it is the only
+route that recovers the vector half at all, at `R² = 0.79` against `0.10` and
+`0.14` for the two learned maps — and it still falls short by a factor of three.
+**The binding limit is the depth of the memory, not the compression and not the
+predictability.** A fourth generation is worth about `0.10` of the energy on our
+measurements, and the end-to-end response is convex in quality, so buying the
+missing factor of three this way would mean carrying most of the history — which
+is the uncompressed object we were trying to avoid.
+
+**The five ceilings, which is what we would want a reader to take away:**
+
+| route | ceiling |
+|---|---|
+| select a subspace of what the flow already holds | `1.45×`–`2.10×` **worse than not correcting** |
+| select using the covariance's dominant range | containment `= r/n` — **chance** |
+| predict the vector from carried per-neuron scalars | `R² = 0.26` |
+| predict the matrix from 29 equivariant terms | `R² = 0.17` |
+| **keep three generations of both, exactly** | **`3.87×` end-to-end** |
+| *(what `10×` needs: the vector near-exact)* | *`18.9×`* |
+
+**What we would tell the next person, and it is a different lesson from §7.4's.**
+Our pre-registration fixed the gate, the falsifier, the statistic, the block and
+the predictions — everything except *whether the cell we wrote implemented the
+hypothesis we stated*. It did not, and every check we had passed anyway: the
+instrument self-test passed, the in-flight algebra probe passed at `3e-08`, the
+null sat at chance, an independent cross-run anchor agreed to `0.5%`, and the
+promotion statistic was clean on 64 paired networks. **Nothing was broken.** The
+cell was a correct implementation of the wrong construction, and no amount of
+verification can see that — only an adversarial reader who asks what the code
+does with each object it was handed. We now write the check into the protocol.
 
 
 ---
