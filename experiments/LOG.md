@@ -31688,3 +31688,142 @@ the worse answer.
    greps would have caught it. The commit message asserted it; nothing executed
    it; and the transcript that was supposed to prove the change was safe
    contained the file's own name marked `??`.
+
+---
+
+# 2026-09-04 — **WP20 PREP: `c(r)` is frozen, and the live-shape smoke says the CEILING of the ceiling is `3.200x`. Recorded BEFORE `P06` is touched.**
+
+Two jobs, neither of them the experiment. `gpuq 227` is the `P05` calibration
+the contract requires; `gpuq 228` is a live-shape smoke on an **out-of-block**
+seed. **Neither scores a gate, neither spends `P06`, and both are recorded here
+before the `P06` job is submitted** so that the order is in git rather than in
+anyone's account of it.
+
+## 1. `gpuq 227` — the `P05` calibration, and a mechanistic result it produced for free
+
+8 nets, `P05[..136..143]`, `1024 x 16`, f32, ~20 s a net. Artifact
+`experiments/2026-09-03_wp20/calib3_P05.json`, sha256 `bac8cc611a1de16e...`,
+**finalized against the claim** (`test_seed_ledger` back to `66/66`).
+
+**The frozen scalars, now literals in `CARRY3_C`:**
+
+| `r` | `c(r)` | WP19's `c` on the TRUE `E21` | frozen? |
+|---:|---:|---:|---|
+| `128` | **`0.7704606496370676`** | `0.703` | **YES** |
+| `192` | **`1.09501658640386`** | `1.019` | **YES** |
+| `256` | `1.5483929734790964` | `1.505` | **NO — deliberately** |
+
+**`r = 256` is measured and deliberately NOT frozen into the code.** `CONTRACT
+WP15` puts the affordability horizon at `r = 192`, and `G-DIAG-E2E` already
+refused *in writing* to move a gate to `256` because `256` passes. Leaving it
+out of `CARRY3_C` makes `_parse_cells` **REFUSE** a `carry3_sketch:256` cell, so
+the horizon is enforced by the code and not by anyone's restraint. Its value is
+recorded here and nowhere executable.
+
+**The three `c(r)` reproduce WP19's to within `10%`, on different networks and
+against a different underlying object** — WP19 fitted against a truncation of
+the TRUE `E21`; this fits against a truncation of the CARRIED difference. That
+is an independent corroboration of WP19's finding C5, which was one
+measurement and is now two.
+
+### The result that was not asked for: the carry recovers BOTH slices equally well
+
+| pre-layer | `E21` recovered | `E3` recovered |
+|---:|---:|---:|
+| 1–3 | `1.0000` | `1.0000` |
+| 4 | `0.9892` | `0.9895` |
+| 6 | `0.8996` | `0.8982` |
+| 8 | `0.8120` | `0.8105` |
+| 10 | `0.7339` | `0.7360` |
+| 12 | `0.6539` | `0.6594` |
+| 14 | `0.5753` | `0.5776` |
+| 15 | `0.5431` | `0.5194` |
+
+**`E3` tracks `E21` to within `0.03` at every depth**, mean `0.8012` against
+`0.8054`. *(Pre-layers 1–3 are `1.0` trivially: a `k = 3` window at pre-layer
+`<= 3` IS the uncapped flow, because there was never an older generation to
+discard. Over `GATE_LAYERS` (4–14) the `E21` mean is `0.776`, against
+`G-M-DEPTH`'s `0.73` on `P01` — different networks, consistent.)*
+
+**This is the hypothesis's own mechanism, confirmed at the ceiling.** Arm L
+needed two separate maps and got `0.10` and `0.14`. A carry needs no map at all
+and gets both slices at the *same* quality, because it is estimating **one
+tensor** rather than two functions. Prediction **P3 HOLDS at the ceiling** and
+holds far more strongly than I wrote it.
+
+**And the carry's memory decays smoothly and steeply with depth**: `0.99` at
+pre-layer 4 to `0.54` at pre-layer 15. `G-M-DEPTH` measured the *aggregate*;
+this is the curve, and the curve is the more useful object.
+
+## 2. `gpuq 228` — the live-shape smoke, and it is the number that matters
+
+**One network, seed `90000000401`, OUT OF EVERY BLOCK. `1024 x 16`, f32.** It
+was queued to de-risk the `P06` job — *"do not spend a decision block on an
+unvalidated cell at the live shape"* — and it validated the cell. It also
+returned this:
+
+| cell | drift | vs uncorrected |
+|---|---:|---:|
+| `none` | `6.9019e-07` | `1.000x` |
+| `carry3_null:192` | `6.1988e-07` | `1.113x` |
+| **`carry3_sketch1:128`** | `4.4379e-07` | **`1.555x`** |
+| **`carry3_sketch1:192`** | `3.9917e-07` | **`1.729x`** |
+| **`carry3_exact`** — the UNTRUNCATED `k = 3` carry | `2.1571e-07` | **`3.200x`** |
+| `e3svd:192` — WP19's oracle, as a cross-run anchor | `3.9055e-08` | `17.672x` |
+
+**The anchor validates the run.** `e3svd:192` reads `17.672x` here against
+WP19's `18.873x` on 8 different `P05` networks. Same cell, different networks,
+consistent — so the harness is measuring what it measured before.
+
+**And then the problem.** `carry3_exact` is the **untruncated** carry. **No
+sketch of any rank can beat it**, and the contract's own nesting says so:
+`carry3_exact >= carry3_sketch:192 >= carry3_sketch:128`. On this network it is
+**`3.200x`**.
+
+| `CONTRACT WP20` | threshold | this network |
+|---|---:|---:|
+| `G-WP20-E2E` gate | `>= 4.0x` | ceiling `3.200x` — **below the gate** |
+| falsifier | `< 3.0x` | sketch at `r = 192`: **`1.729x`** — **below the falsifier** |
+
+**`n = 1`, out of block, `c = 1` on the sketch cells.** It is not the answer and
+it is not scored. But it is the strongest single piece of evidence the slice
+has, and it points at the falsifier.
+
+## 3. What I am doing about it, and what I am NOT doing
+
+**I am running the `P06` job as contracted, unchanged.** Reasons, in order:
+
+1. **`n = 1`.** WP19's per-net spread on comparable cells ran `8.81`–`12.98`
+   around a mean of `10.57`. A single network cannot close a lane.
+2. **The falsifier closes the accuracy lane PERMANENTLY.** That deserves the
+   pre-registered, correctly-tiered measurement it was written for, not a
+   deduction from one out-of-block network. This repository has already
+   retracted one lane closure made on the wrong measurement
+   (`SKEPTIC`, 2026-08-21).
+3. **Abandoning a committed contract immediately after a smoke agrees with my
+   own recorded prediction is exactly the shape of confirmation bias the
+   pre-registration exists to prevent.** I predicted `3.0x` and `P(< 3x) ~ 0.50`
+   before any of this ran; a smoke agreeing with me is not a licence to stop
+   measuring.
+4. **It costs one job and no extra block.** `P06[..000..063]` was reserved for
+   this and Arm L — Arm L is dead, so there is no competing claimant. And the
+   contracted cell list **already contains `carry3_exact`**, so the `P06` run
+   produces the ceiling on 64 correctly-tiered networks *inside the same job*.
+
+**What I am NOT doing:** not changing the cell list, not changing the ranks, not
+changing the gate, not changing the falsifier, not re-fitting `c`, and not
+substituting an out-of-block ceiling argument for the scored measurement. **The
+contract stands exactly as committed at `40e88fe`.**
+
+**What this smoke DOES change is the honest expectation, and it is written down
+before the data:** I now expect `G-WP20-E2E` to fail and I think the falsifier
+is more likely than not to fire. My pre-registered `P(< 3x)` was `0.50`; after
+this smoke I would say `~0.80`. **The gate and the falsifier are unchanged; only
+my credence moved, and it moved on the record.**
+
+## 4. Ledger and gate state
+
+`test_seed_ledger` is back to **`66/66`** — the open claim is finalized against
+the artifact's hash, so `preflight` steps 7 and 9 clear, and
+`test_enforcement_labels`' `64/66` clears with them. That red was the
+claim-then-finalize protocol working, exactly as `CURRENT_STATE` said it was.

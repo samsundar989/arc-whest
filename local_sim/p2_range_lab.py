@@ -741,10 +741,21 @@ def cmd_contain(a) -> int:
 
 #: `CONTRACT WP20`. The `(3,)` scalar, FITTED ON `P05` and frozen here as a
 #: literal before `P06` was touched -- `P05`'s registry entry is the one place
-#: this repository permits tuning, and `P06`'s forbids it. Filled by
-#: `local_sim/p2_range_lab.py calib3` and committed in its own commit, whose git
-#: timestamp precedes the `P06` job. NEVER edited after that commit.
-CARRY3_C = {}          # r -> c, populated by the calibration commit
+#: this repository permits tuning, and `P06`'s forbids it.
+#:
+#: Source: `gpuq 227`, 8 nets `P05[..136..143]`, `1024 x 16`, f32,
+#: `experiments/2026-09-03_wp20/calib3_P05.json`
+#: (sha256 `bac8cc611a1de16e...`, finalized against the claim). Pooled least
+#: squares over 8 networks x 15 pre-layers. **NEVER edited after this commit**,
+#: whose git timestamp precedes the `P06` job.
+#:
+#: `r = 256` was ALSO measured, at `c = 1.5483929734790964`, and is DELIBERATELY
+#: NOT FROZEN HERE. `CONTRACT WP15` puts the affordability horizon at `r = 192`,
+#: and `G-DIAG-E2E` already refused, in writing, to move a gate to `r = 256`
+#: because `256` passes. Leaving it out of this dict makes `_parse_cells`
+#: REFUSE a `carry3_sketch:256` cell, so the horizon is enforced by the code
+#: rather than by anyone's restraint. The value is recorded in the LOG.
+CARRY3_C = {128: 0.7704606496370676, 192: 1.09501658640386}
 
 
 def _parse_cells(specs):
