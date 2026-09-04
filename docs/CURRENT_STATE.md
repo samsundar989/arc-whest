@@ -1,5 +1,183 @@
 # CURRENT_STATE.md — read this first
 
+> **2026-09-03 (LATE) — THE CANARY IS `30/30`, CERTIFIED `36/36`, AND
+> PRESENTED. THE STRATEGIST'S TWO RULINGS ARE IN FORCE, THE ALLOCATION TO
+> OCT 10 IS FIXED, AND `CONTRACT WP20` — THE LAST ACCURACY QUESTION THIS
+> PROJECT WILL ASK — IS PRE-REGISTERED WITH ITS INSTRUMENT BUILT AND ITS FIRST
+> JOB QUEUED.**
+>
+> `estimator.py` untouched at **v2.6.1** (`00240eb1`). **Nothing submitted,
+> nothing designated.** `P06` unspent. Contract `40e88fe` precedes every WP20
+> number that will exist.
+>
+> ## 1. RULING 1 EXECUTED — invariant 9's stale item is replaced, and the canary is green
+>
+> The red item was `d_k / max(scale, 1e-30) < 1e-6`: a max-absolute deviation
+> against a fixed bar about `10x` float32 epsilon, written when the K2 flow had
+> an f64 backbone. The live design runs the covariance backbone in **f32 on
+> purpose** — that is what puts `C/B = 0.0767` on the `0.1` multiplier floor —
+> and `SKEPTIC WP18-C` measured curing it at **exactly `2.0x` billing**, i.e.
+> `1.53x` worse score. **The item did not ask a candidate to be correct. It
+> asked it to be expensive.**
+>
+> It is replaced by the criterion the invariant's *surviving* clause already
+> used, extended to the two deviations the old gate merely **printed**: every
+> row's drift, in MSE units, `<= 1%` of the candidate's own raw MSE.
+>
+> | deviation | old | new |
+> |---|---|---|
+> | row `k` | `max/scale < 1e-6` | `mse <= 1%` of raw MSE |
+> | **all other rows** | **printed, NOT gated** | `mse <= 1%` of raw MSE |
+> | **final row** (the scored one) | `mse < 1.4e-8` | unchanged in value, restated |
+>
+> **A net widening in one place and a net tightening in two.** `d_other` on the
+> canary is `1.91e-06` — *larger* than the `d_k` the old gate rejected on — and
+> nothing was looking at it. The default denominator is the frozen `1.4e-6`, so
+> **the bar on the shipped file did not move**; `ARC_WHEST_RAW_MSE` is clamped
+> so an override can only ever tighten.
+>
+> **`local_sim/test_edge_cases_inv9.py` is the standing proof that the item
+> still bites, and it is a gate, not a comment.** Six deliberate positional
+> defects — a transposed index, a swapped reduction axis, an off-by-one on the
+> depth axis, a basis on the wrong side, an adjacent-position swap, a
+> closest-valued-position swap — are still **REJECTED at `5.3e4x`–`3.9e7x` the
+> bar**. Two equivariant controls are still **accepted**, because invariant 9
+> tests equivariance and not accuracy, and a battery in which everything fails
+> proves nothing about specificity. The **detection floor is measured, not
+> asserted**: a positional distortion above **`~0.04%` of a row** is caught,
+> checked at `0.5x` and `2.0x` that amplitude.
+>
+> Writing the battery found **two errors in my own test before it found any in
+> the invariant**: a value-selected swap is equivariant by construction and
+> therefore invisible by design, and the first floor probe injected a second,
+> larger defect and rejected at half the claimed floor. Both are recorded in the
+> file rather than quietly fixed.
+>
+> | run | result |
+> |---|---|
+> | `edge_cases.py estimator_wp18_canary.py` | **`30/30`** |
+> | the same with `ARC_WHEST_RAW_MSE=8.5075e-07` (**stricter**, the canary's own raw MSE) | **`30/30`** |
+> | `edge_cases.py estimator.py` (v2.6.1) | **`30/30`**, row-k `1e-31` |
+> | `scripts/preflight.ps1 -Full` | **`16/16` GREEN** |
+> | `certify_candidate.py --candidate estimator_wp18_canary.py` | **`36/36` — CANDIDATE CERTIFIED** |
+>
+> **Rule 2 is running, and its verdict is NOT in.** An independent Skeptic was
+> launched against pinned commit `40e88fe` with the contract, the diff, the
+> evaluation protocol and the raw artifact paths, and told in as many words that
+> the contract already contains a written commitment to revert if the amendment
+> turns out to be a hole. **Nothing here is to be treated as audited until that
+> verdict is recorded below this line.**
+>
+> Transcripts committed under `experiments/2026-09-03_inv9_amendment/`.
+> Predictions 1, 2, 3 and 5 held; **prediction 4 held in direction but not in
+> magnitude** — I said margins `>= 1e5x` and the weakest is `5.3e4x`.
+>
+> ## 2. THE CANARY IS PRESENTED, AND EVERY BAR ELEMENT IS ON AN ARTIFACT
+>
+> | | | artifact |
+> |---|---|---|
+> | archive | `experiments/2026-09-03_wp18_canary/submission_wp18_canary.tar.gz`, `13,858` bytes | |
+> | archive sha256 | `e40f6b4de6a10cdcef74b729cc8dbc5eae9a930976e53ba37bee78904fb99960` | |
+> | inner `estimator.py`, LF (the shipped bytes) | `252c3c947f130e75b71bdb976293af964ed93a377bfeb7fa8403e5e76a4acddc` | |
+> | contents | `estimator.py` (`31,196` B) + `manifest.json` (`529` B) | |
+> | **certify** | **`36/36`**, invariant section `30/30` | `certify_guarded.json` |
+> | **Linux `8,192` MB gate** | `13/13`, `VmPeak 2266.8 MB`, both controls behaving | `linux_memory_gate.json` |
+> | **local failures** | **`0 / 100`**, residual exhausted `0` | `official_residual.json` |
+> | **multiplier** | `C/B = 0.0766870` -> **`0.100000`, the floor**, with `+2**24` | `certify_guarded.json` |
+> | **local worst-row headroom** | **`2.23x`** against a `>= 1.5x` canary bar | `official_residual.json` |
+>
+> **Two caveats that travel with the headroom number rather than being smoothed
+> over.** The `2.23x` was measured on snapshot `22db10a` at **`2,646`
+> operations**, and the guarded file bills **`2,674`** (`+1.17%`). The guarded
+> file's OWN graded-path read — `certify` § 10, mini split — is
+> **`204.45 ms -> 2.0x`**. Both clear `1.5x`; **neither clears `4x`, which is the
+> NOMINATION bar and is deliberately not what this is.**
+>
+> **The label is exact: *residual-measurement canary; nomination pending graded
+> telemetry*. Submitting is Samuel's. No agent runs `whest submit` and no agent
+> designates.**
+>
+> ## 3. RULING 2 — the allocation, fixed
+>
+> **(a) When the canary's graded telemetry returns, read EVERY row's residual.**
+>
+> | graded worst-row headroom | action |
+> |---|---|
+> | **`>= 4x`** | **stop. No op work.** It is nominee A as-is |
+> | **`2.5x`–`4x`** | reassociate to reach `4x`, **time-boxed `<= 4 days`**, WP16 parity gate (drift `<= 1%`, raw within noise) and a re-metered price on **every** change, then re-canary |
+> | **`< 2.5x`** | **one** time-boxed round. If a `> 40%` op cut cannot be reached without drift, **abandon the flow as a nominee** and fall back to `v2.7` + a `v2.6.1`-class diverse pair |
+>
+> **(b) The write-up is a co-equal `$20k` objective and becomes real work from
+> ~Sep 21**, continuous before. Added today: **§7.4**, which states what
+> §§7.1–7.3 add up to as one mechanistic result — the two discarded objects are
+> one object; corrected jointly at rank `128` of `1024` the end-to-end drift
+> falls **`11.1x`**, so the lane is blocked by **neither rank nor cost**; and
+> neither slice is predictable from the carried state above `0.15` held out,
+> both at ceilings within `0.03`–`0.16` of their own basis. **A regenerating
+> cumulant flow's carried state does not determine what that flow discards** —
+> the information is *destroyed* by the regeneration, not *compressed* by it.
+> §6.8 already carried the graded 100-row result; §7.3 already carried the
+> four-way closure and the `E3` convexity table.
+>
+> **(c) Nominations by Oct 10, explicitly designated.** **A** = the best
+> certified flow with graded worst-row `>= 4x`. **B** = `v2.7`. Close **Oct 17**;
+> write-up **Oct 24**.
+>
+> ## 4. CONTRACT WP20 — pre-registered, instrument built, first job queued
+>
+> **The question:** does a **CARRIED** three-generation sketch of the discarded
+> all-distinct block, rank `r ∈ {128, 192}`, recover `E3` as well as `E21`, and
+> what is the joint end-to-end drift reduction on fresh networks?
+>
+> **It is not a reopening.** Arm M was killed as a **standalone
+> generate-and-contract** design on a `1`–`2`-step memory gate; Arm L died
+> **predicting** the correction from carried state. A carried sketch is neither,
+> and WP19's own findings motivate it — `E3` convexity (`5.06x` from `E3`'s
+> quality alone), the joint `11.1x` oracle, and *"state does not determine what
+> it discards"*.
+>
+> **What it actually measures is a CEILING, and the contract says so in
+> advance.** The cell truncates *after* an exact three-layer propagation, where
+> a deployable design would propagate the truncated state. So:
+> **a ceiling that fails closes the lane strictly; a ceiling that passes
+> promotes nothing and buys a second contract.**
+>
+> | | |
+> |---|---|
+> | **gate** | joint end-to-end **`>= 4.0x`** paired arithmetic through `decide()`; FLOPs `<= 51,249,140,941` added (`0.02330 B`, the repository's own `C/B` rather than the directive's `0.0236`); ops within the nomination residual bar the canary returns — **and that clause is UNSCORABLE until the telemetry exists, recorded `UNSCORED`, never `passed`** |
+> | **falsifier** | `< 3.0x`, or residual-infeasible -> **the accuracy lane closes for good.** Strict, because the measured cell bounds the deployable one |
+> | **the `3`–`4x` band** | pre-registered: gate fails, falsifier does not fire, **nothing is promoted, no op work, and I do not reopen it.** A strategist call with a number attached |
+> | **block** | `P06[..000..063]`. `P06[..064..127]` was Arm L's and **stays unspent** — re-purposing a reserved half inside the contract that would benefit is the move this protocol exists to prevent |
+> | **my prediction** | **`3.0x`, and I expect the gate to FAIL** (`P(>= 4x) ~ 0.15`, `P(< 3x) ~ 0.50`). Recorded deliberately: a contract written to be passed is not evidence |
+>
+> **The `(3,)` scalar is fitted on `P05` and FROZEN before `P06` is touched.**
+> `P06`'s charter says *"No tuning of any kind here"* and that binds; `P05`'s
+> says tuning is permitted there and nowhere else. `gpuq 227` is that
+> calibration (8 nets, `P05[..136..143]`, claimed on the host). Its two
+> constants go into `CARRY3_C` **in their own commit**, whose git timestamp
+> precedes the `P06` job. `_parse_cells` **REFUSES** a `carry3_sketch` cell for
+> which no frozen `c(r)` exists.
+>
+> **Two development smokes are DISCLOSED in the contract** (`256 x 4`,
+> `256 x 6`, `f64`, out-of-block seeds, no gate scored). They earned their
+> disclosure: they **corrected the null clause before it was committed** — a
+> random rank-`r` sketch recovers `r/n` *by chance*, measured `0.2407` against
+> `0.250`, which is WP14's containment result reappearing, and the original
+> clause would have voided a valid run — and they **revised prediction P3 down**,
+> since `E3` recovery trails `E21` recovery badly at `c = 1` (`0.525` vs
+> `0.880`).
+>
+> ## 5. Next actions, in order
+>
+> 1. **Samuel: submit the canary** (or decline). Everything on the nomination
+>    path is downstream of the graded per-row residual it buys.
+> 2. `gpuq 227` -> freeze `c(128)`, `c(192)` -> commit -> submit the `P06` job.
+>    Answer due **~Sep 14**.
+> 3. Write-up continues; it is now a co-equal objective, not a trailing one.
+> 4. `estimator.py` stays at v2.6.1 until a promotion contract exists.
+
+
+
 > **2026-09-03 (END OF SESSION) — ARM L IS DEAD ON ITS OWN FALSIFIER. THE
 > CORRECTION LANE IS CLOSED FOUR WAYS ON MEASURED CEILINGS. THE CANARY IS
 > `29/30` AND PACKAGED. THE KILL LINE'S CONDITION IS MET THREE WEEKS EARLY, AND
