@@ -1,0 +1,123 @@
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:470: RuntimeWarning: overflow encountered in multiply
+  prod = f if prod is None else prod * f
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:479: RuntimeWarning: overflow encountered in multiply
+  term = prod * coef
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:470: RuntimeWarning: invalid value encountered in multiply
+  prod = f if prod is None else prod * f
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:480: RuntimeWarning: invalid value encountered in add
+  acc = term if acc is None else acc + term
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:487: RuntimeWarning: overflow encountered in multiply
+  M_out = fnp.diag(K[(3,)]) + 3.0 * K[(2, 1)].T
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\numpy\_core\_methods.py:52: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:343: RuntimeWarning: invalid value encountered in matmul
+  cov_pre = W.T @ cov @ W                                   # 2 matmuls
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:344: RuntimeWarning: invalid value encountered in matmul
+  P = W.T @ M                                               # 1 matmul
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:373: RuntimeWarning: invalid value encountered in multiply
+  C11 = cov_pre * off_mask
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:374: RuntimeWarning: invalid value encountered in matmul
+  D21 = ((2.0 * (PQ @ Q.T) + ((Q * Q) @ P.T)) / 3.0) * off_mask  # 2 matmuls
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:444: RuntimeWarning: invalid value encountered in multiply
+  term = term * (wk if d == 1 else (wk[:, None] if axis == 0 else wk[None, :]))
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:445: RuntimeWarning: invalid value encountered in add
+  pK[ip] = term if ip not in pK else pK[ip] + term
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:402: RuntimeWarning: overflow encountered in multiply
+  PK1 = PK1 + u4[None, :] * W4
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\numpy\_core\_methods.py:52: RuntimeWarning: overflow encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:342: RuntimeWarning: invalid value encountered in matmul
+  mu_pre = W.T @ mu
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:490: RuntimeWarning: invalid value encountered in scalar add
+  float(lap["(4,)"]["terms"][0]["coef"])
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:428: RuntimeWarning: overflow encountered in multiply
+  term = f if term is None else term * f
+candidate: tau=n/a  target C/B=n/a  chunk=n/a
+
+1. NORMAL CASE
+  he 256x32                          ok   shape (32, 256)  range [0.000e+00, 5.121e+00]  final mean 0.6469  deterministic=True
+
+2. DEGENERATE PRUNING (whole layers pushed below tau)
+  layer 5 scaled 0.02                ok   shape (32, 256)  range [0.000e+00, 1.318e+03]  final mean 0.0000  deterministic=True
+  layer 5 scaled 0.001               ok   shape (32, 256)  range [0.000e+00, 1.032e+07]  final mean 0.0000  deterministic=True
+  layer 7 identically zero           ok   shape (32, 256)  range [0.000e+00, 4.343e+00]  final mean 0.0000  deterministic=True
+
+3. EXTREME DYNAMIC RANGE
+  layer 12 scaled 100x               ok   shape (32, 256)  range [0.000e+00, 5.106e+02]  final mean 67.7106  deterministic=True
+  layer 12 scaled 1e-3               ok   shape (32, 256)  range [0.000e+00, 1.946e+08]  final mean 0.0000  deterministic=True
+  layer 12 scaled 1e4                ok   shape (32, 256)  range [0.000e+00, 5.106e+04]  final mean 6771.0646  deterministic=True
+  layer 3 mean-shifted (all on)      ok   shape (32, 256)  range [0.000e+00, 1.590e+02]  final mean 15.5079  deterministic=True
+
+4. SEED EXTREMES (the rng contract)
+  seed 0                             ok   shape (32, 256)  range [0.000e+00, 5.307e+00]  final mean 0.5714  deterministic=True
+  seed 1                             ok   shape (32, 256)  range [0.000e+00, 5.307e+00]  final mean 0.5714  deterministic=True
+  seed 2147483647                    ok   shape (32, 256)  range [0.000e+00, 5.307e+00]  final mean 0.5714  deterministic=True
+  seed 9223372036854775807           ok   shape (32, 256)  range [0.000e+00, 5.307e+00]  final mean 0.5714  deterministic=True
+  seed 12345678901234567890          ok   shape (32, 256)  range [0.000e+00, 5.307e+00]  final mean 0.5714  deterministic=True
+
+5. SHAPE GENERALITY (calibration must disable itself off-width)
+  depth 2 x width 256                ok   shape (2, 256)  range [6.966e-03, 1.983e+00]  final mean 0.5480  deterministic=True
+  depth 8 x width 128                ok   shape (8, 128)  range [0.000e+00, 2.745e+00]  final mean 0.3152  deterministic=True
+  depth 32 x width 64                ok   shape (32, 64)  range [0.000e+00, 4.317e+00]  final mean 0.2103  deterministic=True
+  depth 4 x width 256                ok   shape (4, 256)  range [0.000e+00, 2.966e+00]  final mean 0.5808  deterministic=True
+  depth 64 x width 256               ok   shape (64, 256)  range [0.000e+00, 4.646e+00]  final mean 0.5073  deterministic=True
+
+6. BUDGET EDGES (the analytic fallback path)
+  budget 0                           ok   shape (32, 256)  range [0.000e+00, 4.648e+00]  final mean 0.4043  deterministic=True
+  budget 1                           ok   shape (32, 256)  range [0.000e+00, 4.648e+00]  final mean 0.4043  deterministic=True
+  budget 1e7 (below min N)           ok   shape (32, 256)  range [0.000e+00, 4.648e+00]  final mean 0.4043  deterministic=True
+  budget 1e9                         ok   shape (32, 256)  range [0.000e+00, 4.648e+00]  final mean 0.4043  deterministic=True
+  budget 10x                         ok   shape (32, 256)  range [0.000e+00, 4.648e+00]  final mean 0.4043  deterministic=True
+
+7. GRADER-ARRAY IMMUTABILITY (weights must be untouched)
+  input weights unmodified           ok
+
+8. LAYER-1 CLOSED FORM  (exact: ||W1[:,j]|| / sqrt(2*pi))
+  256x32                             max rel err 1.773e-16   ok
+  128x8                              max rel err 1.644e-16   ok
+  64x4                               max rel err 1.631e-16   ok
+  256x2                              max rel err 1.724e-16   ok
+
+9. PERMUTATION EQUIVARIANCE  (hidden-layer relabelling)
+  bar: every row MSE <= 1% of raw MSE = 8.508e-09   [candidate raw MSE 8.5075e-07]
+  256x32 permute layer 7             row-k 7.15e-07  other-rows 1.91e-06  final 1.43e-06
+                                     MSE row-k 2.21e-14  other 1.07e-13  final 1.38e-13
+                                     worst 1.38e-13 = 0.0000% of raw MSE   ok
+  256x32 permute layer 20            row-k 7.15e-07  other-rows 1.67e-06  final 1.67e-06
+                                     MSE row-k 2.82e-14  other 3.99e-14  final 1.53e-13
+                                     worst 1.53e-13 = 0.0000% of raw MSE   ok
+  128x8 permute layer 3              row-k 3.58e-07  other-rows 6.85e-07  final 6.85e-07
+                                     MSE row-k 6.04e-15  other 8.11e-15  final 1.91e-14
+                                     worst 1.91e-14 = 0.0000% of raw MSE   ok
+  256x32 permute layer 30            row-k 2.98e-07  other-rows 5.96e-07  final 5.96e-07
+                                     MSE row-k 5.30e-15  other 4.88e-16  final 1.51e-14
+                                     worst 1.51e-14 = 0.0000% of raw MSE   ok
+
+10. BUDGET MONOTONICITY  (the failsafe ladder)
+  budget                0  n/a        valid=True  non-decreasing=True
+  budget                1  n/a        valid=True  non-decreasing=True
+  budget        1,000,000  n/a        valid=True  non-decreasing=True
+  budget       10,000,000  n/a        valid=True  non-decreasing=True
+  budget      100,000,000  n/a        valid=True  non-decreasing=True
+  budget    1,000,000,000  n/a        valid=True  non-decreasing=True
+  budget   10,000,000,000  n/a        valid=True  non-decreasing=True
+  budget   27,200,000,000  n/a        valid=True  non-decreasing=True
+  budget  272,000,000,000  n/a        valid=True  non-decreasing=True
+  budget 2,720,000,000,000  n/a        valid=True  non-decreasing=True
+  every rung degrades, none throws   ok
+  sample-count monotonicity          NOT PROVABLE -- this candidate exposes no _log2_samples
+
+11. DETERMINISM  (3x bit-identity + fresh instance)
+  256x32                             3x identical=True  fresh-instance identical=True  ok
+  128x8                              3x identical=True  fresh-instance identical=True  ok
+
+12. SEED-BLOCK HYGIENE
+  live blocks disjoint               ok   (25 decision blocks + vault block 20,260,806,000..20,260,806,499)
+
+13. GT-NOISE FLOOR  (what counts as signal)
+  vault GT samples/MLP               33,554,432
+  vault GT-noise MSE (mean)          1.575e-09  (0.113% of the 1.4e-6 decision signal)
+  vault touches                      1
+  noise < 10% of signal              ok
+
+30/30 checks passed

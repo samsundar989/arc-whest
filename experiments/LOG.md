@@ -31126,3 +31126,382 @@ verdict is not an amendment, it is a different instrument).
   quantity** is unaffected by relabelling at the 1%-of-raw-MSE level, which is
   the property the invariant exists to check.
 
+
+---
+
+# 2026-09-03 — **PRE-REGISTRATION (Rule 1): CONTRACT WP20 — the CARRIED three-generation sketch, and the last accuracy question this project will ask**
+
+**Class: STRATEGIC.** It spends a decision block (`P06[..000..063]`), it decides
+whether an accuracy lane stays open, and its result is intended to reach the
+write-up and possibly a nomination. Committed **before any data exists**;
+`estimator.py` is untouched at **v2.6.1** (`00240eb1`).
+
+**Authority: the strategist's WP20 directive, 2026-09-03.** Predictions below
+are mine — Samuel delegated them explicitly in this instruction — and they are
+recorded before the run.
+
+## Question
+
+**Does a CARRIED, rank-`r` sketch of the discarded all-distinct block, kept over
+three generations, recover `E3` as well as it recovers `E21`, and what is the
+JOINT end-to-end drift reduction on fresh networks?**
+
+Rank `r ∈ {128, 192}`, live shape `1024 x 16`.
+
+## Why this is NOT a reopening of a closed lane
+
+Two things are closed and neither of them is this:
+
+| what is closed | on what | why this is different |
+|---|---|---|
+| **Arm M**, killed 2026-09-03 | a **standalone generate-and-contract** design, on a `1`–`2`-step memory gate (`G-M-DEPTH`: `0.34 / 0.57 / 0.73` at `k = 1/2/3`, gate written on two ages needing `0.70`) | WP20 carries **three** generations and it is not standalone — it is a component inside the existing flow. The `k = 3` number that killed the two-age design is the number that **motivates** this one |
+| **Arm L**, dead 2026-09-03 on `CONTRACT WP18` § B | **predicting** the correction from the flow's carried state: `E3` held out `0.1002` (ceiling `0.2575`), `E21` held out `0.1436` (ceiling `0.1665`) | WP20 **predicts nothing**. It carries the object forward. WP19's own closing finding is *"state does not determine what it discards"* — a carried sketch is the one construction that does not have to |
+
+And WP19's three findings are what make it worth a job at all:
+the joint oracle cell reaches **`11.098x`** at `r = 128`; `E3`'s quality is what
+controls the outcome (`2.223x -> 3.727x -> 18.873x` as `E3` goes absent ->
+`R^2 = 0.453` -> exact, a **`5.06x`** multiplier from `E3` alone); and the
+injection is **non-destructive**, `0/8` at three ranks.
+
+**It is nonetheless the LAST accuracy contract.** Its falsifier closes the lane
+permanently, and that is stated below rather than left to judgement.
+
+## Evidence
+
+| item | status |
+|---|---|
+| a `k = 3` exact window recovers **`0.73`** of `E21`'s Frobenius energy at `1024 x 16` | **CONFIRMED** — `G-M-DEPTH`, 16 `P01` nets, f32, f64 control agreeing to `1.6%` |
+| `E3` and `E21` are the diagonal and the zeroed off-diagonal of **one** discarded tensor | **CONFIRMED** — `SKEPTIC WP18-B` verified `_factored_get_dslice(.,(3,)) == diag(T)` to `0.0` against upstream |
+| the diagonal of a rank-`192` truncation of the **true** `E21` is an unbiased estimate of `E3` (`c = 1.019`) and recovers `R^2 = 0.4529` | **CONFIRMED** — WP19, 8 `P05` nets, live shape |
+| joint oracle end-to-end at `r = 192` is `18.873x`; at `r = 128`, `10.570x` | **CONFIRMED** — WP19, and these are **ceilings**, not operating points |
+| an in-flight injection of this shape is non-destructive | **CONFIRMED** — `G-DIAG-NOTWORSE`, `0/8` at `r = 128/192/256` |
+| a rank-`r` sketch of a `k = 3` carry loses **less** than `1 - 0.73` times the rank-`r` truncation loss, because the carried sum is lower-rank than `E21` itself | **SPECULATIVE.** This is the only way WP20 beats my point prediction and it is called out as speculative on purpose |
+| the price of maintaining a rank-`r` sketch fits the `0.02330 B` FLOP margin | **SPECULATIVE** — the whole point of the price pass |
+| the ops cost fits the graded residual budget | **UNKNOWN, and unknowable until the canary is graded.** See § *Gate*, clause 3 |
+
+## Hypothesis + mechanism
+
+**Hypothesis.** A rank-`r` sketch of the all-distinct blocks generated in the
+last three layers, carried forward by the flow's own propagation, supplies BOTH
+discarded slices from one object — `E21_hat = offdiag(S)`, `E3_hat = diag(S)` —
+and recovers `E3` at least as well as it recovers `E21`.
+
+**Mechanism, and why it should be true rather than merely hopeful.** Three
+independent legs:
+
+1. **The object is one object.** `E3` and `E21` are its diagonal and its
+   zeroed off-diagonal, verified against upstream. Anything that estimates the
+   tensor estimates both slices at once, with **no second model, no second
+   fit, and no fitted scalar** — which is precisely what Arm L needed and could
+   not get.
+2. **Three generations is where the energy is.** `G-M-DEPTH` measured
+   `0.34 / 0.57 / 0.73`; the increments are `0.34 / 0.23 / 0.16`, so a fourth
+   generation is worth `~0.1` and the tail is diffuse. Three is the knee.
+3. **Carrying is not predicting.** Arm L died because the flow's carried
+   per-neuron state does not determine what the flow discards — ceiling `0.2575`
+   on `E3`, `0.1665` on `E21`, both verified five ways. A sketch does not have
+   to solve that problem; it keeps the thing.
+
+**Why `E3` might be recovered BETTER than `E21`, which is the interesting half
+of the question.** `E3` is `n` numbers and `E21` is `n^2`; a rank-`r` object
+carries `2nr` numbers. The diagonal is exactly the part of the tensor a low-rank
+factorisation is best conditioned to reproduce, and WP19 already measured the
+diagonal of a rank-`192` truncation to be **unbiased** (`c = 1.019`) rather than
+merely correlated. If `E3` recovery exceeds `E21` recovery, the `5.06x`
+`E3`-sensitivity WP19 measured works **for** this design instead of against it.
+
+## Intervention — the smallest thing that discriminates
+
+One new cell mode, `carry3_sketch`, in `local_sim/p2_range_lab.py`, built on the
+window-`k` fresh-block reconstruction that **already exists and is already
+self-tested** in `local_sim/p2_wp15_depth.py` (its `--selftest` asserts that a
+window-1 flow reproduces the uncapped flow's `(2,1)` slice at pre-layer 1
+exactly, which is the check that a re-derivation of upstream's hidden block is
+right — the exact class of error WP16 cost a month to).
+
+No new instrument. No new minting path. No change to `estimator.py`.
+
+### WHAT THIS ACTUALLY MEASURES, AND IT IS A CEILING
+
+**Stated before the run, because it changes what the falsifier is entitled to
+conclude.** `slices_window(mlp, snap, p, k)` gives a window-`k` flow's slices by
+**delayed regeneration** — regenerate up to layer `p-k-1`, then propagate
+UNCAPPED for the last `k` layers. So the object WP20 sketches is
+
+    D(p) = slices_window(p, k=3) - slices_window(p, k=0)
+
+and the scored cells inject `truncate_r(D)`. That is **truncate-after-exact-
+propagation**. A deployable design cannot do that: it would have to carry a
+rank-`r` state and propagate the TRUNCATED state, accumulating truncation error
+at every one of the three hops.
+
+**Therefore `carry3_sketch:r` is an UPPER BOUND on the deployable carried
+sketch of the same rank**, and every number this contract produces must carry
+that label. The consequence for the logic is asymmetric and it is the reason
+the ordering below is what it is:
+
+* **If the ceiling FAILS, the deployable design fails too**, strictly. The
+  falsifier is sound and the lane closes on a rigorous argument.
+* **If the ceiling PASSES, nothing is promoted.** A second contract must build
+  the genuinely carried, propagate-the-truncated-state version and re-measure.
+  The gate below is a gate on *whether that second contract is worth writing*,
+  not on a deployable result.
+
+`carry3_exact` is `D` untruncated — the `k = 3` window itself — and it bounds
+the sketches from above in turn. Three nested bounds, all measured in one run:
+`carry3_exact >= carry3_sketch:192 >= carry3_sketch:128`.
+
+### Ordering, and it saves a price pass
+
+**Accuracy first, price only if it clears.** One `gpuq` job produces the
+end-to-end and recovery numbers. The metered `fnp` price pass runs **only if
+`G-WP20-E2E` passes**, because pricing a design whose ceiling already failed is
+work spent on a dead answer. If the ceiling fails, clauses 2 and 3 are recorded
+`NOT REACHED` — not passed, not failed.
+
+**Cells, all `1024 x 16`, f32, on the same 64 networks, one run, paired on
+common random numbers:**
+
+| cell | what | scored? |
+|---|---|---|
+| `none` | the uncorrected regenerating flow | **the paired baseline** |
+| `carry3_sketch:128` | rank-128 carried sketch, both slices, frozen `c(128)` | **SCORED** |
+| `carry3_sketch:192` | rank-192 carried sketch, both slices, frozen `c(192)` | **SCORED** |
+| `carry3_sketch1:{128,192}` | the same with `c = 1` | diagnostic, pre-registered |
+| `carry3_null:128` | equal-rank **random** sketch of the same blocks | **NULL** |
+| `carry3_null:192` | same, `r = 192` | **NULL** |
+| `carry3_exact` | the `k = 3` window with **no** rank truncation | diagnostic — the ceiling the sketch is chasing |
+| `e3svd:192` | WP19's oracle joint cell, re-run here | diagnostic — a cross-run anchor on different networks |
+
+### The `(3,)` scalar, and why `c = 1` is NOT good enough
+
+The sketch supplies `(2,1)` as `truncate_r(zerodiag(d21))` and `(3,)` as the
+**diagonal of that same reconstruction**, which is WP19's mechanism: `E21` is
+diagonal-free, so a rank-`r` truncation's diagonal is pure leakage from the
+discarded tail and carries information about `E3`.
+
+That diagonal's **magnitude** depends on `r`, and WP19 measured exactly how:
+the fitted scalar was `0.703` at `r = 128`, `1.019` at `r = 192`, `1.505` at
+`r = 256`. So `c = 1` is only right near `r = 192` and **handicaps `r = 128` by
+about `1.4x` in the wrong direction** — which would make prediction P5's
+monotonicity an artefact of the constant rather than a property of the rank.
+
+**`P06`'s charter says "No tuning of any kind here" and that binds absolutely.**
+The resolution is the one the block structure was designed for:
+
+1. **`c` is fitted on `P05`**, where the registry says *"Tuning, basis
+   selection, coefficient counts and regularisation are PERMITTED here and
+   NOWHERE else"* — on `P05[..136..143]`, 8 of its 24 remaining seeds, disjoint
+   from the 136 already spent.
+2. **`c(128)` and `c(192)` are then FROZEN, written into this contract as
+   literals, and committed**, before `P06` is touched at all. Git timestamps
+   prove the order.
+3. **`P06` fits nothing.** It applies two frozen constants.
+
+**Frozen values: `c(128) = TBD-P05`, `c(192) = TBD-P05`** — filled in by the
+calibration commit that precedes the `P06` job, and never afterwards.
+
+**Both are scored, and `c = 1` is kept as a pre-registered diagnostic**, not as
+a fallback to be selected after the fact:
+
+| cell | `(3,)` scalar | role |
+|---|---|---|
+| `carry3_sketch:{128,192}` | frozen `c(r)` from `P05` | **SCORED — the gate is on these** |
+| `carry3_sketch1:{128,192}` | `c = 1` | diagnostic: what an entirely untuned sketch does |
+
+Choosing between them after seeing `P06` is forbidden and is not a decision this
+contract leaves open.
+
+## Predictions — mine, numbered, before the data
+
+| # | prediction | confidence |
+|---|---|---|
+| **P1** | `E21` recovery at `r = 192` lands in **`0.55`–`0.70`**, point **`0.63`** — below the `0.73` a `k = 3` exact window gets, because rank-192 truncation of that sum costs something | moderate |
+| **P2** | `E3` recovery (uncentered, `c = 1`) at `r = 192` lands in **`0.30`–`0.50`**, point **`0.40`** | low–moderate |
+| **P3** | **`E3` recovery is at least `0.60x` of `E21` recovery** — the hypothesis's own claim, "as well as", made falsifiable. **Revised down from "within `0.15`" on smoke evidence; see below** | moderate |
+| **P4** | **joint end-to-end at `r = 192`: `2.6x`–`3.6x`, point `3.0x`.** `P(>= 4x) ~ 0.15`. `P(< 3x) ~ 0.50` | this is the one that decides the slice, and **I expect the gate to FAIL** |
+| **P5** | `r = 128` is strictly worse than `r = 192` on all three quantities, monotone as WP19's C4 held | high |
+| **P6** | the null's `E21` recovery is within `0.05` of `r/n`, and the scored sketch beats it by `>= 3x` end-to-end | high — the `256 x 4` smoke gave sketch `4.08x` vs null `1.09x`, a `3.7x` separation at `r/n = 0.25` |
+| **P7** | FLOPs at `r = 192` fit inside the `0.02330 B` margin: `P ~ 0.55`. At `r = 128`: `P ~ 0.85` | genuinely uncertain, hence a separate metered pass |
+| **P8** | the f64 control agrees with f32 on end-to-end to within `3%` | high |
+
+**What would surprise me most, and what it would mean:** `E3` recovery above
+`0.60`. That would say the carried sum is materially lower-rank than `E21`
+itself, which is the SPECULATIVE evidence line above, and it is the only route
+by which this clears `4x`.
+
+**I am pre-registering a prediction that my own slice fails its gate.** That is
+deliberate. The value of WP20 is that it closes the lane on a number either way,
+and a contract written to be passed is not evidence.
+
+### What the development smoke showed, disclosed because I saw it before committing
+
+Building the cell required running it. Two smokes were run at `256 x 4` and
+`256 x 6`, `f64`, `r = 64`, on **out-of-block seeds** (`90000000301`,
+`90000000302`) — instrument development, no block touched, no gate scored, and
+a shape the contract makes no claim about. They are disclosed because they bear
+on predictions I am recording, and a pre-registration that quietly conditions on
+unreported data is not one:
+
+| quantity, `256 x 6`, `r/n = 0.25` | value |
+|---|---:|
+| `carry3_exact` end-to-end | `25.34x` |
+| `carry3_sketch1:64` end-to-end | `3.22x` |
+| `carry3_null:64` end-to-end | `1.088x` |
+| null `E21` recovery vs the chance level `r/n = 0.250` | **`0.2407`** |
+| `carry3_exact` recovery, `E21` / `E3` | `0.971` / `0.965` |
+| `carry3_sketch1:64` recovery, `E21` / `E3` | **`0.880` / `0.525`** |
+
+Three things follow and all three are acted on **before** the contract is
+committed rather than argued about afterwards:
+
+1. **The null clause was wrong** and is corrected above — `0.2407` against a
+   chance level of `0.250` is the WP14 result reappearing, not a broken null.
+2. **`E3` recovery trails `E21` recovery badly with `c = 1`** (`0.525` vs
+   `0.880`, a ratio of `0.60`). **P3 is revised down accordingly**, and this is
+   also the strongest available argument that the frozen `c(r)` from `P05` is
+   necessary rather than fussy.
+3. **The `25.34x` ceiling at `256 x 6` is a SHAPE ARTEFACT and must not be read
+   as a preview.** At depth 6 a `k = 3` window is most of the network; at
+   `1024 x 16` `G-M-DEPTH` measured the same carry at `0.73` of `E21`'s energy.
+   No number in this table is evidence about the live shape, and P4 is
+   deliberately left unrevised at `3.0x` because of it.
+
+## Gate — fixed NOW, and passed to `competition_score.decide(gate=...)`
+
+Three clauses. **All three must hold.** The gate is on the joint end-to-end
+number the slice isolates, not on any total that contains it.
+
+1. **`G-WP20-E2E`** — the better of `carry3_sketch:{128,192}` reaches
+   **`>= 4.0x`** paired arithmetic end-to-end drift reduction against `none`,
+   with a studentised-t interval, through
+   `competition_score.decide(base, cell, gate=4.0, interval="t")`. The
+   geometric mean of per-net ratios is reported as a **stability diagnostic
+   only** and has no authority (`VALIDATION.md` § 2b-i).
+2. **`G-WP20-FLOP`** — the **metered `fnp`** price of the sketch keeps the
+   candidate on the multiplier floor: added counted FLOPs
+   **`<= 51,249,140,941`**, which is `0.1 * 2^41 - 168,636,407,398 - 2^24` and
+   therefore `0.02330 B`. *(The directive quoted `0.0236 B`; the repository's
+   own artifact `certify_guarded.json` gives `C/B = 0.07668696`, so the
+   stricter `0.02330 B` is used and the difference is recorded rather than
+   split.)*
+3. **`G-WP20-OPS`** — added flopscope **operations** keep the worst-row residual
+   inside the nomination bar the canary's graded telemetry returns.
+   **This clause is UNSCORABLE until that telemetry exists.** If the accuracy
+   number lands first, the slice reports clauses 1 and 2 and marks clause 3
+   `UNSCORED`; **no nomination may follow while it is unscored.** A gate that
+   cannot be evaluated is recorded as unevaluated, never as passed.
+4. **`G-WP20-NULL`** — the scored sketch must beat chance, and *chance is not
+   zero here*:
+   * `carry3_sketch:r` end-to-end `>= 2.0x` the `carry3_null:r` end-to-end, at
+     both ranks; and
+   * the null's own `E21` recovery sits within `0.05` of the **chance level
+     `r/n`**.
+
+   **This clause was written weaker and corrected before the contract was
+   committed, and the correction is recorded rather than quietly made.** The
+   first draft demanded the null recover `< 0.05` and land in `[0.97, 1.03]x`
+   end-to-end. A development smoke at `256 x 4`, `f64`, on an out-of-block seed
+   — instrument work, no block touched, no gate scored — returned
+   `carry3_null:64` at **`1.089x`**, which fails a band the null was never
+   going to satisfy: a random rank-`r` projection captures `r/n` of the energy
+   *in expectation*, and `WP14` already measured exactly that
+   (*"containment `= r/n` to three decimals — chance"*). A null whose job is to
+   be zero would have voided a valid run. The null's job is to show the SVD
+   sketch beats a random subspace of the same rank, and that is what it now
+   asks.
+
+**Thresholds are in flopscope FLOPs.** Nulls differ in **code path**, not merely
+in seed: `carry3_null` carries a sketch built from a random orthonormal basis
+through the identical carry-and-inject machinery.
+
+## Falsifier — and it closes the lane permanently
+
+**If the better of the two scored cells is `< 3.0x` end-to-end, OR the design is
+residual-infeasible (clause 2 fails, or clause 3 fails once telemetry exists),
+the accuracy lane is CLOSED FOR GOOD and no further accuracy contract is
+written.** The `< 3.0x` half of that is a **strict** argument, not a judgement
+call: the measured cell is an upper bound on the deployable one, so a ceiling
+below `3.0x` puts the deployable design below `3.0x` too. The remaining time goes to the write-up and to op-count work on the
+nomination, per the strategist's allocation.
+
+**The `3.0x`–`4.0x` band, stated in advance so it cannot be argued afterwards.**
+The gate fails and the falsifier does not fire. Pre-registered disposition:
+**nothing is promoted, no op work is spent on it, and the lane is not reopened
+by me.** It becomes a strategist decision with a measured number attached. I
+will not move the gate to meet the result — `G-M-DEPTH` refused that at `k = 3`
+and `G-DIAG-E2E` refused it at `r = 256`, and this contract refuses it a third
+time in writing.
+
+## Baseline and control
+
+* **Baseline:** the `none` cell — the uncorrected regenerating flow — on the
+  **same 64 networks**, same run, paired.
+* **Null:** `carry3_null:{128,192}`, code-path distinct.
+* **Ceiling:** `carry3_exact` (no truncation) and `e3svd:192` (WP19's oracle).
+* **Numerical control:** `carry3_sketch:192` in **f64** on the first 8 networks.
+* **Tier:** DECIDE, on a **new block never previously touched**.
+
+## Cost model — Phase 2, `lambda = 0`, so `C = F`
+
+Frozen before the data, per `VALIDATION.md` § 2b-ii:
+
+* **Counted FLOPs** are the currency. The budget line is
+  `168,636,407,398 + added <= 0.1 * 2^41 - 2^24`.
+* **Residual is not a cost**, it is a `0.4 s` per-MLP **cliff** that FAILS the
+  MLP. It is reported as **headroom**, `0.4 / observed`, against the worst
+  observed run.
+* **The accuracy run is torch on GPU and prices NOTHING.** The price comes from
+  a separate metered `fnp` pass on the shipped code path. **These two numbers
+  are never merged into one claim** — WP16 is why that caveat is compulsory, and
+  `SKEPTIC WP18-C` is why the meter must be run on `fnp` arrays and not on raw
+  numpy (it understated a delta `4.36x`).
+* **No local absolute wall time is quoted.** Authority is `--runner subprocess`.
+
+## Statistic
+
+Paired, common random numbers, **arithmetic** score difference, studentised-t
+or basic bootstrap. **Percentile and BCa are refused** (measured false-promotion
+rates `6.8`–`8.2%` and `9.1`–`11.5%` against a nominal `5%`). The promotion
+boolean comes from `local_sim/competition_score.py::decide()` and nowhere else.
+
+## Seed block
+
+**`P06[..000..063]`** — the first disjoint half, claimed through
+`local_sim/seed_ledger.py` at claim time with `artifact=` named, and `finalize`d
+against the artifact's hash. Never a literal in source.
+
+`P06[..064..127]` was reserved for Arm L's end-to-end validation. **Arm L is
+dead, so that half is not spent here and not re-purposed here** — re-purposing a
+reserved half inside the contract that would benefit from it is the move this
+protocol exists to prevent. It stays unspent.
+
+## Confounders / scope / what must not change
+
+* **Torch lab vs the `fnp` port.** Accuracy here says nothing about the shipped
+  path's arithmetic. Compulsory caveat on every number.
+* **This is `1024 x 16` only.** WP18's *"true at `1024 x 16`, false at
+  `64 x 32`"* finding means every statement carries its shape.
+* **`estimator.py` stays at v2.6.1.** No promotion, no submission, no
+  designation follows from this contract on its own.
+* **The canary is independent of this.** WP20 must not delay presenting it, and
+  its graded telemetry is an input to clause 3, not an output of this slice.
+* **The vault is not touched.** Three permitted touches, ever; one spent.
+* **What must not change mid-run:** the cell list, the ranks, the gate, the
+  frozen `c(r)`, the block, or the baseline.
+* **`P05`'s calibration seeds are DESIGN tier and decide nothing.** They set two
+  constants and are reported as such.
+
+## Answer due
+
+**~2026-09-14**, per the allocation. **One `gpuq` job spends the decision
+block**; it is preceded by a small `P05` calibration job that spends no block's
+authority and decides nothing, and followed — only if the gate passes — by a
+local CPU-only metered price pass.
+
+## Skeptic
+
+**Rule 2 binds**: an independent Skeptic runs after the result and before any
+claim from it enters the write-up, `CURRENT_STATE.md`, or a nomination. It is
+handed this contract, the diff, the evaluation protocol, the **pinned commit**,
+and the **raw artifact paths** — never a prose summary.

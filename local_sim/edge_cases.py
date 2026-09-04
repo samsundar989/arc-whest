@@ -29,7 +29,10 @@ INVARIANTS (added 2026-08-06). The cases above ask "does it survive?"; these ask
                        the one test that catches a transposed index, an axis
                        swapped in a reduction, or a basis applied on the wrong
                        side — mistakes that produce perfectly finite, perfectly
-                       plausible, wrong numbers.
+                       plausible, wrong numbers. AMENDED 2026-09-03: judged in
+                       MSE units against the candidate's own raw MSE at a 1%
+                       bar, on EVERY row. The old absolute clause was an f64-era
+                       float32-precision bar; see `inv_permutation`.
   budget monotonicity  more budget must never buy fewer samples, and every rung
                        of the ladder down to zero must degrade rather than throw.
   determinism x3       three runs bit-identical, plus a re-instantiated
@@ -220,6 +223,70 @@ def inv_layer1(est):
     return [ok]
 
 
+#: The MSE this project makes decisions on. Frozen; `VALIDATION.md` quotes it,
+#: and the GT-noise invariant (13) reports the vault floor as a share of it.
+DECISION_MSE = 1.4e-6
+#: Invariant 9's bar: a relabelling may not move any row by more than this
+#: share of the candidate's own raw MSE.
+DRIFT_SHARE = 0.01
+
+
+def raw_mse_denominator():
+    """The `raw MSE` invariant 9 judges drift against.
+
+    Defaults to the frozen decision signal, so amending the invariant did NOT
+    move the bar on the shipped file. `ARC_WHEST_RAW_MSE` lets a candidate be
+    held to ITS OWN measured raw MSE -- the canary's is 8.5075e-07, a 1.65x
+    STRICTER bar than the default -- and is clamped so an override can only ever
+    tighten. An override that could loosen a gate is a hole, and this repository
+    has been bitten by that shape of thing before.
+    """
+    raw = os.environ.get("ARC_WHEST_RAW_MSE")
+    if not raw:
+        return DECISION_MSE, "frozen decision signal"
+    try:
+        v = float(raw)
+    except ValueError:
+        return DECISION_MSE, "frozen decision signal (ARC_WHEST_RAW_MSE unparseable)"
+    if not (v > 0.0):
+        return DECISION_MSE, "frozen decision signal (ARC_WHEST_RAW_MSE non-positive)"
+    if v >= DECISION_MSE:
+        return DECISION_MSE, ("frozen decision signal (override %.4e would loosen; "
+                              "clamped)" % v)
+    return v, "candidate raw MSE %.4e" % v
+
+
+def perm_gate(base, perm, P, k, depth, denom=None):
+    """THE gate invariant 9 applies, factored out so nothing can disagree with it.
+
+    `base` is the prediction on the network, `perm` the prediction on the same
+    network with hidden layer `k` relabelled by `P`. Equivariance says
+    `perm[k] == base[k][P]` and `perm[l] == base[l]` for every `l != k`; we
+    require each deviation, in MSE units, to be at most `DRIFT_SHARE` of the
+    candidate's own raw MSE. `local_sim/test_edge_cases_inv9.py` calls this
+    directly with deliberately broken predictions.
+    """
+    if denom is None:
+        denom, _ = raw_mse_denominator()
+    bar = DRIFT_SHARE * denom
+    others = [l for l in range(depth) if l != k]
+    d = {
+        "d_k": float(np.abs(perm[k] - base[k][P]).max()),
+        "d_other": float(np.abs(perm[others] - base[others]).max()),
+        "d_final": (float(np.abs(perm[-1] - base[-1]).max())
+                    if k != depth - 1 else 0.0),
+        "mse_k": float(((perm[k] - base[k][P]) ** 2).mean()),
+        "mse_other": float(((perm[others] - base[others]) ** 2).mean()),
+        "mse_final": (float(((perm[-1] - base[-1]) ** 2).mean())
+                      if k != depth - 1 else 0.0),
+    }
+    d["worst"] = max(d["mse_k"], d["mse_other"], d["mse_final"])
+    d["bar"] = bar
+    d["denom"] = denom
+    d["ok"] = bool(np.isfinite(d["worst"])) and d["worst"] <= bar
+    return d
+
+
 def inv_permutation(est):
     """Relabelling hidden layer k must permute row k and change nothing else.
 
@@ -231,10 +298,38 @@ def inv_permutation(est):
     The residual we tolerate is not slop: reordering columns reorders the
     summation inside every downstream matmul, so JJ^T shifts at the 1e-16 level
     and the alignment basis inherits that. We therefore report the deviation as
-    a share of the ~1.4e-6 MSE we make decisions on, rather than asserting an
-    exact equality the hardware cannot deliver.
+    a share of the MSE we make decisions on, rather than asserting an exact
+    equality the hardware cannot deliver.
+
+    AMENDED 2026-09-03 (strategist Ruling 1; LOG "IMPORTANT (instrument)").
+    This used to gate additionally on `d_k / scale < 1e-6` -- a max-absolute
+    deviation against a fixed relative bar about 10x float32 epsilon. That is a
+    bar only a float64 backbone can hold, and it was written when the K2 flow
+    had one. The live design deliberately runs the covariance backbone in f32,
+    which is what puts C/B = 0.0767 on the 0.1 multiplier floor; curing it was
+    measured at exactly 2.0x billing, i.e. 1.53x worse score. So the clause did
+    not ask a candidate to be correct, it asked it to be expensive. That it is a
+    DTYPE bar and not an index bug was established independently by
+    SKEPTIC WP18-C, which ran the same flow on the same networks at f32 and f64
+    and moved d_k/scale from 2.116e-06 to 2.365e-15 -- a ~1e9 ratio, which is
+    the eps ratio.
+
+    What replaces it is the criterion the surviving clause already used,
+    extended to the two deviations the old gate merely PRINTED: every row's
+    drift, in MSE units, must be <= 1% of the candidate's own raw MSE. That is a
+    net widening on row k and a net TIGHTENING on the other rows and the final
+    row, which had no gate at all -- and `d_other` on the canary is 1.91e-06,
+    LARGER than the d_k the old gate rejected on, with nothing looking at it.
+    It still catches the mistakes the invariant exists for by five or more
+    orders of magnitude: a transposed index or a swapped reduction axis moves a
+    row by O(1), not by O(eps). `local_sim/test_edge_cases_inv9.py` is the
+    standing proof and it is a gate, not a comment.
     """
+    denom, denom_src = raw_mse_denominator()
+    bar = DRIFT_SHARE * denom
     print("\n9. PERMUTATION EQUIVARIANCE  (hidden-layer relabelling)")
+    print("  bar: every row MSE <= %.0f%% of raw MSE = %.3e   [%s]"
+          % (DRIFT_SHARE * 100, bar, denom_src))
     rng = np.random.default_rng(30_806_006_100)
     ok = True
     for depth, width, seed, k in ((32, 256, 30_806_006_011, 7),
@@ -251,20 +346,16 @@ def inv_permutation(est):
         mp = MLP(w, seed=m.seed)
         perm = np.asarray(est.predict(mp, BUDGET), dtype=np.float64)
 
-        d_k = float(np.abs(perm[k] - base[k][P]).max())
-        others = [l for l in range(depth) if l != k]
-        d_other = float(np.abs(perm[others] - base[others]).max())
-        d_final = float(np.abs(perm[-1] - base[-1]).max()) if k != depth - 1 else 0.0
-        scale = float(np.abs(base[-1]).mean())
-        implied = float(((perm[-1] - base[-1]) ** 2).mean()) if k != depth - 1 else 0.0
-
-        good = (d_k / max(scale, 1e-30) < 1e-6) and (implied < 1.4e-8)
-        ok &= good
-        print(f"  {f'{width}x{depth} permute layer {k}':<34} "
-              f"row-k {d_k:.2e}  other-rows {d_other:.2e}  final {d_final:.2e}")
-        print(f"  {'':<34} implied MSE {implied:.2e} = "
-              f"{implied / 1.4e-6 * 100:.4f}% of decision signal   "
-              f"{'ok' if good else 'FAILED'}")
+        g = perm_gate(base, perm, P, k, depth, denom=denom)
+        ok &= g["ok"]
+        print("  %-34s row-k %.2e  other-rows %.2e  final %.2e"
+              % ("%dx%d permute layer %d" % (width, depth, k),
+                 g["d_k"], g["d_other"], g["d_final"]))
+        print("  %-34s MSE row-k %.2e  other %.2e  final %.2e"
+              % ("", g["mse_k"], g["mse_other"], g["mse_final"]))
+        print("  %-34s worst %.2e = %.4f%% of raw MSE   %s"
+              % ("", g["worst"], g["worst"] / denom * 100,
+                 "ok" if g["ok"] else "FAILED"))
     return [ok]
 
 

@@ -1,0 +1,88 @@
+candidate: tau=-2.5  target C/B=0.3  chunk=16384
+
+1. NORMAL CASE
+  he 256x32                          ok   shape (32, 256)  range [0.000e+00, 5.171e+00]  final mean 0.6462  deterministic=True
+
+2. DEGENERATE PRUNING (whole layers pushed below tau)
+  layer 5 scaled 0.02                ok   shape (32, 256)  range [0.000e+00, 4.003e+00]  final mean 0.0133  deterministic=True
+  layer 5 scaled 0.001               ok   shape (32, 256)  range [0.000e+00, 4.003e+00]  final mean 0.0007  deterministic=True
+  layer 7 identically zero           ok   shape (32, 256)  range [0.000e+00, 4.352e+00]  final mean 0.0000  deterministic=True
+
+3. EXTREME DYNAMIC RANGE
+  layer 12 scaled 100x               ok   shape (32, 256)  range [0.000e+00, 5.158e+02]  final mean 67.7158  deterministic=True
+  layer 12 scaled 1e-3               ok   shape (32, 256)  range [0.000e+00, 4.554e+00]  final mean 0.0007  deterministic=True
+  layer 12 scaled 1e4                ok   shape (32, 256)  range [0.000e+00, 5.158e+04]  final mean 6771.5833  deterministic=True
+  layer 3 mean-shifted (all on)      ok   shape (32, 256)  range [0.000e+00, 1.577e+02]  final mean 15.9039  deterministic=True
+
+4. SEED EXTREMES (the rng contract)
+  seed 0                             ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5729  deterministic=True
+  seed 1                             ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5720  deterministic=True
+  seed 2147483647                    ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5720  deterministic=True
+  seed 9223372036854775807           ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5728  deterministic=True
+  seed 12345678901234567890          ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5717  deterministic=True
+
+5. SHAPE GENERALITY (calibration must disable itself off-width)
+  depth 2 x width 256                ok   shape (2, 256)  range [7.214e-03, 1.983e+00]  final mean 0.5480  deterministic=True
+  depth 8 x width 128                ok   shape (8, 128)  range [0.000e+00, 2.760e+00]  final mean 0.3155  deterministic=True
+  depth 32 x width 64                ok   shape (32, 64)  range [0.000e+00, 4.656e+00]  final mean 0.1559  deterministic=True
+  depth 4 x width 256                ok   shape (4, 256)  range [1.154e-05, 2.968e+00]  final mean 0.5810  deterministic=True
+  depth 64 x width 256               ok   shape (64, 256)  range [0.000e+00, 4.687e+00]  final mean 0.5158  deterministic=True
+
+6. BUDGET EDGES (the analytic fallback path)
+  budget 0                           ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 1                           ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 1e7 (below min N)           ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 1e9                         ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 10x                         ok   shape (32, 256)  range [0.000e+00, 4.670e+00]  final mean 0.4044  deterministic=True
+
+7. GRADER-ARRAY IMMUTABILITY (weights must be untouched)
+  input weights unmodified           ok
+
+8. LAYER-1 CLOSED FORM  (exact: ||W1[:,j]|| / sqrt(2*pi))
+  256x32                             max rel err 1.773e-16   ok
+  128x8                              max rel err 1.644e-16   ok
+  64x4                               max rel err 1.631e-16   ok
+  256x2                              max rel err 1.724e-16   ok
+
+9. PERMUTATION EQUIVARIANCE  (hidden-layer relabelling)
+  bar: every row MSE <= 1% of raw MSE = 1.400e-08   [frozen decision signal]
+  256x32 permute layer 7             row-k 2.22e-15  other-rows 7.75e-08  final 7.75e-08
+                                     MSE row-k 1.13e-31  other 1.30e-17  final 4.04e-16
+                                     worst 4.04e-16 = 0.0000% of raw MSE   ok
+  256x32 permute layer 20            row-k 1.78e-15  other-rows 1.93e-07  final 1.93e-07
+                                     MSE row-k 1.68e-31  other 4.45e-17  final 1.38e-15
+                                     worst 1.38e-15 = 0.0000% of raw MSE   ok
+  128x8 permute layer 3              row-k 8.88e-16  other-rows 1.06e-07  final 1.06e-07
+                                     MSE row-k 4.00e-32  other 7.96e-17  final 5.57e-16
+                                     worst 5.57e-16 = 0.0000% of raw MSE   ok
+  256x32 permute layer 30            row-k 1.33e-15  other-rows 1.59e-07  final 1.59e-07
+                                     MSE row-k 3.62e-32  other 3.10e-17  final 9.61e-16
+                                     worst 9.61e-16 = 0.0000% of raw MSE   ok
+
+10. BUDGET MONOTONICITY  (the failsafe ladder)
+  budget                0  analytic   valid=True  non-decreasing=True
+  budget                1  analytic   valid=True  non-decreasing=True
+  budget        1,000,000  analytic   valid=True  non-decreasing=True
+  budget       10,000,000  analytic   valid=True  non-decreasing=True
+  budget      100,000,000  analytic   valid=True  non-decreasing=True
+  budget    1,000,000,000  analytic   valid=True  non-decreasing=True
+  budget   10,000,000,000  N=2^9      valid=True  non-decreasing=True
+  budget   27,200,000,000  N=2^11     valid=True  non-decreasing=True
+  budget  272,000,000,000  N=2^14     valid=True  non-decreasing=True
+  budget 2,720,000,000,000  N=2^17     valid=True  non-decreasing=True
+  ladder monotone and total          ok
+
+11. DETERMINISM  (3x bit-identity + fresh instance)
+  256x32                             3x identical=True  fresh-instance identical=True  ok
+  128x8                              3x identical=True  fresh-instance identical=True  ok
+
+12. SEED-BLOCK HYGIENE
+  live blocks disjoint               ok   (25 decision blocks + vault block 20,260,806,000..20,260,806,499)
+
+13. GT-NOISE FLOOR  (what counts as signal)
+  vault GT samples/MLP               33,554,432
+  vault GT-noise MSE (mean)          1.575e-09  (0.113% of the 1.4e-6 decision signal)
+  vault touches                      1
+  noise < 10% of signal              ok
+
+30/30 checks passed

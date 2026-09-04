@@ -336,7 +336,7 @@ def _idem_hook_lin():
 
 
 def _correct_hook_lin(ref, *, mode: str, r: int, seed: int, power_iters: int,
-                      record=None, probe=None):
+                      record=None, probe=None, dref=None, c_scalar=None):
     """Inject the true residual at the linear point, in one of five ways.
 
     `mode`:
@@ -358,6 +358,34 @@ def _correct_hook_lin(ref, *, mode: str, r: int, seed: int, power_iters: int,
                the zeroed off-diagonal of ONE tensor -- so this asks whether the
                `(3,)` correction is FREE once the `(2,1)` one is paid for.
                Gates `G-DIAG-R2`, `G-DIAG-E2E`, `G-DIAG-NOTWORSE`.
+      `carry3_exact`
+               `CONTRACT WP20`. NOT an oracle read of the true residual: the
+               **carried** difference `D(p) = window_3(p) - window_0(p)`, which
+               is what a flow that kept the last THREE generations of the
+               all-distinct block would have, taken from
+               `p2_wp15_depth.slices_window` and supplied whole. Both slices
+               come from ONE carried object. This is the ceiling the two sketch
+               cells are chasing.
+      `carry3_sketch`
+               `CONTRACT WP20`, and the two cells the gate is scored on. The
+               `(2,1)` half is `truncate_r(zerodiag(D21))`; the `(3,)` half is
+               `c(r) * diag(that same reconstruction)`, with `c(r)` a scalar
+               FROZEN on `P05` before `P06` was touched and passed in as
+               `c_scalar` -- never fitted here, because `P06`'s charter forbids
+               tuning. `D21` is diagonal-free, so the reconstruction's diagonal
+               is leakage from the discarded tail, which is the WP19 mechanism.
+
+               **This cell is an UPPER BOUND on a deployable carried sketch**,
+               and the contract says so in advance: it truncates AFTER an exact
+               three-layer propagation, where a real design would propagate the
+               truncated state and accumulate error at each of the three hops.
+               A ceiling that fails therefore closes the lane strictly; a
+               ceiling that passes promotes nothing and buys a second contract.
+      `carry3_null`
+               the NULL for the two above, and it differs in CODE PATH, not in
+               seed: the same carry-and-inject machinery fed a rank-`r`
+               reconstruction built on a RANDOM orthonormal basis of the same
+               rank. It must recover nothing.
       `e3svd`  the exact `(3,)` residual AND the rank-`r` SVD truncation of
                `E21`. **This is the ceiling the whole correction lane is
                chasing** and the first C2 run omitted it: `svd` alone leaves the
@@ -435,6 +463,54 @@ def _correct_hook_lin(ref, *, mode: str, r: int, seed: int, power_iters: int,
                                    "diag_r2_uncentered": 1.0 - float(
                                        ((E3.double() - c * dg) ** 2).sum())
                                    / max(float((E3.double() ** 2).sum()), 1e-300)})
+        elif mode.startswith("carry3"):
+            # CONTRACT WP20. `dref[p]` is the CARRIED difference, precomputed
+            # from two window flows -- it is not read off the uncapped flow and
+            # it is not a function of this corrected flow's own state, which is
+            # what makes it a carry rather than a prediction.
+            if dref is None or p not in dref:
+                return K
+            D3, D21 = dref[p]
+            D21 = D21 - torch.diag(torch.diagonal(D21))
+            if mode == "carry3_exact":
+                d3, d21 = D3, D21
+            else:
+                if r <= 0:
+                    return K
+                if mode == "carry3_null":
+                    # A random rank-r subspace, projected the same way, through
+                    # the identical arithmetic. Not a reseeded rerun of the same
+                    # deterministic call -- SKEPTIC WP13 finding (4).
+                    Q = random_basis(int(D21.shape[0]), r, seed=seed * 7919 + p * 31 + r,
+                                     device=D21.device, dtype=D21.dtype)
+                    rec = (Q @ (Q.T @ D21.double().to(Q.dtype))).double()
+                else:
+                    U, sv, Vh = torch.linalg.svd(D21.double(), full_matrices=False)
+                    k = min(r, int(sv.shape[0]))
+                    rec = ((U[:, :k] * sv[:k]) @ Vh[:k])
+                d21 = rec.to(s21.dtype)
+                cc = 1.0 if c_scalar is None else float(c_scalar)
+                d3 = (cc * rec.diagonal()).to(s3.dtype)
+            if record is not None:
+                # Recovery of each slice by the carried object, against the TRUE
+                # discarded slices -- a MEASUREMENT of the scored quantity, not
+                # a fit. Uncentered R^2, so a component orthogonal to the target
+                # earns nothing.
+                def _r2(hat, tgt):
+                    tgt = tgt.double()
+                    den = float((tgt * tgt).sum())
+                    return (1.0 - float(((tgt - hat.double()) ** 2).sum()) / den) \
+                        if den > 0.0 else float("nan")
+
+                E21z = E21 - torch.diag(torch.diagonal(E21))
+                record.append({
+                    "pre_layer": p, "layer": p - 1, "r": r,
+                    "c_scalar": (1.0 if c_scalar is None else float(c_scalar)),
+                    "recovery_e21": _r2(d21, E21z),
+                    "recovery_e3": _r2(d3, E3),
+                    "carry_ceiling_e21": _r2(D21, E21z),
+                    "carry_ceiling_e3": _r2(D3, E3),
+                })
         elif mode in ("proj", "e3proj", "svd", "e3svd"):
             if mode in ("e3proj", "e3svd"):
                 d3 = E3
@@ -480,6 +556,40 @@ def _correct_hook_lin(ref, *, mode: str, r: int, seed: int, power_iters: int,
         return K
 
     return hook
+
+
+def carried_difference(weights, a, dtype, pre_layers):
+    """`D(p) = window_3(p) - window_0(p)`: what a three-generation carry HAS.
+
+    `CONTRACT WP20`. Built from `p2_wp15_depth.slices_window`, which is the
+    instrument `G-M-DEPTH` was measured on and which carries its own `--selftest`
+    proving that a window-`k` flow is the uncapped flow at `k >= p` and the
+    regenerating flow at `k = 0`. That selftest is the reason this is reused
+    rather than respelled: an earlier hand-rolled "carry the fresh two-leg block"
+    spelling was WRONG and failed S1 by `35%`, because the regenerated base picks
+    up an all-distinct part the moment `contract_W` touches it.
+
+    `window_0` is subtracted rather than assumed zero for the same reason.
+    """
+    import torch
+
+    import p2_wp15_depth as wd
+
+    bridge_ = wd._upstream()
+    mlp = bridge_.build_mlp(weights, device=a.device, dtype=dtype)
+    n = a.width
+    K_in = {1: torch.zeros(n, device=a.device, dtype=dtype),
+            2: torch.eye(n, device=a.device, dtype=dtype)}
+    snap = wd.regen_snapshots(mlp, K_in, a.depth)
+    out = {}
+    for p_ in sorted(pre_layers):
+        a3, a21 = wd.slices_window(mlp, snap, p_, 3)
+        b3, b21 = wd.slices_window(mlp, snap, p_, 0)
+        out[p_] = (a3 - b3, a21 - b21)
+    del snap
+    if a.device == "cuda":
+        torch.cuda.empty_cache()
+    return out
 
 
 def _mint(a, seed):
@@ -629,13 +739,39 @@ def cmd_contain(a) -> int:
 # C2 -- inject the projected residual in flight, end to end
 # ==========================================================================
 
+#: `CONTRACT WP20`. The `(3,)` scalar, FITTED ON `P05` and frozen here as a
+#: literal before `P06` was touched -- `P05`'s registry entry is the one place
+#: this repository permits tuning, and `P06`'s forbids it. Filled by
+#: `local_sim/p2_range_lab.py calib3` and committed in its own commit, whose git
+#: timestamp precedes the `P06` job. NEVER edited after that commit.
+CARRY3_C = {}          # r -> c, populated by the calibration commit
+
+
 def _parse_cells(specs):
+    """`mode[:rank]`, plus the WP20 spelling `carry3_sketch1:<r>`.
+
+    `carry3_sketch1` is `carry3_sketch` with `c = 1` instead of the frozen
+    scalar. It is a PRE-REGISTERED DIAGNOSTIC, not a fallback to be chosen after
+    seeing `P06`, and it is spelled as its own cell so that both appear in every
+    artifact and neither can be quietly substituted for the other.
+    """
     out = []
     for spec in specs:
         parts = spec.split(":")
         mode = parts[0]
         r = int(parts[1]) if len(parts) > 1 else 0
-        out.append((spec, mode, r))
+        c = None
+        if mode == "carry3_sketch1":
+            mode, c = "carry3_sketch", 1.0
+        elif mode == "carry3_sketch":
+            if r not in CARRY3_C:
+                raise SystemExit(
+                    "REFUSED: cell %r needs a frozen c(%d) and CARRY3_C has %r. "
+                    "Run `calib3` on P05, commit the literal, and only then run "
+                    "P06 -- fitting it inside the P06 run is exactly what that "
+                    "block's charter forbids." % (spec, r, sorted(CARRY3_C)))
+            c = CARRY3_C[r]
+        out.append((spec, mode, r, c))
     return out
 
 
@@ -668,18 +804,26 @@ def cmd_e2e(a) -> int:
                          for l in range(a.depth)], axis=0)
         del out
 
+        # CONTRACT WP20: the carried difference, built ONCE per network from two
+        # window flows and shared by every carry3 cell, so the sketches and
+        # their null and their ceiling all see the identical carried object.
+        dref = None
+        if any(mode.startswith("carry3") for _s, mode, _r, _c in cells):
+            dref = carried_difference(w, a, dtype, pre_layers)
+
         per_cell = {}
-        for spec, mode, r in cells:
+        for spec, mode, r, c in cells:
             rec, prb = [], []
             m = means_of(w, hook_nl=_regen_hook_nl(),
                          hook_lin=_correct_hook_lin(
                              ref_slices, mode=mode, r=r, seed=seed,
-                             power_iters=a.power_iters, record=rec, probe=prb),
+                             power_iters=a.power_iters, record=rec, probe=prb,
+                             dref=dref, c_scalar=c),
                          dtype=dtype, device=a.device)
             drift = float(((m[-1] - base[-1]) ** 2).mean())
             per_cell[spec] = drift
             rows.append({"seed": seed, "cell": spec, "mode": mode, "r": r,
-                         "dtype": a.dtype,
+                         "c_scalar": c, "dtype": a.dtype,
                          "drift_final_layer": drift,
                          "ratio_to_mse_full": drift / MSE_FULL_ANCHOR,
                          "slice_probe": prb[:2]})
@@ -691,6 +835,14 @@ def cmd_e2e(a) -> int:
                 # this line assumed every record carried `sigma_applications`.
                 if "sigma_applications" in rec[0]:
                     row["sigma_applications_per_layer"] = rec[0]["sigma_applications"]
+                if "recovery_e21" in rec[0]:
+                    for fld in ("recovery_e21", "recovery_e3",
+                                "carry_ceiling_e21", "carry_ceiling_e3"):
+                        vals = [x[fld] for x in rec]
+                        row[fld + "_mean"] = float(sum(vals) / len(vals))
+                        row[fld + "_min"] = float(min(vals))
+                    row["c_scalar"] = rec[0]["c_scalar"]
+                    row["carry3_per_layer"] = rec
                 if "diag_scalar_c" in rec[0]:
                     row["diag_scalar_c_mean"] = float(
                         sum(x["diag_scalar_c"] for x in rec) / len(rec))
@@ -740,6 +892,112 @@ def cmd_e2e(a) -> int:
         "determinism_check": "cell 'proj:0' must equal cell 'none' exactly; this is "
                              "NOT a null control (SKEPTIC WP13 finding 4)",
         "rows": rows, "selector_cost": cost_rows,
+    })
+    return 0
+
+
+# ==========================================================================
+# WP20 -- the P05 calibration of the (3,) scalar, and NOTHING else
+# ==========================================================================
+
+def cmd_calib3(a) -> int:
+    """Fit `c(r)` for `CONTRACT WP20`, on `P05` seeds, and score no gate.
+
+    `P05`'s registry entry is the ONE place this repository permits tuning;
+    `P06`'s forbids it outright. So the scalar that scales `diag(rank-r
+    reconstruction)` into the `(3,)` slice is fitted here, printed as a literal
+    to paste into `CARRY3_C`, and committed in its own commit BEFORE the `P06`
+    job runs. Git timestamps then prove the order, which is the only thing that
+    makes the `P06` numbers a measurement rather than a fit.
+
+    Pooled least squares across networks and layers, one scalar per rank:
+
+        c(r) = sum_<E3, diag(rec)> / sum_<diag(rec), diag(rec)>
+
+    It also prints, for free, the two ceilings the sketch cannot exceed: how
+    much of `E3` and of `E21` the UNTRUNCATED three-generation carry recovers.
+    `G-M-DEPTH` measured the `E21` one at `0.73` on `P01`; agreement here on
+    different networks is a cross-check, and disagreement is a finding.
+    """
+    import torch
+
+    dtype = torch.float64 if a.dtype == "f64" else torch.float32
+    pre_layers = sorted(set(range(1, a.depth)))
+    ranks = list(a.ranks)
+    num = {r: 0.0 for r in ranks}
+    den = {r: 0.0 for r in ranks}
+    ceil_e3, ceil_e21, rows = [], [], []
+
+    for seed in a.seeds:
+        w = _mint(a, seed)
+        t0 = time.perf_counter()
+        ref = {}
+        mlp = bridge.build_mlp(w, device=a.device, dtype=dtype)
+        n = a.width
+        K_in = {1: torch.zeros(n, device=a.device, dtype=dtype),
+                2: torch.eye(n, device=a.device, dtype=dtype)}
+        with torch.no_grad():
+            run_flow(mlp, K_in, hook_lin=_capture_hook(ref, set(pre_layers)),
+                     up_to_layer=f"act{a.depth - 1}", output_d_max=1)
+        dref = carried_difference(w, a, dtype, pre_layers)
+
+        import p2_wp15_depth as wd
+        mlp2 = wd._upstream().build_mlp(w, device=a.device, dtype=dtype)
+        snap = wd.regen_snapshots(mlp2, K_in, a.depth)
+
+        for p_ in pre_layers:
+            b3, b21 = wd.slices_window(mlp2, snap, p_, 0)   # the regen flow
+            E3 = (ref[p_][0] - b3).double()
+            E21 = (ref[p_][1] - b21).double()
+            E21 = E21 - torch.diag(torch.diagonal(E21))
+            D3, D21 = dref[p_]
+            D3, D21 = D3.double(), D21.double()
+            D21 = D21 - torch.diag(torch.diagonal(D21))
+
+            def r2(hat, tgt):
+                d = float((tgt * tgt).sum())
+                return (1.0 - float(((tgt - hat) ** 2).sum()) / d) if d > 0 else float("nan")
+
+            ceil_e3.append(r2(D3, E3))
+            ceil_e21.append(r2(D21, E21))
+
+            U, sv, Vh = torch.linalg.svd(D21, full_matrices=False)
+            for r in ranks:
+                k = min(r, int(sv.shape[0]))
+                dg = ((U[:, :k] * sv[:k]) @ Vh[:k]).diagonal()
+                num[r] += float((E3 * dg).sum())
+                den[r] += float((dg * dg).sum())
+            rows.append({"seed": seed, "pre_layer": p_,
+                         "carry_ceiling_e3": ceil_e3[-1],
+                         "carry_ceiling_e21": ceil_e21[-1]})
+        del snap, dref, ref
+        if a.device == "cuda":
+            torch.cuda.empty_cache()
+        print(f"    seed {seed}  [{time.perf_counter() - t0:.1f}s]")
+
+    c = {r: (num[r] / den[r] if den[r] > 0 else float("nan")) for r in ranks}
+    print("\n  UNTRUNCATED three-generation carry, the ceiling the sketch chases:")
+    print(f"    E21 recovery  mean {sum(ceil_e21)/len(ceil_e21):.4f}   "
+          f"min {min(ceil_e21):.4f}   (G-M-DEPTH measured 0.73 on P01)")
+    print(f"    E3  recovery  mean {sum(ceil_e3)/len(ceil_e3):.4f}   "
+          f"min {min(ceil_e3):.4f}")
+    print("\n  PASTE THIS INTO `CARRY3_C` AND COMMIT IT BEFORE TOUCHING P06:")
+    print("    CARRY3_C = {" + ", ".join(f"{r}: {c[r]!r}" for r in ranks) + "}")
+
+    _dump(a.out_calib3, {
+        "check": "CONTRACT WP20: the P05 calibration of the (3,) scalar",
+        "contract": "LOG 2026-09-03 CONTRACT WP20",
+        "tier": "DESIGN. Tuning is PERMITTED on P05 and forbidden on P06. "
+                "This run decides no gate and its numbers are constants, not "
+                "results.",
+        "seed_block": "P05", "seeds": list(a.seeds), "dtype": a.dtype,
+        "width": a.width, "depth": a.depth, "ranks": ranks,
+        "c_scalar": {str(r): c[r] for r in ranks},
+        "carry_ceiling_e21_mean": sum(ceil_e21) / len(ceil_e21),
+        "carry_ceiling_e21_min": min(ceil_e21),
+        "carry_ceiling_e3_mean": sum(ceil_e3) / len(ceil_e3),
+        "carry_ceiling_e3_min": min(ceil_e3),
+        "rows": rows,
     })
     return 0
 
@@ -918,6 +1176,8 @@ def main() -> int:
     ap.add_argument("--e2e", action="store_true", help="C2")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--verify-ledger", action="store_true")
+    ap.add_argument("--calib3", action="store_true",
+                    help="CONTRACT WP20: fit c(r) on P05. Decides no gate.")
     ap.add_argument("--width", type=int, default=WIDTH)
     ap.add_argument("--depth", type=int, default=DEPTH)
     ap.add_argument("--selftest-width", type=int, default=256)
@@ -936,6 +1196,7 @@ def main() -> int:
     ap.add_argument("--out-c1", default="")
     ap.add_argument("--out-c2", default="")
     ap.add_argument("--out-selftest", default="")
+    ap.add_argument("--out-calib3", default="")
     a = ap.parse_args()
 
     # The upstream checkout is put on the path and VERIFIED to be rev 93d091a4
@@ -953,8 +1214,12 @@ def main() -> int:
     print("=" * 78)
     print(f"  shape {a.width} x {a.depth}   dtype {a.dtype}   device {a.device}")
     print(f"  upstream        {src}  rev 93d091a4 VERIFIED")
-    print(f"  seed block P01, {len(a.seeds)} networks -- ALREADY CLAIMED by WP13, "
-          "no new draw")
+    # The provenance line has to describe THIS run, not the run this module was
+    # written for. It said "seed block P01 ... ALREADY CLAIMED by WP13" on every
+    # invocation, which was a false provenance statement the moment WP19 ran on
+    # P05 and WP20 on P06.
+    print(f"  seeds: {len(a.seeds)} networks -- provenance is the claim recorded "
+          f"in local_sim/seed_ledger.py for THIS run, not this module's default")
     print()
 
     rc = 0
@@ -966,6 +1231,9 @@ def main() -> int:
         if rc:
             print("  REFUSING to run C1/C2 on a failed self-test.")
             return rc
+    if a.calib3:
+        print("\n-- WP20: the P05 calibration of c(r) ---------------------------")
+        rc |= cmd_calib3(a)
     if a.contain or a.all:
         print("\n-- C1: containment fraction ------------------------------------")
         rc |= cmd_contain(a)
