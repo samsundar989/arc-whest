@@ -26,18 +26,28 @@ its own forward pass. That carry is the cost, and it is what this module meters.
 The carried object is upstream's own. `factor_k3.py`, read 2026-09-04:
 
     contract_W(W)            ->  `W @ factor` for EACH of the three legs
-    _factored_get_dslice     ->  one `(A_i * A_j) @ A_k^T` per distinct block
-                                 permutation; three legs distinct -> three
-                                 matmuls; two legs equal -> two
+    _factored_get_dslice     ->  one `(A_i * A_j) @ A_k^T` per block permutation
     from_dstensor(ds)        ->  factors `(diag(S3) + 3 S21^T, I, I)`
+    the generated block      ->  `fac2 = torch.eye(n) * 3`  (line 400)
+
+**Correction, `SKEPTIC` 2026-09-04.** An earlier revision of this docstring said
+`_factored_get_dslice` costs *"three matmuls when the legs differ, two when two
+coincide"*. That is a true statement about the ARITHMETIC and a false one about
+upstream: `block_perms` is built from INDEX permutations (`factor_k3.py:42-44`)
+and is always three for `d = 3, part = (2,1)`, whatever the leg values. Two of
+the three products coincide when `A2 == A3`, and upstream does not realise the
+saving -- this module's `regen` spelling realises it by hand. The claim is kept
+here in corrected form rather than deleted, because it was quoted as a fact about
+upstream and it was not one.
 
 The regenerating flow is cheap for exactly one reason: two of its three legs are
-the identity, so `contract_W` on them is free and the `(2,1)` slice has two
-distinct block permutations instead of three. **A carried generation destroys
-that structure the moment it is propagated once.** The block layer `l` generates
-is `(w1 . WK_11, 3 I, (w2 (x) w1 . WK_11)^T)` (`p2_wp15_depth.fresh_block`);
-after one `contract_W` its legs are `(W A1, 3 W, W A3)` -- three real `(n, R)`
-matrices, no identity left, generic price.
+the identity, so `contract_W` on them is free and the `(2,1)` slice's three block
+permutations collapse to two distinct products. **A carried generation destroys
+that structure once it has been propagated twice.** The block layer `l` generates
+is `(w1 . WK_11, 3 I, (w2 (x) w1 . WK_11)^T)` (`p2_wp15_depth.fresh_block`); its
+FIRST `contract_W` is two products and a column scaling, because the middle leg
+is still a scaled identity, and every hop after that is three real `(n, R)`
+matrices at the generic price.
 
 THE SPELLINGS, CHEAPEST FIRST
 -----------------------------
@@ -46,21 +56,45 @@ THE SPELLINGS, CHEAPEST FIRST
                 dtype that has drifted shows up against a known number before it
                 reaches a verdict.
 
-`floor_r`       **a LOWER BOUND that is not achievable.** Three carried blocks,
-                legs pretended to be `(n, r)`, `contract_W` ONLY -- no slice
-                read, no fresh-block construction, no truncation, no injection.
-                Nothing deployable can cost less than this and still be a
-                three-generation carry. It exists so that "does not fit" can be
-                stated without depending on any implementation choice of mine.
+`floor_r`       **a LOWER BOUND that is not achievable, and it FITS.** The
+                carried window's `contract_W` ONLY -- no slice read, no
+                fresh-block construction, no truncation, no injection -- with
+                every leg at `(n, r)` and the age-1 middle leg charged as the
+                scaling it is. **The window WARMS UP**: at layer `l` the live
+                generations are those made at `l-1, l-2, l-3`, so the counts are
+                `1, 2, 3, 3, ...` = 42 block propagations over 15 rounds, not 45.
+                `p2_wp15_depth.slices_window` is the authority -- *"`k >= p` is
+                the uncapped flow, because there was never an older generation to
+                discard"*.
+
+                **`SKEPTIC` 2026-09-04, defect 1, and it flipped this row.** The
+                first revision propagated three generations in every round and
+                billed the age-1 middle leg as a matmul, giving `54,331,637,760`
+                = `1.060x` the headroom, on which this module claimed *"the gap
+                is arithmetic, not implementation"*. Corrected it is
+                `44,675,629,056` = `0.872x` -- **AT the floor**. That claim is
+                WITHDRAWN. The lower bound bounds nothing useful; the verdict
+                rests on `carry3_full` instead, where the margin is a factor of
+                ten rather than six percent.
 
 `floor_full`    the same lower bound with honest `(n, n)` legs.
 
-`carry3_r`      three carried blocks at rank `r`: `contract_W` (9 matmuls) + the
-                `(2,1)` slice (9 matmuls) + the fresh block + the rank-`r`
-                re-truncation + the injection. Strictly LESS accurate than
-                `3.330x`, because it propagates truncated state where the
-                measured cell truncated after an exact propagation. It is priced
-                as a second lower bound, never as a candidate.
+`carry3_r`      three carried blocks at rank `r`: `contract_W` + the `(2,1)`
+                slice + the fresh block + the rank-`r` re-truncation + the
+                injection.
+
+                **It prices an object that CANNOT EXIST** (`SKEPTIC` 2026-09-04,
+                defect 3). A `FactoredTensor`'s rank index is SHARED across all
+                three legs (`factor_k3.py:80`, `add_factors_` concatenates along
+                `dim=1`), so replacing each leg by an orthonormal basis of its
+                range and discarding `B_i = Q_i^T A_i` yields a Tucker form whose
+                `(r,r,r)` core is thrown away -- not a rank-`r` CP carry. Reading
+                the `(2,1)` slice of the honest object needs `Q_i B_i`
+                re-materialised at `(n, n)`, which is `floor_full`'s price.
+                It therefore **UNDER-prices**, which is conservative for the
+                verdict, and **the rank sweep below describes a fiction**: no
+                conclusion of the form "the largest carried rank that fits is X"
+                may be drawn from it.
 
 `carry3_full`   **the price of the object that measured `3.330x`.** The same,
                 with the carried legs at their honest rank. A generated block's
@@ -82,10 +116,19 @@ leaves is printed as `budget_headroom` and must equal `CONTRACT WP20`'s own
 `51,249,140,941` -- asserted below, because a headroom that silently disagreed
 with the contract would decide this on the wrong number.
 
-Operations are reported alongside FLOPs and are the SECOND bar, not a footnote:
-`docs/CURRENT_STATE.md` and write-up 6.6 record that under `lambda = 0` the cost
-that can kill a submission is an OPERATION COUNT, because that is what the `0.4 s`
-residual cliff is paid in. The canary bills `2,674` operations.
+Operations are the SECOND bar, not a footnote: under `lambda = 0` the cost that
+can kill a submission is an OPERATION COUNT, because that is what the `0.4 s`
+residual cliff is paid in (write-up 6.6). The canary bills `2,674`.
+
+**But an op count is not portable between spellings, and this module's first
+revision added one that was not** (`SKEPTIC` 2026-09-04, defect 2). `regen`
+bills `469` operations where the canary's OWN third-order increment is `2,255`
+(`flow_price_wp17b.json`, `2,708 - 453`) -- the same arithmetic in `4.81x` fewer
+array calls, and the auditor measured `3x` spelling-dependence inside identical
+arithmetic besides. A lab op increment may therefore NEVER be added to a
+shipped-file op total. `added_ops_shipped_estimate` translates through that ratio
+first; `ops_x_canary_lab_spelling_DO_NOT_USE` is retained under that name so the
+old number is traceable rather than deleted.
 
 Run:
     uv run python local_sim/p2_wp20_price.py
@@ -122,6 +165,19 @@ CANARY_OPS = 2_674
 SERVER_OFFSET_FLOPS = 2 ** 24
 #: `CONTRACT WP20`'s own headroom figure. Asserted, not trusted.
 CONTRACT_HEADROOM = 51_249_140_941
+
+#: `experiments/2026-09-03_wp16_parity/flow_price_wp17b.json` -- the canary's own
+#: flow, metered on the SHIPPED instrument. `SKEPTIC` 2026-09-04 defect 2: this
+#: module's `regen` is an excellent FLOP control (`-0.78%` against the increment
+#: below) and a POOR operation control, because a lab transcription spells the
+#: same arithmetic in far fewer array calls. Operation counts are `3x`
+#: spelling-dependent inside identical arithmetic, so a lab op increment may NOT
+#: be added to a shipped-file op total. These constants are what makes the
+#: `n_ops` column translatable instead of misleading.
+SHIPPED_K3_OPS = 2708      # the canary's whole flow
+SHIPPED_K2_OPS = 453       # its second-order backbone
+SHIPPED_K3_FLOPS = 168_676_988_572
+SHIPPED_K2_FLOPS = 68_782_549_504
 
 
 def _require_real_flopscope(flops) -> None:
@@ -173,14 +229,35 @@ def _regen_layer(fnp, W, M, w1, Sig_off, *, last_layer: bool):
     return S3_z, S21
 
 
-def _carry_propagate(W, blocks):
+def _carry_propagate(W, blocks, w2=None):
     """`contract_W` on every carried generation: `W @ factor`, three legs each.
 
     Upstream's `FactoredTensor.contract_W` verbatim in shape terms. This is the
     irreducible cost of carrying: a block that is not propagated is not carried,
     and none of its three legs is the identity after the first hop.
+
+    **`SKEPTIC` 2026-09-04, defect 1(b), and it is a real saving I was billing
+    for.** A block's FIRST `contract_W` is not three matmuls. Upstream builds the
+    generated block with `fac2 = torch.eye(n) * 3` (`factor_k3.py:400`), so at
+    age 1 the middle leg is a scaled identity and `W @ (3 I_w)` is a COLUMN
+    SCALING of `W`, not a product. Exactly one carried block is at age 1 in every
+    round. `blocks` therefore carries `(legs, age)` and the age-1 middle leg is
+    billed as the scaling it is.
     """
-    return [tuple(W.T @ A for A in blk) for blk in blocks]
+    out = []
+    for legs, age in blocks:
+        A1, A2, A3 = legs
+        if age == 0 and w2 is not None:
+            # The middle leg is still `3 I` scaled by the wick vector, so this
+            # hop is a scaling and not a product. Billed on the leg's OWN shape,
+            # which is the cheapest defensible charge -- appropriate because the
+            # only spellings that take this branch are lower bounds. (The
+            # constant 3 folds into `w2` and does not change what is billed.)
+            mid = A2 * w2[:, None]
+        else:
+            mid = W.T @ A2
+        out.append(((W.T @ A1, mid, W.T @ A3), age + 1))
+    return out
 
 
 def _carry_slice21(blocks):
@@ -193,7 +270,7 @@ def _carry_slice21(blocks):
     approximation and does not understate the price.
     """
     out = None
-    for A1, A2, A3 in blocks:
+    for (A1, A2, A3), _age in blocks:
         s = (A1 * A2) @ A3.T + (A1 * A3) @ A2.T + (A2 * A3) @ A1.T
         out = s if out is None else out + s
     return out
@@ -272,15 +349,30 @@ def measure(spelling: str, *, width: int, depth: int, rank: int,
                     M = fnp.diag(S3) + 3.0 * S21.T
 
         elif spelling in ("floor_r", "floor_full"):
-            blocks = blocks_r if spelling == "floor_r" else blocks_n
+            src = blocks_r if spelling == "floor_r" else blocks_n
             # The final layer reads only the (3,) slice, so the carry is
             # propagated `depth - 1` times, not `depth`.
+            #
+            # **SKEPTIC 2026-09-04, defect 1(a).** The FIRST version of this
+            # loop propagated three generations in every one of the fifteen
+            # rounds. `p2_wp15_depth.slices_window` forbids that -- "`k >= p` is
+            # the uncapped flow, because there was never an older generation to
+            # discard" -- so at layer `l` the live generations are those made at
+            # `l-1, l-2, l-3` and the counts are `1, 2, 3, 3, ...` = 42 block
+            # propagations, not 45. It was a 6.7% over-count on the row the
+            # verdict rested on, and it flipped that row.
+            blocks = []
             for l in range(depth - 1):
-                blocks = _carry_propagate(Ws[l], blocks)
+                # drop anything older than three generations, admit the block
+                # this layer generates (age 0, middle leg still `3 I`), then
+                # propagate every live block. Counts: 1, 2, 3, 3, ... = 42.
+                blocks = [b for b in blocks if b[1] < 3]
+                blocks = blocks + [(src[l % 3], 0)]
+                blocks = _carry_propagate(Ws[l], blocks, w2)
 
         elif spelling in ("carry3_r", "carry3_full"):
             wide = (spelling == "carry3_full")
-            blocks = list(blocks_n if wide else blocks_r)
+            blocks = []
             M = M0
             for l in range(depth):
                 last = (l == depth - 1)
@@ -288,17 +380,22 @@ def measure(spelling: str, *, width: int, depth: int, rank: int,
                 S3, S21 = _regen_layer(fnp, Ws[l], M, w1, Sig, last_layer=last)
                 if last:
                     break
-                # propagate every carried generation
-                blocks = _carry_propagate(Ws[l], blocks)
-                # what they contribute to the discarded (2,1) and (3,) slices
-                D21 = _carry_slice21(blocks)
-                D21 = D21 - fnp.diag(fnp.diag(D21))
-                D3 = (blocks[0][0] * blocks[0][1] * blocks[0][2]).sum(axis=1)
-                # roll the window: drop the oldest, add the block just generated
+                # roll the window: drop anything older than three generations,
+                # admit the block this layer generates. SKEPTIC 2026-09-04
+                # defect 1(a) -- the window WARMS UP, it is not three deep at
+                # layer 0.
+                blocks = [b for b in blocks if b[1] < 3]
                 fresh = _fresh_block(fnp, Sig, w1, w2)
                 if not wide:
                     fresh = _truncate_block(fnp, fresh, r)
-                blocks = blocks[1:] + [fresh]
+                blocks = blocks + [(fresh, 0)]
+                # propagate every carried generation
+                blocks = _carry_propagate(Ws[l], blocks, None if not wide else w2)
+                # what they contribute to the discarded (2,1) and (3,) slices
+                D21 = _carry_slice21(blocks)
+                D21 = D21 - fnp.diag(fnp.diag(D21))
+                b0 = blocks[0][0]
+                D3 = (b0[0] * b0[1] * b0[2]).sum(axis=1)
                 # inject the correction the way `add_factors` takes it:
                 # `M_corr = diag(D3) + 3 D21^T`, summed into the regenerated M.
                 M = fnp.diag(S3) + 3.0 * S21.T + (fnp.diag(D3) + 3.0 * D21.T)
@@ -314,18 +411,35 @@ def measure(spelling: str, *, width: int, depth: int, rank: int,
             "flops_per_n3": ctx.flops_used / float(width ** 3)}
 
 
-def _verdict(added_flops: int, added_ops: int, anchor: int) -> dict:
+#: how many shipped-instrument operations one lab-transcription operation of the
+#: third-order flow stands for. `SKEPTIC` 2026-09-04 defect 2.
+def _op_scale(regen_ops: int) -> float:
+    return (SHIPPED_K3_OPS - SHIPPED_K2_OPS) / float(regen_ops)
+
+
+def _verdict(added_flops: int, added_ops: int, anchor: int,
+             regen_ops: int | None = None) -> dict:
     total = anchor + added_flops + SERVER_OFFSET_FLOPS
     mult = max(0.1, total / BUDGET)
     headroom = int(0.1 * BUDGET) - anchor - SERVER_OFFSET_FLOPS
-    return {"added_flops": int(added_flops), "added_ops": int(added_ops),
-            "total_with_server_offset": int(total),
-            "x_budget": total / BUDGET, "multiplier": mult,
-            "at_floor": bool(mult <= 0.1 + 1e-15),
-            "budget_headroom": int(headroom),
-            "x_headroom": added_flops / float(headroom),
-            "ops_total": int(CANARY_OPS + added_ops),
-            "ops_x_canary": (CANARY_OPS + added_ops) / float(CANARY_OPS)}
+    out = {"added_flops": int(added_flops),
+           "added_ops_lab_spelling": int(added_ops),
+           "total_with_server_offset": int(total),
+           "x_budget": total / BUDGET, "multiplier": mult,
+           "at_floor": bool(mult <= 0.1 + 1e-15),
+           "budget_headroom": int(headroom),
+           "x_headroom": added_flops / float(headroom)}
+    if regen_ops:
+        # NEVER add a lab op increment to a shipped op total. Translate first.
+        scale = _op_scale(regen_ops)
+        est = CANARY_OPS + added_ops * scale
+        out.update({"op_instrument_scale": scale,
+                    "added_ops_shipped_estimate": est - CANARY_OPS,
+                    "ops_total_shipped_estimate": est,
+                    "ops_x_canary_shipped_estimate": est / float(CANARY_OPS),
+                    "ops_x_canary_lab_spelling_DO_NOT_USE":
+                        (CANARY_OPS + added_ops) / float(CANARY_OPS)})
+    return out
 
 
 def main(argv=None) -> int:
@@ -368,7 +482,8 @@ def main(argv=None) -> int:
         sub = base["flops"] if sp.startswith("carry3") else 0
         sub_ops = base["n_ops"] if sp.startswith("carry3") else 0
         m["added"] = _verdict(max(m["flops"] - sub, 0),
-                              max(m["n_ops"] - sub_ops, 0), a.anchor)
+                              max(m["n_ops"] - sub_ops, 0), a.anchor,
+                              regen_ops=base["n_ops"] if sp.startswith("carry3") else None)
         rows[sp] = m
 
     print(f"  {'spelling':<14}{'counted FLOPs':>20}{'ops':>7}{'/n^3':>10}"
@@ -384,14 +499,18 @@ def main(argv=None) -> int:
     print()
     fits = rows["carry3_full"]["added"]["at_floor"]
     lb_fits = rows["floor_r"]["added"]["at_floor"]
+    cf = rows["carry3_full"]["added"]
     print(f"  VERDICT   the 3.330x cell as built "
-          f"{'FITS' if fits else 'DOES NOT FIT'} at the 0.1 multiplier floor "
-          f"({rows['carry3_full']['added']['x_headroom']:.2f}x the headroom).")
-    print(f"            the unachievable lower bound "
-          f"{'fits' if lb_fits else 'DOES NOT FIT EITHER'} "
-          f"({rows['floor_r']['added']['x_headroom']:.2f}x the headroom), so the "
-          f"gap is {'implementation' if lb_fits else 'arithmetic'}, not "
-          f"{'arithmetic' if lb_fits else 'implementation'}.")
+          f"{'FITS' if fits else 'DOES NOT FIT'} at the 0.1 multiplier floor: "
+          f"{cf['x_headroom']:.2f}x the headroom on FLOPs, and "
+          f"{cf['ops_x_canary_shipped_estimate']:.2f}x the canary's operations "
+          f"on the shipped-instrument estimate (the 0.4 s cliff sits at about "
+          f"{0.4/0.1797:.2f}x).")
+    print(f"            The lower bound `floor_r` "
+          f"{'FITS' if lb_fits else 'does not fit'} "
+          f"({rows['floor_r']['added']['x_headroom']:.2f}x the headroom), so it "
+          f"bounds nothing useful and the verdict rests on the as-built row, "
+          f"where the margin is a factor of ten rather than six percent.")
 
     # The rank sweep. `carry3_r` is already LESS accurate than the 3.330x cell
     # at every rank, so this cannot rescue the lane -- it says how far from
@@ -400,23 +519,33 @@ def main(argv=None) -> int:
     sweep = []
     ranks = [int(x) for x in a.sweep.split(",") if x.strip()]
     print(f"\n  rank sweep -- `carry3_r`, net of the regenerating backbone\n")
-    print(f"  {'rank':>6}{'added FLOPs':>18}{'x headroom':>12}{'added ops':>11}"
-          f"{'ops x canary':>14}  fits?")
+    print(f"  {'rank':>6}{'added FLOPs':>18}{'x headroom':>12}"
+          f"{'added ops (lab)':>17}{'ops x canary*':>15}  FLOPs fit?")
     print("  " + "-" * 66)
     biggest_fit = None
     for rk in ranks:
         m = measure("carry3_r", width=a.width, depth=a.depth, rank=rk)
         v = _verdict(max(m["flops"] - base["flops"], 0),
-                     max(m["n_ops"] - base["n_ops"], 0), a.anchor)
+                     max(m["n_ops"] - base["n_ops"], 0), a.anchor,
+                     regen_ops=base["n_ops"])
         m["added"] = v
         sweep.append(m)
         if v["at_floor"]:
             biggest_fit = rk
         print(f"  {rk:>6}{v['added_flops']:>18,}{v['x_headroom']:>12.3f}"
-              f"{v['added_ops']:>11,}{v['ops_x_canary']:>14.3f}"
+              f"{v['added_ops_lab_spelling']:>17,}"
+              f"{v['ops_x_canary_shipped_estimate']:>15.2f}"
               f"  {'yes' if v['at_floor'] else 'NO'}")
-    print(f"\n  largest carried rank that stays at the floor: "
-          f"{biggest_fit if biggest_fit is not None else 'NONE -- not even rank 16'}")
+    print("\n  * operations translated to the shipped instrument; the raw lab "
+          "count is not portable.")
+    print("    The FLOPs column is a LOWER BOUND ON A FICTION -- `carry3_r` "
+          "prices a Tucker")
+    print("    truncation, not a valid rank-`r` CP carry (SKEPTIC 2026-09-04, "
+          "defect 3), so NO")
+    print("    conclusion of the form 'the largest rank that fits is X' may be "
+          "drawn from it.")
+    print(f"    (For traceability only, the withdrawn figure was: "
+          f"{biggest_fit if biggest_fit is not None else 'none'}.)")
 
     out = {"check": "WP20 deployment price -- ops and FLOPs of shipping carry3_hybrid",
            "ruling": "strategist 2026-09-04, carve-out to Ruling 1",
@@ -426,7 +555,11 @@ def main(argv=None) -> int:
            "budget_headroom_flops": hd,
            "spellings": rows,
            "rank_sweep": sweep,
-           "largest_rank_at_floor": biggest_fit,
+           "rank_sweep_caveat": "carry3_r prices a Tucker truncation, not a "
+                                "valid rank-r CP carry (SKEPTIC 2026-09-04 "
+                                "defect 3). It UNDER-prices. No 'largest rank "
+                                "that fits' conclusion may be drawn.",
+           "largest_rank_at_floor_WITHDRAWN": biggest_fit,
            "as_built_fits_at_floor": bool(fits),
            "lower_bound_fits_at_floor": bool(lb_fits)}
     if a.out:

@@ -82,13 +82,13 @@ lanes we closed with a measured reason for each.
    | what the multiplier floor allows a `1024 x 16` estimator | **`6.40`** |
    | a second-order Gaussian closure, `float32` | `2.00` |
    | + regenerating the third cumulant from its own two read-slices | `4.91` |
-   | + *keeping* three generations of what that flow discards | `6.49` — **over** |
+   | + *keeping* three generations of what that flow discards | `22.62` — **over, by 3.5x** |
 
    **The third order is affordable and the second order was never the cheap
    option it looked like**; the memory that would make the third order accurate
-   is not affordable, by `1.06x`, and §7.6 shows the reason is structural. That
-   table prices the whole design space, and none of it was true until the dtype
-   was in the unit.
+   costs `3.5x` the entire allowance, and §7.6 shows the reason is structural.
+   That table prices the whole design space, and none of it was true until the
+   dtype was in the unit.
 
 We also report a negative that we think is the most useful thing in the paper: a
 Gaussian closure is an *internally consistent approximation, not a set of
@@ -1181,21 +1181,44 @@ generation carried.
 
 | what is priced | added counted FLOPs | × the spare budget |
 |---|---:|---:|
-| the object that measured `3.33×`, carried honestly | `579,970,045,440` | **`11.32×`** |
-| the same at rank 192, propagating compressed state *(already less accurate)* | `151,418,672,640` | **`2.96×`** |
-| **three generations, contraction only — no slice read, no injection, an implementation that could not work** | `54,331,637,760` | **`1.06×`** |
+| **the object that measured `3.33×`, carried honestly** | `608,251,203,072` | **`9.93×`** |
+| three generations, contraction only — no slice read, no injection, an implementation that could not work | `44,675,629,056` | `0.87×` |
 
-That third row is the one that settles it. It prices an implementation that does
-not exist and could not function — it propagates the memory and never reads it —
-and it is *still over budget*. **The gap is arithmetic, not engineering.** There
-was no cleverer spelling left for us to find: concatenating the three generations
-into one wider tensor bills identically, and sharing the weight contraction
-across them bills identically.
+**A factor of ten.** Not a margin any spelling recovers: we checked the three
+structural savings available — the identity legs, the window's warm-up, and
+concatenating the three generations into one wider tensor — and none takes `9.9×`
+under `1×`.
 
-Sweeping the carried rank puts a number on how far away it is: the largest rank
-that stays at the multiplier floor is **64**, and the two ranks whose accuracy we
-actually measured are `128` (`3.05×`) and `192` (`3.33×`). Everything affordable
-is less accurate than something that had already failed.
+**We also got this wrong once, in a way worth reporting, because it is the exact
+failure mode this section is about.** Our first version of the second row came in
+at `1.06×` — *over* budget — and we wrote the conclusion that follows from it:
+*the gap is arithmetic, not engineering; no cleverness was left on the table.* An
+independent audit found two over-charges. The carried window **warms up** — at
+layer `l` only the generations made at `l-1, l-2, l-3` exist, so there are 42
+propagation rounds and not 45 — and a generation's **first** weight contraction
+is cheaper than the rest, because the block a layer generates still has a scaled
+identity in its middle slot. Either correction alone flips the row; together they
+put it at `0.87×`. **It fits, and it bounds nothing.**
+
+So we withdraw *"the gap is arithmetic, not engineering."* The verdict rests on
+the first row instead, where the margin is a factor of ten rather than six
+percent — **and the lesson we would actually pass on is that we let a decision
+rest on a row with a single-digit margin without noticing we had.** The
+over-charges were not random: both were the conservative-*looking* choice, and
+both made our own negative stronger.
+
+**The other axis, honestly.** The same audit found we had measured the operation
+cost on a mismatched instrument — our laboratory spelling of the flow bills `469`
+array operations where the shipped file's own third-order step bills `2,255`, the
+same arithmetic in `4.8×` fewer calls. Corrected, the carried design lands at
+about `2.3×` the shipped file's operation count, against a wall-time cliff its
+worst graded network already sits `2.23×` under. **So the memory probably fails
+on both axes, and we can only say "probably":** an operation count turns out to
+be `3×` spelling-dependent inside identical arithmetic — three separate rank-192
+blocks bill 35 operations, one concatenated rank-576 block bills 11, same FLOPs,
+same values to `5×10⁻⁷`. **An operation count is a property of a program, not of
+a computation.** The arithmetic axis is the one measured on a matched instrument,
+and it is the one the decision stands on.
 
 **Two things in this generalise past our benchmark.**
 
@@ -1207,20 +1230,23 @@ to spend, and against that the same call is **`54.5%` of everything it has**. A
 rate quoted against the total is smallest exactly where it is fatal. Every price
 in a promotion decision belongs in units of what is actually free.
 
-**Two: which cost axis binds is a property of the design, not of the
-competition.** §6.6 is the story of us discovering that under this Phase's scoring
-the arithmetic is free and the thing that can actually kill a submission is an
-*operation count*, because that is what the wall-time cliff is paid in. Within a
-day that had hardened into an assumption. The carried design is killed by
-arithmetic while adding only `33%` more operations — a load the wall-time margin
-would have absorbed comfortably. Had we metered only the axis that bit us last
-time, this would have read as affordable, and we would have built it.
+**Two: meter both cost axes, and name the instrument in the same sentence as the
+number.** §6.6 is the story of us discovering that under this Phase's scoring the
+arithmetic is free and the thing that can actually kill a submission is an
+*operation count*. Within a day that had hardened into an assumption, and this
+section is what happened next: we metered the arithmetic axis carefully, on a
+matched instrument, and the operation axis carelessly, on a mismatched one. The
+operation census we ran the same day makes the point cleanly on one instrument
+throughout — **78 of our shipped candidate's 2,673 array operations carry its
+entire arithmetic bill, and the other 97% carry its wall-time risk.** The two
+budgets are spent in almost disjoint places, so an optimisation for one is by
+default irrelevant to the other.
 
-So the fifth route closes twice, on two independent walls, and the second wall is
-the more interesting one: **the only correction that recovers what the flow
-throws away is unaffordable for the same structural reason that makes the flow
-cheap in the first place.** The identity legs that buy us a third-order flow at
-second-order prices are exactly what a memory cannot have.
+So the fifth route closes twice, and the second closure is the more interesting
+one: **the only correction that recovers what the flow throws away is
+unaffordable for the same structural reason that makes the flow cheap in the
+first place.** The identity legs that buy a third-order flow at second-order
+prices are exactly what a memory cannot keep.
 
 ---
 
@@ -1259,12 +1285,12 @@ second-order prices are exactly what a memory cannot have.
    hypothesis names?" It is the only check that can see a correct implementation
    of the wrong construction, and it costs minutes. We adopted it as a standing
    rule the day after it would have saved us sixty-four networks.
-9. **Meter every cost axis the scoring rule contains, every time, even the one
-   that did not bind last time.** Which axis binds is a property of the design,
-   not of the competition (§7.6). We learned that the wall-time axis was the
-   dangerous one, and eleven days later were nearly wrong-footed by a design that
-   the wall-time axis would have waved through and the arithmetic axis killed
-   by `11x`.
+9. **Meter every cost axis the scoring rule contains, and name the instrument in
+   the same sentence as the number.** Which axis binds is a property of the
+   design, not of the competition. An operation count in particular is a property
+   of a *program*: we measured a `3x` range for identical arithmetic spelled two
+   ways, so a count taken from a laboratory transcription may never be added to a
+   shipped file's total (§7.6).
 10. **Quote every price against the budget that is actually free.** A cost that
    is `0.16%` of the total allowance is `54.5%` of what an estimator sitting at
    the multiplier floor has left. Rates quoted against the total read smallest
@@ -1361,11 +1387,20 @@ second-order prices are exactly what a memory cannot have.
   We caught it while writing §7.6 and only because the decision happened to land
   on a boundary. **A rate quoted against the total is smallest exactly where it
   is fatal.** (§7.6)
-- **We generalised "the binding cost is the operation count" from one design to
-  the project, in a day.** It is a property of the design. The carried memory in
-  §7.6 is killed by arithmetic at `11.3x` while adding `33%` operations — a
-  wall-time load our margin would have absorbed. Had we metered only the axis
-  that bit us last time, we would have built it. (§7.6)
+- **We rested a cost verdict on a row with a 6% margin, and an audit flipped
+  it.** Our "unachievable lower bound" for the carried memory over-charged twice
+  — the window's warm-up, and a generated block's cheaper first contraction —
+  and came in at `1.06x` the spare budget. Corrected it is `0.87x`: it fits, and
+  bounds nothing. **Both over-charges were the conservative-looking choice, and
+  both strengthened our own negative.** The decision did not change; the reason
+  we had published for it did. (§7.6)
+- **We metered one cost axis on the wrong instrument.** Our laboratory spelling
+  of the flow bills `469` array operations where the shipped file's own
+  third-order step bills `2,255` — the same arithmetic in `4.8x` fewer calls —
+  and we added a lab increment to a shipped total. **An operation count is `3x`
+  spelling-dependent inside identical arithmetic**, so it is a property of a
+  program and never transfers between spellings; counted FLOPs on a dense path
+  do. (§7.6)
 - **Four consecutive null controls could not do their job.** The most recent
   compares a deterministic call with itself: the perturbation branch is skipped
   when the perturbation is zero, so the control returns exactly zero and *cannot*
@@ -1415,7 +1450,7 @@ reader to first.
 | 9 | **exact sparse / equality-aware K3** ("W-EFF") | `1.073 B` under the official meter against a pre-registered `<= 0.35 B` screen — fails by `3.07x` | `experiments/2026-08-28_weff/` |
 | 10 | **rank-capping** the factored third cumulant | accuracy falls faster than cost; at rank `n` the object is `14x` closer to the second-order closure than to the third-order one. It is coordinate pruning, not compression (§5). **Closed twice** — the first closure claimed "for good" and was softened to a measured negative | P-B, ORACLE-1/2/2b |
 | 11 | **late / age-windowed K3** | every window arm's provable score floor is `2.1x`-`4.7x` worse than the shipped file, and `89%` of a window's error is its cheap prefix, not the missing memory | `experiments/2026-08-28_window/` |
-| 12 | **carrying** the discarded third-cumulant block for three generations | closed **twice, on two independent walls**. Accuracy: keeping both halves *exactly* — the ceiling on the whole family — is `3.87x` against a `10x` requirement, and the operating point is `3.33x` (§7.5). Cost: carried honestly it needs `11.3x` the estimator's entire spare budget, and even a deliberately unachievable lower bound that propagates the memory and never reads it is `1.06x` over (§7.6). The largest carried rank the budget allows is `64`; the ranks we measured are `128` and `192` | WP20, `experiments/2026-09-03_wp20/c2_carry3_hybrid_P05.json`, `experiments/2026-09-04_wp20_price/wp20_price.json` |
+| 12 | **carrying** the discarded third-cumulant block for three generations | closed **twice**. Accuracy: keeping both halves *exactly* — the ceiling on the whole family — is `3.87x` against a `10x` requirement, and the operating point is `3.33x` (§7.5). Cost: carried honestly it needs **`9.93x`** the estimator's entire spare budget, and about `2.3x` its operation count against a wall-time cliff already only `2.23x` away (§7.6). **Closed twice in the second sense too** — our first cost verdict rested on a lower bound that an audit showed was over-charged and actually fits; the decision did not change, the published reason did | WP20, `experiments/2026-09-03_wp20/c2_carry3_hybrid_P05.json`, `experiments/2026-09-04_wp20_price/wp20_price.json` |
 
 Two further lanes are *not* in this table because they are not closed, and saying
 so is part of the honesty: **query-directed / adjoint K3** had its kill

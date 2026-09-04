@@ -31,7 +31,15 @@
 > job that scores a gate or spends a seed block: an **adversarial read that
 > traces what the code does with each object the contract names**, confirming the
 > cell answers the contract's question and not a narrower one. **It is distinct
-> from the post-run Skeptic and does not replace it.** It exists because
+> from the post-run Skeptic and does not replace it.**
+>
+> **AMENDED the same day, by the Skeptic that found what it would have missed.**
+> The rule as first written would have caught the warm-up defect (it is in
+> `slices_window`'s own docstring) and missed the `3 I` middle leg entirely —
+> that lives in `factor_k3.py:400`, upstream, three files away, and is named by
+> nothing in the contract. **Second clause: trace each named object to the
+> UPSTREAM DEFINITION that produces it, not only to the place the contract names
+> it.** It exists because
 > `SKEPTIC WP20` found a cell where *nothing was broken* and every correctness
 > check passed on the wrong construction. Its first binding application is the
 > next contract; today's pricing was ROUTINE-by-the-table (no gate, no block) and
@@ -46,36 +54,52 @@
 > **`51,249,140,941`** FLOPs — the module refuses to run if that disagrees with
 > `CONTRACT WP20`'s own figure.
 >
+> **THESE ARE THE POST-AUDIT NUMBERS.** Rule 2 returned **`PROVISIONAL`** against
+> pinned commit `af465fc`, the disposition survived over-determined, and **three
+> supporting claims did not.** Every correction is applied and the artifact is
+> regenerated. Full verdict and errata: `experiments/LOG.md`, *"SKEPTIC ON THE
+> WP20 DEPLOYMENT PRICE"*.
+>
 > | spelling | added FLOPs | `x headroom` | |
 > |---|---:|---:|---|
-> | **`carry3_full`** — the object that measured `3.330x` | `579,970,045,440` | **`11.317`** | **OVER** |
-> | `carry3_r` — rank `192`, propagating truncated state (already less accurate) | `151,418,672,640` | **`2.955`** | **OVER** |
-> | **`floor_r`** — 3 blocks, rank `192`, `contract_W` ONLY; no slice read, no injection. **An unachievable lower bound** | `54,331,637,760` | **`1.060`** | **OVER** |
->
-> **Largest carried rank that stays at the floor: `64`.** The ranks whose
-> accuracy was measured are `128` (`3.047x`) and `192` (`3.330x`).
+> | **`carry3_full`** — the object that measured `3.330x`, carried honestly | `608,251,203,072` | **`9.934`** | **OVER** |
+> | `floor_full` — carry propagation only, `(n,n)` legs | `238,270,021,632` | `4.649` | OVER |
+> | `floor_r` — the "unachievable lower bound" | `44,675,629,056` | `0.872` | **AT FLOOR** |
 >
 > **It does not fit. Per the ruling it is DROPPED and no further contract opens.**
-> The lower bound being over is what makes this independent of implementation
-> skill: **the gap is arithmetic, not engineering.**
+> The verdict rests on `carry3_full` — **a factor of ten** — and the three
+> structural savings available (identity legs, the window's warm-up,
+> concatenation) were checked and none takes `9.9x` under `1x`.
 >
 > **The cause is structural.** `from_dstensor` returns `(diag(S3) + 3 S21^T, I,
-> I)` — two identity legs, which is the regenerating flow's entire saving. One
-> `contract_W` on a *carried* block leaves `(W A1, 3W, W A3)`, three real
-> matrices. **Carrying is not a knob with a cost; it is a different price regime,
-> entered on the first hop.**
+> I)` — two identity legs, the regenerating flow's entire saving. A carried
+> block's first `contract_W` is two products and a column scaling (its middle leg
+> is still `3 I`, `factor_k3.py:400`); **every hop after that is three real
+> matrices at the generic price.** Carrying is a different price regime, not a
+> knob with a cost.
 >
-> **The op axis is NOT what killed it** — `+885` ops, `1.331x` the canary — which
-> is the mirror image of the residual-is-op-count finding and is why both axes
-> are metered from now on.
+> **THREE CLAIMS ARE WITHDRAWN, and they are not in the table above:**
 >
-> **Control:** the regenerating layer bills `92.310 n^3` at f32, **exactly half**
-> WP13's published f64 `184.62 n^3`, and reconciles the canary's metered total to
-> `+1.0%`. Two numbers the module never fitted to.
+> 1. *"the unachievable lower bound is over too, so the gap is arithmetic, not
+>    implementation"* — **FALSE.** `floor_r` over-charged twice (the window warms
+>    up: `42` propagations, not `45`; and the age-1 middle leg is a scaling, not a
+>    matmul). Corrected it is `0.872x` and **it fits**. It bounds nothing.
+> 2. *"the op axis is NOT what killed it, `+885` ops, `1.331x`"* — **NOT
+>    ESTABLISHED.** That added a LAB op increment to a SHIPPED op total. `regen`
+>    bills `469` operations where the canary's own third-order increment is
+>    `2,255` (`flow_price_wp17b.json`). Translated: about **`2.28x`** the canary,
+>    against a cliff its worst graded row already sits `2.23x` under. **Op counts
+>    are `3x` spelling-dependent inside identical arithmetic** and never transfer.
+> 3. *"largest carried rank that stays at the floor: `64`"* — **WITHDRAWN.**
+>    `carry3_r` prices a Tucker truncation, not a valid rank-`r` CP carry (a
+>    `FactoredTensor`'s rank index is shared across all three legs). It
+>    under-prices a fiction.
 >
-> **Rule 2 is RUNNING**: an independent Skeptic was launched against the pinned
-> commit `af465fc` on this claim. **The verdict is not in as this was written.**
-> Read `experiments/LOG.md` for it before quoting anything in § 3.
+> **Control, and the audit strengthened it:** `regen` at f32 is **bit-exact half**
+> WP13's committed f64 figure (`99,116,660,736` vs `198,233,321,472`), which also
+> proves no silent NEP-50 promotion — and the reconciliation needed no `137.6e9/2`
+> guess, because the measured f32 backbone `68,782,549,504` is on disk in
+> `flow_price_wp17b.json`.
 >
 > ## 4. THE OP WORK IS SIZED, BEFORE IT IS ORDERED — and it needs `45.2%`
 >

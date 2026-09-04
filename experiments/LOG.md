@@ -32717,3 +32717,208 @@ parity gate was built for.
    directly cost one command and turned a quoted ratio into an independent
    confirmation at `0.1%`. **Check the anchor of any projection you are about to
    make a decision on.**
+
+---
+
+# 2026-09-04 (LATE) — **SKEPTIC ON THE WP20 DEPLOYMENT PRICE: `PROVISIONAL`. The DROP survives and is over-determined. Three of my supporting claims do not, and one had already reached `docs/GOTCHAS.md` and the write-up.**
+
+Rule 2, launched against pinned commit `af465fc` in a context that never saw my
+reasoning. Verdict **PROVISIONAL**. **Every correction below is applied; the
+instrument is re-run and the artifact regenerated.**
+
+> *"The disposition — drop the cell, open no contract — survives and is
+> over-determined. But one of the three legs of the claim as stated is false, I
+> reproduce the flip, and it has already been written into `docs/GOTCHAS.md` as a
+> durable lesson."*
+
+## 1. Defect 1 — `floor_r` was NOT a lower bound, and the row it decided FLIPS
+
+Two independent over-charges, **either one of which flips the row**:
+
+**(a) The window WARMS UP and I billed it as though it did not.** My loop
+propagated three generations in every one of the fifteen rounds.
+`p2_wp15_depth.slices_window:204-217` is the authority and says otherwise in its
+own docstring — *"`k >= p` is the uncapped flow, **because there was never an
+older generation to discard**"*. At layer `l` the live generations are those made
+at `l-1, l-2, l-3`, so the counts are `1, 2, 3, 3, ...` = **42** block
+propagations, not `15 x 3 = 45`. A `6.7%` over-count on a row whose margin was
+`6.0%`.
+
+**(b) A generation's FIRST `contract_W` is not three matmuls.** Upstream
+`factor_k3.py:400`: `fac2 = torch.eye(n) * 3`. At age 1 the middle leg is a
+scaled identity, so `W @ (3I)` is a **column scaling**, not a product. Exactly
+one carried block is at age 1 in every round. Measured on this host at the live
+shape: `W.T @ dense(3I)` bills `2,146,960,896`; the scaling bills `1,049,600`.
+
+| `floor_r` | counted FLOPs | `x headroom` | |
+|---|---:|---:|---|
+| as I committed it | `54,331,637,760` | `1.060` | over |
+| corrected, this session | **`44,675,629,056`** | **`0.872`** | **AT THE FLOOR** |
+
+**WITHDRAWN, in the words they were written in:**
+
+1. *"the unachievable lower bound is over too… so the gap is arithmetic, not
+   implementation"* — **FALSE.** `floor_r` fits. It bounds nothing useful.
+2. Knowledge delta #2, *"that single row makes the verdict independent of every
+   implementation choice in the module"* — **FALSE**, and falsified by the very
+   instance it cited. The row was `6%` from flipping and it flipped.
+3. `docs/GOTCHAS.md` item 4, *"A deliberately UNACHIEVABLE lower bound is the
+   cheapest way to make a negative decision robust"* — the technique is still
+   sound; **my execution of it was wrong, and the item now says so and carries
+   the corrected number.**
+
+**The DROP does not depend on any of it.** It rests on `carry3_full`, and after
+the same two corrections that row reads **`608,251,203,072`, `9.934x` the
+headroom** — a factor of ten, not a six-percent margin. The auditor checked the
+three structural savings available (identity legs, warm-up, concatenation) and
+none takes `9.9x` under `1x`.
+
+## 2. Defect 2 — the op axis was measured on a MISMATCHED INSTRUMENT, and the corrected number does not say what I said
+
+My `regen` is an excellent **FLOP** control — `99,116,660,736`, within `-0.78%`
+of the canary's directly measured third-order increment — and I used it as an
+**operation** control as well. It is not one.
+
+`experiments/2026-09-03_wp16_parity/flow_price_wp17b.json` holds the canary's own
+flow on the shipped instrument: `k3_ops 2,708`, `k2_ops 453`, so the real
+third-order increment is **`2,255` operations**. My `regen` bills **`469`** —
+the same arithmetic in **`4.81x` fewer array calls**. `added_ops = 1354 - 469 =
+885` was therefore a **lab-transcription increment added to a shipped-file
+total**, which is the mixed-instrument error `VALIDATION.md` names.
+
+The auditor also measured the spelling-dependence directly: three separate
+rank-`192` blocks bill `35` operations; **one concatenated rank-`576` block bills
+`11`** — identical FLOPs, values agreeing to `5.1e-07` relative. **A `3x` range
+inside identical arithmetic.**
+
+Translated through the instrument ratio, `carry3_full` adds about `2,900`
+shipped-instrument operations: **`2.28x` the canary**, against a `0.4 s` cliff
+that the canary's graded worst row already sits `2.23x` under.
+
+**WITHDRAWN:** *"The op axis is NOT what kills it… a `+33%` residual load that a
+`>= 4x` graded headroom would have absorbed"*, and knowledge delta #3's use of it
+as the evidence that the binding axis is design-dependent.
+
+**What replaces it is weaker and points the other way.** On the same-instrument
+projection the carried design lands at `2.28x` the canary's operations, i.e.
+**at or just past the cliff its worst graded row already sits under** — so the
+op axis probably kills it too. That is a projection with a `3x` spelling
+uncertainty in it and it is not the ground the decision stands on; **the FLOP
+axis is the one measured on a matched instrument, and it is the one that decides.**
+
+**The underlying lesson SURVIVES and is if anything better evidenced:** the two
+axes are spent in different places and must both be metered. The op census entry
+above measures that directly on the shipped file — `78` of `2,673` operations
+carry the entire FLOP bill — and that measurement is on one instrument
+throughout.
+
+## 3. Defect 3 — `carry3_r` prices an object that cannot exist, so the rank sweep is a fiction
+
+`_truncate_block` returns `Qm` and discards `B = Q^T A`. A `FactoredTensor`'s
+rank index is **shared across all three legs** (`factor_k3.py:80`, `add_factors_`
+concatenates along `dim=1`), so replacing each leg by an orthonormal basis of its
+range and dropping the core gives a **Tucker** form whose `(r,r,r)` core has been
+thrown away — **not a rank-`r` CP carry**. Reading the `(2,1)` slice of the
+honest object requires `Q_i B_i` re-materialised at `(n, n)`, which is
+`floor_full`'s price.
+
+**Direction: it UNDER-prices**, so it is conservative for the verdict. But:
+
+**WITHDRAWN:** *"largest carried rank that stays at the floor: `64`"*, and the
+whole framing of `carry3_r` as *"the full deployable spelling"*. It is a lower
+bound on a fiction. The module now prints that in place of the number, the JSON
+carries `rank_sweep_caveat` and `largest_rank_at_floor_WITHDRAWN`, and no
+conclusion of the form *"the largest rank that fits is X"* may be drawn.
+
+## 4. A false statement about upstream, in my own docstring
+
+I wrote that `_factored_get_dslice` gives *"three matmuls when the legs differ,
+two when two coincide"*. **True about the arithmetic, false about upstream:**
+`block_perms` is built from **index** permutations (`factor_k3.py:42-44`) and is
+always three for `d = 3, part = (2,1)`, whatever the leg values. Two products
+coincide when `A2 == A3` and **upstream does not realise the saving** — my
+`regen` spelling realises it by hand. Not load-bearing (the reconciliation holds
+either way) but it was quoted as a fact about upstream and it was not one.
+Corrected in place, with the error kept.
+
+## 5. What the auditor CONFIRMED, including things I had understated
+
+- **The FLOP control is stronger than I claimed.** `regen` at f32 is **bit-exact
+  half** the committed f64 figure in `e0_cost.json` (`99,116,660,736` against
+  `198,233,321,472`), which *also* proves there is no silent NEP-50 promotion
+  anywhere in the spelling. And I did not need the `137.6e9 / 2` reconciliation
+  guess at all — **the measured f32 backbone `68,782,549,504` is on disk** in
+  `flow_price_wp17b.json`.
+- **f32 discipline holds end to end** (my question 5): every carried leg, `D3`,
+  `D21`, `M`, and the outputs of `fnp.linalg.qr` and `fnp.linalg.svd` are f32,
+  and both totals reproduce to the FLOP.
+- **The headroom assert is a transcription check, not a circular one** (my
+  question 7) — `int(0.1 * 2**41) - 168,636,407,398 - 2**24 = 51,249,140,941`,
+  recomputed independently. **But it is not independent evidence and must not be
+  cited as if it were.**
+- **The slices-to-slices map really is not closed** (my question 1): any slice of
+  `contract_W(T)` needs the factors, and `_factored_get_dslice` explicitly
+  refuses the all-distinct slice as unmaterialisable. The auditor could not break
+  it either. My §5.1 scoping of it as an assertion was correct.
+- **Process hygiene clean**: real `flopscope`, `sys.path` appended, no seed block
+  drawn, `scan_sources()` empty, `P06[..064..127]` unspent, `estimator.py`
+  untouched.
+
+## 6. Two wording defects in the rank-64 inference, and the auditor is right about both
+
+My question 4 largely cleared — the auditor confirmed the **hybrid** family IS
+monotone in rank (`E3` recovery rank-independent at `0.794 / 0.793 / 0.792`,
+`E21` climbing `0.664 / 0.718 / 0.799`), and `SKEPTIC WP20`'s non-monotonicity is
+specific to the **sketch** family. Feeding that Skeptic's own response surface
+with `u3` fixed reproduces `2.91x` at `r = 128` and `3.17x` at `r = 192` against
+measured `3.047 / 3.330`, and gives `~2.6x` at `r = 64`. But:
+
+1. LOG §3.4 said *"the family is climbing in rank"* **without saying which
+   family** — the exact ambiguity the previous audit was about. **Corrected: the
+   HYBRID family.**
+2. *"rank 64 is below `3.047x`"* is **shape-specific and reads as universal**.
+   `SKEPTIC WP20` §1 records a `256 x 6` smoke with `carry3_hybrid:64` at
+   **`12.485x`**. **Corrected: at the live `1024 x 16` shape.**
+
+Moot for the decision — the rank sweep that motivated it is withdrawn under
+defect 3 — but recorded because both are the kind of imprecision that survives
+into a write-up.
+
+## 7. What this changes, and what it does not
+
+**Unchanged:** the cell is **DROPPED**, no deployment contract opens, no seed
+block is spent, `estimator.py` stays at v2.6.1. The disposition was never close:
+the cell failed its own pre-registered `>= 4.0x` gate at `3.330x` against a `10x`
+kill line, and its honest carry is `9.93x` the entire budget headroom.
+
+**Changed:** three supporting claims are withdrawn, `docs/GOTCHAS.md` items 3 and
+4 are rewritten, write-up § 7.6 is corrected before it was ever quoted outside
+this repository, and the instrument now prints its own caveats rather than
+relying on a reader having read this entry.
+
+## Knowledge delta
+
+1. **A "conservative" implementation choice is not conservative if it is
+   unexamined.** Propagating three generations at every layer *looked* like the
+   safe direction — more cost, stronger negative — and it was the direction that
+   **favoured my conclusion**. The auditor's checklist item 18 is exactly this:
+   *an implementation choice that happens to favour the stated conclusion.* I
+   made two of them in one function and neither was flagged in my own scope
+   section.
+2. **A margin of `6%` on a decisive row is not a decision, it is a coin flip
+   waiting for an audit.** The fix is not "be more careful" — it is to notice,
+   at writing time, that the row the verdict rests on has a single-digit margin,
+   and to say so in the entry. `carry3_full` at `9.93x` needed no such care;
+   `floor_r` at `1.060x` needed it and did not get it.
+3. **Operation counts are `3x` spelling-dependent inside identical arithmetic**
+   (`35` ops for three rank-192 blocks, `11` for one concatenated rank-576 block,
+   same FLOPs, same values to `5.1e-07`). **An op count is a property of a
+   program, not of a computation**, and may never be transferred between
+   spellings. FLOP counts, on this dense path, may.
+4. **The pre-run instrument check adopted this morning would have caught defect
+   1(a) and missed 1(b).** Walking the contract's nouns against the code would
+   have reached `slices_window` and its warm-up sentence. It would not have
+   reached `fac2 = torch.eye(n) * 3`, which is upstream, three files away, and
+   named by nothing in the contract. **The rule needs a second clause: trace each
+   named object to the upstream definition that produces it, not only to the
+   place the contract names it.**

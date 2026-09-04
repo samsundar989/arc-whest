@@ -24,6 +24,13 @@ narrative record), `docs/GAME_PLAN.md` (the sole active Phase-2 strategy).
 
 ## 2026-09-04 (WP20 deployment price) — a regenerating flow's cheapness has a ONE-HOP HALF-LIFE, and price against the HEADROOM
 
+> **AUDITED AND CORRECTED THE SAME DAY.** An independent Skeptic returned
+> `PROVISIONAL` on the slice this section came from and flipped one of its rows.
+> Items 1 and 2 stand as written. **Items 3 and 4 are rewritten below**, and the
+> numbers they originally carried are recorded as errata in `experiments/LOG.md`
+> rather than deleted. Full verdict: LOG, 2026-09-04, *"SKEPTIC ON THE WP20
+> DEPLOYMENT PRICE"*.
+
 **1. The identity legs are the whole saving, and one `contract_W` destroys them.**
 `FactoredTensor.from_dstensor` returns `(diag(S3) + 3 S21^T, I, I)` — recorded in
 the WP14 section above as *"worth `2.08x`"*. What that section does not say, and
@@ -37,13 +44,25 @@ what a carried design needs to know before it is designed:
 > `3` block permutations in the `(2,1)` slice instead of `2`.
 
 **"Carry it instead of regenerating it" is therefore not a knob with a cost. It
-is a different price regime**, entered permanently on the first hop, at `2x` on
-`contract_W` and `1.5x` on every slice read, **per carried generation**.
-Measured, f32, live shape: three carried generations at rank `192`, propagation
-and **nothing else** — no slice read, no fresh block, no truncation, no
-injection — is `54,331,637,760` FLOPs, which is `1.06x` the canary's entire
-`51,249,140,941` headroom to the `0.1` multiplier floor. The same at honest
-`(n, n)` legs is `5.65x` it. `local_sim/p2_wp20_price.py`,
+is a different price regime**, entered on the first hop, at `2x` on `contract_W`
+and `1.5x` on every slice read, **per carried generation**. Two qualifications
+the first draft of this section got wrong, both found by audit:
+
+- **the window warms up.** At layer `l` the live generations are those made at
+  `l-1, l-2, l-3`, so the propagation counts are `1, 2, 3, 3, …` — **42** rounds
+  over a `16`-layer flow, not `45`. `p2_wp15_depth.slices_window` says so in its
+  own docstring and I billed as though it did not.
+- **a generation's FIRST hop is cheaper than the rest.** Upstream's generated
+  block has `fac2 = torch.eye(n) * 3` (`factor_k3.py:400`), so at age 1 the
+  middle leg is a scaled identity and `W @ 3I` is a column scaling. Exactly one
+  carried block is at age 1 in every round.
+
+Measured, f32, live shape, **corrected**: carrying three generations at rank
+`192` with propagation and **nothing else** — no slice read, no fresh block, no
+truncation, no injection — is `44,675,629,056` FLOPs, `0.87x` the canary's
+`51,249,140,941` headroom, i.e. **it fits**. The honest carry of the object that
+was actually measured is `608,251,203,072`, **`9.93x` the headroom**. That is the
+number the regime change is worth quoting on. `local_sim/p2_wp20_price.py`,
 `experiments/2026-09-04_wp20_price/wp20_price.json`.
 
 **2. Price against the HEADROOM, not against the budget.** This file's own
@@ -54,19 +73,39 @@ spend and not `100%`. **A rate quoted against `B` is smallest exactly where it i
 fatal.** Every price in a promotion decision belongs in units of
 `0.1 * B - (candidate + 2**24)`.
 
-**3. Meter BOTH cost axes every time; which one binds is a property of the
-DESIGN, not of the project.** The 2026-09-03 finding that the binding Phase-2
-cost is an *operation count* (the `0.4 s` residual cliff, `lambda = 0`) hardened
-into an assumption within a day. The carried design is killed by **FLOPs** while
-adding only `+33%` operations — a residual load a `>= 4x` graded headroom would
-have absorbed. Had only the axis that bit last time been metered, this would have
-read as affordable.
+**3. AN OPERATION COUNT IS A PROPERTY OF A PROGRAM, NOT OF A COMPUTATION — never
+transfer one between spellings.** Measured by the audit, at the live shape, in
+one flopscope: three separate rank-`192` blocks bill **`35`** operations; **one
+concatenated rank-`576` block bills `11`** — *identical* counted FLOPs, values
+agreeing to `5.1e-07` relative. **A `3x` range inside the same arithmetic.**
 
-**4. A deliberately UNACHIEVABLE lower bound is the cheapest way to make a
-negative decision robust.** Four lines that price an implementation which does
-not exist and could not work — propagation with no slice read — came back *over
-budget*, which makes "does not fit" independent of every implementation choice in
-the module. Reach for it before optimising a spelling you are trying to reject.
+The concrete error this caused, and it is easy to repeat: a lab transcription of
+the regenerating flow bills `469` operations where the canary's own third-order
+increment is **`2,255`** (`flow_price_wp17b.json`, `2,708 - 453`) — the same
+arithmetic in `4.81x` fewer array calls, because a lab spelling fuses what a
+shipped file spells out. **Adding a lab op increment to a shipped-file op total
+is the mixed-instrument error, and it understated a carried design's operation
+cost by about `2x`.** Counted FLOPs on a dense path *do* transfer between
+spellings; operation counts do not.
+
+Meter both axes anyway. Which one binds is a property of the design — but say
+which instrument each was metered on, in the same sentence as the number.
+
+**4. A deliberately unachievable lower bound is a good technique and I executed
+it wrongly, which is the more useful half of the lesson.** The idea is sound:
+price an implementation that could not work, and if it is *already* over budget,
+the negative verdict is independent of every implementation choice you made.
+**But a lower bound has to actually be one.** Mine over-charged twice — the
+warm-up and the age-1 identity leg, item 1 above — and came in at `1.060x` the
+headroom on a `6.0%` margin. Corrected it is `0.872x`: **it fits, and it bounds
+nothing.**
+
+Two rules out of it. **Never let a decision rest on a row whose margin is
+single-digit percent without saying so in the same paragraph** — `9.93x` needs no
+audit, `1.06x` does. And **watch for the implementation choices that happen to
+favour your own conclusion**: propagating three generations at every layer looked
+like the safe, conservative direction, and it was the direction that made the
+negative stronger.
 
 ---
 
