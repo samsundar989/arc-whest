@@ -31827,3 +31827,193 @@ my credence moved, and it moved on the record.**
 the artifact's hash, so `preflight` steps 7 and 9 clear, and
 `test_enforcement_labels`' `64/66` clears with them. That red was the
 claim-then-finalize protocol working, exactly as `CURRENT_STATE` said it was.
+
+---
+
+# 2026-09-04 — **WP20 RESULT: `2.003x`. THE FALSIFIER FIRES AND THE ACCURACY LANE IS CLOSED FOR GOOD. And the mechanism that failed is not the one anybody predicted.**
+
+`gpuq 234`, **64 `P06[..000..063]` networks**, `1024 x 16`, f32, nine cells in one
+run so every comparison is within-run and paired on common random numbers.
+Artifact `experiments/2026-09-03_wp20/c2_carry3_P06.json`. Contract `40e88fe`;
+`c(r)` frozen at `ae3ea8f`, both **before** this block was claimed.
+
+## The table
+
+| cell | mean drift | **paired `x`** | per-net min | max |
+|---|---:|---:|---:|---:|
+| `none` — the uncorrected regenerating flow | `8.5419e-07` | `1.000` | | |
+| `carry3_null:128` — random rank-128 sketch | `8.1473e-07` | `1.048` | 0.94 | 1.16 |
+| `carry3_null:192` — random rank-192 sketch | `7.8782e-07` | `1.084` | 0.97 | 1.19 |
+| `carry3_sketch1:128` — `c = 1` | `5.0596e-07` | `1.688` | 1.20 | 2.28 |
+| `carry3_sketch1:192` — `c = 1` | `4.2040e-07` | `2.032` | 1.42 | 2.60 |
+| **`carry3_sketch:128`** — frozen `c = 0.7705` | `4.7468e-07` | **`1.799`** | 1.29 | 2.35 |
+| **`carry3_sketch:192`** — frozen `c = 1.0950` | `4.2647e-07` | **`2.003`** | 1.40 | 2.58 |
+| `carry3_exact` — the UNTRUNCATED `k = 3` carry | `2.3342e-07` | **`3.659`** | 3.00 | 4.89 |
+| `e3svd:192` — WP19's oracle, cross-run anchor | `4.5472e-08` | `18.785` | 13.16 | 26.21 |
+
+**The anchor validates the run before anything is concluded from it.**
+`e3svd:192` reads `18.785x` here against WP19's **`18.873x`** on 8
+different `P05` networks. Same cell, different block, `0.5%` apart. The harness
+is measuring what it measured before.
+
+## The gates, scored through `competition_score.decide()`
+
+```
+decide(none, carry3_sketch:128, gate=4.0, interval="t")  ->  gain 1.79949  passed False
+decide(none, carry3_sketch:192, gate=4.0, interval="t")  ->  gain 2.00291  passed False
+decide(none, carry3_exact,      gate=4.0, interval="t")  ->  gain 3.65937  passed False
+```
+
+| clause | threshold | measured | verdict |
+|---|---|---:|---|
+| **`G-WP20-E2E`** | better of the two scored cells `>= 4.0x` | **`2.003x`** | **FAIL** |
+| **`G-WP20-FLOP`** | added FLOPs `<= 51,249,140,941` | — | **NOT REACHED** — the contract's ordering prices nothing whose ceiling already failed |
+| **`G-WP20-OPS`** | within the nomination residual bar | — | **NOT REACHED**, and it was **UNSCORABLE** anyway until the canary's telemetry exists |
+| **`G-WP20-NULL`** a) | sketch `>= 2.0x` the null's end-to-end | `1.85x` (`2.003 / 1.084`) | **FAIL as written** — see below |
+| **`G-WP20-NULL`** b) | null's `E21` recovery within `0.05` of chance `r/n` | `0.1510` vs `0.1875`; `0.1007` vs `0.125` | **PASS**, both ranks |
+
+## **THE FALSIFIER FIRES**
+
+> *"If the better of the two scored cells is `< 3.0x` end-to-end … the accuracy
+> lane is CLOSED FOR GOOD and no further accuracy contract is written."*
+
+**`2.003x < 3.0x`. It fires.** And it fires with room to spare in the direction
+that matters: **the UNTRUNCATED carry — which no sketch of any rank can beat —
+is `3.659x`, itself below the `4.0x` gate.** The contract's nesting
+(`carry3_exact >= carry3_sketch:192 >= carry3_sketch:128`) held on the data
+(`3.659 >= 2.003 >= 1.799`), and the measured cell is an upper bound on the
+deployable design, so **the deployable design is below `3.0x` by a deductive
+argument and not merely by this measurement.**
+
+**The accuracy lane is closed. No further accuracy contract will be written.**
+
+## The null clause failed as written, and I am not moving it
+
+**Reported as a failure, because that is what it is.** `2.003 / 1.084 = 1.85`
+against a threshold of `2.0`.
+
+**It is also the wrong functional form, and I wrote it.** A ratio of ratios
+compresses badly near `1.0`. The two statements the clause was actually trying
+to make both hold, overwhelmingly:
+
+| what the clause meant to ask | sketch `r = 192` | null `r = 192` | separation |
+|---|---:|---:|---:|
+| `E21` recovered | `0.7193` | `0.1510` (chance is `0.1875`) | **`4.8x`** |
+| share of the available drift actually removed | `50.1%` | `7.7%` | **`6.5x`** |
+
+**The threshold stays where it was written.** I am recording a clause that
+failed, explaining why its scale was badly chosen, and noting that **the
+falsifier does not depend on it**: the falsifier is written on the end-to-end
+number alone, and the run's validity is established by the anchor
+(`18.785` vs `18.873`) and by clause (b) passing at both ranks.
+
+## THE FINDING, and it is not the one the hypothesis expected
+
+**The carry does recover both slices equally well. The rank truncation then
+destroys one of them.**
+
+| | `E21` recovered | `E3` recovered | ratio `E3 / E21` |
+|---|---:|---:|---:|
+| **`carry3_exact`** (untruncated) | `0.8007` | `0.7948` | **`0.99`** |
+| `carry3_sketch:192` | `0.7193` | **`0.3147`** | **`0.44`** |
+| `carry3_sketch:128` | `0.6649` | **`0.2318`** | **`0.35`** |
+
+**At the ceiling the two slices come out at the same quality — `0.99` — exactly
+as the mechanism predicted, because a carry estimates ONE TENSOR rather than two
+functions.** That is a real result and it is the thing Arm L could never buy at
+any price: Arm L needed two separate maps and got `0.10` and `0.14`.
+
+**And it survives truncation asymmetrically.** Going from the exact carry to
+rank `192` costs `E21` only `0.08` (`0.80 -> 0.72`) and costs `E3` **`0.48`**
+(`0.79 -> 0.31`). **The diagonal is precisely what a low-rank truncation of a
+diagonal-free matrix cannot keep.** `E3` is `n` numbers living on a diagonal
+that has been explicitly zeroed; the reconstruction's diagonal is leakage from
+the discarded tail, and the tail is what truncation throws away.
+
+**That closes the question WP19 opened.** WP19 measured that end-to-end value is
+violently sensitive to `E3`'s quality — `2.223x -> 3.727x -> 18.873x` as `E3`
+goes absent -> `0.45` -> exact, a `5.06x` multiplier from `E3` alone. WP20 shows
+**the one route that gets `E3` right cannot be compressed**, and the compression
+is not optional: the uncompressed carry is `n^2` numbers a layer.
+
+## Predictions — mine, recorded before the data
+
+| # | prediction | outcome |
+|---|---|---|
+| **P1** | `E21` recovery at `r = 192` in `0.55`–`0.70`, point `0.63` | **REFUTED, narrowly and in my favour**: `0.7193`, just above my range |
+| **P2** | `E3` recovery at `r = 192` in `0.30`–`0.50`, point `0.40` | **HELD**, at the low end: `0.3147` |
+| **P3** | `E3` recovery `>= 0.60x` of `E21` recovery | **REFUTED at the operating point** (`0.44`) and **HELD at the ceiling** (`0.99`). The split is the finding |
+| **P4** | joint end-to-end at `r = 192` in `2.6`–`3.6x`, point `3.0x` | **REFUTED. `2.003x`, below my range.** I was optimistic even while predicting failure |
+| **P5** | `r = 128` strictly worse than `r = 192` on all three quantities | **HELD**, all three (`0.665 < 0.719`, `0.232 < 0.315`, `1.799 < 2.003`) |
+| **P6** | null within `0.05` of chance, and beaten by `>= 3x` | **SPLIT**: chance clause **HELD** at both ranks; the `3x` end-to-end separation **REFUTED as stated** (`1.85x`), for the scale reason above |
+| **P7** | FLOPs fit the margin | **NOT REACHED** — correctly, by the contract's own ordering |
+| **P8** | f64 control agrees to `3%` | pending `gpuq 235` |
+
+**My pre-registered credence was `P(< 3x) = 0.50`, revised to `~0.80` after the
+one-net smoke and before this run. The outcome is `2.003x`.** The direction was
+right; **the magnitude was not** — I predicted the ceiling would be near `3.0x`
+and the sketch near it, and the truth is that the ceiling is `3.66x` while the
+sketch is `2.00x`. **I under-estimated how much rank truncation costs and
+over-estimated the ceiling.**
+
+## The frozen scalar earned its keep at one rank and not the other
+
+| | frozen `c` | `c = 1` | frozen better? |
+|---|---:|---:|---|
+| `r = 128`, `E3` recovered | `0.2318` (`c = 0.7705`) | `0.1560` | **yes, by `49%`** |
+| `r = 128`, end-to-end | `1.799x` | `1.688x` | **yes** |
+| `r = 192`, `E3` recovered | `0.3147` (`c = 1.0950`) | `0.3232` | **NO — `c = 1` is better** |
+| `r = 192`, end-to-end | `2.003x` | `2.032x` | **NO — `c = 1` is better** |
+
+**At `r = 192` the scalar fitted on `P05` is slightly WORSE on `P06` than not
+fitting one at all.** `P05` gave `c(192) = 1.0950`; WP19 gave `1.019` on the
+true `E21`; the truth on these networks is evidently nearer `1.0`. The
+difference is small and it does not change any verdict — both cells fail both
+thresholds — but **the honest reading is that a one-parameter fit on 8 networks
+did not transfer, and that the diagnostic I pre-registered as a control turned
+out to be the better estimator at the rank that matters.** It is recorded
+because the *scored* cell is the frozen one and it stays scored; choosing the
+`c = 1` number after the fact is exactly what the two-cell pre-registration
+existed to prevent.
+
+## Cost
+
+**Not measured, deliberately.** `G-WP20-FLOP` and `G-WP20-OPS` are **NOT
+REACHED**: the contract ordered accuracy first and priced only on a pass,
+*"because pricing a design whose ceiling already failed is work spent on a dead
+answer."* Nothing here is a cost claim, and no FLOP or operation figure from
+this slice may be quoted.
+
+## Scope, and the caveats that travel with these numbers
+
+* **This is the torch lab, not the `fnp` port that would ship.** WP16 is why
+  that caveat is compulsory.
+* **`1024 x 16` only.** Every statement carries its shape.
+* `carry3_exact` is itself an **upper bound on a deployable carry** — it
+  propagates exactly for three layers and truncates after. It is not an
+  operating point and it is `3.659x`.
+* The `E3`/`E21` recovery figures are **uncentered `R^2` against the true
+  discarded slices**, so a component orthogonal to the target earns nothing.
+* 64 networks, DECIDE tier, `P06`'s first half. **`P06[..064..127]` remains
+  UNSPENT** and is not re-purposed by this result.
+
+## Knowledge delta
+
+1. **A carried estimate recovers both discarded slices at the same quality
+   (`0.99` ratio) where a learned map recovered neither above `0.15`.** The
+   mechanism — one tensor, not two functions — is real and now measured on 64
+   networks.
+2. **Low-rank truncation is not slice-neutral.** It costs the matrix `0.08` and
+   the diagonal `0.48`. A diagonal-free matrix's rank-`r` reconstruction keeps
+   its off-diagonal structure and loses the leakage that carried the diagonal.
+   **This is why the carried route fails**, and it is a statement about linear
+   algebra rather than about this flow.
+3. **The lane is closed on a bound, not on a fit.** Every route now has a
+   measured ceiling: `1.45`–`2.10x` *worse* (select), chance (`Sigma`-range),
+   `0.2575` (predict `E3`), `0.1665` (predict `E21`), and **`3.659x` (carry
+   three generations exactly)** — against a target that needs `10x`.
+4. **A ratio-of-ratios is a bad statistic near 1.0**, and I pre-registered one.
+   The clause it broke was a null check whose two substantive readings both pass
+   by `4.8x` and `6.5x`. Write nulls on the quantity that carries the signal.
+5. **A one-parameter fit on 8 networks did not transfer**, and the untuned
+   control beat it at the operating rank. Cheap tuning is not free tuning.
