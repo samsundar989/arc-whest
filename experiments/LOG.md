@@ -32335,3 +32335,220 @@ which is what makes that acceptable.
    cell to `4.7%`.** That is a cheap and underused way to ask "what would the
    adjacent construction have done?" before spending a job on it — and here it
    was an auditor, not the builder, who thought to.
+
+---
+
+# 2026-09-04 (LATE) — **STRATEGIST RULING ON THE WP20 PACKET, A NEW STANDING RULE, AND THE DEPLOYMENT PRICE: THE `3.330x` CELL DOES NOT FIT. IT IS DROPPED.**
+
+`estimator.py` untouched at **v2.6.1**. **Nothing submitted, nothing designated.**
+`P06[..064..127]` **UNSPENT, and now permanently so.** No seed block was drawn for
+anything below.
+
+## 1. The ruling, recorded verbatim in effect
+
+`docs/STRATEGIST_PACKET_2026-09-04.md` asked three questions. All three are
+answered, and the answers close rather than open work.
+
+| # | question | ruling |
+|---|---|---|
+| **1** | a second research contract on the carried-sketch lane? | **NO.** The `3.874x` exact-both-slices ceiling settles it. **Carve-out, deployment not research:** the `3.330x` cell *as built* may be shipped **only** under a promotion-class deployment contract conditioned on the canary — its added ops must keep graded worst-row residual headroom `>= 4x`. **Price its ops and FLOPs first; if it does not fit, drop it WITHOUT a further contract** |
+| **2** | `P06[..064..127]`? | **stays unspent** unless that deployment contract opens, in which case it funds the paired corrected-vs-uncorrected comparison with residual measured |
+| **3** | `P06`'s tier label | **record it as ACTUALLY USED. Never relabel.** `seed_blocks.py:156` registers `P06` as **DESIGN**; `CONTRACT WP20` called it DECIDE; the registry is the authority and the contract's label was wrong. It is recorded as the defect it is, in `SKEPTIC WP20` finding 5 and here, and is **not** edited into agreement |
+
+**The programme moves to consolidation**: canary -> residual-sized decisions ->
+**write-up as primary work** -> two designated nominations. No new research
+contracts are opened.
+
+## 2. NEW STANDING RULE, effective now — the pre-run instrument check
+
+> **Every contract gets a pre-run instrument check before the job runs: an
+> adversarial read that traces what the code does with each object the contract
+> names, and confirms the cell answers the contract's question and not a
+> narrower one.** It is DISTINCT from the post-run Skeptic and does not replace
+> it.
+
+It exists because of `SKEPTIC WP20`, and it is aimed at exactly the failure that
+slice recorded in its own knowledge delta:
+
+> *"A cell can be a correct implementation of a wrong construction, and every
+> check will pass. The selftest passed, the `S-SLICE` probe passed, the null was
+> at chance, the anchor matched, `decide()` was clean, and the cell still
+> answered a narrower question than the contract asked. **None of the instrument
+> checks could see it, because nothing was broken.**"*
+
+Every existing check is a check on *correctness*. This one is a check on
+*correspondence* — that the object the code manipulates is the object the
+contract's Hypothesis section names. `carry3_sketch` never touched `D3`; a read
+that walked the contract's noun list (`D3`, `D21`, "BOTH discarded slices from
+one object") against the code would have found it in minutes, and it cost a
+64-network `P06` half and a retracted lane closure instead.
+
+**Scope, stated so it is not quietly widened or narrowed:** it is required
+before any job that scores a gate or spends a seed block. This entry's own
+pricing work is neither — it is a ROUTINE lab module drawing no block and
+scoring no gate — so the rule's **first binding application is the next
+contract**, and this slice takes the post-run Skeptic instead. Recording that
+honestly rather than claiming the rule was applied here.
+
+## 3. THE DEPLOYMENT PRICE — and the cell does not fit
+
+Instrument `local_sim/p2_wp20_price.py` (new). Artifact
+`experiments/2026-09-04_wp20_price/wp20_price.json`. Executed arithmetic in
+**flopscope 0.12, f32, inside a real `BudgetContext`, at the live `1024 x 16`**.
+`# seed-ledger: no block named`. No GPU, no truth, no CONFIRM read.
+
+### 3.1 Why the price is not the cell's own arithmetic
+
+`carry3_hybrid:192` is a **ceiling**: it reads `D(p) = window_3(p) - window_0(p)`
+from two offline flows, truncates `D21` after an **exact** three-layer
+propagation, keeps `D3` whole, and injects. A shipped estimator has no offline
+flow. It must **carry** the last three generations of the all-distinct block
+through its own forward pass, and that carry is the cost.
+
+The carried object is upstream's, read out of `factor_k3.py` this session:
+
+| upstream | what it costs, in shapes |
+|---|---|
+| `contract_W(W)` | `W @ factor` for **each of the three legs** |
+| `_factored_get_dslice(part=(2,1))` | one `(A_i * A_j) @ A_k^T` per distinct block permutation — **three** when the legs differ, **two** when two coincide |
+| `from_dstensor(ds)` | factors `(diag(S3) + 3 S21^T, I, I)` |
+
+**The regenerating flow is cheap for exactly one reason: two of its three legs
+are the identity.** `contract_W` on an identity leg is free and the `(2,1)` slice
+has two distinct block permutations instead of three. **A carried generation
+destroys that structure on its first hop.** The block layer `l` generates is
+`(w1 . WK_11, 3 I, (w2 (x) w1 . WK_11)^T)`; after one `contract_W` its legs are
+`(W A1, 3 W, W A3)` — three real `(n, R)` matrices, no identity left, generic
+price. **That is the whole finding, and it is structural rather than a matter of
+implementation skill.**
+
+### 3.2 The control, which is what licenses every other row
+
+| | counted, f32 | `/n^3` | expected |
+|---|---:|---:|---|
+| `regen` — WP13's structured regenerating layer | `99,116,660,736` | **`92.310`** | WP13 published `184.62 n^3` at **f64**; f32 is billed at half the rate -> **`92.31`** |
+
+**Exact agreement to the digit.** And it reconciles the canary independently:
+`168,636,407,398` metered total minus this `99.1e9` third-order increment leaves
+`69.5e9` for the K2 backbone and the readout — against `137.6e9 / 2 = 68.8e9` for
+the f32 covariance backbone, i.e. **`+1.0%` for the guards, the readout and the
+calibration.** Two independent numbers this module never fitted to.
+
+### 3.3 The table
+
+Bar: `max(0.1, (168,636,407,398 + added + 2**24) / 2**41) == 0.1`. Headroom
+`51,249,140,941` FLOPs — **asserted against `CONTRACT WP20`'s own figure by the
+module, which refuses to run if they disagree.** Carried spellings are charged
+**net of `regen`**, because the regenerating backbone is already inside the
+anchor.
+
+| spelling | counted FLOPs | ops | `x headroom` | multiplier | |
+|---|---:|---:|---:|---:|---|
+| `regen` — the control, already inside the anchor | `99,116,660,736` | `469` | — | — | |
+| **`floor_r`** — 3 blocks at rank `192`, `contract_W` ONLY: no slice read, no fresh block, no truncation, no injection. **An unachievable lower bound** | `54,331,637,760` | `135` | **`1.060`** | `0.1014` | **OVER** |
+| `carry3_r` — the full deployable spelling at rank `192`, and **strictly less accurate than `3.330x`** | `151,418,672,640` net | `+885` | **`2.955`** | `0.1456` | **OVER** |
+| `floor_full` — the same lower bound at honest `(n, n)` legs | `289,768,734,720` | `135` | **`5.654`** | `0.2085` | **OVER** |
+| **`carry3_full`** — **the price of the object that measured `3.330x`** | `579,970,045,440` net | `+750` | **`11.317`** | `0.3404` | **OVER** |
+| `svd_full` — ONE exact `linalg.svd` of an `(n, n)`, for scale | `27,917,287,424` | `1` | `0.545` | — | |
+
+**A single exact `n x n` SVD — which is how the lab cell spells its truncation —
+bills `26 n^3` and consumes `54.5%` of the entire headroom on its own.** No
+shipped file could spell it that way; the deployable rows above use a randomized
+range finder instead, and are cheaper for it.
+
+### 3.4 The crossing, so the verdict is quantitative and not a single point
+
+`carry3_r`, swept over carried rank. **Every row of this sweep is already less
+accurate than the `3.330x` that was measured**, so nothing here can rescue the
+lane — it says how far from fitting the lane is, and where the arithmetic first
+allows a three-generation carry at all.
+
+| rank | added FLOPs | `x headroom` | added ops | ops `x` canary | at the floor? |
+|---:|---:|---:|---:|---:|---|
+| `16` | `12,228,073,020` | `0.239` | `885` | `1.331` | yes |
+| `32` | `24,446,768,670` | `0.477` | `885` | `1.331` | yes |
+| `48` | `36,756,887,040` | `0.717` | `885` | `1.331` | yes |
+| **`64`** | `49,156,953,660` | **`0.959`** | `885` | `1.331` | **yes — the largest** |
+| `96` | `74,221,032,960` | `1.448` | `885` | `1.331` | **NO** |
+| `128` | `99,627,210,270` | `1.944` | `885` | `1.331` | **NO** |
+| `192` | `151,418,672,640` | `2.955` | `885` | `1.331` | **NO** |
+
+**The largest carried rank that stays at the multiplier floor is `64`.** The two
+ranks whose accuracy was actually measured are `128` (`3.047x`) and `192`
+(`3.330x`), and **both are over.** Rank `64`'s accuracy has never been measured;
+the family is `3.047 -> 3.330 -> 3.874` climbing in rank, so rank `64` is below
+`3.047x` before the truncated-propagation penalty is charged, against a `4.0x`
+gate and a `10x` kill line.
+
+## 4. THE DECISION, under the ruling's own terms
+
+> *"Price its ops and FLOPs first (must stay at the floor with `+2**24`); if it
+> does not fit, drop it without a further contract."*
+
+**It does not fit. It is dropped, and no further contract is opened.**
+
+It does not fit **three times over**, and the three are independent:
+
+1. **As built**, the object that measured `3.330x` costs **`11.3x` the entire
+   headroom**.
+2. **The unachievable lower bound is over too** — three blocks, rank `192`,
+   propagation and nothing else, no slice read at all, is `1.060x` the headroom.
+   **So the gap is arithmetic, not implementation**, and no cleverness of mine
+   was left on the table. Concatenating the three generations into one rank-`576`
+   tensor bills identically; sharing `W` across blocks bills identically.
+3. **Every rank that fits is less accurate than a cell that already failed the
+   gate.**
+
+**The op axis is NOT what kills it, and that is worth recording because it is the
+mirror image of 6.6.** The carry adds `885` operations, `1.331x` the canary's
+`2,674` — a `+33%` residual load that a `>= 4x` graded headroom would have
+absorbed. **Under `lambda = 0` this repository has spent a month learning that
+the operation count is the binding cost; here it is the FLOP count, and the FLOP
+count alone.** A design rule that had hardened into an assumption, caught by
+measuring both axes rather than the one that bit last time.
+
+## 5. Scope — what this price does NOT establish
+
+1. **It bounds the FACTORED-CARRY family**, which is the family the `3.330x`
+   measurement is about. It says nothing about a hypothetical scheme that
+   propagates the discarded `(2,1)` slice without materialising the tensor — and
+   there is no such scheme, because the slice-to-slice map is not closed; that is
+   *why* the flow discards anything. Recorded as the boundary of the claim, not
+   as a proof.
+2. **It is a projection, not a candidate.** No `fnp` port of a carried flow
+   exists, nothing was run through `whest validate`, and no residual was
+   measured. WP13's identical caveat applies unchanged.
+3. **Rank `64`'s accuracy is inferred from the family's monotone rank ordering,
+   not measured.** It would take a job to measure and the ruling forbids one.
+   The inference is stated as an inference.
+4. **The `+1.0%` reconciliation in 3.2 is a consistency check, not a parity
+   proof.** It compares a transcribed lab spelling with a shipped file's total,
+   not op for op. `p2_flop_anchor.py --gate` is what does that, and it was not
+   run against a carried flow because none exists.
+
+## Knowledge delta
+
+1. **The regenerating flow's cheapness is a structural property with a
+   one-hop half-life.** Two identity legs make `contract_W` free and collapse the
+   `(2,1)` slice from three block permutations to two. One `contract_W` on a
+   carried generation destroys both savings permanently. **"Carry it instead of
+   regenerating it" is not a knob with a cost — it is a different price
+   regime**, `2x` on `contract_W` and `1.5x` on every slice read, per carried
+   generation, forever.
+2. **A lower bound that is deliberately unachievable is the cheapest way to make
+   a negative decision robust.** `floor_r` prices an implementation that does not
+   exist and could not work — propagation with no slice read — and it is *over
+   the budget*. That single row makes the verdict independent of every
+   implementation choice in the module, and it took four lines to write.
+3. **The binding cost axis is not a property of the project, it is a property of
+   the design.** 6.6 established that residual-as-operation-count was what could
+   kill a submission; that hardened into an assumption. This design is killed by
+   FLOPs with `33%` op growth it could have afforded. **Meter both axes every
+   time.**
+4. **`26 n^3` for an `n x n` SVD is NOT a new finding, and I nearly wrote it up
+   as one.** `docs/GOTCHAS.md` already records *"thin SVD `26 n^3` ~ `0.16%` B"*
+   in its pricing table. What is new is only the framing that makes it bite:
+   `0.16%` of the **budget** is `54.5%` of this candidate's **spare** budget, and
+   a rate quoted against `B` reads harmless exactly where it is fatal. **Price
+   against the headroom, not against the budget.** Recorded as a correction to
+   my own draft rather than deleted from it.

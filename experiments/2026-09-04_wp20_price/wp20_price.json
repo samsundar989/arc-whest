@@ -1,0 +1,292 @@
+{
+  "check": "WP20 deployment price -- ops and FLOPs of shipping carry3_hybrid",
+  "ruling": "strategist 2026-09-04, carve-out to Ruling 1",
+  "width": 1024,
+  "depth": 16,
+  "rank": 192,
+  "budget": 2199023255552,
+  "anchor_flops": 168636407398,
+  "anchor_ops": 2674,
+  "server_offset_flops": 16777216,
+  "budget_headroom_flops": 51249140941,
+  "spellings": {
+    "regen": {
+      "spelling": "regen",
+      "width": 1024,
+      "depth": 16,
+      "rank": 192,
+      "flops": 99116660736,
+      "n_ops": 469,
+      "flops_per_n3": 92.30958366394043,
+      "added": {
+        "added_flops": 99116660736,
+        "added_ops": 469,
+        "total_with_server_offset": 267769845350,
+        "x_budget": 0.12176762782019068,
+        "multiplier": 0.12176762782019068,
+        "at_floor": false,
+        "budget_headroom": 51249140941,
+        "x_headroom": 1.9340160423392647,
+        "ops_total": 3143,
+        "ops_x_canary": 1.175392670157068
+      }
+    },
+    "floor_r": {
+      "spelling": "floor_r",
+      "width": 1024,
+      "depth": 16,
+      "rank": 192,
+      "flops": 54331637760,
+      "n_ops": 135,
+      "flops_per_n3": 50.60028076171875,
+      "added": {
+        "added_flops": 54331637760,
+        "added_ops": 135,
+        "total_with_server_offset": 222984822374,
+        "x_budget": 0.10140175726246525,
+        "multiplier": 0.10140175726246525,
+        "at_floor": false,
+        "budget_headroom": 51249140941,
+        "x_headroom": 1.060147287591585,
+        "ops_total": 2809,
+        "ops_x_canary": 1.050486163051608
+      }
+    },
+    "carry3_r": {
+      "spelling": "carry3_r",
+      "width": 1024,
+      "depth": 16,
+      "rank": 192,
+      "flops": 250535333376,
+      "n_ops": 1354,
+      "flops_per_n3": 233.32921171188354,
+      "added": {
+        "added_flops": 151418672640,
+        "added_ops": 885,
+        "total_with_server_offset": 320071857254,
+        "x_budget": 0.145551829179567,
+        "multiplier": 0.145551829179567,
+        "at_floor": false,
+        "budget_headroom": 51249140941,
+        "x_headroom": 2.9545602103715076,
+        "ops_total": 3559,
+        "ops_x_canary": 1.330964846671653
+      }
+    },
+    "floor_full": {
+      "spelling": "floor_full",
+      "width": 1024,
+      "depth": 16,
+      "rank": 192,
+      "flops": 289768734720,
+      "n_ops": 135,
+      "flops_per_n3": 269.8681640625,
+      "added": {
+        "added_flops": 289768734720,
+        "added_ops": 135,
+        "total_with_server_offset": 458421919334,
+        "x_budget": 0.20846615340542485,
+        "multiplier": 0.20846615340542485,
+        "at_floor": false,
+        "budget_headroom": 51249140941,
+        "x_headroom": 5.65411886715512,
+        "ops_total": 2809,
+        "ops_x_canary": 1.050486163051608
+      }
+    },
+    "carry3_full": {
+      "spelling": "carry3_full",
+      "width": 1024,
+      "depth": 16,
+      "rank": 192,
+      "flops": 679086706176,
+      "n_ops": 1219,
+      "flops_per_n3": 632.4487795829773,
+      "added": {
+        "added_flops": 579970045440,
+        "added_ops": 750,
+        "total_with_server_offset": 748623230054,
+        "x_budget": 0.3404344306791245,
+        "multiplier": 0.3404344306791245,
+        "at_floor": false,
+        "budget_headroom": 51249140941,
+        "x_headroom": 11.316678383110538,
+        "ops_total": 3424,
+        "ops_x_canary": 1.2804786836200448
+      }
+    },
+    "svd_full": {
+      "spelling": "svd_full",
+      "width": 1024,
+      "depth": 16,
+      "rank": 192,
+      "flops": 27917287424,
+      "n_ops": 1,
+      "flops_per_n3": 26.0,
+      "added": {
+        "added_flops": 27917287424,
+        "added_ops": 1,
+        "total_with_server_offset": 196570472038,
+        "x_budget": 0.08938990142178227,
+        "multiplier": 0.1,
+        "at_floor": true,
+        "budget_headroom": 51249140941,
+        "x_headroom": 0.5447366904381766,
+        "ops_total": 2675,
+        "ops_x_canary": 1.00037397157816
+      }
+    }
+  },
+  "rank_sweep": [
+    {
+      "spelling": "carry3_r",
+      "width": 1024,
+      "depth": 16,
+      "rank": 16,
+      "flops": 111344733756,
+      "n_ops": 1354,
+      "flops_per_n3": 103.6978641115129,
+      "added": {
+        "added_flops": 12228073020,
+        "added_ops": 885,
+        "total_with_server_offset": 180881257634,
+        "x_budget": 0.08225527273407351,
+        "multiplier": 0.1,
+        "at_floor": true,
+        "budget_headroom": 51249140941,
+        "x_headroom": 0.238600546184324,
+        "ops_total": 3559,
+        "ops_x_canary": 1.330964846671653
+      }
+    },
+    {
+      "spelling": "carry3_r",
+      "width": 1024,
+      "depth": 16,
+      "rank": 32,
+      "flops": 123563429406,
+      "n_ops": 1354,
+      "flops_per_n3": 115.07741120271385,
+      "added": {
+        "added_flops": 24446768670,
+        "added_ops": 885,
+        "total_with_server_offset": 193099953284,
+        "x_budget": 0.08781169221219898,
+        "multiplier": 0.1,
+        "at_floor": true,
+        "budget_headroom": 51249140941,
+        "x_headroom": 0.477018116228408,
+        "ops_total": 3559,
+        "ops_x_canary": 1.330964846671653
+      }
+    },
+    {
+      "spelling": "carry3_r",
+      "width": 1024,
+      "depth": 16,
+      "rank": 48,
+      "flops": 135873547776,
+      "n_ops": 1354,
+      "flops_per_n3": 126.54210233688354,
+      "added": {
+        "added_flops": 36756887040,
+        "added_ops": 885,
+        "total_with_server_offset": 205410071654,
+        "x_budget": 0.09340968593005528,
+        "multiplier": 0.1,
+        "at_floor": true,
+        "budget_headroom": 51249140941,
+        "x_headroom": 0.7172195741254659,
+        "ops_total": 3559,
+        "ops_x_canary": 1.330964846671653
+      }
+    },
+    {
+      "spelling": "carry3_r",
+      "width": 1024,
+      "depth": 16,
+      "rank": 64,
+      "flops": 148273614396,
+      "n_ops": 1354,
+      "flops_per_n3": 138.0905643068254,
+      "added": {
+        "added_flops": 49156953660,
+        "added_ops": 885,
+        "total_with_server_offset": 217810138274,
+        "x_budget": 0.09904858337631595,
+        "multiplier": 0.1,
+        "at_floor": true,
+        "budget_headroom": 51249140941,
+        "x_headroom": 0.9591761492468994,
+        "ops_total": 3559,
+        "ops_x_canary": 1.330964846671653
+      }
+    },
+    {
+      "spelling": "carry3_r",
+      "width": 1024,
+      "depth": 16,
+      "rank": 96,
+      "flops": 173337693696,
+      "n_ops": 1354,
+      "flops_per_n3": 161.43330717086792,
+      "added": {
+        "added_flops": 74221032960,
+        "added_ops": 885,
+        "total_with_server_offset": 242874217574,
+        "x_budget": 0.11044640704039921,
+        "multiplier": 0.11044640704039921,
+        "at_floor": false,
+        "budget_headroom": 51249140941,
+        "x_headroom": 1.4482395528433567,
+        "ops_total": 3559,
+        "ops_x_canary": 1.330964846671653
+      }
+    },
+    {
+      "spelling": "carry3_r",
+      "width": 1024,
+      "depth": 16,
+      "rank": 128,
+      "flops": 198743871006,
+      "n_ops": 1354,
+      "flops_per_n3": 185.09465363435447,
+      "added": {
+        "added_flops": 99627210270,
+        "added_ops": 885,
+        "total_with_server_offset": 268280394884,
+        "x_budget": 0.1219997988682735,
+        "multiplier": 0.1219997988682735,
+        "at_floor": false,
+        "budget_headroom": 51249140941,
+        "x_headroom": 1.9439781514522305,
+        "ops_total": 3559,
+        "ops_x_canary": 1.330964846671653
+      }
+    },
+    {
+      "spelling": "carry3_r",
+      "width": 1024,
+      "depth": 16,
+      "rank": 192,
+      "flops": 250535333376,
+      "n_ops": 1354,
+      "flops_per_n3": 233.32921171188354,
+      "added": {
+        "added_flops": 151418672640,
+        "added_ops": 885,
+        "total_with_server_offset": 320071857254,
+        "x_budget": 0.145551829179567,
+        "multiplier": 0.145551829179567,
+        "at_floor": false,
+        "budget_headroom": 51249140941,
+        "x_headroom": 2.9545602103715076,
+        "ops_total": 3559,
+        "ops_x_canary": 1.330964846671653
+      }
+    }
+  ],
+  "largest_rank_at_floor": 64,
+  "as_built_fits_at_floor": false,
+  "lower_bound_fits_at_floor": false
+}

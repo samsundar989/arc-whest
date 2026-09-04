@@ -22,6 +22,55 @@ narrative record), `docs/GAME_PLAN.md` (the sole active Phase-2 strategy).
 ---
 
 
+## 2026-09-04 (WP20 deployment price) — a regenerating flow's cheapness has a ONE-HOP HALF-LIFE, and price against the HEADROOM
+
+**1. The identity legs are the whole saving, and one `contract_W` destroys them.**
+`FactoredTensor.from_dstensor` returns `(diag(S3) + 3 S21^T, I, I)` — recorded in
+the WP14 section above as *"worth `2.08x`"*. What that section does not say, and
+what a carried design needs to know before it is designed:
+
+> The saving belongs to the **regenerated** tensor and **does not survive being
+> carried**. A generated all-distinct block is `(w1 . WK_11, 3 I, (w2 (x) w1 .
+> WK_11)^T)`; after ONE `contract_W` its legs are `(W A1, 3 W, W A3)` — three
+> real `(n, R)` matrices with no identity among them. From that hop onward it
+> pays the generic price forever: `3` matmuls in `contract_W` instead of `1`, and
+> `3` block permutations in the `(2,1)` slice instead of `2`.
+
+**"Carry it instead of regenerating it" is therefore not a knob with a cost. It
+is a different price regime**, entered permanently on the first hop, at `2x` on
+`contract_W` and `1.5x` on every slice read, **per carried generation**.
+Measured, f32, live shape: three carried generations at rank `192`, propagation
+and **nothing else** — no slice read, no fresh block, no truncation, no
+injection — is `54,331,637,760` FLOPs, which is `1.06x` the canary's entire
+`51,249,140,941` headroom to the `0.1` multiplier floor. The same at honest
+`(n, n)` legs is `5.65x` it. `local_sim/p2_wp20_price.py`,
+`experiments/2026-09-04_wp20_price/wp20_price.json`.
+
+**2. Price against the HEADROOM, not against the budget.** This file's own
+pricing table records *"thin SVD `26 n^3` ~ `0.16%` B"*. `0.16%` of `B` reads
+harmless. The same call is **`54.5%` of a floor-resident candidate's spare
+budget**, because a candidate at the `0.1` multiplier floor has `2.33%` of `B` to
+spend and not `100%`. **A rate quoted against `B` is smallest exactly where it is
+fatal.** Every price in a promotion decision belongs in units of
+`0.1 * B - (candidate + 2**24)`.
+
+**3. Meter BOTH cost axes every time; which one binds is a property of the
+DESIGN, not of the project.** The 2026-09-03 finding that the binding Phase-2
+cost is an *operation count* (the `0.4 s` residual cliff, `lambda = 0`) hardened
+into an assumption within a day. The carried design is killed by **FLOPs** while
+adding only `+33%` operations — a residual load a `>= 4x` graded headroom would
+have absorbed. Had only the axis that bit last time been metered, this would have
+read as affordable.
+
+**4. A deliberately UNACHIEVABLE lower bound is the cheapest way to make a
+negative decision robust.** Four lines that price an implementation which does
+not exist and could not work — propagation with no slice read — came back *over
+budget*, which makes "does not fit" independent of every implementation choice in
+the module. Reach for it before optimising a spelling you are trying to reject.
+
+---
+
+
 ## 2026-09-03 (WP18 / SKEPTIC WP18) — five traps, and three of them were in things I had already written down
 
 **1. A `gpuq` job reports the CRLF hash. The working tree and the archive are LF.**
