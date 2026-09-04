@@ -32017,3 +32017,159 @@ this slice may be quoted.
    by `4.8x` and `6.5x`. Write nulls on the quantity that carries the signal.
 5. **A one-parameter fit on 8 networks did not transfer**, and the untuned
    control beat it at the operating rank. Cheap tuning is not free tuning.
+
+---
+
+# 2026-09-04 — **SKEPTIC WP20: PROVISIONAL, and it found that the scored cell THREW AWAY the carried diagonal it already had. THE LANE CLOSURE IS SUSPENDED.**
+
+Pinned commit `8f4648a`. **The pin discipline held this time** — the Skeptic
+confirmed no named artifact was modified after the pin, and confirmed the WP20
+wording had **not** reached `docs/CURRENT_STATE.md` or the write-up. Rule 2's
+ordering did what it exists for.
+
+## 1. THE FINDING, and it invalidates the reason, not the measurement
+
+`local_sim/p2_range_lab.py:473` binds `D3, D21 = dref[p]`. `carry3_exact` uses
+`d3 = D3`. **`carry3_sketch` — the SCORED cell — never uses `D3` at all.** It
+sets `d3 = c * rec.diagonal()`, re-deriving the diagonal from the *leakage* in
+`truncate_r(zerodiag(D21))`, while the carried `D3` sits unused two lines above.
+
+**That mechanism was imported from WP19's `e3diag_svd`, where it was the right
+question** — *"is the `(3,)` correction free once `(2,1)` is paid for, read off
+an object already materialised?"* — **and it is the wrong question here, because
+a carry HAS the diagonal.** `(3,)` is an `n`-vector; this module's own docstring
+calls it *"`O(n)` a layer, and therefore free at any budget."*
+
+**So the headline mechanism I wrote is mis-attributed.** Knowledge delta #2 said
+*"low-rank truncation is not slice-neutral… a statement about linear algebra
+rather than about this flow."* The arithmetic is right and the attribution is
+not: the `E3` collapse `0.795 -> 0.315` is **the cell electing to discard the
+diagonal**, not truncation destroying it.
+
+**The Skeptic did not merely assert this. It fitted a response surface** —
+`drift_frac = 0.5164*u21 + 0.3893*u3 + 0.0894`, `u = 1 - R^2` — to all 512
+network x cell observations, reproduced **all eight measured cells to `<= 1%`**
+(held out: `carry3_null:192` predicted `1.073x` vs measured `1.083x`;
+`carry3_sketch1:128` predicted `1.692x` vs `1.678x`), and predicted the
+unmeasured diagonal-preserving cell at **`3.18x`** — **above the `3.0x`
+falsifier, inside the pre-registered `3`–`4x` no-action band.**
+
+**And a `256 x 6` f64 smoke run before this entry was written agrees violently:**
+
+| cell, `256 x 6`, `r = 64` | end-to-end |
+|---|---:|
+| `carry3_sketch1:64` — the scored construction | `3.223x` |
+| **`carry3_hybrid:64` — keep `D3`, truncate only `D21`** | **`12.485x`** |
+| `carry3_msketch:64` — truncate `M = diag(D3) + 3 D21^T` itself | `1.426x` |
+| `carry3_exact` | `25.344x` |
+
+**`3.9x` better from keeping a vector the run had already computed.**
+
+## 2. THE LANE CLOSURE IS SUSPENDED, and the wording is withdrawn
+
+**Withdrawn, pending `gpuq 238`:**
+
+* *"the accuracy lane is CLOSED FOR GOOD"* — **suspended.** The falsifier fired
+  on a cell that discarded free information. It has not fired on the family.
+* *"the deployable design is below `3.0x` by a deductive argument"* —
+  **WITHDRAWN.** The Skeptic showed the nesting is not a nesting: `carry3_exact`
+  and `carry3_sketch` inject **different objects** on the `(3,)` leg, not a
+  truncation of one another. Worse, **the sketch family is non-monotone in
+  rank**: as `r -> n`, `rec -> D21`, which is diagonal-free, so
+  `diag(rec) -> 0` and `E3` recovery `-> 0`. The climbing `c(r)`
+  (`0.770 -> 1.095 -> 1.548`) is that degeneracy showing up in the calibration.
+  The observed ordering was empirical at two ranks, never deductive.
+* Knowledge delta #2 — **rewritten** when `238` lands.
+
+**What STANDS, unchanged:** every measured number. The Skeptic reproduced all of
+them from the raw rows — the means, the gains `3.659 / 2.003 / 1.799 / 1.688 /
+2.032 / 1.048 / 1.084 / 18.785`, the per-net columns, the recoveries, the
+`0.081`/`0.480` deltas, the null separations. `decide()` returns exactly
+`1.79949 / 2.00291 / 3.65937`, all `passed False`, CIs excluding zero, candidate
+better on `64/64`, biggest single mover `2.1`–`2.4%` of the delta. And
+`p2_wp15_depth --selftest` **PASSES** at both ends, so `D(p)` **is** the object
+the contract describes and `carry3_exact` **is** the untruncated three-generation
+carry. The in-flight `S-SLICE` probe is `3.1e-08` worst over 896 probes.
+
+**`CONTRACT WP20`'s scored cells remain `carry3_sketch:{128,192}` and their
+result remains `2.003x`.** I am not retro-fitting the contract. What is
+suspended is the *conclusion drawn from* that number, because the Skeptic showed
+the number answers a narrower question than the contract's own **Hypothesis**
+section posed: *"supplies BOTH discarded slices from one object — `E21_hat =
+offdiag(S)`, `E3_hat = diag(S)`."* **The contract was internally inconsistent** —
+its hypothesis describes the hybrid; its implementation section specifies the
+handicapped cell. I wrote both.
+
+## 3. Six further defects, all real, all reproduced
+
+| # | defect | status |
+|---|---|---|
+| 1 | **the artifact self-describes as a DIFFERENT EXPERIMENT.** `c2_carry3_P06.json` carries `seed_block: "P01"`, `contract: "LOG 2026-09-02 CONTRACT WP14, HEAD d915f83"`, a `gate` string about `5*drift_proj512`, and a `positive_control` naming a cell (`exact`) this run does not contain — hardcoded literals. **A future session reading the JSON alone would attribute the lane closure to the wrong block and the wrong contract** | **FIXED.** Those four fields are now `--check-label` / `--contract-label` / `--block-label` / `--gate-label`, defaulting to `UNLABELLED`, and `positive_control` is conditional on the cell being present. `gpuq 238` is the first run to carry true self-description |
+| 2 | **the frozen scalar's failure to transfer is UNDER-stated, not over-stated.** I wrote *"the difference is small"*. Paired over the same 64 nets: `r = 192`, frozen minus `c = 1` is `+6.08e-09`, `se 4.84e-10`, **`t = +12.55`, frozen worse on `62/64`**; `r = 128`, `t = -17.29`, frozen **better on `64/64`** | **CORRECTED.** Reproduced exactly. It is not noise in either direction |
+| 3 | **no noise floor and no bridge to the scored quantity**, which `VALIDATION.md` requires. The artifact holds `mse_full_anchor = 4.0047e-08` and `gt_noise_floor = 1.155e-09` | **ADDED**: the best sketch leaves drift at **`10.65x`** the uncapped flow's own error, and `carry3_exact` at **`5.83x`**. Both support the conclusion and both were missing |
+| 4 | **the null is seeded from the network being scored** (`seed * 7919 + p * 31 + r`) — the exact coupling `VALIDATION.md` § 1 removed. One realisation per net, no independent replicate | **RECORDED.** Affects the null cell only; no route by which it flatters the result |
+| 5 | **tier label vs registry.** The contract and result say *"DECIDE tier"*; `seed_blocks.py:156` registers `P06` as **DESIGN**, and the ledger record says `DESIGN`. Nothing mechanically stops `P06[..000..063]` being drawn again and quoted as independent | **RECORDED, NOT silently changed.** The registry is the authority and my label was wrong. Changing a block's tier is an IMPORTANT instrument change and it is not being done inside the slice that would benefit from it |
+| 6 | **the contract says *"Three clauses. All three must hold"* and then lists FOUR** (`LOG:31372` vs `:31394`), so the null's status as a gate clause was ambiguous *before* the data existed | **RECORDED.** The Skeptic's reading is the right one — the falsifier references the end-to-end number alone, and a weaker sketch-vs-null separation can only make the sketch *less* informative, never rescue it |
+
+## 4. The anchor, honestly re-stated
+
+I called `18.785` vs WP19's `18.873` a validation. The Skeptic confirmed
+`e3svd` is literally the same code path in both runs and never touches `dref`,
+and confirmed WP19's artifact reads `18.8733`. **But**: the per-net spread is
+`13.2`–`26.2`, so WP19's 8-net mean carries `SE ~ 0.98` (`5%`), and **agreeing
+to `0.5%` is luckier than the sampling supports.** It also validates only the
+*shared* machinery — mint, flow, injection, drift metric — and does **not**
+exercise `carried_difference`/`slices_window`. Those are covered by the selftest
+and the `S-SLICE` probe instead, and that is where the credit belongs.
+
+## 5. `P8` is closed and it PASSES
+
+`gpuq 235`, 8 nets, f64: `carry3_exact` `3.631314` vs f32's `3.631219`
+(**`0.0026%`**); `carry3_sketch:192` `1.954761` vs `1.954678` (**`0.0042%`**);
+worst per-net drift difference `0.023%`. **Prediction P8 held by three orders of
+magnitude.** I checked it genuinely ran in f64 rather than trusting a `0.00%`
+print: the `dtype` field reads `f64` and the raw values differ in the fifth
+significant figure (`1.920449e-07` vs `1.9204788e-07`), which is what a real
+f32/f64 pair looks like and not what a silently-ignored flag looks like.
+
+## 6. What happens next, and what does NOT
+
+**`gpuq 238`** — `carry3_hybrid:{128,192}` (keep `D3`, truncate only `D21`) and
+`carry3_msketch:192` (truncate `M` itself), against `carry3_sketch:192`,
+`carry3_null:192` and `carry3_exact`, 16 nets, **`P05[..144..159]`**, live shape.
+**DESIGN tier, scores no gate**, because it is a construction question and `P05`
+is the block where construction questions belong.
+
+**`P06[..064..127]` IS NOT TOUCHED.** Not for this, not for the re-measurement,
+not at all. A reserved half is not spent to rescue a slice that mis-specified
+its own cell.
+
+**And the decision is over-determined either way, which is worth saying plainly
+before the number arrives.** The kill-line condition is `>= 10x`. The
+UNTRUNCATED carry — a genuine, selftest-verified ceiling on the whole `k = 3`
+family — is `3.659x`. **`3.18x`, `3.66x` and `10x` are not close.** If `238`
+returns `~3.2x` as predicted, the correct disposition is the `3`–`4x` band's,
+pre-registered in the contract: *nothing promoted, no op work, and the lane is
+not reopened by me.* What changes is **the wording and the mechanism**, not the
+allocation — and the wording is going into a `$20k` write-up, which is why it
+has to be right.
+
+## Knowledge delta
+
+1. **A cell can be a correct implementation of a wrong construction, and every
+   check will pass.** The selftest passed, the `S-SLICE` probe passed, the null
+   was at chance, the anchor matched, `decide()` was clean, and the cell still
+   answered a narrower question than the contract asked. **None of the
+   instrument checks could see it, because nothing was broken.**
+2. **Importing a mechanism from a prior slice imports its assumptions.** WP19's
+   `e3diag_svd` read the diagonal off the `(2,1)` reconstruction because in
+   WP19 the diagonal was **not available** — that was the whole point of the
+   cell. In WP20 it is available and free. I copied the code and the reason did
+   not travel with it.
+3. **A "ceiling" needs to bound the family it is quoted against.**
+   `carry3_exact` bounds the `k = 3` carry family; it does not order the sketch
+   family, which is **non-monotone in rank** because the object it truncates is
+   diagonal-free. I wrote "deductive" about a relation that is not one.
+4. **An artifact must state its own provenance or it will state someone
+   else's.** Four hardcoded strings made a 64-network `P06` lane closure
+   self-describe as a `P01`/WP14 run.

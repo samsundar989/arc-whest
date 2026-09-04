@@ -474,6 +474,43 @@ def _correct_hook_lin(ref, *, mode: str, r: int, seed: int, power_iters: int,
             D21 = D21 - torch.diag(torch.diagonal(D21))
             if mode == "carry3_exact":
                 d3, d21 = D3, D21
+            elif mode == "carry3_hybrid":
+                # SKEPTIC (2026-09-04), and it is the finding that mattered:
+                # `carry3_sketch` NEVER USES `D3`. It re-derives the diagonal
+                # from the leakage in `truncate_r(zerodiag(D21))` while the
+                # carried `D3` sits unused two lines above. That mechanism was
+                # imported from WP19's `e3diag_svd`, where it was the RIGHT
+                # question -- "is `(3,)` free once `(2,1)` is paid for, read off
+                # an object already materialised?" -- and it is the WRONG one
+                # here, because a carry HAS the diagonal. `(3,)` is an
+                # `n`-vector, `O(n)` a layer, free at any budget (this module's
+                # own docstring says so).
+                #
+                # So the measured `E3` collapse `0.795 -> 0.315` is NOT "rank
+                # truncation destroying the diagonal". It is this cell electing
+                # to throw the diagonal away. This branch keeps it.
+                if r <= 0:
+                    return K
+                U, sv, Vh = torch.linalg.svd(D21.double(), full_matrices=False)
+                k = min(r, int(sv.shape[0]))
+                d21 = ((U[:, :k] * sv[:k]) @ Vh[:k]).to(s21.dtype)
+                d3 = D3
+            elif mode == "carry3_msketch":
+                # The faithful model of "a rank-`r` sketch of the carried
+                # TENSOR", which is what `CONTRACT WP20` says it is measuring
+                # and which neither `carry3_sketch` nor `carry3_hybrid` is.
+                # `add_factors((M, I, I))` with `M = diag(d3) + 3 d21^T` is how
+                # a correction enters, so the object a sketch should compress is
+                # `M` itself. Truncate `M`, then read BOTH slices back off it.
+                if r <= 0:
+                    return K
+                M0 = (torch.diag(D3.double()) + 3.0 * D21.double().T)
+                U, sv, Vh = torch.linalg.svd(M0, full_matrices=False)
+                k = min(r, int(sv.shape[0]))
+                Mr = ((U[:, :k] * sv[:k]) @ Vh[:k])
+                dg = Mr.diagonal().clone()
+                d3 = dg.to(s3.dtype)
+                d21 = ((Mr - torch.diag(dg)).T / 3.0).to(s21.dtype)
             else:
                 if r <= 0:
                     return K
@@ -876,17 +913,27 @@ def cmd_e2e(a) -> int:
             torch.cuda.empty_cache()
         print(f"    seed {seed}  [{time.perf_counter() - t0:.1f}s]")
 
+    # SKEPTIC (2026-09-04): these three fields were HARDCODED literals naming
+    # WP14, P01 and a `proj512` gate -- so `c2_carry3_P06.json`, which is 64 P06
+    # networks under CONTRACT WP20, self-described as a P01/WP14 run and named a
+    # positive control (`exact`) it does not contain. A future session reading
+    # the JSON alone would have attributed a lane closure to the wrong block and
+    # the wrong contract. They are parameters now, and they default to nothing.
     _dump(a.out_c2, {
-        "check": "WP14 C2: end-to-end drift with the projected residual injected in flight",
-        "contract": "LOG 2026-09-02 CONTRACT WP14, HEAD d915f83",
-        "seed_block": "P01", "seeds": a.seeds, "dtype": a.dtype,
+        "check": a.check_label or "end-to-end drift with a residual injected in flight",
+        "contract": a.contract_label or "UNLABELLED -- pass --contract-label",
+        "seed_block": a.block_label or "UNLABELLED -- pass --block-label",
+        "seeds": a.seeds, "dtype": a.dtype,
         "width": a.width, "depth": a.depth, "cells": list(a.cells),
         "power_iters": a.power_iters,
         "mse_full_anchor": MSE_FULL_ANCHOR, "gt_noise_floor": GT_NOISE_FLOOR,
         "regen_drift_reference": REGEN_DRIFT_REF,
         "baseline_cell": "none",
-        "gate": "G-E2E: studentised-t lower bound of mean(drift_none - 5*drift_proj512) > 0",
-        "positive_control": "G-POS, unchanged from the contract: cell 'exact' must "
+        "gate": a.gate_label or "UNLABELLED -- pass --gate-label",
+        "cells_present": list(a.cells),
+        "positive_control": ("cell 'exact' is NOT in this run; this field describes "
+                             "it only when it is" if "exact" not in a.cells else
+                             "G-POS, unchanged from the contract: cell 'exact' must "
                             "reproduce the UNCAPPED flow to relative final-layer MSE "
                             "<= 1e-12. A failure VOIDS C2 and C3. Note what selftest "
                             "S-IDEM did and did NOT refute: the MEAN reads kappa_3 "
@@ -896,7 +943,7 @@ def cmd_e2e(a) -> int:
                             "incoming tensor whole and a rebuild kills an "
                             "all-distinct block that would have reached the NEXT "
                             "layer's slices. C2 therefore ADDS factors rather than "
-                            "rebuilding.",
+                            "rebuilding."),
         "slice_algebra_check": "S-SLICE, in flight: add_factors((diag(d3)+3 d21^T, "
                                "I, I)) moves (3,) by exactly d3 and (2,1) by exactly "
                                "d21 -- see 'slice_probe' on every row",
@@ -1208,6 +1255,11 @@ def main() -> int:
     ap.add_argument("--out-c2", default="")
     ap.add_argument("--out-selftest", default="")
     ap.add_argument("--out-calib3", default="")
+    # Provenance the artifact states about ITSELF. See the _dump comment.
+    ap.add_argument("--check-label", default="")
+    ap.add_argument("--contract-label", default="")
+    ap.add_argument("--block-label", default="")
+    ap.add_argument("--gate-label", default="")
     a = ap.parse_args()
 
     # The upstream checkout is put on the path and VERIFIED to be rev 93d091a4
