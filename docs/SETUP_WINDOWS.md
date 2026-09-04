@@ -221,6 +221,7 @@ Over-declaring only makes a job wait slightly longer.
 | `whest run --split mini --runner subprocess` | 20 | 0 | 6 | **MEASURED 2026-09-01**: harness `PeakWorkingSet64` **14.32 GiB** + a ~1.67 GiB estimator worker = ~16 GiB. See below |
 | `linux_memory_gate.py` | 12 | 0 | 2 | **deliberately** requests 9 GiB in a WSL child to prove the 8,192 MB cap is in force |
 | `p2_wp18_labels.py --labels --nets 128` | 16 | 10 | 4 | 1024x16 f32: the uncapped full-K3 flow plus a 16-layer snapshot tower, two `n x n` slices per pre-layer and an SVD of one of them |
+| `p2_range_lab.py --e2e` / `--calib3`, 1024x16 f32 | **4** | 12 | 4 | **MEASURED 2026-09-04**: `workerq resources --verify` puts jobs 227 and 228 at **1.5 GiB host RAM peak**, 7-8% of the 20 GiB I declared, suggestion 3. The work is on the GPU; the host holds almost nothing. A 20 GiB declaration held a queue slot for nothing, behind four other projects' jobs, for 48 minutes. **Declare `--ram 4` and put the headroom in `--vram`.** For `--dtype f64`, keep `--ram 6` and raise `--vram` to 22 |
 | `p2_truth.py` | 8 | 6 | 4 | chunk `2**16` x 1024: fp32 draw + matmul + fp64 cast ~1.1 GiB, plus CUDA context |
 | `p2_cal_gpu.py` | 8 | 8 | 4 | 3.2 GB fp32 memmap streamed a layer at a time in fp64 |
 | `gpu_mint.py --mint 50000 --samples 65536` | 16 | 8 | 4 | writes a 497 MB npz; large host-side accumulation |
