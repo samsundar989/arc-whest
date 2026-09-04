@@ -77,7 +77,42 @@
 > commit `af465fc` on this claim. **The verdict is not in as this was written.**
 > Read `experiments/LOG.md` for it before quoting anything in § 3.
 >
-> ## 4. The write-up is now PRIMARY WORK
+> ## 4. THE OP WORK IS SIZED, BEFORE IT IS ORDERED — and it needs `45.2%`
+>
+> Instrument `local_sim/p2_op_census.py` (new); artifacts
+> `experiments/2026-09-04_wp20_price/op_census_canary.json`, `op_census_v261.json`.
+>
+> **A graded worst-row headroom of `2.226x` ALREADY EXISTS** —
+> `experiments/2026-09-03_wp17_official/official_residual.json`, `gpuq 182`, one
+> official `100`-row run of the **un-guarded** canary at `2,646` ops, `0/100`
+> failures, `clears_soak_requirement: false`. The guarded file bills `2,674`, so
+> its expected reading is about **`2.20x`** — the **`< 2.5x` branch** of § 7's
+> table. **This does not pre-empt the canary**; the artifact's own one-run caveat
+> binds, and the graded file was not the guarded one.
+>
+> | | |
+> |---|---:|
+> | fit from the two graded points | `residual ~ 0.85 ms + 57.77 us/op`, worst/median `1.169` |
+> | operations that fit under `>= 4x` | **`1,466`** |
+> | **required cut from `2,674`** | **`45.2%`** |
+> | the ruling abandons the flow above | `40.0%` |
+>
+> **The fit's low anchor was checked rather than quoted:** `estimator.py` bills
+> **`442`** operations metered directly, against `442.5` inferred from write-up
+> 6.8's ratio — `0.1%`, on a number it was never fitted to.
+>
+> **Where the operations are, which is what makes `45.2%` targetable:** `78` of
+> `2,673` operations carry the ENTIRE `168.6e9` FLOPs. The other `97.1%` are
+> elementwise `O(n^2)`-and-smaller work — `103` scalar-by-scalar multiplies at
+> **zero** FLOPs and `3.9%` of the op budget, `265` vector-by-scalar (`9.9%`),
+> `390` row/column broadcasts (`14.6%`). **The FLOP budget and the op budget are
+> spent in almost disjoint places.**
+>
+> **No cut has been made and none is authorised** — the branch opens only when the
+> canary's own telemetry lands. Every change in it gets WP16's parity gate and a
+> re-metered price.
+>
+> ## 5. The write-up is now PRIMARY WORK
 >
 > `docs/writeup-p2-draft.md`. **Near-final by Oct 3, final by Oct 20, due Oct 24**
 > (exactly one graded submission ID). Today:
@@ -92,11 +127,11 @@
 > - Appendix B has a **twelfth** closed lane, the only one closed on cost.
 > - §§ 8 and 9 carry the two new process lessons.
 >
-> ## 5. Next actions, in order
+> ## 6. Next actions, in order
 >
 > 1. **Samuel: submit the canary** (or decline). Nothing else moves until it is
 >    graded.
-> 2. **When graded, read EVERY row's residual** and apply § 6's table below.
+> 2. **When graded, read EVERY row's residual** and apply § 7's table below.
 > 3. **Write-up** — continuous, and now the default use of a session.
 > 4. **Hardening, after the draft**: `1000+` fresh mints through the exact
 >    nominee files, determinism twin runs, the Linux memory gate, brokered `gpuq`
@@ -106,7 +141,7 @@
 >    **B** = `v2.7`. Present both to Samuel with SHAs and one paragraph each;
 >    **Samuel designates.** Buffer Oct 10–17; close **Oct 17**.
 >
-> ## 6. The graded-residual decision table, unchanged and still binding
+> ## 7. The graded-residual decision table, unchanged and still binding
 >
 > | graded worst-row headroom | action |
 > |---|---|
@@ -117,7 +152,7 @@
 > **The `3.330x` branch of that table is now dead** — it was conditional on the
 > cell fitting, and it does not.
 >
-> ## 7. Standing watch, and it is the only one
+> ## 8. Standing watch, and it is the only one
 >
 > **Phase-1 winner code (`ednacob`), 30-day window closes ~Sep 30.** If it drops,
 > **cite it in the write-up's related work. Do not build on it.**
