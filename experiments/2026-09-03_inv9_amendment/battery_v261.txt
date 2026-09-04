@@ -1,0 +1,48 @@
+MUTATION BATTERY for invariant 9 -- candidate: estimator.py
+gate: edge_cases.perm_gate, bar = 1% of raw MSE = 1.400e-08  [frozen decision signal]
+
+128x8 layer 3   UNMUTATED   worst 3.469e-16 = 0.0000% of bar   accepted
+128x8 layer 3   detection floor: a POSITIONAL distortion is rejected once it exceeds 4.307e-04 = 0.0431% of the row
+128x8 layer 3   THE SENSITIVITY SURRENDERED: the retired clause rejected at 2.794e-07 (0.000028%); the amendment gives away a factor of 1541x
+128x8 layer 3   floor probe amp = 0.50x floor -> mse_k 3.500e-09, accepted   ok
+128x8 layer 3   floor probe amp = 2.00x floor -> mse_k 5.600e-08, REJECTED   ok
+
+  transposed index (row reversed)            worst 4.786e-01 = 3.42e+07x bar   REJECTED  ok
+  reduction axis swapped (positional ramp)   worst 7.547e-04 = 5.39e+04x bar   REJECTED  ok
+  off-by-one on the depth axis               worst 4.341e-01 =  3.1e+07x bar   REJECTED  ok
+  basis on the wrong side (fixed shuffle)    worst 5.579e-01 = 3.98e+07x bar   REJECTED  ok
+  minimal index bug (adjacent positions 0<->1) worst 1.313e-03 = 9.38e+04x bar   REJECTED  ok
+  closest-valued positions swapped           worst 2.778e-03 = 1.98e+05x bar   REJECTED  ok
+  NaN on the SCORED final row                worst nan =      infx bar   REJECTED  ok
+  NaN on the permuted row k                  worst nan =      infx bar   REJECTED  ok
+  inf on a non-k, non-final row              worst nan =      infx bar   REJECTED  ok
+  CONTROL: equivariant 0.1% scale error      worst 3.476e-16 = 2.48e-08x bar   accepted  ok
+  CONTROL: value-selected swap (commutes)    worst 3.469e-16 = 2.48e-08x bar   accepted  ok
+
+64x4 layer 1   UNMUTATED   worst 9.823e-16 = 0.0000% of bar   accepted
+64x4 layer 1   detection floor: a POSITIONAL distortion is rejected once it exceeds 3.872e-04 = 0.0387% of the row
+64x4 layer 1   THE SENSITIVITY SURRENDERED: the retired clause rejected at 4.884e-07 (0.000049%); the amendment gives away a factor of 793x
+64x4 layer 1   floor probe amp = 0.50x floor -> mse_k 3.500e-09, accepted   ok
+64x4 layer 1   floor probe amp = 2.00x floor -> mse_k 5.600e-08, REJECTED   ok
+
+  transposed index (row reversed)            worst 3.149e-01 = 2.25e+07x bar   REJECTED  ok
+  reduction axis swapped (positional ramp)   worst 9.337e-04 = 6.67e+04x bar   REJECTED  ok
+  off-by-one on the depth axis               worst 8.004e-02 = 5.72e+06x bar   REJECTED  ok
+  basis on the wrong side (fixed shuffle)    worst 3.509e-01 = 2.51e+07x bar   REJECTED  ok
+  minimal index bug (adjacent positions 0<->1) worst 5.817e-02 = 4.15e+06x bar   REJECTED  ok
+  closest-valued positions swapped           worst 2.358e-02 = 1.68e+06x bar   REJECTED  ok
+  NaN on the SCORED final row                worst nan =      infx bar   REJECTED  ok
+  NaN on the permuted row k                  worst nan =      infx bar   REJECTED  ok
+  inf on a non-k, non-final row              worst nan =      infx bar   REJECTED  ok
+  CONTROL: equivariant 0.1% scale error      worst 9.842e-16 = 7.03e-08x bar   accepted  ok
+  CONTROL: value-selected swap (commutes)    worst 9.823e-16 = 7.02e-08x bar   accepted  ok
+
+SURRENDERED SENSITIVITY, and it is the honest cost of the amendment:
+  128x8 layer 3      old 2.794e-07 -> new 4.307e-04   = 1541x given away
+  64x4 layer 1       old 4.884e-07 -> new 3.872e-04   = 793x given away
+  Every mutation above sits FAR ABOVE this band, so the battery says nothing about
+  what lives inside it. docs/VALIDATION.md section 3.2 names one thing that does
+  (rotation stability at 4.4e-08) and it has been rewritten to record that this
+  instrument no longer measures it.
+
+BATTERY PASSED -- every deliberate equivariance defect is still rejected, the equivariant control is still accepted, and the unmutated prediction passes.

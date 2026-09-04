@@ -525,24 +525,82 @@ This is the only check in the suite that catches a transposed index, an axis
 swapped inside a reduction, or a basis applied on the wrong side — mistakes that
 produce perfectly finite, perfectly plausible, wrong numbers.
 
-| case | permuted row | other rows | implied MSE | share of signal |
+> **AMENDED 2026-09-03, and one of this section's two jobs was RETIRED by the
+> amendment.** Read the whole block before quoting any number below it. The
+> change is recorded in `experiments/LOG.md` (*IMPORTANT (instrument)*), it was
+> authorised by the strategist's Ruling 1, and an independent Skeptic returned
+> **PROVISIONAL** on it — the finding that forced this rewrite is that the
+> amendment retired a detector this section still advertised.
+
+**The gate, as it now stands.** Every deviation a relabelling produces — the
+permuted row, every other row, and the scored final row — is required to be, in
+MSE units, **at most 1% of the candidate's own raw MSE**. The default
+denominator is the frozen `1.4e-6` decision signal; `ARC_WHEST_RAW_MSE` may name
+a candidate's own measured raw MSE and is clamped so it can only ever tighten.
+Every component is tested for finiteness **before** any ordering.
+
+**What was retired, and it is not a rounding detail.** The old gate also
+required `max|pred'[k] - pred[k][P]| / mean|pred[-1]| < 1e-6` — roughly ten
+times float32 epsilon. That is a bar only a float64 backbone can hold, and the
+live design runs the covariance backbone in f32 deliberately, which is what puts
+`C/B = 0.0767` on the `0.1` multiplier floor. **Measured on the same networks,
+the amendment gives away a factor of 796×–1,552× of sensitivity** to positional
+distortion (`local_sim/test_edge_cases_inv9.py` prints both floors on the same
+ramp, every run):
+
+| case | old clause rejected at | new clause rejects at | surrendered |
+|---|---:|---:|---:|
+| 128×8, layer 3 | `2.799e-07` of a row | `4.345e-04` | **1,552×** |
+| 64×4, layer 1 | `4.884e-07` of a row | `3.887e-04` | **796×** |
+
+**THE SECOND JOB THIS SECTION USED TO DO IS GONE.** The paragraph below used to
+end by claiming this invariant *"doubles as an independent measurement of
+v2.4.1's rotation stability… a full relabelling moves the final row by 4.4e-8."*
+**That measurement lived entirely inside the surrendered band** — `4.4e-8` is
+roughly three orders of magnitude below the new floor's implied deviation.
+*(Written out rather than as a ratio: `test_enforcement_labels.py` scans this
+document for `N` over `M` and reads any it finds as a suite-count claim, so a
+bare ratio in prose turns the harness red for a reason that has nothing to do
+with a suite.)* The invariant still *reports*
+the deviation, and the number is still readable in its output; what it no longer
+does is **gate** on it. **Do not cite invariant 9 as evidence of rotation
+stability.** If that property needs a gate, it needs its own check with its own
+threshold, and this document will say so when one exists.
+
+**The measured deviations**, refreshed against today's `estimator.py` — the
+previous table was stale by up to 75× in its *other rows* column, which is
+exactly the rot a Skeptic caught and which is why the numbers are dated:
+
+| case (v2.6.1, 2026-09-03) | permuted row | other rows | implied MSE | share of the 1.4e-6 signal |
 |---|---|---|---|---|
-| 256×32, layer 7 | 2.22e-15 | 4.38e-08 | 1.18e-16 | 8e-9 % |
-| 256×32, layer 20 | 1.78e-15 | 2.07e-08 | 3.43e-17 | 2e-9 % |
-| 128×8, layer 3 | 8.88e-16 | 1.42e-09 | 1.97e-19 | 1e-11 % |
-| 256×32, layer 30 | 1.33e-15 | 4.96e-09 | 1.23e-18 | 9e-11 % |
+| 256×32, layer 7 | 2.22e-15 | 7.75e-08 | 4.04e-16 | 3e-8 % |
+| 256×32, layer 20 | 1.78e-15 | 1.93e-07 | 1.38e-15 | 1e-7 % |
+| 128×8, layer 3 | 8.88e-16 | 1.06e-07 | 5.57e-16 | 4e-8 % |
+| 256×32, layer 30 | 1.33e-15 | 1.59e-07 | 9.61e-16 | 7e-8 % |
 
-The permuted row matches to floating point. The residual in the *other* rows is
-not slop and is worth understanding: reordering columns reorders the summation
-inside every downstream matmul, so JJᵀ moves at the 1e-16 level and the alignment
-basis inherits it. We therefore report the deviation as a share of the decision
-signal rather than asserting an equality the hardware cannot deliver. At ≤1.2e-16
-implied MSE it is nine orders below anything we would act on.
+The permuted row matches to floating point on the shipped file (`mse` at
+`1e-31`). The residual in the *other* rows is not slop and is worth
+understanding: reordering columns reorders the summation inside every downstream
+matmul, so JJᵀ moves at the 1e-16 level and the alignment basis inherits it. We
+therefore report the deviation as a share of the decision signal rather than
+asserting an equality the hardware cannot deliver.
 
-This doubles as an independent measurement of v2.4.1's rotation stability: under
-the pre-v2.4.1 raw eigenbasis, a 1e-15 weight perturbation moved the basis by
-0.81 in max column distance. Here a full relabelling moves the final row by
-4.4e-8.
+**A candidate at f32 reads three orders of magnitude higher on this invariant
+than a candidate at f64, and that is a DTYPE fact, not an index bug.** Verified
+two ways: the same flow on the same networks at f32 vs f64 moves `d_k/scale` from
+`2.116e-06` to `2.365e-15` — a ~1e9 ratio, which is the eps ratio — and the
+deviation **grows with width** (`1.105e-06` at 256×32 to `2.992e-06` at
+1024×16), which is what BLAS accumulation noise does and what an index bug does
+not. Before reading a permutation-equivariance failure as a math error, run the
+f64 control.
+
+**The standing proof that the item still bites** is
+`local_sim/test_edge_cases_inv9.py`, a mutation battery wired into
+`scripts/preflight.ps1` and `local_sim/certify_candidate.py`. Nine deliberate
+defects — a transposed index, a swapped reduction axis, a depth off-by-one, a
+basis on the wrong side, two positional swaps, and non-finite values on each of
+the three gated rows — must all be REJECTED; two *equivariant* defects must be
+ACCEPTED, because this invariant tests equivariance and not accuracy.
 
 ### 3.3 Budget monotonicity
 

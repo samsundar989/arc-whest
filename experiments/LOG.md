@@ -31505,3 +31505,186 @@ local CPU-only metered price pass.
 claim from it enters the write-up, `CURRENT_STATE.md`, or a nomination. It is
 handed this contract, the diff, the evaluation protocol, the **pinned commit**,
 and the **raw artifact paths** — never a prose summary.
+
+---
+
+# 2026-09-03 — **SKEPTIC (invariant 9): PROVISIONAL. I shipped a NaN hole, cited a gate that nothing executed, and left the binding protocol document describing an instrument that no longer exists.**
+
+Pinned commit `40e88fe`. Rule 2, on the IMPORTANT instrument change recorded
+above. The Skeptic ran every command in the protocol **plus four read-only
+probes of its own**, and it is the probes that produced the findings.
+
+## 1. A LIVE REGRESSION, in the direction of accepting a broken candidate
+
+`perm_gate` computed `d["worst"] = max(mse_k, mse_other, mse_final)` and then
+tested `np.isfinite(d["worst"])`. **Python's `max` orders with `>`, and
+`nan > x` is `False`, so a NaN anywhere but the first position was DROPPED
+before the finiteness check ever saw it.** Measured by the Skeptic: injecting
+`nan` into `perm[-1, 0]` gave `mse_other = nan`, `mse_final = nan`,
+**`worst = 0.0`, `ok = True`**.
+
+**The pre-amendment code REJECTED that exact input**, because `nan < 1.4e-8` is
+`False`. So the amendment did not merely coarsen a bar — on this input it
+inverted a verdict.
+
+It matters concretely rather than theoretically: **the candidate family under
+test is the one that returns NaN on degenerate networks** (`GOTCHAS.md`,
+2026-09-03, item 5 — `certify` refused the canary at `5/30` for exactly that),
+and a NaN produced only on the *permuted* network is seen by no other invariant.
+
+**And it is this repository's own signature failure class**, recorded in
+`GOTCHAS.md` on 2026-09-02: *"A `>` comparison is not a check. It silently
+admits the one value it cannot order."* I wrote that sentence's mistake again,
+eight lines into the function whose whole purpose was to be more careful.
+
+**FIXED.** Each of the three components is tested for finiteness on its own,
+**before** any ordering. Three new battery cases — a NaN on the scored final
+row, a NaN on the permuted row, an `inf` on a non-`k` non-final row — are
+injected into the **permuted prediction only** (injecting into both leaves the
+difference finite on some rows and tests the wrong thing) and all three now
+REJECT.
+
+## 2. THE "STANDING PROOF" WAS A FILE NOTHING RAN
+
+`local_sim/test_edge_cases_inv9.py` is called *"a gate, not a comment"* in the
+commit message and in the invariant's own docstring. `grep -rn` returns two
+docstring mentions and **one line in the committed preflight transcript reading
+`?? local_sim/test_edge_cases_inv9.py` — it was UNTRACKED when
+`preflight -Full` ran.** `preflight.ps1` ran `edge_cases.py`;
+`certify_candidate.py` ran `edge_cases.py`. Neither ran the battery, and
+`test_enforcement_labels.py` only checks `N/N` counts, so nothing could have
+noticed it rotting.
+
+**FIXED.** It runs in `preflight.ps1` step 3 (**two commands, one step — the
+denominator stays 16**, which is that file's own stated convention) and in
+`certify_candidate.py` as check `3b`, recorded in the report as
+`sections.inv9_battery`.
+
+## 3. I PROMISED TO REPORT WHAT THE AMENDMENT COST AND DID NOT
+
+The battery's docstring said the sensitivity loss *"is reported here rather than
+argued away."* It printed the **new** floor and never the **old** one, and
+**every one of its six mutations sat at `5.3e4x`–`3.9e7x` the bar — far above
+the band the amendment actually changed.** The battery was silent exactly where
+the change did something. That is not a weak proof; it is a proof of a
+different proposition.
+
+The Skeptic measured the gap. So does the battery now, on every run, on the same
+ramp:
+
+| case | old clause rejected at | new clause rejects at | **surrendered** |
+|---|---:|---:|---:|
+| `128 x 8`, layer 3 | `2.799e-07` of a row | `4.345e-04` | **`1,552x`** |
+| `64 x 4`, layer 1 | `4.884e-07` of a row | `3.887e-04` | **`796x`** |
+
+(The Skeptic's own probe, on `estimator.py` at three shapes, gives
+`794x`–`1,585x`. Same band, different networks.)
+
+## 4. AND THE THING THAT LIVES IN THE SURRENDERED BAND WAS IN THE BINDING DOCUMENT
+
+**This is the finding that matters most and it is the one I would never have
+found.** `docs/VALIDATION.md` § 3.2 — the binding measurement protocol, **which
+this change did not amend** — assigned invariant 9 a *second* job:
+
+> *"This doubles as an independent measurement of v2.4.1's rotation stability…
+> a full relabelling moves the final row by `4.4e-8`."*
+
+**`4.4e-8` is about `1/1500` of the new floor's implied deviation.** The
+amendment retired a detector the protocol still advertised, and the protocol
+went on advertising it. § 3.2's own table was **stale by up to `75x`** in its
+*other rows* column as well.
+
+**FIXED.** § 3.2 is rewritten: it states the new gate, states the surrendered
+factor with its table, refreshed every number against today's `estimator.py`,
+and says in bold that **invariant 9 must not be cited as evidence of rotation
+stability** — if that property needs a gate it needs its own check with its own
+threshold. It also now carries the f32-vs-f64 diagnostic so the next person does
+not read a dtype effect as an index bug.
+
+## 5. Three claims of mine that were weaker than I wrote them
+
+| claim | what is actually true |
+|---|---|
+| the ruling was *"quoted rather than paraphrased so a later reader can see exactly what was authorised"* | the quote says **f32-vs-f64 output drift**; what I implemented judges **permutation drift** at the same `1%` bar. The implemented version is arguably the better one — it keeps testing equivariance rather than swapping it for a precision check — but **the divergence was undisclosed in an entry whose stated purpose was fidelity to the quote.** Disclosed here |
+| *"curing it was measured at exactly `2.0x` billing"* | a **rate-table fact plus an inference**. What was measured is the rate on **one matmul** (`268,173,312 -> 536,346,624`); that the whole backbone scales at it is inferred. Defensible — the backbone is essentially the whole bill — but **this repository already recorded getting exactly this attribution wrong once** (`GOTCHAS.md`: *"the 1.53x penalty does not apply to the fix I declined, and I attached it to that fix anyway"*). Now labelled as an inference in `GOTCHAS.md` and in the invariant's docstring |
+| the newly-gated other/final rows are *"a net TIGHTENING"* that offsets the row-`k` widening | **true only trivially.** Those clauses leave the canary `1e5x` of slack and v2.6.1 `1e9x`. They **discriminate nothing**, and calling them an offset does not survive arithmetic. Corrected in the battery's docstring |
+
+`docs/GOTCHAS.md`'s *"Invariant 9 is therefore unmeetable by any competitive
+Phase-2 candidate"* — a universal `CURRENT_STATE.md` had already retracted once
+— is now struck there too, with the amendment recorded as its falsification.
+
+## 6. What the Skeptic CONFIRMED, including one thing it checked better than I did
+
+* **The contract's falsifier did NOT fire, and it tried.** It reproduced the
+  battery on both files: `6/6` positional defects rejected, `2/2` equivariant
+  controls accepted, `rc = 0`, weakest margin `5.3e4x` — matching my own
+  self-reported miss on prediction 4.
+* **All three protocol transcripts reproduce EXACTLY**: canary `30/30`
+  (`worst 1.38e-13`), canary under the stricter denominator `30/30`
+  (bar `8.508e-09`), `estimator.py` `30/30` with `mse row-k 1.13e-31`.
+* **The override survives fully.** `24` adversarial values of
+  `ARC_WHEST_RAW_MSE` — `nan`, `NaN`, `inf`, `-inf`, `Infinity`, `1e400`,
+  `9e99`, `-0.0`, `0`, `-1e-9`, `1_000`, whitespace, trailing newline,
+  `1.4e-6`, `5e-324`, empty — and **none loosens.** One real gap: the certify
+  artifact did not record *which* denominator was in force. **FIXED**;
+  `sections.invariants.arc_whest_raw_mse` now says.
+* **The dtype story checks out, and it was corroborated by a route I did not
+  run.** Beyond confirming WP18-C's three f32→f64 pairs in the LOG, it ran the
+  gate at the **live `1024 x 16` shape, which invariant 9 never tests**, and
+  found the canary's `d_k/scale` **grows with width** (`1.105e-06` at
+  `256 x 32` to `2.992e-06` at `1024 x 16`) — *"which is what BLAS accumulation
+  noise does and what an index bug does not."* That is a better argument than
+  the one I made, and it is now in `VALIDATION.md` § 3.2 and `GOTCHAS.md`.
+* **Q4 answered NO**: no shape found where v2.6.1 newly fails; at `1024 x 16`
+  its `worst/bar` is `1.4e-22`.
+* **Q5 verified**: `30` checks before, `30` after, none dropped, and
+  `preflight_full.txt` carries a genuine `PREFLIGHT GREEN -- 16/16` verdict line
+  (the `2>&1` transcript trap was avoided).
+
+## 7. One process failure, mine
+
+**The tree moved out from under the audit.** The Skeptic was pinned to
+`40e88fe`; `git rev-parse HEAD` returned `6d7aa50` by the time it looked, and one
+of the artifacts I handed it — `certify_guarded.json` — had been **rewritten
+after the pin** (`29/30`/CRLF hash → `30/30`/LF hash). The audited code is
+byte-identical at both commits so nothing is invalidated, **but this is the exact
+hazard `CURRENT_STATE.md` already records against a previous Skeptic, and I
+reproduced it.** The rule I should have followed and will: once a commit is
+pinned for an audit, do not rewrite any artifact named in that audit's brief
+until the verdict lands.
+
+## 8. The follow-up, and a decision NOT to run it yet
+
+The Skeptic's cheapest discriminating experiment: re-derive the estimator's
+rank-32 alignment basis from the *permuted* covariance with a deliberately
+near-degenerate spectrum, and measure the output drift as a fraction of a row.
+Below `0.04%` and the retired detector was real; above and the surrendered band
+contains nothing this repository knows how to produce.
+
+**Deliberately deferred, with the conservative branch taken instead.**
+`VALIDATION.md` § 3.2 has been rewritten **as if the experiment came back on the
+unfavourable side** — it declares the rotation-stability measurement retired and
+forbids citing invariant 9 for it. Running the probe could only *upgrade* that
+claim, never protect anything, and the canary and `CONTRACT WP20` are on the
+critical path today. **It is recorded as a named open item rather than silently
+dropped**, and it does not gate anything, because the document already assumes
+the worse answer.
+
+## Knowledge delta
+
+1. **`max()` is not a finiteness-safe reduction, and I knew that before I wrote
+   it.** The repository had the lesson recorded, in the file I had read that
+   morning. Guard each component before ordering; `np.max` over an array with an
+   explicit `np.isfinite` on the components, never Python's `max`.
+2. **A proof that a gate still bites must contain cases INSIDE the band the
+   change moved.** Six mutations at `1e5x`–`1e7x` the bar prove the gate catches
+   large things. That was never in doubt.
+3. **Amending an instrument means amending the document that certifies it.** The
+   binding protocol assigned invariant 9 a second job I did not know it had, and
+   nothing mechanical connects `edge_cases.py` to `VALIDATION.md` § 3.2. The
+   amendment was five hours old and the protocol had already been wrong for all
+   of them.
+4. **"It is a gate" is a claim about the harness, and it is checkable.** Two
+   greps would have caught it. The commit message asserted it; nothing executed
+   it; and the transcript that was supposed to prove the change was safe
+   contained the file's own name marked `??`.

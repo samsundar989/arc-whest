@@ -16,13 +16,24 @@ it exits non-zero if any deliberately broken prediction is ACCEPTED by
 `edge_cases.perm_gate`, which is the same function invariant 9 itself calls, so
 the two cannot drift apart.
 
-It also measures and prints the thing the amendment genuinely costs: the
-**detection floor**, the smallest positional distortion of a row that is still
-rejected. The old max-abs clause had a lower floor; that is a real loss of
-sensitivity and it is reported here rather than argued away. What the amendment
-buys back is that `other rows` and `final row` -- which the old gate merely
-PRINTED -- are now gated at all, and that the item is met by a candidate that is
-correct rather than only by one that is expensive.
+It also measures and prints the thing the amendment genuinely costs. **The first
+version of this file promised that and did not deliver it** -- it printed the new
+floor and never the old one, and every mutation in the battery sits far above
+the band between them, so the battery was silent exactly where the change did
+something. An independent Skeptic found that on 2026-09-03 and measured the gap
+at **794x-1,585x**. `old_bar_floor()` now computes both floors on the same ramp
+and prints the ratio, so the cost is a number in the output rather than a
+sentence in a docstring.
+
+What the amendment buys back is smaller than the first version of this file
+claimed. The `other rows` and `final row` clauses are new, but they leave the
+canary `1e5x` of slack and v2.6.1 `1e9x`: they discriminate nothing, and calling
+them an offset to the row-`k` widening does not survive arithmetic. The honest
+statement is that the item is now MEETABLE by a candidate that is correct rather
+than only by one that is expensive, at the price of a 3-orders-of-magnitude
+coarser floor -- and that `docs/VALIDATION.md` section 3.2 had to be rewritten,
+because it assigned invariant 9 a second job that lived entirely inside the
+band that was given away.
 
 The battery is deliberately run on SMALL networks (128x8, 64x4). Detection here
 is a property of the gate arithmetic, not of the shape, and the invariant itself
@@ -177,6 +188,39 @@ def ctl_global_scale(out, k):
     return out * 1.001
 
 
+def mut_nan_final(out, k):
+    """A NaN on the SCORED final row. Must be REJECTED.
+
+    `SKEPTIC` (2026-09-03) found that `perm_gate` accepted exactly this: `max()`
+    orders with `>`, `nan > x` is False, so a NaN anywhere but the first position
+    was dropped before the finiteness check saw it, and the gate returned
+    `worst = 0.0, ok = True`. The pre-amendment code rejected it. The candidate
+    family under test is the one that returns NaN on degenerate inputs, and a
+    NaN produced only on the PERMUTED network is seen by no other invariant --
+    so this case is not hypothetical, it is the one that mattered.
+    """
+    o = out.copy()
+    o[-1, 0] = np.nan
+    return o
+
+
+def mut_nan_rowk(out, k):
+    """A NaN on the permuted row. Must be REJECTED."""
+    o = out.copy()
+    o[k, 0] = np.nan
+    return o
+
+
+def mut_inf_other(out, k):
+    """An infinity on a row that is neither k nor final. Must be REJECTED."""
+    o = out.copy()
+    j = 0 if k != 0 else 1
+    if j == out.shape[0] - 1:
+        j = max(0, out.shape[0] - 2)
+    o[j, 0] = np.inf
+    return o
+
+
 MUTATIONS = (
     ("transposed index (row reversed)", mut_row_reversed, True),
     ("reduction axis swapped (positional ramp)", mut_positional_ramp, True),
@@ -185,6 +229,9 @@ MUTATIONS = (
     ("minimal index bug (adjacent positions 0<->1)", mut_swap_adjacent, True),
     ("closest-valued positions swapped",
      mut_swap_closest_positional, True),
+    ("NaN on the SCORED final row", mut_nan_final, True),
+    ("NaN on the permuted row k", mut_nan_rowk, True),
+    ("inf on a non-k, non-final row", mut_inf_other, True),
     ("CONTROL: equivariant 0.1% scale error", ctl_global_scale, False),
     ("CONTROL: value-selected swap (commutes)", ctl_value_selected_swap, False),
 )
@@ -223,6 +270,27 @@ def detection_floor(base, perm, P, k, depth, denom):
     return a_star, g["mse_k"]
 
 
+def old_bar_floor(base, perm, P, k, depth):
+    """The amplitude at which the RETIRED clause `d_k/scale < 1e-6` rejected.
+
+    `SKEPTIC` (2026-09-03): the battery's own docstring promised to report what
+    the amendment surrendered and did not, and every one of its mutations sits
+    far ABOVE the surrendered band, so the battery was silent exactly where the
+    change did something. This closes that gap by measuring both floors on the
+    same ramp and printing the ratio.
+
+    The old clause was `max|perm[k] - base[k][P]| / mean|base[-1]| < 1e-6`. Under
+    `row * (1 + a*t)` the deviation is `v[P] * a * (t - t[P])`, linear in `a`, so
+    `a*_old = a_ref * 1e-6 * scale / d_k(a_ref)`.
+    """
+    a_ref = 0.10
+    b2 = positional_ramp(base, k, a_ref)
+    p2 = positional_ramp(perm, k, a_ref)
+    d_k = float(np.abs(p2[k] - b2[k][P]).max())
+    scale = float(np.abs(base[-1]).mean())
+    return a_ref * 1e-6 * scale / max(d_k, 1e-300)
+
+
 def main():
     cand = sys.argv[1] if len(sys.argv) > 1 else "estimator.py"
     est = ec.load(cand).Estimator()
@@ -239,7 +307,7 @@ def main():
           % (ec.DRIFT_SHARE * 100, bar, denom_src))
 
     rng = np.random.default_rng(30_806_006_100)
-    failures = []
+    failures, surrendered = [], []
     for depth, width, seed, k in CASES:
         base, perm, P = _truth_pair(est, depth, width, seed, k, rng)
 
@@ -252,8 +320,13 @@ def main():
             failures.append("%s: the UNMUTATED prediction was rejected" % tag)
 
         a_star, mse_ref = detection_floor(base, perm, P, k, depth, denom)
+        a_old = old_bar_floor(base, perm, P, k, depth)
         print("%s   detection floor: a POSITIONAL distortion is rejected once "
               "it exceeds %.3e = %.4f%% of the row" % (tag, a_star, a_star * 100))
+        print("%s   THE SENSITIVITY SURRENDERED: the retired clause rejected at "
+              "%.3e (%.6f%%); the amendment gives away a factor of %.0fx"
+              % (tag, a_old, a_old * 100, a_star / max(a_old, 1e-300)))
+        surrendered.append((tag, a_old, a_star, a_star / max(a_old, 1e-300)))
 
         for mult, want_reject in ((0.5, False), (2.0, True)):
             gg = ec.perm_gate(positional_ramp(base, k, a_star * mult),
@@ -273,7 +346,14 @@ def main():
         print()
 
         for name, fn, must_reject in MUTATIONS:
-            b2, p2 = fn(base, k), fn(perm, k)
+            if name.startswith(("NaN", "inf")):
+                # A non-finite value must be caught wherever it appears, so it
+                # is injected into the PERMUTED prediction only -- injecting it
+                # into both would leave the DIFFERENCE finite on some rows and
+                # test the wrong thing.
+                b2, p2 = base, fn(perm, k)
+            else:
+                b2, p2 = fn(base, k), fn(perm, k)
             g = ec.perm_gate(b2, p2, P, k, depth, denom=denom)
             margin = g["worst"] / bar if np.isfinite(g["worst"]) else float("inf")
             verdict = "REJECTED" if not g["ok"] else "accepted"
@@ -295,6 +375,15 @@ def main():
               "it (LOG, IMPORTANT (instrument), 'what would make me revert').")
         return 1
 
+    print("SURRENDERED SENSITIVITY, and it is the honest cost of the amendment:")
+    for tag, a_old, a_new, ratio in surrendered:
+        print("  %-18s old %.3e -> new %.3e   = %.0fx given away"
+              % (tag, a_old, a_new, ratio))
+    print("  Every mutation above sits FAR ABOVE this band, so the battery says "
+          "nothing about\n  what lives inside it. docs/VALIDATION.md section 3.2 "
+          "names one thing that does\n  (rotation stability at 4.4e-08) and it "
+          "has been rewritten to record that this\n  instrument no longer "
+          "measures it.\n")
     print("BATTERY PASSED -- every deliberate equivariance defect is still "
           "rejected, the equivariant control is still accepted, and the "
           "unmutated prediction passes.")

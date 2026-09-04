@@ -280,10 +280,20 @@ def perm_gate(base, perm, P, k, depth, denom=None):
         "mse_final": (float(((perm[-1] - base[-1]) ** 2).mean())
                       if k != depth - 1 else 0.0),
     }
-    d["worst"] = max(d["mse_k"], d["mse_other"], d["mse_final"])
+    # SKEPTIC (2026-09-03) found a REGRESSION here, and it is this repository's
+    # own signature failure class. `max()` compares with `>`, `nan > x` is False,
+    # so a NaN anywhere but the first position was DROPPED before the finiteness
+    # check ever saw it: injecting nan into the scored final row gave
+    # `worst = 0.0, ok = True`. The OLD code rejected that exact input, because
+    # `nan < 1.4e-8` is False. Each component is therefore tested for finiteness
+    # on its own, BEFORE any ordering. GOTCHAS.md, 2026-09-02: "A `>` comparison
+    # is not a check. It silently admits the one value it cannot order."
+    parts = (d["mse_k"], d["mse_other"], d["mse_final"])
+    d["finite"] = bool(np.all(np.isfinite(np.asarray(parts, dtype=np.float64))))
+    d["worst"] = float(np.max(np.asarray(parts, dtype=np.float64))) if d["finite"]         else float("nan")
     d["bar"] = bar
     d["denom"] = denom
-    d["ok"] = bool(np.isfinite(d["worst"])) and d["worst"] <= bar
+    d["ok"] = d["finite"] and d["worst"] <= bar
     return d
 
 
@@ -353,9 +363,10 @@ def inv_permutation(est):
                  g["d_k"], g["d_other"], g["d_final"]))
         print("  %-34s MSE row-k %.2e  other %.2e  final %.2e"
               % ("", g["mse_k"], g["mse_other"], g["mse_final"]))
-        print("  %-34s worst %.2e = %.4f%% of raw MSE   %s"
+        print("  %-34s worst %.2e = %.4f%% of raw MSE   %s%s"
               % ("", g["worst"], g["worst"] / denom * 100,
-                 "ok" if g["ok"] else "FAILED"))
+                 "ok" if g["ok"] else "FAILED",
+                 "" if g["finite"] else "  (NON-FINITE component)"))
     return [ok]
 
 

@@ -292,8 +292,28 @@ def main() -> int:
     tail = [l for l in (p.stdout or "").splitlines() if l.strip()][-1:] or [""]
     check("3: the invariant suite passes on THIS candidate", p.returncode == 0,
           tail[0][:60])
-    report["sections"]["invariants"] = {"returncode": p.returncode,
-                                        "tail": tail[0]}
+    report["sections"]["invariants"] = {
+        "returncode": p.returncode, "tail": tail[0],
+        # SKEPTIC (2026-09-03): the report recorded only a returncode and a tail
+        # line, so it did not say WHICH denominator invariant 9 ran against.
+        # `ARC_WHEST_RAW_MSE` is inherited from the environment and can only
+        # tighten, but an artifact that cannot say what bar was in force is not
+        # a certification of anything in particular.
+        "arc_whest_raw_mse": os.environ.get(
+            "ARC_WHEST_RAW_MSE", "(unset: the frozen 1.4e-6 decision signal)"),
+    }
+
+    # Invariant 9's mutation battery. It exists because that invariant's
+    # absolute float32 clause was replaced on 2026-09-03, and an amendment that
+    # makes a failing gate pass has to prove it still bites. It was written as a
+    # file NOTHING EXECUTED -- an independent Skeptic found it cited as "a gate"
+    # while this command and `preflight.ps1` both ran only `edge_cases.py`.
+    pb = _uvpy(os.path.join(_HERE, "test_edge_cases_inv9.py"), rel, timeout=1800)
+    btail = [l for l in (pb.stdout or "").splitlines() if l.strip()][-1:] or [""]
+    check("3b: invariant 9 still rejects deliberate equivariance defects",
+          pb.returncode == 0, btail[0][:60])
+    report["sections"]["inv9_battery"] = {"returncode": pb.returncode,
+                                          "tail": btail[0]}
 
     # ---------------------------------------------------------------- 4 ----
     head("4  determinism, in-process and in a FRESH worker")

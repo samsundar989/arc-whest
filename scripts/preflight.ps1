@@ -19,7 +19,13 @@
                             still describes the dataset those bytes came from,
                             and the loader still takes the route we compared.
                             Two commands, one step -- the denominator stays 16.
-    3. invariant suite    - 30/30 on the SHIPPED file, not on a candidate
+    3. invariant suite    - 30/30 on the SHIPPED file, not on a candidate,
+                            AND (2026-09-03) invariant 9's mutation battery,
+                            local_sim/test_edge_cases_inv9.py: nine deliberate
+                            equivariance defects must still be REJECTED and two
+                            EQUIVARIANT ones still accepted, after that
+                            invariant's absolute float32 clause was replaced.
+                            Two commands, one step -- the denominator stays 16.
     4. whest validate     - the grader contract, run with the child's text
                             encoding OWNED by this gate and ASSERTED, not
                             assumed. See the PYTHONIOENCODING block below.
@@ -302,7 +308,17 @@ Step "2. mint provenance + dataset pin" {
 }
 
 # --- 3. invariants on the SHIPPED file ----------------------------------------
-Step "3. invariant suite" { uv run python local_sim/edge_cases.py }
+# TWO commands, ONE step -- the denominator stays 16. The second is invariant
+# 9's mutation battery: that invariant's absolute float32 clause was replaced on
+# 2026-09-03 by a 1%-of-raw-MSE criterion, and an amendment that makes a failing
+# gate PASS has to prove it still bites. The proof was written as a file NOTHING
+# EXECUTED -- an independent Skeptic found it cited as "a gate" while this file
+# and certify_candidate.py both ran only edge_cases.py. It is a gate now.
+Step "3. invariant suite" {
+    uv run python local_sim/edge_cases.py
+    if ($LASTEXITCODE -ne 0) { return }
+    uv run python local_sim/test_edge_cases_inv9.py estimator.py
+}
 
 # --- 4. grader contract --------------------------------------------------------
 Step "4. whest validate" {

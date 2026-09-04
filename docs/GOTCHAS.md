@@ -81,15 +81,43 @@ the same as robustness**.
 
 **And one methodological trap worth the same weight.** `local_sim/edge_cases.py`
 invariants **8** (layer-1 closed form, `rel < 1e-12`) and **9** (permutation
-equivariance, `d_k/scale < 1e-6`) were calibrated beside an incumbent delivering
-`1.7e-16` and `2.2e-15` — they encode a **float64** expectation. Phase 2 bills
-float64 at exactly `2.0x` (measured: matmul `268,173,312 -> 536,346,624`), so a
-full-f64 flow pushes `x` from `0.0767` to `0.153`, the multiplier leaves the `0.1`
-floor, and the score is `1.53x` worse. **Invariant 9 is therefore unmeetable by any
-competitive Phase-2 candidate.** Invariant 8 is NOT: row 0 has a closed form and
-`estimator.py` has met the bar since v2.4 with three lines (`_exact_first_layer`),
-at about four operations. Do not attach the `1.53x` full-flow penalty to a narrow
-fix — that argument was made here and it was wrong.
+equivariance) were calibrated beside an incumbent delivering `1.7e-16` and
+`2.2e-15` — they encode a **float64** expectation. Phase 2 bills float64 at
+`2.0x` on the operation this repository actually measured (matmul
+`268,173,312 -> 536,346,624`), and since the covariance backbone is essentially
+the whole cost, a full-f64 flow pushes `x` from `0.0767` to `0.153`, the
+multiplier leaves the `0.1` floor, and the score is `1.53x` worse.
+
+> **SUPERSEDED IN ITS CONCLUSION, 2026-09-03.** This paragraph used to end
+> *"Invariant 9 is therefore unmeetable by any competitive Phase-2 candidate."*
+> `CURRENT_STATE.md` retracted that universal once already — the evidence
+> reaches the mechanism and the cost **for one candidate**, not a claim about
+> every candidate — and the amendment below has now falsified it outright:
+> invariant 9's absolute clause was replaced by "every row's drift, in MSE
+> units, `<= 1%` of the candidate's own raw MSE", and the f32 canary reads
+> `30/30`. See `docs/VALIDATION.md` § 3.2, which also records what the
+> amendment **surrendered** (796x-1,552x of sensitivity, and a rotation-stability
+> measurement that section used to advertise).
+>
+> **A second correction, same date.** *"exactly `2.0x` (measured)"* overstates
+> what exists. What was measured is the **rate on one matmul**; that the whole
+> backbone would scale at that rate is an **inference**, and no artifact shows a
+> partial-f64 backbone being built and priced. The inference is defensible here
+> because the backbone dominates the bill — but this repository has already
+> recorded getting exactly this kind of attribution wrong once (see the sentence
+> that follows), so it is labelled rather than repeated.
+
+**Before reading a permutation-equivariance failure as an index bug, run the f64
+control.** The deviation is a **dtype** effect: same flow, same networks, f32 vs
+f64 moves `d_k/scale` from `2.116e-06` to `2.365e-15` (a ~1e9 ratio, which is
+the eps ratio), and it **grows with width** (`1.105e-06` at `256x32` to
+`2.992e-06` at `1024x16`) — which is what BLAS accumulation noise does and what
+an index bug does not.
+
+Invariant 8 is NOT in this category: row 0 has a closed form and `estimator.py`
+has met the bar since v2.4 with three lines (`_exact_first_layer`), at about four
+operations. Do not attach the `1.53x` full-flow penalty to a narrow fix — that
+argument was made here and it was wrong.
 
 ---
 
