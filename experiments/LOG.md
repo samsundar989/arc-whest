@@ -31012,3 +31012,117 @@ it re-read the same 128 networks the labels used, passed in by `--seed`, with no
 already finalized to `labels_P05.npz`'s hash. One claim, one artifact hash, and a
 second derived artifact does not get to acquire the authority of a fresh draw.
 `test_seed_ledger` is `66/66`.
+
+---
+
+# 2026-09-03 — **IMPORTANT (instrument): invariant 9's absolute float32 bar is replaced. Prediction FIRST, before the amended suite is run.**
+
+**Class: IMPORTANT** — this edits `local_sim/edge_cases.py`, which is *the
+instrument*. Per `AGENTS.md` § *Work classification* that requires a written
+prediction before the change is measured, a green `scripts/preflight.ps1`, and a
+knowledge delta. It is **not** STRATEGIC: no seed block is spent, no vault touch,
+no gate on a promotion statistic, and `estimator.py` is untouched at v2.6.1
+(`00240eb1`).
+
+**Authority: the strategist's Ruling 1, 2026-09-03.** Not an agent's judgement
+call, and the ruling is quoted rather than paraphrased so that a later reader can
+see exactly what was authorised:
+
+> The red item "float32 precision" is inherited from the f64-K2 era; f32 is the
+> deliberate design (dtype rate 1.0 reaches the floor). Its guarded risk is
+> covered by WP16's parity gate (f32-vs-f64 drift 1.7e-11 vs raw 8.5e-7).
+> Record an IMPORTANT instrument change: replace the item with "candidate
+> f32-vs-f64 output drift <= 1% of its own raw MSE", run its preflight, reach
+> 30/30, then present the canary.
+
+## What is actually wrong with the item being replaced
+
+`inv_permutation` gates on
+
+```python
+good = (d_k / max(scale, 1e-30) < 1e-6) and (implied < 1.4e-8)
+```
+
+Two clauses, and they are not the same kind of statement:
+
+| clause | what it is | units |
+|---|---|---|
+| `d_k / scale < 1e-6` | a **max-absolute** deviation against a **fixed** relative bar | dimensionless, `~1e-7` = f32 eps territory |
+| `implied < 1.4e-8` | an **MSE** deviation against **1% of the `1.4e-6` decision signal** | the units decisions are made in |
+
+The second clause is already the amendment the ruling asks for; the print line
+says so in as many words (`implied / 1.4e-6 * 100` = "% of decision signal").
+The first is the stale one. `1e-6` is roughly `10x` float32 epsilon: it is a bar
+only a float64 backbone can hold, and it was written when the K2 flow *had* one.
+The current design deliberately runs the covariance backbone in **float32**,
+which is what puts `C/B = 0.0767` on the `0.1` multiplier floor; `SKEPTIC WP18-C`
+measured the price of curing it at **exactly `2.0x` billing**, moving
+`x = 0.0767 -> 0.153` and costing `1.53x` of score. The item as written therefore
+does not ask a candidate to be correct. It asks it to be *expensive*.
+
+**The measured evidence that the bar is a dtype bar and not an index bug** is
+already on record and was produced by an independent context, not by me:
+`SKEPTIC WP18-C` ran the same flow on the same networks at f32 and f64 and got
+`d_k/scale` `2.116e-06 -> 2.365e-15`. **A ratio of `~1e9` is the eps ratio.**
+
+## What replaces it, stated as executable law
+
+Every deviation the invariant measures is judged **in MSE units against the
+candidate's own raw MSE, at a 1% bar** — the same criterion the surviving clause
+already applies to the final row, extended to the two the old gate left ungated:
+
+| deviation | old | new |
+|---|---|---|
+| row `k` (the permuted row) | `max/scale < 1e-6` | `mse <= 1% of raw MSE` |
+| all other rows | **printed, not gated** | `mse <= 1% of raw MSE` |
+| final row (the scored one) | `mse < 1.4e-8` | unchanged in value; restated as `1% of raw MSE` |
+
+The denominator defaults to the frozen `1.4e-6` decision signal, **so the bar on
+the shipped file does not move**. `ARC_WHEST_RAW_MSE` may name a candidate's own
+measured raw MSE, and is **clamped so it can only tighten**
+(`min(1.4e-6, override)`) — an override that could loosen a gate is a hole, and
+this repository has been bitten by exactly that shape of thing before.
+
+**This is a net widening in one place and a net tightening in two.** The
+other-rows and final-row structural claims in the docstring were never enforced;
+now they are. That matters more than it sounds: `d_other` on the canary is
+`1.91e-06`, *larger* than the `d_k` the old gate rejected on, and nothing was
+looking at it.
+
+## Predictions — mine, numbered, recorded before the amended suite runs
+
+1. **`edge_cases.py estimator_wp18_canary.py` reaches `30/30`.** Confidence high.
+   `d_k <= 7.15e-07` implies `mse_k <= 5.1e-13`, four to five orders under a
+   `1.4e-8` bar.
+2. **It still reaches `30/30` under the stricter candidate-specific denominator**
+   `ARC_WHEST_RAW_MSE=8.5075e-07` (bar `8.5e-09`). Confidence high, same margin
+   argument.
+3. **`edge_cases.py estimator.py` (v2.6.1) stays at `30/30`.** Confidence high —
+   it passed the *stricter* old bar, and the two newly-gated rows are f32-noise
+   on a file whose final row already cleared `1.4e-8`.
+4. **The amended item still bites.** A mutation battery of deliberate
+   equivariance defects — a transposed index, an axis swapped in a reduction, an
+   off-by-one row shift — makes invariant 9 **FAIL**, with margins I predict at
+   `>= 1e5x` over the bar rather than the `~1.5x` the old bar was failing by.
+   This is the prediction that could actually be wrong and it is the one that
+   decides whether the amendment is legitimate: if a real index bug clears the
+   new bar, the amendment is a hole and must be reverted.
+5. **No other invariant's verdict changes**, on either file.
+
+**What would make me revert this in writing:** prediction 4 failing on any
+mutation, or prediction 3 failing (a change that moves the *shipped* file's
+verdict is not an amendment, it is a different instrument).
+
+## Scope — what this does NOT license
+
+* It does not make the canary a **nomination**. The nomination bar is graded
+  worst-row headroom `>= 4x` and is unchanged; `30/30` only clears the **canary**
+  bar, which `CONTRACT WP18` § A wrote as certify-green + the Linux memory gate +
+  `0/100` local failures + the FLOP floor with `+2**24` + local worst-row
+  `>= 1.5x` (measured `2.23x`).
+* It does not touch `estimator.py`, any seed block, the vault, or any promotion
+  gate.
+* It does not claim the candidate is float64-accurate. It claims the **scored
+  quantity** is unaffected by relabelling at the 1%-of-raw-MSE level, which is
+  the property the invariant exists to check.
+
