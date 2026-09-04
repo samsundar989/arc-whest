@@ -32552,3 +32552,168 @@ measuring both axes rather than the one that bit last time.
    a rate quoted against `B` reads harmless exactly where it is fatal. **Price
    against the headroom, not against the budget.** Recorded as a correction to
    my own draft rather than deleted from it.
+
+---
+
+# 2026-09-04 (LATE, second entry) — **THE OP WORK IS SIZED BEFORE IT IS ORDERED: `45.2%`, which is ABOVE the ruling's abandon threshold — and the census says the fat is there anyway**
+
+`estimator.py` untouched at **v2.6.1**. **Nothing submitted, nothing designated.**
+No seed block drawn. Instrument `local_sim/p2_op_census.py` (new); artifacts
+`experiments/2026-09-04_wp20_price/op_census_canary.json` and
+`op_census_v261.json`.
+
+**This moves no gate and is not a contract.** It is preparation: the strategist's
+graded-residual decision table has three branches and the canary's own earlier
+telemetry says which one is most likely to fire. Sizing it now is the difference
+between the `<= 4 day` time-box starting on the day the number lands and starting
+four days later.
+
+## 1. Why this was worth doing before the canary is graded
+
+`experiments/2026-09-03_wp17_official/official_residual.json` — **one official
+`100`-row run**, `gpuq 182`, snapshot `22db10a`, `canary_identical_to_HEAD: true`
+at the time, `2,646` operations per MLP:
+
+| | |
+|---|---:|
+| worst-row residual | `0.1797 s` |
+| **worst-row headroom against the `0.4 s` cliff** | **`2.226x`** |
+| mean headroom | `2.595 x` |
+| failed MLPs | **`0 / 100`** |
+| `clears_soak_requirement` | **`false`** |
+
+**A graded worst-row headroom of `2.226x` already exists.** The guarded canary
+bills `2,674` operations (`+1.06%`), so its expected reading is about `2.20x`.
+Against the strategist's table that is the **`< 2.5x` branch**: one time-boxed
+round, and if a `> 40%` op cut cannot be reached without drift, the flow is not a
+nominee.
+
+**This does NOT pre-empt the canary and nothing here is treated as its answer.**
+The artifact's own caveat binds — *"ONE official run, 100 rows. The standing
+requirement is `>= 4x` on the WORST run of a `3 x 100` soak"* — and the graded
+file was the **un-guarded** canary. What it licenses is preparation, not a
+decision.
+
+## 2. The requirement, projected from the two graded points we own
+
+`residual ~ a + b * ops`, fitted to the shipped second-order file and the canary,
+both medians, both from the evaluator (write-up 6.8's `5.82x` residual ratio
+against a `5.98x` operation ratio):
+
+    a = 0.85 ms          b = 57.77 us / operation          worst / median = 1.169
+
+    >= 4x headroom  <=>  worst <= 0.100 s  <=>  N <= 1,466 operations
+
+| | |
+|---|---:|
+| the canary, metered here | `2,673` operations |
+| the canary, `certify_guarded.json` | `2,674` |
+| operations that fit under `4x` | **`1,466`** |
+| **required cut** | **`45.2%`** |
+| the ruling abandons the flow above | `40.0%` |
+
+**It is above the abandon threshold on this projection, and that is stated
+plainly rather than rounded down to `40`.** The intercept is `0.55%` of the
+canary's residual, so the model is effectively proportional and the answer is not
+an artefact of the fit: the crude proportional form gives `44.4%`.
+
+**The fit's low anchor is confirmed independently, and this is the part I did not
+expect to come out exactly.** The fit inferred `2,646 / 5.98 = 442.5` operations
+for `estimator.py` from a ratio in the write-up. Metered directly this session:
+
+    estimator.py (v2.6.1)   137,600,293,888 FLOPs   442 operations
+
+**`442`, against `442.5` inferred.** Write-up 6.8's operation ratio reproduces to
+`0.1%` on a number it was never fitted to. The low anchor is real, so the `45.2%`
+is not resting on a quoted ratio.
+
+*(Left open, deliberately: this in-process run bills `137,600,293,888` where the
+official one-row subprocess anchor is `137,600,326,656` — a difference of exactly
+`32,768 = 2**15`. I have NOT attributed it, and it is not the `15 n^2` gap
+`p2_wp18_price.py` documents, which is `15,728,640`. It is `0.000024%` and moves
+nothing here, but an unexplained exact power of two in a FLOP total is the kind of
+thing this repository has been bitten by, so it is recorded rather than rounded
+away.)*
+
+## 3. The census, which is what makes `45.2%` targetable instead of merely large
+
+The canary, steady state (`--mlp-index 1`: the grader constructs ONE `Estimator`
+and calls `predict` per MLP, so the constants cache is paid by the first row and
+by none of the other ninety-nine):
+
+| ops | % | operation | shapes |
+|---:|---:|---|---|
+| `300` | `11.2` | `add` | `(1024,1024) x (1024,1024)` |
+| `261` | `9.8` | `multiply` | `(1024) x (1024)` |
+| `195` | `7.3` | `multiply` | `(1024,1024) x (1024,1)` |
+| `195` | `7.3` | `multiply` | `(1024,1024) x (1,1024)` |
+| `165` | `6.2` | `multiply` | `(1024,1024) x ()` |
+| `137` | `5.1` | `multiply` | `(1024) x ()` |
+| `128` | `4.8` | `multiply` | `() x (1024)` |
+| `122` | `4.6` | `multiply` | `(1024,1024) x (1024,1024)` |
+| `112` | `4.2` | `add` | `(6,1024) x (6,1)` |
+| `112` | `4.2` | `multiply` | `(6,1024) x (1,1024)` |
+| `105` | `3.9` | `add` | `(1024) x (1024)` |
+| **`103`** | **`3.9`** | **`multiply`** | **`() x ()` — scalar by scalar** |
+| **`78`** | **`2.9`** | **`matmul`** | **`(1024,1024) x (1024,1024)`** |
+
+`54` distinct `(operation, dtype, shape)` groups; the twelve above are `72%` of
+every operation the file executes.
+
+**The whole arithmetic bill is in `78` operations — `2.9%` of the count.** The
+other `2,595` are `O(n^2)` and smaller elementwise work: broadcasts, row and
+column scalings, scalar folds. **The op budget and the FLOP budget are spent in
+almost disjoint places**, which is the single most useful thing this census says
+and is exactly why the two axes had to be metered separately (the WP20 pricing
+entry above learned the same lesson from the other side).
+
+**Three groups are free FLOPs that cost operations**, and they are where a cut
+starts rather than where it ends:
+
+* `103` scalar-by-scalar multiplies — `()` by `()`, **zero** counted FLOPs,
+  `3.9%` of the operation budget, and constant-foldable in principle.
+* `265` vector-by-scalar multiplies (`137 + 128`), `9.9%`.
+* `390` row/column broadcasts (`195 + 195`), `14.6%`, the classic
+  `(A * u[:, None]) * v[None, :]` shape.
+
+Those three alone are `28.4%`. **`45.2%` is not obviously out of reach**, and it
+is a reassociation problem on the elementwise layer — precisely the class WP16's
+parity gate was built for.
+
+## 4. What is NOT established, and it is most of what matters
+
+1. **No cut has been made and none is authorised.** The ruling's op-work branch
+   opens only when the canary's own graded telemetry lands. This entry sizes the
+   work; it does not start it.
+2. **`45.2%` is a projection from two points**, both of them medians from
+   `100`-row runs of two very different files, and it is stated as such. The
+   canary's telemetry can move it in either direction.
+3. **Every wall-clock column in the artifacts is THIS HOST's and predicts
+   nothing.** The module says so in its own docstring and in the JSON's
+   `authority_note`. `docs/GOTCHAS.md`: two runs of the same evaluator on files
+   differing by `2.3%` in operation count reported mean residuals differing by
+   `31%`. **The COUNT column is the decision column.**
+4. **"Constant-foldable in principle" is an inspection, not a measurement.** No
+   fold has been attempted, no parity has been checked, and a fold that changes a
+   value fails WP16's gate regardless of what it saves. Every change in that
+   branch gets the parity gate and a re-metered price, per the ruling.
+5. **The `f64` promotions the run warns about are already handled.**
+   `stats.norm.cdf/pdf` promote and the file casts back on the next line; the
+   `32` `astype float64` rows are that round trip. They are `1.2%` of operations
+   and they are not free to remove — `GOTCHAS` records the `3.1%`-saving that
+   turned out to be `50%` when the casts were counted.
+
+## Knowledge delta
+
+1. **A candidate's FLOP budget and its operation budget are spent in almost
+   disjoint places.** `78` of `2,673` operations carry the entire `168.6e9`
+   FLOPs; the remaining `97.1%` carry the residual. **An optimisation that helps
+   one axis is, by default, irrelevant to the other**, and this is the second
+   finding today pointing at the same rule: meter both, every time.
+2. **`442` operations for the shipped file, metered.** It was previously only
+   inferable from a ratio. Recording the absolute number retires the inference.
+3. **A projection's anchor can be checked for free and usually is not.** The
+   `45.2%` rested on `442.5` inferred from a published ratio; metering the file
+   directly cost one command and turned a quoted ratio into an independent
+   confirmation at `0.1%`. **Check the anchor of any projection you are about to
+   make a decision on.**

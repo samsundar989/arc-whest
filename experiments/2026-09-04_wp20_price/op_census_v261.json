@@ -1,0 +1,242 @@
+{
+  "check": "operation census -- where a candidate's operations go, and what a 4x-headroom cut would have to remove",
+  "authority_note": "COUNT is the decision column. Wall-clock columns are this host's and are NOT a residual prediction; the authority is `whest run --runner subprocess`.",
+  "graded_reference": {
+    "snapshot": "22db10a",
+    "ops": 2646,
+    "n_mlps": 100,
+    "worst_residual_s": 0.1797,
+    "median_residual_s": 0.1537,
+    "worst_headroom_x": 2.2262120890959607,
+    "mean_headroom_x": 2.5951266374968225
+  },
+  "guarded_canary_ops": 2674,
+  "target": {
+    "fit_intercept_s": 0.0008484798299728188,
+    "fit_slope_s_per_op": 5.7767014425558266e-05,
+    "worst_over_median": 1.1691607026675341,
+    "allowed_worst_residual_s": 0.1,
+    "max_ops_for_4x": 1465.9397288082962,
+    "ops_now": 442,
+    "required_cut_frac": -2.316605721285738,
+    "abandon_threshold_frac": 0.4
+  },
+  "candidate": "estimator.py",
+  "width": 1024,
+  "depth": 16,
+  "seed": 1000003,
+  "mlp_index": 1,
+  "flops": 137600293888,
+  "n_ops": 442,
+  "groups": [
+    {
+      "op": "multiply",
+      "dtype": "float64",
+      "shapes": "(1024)x(1024)",
+      "calls": 112,
+      "flops": 229376,
+      "backend_s": 0.0002150999935111031,
+      "overhead_s": 0.03530829992087092
+    },
+    {
+      "op": "add",
+      "dtype": "float64",
+      "shapes": "(1024)x(1024)",
+      "calls": 48,
+      "flops": 98304,
+      "backend_s": 7.940000796224922e-05,
+      "overhead_s": 0.0042831000027945265
+    },
+    {
+      "op": "multiply",
+      "dtype": "float64",
+      "shapes": "(1024,1024)x(1024,1024)",
+      "calls": 33,
+      "flops": 69206016,
+      "backend_s": 0.032635899988235906,
+      "overhead_s": 0.007296599971596152
+    },
+    {
+      "op": "matmul",
+      "dtype": "float64",
+      "shapes": "(1024,1024)x(1024,1024)",
+      "calls": 32,
+      "flops": 137371844608,
+      "backend_s": 0.12495449994457886,
+      "overhead_s": 0.005647700061672367
+    },
+    {
+      "op": "maximum",
+      "dtype": "float64",
+      "shapes": "(1024)x()",
+      "calls": 32,
+      "flops": 65536,
+      "backend_s": 0.00016049998521339148,
+      "overhead_s": 0.00449090005713515
+    },
+    {
+      "op": "sqrt",
+      "dtype": "float64",
+      "shapes": "(1024)",
+      "calls": 17,
+      "flops": 34816,
+      "backend_s": 5.300001066643745e-05,
+      "overhead_s": 0.0017931000038515776
+    },
+    {
+      "op": "matmul",
+      "dtype": "float64",
+      "shapes": "(1024,1024)x(1024)",
+      "calls": 16,
+      "flops": 67076096,
+      "backend_s": 0.004518000016105361,
+      "overhead_s": 0.003231899958336726
+    },
+    {
+      "op": "astype",
+      "dtype": "float64",
+      "shapes": "(1024,1024)",
+      "calls": 16,
+      "flops": 33554432,
+      "backend_s": 0.018244799983222038,
+      "overhead_s": 0.0014165999891702086
+    },
+    {
+      "op": "add",
+      "dtype": "float64",
+      "shapes": "(1024,1024)x(1024,1024)",
+      "calls": 16,
+      "flops": 33554432,
+      "backend_s": 0.028571000002557412,
+      "overhead_s": 0.0031112999859033152
+    },
+    {
+      "op": "outer",
+      "dtype": "float64",
+      "shapes": "(1024)x(1024)",
+      "calls": 16,
+      "flops": 16793600,
+      "backend_s": 0.015370300025097094,
+      "overhead_s": 0.002635799959534779
+    },
+    {
+      "op": "stats.norm.cdf",
+      "dtype": "float64",
+      "shapes": "(1024)",
+      "calls": 16,
+      "flops": 1572864,
+      "backend_s": 0.0,
+      "overhead_s": 0.004590000011376105
+    },
+    {
+      "op": "stats.norm.pdf",
+      "dtype": "float64",
+      "shapes": "(1024)",
+      "calls": 16,
+      "flops": 884736,
+      "backend_s": 0.0,
+      "overhead_s": 0.00136980002571363
+    },
+    {
+      "op": "true_divide",
+      "dtype": "float64",
+      "shapes": "(1024)x(1024)",
+      "calls": 16,
+      "flops": 32768,
+      "backend_s": 4.400001489557326e-05,
+      "overhead_s": 0.001845800012233667
+    },
+    {
+      "op": "subtract",
+      "dtype": "float64",
+      "shapes": "(1024)x(1024)",
+      "calls": 16,
+      "flops": 32768,
+      "backend_s": 2.3500033421441913e-05,
+      "overhead_s": 0.0014497999363811687
+    },
+    {
+      "op": "diag",
+      "dtype": "float64",
+      "shapes": "(1024)",
+      "calls": 16,
+      "flops": 32768,
+      "backend_s": 0.011251999996602535,
+      "overhead_s": 0.002008699972066097
+    },
+    {
+      "op": "diagonal",
+      "dtype": "None",
+      "shapes": "(1024,1024)",
+      "calls": 16,
+      "flops": 0,
+      "backend_s": 0.00010179993114434183,
+      "overhead_s": 0.0013110000872984529
+    },
+    {
+      "op": "eye",
+      "dtype": "float64",
+      "shapes": "",
+      "calls": 2,
+      "flops": 4096,
+      "backend_s": 0.0016733999946154654,
+      "overhead_s": 0.00021410001500044018
+    },
+    {
+      "op": "ones",
+      "dtype": "float64",
+      "shapes": "",
+      "calls": 1,
+      "flops": 2097152,
+      "backend_s": 0.0008381999941775575,
+      "overhead_s": 0.00010299999848939478
+    },
+    {
+      "op": "sum",
+      "dtype": "float64",
+      "shapes": "(1024,1024)",
+      "calls": 1,
+      "flops": 2095104,
+      "backend_s": 0.00018819999240804464,
+      "overhead_s": 0.0002986000181408599
+    },
+    {
+      "op": "subtract",
+      "dtype": "float64",
+      "shapes": "(1024,1024)x(1024,1024)",
+      "calls": 1,
+      "flops": 1049600,
+      "backend_s": 0.0019432999979471788,
+      "overhead_s": 0.0002744000084931031
+    },
+    {
+      "op": "stack",
+      "dtype": "float64",
+      "shapes": "",
+      "calls": 1,
+      "flops": 32768,
+      "backend_s": 7.980001100804657e-05,
+      "overhead_s": 0.0001177999802166596
+    },
+    {
+      "op": "multiply",
+      "dtype": "float64",
+      "shapes": "(1024)x()",
+      "calls": 1,
+      "flops": 2048,
+      "backend_s": 3.4999975468963385e-06,
+      "overhead_s": 0.00011789999553002417
+    },
+    {
+      "op": "zeros",
+      "dtype": "None",
+      "shapes": "",
+      "calls": 1,
+      "flops": 0,
+      "backend_s": 4.799992893822491e-06,
+      "overhead_s": 0.0004690000059781596
+    }
+  ],
+  "total_backend_s": 0.24095499991381075,
+  "total_overhead_s": 0.08338519997778349
+}
