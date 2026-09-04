@@ -59,14 +59,49 @@
 > | the same with `ARC_WHEST_RAW_MSE=8.5075e-07` (**stricter**, the canary's own raw MSE) | **`30/30`** |
 > | `edge_cases.py estimator.py` (v2.6.1) | **`30/30`**, row-k `1e-31` |
 > | `scripts/preflight.ps1 -Full` | **`16/16` GREEN** |
-> | `certify_candidate.py --candidate estimator_wp18_canary.py` | **`36/36` — CANDIDATE CERTIFIED** |
+> | `certify_candidate.py --candidate estimator_wp18_canary.py` | **`37/37` — CANDIDATE CERTIFIED**, and the `37th` is the battery, as check `3b` |
 >
-> **Rule 2 is running, and its verdict is NOT in.** An independent Skeptic was
-> launched against pinned commit `40e88fe` with the contract, the diff, the
-> evaluation protocol and the raw artifact paths, and told in as many words that
-> the contract already contains a written commitment to revert if the amendment
-> turns out to be a hole. **Nothing here is to be treated as audited until that
-> verdict is recorded below this line.**
+> **THE CHANGE GATE IS RED, AND FOR A KNOWN REASON THAT IS NOT THIS WORK.**
+> `preflight -Full` after the Skeptic fixes is **`14 / 16`**: step 3 green *with
+> the battery inside it*, and steps **7 and 9 RED on one cause** —
+> `p2_range_lab.py::WP20 calib3` has **claimed `P05[..136..143]` and named an
+> artifact `gpuq 227` has not produced yet**, so `A7: every artifact-naming
+> claim in the REAL ledger is hashed` fails. **This is the claim-then-finalize
+> protocol working, not a defect**; both steps go green the moment `227` lands
+> and is `finalize`d. It is written here because this is the exact state that
+> stayed red for nine commits in August and got rediscovered rather than read.
+> The same single cause is the whole of `test_enforcement_labels`' `64/66`.
+>
+> **Rule 2 RAN and returned PROVISIONAL, and it was right to.** Pinned commit
+> `40e88fe`; full entry in `experiments/LOG.md`. It found **four real things**,
+> all now fixed:
+>
+> | finding | what it was |
+> |---|---|
+> | **a LIVE regression** | `perm_gate` used Python's `max`, which orders with `>`; `nan > x` is `False`, so **a NaN anywhere but the first position was DROPPED before the finiteness check saw it** — `worst = 0.0, ok = True`. The *pre-amendment* code rejected that input. The candidate family under test is the one that returns NaN on degenerate networks. Each component is now checked for finiteness **before** any ordering, with three non-finite cases in the battery |
+> | **the "standing proof" ran nowhere** | the battery is called *"a gate, not a comment"* and **nothing executed it** — it was `??` (untracked) in the very preflight transcript meant to prove the change safe. It now runs in `preflight` step 3 (two commands, one step — **the denominator stays 16**) and as `certify` check `3b` |
+> | **the cost was promised and not reported** | every mutation sat at `5.3e4x`–`3.9e7x` the bar, i.e. **far above the band the change moved**, so the battery was silent exactly where it mattered. It now measures both floors on the same ramp every run: **`1,541x` and `793x` given away** on `estimator.py` |
+> | **and something LIVED in that band** | `VALIDATION.md` § 3.2 assigned invariant 9 a *second job* — *"an independent measurement of v2.4.1's rotation stability… `4.4e-8`"* — three orders of magnitude below the new floor. **The amendment retired a detector the binding protocol still advertised**, and § 3.2's table was stale by up to `75x` besides. § 3.2 is rewritten and now forbids citing invariant 9 for rotation stability |
+>
+> Three claims of mine were weaker than written and are labelled as such: the
+> ruling's quoted wording says **f32-vs-f64** drift while I implemented
+> **permutation** drift (the better choice, but an undisclosed divergence in an
+> entry whose stated purpose was fidelity to the quote); *"measured at exactly
+> `2.0x`"* is a rate-table fact **plus an inference**; and the newly-gated rows
+> are a "tightening" that discriminates nothing at `1e5x`–`1e9x` slack.
+>
+> **One process failure, mine:** the tree moved under the audit — `HEAD` was
+> `6d7aa50` against a pin of `40e88fe`, and `certify_guarded.json` was rewritten
+> after the pin. Nothing is invalidated (the audited code is byte-identical at
+> both commits) but it is the exact hazard this file already records against a
+> previous Skeptic. **Rule adopted: once a commit is pinned for an audit, do not
+> rewrite any artifact named in that audit's brief until the verdict lands.**
+>
+> **Deferred deliberately, conservative branch taken:** the Skeptic's follow-up
+> probe (re-derive the alignment basis from a near-degenerate permuted
+> covariance) is NOT run. § 3.2 is written **as if it had come back
+> unfavourably** — the detector is declared retired. Running it could only
+> upgrade that claim, never protect anything.
 >
 > Transcripts committed under `experiments/2026-09-03_inv9_amendment/`.
 > Predictions 1, 2, 3 and 5 held; **prediction 4 held in direction but not in

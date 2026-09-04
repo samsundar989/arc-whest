@@ -20,7 +20,12 @@
     },
     "invariants": {
       "returncode": 0,
-      "tail": "30/30 checks passed"
+      "tail": "30/30 checks passed",
+      "arc_whest_raw_mse": "(unset: the frozen 1.4e-6 decision signal)"
+    },
+    "inv9_battery": {
+      "returncode": 0,
+      "tail": "BATTERY PASSED -- every deliberate equivariance defect is still rejected, the equivariant control is still accepted, and the unmutated prediction passes."
     },
     "determinism": {
       "fresh_worker": [
@@ -31,7 +36,7 @@
             1024
           ],
           "flops_used": 168636374630.0,
-          "pid": 46552
+          "pid": 53224
         },
         {
           "sha256": "ffdd750219e093a019c7881f8ed65313a44c2be7dee56437389ead30f7ef0765",
@@ -40,7 +45,7 @@
             1024
           ],
           "flops_used": 168636374630.0,
-          "pid": 47996
+          "pid": 26656
         }
       ]
     },
@@ -51,8 +56,8 @@
         "flops_used": 168636407398.0,
         "n_ops": 2674,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.17200309985491913,
-        "wall_time_s": 1.4629104000050575,
+        "residual_wall_time_s": 0.19948310025210958,
+        "wall_time_s": 1.64096440000867,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -80,8 +85,8 @@
         "flops_used": 168636407398.0,
         "n_ops": 2674,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.1648475003312342,
-        "wall_time_s": 1.3945611999952234,
+        "residual_wall_time_s": 0.18455300052301027,
+        "wall_time_s": 1.5776312000089092,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -109,8 +114,8 @@
         "flops_used": 168636407398.0,
         "n_ops": 2674,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.18068290034716483,
-        "wall_time_s": 1.4883572999970056,
+        "residual_wall_time_s": 0.18379619988263585,
+        "wall_time_s": 1.536296800011769,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -138,8 +143,8 @@
         "flops_used": 168636407398.0,
         "n_ops": 2674,
         "multiplier": 0.1,
-        "residual_wall_time_s": 0.17185790024814196,
-        "wall_time_s": 1.4260057999927085,
+        "residual_wall_time_s": 0.18153820003499277,
+        "wall_time_s": 1.5336079000117024,
         "materializations": {
           "__bool__": 0,
           "__float__": 0,
@@ -162,13 +167,13 @@
         "mean_square_final_row": 0.6244963636674716
       }
     ],
-    "setup_s_local": 0.0014110000047367066,
+    "setup_s_local": 0.0012516999995568767,
     "linux_memory_gate": "experiments\\2026-08-31_wp0cd_certify\\linux_memory_gate_estimator_wp18_canary.json",
     "windows_memory_accounting": {
       "available": true,
       "source": "test_deployment_envelope.peak_memory_bytes",
-      "peak_wset_bytes": 387039232,
-      "peak_pagefile_bytes": 888152064
+      "peak_wset_bytes": 386859008,
+      "peak_pagefile_bytes": 887926784
     },
     "subprocess_smoke": {
       "ok_report": true,
@@ -187,7 +192,7 @@
       "lambda": 0.0,
       "residual_cap": 0.4,
       "wall_limit": 120.0,
-      "worst_residual": 0.2044542003859533,
+      "worst_residual": 0.20117089948325884,
       "flops_per_mlp": 168636407398,
       "multiplier": 0.1,
       "c_over_b": 0.07668695952725102,
@@ -197,7 +202,7 @@
       "requested": false
     }
   },
-  "checks_total": 36,
+  "checks_total": 37,
   "checks_failed": [],
   "checks_skipped": [],
   "verdict": "CERTIFIED"

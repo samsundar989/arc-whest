@@ -1,0 +1,102 @@
+uv : C:\Users\samsu\Documents\arc-whest\local_sim\certify_candidate.py:355: ConfigureNoOpWarning: flops.configure() 
+configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so 
+these settings will not affect a graded submission.
+At line:1 char:302
++ ... tch {} } }; uv run python local_sim/certify_candidate.py --candidate  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\samsu\...ded submission.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:258: FlopscopeWarning: stats.norm.cdf promoted its float32 
+input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with 
+result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_wp18_canary.py:259: FlopscopeWarning: stats.norm.pdf promoted its float32 
+input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with 
+result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+candidate certification -- READ-ONLY, TRUTH-FREE
+  candidate   estimator_wp18_canary.py
+  sha256      252c3c947f130e75b71bdb976293af964ed93a377bfeb7fa8403e5e76a4acddc
+  shape       1024x16   B = 2,199,023,255,552
+  NOTE: this is NOT preflight and NOT a promotion. The ship-file gate is untouched;
+        `scripts/preflight.ps1` still certifies estimator.py.
+
+1  the official grader contract
+  PASS  1: `whest validate` accepts the candidate                     Next: `whest run --estimator estimator.py --split mini`
+
+2  package and round identity
+  PASS  2: the LIVE round matches the INSTALLED package, field by field  82/82
+  PASS  2: whestbench is the real package, not local_sim's shim       env\lib\site-packages\whestbench\__init__.py
+  PASS  2: flopscope is the real package, not local_sim's shim        venv\lib\site-packages\flopscope\__init__.py
+
+3  shape generality, the exact layer-1 closed form, and equivariance
+  PASS  3: the invariant suite passes on THIS candidate               30/30 checks passed
+  PASS  3b: invariant 9 still rejects deliberate equivariance defects BATTERY PASSED -- every deliberate equivariance defect is st
+
+4  determinism, in-process and in a FRESH worker
+  PASS  4: two FRESH interpreters agree bitwise on seed 90000000201   b0c8fe7a21d7a231 pid 53224 vs 47264
+  PASS  4: ...and bill identical FLOPs on seed 90000000201            168,636,374,630
+  PASS  4: the shape is (16, 1024) on seed 90000000201                [16, 1024]
+  PASS  4: two FRESH interpreters agree bitwise on seed 90000000202   ffdd750219e093a0 pid 26656 vs 45556
+  PASS  4: ...and bill identical FLOPs on seed 90000000202            168,636,374,630
+  PASS  4: the shape is (16, 1024) on seed 90000000202                [16, 1024]
+
+5-8  one metered run: immutability, cost, telemetry, scalar sync
+  PASS  5: setup() raised nothing                                     0.0013 s
+  PASS  5: setup is inside the 5 s ceiling (LOCAL, in-process -- the grader's window is larger)0.0013 s of 5.0 s
+  PASS  5: no run raised                                              clean
+  PASS  5: the grader's weight arrays are UNCHANGED after predict     sha256 before == after
+  PASS  5: every output has shape (depth, width)                      [16, 1024]
+  PASS  5: every output is finite                                     
+  PASS  5: no output is negative beyond float rounding (bar -4.5e-12, scaled to the row)most negative 0.000e+00 -- none
+  PASS  5: no returned array approaches the 4 GiB single-array cap    0.062 MB
+  PASS  6: counted FLOPs are network-INDEPENDENT or explained         168,636,407,398
+  PASS  6: the multiplier is the score's own identity max(0.1, F/B)   0.100000  (C/B = 0.0766870, PINNED at the floor)
+  PASS  6: the operation ledger is non-empty                          2,674 ops
+  PASS  7: worst residual is under the 0.4 s cliff (LOCAL -- the authority is --runner subprocess)199.5 ms -> 2.01x LOCAL headroom
+  PASS  7: worst per-MLP wall is under the installed 120 s limit      1.641 s -> 73x
+  PASS  8: ZERO scalar materializations during predict (__bool__/__float__/__int__/__index__)counted, not asserted
+
+9  memory: accounting here, ENFORCEMENT only on Linux
+      peak working set 368.9 MB, peak commit 846.8 MB (test_deployment_envelope.peak_memory_bytes)
+      RLIMIT_AS caps ADDRESS SPACE, which exceeds both counters by an amount
+      no Windows counter reports. These are accounting, and a headroom computed
+      from them is an UPPER BOUND, never a margin.
+  PASS  9: a Linux 8-GiB enforcement report exists FOR THIS CANDIDATE experiments\2026-08-31_wp0cd_certify\linux_memory_gate_estimator_wp18_canary.json
+  PASS  9: the cap was APPLIED in that run (soft == requested)        8589934592
+  PASS  9: the negative control DIED under the cap                    a gate whose cap is not in force proves nothing
+  PASS  9: predict completed under the real cap                       VmPeak 2266.8 MB of 8192 MB
+
+10  the official subprocess runner -- DEPLOYMENT AUTHORITY
+      *** THIS SECTION READS CONFIRM-TIER TRUTH. It runs the
+      organisers' v2-phase2 mini split, so the report's
+      `final_layer_mse_CONFIRM_ONLY` is a REAL error against REAL
+      labels. CONFIRM is read-only: it may CHECK a decision made
+      on mints and may CHOOSE nothing. Do not select a basis
+      count, a blend, a rank or a threshold on it, and do not
+      describe a run that includes this section as truth-free.
+  PASS  10: the official runner produced a report                     
+  PASS  10: zero failed MLPs                                          0 failed
+  PASS  10: the live config is the Phase-2 round                      1024x16, lambda 0.0, cap 0.4 s
+  PASS  10: worst GRADED-PATH residual is under the cliff             201.17 ms -> 2.0x
+      counted FLOPs 168,636,407,398   multiplier 0.1000   C/B 0.0766870
+
+11  residual TAIL -- the soak, not the anecdote
+      not requested (--residual-soak 0, the default).
+      Section 10 measured residual on TWO MLPs, ONCE. That is an
+      anecdote, not a tail, and this certificate does NOT carry a
+      p99. Rung-3 hardening requires --residual-soak 3.
+
+R  the repository was not modified
+  PASS  R: the candidate file is byte-identical                       252c3c947f130e75
+  PASS  R: estimator.py is byte-identical                             00240eb1e60810f5
+  PASS  R: this run changed no tracked source under estimator.py/scripts/local_simunchanged since start
+
+  report -> experiments\2026-09-03_wp18_canary\certify_guarded.json
+
+CANDIDATE CERTIFIED -- 37/37 checks passed
+  This is one input to promotion, not promotion. See GAME_PLAN.md section 6.
+
+[exited with code 0]
