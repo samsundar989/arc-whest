@@ -26,7 +26,7 @@
 | 4. Where the error actually is | **populated, evidence complete** | — |
 | 5. Compressing the third cumulant | **populated, evidence complete** | — |
 | 6. What an estimator may spend, and the two levers | **populated, evidence complete** (new 2026-09-02; §6.6-6.7 new 2026-09-03) | — |
-| 7. The off-diagonal lane | **populated, and the lane is CLOSED four ways on measured ceilings** — §7.1 memory depth, §7.2 the vector ceiling, §7.3 the matrix ceiling plus the sensitivity that explains all of it (new 2026-09-03) | — |
+| 7. The off-diagonal lane | **populated, and the lane is CLOSED four ways on measured ceilings** — §7.1 memory depth, §7.2 the vector ceiling, §7.3 the matrix ceiling plus the sensitivity that explains all of it, §7.4 the complete mechanistic result and the joint `11.1x` oracle (new 2026-09-03) | one pre-registered open question, §7.4's last paragraph, reported either way |
 | 8. Method and protocol | **populated** | — |
 | 9. What we got wrong | **populated — fifteen entries, and this list grows** | — |
 | 10. Result and nomination | **PENDING** | end of Phase 2; Samuel's gate |
@@ -950,6 +950,90 @@ cost us:
    The expensive terms turned out to contribute nothing, twice over — the same
    shape of error as §6.6, where we spent weeks reducing a FLOP count that the
    score was not charging us for.
+
+
+
+### 7.4 The complete result: the target is reachable at an affordable rank, and the carried state does not determine it *(new 2026-09-03)*
+
+**Evidence: CONFIRMED.** This section states what §§7.1–7.3 add up to. We think
+it is the most transferable thing in the paper, and it is a *positive*
+statement about the structure of the problem that happens to be delivered by
+four negative experiments.
+
+**The two discarded objects are one object.** The flow throws away an
+all-distinct third-order block. What the scored means actually read of it are
+two slices: a vector (the diagonal of that block) and a matrix (the same block
+with its diagonal zeroed). We verified this against the upstream reference
+rather than assuming it — the library's own slice accessor returns exactly the
+diagonal, to `0.0`, not to a tolerance.
+
+**Corrected jointly, at a rank we can afford, the target is reached.** With
+*both* slices supplied exactly and the matrix truncated to rank 128 of 1024 —
+one eighth — the end-to-end drift falls by **`11.1×`**, on 8 networks at the
+live shape, paired:
+
+| what is corrected, at rank 128 of 1024 | end-to-end |
+|---|---:|
+| nothing | `1.0×` |
+| the matrix only | `2.1×` |
+| **both slices** | **`11.1×`** |
+| both slices, rank 192 | `18.9×` |
+
+**This is the number that makes the negative result interesting.** Every other
+compression lane we closed (§5) was closed because the *thing itself* was not
+compressible at a price we could pay. This one is not. A rank-128 sketch is
+about `2nr = 0.26M` numbers against the block's `n² = 1M`, it costs a fraction
+of our FLOP margin, and it delivers an order of magnitude. **The lane is not
+blocked by rank, and it is not blocked by cost.**
+
+**It is blocked by predictability, and that is a statement about information,
+not about effort.** Everything the flow still carries at the moment of the
+discard — the mean vector, the covariance, and the two repeated slices it
+regenerates from — was given to two different learned maps:
+
+| target | best held-out | **the basis's own ceiling** | what the ceiling is over |
+|---|---:|---:|---|
+| the vector | `0.10` | **`0.26`** | 24 per-neuron features, +300 pairwise products, +10 row contractions |
+| the matrix | `0.14` | **`0.17`** | 29 permutation-equivariant terms, including 6 at full `2n³` |
+
+Both maps land within `0.03`–`0.16` of the most *any* map over those terms could
+achieve. Adding features moved the vector's honest cross-validated score from
+`0.292` to `0.306`. The expensive terms moved the matrix's by `~1e-6`, two of
+them negatively.
+
+So, stated as plainly as we can:
+
+> **A regenerating cumulant flow's carried state does not determine what that
+> flow discards.** The discarded object is reachable — an eighth-rank sketch of
+> it is worth an order of magnitude end to end — and it is not recoverable from
+> what remains. Those two facts are not in tension; together they say the
+> information is *destroyed* by the regeneration, not merely *compressed* by it.
+
+**Why we believe this rather than suspecting it.** A poor held-out score is a
+claim about the modeller. A ceiling is a claim about the problem, and we
+computed one for each map, five and three ways respectively, on artifacts rather
+than on a summary. The ceilings agree to six decimals across solvers and
+truncation settings, and the design matrices are full rank with no silent
+truncation. We also checked the failure is not a *harmful* correction rather
+than an absent one: the injection is better than no correction on `8/8` networks
+at three ranks, so what we built is not wrong, it is not there.
+
+**What this predicts, and what we are testing next.** If the information is
+destroyed rather than hidden, then the only way to have it is to **keep** it —
+and keeping is a different problem from predicting, with a different cost. We
+measured how deep the memory runs (§7.1): three generations of the discarded
+block carry `0.73` of its energy at the live shape, and the increments
+(`0.34 / 0.23 / 0.16`) say the tail is diffuse rather than long. Whether a
+rank-limited *carried* sketch of those three generations clears the same bar is
+a pre-registered open question at the time of writing, with its gate, its
+falsifier and its predictions committed before the data exists. **We report it
+either way**, and if it fails, the sentence above is the paper's result.
+
+**The one caveat that travels with all of it.** Every joint number in this
+section uses an *oracle*: the true slices, truncated. They are ceilings, not
+operating points, and we have been careful throughout not to quote a ceiling as
+a result — an earlier draft of ours did exactly that, cited a single-slice cell
+as if it were the joint one, and had to be withdrawn (§9).
 
 
 ---
