@@ -23,16 +23,38 @@
 > implemented `whest submit` as **confirm**, not deny, so the enforcement layer
 > needed no change — only the prose did.
 >
-> ## 1. THE ONE THING THAT IS BLOCKED ON A HUMAN
+> ## 1. THE CANARY WAS SUBMITTED AND IT **FAILED**. THE GRADING STACK HAS MOVED.
 >
-> **Samuel: the canary.** It is certified `37/37`, packaged, presented, and
-> **waiting to be submitted**. Everything downstream of it — the nomination, the
-> op work, the whole of § 3's decision tree — is downstream of one graded number.
+> **Submission `329887`, 2026-09-05 — `FAILED`.** Server smoke test,
+> `error_code: ESTIMATOR_EXCEPTION`, `95 ms`, `0` of `100` MLPs evaluated. No
+> score, no board movement, one of ten daily slots spent. Report:
+> `experiments/run_reports/canary_failed_329887_graded_report.json`. Full entry in
+> `experiments/LOG.md`.
 >
-> **Do not re-open, re-certify or modify it while it waits.** If asked what it
-> is: *public, undesignated, zero prize consequence, moves the public board from
-> about `#57` to about `#33`, and buys the per-row residual measurement that
-> everything else needs.*
+> **THE GRADER IS ON `whestbench 0.16.1` / `flopscope 0.12.1`. THIS REPOSITORY IS
+> ON `0.16.0` / `0.12.0`.** `preflight.ps1` step 1 asserts `0.16.x` / `0.12.x`, so
+> it passes green on a point release and **could not have caught this**. Every
+> local number here is measured one point release behind the grader.
+>
+> **The failure does NOT reproduce on the grader's own versions.** Built against
+> `whestbench==0.16.1, flopscope==0.12.1, numpy==2.2.6`, the submitted bytes
+> import, construct, `setup`, validate (`41 ms`), package to an identical manifest
+> and inner sha256, pass `validate-package`, and **run at the live `1024 x 16` to
+> finite output with identical `168,636,374,630` FLOPs / `2,673` operations.**
+>
+> **Leading hypothesis by ELIMINATION, not evidence: the participant shim and the
+> flopscope CLIENT/SERVER split** (`flopscope_client` and `flopscope_server` are
+> separate components in the report; every local run here uses the in-process
+> backend). **That is the one environment this lab cannot replicate.**
+>
+> **THE OPEN QUESTION THAT MATTERS MOST, AND IT IS SAMUEL'S CALL:** v2.6.1 and
+> v2.7 graded cleanly on the OLD stack. **Whether either still grades on `0.16.1`
+> is unknown**, and both nominees are exposed, not just the canary. Finding out
+> costs one submission slot.
+>
+> **The `>= 4x` graded per-row residual the canary exists to buy was NOT
+> obtained** — the run never reached an MLP — so § 7's decision tree is still
+> blocked on exactly the number it was blocked on before.
 >
 > ## 2. The ruling, and what it closes
 >

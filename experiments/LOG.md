@@ -32965,3 +32965,134 @@ relying on a reader having read this entry.
    named by nothing in the contract. **The rule needs a second clause: trace each
    named object to the upstream definition that produces it, not only to the
    place the contract names it.**
+
+---
+
+# 2026-09-05 — **SUBMISSION `329887` (the canary) FAILED at the server's smoke test: `ESTIMATOR_EXCEPTION`. And the grading stack has moved to `0.16.1 / 0.12.1` under us.**
+
+**First agent-run submission under the rule Samuel changed today.** Approving
+message, verbatim: *"submit it yourself"*, then *"change the rule for agents not
+to submit you should be allowed to submit ill approve"*. Rule and authority:
+`AGENTS.md` hard rule 6, commit `e14bf02`.
+
+| | |
+|---|---|
+| submission id | **`329887`** |
+| artifact | `experiments/2026-09-03_wp18_canary/submission_wp18_canary.tar.gz` |
+| artifact sha256 | `e40f6b4de6a10cdcef74b729cc8dbc5eae9a930976e53ba37bee78904fb99960` |
+| inner `estimator.py` sha256 | `252c3c947f130e75b71bdb976293af964ed93a377bfeb7fa8403e5e76a4acddc` — **matches `certify_guarded.json`'s certified hash exactly** |
+| description | *residual-measurement canary, undesignated* |
+| **result** | **`FAILED`. No score. No leaderboard change. `0` of `100` MLPs evaluated** |
+| report | `experiments/run_reports/canary_failed_329887_graded_report.json` |
+
+**Pre-submission order was followed** (hard rule 6): `whest validate` PASS in
+`41 ms`, and a clean run of record with `n_failed_mlps: 0` (`gpuq 182`, 100 rows,
+this exact sha256) plus `certify_guarded.json`'s `subprocess_smoke` at `0`
+failures. **The failure was not predictable from anything in the pre-flight.**
+
+## 1. What the server said
+
+```
+smoke_test_result: {passed: false, duration_ms: 95.28,
+                    worker_passes: 0, worker_failures: 1,
+                    error_code: "ESTIMATOR_EXCEPTION"}
+progress:          {mlps_failed: 100, mlps_completed: 0}
+error:             {}
+```
+
+**`95 ms` is far too short for a `1024 x 16` predict** (this host takes `~1.2 s`),
+so the exception fired at import, construction, `setup`, or in the first moments
+of `predict`. `error` is empty and `gradingLogUrl` is `null`; there is no
+traceback on the participant side.
+
+## 2. THE FINDING THAT OUTLIVES THIS SUBMISSION — the grading stack moved
+
+`runtime_environment`, from the failed report:
+
+| | server, 2026-09-05 | this repository |
+|---|---|---|
+| `whestbench` | **`0.16.1`** | `0.16.0` |
+| `flopscope` | **`0.12.1`** | `0.12.0` |
+| `flopscope_server` / `flopscope_client` | **`0.12.1` / `0.12.1`** | in-process backend only |
+| `participant_shim` | `0.1.0` | not modelled here |
+| numpy / python | `2.2.6` / `3.10.21` | `2.2.6` / `3.10.19` |
+
+**`preflight.ps1` step 1 could not have caught this.** It asserts
+`whestbench 0.16.x` and `flopscope 0.12.x` — an `x`-level match by construction,
+so a point release passes it silently. `AGENTS.md` says *"the official Phase-2
+stack is WhestBench 0.16 / flopscope 0.12"*, which is also `x`-level. **Every
+local number in this repository is now measured on a stack one point release
+behind the grader**, and nothing in the harness was watching the point release.
+
+## 3. What was tested against the server's OWN stack, and passed
+
+`.venv-0161` was built with **`whestbench==0.16.1`, `flopscope==0.12.1`,
+`numpy==2.2.6`** — the exact triple the failed report names — and the submitted
+bytes were extracted from the tarball and run through it:
+
+| check, on `0.16.1 / 0.12.1` | result |
+|---|---|
+| module imports (`base64 json math zlib`, `flopscope`, `flopscope.numpy`, `from whestbench import MLP, BaseEstimator`) | **OK** |
+| `Estimator()` constructs, `setup(context)` completes | **OK** |
+| `predict` at `32 x 4` | **OK**, finite |
+| **`predict` at the LIVE `1024 x 16`** | **OK** — `(16, 1024)`, all finite, **`168,636,374,630` FLOPs / `2,673` operations, identical to `0.12.0`** |
+| `whest validate --estimator` | **PASS, `41 ms`** |
+| `whest validate-package <the submitted tar.gz>` | **"is a valid submission archive"** |
+| `whest package` on `0.16.1`, manifest diff | **identical structure, identical inner sha256**; only the version-stamp fields differ |
+| `flops.*` API surface vs `estimator.py` v2.6.1, which grades cleanly | canary uses `stats.norm.cdf/pdf`; **v2.6.1 uses those AND `ppf`** — a strict subset |
+| `fnp.*` API surface vs v2.6.1 | canary-only names are `asarray`, `clip`, `isfinite`, `reshape`, all present in `flopscope.numpy` |
+
+**So the failure does not reproduce on the grader's own package versions.**
+
+*(One false lead, recorded because it cost time: `grep` reported the canary
+calling `fnp.k3_flow`, which is not a flopscope function. It is the substring
+`fnp.k3_flow` inside `p2_k3_fnp.k3_flow` in a comment. A `grep -o` on a
+dotted-name pattern will happily match the tail of a longer dotted name.)*
+
+*(A second: `whest smoke-test` is **not** the server's smoke test. It is an
+installation self-check that runs a bundled reference estimator — it reported
+`mean_compute_utilization 0.06252058`, v2.6.1's signature, from a directory
+containing only the canary. It proves the install works and nothing about a
+candidate.)*
+
+## 4. What is NOT ruled out
+
+1. **The participant shim and the flopscope CLIENT/SERVER split.** The report
+   names `flopscope_client 0.12.1` and `flopscope_server 0.12.1` as separate
+   components; every local run here uses the in-process backend. `GOTCHAS`
+   already records one asymmetry in that direction (*"`flops.configure()` is a
+   no-op on flopscope-client and the evaluation servers"*). **This is the one
+   environment this repository cannot replicate, and it is now the leading
+   hypothesis by elimination rather than by evidence.**
+2. **The real `SetupContext`.** Ours is a three-attribute stand-in
+   (`seed`, `scratch_dir`, `submission_dir`). The server's may differ in ways
+   `setup` touches.
+3. **A `0.16.1` behaviour change reachable only through the shim.**
+4. **Whether v2.6.1 / v2.7 still grade.** Both graded cleanly on the OLD stack.
+   Whether they survive `0.16.1` is **unknown**, and it is the question that
+   matters most for the nomination — both nominees are affected, not just the
+   canary. Answering it costs a submission slot and **that is Samuel's call.**
+
+## 5. Cost of this submission
+
+One of `10` daily slots. **No score, no leaderboard movement, nothing
+designated, `estimator.py` untouched at v2.6.1, no seed block drawn.** The
+`>= 4x` graded per-row residual measurement the canary exists to buy **was not
+obtained** — the run never reached a single MLP — so every downstream decision
+that was waiting on it is still waiting.
+
+## Knowledge delta
+
+1. **An `x`-level version assertion is not a version assertion.** `0.16.x` /
+   `0.12.x` passed green while the grader moved to `0.16.1 / 0.12.1`. A harness
+   that pins a *range* cannot tell you the deployment target has moved inside it.
+   **The stack the grader reports in every graded report is the authority, and
+   nothing here was reading that field.**
+2. **A submission can fail for a reason no local instrument models.** Validate,
+   validate-package, certify `37/37`, `0/100` on the official runner, and an
+   exact-version replay of the live shape all pass; the grader still threw in
+   `95 ms`. The gap is the participant shim, and its absence from the local lab
+   is now a known, named hole rather than an unexamined assumption.
+3. **The pre-flight was followed and was insufficient, which is different from
+   being wrong.** Nothing in hard rule 6's order would have caught this. The
+   order is not at fault; its coverage is.
