@@ -29,8 +29,10 @@
 > residual soak (worst run, `>= 4x` headroom) → the Linux memory gate → full-suite
 > metered FLOPs including the `+2**24` server offset → an exact
 > `submission.tar.gz` with its sha256 and a one-paragraph recommendation for
-> **Samuel** to submit. **Never run `whest submit`, and never designate a
-> submission.**
+> **Samuel** to approve. **An agent may run `whest submit` once he has approved
+> that specific submission** (rule changed by Samuel 2026-09-05; `AGENTS.md`
+> hard rule 6 is the authority). **Never designate a submission** — that is
+> unchanged and is his alone.
 >
 > **2. `CONTRACT WP15` (`experiments/LOG.md`, commit `1b6ac04`).** Two arms on the
 > one remaining question — is there a MAP from the carried state

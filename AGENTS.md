@@ -54,8 +54,10 @@ Where we stand, what is open, and what to do next: **`docs/CURRENT_STATE.md`**.
    history), 157× residual blowup.
 5. Secrets: the AIcrowd key lives only in `whest login`'s credential store. Never in
    tracked files, logs, or LOG.md.
-6. **Never submit without Samuel's explicit approval.** A failed MLP scores as zeros.
-   Order is always: `whest validate` → clean mini run (`n_failed_mlps: 0`) → ask.
+6. **Never submit without Samuel's approval** — per submission, never durable. A
+   failed MLP scores as zeros. Order: `whest validate` → clean mini run
+   (`n_failed_mlps: 0`) → ask → an agent **may** then run `whest submit` (rule
+   changed 2026-09-05), logging its sha256. **No agent ever designates.**
 7. Keep `estimator.py` shape-generic (`mlp.width`, `len(mlp.weights)`).
    `ARC_WHEST_DISABLE_CAL=1` disables calibration (used by fitting).
 
@@ -274,10 +276,9 @@ disadvantaged here; an agent that uses them is deviating from the contract.
 
 **Working-directory assumption: every agent is started from the repository root**
 (`c:\Users\samsu\Documents\arc-whest`). All paths in this file and in
-every adapter are repo-relative and assume that root. There are no nested
-`AGENTS.md` files and no directory-scoped skill overrides; if one is ever added, the
-more deeply nested file wins for work inside its directory, and that must be recorded
-here. Starting an agent from a subdirectory may prevent skill discovery entirely.
+every adapter are repo-relative and assume it. There are no nested `AGENTS.md`
+files; if one is ever added, the more deeply nested wins inside its directory and
+must be recorded here.
 
 Adapters are thin by rule. If an adapter contains project behaviour that is not in
 `docs/`, that is a portability bug — `scripts/verify_portability.py`

@@ -8,6 +8,21 @@
 > designated.** `P06[..064..127]` **UNSPENT, and now permanently so.** No seed
 > block was drawn today.
 >
+> ## 0. RULE CHANGE, 2026-09-05 — an agent may now run `whest submit`
+>
+> **Samuel, verbatim:** *"change the rule for agents not to submit you should be
+> allowed to submit ill approve"*.
+>
+> | | |
+> |---|---|
+> | **`whest submit`** | an agent **MAY** run it — **only** on Samuel's explicit approval of **that specific submission**. Approval is **per submission and never durable**; a previous yes carries to nothing |
+> | **designation** | **UNCHANGED. No agent designates, ever.** That is the act that picks the entries for the private prize re-run, and it was not part of this change |
+> | still binding | `whest validate` → clean mini run (`n_failed_mlps: 0`) → ask → submit. Record every agent-run submission in `experiments/LOG.md` with its artifact sha256 and the approving message |
+>
+> `AGENTS.md` hard rule 6 is the authority. `scripts/guard_paths.py` already
+> implemented `whest submit` as **confirm**, not deny, so the enforcement layer
+> needed no change — only the prose did.
+>
 > ## 1. THE ONE THING THAT IS BLOCKED ON A HUMAN
 >
 > **Samuel: the canary.** It is certified `37/37`, packaged, presented, and
@@ -392,8 +407,13 @@
 > NOMINATION bar and is deliberately not what this is.**
 >
 > **The label is exact: *residual-measurement canary; nomination pending graded
-> telemetry*. Submitting is Samuel's. No agent runs `whest submit` and no agent
-> designates.**
+> telemetry*. Submitting is Samuel's. ~~No agent runs `whest submit`~~ and no
+> agent designates.**
+>
+> > **SUPERSEDED 2026-09-05 in part.** Samuel changed the rule: **an agent MAY run
+> > `whest submit` once he has approved that specific submission.** `AGENTS.md`
+> > hard rule 6 is the authority. **The designation half is UNCHANGED** — no agent
+> > designates, ever.
 >
 > ## 3. RULING 2 — the allocation, fixed
 >
@@ -995,8 +1015,9 @@
 > **NEXT, in order.**
 > 1. Read the official run: `n_failed_mlps`, worst per-MLP residual, raw MSE.
 > 2. If headroom `>= 4x`: Linux memory gate -> `certify_candidate` -> brokered
->    `3 x 100`-MLP soak -> present the canary for **Samuel** to submit. Never
->    `whest submit`, never designate.
+>    `3 x 100`-MLP soak -> present the canary for **Samuel** to submit. ~~Never
+>    `whest submit`~~ *(superseded 2026-09-05: an agent may, on his per-submission
+>    approval — `AGENTS.md` hard rule 6)*, never designate.
 > 3. If not: the next reductions require **reassociation** (factoring
 >    `0.5 C11^2 X + 0.25 D22 X`, batching the 13 two-dimensional terms through a
 >    3-D stack). Those are not identities, so each needs a measured drift check
