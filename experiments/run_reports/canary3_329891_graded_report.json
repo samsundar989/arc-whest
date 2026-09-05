@@ -1,0 +1,91 @@
+{
+  "id": "329891",
+  "createdAt": "2026-09-05T10:39:18Z",
+  "status": "FAILED",
+  "gradingMessage": "<p>Error : Smoke test failed</p>\n",
+  "score": null,
+  "scoreSecondary": null,
+  "participant": {
+    "name": "neopok919",
+    "avatarUrl": "https://assets.aicrowd.com/avatars/p/513543/100x100/8f0d14b0",
+    "profileUrl": "/participants/neopok919",
+    "affiliation": ""
+  },
+  "team": null,
+  "round": {
+    "name": "Phase 2"
+  },
+  "viewerCanManage": false,
+  "gradingLogUrl": null,
+  "submissionFiles": null,
+  "evaluation": {
+    "schema_version": "2.0",
+    "session_id": "sess-d5b6c27549e4",
+    "submission_id": "329891",
+    "state": "failed",
+    "phase": "failed",
+    "started_at": "2026-09-05T10:39:47Z",
+    "updated_at": "2026-09-05T10:39:52Z",
+    "completed_at": "2026-09-05T10:39:52Z",
+    "config_snapshot": {
+      "n_mlps": 100,
+      "depth": 16,
+      "width": 1024,
+      "flop_budget": 2199023255552.0
+    },
+    "progress": {
+      "total_mlps": 100,
+      "mlps_completed": 0,
+      "mlps_in_flight": 0,
+      "mlps_failed": 100,
+      "pct_complete": 100.0
+    },
+    "truncation": null,
+    "workers": [
+      {
+        "worker_id": "w-0",
+        "state": "idle",
+        "current_mlp": null
+      },
+      {
+        "worker_id": "w-1",
+        "state": "idle",
+        "current_mlp": null
+      },
+      {
+        "worker_id": "w-2",
+        "state": "idle",
+        "current_mlp": null
+      }
+    ],
+    "partial_metrics": null,
+    "smoke_test_result": {
+      "passed": false,
+      "duration_ms": 96.25027200002023,
+      "worker_passes": 0,
+      "worker_failures": 1,
+      "error_code": "ESTIMATOR_EXCEPTION"
+    },
+    "results": {
+      "per_mlp": [],
+      "public_scores": [],
+      "aggregates": null,
+      "breakdowns": {
+        "sampling": null,
+        "estimator": null
+      },
+      "setup_executions": []
+    },
+    "runtime_environment": {
+      "whestbench_version": "0.16.1",
+      "flopscope_version": "0.12.1",
+      "flopscope_server_version": "0.12.1",
+      "numpy_version": "2.2.6",
+      "python_version": "3.10.21",
+      "flopscope_client_version": "0.12.1",
+      "participant_shim_version": "0.1.0",
+      "participant_python_version": "3.10.21"
+    },
+    "error": {}
+  }
+}

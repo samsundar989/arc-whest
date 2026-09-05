@@ -33231,3 +33231,171 @@ and MLP 2 in both paths**, which is the § 6 property. `whest validate`: PASS,
    slot on an unchanged, previously-graded file turned *"the stack moved and
    something is broken"* into *"the stack is fine and the fault is one file"*. The
    local investigation that preceded it produced two false leads and no cause.
+
+---
+
+# 2026-09-05 — **THE CANARY IS GRADED. Worst-row residual headroom is `13.047x` against a `>= 4x` bar. Ruling 2(a)'s FIRST branch fires: NO OP WORK. And the cause of three failures was `copy=False`.**
+
+Seven submissions, spent as instruments under Samuel's *"fix the submission and
+proceed we have slots to spend"*.
+
+| id | file | result |
+|---|---|---|
+| `329887` | canary v1 | **FAILED** — smoke `ESTIMATOR_EXCEPTION`, `95.28 ms` |
+| `329889` | **v2.7, unchanged — CONTROL** | **GRADED `1.3738e-07`**, `100/100`, smoke `11,313.70 ms`, 5 passes |
+| `329890` | canary v2 — best-effort `setup` | **FAILED**, `94.28 ms` |
+| `329891` | canary v3 — width-2 `ZeroDivisionError` fixed | **FAILED**, `96.25 ms` |
+| `329892` | **BISECTION PROBE** — flow replaced by zeros | **GRADED**, smoke PASSED `98.80 ms`, `100/100` |
+| `329894` | **STAGE DIAGNOSTIC** — returns the failing stage as a constant | **GRADED**, decoded **stage 2** |
+| **`329896`** | **canary v4 — the weight cast hardened** | **GRADED `8.501e-08`, `100/100`, `0` failed** |
+
+## 1. THE ANSWER THE CANARY EXISTED TO BUY
+
+**Graded per-MLP residual, 100 rows, `329896`:**
+
+| | seconds |
+|---|---:|
+| min | `0.0292` |
+| median | `0.0301` |
+| p99 | `0.0306` |
+| **max** | **`0.0307`** |
+
+> # **WORST-ROW HEADROOM = `13.047x`. The bar is `>= 4x`. PASS, by `3.3x`.**
+
+Mean headroom `13.301x`. `n_failed_mlps` `0 / 100`.
+`mean_compute_utilization 0.0767022` -> multiplier pinned at the **`0.1` floor**.
+Raw final-layer MSE **`8.501e-07`**, adjusted **`8.501e-08`**.
+
+**RULING 2(a)'s FIRST BRANCH FIRES:**
+
+> *"`>= 4x` -> **stop. No op work.** It is nominee A as-is."*
+
+**The entire op-cut work stream is CANCELLED.** Not deferred — cancelled, by the
+pre-registered decision table, on the measurement it was written for.
+
+## 2. AND IT VINDICATES THIS MORNING'S ERRATUM, EXPENSIVELY
+
+| | worst-row headroom |
+|---|---:|
+| `gpuq 182`, official runner **ON THIS HOST** | `2.226x` |
+| **`329896`, AIcrowd, GRADED** | **`13.047x`** |
+| ratio | **`5.86x`** |
+
+This morning I called the local figure "graded", sized a `45.2%` op cut against
+it, and wrote that the `< 2.5x` branch was the likely one. **The erratum was
+right to withdraw all of it, and the true number is `5.9x` better than the local
+one** — squarely consistent with `AGENTS.md`'s standing note that the servers ran
+submitted K2 files *"about `7x` faster than this host"*.
+
+**`p2_op_census.py`'s `_target()` was built to be a calculator rather than a
+finding, and this is the substitution it was waiting for.** Fed the real graded
+worst row it returns: no cut required at any rank.
+
+## 3. THE CAUSE, AND THE THREE WRONG DIAGNOSES BEFORE IT
+
+**It was one keyword argument:**
+
+    w = [x if x.dtype == dtype else x.astype(dtype, copy=False)
+         for x in mlp.weights]
+
+**`copy=False`.** Removing it — and nothing else of substance — took the file
+from `FAILED` to `100/100`.
+
+**Why it was invisible here: every local test built float32 weights**, so
+`x.dtype == dtype` short-circuited and the cast never ran. The grader's weights
+are not float32; the stage report shows `16 n^2` FLOPs billed before death, so
+the cast was reached on all sixteen layers. The flag was **redundant** — the
+`if` already makes an already-float32 cast free — so it bought nothing and cost
+three submissions.
+
+**Two prior fixes were WRONG about the cause and are retained anyway**, because
+each is a genuine hardening and neither costs anything:
+
+1. **`329890`, best-effort `setup`.** Wrong: the probe later proved `setup`
+   completes fine on the grader. Retained — `estimator.py` and `v2.7` both do it.
+2. **`329891`, the width-2 `ZeroDivisionError`.** Wrong as a cause: the smoke
+   spec is `width=1024, depth=16` (`whestbench/cli.py::_smoke_test_contest_spec`).
+   **But it is a real defect** — `_proj_coef_d4_r2(2)` divides by zero, upstream
+   itself raises there, and the docstring's *"verified at n = 4..4096"* could
+   never have seen a hole at `2`. Retained.
+
+## 4. HOW IT WAS ACTUALLY FOUND — two diagnostic submissions, not more guessing
+
+After three failures on inference I stopped guessing and bought evidence.
+
+**`329892`, the bisection probe.** Every byte of canary3 with the flow replaced
+by `return zeros`. It **PASSED**, `100/100` — proving import, module scope, the
+class body and `setup` are all fine on the grader, and the fault is inside
+`predict`. **It also reframed the timing**: a *passing* smoke on a trivial
+estimator takes `98.80 ms`, so the failures' `~95 ms` was never "died before
+starting" — it is simply what a cheap smoke costs. **v2.7's `11,313 ms` is slow
+because v2.7 is a sampling estimator, not because passing takes long.** I had
+read that backwards for an hour.
+
+**`329894`, the stage diagnostic.** The server returns no traceback, an empty
+`error` object and a null grading log — so the file was made to carry the answer
+out in the only channel available: **its own score.** `_flow` records progress in
+`self._stage`; on `BaseException` `predict` returns a constant array equal to
+that stage, so `final_layer_mse ~ stage^2` and the leaderboard reports the
+failure location.
+
+| | observed | predicted for a constant `c` |
+|---|---:|---|
+| stage 1 | | `0.8226` |
+| **stage 2** | **`2.689`** | **`2.6834`** |
+| stage 3 | | `6.5442` |
+
+**A `0.2%` match, with the neighbours a factor of `2.4` and `2.4` away.** Stage
+2's window is the weight-cast comprehension and nothing else. `BaseException`
+rather than `Exception` was deliberate: `MemoryError` was live at that point and
+is not an `Exception`.
+
+## 5. Where this puts the entry
+
+| | adjusted | rank, 2026-08-28 snapshot (67 entries) |
+|---|---:|---|
+| v2.7 (`329889`) | `1.3738e-07` | `41` |
+| **canary v4 (`329896`)** | **`8.501e-08`** | **`22`** |
+
+**`1.62x` better than the previous best public submission**, at the multiplier
+floor, with `0` failures and `13x` residual headroom.
+
+## 6. What is NOT settled
+
+1. **`estimator.py` is untouched at v2.6.1, and nothing is designated.**
+   Promotion is a STRATEGIC slice needing its own contract; this entry promotes
+   nothing.
+2. **`canary4` retains the stage channel**, i.e. a `BaseException` catch that
+   returns a constant. For a *canary* that is a safety net; **for a NOMINEE it is
+   a design decision, because it converts a crash into a scored-but-wrong answer
+   rather than a visible failure.** It must be settled explicitly before
+   nomination, not inherited.
+3. **The `13.047x` is ONE graded run of 100 rows.** The standing soak language is
+   the worst of `3 x 100`. Whether that is still required when the margin is
+   `3.3x` above the bar is a judgement for the nomination contract.
+4. **The cause is confirmed by construction, not by reproduction.** `copy=False`
+   still does not fail on this host under any runner or package version tried.
+   What is established: removing it, plus the two retained hardenings, takes the
+   same file from three failures to `100/100`.
+5. **`preflight` step 1's `x`-level version assertion is still too loose** — the
+   grader is on `0.16.1 / 0.12.1`, this repo on `0.16.0 / 0.12.0`. Unrelated to
+   this bug and still worth fixing.
+
+## Knowledge delta
+
+1. **A local test that never exercises a branch is not a test of that branch.**
+   `x.dtype == dtype` short-circuited in every local run because every local
+   harness built float32 weights. The grader does not. **Test the dtype the
+   deployment actually supplies, not the one your fixtures find convenient.**
+2. **When the deployment returns no diagnostics, make the artifact carry them.**
+   The score is a channel. A stage counter plus a constant return converted an
+   opaque `ESTIMATOR_EXCEPTION` into a two-decimal-place location for one slot.
+   **This is now the standard move for any future opaque grader failure.**
+3. **Bisect before you fix.** Three inferred fixes cost three slots and found
+   nothing; two diagnostic submissions cost two slots and found it exactly. The
+   probe partitioned the space and the stage channel located the line.
+4. **A redundant optimisation is a pure liability.** `copy=False` could not save
+   anything the guard above it had not already saved, and it cost three
+   submissions and most of a day.
+5. **Read a passing baseline's timings before interpreting a failing one's.**
+   `95 ms` looked like "died instantly" until the probe passed in `98.80 ms`.

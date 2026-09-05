@@ -1,13 +1,81 @@
 # CURRENT_STATE.md — read this first
 
-> **2026-09-04 (LATE) — THE STRATEGIST HAS RULED. NO NEW RESEARCH CONTRACTS.
-> THE `3.330x` CELL WAS PRICED AND IT DOES NOT FIT — IT IS DROPPED. THE PROGRAMME
-> IS NOW CONSOLIDATION, AND THE WRITE-UP IS PRIMARY WORK.**
+> **2026-09-05 — THE CANARY IS GRADED. WORST-ROW RESIDUAL HEADROOM IS `13.047x`
+> AGAINST A `>= 4x` BAR. RULING 2(a)'s FIRST BRANCH FIRES: *STOP, NO OP WORK,
+> IT IS NOMINEE A AS-IS.***
 >
-> `estimator.py` untouched at **v2.6.1**. **Nothing submitted, nothing
-> designated.** `P06[..064..127]` **UNSPENT, and now permanently so.** No seed
-> block was drawn today.
+> `estimator.py` untouched at **v2.6.1**. **Nothing designated.** `P06[..064..127]`
+> unspent. No seed block drawn.
 >
+> ## THE NUMBER
+>
+> `329896` = `estimator_wp18_canary4.py`, AIcrowd, 100 rows, report
+> `experiments/run_reports/canary4_329896_graded_report.json`:
+>
+> | | |
+> |---|---:|
+> | **worst-row residual headroom vs the `0.4 s` cliff** | **`13.047x`** |
+> | mean headroom | `13.301x` |
+> | failed MLPs | **`0 / 100`** |
+> | raw final-layer MSE | **`8.501e-07`** |
+> | **adjusted score** | **`8.501e-08`** |
+> | mean compute utilization | `0.0767022` -> multiplier at the **`0.1` floor** |
+>
+> **`1.62x` better than v2.7**, which re-graded healthy at `1.3738e-07` the same
+> day. Projected rank `22` of `67` against the 2026-08-28 snapshot, where v2.7
+> sits at `41`.
+>
+> **THE OP-CUT WORK STREAM IS CANCELLED** by the pre-registered table, not
+> deferred. § 4's `45.2%` was sized against a LOCAL residual and this morning's
+> erratum withdrew it; the graded number is **`5.86x` better than the local
+> `2.226x`**, consistent with the standing "~`7x` faster than this host" note.
+>
+> ## THE BUG THAT COST SEVEN SLOTS, AND IT WAS ONE KEYWORD
+>
+>     w = [x if x.dtype == dtype else x.astype(dtype, copy=False)   # <- copy=False
+>          for x in mlp.weights]
+>
+> **Every local harness builds float32 weights, so `x.dtype == dtype`
+> short-circuited and the cast never ran here. The grader's weights are not
+> float32.** `copy=False` was redundant — the `if` already makes a no-op cast
+> free — so it bought nothing and killed three submissions.
+>
+> Found by **two diagnostic submissions after three inferred fixes failed**:
+> `329892` (flow replaced by zeros) PASSED, proving the fault is inside
+> `predict`; `329894` returned its failing stage as a constant so the score
+> decoded it — observed `final_layer_mse 2.689` against `2.6834` predicted for
+> **stage 2**, neighbours at `0.82` and `6.54`.
+>
+> **Timing was read backwards for an hour:** the probe PASSED in `98.80 ms`, so
+> the failures' `~95 ms` was never "died instantly" — that is simply what a cheap
+> smoke costs. v2.7's `11,313 ms` is slow because v2.7 samples.
+>
+> ## OPEN, AND IT IS THE NOMINATION'S TO SETTLE
+>
+> 1. **`canary4` retains a `BaseException` catch that returns a constant** (the
+>    stage channel). A safety net for a canary; **for a NOMINEE it converts a
+>    crash into a scored-but-wrong answer instead of a visible failure.** Settle
+>    it explicitly in the promotion contract — do not inherit it.
+> 2. `13.047x` is ONE graded run. The standing soak language is the worst of
+>    `3 x 100`; whether that still binds at `3.3x` above the bar is a judgement.
+> 3. **Promotion of the flow into `estimator.py` is a STRATEGIC slice** and needs
+>    its own contract. This session promoted nothing.
+> 4. `preflight` step 1 asserts `0.16.x` / `0.12.x`; the grader is on
+>    `0.16.1 / 0.12.1` and this repo on `0.16.0 / 0.12.0`. Unrelated to the bug,
+>    still worth tightening.
+>
+> ## Today's submissions, all public and UNDESIGNATED
+>
+> | id | what | result |
+> |---|---|---|
+> | `329887` | canary v1 | FAILED |
+> | `329889` | v2.7 unchanged, **control** | GRADED `1.3738e-07`, healthy |
+> | `329890` | canary v2, best-effort `setup` | FAILED (fix was right, cause was not) |
+> | `329891` | canary v3, width-2 `ZeroDivisionError` | FAILED (real defect, not the cause) |
+> | `329892` | **bisection probe** | GRADED — fault is inside `predict` |
+> | `329894` | **stage diagnostic** | GRADED — decoded stage 2 |
+> | **`329896`** | **canary v4** | **GRADED `8.501e-08`, `0/100` failed, `13.047x`** |
+
 > ## 0. RULE CHANGE, 2026-09-05 — an agent may now run `whest submit`
 >
 > **Samuel, verbatim:** *"change the rule for agents not to submit you should be

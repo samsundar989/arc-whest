@@ -1,8 +1,8 @@
 {
   "id": "329890",
   "createdAt": "2026-09-05T10:30:22Z",
-  "status": "SUBMITTED",
-  "gradingMessage": "<p>Successfully enqueued 1 Job</p>\n",
+  "status": "FAILED",
+  "gradingMessage": "<p>Error : Smoke test failed</p>\n",
   "score": null,
   "scoreSecondary": null,
   "participant": {
@@ -18,5 +18,64 @@
   "viewerCanManage": false,
   "gradingLogUrl": null,
   "submissionFiles": null,
-  "evaluation": null
+  "evaluation": {
+    "schema_version": "2.0",
+    "session_id": "sess-e86ce746e9db",
+    "submission_id": "329890",
+    "state": "failed",
+    "phase": "failed",
+    "started_at": "2026-09-05T10:30:51Z",
+    "updated_at": "2026-09-05T10:30:52Z",
+    "completed_at": "2026-09-05T10:30:52Z",
+    "config_snapshot": {
+      "n_mlps": 100,
+      "depth": 16,
+      "width": 1024,
+      "flop_budget": 2199023255552.0
+    },
+    "progress": {
+      "total_mlps": 100,
+      "mlps_completed": 0,
+      "mlps_in_flight": 0,
+      "mlps_failed": 100,
+      "pct_complete": 100.0
+    },
+    "truncation": null,
+    "workers": [
+      {
+        "worker_id": "w-4",
+        "state": "idle",
+        "current_mlp": null
+      }
+    ],
+    "partial_metrics": null,
+    "smoke_test_result": {
+      "passed": false,
+      "duration_ms": 94.28331899999876,
+      "worker_passes": 0,
+      "worker_failures": 1,
+      "error_code": "ESTIMATOR_EXCEPTION"
+    },
+    "results": {
+      "per_mlp": [],
+      "public_scores": [],
+      "aggregates": null,
+      "breakdowns": {
+        "sampling": null,
+        "estimator": null
+      },
+      "setup_executions": []
+    },
+    "runtime_environment": {
+      "whestbench_version": "0.16.1",
+      "flopscope_version": "0.12.1",
+      "flopscope_server_version": "0.12.1",
+      "numpy_version": "2.2.6",
+      "python_version": "3.10.21",
+      "flopscope_client_version": "0.12.1",
+      "participant_shim_version": "0.1.0",
+      "participant_python_version": "3.10.21"
+    },
+    "error": {}
+  }
 }
