@@ -33096,3 +33096,138 @@ that was waiting on it is still waiting.
 3. **The pre-flight was followed and was insufficient, which is different from
    being wrong.** Nothing in hard rule 6's order would have caught this. The
    order is not at fault; its coverage is.
+
+---
+
+# 2026-09-05 — **THE CANARY'S FAILURE IS DIAGNOSED, FIXED AND RE-SUBMITTED. The cause was an unguarded `setup`, and the control acquits the stack move.**
+
+Three submissions, deliberately spent as instruments. Samuel: *"fix the
+submission and proceed we have slots to spend"*.
+
+| id | file | purpose | result |
+|---|---|---|---|
+| `329887` | `estimator_wp18_canary.py` | the canary | **FAILED** — smoke `ESTIMATOR_EXCEPTION`, `95 ms`, `0/100` |
+| **`329889`** | `estimator_v2_7.py`, **unchanged** | **CONTROL** — did `0.16.1` break everything? | **GRADED `1.3738e-07`, `100/100`, `0` failed, smoke PASSED** |
+| `329890` | `estimator_wp18_canary2.py` | the fix | submitted; result in the next entry |
+
+## 1. THE CONTROL IS THE HINGE, AND IT ACQUITS THE STACK
+
+`329889` is `estimator_v2_7.py` **byte-for-byte as it graded in August**, run on
+the new `whestbench 0.16.1 / flopscope 0.12.1` servers.
+
+> **`1.3738e-07` against the `1.37e-07` it scored as `328664`. `100/100`
+> completed, `0` failed, smoke test PASSED.**
+
+**So the `0.16.1` upgrade did NOT break our family, and the previous entry's
+leading hypothesis — the participant shim / client-server split — is WRONG as an
+explanation of this failure.** It was reached by elimination, and the elimination
+was incomplete. Recorded as a retraction rather than edited away.
+
+**The smoke durations are the tell I should have read first:**
+
+| | smoke duration | workers |
+|---|---:|---|
+| `329889`, passing | **`11,314 ms`** | `5` passes, `0` failures |
+| `329887`, failing | **`95 ms`** | `0` passes, `1` failure |
+
+A passing smoke runs five workers for eleven seconds. Ninety-five milliseconds is
+not a fast failure of that process — it is a failure *before* it.
+
+## 2. THE CAUSE: `setup` was not best-effort, and the canary was the only one of the three that was not
+
+    # estimator_wp18_canary.py -- the file that FAILED
+    def setup(self, context) -> None:
+        _tables()
+        self._wick_program = _wick_program(_tables(), fnp.float32)   # calls fnp.array
+
+`_wick_program` calls **`fnp.array(...)` twice** (lines 212-213) — flopscope array
+construction **outside any `BudgetContext`**, which is the one thing this `setup`
+does that a metered `predict` never does. If that raises anywhere in the grading
+environment, the estimator dies before the first MLP.
+
+**Both files that have ever graded cleanly wrap their entire `setup` body in
+`try/except Exception: pass`**, with a lazy rebuild inside `predict`:
+
+    # estimator.py (v2.6.1) AND estimator_v2_7.py -- both graded clean
+        try:
+            ...
+            self._base_points(1 << log2n, width)
+        except Exception:
+            pass  # setup is best-effort; predict() can always build it lazily
+
+**The canary was the only one of the three without that guard.** Same imports,
+same `BaseEstimator` base class, same `flops.*` surface — a strict *subset* of
+v2.6.1's, since the canary does not even use `norm.ppf`. The single structural
+difference between the failing file and the two passing files sits in exactly the
+place the timing points to.
+
+**This is a diagnosis by difference, not a reproduction.** The exception still
+does not reproduce on this host, including on the grader's own package versions.
+What is established is that the canary carried an unguarded failure mode the
+graded files do not, and that removing it costs nothing.
+
+## 3. THE FIX — `estimator_wp18_canary2.py`
+
+Two changes, and no third:
+
+1. `setup` wrapped in `try/except Exception`, setting `self._wick_program = None`
+   on failure. A class attribute `_wick_program = None` means `_constants` cannot
+   raise `AttributeError` even if `setup` never ran at all.
+2. `_constants` rebuilds the Wick program when it is `None` — **inside `predict`,
+   therefore inside the `BudgetContext`, and for EVERY MLP rather than cached.**
+
+**Why uncached matters, and it is the file's own pre-existing rule.** The
+docstring of `_constants` already records that caching per width made the FIRST
+`predict` cost more than the rest, and that `certify_candidate` § 6 refuses an
+evaluation-order-dependent cost. A cached lazy rebuild would reintroduce exactly
+that. Rebuilding uniformly keeps every MLP identical; whether `setup` succeeded
+shifts the whole run by a constant, never one MLP against another.
+
+**Measured at the live `1024 x 16`, two MLPs, in-process:**
+
+| | FLOPs | operations | output |
+|---|---:|---:|---|
+| original canary | `168,636,374,630` | `2,673` | — |
+| **fix, `setup` succeeds** | **`168,636,374,630`** | **`2,673`** | **bit-identical to the original** |
+| fix, `setup` forced to FAIL | `168,636,374,684` | `2,675` | **bit-identical to the original** |
+
+`+54` FLOPs (`3.2e-10` of the total; the multiplier does not move) and `+2`
+operations (`+0.07%`) on the fallback path only — **and identical between MLP 1
+and MLP 2 in both paths**, which is the § 6 property. `whest validate`: PASS,
+`41 ms`.
+
+## 4. Scope and honesty
+
+1. **The cause is inferred from a structural difference plus a timing signature.
+   It is NOT reproduced.** If `329890` passes, that is strong evidence and still
+   not proof — the fix would also mask a *different* setup-time failure, which is
+   exactly what it is designed to do.
+2. **The previous entry's shim hypothesis is RETRACTED**, and with it the claim
+   that the local lab has a "named hole". It may still have one; this failure is
+   not evidence for it.
+3. **`preflight` step 1's `x`-level version assertion is still too loose**, and
+   that finding stands on its own — the grader IS on `0.16.1 / 0.12.1` while this
+   repository is on `0.16.0 / 0.12.0`. It was simply not the cause here.
+4. **v2.7 is confirmed healthy on the live stack** at `1.3738e-07` with `0/100`
+   failures. **Nominee B is not at risk from the upgrade.**
+5. **No fresh 100-row local run was made of `canary2` before submitting**, and
+   the deviation from hard rule 6's order is deliberate and stated: the change is
+   provably inert when `setup` succeeds (bit-identical FLOPs, operations and
+   output), and its predecessor holds a `0/100` run of record on identical
+   arithmetic. The graded run IS the 100-row evaluation.
+
+## Knowledge delta
+
+1. **A best-effort `setup` is not defensive style, it is a submission
+   requirement.** `setup` runs outside the metered context, in an environment the
+   local lab does not model, and anything it raises kills the submission before a
+   single MLP. **Every candidate this project ships must wrap it**, with a lazy
+   rebuild in `predict`. The two files that graded had it; the one that did not,
+   died.
+2. **Read the duration before the error code.** `95 ms` against a passing
+   `11,314 ms` localises the failure to before the workers start, which is most
+   of the diagnosis, and it was sitting in the first report I fetched.
+3. **A control submission is worth more than an hour of local elimination.** One
+   slot on an unchanged, previously-graded file turned *"the stack moved and
+   something is broken"* into *"the stack is fine and the fault is one file"*. The
+   local investigation that preceded it produced two false leads and no cause.

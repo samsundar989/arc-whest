@@ -1,0 +1,22 @@
+{
+  "id": "329890",
+  "createdAt": "2026-09-05T10:30:22Z",
+  "status": "SUBMITTED",
+  "gradingMessage": "<p>Successfully enqueued 1 Job</p>\n",
+  "score": null,
+  "scoreSecondary": null,
+  "participant": {
+    "name": "neopok919",
+    "avatarUrl": "https://assets.aicrowd.com/avatars/p/513543/100x100/8f0d14b0",
+    "profileUrl": "/participants/neopok919",
+    "affiliation": ""
+  },
+  "team": null,
+  "round": {
+    "name": "Phase 2"
+  },
+  "viewerCanManage": false,
+  "gradingLogUrl": null,
+  "submissionFiles": null,
+  "evaluation": null
+}
