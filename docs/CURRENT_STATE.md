@@ -101,29 +101,40 @@
 > guess, because the measured f32 backbone `68,782,549,504` is on disk in
 > `flow_price_wp17b.json`.
 >
-> ## 4. THE OP WORK IS SIZED, BEFORE IT IS ORDERED — and it needs `45.2%`
+> ## 4. THE OP CENSUS — where the operations are. **The cut SIZE is NOT known.**
 >
 > Instrument `local_sim/p2_op_census.py` (new); artifacts
 > `experiments/2026-09-04_wp20_price/op_census_canary.json`, `op_census_v261.json`.
 >
-> **A graded worst-row headroom of `2.226x` ALREADY EXISTS** —
-> `experiments/2026-09-03_wp17_official/official_residual.json`, `gpuq 182`, one
-> official `100`-row run of the **un-guarded** canary at `2,646` ops, `0/100`
-> failures, `clears_soak_requirement: false`. The guarded file bills `2,674`, so
-> its expected reading is about **`2.20x`** — the **`< 2.5x` branch** of § 7's
-> table. **This does not pre-empt the canary**; the artifact's own one-run caveat
-> binds, and the graded file was not the guarded one.
+> > **CORRECTED 2026-09-05.** This section first said *"a graded worst-row
+> > headroom of `2.226x` already exists"* and sized a `45.2%` cut against it.
+> > **`official_residual.json` is NOT graded** — it is `gpuq 182`, the official
+> > *runner*, **on this host**. `AGENTS.md`: the grading server ran submitted K2
+> > files **about `7x` faster than this host**. The Sep-3 ruling says *"size the
+> > op-count work to the **graded** worst row, not to the local one"*, and the
+> > canary's own bar is *local* `>= 1.5x` (met at `2.23x`) while the NOMINATION
+> > bar is `>= 4x` **graded**. **WHICH BRANCH OF § 7 FIRES IS UNKNOWN, and
+> > resolving it is the whole purpose of the canary.** Full erratum in
+> > `experiments/LOG.md`.
+>
+> **What the census establishes, and it depends on no timing instrument:**
 >
 > | | |
 > |---|---:|
-> | fit from the two graded points | `residual ~ 0.85 ms + 57.77 us/op`, worst/median `1.169` |
-> | operations that fit under `>= 4x` | **`1,466`** |
-> | **required cut from `2,674`** | **`45.2%`** |
-> | the ruling abandons the flow above | `40.0%` |
+> | canary operations, steady state | `2,673` (`2,674` in `certify_guarded.json`) |
+> | **operations carrying the ENTIRE `168.6e9` FLOPs** | **`78` — `2.9%`** |
+> | elementwise `O(n^2)`-and-smaller work | `2,595` — `97.1%` |
+> | `estimator.py` (v2.6.1), metered directly | **`442`** operations |
 >
-> **The fit's low anchor was checked rather than quoted:** `estimator.py` bills
-> **`442`** operations metered directly, against `442.5` inferred from write-up
-> 6.8's ratio — `0.1%`, on a number it was never fitted to.
+> **The FLOP budget and the op budget are spent in almost disjoint places.** The
+> three cheapest-looking groups — `103` scalar-by-scalar multiplies at **zero**
+> FLOPs (`3.9%`), `265` vector-by-scalar (`9.9%`), `390` row/column broadcasts
+> (`14.6%`) — are `28.4%` of the operation budget between them.
+>
+> **The fit in the LOG is a CALCULATOR, not a finding.** `residual ~ 0.85 ms +
+> 57.77 us/op`, worst/median `1.169`. Substitute a real graded worst row when the
+> canary returns one and it gives the cut size then. Substituted with the LOCAL
+> `2.23x` it returns `45.2%`; **that is one scenario, not a requirement.**
 >
 > **Where the operations are, which is what makes `45.2%` targetable:** `78` of
 > `2,673` operations carry the ENTIRE `168.6e9` FLOPs. The other `97.1%` are

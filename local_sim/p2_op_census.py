@@ -1,8 +1,9 @@
-"""Where do a candidate's OPERATIONS go, and what would a 45% cut have to remove?
+"""Where do a candidate's OPERATIONS go, and where would a cut have to come from?
 
-Opened 2026-09-04 to SIZE the op work before the canary's graded telemetry lands,
-so the strategist's `< 2.5x` branch is actionable the day it fires rather than
-four days later. **It moves no gate, spends no seed block, and changes no shipped
+Opened 2026-09-04 to MAP the op work before the canary's graded telemetry lands,
+so whichever branch of the strategist's decision table fires is actionable that
+day rather than four days later. **It does not size the cut** -- see the
+instrument warning below; the cut size needs a graded worst row and none exists. **It moves no gate, spends no seed block, and changes no shipped
 file.** `# seed-ledger: no block named` -- `canonical_mint` is called on a fixed
 seed outside every registered block, purely to give `predict` something to run on.
 
@@ -29,32 +30,53 @@ this host reads high besides. **The COUNT column is the decision column**; the
 time columns are here to say which operations are unusually expensive per call,
 which a count alone cannot.
 
-THE ARITHMETIC THIS IS PREPARING
---------------------------------
-`experiments/2026-09-03_wp17_official/official_residual.json` -- ONE official
-100-row run, snapshot `22db10a`, `2,646` operations per MLP:
+THE ARITHMETIC THIS IS PREPARING -- AND THE INSTRUMENT IT IS **NOT** MEASURED ON
+--------------------------------------------------------------------------------
+**READ THIS BEFORE USING THE NUMBER BELOW.** `official_residual.json` is `gpuq
+182`: `whest run --runner subprocess` on the public split, **on this host**. In
+this repository "the deployment authority" names the official *runner* -- the
+authority among LOCAL instruments -- and NOT the AIcrowd grading server, which
+`AGENTS.md` records as having run submitted K2 files **about `7x` faster than
+this host**.
+
+The Sep-3 ruling in `experiments/LOG.md` is explicit: *"size the op-count work to
+the **graded** worst row, not to the local one."* The canary's own bar is a
+**local** worst-row headroom `>= 1.5x` (met at `2.23x`); the NOMINATION bar is
+`>= 4x` on **graded** telemetry, which does not exist yet and is precisely what
+submitting the canary buys.
+
+**So `_target()` below is a CALCULATOR, not a finding.** Feed it a real graded
+worst row and it returns the cut size. Fed the local `2.23x` it returns `45.2%`,
+and that is one scenario among three, not a requirement. The census itself --
+which operations a candidate executes -- depends on no timing instrument at all
+and is the part of this module that stands unconditionally.
+
+`experiments/2026-09-03_wp17_official/official_residual.json` -- ONE **local**
+official-runner 100-row run, snapshot `22db10a`, `2,646` operations per MLP:
 
     worst-row residual   0.1797 s   ->   headroom  2.226x   against the 0.4 s cliff
     median                0.1537 s
     mean headroom                          2.595x
     failures                               0 / 100
 
-The guarded canary bills `2,674` operations (`+1.06%`), so its expected worst-row
-headroom is about `2.20x`, and the nomination bar is `>= 4x`. Reaching it needs
-the worst-row residual multiplied by `2.20 / 4.0 = 0.55`.
+All four are LOCAL. The guarded canary bills `2,674` operations (`+1.06%`). If
+the graded worst row were to land where the local one sits -- **which nothing
+supports, and the `7x` observation argues against** -- reaching `>= 4x` would
+need the worst-row residual multiplied by `2.20 / 4.0 = 0.55`.
 
-Fitting the two graded points we have -- `(442 ops, 0.0264 s)` for the shipped
+Fitting the two LOCAL points we have -- `(442 ops, 0.0264 s)` for the shipped
 second-order file and `(2646 ops, 0.1537 s)` for the canary, both medians, both
-from the evaluator -- gives `residual ~ 0.00087 + 5.776e-5 * ops` seconds, i.e.
+from the official runner on this host -- gives `residual ~ 0.00087 + 5.776e-5 * ops` seconds, i.e.
 **essentially proportional with a sub-millisecond fixed cost**. With the observed
 worst/median ratio of `1.169`, `>= 4x` headroom needs
 
     1.169 * (0.00087 + 5.776e-5 * N)  <=  0.100      ->      N  <=  ~1,465 ops
 
-**a `45%` cut from `2,674`**, which is above the `> 40%` the ruling names as the
-abandon threshold. **That is the number this census exists to make targetable**,
-and it is a projection from two graded points, not a measurement of a file that
-exists. It is stated so it can be falsified by the canary's own telemetry.
+**a `45%` cut from `2,674`** in that scenario, above the `> 40%` the ruling names
+as its abandon threshold. **It is a projection from two LOCAL points under an
+assumption the canary exists to test**, and it is stated so the canary's own
+telemetry can replace it. What this census makes targetable is not the `45%` --
+it is the map of where a cut of any size would have to come from.
 
 Run:
     uv run python local_sim/p2_op_census.py --candidate estimator_wp18_canary.py
@@ -83,8 +105,8 @@ import numpy as np  # noqa: E402
 WIDTH, DEPTH = 1024, 16
 BUDGET = 2 ** 41
 
-#: `experiments/2026-09-03_wp17_official/official_residual.json`, gpuq 182.
-GRADED = {"snapshot": "22db10a", "ops": 2646, "n_mlps": 100,
+#: `official_residual.json`, gpuq 182 -- LOCAL official-runner, NOT graded.
+LOCAL_RUN = {"snapshot": "22db10a", "ops": 2646, "n_mlps": 100,
           "worst_residual_s": 0.1797, "median_residual_s": 0.1537,
           "worst_headroom_x": 2.2262120890959607,
           "mean_headroom_x": 2.5951266374968225}
@@ -187,11 +209,11 @@ def _target(ops_now: int) -> dict:
     the ratio pair that gives the shipped file's operating point
     (`5.82x` residual against `5.98x` operations).
     """
-    ops_lo = GRADED["ops"] / 5.98
-    res_lo = GRADED["median_residual_s"] / 5.82
-    b = (GRADED["median_residual_s"] - res_lo) / (GRADED["ops"] - ops_lo)
+    ops_lo = LOCAL_RUN["ops"] / 5.98
+    res_lo = LOCAL_RUN["median_residual_s"] / 5.82
+    b = (LOCAL_RUN["median_residual_s"] - res_lo) / (LOCAL_RUN["ops"] - ops_lo)
     a = res_lo - b * ops_lo
-    worst_over_median = GRADED["worst_residual_s"] / GRADED["median_residual_s"]
+    worst_over_median = LOCAL_RUN["worst_residual_s"] / LOCAL_RUN["median_residual_s"]
     allowed_worst = 0.4 / NOMINATION_HEADROOM_X
     n_max = ((allowed_worst / worst_over_median) - a) / b
     return {"fit_intercept_s": a, "fit_slope_s_per_op": b,
@@ -231,9 +253,10 @@ def main(argv=None) -> int:
     print(f"  guarded canary    {GUARDED_OPS:,} operations "
           f"(certify_guarded.json)")
     print()
-    print("  THE BAR, projected from the two graded points -- NOT a measurement")
-    print(f"    graded worst-row headroom, {GRADED['n_mlps']} rows, snapshot "
-          f"{GRADED['snapshot']}       {GRADED['worst_headroom_x']:.3f}x")
+    print("  A SCENARIO, from two LOCAL points -- NOT a graded measurement.")
+    print("  The graded worst row does not exist yet; the canary is what buys it.")
+    print(f"    LOCAL worst-row headroom, {LOCAL_RUN['n_mlps']} rows, snapshot "
+          f"{LOCAL_RUN['snapshot']}        {LOCAL_RUN['worst_headroom_x']:.3f}x")
     print(f"    nomination bar                                        "
           f"{NOMINATION_HEADROOM_X:.1f}x")
     print(f"    fit: residual ~ {tgt['fit_intercept_s']*1e3:.2f} ms + "
@@ -272,9 +295,14 @@ def main(argv=None) -> int:
     out = {"check": "operation census -- where a candidate's operations go, and "
                     "what a 4x-headroom cut would have to remove",
            "authority_note": "COUNT is the decision column. Wall-clock columns "
-                             "are this host's and are NOT a residual prediction; "
-                             "the authority is `whest run --runner subprocess`.",
-           "graded_reference": GRADED, "guarded_canary_ops": GUARDED_OPS,
+                             "are this host's and are NOT a residual prediction. "
+                             "`official_residual.json` is the official RUNNER on "
+                             "THIS HOST (gpuq 182), not the AIcrowd grading "
+                             "server, which has run K2 files ~7x faster. The "
+                             "`target` block is therefore a CALCULATOR under a "
+                             "local-equals-graded assumption the canary exists "
+                             "to test -- not a measured requirement.",
+           "local_runner_reference_NOT_GRADED": LOCAL_RUN, "guarded_canary_ops": GUARDED_OPS,
            "target": tgt, **c}
     if a.out:
         os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)

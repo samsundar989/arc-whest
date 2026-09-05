@@ -32555,7 +32555,50 @@ measuring both axes rather than the one that bit last time.
 
 ---
 
-# 2026-09-04 (LATE, second entry) — **THE OP WORK IS SIZED BEFORE IT IS ORDERED: `45.2%`, which is ABOVE the ruling's abandon threshold — and the census says the fat is there anyway**
+# 2026-09-04 (LATE, second entry) — **THE OP CENSUS: `78` of `2,673` operations carry the whole FLOP bill. *(HEADLINE CORRECTED 2026-09-05 — see the ERRATUM immediately below: the `45.2%` this entry originally led with was sized against the LOCAL residual, which the Sep-3 ruling explicitly forbids.)***
+
+> ## ERRATUM, 2026-09-05, and it invalidates this entry's original headline
+>
+> This entry called `experiments/2026-09-03_wp17_official/official_residual.json`
+> a **graded** measurement and sized the op work against it. **It is not graded.**
+> It is `gpuq 182` — `whest run --runner subprocess` on the public split, **on
+> this host**. In this repository "the deployment authority" names the official
+> *runner*, which is still local hardware; the AIcrowd grading *server* is a
+> different instrument, and `AGENTS.md` records that it ran submitted K2 files
+> **about `7x` faster than this host**.
+>
+> The Sep-3 ruling (LOG, *"Order of work, as ruled"*) says it in as many words:
+>
+> > *"canary first; then size the op-count work **to the graded worst row, not to
+> > the local one**."*
+>
+> **I sized it to the local one.** The same ruling sets the CANARY bar at *local*
+> worst-row headroom `>= 1.5x` (met, `2.23x`) and the NOMINATION bar at `>= 4x`
+> on **graded** telemetry (unknown, and unknowable until the canary is graded).
+>
+> **WITHDRAWN:** *"A graded worst-row headroom of `2.226x` already exists"*; *"its
+> expected reading is about `2.20x`"*; *"against the strategist's table that is the
+> `< 2.5x` branch"*; and the framing of `45.2%` as a requirement rather than as
+> one arithmetic scenario among three. **Which branch fires is UNKNOWN. That
+> unknown is the entire purpose of the canary, and this entry wrote it up as
+> already answered.**
+>
+> **WHAT SURVIVES, and it is the part worth keeping:** §3's census is a property
+> of the file, not of any timing instrument — `78` of `2,673` operations carry the
+> entire `168.6e9` FLOPs, the other `97.1%` are elementwise work, and the three
+> named groups are `28.4%` of the operation budget. `estimator.py` = `442`
+> operations, metered, also stands. §2's fit stands **as arithmetic**: it says
+> what op count a given residual target implies, and remains valid the moment a
+> real graded worst row is substituted for the local one. Read §2 as a
+> *calculator*, not as a *finding*.
+>
+> **Knowledge delta, added:** the repository already had this exact rule written
+> down, in a ruling six lines long, and I still made the error — because
+> `official_residual.json` is produced by a command the docs call "the deployment
+> authority", and that phrase reads like "the grader". **A name that is accurate
+> within one comparison class is a trap across classes.** The Sep-3 entry hedged
+> it correctly and labelled the figure `local worst-row headroom`; I dropped the
+> word.
 
 `estimator.py` untouched at **v2.6.1**. **Nothing submitted, nothing designated.**
 No seed block drawn. Instrument `local_sim/p2_op_census.py` (new); artifacts

@@ -260,7 +260,7 @@ corrected cell is the one tabled above.
 
 ---
 
-## 6. What an estimator may actually spend *(new 2026-09-02; **materially corrected the same day** — see 9.4; **executed rather than projected** — see 6.5; **found to be measuring the free half of the objective** — see 6.6, 6.7; **and confirmed on 100 graded networks, which then moved the binding constraint again** — see 6.8)*
+## 6. What an estimator may actually spend *(new 2026-09-02; **materially corrected the same day** — see 9.4; **executed rather than projected** — see 6.5; **found to be measuring the free half of the objective** — see 6.6, 6.7; **and confirmed on 100 networks of the organisers' public split, which then moved the binding constraint again** — see 6.8)*
 
 **Evidence: CONFIRMED.** `experiments/2026-09-02_wp14_range/e0_cost_f64.json` and
 `e0_cost_f32.json`, executed in the official metering package inside a real budget
@@ -553,7 +553,7 @@ reference implementation, the flow driver, and the network builder — would be
 invisible to every comparison among them. So we ran the fixed port on the
 evaluator, on 100 networks, with our shipped file as a control in the same run.
 
-| 100 graded networks | raw MSE | adjusted | failed |
+| 100 networks of the organisers' public split | raw MSE | adjusted | failed |
 |---|---:|---:|---:|
 | shipped second-order file (control) | `4.05e-06` | `4.05e-07` | 0 / 100 |
 | **fixed third-order flow** | **`8.75e-07`** | **`8.75e-08`** | **0 / 100** |
@@ -567,16 +567,28 @@ hundred — `3.22x`, against the `3.16x` our offline paired measurement predicte
 oracle could see, because the grader's labels are independent of all three of our
 programs.**
 
+**A note on instruments, because the next half of this section turns on it.** The
+accuracy rows above are scored against the **organisers' own published labels**,
+which is the whole point of running them — those labels are independent of all
+three of our programs, so a defect shared by all three cannot hide. The *timing*
+rows below are a different matter: they come from the official runner executing
+**on our own workstation**, not from the competition's servers. We use the phrase
+"the deployment authority" for that runner because it is the most trustworthy
+instrument *we* can run, and we then spent a day treating its numbers as though
+they were the graders'. They are not, and on the two submissions where we can
+compare, the competition's servers ran our files about **7× faster** than this
+machine.
+
 **Then the same run told us something we had been measuring wrongly for weeks.**
 Phase 2's residual limit is not a cost — it is a `0.4 s` per-network cliff that
 *fails* the network. We had set ourselves a safety bar of `4x` headroom against
 it. That bar was calibrated on a run-to-run spread of about `2.4x`, measured on
 our own workstation.
 
-On the evaluator, the per-network spread across 100 rows is **`1.20x` from
-minimum to maximum**, with the worst network `13%` above the 99th percentile.
+Through the official runner, the per-network spread across 100 rows is **`1.20×`
+from minimum to maximum**, with the worst network `13%` above the 99th percentile.
 
-| per-network residual, 100 graded rows | seconds |
+| per-network residual, 100 rows, official runner **on this host** | seconds |
 |---|---:|
 | minimum | `0.1493` |
 | median | `0.1537` |
@@ -584,14 +596,14 @@ minimum to maximum**, with the worst network `13%` above the 99th percentile.
 | **maximum** | **`0.1797`** |
 | headroom against the `0.4 s` cliff | **`2.23x`** |
 
-**The bar was calibrated against noise the evaluator does not have.** Two things
+**The bar was calibrated against noise the runner does not have.** Two things
 follow, and they point in opposite directions, which is why we are writing both
 down.
 
 - The safety margin we demanded was set by *our* measurement noise rather than by
-  the *evaluator's* dispersion. A `2.23x` margin against a distribution whose
-  observed spread is `1.20x` is a different proposition from a `2.23x` margin
-  against a `2.4x` spread, and we had been treating them as the same.
+  the *runner's* dispersion. A `2.23×` margin against a distribution whose
+  observed spread is `1.20×` is a different proposition from a `2.23×` margin
+  against a `2.4×` spread, and we had been treating them as the same.
 - **But our own instrument is worse than we thought, in exactly the direction
   that makes local measurement useless here.** Two runs of the *same* evaluator,
   on files differing by `2.3%` in operation count, reported mean residuals
@@ -612,9 +624,20 @@ timings had been contaminated. **Count the operations, not the arithmetic, and
 take the timing from the deployment authority or not at all.**
 
 > **A `raw` report does not print the number a tail gate is written on.** Our
-> requirement was on the *worst* network. The first graded run gave us an
-> aggregate, and four hours of local residual measurement went into trying to
-> reconstruct what one command-line flag (`--detail full`) returned directly.
+> requirement was on the *worst* network. The first run gave us an aggregate, and
+> four hours of residual measurement went into trying to reconstruct what one
+> command-line flag (`--detail full`) returned directly.
+
+> **And the number that gate is written on still does not exist.** Everything
+> above is our hardware. The competition's own per-network timing is only
+> obtainable by submitting, which is why our next action is a deliberately
+> undesignated public submission whose entire purpose is to buy one measurement.
+> **We wrote "graded" in our own notes for a figure that was local, twice, in two
+> days** — the second time in the sentence that chose which of three remediation
+> branches to plan for. The trap is a name: we call the official runner "the
+> deployment authority" because it *is* the authority among the instruments we
+> control, and that phrase reads like "the grader" when you are moving fast. **A
+> name that is accurate inside one comparison class is a trap across classes.**
 
 ---
 
@@ -1212,7 +1235,8 @@ cost on a mismatched instrument — our laboratory spelling of the flow bills `4
 array operations where the shipped file's own third-order step bills `2,255`, the
 same arithmetic in `4.8×` fewer calls. Corrected, the carried design lands at
 about `2.3×` the shipped file's operation count, against a wall-time cliff its
-worst graded network already sits `2.23×` under. **So the memory probably fails
+worst network already sits `2.23×` under on our own hardware. **So the memory
+probably fails
 on both axes, and we can only say "probably":** an operation count turns out to
 be `3×` spelling-dependent inside identical arithmetic — three separate rank-192
 blocks bill 35 operations, one concatenated rank-576 block bills 11, same FLOPs,
@@ -1394,6 +1418,14 @@ prices are exactly what a memory cannot keep.
   bounds nothing. **Both over-charges were the conservative-looking choice, and
   both strengthened our own negative.** The decision did not change; the reason
   we had published for it did. (§7.6)
+- **We wrote "graded" for a number that was local, twice in two days — and the
+  second time it chose which remediation branch to plan for.** Our worst-network
+  residual figure comes from the official runner on our own workstation, not from
+  the competition's servers, which have run our files about `7x` faster. Our own
+  written ruling said *"size the work to the graded worst row, not the local
+  one"*, and we sized it to the local one anyway. **The trap was a name**: we call
+  that runner "the deployment authority" because it is the best instrument we
+  control, and the phrase reads like "the grader". (§6.8)
 - **We metered one cost axis on the wrong instrument.** Our laboratory spelling
   of the flow bills `469` array operations where the shipped file's own
   third-order step bills `2,255` — the same arithmetic in `4.8x` fewer calls —
