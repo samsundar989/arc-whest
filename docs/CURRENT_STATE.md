@@ -146,6 +146,30 @@
 > 3. Hygiene owed on the next candidate, not on the shipped one: `_regen` is not
 >    a cheaper fallback (it is `gens=1` again and would blow the budget at
 >    non-live shapes); stale docstrings at lines ~52–68, 79–82, 353–358, 980–987.
+>
+> ### WHAT THE 2026-09-07 SESSION DID NOT DO — read this before assuming
+>
+> The Slice-2 handoff covers Sep 7–19. One session closed §1 and §2a's pricing.
+> **Everything below is untouched**, and none of it is blocked:
+>
+> | handoff | state |
+> |---|---|
+> | §1 submit | **DONE** — `330212` graded `2.9467e-08`, telemetry recorded |
+> | §2a batched Strassen | **PRICED, NOT BUILT.** The frontier and its gating risk are measured; the next act is the pre-registered 24-net accuracy contract above, then the implementation |
+> | §2b dead/cold-column pruning | **not started** — still unpriced |
+> | §2c aliased-operand self-contractions | **not started** |
+> | §2d per-MLP variable spend | **not started** |
+> | §3a–3e the accuracy layer | **NOT STARTED, and it is the critical path.** Part C of Slice 1 was never run either, so this has now slipped twice. Nothing about it is blocked: it is torch work for the GPU queue and does not wait on any cost lever |
+> | §4 nominee discipline | A = `k3_full` (1 clean graded run), B = canary4 until A has 3 |
+> | §5 hand-back | this section |
+>
+> **If you can only do one thing next, do §3d (the Puffi SSC κ₄-response
+> closure).** It is the most evidence-backed route to the leaders' 2× (Puffi
+> measured −77% at 256×32), it is independent of every cost lever, and its
+> go/no-go is due Sep 19. The cost work has already returned `2.9467e-08 →
+> ~1.82e-08` on paper; the raw-error floor of `~1.9e-8` that the whole top-12
+> shares is what actually separates us from #1, and no amount of Strassen touches
+> it.
 
 
 > ## 2026-09-05 (evening) — SLICE 1 PARTS A AND B: THE EXACT K3 CHAIN IS BUILT
