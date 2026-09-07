@@ -1,0 +1,18 @@
+  6/24  211s
+  12/24  430s
+  18/24  683s
+  24/24  959s
+
+24 P01 nets, 2^26 labels/half, cross-product (unbiased) MSE
+GT noise per replica: mean 1.155e-09  max 1.394e-09
+arm                 raw MSE   B-frac  multiplier     adjusted
+full_exact       4.0041e-08   0.9994      0.9994   4.0015e-08
+regen_nosub      9.0917e-07   0.0767      0.1000   9.0917e-08
+full_gen1        2.4927e-06   0.1442      0.1442   3.5947e-07
+full_gen2        1.6514e-06   0.2625      0.2625   4.3345e-07
+full_gen4        7.3257e-07   0.4726      0.4726   3.4621e-07
+full_gen6        3.1837e-07   0.6475      0.6475   2.0615e-07
+full_gen8        1.3512e-07   0.7873      0.7873   1.0638e-07
+full_gen12       4.3559e-08   0.9613      0.9613   4.1872e-08
+
+[exited with code 0]

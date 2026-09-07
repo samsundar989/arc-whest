@@ -430,6 +430,53 @@ Two arithmetic hygiene rules, both of which Sprint 4 broke:
    applies to both arms at once and largely cancels. The absolute second still
    obeys every rule above: LOCAL, worst run, and never the deployment authority.
 
+### 2b-iii. THE GRADED RESIDUAL IS PER-OPERATION — MEASURED, 2026-09-07 (`330212`)
+
+§2b-ii said the measurement path matters more near a cliff than it does for a
+price, and left open *which* path. It is now closed by a cross-candidate control.
+
+**BINDING: the local `residual_wall_time_s` — in-process or under
+`--runner subprocess` — is a RATIO-ONLY instrument for a data-heavy candidate. It
+has no authority over a go/no-go. The gate is the OPERATION COUNT.**
+
+Two graded submissions of our own, on the same stack, `10.2×` apart in FLOPs:
+
+| | ops/MLP | FLOPs | kernel wall | GFLOP/s | graded residual med | **per-op** |
+|---|---:|---:|---:|---:|---:|---:|
+| canary4 `329896` | 2,673 | `168.7 G` | `2.540 s` | 66.4 | `30.11 ms` | **`11.263 µs`** |
+| k3_full `330212` | 3,249 | `1,714.6 G` | `7.970 s` | 215.1 | `36.41 ms` | **`11.205 µs`** |
+
+`10.2×` the FLOPs and `3.2×` the arithmetic intensity move the per-op residual by
+**`0.5%`**. Array traffic does not enter the grader's residual; it is billed to
+`flopscope_server_kernel_wall_s`, which scaled with the FLOPs as expected. The
+local reading on `330212` was `0.453 s` min, `0.469 s` median, `0.509 s` max —
+it FAILED all 100 rows locally and passed all 100 graded, **over-reading by
+`12.9×`**, because
+in-process it absorbs array allocation the grader performs on its own backend.
+
+**The gate, and how to size it.** Use the *worst* graded per-op figure, never the
+median, because the cliff is per-row:
+
+    worst observed per-op residual                     12.096 µs   (330212, worst row)
+    ops at the 0.400 s cliff                           33,070
+    ops at 0.300 s — the 25%-margin working gate       24,800  ->  ADOPT 24,000
+    a candidate is admissible when   ops <= 24,000  AND  ops * 12.1 µs <= 0.3 s
+
+A candidate that passes the op gate but fails the local residual reading is
+**admissible on the evidence above**, and that combination must be put to Samuel
+with BOTH numbers — `certify_candidate.py` §10 continues to refuse on the local
+number by design, because it is the deployment-authority runner and a silent pass
+there would destroy the only conservative check we have. Relaxing hard rule 6 on
+that basis remains Samuel's decision per submission, never an agent's; it was made
+once, on 2026-09-07, and the instrument argument it rested on is the table above.
+
+**Scope.** This is measured at the Phase-2 live shape (1024×16, float32) on
+whestbench 0.16.1 / flopscope 0.12.1 with a client/server backend. It says nothing
+about a single-process grader, and nothing about a candidate whose ops are of a
+kind neither graded file contains — both of ours are matmul-dominated. An
+estimator built from gather/sort/elementwise ops (AndreasHad04's profile, `2.9
+GFLOP/s`) is outside the fit and must re-anchor before it trusts the constant.
+
 ### 2b-i. THE BINDING STATISTIC — arithmetic, adopted 2026-08-20 (CP0.3)
 
 **The primary promotion statistic is the paired ARITHMETIC score difference, with
@@ -782,7 +829,7 @@ the number has moved.
 
 | tier | steps run | when |
 |---|---|---|
-| **default** | **12 of 16** — **1** official stack + round configuration (82/82, asserted against the *installed* package; WP6 grew it by nine checks against the STORED GRADED REPORTS, for the grading server's per-MLP FLOP offset), **2** mint provenance (1024×16 first) **+ the dataset pin** (`local_sim/test_p2_tag_drift.py`, added 2026-08-31 by WP0A; two commands, one step, so the denominator stays 16), **3** invariant suite (30/30), **4** `whest validate`, **5** ship-file identity, **6** vault seal, **7** seed ledger consumption + source scan (no count; it reports CONSISTENT or refuses) **+ the enforcement labels** (`local_sim/test_enforcement_labels.py --labels-only`, added 2026-08-31 by WP0B; two commands, one step, so the denominator stays 16), **8** canonical scorer + the binding gate (98/98), **9** seed-ledger *refusals* (66/66), **10** vault integrity, **11** lifecycle evaluator (56/56), **12** counted-FLOP anchor vs the official runner | every change |
+| **default** | **12 of 16** — **1** official stack + round configuration (87/87, asserted against the *installed* package; WP6 grew it by nine checks against the STORED GRADED REPORTS, for the grading server's per-MLP FLOP offset, and the Slice-2 work grew it again as the offset's cast model gained its second and third graded rows — 329896 and 330212, both offset-zero), **2** mint provenance (1024×16 first) **+ the dataset pin** (`local_sim/test_p2_tag_drift.py`, added 2026-08-31 by WP0A; two commands, one step, so the denominator stays 16), **3** invariant suite (30/30), **4** `whest validate`, **5** ship-file identity, **6** vault seal, **7** seed ledger consumption + source scan (no count; it reports CONSISTENT or refuses) **+ the enforcement labels** (`local_sim/test_enforcement_labels.py --labels-only`, added 2026-08-31 by WP0B; two commands, one step, so the denominator stays 16), **8** canonical scorer + the binding gate (98/98), **9** seed-ledger *refusals* (66/66), **10** vault integrity, **11** lifecycle evaluator (56/56), **12** counted-FLOP anchor vs the official runner | every change |
 | **`-Full`** | **16 of 16** — adds **13** shape parity, **14** carrier strength, **15** deployment envelope (+ what it cannot prove) **and its read-only proof** (`local_sim/test_envelope_readonly.py`, added by P1-PRE 2026-08-25), **16** official Phase-2 subprocess smoke, zero failures | **required** before any promotion, submission, or vault touch |
 
 > **Suite counts have been removed from the `-Full` row.** They moved three times

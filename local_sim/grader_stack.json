@@ -1,0 +1,22 @@
+{
+  "_comment": "DERIVED, do not hand-edit. Regenerate with `python local_sim/grader_stack.py --write` after fetching a newer graded report. official_config.verify() asserts PINNED == installed.",
+  "derived_from": {
+    "source_report": "canary4_329896_graded_report.json",
+    "submission_id": "329896",
+    "observed_at": "2026-09-05T11:07:21Z",
+    "status": "GRADED",
+    "n_reports_with_runtime_environment": 15
+  },
+  "pinned": {
+    "whestbench_version": "0.16.1",
+    "flopscope_version": "0.12.1"
+  },
+  "observed": {
+    "flopscope_client_version": "0.12.1",
+    "flopscope_server_version": "0.12.1",
+    "numpy_version": "2.2.6",
+    "python_version": "3.10.21",
+    "participant_shim_version": "0.1.0",
+    "participant_python_version": "3.10.21"
+  }
+}

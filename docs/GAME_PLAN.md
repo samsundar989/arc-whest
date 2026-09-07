@@ -1,5 +1,34 @@
 # GAME_PLAN.md — Phase-2 implementation plan and target architecture
 
+> ## SUPERSEDED IN PART, 2026-09-05 — read `docs/PHASE2_STRATEGY_2026-09-05.md` first
+>
+> **`docs/PHASE2_STRATEGY_2026-09-05.md` (rev 10) is the strategy canon.** Where
+> this file and the 2026-09-02 amendment below differ from it, IT wins. The
+> amendment's closed-lane table is amended again here, on the Sep-5 board
+> telemetry:
+>
+> | lane | amendment (2026-09-02) said | rev 10 says |
+> |---|---|---|
+> | **W-EFF** (exact factorized K3) | CLOSED / not needed | **OPEN, and it is nominee A's chassis.** Closed for pricing at 1.07 B against a `<= 0.35 B` screen; that screen asked "can it win at the floor" and the objective is score |
+> | **Strassen** (batched leaf spelling) | CLOSED / not needed | **OPEN.** Not needed for a 0.077 B flow; the whole game for a 1.07 B chain. Must be re-spelled as BATCHED leaf matmuls -- the repo's L=4 recursion issues ~1.1M array ops/MLP |
+> | **aliased-operand einsum discounts / symmetry tagging** | CLOSED / bills the identical figure | **OPEN, at ~1.1x, not more,** until a new measurement says otherwise |
+> | **dead/cold-column pruning** | not considered | **OPEN.** marius measured 14% from the cold path alone |
+> | **O1** (fitted per-layer renormalisation of the K3 chain) | dropped in the Aug-31 pivot | **OPEN, and it is the cheapest accuracy lever.** Never run |
+> | **AUGMENT** (degree-3 vector + degree-4 scalar) | DEPRIORITISED on op count | **OPEN.** Op count is not binding -- the leaders run ~10x our ops |
+> | **Edgeworth-4 readout + diagonal kappa_4** | not considered | **OPEN** |
+> | **kappa_4 response closure** (Puffi SSC) | not considered | **OPEN, and the most evidence-backed accuracy layer** (-77% at 256x32 for +34% named ops, public PDF) |
+> | **learned corrector on K3-CHAIN features** | closed on WP9/WP10 | **OPEN in that form only.** WP9 fit state targets on a K2 chain; chain features with an end-to-end objective were never tried |
+>
+> Everything else in the amendment's closed list STAYS CLOSED: the carrier lane,
+> the five column-weight selectors, Sigma's dominant range as a selector,
+> sampling as a primary estimator, naive rank caps, per-layer scalar calibration
+> of K2, QMC rate work, and any wall-time game.
+>
+> Two assumptions the amendment rested on are retired: that the 0.1 multiplier
+> floor must be hit (no top-12 entry is at it), and that offline learned
+> correctors cannot close the gap (only ever tested on the wrong chain with the
+> wrong target).
+
 > ## AMENDMENT, 2026-09-02 — read this before anything below it
 >
 > **This plan is dated 2026-08-31 and four slices have run since (WP13, WP14,

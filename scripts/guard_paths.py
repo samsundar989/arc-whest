@@ -59,6 +59,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from dataclasses import dataclass
@@ -155,6 +156,30 @@ VAULT_TOUCH_REASON = (
     "measured, cancel."
 )
 
+def _slot_ledger_line() -> str:
+    """Today's slot usage, read from `experiments/submissions.jsonl`.
+
+    Ten submissions per team per UTC day. On 2026-09-05 seven of them went to
+    one defect and the running count lived only in a chat transcript -- state
+    that `AGENTS.md` says must live in the repository, because the driving agent
+    changes and chat history does not transfer. Putting it in the confirmation
+    prompt puts it in front of whoever approves, at the moment they approve.
+
+    Never raises and never blocks: a guard that can fail closed on a missing
+    optional file is a worse guard than one that says it does not know.
+    """
+    try:
+        here = os.path.dirname(os.path.abspath(__file__))
+        local_sim = os.path.join(os.path.dirname(here), "local_sim")
+        if local_sim not in sys.path:
+            sys.path.append(local_sim)
+        import submission_ledger  # noqa: PLC0415
+        return "  " + submission_ledger.status_line()
+    except Exception as exc:  # pragma: no cover - advisory only
+        return (f"  SLOT LEDGER unavailable ({type(exc).__name__}); slot usage "
+                f"is UNKNOWN, not zero.")
+
+
 CONFIRM_COMMANDS = [
     ("submit", re.compile(r"whest\s+submit", re.IGNORECASE), SUBMIT_REASON),
     ("vault-touch", re.compile(r"vault\.py\s+evaluate", re.IGNORECASE), VAULT_TOUCH_REASON),
@@ -213,6 +238,8 @@ def check_command(command: str) -> Optional[Decision]:
 
     for rule, pattern, reason in CONFIRM_COMMANDS:
         if pattern.search(command):
+            if rule == "submit":
+                reason = reason + chr(10) + _slot_ledger_line()
             return Decision(ASK, reason, rule)
     return None
 

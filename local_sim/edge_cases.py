@@ -54,7 +54,36 @@ for p in (_HERE, _ROOT):
     if p not in sys.path:
         sys.path.insert(0, p)
 
+#: THE WORLD THIS SUITE RUNS IN. Until 2026-09-05 all three were literals
+#: scattered through `main()`: Phase 1's 256x32 shape, Phase 1's budget, and raw
+#: NumPy float32 weights. The suite therefore graded every candidate -- including
+#: Phase-2 ones -- in a world the competition stopped grading on 2026-08-21, and
+#: in a dtype the grading server has never handed anyone. `--phase2` and
+#: `--real-flopscope` move it into the live world; the defaults are unchanged, so
+#: every historical invocation still means exactly what it meant.
 BUDGET = 272_000_000_000
+
+#: The PRIMARY shape. The deliberately odd shapes elsewhere in the suite (width
+#: 64, depth 2, non-square sweeps) are shape-genericity tests and stay literal.
+PD, PW = 32, 256
+
+#: Weight representation. "numpy" is the historical world: raw np.float32.
+#: "flopscope" is the grader's: metered arrays in `WEIGHTS_MODE`. Operations
+#: invoked as METHODS ON A WEIGHT are billed on the grader and free on bare
+#: NumPy, and the dtype decides which branch of a `x.dtype == ...` guard runs --
+#: which is how a defect reached five submission slots on 2026-09-05.
+WEIGHTS_BACKEND = "numpy"
+WEIGHTS_MODE = "f64_readonly"
+
+
+def _weights(arrays):
+    """Build the estimator's weight list under the configured world."""
+    if WEIGHTS_BACKEND == "numpy":
+        return [np.asarray(w, dtype=np.float32) for w in arrays]
+    import flopscope.numpy as fnp
+    from lifecycle_eval import build_weights
+    return build_weights([np.asarray(w, dtype=np.float32) for w in arrays],
+                         WEIGHTS_MODE, fnp)
 
 
 def load(path="estimator.py"):
@@ -68,8 +97,9 @@ def load(path="estimator.py"):
 
 class MLP:
     def __init__(self, weights, seed=0):
-        self.weights = [np.asarray(w, dtype=np.float32) for w in weights]
-        self.width = self.weights[0].shape[1]
+        self.weights = _weights(weights)
+        self.width = int(np.asarray(self.weights[0]).shape[1])
+        self.depth = len(self.weights)
         self.seed = seed
 
 
@@ -98,8 +128,20 @@ def check(name, est, mlp, budget=BUDGET, expect_depth=None, rerun=True):
     if not np.isfinite(a).all():
         print(f"  {name:<34} NON-FINITE ({np.sum(~np.isfinite(a))} entries)")
         ok = False
-    if (a < 0).any():
-        print(f"  {name:<34} NEGATIVE MEANS (min {a.min():.3e}) — post-ReLU means cannot be < 0")
+    # A post-ReLU mean cannot be negative as a QUANTITY, but a float64 sum that
+    # should land on a near-zero neuron can round below it, and the wider the
+    # layer the more terms there are to round. At Phase 1's width 256 the
+    # shipped file never crossed zero, so an absolute test looked exact; at the
+    # live width 1024 it does, by ~1e-16 relative to row means of ~0.46, and the
+    # absolute test then fails 17 of 30 invariants on a correct candidate.
+    # This is the SAME bar `certify_candidate.py` section 5 already reasoned to
+    # from the same measurement -- scaled to the row, four orders above the
+    # observed rounding and many orders below any structural sign error. The
+    # Phase-1 default is unaffected: it never produced a negative value at all.
+    neg_tol = -1e-12 * max(1.0, float(np.max(np.abs(a))))
+    if (a < neg_tol).any():
+        print(f"  {name:<34} NEGATIVE MEANS (min {a.min():.3e}, bar "
+              f"{neg_tol:.1e}) — post-ReLU means cannot be < 0")
         ok = False
     ident = True
     if rerun and ok:
@@ -115,11 +157,42 @@ def check(name, est, mlp, budget=BUDGET, expect_depth=None, rerun=True):
 
 
 def main():
-    est_mod = load(sys.argv[1] if len(sys.argv) > 1 else "estimator.py")
+    global BUDGET, PD, PW, WEIGHTS_BACKEND, WEIGHTS_MODE
+    import argparse
+    ap = argparse.ArgumentParser(
+        description="The invariant suite. Defaults reproduce the historical "
+                    "Phase-1 world exactly; --phase2 and --real-flopscope move "
+                    "it into the world the competition actually grades.")
+    ap.add_argument("candidate", nargs="?", default="estimator.py")
+    ap.add_argument("--phase2", action="store_true",
+                    help="run at the LIVE shape (1024x16) and budget (2**41) "
+                         "instead of Phase 1's 256x32 / 2.72e11")
+    ap.add_argument("--real-flopscope", action="store_true",
+                    help="build weights as flopscope-metered arrays in the "
+                         "grader's dtype, not raw NumPy float32")
+    ap.add_argument("--weights-mode", default="f64_readonly",
+                    choices=("f32", "f64", "f64_readonly", "f64_listconstructed"),
+                    help="which grader-twin arm --real-flopscope uses")
+    a = ap.parse_args()
+
+    if a.phase2:
+        import official_config as _oc
+        PD, PW = _oc.LIVE.depth, _oc.LIVE.width
+        BUDGET = _oc.LIVE.flop_budget
+    if a.real_flopscope:
+        WEIGHTS_BACKEND = "flopscope"
+        WEIGHTS_MODE = a.weights_mode
+
+    print(f"world: {PW}x{PD}  B = {BUDGET:,}  weights = {WEIGHTS_BACKEND}"
+          + (f"/{WEIGHTS_MODE}" if WEIGHTS_BACKEND != "numpy" else " float32")
+          + ("   [LIVE PHASE-2 WORLD]" if a.phase2 and a.real_flopscope
+             else "   [HISTORICAL DEFAULT -- not the graded world]"))
+
+    est_mod = load(a.candidate)
     est = est_mod.Estimator()
 
     class Ctx:
-        width, depth, flop_budget, seed = 256, 32, BUDGET, 0
+        width, depth, flop_budget, seed = PW, PD, BUDGET, 0
 
     est.setup(Ctx())
     # A BANNER, not a check. It used to read `est_mod._PRUNE_TAU` directly, and
@@ -138,27 +211,27 @@ def main():
     results = []
 
     print("1. NORMAL CASE")
-    results.append(check("he 256x32", est, MLP(he(32, 256, 1), seed=7)))
+    results.append(check(f"he {PW}x{PD}", est, MLP(he(PD, PW, 1), seed=7)))
 
     print("\n2. DEGENERATE PRUNING (whole layers pushed below tau)")
     # A strongly negative-biased layer drives the next layer's alpha very low.
     for s, label in ((0.02, "layer 5 scaled 0.02"), (0.001, "layer 5 scaled 0.001")):
-        results.append(check(label, est, MLP(he(32, 256, 2, {5: s}), seed=11)))
-    w = he(32, 256, 3)
+        results.append(check(label, est, MLP(he(PD, PW, 2, {5: s}), seed=11)))
+    w = he(PD, PW, 3)
     w[7] = (w[7] * np.float32(0.0)).copy()  # an exactly zero layer: sigma -> 0
     results.append(check("layer 7 identically zero", est, MLP(w, seed=13)))
 
     print("\n3. EXTREME DYNAMIC RANGE")
     for s, label in ((100.0, "layer 12 scaled 100x"), (1e-3, "layer 12 scaled 1e-3"),
                      (1e4, "layer 12 scaled 1e4")):
-        results.append(check(label, est, MLP(he(32, 256, 4, {12: s}), seed=17)))
-    w = he(32, 256, 5)
+        results.append(check(label, est, MLP(he(PD, PW, 4, {12: s}), seed=17)))
+    w = he(PD, PW, 5)
     w = w.copy()
-    w[3] = w[3] + np.float32(2.0) * np.float32(np.sqrt(2.0 / 256))  # strong positive bias
+    w[3] = w[3] + np.float32(2.0) * np.float32(np.sqrt(2.0 / PW))  # strong positive bias
     results.append(check("layer 3 mean-shifted (all on)", est, MLP(w, seed=19)))
 
     print("\n4. SEED EXTREMES (the rng contract)")
-    base = he(32, 256, 6)
+    base = he(PD, PW, 6)
     for sd in (0, 1, 2**31 - 1, 2**63 - 1, 12345678901234567890 % (2**64)):
         results.append(check(f"seed {sd}", est, MLP(base, seed=sd)))
 
@@ -167,13 +240,13 @@ def main():
         results.append(check(f"depth {d} x width {wd}", est, MLP(he(d, wd, 8), seed=23)))
 
     print("\n6. BUDGET EDGES (the analytic fallback path)")
-    m = MLP(he(32, 256, 9), seed=29)
+    m = MLP(he(PD, PW, 9), seed=29)
     for b, label in ((0, "budget 0"), (1, "budget 1"), (10**7, "budget 1e7 (below min N)"),
                      (10**9, "budget 1e9"), (10 * BUDGET, "budget 10x")):
         results.append(check(label, est, m, budget=b))
 
     print("\n7. GRADER-ARRAY IMMUTABILITY (weights must be untouched)")
-    m = MLP(he(32, 256, 10), seed=31)
+    m = MLP(he(PD, PW, 10), seed=31)
     before = [w.copy() for w in m.weights]
     est.predict(m, BUDGET)
     same = all(np.array_equal(a, b) for a, b in zip(before, m.weights))
@@ -209,7 +282,7 @@ def inv_layer1(est):
     """
     print("\n8. LAYER-1 CLOSED FORM  (exact: ||W1[:,j]|| / sqrt(2*pi))")
     ok = True
-    for depth, width, seed in ((32, 256, 30_806_006_001), (8, 128, 30_806_006_002),
+    for depth, width, seed in ((PD, PW, 30_806_006_001), (8, 128, 30_806_006_002),
                                (4, 64, 30_806_006_003), (2, 256, 30_806_006_004)):
         m = canon(depth, width, seed)
         pred = np.asarray(est.predict(m, BUDGET), dtype=np.float64)
@@ -342,10 +415,22 @@ def inv_permutation(est):
           % (DRIFT_SHARE * 100, bar, denom_src))
     rng = np.random.default_rng(30_806_006_100)
     ok = True
-    for depth, width, seed, k in ((32, 256, 30_806_006_011, 7),
-                                  (32, 256, 30_806_006_012, 20),
+    # The layer indices 7/20/30 were chosen for Phase 1's depth 32 and are kept
+    # EXACTLY there, so the historical default is bit-for-bit what it was. At any
+    # other depth they are scaled proportionally and clamped to `depth - 2` (the
+    # permutation renames layer k's outputs and layer k+1's inputs, so k+1 must
+    # exist): at Phase 2's depth 16 that is 4/10/14, still early/middle/last.
+    # Before this, `--phase2` died with an IndexError at k = 20.
+    def _k_for(depth_, k_):
+        if depth_ == 32:
+            return k_
+        return max(1, min(depth_ - 2, int(round(k_ * depth_ / 32.0))))
+
+    for depth, width, seed, k in ((PD, PW, 30_806_006_011, 7),
+                                  (PD, PW, 30_806_006_012, 20),
                                   (8, 128, 30_806_006_013, 3),
-                                  (32, 256, 30_806_006_014, 30)):
+                                  (PD, PW, 30_806_006_014, 30)):
+        k = _k_for(depth, k)
         m = canon(depth, width, seed)
         base = np.asarray(est.predict(m, BUDGET), dtype=np.float64)
 
@@ -373,7 +458,7 @@ def inv_permutation(est):
 def inv_budget_monotone(est, est_mod):
     """More budget must never buy fewer samples, and no rung may throw."""
     print("\n10. BUDGET MONOTONICITY  (the failsafe ladder)")
-    m = canon(32, 256, 30_806_006_021)
+    m = canon(PD, PW, 30_806_006_021)
     ladder = [0, 1, 10**6, 10**7, 10**8, 10**9, 10**10, 27_200_000_000,
               272_000_000_000, 2_720_000_000_000]
     # TWO invariants live here, and only one of them is universal:
@@ -396,9 +481,15 @@ def inv_budget_monotone(est, est_mod):
         log2n = None
         try:
             if has_ladder:
-                log2n = est._log2_samples(256, 32, b)
+                log2n = est._log2_samples(PW, PD, b)
             out = np.asarray(est.predict(m, b), dtype=np.float64)
-            fin = bool(np.isfinite(out).all()) and out.shape == (32, 256) and (out >= 0).all()
+            # Same scaled non-negativity bar as `check()` above and as
+            # `certify_candidate.py` section 5: an absolute `>= 0` is exact at
+            # width 256 and wrong at width 1024, where a float64 sum on a
+            # near-zero neuron rounds to ~-1e-16 against row means of ~0.46.
+            _tol = -1e-12 * max(1.0, float(np.max(np.abs(out))))
+            fin = (bool(np.isfinite(out).all()) and out.shape == (PD, PW)
+                   and bool((out >= _tol).all()))
         except Exception as e:
             print(f"  budget {b:>16,}  RAISED {type(e).__name__}: {e}")
             ok = False
@@ -427,7 +518,7 @@ def inv_determinism(est, est_mod):
     """Three bit-identical runs, plus a fresh Estimator instance."""
     print("\n11. DETERMINISM  (3x bit-identity + fresh instance)")
     ok = True
-    for depth, width, seed in ((32, 256, 30_806_006_031), (8, 128, 30_806_006_032)):
+    for depth, width, seed in ((PD, PW, 30_806_006_031), (8, 128, 30_806_006_032)):
         m = canon(depth, width, seed)
         runs = [np.asarray(est.predict(m, BUDGET), dtype=np.float64) for _ in range(3)]
         same3 = all(np.array_equal(runs[0], r) for r in runs[1:])

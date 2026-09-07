@@ -9,7 +9,7 @@ if [ ! -x "$VENV/bin/python" ]; then
   uv venv "$VENV" --python 3.12 2>&1 | tail -3
 fi
 uv pip install --quiet --python "$VENV/bin/python" \
-    'whestbench==0.16.0' 'flopscope==0.12.0' 2>&1 | tail -5
+    'whestbench==0.16.1' 'flopscope==0.12.1' 2>&1 | tail -5
 "$VENV/bin/python" - <<'PY'
 import importlib.metadata as md
 import resource

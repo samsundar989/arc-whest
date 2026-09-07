@@ -456,6 +456,96 @@ def validate_predictions(predictions, *, depth: int, width: int) -> np.ndarray:
 # --------------------------------------------------------------------------- #
 
 
+# ---------------------------------------------------------------- twin ----
+#: THE GRADER-TWIN ARM.
+#:
+#: On 2026-09-05 seven submission slots were spent on one keyword. The candidate
+#: opened with
+#:
+#:     w = [x if x.dtype == dtype else x.astype(dtype, copy=False)
+#:          for x in mlp.weights]
+#:
+#: and every local weight producer in this repository -- `canonical_mint`,
+#: `harness.py`, `edge_cases.py`, `fresh_eval.py`, this function, and
+#: `certify_candidate.py` -- built **float32** arrays. `x.dtype == dtype`
+#: short-circuited locally, the cast never ran, and the branch that the grader
+#: takes (its weights are float64) was never once exercised offline. No local
+#: gate could have caught it, because no local gate built the grader's dtype.
+#:
+#: So the dtype is now an ARM, not an assumption, and `f64_readonly` is the
+#: default for a candidate. The four modes:
+#:
+#:   f32                 the historical local world (kept, so the arm's own
+#:                       delta is measurable rather than asserted)
+#:   f64                 what the grader hands over: float64 flopscope arrays
+#:   f64_readonly        f64 with `setflags(write=False)` -- the grader's arrays
+#:                       are immutable, and an in-place write is a crash there
+#:                       and a silent success here
+#:   f64_listconstructed f64 rebuilt through `.tolist()`, so the array carries
+#:                       none of the base/stride/ownership metadata a numpy view
+#:                       carries; catches code that survives only because its
+#:                       input happened to be a well-behaved contiguous view
+#:
+#: `f64*` modes are the deployment truth. `f32` is a control.
+WEIGHTS_MODES: Tuple[str, ...] = (
+    "f32", "f64", "f64_readonly", "f64_listconstructed",
+)
+
+#: What a candidate is certified under unless a caller deliberately says otherwise.
+DEFAULT_WEIGHTS_MODE = "f64_readonly"
+
+
+def build_weights(w_np, mode: str, fnp):
+    """The grader's weight objects, in one of `WEIGHTS_MODES`.
+
+    `w_np` is the mint's list of float32 numpy arrays. The returned list is what
+    `whestbench.domain.MLP.from_row` would hand a candidate under `mode` --
+    flopscope-backed in every mode, because operations invoked as METHODS ON A
+    WEIGHT are metered on the grader and free on bare numpy (that difference was
+    33.5M of the 37.8M FLOP shortfall the anchor closed on 2026-08-24).
+    """
+    if mode not in WEIGHTS_MODES:
+        raise ValueError(f"unknown weights_mode {mode!r}; expected one of "
+                         f"{list(WEIGHTS_MODES)}")
+    out = []
+    for x in w_np:
+        if mode == "f32":
+            a = fnp.array(np.asarray(x, dtype=np.float32))
+        elif mode == "f64":
+            a = fnp.array(np.asarray(x).astype(np.float64))
+        elif mode == "f64_readonly":
+            a = fnp.array(np.asarray(x).astype(np.float64))
+            _setflags_readonly(a)
+        elif mode == "f64_listconstructed":
+            a = fnp.array(np.asarray(x).astype(np.float64).tolist())
+        out.append(a)
+    return out
+
+
+def _setflags_readonly(a) -> bool:
+    """Mark a flopscope-backed array non-writeable, whatever it wraps.
+
+    flopscope arrays are wrappers, not ndarray subclasses in every version, so
+    `setflags` may live on the wrapper, on `.array`, or on `._array`. Returns
+    whether the flag actually took -- a caller that silently believed it did
+    would be running the f64 arm under a different name.
+    """
+    for obj in (a, getattr(a, "array", None), getattr(a, "_array", None),
+                getattr(a, "data", None)):
+        if obj is None:
+            continue
+        try:
+            obj.setflags(write=False)
+        except Exception:
+            continue
+        try:
+            if not obj.flags.writeable:
+                return True
+        except Exception:
+            return True
+    return False
+
+
 def evaluate(
     candidate: str,
     seeds: Sequence[int],
@@ -466,6 +556,7 @@ def evaluate(
     mint=None,
     progress_every: int = 0,
     on_setup_failure: str = "raise",
+    weights_mode: str = DEFAULT_WEIGHTS_MODE,
     _lifecycle: str = "grader",
 ) -> Tuple[List[EvidenceRow], Dict[str, Any]]:
     """Run `candidate` over `seeds` under the GRADER's lifecycle.
@@ -474,10 +565,18 @@ def evaluate(
     `mint` defaults to `mint_provenance.canonical_mint`, proven bit-identical to
     the grader's generator (100/100, `docs/VALIDATION.md` section 1).
 
+    `weights_mode` selects the GRADER-TWIN ARM (`WEIGHTS_MODES`); it defaults to
+    `f64_readonly`, which is what the grading server actually hands a candidate.
+    Passing `"f32"` reproduces the historical local world and is a control, not
+    evidence about deployment.
+
     `_lifecycle` exists ONLY so the regression test can drive the historical
     `"per_mlp_no_setup"` path (vault.py:282 / coverage_lab.py:226) through the
     same code and show the difference. Never use it to produce evidence.
     """
+    if weights_mode not in WEIGHTS_MODES:
+        raise ValueError(f"unknown weights_mode {weights_mode!r}; expected one "
+                         f"of {list(WEIGHTS_MODES)}")
     flops = _require_real_flopscope()
     fnp = _require_real_fnp()
     try:
@@ -557,7 +656,7 @@ def evaluate(
         # Built OUTSIDE the BudgetContext below, because `from_row` runs during
         # dataset load on the grader, so construction itself is free there too.
         mlp = harness.MLP(
-            weights=[fnp.array(x) for x in w_np],
+            weights=build_weights(w_np, weights_mode, fnp),
             width=spec.width,
             depth=spec.depth,
             seed=est_seed,
@@ -707,6 +806,11 @@ def evaluate(
         "round_tag": spec.round_tag,
         "round_deviations": spec.deviations_from_round(),
         "lifecycle": _lifecycle,
+        #: THE GRADER-TWIN ARM this run used. A number produced under "f32" is a
+        #: number about the historical local world, not about deployment; it must
+        #: never be quoted as a certification result. See WEIGHTS_MODES.
+        "weights_mode": weights_mode,
+        "weights_mode_is_grader_default": weights_mode == DEFAULT_WEIGHTS_MODE,
         "setup_called": _lifecycle == "grader",
         "setup_seconds": setup_s,
         "setup_timeout_s": spec.setup_timeout_s,
@@ -766,12 +870,45 @@ def write_evidence(path: str, rows: Sequence[EvidenceRow], provenance: Dict[str,
     return path
 
 
+def _ops_and_residual_line(rows: Sequence[EvidenceRow]) -> str:
+    """Op count and the PREDICTED GRADED residual, beside the FLOPs.
+
+    Phase 2 caps residual at 0.4 s and fails the MLP above it; it does not price
+    it. This host measures residual ~8x pessimistically and unstably, so the
+    number that decides the outcome is the OP COUNT, which is exact and
+    host-independent, run through the graded law
+    (`official_config.GRADED_RESIDUAL_PROVENANCE`).
+    """
+    try:
+        import official_config as _oc
+    except Exception:
+        if _HERE not in sys.path:
+            sys.path.append(_HERE)
+        import official_config as _oc
+    ops = [float(r.n_ops) for r in rows if np.isfinite(r.n_ops)]
+    if not ops:
+        return "  ops            no operation ledger -- residual is UNPREDICTED"
+    worst = max(ops)
+    pred = _oc.predicted_graded_residual_s(worst)
+    hr = _oc.predicted_graded_residual_headroom(worst)
+    loc = max((r.residual_wall_time_s for r in rows), default=0.0)
+    return (f"  ops worst {worst:,.0f}"
+            f"   PREDICTED graded residual {pred * 1000:.1f} ms"
+            + (f" -> {hr:.2f}x under the cliff" if hr is not None else "")
+            + f"   [gate {_oc.PHASE2_OP_COUNT_GATE:,} ops]"
+            + (f"   (LOCAL residual {loc * 1000:.0f} ms is a RATIO instrument, "
+               f"not headroom)" if loc else ""))
+
+
 def format_suite(rows: Sequence[EvidenceRow], suite: SuiteScore,
                  provenance: Dict[str, Any]) -> str:
     gt = np.array([r.gt_noise for r in rows], dtype=np.float64)
     gt_mean = float(np.nanmean(gt)) if np.any(np.isfinite(gt)) else float("nan")
     lines = [
         f"candidate      {provenance['candidate']}  sha256 {provenance['candidate_sha256'][:16]}...",
+        f"weights arm    {provenance.get('weights_mode', '?')}"
+        + ("   (GRADER TWIN)" if provenance.get('weights_mode_is_grader_default')
+           else "   <-- NOT the grader's dtype; this is a control, not evidence"),
         f"lifecycle      {provenance['lifecycle']}   setup_called={provenance['setup_called']}"
         f"   setup {provenance['setup_seconds'] * 1e3:.1f} ms"
         f" / {provenance['setup_timeout_s'] * 1e3:.0f} ms allowed",
@@ -782,6 +919,7 @@ def format_suite(rows: Sequence[EvidenceRow], suite: SuiteScore,
         + (f"   GT noise {gt_mean:.3e} = {gt_mean / suite.mean_mse * 100:.2f}% of it"
            if np.isfinite(gt_mean) and suite.mean_mse else "   GT noise not supplied"),
         f"  multiplier mean {suite.mean_multiplier:.5f}   failures {suite.n_failed}/{suite.n}",
+        _ops_and_residual_line(rows),
         f"  worst {suite.worst:.4e}   best {suite.best:.4e}   "
         f"top-1 tail share {suite.tail_share(1) * 100:.2f}%",
         f"  rows_hash {provenance['rows_hash'][:32]}...",

@@ -1,0 +1,4 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+whestbench: downloading 'mini' split from hf://aicrowd/arc-whestbench-public-2026@v2-phase2
+Fetching Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+100 of 100 MLP(s) raised during predict; rerun with --debug for tracebacks. Use --fail-fast to stop on first error.

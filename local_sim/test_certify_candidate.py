@@ -239,7 +239,59 @@ register(
     "invariant suite passes on THIS candidate", "3")
 
 
-def _certify(cand, tmp_json, timeout=2400, extra=()):
+# ---- M11/M12: THE GRADER-TWIN ARM (section 5b) -----------------------------
+# On 2026-09-05 seven submission slots went to a candidate that opened with
+#
+#     w = [x if x.dtype == dtype else x.astype(dtype, copy=False)
+#          for x in mlp.weights]
+#
+# Every local weight producer in this repository built float32, so the `if`
+# short-circuited, the `else` branch NEVER RAN offline, and the grader -- whose
+# weights are float64 -- took a path no gate had ever executed. Section 5b now
+# runs the candidate under all four weight dtypes.
+#
+# What these two mutants DO and DO NOT prove, stated plainly because the
+# distinction is the whole value of the arm:
+#
+#   They prove the arm EXECUTES the dtype-guarded branch and reports both ways
+#   it can go wrong -- raising, and silently answering differently.
+#
+#   They do NOT reproduce submission 329887's own crash. `copy=False` behaves
+#   identically to `copy=True` in-process on a flopscope float64 array (measured
+#   2026-09-05: both return a writeable float32 FlopscopeArray, and both bill
+#   2 FLOP/element), and canary4's own source comment records the same negative
+#   result under `--runner server`. That crash remains unreproduced offline; the
+#   arm's claim is narrower and true -- a candidate whose BEHAVIOUR depends on
+#   the weight dtype can no longer reach a submission slot unexercised.
+#
+# Numbered M11/M12 because M9 (over budget) and M10 (wrong layer 1) were already
+# taken; the handoff that requested this called it "M9".
+register(
+    "M11", "a dtype-guarded branch that RAISES on the grader's float64 weights",
+    lambda tmp: _wrap(
+        tmp, "cand_m11.py", "RAISES ONLY ON THE GRADER'S DTYPE",
+        pre_body=_indent([
+            "import numpy as _np",
+            "if any(_np.asarray(x).dtype != _np.float32 for x in mlp.weights):",
+            "    raise RuntimeError('deliberate: float64 weights take this path')",
+        ])),
+    "the f64 arm raised nothing", "5b")
+
+register(
+    "M12", "a dtype-guarded branch that silently ANSWERS DIFFERENTLY on float64",
+    lambda tmp: _wrap(
+        tmp, "cand_m12.py", "WRONG ONLY ON THE GRADER'S DTYPE",
+        pre_body=_indent([
+            "import numpy as _np",
+            "self._twin_scale = 1.0",
+            "if any(_np.asarray(x).dtype != _np.float32 for x in mlp.weights):",
+            "    self._twin_scale = 1.01",
+        ]),
+        post_body="out = out * self._twin_scale"),
+    "agrees with the f32 control", "5b")
+
+
+def _certify(cand, tmp_json, timeout=7200, extra=()):
     argv = [sys.executable, os.path.join(_HERE, "certify_candidate.py"),
             "--candidate", cand, "--skip-smoke", "--quick",
             "--json", tmp_json] + list(extra)

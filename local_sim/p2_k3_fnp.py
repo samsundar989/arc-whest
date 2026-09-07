@@ -545,11 +545,50 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
         ones_n = fnp.ones(n, dtype=dtype)
     mu, cov, M, c4 = state["mu"], state["cov"], state["M"], state["c4"]
 
+    # ---- THE FULL-K3 SWITCH (2026-09-05) -----------------------------------
+    # `state["lins"]` present => the tower is carried EXACTLY, as a list of
+    # `p2_weff.Lineage` objects (one per birth layer, 2n columns each), instead
+    # of being collapsed to a rank-n `(M, I, I)` every layer. Absent => the
+    # regenerating flow this function has always been, byte for byte: nothing
+    # below reads `lins` on that path, and `--collapse-equivalence` is the
+    # standing proof that the regen output is unchanged.
+    #
+    # The full tower changes exactly TWO things and nothing else:
+    #   * where the incoming `(3,)` and `(2,1)` repeated slices come from --
+    #     `dslice_weff` over the advanced lineages rather than `(P, Q, Q)`;
+    #   * what the layer hands on -- the wick-scaled advanced lineages plus the
+    #     two blocks born here, rather than `diag(S3) + 3 S21^T`.
+    # Every pK term, every wick coefficient and the whole `pK -> K` table are
+    # literally the same code, which is why this is an amendment and not a port.
+    #
+    # It also forces `regen_mode="sub"`. Upstream subtracts `rep(pK_111)` from
+    # the stored DS part precisely because `pK_111` is added back as its own
+    # factors; `"nosub"` is correct ONLY because the regeneration hook's collapse
+    # undoes that subtraction (CONTRACT WP16). With no collapse the subtraction
+    # is real, and skipping it double-counts the whole incoming tower.
+    lins = state.get("lins")
+    full = lins is not None
+    if full:
+        if regen_mode != "sub":
+            regen_mode = "sub"
+        from p2_weff import (Lineage, contract_W_weff, contract_wick_weff,
+                             dslice_weff)
+
     # ---- linear step -------------------------------------------------------
     mu_pre = audit.check("mu_pre", W.T @ mu)
     cov_pre = audit.check("cov_pre", W.T @ cov @ W)          # 2 matmuls
-    P = audit.check("P", W.T @ M)                            # 1 matmul
-    Q = W.T                                                  # the identity legs
+    if full:
+        # `contract_W` on every carried lineage. `W.T` is the operator, exactly
+        # as `P = W.T @ M` and `Q = W.T` are below: upstream applies the same
+        # matrix to every mode, which is the mode-equality W-EFF exploits.
+        # Streamed one lineage at a time so the peak holds the advanced list and
+        # not also the incoming one.
+        WT = W.T
+        adv = [contract_W_weff(fnp, WT, L) for L in lins]
+        P = Q = None
+    else:
+        P = audit.check("P", W.T @ M)                        # 1 matmul
+        Q = W.T                                              # the identity legs
     # `set_metric = mlp.init_scale[l]`: the average-case metric E[W W^T].
     # 2.0 AT EVERY LAYER IS CORRECT FOR OUR NETWORKS AND NOT FOR UPSTREAM'S.
     # Upstream's `init_kind='he'` sets `w_var[0] = 1.0` and `w_var[1:] = 2.0`;
@@ -579,8 +618,18 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
     # slice's TWO matmuls, `C11`, `D22`, twenty-two of the twenty-five pK terms,
     # six of the seven `pK -> K` slices, `cov_out`, `c4_out` and the rebuild.
     # `last_layer` previously skipped only the rebuild, worth 0.001 of a matmul.
-    PQ = P * Q
-    D3 = audit.check("D3", (PQ * Q).sum(axis=1))
+    if full:
+        PQ = None
+        # An EMPTY tower is layer 0: the input kappa_3 is identically zero, so
+        # `dslice_weff` has nothing to accumulate and returns None. The regen
+        # flow spends three (n, n) matmuls on a zero `M` here and its own
+        # docstring notes that layer 0 is "not cheaper, it is dearer"; carrying
+        # the tower exactly makes it genuinely cheaper, and this is where.
+        D3 = audit.check("D3", dslice_weff(fnp, adv, n, (3,), dtype) if adv
+                         else fnp.zeros(n, dtype=dtype))
+    else:
+        PQ = P * Q
+        D3 = audit.check("D3", (PQ * Q).sum(axis=1))
     # `fnp.full(n, c4 * ...)` would be one operation instead of two, but `c4`
     # is a metered 0-d array after layer 0 (`K[(4,)].sum()`), and flopscope
     # 0.12 raises `FlopscopeArray reached numpy.copyto` from inside its own
@@ -591,8 +640,15 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
         S = {(1,): mu_pre, (3,): D3, (4,): D4}
     else:
         C11 = audit.check("C11", cov_pre * off_mask)
-        D21 = (2.0 * (PQ @ Q.T) + ((Q * Q) @ P.T)) / 3.0     # 2 matmuls
-        D21 = audit.check("D21", D21 * off_mask)
+        if full:
+            # `dslice_weff` already applies the 2!1!/3! coefficient and the
+            # diagonal kill, so this is the finished slice.
+            D21 = audit.check("D21",
+                              dslice_weff(fnp, adv, n, (2, 1), dtype) if adv
+                              else fnp.zeros((n, n), dtype=dtype))
+        else:
+            D21 = (2.0 * (PQ @ Q.T) + ((Q * Q) @ P.T)) / 3.0  # 2 matmuls
+            D21 = audit.check("D21", D21 * off_mask)
         # K[4] = Sym(c4 (x) metric^(x)2) with a DIAGONAL metric: the (4,) slice
         # is c4 * m^2 and the (2,2) slice is c4 * m^2 / 3 off the diagonal. Both
         # are constant. `outer(ones, ones)` used to be materialised here so the
@@ -722,6 +778,7 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
     # NOTHING reads it -- upstream's subtraction of it from the DS part is undone
     # by adding `pK_111` back into `K_out[3]`, so the regeneration hook rebuilds
     # from the un-subtracted slices. It is then dead work, and skipped.
+    fac1 = fac3 = None
     if regen_mode == "sub" and not last_layer:
         w1, w2 = w[(1, 1)], w[(2, 1)]
         fac1 = audit.check("fac1", w1[:, None] * C11)
@@ -776,6 +833,7 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
         cov_out = M_out = None
         c4_out = 0.0
         S3 = S21 = None
+        lins_out = []
     else:
         cov_out = audit.check("cov_out", fnp.diag(K[(2,)]) + K[(1, 1)])
         # K[3]: REGENERATE -- `from_dstensor` returns (diag(S3) + 3 S21^T, I, I).
@@ -788,7 +846,24 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
         else:
             raise ValueError(
                 f"regen_mode must be 'sub' or 'nosub', got {regen_mode!r}")
-        M_out = audit.check("M_out", fnp.diag(S3) + 3.0 * S21.T)
+        if full:
+            # NO COLLAPSE. The two blocks born here share `M == I`, so W-EFF
+            # carries them as ONE lineage with four (n, n) matrices where a
+            # dense spelling would carry six -- the whole of the W-EFF saving.
+            #   D block: from_dstensor(DS part)  -> (A_D, I, I)
+            #   L block: the two-leg block       -> (A_L, 3I, C_L)
+            A_D = audit.check("A_D", fnp.diag(S3) + 3.0 * S21.T)
+            born = Lineage(A_D=A_D, A_L=fac1, C_L=fac3, M=None,
+                           m_is_identity=True, has_D=True, has_L=True)
+            # The aged tower carries THIS layer's wick forward. `p111_3 =
+            # w1^3 D3` and `p111_21 = w1_i^2 w1_j D21` above are the same
+            # scaling read off the slices, which is why the two agree.
+            wick1 = w[(1, 1)]
+            lins_out = [contract_wick_weff(fnp, wick1, L) for L in adv]
+            lins_out.append(born)
+            M_out = A_D
+        else:
+            M_out = audit.check("M_out", fnp.diag(S3) + 3.0 * S21.T)
         # K[4]: DS_harmonic_proj(., r_out=2). Both surviving Laplacian
         # multigraphs cap every leg, so the core really is a scalar.
         lap = table["lap2_d4"]
@@ -808,7 +883,10 @@ def k3_layer(fnp, flops, W, state, table, dtype, off_mask, audit,
                      "S3": S3, "S21": S21, "M": M_out, "c4": c4_out,
                      "p111_3": p111_3, "p111_21": p111_21})
 
-    return {"mu": mu_out, "cov": cov_out, "M": M_out, "c4": c4_out}
+    out_state = {"mu": mu_out, "cov": cov_out, "M": M_out, "c4": c4_out}
+    if full:
+        out_state["lins"] = lins_out
+    return out_state
 
 
 def _relu_cumulants_quad(mu, sig, deg=300):
@@ -1232,7 +1310,8 @@ def cmd_layer_k2_degeneracy(a) -> int:
 
 
 def k3_flow(fnp, flops, weights, table, dtype, audit, depth=None,
-            regen_mode="nosub", probe=None, wick_const=None):
+            regen_mode="nosub", probe=None, wick_const=None,
+            full=False, collapse=False, generations=None, last_generations=None):
     """The WHOLE regenerating flow: `depth` layers, one program, one context.
 
     Input cumulants for `x ~ N(0, I)`: `K[1] = 0`, `K[2] = I`, `K[3] = 0`,
@@ -1271,13 +1350,60 @@ def k3_flow(fnp, flops, weights, table, dtype, audit, depth=None,
              "cov": fnp.eye(n, dtype=dtype),
              "M": fnp.zeros((n, n), dtype=dtype),
              "c4": 0.0}
+    # `full=True` carries the tower EXACTLY (rank 2nl at layer l) instead of
+    # collapsing it to rank n every layer. The input kappa_3 is zero, so the
+    # list starts EMPTY -- not with a zero lineage, which would bill 2n columns
+    # of arithmetic on a tensor that is identically zero.
+    if full:
+        state["lins"] = []
+        from p2_weff import dslice_weff
+    # `collapse=True` is the EQUIVALENCE HARNESS, not an option: it runs the
+    # full-lineage code path and then projects the state back to `(M, I, I)`
+    # after every layer. CONTRACT WP16 established that
+    # `rep(pK_111) + (K_ds3 - rep(pK_111)) == K_ds3`, so this must reproduce
+    # `regen_mode="nosub"` -- which is exactly the check that the lineage
+    # spelling's conventions (operator, wick placement, subtraction) are right,
+    # without needing a torch reference to say so.
+    #
+    # `generations=g` truncates the carried tower to its g YOUNGEST lineages.
+    # `None` is exact. This is the generation-age lever, priced and measured
+    # separately -- never on by default.
     mus = []
     for l in range(depth):
         lp = None if probe is None else (lambda tag, d, _l=l: probe(_l, tag, d))
+        # `last_generations` caps the tower for the FINAL layer only. That layer
+        # reads the `(3,)` slice and nothing else, so it costs 4 matmuls per
+        # lineage instead of 9 -- but at depth 16 that is still 60 of the
+        # tower's 1,022 matmuls (5.9% of B) spent on a term that reaches the
+        # answer only through `pK[(1,)] = ... + (1/6) D3 w(3,1)`. Whether that
+        # term is worth 5.9% of the budget is a MEASUREMENT, and this is the
+        # knob that makes it one.
+        if (full and last_generations is not None and l == depth - 1
+                and state.get("lins") and len(state["lins"]) > last_generations):
+            k = int(last_generations)
+            state["lins"] = state["lins"][len(state["lins"]) - k:] if k else []
         state = k3_layer(fnp, flops, weights[l], state, table, dtype, off_mask,
                          audit, last_layer=(l == depth - 1),
                          regen_mode=regen_mode, probe=lp,
                          wick_const=wick_const, ones_n=ones_n)
+        if full and state.get("lins"):
+            if collapse:
+                # THE HONEST COLLAPSE: read the repeated slices of the WHOLE
+                # carried tower and rebuild `(M, I, I)` from them, which is
+                # exactly what upstream's regeneration hook does. Reading them
+                # through `dslice_weff` rather than reusing the layer's own
+                # `A_D` is deliberate -- it makes the harness exercise the
+                # lineage slicer on freshly born (`M == I`) lineages too, which
+                # the shipped path never does.
+                from p2_weff import Lineage
+                _s3 = dslice_weff(fnp, state["lins"], n, (3,), dtype)
+                _s21 = dslice_weff(fnp, state["lins"], n, (2, 1), dtype)
+                state["M"] = fnp.diag(_s3) + 3.0 * _s21.T
+                state["lins"] = [Lineage(A_D=state["M"], A_L=None, C_L=None,
+                                         M=None, m_is_identity=True,
+                                         has_D=True, has_L=False)]
+            elif generations is not None and len(state["lins"]) > generations:
+                state["lins"] = state["lins"][-int(generations):]
         mus.append(state["mu"])
     return fnp.stack(mus), state
 

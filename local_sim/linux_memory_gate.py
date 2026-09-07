@@ -61,6 +61,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import hashlib
 import os
 import shutil
 import subprocess
@@ -382,10 +383,19 @@ def main() -> int:
           f"B = {a.budget:,}")
 
     runner = find_linux()
+    # sha256 of the exact bytes tested. A path is not an identity: a report keyed
+    # only on `candidate` stays "for this candidate" after the file is edited,
+    # so certify section 9 could read a memory result for code that no longer
+    # exists. Added 2026-09-05; `artifact_version` goes to 2 to say so.
+    _h = hashlib.sha256()
+    with open(cand, "rb") as _fh:
+        for _chunk in iter(lambda: _fh.read(1 << 20), b""):
+            _h.update(_chunk)
     report = {
         "artifact": "linux_memory_gate",
-        "artifact_version": 1,
+        "artifact_version": 2,
         "candidate": os.path.relpath(cand, _ROOT).replace("\\", "/"),
+        "candidate_sha256": _h.hexdigest(),
         "limit_mb": a.limit_mb,
         "width": a.width, "depth": a.depth, "budget": a.budget, "seed": a.seed,
         "host_platform": sys.platform,

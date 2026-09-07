@@ -21,9 +21,29 @@ import sys
 import numpy as np
 
 DATASET = "aicrowd/arc-whestbench-public-2026"
-REVISION = "v1-phase1"
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+def _live_revision() -> str:
+    """The revision of the round CURRENTLY BEING GRADED.
+
+    Until 2026-09-05 this module hard-coded `"v1-phase1"`, which stopped being
+    the live round on 2026-08-21. A default that names a dead round is worse
+    than no default: every caller that omitted `revision=` silently measured
+    Phase 1 at Phase-2 shapes. The single source of truth is
+    `official_config.LIVE.tag`, which `verify()` asserts against the installed
+    package's `budget.CURRENT_ROUND`.
+    """
+    if _HERE not in sys.path:
+        sys.path.append(_HERE)
+    import official_config
+    return official_config.LIVE.tag
+
+
+#: The LIVE round's dataset revision. Resolved once, from the installed package
+#: via official_config -- never a literal.
+REVISION = _live_revision()
 
 
 def _real_whestbench():

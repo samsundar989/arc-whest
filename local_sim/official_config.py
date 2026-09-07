@@ -301,30 +301,147 @@ PHASE2 = OfficialRound(
     note=("Wider and shallower. lambda is 0 and residual is capped at 0.4 s "
           "instead, so C == F and the FLOP budget means what it says."),
     server_flop_offset_per_mlp=2 ** 24,       # 16,777,216 -- the MAXIMUM observed
-    server_flop_offset_observed_range=(2 ** 24 - 32, 2 ** 24),
+    server_flop_offset_observed_range=(0, 2 ** 24),
     server_flop_offset_provenance=(
-        "MEASURED, NOT DERIVED, AND NOT A CONSTANT. Two graded submissions, "
-        "100 MLPs each, every row within a submission identical:\n"
-        "  328662 (v2.6.1): local 137,600,326,656 -> graded 137,617,103,872   "
-        "offset 16,777,216 = 2**24 exactly\n"
-        "  328664 (v2.7)  : local 137,600,359,488 -> graded 137,617,136,672   "
-        "offset 16,777,184 = 2**24 - 32\n"
-        "So the offset is weakly ESTIMATOR-DEPENDENT. This was preregistered on "
-        "2026-09-01 as a bit-identical constant and the preregistered check "
-        "FALSIFIED that reading; the claim was corrected rather than kept. "
-        "Equivalently: the two files differ by 32,832 counted FLOPs locally but "
-        "only 32,800 on the grader -- the server bills the extra calibration "
-        "work 32 FLOPs cheaper than the local meter does. "
-        "`server_flop_offset_per_mlp` therefore carries the MAXIMUM of the two, "
-        "so `graded_flops()` over-estimates rather than under-estimates the "
-        "server bill; that is the safe direction for a floor-margin check and "
-        "the wrong direction for claiming parity. n = 2 submissions, one round, "
-        "one package version, and the variation between them (32 FLOPs) is "
-        "1.9e-9 of the offset and 1.5e-11 of the budget. NO GRADED OPERATION "
-        "LEDGER EXISTS, so none of this is attributed to an operation and none "
-        "of it is a claim of server op-by-op parity. Reports: "
-        "experiments/run_reports/submission_3286{62,64}_*_graded_report.json"),
+        "MEASURED, NOT DERIVED, AND NOT A CONSTANT. FOUR graded submissions, "
+        "100 MLPs each, every row within a submission identical. The LOCAL "
+        "figure is taken under the GRADER-TWIN ARM "
+        "(`lifecycle_eval.build_weights(..., 'f64_readonly')`) with whestbench's "
+        "own in-window `materialise_predictions` included -- i.e. what the local "
+        "meter counts once it is finally handed the dtype the grader hands:\n"
+        "  328662 (v2.6.1, fs 0.12.0): local 137,600,326,656 -> graded "
+        "137,617,103,872   offset 16,777,216 = 2**24 exactly\n"
+        "  328664 (v2.7,   fs 0.12.0): local 137,600,359,488 -> graded "
+        "137,617,136,672   offset 16,777,184 = 2**24 - 32\n"
+        "  329896 (canary4, fs 0.12.1): local 168,669,961,830 -> graded "
+        "168,669,961,830   offset 0 -- EXACT\n"
+        "  330212 (k3_full, fs 0.12.1): local 1,714,587,938,406 -> graded "
+        "1,714,587,938,406   offset 0 -- EXACT, and PREDICTED BY THIS MODEL "
+        "BEFORE SUBMISSION at 10.2x canary4's FLOPs. The cast reading below is "
+        "therefore confirmed out of sample, not merely fitted.\n"
+        "The 0.16.0->0.16.1 / 0.12.0->0.12.1 stack move is NOT the explanation: "
+        "329889 re-graded v2.7's UNCHANGED bytes on 0.16.1/0.12.1 and billed "
+        "137,617,136,672, bit-identical to 328664 on the old stack. What "
+        "separates the rows is how the candidate touches the grader's float64 "
+        "weights. v2.6.1 and v2.7 open with `w.astype(fnp.float64)`, which on "
+        "the grader is a SAME-DTYPE f64 cast; canary4 opens with a real "
+        "f64->f32 cast. The local meter bills both at 2 FLOP/element (measured "
+        "directly 2026-09-05: f64->f32, f32->f64 and f64->f64 all cost 2/elt "
+        "with copy=True; f32->f32 costs 1; `copy=False` on a same-dtype cast "
+        "costs 0 -- the keyword that cost five slots). The residual +2**24 on "
+        "the two same-dtype rows is exactly ONE extra FLOP per weight element "
+        "(16 * 1024**2); the candidate that does a genuine cast shows none. "
+        "That is a MODEL, not a mechanism: no graded operation ledger exists, "
+        "so nothing here is attributed to an operation and nothing here claims "
+        "server op-by-op parity.\n"
+        "`server_flop_offset_per_mlp` carries the MAXIMUM observed, so "
+        "`graded_flops()` over-estimates rather than under-estimates -- the safe "
+        "direction for a floor-margin check and the wrong direction for claiming "
+        "parity. Reports: experiments/run_reports/"
+        "submission_3286{62,64}_*, canary4_329896_*, s329889_329889_*."),
 )
+
+# --------------------------------------------------------------------------
+# THE GRADED RESIDUAL LAW
+# --------------------------------------------------------------------------
+# Phase 2 does not PRICE residual wall time; it caps it at 0.4 s and FAILS the
+# MLP above that. So residual is a cliff to clear, and clearing it needs a
+# predictor of what the GRADING SERVER will spend -- not what this host spends.
+#
+# This host is 8x pessimistic and unstable run to run. Measured 2026-09-05 on
+# `estimator_wp18_canary4.py` (submission 329896, 100/100 rows, graded):
+#
+#     local  (certify section 5, 4 seeds): 2,690 ops, 234-244 ms residual
+#                                          -> 87-91 us/op
+#     graded (329896 telemetry, 100 rows): 2,673 ops,  29.7-31.0 ms residual
+#                                          -> 11.1-11.6 us/op
+#
+# CONFIRMED OUT OF SAMPLE 2026-09-07 by submission 330212 (estimator_k3_full,
+# 3,249 ops, 1,714.6 GFLOP -- 10.2x canary4): graded residual 35.5-39.3 ms,
+# i.e. 10.93-12.10 us/op, median 11.205 against canary4's 11.263. The median
+# moved 0.5%; the tail widened. Gate on the tail. VALIDATION.md 2b-iii.
+#
+# The per-op figure is what transfers. Two independent corroborations:
+#   * the whole Phase-2 top-8 sits at 5-13 s of `flopscope_server_overhead_wall_s`
+#     and 0.29-0.39 s of residual, i.e. 25-35k ops at ~11 us each;
+#   * marius_binner's Phase-1 write-up self-measures 11.4 us per flopscope call.
+#
+# So a candidate is gated on ITS OP COUNT, which the local meter reports exactly
+# and which does not depend on the host at all. The local residual SECONDS stay
+# in the reports as a ratio-only instrument (worst/median, run to run) and must
+# never be quoted as a headroom against the 0.4 s cliff -- doing exactly that on
+# 2026-09-05 sized a whole work stream against a number that was 5.9x wrong, and
+# the erratum that withdrew it is in `experiments/LOG.md`.
+
+#: Seconds of graded residual per flopscope operation. The MAXIMUM of the
+#: observed range, so a prediction errs toward the cliff rather than away.
+#: Re-fit 2026-09-07 on a second graded point (330212), which widened the tail
+#: 11.47 -> 12.10 us while moving the median by 0.5%.
+GRADED_RESIDUAL_S_PER_OP: float = 12.1e-6
+
+#: The observed range, kept so nobody can quote the point estimate as exact.
+GRADED_RESIDUAL_S_PER_OP_RANGE: Tuple[float, float] = (10.9e-6, 12.1e-6)
+
+GRADED_RESIDUAL_PROVENANCE = (
+    "MEASURED on TWO graded submissions and corroborated twice. "
+    "329896 (canary4): 2,673 ops/MLP, 168.7 GFLOP, residual 0.0292-0.0307 s "
+    "over 100 rows -> 10.94-11.47 us/op, median 11.263. "
+    "330212 (estimator_k3_full): 3,249 ops/MLP, 1,714.6 GFLOP, residual "
+    "0.0355-0.0393 s over 100 rows -> 10.93-12.10 us/op, median 11.205. "
+    "THE MEDIAN MOVED 0.5% ACROSS A 10.2x CHANGE IN FLOPs and a 3.2x change in "
+    "arithmetic intensity (66.4 -> 215.1 GFLOP/s): the graded residual is a "
+    "per-OPERATION constant and array traffic does not enter it -- that is "
+    "billed to flopscope_server_kernel_wall_s (2.54 -> 7.97 s). "
+    "Corroboration: the Phase-2 top-8's 25-35k inferred ops against 0.29-0.39 s "
+    "of graded residual; and marius_binner's Phase-1 write-up, which "
+    "self-measures 11.4 us per flopscope call. "
+    "STILL A PLANNING LAW, not a certified constant: n = 2, and both are "
+    "matmul-dominated files by the same author, not a random sample of "
+    "estimator designs. A gather/sort/elementwise profile (AndreasHad04, 2.9 "
+    "GFLOP/s) is outside the fit and must re-anchor. See VALIDATION.md 2b-iii. "
+    "The LOCAL host measures 87-91 us/op for canary4 and over-reads "
+    "estimator_k3_full by 12.9x (0.469 s local vs 0.0364 s graded); local "
+    "residual seconds are therefore a ratio-only instrument here."
+)
+
+#: The op-count gate for a Phase-2 candidate. Tightened 30,000 -> 24,000 on
+#: 2026-09-07 with the re-fit above: 24,000 ops x 12.1 us = 0.290 s against the
+#: 0.4 s cliff, a 1.38x margin, replacing 30,000 x 11.6 us = 0.348 s and its
+#: 1.15x. The gate got stricter in ops and safer in seconds at the same time.
+#: The whole top-8 runs at 25-35k ops and 0.29-0.39 s, i.e. they operate ON the
+#: cliff; we deliberately do not. Anything under this is safe on the evidence we
+#: have; anything over it needs its own graded measurement before it is submitted.
+PHASE2_OP_COUNT_GATE: int = 24_000
+
+
+def predicted_graded_residual_s(n_ops: float,
+                                per_op_s: float = GRADED_RESIDUAL_S_PER_OP) -> float:
+    """What the GRADING SERVER is predicted to spend in residual, from op count.
+
+    This is the number to gate on. `n_ops` comes from the local flopscope
+    ledger (`BudgetContext.summary_dict(by_namespace=True)`, summing `calls`),
+    is exact, and does not depend on this host's speed.
+    """
+    return float(n_ops) * float(per_op_s)
+
+
+def predicted_graded_residual_headroom(n_ops: float, round_: "OfficialRound" = None
+                                       ) -> Optional[float]:
+    """`cap / predicted`, or None where the round has no residual cap."""
+    r = round_ if round_ is not None else LIVE
+    cap = r.residual_wall_time_limit_s
+    if not cap:
+        return None
+    pred = predicted_graded_residual_s(n_ops)
+    return float("inf") if pred <= 0 else cap / pred
+
+
+def op_count_at_cap(round_: "OfficialRound" = None) -> Optional[float]:
+    """The op count whose PREDICTED graded residual exactly hits the cliff."""
+    r = round_ if round_ is not None else LIVE
+    cap = r.residual_wall_time_limit_s
+    return None if not cap else cap / GRADED_RESIDUAL_S_PER_OP
+
 
 ROUNDS: Dict[str, OfficialRound] = {r.tag: r for r in (WARMUP, PHASE1, PHASE2)}
 
@@ -401,10 +518,68 @@ def verify() -> Tuple[List[Tuple[str, bool, str]], bool]:
     import importlib.metadata as md
     wb_ver = md.version("whestbench")
     fs_ver = md.version("flopscope")
-    check("whestbench is the official Phase-2 stack (0.16.x)",
-          wb_ver.startswith("0.16."), wb_ver)
-    check("flopscope is the official Phase-2 stack (0.12.x)",
-          fs_ver.startswith("0.12."), fs_ver)
+    # EQUALITY against evidence, not a range against belief. Until 2026-09-05
+    # these two lines read `startswith("0.16.")` / `startswith("0.12.")`, and on
+    # that day the grading server moved to 0.16.1 / 0.12.1 while this host sat on
+    # 0.16.0 / 0.12.0 with every gate green. The range accepted both, so the
+    # difference between the measurement host and the grading host was invisible.
+    # `local_sim/grader_stack.py` derives the pin from the newest
+    # `evaluation.runtime_environment` in `experiments/run_reports/`; a missing or
+    # partial frozen file is RED here, never green.
+    if _HERE not in sys.path:
+        sys.path.append(_HERE)
+    import grader_stack as _gs
+    try:
+        _stack = _gs.load()
+        _pin = _stack["pinned"]
+        _src = _stack.get("derived_from", {})
+        _pin_ok = True
+    except Exception as _exc:
+        _pin, _src, _pin_ok = {}, {}, False
+        check("grader_stack.json exists and is complete (the pin is EVIDENCE, "
+              "not a default)", False, f"{type(_exc).__name__}: {_exc}")
+    if _pin_ok:
+        check("grader_stack.json exists and is complete (the pin is EVIDENCE, "
+              "not a default)", True,
+              f"from {_src.get('source_report')} "
+              f"(submission {_src.get('submission_id')}, {_src.get('observed_at')})")
+        check(f"whestbench == the GRADED stack ({_pin['whestbench_version']}), "
+              f"not merely 0.16.x",
+              wb_ver == _pin["whestbench_version"],
+              f"installed {wb_ver}, graded {_pin['whestbench_version']}")
+        check(f"flopscope == the GRADED stack ({_pin['flopscope_version']}), "
+              f"not merely 0.12.x",
+              fs_ver == _pin["flopscope_version"],
+              f"installed {fs_ver}, graded {_pin['flopscope_version']}")
+        # The derived pin must still MATCH the reports on disk: a frozen file
+        # that has fallen behind a newer fetched report is itself drift.
+        try:
+            _derived = _gs.derive()["pinned"]
+        except Exception as _exc:
+            _derived = None
+            check("the frozen pin is re-derivable from the stored reports",
+                  False, f"{type(_exc).__name__}: {_exc}")
+        if _derived is not None:
+            check("the frozen pin still equals what the NEWEST stored graded "
+                  "report says (a stale freeze is drift too)",
+                  _derived == dict(_pin),
+                  f"frozen {dict(_pin)} vs newest report {_derived}")
+    # The declared dependency ranges must not be able to admit a stack the
+    # grader is not on. A pin asserted at runtime but not written into
+    # pyproject.toml is one `uv sync` away from being undone.
+    _pyproject = os.path.join(os.path.dirname(_HERE), "pyproject.toml")
+    try:
+        with open(_pyproject, "r", encoding="utf-8") as _fh:
+            _pp = _fh.read()
+    except Exception:
+        _pp = ""
+    if _pin_ok:
+        for _dist, _key in (("whestbench", "whestbench_version"),
+                            ("flopscope", "flopscope_version")):
+            _want = f'"{_dist}=={_pin[_key]}"'
+            check(f"pyproject.toml pins {_dist} to =={_pin[_key]} (a runtime pin "
+                  f"a `uv sync` can undo is not a pin)",
+                  _want in _pp, _want)
     # Not `True`: a check whose condition is a literal cannot fail, and this repo
     # has lost several checks to exactly that. `_real_whestbench()` above raises on
     # the shim, so the property IS enforced -- but a passing line that tests
@@ -539,17 +714,22 @@ def verify() -> Tuple[List[Tuple[str, bool, str]], bool]:
     # --- against what the RUNNER actually used, not only what it declares ----
     # A default the package states and a value the runner used are two different
     # facts. Where a real `whest run --json` report exists, check the second.
+    # Regenerated 2026-09-05 on the PINNED stack (0.16.1 / 0.12.1); the 0.16.0
+    # report beside it is retained for audit and is op-for-op identical.
     report = os.path.join(_ROOT, "experiments", "2026-08-24_p2_p0",
-                          "official_anchor_1row.json")
+                          "official_anchor_1row_0161.json")
     if os.path.exists(report):
         import json
         with open(report, encoding="utf-8-sig") as fh:
             raw = fh.read()
         doc = json.loads(raw[raw.find("{"):])
         rc = doc.get("run_config") or {}
-        check("the report was produced by the official stack",
-              str(doc.get("whestbench_version", "")).startswith("0.16."),
-              str(doc.get("whestbench_version")))
+        check("the report was produced by the PINNED grader stack (equality, "
+              "not 0.16.x)",
+              str(doc.get("whestbench_version", "")) ==
+              (_pin.get("whestbench_version") if _pin_ok else object()),
+              f"report {doc.get('whestbench_version')}, "
+              f"pinned {_pin.get('whestbench_version') if _pin_ok else 'UNKNOWN'}")
         check("the report is the LIVE round's dataset revision",
               str((rc.get("dataset") or {}).get("path", "")).endswith("@" + LIVE.tag),
               str((rc.get("dataset") or {}).get("path")))
@@ -597,9 +777,17 @@ def verify() -> Tuple[List[Tuple[str, bool, str]], bool]:
     # These are asserted against the STORED GRADED REPORTS, not against the
     # installed package -- the package cannot see the grading server. WP0B's
     # lesson: a constant no gate scans is a constant nobody has checked.
-    _GRADED = {  # submission id -> (local official-package count, graded count)
+    # submission id -> (local count UNDER THE GRADER-TWIN ARM, graded count).
+    # canary4 was added 2026-09-05 and immediately falsified the "+2**24 always"
+    # reading: under the twin arm its local count equals the graded count exactly.
+    _GRADED = {
         "328662": (137_600_326_656, 137_617_103_872),
         "328664": (137_600_359_488, 137_617_136_672),
+        "329896": (168_669_961_830, 168_669_961_830),
+        # 330212 was PREDICTED to be offset-zero by the cast model below, before
+        # it was submitted, and graded offset-zero on 2026-09-07 at 10.2x the
+        # FLOPs of the row the model was fitted on. Out-of-sample confirmation.
+        "330212": (1_714_587_938_406, 1_714_587_938_406),
     }
     check("the Phase-2 server offset is recorded as MEASURED, with a range",
           PHASE2.server_offset_is_measured
@@ -612,8 +800,29 @@ def verify() -> Tuple[List[Tuple[str, bool, str]], bool]:
     check("the offset is NOT a constant, and the range says so",
           (PHASE2.server_flop_offset_observed_range[0]
            != PHASE2.server_flop_offset_observed_range[1]),
-          "2**24 on 328662 and 2**24-32 on 328664; the preregistered "
-          "'bit-identical constant' reading was falsified 2026-09-01")
+          "2**24 on 328662, 2**24-32 on 328664, ZERO on 329896 under the "
+          "grader-twin arm; the preregistered 'bit-identical constant' reading "
+          "was falsified 2026-09-01 and the range widened to [0, 2**24] on "
+          "2026-09-05")
+    # The zero row carries the design consequence, so it is asserted rather than
+    # left in prose: a candidate that performs a GENUINE dtype-changing cast of
+    # the grader's weights shows NO offset, and the twin arm predicts its graded
+    # bill exactly. `estimator_k3_full.py` is deliberately in that family; v2.6.1
+    # and v2.7, whose `astype(fnp.float64)` is a same-dtype no-op on the grader,
+    # are the two that show +2**24.
+    #
+    # THE MODEL HAS NOW BEEN TESTED OUT OF SAMPLE AND HELD. The sentence above
+    # was written on 2026-09-05 as a PREDICTION about a file that had not been
+    # submitted. On 2026-09-07 that file graded as 330212 with offset exactly 0,
+    # at 10.2x the FLOPs of canary4. Both members of the zero branch do a real
+    # f64->f32 cast; both members of the +2**24 branch do a same-dtype f64 cast.
+    _ZERO_OFFSET = {k: v for k, v in _GRADED.items() if v[0] == v[1]}
+    check("the genuine-cast family is predicted EXACTLY by the grader-twin arm "
+          "(offset 0), so the offset is not a server constant",
+          len(_ZERO_OFFSET) >= 2,
+          "329896 canary4 168,669,961,830 and 330212 k3_full "
+          "1,714,587,938,406 -- local == graded, and 330212 was predicted "
+          "before it was submitted")
     check("every stored graded offset lies inside the recorded range",
           all(PHASE2.server_flop_offset_observed_range[0] <= g - loc
               <= PHASE2.server_flop_offset_observed_range[1]

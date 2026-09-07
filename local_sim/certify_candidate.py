@@ -81,6 +81,11 @@ SETUP_CAP_S = 5.0
 MEMORY_CAP_MB = 8192
 SINGLE_ARRAY_CAP = 4 * (1 << 30)
 
+#: THE GRADER-TWIN ARM. Mirrors `lifecycle_eval.WEIGHTS_MODES`; declared here so
+#: argparse can offer the choices before `lifecycle_eval` is imported.
+_TWIN_MODES = ("f32", "f64", "f64_readonly", "f64_listconstructed")
+_TWIN_DEFAULT = "f64_readonly"
+
 _FAILED = []
 _SKIPPED = []
 _TOTAL = [0]
@@ -200,6 +205,15 @@ def main() -> int:
                     help="skip the network-dependent sections (1 whest validate "
                          "is local, 10 subprocess smoke needs the dataset)")
     ap.add_argument("--skip-smoke", action="store_true")
+    ap.add_argument("--weights-mode", default=None,
+                    choices=list(_TWIN_MODES),
+                    help="THE GRADER-TWIN ARM for section 5. Default is "
+                         "f64_readonly -- what the grading server actually "
+                         "hands a candidate. 'f32' is the historical local "
+                         "world and is a CONTROL, not evidence.")
+    ap.add_argument("--skip-twin", action="store_true",
+                    help="skip section 5b (the cross-dtype arm). Only for "
+                         "debugging; a certification without it is not one.")
     ap.add_argument("--residual-soak", type=int, default=0, metavar="N",
                     help="run the official subprocess mini split N times and "
                          "pool the residuals into a TAIL (worst / p99 / median) "
@@ -228,6 +242,10 @@ def main() -> int:
     git_dirty_before = ((_run(["git", "status", "--porcelain", "--",
                                "estimator.py", "scripts", "local_sim"],
                               timeout=180).stdout) or "").strip()
+
+    # Resolved here because section 3 runs long before section 5 imports
+    # lifecycle_eval; the two must agree on which arm is being certified.
+    twin_mode_for_edge = a.weights_mode or _TWIN_DEFAULT
 
     print("candidate certification -- READ-ONLY, TRUTH-FREE")
     print(f"  candidate   {rel}")
@@ -288,12 +306,23 @@ def main() -> int:
     # `edge_cases.py` already owns these 30 invariants and already takes a path.
     # Re-implementing them here would give this repository two answers to
     # "is layer 1 right", which is the failure it keeps recording.
-    p = _uvpy(os.path.join(_HERE, "edge_cases.py"), rel, timeout=1800)
+    # ...IN THE LIVE WORLD. Until 2026-09-05 this ran the suite's historical
+    # defaults: Phase 1's 256x32 shape, Phase 1's 2.72e11 budget, and raw NumPy
+    # float32 weights. A Phase-2 candidate was therefore certified on invariants
+    # measured at a shape the competition stopped grading on 2026-08-21 and in a
+    # dtype the grading server has never handed anyone. `--phase2
+    # --real-flopscope` puts it in the world that decides the score.
+    edge_argv = [rel, "--phase2", "--real-flopscope",
+                 "--weights-mode", twin_mode_for_edge]
+    p = _uvpy(os.path.join(_HERE, "edge_cases.py"), *edge_argv, timeout=5400)
     tail = [l for l in (p.stdout or "").splitlines() if l.strip()][-1:] or [""]
-    check("3: the invariant suite passes on THIS candidate", p.returncode == 0,
-          tail[0][:60])
+    check("3: the invariant suite passes on THIS candidate, at the LIVE shape "
+          "and in the grader's dtype", p.returncode == 0,
+          tail[0][:60] + f"   [{' '.join(edge_argv[1:])}]")
     report["sections"]["invariants"] = {
         "returncode": p.returncode, "tail": tail[0],
+        "world": {"phase2": True, "real_flopscope": True,
+                  "weights_mode": twin_mode_for_edge},
         # SKEPTIC (2026-09-03): the report recorded only a returncode and a tail
         # line, so it did not say WHICH denominator invariant 9 ran against.
         # `ARC_WHEST_RAW_MSE` is inherited from the environment and can only
@@ -349,7 +378,15 @@ def main() -> int:
     from mint_provenance import canonical_mint
     from p2_weff import MaterializationCounter
     from whestbench import MLP
-    from lifecycle_eval import materialise_predictions
+    from lifecycle_eval import (materialise_predictions, build_weights,
+                                WEIGHTS_MODES, DEFAULT_WEIGHTS_MODE)
+    import official_config as _oc
+
+    # The arm this certification runs section 5 under. Default = the grader's.
+    twin_mode = a.weights_mode or DEFAULT_WEIGHTS_MODE
+    assert set(_TWIN_MODES) == set(WEIGHTS_MODES), (
+        "certify's argparse choices have drifted from lifecycle_eval.WEIGHTS_MODES"
+    )
 
     try:
         flops.configure(symmetry_warnings=False)
@@ -374,11 +411,18 @@ def main() -> int:
     rows = []
     for i, s in enumerate(SEEDS):
         w_np, est_seed, _ = canonical_mint(a.width, a.depth, int(s))
-        weights = [fnp.array(x) for x in w_np]
+        # THE GRADER-TWIN ARM, not `fnp.array(x)` on a float32 mint. Until
+        # 2026-09-05 this line built float32 weights and so did every other
+        # weight producer in the repository, which is why a `copy=False` on a
+        # float64->float32 cast could survive every local gate and kill five
+        # submissions. See lifecycle_eval.WEIGHTS_MODES.
+        weights = build_weights(w_np, twin_mode, fnp)
         # sha256 of the grader's arrays BEFORE the call, taken from the
         # flopscope-backed objects the estimator actually receives.
+        # At the array's OWN dtype. Casting to float32 to hash would throw away
+        # exactly the low bits an in-place f64 mutation would land in.
         pre = [hashlib.sha256(np.ascontiguousarray(
-            np.asarray(w, dtype=np.float32)).tobytes()).hexdigest()
+            np.asarray(w)).tobytes()).hexdigest()
             for w in weights]
         mlp = MLP(weights=weights, width=a.width, depth=a.depth, seed=est_seed)
 
@@ -394,7 +438,7 @@ def main() -> int:
             except Exception as exc:
                 err = f"{type(exc).__name__}: {exc}"
         post = [hashlib.sha256(np.ascontiguousarray(
-            np.asarray(w, dtype=np.float32)).tobytes()).hexdigest()
+            np.asarray(w)).tobytes()).hexdigest()
             for w in weights]
 
         arr = None if pred is None else np.asarray(pred)
@@ -425,8 +469,15 @@ def main() -> int:
             # magnitude that catches an all-zero or exploded return.
             "mean_square_final_row": None if arr is None
             else float(np.mean(np.asarray(arr[-1], dtype=np.float64) ** 2)),
+            "weights_mode": twin_mode,
         })
 
+    check(f"5: the arm is the GRADER's dtype ({_TWIN_DEFAULT}), not the "
+          f"historical local float32",
+          twin_mode == _TWIN_DEFAULT,
+          f"ran under {twin_mode!r}"
+          + ("" if twin_mode == _TWIN_DEFAULT
+             else "  <-- a CONTROL arm; this is not a certification"))
     check("5: no run raised", all(not r["error"] for r in rows),
           "; ".join(r["error"] for r in rows if r["error"])[:60] or "clean")
     check("5: the grader's weight arrays are UNCHANGED after predict",
@@ -453,9 +504,16 @@ def main() -> int:
              f"{sum(r['n_values'] for r in rows)}, "
              f"{abs(worst_neg) / max(scale, 1e-300):.1e} relative"
              if worst_neg < 0 else " -- none"))
+    # `nbytes` is None on a row whose predict raised. `0 < None` is a TypeError
+    # in Python 3, and a TypeError here ABORTS the certifier -- which is how a
+    # candidate that raises on every seed used to skip sections 5b onward
+    # entirely, reporting three FAIL lines instead of the arm's verdict. Found
+    # by mutation M11 on 2026-09-05.
     check("5: no returned array approaches the 4 GiB single-array cap",
-          all(0 < r["nbytes"] < SINGLE_ARRAY_CAP for r in rows),
-          f"{rows[0]['nbytes'] / 2**20:.3f} MB")
+          all(r["nbytes"] is not None and 0 < r["nbytes"] < SINGLE_ARRAY_CAP
+              for r in rows),
+          f"{rows[0]['nbytes'] / 2**20:.3f} MB" if rows[0]["nbytes"] is not None
+          else "no array returned")
 
     f0 = rows[0]["flops_used"]
     check("6: counted FLOPs are network-INDEPENDENT or explained",
@@ -470,13 +528,38 @@ def main() -> int:
     check("6: the operation ledger is non-empty",
           all(r["n_ops"] > 0 for r in rows), f"{rows[0]['n_ops']:,} ops")
 
+    # --- THE OP COUNT IS THE RESIDUAL GATE --------------------------------
+    # Phase 2 does not price residual; it FAILS an MLP above 0.4 s. This host
+    # measures residual 8x pessimistically and 2.4x unstably, so the number that
+    # decides the outcome cannot come from here. The op count can: it is exact,
+    # host-independent, and the graded law is
+    # `residual ~ 11.6 us x ops` (official_config.GRADED_RESIDUAL_PROVENANCE,
+    # calibrated on 329896 and corroborated by the top-8's telemetry).
+    worst_ops = max(r["n_ops"] for r in rows)
+    pred_res = _oc.predicted_graded_residual_s(worst_ops)
+    pred_hr = _oc.predicted_graded_residual_headroom(worst_ops)
+    check(f"7: worst op count is inside the Phase-2 gate "
+          f"({_oc.PHASE2_OP_COUNT_GATE:,} ops)",
+          worst_ops <= _oc.PHASE2_OP_COUNT_GATE,
+          f"{worst_ops:,} ops -> PREDICTED graded residual "
+          f"{pred_res * 1000:.1f} ms, {pred_hr:.2f}x under the "
+          f"{RESIDUAL_CAP_S} s cliff "
+          f"({_oc.op_count_at_cap():,.0f} ops would hit it)")
+
     worst_res = max(r["residual_wall_time_s"] for r in rows)
     worst_wall = max(r["wall_time_s"] for r in rows)
-    check("7: worst residual is under the 0.4 s cliff (LOCAL -- the "
-          "authority is --runner subprocess)",
-          worst_res < RESIDUAL_CAP_S,
-          f"{worst_res * 1000:.1f} ms -> {RESIDUAL_CAP_S / worst_res:.2f}x "
-          f"LOCAL headroom" if worst_res else "0")
+    # The LOCAL residual survives as a RATIO-ONLY instrument: run-to-run spread
+    # and worst-vs-median, never a headroom against the cliff. Quoting the local
+    # seconds as graded headroom on 2026-09-05 sized a whole work stream against
+    # a number 5.9x wrong; the erratum is in experiments/LOG.md.
+    med_res = sorted(r["residual_wall_time_s"] for r in rows)[len(rows) // 2]
+    check("7: LOCAL residual is stable run to run (a RATIO instrument -- the "
+          "cliff is judged on the op count above, never on these seconds)",
+          worst_res <= 3.0 * max(med_res, 1e-9),
+          f"worst {worst_res * 1000:.1f} ms / median {med_res * 1000:.1f} ms "
+          f"= {worst_res / max(med_res, 1e-9):.2f}x spread; this host measures "
+          f"{worst_res / max(worst_ops, 1) * 1e6:.0f} us/op against the "
+          f"grader's {_oc.GRADED_RESIDUAL_S_PER_OP * 1e6:.1f}")
     check("7: worst per-MLP wall is under the installed 120 s limit",
           worst_wall < WALL_CAP_S,
           f"{worst_wall:.3f} s -> {WALL_CAP_S / worst_wall:.0f}x"
@@ -490,6 +573,128 @@ def main() -> int:
           else json.dumps(rows[0]["materializations"]))
     report["sections"]["metered_runs"] = rows
     report["sections"]["setup_s_local"] = setup_s
+
+    # --------------------------------------------------------------- 5b ----
+    # THE CROSS-DTYPE ARM. Section 5 proves the candidate works under the
+    # grader's dtype. This proves the dtype is not silently changing the ANSWER,
+    # and that whatever FLOPs it costs are ACCOUNTED, not merely observed.
+    #
+    # The 2026-09-05 defect was invisible because no arm existed at all. An arm
+    # that only ran the f64 path would have caught that one; an arm that does
+    # not also compare against f32 would miss the opposite defect -- a candidate
+    # that runs everything in f64 and quietly doubles its bill.
+    if not a.skip_twin:
+        head("5b  grader-twin arm: the same candidate across weight dtypes")
+        twin_seed = int(SEEDS[0])
+        w_np, est_seed, _ = canonical_mint(a.width, a.depth, twin_seed)
+        arms = {}
+        for mode in WEIGHTS_MODES:
+            wts = build_weights(w_np, mode, fnp)
+            m = MLP(weights=wts, width=a.width, depth=a.depth, seed=est_seed)
+            c = flops.BudgetContext(flop_budget=a.budget, quiet=True)
+            e2 = _load(cand).Estimator()
+            terr = ""
+            try:
+                e2.setup(_Ctx(a.width, a.depth, a.budget, twin_seed))
+            except Exception as exc:
+                terr = f"setup {type(exc).__name__}: {exc}"
+            p_ = None
+            if not terr:
+                try:
+                    with c:
+                        p_ = e2.predict(m, a.budget)
+                        p_ = materialise_predictions(p_, depth=a.depth,
+                                                     width=a.width)
+                except Exception as exc:
+                    terr = f"{type(exc).__name__}: {exc}"
+            pa = None if p_ is None else np.asarray(p_, dtype=np.float64)
+            try:
+                nsx = (c.summary_dict(by_namespace=True).get("by_namespace") or {})
+                ops_ = int(sum(float(v.get("calls", 0.0)) for v in nsx.values()))
+            except Exception:
+                ops_ = -1
+            arms[mode] = {
+                "error": terr,
+                "flops_used": float(c.flops_used),
+                "n_ops": ops_,
+                "finite": None if pa is None else bool(np.all(np.isfinite(pa))),
+                "shape": None if pa is None else list(pa.shape),
+                "mean_square_final_row": None if pa is None
+                else float(np.mean(pa[-1] ** 2)),
+                "_pred": pa,
+            }
+            print(f"      {mode:<20} {c.flops_used:>18,.0f} FLOPs  "
+                  f"{ops_:>7,} ops  " + (terr or "clean"))
+
+        for mode in WEIGHTS_MODES:
+            check(f"5b: the {mode} arm raised nothing",
+                  arms[mode]["error"] == "", arms[mode]["error"] or "clean")
+            check(f"5b: the {mode} arm returned a finite (depth, width) array",
+                  arms[mode]["finite"] is True
+                  and arms[mode]["shape"] == [a.depth, a.width],
+                  f"{arms[mode]['shape']}, finite={arms[mode]['finite']}")
+
+        # --- the answer must not depend on the arm ---------------------------
+        # float32 tolerance, because a candidate that legitimately computes in
+        # f32 will differ in the last bits depending on where its inputs were
+        # rounded. `np.finfo(np.float32).eps` is 1.19e-7; 8x that, relative to
+        # the row's own scale, is loose enough for a reordered f32 reduction and
+        # far tighter than any real behaviour change.
+        F32_TOL = 8.0 * float(np.finfo(np.float32).eps)
+        base = arms["f32"]["_pred"]
+        for mode in WEIGHTS_MODES:
+            if mode == "f32":
+                continue
+            other = arms[mode]["_pred"]
+            if base is None or other is None:
+                check(f"5b: {mode} agrees with the f32 control within f32 "
+                      f"tolerance", False, "an arm produced no output")
+                continue
+            scale = max(float(np.max(np.abs(base))), 1e-30)
+            # NOT `rel` -- that name belongs to the candidate's repo-relative
+            # path for the whole of main(), and shadowing it turned section 9's
+            # remediation hint into "--candidate 0.0".
+            rel_diff = float(np.max(np.abs(other - base))) / scale
+            check(f"5b: {mode} agrees with the f32 control within f32 "
+                  f"tolerance ({F32_TOL:.2e} relative)",
+                  rel_diff <= F32_TOL,
+                  f"max relative difference {rel_diff:.3e}")
+
+        # --- and whatever the dtype costs must be EXPLAINED -------------------
+        # A cast of the grader's 16 float64 (n, n) weight matrices is billed at
+        # 1 FLOP/element at the f64 rate = 2, i.e. 2 * 16 * n^2. A candidate that
+        # casts once pays exactly that; one that casts per layer inside the tower
+        # pays a multiple of it; one that never casts pays zero and is running
+        # f64 arithmetic end to end, which is a 2x bill everywhere else. All
+        # three are legitimate designs and all three must be NAMED.
+        quantum = 2 * a.depth * a.width * a.width
+        d_f64 = arms["f64"]["flops_used"] - arms["f32"]["flops_used"]
+        ratio = d_f64 / quantum if quantum else float("nan")
+        near_int = abs(ratio - round(ratio)) <= 0.02
+        check("5b: the f64-vs-f32 FLOP delta is an integer multiple of one "
+              f"pass over the weights (2*depth*width^2 = {quantum:,})",
+              near_int,
+              f"delta {d_f64:+,.0f} = {ratio:.4f} passes"
+              + ("  (0 passes: the candidate never casts -- it is doing f64 "
+                 "arithmetic on the grader)" if abs(ratio) < 0.02 else ""))
+        check("5b: the read-only arm bills exactly what the writable f64 arm "
+              "does (immutability is free, or the candidate is copying)",
+              arms["f64_readonly"]["flops_used"] == arms["f64"]["flops_used"],
+              f"{arms['f64_readonly']['flops_used'] - arms['f64']['flops_used']:+,.0f}")
+        check("5b: section 5's own bill matches its arm in 5b "
+              "(the two sections ran the same candidate the same way)",
+              abs(rows[0]["flops_used"] - arms[twin_mode]["flops_used"]) < 1e-9,
+              f"{rows[0]['flops_used']:,.0f} vs "
+              f"{arms[twin_mode]['flops_used']:,.0f}")
+
+        report["sections"]["grader_twin_arm"] = {
+            "seed": twin_seed,
+            "certified_under": twin_mode,
+            "f32_tolerance": F32_TOL,
+            "weight_pass_flops": quantum,
+            "arms": {k: {kk: vv for kk, vv in v.items() if kk != "_pred"}
+                     for k, v in arms.items()},
+        }
 
     # ---------------------------------------------------------------- 9 ----
     head("9  memory: accounting here, ENFORCEMENT only on Linux")
@@ -514,9 +719,15 @@ def main() -> int:
     # Beside the candidate first -- a research candidate under
     # `experiments/<slice>/` keeps its own evidence in that slice -- then the
     # WP0C/D directory for the shipped file. The match is on the report's own
-    # `candidate` field, never on the filename, so a report for a DIFFERENT file
-    # can never be read as this one's.
+    # `candidate_sha256`, never on the filename and, since 2026-09-05, no longer
+    # on the path either: a path is not an identity, so a report written before
+    # the file was edited kept passing as "FOR THIS CANDIDATE" for bytes that no
+    # longer existed. `artifact_version` 1 reports carry no sha256; they are
+    # accepted on the path AND explicitly labelled as unverified bytes, because
+    # silently rejecting every historical report would have made this change a
+    # different, larger one.
     lg_path = None
+    lg_match = ""
     cand_dir = os.path.dirname(cand)
     stem = os.path.splitext(os.path.basename(cand))[0]
     for c in (os.path.join(cand_dir, "linux_memory_gate_%s.json" % stem),
@@ -527,11 +738,18 @@ def main() -> int:
         if os.path.exists(c):
             try:
                 with open(c, encoding="utf-8") as fh:
-                    if json.load(fh).get("candidate") == rel:
-                        lg_path = c
-                        break
+                    _d = json.load(fh)
             except (OSError, ValueError):
                 continue
+            _lg_sha = _d.get("candidate_sha256")
+            if _lg_sha:
+                if _lg_sha == sha_before:
+                    lg_path, lg_match = c, "sha256"
+                    break
+                continue
+            if _d.get("candidate") == rel:
+                lg_path, lg_match = c, "path only (artifact_version 1)"
+                break
     if lg_path is None:
         skip("9: the real 8-GiB enforcement",
              "no linux_memory_gate report FOR THIS CANDIDATE. Run: uv run "
@@ -543,7 +761,13 @@ def main() -> int:
             lg = json.load(fh)
     if lg is not None:
         check("9: a Linux 8-GiB enforcement report exists FOR THIS CANDIDATE",
-              True, os.path.relpath(lg_path, _ROOT))
+              True, f"{os.path.relpath(lg_path, _ROOT)}  matched on {lg_match}")
+        check("9: ...and it is matched on the candidate's sha256, not its path",
+              lg_match == "sha256",
+              f"{sha_before[:16]}..." if lg_match == "sha256"
+              else "a pre-2026-09-05 report with no candidate_sha256 -- "
+                   "regenerate it with linux_memory_gate.py to certify the "
+                   "BYTES rather than the filename")
         if True:
             cr = lg.get("candidate_run", {})
             check("9: the cap was APPLIED in that run (soft == requested)",

@@ -146,7 +146,15 @@ HISTORICAL_LOCAL_FLOPS = 137_562_547_200
 #:     --runner subprocess --n-mlps 1 --profile --detail full --json
 #: A total that matches while an operation does not is a coincidence, not parity,
 #: so the op table is the check and the total is the summary.
-OFFICIAL_REPORT = os.path.join(OUT_DIR, "official_anchor_1row.json")
+#: 2026-09-05: regenerated on the PINNED grader stack (whestbench 0.16.1 /
+#: flopscope 0.12.1) after `local_sim/grader_stack.py` turned the version range
+#: into an equality pin. The 0.16.0 report it replaces is kept beside it, and the
+#: two are op-for-op identical for `estimator.py` -- which is the finding: the
+#: 0.16.0 -> 0.16.1 / 0.12.0 -> 0.12.1 stack move changed nothing in the ledger.
+OFFICIAL_REPORT = os.path.join(OUT_DIR, "official_anchor_1row_0161.json")
+
+#: The pre-pin report, retained so the stack move stays auditable.
+OFFICIAL_REPORT_0160 = os.path.join(OUT_DIR, "official_anchor_1row.json")
 
 
 #: sha256 of the `estimator.py` the official report was recorded against, so the

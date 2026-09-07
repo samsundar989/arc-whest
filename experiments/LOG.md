@@ -33399,3 +33399,812 @@ floor, with `0` failures and `13x` residual headroom.
    submissions and most of a day.
 5. **Read a passing baseline's timings before interpreting a failing one's.**
    `95 ms` looked like "died instantly" until the probe passed in `98.80 ms`.
+
+---
+
+# 2026-09-05 — SLICE 1 (Sep 6–12), PARTS A AND B
+
+*Driven under the lighter process the Sep-5 strategy canon proposes: a pre-run
+instrument check and a post-run ledger entry per job, no new contracts or Skeptic
+cycles unless a number scores a gate that changes a nomination. **No nomination is
+changed here and no submission has been made.***
+
+Canon: `docs/PHASE2_STRATEGY_2026-09-05.md` (rev 10). Seed blocks: **none drawn** —
+every accuracy number below is on the existing 24-net `P01` ground-truth set
+(`experiments/2026-08-26_p2_gt/`, `2^26` labels per half, GT noise `1.155e-09`),
+an already-spent confirmation set, not a decision block. `P06[..064..127]` remains
+unspent.
+
+## PART A — the instrument
+
+### A1. The stack pin is now EQUALITY, derived from evidence
+
+`local_sim/grader_stack.py` reads the newest `evaluation.runtime_environment` from
+`experiments/run_reports/` and freezes it into `local_sim/grader_stack.json`;
+`official_config.verify()` asserts installed `==` frozen `==` newest report, and
+also that `pyproject.toml` carries the same pin (a runtime pin a `uv sync` can undo
+is not a pin). `preflight` step 1 runs that file, so drift is RED there.
+
+- Frozen: **whestbench 0.16.1 / flopscope 0.12.1**, from `329896`.
+- Both venvs rebuilt on it (`uv sync`; `scripts/linux_stack_setup.sh` for WSL).
+- **New FLOP anchor, regenerated on the pinned stack**
+  (`experiments/2026-08-24_p2_p0/official_anchor_1row_0161.json`):
+  `137,600,326,656` counted FLOPs, **19 operations compared, 0 disagreeing —
+  op-by-op EXACT**. Identical to the 0.16.0 anchor it replaces, and *that is the
+  finding*: the stack move changed nothing in the ledger.
+- Recorded, not asserted: the Linux deployment venv is Python 3.12 / numpy 2.4.6
+  while the grader is Python 3.10.21 / numpy 2.2.6. `grader_stack.py` reports
+  drift in those fields without failing on it — the grader's interpreter is not
+  ours to match.
+
+### A2. The grader-twin arm, and the mutations that prove it bites
+
+`lifecycle_eval.WEIGHTS_MODES = (f32, f64, f64_readonly, f64_listconstructed)`
+with `build_weights()`; `DEFAULT_WEIGHTS_MODE = "f64_readonly"` is now the default
+for `lifecycle_eval.evaluate` and for `certify_candidate` section 5. New section
+**5b** runs all four arms and requires: each raises nothing; each returns a finite
+`(depth, width)` array; each agrees with the f32 control within `8 eps32` relative;
+the f64-vs-f32 FLOP delta is an integer multiple of one pass over the weights; and
+section 5's own bill matches its arm.
+
+Mutations **M11** (a dtype-guarded branch that RAISES on float64) and **M12** (one
+that silently ANSWERS DIFFERENTLY on float64) both fail their named 5b checks.
+Numbered 11/12 because M9 and M10 were taken; the handoff called this "M9".
+
+**What the arm does NOT do, stated because it matters.** It does not reproduce
+submission `329887`'s crash. Measured directly 2026-09-05: `astype(float32,
+copy=False)` on a flopscope float64 array behaves identically to `copy=True` —
+both return a writeable float32 array, both bill 2 FLOP/element — and canary4's own
+source records the same negative result under `--runner server`. That crash remains
+unreproduced offline. The arm's claim is narrower and true: **a candidate whose
+behaviour depends on the weight dtype can no longer reach a submission slot
+unexercised.**
+
+Defect found while proving M11 bites: `certify` aborted with a `TypeError`
+(`0 < None`) on a candidate that raised on every seed, so sections 5b onward never
+ran at all. Fixed.
+
+### A3. The FLOP-offset model — and "+2**24 always" is FALSIFIED
+
+Local counts are now taken **under the twin arm**, with whestbench's own in-window
+`materialise_predictions` included:
+
+| sub | file | stack | local (twin arm) | graded | offset |
+|---|---|---|---|---|---|
+| 328662 | v2.6.1 | 0.12.0 | 137,600,326,656 | 137,617,103,872 | `+2**24` |
+| 328664 | v2.7 | 0.12.0 | 137,600,359,488 | 137,617,136,672 | `+2**24 − 32` |
+| **329896** | **canary4** | **0.12.1** | **168,669,961,830** | **168,669,961,830** | **0 — EXACT** |
+
+The stack move is **not** the explanation: `329889` re-graded v2.7's unchanged
+bytes on 0.16.1/0.12.1 and billed `137,617,136,672`, bit-identical to `328664`.
+What separates the rows is how the candidate touches the grader's float64 weights.
+Measured cast costs (flopscope 0.12.1, direct): `f64→f32`, `f32→f64` and `f64→f64`
+all bill 2 FLOP/element with `copy=True`; `f32→f32` bills 1; **`copy=False` on a
+same-dtype cast bills 0** — the keyword that cost five slots. v2.6.1 and v2.7 open
+with `w.astype(fnp.float64)`, a SAME-DTYPE cast on the grader; canary4 does a
+genuine `f64→f32` cast. The residual `+2**24` on the two same-dtype rows is exactly
+one extra FLOP per weight element, and the candidate that casts for real shows none.
+
+That is a **model, not a mechanism** — no graded operation ledger exists.
+`server_flop_offset_observed_range` widened to `(0, 2**24)`; the carried offset
+stays at the MAXIMUM so `graded_flops()` over-estimates. `estimator_k3_full.py` is
+deliberately in the genuine-cast family.
+
+### A4. Residual is gated on the OP COUNT, never on local seconds
+
+`official_config.GRADED_RESIDUAL_S_PER_OP = 11.6e-6` (range `11.1–11.6`),
+`PHASE2_OP_COUNT_GATE = 30,000`, with `predicted_graded_residual_s()`,
+`..._headroom()` and `op_count_at_cap()`. Calibration, `329896`:
+
+    local  (certify §5, 4 seeds) : 2,690 ops, 234–244 ms  → 87–91 µs/op
+    graded (100 rows)            : 2,673 ops, 29.7–31.0 ms → 11.1–11.6 µs/op
+
+Corroborated by the top-8's telemetry (25–35k inferred ops against 0.29–0.39 s) and
+by marius_binner's Phase-1 self-measurement of 11.4 µs/call. **Check: the law
+predicts canary4's graded headroom as `12.82x` against the observed `13.047x` — a
+1.7% error.** `certify` §7 now gates on the op count and demotes the local seconds
+to a run-to-run RATIO instrument, naming the 2026-09-05 erratum that sized a whole
+work stream against them.
+
+### A5. Small fixes
+
+- `real_data.REVISION` is `official_config.LIVE.tag` (`v2-phase2`), not the literal
+  `v1-phase1` that stopped being live on 2026-08-21.
+- `linux_memory_gate` reports carry `candidate_sha256` (`artifact_version` 2) and
+  `certify` §9 matches on it; a path-only match is accepted for historical reports
+  and explicitly labelled unverified bytes. Regenerated for `estimator.py`:
+  VmPeak 2,345.5 MB of 8,192, 14/14.
+- `experiments/submissions.jsonl` + `local_sim/submission_ledger.py`; the
+  `whest submit` confirmation prompt in `scripts/guard_paths.py` now carries the
+  day's slot usage. Backfilled: **7/10 used on 2026-09-05 UTC**.
+- `edge_cases.py` gains `--phase2` (1024×16, `B = 2**41`) and `--real-flopscope`
+  (metered arrays in the grader's dtype); `certify` §3 runs the candidate in that
+  world. Two repairs were needed, both the same defect: **the absolute `>= 0`
+  non-negativity test is exact at width 256 and WRONG at width 1024**, where a
+  float64 sum on a near-zero neuron rounds to `~-1e-16` against row means of
+  `~0.46`. It failed 17 of 30 invariants on the correct shipped file. Replaced by
+  the scaled bar `certify` §5 already reasoned to from the same measurement. Also,
+  invariant 9's permutation layer indices (7/20/30, chosen for depth 32) are now
+  scaled and clamped, so `--phase2` no longer dies with an `IndexError` at `k=20`.
+  **`estimator.py`: 30/30 in the historical world AND 30/30 in the live world.
+  `estimator_wp18_canary4.py`: 30/30 in the live world** (it scored 5/30 when the
+  suite was last run on it in the Phase-1 world).
+
+## PART B — `estimator_k3_full.py`, the EXACT factorized-K3 chain
+
+### The port is an AMENDMENT, not a transcription
+
+`local_sim/p2_k3_fnp.py::k3_layer` now takes an optional `state["lins"]` — the
+tower carried EXACTLY as a list of `p2_weff.Lineage` objects, rank `2 n l` at layer
+`l`. Exactly two things change and nothing else: where the incoming `(3,)` and
+`(2,1)` repeated slices come from, and what the layer hands on. Every pK term,
+every Wick coefficient and the whole `pK → K` table are literally the same code.
+The full path forces `regen_mode="sub"`: upstream's subtraction of `rep(pK_111)` is
+real once there is no collapse to undo it.
+
+### Three checks, in increasing strength
+
+1. **COLLAPSE EQUIVALENCE — `1.93e-16` relative, 48×5 float64.** Run the lineage
+   path and project the tower back to `(M, I, I)` after every layer; it reproduces
+   the regenerating flow to round-off. This is what pins the operator (`W.T`), the
+   placement of the Wick scaling, and the `rep(pK_111)` subtraction — none of which
+   a FLOP count would have caught.
+2. **UPSTREAM PARITY, MATCHED CONTROLS**, against `mlp_cumulant_propagation` rev
+   `93d091a4`, 48×5 float64:
+
+       CONTROL  regenerating vs upstream WITH the regeneration hook : 8.737e-10
+       ARM      full lineage vs upstream with NO hook               : 8.487e-10
+
+   The arm's parity EQUALS the control's, so the lineage spelling introduces no
+   error of its own. The two references differ from each other by `7.37e-03` — that
+   gap is the information the regenerating flow discards.
+3. **Accuracy against real labels**, below.
+
+### THE NUMBER — 24 P01 nets, `2^26` labels/half, cross-product estimator
+
+    arm                       raw MSE     B-frac   multiplier    adjusted
+    FULL EXACT             4.0041e-08     0.9994     0.9994    4.0015e-08
+    regenerating (canary4) 9.0917e-07     0.0767     0.1000    9.0917e-08
+
+**2.27× better adjusted than the graded nominee**, and the multiplier is no longer
+pinned at the floor, so every FLOP trimmed is now a proportional score win.
+
+### THE GENERATION-TRUNCATION CURVE — and it says DO NOT TRUNCATE
+
+The handoff's Part C4, measured directly in the SHIPPED spelling rather than in
+torch, which is strictly better evidence. All arms paired on the same 24 networks:
+
+    generations   raw MSE     B-frac   adjusted    vs exact
+    exact (15)  4.0041e-08    0.9994  4.0015e-08    1.000×
+    12          4.3559e-08    0.9613  4.1872e-08    1.046×
+    11          5.0624e-08    0.9310  4.7130e-08    1.178×
+     8          1.3512e-07    0.7873  1.0638e-07    2.659×
+     6          3.1837e-07    0.6475  2.0615e-07    5.152×
+     4          7.3257e-07    0.4726  3.4621e-07    8.652×
+     2          1.6514e-06    0.2625  4.3345e-07   10.833×
+     1          2.4927e-06    0.1442  3.5947e-07    8.983×
+    regenerating 9.0917e-07   0.0767  9.0917e-08    2.272×
+
+And the last layer's tower, capped on its own (it costs 5.9% of `B` and reaches the
+answer only through `pK[(1,)] = … + (1/6) D3 w(3,1)`):
+
+    last-layer cap   raw MSE     B-frac   adjusted    vs exact
+    exact          4.0041e-08    0.9994  4.0015e-08    1.000×
+    8              6.4795e-08    0.9720  6.2982e-08    1.574×
+    4              1.2723e-07    0.9564  1.2168e-07    3.041×
+    0              2.3615e-07    0.9417  2.2239e-07    5.558×
+
+**Every truncation is a losing trade.** Raw error roughly doubles per generation
+removed near the top while the budget saving is linear, and dropping the last
+layer's tower costs 5.6× for 5.9% of `B`. Memory depth is worth far more than it
+costs, and this is the quantitative form of the repository's standing "memory depth
+cannot be compressed" result — measured for the first time on the EXACT chain
+rather than on a compressed one.
+
+Second finding, unexpected and worth the write-up: **the regenerating collapse is a
+better approximation per FLOP than naive generation truncation** — `9.09e-8`
+adjusted at `0.077 B` beats every arm from `gens=1` through `gens=8`. Keeping a
+rank-`n` projection of ALL generations beats keeping the youngest `k` outright.
+
+**Consequence for the design: the score-optimal operating point IS the exact tower,
+and the whole remaining gain must come from cost engineering that loses no
+accuracy** — exactly as the canon says.
+
+### THE EXACT COST LEVER THAT LANDED: `C_L` IS NEVER CARRIED
+
+The two-leg block is born with `A_L = w1[:,None] * C11` and
+`C_L = (w2[:,None] * w1[None,:] * C11).T`. `C11 = cov_pre * off_mask` is symmetric,
+so `C_L[i,j] = w2[j] w1[i] C11[i,j] = A_L[i,j] w2[j]`, i.e.
+
+    C_L = A_L @ diag(w2)          at birth
+
+and **that relation survives the lineage's whole life**, because every operation
+applied to it afterwards is a LEFT multiplication — `contract_W` is `W^T X`,
+`contract_wick_` is `diag(col) X` — and a left multiplication commutes with a right
+diagonal. So `C_L` is never carried and never advanced: it is regenerated as
+`A_L * w2b[None,:]` at `O(n^2)` whenever a slice reads it, instead of costing one
+`(n,n) @ (n,n)` matmul per lineage per layer. `fac3` is now never constructed at
+all, which also removes three `O(n^2)` products per layer.
+
+Verified n=256 float32: `cov_pre`'s own float32 asymmetry is `2.5e-07` relative and
+`fac3` vs `fac1 * w2` agrees to `7.8e-07`. Exact in real arithmetic;
+float32-round-off-limited here. **Cost: one matmul of nine, 120 matmuls at 1024×16,
+`0.117 B`. Accuracy: none — raw MSE `4.0041e-08 → 4.0050e-08` (0.02%).**
+
+### The cost model, priced before it is spent
+
+flopscope bills `(m,k)@(k,n)` at `m n (2k−1)`; every dominant operation is a square
+matmul, so the whole bill is a matmul COUNT times one constant:
+
+    per layer, not last : 2 (cov_pre) + 8 per aged lineage + 7 for the youngest
+    last layer          : 2 (cov_pre) + 3 per aged lineage + 2 for the youngest
+
+(the youngest lineage is a matmul cheaper because its `M` is still symbolically `I`
+and `W @ I` is `W` at zero cost; the last layer reads only the `(3,)` slice). At
+1024×16 that is **902 matmuls**, and `predict` evaluates it from the shapes in pure
+Python — zero FLOPs, zero operations, no scalar materialisation — BEFORE the tower
+starts, because an MLP over `B` is scored as ZEROS at multiplier 1.0 and one such
+row would cost more than the method gains. Projection `1,942,795,321,344` against a
+meter reading of `1,940,205,827,686`: **0.13% conservative, the safe direction.**
+
+### THE CANDIDATE
+
+`estimator_k3_full.py`, 923 lines, importing `flopscope`, `flopscope.numpy`,
+`whestbench` and stdlib only — the coefficient tables travel as a zlib+base64 blob
+decoded with `json`, because the grader sandbox has no numpy and therefore no
+`.npz`. `whest validate`: **PASS in 48 ms**. No `BaseException`-to-constant
+channel; the cast is `x.astype(dtype)` with no `copy=False`; `mlp.seed` is never
+read; nothing writes into `mlp.weights`.
+
+Scored through the SHIPPED BYTES under the grader-twin arm at `B = 2**41`, budget
+audit choosing the EXACT tower (`generations: None`):
+
+| | |
+|---|---:|
+| raw final-layer MSE | **`4.0050e-08`** (GT noise `1.155e-09`) |
+| per-net spread | `2.960e-08` … `4.916e-08` |
+| counted FLOPs / MLP | `1,940,205,827,686` = **`0.88230 B`**, constant across all 24 |
+| headroom to `B` | `258,817,427,866` (**11.77%**) |
+| multiplier | `0.88230` |
+| **ADJUSTED SCORE** | **`3.5336e-08`** |
+| operations / MLP | `6,693` → predicted graded residual `77.6 ms`, **`5.15×`** under the `0.4 s` cliff |
+
+**2.41× better than the graded nominee `329896` (`8.501e-08`)**, and it meets the
+handoff's `<= 0.9 B` cost target with margin.
+
+## THE RANKED COST-LEVER LIST FOR SLICE 2
+
+Everything here is measured or priced on this chain, not assumed.
+
+| lever | factor | status |
+|---|---|---|
+| **`C_L` regenerated from `A_L`** | **0.883×, accuracy-neutral** | **LANDED** (above) |
+| batched Strassen–Winograd L=4 on the 902 matmuls | `(7/8)^4 = 0.586×` | priced by shape, unbuilt. Must be a BATCHED leaf spelling — the repo's L=4 recursion issues ~1.1M array ops/MLP and would blow the residual cliff 30× |
+| dead/cold-column pruning with exact compensation | ≈`0.8×` (marius measured 14% from the cold path alone) | unpriced here |
+| aliased-operand / symmetry tagging | ≤`1.1×` | 0.12.1's changelog says charges are unchanged; do not plan on more |
+| packed-symmetric order-3 spelling of the `(2,1)` slice | up to `~6×` on 5 of 8 matmuls | SPECULATIVE — flopscope may bill the unpacking |
+| generation truncation | **NEGATIVE** — 1.05–10.8× worse adjusted | **CLOSED by measurement, today** |
+| last-layer tower cap | **NEGATIVE** — 1.57–5.56× worse adjusted | **CLOSED by measurement, today** |
+
+Strassen alone would take `0.883 B → 0.517 B` and the adjusted score to
+`~2.1e-08`; with pruning, `~0.41 B` and `~1.6e-08`.
+
+## OPEN
+
+1. **The canary submission needs Samuel's approval** and is not made. `whest
+   validate` is green; certification and the official mini run are the gate.
+2. Part C's torch reads (O1 renormalisation, Edgeworth-4 + diagonal `κ₄`, AUGMENT
+   sign) are **not started**. C4 was answered here instead, and better.
+3. The candidate's fallback ladder should be REORDERED before it can ever fire: on
+   today's curve the regenerating tower is a better fallback than any generation
+   cap. It does not fire at 1024×16 — the exact tower fits — so this is
+   correctness-at-a-shape-we-do-not-grade, not a live risk.
+
+## AMENDMENT, same day — THE BATCHED TOWER, and why certification refused first
+
+The first certification of `estimator_k3_full.py` was **REFUSED**, and correctly:
+`certify` section 10 (`--runner subprocess`, the deployment authority) failed
+**2 of 2 MLPs on the residual cliff at 788 ms against 400 ms**. The op-count law
+predicted `77.6 ms` graded. Both instruments were read, and the local one was
+NOT dismissed with canary4's `7.9x` local:graded ratio — `AGENTS.md` says in
+terms that that observation "is not a general safety factor for a different
+candidate", and this is a different candidate.
+
+**The fix is a spelling, and it is free.** The per-lineage spelling issued `~9k`
+metered operations a layer for arithmetic that is one matmul on a wider operand:
+
+    [A_1 | ... | A_k]  is (n, k n),  and  W^T [A_1|...|A_k]  is ONE matmul
+    sum_b X_b @ Y_b^T  is  [X_1|...|X_k] @ [Y_1|...|Y_k]^T   ONE matmul
+
+flopscope bills `(m,k)@(k,n)` at `m n (2k-1)`, so `k` separate `(n,n)@(n,n)`
+products and the batched `(n,n)@(n,kn)` cost the **same FLOPs**; the reduction
+spellings differ by `n^2 (k-1)` = 0.2% in the batched form's disfavour and by a
+factor of `k` in its favour on the operation count. Measured at n=256, k=8:
+8 ops -> 2 for `contract_W`, 15 ops -> 3 for a summed `A @ B^T`, values agreeing
+to `6.0e-07` relative (five float32 ulps of reassociation).
+
+    quantity                     per-lineage      batched
+    counted FLOPs / MLP        1,940,205,827,686  1,940,198,501,990   (-0.0000038%)
+    operations / MLP                   6,693              3,305       (-50.6%)
+    predicted graded residual         77.6 ms            38.3 ms
+    ...as headroom vs the cliff        5.15x             10.43x
+    raw MSE (24 nets, 2^26)        4.0050e-08         4.0044e-08
+    ADJUSTED SCORE                 3.5336e-08         3.5331e-08
+    local in-process residual          740 ms             523 ms
+    local wall / MLP                  6.46 s             4.48 s
+
+The tower now adds only ~39 operations a layer over the `pK` machinery's ~168,
+so there is little further to win on this axis. `_matmuls()` is unchanged by the
+respelling — the batched form has the identical matmul-equivalent count — so the
+budget audit and its `0.13%`-conservative projection stand as written.
+
+**The local residual is still `523 ms`, over the 400 ms LOCAL cap, and this is
+recorded as an open disagreement between two instruments rather than resolved by
+argument.** The op count (`3,305`, against a `30,000` gate) is `10.43x` under the
+cliff on the graded law; the local subprocess reading is not. The local number
+also tracks DATA VOLUME, which the batching does not reduce — our operands are
+`k n` wide — whereas the graded residual is participant-side Python between
+metered calls, which is what the op count measures, and the grader reports data
+transfer separately as `flopscope_server_comms_wall_s` (canary4: 0.106 s comms
+against 0.0297 s residual). That is a mechanism, not a proof. **Only a graded run
+settles it, and settling it is exactly what the canary is for.**
+
+## Mutation battery, full run
+
+**All 12 mutations bite**, each failing its own named check, M11 and M12
+included. The positive control's only failure is `R: this run changed no tracked
+source` — the working tree was dirty with this slice's own edits while the
+battery ran. Re-run it on a clean tree before quoting it as green.
+
+
+## THE RESIDUAL DISAGREEMENT IS RESOLVED — BY MEASUREMENT, NOT BY ARGUMENT
+
+`certify` section 10 refused the batched build too: `488.89 ms` against the
+`400 ms` cliff, 2 of 2 MLPs failed. Rather than reach for canary4's local:graded
+ratio — which `AGENTS.md` forbids applying to a different candidate — the
+question was made into an experiment.
+
+**Run the SAME candidate at three widths. The operation count is identical at all
+three; only the array sizes change.**
+
+    width    ops     counted FLOPs        local residual   us/op   widest array
+      256  3,304      30,465,280,998            66.6 ms    20.2         3.8 MB
+      512  3,304     242,922,395,494           158.2 ms    47.9        15.0 MB
+     1024  3,304   1,940,198,469,222           480.4 ms   145.4        60.0 MB
+
+**Residual grows `7.2x` across a `16x` growth in array size at a FIXED operation
+count.** The local reading is therefore absorbing in-process array allocation and
+memory traffic, not Python-between-metered-calls.
+
+On the grading server that traffic is somewhere else and is reported separately:
+flopscope runs client/server, the participant process holds `RemoteArray`
+handles, and the arithmetic and buffers live on the server's seven cores.
+`329896`, 100 graded rows: kernel `2.39–2.83 s`, overhead `0.93–1.03 s`, comms
+`0.105–0.110 s`, **residual `0.0292–0.0307 s` = 0.8% of wall**. The `0.4 s` cap
+applies to the last row only.
+
+Quantitatively, for `estimator_k3_full.py` to hit the cliff its graded per-op
+residual would have to be `121.0 us` — **`10.6x` canary4's measured `11.47 us`**.
+
+`docs/GOTCHAS.md` carries this as standing knowledge. `certify` section 10 is
+deliberately left refusing on the local number, because it is the
+deployment-authority runner; the rule is that a candidate in this class carries
+BOTH numbers to the human who decides, never the convenient one.
+
+## Certification status
+
+    section                                        verdict
+    1  whest validate                              PASS
+    2  provenance / dataset pin                    PASS
+    3  invariants, LIVE shape + grader dtype        PASS  (30/30)
+    3b invariant-9 mutation battery                PASS
+    4  determinism, fresh interpreters             PASS
+    5  metered runs, grader-twin arm default        PASS
+    5b cross-dtype arm                              PASS
+    6  FLOPs network-independent, multiplier        PASS
+    7  op-count gate + local residual ratio         PASS
+    8  zero scalar materialisations                 PASS
+    9  Linux 8-GiB enforcement                      PASS  13/13, VmPeak 2,827.5 MB
+    10 official subprocess runner                   FAIL  local residual only (above)
+
+Section 9 first SKIPPED because the `candidate_sha256` match added today caught a
+memory-gate report produced from different bytes — `workerq` runs from a git
+snapshot and the candidate is untracked, so the queued job did not test the file
+on disk. **That check earned its place on the day it was written.** Re-run
+directly: 13/13, sha `92b415b3…` matching the shipped bytes.
+
+
+## A SECOND EXACT LEVER, FOUND BY RE-READING THE SLICE ALGEBRA
+
+`C_L = A_L diag(w2)` has a consequence the first implementation missed. The
+`(2,1)` slice sums three block permutations per block, and for the D block
+W-EFF already exploits that two of them coincide:
+
+    D block (A_D, M, M):   {0,1}|{2} == {0,2}|{1}      2 matmuls, not 3
+
+**The same collapse happens in the L block, and for the same reason.** With
+`C_L[a,j] = A_L[a,j] w2[j]`:
+
+    {0,1}|{2}[a,i] = sum_j A_L[a,j] M[a,j] . A_L[i,j] w2[j]
+    {1,2}|{0}[a,i] = sum_j M[a,j] A_L[a,j] w2[j] . A_L[i,j]
+
+the same floats in a different written order. Verified numerically at n=64, k=3:
+`1.697e-16` relative between those two, against `1.48e+00` and `1.25e+00` for the
+genuinely distinct pairs. So the two-leg block needs **two** matmuls, not three,
+and the `(2,1)` slice needs **four**, not five.
+
+    quantity                     before          after
+    matmuls / MLP                   902            797
+    counted FLOPs / MLP  1,940,198,501,990  1,714,587,938,406
+    B-fraction                  0.88230        0.77970
+    operations / MLP              3,305          3,249
+    raw MSE (24 nets)        4.0044e-08      4.0045e-08     (unchanged)
+    ADJUSTED SCORE           3.5331e-08      3.1224e-08     (-11.6%)
+
+**`3.1224e-08` is `2.72x` better than the graded nominee `329896`**, at
+`0.77970 B` with **22.03% budget headroom**, and the final-row mean is bit
+identical to the pre-batching exact tower. Two exact levers have now taken the
+chain from `0.99937 B` to `0.77970 B` -- a `22%` cost reduction at zero accuracy
+cost, entirely from the mode-equality structure `C_L = A_L diag(w2)`.
+
+Linux 8-GiB gate on the final bytes: 13/13, VmPeak `2,827.5 MB`, `2.90x`.
+
+## The official mini-100, and what hard rule 6 asks for
+
+`whest run --split mini --runner subprocess` on the batched `0.88230 B` build:
+
+    n_failed_mlps        100  -- ALL of them, and all for one reason:
+    failure_breakdown    {'residual_wall_time_exhausted': 100, everything else 0}
+    residual s (min/med/max)   0.453 / 0.469 / 0.509    against a 0.400 cap
+    wall s     (min/med/max)   4.04 / 4.11 / 4.47       against a 120 s cap
+    counted FLOPs        1,940,164,947,558, IDENTICAL on all 100 rows
+    mean_compute_utilization   0.8822848701847761
+
+**Hard rule 6 requires a clean mini run (`n_failed_mlps: 0`) before asking, and
+this is not one.** Every failure is the local residual cap, which the width sweep
+above shows is measuring array traffic this host does in-process and the grading
+server does on its seven-core backend. Nothing else failed: no budget exhaustion,
+no time exhaustion, no error, and the FLOP count is bit-identical across all 100
+rows. A run with the cap lifted is being taken for the accuracy read, and BOTH
+are being put in front of Samuel. **The rule is his to relax, not an agent's, and
+this entry exists so the choice is made on the numbers rather than on a summary.**
+
+
+## THE OFFICIAL MINI-100, CAP LIFTED — the accuracy read on organiser labels
+
+`whest run --split mini --runner subprocess --no-residual-wall-time-limit`, the
+final `0.77970 B` bytes, 100 rows of the organisers' own public split:
+
+| | |
+|---|---:|
+| **adjusted final-layer score** | **`3.0603e-08`** |
+| raw final-layer MSE | `3.9251e-08` |
+| **all-layers MSE** | **`1.5937e-08`** |
+| mean compute utilization | `0.7796890640629499` |
+| best / worst per-MLP adjusted | `2.1417e-08` / `4.2667e-08` |
+| **n_failed_mlps** | **`0`** — budget 0, time 0, residual 0, combined 0, error 0 |
+| counted FLOPs | `1,714,554,383,974`, **bit-identical on all 100 rows** |
+| wall s (min/med/max) | `3.81 / 3.87 / 4.06` against a `120 s` cap |
+| residual s (min/med/max) | `0.436 / 0.449 / 0.467` |
+
+Two things beyond the headline.
+
+**The all-layers MSE is BETTER than the final-layer MSE** (`1.59e-08` vs
+`3.93e-08`). That is the depth-propagating-chain signature the whole Phase-2
+top-8 shows (`7–11e-9` all-layers against `1.9–2.8e-8` final) and which a
+final-row sampler cannot produce. Our regenerating canary shares the shape but
+an order of magnitude worse (`4.07e-07` vs `8.50e-07`). **We are now in the
+leaders' family on both axes, at 1.6x their raw error rather than 22x.**
+
+**It beats the 24-net estimate**: `3.0603e-08` on the official split against
+`3.1224e-08` on the P01 mints — a 2% disagreement between two independent
+truth sources, which is the calibration this project has repeatedly wanted and
+rarely had.
+
+Against the 2026-09-05 board snapshot this sits between `#26` (ArtemVoronov,
+`1.83e-08`) and `#38` (trim_qewas, `3.74e-08`), i.e. **roughly `#33`–`#38`, from
+`#47`** — and the strategy canon's L1 prediction was "`~3.5e-08`, `#47 -> ~#38`".
+
+
+## CERTIFICATION OF RECORD — final bytes, sha256 `220d2314...`
+
+`uv run python local_sim/certify_candidate.py --candidate estimator_k3_full.py`
+(`experiments/2026-09-05_slice1/certify_k3_full.json`):
+
+**52 checks PASS, 2 FAIL, 0 SKIP.** Both failures are section 10 and both are the
+same local number:
+
+    FAIL  10: zero failed MLPs                              2 failed
+    FAIL  10: worst GRADED-PATH residual is under the cliff 464.00 ms -> 0.9x
+
+Everything else is green, including the ones that matter most here:
+
+    3   invariant suite, LIVE shape (1024x16) and the GRADER'S DTYPE   30/30
+    3b  invariant-9 mutation battery                                   PASS
+    4   determinism, two fresh interpreters, bitwise + FLOP-identical  PASS
+    5   metered runs under the grader-twin arm (f64 read-only)         PASS
+    5b  cross-dtype arm: 4 arms agree within f32 tolerance, FLOP
+        delta an integer multiple of one pass over the weights         PASS
+    6   FLOPs network-INDEPENDENT; multiplier == max(0.1, F/B)         PASS
+    7   op count 3,249 inside the 30,000 gate; local residual stable   PASS
+    8   ZERO scalar materializations in predict                        PASS
+    9   Linux 8-GiB enforcement, MATCHED ON sha256                     PASS
+
+Section 9 is worth one more line. It first SKIPPED, then FAILED on a path-only
+match, and now passes **matched on sha256** -- the check added this morning
+caught, in its first day, a `linux_memory_gate` report produced from different
+bytes because `workerq` runs from a git snapshot and the candidate is untracked.
+
+## WHAT IS BEING PUT TO SAMUEL, AND WHY IT IS HIS DECISION
+
+The candidate is complete and every gate except one passes. The one is that
+**hard rule 6 wants `n_failed_mlps: 0` from a mini run, and the CAPPED mini run
+gives `100/100` failures, all `residual_wall_time_exhausted`.** With the cap
+lifted the same bytes give `0` failures in every category and `3.0603e-08`.
+
+The agent's reading is that the local cap measures a quantity the grader does not
+(the width sweep, the `0.8%`-of-wall graded residual, and the `10.6x` per-op
+margin are all above). **That reading is not an agent's to act on.** Rule 6 is a
+standing instruction from Samuel and only he relaxes it. Recorded here so the
+decision is made on the numbers rather than on a summary of them, and so a later
+reader can see exactly what was known at the time it was made.
+
+Recommendation on the record: **spend one of the three remaining slots on the
+canary.** Downside if the reading is wrong -- 100 failed MLPs, a `~0.9` score on
+a public UNDESIGNATED entry, one slot, and the local:graded residual ratio for a
+data-heavy candidate, which no offline instrument in this repository can produce.
+Upside -- `~#33-#38` and the first graded telemetry for a `~0.8 B` chain, which
+is what calibrates every cost lever in Slice 2.
+
+
+
+---
+
+# 2026-09-07 — **SUBMISSION 330212 IS GRADED: `2.9467e-08` ADJUSTED, 0/100 FAILED, RESIDUAL `36.4 ms`.** The local residual cap was an instrument artefact, and the grader's residual is now proven PER-OPERATION and array-size-independent.
+
+**Class: STRATEGIC (a submission).** Approval: Samuel, per-submission, in the Slice 2
+handoff message of 2026-09-07, which also **relaxed hard rule 6's
+`n_failed_mlps: 0` mini-run precondition for this one submission** on the reasoning
+recorded in the 2026-09-05 entry above. No designation was made and none is an
+agent's to make. Slot 1 of 10 for 2026-09-07 UTC.
+
+## 1. What was submitted, and the chain of custody
+
+`estimator_k3_full.py`, sha256
+`220d23143eaadfa583ba629e0bc23634981b47b1594193204d0b181b7e9fbf17`, **byte-for-byte
+as certified** — no edit of any kind was made between the certification of record
+above and the upload.
+
+    whest validate --estimator estimator_k3_full.py     PASS, 45 ms
+    whest package  --estimator estimator_k3_full.py     submission-k3full-220d2314.tar.gz
+    packaged inner estimator.py sha256                  220d2314...  == the file on disk
+    manifest whestbench / flopscope                     0.16.1 / 0.12.1  == the live grading stack
+    whest submit --watch                                submission id 330212
+
+The inner sha was verified by extracting the archive and hashing its `estimator.py`
+*before* the upload, not after. `experiments/submissions.jsonl` carries the row.
+
+## 2. THE GRADED RESULT
+
+| | graded (330212) | predicted | previous nominee (329896) |
+|---|---:|---:|---:|
+| **adjusted final-layer score** | **`2.9467e-08`** | `~3.1e-08` | `8.501e-08` |
+| raw final-layer MSE | `3.7793e-08` | `3.925e-08` (mini-100) | `8.50e-07` |
+| **all-layers MSE** | **`1.5590e-08`** | `1.594e-08` | `4.07e-07` |
+| mean compute utilization | `0.77970432` | `0.77970` | `0.077` |
+| **n_failed_mlps** | **`0`** | 0 | 0 |
+| best / worst per-MLP adjusted | `2.396e-08` / `3.826e-08` | — | — |
+| sampling_mse (organisers' own baseline) | `1.132e-06` | — | — |
+
+**`2.885x` better than the graded nominee**, and it beat its own pre-registered
+prediction — the mini-100 read said `3.0603e-08` and the graded truth is
+`2.9467e-08`, a `3.7%` disagreement in our favour between two independent 100-net
+truth sources. Both `state` and `error_code` are clean on all 100 rows:
+`Counter({'completed': 100})`, `Counter({None: 100})`.
+
+Every failure channel is zero on every row: `budget_exhausted`,
+`combined_budget_exhausted`, `time_exhausted`, `residual_wall_time_exhausted`.
+
+Report saved: `experiments/run_reports/k3_full_220d2314_330212_graded_report.json`.
+
+## 3. THE RESIDUAL QUESTION IS SETTLED, AND THE SLICE-2 OP GATE IS NOW CALIBRATED
+
+This was the one outcome that could have changed the whole plan. It did not.
+
+    graded residual s/MLP    min 0.035501   med 0.036406   max 0.039301   (cap 0.400)
+    worst-row headroom       10.18x
+    local capped mini-100    0.453 / 0.469 / 0.509        -- 12.9x the graded median
+
+The prediction on the record was `37.7 ms` and `10.61x`. The measurement is
+`36.4 ms` and `10.99x` median, `10.18x` worst row. **The `11.5 us/op` model
+predicted the graded residual of a candidate 10.2x larger than the one it was
+fitted on, to within 4%.**
+
+And the reason it generalises is now visible directly, because two candidates with
+wildly different array traffic have both been graded:
+
+| | ops/MLP | FLOPs | kernel wall | GFLOP/s | residual med | **per-op med** | worst per-op |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| canary4 `329896` | 2,673 | `168.7 G` | `2.540 s` | 66.4 | `30.11 ms` | **`11.263 us`** | `11.470 us` |
+| k3_full `330212` | 3,249 | `1,714.6 G` | `7.970 s` | 215.1 | `36.41 ms` | **`11.205 us`** | `12.096 us` |
+
+**`10.2x` the FLOPs, `3.1x` the kernel wall, `3.2x` the GFLOP/s — and the per-op
+residual moves by `0.5%`.** The grader's residual is a per-operation constant; the
+array traffic that dominates the LOCAL reading is billed on the server to
+`flopscope_server_kernel_wall_s`, which went `2.54 s -> 7.97 s` roughly as the FLOPs
+did. This is the cross-candidate control the 2026-09-05 width sweep could only infer.
+
+**Therefore the Slice-2 operations gate is now measured, not assumed.** Sizing on the
+WORST graded per-op figure (`12.096 us`), not the median:
+
+    ops for 0.300 s (the 25%-margin working gate)     24,800
+    ops for 0.400 s (the cliff itself)                33,070
+    current chain                                      3,249      7.6x of room
+
+The handoff's `<= 24,000 ops` gate is confirmed by measurement and is adopted
+unchanged. It also explains the board: the top-8 run 25-35k ops at `.29-.39 s`
+residual, i.e. they are sitting *on* the cliff at ~11.5 us/op, which is why every
+one of them shows a residual near the cap.
+
+## 4. THE OFFSET MODEL PREDICTED THIS EXACTLY — and a local-meter anomaly
+
+**Correction to how I first wrote this section.** The handoff predicted graded
+FLOPs of `1,714,587,938,406 + 2**24 + 32,768`, and the graded answer was
+`+0`. That looks like a refuted model, and it is not: the handoff was quoting
+`AGENTS.md`'s one-line coarse figure. **This repository's actual model, in
+`local_sim/official_config.py`, predicted offset ZERO for this file, in a comment
+written on 2026-09-05 before the file was ever submitted:**
+
+> "a candidate that performs a GENUINE dtype-changing cast of the grader's weights
+> has so far shown NO offset… `estimator_k3_full.py` is deliberately in that
+> family; v2.6.1 and v2.7, whose `astype(fnp.float64)` is a same-dtype no-op on
+> the grader, are the two that show `+2**24`."
+
+`estimator_k3_full.py` opens with `x.astype(fnp.float32)` on float64 grader
+weights — a real cast. The model said zero. The grader said zero, at `10.2x` the
+FLOPs of the row the model was fitted on. **That is an out-of-sample confirmation
+of the cast model, and it is the strongest evidence we have for it.** `330212` is
+now registered in `official_config._GRADED` and the self-check asserts the
+zero-offset family has two members rather than one.
+
+What came back, **bit-identical on all 100 rows**, was:
+
+    graded flops_used         1,714,587,938,406
+    local certify / P01       1,714,587,938,406      delta 0        EXACT
+    local mini-100 subprocess 1,714,554,383,974      delta +33,554,432 = 2**25
+
+Two things follow, and only the first is a claim.
+
+**CLAIM.** For this candidate the grading server added **no offset at all**, and the
+certify-path local meter matched it exactly — as `official_config.py` predicted.
+`AGENTS.md`'s flat `+2**24` line is the stale coarse form and should be read as
+superseded by the two-family cast model; it is now wrong in a *known* direction
+and for a known reason, which is the useful kind of wrong. It remains a MODEL and
+not a mechanism — there is still no graded operation ledger, so nothing is
+attributed to an operation and no server op-by-op parity is claimed.
+
+**OPEN QUESTION, not a claim.** Two of our own local meters disagree with each other
+by exactly `2**25` on the same bytes, and the certify one is the one that is right.
+`2**25 = 2 * 1024 * 1024 * 16 = 2 n^2 L` — precisely one `(n,n) @ (n,)` matrix-vector
+product per layer, over all 16 layers. That is a mechanism-shaped number, not a
+rounding artefact. It is `0.0000153 B`, i.e. score-irrelevant (`0.002%`), so it is
+NOT a blocker for Slice 2 — but a `whest run` meter that silently under-counts one
+matvec per layer would corrupt any *pricing* decision made from a mini run, and every
+Strassen arm in section 2 of the handoff is priced by exactly that instrument. **Slice
+2 prices its arms on the certify meter, and cross-checks against `whest run` rather
+than trusting it.** Root cause deferred, logged here so it is not rediscovered.
+
+## 5. Wall time, and what is NOT binding
+
+    participant_predict_wall_s     8.946 / 9.221 / 9.540     (cap 120 s)
+    participant_roundtrip_wall_s   9.327 / 9.606 / 9.922
+    flopscope_server_kernel_wall_s 7.746 / 7.970 / 8.295     -- 86% of predict
+    flopscope_server_overhead_s    1.163 / 1.227 / 1.279
+    flopscope_server_comms_s       0.1115 / 0.1296 / 0.1356
+    participant_setup_wall_s       0.0167 / 0.0172 / 0.0174  (cap 5 s)
+
+**Wall is not a constraint: `12.1x` headroom at the worst row.** At `215.1 GFLOP/s`
+this is the highest arithmetic intensity on the board (jamespayor `85`, 504aldo `27`,
+AndreasHad04 `2.9`) — a consequence of doing few, very large matmuls. That is worth
+naming *now* because Strassen recursion trades exactly this away: it replaces big
+matmuls with many smaller ones, which raises ops and lowers GFLOP/s. Both budgets it
+spends have room (`7.6x` on ops, `12.1x` on wall), but neither is infinite and the
+ops one is the tighter of the two.
+
+## 6. Where this puts the entry
+
+Against the 2026-09-05 board snapshot, `2.9467e-08` sits between ArtemVoronov
+(`#26`, `1.83e-08`) and trim_qewas (`#38`, `3.74e-08`) — **roughly `#30`-`#34`, from
+`#47`**. The strategy canon's L1 prediction was "`~3.5e-08`, `#47 -> ~#38`"; the
+result is better than the prediction on both axes. A fresh board snapshot is owed
+before any rank is quoted as fact; the number above is a projection against a
+two-day-old table.
+
+Nominee discipline per handoff section 4 is now: **A = `estimator_k3_full.py`
+(`2.9467e-08`, 1 clean graded run), B = canary4 `329896` (`8.501e-08`, 3 clean
+graded runs).** A needs two more clean graded runs before B is retired. Nothing is
+designated; `estimator.py` remains untouched at v2.6.1.
+
+## Knowledge delta
+
+1. **The grader's residual is a per-operation constant.** Measured across two
+   graded candidates differing 10.2x in FLOPs: `11.263` vs `11.205 us/op` median.
+   Array size does not enter it. The local `whest run` residual reading does absorb
+   array traffic and over-reads by `12.9x` on a data-heavy candidate; it is a
+   ratio-only instrument.
+2. **The op gate is `<= 24,000` ops/MLP** for a 25% margin under the `0.4 s` cliff,
+   derived from the worst graded per-op figure `12.096 us`. We are at `3,249`.
+3. **The cast model of the server FLOP offset held OUT OF SAMPLE.** It predicted
+   offset zero for this file on 2026-09-05, before submission, from the single
+   fact that the file opens with a genuine `f64 -> f32` cast; the grader billed
+   offset zero at `10.2x` the FLOPs it was fitted on. `AGENTS.md`'s flat
+   `+2**24` line is the stale coarse form.
+4. **Two local FLOP meters disagree by `2**25` on identical bytes** — one matvec per
+   layer over 16 layers. The certify meter is the one that matches the grader.
+5. Relaxing rule 6 on a measured instrument argument was **correct**, and the record
+   of the reasoning preceded the result, which is the only way that could be known.
+
+
+---
+
+# 2026-09-07 — IMPORTANT: re-fitting the graded-residual law on its second graded point, and tightening the op gate `30,000 -> 24,000`
+
+**Class: IMPORTANT** (it changes the instrument: `local_sim/official_config.py`,
+consumed by `certify_candidate.py` §7 and `lifecycle_eval.py`). The change is
+made because the constant's own provenance string demanded it:
+
+> "n = 1 submission for the direct measurement, so this is a PLANNING LAW, not a
+> certified constant — **confirm it on the next graded run of a candidate with a
+> materially different op count.**"
+
+`330212` is that run: `3,249` ops against canary4's `2,673`, and `10.2x` the FLOPs.
+
+## PREDICTION, WRITTEN BEFORE THE EDIT
+
+1. `GRADED_RESIDUAL_S_PER_OP` moves `11.6 -> 12.1 us`, because the policy on that
+   constant is *the maximum observed*, and `330212`'s worst row is `12.096 us/op`.
+   The point estimate therefore gets **more** conservative, not less, even though
+   the median barely moved (`11.263 -> 11.205 us`).
+2. `PHASE2_OP_COUNT_GATE` moves `30,000 -> 24,000`. At the new per-op figure that
+   is `0.290 s` against the `0.400 s` cliff, a `1.38x` margin, replacing the old
+   `30,000 x 11.6 us = 0.348 s` and its `1.15x`. **The gate gets stricter in ops
+   AND safer in seconds** — the two moves are not independent.
+3. Nothing regresses: the only two consumers compare a candidate's op count to
+   the gate, and our candidate is at `3,249`, `7.4x` inside the new gate.
+   `certify_candidate.py` §7 stays PASS; its §10 stays FAIL on the local residual,
+   deliberately (see `VALIDATION.md` §2b-iii).
+4. `preflight.ps1` stays green.
+
+## THE RE-FIT
+
+| | canary4 `329896` | k3_full `330212` | fitted |
+|---|---:|---:|---:|
+| ops / MLP | 2,673 | 3,249 | — |
+| FLOPs | `168.7 G` | `1,714.6 G` | `10.2x` apart |
+| graded residual min/med/max (ms) | `29.24/30.11/30.66` | `35.50/36.41/39.30` | — |
+| per-op min (µs) | `10.939` | `10.927` | **`10.93` floor** |
+| per-op med (µs) | `11.263` | `11.205` | `11.2` central |
+| per-op max (µs) | `11.470` | `12.096` | **`12.10` ceiling** |
+
+The **median** is stable to `0.5%` across a `10.2x` change in FLOPs and a `3.2x`
+change in arithmetic intensity — that is the finding, and it is what licenses
+gating on op count at all. The **ceiling** widened (`11.47 -> 12.10 us`), which is
+row-to-row jitter on the grading server, and the ceiling is what a cliff must be
+sized against.
+
+    GRADED_RESIDUAL_S_PER_OP        11.6e-6  ->  12.1e-6
+    GRADED_RESIDUAL_S_PER_OP_RANGE  (11.1, 11.6)e-6  ->  (10.9, 12.1)e-6
+    PHASE2_OP_COUNT_GATE            30_000   ->  24_000
+
+The provenance string is rewritten to say `n = 2` and to name both submissions.
+It is still a planning law rather than a certified constant — two matmul-dominated
+candidates from the same author are not a random sample of estimator designs, and
+`VALIDATION.md` §2b-iii carries the scope limit (a gather/sort/elementwise profile
+is outside the fit).
+
+## Knowledge delta
+
+- The residual law survived its first out-of-sample test **on the median** and
+  widened **on the tail**. Gate on the tail.
+- The op gate is now `24,000`, and this is the number every Slice-2 cost lever is
+  priced against. Strassen depth is chosen by it, not by FLOPs.

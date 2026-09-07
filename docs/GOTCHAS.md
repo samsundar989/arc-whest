@@ -1,5 +1,115 @@
 # GOTCHAS.md — standing operational knowledge
 
+## 2026-09-07 — THE CAST MODEL OF THE SERVER FLOP OFFSET PREDICTED `330212` EXACTLY, OUT OF SAMPLE
+
+**Do not add a flat `+2**24` to a local FLOP count and call it the graded
+number** — `AGENTS.md`'s one-line "unexplained `+2**24` FLOPs (`+0.0122%`)" is the
+stale coarse reading. `local_sim/official_config.py` already carries the refined
+one, and on 2026-09-07 that refined model was confirmed **out of sample**:
+
+    graded flops_used (330212)  1,714,587,938,406
+    local certify / P01         1,714,587,938,406      delta 0  -- EXACT
+
+**The offset depends on how the candidate touches the grader's float64 weights,
+and the model predicted this row before it was submitted.** Two families:
+
+| opening cast | on the grader | offset | submissions |
+|---|---|---:|---|
+| `x.astype(fnp.float64)` | a SAME-DTYPE f64 cast | `+2**24` (one FLOP per weight element, `16 · 1024²`) | `328662`, `328664` |
+| `x.astype(fnp.float32)` | a GENUINE f64→f32 cast | **`0`, exact** | `329896`, **`330212`** |
+
+`estimator_k3_full.py` was deliberately put in the second family, and the comment
+in `official_config.py` saying so was written on 2026-09-05, *before* the file was
+submitted. It graded offset-zero at `10.2×` canary4's FLOPs. That is a prediction
+that held out of sample, not a curve fitted after the fact.
+
+**What this does NOT license.** It remains a MODEL, not a mechanism: no graded
+operation ledger exists, so nothing is attributed to an operation and nothing here
+claims server op-by-op parity. `server_flop_offset_per_mlp` still carries the
+MAXIMUM observed (`2**24`) so `graded_flops()` over-estimates — the safe direction
+for a floor-margin check and the wrong direction for claiming parity.
+
+**And a second, worse trap found by the same comparison: two of our own local FLOP
+meters disagree on identical bytes.**
+
+    local certify_candidate.py            1,714,587,938,406   <- matches the grader
+    local whest run --split mini
+              --runner subprocess         1,714,554,383,974   <- 2**25 LOW
+
+`2**25 = 33,554,432 = 2 · 1024² · 16 = 2 n² L` — exactly one `(n,n) @ (n,)`
+matrix-vector product per layer across all 16 layers. That is mechanism-shaped, not
+a rounding artefact, and the root cause is not yet found. It is `0.0000153 B`
+(`0.002%`), so it changes no score — but it would corrupt a **pricing** decision
+taken from a mini run, which is how cost levers get compared. **Price arms on the
+certify meter; treat `whest run` as a cross-check, not an authority.**
+
+## 2026-09-05 — LOCAL `residual_wall_time_s` IS DATA-BOUND, AND THE GRADER'S IS NOT
+
+> **CONFIRMED 2026-09-07 by the cross-candidate control this section could only
+> infer.** `estimator_k3_full.py` was graded as `330212`. Its local residual was
+> `0.453/0.469/0.509 s` — 100/100 local failures. Its GRADED residual was
+> `0.0355/0.0364/0.0393 s`, `0/100` failures: **the local instrument over-read by
+> `12.9×`.** And the per-op constant held across a `10.2×` change in FLOPs:
+>
+>     candidate        ops    FLOPs    kernel   GFLOP/s   residual med   PER-OP
+>     canary4 329896  2,673   168.7 G   2.54 s     66.4      30.11 ms   11.263 µs
+>     k3_full 330212  3,249  1714.6 G   7.97 s    215.1      36.41 ms   11.205 µs
+>
+> `0.5%` apart. The array traffic that dominates the local reading is billed on
+> the server to `flopscope_server_kernel_wall_s` (`2.54 s → 7.97 s`), which is
+> **not** charged to the residual. The gate is the operation count and nothing
+> else. Size it on the WORST graded per-op figure, `12.096 µs`, not the median:
+> `24,000` ops/MLP is the 25%-margin working gate, `33,070` is the cliff itself.
+> Binding form: `docs/VALIDATION.md` §2b-iii.
+
+**Do not gate a data-heavy candidate on the local residual reading, in-process or
+under `--runner subprocess`. It measures a different quantity than the grader's.**
+
+The experiment, because this one is a measurement rather than a caution.
+`estimator_k3_full.py` run at three widths, depth 16, float32. The operation
+count is IDENTICAL at all three — same code, same Python, same number of metered
+calls — and only the array sizes change:
+
+    width    ops     counted FLOPs        local residual   us/op   widest array
+      256  3,304      30,465,280,998            66.6 ms    20.2         3.8 MB
+      512  3,304     242,922,395,494           158.2 ms    47.9        15.0 MB
+     1024  3,304   1,940,198,469,222           480.4 ms   145.4        60.0 MB
+
+Residual grows `7.2x` across a `16x` growth in array size at a FIXED operation
+count. It is therefore absorbing in-process array allocation and memory traffic,
+not Python-between-calls.
+
+**On the grading server that traffic is somewhere else and is reported
+separately.** flopscope runs client/server there — the participant process holds
+`RemoteArray` handles, and the arithmetic and the buffers live on the server's
+seven cores. Submission `329896` (canary4), 100 graded rows:
+
+    participant_predict_wall_s        3.3811 / 3.5461 / 3.8560
+    flopscope_server_kernel_wall_s    2.3941 / 2.5392 / 2.8305
+    flopscope_server_overhead_wall_s  0.9318 / 0.9731 / 1.0263
+    flopscope_server_comms_wall_s     0.1046 / 0.1073 / 0.1098
+    residual_wall_time_s              0.0292 / 0.0301 / 0.0307   <- 0.8% of wall
+
+The same file reads `~234 ms` of residual on this host. The `0.4 s` cap is
+applied to the last row only, and neither the kernel time nor the comms time
+counts against it.
+
+**What to gate on instead: the OPERATION COUNT**, through
+`official_config.predicted_graded_residual_s()` (`11.6 us/op`, calibrated on
+`329896` to 1.7% and corroborated by the Phase-2 top-8's telemetry and by
+marius_binner's Phase-1 self-measurement of `11.4 us/call`). The op count is
+exact, host-independent, and is the quantity the graded residual actually tracks.
+
+**What this does NOT license.** `AGENTS.md` is still right that a local absolute
+wall time is not quotable and that canary4's local:graded ratio is not a general
+safety factor for a different candidate. The claim here is narrower and is
+supported by the table above: the local number contains a term the graded number
+does not, and that term grows with array size. `certify_candidate` section 10
+still reports the local residual and still refuses on it — deliberately, because
+it is the deployment-authority runner — so a candidate in this class must carry
+BOTH numbers to the human who decides, not the convenient one.
+
+
 *Extracted verbatim from `CLAUDE.md` on 2026-08-07 when the top-level agent file
 was slimmed to a map. Nothing here was rewritten: these are the findings that must
 not be rediscovered, in the words they were recorded in. Newest sections first;
