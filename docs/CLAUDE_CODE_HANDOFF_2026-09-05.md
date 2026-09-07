@@ -1,5 +1,11 @@
 # Handoff to Claude Code — Slice 1 (Sep 6–12): full-K3 chain to the board, grader-twin infra, first accuracy reads
 
+> **SUPERSEDED 2026-09-07.** Its A4 residual predictor (`11 µs × ops`, gate
+> `≤30k`, canary4 at `2,673 ops`) is corrected to: size on `13.4 µs/op`, gate
+> `≤22,000`, canary4 is `2,690` ops in the grader's weight convention. See
+> `docs/VALIDATION.md` §2b-iii and `docs/GOTCHAS.md`.
+
+
 You are working in `C:\Users\samsu\Documents\arc-whest` (Windows host; Linux deployment path in `~/.arcwhest-linux` via WSL). Read, in this order, before touching anything: `CLAUDE.md`, `AGENTS.md`, **`docs/PHASE2_STRATEGY_2026-09-05.md` (the new strategy canon — rev 10; it supersedes rev 9, the 09-10 strategist response, and `docs/GAME_PLAN.md`'s header)**, `experiments/board_snapshots/board_2026-09-05_telemetry.md`, the top of `docs/CURRENT_STATE.md`, `docs/VALIDATION.md`, `docs/GOTCHAS.md` (skim for grader-environment entries), and `local_sim/p2_weff.py` in full.
 
 ## Why this slice exists (the one-paragraph version)

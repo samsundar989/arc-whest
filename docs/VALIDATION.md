@@ -432,50 +432,116 @@ Two arithmetic hygiene rules, both of which Sprint 4 broke:
 
 ### 2b-iii. THE GRADED RESIDUAL IS PER-OPERATION — MEASURED, 2026-09-07 (`330212`)
 
+*Corrected the same day, after an independent Skeptic. The first version of this
+section compared two op counts taken in DIFFERENT WEIGHT CONVENTIONS, one of them
+read off a file that never graded, and quoted a local residual from a superseded
+build. Every number below is the corrected one; the errors and their effect are in
+`experiments/LOG.md`, 2026-09-07 ERRATUM. Correcting them made the agreement
+**better**, from 0.52% to 0.10%.*
+
 §2b-ii said the measurement path matters more near a cliff than it does for a
-price, and left open *which* path. It is now closed by a cross-candidate control.
+price, and left open *which* path. It is now closed.
 
-**BINDING: the local `residual_wall_time_s` — in-process or under
-`--runner subprocess` — is a RATIO-ONLY instrument for a data-heavy candidate. It
-has no authority over a go/no-go. The gate is the OPERATION COUNT.**
+> **BINDING: the local `residual_wall_time_s` — in-process or under
+> `--runner subprocess` — is a RATIO-ONLY instrument for a data-heavy candidate.
+> It has no authority over a go/no-go. The gate is the OPERATION COUNT, in the
+> grader's weight convention.**
 
-Two graded submissions of our own, on the same stack, `10.2×` apart in FLOPs:
+#### The convention, first, because getting it wrong is how this went wrong
+
+An op count is only comparable to another op count taken the same way. Three
+local conventions exist and they differ:
+
+| convention | k3_full | canary4 | what it is |
+|---|---:|---:|---|
+| f32 census | `3,232` | `2,673` | `p2_op_census.py`; float32 weights, no materialise |
+| `whest run` mini | `3,233` | `2,674` | + `materialise_predictions` on the output |
+| **grader twin (f64 read-only)** | **`3,249`** | **`2,690`** | **+ the opening `f64→f32` weight cast** |
+
+Only the third reproduces the graded FLOP total, and it does so exactly:
+
+    k3_full   f32 1,714,554,351,206 / 3,232
+              + 32,768         + 1 op   materialise_predictions, 2 FLOP/elt on (16,1024)
+              + 33,554,432    + 16 ops  the f64->f32 cast, 2 FLOP/elt x 16 x 1024^2
+              = 1,714,587,938,406 / 3,249  == THE GRADED TOTAL, all 100 rows
+
+    canary4   f32   168,636,374,630 / 2,673  -> 168,669,961,830 / 2,690  == GRADED
+
+**Quote the grader-twin count, always.** `local_sim/lifecycle_eval.build_weights`
+is what produces it offline.
+
+#### The law
+
+Two graded submissions on the same stack, `10.2×` apart in FLOPs:
 
 | | ops/MLP | FLOPs | kernel wall | GFLOP/s | graded residual med | **per-op** |
 |---|---:|---:|---:|---:|---:|---:|
-| canary4 `329896` | 2,673 | `168.7 G` | `2.540 s` | 66.4 | `30.11 ms` | **`11.263 µs`** |
-| k3_full `330212` | 3,249 | `1,714.6 G` | `7.970 s` | 215.1 | `36.41 ms` | **`11.205 µs`** |
+| canary4 `329896` | 2,690 | `168.7 G` | `2.540 s` | 66.4 | `30.11 ms` | **`11.192 µs`** |
+| k3_full `330212` | 3,249 | `1,714.6 G` | `7.970 s` | 215.1 | `36.40 ms` | **`11.205 µs`** |
 
 `10.2×` the FLOPs and `3.2×` the arithmetic intensity move the per-op residual by
-**`0.5%`**. Array traffic does not enter the grader's residual; it is billed to
-`flopscope_server_kernel_wall_s`, which scaled with the FLOPs as expected. The
-local reading on `330212` was `0.453 s` min, `0.469 s` median, `0.509 s` max —
-it FAILED all 100 rows locally and passed all 100 graded, **over-reading by
-`12.9×`**, because
-in-process it absorbs array allocation the grader performs on its own backend.
+**`0.10%`**. Array traffic does not enter the grader's residual. Nor does it track
+FLOPs by way of the kernel: `flopscope_server_kernel_wall_s` moved only `3.1×` on
+that `10.2×` FLOP change, so **operations predict residual better than any
+array-traffic proxy** — which is the actual claim, and it was tested rather than
+assumed.
 
-**The gate, and how to size it.** Use the *worst* graded per-op figure, never the
-median, because the cliff is per-row:
+The local reading on the SUBMITTED bytes was `0.4363 / 0.4486 / 0.4667 s`
+(`mini_k3_full_nocap.json`): it failed all 100 rows locally, passed all 100
+graded, and **over-read by `12.3×`**.
 
-    worst observed per-op residual                     12.096 µs   (330212, worst row)
-    ops at the 0.400 s cliff                           33,070
-    ops at 0.300 s — the 25%-margin working gate       24,800  ->  ADOPT 24,000
-    a candidate is admissible when   ops <= 24,000  AND  ops * 12.1 µs <= 0.3 s
+#### Extrapolation — two points `1.21×` apart cannot license a `7×` gate
+
+Our two direct points span `2,690 → 3,249` operations. A gate near 22,000 sits
+far beyond both, in exactly the variable the law says matters. So the law is
+corroborated against a third source, already committed and costing nothing:
+`experiments/board_snapshots/board_2026-09-05_telemetry.md` carries median
+overhead and residual for **twenty other graded submissions**.
+`local_sim/p2_residual_law.py` calibrates overhead-per-operation on our own two
+rows (`361.7` and `377.5 µs/op`, agreeing to `4.3%`) and inverts it:
+
+    20 rows, inferred 6,223 - 33,818 operations   -- a 5.4x lever, STRADDLING the gate
+    per-op residual   8.99 - 13.31 us,  median 10.14
+    linear fit        residual = -0.023 s + 11.66 us/op * ops     R^2 = 0.939
+
+A near-zero intercept and `R² = 0.939`: residual is proportional to operations
+across a range five times wider than our own. **Those op counts are INFERRED and
+are a model — never quote a row as another team's operation count.**
+
+#### The gate, and how to size it
+
+The policy on `GRADED_RESIDUAL_S_PER_OP` is *the maximum observed*, so it takes
+the widest evidence available, not the most convenient:
+
+    our worst single graded row                        12.096 us/op  (k3_full, one MLP)
+    widest inferred row (neilarmstrong4 329639)        13.31  us/op
+    carried figure                                     13.4   us/op
+    ops at the 0.400 s cliff                           29,850
+    **working gate, 25% margin**                       **22,000  (0.295 s, 1.36x)**
+
+An earlier `24,000` was **not conservative** under this policy — two rows of the
+visible population exceed the `12.1 µs` it was built on — and it was **not
+derived from the data**: it was specified in the Slice 2 handoff before `330212`
+was graded, and the entry that "derived" it was a retro-derivation. Both were
+caught by the Skeptic. `local_sim/official_config.py::verify()` now RECOMPUTES the
+per-op residual from the raw graded reports and refuses if the carried constant is
+below any measured or inferred row, so this constant is scanned by a gate rather
+than trusted as prose.
 
 A candidate that passes the op gate but fails the local residual reading is
 **admissible on the evidence above**, and that combination must be put to Samuel
 with BOTH numbers — `certify_candidate.py` §10 continues to refuse on the local
 number by design, because it is the deployment-authority runner and a silent pass
 there would destroy the only conservative check we have. Relaxing hard rule 6 on
-that basis remains Samuel's decision per submission, never an agent's; it was made
-once, on 2026-09-07, and the instrument argument it rested on is the table above.
+that basis remains Samuel's decision per submission, never an agent's.
 
-**Scope.** This is measured at the Phase-2 live shape (1024×16, float32) on
-whestbench 0.16.1 / flopscope 0.12.1 with a client/server backend. It says nothing
-about a single-process grader, and nothing about a candidate whose ops are of a
-kind neither graded file contains — both of ours are matmul-dominated. An
-estimator built from gather/sort/elementwise ops (AndreasHad04's profile, `2.9
-GFLOP/s`) is outside the fit and must re-anchor before it trusts the constant.
+**Scope.** Measured at the Phase-2 live shape (1024×16, float32) on whestbench
+0.16.1 / flopscope 0.12.1 with a client/server backend. Our two direct points are
+matmul-dominated files by one author; the twenty others reach us through an
+overhead model an unusual operation mix could break (AndreasHad04 runs at `2.9
+GFLOP/s` against our `215`). **Nothing here constrains curvature**, and no
+experiment in this repository can — the grading server is not instrumentable from
+here.
 
 ### 2b-i. THE BINDING STATISTIC — arithmetic, adopted 2026-08-20 (CP0.3)
 
@@ -829,7 +895,7 @@ the number has moved.
 
 | tier | steps run | when |
 |---|---|---|
-| **default** | **12 of 16** — **1** official stack + round configuration (87/87, asserted against the *installed* package; WP6 grew it by nine checks against the STORED GRADED REPORTS, for the grading server's per-MLP FLOP offset, and the Slice-2 work grew it again as the offset's cast model gained its second and third graded rows — 329896 and 330212, both offset-zero), **2** mint provenance (1024×16 first) **+ the dataset pin** (`local_sim/test_p2_tag_drift.py`, added 2026-08-31 by WP0A; two commands, one step, so the denominator stays 16), **3** invariant suite (30/30), **4** `whest validate`, **5** ship-file identity, **6** vault seal, **7** seed ledger consumption + source scan (no count; it reports CONSISTENT or refuses) **+ the enforcement labels** (`local_sim/test_enforcement_labels.py --labels-only`, added 2026-08-31 by WP0B; two commands, one step, so the denominator stays 16), **8** canonical scorer + the binding gate (98/98), **9** seed-ledger *refusals* (66/66), **10** vault integrity, **11** lifecycle evaluator (56/56), **12** counted-FLOP anchor vs the official runner | every change |
+| **default** | **12 of 16** — **1** official stack + round configuration (93/93, asserted against the *installed* package; WP6 grew it by nine checks against the STORED GRADED REPORTS, for the grading server's per-MLP FLOP offset, and the Slice-2 work grew it again as the offset's cast model gained its second and third graded rows — 329896 and 330212, both offset-zero), **2** mint provenance (1024×16 first) **+ the dataset pin** (`local_sim/test_p2_tag_drift.py`, added 2026-08-31 by WP0A; two commands, one step, so the denominator stays 16), **3** invariant suite (30/30), **4** `whest validate`, **5** ship-file identity, **6** vault seal, **7** seed ledger consumption + source scan (no count; it reports CONSISTENT or refuses) **+ the enforcement labels** (`local_sim/test_enforcement_labels.py --labels-only`, added 2026-08-31 by WP0B; two commands, one step, so the denominator stays 16), **8** canonical scorer + the binding gate (98/98), **9** seed-ledger *refusals* (66/66), **10** vault integrity, **11** lifecycle evaluator (56/56), **12** counted-FLOP anchor vs the official runner | every change |
 | **`-Full`** | **16 of 16** — adds **13** shape parity, **14** carrier strength, **15** deployment envelope (+ what it cannot prove) **and its read-only proof** (`local_sim/test_envelope_readonly.py`, added by P1-PRE 2026-08-25), **16** official Phase-2 subprocess smoke, zero failures | **required** before any promotion, submission, or vault touch |
 
 > **Suite counts have been removed from the `-Full` row.** They moved three times

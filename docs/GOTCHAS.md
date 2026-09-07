@@ -1,69 +1,104 @@
 # GOTCHAS.md — standing operational knowledge
 
+## 2026-09-07 — AN OP COUNT IS MEANINGLESS WITHOUT ITS WEIGHT CONVENTION. THERE ARE THREE.
+
+**Never compare two operation counts, or two FLOP totals, without checking which
+weight convention each was taken in.** Doing exactly that on 2026-09-07 made the
+per-operation residual law look `5×` worse than it is, and an independent Skeptic
+caught it. The three conventions, on the same bytes:
+
+| convention | how you get it | k3_full | canary4 |
+|---|---|---:|---:|
+| f32 census | `p2_op_census.py`, float32 weights | `3,232` ops / `1,714,554,351,206` | `2,673` / `168,636,374,630` |
+| `whest run` mini | `--runner subprocess` on the public split | `3,233` / `1,714,554,383,974` | `2,674` / `168,636,407,398` |
+| **grader twin** | `lifecycle_eval.build_weights(..., 'f64_readonly')` | **`3,249` / `1,714,587,938,406`** | **`2,690` / `168,669,961,830`** |
+
+The ladder between them is exact and fully explained:
+
+    f32 census
+      + 32,768      + 1 op    materialise_predictions, 2 FLOP/elt on the (16,1024) output
+      + 33,554,432  + 16 ops  the opening f64->f32 weight cast, 2 FLOP/elt x 16 x 1024^2
+    = grader twin   == THE GRADED TOTAL, bit-identical on all 100 rows, both submissions
+
+**`whest run` reads low because the local dataset hands the candidate float32
+weights and the grader hands float64** (`lifecycle_eval.py`), so the local run
+never pays the opening cast. `certify_candidate.py` already asserts this — "the
+f64-vs-f32 FLOP delta is an integer multiple of one pass over the weights
+(`2*depth*width^2 = 33,554,432`)", and it reads `1.0000` passes.
+
+> **RETRACTED, same day.** An earlier version of this section called the
+> `2**25` gap an OPEN QUESTION and offered "precisely one `(n,n) @ (n,)`
+> matrix-vector product per layer" as a candidate mechanism, on the arithmetic
+> `2 n^2 L = 2**25`. **That was a numerical coincidence and it was wrong.** The
+> root cause was already determined, already checked by an existing gate, and
+> named in the very artifact the entry cited. `2 n^2 L` and
+> `2 FLOP/elt × L × n^2` are the same number for a reason that has nothing to do
+> with matrix-vector products.
+
 ## 2026-09-07 — THE CAST MODEL OF THE SERVER FLOP OFFSET PREDICTED `330212` EXACTLY, OUT OF SAMPLE
 
 **Do not add a flat `+2**24` to a local FLOP count and call it the graded
 number** — `AGENTS.md`'s one-line "unexplained `+2**24` FLOPs (`+0.0122%`)" is the
-stale coarse reading. `local_sim/official_config.py` already carries the refined
-one, and on 2026-09-07 that refined model was confirmed **out of sample**:
+stale coarse reading. `local_sim/official_config.py` carries the refined one, and
+on 2026-09-07 it was confirmed **out of sample**:
 
     graded flops_used (330212)  1,714,587,938,406
-    local certify / P01         1,714,587,938,406      delta 0  -- EXACT
+    local grader-twin arm       1,714,587,938,406      delta 0  -- EXACT
 
 **The offset depends on how the candidate touches the grader's float64 weights,
-and the model predicted this row before it was submitted.** Two families:
+and the model predicted this row before it was submitted** — the prediction is in
+commit `fe2c6ed` (2026-09-05), two days ahead of the submission, and names
+`estimator_k3_full.py` by filename.
 
 | opening cast | on the grader | offset | submissions |
 |---|---|---:|---|
 | `x.astype(fnp.float64)` | a SAME-DTYPE f64 cast | `+2**24` (one FLOP per weight element, `16 · 1024²`) | `328662`, `328664` |
 | `x.astype(fnp.float32)` | a GENUINE f64→f32 cast | **`0`, exact** | `329896`, **`330212`** |
 
-`estimator_k3_full.py` was deliberately put in the second family, and the comment
-in `official_config.py` saying so was written on 2026-09-05, *before* the file was
-submitted. It graded offset-zero at `10.2×` canary4's FLOPs. That is a prediction
-that held out of sample, not a curve fitted after the fact.
+The obvious confound — the `0.12.0 → 0.12.1` stack move — is killed by `329889`,
+which re-graded v2.7's unchanged bytes on the new stack and still billed
+`+2**24 − 32`.
 
 **What this does NOT license.** It remains a MODEL, not a mechanism: no graded
 operation ledger exists, so nothing is attributed to an operation and nothing here
-claims server op-by-op parity. `server_flop_offset_per_mlp` still carries the
-MAXIMUM observed (`2**24`) so `graded_flops()` over-estimates — the safe direction
-for a floor-margin check and the wrong direction for claiming parity.
-
-**And a second, worse trap found by the same comparison: two of our own local FLOP
-meters disagree on identical bytes.**
-
-    local certify_candidate.py            1,714,587,938,406   <- matches the grader
-    local whest run --split mini
-              --runner subprocess         1,714,554,383,974   <- 2**25 LOW
-
-`2**25 = 33,554,432 = 2 · 1024² · 16 = 2 n² L` — exactly one `(n,n) @ (n,)`
-matrix-vector product per layer across all 16 layers. That is mechanism-shaped, not
-a rounding artefact, and the root cause is not yet found. It is `0.0000153 B`
-(`0.002%`), so it changes no score — but it would corrupt a **pricing** decision
-taken from a mini run, which is how cost levers get compared. **Price arms on the
-certify meter; treat `whest run` as a cross-check, not an authority.**
+claims server op-by-op parity. `n = 2` per branch, and the branches are confounded
+with file vintage, which is not resolvable from what we hold.
+`server_flop_offset_per_mlp` still carries the MAXIMUM observed (`2**24`) so
+`graded_flops()` over-estimates — the safe direction for a floor-margin check and
+the wrong direction for claiming parity.
 
 ## 2026-09-05 — LOCAL `residual_wall_time_s` IS DATA-BOUND, AND THE GRADER'S IS NOT
 
 > **CONFIRMED 2026-09-07 by the cross-candidate control this section could only
-> infer.** `estimator_k3_full.py` was graded as `330212`. Its local residual was
-> `0.453/0.469/0.509 s` — 100/100 local failures. Its GRADED residual was
-> `0.0355/0.0364/0.0393 s`, `0/100` failures: **the local instrument over-read by
-> `12.9×`.** And the per-op constant held across a `10.2×` change in FLOPs:
+> infer**, and the figures below are the CORRECTED ones (see the convention
+> section above; the first write-up compared two conventions as one).
+> `estimator_k3_full.py` was graded as `330212`. Its local residual on the
+> SUBMITTED bytes was `0.4363 / 0.4486 / 0.4667 s` — 100/100 local failures. Its
+> GRADED residual was `0.0355 / 0.0364 / 0.0393 s`, `0/100` failures: **the local
+> instrument over-read by `12.3×`.** And the per-op constant held across a
+> `10.2×` change in FLOPs:
 >
 >     candidate        ops    FLOPs    kernel   GFLOP/s   residual med   PER-OP
->     canary4 329896  2,673   168.7 G   2.54 s     66.4      30.11 ms   11.263 µs
->     k3_full 330212  3,249  1714.6 G   7.97 s    215.1      36.41 ms   11.205 µs
+>     canary4 329896  2,690   168.7 G   2.54 s     66.4      30.11 ms   11.192 us
+>     k3_full 330212  3,249  1714.6 G   7.97 s    215.1      36.40 ms   11.205 us
 >
-> `0.5%` apart. The array traffic that dominates the local reading is billed on
-> the server to `flopscope_server_kernel_wall_s` (`2.54 s → 7.97 s`), which is
-> **not** charged to the residual. The gate is the operation count and nothing
-> else. Size it on the WORST graded per-op figure, `12.096 µs`, not the median:
-> `24,000` ops/MLP is the 25%-margin working gate, `33,070` is the cliff itself.
-> Binding form: `docs/VALIDATION.md` §2b-iii.
+> **`0.10%` apart.** The array traffic that dominates the local reading is billed
+> on the server to `flopscope_server_kernel_wall_s` — which moved only `3.1×` on
+> that `10.2×` FLOP change, so it does not track FLOPs either, and **operations
+> predict residual better than any array-traffic proxy**. Size the gate on the
+> MAXIMUM observed: `13.4 µs/op`, from the widest inferred row of the visible
+> board population, giving a working gate of `22,000` ops/MLP.
+> Binding form: `docs/VALIDATION.md` §2b-iii. Corroboration across a `5.4×` op
+> lever: `local_sim/p2_residual_law.py`.
 
 **Do not gate a data-heavy candidate on the local residual reading, in-process or
 under `--runner subprocess`. It measures a different quantity than the grader's.**
+
+> **The width-sweep table below is from an EARLIER BUILD** (`1,940,198,469,222`
+> FLOPs at `3,304` ops — the pre-collapse `0.88230 B` chain), not the submitted
+> `0.77970 B` bytes. Its qualitative point — residual scales with array size at a
+> FIXED operation count — is unaffected, and it is kept in the words it was
+> recorded in. Do not quote its absolute seconds against the submitted file.
 
 The experiment, because this one is a measurement rather than a caution.
 `estimator_k3_full.py` run at three widths, depth 16, float32. The operation
@@ -95,9 +130,12 @@ applied to the last row only, and neither the kernel time nor the comms time
 counts against it.
 
 **What to gate on instead: the OPERATION COUNT**, through
-`official_config.predicted_graded_residual_s()` (`11.6 us/op`, calibrated on
-`329896` to 1.7% and corroborated by the Phase-2 top-8's telemetry and by
-marius_binner's Phase-1 self-measurement of `11.4 us/call`). The op count is
+`official_config.predicted_graded_residual_s()` (**`13.4 us/op` as of
+2026-09-07** — the MAXIMUM observed across two of our own graded rows and twenty
+inferred board rows; the figure this section originally carried, `11.6 us/op`,
+is close to the MEDIAN, `11.2`, and is not the number a cliff is sized on).
+Corroborated by marius_binner's Phase-1 self-measurement of `11.4 us/call`. The
+op count is
 exact, host-independent, and is the quantity the graded residual actually tracks.
 
 **What this does NOT license.** `AGENTS.md` is still right that a local absolute

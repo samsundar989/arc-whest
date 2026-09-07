@@ -1,0 +1,96 @@
+{
+  "candidate": "estimator_k3_full.py",
+  "base_flops": 1714554351206,
+  "base_ops": 3232,
+  "matmul_flops": 1711090434048,
+  "n_groups": 30,
+  "op_gate": 22000,
+  "graded_s_per_op": 1.34e-05,
+  "graded_raw": 3.7793e-08,
+  "measured_mem_mb": {
+    "L0s0": 0.0,
+    "L1s0": 896.3,
+    "L2s0": 2688.3,
+    "L3s0": null,
+    "L4s0": null,
+    "L0s1": 0.0,
+    "L1s1": 145.4,
+    "L2s1": 475.1,
+    "L3s1": 922.2,
+    "L4s1": 1706.0
+  },
+  "ops_per_invocation": {
+    "L0s0": 1,
+    "L1s0": 24,
+    "L2s0": 47,
+    "L3s0": 70,
+    "L4s0": 93,
+    "L0s1": 1,
+    "L1s1": 28,
+    "L2s1": 189,
+    "L3s1": 350,
+    "L4s1": 511
+  },
+  "frontier": [
+    {
+      "L": 0,
+      "groups_split0": 30,
+      "groups_split1": 0,
+      "ops": 3232,
+      "ops_ok": true,
+      "peak_mb": 2827.5,
+      "mem_ok": true,
+      "chain_flops": 1714554351206.0,
+      "chain_B": 0.7796890491617887,
+      "adj_score_at_graded_raw": 2.946678823497148e-08
+    },
+    {
+      "L": 1,
+      "groups_split0": 30,
+      "groups_split1": 0,
+      "ops": 3922,
+      "ops_ok": true,
+      "peak_mb": 3723.8,
+      "mem_ok": true,
+      "chain_flops": 1502943797227.284,
+      "chain_B": 0.6834597103203505,
+      "adj_score_at_graded_raw": 2.5829992832137004e-08
+    },
+    {
+      "L": 2,
+      "groups_split0": 30,
+      "groups_split1": 0,
+      "ops": 4612,
+      "ops_ok": true,
+      "peak_mb": 5515.8,
+      "mem_ok": true,
+      "chain_flops": 1324904837564.5894,
+      "chain_B": 0.6024969650591581,
+      "adj_score_at_graded_raw": 2.277016780048076e-08
+    },
+    {
+      "L": 3,
+      "groups_split0": 0,
+      "groups_split1": 30,
+      "ops": 13702,
+      "ops_ok": true,
+      "peak_mb": 3749.7,
+      "mem_ok": true,
+      "chain_flops": 1177083734967.1826,
+      "chain_B": 0.5352757102478711,
+      "adj_score_at_graded_raw": 2.0229674917397792e-08
+    },
+    {
+      "L": 4,
+      "groups_split0": 0,
+      "groups_split1": 30,
+      "ops": 18532,
+      "ops_ok": true,
+      "peak_mb": 4533.5,
+      "mem_ok": true,
+      "chain_flops": 1061704906999.326,
+      "chain_B": 0.4828074938811033,
+      "adj_score_at_graded_raw": 1.8246743616248536e-08
+    }
+  ]
+}

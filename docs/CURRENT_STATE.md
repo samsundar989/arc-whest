@@ -33,35 +33,47 @@
 > ### THE BLOCKER FROM 2026-09-05 IS CLOSED, AND IT WAS THE INSTRUMENT
 >
 > The local mini-100 failed `100/100` on `residual_wall_time_exhausted` at
-> `0.453/0.469/0.509 s`. The graded truth on the same bytes is
-> `0.0355/0.0364/0.0393 s` — **the local reading over-reads by `12.9x`.**
+> `0.4363/0.4486/0.4667 s` (`mini_k3_full_nocap.json`, the SUBMITTED bytes).
+> The graded truth on those bytes is `0.0355/0.0364/0.0393 s` — **the local
+> reading over-reads by `12.3x`.**
 > Samuel relaxed hard rule 6 for that one submission on the measured argument;
 > the argument was right.
 >
 > **The grader's residual is a PER-OPERATION CONSTANT.** Two graded candidates,
-> `10.2x` apart in FLOPs and `3.2x` apart in arithmetic intensity:
+> `10.2x` apart in FLOPs and `3.2x` apart in arithmetic intensity, both counted
+> in the GRADER'S weight convention (f64 read-only + `materialise_predictions` —
+> the only one whose FLOP total reproduces the graded total):
 >
 >     candidate        ops    FLOPs    kernel   GFLOP/s   residual   PER-OP
->     canary4 329896  2,673   168.7 G   2.54 s     66.4    30.11 ms  11.263 us
->     k3_full 330212  3,249  1714.6 G   7.97 s    215.1    36.41 ms  11.205 us
+>     canary4 329896  2,690   168.7 G   2.54 s     66.4    30.11 ms  11.192 us
+>     k3_full 330212  3,249  1714.6 G   7.97 s    215.1    36.40 ms  11.205 us
 >
-> `0.5%` apart. Array traffic does not enter the grader's residual — it is billed
-> to `flopscope_server_kernel_wall_s`. **`docs/VALIDATION.md` §2b-iii and
-> `docs/GOTCHAS.md` now carry this.**
+> **`0.10%` apart.** Array traffic does not enter the grader's residual; it is
+> billed to `flopscope_server_kernel_wall_s`, which moved only `3.1x` on that
+> `10.2x` FLOP change and so does not track FLOPs either. **Operations predict
+> residual better than any array-traffic proxy.** Corroborated across a `5.4x`
+> op lever spanning the gate (`local_sim/p2_residual_law.py`, `R^2 = 0.939`).
+> **`docs/VALIDATION.md` §2b-iii and `docs/GOTCHAS.md` carry this.**
 >
-> ### THE OPERATIONS GATE, NOW MEASURED RATHER THAN ASSUMED
+> ### THE OPERATIONS GATE IS `22,000`
 >
-> Sized on the **worst** graded per-op figure (`12.096 us`), not the median:
+> Sized on the **maximum observed** per-op figure, which is the stated policy on
+> that constant — and the maximum is not ours. Our own worst row is `12.096 us`
+> (a single MLP), but two of the twenty other graded rows visible in
+> `experiments/board_snapshots/` exceed it: neilarmstrong4 `13.31`, Camaro
+> `12.17`.
 >
 > | | ops / MLP |
 > |---|---:|
-> | the `0.400 s` cliff itself | `33,070` |
-> | **working gate, 25% margin (`0.300 s`)** | **`24,800` → adopt `24,000`** |
-> | current chain | `3,249` — **`7.6x` of room** |
+> | the `0.400 s` cliff at `13.4 us/op` | `29,850` |
+> | **working gate, 25% margin (`0.295 s`, `1.36x`)** | **`22,000`** |
+> | current chain | `3,249` — **`6.8x` of room** |
 >
-> This is what every Slice-2 cost lever is priced against, and it explains the
-> board: the top-8 run 25–35k ops at `.29–.39 s` residual, i.e. they are sitting
-> *on* the cliff at ~`11.5 us/op`.
+> An intermediate `24,000` was carried for part of the day and was **neither
+> derived from the data nor conservative** — it came from the Slice-2 handoff
+> before `330212` graded, and the entry that derived it was a retro-derivation.
+> An independent Skeptic caught both. `official_config.verify()` now RECOMPUTES
+> the law from the raw graded reports (`93/93`), so it is no longer prose.
 >
 > ### TWO INSTRUMENT FACTS FOUND BY THIS SUBMISSION
 >
@@ -71,12 +83,15 @@
 >    because the file opens with a genuine `f64 → f32` cast. (The `+2**24`
 >    family is the one whose opening cast is a same-dtype f64 no-op: v2.6.1,
 >    v2.7.) `AGENTS.md`'s flat `+2**24` line is the stale coarse form.
-> 2. **Two of our own local FLOP meters disagree by `2**25` on identical bytes.**
->    `certify_candidate.py` = `1,714,587,938,406` (matches the grader);
->    `whest run --split mini --runner subprocess` = `1,714,554,383,974`.
->    `2**25 = 2 n^2 L` — one `(n,n) @ (n,)` matvec per layer over all 16 layers.
->    Score-irrelevant (`0.002%`) but **pricing-relevant**: Slice 2 prices its arms
->    on the certify meter and treats `whest run` as a cross-check only.
+> 2. **An op count is meaningless without its weight convention, and there are
+>    three.** f32 census `3,232` → `whest run` mini `3,233` → grader twin
+>    `3,249`, and only the last reproduces the graded FLOP total. The ladder is
+>    `+32,768` (`materialise_predictions`) and `+33,554,432` (the opening
+>    `f64→f32` weight cast, which `whest run` never pays because the local
+>    dataset hands float32 weights). **An earlier reading of this as an open
+>    `2**25` mystery, with a matrix-vector mechanism, is RETRACTED** — the cause
+>    was already asserted by `certify_candidate.py` and the mechanism was a
+>    coincidence. Quote the grader-twin count, always.
 >
 > ### NOMINEE DISCIPLINE (handoff §4)
 >
@@ -86,10 +101,27 @@
 >
 > ### NEXT — Slice 2 (Sep 7–19)
 >
-> 1. **Cost engineering to `<= 0.45 B` at zero accuracy cost** (handoff §2):
->    batched Strassen–Winograd bounded by the `24,000`-op gate, dead-column
->    pruning with exact compensation, aliased self-contractions, per-MLP variable
->    spend. Target `<= 0.45 B` at raw `3.9–4.0e-8` ⇒ adjusted `<= 1.8e-08`.
+> 1. **Cost engineering (handoff §2). Batched Strassen is PRICED and the
+>    handoff's framing of it is corrected: the binding constraint is MEMORY, not
+>    operations.** A fully batched Strassen level costs a flat 23 operations per
+>    invocation, so even L=5 stays inside the gate — but the operand stacks grow
+>    as `(7/4)^L` and a fully batched L=3 on the widest shape class raises
+>    `MemoryError` against the `8,192 MB` limit. Expanding the top level into 7
+>    sequential branches cuts peak memory ~6x for a few hundred operations. The
+>    measured frontier (`local_sim/p2_strassen_plan.py`,
+>    `experiments/2026-09-05_slice1/strassen_frontier.json`):
+>
+>    | L | chain B | ops (gate 22,000) | peak MB (limit 8,192) | adjusted |
+>    |---:|---:|---:|---:|---:|
+>    | 0 | `0.77969` | `3,232` | `2,828` | `2.9467e-08` |
+>    | 2 | `0.60250` | `4,612` | `5,516` | `2.2770e-08` |
+>    | 3 | `0.53528` | `13,702` | `3,750` | `2.0230e-08` |
+>    | **4** | **`0.48281`** | **`18,532`** | **`4,534`** | **`1.8247e-08`** |
+>
+>    **L=4 hits the handoff's score target.** NOT YET BUILT — this prices a
+>    candidate that does not exist. float32 parity is the open risk: the probe
+>    reads `1.3e-06` relative at L=3 against a `1e-06` bar. Then dead-column
+>    pruning, aliased self-contractions, per-MLP variable spend.
 > 2. **The accuracy layer (handoff §3) is the critical path** — Part C of Slice 1
 >    was never run. O1 renormalisation, Edgeworth-4 with per-neuron diagonal κ₄,
 >    AUGMENT sign, and the Puffi SSC κ₄-response closure (go/no-go ≥ `1.5x` by

@@ -377,41 +377,77 @@ PHASE2 = OfficialRound(
 #: observed range, so a prediction errs toward the cliff rather than away.
 #: Re-fit 2026-09-07 on a second graded point (330212), which widened the tail
 #: 11.47 -> 12.10 us while moving the median by 0.5%.
-GRADED_RESIDUAL_S_PER_OP: float = 12.1e-6
+GRADED_RESIDUAL_S_PER_OP: float = 13.4e-6
 
 #: The observed range, kept so nobody can quote the point estimate as exact.
-GRADED_RESIDUAL_S_PER_OP_RANGE: Tuple[float, float] = (10.9e-6, 12.1e-6)
+#: The floor is the visible population's minimum (504aldo, 8.99 us/op) and the
+#: ceiling is its maximum (neilarmstrong4, 13.31 us/op), rounded out.
+GRADED_RESIDUAL_S_PER_OP_RANGE: Tuple[float, float] = (9.0e-6, 13.4e-6)
 
 GRADED_RESIDUAL_PROVENANCE = (
-    "MEASURED on TWO graded submissions and corroborated twice. "
-    "329896 (canary4): 2,673 ops/MLP, 168.7 GFLOP, residual 0.0292-0.0307 s "
-    "over 100 rows -> 10.94-11.47 us/op, median 11.263. "
-    "330212 (estimator_k3_full): 3,249 ops/MLP, 1,714.6 GFLOP, residual "
-    "0.0355-0.0393 s over 100 rows -> 10.93-12.10 us/op, median 11.205. "
-    "THE MEDIAN MOVED 0.5% ACROSS A 10.2x CHANGE IN FLOPs and a 3.2x change in "
-    "arithmetic intensity (66.4 -> 215.1 GFLOP/s): the graded residual is a "
-    "per-OPERATION constant and array traffic does not enter it -- that is "
-    "billed to flopscope_server_kernel_wall_s (2.54 -> 7.97 s). "
-    "Corroboration: the Phase-2 top-8's 25-35k inferred ops against 0.29-0.39 s "
-    "of graded residual; and marius_binner's Phase-1 write-up, which "
-    "self-measures 11.4 us per flopscope call. "
-    "STILL A PLANNING LAW, not a certified constant: n = 2, and both are "
-    "matmul-dominated files by the same author, not a random sample of "
-    "estimator designs. A gather/sort/elementwise profile (AndreasHad04, 2.9 "
-    "GFLOP/s) is outside the fit and must re-anchor. See VALIDATION.md 2b-iii. "
+    "MEASURED on TWO graded submissions of ours, CORROBORATED on twenty more, "
+    "and quoted throughout in the GRADER'S WEIGHT CONVENTION -- f64 read-only "
+    "weights plus whestbench's own `materialise_predictions`, which is the only "
+    "convention whose FLOP total reproduces the graded total exactly. Getting "
+    "that wrong is the trap this string exists to close: an earlier version of "
+    "this constant cited canary4 at '2,673 ops', which is the f32 CENSUS "
+    "convention AND was read off a different file (estimator_wp18_canary.py, "
+    "submission 329887, which FAILED). Comparing it against k3_full's 3,249 "
+    "compared two conventions as one.\n"
+    "  329896 (canary4):  2,690 ops/MLP, 168.7 GFLOP, residual 0.0292-0.0307 s "
+    "over 100 rows -> 10.87-11.40 us/op, median 11.192.\n"
+    "  330212 (k3_full):  3,249 ops/MLP, 1,714.6 GFLOP, residual 0.0355-0.0393 s "
+    "over 100 rows -> 10.93-12.10 us/op, median 11.204.\n"
+    "THE MEDIANS ARE 0.10% APART ACROSS A 10.2x CHANGE IN FLOPs and a 3.2x "
+    "change in arithmetic intensity (66.4 -> 215.1 GFLOP/s): the graded residual "
+    "is a per-OPERATION constant and array traffic does not enter it -- that is "
+    "billed to flopscope_server_kernel_wall_s, which moved only 3.1x on that "
+    "10.2x FLOP change and therefore does NOT track FLOPs either.\n"
+    "EXTRAPOLATION, which two points 1.21x apart cannot test on their own: "
+    "`local_sim/p2_residual_law.py` calibrates overhead-per-operation on our own "
+    "two rows (361.7 and 377.5 us/op, agreeing to 4.3%) and inverts it across the "
+    "twenty other graded submissions in experiments/board_snapshots/"
+    "board_2026-09-05_telemetry.md. That spans 6,223-33,818 inferred operations, "
+    "a 5.4x lever STRADDLING the gate, and fits residual = -0.023 s + 11.66 us/op "
+    "with R^2 = 0.939 -- a near-zero intercept, i.e. proportional to operations. "
+    "Per-op residual across that population runs 8.99-13.31 us. Those op counts "
+    "are INFERRED and are a model, never another team's measured op count.\n"
+    "The carried figure is the MAXIMUM of everything visible (13.31 us/op, "
+    "neilarmstrong4 329639, rounded to 13.4), because the policy on this constant "
+    "is to err toward the cliff. Two rows exceed our own worst row: "
+    "neilarmstrong4 13.31 and Camaro 12.17.\n"
+    "STILL A PLANNING LAW, not a certified constant. Our two direct points are "
+    "matmul-dominated files by the same author; the other twenty are inferred "
+    "through an overhead model that an unusual operation mix could break "
+    "(AndreasHad04 runs at 2.9 GFLOP/s against our 215). Nothing here constrains "
+    "CURVATURE, and no experiment in this repository can: the grading server is "
+    "not instrumentable from here. See VALIDATION.md 2b-iii.\n"
     "The LOCAL host measures 87-91 us/op for canary4 and over-reads "
-    "estimator_k3_full by 12.9x (0.469 s local vs 0.0364 s graded); local "
-    "residual seconds are therefore a ratio-only instrument here."
+    "estimator_k3_full by 12.3x (0.4486 s local median vs 0.036402 s graded, "
+    "like-for-like on the SUBMITTED bytes -- experiments/2026-09-05_slice1/"
+    "mini_k3_full_nocap.json); local residual seconds are a ratio-only "
+    "instrument here."
 )
 
-#: The op-count gate for a Phase-2 candidate. Tightened 30,000 -> 24,000 on
-#: 2026-09-07 with the re-fit above: 24,000 ops x 12.1 us = 0.290 s against the
-#: 0.4 s cliff, a 1.38x margin, replacing 30,000 x 11.6 us = 0.348 s and its
-#: 1.15x. The gate got stricter in ops and safer in seconds at the same time.
-#: The whole top-8 runs at 25-35k ops and 0.29-0.39 s, i.e. they operate ON the
-#: cliff; we deliberately do not. Anything under this is safe on the evidence we
+#: The op-count gate for a Phase-2 candidate. 30,000 -> 22,000 on 2026-09-07.
+#: 22,000 ops x 13.4 us = 0.295 s against the 0.4 s cliff, a 1.36x margin,
+#: replacing 30,000 x 11.6 us = 0.348 s and its 1.15x -- stricter in operations
+#: and safer in seconds at once.
+#:
+#: An intermediate 24,000 was carried for part of 2026-09-07 and was NOT
+#: conservative under this constant's own stated policy: it was sized on OUR
+#: worst row (12.096 us/op, a single MLP), while two rows of the visible
+#: population sit above it (neilarmstrong4 13.31, Camaro 12.17). 24,000 was also
+#: not derived from the data -- it was specified in the Slice 2 handoff BEFORE
+#: 330212 was graded, and the LOG entry that "derived" it was a retro-derivation.
+#: An independent Skeptic caught both on 2026-09-07; see experiments/LOG.md.
+#:
+#: Leaders sit at 0.10-0.36 s of graded residual (NOT the "0.29-0.39 s" an
+#: earlier version of this comment claimed -- that was false for suliman_tadros
+#: 0.124, Puffi 0.193 and hyojun_kwon 0.237). Several do operate near the cliff;
+#: we deliberately do not. Anything under this gate is safe on the evidence we
 #: have; anything over it needs its own graded measurement before it is submitted.
-PHASE2_OP_COUNT_GATE: int = 24_000
+PHASE2_OP_COUNT_GATE: int = 22_000
 
 
 def predicted_graded_residual_s(n_ops: float,
@@ -851,7 +887,115 @@ def verify() -> Tuple[List[Tuple[str, bool, str]], bool]:
           PHASE2.multiplier(1e9, 0.0, failed=True, meter="server")
           == PHASE2.failure_multiplier)
 
+    # --- the residual law, RECOMPUTED from the graded reports ----------------
+    # WP0B's own lesson, applied to this file's other constant: "a constant no
+    # gate scans is a constant nobody has checked." Until 2026-09-07 the offset
+    # constants were recomputed against `_GRADED` while GRADED_RESIDUAL_S_PER_OP
+    # and PHASE2_OP_COUNT_GATE were trusted as prose -- and an independent
+    # Skeptic found the prose citing the wrong file, in the wrong weight
+    # convention, calling a local number "graded". These checks close that.
+    #
+    # submission id -> (ops per MLP in the GRADER'S weight convention, report).
+    # The op counts are measured by replaying each candidate under
+    # `lifecycle_eval.build_weights(..., 'f64_readonly')` plus whestbench's own
+    # `materialise_predictions`; that is the ONLY convention whose FLOP total
+    # reproduces the graded total, and the graded totals in `_GRADED` above are
+    # what pin it. Do NOT substitute an f32 census count here.
+    _RESIDUAL = {
+        "329896": (2690, "canary4_329896_graded_report.json"),
+        "330212": (3249, "k3_full_220d2314_330212_graded_report.json"),
+    }
+    observed = _graded_residual_per_op(_RESIDUAL)
+    check("the graded reports for the residual law are present",
+          len(observed) == len(_RESIDUAL),
+          f"found {sorted(observed)} of {sorted(_RESIDUAL)}")
+    if observed:
+        meds = {k: v["median"] for k, v in observed.items()}
+        worst = max(v["max"] for v in observed.values())
+        spread = max(meds.values()) / min(meds.values())
+        check("the per-op residual MEDIANS agree across candidates "
+              "(this is the whole per-operation law)",
+              spread < 1.05,
+              " ".join(f"{k}={v * 1e6:.3f}us" for k, v in sorted(meds.items()))
+              + f"  spread {100 * (spread - 1):.2f}%")
+        check("GRADED_RESIDUAL_S_PER_OP is >= every per-op residual we have "
+              "MEASURED (the policy is the maximum observed)",
+              GRADED_RESIDUAL_S_PER_OP >= worst,
+              f"carried {GRADED_RESIDUAL_S_PER_OP * 1e6:.1f} us"
+              f" vs worst measured row {worst * 1e6:.3f} us")
+        check("...and >= the maximum INFERRED across the visible board "
+              "population, which is 5.4x wider in op count than our own two",
+              GRADED_RESIDUAL_S_PER_OP >= 13.31e-6,
+              "neilarmstrong4 329639 at 13.31 us/op; Camaro 329762 at 12.17."
+              " Both exceed our own worst row (12.096) -- see"
+              " local_sim/p2_residual_law.py")
+        check("every measured per-op residual lies inside the recorded range",
+              all(GRADED_RESIDUAL_S_PER_OP_RANGE[0] <= v["min"]
+                  and v["max"] <= GRADED_RESIDUAL_S_PER_OP_RANGE[1]
+                  for v in observed.values()),
+              f"range {tuple(round(x * 1e6, 1) for x in GRADED_RESIDUAL_S_PER_OP_RANGE)} us")
+    check("the op gate leaves at least a 1.25x margin under the cliff at the "
+          "carried per-op figure",
+          (PHASE2.residual_wall_time_limit_s
+           / (PHASE2_OP_COUNT_GATE * GRADED_RESIDUAL_S_PER_OP)) >= 1.25,
+          f"{PHASE2_OP_COUNT_GATE:,} ops x"
+          f" {GRADED_RESIDUAL_S_PER_OP * 1e6:.1f} us ="
+          f" {PHASE2_OP_COUNT_GATE * GRADED_RESIDUAL_S_PER_OP:.3f} s ->"
+          f" {PHASE2.residual_wall_time_limit_s / (PHASE2_OP_COUNT_GATE * GRADED_RESIDUAL_S_PER_OP):.2f}x")
+
     return checks, all(c[1] for c in checks)
+
+
+def _graded_residual_per_op(spec: Dict[str, Tuple[int, str]]) -> Dict[str, dict]:
+    """Per-operation graded residual, recomputed from the raw report JSON.
+
+    Returns `{submission_id: {"min", "median", "max", "ops", "n_rows"}}`, in
+    seconds per operation, omitting any submission whose report is absent.
+    """
+    import json
+
+    out: Dict[str, dict] = {}
+    root = os.path.join(_ROOT, "experiments", "run_reports")
+    for sub, (ops, fname) in spec.items():
+        path = os.path.join(root, fname)
+        if not os.path.exists(path):
+            continue
+        try:
+            with open(path, encoding="utf-8") as fh:
+                doc = json.load(fh)
+        except Exception:                                      # noqa: BLE001
+            continue
+        rows = _find_key(doc, "per_mlp")
+        if not isinstance(rows, list) or not rows:
+            continue
+        vals = sorted(
+            float(r["telemetry"]["residual_wall_time_s"]) for r in rows
+            if isinstance(r, dict) and isinstance(r.get("telemetry"), dict)
+            and r["telemetry"].get("residual_wall_time_s") is not None)
+        if not vals:
+            continue
+        out[sub] = {"min": vals[0] / ops,
+                    "median": vals[len(vals) // 2] / ops,
+                    "max": vals[-1] / ops,
+                    "ops": ops, "n_rows": len(vals)}
+    return out
+
+
+def _find_key(obj, key):
+    """First value stored under `key` anywhere in a nested JSON document."""
+    if isinstance(obj, dict):
+        if key in obj:
+            return obj[key]
+        for v in obj.values():
+            r = _find_key(v, key)
+            if r is not None:
+                return r
+    elif isinstance(obj, list):
+        for v in obj:
+            r = _find_key(v, key)
+            if r is not None:
+                return r
+    return None
 
 
 def _raises(fn) -> bool:

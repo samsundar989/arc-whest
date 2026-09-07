@@ -4,6 +4,29 @@
 
 ---
 
+> ## AMENDMENT, 2026-09-07 — the operations gate in this document is SUPERSEDED
+>
+> This file is still the strategy canon, and its architecture, board reading and
+> lane verdicts stand. **Three of its operational numbers do not**, and they
+> appear in §§ 4, 5 and the plan revision at the end. `local_sim/official_config.py`
+> is the authority; `docs/VALIDATION.md` §2b-iii is the binding form.
+>
+> | this file says | corrected | why |
+> |---|---|---|
+> | gate candidates at **≤30k ops** | **≤22,000 ops** | `22,000 × 13.4 µs = 0.295 s`, a `1.36×` margin under the `0.4 s` cliff |
+> | `residual ≈ 11 µs × ops` | median `11.2 µs`, **size on `13.4 µs`** | a cliff is sized on the MAXIMUM observed, not the median |
+> | "canary 0.030 s / **2,673** ops = 11.2 µs" | **2,690** ops | 2,673 is the f32 CENSUS convention; the grader's convention adds the opening `f64→f32` weight cast (+16 ops). See `docs/GOTCHAS.md` |
+> | leaders "0.29–0.39 s residual" | **0.10–0.36 s** | false for suliman_tadros `0.124`, Puffi `0.193`, hyojun_kwon `0.237` |
+>
+> The Slice-2 plan revision at the end of this file also says Strassen depth is
+> "bounded by the ops budget". **It is not** — at these shapes a fully batched
+> Strassen level costs a flat 23 operations, so even L=5 stays inside the gate.
+> What binds is **memory**: the operand stacks grow as `(7/4)^L` and a fully
+> batched L=3 on the widest shape class raises `MemoryError` against an
+> `8,192 MB` graded limit. `local_sim/p2_strassen_plan.py` carries the frontier.
+
+---
+
 ## 0. The verdict in one page
 
 **Where we are.** Best public entry 329896 (`estimator_wp18_canary4.py`, the regenerating K3 flow): adjusted **8.50e-8**, raw 8.50e-7, at the 0.1 multiplier floor, 0/100 failures, **rank #47 of 109** today. The board top is **3.80e-9** (marius_binner, raw 1.87e-8 at util 0.205; a brand-new entrant, suliman_tadros, tied at 3.80e-9 after 13 entries). We are 22× off #1 and ~8× off top-10 (1.0e-8).
