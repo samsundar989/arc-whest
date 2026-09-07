@@ -119,9 +119,26 @@
 >    | **4** | **`0.48281`** | **`18,532`** | **`4,534`** | **`1.8247e-08`** |
 >
 >    **L=4 hits the handoff's score target.** NOT YET BUILT — this prices a
->    candidate that does not exist. float32 parity is the open risk: the probe
->    reads `1.3e-06` relative at L=3 against a `1e-06` bar. Then dead-column
->    pruning, aliased self-contractions, per-MLP variable spend.
+>    candidate that does not exist, and the adjusted column assumes Strassen is
+>    exact.
+>
+>    **The gating risk is measured and the `1e-6` parity bar is the WRONG
+>    INSTRUMENT.** At the live shapes every arm, L=1 included, is over it — but
+>    the plain float32 matmul is itself `4–8e-7` off float64 there, so a `1e-6`
+>    bar allows only `1.3–2.5x` the error float32 already commits. Quote EXCESS
+>    over the float32 baseline instead: L=1 `1.4–2.4x`, L=2 `2.7–6.1x`, L=3
+>    `3.9–12x`, L=4 `5.4–30x`. Error is driven by the CONTRACTION LENGTH — `30x`
+>    at `k=14336` against `6.5x` at `k=1024`, same array sizes — so a per-group
+>    depth is an unpriced design option.
+>
+>    **Break-even is generous**: at L=4 the multiplier falls `0.619x`, so raw MSE
+>    may rise to `6.10e-08` from `3.78e-08` before the trade stops paying. Whether
+>    it does is a question for the **24-net paired raw MSE**, not for a per-matmul
+>    relative error — and that is a STRATEGIC slice needing a pre-registered
+>    contract and a seed block (`P06[..064..127]` unspent). Slice 1 closed two
+>    accuracy-for-budget lanes, so the sign is genuinely open.
+>
+>    Then dead-column pruning, aliased self-contractions, per-MLP variable spend.
 > 2. **The accuracy layer (handoff §3) is the critical path** — Part C of Slice 1
 >    was never run. O1 renormalisation, Edgeworth-4 with per-neuron diagonal κ₄,
 >    AUGMENT sign, and the Puffi SSC κ₄-response closure (go/no-go ≥ `1.5x` by

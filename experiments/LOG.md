@@ -34416,3 +34416,155 @@ strictly worse for the project. So:
    derivation for it afterwards is worse than quoting it plainly.
 5. A constant that no gate recomputes will drift, and the drift will be invisible
    because it lives in prose that reads like a measurement.
+
+
+---
+
+# 2026-09-07 — LEVER 2a PRICED AND ITS GATING RISK MEASURED: the `1e-6` parity bar is the WRONG INSTRUMENT at the live shapes, and the decision belongs to the 24-net paired raw MSE
+
+**Class: ROUTINE** (five lab scripts; no seed block, no shipped file, no gate
+moved). Everything here prices a candidate that **has not been built**, and
+nothing here is a promotion.
+
+## 1. The three facts that make batched Strassen possible at all
+
+Measured, because none of them is documented anywhere we control
+(`local_sim/p2_batched_matmul_probe.py`):
+
+1. **`fnp.matmul` on 3-D operands is ONE flopscope operation**, billed at exactly
+   `b * m * n * (2k - 1)` — no batching surcharge, verified to the FLOP at
+   `b = 128`. So the seven sub-products of a Strassen level cost ONE operation.
+2. **Slicing is free** — 0 FLOPs and 0 operations. Quadrant extraction is a view.
+3. **A whole batched level costs a flat 23 operations**, however wide the batch
+   has already grown. Operations therefore grow LINEARLY in the recursion depth,
+   not as `7^L`. That is the entire escape from the ranked lever list's warning
+   that the naive recursion issues ~1.1M operations per MLP.
+
+**A trap found on the way, and it invalidates any FLOP figure taken carelessly:**
+`fnp.zeros(shape) + 1.0` is tagged SYMMETRIC by flopscope, which then bills
+operations on it at the UNIQUE-ENTRY rate. A `(7,128,128)` add came to `57,792`
+FLOPs — exactly `7 · 128 · 129 / 2` — instead of `114,688`. Every probe operand in
+this repository must be random, and the first version of my own probe was wrong
+by ~2x because of it.
+
+## 2. THE HANDOFF'S BINDING CONSTRAINT IS THE WRONG ONE — it is memory, not operations
+
+The handoff says to "ship the deepest L whose ops ≤ 24k", expects L=3 "at ~15–20k
+ops", and calls L=4 "feasible only if the base op count gets under ~4k". At this
+chain's shapes both halves are wrong, in opposite directions.
+
+The chain's 797 logical matmuls are already 148 metered calls carrying **99.80%
+of the FLOPs**, and the operation log clusters them into **30 SIMULTANEOUS
+invocation groups** — three per layer (`_advance`'s trio, the birth pair,
+`_dslice21`'s four), separated by long gaps that are layer boundaries and
+therefore data dependencies. Shape does not determine batchability; simultaneity
+does, and grouping by shape class (as my first pricing pass did) is optimistic.
+
+Operations are not scarce. **Memory is.** Each level multiplies the batch axis by
+7 while halving each dimension, so operand stacks grow as `(7/4)^L`. MEASURED on
+the widest group, `(1024,14336) @ (14336,1024) × 4`, one process per point, peak
+working set over the operands:
+
+    L    fully batched (s=0)      top level split 7 ways (s=1)
+    1        +896 MB                    +145 MB
+    2      +2,688 MB                    +475 MB
+    3    MemoryError at 5,555 MB        +922 MB
+    4    MemoryError                  +1,706 MB
+
+A fully batched L=3 **does not fit**, on a host with room to spare, against a
+graded limit of `8,192 MB` and an existing peak of `2,827.5 MB`. Expanding the top
+level into seven sequential sub-problems costs a few hundred operations per
+invocation and divides peak memory by about six.
+
+## 3. THE FRONTIER (`local_sim/p2_strassen_plan.py`)
+
+Give each invocation group the cheapest `split_top` that fits memory, then check
+operations against the `22,000` gate:
+
+| L | chain B | ops (gate `22,000`) | worst peak MB (limit `8,192`) | adjusted at graded raw |
+|---:|---:|---:|---:|---:|
+| 0 | `0.77969` | `3,232` | `2,828` | `2.9467e-08` |
+| 1 | `0.68346` | `3,922` | `3,724` | `2.5830e-08` |
+| 2 | `0.60250` | `4,612` | `5,516` | `2.2770e-08` |
+| 3 | `0.53528` | `13,702` | `3,750` | `2.0230e-08` |
+| **4** | **`0.48281`** | **`18,532`** | **`4,534`** | **`1.8247e-08`** |
+
+**L=4 reaches the handoff's Sep-19 target** (`≤0.45 B`… `adjusted ≤1.8e-8`) on the
+score axis, slightly short on `B`. The adjusted column holds raw MSE at the GRADED
+`3.7793e-08` and moves ONLY the multiplier — i.e. it assumes Strassen is exact.
+Section 4 is why that assumption cannot be waved through.
+
+## 4. THE GATING RISK, MEASURED — and the bar it was written against is unusable
+
+`local_sim/p2_strassen_parity.py`, at the chain's real shapes, float32, against a
+float64 reference, two operand distributions (white, and a correlated
+decaying-spectrum "covlike" operand closer to a propagated cumulant block):
+
+    shape (m,k,n)        L    strassen vs f32   baseline f32 vs f64   EXCESS
+    (1024,14336,1024)    1        1.08e-06            4.03e-07         2.44x
+    (1024,14336,1024)    2        2.19e-06            4.03e-07         5.38x
+    (1024,14336,1024)    3        4.90e-06            4.03e-07        12.14x
+    (1024,14336,1024)    4        1.23e-05            4.03e-07        30.18x
+    (1024,1024,14336)    4        5.40e-06            8.26e-07         6.45x
+    (1024,1024,1024)     4        4.38e-06            5.28e-07         8.19x
+
+**Every arm at every depth, L=1 included, is over the handoff's `1e-6` relative
+bar.** But the bar is the wrong instrument, and the `baseline` column is why:
+**the plain float32 matmul is itself `4–8e-7` off float64 at these shapes.** A
+`1e-6` bar therefore permits only `1.3–2.5×` the error float32 already commits,
+which no reassociation of a `k = 14336` contraction is going to satisfy. The bar
+was written from an `n = 128` probe, where the baseline is far smaller.
+
+Two structural readings worth keeping:
+
+- **The long contraction dimension is what hurts.** `(1024, 14336, 1024)` degrades
+  to `30×` excess at L=4 while `(1024, 1024, 14336)` — same size, contraction over
+  1024 — reaches only `6.5×`. Strassen's cancellations accumulate along `k`. A
+  per-group depth that goes deep only on short-`k` groups is therefore a real
+  design option and is not yet priced.
+- **`covlike` is consistently gentler than white** (L=4: `15.3×` vs `30.2×` on the
+  widest shape), so the real operands are likely the easier case — but "likely" is
+  not a measurement of the real operands.
+
+## 5. WHAT THIS DOES *NOT* SETTLE, AND THE EXPERIMENT THAT WOULD
+
+**A per-matmul relative error is not a score.** The binding statistic is the paired
+arithmetic difference in raw MSE on 24 nets against the GT noise floor
+(`VALIDATION.md` §2b-i), and this measures one matmul in isolation while the chain
+applies sixteen layers of them and compounds.
+
+The break-even is generous and should be stated so nobody kills the lever on
+section 4 alone: at L=4 the multiplier falls `0.77969 → 0.48281`, a factor of
+`0.619`, so **raw MSE may rise by up to `1.615×` — from `3.78e-08` to `6.10e-08` —
+before the trade stops paying.** An order-of-magnitude argument says there is room:
+a relative error of `1.2e-05` on O(1) activations induces a squared error near
+`1.4e-10`, which is `270×` below the current raw MSE. **That is an argument, not a
+measurement**, it ignores compounding across layers, and Slice 1 closed two lanes
+(generation truncation, last-layer capping) precisely because accuracy-for-budget
+trades on this chain lose. It must be measured.
+
+**The next experiment, and it is a STRATEGIC slice requiring a pre-registered
+contract and a seed block before any data exists:** build the L=2 and L=4 arms in
+the numpy/torch reference chain, and measure the paired raw MSE against the exact
+chain on 24 nets with common random numbers, gate on
+`competition_score.decide(...)` written on the DIFFERENCE, with the GT noise floor
+quoted. `P06[..064..127]` is still unspent. Predict before running, and take
+Samuel's prediction too — the sign here is genuinely open, which is what makes it
+worth predicting.
+
+## Knowledge delta
+
+1. **A batched flopscope matmul is one operation with no billing surcharge**, and
+   slices are free. This is what makes any Strassen spelling viable here.
+2. **A Strassen level costs a flat 23 operations.** Depth is not an operations
+   problem at these shapes.
+3. **It IS a memory problem**: `(7/4)^L` operand growth, `MemoryError` at a fully
+   batched L=3 on the widest group. Splitting the top level 7 ways fixes it for a
+   few hundred operations.
+4. **`fnp.zeros(...) + 1.0` is billed as SYMMETRIC.** Probe operands must be
+   random or every FLOP figure is ~2x low.
+5. **A `1e-6` relative parity bar is unusable at 1024×16**: float32 itself is
+   `4–8e-7` off float64 there. Quote EXCESS over the float32 baseline, not
+   absolute relative error, and decide on the paired raw MSE.
+6. **Strassen error is driven by the contraction length `k`**, not by operand
+   count: `30×` excess at `k=14336` against `6.5×` at `k=1024`, same array sizes.
