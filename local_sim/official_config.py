@@ -440,6 +440,7 @@ GRADED_RESIDUAL_PROVENANCE = (
 #:     submission        FLOPs      kernel wall   GFLOP/s   predict wall (worst)
 #:     330212 k3_full    1,714.6 G     7.97 s      215.1        9.54 s
 #:     330290 L=4        1,068.2 G    98.96 s       10.8      114.68 s   <- 1.046x
+#:                                                                   (0.65x under contention)
 #:
 #: A 0.62x cut in FLOPs bought a 12.4x rise in kernel wall, because arithmetic
 #: intensity fell 20x. The worst graded row cleared the cap by 5.3 SECONDS.
@@ -457,6 +458,25 @@ GRADED_WALL_S_PER_MLP_OBSERVED: Dict[str, float] = {
 #: Worst graded predict wall seen, in seconds, against the 120 s cap. A candidate
 #: whose projected wall exceeds this needs its own graded measurement first.
 GRADED_WALL_S_WORST_OBSERVED: float = 114.68
+
+#: How much the grading server's wall can move BETWEEN RUNS of identical bytes.
+#: MEASURED, not assumed: v2.7 was graded twice, `328664` (0.16.0/0.12.0) and
+#: `329889` (0.16.1/0.12.1), with `flops_used = 137,617,136,672` on both.
+#:
+#:     run      wall median   wall max    max/med   rows > 1.15x med
+#:     328664     0.9209 s    1.0527 s     1.143          0 / 100
+#:     329889     0.9151 s    1.5979 s     1.746         16 / 100
+#:
+#: The median moved `-0.6%` and the MAXIMUM moved `+51.8%`, in a contiguous index
+#: window -- a server-contention episode, on the stack that grades us now. Any
+#: wall margin has to survive this, because a failed MLP is zeroed at multiplier
+#: 1.0 and costs ~3e5 at our operating point.
+#:
+#: UNRESOLVED, and it is why this is a planning factor and not a law: nobody here
+#: can tell whether a 1.6x episode on a 0.9 s/MLP file scales multiplicatively to
+#: a 105 s row or is a fixed per-row overhead invisible at that scale. The
+#: grading server is not instrumentable from here.
+GRADED_WALL_CONTENTION_FACTOR: float = 1.60
 
 #: The op-count gate for a Phase-2 candidate. 30,000 -> 22,000 on 2026-09-07.
 #: 22,000 ops x 13.4 us = 0.295 s against the 0.4 s cliff, a 1.36x margin,
@@ -992,11 +1012,37 @@ def verify() -> Tuple[List[Tuple[str, bool, str]], bool]:
           f"carried {GRADED_WALL_S_WORST_OBSERVED:.2f}s vs"
           f" observed {max(_wall.values()):.2f}s"
           if _wall else "no reports")
-    check("the worst graded wall still leaves a margin -- WARN if under 1.25x",
-          bool(_wall)
-          and PHASE2.wall_time_limit_s / max(_wall.values()) >= 1.04,
-          f"{PHASE2.wall_time_limit_s / max(_wall.values()):.3f}x"
-          if _wall else "-")
+    # THE CHECK THIS REPLACES WAS THE REPOSITORY'S OWN NAMED FAILURE MODE, and an
+    # independent Skeptic caught it inside the very commit whose knowledge-delta
+    # said "a constant no gate scans is a constant nobody has checked". It read:
+    #
+    #     check("the worst graded wall still leaves a margin -- WARN if under
+    #            1.25x", ... >= 1.04, ...)
+    #
+    # The label advertised 1.25x, the predicate tested 1.04x, and the observed
+    # value was 1.046x -- a threshold set 0.6% below the datum that motivated
+    # writing it, reporting PASS under a label it did not test. It was also
+    # unfalsifiable by construction, because the quantity it compared against is
+    # DEFINED as max(_wall.values()).
+    #
+    # The replacement tests a PROPERTY instead of reporting a STATE: does every
+    # graded row survive the contention factor MEASURED on identical bytes graded
+    # twice? v2.7's 328664 -> 329889 moved the median wall -0.6% and the MAXIMUM
+    # +51.8%, 16/100 rows above 1.15x median. A candidate with less margin than
+    # that has an already-observed failure mode, and a failed MLP is zeroed at
+    # multiplier 1.0 -- at our operating point a ~3e5 score penalty.
+    _surv = {k: PHASE2.wall_time_limit_s / (v * GRADED_WALL_CONTENTION_FACTOR)
+             for k, v in _wall.items()}
+    # Framed as a SELECTION criterion, not a repository invariant: history is
+    # allowed to contain thin rows, but we must always still HOLD a candidate
+    # that survives contention, or there is nothing safe to designate. The
+    # per-submission margins stay in the detail string so a thin one is visible
+    # rather than averaged away.
+    check("a contention-surviving nominee still exists "
+          f"(margins at the MEASURED {GRADED_WALL_CONTENTION_FACTOR:.2f}x)",
+          bool(_surv) and any(m >= 1.0 for m in _surv.values()),
+          "  ".join(f"{k}={m:.2f}x" for k, m in sorted(_surv.items()))
+          + "   <1.00x = that submission would FAIL rows on a busy server")
 
     check("the op gate leaves at least a 1.25x margin under the cliff at the "
           "carried per-op figure",
