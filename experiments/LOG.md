@@ -36263,3 +36263,89 @@ integer partitions the algorithm forms, which is width-independent. It is **not*
 a downscaled measurement of the quantity under test, and no accuracy number was
 taken from it. Samuel's instruction that a width-512 proxy would not answer D1's
 question stands and is not weakened by this — D1 remains a 1024×16 job.
+
+## Addendum, same day — the fused spelling looks AFFORDABLE, and here is the term count
+
+*Desk exercise promised in the entry above. Enumeration is exact; the FLOP figure
+is a back-of-envelope ESTIMATE and is labelled one. No GPU, no seed block.*
+
+`vector_partitions((2,1,1))` returns **11 terms**. Writing axis 0 for the doubled
+index `i`, axis 1 for `j`, axis 2 for `k`, and marking each block by the axes it
+occupies:
+
+| # | blocks | coef | widest block |
+|---:|---|---:|---|
+| 1 | `(0,0,1)·(0,1,0)·(1,0,0)·(1,0,0)` | 1 | 1 axis |
+| 2 | `(0,0,1)·(0,1,0)·(2,0,0)` | 1 | 1 axis |
+| 3 | `(0,0,1)·(1,0,0)·(1,1,0)` | 2 | 2 axes |
+| 4 | `(0,0,1)·(2,1,0)` | 1 | 2 axes |
+| 5 | `(0,1,0)·(1,0,0)·(1,0,1)` | 2 | 2 axes |
+| 6 | `(0,1,0)·(2,0,1)` | 1 | 2 axes |
+| 7 | `(0,1,1)·(1,0,0)·(1,0,0)` | 1 | 2 axes |
+| 8 | `(0,1,1)·(2,0,0)` | 1 | 2 axes |
+| 9 | `(1,0,0)·(1,1,1)` | 2 | **3 axes — but DROPPED, see below** |
+| 10 | `(1,0,1)·(1,1,0)` | 2 | 2 axes |
+| 11 | `(2,1,1)` | 1 | **3 axes — the identity term** |
+
+**Nine of the eleven terms are products of objects with at most two axes.** Each
+is an elementwise product of `(n,n)`, `(n,)` and scalar factors broadcast into
+`(n,n,n)` — never an intrinsically order-3 quantity. Contracting such a product
+distributes onto its factors as traces, matrix–vector and matrix–matrix products,
+so none of the nine needs the `n³` buffer.
+
+**Term 9 does not exist.** Its block `(1,1,1)` needs `A[3].get_slice((1,1,1))` —
+the degree-3 **all-distinct** slice — which the factored path never puts in the
+`DSTower` (it lives as a `FactoredTensor`). `get_block` raises, and because
+`DS_pK_to_K` is called with `strict = not augment` = `False`
+(`factor_k3.py:466`), the `except` branch returns `0.` and the term drops. That
+is `factored_keeps_term`'s documented dropping, arriving here as a silent zero.
+**Worth flagging on its own account:** the augment path's correctness depends on
+a bare `except:` returning `0.` for a slice that is *legitimately absent*, and
+the same `except:` would swallow a slice that is absent *by mistake*. Not a
+defect we introduced and not one to fix in a read-only checkout, but it is the
+kind of thing a port must not copy.
+
+**Term 11 is the identity term** — `pK`'s own `(2,1,1)` slice, which is itself
+built in §3.1 by `eval_part`, from the same product-of-broadcast-blocks
+machinery. So it fuses by the same argument, one level up.
+
+### The estimate, with its assumptions stated
+
+Every `n³` object in the AUGMENT path is (a) a product of ≤2-axis broadcast
+factors and (b) consumed **only** by a contraction back to ≤2 axes
+(`DS_harmonic_proj(K_ds[4], r_out=1)` → an `(n,n)` core). Fusing trades memory
+for arithmetic in the standard way: an `Σ_k A_ik B_jk C_ij` shape costs `n³`
+**FLOPs** but only `n²` **memory**.
+
+    ~10 surviving terms x 2 contractions (L^1, L^2) x 2 n^3 flops x 16 layers
+      ~= 6.8e11 FLOPs  ~= 0.31 B          (B = 2.2e12 FLOPs at this shape)
+
+against the shipped chain's `0.537 B`. **Assumptions this rests on, any of which
+could move it by 2x either way:** that no term needs more than one `n³`-shaped
+contraction; that several of the nine collapse to `n²` outright (likely — terms
+1, 2, 7, 8 have no two-axis factor sharing an axis pair, so they should reduce to
+outer products of traces); and that `L¹`/`L²` do not each require a separate
+pass. It is an order-of-magnitude sanity check, **not a price**. The price comes
+from `p2_flop_anchor` on an actual fnp spelling, per the measurement law.
+
+### What this changes
+
+**Memory is not the wall it first appeared to be — arithmetic is the real
+question, and it looks payable.** The Step-2 precondition added above stands, but
+its expected answer moves from "probably impossible" to "probably affordable,
+needs deriving". Concretely, Step 2's first task is now well-posed and small:
+
+> Derive the fused contraction for the nine surviving vector partitions of
+> `(2,1,1)`, verify it against upstream's dense `DS_pK_to_K` + `DS_harmonic_proj`
+> at `n = 32/64` to float precision, and price it with `p2_flop_anchor`.
+
+That is the same shape of task as the `core ↔ T` identity in D2, which was
+derived, verified against upstream at small `n` (`2e-12`), and then used at
+`n = 1024` — so the method is already proven in this slice.
+
+**And it would unblock D1 immediately.** A fused torch spelling runs the AUGMENT
+arm in `~2 GiB` instead of `≥26 GiB`, which removes the queue contention that is
+currently the only thing between us and D1's number. That is a reason to do it
+now rather than in Step 2 — but it must be *verified against the dense path*
+before any accuracy number taken through it is quoted, because a fused spelling
+that is subtly wrong would produce a plausible D1 number and no error.
