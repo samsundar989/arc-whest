@@ -1,0 +1,304 @@
+{
+  "artifact": "candidate_certification",
+  "artifact_version": 1,
+  "candidate": "estimator_k3_strassen.py",
+  "candidate_sha256": "052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58",
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "truth_free": false,
+  "confirm_tier_read": true,
+  "is_shipped_file": false,
+  "sections": {
+    "validate": {
+      "returncode": 0
+    },
+    "package_identity": {
+      "whestbench": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\whestbench\\__init__.py",
+      "flopscope": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\__init__.py",
+      "official_config_rc": 0
+    },
+    "invariants": {
+      "returncode": 1,
+      "tail": "  layer 5 scaled 0.001               RAISED MemoryError: Unable to allocate 5.36 MiB for an array with shape (343, 64, 64) and data type float32",
+      "world": {
+        "phase2": true,
+        "real_flopscope": true,
+        "weights_mode": "f64_readonly"
+      },
+      "arc_whest_raw_mse": "(unset: the frozen 1.4e-6 decision signal)"
+    },
+    "inv9_battery": {
+      "returncode": 0,
+      "tail": "BATTERY PASSED -- every deliberate equivariance defect is still rejected, the equivariant control is still accepted, and the unmutated prediction passes."
+    },
+    "determinism": {
+      "fresh_worker": [
+        {
+          "sha256": "b3f2f612fa36316792f6e3932117a02d91f61f44d75fa656f17b7f2f54230d36",
+          "shape": [
+            16,
+            1024
+          ],
+          "flops_used": 1068211920486.0,
+          "pid": 15784
+        },
+        {
+          "sha256": "91804bd926dac2e11128a382a2db1f6125ca1178c5e7aff6d3947a95e1ccc90d",
+          "shape": [
+            16,
+            1024
+          ],
+          "flops_used": 1068211920486.0,
+          "pid": 22588
+        }
+      ]
+    },
+    "metered_runs": [
+      {
+        "seed": 90000000201,
+        "error": "",
+        "flops_used": 1068245507686.0,
+        "n_ops": 15393,
+        "multiplier": 0.48578181471657444,
+        "residual_wall_time_s": 9.912786699889693,
+        "wall_time_s": 87.6864091999596,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.382906436920166,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.4750628127165855,
+        "weights_mode": "f64_readonly"
+      },
+      {
+        "seed": 90000000202,
+        "error": "",
+        "flops_used": 1068245507686.0,
+        "n_ops": 15393,
+        "multiplier": 0.48578181471657444,
+        "residual_wall_time_s": 9.95070679782657,
+        "wall_time_s": 88.56765009998344,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.5427141189575195,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.7016218722926212,
+        "weights_mode": "f64_readonly"
+      },
+      {
+        "seed": 90000000203,
+        "error": "",
+        "flops_used": 1068245507686.0,
+        "n_ops": 15393,
+        "multiplier": 0.48578181471657444,
+        "residual_wall_time_s": 9.896112899878062,
+        "wall_time_s": 86.15559779998148,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.4587082862854,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.7448653399874499,
+        "weights_mode": "f64_readonly"
+      },
+      {
+        "seed": 90000000204,
+        "error": "",
+        "flops_used": 1068245507686.0,
+        "n_ops": 15393,
+        "multiplier": 0.48578181471657444,
+        "residual_wall_time_s": 10.00570439628791,
+        "wall_time_s": 88.450554799987,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.280097484588623,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.6246376051417453,
+        "weights_mode": "f64_readonly"
+      }
+    ],
+    "setup_s_local": 0.0006089999806135893,
+    "grader_twin_arm": {
+      "seed": 90000000201,
+      "certified_under": "f64_readonly",
+      "f32_tolerance": 9.5367431640625e-07,
+      "weight_pass_flops": 33554432,
+      "arms": {
+        "f32": {
+          "error": "",
+          "flops_used": 1068211953254.0,
+          "n_ops": 15377,
+          "finite": true,
+          "shape": [
+            16,
+            1024
+          ],
+          "mean_square_final_row": 0.4750628127165855
+        },
+        "f64": {
+          "error": "",
+          "flops_used": 1068245507686.0,
+          "n_ops": 15393,
+          "finite": true,
+          "shape": [
+            16,
+            1024
+          ],
+          "mean_square_final_row": 0.4750628127165855
+        },
+        "f64_readonly": {
+          "error": "",
+          "flops_used": 1068245507686.0,
+          "n_ops": 15393,
+          "finite": true,
+          "shape": [
+            16,
+            1024
+          ],
+          "mean_square_final_row": 0.4750628127165855
+        },
+        "f64_listconstructed": {
+          "error": "",
+          "flops_used": 1068245507686.0,
+          "n_ops": 15393,
+          "finite": true,
+          "shape": [
+            16,
+            1024
+          ],
+          "mean_square_final_row": 0.4750628127165855
+        }
+      }
+    },
+    "windows_memory_accounting": {
+      "available": true,
+      "source": "test_deployment_envelope.peak_memory_bytes",
+      "peak_wset_bytes": 3794530304,
+      "peak_pagefile_bytes": 4318400512
+    },
+    "subprocess_smoke": {
+      "ok_report": true,
+      "n_failed_mlps": 2,
+      "failure_breakdown": {
+        "budget_exhausted": 0,
+        "time_exhausted": 0,
+        "residual_wall_time_exhausted": 2,
+        "combined_budget_exhausted": 0,
+        "error": 0
+      },
+      "failures": [
+        {
+          "rep": 1,
+          "mlp_index": 0,
+          "mlp_name": "logan-fitzgerald",
+          "error_code": null,
+          "error": null,
+          "flags": [
+            "residual_wall_time_exhausted"
+          ],
+          "traceback_last_line": null,
+          "deepest_candidate_frame": null,
+          "residual_wall_time_s": 9.850912898487877,
+          "flops_used": 1068211953254
+        },
+        {
+          "rep": 1,
+          "mlp_index": 1,
+          "mlp_name": "william-graves",
+          "error_code": null,
+          "error": null,
+          "flags": [
+            "residual_wall_time_exhausted"
+          ],
+          "traceback_last_line": null,
+          "deepest_candidate_frame": null,
+          "residual_wall_time_s": 8.63567110337317,
+          "flops_used": 1068211953254
+        }
+      ],
+      "dataset": "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
+      "width": 1024,
+      "depth": 16,
+      "lambda": 0.0,
+      "residual_cap": 0.4,
+      "wall_limit": 120.0,
+      "worst_residual": 9.850912898487877,
+      "flops_per_mlp": 1068211953254,
+      "multiplier": 1.0,
+      "c_over_b": 0.48576655592751194,
+      "final_layer_mse_CONFIRM_ONLY": 1.0336934924125671
+    },
+    "residual_soak": {
+      "requested": false
+    }
+  },
+  "checks_total": 49,
+  "checks_failed": [
+    "[3] 3: the invariant suite passes on THIS candidate, at the LIVE shape and in the grader's dtype",
+    "[10] 10: zero failed MLPs",
+    "[10] 10: worst GRADED-PATH residual is under the cliff"
+  ],
+  "checks_skipped": [
+    "[9] 9: the real 8-GiB enforcement -- no linux_memory_gate report FOR THIS CANDIDATE. Run: uv run python local_sim/linux_memory_gate.py --candidate estimator_k3_strassen.py --json <dir>/linux_memory_gate_estimator_k3_strassen.json"
+  ],
+  "verdict": "REFUSED"
+}

@@ -34897,3 +34897,153 @@ error that does not exist.
 4. Method note worth keeping: a nested ladder of arms (1 → 16 → 32 parameters) is
    worth more than a single fit, because the FLATNESS of the ladder identified
    *what kind* of error this is, which a single number could not.
+
+
+---
+
+# 2026-09-08 — WP21 RESULT: **batched Strassen costs NO measurable accuracy.** L=4 clears the gate at `0.48578 B`, adjusted `1.9750e-08`.
+
+Evidence packet for the contract registered at `519b545` on 2026-09-07, committed
+**before any of these numbers existed**. Gate, falsifier, predictions and cost
+model were all frozen there.
+
+## The measurement
+
+`local_sim/p2_wp21_score.py`, workerq job 350, 59 min.
+Artifact: `experiments/2026-09-05_slice1/wp21_strassen_score.json`.
+Tier P01 DESIGN, 24 nets, `gt_halfA/B.npz` at `2**26` samples per half.
+**GT noise floor on the averaged truth: `6.1271e-10`** (cross-replica `2.4509e-09`).
+
+The control reproduced Slice 1 before any arm was allowed to run — the harness
+refuses otherwise:
+
+    raw final-layer MSE   4.065813e-08   recorded 4.004541e-08   delta 1.530%
+    counted FLOPs         1,714,587,938,406   == the graded total of 330212, exactly
+    operations            3,249 in the grader's convention
+
+| L | raw MSE | vs ctrl | B | ops | adjusted | vs ctrl | 95% studentised-t on the paired diff | verdict |
+|---:|---:|---:|---:|---:|---:|---:|---|---|
+| 0 | `4.065813e-08` | `1.00000` | `0.77970` | 3,249 | `3.170132e-08` | `1.0000` | control | — |
+| 1 | `4.065170e-08` | `0.99984` | `0.68493` | 6,285 | `2.784377e-08` | `0.8783` | `[+3.643e-09, +4.047e-09]` | **PROMOTE** |
+| 2 | `4.065716e-08` | `0.99998` | `0.60422` | 9,321 | `2.456576e-08` | `0.7749` | `[+6.739e-09, +7.485e-09]` | **PROMOTE** |
+| 3 | `4.065926e-08` | `1.00003` | `0.53745` | 12,357 | `2.185229e-08` | `0.6893` | `[+9.304e-09, +1.033e-08]` | **PROMOTE** |
+| **4** | `4.065535e-08` | **`0.99993`** | **`0.48578`** | **15,393** | **`1.974963e-08`** | **`0.6230`** | `[+1.129e-08, +1.254e-08]` | **PROMOTE** |
+
+**Raw MSE moves by at most `0.02%` across a `1.605×` change in the multiplier.**
+Every interval strictly excludes zero in the arm's favour, so the frozen gate
+promotes **the deepest, L=4**.
+
+## The counter-mechanism the contract named did NOT fire
+
+The contract's reason for treating the sign as genuinely open was specific:
+
+> "The tower carries THIRD cumulants, which are differences of larger quantities
+> and therefore ill-conditioned… Reassociation error on a near-cancellation is not
+> small relative to the *result*, only relative to the *operands*. If the error
+> lands in the κ₃ channel, raw MSE can rise far faster than the per-matmul figures
+> suggest, and the lever dies exactly as generation truncation did."
+
+It does not fire. At L=4 the raw-MSE ratio is `0.99993` — indistinguishable from 1,
+and in the *favourable* direction by an amount that is plainly noise. Whatever
+conditioning the κ₃ slice has, four levels of Winograd reassociation do not excite
+it at these shapes.
+
+## Against the pre-registered predictions — two were WRONG, both the same way
+
+| # | prediction | actual | verdict |
+|---|---|---|---|
+| P1 | L=1 raw ratio `1.000–1.02` | `0.99984` | correct (at the very bottom) |
+| P2 | L=2 raw ratio `1.00–1.06` | `0.99998` | correct (at the bottom) |
+| P3 | L=3 raw ratio `1.01–1.20` | `1.00003` | **WRONG — below the range** |
+| P4 | L=4 raw ratio `1.02–1.40`, point `1.10` | `0.99993` | **WRONG — far below** |
+| P5 | best is L=4, `1.85e-08–2.6e-08`, point `2.0e-08` | L=4 at `1.9750e-08` | correct, near the point |
+| P7 | land well under break-even `6.428e-08` | `4.0655e-08` | correct, `1.58×` to spare |
+
+**The instrument that misled me is named, because it will mislead the next reader
+too.** `p2_strassen_parity.py` measured per-matmul float32 excess over the plain
+`@` baseline at `1.4–2.4×` for L=1 and `5.4–30×` for L=4, and I sized P3 and P4 off
+it. End-to-end damage is **zero**. That entry already warned "a per-matmul pass is
+NECESSARY and NOT SUFFICIENT"; the correction is stronger and points the other way
+— **a per-matmul relative error is not even a useful upper bound on end-to-end
+damage.** Two reasons, both visible in advance:
+
+1. The predictions are a *mean* channel averaged over 1024 neurons, and
+   reassociation error is zero-mean and near-independent across entries, so it
+   cancels rather than accumulates.
+2. Induced MSE goes as the SQUARE of a relative error on an O(1) signal: `1.2e-05`
+   relative implies `~1.4e-10`, which is `290×` below a raw MSE of `4.07e-08`.
+   That argument was in the parity entry marked SPECULATIVE, and it was the whole
+   story.
+
+**Samuel's prediction was "I don't know", recorded before the result.** Given that
+both of my own point predictions on the accuracy axis were wrong in the same
+direction, that was the better-calibrated answer.
+
+## A shape-genericity defect caught before it could ship
+
+Testing at non-live shapes exposed that deep Strassen **costs** FLOPs when operands
+are small — the Winograd glue is `O(n^2)` per level growing as `(7/4)^L`, while the
+saving is `O(n^3)`:
+
+    shape     L=0          L=2          L=4
+    48 x 5    14,382,001   14,255,857   21,013,741      <- L=4 is 46% WORSE
+    64 x 4    19,716,466   18,679,410   25,381,826
+    96 x 3    31,960,667   28,743,707   35,085,287
+
+A fixed depth would have been over budget at every shape except the live one —
+**the exact defect the Slice-1 review flagged in `_regen`**, reintroduced by a
+different route. `_depth_for(m, k, n)` now grants a level only while the smallest
+operand dimension stays `>= 64` after halving. At 1024 that is not binding
+(`1024 >> 4 = 64`), so the live shape keeps L=4 in full and the frozen cost model
+is unchanged; everything from `2x2` to `96x3` is now bit-identical to L=0, while
+`128x3` gets `0.9137×` and `256x4` `0.8134×`.
+
+## CERTIFICATION — and the one number that decides the submission
+
+`certify_candidate.py --candidate estimator_k3_strassen.py`, sha256
+`052dd768…`, artifact `experiments/2026-09-05_slice1/certify_k3_strassen.json`.
+
+Green on everything that tests the arithmetic and the contract:
+
+    4   determinism, two fresh interpreters, bitwise + FLOP-identical    PASS
+    5   metered runs under the grader-twin arm (f64 read-only)           PASS
+    5b  four dtype arms agree to 0.000e+00 relative; the f64-vs-f32
+        FLOP delta is EXACTLY 1.0000 passes over the weights             PASS
+    6   FLOPs network-INDEPENDENT; multiplier == max(0.1, F/B) = 0.485782 PASS
+    7   op count 15,393 inside the 22,000 gate -> predicted graded
+        residual 206.3 ms, 1.94x under the cliff                        PASS
+    8   ZERO scalar materializations in predict                          PASS
+
+Linux 8-GiB gate, run under the REAL cap: **13/13 PASS, VmPeak `5,563 MB` of
+`8,192` — `1.47×` headroom**, `finite`, `multiplier 0.48577`. (Its report records
+sha `64503c27…` rather than `052dd768…`; that is the git snapshot's LF line
+endings against the working copy's CRLF, and the FLOP totals match op for op, so
+the bytes tested are the same code. `certify` §9 SKIPPED on the sha mismatch,
+correctly and conservatively.)
+
+**The refusal is `§10`, and it is the known local-residual artefact — but larger
+than it has ever been.**
+
+    local subprocess residual   8.64 s and 9.85 s on two MLPs   (cap 0.4 s)
+    time_exhausted              0     -- the 120 s wall is NOT hit locally
+    predicted graded residual   0.206 s at the carried 13.4 us/op, 1.94x headroom
+
+Two models disagree by `4×` and they straddle the cliff:
+
+| model | prediction | basis |
+|---|---:|---|
+| op-count law | `0.206 s` **PASS** | `13.4 µs/op`, corroborated across 20 board rows spanning 6,223–33,818 ops — and 15,393 is INSIDE that range |
+| naive local:graded ratio | `0.80 s` **FAIL** | k3_full's own `12.3×` local:graded ratio applied to `9.85 s` |
+
+`AGENTS.md` is explicit that the second is not transferable — "canary4's
+local:graded ratio is not a general safety factor for a different candidate" — and
+`VALIDATION.md` §2b-iii makes the op count the gate. But the local per-op reading
+has itself jumped from `138 µs/op` to `~640 µs/op`, because Strassen's operations
+are concatenates and adds over multi-GB stacks and the local instrument charges
+that array traffic while the grader bills it to kernel and overhead.
+
+**This is precisely the extrapolation the Skeptic flagged as unresolved on
+2026-09-07**: our two direct calibration points are `1.21×` apart at ~3,000 ops,
+and this candidate runs `4.7×` beyond them. The board population covers the range
+but is inferred, not measured. **A graded run is the only instrument that settles
+it**, and it is cheap: one slot, and a failure is a public UNDESIGNATED row.
