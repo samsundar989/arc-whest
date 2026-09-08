@@ -34728,3 +34728,78 @@ authority**, and counted FLOPs / operations / residual headroom in the same tabl
   throughout; no arm may silently promote to float64.
 - `estimator.py` is NOT touched. The shipped file stays v2.6.1.
 - The 24 P01 nets are DESIGN, not a promotion tier. Nothing here is designated.
+
+
+---
+
+# 2026-09-07 — LEVER 2c CLOSED: the aliased-operand discount is REAL on 0.12.1 and this chain has NOWHERE to apply it
+
+**Class: ROUTINE.** A billing probe; no seed block, no shipped file, no gate.
+
+The ranked lever list carries "aliased-operand / symmetry tagging, `≤1.1×`, 0.12.1's
+changelog says charges are unchanged; do not plan on more", and handoff §2c asks
+for "every `X @ X.T`-shaped product spelled as `einsum('ij,kj->ik', X, X)` where
+the operands are literally the same buffer; measured `0.5005×` on those ops."
+
+**Both halves check out, and the lever is still inapplicable here.** Measured on
+the installed 0.12.1, `n = 512`, float32, random (non-symmetric) operands:
+
+    spelling                                    FLOPs        ops   ratio
+    X @ Y.T   (distinct operands)          268,173,312         1   1.0000
+    X @ X.T   (the SAME buffer)            268,173,312         1   1.0000   <- NO discount
+    einsum ij,kj->ik  on (X, X)            134,348,544         1   0.5010   <- the discount
+    einsum ij,kj->ik  on (X, Y)            268,173,312         1   1.0000
+    X @ X.T via a copy of X                268,435,456         2   1.0010
+
+So the discount is live, it is worth `0.5010×`, and it requires **both** the einsum
+spelling **and** literally the same buffer on both sides. `X @ X.T` on one buffer
+gets nothing.
+
+**The chain has no such site.** Every matmul in `estimator_k3_full.py` contracts two
+genuinely different arrays:
+
+    _advance      WT @ A_D,  WT @ A_L,  WT @ M
+    _dslice21     (A_D . M) @ M^T,  (M . M) @ A_D^T,
+                  (A_L . M) @ C_L^T,  (A_L . C_L) @ M^T
+    the layer     WT @ cov @ W
+
+The `_dslice21` products look self-contracting because each is an outer contraction
+of the tower against itself, but the two operands are always a DIFFERENT elementwise
+product of the blocks — `(A_D · M)` against `M`, never `M` against `M`. **Lever 2c
+yields nothing on this chain and is CLOSED.** Reopening condition: a future spelling
+that genuinely contracts one buffer with itself, which the packed-symmetric order-3
+idea (still SPECULATIVE on the ranked list) would create.
+
+## And there is no symmetry discount to be had either
+
+`cov_pre = W^T cov W` is mathematically symmetric, which looked like the other half
+of the lever. It is not:
+
+    (W.T @ C) @ W          -- the shipped spelling     536,346,624 FLOPs, 2 ops
+    einsum ji,jk,kl->il    -- one call                 536,346,624 FLOPs, 1 op
+    W.T @ (C @ W)                                      536,346,624 FLOPs, 2 ops
+
+and a downstream elementwise add on the result bills `1.000 FLOP/element`, i.e. the
+result is NOT auto-tagged symmetric. `fnp.as_symmetric` is **registered but not
+implemented** in 0.12.1 — it raises `AttributeError` with a note that it would cost
+`k(7·numel − 1)` anyway, which for a `(1024,1024)` block is `7.3 M` FLOPs to save
+`0.5 M`. Dead twice over.
+
+**A free micro-win found on the way, and it is the only thing 2c leaves behind:**
+`fnp.einsum('ji,jk,kl->il', W, cov, W)` computes `W^T cov W` in **ONE operation
+instead of two**, at bit-identical FLOPs. That is `16` operations per MLP (one per
+layer) off a `3,249` baseline — `0.5%`, worth `~0.2 ms` of graded residual. Not
+worth a submission on its own; worth taking whenever the file is next edited for
+another reason.
+
+## Knowledge delta
+
+1. **flopscope 0.12.1 DOES give a `0.5010×` aliased-operand discount**, but only
+   for `einsum` with the same buffer twice. `X @ X.T` gets nothing. The ranked
+   list's "changelog says charges are unchanged" was right to be cautious and
+   wrong on the specifics.
+2. **This chain has no aliased site.** Lever 2c is CLOSED as inapplicable rather
+   than as small.
+3. **There is no symmetry discount at all**: results are not auto-tagged, and
+   `as_symmetric` is unimplemented in 0.12.1 and would cost more than it saves.
+4. `einsum('ji,jk,kl->il', W, cov, W)` is a free `-16` operations per MLP.
