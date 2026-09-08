@@ -36046,3 +36046,102 @@ declaration is corrected in place from what it reports.
 
 **Nothing here is a result.** No 24-net datum exists. The gates, the thresholds
 and the refusal above are all fixed **before** the runs they govern.
+
+# 2026-09-08 — D1 FEASIBILITY PROBE (job `399`): the drift check is EXACTLY ZERO, `no_grad` cut SIMPLE `17x`, and **factored AUGMENT OOMs at 1024×16 asking for a DENSE `n³` array**
+
+*Post-run ledger entry for job `399` (the standing pre-run-check + post-run-ledger
+rule). One network, both arms, feasibility only. **Not a result** — the contract's
+question needs 24 nets and this ran 1. `# seed-ledger: no block named`.*
+
+    seed 40821001144   SIMPLE 4.0147e-08   AUGMENT nan
+                       [SIMPLE 2s / 1.3 GiB]  [AUGMENT 15s / 22.0 GiB, OOM]
+                       drift +0.00e+00
+    exit 1, "NO PAIRED ROWS. Nothing is concluded."
+
+## 1. The instrument check passed BIT-EXACTLY, which is worth more than it sounds
+
+The re-run SIMPLE arm reproduced the stored P-A value for this seed
+(`pa_k3.json`, `xmse_k3 = 4.0146999637159986e-08`) with **`drift = +0.00e+00`** —
+not "within tolerance", *identical*. So the gt asset, `canonical_mint`, the
+pinned upstream checkout, the four bridge conventions and the whole f32 GPU path
+are unchanged since 2026-08-26, across a driver and a `no_grad` change.
+
+That also retires the worry behind the loosened `--drift-tol` (`1e-12 → 1e-11`,
+ERRATUM §10): the tolerance was widened because benign non-determinism *could*
+have halted the run. Measured, there is none at all on this path. The wider
+tolerance stays — it is still the right bar for a check that hard-exits — but it
+is now known not to be load-bearing.
+
+## 2. `no_grad` was worth `17x`, and the `22.3 GiB` figure in the record was an artefact
+
+`p2_pa_kprop.py:38` records `22.3 GiB` peak for the f32 SIMPLE arm at 1024×16.
+**Measured now: `1.3 GiB`.** Upstream builds its MLP from `nn.Linear`, whose
+weights carry `requires_grad=True`, so the sixteen-layer chain had been retaining
+an autograd graph it never uses. Nothing about the arithmetic changed — the
+prediction is bit-identical, see §1.
+
+**Consequence for the record:** the `22.3 GiB` and `44.6 GiB` figures in
+`p2_pa_kprop`'s docstring are *autograd-inclusive* and should not be quoted as
+the method's footprint. Any future torch chain work in this repository should
+wrap the flow in `no_grad` by default.
+
+## 3. The finding that matters: **factored AUGMENT wants a DENSE `n³` array**
+
+    memory allocation failed with OOM on device 0 while trying to allocate
+    4294967296 bytes (free: 3886018560, total: 34190458880)
+
+`4294967296 = 4 GiB = 1024³ × 4 bytes`. That is **exactly a dense `(n, n, n)`
+float32 tensor**, requested on top of a `22.0 GiB` working set — so factored
+AUGMENT at this shape needs **`≥26 GiB`**, against SIMPLE's `1.3 GiB`. A `17x`
+step, not the `≤1.43x` the amended Prediction 6 allowed.
+
+**Prediction 6 is FALSIFIED, and by a mechanism it did not consider.** It reasoned
+about state size — degree 4 growing from a scalar to an `(n,n)`, plus ~6× more
+rank-`n` legs — and concluded `≤1.5x` (amended to `≤1.43x` for the card). The
+actual driver is neither: the augment branch **materialises a dense order-3
+object**, which the SIMPLE branch never does. Recorded as a miss rather than
+quietly re-scoped.
+
+### What this does and does not say about the port
+
+**It does NOT kill Step 2.** The torch reference is a research implementation
+with no memory discipline; our fnp chain is the opposite — `estimator_k3_full.py`
+already ships streaming lineage at `≤6 GiB` precisely because the naive spelling
+does not fit. A torch OOM is evidence about *upstream's spelling*, not about the
+estimator's information content.
+
+**But it raises a hard constraint that Step 2 must answer BEFORE it is worth
+building**, and it comes straight from the grader contract, not from this box:
+
+- **Hard rule 1: single array `≤ 4 GiB`.** A `1024³` f32 array is *exactly*
+  `4 GiB` — at the limit with zero headroom, and `8 GiB` in f64, over it.
+- **The installed memory cap is `8 GiB` per MLP** (`docs/CURRENT_STATE.md`), and
+  `docs/GOTCHAS.md` records that this cap is **unenforceable on Windows** — so it
+  is accounting here and a real failure there.
+
+So the open question for Step 2 is no longer only "is AUGMENT accurate enough".
+It is **"can the augmented `(1,1,1)` block be spelled without a dense `n³`
+intermediate"** — streamed over generations the way the K3 tower already is. If
+it cannot, the port dies on memory whatever D1's accuracy number says. That
+question is now on the record ahead of the accuracy answer, rather than being
+discovered after a promising number.
+
+## 4. What was done about it, and what was NOT
+
+**Not done:** no width reduction, no depth reduction, no f64→f32 substitution
+that changes the estimator, no "downscale and note it". Samuel's instruction was
+explicit that a width-512 proxy would not answer the question, and the module
+refuses to retry narrower by construction.
+
+**Done:** re-declared and resubmitted at the largest VRAM `worker-q` will admit
+(`27 GiB` of `27.8 GiB` usable) with `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`
+— an *allocator* change that cannot affect a single computed value, aimed at the
+fragmentation visible in the OOM line (it wanted `4.00 GiB` with `3.89 GiB`
+free — a `110 MB` shortfall that a non-fragmented heap would likely have served).
+
+**If it OOMs again at `27 GiB`, that is the answer and it will be reported as
+one:** factored AUGMENT is not runnable at `1024×16` on a 32 GiB card in
+upstream's spelling, D1's accuracy number cannot be obtained from the reference
+implementation at the live shape, and Step 2 would have to begin with a memory
+re-spelling *before* any accuracy evidence exists — which is a materially worse
+bet than the handoff assumed.
