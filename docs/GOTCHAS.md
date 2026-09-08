@@ -1,5 +1,32 @@
 # GOTCHAS.md — standing operational knowledge
 
+## 2026-09-08 — TWO `workerq` TRAPS THAT COST A JOB EACH
+
+**1. A `workerq` job requests ONE GPU by default, even when it is pure numpy.**
+A CPU-only job submitted without `--gpus 0` sits in QUEUED behind whatever holds
+the card, reporting `waiting for 1 free GPU(s)`, and `workerq requests` cannot fix
+it — that subcommand takes `--ram`, `--vram` and `--cpus` but **not** `--gpus`, so
+the only remedy is `cancel` and resubmit. Every probe in `local_sim/` that meters
+flopscope is CPU-only. Submit them as:
+
+    workerq submit --project arc-whest --ram 8 --cpus 4 --gpus 0 -- uv run python ...
+
+**2. The job snapshot silently DROPS large gitignored files.** `.gitignore` line 5
+is `*.npz`, so every truth artifact is untracked. Small ones are carried into the
+snapshot anyway; large ones are not, and the job dies on `FileNotFoundError` inside
+`~/.local/state/gpuq/snapshots/<id>/`. Measured the same day:
+
+    experiments/2026-08-26_p2_gt/gt_halfA.npz          3 MB   -> IN the snapshot
+    experiments/2026-09-01_wp9_corrector/truth_P02.npz 35 MB  -> DROPPED
+
+`workerq submit` prints the excluded paths in its own output, and that list is
+worth reading rather than scrolling past. **A job that needs a large `.npz` must
+run locally**, or the file must be staged somewhere the snapshot keeps. This is
+the second time the snapshot has bitten this repository — the 2026-09-05 entry
+records it dropping an untracked *candidate* — so the general rule is: **check
+what the snapshot actually contains before trusting a queued result.**
+
+
 ## 2026-09-07 — AN OP COUNT IS MEANINGLESS WITHOUT ITS WEIGHT CONVENTION. THERE ARE THREE.
 
 **Never compare two operation counts, or two FLOP totals, without checking which
