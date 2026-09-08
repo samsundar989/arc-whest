@@ -36145,3 +36145,121 @@ upstream's spelling, D1's accuracy number cannot be obtained from the reference
 implementation at the live shape, and Step 2 would have to begin with a memory
 re-spelling *before* any accuracy evidence exists — which is a materially worse
 bet than the handoff assumed.
+
+# 2026-09-08 — THE AUGMENT MEMORY WALL IS **ONE OBJECT**, IDENTIFIED EXACTLY: the degree-4 `(2,1,1)` diagonal slice, three free indices, `4.000 GiB` at width 1024
+
+*Structural diagnosis of the jobs `399`/`402` OOM. No GPU, no seed block, no
+accuracy claim. `# seed-ledger: no block named`. ROUTINE by classification, but
+it decides the shape of Step 2, so it is recorded as evidence rather than as a
+note.*
+
+## The measurement
+
+`DS_part_sum` (`cumulants.py:83-93`) allocates one output tensor **per integer
+partition present at each degree**, `torch.zeros_like(A[d].slices[int_part])`.
+Instrumented at `n = 64` (which partitions exist is a property of the algorithm,
+not of the width — this is a structural read, not a downscaled measurement):
+
+| degree | int_part | free indices | SIMPLE | AUGMENT |
+|---|---|---:|:---:|:---:|
+| 1 | `(1,)` | 1 | yes | yes |
+| 2 | `(2,)` | 1 | yes | yes |
+| 2 | `(1,1)` | 2 | yes | yes |
+| 3 | `(3,)` | 1 | yes | yes |
+| 3 | `(2,1)` | 2 | yes | yes |
+| 4 | `(4,)` | 1 | yes | yes |
+| 4 | `(2,2)` | 2 | yes | yes |
+| 4 | `(3,1)` | 2 | — | **yes** |
+| 4 | **`(2,1,1)`** | **3** | — | **yes ← the wall** |
+
+**SIMPLE's largest object has two free indices.** Its whole state is `O(n²)`.
+**AUGMENT adds a three-free-index slice at degree 4**, and at `n = 1024` in f32
+that is
+
+    1024³ × 4 bytes = 4,294,967,296 bytes = 4.000 GiB
+
+which is **byte-for-byte the allocation the OOM named**
+(`"Tried to allocate 4.00 GiB"`, `"trying to allocate 4294967296 bytes"`). The
+mechanism is not inferred from the number; the number and the mechanism were
+derived independently and agree exactly.
+
+**Why the peak was `22 GiB` and not `4 GiB`:** `DS_part_sum` allocates the output
+slice, reads the input slice of the same shape, and builds a temporary per vector
+partition inside `math.prod(get_block(block) for block in vpart)`. Four to five
+live `n³` tensors is `16–20 GiB`, and the measured `22.0 GiB` peak with a `4 GiB`
+request outstanding is exactly that picture.
+
+This also explains the `17x` SIMPLE→AUGMENT jump (`1.3 GiB → ≥26 GiB`) that
+falsified Prediction 6. The amended prediction reasoned about *state* size —
+degree 4 growing from a scalar to an `(n,n)`, plus ~6× more rank-`n` legs — and
+would have been right about the state. It missed that the augment branch
+introduces an entirely new **order-3 intermediate** that the simple branch never
+forms. `get_r_x` describes what is *tracked*; it says nothing about what is
+*materialised on the way*.
+
+## Why this is not merely a local-hardware problem
+
+Even with an infinite GPU, the port could not legally allocate this array:
+
+- **Hard rule 1 caps a single array at `4 GiB`.** A `1024³` f32 array is
+  **exactly** `4 GiB` — at the limit with zero headroom, and `8 GiB` in f64,
+  over it outright.
+- **The installed per-MLP memory cap is `8 GiB`**, and `docs/GOTCHAS.md` records
+  that this cap is **unenforceable on Windows** (no `RLIMIT_AS`) — so it is
+  accounting here and a real failure on the grader.
+
+So a fused spelling is not a performance optimisation for Step 2. **It is a
+precondition.** An AUGMENT port that forms this slice cannot ship at any accuracy.
+
+## Is it avoidable? Probably — and the reason is specific, not hopeful
+
+The `(2,1,1)` slice is **built in full and then immediately contracted away**.
+Its only consumer is `K_out[4] = DS_harmonic_proj(K_ds[4], r_out=1)`
+(`factor_k3.py:530`), which applies `_lap_m_dslice` — Laplacian contractions —
+and returns an `(n, n)` core. Nothing downstream ever sees three free indices.
+
+And each term inside `DS_part_sum` is
+`math.prod(get_block(block) for block in vpart)`, where `get_block` is
+`expand(lower_order_slice, nonzeros, len(block))` — i.e. **an elementwise product
+of broadcast lower-order tensors**. Contracting indices of such a product does
+not require forming it: the contraction distributes onto the factors as traces,
+matrix–vector and matrix–matrix products. That is the same algebraic move
+`estimator_k3_full.py` already makes elsewhere, and it is why our fnp chain
+streams at `≤6 GiB` where the reference does not.
+
+**What is NOT yet established**, and must be before Step 2 is costed: that the
+fused contraction exists for *every* vector partition of `(2,1,1)` at a FLOP cost
+that fits the budget. Composing `L` with a broadcast product is cheap; doing it
+for all partitions without an `O(n³)` term *in FLOPs* is the actual question.
+`n³ = 1.07e9` multiply-adds per term per layer is roughly `2.1 GFLOP`, ×16
+layers — affordable against a `0.54 B` chain only if the term count is small.
+**That count is the next thing to derive, and it is a desk exercise, not a GPU
+job.**
+
+## What this changes about the plan
+
+1. **Step 2 acquires a precondition that precedes its accuracy gate.** The
+   handoff's §5.2 reads "if D1 ≤ 2.5e-8: port AUGMENT". It should now read: *if
+   D1 ≤ 2.5e-8 **and** the `(2,1,1)` contraction admits a fused spelling within
+   the FLOP budget*. A good D1 number with no fused spelling is not a lane.
+2. **The D1 measurement is unaffected.** It is an information question run in
+   torch, where `26 GiB` is merely inconvenient rather than illegal. Nothing
+   about this diagnosis changes what D1 would measure — only what could be built
+   afterwards.
+3. **The record is corrected on a related point.** The 2026-09-07 amendment to
+   `docs/PHASE2_STRATEGY_2026-09-05.md` already found that Strassen depth is
+   bounded by **memory** (`(7/4)^L` operand stacks against the `8,192 MB` limit)
+   and not by the ops budget. **This is the second time in two slices that a
+   lever's real constraint turned out to be memory rather than the quantity being
+   reasoned about.** Worth stating as a pattern: at width 1024, an order-3 object
+   is `4 GiB` and an order-4 object is unthinkable, so *any* lever that raises the
+   tensor order of an intermediate should be priced in memory before it is priced
+   in FLOPs or accuracy.
+
+## Method note
+
+The width-64 instrumentation above is a **structural** read: it enumerates which
+integer partitions the algorithm forms, which is width-independent. It is **not**
+a downscaled measurement of the quantity under test, and no accuracy number was
+taken from it. Samuel's instruction that a width-512 proxy would not answer D1's
+question stands and is not weakened by this — D1 remains a 1024×16 job.
