@@ -35823,3 +35823,226 @@ argument. If it is per-team, B is `330212` and there is nothing to decide.
 
 **Deadline pressure is low.** Phase 2 ends Sep 19 and designation is due before
 it; the write-up is due Oct 24. This does not block Slice 3.
+
+# 2026-09-08 — ERRATUM AND AMENDED CONTRACT (Slice 3 step 1), on the Skeptic's PROVISIONAL verdict, BEFORE any 24-net datum exists
+
+*Independent Skeptic run against the D1/D2 construction (Rule 2), in a context
+that never saw the builder's reasoning, given the contract, the diff
+(`432f7fd`, `eff8367`, `366fed1`), the evaluation protocol and the raw artifact
+paths. Verdict **PROVISIONAL**. Its own probes are under the session scratchpad;
+it wrote nothing into the tree.*
+
+**Timing, stated first because it is the whole value of the rule:** the 24-net
+D1 and D2 jobs had been submitted and were then **cancelled** (`392`, `398`)
+for an unrelated VRAM reason before the Skeptic reported. Nothing below was
+caught after the fact. `397` (`--precision-check`) is cancelled by this entry.
+No datum from either instrument exists.
+
+## 1. Rung (b) is mislabelled, and the thing it was named for is NOT MEASURABLE HERE
+
+**The defect.** `mix_T(..., "b")` replaces `diag(T)`, and
+
+    diag(T)_i = T_ii = SUM_k kappa_4(i, i, k, k)      <- a per-neuron TRACE
+
+which is **not** `kappa_4(i,i,i,i)`. The contract's mechanism table called it
+"per-neuron diagonal — `κ₄(i,i,i,i)`" and the module docstring called it
+"per-neuron κ₄ is true". **Both are wrong**, and the module contradicted itself
+inside one docstring, since its own scope paragraph already said a per-neuron
+diagonal carrier "is not representable in this state at all".
+
+**Measured, not argued** (Skeptic's probes, dense κ₄ at small `n`, float64,
+against upstream's `proj_geq_r`):
+
+| n | per-neuron `(i,i,i,i)` of `P_{≥1}κ₄` ÷ true `κ₄(i,i,i,i)` | `diag(T)_i ÷ κ₄(i,i,i,i)` | `‖κ₄ − P_{≥1}κ₄‖ / ‖κ₄‖` |
+|---:|---:|---:|---:|
+| 16 | 0.2433 | 1.460 | 0.8713 |
+| 32 | 0.1318 | 1.494 | 0.9308 |
+| 64 | 0.0598 | 1.316 | 0.9711 |
+
+The first column scales as `~1/n`. **Extrapolated to the live `n = 1024`, rung
+(b) leaves the state's per-neuron `κ₄(i,i,i,i)` at ≈0.4% of truth.**
+
+**Amendment.** Rung (b) is renamed **"the diagonal of the trace matrix"**
+everywhere. And the consequence is recorded so it is not rediscovered:
+
+> **The strategist's D2(b) / §3b "per-neuron diagonal κ₄ in flight" is not
+> measured by this instrument, and cannot be — an `r=1` HTensor `Sym(core ⊗ I)`
+> has no per-neuron κ₄ degree of freedom to set. Building that carrier requires
+> leaving the AUGMENT representation, which is Step 3, not Step 1.**
+
+## 2. Rung (c) does less than the contract said
+
+The contract claimed (c) replaces "the `(2,2)` diagslice `κ₄(i,i,j,j)` **and**
+the `(2,1,1)` `r=1` core **and** its metric". **It replaces only the core.** The
+`(2,2)` diagslice that `factor_k3.py:396` reads is then *derived* from
+`Sym(core ⊗ I)`; it is not set to the true `κ₄(i,i,j,j)`. No metric is replaced.
+
+(c) remains the right quantity — it sets the degree-4 state to exactly
+`proj_geq_r(κ₄_true, n, 1)`, the ceiling of the representation — but the
+contract's description of the mechanism was not what the code does. Corrected.
+
+## 3. The CARRIER gate has the same hole the LANE gate's caveat plugs
+
+The module flagged that `D2(c)/K3 < 1.5` kills only the trace-matrix family and
+not a traceless carrier. **It applied that caveat to one gate and not the other.**
+`D2(c)/D2(a) ≥ 1.5 → build the traceless carrier` is a ratio measured *entirely
+inside the trace-matrix subspace*, used to decide whether to build a carrier for
+its **orthogonal complement**. Neither direction of that inference follows.
+
+Skeptic's measurement makes the size of the hole concrete:
+`‖κ₄ − P_{≥1}κ₄‖/‖κ₄‖` runs 0.87 → 0.93 → 0.97 at `n = 16/32/64`, extrapolating
+to **≈0.998 at `n = 1024`**. D2 bounds a subspace holding roughly **0.2% of κ₄'s
+Frobenius mass**.
+
+**Amendment.** The carrier gate is demoted from a gate to a **diagnostic**. It
+may not open or close the Step-3 traceless-carrier lane in either direction.
+Deciding that lane needs an oracle that can *hold* the traceless part, which this
+one cannot. Recorded as an open question rather than silently answered.
+
+## 4. The lane gate was implemented as half of itself
+
+The contract's lane gate is conjunctive — `D2(c)/K3 < 1.5` **AND**
+`D1 ≥ 3.5e-8`, "both, not either". `_summary` tested only the first and the
+report printed "FIRED: the TRACE-MATRIX family is dead". Fixed: the flag now
+requires both and takes D1's measured value as an input rather than assuming it.
+
+## 5. `D2(c)/K3` is confounded with D1 and cannot be read as a κ₄ result
+
+`K3` is `SIMPLE`; `(c)` is `AUGMENT` with true T. The ratio therefore contains
+**the representation change and the truth injection together**. In the Skeptic's
+64×5 reproduction the SIMPLE→AUGMENT change alone was `2.24×` while the truth
+injection added `2.5%` — so the lane gate can be carried almost entirely by D1's
+own effect and then be misread as "κ₄ in flight is worth something".
+
+**Amendment.** `(a) → (c)` is the only contrast that isolates truth, and it is
+now the reported headline for D2. `D2(c)/K3` is retained but labelled
+**confounded**, with its D1 component printed beside it.
+
+## 6. The gates were unpaired ratios of means; the contract contradicted itself
+
+The Statistic clause says "Ratios are reported as diagnostics beside the paired
+difference, never in place of it", and the Gate clause was then written in
+ratios — which the code resolved the wrong way, reading its verdicts straight
+out of a dict the module itself labels *diagnostic only*, ignoring the CIs it had
+already computed. `docs/VALIDATION.md` §2b-i is explicit that
+`competition_score.decide()` is the only function here that returns a promotion
+boolean, and the contract declined to call it.
+
+**Amendment.** Every gate is decided on the **paired arithmetic difference with
+its studentised-t interval**, through `competition_score.decide(gate=...)` with
+the threshold passed explicitly. The ratios remain, printed, labelled
+diagnostic. Where a threshold was pre-registered as a ratio, it is converted to
+the equivalent paired difference **using the pre-registered baseline only**, so
+no threshold is chosen after seeing data.
+
+## 7. The oracle has its own noise floor, it was recorded and never gated, and its scale was wrong by a factor of `n`
+
+`--precision-check` compared the f32/f64 gap against `1/sqrt(N)`. That is the
+wrong bar. `T = S − C tr(C) − 2C²` is an `O(n)` cancellation and the **noise in
+`S` does not cancel**, so measured:
+
+    oracle_rel_noise_T  ~=  1.7 * n / sqrt(N)
+
+    n=128 N=2^18  0.4226      n=128 N=2^20  0.2136
+    n=256 N=2^18  0.9486      n=256 N=2^20  0.4868      n=512 N=2^20  1.3404
+
+At the live `n = 1024, N = 2^22` the layer-mean is ~0.35–0.46 and **layer 0 is
+~1.8–2.5**; deeper layers are far quieter (`1.300 0.720 0.432 0.297 0.211 0.146 …`).
+Job `397` would have run at `2^17` — 32× fewer samples — against a bar ~1000×
+tighter than the real sampling noise, and a spurious FAIL would have pushed the
+whole oracle to f64 for no reason. **`397` is cancelled.**
+
+The more serious half: a noisy oracle adds `E‖δ‖²` to `xmse_c`, a **positive**
+bias — it pushes toward the pre-registered kill. The Skeptic measured the
+prediction-level effect and withdrew the strong form of the objection (the chain
+averages most of it away: noise/signal 0.09 → 0.04 → 0.02 at `n=128` for
+`N = 2^18/20/22`), but the ratio grows as `~n^1.1`, extrapolating to **~0.2 of
+the (c)-vs-control signal at the live width** — and the `(a)→(c)` gap the
+carrier diagnostic rests on is *smaller* than that.
+
+**Amendment — a new pre-registered refusal, fixed now, before data.**
+
+> Before the 24-net D2 run, one network is run with **two independent oracle
+> streams** at `--log2-oracle-samples 20, 22, 24`. Report, per rung,
+> `‖p_stream1 − p_stream2‖ / ‖p_c − p_a‖` beside `oracle_rel_noise_T`.
+> **The 24-net run is REFUSED unless the two-stream spread is ≤ 0.2 of the
+> `(a)→(c)` gap** — the `(a)→(c)` gap, not the larger (c)-vs-control gap.
+> The sample count is then whichever of `2^20/22/24` first clears it.
+
+`--precision-check` is re-posed against the measured `oracle_rel_noise_T`
+(via `split_halves`) instead of `1/sqrt(N)`.
+
+## 8. Evidence-table corrections
+
+- **"label noise per half `1.1552e-09`, i.e. `29×` below the baseline MSE"** —
+  value and ratio came from **different columns**.
+  `4.00469e-8 / 1.1552e-9 = 34.7×`; the `29×` is against
+  `gt_noise_per_half_max = 1.3943e-9`. The correct statement is
+  **`34.7×` against the mean, `28.7×` against the worst-case max.**
+- **"arms O0–O3 are readout corrections on a K2 closure's state"** — **wrong
+  reason, right conclusion.** Only `O0` uses the closure's own state; `O1–O3`
+  consume **true** `(μ, σ, κ₃, κ₄)` from Monte Carlo
+  (`p2_cumulant_oracle.py:197-203`). The row's conclusion survives — a *readout*
+  oracle on a K2 chain still cannot bound an *in-flight* scheme on a K3 chain —
+  but the `0.46%` figure is a **stronger prior against D2 than the row admitted**:
+  it says that given a perfect state, a perfect κ₄ at the readout bought 0.46%.
+  Recorded as such rather than dismissed.
+- Confirmed correct: our fnp chain vs upstream, `4.004541e-08` vs `4.004685e-08`
+  = `3.60e-5` relative.
+
+## 9. Prediction 6's arithmetic did not close
+
+It predicted AUGMENT peak `≤ 1.5×` SIMPLE's recorded `22.3 GiB` and called that
+"feasible on one 32 GiB card". `1.5 × 22.3 = 33.5 GiB` on a `31.8 GiB` card.
+**The feasible band is `≤ 1.43×`**, and less once the driver's own reservation is
+counted. The prediction's *direction* is unchanged; its stated bound was wrong.
+
+Related: job `399` declares `13.0 GiB` against that recorded `22.3 GiB`. The
+reasoning was undeclared and is recorded here — the `22.3 GiB` figure predates
+`no_grad` (`cbc1a9c`), and upstream builds its MLP from `nn.Linear`, so the
+sixteen-layer chain had been retaining an autograd graph it never uses. `399`
+exists to **measure** the post-`no_grad` peak; its OOM path is data, and the
+declaration is corrected in place from what it reports.
+
+## 10. Minor, recorded so they are not rediscovered
+
+- **The last injection is never consumed.** At `l = depth−1` the driver breaks
+  (`kprop_harmonic.py:601`), so D2 injects 16 times and **15 propagate**. Not a
+  defect — the final layer's κ₄ cannot affect a mean already read out — but the
+  count in any future write-up should say 15.
+- **`--drift-tol 1e-12` had no derivation** and was a hard exit. An f32-level
+  `1e-7` relative change in the prediction moves `xmse` by order `4e-13`, so
+  benign cuBLAS or driver non-determinism since 2026-08-26 could halt the run on
+  network 1 and be misread as real drift. Re-derived to `1e-11` (≈25× the f32
+  round-off floor, still `4` orders below the effect under test), with the
+  measured deviation printed either way.
+- **JSON keys `c_over_a` and `c_over_b` held `a/c` and `b/c`.** Printed labels
+  were right, the artifact keys were inverted. Renamed to what they hold.
+- **The seam evidence lived only in a commit message.** A runnable regression
+  test is now committed (`local_sim/test_p2_d2_seam.py`), because the next
+  session cannot execute a commit message. The Skeptic also correctly notes the
+  no-op check is an **exact algebraic bijection** and so cannot detect wrong
+  `c₁/c₂` (they cancel), wrong `T_true`, or layer misalignment — calling it "the
+  seam's own proof" overstated it. The committed test therefore adds the
+  Skeptic's **sensitivity mutations** (`3·T_true`, `T = 0`), which is what proves
+  the seam is live.
+
+## What the Skeptic ACCEPTED, so it is not re-litigated
+
+- **The injection frame** (finding 1) — identity metric at every layer, verified
+  in `harmonic.py:626` and `factor_k3.py:530`, with no consumer between the
+  nonlinearity and the next `linear_kprop`.
+- **The core↔T identity** — and it *discriminates*: a five-mutation battery
+  against `--validate-small` killed a wrong `lap` factor (`5.89e-1`), a wrong
+  `rad` factor (`1.66e-1`), `P_{r=1}` for `P_{≥1}`, a wrong `r` range
+  (`9.10e-1`), and dropping the `c₂` term (`3.32e-1`). The builder's numbers
+  reproduced exactly.
+- **Stream independence** — checked against the **producer**
+  (`p2_gt_hires.py:223` calls `p2_truth._replica_seeds`), not the docstring.
+- **The AUGMENT-representation scope limit** — accepted, and judged if anything
+  understated.
+- **Prediction 5 (D3 is already banked)** — `use_pK` is the same object the
+  handoff calls power cumulants, and there is only one such flag.
+
+**Nothing here is a result.** No 24-net datum exists. The gates, the thresholds
+and the refusal above are all fixed **before** the runs they govern.
