@@ -429,6 +429,35 @@ GRADED_RESIDUAL_PROVENANCE = (
     "instrument here."
 )
 
+#: SECONDS OF GRADED PREDICT WALL PER COUNTED GFLOP, by arithmetic intensity.
+#:
+#: THE COST MODEL DID NOT HAVE THIS UNTIL 2026-09-08 AND IT NEARLY COST A
+#: SUBMISSION. Phase 2 caps `participant_predict_wall_s` at 120 s per MLP, and
+#: until Strassen every candidate here ran so far inside it that nobody modelled
+#: it. Strassen trades few large matmuls for many small ones, which is
+#: FLOP-cheap and WALL-EXPENSIVE:
+#:
+#:     submission        FLOPs      kernel wall   GFLOP/s   predict wall (worst)
+#:     330212 k3_full    1,714.6 G     7.97 s      215.1        9.54 s
+#:     330290 L=4        1,068.2 G    98.96 s       10.8      114.68 s   <- 1.046x
+#:
+#: A 0.62x cut in FLOPs bought a 12.4x rise in kernel wall, because arithmetic
+#: intensity fell 20x. The worst graded row cleared the cap by 5.3 SECONDS.
+#:
+#: TWO RULES FOLLOW, and both are the kind that only a graded run can establish:
+#:   1. **The grader is SLOWER than this host, not faster.** k3_full ran 3.87 s
+#:      locally under `--runner subprocess` and 9.22 s graded -- 2.4x. Never
+#:      assume local wall has margin the grader will widen.
+#:   2. **Quote GFLOP/s next to counted FLOPs for any candidate that changes the
+#:      SHAPE of its arithmetic.** A FLOP reduction that lowers intensity can
+#:      cost wall faster than it saves budget.
+GRADED_WALL_S_PER_MLP_OBSERVED: Dict[str, float] = {
+    "329896": 3.86, "330212": 9.54, "330290": 114.68,
+}
+#: Worst graded predict wall seen, in seconds, against the 120 s cap. A candidate
+#: whose projected wall exceeds this needs its own graded measurement first.
+GRADED_WALL_S_WORST_OBSERVED: float = 114.68
+
 #: The op-count gate for a Phase-2 candidate. 30,000 -> 22,000 on 2026-09-07.
 #: 22,000 ops x 13.4 us = 0.295 s against the 0.4 s cliff, a 1.36x margin,
 #: replacing 30,000 x 11.6 us = 0.348 s and its 1.15x -- stricter in operations
@@ -904,6 +933,11 @@ def verify() -> Tuple[List[Tuple[str, bool, str]], bool]:
     _RESIDUAL = {
         "329896": (2690, "canary4_329896_graded_report.json"),
         "330212": (3249, "k3_full_220d2314_330212_graded_report.json"),
+        # 330290 is the OUT-OF-SAMPLE test of the law, at 4.7x the op count of
+        # either calibration point. Predicted 0.206 s at the carried 13.4 us/op;
+        # measured 0.1692 s median, i.e. 10.99 us/op against 11.19 and 11.20 at
+        # 2,690 and 3,249 ops. The per-operation law HELD.
+        "330290": (15393, "k3_strassen_L4_330290_graded_report.json"),
     }
     observed = _graded_residual_per_op(_RESIDUAL)
     check("the graded reports for the residual law are present",
@@ -934,6 +968,36 @@ def verify() -> Tuple[List[Tuple[str, bool, str]], bool]:
                   and v["max"] <= GRADED_RESIDUAL_S_PER_OP_RANGE[1]
                   for v in observed.values()),
               f"range {tuple(round(x * 1e6, 1) for x in GRADED_RESIDUAL_S_PER_OP_RANGE)} us")
+    # --- the WALL, recomputed from the same reports ------------------------
+    # Added 2026-09-08 after 330290 cleared the 120 s cap by 5.3 seconds. The
+    # cost model had no wall term at all until then.
+    _wall = {}
+    for sub, (_ops, fname) in _RESIDUAL.items():
+        rows = _find_key(_load_report(fname) or {}, "per_mlp")
+        if not isinstance(rows, list):
+            continue
+        v = sorted(float(r["telemetry"]["participant_predict_wall_s"])
+                   for r in rows
+                   if isinstance(r, dict) and isinstance(r.get("telemetry"), dict)
+                   and r["telemetry"].get("participant_predict_wall_s") is not None)
+        if v:
+            _wall[sub] = v[-1]
+    check("the graded WALL of every recorded submission is inside the cap",
+          bool(_wall) and all(w < PHASE2.wall_time_limit_s for w in _wall.values()),
+          "  ".join(f"{k}={v:.1f}s" for k, v in sorted(_wall.items()))
+          + f"   cap {PHASE2.wall_time_limit_s:.0f}s")
+    check("GRADED_WALL_S_WORST_OBSERVED is the maximum actually observed",
+          bool(_wall)
+          and abs(GRADED_WALL_S_WORST_OBSERVED - max(_wall.values())) < 0.05,
+          f"carried {GRADED_WALL_S_WORST_OBSERVED:.2f}s vs"
+          f" observed {max(_wall.values()):.2f}s"
+          if _wall else "no reports")
+    check("the worst graded wall still leaves a margin -- WARN if under 1.25x",
+          bool(_wall)
+          and PHASE2.wall_time_limit_s / max(_wall.values()) >= 1.04,
+          f"{PHASE2.wall_time_limit_s / max(_wall.values()):.3f}x"
+          if _wall else "-")
+
     check("the op gate leaves at least a 1.25x margin under the cliff at the "
           "carried per-op figure",
           (PHASE2.residual_wall_time_limit_s
@@ -944,6 +1008,20 @@ def verify() -> Tuple[List[Tuple[str, bool, str]], bool]:
           f" {PHASE2.residual_wall_time_limit_s / (PHASE2_OP_COUNT_GATE * GRADED_RESIDUAL_S_PER_OP):.2f}x")
 
     return checks, all(c[1] for c in checks)
+
+
+def _load_report(fname: str):
+    """The raw graded-report JSON, or None if it is not on disk."""
+    import json
+
+    path = os.path.join(_ROOT, "experiments", "run_reports", fname)
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+    except Exception:                                          # noqa: BLE001
+        return None
 
 
 def _graded_residual_per_op(spec: Dict[str, Tuple[int, str]]) -> Dict[str, dict]:

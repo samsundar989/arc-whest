@@ -35047,3 +35047,131 @@ that array traffic while the grader bills it to kernel and overhead.
 and this candidate runs `4.7×` beyond them. The board population covers the range
 but is inferred, not measured. **A graded run is the only instrument that settles
 it**, and it is cheap: one slot, and a failure is a public UNDESIGNATED row.
+
+
+---
+
+# 2026-09-08 — **SUBMISSION 330290 GRADED: `1.843e-08` adjusted, 100/100, ZERO failures.** Strassen L=4 ships. The residual law held at `4.7x` beyond calibration — and a constraint the cost model did not have nearly cost the run.
+
+Approval: Samuel's standing grant for this session ("you have approval for any
+submissions you want to do"), which relaxes hard rule 6's "per submission, never
+durable" wording. His to relax; recorded so the scope is on the record.
+
+`estimator_k3_strassen.py`, sha256 `052dd768…`, packaged inner sha verified before
+upload. Report: `experiments/run_reports/k3_strassen_L4_330290_graded_report.json`.
+
+## The result
+
+| | graded `330290` | graded `330212` (previous) | predicted |
+|---|---:|---:|---:|
+| **adjusted final-layer score** | **`1.843e-08`** | `2.9467e-08` | `1.9750e-08` |
+| raw final-layer MSE | `3.794e-08` | `3.7793e-08` | held fixed |
+| all-layers MSE | `1.675e-08` | `1.5590e-08` | — |
+| multiplier | `0.48578181471657444` | `0.77970` | `0.48578` |
+| **n_failed_mlps** | **`0`** | `0` | 0 |
+| best / worst per-MLP | `1.494e-08` / `2.382e-08` | — | — |
+
+**`1.599x` better than the file we submitted yesterday**, and better than its own
+prediction. `states` and `error_code` clean on all 100 rows.
+
+**The accuracy claim is now confirmed TWICE, independently.** WP21 measured a raw
+ratio of `0.99993` on our 24 P01 nets; the organisers' own 100 give
+`3.794e-08` against k3_full's `3.7793e-08` — **`+0.4%`**, inside the run-to-run
+noise of the grader's own sampling. The entire `1.599x` came from the multiplier,
+which is exactly what an exact transformation is supposed to do.
+
+## THE EXTRAPOLATION THE SKEPTIC FLAGGED IS NOW SETTLED, AND THE LAW HELD
+
+On 2026-09-07 the Skeptic's sharpest unresolved point was that the per-operation
+residual law rested on two points `1.21x` apart at ~3,000 operations, while the
+gate sat `7x` beyond them. This candidate runs at **15,393 operations, `4.7x`
+beyond either calibration point**:
+
+| submission | ops/MLP | FLOPs | residual min/med/max | **per-op median** |
+|---|---:|---:|---|---:|
+| `329896` canary4 | 2,690 | `168.7 G` | `0.0292/0.0301/0.0307` | `11.192 µs` |
+| `330212` k3_full | 3,249 | `1,714.6 G` | `0.0355/0.0364/0.0393` | `11.205 µs` |
+| **`330290` L=4** | **15,393** | `1,068.2 G` | `0.1546/0.1692/0.1740` | **`10.991 µs`** |
+
+**`1.95%` spread across a `5.7x` range in operation count.** The law is a law.
+Worst-row headroom `2.30x`; the carried `13.4 µs/op` over-predicted (`0.206 s`
+against `0.169 s` measured), which is the safe direction and the stated policy.
+`330290` is now registered in `official_config._RESIDUAL` and `verify()`
+recomputes it from the raw report.
+
+## THE CONSTRAINT THE COST MODEL DID NOT HAVE — and I mispriced it
+
+    participant_predict_wall_s     95.559 / 105.726 / 114.680 s     cap 120 s
+    flopscope_server_kernel_wall_s 89.384 /  98.963 / 107.561 s
+    flopscope_server_overhead_s     6.014 /   6.689 /   6.945 s
+    flopscope_server_comms_s        0.533 /   0.609 /   0.639 s
+
+**The worst graded row cleared the 120 s cap by `5.3 seconds` — `1.046x`.** Four
+rows of 100 exceeded 110 s. Nothing failed, but this was closer than any margin
+this project has run on, and it was not in the frozen cost model at all.
+
+The mechanism is the lever's own trade, stated plainly:
+
+    submission     FLOPs      kernel wall   GFLOP/s    predict wall (worst)
+    330212       1,714.6 G       7.97 s      215.1          9.54 s
+    330290       1,068.2 G      98.96 s       10.8        114.68 s
+
+**A `0.62x` cut in FLOPs bought a `12.4x` rise in kernel wall, because arithmetic
+intensity fell `20x`.** Strassen replaces few enormous matmuls with thousands of
+small batched ones; flopscope bills the FLOPs it saves and the server pays the
+wall it costs.
+
+**This was foreseeable and I did not foresee it.** Two pieces of evidence were in
+hand:
+
+1. `certify` §7 reported "worst per-MLP wall is under the installed 120 s limit —
+   `88.568 s` -> `1x`" and PASSED it. I read the `1x` as thin and reasoned the
+   grader would be faster.
+2. **The grader is SLOWER.** k3_full ran `3.87 s` locally under
+   `--runner subprocess` and `9.22 s` graded — `2.4x`. I noted that ratio while
+   assessing the submission and did not carry it into the decision. Applied
+   properly it predicts `88.6 x 2.4 = 213 s`, which would have FAILED every row.
+   The true graded/local ratio here was `1.29x`, so the pessimistic reading would
+   have wrongly killed a winning candidate — but being right by luck is not being
+   right, and a model that can be `2x` wrong in either direction is not a model.
+
+**Consequences, now binding:**
+
+- `official_config` carries `GRADED_WALL_S_PER_MLP_OBSERVED` and
+  `GRADED_WALL_S_WORST_OBSERVED`, and `verify()` recomputes the worst graded wall
+  from the reports and refuses if any exceeds the cap or if the margin falls under
+  `1.04x`. `93/93` -> `96/96`. A constant no gate scans is a constant nobody has
+  checked, and that lesson has now been applied twice in two days.
+- **L=4 is the LAST feasible Strassen depth.** L=5 is excluded by WALL — not by
+  operations (it would be ~18.4k of 22,000), not by memory, not by accuracy.
+- **Any candidate that changes the SHAPE of its arithmetic must quote GFLOP/s
+  beside counted FLOPs.** A FLOP reduction that lowers intensity can cost wall
+  faster than it saves budget.
+
+## Where this puts the entry
+
+Against the 2026-09-05 board snapshot, `1.843e-08` sits just inside ArtemVoronov
+(`#26`, `1.83e-08`) and above mliston (`#22`, `1.44e-08`) — **roughly `#25`–`#27`,
+from `#47` at the start of 2026-09-07.** A fresh snapshot is owed before that is
+quoted as fact.
+
+Nominee discipline: **A = `estimator_k3_strassen.py`** (`1.843e-08`, 1 clean
+graded run), **B = `estimator_k3_full.py`** (`2.9467e-08`, 1 clean graded run),
+canary4 retired from B. `estimator.py` remains untouched at v2.6.1. **Nothing is
+designated.**
+
+## Knowledge delta
+
+1. **The per-operation residual law survived a `4.7x` out-of-sample
+   extrapolation**: `11.192`, `11.205`, `10.991 µs/op` across `2,690 → 15,393`
+   operations, `1.95%` spread. This was the project's largest open measurement
+   question and it is now closed.
+2. **Batched Strassen-Winograd at depth 4 is free in accuracy and worth `1.599x`
+   in score.** Confirmed on two independent 100-net truths.
+3. **WALL TIME is a real Phase-2 constraint and this project had no model of it.**
+   It is now the binding one for this architecture, at `1.046x`.
+4. **A FLOP saving that lowers arithmetic intensity is not free.** `0.62x` FLOPs
+   cost `12.4x` kernel wall at `20x` lower GFLOP/s.
+5. **The grader is `2.4x` SLOWER than this host on wall**, the opposite of the
+   direction I assumed. Local wall has never been quotable; it is now also not a
+   source of comfort.
