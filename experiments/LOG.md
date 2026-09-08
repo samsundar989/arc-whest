@@ -35390,3 +35390,146 @@ would be 6% and would have refused a correct control.
    same commit whose lesson was that constants need gates.
 6. An evidence packet must disclose EVERY failed check, not the ones it has an
    explanation for.
+
+
+---
+
+# 2026-09-08 — §3d (Puffi SSC) GO/NO-GO, answered largely from evidence THIS REPOSITORY ALREADY HAD: the κ₄ readout is priced at `0.46%` and the go/no-go now rests on a mechanism nobody has measured.
+
+**Class: IMPORTANT** (it redirects the handoff's highest-priority accuracy item).
+No seed block drawn; no new measurement was needed to get this far, which is the
+point of the entry. Source extracted to `docs/SSC_PUFFI.md`, PDF committed at
+`docs/refs/algorithmic_contribution_puffi.pdf`.
+
+## What SSC actually is, and the structural fact that reframes it
+
+`κ₄,ijkl = Σ_ab Λ_ab (B_a,ij B_b,kl + B_a,ik B_b,jl + B_a,il B_b,jk)`, `p ≤ 4`
+symmetric covariance-response modes with a small ridge-fitted coupling `Λ`. The
+dense `n⁴` tensor is never formed. Its **readout** is a per-neuron scalar:
+
+    q_aj = w_j^T B_a w_j          κ₄,j = 3 q_j^T Λ q_j
+
+consumed as the **fourth-order Edgeworth contribution to the next ReLU mean**.
+
+**Our chain already computes the Hermite factor that term multiplies.**
+`_wick`'s `base(4) = (α² − 1) φ / σ³` is exactly `E_G[δ''(z)]`, and the Edgeworth
+identity `+ (κ₄ / (24 σ³))(α² − 1) φ(α)` is already written down and MC-verified in
+`local_sim/p2_cumulant_oracle.py`. So handoff **§3b and §3d are the same lever**:
+§3b asks how to CONSUME a per-neuron κ₄, §3d is one way to PRODUCE one.
+
+## AND THIS REPOSITORY ALREADY PRICED THE CONSUMING HALF — AT `0.46%`
+
+`p2_cumulant_oracle.py` (P2-CP3R, 2026-08-21) ran the exact ladder this go/no-go
+needs, with ORACLE cumulants from an independent sample stream:
+
+| arm | what it knows | final-layer MSE | recovered vs `O0` |
+|---|---|---:|---:|
+| `O0` | the honest closure, no truth | `4.2271e-06` | — |
+| `O1` | **TRUE** `(μ, σ)`, Gaussian map | `2.2774e-07` | `94.61%` |
+| `O2` | + **TRUE** κ₃ | `5.8088e-08` | `98.62%` |
+| `O3` | + **TRUE** κ₄ | `3.8785e-08` | `99.08%` |
+
+| source | share of `O0`'s MSE |
+|---|---:|
+| propagated STATE drift | **`94.61%`** |
+| 3rd-cumulant map | `4.01%` |
+| **4th-cumulant map** | **`0.46%`** |
+
+**A PERFECT per-neuron κ₄, handed free to the readout, is worth `0.46%` of the
+closure's error.** That is the ceiling on the half of SSC that touches our score
+directly, and it is an oracle — no closure can beat it, and SSC would have to
+*estimate* what the oracle was given.
+
+Two further readings, both against the lane:
+
+- On a perfect state the whole cumulant map buys `4.47%`, which the CP3R entry
+  itself called **"below even the 20% KILL threshold"** and recorded as *"the
+  cumulant-map lane is DEAD."*
+- `O3`'s residual after subtracting stream-B noise is `1.941e-08`, indistinguishable
+  from stream A's noise: **with exact cumulants the Edgeworth map is essentially
+  perfect.** There is no headroom hiding in a better κ₄ *map*; only in a better
+  κ₄ *value*, which is worth `0.46%`.
+
+## SO WHY IS THIS NOT AN OUTRIGHT NO-GO
+
+Because **SSC's mechanism is not the readout.** In SSC, κ₄ is reinstalled after
+every ReLU and **transported through the next linear layer**, so it changes the
+state the next Wick/Hermite update consumes. The oracle above adds the κ₄ term
+**only to the readout map** on an otherwise-unchanged state; it never lets κ₄ feed
+back into the covariance evolution.
+
+And the oracle's own decomposition says that is where the money is: **`94.61%` of
+the error is propagated `(μ, σ)` state drift.** SSC's claim, in effect, is that a
+κ₄ carried in flight reduces that drift. **Nothing in this repository has measured
+that**, and the `0.46%` figure does not bound it.
+
+Against that, two pieces of local evidence point the other way, and both are
+recorded here rather than ignored:
+
+- WP9: *"Acting at every layer is not better than acting at the readout; it is
+  catastrophically worse."* Measured for a different correction, so it is
+  suggestive and not decisive.
+- Puffi's `−77.2%` is at **width 256, depth 32**. We are **1024 × 16** — four times
+  wider, half as deep — and the paper explicitly refuses the joint `L/n`
+  extrapolation ("one fixed width cannot establish a joint `(L/n)^p` law").
+
+## What the paper says against itself, which the handoff did not carry
+
+- SSC's raw layer-32 MSE is **`7.94×` full-budget Kerdock QMC** on the same panel:
+  *"the submitted method therefore remains less accurate than the sampling
+  references used here."*
+- *"SSC has no identified small expansion parameter and no corresponding bound on
+  its truncation error."*
+- **The `−77.2%` measures the DEPLOYED STACK**, not Eq. (2): a κ₃ repair adding up
+  to 64 cross-family atoms, pair-series terms, a `−0.3` response-memory
+  coefficient, and a `31→32→32→1` drift corrector fitted on 160 networks all sit
+  between the clean closure and the number. The handoff's "Puffi got −77% at
+  256×32" attributes to the closure a result the paper attributes to the system.
+- Cost: `0.501 B` vs `0.373 B` for their K=3 port — **`+34.3%` operations**. On our
+  chain that is roughly `12,357 → 16,600` operations, which is inside the `22,000`
+  gate but pushes wall toward the region that just cost L=4 its nominee status.
+
+## A FREE IMPROVEMENT THEY PUBLISHED AND DID NOT SHIP
+
+Their own conclusion reports a controlled audit that kept the four modes and
+**changed the regression target** — fitting `Λ` to *the mean correction consumed
+after the next weight and ReLU update* rather than to marginal κ₄ — for a further
+**`−13.6%`** at layer 32, winning on 26 of 30 networks, and *"the measured
+reduction came from changing the target, not from adding modes"*. It was never
+embedded in `#327725`. **Any κ₄ work here should fit to the consumed mean
+correction from the start.**
+
+## THE VERDICT, AND THE ONE EXPERIMENT THAT WOULD SETTLE IT
+
+**Provisional NO-GO on §3d as specified**, and the handoff's `≥1.5×` bar is
+already unreachable through the readout: the oracle ceiling there is `0.46%` of a
+closure error we have since reduced by two orders of magnitude.
+
+**The lane survives only through the propagation channel**, and that is worth
+exactly one cheap measurement before anything is built:
+
+> **Extend `p2_cumulant_oracle.py` with an `O4` arm: carry the TRUE κ₄ IN FLIGHT
+> — feed it to each layer's Wick/Hermite update and let it change the state the
+> next layer consumes — and measure the final-layer MSE against `O2`.**
+> `O4 − O2` is the propagation half, which nothing has measured. It is an oracle,
+> so it bounds SSC and every other κ₄ closure on OUR shape. It needs the GPU
+> sampling the module already does, no seed block beyond what CP3R claimed, and no
+> production spelling.
+>
+> **If `O4` does not beat `O2` by `≥1.5×`, §3d is dead on our shape** and §3
+> collapses to §3e (the corrector on chain features), which is the only remaining
+> arm that adds information rather than re-expanding the same state.
+
+## Knowledge delta
+
+1. **SSC's readout is a per-neuron scalar κ₄**, and our chain already computes the
+   Hermite factor it multiplies. §3b and §3d are one lever, not two.
+2. **This repository priced that readout at `0.46%` on 2026-08-21** and recorded
+   the cumulant-map lane as dead. The handoff's §3d was written without that
+   number beside it.
+3. **The unmeasured half is propagation**, where `94.61%` of the error lives, and
+   an `O4` arm on the existing oracle would bound it for one GPU job.
+4. Puffi's `−77.2%` is a whole-stack result at a shape `4×` wider and `2×`
+   shallower than ours, against a baseline `112×` worse than our current chain.
+5. Fit any κ₄ coupling to **the consumed mean correction**, not to κ₄ — their own
+   audit says that alone is worth `13.6%`.
