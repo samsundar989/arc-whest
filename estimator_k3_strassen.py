@@ -507,7 +507,7 @@ class _Tower(object):
 # nets against the frozen gate in the contract, never by a per-matmul figure.
 
 #: Recursion depth. 0 reproduces `estimator_k3_full.py` bit-for-bit.
-_STRASSEN_DEPTH = 4
+_STRASSEN_DEPTH = 3
 
 
 def _sb(A, B, depth):
