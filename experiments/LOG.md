@@ -35533,3 +35533,159 @@ exactly one cheap measurement before anything is built:
    shallower than ours, against a baseline `112×` worse than our current chain.
 5. Fit any κ₄ coupling to **the consumed mean correction**, not to κ₄ — their own
    audit says that alone is worth `13.6%`.
+
+# 2026-09-08 — CONTRACT (Rule 1): SLICE 3 STEP 1 — D1 (ARC `kind=AUGMENT`) and D2 (the O4 in-flight κ₄ oracle)
+
+*Pre-registered before any AUGMENT or O4 datum exists. Handoff:
+`docs/STRATEGIST_RESPONSE_2026-09-08.md` §5 step 1. Samuel's instruction of
+2026-09-08 overrules that document's own §3d "provisional NO-GO" as **not yet
+measured**, and this contract is written against the overruling.*
+
+## Question
+
+Is the `~1.9e-8` raw floor shared by the public board's top twelve a property of
+**cumulant-truncation estimators as a class**, or only of the member we happen to
+be running? Concretely: our chain is ARC's `kind=SIMPLE` K3, in which κ₄ enters
+the flow as **one global scalar**. Two refinements carry more of κ₄ *in flight*.
+Do either of them move the number, and how far can any κ₄-in-flight scheme go?
+
+## Evidence
+
+| item | status |
+|---|---|
+| our chain is `kind=SIMPLE` K3 with κ₄ as a single scalar | **CONFIRMED** — `get_r_x(4, 3, SIMPLE) = 2`, so degree 4 is tracked at radial order 2 and its core has `4 − 2·2 = 0` free indices. `estimator_k3_full.py:7`, `:690`, `:697` |
+| `kind=AUGMENT` at `k_max=3` carries κ₄ as an `(n, n)` object | **CONFIRMED** — `get_r_x(4, 3, AUGMENT) = 1` so `4 − 2·1 = 2` free indices; `get_d_max(3, ·) = 4` for **both** kinds, so AUGMENT adds no new degree, it *enriches degree 4 from a scalar to a matrix* (`kprop_harmonic.py:194–245`) |
+| `factor=True, kind=AUGMENT, k_max=3` is an implemented upstream path | **CONFIRMED** — `kprop_harmonic.py:366–376` dispatches to `factor_k3.factored_nonlin_kprop_k3(augment=True)` |
+| the factored AUGMENT path is **not** equivalent to unfactored AUGMENT | **CONFIRMED** — `factor_k3.py:291–299`: it drops the non-hypertree diagrams (covariance triangle, κ₃ × edge products) which "have the same `Θ(n^-3)` squared size as the extra terms that are kept". `local_sim/p2_augment.py` (WP3) made unfactored the only admissible *parity* target for exactly this reason. **We measure `factor=True` anyway, because it is the only variant that could ever be ported** (see Scope) |
+| the K3 SIMPLE baseline on this exact asset | **CONFIRMED** — `xmse = 4.00469e-08`, `se 1.017e-09`, `95% [3.794e-08, 4.215e-08]`, 24 nets, `experiments/2026-08-26_p2_gt/pa_k3.json` |
+| our shipped fnp chain reproduces that baseline | **CONFIRMED** — `k3_full_score.json` raw `4.004541e-08` vs upstream `4.004685e-08`, a `3.6e-5` relative agreement |
+| label noise per half | **CONFIRMED** `1.1552e-09`, i.e. `29×` below the baseline MSE. The two-half cross estimator is unbiased regardless |
+| **power cumulants (D3) are ALREADY IN the baseline** | **CONFIRMED** — upstream `use_pK` defaults to `True` and neither `p2_pa_kprop` nor `p2_kprop_bridge` passes it; `use_pK=False` is upstream's *ablation*, documented as "doesn't get good MSE". Our fnp chain likewise implements "all 25 kept pK terms" (`p2_k3_fnp.py:188`). **D3 is not an available lever — its gain is already banked.** See Prediction 5 |
+| the `0.46%` κ₄ figure | **CONFIRMED but out of scope** — `p2_cumulant_oracle.py` arms O0–O3 are *readout* corrections on a **K2** closure's state. Nothing in that module propagates κ₄, and nothing in it runs a K3 chain. It cannot bound an in-flight κ₄ scheme on a K3 chain, and this contract does not treat it as doing so |
+
+## Hypothesis + mechanism
+
+**H1 (D1).** The leading error of a K3 chain is the effect of the omitted κ₄ on
+the *propagated* `(μ, Σ, κ₃)` state, not on the final readout. Carrying κ₄'s
+non-traceless part in flight corrects that drift at all sixteen layers rather
+than one, so `kind=AUGMENT` moves the raw number to the board floor.
+
+**H2 (D2).** The κ₄ family's ceiling is what a *perfect* κ₄, injected in flight
+from an independent sample stream, buys. If the ceiling is close to the floor
+(`< 1.5×`), no κ₄ carrier — AUGMENT, SSC, per-neuron diagonal — can matter, and
+the lane is dead however it is spelled.
+
+Mechanism for the ladder in D2: the factored K3 Wick step reads κ₄ through
+exactly three surfaces (`factor_k3.py`), and the variants are chosen to be those
+surfaces, not an arbitrary ladder:
+
+| variant | what is replaced by truth | the surface in the code |
+|---|---|---|
+| **(a)** trace/scalar part only | the pure-radial `(2,2)` coarsening — what `SIMPLE` already carries | `terms_iso` at `d_max=4`, `factor_k3.py:327–338` |
+| **(b)** per-neuron diagonal | `κ₄(i,i,i,i)` on the diagonal of the slices below | `WK[4].core.diagonal()`, `factor_k3.py:434` |
+| **(c)** every κ₄ slice the step reads | the `(2,2)` diagslice `κ₄(i,i,j,j)` **and** the `(2,1,1)` `r=1` core `T_ij = Σ_k κ₄(i,j,k,k)` **and** its metric | `WK_22` (`:396`), `core`/`metric` (`:419–421`) |
+
+Each of (a)–(c) is computable from samples **without materialising the `n⁴`
+tensor**: `T_ij = E[z_i z_j |z|²] − C_ij tr(C) − 2(C²)_ij` for centred `z`, all
+of which are `(n, n)` accumulations. That identity is what makes D2 buildable at
+`n = 1024` at all, and it is checked in the instrument check below.
+
+## Intervention
+
+**D1:** one flag — `kind=AUGMENT` instead of `SIMPLE` — through
+`p2_kprop_bridge.kprop_means`, everything else identical, both arms re-run in the
+same process on the same nets in the same order.
+
+**D2:** drive the upstream layer loop ourselves and override the degree-4 state
+at the input to every nonlinear step with truth from an independent sample
+stream. **The upstream checkout is not modified** (`verify_upstream` refuses
+otherwise); the override is a wrapper around the dispatch target.
+
+## Predictions (numbered, pre-registered)
+
+1. **D1 raw `xmse` lands in `[1.8e-8, 2.5e-8]`** (the strategist's band, adopted
+   verbatim from Samuel's 2026-09-08 instruction).
+2. **Falsifier for D1: `xmse ≥ 3.5e-8`** means augmentation is not the missing term.
+3. **D2(c)/D2(a) — the shape of the ceiling.** Predicted `≥ 3×` for (c).
+4. **Gate: `D2(c)/K3 < 1.5×` kills the κ₄ lane entirely**, whatever its spelling.
+5. **D3 returns nothing**, because power cumulants are already on in both arms.
+   *This prediction is recorded as already-CONFIRMED from source reading, not as
+   an open question, and it contradicts the Sep 8 response's D3 row.*
+6. **Memory:** AUGMENT's degree-4 state grows only `n² − 1` numbers over SIMPLE
+   (`~4 MB` at f32), but its `(1,1,1)` factored block gains `~6×` more rank-`n`
+   leg products per layer (`factor_k3.py:389–451`: 1 leg in SIMPLE, 4 legs plus
+   3 `(2,1,1)` blocks in AUGMENT). **Predicted peak `≤ 1.5×` of SIMPLE's**, i.e.
+   feasible on one 32 GiB card. If it OOMs, that is a reported result, **not** a
+   reason to fall back to a narrower width.
+
+## Gate
+
+- D1 promotes the AUGMENT port to a build **iff `xmse ≤ 2.5e-8`** (handoff §5.2).
+- D2 opens the traceless-κ₄ carrier **iff `D2(c)/D2(a) ≥ 1.5`** (handoff §5.3).
+- D2 **closes the whole κ₄ lane iff `D2(c)/K3 < 1.5`** *and* D1 `≥ 3.5e-8`
+  (handoff §5.5) — both, not either.
+
+All three thresholds are fixed here, before data, and are passed explicitly;
+`competition_score.decide()` has no default and none is supplied.
+
+## Falsifier
+
+H1 is rejected by prediction 2. H2 is rejected by the `1.5×` gate on (c).
+
+## Baseline
+
+`xmse_k3 = 4.004685e-08` (upstream SIMPLE, `pa_k3.json`), **re-run in the same
+process as the AUGMENT arm** so the comparison is paired on common random
+numbers rather than against a stored number. Agreement of the re-run with the
+stored value to `<1e-12` is itself an instrument check; disagreement halts.
+
+## Cost model
+
+**Round-dependent, Phase 2, λ = 0 so `C = F`.** No cost is claimed by this
+contract: D1 and D2 are **information** questions run in torch, and upstream's
+`NamedFlopCounter` is torch's meter, not flopscope's
+(`docs/GOTCHAS.md`; `p2_augment.py` § THE METER CAUTION). Any FLOP number a port
+would carry is a **projection** until `p2_flop_anchor` prices the fnp spelling.
+Residual is reported as **headroom against the `0.4 s` cliff** only when a
+candidate exists, which is Step 2, not this slice.
+
+## Statistic
+
+Paired, common random numbers, **arithmetic** difference of the two-half cross
+estimator `xmse(p) = mean_j (p_j − A_j)(p_j − B_j)`, with a studentised-t 95%
+interval. Never percentile, never BCa. Ratios are reported as **diagnostics**
+beside the paired difference, never in place of it.
+
+## Seed block
+
+**None claimed.** Both jobs read the existing sealed asset
+`experiments/2026-08-26_p2_gt/{gt_halfA,gt_halfB}.npz` — 24 networks, `2**26`
+samples per half — per Samuel's instruction ("no seed block"). `# seed-ledger: no
+block named`.
+
+**Stated plainly because it matters:** P01 is a **DESIGN** block and it has been
+read before (P-A, WP21, WP22). Re-reading it orients priority; under
+`docs/VALIDATION.md` it **cannot promote anything**. No result in this slice is
+promotion evidence, and the AUGMENT port in Step 2 will need its own fresh block
+plus the official mini-100 before any submission.
+
+## Confounders / scope / what must not change
+
+- **Scope: `factor=True` only.** Unfactored AUGMENT is the theoretically cleaner
+  arm and WP3 made it the only admissible *parity* target — but it is `O(n⁴)` and
+  unreachable at `n = 1024`, so it could never be ported. Measuring the factored
+  variant answers the question we can act on. **The reported number is therefore a
+  LOWER BOUND on what AUGMENT-class information is worth**, because the factored
+  path drops same-order diagrams. Recorded so no later reader mistakes it for the
+  full AUGMENT estimator.
+- **f32 only.** P-A measured `f32 − f64 = −1.3e-12` on the same asset — four
+  orders below the effect — and f64 doubles a memory footprint that is the
+  binding risk here.
+- Must not change: the gt asset, `mint_provenance.canonical_mint`, the upstream
+  rev + patch (`verify_upstream` asserts both on every call), the four wiring
+  conventions in `p2_kprop_bridge`, or `estimator.py` (untouched at v2.6.1).
+- **The independent-stream rule is load-bearing for D2.** The oracle's κ₄ and the
+  evaluation target must come from disjoint sample streams; sharing them made an
+  earlier oracle score `3.6e-10` against a `7.2e-8` noise floor — an impossibility
+  that was the only tell. D2 reuses the two-stream construction and the same
+  impossibility check.
