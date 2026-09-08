@@ -182,7 +182,13 @@ def _run_arm(bridge, torch, w, kind, dtype):
     _mem_reset(torch)
     t0 = time.perf_counter()
     try:
-        means = bridge.kprop_means(w, k_max=3, factor=True, kind=kind, dtype=dtype)
+        # No autograd graph. This is pure inference, and upstream builds the MLP
+        # from nn.Linear, whose weights carry requires_grad=True -- so without
+        # this the chain retains every intermediate of all sixteen layers. It
+        # cannot change a single output value; it only decides whether the run
+        # fits on the card.
+        with torch.no_grad():
+            means = bridge.kprop_means(w, k_max=3, factor=True, kind=kind, dtype=dtype)
     except torch.cuda.OutOfMemoryError as e:
         tel = {"seconds": time.perf_counter() - t0, "oom": True,
                "error": str(e)[:400], **_mem_read(torch)}
