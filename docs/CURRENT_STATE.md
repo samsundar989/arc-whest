@@ -1,5 +1,98 @@
 # CURRENT_STATE.md — read this first
 
+> ## 2026-09-08 (later) — SLICE 3 STEP 1 IS PRE-REGISTERED, BUILT, SKEPTIC-CORRECTED AND QUEUED. NO DATUM EXISTS YET.
+>
+> **Read this before touching D1/D2.** Contract `432f7fd`, instruments `eff8367`
+> / `366fed1`, **ERRATUM `7245bea`**, fixes `00f0d57`. `estimator.py` is still
+> untouched at **v2.6.1**. **Nothing is designated.**
+>
+> ### THREE FINDINGS FROM SOURCE READING, BEFORE ANY GPU TIME
+>
+> 1. **The ruling's mechanism is confirmed exactly.** `get_d_max(3, ·) = 4` for
+>    **both** kinds — AUGMENT adds no cumulant degree, it enriches degree 4 from
+>    a **scalar** (`r_x = 2`, SIMPLE) to an **`(n,n)` matrix** (`r_x = 1`).
+>    `kprop_harmonic.py:194-245`. `factor=True, kind=AUGMENT, k_max=3` is an
+>    implemented upstream path (`:366-376`).
+> 2. **D3 IS ALREADY BANKED — there is nothing to run.** Power cumulants are
+>    upstream's `use_pK`, which **defaults to `True`**; `use_pK=False` is their
+>    documented *ablation*. Both arms already carry them, and our fnp chain
+>    implements "all 25 kept pK terms". **This contradicts the Sep 8 response's
+>    D3 row** (predicted `1.1–1.5x`): the gain is already inside the `4.0e-8`
+>    baseline. Checked, not asserted (`_assert_pk_default`).
+> 3. **D1's number will be a LOWER BOUND.** `factor_k3.py:291-299` — factored
+>    AUGMENT *drops* the non-hypertree diagrams, which carry the **same**
+>    `Θ(n^-3)` squared size as those it keeps. Unfactored AUGMENT is `O(n^4)` and
+>    unportable at `n = 1024`, so the factored variant is the only one worth
+>    measuring — but it bounds AUGMENT-class information from **below**.
+>
+> ### THE SKEPTIC RETURNED **PROVISIONAL** AND IT PAID FOR ITSELF AGAIN
+>
+> Run against the *construction*, before the 24-net jobs. Every defect is fixed
+> in `00f0d57`; the full list is the ERRATUM. The three that mattered:
+>
+> - **Rung (b) was mislabelled, and the thing it was named for is NOT MEASURABLE
+>   HERE.** `diag(T)_i = Σ_k κ₄(i,i,k,k)` is a per-neuron **trace**, not
+>   `κ₄(i,i,i,i)`. Measured against a dense κ₄: the per-neuron `κ₄(i,i,i,i)`
+>   actually represented after rung (b) is `0.243/0.132/0.060` of truth at
+>   `n = 16/32/64` — a `~1/n` law reaching **≈0.4% at `n = 1024`**.
+>   **The strategist's D2(b) / §3b "per-neuron diagonal κ₄ in flight" needs Step
+>   3, not Step 1** — an `r=1` HTensor has no per-neuron κ₄ degree of freedom.
+> - **`D2(c)/K3` is confounded with D1** (`SIMPLE→AUGMENT` change *and* the truth
+>   injection). In a 64×5 reproduction the representation change alone was
+>   `2.24x` while the truth injection added `2.5%`. **`(a)→(c)` is the only
+>   contrast isolating truth** and is now the headline.
+> - **The CARRIER gate had the same hole as the LANE gate's caveat.**
+>   `D2(c)/D2(a)` is measured *inside* the trace-matrix subspace and was being
+>   used to decide a carrier for its **orthogonal complement**. Measured,
+>   `‖κ₄ − P_{≥1}κ₄‖/‖κ₄‖` → **≈0.998 at `n = 1024`**: D2 bounds a subspace
+>   holding **~0.2% of κ₄'s Frobenius mass**. **Demoted to a diagnostic; it may
+>   not open or close the Step-3 lane in either direction.**
+>
+> Also fixed: the lane gate was implemented as half of its conjunctive self; all
+> gates now run through `competition_score.decide()` on paired differences with
+> intervals; the oracle's own noise scales as `~1.7·n/√N`, **not** `1/√N`
+> (`--precision-check` was re-posed and job `397` cancelled before it printed a
+> conclusion against a bar ~1000× too tight); JSON keys `c_over_a`/`c_over_b`
+> held their reciprocals.
+>
+> **A new pre-registered REFUSAL** (before data): two independent oracle streams
+> on one net must agree to **≤ 0.2 of the `(a)→(c)` gap** — the *smaller* gap —
+> or the 24-net D2 run must not be submitted. The oracle's noise biases `xmse_c`
+> **upward**, i.e. toward the pre-registered kill, and it was recorded but never
+> gated.
+>
+> ### QUEUED — nothing has run
+>
+> | job | what | gates |
+> |---|---|---|
+> | `399` | D1 feasibility probe, 1 net, both arms, post-`no_grad` peak VRAM | fixes the VRAM declaration for everything below |
+> | `402` | D2 two-stream REFUSAL at `2^20/22/24` | **the 24-net D2 is refused unless this passes** |
+> | — | 24-net D1 | submit after `399`; needs the corrected declaration |
+> | — | 24-net D2 (`--d1-xmse` REQUIRED) | submit after `402` passes **and** D1 lands |
+>
+> `392`/`398` (24-net, declared `26 GiB`) were **cancelled**: upstream builds its
+> MLP from `nn.Linear`, so the chain had been retaining a sixteen-layer autograd
+> graph it never uses. `no_grad` (`cbc1a9c`) is numerics-neutral; `399` measures
+> the real peak rather than re-guessing it. **Nothing was narrowed in width** — a
+> width-512 proxy would answer a different question.
+>
+> ### NOMINEES — the sentence the handoff asks for DOES NOT EXIST in our captures
+>
+> Rules v14 establishes that up to **two** may be designated, and §6's fallback
+> ("two best-scoring valid submissions from that Phase on that Phase's public
+> leaderboard"). **Neither capture says how two designated submissions are
+> SCORED** — both capture-scope fields say they were taken to settle *how many*.
+> The live page is login-gated. So the handoff's ambiguity branch applies:
+>
+> **A = `330327` (L=3). B = `330212` (k3_full).**
+>
+> That is also **maximin**: `330290` (L=4) sits at `0.65x` of the wall cap under
+> the measured `1.60x` contention, so it is a coin-flip on a fresh private suite
+> and buys at most `1.106x` when it works; `330212` has `12.6x` wall headroom and
+> cannot fail. **Samuel designates; nothing here does.** One logged-in read of §6
+> settles it — look for whether the private re-run yields **one score per
+> submission** (ranked by best) or **one per team** (averaged/combined).
+
 > ## 2026-09-08 — NOMINEE A IS STRASSEN L=3 AT `2.031e-08`, FROM `8.501e-08` TWO DAYS AGO
 >
 > Three graded submissions in two days took the entry from **`#47`** to roughly
