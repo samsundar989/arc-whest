@@ -66,8 +66,25 @@ to avoid.
 
     control  the chain's own T                          (== D1's AUGMENT arm)
     (a)      T_chain, retraced to tr(T_true)            only the SCALAR is true
-    (b)      T_chain with diag replaced by diag(T_true) per-neuron κ₄ is true
+    (b)      T_chain with diag(T) set true              the trace matrix's DIAGONAL
     (c)      T_true                                     the whole trace matrix
+
+**Rung (b) is NOT "per-neuron κ₄".** `diag(T)_i = Σ_k κ₄(i,i,k,k)` is a
+per-neuron *trace*, not `κ₄(i,i,i,i)`. Measured against a dense κ₄ at small n,
+the per-neuron `κ₄(i,i,i,i)` actually represented after rung (b) is `0.243 /
+0.132 / 0.060` of truth at `n = 16 / 32 / 64` — a `~1/n` law that reaches
+**≈0.4% at n = 1024**. The strategist's D2(b) / §3b "per-neuron diagonal κ₄ in
+flight" is therefore **not measured here and cannot be**: an `r=1` HTensor has no
+per-neuron κ₄ degree of freedom to set. That carrier requires leaving this
+representation, which is Step 3. (Skeptic, 2026-09-08; `experiments/LOG.md`
+ERRATUM of that date.)
+
+Rung (c) sets the degree-4 state to exactly `proj_geq_r(κ₄_true, n, 1)`. Note
+what that is **not**: it replaces the *core* only. The `(2,2)` diagslice that
+`factor_k3.py:396` reads is then *derived* from `Sym(core ⊗ I)` rather than set
+to the true `κ₄(i,i,j,j)`, and no metric is replaced. (c) is still the ceiling of
+the representation; an earlier draft of the contract described it as replacing
+each slice independently, which is not what the code does.
 
 `T_chain` is recovered by inverting the map above, which is exact:
 
@@ -140,7 +157,7 @@ D2_PRED_C_OVER_A = 3.0    # prediction 3
 # streams
 # --------------------------------------------------------------------------
 
-def oracle_seed(input_seed: int, verify: bool = True) -> int:
+def oracle_seed(input_seed: int, verify: bool = True, child: int = 2) -> int:
     """A third child of the evaluator's sampling substream, disjoint from A and B.
 
     `SeedSequence.spawn` is deterministic and append-only, so `spawn(3)[:2]` are
@@ -150,9 +167,11 @@ def oracle_seed(input_seed: int, verify: bool = True) -> int:
     """
     from p2_truth import seed_streams, _replica_seeds
     _w, sample_ss, _e = seed_streams(input_seed)
-    kids = sample_ss.spawn(3)
+    assert child >= 2, "children 0 and 1 ARE the label halves; never draw them"
+    kids = sample_ss.spawn(child + 1)
     to_int = lambda ss: int.from_bytes(ss.generate_state(2).tobytes(), "little")
-    a, b, c = (to_int(k) for k in kids)
+    ids = [to_int(k) for k in kids]
+    a, b, c = ids[0], ids[1], ids[child]
     if verify:
         ra, rb = _replica_seeds(input_seed)
         assert (a, b) == (ra, rb), (
@@ -314,7 +333,12 @@ def T_from_core(core, c1, c2):
 
 
 def mix_T(T_chain, T_true, variant):
-    """The nested ladder. Each rung uses strictly more of T_true than the last."""
+    """The nested ladder. Each rung uses strictly more of T_true than the last.
+
+    Rung "b" sets the DIAGONAL OF THE TRACE MATRIX, `diag(T)_i = sum_k
+    kappa_4(i,i,k,k)`. It is NOT `kappa_4(i,i,i,i)` and must not be described as
+    per-neuron kappa_4 -- see the module docstring.
+    """
     import torch
     n = T_chain.shape[0]
     if variant == "noop":
@@ -501,6 +525,57 @@ def validate_small(n=24, depth=2, n_samples=1 << 19, device="cuda", seed=12345):
 # main
 # --------------------------------------------------------------------------
 
+# Pre-registered by the 2026-09-08 ERRATUM, before any 24-net datum.
+TWO_STREAM_REFUSAL = 0.2   # spread must be <= this FRACTION OF THE (a)->(c) GAP
+
+
+def two_stream_check(seeds, man, a, torch, bridge, canonical_mint):
+    """REFUSAL gate: is the oracle quiet enough for the (a)->(c) gap to be real?
+
+    The oracle's own noise adds `E||delta||^2` to `xmse_c` -- a POSITIVE bias, so
+    it pushes toward the pre-registered kill. Recording `oracle_rel_noise_T` and
+    never gating on it (the earlier draft) means a kill could be an artefact of
+    too few samples.
+
+    The bar is deliberately the `(a) -> (c)` gap and NOT the larger
+    (c)-vs-control gap: `(a) -> (c)` is the contrast the whole slice turns on and
+    it is the smaller of the two, so gating on the larger one would pass an
+    oracle too noisy for the number actually being quoted.
+    """
+    from mlp_kprop.kprop_harmonic import AUGMENT
+    s0 = seeds[0]
+    w, _e, _ss = canonical_mint(man["width"], man["depth"], s0)
+    out = []
+    for log2n in (a.two_stream_log2 or [20, 22, 24]):
+        ns = 1 << log2n
+        preds, noises = {}, {}
+        for child in (2, 3):
+            T, halves = true_trace_matrices(
+                w, oracle_seed(s0, verify=(child == 2), child=child), ns,
+                a.device, a.chunk, dtype=torch.float32, split_halves=True)
+            Ta, Tb = halves
+            noises[child] = float(np.mean([
+                float(torch.linalg.norm(Ta[l] - Tb[l]) / 2 / torch.linalg.norm(T[l]))
+                for l in range(len(T))]))
+            preds[child] = {v: kprop_means_injected(w, T, v, device=a.device,
+                                                    dtype=torch.float32)[-1]
+                            for v in ("a", "c")}
+        gap = float(np.linalg.norm(preds[2]["c"] - preds[2]["a"]))
+        spread = float(np.linalg.norm(preds[2]["c"] - preds[3]["c"]))
+        rec = {"log2_samples": log2n, "samples": ns,
+               "oracle_rel_noise_T_stream2": noises[2],
+               "oracle_rel_noise_T_stream3": noises[3],
+               "a_to_c_gap": gap, "two_stream_spread_on_c": spread,
+               "spread_over_gap": (spread / gap) if gap else float("inf"),
+               "passes": bool(gap and spread / gap <= TWO_STREAM_REFUSAL)}
+        out.append(rec)
+        print(f"    2^{log2n:<2} ({ns:>10,})  rel_noise_T {noises[2]:.3f}   "
+              f"(a)->(c) gap {gap:.3e}   two-stream spread {spread:.3e}   "
+              f"ratio {rec['spread_over_gap']:.3f}   "
+              f"{'PASS' if rec['passes'] else 'REFUSE'}")
+    return out
+
+
 def _progress(frac):
     p = os.environ.get("WORKERQ_PROGRESS")
     if not p:
@@ -522,11 +597,20 @@ def main(argv=None) -> int:
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--noop-tol", type=float, default=1e-9,
                     help="max relative |noop arm - control| before HALT")
+    ap.add_argument("--d1-xmse", type=float, default=None,
+                    help="D1's measured AUGMENT xmse. REQUIRED to evaluate the "
+                         "lane gate, which is conjunctive: (c) failing 1.5x over "
+                         "SIMPLE *and* D1 >= 3.5e-8. Without it the gate reports "
+                         "None rather than half of itself.")
     ap.add_argument("--validate-small", action="store_true")
     ap.add_argument("--precision-check", action="store_true",
                     help="f32-matmul vs f64-matmul T at the REAL width, where the "
                          "O(n) cancellation actually bites")
-    ap.add_argument("--precision-samples", type=int, default=17)
+    ap.add_argument("--precision-samples", type=int, default=22)
+    ap.add_argument("--two-stream-check", action="store_true",
+                    help="the pre-registered REFUSAL: two independent oracle "
+                         "streams on one net must agree to <=0.2 of the (a)->(c) gap")
+    ap.add_argument("--two-stream-log2", type=int, nargs="*", default=None)
     ap.add_argument("--small-n", type=int, default=24)
     a = ap.parse_args(argv)
 
@@ -558,6 +642,38 @@ def main(argv=None) -> int:
         print("        roundoff is the only expected residue.")
         return 0 if ok else 1
 
+    if a.two_stream_check:
+        from mint_provenance import canonical_mint as _cm2
+        gt0 = os.path.join(_ROOT, a.gt_dir)
+        man0 = json.load(open(os.path.join(gt0, "gt_manifest.json"), encoding="utf-8"))
+        sds = [int(x) for x in np.load(os.path.join(gt0, "gt_halfA.npz"))["seeds"]]
+        print("=" * 78)
+        print("D2 PRE-REGISTERED REFUSAL -- two independent oracle streams, one net")
+        print("=" * 78)
+        print(f"  bar: two-stream spread on (c) must be <= {TWO_STREAM_REFUSAL} "
+              f"of the (a)->(c) gap")
+        print("  (the (a)->(c) gap, not the larger (c)-vs-control gap: (a)->(c) is")
+        print("   the contrast the slice turns on and is the smaller of the two)")
+        print()
+        recs = two_stream_check(sds, man0, a, torch, bridge, _cm2)
+        ok = [r for r in recs if r["passes"]]
+        print()
+        if ok:
+            print(f"  -> PASS at 2^{min(r['log2_samples'] for r in ok)} samples; "
+                  f"use that (or more) for the 24-net run")
+        else:
+            print("  -> REFUSED at every sample count tried. The 24-net D2 run must")
+            print("     NOT be submitted: the oracle's own noise is comparable to the")
+            print("     (a)->(c) gap, and it biases xmse_c UPWARD, i.e. toward the kill.")
+        if a.out:
+            os.makedirs(os.path.dirname(os.path.join(_ROOT, a.out)), exist_ok=True)
+            with open(os.path.join(_ROOT, a.out), "w", encoding="utf-8") as fh:
+                json.dump({"check": "D2 two-stream oracle-noise refusal",
+                           "refusal_bar_fraction_of_a_to_c_gap": TWO_STREAM_REFUSAL,
+                           "contract": "experiments/LOG.md ERRATUM 2026-09-08",
+                           "rows": recs}, fh, indent=2)
+        return 0 if ok else 1
+
     if a.precision_check:
         from mint_provenance import canonical_mint as _cm
         print("=" * 78)
@@ -568,23 +684,34 @@ def main(argv=None) -> int:
         w, _e, _ss = _cm(1024, 16, 40821001144)
         ns = 1 << a.precision_samples
         osd = oracle_seed(40821001144, verify=True)
-        t32, _ = true_trace_matrices(w, osd, ns, a.device, a.chunk,
-                                     dtype=torch.float32, matmul_f64=False)
+        t32, h32 = true_trace_matrices(w, osd, ns, a.device, a.chunk,
+                                       dtype=torch.float32, matmul_f64=False,
+                                       split_halves=True)
         t64, _ = true_trace_matrices(w, osd, ns, a.device, a.chunk,
                                      dtype=torch.float32, matmul_f64=True)
-        worst = 0.0
+        # The RIGHT bar is this oracle's OWN measured sampling noise, not
+        # 1/sqrt(N). T = S - C tr(C) - 2C^2 is an O(n) cancellation and the noise
+        # in S does not cancel, so the true scale is ~1.7*n/sqrt(N) -- at n=1024
+        # that is a factor of ~1700 looser than 1/sqrt(N), and comparing against
+        # 1/sqrt(N) would have failed a perfectly adequate f32 path and pushed
+        # the whole oracle to f64 for nothing. (Skeptic, 2026-09-08.)
+        Ta, Tb = h32
+        worst = worst_mc = 0.0
         for l in range(len(t32)):
             rel = float(torch.linalg.norm(t32[l] - t64[l]) / torch.linalg.norm(t64[l]))
-            worst = max(worst, rel)
-            print(f"    layer {l:>2}  rel |T_f32 - T_f64| / |T_f64| = {rel:.3e}")
-        mc = 1.0 / np.sqrt(ns)
+            mcl = float(torch.linalg.norm(Ta[l] - Tb[l]) / 2 / torch.linalg.norm(t32[l]))
+            worst, worst_mc = max(worst, rel), max(worst_mc, mcl)
+            print(f"    layer {l:>2}  |T_f32-T_f64|/|T_f64| = {rel:.3e}   "
+                  f"measured MC noise = {mcl:.3e}   ratio {rel / mcl if mcl else float('nan'):.3e}")
         print("")
-        print(f"  worst {worst:.3e}   vs Monte-Carlo scale 1/sqrt(N) = {mc:.3e} "
-              f"at {ns:,} samples")
-        print(f"  -> f32 matmul is {'BELOW' if worst < mc else 'ABOVE'} the sampling "
-              f"noise it sits beside, so it is "
-              f"{'not the limiting error' if worst < mc else 'THE LIMITING ERROR -- use f64'}")
-        return 0 if worst < mc else 1
+        print(f"  worst f32-vs-f64 {worst:.3e}   worst MEASURED oracle noise {worst_mc:.3e}"
+              f"   ({ns:,} samples)")
+        print(f"  (1/sqrt(N) = {1.0 / np.sqrt(ns):.3e} is NOT the bar -- see the comment above)")
+        ok = worst < 0.1 * worst_mc
+        print(f"  -> f32 matmul error is {'well below' if ok else 'NOT clearly below'} "
+              f"a tenth of the sampling noise it sits beside, so it is "
+              f"{'not the limiting error' if ok else 'worth re-examining'}")
+        return 0 if ok else 1
 
     from mlp_kprop.kprop_harmonic import SIMPLE, AUGMENT
 
@@ -674,7 +801,7 @@ def main(argv=None) -> int:
     return _report(a, rows, man, v, seeds, gt_noise)
 
 
-def _summary(rows, gt_noise):
+def _summary(rows, gt_noise, d1_xmse=None):
     if not rows:
         return {}
     g = lambda k: np.array([r[k] for r in rows])
@@ -690,16 +817,57 @@ def _summary(rows, gt_noise):
         m, se, ci = studentised_t(g(f"xmse_{lo}") - g(f"xmse_{hi}"))
         out[name] = {"paired_diff": m, "se": se, "ci95": list(ci)}
     k3 = out["simple"]["mean_xmse"]
+    # Named for what they HOLD. An earlier draft called these c_over_a / c_over_b
+    # while holding a/c and b/c; the printed labels were right and the artifact
+    # keys were inverted, which is the class of convention error this repository
+    # has been bitten by twice.
     out["ratios_diagnostic"] = {
-        "K3_over_c": k3 / out["c"]["mean_xmse"] if out["c"]["mean_xmse"] else None,
-        "c_over_a": out["a"]["mean_xmse"] / out["c"]["mean_xmse"] if out["c"]["mean_xmse"] else None,
-        "c_over_b": out["b"]["mean_xmse"] / out["c"]["mean_xmse"] if out["c"]["mean_xmse"] else None,
+        "K3_over_c_CONFOUNDED": k3 / out["c"]["mean_xmse"] if out["c"]["mean_xmse"] else None,
+        "a_over_c": out["a"]["mean_xmse"] / out["c"]["mean_xmse"] if out["c"]["mean_xmse"] else None,
+        "b_over_c": out["b"]["mean_xmse"] / out["c"]["mean_xmse"] if out["c"]["mean_xmse"] else None,
+        "control_over_c": out["control"]["mean_xmse"] / out["c"]["mean_xmse"] if out["c"]["mean_xmse"] else None,
+        "_note": ("K3_over_c is CONFOUNDED: K3 is SIMPLE and (c) is AUGMENT+truth, "
+                  "so it contains the representation change AND the truth injection. "
+                  "a_over_c is the only ratio here that isolates truth."),
     }
     r = out["ratios_diagnostic"]
+    # ---- the gates, through decide(), on PAIRED DIFFERENCES ------------------
+    # docs/VALIDATION.md 2b-i: decide() is the only function in this repository
+    # that returns a promotion boolean. An earlier draft read its verdicts
+    # straight out of ratios_diagnostic -- a dict this module itself labels
+    # diagnostic only -- while computing and then ignoring the intervals.
+    from competition_score import decide
+
+    def _verdict(control_key, cand_key, gate):
+        v = decide(g(f"xmse_{control_key}"), g(f"xmse_{cand_key}"), gate=gate)
+        return {"passed": bool(v.passed), "gain": float(v.gain), "gate": float(v.gate),
+                "ci_paired_difference": list(v.ci),
+                "ci_excludes_zero": bool(v.ci_excludes_zero),
+                "geometric_gain_diagnostic": float(v.geometric_gain),
+                "n": int(v.n), "n_candidate_better": int(v.n_candidate_better),
+                "reasons": list(v.reasons)}
+
+    # THE headline: (a) -> (c) is the only contrast that isolates TRUTH from the
+    # SIMPLE -> AUGMENT representation change.
+    out["verdict_a_to_c"] = _verdict("a", "c", D2_CARRIER_GATE)
+    out["verdict_simple_to_c_CONFOUNDED"] = _verdict("simple", "c", D2_LANE_GATE)
+    out["verdict_control_to_c"] = _verdict("control", "c", D2_LANE_GATE)
+
     out["gates"] = {
-        "lane_dead_if_true": bool(r["K3_over_c"] is not None and r["K3_over_c"] < D2_LANE_GATE),
-        "build_traceless_carrier": bool(r["c_over_a"] is not None and r["c_over_a"] >= D2_CARRIER_GATE),
-        "prediction_3_c_over_a_ge_3": bool(r["c_over_a"] is not None and r["c_over_a"] >= D2_PRED_C_OVER_A),
+        # Conjunctive, exactly as pre-registered: BOTH, not either. d1_xmse must
+        # be supplied; without D1's number this gate cannot be evaluated at all.
+        "lane_dead": (None if d1_xmse is None else bool(
+            (not out["verdict_simple_to_c_CONFOUNDED"]["passed"]) and d1_xmse >= 3.5e-8)),
+        "lane_dead_inputs": {"d1_xmse": d1_xmse,
+                             "simple_to_c_passed_1.5x": out["verdict_simple_to_c_CONFOUNDED"]["passed"],
+                             "requires": "BOTH (c) failing 1.5x over SIMPLE AND D1 >= 3.5e-8"},
+        "prediction_3_a_over_c_ge_3": bool(
+            r["a_over_c"] is not None and r["a_over_c"] >= D2_PRED_C_OVER_A),
+        # DEMOTED from a gate to a diagnostic by the 2026-09-08 ERRATUM: it is a
+        # ratio measured entirely INSIDE the trace-matrix subspace, and it was
+        # being used to decide whether to build a carrier for that subspace's
+        # ORTHOGONAL COMPLEMENT. Neither direction of that inference follows.
+        "carrier_DIAGNOSTIC_ONLY_not_a_gate": out["verdict_a_to_c"]["passed"],
     }
     out["worst_noop_rel_dev"] = float(max(r_["noop_rel_dev"] for r_ in rows))
     out["mean_oracle_rel_noise_T"] = float(np.mean([r_["oracle_rel_noise_T"] for r_ in rows]))
@@ -736,7 +904,8 @@ def _dump(a, rows, man, v, seeds, partial=False, halted=""):
             "every kappa_4-in-flight scheme, including SSC' is NOT supported and is "
             "not made here."),
         "cost_note": "No cost claim; torch meter, not flopscope.",
-        "summary": _summary(rows, man["gt_noise_per_half_mean"]), "rows": rows,
+        "summary": _summary(rows, man["gt_noise_per_half_mean"], a.d1_xmse),
+        "rows": rows,
     }
     with open(out, "w", encoding="utf-8") as fh:
         json.dump(rec, fh, indent=2)
@@ -744,7 +913,7 @@ def _dump(a, rows, man, v, seeds, partial=False, halted=""):
 
 
 def _report(a, rows, man, v, seeds, gt_noise) -> int:
-    s = _summary(rows, gt_noise)
+    s = _summary(rows, gt_noise, a.d1_xmse)
     print()
     print(f"  gt_noise per half          {gt_noise:.4e}")
     for k, label in (("simple", "K3 SIMPLE (control)"), ("control", "AUGMENT (own k4)"),
@@ -761,8 +930,10 @@ def _report(a, rows, man, v, seeds, gt_noise) -> int:
               f"95% [{e['ci95'][0]:+.4e}, {e['ci95'][1]:+.4e}]")
     r = s["ratios_diagnostic"]
     print()
-    print(f"  ratios (DIAGNOSTIC only)   K3/(c) {r['K3_over_c']:.3f}x   "
-          f"(a)/(c) {r['c_over_a']:.3f}x   (b)/(c) {r['c_over_b']:.3f}x")
+    print(f"  ratios (DIAGNOSTIC only)   (a)/(c) {r['a_over_c']:.3f}x   "
+          f"(b)/(c) {r['b_over_c']:.3f}x   control/(c) {r['control_over_c']:.3f}x")
+    print(f"                             K3/(c) {r['K3_over_c_CONFOUNDED']:.3f}x  "
+          f"<- CONFOUNDED: contains the SIMPLE->AUGMENT change AND the truth")
     print(f"  seam    worst no-op deviation {s['worst_noop_rel_dev']:.2e}")
     print(f"  oracle  mean relative noise in T {s['mean_oracle_rel_noise_T']:.2e}")
     if s["impossible_arms"]:
@@ -770,16 +941,33 @@ def _report(a, rows, man, v, seeds, gt_noise) -> int:
               f"label noise floor. A sample stream is shared. Results VOID. ***")
     print()
     g = s["gates"]
-    print(f"  GATE  D2(c)/K3 < {D2_LANE_GATE} -> "
-          f"{'FIRED: the TRACE-MATRIX family is dead (NOT a traceless carrier)' if g['lane_dead_if_true'] else 'not fired'}")
-    print(f"  GATE  D2(c)/D2(a) >= {D2_CARRIER_GATE} -> "
-          f"{'FIRED: build the traceless-k4 carrier (handoff 5.3)' if g['build_traceless_carrier'] else 'not fired'}")
-    print(f"  PRED 3  (c)/(a) >= {D2_PRED_C_OVER_A} -> "
-          f"{'HELD' if g['prediction_3_c_over_a_ge_3'] else 'MISSED'}")
+    va = s["verdict_a_to_c"]
+    print(f"  HEADLINE  (a) -> (c), the ONLY contrast isolating truth:")
+    print(f"            gain {va['gain']:.3f}x vs gate {va['gate']:.2f}x   "
+          f"paired 95% [{va['ci_paired_difference'][0]:+.3e}, {va['ci_paired_difference'][1]:+.3e}]   "
+          f"decide() -> {'PASS' if va['passed'] else 'FAIL'}")
+    for why in va["reasons"]:
+        print(f"              - {why}")
     print()
-    print("  SCOPE: (c) is the ceiling of the AUGMENT REPRESENTATION, not of kappa_4.")
-    print("         An r=1 HTensor carries the TRACE MATRIX only; kappa_4's traceless")
-    print("         part -- what an SSC-style carrier holds -- is not representable here.")
+    if g["lane_dead"] is None:
+        print(f"  GATE  lane_dead: NOT EVALUABLE -- pass --d1-xmse. The gate is "
+              f"CONJUNCTIVE ((c) failing {D2_LANE_GATE}x over SIMPLE AND D1 >= 3.5e-8);")
+        print(f"        reporting half of it is how a printed verdict gets quoted downstream.")
+    else:
+        print(f"  GATE  lane_dead -> {'FIRED: the TRACE-MATRIX family is dead' if g['lane_dead'] else 'not fired'}"
+              f"   inputs {g['lane_dead_inputs']}")
+    print(f"  PRED 3  (a)/(c) >= {D2_PRED_C_OVER_A} -> "
+          f"{'HELD' if g['prediction_3_a_over_c_ge_3'] else 'MISSED'}")
+    print(f"  DIAGNOSTIC (NOT a gate)  carrier {D2_CARRIER_GATE}x -> "
+          f"{'passed' if g['carrier_DIAGNOSTIC_ONLY_not_a_gate'] else 'not passed'}")
+    print()
+    print("  SCOPE, and it binds BOTH gates, not just the lane one:")
+    print("    (c) is the ceiling of the AUGMENT REPRESENTATION, not of kappa_4. An r=1")
+    print("    HTensor carries the TRACE MATRIX only -- measured, that subspace holds")
+    print("    ~0.2% of kappa_4's Frobenius mass at n=1024. So a small (a)->(c) does NOT")
+    print("    kill an SSC-style traceless carrier, and a large one is not evidence FOR")
+    print("    one either: both are measured inside the subspace, and the carrier lives")
+    print("    in its orthogonal complement. Step 3 needs its own oracle.")
     _dump(a, rows, man, v, seeds)
     if a.out:
         print(f"\n  artifact  {a.out}")

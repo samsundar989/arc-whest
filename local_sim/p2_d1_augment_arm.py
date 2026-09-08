@@ -102,6 +102,7 @@ D1_BAND = (1.8e-8, 2.5e-8)          # prediction 1
 D1_FALSIFIER = 3.5e-8               # prediction 2 / handoff §5.5
 D1_BUILD_GATE = 2.5e-8              # handoff §5.2 -- port only if xmse <= this
 PA_STORED = "experiments/2026-08-26_p2_gt/pa_k3.json"
+PA_BASELINE_XMSE = 4.004685e-08     # pa_k3.json k3_mean_xmse, pre-registered
 
 
 def xmse(pred, A, B):
@@ -206,8 +207,14 @@ def main(argv=None) -> int:
     ap.add_argument("--out", default="")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--dtype", default="float32", choices=("float32", "float64"))
-    ap.add_argument("--drift-tol", type=float, default=1e-12,
-                    help="max |re-run SIMPLE - stored P-A| per network before HALT")
+    ap.add_argument("--drift-tol", type=float, default=1e-11,
+                    help="max |re-run SIMPLE - stored P-A| per network before HALT. "
+                         "DERIVED, not picked: an f32-level 1e-7 relative change in "
+                         "the prediction moves xmse by order 4e-13, so 1e-12 would "
+                         "halt on benign cuBLAS/driver non-determinism since "
+                         "2026-08-26 and it would be misread as real drift. 1e-11 "
+                         "is ~25x that floor and still 4 orders below the effect "
+                         "under test (~1.5e-8).")
     ap.add_argument("--probe-only", type=int, default=0,
                     help="run only this many networks; a feasibility probe, not a result")
     a = ap.parse_args(argv)
@@ -332,6 +339,14 @@ def _summary(rows):
     ms, ses, cis = studentised_t(xs)
     ma, sea, cia = studentised_t(xa)
     dm, sed, cid = studentised_t(xs - xa)     # positive => AUGMENT is better
+    # docs/VALIDATION.md 2b-i: decide() is the only function here that returns a
+    # promotion boolean. The pre-registered gate is absolute (xmse <= 2.5e-8);
+    # it is converted to the equivalent paired ratio using the PRE-REGISTERED
+    # baseline only (pa_k3.json's 4.004685e-08), so no threshold is chosen after
+    # seeing data. Both forms are reported.
+    from competition_score import decide
+    ratio_gate = PA_BASELINE_XMSE / D1_BUILD_GATE
+    v = decide(xs, xa, gate=ratio_gate)
     return {
         "n_paired": len(ok),
         "simple_mean_xmse": ms, "simple_se": ses, "simple_ci95": list(cis),
@@ -342,7 +357,21 @@ def _summary(rows):
         "geo_mean_ratio_diagnostic": float(np.exp(np.mean(np.log(xs / xa)))),
         "prediction_1_band_held": bool(D1_BAND[0] <= ma <= D1_BAND[1]),
         "prediction_2_falsifier_fired": bool(ma >= D1_FALSIFIER),
-        "build_gate_passed": bool(ma <= D1_BUILD_GATE),
+        # The absolute reading of the gate, WITH its interval -- an earlier draft
+        # gated on the bare point estimate while computing augment_ci95 and
+        # ignoring it.
+        "build_gate_point_estimate_passed": bool(ma <= D1_BUILD_GATE),
+        "build_gate_ci_upper_also_passed": bool(cia[1] <= D1_BUILD_GATE),
+        "verdict_simple_to_augment": {
+            "passed": bool(v.passed), "gain": float(v.gain), "gate": float(v.gate),
+            "gate_derivation": (f"{PA_BASELINE_XMSE:.6e} (pre-registered SIMPLE "
+                                f"baseline) / {D1_BUILD_GATE:.1e} (pre-registered "
+                                f"absolute gate) = {ratio_gate:.4f}x"),
+            "ci_paired_difference": list(v.ci),
+            "ci_excludes_zero": bool(v.ci_excludes_zero),
+            "geometric_gain_diagnostic": float(v.geometric_gain),
+            "n": int(v.n), "n_candidate_better": int(v.n_candidate_better),
+            "reasons": list(v.reasons)},
     }
 
 
@@ -413,8 +442,19 @@ def _report(a, rows, man, v, pk, shape_check, seeds) -> int:
           f"{'HELD' if s['prediction_1_band_held'] else 'MISSED'}")
     print(f"  PREDICTION 2  falsifier >= {D1_FALSIFIER:.1e} -> "
           f"{'FIRED -- augmentation is NOT the missing term' if s['prediction_2_falsifier_fired'] else 'not fired'}")
+    bg = s["build_gate_point_estimate_passed"]
+    bgc = s["build_gate_ci_upper_also_passed"]
+    vv = s["verdict_simple_to_augment"]
     print(f"  BUILD GATE    xmse <= {D1_BUILD_GATE:.1e} -> "
-          f"{'PASSED -- port AUGMENT (handoff 5.2)' if s['build_gate_passed'] else 'NOT PASSED -- do not port'}")
+          f"{'point estimate PASSES' if bg else 'NOT PASSED'}; "
+          f"CI upper {'also below the gate' if bgc else 'ABOVE the gate'}")
+    print(f"  decide()      gain {vv['gain']:.3f}x vs gate {vv['gate']:.3f}x "
+          f"({vv['gate_derivation']})")
+    print(f"                paired 95% [{vv['ci_paired_difference'][0]:+.4e}, "
+          f"{vv['ci_paired_difference'][1]:+.4e}] -> "
+          f"{'PASS -- port AUGMENT (handoff 5.2)' if vv['passed'] else 'FAIL -- do not port'}")
+    for why in vv["reasons"]:
+        print(f"                  - {why}")
     if a.probe_only:
         print()
         print("  *** PROBE ONLY. These verdicts are NOT the slice's answer. ***")
