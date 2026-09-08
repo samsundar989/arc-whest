@@ -1,5 +1,106 @@
 # CURRENT_STATE.md — read this first
 
+> ## 2026-09-08 — NOMINEE A IS STRASSEN L=3 AT `2.031e-08`, FROM `8.501e-08` TWO DAYS AGO
+>
+> Three graded submissions in two days took the entry from **`#47`** to roughly
+> **`#27`**. `estimator.py` is still untouched at **v2.6.1**. **Nothing is
+> designated** — that is Samuel's alone.
+>
+> | submission | file | adjusted (AGGREGATE) | B | ops | wall worst | failed |
+> |---|---|---:|---:|---:|---:|---:|
+> | `330212` | `estimator_k3_full.py` | `2.9467e-08` | `0.77970` | 3,249 | `9.54 s` | 0/100 |
+> | `330290` | Strassen **L=4** | **`1.835981e-08`** | `0.48578` | 15,393 | `114.68 s` | 0/100 |
+> | **`330327`** | Strassen **L=3** | **`2.031e-08`** | `0.53745` | 12,357 | **`61.93 s`** | 0/100 |
+>
+> **A = `330327` (L=3).** Not the best score — the best *nominee*. `330290` scores
+> `1.106x` better and its worst row cleared the `120 s` wall cap by `5.3 s`
+> (`1.046x`, `1.23` sd). Against the **measured** `1.60x` contention factor it sits
+> at `0.65x`, i.e. it would fail rows on a busy grading server, and a failed MLP is
+> zeroed at multiplier 1.0 — a `~3e5` score penalty. L=3 sits at `1.94x` margin and
+> `1.21x` under contention. **B = `330290`** as a public row; `330212` behind it.
+>
+> ### WHAT STRASSEN BOUGHT, AND WHAT IT COST
+>
+> Batched Strassen is **exact**: graded raw MSE `3.7794363e-08` against the
+> control's `3.7793002e-08` — **`+0.0036%`** — and the whole score gain equals the
+> multiplier ratio (`1.605120` vs `1.6050505`) **to `4e-5`**. That is what an exact
+> transformation looks like.
+>
+> Its cost is **wall time**, which the cost model did not have: intensity collapsed
+> `215 → 17 GFLOP/s` and kernel wall went `7.97 → 51.8 s` at L=3 *despite fewer
+> FLOPs*. `official_config` now carries `GRADED_WALL_S_PER_MLP_OBSERVED`,
+> `GRADED_WALL_S_WORST_OBSERVED` and `GRADED_WALL_CONTENTION_FACTOR = 1.60`, and
+> `verify()` recomputes them from the raw reports (`93/93 → 96/96`).
+>
+> ### THE PER-OPERATION RESIDUAL LAW IS SETTLED — four graded points
+>
+>     submission   ops/MLP   residual median   per-op
+>     329896         2,690        30.11 ms     11.190 us
+>     330212         3,249        36.40 ms     11.204 us
+>     330327        12,357       132.54 ms     10.726 us
+>     330290        15,393       169.19 ms     10.991 us
+>
+> `4.3%` spread across a `5.7x` range in operation count, and `330290`'s op mix is
+> concatenate/add glue rather than matmuls — so this is invariance in op TYPE as
+> well as op COUNT. The Skeptic named this as the largest open measurement question
+> on 2026-09-07; it is closed. **But the op gate is no longer the binding one for
+> this architecture** — at 22,000 ops residual would be `~0.24 s` (fine) while wall
+> would be `~150 s` (fail).
+>
+> ### COST ENGINEERING IS FINISHED AT `~0.54 B` NOMINEE-GRADE
+>
+> | lever | verdict |
+> |---|---|
+> | §2a batched Strassen | **SHIPPED at L=3.** L=4 is public-row only; L=5 excluded by the shape cap, memory AND wall |
+> | §2c aliased self-contractions | **CLOSED — inapplicable.** The `0.5010x` einsum discount needs literally the same buffer; every matmul here contracts two different arrays. No symmetry discount either |
+> | §2b pruning, §2d per-MLP spend | not started, and both are accuracy-affecting — the class Slice 1 already showed loses here |
+>
+> **The strategy canon's `≤0.35 B` target is unreachable by this route.** Wall
+> binds. Further cost reduction must come from doing less work, not from computing
+> the same work more cleverly.
+>
+> ### §3, THE ACCURACY LAYER — RE-SCOPED BY TWO MEASUREMENTS
+>
+> **§3a is falsified for the readout.** `WP22/O1`: a fitted scale removes `0.75%`
+> of the error (32 per-layer parameters buy `1.0076x` against a predicted
+> `1.2–1.5x`), and 31 extra degrees of freedom over one global scalar buy `0.15%`.
+> **The residual is structure, not scale**, and not even layer-dependent scale.
+>
+> **§3d is a provisional NO-GO, on evidence the repository already had.** SSC's
+> readout is a per-neuron scalar κ₄ (`docs/SSC_PUFFI.md`), and our chain already
+> computes the Hermite factor it multiplies — so **§3b and §3d are one lever**. And
+> `p2_cumulant_oracle.py` priced it on 2026-08-21 with oracle cumulants:
+>
+>     O1 + TRUE (mu, sigma)   94.61% of the error   <- propagated STATE drift
+>     O2 + TRUE kappa_3        4.01%
+>     O3 + TRUE kappa_4        0.46%                 <- the ceiling on SSC's readout
+>
+> A **perfect** per-neuron κ₄, handed free to the readout, is worth `0.46%`. Puffi's
+> `−77.2%` is a whole-stack result at `256×32` against a baseline `112x` worse than
+> our chain, and their own paper says SSC is still `7.94x` worse than sampling.
+>
+> **The lane survives only through PROPAGATION** — κ₄ carried in flight, changing
+> the state the next Wick update consumes — which is where the `94.61%` lives and
+> which nothing has measured.
+>
+> ### NEXT — one experiment, then the strategist
+>
+> 1. **Add an `O4` arm to `local_sim/p2_cumulant_oracle.py`: carry TRUE κ₄ IN
+>    FLIGHT and measure against `O2`.** One GPU job, no new seed block, and it
+>    bounds SSC and every other κ₄ closure on our shape. **If `O4` does not beat
+>    `O2` by `≥1.5x`, §3d is dead and §3 collapses to §3e** (the corrector on chain
+>    features — the only remaining arm that *adds information* rather than
+>    re-expanding the same state).
+> 2. **Then the Strategist Packet**, whose question has changed: cost engineering
+>    is finished at `~0.54 B`; the `~1.9e-8` raw floor the whole top-12 shares is
+>    all that separates us from `#1`; §3a is falsified and §3d is priced at
+>    `0.46%` through its readout. `docs/STRATEGIST_PACKET_2026-09-08.md`.
+> 3. Hygiene owed on the next candidate: `_regen` is still not a cheaper fallback;
+>    stale docstrings; and the Strassen code is labelled "Strassen–Winograd" but
+>    implements **classical Strassen** (18 additions, not 15) — the Winograd form
+>    would lower the min-block threshold.
+
+
 > ## 2026-09-07 — SUBMISSION `330212` IS GRADED AT `2.9467e-08`. NOMINEE A EXISTS.
 >
 > **`estimator_k3_full.py` (sha256 `220d2314…`) graded `2.9467e-08` adjusted on
