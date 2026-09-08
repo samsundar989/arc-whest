@@ -145,6 +145,15 @@ for _p in (_HERE, _ROOT):
     if _p not in sys.path:
         sys.path.append(_p)
 
+# Allocator hint, set BEFORE torch is imported anywhere in this process.
+# The 2026-09-08 probe (job 399) OOMed asking for 4.00 GiB with 3.89 GiB free --
+# a 110 MB shortfall, i.e. fragmentation, not a genuine ceiling. Expandable
+# segments let the caching allocator grow a segment instead of demanding one
+# contiguous block. It is an ALLOCATOR setting and cannot change a computed
+# value; the bit-exact drift check in the same run is what proves that claim
+# is testable rather than asserted.
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
 import numpy as np  # noqa: E402
 
 # Pre-registered in the contract at 432f7fd, before any datum. Do not edit.
