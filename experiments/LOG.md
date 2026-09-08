@@ -34568,3 +34568,163 @@ worth predicting.
    absolute relative error, and decide on the paired raw MSE.
 6. **Strassen error is driven by the contraction length `k`**, not by operand
    count: `30×` excess at `k=14336` against `6.5×` at `k=1024`, same array sizes.
+
+
+---
+
+# 2026-09-07 — CONTRACT (Rule 1): WP21, does batched Strassen–Winograd cost accuracy?
+
+**Class: STRATEGIC.** Registered and committed **BEFORE any accuracy data exists**;
+`git log` on this file is the proof. The cost model below is already measured — a
+cost measurement is not the outcome this contract gates, and freezing it is what
+Rule 1 asks for.
+
+## Question
+
+Batched Strassen–Winograd reduces the chain's counted FLOPs by a measured
+`0.6230×` at depth 4, which at a fixed raw MSE would take the adjusted score from
+`2.9467e-08` to `~1.84e-08`. Strassen is exact in real arithmetic but reassociates
+in float32. **Does that reassociation, compounded over 16 layers, cost more raw
+accuracy than the multiplier saves — and at which depth does the trade turn?**
+
+## Evidence
+
+| item | status |
+|---|---|
+| a 3-D `fnp.matmul` is ONE operation, billed at `b·m·n·(2k−1)`, no surcharge | **CONFIRMED** (`p2_batched_matmul_probe.py`, exact to the FLOP at `b=128`) |
+| a Strassen level costs a flat 23 operations, shape- and batch-independent | **CONFIRMED** (same probe) |
+| slicing is free (0 FLOPs, 0 ops) | **CONFIRMED** |
+| per-call Strassen at L=4: `0.48577 B`, `15,376` ops | **CONFIRMED** (measured on the real shape census, this session) |
+| graded raw final-layer MSE of the exact chain | **CONFIRMED** `3.7793e-08` (submission `330212`, 100 organiser nets) |
+| 24-net P01 raw MSE of the exact chain | **CONFIRMED** `4.004541e-08` (`k3_full_score.json`) |
+| per-matmul float32 excess over the plain-`@` baseline: L=1 `1.4–2.4×`, L=4 `5.4–30×` | **CONFIRMED** (`p2_strassen_parity.py`) |
+| the `1e-6` relative bar is unusable at 1024×16 (float32 itself is `4–8e-7` off f64) | **CONFIRMED** (same) |
+| Strassen error is driven by contraction length `k`, not array size | **CONFIRMED** (`30×` at `k=14336` vs `6.5×` at `k=1024`) |
+| the induced MSE from a `1.2e-5` relative error on O(1) activations is `~1.4e-10`, i.e. `~0.4%` of the current raw MSE | **SPECULATIVE** — an order-of-magnitude argument that ignores compounding across layers. It is the thing this contract exists to test |
+| accuracy-for-budget trades LOSE on this chain (generation truncation, last-layer capping) | **CONFIRMED**, 2026-09-05 — which is why the sign here is not assumed |
+
+## Hypothesis and mechanism
+
+**H.** Strassen's float32 error enters the chain as a small relative perturbation
+of each propagated block, and the chain is contractive enough in the mean channel
+that the perturbation does not amplify across depth. So raw MSE rises
+sub-proportionally to the per-matmul excess, and because the multiplier falls
+`0.623×` at L=4 while raw would have to rise `1.605×` to cancel it, **some depth
+in `{1,2,3,4}` improves the adjusted score.**
+
+**Mechanism for the counter-hypothesis, which is why this is a real test.** The
+tower carries THIRD cumulants, which are differences of larger quantities and
+therefore ill-conditioned: the `(2,1)` slice is a sum of near-cancelling block
+permutations. Reassociation error on a near-cancellation is not small relative to
+the *result*, only relative to the *operands*. If the κ₃ channel is where the
+error lands, raw MSE can rise far faster than the per-matmul figures suggest, and
+the lever dies exactly as generation truncation did.
+
+## Intervention
+
+One change, applied at increasing depth: route every 2-D matmul in the chain
+through `strassen(A[None], B[None], L)[0]` instead of `A @ B`. Nothing else
+changes — same term table, same tower, same constants, same order of layers.
+`L = 0` reproduces the shipped file bit-for-bit and is the control.
+
+## Predictions (numbered, before the result)
+
+Against the exact chain's 24-net `raw = 4.004541e-08`, `gt_noise ≈ 1.155e-09`:
+
+| # | quantity | prediction |
+|---|---|---|
+| P1 | raw MSE ratio at L=1 | `1.000–1.02×` — within, or barely above, GT noise |
+| P2 | raw MSE ratio at L=2 | `1.00–1.06×` |
+| P3 | raw MSE ratio at L=3 | `1.01–1.20×` |
+| P4 | raw MSE ratio at L=4 | `1.02–1.40×`, point estimate `1.10×` |
+| P5 | best adjusted score | **L=4**, at `1.85e-08 – 2.6e-08`, point `2.0e-08` |
+| P6 | the ratio grows FASTER than the per-matmul excess would imply if error lands in κ₃, and SLOWER if it lands in the mean | direction only |
+| P7 | break-even raw at L=4 is `4.004541e-08 / 0.6230 = 6.428e-08`; I predict we land well under it | |
+
+**Samuel's prediction, taken before the result and recorded verbatim: "I don't
+know."** That is an explicitly valid answer under Rule 1 and is the honest state
+of the project's model of itself here — the two closest priors point opposite
+ways (Strassen is exact in exact arithmetic; two accuracy-for-budget lanes on this
+same chain already lost).
+
+## Gate — chosen NOW, written on the DIFFERENCE the slice isolates
+
+Executable, through `local_sim/competition_score.decide(gate=...)`, which has no
+default:
+
+> **PROMOTE the deepest `L` whose paired arithmetic ADJUSTED-SCORE difference
+> against the exact chain (exact − strassen, so positive favours Strassen) has a
+> 95% studentised-t or basic-bootstrap interval strictly excluding 0, on common
+> random numbers over the 24 P01 nets.**
+
+The gate is on the adjusted score and not on raw MSE, because the adjusted score
+is the quantity the competition pays on and is exactly the difference this slice
+isolates: the arm changes raw and multiplier together, and a gate on either half
+alone would be measuring the wrong thing. Raw MSE and its GT noise floor are
+REPORTED with every arm regardless (`VALIDATION.md` §3.5).
+
+Percentile and BCa intervals are refused (`VALIDATION.md` §2b-i).
+
+## Falsifier
+
+**If no `L ∈ {1,2,3,4}` produces an interval excluding 0 in Strassen's favour, the
+lever is CLOSED** and joins generation truncation and last-layer capping on the
+list of accuracy-for-budget trades that lose on this chain. Reopening condition:
+new external evidence that a different exact factorisation (not depth-L Strassen)
+has a materially better error constant — a competitor write-up, or a published
+result on cumulant-chain conditioning.
+
+## Baseline and tier
+
+Control: `estimator_k3_full.py` at `L = 0`, which is the shipped bytes of
+submission `330212`, run in the same process, same host, same interpreter, on the
+same nets, in the same order. Tier: **P01 DESIGN**, the same 24 networks Slice 1
+scored, so the control's raw MSE is directly comparable to the recorded
+`4.004541e-08`.
+
+**No new decision block is drawn, and that is deliberate.** `L` is SELECTED on
+these nets, which is a DESIGN role, and P01 is a DESIGN block where selection is
+permitted. The independent CONFIRM is the graded 100 — a submission, on nets we
+have never seen, which Samuel has approved for this session. Drawing a DECIDE
+block to choose a hyper-parameter would spend it on selection, which is the one
+thing `VALIDATION.md` says it must never be spent on.
+
+## Cost model — FROZEN HERE, Phase 2, λ = 0 so `C = F`
+
+Counted FLOPs, measured on the real shape census
+(`experiments/2026-09-05_slice1/strassen_price_L2.json`), per-call spelling:
+
+| L | counted FLOPs | B | ops | predicted residual at `13.4 µs/op` | headroom |
+|---:|---:|---:|---:|---:|---:|
+| 0 | `1,714,554,351,206` | `0.77969` | `3,232` | `0.043 s` | `9.2×` |
+| 1 | `1,506,154,327,654` | `0.68492` | `6,268` | `0.084 s` | `4.8×` |
+| 2 | `1,328,654,462,566` | `0.60420` | `9,304` | `0.125 s` | `3.2×` |
+| 3 | `1,181,829,852,774` | `0.53743` | `12,340` | `0.165 s` | `2.4×` |
+| 4 | `1,068,211,920,486` | `0.48577` | `15,376` | `0.206 s` | `1.94×` |
+
+All inside the `22,000`-op gate; L=4 keeps a `1.43×` margin on operations and
+`1.94×` on the residual cliff. Memory is accounted, not tested, on this host
+(`AGENTS.md`): the widest single call at L=4 holds `~1.1 GB` of operand stacks,
+against `8,192 MB` with a `2,827.5 MB` baseline. **`linux_memory_gate.py` on the
+chosen candidate's sha256 is required before any submission.**
+
+## Statistic
+
+Paired, common random numbers, **arithmetic** adjusted-score difference, with the
+studentised-t interval. Reported alongside: raw MSE per arm, the GT noise floor
+per net, the geometric mean of per-net ratios as a **stability diagnostic with no
+authority**, and counted FLOPs / operations / residual headroom in the same table
+(`VALIDATION.md` §2b-ii, BINDING).
+
+## Confounders, scope, and what must not change
+
+- **Compounding across depth is the whole risk** and a per-matmul figure cannot
+  see it. That is why the readout is end-to-end raw MSE, not a matmul parity.
+- The `(2,1)` slice's near-cancelling permutations are the suspected sensitive
+  site. If an arm degrades, report WHERE by re-running with Strassen applied to
+  `_advance` only, then to `_dslice21` only. That diagnostic is pre-authorised
+  here so it does not become a post-hoc fishing expedition.
+- Same interpreter, same process, same net order for all arms. float32
+  throughout; no arm may silently promote to float64.
+- `estimator.py` is NOT touched. The shipped file stays v2.6.1.
+- The 24 P01 nets are DESIGN, not a promotion tier. Nothing here is designated.
