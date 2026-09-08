@@ -34803,3 +34803,97 @@ another reason.
 3. **There is no symmetry discount at all**: results are not auto-tagged, and
    `as_symmetric` is unimplemented in 0.12.1 and would cost more than it saves.
 4. `einsum('ji,jk,kl->il', W, cov, W)` is a free `-16` operations per MLP.
+
+
+---
+
+# 2026-09-08 — WP22 / O1: the chain's residual error is NOT A SCALE ERROR. Handoff §3a's `1.2–1.5x` should not be expected, and §3 re-scopes to the shape-correcting arms.
+
+**Class: IMPORTANT** (it redirects a whole handoff section). No seed block drawn:
+the fit uses P02, already claimed by `truth_P02.npz`, and the validation set is the
+24 high-resolution `gt_halfA/B` nets, disjoint by construction.
+`local_sim/p2_wp22_o1.py`, artifact `experiments/2026-09-05_slice1/wp22_o1.json`.
+
+## What was asked, and the cheaper question asked first
+
+Handoff §3a wants "fitted renormalisation of the K3 chain: per-layer scalars on the
+mean, and separately on the `(3,)` and `(2,1)` κ₃ slices; sequential closed-form
+least squares", predicting **`1.2–1.5×`**.
+
+The full version renormalises INSIDE the chain, so the correction propagates, and it
+needs the chain's internal per-layer state exposed — a real piece of work. Before
+building it, this asks the half that is nearly free and that **decides whether the
+expensive half is worth building**: fit scalars on the RETURNED array. Four nested
+closed-form arms, fitted on P02's 96 nets, quoted on 24 nets no coefficient saw.
+
+## The result
+
+| arm | params | final-layer MSE | **gain** | all-layers MSE |
+|---|---:|---:|---:|---:|
+| A0 none (control) | 0 | `4.065813e-08` | `1.0000×` | `1.7622e-08` |
+| A1 one global scalar | 1 | `4.040971e-08` | `1.0061×` | `1.7537e-08` |
+| A2 scalar per layer | 16 | `4.036979e-08` | `1.0071×` | `1.7512e-08` |
+| A3 scalar + offset per layer | 32 | `4.035167e-08` | **`1.0076×`** | `1.7508e-08` |
+
+GT noise floor on the validation final layer: `6.1271e-10`.
+
+**A fitted scale removes `0.75%` of the error, against a predicted `20–50%`.** And
+the shape of the ladder is as informative as its height: going from ONE global
+scalar to THIRTY-TWO per-layer parameters buys another `0.15%`. The error is not a
+scale error, and it is not even a layer-dependent-scale error — thirty-one extra
+degrees of freedom find almost nothing to correct.
+
+## What this does and does not settle
+
+**Settles:** the chain's output is not systematically mis-scaled. Any correction
+of the form "multiply layer `d` by `a_d`" is worth `≤1.008×` at the readout, which
+is inside the noise of everything else we are doing. Prediction P for §3a's
+readout half is **falsified**: `1.0076×` against `1.2–1.5×`.
+
+**Does not settle:** the INTERNAL version is not strictly the same experiment. A
+scalar applied inside the chain changes what propagates into the next layer, so it
+alters the dynamics rather than just rescaling the answer, and it could in
+principle help where a readout scale cannot. The evidence still tilts hard against
+it — if each layer's state were multiplicatively biased, a per-layer readout scale
+would capture a visible share of the final-layer error, and it captures `0.7%` —
+but "tilts hard against" is not "excluded".
+
+**Nor does it touch §3a's κ₃-slice half.** Scalars on the `(3,)` and `(2,1)` slices
+are corrections to the *third-cumulant channel*, and nothing here measured that
+channel; the readout only ever sees the mean. That half remains open and is a
+shape correction, not a scale one — which is exactly the direction the result below
+points.
+
+## The re-scope this justifies
+
+The residual is **structure, not scale**. That is precisely what the two
+shape-correcting arms are for, and it raises their prior:
+
+- **§3b, Edgeworth-4 with a per-neuron diagonal κ₄** replacing the global scalar κ₄
+  — a per-neuron correction to the READOUT's shape. Handoff predicts `1.1–1.4×`.
+  Near-free in FLOPs, and now the cheapest untried arm.
+- **§3d, the Puffi SSC κ₄-response closure** — regenerating κ₄ from `≤4` covariance
+  response matrices with a ridge-fitted coupling. Puffi measured `−77%` at 256×32.
+  Handoff go/no-go `≥1.5×` by Sep 19. **This is the most evidence-backed route to
+  the leaders' 2× and it should now be the first thing built, not the last.**
+- **§3e, the corrector on chain features**, is also a shape correction and inherits
+  the same logic; it stays after 3d's verdict as the handoff has it.
+
+**Recommended amendment to the handoff: demote §3a to its κ₃-slice half only, and
+promote §3d ahead of §3a and §3b.** The `1.2–1.5×` that §3a was carrying in the
+Sep-19 arithmetic should be struck from the plan's expected total until the
+internal version is actually measured, because `1.0076×` is what the readout
+version delivered and the whole section was sized on the assumption of a scale
+error that does not exist.
+
+## Knowledge delta
+
+1. **The K3 chain is not mis-scaled.** A fitted global scalar buys `1.0061×`;
+   thirty-two per-layer parameters buy `1.0076×`. The residual error is shape.
+2. **§3a's `1.2–1.5×` prediction is falsified for the readout version** and should
+   not be carried in the Sep-19 total for the internal one without a measurement.
+3. The right next accuracy arm is a **shape** correction — §3d (SSC) first, then
+   §3b (per-neuron diagonal κ₄).
+4. Method note worth keeping: a nested ladder of arms (1 → 16 → 32 parameters) is
+   worth more than a single fit, because the FLATNESS of the ladder identified
+   *what kind* of error this is, which a single number could not.

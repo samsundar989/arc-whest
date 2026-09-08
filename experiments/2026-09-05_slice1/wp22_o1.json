@@ -1,0 +1,42 @@
+{
+  "candidate": "estimator_k3_full.py",
+  "n_fit": 96,
+  "n_val": 24,
+  "gt_noise_final": 6.127133838877202e-10,
+  "base_final_mse": 4.065812690383121e-08,
+  "base_all_mse": 1.762225319068095e-08,
+  "arms": [
+    {
+      "arm": "A0  none",
+      "params": 0,
+      "final_mse": 4.065812690383121e-08,
+      "final_ratio": 1.0,
+      "all_mse": 1.762225319068095e-08,
+      "all_ratio": 1.0
+    },
+    {
+      "arm": "A1  one global scalar",
+      "params": 1,
+      "final_mse": 4.04097084804117e-08,
+      "final_ratio": 0.9938900671935257,
+      "all_mse": 1.7536625174810937e-08,
+      "all_ratio": 0.9951409155830712
+    },
+    {
+      "arm": "A2  scalar per layer",
+      "params": 16,
+      "final_mse": 4.0369786833508685e-08,
+      "final_ratio": 0.9929081811613079,
+      "all_mse": 1.7511941672175558e-08,
+      "all_ratio": 0.9937402148685659
+    },
+    {
+      "arm": "A3  scalar + offset per layer",
+      "params": 32,
+      "final_mse": 4.035167145397418e-08,
+      "final_ratio": 0.992462627445138,
+      "all_mse": 1.7508092189674916e-08,
+      "all_ratio": 0.9935217704699417
+    }
+  ]
+}
