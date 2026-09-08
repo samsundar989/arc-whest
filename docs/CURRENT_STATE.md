@@ -139,10 +139,40 @@
 >    accuracy-for-budget lanes, so the sign is genuinely open.
 >
 >    Then dead-column pruning, aliased self-contractions, per-MLP variable spend.
-> 2. **The accuracy layer (handoff §3) is the critical path** — Part C of Slice 1
->    was never run. O1 renormalisation, Edgeworth-4 with per-neuron diagonal κ₄,
->    AUGMENT sign, and the Puffi SSC κ₄-response closure (go/no-go ≥ `1.5x` by
->    Sep 19).
+> 2. **The accuracy layer (handoff §3) is the critical path, and it is now
+>    RE-SCOPED by measurement.** `WP22/O1` asked the cheap half of §3a first:
+>    fit scalars on the RETURNED array, on P02, quoted on 24 disjoint high-res
+>    nets.
+>
+>    | arm | params | final-layer MSE | gain |
+>    |---|---:|---:|---:|
+>    | none | 0 | `4.065813e-08` | `1.0000x` |
+>    | one global scalar | 1 | `4.040971e-08` | `1.0061x` |
+>    | scalar per layer | 16 | `4.036979e-08` | `1.0071x` |
+>    | scalar + offset per layer | 32 | `4.035167e-08` | **`1.0076x`** |
+>
+>    **A fitted scale removes `0.75%` of the error, against §3a's predicted
+>    `20–50%` — and 31 extra degrees of freedom buy another `0.15%`.** The
+>    residual is **structure, not scale**, and not even layer-dependent scale.
+>    §3a's prediction is FALSIFIED for the readout version. (The INTERNAL version
+>    propagates and is not strictly this experiment; §3a's κ₃-slice half was not
+>    measured at all. Both stay open — the evidence tilts hard, it does not
+>    exclude.)
+>
+>    **So build the SHAPE corrections first.** Recommended amendment: promote
+>    **§3d, the Puffi SSC κ₄-response closure** (`−77%` at 256×32; go/no-go
+>    `≥1.5x` by Sep 19) ahead of §3a and §3b, and strike §3a's `1.2–1.5x` from
+>    the Sep-19 arithmetic until the internal version is measured. Then §3b
+>    (Edgeworth-4 with per-neuron diagonal κ₄), then §3e.
+>
+> 2b. **Lever §2c is CLOSED as inapplicable.** The aliased-operand discount is
+>    real on 0.12.1 (`einsum('ij,kj->ik', X, X)` bills `0.5010x`) but needs the
+>    einsum spelling AND literally the same buffer; `X @ X.T` gets nothing, and
+>    every matmul in this chain contracts two genuinely different arrays. No
+>    symmetry discount either — results are not auto-tagged and `as_symmetric` is
+>    unimplemented in 0.12.1. One free micro-win banked for the next edit:
+>    `einsum('ji,jk,kl->il', W, cov, W)` does `W^T cov W` in ONE operation
+>    instead of two at identical FLOPs (`−16` ops/MLP).
 > 3. Hygiene owed on the next candidate, not on the shipped one: `_regen` is not
 >    a cheaper fallback (it is `gens=1` again and would blow the budget at
 >    non-live shapes); stale docstrings at lines ~52–68, 79–82, 353–358, 980–987.
