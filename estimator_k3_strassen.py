@@ -559,11 +559,46 @@ def _sb(A, B, depth):
                             fnp.concatenate([c21, c22], axis=2)], axis=1)
 
 
+#: The smallest block a Strassen level may produce. Below this the Winograd glue
+#: -- O(n^2) per level and growing as (7/4)^L -- outruns the O(n^3) saving, and
+#: the recursion COSTS FLOPs instead of saving them. Measured 2026-09-08, counted
+#: FLOPs for the whole chain at non-live shapes:
+#:
+#:     shape      L=0          L=2          L=4
+#:     48 x 5     14,382,001   14,255,857   21,013,741   <- L=4 is 46% WORSE
+#:     64 x 4     19,716,466   18,679,410   25,381,826
+#:     96 x 3     31,960,667   28,743,707   35,085,287
+#:
+#: At the live shape the smallest operand dimension is 1024, so `1024 >> 4 = 64`
+#: and the cap is not binding: L=4 is granted in full and the measured chain cost
+#: is 0.48577 B. At 96 or below the cap refuses every level, which is the safe
+#: direction. Hard rule 7 -- `estimator.py` stays shape-generic -- and this is
+#: exactly the defect `_regen` was flagged for on 2026-09-07: a fixed depth that
+#: is right at 1024 and over budget everywhere else.
+_STRASSEN_MIN_BLOCK = 64
+
+
+def _depth_for(m, k, n):
+    """How many Strassen levels this shape can actually afford.
+
+    Deterministic, shape-derived, and never larger than `_STRASSEN_DEPTH`.
+    """
+    lo = m if m < k else k
+    lo = lo if lo < n else n
+    d = 0
+    while d < _STRASSEN_DEPTH and (lo >> (d + 1)) >= _STRASSEN_MIN_BLOCK:
+        d += 1
+    return d
+
+
 def _mm(A, B):
     """The chain's ONE matmul spelling. `_STRASSEN_DEPTH = 0` is a plain `@`."""
     if _STRASSEN_DEPTH <= 0:
         return A @ B
-    return _sb(A[None], B[None], _STRASSEN_DEPTH)[0]
+    d = _depth_for(A.shape[0], A.shape[1], B.shape[1])
+    if d <= 0:
+        return A @ B
+    return _sb(A[None], B[None], d)[0]
 
 
 def _advance(WT, tw):
