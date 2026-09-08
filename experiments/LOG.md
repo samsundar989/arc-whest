@@ -35689,3 +35689,137 @@ plus the official mini-100 before any submission.
   earlier oracle score `3.6e-10` against a `7.2e-8` noise floor — an impossibility
   that was the only tell. D2 reuses the two-stream construction and the same
   impossibility check.
+
+# 2026-09-08 — NOMINEES: the Rules v14 §6 sentence the handoff asks for DOES NOT EXIST in anything we captured. B = `330212` under the handoff's own ambiguity branch.
+
+*Slice 3 deliverable (Samuel's instruction 2026-09-08; `STRATEGIST_RESPONSE_2026-09-08.md`
+§4). No gate, no seed block, no GPU. `# seed-ledger: no block named`.*
+
+## What was asked
+
+> "quote the Rules v14 §6 sentence from `experiments/2026-08-28_p2_live/*rules_v14*`
+> on how two designated submissions are scored. If each is scored independently
+> and the team ranks by its best, propose A = L=3 (330327) and B = L=4 (330290);
+> if the rule averages, combines, or is ambiguous, B = k3_full (330212)."
+
+## What we actually hold — every scrap of captured rules evidence, quoted
+
+**1. `2026-08-28T170620Z_rules_v14_phase2_designation_capture.json`** — §Phase 2:
+
+> "Before the Phase 2 End, each Participant may designate up to two (2)
+> submissions for the Private Re-evaluation as described in §6."
+
+**2. `2026-08-28T171010Z_rules_v14_phase2_default_selection_capture.json`** — the
+§6 cross-reference and the §6 fallback, captured as two fragments:
+
+> "if no designation is made, the default-selection rule in §6 applies."
+
+> §6, *"Default selection if no designation is made"*:
+> "two best-scoring valid submissions from that Phase on that Phase's public
+> leaderboard"
+
+**3. `2026-08-26_p2_live/rules_landing_text_capture.json`** — the challenge
+Overview page, which is the **stale single-designation text** (`PHASE2_STRATEGY`
+§ Nominations already records it as superseded by v14):
+
+> "After the Phase 2 deadline, the grader re-executes each team's **one**
+> designated final submission against a fresh, unseen MLP suite generated from a
+> private seed that was not used during the open phases. **Prize ranking is
+> decided exclusively from this re-run.**"
+
+> "Before the Phase 2 deadline, each team designates **one** valid submission to
+> carry forward into the final private re-run. That designation is what
+> determines your prize ranking, not your best public-leaderboard score."
+
+## The finding
+
+**No captured sentence says how TWO designated submissions are scored.** Not
+"each independently, ranked by best". Not "averaged". Not "combined". The
+question the handoff makes B's identity turn on is **not answered by our
+evidence**, and it was never captured because the capture scope says so in its
+own metadata:
+
+> "Minimal visible-DOM excerpt needed to verify the two-designation claim"
+> "Minimal visible-DOM fragments establishing the Phase-2-to-§6 cross-reference
+> and the same-Phase two-best-scoring fallback"
+
+Both captures were taken to settle *how many* may be designated, which they do.
+Neither was taken to settle *how they are scored*, and neither does.
+
+The live page cannot close this from here: `challenge_rules` renders its body
+behind a login, and an unauthenticated fetch returns only the navigation shell
+and footer (attempted 2026-09-08). Adding browser automation to close it is
+explicitly on `AGENTS.md`'s not-to-be-added list.
+
+**So the handoff's own rule applies: the rule is AMBIGUOUS to us, therefore
+`B = k3_full (330212)`.**
+
+## The inference we can make, marked as inference and not used to decide
+
+There is a real argument that §6 scores each designated submission independently
+and ranks the team by its best, and it is worth recording so nobody re-derives it:
+
+**INFERRED — the default would be perverse under any combining rule.** §6's
+fallback force-selects the *two best-scoring* public entries when a team
+designates nothing. If the two were averaged or otherwise combined, that default
+would actively **harm** a team whose second-best is much worse than its best —
+inaction would be punished relative to designating one entry. Under "ranked by
+best", the two-best default is optimal by construction and harmless. Rules are
+not usually written so that the do-nothing path is a trap.
+
+**This is not the sentence, and it does not move B.** A lane has already been
+closed once in this repository on a measurement of a different method
+(Skeptic, 2026-08-21). Designating on an inference about unread rules text would
+be the same error in a more expensive place.
+
+## Why `B = 330212` is the right nominee under BOTH readings anyway
+
+This is the part that makes the ambiguity cheap rather than blocking, and it is
+the reason not to spend a slot chasing the rules text:
+
+| | `330327` **A** (L=3) | `330290` (L=4) | `330212` **B** (k3_full) |
+|---|---:|---:|---:|
+| adjusted | `2.031e-08` | `1.835981e-08` | `2.9467e-08` |
+| worst graded wall | `61.93 s` | `114.68 s` | `9.54 s` |
+| margin vs `120 s` cap | `1.94x` | `1.046x` | `12.6x` |
+| under the measured `1.60x` contention | `1.21x` | **`0.65x`** | `7.9x` |
+| ops | 12,357 | 15,393 | 3,249 |
+| failed MLPs, graded | 0/100 | 0/100 | 0/100 |
+
+- **If §6 ranks by best:** B is free upside only if B can actually *finish*.
+  `330290` sits at `0.65x` of the wall cap under the contention factor this
+  repository measured on identical bytes (`1.60x`, `official_config`'s
+  `GRADED_WALL_CONTENTION_FACTOR`, recomputed from 96/96 raw reports). A failed
+  MLP is zeroed at multiplier 1.0 — a `~3e5` score penalty per row. Its expected
+  contribution on a *fresh* private suite is not `1.106x` better than A; it is a
+  coin-flip on whether the private grader is as busy as the public one was.
+  And it buys at most `1.106x` even when it works.
+- **If §6 averages or combines:** `330290` is not merely useless, it is
+  catastrophic — its failure rows would be averaged into the team's number.
+- **`330212` is `1.45x` worse than A and cannot fail.** `12.6x` wall headroom,
+  `10.2x` residual headroom, the lowest op count we have shipped, and three
+  clean graded rows' worth of evidence behind the architecture.
+
+So `B = 330212` is the **maximin** choice: it is never catastrophic, and the
+thing it gives up (`330290`'s `1.106x`, conditional on it not timing out) is
+small. `330290` is only correct if the rule is confirmed AND the wall risk is
+accepted, and it would still be worth at most 10%.
+
+## Recommendation to Samuel — **the designation is yours, and nothing here designates**
+
+- **A = `330327`** (Strassen L=3). Unchanged, and unchallenged by this analysis.
+- **B = `330212`** (k3_full), under the handoff's ambiguity branch and under the
+  maximin argument above, which holds even if the ambiguity is resolved.
+- **Revisit both if D1's AUGMENT port lands.** A `~1.1e-8` candidate would
+  displace A, and today's A becomes the natural B.
+
+**One thing only Samuel can do, and it takes a minute:** open the challenge Rules
+page while logged in, go to §6, and read what follows the two-designation
+sentence. The exact thing to look for is whether the private re-run produces
+**one score per designated submission** (ranked by best) or **one score per
+team** (averaged/combined). If it is per-submission, B becomes a live choice
+between `330290` and `330212` and the wall-risk table above is the whole
+argument. If it is per-team, B is `330212` and there is nothing to decide.
+
+**Deadline pressure is low.** Phase 2 ends Sep 19 and designation is due before
+it; the write-up is due Oct 24. This does not block Slice 3.
