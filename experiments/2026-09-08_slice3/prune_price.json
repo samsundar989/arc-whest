@@ -1,0 +1,52 @@
+{
+  "slice": "dead/cold-column pruning -- price at 1024x16",
+  "naive_drop_cost": {
+    "-2.0": {
+      "rel_l2": 0.0016748271415796291,
+      "max_rel": 0.001682736734356583
+    },
+    "-3.0": {
+      "rel_l2": 4.908801521975117e-05,
+      "max_rel": 5.494830051599826e-05
+    },
+    "-4.0": {
+      "rel_l2": 6.196230504481225e-07,
+      "max_rel": 6.844025063196043e-07
+    },
+    "-5.0": {
+      "rel_l2": 3.2489968241673845e-09,
+      "max_rel": 5.3520773375681044e-09
+    }
+  },
+  "claim_under_test": "~0.8x (marius, 256x32)",
+  "n_mlps": 3,
+  "width": 1024,
+  "depth": 16,
+  "closure_parity_worst": 1.3775206346949779e-15,
+  "mean_fraction_below_alpha": {
+    "-2.0": 0.15468343098958334,
+    "-3.0": 0.08197021484375,
+    "-4.0": 0.039204915364583336,
+    "-5.0": 0.017781575520833332
+  },
+  "per_layer_fraction_below_-2": [
+    0.0,
+    0.002278645833333333,
+    0.0185546875,
+    0.05859375,
+    0.080078125,
+    0.1259765625,
+    0.1455078125,
+    0.17415364583333334,
+    0.18717447916666666,
+    0.2041015625,
+    0.21744791666666669,
+    0.2216796875,
+    0.23893229166666669,
+    0.2561848958333333,
+    0.26920572916666663,
+    0.2750651041666667
+  ],
+  "tier": "ROUTINE lab measurement. No gate, no seed block, no promotion.",
+  "note": "Prices only whether the columns EXIST and what dropping them would save. Does NOT price a compensation scheme -- inventing one and then pricing it would be designing the answer."
+}

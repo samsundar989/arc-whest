@@ -37144,3 +37144,75 @@ path at small `n`, then use it.
 whole fused path with `p2_flop_anchor`. Only then is the FLOP estimate from
 2026-09-08 (`~0.31 B`, explicitly a sanity check and not a price) replaced by a
 number that may be quoted.
+
+# 2026-09-09 — **DEAD/COLD-COLUMN PRUNING PRICED: it is worth `0.96x`, not `0.80x`.** The `0.8x` needs a compensation that recovers `139x` our entire MSE.
+
+*Cost-half deliverable, unblocked once Step 1 had numbers (Samuel's instruction,
+2026-09-08). Instrument `local_sim/p2_prune_price.py`, artifact
+`experiments/2026-09-08_slice3/prune_price.json`. ROUTINE: numpy, CPU, no GPU, no
+gate, no promotion. `# seed-ledger: no block named`.*
+
+## Instrument check first
+
+The `alpha` recursion here reproduces `p2_cal_lab.closure`'s returned means to
+**`1.38e-15`** on every network. So the `alpha` distribution is the **shipped
+chain's own**, not a re-derivation that merely looks plausible.
+
+## The columns exist, and they grow with depth exactly as the mechanism predicts
+
+    per-layer fraction with alpha < -2, layer 0 first:
+    0.000%  0.228%  1.855%  5.859%  8.008%  12.598%  14.551%  17.415%
+    18.717%  20.410%  21.745%  22.168%  23.893%  25.618%  26.921%  27.507%
+
+**Layer 0 is exactly `0.000%`, and that is not luck** — `x ~ N(0, I)` makes every
+layer-1 pre-activation mean *exactly* zero, so `alpha = 0` and every neuron fires
+half the time. Coldness can only develop with depth, and it does: `27.5%` by
+layer 15. A prediction that came out of the mechanism before the run and held.
+
+## The price
+
+`RMS` of the true final-layer means is `0.9736` (24 nets x 1024 neurons,
+`gt_halfA`), so a relative perturbation converts to MSE directly. Against the
+AUGMENT chain's `1.912e-08`:
+
+| `alpha <` | columns | FLOP saving | naive-drop rel L2 | added MSE | vs AUGMENT | **score ratio** |
+|---:|---:|---:|---:|---:|---:|---:|
+| `-2` | `15.47%` | `0.8453x` | `0.1675%` | `2.66e-06` | **`139x`** | **`118x WORSE`** |
+| `-3` | `8.20%` | `0.9180x` | `0.0049%` | `2.28e-09` | `0.119x` | `1.028x` worse |
+| `-4` | `3.92%` | `0.9608x` | `0.0001%` | `3.64e-13` | `1.9e-05x` | **`0.961x` BETTER** |
+| `-5` | `1.78%` | `0.9822x` | `~0` | `1.00e-17` | `5.2e-10x` | `0.982x` better |
+
+`score = MSE x max(0.1, F/2^41)`, so the last column is
+`(1 + added/AUGMENT) x saving` — the only column that matters.
+
+## The verdict
+
+**The `~0.8x` figure does not survive at this shape.** It requires dropping the
+`alpha < -2` columns, and dropping those *uncompensated* injects `139x` the
+entire error of the chain we are trying to improve. "Accuracy-neutral by
+construction if the compensation is exact" is true but now has a measured price
+attached: **the compensation must recover essentially all of a `2.66e-06`
+perturbation to break even, against a target MSE of `1.9e-08`.** That is not a
+correction term, it is the whole quantity — and any compensation accurate to less
+than ~1 part in 140 leaves us worse off than not pruning.
+
+**What IS free: `alpha < -4`, worth `0.961x` on the score** with an added MSE of
+`3.6e-13` — five orders below the chain's own error, i.e. genuinely
+accuracy-neutral with **no compensation scheme at all**. The score-optimal
+threshold lies between `-4` and `-3` and a finer sweep would place it, but the
+prize is bounded: **~4%, not ~20%.**
+
+**Recorded as a correction to the strategy canon.** `PHASE2_STRATEGY` 4 and the
+Sep 8 handoff both carry `~0.8x` for this lever, sourced from marius's `256 x 32`
+Phase-1 note. At `1024 x 16` the honest figure for the free version is `0.96x`,
+and the `0.8x` version is gated behind a compensation nobody has built and whose
+required accuracy is now quantified.
+
+## What this does NOT settle
+
+No compensation scheme was designed or priced — deliberately. Inventing one and
+then pricing it would be designing the answer. What is established is the **size
+of the hole** such a scheme must fill exactly, which is the number that decides
+whether building one is worth a slice. On this evidence it is not: the gap between
+the free `0.961x` and the compensated `0.845x` is `1.14x` of cost, for which the
+compensation must be near-perfect.
