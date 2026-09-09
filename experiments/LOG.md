@@ -37494,3 +37494,73 @@ a fresh read**, and the write-up is currently marked stale/do-not-submit pending
 STRATEGIC claim review. **This is a live question for Samuel** — if the write-up
 is genuinely due Sep 26, it is `17` days away and is the binding constraint on the
 whole slice, not the Oct 17 submission deadline.
+
+# 2026-09-09 — **THE FUSED REDUCTION IS PROVEN END TO END, ON THE REAL CHAIN.** A `10x` perturbation of the `4 GiB` object moves the output by `1.6e-16`.
+
+*Step 2 precondition, part 4 — the composition test the three previous entries
+owed. Instrument `local_sim/test_p2_fused_reduction.py`, `6/6`. CPU, seconds.
+`# seed-ledger: no block named`.*
+
+## Why this test and not a reimplementation
+
+Three results were established separately: the `r=1` core depends only on the
+axis-0 sum; 15 of 17 vector partitions have blocks spanning `<=2` axes; the other
+two are rank-1 separable. **None of that proves they COMPOSE.** A reimplementation
+of the fused algebra would not settle it either — it could be self-consistently
+wrong, and it would be a new thing to trust rather than a test of the existing one.
+
+So the question was put directly to the **real** chain: perturb the `n³` slice in
+a way that **exactly preserves its axis-0 sum**; if the reduction is true the
+output must not move at all.
+
+## The result
+
+    width 24, depth 4    perturbation |P|/|X| = 10.18    axis-0 sum residual 2.7e-15
+                         relative change in final-layer means = 1.578e-16
+    width 32, depth 3    perturbation |P|/|X| =  5.84    axis-0 sum residual 3.8e-15
+                         relative change in final-layer means = 3.807e-17
+
+**A perturbation ten times larger than the slice itself changes nothing**, at f64
+machine precision, through the entire composition: `eval_part` -> `DS_pK_to_K` ->
+`DS_harmonic_proj` -> the next `linear_kprop` -> the remaining layers -> the
+readout.
+
+## The negative control, without which the above proves nothing
+
+    sum-BREAKING perturbation of the same size:
+    width 24  relative change = 2.011e-01
+    width 32  relative change = 3.950e-02
+
+**Fifteen orders of magnitude** between the two. So the hook genuinely reaches
+the arithmetic and the passing test is not vacuous — a test that cannot fail is
+not evidence, and this one demonstrably can.
+
+## One earlier false refutation, and why it was the test's fault
+
+A first attempt at this on 2026-09-09 reported the reduction REFUTED (cores
+differing by `1.006`). Diagonal slices are stored **zero-repeated**, so a naive
+`X - X.mean(0)` does not preserve the axis-0 sum on the support. The perturbation
+here is built on the support and then explicitly re-projected — `sum_i P = 0`
+holds to `2.7e-15` and the test **asserts that before trusting the arm**. The
+claim survived a test that could have killed it, once the test was correct.
+
+## Where Step 2 now stands
+
+**The research question is closed.** The `4.000 GiB` allocation that OOMed jobs
+`399` and `402` — sitting at exactly hard rule 1's single-array cap — is provably
+unnecessary, end to end, on the real chain. The fused path's largest array is
+`(n, n)`, `4 MB` at f32.
+
+What remains is a **BUILD, not a question**:
+
+1. the fnp transcription of the fused degree-4 route into `estimator_k3_aug.py`;
+2. `p2_flop_anchor` pricing, which replaces the `~0.31 B` sanity estimate with a
+   quotable number and settles what multiplier the AUGMENT port ships at;
+3. certification — twin arm (f64 read-only), `edge_cases --real-flopscope
+   --phase2` on the candidate, ops `<=24k`, projected residual `<=0.3 s`, Linux
+   memory gate on the candidate's sha, `>=1.6x` wall margin, official mini-100;
+4. then, and only then, one canary on Samuel's approval.
+
+**The Strassen depth must be chosen at step 2, not inherited.** Depth 2 buys
+`2.28x` wall margin under contention against nominee A's `1.21x` for `12.4%` of
+score, and AUGMENT's extra FLOPs land on top of whatever depth ships.
