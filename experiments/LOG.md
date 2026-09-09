@@ -36839,3 +36839,107 @@ band, and the P01-24 path is known to read `+6.0%` hot against graded-100 for an
 identical file — so the comparison is good to a few percent, not better, and the
 sign of the residual difference should not be read as "we are ahead". And the
 band `7–11e-9` is scraped board telemetry, not a controlled measurement.
+
+# 2026-09-09 — **A5 RESULT: the attribution is SETTLED. The whole `2.094x` is κ₄'s `(n,n)` STRUCTURE; the raised diagram budget alone is slightly HARMFUL.** (My prediction missed for the second time.)
+
+*Post-run ledger entry, job `436`, four arms paired in one process on the same 24
+nets. Arm A5 pre-registered at `0e637ec` **before this datum**. Artifact
+`experiments/2026-09-08_slice3/a5_attribution.json`. Tier **P01 DESIGN, re-read**
+— promotes nothing. `# seed-ledger: no block named`.*
+
+## The four arms
+
+| arm | diagram budget | κ₄ carried as | mean xmse | vs SIMPLE |
+|---|---|---|---:|---:|
+| K3 `SIMPLE` | base (40 terms) | a scalar | `4.0047e-08` | `1.000x` |
+| **A5** | **raised (142)** | **a scalar** | **`4.3448e-08`** | **`1.085x` — WORSE** |
+| K3 `AUGMENT` | raised (142) | an `(n,n)` matrix | `1.9123e-08` | `0.478x` |
+| A3 | raised (142) | zero | `3.6895e-07` | `9.21x` — catastrophic |
+
+    SIMPLE - A5   (does the raised BUDGET alone help?)
+        -3.4014e-09   95% [-4.9367e-09, -1.8662e-09]   A5 better on only 4/24
+    A5 - AUGMENT  (what the (n,n) STRUCTURE buys)
+        +2.4325e-08   95% [+2.2968e-08, +2.5682e-08]
+    f5 = structure's share of the gain = 1.1626   (in domain)
+
+## The answer to the Skeptic's challenge
+
+The Skeptic was right that `kind=AUGMENT` is a **bundle** — `40 → 142` diagram
+terms *and* κ₄ promoted from a scalar to an `(n,n)` matrix — and right that D1
+could not tell which one paid. A5 separates them, and the separation is clean:
+
+> **The raised diagram budget, on its own, is worth NOTHING — it is slightly
+> NEGATIVE.** `+8.5%` worse than `SIMPLE`, on `20/24` networks, with a paired
+> interval strictly below zero. **Every bit of the `2.094x` is κ₄'s `(n,n)`
+> structure.**
+
+`f5 = 1.16` — the structure accounts for *more than* the whole gain, precisely
+because the budget alone costs a little.
+
+**And the two are complementary, not additive.** Neither component alone helps:
+the budget without the matrix is harmful, and the matrix is only available in the
+presence of the budget (upstream's `kind` sets both, via `get_r_x` and
+`get_vec_cond` respectively). The `2.094x` is an interaction. The one cell we have
+**not** measured is *base budget + `(n,n)` κ₄*, which upstream exposes no flag for
+and which the injection seam cannot reach — it would need surgery on which terms
+are computed, not on the state. Recorded as untested rather than assumed
+uninteresting: if that cell worked, it would be a cheaper port.
+
+## What this settles for Step 2
+
+**The port MUST carry κ₄ as an `(n,n)` core. There is no scalar shortcut.**
+A5 *is* the scalar shortcut, and it is worse than the chain we already ship.
+
+So the memory precondition is **aimed at the right object after all** — but that
+is now established by A5, not by A3, whose out-of-range verdict claimed it for a
+reason the measurement did not support. Both of Step 2's cheaper escape routes are
+now closed by measurement:
+
+- *"budget-only, no κ₄, never form the `4 GiB` array"* — closed by **A3**
+  (`9.2x` worse than SIMPLE).
+- *"carry κ₄ as a scalar, skip the `(n,n)` core"* — closed by **A5**
+  (`1.085x` worse than SIMPLE).
+
+**The fused `(2,1,1)` contraction stands as Step 2's first task**, unchanged, and
+now for a fully attributed reason.
+
+## MY PREDICTION MISSED AGAIN — twice in a row, in the same direction
+
+    A3   predicted f in [0.5, 0.8]        measured 16.72
+    A5   predicted [2.2e-8, 3.2e-8]       measured 4.3448e-08
+
+Both misses are the same error: **I expected the raised diagram budget to be
+carrying a meaningful share of the gain, and it carries none of it.** I twice
+modelled AUGMENT as "κ₄ plus some extra terms that also help", when it is really
+"κ₄'s matrix, plus extra terms that exist to consume it and are useless — mildly
+harmful — without it".
+
+Recorded plainly because prediction-tracking is the only instrument this project
+has for whether its model of itself is any good, and on this chain it currently is
+not. The relevant consequence for the rest of Slice 3: **my priors about which
+term matters in this closure should be given little weight**, and arms should be
+measured rather than reasoned about wherever an arm is cheap. Both of these were
+cheap.
+
+## The controls, again clean
+
+- **Reversed arm order: BIT-IDENTICAL across all FOUR arms** — worst `|diff|`
+  exactly `0.0`. Now closed for A5 as well.
+- **`"Snapping negative variance"`: ZERO occurrences** at `1024x16` over four arms
+  × 24 networks.
+- `SIMPLE` and `AUGMENT` reproduced D1's means to the digit for a **third** time,
+  in a third process, across two reboots.
+
+## All-layers, updated
+
+| arm | all-layers | final-layer |
+|---|---:|---:|
+| `SIMPLE` | `1.5936e-08` | `4.0047e-08` |
+| **A5** | `1.6078e-08` | `4.3448e-08` |
+| **`AUGMENT`** | **`6.9060e-09`** | **`1.9123e-08`** |
+| A3 | `1.9746e-07` | `3.6895e-07` |
+| leaders, published | `7–11e-9` | `1.9–2.8e-8` |
+
+A5's all-layers sits on top of SIMPLE's (`1.61e-8` vs `1.59e-8`), confirming from
+a second, independent functional that stripping κ₄ to a scalar returns the chain
+to SIMPLE-grade accuracy at every depth, not just at the readout.
