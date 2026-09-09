@@ -37650,3 +37650,272 @@ compressing.
 `docs/RESEARCH_NOTES.md` §1's timeline row should be struck or re-sourced; it is
 now known stale in **four** cells and it is the kind of orphaned intel that
 `docs/GOTCHAS.md` already warns about.
+
+# 2026-09-09 — **THE AUGMENT PORT IS PRICED AT `7.45x` OUR FLOPs AND CANNOT SHIP.** The blocker was never memory; it is that the lineage births `8n` columns a layer instead of `2n`.
+
+*Slice 4 item 1, the strategist's day-1 deliverable: "Meter the fused AUGMENT
+route... Report before transcription. Stop rule: none — this is information."
+Instrument `local_sim/p2_augment_port_price.py`, artifacts
+`experiments/2026-09-09_slice4/augment_port_price.json` and
+`augment_rank_schedule.json`. Desk + CPU + one CPU torch read. No seed block, no
+gate, no shipped file touched. `# seed-ledger: no block named`.*
+
+## The answer, before anything else
+
+| Strassen depth | ours | **AUGMENT** | ratio | proj worst wall | verdict |
+|---:|---:|---:|---:|---:|---|
+| 2 (leaf 256) | `0.60420 B` | **`4.49872 B`** | `7.45x` | `245 s` | every MLP times out |
+| 3 (leaf 128) | `0.53743 B` | **`4.00159 B`** | `7.45x` | `461 s` | every MLP times out |
+
+Against a `120 s` wall cap and a break-even multiplier of `1.126 B`. At depth 3
+the port would score `7.2e-8` against nominee A's graded `2.031e-8` — **`3.55x`
+worse** — and it would not get that far, because at `461 s` projected worst wall
+every MLP fails and scores as zeros.
+
+**So Slice 4 item 2 must not be executed as written.** `estimator_k3_aug.py` as
+specified — same tower, AUGMENT nonlinearity, Strassen at the deepest admissible
+depth — is not a candidate at any depth.
+
+## What was actually mispriced, and it was not the thing everyone was looking at
+
+Every AUGMENT cost note in this repository priced the **fused `(2,1,1)` route** —
+the `4.000 GiB` `n³` object that OOMed jobs `399` and `402`, then was proven
+reducible to `n²` end to end on 2026-09-09 (a `10x` sum-preserving perturbation
+moves the output by `1.6e-16`). **That work is correct and it stands.** It priced
+the wrong thing: the dense `n³` int_parts are `7.8%` of upstream's AUGMENT bill.
+
+The unpriced item is the **lineage**:
+
+    kind=SIMPLE    the factored K3 tensor births  2n  columns per layer
+    kind=AUGMENT   the factored K3 tensor births  8n  columns per layer
+
+measured by reading `factors[0].shape[1]` off upstream's own `factor=True` flow
+at `(n, depth) = (24, 6)` and `(32, 5)` — **identical at both**:
+
+    SIMPLE   ranks/n  [2, 4, 6, 8, 10, 12]      births/n [2]
+    AUGMENT  ranks/n  [3, 11, 19, 27, 35, 43]   births/n [8]
+
+The `8` decomposes exactly as `factor_k3.py` §3.2 and §4.1 read: **five `legs`**
+(the light edge, two `kappa_3` `(2,1)`-slice legs, the `kappa_4` `(2,2)`-slice
+leg, the doubled light edge) **plus two `211 -> 111` blocks** (cases 1 and 3;
+case 2 is identically zero for a diagonal metric) **plus the `from_dstensor`
+block**. `SIMPLE` has one leg and the `from_dstensor` block, hence `2`.
+
+Summed over a 16-layer tower that is **`885` block-layers against `240`**, a
+ratio of **`3.6875`**.
+
+## Two independent instruments, agreeing to three significant figures
+
+The structural count above never touches a FLOP model. Upstream's own
+`fit_flop_polys` at `n = 1024`, `act15`, `factor=True`, both arms identical apart
+from `kind`:
+
+| component | SIMPLE | AUGMENT | |
+|---|---:|---:|---:|
+| `FactoredTensor3.contract_W` | `1.5462e12` | `5.7016e12` | **`x3.69`** |
+| `FactoredTensor3.get_dslice` | `1.5560e12` | `5.7266e12` | **`x3.68`** |
+| `pK_111 -> K_211` | `0` | `6.5036e12` | **NEW** |
+| `pK_211 -> K_211` | `0` | `5.8125e12` | **NEW** |
+| total | `3.2537e12` | `2.6601e13` | `x8.18` |
+
+`3.6875` from counting columns, `3.684` from a FLOP polynomial fitted by a
+different code path. **The ratio is also shape-independent** — `8.162`, `8.170`,
+`8.174`, `8.176`, `8.177` at `n = 128, 256, 512, 1024, 2048` — so it is a
+property of the algorithm and not of an extrapolation.
+
+## Where the `7.45x` comes from, term by term
+
+At depth 3, on our anchored `0.53743 B`:
+
+    tower (contract_W + get_dslice), x3.684        1.918 B
+    pK_111 -> K_211 and pK_211 -> K_211, NEW       2.067 B
+    everything else                                0.017 B
+                                                   -------
+                                                   4.002 B
+
+**Half the bill is two contractions that have no `SIMPLE` counterpart at all.**
+Both are rank-`R` products of exactly the class our `contract_W` already issues,
+so our W-EFF spelling has no known structural advantage over upstream's — and
+even deleting them outright leaves `3.6x`, still `3.2x` past break-even.
+
+## The three things this does NOT say
+
+1. **It does not say the accuracy result is wrong.** D1's `1.912e-8` was measured
+   with `factor=True`, `use_pK` default, `use_avg_metric=True` — the *same*
+   spelling priced here. The accuracy and the cost belong to one object.
+2. **It does not say `kappa_4`-in-flight is dead.** It says *upstream's factored
+   AUGMENT spelling of it* costs `8x`. The board is standing evidence that
+   AUGMENT-class accuracy is reachable at `0.18–0.21 B`, which is now **`22x`
+   cheaper than the only spelling of it we have priced** — a far larger gap than
+   the Sep 9 response supposed, and pointing much harder at the leaders using a
+   different representation rather than a better-tuned one.
+3. **It does not close the merges.** Legs 2/3/4 appear to share `fac2 = 3I` and
+   `fac3` exactly, which would take births `8n -> 6n` and the tower term to
+   `2.81x`; the two `211` blocks may have zero all-distinct content. Neither is
+   applied above and neither is measured — **and neither would reach break-even**,
+   which is why the verdict does not wait on them.
+
+## Contradicting the Sep 9 strategist response, explicitly
+
+`STRATEGIST_RESPONSE_2026-09-09.md` §2 Q1: *"port first? Yes, unconditionally...
+It is a measured `2x` with zero research risk... If the delta is `+60%` (`0.86 B`),
+it still ships."* The delta is `+645%`. §3 item 2's expected graded row
+(`1.06–1.55e-8`, `#15–22`) is unreachable by this route.
+
+The response was right about one thing and it is the important one: it made the
+price the **first** deliverable and said report it *before* transcribing. Had item
+2 been executed first, the cost would have surfaced after the build.
+
+## Caveats, stated
+
+- **Wall is PROJECTED.** `docs/VALIDATION.md` forbids quoting a local absolute
+  wall time. The two-point graded intensity law validated `+3.1%` out of sample
+  on the L=4 row; at a *fixed* leaf, intensity is fixed and wall scales linearly
+  in FLOPs, which is the mildest use that model has been put to. The `120 s`
+  conclusion survives the model being wrong by `3x`.
+- **Ratios only, one meter.** No absolute upstream FLOP figure is used as a cost.
+  `docs/CURRENT_STATE.md` records the `5.49x` "affordability target" that mixed
+  two meters; this deliberately does not repeat it.
+- The transfer assumes our tower is `990/1022` of our anchored FLOPs, from the
+  shape model in `estimator_k3_strassen._matmuls`.
+
+## Rule 2
+
+An independent Skeptic was launched on this claim before it was written up, with
+the handoff, the diff, the protocol and the raw artifact paths — never a summary.
+
+# 2026-09-09 — CONTRACT (Rule 1): Slice 4 item 5, the small-width ladder at fixed `L/n = 1/64`
+
+*Pre-registered before any data exists. Instrument
+`local_sim/p2_small_width_ladder.py`; artifact
+`experiments/2026-09-09_slice4/small_width_ladder.json`. Committed before the job
+runs, so git timestamps prove the contract preceded the data.*
+
+**Question.** Does a traceless `kappa_4` carrier have a ceiling meaningfully above
+`AUGMENT`, and how much accuracy does upstream's `factor=True` throw away?
+
+**Evidence.**
+- CONFIRMED: `AUGMENT` at `1024x16` is `1.912e-8` against `SIMPLE`'s `4.005e-8`,
+  `24/24` nets, bit-exact control (D1).
+- CONFIRMED: an `r=1` state holds `~0.2%` of `kappa_4`'s Frobenius mass, so D2
+  cannot represent the traceless part and does not bound a traceless carrier.
+- CONFIRMED: upstream warns (`kprop_harmonic.py:538`) that factored AUGMENT drops
+  the augmented diagrams that do not factor and is NOT the same estimator as
+  unfactored AUGMENT. That gap has never been measured at any width.
+- INFERRED: ARC's `MSE_K ~ c_K (L/n)^K` makes method RATIOS a function of `L/n`,
+  so `(128,2)`, `(192,3)`, `(256,4)` are affordable proxies for `(1024,16)`.
+- SPECULATIVE: Puffi (SSC's authors) sit at `2.13e-8`, the worst of the six
+  leaders, which is a prior that low-rank traceless carriers saturate near the
+  same floor.
+
+**Hypothesis + mechanism.** Full `K4` is the ceiling of *every* `kappa_4` carrier,
+traceless included, because it carries `kappa_4` exactly. If `full-K4 / AUGMENT`
+is small at `(256,4)` and flat or falling along the ladder, no carrier — SSC or
+otherwise — can buy much over `AUGMENT` at `1024x16`, and the lane closes without
+a 1024-width oracle.
+
+**Intervention.** Four arms on the same networks and the same labels: `k3_simple`,
+`k3_augment` (`factor=True`), `k3_augment_unfactored` (`factor=False`),
+`k4_factored`. Nothing else differs.
+
+**Predictions (recorded before the result exists).**
+1. Samuel/strategist: `full-K4 / AUGMENT` in `[2.0, 4.0]` at `(256,4)`.
+2. Samuel/strategist: `unfactored / factored AUGMENT` in `[1.1, 1.3]` at `(256,4)`.
+3. Mine: `SIMPLE / AUGMENT` reproduces roughly the `2.09x` seen at `1024x16` at
+   every rung — if it does not, the ladder is not a proxy for the live shape and
+   predictions 1 and 2 must not be extrapolated. **This is the ladder's own
+   validity check and it is the first thing to read.**
+4. Mine: `unfactored / factored` is **below** `1.1` — the `2^18` pilot read
+   `1.00`, `0.99` and `0.97` at the three rungs, i.e. no measurable gap and if
+   anything the factored arm slightly *better*. I expect prediction 2 to fail low.
+
+**Gate.** None. **This block passes no gate and promotes nothing.** It is a
+DESIGN-tier read that orients priority, exactly as D2 was labelled. The lane
+verdict it feeds is a later, separately pre-registered decision.
+
+**Falsifier.** Prediction 3: if `SIMPLE / AUGMENT` at the rungs is not close to
+the live shape's `2.09x`, the proxy argument fails and nothing else here may be
+extrapolated to `1024x16`.
+
+**Baseline.** `k3_simple` on the same nets and labels, DESIGN tier.
+
+**Cost model.** None applies — the torch research chain is not the flopscope
+meter and no cost claim is made from it. Phase 2's `lambda = 0` residual/headroom
+rule is not engaged because nothing here runs on the grader.
+
+**Statistic.** Paired, common random numbers (identical nets and identical label
+replicas across arms), arithmetic difference with a studentised-t interval. The
+geometric mean of per-net ratios is printed as a **diagnostic** with no authority.
+
+**Seed block.** `# seed-ledger: no block named`, and none can be contaminated:
+every shape is a PROXY (`128/192/256` wide), no live-shape seed is consumed, and
+the seeds are a fixed documented range from `SEED_BASE = 9_100_000`.
+
+**Labels.** Two INDEPENDENT MC replicas per net from the evaluator's own sampling
+substream spawned into two children; the two-half cross estimator
+`mean_j (p_j - A_j)(p_j - B_j)`, whose expectation is `MSE(p)` exactly. `2^24`
+samples per replica — **set from a measurement, not from habit**: a `2^16` pilot
+read per-replica label noise `6.0e-6` against an AUGMENT signal of `~5e-8` at
+`(256,4)` and the cross estimator went NEGATIVE. `2^22` would not have been
+enough. This is the same trap that fired on D2's refusal gate earlier in the
+slice, caught here before the job rather than after it.
+
+**Confounders / scope / what must not change.** Every ratio is measured at
+`L/n = 1/64` and `n <= 256`; extrapolation to `n = 1024` is an INFERENCE and the
+ladder's own trend across three rungs is the only evidence offered for it. The
+upstream checkout is verified to be rev `93d091a4` plus exactly the recorded
+patch before any arm runs, and the job refuses otherwise.
+
+**Instrument check performed before the job.** Two pilot runs at `2^16` and
+`2^18` samples, one net per rung. The first found the `k4_factored` arm did not
+run at all (`out=` kwargs refuse an `nn.Linear` weight that still carries
+`requires_grad`) — a silent-absence failure, now fixed with an explicit
+`torch.no_grad()` and a comment saying why. The second confirmed all four arms
+produce finite readings at all three rungs.
+
+# 2026-09-09 — RULES v14 §6, ASKED FOR A THIRD TIME: the sentence on how two designated submissions are scored **is not in any capture we hold**, and this closes the question rather than deferring it again.
+
+*Provenance check, no measurement. `# seed-ledger: no block named`.*
+
+The handoff asks to "quote verbatim the Rules v14 §6 sentence on how two
+designated submissions are scored — this is the third time it has been asked
+for." **It cannot be quoted, and the reason is not an oversight.** Here is
+everything the repository holds, so the question stops being re-asked:
+
+`experiments/2026-08-28_p2_live/2026-08-28T170620Z_rules_v14_phase2_designation_capture.json`:
+
+> "Before the Phase 2 End, each Participant may designate up to two (2)
+> submissions for the Private Re-evaluation as described in §6."
+
+`experiments/2026-08-28_p2_live/2026-08-28T171010Z_rules_v14_phase2_default_selection_capture.json`,
+which captured §6's heading and its fallback clause but not its scoring sentence:
+
+> section label: "Default selection if no designation is made."
+> Phase-2 cross reference: "if no designation is made, the default-selection
+> rule in §6 applies."
+> §6 fallback fragment: "two best-scoring valid submissions from that Phase on
+> that Phase's public leaderboard"
+
+A repository-wide search for `re-evaluation` returns exactly these two artifacts,
+`docs/GOTCHAS.md`, `docs/email-draft-organizers.md` and this log. **There is no
+third capture and no fuller §6 text anywhere in the tree.** Both captures are
+read-only browser evidence from `2026-08-28`, and their `capture_scope` fields
+say plainly that they took the minimal visible-DOM excerpt for the two-designation
+claim — the scoring sentence was never in scope.
+
+**Why it was not simply fetched since:** the live rules page is login-gated, and
+the capture route is Samuel's browser, not an agent's.
+
+**So the standing ruling holds and should be treated as settled rather than
+pending:** designation semantics are ambiguous in our evidence,
+`docs/CURRENT_STATE.md` already records the maximin argument that holds either
+way, and **nominee B should be chosen so that it is right under both readings**.
+Two ways to end the ambiguity, both requiring Samuel and neither requiring another
+agent-side search:
+
+1. Samuel opens the rules page while logged in and captures §6 in full.
+2. `docs/email-draft-organizers.md` already asks the organisers this exact
+   question and has not been sent.
+
+**Recorded as a dead end so it is not searched a fourth time.** Three handoffs
+have now asked for a sentence that no artifact in this repository contains.

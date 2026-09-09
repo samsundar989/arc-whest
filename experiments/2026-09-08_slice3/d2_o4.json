@@ -1,0 +1,301 @@
+{
+  "slice": "D2 -- O4 oracle, true kappa_4 in flight on the K3 chain, 1024x16",
+  "contract": "experiments/LOG.md, CONTRACT (Rule 1) Slice 3 step 1, commit 432f7fd",
+  "asset": "experiments/2026-08-26_p2_gt",
+  "n_mlps_requested": 24,
+  "oracle_samples": 16777216,
+  "oracle_stream": "seed_streams(s)[1].spawn(3)[2]; children 0,1 verified to reproduce p2_truth._replica_seeds, so disjointness from both label halves is checked, not assumed",
+  "injection_point": "OUTPUT of every nonlinearity, where linear_kprop:308 guarantees an identity metric and proj_geq_r's core convention applies verbatim",
+  "upstream": {
+    "rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+    "expected_rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+    "changed_lines": 25,
+    "recorded_lines": 25,
+    "changed_md5": "11d296d73c8895668333d21a0cfd5526",
+    "recorded_md5": "11d296d73c8895668333d21a0cfd5526",
+    "pass": true
+  },
+  "partial": true,
+  "halted": "",
+  "lane_gate": 1.5,
+  "carrier_gate": 1.5,
+  "tier": "DESIGN (P01), re-read. Orients priority; promotes NOTHING.",
+  "scope_caveat": "D2(c) is the ceiling of the AUGMENT REPRESENTATION -- an r=1 HTensor Sym(core (x) I) can carry kappa_4's TRACE MATRIX and nothing else. kappa_4's traceless part, which is exactly what an SSC-style response-mode carrier holds, is NOT representable in this state. So a small (c)/K3 kills the trace-matrix family (AUGMENT and equivalents) and does NOT kill a traceless carrier. The Sep 8 handoff's claim that D2 'brackets every kappa_4-in-flight scheme, including SSC' is NOT supported and is not made here.",
+  "cost_note": "No cost claim; torch meter, not flopscope.",
+  "summary": {
+    "n": 1,
+    "gt_noise_per_half": 1.1552182657290076e-09,
+    "simple": {
+      "mean_xmse": 4.0146999637159986e-08,
+      "se": NaN,
+      "ci95": [
+        NaN,
+        NaN
+      ]
+    },
+    "control": {
+      "mean_xmse": 2.1246388058048308e-08,
+      "se": NaN,
+      "ci95": [
+        NaN,
+        NaN
+      ]
+    },
+    "noop": {
+      "mean_xmse": 2.1246388058048308e-08,
+      "se": NaN,
+      "ci95": [
+        NaN,
+        NaN
+      ]
+    },
+    "a": {
+      "mean_xmse": 2.6824339907007868e-08,
+      "se": NaN,
+      "ci95": [
+        NaN,
+        NaN
+      ]
+    },
+    "b": {
+      "mean_xmse": 2.6491869437284377e-08,
+      "se": NaN,
+      "ci95": [
+        NaN,
+        NaN
+      ]
+    },
+    "c": {
+      "mean_xmse": 1.676277208318604e-08,
+      "se": NaN,
+      "ci95": [
+        NaN,
+        NaN
+      ]
+    },
+    "control_minus_a": {
+      "paired_diff": -5.57795184895956e-09,
+      "se": NaN,
+      "ci95": [
+        NaN,
+        NaN
+      ]
+    },
+    "control_minus_b": {
+      "paired_diff": -5.245481379236069e-09,
+      "se": NaN,
+      "ci95": [
+        NaN,
+        NaN
+      ]
+    },
+    "control_minus_c": {
+      "paired_diff": 4.483615974862268e-09,
+      "se": NaN,
+      "ci95": [
+        NaN,
+        NaN
+      ]
+    },
+    "simple_minus_c": {
+      "paired_diff": 2.3384227553973946e-08,
+      "se": NaN,
+      "ci95": [
+        NaN,
+        NaN
+      ]
+    },
+    "a_minus_c": {
+      "paired_diff": 1.0061567823821828e-08,
+      "se": NaN,
+      "ci95": [
+        NaN,
+        NaN
+      ]
+    },
+    "ratios_diagnostic": {
+      "K3_over_c_CONFOUNDED": 2.3950095746651345,
+      "a_over_c": 1.6002329312771675,
+      "b_over_c": 1.5803990715746319,
+      "control_over_c": 1.2674746129466006,
+      "_note": "K3_over_c is CONFOUNDED: K3 is SIMPLE and (c) is AUGMENT+truth, so it contains the representation change AND the truth injection. a_over_c is the only ratio here that isolates truth."
+    },
+    "verdict_a_to_c": {
+      "passed": false,
+      "gain": 1.6002329312771675,
+      "gate": 1.5,
+      "ci_paired_difference": [
+        NaN,
+        NaN
+      ],
+      "ci_excludes_zero": false,
+      "geometric_gain_diagnostic": 1.6002329312771697,
+      "n": 1,
+      "n_candidate_better": 1,
+      "reasons": [
+        "the t 95% interval on the paired difference does not lie strictly above zero [+nan, +nan]",
+        "the biggest single mover carries 100% of the delta; treat as a draw until proven otherwise"
+      ]
+    },
+    "verdict_simple_to_c_CONFOUNDED": {
+      "passed": false,
+      "gain": 2.3950095746651345,
+      "gate": 1.5,
+      "ci_paired_difference": [
+        NaN,
+        NaN
+      ],
+      "ci_excludes_zero": false,
+      "geometric_gain_diagnostic": 2.395009574665135,
+      "n": 1,
+      "n_candidate_better": 1,
+      "reasons": [
+        "the t 95% interval on the paired difference does not lie strictly above zero [+nan, +nan]",
+        "the biggest single mover carries 100% of the delta; treat as a draw until proven otherwise"
+      ]
+    },
+    "verdict_control_to_c": {
+      "passed": false,
+      "gain": 1.2674746129466006,
+      "gate": 1.5,
+      "ci_paired_difference": [
+        NaN,
+        NaN
+      ],
+      "ci_excludes_zero": false,
+      "geometric_gain_diagnostic": 1.2674746129466008,
+      "n": 1,
+      "n_candidate_better": 1,
+      "reasons": [
+        "arithmetic gain 1.2675x is below the pre-registered gate 1.5000x",
+        "the t 95% interval on the paired difference does not lie strictly above zero [+nan, +nan]",
+        "the biggest single mover carries 100% of the delta; treat as a draw until proven otherwise"
+      ]
+    },
+    "gates": {
+      "lane_dead": false,
+      "lane_dead_inputs": {
+        "d1_xmse": 1.912323e-08,
+        "simple_to_c_passed_1.5x": false,
+        "requires": "BOTH (c) failing 1.5x over SIMPLE AND D1 >= 3.5e-8"
+      },
+      "prediction_3_a_over_c_ge_3": false,
+      "carrier_DIAGNOSTIC_ONLY_not_a_gate": false
+    },
+    "worst_noop_rel_dev": 0.0,
+    "mean_oracle_rel_noise_T": 0.35741658112662333,
+    "impossible_arms": []
+  },
+  "rows": [
+    {
+      "seed": 40821001144,
+      "oracle_seconds": 46.34768389999954,
+      "oracle_rel_noise_T": 0.35741658112662333,
+      "xmse_simple": 4.0146999637159986e-08,
+      "xmse_control": 2.1246388058048308e-08,
+      "xmse_noop": 2.1246388058048308e-08,
+      "xmse_a": 2.6824339907007868e-08,
+      "xmse_b": 2.6491869437284377e-08,
+      "xmse_c": 1.676277208318604e-08,
+      "chain_vs_true_T": [
+        {
+          "layer": 0,
+          "tr_T_chain": 1655.6338141133072,
+          "tr_T_true": 1655.95103616444,
+          "rel_fro_err_T": 0.13295800783571027
+        },
+        {
+          "layer": 1,
+          "tr_T_chain": 1495.833165296001,
+          "tr_T_true": 1498.5547571431966,
+          "rel_fro_err_T": 0.17033365153677488
+        },
+        {
+          "layer": 2,
+          "tr_T_chain": 1212.9985226241588,
+          "tr_T_true": 1215.218991579036,
+          "rel_fro_err_T": 0.19671086168359084
+        },
+        {
+          "layer": 3,
+          "tr_T_chain": 1007.6023002340944,
+          "tr_T_true": 1010.4880634654321,
+          "rel_fro_err_T": 0.21227335466586036
+        },
+        {
+          "layer": 4,
+          "tr_T_chain": 895.4812989585781,
+          "tr_T_true": 894.8935515367443,
+          "rel_fro_err_T": 0.21378176683280004
+        },
+        {
+          "layer": 5,
+          "tr_T_chain": 723.5942202660192,
+          "tr_T_true": 724.316157937265,
+          "rel_fro_err_T": 0.2183859842350966
+        },
+        {
+          "layer": 6,
+          "tr_T_chain": 567.724254522728,
+          "tr_T_true": 569.5133716795799,
+          "rel_fro_err_T": 0.22714347750948802
+        },
+        {
+          "layer": 7,
+          "tr_T_chain": 469.2554228269624,
+          "tr_T_true": 469.292074812965,
+          "rel_fro_err_T": 0.22857185995389676
+        },
+        {
+          "layer": 8,
+          "tr_T_chain": 403.28566815901627,
+          "tr_T_true": 404.239365204652,
+          "rel_fro_err_T": 0.2228254122257116
+        },
+        {
+          "layer": 9,
+          "tr_T_chain": 330.77741138876576,
+          "tr_T_true": 330.9869755688429,
+          "rel_fro_err_T": 0.22320524445456535
+        },
+        {
+          "layer": 10,
+          "tr_T_chain": 263.1445461656457,
+          "tr_T_true": 263.09599809707066,
+          "rel_fro_err_T": 0.21989594970888218
+        },
+        {
+          "layer": 11,
+          "tr_T_chain": 261.04648881328177,
+          "tr_T_true": 260.982576469836,
+          "rel_fro_err_T": 0.20784393279437785
+        },
+        {
+          "layer": 12,
+          "tr_T_chain": 224.04273158265434,
+          "tr_T_true": 224.6196532311344,
+          "rel_fro_err_T": 0.20148088028798514
+        },
+        {
+          "layer": 13,
+          "tr_T_chain": 216.11073698192314,
+          "tr_T_true": 216.24482745933523,
+          "rel_fro_err_T": 0.18630975086801987
+        },
+        {
+          "layer": 14,
+          "tr_T_chain": 201.6102200600704,
+          "tr_T_true": 200.969424559146,
+          "rel_fro_err_T": 0.1750164171210334
+        },
+        {
+          "layer": 15,
+          "tr_T_chain": 185.771040079088,
+          "tr_T_true": 185.213025433518,
+          "rel_fro_err_T": 0.16832774272351328
+        }
+      ],
+      "noop_rel_dev": 0.0
+    }
+  ]
+}

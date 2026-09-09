@@ -4,29 +4,6 @@
 
 ---
 
-> ## AMENDMENT, 2026-09-07 — the operations gate in this document is SUPERSEDED
->
-> This file is still the strategy canon, and its architecture, board reading and
-> lane verdicts stand. **Three of its operational numbers do not**, and they
-> appear in §§ 4, 5 and the plan revision at the end. `local_sim/official_config.py`
-> is the authority; `docs/VALIDATION.md` §2b-iii is the binding form.
->
-> | this file says | corrected | why |
-> |---|---|---|
-> | gate candidates at **≤30k ops** | **≤22,000 ops** | `22,000 × 13.4 µs = 0.295 s`, a `1.36×` margin under the `0.4 s` cliff |
-> | `residual ≈ 11 µs × ops` | median `11.2 µs`, **size on `13.4 µs`** | a cliff is sized on the MAXIMUM observed, not the median |
-> | "canary 0.030 s / **2,673** ops = 11.2 µs" | **2,690** ops | 2,673 is the f32 CENSUS convention; the grader's convention adds the opening `f64→f32` weight cast (+16 ops). See `docs/GOTCHAS.md` |
-> | leaders "0.29–0.39 s residual" | **0.10–0.36 s** | false for suliman_tadros `0.124`, Puffi `0.193`, hyojun_kwon `0.237` |
->
-> The Slice-2 plan revision at the end of this file also says Strassen depth is
-> "bounded by the ops budget". **It is not** — at these shapes a fully batched
-> Strassen level costs a flat 23 operations, so even L=5 stays inside the gate.
-> What binds is **memory**: the operand stacks grow as `(7/4)^L` and a fully
-> batched L=3 on the widest shape class raises `MemoryError` against an
-> `8,192 MB` graded limit. `local_sim/p2_strassen_plan.py` carries the frontier.
-
----
-
 ## 0. The verdict in one page
 
 **Where we are.** Best public entry 329896 (`estimator_wp18_canary4.py`, the regenerating K3 flow): adjusted **8.50e-8**, raw 8.50e-7, at the 0.1 multiplier floor, 0/100 failures, **rank #47 of 109** today. The board top is **3.80e-9** (marius_binner, raw 1.87e-8 at util 0.205; a brand-new entrant, suliman_tadros, tied at 3.80e-9 after 13 entries). We are 22× off #1 and ~8× off top-10 (1.0e-8).
@@ -244,3 +221,21 @@ Gaps, ranked, with the fix:
 **Two lanes closed by measurement:** generation truncation (raw roughly doubles per generation dropped; saving only linear) and last-layer capping (5.6× worse for 5.9% of B). The score-optimal operating point is the *exact* tower; all remaining cost gain must be accuracy-neutral. The regenerating collapse (0.077 B, 9.1e-8) beats every truncated arm per FLOP — write-up material.
 
 **Plan revision (Slice 2, Sep 7–19):** (1) submit; (2) batched Strassen–Winograd on shape-grouped batched matmuls, **depth bounded by the ops budget** (≤24k ops at 11.5 µs/op; the leaders' 0.29–0.39 s residual at 25–35k ops is almost certainly this same trade) — L=3 ≈ 0.52 B, L=4 ≈ 0.46 B if base ops permit; (3) exact dead/cold-column pruning ≈0.8×; (4) aliased-operand spellings; (5) the accuracy layer in torch in parallel — O1, Edgeworth-4 + diagonal κ₄, AUGMENT sign, **Puffi SSC κ₄ response closure (go/no-go ≥1.5× by Sep 19)**, corrector on chain features. Target Sep 19: ≤0.45 B, adjusted ≤1.8e-8 (~#25) with the accuracy verdicts in hand; Slice 3 integrates the accuracy layer toward ≤7e-9. Handoff: `docs/CLAUDE_CODE_HANDOFF_2026-09-07_slice2.md`.
+
+
+---
+
+## Addendum 2026-09-08 — Slice 2 outcome; the floor ruling
+
+Graded: k3_full 2.9467e-8 (0.78 B); batched Strassen L=3 **2.031e-8** (0.537 B, worst wall 61.9 s) = nominee A; L=4 1.836e-8 (worst wall 114.7 s, not nominee-grade under the measured 1.6× wall contention). ~#27. Cost engineering is wall-bound at ~0.54 B (Strassen leaves run at 17 GFLOP/s); the ≤0.35 B target is unreachable by Strassen depth alone. Graded laws: residual 10.7–11.2 µs/op (2.7k–15.4k ops); graded wall max varies 1.6× on identical bytes. O1 output renormalisation: 0.75% (falsified — the residual is structure, not scale).
+
+**Ruling on the packet's question (see `STRATEGIST_RESPONSE_2026-09-08.md`):** the 1.9e-8 board floor is the floor of one member of the cumulant-truncation class — most likely ARC's `AUGMENT` factorized K3 (κ₄'s non-traceless part carried in flight) or an equivalent in-flight κ₄ scheme — not of the class. Our chain is `kind=SIMPLE` with a scalar κ₄. Slice 3 opens with two torch measurements (ARC AUGMENT at 1024×16; an O4 oracle with true κ₄ in flight, trace/diagonal/full) that decide everything downstream; then the AUGMENT port (expected ~1.1e-8, ~#15), then traceless-κ₄ carriers / corrector for the sub-floor 2× that #1 requires.
+
+
+---
+
+## Addendum 2026-09-09 — AUGMENT measured; the gap to #1 is cost
+
+ARC `kind=AUGMENT` (κ₄ carried as an (n,n) object in flight) on the 24-net set: **1.912e-8** vs SIMPLE 4.005e-8 (2.09×, 24/24, bit-exact control); all-layers 6.9e-9. Matches the leaders' two-number signature. Ablation: the raised diagram budget alone is 1.085× *worse*; all the gain is κ₄'s matrix structure; κ₄ zeroed is 9.2× worse (self-inconsistent state). Cost levers deflated: pruning 0.961×; hybrid Strassen has no target point; nominee-grade cost floor ~0.52 B before the port's (unpriced) addition. Falsified from Sep 8: D2 cannot represent traceless κ₄ (r=1 holds 0.2% of its mass); power cumulants were already on.
+
+**Ruling (`STRATEGIST_RESPONSE_2026-09-09.md`):** after the port our raw (~1.8e-8 graded) equals the leaders'; the entire distance to #1 (3.80e-9 at 0.205 B) is multiplier, 2.5–4×, and six teams have closed it at our accuracy — so cost is not exhausted, only our spelling is. Slice 4: price then port AUGMENT (canary → ~1.1–1.5e-8, #15–22); wall-profile the Strassen spelling to buy depth under a **≥2.0× nominee wall-margin rule** (a single timeout costs ~9e-3; break-even p ≈ 3e-7); price a symmetric-packed spelling of the two dominant contractions (the one representation-level lever untried, the only candidate for the full 2.5×); small-width ladder at fixed L/n = 1/64 (factored vs unfactored AUGMENT vs full K4) to gate the traceless lane without a 1024-width oracle; corrector capped at 3 GPU-days. Board prior: Puffi (SSC's authors) at 2.13e-8 ⇒ low-rank traceless carriers saturate at the same floor; six teams within 14% ⇒ no one has a ≥1.5× corrector.

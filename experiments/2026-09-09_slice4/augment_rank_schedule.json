@@ -1,0 +1,125 @@
+{
+ "rank_schedule": {
+  "SIMPLE": [
+   {
+    "n": 24,
+    "depth": 6,
+    "ranks_over_n": [
+     2,
+     4,
+     6,
+     8,
+     10,
+     12
+    ],
+    "births_over_n": [
+     2
+    ]
+   },
+   {
+    "n": 32,
+    "depth": 5,
+    "ranks_over_n": [
+     2,
+     4,
+     6,
+     8,
+     10
+    ],
+    "births_over_n": [
+     2
+    ]
+   }
+  ],
+  "AUGMENT": [
+   {
+    "n": 24,
+    "depth": 6,
+    "ranks_over_n": [
+     3,
+     11,
+     19,
+     27,
+     35,
+     43
+    ],
+    "births_over_n": [
+     8
+    ]
+   },
+   {
+    "n": 32,
+    "depth": 5,
+    "ranks_over_n": [
+     3,
+     11,
+     19,
+     27,
+     35
+    ],
+    "births_over_n": [
+     8
+    ]
+   }
+  ]
+ },
+ "upstream_components": {
+  "SIMPLE": {
+   "DSTensor constructor": 130048.00044904971,
+   "nonlin_sum 111 factored": 97790289920.03584,
+   "zero_repeated": 0.0,
+   "FactoredTensor3.contract_W": 1546188226559.9287,
+   "eval_part": 261218303.99540132,
+   "nonlin_sum": 583827455.9968076,
+   "harmonic diagslice": 96530431.99885759,
+   "resid": 0.0,
+   "contract_W_basic": 51589939199.98757,
+   "coerce_input": 0.0,
+   "mlp setup": 17826176.00015655,
+   "symmetrize": 0.0,
+   "harmonic contract_W": 0.0,
+   "DS_harmonic_proj": 16793776.000356153,
+   "pK_to_K": 1108426751.9659915,
+   "get_wick_coef": 3867648.011190653,
+   "is_symmetric": 0.0,
+   "FactoredTensor3.from_dstensor": 50331648.000093855,
+   "DSTensor.to_tensor": 33619968.00008693,
+   "FactoredTensor3.get_dslice": 1555982991360.107,
+   "total": 3253724019247.9355,
+   "setup": 0.0,
+   "DSTower.from_slices": 0.0
+  },
+  "AUGMENT": {
+   "DSTensor constructor": 100857855.99404617,
+   "nonlin_sum 111 factored": 681977360383.6206,
+   "zero_repeated": 0.0,
+   "FactoredTensor3.contract_W": 5701569085440.187,
+   "eval_part": 564020764671.9609,
+   "nonlin_sum": 703856259071.7633,
+   "harmonic diagslice": 48493540351.98651,
+   "resid": 0.0,
+   "contract_W_basic": 99924049919.97955,
+   "coerce_input": 0.0,
+   "mlp setup": 17826176.00015655,
+   "symmetrize": 0.0,
+   "harmonic contract_W": 0.0,
+   "DS_harmonic_proj": 17700044992.00137,
+   "pK_to_K": 740497375231.9525,
+   "pK_211 -> K_211": 5812453232640.209,
+   "get_wick_coef": 5173248.012977154,
+   "is_symmetric": 0.0,
+   "pK_111 -> K_211": 6503600799744.701,
+   "FactoredTensor3.from_dstensor": 147849216.00191438,
+   "DSTensor.to_tensor": 33619968.00008693,
+   "FactoredTensor3.get_dslice": 5726612242431.944,
+   "total": 26601010081343.34,
+   "setup": 0.0,
+   "DSTower.from_slices": 0.0
+  }
+ },
+ "upstream_totals": {
+  "SIMPLE": 3253706193071.9355,
+  "AUGMENT": 26600992255167.34
+ },
+ "meter": "upstream torch NamedFlopCounter -- NOT flopscope; ratios only"
+}
