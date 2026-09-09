@@ -37564,3 +37564,70 @@ What remains is a **BUILD, not a question**:
 **The Strassen depth must be chosen at step 2, not inherited.** Depth 2 buys
 `2.28x` wall margin under contention against nominee A's `1.21x` for `12.4%` of
 score, and AUGMENT's extra FLOPs land on top of whatever depth ships.
+
+# 2026-09-09 — **THE AUGMENT PORT IS SCOPED AND ITS COEFFICIENT TABLES ARE GENERATED.** 79 terms against SIMPLE's 25, and the frozen SIMPLE artifact is untouched.
+
+*Step 2, first build increment. `local_sim/p2_k3_coefs.py --augment`, artifact
+`experiments/2026-09-02_wp14_fnp/k3_coefs_augment.json`. CPU, seconds.
+`# seed-ledger: no block named`.*
+
+## The scoping result that matters
+
+The fnp chain's term table is **generated from upstream and frozen**, not hand
+transcribed — `p2_k3_coefs.py` enumerates it from
+`kprop_harmonic.get_all_terms_iso` against rev `93d091a4`. So the port is **not**
+a hand-transcription of 142 diagrams; it is a regenerated table plus the
+structural changes AUGMENT needs. The generator hardcoded `augment=False` on one
+line.
+
+    augment=False   25 kept terms   (1,):3  (1,1):4  (2,):3  (2,1):5  (2,2):4  (3,):3  (4,):3
+    augment=True    79 kept terms   (1,):3  (1,1):10 (2,):3  (2,1):15 (2,2):10 (3,):3  (4,):3
+                                    + (2,1,1):17  + (3,1):15
+
+The `keep` filter now mirrors `factor_k3.py` §3.1 **exactly**, including its
+`(augment or int_part not in [(3,1),(2,1,1)])` clause — those two int_parts being
+kept is most of the growth. The `(2,1,1):17` count **independently reproduces**
+the 17 vector partitions enumerated by hand on 2026-09-09, from a different code
+path.
+
+## The reduction, now confirmed a third time and structurally
+
+`lap_d4_table` generalises the frozen `m = 2` table over `m` and `part`, because
+AUGMENT's degree-4 state is `r = 1` and `DS_harmonic_proj(., r_out=1, geq=True)`
+sums the `r=1` term (`L¹`, no raise) and the `r=2` term (`R(L²)`):
+
+    m = 1:  (4,) 1 term   (3,1) 1 term   (2,2) 2 terms   (2,1,1) 1 term
+    m = 2:  (4,) 1 term   (3,1) 0 terms  (2,2) 1 term    (2,1,1) 0 TERMS
+
+**`(2,1,1)` at `m = 2` has zero valid cap-graphs.** That is the whole reduction,
+now arrived at three independent ways: numerically (`_lap_m_dslice` returns
+exactly zero), end to end (a `10x` sum-preserving perturbation moves the chain by
+`1.6e-16`), and now **structurally, from the generator's own combinatorics**.
+
+## The regression check that had to pass
+
+`p2_k3_coefs.py --check` re-enumerates the SIMPLE table against the live upstream
+and compares it to the committed artifact:
+
+    artifact   experiments\2026-09-02_wp14_fnp\k3_coefs_simple.json
+    sha256     894185e450533765f633312b36345ab7a29bfb4219a9ab5ee0c36a12d5988fa7
+    upstream re-enumeration identical to the frozen table: True
+
+**The shipped chain's pinned table is unaffected by the generator change.** That
+was the one way this increment could have broken something already graded, and it
+is checked rather than assumed.
+
+## What the port still owes
+
+1. The fnp transcription itself — extend the tower to carry degree 4 at `r = 1`
+   (an `(n,n)` core) instead of `r = 2` (a scalar), driving the 79-term program
+   and the fused `(2,1,1)` route.
+2. Parity against upstream AUGMENT at small `n`, then at `1024 x 16`.
+3. `p2_flop_anchor` pricing — replaces the `~0.31 B` sanity estimate and settles
+   the multiplier the port ships at.
+4. Certification: twin arm (f64 read-only), `edge_cases --real-flopscope
+   --phase2`, ops `<=24k`, projected residual `<=0.3 s`, Linux memory gate,
+   `>=1.6x` wall margin, official mini-100.
+5. **Choose the Strassen depth here, not before** — depth 2 buys `2.28x` wall
+   margin under contention against nominee A's `1.21x` for `12.4%` of score, and
+   AUGMENT's extra FLOPs land on top of whatever depth ships.

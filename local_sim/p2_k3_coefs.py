@@ -65,7 +65,7 @@ def pk_to_k_table() -> dict:
     return out
 
 
-def term_program() -> list:
+def term_program(augment: bool = False) -> list:
     """The 25 kept SIMPLE terms as an executable program.
 
     Each row is everything the fnp side needs to evaluate one term without
@@ -75,12 +75,16 @@ def term_program() -> list:
     (``count * vec_part_coef(vpart, divide_fac=True)``) and the per-axis Wick
     indices ``(k_i, p_i)``.
     """
-    live = get_all_terms_iso(k_max=3, d_max=4, augment=False)
+    live = get_all_terms_iso(k_max=3, d_max=4, augment=augment)
     rows = []
     for int_part, vpd in live.items():
         for vec_part, count in vpd.items():
+            # Mirrors factor_k3.py 3.1's own filter EXACTLY, including its
+            # `(augment or int_part not in [(3,1),(2,1,1)])` clause -- under
+            # AUGMENT those two int_parts are KEPT, which is most of the
+            # 40 -> 142 term growth.
             keep = (len(int_part) <= 3
-                    and int_part not in [(3, 1), (2, 1, 1)]
+                    and (augment or int_part not in [(3, 1), (2, 1, 1)])
                     and int_part != (1, 1, 1)
                     and (int_part, set(vec_part)) != ((2, 1, 1), {(1, 1, 1)})
                     and factored_keeps_term(3, int_part, vec_part))
@@ -125,6 +129,36 @@ def wick_table(terms: list) -> dict:
     return out
 
 
+def lap_d4_table(m: int, parts) -> dict:
+    """`_lap_m_dslice(m, dslice, part)` coefficients, generalised over m and part.
+
+    `lap2_d4_table` below is the `m = 2` SIMPLE case, kept verbatim so the frozen
+    artifact's sha is unaffected. AUGMENT needs `m = 1` too: its degree-4 state is
+    an `r = 1` HTensor, and `DS_harmonic_proj(., r_out=1, geq=True)` sums the
+    `r = 1` term (`L^1`, no raise) and the `r = 2` term (`R(L^2)`).
+
+    The `(2,1,1)` row is the one the port turns on: its blocks are sizes
+    `2, 1, 1`, so `m = 1` admits exactly ONE cap-graph and `m = 2` admits NONE.
+    That is why the dense `n^3` slice collapses to an axis-0 sum, proven end to
+    end in `local_sim/test_p2_fused_reduction.py`.
+    """
+    out = {}
+    for part in parts:
+        rows = []
+        for graph in weak_compositions(len(part), m):
+            if any(2 * graph[i] > part[i] for i in range(len(part))):
+                continue
+            coef = _multigraph_coef(
+                [((i, i), graph[i]) for i in range(len(part)) if graph[i] > 0], part)
+            l_part = tuple(part[i] - 2 * graph[i] for i in range(len(part)))
+            rows.append({"graph": list(graph), "coef": float(coef),
+                         "capped": [i for i in range(len(part)) if l_part[i] == 0],
+                         "residual_part": [b for b in l_part if b > 0]})
+        out[str(part)] = {"terms": rows, "n_terms": len(rows),
+                          "int_partition_coef": int(int_partition_coef(part))}
+    return out
+
+
 def lap2_d4_table() -> dict:
     """`_lap_m_dslice(2, dslice, part)` for part in {(4,), (2, 2)}, m = r = 2."""
     out = {}
@@ -146,8 +180,10 @@ def lap2_d4_table() -> dict:
 
 def main() -> int:
     global _TERMS
-    _TERMS = term_program()
+    augment = bool(getattr(_ARGS, "augment", False))
+    _TERMS = term_program(augment=augment)
     doc = {
+        "kind": "AUGMENT" if augment else "SIMPLE",
         "source": "mlp_kprop.cumulants._pK_to_K_coef / partitions / harmonic",
         "upstream_rev": "93d091a4",
         "note": "depends only on partition combinatorics; independent of n, of the "
@@ -162,9 +198,34 @@ def main() -> int:
         "proj_coef_n1024_d4_r2": [float(x) for x in proj_coef(1024, 4, 2)],
         "proj_coef_formula": "harmonic.proj_coef(n, d, r); evaluated by the port, not frozen",
     }
+    if augment:
+        # AUGMENT keeps degree 4 at r = 1, so the projection sums the r=1 term
+        # (L^1, no raise) and the r=2 term (R(L^2)). Both lap tables are needed.
+        d4_parts = [(4,), (3, 1), (2, 2), (2, 1, 1)]
+        doc["lap1_d4"] = lap_d4_table(1, d4_parts)
+        doc["lap2_d4_augment"] = lap_d4_table(2, d4_parts)
+        doc["proj_coef_n1024_d4_r1"] = [float(x) for x in proj_coef(1024, 4, 1)]
+        doc["degree4_reduction"] = {
+            "claim": "the (2,1,1) slice enters the r=1 core ONLY through its "
+                     "axis-0 sum, so the dense n^3 array is never needed",
+            "why": "(2,1,1) has blocks of sizes 2,1,1, so L^m caps legs within "
+                   "blocks and m=2 admits NO valid cap-graph while m=1 admits "
+                   "exactly one",
+            "lap2_211_n_terms": doc["lap2_d4_augment"]["(2, 1, 1)"]["n_terms"],
+            "verified_end_to_end": "local_sim/test_p2_fused_reduction.py -- a 10x "
+                                   "sum-preserving perturbation of the n^3 slice "
+                                   "moves the chain output by 1.6e-16, while a "
+                                   "sum-breaking one moves it by 2.0e-1",
+            "three_axis_blocks_are_rank1": {
+                "(2,1,1)": "(1/6) * g[i] * A[j,k]",
+                "(1,1,2)": "(1/6) * A[i,j] * g[k]",
+                "verified": "~1e-16 vs upstream diagslice, 2 widths, 3 metrics",
+            },
+        }
     here = os.path.dirname(os.path.abspath(__file__))
-    committed = os.path.join(os.path.dirname(here), "experiments",
-                             "2026-09-02_wp14_fnp", "k3_coefs_simple.json")
+    committed = os.path.join(
+        os.path.dirname(here), "experiments", "2026-09-02_wp14_fnp",
+        "k3_coefs_augment.json" if augment else "k3_coefs_simple.json")
     if _ARGS.check:
         # The analogue of `p2_k3_fnp.py --check-terms`: re-enumerate against the
         # LIVE upstream checkout and refuse on drift, without writing anything.
@@ -230,6 +291,9 @@ if __name__ == "__main__":
     import argparse
 
     _ap = argparse.ArgumentParser()
+    _ap.add_argument("--augment", action="store_true",
+                     help="emit the kind=AUGMENT tables (79 kept terms vs "
+                          "SIMPLE's 25) instead of the frozen SIMPLE ones")
     _ap.add_argument("--check", action="store_true",
                      help="re-enumerate against the live upstream checkout and "
                           "refuse on drift; writes nothing")
