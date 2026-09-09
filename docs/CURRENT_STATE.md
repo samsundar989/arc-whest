@@ -1,5 +1,73 @@
 # CURRENT_STATE.md — read this first
 
+> ## 2026-09-09 — **D1 IS IN: `AUGMENT` TAKES THE CHAIN `4.0047e-08 → 1.9123e-08`, `2.094x`, ON 24/24 NETWORKS.** The floor ruling is confirmed.
+>
+> `estimator.py` untouched at **v2.6.1**. **Nothing is designated.** Nothing is
+> promoted — P01 is a re-read DESIGN block.
+>
+> | arm | mean xmse | se | 95% CI |
+> |---|---:|---:|---|
+> | K3 `SIMPLE` (control) | `4.004685e-08` | `1.017e-09` | `[3.7943e-08, 4.2151e-08]` |
+> | K3 **`AUGMENT`** | **`1.912323e-08`** | `4.320e-10` | **`[1.8229e-08, 2.0017e-08]`** |
+>
+> `paired SIMPLE − AUGMENT = +2.0924e-08`, 95% `[+1.9441e-08, +2.2406e-08]`.
+> `decide()` **PASS with an empty `reasons` list**, gain `2.0941x` against the
+> pre-registered gate `1.6019x`. `gt_noise/half 1.1552e-09`, `16.6x` below.
+> Artifact `experiments/2026-09-08_slice3/d1_augment.json`, job `411`.
+>
+> **Why it is trustworthy, not merely good:** the control reproduced
+> **BIT-EXACTLY** (`max |drift vs pa_k3.json| = 0.0` over all 24 nets, mean
+> `4.004685e-08` digit for digit, across a reboot, a driver, `no_grad` and
+> `expandable_segments`); the gain is **broad** (arithmetic `2.0941x` vs geometric
+> `2.0905x`, agreeing to `0.2%`, `24/24` nets, no biggest-mover warning); and
+> `kind` was the **only** difference between the arms.
+>
+> **`1.912e-8` lands inside the leaders' `1.87–2.13e-8` cluster.** That is the
+> "same algorithm, different constants" fingerprint, reached independently. It is
+> also a **LOWER bound** — factored AUGMENT drops same-order diagrams
+> (`factor_k3.py:291-299`), and unfactored AUGMENT is `O(n⁴)`, unmeasurable here.
+>
+> **NOT a score.** AUGMENT's FLOP cost is **unpriced**. The `30x` torch wall ratio
+> is the dense `n³` intermediate, *not* a cost signal. No projected adjusted score
+> may be quoted until `p2_flop_anchor` prices a real fnp spelling.
+>
+> ### STEP 2 IS GATED OPEN — BUT ITS PRECONDITION IS MEMORY, NOT ACCURACY
+>
+> The degree-4 `(2,1,1)` slice is a dense `n³` object — **exactly `4.000 GiB` at
+> width 1024 in f32, i.e. exactly hard rule 1's single-array cap**, and `8 GiB` in
+> f64. An AUGMENT port that forms it cannot ship at any accuracy. So Step 2's
+> first task is **not** the port:
+>
+> > Derive the fused `(2,1,1)` contraction (11 vector partitions; **9 survive**,
+> > one is dropped by `factored_keeps_term`, one is the identity term; **none is
+> > intrinsically order-3**), verify it against upstream's dense
+> > `DS_pK_to_K` + `DS_harmonic_proj` at `n = 32/64`, and price it with
+> > `p2_flop_anchor`. Rough estimate `~0.31 B` extra — a sanity check, **not** a
+> > price.
+>
+> Same method already proven in this slice: the `core ↔ T` identity was derived,
+> verified against upstream at small `n` to `2e-12`, then used at `n = 1024`.
+>
+> **It is also the practical unblocker.** Fused AUGMENT runs in `~2 GiB` instead of
+> `22.97 GiB`, which is the difference between waiting on a card the desktop is
+> using and running any time.
+>
+> ### IN FLIGHT
+>
+> | job | what | state |
+> |---|---|---|
+> | `413` | D2 two-stream REFUSAL, `2^20/22/24` | queued; **the 24-net D2 is refused unless it passes** |
+> | — | 24-net D2 | after `413`; `--d1-xmse 1.912323e-08` is now available and REQUIRED |
+> | — | Skeptic on D1 | running, before any port is started (Rule 2) |
+>
+> **`workerq` 1.3.0 changed under us** — see `docs/GOTCHAS.md`, four traps now.
+> The two new ones: a **relative interpreter path** fails (the snapshot has no
+> `python.exe`), and a **relative `--out` writes into the snapshot**, not the
+> repository. Submit with an absolute interpreter and an absolute `--out`.
+> AUGMENT needs `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` — the earlier
+> OOMs were fragmentation, not capacity.
+
+
 > ## 2026-09-08 (later) — SLICE 3 STEP 1 IS PRE-REGISTERED, BUILT, SKEPTIC-CORRECTED AND QUEUED. NO DATUM EXISTS YET.
 >
 > **Read this before touching D1/D2.** Contract `432f7fd`, instruments `eff8367`
@@ -61,7 +129,7 @@
 > **upward**, i.e. toward the pre-registered kill, and it was recorded but never
 > gated.
 >
-> ### QUEUED — nothing has run
+> ### QUEUED — nothing has run  *(SUPERSEDED 2026-09-09: D1 has run; see the block above)*
 >
 > | job | what | gates |
 > |---|---|---|
