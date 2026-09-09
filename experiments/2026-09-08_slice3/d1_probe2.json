@@ -1,0 +1,113 @@
+{
+  "slice": "D1 -- ARC kind=AUGMENT vs SIMPLE, factorized K3, 1024x16",
+  "contract": "experiments/LOG.md, CONTRACT (Rule 1) Slice 3 step 1, commit 432f7fd",
+  "handoff": "docs/STRATEGIST_RESPONSE_2026-09-08.md section 5 step 1",
+  "asset": "experiments/2026-08-26_p2_gt",
+  "n_mlps_requested": 1,
+  "samples_per_half": 67108864,
+  "label_noise_per_half": 1.1552182657290076e-09,
+  "dtype": "float32",
+  "upstream": {
+    "rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+    "expected_rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+    "changed_lines": 25,
+    "recorded_lines": 25,
+    "changed_md5": "11d296d73c8895668333d21a0cfd5526",
+    "recorded_md5": "11d296d73c8895668333d21a0cfd5526",
+    "pass": true
+  },
+  "use_pK_defaults": {
+    "mlp_kprop": true,
+    "nonlin_kprop": true
+  },
+  "degree4_shape_check": {
+    "d_max_simple": 4,
+    "d_max_augment": 4,
+    "r_x_4_simple": 2,
+    "r_x_4_augment": 1
+  },
+  "prediction_band": [
+    1.8e-08,
+    2.5e-08
+  ],
+  "falsifier": 3.5e-08,
+  "build_gate": 2.5e-08,
+  "partial": false,
+  "halted": "",
+  "probe_only": true,
+  "tier": "DESIGN (P01), re-read. Orients priority; promotes NOTHING. A port needs a fresh block plus the official mini-100.",
+  "scope_caveat": "factor=True only. The factored AUGMENT path DROPS the non-hypertree diagrams (factor_k3.py:291-299), which have the same Theta(n^-3) squared size as those it keeps. This number is therefore a LOWER BOUND on what AUGMENT-class information is worth. Unfactored AUGMENT is O(n^4) and unreachable at n=1024, so it is not portable either way.",
+  "cost_note": "No cost claim. Upstream's NamedFlopCounter is torch's meter, not flopscope's. Any FLOP figure for a port is a PROJECTION until p2_flop_anchor prices the fnp spelling.",
+  "summary": {
+    "n_paired": 1,
+    "simple_mean_xmse": 4.0146999637159986e-08,
+    "simple_se": NaN,
+    "simple_ci95": [
+      NaN,
+      NaN
+    ],
+    "augment_mean_xmse": 2.1246388058048308e-08,
+    "augment_se": NaN,
+    "augment_ci95": [
+      NaN,
+      NaN
+    ],
+    "paired_simple_minus_augment": 1.8900611579111678e-08,
+    "paired_se": NaN,
+    "paired_ci95": [
+      NaN,
+      NaN
+    ],
+    "augment_better_on": 1,
+    "ratio_diagnostic_simple_over_augment": 1.889591752135581,
+    "geo_mean_ratio_diagnostic": 1.889591752135581,
+    "prediction_1_band_held": true,
+    "prediction_2_falsifier_fired": false,
+    "build_gate_point_estimate_passed": true,
+    "build_gate_ci_upper_also_passed": false,
+    "verdict_simple_to_augment": {
+      "passed": false,
+      "gain": 1.889591752135581,
+      "gate": 1.601874,
+      "gate_derivation": "4.004685e-08 (pre-registered SIMPLE baseline) / 2.5e-08 (pre-registered absolute gate) = 1.6019x",
+      "ci_paired_difference": [
+        NaN,
+        NaN
+      ],
+      "ci_excludes_zero": false,
+      "geometric_gain_diagnostic": 1.8895917521355812,
+      "n": 1,
+      "n_candidate_better": 1,
+      "reasons": [
+        "the t 95% interval on the paired difference does not lie strictly above zero [+nan, +nan]",
+        "the biggest single mover carries 100% of the delta; treat as a draw until proven otherwise"
+      ]
+    }
+  },
+  "rows": [
+    {
+      "seed": 40821001144,
+      "simple": {
+        "seconds": 1.6657998999999108,
+        "oom": false,
+        "finite": true,
+        "host_rss_gib": null,
+        "cuda_peak_alloc_gib": 1.2658782005310059,
+        "cuda_peak_reserved_gib": 11.845703125
+      },
+      "xmse_simple": 4.0146999637159986e-08,
+      "plain_mse_simple_halfA": 4.212537632811354e-08,
+      "drift_vs_pa_k3": 0.0,
+      "augment": {
+        "seconds": 34.272467799999504,
+        "oom": false,
+        "finite": true,
+        "host_rss_gib": null,
+        "cuda_peak_alloc_gib": 22.96511173248291,
+        "cuda_peak_reserved_gib": 28.134765625
+      },
+      "xmse_augment": 2.1246388058048308e-08,
+      "plain_mse_augment_halfA": 2.231255533318727e-08
+    }
+  ]
+}

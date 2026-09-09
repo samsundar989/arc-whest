@@ -36349,3 +36349,126 @@ currently the only thing between us and D1's number. That is a reason to do it
 now rather than in Step 2 — but it must be *verified against the dense path*
 before any accuracy number taken through it is quoted, because a fused spelling
 that is subtly wrong would produce a plausible D1 number and no error.
+
+# 2026-09-09 — **D1 RESULT: `kind=AUGMENT` MOVES THE CHAIN `4.0047e-08 → 1.9123e-08`, A `2.094x` GAIN ON 24/24 NETWORKS. THE STRATEGIST'S RULING IS CONFIRMED.**
+
+*Post-run ledger entry, job `411`. Contract `432f7fd`, ERRATUM `7245bea`, fixes
+`00f0d57`. Artifact `experiments/2026-09-08_slice3/d1_augment.json`. Tier **P01
+DESIGN, re-read** — this orients priority and **promotes nothing**.
+`# seed-ledger: no block named`.*
+
+## The number
+
+| arm | mean xmse | se | 95% CI |
+|---|---:|---:|---|
+| K3 `SIMPLE` (control) | `4.004685e-08` | `1.017e-09` | `[3.7943e-08, 4.2151e-08]` |
+| K3 **`AUGMENT`** | **`1.912323e-08`** | `4.320e-10` | **`[1.8229e-08, 2.0017e-08]`** |
+
+    PAIRED SIMPLE - AUGMENT   +2.092362e-08   95% [+1.9441e-08, +2.2406e-08]
+    AUGMENT better on         24/24 networks
+    gt_noise per half          1.1552e-09      (16.6x below the AUGMENT mean)
+    AUGMENT per-net min/med/max  1.4320e-08 / 1.9337e-08 / 2.4382e-08
+
+`decide(control=SIMPLE, candidate=AUGMENT, gate=1.6019)` → **PASS, with an empty
+`reasons` list.** Gain `2.0941x`; the gate is the pre-registered absolute
+`≤ 2.5e-8` converted through the pre-registered baseline only
+(`4.004685e-08 / 2.5e-08 = 1.6019x`), so no threshold was chosen after seeing data.
+
+**Every pre-registered check passed:**
+
+- **Prediction 1** — AUGMENT in `[1.8e-8, 2.5e-8]`: **HELD** (`1.9123e-08`).
+- **Prediction 2** — falsifier `≥ 3.5e-8`: **not fired**.
+- **Build gate** — `≤ 2.5e-8`: passes on the point estimate **and on the CI upper
+  bound** (`2.0017e-08`). The ERRATUM added that second reading precisely because
+  the first draft gated on a bare point estimate; it would have passed either way,
+  but it is now passed on the stronger form.
+
+## Three things that make this trustworthy rather than merely good
+
+1. **The control reproduced BIT-EXACTLY.** `max |drift vs pa_k3.json| = 0.0`
+   across all 24 networks — the re-run SIMPLE mean is `4.004685e-08`, digit for
+   digit the value stored on 2026-08-26. The asset, `canonical_mint`, the pinned
+   upstream checkout, the four bridge conventions and the f32 GPU path are
+   unchanged across a reboot, a driver, `no_grad` and `expandable_segments`.
+   A paired comparison is only as good as its control, and this control is exact.
+2. **The improvement is BROAD, not carried by outliers.** Arithmetic ratio
+   `2.0941x`, geometric `2.0905x` — they agree to `0.2%`. `docs/VALIDATION.md`
+   keeps the geometric mean as a *stability diagnostic* with no authority; here
+   it says the two estimands agree, and `decide()` reported no biggest-mover
+   warning. `24/24` nets improved.
+3. **The one-flag discipline held.** `kind` is the only difference between the
+   arms — same nets, same order, same process, same dtype, same `factor=True`,
+   same `use_pK` (asserted at runtime). So `2.094x` is attributable to the κ₄
+   representation and to nothing else.
+
+## What it means
+
+**The strategist's ruling of 2026-09-08 is confirmed on its own terms.** The
+`~1.9e-8` floor shared by the public board's top twelve is **the floor of one
+member of the cumulant-truncation class, not of the class**, and we had been
+running a worse member. Carrying κ₄'s non-traceless part in flight — degree 4 as
+an `(n,n)` object at `r=1` instead of a global scalar at `r=2` — closes the gap:
+
+    our SIMPLE K3      4.00e-8
+    our AUGMENT K3     1.91e-8   <- lands INSIDE the leaders' cluster
+    board top twelve   1.87e-8 .. 2.13e-8 across six teams
+    board #1           3.80e-9 adjusted
+
+`1.912e-8` sits essentially **at** `marius_binner`'s `1.87e-8` raw. That is the
+"same algorithm, different constants" fingerprint the strategist predicted from
+the board's shape, arrived at independently — and it is the strongest evidence yet
+that the leaders are running factorized-augmented K3 or an equivalent in-flight
+κ₄ scheme.
+
+**And it is a LOWER bound.** The factored AUGMENT path drops the non-hypertree
+diagrams (`factor_k3.py:291-299`), which carry the same `Θ(n^-3)` squared size as
+those it keeps. Unfactored AUGMENT is `O(n^4)` and unmeasurable at this width, so
+`2.094x` is what the *portable* variant is worth, not what augmentation is worth.
+
+## What it does NOT license
+
+- **It is not a score.** `1.9123e-8` is raw final-layer MSE on 24 P01 DESIGN
+  networks. The adjusted score is `raw × max(0.1, F/2^41)`, and **AUGMENT's FLOP
+  cost is unpriced**. At L=3's shipped multiplier `0.53745` an unchanged cost
+  would give `≈1.03e-8` — but the cost will not be unchanged, and quoting that
+  number as a projection without `p2_flop_anchor` on a real fnp spelling would
+  breach the measurement law. The strategist's `+5–15%` is an expectation, not a
+  measurement.
+- **The `30x` torch wall ratio is NOT a cost signal.** AUGMENT ran `613 s` for 24
+  nets against SIMPLE's `20 s`, but that is dominated by the dense `n³`
+  intermediate (`experiments/LOG.md`, same-day entry), which is upstream's
+  spelling and is exactly what a port must not copy. It predicts nothing about
+  flopscope FLOPs.
+- **It promotes nothing.** P01 is a DESIGN block and has been read before. A
+  candidate needs a fresh block plus the official mini-100 before any submission.
+
+## The gate this opens, and the precondition it does not clear
+
+Handoff §5.2 fires: **port AUGMENT into the fnp chain.** But per the same-day
+memory entry, Step 2 now carries a precondition *ahead of* its accuracy gate:
+
+> the degree-4 `(2,1,1)` slice is a dense `n³` object — exactly `4.000 GiB` at
+> width 1024 in f32, i.e. **exactly hard rule 1's single-array cap**. The port
+> must be shown to admit a fused spelling with no such intermediate before it is
+> worth building. Eleven vector partitions; nine survive and none is
+> intrinsically order-3; estimated `~0.31 B` extra arithmetic (a sanity check,
+> **not** a price).
+
+So Step 2's real first task is the fused `(2,1,1)` contraction, verified against
+upstream's dense path at small `n` and priced with `p2_flop_anchor` — the same
+method already proven in this slice on the `core ↔ T` identity (`2e-12`).
+
+## Rule 2
+
+D1 gates a build, so an independent Skeptic runs on this result **before** the
+port is started, with the contract, the diff, the protocol and the raw artifact
+path — never this summary.
+
+## Feasibility, recorded
+
+    peak CUDA alloc   SIMPLE 1.27 GiB    AUGMENT 22.97 GiB   (18.1x)
+    wall, 24 nets     SIMPLE 20 s        AUGMENT 613 s       (30.2x)
+
+Runnable at the live shape only with `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`
+— the earlier OOMs were fragmentation (`5.48 GiB` reserved-but-unallocated), not
+capacity, exactly as the torch error itself said.
