@@ -37631,3 +37631,22 @@ is checked rather than assumed.
 5. **Choose the Strassen depth here, not before** — depth 2 buys `2.28x` wall
    margin under contention against nominee A's `1.21x` for `12.4%` of score, and
    AUGMENT's extra FLOPs land on top of whatever depth ships.
+
+# 2026-09-09 — TIMELINE RESOLVED BY SAMUEL: the contribution write-up is due **Oct 24**, not Sep 26.
+
+*`RESEARCH_NOTES` §1's "write-up due Sep 26" is **STALE**, consistent with the
+same row already being wrong on three other cells (Phase-2 start, Phase-2 end,
+Phase-1 end). `PHASE2_STRATEGY`'s Oct 24 is correct.*
+
+**The two binding dates, both now settled:**
+
+    submissions close   2026-10-17 23:59 UTC   (live round 1429 metadata, authoritative)
+    write-up due        2026-10-24             (Samuel, 2026-09-09)
+
+So the runway is **~5.5 weeks to the submission deadline** and **~6.5 weeks to the
+write-up** — not the 17 days the stale row implied. Nothing in the plan needs
+compressing.
+
+`docs/RESEARCH_NOTES.md` §1's timeline row should be struck or re-sourced; it is
+now known stale in **four** cells and it is the kind of orphaned intel that
+`docs/GOTCHAS.md` already warns about.
