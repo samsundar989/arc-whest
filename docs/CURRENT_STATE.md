@@ -1,5 +1,98 @@
 # CURRENT_STATE.md — read this first
 
+> ## 2026-09-09 — SLICE 3 STATUS: **Step 1 is done, the cost half is done, and the AUGMENT port is the next slice with its feasibility PROVEN.**
+>
+> `estimator.py` untouched at **v2.6.1**. **Nothing designated.** Nothing promoted
+> — every measurement below is P01 DESIGN, re-read.
+>
+> ### THE RESULT THAT MATTERS
+>
+> | arm | budget | κ₄ as | mean xmse | 95% CI |
+> |---|---|---|---:|---|
+> | K3 `SIMPLE` | base (40 terms) | scalar | `4.004685e-08` | `[3.7943e-08, 4.2151e-08]` |
+> | A5 | raised (142) | scalar | `4.3448e-08` | `[4.1498e-08, 4.5398e-08]` |
+> | K3 **`AUGMENT`** | raised (142) | **`(n,n)` matrix** | **`1.912323e-08`** | **`[1.8229e-08, 2.0017e-08]`** |
+> | A3 | raised (142) | zero | `3.6895e-07` | `[3.4443e-07, 3.9346e-07]` |
+>
+> `decide()` PASS, empty `reasons`, `2.094x`, `24/24` nets, control reproduced
+> **bit-exactly** three times across two reboots. Quote it as **`1.9e-8`** — the CI
+> is `±4.5%`, so it carries two significant figures.
+>
+> **The whole gain is κ₄'s `(n,n)` structure.** The raised diagram budget alone is
+> *negative* (A5 is `1.085x` worse than SIMPLE). Both cheap ports are closed by
+> measurement: budget-only by A3, scalar-κ₄ by A5.
+>
+> **All-layers fingerprint:** AUGMENT `6.906e-09` all-layers / `1.912e-08`
+> final-layer, against the leaders' published `7–11e-9` / `1.9–2.8e-8`. It matches
+> on **both** simultaneously. Caveat: the P01-24 path reads `+6.0%` hot vs
+> graded-100 on an identical file, so this is good to a few percent.
+>
+> ### STEP 2 (the port) — FEASIBILITY PROVEN, DERIVATION OWED
+>
+> The blocker was the dense `n³` `(2,1,1)` object at **exactly** hard rule 1's
+> `4 GiB` single-array cap. Both of its sites are now settled:
+>
+> 1. **`K_ds[(2,1,1)]` enters the `r=1` core ONLY through its axis-0 sum** —
+>    `core = c(n)·sym(Σ_i slice[i,j,k])`, `c(1024) = 3/514`, verified against
+>    upstream's own `proj_geq_r` at `2.2e-16`. `L²` of a `(2,1,1)` slice is
+>    identically zero (no valid cap-graph), so only `L¹` survives.
+> 2. **`pK[(2,1,1)]` carries no order-3 information.** Of 17 surviving vector
+>    partitions, 15 have every block spanning ≤2 axes; the two that span three are
+>    *degree-4* blocks, i.e. slices of `WK[4]`, which under AUGMENT is `r=1` with
+>    an `(n,n)` core — `n³`-shaped views of `n²` data.
+>
+> **So the fused path fits `n²`; the largest array is `4 MB` at f32 against a
+> `4 GiB` cap, by construction.** Owed next: the fused expression per partition;
+> the two diagslices' closed form **read off upstream numerically, not derived**;
+> verification against the dense path at `n = 32/64`; `p2_flop_anchor` pricing to
+> replace the `~0.31 B` sanity estimate.
+>
+> ### COST HALF — BOTH ITEMS PRICED, BOTH DEFLATED
+>
+> | lever | claimed | **measured** |
+> |---|---|---|
+> | dead/cold-column pruning | `~0.80x` | **`0.961x`** free (`α < −4`). `0.845x` needs a compensation recovering `139x` our MSE |
+> | hybrid Strassen | L=4 FLOPs at `≤75 s` | **the point does not exist** — Strassen's saving comes *from* depth |
+>
+> **But hybrid found a live nominee trade:** depth 2 (leaf 256) is `0.60420 B` at a
+> projected `33.0 s` worst wall — **`2.28x` under the measured `1.60x` contention**,
+> against nominee A's `1.21x` — for `12.4%` more score. **Choose the Strassen depth
+> AFTER the port is priced**, on the combined cost. The pricing instrument
+> reproduces the grader on both anchors (`+0.003%`), and its wall model validated
+> **out of sample** (`118.2 s` predicted vs `114.68 s` graded, `+3.1%`).
+>
+> ### DEFERRED, WITH REASONS
+>
+> - **D2** — both its gates are dead (the lane gate is conjunctive and needs
+>   `D1 ≥ 3.5e-8`; the carrier gate was demoted to a diagnostic). It is a Step 3/4
+>   input, ~12 h of GPU, and Step 2 does not wait on it. Run when the machine idles.
+>   Its **refusal gate bit on first use**: the default `2^22` would have let the
+>   oracle's own noise push it toward its own kill; it must run at `2^24`.
+> - **The corrector** (Step 4) — not started.
+>
+> ### NOMINEES
+>
+> **A = `330327` (L=3). B = `330212` (k3_full).** The Rules v14 §6 sentence on *how
+> two designated submissions are scored* **does not exist in any capture we hold**;
+> the live page is login-gated. Under the handoff's ambiguity branch, and on a
+> maximin argument that holds either way, B is the safe one. **Samuel designates.**
+>
+> ### CORRECTIONS TO THE RECORD MADE THIS SLICE
+>
+> - **D3 is already banked** — power cumulants are upstream's `use_pK`, default
+>   `True`. Contradicts the Sep 8 handoff's D3 row.
+> - **D2 does not bracket SSC** — an `r=1` state holds `~0.2%` of κ₄'s Frobenius
+>   mass. Contradicts the Sep 8 handoff.
+> - **`expandable_segments` is inoperative on Windows** — it is NOT why AUGMENT
+>   fits; capacity is.
+> - **`215 → 17 GFLOP/s` does not reproduce.** `215.13` is exact; the L=3 row gives
+>   `1181.9 GFLOP / 51.8 s = 22.82`, not 17. Trace or strike the 17.
+> - **Two of my predictions missed** (A3 `f`: predicted `[0.5,0.8]`, got `16.72`;
+>   A5: predicted `[2.2e-8,3.2e-8]`, got `4.34e-8`), both in the same direction, and
+>   **two cost estimates were wrong by 4x and by everything**. Standing correction:
+>   **on this chain, measure before estimating.**
+
+
 > ## 2026-09-09 (later) — **THE ATTRIBUTION IS SETTLED: the whole `2.094x` is κ₄'s `(n,n)` STRUCTURE.** Both cheap ports are dead. D2 is running at `2^24`.
 >
 > `estimator.py` untouched at **v2.6.1**. **Nothing designated.** Nothing promoted
