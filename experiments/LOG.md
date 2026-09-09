@@ -37387,3 +37387,72 @@ What is **not** yet done, and is the next slice's work:
    `eval_part` + `DS_pK_to_K` + `DS_harmonic_proj` at `n = 32/64`;
 4. `p2_flop_anchor` pricing, which replaces the `~0.31 B` sanity estimate of
    2026-09-08 with a number that may be quoted.
+
+# 2026-09-09 — **THE TWO THREE-AXIS BLOCKS ARE RANK-1 SEPARABLE.** The degree-4 `(2,1,1)` route is now in closed form at `n²`, end to end.
+
+*Step 2 precondition, part 3 — the item the previous entry owed as "read off
+upstream numerically, not derived". Desk + CPU. `# seed-ledger: no block named`.*
+
+## The closed forms
+
+For `WK[4] = HTensor(core=A, r=1, metric=g)` — which is what `kind=AUGMENT`
+carries at every layer, asserted at runtime:
+
+    diagslice(WK[4], (2,1,1))[i,j,k]  =  (1/6) * g[i] * A[j,k]
+    diagslice(WK[4], (1,1,2))[i,j,k]  =  (1/6) * A[i,j] * g[k]
+
+both **zero-repeated**, i.e. on the all-distinct part the `DSTensor` stores.
+
+**Verified against upstream's own `diagslice`**, not derived:
+
+    n     metric      part        max abs residual      relative       c
+    7    identity   (2,1,1)          2.776e-17          1.63e-16    0.166667
+    7    identity   (1,1,2)          2.776e-17          1.63e-16    0.166667
+    7   uniform 2   (2,1,1)          1.110e-16          2.43e-16    0.166667
+    7   uniform 2   (1,1,2)          1.110e-16          2.43e-16    0.166667
+    7      random   (2,1,1)          5.551e-17          1.49e-16    0.166667
+    7      random   (1,1,2)          5.551e-17          1.49e-16    0.166667
+    11   identity   (2,1,1)          5.551e-17          1.44e-16    0.166667
+    11  uniform 2   (1,1,2)          1.110e-16          2.11e-16    0.166667
+    11     random   (2,1,1)          1.110e-16          2.50e-16    0.166667
+    11     random   (1,1,2)          1.110e-16          2.50e-16    0.166667
+
+Machine precision at two widths and three metrics — identity, uniform, and a
+**random diagonal** — so the form is not an artefact of the metric the chain
+happens to use (`use_avg_metric` gives a uniform `init_scale`).
+
+`c = 1/6` exactly, and now the combinatorics *do* explain it: `Sym(A (x) g)` averages
+over the `C(4,2) = 6` ways of assigning two slots to `A`, and for each of these
+index patterns exactly **one** assignment leaves `g` with a repeated index and so
+survives a diagonal metric. That is also where my earlier derivation went wrong —
+I concluded *every* pairing vanishes, having missed the surviving one.
+
+## What this completes
+
+Both three-axis blocks are **rank-1 separable**: a `(n,)` vector times an `(n,n)`
+matrix. So `SUM_i` over any product containing them is a matvec or a matmul, at
+`n²` memory — the same reduction the other 15 vector partitions already admit.
+
+**The degree-4 `(2,1,1)` route is therefore in closed form end to end:**
+
+| site | status |
+|---|---|
+| `K_ds[(2,1,1)] -> r=1 core` | axis-0 sum only, `c(n) = 12·proj_coef(n,4,1)[1]`, verified `2.2e-16` |
+| `pK[(2,1,1)]`, 15 of 17 partitions | every block spans ≤2 axes; `SUM_i` distributes |
+| `pK[(2,1,1)]`, the 2 three-axis partitions | **rank-1 separable**, verified `~1e-16` |
+
+Largest array in the fused path: `(n, n)` = **`4 MB` at f32**, against hard rule
+1's `4 GiB` single-array cap and the `8 GiB` per-MLP limit. The `4.000 GiB`
+allocation that OOMed jobs `399` and `402` is not merely avoidable — it was never
+carrying more than `n²` of information.
+
+## Still owed by the port
+
+1. The explicit fused expression for each of the 15 ≤2-axis partitions
+   (mechanical now that the pattern is fixed).
+2. **End-to-end verification** of the fused path against upstream's dense
+   `eval_part` + `DS_pK_to_K` + `DS_harmonic_proj` at `n = 32/64`. Nothing above
+   substitutes for this: three correct pieces can still compose wrongly.
+3. `p2_flop_anchor` pricing, replacing the `~0.31 B` sanity estimate.
+4. The fnp transcription itself, and its certification (twin arm, ops `<=24k`,
+   projected residual, Linux memory gate, official mini-100).
