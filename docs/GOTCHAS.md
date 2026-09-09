@@ -1,6 +1,6 @@
 # GOTCHAS.md — standing operational knowledge
 
-## 2026-09-08 — TWO `workerq` TRAPS THAT COST A JOB EACH
+## 2026-09-08 / 09-09 — FOUR `workerq` TRAPS, ONE JOB EACH
 
 **1. A `workerq` job requests ONE GPU by default, even when it is pure numpy.**
 A CPU-only job submitted without `--gpus 0` sits in QUEUED behind whatever holds
@@ -25,6 +25,42 @@ run locally**, or the file must be staged somewhere the snapshot keeps. This is
 the second time the snapshot has bitten this repository — the 2026-09-05 entry
 records it dropping an untracked *candidate* — so the general rule is: **check
 what the snapshot actually contains before trusting a queued result.**
+
+**3. The snapshot has no `python.exe`, so a RELATIVE interpreter path fails.**
+Added 2026-09-09 on `workerq 1.3.0`. Job `406` died at 0 s with no traceback:
+
+    worker-q: failed to start command: [WinError 2] The system cannot find the file specified
+    worker-q: '.venv-gpu/Scripts/python.exe' was not found in the snapshot
+
+`.venv-gpu` is gitignored. The snapshot carries the directory skeleton and even
+`Scripts/activate`, but not the interpreter binary. Every GPU module in
+`local_sim/` documents itself as `.venv-gpu\Scripts\python.exe local_sim/...`,
+which is right by hand and **wrong on submit**. Use an absolute interpreter path;
+keep the SCRIPT path relative so it still resolves inside the frozen copy, which
+is the whole point of the snapshot:
+
+    workerq submit --project arc-whest --ram 10 --vram 25 --cpus 4 -- \
+      "C:/Users/samsu/Documents/arc-whest/.venv-gpu/Scripts/python.exe" \
+      -u local_sim/<module>.py --out "<ABSOLUTE path>"
+
+(1.3.0 now prints `Passthrough: .venv, .venv-gpu, ...` and may fix this on its
+own. The absolute path costs nothing and does not depend on that holding.)
+
+**4. A relative `--out` writes into the SNAPSHOT, not the repository.** The job
+prints `artifact experiments/.../x.json` and exits 0, and the file is not there.
+It is at `~/.local/state/gpuq/snapshots/<id>/job-<id>/experiments/.../x.json`,
+and `cleanup` will eventually delete it. Job `409`'s D1 probe result had to be
+copied back by hand. **Pass an absolute `--out`.** This is the same class as trap
+2 and the 2026-09-05 candidate drop: *the snapshot is a different filesystem from
+the one you are looking at.*
+
+### `workerq 1.3.0` commands worth knowing before declaring
+
+`doctor` (health; exit 0/1/2) · `reconcile` (**run after a reboot** — repairs job
+metadata) · `gpu` (who holds memory) · `reserve` · `gpu-threshold` · `promote`
+(queue-front, never preempts) · `config` · and `--env KEY=VALUE` on submit, which
+is the supported way to pass e.g. `PYTORCH_CUDA_ALLOC_CONF` rather than baking it
+into a module.
 
 
 ## 2026-09-07 — AN OP COUNT IS MEANINGLESS WITHOUT ITS WEIGHT CONVENTION. THERE ARE THREE.
