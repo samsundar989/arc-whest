@@ -7,9 +7,18 @@ committed at `432f7fd` **before this file existed**. Handoff:
 ## The one thing that changes between the arms
 
 `kind`. Nothing else. Same nets, same order, same process, same dtype, same
-`factor=True`, same `use_pK` (upstream's default `True` — see below). A one-flag
-diff is the entire point: it makes the measured difference attributable to the
-κ₄ representation and to nothing else.
+`factor=True`, same `use_pK` (upstream's default `True` — see below).
+
+**But one flag is NOT one mechanism, and an earlier version of this docstring
+claimed it was.** `kprop_harmonic.py:59` is `budget = k_max - 1 + augment`, inside
+`get_vec_cond`, which gates every vec-partition at **every** degree:
+`get_all_terms(3, d_max=4)` returns **40** terms at `augment=False` and **142** at
+`augment=True`. Three of the four legs `augment` adds to the factored `(1,1,1)`
+block carry no κ₄ at all. So what this module measures is the value of
+`kind=AUGMENT` as a **bundle** — κ₄ as an `(n,n)` object *plus* a raised diagram
+budget — which is exactly the arm a port would ship, but is **not** an isolated κ₄
+effect. Attribution is `local_sim/p2_a3_attribution.py`.
+(Withdrawn by the 2026-09-09 ERRATUM after the independent Skeptic.)
 
     SIMPLE   get_r_x(4, 3) = 2  ->  degree 4 has 4 - 2*2 = 0 free indices  -> a SCALAR
     AUGMENT  get_r_x(4, 3) = 1  ->  degree 4 has 4 - 2*1 = 2 free indices  -> an (n, n) MATRIX
