@@ -37216,3 +37216,95 @@ of the hole** such a scheme must fill exactly, which is the number that decides
 whether building one is worth a slice. On this evidence it is not: the gap between
 the free `0.961x` and the compensated `0.845x` is `1.14x` of cost, for which the
 compensation must be near-perfect.
+
+# 2026-09-09 — **HYBRID STRASSEN PRICED: the point Samuel asked for DOES NOT EXIST.** But the sweep found a live nominee-safety trade, and the wall model validated out-of-sample.
+
+*Cost-half deliverable. Instrument `local_sim/p2_hybrid_strassen_price.py`,
+artifact `experiments/2026-09-08_slice3/hybrid_strassen_price.json`. ROUTINE: no
+seed block, no gate, no shipped file edited (the candidate is copied).
+`# seed-ledger: no block named`.*
+
+## The instrument reproduces the GRADER, not a local model
+
+| effective depth | leaf | measured `B` | ops | graded `B` | error |
+|---:|---:|---:|---:|---:|---:|
+| 2 | 256 | `0.60420` | 9,304 | — | — |
+| 3 | 128 | `0.53743` | 12,340 | `0.53745` | **`+0.003%`** |
+| 4 | 64 | `0.48577` | 15,376 | `0.48578` | **`+0.003%`** |
+
+**Two graded anchors reproduced to 3 parts in 100,000.** The depth-2 row is
+therefore trustworthy at the same fidelity — it is anchored to the grader's own
+FLOP total, not to a local estimate of one.
+
+## The answer: no such point exists
+
+    target: L=4's FLOPs (0.48578 B) with leaves >= 256
+
+    depth 2  leaf 256   B 0.60420   proj worst wall  33.0 s   margin 3.64x  (2.28x under contention)
+    depth 3  leaf 128   B 0.53743   proj worst wall  61.9 s   margin 1.94x  (1.21x under contention)
+    depth 4  leaf  64   B 0.48577   proj worst wall 118.2 s   margin 1.02x  (0.63x under contention)
+
+**Strassen's FLOP saving comes FROM recursion depth** — each level trades 8
+multiplies for 7 plus additions. Large leaves and deep recursion are *the same
+knob pulled in opposite directions*. Depth-4 savings at depth-2 recursion are not
+arithmetically available, so "L=4's FLOPs at `<=75 s`" asks for a point that is
+not on the curve. That is a structural fact, not a tuning failure, and no amount
+of threshold engineering reaches it.
+
+## The wall model validated OUT OF SAMPLE, which is why the projection is quotable at all
+
+The intensity law `48.2 * leaf^1.114 GFLOP/s`-style fit uses **two** graded points
+(leaf 1024 at `215.13`, leaf 128 at `22.82`). The **depth-4 row was not used to
+fit it**, and the model predicts `118.2 s` against a graded `114.68 s` —
+**`+3.1%` out of sample**. A two-point extrapolation that lands within `3%` on a
+held-out point is worth more than its construction suggested.
+
+It remains a **PROJECTION**. `docs/VALIDATION.md` forbids quoting a local absolute
+wall time; only a graded `--runner subprocess` row settles wall.
+
+## The finding the instruction did NOT ask for, and it is the useful one
+
+**Depth 2 buys `1.9x` the wall margin for `12.4%` of score.**
+
+| | nominee A (depth 3) | depth 2 |
+|---|---:|---:|
+| `B` (the multiplier) | `0.53745` | `0.60420` |
+| projected worst wall | `61.9 s` | **`33.0 s`** |
+| margin under the measured `1.60x` contention | `1.21x` | **`2.28x`** |
+| score, relative | `1.000` | `1.124` (worse) |
+
+Nominee A currently sits at `1.21x` under contention — the judgement that made it
+nominee-grade over L=4 in the first place. **Depth 2 nearly doubles that margin
+for a `12.4%` score cost**, and a failed MLP is zeroed at multiplier `1.0`, a
+`~3e5` penalty. That trade is not obviously wrong for a *private re-run on a
+grading server whose contention we cannot observe*.
+
+**And it becomes more relevant, not less, once AUGMENT lands.** The AUGMENT port
+adds FLOPs (still unpriced) on top of whatever Strassen depth it ships with. If
+that pushes depth 3's `61.9 s` toward the cap, depth 2's headroom is the thing
+that keeps the candidate nominee-grade. **The Strassen depth should be chosen
+after the port is priced, not before** — recorded so the choice is made once, on
+the combined cost, rather than inherited from a pre-AUGMENT decision.
+
+## A number in the record that does not reproduce
+
+`CURRENT_STATE.md` states intensity "collapsed `215 -> 17 GFLOP/s`" at L=3.
+
+- `215.13` reproduces exactly: `0.77970 B = 1714.6 GFLOP / 7.97 s`.
+- **`17` does not.** The same graded row gives `0.53745 B = 1181.9 GFLOP / 51.8 s
+  = 22.82 GFLOP/s`.
+
+This module uses the reproducible `22.82` and flags the other rather than
+silently adopting either. The `17` should be traced or struck — on the evidence
+here it is wrong by `34%`, and it is the kind of orphaned scalar
+`docs/GOTCHAS.md` already has a standing warning about.
+
+## Two defects of mine, caught before they reached a conclusion
+
+1. **I hardcoded a depth cap of 4** while the shipped file carries
+   `_STRASSEN_DEPTH = 3`, so the first run rewrote only `_STRASSEN_MIN_BLOCK`,
+   silently inherited depth 3, and mislabelled every row's depth and leaf. Fixed:
+   the sweep now rewrites **both** constants and reports effective depth.
+2. The first run's verdict was right by luck — it reported "no setting meets the
+   target" from mislabelled rows. A correct conclusion from wrong numbers is not
+   a result, and it is only visible because the graded anchor check was there.
