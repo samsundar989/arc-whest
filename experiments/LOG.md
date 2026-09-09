@@ -36943,3 +36943,40 @@ cheap.
 A5's all-layers sits on top of SIMPLE's (`1.61e-8` vs `1.59e-8`), confirming from
 a second, independent functional that stripping κ₄ to a scalar returns the chain
 to SIMPLE-grade accuracy at every depth, not just at the readout.
+
+# 2026-09-09 — D2 TWO-STREAM REFUSAL (job `413`): **the default `2^22` would have been REFUSED.** D2 must run at `2^24`.
+
+*Post-run ledger entry for the refusal gate the Skeptic forced into the contract
+on 2026-09-08 (ERRATUM `7245bea` §7). One network, two independent oracle
+streams. `# seed-ledger: no block named`.*
+
+    bar: two-stream spread on (c) <= 0.2 of the (a)->(c) gap
+
+    2^20 ( 1,048,576)  rel_noise_T 1.356   gap 3.545e-03  spread 1.503e-03  ratio 0.424  REFUSE
+    2^22 ( 4,194,304)  rel_noise_T 0.705   gap 3.395e-03  spread 8.112e-04  ratio 0.239  REFUSE
+    2^24 (16,777,216)  rel_noise_T 0.357   gap 3.368e-03  spread 3.733e-04  ratio 0.111  PASS
+
+**`2^22` was the module's default and is what a 24-net D2 would have used.** Its
+two-stream spread is `24%` of the very gap the slice turns on — above the `0.2`
+bar — so the oracle's own Monte-Carlo noise would have been a material fraction
+of the measured effect, biasing `xmse_c` **upward**, i.e. **toward the
+pre-registered kill**. A `D2(c)` that failed its gate at `2^22` could have closed
+the κ₄ lane on the oracle's noise rather than on the method.
+
+This is the gate the first draft did not have: the module *computed*
+`oracle_rel_noise_T` and never gated on it. The independent Skeptic caught that,
+the ERRATUM pre-registered the refusal before any data, and the refusal then
+fired on the very first configuration it was pointed at. **Recorded because a
+guard that never bites is indistinguishable from no guard, and this one bit.**
+
+The measured noise law also confirms the Skeptic's correction to my arithmetic:
+`rel_noise_T` runs `1.356 → 0.705 → 0.357` as `N` goes `x4` each step — the
+`~1/sqrt(N)` decay of a quantity whose scale is `~n/sqrt(N)`, **not** `1/sqrt(N)`.
+At `2^22` it is `0.705`, i.e. **higher** than the `0.35–0.46` the Skeptic
+extrapolated from `n <= 256`, so the extrapolation across the 4x width gap was
+optimistic and the measurement was worth taking.
+
+**Consequence:** the 24-net D2 runs at `--log2-oracle-samples 24`. That is `4x`
+the truth-accumulation cost of the default and takes the job from roughly 75
+minutes to roughly 2.5 hours. Paid without complaint — the alternative is a
+number that cannot be trusted in the direction that matters.

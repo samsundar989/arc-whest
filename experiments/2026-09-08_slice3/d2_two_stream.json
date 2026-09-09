@@ -1,0 +1,37 @@
+{
+  "check": "D2 two-stream oracle-noise refusal",
+  "refusal_bar_fraction_of_a_to_c_gap": 0.2,
+  "contract": "experiments/LOG.md ERRATUM 2026-09-08",
+  "rows": [
+    {
+      "log2_samples": 20,
+      "samples": 1048576,
+      "oracle_rel_noise_T_stream2": 1.3561780775753316,
+      "oracle_rel_noise_T_stream3": 1.362444747972338,
+      "a_to_c_gap": 0.0035451487168272114,
+      "two_stream_spread_on_c": 0.0015025577335557995,
+      "spread_over_gap": 0.42383489483074155,
+      "passes": false
+    },
+    {
+      "log2_samples": 22,
+      "samples": 4194304,
+      "oracle_rel_noise_T_stream2": 0.7045290572131045,
+      "oracle_rel_noise_T_stream3": 0.7109985423134817,
+      "a_to_c_gap": 0.003395100376140085,
+      "two_stream_spread_on_c": 0.0008112006563722448,
+      "spread_over_gap": 0.23893274616360677,
+      "passes": false
+    },
+    {
+      "log2_samples": 24,
+      "samples": 16777216,
+      "oracle_rel_noise_T_stream2": 0.35741658112662333,
+      "oracle_rel_noise_T_stream3": 0.35783382262715846,
+      "a_to_c_gap": 0.0033678649557692254,
+      "two_stream_spread_on_c": 0.00037332602073289896,
+      "spread_over_gap": 0.11084946268210173,
+      "passes": true
+    }
+  ]
+}
