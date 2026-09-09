@@ -36698,3 +36698,144 @@ question only. Tier **P01 DESIGN, re-read**; promotes nothing.
 ## Falsifier
 
 `f <= 0.3` rejects the κ₄ attribution and redirects Step 2's first task.
+
+# 2026-09-09 — **A3 RESULT: my prediction MISSED by 20x, and my own contract's split was mis-specified.** Zeroing κ₄ in an AUGMENT chain is `9.2x` WORSE than SIMPLE. What that closes, and what it does not.
+
+*Post-run ledger entry, job `422`. Contract `2e4e9c2`, pre-registered before this
+datum. Artifact `experiments/2026-09-08_slice3/a3_attribution.json`. Tier **P01
+DESIGN, re-read** — promotes nothing. `# seed-ledger: no block named`.*
+
+## The numbers
+
+| arm | mean xmse | se | 95% CI |
+|---|---:|---:|---|
+| K3 `SIMPLE` | `4.0047e-08` | — | — |
+| K3 `AUGMENT` | `1.9123e-08` | — | — |
+| **A3** (`AUGMENT`, `WK[4] := 0`) | **`3.6895e-07`** | `1.19e-08` | `[3.4443e-07, 3.9346e-07]` |
+
+    SIMPLE - AUGMENT  (D1's total gain)  +2.0924e-08   95% [+1.9441e-08, +2.2406e-08]
+    A3     - AUGMENT                     +3.4983e-07   95% [+3.2556e-07, +3.7409e-07]
+    SIMPLE - A3                          -3.2890e-07   95% [-3.5339e-07, -3.0441e-07]
+
+    f = 16.7192      per-net median +16.649, IQR [+14.198, +19.781], negative on 0/24
+
+SIMPLE and AUGMENT reproduced D1 to the digit, in a different process, after a
+reboot. **A3 is `9.2x` worse than SIMPLE and `19.3x` worse than AUGMENT.**
+
+## 1. **PREDICTION MISSED.** I said `f` in `[0.5, 0.8]`; it is `16.72`
+
+Recorded plainly because that is what the prediction is for. And the miss is not
+a near-miss — it is off the end of the scale the statistic was defined on.
+
+## 2. **My contract's split was mis-specified, and I should have caught it**
+
+`f` was defined as *"the fraction of the paired gain κ₄ carries"*, with a
+three-way split at `0.3` and `0.7`. A fraction lives in `[0, 1]`. **I never
+bound-checked it**, and the `f >= 0.7` branch therefore fires on `f = 16.7`,
+printing *"KAPPA4 CARRIES IT — the (2,1,1) memory work is EARNED"*.
+
+**That verdict string is not supported by this measurement and is withdrawn.**
+`f > 1` does not mean "κ₄ carries more than all of the gain"; it means the arm
+left the regime the statistic describes. A gate that cannot distinguish "the
+hypothesis is strongly true" from "the arm is out of range" is a bad gate, and
+this repository has an executable-gate rule precisely so that thresholds are
+chosen before data — it does not excuse choosing a threshold on a statistic whose
+domain was never bounded. `p2_a3_attribution.py` is corrected to refuse `f`
+outside `[-0.5, 1.5]` and report OUT-OF-RANGE instead of a verdict.
+
+## 3. What A3 DOES establish, decisively
+
+**You cannot keep AUGMENT's raised diagram budget and drop κ₄.** The result is
+not "a bit worse", it is `9.2x` worse than the SIMPLE chain we started from.
+
+That **closes the `f <= 0.3` branch of the contract by measurement**: the
+"budget-only, no κ₄ — a much cheaper port that never forms the `4 GiB` array"
+option is **dead**. It was the branch that would have redirected Step 2's memory
+work, and it is now excluded, which is exactly what the arm was commissioned to
+decide.
+
+**Mechanism, and it is the interesting part.** The AUGMENT term set consumes κ₄
+in the same Wick expansion that produces the next layer's `(μ, Σ, κ₃)`. Setting
+`WK[4] := 0` does not *remove* κ₄'s contribution — it substitutes a **wrong** κ₄
+into terms that are calibrated to consume a consistent one, and the inconsistency
+compounds through fifteen layers. **A self-inconsistent cumulant state is worse
+than a lower-order consistent one.** That is a genuine, publishable observation
+about closure design and it belongs in the write-up.
+
+## 4. What A3 does NOT establish — and this is the part not to over-read
+
+**It does not show that κ₄'s information content buys the `2.094x`.** A3 is not
+"AUGMENT minus κ₄'s information"; it is "AUGMENT with a corrupted κ₄". The
+Skeptic's original question — *do the κ₂/κ₃ legs carry the gain, or does κ₄?* —
+is **still open**, because the ablation overshot it.
+
+So the `f >= 0.7` reading ("the memory work is earned") is **not** licensed
+either. Both outer branches of my split are now unusable: one closed by
+measurement, one not tested by this arm.
+
+## 5. The clean isolation, pre-registered below as **A5**
+
+The right ablation keeps κ₄ **present and self-consistent** while removing only
+the *structure* the AUGMENT representation adds over SIMPLE:
+
+> **A5 = `kind=AUGMENT` with κ₄'s core replaced by its own PURE-RADIAL PART**,
+> `T := (tr(T)/n) · I`, taken from the **chain's own** `T` at every layer.
+
+That is κ₄ carried exactly as `SIMPLE` carries it — one scalar — inside a chain
+running AUGMENT's raised budget. It is consistent (no corrupted state), and the
+only thing removed is the `(n,n)` structure. It reuses the proven seam and the
+exact `core ↔ T` inverse already verified against upstream to `2e-12`.
+
+| A5 lands near | reading | consequence for Step 2 |
+|---|---|---|
+| `~1.9e-8` (AUGMENT) | the `(n,n)` structure is NOT what buys it; the budget is | the port may carry κ₄ as a **scalar**; the `(n,n)` core is unnecessary |
+| `~4.0e-8` (SIMPLE) | the structure is the whole thing | the `(n,n)` core is essential |
+| between | both contribute | port needs both; report the split |
+
+**Prediction, recorded before the run: A5 in `[2.2e-8, 3.2e-8]`** — i.e. the
+structure carries roughly half. Stated as a genuine guess after being wrong by
+`20x` on the last one.
+
+**`f5 = (A5 − AUGMENT) / (SIMPLE − AUGMENT)`, and this time the statistic is
+bound-checked**: `f5` outside `[-0.5, 1.5]` is reported as OUT-OF-RANGE, not as a
+verdict.
+
+Note what A5 does **not** decide: whether the dense `(2,1,1)` slice is formed.
+That slice belongs to the raised **budget** at degree 4, so it is built whether or
+not κ₄'s core is a scalar. **Step 2's fused-contraction precondition stands
+regardless of A5's outcome** — A5 decides how much κ₄ *state* must be carried,
+not whether the fusion is needed.
+
+## 6. Two controls the Skeptic asked for, both now closed
+
+- **Reversed arm order: BIT-IDENTICAL.** Worst `|diff|` across all three arms on
+  3 networks is **exactly `0.0`**. SIMPLE had run first in every prior run on
+  disk; that was the last untested control and it is now closed. No leakage, no
+  order effect, no allocator-state dependence.
+- **Upstream's *"Snapping negative variance to zero"* fired ZERO times** at
+  `1024x16` across all three arms and 24 networks. It fires freely at `64x5`.
+  Recorded so the absence is a fact rather than an assumption.
+
+## 7. **The all-layers fingerprint — an independent confirmation the final-layer number cannot give**
+
+`gt_halfA["means"]` is `(24, 16, 1024)`; D1 discarded fifteen sixteenths of it.
+Grand mean over all layers:
+
+| arm | all-layers | final-layer |
+|---|---:|---:|
+| `SIMPLE` | `1.5936e-08` | `4.0047e-08` |
+| **`AUGMENT`** | **`6.9060e-09`** | **`1.9123e-08`** |
+| A3 | `1.9746e-07` | `3.6895e-07` |
+| **the leaders, published** | **`7–11e-9`** | **`1.9–2.8e-8`** |
+
+**AUGMENT matches the leaders on BOTH numbers simultaneously.** A final-layer
+match alone is one constraint and many methods could hit it; matching the
+all-layers/final-layer *pair* is a much harder test, and it is the strongest
+evidence yet that the top of the board is running factorized-augmented K3 or
+something with the same error profile.
+
+Two honesties about that. Our `6.91e-9` sits a shade **below** the leaders' quoted
+band, and the P01-24 path is known to read `+6.0%` hot against graded-100 for an
+identical file — so the comparison is good to a few percent, not better, and the
+sign of the residual difference should not be read as "we are ahead". And the
+band `7–11e-9` is scraped board telemetry, not a controlled measurement.

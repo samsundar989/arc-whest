@@ -352,6 +352,13 @@ def mix_T(T_chain, T_true, variant):
     """
     import torch
     n = T_chain.shape[0]
+    if variant == "scalar":
+        # ARM A5 (2026-09-09): keep kappa_4 PRESENT and SELF-CONSISTENT but strip
+        # the (n,n) structure -- carry only its pure-radial part, which is exactly
+        # what kind=SIMPLE carries. Uses the CHAIN's own T, so unlike variant
+        # "zero" it substitutes no wrong value; it removes structure only.
+        return (float(torch.trace(T_chain).detach()) / n) * torch.eye(
+            n, device=T_chain.device, dtype=T_chain.dtype)
     if variant == "zero":
         # ARM A3 (2026-09-09 contract): remove every kappa_4 INFORMATION surface
         # while keeping the raised diagram budget, to attribute D1's 2.094x.

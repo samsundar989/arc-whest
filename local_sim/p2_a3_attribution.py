@@ -100,6 +100,13 @@ import numpy as np  # noqa: E402
 F_KAPPA4_EARNED = 0.7      # f >= this  -> the (2,1,1) memory work is earned
 F_BUDGET_CARRIES = 0.3     # f <= this  -> aimed at the wrong object
 F_PREDICTION = (0.5, 0.8)
+# f is a SHARE and lives in [0, 1]. The 2026-09-09 A3 run returned f = 16.72 --
+# the arm left the regime the statistic describes -- and the `f >= 0.7` branch
+# fired anyway, printing a verdict the measurement does not support. A gate that
+# cannot tell "strongly true" from "out of range" is a bad gate. Bound-checked.
+F_DOMAIN = (-0.5, 1.5)
+# ARM A5, pre-registered 2026-09-09 in the A3 RESULT entry, before any A5 datum.
+A5_PREDICTION = (2.2e-8, 3.2e-8)
 
 
 def xmse(pred, A, B):
@@ -193,9 +200,13 @@ def main(argv=None) -> int:
         t0 = time.perf_counter()
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
-            if kind_or_zero == "A3":
-                m = D2.kprop_means_injected(w, None, "zero", device=a.device,
-                                            dtype=torch.float32)
+            if kind_or_zero in ("A3", "A5"):
+                # A3 zeroes kappa_4 (an INCONSISTENT state); A5 keeps it present
+                # and self-consistent but strips the (n,n) structure down to the
+                # pure-radial scalar that kind=SIMPLE carries.
+                m = D2.kprop_means_injected(
+                    w, None, "zero" if kind_or_zero == "A3" else "scalar",
+                    device=a.device, dtype=torch.float32)
             else:
                 with torch.no_grad():
                     m = bridge.kprop_means(w, k_max=3, factor=True,
@@ -214,7 +225,8 @@ def main(argv=None) -> int:
         Af, Bf = A_all[i], B_all[i]          # (depth, width) -- ALL layers
         row = {"seed": s}
         preds = {}
-        for name, arg in (("simple", SIMPLE), ("augment", AUGMENT), ("a3", "A3")):
+        for name, arg in (("simple", SIMPLE), ("augment", AUGMENT),
+                          ("a3", "A3"), ("a5", "A5")):
             m, tel = run(arg, w)
             preds[name] = m
             row[name] = tel
@@ -225,7 +237,8 @@ def main(argv=None) -> int:
         # CONTROL: reversed arm order must not change a single value.
         if i < a.reverse_nets:
             rev = {}
-            for name, arg in (("a3", "A3"), ("augment", AUGMENT), ("simple", SIMPLE)):
+            for name, arg in (("a5", "A5"), ("a3", "A3"),
+                              ("augment", AUGMENT), ("simple", SIMPLE)):
                 m, _ = run(arg, w)
                 rev[name] = float(np.max(np.abs(m - preds[name])))
             row["reverse_order_max_abs_diff"] = rev
@@ -251,8 +264,12 @@ def _summary(rows, depth):
         return {}
     g = lambda k: np.array([r[k] for r in rows], dtype=np.float64)
     xs, xa, x3 = g("xmse_simple"), g("xmse_augment"), g("xmse_a3")
+    x5 = g("xmse_a5") if "xmse_a5" in rows[0] else None
     out = {"n": len(rows)}
-    for k, arr in (("simple", xs), ("augment", xa), ("a3", x3)):
+    arms = [("simple", xs), ("augment", xa), ("a3", x3)]
+    if x5 is not None:
+        arms.append(("a5", x5))
+    for k, arr in arms:
         m, se, ci = studentised_t(arr)
         out[k] = {"mean_xmse": m, "se": se, "ci95": list(ci)}
     d_total, se_t, ci_t = studentised_t(xs - xa)     # SIMPLE - AUGMENT, the D1 gain
@@ -261,6 +278,21 @@ def _summary(rows, depth):
     out["paired_simple_minus_augment"] = {"diff": d_total, "se": se_t, "ci95": list(ci_t)}
     out["paired_a3_minus_augment_KAPPA4_SHARE"] = {"diff": d_k4, "se": se_k, "ci95": list(ci_k)}
     out["paired_simple_minus_a3_BUDGET_SHARE"] = {"diff": d_bud, "se": se_b, "ci95": list(ci_b)}
+    if x5 is not None:
+        d5, se5, ci5 = studentised_t(x5 - xa)      # A5 - AUGMENT
+        out["paired_a5_minus_augment_STRUCTURE_SHARE"] = {
+            "diff": d5, "se": se5, "ci95": list(ci5)}
+        f5 = d5 / d_total if d_total else float("nan")
+        out["f5_structure_share"] = f5
+        out["f5_in_domain"] = bool(F_DOMAIN[0] <= f5 <= F_DOMAIN[1])
+        out["f5_prediction_held"] = bool(A5_PREDICTION[0] <= float(np.mean(x5))
+                                         <= A5_PREDICTION[1])
+        out["a5_verdict"] = (
+            f"OUT OF RANGE (f5 = {f5:.3f})" if not out["f5_in_domain"] else
+            "THE (n,n) STRUCTURE IS NOT WHAT BUYS IT -- the port may carry kappa_4 "
+            "as a SCALAR; the (n,n) core is unnecessary" if f5 <= 0.3 else
+            "THE (n,n) STRUCTURE IS ESSENTIAL -- the core must be carried" if f5 >= 0.7
+            else "BOTH CONTRIBUTE -- report the split; the port needs the core")
     f = d_k4 / d_total if d_total else float("nan")
     per_net = (x3 - xa) / np.where(xs - xa == 0, np.nan, xs - xa)
     out["f_kappa4_share"] = f
@@ -270,16 +302,27 @@ def _summary(rows, depth):
         "q75": float(np.nanpercentile(per_net, 75)),
         "n_negative": int(np.nansum(per_net < 0)),
     }
-    out["verdict"] = ("KAPPA4 CARRIES IT -- the (2,1,1) memory work is EARNED"
-                      if f >= F_KAPPA4_EARNED else
-                      "THE RAISED BUDGET CARRIES IT -- the memory work is aimed at "
-                      "the wrong object; price a budget-only port first"
-                      if f <= F_BUDGET_CARRIES else
-                      "BOTH MATTER -- port needs both; a budget-only arm is worth "
-                      "pricing as a cheaper fallback")
+    in_domain = F_DOMAIN[0] <= f <= F_DOMAIN[1]
+    out["f_in_domain"] = bool(in_domain)
+    if not in_domain:
+        out["verdict"] = (
+            f"OUT OF RANGE (f = {f:.3f}, domain {F_DOMAIN}). f is a SHARE of the "
+            f"paired gain and lives in [0, 1]; a value outside it means the arm "
+            f"left the regime the split describes, NOT that the hypothesis is "
+            f"strongly true. No verdict is issued. If the arm is far WORSE than "
+            f"the control, what is established is that the ablated term is "
+            f"load-bearing -- not that it carries the gain.")
+    else:
+        out["verdict"] = ("KAPPA4 CARRIES IT -- the (2,1,1) memory work is EARNED"
+                          if f >= F_KAPPA4_EARNED else
+                          "THE RAISED BUDGET CARRIES IT -- the memory work is aimed at "
+                          "the wrong object; price a budget-only port first"
+                          if f <= F_BUDGET_CARRIES else
+                          "BOTH MATTER -- port needs both; a budget-only arm is worth "
+                          "pricing as a cheaper fallback")
     out["prediction_f_held"] = bool(F_PREDICTION[0] <= f <= F_PREDICTION[1])
     # all-layers fingerprint
-    for k in ("simple", "augment", "a3"):
+    for k in [n for n, _ in arms]:
         arr = np.array([r[f"xmse_all_layers_{k}"] for r in rows], dtype=np.float64)
         out[f"all_layers_mean_{k}"] = arr.mean(axis=0).tolist()
         out[f"all_layers_grand_mean_{k}"] = float(arr.mean())
@@ -288,7 +331,7 @@ def _summary(rows, depth):
         out["reverse_order_worst_abs_diff"] = {
             k: max(r[k] for r in rev) for k in rev[0]}
     out["snap_warnings_total"] = int(sum(
-        r[k]["snap_warnings"] for r in rows for k in ("simple", "augment", "a3")))
+        r[k]["snap_warnings"] for r in rows for k, _ in arms))
     return out
 
 
@@ -323,7 +366,9 @@ def _report(a, rows, man, v, terms, depth) -> int:
     s = _summary(rows, depth)
     print()
     print(f"  gt_noise per half   {man['gt_noise_per_half_mean']:.4e}")
-    for k, lbl in (("simple", "SIMPLE"), ("augment", "AUGMENT"), ("a3", "A3 (AUGMENT, k4:=0)")):
+    labels = [("simple", "SIMPLE"), ("augment", "AUGMENT"),
+              ("a3", "A3 (AUGMENT, k4:=0)"), ("a5", "A5 (AUGMENT, k4 scalar)")]
+    for k, lbl in [x for x in labels if x[0] in s]:
         e = s[k]
         print(f"  {lbl:<22s} {e['mean_xmse']:.4e}   se {e['se']:.2e}   "
               f"95% [{e['ci95'][0]:.4e}, {e['ci95'][1]:.4e}]")
@@ -343,10 +388,22 @@ def _report(a, rows, man, v, terms, depth) -> int:
           f"{'HELD' if s['prediction_f_held'] else 'MISSED'}")
     print()
     print(f"  VERDICT  {s['verdict']}")
+    if "f5_structure_share" in s:
+        e = s["paired_a5_minus_augment_STRUCTURE_SHARE"]
+        print()
+        print(f"  A5 -- kappa_4 PRESENT but SCALAR (consistent state, no (n,n) structure)")
+        print(f"    paired A5 - AUGMENT   {e['diff']:+.4e}   "
+              f"95% [{e['ci95'][0]:+.4e}, {e['ci95'][1]:+.4e}]")
+        print(f"    f5 = structure's share of the gain   {s['f5_structure_share']:+.4f}"
+              f"   (in domain: {s['f5_in_domain']})")
+        print(f"    prediction A5 in [{A5_PREDICTION[0]:.1e}, {A5_PREDICTION[1]:.1e}] -> "
+              f"{'HELD' if s['f5_prediction_held'] else 'MISSED'}")
+        print(f"    VERDICT  {s['a5_verdict']}")
     print()
     print("  ALL-LAYERS fingerprint (grand mean over layers; leaders publish 7-11e-9)")
-    for k, lbl in (("simple", "SIMPLE"), ("augment", "AUGMENT"), ("a3", "A3")):
-        print(f"    {lbl:<10s} {s[f'all_layers_grand_mean_{k}']:.4e}")
+    for k in ("simple", "augment", "a3", "a5"):
+        if f"all_layers_grand_mean_{k}" in s:
+            print(f"    {k.upper():<10s} {s[f'all_layers_grand_mean_{k}']:.4e}")
     if "reverse_order_worst_abs_diff" in s:
         r = s["reverse_order_worst_abs_diff"]
         ok = all(x == 0.0 for x in r.values())
