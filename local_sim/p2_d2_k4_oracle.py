@@ -156,7 +156,10 @@ for _p in (_HERE, _ROOT):
 # never be cited as the reason a run fits.
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
+from functools import lru_cache  # noqa: E402
+
 import numpy as np  # noqa: E402
+import torch  # noqa: E402  -- after the allocator hint above
 
 # Pre-registered in the contract at 432f7fd, before any datum. Do not edit.
 D2_LANE_GATE = 1.5        # D2(c)/K3 < this  -> the trace-matrix family is dead
@@ -308,15 +311,22 @@ def true_trace_matrices(weights, seed64, n_samples, device, chunk, dtype=None,
 # the core <-> T map, in upstream's own coefficients
 # --------------------------------------------------------------------------
 
-def _proj_constants(n, device, dtype):
+@lru_cache(maxsize=None)
+def _proj_constants_cached(n):
     """(c1, c2) with  core = c1 * T + c2 * tr(T) * I, read from upstream.
 
     Derived from `harmonic.proj_geq_r(A, n, r_out=1)` at d = 4:
         core = a1 * L(A) + a2 * R(L^2(A)),  L(A) = 12 T,  L^2(A) = 24 tr(T),
         R(s) = s * I.
     Nothing here re-derives proj_coef; it is called.
+
+    CACHED. It depends only on `n`, and it was being recomputed once per layer
+    per chain per network -- 1,920 times in a 24-net run -- each time building
+    tensors and calling `float()` twice. `float()` on a device tensor is a
+    GPU->CPU SYNC that forces every queued kernel to complete, including the
+    4 GiB dense (2,1,1) ops. That is why the injected chains ran 250 s against
+    plain AUGMENT's 25 s (job 438). Caching changes no value.
     """
-    import torch
     from mlp_kprop.harmonic import proj_coef
     P = sum(proj_coef(n, 4, r) for r in range(1, 3))   # r_out = 1, geq
     a1, a2 = float(P[1]), float(P[2])
@@ -325,22 +335,38 @@ def _proj_constants(n, device, dtype):
     return c1, c2
 
 
-def core_from_T(T, c1, c2):
+def _proj_constants(n, device=None, dtype=None):
+    return _proj_constants_cached(int(n))
+
+
+@lru_cache(maxsize=8)
+def _eye_cached(n, device_str, dtype):
+    """One identity per (n, device, dtype). It was reallocated every layer."""
     import torch
-    n = T.shape[0]
-    I = torch.eye(n, device=T.device, dtype=T.dtype)
-    return c1 * T + c2 * float(torch.trace(T).detach()) * I
+    return torch.eye(n, device=torch.device(device_str), dtype=dtype)
+
+
+def _eye_like(T):
+    return _eye_cached(T.shape[0], str(T.device), T.dtype)
+
+
+def core_from_T(T, c1, c2):
+    """No `float()`: the trace stays a 0-d DEVICE tensor.
+
+    A Python float and a 0-d f64 tensor hold the same value, so this changes no
+    number -- but `float()` forces a GPU->CPU sync. The no-op arm's bit-identity
+    is the standing proof that it changed nothing.
+    """
+    return c1 * T + c2 * torch.trace(T) * _eye_like(T)
 
 
 def T_from_core(core, c1, c2):
-    """Exact inverse of `core_from_T`. tr(core) = tr(T)(c1 + c2*n)."""
-    import torch
+    """Exact inverse of `core_from_T`. tr(core) = tr(T)(c1 + c2*n). Sync-free."""
     n = core.shape[0]
     denom = c1 + c2 * n
     assert abs(denom) > 0, "REFUSED: core->T map is singular"
-    trT = float(torch.trace(core).detach()) / denom
-    I = torch.eye(n, device=core.device, dtype=core.dtype)
-    return (core - c2 * trT * I) / c1
+    trT = torch.trace(core) / denom          # 0-d device tensor, no sync
+    return (core - c2 * trT * _eye_like(core)) / c1
 
 
 def mix_T(T_chain, T_true, variant):
@@ -350,15 +376,13 @@ def mix_T(T_chain, T_true, variant):
     kappa_4(i,i,k,k)`. It is NOT `kappa_4(i,i,i,i)` and must not be described as
     per-neuron kappa_4 -- see the module docstring.
     """
-    import torch
     n = T_chain.shape[0]
     if variant == "scalar":
         # ARM A5 (2026-09-09): keep kappa_4 PRESENT and SELF-CONSISTENT but strip
         # the (n,n) structure -- carry only its pure-radial part, which is exactly
         # what kind=SIMPLE carries. Uses the CHAIN's own T, so unlike variant
         # "zero" it substitutes no wrong value; it removes structure only.
-        return (float(torch.trace(T_chain).detach()) / n) * torch.eye(
-            n, device=T_chain.device, dtype=T_chain.dtype)
+        return (torch.trace(T_chain) / n) * _eye_like(T_chain)
     if variant == "zero":
         # ARM A3 (2026-09-09 contract): remove every kappa_4 INFORMATION surface
         # while keeping the raised diagram budget, to attribute D1's 2.094x.
@@ -370,8 +394,8 @@ def mix_T(T_chain, T_true, variant):
         return T_true
     if variant == "a":
         # keep the chain's traceless part; make only the SCALAR true
-        d = (float(torch.trace(T_true).detach()) - float(torch.trace(T_chain).detach())) / n
-        return T_chain + d * torch.eye(n, device=T_chain.device, dtype=T_chain.dtype)
+        d = (torch.trace(T_true) - torch.trace(T_chain)) / n
+        return T_chain + d * _eye_like(T_chain)
     if variant == "b":
         out = T_chain.clone()
         out.diagonal().copy_(T_true.diagonal())
@@ -424,12 +448,14 @@ def kprop_means_injected(weights, T_true_by_layer, variant, *, device, dtype,
                else T_true_by_layer[l].to(torch.float64))
         T_new = mix_T(T_chain, T_l, variant)
         if record is not None and T_l is not None:
+            # 0-d DEVICE tensors, converted once after the chain finishes.
+            # Converting here cost three syncs per layer for the (c) arm alone.
             record.append({
                 "layer": l,
-                "tr_T_chain": float(torch.trace(T_chain).detach()),
-                "tr_T_true": float(torch.trace(T_l).detach()),
-                "rel_fro_err_T": float(
-                    torch.linalg.norm(T_chain - T_l) / torch.linalg.norm(T_l)),
+                "tr_T_chain": torch.trace(T_chain).detach(),
+                "tr_T_true": torch.trace(T_l).detach(),
+                "rel_fro_err_T": (torch.linalg.norm(T_chain - T_l)
+                                  / torch.linalg.norm(T_l)).detach(),
             })
         out[4] = HTensor(core_from_T(T_new, c1, c2).to(h.core.dtype), r=1, n=n)
         return out
@@ -621,6 +647,16 @@ def main(argv=None) -> int:
     ap.add_argument("--log2-oracle-samples", type=int, default=22)
     ap.add_argument("--chunk", type=int, default=8192)
     ap.add_argument("--device", default="cuda")
+    ap.add_argument("--arms", default="noop,a,b,c",
+                    help="which injected arms to run, comma-separated. The "
+                         "decision-relevant contrasts are (a)->(c) and "
+                         "control->(c); 'b' is a middle rung of the nested "
+                         "ladder and 'noop' is a seam check.")
+    ap.add_argument("--noop-nets", type=int, default=0,
+                    help="run the no-op seam check on only the first N networks "
+                         "(0 = every network). It has been bit-identical on every "
+                         "network ever run, so a few are enough to catch a seam "
+                         "regression without paying for 24 chains.")
     ap.add_argument("--noop-tol", type=float, default=1e-9,
                     help="max relative |noop arm - control| before HALT")
     ap.add_argument("--d1-xmse", type=float, default=None,
@@ -793,27 +829,35 @@ def main(argv=None) -> int:
                                    device=a.device, dtype=torch.float32)[-1], Af, Bf)
 
         rec = []
-        for variant in ("noop", "a", "b", "c"):
+        want = [v.strip() for v in a.arms.split(",") if v.strip()]
+        if a.noop_nets and i >= a.noop_nets and "noop" in want:
+            want = [v for v in want if v != "noop"]
+        for variant in want:
             m = kprop_means_injected(w, T_true, variant, device=a.device,
                                      dtype=torch.float32,
                                      record=rec if variant == "c" else None)
             row[f"xmse_{variant}"] = xmse(m[-1], Af, Bf)
-        row["chain_vs_true_T"] = rec
+        # the record holds 0-d DEVICE tensors; one conversion per net, not per layer
+        row["chain_vs_true_T"] = [
+            {k: (float(v) if hasattr(v, "item") else v) for k, v in d.items()}
+            for d in rec]
 
         # THE SEAM'S OWN PROOF: injecting the chain's own T must be a no-op.
-        den = abs(row["xmse_control"]) or 1.0
-        row["noop_rel_dev"] = abs(row["xmse_noop"] - row["xmse_control"]) / den
+        if "xmse_noop" in row:
+            den = abs(row["xmse_control"]) or 1.0
+            row["noop_rel_dev"] = abs(row["xmse_noop"] - row["xmse_control"]) / den
         rows.append(row)
 
         el = time.perf_counter() - t0
         print(f"    {i + 1:>3}/{len(seeds)}  seed {s}   "
               f"SIMPLE {row['xmse_simple']:.3e}  AUG {row['xmse_control']:.3e}  "
-              f"a {row['xmse_a']:.3e}  b {row['xmse_b']:.3e}  c {row['xmse_c']:.3e}   "
-              f"[noop dev {row['noop_rel_dev']:.1e}, oracle noise {row['oracle_rel_noise_T']:.1e}, "
-              f"eta {el / (i + 1) * (len(seeds) - i - 1) / 60:.0f}m]")
+              + "  ".join(f"{v} {row[f'xmse_{v}']:.3e}" for v in want if f"xmse_{v}" in row)
+              + f"   [noop dev {row.get('noop_rel_dev', float('nan')):.1e}, "
+              + f"oracle noise {row['oracle_rel_noise_T']:.1e}, "
+              + f"eta {el / (i + 1) * (len(seeds) - i - 1) / 60:.0f}m]")
         _progress((i + 1) / len(seeds))
 
-        if row["noop_rel_dev"] > a.noop_tol:
+        if row.get("noop_rel_dev", 0.0) > a.noop_tol:
             _dump(a, rows, man, v, seeds,
                   halted=f"the no-op injection changed the result by "
                          f"{row['noop_rel_dev']:.3e} (tol {a.noop_tol:.1e}) on seed {s}. "
