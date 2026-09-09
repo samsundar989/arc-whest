@@ -96,12 +96,20 @@ for _p in (_HERE, _ROOT):
         sys.path.append(_p)
 
 # Allocator hint, set BEFORE torch is imported anywhere in this process.
-# The 2026-09-08 probe (job 399) OOMed asking for 4.00 GiB with 3.89 GiB free --
-# a 110 MB shortfall, i.e. fragmentation, not a genuine ceiling. Expandable
-# segments let the caching allocator grow a segment instead of demanding one
-# contiguous block. It is an ALLOCATOR setting and cannot change a computed
-# value; the bit-exact drift check in the same run is what proves that claim
-# is testable rather than asserted.
+#
+# INOPERATIVE ON THIS HOST, and the record used to claim otherwise. Torch on
+# Windows prints
+#     UserWarning: expandable_segments not supported on this platform
+# in every run here (jobs 409 and 411, both of which SUCCEEDED). So this setting
+# is NOT why AUGMENT fits: jobs 399/402 OOMed while the desktop held ~7 GiB of
+# VRAM, and 409/411 ran after a reboot with the card 88% free. The difference was
+# CAPACITY, not fragmentation. Corrected by the 2026-09-09 ERRATUM after the
+# independent Skeptic checked the logs against the claim.
+#
+# Left in place because it is correct and does operate on Linux, which is the
+# deployment authority -- but it must not be cited as the reason a run fits.
+# The practical consequence: the AUGMENT arm needs ~23 GiB and is therefore NOT
+# runnable on demand on this host; it waits for the desktop to be idle.
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 import numpy as np  # noqa: E402

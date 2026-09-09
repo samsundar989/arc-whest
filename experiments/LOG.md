@@ -36472,3 +36472,229 @@ path — never this summary.
 Runnable at the live shape only with `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`
 — the earlier OOMs were fragmentation (`5.48 GiB` reserved-but-unallocated), not
 capacity, exactly as the torch error itself said.
+
+# 2026-09-09 — ERRATUM ON THE D1 ENTRY, AND **CONTRACT (Rule 1) FOR ARM A3**: the `2.094x` stands, but it is NOT attributable to κ₄, and my stated reason for the run working is FALSE
+
+*Independent Skeptic (Rule 2) on the D1 result, in a context that never saw the
+builder's reasoning, given the contract, the diff, the protocol and the raw
+artifact paths. Verdict **PROVISIONAL**. It re-derived the control, the label
+alignment, the estimator and the gate independently and **found nothing that
+invalidates `2.094x`**. What it broke is the causal story around it, and two of
+my own claims. The A3 contract at the bottom is pre-registered **before any A3
+datum exists**.*
+
+## 1. THE OVER-ATTRIBUTION — and it is the one that costs money
+
+The D1 entry says the `2.094x` is "attributable to the κ₄ representation and to
+nothing else", on the grounds that `kind` is a single flag.
+
+**One flag is not one mechanism.** `kprop_harmonic.py:59`:
+
+    budget = k_max - 1 + augment
+
+That is inside `get_vec_cond`, which gates **every** vec-partition at **every**
+degree — not degree 4. Measured against the pinned upstream (`get_all_terms(3,
+d_max=4)`): **40 terms at `augment=False`, 142 at `augment=True`.** The growth is
+everywhere, not in κ₄:
+
+    (1,1)    5 -> 15        (2,1)    5 -> 15        (2,2)    5 -> 15
+    (1,1,1)  4 -> 31        (2,1,1)  4 -> 32
+
+And of the four legs `augment` adds to the factored `(1,1,1)` block
+(`factor_k3.py:389-399`), **three contain no κ₄ at all**: `WK_21` twice (a **κ₃**
+`(2,1)`-slice) and `WK_11 * WK_11 / 2` (a **doubled κ₂ edge**). Only `WK_22` is
+κ₄.
+
+**Why this is load-bearing rather than pedantic.** Step 2's entire memory
+precondition — the dense `n³` `(2,1,1)` slice sitting at *exactly* hard rule 1's
+`4 GiB` single-array cap — is justified by the κ₄ attribution. If the κ₂/κ₃ legs
+carry most of the `2.09x`, then a port that raises the diagram budget **without**
+carrying κ₄'s `(n,n)` object may get most of the gain and **never form the 4 GiB
+array**. Nothing on disk distinguishes those. The correction is at the bottom.
+
+**The entry's sentence is withdrawn.** What D1 measured is *the value of
+`kind=AUGMENT`*, which is a bundle: κ₄ carried as an `(n,n)` matrix **plus** a
+raised diagram budget at every degree. That is still exactly the arm the handoff
+asked for and still the arm a port would ship — but the mechanism is not isolated
+and must not be described as if it were.
+
+## 2. **MY REPRODUCIBILITY CLAIM IS FALSE.** `expandable_segments` never operated
+
+The D1 entry and `p2_d1_augment_arm.py:98-105` both state the run is possible
+"only with `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`", and that the
+earlier OOMs were fragmentation. **The job logs say otherwise**, in both the
+probe (`409`) and the 24-net run (`411`):
+
+    UserWarning: expandable_segments not supported on this platform
+      (Triggered internally at .../c10/cuda/CUDAAllocatorConfig.h:40)
+
+**Torch rejected the setting on Windows.** The stated cause of the fix did not
+operate, in either successful run. I asserted a mechanism from the torch error
+message's own suggestion and never checked whether it took effect — the exact
+class of tidy causal story `docs/VALIDATION.md` has had to retract before.
+
+**What actually differed** is capacity, not fragmentation. Jobs `399`/`402` ran
+while the desktop held `~7 GiB` of VRAM (`free: 3,886,018,560` of
+`34,190,458,880` at the OOM). Jobs `409`/`411` ran after the reboot with the card
+**88% free**. `411` peaked at `22.97 GiB` allocated / **`28.13 GiB` reserved on a
+`31.84 GiB` card** — about `3.7 GiB` of margin.
+
+**The practical consequence, which is worse than the wrong sentence:** the
+AUGMENT arm is **not runnable on demand**. It needs the desktop to be idle. Job
+`413` is queued right now behind `14.0 GiB` free and cannot start. This is not a
+declaration problem — 23 GiB is genuinely needed — and it is a second, independent
+reason the fused `(2,1,1)` spelling pays for itself: it takes the arm from
+`22.97 GiB` to `~2 GiB` and off the critical path of whatever Samuel has open.
+
+The comment in `p2_d1_augment_arm.py` and the module docstring are corrected in
+the same commit as this entry. The setting is left in place — it is harmless and
+correct on Linux, which is the deployment authority — but it is now labelled
+**inoperative on this host**.
+
+## 3. "Every pre-registered check passed" — FALSE, and I wrote it
+
+**Prediction 6 failed.** The contract predicted AUGMENT's peak at `≤1.5x`
+SIMPLE's, tightened by the ERRATUM to `≤1.43x`. **Measured `18.14x`**
+(`1.27 GiB → 22.97 GiB`). I recorded that falsification honestly in the probe
+entry (job `399`) and then wrote "Every pre-registered check passed" in the D1
+entry over a list of three that omitted it, with the number relegated to a
+footer. Two entries in the same log disagreeing is a documentation defect, and
+the sentence is withdrawn: **five checks were pre-registered; four passed and
+Prediction 6 failed.**
+
+(It is arguably *unresolvable* rather than failed — its `22.3 GiB` SIMPLE
+baseline was a with-autograd artefact, so the `1.43x` was computed against a
+number that was itself wrong. Unresolvable is still not "passed".)
+
+## 4. "The strategist's ruling is confirmed" over-reads a permissive pre-registration
+
+The band `[1.8e-8, 2.5e-8]` was adopted verbatim from the handoff and **is the
+board's observed cluster** — a target, not a magnitude derived from H1. Anything
+between a `1.60x` and a `2.22x` gain "holds" it, and the falsifier at `3.5e-8`
+fires only below a **`1.14x`** gain. H1 predicted a *sign*; the band predicted
+where we wanted to land.
+
+**What is honestly established:** switching to `kind=AUGMENT` produces a large,
+broad, bit-exactly-controlled improvement that puts our raw final-layer MSE in
+the leaders' range — and therefore that the `1.9e-8` floor is **not** a property
+of cumulant truncation as a class, since a different member of the class clears
+our previous number by `2.09x`. That is the ruling's substance and it stands.
+"Confirmed" as a blanket word does not.
+
+## 5. Precision and comparison claims to strike or fix
+
+- **`1.912323e-08` is quoted to seven figures against a `±4.5%` interval.** It
+  carries **two** significant figures: `1.9e-8`. The CI is the number.
+- **"sits essentially at `marius_binner`'s `1.87e-8`" — STRUCK.** For the
+  *identical file* (`k3_full`) the P01-24 path reads `4.0045e-08` against
+  graded-100 `3.7793e-08` (**+6.0%**) and local mini-100 `3.9251e-08` (**+2.0%**).
+  Our `1.912e-8` carries that unquoted path offset, so a `2.2%` assertion is
+  unsupportable. **"Inside the cluster" survives** — and correcting the offset
+  moves us to `~1.80e-8`, which *strengthens* it. The board raw values are the
+  same estimand (`marius 3.83e-9 / 0.205 = 1.868e-8`,
+  `board_2026-09-05_telemetry.md`); it is the precision that was wrong, not the
+  comparison.
+- **The `≈1.03e-8` projected score is STRUCK, not disclaimed.** It multiplied a
+  P01-tier raw MSE by a *different file's* graded multiplier, and this entry's own
+  `~0.31 B` extra-arithmetic estimate would put it nearer `1.6e-8`. A disclaimed
+  wrong number still gets quoted.
+
+## 6. What the Skeptic ACCEPTED, so it is not re-litigated
+
+Each verified independently, not from my summary:
+
+- **The control is non-circular and bit-exact.** `p2_d1_augment_arm.py:271-275`
+  reads `xmse_k3` from `pa_k3.json` on disk; that file has **one** commit
+  (`698588b`, Aug 27) and is unmodified. All 24 rows match **bitwise**, and so
+  does the independent functional `plain_mse_halfA`.
+- **Label alignment and layer indexing PROVEN**, not assumed: `gt_halfA["means"]
+  [i,0,:]` matches the exact layer-1 closed form `‖W₁[:,j]‖/√(2π)` to `5.7e-4`
+  (MC noise at `2^26`) versus `1.0e-1` against a neighbouring network. Both
+  `.npz` sha256s match the manifest.
+- **No label path into the estimator** — `kprop_means` consumes weights only.
+- **`decide()` reproduces exactly**: gain `2.09414659`, gate `1.601874`, t-CI
+  `[+1.9441e-08, +2.2406e-08]`, basic bootstrap agrees, sign-test `p = 1.2e-7`,
+  biggest mover **5.2%**, leave-one-out gain `2.081–2.107x`, skew `−0.43` so `t`
+  is the right interval.
+- **The gate conversion is legitimate** — the pre-registered baseline and the
+  measured control are the same number *because* the control reproduced bitwise.
+- **No leakage channel.** Every upstream `@cache` is keyed on `augment` where it
+  matters; `get_wick_coef` is a fresh closure per call; no RNG in the propagation
+  path. Positively: SIMPLE reproduces bitwise in a process where AUGMENT ran 23
+  times before it.
+- **The estimator is unbiased in both arms**: `plain_mse_halfA − xmse` is
+  `1.283e-9` (SIMPLE) and `1.276e-9` (AUGMENT), both ≈ `gt_noise_per_half_mean`
+  `1.1552e-9` and equal to each other within `7e-12`.
+- **The "30x torch wall is not a cost signal" abstention is CORRECT.**
+
+---
+
+# CONTRACT (Rule 1): ARM A3 — does κ₄ carry the gain, or does the raised diagram budget?
+
+*Pre-registered before any A3 datum exists. This is the measurement that decides
+whether Step 2's `4 GiB` memory engineering is aimed at the right object.*
+
+## Question
+
+`kind=AUGMENT` bundles two changes: κ₄ carried as an `(n,n)` object at `r=1`, and
+a diagram budget raised at every degree (`40 → 142` terms). **Which one carries
+the `2.094x`?**
+
+## Hypothesis + mechanism
+
+**H-A3.** The strategist's mechanism says the omitted κ₄ drives the propagated
+state drift, so κ₄ should carry most of it. But three of the four legs `augment`
+adds contain no κ₄, and the `(1,1,1)` block's term count grows `4 → 31` — so the
+budget is not a small perturbation. **My honest prior is that the gain is split,
+with κ₄ the larger share.**
+
+## Intervention
+
+**Arm A3 = `kind=AUGMENT` with `WK[4]` forced to ZERO at every nonlinear step's
+output**, through the injection seam already built and proven for D2
+(`p2_d2_k4_oracle.kprop_means_injected`, `test_p2_d2_seam.py` **6/6**, no-op arm
+bit-identical). Upstream stays unmodified; `verify_upstream` still passes.
+
+This keeps the raised budget — the doubled κ₂ edge, both κ₃ `WK_21` legs — and
+removes every κ₄ *information* surface. It is an ablation, not a deployable
+estimator, and it does not reduce memory (the slice is still formed).
+
+## Statistic and the split, fixed NOW
+
+Let `f` be the fraction of the paired gain that κ₄ carries:
+
+    f = (xmse_A3 - xmse_AUGMENT) / (xmse_SIMPLE - xmse_AUGMENT)
+
+reported paired, common random numbers, arithmetic, studentised-t, on the same
+24 P01 nets. `f = 1` ⇒ κ₄ carries all of it; `f = 0` ⇒ none.
+
+| outcome | reading | consequence for Step 2 |
+|---|---|---|
+| **`f >= 0.7`** | κ₄ carries the gain | the `(2,1,1)` memory work is **earned**; port as planned |
+| **`f <= 0.3`** | the raised budget carries it | **the memory work is aimed at the wrong object.** Try budget-only first — it may never form the `4 GiB` array |
+| `0.3 < f < 0.7` | both matter | port needs both; memory work earned, but a budget-only arm is worth pricing as a cheaper fallback |
+
+**Prediction: `f` in `[0.5, 0.8]`.**
+
+## Two controls in the same job, both cheap
+
+- **A4 — arm order reversed** (AUGMENT before SIMPLE) on 3 nets, asserting
+  bit-equality with the recorded rows. SIMPLE ran first in every run on disk; this
+  closes the last untested control. ~2 minutes.
+- **All 16 layers' `xmse` in every arm.** `gt_halfA["means"]` is `(24,16,1024)` —
+  the labels already exist and were being discarded. It buys an independent board
+  fingerprint: the leaders' all-layers `7–11e-9` against final `1.9–2.8e-8` is a
+  much harder test of "same algorithm" than the final-layer number alone.
+- Also record whether `wick.py`'s *"Snapping negative variance to zero"* fires at
+  `1024x16` (it did **not** in job `411` — zero occurrences — but that is
+  currently unrecorded, and it fires freely at `64x5`).
+
+## Cost model / tier / seeds
+
+Phase 2, `λ = 0`, `C = F`. **No cost is claimed** — torch meter, information
+question only. Tier **P01 DESIGN, re-read**; promotes nothing.
+**`# seed-ledger: no block named`** — same asset, same 24 nets, no new block.
+
+## Falsifier
+
+`f <= 0.3` rejects the κ₄ attribution and redirects Step 2's first task.
