@@ -1,5 +1,87 @@
 # CURRENT_STATE.md — read this first
 
+> ## 2026-09-09 (later) — **THE ATTRIBUTION IS SETTLED: the whole `2.094x` is κ₄'s `(n,n)` STRUCTURE.** Both cheap ports are dead. D2 is running at `2^24`.
+>
+> `estimator.py` untouched at **v2.6.1**. **Nothing designated.** Nothing promoted
+> — P01 is a re-read DESIGN block.
+>
+> ### FOUR ARMS, PAIRED IN ONE PROCESS, SAME 24 NETS
+>
+> | arm | budget | κ₄ carried as | mean xmse | vs SIMPLE |
+> |---|---|---|---:|---:|
+> | K3 `SIMPLE` | base (40 terms) | a scalar | `4.0047e-08` | `1.000x` |
+> | **A5** | **raised (142)** | **a scalar** | **`4.3448e-08`** | **`1.085x` WORSE** |
+> | K3 **`AUGMENT`** | raised (142) | an **`(n,n)` matrix** | **`1.9123e-08`** | **`0.478x`** |
+> | A3 | raised (142) | zero | `3.6895e-07` | `9.21x` |
+>
+>     SIMPLE - A5    -3.4014e-09  95% [-4.9367e-09, -1.8662e-09]   A5 better on 4/24
+>     A5 - AUGMENT   +2.4325e-08  95% [+2.2968e-08, +2.5682e-08]
+>     f5 = 1.1626 (structure's share; >1 because the budget alone is net-negative)
+>
+> **The raised diagram budget on its own is worth NOTHING — it is slightly
+> negative.** Every bit of the gain is κ₄'s `(n,n)` structure. The two are
+> complementary, not additive.
+>
+> ### BOTH CHEAP PORTS ARE CLOSED BY MEASUREMENT
+>
+> | escape route | closed by | how badly |
+> |---|---|---|
+> | budget-only, no κ₄, never form the `4 GiB` array | **A3** | `9.2x` worse than SIMPLE |
+> | carry κ₄ as a scalar, skip the `(n,n)` core | **A5** | `1.085x` worse than SIMPLE |
+>
+> **So the port MUST carry κ₄ as an `(n,n)` core, and Step 2's first task is
+> unchanged: the fused `(2,1,1)` contraction** — now for a fully attributed
+> reason. (A3's own verdict string claimed this for a reason its measurement did
+> not support; it is A5 that establishes it.)
+>
+> One cell remains **untested**: *base budget + `(n,n)` κ₄*. Upstream exposes no
+> flag for it and the injection seam cannot reach it. If it worked it would be a
+> cheaper port.
+>
+> ### THE ALL-LAYERS FINGERPRINT — the leaders' signature on BOTH numbers
+>
+> | arm | all-layers | final-layer |
+> |---|---:|---:|
+> | `SIMPLE` | `1.5936e-08` | `4.0047e-08` |
+> | A5 | `1.6078e-08` | `4.3448e-08` |
+> | **`AUGMENT`** | **`6.9060e-09`** | **`1.9123e-08`** |
+> | **leaders, published** | **`7–11e-9`** | **`1.9–2.8e-8`** |
+>
+> Matching the *pair* is a far harder test than the final-layer number alone.
+> Caveats: ours sits a shade below the band, the P01-24 path reads `+6.0%` hot
+> against graded-100 for an identical file, and the band is scraped telemetry — so
+> good to a few percent, and the sign must not be read as "we are ahead".
+>
+> ### MY PREDICTIONS MISSED TWICE, IN THE SAME DIRECTION
+>
+>     A3   predicted f in [0.5, 0.8]     measured 16.72
+>     A5   predicted [2.2e-8, 3.2e-8]    measured 4.3448e-08
+>
+> Both are the same error: I expected the raised budget to carry a meaningful
+> share, and it carries none. **My priors about which term matters in this closure
+> should be given little weight**; cheap arms should be measured, not reasoned
+> about.
+>
+> ### THE REFUSAL GATE BIT ON ITS FIRST USE
+>
+>     2^20 ratio 0.424 REFUSE | 2^22 ratio 0.239 REFUSE | 2^24 ratio 0.111 PASS
+>
+> **`2^22` was the default a 24-net D2 would have used**, and its two-stream
+> spread is `24%` of the gap the slice turns on. The oracle's noise biases
+> `xmse_c` **upward — toward the pre-registered kill** — so D2 could have closed
+> the κ₄ lane on its own noise. The first draft computed that noise and never
+> gated on it; the Skeptic caught it, the ERRATUM pre-registered the refusal
+> before any data, and it fired immediately. D2 therefore runs at **`2^24`**
+> (`~2.5 h`, job `438`).
+>
+> ### CONTROLS NOW CLOSED
+>
+> - **Reversed arm order: BIT-IDENTICAL** (`0.0`) across all four arms.
+> - **Zero** `"Snapping negative variance"` warnings at `1024x16`.
+> - `SIMPLE` and `AUGMENT` reproduced D1's means **to the digit a third time**, in
+>   a third process, across two reboots.
+
+
 > ## 2026-09-09 — **D1 IS IN: `AUGMENT` TAKES THE CHAIN `4.0047e-08 → 1.9123e-08`, `2.094x`, ON 24/24 NETWORKS.** The floor ruling is confirmed.
 >
 > `estimator.py` untouched at **v2.6.1**. **Nothing is designated.** Nothing is
@@ -52,7 +134,7 @@
 > `22.97 GiB`, which is the difference between waiting on a card the desktop is
 > using and running any time.
 >
-> ### IN FLIGHT
+> ### IN FLIGHT  *(SUPERSEDED 2026-09-09 later: A3/A5 are in, D2 is running at 2^24)*
 >
 > | job | what | state |
 > |---|---|---|
