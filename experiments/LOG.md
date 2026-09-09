@@ -37456,3 +37456,41 @@ carrying more than `n²` of information.
 3. `p2_flop_anchor` pricing, replacing the `~0.31 B` sanity estimate.
 4. The fnp transcription itself, and its certification (twin arm, ops `<=24k`,
    projected residual, Linux memory gate, official mini-100).
+
+# 2026-09-09 — TIMELINE: `RESEARCH_NOTES` §1's Phase-2 row is **STALE**. The live round closes **Oct 17**, not Sep 19.
+
+*Provenance check, no measurement. `# seed-ledger: no block named`.*
+
+Two dates were in circulation and they are `28` days apart, which is the
+difference between "the port is comfortable" and "the port is impossible":
+
+| source | Phase 2 | status |
+|---|---|---|
+| `docs/RESEARCH_NOTES.md` §1 timeline row | `Aug 1 – Sep 19 23:59 UTC` | **STALE** |
+| **live round metadata** (`local_sim/phase2_checklist.py`, round `1429`) | **`2026-08-22 → 2026-10-17 23:59 UTC`, `active=true`** | **AUTHORITATIVE** |
+
+The notes row is a snapshot of the overview page crawled ~Aug 3, and it is
+demonstrably stale in more than one cell: it gives the Phase-2 **start** as Aug 1
+when the round actually opened **Aug 22**, and Phase 1 as ending Aug 7 when the
+round metadata says **Aug 10**. Its own header warns "snapshot dates matter —
+update as Phase 2 develops"; it was not updated.
+
+`docs/PHASE2_STRATEGY_2026-09-05.md`'s plan-to-Oct-17 is therefore **correct**,
+and `CURRENT_STATE`'s repeated "close Oct 17" lines are correct. Nothing needs
+re-planning.
+
+**Recorded because the failure mode is asymmetric.** Believing the stale row
+would have compressed a `5.5`-week runway into `10` days and could have panicked
+the AUGMENT port into being skipped. Believing it in the other direction — had
+the live round been the earlier one — would have missed the deadline outright.
+**The round metadata is the authority; the notes table is intel, and intel goes
+stale.**
+
+**One item NOT settled by round metadata:** the contribution write-up deadline.
+`RESEARCH_NOTES` §1 says **Sep 26**, `PHASE2_STRATEGY` says **Oct 24**. Round
+metadata governs submissions, not the write-up, so neither is verified here. Given
+the same row is stale on three other cells, **Sep 26 should not be trusted without
+a fresh read**, and the write-up is currently marked stale/do-not-submit pending a
+STRATEGIC claim review. **This is a live question for Samuel** — if the write-up
+is genuinely due Sep 26, it is `17` days away and is the binding constraint on the
+whole slice, not the Oct 17 submission deadline.
