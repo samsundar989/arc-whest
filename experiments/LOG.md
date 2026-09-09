@@ -37063,3 +37063,84 @@ measuring it — the same failure mode as the two missed predictions on A3 and A
 **The standing correction: on this chain, measure before estimating, and treat my
 priors as weak evidence.** A one-network timing probe would have cost 25 minutes
 and caught both.
+
+# 2026-09-09 — **STEP 2 PRECONDITION, SOLVED IN STRUCTURE: the `4 GiB` `(2,1,1)` tensor enters the state ONLY through an `(n,n)` sum.** Proven against upstream at machine precision.
+
+*Step 2's first task, per `CURRENT_STATE.md`. Desk + CPU only, no GPU, no seed
+block, no accuracy claim. `# seed-ledger: no block named`.*
+
+## The result
+
+For the degree-4 `(2,1,1)` diagonal slice — the dense `n³` object that OOMed jobs
+`399`/`402` and sits at **exactly** hard rule 1's `4 GiB` single-array cap:
+
+    core_{r=1}  =  c(n) · sym( SUM_i  slice[i, j, k] )        c(n) = 12 · proj_coef(n,4,1)[1]
+
+**Nothing else about the tensor matters.** It is consumed by exactly one thing —
+`DS_harmonic_proj(K_ds[4], r_out=1)` — and that consumer sees only its sum over
+the doubled index.
+
+## Why, and it falls straight out of upstream's own combinatorics
+
+`_lap_m_dslice` (`harmonic.py:551`) sums over *loops-only* multigraphs: `L^m`
+caps legs **within** blocks, and a block of size `p` admits at most `floor(p/2)`
+caps. For `part = (2,1,1)` the blocks are sizes `2, 1, 1`, so:
+
+    m = 1:  exactly one valid cap-graph, (1,0,0)   -> caps the doubled block
+    m = 2:  NO valid cap-graph                     -> L^2 is identically zero
+
+Verified, not read: `L^2` returns exactly zero, and `L^1 = 12 · sym(axis-0 sum)`.
+`DS_harmonic_proj` at `r_out = 1` only ever applies `L^1` and `L^2`, and the `L^2`
+term vanishes — so the whole contribution is the `L^1` one.
+
+## The verification, including the test that first FALSIFIED it
+
+The first test compared two `n³` slices with equal axis-0 sums and found cores
+differing by `1.006` — an apparent refutation. **The test was wrong, not the
+claim:** `DSTensor(..., autozero=True)` zeroes repeated indices, and my
+perturbation's axis-0 sum did not survive that projection. Re-tested against the
+**stored** (post-`autozero`) slice:
+
+    trial 0   c = 0.500000015   spread 1.1e-16   max residual 2.2e-16
+    trial 1   c = 0.500000015   spread 2.2e-16   max residual 2.2e-16
+    trial 2   c = 0.500000015   spread 1.1e-16   max residual 2.2e-16
+
+and the constant reproduces upstream's own `proj_coef` at every width tried:
+
+    n        6      8     12     16     24     32
+    c   0.6000 0.5000 0.3750 0.3000 0.2143 0.1667      all matching to <1e-9
+
+    at the live width:  c(1024) = 0.005836575874  ( = 12/2056 = 3/514 )
+
+Recorded because the falsifying run is the reason to trust the confirming one:
+the claim survived a test that could have killed it, once the test was right.
+
+## What this means for the port
+
+**The `4 GiB` array never has to exist.** The fused spelling does not need a
+clever contraction schedule — it needs `SUM_i` of each contributing term, and
+every term in `DS_part_sum` is a product of *broadcast* lower-order blocks, so
+its axis-0 sum is a matvec or a matmul at `n²` memory. Worked example, term 3 of
+11 (`(0,0,1)·(1,0,0)·(1,1,0)`):
+
+    SUM_i  A_k · B_i · C_{i,j}  =  A_k · (B^T C)_j        <- an outer product, no n^3
+
+**Hard rule 1 is satisfied by construction**, not by tuning: the largest array in
+the fused path is `(n, n)`, `4 MB` at f32, against a `4 GiB` cap.
+
+## What is NOT yet done
+
+There are **two** `n³` sites, and this settles one. The other is upstream of it:
+`pK[(2,1,1)]` is built in `factor_k3.py` §3.1 by `eval_part` *before*
+`DS_pK_to_K` consumes it. Since `pK[(2,1,1)]` is read only by `K_ds[(2,1,1)]`
+(no vector partition of a different degree-4 int_part contains a `(2,1,1)`
+block), and `K_ds[(2,1,1)]` is now known to be needed only as its axis-0 sum,
+**the same reduction should apply one level up** — but that is a claim, not a
+result, and it needs the same treatment: derive, verify against upstream's dense
+path at small `n`, then use it.
+
+**Next, in order:** (1) fuse §3.1's `pK[(2,1,1)]` to its axis-0 sum and verify;
+(2) enumerate the axis-0-summed form of all 11 vector partitions; (3) price the
+whole fused path with `p2_flop_anchor`. Only then is the FLOP estimate from
+2026-09-08 (`~0.31 B`, explicitly a sanity check and not a price) replaced by a
+number that may be quoted.
