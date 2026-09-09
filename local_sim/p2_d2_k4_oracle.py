@@ -146,12 +146,14 @@ for _p in (_HERE, _ROOT):
         sys.path.append(_p)
 
 # Allocator hint, set BEFORE torch is imported anywhere in this process.
-# The 2026-09-08 probe (job 399) OOMed asking for 4.00 GiB with 3.89 GiB free --
-# a 110 MB shortfall, i.e. fragmentation, not a genuine ceiling. Expandable
-# segments let the caching allocator grow a segment instead of demanding one
-# contiguous block. It is an ALLOCATOR setting and cannot change a computed
-# value; the bit-exact drift check in the same run is what proves that claim
-# is testable rather than asserted.
+#
+# INOPERATIVE ON THIS HOST. Torch on Windows prints "expandable_segments not
+# supported on this platform" in every run here, so this is NOT why an AUGMENT
+# chain fits: jobs 399/402 OOMed while the desktop held ~7 GiB of VRAM, and
+# 409/411 succeeded after a reboot with the card 88% free. The difference was
+# CAPACITY, not fragmentation. Corrected by the 2026-09-09 ERRATUM.
+# Kept because it is correct on Linux, the deployment authority -- but it must
+# never be cited as the reason a run fits.
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 import numpy as np  # noqa: E402
@@ -350,6 +352,11 @@ def mix_T(T_chain, T_true, variant):
     """
     import torch
     n = T_chain.shape[0]
+    if variant == "zero":
+        # ARM A3 (2026-09-09 contract): remove every kappa_4 INFORMATION surface
+        # while keeping the raised diagram budget, to attribute D1's 2.094x.
+        # T_true is not consulted and may be None.
+        return torch.zeros_like(T_chain)
     if variant == "noop":
         return T_chain
     if variant == "c":
@@ -390,7 +397,9 @@ def kprop_means_injected(weights, T_true_by_layer, variant, *, device, dtype,
         out = real(*args, **kw)
         l = state["layer"]
         state["layer"] += 1
-        if 4 not in out or l >= len(T_true_by_layer):
+        if 4 not in out:
+            return out
+        if T_true_by_layer is not None and l >= len(T_true_by_layer):
             return out
         h = out[4]
         assert isinstance(h, HTensor) and h.r == 1, (
@@ -404,15 +413,16 @@ def kprop_means_injected(weights, T_true_by_layer, variant, *, device, dtype,
         n = h.n
         c1, c2 = _proj_constants(n, h.core.device, h.core.dtype)
         T_chain = T_from_core(h.core.to(torch.float64), c1, c2)
-        T_new = mix_T(T_chain, T_true_by_layer[l].to(torch.float64), variant)
-        if record is not None:
+        T_l = (None if T_true_by_layer is None
+               else T_true_by_layer[l].to(torch.float64))
+        T_new = mix_T(T_chain, T_l, variant)
+        if record is not None and T_l is not None:
             record.append({
                 "layer": l,
                 "tr_T_chain": float(torch.trace(T_chain).detach()),
-                "tr_T_true": float(torch.trace(T_true_by_layer[l]).detach()),
+                "tr_T_true": float(torch.trace(T_l).detach()),
                 "rel_fro_err_T": float(
-                    torch.linalg.norm(T_chain - T_true_by_layer[l].to(torch.float64))
-                    / torch.linalg.norm(T_true_by_layer[l].to(torch.float64))),
+                    torch.linalg.norm(T_chain - T_l) / torch.linalg.norm(T_l)),
             })
         out[4] = HTensor(core_from_T(T_new, c1, c2).to(h.core.dtype), r=1, n=n)
         return out
