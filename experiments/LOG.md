@@ -37308,3 +37308,82 @@ here it is wrong by `34%`, and it is the kind of orphaned scalar
 2. The first run's verdict was right by luck — it reported "no setting meets the
    target" from mislabelled rows. A correct conclusion from wrong numbers is not
    a result, and it is only visible because the graded anchor check was there.
+
+# 2026-09-09 — **THE SECOND `n³` SITE CARRIES NO ORDER-3 INFORMATION.** Every three-axis object in the `(2,1,1)` path is a slice of an `(n,n)` core.
+
+*Step 2 precondition, part 2. Desk + CPU, no GPU, no seed block, no gate.
+`# seed-ledger: no block named`.*
+
+## The question
+
+The 2026-09-09 entry above proved the **first** `n³` site reducible: `K_ds[(2,1,1)]`
+enters the `r=1` core only through its axis-0 sum, verified to `2.2e-16`. The
+**second** site is upstream of it — `pK[(2,1,1)]`, built in `factor_k3.py` §3.1 by
+`eval_part` before `DS_pK_to_K` consumes it. Does *it* need order-3 data?
+
+## What reaches it
+
+`get_all_terms_iso(3, d_max=4, augment=True)` at `int_part = (2,1,1)`, after
+§3.1's own filters (including `factored_keeps_term` and the explicit exclusion of
+the all-`(1,1,1)` vec_part, which upstream carries manually into
+`K211_contrib`): **17 surviving vector partitions.**
+
+Of those 17, **15 have every block spanning at most two axes** — products of
+`(n,n)`, `(n,)` and scalar factors broadcast into `(n,n,n)`. For those, `SUM_i` of
+the product distributes onto the factors as matvecs and matmuls, exactly as for
+the first site.
+
+**Exactly two span all three axes**, and both are *degree-4* blocks:
+
+    [(1,1,2)]     count 2      the (1,1,2) diagslice of WK[4]
+    [(2,1,1)]     count 1      the (2,1,1) diagslice of WK[4]
+
+## Why that closes the question
+
+Under `kind=AUGMENT`, `WK[4]` is an **`r=1` HTensor** — `Sym(core (x) metric)`
+with `core` an `(n, n)` matrix. That is asserted at runtime in
+`p2_d2_k4_oracle.kprop_means_injected` and holds at every layer. So both
+three-axis blocks are **`n³`-shaped VIEWS of `n²` data**: they contain no order-3
+information, and `expand_dslice` materialising them is a spelling choice, not an
+information requirement.
+
+**Therefore no genuinely order-3 quantity exists anywhere in the `(2,1,1)` path.**
+Combined with the first site's proven axis-0 reduction, the whole degree-4 route
+is expressible at `n²` memory.
+
+## Measured, because my derivation was WRONG
+
+I first derived that the `(2,1,1)` diagslice of `Sym(A (x) g)` must **vanish** on
+all-distinct indices — every pairing puts a diagonal `g` on two distinct indices.
+Measured at `n = 7` against upstream's own `diagslice`:
+
+    metric identity     (2,1,1) max|.| = 2.922e-01     (1,1,2) max|.| = 2.922e-01
+    metric uniform 2.0  (2,1,1) max|.| = 5.843e-01     (1,1,2) max|.| = 5.843e-01
+
+**Non-zero.** My model of upstream's symmetrisation convention was wrong, and the
+"it vanishes" shortcut would have silently dropped two real terms from the port.
+The structural conclusion above does **not** depend on that derivation — it rests
+only on `WK[4]` being `r=1`, which is checked — but the episode is recorded
+because it is the third time this slice that measuring beat deriving.
+
+## What remains for the port, stated honestly
+
+**Feasibility is settled; the derivation is not.** What is proven:
+
+- the first site reduces to an axis-0 sum, exactly, with the constant read from
+  upstream's own `proj_coef` (`c(1024) = 3/514`);
+- the second site contains no order-3 information, because its only three-axis
+  blocks are slices of an `(n,n)` core;
+- so the fused path fits `n²` memory, and hard rule 1's `4 GiB` single-array cap
+  is satisfied **by construction**, with the largest array `4 MB` at f32.
+
+What is **not** yet done, and is the next slice's work:
+
+1. the explicit fused expression for each of the 17 vector partitions;
+2. the closed form of the two degree-4 diagslices in terms of `core` and
+   `metric` — to be **read off upstream numerically**, not derived, given the
+   above;
+3. verification of the whole fused path against upstream's dense
+   `eval_part` + `DS_pK_to_K` + `DS_harmonic_proj` at `n = 32/64`;
+4. `p2_flop_anchor` pricing, which replaces the `~0.31 B` sanity estimate of
+   2026-09-08 with a number that may be quoted.
