@@ -37919,3 +37919,316 @@ agent-side search:
 
 **Recorded as a dead end so it is not searched a fourth time.** Three handoffs
 have now asked for a sentence that no artifact in this repository contains.
+
+# 2026-09-09 — **WALL PROFILE OF THE STRASSEN SPELLING: `73%` of the wall is glue that bills `2.9%` of the FLOPs.** And the obvious fix is measured DEAD.
+
+*Slice 4 item 3. Instrument `local_sim/p2_op_census.py` (extended use — it already
+recorded `flopscope_backend_duration_s` per operation group and nobody had read
+that column), artifact `experiments/2026-09-09_slice4/op_census_L3.json`. CPU,
+minutes. No seed block, no gate, no shipped file edited.
+`# seed-ledger: no block named`.*
+
+## Where the wall goes at Strassen `L=3`
+
+`estimator_k3_strassen.py`, one steady-state `1024 x 16` MLP, `12,340` operations,
+`1.1818e12` counted FLOPs:
+
+| class | calls | % ops | % FLOPs | **% backend wall** |
+|---|---:|---:|---:|---:|
+| Winograd add/sub, batched | 7,128 | 57.8% | **1.3%** | **37.2%** |
+| concatenate (stacking + reconstruction + tower append) | 2,037 | 16.5% | **1.6%** | **30.5%** |
+| **matmul (the Strassen leaves)** | **132** | **1.1%** | **96.8%** | **26.6%** |
+| elementwise multiply/divide | 2,013 | 16.3% | 0.2% | 3.9% |
+| everything else | 1,030 | 8.3% | 0.1% | 1.8% |
+
+**The arithmetic Strassen exists to save is a quarter of the wall. Two thirds is
+memory traffic moving operands into and out of the recursion.** The meter's own
+overhead is `5.9%` and is not the story.
+
+This is the mechanism behind a number already in the record and never explained:
+graded intensity `215.13 GFLOP/s` at `L=0` collapsing to `22.82` at `L=3`. It is
+not the leaves getting slower. It is `73%` of the wall being spent on `2.9%` of
+the FLOPs.
+
+**And the effect is LARGER on the grader than here, which cuts the right way for
+the lever's value.** Locally the leaves run at `115 GFLOP/s` (`1.144e12` FLOPs in
+`26.6%` of `37.4 s`) while the whole chain reads `31.6`; the grader reads `215` at
+`L=0` and `22.82` at `L=3`. The glue's share on the grading server is therefore
+*higher* than the `73%` measured here.
+
+## The obvious fix, and it does not work
+
+The census says `74%` of operations are Strassen glue and the glue count is flat
+per call site (`23` operations per level, whatever the operand width). One layer
+issues **seven** separate Strassen call sites — three in `_advance`, four in
+`_dslice21` — each paying its own three levels of glue. Merging them into one
+wide call should amortise the glue `3.5x`.
+
+**Measured at `n = 1024`, `k = 15` generations, on the shipped `_sb`:**
+
+| | ops | backend |
+|---|---:|---:|
+| `_advance` as 3 separate `_mm` calls | 210 | `3.12 s` |
+| `_advance` as 1 `_mm` on a concatenated operand | **71** | `3.06 s` |
+| `_dslice21` as 4 separate `_mm` calls | 284 | `3.17 s` |
+| `_dslice21` as 1 batched `_sb` over the four | **76** | **`4.07 s`** |
+
+**Operations fall `3.0x` and `3.7x`. Wall does not move, and in the second case it
+gets `28%` WORSE.**
+
+The reason is the whole point of the profile: **the glue is memory-bound, so it
+costs BYTES MOVED, not CALLS ISSUED.** Three call sites each pass their own
+operands through three levels of adds and concatenates; one merged call site
+passes three times as much data through the same *number* of glue operations. The
+total traffic is identical, so the wall is identical. The batched `_dslice21` is
+worse still because stacking four `(n, kn)` operands is itself a large copy that
+the separate spelling never makes.
+
+**This is a real distinction and it should be carried forward: fewer, bigger
+operations buy RESIDUAL (the `0.4 s` op-count cliff) and buy nothing on WALL.**
+The repository has been treating "batch it" as a general good; it is a
+residual-only good. `_Tower`'s batching is still right — it was adopted for the
+op count and it delivers on the op count.
+
+## What is left of item 3, priced honestly
+
+The handoff's target is L=4's FLOPs (`0.486 B`) at `<=60 s` worst, and its stop
+rule is `25%` off L=3's wall by day 5. Cutting wall means cutting bytes. Two
+candidates remain, and neither reaches `25%` alone:
+
+1. **Winograd's 15-add form instead of classic Strassen's 18.** `_sb` issues 10
+   operand additions and 8 reconstruction additions per level. Winograd's
+   variant does the same product in 15. Ceiling: `3/18` of the `37.2%` add wall
+   = **`6%`** of total.
+2. **The stacking concatenates.** `2` per level on input, `3` on output, and they
+   are `30.5%` of the wall for pure copying. At level `l` they move `(7/4)^l`
+   times the top-level array, so the DEEPEST level dominates. Removing them means
+   issuing the seven sub-products as seven calls — which returns `7^L` operations
+   per call site (`~49,000` at `L=3` across the chain) and breaks the `24,000`-op
+   gate. A hybrid — batched at the deep levels, unbatched at the shallow ones —
+   is the only version that could clear both, and it has not been priced.
+
+**Recommendation: treat item 3 as closed at `6%` unless the hybrid is priced.**
+The lever's whole prize is making `L=4` (`0.486 B`) nominee-grade, which is a
+`9.5%` score gain — and after this measurement it is not reachable by any cheap
+respelling.
+
+## The correction this makes to my own reasoning
+
+I predicted, from the op census alone, that merging call sites would cut wall by
+about half. It cut wall by `2%` and `-28%`. **The op count and the wall are
+different instruments and I read one as a proxy for the other.** That is the same
+class of error as the `5.49x` two-meter episode in `CURRENT_STATE`, and it was
+caught only because the fix was measured before it was proposed rather than after.
+
+# 2026-09-09 — SKEPTIC ON THE AUGMENT PRICE: **PROVISIONAL.** The decision stands and stands wider; **two load-bearing sentences of my entry were false and are corrected here.**
+
+*Rule 2 verdict on the 2026-09-09 entry "THE AUGMENT PORT IS PRICED AT `7.45x`".
+The Skeptic was launched before that entry was written, in a context that never
+saw my reasoning, with the handoff, the diff, the protocol and the raw artifact
+paths. `experiments/LOG.md` is append-only, so the entry above is NOT edited —
+this entry is the correction, and `docs/CURRENT_STATE.md` (which is not
+append-only) has been rewritten to match.*
+
+## The verdict
+
+**PROVISIONAL.** *"The operative decision — do not execute Slice 4 item 2 as
+specified — survives every attack I could construct, and survives by a wider
+margin than the note claims. But two load-bearing sentences of the claim are
+false as written, one of them falsified by the builder's own artifact."*
+
+## Correction 1 — the port dies on the HARD FLOP BUDGET, not on the wall
+
+I wrote *"every MLP times out"* and *"not submittable at any score"*. **Both are
+wrong, and the second is wrong in a way that understates the problem.**
+
+`B` is **a hard per-MLP cap, not only a multiplier.** Verified in the installed
+package, not taken on trust:
+
+    whestbench/scoring.py:709   flops.BudgetContext(flop_budget=spec.flop_budget, ...)
+    whestbench/scoring.py:739   except flops.BudgetExhaustedError:
+                                    predictions = fnp.zeros(...)
+                                    budget_exhausted = True
+    whestbench/scoring.py:1035  a failed entry's multiplier is forced to 1.0
+
+So a candidate above `1.0 B` does not score `raw x B`. **It scores as zeros** —
+about two orders of magnitude worse than the `7.2e-8` my entry computed. `max(0.1,
+C/B)` is unbounded above only because under `lambda = 0` a *valid* run cannot
+exceed `B`. **My score row `1.804e-8 x 4.002 B = 7.218e-8, 3.55x worse` is not the
+grader's arithmetic and is retracted.**
+
+**And the wall claim is contradicted by my own artifact.** `augment_port_price.json`
+`rows[0]`: at Strassen depth 0 the projected worst wall is `70.4 s` with margin
+`1.70x` — comfortably *under* the `120 s` cap. My printed verdict block looped over
+depths 2 and 3 only, and I generalised "any depth" over a row that refutes it. The
+instrument now prints every depth's wall and says plainly that the wall is not the
+binding limit.
+
+**The correct sentence:** *the port is `4.0x`–`5.8x` over a hard per-MLP FLOP cap
+at every Strassen depth, so it never reaches the wall.*
+
+## Correction 2 — `OUR_TOWER_SHARE` was read from a stale docstring
+
+I used `990/1022`, taken from `_matmuls`' own docstring ("the model says 1,022
+matmuls"). **The function returns `797`.** Verified:
+
+    _matmuls(16, None)            797       (765 tower + 32 covariance)
+    _projected_flops(1024,16,None)  1.7174e12
+    graded L=0 anchor               1.71455e12      ratio 1.00167
+
+`797` reproduces the graded anchor to `0.17%`; `1022` is `28%` high and describes
+an older build. **A constant read from prose instead of from the function is
+exactly the orphaned-scalar failure `docs/GOTCHAS.md` already warns about**, and
+it is the second one this slice — `CURRENT_STATE`'s `215 -> 17 GFLOP/s` was the
+first. The shipped candidate's docstring is itself stale and should be corrected.
+
+## Correction 3 — the transfer was more generous than its own prose
+
+My caveat said *"the transfer assumes our spelling of the two new rank-R
+contractions is no better than upstream's."* The arithmetic did the opposite: it
+scaled them by our tower's own per-column efficiency, silently granting them our
+measured **`1.889x`** advantage over upstream (upstream bills `6.02`
+matmul-equivalents per `n`-column-layer; we bill `3.19`). Stated as written, the
+answer is **`10.77x`**, not `7.45x`.
+
+The instrument now prints **both** ends of that band and says neither is measured.
+
+## Corrections 4–6, smaller
+
+- **"Two independent instruments" overclaims.** `fit_flop_polys` is fitted by
+  *running the same code* whose tensor columns the structural leg counts. Their
+  agreement proves upstream's tower cost is linear in carried rank — a real
+  internal check — not two lines of evidence converging. **The structural count is
+  the load-bearing leg and it needs no meter at all.**
+- **The op gate is `22,000`, not `24,000`.** `docs/VALIDATION.md` §2b-iii retracted
+  `24,000` as not conservative, after a Skeptic. And **the port's op count was
+  asserted, not metered** — `docs/GOTCHAS.md` 2026-09-04 item 3 forbids
+  transferring an operation count between spellings. No claim is made now.
+- **Memory checked against the wrong limit.** I verified the `4 GiB` single-array
+  cap and not the `8,192 MB` total. Three factors plus one advanced copy is
+  `~2.9 GB` before intermediates — tight, and unenforceable on this host anyway.
+
+## What the Skeptic CONFIRMED, from source, that I had only flagged
+
+- **Legs 2/3/4 merge is real** (`factor_k3.py:401-407`). `budget = 3` and `c_l = 2`
+  force `rights = [L0]` for all three, so `fac3 = w(b_l+1) (x) w(1) . WK_11` with
+  `b_l = 2` in every case — identical — and `fac2 = 3I` is shared. `add_factors_`
+  is multilinear, so the three collapse exactly. L1 has `b_l = 1` and does not
+  join. **5 leg blocks -> 3.**
+- **The `211` case-1 block is dead work** (`factor_k3.py:432-436`). With a diagonal
+  metric it is `T_ijk = v_i g_j delta_jk` — support only where `j = k`, **zero
+  all-distinct content** — and `pK_111`'s repeated part is cancelled twice
+  (`:467`+`:526`, and again at `:476-478`). It contributes nothing anywhere.
+  **8n -> 6n -> 5n.**
+
+## Why the decision survives anyway, and by more than I claimed
+
+Take the **floor scenario**: apply the confirmed merge, delete case 1 as dead, and
+make **both** new rank-R contractions **free**. Births `8n -> 5n`, tower ratio
+`570/240 = 2.375`, overall `2.32x`:
+
+| depth | ours | floor-scenario AUGMENT | hard cap |
+|---:|---:|---:|---|
+| 0 | `0.77969 B` | `1.79 B` | **OVER** |
+| 2 | `0.60420 B` | `1.40 B` | **OVER** |
+| 3 | `0.53743 B` | `1.25 B` | **OVER** |
+| 4 | `0.48577 B` | `1.13 B` | **OVER** |
+
+**Every cell of every column, at every measured depth, is over the hard budget.**
+The structural leg alone — a direct read of upstream's own factored tensor, no
+meter involved — kills the port before any FLOP model is consulted.
+
+## A third instrument I had and did not use, and it agrees
+
+`experiments/2026-09-08_slice3/d1_augment.json` carries per-arm telemetry on all 24
+nets: median AUGMENT **`24.42 s`** against SIMPLE **`0.77 s`** (`31.6x` torch GPU
+wall), `cuda_peak_alloc` **`22.97`** against **`1.27 GiB`** (`18.1x`). Neither is a
+FLOP count and both include the dense `n³` objects our fused route removes — but
+it is a genuinely independent instrument, it runs the same direction, and it is
+*larger* than `7.45x`. **It was sitting in the artifact D1 wrote and I did not
+look at it.**
+
+## What the Skeptic resolved in the entry's favour
+
+Question 4 — did I price the same estimator whose accuracy was measured — resolves
+completely. `use_avg_metric` defaults `True` (`kprop_harmonic.py:511`), `use_pK`
+defaults `True` (`:513`), D1 ran `factor=True` (`p2_d1_augment_arm.py:218`) with
+`use_pK_defaults` recorded in its artifact, same upstream rev `93d091a4`.
+**Accuracy and price are the same object.** The `5.49x` two-meter trap is not
+repeated in the tower leg.
+
+# 2026-09-09 — CONTRACT (Rule 1): capped-generation AUGMENT — the one measurement that can reopen the port
+
+*Pre-registered before any data exists, on the Skeptic's nomination as the cheapest
+discriminating follow-up. Committed before the job runs.*
+
+**Question.** A real `estimator_k3_aug.py` would not time out and would not score
+zeros: `_fit_generations` already drops carried generations until the projected
+cost clears `0.95 B`, so an AUGMENT candidate would **shrink itself** to roughly
+**two carried generations out of fifteen**. *What does AUGMENT score there?*
+
+**Why this and nothing else.** The `7.45x` is not worth re-measuring: the decision
+is insensitive from `2.32x` to `10.8x`, which is wider than any honest error bar
+on the transfer. The only unmeasured quantity that can change what happens next is
+the accuracy of AUGMENT at the operating point where it actually fits.
+
+**Evidence.**
+- CONFIRMED: AUGMENT at full tower is `1.912e-8` vs SIMPLE `4.005e-8` (D1, 24/24).
+- CONFIRMED: `B` is a hard per-MLP cap; over-budget scores zeros.
+- CONFIRMED: AUGMENT is `2.32x`–`10.8x` over that cap at every Strassen depth.
+- CONFIRMED (SIMPLE only): generation truncation is a losing trade on the exact
+  chain — raw roughly doubles per generation dropped while the saving is linear
+  (2026-09-05, 24 nets: `4.00e-8` exact, `4.36e-8` at 12 generations, `5.06e-8`
+  at 11).
+- INFERRED: AUGMENT's extra blocks are *younger-weighted* (five of the eight
+  births are new each layer), so capping generations may cost it less than it
+  costs SIMPLE — or more, since AUGMENT's whole gain is `kappa_4` structure that
+  accumulates. **The sign is genuinely unknown and that is why it is measured.**
+
+**Hypothesis + mechanism.** If AUGMENT's `2.09x` comes from `kappa_4` structure
+generated *locally* at each layer rather than from deep memory, a capped tower
+keeps most of it. If it comes from accumulated `kappa_4` in flight, capping
+destroys it and the lane closes on accuracy as well as cost.
+
+**Intervention.** Re-run the D1 AUGMENT arm with the carried `K3` lineage capped at
+`g` generations, `g` in `{2, 3, 4}`, plus the uncapped AUGMENT and SIMPLE controls,
+on the **same 24 nets**, paired, in one process.
+
+**Predictions (recorded before the result exists).**
+1. Mine: capped-AUGMENT at `g = 2` is **worse than SIMPLE's uncapped `4.005e-8`**
+   — i.e. the port has no operating point at all. Stated because it is the
+   outcome that closes the lane, and I want it on the record before the data.
+2. Mine: `AUGMENT(g=2) / AUGMENT(uncapped)` is in `[3, 12]`, on the SIMPLE
+   truncation law (raw roughly doubles per generation dropped) applied over 13
+   dropped generations but damped by AUGMENT's younger weighting.
+3. Mine: the control `SIMPLE` uncapped reproduces `4.004685e-8` to the digit, as
+   it has now three times. **If it does not, nothing else in the run is read.**
+
+**Gate.** `AUGMENT(g=2)` beating SIMPLE's uncapped `4.004685e-8` by `>= 1.4x`
+(i.e. `<= 2.86e-8`) reopens item 2 at a rewritten operating point. Below that the
+lane closes on accuracy as well as cost. Chosen now, written on the DIFFERENCE the
+slice isolates, and passed to `competition_score.decide(gate=...)`, which has no
+default.
+
+**Falsifier.** Prediction 1 is falsified by `AUGMENT(g=2) <= 2.86e-8`.
+
+**Baseline.** Uncapped SIMPLE on the same nets and the same labels, DESIGN tier.
+
+**Cost model.** Phase 2 sets `lambda = 0`, so `C = F`. The capped candidate's
+counted-FLOP model is the frozen `_projected_flops` shape model at the AUGMENT
+birth rate, and the operating point is defined as the largest `g` clearing
+`0.95 B` — **the cost is fixed by construction and is not an outcome of this
+run.** Residual is reported as headroom against the `0.4 s` cliff only if a
+candidate is ever built; nothing here runs on the grader.
+
+**Statistic.** Paired, common random numbers, arithmetic score difference with a
+studentised-t or basic-bootstrap interval. Percentile and BCa are refused.
+
+**Seed block.** `# seed-ledger: no block named` — this re-reads the **P01 DESIGN**
+asset (`experiments/2026-08-26_p2_gt`) that D1 already spent, exactly as D2 did.
+It orients priority and **promotes nothing**; any promotion needs a fresh block.
+
+**Confounders / scope / what must not change.** `kind` and the generation cap are
+the only differences between arms. Upstream stays rev `93d091a4` plus exactly the
+recorded patch; the cap is applied by a recorded seam, and the seam's line count
+and md5 go in the artifact as `p2_d2_k4_oracle` already does.

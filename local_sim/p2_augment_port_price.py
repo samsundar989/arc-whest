@@ -153,8 +153,38 @@ TOWER = ("FactoredTensor3.get_dslice", "FactoredTensor3.contract_W")
 NEW_RANK_R = ("pK_111 -> K_211", "pK_211 -> K_211")
 
 #: Share of our anchored total that is tower work. From the shape model in
-#: `estimator_k3_strassen._matmuls`: 990 of 1022 matmul-equivalents.
-OUR_TOWER_SHARE = 990.0 / 1022.0
+#: `estimator_k3_strassen._matmuls`, which returns **797** at `(16, None)`:
+#: `765` tower matmul-equivalents and `32` covariance ones.
+#:
+#: CORRECTED 2026-09-09 after a Skeptic. The first version of this module read
+#: `990/1022` from that function's own DOCSTRING, which says "1,022 matmuls".
+#: **The docstring is stale and describes a build 28% heavier than the one we
+#: ship** — `_matmuls(16, None)` returns `797`, and `_projected_flops` on `797`
+#: reproduces the graded `L=0` anchor to `0.17%` (`1.7174e12` vs `1.71455e12`)
+#: where `1022` is `28%` high. A constant read from prose rather than from the
+#: function is exactly the orphaned-scalar failure `docs/GOTCHAS.md` warns about,
+#: and it is the second one found in this file's lineage this slice.
+OUR_TOWER_MATMULS = 765.0
+OUR_TOTAL_MATMULS = 797.0
+OUR_TOWER_SHARE = OUR_TOWER_MATMULS / OUR_TOTAL_MATMULS
+
+#: `B` IS A HARD PER-MLP CAP, NOT ONLY A MULTIPLIER. `whestbench/scoring.py:709`
+#: builds `flops.BudgetContext(flop_budget=spec.flop_budget)` around
+#: `estimator.predict`; `:739` catches `flops.BudgetExhaustedError` and returns
+#: `fnp.zeros(...)` with `budget_exhausted = True`; `:1035` then forces the
+#: multiplier to `1.0` for a failed entry. So a candidate above `1.0 B` does not
+#: score `raw x B` — **it scores as zeros**, roughly two orders of magnitude
+#: worse. `max(0.1, C/B)` is unbounded above only because under `lambda = 0` a
+#: VALID run cannot exceed `B`.
+HARD_BUDGET_B = 1.0
+
+#: `docs/VALIDATION.md` section 2b-iii. `24,000` was RETRACTED as not
+#: conservative under this policy; the working gate is `22,000`.
+OPS_GATE = 22_000
+
+#: The 8,192 MB per-MLP memory limit. Unenforceable on this host (Windows has no
+#: `RLIMIT_AS`), so it is accounting, never a test passed — `docs/GOTCHAS.md`.
+MEMORY_LIMIT_MB = 8192
 
 
 def _block_layers(birth_first, birth_steady, depth):
@@ -191,22 +221,55 @@ def project():
 
     up_fused_away = sum(up_a.get(k, 0.0) for k in FUSED_AWAY)
 
+    # Our spelling's measured efficiency advantage over upstream's, per carried
+    # n-column-layer. Upstream bills `up_tower_s / bl_s` FLOPs per block-layer;
+    # we bill `OUR_TOWER_MATMULS / bl_s` matmul-equivalents. This is the factor
+    # the two transfer variants below differ by, and it is why they must both be
+    # printed: the first version of this module SAID "our spelling is no better
+    # than upstream's" and then silently granted the advantage anyway.
+    one_matmul = WIDTH * WIDTH * (2 * WIDTH - 1)
+    up_per_bl = (up_tower_s / bl_s) / one_matmul
+    our_per_bl = OUR_TOWER_MATMULS / bl_s
+    our_advantage = up_per_bl / our_per_bl
+
+    #: The most generous spelling anyone has argued for, as a FLOOR:
+    #: legs 2/3/4 merged (they share `fac2 = 3I` and `fac3` exactly) and the
+    #: `211` case-1 block deleted as having zero all-distinct content, taking
+    #: births `8n -> 5n`; AND both new rank-R contractions made free. DERIVED
+    #: FROM SOURCE, not measured -- it exists only to show the decision does not
+    #: depend on it.
+    bl_floor = _block_layers(3, 5, DEPTH)
+    floor_tower = bl_floor / bl_s
+
     rows = []
     for d, row in sorted(OURS.items()):
         base = row["flops"]
         tower = base * OUR_TOWER_SHARE
         rest = base - tower
         aug_tower = tower * meter_tower
-        aug_new = tower * new_over_simple_tower
-        aug = aug_tower + aug_new + rest
+        # variant A -- what the arithmetic does: the two new contractions inherit
+        # our tower's per-column efficiency.
+        aug_new_a = tower * new_over_simple_tower
+        # variant B -- what the prose ASSUMES: no structural advantage on them.
+        aug_new_b = aug_new_a * our_advantage
+        aug_a = aug_tower + aug_new_a + rest
+        aug_b = aug_tower + aug_new_b + rest
+        aug_floor = tower * floor_tower + rest
         rows.append({
-            "strassen_depth": d, "leaf": row["leaf"], "ops": row["ops"],
+            "strassen_depth": d, "leaf": row["leaf"],
+            "ops_ours_metered": row["ops"],
             "ours_flops": base, "ours_B": base / BUDGET,
-            "augment_flops": aug, "augment_B": aug / BUDGET,
-            "ratio": aug / base,
+            "augment_flops": aug_a, "augment_B": aug_a / BUDGET,
+            "ratio": aug_a / base,
+            "augment_B_no_advantage": aug_b / BUDGET,
+            "ratio_no_advantage": aug_b / base,
+            "augment_B_floor_scenario": aug_floor / BUDGET,
+            "ratio_floor_scenario": aug_floor / base,
             "component_tower_B": aug_tower / BUDGET,
-            "component_new_rank_r_B": aug_new / BUDGET,
+            "component_new_rank_r_B": aug_new_a / BUDGET,
             "component_rest_B": rest / BUDGET,
+            "over_hard_budget": aug_a / BUDGET > HARD_BUDGET_B,
+            "over_hard_budget_floor_scenario": aug_floor / BUDGET > HARD_BUDGET_B,
         })
 
     c, p = _intensity_law()
@@ -224,7 +287,11 @@ def project():
 
     return {
         "structural_ratio": structural,
-        "structural_block_layers": {"SIMPLE": bl_s, "AUGMENT": bl_a},
+        "structural_block_layers": {"SIMPLE": bl_s, "AUGMENT": bl_a,
+                                    "floor_scenario": bl_floor},
+        "our_efficiency_advantage_over_upstream": our_advantage,
+        "floor_scenario_tower_ratio": floor_tower,
+        "hard_budget_B": HARD_BUDGET_B,
         "upstream_meter_tower_ratio": meter_tower,
         "upstream_meter_total_ratio": up_a["total"] / up_s["total"],
         "new_rank_r_over_simple_tower": new_over_simple_tower,
@@ -316,9 +383,14 @@ def cmd_price(a) -> int:
     print("      AUGMENT  births 8n columns per layer   %4d block-layers at depth 16"
           % d["structural_block_layers"]["AUGMENT"])
     print("      structural ratio                       %.4f" % d["structural_ratio"])
-    print("      SAME ratio from upstream's FLOP model  %.4f"
+    print("      same ratio from upstream's FLOP model  %.4f"
           % d["upstream_meter_tower_ratio"])
-    print("      -> two independent instruments, agreeing to 3 s.f.")
+    print("      -> these are NOT independent: fit_flop_polys is fitted by")
+    print("         RUNNING the same code whose columns the structural leg")
+    print("         counts. Their agreement proves upstream's tower cost is")
+    print("         linear in carried rank -- a real internal check, and not")
+    print("         two lines of evidence converging. The structural count is")
+    print("         the load-bearing one; it needs no meter at all.")
     print("\n  what AUGMENT adds that SIMPLE has no counterpart for:")
     print("      pK_111 -> K_211 and pK_211 -> K_211, both rank-R contractions,")
     print("      together %.3fx the whole SIMPLE tower."
@@ -329,14 +401,40 @@ def cmd_price(a) -> int:
              100 * d["upstream_fused_away_share_of_augment"]))
     print("      (the dense n^3 int_parts. Real, correct -- and a few per cent.)")
 
-    print("\n  %-6s %-6s %9s %9s %7s   %11s %11s"
-          % ("depth", "leaf", "ours B", "AUG B", "ratio", "AUG kernel", "AUG worst"))
-    print("  " + "-" * 74)
+    print("\n  WHAT KILLS IT IS THE HARD PER-MLP FLOP BUDGET, NOT THE WALL.")
+    print("  whestbench/scoring.py:709 wraps predict in a BudgetContext with")
+    print("  flop_budget = B; :739 catches BudgetExhaustedError and returns")
+    print("  zeros with budget_exhausted=True; :1035 forces the multiplier to")
+    print("  1.0 for a failed entry. So above %.1f B the score is not raw x B --"
+          % HARD_BUDGET_B)
+    print("  it is ZEROS. There is no 'expensive but it still ships' regime.")
+
+    print("\n  %-6s %-6s %8s %8s %7s %9s %9s   %10s %8s"
+          % ("depth", "leaf", "ours B", "AUG B", "ratio", "no-adv B",
+             "floor B", "AUG worst", "budget"))
+    print("  " + "-" * 86)
     for r in d["rows"]:
-        print("  %-6d %-6d %9.5f %9.5f %6.2fx   %9.1f s %9.1f s"
+        print("  %-6d %-6d %8.5f %8.5f %6.2fx %9.3f %9.3f   %8.1f s %8s"
               % (r["strassen_depth"], r["leaf"], r["ours_B"], r["augment_B"],
-                 r["ratio"], r["augment_proj_kernel_s"],
-                 r["augment_proj_worst_wall_s"]))
+                 r["ratio"], r["augment_B_no_advantage"],
+                 r["augment_B_floor_scenario"], r["augment_proj_worst_wall_s"],
+                 "OVER" if r["over_hard_budget"] else "ok"))
+    print("\n    AUG B    the transfer as implemented: the two NEW rank-R")
+    print("             contractions inherit our tower's measured %.3fx"
+          % d["our_efficiency_advantage_over_upstream"])
+    print("             per-column efficiency advantage over upstream.")
+    print("    no-adv B the transfer as the prose ASSUMES it -- no structural")
+    print("             advantage on operations nobody has spelled yet. Neither")
+    print("             is measured; the truth is inside this band.")
+    print("    floor B  the most generous case anyone has argued: legs 2/3/4")
+    print("             merged and the 211 case-1 block deleted (births 8n->5n,")
+    print("             tower %.3fx) AND both new contractions FREE."
+          % d["floor_scenario_tower_ratio"])
+    print("             DERIVED FROM SOURCE, not measured.")
+    print("\n    Every cell of every column is over %.1f B. **The floor scenario"
+          % HARD_BUDGET_B)
+    print("    is over the hard budget at every measured Strassen depth**, so")
+    print("    the decision does not depend on which column is right.")
 
     print("\n  THE TWO DEPTHS THE HANDOFF ASKED FOR")
     for dd in (2, 3):
@@ -346,62 +444,67 @@ def cmd_price(a) -> int:
               "(%.2fx contended)"
               % (r["ours_B"], r["ours_proj_worst_wall_s"], r["ours_margin"],
                  r["ours_margin_contended"]))
-        print("      AUGMENT  %8.5f B   proj worst wall %6.1f s   margin %5.2fx "
-              "(%.2fx contended)"
-              % (r["augment_B"], r["augment_proj_worst_wall_s"],
-                 r["augment_margin"], r["augment_margin_contended"]))
+        print("      AUGMENT  %8.5f B   proj worst wall %6.1f s"
+              % (r["augment_B"], r["augment_proj_worst_wall_s"]))
         print("        of which  tower %.3f B  |  new rank-R %.3f B  |  rest %.3f B"
               % (r["component_tower_B"], r["component_new_rank_r_B"],
                  r["component_rest_B"]))
-        if r["augment_margin"] < 1.0:
-            verdict = "EVERY MLP TIMES OUT -- not submittable at any score"
-        elif r["augment_margin_contended"] >= MARGIN_RULE:
-            verdict = "clears the >=2.0x nominee margin rule"
-        else:
-            verdict = "under the >=2.0x nominee margin rule"
-        print("      verdict: %s" % verdict)
+        print("      verdict: %.2fx OVER the hard per-MLP FLOP budget -> zeros"
+              % (r["augment_B"] / HARD_BUDGET_B))
 
-    print("\n  SCORE ARITHMETIC (raw from D1's 24 nets, 1.912e-8, deflated 6% for")
-    print("  the graded-100 path; nominee A graded at 2.031e-8 adjusted)")
-    raw = 1.912e-8 / 1.06
-    for dd in (2, 3):
-        r = next(x for x in d["rows"] if x["strassen_depth"] == dd)
-        print("      depth %d: %.3e raw x %.3f B = %.3e  vs nominee A 2.031e-08"
-              "  (%.2fx WORSE)"
-              % (dd, raw, r["augment_B"], raw * r["augment_B"],
-                 raw * r["augment_B"] / 2.031e-8))
-    print("\n      break-even B against nominee A: %.3f" % (2.031e-8 / raw))
-    print("      strategist's expected B for #15-22: 0.59 - 0.86")
+    print("\n  A REAL PORT WOULD NOT TIME OUT -- IT WOULD SHRINK ITSELF.")
+    print("  `_fit_generations` already drops carried generations until the")
+    print("  projected cost clears 0.95 B. An AUGMENT candidate would do the")
+    print("  same and land near TWO carried generations out of fifteen. That")
+    print("  candidate's ACCURACY is unmeasured, and it is the only thing that")
+    print("  could reopen this. See the follow-up in the LOG.")
 
-    print("\n  LARGEST ARRAY (not the blocker any more, and this is the point)")
+    print("\n  WALL, for completeness -- and note it is NOT the binding limit:")
+    for r in d["rows"]:
+        print("      depth %d: proj worst wall %7.1f s   margin %5.2fx  %s"
+              % (r["strassen_depth"], r["augment_proj_worst_wall_s"],
+                 r["augment_margin"],
+                 "under the cap" if r["augment_margin"] >= 1.0 else "over the cap"))
+    print("      At depth 0 the wall is FINE (%.2fx margin). The port still"
+          % d["rows"][0]["augment_margin"])
+    print("      scores zeros there, because %.2f B is over the hard budget."
+          % d["rows"][0]["augment_B"])
+
+    print("\n  LARGEST ARRAY (not the blocker, and this is the point)")
     cols = (RANK_SCHEDULE["AUGMENT"]["birth_first"]
             + RANK_SCHEDULE["AUGMENT"]["birth_steady"] * (DEPTH - 2))
-    print("      widest factor  (%d, %d) f32 = %.0f MB   x3 factors = %.2f GiB"
-          % (WIDTH, cols * WIDTH, WIDTH * cols * WIDTH * 4 / 1e6,
-             3 * WIDTH * cols * WIDTH * 4 / 2 ** 30))
-    print("      against hard rule 1's 4 GiB single-array cap: LEGAL.")
-    print("      the 4.000 GiB n^3 object is gone, exactly as proven. It was")
-    print("      never the binding constraint.")
+    one_mb = WIDTH * cols * WIDTH * 4 / 1e6
+    print("      widest factor  (%d, %d) f32 = %.0f MB   x3 factors = %.0f MB"
+          % (WIDTH, cols * WIDTH, one_mb, 3 * one_mb))
+    print("      hard rule 1's 4 GiB SINGLE-ARRAY cap: LEGAL (%.0f MB)." % one_mb)
+    print("      the %d MB per-MLP TOTAL limit: three factors plus one advanced"
+          % MEMORY_LIMIT_MB)
+    print("      copy is ~%.0f MB before intermediates -- tight, and it is"
+          % (6 * one_mb))
+    print("      ACCOUNTING, not a test passed: Windows has no RLIMIT_AS.")
+    print("      The 4.000 GiB n^3 object is gone, exactly as proven.")
 
-    print("\n  OPS are NOT the constraint either: the tower is issued batched, so")
-    print("  op count is flat in rank. Our L=3 is 12,340 against a 24,000 gate.")
+    print("\n  OPS: our L=3 is %d METERED against the %s gate"
+          % (d["rows"][3]["ops_ours_metered"], format(OPS_GATE, ",")))
+    print("      (docs/VALIDATION.md 2b-iii; 24,000 was RETRACTED as not")
+    print("      conservative). **The PORT's op count is NOT metered here** --")
+    print("      docs/GOTCHAS.md 2026-09-04 item 3 forbids transferring an")
+    print("      operation count between spellings, so no claim is made.")
 
     print("\n  CAVEATS")
     print("    - wall is PROJECTED from the two-point graded intensity law, which")
-    print("      validated +3.1% out of sample. At a FIXED leaf, intensity is")
-    print("      fixed and wall scales linearly in FLOPs -- the mildest use of")
-    print("      that model.")
-    print("    - the transfer assumes our spelling of the two new rank-R")
-    print("      contractions is no better than upstream's. They are the same")
-    print("      class of operation as contract_W, so there is no known")
-    print("      structural edge; if one is found it moves %.2fx of the %.2fx."
-          % (d["rows"][3]["component_new_rank_r_B"] / d["rows"][3]["ours_B"],
-             d["rows"][3]["ratio"]))
-    print("    - a merge exists (legs 2/3/4 share fac2 and fac3 exactly) that")
-    print("      would take births 8n -> 6n. It is NOT applied above. It would")
-    print("      move the tower term to %.2fx, which is still far above the"
-          % (_block_layers(3, 6, DEPTH) / _block_layers(2, 2, DEPTH)))
-    print("      break-even.")
+    print("      validated +3.1% out of sample. It is reported for completeness")
+    print("      only; the budget verdict does not use it.")
+    print("    - the transfer band (AUG B .. no-adv B) is %.2fx wide and neither"
+          % (d["rows"][3]["ratio_no_advantage"] / d["rows"][3]["ratio"]))
+    print("      end is measured. The decision is insensitive across it, and")
+    print("      across the floor scenario too.")
+    print("    - the floor scenario's merges are DERIVED FROM SOURCE by two")
+    print("      readers, not measured. This slice has already been wrong three")
+    print("      times deriving where it could have measured, so they are used")
+    print("      only to bound the answer, never to reach it.")
+    print("    - what is NOT bounded here is a port that FITS by dropping")
+    print("      carried generations. That is the live question.")
 
     if a.out:
         os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
