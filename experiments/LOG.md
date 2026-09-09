@@ -36980,3 +36980,86 @@ optimistic and the measurement was worth taking.
 the truth-accumulation cost of the default and takes the job from roughly 75
 minutes to roughly 2.5 hours. Paid without complaint — the alternative is a
 number that cannot be trusted in the direction that matters.
+
+# 2026-09-09 — **D2 IS DEFERRED, and my speed diagnosis was WRONG.** The de-sync fix was correct and bought nothing.
+
+*Decision entry. No new data. `# seed-ledger: no block named`. Jobs `438` and
+`439` cancelled; the GPU went to `biohub`, which had queued `2h22m`.*
+
+## What happened
+
+Job `438` (D2, 24 nets, `2^24`) projected **12 hours**. The breakdown was not what
+I assumed when I priced it at 2.5 h:
+
+    truth accumulation at 2^24     46 s / net      <- NOT the bottleneck
+    the six chains               ~1,490 s / net    <- ~250 s each
+    plain AUGMENT (job 411)          25 s          <- the same chain, uninjected
+
+**Diagnosis 1 (WRONG).** I attributed the `10x` to GPU→CPU syncs in my injection
+wrapper: `_proj_constants` rebuilt per layer with two `float()` calls,
+`float(torch.trace(...))` in three helpers, `torch.eye(n)` reallocated per layer —
+~1,900 syncs per run, each forcing every queued kernel to complete including the
+`4 GiB` dense `(2,1,1)` ops.
+
+I fixed all of it (`dde0e1a`): constants and identities `lru_cache`d, traces kept
+as 0-d device tensors, diagnostics converted once per network. **The fix is
+correct and provably number-preserving** — seam test `6/6` with the no-op arm
+still bit-identical, and `--validate-small` still reporting `2.066e-12` against
+upstream's own `proj_geq_r`, the same digits as before.
+
+**It bought nothing.** Job `439` reached `16m18s` without completing network 1,
+against `438`'s `25.6 min`. Predicted `~3.3 min`. The syncs were real and worth
+removing, but they were not the cost.
+
+**Diagnosis 2, unverified but likely.** `harmonic.HTensor.__setattr__` invalidates
+the cached diagonal slices whenever `core` is assigned — *"Any mutation of the
+HTensor state invalidates cached diagonal slices"*. The **control** arm never
+touches its degree-4 core, so its cached diagslices survive and `factor_k3` reads
+them for free. **Every injected arm replaces that core**, so the cache dies and
+the degree-4 diagslices — the `(2,1,1)`-scale ones — are recomputed every layer.
+That is `~16 s/layer`, which is the right order, and it would be **inherent to
+injection**, not a defect in the wrapper. Recorded as a hypothesis, **not
+measured**, because measuring it costs more GPU than the answer is worth right
+now.
+
+## Why D2 is deferred rather than reduced
+
+**Both of D2's gates are already dead**, and neither death is D2's fault:
+
+- The **lane gate is conjunctive** — `D2(c)/K3 < 1.5` **AND** `D1 >= 3.5e-8`
+  (contract `432f7fd`). D1 measured `1.912e-8`. **The gate cannot fire**, so D2
+  can no longer kill the κ₄ lane whatever it reports.
+- The **carrier gate was demoted to a diagnostic** by the 2026-09-08 ERRATUM: an
+  `r=1` HTensor holds `~0.2%` of κ₄'s Frobenius mass, so `D2(c)/D2(a)` cannot open
+  or close the Step-3 traceless-carrier lane in either direction.
+
+What survives is real but narrower: **how much would perfect κ₄ estimation buy
+inside the AUGMENT representation?** That is a **Step 3/4 input** — it prices the
+learned corrector's ceiling — and it is **not a Step 2 gate**. Net 1 of job `438`
+hinted at `(c) 1.676e-8` against `control 2.125e-8`, i.e. `~1.27x` headroom, which
+if it holds says the representation is near-saturated and better κ₄ *estimation*
+is not where the money is. One network; nothing is concluded from it.
+
+**Step 2 does not wait on D2.** D1 (`2.094x`) and A5 (the whole gain is κ₄'s
+`(n,n)` structure) gate it open, and its first task is independent of D2 entirely.
+
+## The cost that decided it
+
+D2 would hold the whole card for ~12 h. `biohub`'s job `435` had been queued
+`2h22m` behind it and started within seconds of the cancellation. Spending 12
+shared-GPU hours on a Step-3 input while the Step-2 critical path is idle is the
+wrong order of work.
+
+**D2 is not abandoned.** It should run when the machine is otherwise idle, and it
+will be cheaper after the fused `(2,1,1)` work below — or, if diagnosis 2 is
+right, it will need the injection to preserve the diagslice cache, which is its
+own small piece of engineering. Either way it is a *later* question.
+
+## What I got wrong, stated plainly
+
+Two mispriced estimates in one slice: `2.5 h` for a 12 h job, then `~1 h` for a
+fix that bought nothing. Both came from reasoning about the code instead of
+measuring it — the same failure mode as the two missed predictions on A3 and A5.
+**The standing correction: on this chain, measure before estimating, and treat my
+priors as weak evidence.** A one-network timing probe would have cost 25 minutes
+and caught both.
