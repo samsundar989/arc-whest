@@ -95,6 +95,14 @@ TIERS: Dict[str, str] = {
     # directions, so a block can never again exist in one and not the other.
     "P05": "DESIGN",
     "P06": "DESIGN",
+    # Allocated 2026-09-10 with CONTRACT T2. P07 FITS the chain-state ->
+    # final-residual corrector (tuning permitted); P08 is the single held-out
+    # read where the 1.15x gate is decided, on networks the fit never saw.
+    # The pair exists for the same reason P05/P06 do, and it is minted DECIDE
+    # data rather than the handoff's public split because `docs/VALIDATION.md`
+    # section 0 makes the public split read-only.
+    "P07": "DESIGN",
+    "P08": "DESIGN",
 }
 
 

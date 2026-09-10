@@ -39138,3 +39138,86 @@ IMPORTANT change to the enforcement layer and it gets its own prediction and
 For `docs/GOTCHAS.md`: **a sha256 recorded by a `workerq` job is the sha of the
 snapshot's bytes, not of your working copy's.** For any check that must bind on
 submitted bytes, pass `--no-snapshot`.
+
+# 2026-09-10 — IMPORTANT: **P07 and P08 allocated for T2**, and the handoff's public-split corpus is REFUSED on the measurement law
+
+*Change to the instrument (`local_sim/seed_blocks.py`, `local_sim/seed_ledger.py`).
+`scripts/preflight.ps1` **GREEN 12/16**. `test_seed_ledger.py` **66/66**.
+`verify_portability.py` **103/103**. Committed with this entry.*
+
+## The refusal, which is the substance of this change
+
+`docs/STRATEGIST_RESPONSE_2026-09-10.md` §1 specifies T2 as *"trained on the
+public 1,100 (labels 1e9) with cross-fitting"*. **`docs/VALIDATION.md` §0 forbids
+it**, in terms that leave no room:
+
+> **CONFIRM** | the real public split (mini 100 / full 1000, 1e9-sample truth) |
+> ... | choose *anything*. Read-only. **No constant may ever again be fitted
+> here.**
+
+and its standing rule: *"Never tune on public data again."* A cross-fitted
+regression is a fit; a corrector's coefficients are constants. The handoff and the
+measurement law are in direct conflict, and **the law wins** — `AGENTS.md` makes
+`VALIDATION.md` binding, and a strategist packet is advice, not an amendment to it.
+
+The law's stated reason applies here with full force: *"the public mini split
+steered a month of decisions. Its optimum is partly a memory of our own search, so
+a constant tuned on it carries an unknown amount of our own noise into the private
+re-run."* T2's whole claim would be about generalisation to fresh MLPs, which is
+exactly the claim that reason attacks.
+
+**The substitution.** Train and validate on freshly minted DECIDE-tier networks;
+read the public split at the end as a **check that chooses nothing**. This is
+recorded rather than quietly done, because it changes the corpus the strategist
+assumed and therefore changes what a negative result would mean. *It is flagged
+for the next packet.*
+
+**What is lost, honestly.** Label precision. The public split carries `1e9`-sample
+truth; our mints will carry `2^24` per half, whose per-neuron noise standard
+deviation is roughly `2.4e-4` against a residual of roughly `2.0e-4`. **That does
+not bias the fit** — target noise is mean-zero and least squares is unbiased under
+it — but it inflates coefficient variance and it caps any reported `R^2` at about
+`0.4`. So T2 will report the held-out **gain**, which the two-half cross estimator
+makes unbiased, and will quote `R^2` only beside its noise ceiling. Anyone reading
+a bare `R^2` from this slice against WP9's would be comparing two different
+instruments.
+
+## The blocks
+
+| block | start | n | role |
+|---|---:|---:|---|
+| `P07` | `40,910,007,000` | 384 | **the FIT.** Tuning, feature choice, head width, folds and shrinkage permitted HERE and nowhere else |
+| `P08` | `40,910,008,000` | 128 | **the held-out READ.** The `1.15x` gate is decided here, once. No tuning of any kind |
+
+Two blocks for the same reason `P05`/`P06` are two: a map fitted and validated on
+the same networks is not evidence. `128` held-out networks is above
+`VALIDATION.md` §3's floor of `>= 64` for a paired comparison, and the effect
+under test (`1.15x`) is far larger than the `10%` that floor was derived for.
+
+## The knowledge delta: an invariant added after a Skeptic finding bit again today, on the first block allocated since
+
+`seed_blocks.py` and `seed_ledger.TIERS` are two registries of the same fact.
+`SKEPTIC WP14-FOLLOWUP` found `P05`/`P06` in the first and not the second —
+`block_span('P05')` worked, `tier_of('P05')` raised, and WP15's first instrument
+run would have died on its first claim. The fix was a test asserting the two agree
+**in both directions**.
+
+**It fired today.** Adding `P07`/`P08` to `seed_blocks.py` alone left
+`test_seed_ledger.py` failing with `KeyError: "block 'P07' has no tier in
+seed_ledger.TIERS"` — before any instrument was written, let alone run. That is
+the second time this exact omission has been made and the first time it was caught
+by machinery instead of by a person. **Recorded because a passing test proves
+nothing; a test that bites proves the invariant is load-bearing.**
+
+## A process deviation, declared
+
+`AGENTS.md`'s IMPORTANT row requires *"written prediction first"*. I made the
+`seed_blocks.py` edit and ran the tests **before** writing a prediction, so the
+prediction slot for this change is **VOID** — anything I wrote afterwards would
+have been informed by the answer, and a prediction recorded after its result is
+worse than none because it flatters the record. It is declared here instead of
+being filled in. The other two IMPORTANT requirements were met in order:
+`preflight` green, and this entry.
+
+The deviation cost nothing this time only because the machinery caught what a
+prediction would have been about. That is luck, not process.

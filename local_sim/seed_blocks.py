@@ -161,6 +161,35 @@ DECISION_BLOCKS = [
                                  "P06[..000..063] for Arm M, P06[..064..127] for "
                                  "Arm L -- so the two arms are never scored on the "
                                  "same networks. No tuning of any kind here."),
+    # --- CONTRACT T2, allocated 2026-09-10 BEFORE any T2 data exists ----------
+    # T2 asks whether a learned corrector on the exact-K3 chain's own carried
+    # state is worth >= 1.15x held-out. The Slice-5 handoff specified training on
+    # the organisers' public 1,100 networks, and `docs/VALIDATION.md` section 0
+    # forbids exactly that: the public split is CONFIRM tier, read-only, and "no
+    # constant may ever again be fitted here". The rule wins over the handoff, so
+    # the corpus is minted DECIDE-tier networks and the public split is read at
+    # the end as a check that chooses nothing. Two blocks because a map fitted
+    # and validated on the same networks is not evidence -- the same reason P05
+    # and P06 are two.
+    ("P07", 40_910_007_000, 384, "PHASE-2 DESIGN block, allocated 2026-09-10 for "
+                                 "CONTRACT T2: the SUPERVISED FIT of the "
+                                 "chain-state -> final-residual corrector on the "
+                                 "exact factored K3 chain. Tuning, feature "
+                                 "choice, head width, cross-fitting folds and "
+                                 "shrinkage are PERMITTED here and NOWHERE else. "
+                                 "No gate is decided on it, and nothing fitted "
+                                 "here may be reported without P08. Replaces the "
+                                 "handoff's public-split corpus, which "
+                                 "VALIDATION.md section 0 forbids."),
+    ("P08", 40_910_008_000, 128, "PHASE-2 DESIGN block, allocated 2026-09-10 for "
+                                 "CONTRACT T2: the held-out read of whatever P07 "
+                                 "fits, on networks the fit never saw. DISJOINT "
+                                 "from P07 by construction. The 1.15x gate is "
+                                 "read HERE and nowhere else. No tuning of any "
+                                 "kind, no feature selection, no re-fitting -- "
+                                 "claiming P08 for anything but the single "
+                                 "held-out read defeats the only reason it "
+                                 "exists."),
 ]
 
 # --- single-use blocks -------------------------------------------------------
