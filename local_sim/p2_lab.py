@@ -54,6 +54,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -169,6 +170,16 @@ def _cost_under_012(name, width, depth, budget):
     return None
 
 
+
+_BLOCK_RE = re.compile(r"truth_([A-Z]\d{2})")
+
+
+def _block_from_path(path: str) -> str:
+    """The block id a truth filename carries, or "" if it carries none."""
+    m = _BLOCK_RE.search(os.path.basename(path))
+    return m.group(1) if m else ""
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--truth", required=True)
@@ -184,7 +195,28 @@ def main() -> int:
                     help="networks used for the MSE-by-depth mechanism curve")
     ap.add_argument("--gate", type=float, default=None,
                     help="pre-registered promotion gate; REQUIRED to print a verdict")
+    ap.add_argument("--block", default="",
+                    help="the seed block this truth belongs to. Inferred from "
+                         "the filename when it carries a block id; REQUIRED "
+                         "otherwise, because guessing is how a single-use "
+                         "block gets read twice.")
+    ap.add_argument("--ts", default="",
+                    help="UTC timestamp for the read register. REQUIRED: this "
+                         "module must never read the clock, so a replay carries "
+                         "the historical date.")
+    ap.add_argument("--note", default="", help="recorded on the read line")
+    ap.add_argument("--control", default=CONTROL,
+                    help="the arm every other arm is paired against")
+    ap.add_argument("--residual-cap", type=float, default=None,
+                    help="override the 0.4 s cliff for an ACCURACY-ONLY run. "
+                         "<=0 disables it entirely. The relaxation is printed "
+                         "and recorded; such a run is never residual evidence.")
     a = ap.parse_args()
+    if not a.ts:
+        print("REFUSED: --ts is required. The read register records WHEN a "
+              "protected artifact was looked at, and a module that reads the "
+              "clock cannot replay a historical run honestly.")
+        return 2
 
     man = load_manifest()
     width, depth = man["shape"]["width"], man["shape"]["depth"]
@@ -192,7 +224,27 @@ def main() -> int:
     floor = man["budget"]["multiplier_floor"]
     parity = man["package_parity"]
 
-    z = np.load(a.truth)
+    # THE TRUTH READ IS REGISTERED, NOT MERELY PERFORMED.
+    #
+    # Stage 0 R3 (2026-09-10): `seed_ledger` refuses a second CLAIM on a
+    # single-use block and has never been able to refuse a second np.load of
+    # the truth that claim produced. P08 was claimed once and read three times
+    # before anything noticed. `local_sim/truth_reads.py` counts looks; this is
+    # the call site that makes the lab honest, and the block is REQUIRED rather
+    # than guessed at when the filename does not carry it.
+    import truth_reads as _tr
+    block = a.block or _block_from_path(a.truth)
+    if not block:
+        print("REFUSED: cannot tell which seed block "
+              f"{os.path.basename(a.truth)!r} belongs to. Pass --block. "
+              "Guessing here is how a single-use block gets read twice.")
+        return 2
+    with _tr.reserve(block, a.truth, consumer="local_sim/p2_lab.py",
+                     purpose=f"arms {a.arms} at the live shape",
+                     ts=a.ts, instrument=os.path.abspath(__file__),
+                     result_artifact=a.out,
+                     note=a.note):
+        z = dict(np.load(a.truth))
     seeds = [int(s) for s in z["seeds"]]
     n = len(seeds) if a.n == 0 else min(a.n, len(seeds))
     seeds = seeds[:n]
@@ -203,7 +255,7 @@ def main() -> int:
     gt_noise = z["gt_noise"][:n].astype(np.float64)
     y_mid = ((y1 + y2) / 2.0).astype(np.float32)
 
-    is_probe = bool(int(z["probe"])) if "probe" in z.files else False
+    is_probe = bool(int(z["probe"])) if "probe" in z else False
     if is_probe:
         print("!" * 92)
         print("!!  PROBE TRUTH -- unregistered seeds, no block claimed. This run is a")
@@ -234,9 +286,32 @@ def main() -> int:
     # may fail an arm that passed then. That is the correct behaviour and the
     # difference is a finding, not a regression -- see the P2-P0 correction in
     # experiments/LOG.md before comparing a new run to the recorded one.
+    # THE RESIDUAL CLIFF, AND WHY A DESIGN-TIER ACCURACY RUN MAY RELAX IT.
+    #
+    # `--residual-cap` exists because this host reads ~27x high per operation
+    # on residual (docs/VALIDATION.md 433-542, docs/GOTCHAS.md 126), so the
+    # armed 0.4 s cliff fails the exact K3 chain here on machine speed rather
+    # than on the candidate's behaviour -- measured 726 ms on one network at
+    # 1024x16 against a graded 330566 whose worst SERVER wall was 33 s of 120.
+    # A failed MLP scores as zero-prediction MSE, so leaving it armed would
+    # replace an accuracy comparison with a comparison of nothing.
+    #
+    # It is NOT disabled silently and it is NOT a policy change. The cap is
+    # printed, recorded in the report, and any run that relaxes it is labelled
+    # ACCURACY-ONLY. Deployment residual remains `certify_candidate` section 7
+    # and the official subprocess runner's job, and no relaxed run may be
+    # quoted as residual evidence.
+    _res = {} if a.residual_cap is None else {
+        "residual_wall_time_limit_s": (None if a.residual_cap <= 0
+                                       else a.residual_cap)}
     spec = le.LifecycleSpec(width=width, depth=depth, flop_budget=budget,
-                            floor=floor,
+                            floor=floor, **_res,
                             **({} if a.lam is None else {"lam": a.lam}))
+    if a.residual_cap is not None:
+        print("  *** RESIDUAL CAP RELAXED -- this run is ACCURACY-ONLY. Its "
+              "failure accounting")
+        print("      cannot see a 0.4 s violation and it is NOT residual "
+              "evidence for anything.")
     print(f"  deciding model   lambda = {spec.lam:.4g}"
           + ("   (COUNTED FLOPS ONLY -- the frozen model)" if spec.lam == 0.0
              else "   (Phase-1 lambda; NOT the frozen P2-CP1 model)"))
@@ -308,14 +383,14 @@ def main() -> int:
 
     # ---- paired comparisons against the control ---------------------------
     print()
-    print(f"  PAIRED vs {CONTROL} -- arithmetic score difference, "
+    print(f"  PAIRED vs {a.control} -- arithmetic score difference, "
           f"studentised-t 95% (the binding statistic, docs/VALIDATION.md 2b-i)")
     print(f"  {'arm':<18} {'gain':>8} {'95% t CI (relative)':>26} {'better':>9} "
           f"{'sign p':>8}")
-    ctrl_rows = results[CONTROL]["rows"]
+    ctrl_rows = results[a.control]["rows"]
     paired = {}
     for name in arms:
-        if name == CONTROL:
+        if name == a.control:
             continue
         res = cs.paired_compare_rows(
             [r.to_row() for r in ctrl_rows],
@@ -347,7 +422,7 @@ def main() -> int:
     print("  FLOOR CHECK -- counted vs effective, at the PHASE-1 lambda = 1e11")
     print("  (local residual does NOT transfer; the RATIO to the control is the")
     print("   signal, not the level)")
-    ctl_r = float(np.mean([r.residual_wall_time_s for r in results[CONTROL]["rows"]]))
+    ctl_r = float(np.mean([r.residual_wall_time_s for r in results[a.control]["rows"]]))
     for name in arms:
         rws = results[name]["rows"]
         f = float(np.mean([r.flops_used for r in rws]))
@@ -375,12 +450,12 @@ def main() -> int:
         print("  decision, and only the threshold registered BEFORE the data.")
     else:
         print()
-        print(f"  VERDICT vs {CONTROL}, pre-registered gate {a.gate:.4f}x, "
+        print(f"  VERDICT vs {a.control}, pre-registered gate {a.gate:.4f}x, "
               f"studentised-t, one-sided")
         ctrl_scores = cs.score_suite([r.to_row() for r in ctrl_rows],
                                      lam=spec.lam, floor=floor).scores
         for name in arms:
-            if name == CONTROL:
+            if name == a.control:
                 continue
             cand_scores = cs.score_suite(
                 [r.to_row() for r in results[name]["rows"]],
@@ -473,7 +548,9 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
                            "NOT the model the contract froze"),
         "lambda_provenance": "PHASE-1 value 1e11; Phase-2 lambda is UNPUBLISHED",
         "residual_is_graded": False,
-        "control": CONTROL,
+        "control": a.control,
+        "residual_cap_override": a.residual_cap,
+        "accuracy_only": a.residual_cap is not None,
         "pre_registered_gate": gate,
         "gate_note": (
             "the gate is registered in experiments/LOG.md BEFORE any data "

@@ -569,6 +569,7 @@ def evaluate(
     progress_every: int = 0,
     on_setup_failure: str = "raise",
     weights_mode: str = DEFAULT_WEIGHTS_MODE,
+    predictions_out: Optional[List[np.ndarray]] = None,
     _lifecycle: str = "grader",
 ) -> Tuple[List[EvidenceRow], Dict[str, Any]]:
     """Run `candidate` over `seeds` under the GRADER's lifecycle.
@@ -581,6 +582,14 @@ def evaluate(
     `f64_readonly`, which is what the grading server actually hands a candidate.
     Passing `"f32"` reproduces the historical local world and is a control, not
     evidence about deployment.
+
+    `predictions_out`, when a list is passed, collects each MLP's FINAL-LAYER
+    prediction as it was actually SCORED -- after every zeroing, so a failed MLP
+    contributes the zeros the grader scored and not the array the candidate
+    returned before it was disqualified. Purely additive: nothing else in this
+    function reads it, and passing nothing changes no behaviour. It exists
+    because `vault.py` used to save its own predictions from its own loop, and
+    deleting that loop must not delete the raw output of a once-ever touch.
 
     `_lifecycle` exists ONLY so the regression test can drive the historical
     `"per_mlp_no_setup"` path (vault.py:282 / coverage_lab.py:226) through the
@@ -773,6 +782,12 @@ def evaluate(
 
         # float32, as scoring.py:846 does it
         mse = float(np.mean((final.astype(np.float32) - target) ** 2))
+
+        if predictions_out is not None:
+            # A COPY, and the post-zeroing array: the caller must not be able to
+            # reach back into this loop's state, and what it stores must be what
+            # was scored.
+            predictions_out.append(np.array(final, dtype=np.float32, copy=True))
 
         rows.append(
             EvidenceRow(

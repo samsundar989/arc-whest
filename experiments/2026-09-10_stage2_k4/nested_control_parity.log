@@ -1,0 +1,23 @@
+C:\Users\samsu\Documents\arc-whest\local_sim\p2_build_k4_arms.py:339: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_full.py:303: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_full.py:304: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\local_sim\p2_arms\arm_k3_exact.py:225: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\local_sim\p2_arms\arm_k3_exact.py:226: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\local_sim\p2_arms\arm_k3_k4coh.py:225: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\local_sim\p2_arms\arm_k3_k4coh.py:226: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+parity at 96x5
+  seed 90000000301: theta=0 bit-identical: True   same counted FLOPs: True (110,277,439 vs 110,277,439)
+               intervention differs by 2.271e-03 relative   cost 110,652,415 (1.003400x)
+  seed 90000000302: theta=0 bit-identical: True   same counted FLOPs: True (110,277,439 vs 110,277,439)
+               intervention differs by 1.892e-03 relative   cost 110,652,415 (1.003400x)
+  seed 90000000303: theta=0 bit-identical: True   same counted FLOPs: True (110,277,439 vs 110,277,439)
+               intervention differs by 1.544e-03 relative   cost 110,652,415 (1.003400x)
+
+PARITY OK
