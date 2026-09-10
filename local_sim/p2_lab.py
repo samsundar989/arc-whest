@@ -512,9 +512,14 @@ def main(argv=None) -> int:
     # killed the packed lane. Report it loudly rather than letting the freeze hide
     # it, because the next lane (K3/Edgeworth) is elementwise-heavy in the same way.
     print()
-    print("  FLOOR CHECK -- counted vs effective, at the PHASE-1 lambda = 1e11")
-    print("  (local residual does NOT transfer; the RATIO to the control is the")
-    print("   signal, not the level)")
+    if spec.lam == 0.0:
+        print("  COST CHECK -- Phase 2 lambda = 0, so effective C equals counted F")
+        print("  (local residual is shown separately as a cliff-risk diagnostic;")
+        print("   it is not priced and its absolute level does not transfer)")
+    else:
+        print(f"  COST CHECK -- effective C = F + lambda*R at lambda = {spec.lam:g}")
+        print("  (local residual does NOT transfer; only the within-instrument")
+        print("   ratio is descriptive, and this is not a Phase-2 cost model)")
     ctl_r = float(np.mean([r.residual_wall_time_s for r in results[a.control]["rows"]]))
     for name in arms:
         rws = results[name]["rows"]
@@ -785,6 +790,35 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
                 "n_negative_corrected": nc.n_negative_corrected,
                 "notes": list(nc.notes),
             }
+    build_ok = (payload["status"] == "complete" and
+                all(payload["arms"][name]["n_failed"] == 0 for name in arms))
+    payload["outcomes"] = {
+        "build": {
+            "kind": "build",
+            "status": "PASS" if build_ok else "FAIL",
+            "criterion": ("all four requested arms parsed, ran through the "
+                          "canonical lifecycle, and produced no failed rows"),
+        },
+        "kill": {
+            "kind": "kill",
+            "status": "NOT_EVALUATED",
+            "reason": ("this command has no separately registered kill rule; "
+                       "failure to pass a promotion gate is not a kill"),
+        },
+        "mechanism": {
+            "kind": "mechanism",
+            "status": "DESCRIPTIVE",
+            "arms": [name for name in ("consumers-only", "births-only")
+                     if name in payload["arms"]],
+            "reason": ("component-arm comparisons are reported separately and "
+                       "do not return a promotion or kill boolean"),
+        },
+        "promotion": {
+            "kind": "promotion",
+            "status": ("NOT_EVALUATED" if gate is None else "EVALUATED"),
+            "authority": "competition_score.decide(gate=..., interval='t')",
+        },
+    }
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     try:
         with open(path, "x", encoding="utf-8") as fh:

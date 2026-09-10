@@ -177,6 +177,11 @@ def test_complete_report_and_receipt():
         check("the report identifies itself as complete", report["status"] == "complete")
         check("all four registered arm names survive into the report",
               set(report["arms"]) == set(lab.MECHANISM_ARMS))
+        check("build, kill, mechanism and promotion outcomes stay separate",
+              report["outcomes"]["build"]["status"] == "PASS" and
+              report["outcomes"]["kill"]["status"] == "NOT_EVALUATED" and
+              report["outcomes"]["mechanism"]["status"] == "DESCRIPTIVE" and
+              report["outcomes"]["promotion"]["status"] == "NOT_EVALUATED")
         check("the saved average-truth floor is half the per-replica floor",
               report["truth"]["noise_floor_of_two_replica_average_mean"] == 0.01)
         q = report["arms"]["coherent"]["noise_aware_vs_control"]
