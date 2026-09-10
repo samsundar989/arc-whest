@@ -6,8 +6,8 @@
   "width": 1024,
   "depth": 16,
   "budget": 2199023255552,
-  "truth_free": false,
-  "confirm_tier_read": true,
+  "truth_free": true,
+  "confirm_tier_read": false,
   "is_shipped_file": true,
   "sections": {
     "linux_memory_gate": {

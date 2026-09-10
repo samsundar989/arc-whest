@@ -354,9 +354,15 @@ def test_production_cli_memory_only():
                 "--memory-only"]
         good = subprocess.run(base + ["--json", out], cwd=_ROOT,
                               text=True, capture_output=True)
+        receipt = {}
+        if os.path.isfile(out):
+            with open(out, encoding="utf-8") as handle:
+                receipt = json.load(handle)
         check("explicit applicable report is CERTIFIED through the real CLI",
-              good.returncode == 0 and os.path.isfile(out)
-              and "memory consumer verdict: CERTIFIED" in good.stdout,
+              good.returncode == 0
+              and "memory consumer verdict: CERTIFIED" in good.stdout
+              and receipt.get("truth_free") is True
+              and receipt.get("confirm_tier_read") is False,
               "returncode=%d" % good.returncode)
         report["candidate_sha256"] = "0" * 64
         with open(path, "w", encoding="utf-8") as handle:

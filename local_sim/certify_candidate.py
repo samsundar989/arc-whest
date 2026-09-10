@@ -725,8 +725,9 @@ def main() -> int:
               # legitimate CONFIRM-tier use -- but a report that says
               # `truth_free: true` beside a real MSE is a false label, and a LOG
               # entry that repeats it inherits the falsehood.
-              "truth_free": bool(a.quick or a.skip_smoke),
-              "confirm_tier_read": not bool(a.quick or a.skip_smoke),
+              "truth_free": bool(a.quick or a.skip_smoke or a.memory_only),
+              "confirm_tier_read": not bool(
+                  a.quick or a.skip_smoke or a.memory_only),
               "is_shipped_file": is_ship,
               "sections": {}}
 
