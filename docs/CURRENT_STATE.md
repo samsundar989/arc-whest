@@ -135,28 +135,19 @@
 >   estimate was `1.8x` low (measured `39.4 s/net`), and the ETAs are corrected
 >   in the queue.**
 >
-> ### PREFLIGHT IS CURRENTLY RED, DELIBERATELY AND TRANSIENTLY — READ THIS BEFORE PROMOTING
+> ### THE LEDGER GATE WENT RED MID-FLIGHT AND IS NOW GREEN AGAIN — kept as a note
 >
-> `preflight` step 7 (`seed_ledger.py --check --scan`) reports **2 ERRORS**:
+> Claiming `P07`/`P08` with their artifact paths left `preflight` step 7
+> (`seed_ledger.py --check --scan`) reporting **2 ERRORS** for several hours: an
+> artifact named in a claim but never hashed. That is the designed order — the
+> claim is written FIRST so an interrupted run leaves a claim rather than a silent
+> draw — and the fix is `seed_ledger.finalize(...)` on the host once the file
+> exists. **Both are finalized against their job-reported sha256
+> (`b96f90a0…`, `4c7a8da9…`) and the check reads `CONSISTENT`.**
 >
->     ERROR local_sim/p2_truth.py: names artifact .../truth_P07.npz but no hash
->       was ever recorded for it.
->     ERROR local_sim/p2_truth.py: names artifact .../truth_P08.npz  (same)
->
-> This is the **expected mid-flight state**, not a defect. `P07`/`P08` were
-> claimed on the host with their artifact paths (a claim is written FIRST so an
-> interrupted run leaves a claim rather than a silent draw), the label jobs run
-> with `--already-claimed` and therefore write nothing to the ledger, and the
-> hash is recorded when the artifact exists. **The fix is one call each, on the
-> host, as soon as jobs `493`/`494` land:**
->
->     seed_ledger.finalize('local_sim/p2_truth.py',
->                          'experiments/2026-09-10_slice5/truth_P07.npz',
->                          ts='2026-09-10')
->
-> **Nothing may be promoted or submitted while step 7 is red.** The nominee-A
-> canary is unaffected — it spends no seed block — but a `preflight -Full` run
-> before that finalize will fail, and it should.
+> Kept here because the window is real and a successor could land in it: **between
+> claiming a block with an artifact path and finalizing it, preflight is red and
+> nothing may be promoted.** Finalize on the host as soon as the job lands.
 > - `497` — depth-2 mini-100 with the residual cap lifted: the replacement gate,
 >   and the first accuracy read on the organisers' data (the capped run produced
 >   **none**, because every row was zeroed).
