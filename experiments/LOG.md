@@ -40322,3 +40322,80 @@ held-out block would compound the violation rather than fix it.
 demonstrated to recover `99.5%` of a gate-strength smooth signal finds `0.5%` of
 the real residual, and a second, entirely different estimator family agrees to
 four decimals.
+
+# 2026-09-10 — **SUBMITTED: `330566`, Strassen depth 2, sha256 `390bc226…`.** Approved on slot availability, NOT on a finding that the two failed gates were wrong — and that distinction is the point of this entry.
+
+*Hard rule 6's order executed in full: `whest validate` clean (`49 ms`) → clean
+mini run (`0/100` failures, job `497`) → Samuel asked → submitted. Slot ledger
+`1/10` used on 2026-09-10 UTC. Packaged inner sha verified against the certified
+bytes **before** transmission.*
+
+## What was submitted
+
+    submission id      330566
+    file               estimator_k3_strassen_L2.py  ->  estimator.py in the archive
+    sha256             390bc226bbf517df0110facfc0dc91c78ef670e8a49368a536cabf630057d1db
+    bytes              52,380   (byte delta from 330327: ZERO; one character differs)
+    _STRASSEN_DEPTH    2
+    stack              whestbench 0.16.1 / flopscope 0.12.1 / py 3.10.19 / numpy 2.2.6
+    counted FLOPs      0.604217 B      operations 9,321
+    projected residual 0.100 s         3.20x under the 0.4 s cliff
+    projected worst wall 33.0 s        2.28x margin under the measured 1.60x contention
+    CONFIRM read       0/100 failures, raw 3.92e-08, adjusted 2.37e-08, multiplier 0.60420211
+
+## THE APPROVAL, RECORDED AS GIVEN AND NOT AS I WOULD HAVE PREFERRED IT
+
+I asked one question: *were gates (b)-§10 and (h) mis-specified?* Samuel's answer,
+verbatim:
+
+> **"i dont know if they were mis specified, but if we have submissions available
+> then submit, nothing to lose."**
+
+**He did not adjudicate the gate question, and this entry does not treat his
+approval as if he had.** The two gates stay **FAILED** on the record:
+
+    FAIL  10: zero failed MLPs                              2 failed
+    FAIL  10: worst GRADED-PATH residual is under the cliff  3305.05 ms -> 0.1x
+
+They were written by me before the data, they failed, and **they have not been
+retracted, amended, or ruled mis-specified by anyone.** The submission proceeded
+on a different and entirely legitimate ground — a free slot and a bounded
+downside — which is Samuel's call to make and not a statement about the gates.
+
+**Why the distinction is worth this much ink.** The failure mode Rule 1 exists to
+prevent is a gate that quietly becomes non-binding once it is inconvenient. If
+this graded row comes back well, the temptation will be to read it backwards as
+proof the gates were wrong. **It is not.** A good graded row would be evidence
+about the *candidate*; the gates would remain two clauses that judge residual in
+local seconds on a host that reads `27x` high per operation, and they would still
+refuse `330327`, which holds a real graded `0/100` row. That argument was already
+on the record on 2026-09-05, five days before the run — and it is still an
+argument nobody has ruled on.
+
+**One correction to the approval's own premise, recorded because it was mine to
+make and I made it before he decided.** "Nothing to lose" is not quite right and I
+said so at the time: a submission spends a slot, and a failure would stand as a
+public undesignated row. He decided with that in front of him. `9` slots remain
+today.
+
+## What this buys
+
+Depth 2 cannot be **designated** without a graded row — it was priced and
+certified, not graded. This canary is that row. Under the standing
+`>= 2.0x` wall-margin rule, depth 2's `2.28x` is the only configuration that
+qualifies; depth 3's `1.21x` does not, and depth 4's `0.63x` is far outside.
+
+**Nothing is designated by this.** Designation is Samuel's, always, and the pair
+still waits on the Rules v14 §6 question — which remains a checked negative with a
+neutral forum post drafted and unsent.
+
+## Predictions still open, and they are the contract's
+
+Pre-registered on 2026-09-10 at `0a82ad1`, before any certification datum:
+
+| # | prediction | status |
+|---|---|---|
+| 1 | graded raw in `[3.760e-08, 3.798e-08]` | **OPEN** — the graded suite is a hidden 100 with `0/100` overlap with the mini, so today's `3.92e-08` corroborates the mechanism without testing the number |
+| 2 | graded score in `[2.26e-08, 2.30e-08]`, point `2.283e-08` | **OPEN** |
+| 3 | graded worst wall in `[26 s, 45 s]` | **OPEN** — and this is the one that matters, because it tests the wall model the `>= 2.0x` margin rule is built on |
+| 4 | ops `9,304 +- 0`; residual `<= 0.15 s`; `n_failed_mlps = 0` | **ops already MISSED** (`9,321`); the rest open |
