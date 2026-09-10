@@ -251,10 +251,9 @@ def main(argv=None) -> int:
                          + ",".join(MECHANISM_ARMS))
     ap.add_argument("--n", type=int, default=0, help="0 = every network in the truth file")
     ap.add_argument("--lam", type=float, default=None,
-                    help="residual price. Pass 0.0 for the COUNTED-FLOPS-ONLY "
-                         "model, which is what the P2-CP1 contract froze as the "
-                         "deciding model. Default: the Phase-1 lambda = 1e11, "
-                         "reported alongside but NOT the frozen model.")
+                    help="lambda used by the named lifecycle. The live Phase-2 "
+                         "default is 0, so cost is counted FLOPs only; any "
+                         "nonzero value is an explicit non-Phase-2 deviation.")
     ap.add_argument("--depth-subset", type=int, default=8,
                     help="networks used for the MSE-by-depth mechanism curve")
     ap.add_argument("--gate", type=float, default=None,
