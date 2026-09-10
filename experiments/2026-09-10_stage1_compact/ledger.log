@@ -1,0 +1,126 @@
+================================================================================================
+STAGE 1 -- PROJECTED counted-FLOP ledger at 1024x16, B = 2**41
+================================================================================================
+
+EVERY NUMBER BELOW IS A MODEL. It prices arithmetic that has not
+been written in `fnp`. `local_sim/p2_flop_anchor.py` is what turns a
+model into a measurement, and it needs a real file to run.
+
+A. the tower this repository SHIPS (exact, no generation cap)
+-------------------------------------------------------------
+  family                                         per layer               total         B
+  transport (contract_W)                    54,734,094,336     875,745,509,376   0.39824
+  (2,1) slice                               73,010,249,728   1,168,163,995,648   0.53122
+  (3,) slice                                    53,477,376         855,638,016   0.00039
+  Wick column scales                            26,738,688         427,819,008   0.00019
+  TOTAL                                                      2,045,192,962,048   0.93005
+    transport (contract_W): 3 blocks x (n,n)@(n,kn); the youngest M is I and is concatenated, not multiplied
+    (2,1) slice: 4 distinct matmuls after the two documented coincidences collapse six into four
+    (3,) slice: elementwise, O(n^2 k)
+    Wick column scales: three left diagonal scales
+
+  Cross-check: estimator_k3_strassen_L2.py MEASURES 1,328,654,462,566
+  (0.60420 B) at Strassen depth 2. This model prices depth 0, and
+  Strassen's own measured ladder puts depth 0 at 1,714,554,351,206
+  (0.77969 B). Model / measured = 1.1928.
+
+B. the COMPACT representation (recent=4 dense, shared rank 384)
+---------------------------------------------------------------
+  family                                         per layer               total         B
+  recent tier: transport                    23,342,481,408     373,479,702,528   0.16984
+  recent tier: (2,1) slice                  31,134,318,592     498,149,097,472   0.22653
+  recent tier: elementwise                      34,209,792         547,356,672   0.00025
+  shared tier: transport of Q                  603,684,864       9,658,957,824   0.00439
+  shared tier: reconstruction               11,762,270,208     188,196,323,328   0.08558
+  shared tier: (2,1) into r-coords          15,695,806,464     251,132,903,424   0.11420
+  shared tier: one trailing @ Q^T              603,193,344       9,651,093,504   0.00439
+  shared tier: elementwise                      46,006,272         736,100,352   0.00033
+  basis join (incremental)                  50,118,983,680     801,903,738,880   0.36466
+  rebase right factors after join            4,410,851,328      70,573,621,248   0.03209
+  TOTAL                                                      2,204,028,895,232   1.00228
+    recent tier: transport: 4 newest sources stay dense
+    recent tier: (2,1) slice: unchanged from the shipped chain
+    recent tier: elementwise: (3,) slice and Wick scales
+    shared tier: transport of Q: P1: one (n,n)@(n,r) serves every age
+    shared tier: reconstruction: P2: the Hadamard destroys the rank structure, so every old source must be materialised
+    shared tier: (2,1) into r-coords: P2: (n,n)@(n,r) instead of (n,n)@(n,n)
+    shared tier: one trailing @ Q^T: the sum is taken in r-coords first
+    shared tier: elementwise: (3,) slice and Wick, per source
+    basis join (incremental): project-off + thin QR + an (r+c) core eigendecomposition + one rotation. The core step has NO flopscope primitive: priced as arithmetic, and a deployable version must be priced again
+    rebase right factors after join: R @ F_s for every source, every join -- the price of sharing, and the family most often forgotten
+
+C. the fourth-order diagonal channel, with the backbone's covariance diagonal
+-----------------------------------------------------------------------------
+  family                                         per layer               total         B
+  W . W                                          1,048,576          16,777,216   0.00001
+  (W.W) g and (W.W) diag(C)                      4,192,256          67,076,096   0.00003
+  diag(W C W^T)                                          0                   0   0.00000
+  TOTAL                                                             83,853,312   0.00004
+    W . W: one Hadamard per layer
+    (W.W) g and (W.W) diag(C): two matrix-vector products
+    diag(W C W^T): FREE: it is the diagonal of the next layer's covariance, which the K2 backbone computes
+
+D. ...and WITHOUT it, which is the version that is not free
+-----------------------------------------------------------
+  family                                         per layer               total         B
+  W . W                                          1,048,576          16,777,216   0.00001
+  (W.W) g and (W.W) diag(C)                      4,192,256          67,076,096   0.00003
+  diag(W C W^T)                              2,147,483,648      34,359,738,368   0.01562
+  TOTAL                                                         34,443,591,680   0.01566
+    W . W: one Hadamard per layer
+    (W.W) g and (W.W) diag(C): two matrix-vector products
+    diag(W C W^T): NOT free: a full (n,n)@(n,n) if the backbone does not already have it
+
+================================================================================================
+WHAT THE LEDGER SAYS
+================================================================================================
+  shipped tower, modelled             2,045,192,962,048   0.93005 B
+  compact, modelled                   2,204,028,895,232   1.00228 B
+  ratio                                           0.928x
+  K4 diagonal channel, backbone              83,853,312   0.000038 B
+  K4 diagonal channel, standalone        34,443,591,680   0.015663 B
+
+  The join's CORE step is priced as arithmetic: flopscope has no
+  symmetric-eigendecomposition primitive, so a deployable version
+  needs an explicit orthogonalisation and must be priced AGAIN.
+  Read the join line before quoting the ratio.
+
+================================================================================================
+E. THE SHAPE SWEEP -- where the compact form is cheaper, if anywhere
+================================================================================================
+   recent   rank                 total         B   vs dense  join share
+        1    128     1,043,183,566,848   0.47438      1.961       53.3%  <- cheaper
+        1    192     1,271,124,000,768   0.57804      1.609       51.3%  <- cheaper
+        1    256     1,515,021,139,968   0.68895      1.350       50.1%  <- cheaper
+        1    384     2,052,667,342,848   0.93345      0.996       48.8%
+        1    512     2,660,085,792,768   1.20967      0.769       48.6%
+        2    128     1,201,359,334,059   0.54631      1.702       43.2%  <- cheaper
+        2    192     1,406,649,477,803   0.63967      1.454       43.3%  <- cheaper
+        2    256     1,626,480,224,939   0.73964      1.257       43.5%  <- cheaper
+        2    384     2,111,613,217,451   0.96025      0.969       44.3%
+        2    512     2,660,457,687,723   1.20984      0.769       45.3%
+        3    128     1,346,481,509,717   0.61231      1.519       35.8%  <- cheaper
+        3    192     1,530,186,257,749   0.69585      1.337       37.0%  <- cheaper
+        3    256     1,727,065,838,933   0.78538      1.184       38.1%  <- cheaper
+        3    384     2,162,067,068,245   0.98319      0.946       40.2%
+        3    512     2,654,920,332,629   1.20732      0.770       42.2%
+        4    128     1,478,550,093,824   0.67237      1.383       30.1%  <- cheaper
+        4    192     1,641,734,340,608   0.74657      1.246       31.8%  <- cheaper
+        4    256     1,816,777,981,952   0.82617      1.126       33.4%  <- cheaper
+        4    384     2,204,028,895,232   1.00228      0.928       36.4%
+        4    512     2,643,473,727,488   1.20211      0.774       39.1%
+        6    128     1,703,526,487,381   0.77467      1.201       21.8%  <- cheaper
+        6    192     1,828,864,415,061   0.83167      1.118       23.8%  <- cheaper
+        6    256     1,963,581,855,061   0.89293      1.042       25.8%  <- cheaper
+        6    384     2,262,476,477,781   1.02886      0.904       29.5%
+        6    512     2,602,852,767,061   1.18364      0.786       33.1%
+
+  CALIBRATION: this model prices the shipped tower 1.1928x its
+  own measured depth-0 figure. The compact side gets no equivalent
+  concession, so divide every ratio by ~1.19 before believing
+  it. Calibrated best: 1.644x
+
+  Cheapest: recent=1, rank=128, 0.47438 B, 1.961x cheaper than
+  the modelled tower. That is a MODEL, on families that have not
+  been written in `fnp`, and the join's core step has no
+  primitive. It is a reason to build, not a result.

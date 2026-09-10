@@ -1,0 +1,58 @@
+================================================================================================
+STAGE 1 -- the compact all-age representation: algebra before labels
+================================================================================================
+
+1. the compact form reproduces the dense one EXACTLY at full rank
+-----------------------------------------------------------------
+  (generic signed) the (3,) slice agrees                           ok   rel 2.52e-17
+  (generic signed) the (2,1) slice agrees                          ok   rel 3.20e-16
+  (orientation (rank-one, u v^T)) the (3,) slice agrees            ok   rel 1.34e-16
+  (orientation (rank-one, u v^T)) the (2,1) slice agrees           ok   rel 1.85e-16
+  (sign cancellation) the (3,) slice agrees                        ok   rel 1.53e-16
+  (sign cancellation) the (2,1) slice agrees                       ok   rel 1.45e-16
+  (repeated indices (all ones)) the (3,) slice agrees              ok   rel 0.00e+00
+  (repeated indices (all ones)) the (2,1) slice agrees             ok   rel 0.00e+00
+  (zero-variance lineage) the (3,) slice agrees                    ok   rel 2.59e-16
+  (zero-variance lineage) the (2,1) slice agrees                   ok   rel 1.76e-16
+
+2. the fixtures would CATCH the mistakes they are for
+-----------------------------------------------------
+  a TRANSPOSED result is visibly different on this fixture         ok   rel 3.68e-01
+  a dropped Wick coefficient is visibly different                  ok   rel 2.62e-01
+  the cancellation fixture is not accidentally trivial             ok   max |slice| 4.884e+01
+  a dead lineage yields finite output, not nan                     ok   
+
+3. the two collapses the shipped chain relies on
+------------------------------------------------
+  D block: {0,1}|{2} == {0,2}|{1}                                  ok   rel 1.59e-16
+  L block: {0,1}|{2} == {1,2}|{0}, via C_L = A_L diag(w2)          ok   rel 2.02e-16
+  ...and the DISTINCT pair really is distinct                      ok   rel 9.31e-01  (a vacuous check would show ~0)
+
+4. P1 — transport factors through the shared basis, exactly
+-----------------------------------------------------------
+  W^T (Q F) == (W^T Q) F on every block                            ok   rel 1.71e-16
+  diag(c) (Q F) == (diag(c) Q) F on every block                    ok   a left scale cannot see F
+  the (2,1) slice is equivariant under a neuron relabelling        ok   rel 0.00e+00
+
+5. the basis join is exact when nothing is dropped
+--------------------------------------------------
+  a full-rank join changes NO carried block                        ok   rel 1.28e-15
+  ...and the new legs are inside the joined span                   ok   otherwise the newborn source has nowhere to live
+  a truncated join IS lossy, and measurably so                     ok   rel 5.84e-01 at rank 2 of 8  -- an approximation, not algebra
+
+6. P3 — the fourth-order diagonal identity, exact for its core
+--------------------------------------------------------------
+  diag(W G W^T) == (W.W)g + lam[diag(WCW^T) - (W.W)diag(C)]        ok   rel 3.27e-16
+  ...and using the backbone's own diag(W C W^T) is bit-identical   ok   so the free path is the same algebra
+  a GENERAL core is NOT reproduced -- the closure is the approximation ok   rel 9.96e-01
+  a zero covariance yields finite output                           ok   
+
+7. what truncation costs, measured on a transported chain
+---------------------------------------------------------
+    rank  24 (kept  24)   ||(2,1)|| 6.589788e+00   ratio 1.0000
+    rank  12 (kept  12)   ||(2,1)|| 2.131244e+00   ratio 0.3234
+    rank   6 (kept   6)   ||(2,1)|| 1.931819e+00   ratio 0.2932
+    rank   3 (kept   3)   ||(2,1)|| 1.583934e-01   ratio 0.0240
+  truncation changes the answer monotonically, and is reported as an approximation ok   this is a SHAPE measurement on synthetic transports, NOT an accuracy result on networks
+
+28/28 checks passed

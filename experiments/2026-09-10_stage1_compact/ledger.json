@@ -1,0 +1,340 @@
+{
+  "dense": {
+    "total": 2045192962048.0,
+    "b": 0.9300460815429688,
+    "lines": [
+      {
+        "family": "transport (contract_W)",
+        "total": 875745509376,
+        "note": "3 blocks x (n,n)@(n,kn); the youngest M is I and is concatenated, not multiplied"
+      },
+      {
+        "family": "(2,1) slice",
+        "total": 1168163995648,
+        "note": "4 distinct matmuls after the two documented coincidences collapse six into four"
+      },
+      {
+        "family": "(3,) slice",
+        "total": 855638016.0,
+        "note": "elementwise, O(n^2 k)"
+      },
+      {
+        "family": "Wick column scales",
+        "total": 427819008.0,
+        "note": "three left diagonal scales"
+      }
+    ]
+  },
+  "compact": {
+    "total": 2204028895232.0,
+    "b": 1.0022763013839722,
+    "lines": [
+      {
+        "family": "recent tier: transport",
+        "total": 373479702528,
+        "note": "4 newest sources stay dense"
+      },
+      {
+        "family": "recent tier: (2,1) slice",
+        "total": 498149097472,
+        "note": "unchanged from the shipped chain"
+      },
+      {
+        "family": "recent tier: elementwise",
+        "total": 547356672.0,
+        "note": "(3,) slice and Wick scales"
+      },
+      {
+        "family": "shared tier: transport of Q",
+        "total": 9658957824,
+        "note": "P1: one (n,n)@(n,r) serves every age"
+      },
+      {
+        "family": "shared tier: reconstruction",
+        "total": 188196323328,
+        "note": "P2: the Hadamard destroys the rank structure, so every old source must be materialised"
+      },
+      {
+        "family": "shared tier: (2,1) into r-coords",
+        "total": 251132903424,
+        "note": "P2: (n,n)@(n,r) instead of (n,n)@(n,n)"
+      },
+      {
+        "family": "shared tier: one trailing @ Q^T",
+        "total": 9651093504,
+        "note": "the sum is taken in r-coords first"
+      },
+      {
+        "family": "shared tier: elementwise",
+        "total": 736100352.0,
+        "note": "(3,) slice and Wick, per source"
+      },
+      {
+        "family": "basis join (incremental)",
+        "total": 801903738880.0,
+        "note": "project-off + thin QR + an (r+c) core eigendecomposition + one rotation. The core step has NO flopscope primitive: priced as arithmetic, and a deployable version must be priced again"
+      },
+      {
+        "family": "rebase right factors after join",
+        "total": 70573621248,
+        "note": "R @ F_s for every source, every join -- the price of sharing, and the family most often forgotten"
+      }
+    ]
+  },
+  "k4": {
+    "total": 83853312.0,
+    "b": 3.813207149505615e-05,
+    "lines": [
+      {
+        "family": "W . W",
+        "total": 16777216.0,
+        "note": "one Hadamard per layer"
+      },
+      {
+        "family": "(W.W) g and (W.W) diag(C)",
+        "total": 67076096.0,
+        "note": "two matrix-vector products"
+      },
+      {
+        "family": "diag(W C W^T)",
+        "total": 0.0,
+        "note": "FREE: it is the diagonal of the next layer's covariance, which the K2 backbone computes"
+      }
+    ]
+  },
+  "k4_standalone": {
+    "total": 34443591680.0,
+    "b": 0.015663132071495056,
+    "lines": [
+      {
+        "family": "W . W",
+        "total": 16777216.0,
+        "note": "one Hadamard per layer"
+      },
+      {
+        "family": "(W.W) g and (W.W) diag(C)",
+        "total": 67076096.0,
+        "note": "two matrix-vector products"
+      },
+      {
+        "family": "diag(W C W^T)",
+        "total": 34359738368.0,
+        "note": "NOT free: a full (n,n)@(n,n) if the backbone does not already have it"
+      }
+    ]
+  },
+  "meta": {
+    "width": 1024,
+    "depth": 16,
+    "budget": 2199023255552,
+    "recent": 4,
+    "rank": 384,
+    "status": "PROJECTED MODEL, not a metered measurement"
+  },
+  "sweep": {
+    "dense_total": 2045192962048.0,
+    "dense_b": 0.9300460815429688,
+    "rows": [
+      {
+        "recent": 1,
+        "rank": 128,
+        "total": 1043183566848.0,
+        "b": 0.47438496351242065,
+        "ratio_vs_dense": 1.9605302719899926,
+        "join_share": 0.5333540900774847
+      },
+      {
+        "recent": 1,
+        "rank": 192,
+        "total": 1271124000768.0,
+        "b": 0.5780402719974518,
+        "ratio_vs_dense": 1.6089641614919674,
+        "join_share": 0.5133360483522913
+      },
+      {
+        "recent": 1,
+        "rank": 256,
+        "total": 1515021139968.0,
+        "b": 0.688951849937439,
+        "ratio_vs_dense": 1.3499435143797387,
+        "join_share": 0.5006915141105042
+      },
+      {
+        "recent": 1,
+        "rank": 384,
+        "total": 2052667342848.0,
+        "b": 0.9334450364112854,
+        "ratio_vs_dense": 0.9963586984388666,
+        "join_share": 0.4883303069503874
+      },
+      {
+        "recent": 1,
+        "rank": 512,
+        "total": 2660085792768.0,
+        "b": 1.2096669673919678,
+        "ratio_vs_dense": 0.7688447371164814,
+        "join_share": 0.4856287636406567
+      },
+      {
+        "recent": 2,
+        "rank": 128,
+        "total": 1201359334058.6667,
+        "b": 0.5463149746259054,
+        "ratio_vs_dense": 1.7023990275570005,
+        "join_share": 0.4322551900606515
+      },
+      {
+        "recent": 2,
+        "rank": 192,
+        "total": 1406649477802.6665,
+        "b": 0.6396701236565907,
+        "ratio_vs_dense": 1.4539464126079265,
+        "join_share": 0.43295281662494084
+      },
+      {
+        "recent": 2,
+        "rank": 256,
+        "total": 1626480224938.6665,
+        "b": 0.7396375735600789,
+        "ratio_vs_dense": 1.2574348772823984,
+        "join_share": 0.43528821873094975
+      },
+      {
+        "recent": 2,
+        "rank": 384,
+        "total": 2111613217450.6665,
+        "b": 0.9602505167325337,
+        "ratio_vs_dense": 0.9685452549483209,
+        "join_share": 0.4430519539729694
+      },
+      {
+        "recent": 2,
+        "rank": 512,
+        "total": 2660457687722.667,
+        "b": 1.2098360856374106,
+        "ratio_vs_dense": 0.7687372633235414,
+        "join_share": 0.45319015419889336
+      },
+      {
+        "recent": 3,
+        "rank": 128,
+        "total": 1346481509717.3333,
+        "b": 0.6123088995615641,
+        "ratio_vs_dense": 1.5189164851415948,
+        "join_share": 0.3581195798006627
+      },
+      {
+        "recent": 3,
+        "rank": 192,
+        "total": 1530186257749.3335,
+        "b": 0.6958481470743816,
+        "ratio_vs_dense": 1.3365647166745318,
+        "join_share": 0.36957065354195096
+      },
+      {
+        "recent": 3,
+        "rank": 256,
+        "total": 1727065838933.3335,
+        "b": 0.7853786150614421,
+        "ratio_vs_dense": 1.1842009238693225,
+        "join_share": 0.38065551209985476
+      },
+      {
+        "recent": 3,
+        "rank": 384,
+        "total": 2162067068245.3335,
+        "b": 0.9831942717234294,
+        "ratio_vs_dense": 0.945943348421571,
+        "join_share": 0.40180485758860707
+      },
+      {
+        "recent": 3,
+        "rank": 512,
+        "total": 2654920332629.3335,
+        "b": 1.2073179880777996,
+        "ratio_vs_dense": 0.7703406150882568,
+        "join_share": 0.4216971300410175
+      },
+      {
+        "recent": 4,
+        "rank": 128,
+        "total": 1478550093824.0,
+        "b": 0.672366738319397,
+        "ratio_vs_dense": 1.3832422523869188,
+        "join_share": 0.3010442321320388
+      },
+      {
+        "recent": 4,
+        "rank": 192,
+        "total": 1641734340608.0,
+        "b": 0.746574342250824,
+        "ratio_vs_dense": 1.2457514662759526,
+        "join_share": 0.31796314684060173
+      },
+      {
+        "recent": 4,
+        "rank": 256,
+        "total": 1816777981952.0,
+        "b": 0.8261749744415283,
+        "ratio_vs_dense": 1.1257253128148241,
+        "join_share": 0.3340235234092754
+      },
+      {
+        "recent": 4,
+        "rank": 384,
+        "total": 2204028895232.0,
+        "b": 1.0022763013839722,
+        "ratio_vs_dense": 0.9279338244940384,
+        "join_share": 0.3638354018927643
+      },
+      {
+        "recent": 4,
+        "rank": 512,
+        "total": 2643473727488.0,
+        "b": 1.2021126747131348,
+        "ratio_vs_dense": 0.7736762959968869,
+        "join_share": 0.39094443384464894
+      },
+      {
+        "recent": 6,
+        "rank": 128,
+        "total": 1703526487381.3333,
+        "b": 0.7746741573015848,
+        "ratio_vs_dense": 1.200564227910467,
+        "join_share": 0.21773899660551752
+      },
+      {
+        "recent": 6,
+        "rank": 192,
+        "total": 1828864415061.3333,
+        "b": 0.8316712478796641,
+        "ratio_vs_dense": 1.1182857215686008,
+        "join_share": 0.23785753467063042
+      },
+      {
+        "recent": 6,
+        "rank": 256,
+        "total": 1963581855061.3333,
+        "b": 0.8929336468378702,
+        "ratio_vs_dense": 1.0415623656209216,
+        "join_share": 0.2575423501443679
+      },
+      {
+        "recent": 6,
+        "rank": 384,
+        "total": 2262476477781.3335,
+        "b": 1.0288551847139995,
+        "ratio_vs_dense": 0.9039620885047125,
+        "join_share": 0.29536356390703633
+      },
+      {
+        "recent": 6,
+        "rank": 512,
+        "total": 2602852767061.3335,
+        "b": 1.1836404005686443,
+        "ratio_vs_dense": 0.7857505379979901,
+        "join_share": 0.33087136572294634
+      }
+    ]
+  }
+}
