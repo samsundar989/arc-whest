@@ -39558,3 +39558,120 @@ Predictions 1, 2 and 3 need the graded row and are still open.
 The canary stays HELD pending Samuel's acknowledgement that (b)'s §10 clause and
 (h) are the same mis-specification, for the reason recorded in the mini-100 entry:
 they would refuse `330327`, which has a real graded `0/100` row.
+
+# 2026-09-10 — **T1: H1 IS DEAD. κ₄'s cheap channel carries none of the `2.094x` — and removing its births costs `74x`–`109x` the WHOLE chain's accuracy.** The strategist's band is falsified by two orders of magnitude, and so is mine.
+
+*Contract: `experiments/LOG.md` 2026-09-10 *CONTRACT (Rule 1): T1*, committed at
+`a74e051` before the job ran. Instrument `local_sim/p2_t1_augment_lite.py`,
+artifact `experiments/2026-09-10_slice5/t1_augment_lite.json`, workerq job `487`
+(`22m`). Upstream `93d091a4` + recorded patch, verified. `float32`.
+`# seed-ledger: no block named` — re-reads the P01 DESIGN asset.*
+
+## The result
+
+| arm | births/layer | mean cross-MSE | 95% CI |
+|---|---:|---:|---|
+| `SIMPLE` | `2n` | `4.004685e-08` | `[3.7943e-08, 4.2151e-08]` |
+| `AUGMENT` | `8n` | `1.912323e-08` | `[1.8229e-08, 2.0017e-08]` |
+| **`AUGMENT-LITE`** | `5n` | **`4.365096e-06`** | `[3.4824e-06, 5.2478e-06]` |
+| **`AUGMENT-MINIMAL`** | **`2n`** | **`2.976232e-06`** | `[2.5350e-06, 3.4174e-06]` |
+
+    SIMPLE / AUGMENT           2.0941x    (anchor 2.0941x -- reproduced exactly)
+    SIMPLE / AUGMENT-LITE      0.0092x    109x WORSE than SIMPLE
+    SIMPLE / AUGMENT-MINIMAL   0.0135x     74x WORSE than SIMPLE
+
+    GATE (on MINIMAL, the affordable arm): build >= 1.5x, kill <= 1.2x  ->  H1 DEAD
+
+Paired, common random numbers, arithmetic differences with studentised-t intervals:
+
+    SIMPLE - AUGMENT   +2.0924e-08   95% [+1.944e-08, +2.241e-08]   AUGMENT better 24/24
+    SIMPLE - LITE      -4.3250e-06   95% [-5.207e-06, -3.443e-06]   LITE better  0/24
+    SIMPLE - MINIMAL   -2.9362e-06   95% [-3.377e-06, -2.495e-06]   MINIMAL better 0/24
+
+**Not one network of 24 is improved by either ablation.** The intervals are clear
+of zero by two orders of magnitude.
+
+## The instrument is sound, and that is checked rather than asserted
+
+- **Fidelity: bit-exact.** The text-patched copy of `factor_k3.py` with its flags
+  OFF reproduces upstream's `kind=AUGMENT` at `max |diff| = 0.000e+00` on a full
+  `1024 x 16` network. The ablation is therefore an ablation, not a rewrite.
+- **Both controls reproduce their pre-registered anchors:** SIMPLE
+  `+1.299e-15`, AUGMENT `+2.076e-15`. Prediction 1 and prediction 2 CONFIRMED.
+- **All three anchors matched exactly once each**; an anchor that stopped matching
+  would have refused the run.
+- **The birth counts are read off the returned tensor, at the live width:**
+
+      simple    2,048 columns per layer   =  2n
+      augment   8,192                     =  8n
+      lite      5,120                     =  5n
+      minimal   2,048                     =  2n
+
+  `AUGMENT-MINIMAL` really does cost SIMPLE's lineage exactly, and it really is a
+  different estimator. It is simply a far worse one.
+
+## Every prediction about the SIZE was wrong, mine and the strategist's
+
+| prediction | source | outcome |
+|---|---|---|
+| retains `1.4x–1.8x` of the `2.094x` | strategist, §1 | **FALSIFIED by ~150x** |
+| `SIMPLE / LITE` in `[0.6, 1.1]` | mine, prediction 3 | **MISSED.** Actual `0.0092` |
+| `SIMPLE / MINIMAL` in `[0.35, 0.9]` | mine, prediction 4 | **MISSED.** Actual `0.0135` |
+| the gate FAILS, `~75%` confidence | mine, prediction 5 | **CONFIRMED** |
+| the live shape is LESS extreme than the smoke, because the ladder over-reads | mine, prediction 6 | **FALSIFIED, and in the opposite direction** |
+
+Prediction 6 is the interesting failure. The pre-run smoke at `n=128, L=8` read
+`SIMPLE/LITE = 0.748` and `SIMPLE/MINIMAL = 0.462`. I reasoned that the small-width
+ladder over-reads method ratios by `1.2x–1.4x`, so the live shape should sit
+*closer to 1.0*. **It is `50x`–`80x` further from 1.0.** The calibration I applied
+is real for ratios between two *consistent* schemes; it says nothing about a ratio
+where one arm is internally inconsistent, and I applied it outside its domain.
+
+## The mechanism, and it sharpens the theorem rather than merely confirming it
+
+`AUGMENT-MINIMAL` keeps κ₄ alive as an `(n,n)` object and keeps every diagram that
+*consumes* it in the μ/Σ/diagonal-κ₃ updates, while removing the diagrams that let
+κ₄'s information reach κ₃'s factored columns. The state is then **internally
+inconsistent**: the slice set is AUGMENT's 142 terms, the factored `(1,1,1)`
+diagram set is SIMPLE's. That is precisely arm A3's condition — A3 zeroed κ₄ while
+its consumers kept running and came out `9.21x` worse — and T1 is the same
+mechanism with the cut made on the other side.
+
+**The new part is how it scales.** Comparing the pre-run smoke with the live shape:
+
+| shape | SIMPLE | SIMPLE/MINIMAL | inconsistency penalty |
+|---|---:|---:|---:|
+| `128 x 8` (smoke, 4 nets) | `8.55e-06` | `0.462` | `2.2x` worse |
+| `1024 x 16` (live, 24 nets) | `4.00e-08` | `0.0135` | **`74x` worse** |
+
+SIMPLE's error falls by `214x` between those shapes. **The inconsistent arm's does
+not fall at all** — `1.85e-05` to `2.98e-06`, a factor of `6`, against the
+consistent chain's `214`. So the penalty ratio explodes not because the
+inconsistency gets worse but because **it introduces an error floor that does not
+scale away with width, while the consistent chain's error does.**
+
+That is a stronger statement than §(iii) had, and it is the one the write-up
+should carry: *cumulant information in flight pays only when the tower that
+consumes it is exact — and an inexact tower does not merely lose the gain, it
+installs a width-independent error floor that swamps everything the width was
+buying.*
+
+## What this closes, and what is left
+
+**H1 is dead in every affordable form**, which is exactly what the strategist's
+kill clause asked to be reported immediately. The cheap channel carries **none** of
+the `2.094x`; the births are not an implementation detail of κ₄'s value, they
+*are* κ₄'s value in this representation.
+
+Note the honest boundary: this is DESIGN-tier P01, re-read, and
+`gt_manifest.json` says in writing that nothing measured on that asset may close a
+lane. So **H1 is DEPRIORITIZED on a `74x` margin, not formally closed** — the same
+distinction the AUGMENT port carries. At `74x` a fresh block would be waste.
+
+Against the Slice-5 kill criteria: **T1 has failed its gate.** The score lane now
+rests entirely on T2, whose labels are minting. If T2 also fails at `<= 1.1x`,
+score is closed at nominee A's `~2.0-2.3e-8` and the remaining weeks are hardening,
+nominations and the write-up.
+
+**For §(ii) and §(iii) of the write-up**: this is the third independent
+confirmation of the theorem, and the first one that gives it a *width* argument.
