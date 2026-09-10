@@ -100,7 +100,7 @@ WSL_DISTRO = "Ubuntu"
 # --------------------------------------------------------------------------- #
 
 CHILD_PREDICT = r'''
-import gc, json, os, resource, sys, time
+import gc, json, os, resource, sys, time, warnings
 from importlib.metadata import version as distribution_version
 
 LIMIT_MB     = int(sys.argv[1])
@@ -153,6 +153,11 @@ import flopscope as flops
 import flopscope.numpy as fnp
 import whestbench
 import numpy as np
+
+# The shipped candidate intentionally performs operations whose symmetry tag is
+# dropped by flopscope. The warning is known, typed, and unrelated to memory.
+# Suppress only that class; every other stderr byte remains a failed v5 gate.
+warnings.filterwarnings("ignore", category=flops.SymmetryLossWarning)
 
 out["whestbench_file"] = whestbench.__file__
 out["flopscope_file"] = flops.__file__
