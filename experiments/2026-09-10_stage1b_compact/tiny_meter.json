@@ -1,7 +1,7 @@
 {
   "kind": "label-free end-to-end compact all-history reference ledger",
   "evidence_note": "Counted-cost and lifecycle evidence for this research reference only; it makes no accuracy or competitiveness claim.",
-  "source_sha256": "bd7b4a8cafa7bf4809d93dda14c5c99bc619dada668f95f9cdf333fb17eebe42",
+  "source_sha256": "2d90cdf4fae7af5a20071abd82b5c3a521ec6e6ca61e8627720f8b346a741ef7",
   "shape": [
     12,
     7
@@ -600,6 +600,9 @@
   "parity": {
     "family_sum": 740040,
     "context_flops": 740040,
-    "exact": true
+    "exact": true,
+    "tiny_dense_oracle_executed": true,
+    "tiny_dense_D3_max_relative": 1.8917704808218971e-07,
+    "tiny_dense_D21_max_relative": 2.2251765002812007e-07
   }
 }

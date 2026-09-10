@@ -335,13 +335,13 @@ def parity(width=12, depth=3, out=""):
     zero_output_same = np.array_equal(ref, zero_pred)
     zero_cost_same = ref_cost == zero_cost
     if not zero_output_same or not zero_cost_same:
-        raise AssertionError("zero-core nesting failed: output=%s cost=%d/%d" %
+        raise AssertionError("master-off nesting failed: output=%s cost=%d/%d" %
                              (zero_output_same, ref_cost, zero_cost))
     print("exact output and counted-cost parity: PASS (%d FLOPs)" % ref_cost)
     for name, row in rows.items():
         print("  %-20s %14d  shift %.3e" %
               (name, row["flops"], row["relative_shift"]))
-    print("zero-core coherent nesting: PASS (output and %d FLOPs)" % zero_cost)
+    print("master-off coherent nesting: PASS (output and %d FLOPs)" % zero_cost)
     if out:
         payload = {"kind": "label-free generated-arm parity",
                    "width": width, "depth": depth,
@@ -349,7 +349,7 @@ def parity(width=12, depth=3, out=""):
                    "exact_output_bit_identical": True,
                    "exact_counted_cost_identical": True,
                    "source_flops": ref_cost, "arms": rows}
-        payload["zero_core_nesting"] = {
+        payload["master_off_nesting"] = {
             "output_bit_identical": zero_output_same,
             "counted_cost_identical": zero_cost_same, "flops": zero_cost}
         with open(out, "w", encoding="utf-8") as fh:

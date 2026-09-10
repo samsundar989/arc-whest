@@ -24,7 +24,7 @@
       "relative_shift": 0.0004615787283210594
     }
   },
-  "zero_core_nesting": {
+  "master_off_nesting": {
     "output_bit_identical": true,
     "counted_cost_identical": true,
     "flops": 97829

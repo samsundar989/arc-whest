@@ -41,8 +41,10 @@ def _source_sha256():
 
 def _rel(a, b):
     a, b = np.asarray(a), np.asarray(b)
-    return float(np.max(np.abs(a - b)) /
-                 max(np.max(np.abs(a)), np.max(np.abs(b)), 1e-300))
+    if not np.isfinite(a).all() or not np.isfinite(b).all():
+        return float("inf")
+    scale = max(float(np.max(np.abs(a))), float(np.max(np.abs(b))), 1e-300)
+    return float(np.max(np.abs(a / scale - b / scale)))
 
 
 @dataclass
@@ -353,6 +355,7 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
     Ws = [mk((n, n)) for _ in range(depth)]
     young, shared, newborn = [], None, None
     bpe = 4
+    oracle_trace = []
     with flops.BudgetContext(flop_budget=100 * BUDGET, quiet=True) as ctx:
         meter = Meter(ctx)
         mu = meter.run("backbone_mean_init",
@@ -526,6 +529,13 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                 D21_total = meter.run("history_D21_add",
                                       lambda: D21_total + d21old)
 
+            # Preserve the actual tuple-program state for a separately executed
+            # dense oracle.  This is enabled only at tiny full rank, so oracle
+            # arithmetic is outside the counted reference and cannot affect its
+            # output or ledger.
+            if n <= 16 and rank == n:
+                oracle_trace.append((list(all_sources), D3_total, D21_total, last))
+
             # Analytic ReLU closure.  This is deliberately coefficient-free:
             # derivatives of the Gaussian ReLU mean supply the Wick factors.
             safe_var = meter.run("nonlinear_safe_variance",
@@ -667,6 +677,24 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
             raise AssertionError("metered family ledger mismatch: %d != %d" %
                                  (family_sum, used))
         ops = len(ctx.op_log)
+    oracle_d3_rel = 0.0
+    oracle_d21_rel = 0.0
+    for source_rows, got_d3, got_d21, was_last in oracle_trace:
+        dense_sources = []
+        for _kind, row in source_rows:
+            dense_sources.append(Source(*[np.asarray(x) for x in row[:12]],
+                                        age=int(row[12])))
+        want_d3, want_d21 = dense_slices(dense_sources, need_d21=not was_last)
+        want_d3 = np.zeros(n) if want_d3 is None else want_d3
+        oracle_d3_rel = max(oracle_d3_rel, _rel(np.asarray(got_d3), want_d3))
+        if not was_last:
+            want_d21 = np.zeros((n, n)) if want_d21 is None else want_d21
+            oracle_d21_rel = max(oracle_d21_rel,
+                                 _rel(np.asarray(got_d21), want_d21))
+    if oracle_d3_rel > 2e-5 or oracle_d21_rel > 2e-5:
+        raise AssertionError("metered tuple/dense oracle mismatch: %.3e %.3e" %
+                             (oracle_d3_rel, oracle_d21_rel))
+
     retained = len(young) + (0 if shared is None else len(shared[1]))
     if retained != max(depth - 1, 0):
         raise AssertionError("all-history lifecycle lost a source: %d != %d" %
@@ -787,7 +815,10 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                 "term_deletion": "the analytic reference closure omits higher cross-cumulant nonlinear terms outside D3/D21 and represented D4/D22/D31",
                 "coefficient_policy": "fixed lam=1/3 structural fixture; no fitted coefficients or labels"},
             "parity": {"family_sum": family_sum, "context_flops": used,
-                       "exact": family_sum == used}}
+                       "exact": family_sum == used,
+                       "tiny_dense_oracle_executed": bool(oracle_trace),
+                       "tiny_dense_D3_max_relative": oracle_d3_rel,
+                       "tiny_dense_D21_max_relative": oracle_d21_rel}}
 
 
 def lifecycle_check(n=12, depth=7, recent=2, rank=12, residual_rank=3):
@@ -800,6 +831,9 @@ def lifecycle_check(n=12, depth=7, recent=2, rank=12, residual_rank=3):
         "deterministic_flops": first["flops"] == second["flops"],
         "deterministic_calls": first["family_calls"] == second["family_calls"],
         "family_context_parity": first["parity"]["exact"],
+        "tiny_dense_oracle": (not first["parity"]["tiny_dense_oracle_executed"]
+                              or (first["parity"]["tiny_dense_D3_max_relative"] <= 2e-5
+                                  and first["parity"]["tiny_dense_D21_max_relative"] <= 2e-5)),
         "finite_shape": (first["lifecycle"]["all_finite"]
                          and first["lifecycle"]["output_shape"] == [depth, n]),
         "all_history_retained": first["lifecycle"]["all_births_retained"],
