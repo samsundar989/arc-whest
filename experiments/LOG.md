@@ -40869,3 +40869,49 @@ never residual evidence.
    Queue it: `workerq submit --project arc-whest --ram 8 --vram 0 --gpus 0
    --cpus 2 --no-snapshot -- powershell -NoProfile -ExecutionPolicy Bypass
    -File …/scripts/preflight.ps1 -Log …`
+
+### Stage 0 R7 — the vault repair, in detail
+
+Recorded separately because two of its findings are durable and were not in the
+validation audit's list.
+
+- **The sacrificial path wrote into the sealed directory.** The old code put
+  `sacrificial_preds.npz` inside `experiments/vault/`. A throwaway fixture was
+  depositing files beside the seal. Sacrificial artifacts now land beside their
+  fixture and never in `experiments/vault/`.
+- **`candidate_preds.npz` was overwritten on every touch** — defect 6 of the
+  2026-08-19 audit, still open. Replaced by an append-only
+  `lifecycle_eval.write_evidence` bundle named by timestamp and rows hash,
+  which refuses to overwrite. A once-ever touch no longer discards the previous
+  one's raw output.
+- **The round is now named rather than implied.** `WIDTH, DEPTH = 256, 32` and
+  the `272_000_000_000` budget default were Phase 1's, with nothing recording
+  that. `VAULT_ROUND_TAG = "v1-phase1"`, shape and budget come from
+  `official_config` through `LifecycleSpec.for_round`, and `--budget` is a
+  **declared deviation** that appears in `round_deviations` rather than a
+  silent default.
+- **The sealed entry point refuses**, and refuses **before `load()` opens the
+  arrays** — reading the truth *is* the touch, so a post-read refusal is not a
+  refusal. It lifts automatically if a Phase-2 corpus is ever sealed, and says
+  that one needs its own STRATEGIC contract.
+- **The optimistic scorer is gone.** `_score_block` used
+  `score_suite(on_over_budget="fail")`, which the canonical scorer labels
+  optimistic because it keeps the candidate's MSE while forcing the failure
+  multiplier. The control measures what that was worth: on identical
+  budget-blown rows the old path scores **0.000000** — a perfect score for a
+  submission the grader flattens — against the real `0.0625`.
+
+**Discrimination, checked rather than asserted.** At `0fe164c` the new suite
+cannot import, and an import failure is weak per-check evidence, so HEAD's
+`_run_candidate` was driven against the identical fixture out of tree:
+**4 `__init__`, 0 `setup`; weights `float32|writeable|numpy`; 0.0 counted FLOPs
+where the repaired path bills exactly 96; and a raising `predict` kills the
+whole run.** Every check discriminates.
+
+**The seal never moved.** All six files under `experiments/vault/` re-hashed
+byte-identical, `vault.py verify` reports counter and log agreeing at 1 before
+and after, and `vault.py evaluate` was never run — it spends one of three
+permitted touches, ever.
+
+**Owed on this slice:** `scripts/preflight.ps1` (queued, not launched) and the
+Rule 2 Skeptic, along with Stage 0's other six repairs and Stage 1.
