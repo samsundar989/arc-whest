@@ -326,8 +326,11 @@ class Meter:
         delta = int(self.ctx.flops_used) - before
         self.families[family] = self.families.get(family, 0) + delta
         self.calls[family] = self.calls.get(family, 0) + 1
-        self.scratch[family] = max(self.scratch.get(family, 0), scratch_bytes)
-        self.peak_bytes = max(self.peak_bytes, live_bytes + scratch_bytes)
+        result_bytes = int(getattr(out, "nbytes", 0))
+        accounted_scratch = max(scratch_bytes, result_bytes)
+        self.scratch[family] = max(self.scratch.get(family, 0),
+                                   accounted_scratch)
+        self.peak_bytes = max(self.peak_bytes, live_bytes + accounted_scratch)
         return out
 
 
@@ -351,8 +354,9 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
     rank = min(rank, n)
     residual_rank = min(residual_rank, n)
     rng = np.random.default_rng(seed)
-    mk = lambda shape: fnp.array((rng.normal(size=shape) / math.sqrt(n)).astype(np.float32))
-    Ws = [mk((n, n)) for _ in range(depth)]
+    # Match the grader-facing boundary: incoming weights are float64 and each
+    # layer is explicitly converted before counted arithmetic.
+    Ws = [rng.normal(size=(n, n)) / math.sqrt(n) for _ in range(depth)]
     young, shared, newborn = [], None, None
     bpe = 4
     oracle_trace = []
@@ -368,7 +372,10 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
         outputs = []
         for layer in range(depth):
             last = layer == depth - 1
-            W, wick = Ws[layer], wick_prev
+            W = meter.run("cast_weight_f32",
+                          lambda layer=layer: fnp.array(Ws[layer], dtype=fnp.float32),
+                          scratch_bytes=bpe * n * n)
+            wick = wick_prev
             C_old = C
             mu_pre = meter.run("backbone_mean_linear", lambda: W @ mu)
             WC = meter.run("backbone_cov_linear_left", lambda: W @ C)
@@ -709,7 +716,8 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
     births = max(depth - 1, 0)
     young_peak = min(recent + 1, births)
     old_peak = births - young_peak
-    weights_bytes = bpe * depth * n * n
+    weights_bytes = 8 * depth * n * n
+    weight_cast_scratch = bpe * n * n
     backbone_state_bytes = bpe * (2 * n * n + (depth + 12) * n)
     young_payload = young_peak * (
         2 * n * n + 2 * n * residual_rank + 8 * n)
@@ -728,7 +736,7 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
     contraction_scratch = (0 if births == 0 else
                            bpe * (3 * n * n + 2 * n * rank + n * residual_rank))
     peak_algorithm = weights_bytes + backbone_state_bytes + source_state_bytes + max(
-        source_construction_scratch, join_scratch,
+        weight_cast_scratch, source_construction_scratch, join_scratch,
         materialize_scratch + contraction_scratch)
     groups = {"casts": {}, "backbone": {}, "nonlinear": {}, "k4": {},
               "source_construction": {}, "transport": {}, "join_and_rebase": {},
@@ -771,10 +779,13 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
             "shape": [n, depth], "recent": recent, "rank": rank,
             "residual_rank": residual_rank, "flops": used,
             "budget_fraction": used / BUDGET, "operations": ops,
+            "operations_kind": "atomic flopscope op_log entries",
             "families": meter.families, "family_calls": meter.calls,
+            "family_calls_kind": "explicit program-family wrapper invocations",
             "family_groups": groups, "family_group_totals": group_totals,
             "memory": {"persistent_source_bytes_final": persistent,
                        "external_weight_bytes": weights_bytes,
+                       "weight_cast_scratch_bytes": weight_cast_scratch,
                        "backbone_state_and_output_bytes": backbone_state_bytes,
                        "persistent_source_state_peak_bytes": source_state_bytes,
                        "source_construction_scratch_bytes": source_construction_scratch,
@@ -784,14 +795,17 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                        "contraction_scratch_bytes": contraction_scratch,
                        "estimated_peak_bytes": peak_algorithm,
                        "single_array_max_bytes": bpe * n * n,
-                       "scratch_by_metered_family": meter.scratch,
-                       "basis": "float32 array payloads; Python/flopscope metadata excluded"},
+                       "result_or_declared_scratch_by_family": meter.scratch,
+                       "basis": ("array payloads only; each family records at least its "
+                                 "result allocation, with larger explicitly declared "
+                                 "temporary workspace where modeled; Python/flopscope "
+                                 "metadata excluded")},
             "casts": {"counted_flops": sum(
                           value for name, value in meter.families.items()
                           if name.startswith("cast_")),
                       "calls": sum(value for name, value in meter.calls.items()
                                    if name.startswith("cast_")),
-                      "reason": "normal CDF/PDF return float64 and are explicitly cast to float32; external weights already enter as float32"},
+                      "reason": "incoming float64 weights and normal CDF/PDF outputs are explicitly cast to float32"},
             "source_factors": {
                 "latent_constructed": ["a", "R", "L", "s", "e", "w2", "dA", "dP", "c1", "c2", "y"],
                 "inserted_next_layer": ["A=W@a", "P=copy(W)", "Z=W@R", "Y=W@y"],

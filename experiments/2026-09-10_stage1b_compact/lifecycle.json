@@ -1,6 +1,6 @@
 {
   "kind": "label-free end-to-end compact lifecycle",
-  "source_sha256": "2d90cdf4fae7af5a20071abd82b5c3a521ec6e6ca61e8627720f8b346a741ef7",
+  "source_sha256": "ff1b302a6a301979a0228035fc43a38ccc85b6106dc816ee3040c3674ef18f70",
   "shape": [
     12,
     7
@@ -18,6 +18,6 @@
   },
   "pass": true,
   "output_sha256": "3f1cc5b3183a260b7bd3d2959df2c85715c92c4aa159f435315aef20bde311be",
-  "flops": 740040,
-  "operations": 2469
+  "flops": 741048,
+  "operations": 2476
 }
