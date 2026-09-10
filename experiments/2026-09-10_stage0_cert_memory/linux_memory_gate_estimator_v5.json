@@ -1,0 +1,176 @@
+{
+  "artifact": "linux_memory_gate",
+  "artifact_version": 5,
+  "candidate": "estimator.py",
+  "candidate_sha256": "1caa3752be56e8625ddb8b163ff8ffa853b110b18c2b25c71a53f261f42c9fb8",
+  "instrument": "local_sim/linux_memory_gate.py",
+  "instrument_sha256": "77053d26bf0400a0003f8f2bcab274961b18a9368b10def5da5deadb5e8f853f",
+  "instrument_policy": "current-source-sha256",
+  "limit_mb": 8192,
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "seed": 90000000101,
+  "suite_n_mlps": 100,
+  "weights_mode": "f64_readonly",
+  "repeats": 3,
+  "host_platform": "win32",
+  "generated_utc": "2026-09-10T21:12:36Z",
+  "linux_kind": "wsl",
+  "linux_note": "WSL2 Ubuntu, official stack in $HOME/.arcwhest-linux",
+  "negative_control": {
+    "limit_mb": 8192,
+    "request_gib": 9.0,
+    "cap_applied": true,
+    "allocated": false,
+    "survived": false,
+    "error": "MemoryError: "
+  },
+  "positive_control": {
+    "limit_mb": 0,
+    "request_gib": 9.0,
+    "cap_applied": false,
+    "allocated": true,
+    "survived": true
+  },
+  "lifecycle_controls": {
+    "growth_threshold_bytes": 67108864,
+    "stateless": {
+      "completed": true,
+      "retain": false,
+      "allocation_mib": 96,
+      "repeats": 3,
+      "rows": [
+        {
+          "i": 0,
+          "vm_size_settled_bytes": 16072704
+        },
+        {
+          "i": 1,
+          "vm_size_settled_bytes": 16072704
+        },
+        {
+          "i": 2,
+          "vm_size_settled_bytes": 16072704
+        }
+      ],
+      "growth_bytes": 0,
+      "error": "",
+      "cap_applied": true
+    },
+    "retaining": {
+      "completed": true,
+      "retain": true,
+      "allocation_mib": 96,
+      "repeats": 3,
+      "rows": [
+        {
+          "i": 0,
+          "vm_size_settled_bytes": 116740096
+        },
+        {
+          "i": 1,
+          "vm_size_settled_bytes": 217407488
+        },
+        {
+          "i": 2,
+          "vm_size_settled_bytes": 318074880
+        }
+      ],
+      "growth_bytes": 201334784,
+      "error": "",
+      "cap_applied": true
+    }
+  },
+  "candidate_run": {
+    "stage": "done",
+    "limit_mb": 8192,
+    "setrlimit_raised": null,
+    "soft_limit_bytes": 8589934592,
+    "hard_limit_bytes": 8589934592,
+    "cap_requested_bytes": 8589934592,
+    "cap_applied": true,
+    "whestbench_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/whestbench/__init__.py",
+    "flopscope_file": "/home/samsu/.arcwhest-linux/lib/python3.12/site-packages/flopscope/__init__.py",
+    "numpy_version": "2.4.6",
+    "whestbench_version": "0.16.1",
+    "flopscope_version": "0.12.1",
+    "stack_version_source": "importlib.metadata.version",
+    "python_version": "3.12.3",
+    "weights_mode": "f64_readonly",
+    "repeats": 3,
+    "suite_n_mlps": 100,
+    "weight_dtype": "float64",
+    "weight_writeable": false,
+    "setup_raised": null,
+    "setup_s": 0.013895819999994785,
+    "predict_s": 2.012663220999997,
+    "predict_error": "",
+    "shape": [
+      16,
+      1024
+    ],
+    "finite": true,
+    "dtype": "float32",
+    "largest_array_bytes": 65536,
+    "repeat_runs": [
+      {
+        "i": 0,
+        "vm_peak_bytes": 2462158848,
+        "vm_size_settled_bytes": 2139197440,
+        "flops_used": 137600326656.0,
+        "error": ""
+      },
+      {
+        "i": 1,
+        "vm_peak_bytes": 2462158848,
+        "vm_size_settled_bytes": 2139197440,
+        "flops_used": 137600326656.0,
+        "error": ""
+      },
+      {
+        "i": 2,
+        "vm_peak_bytes": 2462158848,
+        "vm_size_settled_bytes": 2139197440,
+        "flops_used": 137600326656.0,
+        "error": ""
+      }
+    ],
+    "repeat_error": "",
+    "repeat_vm_size_growth_bytes": 0,
+    "repeat_flops_identical": true,
+    "repeat_flops_observed": [
+      137600326656.0,
+      137600326656.0,
+      137600326656.0
+    ],
+    "flops_used": 137600326656.0,
+    "residual_wall_time_s": 0.016574991999902977,
+    "wall_time_s": 2.0126722729999997,
+    "multiplier": 0.1,
+    "peak_rss_bytes": 503615488,
+    "vm_peak_bytes": 2462158848,
+    "vm_hwm_bytes": 503615488,
+    "ok": true
+  },
+  "child_stderr": {
+    "negative": "",
+    "positive": "",
+    "lifecycle_stateless": "",
+    "lifecycle_retaining": "",
+    "candidate": "/mnt/c/Users/samsu/.local/state/gpuq/snapshots/592/job-592/estimator.py:772: SymmetryLossWarning: Symmetry lost along dims (0, 1): multiply \u00e2\u20ac\u201d no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).\n  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)\n/mnt/c/Users/samsu/.local/state/gpuq/snapshots/592/job-592/estimator.py:772: SymmetryLossWarning: Symmetry lost along dims (0, 1): add \u00e2\u20ac\u201d no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).\n  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)\n"
+  },
+  "child_stderr_tail": "o symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).\n  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)\n/mnt/c/Users/samsu/.local/state/gpuq/snapshots/592/job-592/estimator.py:772: SymmetryLossWarning: Symmetry lost along dims (0, 1): add \u00e2\u20ac\u201d no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).\n  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)\n",
+  "stack": {
+    "whestbench": "0.16.1",
+    "flopscope": "0.12.1",
+    "numpy": "2.4.6",
+    "python": "3.12.3",
+    "source": "importlib.metadata.version"
+  },
+  "status": "FAIL",
+  "checks_total": 24,
+  "checks_failed": [
+    "C: the candidate child wrote no stderr"
+  ]
+}
