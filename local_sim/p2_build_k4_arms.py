@@ -337,11 +337,33 @@ def parity(width=12, depth=3, out=""):
     if not zero_output_same or not zero_cost_same:
         raise AssertionError("master-off nesting failed: output=%s cost=%d/%d" %
                              (zero_output_same, ref_cost, zero_cost))
+
+    # Exercise the active mechanism with an identically zero transported core.
+    # This is distinct from the master-off nesting check above: K4 consumers and
+    # births still execute, so counted cost must increase even though their
+    # mathematical contribution is zero.
+    coherent = modules["coherent"]
+    original_lam = coherent._K4_LAM
+    original_project = coherent._k4_project_residual
+    coherent._K4_LAM = 0.0
+    coherent._k4_project_residual = lambda K4v, K22, c4, n, metric: K4v * 0.0
+    try:
+        active_zero_pred, active_zero_cost = run(coherent)
+    finally:
+        coherent._K4_LAM = original_lam
+        coherent._k4_project_residual = original_project
+    active_zero_output_same = np.array_equal(ref, active_zero_pred)
+    if not active_zero_output_same or active_zero_cost <= ref_cost:
+        raise AssertionError("active zero-core check failed: output=%s cost=%d/%d" %
+                             (active_zero_output_same, ref_cost,
+                              active_zero_cost))
     print("exact output and counted-cost parity: PASS (%d FLOPs)" % ref_cost)
     for name, row in rows.items():
         print("  %-20s %14d  shift %.3e" %
               (name, row["flops"], row["relative_shift"]))
     print("master-off coherent nesting: PASS (output and %d FLOPs)" % zero_cost)
+    print("active zero-core mechanism: PASS (output; %d counted FLOPs execute)" %
+          active_zero_cost)
     if out:
         payload = {"kind": "label-free generated-arm parity",
                    "width": width, "depth": depth,
@@ -352,6 +374,13 @@ def parity(width=12, depth=3, out=""):
         payload["master_off_nesting"] = {
             "output_bit_identical": zero_output_same,
             "counted_cost_identical": zero_cost_same, "flops": zero_cost}
+        payload["active_zero_core"] = {
+            "mechanism_active": True,
+            "output_bit_identical": active_zero_output_same,
+            "counted_cost_identical": active_zero_cost == ref_cost,
+            "expected_cost_relation": "greater_than_exact",
+            "flops": active_zero_cost,
+            "incremental_flops": active_zero_cost - ref_cost}
         with open(out, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, indent=2)
             fh.write("\n")

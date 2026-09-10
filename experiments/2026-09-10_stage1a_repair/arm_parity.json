@@ -28,5 +28,13 @@
     "output_bit_identical": true,
     "counted_cost_identical": true,
     "flops": 97829
+  },
+  "active_zero_core": {
+    "mechanism_active": true,
+    "output_bit_identical": true,
+    "counted_cost_identical": false,
+    "expected_cost_relation": "greater_than_exact",
+    "flops": 149231,
+    "incremental_flops": 51402
   }
 }
