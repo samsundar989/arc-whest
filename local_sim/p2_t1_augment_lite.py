@@ -105,18 +105,29 @@ PA_STORED = "experiments/2026-08-26_p2_gt/pa_k3.json"
 
 #: (tag, kind, ablate kappa_4 births, ablate the raised budget's extra legs).
 #: The order is the order they run in, per network, inside one process.
+#: The 2x2 is now COMPLETE. The first version ran (F,F), (F,F), (T,F), (T,T) and
+#: never ran (births kept, legs dropped) -- a missing cell the 2026-09-10 Skeptic
+#: found, and the one that decides whether the collapse is about kappa_4 at all.
 ARMS = (
-    ("simple",  "SIMPLE",  False, False),
-    ("augment", "AUGMENT", False, False),
-    ("lite",    "AUGMENT", True,  False),
-    ("minimal", "AUGMENT", True,  True),
+    ("simple",   "SIMPLE",  False, False),
+    ("augment",  "AUGMENT", False, False),
+    ("lite",     "AUGMENT", True,  False),
+    ("legsonly", "AUGMENT", False, True),
+    ("minimal",  "AUGMENT", True,  True),
 )
 ARM_LABEL = {
-    "simple":  "SIMPLE (2n)",
-    "augment": "AUGMENT (8n)",
-    "lite":    "AUGMENT-LITE (5n)",
-    "minimal": "AUGMENT-MINIMAL (2n)",
+    "simple":   "SIMPLE (2n)",
+    "augment":  "AUGMENT (8n)",
+    "lite":     "AUGMENT-LITE (5n)",
+    "legsonly": "AUGMENT-LEGSONLY (4n)",
+    "minimal":  "AUGMENT-MINIMAL (2n)",
 }
+
+#: The Gaussian baselines, on the SAME 24 seeds and the SAME labels, already on
+#: disk in `pa_k3.json`. They cost nothing to report and they are the reference
+#: the first version of this module omitted -- without them an arm sitting on the
+#: no-kappa_3 baseline looks like a finding about kappa_4.
+BASELINE_COLUMNS = ("xmse_k2", "xmse_k2cal")
 
 
 class AnchorError(RuntimeError):
@@ -226,17 +237,49 @@ def xmse(pred, A, B):
     return float(np.mean((pred - A) * (pred - B)))
 
 
+#: Which branch produced the last critical value. An artifact that cannot say
+#: whether its interval came from scipy or from a fallback is not reproducible,
+#: and the old fallback was WRONG: `2.064` is t at df=24, used for every n
+#: from 2 to 60. A Skeptic found it latent on 2026-09-10 (scipy is installed in
+#: both venvs, so it never fired) and it is fixed before a 1.15x gate uses it.
+_LAST_T_CRIT = {"value": None, "source": None}
+
+#: Two-sided 97.5% t critical values, df 1..30. Exact to 4 decimals, so a
+#: missing scipy degrades the interval by <0.05% instead of by 12%.
+_T975 = (
+    12.7062, 4.3027, 3.1824, 2.7764, 2.5706, 2.4469, 2.3646, 2.3060, 2.2622,
+    2.2281, 2.2010, 2.1788, 2.1604, 2.1448, 2.1314, 2.1199, 2.1098, 2.1009,
+    2.0930, 2.0860, 2.0796, 2.0739, 2.0687, 2.0639, 2.0595, 2.0555, 2.0518,
+    2.0484, 2.0452, 2.0423,
+)
+
+
+def _t_crit(df, alpha=0.05):
+    """The two-sided critical value, and where it came from."""
+    if df < 1:
+        return float("nan"), "df<1"
+    try:
+        from scipy import stats
+        return float(stats.t.ppf(1 - alpha / 2, df)), "scipy"
+    except Exception:
+        pass
+    if abs(alpha - 0.05) > 1e-12:
+        return 1.96, "normal-approx (alpha != 0.05, no scipy)"
+    if df <= len(_T975):
+        return _T975[df - 1], "table"
+    # Beyond the table, Cornish-Fisher on the normal quantile: error < 0.1%.
+    z = 1.959963984540054
+    return z + (z ** 3 + z) / (4.0 * df), "cornish-fisher"
+
+
 def studentised_t(d, alpha=0.05):
     """Paired studentised-t interval. Never percentile, never BCa."""
     d = np.asarray(d, dtype=np.float64)
     n = len(d)
     m = float(d.mean())
     se = float(d.std(ddof=1) / np.sqrt(n)) if n > 1 else float("nan")
-    try:
-        from scipy import stats
-        crit = float(stats.t.ppf(1 - alpha / 2, n - 1))
-    except Exception:
-        crit = 1.96 if n > 60 else 2.064
+    crit, src = _t_crit(n - 1, alpha)
+    _LAST_T_CRIT["value"], _LAST_T_CRIT["source"] = crit, src
     return m, se, (m - crit * se, m + crit * se)
 
 
@@ -385,11 +428,13 @@ def main(argv=None) -> int:
     ab_mod, ab_meta = build_ablated_module(_fk3.__file__)
     ablation = _Ablation(ab_mod)
 
-    stored = {}
+    stored, baselines = {}, {}
     sp = os.path.join(_ROOT, PA_STORED)
     if os.path.exists(sp):
-        stored = {int(r["seed"]): float(r["xmse_k3"])
-                  for r in json.load(open(sp, encoding="utf-8"))["rows"]}
+        _pa = json.load(open(sp, encoding="utf-8"))["rows"]
+        stored = {int(r["seed"]): float(r["xmse_k3"]) for r in _pa}
+        baselines = {int(r["seed"]): {c: float(r[c]) for c in BASELINE_COLUMNS
+                                      if c in r} for r in _pa}
 
     print("=" * 78)
     print("T1  --  AUGMENT-LITE: which CHANNEL of kappa_4 carries the 2.094x?")
@@ -480,6 +525,8 @@ def main(argv=None) -> int:
     # ---- the result ---------------------------------------------------------
     tags = [t for t, _k, _b, _l in ARMS]
     ok = [r for r in rows if all(f"xmse_{t}" in r for t in tags)]
+    # Attach the Gaussian baselines for the SAME networks, in the same order.
+    have_base = baselines and all(r["seed"] in baselines for r in ok)
     arr = {t: np.array([r[f"xmse_{t}"] for r in ok], dtype=np.float64)
            for t in tags}
 
@@ -497,11 +544,31 @@ def main(argv=None) -> int:
         m, se, ci = studentised_t(d)
         res[f"simple_minus_{t}"] = {"mean_diff": m, "se": se, "ci95": list(ci),
                                     "n_better": int(np.sum(d > 0)), "n": len(d)}
-    for t in ("lite", "minimal"):
+    for t in ("lite", "legsonly", "minimal"):
         d = arr[t] - arr["augment"]
         m, se, ci = studentised_t(d)
         res[f"{t}_minus_augment"] = {"mean_diff": m, "se": se, "ci95": list(ci),
                                      "n_better": int(np.sum(d < 0)), "n": len(d)}
+
+    if have_base:
+        for c in BASELINE_COLUMNS:
+            arr[c] = np.array([baselines[r["seed"]][c] for r in ok],
+                              dtype=np.float64)
+            m, se, ci = studentised_t(arr[c])
+            res[c] = {"mean_xmse": m, "se": se, "ci95": list(ci), "n": len(ok)}
+        # THE COMPARISON THE FIRST VERSION OMITTED: is an ablated arm simply the
+        # Gaussian baseline? An arm sitting on it carries no information about
+        # which kappa_4 channel carried anything.
+        for t in ("lite", "legsonly", "minimal"):
+            for c in BASELINE_COLUMNS:
+                d = arr[c] - arr[t]
+                m, se, ci = studentised_t(d)
+                res[f"{c}_minus_{t}"] = {
+                    "mean_diff": m, "se": se, "ci95": list(ci),
+                    "arm_better_than_baseline": int(np.sum(d > 0)), "n": len(d),
+                    "ratio_of_means": float(arr[c].mean() / arr[t].mean()),
+                    "straddles_zero": bool(ci[0] < 0.0 < ci[1]),
+                }
 
     gain = {t: float(arr["simple"].mean() / arr[t].mean()) for t in tags[1:]}
     gain_augment = gain["augment"]
@@ -510,7 +577,7 @@ def main(argv=None) -> int:
         return ((gain[t] - 1.0) / (gain_augment - 1.0)
                 if gain_augment > 1 else float("nan"))
 
-    retention = {t: retention_of(t) for t in ("lite", "minimal")}
+    retention = {t: retention_of(t) for t in ("lite", "legsonly", "minimal")}
 
     # THE GATE IS ON `minimal`, and the contract says why: it is the ONLY arm
     # that births SIMPLE's `2n` columns and can therefore be afforded. `lite` is
@@ -528,9 +595,22 @@ def main(argv=None) -> int:
     print()
     print(f"   SIMPLE / AUGMENT           {gain_augment:.4f}x   "
           f"(anchor {FULL_GAIN:.4f}x)")
-    for t in ("lite", "minimal"):
-        print(f"   SIMPLE / {ARM_LABEL[t]:17s} {gain[t]:.4f}x   "
-              f"retains {retention[t]:+.3f} of the full gain")
+    for t in ("lite", "legsonly", "minimal"):
+        print(f"   SIMPLE / {ARM_LABEL[t]:22s} {gain[t]:.4f}x   "
+              f"retains {retention.get(t, float('nan')):+.3f} of the full gain")
+    if have_base:
+        print()
+        print("   AGAINST THE GAUSSIAN BASELINES, same seeds, same labels:")
+        for c in BASELINE_COLUMNS:
+            print(f"     {c:12s} {res[c]['mean_xmse']:.6e}")
+        for t in ("lite", "legsonly", "minimal"):
+            for c in BASELINE_COLUMNS:
+                k = f"{c}_minus_{t}"
+                v = res[k]
+                print(f"     {c} - {t:9s} {v['mean_diff']:+.4e}  "
+                      f"95% [{v['ci95'][0]:+.3e}, {v['ci95'][1]:+.3e}]  "
+                      f"ratio {v['ratio_of_means']:.4f}  "
+                      f"{'STRADDLES ZERO -- the arm IS this baseline' if v['straddles_zero'] else ''}")
     print(f"   GATE (on MINIMAL, the affordable arm)   build >= {BUILD_GATE}x"
           f"   kill <= {KILL_GATE}x   ->  {verdict}")
     print()
@@ -572,6 +652,8 @@ def main(argv=None) -> int:
         "verdict": verdict,
         "controls": control,
         "lineage_columns_per_layer": col_counts,
+        "gaussian_baselines_attached": bool(have_base),
+        "t_crit": dict(_LAST_T_CRIT),
         "rows": rows,
         "seed_ledger": "no block named",
     }

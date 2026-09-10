@@ -39675,3 +39675,140 @@ nominations and the write-up.
 
 **For §(ii) and §(iii) of the write-up**: this is the third independent
 confirmation of the theorem, and the first one that gives it a *width* argument.
+
+# 2026-09-10 — **SKEPTIC ON T1: PROVISIONAL.** The gate survives; almost everything I said about *why* does not. Eight sentences struck, and the ablated arms are the GAUSSIAN BASELINE.
+
+*Rule 2, independent context, given the contract, the diff, the protocol and the
+raw artifact paths — never a summary. It found five defects, two of which change
+the conclusion, and one of which had already reached
+`docs/writeup-phase2-draft.md`.*
+
+## What survives
+
+`SIMPLE / MINIMAL = 0.0135x` against a pre-registered kill of `1.2x` is **real,
+paired, bit-exactly controlled and unmoved from the contract.** Nobody should
+build `estimator_k3_lite.py`. The Skeptic verified provenance end to end: contract
+`a74e051` at `03:27:10`, instrument committed with it and unmodified since,
+artifact `04:44`, result `04:45`; gate identical in contract and artifact; binding
+statistic used correctly; arithmetic and geometric estimands agree
+(`0.01346` vs `0.01411`); no vault, no public split, no seed block spent.
+
+**It also strengthened two things I understated.** The controls are not `~1e-15` —
+they are **bit-identical, `0.000e+00` on all 24 rows for both SIMPLE and
+AUGMENT**; my `1e-15` was the rounding of the 7-figure anchor constants in my own
+contract. And the birth counts are confirmed independently from the source, with a
+layer-1 `3n` warm-up I had not stated.
+
+## What does not survive, and it is the whole attribution
+
+**The ablated arms did not lose "κ₄'s expensive channel". They lost the κ₃
+correction altogether and fell back to the Gaussian baseline.** On the same 24
+seeds and the same labels, from `pa_k3.json`:
+
+    K2 (Gaussian)   4.1963e-06      LITE  4.3651e-06      MINIMAL  2.9762e-06
+    K2 - LITE       -1.687e-07   95% [-9.647e-07, +6.272e-07]   STRADDLES ZERO, 13/24
+    K2 - MINIMAL    +1.220e-06   95% [+8.199e-07, +1.620e-06]   21/24
+    K2cal - LITE    -2.916e-06   95% [-3.789e-06, -2.044e-06]   ratio 0.332
+
+`LITE` **is** K2, to within `4%`, with its interval through zero. `MINIMAL` is
+worse than *calibrated* K2. An arm sitting on the no-κ₃ baseline carries no
+information about which κ₄ channel carried the `2.094x`.
+
+**And the patch cannot separate the channels in principle.** `factor_k3.py:473-497`
+computes `pK111_K211` from `pK_111.factors` — the very blocks anchors 1 and 2
+delete — and line 531 does `K_out[4].core += K211_contrib`. So from layer 2 onward
+the ablated arms propagate a **different κ₄**, not the same κ₄ with its births
+suppressed. My contract listed `K211_contrib` as part of the *cheap* channel. **It
+is a functional of the expensive one's output.** I asked the Skeptic to look for
+exactly this and it found it; my instrument's premise was wrong, not merely its
+prose.
+
+**A simpler explanation already on disk covers both results.** Capped-generation
+**SIMPLE** — which contains no κ₄ births anywhere — reads `1.651e-06` at `g=2`
+(`LOG.md:38273`), reproduced by two independent implementations to `3e-5`
+relative, and `augment_capped.json` gives `g2 1.6541e-06`, `g3 1.1249e-06`,
+`g4 7.4162e-07`. Same order as T1's collapse, from a mechanism that removes no κ₄
+diagram at all. **One parsimonious statement covers every one of these: any
+deletion from the carried `(1,1,1)` lineage returns this chain to roughly Gaussian
+accuracy.** My "internal inconsistency of the cumulant state" story fits the
+outcome but was never discriminated from the simpler one I had written down myself
+the day before.
+
+**A non-monotonicity I failed to report.** `MINIMAL` removes strictly more
+diagrams than `LITE` and is **`1.47x` better** (`2.976e-06` vs `4.365e-06`, on
+21/24 nets). My prediction 4's stated reasoning — *"worse still, because it removes
+more diagrams from the same live κ₄ state"* — has the **direction** wrong, not just
+the magnitude, and my scorecard recorded it only as "MISSED. Actual `0.0135`".
+
+**The width claim contradicts itself inside one sentence.** I wrote *"the
+inconsistent arm's does not fall at all — `1.85e-05` to `2.98e-06`, a factor of
+`6`."* A factor of 6 is not "not at all". Worse: both width *and* depth move
+between the two rows, the small row is a 4-net smoke with no interval, and
+**`8.55e-06` and `1.85e-05` exist nowhere on disk** — they are prose, and they had
+already reached the write-up.
+
+**No ground-truth noise floor was quoted.** It is `1.1552e-09`
+(`gt_manifest.json`), and `VALIDATION.md` requires it beside every MSE.
+
+## Corrections applied now
+
+Struck or narrowed in `experiments/LOG.md` and `docs/writeup-phase2-draft.md`:
+
+| was | now |
+|---|---|
+| "κ₄'s cheap channel carries none of the `2.094x`" | the affordable **deletion** spelling fails its gate by `100x` and lands on the Gaussian baseline. The channel attribution is **not identified** |
+| "keeps **every diagram that consumes it**" | **false** — κ₄'s own update reads the deleted blocks, so the channels are not separable under this patch |
+| "does not fall at all" | struck; it falls `6x` |
+| "installs a width-independent error floor" | struck pending a K2 reading at `128x8` |
+| "the births ... **are** κ₄'s value" | struck — capped SIMPLE has no κ₄ births and collapses the same way |
+| "H1 is dead in every affordable form" | narrowed to **"in the deletion spelling"**. The handoff names a second form — *project the tower back to SIMPLE's column set each layer* — and only deletion was run |
+| "the **third independent** confirmation" | struck "independent": it is the same chain collapsing under a perturbed lineage as the capped run |
+
+## The instrument defects, both fixed before anything else uses them
+
+1. **The 2x2 had a missing cell.** `ARMS` ran `(F,F), (F,F), (T,F), (T,T)` and
+   never `(births kept, legs dropped)`. Added as `legsonly` (`4n`).
+2. **The Gaussian baselines were on disk and unused.** `xmse_k2` and `xmse_k2cal`
+   are in `pa_k3.json` for these exact 24 seeds. They are now reported as columns
+   with paired comparisons against every ablated arm, and the report says
+   explicitly when an arm's interval **straddles zero against a baseline**.
+3. **A latent statistics bug.** `crit = 1.96 if n > 60 else 2.064` is `t` at
+   `df=24` used for every `n` from 2 to 60 — `2.064` against the correct `2.0687`
+   at `df=23`. scipy is installed in both venvs so it never fired and **no
+   published interval is affected**, but T2's `1.15x` gate would have used the
+   same helper. Replaced with an exact `df 1..30` table plus a Cornish-Fisher tail,
+   and the artifact now records **which branch produced the critical value**.
+
+## The discriminating follow-up, pre-registered
+
+**Question.** Is the `~1e-6` collapse about κ₄ at all, or does any deletion from
+the factored `(1,1,1)` lineage return this chain to Gaussian accuracy?
+
+**Intervention.** Re-run the same instrument, same 24 P01 networks, with the
+completed 2x2 and the baseline columns. One job, `~10` GPU-minutes, no seed block.
+
+**Prediction, recorded before the run.** `legsonly` lands in `[1e-6, 6e-6]`, i.e.
+**also at the Gaussian baseline**, and `K2 - legsonly` straddles zero. I put
+`~80%` on this. If it holds, **the κ₄ attribution is dead and the correct finding
+is the Skeptic's**: any deletion from the carried lineage costs the whole κ₃
+correction.
+
+**Falsifier.** `legsonly` at or below `1e-7` — within an order of magnitude of
+SIMPLE — would mean the deletions are *not* interchangeable and that κ₄'s births
+are specifically implicated after all.
+
+**Gate.** None. This is an attribution question, not a promotion; no constant is
+chosen and no lane is opened by it.
+
+## What I take from this
+
+The Skeptic changed a conclusion for the third time in this project, and this time
+it caught a claim that had **already been copied into the write-up**. The failure
+mode was mine and it is recognisable: I had the competing explanation on disk, in
+an entry I wrote the day before, and I did not test my story against it. The
+instrument's premise — that the two channels are separable — was checkable in the
+source in ten minutes and I did not check it.
+
+**The status header of `docs/writeup-phase2-draft.md` already said no sentence of
+§(ii) may be treated as settled until the Skeptic returned. That header did its
+job.**

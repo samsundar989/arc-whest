@@ -94,17 +94,49 @@ def xmse(pred, A, B):
     return float(np.mean((pred - A) * (pred - B)))
 
 
+#: Which branch produced the last critical value. An artifact that cannot say
+#: whether its interval came from scipy or from a fallback is not reproducible,
+#: and the old fallback was WRONG: `2.064` is t at df=24, used for every n
+#: from 2 to 60. A Skeptic found it latent on 2026-09-10 (scipy is installed in
+#: both venvs, so it never fired) and it is fixed before a 1.15x gate uses it.
+_LAST_T_CRIT = {"value": None, "source": None}
+
+#: Two-sided 97.5% t critical values, df 1..30. Exact to 4 decimals, so a
+#: missing scipy degrades the interval by <0.05% instead of by 12%.
+_T975 = (
+    12.7062, 4.3027, 3.1824, 2.7764, 2.5706, 2.4469, 2.3646, 2.3060, 2.2622,
+    2.2281, 2.2010, 2.1788, 2.1604, 2.1448, 2.1314, 2.1199, 2.1098, 2.1009,
+    2.0930, 2.0860, 2.0796, 2.0739, 2.0687, 2.0639, 2.0595, 2.0555, 2.0518,
+    2.0484, 2.0452, 2.0423,
+)
+
+
+def _t_crit(df, alpha=0.05):
+    """The two-sided critical value, and where it came from."""
+    if df < 1:
+        return float("nan"), "df<1"
+    try:
+        from scipy import stats
+        return float(stats.t.ppf(1 - alpha / 2, df)), "scipy"
+    except Exception:
+        pass
+    if abs(alpha - 0.05) > 1e-12:
+        return 1.96, "normal-approx (alpha != 0.05, no scipy)"
+    if df <= len(_T975):
+        return _T975[df - 1], "table"
+    # Beyond the table, Cornish-Fisher on the normal quantile: error < 0.1%.
+    z = 1.959963984540054
+    return z + (z ** 3 + z) / (4.0 * df), "cornish-fisher"
+
+
 def studentised_t(d, alpha=0.05):
     """Paired studentised-t interval. Never percentile, never BCa."""
     d = np.asarray(d, dtype=np.float64)
     n = len(d)
     m = float(d.mean())
     se = float(d.std(ddof=1) / np.sqrt(n)) if n > 1 else float("nan")
-    try:
-        from scipy import stats
-        crit = float(stats.t.ppf(1 - alpha / 2, n - 1))
-    except Exception:
-        crit = 1.96 if n > 60 else 2.064
+    crit, src = _t_crit(n - 1, alpha)
+    _LAST_T_CRIT["value"], _LAST_T_CRIT["source"] = crit, src
     return m, se, (m - crit * se, m + crit * se)
 
 
