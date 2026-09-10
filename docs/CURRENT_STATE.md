@@ -41,10 +41,12 @@ and placeholder-smoke exposure; it is never relabeled untouched. P07 is reusable
 DESIGN. P08 is exhausted. Samuel's three new predictions are all **“I don't know”**,
 which is valid and recorded without interpretation.
 
-The first experiment is ready to arm after its exact coefficient registry is
-committed: produce bounded coherent candidates on P07 weights without labels, open
-P07 once through `truth_reads` to freeze the coefficient receipt, then run the
-registered exact/coherent/consumers-only/births-only comparison on exposed P01.
+The exact coefficient and identity registries are committed, and a fresh-context
+Skeptic accepted the producer's exact-P07 pre-mint guard after independently
+checking all 384 ordered identities and the negative mutations. Produce bounded
+coherent candidates on P07 weights without labels, verify the immutable producer
+receipt, open P07 once through `truth_reads` to freeze the coefficient receipt,
+then run the registered exact/coherent/consumers-only/births-only comparison on exposed P01.
 That DESIGN result must end with synthesis and a fresh Skeptic before any untouched
 DECIDE allocation. No public or vault truth is authorized.
 

@@ -41397,3 +41397,31 @@ Full-tier reports were restored after comparison; no tested source, estimator,
 ledger, protected data or vault file changed. This is a passing Full preflight. It
 does not substitute for the separately required current full certifier mutation
 battery or for Linux memory evidence (workerq 599 supplies the latter).
+
+### Exact P07 identity guard accepted before production
+
+Commit `e17c3ba` extends the label-free producer to accept only the exact registered
+P07 design manifest at production shape: block `P07`, width 1024, depth 16, all 384
+seeds in `seed_blocks.seeds("P07")` order, and identity strings equal to those
+seeds. Validation completes before candidate generation, output-directory creation,
+network minting or lifecycle evaluation. Synthetic mode remains available for
+unprotected fixtures. The producer still has no truth argument or truth loader.
+
+The expanded producer/selector mutation suite passes **19/19**. Wrong block, seed,
+seed order, shape and identity mapping refuse before lifecycle evaluation. The
+committed armed manifest independently matches seeds `40910007000` through
+`40910007383` in order.
+
+A fresh-context Skeptic received the contract, diff and raw synthetic artifacts,
+reran the suite, independently compared all 384 identities with the seed registry,
+and returned **ACCEPT**. Its limitation is binding: this proves the pre-mint guard
+and bounded interface, not that full P07 production completes or that any
+coefficient improves accuracy. The next authorized action is one label-free
+workerq production of the four committed candidates, followed by receipt
+verification before the single registered P07 truth read.
+
+Workerq 574 was inspected rather than assumed complete. It had no source snapshot,
+never started, and was cancelled while queued after 10,248 seconds. It supplies no
+preflight evidence. Current-source default preflight is queued as workerq 634 with
+15 GiB RAM, 0 GiB VRAM and 2 CPUs; the separately required full certification
+mutation battery is queued as workerq 633 with 32 GiB RAM, 0 GiB VRAM and 2 CPUs.
