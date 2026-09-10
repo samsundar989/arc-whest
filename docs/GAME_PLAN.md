@@ -2,6 +2,15 @@
 
 **Revised September 10, 2026 after worker review at bcca354.** This is the sole active roadmap. Read [CURRENT_STATE](CURRENT_STATE.md), [WORKER_REVIEW](WORKER_REVIEW_2026-09-10.md), VALIDATION.md, GOTCHAS.md and LOG tail. The [prior plan](archive/GAME_PLAN_before_worker_review_2026-09-10.md) is historical. Existing gate verdicts, data restrictions and human approvals retain their scope.
 
+**Execution status.** Stages 0 and 1 are implemented and independently accepted;
+their exact evidence and limitations are recorded in CURRENT_STATE and the LOG.
+Stage 2 is the active frontier, but its old contract is superseded because P01 was
+already exposed and its promised chronology cannot be reconstructed. No new labels
+may be read until replacement Samuel predictions are recorded and committed. The
+four-arm coherent-K4 mechanism comparison remains first; the compact reference is
+the priced baseline for later residual/shared-coordinate questions. Stage 4 remains
+conditional on a measured Stage-2 bottleneck.
+
 ## Objective and architecture
 
 Aim at the fresh private rerun's best eligible submission, not a public-board fit. The inspected leader is about 6.8x better than our best public score, with undisclosed method and unavailable displayed truth-noise floor. **No winning architecture is established.** The current best-supported research direction is:
@@ -17,7 +26,7 @@ The [pinned public reconstruction](https://github.com/504aldo/whest-p2-cumulant-
 
 **Samuel has closed Stage 3: hold eligibility work off entirely.** Do not draft/send a new organizer question or advance a participant-derived reconstruction toward submission. Historical drafts are inactive. Attribution, fresh code or a mathematical rewrite alone does not resolve rules §6. Research can proceed within this hold.
 
-## Stage 0 — finish the instrument through its real paths
+## Stage 0 — instrument through its real paths (**implemented and accepted**)
 
 **IMPORTANT:** write a prediction before each bounded instrument change, record evidence/knowledge delta, run required preflight and get a fresh-context Skeptic. Any change to gate policy, data tiers or residual model is STRATEGIC; do not smuggle it into a bug fix. No new research labels while repairing the measurement path.
 
@@ -34,7 +43,7 @@ Passing helper suites is insufficient: reproduce the review counterexamples at t
 
 Inspect in-flight jobs first. Default preflight **574** was submitted with no source snapshot and remained queued; attribute its eventual result to actual executing bytes or replace this owned job with a frozen run. It is not Full. Locate the worker's separate full mutation result; avoid duplicate substantial runs. Required heavy preflight, full mutation, live-shape memory/evaluation jobs go through workerq with RAM/VRAM/CPU declarations. No priority changes or queue bypass.
 
-## Stage 1 — prove the intended representation and price its executable form
+## Stage 1 — intended representation and executable cost (**implemented and accepted**)
 
 **IMPORTANT probe mathematics, without protected labels.** The worker's 28 tiny identity checks survive; its complete-closure and cost conclusions do not. Use independently derived dense fixtures rather than mirroring implementation formulas.
 
@@ -55,6 +64,11 @@ Start with tiny metered operation-family checks; then queue label-free 1024 x 16
 **Stage-1 exit:** independent conformance passes; executable end-to-end report works; complete counted costs are reproducible; remaining approximations are named; fresh Skeptic accepts the evidence. If conformance fails, repair the implementation rather than kill the scientific hypothesis. If a correctly implemented full program is uncompetitive, synthesize before spending labels.
 
 ## Stage 2 — valid design, then fresh decisions
+
+**Current stop condition:** the replacement experiment contract is prepared in
+the LOG, but its human-prediction fields are deliberately blank. Record Samuel's
+new answers and commit them before fitting or opening P07/P01. Do not reuse the
+predictions attached to the rejected placeholder implementation.
 
 The current 08f787b contract has **not been tested as specified**. It promised a freeze before P01, but P01 has three recorded DESIGN reads and informed the proposed range. Manual timestamps cannot establish preregistration chronology. Preserve exposure; reconcile independent job records if available; otherwise mark chronology unresolved. Do not recycle the old contract/predictions as evidence for a changed intervention.
 

@@ -1,5 +1,46 @@
 # CURRENT_STATE.md — read this first
 
+**Execution update, September 10, 2026.** The production-path repair and the
+label-free compact-reference work ordered by the worker review are implemented.
+Both packages have fresh-context Skeptic **ACCEPT** verdicts. No protected research
+truth was opened, no seed block or vault touch was spent, and no shipped or frozen
+estimator was changed.
+
+The Stage-0 certificate now binds the exact packaged candidate bytes, current
+instrument hash, installed WhestBench/flopscope distributions, Phase-2 workload,
+read-only float64 weights, lifecycle controls and Linux cap. Workerq job 599 passed
+24/24; the real `certify_candidate.py --memory-only` consumer returns CERTIFIED for
+the bound report and INCOMPLETE for mismatched evidence. The repaired reporting,
+noise, protected-read and vault-fixture paths have positive, negative and
+incomplete-evidence regression coverage. Raw evidence is under
+`experiments/2026-09-10_stage0_*`.
+
+The four coherent-K4 arms now parse and pass an independently constructed dense
+oracle. The compact all-history reference executes weighted-Gram/thin-QR joins,
+factor rotations, a carried Gram, both shared legs, explicit residuals, K4
+consumers/births and the initial/final shortcuts. Independent dense closure and
+state-shadow checks pass. At width 1024 x depth 16 with old-source rank 384 and
+residual rank 16 it meters **818,494,496,296 FLOPs (0.372208 B)**, estimates
+345,587,712 bytes of array payload, and used about 1,014 MiB process RAM in
+workerq jobs 614/615. This is a label-free implementation and cost result; it is
+not an accuracy or competitiveness result. Raw evidence is under
+`experiments/2026-09-10_stage1a_repair/` and
+`experiments/2026-09-10_stage1b_compact/`.
+
+The old Stage-2 contract at `08f787b` is superseded before any new read. Its
+freeze-before-P01 chronology cannot be satisfied: P01 already has three recorded
+DESIGN reads and the placeholder smoke influenced the proposed range. P01 remains
+exposed DESIGN, P07 remains DESIGN, and P08 remains exhausted. New Samuel
+predictions are required before the first repaired coherent-K4 result. Until they
+are recorded and committed, fitting and label-consuming execution remain stopped.
+
+The old full mutation job 576 was found and is a failure on obsolete snapshot
+`fd9173` (31.8 GiB peak, old package versions); it is not current evidence. Git
+snapshot preflight 612 failed global byte-identity gates because checkout
+normalization changed CRLF working/package bytes to LF. The replacement acceptance
+gate must therefore run from a clean, unchanged live worktree and record the exact
+HEAD and hashes. Its outcome is recorded at the bottom of `experiments/LOG.md`.
+
 **Current September 10, 2026, after independent review of worker HEAD `bcca354`.** Then read `experiments/LOG.md` from the bottom. The preceding snapshot is [archived verbatim](archive/CURRENT_STATE_before_worker_review_2026-09-10.md).
 
 ## Pick up here

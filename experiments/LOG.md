@@ -41098,3 +41098,213 @@ incomplete fixtures; stored-report replay; exact source hashes; a default and Fu
 preflight attributed to the executed bytes; and fresh-context Skeptic review of the
 contract, diff, protocol and raw artifacts. Heavy memory/live-shape/full-gate work
 uses `workerq` with declared resources. No queued result is called complete.
+
+---
+
+## 2026-09-10 — Stage 0/1 repair package: accepted evidence and knowledge delta
+
+**Classification: IMPORTANT, label-free.** This closes the implementation package
+pre-registered immediately above. It does not change `estimator.py`, a frozen
+estimator, a data tier, a decision block, the vault, a gate, a residual policy, a
+submission asset or an eligibility position. The predictions preceded every
+artifact in this package.
+
+### Stage 0 — real production paths
+
+- Certification checks now carry their true domains, bind installed distribution
+  versions from `importlib.metadata`, bind the current instrument SHA, and preserve
+  applicable explicit failures when an older report lacks newer fields. All seven
+  stored reports were replayed without rewriting them. Missing evidence remains
+  INCOMPLETE; it cannot mask an applicable REFUSED result.
+- The repeated-memory child releases instrument-owned networks. Stateless and
+  deliberately retaining controls discriminate lifecycle growth, and candidate
+  FLOPs are recorded rather than required equal across different weights.
+- The lab validates arms, control and output before reserving truth, writes the
+  actual report schema without overwrite, reports unequal-multiplier noise and the
+  half-floor for a two-replica mean, and separates build/kill/mechanism outcomes.
+  Extreme Student-t inversion is computed rather than silently capped.
+- Every named protected-truth consumer, including `p2_corrector.py` and the generic
+  scorer route, now reserves before opening labels. Receipts distinguish measured
+  execution from supplied historical time. P01 remains at three exposed DESIGN
+  reads; P08 remains exhausted. Phase-1 vault refusal and seal are unchanged;
+  atomic/crash/concurrency behavior was exercised only on sacrificial fixtures.
+
+**Current exact memory proof.** Workerq 599 ran the WSL/package-byte memory gate
+with 12 GiB RAM, no GPU and two CPUs: 24/24 passed. The report binds candidate SHA
+`00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec`,
+instrument SHA `55a644d1d7e4113f8f827ce1075af38b0bdde8b634a19d240a7e959d268c9761`,
+WhestBench 0.16.1, flopscope 0.12.1, the 1024x16 Phase-2 workload, three repeated
+predictions, 137,600,326,656 counted FLOPs, no settled growth and 2,346.7 MiB
+VmPeak under the 8 GiB cap. The real `certify_candidate.py --memory-only`
+entry point returns CERTIFIED for that report and INCOMPLETE for a wrong candidate.
+
+Raw evidence:
+
+- `experiments/2026-09-10_stage0_cert_memory/linux_memory_gate_estimator_v5c.json`
+- `experiments/2026-09-10_stage0_cert_memory/certifier_v5c_memory_only.json`
+- `experiments/2026-09-10_stage0_cert_memory/stored_report_replay.json`
+- the bounded Stage-0 artifacts under `experiments/2026-09-10_stage0_*`
+
+Two fresh-context reviews accepted the repaired package: the reporting/truth review
+returned **ACCEPT** after commit `ecd1751`; the certification/memory review returned
+**ACCEPT** after `a8d8181` and preserved it after the relocatable traceback repair
+`c3911ae`. The latter correctly leaves one final full-mutation acceptance run owed.
+
+### Stage 1 — coherent closure and executable compact reference
+
+The four public arms are `exact`, `coherent`, `consumers_only` and `births_only`.
+An independent signed dense polynomial/tensor oracle passes 37/37 checks, including
+repeated indices, cancellations, permutations and zero limits. Exact and master-off
+are bit- and cost-identical at 97,829 tiny-fixture FLOPs. An active zero core is
+output-identical but deliberately costs 149,231 FLOPs because the intervention
+executes; this distinguishes switching the mechanism off from setting its value to
+zero.
+
+The compact reference executes the complete represented program: mean/full
+covariance, exact recent K3 sources, all older sources in a common rank-384 basis,
+rank-16 explicit residuals, weighted Gram, thin QR, factor rotations, carried Gram,
+two shared legs, coherent D4/D22/D31 consumers and K3 births, empty initial history
+and final mean-only readout. A separately evolved dense shadow checks every source
+field and age after every layer; the worst relative error is `2.84e-7`. A separate
+dense closure checks transported K4, consumers, mean, covariance and newborns; the
+worst relative error is `2.16e-7`. Compact conformance and lifecycle each pass
+11/11.
+
+Workerq 614/615 executed width 1024 x depth 16 without labels. Exact counted cost
+is **818,494,496,296 FLOPs = 0.372208 x 2^41**, including 48 casts costing
+16,842,752 FLOPs. Estimated peak array payload is 345,587,712 bytes; observed
+process peak was about 1,014 MiB; the largest array is 4,194,304 bytes. All fifteen
+births remain represented. This establishes implementation, algebra within the
+represented closure, cost and lifecycle. It establishes no score, server residual
+or competitiveness claim. Compression at ranks 384/16 and deletion of higher
+cross-cumulant nonlinear terms remain named approximations.
+
+Raw evidence:
+
+- `experiments/2026-09-10_stage1a_repair/conformance.json`
+- `experiments/2026-09-10_stage1a_repair/arm_parity.json`
+- `experiments/2026-09-10_stage1b_compact/tiny_meter.json`
+- `experiments/2026-09-10_stage1b_compact/lifecycle.json`
+- `experiments/2026-09-10_stage1b_compact/live_meter.json`
+- `experiments/2026-09-10_stage1b_compact/live_lifecycle.json`
+
+The fresh Stage-1 Skeptic initially rejected the self-referential check. After the
+independent dense closure and state-shadow repairs it returned **ACCEPT**, then
+preserved ACCEPT on commits `a919384` and `4dda124` with no material defects.
+
+### Negative acceptance evidence that remains negative
+
+The prior full mutation run was located: workerq 576 FAILED on obsolete snapshot
+`fd9173`, peaked at 31.8 GiB and loaded WhestBench 0.16.0/flopscope 0.12.0. Its U4
+developer-path defect motivated `c3911ae`, but its result cannot certify current
+0.16.1/0.12.1 bytes. Workerq 612 also FAILED global preflight gates 7, 9 and 12
+because a Git snapshot normalized CRLF working/package evidence to LF; no Stage-1
+test failed. Neither result is relabeled green. The final replacement must run from
+a clean unchanged live worktree with enough declared RAM and record exact hashes.
+
+**Knowledge delta.** The independent review was right: helper-level checks had
+hidden real producer/consumer failures, and the old eigencore ledger priced another
+algorithm. The repaired compact program is much larger than the withdrawn estimate
+but remains below the Phase-2 counted budget at the chosen ranks. Its main counted
+families are contractions, transport, materialization and join/rebase, so later
+frontier work must be motivated by measured accuracy/cost behavior in those paths,
+not by the withdrawn scalar estimate.
+
+---
+
+## 2026-09-10 — SUPERSEDING CONTRACT: Stage-2 experiment 1, repaired coherent K4
+
+**State: PREPARED, NOT ARMED. No protected labels may be opened until Samuel's new
+predictions below are recorded and this entry is committed again.** This contract
+supersedes `08f787b` for all future evidence. It does not erase that contract or its
+three P01 DESIGN reads.
+
+### Provenance correction
+
+P01 is already exposed DESIGN data. The placeholder smoke used three P01 networks
+and influenced the old proposed range. The promised “freeze before P01 is read”
+chronology therefore cannot be met, and independent worker records did not recover
+a defensible earlier chronology. P01 is never relabeled untouched. P07 remains
+DESIGN; P08 remains spent and exhausted. The old Samuel predictions described the
+rejected placeholder intervention and are not reused as predictions for the
+repaired closure.
+
+### Question and evidence
+
+**Question.** After a bounded P07-only calibration, does the now-conformant coherent
+K4 closure improve paired Phase-2 arithmetic score over the exact K3 control, and
+does the improvement require both its consumers and induced births?
+
+- **CONFIRMED:** the four switches parse and the exact/master-off control nests in
+  output and counted cost on label-free fixtures.
+- **CONFIRMED:** the compact represented program meters 0.372208 B at ranks 384/16;
+  this is implementation cost, not accuracy evidence.
+- **CONFIRMED:** P01 has three prior DESIGN reads; P07 is reusable DESIGN; P08 is
+  exhausted. No untouched decision evidence exists for this intervention.
+- **INFERRED:** the old theta=1 placeholder instability says only that its scale was
+  unsuitable; it does not predict the repaired closure's sign or useful scale.
+- **SPECULATIVE:** coherent consumers and births recover a depth-amplified relational
+  fourth-order signal that neither half-arm captures alone.
+
+### Hypothesis and mechanism
+
+The per-neuron matrix-core K4 state changes both the current layer's D4/D22/D31
+consumers and the K3 sources born for later layers. If the same represented
+fourth-order signal matters through depth, the jointly coherent arm should beat the
+exact control and both half-arms. A half-arm matching the whole falsifies the claim
+that this coupling is the mechanism.
+
+### Intervention and immutable fitting receipt
+
+First implement a bounded fitting interface and prove it only on synthetic data.
+Then fit only the explicitly registered structural coefficient(s) on P07, through
+reserved reads, and write a non-overwriting receipt containing source hashes,
+candidate grid or bounds, objective, identities, truth manifest, counted costs and
+the frozen selected values. No autonomous sweep, public fit or P01-informed range
+change is allowed. After freezing, run the four arms `exact`, `coherent`,
+`consumers_only`, `births_only` on exposed P01 DESIGN data through `p2_lab.py`.
+
+### Builder predictions
+
+The Builder predicts only direction before labels: coherent should beat exact; both
+half-arms should fall short of coherent; births-only is the likelier harmful half.
+Magnitude is deliberately left to the isolated gate and Samuel's recorded range.
+The complete compact program's 0.372208 B cost leaves counted-budget room, but its
+server residual headroom is unknown.
+
+### Samuel's predictions — REQUIRED BEFORE ARMING
+
+1. Expected coherent-versus-exact arithmetic gain on this exposed DESIGN check:
+   **PENDING SAMUEL**.
+2. Expected mechanism result — coherent beats both half-arms, one half matches it,
+   or no useful arm improves: **PENDING SAMUEL**.
+3. Expected residual headroom against the 0.4 s server cliff for the compact
+   rank-384/rank-16 reference: **PENDING SAMUEL**.
+
+### Gate and falsifier
+
+The isolated build gate remains a paired arithmetic score difference
+`exact - coherent > 0` with the studentised-t 95% interval excluding zero and an
+arithmetic gain of at least `1.10x`, passed to
+`competition_score.decide(gate=1.10, interval="t")`. A DESIGN pass licenses a
+fresh-DECIDE contract; it is not promotion. The mechanism claim also requires
+coherent to exceed the better half-arm by at least `0.02x` descriptively. A gain
+below `1.05x`, or either half-arm matching coherent within `0.02x`, falsifies the
+stated mechanism on these DESIGN assets. Failure to pass the build gate is not a
+general K4 kill.
+
+### Baseline, cost, statistic and scope
+
+The exact K3 arm is the control; all arms use common networks, one process and
+identity alignment. Phase 2 has `lambda=0`, so cost is counted FLOPs only. Freeze
+each arm's counted cost before scores. Report worst observed subprocess residual as
+headroom `0.4 / observed`; local wall time is never quoted as authority. Report
+each MSE with its truth floor, and report observed, noise-corrected and
+official-precision arithmetic comparisons with unequal multipliers handled per
+row. Studentised-t is binding; geometric ratios are diagnostic only.
+
+No decision block, public truth, vault, estimator, frozen archive, L2 candidate,
+submission, designation or eligibility action is authorized. After this DESIGN
+result, stop for synthesis and a fresh Skeptic before writing any fresh-DECIDE
+contract. Residual-rank, shared-basis and nested-tier questions remain later
+separate interventions in GAME_PLAN order.
