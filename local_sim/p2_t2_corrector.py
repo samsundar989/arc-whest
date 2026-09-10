@@ -220,17 +220,26 @@ def extract(a) -> int:
     import torch
     import p2_kprop_bridge as bridge
     from mint_provenance import canonical_mint
-    from mlp_kprop.kprop_harmonic import SIMPLE, mlp_kprop
+
+    # `bridge._src()` is what puts the pinned upstream checkout on `sys.path`
+    # (`p2_kprop_bridge.py:94`), so **nothing may import `mlp_kprop` before it has
+    # been called**. The first version of this module imported
+    # `mlp_kprop.kprop_harmonic` on the line above and died with
+    # `ModuleNotFoundError` two seconds into a queued job. Verify first, import
+    # second -- which is also the order that guarantees no upstream symbol is
+    # bound before the rev has been checked.
+    src = bridge._src()
+    v = bridge.verify_upstream(src)
+    if not v["pass"]:
+        raise SystemExit(f"REFUSED: upstream is not the pinned rev + patch: {v}")
+
+    from mlp_kprop.kprop_harmonic import SIMPLE, mlp_kprop  # noqa: E402
 
     z = np.load(a.truth)
     seeds = [int(s) for s in z["seeds"]]
     m1, m2 = z["means_r1"], z["means_r2"]
     n_samples = int(z["n_samples"])
     gt_noise = z["gt_noise"] if "gt_noise" in z else None
-
-    v = bridge.verify_upstream(bridge._src())
-    if not v["pass"]:
-        raise SystemExit(f"REFUSED: upstream is not the pinned rev + patch: {v}")
 
     dev = a.device
     dtype = torch.float32
