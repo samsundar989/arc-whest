@@ -38502,3 +38502,68 @@ difference between arms. Upstream stays rev `93d091a4` plus exactly the recorded
 patch, verified before the first datum. `float32`, to match the control's dtype —
 the two dtype defaults that went wrong earlier in this slice are the reason that
 is stated rather than assumed.
+
+# 2026-09-10 — **THE EXACT-METRIC LEVER DECAYS TO `1.07x` AT THE LIVE SHAPE.** Gate failed, lane closed for free — and the ladder is now CALIBRATED as an over-reader.
+
+*Contract: `experiments/LOG.md` 2026-09-10, committed before the run. Instrument
+`local_sim/p2_metric_arm.py`, artifact `experiments/2026-09-09_slice4/metric_arm.json`,
+workerq job `475` (`41s`). `# seed-ledger: no block named` — re-reads P01 DESIGN.*
+
+## The result, and the prediction was right for the stated reason
+
+    control (avg metric)  4.004685e-08   drift vs pre-registered  +1.299e-15
+    exact metric          3.743003e-08
+    gain at 1024 x 16     1.0699x        gate 1.15x  ->  FAIL
+    paired (exact - avg)  -2.6168e-09    95% [-3.186e-09, -2.048e-09]
+    the exact metric wins on 24/24 nets
+
+The effect is **real** — every net, CI well clear of zero — and **too small to
+buy**. Against its cost (`metric.ndim == 2` switches on the `211` case-2 block,
+births `8n -> 9n`, and it breaks `_proj_coef_d4_r2`'s reduction of the whole
+degree-4 object to one scalar) a `1.07x` accuracy gain cannot be repaid.
+**Closed, and it cost 41 seconds because the accuracy was measured before any
+cost model.**
+
+Pre-registered prediction 1 (gain below `1.31x`) and prediction 2 (below the
+`1.15x` gate) both **CONFIRMED**; prediction 3, the control, reproduced to
+`1.3e-15`. The mechanism given in the contract is the one that fired:
+`E[W W^T] = 2I` is a concentration approximation and its error falls as the
+spectrum concentrates, so the gain must decay with width.
+
+## The number that matters more than the lever: **the ladder OVER-READS**
+
+    ladder  128 x 2    gain 1.681x
+    ladder  192 x 3    gain 1.458x
+    ladder  256 x 4    gain 1.311x
+    LIVE   1024 x 16   gain 1.070x
+
+**This is the second calibration point for the small-width ladder, and both point
+the same way:**
+
+| quantity | ladder, top rung | live shape | ladder over-reads by |
+|---|---:|---:|---:|
+| `SIMPLE / AUGMENT` | `2.909` | `2.094` | **`1.39x`** |
+| exact-metric gain on SIMPLE | `1.311` | `1.070` | **`1.23x`** |
+
+Two independent method ratios, measured at `(256, 4)` and at `(1024, 16)`, and
+the ladder reads high by `1.2x`–`1.4x` on both. That converts "the ladder cannot
+be extrapolated" — which was true but unquantified — into **a measured bias with
+a direction and a rough size**.
+
+**Consequence for the one ladder reading still live.** Full `K4` over `AUGMENT`
+reads `9.0x`–`10.6x` at the rungs. Discounted by the same `1.2x`–`1.4x`, the
+live-shape ceiling would be **`6.5x`–`8.8x`**. Still very large, still far above
+the `1.5x` threshold the strategist's lane test used — **so the ceiling
+hypothesis survives calibration, and is now the single most valuable unmeasured
+quantity in the project.** It is stated as a hypothesis, not a finding: no
+`kappa_4` ceiling has ever been measured at `1024 x 16`, and this is an
+extrapolation of a bias measured on two other quantities.
+
+## What this run cost, against what the slice has spent
+
+`41` seconds of GPU, one contract, no seed block, and it closed a lane that would
+otherwise have consumed a cost model, a port and a certification cycle. Recorded
+because it is the counter-example to this slice's own worst habit: **the two
+expensive mistakes here (a `2h33m` f64 run, a `3h46m` run at the wrong operating
+point) both came from building before measuring the cheapest discriminating
+quantity.**

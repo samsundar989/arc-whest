@@ -94,7 +94,12 @@ def paired(a, b):
     h = _t975(n - 1) * se if n > 1 else float("nan")
     return {"paired_diff": m, "se": se, "ci95": [m - h, m + h], "n": n,
             "arithmetic_ratio": float(np.mean(a) / np.mean(b)),
-            "n_exact_worse": int((np.asarray(b, float) > np.asarray(a, float)).sum())}
+            # NAME IT FOR WHAT IT COUNTS. `b` is the avg-metric arm and `a` the
+            # exact one, so this is the number of nets on which the EXACT
+            # metric WINS. The first spelling called it `n_exact_worse`
+            # and printed it as "nets worse" -- the same sign confusion
+            # that already misread `unfactored/factored` once this slice.
+            "n_exact_better": int((np.asarray(b, float) > np.asarray(a, float)).sum())}
 
 
 def _progress(frac):
@@ -225,9 +230,9 @@ def report(a) -> int:
     print("\n  gain at 1024x16       %.4fx   (gate %.2fx -> %s)"
           % (gain, doc["gate_ratio"],
              "PASS" if gain >= doc["gate_ratio"] else "FAIL"))
-    print("  paired (exact - avg)  %+.4e   95%% [%+.4e, %+.4e]   %d/%d nets worse"
+    print("  paired (exact - avg)  %+.4e   95%% [%+.4e, %+.4e]   exact wins on %d/%d"
           % (st["paired_diff"], st["ci95"][0], st["ci95"][1],
-             st["n_exact_worse"], st["n"]))
+             st["n_exact_better"], st["n"]))
     lr = doc["ladder_simple_ratios"]
     print("\n  the trend this run tested:")
     for k in ("128x2", "192x3", "256x4"):

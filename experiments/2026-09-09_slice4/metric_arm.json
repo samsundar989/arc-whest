@@ -1,0 +1,200 @@
+{
+ "slice": "Slice 4 -- the exact-metric arm at the live shape",
+ "contract": "experiments/LOG.md 2026-09-10 CONTRACT (Rule 1): the exact-metric arm at 1024x16",
+ "tier": "DESIGN. Re-reads the P01 asset. Orients priority; promotes NOTHING. That asset's manifest forbids closing a lane on it.",
+ "asset": "experiments/2026-08-26_p2_gt",
+ "width": 1024,
+ "depth": 16,
+ "dtype": "float32",
+ "device": "cuda",
+ "gt_noise_per_half": 1.1552182657290076e-09,
+ "upstream": {
+  "rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+  "expected_rev": "93d091a4c26c042bfffa28f2e76a81bc0aba94bb",
+  "changed_lines": 25,
+  "recorded_lines": 25,
+  "changed_md5": "11d296d73c8895668333d21a0cfd5526",
+  "recorded_md5": "11d296d73c8895668333d21a0cfd5526",
+  "pass": true
+ },
+ "written_at_utc": "2026-09-10T07:09:21Z",
+ "workerq_job": "475",
+ "gate_ratio": 1.15,
+ "control_baseline": 4.004685e-08,
+ "ladder_simple_ratios": {
+  "128x2": 0.595,
+  "192x3": 0.686,
+  "256x4": 0.763
+ },
+ "cost_note": "NOT free: metric.ndim == 2 switches on the 211 case-2 block (factor_k3.py:439-446), taking births 8n -> 9n, and in the shipped fnp chain it breaks _proj_coef_d4_r2's reduction of the whole degree-4 object to one scalar. No cost model is offered here -- accuracy first, on purpose.",
+ "rows": [
+  {
+   "seed": 40821001144,
+   "avg_metric": 4.0146999637159986e-08,
+   "avg_metric_all_layers": 1.707606046653525e-08,
+   "exact_metric": 3.72503860503212e-08,
+   "exact_metric_all_layers": 1.5545760072724742e-08
+  },
+  {
+   "seed": 40821001145,
+   "avg_metric": 4.624417151252901e-08,
+   "avg_metric_all_layers": 1.8179801880661996e-08,
+   "exact_metric": 4.4269171155673825e-08,
+   "exact_metric_all_layers": 1.6762016312915673e-08
+  },
+  {
+   "seed": 40821001146,
+   "avg_metric": 4.430410987998273e-08,
+   "avg_metric_all_layers": 1.6417443726020156e-08,
+   "exact_metric": 4.258374219192435e-08,
+   "exact_metric_all_layers": 1.5420284308148018e-08
+  },
+  {
+   "seed": 40821001147,
+   "avg_metric": 4.0070276281950715e-08,
+   "avg_metric_all_layers": 1.54569219384773e-08,
+   "exact_metric": 3.8979173399691766e-08,
+   "exact_metric_all_layers": 1.5325184088000833e-08
+  },
+  {
+   "seed": 40821001148,
+   "avg_metric": 3.589794519983273e-08,
+   "avg_metric_all_layers": 1.582575702519374e-08,
+   "exact_metric": 3.2673549128423096e-08,
+   "exact_metric_all_layers": 1.4043266428753226e-08
+  },
+  {
+   "seed": 40821001149,
+   "avg_metric": 4.093732584186786e-08,
+   "avg_metric_all_layers": 1.553509527790448e-08,
+   "exact_metric": 3.976621699144929e-08,
+   "exact_metric_all_layers": 1.4643833576100842e-08
+  },
+  {
+   "seed": 40821001150,
+   "avg_metric": 3.385157993619871e-08,
+   "avg_metric_all_layers": 1.6266650348743754e-08,
+   "exact_metric": 3.1988087976826274e-08,
+   "exact_metric_all_layers": 1.4927415399742266e-08
+  },
+  {
+   "seed": 40821001151,
+   "avg_metric": 2.959136500297685e-08,
+   "avg_metric_all_layers": 1.385104621742984e-08,
+   "exact_metric": 2.7755494001483864e-08,
+   "exact_metric_all_layers": 1.2490958319656214e-08
+  },
+  {
+   "seed": 40821001152,
+   "avg_metric": 4.357765683300595e-08,
+   "avg_metric_all_layers": 1.6195256387041755e-08,
+   "exact_metric": 3.940424017640941e-08,
+   "exact_metric_all_layers": 1.46775863638582e-08
+  },
+  {
+   "seed": 40821001153,
+   "avg_metric": 3.981884604357957e-08,
+   "avg_metric_all_layers": 1.570156785072257e-08,
+   "exact_metric": 3.866315655369628e-08,
+   "exact_metric_all_layers": 1.4959114354277306e-08
+  },
+  {
+   "seed": 40821001154,
+   "avg_metric": 4.672291182421115e-08,
+   "avg_metric_all_layers": 1.696715628369143e-08,
+   "exact_metric": 4.317621091813572e-08,
+   "exact_metric_all_layers": 1.5271078598755735e-08
+  },
+  {
+   "seed": 40821001155,
+   "avg_metric": 3.448924336766326e-08,
+   "avg_metric_all_layers": 1.4103656110459664e-08,
+   "exact_metric": 3.1307860915931474e-08,
+   "exact_metric_all_layers": 1.2676116190349551e-08
+  },
+  {
+   "seed": 40821001156,
+   "avg_metric": 3.804412205279595e-08,
+   "avg_metric_all_layers": 1.5786531391186586e-08,
+   "exact_metric": 3.735790790561481e-08,
+   "exact_metric_all_layers": 1.4532880207852062e-08
+  },
+  {
+   "seed": 40821001157,
+   "avg_metric": 3.562219975739323e-08,
+   "avg_metric_all_layers": 1.4566147124093368e-08,
+   "exact_metric": 3.285978169525596e-08,
+   "exact_metric_all_layers": 1.3437556711995105e-08
+  },
+  {
+   "seed": 40821001158,
+   "avg_metric": 4.3540552734917346e-08,
+   "avg_metric_all_layers": 1.6548345269050147e-08,
+   "exact_metric": 4.0190244177008356e-08,
+   "exact_metric_all_layers": 1.4886913218518261e-08
+  },
+  {
+   "seed": 40821001159,
+   "avg_metric": 4.219063801571507e-08,
+   "avg_metric_all_layers": 1.699785994419281e-08,
+   "exact_metric": 3.8627526635878157e-08,
+   "exact_metric_all_layers": 1.4881913366371542e-08
+  },
+  {
+   "seed": 40821001160,
+   "avg_metric": 4.37253649629393e-08,
+   "avg_metric_all_layers": 1.6239114790351816e-08,
+   "exact_metric": 3.87014631426925e-08,
+   "exact_metric_all_layers": 1.4553260816059662e-08
+  },
+  {
+   "seed": 40821001161,
+   "avg_metric": 4.392901381876512e-08,
+   "avg_metric_all_layers": 1.5036678463726846e-08,
+   "exact_metric": 4.074251561769516e-08,
+   "exact_metric_all_layers": 1.3495637430246884e-08
+  },
+  {
+   "seed": 40821001162,
+   "avg_metric": 3.807001173952449e-08,
+   "avg_metric_all_layers": 1.432549507386609e-08,
+   "exact_metric": 3.2671166349618456e-08,
+   "exact_metric_all_layers": 1.2582502395883087e-08
+  },
+  {
+   "seed": 40821001163,
+   "avg_metric": 4.170976343891999e-08,
+   "avg_metric_all_layers": 1.6985667934283234e-08,
+   "exact_metric": 3.868807961861115e-08,
+   "exact_metric_all_layers": 1.585303837859947e-08
+  },
+  {
+   "seed": 40821001164,
+   "avg_metric": 4.9120026440848105e-08,
+   "avg_metric_all_layers": 1.6628808038798547e-08,
+   "exact_metric": 4.509559967881646e-08,
+   "exact_metric_all_layers": 1.562924299718902e-08
+  },
+  {
+   "seed": 40821001165,
+   "avg_metric": 3.8421537571128084e-08,
+   "avg_metric_all_layers": 1.6436236375552487e-08,
+   "exact_metric": 3.7852620892030077e-08,
+   "exact_metric_all_layers": 1.5768034826255113e-08
+  },
+  {
+   "seed": 40821001166,
+   "avg_metric": 4.101503199709101e-08,
+   "avg_metric_all_layers": 1.7118603311692493e-08,
+   "exact_metric": 3.840516464835457e-08,
+   "exact_metric_all_layers": 1.5521728428388515e-08
+  },
+  {
+   "seed": 40821001167,
+   "avg_metric": 3.00837372748639e-08,
+   "avg_metric_all_layers": 1.4209501374831673e-08,
+   "exact_metric": 2.9311477602057447e-08,
+   "exact_metric_all_layers": 1.2998262809285737e-08
+  }
+ ]
+}
