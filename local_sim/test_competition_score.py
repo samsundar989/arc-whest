@@ -61,7 +61,9 @@ from competition_score import (LAMBDA_FLOPS_PER_SECOND,  # noqa: E402
                                rows_from_graded_report, score_multiplier,
                                score_suite, zero_prediction_mse, decide, Verdict,
                                align_rows_by_identity, PairingError, _t_ppf, _t975,
-                               paired_diff_ci)
+                               paired_diff_ci,
+                               noise_corrected_compare,
+                               NoiseAwareCompare)
 
 RESULTS = []
 REPORTS = os.path.join(_ROOT, "experiments", "run_reports")
@@ -1076,6 +1078,137 @@ def t_t_quantile_alpha():
         check("scipy not importable; table comparison stands alone", True, "skipped")
 
 
+
+# --------------------------------------------------------------------------- #
+# 16. Label noise does not cancel from an ADJUSTED difference
+#
+# Validation audit finding 6. These fail against the code at 0fe164c because
+# the function did not exist and MlpRow had nowhere to put a noise floor.
+# --------------------------------------------------------------------------- #
+
+
+def _noise_arms(n=60, seed=5, q_ctrl=0.60, q_cand=0.25,
+                true_c=4.0e-8, true_k=4.0e-8, v=1.1552e-9, meas_sd=0.0):
+    """Two arms on the same networks with KNOWN true errors and a known floor."""
+    B = 2.0 ** 41
+    rs = np.random.default_rng(seed)
+    rows_c, rows_k = [], []
+    for i in range(n):
+        vi = v * float(rs.uniform(0.9, 1.1))
+        name = "seed:%d" % (900000 + i)
+        ec = float(rs.normal(0.0, meas_sd)) if meas_sd else 0.0
+        ek = float(rs.normal(0.0, meas_sd)) if meas_sd else 0.0
+        rows_c.append(MlpRow(mse=true_c + vi + ec, flops_used=q_ctrl * B,
+                             budget=B, name=name, gt_noise=vi))
+        rows_k.append(MlpRow(mse=true_k + vi + ek, flops_used=q_cand * B,
+                             budget=B, name=name, gt_noise=vi))
+    return rows_c, rows_k
+
+
+def t_noise_does_not_cancel():
+    head("16. label noise, and the multiplier that stops it cancelling")
+
+    # Two arms with IDENTICAL true error and DIFFERENT cost. On the true
+    # functions the arms differ only through cost; the observed difference
+    # additionally carries (q_c - q_k) * v.
+    rows_c, rows_k = _noise_arms()
+    r = noise_corrected_compare(rows_c, rows_k, local_samples=2 ** 24)
+    q_c, q_k = 0.60, 0.25
+    v_mean = float(np.mean([x.gt_noise for x in rows_c]))
+    expected_bias = (q_c - q_k) * v_mean
+    check("the noise bias matches the closed form (q_c - q_k) * v",
+          abs(r.noise_bias - expected_bias) / expected_bias < 1e-9,
+          f"{r.noise_bias:.6e} vs {expected_bias:.6e}")
+    check("...and it is exactly the gap between observed and true-function",
+          abs((r.observed.mean_difference - r.true_function.mean_difference)
+              - r.noise_bias) < 1e-18,
+          f"{r.observed.mean_difference - r.true_function.mean_difference:.6e}")
+    check("the observed difference OVERSTATES the true-function difference",
+          r.observed.mean_difference > r.true_function.mean_difference,
+          f"{r.observed.mean_difference:.4e} vs "
+          f"{r.true_function.mean_difference:.4e}")
+    check("...and the report says what share of it is noise",
+          0.02 < r.noise_bias_share < 0.04,
+          f"{r.noise_bias_share * 100:.2f}% of the observed difference")
+
+    # Same cost on both arms: the term is exactly zero, and the correction is a
+    # no-op. This is the case where the old "it cancels" wording was right, and
+    # saying so is the difference between a scope correction and a scare.
+    same_c, same_k = _noise_arms(q_ctrl=0.5, q_cand=0.5)
+    rs2 = noise_corrected_compare(same_c, same_k, local_samples=2 ** 24)
+    check("at EQUAL multipliers the noise bias is exactly zero",
+          rs2.noise_bias == 0.0,
+          "the old cancellation claim is right here, and only here")
+    check("...and observed equals true-function to the last bit",
+          rs2.observed.mean_difference == rs2.true_function.mean_difference, "")
+
+
+def t_noise_forecast_and_refusals():
+    head("17. the official-precision forecast, and what it refuses")
+    rows_c, rows_k = _noise_arms(true_k=3.0e-8)
+    r = noise_corrected_compare(rows_c, rows_k, local_samples=2 ** 24,
+                                official_samples=1e9)
+    # 2**24 / 1e9 is about 1/60, so the official floor is ~60x smaller and the
+    # forecast sits between the corrected and the observed figure.
+    lo = min(r.true_function.mean_difference, r.observed.mean_difference)
+    hi = max(r.true_function.mean_difference, r.observed.mean_difference)
+    check("the official-precision forecast lies between corrected and observed",
+          lo <= r.forecast.mean_difference <= hi,
+          f"{r.forecast.mean_difference:.6e} in [{lo:.4e}, {hi:.4e}]")
+    check("...and much nearer the corrected figure, since 2**24 << 1e9",
+          abs(r.forecast.mean_difference - r.true_function.mean_difference)
+          < 0.05 * abs(r.observed.mean_difference - r.true_function.mean_difference),
+          "the official labels are ~60x more precise than ours")
+
+    # A missing floor is not zero.
+    bare = [MlpRow(mse=x.mse, flops_used=x.flops_used, budget=x.budget,
+                   name=x.name) for x in rows_c]
+    try:
+        noise_corrected_compare(bare, rows_k, local_samples=2 ** 24)
+        ok = False
+    except ValueError as e:
+        ok = "gt_noise on EVERY row" in str(e)
+    check("a row with no gt_noise is REFUSED, not treated as zero", ok,
+          "an unknown floor is not a floor of zero")
+
+    # The same networks have ONE floor.
+    bad = [MlpRow(mse=x.mse, flops_used=x.flops_used, budget=x.budget,
+                  name=x.name, gt_noise=x.gt_noise * 2) for x in rows_k]
+    try:
+        noise_corrected_compare(rows_c, bad, local_samples=2 ** 24)
+        ok = False
+    except PairingError as e:
+        ok = "disagree about the LABEL NOISE" in str(e)
+    check("two arms disagreeing about one network's floor are REFUSED", ok, "")
+
+    try:
+        noise_corrected_compare(rows_c, rows_k, local_samples=0)
+        ok = False
+    except ValueError:
+        ok = True
+    check("a non-positive sample count is refused rather than guessed at", ok, "")
+
+
+def t_negative_corrections_are_kept():
+    head("18. a negative corrected MSE is retained, never clipped")
+    # An estimator sitting essentially ON the noise floor: half the corrected
+    # values must come out below zero by construction.
+    rows_c, rows_k = _noise_arms(n=80, true_c=0.0, true_k=0.0, v=2.0e-9,
+                                 meas_sd=4.0e-10, seed=17)
+    r = noise_corrected_compare(rows_c, rows_k, local_samples=2 ** 24)
+    check("negative corrected MSEs occur and are COUNTED",
+          r.n_negative_corrected > 0, f"{r.n_negative_corrected} of 160 rows")
+    check("...and the result says so in its notes",
+          any("NEGATIVE" in n for n in r.notes), "")
+    check("...and no network was dropped", r.n == 80, f"n = {r.n}")
+    # The mean of the corrected values must stay near zero. Clipping would push
+    # it up; this asserts it did not.
+    tf = r.true_function
+    check("the corrected true-function means stay near zero",
+          abs(tf.mean_control) < 1e-10 and abs(tf.mean_candidate) < 1e-10,
+          f"ctrl {tf.mean_control:+.3e}, cand {tf.mean_candidate:+.3e}")
+
+
 def main():
     print("=" * 100)
     print("CANONICAL COMPETITION SCORER — parity with installed whestbench, and the estimand fixture")
@@ -1096,6 +1229,9 @@ def main():
         t_the_binding_gate,
         t_pairing_identity,
         t_t_quantile_alpha,
+        t_noise_does_not_cancel,
+        t_noise_forecast_and_refusals,
+        t_negative_corrections_are_kept,
     ):
         fn()
     n_ok = sum(1 for r in RESULTS if r)

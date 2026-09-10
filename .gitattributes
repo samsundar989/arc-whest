@@ -1,1 +1,40 @@
+# Deterministic bytes for the things whose bytes are the evidence.
+#
+# Stage 0 R6, 2026-09-10. `docs/research/2026-09-10_validation_audit.md`
+# finding 7: preflight step 5 compares NORMALISED LF bytes against the version
+# archive, which is the right check for semantic identity and says nothing
+# about the exact sha256 that reaches AIcrowd. The submitted artifact is
+# hashed at submit time, so nothing published is wrong -- but a repository
+# whose working tree holds three different line-ending conventions across its
+# Python files cannot make "the exact bytes" mean one thing.
+#
+# The index was ALREADY all-LF (`git ls-files --eol`: 206 w/lf, 51 w/crlf, one
+# w/mixed, every one of them i/lf), so this changes no committed byte. It
+# fixes the working tree, which is where a candidate file is read from.
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.toml text eol=lf
+
+# PowerShell is run by PowerShell, on Windows, and CRLF is its native form.
+*.ps1 text eol=crlf
+
+# Shell scripts are executed by bash, including inside WSL, where a CR is a
+# syntax error rather than whitespace.
+*.sh text eol=lf
+
+# Frozen evidence. Never normalised, never diffed: these are bytes, not text.
 experiments/2026-08-21_phase2_manifest/cache/*.raw -text -diff
+*.npz -text -diff
+
+# THE VAULT SEAL IS ALREADY LF IN THE INDEX, AND STAYS THAT WAY.
+# The first draft of this file marked `experiments/vault/*` as `-text`, meaning
+# "store the working tree verbatim". The working tree held CRLF, so git
+# immediately staged three seal artifacts -- README.md, manifest.json and
+# touch_log.jsonl -- with different bytes. The seal's whole job is that its
+# bytes do not move. Caught before it was committed; recorded here so nobody
+# reintroduces it as a tidy-up.
+experiments/vault/*.md text eol=lf
+experiments/vault/*.json text eol=lf
+experiments/vault/*.jsonl text eol=lf

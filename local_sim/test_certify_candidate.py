@@ -539,6 +539,81 @@ def unit_tests():
           len(out7["failures"]) == cc._MAX_FAILURE_RECORDS,
           "%d of 200" % len(out7["failures"]))
 
+    # -- U9: the three evidence domains, and the verdict that does NOT move -
+    #
+    # Stage 0 R5, validation audit finding 4. One word over three different
+    # questions is what this repairs. The rollup is pure, so it is tested here
+    # rather than behind a candidate run.
+    tagged = [
+        {"section": "1", "domain": cc.MATH, "name": "imports", "ok": True,
+         "skipped": False},
+        {"section": "5", "domain": cc.MATH, "name": "grader twin", "ok": True,
+         "skipped": False},
+        {"section": "6", "domain": cc.SERVER, "name": "op-count gate",
+         "ok": True, "skipped": False},
+        # The two standing historical failures are BOTH of this shape.
+        {"section": "10", "domain": cc.LOCAL,
+         "name": "10: worst GRADED-PATH residual is under the cliff",
+         "ok": False, "skipped": False},
+    ]
+    roll = cc.domain_rollup(tagged)
+    check("U9: a LOCAL-only failure leaves MATH certified",
+          roll[cc.MATH]["verdict"] == "CERTIFIED", roll[cc.MATH]["verdict"])
+    check("U9: ...and SERVER certified",
+          roll[cc.SERVER]["verdict"] == "CERTIFIED", roll[cc.SERVER]["verdict"])
+    check("U9: ...while LOCAL is REFUSED, naming the check",
+          roll[cc.LOCAL]["verdict"] == "REFUSED"
+          and "GRADED-PATH" in roll[cc.LOCAL]["failed"][0],
+          roll[cc.LOCAL]["failed"][0][:46])
+    check("U9: the historical check NAME is unchanged, so old FAIL lines match",
+          "10: worst GRADED-PATH residual is under the cliff"
+          in roll[cc.LOCAL]["failed"],
+          "renaming it would orphan two standing gate failures")
+
+    # A domain nobody ran is NOT_RUN, which VALIDATION.md forbids scoring as a
+    # pass.
+    roll2 = cc.domain_rollup([t for t in tagged if t["domain"] != cc.SERVER])
+    check("U9: a domain with no checks reports NOT_RUN, not CERTIFIED",
+          roll2[cc.SERVER]["verdict"] == "NOT_RUN",
+          roll2[cc.SERVER]["verdict"])
+    roll3 = cc.domain_rollup(
+        [{"section": "6", "domain": cc.SERVER, "name": "x", "ok": None,
+          "skipped": True, "why": "not run"}])
+    check("U9: a skipped-only domain is INCOMPLETE, not CERTIFIED",
+          roll3[cc.SERVER]["verdict"] == "INCOMPLETE",
+          roll3[cc.SERVER]["verdict"])
+
+    # -- U10: prediction 9 -- no STORED certification changes disposition ---
+    #
+    # The single verdict is still computed from `_FAILED`/`_SKIPPED` alone.
+    # Re-derive each stored report's verdict from the failures and skips IT
+    # recorded, and require the stored word back.
+    import glob as _glob
+    import json as _json
+    seen, agreed, disagreed = 0, 0, []
+    for path in _glob.glob(os.path.join(cc._ROOT, "experiments", "*",
+                                        "certify_*.json")):
+        try:
+            with open(path, encoding="utf-8") as fh:
+                rep = _json.load(fh)
+        except (OSError, ValueError):
+            continue
+        if "verdict" not in rep:
+            continue
+        seen += 1
+        f, k = rep.get("checks_failed") or [], rep.get("checks_skipped") or []
+        want = ("CERTIFIED" if not f and not k else
+                "INCOMPLETE" if not f else "REFUSED")
+        if want == rep["verdict"]:
+            agreed += 1
+        else:
+            disagreed.append((os.path.basename(path), rep["verdict"], want))
+    check("U10: every stored certification's verdict is reproduced exactly",
+          seen > 0 and not disagreed,
+          "%d reports, %d agree%s" % (seen, agreed,
+                                      "" if not disagreed else
+                                      "; DISAGREE %s" % (disagreed[:2],)))
+
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])

@@ -209,6 +209,12 @@ class MlpRow:
     budget: float = 0.0
     failed: bool = False
     name: str = ""
+    #: THIS network's label-noise floor at the precision `mse` was measured at:
+    #: `mean_j Var_j / N`. `mse` is an OBSERVED squared error, so its
+    #: expectation is `true_mse + gt_noise`. Carried here since 2026-09-10 so
+    #: `noise_corrected_compare` can separate the two; `nan` means unknown, and
+    #: nothing silently treats unknown as zero.
+    gt_noise: float = float("nan")
 
     def effective_compute(self, lam: float = DEFAULT_LAMBDA_FLOPS_PER_SECOND) -> float:
         return effective_compute(self.flops_used, self.residual_wall_time_s, lam)
@@ -900,6 +906,180 @@ def paired_compare_rows(
         raise PairingError(f"arms have different MLP counts: {cs.n} vs {ks.n}")
     res = paired_compare(cs.scores, ks.scores, **kw)
     return _dc_replace(res, notes=list(res.notes) + pair_notes)
+
+
+
+# --------------------------------------------------------------------------- #
+# Label noise does not cancel from an ADJUSTED difference
+#
+# The two-replica design (`p2_truth.py`) exists because every measured MSE is
+# contaminated by its label's own Monte-Carlo noise:
+#
+#     E[(p - y)^2] = MSE_true(p) + v,      v = mean_j Var_j / N
+#
+# That contamination cancels between two RAW MSEs on common labels. It does NOT
+# cancel from a difference of ADJUSTED scores when the two arms have different
+# multipliers -- and Phase 2 is exactly the regime where they do, because cost
+# is the whole second half of the objective:
+#
+#     E[q_c MSE_c - q_k MSE_k]
+#         = q_c MSE_true,c - q_k MSE_true,k  +  (q_c - q_k) v
+#                                              ^^^^^^^^^^^^^^^
+#                                              does not vanish
+#
+# Pairing removes variance. It does not remove this term, because it is a bias,
+# not a variance. MEASURED on a synthetic pair with IDENTICAL true error
+# (`experiments/2026-09-10_stage0_instrument/defects_before.json`): at
+# q = 0.60 against 0.25 with v = 1.1552e-9, the closed form predicts the
+# empirical adjusted difference to 1.5e-4 relative, and the noise term carries
+# 2.8% of a measured difference that SHOULD have been zero on the true
+# functions.
+#
+# This is a mathematical scope correction to the two-replica docstring. It is
+# NOT a claim that any particular past comparison reverses: the term scales
+# with `(q_c - q_k)`, and in a same-cost comparison it is exactly zero.
+#
+# TWO OUTPUTS, ALWAYS. What the estimator does to the true function, and what
+# the competition would score at ITS label precision, are different questions.
+# This returns both, and the observed quantity beside them.
+#
+# `docs/research/2026-09-10_validation_audit.md` finding 6.
+
+
+@dataclass(frozen=True)
+class NoiseAwareCompare:
+    """True-function performance and predicted competition score, separately."""
+
+    n: int
+    #: The competition identity on the OBSERVED (noisy) MSEs -- what every
+    #: report in this repository before 2026-09-10 quoted.
+    observed: PairedResult
+    #: The same identity on `q_i (mse_i - v_i)`: an unbiased estimate of what
+    #: the estimator does to the TRUE conditional expectation.
+    true_function: PairedResult
+    #: `q_i (mse_i - v_i + v_official_i)`: the competition score at the
+    #: OFFICIAL label precision, which is not the precision we measured at.
+    forecast: PairedResult
+    #: `mean_i (q_c,i - q_k,i) v_i` -- the part of `observed` that is neither
+    #: arm's error.
+    noise_bias: float
+    #: Its share of the observed mean difference. Read this before quoting a
+    #: small adjusted gain.
+    noise_bias_share: float
+    local_samples: float
+    official_samples: float
+    n_negative_corrected: int
+    notes: List[str] = field(default_factory=list)
+
+    def __str__(self) -> str:
+        lines = [
+            f"NOISE-AWARE  n = {self.n}",
+            f"  observed adjusted difference      "
+            f"{self.observed.mean_difference:+.6e}",
+            f"  true-function difference          "
+            f"{self.true_function.mean_difference:+.6e}",
+            f"  forecast at official precision    "
+            f"{self.forecast.mean_difference:+.6e}",
+            f"  label-noise bias in `observed`    {self.noise_bias:+.6e}"
+            f"   ({self.noise_bias_share * 100:+.2f}% of it)",
+            f"  networks whose corrected MSE went negative: "
+            f"{self.n_negative_corrected} (RETAINED, never clipped)",
+        ]
+        for x in self.notes:
+            lines.append(f"  - {x}")
+        return chr(10).join(lines)
+
+
+def noise_corrected_compare(
+    control_rows: Sequence[MlpRow],
+    candidate_rows: Sequence[MlpRow],
+    *,
+    local_samples: float,
+    official_samples: float = 1e9,
+    lam: float = DEFAULT_LAMBDA_FLOPS_PER_SECOND,
+    floor: float = MULTIPLIER_FLOOR,
+    on_over_budget: str = "raise",
+    require_ids: bool = False,
+    **kw: Any,
+) -> NoiseAwareCompare:
+    """Three paired comparisons: observed, noise-corrected, and forecast.
+
+    Both arms must carry `gt_noise` on every row, and the two arms must agree
+    on it network by network -- they are the SAME labels, so a disagreement
+    means the rows are not what they claim to be. That is refused rather than
+    averaged away.
+
+    NEGATIVE CORRECTED VALUES ARE KEPT. `mse_i - v_i` is a noisy estimate of a
+    non-negative quantity, so on a network where the estimator is near the
+    floor it can come out below zero. Clipping it, or dropping that network,
+    biases the mean upward -- the direction that flatters a candidate. They are
+    counted and reported instead.
+    """
+    control_rows, candidate_rows, notes = align_rows_by_identity(
+        control_rows, candidate_rows, require_ids=require_ids)
+    if local_samples <= 0 or official_samples <= 0:
+        raise ValueError("sample counts must be positive; refusing to guess one")
+
+    v_c = np.asarray([r.gt_noise for r in control_rows], dtype=np.float64)
+    v_k = np.asarray([r.gt_noise for r in candidate_rows], dtype=np.float64)
+    if not np.all(np.isfinite(v_c)) or not np.all(np.isfinite(v_k)):
+        raise ValueError(
+            "noise_corrected_compare needs gt_noise on EVERY row of both arms. "
+            "An unknown floor is not zero, and a report that quietly treated it "
+            "as zero would understate every corrected error by exactly the "
+            "quantity this function exists to remove.")
+    if not np.allclose(v_c, v_k, rtol=1e-9, atol=0.0):
+        worst = int(np.argmax(np.abs(v_c - v_k)))
+        raise PairingError(
+            "the two arms disagree about the LABEL NOISE of the same network "
+            f"(worst: {control_rows[worst].name!r}, {v_c[worst]:.6e} vs "
+            f"{v_k[worst]:.6e}). Common labels have one floor.")
+
+    v = v_c
+    # The official suite is measured at a different precision from ours, and
+    # the floor scales as 1/N. This is the ONE conversion, in one place.
+    v_official = v * (float(local_samples) / float(official_samples))
+
+    def _rows(src, adjusted):
+        return [_dc_replace(r, mse=float(m)) for r, m in zip(src, adjusted)]
+
+    obs = paired_compare_rows(list(control_rows), list(candidate_rows),
+                              lam=lam, floor=floor,
+                              on_over_budget=on_over_budget, **kw)
+
+    mse_c = np.asarray([r.mse for r in control_rows], dtype=np.float64)
+    mse_k = np.asarray([r.mse for r in candidate_rows], dtype=np.float64)
+    true_c, true_k = mse_c - v, mse_k - v
+    n_neg = int((true_c < 0).sum() + (true_k < 0).sum())
+
+    tru = paired_compare_rows(_rows(control_rows, true_c),
+                              _rows(candidate_rows, true_k),
+                              lam=lam, floor=floor,
+                              on_over_budget=on_over_budget, **kw)
+    fc = paired_compare_rows(_rows(control_rows, true_c + v_official),
+                             _rows(candidate_rows, true_k + v_official),
+                             lam=lam, floor=floor,
+                             on_over_budget=on_over_budget, **kw)
+
+    q_c = np.asarray([r.multiplier(lam, floor) for r in control_rows])
+    q_k = np.asarray([r.multiplier(lam, floor) for r in candidate_rows])
+    bias = float(np.mean((q_c - q_k) * v))
+    share = bias / obs.mean_difference if obs.mean_difference else float("nan")
+
+    if n_neg:
+        notes.append(
+            f"{n_neg} noise-corrected MSEs came out NEGATIVE and were retained; "
+            "clipping them would bias the mean upward")
+    if abs(share) > 0.10:
+        notes.append(
+            f"the label-noise bias carries {share * 100:.1f}% of the observed "
+            "adjusted difference -- read `true_function`, not `observed`")
+    return NoiseAwareCompare(
+        n=obs.n, observed=obs, true_function=tru, forecast=fc,
+        noise_bias=bias, noise_bias_share=share,
+        local_samples=float(local_samples),
+        official_samples=float(official_samples),
+        n_negative_corrected=n_neg, notes=notes)
 
 
 @dataclass(frozen=True)

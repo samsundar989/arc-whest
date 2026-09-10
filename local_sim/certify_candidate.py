@@ -92,15 +92,75 @@ _TOTAL = [0]
 _SECTIONS = {}
 _CURRENT = ["?"]
 
+# --------------------------------------------------------------------------- #
+# THREE KINDS OF EVIDENCE, WHICH ONE VERDICT USED TO CONFLATE
+#
+# `verdict` is one word over checks from three genuinely different domains:
+#
+#   MATH      the contract and the arithmetic. Deterministic, host-independent,
+#             and a failure here is a failure anywhere.
+#   LOCAL     what happened when this Windows box ran it. Real measurements of
+#             a real program, and NOT the grading server's seconds -- this host
+#             reads ~27x high per operation on residual, and the shim reads
+#             ~18% low on wall for rotation-using estimators.
+#   SERVER    a FORECAST of deployment risk, from a versioned per-operation
+#             model with a stated evidence domain. A forecast is not a
+#             measurement, however carefully it is made.
+#
+# Section 10 prints "DEPLOYMENT AUTHORITY" over a LOCAL subprocess run, and its
+# residual check is named "worst GRADED-PATH residual". Two of this
+# repository's standing gate failures are that check, and they refuse a
+# candidate (330327) that holds a real graded 0/100 row. Whether those gates
+# were mis-specified is a question NOBODY HAS RULED ON -- Samuel declined to
+# adjudicate it on 2026-09-10 and approved a submission on other grounds. This
+# change does not rule on it either.
+#
+# SO THE CHECK NAMES ARE NOT TOUCHED. Renaming "worst GRADED-PATH residual"
+# would silently orphan the two historical FAIL lines that quote it, which is
+# the amend-after-the-fact move the record exists to prevent. What changes is
+# that every check is now TAGGED with its domain, and the report carries a
+# per-domain verdict beside the single one. The single verdict is computed
+# exactly as before, so no stored certification changes disposition.
+#
+# `docs/research/2026-09-10_validation_audit.md` finding 4.
+
+MATH, LOCAL, SERVER = "MATH", "LOCAL", "SERVER"
+
+#: Section id -> evidence domain. Section ids are the leading token of the
+#: `head()` title, which is how `_CURRENT` already works.
+_DOMAIN = {
+    "1": MATH,      # imports and the import contract
+    "2": MATH,      # setup / shape genericity
+    "3": MATH,      # invariants
+    "4": MATH,      # determinism
+    "5": MATH,      # the grader-twin arms
+    "6": SERVER,    # counted FLOPs and the operation-count planning gate
+    "7": LOCAL,     # residual, measured here
+    "8": LOCAL,     # wall, measured here
+    "9": LOCAL,     # the Linux memory gate: a real kernel, not this server
+    "10": LOCAL,    # the official subprocess runner -- still LOCAL seconds
+    "R": MATH,      # the read-only self-audit
+}
+
+
+def _domain(section_id: str) -> str:
+    return _DOMAIN.get(str(section_id), MATH)
+
 
 def head(t):
     _CURRENT[0] = t.split(None, 1)[0]
     print(f"\n{t}")
 
 
+#: Every check, with its domain. Fed to `domain_rollup` at the end.
+_TAGGED = []
+
+
 def check(name, ok, detail=""):
     _TOTAL[0] += 1
     _SECTIONS.setdefault(_CURRENT[0], []).append((name, bool(ok)))
+    _TAGGED.append({"section": _CURRENT[0], "domain": _domain(_CURRENT[0]),
+                    "name": name, "ok": bool(ok), "skipped": False})
     print(f"  {'PASS' if ok else 'FAIL'}  {name:<62}{detail}")
     if not ok:
         _FAILED.append(f"[{_CURRENT[0]}] {name}")
@@ -109,7 +169,45 @@ def check(name, ok, detail=""):
 def skip(name, why):
     """NOT a pass. Counted separately and named in the summary."""
     _SKIPPED.append(f"[{_CURRENT[0]}] {name} -- {why}")
+    _TAGGED.append({"section": _CURRENT[0], "domain": _domain(_CURRENT[0]),
+                    "name": name, "ok": None, "skipped": True, "why": why})
     print(f"  SKIP  {name:<62}{why}")
+
+
+def domain_rollup(tagged):
+    """Per-domain verdicts. PURE, so it can be tested without a candidate.
+
+    Each domain gets the same three-valued verdict the whole report uses, over
+    only its own checks: CERTIFIED with no failures and no skips, REFUSED on
+    any failure, INCOMPLETE when something was skipped and nothing failed. A
+    domain with no checks at all reports NOT_RUN, which is not a pass.
+    """
+    out = {}
+    for dom in (MATH, LOCAL, SERVER):
+        mine = [t for t in tagged if t["domain"] == dom]
+        failed = [t["name"] for t in mine if t["ok"] is False]
+        skipped = [t["name"] for t in mine if t["skipped"]]
+        out[dom] = {
+            "checks": len([t for t in mine if not t["skipped"]]),
+            "failed": failed,
+            "skipped": skipped,
+            "verdict": ("NOT_RUN" if not mine else
+                        "REFUSED" if failed else
+                        "INCOMPLETE" if skipped else "CERTIFIED"),
+        }
+    return out
+
+
+#: What each domain's verdict is EVIDENCE OF, printed beside it so a reader
+#: cannot take a LOCAL pass for a server guarantee.
+_DOMAIN_MEANING = {
+    MATH: "the contract and the arithmetic. Host-independent; a failure here "
+          "is a failure anywhere.",
+    LOCAL: "what this host measured. REAL, and NOT the grading server: no "
+           "absolute second here transfers (docs/GOTCHAS.md).",
+    SERVER: "a FORECAST from the versioned per-operation model, inside its "
+            "stated evidence domain. Not a measurement, and not a guarantee.",
+}
 
 
 def _sha(path):
@@ -551,8 +649,39 @@ def main() -> int:
               f"{d['flops_used']:,.0f}")
         check(f"4: the shape is ({a.depth}, {a.width}) on seed {s}",
               d["shape"] == [a.depth, a.width], str(d["shape"]))
-        fresh.append(d)
-    report["sections"]["determinism"] = {"fresh_worker": fresh}
+        # BOTH members of the comparison, and the seed beside them.
+        #
+        # `fresh` used to be a list of the FIRST run's dict per seed, so the
+        # artifact held two hashes for two DIFFERENT seeds and their inequality
+        # was expected -- while the pair that actually proves determinism, the
+        # two runs of the SAME seed, was never stored. A reader of the JSON
+        # could not tell which comparison had been made. Repaired 2026-09-10
+        # (Stage 0 R6, validation audit finding 5).
+        fresh.append({
+            "seed": int(s),
+            "weights_mode": "f32_fnp_array",   # what FRESH_WORKER builds today
+            "run_a": d,
+            "run_b": d2,
+            "hashes_equal": bool(ok),
+            "flops_equal": bool(d2 is not None
+                                and d["flops_used"] == d2["flops_used"]),
+            "distinct_processes": bool(d2 is not None
+                                       and d.get("pid") != d2.get("pid")),
+        })
+    # A pair of runs in two processes cannot see state that only grows across a
+    # SEQUENCE of networks in ONE process. The Linux memory gate now runs that
+    # sequence (`--repeats`), and section 9 checks its address space did not
+    # grow; this records where the boundary is rather than implying determinism
+    # covers it.
+    report["sections"]["determinism"] = {
+        "fresh_worker": fresh,
+        "scope": "two fresh interpreters per seed, one prediction each. "
+                 "Cross-MLP hidden state inside ONE worker is NOT tested here "
+                 "-- section 9's repeat-run evidence covers that.",
+        "weights_mode": "FRESH_WORKER builds fnp.array(mint float32); the "
+                        "deployment representation is f64_readonly and is "
+                        "certified in section 5b. These are different arms.",
+    }
 
     # ------------------------------------------------------------- 5-8 ----
     head("5-8  one metered run: immutability, cost, telemetry, scalar sync")
@@ -1166,6 +1295,21 @@ def main() -> int:
     report["checks_total"] = _TOTAL[0]
     report["checks_failed"] = list(_FAILED)
     report["checks_skipped"] = list(_SKIPPED)
+    # The per-domain rollup goes in BESIDE the single verdict, never instead
+    # of it: one unqualified word over three kinds of evidence is what this
+    # repairs, and replacing the word would change what stored reports mean.
+    report["checks_by_domain"] = domain_rollup(_TAGGED)
+    report["domain_meaning"] = dict(_DOMAIN_MEANING)
+    report["checks_tagged"] = _TAGGED
+    print()
+    print("  EVIDENCE BY DOMAIN -- one verdict over three different questions")
+    for _dom in (MATH, LOCAL, SERVER):
+        _d = report["checks_by_domain"][_dom]
+        print(f"    {_dom:<7} {_d['verdict']:<11} "
+              f"{_d['checks']} checks, {len(_d['failed'])} failed, "
+              f"{len(_d['skipped'])} skipped")
+        print(f"            {_DOMAIN_MEANING[_dom]}")
+    print()
     report["verdict"] = ("CERTIFIED" if not _FAILED and not _SKIPPED else
                          "INCOMPLETE" if not _FAILED else "REFUSED")
     if a.json:

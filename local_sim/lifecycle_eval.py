@@ -321,6 +321,12 @@ class EvidenceRow:
             # `competition_score.align_rows_by_identity` for a difference that
             # is not a difference. The input seed IS the network.
             name=f"seed:{self.input_seed}",
+            # Carried through since 2026-09-10 so `noise_corrected_compare` can
+            # separate what the estimator does to the TRUE function from what
+            # the label noise contributes to the score. `nan` when the
+            # evaluation had no ground-truth noise figure, which is refused
+            # rather than treated as zero.
+            gt_noise=self.gt_noise,
         )
 
     def row_hash(self) -> str:
