@@ -38881,3 +38881,130 @@ aliasing in `einsum`, worth exactly `2x`. Tagging an operand symmetric is a
 `1.8%` *penalty*. If a future candidate ever produces a genuine `X X^T`, spell it
 `fnp.einsum("ij,kj->ik", x, x)` and pass the same object — `x @ x.T` throws the
 discount away silently.
+
+# 2026-09-10 — CONTRACT (Rule 1): **T1 — which CHANNEL of κ₄ carries the `2.094x`?**
+
+*Pre-registered before any live-shape datum. Handoff
+`docs/STRATEGIST_RESPONSE_2026-09-10.md` §1 (H1) and §5 step 1. Instrument
+`local_sim/p2_t1_augment_lite.py`, artifact
+`experiments/2026-09-10_slice5/t1_augment_lite.json`. Committed before the job runs.*
+
+**Question.** All of `kind=AUGMENT`'s `2.094x` is κ₄'s `(n,n)` structure, and the
+factored spelling of that structure is `3.6x–5.8x` over the hard budget because it
+births `8n` lineage columns per layer against SIMPLE's `2n`. κ₄ couples into the
+flow through **two channels**: the cheap one — `WK[4]` read by the `terms_iso` sum
+that builds `pK_slices`, i.e. the Wick updates of μ, Σ and the diagonal κ₃ slices,
+plus `K211_contrib`, κ₄'s own update, all `O(n²)` — and the expensive one, the
+births. **Which channel carries the accuracy?**
+
+**Evidence.**
+- CONFIRMED: SIMPLE `4.004685e-08`, AUGMENT `1.912323e-08` on the 24-net P01 set,
+  `24/24`, control bit-exact across two reboots (`d1_augment.json`).
+- CONFIRMED: the raised diagram budget **alone** is `1.085x` *worse* than SIMPLE
+  (arm A5). So the budget is not the mechanism; the `(n,n)` κ₄ object is.
+- CONFIRMED: κ₄ **zeroed** while the rest of the AUGMENT machinery runs is
+  `9.21x` worse than SIMPLE (arm A3). **A self-inconsistent cumulant state is far
+  worse than a lower-order consistent one.** This is the risk this slice runs.
+- CONFIRMED **today, by measurement, not by reading** — the birth counts, read off
+  the returned `FactoredTensor` at `n=64, L=4`:
+
+      SIMPLE            births 2n / layer
+      AUGMENT           births 8n / layer   (5 leg blocks + 2 degree-4 blocks + 1 dense slice)
+      AUGMENT-LITE      births 5n / layer   (κ₄'s births suppressed)
+      AUGMENT-MINIMAL   births 2n / layer   (κ₄'s births AND the raised budget's extra legs suppressed)
+
+  **`AUGMENT-MINIMAL` births exactly SIMPLE's `2n`** and is numerically distinct
+  from SIMPLE. It is the only arm here that can be afforded, and it is the arm the
+  strategist described as "SIMPLE tower + the κ₄ transport + the modified
+  nonlinear step".
+- CONFIRMED: the ablation is **bit-exact against upstream with its flag off**, at
+  `n=64` and again at the live shape inside the job. The upstream checkout is
+  never edited; two anchored text substitutions are applied to a copy, and an
+  anchor that stops matching **refuses the run**.
+- **SPECULATIVE, and disclosed because it was seen before this contract was
+  written:** a pre-run smoke at `n=128, L=8`, 4 nets, `2^21` samples/half — a
+  shape the ladder has already proven does **not** transfer — reads
+  `SIMPLE/LITE = 0.748x` and `SIMPLE/MINIMAL = 0.462x`, i.e. **both ablations
+  are WORSE than SIMPLE, not merely less good than AUGMENT.** It was run to catch
+  a broken arm before spending GPU-days, it caught none, and it is recorded here
+  rather than quietly informing a prediction. It is a smoke, not evidence: 4 nets,
+  no CI, and the wrong shape.
+
+**Hypothesis + mechanism.** H1 says κ₄'s accuracy is carried by the cheap channel,
+so suppressing the births should keep most of the `2.094x` at SIMPLE's column
+cost. The **competing** mechanism is A3's: κ₃'s births are how κ₄'s information
+reaches κ₃, and cutting them while κ₄ stays live in the μ/Σ/diag updates leaves
+the tower **self-inconsistent** — the slice set is AUGMENT's (142 terms) while the
+factored `(1,1,1)` diagram set is SIMPLE's. A3 measured that inconsistency costs
+`9.21x`. The two mechanisms make opposite predictions and the run discriminates
+them.
+
+**Intervention.** Four arms, paired in one process, same 24 P01 nets, same labels,
+same order, **`float32`** (D1's anchor dtype; stated because this slice has
+already lost two runs to a `float64` default). Arms differ **only** by two
+booleans on a text-patched copy of `factor_k3.py`:
+
+| arm | `kind` | κ₄ births | raised-budget legs | births/layer |
+|---|---|---|---|---:|
+| `simple` | SIMPLE | — | — | `2n` |
+| `augment` | AUGMENT | on | on | `8n` |
+| `lite` | AUGMENT | **off** | on | `5n` |
+| `minimal` | AUGMENT | **off** | **off** | `2n` |
+
+**Predictions (numbered, recorded before any live-shape datum).**
+1. The SIMPLE control reproduces `4.004685e-08` to within the `1e-11` per-net
+   drift tolerance. **If it does not, nothing else in the run is read.**
+2. The AUGMENT control reproduces `1.912323e-08` to within the same tolerance.
+3. `SIMPLE / LITE` lands in `[0.6, 1.1]` — i.e. **below `1.0`, the ablation is
+   worse than SIMPLE.** This contradicts the strategist's pre-registered band of
+   `[1.4, 1.8]`, and I am recording the disagreement rather than adopting his
+   number: the smoke and A3's mechanism both point the other way.
+4. `SIMPLE / MINIMAL` lands in `[0.35, 0.9]`, i.e. worse still, because it removes
+   more diagrams from the same live κ₄ state.
+5. Therefore the gate **FAILS** and H1 is dead in every affordable form. I put
+   `~75%` on this.
+6. The live-shape numbers are **less extreme** than the smoke's `0.748` / `0.462`
+   in the direction of `1.0`, because the ladder over-reads method ratios by
+   `1.2x–1.4x` and this is a method ratio.
+
+**Gate.** Pre-set by the strategist before any datum, and **written on `minimal`**,
+because `minimal` is the only arm that births `2n` and can therefore be afforded:
+`SIMPLE / MINIMAL >= 1.5x` ⇒ price and build `estimator_k3_lite.py`, certify under
+the `>= 2.0x` wall-margin rule, canary. `<= 1.2x` ⇒ **H1 is dead in every
+affordable form; record it and report immediately.** Between the two is an
+inconclusive band and buys one follow-up, not a build. `lite` is reported as the
+channel attribution and is **not** a build candidate: at `5n` births it is `2.5x`
+SIMPLE's lineage cost, which puts it over the hard cap before any accuracy
+question is asked.
+
+**Falsifier.** Prediction 3 is falsified by `SIMPLE / LITE >= 1.4x`, which would
+put the strategist's band right and mine wrong, and would mean the cheap channel
+does carry the gain. Prediction 1 or 2 failing falsifies the whole instrument and
+halts the run in place.
+
+**Baseline.** `kind=SIMPLE`, re-run inside the same process rather than read from
+`pa_k3.json`, and then compared against the stored per-net P-A numbers with a
+`1e-11` halt. DESIGN tier.
+
+**Cost model.** None for the arms — this is a torch accuracy measurement and its
+cost half is the **birth count**, which the instrument reads off the returned
+`FactoredTensor` per layer rather than estimating. Phase 2 pricing of any arm that
+passes is the next slice's work and starts from that count. Pricing before
+measuring is the error this slice has already made twice.
+
+**Statistic.** Paired, common random numbers, **arithmetic score difference** with
+a studentised-t interval. Gains are quoted as ratios **of means**, never as a mean
+of ratios. Percentile and BCa are refused.
+
+**Seed block.** `# seed-ledger: no block named` — re-reads the **P01 DESIGN**
+asset, as D1, A3, A5, D2, the capped run and the metric arm did. Promotes nothing;
+that asset's manifest forbids closing a lane on it, and this contract does not try
+to. A failed gate here **deprioritizes**; it does not formally close.
+
+**Confounders / scope / what must not change.** Upstream stays rev `93d091a4`
+plus exactly the recorded patch, verified before the first datum by
+`verify_upstream`. The two ablation booleans are the only difference between arms.
+`use_pK` stays upstream's default `True` in all four. `use_avg_metric` stays
+`True`, so `WK[4].metric` is 1-d and the `211 -> 111` case-2 block is identically
+zero in every arm — the ablation removes cases 1 and 3 only, and the exact-metric
+lane is already closed at `1.07x`.
