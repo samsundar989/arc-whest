@@ -291,6 +291,12 @@ def extract(a) -> int:
         sig=np.stack(SIG),          # (N, WIDTH)   final PRE-activation sigma
         truth_r1=m1[:, -1, :].astype(np.float64),
         truth_r2=m2[:, -1, :].astype(np.float64),
+        # PER-NEURON label variances, so the R^2 ceiling can be computed exactly.
+        # Without these the ceiling falls back to `gt_noise`, a per-network MEAN
+        # over neurons, which the 2026-09-10 T2 Skeptic showed overstates the
+        # label noise by 4.06%.
+        var_r1=z["var_r1"].astype(np.float64),
+        var_r2=z["var_r2"].astype(np.float64),
         n_samples=np.int64(n_samples),
         per_names=np.asarray(PER_NEURON), pooled_names=np.asarray(POOLED),
     )
@@ -583,9 +589,19 @@ def fit(a) -> int:
               f"{pc['capacity_probe']['recovered_weighted_r2']:+.4f}"
               f"   (a LOW number here means the head has a basis limit, not that"
               f" the chain has no signal)")
-        at_gate = [c for c in pc["curve"] if abs(c["planted_weighted_r2"] - 0.1304) < 1e-6]
-        pc["passes"] = bool(at_gate and at_gate[0]["implied_gain"] >= BUILD_GATE)
-        print(f"     GATE-STRENGTH CONTROL  "
+        # THE PASS CONDITION IS A RECOVERY FRACTION, NOT AN ABSOLUTE GAIN.
+        # The first version demanded `implied_gain >= BUILD_GATE` on a signal
+        # planted at exactly the weighted R^2 that PRODUCES `BUILD_GATE` -- so
+        # only a literally perfect learner could pass, and a 99.5% recovery was
+        # reported as a failure. What the control has to establish is that a
+        # gate-strength signal would be FOUND, i.e. that recovery is near unity.
+        at_gate = [c for c in pc["curve"]
+                   if abs(c["planted_weighted_r2"] - (1 - 1 / BUILD_GATE)) < 1e-3]
+        frac = (at_gate[0]["recovered_weighted_r2"] / at_gate[0]["planted_weighted_r2"]
+                if at_gate else float("nan"))
+        pc["recovery_fraction_at_gate"] = frac
+        pc["passes"] = bool(frac >= 0.90)
+        print(f"     GATE-STRENGTH CONTROL  recovery {frac:.4f} of planted   "
               f"{'PASS -- a 1.15x signal WOULD have been found' if pc['passes'] else '*** FAIL -- a 1.15x signal would NOT have been found; the arms below are unreadable ***'}")
         print()
 

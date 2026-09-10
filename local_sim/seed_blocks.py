@@ -202,7 +202,31 @@ SINGLE_USE_BLOCKS = {
     "D17": "reserved single-shot gate — allocated 2026-08-10, never drawn, LOCKED 2026-08-19",
     "D19": "v2.6 promotion gate once the Phase-2 shape is known — allocated 2026-08-19, unspent",
     "P04": "the one Phase-2 DECIDE comparison against graded v2.7 — allocated 2026-09-01, unspent",
+    # Added 2026-09-10 after the T2 Skeptic. P08's own registry text already said
+    # "claiming P08 for anything but the single held-out read defeats the only
+    # reason it exists" — and that was PROSE, so nothing stopped the block being
+    # read three times while the instrument was being repaired. Registering it
+    # here makes a second CLAIM refuse. It does NOT count re-READS of an
+    # already-claimed block, which is the deeper gap: see READ-COUNTED ARTIFACTS
+    # below.
+    "P08": "the one Phase-2 T2 held-out read — allocated and claimed 2026-09-10, SPENT",
 }
+
+# --- READ-COUNTED ARTIFACTS, owed --------------------------------------------
+# `SINGLE_USE_BLOCKS` protects a block from being CLAIMED twice. It does not
+# protect a claimed block's artifact from being READ twice, and on 2026-09-10 the
+# T2 held-out corpus was read three times: two runs of a broken instrument, then
+# the repaired one. Nothing recorded that, and the LOG entry said "single
+# held-out read" in good faith.
+#
+# The repository already has the right machinery in exactly one place —
+# `local_sim/vault.py`, which is touch-counted with a permanent log and a
+# hard cap. A single-use held-out block deserves the same shape:
+#   * a `<block>_reads.jsonl` beside the artifact, appended by whatever reads it;
+#   * the consumer, the instrument's sha256 and the timestamp on every line;
+#   * a cap, and a refusal past it.
+# Owed as its own IMPORTANT change with its own prediction and preflight run.
+READ_COUNTED_OWED = ("P08",)
 
 # Consumption — as opposed to allocation — is recorded in `seed_ledger.py` and
 # `experiments/seed_ledger.jsonl`. `check_disjoint()` below proves that no two

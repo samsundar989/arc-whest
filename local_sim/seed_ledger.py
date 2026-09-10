@@ -102,8 +102,20 @@ TIERS: Dict[str, str] = {
     # data rather than the handoff's public split because `docs/VALIDATION.md`
     # section 0 makes the public split read-only.
     "P07": "DESIGN",
-    "P08": "DESIGN",
+    # P08 is registered SINGLE_USE, not DESIGN, from 2026-09-10: it is the one
+    # held-out read of the T2 gate and its own registry text always said so. It
+    # was prose until the T2 Skeptic pointed out that nothing enforced it.
+    "P08": "SINGLE_USE",
 }
+
+#: Strictness ordering, so a tier CHANGE can be judged as a tightening or a
+#: loosening rather than merely "different". Only tightening is permitted after a
+#: claim has been recorded.
+TIER_STRICTNESS: Dict[str, int] = {
+    "LEGACY": 0, "INFRA": 1, "DESIGN": 2, "DECISION": 3,
+    "SINGLE_USE": 4, "VAULT": 5,
+}
+
 
 
 @dataclass(frozen=True)
@@ -563,10 +575,49 @@ def finalize(
     return digest
 
 
+
+def _retier_covers(recs, block: str, old_tier: str, new_tier: str) -> bool:
+    """Is this tier change DECLARED, and is it a tightening?
+
+    Both conditions, not either. A declared LOOSENING is still an error: the
+    point of the declaration is to make a deliberate hardening visible, never to
+    provide a route around a block's own rules.
+    """
+    if TIER_STRICTNESS.get(new_tier, -1) <= TIER_STRICTNESS.get(old_tier, -1):
+        return False
+    for r in recs:
+        if (r.kind == "retier" and r.block == block
+                and r.note and new_tier in r.note and old_tier in r.note):
+            return True
+    return False
+
+
+def retier(block: str, old_tier: str, new_tier: str, reason: str, *, ts: str,
+           path: str = LEDGER_PATH) -> None:
+    """Declare that `block` was TIGHTENED after claims against it existed.
+
+    Appends, never rewrites. Refuses a loosening outright: a block's rules may
+    only ever get stricter after it has been drawn from.
+    """
+    if TIER_STRICTNESS.get(new_tier, -1) <= TIER_STRICTNESS.get(old_tier, -1):
+        raise ValueError(
+            f"REFUSED: {old_tier!r} -> {new_tier!r} is not a tightening. A block "
+            f"that has already been claimed may only be made STRICTER.")
+    lo, _hi = block_span(block)
+    _append(Claim(block=block, start=lo, n=0, consumer="seed_ledger.retier",
+                  tier=new_tier, ts=ts, kind="retier",
+                  note=f"tier {old_tier} -> {new_tier}: {reason}"),
+            path=path)
+
+
 def check_ledger(path: str = LEDGER_PATH, *, verbose: bool = True) -> List[str]:
     """Re-validate the whole ledger. Returns a list of ERRORS (empty == good)."""
     errors: List[str] = []
     absent: List[str] = []
+    #: Non-fatal observations that must still be VISIBLE. A tier tightened after
+    #: a claim is legitimate, but it is exactly the kind of thing that must never
+    #: happen silently.
+    notes: List[str] = []
     recs = ledger(path)
     for c in recs:
         try:
@@ -574,18 +625,45 @@ def check_ledger(path: str = LEDGER_PATH, *, verbose: bool = True) -> List[str]:
         except KeyError as exc:
             errors.append(f"{c.consumer}: {exc}")
             continue
-        if c.n <= 0:
+        # A `retier` record is a DECLARATION about a block, not a range, so it
+        # carries `n = 0` deliberately. Every other kind must span at least one
+        # seed.
+        if c.n <= 0 and c.kind != "retier":
             errors.append(f"{c.consumer}: non-positive n={c.n}")
         if c.start < lo or c.end > hi:
             errors.append(
                 f"{c.consumer}: {c.block}[{c.start:,}..{c.end:,}] outside [{lo:,}..{hi:,}]"
             )
         try:
-            if c.tier != tier_of(c.block):
-                errors.append(
-                    f"{c.consumer}: recorded tier {c.tier!r} != registry tier "
-                    f"{tier_of(c.block)!r} for {c.block}"
-                )
+            # A recorded tier that DISAGREES with the registry is drift -- unless
+            # the registry has been TIGHTENED since the claim. Tightening is the
+            # deliberate hardening of a block after the fact and is safe: the
+            # claim happened under weaker rules and every rule now in force is
+            # stricter. Loosening is the dangerous direction (it would let a
+            # DECISION block be claimed under DESIGN's overlap rules) and stays a
+            # hard error. Added 2026-09-10 when P08 was promoted DESIGN ->
+            # SINGLE_USE after the T2 Skeptic found its single-use rule was prose.
+            _now = tier_of(c.block)
+            if c.tier != _now:
+                # A DECLARED tightening is legitimate; an undeclared mismatch is
+                # drift, and the two are indistinguishable from the tier alone.
+                # A record claiming DESIGN on a SINGLE_USE block is exactly how
+                # one would dodge the single-use rule, so "tightening is safe"
+                # cannot be inferred -- it must be DECLARED, the same way a
+                # deliberate overlap is declared by a `pair` record. A `retier`
+                # record names the block, the old tier and the new one, and is
+                # appended to the same append-only ledger.
+                if _retier_covers(recs, c.block, c.tier, _now):
+                    notes.append(
+                        f"{c.consumer}: {c.block} was TIGHTENED {c.tier!r} -> "
+                        f"{_now!r} by a declared `retier` record. The claim stands "
+                        f"and every rule now in force is stricter."
+                    )
+                else:
+                    errors.append(
+                        f"{c.consumer}: recorded tier {c.tier!r} != registry tier "
+                        f"{_now!r} for {c.block}"
+                    )
         except KeyError as exc:
             errors.append(str(exc))
         if c.artifact and c.artifact_sha256:
@@ -658,14 +736,19 @@ def check_ledger(path: str = LEDGER_PATH, *, verbose: bool = True) -> List[str]:
               f"{sum(1 for c in recs if c.kind == 'finalize')} finalizations, "
               f"{sum(1 for c in recs if c.kind == 'pair')} pairings)")
         _kinds = {c.kind for c in recs}
-        if _kinds - {"claim", "finalize", "pair"}:
+        if _kinds - {"claim", "finalize", "pair", "retier"}:
             errors.append(f"unknown ledger record kind(s): "
-                          f"{sorted(_kinds - {'claim', 'finalize', 'pair'})}")
+                          f"{sorted(_kinds - {'claim', 'finalize', 'pair', 'retier'})}")
         print(f"  claims naming an artifact          "
               f"{sum(1 for c in recs if c.kind == 'claim' and c.artifact)}"
               f"  ({len(absent)} absent on this host, hash recorded)")
         for a in absent:
             print(f"    - not on disk here (gitignored?): {a}")
+        if notes:
+            print(f"  tier tightenings                   {len(set(notes))}"
+                  f"  (permitted; recorded so they are never silent)")
+            for n in sorted(set(notes)):
+                print(f"    - {n}")
         print(f"  hard collisions (DECISION/VAULT)   {len(hard)}")
         print(f"  permitted overlaps (DESIGN)        {len(permitted)}")
         for a, b in permitted:

@@ -1,0 +1,41 @@
+{
+  "artifact_kind": "t2_positive_controls_only",
+  "fit_features": "C:/Users/samsu/Documents/arc-whest/experiments/2026-09-10_slice5/feat_P07.npz",
+  "note": "P08 IS NOT READ BY THIS RUN. Controls are fitted and read entirely within P07.",
+  "label_noise_per_replica": 4.498785921718335e-09,
+  "noise_in_target_units": 1.4234964943943194e-08,
+  "r2_ceiling_on_this_corpus": 0.9444093880832088,
+  "positive_control": {
+    "gate_weighted_r2": {
+      "build_1.15x": 0.13043478260869557,
+      "kill_1.10x": 0.09090909090909094
+    },
+    "curve": [
+      {
+        "planted_weighted_r2": 0.0909,
+        "recovered_weighted_r2": 0.0900939786471443,
+        "implied_gain": 1.099014597697894
+      },
+      {
+        "planted_weighted_r2": 0.1304,
+        "recovered_weighted_r2": 0.12984069121071362,
+        "implied_gain": 1.1492148505442872
+      },
+      {
+        "planted_weighted_r2": 0.3,
+        "recovered_weighted_r2": 0.3000394615752605,
+        "implied_gain": 1.428651966938735
+      }
+    ],
+    "capacity_probe": {
+      "planted_weighted_r2": 0.3,
+      "recovered_weighted_r2": -0.001929192645368838,
+      "target": "sin(20*alpha)*k3n -- deliberately hard"
+    },
+    "passes": false
+  },
+  "t_crit": {
+    "value": null,
+    "source": null
+  }
+}

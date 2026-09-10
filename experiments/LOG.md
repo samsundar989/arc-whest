@@ -40194,3 +40194,131 @@ on **our** chain's own carried state. It does not close:
 
 Each of those is a real gap and none is a rescue. The first is cheap and should
 be run before the write-up claims H2 is closed as a whole.
+
+# 2026-09-10 — **SKEPTIC ON T2: PROVISIONAL.** The kill survives and was independently reproduced. Four load-bearing sentences do not, including my headline. And the gate-strength control it demanded **PASSES at 99.5% recovery**.
+
+*Rule 2, independent context, given the contract, the instrument, the raw
+artifacts and the prior closed corrector lanes. It reproduced the result with a
+second estimator family, bounded it from above, found a protocol violation I had
+not seen, and corrected two of my numbers. Follow-up job `518`, artifact
+`experiments/2026-09-10_slice5/t2_controls.json`.*
+
+## What survives, and it is stronger than I had it
+
+**The kill is independently reproduced.** A closed-form cross-fitted **linear
+ridge** over the same 116-column design — no Adam, no epochs, no initialisation,
+no standardisation to get wrong — returns out-of-fold `R^2 = +0.0054`, **the
+head's figure to four decimals**, and `1.0089x` on P08. Fitted on all of P07 and
+applied once: `1.0113x` unshrunk, `1.0114x` at an *oracle* shrinkage fitted on
+P08 itself. **Nothing in that family reaches `1.10x`, and "the head didn't
+converge" is dead.**
+
+**Two arguments FOR the result that my entry omitted, and they are its best:**
+
+1. **The gate's arithmetic equivalent.** The score identity gives
+   `gain = E[σ²t²] / E[σ²(c−t)²]`, so a gain of `G` is exactly a σ-weighted `R^2`
+   of `1 − 1/G`:
+
+       build gate 1.15x  <=>  weighted R^2 = 0.1304
+       kill  gate 1.10x  <=>  weighted R^2 = 0.0909
+
+   **That is the number that makes every `R^2` in this slice readable**, and it
+   was missing. The measurement is not precision-limited: the required `0.130`
+   sits a factor of seven below the corpus ceiling.
+2. **The magnitude is independently predicted.** The oracle per-network constant
+   `c`, fitted on P08's own truth, is worth `1.0089x`. Output renormalisation on
+   this chain was separately measured at `0.75%` and falsified. Those agree, and
+   the learned head's `1.63%` sits just above them — so **per-neuron structure
+   adds about `0.7%` and nothing more.**
+3. **It reconciles with WP9 instead of contradicting it.** WP9's readout arm
+   reached `R^2 = +0.50`, but that was almost entirely v2.7's calibration curve
+   `(g−1)·h(alpha)` — which lives inside this head's function class, since `alpha`
+   is column 0. Finding `R^2 = 0.005` here is the statement that **the exact-K3
+   chain has essentially no residual multiplicative miscalibration left.**
+
+## The control it demanded, and the answer
+
+The Skeptic's central challenge was that my positive control planted at
+`R^2 ≈ 0.94` — **seven times** the explained variance the gate turns on — from two
+columns of one feature block, using none of `hist` or `ctx`. It then built a proxy
+lacking the right basis, planted a large signal outside its span, and got
+**`oof R^2 +0.0178`, implied gain `1.0164x`** — this slice's exact answer, with a
+big signal present. That is a decisive demonstration that my control did not
+exclude the failure mode that would fake this null.
+
+So the control was rebuilt to plant at **gate strength**, from five features
+spanning `own` + `hist` + `ctx` with a term the head must compose
+(`0.6 tanh(α) + 1.5 k3n + 0.8 k4n − 0.5 tanh(α·k3n) + 0.4 α[layer 12] + 0.7 ⟨α⟩`),
+at the measured label noise, as a **recovery curve** rather than a pass mark:
+
+| planted weighted `R^2` | recovered | recovery | implied gain |
+|---:|---:|---:|---:|
+| `0.0909` (the kill gate) | `+0.0901` | `99.1%` | `1.0990x` |
+| **`0.1304` (the build gate)** | **`+0.1298`** | **`99.5%`** | **`1.1492x`** |
+| `0.3000` | `+0.3000` | `100.0%` | `1.4287x` |
+
+**The head recovers essentially all of a gate-strength signal.** A `1.15x`
+corrector living in smooth functions of the carried invariants **would have been
+found**.
+
+**My pass condition was unpassable by construction and printed `FAIL`.** It
+demanded `implied_gain >= 1.15` on a signal planted at exactly the weighted `R^2`
+that *produces* `1.15x`, so only a literally perfect learner could clear it and a
+`99.5%` recovery was reported as a failure. The criterion is now a **recovery
+fraction** (`>= 0.90`), which is what the control is actually for. The numbers
+above are unchanged; only the verdict line was wrong.
+
+**The capacity probe fires, and it is a real limit worth stating.** A
+high-frequency target `sin(20α)·k3n` planted at `0.30` recovers **`−0.0019`**.
+So the head has a genuine basis limit. **The null therefore holds for smooth
+functions of the carried state and NOT for arbitrary ones** — and that boundary is
+now measured rather than assumed.
+
+## What does not survive: four sentences, struck
+
+| was | now |
+|---|---|
+| *"…meets BOTH kill criteria — **the score lane is closed**"* | *"both named levers have failed their gates."* The contract's gate closes **H2's readout form**, nothing wider; T1's own entry says H1 is *deprioritized, not formally closed*. Two gates failing is not a lane closing |
+| *"**single** held-out read on P08"* | **P08 was read THREE times.** The two broken runs computed `gain` on it, and the winning instrument was changed afterwards and committed **in the same commit as the result**. There is no committed state of the winning instrument predating its P08 read |
+| *"held-out `R^2 +0.9434` (the corpus ceiling is `0.9444`)"* | that control target's own ceiling is `0.9473`; the **corpus** ceiling is `0.9466`, using the per-neuron label variances on disk rather than the per-network mean. My instrument overstated label noise by `4.06%` |
+| *"**All four** pre-registered predictions CONFIRMED"* | **Four of five.** Prediction 5 was never measured: arm `S`, the in-flight sensitivity probe, was not run and `--sensitivity` does not exist in the parser although the module docstring advertises it |
+| *"the same head, the same folds and **the same shrinkage**"* | strike the shrinkage clause — the control path never called `_james_stein` |
+| *"**The information is not there**, and that is now a measurement rather than an absence"* | *"The information is not reachable at gate strength by this head, nor by an optimal linear readout of these 116 features — the latter independently reproduces the same `R^2` of `0.005`. A high-frequency signal would not have been found; the capacity probe recovers `−0.002` of one."* |
+| *"`R0` collapses … so the harness does not leak"* | `R0`'s collapse is **structural** — its design is constant across neurons by construction — so it cannot detect a leak. The Skeptic **traced the code path and confirmed it is clean**: no P08 array enters the fit, the standardisation or the shrinkage. Cite that instead. And record that `R0`'s own oracle ceiling is `1.0089x`, so it under-delivers its function class by `~15x` |
+
+Two things checked and **passed** that I would have expected to be the weak points:
+`Rshuf`'s permutation slice is exactly `own + hist` and touches no `ctx` column;
+and the extraction is right — `pred` is the post-ReLU mean, `sig` the
+pre-activation sigma, and the cross-check by deliberate misalignment gives
+`3.87e-08` against the correct layer and `1.22e+00` against the wrong one.
+
+## The protocol violation, and the fix
+
+**P08 was read three times and nothing recorded it.** `SINGLE_USE_BLOCKS` protects
+a block from being *claimed* twice; it does not protect a claimed block's artifact
+from being *read* twice. P08's own registry text said *"claiming P08 for anything
+but the single held-out read defeats the only reason it exists"* — **prose, not
+code**, which is the failure shape `AGENTS.md` § *Enforcement* exists to prevent.
+
+Applied now: **`P08` is registered `SINGLE_USE`** in both registries, so a second
+claim refuses. Recorded as owed, with the vault as the model: a single-use
+held-out block needs a **read log** — consumer, instrument sha256, timestamp, a
+cap and a refusal past it — exactly as `vault.py` already does for its three
+permitted touches. That is its own IMPORTANT change.
+
+**The gate-strength control was deliberately run with `--controls-only`, which
+reads the fit corpus and nothing else.** Repairing a control by re-reading the
+held-out block would compound the violation rather than fix it.
+
+## Where T2 stands after all of it
+
+    fitted readout corrector, held out on P08     1.0163x
+    build gate                                    1.15x     -> NOT MET
+    kill gate                                     1.10x     -> MET, H2 readout closed
+    would a 1.15x signal have been found?         YES, 99.5% recovery at gate strength
+    would a high-frequency one?                   NO, -0.002 recovery
+
+**The kill stands, and it is now bounded on both sides**: an instrument
+demonstrated to recover `99.5%` of a gate-strength smooth signal finds `0.5%` of
+the real residual, and a second, entirely different estimator family agrees to
+four decimals.
