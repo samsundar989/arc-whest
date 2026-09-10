@@ -38666,3 +38666,86 @@ Samuel later.
 2026-09-10, per submission, in the Slice 5 handoff message. Hard rule 6's order is
 still executed in full: `whest validate` -> clean mini run -> the certification
 gate above -> `whest submit`, with the sha256 logged.
+
+# 2026-09-10 — CONTRACT (Rule 1): the SYMMETRIC-PACKED spelling — one day of feasibility, not five of building
+
+*Pre-registered before any datum. Handoff `docs/STRATEGIST_RESPONSE_2026-09-10.md`
+§2. Instrument `local_sim/p2_packed_feasibility.py`, artifact
+`experiments/2026-09-10_slice5/packed_feasibility.json`. Committed before the run.*
+
+**Question.** Cost is the whole remaining lane and the symmetric-packed spelling of
+the dominant contractions is the last representation-level lever nobody has
+priced. **How many of the chain's `797` matmuls can a symmetry-aware spelling make
+cheaper ON THE INSTALLED METER, and what is the theoretical saving?**
+
+**Evidence.**
+- CONFIRMED: `_matmuls(16, None)` returns `797` and reproduces the graded `L=0`
+  anchor to `0.17%`. The chain has exactly **eight static matmul call sites**
+  (`estimator_k3_strassen.py:610,611,612,657,658,667,668,805`), all routed through
+  the single spelling `_mm`.
+- CONFIRMED: the installed flopscope carries a real symmetry cost model
+  (`_symmetric.py`, `_canonical_symmetry.py`, `_perm_group.py`) and bills by
+  **unique elements under the tagged group** (`_flops.py:121-122`).
+- SPECULATIVE, and the reason this is a measurement and not a reading: **which
+  spellings the meter actually discounts.** The strategist's framing was "does any
+  matmul have a symmetric operand"; whether a symmetric *operand* buys anything on
+  this meter is itself unmeasured.
+
+**Hypothesis + mechanism.** The lineage's dominant products contract
+**non-symmetric factor blocks** — `W^T · (n, kn)` in `_advance`, and four
+`(n, kn) @ (kn, n)` bilinear forms in `_dslice21` whose two operands are built
+from *different* factor blocks (`A_D`, `A_L`, `M`, `C_L`). A symmetry discount
+needs a redundancy the meter can see; two different blocks share none. The one
+place a symmetric object provably appears is the covariance congruence
+`W^T C W` at site `805`, which is `2` matmuls of `797` per layer. So the
+mechanism predicts the saving is **structural and tiny**, not a matter of
+spelling effort.
+
+**Intervention.** No build. Instrument the shipped chain read-only: wrap `_mm`,
+run one net at a reduced width where the *structure* is identical (the set of
+matmuls is fixed by depth and lineage count, not by `n`), and record for every
+issued matmul whether its operands are the same object, whether either operand is
+numerically symmetric, and whether the result is. Then measure the meter's actual
+discount law on each spelling and price the best case at `1024 x 16`.
+
+**Predictions (numbered, recorded before the run).**
+1. **Zero** of the `781` lineage matmuls (`797` minus the `16` covariance pairs...
+   i.e. `797 - 32 = 765` lineage matmuls plus `32` covariance matmuls) has two
+   aliased operands.
+2. The only matmuls with a symmetric *result* are the second of each covariance
+   congruence pair: **`16` of `797`**.
+3. A symmetric **operand** buys **nothing** on this meter — the bill for
+   `as_symmetric(S) @ B` is within `2%` of `A @ B`, because a matmul's cost is set
+   by the output's unique elements and the contracted length, not by the operand's
+   redundancy.
+4. Best-case total saving is **below `1.05x`**, i.e. the lane closes. My point
+   estimate is `1.007x`.
+
+**Gate.** `>= 1.5x` theoretical saving on the meter ⇒ take the remaining four days
+and build it. `< 1.5x` ⇒ **close the lane and say so**, which under the Slice-4
+kill criterion closes cost at `~0.5 B` and makes the leaders' `0.18-0.21 B`
+formally unexplained by any route we have priced.
+
+**Falsifier.** Prediction 4 is falsified by any measured spelling that takes the
+chain's total counted FLOPs below `0.95x` of the dense bill. Prediction 3 is
+falsified by a measured discount on a symmetric operand.
+
+**Baseline.** The shipped dense spelling at `1024 x 16`: `797` matmuls,
+`0.53743 B` at Strassen depth 3, `0.60420 B` at depth 2.
+
+**Cost model.** Phase 2, `lambda = 0`, `C = F`. The saving is quoted as a ratio of
+**counted FLOPs** measured in the installed flopscope `0.12.1`, never as a wall
+time. Operation count is reported beside it because a symmetry-aware spelling that
+saves FLOPs by issuing more operations trades against the `0.4 s` residual cliff.
+
+**Statistic.** None — this is deterministic accounting, not a sample.
+
+**Seed block.** `# seed-ledger: no block named`. No truth is read; no accuracy is
+measured; nothing is promoted.
+
+**Confounders / scope / what must not change.** `estimator_k3_strassen.py` is
+imported read-only and never edited (its sha is submission `330327`'s bytes).
+The reduced-width run is used **only** to enumerate which matmuls exist and what
+their operands are — every FLOP figure is priced at the live `1024 x 16` from the
+shape law, and any claim that a *ratio* transfers across width would be exactly
+the ladder error this slice already made.
