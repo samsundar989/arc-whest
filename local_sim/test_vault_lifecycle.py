@@ -52,9 +52,11 @@ Run: uv run python local_sim/test_vault_lifecycle.py
 
 import dataclasses
 import hashlib
+import json
 import os
 import sys
 import tempfile
+import threading
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
@@ -69,6 +71,7 @@ for _p in (_HERE, _ROOT):
 import numpy as np  # noqa: E402
 
 import lifecycle_eval  # noqa: E402
+import truth_reads  # noqa: E402
 import vault  # noqa: E402
 from competition_score import (MlpRow, align_rows_by_identity,  # noqa: E402
                                score_suite, zero_prediction_mse)
@@ -652,6 +655,88 @@ def t_end_to_end(before):
           else f"CHANGED: {sorted(set(before) ^ set(after)) or 'contents'}")
 
 
+def t_future_touch_reservation():
+    head("8. a future vault look is reserved before read, crash-safe and exclusive")
+
+    def paths():
+        d = _sandbox()
+        reads = os.path.join(d, "truth_reads.jsonl")
+        ledger = os.path.join(d, "seed_ledger.jsonl")
+        open(ledger, "w").close()
+        artifact = os.path.join(d, "future_vault.npz")
+        with open(artifact, "wb") as fh:
+            fh.write(b"sacrificial bytes; never parsed")
+        return reads, ledger, artifact
+
+    reads, ledger, artifact = paths()
+    with vault._reserve_vault_truth(
+            label="first", reason="seal", candidate_sha256="a" * 64,
+            artifact=artifact, reads_path=reads, ledger_path=ledger):
+        rs = truth_reads.reads(reads)
+        check("the vault wrapper writes RESERVED before its body can read",
+              len(rs) == 1 and rs[0].status == "reserved", "reserve then look")
+
+    try:
+        with vault._reserve_vault_truth(
+                label="crash", reason="estimator-change",
+                candidate_sha256="b" * 64, artifact=artifact,
+                reads_path=reads, ledger_path=ledger):
+            raise RuntimeError("candidate process died after labels opened")
+    except RuntimeError:
+        pass
+    rs = truth_reads.reads(reads)
+    check("a failure after reservation is recorded ABORTED",
+          any(r.status == "aborted" for r in rs), "the look still counts")
+    try:
+        with vault._reserve_vault_truth(
+                label="fourth", reason="designation",
+                candidate_sha256="c" * 64, artifact=artifact,
+                reads_path=reads, ledger_path=ledger):
+            pass
+        refused = False
+    except truth_reads.ReadRefused:
+        refused = True
+    check("historical seal + success + crash exhaust the three-look cap",
+          refused, "a repaired process does not restore the crashed look")
+
+    reads, ledger, artifact = paths()
+    # Spend one of the two post-adoption slots, leaving exactly one for the race.
+    with vault._reserve_vault_truth(
+            label="spent", reason="estimator-change",
+            candidate_sha256="d" * 64, artifact=artifact,
+            reads_path=reads, ledger_path=ledger):
+        pass
+    outcome = {"ok": 0, "refused": 0, "other": []}
+    guard = threading.Lock()
+    barrier = threading.Barrier(8)
+
+    def racer(i):
+        barrier.wait()
+        try:
+            with vault._reserve_vault_truth(
+                    label=f"racer-{i}", reason="designation",
+                    candidate_sha256=str(i) * 64, artifact=artifact,
+                    reads_path=reads, ledger_path=ledger):
+                pass
+            with guard:
+                outcome["ok"] += 1
+        except truth_reads.ReadRefused:
+            with guard:
+                outcome["refused"] += 1
+        except Exception as exc:  # noqa: BLE001
+            with guard:
+                outcome["other"].append(repr(exc))
+
+    threads = [threading.Thread(target=racer, args=(i,)) for i in range(8)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    check("exactly one of eight concurrent evaluators gets the last look",
+          outcome["ok"] == 1 and outcome["refused"] == 7
+          and not outcome["other"], json.dumps(outcome, sort_keys=True))
+
+
 def main():
     print("=" * 96)
     print("THE VAULT'S CANDIDATE PATH IS THE GRADER'S LIFECYCLE — regression suite")
@@ -664,6 +749,7 @@ def main():
     t_rows_have_identity()
     t_round_mismatch_is_refused()
     t_end_to_end(before)
+    t_future_touch_reservation()
     n_ok = sum(1 for r in RESULTS if r)
     print(f"\n{n_ok}/{len(RESULTS)} checks passed")
     return 0 if n_ok == len(RESULTS) else 1

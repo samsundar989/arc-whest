@@ -54,6 +54,7 @@ Run:
 """
 
 import argparse
+import contextlib
 import datetime as _dt
 import hashlib
 import json
@@ -83,6 +84,13 @@ VAULT_DIR = os.path.join(_ROOT, "experiments", "vault")
 ARRAYS = os.path.join(VAULT_DIR, "vault_v1.npz")
 MANIFEST = os.path.join(VAULT_DIR, "manifest.json")
 TOUCHLOG = os.path.join(VAULT_DIR, "touch_log.jsonl")
+
+# The August 6 seal evaluation predates the shared truth-read register.  It is
+# preserved in manifest.json/touch_log.jsonl and counts against the same
+# three-look cap. Every later reservation is written by truth_reads before the
+# arrays are opened, so this fixed adoption baseline must not be replaced by
+# the live manifest counter (doing that would double-count registered reads).
+VAULT_HISTORICAL_READS_OUTSIDE_REGISTER = 1
 
 #: THE ROUND THE SEALED CORPUS WAS MINTED UNDER, named rather than implied.
 #:
@@ -382,6 +390,41 @@ def _refuse_unless_corpus_matches_live_round(man):
     )
 
 
+@contextlib.contextmanager
+def _reserve_vault_truth(
+    *,
+    label,
+    reason,
+    candidate_sha256,
+    artifact=ARRAYS,
+    reads_path=None,
+    ledger_path=None,
+):
+    """Reserve a future vault look before exposing any label bytes.
+
+    `truth_reads.reserve` writes the reservation under the seed-ledger lock.
+    A process crash can therefore leave a `reserved` line, but that line still
+    consumes the cap; concurrent evaluators cannot both receive the final look.
+    The optional paths exist solely for sacrificial regression fixtures.
+    """
+    import truth_reads
+
+    kw = {
+        "consumer": "local_sim/vault.py",
+        "purpose": f"vault {reason}: {label}",
+        "instrument": os.path.abspath(__file__),
+        "note": ("pre-read reservation; candidate sha256 "
+                 + str(candidate_sha256)),
+        "prior_spent": VAULT_HISTORICAL_READS_OUTSIDE_REGISTER,
+    }
+    if reads_path is not None:
+        kw["path"] = reads_path
+    if ledger_path is not None:
+        kw["ledger_path"] = ledger_path
+    with truth_reads.reserve("V", artifact, **kw) as resolved:
+        yield resolved
+
+
 def _run_candidate(candidate, seeds, truth_final, spec, gt_noise,
                    weights_mode=None, progress_every=50):
     """Run a candidate FILE over `seeds` through THE canonical lifecycle evaluator.
@@ -628,12 +671,10 @@ def evaluate(label, reason, candidate="estimator.py", budget=None,
                 f"sealed corpus is spent once; it is not a place to replay an old "
                 f"rulebook."
             )
-        spec = build_spec(live.tag, width=int(man["width"]),
-                          depth=int(man["depth"]), budget=budget)
-        d, man = load(check=True)
-        seeds, truth_final, gt_noise = (d["seeds"], d["truth"][:, -1, :],
-                                        d["gt_noise"])
-        out_dir = evidence_dir or VAULT_DIR
+        # The cap is checked before the reservation, and the reservation is
+        # written before `load()` opens the arrays.  The shared register also
+        # knows about crashed and concurrent attempts; manifest.json alone did
+        # not, because the old path updated it only after a successful run.
         if man["touches"] >= MAX_TOUCHES:
             raise SystemExit(
                 f"REFUSED: the vault has already been touched {man['touches']} times "
@@ -641,6 +682,14 @@ def evaluate(label, reason, candidate="estimator.py", budget=None,
                 f"designation). Re-read experiments/vault/README.md before doing "
                 f"anything that would need a fourth."
             )
+        spec = build_spec(live.tag, width=int(man["width"]),
+                          depth=int(man["depth"]), budget=budget)
+        with _reserve_vault_truth(
+                label=label, reason=reason, candidate_sha256=cand_sha):
+            d, man = load(check=True)
+        seeds, truth_final, gt_noise = (d["seeds"], d["truth"][:, -1, :],
+                                        d["gt_noise"])
+        out_dir = evidence_dir or VAULT_DIR
     if limit:
         seeds, truth_final, gt_noise = (seeds[:limit], truth_final[:limit],
                                         gt_noise[:limit])
