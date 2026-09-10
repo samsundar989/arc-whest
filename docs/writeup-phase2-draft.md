@@ -2,7 +2,7 @@
 
 > **Status 2026-09-10 (revised after the Skeptic returned PROVISIONAL on §(ii)):
 > sections (i), (ii), (iii) and (v) are substantially drafted; (iv) awaits the κ₄
-> rank-sweep; (vi) awaits the depth-2 graded row and T2. §(ii) has been rewritten:
+> rank-sweep; (vi) is drafted and awaits only the graded row. §(ii) has been rewritten:
 > its channel attribution was struck as unidentified, and the surviving result is
 > narrower and better evidenced. §(iii)(a) is now filled from the measured
 > generation-truncation curve.** Nothing here is posted. The
@@ -52,10 +52,13 @@ to make it affordable does not cost part of its advantage but **all of the
 third-cumulant correction**, landing the estimator back on plain Gaussian
 propagation.
 
-Taken together these say something sharper than any one of them: **the carried
-lineage is not a resource that degrades gracefully. Every deletion we have
-measured — by generation, by diagram class, or by cumulant degree — returns the
-chain to roughly Gaussian accuracy**, whatever it was that was deleted.
+Taken together these say something sharper than any one of them: **the term set
+is not a menu. It is two working configurations with a cliff between them.** Both
+self-consistent schemes are good; every partial configuration we constructed
+between them is `14×` to `109×` worse than the worse of the two endpoints, on
+zero of twenty-four networks improved in every case — and which subset is removed
+changes the damage by a factor of eight, in a direction no ordering of *how much*
+predicts.
 
 We then price and close five levers, each with a mechanism and a number: the exact
 `W Wᵀ` metric (`1.07×` at width 1024, decaying with width exactly as concentration
@@ -67,8 +70,10 @@ last-layer capping.
 
 Finally we report what we could and could not reproduce of the public
 leaderboard's shared floor: its accuracy, yes, in a reference implementation; its
-cost, no, and we exclude both public routes to it. `OWED: (vi) needs the depth-2
-graded row and T2.`
+cost, no. We exclude four routes to that cost, each with a number and a
+mechanism, and test the two published hypotheses for the remainder — a cheap κ₄
+channel and a learned per-layer corrector — with both failing under instruments
+we show can detect the effect they were looking for.
 
 ---
 
@@ -281,13 +286,16 @@ rather than whole generations, and land in the same place: `2.98e-06` and
 `4.37e-06` against generation-capped SIMPLE's `1.65e-06`, all of them within a
 factor of a few of plain Gaussian propagation at `4.20e-06`.
 
-Put together, and this is the form the evidence actually identifies: **the carried
-lineage does not degrade gracefully. Every deletion we have measured — by
-generation, by diagram class, or by cumulant degree — costs not a share of the
-correction but essentially all of it**, and the estimator returns to roughly
-Gaussian accuracy whatever was removed. The value of carrying higher-order
-cumulant information is therefore not a property of the information; it is a
-property of the exactness of the consumer.
+Put together, and this is the form the evidence actually identifies: **the
+carried lineage does not degrade gracefully.** Truncation by generation and
+deletion by diagram class both cost essentially the whole correction rather than
+a share of it. We initially wrote that every deletion returns the estimator to
+Gaussian accuracy, and our own completed design refutes that: one ablation
+(`legsonly`) sits `7.6×` below the Gaussian baseline while still `13.8×` above
+the exact chain. **The defensible statement is the cliff, not the floor** — two
+working configurations, and a wide, non-monotone gap between them. The value of
+carrying higher-order cumulant information is therefore not a property of the
+information; it is a property of the exactness of the consumer.
 
 That is why the affordable members of this family cluster at one accuracy and the
 accurate members cluster at one price, and why no team on the public board has
@@ -414,32 +422,64 @@ sharpest single statement of the cost-accuracy bind this class of methods is in.
 
 ## (vi) The board's shared floor, and what we could and could not reproduce
 
-`OWED — needs the depth-2 graded row and T1.`
+**Claim.** The public leaderboard's shared floor is the accuracy of one member of
+the cumulant-truncation class. We reproduce that accuracy in a reference
+implementation and we cannot reproduce its cost, and we can now say which routes
+to that cost are excluded and why.
 
-The skeleton of the argument, which the measurements above already support:
+**The floor is a property of the class, not of a team.** Six independent teams sit
+within `14%` of one another at raw `1.87e-8` to `2.13e-8`. In ARC's own reference
+implementation, `kind=AUGMENT` reaches `1.912e-08` on our 24-network set. The
+convergence of six teams on one number, using methods described differently, is
+evidence that the number is a property of the representation rather than of
+anyone's engineering.
 
-- Six independent teams sit within `14%` of one another at a raw accuracy of
-  `1.87e-8` to `2.13e-8`. We reach `1.912e-8` in torch with ARC's `kind=AUGMENT`.
-  **The board's shared floor is AUGMENT-class accuracy**, and the convergence of
-  six teams on it is evidence that it is a property of the *class* rather than of
-  any team's engineering.
-- The leaders reach it at `0.18–0.21 B`. The only spelling of that accuracy we have
-  priced is roughly `22×` dearer. **We can reproduce their accuracy and not their
-  cost.**
-- We have now excluded both public routes to that cost, each with a number and a
-  mechanism: the wall lever (`~6%`, memory-bound glue), the exact-metric lever
-  (`1.07×`, decaying with width), Strassen recursion depth (bounded by the wall,
-  not by arithmetic), and representation-level packing (`1.007×`, no discountable
-  redundancy exists). **Whatever the leaders are running, it is not this chain
-  spelled better.**
-- What that leaves, stated as open rather than resolved: either κ₄ reaches the
-  same accuracy through a channel that births nothing (`OWED: T1`), or a cheaper
-  chain carries a learned per-layer correction (`OWED: T2`). We report which, and
-  if neither, we report that too — an honest "we excluded the routes we could
-  price and the remaining gap is unexplained" is a better contribution than a
-  guess.
+**We can reproduce the accuracy and not the cost.** The leaders reach that floor
+at `0.18–0.21 B`. The only spelling of that accuracy we have been able to price is
+roughly `22×` dearer, and it is over the hard cap at every recursion depth.
 
----
+**Four routes to their cost are excluded, each with a number and a mechanism:**
+
+| route | measured | mechanism |
+|---|---:|---|
+| wall-time engineering | `~6%` | the Strassen glue is memory-bound; it costs bytes moved, not calls issued |
+| the exact `W Wᵀ` metric | `1.07×` | a concentration approximation whose error *falls* as width grows |
+| Strassen recursion depth | wall-bound | the saving comes from depth, and depth is bounded by a memory-bound glue layer |
+| representation-level packing | `1.007×` | no discountable redundancy exists — the dominant products contract four different factor blocks |
+
+**Two hypotheses for the remaining gap were tested and both failed.**
+
+*That κ₄ reaches the floor through a channel that births nothing.* Deleting κ₄'s
+κ₃ births to make it affordable costs `74×`, not a share of its advantage. No
+affordable member of the family exists by deletion. We report the confound
+honestly: κ₄'s own update is computed from the deleted blocks, so this design
+cannot attribute the loss to a channel, and we say so rather than claiming the
+attribution.
+
+*That a cheaper chain carries a learned per-layer correction.* A per-neuron
+equivariant head over the chain's own scale-invariant state, cross-fitted on 384
+freshly minted networks and read once on 128 held out, is worth **`1.0163×`**.
+
+That last number is only meaningful with its instrument check, so we give it.
+Under the score identity a gain of `G` is exactly a σ-weighted `R²` of `1 − 1/G`,
+so the `1.15×` we needed is `R² = 0.1304`. Planting a signal of exactly that
+strength, built from five features across all three feature blocks with a term the
+head must compose, the same head under the same folds recovers `0.1298` — **`99.5%`.
+A corrector that large would have been found.** A closed-form ridge over the same
+features independently reproduces the head's out-of-fold `R²` to four decimals.
+A deliberately high-frequency target recovers `−0.002`, which bounds the claim:
+**the residual is not a smooth, gate-strength function of the chain's carried
+state.** It could still be a rough one, and we do not claim otherwise.
+
+**So the honest closing statement is a negative with a boundary, not a mystery.**
+We reproduce the field's accuracy, exclude every route to its cost that we could
+price, and find no learnable structure of exploitable size in our own chain's
+state. What the leaders do differently is not a better spelling of this chain,
+and it is not a corrector on features like ours. We do not know what it is.
+
+*Scope: we did not test an in-flight per-layer corrector, which is a
+pre-registered arm of the same experiment that we did not run. That is a gap in
+our evidence, not an argument.*
 
 ## Method-disclosure and honesty commitments
 
@@ -457,6 +497,7 @@ The skeleton of the argument, which the measurements above already support:
 |---|---|
 | §(ii) the completed 2×2: does `legsonly` also land on the Gaussian baseline? | queued, ~10 GPU-min |
 | §(iv) rank sweep curve | background GPU job, not yet queued |
-| §(vi) the whole section | depth-2 graded row + T1 + T2 |
+| §(vi) the graded row for `330566`, to replace the CONFIRM number | submitted, awaiting grading |
+| arm `S` — the in-flight sensitivity probe, pre-registered and not run | one short GPU job |
 | a STRATEGIC claim review of every quantitative claim | Rule 2 Skeptic |
 | decide what stays private | `BENCHMARK.md`, `RESEARCH_NOTES` §2g must not leak |

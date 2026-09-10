@@ -1,30 +1,35 @@
 # CURRENT_STATE.md — read this first
 
-> ## 2026-09-10 (Slice 5, day 1) — **THE COST LANE IS CLOSED AND NO AFFORDABLE κ₄ SPELLING EXISTS BY DELETION.** Two pre-registered gates failed the same day. The Skeptic returned PROVISIONAL on T1 and struck eight of my sentences; the gate outcome survived, the attribution did not.
+> ## 2026-09-10 (Slice 5, COMPLETE) — **BOTH KILL CRITERIA MET. The score lane is done; cost is closed at `~0.5 B` and neither accuracy lever exists.** Depth 2 submitted as `330566`. Two independent Skeptics ran and both returned PROVISIONAL: **both kills survived, and a dozen of my sentences did not.**
 >
-> `estimator.py` untouched at **v2.6.1**. **Nothing designated. Nothing promoted.
-> Nothing submitted.**
+> `estimator.py` untouched at **v2.6.1**. **Nothing designated. Nothing promoted.**
+> One canary submitted (`330566`), on Samuel's slot-availability approval and
+> **not** on any ruling about the two gates it failed.
 >
-> ### THE FOUR-LINE ANSWER
+> ### THE FIVE-LINE ANSWER
 >
-> 1. **T1 — no affordable κ₄ spelling exists BY DELETION**, and that is the
->    narrowed claim the Skeptic left standing. Deleting κ₄'s κ₃ births while
->    keeping the `(n,n)` object live is `74x`–`109x` **worse than SIMPLE**, on
->    `0 of 24` nets improved. **But the ablated arms land on the GAUSSIAN
->    BASELINE** (`LITE` = K2 to within `4%`, interval through zero), so they say
->    nothing about *which* κ₄ channel carried the `2.094x` — and the two channels
->    are **not separable in this implementation** anyway, because κ₄'s own update
->    is computed from the blocks the ablation deletes. **The channel attribution
->    is struck as unidentified.**
-> 2. **Packed spelling — closed at `1.0067x`** against a `1.5x` gate. Zero of the
->    chain's `797` matmuls has the redundancy this meter discounts. **Cost is now
->    closed at `~0.5 B`**, which meets the Slice-4 kill criterion thirteen days
->    early and fails it.
-> 3. **Nominee A (Strassen depth 2) certifies on 6 of 8 gates.** The two failures
->    are one artefact measured twice, and it would refuse `330327` — which has a
->    real graded `0/100` row — for the same reason. **The canary is HELD** pending
->    Samuel, because I will not reinterpret my own failed gate.
-> 4. **Rules v14 §6 is a checked negative.** Three independent public routes
+> 1. **Cost is closed at `~0.5 B`.** Symmetric packing prices at **`1.0067x`**
+>    against a `1.5x` gate: zero of the chain's `797` matmul-equivalents has the
+>    redundancy this meter discounts. That was the last cost lane, so the Slice-4
+>    kill criterion is met thirteen days early and **fails**. All four public
+>    routes to the leaders' `0.18-0.21 B` are now excluded with mechanisms.
+> 2. **T1 — no affordable κ₄ spelling exists BY DELETION.** `SIMPLE / MINIMAL =
+>    0.0135x` against a `1.2x` kill, `0/24` nets improved. **But the ablated arms
+>    land on or near the GAUSSIAN BASELINE**, and κ₄'s own update is computed from
+>    the blocks the ablation deletes — so **the channel attribution is struck as
+>    unidentified.** The completed 2x2 then falsified *both* my replacement story
+>    and the Skeptic's.
+> 3. **T2 — the readout corrector is worth `1.0163x`** against a `1.15x` build
+>    gate and a `1.10x` kill. Real signal (`100/128` nets, both nulls beaten by an
+>    order of magnitude), far too small. **A gate-strength positive control
+>    recovers `99.5%` of a planted `1.15x` signal**, so a corrector that big would
+>    have been found; a *closed-form ridge* reproduces the head's `R^2` to four
+>    decimals, so "the head didn't converge" is dead.
+> 4. **`330566` submitted** — Strassen depth 2, sha `390bc226…`, `0.604217 B`,
+>    `9,321` ops, `2.28x` wall margin. It certified `6 of 8` pre-registered gates;
+>    **the two failures stand unretracted.** Samuel approved on slot availability
+>    and explicitly did **not** rule the gates mis-specified.
+> 5. **Rules v14 §6 is a checked negative.** Three independent public routes
 >    tried; the sentence is not publicly stated and another team hit the same wall.
 >    A neutral forum post is drafted and needs Samuel's account.
 >
@@ -49,8 +54,23 @@
 >
 > **The simpler explanation was already on disk, in an entry I wrote the day
 > before.** Generation-capped SIMPLE — no κ₄ births anywhere — collapses to
-> `1.651e-06`. **One statement covers every case measured: any deletion from the
-> carried `(1,1,1)` lineage returns this chain to roughly Gaussian accuracy.**
+> `1.651e-06`.
+>
+> **THE COMPLETED 2x2 THEN FALSIFIED THAT TOO.** The missing cell — κ₄'s births
+> KEPT, the raised-budget legs deleted (`legsonly`, `4n`) — reads
+> **`5.523768e-07`**, which is `7.6x` **better** than plain Gaussian and `2.6x`
+> better than *calibrated* Gaussian, both intervals clear of zero. So "any
+> deletion returns this chain to Gaussian accuracy" is **false for `legsonly`**,
+> and my `~80%` prediction that it would land at the baseline is falsified.
+>
+> **What the completed design supports instead, and it is cleaner than either
+> story: both consistent configurations are good, and every PARTIAL configuration
+> between them is `13.8x`–`109x` worse than the WORSE endpoint**, on `0 of 24`
+> nets improved in every case. The term set is not a menu; it is two working
+> configurations with a cliff between them. Deleting κ₄'s births is `7.9x` more
+> damaging than deleting the legs — the opposite of what H1 hoped — but that
+> comparison stays confounded and no reweighting of these five arms separates it.
+> **Nothing in the 2x2 is affordable at any price.**
 >
 > **A non-monotonicity I missed:** `MINIMAL` deletes strictly more than `LITE` and
 > is `1.47x` **better**, `21/24`. My prediction 4's reasoning had the direction
@@ -107,33 +127,97 @@
 > before the data and they failed, so amending them now is choosing a gate after
 > seeing the answer. **The canary is held until he acknowledges that.**
 >
-> ### T2 — CONTRACTED, AND THE HANDOFF'S CORPUS REFUSED
+> ### T2 — THE READOUT CORRECTOR IS WORTH `1.0163x`. CLOSED.
 >
-> The handoff says to train the corrector on the organisers' public 1,100.
-> **`docs/VALIDATION.md` §0 forbids fitting anything on the public split** and
-> `AGENTS.md` makes it binding, so the law wins over the packet. `P07` (384, the
-> fit) and `P08` (128, the single held-out read) are allocated, claimed, and their
-> labels are minting at `2^24` per half. The public split is read once at the end
-> as a check that chooses nothing.
+>     B0 on the held-out corpus (P08)   3.859709e-08
+>     R      (fitted)                   3.797635e-08   gain 1.0163x   100/128 better
+>     R0     (constant-c null)          3.857427e-08   gain 1.0006x    68/128
+>     Rshuf  (features permuted)        3.856640e-08   gain 1.0008x    73/128
+>     out-of-fold R^2:  R +0.0054   R0 -0.0008   Rshuf -0.0008
+>     GATE  build 1.15x / kill 1.10x   ->   H2 READOUT CLOSED
 >
-> **This changes what a negative T2 would mean and is flagged for the next packet.**
+> **The signal is real and far too small.** `R` beats both nulls by an order of
+> magnitude and keeps `55%` of its correction under James–Stein shrinkage. The
+> VOID clause did **not** fire. **All four measured predictions confirmed** — the
+> first slice here where every one held. *(Four of five: arm `S`, the in-flight
+> sensitivity probe, was never run and `--sensitivity` does not exist in the
+> parser. Prediction 5 is UNMEASURED and that is owed.)*
 >
-> **The label-precision cost I claimed was wrong, and the correction is in our
-> favour.** P07's labels are minted and measured: noise `4.4988e-09` per replica,
-> `2.2494e-09` in a two-replica mean, against a chain MSE of `4.0047e-08`. **The
-> `R^2` ceiling is `0.944`, not the `~0.40` my own contract predicted.** I had
-> assumed a post-ReLU activation variance of order 1; the measured value is
-> `0.0755`, a factor of `13` in variance. `2^24` per half was therefore
-> over-provisioned by about three GPU-hours. The replica-independence check passes
-> at ratio `1.0076`, so the cross estimator is unbiased and **the gate does not
-> move** — the ceiling governs only how an `R^2` is read.
+> **THE CORPUS WAS REFUSED, AND THE STRATEGIST NEEDS TO KNOW.** The handoff says
+> train on the organisers' public 1,100; `docs/VALIDATION.md` §0 forbids fitting
+> anything on the public split and `AGENTS.md` makes it binding, so the law won.
+> `P07` (384, fit) and `P08` (128, the single held-out read) were minted instead.
+> **This changes what a negative T2 means.**
 >
-> ### IN FLIGHT
+> **The label-precision cost I claimed was wrong, in our favour.** Measured noise
+> `4.4988e-09` per replica against a chain MSE of `4.0047e-08`; the `R^2` ceiling
+> is **`0.9466`**, not the `~0.40` my contract predicted. I had assumed a
+> post-ReLU activation variance of order 1 where the measured value is `0.0755`.
+> `2^24` per half was over-provisioned by about three GPU-hours.
 >
-> - `498` — T1's completed 2x2, the Skeptic's discriminating follow-up.
-> - `493`/`494` — T2 labels for P07 and P08. **~3.3 h and ~1.5 h; my 22 s/net
->   estimate was `1.8x` low (measured `39.4 s/net`), and the ETAs are corrected
->   in the queue.**
+> ### WHAT MAKES T2's NULL READABLE — AND WHAT NEARLY MADE IT WORTHLESS
+>
+> The first two runs gave **all three arms identical to four decimals, including
+> the shuffled one.** I was one commit from publishing "there is no signal". A
+> positive control on a planted target then read **`R^2 = -0.4566`**: the head
+> could not recover a signal it had been handed. Two elementary defects, both
+> mine — no input standardisation feeding a `Tanh` with `alpha` at `±10`, and no
+> target standardisation for values of order `5e-4`.
+>
+> The Skeptic then showed my *repaired* control was still the wrong test: it
+> planted at `R^2 ≈ 0.94`, **seven times** the explained variance the gate turns
+> on. **The score identity makes the gate an `R^2`: `1.15x` ⇔ weighted
+> `R^2 = 0.1304`, `1.10x` ⇔ `0.0909`.** Rebuilt to plant at gate strength across
+> all three feature blocks with a composed nonlinear term:
+>
+>     planted wR^2 0.0909  ->  recovered +0.0901   (99.1%)
+>     planted wR^2 0.1304  ->  recovered +0.1298   (99.5%)   <- the build gate
+>     planted wR^2 0.3000  ->  recovered +0.3000   (100%)
+>     CAPACITY PROBE  sin(20a)*k3n at 0.30  ->  -0.0019
+>
+> **A `1.15x` smooth signal WOULD have been found.** A high-frequency one would
+> not — so the null is bounded to smooth functions of the carried state, and that
+> boundary is measured. A **closed-form ridge** independently reproduces the
+> head's `R^2` to four decimals and gives `1.0089x` on P08, so no optimiser
+> artefact survives. The oracle constant-`c` ceiling is `1.0089x`, agreeing with
+> the previously measured `0.75%` output renormalisation: **per-neuron structure
+> adds about `0.7%` and nothing more.**
+>
+> ### `330566` — SUBMITTED, AND THE APPROVAL IS NOT WHAT IT MAY LOOK LIKE
+>
+>     submission id   330566        sha256  390bc226…      _STRASSEN_DEPTH 2
+>     0.604217 B      9,321 ops     residual 0.100 s (3.20x under the cliff)
+>     projected worst wall 33.0 s   2.28x margin under the measured 1.60x contention
+>     CONFIRM read: 0/100 failures, raw 3.92e-08, adjusted 2.37e-08
+>     slot ledger 1/10 used on 2026-09-10 UTC
+>
+> Samuel's words: *"i dont know if they were mis specified, but if we have
+> submissions available then submit, nothing to lose."* **He did not adjudicate
+> the gate question.** Gates (b)-§10 and (h) stay **FAILED**, unretracted and
+> unruled. **If the graded row comes back well that is evidence about the
+> CANDIDATE, not proof the gates were wrong** — they judge residual in local
+> seconds on a host that reads `27x` high per operation, and they would still
+> refuse `330327`, which holds a real graded `0/100` row.
+>
+> ### IN FLIGHT — NOTHING. WHAT IS OPEN
+>
+> **No job is queued or running. All Slice-5 compute is done.**
+>
+> Waiting on **Samuel**:
+> - the graded row for `330566` to land;
+> - the Rules v14 §6 forum post (drafted in `LOG.md`, needs his account);
+> - designation of the pair. Proposed: **A = depth 2** once graded,
+>   **B = `330212`** on maximin until §6 is answered.
+>
+> Owed by **the next agent**, none of it blocking:
+> - **arm `S`**, T2's in-flight sensitivity probe. Pre-registered, never run, and
+>   `--sensitivity` does not exist in the parser though the docstring advertises
+>   it. Prediction 5 is unmeasured.
+> - **the κ₄ rank-sweep** for write-up §(iv). Not started.
+> - **a READ LOG for single-use held-out blocks**, on `vault.py`'s touch-counted
+>   model. `P08` was read three times before anything noticed.
+> - **`.gitattributes` `*.py eol=lf`**, so a fresh clone reproduces the graded
+>   submissions' shas.
 >
 > ### THE LEDGER GATE WENT RED MID-FLIGHT AND IS NOW GREEN AGAIN — kept as a note
 >
