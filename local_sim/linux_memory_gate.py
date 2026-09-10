@@ -444,19 +444,25 @@ def _wsl() -> "LinuxRunner | None":
     if not drive:
         return None
     repo = "/mnt/" + drive[0].lower() + rest.replace("\\", "/")
-    py = LINUX_VENV + "/bin/python"
+    # Resolve $HOME in one fixed shell command, then use WSL's --exec form for
+    # every child. Passing "$HOME/..." as the executable after bare `--`
+    # caused WSL to concatenate the entire command through a shell; backticks
+    # inside the Python source were then command-substituted before Python saw
+    # them. An instrument hash cannot bind source that a launcher rewrites.
     probe = subprocess.run(
-        [exe, "-d", WSL_DISTRO, "--", "bash", "-lc",
-         'test -x "$HOME/.arcwhest-linux/bin/python" && echo YES || echo NO'],
+        [exe, "-d", WSL_DISTRO, "--exec", "sh", "-c",
+         'p="$HOME/.arcwhest-linux/bin/python"; '
+         'test -x "$p" && readlink -f "$p"'],
         capture_output=True, text=True, errors="replace", timeout=180)
-    ready = "YES" in (probe.stdout or "").replace("\x00", "")
+    py = (probe.stdout or "").replace("\x00", "").strip()
+    ready = probe.returncode == 0 and py.startswith("/") and "\n" not in py
     if not ready:
         return LinuxRunner(
             "wsl-missing-venv", [], repo,
             "WSL is present but the Linux venv is absent. Build it with:\n"
             "    wsl.exe -d %s -- bash %s/scripts/linux_stack_setup.sh"
             % (WSL_DISTRO, repo))
-    return LinuxRunner("wsl", [exe, "-d", WSL_DISTRO, "--", py], repo,
+    return LinuxRunner("wsl", [exe, "-d", WSL_DISTRO, "--exec", py], repo,
                        "WSL2 %s, official stack in %s" % (WSL_DISTRO, LINUX_VENV))
 
 
@@ -552,7 +558,7 @@ def main() -> int:
         # `certify_candidate` section 9 accepted a version-2 report without
         # checking that its shape, cap, budget or stack matched the candidate it
         # was certifying. See docs/research/2026-09-10_validation_audit.md #1.
-        "artifact_version": 4,
+        "artifact_version": 5,
         "candidate": os.path.relpath(cand, _ROOT).replace("\\", "/"),
         "candidate_sha256": _h.hexdigest(),
         "instrument": "local_sim/linux_memory_gate.py",
@@ -601,8 +607,11 @@ def main() -> int:
     neg = runner.run(CHILD_CONTROL, [a.limit_mb, a.control_gib], a.timeout)
     negd = _json_tail(neg.stdout) or {}
     report["negative_control"] = negd
+    child_stderr = {"negative": (neg.stderr or "").replace("\x00", "")}
     check("N: the negative-control child reported", bool(negd),
           (neg.stderr or "")[-70:] if not negd else "json returned")
+    check("N: the negative-control child wrote no stderr",
+          not child_stderr["negative"], child_stderr["negative"][-70:])
     check("N: the cap was APPLIED in that child (soft == requested)",
           negd.get("cap_applied") is True, str(negd.get("cap_applied")))
     check(f"N: requesting {a.control_gib} GiB under a {a.limit_mb} MB cap DIES",
@@ -612,6 +621,9 @@ def main() -> int:
     pos = runner.run(CHILD_CONTROL, [0, a.control_gib], a.timeout)
     posd = _json_tail(pos.stdout) or {}
     report["positive_control"] = posd
+    child_stderr["positive"] = (pos.stderr or "").replace("\x00", "")
+    check("P: the positive-control child wrote no stderr",
+          not child_stderr["positive"], child_stderr["positive"][-70:])
     check("P: the SAME allocation with NO cap succeeds",
           posd.get("survived") is True,
           "so the death above is the cap, not the machine"
@@ -619,7 +631,9 @@ def main() -> int:
 
     controls_ok = (negd.get("cap_applied") is True
                    and negd.get("survived") is False
-                   and posd.get("survived") is True)
+                   and posd.get("survived") is True
+                   and not child_stderr["negative"]
+                   and not child_stderr["positive"])
     if not controls_ok:
         print()
         print("  CONTROLS FAILED. Every memory claim below is WITHDRAWN: a gate "
@@ -639,6 +653,10 @@ def main() -> int:
         [a.limit_mb, a.lifecycle_control_mib, max(3, a.repeats), 1], a.timeout)
     stateless = _json_tail(stateless_run.stdout) or {}
     retaining = _json_tail(retaining_run.stdout) or {}
+    child_stderr["lifecycle_stateless"] = (
+        stateless_run.stderr or "").replace("\x00", "")
+    child_stderr["lifecycle_retaining"] = (
+        retaining_run.stderr or "").replace("\x00", "")
     report["lifecycle_controls"] = {
         "growth_threshold_bytes": LIFECYCLE_GROWTH_THRESHOLD_BYTES,
         "stateless": stateless, "retaining": retaining,
@@ -657,7 +675,14 @@ def main() -> int:
     check("L: deliberately retained allocations exceed the threshold",
           retaining_ok,
           f"{int(retaining.get('growth_bytes', 0)) / 2**20:+.1f} MB")
-    if not (stateless_ok and retaining_ok):
+    check("L: lifecycle-control children wrote no stderr",
+          not child_stderr["lifecycle_stateless"]
+          and not child_stderr["lifecycle_retaining"],
+          (child_stderr["lifecycle_stateless"]
+           + child_stderr["lifecycle_retaining"])[-70:])
+    if not (stateless_ok and retaining_ok
+            and not child_stderr["lifecycle_stateless"]
+            and not child_stderr["lifecycle_retaining"]):
         print("\n  LIFECYCLE CONTROLS FAILED. Candidate memory is not run: the ")
         print("  instrument did not distinguish released from retained state.")
         report["status"] = "CONTROLS_FAILED"
@@ -674,10 +699,14 @@ def main() -> int:
                       a.weights_mode, a.repeats], a.timeout)
     d = _json_tail(res.stdout) or {}
     report["candidate_run"] = d
-    report["child_stderr_tail"] = (res.stderr or "").replace("\x00", "")[-600:]
+    child_stderr["candidate"] = (res.stderr or "").replace("\x00", "")
+    report["child_stderr"] = child_stderr
+    report["child_stderr_tail"] = child_stderr["candidate"][-600:]
     check("C: the child reported", bool(d),
           (res.stderr or "").replace("\x00", "")[-70:] if not d else
           f"stage={d.get('stage')}")
+    check("C: the candidate child wrote no stderr",
+          not child_stderr["candidate"], child_stderr["candidate"][-70:])
     check("C: the cap was applied to the candidate's process too",
           d.get("cap_applied") is True,
           f"soft={d.get('soft_limit_bytes')} requested={d.get('cap_requested_bytes')}")

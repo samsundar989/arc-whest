@@ -44,7 +44,7 @@ def head(title):
 
 
 def good_report():
-    """A complete v4 report. Every mutation begins from this control."""
+    """A complete v5 report. Every mutation begins from this control."""
     return {
         "artifact": "linux_memory_gate",
         "artifact_version": MEMORY_REPORT_MIN_VERSION,
@@ -67,6 +67,9 @@ def good_report():
             "stateless": {"completed": True, "growth_bytes": 1 << 20},
             "retaining": {"completed": True, "growth_bytes": 128 << 20},
         },
+        "child_stderr": {"negative": "", "positive": "",
+                         "lifecycle_stateless": "",
+                         "lifecycle_retaining": "", "candidate": ""},
         "candidate_run": {
             "stage": "done", "ok": True, "cap_applied": True,
             "suite_n_mlps": 100,
@@ -125,7 +128,7 @@ def _mut(name, mutation, expected, needle=""):
 def test_positive_negative_incomplete():
     head("1. positive, negative and incomplete producer fixtures")
     positive = consume(good_report())
-    check("complete v4 positive control CERTIFIES",
+    check("complete v5 positive control CERTIFIES",
           positive["verdict"] == "CERTIFIED" and positive["applicable"] is True,
           positive["verdict"])
 
@@ -135,7 +138,7 @@ def test_positive_negative_incomplete():
                 "instrument_policy", "lifecycle_controls"):
         legacy.pop(key, None)
     incomplete = consume(legacy)
-    check("legacy missing v4 bindings is INCOMPLETE",
+    check("legacy missing v5 bindings is INCOMPLETE",
           incomplete["verdict"] == "INCOMPLETE"
           and incomplete["applicable"] is True,
           incomplete["incomplete"][-1][:72])
@@ -153,7 +156,7 @@ def test_positive_negative_incomplete():
 
     # Applicability is the conjunction of candidate bytes and workload. Drive
     # legacy reports because that was the failure shape: they have no complete
-    # v4 envelope, but their old shape/budget/cap fields can still prove that a
+    # v5 envelope, but their old shape/budget/cap fields can still prove that a
     # negative belongs to another workload.
     for field, wrong, needle in (
             ("width", 64, "certified shape"),
@@ -240,6 +243,30 @@ def test_applicable_failures_and_lifecycle():
          lambda r: r["lifecycle_controls"]["retaining"].__setitem__(
              "growth_bytes", 1 << 20),
          "INCOMPLETE", "retaining lifecycle negative control")
+    _mut("unexpected candidate stderr is an explicit refusal",
+         lambda r: r["child_stderr"].__setitem__(
+             "candidate", "sh: fnp.array(x): not found"),
+         "REFUSED", "unexpected stderr")
+
+
+def test_literal_linux_runner():
+    head("4. Linux runner preserves embedded Python source literally")
+    import linux_memory_gate as gate
+    runner = gate.find_linux()
+    if runner is None or runner.kind == "wsl-missing-venv":
+        check("a Linux runner is available for the launcher discriminator", False,
+              "the live memory gate cannot certify on this host")
+        return
+    sentinel = "`printf SOURCE_WAS_MUTATED`"
+    src = "import json; print(json.dumps({'sentinel': " + repr(sentinel) + "}))"
+    result = runner.run(src, [], timeout=60)
+    payload = gate._json_tail(result.stdout) or {}
+    check("backticks reach Python byte-for-byte instead of shell expansion",
+          result.returncode == 0 and payload.get("sentinel") == sentinel,
+          repr(payload.get("sentinel")))
+    check("the literal-source discriminator writes no stderr",
+          not (result.stderr or "").replace("\x00", ""),
+          (result.stderr or "")[-80:])
 
 
 def _file_sha(path):
@@ -278,7 +305,7 @@ def replay_stored_reports():
 
 
 def test_replay():
-    head("4. non-rewriting replay of every stored Linux memory report")
+    head("5. non-rewriting replay of every stored Linux memory report")
     replay = replay_stored_reports()
     check("the seven historical reports plus any new reports were replayed",
           replay["n_reports"] >= 7, str(replay["n_reports"]))
@@ -287,7 +314,7 @@ def test_replay():
     legacy_rows = [row for row in replay["reports"]
                    if "2026-09-10_stage0_cert_memory" not in row["report"]]
     verdicts = [row["consumer_verdict"] for row in legacy_rows]
-    check("all seven pre-repair reports are incomplete under the v4 consumer",
+    check("all seven pre-repair reports are incomplete under the v5 consumer",
           len(legacy_rows) == 7 and verdicts == ["INCOMPLETE"] * 7,
           repr(verdicts))
 
@@ -297,7 +324,8 @@ def main():
     parser.add_argument("--json", default="")
     args = parser.parse_args()
     for fn in (test_positive_negative_incomplete, test_binding_and_applicability,
-               test_applicable_failures_and_lifecycle, test_replay):
+               test_applicable_failures_and_lifecycle,
+               test_literal_linux_runner, test_replay):
         fn()
     replay = replay_stored_reports()
     if args.json:

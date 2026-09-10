@@ -324,7 +324,7 @@ print(json.dumps({"sha256": hashlib.sha256(a.tobytes()).hexdigest(),
 #: Version 4 binds the exact current instrument, distribution metadata and the
 #: lifecycle controls. Older reports remain historical evidence, but cannot be
 #: upgraded into this gate by a consumer that knows more than their producer did.
-MEMORY_REPORT_MIN_VERSION = 4
+MEMORY_REPORT_MIN_VERSION = 5
 MEMORY_INSTRUMENT = "local_sim/linux_memory_gate.py"
 MEMORY_INSTRUMENT_POLICY = "current-source-sha256"
 MEMORY_SUITE_N_MLPS = 100
@@ -484,7 +484,7 @@ def consume_memory_report(
     if ver < MEMORY_REPORT_MIN_VERSION:
         incomplete.append(
             f"artifact_version {ver} < {MEMORY_REPORT_MIN_VERSION}: missing "
-            "current workload, distribution, instrument and lifecycle bindings")
+            "current workload, distribution, instrument, lifecycle and literal-launch bindings")
         return {"verdict": "REFUSED" if explicit else "INCOMPLETE",
                 "applicable": True, "checks": checks, "bindings": bindings,
                 "incomplete": incomplete, "artifact_version": ver}
@@ -540,6 +540,14 @@ def consume_memory_report(
              retaining.get("completed") is True
              and int(retaining.get("growth_bytes", -1)) >= threshold,
              f"growth={retaining.get('growth_bytes')} threshold={threshold}")
+    child_stderr = lg.get("child_stderr")
+    bind("all child stderr streams are recorded",
+         isinstance(child_stderr, dict)
+         and set(child_stderr) == {"negative", "positive",
+                                   "lifecycle_stateless", "lifecycle_retaining",
+                                   "candidate"},
+         repr(sorted(child_stderr) if isinstance(child_stderr, dict)
+              else type(child_stderr).__name__))
 
     if incomplete:
         # Even a FAIL from a differently configured v4 report is not evidence
@@ -551,6 +559,9 @@ def consume_memory_report(
 
     c("9: the report is bound to the current instrument and workload", True,
       f"v{ver}, {MEMORY_INSTRUMENT_POLICY}")
+    c("9: every child completed without unexpected stderr",
+      isinstance(child_stderr, dict) and all(not text for text in child_stderr.values()),
+      repr({k: str(v)[-80:] for k, v in (child_stderr or {}).items() if v}))
     c("9: the cap read back exactly", cr.get("cap_applied") is True
       and cr.get("cap_requested_bytes") == cap_mb * 1024 * 1024
       and cr.get("soft_limit_bytes") == cap_mb * 1024 * 1024,
