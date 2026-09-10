@@ -41026,3 +41026,75 @@ is applied. Active-document relative links and `git diff --check` pass. The L2
 file was rehashed and matches the SHA above. By 20:30 UTC the old mutation process
 was no longer present, but its result/exit status was unavailable; this is not a
 passing result. Preflight 574 remained queued at the 20:29 check.
+
+# 2026-09-10 — IMPORTANT repair/conformance package: predictions before implementation
+
+**Scope.** This is the label-free implementation package authorized by the reviewed
+`docs/GAME_PLAN.md`: Stage 0 production-path repair and Stage 1 mathematical/cost
+conformance. It changes instruments and probes, not `estimator.py`, frozen
+estimators, gates, data tiers, the residual policy, seed allocations, vault data,
+or any submission asset. No research truth is opened. Stage 2 remains blocked on
+fresh human predictions and a transparently superseded strategic contract.
+
+## Predictions
+
+1. **Certification domains/provenance.** Driving the real check emitters, rather
+   than helper-only fixtures, will reproduce MATH misclassification for at least
+   the combined cost section and section 11. Distribution metadata will recover
+   both installed package versions. A legacy artifact with an applicable explicit
+   failure will remain REFUSED after repair, while one merely lacking v3 binding
+   fields will be INCOMPLETE. Replaying all seven stored reports will leave them
+   incomplete unless one contains an explicit applicable negative; history will
+   not be rewritten.
+2. **Repeated-memory lifecycle.** The reviewed worker retains enough
+   instrument-owned live-shape arrays to compete with the 64 MiB growth threshold.
+   Releasing obsolete networks will make a stateless multi-MLP positive control
+   pass, while a deliberately retaining candidate will still fail. FLOPs may vary
+   across different weight values and will be recorded rather than required equal.
+3. **Lab/report entry point.** The captured dict/undefined-name writer failures and
+   the malformed generated arm will reproduce before repair. Afterwards every
+   registered arm will parse, invalid arms/control/output will refuse before truth
+   reservation, and a tiny synthetic run through the real entry point will create
+   one non-overwriting complete JSON report.
+4. **Noise/statistics.** End-to-end reporting with unequal per-network multipliers
+   will differ from universal-cancellation language by the predicted
+   `(q_control-q_candidate)*v` term. A two-replica mean will report half the
+   per-replica floor. Ordinary-alpha results will stay bit-identical; extreme
+   unsupported alpha will either invert accurately or refuse explicitly rather
+   than silently cap.
+5. **Protected access.** The audit will identify `p2_corrector.py` as a bypass.
+   Routing it through pre-read reservation will record an attempted/crashed read
+   before loading and preserve P08's exhausted refusal and P01's three exposed
+   DESIGN reads. Automatic receipts will distinguish measured execution time from
+   historical supplied timestamps.
+6. **Vault safety.** The Phase-1 live path will continue to refuse before opening
+   arrays. Sacrificial fixtures will show one atomic reservation under concurrency,
+   and a crash after reservation will consume the permitted look rather than make
+   it silently reusable.
+7. **Coherent K4.** An independently constructed dense polynomial/tensor oracle
+   with signed nonconstant cores will reject the worker's scalar-derived
+   projection and missing consumer/birth closure. A jointly derived core,
+   transport, D4/D22/D31 consumers and K3 births will pass signed, repeated-index,
+   cancellation, permutation, zero-core and zero-variance cases. The emitted
+   exact/coherent/consumers-only/births-only switches will be independent;
+   zero-core arms will nest into the exact control in both outputs and counted
+   cost where the registered control requires parity.
+8. **Compact all-history program.** A weighted-Gram/thin-QR implementation with
+   factor rotations and carried Gram state will agree with a tiny dense
+   all-history reference before compression. Its complete ledger will materially
+   differ from the withdrawn `(r+n)` eigendecomposition estimate because it adds
+   the two shared legs, residual, rebasing, initial/final schedules and scratch
+   memory. Whether rank 384 is competitive is deliberately **unknown** until the
+   executable label-free live-shape ledger exists; no scalar calibration will be
+   used to reconcile different algorithms.
+
+## Required falsifiers and evidence
+
+Any real-entry-point counterexample that still passes, a current producer that a
+consumer cannot bind, a writer that opens truth before rejecting configuration, a
+dense-oracle mismatch, a printed-but-nonfatal cost mismatch, or an unpriced live
+allocation falsifies completion. Evidence must include positive, negative and
+incomplete fixtures; stored-report replay; exact source hashes; a default and Full
+preflight attributed to the executed bytes; and fresh-context Skeptic review of the
+contract, diff, protocol and raw artifacts. Heavy memory/live-shape/full-gate work
+uses `workerq` with declared resources. No queued result is called complete.
