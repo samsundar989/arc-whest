@@ -1,6 +1,7 @@
 {
   "kind": "label-free end-to-end compact all-history reference ledger",
-  "source_sha256": "b8f57cf0a184176021749ceb7d99d28a8bfbf09470678c6b10ae9e44c6df89e5",
+  "evidence_note": "Counted-cost and lifecycle evidence for this research reference only; it makes no accuracy or competitiveness claim.",
+  "source_sha256": "bd7b4a8cafa7bf4809d93dda14c5c99bc619dada668f95f9cdf333fb17eebe42",
   "shape": [
     12,
     7
@@ -24,8 +25,10 @@
     "nonlinear_safe_variance": 84,
     "nonlinear_sigma": 84,
     "nonlinear_alpha": 84,
-    "nonlinear_phi": 4704,
-    "nonlinear_Phi": 8232,
+    "nonlinear_phi": 4536,
+    "cast_phi_f32": 168,
+    "nonlinear_Phi": 8064,
+    "cast_Phi_f32": 168,
     "nonlinear_w2": 84,
     "nonlinear_w3": 252,
     "nonlinear_w4": 420,
@@ -138,7 +141,9 @@
     "nonlinear_sigma": 7,
     "nonlinear_alpha": 7,
     "nonlinear_phi": 7,
+    "cast_phi_f32": 7,
     "nonlinear_Phi": 7,
+    "cast_Phi_f32": 7,
     "nonlinear_w2": 7,
     "nonlinear_w3": 7,
     "nonlinear_w4": 7,
@@ -238,6 +243,10 @@
     "output_stack": 1
   },
   "family_groups": {
+    "casts": {
+      "cast_phi_f32": 168,
+      "cast_Phi_f32": 168
+    },
     "backbone": {
       "backbone_mean_init": 0,
       "backbone_cov_init": 12,
@@ -256,8 +265,8 @@
       "nonlinear_safe_variance": 84,
       "nonlinear_sigma": 84,
       "nonlinear_alpha": 84,
-      "nonlinear_phi": 4704,
-      "nonlinear_Phi": 8232,
+      "nonlinear_phi": 4536,
+      "nonlinear_Phi": 8064,
       "nonlinear_w2": 84,
       "nonlinear_w3": 252,
       "nonlinear_w4": 420,
@@ -371,8 +380,9 @@
     }
   },
   "family_group_totals": {
+    "casts": 336,
     "backbone": 64716,
-    "nonlinear": 23268,
+    "nonlinear": 22932,
     "k4": 27588,
     "source_construction": 71064,
     "transport": 72144,
@@ -408,7 +418,9 @@
       "nonlinear_sigma": 0,
       "nonlinear_alpha": 0,
       "nonlinear_phi": 0,
+      "cast_phi_f32": 0,
       "nonlinear_Phi": 0,
+      "cast_Phi_f32": 0,
       "nonlinear_w2": 0,
       "nonlinear_w3": 0,
       "nonlinear_w4": 0,
@@ -510,9 +522,9 @@
     "basis": "float32 array payloads; Python/flopscope metadata excluded"
   },
   "casts": {
-    "counted_flops": 0,
-    "calls": 0,
-    "reason": "external synthetic weights enter as float32 and all generated state remains float32"
+    "counted_flops": 336,
+    "calls": 14,
+    "reason": "normal CDF/PDF return float64 and are explicitly cast to float32; external weights already enter as float32"
   },
   "source_factors": {
     "latent_constructed": [

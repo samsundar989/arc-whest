@@ -532,10 +532,12 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                                  lambda: fnp.maximum(var_pre, 1.0e-8))
             sigma = meter.run("nonlinear_sigma", lambda: fnp.sqrt(safe_var))
             alpha = meter.run("nonlinear_alpha", lambda: mu_pre / sigma)
-            phi = meter.run("nonlinear_phi",
-                            lambda: flops.stats.norm.pdf(alpha).astype(fnp.float32))
-            Phi = meter.run("nonlinear_Phi",
-                            lambda: flops.stats.norm.cdf(alpha).astype(fnp.float32))
+            phi64 = meter.run("nonlinear_phi",
+                              lambda: flops.stats.norm.pdf(alpha))
+            phi = meter.run("cast_phi_f32", lambda: phi64.astype(fnp.float32))
+            Phi64 = meter.run("nonlinear_Phi",
+                              lambda: flops.stats.norm.cdf(alpha))
+            Phi = meter.run("cast_Phi_f32", lambda: Phi64.astype(fnp.float32))
             w1 = Phi
             w2now = meter.run("nonlinear_w2", lambda: phi / sigma)
             w3 = meter.run("nonlinear_w3", lambda: -alpha * phi / safe_var)
@@ -700,12 +702,14 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
     peak_algorithm = weights_bytes + backbone_state_bytes + source_state_bytes + max(
         source_construction_scratch, join_scratch,
         materialize_scratch + contraction_scratch)
-    groups = {"backbone": {}, "nonlinear": {}, "k4": {},
+    groups = {"casts": {}, "backbone": {}, "nonlinear": {}, "k4": {},
               "source_construction": {}, "transport": {}, "join_and_rebase": {},
               "materialization": {}, "contractions": {}, "output": {},
               "initialization": {}}
     for family, value in meter.families.items():
-        if family.startswith("backbone_") or family.startswith("k3_consumer_"):
+        if family.startswith("cast_"):
+            group = "casts"
+        elif family.startswith("backbone_") or family.startswith("k3_consumer_"):
             group = "backbone"
         elif family.startswith("nonlinear_"):
             group = "nonlinear"
@@ -732,6 +736,9 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
     if sum(group_totals.values()) != used:
         raise AssertionError("operation-group ledger mismatch")
     return {"kind": "label-free end-to-end compact all-history reference ledger",
+            "evidence_note": ("Counted-cost and lifecycle evidence for this "
+                              "research reference only; it makes no accuracy or "
+                              "competitiveness claim."),
             "source_sha256": _source_sha256(),
             "shape": [n, depth], "recent": recent, "rank": rank,
             "residual_rank": residual_rank, "flops": used,
@@ -751,8 +758,12 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                        "single_array_max_bytes": bpe * n * n,
                        "scratch_by_metered_family": meter.scratch,
                        "basis": "float32 array payloads; Python/flopscope metadata excluded"},
-            "casts": {"counted_flops": 0, "calls": 0,
-                      "reason": "external synthetic weights enter as float32 and all generated state remains float32"},
+            "casts": {"counted_flops": sum(
+                          value for name, value in meter.families.items()
+                          if name.startswith("cast_")),
+                      "calls": sum(value for name, value in meter.calls.items()
+                                   if name.startswith("cast_")),
+                      "reason": "normal CDF/PDF return float64 and are explicitly cast to float32; external weights already enter as float32"},
             "source_factors": {
                 "latent_constructed": ["a", "R", "L", "s", "e", "w2", "dA", "dP", "c1", "c2", "y"],
                 "inserted_next_layer": ["A=W@a", "P=copy(W)", "Z=W@R", "Y=W@y"],
