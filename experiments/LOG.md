@@ -38437,3 +38437,68 @@ monotonically with `n` (`0.998 -> 0.977 -> 0.948`, non-overlapping CIs, 23 of 24
 nets at the top rung). The direction is the one upstream predicts — factored
 AUGMENT keeps 135 of 142 terms. The report now spells out which way each ratio
 reads, because a ratio without its direction is a sign error waiting to happen.
+
+# 2026-09-10 — CONTRACT (Rule 1): the exact-metric arm at `1024 x 16`
+
+*Pre-registered before any data exists. Instrument `local_sim/p2_metric_arm.py`,
+artifact `experiments/2026-09-09_slice4/metric_arm.json`. Committed before the
+job runs.*
+
+**Question.** Upstream's `use_avg_metric=True` replaces `W W^T` with its average
+`E[W W^T] = 2I`. The ladder (job `474`) found the exact metric worth `1.68x`,
+`1.46x`, `1.31x` on `kind=SIMPLE` — the only kind with a budget. **Does anything
+survive at the live shape?**
+
+**Evidence.**
+- CONFIRMED: exact/avg on SIMPLE reads `0.595 / 0.686 / 0.763` at `(128,2)`,
+  `(192,3)`, `(256,4)`; `0/24` nets worse on any rung; `t` from `-9` to `-14`.
+- CONFIRMED: the same ratio on AUGMENT is FLAT (`0.778 / 0.764 / 0.766`), so the
+  trend is a property of SIMPLE, not of the measurement.
+- CONFIRMED: the ladder cannot extrapolate — its own proxy check fails by ~40%
+  at the one calibrated point, and it contains a method ratio that provably
+  moves with `n` at fixed `L/n`.
+- CONFIRMED: `metric_needed(3, SIMPLE)` is `True`, so the exact metric is live
+  for SIMPLE and this is not an AUGMENT-only question.
+
+**Hypothesis + mechanism.** `E[W W^T] = 2I` is a concentration approximation, and
+its error falls as the spectrum of `W W^T` concentrates — which happens as `n`
+grows. So the gain should DECAY with width. The ladder's SIMPLE row is exactly
+that decay. **The mechanism predicts the gain keeps shrinking**, and the live
+shape is `4x` wider than the top rung.
+
+**Intervention.** Two arms, `use_avg_metric` `True` vs `False`, `kind=SIMPLE`,
+`factor=True`, same 24 P01 nets, same labels, `float32`. One flag apart.
+
+**Predictions (recorded before the result exists).**
+1. Mine: the gain at `1024 x 16` is **below `1.31x`** — i.e. the decay continues.
+2. Mine: it is **below the `1.15x` gate**, and this lane closes for free.
+3. Mine: the control reproduces `4.004685e-08`. **If it does not, nothing else
+   in the run is read.**
+
+**Gate.** `>= 1.15x` at the live shape. Chosen NOW. Below it, the cost — a ninth
+born block from the `211` case-2 term, plus the loss of `_proj_coef_d4_r2`'s
+reduction of the entire degree-4 object to one scalar — cannot plausibly be
+repaid, and no cost model is built.
+
+**Falsifier.** Prediction 1 is falsified by a gain `>= 1.31x`, which would mean
+the effect is not decaying and the mechanism above is wrong.
+
+**Baseline.** `use_avg_metric=True` on the same nets and labels, DESIGN tier.
+
+**Cost model.** **Deliberately none.** Accuracy is measured first, on purpose:
+pricing a lever that may not exist at the live shape is the error this slice has
+already made twice. If the gate passes, the cost model is the next slice's work
+and it starts from the `8n -> 9n` birth change.
+
+**Statistic.** Paired, common random numbers, arithmetic difference with a
+studentised-t interval.
+
+**Seed block.** `# seed-ledger: no block named` — re-reads the **P01 DESIGN**
+asset, as D1, A3, A5, D2 and the capped run did. Promotes nothing; that asset's
+manifest forbids closing a lane on it, and this contract does not try to.
+
+**Confounders / scope / what must not change.** `use_avg_metric` is the only
+difference between arms. Upstream stays rev `93d091a4` plus exactly the recorded
+patch, verified before the first datum. `float32`, to match the control's dtype —
+the two dtype defaults that went wrong earlier in this slice are the reason that
+is stated rather than assumed.
