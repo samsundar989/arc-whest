@@ -40399,3 +40399,146 @@ Pre-registered on 2026-09-10 at `0a82ad1`, before any certification datum:
 | 2 | graded score in `[2.26e-08, 2.30e-08]`, point `2.283e-08` | **OPEN** |
 | 3 | graded worst wall in `[26 s, 45 s]` | **OPEN** — and this is the one that matters, because it tests the wall model the `>= 2.0x` margin rule is built on |
 | 4 | ops `9,304 +- 0`; residual `<= 0.15 s`; `n_failed_mlps = 0` | **ops already MISSED** (`9,321`); the rest open |
+
+---
+
+## 2026-09-10 — deep repo, competition and literature audit
+
+**Scope:** Samuel requested multiple-agent exploration, Chrome inspection of the live competition/boards/submissions/discussions, primary literature research, architecture/validation audit and an implementation plan. This was source review, public-result retrieval, routine documentation consolidation and existing infrastructure verification. No new hypothesis measurement, instrument repair, gate amendment, seed claim, vault evaluation, promotion, submission or designation. [Scope and independent-review contract](2026-09-10_validation_audit/audit_scope.md).
+
+**Evidence packet:** [research synthesis](../docs/PHASE2_RESEARCH_AUDIT_2026-09-10.md); [Chrome source ledger](../docs/research/2026-09-10_competition_sources.md); [architecture audit](../docs/research/2026-09-10_architecture_audit.md); [primary literature/pinned code](../docs/research/2026-09-10_literature_review.md); [validation audit](../docs/research/2026-09-10_validation_audit.md). Original repo HEAD `0fe164cbee81bb329be0672a232554f4faf05459`. External code pin `504aldo/whest-p2-cumulant-k3@18c17e2d7a9aeacd399cfc2c6b571e4e16dbfb45`; no external code executed.
+
+**Knowledge delta — observed:** Rules v14 §7 explicitly ranks only the participant's best-scoring eligible submission. The §6-only checked-negative question is resolved; no forum post is needed for it. Rules explicitly publish 120-second wall and five-second setup caps. Current graded package versions match installed 0.16.1/0.12.1. Live detailed leader #330500 public adjusted 2.683e-9/raw 1.700e-8/15.78% budget. Our best #330290 public adjusted 1.836e-8, rank 44; descriptive mean-score gap 6.84×, not a promotion statistic. Official per-network noise floors unavailable in UI.
+
+**330566 result retrieval:** now GRADED, public mean raw 3.779e-8 and adjusted 2.284e-8, public failures 0/50; all 100 visible ledger statuses completed while private accuracy remains sealed. Worst visible server wall 33.0009 seconds. Exposed public means and wall match the corresponding pre-result intervals above; hidden-suite mean remains unobserved. Ops prediction remains MISSED at 9,321; residual ≤0.15 s not exposed, therefore not resolved. Exact file SHA remains `390bc226bbf517df0110facfc0dc91c78ef670e8a49368a536cabf630057d1db`. Two old certification gate failures stand; grading does not retroactively amend them. L4 #330290 worst wall 114.6798 seconds. Observed cap/worst ratios L2 3.64× and L4 1.05× are separate from old contention-adjusted planning margins.
+
+**Knowledge delta — interpretation:** the public compact K3 release supplies concrete external evidence for consistent K4 use/birth regeneration and common bases retaining all source ages. Those are different interventions from T1 partial deletions, short-generation carry and packing the existing operands. Propose narrowly scoped new contracts; no lane reopened by this audit. Whole score-lane closure was already struck in the prior LOG and is removed from current instructions. Current architecture is promising but not demonstrated winning. Published coefficient tables used public fitting; do not adopt them under our CONFIRM-only policy. Public buffer patterns do not override immutable-array or eligibility rules.
+
+**Validation findings:** configuration-bound memory-proof acceptance, Phase-1 vault/lifecycle mismatch, non-atomic claims/untracked truth reads, row-order pairing, nondefault-alpha handling, runtime authority labels and candidate numerical/byte provenance need repairs. Noise cancels in common-label raw MSE differences, not automatically adjusted differences at unequal costs; see derivation in the audit. These are source/math findings, not new evidence that a specific prior result reverses. Repairs are planned as classified slices, not silently implemented.
+
+**Verification:** official_config 96/96; pure certifier report aggregation 19/19. `workerq` job 539, RAM 8 GiB/VRAM 0/GPU 0/CPU 2, completed exit 0, **PREFLIGHT GREEN 12/16, four skipped**; shipped-file local FLOP anchor 19 categories/zero disagreements. [Full stdout](2026-09-10_validation_audit/preflight-worker-539.log), transcript and metadata alongside. Default preflight checks v2.6.1, not fresh K3 certification. Existing integrity checks made no vault evaluation touch or new research seed claim.
+
+**Continuity changes:** replaced CURRENT_STATE and GAME_PLAN with concise current documents; preserved originals verbatim under `docs/archive/*before_2026-09-10_audit.md`; marked September 5 strategy, September 11 packet, benchmark and old builder handoff with current-document pointers. Next action is Stage 0 evidence repairs and Stage 1 reference algebra, then a fresh committed contract/Samuel prediction before strategic measurement. Contribution write-up remains stale/do-not-submit. Independent fresh-context Skeptic review follows; final verdict/corrections will be appended here.
+
+**Independent Skeptic, final: ACCEPT for the documentation package.** Initial PROVISIONAL required two corrections, both implemented and re-inspected: historical line references now target archived originals; public reconstruction is explicitly a research reference, with rules §6 derivative-eligibility resolution required before advancing it toward submission. A neutral organizer question is drafted but unsent. The reviewer independently checked selected primary sources/rules, raw artifacts, SHA/archive preservation, score/noise arithmetic and the source-confirmed validation gaps; pure certifier aggregation independently passed 19/19. [Full review record](2026-09-10_validation_audit/skeptic_verdict.md). Acceptance does not validate a winning method, certify a candidate or resolve derivative eligibility. Final documentation link check: 37 local references across seven audit/current documents, zero missing paths; `git diff --check` clean. Research and implementation remain prospective under the existing contract.
+
+---
+
+## 2026-09-10 (later) — **Stage 0 instrument repairs R1 + R2**, and Samuel's Stage-2 predictions taken before any data exists
+
+**Class: IMPORTANT** (the instrument, not the estimator). Written prediction
+committed FIRST at `def1b00`, before the first diff:
+[prediction.md](2026-09-10_stage0_instrument/prediction.md). Nothing here
+touches `estimator.py`, any `estimator_v*.py`, the vault seal, the touch
+counter, a gate threshold, a tier boundary or a seed block's claimed state.
+
+### SAMUEL'S PREDICTIONS, recorded before the experiment they are about
+
+Asked before Stage 2 experiment 1 exists in code, so the record is a real one.
+Three short questions; the answers as the options he chose:
+
+| question | Samuel's answer |
+|---|---|
+| paired arithmetic score gain from a coherent K4 core on OUR fresh design networks | **Moderate: 1.1x to 1.5x** — real, but smaller than the public report's near-halving, once fresh fitting and full counted cost are applied |
+| where the coherent-K4 chain lands on counted cost, against L2's 0.604 of budget | **"I don't know"** — a valid answer under Rule 1, and recorded as given |
+| the rules §6 participant-derivation question | **"Hold off entirely for now."** No organizer question drafted, none sent. The public reconstruction stays strictly an attributed research reference |
+
+**The eligibility answer is binding on scope and is not a delay.** Stage 3 —
+exporting a reconstruction-derived candidate toward submission — is **closed by
+Samuel's decision**, not blocked on an external dependency. Research, algebra,
+pricing and fresh-data measurement continue; no derivative advances toward a
+submission, no organizer is contacted, and the robust L2 fallback (`330566`,
+sha `390bc226…`) stays the standing candidate, untouched.
+
+### R1 — pairing on identity, and an alpha that is honoured
+
+`competition_score.paired_compare_rows` checked equal row counts and then paired
+by **list order**. Equal length is not common random numbers.
+
+Measured against the code at `0fe164c`, 24 rows, candidate arm permuted 200
+times ([raw](2026-09-10_stage0_instrument/defects_before_pairing.json)):
+
+    mean_difference        UNCHANGED, to the last bit
+    se_difference          inflated by a median 8.55x
+    t CI excludes zero     true  ->  0 of 200 permutations
+
+**Prediction 4 was WRONG, and the correction is the finding.** I predicted the
+point estimate would move. It cannot: the mean of a difference is
+permutation-invariant. What that means is worse than what I predicted — nothing
+a report prints reveals the mispairing, and a real promotion silently stops
+being one. Duplicate identities run the other way and **do** move the mean,
+which is a false-promotion route; they are now refused outright.
+
+`align_rows_by_identity` realigns named arms on `MlpRow.name`, refuses
+duplicates, disjoint name sets and half-named arms, and keeps the positional
+path for two fully-unnamed arms with the allowance recorded in `notes`.
+`require_ids=True` refuses even that, and a DECIDE-tier contract should pass it.
+`EvidenceRow.to_row` now names rows `seed:<input_seed>`; the old
+`mlp[<index>]/<seed>` carried an arm-local index that would have refused two
+legitimate arms for visiting the same networks in a different order.
+
+`paired_diff_ci(method="t", alpha=...)` read
+`q = _t975(n-1) if abs(alpha-0.05) < 1e-12 else _t975(n-1)` — a ternary whose
+branches are the same expression. **Prediction 3 CONFIRMED:** alpha 0.05, 0.01
+and 0.20 returned the identical tuple bit for bit
+([raw](2026-09-10_stage0_instrument/defects_before.json)). Added an exact
+Student-t quantile (bisection on a continued-fraction incomplete beta); it
+matches scipy to `2.57e-10` and the historical `_T975` table to `4.71e-4`. The
+0.05 default still reads the table, so **no published 95% interval moves**.
+
+### R2 — the memory proof is bound to the workload it claims to test
+
+`certify_candidate.py` section 9 matched a `linux_memory_gate` report on the
+candidate's sha256 and then asked four questions, none of which was *what did
+this report actually run*. Width, depth, budget, cap and weight representation
+are all CLI flags on the gate. A report for the right bytes at `64x4` under a
+512 MB cap on float32 weights satisfied every check.
+
+New pure `validate_memory_report()` binds the report to the exact sha, the live
+shape, the budget, the full 8,192 MB cap **and the soft limit the child read
+back**, the deployment weight mode (declared *and* probed), the installed
+package versions, both controls and the peak. The producer goes to
+`artifact_version 3`: weights now come from `lifecycle_eval.build_weights`
+(it hard-coded `fnp.array` on float32 mints — a peak for a program the grader
+does not run), `--weights-mode` and `--repeats` exist, `predict` runs more than
+once in the **same** worker, and the report carries the stack and the
+instrument's own sha256.
+
+**Prediction 1 CONFIRMED, with a nuance that matters.** All seven stored reports
+are `artifact_version` 1–2 and carry no weights mode, stack or instrument hash,
+so all are now **DEGRADED** rather than accepted. But their shape and cap were
+in fact `1024x16` and `8192` MB. **The defect was reachable; it was not
+exercised.** No stored report is alleged to be misconfigured, and none is
+retroactively reinterpreted as passing the stronger gate.
+
+**Prediction 2 CONFIRMED:** `test_linux_memory_binding.py` mutates a good report
+one field at a time — 21 mutations, one positive control, one purity pair —
+and every mutation is refused. It is pure, so it joins preflight step 11 as a
+second command; the denominator stays sixteen. My own battery caught a real gap
+in the first draft of the validator: it compared the *declared* weight mode and
+not the child's probe, so a report declaring `f64_readonly` over a writable
+array passed. Fixed before the commit.
+
+### Verification
+
+    test_competition_score.py            98/98  ->  114/114
+    test_linux_memory_binding.py         23/23   (new; every case fails at 0fe164c)
+    test_certify_candidate unit_tests()  19/19
+    lifecycle_eval.py --self-test        56/56
+    scripts/verify_portability.py        103/103
+
+Commits `07e8f9b` (R1) and `42fd09f` (R2). Full preflight and the independent
+Skeptic run after the remaining Stage 0 repairs, per the contract.
+
+### Knowledge delta
+
+- A paired comparison in this repository could be silently unpaired, and the
+  symptom was **loss of power with an unchanged point estimate** — the one
+  failure shape no printed report exposes. That is now impossible for named
+  arms and refused for ambiguous ones.
+- A requested non-default confidence level was silently downgraded to 95%.
+  Nothing in the repository requested one, so **no published number moves**;
+  the defect was latent, and latent is not the same as harmless.
+- The 8-GiB evidence path could certify a different experiment from the one its
+  report appeared to describe. It cannot now, and the seven historical reports
+  are labelled for what they are rather than promoted or discarded.
