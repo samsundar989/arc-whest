@@ -4,7 +4,8 @@
 > sections (i), (ii), (iii) and (v) are substantially drafted; (iv) awaits the κ₄
 > rank-sweep; (vi) awaits the depth-2 graded row and T2. §(ii) has been rewritten:
 > its channel attribution was struck as unidentified, and the surviving result is
-> narrower and better evidenced. One `OWED` remains inside it, named below.** Nothing here is posted. The
+> narrower and better evidenced. §(iii)(a) is now filled from the measured
+> generation-truncation curve.** Nothing here is posted. The
 > Phase-1 manuscript `docs/writeup-draft.md` is a different document, is stale, and
 > is not superseded by this one — it is Phase 1's and stays where it is.
 >
@@ -226,20 +227,47 @@ useful:
 
 ## (iii) The theorem: cumulant information in flight pays only when the tower that consumes it is exact
 
-This is the paper's central claim and it rests on three independent measurements
-that were made for three different reasons.
+This is the paper's central claim and it rests on four measurements that were made
+for four different reasons.
 
-**(a) The memory-depth ceiling.** `OWED: restate from the 2026-09-05 entry with
-its number (3.87×) and its mechanism.`
+**(a) Memory depth cannot be traded for budget.** The chain carries one lineage
+block per layer, so at depth 16 the tower holds 15 generations. Dropping the
+oldest is the obvious cost lever, and it is measured here **in the shipped
+spelling** — not in a research reimplementation — with every arm paired on the same
+24 networks. `B`-fraction is the counted cost, and `adjusted` is the competition's
+own score identity, `raw × max(0.1, F/B)`:
+
+| generations kept | raw MSE | `B`-fraction | adjusted | vs exact |
+|---:|---:|---:|---:|---:|
+| exact (15) | `4.0041e-08` | `0.9994` | `4.0015e-08` | `1.000×` |
+| 12 | `4.3559e-08` | `0.9613` | `4.1872e-08` | `1.046×` |
+| 11 | `5.0624e-08` | `0.9310` | `4.7130e-08` | `1.178×` |
+| 8 | `1.3512e-07` | `0.7873` | `1.0638e-07` | `2.659×` |
+| 6 | `3.1837e-07` | `0.6475` | `2.0615e-07` | `5.152×` |
+| 4 | `7.3257e-07` | `0.4726` | `3.4621e-07` | `8.652×` |
+| 2 | `1.6514e-06` | `0.2625` | `4.3345e-07` | `10.833×` |
+| 1 | `2.4927e-06` | `0.1442` | `3.5947e-07` | `8.983×` |
+
+**Raw error roughly doubles per generation removed near the top, while the budget
+saving is only linear.** There is no operating point on this curve that pays: the
+adjusted score is monotonically worse until the multiplier hits its `0.1` floor,
+after which further truncation is pure loss. The same holds for capping the *last*
+layer's tower on its own, which costs `5.9%` of `B` and returns `5.6×` the error.
+
+**The score-optimal operating point is therefore the exact tower**, and every
+remaining cost gain must be accuracy-neutral — which is what §(i)'s three
+identities are and what §(v)'s five closed levers are not.
 
 **(b) Collapse beats truncation.** The *regenerating* tower — which rebuilds the
-lineage each layer rather than carrying it — runs at `0.077 B` and `9.1e-8`. Every
-generation-truncated arm is worse **per FLOP** than that. Truncation of the tower
-by generation roughly doubles raw MSE per generation dropped (`4.00e-08` exact,
-`4.36e-08` at 12 generations, `5.06e-08` at 11) against a saving that is only
-linear. **So the score-optimal operating point is the exact tower, and every
-remaining cost gain must be accuracy-neutral** — which is what §(i)'s three
-identities are and what §(v)'s five closed levers are not.
+lineage each layer from a rank-`n` projection rather than carrying it — runs at
+`0.077 B` for `9.09e-07` raw, i.e. `9.09e-08` adjusted. **That beats every
+truncated arm from 1 through 8 generations**, including arms costing three times as
+much. Keeping a rank-`n` projection of *all* generations beats keeping the youngest
+`k` outright.
+
+This is the one genuinely surprising result in the section, and it sharpens the
+theorem: what the consumer needs is not the most recent history but *some* image of
+all of it. A truncation deletes generations; a collapse keeps a shadow of each.
 
 **(c) AUGMENT's gain does not survive truncation of the tower.** Capped to the
 generations at which it would fit the budget, AUGMENT fails by `26×–58×`, and the
@@ -247,7 +275,7 @@ collapse **is not AUGMENT's**: capped AUGMENT is statistically indistinguishable
 from capped SIMPLE at `g = 2` and significantly *worse* at `g = 4`. The richer
 representation buys nothing once the object that consumes it is approximate.
 
-**(d) Deleting diagram classes does the same thing as deleting generations.**
+**(c′) Deleting diagram classes does the same thing as deleting generations.**
 §(ii)'s ablations remove specific *diagram classes* from the carried lineage
 rather than whole generations, and land in the same place: `2.98e-06` and
 `4.37e-06` against generation-capped SIMPLE's `1.65e-06`, all of them within a
@@ -429,7 +457,6 @@ The skeleton of the argument, which the measurements above already support:
 |---|---|
 | §(ii) the completed 2×2: does `legsonly` also land on the Gaussian baseline? | queued, ~10 GPU-min |
 | §(iv) rank sweep curve | background GPU job, not yet queued |
-| §(iii)(a) memory-depth ceiling | restate from the 2026-09-05 LOG entry |
 | §(vi) the whole section | depth-2 graded row + T1 + T2 |
 | a STRATEGIC claim review of every quantitative claim | Rule 2 Skeptic |
 | decide what stays private | `BENCHMARK.md`, `RESEARCH_NOTES` §2g must not leak |
