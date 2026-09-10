@@ -77,6 +77,7 @@ DEFAULT_LIMIT_MB = 8192
 DEFAULT_WIDTH = 1024
 DEFAULT_DEPTH = 16
 DEFAULT_BUDGET = 2 ** 41
+DEFAULT_SUITE_N_MLPS = 100
 #: An arbitrary seed OUTSIDE every registered block (`local_sim/seed_blocks.py`).
 #: This gate measures memory, not accuracy; it claims no block and reads no truth.
 DEFAULT_SEED = 90000000101
@@ -87,6 +88,8 @@ DEFAULT_SEED = 90000000101
 #: only as a cross-host agreement check on `estimator.py`; a candidate has no
 #: anchor by definition.
 ANCHOR_FLOPS_1024x16 = 137_600_326_656
+LIFECYCLE_GROWTH_THRESHOLD_BYTES = 64 * (1 << 20)
+LIFECYCLE_CONTROL_MIB = 96
 
 LINUX_VENV = "$HOME/.arcwhest-linux"
 WSL_DISTRO = "Ubuntu"
@@ -97,7 +100,8 @@ WSL_DISTRO = "Ubuntu"
 # --------------------------------------------------------------------------- #
 
 CHILD_PREDICT = r'''
-import json, os, resource, sys, time
+import gc, json, os, resource, sys, time
+from importlib.metadata import version as distribution_version
 
 LIMIT_MB     = int(sys.argv[1])
 REPO         = sys.argv[2]
@@ -156,11 +160,13 @@ if "local_sim" in whestbench.__file__ or "local_sim" in flops.__file__:
     out["stage"] = "shim_leak"
     print(json.dumps(out)); sys.exit(4)
 out["numpy_version"] = np.__version__
-out["whestbench_version"] = getattr(whestbench, "__version__", "")
-out["flopscope_version"] = getattr(flops, "__version__", "")
+out["whestbench_version"] = distribution_version("whestbench")
+out["flopscope_version"] = distribution_version("flopscope")
+out["stack_version_source"] = "importlib.metadata.version"
 out["python_version"] = sys.version.split()[0]
 out["weights_mode"] = WEIGHTS_MODE
 out["repeats"] = REPEATS
+out["suite_n_mlps"] = 100
 
 from mint_provenance import canonical_mint
 from whestbench import MLP
@@ -180,12 +186,15 @@ if WEIGHTS_MODE not in WEIGHTS_MODES:
     print(json.dumps(out)); sys.exit(5)
 w_np, est_seed, _ = canonical_mint(WIDTH, DEPTH, SEED)
 _w = build_weights(w_np, WEIGHTS_MODE, fnp)
+del w_np
 out["weight_dtype"] = str(getattr(_w[0], "dtype", ""))
+_probe = None
 try:
     _probe = np.asarray(_w[0])
     out["weight_writeable"] = bool(_probe.flags.writeable)
 except Exception:
     out["weight_writeable"] = None
+del _probe
 mlp = MLP(weights=_w, width=WIDTH, depth=DEPTH, seed=est_seed)
 out["stage"] = "mlp_built"
 
@@ -200,7 +209,7 @@ est = mod.Estimator()
 class _Ctx:
     def __init__(self, w, d, b, s):
         self.width, self.depth, self.flop_budget, self.seed = w, d, b, s
-        self.n_mlps = 1
+        self.n_mlps = 100
 
 try:
     est.setup(_Ctx(WIDTH, DEPTH, BUDGET, SEED))
@@ -233,30 +242,47 @@ except Exception as e:
     err = type(e).__name__ + ": " + str(e)[:160]
 out["predict_s"] = time.perf_counter() - t1
 out["predict_error"] = err
+first_flops = float(getattr(ctx, "flops_used", float("nan")))
+first_residual = float(getattr(ctx, "residual_wall_time_s", 0.0) or 0.0)
+first_wall = float(getattr(ctx, "wall_time_s", 0.0) or 0.0)
 
-# --- 5b. REPEAT in the same worker. One prediction cannot show a cache that
-# grows across a suite, and the grader runs 100 of them in one process.
-def _vm_peak():
+# --- 5b. REPEAT in the same worker. Measure SETTLED current address space
+# after dropping every instrument-owned network. VmPeak remains the hard-cap
+# quantity, but a monotone peak cannot distinguish retained state from reuse.
+def _proc_value(prefix):
     try:
         with open("/proc/self/status") as fh:
             for line in fh:
-                if line.startswith("VmPeak:"):
+                if line.startswith(prefix + ":"):
                     return int(line.split()[1]) * 1024
     except OSError:
         pass
     return 0
 
-reps = [{"i": 0, "vm_peak_bytes": _vm_peak(),
-         "flops_used": float(getattr(ctx, "flops_used", float("nan"))),
+a = None
+if pred is not None:
+    a = np.asarray(pred)
+    out["shape"] = list(a.shape)
+    out["finite"] = bool(np.all(np.isfinite(a)))
+    out["dtype"] = str(a.dtype)
+    out["largest_array_bytes"] = int(a.nbytes)
+del a, pred, mlp, _w, ctx
+gc.collect()
+reps = [{"i": 0, "vm_peak_bytes": _proc_value("VmPeak"),
+         "vm_size_settled_bytes": _proc_value("VmSize"),
+         "flops_used": first_flops,
          "error": err}]
 if not err:
     for _i in range(1, max(1, REPEATS)):
         _s2 = (SEED + 1000 * _i)
-        _w2, _es2, _ = canonical_mint(WIDTH, DEPTH, _s2)
-        _mlp2 = MLP(weights=build_weights(_w2, WEIGHTS_MODE, fnp),
+        _raw2, _es2, _ = canonical_mint(WIDTH, DEPTH, _s2)
+        _weights2 = build_weights(_raw2, WEIGHTS_MODE, fnp)
+        del _raw2
+        _mlp2 = MLP(weights=_weights2,
                     width=WIDTH, depth=DEPTH, seed=_es2)
         _ctx2 = flops.BudgetContext(flop_budget=BUDGET, quiet=True)
         _e2 = ""
+        _p2 = None
         try:
             with _ctx2:
                 _p2 = est.predict(_mlp2, BUDGET)
@@ -265,28 +291,27 @@ if not err:
             _e2 = "MemoryError: " + str(e)[:120]
         except Exception as e:
             _e2 = type(e).__name__ + ": " + str(e)[:160]
-        reps.append({"i": _i, "vm_peak_bytes": _vm_peak(),
-                     "flops_used": float(getattr(_ctx2, "flops_used", float("nan"))),
+        _flops2 = float(getattr(_ctx2, "flops_used", float("nan")))
+        del _p2, _mlp2, _weights2, _ctx2
+        gc.collect()
+        reps.append({"i": _i, "vm_peak_bytes": _proc_value("VmPeak"),
+                     "vm_size_settled_bytes": _proc_value("VmSize"),
+                     "flops_used": _flops2,
                      "error": _e2})
         if _e2:
             break
 out["repeat_runs"] = reps
 out["repeat_error"] = next((r["error"] for r in reps if r["error"]), "")
-_first, _last = reps[0]["vm_peak_bytes"], reps[-1]["vm_peak_bytes"]
-out["repeat_vm_peak_growth_bytes"] = int(_last - _first)
+_first = reps[0]["vm_size_settled_bytes"]
+_last = reps[-1]["vm_size_settled_bytes"]
+out["repeat_vm_size_growth_bytes"] = int(_last - _first)
 out["repeat_flops_identical"] = bool(
     len({r["flops_used"] for r in reps if not r["error"]}) <= 1)
-out["flops_used"] = float(getattr(ctx, "flops_used", float("nan")))
-out["residual_wall_time_s"] = float(getattr(ctx, "residual_wall_time_s", 0.0) or 0.0)
-out["wall_time_s"] = float(getattr(ctx, "wall_time_s", 0.0) or 0.0)
+out["repeat_flops_observed"] = [r["flops_used"] for r in reps]
+out["flops_used"] = first_flops
+out["residual_wall_time_s"] = first_residual
+out["wall_time_s"] = first_wall
 out["multiplier"] = max(0.1, out["flops_used"] / BUDGET)
-
-if pred is not None:
-    a = np.asarray(pred)
-    out["shape"] = list(a.shape)
-    out["finite"] = bool(np.all(np.isfinite(a)))
-    out["dtype"] = str(a.dtype)
-    out["largest_array_bytes"] = int(a.nbytes)
 
 # --- 6. what it actually cost --------------------------------------------
 ru = resource.getrusage(resource.RUSAGE_SELF)
@@ -340,6 +365,43 @@ except MemoryError as e:
     out["error"] = "MemoryError: " + str(e)[:80]
 print(json.dumps(out))
 sys.exit(0)
+'''
+
+CHILD_LIFECYCLE_CONTROL = r'''
+import gc, json, resource, sys
+
+LIMIT_MB, ALLOC_MIB, REPEATS, RETAIN = map(int, sys.argv[1:5])
+limit = LIMIT_MB * 1024 * 1024
+resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+
+def vm_size():
+    with open("/proc/self/status") as fh:
+        for line in fh:
+            if line.startswith("VmSize:"):
+                return int(line.split()[1]) * 1024
+    return 0
+
+held, rows, error = [], [], ""
+try:
+    for i in range(REPEATS):
+        buf = bytearray(ALLOC_MIB * (1 << 20))
+        for j in range(0, len(buf), 4096):
+            buf[j] = 1
+        if RETAIN:
+            held.append(buf)
+        del buf
+        gc.collect()
+        rows.append({"i": i, "vm_size_settled_bytes": vm_size()})
+except Exception as exc:
+    error = type(exc).__name__ + ": " + str(exc)[:160]
+
+growth = (rows[-1]["vm_size_settled_bytes"] - rows[0]["vm_size_settled_bytes"]
+          if len(rows) >= 2 else 0)
+print(json.dumps({"completed": not error and len(rows) == REPEATS,
+                  "retain": bool(RETAIN), "allocation_mib": ALLOC_MIB,
+                  "repeats": REPEATS, "rows": rows, "growth_bytes": growth,
+                  "error": error, "cap_applied":
+                  resource.getrlimit(resource.RLIMIT_AS)[0] == limit}))
 '''
 
 
@@ -441,14 +503,20 @@ def main() -> int:
                     help="the weight representation the candidate is measured "
                          "under. DEPLOYMENT TRUTH is f64_readonly; f32 is a "
                          "control and its peak is NOT a memory proof.")
-    ap.add_argument("--repeats", type=int, default=2,
+    ap.add_argument("--repeats", type=int, default=3,
                     help="predictions in the SAME worker. One cannot show a "
                          "cache that grows across a 100-MLP suite.")
+    ap.add_argument("--lifecycle-control-mib", type=int,
+                    default=LIFECYCLE_CONTROL_MIB,
+                    help="allocation retained/released by lifecycle controls")
     ap.add_argument("--control-gib", type=float, default=9.0,
                     help="how much the controls request; must exceed the cap")
     ap.add_argument("--json", default="", help="write the report here")
     ap.add_argument("--timeout", type=int, default=900)
     a = ap.parse_args()
+    if a.repeats < 3:
+        print("--repeats must be >= 3 for lifecycle evidence")
+        return 2
 
     cand = os.path.abspath(a.candidate)
     if not os.path.exists(cand):
@@ -478,18 +546,21 @@ def main() -> int:
             _ih.update(_chunk)
     report = {
         "artifact": "linux_memory_gate",
-        # 3 (2026-09-10): carries the weight mode, the repeat-run evidence, the
+        # 4 (2026-09-10): binds current-source instrument identity,
+        # distribution metadata and discriminating lifecycle controls.
         # official package versions and the instrument's own sha256, because
         # `certify_candidate` section 9 accepted a version-2 report without
         # checking that its shape, cap, budget or stack matched the candidate it
         # was certifying. See docs/research/2026-09-10_validation_audit.md #1.
-        "artifact_version": 3,
+        "artifact_version": 4,
         "candidate": os.path.relpath(cand, _ROOT).replace("\\", "/"),
         "candidate_sha256": _h.hexdigest(),
         "instrument": "local_sim/linux_memory_gate.py",
         "instrument_sha256": _ih.hexdigest(),
+        "instrument_policy": "current-source-sha256",
         "limit_mb": a.limit_mb,
         "width": a.width, "depth": a.depth, "budget": a.budget, "seed": a.seed,
+        "suite_n_mlps": DEFAULT_SUITE_N_MLPS,
         "weights_mode": a.weights_mode,
         "repeats": a.repeats,
         "host_platform": sys.platform,
@@ -558,6 +629,43 @@ def main() -> int:
         _emit(report, a.json)
         return 1
 
+    # ---- L. distinguish instrument retention from candidate retention ----
+    print("\nL  repeated-worker lifecycle controls")
+    stateless_run = runner.run(
+        CHILD_LIFECYCLE_CONTROL,
+        [a.limit_mb, a.lifecycle_control_mib, max(3, a.repeats), 0], a.timeout)
+    retaining_run = runner.run(
+        CHILD_LIFECYCLE_CONTROL,
+        [a.limit_mb, a.lifecycle_control_mib, max(3, a.repeats), 1], a.timeout)
+    stateless = _json_tail(stateless_run.stdout) or {}
+    retaining = _json_tail(retaining_run.stdout) or {}
+    report["lifecycle_controls"] = {
+        "growth_threshold_bytes": LIFECYCLE_GROWTH_THRESHOLD_BYTES,
+        "stateless": stateless, "retaining": retaining,
+    }
+    stateless_ok = (stateless.get("completed") is True
+                    and stateless.get("cap_applied") is True
+                    and abs(int(stateless.get("growth_bytes", 1 << 60)))
+                    < LIFECYCLE_GROWTH_THRESHOLD_BYTES)
+    retaining_ok = (retaining.get("completed") is True
+                    and retaining.get("cap_applied") is True
+                    and int(retaining.get("growth_bytes", -1))
+                    >= LIFECYCLE_GROWTH_THRESHOLD_BYTES)
+    check("L: stateless allocations settle below the growth threshold",
+          stateless_ok,
+          f"{int(stateless.get('growth_bytes', 0)) / 2**20:+.1f} MB")
+    check("L: deliberately retained allocations exceed the threshold",
+          retaining_ok,
+          f"{int(retaining.get('growth_bytes', 0)) / 2**20:+.1f} MB")
+    if not (stateless_ok and retaining_ok):
+        print("\n  LIFECYCLE CONTROLS FAILED. Candidate memory is not run: the ")
+        print("  instrument did not distinguish released from retained state.")
+        report["status"] = "CONTROLS_FAILED"
+        report["checks_total"] = _TOTAL[0]
+        report["checks_failed"] = list(_FAILED)
+        _emit(report, a.json)
+        return 1
+
     # ---- C. the candidate, under the real cap ----------------------------
     print("\nC  the candidate's own predict(), under the real cap")
     res = runner.run(CHILD_PREDICT,
@@ -577,6 +685,12 @@ def main() -> int:
           d.get("stage") != "shim_leak" and "local_sim" not in
           str(d.get("whestbench_file", "")),
           str(d.get("whestbench_file", ""))[-46:])
+    check("C: installed distribution metadata names both package versions",
+          d.get("stack_version_source") == "importlib.metadata.version"
+          and bool(d.get("whestbench_version"))
+          and bool(d.get("flopscope_version")),
+          f"whestbench={d.get('whestbench_version')!r}, "
+          f"flopscope={d.get('flopscope_version')!r}")
     check("C: setup() raised nothing", d.get("setup_raised") is None,
           f"{d.get('setup_s', float('nan')):.4f} s"
           if d.get("setup_s") is not None else str(d.get("setup_raised")))
@@ -599,18 +713,20 @@ def main() -> int:
           f"writeable {d.get('weight_writeable')}")
     check("C: repeated predictions in the SAME worker all completed",
           d.get("repeat_error") == "" and
-          len(d.get("repeat_runs") or []) >= min(2, a.repeats),
+          len(d.get("repeat_runs") or []) >= a.repeats,
           d.get("repeat_error") or f"{len(d.get('repeat_runs') or [])} runs")
-    check("C: ...and address space did not GROW across them",
-          # A per-MLP cache the candidate never frees shows up here and nowhere
-          # else. VmPeak is monotone, so the bar is growth, not equality; 64 MiB
-          # is arena noise, and anything above it is state.
-          abs(int(d.get("repeat_vm_peak_growth_bytes", 0))) < 64 * (1 << 20),
-          f"+{int(d.get('repeat_vm_peak_growth_bytes', 0)) / 2**20:.1f} MB "
+    check("C: ...and SETTLED address space did not GROW across them",
+          # Instrument-owned raw mints, weights, MLPs and predictions are
+          # deleted before each sample. Current VmSize can therefore expose
+          # candidate-held state; monotone VmPeak cannot.
+          abs(int(d.get("repeat_vm_size_growth_bytes", 1 << 60)))
+          < LIFECYCLE_GROWTH_THRESHOLD_BYTES,
+          f"{int(d.get('repeat_vm_size_growth_bytes', 0)) / 2**20:+.1f} MB "
           f"over {len(d.get('repeat_runs') or [])} predictions")
-    check("C: ...and billed identically on each",
-          d.get("repeat_flops_identical") is True,
-          "counted FLOPs are a function of shape, not of values")
+    print("      repeated FLOPs  "
+          + ", ".join(f"{float(x):,.0f}" for x in d.get("repeat_flops_observed", []))
+          + (" (identical)" if d.get("repeat_flops_identical") else
+             " (value-dependent; recorded, not rejected)"))
     check("C: the single largest returned array is under 4 GiB",
           0 < int(d.get("largest_array_bytes", 0)) < 4 * (1 << 30),
           f"{int(d.get('largest_array_bytes', 0)) / 2**20:.3f} MB")
@@ -645,6 +761,7 @@ def main() -> int:
         "flopscope": d.get("flopscope_version", ""),
         "numpy": d.get("numpy_version", ""),
         "python": d.get("python_version", ""),
+        "source": d.get("stack_version_source", ""),
     }
     report["status"] = "PASS" if not _FAILED else "FAIL"
     report["checks_total"] = _TOTAL[0]

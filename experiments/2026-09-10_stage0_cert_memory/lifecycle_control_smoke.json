@@ -1,0 +1,41 @@
+{
+  "artifact": "stage0_lifecycle_control_smoke",
+  "artifact_version": 1,
+  "generated_utc": "2026-09-10T20:53:00.5845736Z",
+  "scope": "Synthetic WSL RLIMIT_AS lifecycle discriminator; no candidate or truth data.",
+  "command": "uv run python -c <execute CHILD_LIFECYCLE_CONTROL at 512 MiB, 40 MiB per iteration, 3 iterations>",
+  "source_sha256": {
+    "local_sim/linux_memory_gate.py": "3f622b8ba4571dc2655cca0d3990022597a85fd1ac40e972c7eb24e33e39589a"
+  },
+  "growth_threshold_bytes": 67108864,
+  "stateless": {
+    "completed": true,
+    "retain": false,
+    "allocation_mib": 40,
+    "repeats": 3,
+    "rows": [
+      {"i": 0, "vm_size_settled_bytes": 16072704},
+      {"i": 1, "vm_size_settled_bytes": 16072704},
+      {"i": 2, "vm_size_settled_bytes": 16072704}
+    ],
+    "growth_bytes": 0,
+    "error": "",
+    "cap_applied": true,
+    "verdict": "PASS"
+  },
+  "retaining": {
+    "completed": true,
+    "retain": true,
+    "allocation_mib": 40,
+    "repeats": 3,
+    "rows": [
+      {"i": 0, "vm_size_settled_bytes": 58019840},
+      {"i": 1, "vm_size_settled_bytes": 99966976},
+      {"i": 2, "vm_size_settled_bytes": 141914112}
+    ],
+    "growth_bytes": 83894272,
+    "error": "",
+    "cap_applied": true,
+    "verdict": "PASS"
+  }
+}

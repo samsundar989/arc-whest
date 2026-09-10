@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.metadata
 import os
 import shutil
 import subprocess
@@ -582,6 +583,45 @@ def unit_tests():
     check("U9: a skipped-only domain is INCOMPLETE, not CERTIFIED",
           roll3[cc.SERVER]["verdict"] == "INCOMPLETE",
           roll3[cc.SERVER]["verdict"])
+
+    # Drive the production emitter itself. The real section id is `5-8`, so a
+    # section lookup cannot distinguish these checks; each mixed check must
+    # carry its domain at creation. Section 11 similarly has no old map entry.
+    start = len(cc._TAGGED)
+    old_section, old_domain = cc._CURRENT[0], cc._CURRENT_DOMAIN[0]
+    old_total = cc._TOTAL[0]
+    old_sections = {k: list(v) for k, v in cc._SECTIONS.items()}
+    try:
+        cc.head("5-8  integration fixture", domain=cc.MATH)
+        cc.check("5: mathematical contract", True)
+        cc.check("7: local runtime observation", True, domain=cc.LOCAL)
+        cc.check("7: predicted server residual", True,
+                 domain=cc.SERVER_PREDICTED)
+        cc.check("S: measured grading-server row", True,
+                 domain=cc.SERVER_MEASURED)
+        cc.head("11  integration fixture", domain=cc.LOCAL)
+        cc.check("11: residual tail", True)
+        emitted = cc._TAGGED[start:]
+    finally:
+        del cc._TAGGED[start:]
+        cc._CURRENT[0], cc._CURRENT_DOMAIN[0] = old_section, old_domain
+        cc._TOTAL[0] = old_total
+        cc._SECTIONS.clear()
+        cc._SECTIONS.update(old_sections)
+    got_domains = [row["domain"] for row in emitted]
+    check("U9: real head/check emission separates all four evidence domains",
+          got_domains == [cc.MATH, cc.LOCAL, cc.SERVER_PREDICTED,
+                          cc.SERVER_MEASURED, cc.LOCAL],
+          repr(got_domains))
+    check("U9: measured server evidence is not a server forecast",
+          cc.SERVER_MEASURED != cc.SERVER_PREDICTED,
+          f"{cc.SERVER_MEASURED} vs {cc.SERVER_PREDICTED}")
+
+    stack = cc._certified_stack()
+    check("U9: installed distribution metadata recovers both package versions",
+          stack == {"whestbench": importlib.metadata.version("whestbench"),
+                    "flopscope": importlib.metadata.version("flopscope")}
+          and all(stack.values()), repr(stack))
 
     # -- U10: prediction 9 -- no STORED certification changes disposition ---
     #

@@ -51,6 +51,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.metadata
 import importlib.util
 import math
 import json
@@ -93,7 +94,7 @@ _SECTIONS = {}
 _CURRENT = ["?"]
 
 # --------------------------------------------------------------------------- #
-# THREE KINDS OF EVIDENCE, WHICH ONE VERDICT USED TO CONFLATE
+# FOUR KINDS OF EVIDENCE, WHICH ONE VERDICT USED TO CONFLATE
 #
 # `verdict` is one word over checks from three genuinely different domains:
 #
@@ -103,9 +104,14 @@ _CURRENT = ["?"]
 #             a real program, and NOT the grading server's seconds -- this host
 #             reads ~27x high per operation on residual, and the shim reads
 #             ~18% low on wall for rotation-using estimators.
-#   SERVER    a FORECAST of deployment risk, from a versioned per-operation
-#             model with a stated evidence domain. A forecast is not a
-#             measurement, however carefully it is made.
+#   SERVER_PREDICTED
+#             a FORECAST of deployment risk, from a versioned per-operation
+#             model with a stated evidence domain.
+#   SERVER_MEASURED
+#             telemetry returned by a grading-server run. No current
+#             certification section creates such evidence, so this domain is
+#             normally NOT_RUN rather than being silently merged with a
+#             prediction.
 #
 # Section 10 prints "DEPLOYMENT AUTHORITY" over a LOCAL subprocess run, and its
 # residual check is named "worst GRADED-PATH residual". Two of this
@@ -124,17 +130,24 @@ _CURRENT = ["?"]
 #
 # `docs/research/2026-09-10_validation_audit.md` finding 4.
 
-MATH, LOCAL, SERVER = "MATH", "LOCAL", "SERVER"
+MATH = "MATH"
+LOCAL = "LOCAL"
+SERVER_PREDICTED = "SERVER_PREDICTED"
+SERVER_MEASURED = "SERVER_MEASURED"
+# Compatibility for older callers that imported SERVER when it meant the
+# forecast domain. New artifacts use the unambiguous spelling above.
+SERVER = SERVER_PREDICTED
+EVIDENCE_DOMAINS = (MATH, LOCAL, SERVER_PREDICTED, SERVER_MEASURED)
 
 #: Section id -> evidence domain. Section ids are the leading token of the
 #: `head()` title, which is how `_CURRENT` already works.
-_DOMAIN = {
+_SECTION_DEFAULT_DOMAIN = {
     "1": MATH,      # imports and the import contract
     "2": MATH,      # setup / shape genericity
     "3": MATH,      # invariants
     "4": MATH,      # determinism
     "5": MATH,      # the grader-twin arms
-    "6": SERVER,    # counted FLOPs and the operation-count planning gate
+    "6": SERVER_PREDICTED,  # operation-count planning gate
     "7": LOCAL,     # residual, measured here
     "8": LOCAL,     # wall, measured here
     "9": LOCAL,     # the Linux memory gate: a real kernel, not this server
@@ -144,32 +157,37 @@ _DOMAIN = {
 
 
 def _domain(section_id: str) -> str:
-    return _DOMAIN.get(str(section_id), MATH)
+    """Legacy/default section domain; mixed sections override per check."""
+    return _SECTION_DEFAULT_DOMAIN.get(str(section_id), MATH)
 
 
-def head(t):
+def head(t, *, domain=None):
     _CURRENT[0] = t.split(None, 1)[0]
+    _CURRENT_DOMAIN[0] = domain or _domain(_CURRENT[0])
     print(f"\n{t}")
 
 
 #: Every check, with its domain. Fed to `domain_rollup` at the end.
 _TAGGED = []
+_CURRENT_DOMAIN = [MATH]
 
 
-def check(name, ok, detail=""):
+def check(name, ok, detail="", *, domain=None):
     _TOTAL[0] += 1
     _SECTIONS.setdefault(_CURRENT[0], []).append((name, bool(ok)))
-    _TAGGED.append({"section": _CURRENT[0], "domain": _domain(_CURRENT[0]),
+    _TAGGED.append({"section": _CURRENT[0],
+                    "domain": domain or _CURRENT_DOMAIN[0],
                     "name": name, "ok": bool(ok), "skipped": False})
     print(f"  {'PASS' if ok else 'FAIL'}  {name:<62}{detail}")
     if not ok:
         _FAILED.append(f"[{_CURRENT[0]}] {name}")
 
 
-def skip(name, why):
+def skip(name, why, *, domain=None):
     """NOT a pass. Counted separately and named in the summary."""
     _SKIPPED.append(f"[{_CURRENT[0]}] {name} -- {why}")
-    _TAGGED.append({"section": _CURRENT[0], "domain": _domain(_CURRENT[0]),
+    _TAGGED.append({"section": _CURRENT[0],
+                    "domain": domain or _CURRENT_DOMAIN[0],
                     "name": name, "ok": None, "skipped": True, "why": why})
     print(f"  SKIP  {name:<62}{why}")
 
@@ -183,7 +201,7 @@ def domain_rollup(tagged):
     domain with no checks at all reports NOT_RUN, which is not a pass.
     """
     out = {}
-    for dom in (MATH, LOCAL, SERVER):
+    for dom in EVIDENCE_DOMAINS:
         mine = [t for t in tagged if t["domain"] == dom]
         failed = [t["name"] for t in mine if t["ok"] is False]
         skipped = [t["name"] for t in mine if t["skipped"]]
@@ -205,8 +223,12 @@ _DOMAIN_MEANING = {
           "is a failure anywhere.",
     LOCAL: "what this host measured. REAL, and NOT the grading server: no "
            "absolute second here transfers (docs/GOTCHAS.md).",
-    SERVER: "a FORECAST from the versioned per-operation model, inside its "
-            "stated evidence domain. Not a measurement, and not a guarantee.",
+    SERVER_PREDICTED: "a FORECAST from the versioned per-operation model, "
+                      "inside its stated evidence domain. Not a measurement, "
+                      "and not a guarantee.",
+    SERVER_MEASURED: "telemetry observed on the grading server and bound to "
+                     "submitted bytes. A missing row is NOT_RUN, never a "
+                     "forecast promoted into a measurement.",
 }
 
 
@@ -299,9 +321,13 @@ print(json.dumps({"sha256": hashlib.sha256(a.tobytes()).hexdigest(),
 # `docs/research/2026-09-10_validation_audit.md` finding 1.
 
 
-#: A version-2 report predates every field below. It is accepted only as an
-#: explicitly DEGRADED result, never as the strong gate, and section 9 says so.
-MEMORY_REPORT_MIN_VERSION = 3
+#: Version 4 binds the exact current instrument, distribution metadata and the
+#: lifecycle controls. Older reports remain historical evidence, but cannot be
+#: upgraded into this gate by a consumer that knows more than their producer did.
+MEMORY_REPORT_MIN_VERSION = 4
+MEMORY_INSTRUMENT = "local_sim/linux_memory_gate.py"
+MEMORY_INSTRUMENT_POLICY = "current-source-sha256"
+MEMORY_SUITE_N_MLPS = 100
 
 
 
@@ -322,17 +348,209 @@ def _certified_stack() -> dict:
     constant somebody forgot to bump.
     """
     out = {}
+    for distribution in ("whestbench", "flopscope"):
+        try:
+            out[distribution] = importlib.metadata.version(distribution)
+        except importlib.metadata.PackageNotFoundError:
+            out[distribution] = ""
+    return out
+
+
+def _memory_instrument_sha256() -> str:
+    return _sha(os.path.join(_HERE, "linux_memory_gate.py"))
+
+
+def consume_memory_report(
+    lg,
+    *,
+    candidate_sha256: str,
+    width: int,
+    depth: int,
+    budget: int,
+    cap_mb: int = MEMORY_CAP_MB,
+    weights_mode: str = "f64_readonly",
+    stack: dict | None = None,
+    expected_instrument_sha256: str = "",
+):
+    """Classify memory evidence without turning absence into a candidate FAIL.
+
+    ``REFUSED`` is reserved for an explicit negative produced by an applicable
+    report. Missing legacy bindings, a report for other bytes, or a report for
+    another workload are ``INCOMPLETE``. This distinction is essential when old
+    artifacts are replayed after the consumer gains new required fields.
+    """
+    checks = []
+    bindings = []
+    incomplete = []
+
+    def c(name, ok, detail=""):
+        checks.append((name, bool(ok), str(detail)))
+
+    def bind(name, ok, detail=""):
+        bindings.append({"name": name, "ok": bool(ok), "detail": str(detail)})
+        if not ok:
+            incomplete.append(f"{name}: {detail}")
+
+    if not isinstance(lg, dict):
+        c("9: the memory report parses", False, f"got {type(lg).__name__}")
+        return {"verdict": "REFUSED", "applicable": False, "checks": checks,
+                "bindings": bindings, "incomplete": incomplete,
+                "artifact_version": 0}
+
     try:
-        import whestbench as _wb
-        out["whestbench"] = getattr(_wb, "__version__", "")
-    except Exception:
-        pass
-    try:
-        import flopscope as _fs
-        out["flopscope"] = getattr(_fs, "__version__", "")
-    except Exception:
-        pass
-    return {k: v for k, v in out.items() if v}
+        ver = int(lg.get("artifact_version", 0) or 0)
+    except (TypeError, ValueError):
+        ver = 0
+    cr = lg.get("candidate_run") if isinstance(lg.get("candidate_run"), dict) else {}
+    neg = lg.get("negative_control") if isinstance(lg.get("negative_control"), dict) else {}
+    pos = lg.get("positive_control") if isinstance(lg.get("positive_control"), dict) else {}
+
+    got_sha = lg.get("candidate_sha256")
+    if not isinstance(got_sha, str) or not got_sha:
+        incomplete.append("candidate_sha256 is absent; path-only identity is not binding")
+        applicable = None
+    elif got_sha != candidate_sha256:
+        incomplete.append("report is for different candidate bytes")
+        applicable = False
+    else:
+        applicable = True
+
+    # A report for other or unverified bytes cannot say this candidate failed.
+    if applicable is not True:
+        return {"verdict": "INCOMPLETE", "applicable": applicable,
+                "checks": checks, "bindings": bindings,
+                "incomplete": incomplete, "artifact_version": ver}
+
+    # Preserve explicit negative evidence before considering whether newer
+    # binding fields exist. This is the legacy early-return defect from R2.
+    explicit = []
+    status = lg.get("status")
+    if status not in (None, "PASS"):
+        explicit.append(("9: the applicable report's own status is PASS", False,
+                         f"status={status!r}"))
+    if cr.get("predict_error") not in (None, ""):
+        explicit.append(("9: predict completed under the applied cap", False,
+                         str(cr.get("predict_error"))))
+    if cr.get("setup_raised") not in (None, ""):
+        explicit.append(("9: setup completed under the applied cap", False,
+                         str(cr.get("setup_raised"))))
+    if cr.get("cap_applied") is False:
+        explicit.append(("9: the cap was applied in the candidate run", False,
+                         str(cr.get("soft_limit_bytes"))))
+    if neg.get("survived") is True:
+        explicit.append(("9: the negative control died under the cap", False,
+                         "the over-cap allocation survived"))
+    if pos.get("survived") is False:
+        explicit.append(("9: the positive control survived uncapped", False,
+                         str(pos.get("error", "it died"))))
+    if cr.get("ok") is False:
+        explicit.append(("9: the candidate child completed successfully", False,
+                         f"stage={cr.get('stage')!r}"))
+    checks.extend(explicit)
+
+    if ver < MEMORY_REPORT_MIN_VERSION:
+        incomplete.append(
+            f"artifact_version {ver} < {MEMORY_REPORT_MIN_VERSION}: missing "
+            "current workload, distribution, instrument and lifecycle bindings")
+        return {"verdict": "REFUSED" if explicit else "INCOMPLETE",
+                "applicable": True, "checks": checks, "bindings": bindings,
+                "incomplete": incomplete, "artifact_version": ver}
+
+    bind("artifact kind", lg.get("artifact") == "linux_memory_gate",
+         repr(lg.get("artifact")))
+    bind("instrument path", lg.get("instrument") == MEMORY_INSTRUMENT,
+         repr(lg.get("instrument")))
+    bind("instrument verification policy",
+         lg.get("instrument_policy") == MEMORY_INSTRUMENT_POLICY,
+         repr(lg.get("instrument_policy")))
+    bind("instrument sha256",
+         bool(expected_instrument_sha256)
+         and lg.get("instrument_sha256") == expected_instrument_sha256,
+         f"{str(lg.get('instrument_sha256'))[:16]}... vs "
+         f"{expected_instrument_sha256[:16]}...")
+    bind("certified shape",
+         lg.get("width") == width and lg.get("depth") == depth,
+         f"{lg.get('width')}x{lg.get('depth')} vs {width}x{depth}")
+    bind("certified budget", lg.get("budget") == budget,
+         f"{lg.get('budget')} vs {budget}")
+    bind("suite lifecycle size", lg.get("suite_n_mlps") == MEMORY_SUITE_N_MLPS
+         and cr.get("suite_n_mlps") == MEMORY_SUITE_N_MLPS,
+         f"{lg.get('suite_n_mlps')} / child {cr.get('suite_n_mlps')}")
+    bind("full memory cap", lg.get("limit_mb") == cap_mb,
+         f"{lg.get('limit_mb')} MB vs {cap_mb} MB")
+    bind("deployment weight representation",
+         lg.get("weights_mode") == weights_mode
+         and cr.get("weights_mode") == weights_mode,
+         f"{lg.get('weights_mode')} / child {cr.get('weights_mode')}")
+    wanted_stack = dict(stack or {})
+    got_stack = lg.get("stack") if isinstance(lg.get("stack"), dict) else {}
+    bind("distribution version source",
+         got_stack.get("source") == "importlib.metadata.version",
+         repr(got_stack.get("source")))
+    for pkg in ("whestbench", "flopscope"):
+        want = wanted_stack.get(pkg, "")
+        bind(f"installed distribution {pkg}", bool(want) and got_stack.get(pkg) == want,
+             f"{got_stack.get(pkg, '(absent)')!r} vs {want!r}")
+
+    lifecycle = lg.get("lifecycle_controls")
+    bind("lifecycle controls are present", isinstance(lifecycle, dict),
+         type(lifecycle).__name__)
+    if isinstance(lifecycle, dict):
+        stateless = lifecycle.get("stateless") or {}
+        retaining = lifecycle.get("retaining") or {}
+        threshold = int(lifecycle.get("growth_threshold_bytes", 0) or 0)
+        bind("stateless lifecycle positive control",
+             stateless.get("completed") is True
+             and abs(int(stateless.get("growth_bytes", 1 << 60))) < threshold,
+             f"growth={stateless.get('growth_bytes')} threshold={threshold}")
+        bind("retaining lifecycle negative control",
+             retaining.get("completed") is True
+             and int(retaining.get("growth_bytes", -1)) >= threshold,
+             f"growth={retaining.get('growth_bytes')} threshold={threshold}")
+
+    if incomplete:
+        # Even a FAIL from a differently configured v4 report is not evidence
+        # about this workload. Keep it visible in `checks`, but do not promote it
+        # to a candidate refusal.
+        return {"verdict": "INCOMPLETE", "applicable": False,
+                "checks": checks, "bindings": bindings,
+                "incomplete": incomplete, "artifact_version": ver}
+
+    c("9: the report is bound to the current instrument and workload", True,
+      f"v{ver}, {MEMORY_INSTRUMENT_POLICY}")
+    c("9: the cap read back exactly", cr.get("cap_applied") is True
+      and cr.get("cap_requested_bytes") == cap_mb * 1024 * 1024
+      and cr.get("soft_limit_bytes") == cap_mb * 1024 * 1024,
+      f"soft={cr.get('soft_limit_bytes')}")
+    c("9: the negative control died under the cap", neg.get("survived") is False,
+      "an enforcement claim needs a dying over-cap control")
+    c("9: the positive control survived uncapped", pos.get("survived") is True,
+      "distinguishes the cap from host exhaustion")
+    c("9: predict completed under the applied cap",
+      cr.get("predict_error") == "" and status == "PASS",
+      str(cr.get("predict_error", "")))
+    c("9: the deployment arrays are read-only float64",
+      weights_mode != "f64_readonly" or
+      (cr.get("weight_dtype") == "float64" and cr.get("weight_writeable") is False),
+      f"{cr.get('weight_dtype')}, writeable={cr.get('weight_writeable')}")
+    c("9: the real packages loaded, not local_sim shims",
+      "local_sim" not in str(cr.get("whestbench_file", ""))
+      and "local_sim" not in str(cr.get("flopscope_file", "")),
+      str(cr.get("whestbench_file", ""))[-46:])
+    reps = cr.get("repeat_runs") or []
+    c("9: at least three predictions ran in one worker",
+      len(reps) >= 3 and cr.get("repeat_error") == "",
+      cr.get("repeat_error") or f"{len(reps)} predictions")
+    growth = int(cr.get("repeat_vm_size_growth_bytes", 1 << 60))
+    c("9: settled address space did not grow across candidate predictions",
+      abs(growth) < 64 * (1 << 20), f"{growth / 2**20:+.1f} MB")
+    peak = int(cr.get("vm_peak_bytes") or 0)
+    c("9: peak address space is under the cap", 0 < peak <= cap_mb * 1024 * 1024,
+      f"VmPeak {peak / 2**20:.1f} MB")
+    return {"verdict": "REFUSED" if any(not ok for _, ok, _ in checks)
+            else "CERTIFIED", "applicable": True, "checks": checks,
+            "bindings": bindings, "incomplete": incomplete,
+            "artifact_version": ver}
 
 
 def validate_memory_report(
@@ -345,6 +563,7 @@ def validate_memory_report(
     cap_mb: int = MEMORY_CAP_MB,
     weights_mode: str = "f64_readonly",
     stack: dict | None = None,
+    expected_instrument_sha256: str = "",
 ):
     """Is this memory report evidence about THIS candidate under THIS workload?
 
@@ -356,116 +575,12 @@ def validate_memory_report(
     Pure: no filesystem, no subprocess, no globals but the constants above. That
     is the whole point — the mutation battery drives it directly.
     """
-    checks = []
-
-    def c(name, ok, detail=""):
-        checks.append((name, bool(ok), str(detail)))
-
-    if not isinstance(lg, dict):
-        c("9: the memory report parses", False, f"got {type(lg).__name__}")
-        return checks, "unparseable"
-
-    ver = int(lg.get("artifact_version", 0) or 0)
-    cr = lg.get("candidate_run") or {}
-    neg = lg.get("negative_control") or {}
-    pos = lg.get("positive_control") or {}
-
-    # ---- identity: the bytes, and the instrument that measured them --------
-    c("9: the report is for the candidate's exact bytes",
-      isinstance(lg.get("candidate_sha256"), str)
-      and lg.get("candidate_sha256") == candidate_sha256,
-      f"{str(lg.get('candidate_sha256'))[:16]}... vs {candidate_sha256[:16]}...")
-
-    degraded = ""
-    if ver < MEMORY_REPORT_MIN_VERSION:
-        degraded = (f"artifact_version {ver} < {MEMORY_REPORT_MIN_VERSION}: this "
-                    "report cannot say what shape, cap, stack or weight "
-                    "representation it ran, so it is NOT the strong gate")
-        # DEGRADED IS A SKIP, NOT A FAIL, and the distinction is the whole
-        # verdict. A pre-version-3 report cannot ANSWER the workload questions;
-        # that is an absence of evidence, not evidence of a violation. Emitting
-        # a failing check here made `certify_candidate` return REFUSED for a
-        # perfectly correct candidate whose only sin was an old memory report --
-        # caught by the full mutation battery's positive control, which is
-        # exactly what a positive control is for. The caller raises the skip;
-        # `docs/VALIDATION.md` already forbids scoring a skip as a pass, so the
-        # verdict lands on INCOMPLETE, which is the true state.
-        return checks, degraded
-    c(f"9: the report is artifact_version >= {MEMORY_REPORT_MIN_VERSION}", True,
-      f"v{ver}, instrument {str(lg.get('instrument_sha256'))[:16]}...")
-    c("9: ...and it names the instrument that produced it",
-      bool(lg.get("instrument_sha256")), str(lg.get("instrument", "")))
-
-    # ---- the WORKLOAD. This is the whole repair. ---------------------------
-    c("9: the report ran the certified SHAPE",
-      int(lg.get("width", -1)) == int(width)
-      and int(lg.get("depth", -1)) == int(depth),
-      f"{lg.get('width')}x{lg.get('depth')} vs {width}x{depth}")
-    c("9: ...at the certified BUDGET",
-      int(lg.get("budget", -1)) == int(budget),
-      f"{lg.get('budget')} vs {budget}")
-    c("9: ...under the FULL 8,192 MB cap, not a looser one",
-      int(lg.get("limit_mb", -1)) == int(cap_mb),
-      f"{lg.get('limit_mb')} MB vs {cap_mb} MB")
-    c("9: ...and the cap it reports is the cap the child READ BACK",
-      int(cr.get("cap_requested_bytes", -1)) == int(cap_mb) * 1024 * 1024
-      and int(cr.get("soft_limit_bytes", -2)) == int(cap_mb) * 1024 * 1024,
-      f"soft={cr.get('soft_limit_bytes')} requested={cr.get('cap_requested_bytes')}")
-    # The DECLARED mode must match, and for the deployment mode the child's own
-    # probe of the array it built must agree. A report can declare
-    # "f64_readonly" and hand the candidate a writable float32 array; the
-    # declaration is what the operator typed, the probe is what ran.
-    _mode_ok = (lg.get("weights_mode") == weights_mode
-                and cr.get("weights_mode") == weights_mode)
-    if _mode_ok and weights_mode == "f64_readonly":
-        _mode_ok = (cr.get("weight_dtype") == "float64"
-                    and cr.get("weight_writeable") is False)
-    c("9: ...on the DEPLOYMENT weight representation", _mode_ok,
-      f"{lg.get('weights_mode')} / child {cr.get('weights_mode')} "
-      f"(dtype {cr.get('weight_dtype')}, writeable {cr.get('weight_writeable')})")
-
-    # ---- the official stack --------------------------------------------------
-    if stack:
-        got = lg.get("stack") or {}
-        for pkg, want in sorted(stack.items()):
-            if not want:
-                continue
-            c(f"9: ...against the certified {pkg} {want}",
-              str(got.get(pkg, "")) == str(want),
-              f"report says {got.get(pkg, '(absent)')!r}")
-
-    # ---- the controls, and the run ------------------------------------------
-    c("9: the cap was APPLIED in that run (soft == requested)",
-      cr.get("cap_applied") is True, str(cr.get("soft_limit_bytes")))
-    c("9: the negative control DIED under the cap",
-      neg.get("survived") is False,
-      "a gate whose cap is not in force proves nothing")
-    c("9: the positive control SURVIVED uncapped",
-      pos.get("survived") is True,
-      "so the death above is the cap, not the machine")
-    c("9: predict completed under the real cap",
-      cr.get("predict_error") == "" and lg.get("status") == "PASS",
-      f"VmPeak {(cr.get('vm_peak_bytes') or 0) / 2**20:.1f} MB of {cap_mb} MB")
-    c("9: the real packages loaded, not local_sim's shims",
-      "local_sim" not in str(cr.get("whestbench_file", ""))
-      and "local_sim" not in str(cr.get("flopscope_file", "")),
-      str(cr.get("whestbench_file", ""))[-46:])
-
-    # ---- suite-lifetime stability -------------------------------------------
-    reps = cr.get("repeat_runs") or []
-    c("9: predict ran MORE THAN ONCE in the same worker",
-      len(reps) >= 2 and cr.get("repeat_error") == "",
-      cr.get("repeat_error") or f"{len(reps)} predictions")
-    c("9: ...and address space did not grow across them",
-      abs(int(cr.get("repeat_vm_peak_growth_bytes", 1 << 40))) < 64 * (1 << 20),
-      f"+{int(cr.get('repeat_vm_peak_growth_bytes', 0)) / 2**20:.1f} MB")
-
-    peak = int(cr.get("vm_peak_bytes") or 0)
-    c("9: peak ADDRESS SPACE is under the cap",
-      0 < peak <= int(cap_mb) * 1024 * 1024,
-      f"VmPeak {peak / 2**20:.1f} MB -> "
-      f"{(cap_mb * 1024 * 1024) / peak:.2f}x" if peak else "unmeasured")
-    return checks, degraded
+    result = consume_memory_report(
+        lg, candidate_sha256=candidate_sha256, width=width, depth=depth,
+        budget=budget, cap_mb=cap_mb, weights_mode=weights_mode, stack=stack,
+        expected_instrument_sha256=expected_instrument_sha256)
+    incomplete = "; ".join(result["incomplete"])
+    return result["checks"], incomplete
 
 
 def _json_tail(text):
@@ -562,7 +677,7 @@ def main() -> int:
               "sections": {}}
 
     # ---------------------------------------------------------------- 1 ----
-    head("1  the official grader contract")
+    head("1  the official grader contract", domain=MATH)
     if a.quick:
         skip("1: whest validate", "--quick")
     else:
@@ -575,7 +690,7 @@ def main() -> int:
         report["sections"]["validate"] = {"returncode": p.returncode}
 
     # ---------------------------------------------------------------- 2 ----
-    head("2  package and round identity")
+    head("2  package and round identity", domain=MATH)
     p = _uvpy(os.path.join(_HERE, "official_config.py"), timeout=900)
     check("2: the LIVE round matches the INSTALLED package, field by field",
           p.returncode == 0, (p.stdout or "").strip().splitlines()[-1][:40])
@@ -587,10 +702,13 @@ def main() -> int:
               os.path.abspath(m.__file__)[-44:])
     report["sections"]["package_identity"] = {
         "whestbench": _wb.__file__, "flopscope": _fl.__file__,
+        "distribution_versions": _certified_stack(),
+        "version_source": "importlib.metadata.version",
         "official_config_rc": p.returncode}
 
     # ---------------------------------------------------------------- 3 ----
-    head("3  shape generality, the exact layer-1 closed form, and equivariance")
+    head("3  shape generality, the exact layer-1 closed form, and equivariance",
+         domain=MATH)
     # `edge_cases.py` already owns these 30 invariants and already takes a path.
     # Re-implementing them here would give this repository two answers to
     # "is layer 1 right", which is the failure it keeps recording.
@@ -633,7 +751,7 @@ def main() -> int:
                                           "tail": btail[0]}
 
     # ---------------------------------------------------------------- 4 ----
-    head("4  determinism, in-process and in a FRESH worker")
+    head("4  determinism, in-process and in a FRESH worker", domain=MATH)
     fresh = []
     for s in SEEDS[:2]:
         r = _uvpy("-c", FRESH_WORKER, _ROOT, cand, str(a.width), str(a.depth),
@@ -691,7 +809,8 @@ def main() -> int:
     }
 
     # ------------------------------------------------------------- 5-8 ----
-    head("5-8  one metered run: immutability, cost, telemetry, scalar sync")
+    head("5-8  one metered run: immutability, cost, telemetry, scalar sync",
+         domain=MATH)
     import flopscope as flops
     import flopscope.numpy as fnp
     from mint_provenance import canonical_mint
@@ -725,7 +844,8 @@ def main() -> int:
           setup_err or f"{setup_s:.4f} s")
     check("5: setup is inside the 5 s ceiling (LOCAL, in-process -- the "
           "grader's window is larger)",
-          setup_s < SETUP_CAP_S, f"{setup_s:.4f} s of {SETUP_CAP_S} s")
+          setup_s < SETUP_CAP_S, f"{setup_s:.4f} s of {SETUP_CAP_S} s",
+          domain=LOCAL)
 
     rows = []
     for i, s in enumerate(SEEDS):
@@ -835,17 +955,21 @@ def main() -> int:
           else "no array returned")
 
     f0 = rows[0]["flops_used"]
-    check("6: counted FLOPs are network-INDEPENDENT or explained",
-          len({r["flops_used"] for r in rows}) == 1,
-          f"{f0:,.0f}" if len({r['flops_used'] for r in rows}) == 1
-          else "varies: " + ", ".join(f"{r['flops_used']:,.0f}" for r in rows))
+    _flops_values = [r["flops_used"] for r in rows]
+    check("6: every counted-FLOP total is finite and inside the hard budget",
+          all(math.isfinite(v) and 0 < v <= a.budget for v in _flops_values),
+          (f"{_flops_values[0]:,.0f}" if len(set(_flops_values)) == 1 else
+           "value-dependent: " + ", ".join(f"{v:,.0f}" for v in _flops_values)),
+          domain=MATH)
     mult = max(FLOOR, f0 / a.budget)
     check("6: the multiplier is the score's own identity max(0.1, F/B)",
           abs(mult - rows[0]["multiplier"]) < 1e-15,
           f"{mult:.6f}  (C/B = {f0 / a.budget:.7f}"
-          f"{', PINNED at the floor' if f0 / a.budget < FLOOR else ''})")
+          f"{', PINNED at the floor' if f0 / a.budget < FLOOR else ''})",
+          domain=MATH)
     check("6: the operation ledger is non-empty",
-          all(r["n_ops"] > 0 for r in rows), f"{rows[0]['n_ops']:,} ops")
+          all(r["n_ops"] > 0 for r in rows), f"{rows[0]['n_ops']:,} ops",
+          domain=MATH)
 
     # --- THE OP COUNT IS THE RESIDUAL GATE --------------------------------
     # Phase 2 does not price residual; it FAILS an MLP above 0.4 s. This host
@@ -863,7 +987,8 @@ def main() -> int:
           f"{worst_ops:,} ops -> PREDICTED graded residual "
           f"{pred_res * 1000:.1f} ms, {pred_hr:.2f}x under the "
           f"{RESIDUAL_CAP_S} s cliff "
-          f"({_oc.op_count_at_cap():,.0f} ops would hit it)")
+          f"({_oc.op_count_at_cap():,.0f} ops would hit it)",
+          domain=SERVER_PREDICTED)
 
     worst_res = max(r["residual_wall_time_s"] for r in rows)
     worst_wall = max(r["wall_time_s"] for r in rows)
@@ -878,18 +1003,19 @@ def main() -> int:
           f"worst {worst_res * 1000:.1f} ms / median {med_res * 1000:.1f} ms "
           f"= {worst_res / max(med_res, 1e-9):.2f}x spread; this host measures "
           f"{worst_res / max(worst_ops, 1) * 1e6:.0f} us/op against the "
-          f"grader's {_oc.GRADED_RESIDUAL_S_PER_OP * 1e6:.1f}")
+          f"grader's {_oc.GRADED_RESIDUAL_S_PER_OP * 1e6:.1f}",
+          domain=LOCAL)
     check("7: worst per-MLP wall is under the installed 120 s limit",
           worst_wall < WALL_CAP_S,
           f"{worst_wall:.3f} s -> {WALL_CAP_S / worst_wall:.0f}x"
-          if worst_wall else "0")
+          if worst_wall else "0", domain=LOCAL)
 
     tot_mat = sum(r["materializations_total"] for r in rows)
     check("8: ZERO scalar materializations during predict "
           "(__bool__/__float__/__int__/__index__)",
           tot_mat == 0,
           "counted, not asserted" if tot_mat == 0
-          else json.dumps(rows[0]["materializations"]))
+          else json.dumps(rows[0]["materializations"]), domain=MATH)
     report["sections"]["metered_runs"] = rows
     report["sections"]["setup_s_local"] = setup_s
 
@@ -903,7 +1029,8 @@ def main() -> int:
     # not also compare against f32 would miss the opposite defect -- a candidate
     # that runs everything in f64 and quietly doubles its bill.
     if not a.skip_twin:
-        head("5b  grader-twin arm: the same candidate across weight dtypes")
+        head("5b  grader-twin arm: the same candidate across weight dtypes",
+             domain=MATH)
         twin_seed = int(SEEDS[0])
         w_np, est_seed, _ = canonical_mint(a.width, a.depth, twin_seed)
         arms = {}
@@ -1016,7 +1143,7 @@ def main() -> int:
         }
 
     # ---------------------------------------------------------------- 9 ----
-    head("9  memory: accounting here, ENFORCEMENT only on Linux")
+    head("9  memory: accounting here, ENFORCEMENT only on Linux", domain=LOCAL)
     peak = _host_memory()
     if peak.get("available"):
         print(f"      peak working set {peak['peak_wset_bytes'] / 2**20:.1f} MB, "
@@ -1087,14 +1214,17 @@ def main() -> int:
               else "a pre-2026-09-05 report with no candidate_sha256 -- "
                    "regenerate it with linux_memory_gate.py to certify the "
                    "BYTES rather than the filename")
-        mem_checks, degraded = validate_memory_report(
+        memory_result = consume_memory_report(
             lg,
             candidate_sha256=sha_before,
             width=a.width, depth=a.depth, budget=a.budget,
             cap_mb=MEMORY_CAP_MB,
             weights_mode=_lifecycle_default_mode(),
             stack=_certified_stack(),
+            expected_instrument_sha256=_memory_instrument_sha256(),
         )
+        mem_checks = memory_result["checks"]
+        degraded = "; ".join(memory_result["incomplete"])
         for _name, _ok, _detail in mem_checks:
             check(_name, _ok, _detail)
         if degraded:
@@ -1109,10 +1239,15 @@ def main() -> int:
             "matched_on": lg_match,
             "artifact_version": lg.get("artifact_version"),
             "instrument_sha256": lg.get("instrument_sha256", ""),
+            "instrument_policy": MEMORY_INSTRUMENT_POLICY,
+            "consumer_verdict": memory_result["verdict"],
+            "applicable": memory_result["applicable"],
+            "binding_checks": memory_result["bindings"],
             "bound_to": {"width": a.width, "depth": a.depth, "budget": a.budget,
                          "cap_mb": MEMORY_CAP_MB,
                          "weights_mode": _lifecycle_default_mode(),
-                         "stack": _certified_stack()},
+                         "stack": _certified_stack(),
+                         "instrument_sha256": _memory_instrument_sha256()},
             "degraded": degraded,
             "checks": [{"name": n, "ok": o, "detail": d}
                        for n, o, d in mem_checks],
@@ -1120,7 +1255,8 @@ def main() -> int:
     report["sections"]["windows_memory_accounting"] = peak
 
     # --------------------------------------------------------------- 10 ----
-    head("10  the official subprocess runner -- DEPLOYMENT AUTHORITY")
+    head("10  the official subprocess runner -- DEPLOYMENT AUTHORITY",
+         domain=LOCAL)
     if not (a.quick or a.skip_smoke):
         print("      *** THIS SECTION READS CONFIRM-TIER TRUTH. It runs the")
         print("      organisers' v2-phase2 mini split, so the report's")
@@ -1163,7 +1299,7 @@ def main() -> int:
                   f"C/B {smoke['c_over_b']:.7f}")
 
     # --------------------------------------------------------------- 11 ----
-    head("11  residual TAIL -- the soak, not the anecdote")
+    head("11  residual TAIL -- the soak, not the anecdote", domain=LOCAL)
     if not a.residual_soak:
         # NOT a skip(). `skip()` is for a check that would otherwise have run
         # and was suppressed -- it downgrades the verdict to INCOMPLETE, which
@@ -1268,7 +1404,7 @@ def main() -> int:
                   f"safety factor for this one.")
 
     # ---------------------------------------------------------------- R ----
-    head("R  the repository was not modified")
+    head("R  the repository was not modified", domain=MATH)
     # Taken AFTER the run, deliberately: a hash captured before a write cannot
     # see the write. `p1pre_fault_inject.py` shipped that defect once.
     check("R: the candidate file is byte-identical", _sha(cand) == sha_before,
@@ -1310,7 +1446,7 @@ def main() -> int:
     report["checks_tagged"] = _TAGGED
     print()
     print("  EVIDENCE BY DOMAIN -- one verdict over three different questions")
-    for _dom in (MATH, LOCAL, SERVER):
+    for _dom in EVIDENCE_DOMAINS:
         _d = report["checks_by_domain"][_dom]
         print(f"    {_dom:<7} {_d['verdict']:<11} "
               f"{_d['checks']} checks, {len(_d['failed'])} failed, "

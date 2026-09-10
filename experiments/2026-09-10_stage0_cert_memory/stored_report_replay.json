@@ -1,0 +1,475 @@
+{
+  "artifact": "stage0_memory_report_replay",
+  "artifact_version": 1,
+  "consumer_min_version": 4,
+  "instrument_policy": "current-source-sha256",
+  "synthetic_fixtures": {
+    "positive": {
+      "report": {
+        "artifact": "linux_memory_gate",
+        "artifact_version": 4,
+        "candidate": "estimator_candidate.py",
+        "candidate_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "instrument": "local_sim/linux_memory_gate.py",
+        "instrument_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "instrument_policy": "current-source-sha256",
+        "limit_mb": 8192,
+        "width": 1024,
+        "depth": 16,
+        "budget": 2199023255552,
+        "suite_n_mlps": 100,
+        "seed": 90000000101,
+        "weights_mode": "f64_readonly",
+        "repeats": 3,
+        "host_platform": "linux",
+        "status": "PASS",
+        "stack": {
+          "whestbench": "0.16.1",
+          "flopscope": "0.12.1",
+          "numpy": "2.2.6",
+          "python": "3.10.19",
+          "source": "importlib.metadata.version"
+        },
+        "negative_control": {
+          "cap_applied": true,
+          "survived": false
+        },
+        "positive_control": {
+          "survived": true
+        },
+        "lifecycle_controls": {
+          "growth_threshold_bytes": 67108864,
+          "stateless": {
+            "completed": true,
+            "growth_bytes": 1048576
+          },
+          "retaining": {
+            "completed": true,
+            "growth_bytes": 134217728
+          }
+        },
+        "candidate_run": {
+          "stage": "done",
+          "ok": true,
+          "cap_applied": true,
+          "suite_n_mlps": 100,
+          "cap_requested_bytes": 8589934592,
+          "soft_limit_bytes": 8589934592,
+          "predict_error": "",
+          "setup_raised": null,
+          "weights_mode": "f64_readonly",
+          "weight_dtype": "float64",
+          "weight_writeable": false,
+          "whestbench_file": "/venv/site-packages/whestbench/__init__.py",
+          "flopscope_file": "/venv/site-packages/flopscope/__init__.py",
+          "vm_peak_bytes": 1258291200,
+          "repeat_runs": [
+            {
+              "i": 0,
+              "vm_size_settled_bytes": 943718400,
+              "flops_used": 137600000000.0,
+              "error": ""
+            },
+            {
+              "i": 1,
+              "vm_size_settled_bytes": 944766976,
+              "flops_used": 137600000001.0,
+              "error": ""
+            },
+            {
+              "i": 2,
+              "vm_size_settled_bytes": 945815552,
+              "flops_used": 137600000002.0,
+              "error": ""
+            }
+          ],
+          "repeat_error": "",
+          "repeat_vm_size_growth_bytes": 2097152
+        }
+      },
+      "consumer": {
+        "verdict": "CERTIFIED",
+        "applicable": true,
+        "checks": [
+          [
+            "9: the report is bound to the current instrument and workload",
+            true,
+            "v4, current-source-sha256"
+          ],
+          [
+            "9: the cap read back exactly",
+            true,
+            "soft=8589934592"
+          ],
+          [
+            "9: the negative control died under the cap",
+            true,
+            "an enforcement claim needs a dying over-cap control"
+          ],
+          [
+            "9: the positive control survived uncapped",
+            true,
+            "distinguishes the cap from host exhaustion"
+          ],
+          [
+            "9: predict completed under the applied cap",
+            true,
+            ""
+          ],
+          [
+            "9: the deployment arrays are read-only float64",
+            true,
+            "float64, writeable=False"
+          ],
+          [
+            "9: the real packages loaded, not local_sim shims",
+            true,
+            "/venv/site-packages/whestbench/__init__.py"
+          ],
+          [
+            "9: at least three predictions ran in one worker",
+            true,
+            "3 predictions"
+          ],
+          [
+            "9: settled address space did not grow across candidate predictions",
+            true,
+            "+2.0 MB"
+          ],
+          [
+            "9: peak address space is under the cap",
+            true,
+            "VmPeak 1200.0 MB"
+          ]
+        ],
+        "bindings": [
+          {
+            "name": "artifact kind",
+            "ok": true,
+            "detail": "'linux_memory_gate'"
+          },
+          {
+            "name": "instrument path",
+            "ok": true,
+            "detail": "'local_sim/linux_memory_gate.py'"
+          },
+          {
+            "name": "instrument verification policy",
+            "ok": true,
+            "detail": "'current-source-sha256'"
+          },
+          {
+            "name": "instrument sha256",
+            "ok": true,
+            "detail": "bbbbbbbbbbbbbbbb... vs bbbbbbbbbbbbbbbb..."
+          },
+          {
+            "name": "certified shape",
+            "ok": true,
+            "detail": "1024x16 vs 1024x16"
+          },
+          {
+            "name": "certified budget",
+            "ok": true,
+            "detail": "2199023255552 vs 2199023255552"
+          },
+          {
+            "name": "suite lifecycle size",
+            "ok": true,
+            "detail": "100 / child 100"
+          },
+          {
+            "name": "full memory cap",
+            "ok": true,
+            "detail": "8192 MB vs 8192 MB"
+          },
+          {
+            "name": "deployment weight representation",
+            "ok": true,
+            "detail": "f64_readonly / child f64_readonly"
+          },
+          {
+            "name": "distribution version source",
+            "ok": true,
+            "detail": "'importlib.metadata.version'"
+          },
+          {
+            "name": "installed distribution whestbench",
+            "ok": true,
+            "detail": "'0.16.1' vs '0.16.1'"
+          },
+          {
+            "name": "installed distribution flopscope",
+            "ok": true,
+            "detail": "'0.12.1' vs '0.12.1'"
+          },
+          {
+            "name": "lifecycle controls are present",
+            "ok": true,
+            "detail": "dict"
+          },
+          {
+            "name": "stateless lifecycle positive control",
+            "ok": true,
+            "detail": "growth=1048576 threshold=67108864"
+          },
+          {
+            "name": "retaining lifecycle negative control",
+            "ok": true,
+            "detail": "growth=134217728 threshold=67108864"
+          }
+        ],
+        "incomplete": [],
+        "artifact_version": 4
+      }
+    },
+    "negative": {
+      "report": {
+        "artifact": "linux_memory_gate",
+        "artifact_version": 2,
+        "candidate": "estimator_candidate.py",
+        "candidate_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "instrument": "local_sim/linux_memory_gate.py",
+        "limit_mb": 8192,
+        "width": 1024,
+        "depth": 16,
+        "budget": 2199023255552,
+        "suite_n_mlps": 100,
+        "seed": 90000000101,
+        "repeats": 3,
+        "host_platform": "linux",
+        "status": "FAIL",
+        "negative_control": {
+          "cap_applied": true,
+          "survived": true
+        },
+        "positive_control": {
+          "survived": true
+        },
+        "candidate_run": {
+          "stage": "done",
+          "ok": true,
+          "cap_applied": false,
+          "suite_n_mlps": 100,
+          "cap_requested_bytes": 8589934592,
+          "soft_limit_bytes": 8589934592,
+          "predict_error": "MemoryError: deliberate",
+          "setup_raised": null,
+          "weights_mode": "f64_readonly",
+          "weight_dtype": "float64",
+          "weight_writeable": false,
+          "whestbench_file": "/venv/site-packages/whestbench/__init__.py",
+          "flopscope_file": "/venv/site-packages/flopscope/__init__.py",
+          "vm_peak_bytes": 1258291200,
+          "repeat_runs": [
+            {
+              "i": 0,
+              "vm_size_settled_bytes": 943718400,
+              "flops_used": 137600000000.0,
+              "error": ""
+            },
+            {
+              "i": 1,
+              "vm_size_settled_bytes": 944766976,
+              "flops_used": 137600000001.0,
+              "error": ""
+            },
+            {
+              "i": 2,
+              "vm_size_settled_bytes": 945815552,
+              "flops_used": 137600000002.0,
+              "error": ""
+            }
+          ],
+          "repeat_error": "",
+          "repeat_vm_size_growth_bytes": 2097152
+        }
+      },
+      "consumer": {
+        "verdict": "REFUSED",
+        "applicable": true,
+        "checks": [
+          [
+            "9: the applicable report's own status is PASS",
+            false,
+            "status='FAIL'"
+          ],
+          [
+            "9: predict completed under the applied cap",
+            false,
+            "MemoryError: deliberate"
+          ],
+          [
+            "9: the cap was applied in the candidate run",
+            false,
+            "8589934592"
+          ],
+          [
+            "9: the negative control died under the cap",
+            false,
+            "the over-cap allocation survived"
+          ]
+        ],
+        "bindings": [],
+        "incomplete": [
+          "artifact_version 2 < 4: missing current workload, distribution, instrument and lifecycle bindings"
+        ],
+        "artifact_version": 2
+      }
+    },
+    "incomplete": {
+      "report": {
+        "artifact": "linux_memory_gate",
+        "artifact_version": 2,
+        "candidate": "estimator_candidate.py",
+        "candidate_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "instrument": "local_sim/linux_memory_gate.py",
+        "limit_mb": 8192,
+        "width": 1024,
+        "depth": 16,
+        "budget": 2199023255552,
+        "suite_n_mlps": 100,
+        "seed": 90000000101,
+        "repeats": 3,
+        "host_platform": "linux",
+        "status": "PASS",
+        "negative_control": {
+          "cap_applied": true,
+          "survived": false
+        },
+        "positive_control": {
+          "survived": true
+        },
+        "candidate_run": {
+          "stage": "done",
+          "ok": true,
+          "cap_applied": true,
+          "suite_n_mlps": 100,
+          "cap_requested_bytes": 8589934592,
+          "soft_limit_bytes": 8589934592,
+          "predict_error": "",
+          "setup_raised": null,
+          "weights_mode": "f64_readonly",
+          "weight_dtype": "float64",
+          "weight_writeable": false,
+          "whestbench_file": "/venv/site-packages/whestbench/__init__.py",
+          "flopscope_file": "/venv/site-packages/flopscope/__init__.py",
+          "vm_peak_bytes": 1258291200,
+          "repeat_runs": [
+            {
+              "i": 0,
+              "vm_size_settled_bytes": 943718400,
+              "flops_used": 137600000000.0,
+              "error": ""
+            },
+            {
+              "i": 1,
+              "vm_size_settled_bytes": 944766976,
+              "flops_used": 137600000001.0,
+              "error": ""
+            },
+            {
+              "i": 2,
+              "vm_size_settled_bytes": 945815552,
+              "flops_used": 137600000002.0,
+              "error": ""
+            }
+          ],
+          "repeat_error": "",
+          "repeat_vm_size_growth_bytes": 2097152
+        }
+      },
+      "consumer": {
+        "verdict": "INCOMPLETE",
+        "applicable": true,
+        "checks": [],
+        "bindings": [],
+        "incomplete": [
+          "artifact_version 2 < 4: missing current workload, distribution, instrument and lifecycle bindings"
+        ],
+        "artifact_version": 2
+      }
+    }
+  },
+  "source_reports_unchanged": true,
+  "n_reports": 7,
+  "reports": [
+    {
+      "report": "experiments/2026-08-31_wp0cd_certify/linux_memory_gate_estimator_k3_full.json",
+      "source_sha256": "c68c3f3805bf402bb056aaa6813bfc9176d40058d1e26bc61765310008720c0c",
+      "artifact_version": 2,
+      "consumer_verdict": "INCOMPLETE",
+      "applicable": true,
+      "explicit_failed_checks": [],
+      "incomplete_reasons": [
+        "artifact_version 2 < 4: missing current workload, distribution, instrument and lifecycle bindings"
+      ]
+    },
+    {
+      "report": "experiments/2026-08-31_wp0cd_certify/linux_memory_gate_estimator_k3_strassen.json",
+      "source_sha256": "920ed171967a8c66aba76b77cbc581b17203b34f43d57362120e898a5f14e1cb",
+      "artifact_version": 2,
+      "consumer_verdict": "INCOMPLETE",
+      "applicable": true,
+      "explicit_failed_checks": [],
+      "incomplete_reasons": [
+        "artifact_version 2 < 4: missing current workload, distribution, instrument and lifecycle bindings"
+      ]
+    },
+    {
+      "report": "experiments/2026-08-31_wp0cd_certify/linux_memory_gate_estimator_wp18_canary.json",
+      "source_sha256": "b95b4ce749ad2fbe9c66d194e1a7c0a2735500c247b3f8bc7904197080946b4e",
+      "artifact_version": 1,
+      "consumer_verdict": "INCOMPLETE",
+      "applicable": null,
+      "explicit_failed_checks": [],
+      "incomplete_reasons": [
+        "candidate_sha256 is absent; path-only identity is not binding"
+      ]
+    },
+    {
+      "report": "experiments/2026-08-31_wp0cd_certify/linux_memory_gate_v261.json",
+      "source_sha256": "696591f0995c67d83d72bd22ef5461b5effe4fda9315bd1c3f93424021be2855",
+      "artifact_version": 2,
+      "consumer_verdict": "INCOMPLETE",
+      "applicable": true,
+      "explicit_failed_checks": [],
+      "incomplete_reasons": [
+        "artifact_version 2 < 4: missing current workload, distribution, instrument and lifecycle bindings"
+      ]
+    },
+    {
+      "report": "experiments/2026-08-31_wp1_carrier/linux_memory_gate_candidate_carrier_k8.json",
+      "source_sha256": "2485b945536f69de92ccf98cdb520be332870a593b20ad9eef32be52e35413f4",
+      "artifact_version": 1,
+      "consumer_verdict": "INCOMPLETE",
+      "applicable": null,
+      "explicit_failed_checks": [],
+      "incomplete_reasons": [
+        "candidate_sha256 is absent; path-only identity is not binding"
+      ]
+    },
+    {
+      "report": "experiments/2026-09-03_wp18_canary/linux_memory_gate.json",
+      "source_sha256": "7c0503cb3cd7718be09e3dca6b3647de4f3fc71071212a19726a5f61e0259ede",
+      "artifact_version": 1,
+      "consumer_verdict": "INCOMPLETE",
+      "applicable": null,
+      "explicit_failed_checks": [],
+      "incomplete_reasons": [
+        "candidate_sha256 is absent; path-only identity is not binding"
+      ]
+    },
+    {
+      "report": "experiments/2026-09-05_slice1/linux_memory_gate_estimator_k3_full.json",
+      "source_sha256": "3550024efbb2cf3fd43c382c37ed33534285ad1ae410775ab6f469372a0fd254",
+      "artifact_version": 2,
+      "consumer_verdict": "INCOMPLETE",
+      "applicable": true,
+      "explicit_failed_checks": [],
+      "incomplete_reasons": [
+        "artifact_version 2 < 4: missing current workload, distribution, instrument and lifecycle bindings"
+      ]
+    }
+  ]
+}
