@@ -171,10 +171,11 @@ out["suite_n_mlps"] = 100
 from mint_provenance import canonical_mint
 from whestbench import MLP
 
-try:
-    flops.configure(symmetry_warnings=False)
-except Exception:
-    pass
+# Do not call flops.configure here. Under flopscope-client it is deliberately a
+# no-op and emits ConfigureNoOpWarning to stderr. The memory gate treats every
+# unexpected child stderr byte as an instrument failure, so invoking a known
+# no-op merely to suppress in-process symmetry warnings would invalidate the
+# evidence it is trying to collect.
 
 # --- 3. build the network OUTSIDE the budget window, as the grader does ----
 # ONE owner of the weight representation. `lifecycle_eval.build_weights` is it;
@@ -452,10 +453,11 @@ def _wsl() -> "LinuxRunner | None":
     probe = subprocess.run(
         [exe, "-d", WSL_DISTRO, "--exec", "sh", "-c",
          'p="$HOME/.arcwhest-linux/bin/python"; '
-         'test -x "$p" && readlink -f "$p"'],
+         'test -x "$p" && printf "%s\\n" "$HOME"'],
         capture_output=True, text=True, errors="replace", timeout=180)
-    py = (probe.stdout or "").replace("\x00", "").strip()
-    ready = probe.returncode == 0 and py.startswith("/") and "\n" not in py
+    home = (probe.stdout or "").replace("\x00", "").strip()
+    py = home + "/.arcwhest-linux/bin/python"
+    ready = probe.returncode == 0 and home.startswith("/") and "\n" not in home
     if not ready:
         return LinuxRunner(
             "wsl-missing-venv", [], repo,

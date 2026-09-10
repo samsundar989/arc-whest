@@ -258,7 +258,11 @@ def test_literal_linux_runner():
               "the live memory gate cannot certify on this host")
         return
     sentinel = "`printf SOURCE_WAS_MUTATED`"
-    src = "import json; print(json.dumps({'sentinel': " + repr(sentinel) + "}))"
+    src = (
+        "import json,sys; from importlib.metadata import version; "
+        "print(json.dumps({'sentinel': " + repr(sentinel) + ", "
+        "'prefix': sys.prefix, 'whestbench': version('whestbench'), "
+        "'flopscope': version('flopscope')}))")
     result = runner.run(src, [], timeout=60)
     payload = gate._json_tail(result.stdout) or {}
     check("backticks reach Python byte-for-byte instead of shell expansion",
@@ -267,6 +271,13 @@ def test_literal_linux_runner():
     check("the literal-source discriminator writes no stderr",
           not (result.stderr or "").replace("\x00", ""),
           (result.stderr or "")[-80:])
+    check("the literal interpreter remains inside the certified Linux venv",
+          str(payload.get("prefix", "")).endswith("/.arcwhest-linux"),
+          repr(payload.get("prefix")))
+    check("the runner sees the exact installed Phase-2 distributions",
+          payload.get("whestbench") == "0.16.1"
+          and payload.get("flopscope") == "0.12.1",
+          f"{payload.get('whestbench')!r}, {payload.get('flopscope')!r}")
 
 
 def _file_sha(path):
