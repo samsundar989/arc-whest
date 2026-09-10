@@ -374,7 +374,20 @@ def main(argv=None) -> int:
     ap.add_argument("--gens", type=int, nargs="*", default=[2, 3, 4])
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--device", default="cuda")
-    ap.add_argument("--dtype", default="float64")
+    # float32 IS THE COMPARABLE CHOICE, not merely the fast one. D1
+    # (`p2_d1_augment_arm.py:235`) ran `float32`, and its `4.004685e-08` SIMPLE
+    # baseline -- which this run's pre-registered prediction 3 gates on -- is an
+    # f32 number. An f64 arm is measuring a different thing and could not
+    # reproduce it.
+    #
+    # It is also ~46x faster here, and that is not incidental: a consumer RTX
+    # 5090 runs f64 at a small fraction of its f32 rate, and f64 doubles the
+    # state so a 23 GiB AUGMENT arm no longer fits. Job 453 was submitted at
+    # f64, reached 8% in 2h33m against a 60m estimate, held 30.6 of 31.8 GiB,
+    # and was cancelled. THAT IS WHY THIS DEFAULT IS f32 AND WHY IT IS WRITTEN
+    # DOWN: the wrong default here is both a wrong measurement and a queue
+    # outage for every other project on the box.
+    ap.add_argument("--dtype", default="float32", choices=("float32", "float64"))
     ap.add_argument("--verify-walk", action="store_true")
     ap.add_argument("--report", action="store_true")
     ap.add_argument("--upstream",
