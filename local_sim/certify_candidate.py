@@ -180,6 +180,189 @@ print(json.dumps({"sha256": hashlib.sha256(a.tobytes()).hexdigest(),
 '''
 
 
+
+# --------------------------------------------------------------------------- #
+# The memory report's binding check — extracted so it can be MUTATION-TESTED
+#
+# Section 9 used to check four things about a `linux_memory_gate` report: that
+# the cap applied, that the negative control died, that predict raised nothing,
+# and that `status == "PASS"`. It matched the report to the candidate on
+# `candidate_sha256` and then asked NOTHING about what the report had actually
+# run. Every one of `width`, `depth`, `budget`, `limit_mb`, `seed` and the
+# weight representation is a CLI flag on `linux_memory_gate.py`, so a report for
+# the right bytes at 64x4 under a 512 MB cap satisfied all four checks and
+# certified as "the real 8-GiB enforcement".
+#
+# That is a reachable acceptance-path defect, and it was found by reading the
+# source, not by catching a bad report: no stored report is alleged to be
+# misconfigured or forged. `test_linux_memory_binding.py` mutates one field at a
+# time and requires each mutation to be REFUSED.
+#
+# `docs/research/2026-09-10_validation_audit.md` finding 1.
+
+
+#: A version-2 report predates every field below. It is accepted only as an
+#: explicitly DEGRADED result, never as the strong gate, and section 9 says so.
+MEMORY_REPORT_MIN_VERSION = 3
+
+
+
+def _lifecycle_default_mode() -> str:
+    """The ONE weight representation a candidate is certified under."""
+    try:
+        from lifecycle_eval import DEFAULT_WEIGHTS_MODE
+        return DEFAULT_WEIGHTS_MODE
+    except Exception:
+        return "f64_readonly"
+
+
+def _certified_stack() -> dict:
+    """The official package versions THIS host is certifying against.
+
+    Read from the installed packages rather than declared, so a report produced
+    against a different stack cannot be bound to this certification by a
+    constant somebody forgot to bump.
+    """
+    out = {}
+    try:
+        import whestbench as _wb
+        out["whestbench"] = getattr(_wb, "__version__", "")
+    except Exception:
+        pass
+    try:
+        import flopscope as _fs
+        out["flopscope"] = getattr(_fs, "__version__", "")
+    except Exception:
+        pass
+    return {k: v for k, v in out.items() if v}
+
+
+def validate_memory_report(
+    lg,
+    *,
+    candidate_sha256: str,
+    width: int,
+    depth: int,
+    budget: int,
+    cap_mb: int = MEMORY_CAP_MB,
+    weights_mode: str = "f64_readonly",
+    stack: dict | None = None,
+):
+    """Is this memory report evidence about THIS candidate under THIS workload?
+
+    Returns `(checks, degraded)` where `checks` is a list of
+    `(name, ok, detail)` triples in the order section 9 prints them, and
+    `degraded` is a non-empty string when the report is a pre-version-3 artifact
+    that cannot answer the workload questions at all.
+
+    Pure: no filesystem, no subprocess, no globals but the constants above. That
+    is the whole point — the mutation battery drives it directly.
+    """
+    checks = []
+
+    def c(name, ok, detail=""):
+        checks.append((name, bool(ok), str(detail)))
+
+    if not isinstance(lg, dict):
+        c("9: the memory report parses", False, f"got {type(lg).__name__}")
+        return checks, "unparseable"
+
+    ver = int(lg.get("artifact_version", 0) or 0)
+    cr = lg.get("candidate_run") or {}
+    neg = lg.get("negative_control") or {}
+    pos = lg.get("positive_control") or {}
+
+    # ---- identity: the bytes, and the instrument that measured them --------
+    c("9: the report is for the candidate's exact bytes",
+      isinstance(lg.get("candidate_sha256"), str)
+      and lg.get("candidate_sha256") == candidate_sha256,
+      f"{str(lg.get('candidate_sha256'))[:16]}... vs {candidate_sha256[:16]}...")
+
+    degraded = ""
+    if ver < MEMORY_REPORT_MIN_VERSION:
+        degraded = (f"artifact_version {ver} < {MEMORY_REPORT_MIN_VERSION}: this "
+                    "report cannot say what shape, cap, stack or weight "
+                    "representation it ran, so it is NOT the strong gate")
+        c(f"9: the report is artifact_version >= {MEMORY_REPORT_MIN_VERSION}",
+          False, degraded)
+        return checks, degraded
+    c(f"9: the report is artifact_version >= {MEMORY_REPORT_MIN_VERSION}", True,
+      f"v{ver}, instrument {str(lg.get('instrument_sha256'))[:16]}...")
+    c("9: ...and it names the instrument that produced it",
+      bool(lg.get("instrument_sha256")), str(lg.get("instrument", "")))
+
+    # ---- the WORKLOAD. This is the whole repair. ---------------------------
+    c("9: the report ran the certified SHAPE",
+      int(lg.get("width", -1)) == int(width)
+      and int(lg.get("depth", -1)) == int(depth),
+      f"{lg.get('width')}x{lg.get('depth')} vs {width}x{depth}")
+    c("9: ...at the certified BUDGET",
+      int(lg.get("budget", -1)) == int(budget),
+      f"{lg.get('budget')} vs {budget}")
+    c("9: ...under the FULL 8,192 MB cap, not a looser one",
+      int(lg.get("limit_mb", -1)) == int(cap_mb),
+      f"{lg.get('limit_mb')} MB vs {cap_mb} MB")
+    c("9: ...and the cap it reports is the cap the child READ BACK",
+      int(cr.get("cap_requested_bytes", -1)) == int(cap_mb) * 1024 * 1024
+      and int(cr.get("soft_limit_bytes", -2)) == int(cap_mb) * 1024 * 1024,
+      f"soft={cr.get('soft_limit_bytes')} requested={cr.get('cap_requested_bytes')}")
+    # The DECLARED mode must match, and for the deployment mode the child's own
+    # probe of the array it built must agree. A report can declare
+    # "f64_readonly" and hand the candidate a writable float32 array; the
+    # declaration is what the operator typed, the probe is what ran.
+    _mode_ok = (lg.get("weights_mode") == weights_mode
+                and cr.get("weights_mode") == weights_mode)
+    if _mode_ok and weights_mode == "f64_readonly":
+        _mode_ok = (cr.get("weight_dtype") == "float64"
+                    and cr.get("weight_writeable") is False)
+    c("9: ...on the DEPLOYMENT weight representation", _mode_ok,
+      f"{lg.get('weights_mode')} / child {cr.get('weights_mode')} "
+      f"(dtype {cr.get('weight_dtype')}, writeable {cr.get('weight_writeable')})")
+
+    # ---- the official stack --------------------------------------------------
+    if stack:
+        got = lg.get("stack") or {}
+        for pkg, want in sorted(stack.items()):
+            if not want:
+                continue
+            c(f"9: ...against the certified {pkg} {want}",
+              str(got.get(pkg, "")) == str(want),
+              f"report says {got.get(pkg, '(absent)')!r}")
+
+    # ---- the controls, and the run ------------------------------------------
+    c("9: the cap was APPLIED in that run (soft == requested)",
+      cr.get("cap_applied") is True, str(cr.get("soft_limit_bytes")))
+    c("9: the negative control DIED under the cap",
+      neg.get("survived") is False,
+      "a gate whose cap is not in force proves nothing")
+    c("9: the positive control SURVIVED uncapped",
+      pos.get("survived") is True,
+      "so the death above is the cap, not the machine")
+    c("9: predict completed under the real cap",
+      cr.get("predict_error") == "" and lg.get("status") == "PASS",
+      f"VmPeak {(cr.get('vm_peak_bytes') or 0) / 2**20:.1f} MB of {cap_mb} MB")
+    c("9: the real packages loaded, not local_sim's shims",
+      "local_sim" not in str(cr.get("whestbench_file", ""))
+      and "local_sim" not in str(cr.get("flopscope_file", "")),
+      str(cr.get("whestbench_file", ""))[-46:])
+
+    # ---- suite-lifetime stability -------------------------------------------
+    reps = cr.get("repeat_runs") or []
+    c("9: predict ran MORE THAN ONCE in the same worker",
+      len(reps) >= 2 and cr.get("repeat_error") == "",
+      cr.get("repeat_error") or f"{len(reps)} predictions")
+    c("9: ...and address space did not grow across them",
+      abs(int(cr.get("repeat_vm_peak_growth_bytes", 1 << 40))) < 64 * (1 << 20),
+      f"+{int(cr.get('repeat_vm_peak_growth_bytes', 0)) / 2**20:.1f} MB")
+
+    peak = int(cr.get("vm_peak_bytes") or 0)
+    c("9: peak ADDRESS SPACE is under the cap",
+      0 < peak <= int(cap_mb) * 1024 * 1024,
+      f"VmPeak {peak / 2**20:.1f} MB -> "
+      f"{(cap_mb * 1024 * 1024) / peak:.2f}x" if peak else "unmeasured")
+    return checks, degraded
+
+
 def _json_tail(text):
     for line in reversed((text or "").splitlines()):
         line = line.strip()
@@ -768,18 +951,36 @@ def main() -> int:
               else "a pre-2026-09-05 report with no candidate_sha256 -- "
                    "regenerate it with linux_memory_gate.py to certify the "
                    "BYTES rather than the filename")
-        if True:
-            cr = lg.get("candidate_run", {})
-            check("9: the cap was APPLIED in that run (soft == requested)",
-                  cr.get("cap_applied") is True, str(cr.get("soft_limit_bytes")))
-            check("9: the negative control DIED under the cap",
-                  (lg.get("negative_control") or {}).get("survived") is False,
-                  "a gate whose cap is not in force proves nothing")
-            check("9: predict completed under the real cap",
-                  cr.get("predict_error") == "" and lg.get("status") == "PASS",
-                  f"VmPeak {(cr.get('vm_peak_bytes') or 0) / 2**20:.1f} MB of "
-                  f"{MEMORY_CAP_MB} MB")
-        report["sections"]["linux_memory_gate"] = os.path.relpath(lg_path, _ROOT)
+        mem_checks, degraded = validate_memory_report(
+            lg,
+            candidate_sha256=sha_before,
+            width=a.width, depth=a.depth, budget=a.budget,
+            cap_mb=MEMORY_CAP_MB,
+            weights_mode=_lifecycle_default_mode(),
+            stack=_certified_stack(),
+        )
+        for _name, _ok, _detail in mem_checks:
+            check(_name, _ok, _detail)
+        if degraded:
+            skip("9: the STRONG 8-GiB enforcement gate", degraded +
+                 ". Regenerate: uv run python local_sim/linux_memory_gate.py "
+                 "--candidate %s --json <dir>/linux_memory_gate_%s.json"
+                 % (rel, stem))
+        # A path is not evidence. Record what was checked, so the artifact can
+        # be re-audited without re-running the gate.
+        report["sections"]["linux_memory_gate"] = {
+            "report": os.path.relpath(lg_path, _ROOT),
+            "matched_on": lg_match,
+            "artifact_version": lg.get("artifact_version"),
+            "instrument_sha256": lg.get("instrument_sha256", ""),
+            "bound_to": {"width": a.width, "depth": a.depth, "budget": a.budget,
+                         "cap_mb": MEMORY_CAP_MB,
+                         "weights_mode": _lifecycle_default_mode(),
+                         "stack": _certified_stack()},
+            "degraded": degraded,
+            "checks": [{"name": n, "ok": o, "detail": d}
+                       for n, o, d in mem_checks],
+        }
     report["sections"]["windows_memory_accounting"] = peak
 
     # --------------------------------------------------------------- 10 ----

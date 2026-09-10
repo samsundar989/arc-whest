@@ -454,8 +454,20 @@ Step "10. vault integrity (array hashes + seed->weights)" {
 # call setup(); the grader builds ONE and calls setup() once, OFF-budget. This
 # suite pins that lifecycle, the six failure paths, and the immutable evidence
 # rows -- the object every future candidate comparison is scored through.
-Step "11. lifecycle evaluator" {
+Step "11. lifecycle evaluator + the certification consumers' mutation battery" {
     uv run python local_sim/lifecycle_eval.py --self-test
+    if ($LASTEXITCODE -ne 0) { return }
+    # SECOND COMMAND, ONE STEP -- the denominator stays SIXTEEN.
+    #
+    # Added 2026-09-10 (Stage 0 R2). certify_candidate.py section 9 used to
+    # accept a linux_memory_gate report on four checks that said nothing about
+    # WHAT the report had run: shape, depth, budget, memory cap and weight
+    # representation are all CLI flags on that gate, and none was compared to
+    # the candidate being certified. This battery mutates a good report one
+    # field at a time and requires each mutation to be REFUSED. It is pure --
+    # no subprocess, no candidate execution -- so it belongs in the cheap gate;
+    # the expensive candidate run stays queued.
+    uv run python local_sim/test_linux_memory_binding.py
 }
 
 # --- 12. the counted-FLOP anchor against the OFFICIAL runner --------------------
