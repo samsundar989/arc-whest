@@ -41334,3 +41334,22 @@ restriction, protected-schema rejection in synthetic mode, identity mismatch and
 the documented CLI. All recorded source/input hashes reverify. This proves the
 selection/receipt interface only; it is not a fit, score result or permission to
 open P07. Samuel's three predictions remain pending.
+
+**Independent review and repair.** The first fresh Skeptic **REJECTED** commit
+`17eda81`: it was a sound selector, but no repository producer bound registered
+values to generated candidate bytes and canonical lifecycle predictions/costs.
+Commit `96b2a04` adds that producer. It exclusively writes one candidate-specific
+coherent module per registered `lam`, evaluates shared synthetic MLP identities
+through `lifecycle_eval.evaluate`, and writes a candidate-indexed archive plus
+producer receipt. The selector verifies repository-contained paths, exact file
+hashes, encoded coherent switches/value, candidate order, identities and costs
+before calling its truth loader.
+
+The replacement end-to-end artifact
+`experiments/2026-09-10_stage2_fit_interface_final/synthetic_checks.json` passes
+14/14. Mutating source bytes, its recorded hash, source order, cost, candidate
+order or identity refuses with zero loader calls. The candidate sources, archive
+and both receipts re-hash consistently; all three candidates cost 12,473 FLOPs on
+each of the two tiny identities. The same Skeptic reran the suite and returned
+**ACCEPT**. Its deliberate limitation is binding: this proves only small synthetic
+producer-to-selector conformance, not P07 runtime, a fitted value or useful score.
