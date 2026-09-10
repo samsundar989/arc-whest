@@ -30,7 +30,7 @@ levers priced and closed, each with a mechanism.***
 *Cumulant information in flight pays only when the tower that consumes it is
 exact: a cost-accuracy account of factored κ₃ propagation at width 1024*
 
-## Abstract *(draft 2026-09-10 — rewrite once T1 lands)*
+## Abstract *(draft 2026-09-10, revised after T1)*
 
 We give a measured account of what limits white-box estimation of expected
 post-ReLU activations for a random ReLU MLP at width 1024 and depth 16, under an
@@ -39,14 +39,22 @@ analytical FLOP budget.
 Our organising result is structural rather than numerical. Factored cumulant
 propagation carries κ₃ as a rank-`kn` object whose columns are *born* at each
 layer, and the accuracy of the scheme is set almost entirely by whether the tower
-that consumes those columns is **exact**. We show this three times over, from three
+that consumes those columns is **exact**. We show this four times over, from four
 independent directions: truncating the tower by generation destroys the gain of the
 richest scheme we could price, to the point where the truncated rich scheme is
 statistically indistinguishable from the truncated poor one; *collapsing* the tower
-(regenerating it each layer) beats truncating it per FLOP; and a scheme that
+(regenerating it each layer) beats truncating it per FLOP; a scheme that
 carries the fourth cumulant as an `(n,n)` object rather than a scalar is `2.09×`
 more accurate but births `8n` columns per layer against `2n`, which is `3.6×–5.8×`
-over the hard budget at every recursion depth we priced.
+over the hard budget at every recursion depth we priced; and — the sharpest of the
+four — suppressing exactly those births while leaving the fourth cumulant itself
+live and every diagram that consumes it running is not `2.09×` worse but **`74×`
+worse than never tracking it as a matrix at all.**
+
+That last result carries a width argument the others do not. The inconsistent
+scheme's error barely falls as width grows while the consistent one's falls two
+orders of magnitude, so an inexact tower does not merely forfeit the gain — it
+installs an error floor that swamps what the width was buying.
 
 We then price and close five levers, each with a mechanism and a number: the exact
 `W Wᵀ` metric (`1.07×` at width 1024, decaying with width exactly as concentration
@@ -57,7 +65,9 @@ matmuls has the redundancy this meter discounts), generation truncation, and
 last-layer capping.
 
 Finally we report what we could and could not reproduce of the public
-leaderboard's shared floor. `OWED: (vi), after T1 and the depth-2 graded row.`
+leaderboard's shared floor: its accuracy, yes, in a reference implementation; its
+cost, no, and we exclude both public routes to it. `OWED: (vi) needs the depth-2
+graded row and T2.`
 
 ---
 
