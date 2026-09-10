@@ -1,0 +1,73 @@
+{
+  "slice": "hybrid Strassen price at 1024x16",
+  "candidate": "estimator_k3_strassen.py",
+  "graded_anchors": [
+    {
+      "name": "k3_full (L=0)",
+      "sub": 330212,
+      "B": 0.7797,
+      "ops": 3249,
+      "worst_wall_s": 9.54,
+      "kernel_s": 7.97,
+      "intensity": 215.1,
+      "leaf": 1024
+    },
+    {
+      "name": "Strassen L=3",
+      "sub": 330327,
+      "B": 0.53745,
+      "ops": 12357,
+      "worst_wall_s": 61.93,
+      "kernel_s": 51.8,
+      "intensity": 22.82,
+      "leaf": 128,
+      "recorded_intensity_that_does_not_reproduce": 17.0
+    },
+    {
+      "name": "Strassen L=4",
+      "sub": 330290,
+      "B": 0.48578,
+      "ops": 15393,
+      "worst_wall_s": 114.68,
+      "kernel_s": null,
+      "intensity": null,
+      "leaf": 64
+    }
+  ],
+  "intensity_law": {
+    "c": 0.12158812912709654,
+    "p": 1.078878942673914,
+    "note": "two-point fit across an 8x leaf lever; order-of-magnitude guide, never a price"
+  },
+  "target_wall_s": 75.0,
+  "rows": [
+    {
+      "eff_depth": 2,
+      "leaf": 256,
+      "flops": 1328654462566,
+      "n_ops": 9304,
+      "B": 0.6042020970953672,
+      "proj_intensity_gflops": 48.20483087775435,
+      "proj_kernel_s": 27.562682792839126,
+      "proj_worst_wall_s": 32.95283678302176,
+      "proj_margin_vs_cap": 3.6415681232587365,
+      "proj_margin_under_contention": 2.27598007703671
+    },
+    {
+      "eff_depth": 3,
+      "leaf": 128,
+      "flops": 1181829852774,
+      "n_ops": 12340,
+      "B": 0.5374339947475164,
+      "proj_intensity_gflops": 22.81999999999999,
+      "proj_kernel_s": 51.789213530850155,
+      "graded_B_rel_err": 2.977998415401471e-05,
+      "proj_worst_wall_s": 61.917104130609076,
+      "proj_margin_vs_cap": 1.9380751358601946,
+      "proj_margin_under_contention": 1.2112969599126215
+    }
+  ],
+  "meets_target": null,
+  "tier": "ROUTINE. No seed block, no gate, no shipped-file change.",
+  "wall_caveat": "PROJECTED. Local absolute wall times are not quotable (docs/VALIDATION.md); only a graded subprocess row settles wall."
+}

@@ -38567,3 +38567,102 @@ because it is the counter-example to this slice's own worst habit: **the two
 expensive mistakes here (a `2h33m` f64 run, a `3h46m` run at the wrong operating
 point) both came from building before measuring the cheapest discriminating
 quantity.**
+
+# 2026-09-10 — CONTRACT (Rule 1): **nominee A moves to Strassen depth 2**, certified then canaried
+
+*Pre-registered before any certification datum exists. Handoff
+`docs/STRATEGIST_RESPONSE_2026-09-10.md` §4 and §5 step 1. Candidate
+`estimator_k3_strassen_L2.py`, sha256 `390bc226bbf517df0110facfc0dc91c78ef670e8a49368a536cabf630057d1db`.
+Artifacts under `experiments/2026-09-10_slice5/`. Committed before the ladder runs.*
+
+**Question.** Nominee A is submission `330327` (Strassen depth 3, `0.53743 B`,
+graded worst wall `61.93 s`), whose margin under the **measured** `1.60x` graded
+wall contention is `1.21x`. The standing nominee rule requires **`>= 2.0x`
+projected worst-wall margin**. Depth 2 satisfies it at `2.28x` for `12.4%` more
+score. **Does the depth-2 file certify, and what does the grader give it?**
+
+**Evidence.**
+- CONFIRMED: `estimator_k3_strassen.py` sha `3ad05d75...` is submission `330327`'s
+  bytes and MUST NOT be edited. The candidate is a **copy** with the single
+  constant `_STRASSEN_DEPTH` rewritten `3 -> 2`; byte delta is `0` and the diff is
+  one character.
+- CONFIRMED (job re-run today, `experiments/2026-09-10_slice5/hybrid_price_L2_recheck.json`):
+  depth 2 is `0.60420 B`, `9,304` flopscope ops, projected worst wall `33.0 s`,
+  margin `3.64x` free / **`2.28x` under the measured `1.60x` contention**. The same
+  instrument reproduces the depth-3 graded anchor to `+0.003%` (`0.53743` vs graded
+  `0.53745`) and predicted the held-out depth-4 graded wall to `+3.1%`.
+- CONFIRMED: graded residual law `10.7-11.2 us/op` over `2.7k-15.4k` ops. At
+  `9,304` ops that projects `0.100-0.104 s` against the `0.4 s` cliff.
+- CONFIRMED: graded depth 3 scored `2.031e-08` at `0.53743 B`; the multiplier is
+  `max(0.1, F/2^41)`, so raw is unchanged by depth and only the multiplier moves.
+- INFERRED: raw MSE is **identical** across Strassen depths up to floating-point
+  associativity. Strassen is an exact rearrangement of the same matmul.
+- SPECULATIVE: the `+2^24` server FLOP offset (`+0.0122%`) applies here as it did
+  to the two graded Strassen rows.
+
+**Hypothesis + mechanism.** Strassen depth changes only the *spelling* of every
+matmul, not the arithmetic result to within rounding. So raw MSE moves at most by
+float32 associativity noise, and the graded score moves **only** through the
+multiplier `F/2^41`: `0.60420 / 0.53743 = 1.1242`. The mechanism is arithmetic,
+not statistical, which is why this slice's binding test is **certification and a
+graded row**, not an accuracy comparison.
+
+**Intervention.** One constant. `_STRASSEN_DEPTH = 3 -> 2`. Nothing else changes.
+
+**Predictions (numbered, recorded before the ladder runs).**
+1. Graded `final_layer_mse` (raw) reproduces depth 3's raw to within `0.5%`.
+   Depth 3 graded `2.031e-08` at multiplier `0.53743` implies raw
+   `3.779e-08`; so depth 2's raw lands in `[3.760e-08, 3.798e-08]`.
+2. Graded **score** lands in `[2.26e-08, 2.30e-08]` (raw x `0.60420`, plus the
+   server offset). Point estimate `2.283e-08`.
+3. Graded worst wall lands in `[26 s, 45 s]` — the projection is `33.0 s` and the
+   instrument's one out-of-sample wall test read `+3.1%`, but graded wall varies
+   `1.6x` on identical bytes, so the interval is asymmetric and wide.
+4. Graded ops `9,304 +- 0`; graded residual `<= 0.15 s`; `n_failed_mlps = 0`.
+5. Certification: `edge_cases --real-flopscope --phase2` passes on the candidate at
+   the same count as the depth-3 file, and the grader-twin f64-read-only arm is
+   f32-tolerance-identical.
+
+**Gate.** Certification is **conjunctive and all of it is pre-registered now**:
+(a) `whest validate` clean; (b) certify sections 1-11 with no FAIL; (c) grader-twin
+f64 read-only arm identical within f32 tolerance and any FLOP delta explained;
+(d) `edge_cases --real-flopscope --phase2` on the candidate with no regression
+against the depth-3 file; (e) flopscope ops `<= 24,000`; (f) projected residual
+`<= 0.3 s`; (g) Linux memory gate green on this exact sha; (h) official mini-100
+subprocess run with `n_failed_mlps: 0`. **Any FAIL stops the canary.**
+
+**Falsifier.** Prediction 1 is falsified by a graded raw outside `[3.76e-08,
+3.80e-08]`, which would mean Strassen depth is **not** accuracy-neutral and the
+whole depth ladder has been mispriced. Prediction 3 is falsified by a graded worst
+wall above `75 s`, which would falsify the wall model that the `>= 2.0x` margin
+rule is built on and would put the rule itself back in question.
+
+**Baseline.** Submission `330327` (depth 3), graded, `2.031e-08`, `61.93 s` worst
+wall. Graded tier.
+
+**Cost model.** Phase 2, `lambda = 0`, so `C = F`. Counted FLOPs are **frozen at
+`0.60420 B` = `1,329,251,860,480` FLOPs** before the run, from the installed
+official stack via `p2_hybrid_strassen_price.py`. Residual is reported as
+**headroom against the `0.4 s` cliff**: projected `0.100-0.104 s` from the graded
+`10.7-11.2 us/op` law, i.e. `3.8x-4.0x` headroom, quoted against the worst
+observed graded run.
+
+**Statistic.** None. This is a deterministic accounting change plus one graded row;
+there is no paired comparison and no promotion boolean. `competition_score.decide()`
+is **not** invoked and must not be — nothing here is a method comparison.
+
+**Seed block.** `# seed-ledger: no block named`. Certification reads no truth
+except section 10, which is the organisers' own mini split (CONFIRM tier,
+read-only, chooses nothing). No DECIDE-tier data is spent.
+
+**Confounders / scope / what must not change.** `estimator_k3_strassen.py` is not
+touched (its sha is a graded submission's bytes). `estimator.py` stays at
+**v2.6.1**. The installed stack stays pinned at whestbench `0.16.1` /
+flopscope `0.12.1`; certification re-asserts it. **Nothing is designated by this
+contract** — the canary buys a graded row so that depth 2 *can* be designated by
+Samuel later.
+
+**Approval.** Samuel approved the depth-2 canary submission up front on
+2026-09-10, per submission, in the Slice 5 handoff message. Hard rule 6's order is
+still executed in full: `whest validate` -> clean mini run -> the certification
+gate above -> `whest submit`, with the sha256 logged.
