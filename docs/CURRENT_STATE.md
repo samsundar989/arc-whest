@@ -34,6 +34,11 @@ exposed DESIGN, P07 remains DESIGN, and P08 remains exhausted. New Samuel
 predictions are required before the first repaired coherent-K4 result. Until they
 are recorded and committed, fitting and label-consuming execution remain stopped.
 
+The bounded fitting/receipt interface is implemented at `17eda81` and passes 11/11
+synthetic checks. It restricts protected fitting to P07, validates before reserving
+truth, refuses unequal-cost candidates for its MSE objective, and writes an
+exclusive immutable receipt. No real fit has run.
+
 The old full mutation job 576 was found and is a failure on obsolete snapshot
 `fd9173` (31.8 GiB peak, old package versions); it is not current evidence. Git
 snapshot preflight 612 failed global byte-identity gates because checkout

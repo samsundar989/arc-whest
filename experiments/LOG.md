@@ -41308,3 +41308,29 @@ submission, designation or eligibility action is authorized. After this DESIGN
 result, stop for synthesis and a fresh Skeptic before writing any fresh-DECIDE
 contract. Residual-rank, shared-basis and nested-tier questions remain later
 separate interventions in GAME_PLAN order.
+
+### Label-free fitting-interface implementation
+
+Commit `17eda81` implements `local_sim/p2_k4_fit.py` without opening labels. It
+accepts only an explicit candidate registry and matching min/max bounds, exposes
+only the repaired generator's `lam` parameter, and consumes precomputed predictions
+and counted costs. The final-layer-MSE objective is allowed only when counted cost
+is exactly value-independent across candidates for every identity; otherwise it
+refuses before the truth loader. Protected use is restricted to exact block P07 and
+goes through `truth_reads`; synthetic mode requires an explicit unprotected
+manifest and cannot accept the protected schema.
+
+The non-overwriting receipt uses exclusive creation and records identities,
+objective, bounds, all input hashes, verified current fitter/generator/arm hashes,
+producer-asserted per-candidate source hashes, cost matrix, per-candidate results,
+the frozen selection and any protected reservation receipt. The distinction
+between verified current sources and producer assertions is explicit.
+
+Synthetic evidence at
+`experiments/2026-09-10_stage2_fit_interface_final/synthetic_checks.json` passes
+11/11: optimum selection, required provenance, role separation, cost preservation,
+overwrite refusal, invalid-before-loader ordering, unequal-cost refusal, exact-P07
+restriction, protected-schema rejection in synthetic mode, identity mismatch and
+the documented CLI. All recorded source/input hashes reverify. This proves the
+selection/receipt interface only; it is not a fit, score result or permission to
+open P07. Samuel's three predictions remain pending.
