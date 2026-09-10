@@ -24,6 +24,7 @@ import numpy as np  # noqa: E402
 import lifecycle_eval as le  # noqa: E402
 import p2_corrector as corrector  # noqa: E402
 import p2_lab as lab  # noqa: E402
+import p2_k3_parity as k3_parity  # noqa: E402
 import p2_t2_corrector as t2_corrector  # noqa: E402
 import truth_reads as tr  # noqa: E402
 
@@ -169,10 +170,16 @@ def test_block_identity_mismatch_precedes_truth():
                 t2_fit_refused = False
             except SystemExit as exc:
                 t2_fit_refused = "REFUSED before feature-label access" in str(exc)
+            os.replace(feat_p08, truth_p08)
+            pred = os.path.join(td.name, "pred.npz")
+            np.savez(pred, __meta__=np.asarray(json.dumps({"seeds": [101, 202]})))
+            parity_rc = k3_parity.main([
+                "--score", pred, truth_p08, "--score-block", "P01"])
         check("p2_lab refuses P08-as-P01 through its real main()", lab_rc == 2)
         check("p2_corrector refuses P08-as-P01", corrector_refused)
         check("p2_t2_corrector refuses P08-as-P01 before importing its chain", t2_refused)
         check("p2_t2_corrector also binds truth-bearing feature files", t2_fit_refused)
+        check("p2_k3_parity refuses a mismatched generic score input", parity_rc == 2)
         check("all mismatch refusals precede truth reservation", not calls,
               f"loader calls={len(calls)}")
 
@@ -277,6 +284,9 @@ def test_corrector_and_history():
     hits = tr.audit_direct_loads()
     check("the direct-load audit no longer finds p2_corrector",
           not any(h["file"].endswith("p2_corrector.py") for h in hits))
+    parity_hits = [h for h in hits if h["file"].endswith("p2_k3_parity.py")]
+    check("p2_k3_parity's remaining direct loads are classified no-label artifacts",
+          len(parity_hits) == 3 and all(h["classification"] for h in parity_hits))
     check("P01's three reads and P08's exhausted three reads are preserved",
           p01 == 3 and p08 == 3 and tr.spent("P01") == p01 and
           tr.spent("P08") == p08 and _sha(tr.READS_PATH) == before,

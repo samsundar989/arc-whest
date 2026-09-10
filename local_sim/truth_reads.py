@@ -383,9 +383,13 @@ def audit_direct_loads(root: str = _ROOT) -> List[Dict[str, Any]]:
             uses_reserve = "truth_reads" in text
             for i, ln in enumerate(lines, 1):
                 if _LOAD_CALL.search(ln):
+                    classification = ""
+                    if "truth-reads: no-labels" in ln:
+                        classification = "derived_or_prediction_artifact_without_labels"
                     hits.append({"file": _rel(p), "line": i,
                                  "text": ln.strip()[:110],
-                                 "imports_truth_reads": uses_reserve})
+                                 "imports_truth_reads": uses_reserve,
+                                 "classification": classification})
     return hits
 
 

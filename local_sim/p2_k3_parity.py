@@ -280,8 +280,8 @@ def _rel(a, b):
 
 
 def cmd_compare(a) -> int:
-    A = np.load(a.compare[0], allow_pickle=False)
-    B = np.load(a.compare[1], allow_pickle=False)
+    A = np.load(a.compare[0], allow_pickle=False)  # truth-reads: no-labels
+    B = np.load(a.compare[1], allow_pickle=False)  # truth-reads: no-labels
     ma = json.loads(str(A["__meta__"]))
     mb = json.loads(str(B["__meta__"]))
     print(f"  A  {os.path.relpath(a.compare[0], _ROOT)}")
@@ -376,10 +376,19 @@ def cmd_score(a) -> int:
     as a positive bias. Both are printed; the cross product is the one quoted.
     This reads an existing artifact and mints nothing.
     """
-    P = np.load(a.score[0], allow_pickle=False)
+    P = np.load(a.score[0], allow_pickle=False)  # truth-reads: no-labels
     mp = json.loads(str(P["__meta__"]))
-    T = np.load(a.score[1], allow_pickle=False)
-    if "probe" in T.files and int(T["probe"]) == 1:
+    import truth_reads
+    try:
+        block = truth_reads.resolve_block(a.score[1], a.score_block)
+        T = truth_reads.load_truth(
+            block, a.score[1], consumer="local_sim/p2_k3_parity.py",
+            purpose="WP16 parity clause 2 against minted truth",
+            instrument=os.path.abspath(__file__), result_artifact=a.out, ts=a.ts)
+    except truth_reads.ReadRefused as exc:
+        print(f"  REFUSED before truth access: {exc}")
+        return 2
+    if "probe" in T and int(T["probe"]) == 1:
         print("  REFUSED: that is a PROBE truth file, not evidence.")
         return 1
     tseeds = [int(x) for x in T["seeds"]]
@@ -443,13 +452,17 @@ def _dump(path, doc):
     print(f"  wrote {os.path.relpath(path, _ROOT)}")
 
 
-def main() -> int:
+def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", action="store_true")
     ap.add_argument("--ref", action="store_true")
     ap.add_argument("--compare", nargs=2, default=None)
     ap.add_argument("--score", nargs=2, default=None,
                     metavar=("PORT_NPZ", "TRUTH_NPZ"))
+    ap.add_argument("--score-block", default="",
+                    help="truth block for --score; filename identity wins")
+    ap.add_argument("--ts", default="",
+                    help="historical event timestamp only; omit for runtime receipt")
     ap.add_argument("--band", nargs=2, type=float, default=(7.0e-07, 1.1e-06))
     ap.add_argument("--reference", type=float, default=8.5075e-07)
     ap.add_argument("--width", type=int, default=WIDTH)
@@ -467,7 +480,7 @@ def main() -> int:
     ap.add_argument("--all-layers", action="store_true")
     ap.add_argument("--gate", type=float, default=0.01)
     ap.add_argument("--out", default="")
-    a = ap.parse_args()
+    a = ap.parse_args(argv)
 
     print("=" * 78)
     print("WP16 / Blocker A  --  port vs upstream at non-zero kappa_3")
