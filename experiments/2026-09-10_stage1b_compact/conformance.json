@@ -1,6 +1,6 @@
 {
   "kind": "label-free compact reference conformance",
-  "source_sha256": "ff1b302a6a301979a0228035fc43a38ccc85b6106dc816ee3040c3674ef18f70",
+  "source_sha256": "4476457af5b653119e1836b8fc38843627656f96219507e8f88937b612f38bbe",
   "checks": [
     {
       "check": "layer-0 exact-full-rank",

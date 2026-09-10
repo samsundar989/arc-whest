@@ -1,7 +1,7 @@
 {
   "kind": "label-free end-to-end compact all-history reference ledger",
   "evidence_note": "Counted-cost and lifecycle evidence for this research reference only; it makes no accuracy or competitiveness claim.",
-  "source_sha256": "ff1b302a6a301979a0228035fc43a38ccc85b6106dc816ee3040c3674ef18f70",
+  "source_sha256": "4476457af5b653119e1836b8fc38843627656f96219507e8f88937b612f38bbe",
   "shape": [
     12,
     7
@@ -609,7 +609,16 @@
     "context_flops": 741048,
     "exact": true,
     "tiny_dense_oracle_executed": true,
-    "tiny_dense_D3_max_relative": 1.8917704808218971e-07,
-    "tiny_dense_D21_max_relative": 2.2251765002812007e-07
+    "tiny_dense_D3_max_relative": 1.8104901094995185e-07,
+    "tiny_dense_D21_max_relative": 2.1651221304708201e-07,
+    "tiny_dense_closure_max_relative": {
+      "k4_core": 0.0,
+      "k4_consumers": 1.2804573856772805e-07,
+      "mean": 1.7854513145731943e-08,
+      "covariance": 6.40211751390396e-08,
+      "birth": 2.1595680863711886e-07
+    },
+    "tiny_dense_shadow_max_relative": 2.838220038992034e-07,
+    "tiny_dense_shadow_ages_exact": true
   }
 }

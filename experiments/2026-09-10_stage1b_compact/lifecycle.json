@@ -1,6 +1,6 @@
 {
   "kind": "label-free end-to-end compact lifecycle",
-  "source_sha256": "ff1b302a6a301979a0228035fc43a38ccc85b6106dc816ee3040c3674ef18f70",
+  "source_sha256": "4476457af5b653119e1836b8fc38843627656f96219507e8f88937b612f38bbe",
   "shape": [
     12,
     7
@@ -11,6 +11,8 @@
     "deterministic_calls": true,
     "family_context_parity": true,
     "tiny_dense_oracle": true,
+    "tiny_dense_closure": true,
+    "tiny_dense_shadow": true,
     "finite_shape": true,
     "all_history_retained": true,
     "initial_empty": true,

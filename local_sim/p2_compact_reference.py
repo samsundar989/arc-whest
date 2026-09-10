@@ -40,7 +40,7 @@ def _source_sha256():
 
 
 def _rel(a, b):
-    a, b = np.asarray(a), np.asarray(b)
+    a, b = np.asarray(a, dtype=np.float64), np.asarray(b, dtype=np.float64)
     if not np.isfinite(a).all() or not np.isfinite(b).all():
         return float("inf")
     scale = max(float(np.max(np.abs(a))), float(np.max(np.abs(b))), 1e-300)
@@ -134,6 +134,114 @@ def dense_slices(sources, need_d21=True):
                     + ((PP @ source.L) @ source.Z.T) / 3.0
                     + (rf[:, None] * source.Y[None, :]) / 3.0)
     return d3, d21
+
+
+def dense_closure_oracle(rows, n, residual_rank):
+    """Independently recompute every nonlinear closure field from dense arrays."""
+    worst = {name: 0.0 for name in
+             ("k4_core", "k4_consumers", "mean", "covariance", "birth")}
+    off_mask = np.ones((n, n)) - np.eye(n)
+    for row in rows:
+        row = {k: (None if v is None else
+                   tuple(np.asarray(x) for x in v) if k == "newborn" else
+                   np.asarray(v) if hasattr(v, "shape") else v)
+               for k, v in row.items()}
+        W, C_old = row["W"], row["C_old"]
+        mu_pre, var_pre = row["mu_pre"], row["var_pre"]
+        C_off, D3 = row["C_off"], row["D3"]
+        w1, w2, w3, w4 = row["w1"], row["w2"], row["w3"], row["w4"]
+        if row["gcore_in"] is None:
+            dG = np.zeros(n)
+        else:
+            dG = ((W * W) @ (row["gcore_in"] - np.diag(C_old) / 3.0)
+                  + var_pre / 3.0)
+        D4 = 2.0 * dG
+        D22 = (dG[:, None] + dG[None, :]) / 3.0
+        D31 = C_off / 3.0
+        worst["k4_consumers"] = max(
+            worst["k4_consumers"], _rel(D4, row["D4"]),
+            _rel(D22, row["D22"]), _rel(D31, row["D31"]))
+        base = row["sigma"] * row["phi"] + mu_pre * w1
+        mean = base + D3 * w3 / 6.0 + D4 * w4 / 24.0
+        worst["mean"] = max(worst["mean"], _rel(mean, row["mu"]))
+        if row["last"]:
+            continue
+        D21 = row["D21"]
+        e2 = ((var_pre + mu_pre * mu_pre) * w1
+              + mu_pre * row["sigma"] * row["phi"])
+        var_out = np.maximum(e2 - base * base, 1.0e-8)
+        K11 = (C_off * (w1[:, None] * w1[None, :])
+               + 0.5 * C_off * C_off * (w2[:, None] * w2[None, :]))
+        K11 += 0.25 * (D21 * (w2[:, None] * w1[None, :])
+                       + D21.T * (w1[:, None] * w2[None, :]))
+        K11 += D22 * (w2[:, None] * w2[None, :]) / 4.0
+        K11 += (D31 + D31.T) * (w3[:, None] * w1[None, :]) / 12.0
+        covariance = np.diag(var_out) + K11 * off_mask
+        worst["covariance"] = max(worst["covariance"],
+                                  _rel(covariance, row["C"]))
+        k4v, k22 = row["k4v"], row["k22"]
+        h4 = k4v + k22.sum(axis=1)
+        gcore = ((6.0 / (n + 4.0)) * h4
+                 - (3.0 / ((n + 2.0) * (n + 4.0))) * h4.sum()) / 2.0
+        worst["k4_core"] = max(worst["k4_core"], _rel(gcore, row["gcore"]))
+
+        a = w1[:, None] * C_off
+        local21 = ((w1[:, None] ** 2) * w2[None, :] * (C_off ** 2)
+                   + 2.0 * (w2 * w1 * var_pre)[:, None]
+                   * w1[None, :] * C_off)
+        old21 = (w1[:, None] ** 2) * D21 * w1[None, :]
+        y = 0.5 * w2
+        dgw, u, c1 = w1 * w1 * dG, y * dG, w1 / 3.0
+        feed21 = (dgw[:, None] * y[None, :] / 3.0
+                  + (2.0 / 3.0) * y[:, None] * (a * c1[None, :])
+                  + (w1 * w1)[:, None] * u[None, :] / 3.0)
+        feed3 = dgw * y + u * w1 * w1
+        rep21 = old21 + (a * a) * w2[None, :] + feed21
+        K21 = old21 + local21 + feed21
+        s = row["k3v"] - D3 * (w1 ** 3) - feed3
+        e = w2 - 2.0 * mean * w1
+        residual = K21 - rep21 - e[:, None] * C_off * w1[None, :]
+        Om = W[:, :residual_rank]
+        Qr = np.linalg.qr(residual @ Om, mode="reduced")[0][:, :residual_rank]
+        Qr = np.linalg.qr(residual @ (residual.T @ Qr),
+                          mode="reduced")[0][:, :residual_rank]
+        R = (Qr.T @ residual).T * 3.0
+        birth = row["newborn"]
+        expected = (a, R, Qr, s, e, w2,
+                    9.0 + w2 * w2 + 9.0 * e * e,
+                    1.0 + s * s, c1, dgw, y)
+        for got, want in zip(birth, expected):
+            worst["birth"] = max(worst["birth"], _rel(np.asarray(got), want))
+    return worst
+
+
+def dense_shadow_oracle(rows):
+    """Evolve a separate dense history and compare every represented source."""
+    shadow, newborn = [], None
+    worst, age_exact = 0.0, True
+    for row in rows:
+        W, wick = np.asarray(row["W"]), np.asarray(row["wick"])
+        shadow = [transport_dense(source, W, wick) for source in shadow]
+        if newborn is not None:
+            shadow.append(insert_birth(newborn, W))
+        actual = []
+        for _kind, values in row["sources"]:
+            actual.append(Source(*[np.asarray(x) for x in values[:12]],
+                                 age=int(values[12])))
+        shadow.sort(key=lambda source: source.age)
+        actual.sort(key=lambda source: source.age)
+        if len(shadow) != len(actual):
+            return float("inf"), False
+        for want, got in zip(shadow, actual):
+            age_exact = age_exact and want.age == got.age
+            for name in ("A", "P", "Z", "L", "s", "e", "w2", "dA",
+                         "dP", "c1", "c2", "Y"):
+                worst = max(worst, _rel(getattr(want, name),
+                                        getattr(got, name)))
+        birth = row["newborn"]
+        newborn = (None if birth is None else
+                   Birth(*[np.asarray(x) for x in birth]))
+    return worst, age_exact
 
 
 def reconstruct(shared):
@@ -360,6 +468,8 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
     young, shared, newborn = [], None, None
     bpe = 4
     oracle_trace = []
+    closure_trace = []
+    state_trace = []
     with flops.BudgetContext(flop_budget=100 * BUDGET, quiet=True) as ctx:
         meter = Meter(ctx)
         mu = meter.run("backbone_mean_init",
@@ -377,6 +487,7 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                           scratch_bytes=bpe * n * n)
             wick = wick_prev
             C_old = C
+            gcore_in = gcore
             mu_pre = meter.run("backbone_mean_linear", lambda: W @ mu)
             WC = meter.run("backbone_cov_linear_left", lambda: W @ C)
             C_pre = meter.run("backbone_cov_linear_right", lambda: WC @ W.T)
@@ -585,6 +696,18 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
             mu = meter.run("nonlinear_mean_add", lambda: base + mean3 + mean4)
             outputs.append(mu)
             if last:
+                if n <= 16 and rank == n:
+                    closure_trace.append({
+                        "last": True, "W": W, "C_old": C_old,
+                        "mu_pre": mu_pre, "var_pre": var_pre,
+                        "C_off": C_off, "D3": D3_total, "D21": D21_total,
+                        "gcore_in": gcore_in, "sigma": sigma, "phi": phi,
+                        "w1": w1, "w2": w2now, "w3": w3, "w4": w4,
+                        "D4": D4, "D22": D22, "D31": D31, "mu": mu,
+                        "newborn": None})
+                    state_trace.append({"W": W, "wick": wick,
+                                        "sources": list(all_sources),
+                                        "newborn": None})
                 continue
 
             e2 = meter.run("nonlinear_gaussian_e2", lambda: (
@@ -677,6 +800,20 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                 dP0 = meter.run("source_dP", lambda: 1.0 + s0 * s0)
                 newborn = (a, Rr, Lr, s0, e0, w2now, dA0, dP0,
                             c1b, c2b, yb)
+                if n <= 16 and rank == n:
+                    closure_trace.append({
+                        "last": False, "W": W, "C_old": C_old,
+                        "mu_pre": mu_pre, "var_pre": var_pre,
+                        "C_off": C_off, "D3": D3_total, "D21": D21_total,
+                        "gcore_in": gcore_in, "sigma": sigma, "phi": phi,
+                        "w1": w1, "w2": w2now, "w3": w3, "w4": w4,
+                        "D4": D4, "D22": D22, "D31": D31, "mu": mu,
+                        "C": C, "k4v": k4v, "k22": k22,
+                        "gcore": gcore, "k3v": k3v,
+                        "newborn": newborn})
+                    state_trace.append({"W": W, "wick": wick,
+                                        "sources": list(all_sources),
+                                        "newborn": newborn})
         prediction = meter.run("output_stack", lambda: fnp.stack(outputs, axis=0))
         used = int(ctx.flops_used)
         family_sum = sum(meter.families.values())
@@ -701,6 +838,13 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
     if oracle_d3_rel > 2e-5 or oracle_d21_rel > 2e-5:
         raise AssertionError("metered tuple/dense oracle mismatch: %.3e %.3e" %
                              (oracle_d3_rel, oracle_d21_rel))
+    closure_oracle = dense_closure_oracle(closure_trace, n, residual_rank)
+    if closure_trace and max(closure_oracle.values()) > 3e-5:
+        raise AssertionError("dense closure oracle mismatch: %r" % closure_oracle)
+    shadow_rel, shadow_ages = dense_shadow_oracle(state_trace)
+    if state_trace and (shadow_rel > 3e-5 or not shadow_ages):
+        raise AssertionError("dense shadow mismatch: %.3e ages=%s" %
+                             (shadow_rel, shadow_ages))
 
     retained = len(young) + (0 if shared is None else len(shared[1]))
     if retained != max(depth - 1, 0):
@@ -832,7 +976,10 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                        "exact": family_sum == used,
                        "tiny_dense_oracle_executed": bool(oracle_trace),
                        "tiny_dense_D3_max_relative": oracle_d3_rel,
-                       "tiny_dense_D21_max_relative": oracle_d21_rel}}
+                       "tiny_dense_D21_max_relative": oracle_d21_rel,
+                       "tiny_dense_closure_max_relative": closure_oracle,
+                       "tiny_dense_shadow_max_relative": shadow_rel,
+                       "tiny_dense_shadow_ages_exact": shadow_ages}}
 
 
 def lifecycle_check(n=12, depth=7, recent=2, rank=12, residual_rank=3):
@@ -848,6 +995,11 @@ def lifecycle_check(n=12, depth=7, recent=2, rank=12, residual_rank=3):
         "tiny_dense_oracle": (not first["parity"]["tiny_dense_oracle_executed"]
                               or (first["parity"]["tiny_dense_D3_max_relative"] <= 2e-5
                                   and first["parity"]["tiny_dense_D21_max_relative"] <= 2e-5)),
+        "tiny_dense_closure": (not first["parity"]["tiny_dense_oracle_executed"]
+                               or max(first["parity"]["tiny_dense_closure_max_relative"].values()) <= 3e-5),
+        "tiny_dense_shadow": (not first["parity"]["tiny_dense_oracle_executed"]
+                              or (first["parity"]["tiny_dense_shadow_max_relative"] <= 3e-5
+                                  and first["parity"]["tiny_dense_shadow_ages_exact"])),
         "finite_shape": (first["lifecycle"]["all_finite"]
                          and first["lifecycle"]["output_shape"] == [depth, n]),
         "all_history_retained": first["lifecycle"]["all_births_retained"],
