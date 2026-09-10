@@ -1,6 +1,39 @@
 # CURRENT_STATE.md — read this first
 
-**Current as of 2026-09-10, after the repo/competition/literature audit.** This replaces the accumulated snapshot, preserved verbatim in [the pre-audit archive](archive/CURRENT_STATE_before_2026-09-10_audit.md). Historical contracts and verdicts remain binding. Then read [experiments/LOG.md](../experiments/LOG.md) from the bottom.
+**Current as of 2026-09-10 evening, after Stage 0 and Stage 1.** This replaces
+the accumulated snapshot, preserved verbatim in [the pre-audit
+archive](archive/CURRENT_STATE_before_2026-09-10_audit.md). Historical contracts
+and verdicts remain binding. Then read [experiments/LOG.md](../experiments/LOG.md)
+from the bottom.
+
+## PICK UP HERE — the session ended on a usage limit, with a clean tree
+
+Nothing is in flight. HEAD carries every artifact named below. Four things are
+owed, in this order:
+
+1. **Fit `theta` and `lam` on P07 only** (384 networks, DESIGN, reusable), and
+   **freeze them before P01 is read**. Regenerate with
+   `uv run python local_sim/p2_build_k4_arms.py --emit --theta <t> --lam <l>`.
+   Expect `theta` far below 1: the three-network smoke at the placeholder
+   `theta = 1.0` came out ~100x WORSE and diverging with depth, which bounds
+   the fit range and is **not** evidence against the hypothesis.
+2. **Then** run the arms on P01 through `p2_lab.py` with `--gate 1.10
+   --control k3_exact --lam 0.0 --residual-cap 0` and an explicit `--ts`. The
+   contract is committed at `08f787b`, before any data, with Samuel's
+   predictions in it.
+3. **Rule 2 — the independent Skeptic has NOT run** on Stage 0, Stage 1 or the
+   Stage 2 slice. It is owed before any of it is believed. Raw artifacts:
+   `experiments/2026-09-10_stage0_instrument/`,
+   `experiments/2026-09-10_stage1_compact/`,
+   `experiments/2026-09-10_stage2_k4/`.
+4. **Full `scripts/preflight.ps1` has not been re-run since the Stage 0
+   repairs.** Queue it, do not launch it.
+
+**Samuel's standing decisions, which bound the scope:** rules §6 eligibility is
+**"hold off entirely for now"** — no organizer question drafted, none sent, the
+public reconstruction stays an **attributed research reference**, and Stage 3
+is **closed by his decision**, not by an external blocker. `330566` (Strassen
+L2, sha `390bc226…`) remains the standing candidate, untouched.
 
 ## Where we stand
 
@@ -50,11 +83,75 @@ Deadlines: registration/team freeze **October 2**; submissions **October 17, 23:
 
 Local T1 cross-MSE SIMPLE 4.004685e-8 versus AUGMENT 1.912323e-8, per-replica noise 1.1552e-9; full reference not demonstrated affordable. T2 per-replica noise 4.4988e-9. These are not official leaderboard errors. Raw paths and qualifications: [architecture audit](research/2026-09-10_architecture_audit.md).
 
+## Stage 0 — the instrument repairs, DONE
+
+Seven of the validation audit's eight findings are implemented, tested and
+committed (`07e8f9b`, `42fd09f`, `06789bd`, `b3059a3`, `2b048eb`). Finding 8
+(`out=` / mutable participant buffers) is deliberately **not** implemented: it
+is an API question about the official participant shim whose answer is not in
+this repository, and it stays a written question.
+
+| what changed | why it mattered |
+|---|---|
+| arms pair on **MLP identity**, not list order | mispairing left `mean_difference` bit-identical and inflated the SE **8.55x** — the one failure shape no printed report exposes |
+| `paired_diff_ci(method="t", alpha=…)` honours alpha | 0.05, 0.01 and 0.20 returned the same tuple bit for bit. Latent, so **no published interval moves** |
+| the 8-GiB memory proof is bound to shape, budget, cap, weight mode and stack | a report at `64x4` under a 512 MB cap on float32 weights satisfied every old check. **Reachable, not exercised** — the seven stored reports were correctly configured and now read as DEGRADED |
+| the seed claim is **atomic** | twelve concurrent claimers on a `SINGLE_USE` block **all** succeeded, every run. Now one succeeds, eleven are refused |
+| a single-use block **counts its LOOKS** | `local_sim/truth_reads.py`. P08 now reports tier SINGLE_USE, cap 1, spent 3, **EXHAUSTED**. An aborted read still consumes the cap |
+| label noise does **not** cancel from an adjusted difference | `(q_c − q_k)·v` survives pairing. `noise_corrected_compare` returns observed, true-function and official-precision forecast separately |
+| MATH / LOCAL / SERVER are separate verdicts | check **names are unchanged**, so the two standing gate failures are not orphaned. Nobody has ruled on whether they were mis-specified and this does not either |
+| the vault's candidate path runs through `lifecycle_eval` | its seal and touch counter are **byte-identical**, verified by re-hashing all six files |
+
+**Test totals:** `competition_score` 98→**129**, `certify_candidate` unit tests
+19→**26**, plus three new suites — `test_linux_memory_binding` **23/23**,
+`test_truth_reads` **27/27**, `test_vault_lifecycle` **47/47**. Every new case
+fails against `0fe164c`. `lifecycle_eval --self-test` 56/56,
+`verify_portability` 103/103.
+
+## Stage 1 — the compact representation is priced, and the price is a problem
+
+`local_sim/p2_compact_reference.py`, **28/28**. Transport factors through a
+shared basis exactly; the Hadamard does **not** factor, so old sources must be
+reconstructed; the fourth-order diagonal identity is exact for its core and
+demonstrably **not** for a general one.
+
+**At the published shape (4 recent dense, shared rank 384) the compact form is
+MORE expensive than our tower: `1.0023 B` against `0.9300 B`.** It is cheaper
+only at rank ≤ 256, best at recent=1/rank=128 (`1.64x` calibrated). The **join
+carries 22–53%** of the compact total everywhere, and its core step has **no
+flopscope primitive**. The model prices our own tower at `1.1928x` its measured
+figure and gives the compact side no equivalent concession, so every ratio is
+an **upper bound** on the saving.
+
+**The falsifiable consequence:** the configurations cheaper on our ledger are
+precisely the ones the published work did **not** choose. Either their join is
+materially cheaper than the incremental form priced here, or rank 384 buys
+accuracy this cost screen cannot see, or the saving is somewhere this ledger
+has not located. [Ledger](../experiments/2026-09-10_stage1_compact/ledger.json).
+
+## Stage 2 experiment 1 — armed, not run
+
+The shipped chain **already** carries a fourth-order state, and it is **one
+float for all 1,024 neurons**. The intervention carries the per-neuron
+deviation as well, transported by Stage 1's identity — and `diag(W^T C W)` is
+`var`, already computed, so the channel is nearly free.
+
+- `theta = 0` is **bit-identical** to `estimator_k3_full.py` in output **and**
+  counted FLOPs: the control is nested exactly, not approximately.
+- **Cost prediction RESOLVED:** the channel adds `145,977,344` FLOPs at
+  `1024x16` — **`0.000066 B`** against a predicted "under `0.02 B`" and a Stage 1
+  projection of `0.000038 B`. First metered confirmation of that projection.
+- **Accuracy predictions 1, 2, 3, 5, 6 remain OPEN.** The fit is owed first.
+
 ## Validation and remaining repairs
 
 Verified: configuration **96/96**, certifier aggregation **19/19**, default preflight **GREEN 12/16, four skipped**, shipped-file FLOP anchor 19 categories / zero disagreements. Queued job 539 declared 8 GiB RAM, 0 VRAM, 2 CPU, no GPU. [Evidence](research/2026-09-10_validation_audit.md).
 
-Outstanding: memory-proof acceptance not bound to shape/cap/budget/runtime; Linux/fresh-worker input representation mismatch; Phase 1 vault bypasses canonical lifecycle; claims do not count reads and lack atomic locking; pairing lacks network IDs; nondefault t-interval alpha ignored; local/runtime-forecast labels overlap; numerical tolerance/byte manifests need candidate specificity. **No instrument repair was implemented during this audit.**
+Outstanding after Stage 0: the `out=` / mutable-participant-buffer question
+(finding 8), which needs the official participant shim's exact semantics and is
+not answerable from this repository; a full preflight re-run; and the
+independent Skeptic. Everything else in the audit's list is implemented and
+tested — see the Stage 0 table above.
 
 Common-label noise cancels in raw MSE differences, not automatically in adjusted scores with unequal multipliers. Future reports need cross-MSE and official-precision noisy-score forecasts. This mathematical correction does not assert a particular past promotion changes outcome. [Repair details](research/2026-09-10_validation_audit.md).
 
