@@ -7,19 +7,21 @@ archived at `docs/archive/CURRENT_STATE_before_worker_review_2026-09-10.md`.
 ## What is proved
 
 Stage 0's production certification, reporting, noise and protected-access repairs
-are implemented. Exact package-byte Linux memory evidence passed 24/24 in workerq
-599 and the real certification consumer binds it. Positive, negative and
-incomplete-evidence fixtures discriminate failures. Reporting/truth and
-certification/memory each received fresh-context Skeptic **ACCEPT** verdicts.
+are implemented and received scoped fresh-context Skeptic **ACCEPT** verdicts.
+Exact package-byte Linux memory evidence passed 24/24 in workerq 599 and the real
+certification consumer binds it. Positive, negative and incomplete-evidence
+fixtures discriminate failures. Final acceptance closure still requires the
+current full certifier mutation battery queued below.
 
 Stage 1's four coherent-K4 arms pass an independent dense oracle (37/37). The
 compact all-history reference passes conformance and independent dense closure and
 state-shadow checks (11/11 each). At 1024 x 16, old-source rank 384 and residual
-rank 16, workerq 614/615 meter **818,494,496,296 FLOPs = 0.372208 x 2^41**,
+rank 16, workerq 614/615 meter **818,494,496,296 FLOPs = 0.372208 x 2^41** over
+**10,052 operations**,
 345,587,712 bytes estimated peak array payload and about 1,014 MiB observed process
 RAM. Its fresh Skeptic returned **ACCEPT**. This proves the represented algebra,
 implementation, counted cost and lifecycle; it does not prove accuracy, server
-residual or competitiveness.
+residual headroom, deployability or competitiveness.
 
 The bounded K4 fitting path now generates immutable candidate-specific modules,
 runs canonical lifecycle observations, verifies paths/hashes/configuration/costs,

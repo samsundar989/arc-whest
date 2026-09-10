@@ -41464,3 +41464,8 @@ for proceeding after jobs 633/634 and a verified label-free producer receipt,
 provided no grid, bound, gate, identity, producer behavior or candidate source
 changes. All remain byte-frozen. This acceptance does not excuse the bypass or
 turn P07 into decision evidence.
+
+The follow-up review of commit `7598db3` returned **ACCEPT** and independently
+verified that the exact command/stdout artifact contains only keys, shapes and six
+seed endpoints. It also verified the corrected lower-bound wording and did not
+open the protected NPZ. The precise lifetime P07 access count remains unknown.
