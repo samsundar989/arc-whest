@@ -35,11 +35,13 @@ Run:  uv run python local_sim/seed_ledger.py            # show the ledger
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import os
 import re
 import subprocess
+import time
 import sys
 from dataclasses import asdict, dataclass
 from typing import Dict, List, Optional, Sequence, Tuple
@@ -259,6 +261,87 @@ def _append(claim: Claim, path: str = LEDGER_PATH) -> None:
         fh.write(json.dumps(asdict(claim), sort_keys=True) + "\n")
 
 
+
+# --------------------------------------------------------------------------- #
+# The claim is ATOMIC, or it is not a claim
+#
+# `claim_range` read the ledger, decided, and appended -- three steps with no
+# lock between them. Two claimers that both read before either wrote would both
+# pass the SINGLE_USE check and both append.
+#
+# MEASURED against the code at `0fe164c`, twelve concurrent claimers on one
+# SINGLE_USE block, sacrificial ledger, three runs
+# (`experiments/2026-09-10_stage0_instrument/defects_before_ledger_race.json`):
+#
+#     claims that SUCCEEDED   12 of 12
+#     claims REFUSED           0
+#     SINGLE_USE violated      every run
+#
+# Not "two can slip through" -- ALL of them did, deterministically, because the
+# window spans a file read and a `git rev-parse` subprocess. This repository now
+# runs several agents at once and queues work to two machines, so the window is
+# not hypothetical. No overlapping claim is alleged to exist in the live ledger:
+# this is a demonstrated defect in the mechanism, found by driving it, not a
+# finding about a historical claim.
+#
+# WHY A LOCKFILE AND NOT `fcntl`/`msvcrt`. This must hold across PROCESSES on
+# Windows and Linux and inside WSL, where the same repo path is reached through
+# two different kernels. An exclusive-create lockfile is the one primitive all
+# three agree on. It is deliberately NOT stolen when stale: a lock older than
+# the timeout is a human-visible failure with the holder's pid in it, because
+# silently breaking another claimer's lock is the same defect wearing a hat.
+
+_LOCK_TIMEOUT_S = 30.0
+_LOCK_POLL_S = 0.02
+
+
+class LedgerBusy(RuntimeError):
+    """Another claimer holds the ledger lock. Never silently ignored."""
+
+
+@contextlib.contextmanager
+def ledger_lock(path: str = LEDGER_PATH, *, timeout: float = _LOCK_TIMEOUT_S):
+    """Exclusive access to `path` for the read-decide-append sequence."""
+    lockfile = path + ".lock"
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    fd = None
+    deadline = time.monotonic() + timeout
+    while True:
+        try:
+            fd = os.open(lockfile, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            break
+        except FileExistsError:
+            if time.monotonic() >= deadline:
+                try:
+                    with open(lockfile, encoding="utf-8") as fh:
+                        held = fh.read()[:200]
+                except OSError:
+                    held = "(unreadable)"
+                raise LedgerBusy(
+                    f"the seed ledger has been locked for {timeout:.0f}s by "
+                    f"{held!r}.  {lockfile}  "
+                    "If that process is gone, delete the lockfile BY HAND. This "
+                    "is deliberately not automatic: stealing a lock is the same "
+                    "race this lock exists to close."
+                ) from None
+            time.sleep(_LOCK_POLL_S)
+    try:
+        os.write(fd, ("pid=%d ts=%s" % (os.getpid(), time.strftime(
+            "%Y-%m-%dT%H:%M:%SZ", time.gmtime()))).encode())
+        os.close(fd)
+        fd = None
+        yield
+    finally:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+        try:
+            os.unlink(lockfile)
+        except OSError:
+            pass
+
 def _sha256(path: str) -> str:
     p = path if os.path.isabs(path) else os.path.join(_ROOT, path)
     if not os.path.exists(p):
@@ -457,13 +540,23 @@ def claim_range(
             f"claim {block}[{start:,}..{end:,}] leaves its block [{lo:,}..{hi:,}]"
         )
 
-    existing = claims(path)
-    mine = [c for c in existing if c.block == block]
+    # Everything expensive that does NOT need to be inside the lock is done
+    # first: hashing an artifact and shelling out to git are the two operations
+    # that made the old race a certainty rather than a possibility.
     cand = Claim(
         block=block, start=start, n=n, consumer=consumer, tier=tier, ts=ts,
         note=note, artifact=artifact, artifact_sha256=_sha256(artifact) if artifact else "",
         commit=_git_commit(), backfilled=backfilled, paired_with=paired_with,
     )
+    with ledger_lock(path):
+        return _claim_range_locked(cand, block, start, n, tier, path, dry_run)
+
+
+def _claim_range_locked(cand, block, start, n, tier, path, dry_run):
+    """The read-decide-append sequence. Callers hold `ledger_lock`."""
+    end = start + n - 1
+    existing = claims(path)
+    mine = [c for c in existing if c.block == block]
 
     if tier == "SINGLE_USE" and mine:
         raise PermissionError(

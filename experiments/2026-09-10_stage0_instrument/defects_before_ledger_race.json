@@ -1,0 +1,22 @@
+{
+  "concurrent_claimers": 12,
+  "claims_that_SUCCEEDED": 12,
+  "claims_REFUSED": 0,
+  "lines_actually_written_to_the_ledger": 12,
+  "distinct_consumers_on_the_block": [
+    "racer-0",
+    "racer-1",
+    "racer-10",
+    "racer-11",
+    "racer-2",
+    "racer-3",
+    "racer-4",
+    "racer-5",
+    "racer-6",
+    "racer-7",
+    "racer-8",
+    "racer-9"
+  ],
+  "SINGLE_USE_violated": true,
+  "errors": []
+}

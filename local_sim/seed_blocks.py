@@ -225,7 +225,13 @@ SINGLE_USE_BLOCKS = {
 #   * a `<block>_reads.jsonl` beside the artifact, appended by whatever reads it;
 #   * the consumer, the instrument's sha256 and the timestamp on every line;
 #   * a cap, and a refusal past it.
-# Owed as its own IMPORTANT change with its own prediction and preflight run.
+# BUILT 2026-09-10 (Stage 0 R3): `local_sim/truth_reads.py`, register at
+# `experiments/truth_reads.jsonl`, tests in `local_sim/test_truth_reads.py`,
+# wired into preflight step 9. It reserves BEFORE the labels are exposed and
+# counts an aborted read, because a process that died after `np.load` returned
+# has still seen the numbers. P08's three historical reads are backfilled and
+# marked as such, so the block now reports EXHAUSTED to anything that asks.
+# This tuple stays as the record of what was owed and when it was paid.
 READ_COUNTED_OWED = ("P08",)
 
 # Consumption — as opposed to allocation — is recorded in `seed_ledger.py` and

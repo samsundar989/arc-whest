@@ -429,8 +429,18 @@ Step "8. canonical scorer + the binding gate" {
 # These are 66 negative tests: unregistered block, range leaving its block, any
 # overlap in a DECISION block, a second claim on a SINGLE_USE one, a hand-edited
 # ledger, an artifact rewritten after its claim.
-Step "9. seed-ledger refusals" {
+Step "9. seed-ledger refusals + the truth-read register" {
     uv run python local_sim/test_seed_ledger.py
+    if ($LASTEXITCODE -ne 0) { return }
+    # SECOND COMMAND, ONE STEP -- the denominator stays SIXTEEN.
+    #
+    # Added 2026-09-10 (Stage 0 R3). Two demonstrated defects: claim_range had
+    # an unlocked read-decide-append window (twelve concurrent claimers on one
+    # SINGLE_USE block, twelve succeeded), and nothing counted READS at all,
+    # which is how P08 was claimed once and read three times. This drives
+    # sacrificial ledgers in a temp directory and then checks the LIVE register
+    # reports P08 as spent.
+    uv run python local_sim/test_truth_reads.py
 }
 
 # --- 10. vault integrity, not merely the counter ---------------------------------
