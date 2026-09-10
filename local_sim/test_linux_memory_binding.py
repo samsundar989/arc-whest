@@ -12,7 +12,9 @@ import glob
 import hashlib
 import json
 import os
+import subprocess
 import sys
+import tempfile
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
@@ -330,13 +332,51 @@ def test_replay():
           repr(verdicts))
 
 
+def test_production_cli_memory_only():
+    head("6. production certifier consumes an explicit report")
+    candidate = os.path.join(_ROOT, "estimator.py")
+    instrument = os.path.join(_HERE, "linux_memory_gate.py")
+    with open(candidate, "rb") as handle:
+        candidate_sha = hashlib.sha256(handle.read()).hexdigest()
+    with open(instrument, "rb") as handle:
+        instrument_sha = hashlib.sha256(handle.read()).hexdigest()
+    report = good_report()
+    report["candidate"] = "estimator.py"
+    report["candidate_sha256"] = candidate_sha
+    report["instrument_sha256"] = instrument_sha
+    with tempfile.TemporaryDirectory() as td:
+        path = os.path.join(td, "memory.json")
+        out = os.path.join(td, "consumer.json")
+        with open(path, "w", encoding="utf-8") as handle:
+            json.dump(report, handle)
+        base = [sys.executable, os.path.join(_HERE, "certify_candidate.py"),
+                "--candidate", candidate, "--memory-report", path,
+                "--memory-only"]
+        good = subprocess.run(base + ["--json", out], cwd=_ROOT,
+                              text=True, capture_output=True)
+        check("explicit applicable report is CERTIFIED through the real CLI",
+              good.returncode == 0 and os.path.isfile(out)
+              and "memory consumer verdict: CERTIFIED" in good.stdout,
+              "returncode=%d" % good.returncode)
+        report["candidate_sha256"] = "0" * 64
+        with open(path, "w", encoding="utf-8") as handle:
+            json.dump(report, handle)
+        bad = subprocess.run(base, cwd=_ROOT, text=True, capture_output=True)
+        check("explicit wrong-candidate report is INCOMPLETE through the CLI",
+              bad.returncode == 1
+              and "memory consumer verdict: INCOMPLETE" in bad.stdout
+              and "applicable=False" in bad.stdout,
+              "returncode=%d" % bad.returncode)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--json", default="")
     args = parser.parse_args()
     for fn in (test_positive_negative_incomplete, test_binding_and_applicability,
                test_applicable_failures_and_lifecycle,
-               test_literal_linux_runner, test_replay):
+               test_literal_linux_runner, test_replay,
+               test_production_cli_memory_only):
         fn()
     replay = replay_stored_reports()
     if args.json:

@@ -653,6 +653,11 @@ def main() -> int:
         help="explicit Linux memory-gate artifact to consume. Its candidate, "
              "workload, stack and instrument bindings are still verified; "
              "the path itself grants no applicability.")
+    ap.add_argument(
+        "--memory-only", action="store_true",
+        help="run only the production memory-report consumer. Requires "
+             "--memory-report; intended for cheap provenance/conformance "
+             "checks, not whole-candidate certification.")
     ap.add_argument("--quick", action="store_true",
                     help="skip the network-dependent sections (1 whest validate "
                          "is local, 10 subprocess smoke needs the dataset)")
@@ -724,6 +729,54 @@ def main() -> int:
               "confirm_tier_read": not bool(a.quick or a.skip_smoke),
               "is_shipped_file": is_ship,
               "sections": {}}
+
+    if a.memory_only:
+        if not a.memory_report:
+            print("--memory-only requires --memory-report")
+            return 2
+        lg_path = os.path.abspath(a.memory_report)
+        if not os.path.isfile(lg_path):
+            print(f"no such memory report: {lg_path}")
+            return 2
+        try:
+            with open(lg_path, encoding="utf-8") as fh:
+                lg = json.load(fh)
+        except (OSError, ValueError) as exc:
+            print(f"invalid memory report JSON: {lg_path}: {exc}")
+            return 2
+        memory_result = consume_memory_report(
+            lg, candidate_sha256=sha_before, width=a.width, depth=a.depth,
+            budget=a.budget, cap_mb=MEMORY_CAP_MB,
+            weights_mode=_lifecycle_default_mode(), stack=_certified_stack(),
+            expected_instrument_sha256=_memory_instrument_sha256())
+        report["sections"]["linux_memory_gate"] = {
+            "report": os.path.relpath(lg_path, _ROOT),
+            "matched_on": "sha256" if lg.get("candidate_sha256") == sha_before
+                          else "explicit candidate mismatch",
+            "artifact_version": lg.get("artifact_version"),
+            "instrument_sha256": lg.get("instrument_sha256", ""),
+            "instrument_policy": MEMORY_INSTRUMENT_POLICY,
+            "consumer_verdict": memory_result["verdict"],
+            "applicable": memory_result["applicable"],
+            "binding_checks": memory_result["bindings"],
+            "checks": memory_result["checks"],
+            "degraded": "; ".join(memory_result["incomplete"]),
+        }
+        report["status"] = memory_result["verdict"]
+        print("memory consumer verdict: %s (applicable=%s)" % (
+            memory_result["verdict"], memory_result["applicable"]))
+        for name, ok, detail in memory_result["checks"]:
+            print("  %s  %s%s" % ("PASS" if ok else "FAIL", name,
+                                   "  " + detail if detail else ""))
+        for reason in memory_result["incomplete"]:
+            print("  INCOMPLETE  " + reason)
+        if a.json:
+            out = os.path.abspath(a.json)
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            with open(out, "w", encoding="utf-8") as fh:
+                fh.write(json.dumps(report, indent=2, default=str) + "\n")
+            print("  report -> " + os.path.relpath(out, _ROOT))
+        return 0 if memory_result["verdict"] == "CERTIFIED" else 1
 
     # ---------------------------------------------------------------- 1 ----
     head("1  the official grader contract", domain=MATH)

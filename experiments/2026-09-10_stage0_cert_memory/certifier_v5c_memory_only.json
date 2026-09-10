@@ -1,0 +1,164 @@
+{
+  "artifact": "candidate_certification",
+  "artifact_version": 1,
+  "candidate": "estimator.py",
+  "candidate_sha256": "00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec",
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "truth_free": false,
+  "confirm_tier_read": true,
+  "is_shipped_file": true,
+  "sections": {
+    "linux_memory_gate": {
+      "report": "experiments\\2026-09-10_stage0_cert_memory\\linux_memory_gate_estimator_v5c.json",
+      "matched_on": "sha256",
+      "artifact_version": 5,
+      "instrument_sha256": "55a644d1d7e4113f8f827ce1075af38b0bdde8b634a19d240a7e959d268c9761",
+      "instrument_policy": "current-source-sha256",
+      "consumer_verdict": "CERTIFIED",
+      "applicable": true,
+      "binding_checks": [
+        {
+          "name": "artifact kind",
+          "ok": true,
+          "detail": "'linux_memory_gate'"
+        },
+        {
+          "name": "instrument path",
+          "ok": true,
+          "detail": "'local_sim/linux_memory_gate.py'"
+        },
+        {
+          "name": "instrument verification policy",
+          "ok": true,
+          "detail": "'current-source-sha256'"
+        },
+        {
+          "name": "instrument sha256",
+          "ok": true,
+          "detail": "55a644d1d7e4113f... vs 55a644d1d7e4113f..."
+        },
+        {
+          "name": "certified shape",
+          "ok": true,
+          "detail": "1024x16 vs 1024x16"
+        },
+        {
+          "name": "certified budget",
+          "ok": true,
+          "detail": "2199023255552 vs 2199023255552"
+        },
+        {
+          "name": "suite lifecycle size",
+          "ok": true,
+          "detail": "100 / child 100"
+        },
+        {
+          "name": "full memory cap",
+          "ok": true,
+          "detail": "8192 MB vs 8192 MB"
+        },
+        {
+          "name": "deployment weight representation",
+          "ok": true,
+          "detail": "f64_readonly / child f64_readonly"
+        },
+        {
+          "name": "distribution version source",
+          "ok": true,
+          "detail": "'importlib.metadata.version'"
+        },
+        {
+          "name": "installed distribution whestbench",
+          "ok": true,
+          "detail": "'0.16.1' vs '0.16.1'"
+        },
+        {
+          "name": "installed distribution flopscope",
+          "ok": true,
+          "detail": "'0.12.1' vs '0.12.1'"
+        },
+        {
+          "name": "lifecycle controls are present",
+          "ok": true,
+          "detail": "dict"
+        },
+        {
+          "name": "stateless lifecycle positive control",
+          "ok": true,
+          "detail": "growth=0 threshold=67108864"
+        },
+        {
+          "name": "retaining lifecycle negative control",
+          "ok": true,
+          "detail": "growth=201334784 threshold=67108864"
+        },
+        {
+          "name": "all child stderr streams are recorded",
+          "ok": true,
+          "detail": "['candidate', 'lifecycle_retaining', 'lifecycle_stateless', 'negative', 'positive']"
+        }
+      ],
+      "checks": [
+        [
+          "9: the report is bound to the current instrument and workload",
+          true,
+          "v5, current-source-sha256"
+        ],
+        [
+          "9: every child completed without unexpected stderr",
+          true,
+          "{}"
+        ],
+        [
+          "9: the cap read back exactly",
+          true,
+          "soft=8589934592"
+        ],
+        [
+          "9: the negative control died under the cap",
+          true,
+          "an enforcement claim needs a dying over-cap control"
+        ],
+        [
+          "9: the positive control survived uncapped",
+          true,
+          "distinguishes the cap from host exhaustion"
+        ],
+        [
+          "9: predict completed under the applied cap",
+          true,
+          ""
+        ],
+        [
+          "9: the deployment arrays are read-only float64",
+          true,
+          "float64, writeable=False"
+        ],
+        [
+          "9: the real packages loaded, not local_sim shims",
+          true,
+          "ython3.12/site-packages/whestbench/__init__.py"
+        ],
+        [
+          "9: at least three predictions ran in one worker",
+          true,
+          "3 predictions"
+        ],
+        [
+          "9: settled address space did not grow across candidate predictions",
+          true,
+          "-3.4 MB"
+        ],
+        [
+          "9: peak address space is under the cap",
+          true,
+          "VmPeak 2346.7 MB"
+        ]
+      ],
+      "degraded": ""
+    }
+  },
+  "status": "CERTIFIED"
+}
