@@ -40726,3 +40726,146 @@ If the experiment fails, the fourth-order lane closes **for this closure form
 on these design networks** — not in general. Reopening requires new *external*
 evidence naming a different core, or a demonstration that the fit itself was
 the limitation.
+
+---
+
+## 2026-09-10 (evening) — Stage 0 finished, Stage 1 delivered, **Stage 2 experiment 1 ARMED BUT NOT RUN**
+
+**Session ended on a usage limit, deliberately and with the tree clean.** This
+entry is the handoff. Everything below is committed; nothing is in flight.
+
+### Stage 0 — the instrument repairs, all seven
+
+| # | repair | evidence | commit |
+|---|---|---|---|
+| R1 | pairing on MLP identity; an alpha that is honoured | `test_competition_score` 98→114 | `07e8f9b` |
+| R2 | the 8-GiB memory proof bound to its workload | `test_linux_memory_binding` 23/23, new | `42fd09f` |
+| R3 | an atomic claim; a single-use block that counts its LOOKS | `test_truth_reads` 27/27, new | `06789bd` |
+| R4 | label noise that does not cancel from an adjusted difference | `test_competition_score` 114→129 | `b3059a3` |
+| R5 | three evidence domains under one word | `test_certify_candidate` 19→26 | `b3059a3` |
+| R6 | deterministic bytes; both halves of the determinism pair | `.gitattributes`, seal unmoved | `b3059a3` |
+| R7 | the vault's candidate path through `lifecycle_eval` | `test_vault_lifecycle` 47/47, new | `2b048eb` |
+
+**Finding 8 (`out=` / mutable buffers) is deliberately NOT implemented.** It is
+an API question about the official participant shim, the answer is not in this
+repository, and the prediction said so before the work started. It stays a
+written question.
+
+**Every prediction resolved.** 1 CONFIRMED with a nuance that matters (all
+seven stored memory reports are version 1–2 and now read as DEGRADED, but
+their shape and cap were in fact correct — the defect was **reachable, not
+exercised**). 2, 3, 6, 7, 9, 10, 11 CONFIRMED. **4 was WRONG**, and the
+correction is the better finding: mispairing leaves `mean_difference`
+bit-identical and inflates the standard error 8.55× — the one failure shape no
+printed report exposes. 6 was CONFIRMED *and understated*: twelve concurrent
+claimers on a `SINGLE_USE` block all succeeded, every run, not two.
+
+**Three bugs my own new tests caught before they committed:** `spent()` counted
+both lines of each read so the cap halved; reservation ids collided so it
+undercounted; and the memory validator compared the *declared* weight mode
+without the child's probe, so a report declaring `f64_readonly` over a writable
+array passed.
+
+### Stage 1 — the compact representation, derived and priced
+
+`local_sim/p2_compact_reference.py`, **28/28** on fixtures built to break
+things (orientation via rank-one blocks with distinct left and right factors,
+sign cancellation, repeated indices, zero variance, permutation equivariance),
+with section 2 proving each fixture *would* catch the mistake it is for.
+
+**P1** transport factors through a shared left basis — exact. **P2** the
+Hadamard does **not** factor, so every old source must be reconstructed; the
+saving is the reassociation and the sum taken in `r`-coordinates before one
+trailing multiply. **P3** the fourth-order diagonal identity is exact for its
+core, and a test asserts it does **not** reproduce a general core, so the
+closure is visibly the approximation.
+
+**The ledger does not say what the plan hoped.** At the published shape
+(4 recent dense, shared rank 384) the compact form is **more expensive** than
+our tower: `1.0023 B` against `0.9300 B`. It is cheaper only at rank ≤ 256, best
+at recent=1/rank=128 (`0.474 B`, `1.96×`, or **`1.64×` calibrated**). The join
+carries **22–53%** of the compact total everywhere and its core step has **no
+flopscope primitive**.
+
+My first ledger priced the join as a dense thin SVD and killed the
+representation on it. That was a real number about the wrong algorithm, and
+replacing it with the incremental form changed the conclusion. Recorded because
+pricing a strawman is a way to kill a lane for free.
+
+**The model prices our own tower at `1.1928×` its measured figure**, and the
+compact side gets no equivalent concession, so every ratio above is an **upper
+bound** on the saving.
+
+**What that means, stated as a falsifiable claim:** the configurations cheaper
+on our ledger are precisely the ones the published work did **not** choose.
+Either their join is materially cheaper than the incremental form priced here,
+or rank 384 buys accuracy our cost screen cannot see, or the saving is
+somewhere this ledger has not located.
+
+### Stage 2 experiment 1 — the contract is committed, the arms exist, **the experiment has not run**
+
+Contract at `08f787b`, **before any data**. Samuel's predictions recorded
+before that: **1.1–1.5×** on gain, **"I don't know"** on cost.
+
+**The finding that shaped the implementation.** `estimator_k3_full.py` already
+carries a fourth-order state — and it is **one float for all 1,024 neurons**
+(`D4 = c4·metric²·ones_n`, `D22` pinned at exactly one third of it). The
+intervention carries the **per-neuron deviation** as well.
+
+    theta = 0  is BIT-IDENTICAL to the shipped chain, in output AND in
+    counted FLOPs, on three seeds.
+
+so the control is nested exactly rather than approximately.
+
+**Prediction 4 RESOLVED, and it is the first metered confirmation of P3.** The
+channel costs `145,977,344` counted FLOPs at `1024×16` — **`0.000066 B`**,
+against a predicted "under `0.02 B`" and a Stage 1 projection of `0.000038 B`.
+The projection was right within `1.7×`. `diag(W^T C W)` really is `var`, already
+on the table, exactly as P3 says.
+
+**The smoke, and what it is not.** Three P01 networks at the **placeholder**
+`theta = 1.0`: MSE `3.94e-8 → 4.14e-6`, about **100× worse**, diverging with
+depth (`L2 6.8e-8`, `L16 4.2e-6`).
+
+**This is NOT evidence against the hypothesis.** The contract requires `theta`
+and `lam` to be **fitted on P07 first**, and that fit **has not been run**. What
+the smoke establishes is that `theta = 1` is far too large and the channel is
+unstable there — which is information about the fit range, not about the
+mechanism. Predictions 1, 2, 3, 5 and 6 remain **OPEN**.
+
+### The lab is honest about its reads now
+
+`p2_lab.py` registers every truth read through `truth_reads.py` instead of
+calling `np.load`, requires an explicit `--ts`, and refuses to **guess** a block
+from a filename that does not carry one. It gains `--control`, and
+`--residual-cap`: this host reads ~27× high on residual and the armed `0.4 s`
+cliff failed the exact chain on **machine speed** (726 ms measured) rather than
+behaviour, replacing an accuracy comparison with a comparison of
+zero-prediction MSEs. A relaxed run prints and records **ACCURACY-ONLY** and is
+never residual evidence.
+
+### Scope decisions that are Samuel's, recorded as his
+
+- **Rules §6 / eligibility: "hold off entirely for now."** No organizer question
+  drafted, none sent. The public reconstruction stays an **attributed research
+  reference**, and **Stage 3 is closed by his decision**, not by an external
+  blocker. `330566` (L2, sha `390bc226…`) remains the standing candidate,
+  untouched.
+- No DECIDE block spent. **P08 stays spent** and now reports so mechanically.
+  No vault touch. No promotion. No submission. No designation.
+
+### THE NEXT ACTION, exactly
+
+1. **Fit `theta` and `lam` on P07 only** (384 networks, DESIGN, reusable), and
+   **freeze them before P01 is read**. `p2_build_k4_arms.py --emit --theta …
+   --lam …` regenerates the arms. Expect `theta ≪ 1`; the smoke says so.
+2. Then run the four-arm comparison on **P01** through `p2_lab.py` with
+   `--gate 1.10`, `--control k3_exact`, `--lam 0.0`, an explicit `--ts`, and
+   `--residual-cap 0` (ACCURACY-ONLY, labelled).
+3. **Rule 2: an independent Skeptic has NOT yet run** on Stage 0, Stage 1 or
+   this slice. It is owed before anything here is believed or promoted, and
+   the raw artifact paths are all under `experiments/2026-09-10_*`.
+4. Full `scripts/preflight.ps1` has not been re-run since the Stage 0 repairs.
+   Queue it: `workerq submit --project arc-whest --ram 8 --vram 0 --gpus 0
+   --cpus 2 --no-snapshot -- powershell -NoProfile -ExecutionPolicy Bypass
+   -File …/scripts/preflight.ps1 -Log …`
