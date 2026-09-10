@@ -1,10 +1,10 @@
 # Phase-2 write-up — DRAFT, PRIVATE, not posted anywhere
 
-> **Status 2026-09-10 (updated after T1): sections (i), (ii), (iii) and (v) are
-> substantially drafted from `experiments/LOG.md`; (iv) awaits the κ₄ rank-sweep;
-> (vi) awaits the depth-2 graded row and T2. Section (ii)'s channel ablation is
-> under an independent Skeptic and no sentence of it may be treated as settled
-> until that returns.** Nothing here is posted. The
+> **Status 2026-09-10 (revised after the Skeptic returned PROVISIONAL on §(ii)):
+> sections (i), (ii), (iii) and (v) are substantially drafted; (iv) awaits the κ₄
+> rank-sweep; (vi) awaits the depth-2 graded row and T2. §(ii) has been rewritten:
+> its channel attribution was struck as unidentified, and the surviving result is
+> narrower and better evidenced. One `OWED` remains inside it, named below.** Nothing here is posted. The
 > Phase-1 manuscript `docs/writeup-draft.md` is a different document, is stale, and
 > is not superseded by this one — it is Phase 1's and stays where it is.
 >
@@ -46,15 +46,15 @@ statistically indistinguishable from the truncated poor one; *collapsing* the to
 (regenerating it each layer) beats truncating it per FLOP; a scheme that
 carries the fourth cumulant as an `(n,n)` object rather than a scalar is `2.09×`
 more accurate but births `8n` columns per layer against `2n`, which is `3.6×–5.8×`
-over the hard budget at every recursion depth we priced; and — the sharpest of the
-four — suppressing exactly those births while leaving the fourth cumulant itself
-live and every diagram that consumes it running is not `2.09×` worse but **`74×`
-worse than never tracking it as a matrix at all.**
+over the hard budget at every recursion depth we priced; and deleting those births
+to make it affordable does not cost part of its advantage but **all of the
+third-cumulant correction**, landing the estimator back on plain Gaussian
+propagation.
 
-That last result carries a width argument the others do not. The inconsistent
-scheme's error barely falls as width grows while the consistent one's falls two
-orders of magnitude, so an inexact tower does not merely forfeit the gain — it
-installs an error floor that swamps what the width was buying.
+Taken together these say something sharper than any one of them: **the carried
+lineage is not a resource that degrades gracefully. Every deletion we have
+measured — by generation, by diagram class, or by cumulant degree — returns the
+chain to roughly Gaussian accuracy**, whatever it was that was deleted.
 
 We then price and close five levers, each with a mechanism and a number: the exact
 `W Wᵀ` metric (`1.07×` at width 1024, decaying with width exactly as concentration
@@ -172,12 +172,12 @@ Three things follow, and the second and third are the ones worth publishing.
    cumulant degree**. It enriches the one already tracked, from
    `r = 2` (zero free indices, a scalar) to `r = 1` (two free indices, a matrix).
 
-**The channel decomposition, and it is the section's strongest result.** κ₄'s
-`(n,n)` object couples into the flow twice: through the Wick updates of μ, Σ and
-the diagonal κ₃ slices (`O(n²)`, essentially free) and by **birthing new factored
-κ₃ columns** (`8n` per layer against SIMPLE's `2n`, which is what makes the scheme
-unaffordable). We ablate the births while keeping the object live, by two exact
-text substitutions on a copy of the reference implementation, verified bit-exact
+**The deletion experiment, and what it does NOT show.** κ₄'s `(n,n)` object
+couples into the flow twice: through the Wick updates of μ, Σ and the diagonal κ₃
+slices (`O(n²)`, essentially free) and by **birthing new factored κ₃ columns**
+(`8n` per layer against SIMPLE's `2n`, which is what makes the scheme
+unaffordable). We deleted the births and kept the object, by exact text
+substitutions on a copy of the reference implementation, verified bit-exact
 against it with the ablation off.
 
 Birth counts are **read off the returned tensor**, not estimated:
@@ -186,34 +186,41 @@ Birth counts are **read off the returned tensor**, not estimated:
 |---|---:|---:|---:|
 | SIMPLE | `2n` = 2,048 | `4.004685e-08` | `1.000×` |
 | AUGMENT | `8n` = 8,192 | `1.912323e-08` | **`2.094×` better** |
-| AUGMENT-LITE — κ₄'s births suppressed | `5n` = 5,120 | `4.365096e-06` | **`109×` worse** |
-| AUGMENT-MINIMAL — κ₄'s births *and* the raised budget's extra legs suppressed | **`2n` = 2,048** | `2.976232e-06` | **`74×` worse** |
+| AUGMENT-LITE — κ₄'s births deleted | `5n` = 5,120 | `4.365096e-06` | `109×` worse |
+| AUGMENT-MINIMAL — those *and* the raised budget's extra legs deleted | `2n` = 2,048 | `2.976232e-06` | `74×` worse |
+| *(Gaussian K2, same 24 networks, same labels)* | — | `4.196350e-06` | `105×` worse |
+| *(calibrated K2)* | — | `1.448599e-06` | `36×` worse |
 
-`AUGMENT-MINIMAL` costs SIMPLE's lineage exactly while keeping κ₄'s `(n,n)` object
-live and every diagram that *consumes* it — the only affordable member of the
-family. **It is 74× worse than simply not tracking κ₄ as a matrix at all**, on
-`0 of 24` networks improved, with paired intervals clear of zero by two orders of
-magnitude. Both controls reproduce their independent anchors to `~1e-15`.
+Ground-truth noise floor: `1.1552e-09`.
 
-**So the cheap channel carries none of the gain.** The births are not an
-implementation detail of κ₄'s value in this representation; they *are* its value.
-Any scheme that wants AUGMENT's accuracy must pay for AUGMENT's columns, and that
-is `3.6×–5.8×` over the hard budget.
+**Read the last two rows before the middle two.** `AUGMENT-LITE` is statistically
+indistinguishable from plain Gaussian propagation — the paired difference against
+K2 straddles zero. `AUGMENT-MINIMAL` is worse than *calibrated* K2. **Deleting
+blocks from the carried lineage does not cost part of κ₄'s contribution; it costs
+the entire κ₃ correction.**
 
-**The width argument.** Comparing a small-shape probe with the live shape:
+So the honest statement is narrower than it first appeared, and in one way more
+useful:
 
-| shape | SIMPLE | AUGMENT-MINIMAL | penalty |
-|---|---:|---:|---:|
-| `128 × 8` | `8.55e-06` | `1.85e-05` | `2.2×` |
-| `1024 × 16` | `4.00e-08` | `2.98e-06` | **`74×`** |
-
-SIMPLE's error falls `214×` between those shapes; the inconsistent arm's falls
-`6×`. **The penalty explodes not because the inconsistency worsens but because it
-installs an error floor that does not fall with width**, while the consistent
-chain's error does. *(Caveat, stated because the draft must not outrun the data:
-the small-shape leg is a four-network probe with no interval, and both width and
-depth change between the rows. A width sweep at fixed depth would be the honest
-version of this table and is not yet run.)*
+- **What is established.** No affordable member of this family exists *by
+  deletion*. An arm that costs SIMPLE's exact `2n` lineage while keeping κ₄ live
+  is `74×` worse than SIMPLE, on `0 of 24` networks improved. Both controls
+  reproduce their independent anchors **bit-identically**.
+- **What is NOT established, and we say so.** Which κ₄ channel carries the
+  `2.094×`. The two channels are **not separable in this implementation**: κ₄'s
+  own update is computed from the factored κ₃ blocks the ablation removes, so the
+  ablated arms propagate a *different* κ₄ rather than the same one with its births
+  suppressed.
+- **The competing explanation, which our own data supports.** Generation-capped
+  SIMPLE — which contains no κ₄ births at all — collapses to `1.65e-06` by the same
+  order. **A single statement covers every case we have measured: any deletion
+  from the carried `(1,1,1)` lineage returns this chain to roughly Gaussian
+  accuracy.** That is a cleaner result than a channel attribution would have been,
+  and it is the one the evidence identifies.
+- One diagnostic worth reporting because it constrains the mechanism:
+  `AUGMENT-MINIMAL` deletes strictly more than `AUGMENT-LITE` and is `1.47×`
+  **better**, on 21 of 24 networks. The collapse is not monotone in how much is
+  removed.
 
 ---
 
@@ -240,11 +247,27 @@ collapse **is not AUGMENT's**: capped AUGMENT is statistically indistinguishable
 from capped SIMPLE at `g = 2` and significantly *worse* at `g = 4`. The richer
 representation buys nothing once the object that consumes it is approximate.
 
-Put together: **the value of carrying higher-order cumulant information is not a
-property of the information, it is a property of the exactness of the consumer.**
+**(d) Deleting diagram classes does the same thing as deleting generations.**
+§(ii)'s ablations remove specific *diagram classes* from the carried lineage
+rather than whole generations, and land in the same place: `2.98e-06` and
+`4.37e-06` against generation-capped SIMPLE's `1.65e-06`, all of them within a
+factor of a few of plain Gaussian propagation at `4.20e-06`.
+
+Put together, and this is the form the evidence actually identifies: **the carried
+lineage does not degrade gracefully. Every deletion we have measured — by
+generation, by diagram class, or by cumulant degree — costs not a share of the
+correction but essentially all of it**, and the estimator returns to roughly
+Gaussian accuracy whatever was removed. The value of carrying higher-order
+cumulant information is therefore not a property of the information; it is a
+property of the exactness of the consumer.
+
 That is why the affordable members of this family cluster at one accuracy and the
 accurate members cluster at one price, and why no team on the public board has
 published a method that is both.
+
+*What would falsify this: any truncation, of any kind, that keeps the chain
+materially below the Gaussian baseline. We have looked for one along three axes
+and not found it; we have not proved none exists.*
 
 ---
 
@@ -404,8 +427,7 @@ The skeleton of the argument, which the measurements above already support:
 
 | item | blocking |
 |---|---|
-| §(ii) Skeptic verdict on the channel ablation | Rule 2 agent, running |
-| §(ii) width sweep at FIXED depth, to replace the two-shape table | not queued |
+| §(ii) the completed 2×2: does `legsonly` also land on the Gaussian baseline? | queued, ~10 GPU-min |
 | §(iv) rank sweep curve | background GPU job, not yet queued |
 | §(iii)(a) memory-depth ceiling | restate from the 2026-09-05 LOG entry |
 | §(vi) the whole section | depth-2 graded row + T1 + T2 |
