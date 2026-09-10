@@ -39901,3 +39901,57 @@ given that they judge the residual in local seconds — which `VALIDATION.md`
 §2b-iii says is not the gate — and would refuse `330327`, which holds a real
 graded `0/100` row?* If yes, the canary proceeds under his standing approval. If
 no, depth 2 does not move and nominee A stays at depth 3 with its `1.21x` margin.
+
+# 2026-09-10 — P07 LABELS DONE, and a correction: **the R² ceiling on this corpus is `0.944`, not the `~0.40` my own contract predicted.**
+
+*Job `493`, `4h14m`. Artifact `experiments/2026-09-10_slice5/truth_P07.npz`,
+sha256 `b96f90a0…`, ledger **finalized on the host** against that hash. 384
+networks, two independent replicas of `2^24` samples each.*
+
+## The asset, and its own fitness check
+
+    replica disagreement   observed 9.0662e-09   predicted 2V/N 8.9976e-09   ratio 1.0076
+    mean truth noise       4.4988e-09 per replica   (range 3.13e-09 .. 6.21e-09)
+
+**The replicas are independent**, which is the one thing that makes the two-half
+cross estimator unbiased, and it is checked rather than assumed: a ratio far from
+`1.0` would mean either the replicas share a stream or the variance model is
+wrong. `1.0076`.
+
+## The correction, and it is mine
+
+The T2 contract says the label precision *"caps any reported `R^2` near `0.40`"*,
+and today's `IMPORTANT: allocate P07/P08` entry put the per-neuron label noise
+standard deviation at *"roughly `2.4e-4` against a residual of roughly `2.0e-4`"*.
+
+**Both are wrong, and by a lot.** Measured:
+
+    label noise, per replica                4.4988e-09
+    label noise in a two-replica mean       2.2494e-09
+    chain MSE (reference, P01)              4.0047e-08
+    R^2 CEILING                             0.944
+
+**Why I was wrong: I assumed a post-ReLU activation variance of order 1.** The
+measured value is `V = 0.0755` — `gt_noise x N = 4.4988e-09 x 2^24`. That is a
+factor of `13` in variance, which is the whole gap between `0.40` and `0.944`.
+He initialisation keeps the *pre*-activation variance at order 1; the *post*-ReLU
+mean-square of a centred half-normal is much smaller, and I used the wrong one.
+
+**Consequence, and it is good news pointed the wrong way from my own prediction.**
+The fit corpus is far better than I told the strategist. `2^24` per half was
+chosen against a pessimistic noise model; against the real one it is generous, and
+`2^22` would have given a ceiling of `0.78` at a quarter of the `4h14m`. **The
+over-provisioning cost about three GPU-hours** and it is recorded so the next mint
+is sized from the measured `V` and not from an assumption.
+
+**The instrument computed the ceiling wrongly too** and is fixed: it omitted the
+factor of two for averaging two replicas, and applied a corpus-mean noise against
+a per-network `sigma`. Both corrected; the artifact now reports the per-network
+form.
+
+**Nothing about the gate moves.** The `1.15x` gate is read on the paired
+arithmetic difference of the cross estimator, which is unbiased at any label
+precision. The ceiling governs only how an `R^2` should be *read*, and prediction
+4 — held-out `R^2` `<= 0.25` — was written against the ceiling, so it is now a
+**weaker** claim than intended: `0.25` against a `0.944` ceiling is a much lower
+bar than `0.25` against `0.40`. Recorded before any T2 datum exists.

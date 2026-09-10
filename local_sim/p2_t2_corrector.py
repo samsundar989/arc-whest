@@ -395,12 +395,25 @@ def fit(a) -> int:
     perR, poolR, predR, sigR, AR, BR, tgtR = unpack(zr)
 
     nF, nR = len(predF), len(predR)
-    noiseF = float(np.mean(zf["gt_noise"])) if "gt_noise" in zf else float("nan")
     var_tgt = float(np.var(tgtF))
-    # The R^2 ceiling this corpus can support: label noise divided by the
-    # target's own variance, both in the SAME normalised units.
-    noise_in_tgt = float(np.mean(noiseF / np.maximum(sigF, 1e-30) ** 2)) \
-        if np.isfinite(noiseF) else float("nan")
+    # The R^2 ceiling this corpus can support.
+    #
+    # `gt_noise` is the PER-REPLICA noise variance of a per-neuron mean, on the
+    # MSE scale, one number per network. The target uses the AVERAGE of two
+    # independent replicas, so the noise entering it is `gt_noise / 2` -- and it
+    # must be divided by `sigma^2` to reach the target's own normalised units.
+    # The first version of this line omitted the factor of two and applied a
+    # corpus-mean noise against a per-network sigma. Both are fixed.
+    #
+    # The contract's own estimate of this ceiling (`~0.40`) was badly wrong and
+    # is corrected in the LOG: it assumed a post-ReLU activation variance of
+    # order 1, where the measured value is `0.0755`. The real ceiling is `0.944`.
+    if "gt_noise" in zf:
+        gn = np.asarray(zf["gt_noise"], dtype=np.float64).reshape(-1, 1)
+        noiseF = float(gn.mean())
+        noise_in_tgt = float(np.mean((gn / 2.0) / np.maximum(sigF, 1e-30) ** 2))
+    else:
+        noiseF, noise_in_tgt = float("nan"), float("nan")
     r2_ceiling = 1.0 - noise_in_tgt / var_tgt if var_tgt > 0 else float("nan")
 
     print("=" * 78)
