@@ -1,0 +1,141 @@
+{
+  "candidate_source_hashes": [
+    "ba618dd6ae3e16c9c7618354d92f255e523e62716516378591d4fa78bec41d5b",
+    "eae05bf93dda7f92765243677e809864d6b587095ce5e22425e3302534992f3b",
+    "dc6508df880a50be4c98c42801292865009007ab2d0e7583fd47bc07e023b3d5"
+  ],
+  "candidate_sources": [
+    "experiments/2026-09-10_stage2_fit_interface_final/candidate_observations/candidate_000_coherent.py",
+    "experiments/2026-09-10_stage2_fit_interface_final/candidate_observations/candidate_001_coherent.py",
+    "experiments/2026-09-10_stage2_fit_interface_final/candidate_observations/candidate_002_coherent.py"
+  ],
+  "counted_costs": [
+    [
+      12473,
+      12473
+    ],
+    [
+      12473,
+      12473
+    ],
+    [
+      12473,
+      12473
+    ]
+  ],
+  "immutable": true,
+  "manifest": {
+    "bounds": {
+      "lam": {
+        "max": 0.5,
+        "min": 0.0
+      }
+    },
+    "candidate_registry": [
+      {
+        "lam": 0.0
+      },
+      {
+        "lam": 0.25
+      },
+      {
+        "lam": 0.5
+      }
+    ],
+    "candidate_sources": [
+      {
+        "candidate": {
+          "lam": 0.0
+        },
+        "index": 0,
+        "path": "experiments/2026-09-10_stage2_fit_interface_final/candidate_observations/candidate_000_coherent.py",
+        "sha256": "ba618dd6ae3e16c9c7618354d92f255e523e62716516378591d4fa78bec41d5b"
+      },
+      {
+        "candidate": {
+          "lam": 0.25
+        },
+        "index": 1,
+        "path": "experiments/2026-09-10_stage2_fit_interface_final/candidate_observations/candidate_001_coherent.py",
+        "sha256": "eae05bf93dda7f92765243677e809864d6b587095ce5e22425e3302534992f3b"
+      },
+      {
+        "candidate": {
+          "lam": 0.5
+        },
+        "index": 2,
+        "path": "experiments/2026-09-10_stage2_fit_interface_final/candidate_observations/candidate_002_coherent.py",
+        "sha256": "dc6508df880a50be4c98c42801292865009007ab2d0e7583fd47bc07e023b3d5"
+      }
+    ],
+    "counted_costs": [
+      [
+        12473,
+        12473
+      ],
+      [
+        12473,
+        12473
+      ],
+      [
+        12473,
+        12473
+      ]
+    ],
+    "generator": {
+      "path": "local_sim/p2_build_k4_arms.py",
+      "sha256": "3d84b385c040bc0986ca79aa58dd185ee02f62514a9ad42395bf3793af2a7621",
+      "upstream_source_sha256": "220d23143eaadfa583ba629e0bc23634981b47b1594193204d0b181b7e9fbf17"
+    },
+    "identity_manifest": {
+      "depth": 3,
+      "identities": [
+        {
+          "id": "synthetic-0",
+          "seed": 7001
+        },
+        {
+          "id": "synthetic-1",
+          "seed": 7002
+        }
+      ],
+      "kind": "synthetic-identities-v1",
+      "width": 4
+    },
+    "kind": "synthetic coherent-K4 canonical-lifecycle observations",
+    "labels_read": false,
+    "lifecycle_spec": {
+      "depth": 3,
+      "flop_budget": 2199023255552,
+      "residual_cap": null,
+      "weights_mode": "f64_readonly",
+      "width": 4
+    },
+    "n_ops": [
+      [
+        590,
+        590
+      ],
+      [
+        590,
+        590
+      ],
+      [
+        590,
+        590
+      ]
+    ],
+    "producer": {
+      "path": "local_sim/p2_k4_fit_producer.py",
+      "sha256": "962fbf97fcaedc3c18fdd21ddddac097a3ff6137b2ebcfa2e6cf235d22886317"
+    },
+    "row_hashes": [
+      "0a03ade7f705b8e4a35d30a382365dde08de8a127b4a874157417f92399531ca",
+      "65c91765bb2b84df2109a5635d4414e9e4076064bfde438cadb1ebd89c411b97",
+      "8af743bac80f1c452a17f558a576032f5b6be24b5c3c7929ebbdb451c8e0ed6c"
+    ]
+  },
+  "predictions": "experiments/2026-09-10_stage2_fit_interface_final\\candidate_observations\\predictions.npz",
+  "predictions_sha256": "de68907f40a98804677bc5386f78a3b893b4354e4648cec9cdf1b989bd9cce5b",
+  "schema": "arc-whest.coherent-k4-fit-producer-receipt.v1"
+}

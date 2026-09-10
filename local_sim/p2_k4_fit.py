@@ -11,6 +11,7 @@ Synthetic example (all three input files must already exist):
     uv run python local_sim/p2_k4_fit.py --predictions predictions.npz \
       --truth synthetic_truth.npz --data-role synthetic \
       --candidates candidates.json --bounds bounds.json \
+      --identities identities.json \
       --objective final_layer_mse --receipt receipt.json
 """
 
@@ -57,8 +58,26 @@ def _relative(path):
     return os.path.relpath(os.path.abspath(path), _ROOT).replace("\\", "/")
 
 
+def _generated_constants(text, path):
+    """Read the literal mechanism switches emitted by p2_build_k4_arms."""
+    values = {}
+    try:
+        tree = ast.parse(text, filename=path)
+        for node in tree.body:
+            if (isinstance(node, ast.Assign) and len(node.targets) == 1 and
+                    isinstance(node.targets[0], ast.Name) and
+                    node.targets[0].id in {"_K4_ACTIVE", "_K4_CONSUMERS",
+                                           "_K4_BIRTHS", "_K4_LAM"}):
+                values[node.targets[0].id] = ast.literal_eval(node.value)
+    except (SyntaxError, ValueError) as exc:
+        raise FitRefused("candidate source does not parse: %s: %s" %
+                         (path, exc)) from exc
+    return values
+
+
 def _validate_sources():
     paths = {"fit_interface": os.path.abspath(__file__),
+             "fit_producer": os.path.join(_HERE, "p2_k4_fit_producer.py"),
              "arm_generator": os.path.join(_HERE, "p2_build_k4_arms.py")}
     for arm in _ARMS:
         paths["arm_" + arm] = os.path.join(_HERE, "p2_arms",
@@ -129,6 +148,24 @@ def _scalar_strings(value, label):
     return [str(x) for x in arr.tolist()]
 
 
+def _identity_registry(path):
+    raw = _read_json(path, "identity registry")
+    rows = raw.get("identities") if isinstance(raw, dict) else None
+    if not isinstance(rows, list) or not rows:
+        raise FitRefused("identity registry must contain a nonempty identities list")
+    ids = []
+    for i, row in enumerate(rows):
+        if not isinstance(row, dict) or set(row) != {"id", "seed"}:
+            raise FitRefused("identity %d must contain exactly id/seed" % i)
+        identity, seed = str(row["id"]), int(row["seed"])
+        if not identity or seed < 0:
+            raise FitRefused("identity %d has invalid id/seed" % i)
+        ids.append(identity)
+    if len(ids) != len(set(ids)):
+        raise FitRefused("identity registry contains duplicates")
+    return raw, ids
+
+
 def _validate_request(a):
     if a.objective not in _OBJECTIVES:
         raise FitRefused("objective must be explicitly one of %s" %
@@ -139,6 +176,8 @@ def _validate_request(a):
                         ("candidates", a.candidates), ("bounds", a.bounds)):
         if not os.path.isfile(path):
             raise FitRefused("%s file does not exist: %s" % (label, path))
+    if not os.path.isfile(a.identities):
+        raise FitRefused("identities file does not exist: %s" % a.identities)
     if not a.receipt:
         raise FitRefused("receipt path is required")
     if os.path.lexists(a.receipt):
@@ -149,12 +188,14 @@ def _validate_request(a):
     if a.data_role == "protected-design" and a.block.strip().upper() != "P07":
         raise FitRefused("protected-design fitting is restricted to exact block P07")
     names, candidates, bounds, matrix = _registry(a.candidates, a.bounds)
+    identity_manifest, registered_identities = _identity_registry(a.identities)
     source_hashes = _validate_sources()
     try:
         with _load_npz(a.predictions, allow_pickle=False) as z:
             required = {"parameter_names", "candidate_values", "identities",
                         "predictions", "counted_costs",
-                        "producer_candidate_source_hashes"}
+                        "candidate_source_paths", "candidate_source_hashes",
+                        "producer_manifest_json"}
             missing = required - set(z.files)
             if missing:
                 raise FitRefused("prediction archive misses %s" % sorted(missing))
@@ -163,9 +204,12 @@ def _validate_request(a):
             identities = _scalar_strings(z["identities"], "identities")
             predictions = np.asarray(z["predictions"], dtype=np.float64)
             costs = np.asarray(z["counted_costs"])
-            candidate_hashes = _scalar_strings(
-                z["producer_candidate_source_hashes"],
-                "producer_candidate_source_hashes")
+            candidate_paths = _scalar_strings(z["candidate_source_paths"],
+                                              "candidate_source_paths")
+            candidate_hashes = _scalar_strings(z["candidate_source_hashes"],
+                                               "candidate_source_hashes")
+            producer_manifest = json.loads(str(np.asarray(
+                z["producer_manifest_json"]).item()))
     except (OSError, ValueError) as exc:
         if isinstance(exc, FitRefused):
             raise
@@ -173,10 +217,10 @@ def _validate_request(a):
     if archive_names != names or values.shape != matrix.shape or not np.array_equal(values, matrix):
         raise FitRefused("prediction candidates do not exactly match the registry")
     c, n = len(candidates), len(identities)
-    if not identities or len(set(identities)) != n:
-        raise FitRefused("prediction identities must be nonempty and unique")
-    if predictions.ndim != 4 or predictions.shape[:2] != (c, n):
-        raise FitRefused("predictions must have shape (candidates, identities, depth, width)")
+    if identities != registered_identities:
+        raise FitRefused("prediction identities do not exactly match the registry")
+    if predictions.ndim not in (3, 4) or predictions.shape[:2] != (c, n):
+        raise FitRefused("predictions must have shape CxNxW or CxNxDxW")
     if costs.shape == (c,):
         costs = np.repeat(costs[:, None], n, axis=1)
     if costs.shape != (c, n) or costs.dtype.kind not in "iu" or np.any(costs < 0):
@@ -185,13 +229,52 @@ def _validate_request(a):
         raise FitRefused("final_layer_mse requires value-independent candidate costs")
     if not np.isfinite(predictions).all():
         raise FitRefused("predictions contain non-finite values")
-    if len(candidate_hashes) != c or any(not re.fullmatch(r"[0-9a-f]{64}", h)
-                                         for h in candidate_hashes):
-        raise FitRefused("producer_candidate_source_hashes must contain one lowercase SHA-256 per candidate")
+    if len(candidate_paths) != c or len(candidate_hashes) != c:
+        raise FitRefused("candidate source path/hash count must equal candidate count")
+    candidate_sources = []
+    for i, (raw_path, expected) in enumerate(zip(candidate_paths, candidate_hashes)):
+        path = os.path.abspath(raw_path if os.path.isabs(raw_path)
+                               else os.path.join(_ROOT, raw_path))
+        if os.path.commonpath([os.path.abspath(_ROOT), path]) != os.path.abspath(_ROOT):
+            raise FitRefused("candidate source %d escapes the repository" % i)
+        if not os.path.isfile(path) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+            raise FitRefused("candidate source %d is missing or has invalid hash" % i)
+        actual = _sha256(path)
+        if actual != expected:
+            raise FitRefused("candidate source %d hash mismatch" % i)
+        try:
+            with open(path, encoding="utf-8") as fh:
+                constants = _generated_constants(fh.read(), path)
+        except OSError as exc:
+            raise FitRefused("candidate source %d cannot be read: %s" %
+                             (i, exc)) from exc
+        expected_constants = {"_K4_ACTIVE": True, "_K4_CONSUMERS": True,
+                              "_K4_BIRTHS": True,
+                              "_K4_LAM": candidates[i]["lam"]}
+        if constants != expected_constants:
+            raise FitRefused("candidate source %d does not encode its registered coherent configuration" % i)
+        candidate_sources.append({"path": _relative(path), "sha256": actual,
+                                  "verified": True})
+    expected_manifest_sources = [
+        {"index": i, "candidate": candidates[i],
+         "path": candidate_sources[i]["path"],
+         "sha256": candidate_sources[i]["sha256"]}
+        for i in range(c)]
+    if (not isinstance(producer_manifest, dict)
+            or producer_manifest.get("kind") !=
+            "synthetic coherent-K4 canonical-lifecycle observations"
+            or producer_manifest.get("labels_read") is not False
+            or producer_manifest.get("candidate_registry") != candidates
+            or producer_manifest.get("identity_manifest") != identity_manifest
+            or producer_manifest.get("candidate_sources") !=
+            expected_manifest_sources
+            or producer_manifest.get("counted_costs") != costs.tolist()):
+        raise FitRefused("producer manifest does not match the validated observations")
     return {"parameter_names": names, "candidates": candidates,
             "bounds": bounds, "identities": identities,
+            "identity_manifest": identity_manifest,
             "predictions": predictions, "counted_costs": costs.astype(np.int64),
-            "producer_candidate_source_hashes": candidate_hashes,
+            "candidate_sources": candidate_sources,
             "source_hashes": source_hashes}
 
 
@@ -258,11 +341,13 @@ def fit(a, truth_loader=_load_truth):
     if truth_ids != validated["identities"]:
         raise FitRefused("truth identities do not exactly match prediction order")
     predictions = validated["predictions"]
-    if truth.shape != predictions.shape[1:]:
-        raise FitRefused("truth shape does not match each candidate prediction")
+    pred_final = predictions[:, :, -1, :] if predictions.ndim == 4 else predictions
+    truth_final = truth[:, -1, :] if truth.ndim == 3 else truth
+    if truth_final.shape != pred_final.shape[1:]:
+        raise FitRefused("truth shape does not match each candidate final prediction")
     if not np.isfinite(truth).all():
         raise FitRefused("truth contains non-finite values")
-    per_identity = ((predictions[:, :, -1, :] - truth[None, :, -1, :]) ** 2).mean(axis=2)
+    per_identity = ((pred_final - truth_final[None, :, :]) ** 2).mean(axis=2)
     objective = per_identity.mean(axis=1)
     selected = int(np.argmin(objective))  # registered order is the tie break
     receipt = {
@@ -288,10 +373,11 @@ def fit(a, truth_loader=_load_truth):
                    "candidates": {"path": _relative(a.candidates),
                                   "sha256": _sha256(a.candidates)},
                    "bounds": {"path": _relative(a.bounds),
-                              "sha256": _sha256(a.bounds)}},
+                              "sha256": _sha256(a.bounds)},
+                   "identities": {"path": _relative(a.identities),
+                                  "sha256": _sha256(a.identities)}},
         "source_hashes": validated["source_hashes"],
-        "producer_asserted_candidate_source_hashes": validated[
-            "producer_candidate_source_hashes"],
+        "candidate_sources": validated["candidate_sources"],
         "counted_costs": validated["counted_costs"].tolist(),
         "results": [{"candidate": validated["candidates"][i],
                      "objective": float(objective[i]),
@@ -323,6 +409,7 @@ def main(argv=None):
                     choices=("synthetic", "protected-design"))
     ap.add_argument("--candidates", required=True)
     ap.add_argument("--bounds", required=True)
+    ap.add_argument("--identities", required=True)
     ap.add_argument("--objective", required=True, choices=_OBJECTIVES)
     ap.add_argument("--receipt", required=True)
     ap.add_argument("--block", default="")

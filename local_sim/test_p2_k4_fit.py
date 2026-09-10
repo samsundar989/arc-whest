@@ -1,204 +1,183 @@
-"""Synthetic-only regressions for p2_k4_fit's bounded receipt interface."""
-
+"""End-to-end synthetic regressions for the bounded coherent-K4 fit path."""
 from __future__ import annotations
-
-import argparse
-import hashlib
-import json
-import os
-import subprocess
-import sys
-import tempfile
+import argparse, json, os, subprocess, sys, tempfile
 from argparse import Namespace
-
 import numpy as np
 from numpy import load as _load_npz
-
 import p2_k4_fit as fit
+import p2_k4_fit_producer as producer
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_ROOT = os.path.dirname(_HERE)
 
 
 def _write_json(path, value):
     with open(path, "w", encoding="utf-8", newline="\n") as fh:
-        json.dump(value, fh, sort_keys=True)
-        fh.write("\n")
+        json.dump(value, fh, sort_keys=True); fh.write("\n")
+
+
+def _rewrite_npz(path, mutate):
+    with _load_npz(path, allow_pickle=False) as z:
+        values = {name: z[name] for name in z.files}
+    mutate(values); np.savez(path, **values)
+
+
+def _swap_source_order(values):
+    order = [1, 0, 2]
+    values["candidate_source_paths"] = np.asarray(
+        values["candidate_source_paths"])[order]
+    values["candidate_source_hashes"] = np.asarray(
+        values["candidate_source_hashes"])[order]
 
 
 def _fixture(root):
-    candidates = os.path.join(root, "candidates.json")
-    bounds = os.path.join(root, "bounds.json")
-    predictions = os.path.join(root, "predictions.npz")
-    truth = os.path.join(root, "truth.npz")
-    receipt = os.path.join(root, "receipt.json")
-    registry = {"parameters": ["lam"],
-                "candidates": [{"lam": 0.0}, {"lam": 0.25}, {"lam": 0.5}]}
-    _write_json(candidates, registry)
+    candidates, bounds = os.path.join(root, "candidates.json"), os.path.join(root, "bounds.json")
+    identities, produced = os.path.join(root, "identities.json"), os.path.join(root, "candidate_observations")
+    truth, receipt = os.path.join(root, "truth.npz"), os.path.join(root, "receipt.json")
+    _write_json(candidates, {"parameters": ["lam"], "candidates":
+                [{"lam": 0.0}, {"lam": 0.25}, {"lam": 0.5}]})
     _write_json(bounds, {"lam": {"min": 0.0, "max": 0.5}})
-    ids = np.asarray(["synthetic-0", "synthetic-1"])
-    target = np.arange(24, dtype=np.float64).reshape(2, 3, 4) / 10.0
-    pred = np.stack([target + 0.3, target, target - 0.1])
-    hashes = np.asarray([hashlib.sha256(("candidate-%d" % i).encode()).hexdigest()
-                         for i in range(3)])
-    np.savez(predictions, parameter_names=np.asarray(["lam"]),
-             candidate_values=np.asarray([[0.0], [0.25], [0.5]]),
-             identities=ids, predictions=pred,
-             counted_costs=np.asarray([202, 202, 202], dtype=np.int64),
-             producer_candidate_source_hashes=hashes)
-    manifest = {"kind": "synthetic", "fixture": "affine-offset-v1",
+    _write_json(identities, {"kind": "synthetic-identities-v1", "width": 4,
+                "depth": 3, "identities": [{"id": "synthetic-0", "seed": 7001},
+                                             {"id": "synthetic-1", "seed": 7002}]})
+    result = producer.produce(Namespace(candidates=candidates, bounds=bounds,
+                                        identities=identities, out_dir=produced))
+    with _load_npz(result["predictions"], allow_pickle=False) as z:
+        ids, target = z["identities"], np.asarray(z["predictions"])[1]
+    manifest = {"kind": "synthetic", "fixture": "producer-lifecycle-v1",
                 "labels_protected": False, "identity_count": 2}
     np.savez(truth, identities=ids, truth=target,
              manifest_json=np.asarray(json.dumps(manifest, sort_keys=True)))
-    args = Namespace(predictions=predictions, truth=truth,
-                     data_role="synthetic", candidates=candidates,
-                     bounds=bounds, objective="final_layer_mse",
+    args = Namespace(predictions=result["predictions"], truth=truth,
+                     data_role="synthetic", candidates=candidates, bounds=bounds,
+                     identities=identities, objective="final_layer_mse",
                      receipt=receipt, block="", ts="", note="")
-    return args
+    return args, result
+
+
+def _temp(prefix):
+    return tempfile.TemporaryDirectory(prefix=prefix, dir=_ROOT)
 
 
 def run_checks():
     rows = []
-
     def check(name, condition, detail):
         rows.append({"check": name, "pass": bool(condition), "detail": detail})
-        print("%-48s %s  %s" % (name, "PASS" if condition else "FAIL", detail))
+        print("%-52s %s  %s" % (name, "PASS" if condition else "FAIL", detail))
 
-    with tempfile.TemporaryDirectory(prefix="p2-k4-fit-") as root:
-        a = _fixture(root)
-        receipt = fit.fit(a)
-        check("synthetic optimum is frozen", receipt["selection"]["frozen_values"] == {"lam": 0.25},
-              str(receipt["selection"]))
-        required = {"source_hashes", "objective", "identities", "truth_manifest",
-                    "counted_costs", "selection", "candidate_registry", "bounds"}
-        check("receipt carries required provenance", required <= set(receipt),
-              ",".join(sorted(required)))
-        check("synthetic manifest is explicit",
-              receipt["truth_manifest"]["kind"] == "synthetic"
-              and receipt["data_role"] == "synthetic"
-              and receipt["reservation_receipt"] is None, "synthetic only")
-        check("counted costs preserve identities",
-              receipt["counted_costs"] == [[202, 202], [202, 202], [202, 202]],
-              str(receipt["counted_costs"]))
+    with _temp("p2-k4-fit-e2e-") as root:
+        a, produced = _fixture(root); receipt = fit.fit(a)
+        check("producer to selector freezes synthetic optimum",
+              receipt["selection"]["frozen_values"] == {"lam": 0.25}, str(receipt["selection"]))
+        check("candidate source paths and hashes are verified",
+              len(receipt["candidate_sources"]) == 3 and all(x["verified"] for x in receipt["candidate_sources"]),
+              "%d generated sources" % len(receipt["candidate_sources"]))
+        check("canonical lifecycle costs preserve identities",
+              receipt["counted_costs"] == produced["counted_costs"] and
+              len({tuple(x) for x in receipt["counted_costs"]}) == 1, str(receipt["counted_costs"]))
         before = open(a.receipt, "rb").read()
-        refused = False
-        try:
-            fit.fit(a)
-        except fit.FitRefused as exc:
-            refused = "already exists" in str(exc)
+        try: fit.fit(a); refused = False
+        except fit.FitRefused as exc: refused = "already exists" in str(exc)
         check("existing receipt is immutable", refused and open(a.receipt, "rb").read() == before,
               "exclusive create; bytes unchanged")
 
-    with tempfile.TemporaryDirectory(prefix="p2-k4-fit-order-") as root:
-        a = _fixture(root)
-        _write_json(a.bounds, {"lam": {"min": 0.0, "max": 0.1}})
+    with _temp("p2-k4-fit-source-bytes-") as root:
+        a, made = _fixture(root); source = os.path.join(_ROOT, made["candidate_sources"][0])
+        with open(source, "a", encoding="utf-8") as fh: fh.write("\n# mutation\n")
         calls = []
-        try:
-            fit.fit(a, truth_loader=lambda _a: calls.append(True))
-            refused = False
-        except fit.FitRefused as exc:
-            refused = "outside its bound" in str(exc)
-        check("invalid request precedes truth loader", refused and not calls,
+        try: fit.fit(a, truth_loader=lambda _a: calls.append(True)); refused = False
+        except fit.FitRefused as exc: refused = "hash mismatch" in str(exc)
+        check("mutated candidate source refuses before truth", refused and not calls, "loader calls=%d" % len(calls))
+
+    with _temp("p2-k4-fit-source-hash-") as root:
+        a, _ = _fixture(root)
+        _rewrite_npz(a.predictions, lambda d: d.__setitem__("candidate_source_hashes",
+                     np.asarray(["0" * 64] + list(d["candidate_source_hashes"])[1:])))
+        calls = []
+        try: fit.fit(a, truth_loader=lambda _a: calls.append(True)); refused = False
+        except fit.FitRefused as exc: refused = "hash mismatch" in str(exc)
+        check("mutated recorded hash refuses before truth", refused and not calls, "loader calls=%d" % len(calls))
+
+    with _temp("p2-k4-fit-source-order-") as root:
+        a, _ = _fixture(root); _rewrite_npz(a.predictions, _swap_source_order); calls = []
+        try: fit.fit(a, truth_loader=lambda _a: calls.append(True)); refused = False
+        except fit.FitRefused as exc: refused = "registered coherent configuration" in str(exc)
+        check("mutated source order refuses before truth", refused and not calls,
               "loader calls=%d" % len(calls))
 
-    with tempfile.TemporaryDirectory(prefix="p2-k4-fit-cost-") as root:
-        a = _fixture(root)
-        with _load_npz(a.predictions, allow_pickle=False) as z:
-            values = {name: z[name] for name in z.files}
-        values["counted_costs"] = np.asarray([202, 203, 202], dtype=np.int64)
-        np.savez(a.predictions, **values)
-        calls = []
-        try:
-            fit.fit(a, truth_loader=lambda _a: calls.append(True))
-            refused = False
-        except fit.FitRefused as exc:
-            refused = "value-independent" in str(exc)
-        check("MSE objective refuses unequal costs", refused and not calls,
-              "loader calls=%d" % len(calls))
+    mutations = (
+        ("cost", lambda d: d.__setitem__("counted_costs", np.asarray(d["counted_costs"]) +
+                                         np.asarray([[0], [1], [0]])), "value-independent"),
+        ("candidate order", lambda d: d.__setitem__("candidate_values",
+         np.asarray(d["candidate_values"])[[1, 0, 2]]), "exactly match"),
+        ("identity", lambda d: d.__setitem__("identities", np.asarray(d["identities"])[::-1]), "identit"))
+    for label, mutation, expected in mutations:
+        with _temp("p2-k4-fit-mutation-") as root:
+            a, _ = _fixture(root); _rewrite_npz(a.predictions, mutation); calls = []
+            try: fit.fit(a, truth_loader=lambda _a: calls.append(True)); refused = False
+            except fit.FitRefused as exc: refused = expected in str(exc)
+            check("mutated %s refuses before truth" % label, refused and not calls,
+                  "loader calls=%d" % len(calls))
 
-    with tempfile.TemporaryDirectory(prefix="p2-k4-fit-role-") as root:
-        a = _fixture(root)
-        a.data_role, a.block = "protected-design", "P01"
-        calls = []
-        try:
-            fit.fit(a, truth_loader=lambda _a: calls.append(True))
-            refused = False
-        except fit.FitRefused as exc:
-            refused = "exact block P07" in str(exc)
-        check("protected fitting requires exact P07", refused and not calls,
-              "loader calls=%d" % len(calls))
+    with _temp("p2-k4-fit-role-") as root:
+        a, _ = _fixture(root); a.data_role, a.block = "protected-design", "P01"; calls = []
+        try: fit.fit(a, truth_loader=lambda _a: calls.append(True)); refused = False
+        except fit.FitRefused as exc: refused = "exact block P07" in str(exc)
+        check("protected fitting requires exact P07", refused and not calls, "loader calls=%d" % len(calls))
 
-    with tempfile.TemporaryDirectory(prefix="p2-k4-fit-synthetic-role-") as root:
-        a = _fixture(root)
-        np.savez(a.truth, seeds=np.asarray([1, 2]),
-                 means_r1=np.zeros((2, 3, 4)), means_r2=np.zeros((2, 3, 4)))
-        try:
-            fit.fit(a)
-            refused = False
-        except fit.FitRefused as exc:
-            refused = "declared data role" in str(exc)
-        check("synthetic role rejects protected schema", refused
-              and not os.path.exists(a.receipt), "truth_reads cannot be bypassed")
+    with _temp("p2-k4-fit-synthetic-role-") as root:
+        a, _ = _fixture(root)
+        np.savez(a.truth, seeds=np.asarray([1, 2]), means_r1=np.zeros((2, 3, 4)), means_r2=np.zeros((2, 3, 4)))
+        try: fit.fit(a); refused = False
+        except fit.FitRefused as exc: refused = "declared data role" in str(exc)
+        check("synthetic role rejects protected schema", refused and not os.path.exists(a.receipt),
+              "truth_reads cannot be bypassed")
 
-    with tempfile.TemporaryDirectory(prefix="p2-k4-fit-id-") as root:
-        a = _fixture(root)
-        calls = []
-        def wrong_ids(_a):
-            calls.append(True)
-            return ["wrong-0", "wrong-1"], np.zeros((2, 3, 4)), {"kind": "synthetic"}
-        try:
-            fit.fit(a, truth_loader=wrong_ids)
-            refused = False
-        except fit.FitRefused as exc:
-            refused = "identities" in str(exc)
-        check("identity mismatch writes no receipt", refused and len(calls) == 1
-              and not os.path.exists(a.receipt), "post-load alignment refusal")
-
-    with tempfile.TemporaryDirectory(prefix="p2-k4-fit-cli-") as root:
-        a = _fixture(root)
-        command = [sys.executable, os.path.join(os.path.dirname(__file__),
-                   "p2_k4_fit.py"), "--predictions", a.predictions,
-                   "--truth", a.truth, "--data-role", "synthetic",
-                   "--candidates", a.candidates, "--bounds", a.bounds,
-                   "--objective", a.objective, "--receipt", a.receipt]
+    with _temp("p2-k4-fit-cli-") as root:
+        a, _ = _fixture(root)
+        command = [sys.executable, os.path.join(_HERE, "p2_k4_fit.py"), "--predictions", a.predictions,
+                   "--truth", a.truth, "--data-role", "synthetic", "--candidates", a.candidates,
+                   "--bounds", a.bounds, "--identities", a.identities, "--objective", a.objective,
+                   "--receipt", a.receipt]
         proc = subprocess.run(command, capture_output=True, text=True)
-        check("documented synthetic CLI executes", proc.returncode == 0
-              and os.path.isfile(a.receipt), "exit=%d receipt_created=%s" %
-              (proc.returncode, os.path.isfile(a.receipt)))
+        check("documented selector CLI executes", proc.returncode == 0 and os.path.isfile(a.receipt),
+              "exit=%d receipt_created=%s" % (proc.returncode, os.path.isfile(a.receipt)))
 
-    return {"kind": "synthetic coherent-K4 fitting-interface conformance",
-            "labels_read": False, "checks": rows,
-            "n_checks": len(rows),
-            "n_failed": sum(not row["pass"] for row in rows),
-            "pass": all(row["pass"] for row in rows)}
+    with _temp("p2-k4-producer-cli-") as root:
+        candidates = os.path.join(root, "candidates.json")
+        bounds = os.path.join(root, "bounds.json")
+        identities = os.path.join(root, "identities.json")
+        out_dir = os.path.join(root, "observations")
+        _write_json(candidates, {"parameters": ["lam"], "candidates": [{"lam": 0.0}]})
+        _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
+        _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
+                    "depth": 2, "identities": [{"id": "cli-synthetic", "seed": 7011}]})
+        command = [sys.executable, os.path.join(_HERE, "p2_k4_fit_producer.py"),
+                   "--candidates", candidates, "--bounds", bounds,
+                   "--identities", identities, "--out-dir", out_dir]
+        proc = subprocess.run(command, capture_output=True, text=True)
+        second = subprocess.run(command, capture_output=True, text=True)
+        check("documented producer CLI is immutable", proc.returncode == 0 and
+              os.path.isfile(os.path.join(out_dir, "producer_receipt.json")) and
+              second.returncode == 2 and "already exists" in second.stdout,
+              "first=%d second=%d" % (proc.returncode, second.returncode))
+    return {"kind": "synthetic coherent-K4 producer-selector conformance", "labels_read": False,
+            "checks": rows, "n_checks": len(rows), "n_failed": sum(not x["pass"] for x in rows),
+            "pass": all(x["pass"] for x in rows)}
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--json", default="")
-    ap.add_argument("--fixture-dir", default="",
-                    help="exclusively create a durable synthetic fixture and receipt")
+    ap = argparse.ArgumentParser(); ap.add_argument("--json", default=""); ap.add_argument("--fixture-dir", default="")
     a = ap.parse_args(argv)
     if a.fixture_dir:
-        try:
-            os.mkdir(a.fixture_dir)
-        except FileExistsError:
-            raise SystemExit("REFUSED: fixture directory already exists: %s" %
-                             a.fixture_dir)
-        fixture = _fixture(a.fixture_dir)
-        receipt = fit.fit(fixture)
-        print("synthetic fixture selected %s" %
-              json.dumps(receipt["selection"]["frozen_values"], sort_keys=True))
-        print("receipt: %s" % fixture.receipt)
-        return 0
+        os.mkdir(a.fixture_dir); fixture, _ = _fixture(a.fixture_dir); receipt = fit.fit(fixture)
+        print("synthetic fixture selected %s" % json.dumps(receipt["selection"]["frozen_values"], sort_keys=True)); return 0
     result = run_checks()
     if a.json:
-        if os.path.lexists(a.json):
-            raise SystemExit("REFUSED: evidence already exists: %s" % a.json)
-        with open(a.json, "x", encoding="utf-8", newline="\n") as fh:
-            json.dump(result, fh, indent=2, sort_keys=True)
-            fh.write("\n")
-    print("%d/%d passed" % (result["n_checks"] - result["n_failed"],
-                            result["n_checks"]))
+        if os.path.lexists(a.json): raise SystemExit("REFUSED: evidence already exists: %s" % a.json)
+        with open(a.json, "x", encoding="utf-8", newline="\n") as fh: json.dump(result, fh, indent=2, sort_keys=True); fh.write("\n")
+    print("%d/%d passed" % (result["n_checks"] - result["n_failed"], result["n_checks"]))
     return 0 if result["pass"] else 1
 
 
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__ == "__main__": raise SystemExit(main())
