@@ -173,12 +173,24 @@ def t_identity_and_stack():
         lg.pop("candidate_sha256")
     _mut("...and one with no sha256 at all", no_sha, "exact bytes")
 
-    def old_version(lg):
-        lg["artifact_version"] = 2
-        for k in ("weights_mode", "stack", "instrument_sha256"):
-            lg.pop(k, None)
-    _mut("a version-2 report is DEGRADED, not accepted as the strong gate",
-         old_version, f"artifact_version >= {MEMORY_REPORT_MIN_VERSION}")
+    # A version-2 report is DEGRADED: it cannot ANSWER the workload questions,
+    # which is an absence of evidence rather than evidence of a violation. It
+    # must not certify, and it must ALSO not fail -- the first draft emitted a
+    # failing check here and made the certifier return REFUSED for a correct
+    # candidate whose only sin was an old memory report. Caught by the full
+    # mutation battery's positive control.
+    lg = good_report()
+    lg["artifact_version"] = 2
+    for k in ("weights_mode", "stack", "instrument_sha256"):
+        lg.pop(k, None)
+    ok, degraded, bad = verdict(lg)
+    check("a version-2 report does not certify", not ok, degraded[:60])
+    check("...and is reported as DEGRADED, not as a FAILING check",
+          bool(degraded) and not bad,
+          f"{len(bad)} failing checks (a fail here would make a correct "
+          f"candidate REFUSED)")
+    check("...and the degraded reason names the version",
+          f"artifact_version {2}" in degraded, "")
 
     def old_wb(lg):
         lg["stack"]["whestbench"] = "0.15.0"

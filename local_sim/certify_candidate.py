@@ -381,8 +381,15 @@ def validate_memory_report(
         degraded = (f"artifact_version {ver} < {MEMORY_REPORT_MIN_VERSION}: this "
                     "report cannot say what shape, cap, stack or weight "
                     "representation it ran, so it is NOT the strong gate")
-        c(f"9: the report is artifact_version >= {MEMORY_REPORT_MIN_VERSION}",
-          False, degraded)
+        # DEGRADED IS A SKIP, NOT A FAIL, and the distinction is the whole
+        # verdict. A pre-version-3 report cannot ANSWER the workload questions;
+        # that is an absence of evidence, not evidence of a violation. Emitting
+        # a failing check here made `certify_candidate` return REFUSED for a
+        # perfectly correct candidate whose only sin was an old memory report --
+        # caught by the full mutation battery's positive control, which is
+        # exactly what a positive control is for. The caller raises the skip;
+        # `docs/VALIDATION.md` already forbids scoring a skip as a pass, so the
+        # verdict lands on INCOMPLETE, which is the true state.
         return checks, degraded
     c(f"9: the report is artifact_version >= {MEMORY_REPORT_MIN_VERSION}", True,
       f"v{ver}, instrument {str(lg.get('instrument_sha256'))[:16]}...")
