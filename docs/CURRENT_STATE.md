@@ -1,18 +1,21 @@
 # CURRENT_STATE.md — read this first
 
-> ## 2026-09-10 (Slice 5, day 1) — **H1 IS DEAD AND THE COST LANE IS CLOSED.** Two of the three open levers failed their pre-registered gates on the same day. The score now rests entirely on T2.
+> ## 2026-09-10 (Slice 5, day 1) — **THE COST LANE IS CLOSED AND NO AFFORDABLE κ₄ SPELLING EXISTS BY DELETION.** Two pre-registered gates failed the same day. The Skeptic returned PROVISIONAL on T1 and struck eight of my sentences; the gate outcome survived, the attribution did not.
 >
 > `estimator.py` untouched at **v2.6.1**. **Nothing designated. Nothing promoted.
-> Nothing submitted.** An independent Skeptic is running on T1.
+> Nothing submitted.**
 >
 > ### THE FOUR-LINE ANSWER
 >
-> 1. **T1 — H1 is dead.** κ₄'s cheap channel (its use in the μ/Σ/diagonal-κ₃
->    updates) carries **none** of AUGMENT's `2.094x`. Suppressing κ₄'s κ₃ births
->    while keeping the `(n,n)` object live is not "less good" — it is
->    **`74x`–`109x` WORSE than SIMPLE**, on `0 of 24` nets improved. The births
->    are not an implementation detail of κ₄'s value; in this representation they
->    **are** its value.
+> 1. **T1 — no affordable κ₄ spelling exists BY DELETION**, and that is the
+>    narrowed claim the Skeptic left standing. Deleting κ₄'s κ₃ births while
+>    keeping the `(n,n)` object live is `74x`–`109x` **worse than SIMPLE**, on
+>    `0 of 24` nets improved. **But the ablated arms land on the GAUSSIAN
+>    BASELINE** (`LITE` = K2 to within `4%`, interval through zero), so they say
+>    nothing about *which* κ₄ channel carried the `2.094x` — and the two channels
+>    are **not separable in this implementation** anyway, because κ₄'s own update
+>    is computed from the blocks the ablation deletes. **The channel attribution
+>    is struck as unidentified.**
 > 2. **Packed spelling — closed at `1.0067x`** against a `1.5x` gate. Zero of the
 >    chain's `797` matmuls has the redundancy this meter discounts. **Cost is now
 >    closed at `~0.5 B`**, which meets the Slice-4 kill criterion thirteen days
@@ -25,40 +28,54 @@
 >    tried; the sentence is not publicly stated and another team hit the same wall.
 >    A neutral forum post is drafted and needs Samuel's account.
 >
-> ### T1 — THE NUMBERS, AND A MECHANISM THAT IS STRONGER THAN THE THEOREM WAS
+> ### T1 — THE NUMBERS, AND THE EXPLANATION THE EVIDENCE ACTUALLY IDENTIFIES
 >
 > | arm | births/layer | mean xmse | vs SIMPLE |
 > |---|---:|---:|---:|
 > | `SIMPLE` | `2n` | `4.004685e-08` | `1.000x` |
 > | `AUGMENT` | `8n` | `1.912323e-08` | `2.094x` better |
-> | `AUGMENT-LITE` | `5n` | `4.365096e-06` | **`109x` WORSE** |
-> | `AUGMENT-MINIMAL` | **`2n`** | `2.976232e-06` | **`74x` WORSE** |
+> | `AUGMENT-LITE` | `5n` | `4.365096e-06` | `109x` WORSE |
+> | `AUGMENT-MINIMAL` | **`2n`** | `2.976232e-06` | `74x` WORSE |
+> | *Gaussian K2, same seeds/labels* | — | `4.196350e-06` | `105x` worse |
+> | *calibrated K2* | — | `1.448599e-06` | `36x` worse |
 >
-> `AUGMENT-MINIMAL` was **not in the handoff**. It came out of reading the birth
-> count off the returned tensor instead of estimating it, and it is the only
-> affordable member of the family — SIMPLE's exact `2n` lineage with κ₄'s `(n,n)`
-> object still live. The gate was written on it. It fails by a factor of `100`.
+> GT noise floor `1.1552e-09`. Controls are **bit-identical** (`0.000e+00` on all
+> 24 rows, not the `~1e-15` I first wrote — that was rounding in my own contract).
 >
-> **The new mechanism, and it is write-up material.** Between `128x8` and
-> `1024x16`, SIMPLE's error falls **`214x`** and the ablated arm's falls **`6x`**.
-> So the inconsistency penalty explodes from `2.2x` to `74x` **not because the
-> inconsistency worsens but because it installs an error floor that does not fall
-> with width.** An inexact tower does not merely lose the gain — it swamps what
-> the width was buying. *(The `128x8` leg is a 4-net smoke with no CI; the Skeptic
-> has been asked whether this claim over-reaches, and the answer is pending.)*
+> **Read the baselines before the arms.** `LITE` **is** K2: the paired difference
+> straddles zero, `13/24`. `MINIMAL` is worse than *calibrated* K2. Deleting
+> blocks from the carried lineage does not cost part of κ₄'s contribution — **it
+> costs the entire κ₃ correction.**
 >
-> Controls: SIMPLE `+1.299e-15`, AUGMENT `+2.076e-15` against their anchors. The
-> patched module is **bit-exact** against upstream with its flags off.
+> **The simpler explanation was already on disk, in an entry I wrote the day
+> before.** Generation-capped SIMPLE — no κ₄ births anywhere — collapses to
+> `1.651e-06`. **One statement covers every case measured: any deletion from the
+> carried `(1,1,1)` lineage returns this chain to roughly Gaussian accuracy.**
+>
+> **A non-monotonicity I missed:** `MINIMAL` deletes strictly more than `LITE` and
+> is `1.47x` **better**, `21/24`. My prediction 4's reasoning had the direction
+> wrong, not just the magnitude.
+>
+> **STRUCK:** the width claim ("installs a width-independent error floor"). It
+> contradicted itself inside one sentence, both axes moved between the two rows,
+> and the small row was a 4-net smoke whose numbers **exist nowhere on disk** —
+> and it had already reached the write-up. Removed from both.
+>
+> **In flight:** job `498` completes the 2x2 with the missing `legsonly` cell
+> (`4n`, births kept, legs dropped) and the baseline columns. Pre-registered:
+> `legsonly` also lands at `~1e-6` and `K2 - legsonly` straddles zero, `~80%`. If
+> so the κ₄ attribution is dead and the Skeptic's statement is the finding.
 >
 > ### EVERY PREDICTION ABOUT THE SIZE WAS WRONG — THE STRATEGIST'S AND BOTH OF MINE
 >
 > The strategist's band was `1.4x–1.8x`; the answer is `0.0135x`, wrong by `~150x`.
 > Mine were `[0.6, 1.1]` and `[0.35, 0.9]` — right in direction, wrong by two
-> orders of magnitude. **The instructive failure is my prediction 6:** I discounted
-> a small-width smoke by the ladder's measured `1.2x–1.4x` over-read. That
-> calibration holds between two *consistent* schemes and says nothing about a ratio
-> where one arm is internally inconsistent. **I applied a calibration outside its
-> domain**, which is the same class of error as this month's stale scalars.
+> orders of magnitude, and prediction 4's stated **reasoning** was wrong in
+> direction too. **The instructive failure:** I had the competing explanation on
+> disk, in my own entry from the day before, and never tested my story against it.
+> The instrument's premise — that the two channels are separable — was checkable
+> in the upstream source in ten minutes, and I did not check it. **The Skeptic
+> did, and found it false.**
 >
 > ### NOMINEE A — DEPTH 2, GATE BY GATE
 >
@@ -105,7 +122,7 @@
 >
 > ### IN FLIGHT
 >
-> - Skeptic on T1 (Rule 2), running.
+> - `498` — T1's completed 2x2, the Skeptic's discriminating follow-up.
 > - `493`/`494` — T2 labels for P07 and P08.
 > - `497` — depth-2 mini-100 with the residual cap lifted: the replacement gate,
 >   and the first accuracy read on the organisers' data (the capped run produced
@@ -129,6 +146,13 @@
 >   **Append to `LOG.md` from bash, never from PowerShell.**
 > - **The prediction slot for the P07/P08 allocation is VOID** — I edited and ran
 >   the tests before writing one.
+> - **A latent statistics bug**, found by the Skeptic: `crit = 1.96 if n > 60 else
+>   2.064` is `t` at `df=24` used for every `n` from 2 to 60. scipy is installed in
+>   both venvs so it never fired and **no published interval is affected**, but
+>   T2's `1.15x` gate would have inherited it. Replaced with an exact `df 1..30`
+>   table plus a Cornish-Fisher tail, and the artifact now records which branch ran.
+> - **I claimed controls at `~1e-15` that were bit-identical.** Understating a
+>   control is still misreporting it.
 >
 > ### A PROVENANCE DEFECT WORTH FIXING PROPERLY
 >
