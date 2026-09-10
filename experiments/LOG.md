@@ -40542,3 +40542,187 @@ Skeptic run after the remaining Stage 0 repairs, per the contract.
 - The 8-GiB evidence path could certify a different experiment from the one its
   report appeared to describe. It cannot now, and the seven historical reports
   are labelled for what they are rather than promoted or discarded.
+
+---
+
+## 2026-09-10 — **CONTRACT (Rule 1): Stage 2 experiment 1 — a coherent fourth-order core**
+
+**Class: STRATEGIC.** Pre-registered and committed **before any data exists**.
+`AGENTS.md` § *Rule 1*. Samuel's predictions were taken earlier today, before
+this experiment existed in code, and are recorded above in the Stage 0 entry;
+they are restated here so the contract is self-contained.
+
+**Scope guard, stated first.** This experiment produces **DESIGN-tier
+knowledge**. It spends **no DECIDE block**, it is **not a promotion**, and
+because Samuel decided on 2026-09-10 to hold off entirely on the rules §6
+participant-derivation question, **nothing here advances toward a submission**.
+The incumbent `estimator.py` (v2.6.1) and the standing candidate
+`estimator_k3_strassen_L2.py` (`330566`, sha `390bc226…`) are untouched.
+
+### Question
+
+Does replacing the shipped chain's **scalar** fourth-order correction with a
+**carried fourth-order core**, whose diagonal is transported by the exact
+identity P3 and whose *consumers and induced third-order births are derived
+from the same state*, reduce the paired arithmetic competition score on fresh
+design networks — and at what fully counted cost?
+
+### Evidence
+
+| item | status |
+|---|---|
+| the shipped chain computes `K[(4,)]` and `K[(2,2)]` and uses them **only** as one global scalar `c4_out` | **CONFIRMED** — `estimator_k3_full.py::_layer`, the `lap2_d4` block |
+| it carries **no** fourth-order state between layers | **CONFIRMED** — `_Tower` holds `A_D, A_L, M, w2b` and nothing fourth-order |
+| `diag(W G W^T) = (W.W)g + lam[diag(WCW^T) - (W.W)diag(C)]` is exact for `G = diag(g) + lam C_off` | **CONFIRMED** — `local_sim/p2_compact_reference.py::t_k4_identity`, `rel 3.3e-16` |
+| that channel costs `0.000038 B` when the K2 backbone supplies `diag(W C W^T)`, and `0.0157 B` when it does not | **CONFIRMED** — Stage 1 ledger, `experiments/2026-09-10_stage1_compact/ledger.json` |
+| a public Phase-2 implementation reports this mechanism nearly halving its error | **SPECULATIVE for us** — author-reported ablations on a small repeatedly-used public panel, not our evidence, not reproduced |
+| our T1 partial-deletion failure does **not** test this | **CONFIRMED** — T1 deleted births while keeping consumers derived for a different algorithm; this derives both from one state |
+| the published coefficient tables were fitted on eight public MLPs | **CONFIRMED** — and therefore **not used here**. Our policy fits on fresh mints only |
+
+### Hypothesis and mechanism
+
+**H.** The chain currently discards per-neuron fourth-order structure that the
+later layers can consume. Carrying a core `G_l = diag(g_l) + lam * C_off,l`,
+transporting its diagonal by the exact identity, feeding `g` into the Wick
+slices, **and** emitting the third-order births that core induces, will reduce
+final-layer MSE by more than the cost it adds.
+
+**Why it should be true.** ReLU is not a polynomial, so the pushforward of a
+Gaussian has non-zero cumulants at every order; truncating at three discards a
+signal that depth amplifies. The reason a *scalar* correction did not capture
+it (our T2 result, gain `1.0163x`, kill gate met) is that the missing quantity
+is **per-neuron and relational**, and a scalar readout cannot represent it. No
+mechanism, no experiment: if the measured gain is flat, the mechanism claim is
+what fails, not the implementation.
+
+### Intervention
+
+The smallest change that discriminates: **one** carried fourth-order state
+`(g, lam)`, used in **both** its consumers and its induced births, against the
+identical chain without it. One hypothesis, one arm.
+
+### Arms
+
+| arm | what it is |
+|---|---|
+| `k3_exact` | **CONTROL.** The shipped exact chain, scalar `c4_out` intact |
+| `k3_k4coh` | **INTERVENTION.** Carried `(g, lam)` core: transported diagonal, per-neuron consumers, induced K3 births — all from one state |
+| `k3_k4use` | **CONTROL FOR THE COHERENCE CLAIM.** The same core, consumers only, **no** induced births. If this matches `k3_k4coh` the coherence claim is not what is doing the work |
+| `k3_k4birth` | **CONTROL, the other half.** Births only, no consumers |
+
+The two half-arms exist because GAME_PLAN says *use-only is not the proposed
+replacement*, and because a two-arm experiment cannot tell a coherent closure
+from either half of one.
+
+### Numbered predictions, mine, before any data
+
+1. **`k3_k4coh` beats `k3_exact`** on paired arithmetic score by between
+   `1.05x` and `1.35x`. I am below Samuel's `1.1–1.5x` band because our fit is
+   on fresh design data rather than the eight public MLPs the published table
+   used, and because our chain already spends a scalar correction the public
+   baseline may not have.
+2. **Neither half-arm reaches the coherent arm's gain.** Specifically
+   `gain(k3_k4coh) > max(gain(k3_k4use), gain(k3_k4birth)) + 0.02x`. If a half
+   matches the whole, the "coherent" framing is decoration.
+3. **`k3_k4birth` alone is WORSE than the control** — emitting births from a
+   core nothing consumes adds variance and no signal.
+4. **The added counted cost is under `0.02 B`**, dominated by the induced
+   births rather than by the transported diagonal, which Stage 1 priced at
+   `0.000038 B`.
+5. **The fitted `lam` is positive and lies in `[0.05, 0.8]`**, and its
+   per-layer variation is under `3x` across the sixteen layers.
+6. **Residual and operation count move by less than `10%`**, because the
+   channel adds `O(n^2)` work and a bounded number of operations to an
+   `O(n^3)` chain.
+
+### Samuel's predictions, taken before this contract was written
+
+| question | answer, as given |
+|---|---|
+| paired arithmetic score gain on our fresh design networks | **Moderate: 1.1x to 1.5x** |
+| where the coherent-K4 chain lands on counted cost against L2's `0.604 B` | **"I don't know"** |
+
+"I don't know" is a valid Rule 1 answer and is recorded as given, not
+interpreted.
+
+### Gate
+
+**Written on the DIFFERENCE this slice isolates**, not on a total that
+contains it — the mistake two earlier sessions made.
+
+    build gate    paired arithmetic score difference (k3_exact - k3_k4coh)
+                  strictly positive, with its studentised-t 95% interval
+                  excluding zero, AND arithmetic gain >= 1.10x
+    kill gate     arithmetic gain <= 1.03x with the interval excluding
+                  a 1.10x improvement
+
+Passed to `competition_score.decide(gate=1.10)`, which has no default. The
+interval is `t` or `basic`; percentile and BCa are refused by that function and
+are not requested here.
+
+**A DESIGN-tier pass is not a promotion.** It licenses one DECIDE-block
+contract, nothing more.
+
+### Falsifier
+
+Prediction 1 fails (gain `< 1.05x`), **or** prediction 2 fails (a half-arm
+matches the whole). Either rejects the hypothesis *as stated*: the first says
+the fourth-order signal is not reachable this way, the second says coherence is
+not the mechanism.
+
+### Baseline and tier
+
+Control is `k3_exact`, the shipped exact chain, run through the same
+`lifecycle_eval` path in the same process on the same networks.
+
+**Tier: DESIGN.** Truth is the existing `P07` (384 networks) for fitting and
+`P01` (96 networks) for measurement — both **DESIGN**, both reusable by
+construction, both at the live `1024x16` shape. Every read is registered
+through `local_sim/truth_reads.py`, built today, so this experiment's label
+consumption is on the record from its first line. **No `SINGLE_USE` block is
+touched. P08 stays spent.** No public split is read.
+
+### Cost model
+
+**Phase 2 sets `lambda = 0`, so `C = F`** (`VALIDATION.md` §2b-ii). The frozen
+model is **counted FLOPs only**. Residual is reported as **headroom against the
+`0.4 s` cliff**, quoted against the worst observed run, and is **not** a cost
+term. §2b's three-residual-model rule is Phase-1 replay and does not apply.
+
+Frozen before the run: the counted-FLOP figure for each arm, taken from its
+first metered execution and not re-taken after seeing scores.
+
+### Statistic
+
+Paired, common random numbers, **arithmetic** score difference, studentised-t
+interval, through `competition_score.decide(gate=1.10)`. Arms are aligned on
+`MlpRow.name` by `align_rows_by_identity`, added today, so list order cannot
+stand in for the pairing. `noise_corrected_compare` reports the observed
+difference, the noise-corrected true-function difference and the
+official-precision forecast separately, because the arms will have **different
+multipliers** and the label-noise term `(q_c - q_k) v` does not cancel from an
+adjusted difference.
+
+The geometric mean is a **diagnostic** and has no authority here.
+
+### Confounders, scope, and what must not change
+
+- **`lam` and any per-layer scaling are fitted on `P07` only**, and the fit is
+  frozen before `P01` is read. Fitting and measuring on the same networks would
+  make prediction 1 unfalsifiable.
+- **The published coefficient tables are not consulted.** Exposure to the
+  published *structural* choices (a diagonal-plus-scaled-off-diagonal core) is
+  disclosed; exposure to their *fitted numbers* is nil.
+- Nothing else changes: same term table, same Wick program, same Strassen
+  depth, same generation cap policy, same weight representation.
+- `estimator.py`, every `estimator_v*.py`, the vault, its seal and its touch
+  counter, and every `SINGLE_USE` block are out of scope and untouched.
+- This contract authorises **no** DECIDE block, **no** vault touch, **no**
+  submission and **no** designation.
+
+### Reopening condition
+
+If the experiment fails, the fourth-order lane closes **for this closure form
+on these design networks** — not in general. Reopening requires new *external*
+evidence naming a different core, or a demonstration that the fit itself was
+the limitation.
