@@ -262,8 +262,10 @@ def _validate_request(a):
         for i in range(c)]
     if (not isinstance(producer_manifest, dict)
             or producer_manifest.get("kind") !=
-            "synthetic coherent-K4 canonical-lifecycle observations"
+            "coherent-K4 canonical-lifecycle observations-v1"
             or producer_manifest.get("labels_read") is not False
+            or producer_manifest.get("identity_role") !=
+            identity_manifest.get("kind")
             or producer_manifest.get("candidate_registry") != candidates
             or producer_manifest.get("identity_manifest") != identity_manifest
             or producer_manifest.get("candidate_sources") !=

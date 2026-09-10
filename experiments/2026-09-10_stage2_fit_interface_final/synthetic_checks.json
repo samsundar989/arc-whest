@@ -1,6 +1,31 @@
 {
   "checks": [
     {
+      "check": "exact P07 design identity registry is accepted",
+      "detail": "384 ordered identities at 1024x16",
+      "pass": true
+    },
+    {
+      "check": "wrong registered block refuses without evaluation",
+      "detail": "validation-only; no lifecycle or truth call",
+      "pass": true
+    },
+    {
+      "check": "wrong registered seed refuses without evaluation",
+      "detail": "validation-only; no lifecycle or truth call",
+      "pass": true
+    },
+    {
+      "check": "wrong registered order refuses without evaluation",
+      "detail": "validation-only; no lifecycle or truth call",
+      "pass": true
+    },
+    {
+      "check": "wrong registered shape refuses without evaluation",
+      "detail": "validation-only; no lifecycle or truth call",
+      "pass": true
+    },
+    {
       "check": "producer to selector freezes synthetic optimum",
       "detail": "{'registered_index': 1, 'frozen_values': {'lam': 0.25}, 'objective': 0.0, 'tie_break': 'first in explicitly registered order'}",
       "pass": true
@@ -73,7 +98,7 @@
   ],
   "kind": "synthetic coherent-K4 producer-selector conformance",
   "labels_read": false,
-  "n_checks": 14,
+  "n_checks": 19,
   "n_failed": 0,
   "pass": true
 }

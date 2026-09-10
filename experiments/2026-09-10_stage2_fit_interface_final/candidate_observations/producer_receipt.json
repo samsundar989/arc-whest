@@ -102,7 +102,8 @@
       "kind": "synthetic-identities-v1",
       "width": 4
     },
-    "kind": "synthetic coherent-K4 canonical-lifecycle observations",
+    "identity_role": "synthetic-identities-v1",
+    "kind": "coherent-K4 canonical-lifecycle observations-v1",
     "labels_read": false,
     "lifecycle_spec": {
       "depth": 3,
@@ -127,7 +128,7 @@
     ],
     "producer": {
       "path": "local_sim/p2_k4_fit_producer.py",
-      "sha256": "962fbf97fcaedc3c18fdd21ddddac097a3ff6137b2ebcfa2e6cf235d22886317"
+      "sha256": "8a665f7a6c5b0e3788a06e5e8a765d36ca04e34356f732a80dc88879b8d03085"
     },
     "row_hashes": [
       "0a03ade7f705b8e4a35d30a382365dde08de8a127b4a874157417f92399531ca",
@@ -136,6 +137,6 @@
     ]
   },
   "predictions": "experiments/2026-09-10_stage2_fit_interface_final\\candidate_observations\\predictions.npz",
-  "predictions_sha256": "de68907f40a98804677bc5386f78a3b893b4354e4648cec9cdf1b989bd9cce5b",
+  "predictions_sha256": "3d7bcae61d1b9341183a7f99ce7689ee19d6a83bec8d3b5c9a47e36494505bd8",
   "schema": "arc-whest.coherent-k4-fit-producer-receipt.v1"
 }

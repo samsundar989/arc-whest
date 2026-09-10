@@ -30,6 +30,19 @@ def _swap_source_order(values):
         values["candidate_source_hashes"])[order]
 
 
+def _registered_manifest():
+    seeds = producer.seed_blocks.seeds("P07")
+    return {"kind": "registered-design-identities-v1", "block": "P07",
+            "width": 1024, "depth": 16,
+            "identities": [{"id": str(seed), "seed": seed} for seed in seeds]}
+
+
+def _registered_load(root, manifest):
+    path = os.path.join(root, "registered-identities.json")
+    _write_json(path, manifest)
+    return producer._load_identities(path)
+
+
 def _fixture(root):
     candidates, bounds = os.path.join(root, "candidates.json"), os.path.join(root, "bounds.json")
     identities, produced = os.path.join(root, "identities.json"), os.path.join(root, "candidate_observations")
@@ -64,6 +77,31 @@ def run_checks():
     def check(name, condition, detail):
         rows.append({"check": name, "pass": bool(condition), "detail": detail})
         print("%-52s %s  %s" % (name, "PASS" if condition else "FAIL", detail))
+
+    with _temp("p2-k4-fit-p07-registry-") as root:
+        manifest = _registered_manifest()
+        loaded, ids, seeds, width, depth = _registered_load(root, manifest)
+        check("exact P07 design identity registry is accepted",
+              loaded == manifest and ids == [str(x) for x in seeds] and
+              len(seeds) == 384 and (width, depth) == (1024, 16),
+              "%d ordered identities at %dx%d" % (len(seeds), width, depth))
+
+    registered_mutations = (
+        ("wrong registered block", lambda m: m.__setitem__("block", "P08"),
+         "exact block P07"),
+        ("wrong registered seed", lambda m: m["identities"][10].__setitem__(
+         "seed", m["identities"][10]["seed"] + 1), "exactly match P07"),
+        ("wrong registered order", lambda m: m["identities"].__setitem__(
+         slice(0, 2), m["identities"][1::-1]), "exactly match P07"),
+        ("wrong registered shape", lambda m: m.__setitem__("width", 512),
+         "width=1024 and depth=16"))
+    for label, mutation, expected in registered_mutations:
+        with _temp("p2-k4-fit-p07-refusal-") as root:
+            manifest = _registered_manifest(); mutation(manifest)
+            try: _registered_load(root, manifest); refused = False
+            except producer.ProducerRefused as exc: refused = expected in str(exc)
+            check("%s refuses without evaluation" % label, refused,
+                  "validation-only; no lifecycle or truth call")
 
     with _temp("p2-k4-fit-e2e-") as root:
         a, produced = _fixture(root); receipt = fit.fit(a)

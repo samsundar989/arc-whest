@@ -77,7 +77,7 @@
     },
     "predictions": {
       "path": "experiments/2026-09-10_stage2_fit_interface_final/candidate_observations/predictions.npz",
-      "sha256": "de68907f40a98804677bc5386f78a3b893b4354e4648cec9cdf1b989bd9cce5b"
+      "sha256": "3d7bcae61d1b9341183a7f99ce7689ee19d6a83bec8d3b5c9a47e36494505bd8"
     },
     "truth": {
       "path": "experiments/2026-09-10_stage2_fit_interface_final/truth.npz",
@@ -158,11 +158,11 @@
     },
     "fit_interface": {
       "path": "local_sim/p2_k4_fit.py",
-      "sha256": "1a55d3dad939139479ccd06734ebe8ee1058f67cbf80c01ff7c9b1be4e722067"
+      "sha256": "fce4768d1f5bf102e9c81a87cbaee67bdcf756f46f47a5d2f597151f2b12fca6"
     },
     "fit_producer": {
       "path": "local_sim/p2_k4_fit_producer.py",
-      "sha256": "962fbf97fcaedc3c18fdd21ddddac097a3ff6137b2ebcfa2e6cf235d22886317"
+      "sha256": "8a665f7a6c5b0e3788a06e5e8a765d36ca04e34356f732a80dc88879b8d03085"
     }
   },
   "truth_manifest": {

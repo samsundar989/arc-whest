@@ -2,9 +2,13 @@
 
 Every candidate and bound is supplied explicitly.  The producer writes one
 candidate-specific generated source, evaluates it on the same registered
-synthetic identities through the canonical lifecycle evaluator, and stores
+identities through the canonical lifecycle evaluator, and stores
 final predictions, exact per-identity counted costs, and verified source paths
 and hashes for p2_k4_fit.py.
+
+Identity manifests may describe small synthetic fixtures, or the exact P07
+design registry.  The latter is checked against seed_blocks before any network
+is minted.  This producer never opens truth.
 
 Run:
     uv run python local_sim/p2_k4_fit_producer.py \
@@ -32,6 +36,7 @@ for _p in (_HERE, _ROOT):
 import lifecycle_eval as le  # noqa: E402
 import p2_build_k4_arms as builder  # noqa: E402
 import p2_k4_fit as selector  # noqa: E402
+import seed_blocks  # noqa: E402
 
 
 class ProducerRefused(ValueError):
@@ -49,14 +54,26 @@ def _sha256(path):
 
 def _load_identities(path):
     manifest, ids = selector._identity_registry(path)
-    if manifest.get("kind") != "synthetic-identities-v1":
-        raise ProducerRefused("identity manifest kind must be synthetic-identities-v1")
+    kind = manifest.get("kind")
     width, depth = int(manifest.get("width", 0)), int(manifest.get("depth", 0))
-    if width <= 0 or depth <= 0:
-        raise ProducerRefused("identity manifest width/depth must be positive")
     seeds = [int(row["seed"]) for row in manifest["identities"]]
-    if len(seeds) != len(set(seeds)):
-        raise ProducerRefused("identity seeds must be unique")
+    if kind == "synthetic-identities-v1":
+        if width <= 0 or depth <= 0:
+            raise ProducerRefused("synthetic identity manifest width/depth must be positive")
+        if len(seeds) != len(set(seeds)):
+            raise ProducerRefused("synthetic identity seeds must be unique")
+    elif kind == "registered-design-identities-v1":
+        if manifest.get("block") != "P07":
+            raise ProducerRefused("registered design identities require exact block P07")
+        if (width, depth) != (1024, 16):
+            raise ProducerRefused("P07 identity manifest requires width=1024 and depth=16")
+        expected = seed_blocks.seeds("P07")
+        if seeds != expected:
+            raise ProducerRefused("identity seeds must exactly match P07 seed registry in order")
+        if ids != [str(seed) for seed in expected]:
+            raise ProducerRefused("identity ids must exactly match the ordered P07 seeds")
+    else:
+        raise ProducerRefused("identity manifest kind must be synthetic-identities-v1 or registered-design-identities-v1")
     return manifest, ids, seeds, width, depth
 
 
@@ -118,7 +135,8 @@ def produce(a):
     if not np.array_equal(costs, np.repeat(costs[:1], len(candidates), axis=0)):
         raise ProducerRefused("coefficient candidates unexpectedly changed counted cost")
     manifest = {
-        "kind": "synthetic coherent-K4 canonical-lifecycle observations",
+        "kind": "coherent-K4 canonical-lifecycle observations-v1",
+        "identity_role": identity_manifest["kind"],
         "producer": {"path": os.path.relpath(__file__, _ROOT).replace("\\", "/"),
                      "sha256": _sha256(__file__)},
         "generator": {"path": os.path.relpath(builder.__file__, _ROOT).replace("\\", "/"),
