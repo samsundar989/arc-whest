@@ -420,7 +420,11 @@ def fit(a) -> int:
 
     dev = a.device
     zf = np.load(a.fit_features)
-    zr = np.load(a.read_features)
+    # CONTROLS-ONLY reads the FIT corpus and nothing else. It exists because the
+    # 2026-09-10 Skeptic established that P08 had already been read three times
+    # (the two broken runs computed `gain` on it), and re-reading a single-use
+    # held-out block to repair a control would compound that, not fix it.
+    zr = np.load(a.read_features) if not a.controls_only else zf
 
     def unpack(z):
         pred, sig = z["pred"], z["sig"]
@@ -448,7 +452,18 @@ def fit(a) -> int:
     # The contract's own estimate of this ceiling (`~0.40`) was badly wrong and
     # is corrected in the LOG: it assumed a post-ReLU activation variance of
     # order 1, where the measured value is `0.0755`. The real ceiling is `0.944`.
-    if "gt_noise" in zf:
+    #
+    # SECOND CORRECTION, from the 2026-09-10 T2 Skeptic: `gt_noise` is a
+    # per-network MEAN over neurons (`p2_truth.py:400`), and applying it against
+    # a PER-NEURON sigma overstates the label noise by 4.06%. The per-neuron
+    # variances are on disk as `var_r1`/`var_r2`; use them.
+    if "var_r1" in zf and "var_r2" in zf:
+        v = 0.5 * (np.asarray(zf["var_r1"], dtype=np.float64)
+                   + np.asarray(zf["var_r2"], dtype=np.float64))
+        gn_pn = v / float(zf["n_samples"])              # per-neuron, per replica
+        noiseF = float(gn_pn.mean())
+        noise_in_tgt = float(np.mean((gn_pn / 2.0) / np.maximum(sigF, 1e-30) ** 2))
+    elif "gt_noise" in zf:
         gn = np.asarray(zf["gt_noise"], dtype=np.float64).reshape(-1, 1)
         noiseF = float(gn.mean())
         noise_in_tgt = float(np.mean((gn / 2.0) / np.maximum(sigF, 1e-30) ** 2))
@@ -480,48 +495,117 @@ def fit(a) -> int:
     rng = np.random.default_rng(0)
     rng.shuffle(idx)
     parts = np.array_split(idx, folds)
-    # ---- POSITIVE CONTROL, and it runs BEFORE the real arms --------------- #
+    # ---- POSITIVE CONTROLS, and they run BEFORE the real arms ------------- #
     #
-    # All three arms below returned the same held-out `R^2` to four decimals,
-    # including the feature-permuted one. That has two explanations and they are
-    # opposite: either there is no signal, or the head does not learn. A null
-    # result is worthless until the second is excluded, so the same head, the
-    # same folds and the same shrinkage are first fitted to a target that IS a
-    # known function of the features, with noise at the measured label level.
-    # If this does not recover a high `R^2`, nothing else in this report may be
-    # read.
+    # THE GATE'S ARITHMETIC EQUIVALENT, which makes every R^2 below readable.
+    # The score identity gives  gain = E[s^2 t^2] / E[s^2 (c-t)^2], so a gain of
+    # G is exactly a SIGMA-WEIGHTED R^2 of 1 - 1/G:
+    #
+    #     build gate 1.15x  <=>  weighted R^2 = 0.1304
+    #     kill  gate 1.10x  <=>  weighted R^2 = 0.0909
+    #
+    # The first version of this control planted a signal at R^2 ~ 0.94 -- SEVEN
+    # TIMES the explained variance the gate turns on -- built from two columns of
+    # `own` and using none of `hist` or `ctx`. The 2026-09-10 Skeptic showed that
+    # is not a control for the failure mode that would fake this null: it built a
+    # proxy lacking the right basis, planted a large signal OUTSIDE its span, and
+    # got oof R^2 +0.0178 / gain 1.0164x -- this slice's exact answer, with a big
+    # signal present. So the control now plants at GATE STRENGTH, from features
+    # spanning all three blocks, with a term the head must compose.
+    #
+    # A second target is planted that the head should struggle with (a
+    # high-frequency oscillation), so "cannot learn" and "nothing to learn" are
+    # separated rather than conflated.
     pc = None
     if not a.skip_positive_control:
         Xpc = _design(perF, poolF, "full")
-        al = perF[:, -1, :, 0].astype(np.float64)      # alpha, final layer
-        k3 = perF[:, -1, :, 2].astype(np.float64)      # kappa_3 diagonal
-        rng_pc = np.random.default_rng(7)
-        synth = (0.4 * np.tanh(al) + 2.0 * k3 - 0.15 * al * k3)
-        synth = synth * float(np.std(tgtF)) / float(np.std(synth))
-        synth = synth + rng_pc.normal(
-            0.0, math.sqrt(max(noise_in_tgt, 0.0)), size=synth.shape)
-        oof_pc = np.zeros_like(synth)
+        F_ = Xpc.shape[-1]
+        al = perF[:, -1, :, 0].astype(np.float64)
+        gt = perF[:, -1, :, 1].astype(np.float64)
+        k3 = perF[:, -1, :, 2].astype(np.float64)
+        k4 = perF[:, -1, :, 3].astype(np.float64)
+        al8 = perF[:, -4, :, 0].astype(np.float64)          # a `hist` column
+        cx = np.broadcast_to(poolF[:, :, 0].mean(axis=1, keepdims=True),
+                             al.shape).astype(np.float64)   # a `ctx` column
+        w2 = (sigF ** 2)                                    # the score's weights
+
+        def _wr2(t, c):
+            num = float(np.sum(w2 * (c - t) ** 2))
+            den = float(np.sum(w2 * (t - np.average(t, weights=w2)) ** 2))
+            return 1.0 - num / den if den > 0 else float("nan")
+
+        def _plant(f, target_wr2):
+            """Scale `f` and add noise so its own weighted R^2 is `target_wr2`."""
+            f = (f - f.mean()) / (f.std() or 1.0)
+            e = np.random.default_rng(11).normal(0.0, 1.0, size=f.shape)
+            # weighted R^2 of the noiseless part = var(af) / (var(af)+var(e))
+            a_ = math.sqrt(target_wr2 / max(1.0 - target_wr2, 1e-12))
+            t = a_ * f + e
+            return t * float(np.std(tgtF)) / float(np.std(t))
+
+        smooth = (0.6 * np.tanh(al) + 1.5 * k3 + 0.8 * k4
+                  - 0.5 * np.tanh(al * k3) + 0.4 * al8 + 0.7 * cx)
+        rough = np.sin(20.0 * al) * k3
+
+        pc = {"gate_weighted_r2": {"build_1.15x": 1 - 1 / BUILD_GATE,
+                                   "kill_1.10x": 1 - 1 / KILL_GATE},
+              "curve": [], "capacity_probe": None}
+        print("  POSITIVE CONTROLS -- the gate is weighted R^2 "
+              f"{1 - 1 / BUILD_GATE:.4f} (build) / {1 - 1 / KILL_GATE:.4f} (kill)")
+        for lvl in (0.0909, 0.1304, 0.30):
+            tp = _plant(smooth, lvl)
+            oof = np.zeros_like(tp)
+            for k in range(folds):
+                te = parts[k]
+                tr = np.concatenate([parts[q] for q in range(folds) if q != k])
+                net = _fit_head(Xpc[tr], tp[tr], torch, epochs=a.epochs,
+                                width=a.head_width, lr=a.lr, seed=k, dev=dev)
+                oof[te] = _apply(net, Xpc[te], torch, dev)
+            rec_w = _wr2(tp, oof)
+            gain_implied = 1.0 / max(1.0 - rec_w, 1e-12)
+            pc["curve"].append({"planted_weighted_r2": lvl,
+                                "recovered_weighted_r2": rec_w,
+                                "implied_gain": gain_implied})
+            print(f"     planted wR^2 {lvl:.4f} -> recovered {rec_w:+.4f}"
+                  f"   implied gain {gain_implied:.4f}x")
+        tp = _plant(rough, 0.30)
+        oof = np.zeros_like(tp)
         for k in range(folds):
             te = parts[k]
-            tr = np.concatenate([parts[j] for j in range(folds) if j != k])
-            net = _fit_head(Xpc[tr], synth[tr], torch, epochs=a.epochs,
+            tr = np.concatenate([parts[q] for q in range(folds) if q != k])
+            net = _fit_head(Xpc[tr], tp[tr], torch, epochs=a.epochs,
                             width=a.head_width, lr=a.lr, seed=k, dev=dev)
-            oof_pc[te] = _apply(net, Xpc[te], torch, dev)
-        ss_res = float(np.sum((synth - oof_pc) ** 2))
-        ss_tot = float(np.sum((synth - synth.mean()) ** 2))
-        r2_pc = 1.0 - ss_res / ss_tot if ss_tot > 0 else float("nan")
-        pc = {"oof_r2": r2_pc, "target": "0.4 tanh(alpha) + 2 k3n - 0.15 alpha*k3n, "
-                                         "rescaled to the real target's variance, "
-                                         "plus noise at the measured label level",
-              "passes": bool(r2_pc >= 0.5)}
-        print(f"  POSITIVE CONTROL  held-out R^2 {r2_pc:+.4f}   "
-              f"{'PASS -- the head learns' if pc['passes'] else '*** FAIL ***'}")
-        if not pc["passes"]:
-            print("  *** The head cannot recover a signal it was GIVEN. A null")
-            print("  *** from the arms below would be a statement about this")
-            print("  *** instrument, not about the chain. STOP.")
+            oof[te] = _apply(net, Xpc[te], torch, dev)
+        pc["capacity_probe"] = {"planted_weighted_r2": 0.30,
+                                "recovered_weighted_r2": _wr2(tp, oof),
+                                "target": "sin(20*alpha)*k3n -- deliberately hard"}
+        print(f"     CAPACITY PROBE  sin(20a)*k3n planted 0.30 -> recovered "
+              f"{pc['capacity_probe']['recovered_weighted_r2']:+.4f}"
+              f"   (a LOW number here means the head has a basis limit, not that"
+              f" the chain has no signal)")
+        at_gate = [c for c in pc["curve"] if abs(c["planted_weighted_r2"] - 0.1304) < 1e-6]
+        pc["passes"] = bool(at_gate and at_gate[0]["implied_gain"] >= BUILD_GATE)
+        print(f"     GATE-STRENGTH CONTROL  "
+              f"{'PASS -- a 1.15x signal WOULD have been found' if pc['passes'] else '*** FAIL -- a 1.15x signal would NOT have been found; the arms below are unreadable ***'}")
         print()
 
+        if a.controls_only:
+            rec_pc = {"artifact_kind": "t2_positive_controls_only",
+                      "fit_features": a.fit_features,
+                      "note": "P08 IS NOT READ BY THIS RUN. Controls are fitted "
+                              "and read entirely within P07.",
+                      "label_noise_per_replica": noiseF,
+                      "noise_in_target_units": noise_in_tgt,
+                      "r2_ceiling_on_this_corpus": r2_ceiling,
+                      "positive_control": pc,
+                      "t_crit": dict(_LAST_T_CRIT)}
+            if a.json:
+                out = a.json if os.path.isabs(a.json) else os.path.join(_ROOT, a.json)
+                os.makedirs(os.path.dirname(out), exist_ok=True)
+                with open(out, "w", encoding="utf-8") as fh:
+                    json.dump(rec_pc, fh, indent=2)
+                print(f"  artifact  {os.path.relpath(out, _ROOT)}")
+            return 0
 
     for arm in ("R", "R0", "Rshuf"):
         mode = "constant" if arm == "R0" else "full"
@@ -622,6 +706,8 @@ def main(argv=None) -> int:
     ap.add_argument("--epochs", type=int, default=60)
     ap.add_argument("--head-width", type=int, default=32)
     ap.add_argument("--lr", type=float, default=1e-3)
+    ap.add_argument("--controls-only", action="store_true",
+                    help="Run ONLY the positive controls, on the fit corpus. Does not read the held-out block at all.")
     ap.add_argument("--skip-positive-control", action="store_true",
                     help="DIAGNOSTIC ONLY. The control is what makes a null readable.")
     a = ap.parse_args(argv)
@@ -630,8 +716,10 @@ def main(argv=None) -> int:
             raise SystemExit("--extract needs --truth and --out")
         return extract(a)
     if a.fit:
-        if not (a.fit_features and a.read_features):
-            raise SystemExit("--fit needs --fit-features and --read-features")
+        if not a.fit_features:
+            raise SystemExit("--fit needs --fit-features")
+        if not a.read_features and not a.controls_only:
+            raise SystemExit("--fit needs --read-features (or --controls-only)")
         return fit(a)
     raise SystemExit("choose --extract or --fit")
 
