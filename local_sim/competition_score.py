@@ -503,9 +503,10 @@ def _t_cdf(t: float, df: int) -> float:
 def _t_ppf(p: float, df: int) -> float:
     """Exact two-sided-usable Student-t quantile by bisection on `_t_cdf`.
 
-    Bisection rather than Newton because it cannot diverge, and 200 halvings of
-    a bracket that starts at +-1e4 reaches machine precision long before the
-    loop ends. Verified against `scipy.stats.t.ppf` in
+    Bisection rather than Newton because it cannot diverge. The bracket grows
+    until it contains the requested probability; a fixed +-1e4 bracket silently
+    capped legitimate heavy-tail quantiles (for example df=1, alpha=1e-6 needs
+    about 636,620). Verified against `scipy.stats.t.ppf` in
     `test_competition_score.py` when scipy is importable, and against the
     `_T975` table when it is not.
     """
@@ -513,7 +514,15 @@ def _t_ppf(p: float, df: int) -> float:
         return float("nan")
     if p == 0.5:
         return 0.0
-    lo, hi = -1e4, 1e4
+    if p < 0.5:
+        return -_t_ppf(1.0 - p, df)
+    lo, hi = 0.0, 1.0
+    while _t_cdf(hi, df) < p:
+        lo, hi = hi, hi * 2.0
+        if not math.isfinite(hi):
+            raise ValueError(
+                f"Student-t quantile is outside finite float range for p={p}, df={df}"
+            )
     for _ in range(200):
         mid = 0.5 * (lo + hi)
         if _t_cdf(mid, df) < p:
@@ -588,6 +597,8 @@ def paired_diff_ci(
     Which one this project should USE is an empirical question, not a stylistic
     one — see `local_sim/coverage_lab.py`.
     """
+    if not (0.0 < alpha < 1.0):
+        raise ValueError(f"alpha must be strictly between 0 and 1, got {alpha!r}")
     d = np.asarray(d, dtype=np.float64)
     n = int(d.size)
     theta = float(d.mean())

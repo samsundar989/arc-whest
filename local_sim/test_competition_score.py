@@ -1074,8 +1074,22 @@ def t_t_quantile_alpha():
         err = max(abs(_t_ppf(p, df) - float(_st.t.ppf(p, df)))
                   for df in (1, 5, 17, 48, 199) for p in (0.9, 0.975, 0.995))
         check("...and it matches scipy.stats.t.ppf", err < 1e-9, f"max err {err:.2e}")
+        extreme = _t_ppf(1.0 - 5e-7, 1)
+        expected = float(_st.t.ppf(1.0 - 5e-7, 1))
+        check("the df=1 extreme tail is not silently capped at 10,000",
+              extreme > 600_000 and abs(extreme - expected) / expected < 2e-10,
+              f"actual {extreme:.6f}, scipy {expected:.6f}")
     except ImportError:
         check("scipy not importable; table comparison stands alone", True, "skipped")
+
+    for alpha in (0.0, 1.0, -0.1, 1.1):
+        try:
+            paired_diff_ci(d, method="t", alpha=alpha)
+            refused = False
+        except ValueError:
+            refused = True
+        check(f"unsupported alpha={alpha} is explicitly refused", refused,
+              "no NaN or clipped interval escapes")
 
 
 
