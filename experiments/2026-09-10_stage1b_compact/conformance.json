@@ -1,0 +1,113 @@
+{
+  "kind": "label-free compact reference conformance",
+  "source_sha256": "d295bc318cad84589da77ef4721372e2eaba0ed0666323d09a69b34634619887",
+  "checks": [
+    {
+      "check": "layer-0 exact-full-rank",
+      "pass": true,
+      "layer": 0,
+      "last": false,
+      "joined": 0,
+      "n_dense": 0,
+      "n_young": 0,
+      "n_shared": 0,
+      "d3_rel": 0.0,
+      "d21_rel": null
+    },
+    {
+      "check": "layer-1 exact-full-rank",
+      "pass": true,
+      "layer": 1,
+      "last": false,
+      "joined": 0,
+      "n_dense": 1,
+      "n_young": 1,
+      "n_shared": 0,
+      "d3_rel": 0.0,
+      "d21_rel": 0.0
+    },
+    {
+      "check": "layer-2 exact-full-rank",
+      "pass": true,
+      "layer": 2,
+      "last": false,
+      "joined": 0,
+      "n_dense": 2,
+      "n_young": 2,
+      "n_shared": 0,
+      "d3_rel": 0.0,
+      "d21_rel": 0.0
+    },
+    {
+      "check": "layer-3 exact-full-rank",
+      "pass": true,
+      "layer": 3,
+      "last": false,
+      "joined": 1,
+      "n_dense": 3,
+      "n_young": 2,
+      "n_shared": 1,
+      "d3_rel": 1.2014588796848915e-16,
+      "d21_rel": 1.8021883195273365e-16
+    },
+    {
+      "check": "layer-4 exact-full-rank",
+      "pass": true,
+      "layer": 4,
+      "last": false,
+      "joined": 1,
+      "n_dense": 4,
+      "n_young": 2,
+      "n_shared": 2,
+      "d3_rel": 9.430203629317883e-17,
+      "d21_rel": 4.642561786741112e-16
+    },
+    {
+      "check": "layer-5 exact-full-rank",
+      "pass": true,
+      "layer": 5,
+      "last": false,
+      "joined": 1,
+      "n_dense": 5,
+      "n_young": 2,
+      "n_shared": 3,
+      "d3_rel": 7.882315392489542e-16,
+      "d21_rel": 4.926447120305966e-16
+    },
+    {
+      "check": "layer-6 exact-full-rank",
+      "pass": true,
+      "layer": 6,
+      "last": true,
+      "joined": 0,
+      "n_dense": 6,
+      "n_young": 3,
+      "n_shared": 3,
+      "d3_rel": 1.6135066352712252e-15,
+      "d21_rel": null
+    },
+    {
+      "check": "carried-gram-0",
+      "pass": true,
+      "error": 6.318614111678078e-16
+    },
+    {
+      "check": "carried-gram-1",
+      "pass": true,
+      "error": 7.656280850967648e-16
+    },
+    {
+      "check": "carried-gram-2",
+      "pass": true,
+      "error": 8.321780227816642e-16
+    },
+    {
+      "check": "residual-is-explicit",
+      "pass": true,
+      "error": 0.08931565284830022
+    }
+  ],
+  "n_checks": 11,
+  "n_failed": 0,
+  "pass": true
+}

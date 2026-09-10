@@ -1,0 +1,32 @@
+{
+  "kind": "label-free generated-arm parity",
+  "width": 12,
+  "depth": 3,
+  "source_sha256": "220d23143eaadfa583ba629e0bc23634981b47b1594193204d0b181b7e9fbf17",
+  "exact_output_bit_identical": true,
+  "exact_counted_cost_identical": true,
+  "source_flops": 97829,
+  "arms": {
+    "exact": {
+      "flops": 97829,
+      "relative_shift": 0.0
+    },
+    "coherent": {
+      "flops": 149617,
+      "relative_shift": 0.0696863308433709
+    },
+    "consumers_only": {
+      "flops": 104329,
+      "relative_shift": 0.06926192891164368
+    },
+    "births_only": {
+      "flops": 144175,
+      "relative_shift": 0.0004615787283210594
+    }
+  },
+  "zero_core_nesting": {
+    "output_bit_identical": true,
+    "counted_cost_identical": true,
+    "flops": 97829
+  }
+}

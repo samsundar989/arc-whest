@@ -1,0 +1,211 @@
+{
+  "kind": "label-free Stage-1A dense conformance",
+  "source_sha256": "0e7d126250b3bbe5d509e7e199f2c30e569009bee8f72b30ab22e635cb4f9138",
+  "oracle": "explicit index enumeration of Sym(G tensor I) and cubic births",
+  "checks": [
+    {
+      "check": "switches:exact",
+      "error": 0.0,
+      "pass": true,
+      "got": [
+        false,
+        false
+      ]
+    },
+    {
+      "check": "switches:coherent",
+      "error": 0.0,
+      "pass": true,
+      "got": [
+        true,
+        true
+      ]
+    },
+    {
+      "check": "switches:consumers_only",
+      "error": 0.0,
+      "pass": true,
+      "got": [
+        true,
+        false
+      ]
+    },
+    {
+      "check": "switches:births_only",
+      "error": 0.0,
+      "pass": true,
+      "got": [
+        false,
+        true
+      ]
+    },
+    {
+      "check": "signed-nonconstant:D4",
+      "error": 5.264161647206796e-17,
+      "pass": true
+    },
+    {
+      "check": "signed-nonconstant:D22",
+      "error": 1.1796321990474508e-16,
+      "pass": true
+    },
+    {
+      "check": "signed-nonconstant:D31",
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "check": "signed-nonconstant:core-transport",
+      "error": 3.9901379102558683e-16,
+      "pass": true
+    },
+    {
+      "check": "signed-nonconstant:harmonic-projection",
+      "error": 1.0528323294413592e-16,
+      "pass": true
+    },
+    {
+      "check": "signed-nonconstant:birth-D3",
+      "error": 2.613277776793018e-18,
+      "pass": true
+    },
+    {
+      "check": "signed-nonconstant:birth-D21",
+      "error": 7.849278898215502e-17,
+      "pass": true
+    },
+    {
+      "check": "signed-nonconstant:birth-transport",
+      "error": 2.8605754659075365e-16,
+      "pass": true
+    },
+    {
+      "check": "cancellation:D4",
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "check": "cancellation:D22",
+      "error": 1.3322676295501878e-16,
+      "pass": true
+    },
+    {
+      "check": "cancellation:D31",
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "check": "cancellation:core-transport",
+      "error": 9.133429070350282e-17,
+      "pass": true
+    },
+    {
+      "check": "cancellation:harmonic-projection",
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "check": "cancellation:birth-D3",
+      "error": 1.7829739990801286e-17,
+      "pass": true
+    },
+    {
+      "check": "cancellation:birth-D21",
+      "error": 1.4120446784998198e-16,
+      "pass": true
+    },
+    {
+      "check": "cancellation:birth-transport",
+      "error": 1.1367769277089782e-15,
+      "pass": true
+    },
+    {
+      "check": "zero-core:D4",
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "check": "zero-core:D22",
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "check": "zero-core:D31",
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "check": "zero-core:core-transport",
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "check": "zero-core:harmonic-projection",
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "check": "zero-core:birth-D3",
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "check": "zero-core:birth-D21",
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "check": "zero-core:birth-transport",
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "check": "zero-variance-coordinate:D4",
+      "error": 5.084565568658824e-17,
+      "pass": true
+    },
+    {
+      "check": "zero-variance-coordinate:D22",
+      "error": 1.121056496869074e-16,
+      "pass": true
+    },
+    {
+      "check": "zero-variance-coordinate:D31",
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "check": "zero-variance-coordinate:core-transport",
+      "error": 1.782238737734051e-16,
+      "pass": true
+    },
+    {
+      "check": "zero-variance-coordinate:harmonic-projection",
+      "error": 1.0169131137317648e-16,
+      "pass": true
+    },
+    {
+      "check": "zero-variance-coordinate:birth-D3",
+      "error": 1.3379200771707242e-16,
+      "pass": true
+    },
+    {
+      "check": "zero-variance-coordinate:birth-D21",
+      "error": 6.730987817364412e-17,
+      "pass": true
+    },
+    {
+      "check": "zero-variance-coordinate:birth-transport",
+      "error": 6.519147827435392e-16,
+      "pass": true
+    },
+    {
+      "check": "permutation-equivariance",
+      "error": 0.0,
+      "pass": true
+    }
+  ],
+  "n_checks": 37,
+  "n_failed": 0,
+  "pass": true
+}
