@@ -1,0 +1,79 @@
+{
+  "artifact_kind": "t2_readout_corrector",
+  "contract": "experiments/LOG.md 2026-09-10 CONTRACT (Rule 1): T2",
+  "fit_features": "C:/Users/samsu/Documents/arc-whest/experiments/2026-09-10_slice5/feat_P07.npz",
+  "read_features": "C:/Users/samsu/Documents/arc-whest/experiments/2026-09-10_slice5/feat_P08.npz",
+  "n_fit": 384,
+  "n_read": 128,
+  "folds": 4,
+  "label_noise_per_replica": 4.498785921718335e-09,
+  "r2_ceiling_on_this_corpus": 0.9444093880832088,
+  "pre_registered": {
+    "band": [
+      1.0,
+      1.1
+    ],
+    "build_gate": 1.15,
+    "kill_gate": 1.1
+  },
+  "baseline": {
+    "fit": 3.837298058054233e-08,
+    "read": 3.859708695935967e-08
+  },
+  "arms": {
+    "R": {
+      "mean_xmse_read": 3.797635033995095e-08,
+      "gain": 1.0163453468764667,
+      "paired_diff": 6.207366194087219e-10,
+      "se": 6.873510373857382e-11,
+      "ci95": [
+        4.847222534125399e-10,
+        7.567509854049039e-10
+      ],
+      "n_better": 100,
+      "n": 128,
+      "shrinkage": 0.5535661829593492,
+      "oof_r2_fit": 0.005444258639411559
+    },
+    "R0": {
+      "mean_xmse_read": 3.8574274611973615e-08,
+      "gain": 1.0005913875922627,
+      "paired_diff": 2.2812347386054434e-11,
+      "se": 1.1483898285451803e-11,
+      "ci95": [
+        8.778512451826744e-14,
+        4.55369096475906e-11
+      ],
+      "n_better": 68,
+      "n": 128,
+      "shrinkage": 0.2500905849721261,
+      "oof_r2_fit": -0.0007670834758648493
+    },
+    "Rshuf": {
+      "mean_xmse_read": 3.856640477019435e-08,
+      "gain": 1.0007955677836227,
+      "paired_diff": 3.0682189165315336e-11,
+      "se": 1.0216443750010884e-11,
+      "ci95": [
+        1.0465690697829085e-11,
+        5.089868763280159e-11
+      ],
+      "n_better": 73,
+      "n": 128,
+      "shrinkage": 0.17309484964019917,
+      "oof_r2_fit": -0.0008366766092693378
+    }
+  },
+  "verdict": "H2 READOUT CLOSED",
+  "void_clause_fired": false,
+  "positive_control": {
+    "oof_r2": 0.9433931648578112,
+    "target": "0.4 tanh(alpha) + 2 k3n - 0.15 alpha*k3n, rescaled to the real target's variance, plus noise at the measured label level",
+    "passes": true
+  },
+  "wp10_inflight_breakeven_r2_on_K2": 0.99849,
+  "seed_blocks": {
+    "fit": "P07",
+    "read": "P08"
+  }
+}

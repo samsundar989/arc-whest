@@ -40067,3 +40067,130 @@ SIMPLE's lineage cost — and it is still `13.8×` worse than SIMPLE, which cost
 **The gate outcome has now survived two rounds of falsification and three
 different explanations of it.** `SIMPLE / MINIMAL = 0.0135×` against a
 pre-registered kill of `1.2×` has not moved.
+
+# 2026-09-10 — **T2: THE READOUT CORRECTOR IS WORTH `1.0163x`. H2's readout form is CLOSED, and with T1 that meets BOTH kill criteria — the score lane is closed.** A positive control caught my head silently not learning, and the first two runs of this slice were unreadable.
+
+*Contract: `experiments/LOG.md` 2026-09-10 *CONTRACT (Rule 1): T2*, committed at
+`5f6de66` **before P07 or P08 was claimed**. Instrument
+`local_sim/p2_t2_corrector.py`, artifact
+`experiments/2026-09-10_slice5/t2_corrector.json`, job `517`. Fit on **P07** (384
+nets), single held-out read on **P08** (128 nets), both freshly minted DECIDE-tier
+with `2^24`-sample two-replica labels.*
+
+## The result
+
+    POSITIVE CONTROL   held-out R^2  +0.9434     (the corpus ceiling is 0.9444)
+
+    B0 on the READ corpus (P08)      3.859709e-08
+    R      (fitted)                  3.797635e-08   gain 1.0163x   100/128 better
+    R0     (constant-c null)         3.857427e-08   gain 1.0006x    68/128
+    Rshuf  (features permuted)       3.856640e-08   gain 1.0008x    73/128
+
+    paired arithmetic difference, studentised-t:
+      B0 - R      +6.2074e-10   95% [+4.847e-10, +7.568e-10]
+      B0 - R0     +2.2812e-11   95% [+8.779e-14, +4.554e-11]
+      B0 - Rshuf  +3.0682e-11   95% [+1.047e-11, +5.090e-11]
+
+    out-of-fold R^2 on the FIT corpus:  R +0.0054   R0 -0.0008   Rshuf -0.0008
+    James-Stein shrinkage:              R  0.554    R0  0.250    Rshuf  0.173
+
+    GATE  build >= 1.15x   kill <= 1.10x   ->   H2 READOUT CLOSED
+
+**The signal is real and it is tiny.** `R` beats both null controls by an order of
+magnitude, improves `100 of 128` networks, and keeps `55%` of its correction under
+James-Stein shrinkage — a correction that did not point at the residual would have
+been shrunk to nothing, as `Rshuf`'s `0.173` nearly was. So this is not a null
+result in the sense of "nothing there". It is `1.63%`, against a gate of `15%`.
+
+**The VOID clause did not fire.** `R0` collapses to `1.0006x`, so the constant-`c`
+member behaves as the theory says it must and the harness does not leak. That
+clause was written into the contract because WP9 had to fire it; here it holds.
+
+## All four pre-registered predictions CONFIRMED
+
+| # | prediction | outcome |
+|---|---|---|
+| 1 | held-out gain in `[1.00, 1.10]`; `~65%` on the gate failing | **`1.0163x`** — in band, gate failed |
+| 2 | `R0` collapses; otherwise the slice is VOID | **`1.0006x`** — collapsed |
+| 3 | `Rshuf <= 1.01x` | **`1.0008x`** |
+| 4 | held-out `R^2 <= 0.25` | **`+0.0054`**, against a measured ceiling of `0.944` |
+
+This is the first slice in this project where every pre-registered prediction
+held. It is also, as recorded this morning, a slice where prediction 4 turned out
+**weaker** than I intended because I had the noise ceiling wrong by a factor of
+two; the outcome beats it by two orders of magnitude regardless.
+
+## THE POSITIVE CONTROL IS THE POINT OF THIS ENTRY
+
+The first two runs produced this:
+
+    R      gain 1.0001x    oof R^2 -0.0010
+    R0     gain 1.0001x    oof R^2 -0.0010
+    Rshuf  gain 1.0001x    oof R^2 -0.0010
+
+**All three arms identical to four decimals, including the one with its features
+shuffled.** I was one commit away from writing that up as "there is no signal in
+the chain's state". Two explanations fit it and they are opposite: no signal, or
+the head does not learn. So before reporting anything I fitted the same head, the
+same folds and the same shrinkage to a target that **is** a known function of its
+own inputs — `0.4 tanh(alpha) + 2 k3n - 0.15 alpha*k3n`, rescaled to the real
+target's variance, plus noise at the measured label level.
+
+    POSITIVE CONTROL, first attempt:   held-out R^2  -0.4566   *** FAIL ***
+
+**The head could not recover a signal it had been handed.** Two defects, both
+mine and both elementary:
+
+1. **No input standardisation.** The design matrix mixes `alpha` spanning `±10`
+   with a gate probability in `[0, 1]` and cumulant ratios of order `0.1`, and the
+   first layer is a `Tanh`. Unstandardised it saturates on `alpha` and effectively
+   sees one feature.
+2. **No target standardisation.** The target is of order `5e-4`. An
+   unstandardised regression asks a zero-initialised output layer to reach a value
+   four orders below its own weight scale.
+
+With both fixed — statistics taken on the training fold only, so no fold leaks
+into its own prediction — the control reads **`+0.9434` against a ceiling of
+`0.9444`**. The head recovers essentially all of the recoverable signal in a
+planted target.
+
+**That is what makes the real number readable.** With an instrument demonstrated
+to recover `94%` of a planted signal at this exact noise level, on this exact
+corpus, with this exact fold structure, the chain's final residual is predictable
+from its own carried state to `R^2 = 0.005`. **The information is not there, and
+that is now a measurement rather than an absence.**
+
+Recorded as a standing rule: **a learned-model null is unreadable without a
+positive control on the same instrument.** WP9 and WP10 used null controls, which
+catch a leaking harness; they do not catch a harness that cannot learn. Both are
+needed and they fail in opposite directions.
+
+## What this closes
+
+**Both Slice-5 kill criteria are now met.** The handoff:
+
+> Kill criteria: T1 `<=1.2x` and T2 `<=1.1x` ⇒ score is closed at nominee A's
+> `~2.0-2.3e-8`, Sep 24–Oct 17 becomes hardening, nominations by Oct 10, and the
+> write-up. **Report immediately if either gate fails rather than looking for a
+> rescue.**
+
+    T1  SIMPLE / AUGMENT-MINIMAL   0.0135x   against a kill of 1.2x
+    T2  held-out gain              1.0163x   against a kill of 1.10x
+
+**Reported immediately, and no rescue is being sought.** The score is closed at
+nominee A. Depth 2's own CONFIRM read is `2.37e-08` adjusted on the organisers'
+mini; its graded row is pending Samuel's decision on the two mis-specified gates.
+
+**Scope of the closure, stated honestly.** This closes the **readout** form of H2
+on **our** chain's own carried state. It does not close:
+
+- the **in-flight** form (Puffi's per-layer style), which the contract said would
+  be measured by the cheap sensitivity route and which has **not** been run;
+- a corrector on features we do not carry — the head can only be as good as the
+  state handed to it, and ours is `alpha`, the gate probability, and two cumulant
+  diagonals;
+- the possibility that the leaders' corrector works because their **chain** is
+  different, not because their head is better.
+
+Each of those is a real gap and none is a rescue. The first is cheap and should
+be run before the write-up claims H2 is closed as a whole.

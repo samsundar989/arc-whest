@@ -333,26 +333,54 @@ def _design(per, pooled, mode="full"):
         np.concatenate([own, hist, ctx], axis=2).astype(np.float32))
 
 
+class _Head:
+    """A fitted head plus the standardisation it was fitted under.
+
+    STANDARDISATION IS NOT COSMETIC HERE, and its absence is what a positive
+    control caught on 2026-09-10. The design matrix mixes `alpha` spanning
+    `+-10` with a gate probability in `[0, 1]` and cumulant ratios of order
+    `0.1`, and the first layer is a `Tanh`: unstandardised, the net saturates on
+    `alpha` and effectively sees one feature. The target is of order `5e-4`, so
+    an unstandardised regression is asking a zero-initialised output layer to
+    reach a value four orders below its own weight scale. With both fixed the
+    head recovers a signal it is given; without them it returned held-out
+    `R^2 = -0.4566` on a target that was a KNOWN function of its own inputs.
+
+    Statistics are computed on the TRAINING fold only and applied to the held-out
+    fold, so no fold leaks into its own prediction.
+    """
+
+    def __init__(self, net, xm, xs, ym, ys):
+        self.net, self.xm, self.xs, self.ym, self.ys = net, xm, xs, ym, ys
+
+
 def _fit_head(X, y, torch, epochs=60, width=32, lr=1e-3, seed=0, dev="cuda"):
     """A small permutation-equivariant head. Rows are neurons; nothing sees an
     ordering, only its own features and pooled context."""
+    torch.manual_seed(seed)
     g = torch.Generator(device="cpu").manual_seed(seed)
     F = X.shape[-1]
+
+    Xf = X.reshape(-1, F).astype(np.float32)
+    yf = y.reshape(-1, 1).astype(np.float32)
+    xm = Xf.mean(axis=0, keepdims=True)
+    xs = Xf.std(axis=0, keepdims=True)
+    xs[xs < 1e-12] = 1.0                       # a constant column contributes nothing
+    ym = float(yf.mean())
+    ys = float(yf.std()) or 1.0
+
     net = torch.nn.Sequential(
         torch.nn.Linear(F, width), torch.nn.Tanh(),
         torch.nn.Linear(width, width), torch.nn.Tanh(),
         torch.nn.Linear(width, 1),
-    ).to(dev)
-    for m in net:
-        if isinstance(m, torch.nn.Linear):
-            torch.nn.init.normal_(m.weight, 0.0, 0.05, generator=None)
-            torch.nn.init.zeros_(m.bias)
+    ).to(dev)                                   # PyTorch's own init, not an ad-hoc 0.05
+
     opt = torch.optim.Adam(net.parameters(), lr=lr)
-    Xt = torch.as_tensor(X.reshape(-1, F), device=dev)
-    yt = torch.as_tensor(y.reshape(-1, 1), device=dev, dtype=Xt.dtype)
+    Xt = torch.as_tensor((Xf - xm) / xs, device=dev)
+    yt = torch.as_tensor((yf - ym) / ys, device=dev)
     n = Xt.shape[0]
     bs = min(1 << 16, n)
-    for ep in range(epochs):
+    for _ep in range(epochs):
         perm = torch.randperm(n, generator=g).to(dev)
         for k in range(0, n, bs):
             idx = perm[k:k + bs]
@@ -360,14 +388,17 @@ def _fit_head(X, y, torch, epochs=60, width=32, lr=1e-3, seed=0, dev="cuda"):
             loss = torch.nn.functional.mse_loss(net(Xt[idx]), yt[idx])
             loss.backward()
             opt.step()
-    return net
+    return _Head(net, xm, xs, ym, ys)
 
 
-def _apply(net, X, torch, dev="cuda"):
+def _apply(head, X, torch, dev="cuda"):
+    """Predict in the TARGET's units, undoing the fit-time standardisation."""
     F = X.shape[-1]
+    Xf = X.reshape(-1, F).astype(np.float32)
     with torch.no_grad():
-        p = net(torch.as_tensor(X.reshape(-1, F), device=dev))
-    return p.reshape(X.shape[0], X.shape[1]).cpu().numpy().astype(np.float64)
+        p = head.net(torch.as_tensor((Xf - head.xm) / head.xs, device=dev))
+    out = p.cpu().numpy().astype(np.float64) * head.ys + head.ym
+    return out.reshape(X.shape[0], X.shape[1])
 
 
 def _james_stein(c, resid):
@@ -449,6 +480,48 @@ def fit(a) -> int:
     rng = np.random.default_rng(0)
     rng.shuffle(idx)
     parts = np.array_split(idx, folds)
+    # ---- POSITIVE CONTROL, and it runs BEFORE the real arms --------------- #
+    #
+    # All three arms below returned the same held-out `R^2` to four decimals,
+    # including the feature-permuted one. That has two explanations and they are
+    # opposite: either there is no signal, or the head does not learn. A null
+    # result is worthless until the second is excluded, so the same head, the
+    # same folds and the same shrinkage are first fitted to a target that IS a
+    # known function of the features, with noise at the measured label level.
+    # If this does not recover a high `R^2`, nothing else in this report may be
+    # read.
+    pc = None
+    if not a.skip_positive_control:
+        Xpc = _design(perF, poolF, "full")
+        al = perF[:, -1, :, 0].astype(np.float64)      # alpha, final layer
+        k3 = perF[:, -1, :, 2].astype(np.float64)      # kappa_3 diagonal
+        rng_pc = np.random.default_rng(7)
+        synth = (0.4 * np.tanh(al) + 2.0 * k3 - 0.15 * al * k3)
+        synth = synth * float(np.std(tgtF)) / float(np.std(synth))
+        synth = synth + rng_pc.normal(
+            0.0, math.sqrt(max(noise_in_tgt, 0.0)), size=synth.shape)
+        oof_pc = np.zeros_like(synth)
+        for k in range(folds):
+            te = parts[k]
+            tr = np.concatenate([parts[j] for j in range(folds) if j != k])
+            net = _fit_head(Xpc[tr], synth[tr], torch, epochs=a.epochs,
+                            width=a.head_width, lr=a.lr, seed=k, dev=dev)
+            oof_pc[te] = _apply(net, Xpc[te], torch, dev)
+        ss_res = float(np.sum((synth - oof_pc) ** 2))
+        ss_tot = float(np.sum((synth - synth.mean()) ** 2))
+        r2_pc = 1.0 - ss_res / ss_tot if ss_tot > 0 else float("nan")
+        pc = {"oof_r2": r2_pc, "target": "0.4 tanh(alpha) + 2 k3n - 0.15 alpha*k3n, "
+                                         "rescaled to the real target's variance, "
+                                         "plus noise at the measured label level",
+              "passes": bool(r2_pc >= 0.5)}
+        print(f"  POSITIVE CONTROL  held-out R^2 {r2_pc:+.4f}   "
+              f"{'PASS -- the head learns' if pc['passes'] else '*** FAIL ***'}")
+        if not pc["passes"]:
+            print("  *** The head cannot recover a signal it was GIVEN. A null")
+            print("  *** from the arms below would be a statement about this")
+            print("  *** instrument, not about the chain. STOP.")
+        print()
+
 
     for arm in ("R", "R0", "Rshuf"):
         mode = "constant" if arm == "R0" else "full"
@@ -522,6 +595,7 @@ def fit(a) -> int:
                            "build_gate": BUILD_GATE, "kill_gate": KILL_GATE},
         "baseline": {"fit": float(base_fit.mean()), "read": float(base_read.mean())},
         "arms": arms, "verdict": verdict, "void_clause_fired": bool(void),
+        "positive_control": pc,
         "wp10_inflight_breakeven_r2_on_K2": WP10_INFLIGHT_BREAKEVEN_R2,
         "seed_blocks": {"fit": "P07", "read": "P08"},
     }
@@ -548,6 +622,8 @@ def main(argv=None) -> int:
     ap.add_argument("--epochs", type=int, default=60)
     ap.add_argument("--head-width", type=int, default=32)
     ap.add_argument("--lr", type=float, default=1e-3)
+    ap.add_argument("--skip-positive-control", action="store_true",
+                    help="DIAGNOSTIC ONLY. The control is what makes a null readable.")
     a = ap.parse_args(argv)
     if a.extract:
         if not (a.truth and a.out):
