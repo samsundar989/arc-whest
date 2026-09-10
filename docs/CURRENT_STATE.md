@@ -1,5 +1,145 @@
 # CURRENT_STATE.md — read this first
 
+> ## 2026-09-10 (Slice 5, day 1) — **H1 IS DEAD AND THE COST LANE IS CLOSED.** Two of the three open levers failed their pre-registered gates on the same day. The score now rests entirely on T2.
+>
+> `estimator.py` untouched at **v2.6.1**. **Nothing designated. Nothing promoted.
+> Nothing submitted.** An independent Skeptic is running on T1.
+>
+> ### THE FOUR-LINE ANSWER
+>
+> 1. **T1 — H1 is dead.** κ₄'s cheap channel (its use in the μ/Σ/diagonal-κ₃
+>    updates) carries **none** of AUGMENT's `2.094x`. Suppressing κ₄'s κ₃ births
+>    while keeping the `(n,n)` object live is not "less good" — it is
+>    **`74x`–`109x` WORSE than SIMPLE**, on `0 of 24` nets improved. The births
+>    are not an implementation detail of κ₄'s value; in this representation they
+>    **are** its value.
+> 2. **Packed spelling — closed at `1.0067x`** against a `1.5x` gate. Zero of the
+>    chain's `797` matmuls has the redundancy this meter discounts. **Cost is now
+>    closed at `~0.5 B`**, which meets the Slice-4 kill criterion thirteen days
+>    early and fails it.
+> 3. **Nominee A (Strassen depth 2) certifies on 6 of 8 gates.** The two failures
+>    are one artefact measured twice, and it would refuse `330327` — which has a
+>    real graded `0/100` row — for the same reason. **The canary is HELD** pending
+>    Samuel, because I will not reinterpret my own failed gate.
+> 4. **Rules v14 §6 is a checked negative.** Three independent public routes
+>    tried; the sentence is not publicly stated and another team hit the same wall.
+>    A neutral forum post is drafted and needs Samuel's account.
+>
+> ### T1 — THE NUMBERS, AND A MECHANISM THAT IS STRONGER THAN THE THEOREM WAS
+>
+> | arm | births/layer | mean xmse | vs SIMPLE |
+> |---|---:|---:|---:|
+> | `SIMPLE` | `2n` | `4.004685e-08` | `1.000x` |
+> | `AUGMENT` | `8n` | `1.912323e-08` | `2.094x` better |
+> | `AUGMENT-LITE` | `5n` | `4.365096e-06` | **`109x` WORSE** |
+> | `AUGMENT-MINIMAL` | **`2n`** | `2.976232e-06` | **`74x` WORSE** |
+>
+> `AUGMENT-MINIMAL` was **not in the handoff**. It came out of reading the birth
+> count off the returned tensor instead of estimating it, and it is the only
+> affordable member of the family — SIMPLE's exact `2n` lineage with κ₄'s `(n,n)`
+> object still live. The gate was written on it. It fails by a factor of `100`.
+>
+> **The new mechanism, and it is write-up material.** Between `128x8` and
+> `1024x16`, SIMPLE's error falls **`214x`** and the ablated arm's falls **`6x`**.
+> So the inconsistency penalty explodes from `2.2x` to `74x` **not because the
+> inconsistency worsens but because it installs an error floor that does not fall
+> with width.** An inexact tower does not merely lose the gain — it swamps what
+> the width was buying. *(The `128x8` leg is a 4-net smoke with no CI; the Skeptic
+> has been asked whether this claim over-reaches, and the answer is pending.)*
+>
+> Controls: SIMPLE `+1.299e-15`, AUGMENT `+2.076e-15` against their anchors. The
+> patched module is **bit-exact** against upstream with its flags off.
+>
+> ### EVERY PREDICTION ABOUT THE SIZE WAS WRONG — THE STRATEGIST'S AND BOTH OF MINE
+>
+> The strategist's band was `1.4x–1.8x`; the answer is `0.0135x`, wrong by `~150x`.
+> Mine were `[0.6, 1.1]` and `[0.35, 0.9]` — right in direction, wrong by two
+> orders of magnitude. **The instructive failure is my prediction 6:** I discounted
+> a small-width smoke by the ladder's measured `1.2x–1.4x` over-read. That
+> calibration holds between two *consistent* schemes and says nothing about a ratio
+> where one arm is internally inconsistent. **I applied a calibration outside its
+> domain**, which is the same class of error as this month's stale scalars.
+>
+> ### NOMINEE A — DEPTH 2, GATE BY GATE
+>
+> Candidate `estimator_k3_strassen_L2.py`, sha256 `390bc226…`, one character from
+> `330327`'s bytes (`_STRASSEN_DEPTH 3 -> 2`). `0.604217 B`, `9,321` ops.
+>
+> | gate | state |
+> |---|---|
+> | (a) `whest validate` | **PASS** |
+> | (b) certify §1–11 no FAIL | **FAIL**, §10 only, both clauses the artefact |
+> | (c) grader-twin f64 read-only | **PASS**, `0.000e+00` relative, FLOP delta exactly one weight pass |
+> | (d) `edge_cases --real-flopscope --phase2` | **PASS** |
+> | (e) ops `<= 24,000` | **PASS**, `9,321` |
+> | (f) projected residual `<= 0.3 s` | **PASS**, `0.125 s`, `3.20x` under the cliff |
+> | (g) Linux 8-GiB gate on the sha | **PASS**, VmPeak `3,328 MB`, `2.46x`, matched on `390bc226…` |
+> | (h) mini-100 `n_failed_mlps: 0` | **FAIL**, the artefact |
+>
+> **Three instruments agree on the price to `0.008%`**: the shape model, the real
+> flopscope run, and the Linux gate's independently computed `0.6042021`.
+>
+> The nine mini-100 rows that "raised" were **the run, not the candidate**: `0 of 9`
+> reproduce in isolation, all finite, all with byte-identical FLOP counts. Eight of
+> the nine indices were contiguous while another project held 20 GiB for 41 minutes.
+>
+> **WHAT SAMUEL NEEDS TO DECIDE:** gates (b)-§10 and (h) are the same
+> mis-specification — they judge the residual in local seconds, which this host
+> reads `27x` high per operation, instead of on the op count that
+> `VALIDATION.md` §2b-iii makes the gate. They would refuse `330327`. I wrote them
+> before the data and they failed, so amending them now is choosing a gate after
+> seeing the answer. **The canary is held until he acknowledges that.**
+>
+> ### T2 — CONTRACTED, AND THE HANDOFF'S CORPUS REFUSED
+>
+> The handoff says to train the corrector on the organisers' public 1,100.
+> **`docs/VALIDATION.md` §0 forbids fitting anything on the public split** and
+> `AGENTS.md` makes it binding, so the law wins over the packet. `P07` (384, the
+> fit) and `P08` (128, the single held-out read) are allocated, claimed, and their
+> labels are minting at `2^24` per half. The public split is read once at the end
+> as a check that chooses nothing.
+>
+> **This changes what a negative T2 would mean and is flagged for the next packet.**
+> The cost is label precision: our labels cap any reported `R^2` near `0.40`. It
+> does not bias the fit, and the gate is read with the unbiased cross estimator.
+>
+> ### IN FLIGHT
+>
+> - Skeptic on T1 (Rule 2), running.
+> - `493`/`494` — T2 labels for P07 and P08.
+> - `497` — depth-2 mini-100 with the residual cap lifted: the replacement gate,
+>   and the first accuracy read on the organisers' data (the capped run produced
+>   **none**, because every row was zeroed).
+> - Not yet queued: the κ₄ rank-sweep (write-up lane), the T2 fitter.
+>
+> ### PROCESS DEFECTS THIS SLICE
+>
+> - **I handed `predict` bare numpy weights in two probes.** `certify` hands
+>   flopscope-backed arrays because *"operations invoked as METHODS ON A WEIGHT are
+>   metered on the grader and free on bare numpy"* — a trap this repository had
+>   already found, closed and written down on 2026-08-24. My figures under-read by
+>   `144,472,064` FLOPs and `414` ops. **Read `build_weights` before writing a
+>   probe.**
+> - **A pre-registered prediction quoted a pricing instrument's number as the
+>   file's**, with a zero-width interval: `9,304 +- 0` against an actual `9,321`.
+> - **A third stale scalar** in `estimator_k3_strassen.py`'s docstrings: last-layer
+>   pruning saves `4` matmuls per lineage and `60` of `857`, not "5 per lineage,
+>   75 of 1,022". The file is NOT edited — its sha is graded bytes.
+> - **`Add-Content -Encoding utf8` double-encoded 38 lines of `LOG.md`.** Repaired.
+>   **Append to `LOG.md` from bash, never from PowerShell.**
+> - **The prediction slot for the P07/P08 allocation is VOID** — I edited and ran
+>   the tests before writing one.
+>
+> ### A PROVENANCE DEFECT WORTH FIXING PROPERLY
+>
+> A `workerq` git snapshot materialises **CRLF** under `core.autocrlf=true` while
+> the working copy is **LF**. The first memory-gate run therefore certified a
+> different sha for the same code, and `certify` §9 would have skipped. Fixed here
+> with `--no-snapshot`. **The general form is worse: a fresh clone of this
+> repository does not reproduce the graded submissions' shas.** Owed: a
+> `.gitattributes` `*.py eol=lf` entry, as its own IMPORTANT change.
+
+
 > ## 2026-09-10 (Slice 4, day 2) — **THE AUGMENT PORT IS DEPRIORITIZED ON EVERY AXIS.** Over the hard FLOP budget at full tower; its `2.09x` does not survive any approximation of the tower; and the one spelling that fits is beaten by the incumbent on arithmetic alone.
 >
 > `estimator.py` untouched at **v2.6.1**. **Nothing designated.** Nothing promoted.

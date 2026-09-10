@@ -1,8 +1,10 @@
 # Phase-2 write-up — DRAFT, PRIVATE, not posted anywhere
 
-> **Status 2026-09-10: skeleton with sections (i), (iii) and (v) substantially
-> drafted from `experiments/LOG.md`; (ii) and (iv) awaiting T1 and the κ₄
-> rank-sweep; (vi) awaiting the depth-2 graded row.** Nothing here is posted. The
+> **Status 2026-09-10 (updated after T1): sections (i), (ii), (iii) and (v) are
+> substantially drafted from `experiments/LOG.md`; (iv) awaits the κ₄ rank-sweep;
+> (vi) awaits the depth-2 graded row and T2. Section (ii)'s channel ablation is
+> under an independent Skeptic and no sentence of it may be treated as settled
+> until that returns.** Nothing here is posted. The
 > Phase-1 manuscript `docs/writeup-draft.md` is a different document, is stale, and
 > is not superseded by this one — it is Phase 1's and stays where it is.
 >
@@ -160,22 +162,48 @@ Three things follow, and the second and third are the ones worth publishing.
    cumulant degree**. It enriches the one already tracked, from
    `r = 2` (zero free indices, a scalar) to `r = 1` (two free indices, a matrix).
 
-**The channel decomposition.** `OWED — workerq job 487, `t1_augment_lite.json`.`
-κ₄'s `(n,n)` object couples into the flow twice: through the Wick updates of μ, Σ
-and the diagonal κ₃ slices (`O(n²)`, free) and by **birthing new factored κ₃
-columns** (`8n` per layer against SIMPLE's `2n`, which is what makes it
-unaffordable). We ablate the births while keeping the object live. Birth counts,
-read off the returned tensor rather than estimated:
+**The channel decomposition, and it is the section's strongest result.** κ₄'s
+`(n,n)` object couples into the flow twice: through the Wick updates of μ, Σ and
+the diagonal κ₃ slices (`O(n²)`, essentially free) and by **birthing new factored
+κ₃ columns** (`8n` per layer against SIMPLE's `2n`, which is what makes the scheme
+unaffordable). We ablate the births while keeping the object live, by two exact
+text substitutions on a copy of the reference implementation, verified bit-exact
+against it with the ablation off.
 
-| arm | births / layer |
-|---|---:|
-| SIMPLE | `2n` |
-| AUGMENT | `8n` (5 leg blocks + 2 degree-4 blocks + 1 dense slice) |
-| AUGMENT-LITE (κ₄'s births suppressed) | `5n` |
-| AUGMENT-MINIMAL (κ₄'s births and the raised budget's extra legs suppressed) | `2n` |
+Birth counts are **read off the returned tensor**, not estimated:
 
-`AUGMENT-MINIMAL` births exactly SIMPLE's `2n` while keeping κ₄'s `(n,n)` object
-live — the only affordable member of the family. `OWED: its accuracy.`
+| arm | births / layer at `n = 1024` | mean cross-MSE | vs SIMPLE |
+|---|---:|---:|---:|
+| SIMPLE | `2n` = 2,048 | `4.004685e-08` | `1.000×` |
+| AUGMENT | `8n` = 8,192 | `1.912323e-08` | **`2.094×` better** |
+| AUGMENT-LITE — κ₄'s births suppressed | `5n` = 5,120 | `4.365096e-06` | **`109×` worse** |
+| AUGMENT-MINIMAL — κ₄'s births *and* the raised budget's extra legs suppressed | **`2n` = 2,048** | `2.976232e-06` | **`74×` worse** |
+
+`AUGMENT-MINIMAL` costs SIMPLE's lineage exactly while keeping κ₄'s `(n,n)` object
+live and every diagram that *consumes* it — the only affordable member of the
+family. **It is 74× worse than simply not tracking κ₄ as a matrix at all**, on
+`0 of 24` networks improved, with paired intervals clear of zero by two orders of
+magnitude. Both controls reproduce their independent anchors to `~1e-15`.
+
+**So the cheap channel carries none of the gain.** The births are not an
+implementation detail of κ₄'s value in this representation; they *are* its value.
+Any scheme that wants AUGMENT's accuracy must pay for AUGMENT's columns, and that
+is `3.6×–5.8×` over the hard budget.
+
+**The width argument.** Comparing a small-shape probe with the live shape:
+
+| shape | SIMPLE | AUGMENT-MINIMAL | penalty |
+|---|---:|---:|---:|
+| `128 × 8` | `8.55e-06` | `1.85e-05` | `2.2×` |
+| `1024 × 16` | `4.00e-08` | `2.98e-06` | **`74×`** |
+
+SIMPLE's error falls `214×` between those shapes; the inconsistent arm's falls
+`6×`. **The penalty explodes not because the inconsistency worsens but because it
+installs an error floor that does not fall with width**, while the consistent
+chain's error does. *(Caveat, stated because the draft must not outrun the data:
+the small-shape leg is a four-network probe with no interval, and both width and
+depth change between the rows. A width sweep at fixed depth would be the honest
+version of this table and is not yet run.)*
 
 ---
 
@@ -366,7 +394,8 @@ The skeleton of the argument, which the measurements above already support:
 
 | item | blocking |
 |---|---|
-| §(ii) channel decomposition | workerq `487` (T1) |
+| §(ii) Skeptic verdict on the channel ablation | Rule 2 agent, running |
+| §(ii) width sweep at FIXED depth, to replace the two-shape table | not queued |
 | §(iv) rank sweep curve | background GPU job, not yet queued |
 | §(iii)(a) memory-depth ceiling | restate from the 2026-09-05 LOG entry |
 | §(vi) the whole section | depth-2 graded row + T1 + T2 |
