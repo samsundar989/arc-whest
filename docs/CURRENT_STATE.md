@@ -50,6 +50,13 @@ then run the registered exact/coherent/consumers-only/births-only comparison on 
 That DESIGN result must end with synthesis and a fresh Skeptic before any untouched
 DECIDE allocation. No public or vault truth is authorized.
 
+At `2026-09-10T23:07:29Z`, the driver mistakenly inspected the P07 NPZ keys,
+shapes and seed endpoints through direct `numpy.load`. It computed no scores or
+candidate comparisons and changed no frozen choice, but it bypassed pre-read
+reservation. The incident is backfilled honestly as P07 DESIGN read 1 in
+`experiments/truth_reads.jsonl`; the future registered fit will be read 2. P07 was
+already exposed reusable DESIGN, so its role is unchanged.
+
 ## Submission state
 
 There is **no newly proven better submission**. The compact reference has no score

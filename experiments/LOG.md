@@ -41425,3 +41425,22 @@ never started, and was cancelled while queued after 10,248 seconds. It supplies 
 preflight evidence. Current-source default preflight is queued as workerq 634 with
 15 GiB RAM, 0 GiB VRAM and 2 CPUs; the separately required full certification
 mutation battery is queued as workerq 633 with 32 GiB RAM, 0 GiB VRAM and 2 CPUs.
+
+### Integrity incident: direct P07 schema inspection
+
+At `2026-09-10T23:07:29Z`, after the contract, predictions and exact registry were
+committed, the driving Codex used an ad-hoc `numpy.load` command to inspect the P07
+archive's keys, array shapes and first/last seed identities while preparing the
+future selector command. This bypassed `truth_reads` pre-read reservation. No
+candidate score, MSE, activation value or coefficient comparison was computed or
+printed, and nothing learned by the command changes the already committed grid,
+bounds, identities, gate or producer. P07 was already exposed reusable DESIGN data,
+so the incident does not turn fresh decision evidence into exposed evidence, but it
+is still a protected-access failure.
+
+The read was detected immediately and backfilled without backdating as P07 read 1
+in `experiments/truth_reads.jsonl`, reservation
+`backfill-codex-c281b960ff0e`, with the finalized artifact SHA-256 and an explicit
+`automatic_runtime_backfill` timestamp source. The future registered fit, if the
+preflight and producer evidence pass, will therefore be P07 read 2 rather than
+read 1. This backfill records the failure; it does not claim the pre-read guard ran.
