@@ -39955,3 +39955,115 @@ precision. The ceiling governs only how an `R^2` should be *read*, and predictio
 4 — held-out `R^2` `<= 0.25` — was written against the ceiling, so it is now a
 **weaker** claim than intended: `0.25` against a `0.944` ceiling is a much lower
 bar than `0.25` against `0.40`. Recorded before any T2 datum exists.
+
+# 2026-09-10 — **THE COMPLETED 2×2 FALSIFIES BOTH MY PREDICTION AND THE SKEPTIC'S.** `legsonly` is not the Gaussian baseline; it is `7.6×` better than it. What the design identifies is sharper than either story.
+
+*Follow-up pre-registered in today's SKEPTIC entry, with the Skeptic's own
+discriminator. Job `498` (`25m`), artifact
+`experiments/2026-09-10_slice5/t1_augment_lite_v2.json`. Same instrument, same 24
+P01 networks, same labels, `float32`. Fidelity **bit-exact**; both controls
+reproduce; `t_crit` recorded as `2.0686576` from scipy. `# seed-ledger: no block
+named`.*
+
+## The completed design
+
+| arm | κ₄'s κ₃ births | raised-budget legs | births/layer | mean xmse | 95% CI |
+|---|---|---|---:|---:|---|
+| `SIMPLE` (`augment=False`) | — | — | `2n` | `4.004685e-08` | `[3.7943e-08, 4.2151e-08]` |
+| `AUGMENT` | kept | kept | `8n` | `1.912323e-08` | `[1.8229e-08, 2.0017e-08]` |
+| `AUGMENT-LITE` | **deleted** | kept | `5n` | `4.365096e-06` | `[3.4824e-06, 5.2478e-06]` |
+| **`AUGMENT-LEGSONLY`** | kept | **deleted** | `4n` | **`5.523768e-07`** | `[5.1282e-07, 5.9193e-07]` |
+| `AUGMENT-MINIMAL` | **deleted** | **deleted** | `2n` | `2.976232e-06` | `[2.5350e-06, 3.4174e-06]` |
+| *Gaussian K2* | — | — | — | `4.196350e-06` | `[3.8944e-06, 4.4983e-06]` |
+| *calibrated K2* | — | — | — | `1.448599e-06` | `[1.3346e-06, 1.5626e-06]` |
+
+GT noise floor `1.1552e-09`. `SIMPLE / MINIMAL = 0.0135×`; the gate reads **H1
+DEAD**, unchanged.
+
+## Two predictions, both wrong
+
+**Mine, recorded this morning:** *"`legsonly` lands in `[1e-6, 6e-6]`, i.e. also
+at the Gaussian baseline, and `K2 − legsonly` straddles zero. I put `~80%` on
+this."* **FALSIFIED.** `legsonly` is `5.52e-07`, below the band, and
+
+    K2      − legsonly   +3.6440e-06   95% [+3.351e-06, +3.937e-06]   ratio 7.60
+    K2cal   − legsonly   +8.9622e-07   95% [+7.819e-07, +1.011e-06]   ratio 2.62
+
+Both intervals are clear of zero. **`legsonly` is `7.6×` better than plain
+Gaussian propagation and `2.6×` better than *calibrated* Gaussian propagation.**
+
+**The Skeptic's, which I had adopted:** *"any deletion from the factored `(1,1,1)`
+lineage returns this chain to roughly Gaussian accuracy."* **Also falsified**, by
+the same rows. It is true of `lite` (which straddles K2) and roughly true of
+`minimal` (`1.41×` better than K2 but `0.49×` of calibrated K2). It is **not** true
+of `legsonly`. The unified statement was too strong and I had already written it
+into the write-up and `CURRENT_STATE`; both are corrected below.
+
+My strict falsifier — `legsonly` at or below `1e-7` — did **not** fire. So the
+result sits between my prediction and my falsifier, which is the case a
+pre-registration is least able to adjudicate, and I am not going to claim it
+confirmed anything.
+
+## What the design DOES identify
+
+**Deleting κ₄'s κ₃ births is by far the more damaging of the two deletions.**
+Holding the other factor fixed:
+
+    delete the raised-budget legs   (κ₄ births kept)   4n   5.52e-07
+    delete κ₄'s births              (legs kept)        5n   4.37e-06     7.9x worse
+    delete both                                        2n   2.98e-06
+
+So on this axis the κ₄ births are the load-bearing part, and that is the direction
+**opposite** to H1's hope: H1 wanted the births to be the disposable half.
+
+**But the comparison is confounded and stays confounded.** The Skeptic's finding
+holds — κ₄'s own update (`K211_contrib`, `factor_k3.py:473-497`) is a functional of
+`pK_111.factors`, so deleting the births also *changes κ₄ itself*. The
+births-deleted arms therefore differ from the births-kept arms in two ways at
+once. **This design cannot separate them, and no reweighting of these five arms
+can.**
+
+**The damage is wildly non-monotone in how much is removed.** Ordered by badness:
+`lite` (`5n`) worse than `minimal` (`2n`) worse than `legsonly` (`4n`). Ordered by
+how much was deleted: `minimal` more than `lite` ≈ `legsonly`. **There is no
+monotone relationship at all**, and any argument of the form "it removes more so
+it must be worse" is dead here.
+
+## The statement the evidence actually supports
+
+**Both consistent configurations are good; every partial configuration between
+them is catastrophic.** `SIMPLE` (`augment=False`, a self-consistent term set) is
+`4.00e-08`; `AUGMENT` (`augment=True`, the complete term set) is `1.91e-08`. Every
+one of the three arms that keeps *part* of AUGMENT's term set is **`13.8×` to
+`109×` worse than the WORSE of the two endpoints**, on `0 of 24` networks improved
+in every case.
+
+That is a cleaner claim than either the channel attribution I wanted or the
+"returns to Gaussian" the Skeptic proposed, and it does not require identifying a
+channel:
+
+> **The term set of this scheme is not a menu. It is two working configurations
+> with a cliff between them.** Removing any subset of AUGMENT's additional
+> diagrams, while leaving the rest running, costs between `14×` and `109×` — and
+> which subset you remove changes the damage by a factor of `8` in a direction no
+> ordering of "how much" predicts.
+
+**And there is no affordable arm anywhere in the design.** The cheapest ablation
+that beats calibrated Gaussian propagation is `legsonly` at `4n` births — twice
+SIMPLE's lineage cost — and it is still `13.8×` worse than SIMPLE, which costs
+`2n`. **Nothing in this 2×2 is worth building at any price.**
+
+## Corrections owed and applied
+
+- `experiments/LOG.md` and `docs/CURRENT_STATE.md`: the sentence *"any deletion
+  from the carried `(1,1,1)` lineage returns this chain to roughly Gaussian
+  accuracy"* is **narrowed** — true of `lite`, approximately true of `minimal`,
+  **false for `legsonly`**.
+- `docs/writeup-phase2-draft.md` §(ii) and §(iii)(c′): same narrowing, and the
+  full 2×2 replaces the two-arm table.
+- The write-up's abstract sentence *"every deletion ... returns the chain to
+  roughly Gaussian accuracy"* is replaced by the cliff statement above.
+
+**The gate outcome has now survived two rounds of falsification and three
+different explanations of it.** `SIMPLE / MINIMAL = 0.0135×` against a
+pre-registered kill of `1.2×` has not moved.
