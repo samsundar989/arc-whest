@@ -41353,3 +41353,47 @@ and both receipts re-hash consistently; all three candidates cost 12,473 FLOPs o
 each of the two tiny identities. The same Skeptic reran the suite and returned
 **ACCEPT**. Its deliberate limitation is binding: this proves only small synthetic
 producer-to-selector conformance, not P07 runtime, a fitted value or useful score.
+
+### Samuel's predictions recorded; contract armed for implementation
+
+Samuel answered all three required questions before any repaired Stage-2 label
+read: **“I don't know”** for coherent-versus-exact gain, **“I don't know”** for the
+relationship between coherent and the half-arms, and **“I don't know”** for server
+residual headroom. These are valid predictions and are recorded verbatim without
+turning uncertainty into an implied direction.
+
+The bounded P07 coefficient registry is frozen before data:
+
+- parameter: generator `_K4_LAM` (`lam`) only;
+- candidates, in tie-break order: `0`, `1/6`, `1/3`, `1/2`;
+- exact bounds: `[0, 1/2]`;
+- objective: mean final-layer MSE on P07, permitted only if counted cost is exactly
+  identical across candidates for every identity;
+- identities: the 384 P07 seeds from the committed seed-block registry, in registry
+  order; weights may be deterministically minted before labels;
+- immutable inputs: `experiments/2026-09-10_stage2_k4_design/candidates.json`,
+  `bounds.json` and `identities.json`.
+
+This small grid brackets no sign reversal and includes the representation's
+structural one-third value. It is a disclosed DESIGN choice, not an optimization
+sweep. The prior P01 placeholder exposure is a confounder on interpretation, even
+though it did not choose this repaired core's outputs. No candidate or bound may be
+added after P07 opens. The first protected action is one registered P07 fit receipt;
+the subsequent P01 four-arm comparison uses that frozen value and the already
+registered `1.10x` gate.
+
+### Exact-byte acceptance before Stage 2 labels
+
+Workerq 628 ran `scripts/preflight.ps1 -Full` from the live Windows working/package
+bytes at HEAD `e1933f0`; source was unchanged throughout. It passed **16/16**,
+including the lifecycle/certification consumer mutations, exact FLOP anchor, shape
+parity, deployment envelope and zero-failure official Phase-2 subprocess smoke.
+Peak process-tree RAM was 10,580.75 MiB. Transcript:
+`experiments/2026-09-10_final_acceptance/preflight-full.log`.
+
+The transcript directory itself was created before launch and therefore appeared
+as the only untracked entry at preflight start. The two expected timestamp-bearing
+Full-tier reports were restored after comparison; no tested source, estimator,
+ledger, protected data or vault file changed. This is a passing Full preflight. It
+does not substitute for the separately required current full certifier mutation
+battery or for Linux memory evidence (workerq 599 supplies the latter).
