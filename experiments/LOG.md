@@ -38232,3 +38232,208 @@ It orients priority and **promotes nothing**; any promotion needs a fresh block.
 the only differences between arms. Upstream stays rev `93d091a4` plus exactly the
 recorded patch; the cap is applied by a recorded seam, and the seam's line count
 and md5 go in the artifact as `p2_d2_k4_oracle` already does.
+
+# 2026-09-10 — **CAPPED AUGMENT COLLAPSES 26–58x PAST ITS GATE.** But the Skeptic showed I measured the wrong thing at the wrong operating point, and the lane closes for a different reason than I wrote.
+
+*Slice 4, the Skeptic-nominated discriminator. Contract: `experiments/LOG.md`
+2026-09-09, committed `1f9d2c2` before the run. Instrument
+`local_sim/p2_augment_capped.py`, artifact
+`experiments/2026-09-09_slice4/augment_capped.json`, workerq job `457`
+(`3h46m`, f32). Rule-2 Skeptic verdict **PROVISIONAL**, and this entry is
+written to its corrections rather than to my first reading.
+`# seed-ledger: no block named` — re-reads the **P01 DESIGN** asset.*
+
+## What ran, and the controls first
+
+| arm | mean xmse | vs uncapped SIMPLE |
+|---|---:|---:|
+| `simple` (control) | `4.004685e-08` | `1.000x` |
+| `augment` (control) | `1.912323e-08` | `2.094x` better |
+| `augment_g4` | `7.4162e-07` | `18.5x` WORSE |
+| `augment_g3` | `1.1249e-06` | `28.1x` WORSE |
+| `augment_g2` | `1.6541e-06` | `41.3x` WORSE |
+
+**Both controls are bit-identical to D1 on 24/24 rows**, not merely equal to the
+digit; control drift `+1.299e-15`. The walk was asserted **bit-exact** against
+`mlp_kprop` at `gens=None` at two shapes and both kinds *before* the run, and the
+cap was separately shown to bite at `g ∈ {2,3,4}` and be inert beyond the tower
+depth. Pre-registered gate `<= 2.8605e-08`: **FAIL at every cap, by `25.9x`
+(g=4) to `57.8x` (g=2).** My first write-up said "`~58x` or worse"; the honest
+range is `26x–58x`.
+
+## The Skeptic ran its own control, and the seam SURVIVED
+
+I asked it to press hardest on whether the cap manufactures a self-inconsistent
+state — the same failure A3 measured when `kappa_4` was zeroed. It ran the seam's
+own `walk(..., SIMPLE, gens=g)` on the same 24 nets (job `473`, 42 s) against the
+**shipped fnp** `estimator_k3_strassen._truncate` curve in
+`experiments/2026-09-05_slice1/generation_curve.json`:
+
+    uncapped   seam 4.004685e-08   shipped 4.004068e-08   ratio 1.00015
+    g = 2      seam 1.651488e-06   shipped 1.651437e-06   ratio 1.00003
+    g = 4      seam 7.325551e-07   shipped 7.325671e-07   ratio 0.99998
+
+**Two independent implementations agree on capped SIMPLE to `3e-5` — tighter than
+their agreement on the uncapped arm.** The seam is not a shape error, not a wrong
+slice direction, not a corrupted `FactoredTensor`. That attack fails and the
+measurement stands.
+
+## But the mechanism is NOT AUGMENT, and I mis-attributed it
+
+Matched same-instrument comparison at the same cap, same 24 nets, paired:
+
+    g=2   SIMPLE 1.651488e-06   AUGMENT 1.654088e-06   ratio 1.0016   t = 0.50
+    g=4   SIMPLE 7.325551e-07   AUGMENT 7.416235e-07   ratio 1.0124   t = 2.73
+
+**Capped AUGMENT is statistically indistinguishable from capped SIMPLE at `g=2`,
+and significantly WORSE at `g=4` while carrying four times the columns.** So what
+job `457` measured is the price of **generation truncation**, which this
+repository has had on disk for SIMPLE since 2026-09-05. The correct sentence is
+not "AUGMENT collapses" but **"generation truncation collapses this chain for
+either kind, and AUGMENT's `2.094x` does not survive it."**
+
+That is a stronger statement about the lane and a weaker one about my experiment.
+
+## And I measured the wrong operating point
+
+I asserted a budget-fitting AUGMENT lands "near two carried generations out of
+fifteen". Derived from the cost decomposition in `augment_port_price.json` at the
+measured `3n`/`8n` birth schedule:
+
+    g=None 5.759 B | g=1 0.776 B FITS | g=2 1.468 B | g=3 2.109 B | g=4 2.698 B
+
+**Only `g=1` clears the budget. All three caps I measured score literal zeros on
+FLOPs regardless of their accuracy.** The direction is safe — accuracy is
+monotone in `g`, so `g=1` is worse still — but "the caps bracket the operating
+point" was false, and they sit entirely above it.
+
+Worse, at `g=1` the shipped `_fit_generations` **does not truncate at all**: it
+returns `-1` and the caller drops to the **regenerating** tower, which
+`generation_curve.json` shows beats every truncation arm from `g=1` to `g=8`. So
+the budget-fitting AUGMENT candidate is a *regenerating* one, and nothing in job
+`457` speaks to it.
+
+## Prediction 2 missed because the answer was already on disk
+
+I predicted `AUGMENT(g=2)/AUGMENT(uncapped)` in `[3, 12]`; measured `86.5x`. The
+Skeptic found why, and it is not a measurement failure: **`generation_curve.json`
+already had SIMPLE `g=2` at `41x`**, in the same artifact whose `g=12` and `g=11`
+rows my contract's Evidence block quoted. I read two rows of a table and
+extrapolated past the five rows below them. That is a reading failure in the
+contract, and it is the second time this slice that the repository already
+contained the number I was about to estimate.
+
+# 2026-09-10 — **THE REGENERATING ARM CLOSES ON ARITHMETIC ALONE**, with no new data, no seed block, and no cost assumption.
+
+*Follow-up nominated by the Skeptic. Implemented as `regen_bound()` in
+`local_sim/p2_augment_port_price.py`; both inputs were already on disk, on the
+same 24 nets. Desk arithmetic. `# seed-ledger: no block named`.*
+
+The one operating point that fits the budget is the regenerating tower, and it
+does not need measuring. **The multiplier FLOOR closes it:**
+
+    adjusted  =  raw x max(0.1, C/B)   >=   raw x 0.1
+
+    regenerating SIMPLE, 24 P01 nets      raw 9.0917e-07 at 0.07668 B
+    grant AUGMENT its FULL exact gain     / 2.0941
+    best conceivable regen-AUGMENT raw        4.3416e-07
+    x the 0.1 floor, i.e. assume it is FREE
+    best conceivable ADJUSTED                 4.3416e-08
+
+    nominee A (330327, graded)                2.0310e-08
+    -> 2.14x WORSE than the incumbent, in the MOST generous case
+
+**Cost is not assumed at all.** The bound uses the multiplier floor, so it holds
+even for an estimator that costs nothing. The single assumption is that a
+regenerating AUGMENT cannot beat its own exact-tower gain — and the capped run
+argues that grant is far too generous, since AUGMENT's advantage is already gone
+at `g=2`.
+
+## The outcome, worded to the evidence that supports it
+
+**AUGMENT is DEPRIORITIZED, not formally CLOSED**, and the distinction is not
+pedantry. `experiments/2026-08-26_p2_gt/gt_manifest.json` — which
+`p2_augment_capped.py` reads and asserts `all_pass` on — carries in writing:
+
+> `"tier": "DESIGN -- P01. Nothing measured on this asset may close a lane."`
+
+P01 has now been re-read by D1, A3, A5, D2, the generation curve and this run.
+Every input to the arithmetic above is DESIGN-tier. A formal closure needs a
+fresh block; **spending one at a `2.14x` margin on the most generous possible
+assumption would be a waste, and the operational consequence is identical for the
+remaining five weeks.** Recorded so nobody later mistakes deprioritized for
+disproven.
+
+## Smaller corrections carried
+
+- "`4x` to `6x` over budget" -> the artifact says `5.76 / 5.06 / 4.46 / 3.97 /
+  3.59` across Strassen depths 0–4. **The honest range is `3.6x–5.8x`.**
+- The gate was adjudicated by `mean_arm <= GATE_XMSE`, **not** through
+  `competition_score.decide()`, which `docs/VALIDATION.md` §2b-i calls the only
+  function here that returns a promotion boolean. Immaterial at `58x`; wrong
+  anyway, and the contract had promised `decide()`.
+- `augment_capped.json` carries a prose `"seam"` string and **no md5, no line
+  count, no dtype, no upstream rev, no `use_pK`/`factor` flags** — all of which
+  `d1_augment.json` carries and the contract's *what must not change* clause
+  required. Continuity defect.
+- No operation count and no residual headroom anywhere for AUGMENT.
+  `docs/VALIDATION.md` §2b-ii/§2b-iii require counted FLOPs, flopscope op count
+  and residual headroom **in the same table**. Under `lambda = 0` the FLOP total
+  is not the only binding axis and the claim quoted only it.
+
+# 2026-09-10 — LADDER AT f32: **dtype is DEAD as the explanation for the failed proxy check**, and the metric arm was measured on the kind that cannot ship.
+
+*Job `458` (`2m16s`). Artifact
+`experiments/2026-09-09_slice4/small_width_ladder_f32.json`. Re-run of the
+2026-09-09 ladder with `--dtype float32` to match D1's anchor, plus a
+`use_avg_metric=False` arm. `# seed-ledger: no block named`; proxy shapes only.*
+
+## The negative that had to be run
+
+The Skeptic's leading explanation for the ladder reading `SIMPLE/AUGMENT` at
+`2.75/3.00/2.91` against the live shape's `2.094` was that the ladder built at
+`float64` while D1's anchor is `float32`. **It reproduces the f64 numbers to four
+or five significant figures** — `2.7462 / 2.9967 / 2.9091` in both runs. Labels
+are bit-identical across the two by construction, so the comparison isolates the
+estimator dtype.
+
+**Dtype is not the explanation.** The proxy gap is real and is about shape. The
+contract's own falsifier therefore stands: nothing in the ladder extrapolates to
+`1024 x 16`.
+
+## The new arm, and why its 23% is not yet a lever
+
+    exact-metric / avg    0.778 / 0.764 / 0.766     t = -9.2 / -10.1 / -13.8
+                          0 of 24 nets worse on any rung
+
+`use_avg_metric=False` — the exact `W W^T` instead of `E[W W^T] = 2I` — is
+**~23% more accurate, flat across a 2x range in width**. It is the most stable
+ratio in the table and nobody here had measured it.
+
+**Three reasons it is orienting and not yet quotable**, all from the Skeptic:
+
+1. **It was measured on the arm that cannot ship.** Only `k3_augment_exactmetric`
+   existed. `metric_needed(3, SIMPLE)` is `True`, so the exact metric is live for
+   SIMPLE too — and SIMPLE is the only kind with a budget. **The shippable
+   question was untouched.** Job `474` adds `k3_simple_exactmetric`.
+2. **The instrument just failed its own transfer check** by `~40%` at the one
+   calibrated point. A `23%` effect read off it is a direction, not a size.
+3. **It is not free, and the cost is on the wrong side of a switch.**
+   `metric.ndim == 2` also switches on the `211` case-2 block in `nonlin_kprop`
+   (`factor_k3.py:439-446`), taking births `8n -> 9n` — the very axis that is
+   already `3.6x–5.8x` over budget. And in our shipped chain it breaks the
+   `_proj_coef_d4_r2` scalar reduction of the whole degree-4 object, which is a
+   larger change than the two extra `W metric W^T` matmuls.
+
+Sequencing recorded: **price the SIMPLE arm first**; only if SIMPLE shows a
+comparable gain does the `_proj_coef_d4_r2` question earn a FLOP model.
+
+## A sign error of mine, corrected
+
+I reported `unfactored/factored = 0.948` as "the factored arm is slightly
+better". **It is the opposite**: the numerator is the better arm, so
+`factor=True` **costs** `5.2%` of accuracy at `n=256`, and the cost grows
+monotonically with `n` (`0.998 -> 0.977 -> 0.948`, non-overlapping CIs, 23 of 24
+nets at the top rung). The direction is the one upstream predicts — factored
+AUGMENT keeps 135 of 142 terms. The report now spells out which way each ratio
+reads, because a ratio without its direction is a sign error waiting to happen.

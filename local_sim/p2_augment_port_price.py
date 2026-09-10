@@ -186,6 +186,65 @@ OPS_GATE = 22_000
 #: `RLIMIT_AS`), so it is accounting, never a test passed — `docs/GOTCHAS.md`.
 MEMORY_LIMIT_MB = 8192
 
+# ---------------------------------------------------------------------------
+# THE REGENERATING ARM, and why it closes the lane with no data at all.
+#
+# A Skeptic (2026-09-10) established that the capped-generation run measured the
+# WRONG operating point: only `g = 1` clears the budget, and at that point
+# `estimator_k3_strassen._fit_generations` returns `-1` and the caller drops to
+# the REGENERATING tower instead of truncating. So the budget-fitting AUGMENT
+# candidate is a regenerating one, and neither the capped run nor the price
+# above says anything about it.
+#
+# It does not need measuring. The multiplier FLOOR closes it:
+#
+#     adjusted = raw x max(0.1, C/B)   >=   raw x 0.1
+#
+# and `raw` for a regenerating AUGMENT is at best the regenerating SIMPLE arm's
+# own measured raw divided by AUGMENT's full exact-tower gain. Both numbers are
+# already on disk, on the SAME 24 nets.
+# ---------------------------------------------------------------------------
+
+#: `experiments/2026-09-05_slice1/generation_curve.json`, arm `regen_nosub`,
+#: 24 P01 nets: raw `9.0917e-07` at `0.07668 B`, adjusted `9.0917e-08` — the
+#: adjustment IS the 0.1 floor, which is the whole point.
+REGEN_SIMPLE_RAW = 9.091713096788404e-07
+REGEN_SIMPLE_B = 0.07668394905158493
+#: D1's exact-tower gain, granted to the regenerating arm in full. This is the
+#: GENEROUS direction: the capped run measured AUGMENT's advantage vanishing
+#: under truncation (capped AUGMENT is statistically indistinguishable from
+#: capped SIMPLE at g=2 and significantly WORSE at g=4), so there is no evidence
+#: it survives an approximation at all, let alone intact.
+AUGMENT_EXACT_GAIN = 2.0941
+MULTIPLIER_FLOOR = 0.1
+#: The incumbent to beat: submission 330327, graded.
+NOMINEE_A_ADJUSTED = 2.031e-8
+#: The full-exact chain's own graded-equivalent, the weaker bar.
+FULL_EXACT_ADJUSTED = 4.001540629943712e-08
+
+
+def regen_bound():
+    """The closing inequality for a regenerating AUGMENT, from disk alone."""
+    best_raw = REGEN_SIMPLE_RAW / AUGMENT_EXACT_GAIN
+    best_adjusted = best_raw * MULTIPLIER_FLOOR
+    return {
+        "regen_simple_raw": REGEN_SIMPLE_RAW,
+        "regen_simple_B": REGEN_SIMPLE_B,
+        "augment_gain_granted": AUGMENT_EXACT_GAIN,
+        "best_case_raw": best_raw,
+        "multiplier_floor": MULTIPLIER_FLOOR,
+        "best_case_adjusted": best_adjusted,
+        "nominee_a_adjusted": NOMINEE_A_ADJUSTED,
+        "full_exact_adjusted": FULL_EXACT_ADJUSTED,
+        "beats_nominee_a": best_adjusted < NOMINEE_A_ADJUSTED,
+        "beats_full_exact": best_adjusted < FULL_EXACT_ADJUSTED,
+        "ratio_vs_nominee_a": best_adjusted / NOMINEE_A_ADJUSTED,
+        "assumption": ("the ONLY assumption is that regenerating AUGMENT cannot "
+                       "beat its own exact-tower gain of 2.0941x. Cost is not "
+                       "assumed at all -- the bound uses the 0.1 multiplier "
+                       "FLOOR, so it holds even for a free estimator."),
+    }
+
 
 def _block_layers(birth_first, birth_steady, depth):
     """Column-blocks (units of n) alive, summed over the layers that advance them.
@@ -298,6 +357,7 @@ def project():
         "upstream_fused_away_flops": up_fused_away,
         "upstream_fused_away_share_of_augment": up_fused_away / up_a["total"],
         "intensity_law": {"c": c, "p": p},
+        "regen_bound": regen_bound(),
         "rows": rows,
     }
 
@@ -490,6 +550,40 @@ def cmd_price(a) -> int:
     print("      conservative). **The PORT's op count is NOT metered here** --")
     print("      docs/GOTCHAS.md 2026-09-04 item 3 forbids transferring an")
     print("      operation count between spellings, so no claim is made.")
+
+    rb = regen_bound()
+    print("\n" + "=" * 78)
+    print("  THE REGENERATING ARM -- the operating point that DOES fit, closed")
+    print("  on arithmetic alone, with no new data and no seed block")
+    print("=" * 78)
+    print("  Only g=1 clears the budget, and there `_fit_generations` returns -1")
+    print("  and drops to the REGENERATING tower rather than truncating. So the")
+    print("  budget-fitting AUGMENT candidate is a regenerating one, and neither")
+    print("  the capped run nor the table above says anything about it.")
+    print()
+    print("      regenerating SIMPLE, 24 P01 nets   raw %.4e at %.5f B"
+          % (rb["regen_simple_raw"], rb["regen_simple_B"]))
+    print("      grant AUGMENT its FULL exact-tower gain  /%.4f"
+          % rb["augment_gain_granted"])
+    print("      best conceivable regen-AUGMENT raw       %.4e" % rb["best_case_raw"])
+    print("      x the multiplier FLOOR (%.1f), i.e. assume it is FREE"
+          % rb["multiplier_floor"])
+    print("      best conceivable ADJUSTED                %.4e"
+          % rb["best_case_adjusted"])
+    print()
+    print("      nominee A (330327, graded)               %.4e"
+          % rb["nominee_a_adjusted"])
+    print("      -> %.2fx %s than the incumbent, in the MOST generous case"
+          % (rb["ratio_vs_nominee_a"],
+             "better" if rb["beats_nominee_a"] else "WORSE"))
+    print()
+    print("  The only assumption is that regenerating AUGMENT cannot beat its")
+    print("  own exact-tower gain. Cost is not assumed at all: the bound uses")
+    print("  the 0.1 multiplier floor, so it holds even for a free estimator.")
+    print("  And the grant is generous in a direction the data contradicts --")
+    print("  capped AUGMENT is indistinguishable from capped SIMPLE at g=2 and")
+    print("  significantly WORSE at g=4, so there is no evidence the 2.09x")
+    print("  survives ANY approximation of the tower.")
 
     print("\n  CAVEATS")
     print("    - wall is PROJECTED from the two-point graded intensity law, which")

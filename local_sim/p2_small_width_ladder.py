@@ -111,6 +111,14 @@ ARMS = (
     ("k3_augment_exactmetric",
      dict(k_max=3, factor=True, kind="AUGMENT",
           extra={"use_avg_metric": False})),
+    # THE ARM THAT CAN ACTUALLY SHIP. The first pass measured the exact metric
+    # only on AUGMENT, which a Skeptic pointed out is the one kind with no
+    # budget -- so a 23% lever was read off an arm that cannot be built.
+    # `metric_needed(3, SIMPLE)` is True, so the exact metric is live for SIMPLE
+    # too and this is where the question actually is.
+    ("k3_simple_exactmetric",
+     dict(k_max=3, factor=True, kind="SIMPLE",
+          extra={"use_avg_metric": False})),
     ("k4_factored", dict(k_max=4, factor=True, kind="SIMPLE")),
 )
 
@@ -315,7 +323,9 @@ def report(a) -> int:
         ("k3_augment_unfactored", "k3_augment",
          "unfactored / factored  (<1: factor=True COSTS)"),
         ("k3_augment_exactmetric", "k3_augment",
-         "exact-metric / avg     (<1: use_avg_metric COSTS)"),
+         "exact-metric / avg AUG (<1: use_avg_metric COSTS)"),
+        ("k3_simple_exactmetric", "k3_simple",
+         "exact-metric / avg SIM (<1: use_avg_metric COSTS)  <- the shippable one"),
     )
     for rung in doc["rungs"]:
         rows = rung["rows"]

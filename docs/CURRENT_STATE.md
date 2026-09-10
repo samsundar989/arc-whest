@@ -1,137 +1,130 @@
 # CURRENT_STATE.md — read this first
 
-> ## 2026-09-09 (Slice 4, day 1) — **THE AUGMENT PORT IS OVER THE HARD PER-MLP FLOP BUDGET AT EVERY STRASSEN DEPTH.** It does not score badly; it scores zeros. Slice 4 item 2 must not be built as written.
+> ## 2026-09-10 (Slice 4, day 2) — **THE AUGMENT PORT IS DEPRIORITIZED ON EVERY AXIS.** Over the hard FLOP budget at full tower; its `2.09x` does not survive any approximation of the tower; and the one spelling that fits is beaten by the incumbent on arithmetic alone.
 >
 > `estimator.py` untouched at **v2.6.1**. **Nothing designated.** Nothing promoted.
-> **Skeptic verdict: PROVISIONAL** — the decision stands and stands wider than
-> first claimed, and it corrected two false sentences in the first write-up. This
-> entry is the corrected version; `experiments/LOG.md` carries both, because it is
-> append-only.
+> Three Rule-2 Skeptics ran on this slice. **All three found real defects and two
+> changed a conclusion.** Their corrections are folded in below and in
+> `experiments/LOG.md`; where this file and an older LOG entry differ, this file
+> is the corrected one.
 >
-> ### THE NUMBER, AND WHAT ACTUALLY KILLS IT
+> ### THE THREE-LINE ANSWER
 >
-> **`B` is a hard per-MLP cap, not only a multiplier.** `whestbench/scoring.py:709`
-> wraps `predict` in a `BudgetContext(flop_budget=B)`; `:739` catches
-> `BudgetExhaustedError` and returns **zeros**; `:1035` forces a failed entry's
-> multiplier to `1.0`. Above `1.0 B` there is no "expensive but it still ships"
-> regime.
+> 1. **Cost.** `kind=AUGMENT` births `8n` lineage columns per layer against
+>    SIMPLE's `2n` and adds two rank-`R` contractions SIMPLE has no counterpart
+>    for. That is **`3.6x`–`5.8x` over the HARD per-MLP FLOP budget** at every
+>    Strassen depth. `B` is a cap, not only a multiplier: above `1.0 B` the
+>    grader returns **zeros**.
+> 2. **Accuracy under approximation.** Capped to the generations at which it
+>    would fit, AUGMENT fails its pre-registered gate by `26x`–`58x`. And the
+>    collapse is **not AUGMENT's** — capped AUGMENT is statistically
+>    indistinguishable from capped SIMPLE at `g=2` and significantly *worse* at
+>    `g=4`. **AUGMENT's `2.094x` does not survive truncation of the tower.**
+> 3. **The spelling that actually fits.** Only `g=1` clears the budget, and there
+>    `_fit_generations` drops to the **regenerating** tower. That closes on
+>    arithmetic with no new data: grant regenerating AUGMENT its full `2.094x`
+>    and assume it is **free**, and the multiplier floor still puts it at
+>    `4.34e-08` against nominee A's graded `2.031e-08` — **`2.14x` worse in the
+>    most generous case reachable.**
 >
-> | Strassen depth | ours | AUGMENT port | floor scenario | vs hard cap |
-> |---:|---:|---:|---:|---|
-> | 0 (leaf 1024) | `0.77969 B` | `5.76 B` | `1.79 B` | **OVER** |
-> | 2 (leaf 256) | `0.60420 B` | `4.46 B` | `1.40 B` | **OVER** |
-> | 3 (leaf 128) | `0.53743 B` | `3.97 B` | `1.25 B` | **OVER** |
-> | 4 (leaf 64) | `0.48577 B` | `3.62 B` | `1.13 B` | **OVER** |
+> **DEPRIORITIZED, not formally CLOSED**, and the distinction is deliberate:
+> `experiments/2026-08-26_p2_gt/gt_manifest.json` says in writing *"Nothing
+> measured on this asset may close a lane"*, and every input above is DESIGN-tier
+> P01. A fresh block at a `2.14x` margin on the most generous possible assumption
+> would be waste. **Do not later read deprioritized as disproven.**
 >
-> The **floor scenario** is the most generous case anyone has argued: the confirmed
-> leg-2/3/4 merge applied, the dead `211` case-1 block deleted (births `8n -> 5n`),
-> **and both new rank-R contractions made free**. It is still over the cap at every
-> depth. **The decision does not depend on which column is right.**
+> ### WHAT THIS DOES NOT SAY
 >
-> **Wall is NOT the binding limit** and the first write-up was wrong to say so: at
-> depth 0 the projected worst wall is `70.4 s` against a `120 s` cap, margin
-> `1.70x`. The port fails on FLOPs long before it fails on time.
+> - **Not** that D1's `1.912e-8` is wrong. Both controls in the capped run are
+>   **bit-identical to D1 on 24/24 rows**. Accuracy and cost are one object.
+> - **Not** that `kappa_4`-in-flight is dead. It says *upstream's factored
+>   spelling of it* has no viable operating point. The board reaches that
+>   accuracy at `0.18–0.21 B`, roughly **`22x` cheaper than the only spelling we
+>   have priced.** What representation does that is the open question.
 >
-> ### WHAT WAS MISPRICED, AND IT IS NOT WHAT ANYONE WAS LOOKING AT
+> ### SLICE 4 STATUS AGAINST THE HANDOFF
 >
-> Every AUGMENT cost note in this repository priced the fused `(2,1,1)` route —
-> the `4 GiB` `n³` object. **That work is correct and it stands. It is `7.8%` of
-> the bill.** The unpriced item is the lineage:
+> | item | state |
+> |---|---|
+> | 1. port price | **done** (Skeptic PROVISIONAL, two false sentences corrected) |
+> | 2. port, certify, canary | **dropped.** Deprioritized on all three axes above |
+> | 3. wall profile | **done**, cheap fix falsified, recommend closing at `~6%` |
+> | 4. symmetric-packed spelling | **not started.** Now the whole cost lane |
+> | 5. small-width ladder | **done x3.** Proxy check FAILED; dtype excluded |
+> | 6. corrector | not started |
+> | 7. Rules §6 | **closed as a dead end.** Needs Samuel |
 >
->     kind=SIMPLE    the factored K3 tensor births  2n  columns per layer
->     kind=AUGMENT   the factored K3 tensor births  8n  columns per layer
+> ### ITEM 3 — THE WALL PROFILE, AND A RULE WORTH CARRYING
 >
-> — `5` legs `+ 2` live `211 -> 111` blocks `+ 1` `from_dstensor` block against
-> SIMPLE's `1 + 1` — plus **two rank-`R` contractions with no `SIMPLE` counterpart
-> at all** (`pK_111 -> K_211`, `pK_211 -> K_211`), together half the AUGMENT bill.
-> Measured by reading `factors[0].shape[1]` off upstream's own `factor=True` flow
-> at `(24,6)` and `(32,5)`: `885` block-layers against `240`, ratio `3.6875`.
-> **That leg needs no FLOP model at all**, and it is the load-bearing one.
-> Instrument `local_sim/p2_augment_port_price.py`; artifacts in
-> `experiments/2026-09-09_slice4/`.
->
-> ### WHAT THIS DOES **NOT** SAY
->
-> - **Not** that D1's accuracy is wrong. `1.912e-8` was measured with
->   `factor=True`, `use_pK` and `use_avg_metric` at their defaults — the same
->   configuration priced here, same upstream rev. Accuracy and cost are one object.
-> - **Not** that `kappa_4`-in-flight is dead. It says *upstream's factored spelling
->   of it* is `4–6x` over budget. The board reaches AUGMENT-class accuracy at
->   `0.18–0.21 B`, **`22x` cheaper than the only spelling we have priced.** That
->   points hard at the leaders using a *different representation*, not a
->   better-tuned one.
-> - **Not** that a port is impossible. A real candidate would not time out — it
->   would **shrink itself**, exactly as `_fit_generations` already does, landing
->   near **two carried generations out of fifteen**. That candidate's accuracy is
->   unmeasured and is the only thing that can reopen item 2. It is now
->   pre-registered and queued.
->
-> ### CONTRADICTS THE SEP 9 STRATEGIST RESPONSE, EXPLICITLY
->
-> §2 Q1 said *"port first? Yes, unconditionally… a measured `2x` with zero research
-> risk… if the delta is `+60%` (`0.86 B`), it still ships."* **The delta is
-> `+645%`, and there is no "still ships" regime above `1.0 B`.** §3 item 2's
-> expected graded row (`1.06–1.55e-8`, `#15–22`) is unreachable by this route. The
-> response was right about the thing that mattered: it made the price the **first**
-> deliverable and said report it *before* transcribing.
->
-> ### ITEM 3 (WALL PROFILE) IS DONE, AND ITS CHEAP FIX IS DEAD
->
-> At Strassen `L=3`: the Winograd adds are `37.2%` of backend wall for `1.3%` of
-> FLOPs, the concatenates `30.5%` for `1.6%`, and **the matmul leaves are `26.6%`
-> of wall for `96.8%` of FLOPs.** That is the mechanism behind graded intensity
-> collapsing `215 -> 22.8 GFLOP/s`, and the effect is *larger* on the grader.
+> At Strassen `L=3`: Winograd adds are `37.2%` of backend wall for `1.3%` of
+> FLOPs, concatenates `30.5%` for `1.6%`, and **the matmul leaves are `26.6%` of
+> wall for `96.8%` of FLOPs.** That is the mechanism behind graded intensity
+> collapsing `215 -> 22.8 GFLOP/s`.
 >
 > **The obvious fix is measured dead.** Merging the seven Strassen call sites a
-> layer issues into one wide call cuts operations `3.0x` and `3.7x` and moves wall
-> by `2%` and `-28%`. **The glue is memory-bound: it costs bytes moved, not calls
-> issued.** Carry this forward — *fewer, bigger operations buy RESIDUAL and buy
-> nothing on WALL*; the repository has been treating "batch it" as a general good
-> and it is a residual-only good. What remains of item 3 is Winograd's 15-add form
-> (`~6%` of wall) and a batched/unbatched hybrid that has not been priced.
-> **Recommend closing item 3 at `6%`**; its whole prize was making `L=4` nominee-
-> grade, worth `9.5%` of score.
+> layer issues cuts operations `3.0x` and `3.7x` and moves wall by `2%` and
+> `-28%`. **The glue is memory-bound: it costs bytes moved, not calls issued.**
+> Carry this forward — *fewer, bigger operations buy RESIDUAL and buy nothing on
+> WALL.* What remains is Winograd's 15-add form (`~6%`) and an unpriced
+> batched/unbatched hybrid.
 >
-> ### THE QUESTION THE SLICE NOW TURNS ON
+> ### ITEM 5 — THE LADDER CANNOT BE EXTRAPOLATED, AND ONE LEAD CAME OUT OF IT
 >
-> Six teams sit at raw `1.87–2.13e-8` and `0.18–0.21 B`. Our exact `SIMPLE` tower
-> is `0.537 B` at raw `3.78e-8`. Strassen depth alone cannot get our structure to
-> `0.2 B` — `(7/8)^6` on `0.78 B` is `0.35 B`. **So they are not running a
-> 15-generation exact lineage, and the open question is what they are running
-> instead.** That is the packet question, and it is a different question from
-> "port AUGMENT".
+> The pre-registered validity check **failed**: bootstrap CIs on `SIMPLE/AUGMENT`
+> exclude the live shape's `2.094` at all three rungs (`2.75 / 3.00 / 2.91`). The
+> ladder also **falsifies its own similarity premise from inside** — a method
+> ratio moves with `n` at fixed `L/n` (`0.998 -> 0.977 -> 0.948`, non-overlapping
+> CIs). Re-running at `float32` reproduced the `float64` numbers to 4–5
+> significant figures, so **dtype is dead as the explanation**. Nothing in the
+> ladder transfers to `1024 x 16`.
+>
+> Two readings survive as **orienting only**:
+> - **full K4 is `9.0x`–`10.6x` better than AUGMENT** at all three rungs. The
+>   arm is verified to be the exact `kappa_4` ceiling (factoring drops none of
+>   its 171 terms; `FactoredTensor4`'s rank never truncates) and shares an
+>   identical diagram budget with AUGMENT, so it is a clean *representation*
+>   comparison. **A large ceiling above AUGMENT is a live hypothesis, not a
+>   finding.**
+> - **`use_avg_metric=False` is `~23%` more accurate**, flat across the rungs,
+>   0 of 24 nets worse on any rung. **But it was measured on AUGMENT, the kind
+>   with no budget.** Job `474` adds the shippable `k3_simple_exactmetric` arm.
+>   It is not free: `metric.ndim == 2` switches on a ninth born block and breaks
+>   our `_proj_coef_d4_r2` scalar reduction.
+>
+> **SIGN CORRECTION:** `unfactored/factored = 0.948` means `factor=True` **COSTS**
+> `5.2%` of accuracy and the cost grows with `n`. It was first read the other way.
+>
+> ### WHAT THE SLICE NOW TURNS ON
+>
+> Cost is the whole lane and **item 4 is all of it.** The kill criterion
+> ("if neither item 3 nor item 4 has a `>=1.3x` priced saving by Sep 23, cost is
+> closed at `~0.5 B`") now rests entirely on item 4, because item 3 is closed at
+> `~6%`.
+>
+> The strategist packet's question is no longer "port AUGMENT". It is: six teams
+> reach raw `1.87–2.13e-8` at `0.18–0.21 B` while the only spelling of that
+> accuracy we have priced is `22x` dearer, and Strassen depth alone cannot take
+> our structure to `0.2 B`. **They are not running a 15-generation exact lineage.**
 >
 > ### IN FLIGHT
 >
-> - **Job `450`** — Slice 4 item 5, the small-width ladder at fixed `L/n = 1/64`.
->   Contract pre-registered and committed at `b1addb5` **before** the job ran.
-> - **Capped-generation AUGMENT** — the Skeptic's nominated discriminator,
->   contract pre-registered. Gate: `AUGMENT(g=2) <= 2.86e-8` reopens item 2.
+> - **Job `474`** — ladder v3, adds `k3_simple_exactmetric`.
 >
-> ### RULES v14 §6 — CLOSED AS A DEAD END, NOT DEFERRED AGAIN
+> ### PROCESS DEFECTS THIS SLICE, ALL THE SAME SHAPE
 >
-> The sentence on **how two designated submissions are scored** is in **no capture
-> this repository holds**; a repository-wide search returns only the two
-> `2026-08-28` captures, which carry the two-designation clause and §6's
-> *default-selection* fallback, not its scoring sentence. The live page is
-> login-gated and the capture route is Samuel's browser. **Three handoffs have now
-> asked for it.** Ending it needs Samuel: a logged-in capture of §6, or sending
-> `docs/email-draft-organizers.md`, which already asks exactly this. Until then
-> nominee B is chosen to be right under **both** readings.
->
-> ### TWO STALE SCALARS FOUND THIS SLICE, SAME FAILURE MODE
->
-> - `CURRENT_STATE`'s `215 -> 17 GFLOP/s` at `L=3`: the `17` does not reproduce
->   (`22.82` does). **Struck.**
-> - `estimator_k3_strassen._matmuls`' docstring says "1,022 matmuls". **The
->   function returns `797`**, and `797` reproduces the graded `L=0` anchor to
->   `0.17%` while `1022` is `28%` high. The first version of the price instrument
->   read the docstring instead of the function.
->   **DO NOT FIX IT IN PLACE.** `estimator_k3_strassen.py`'s sha256 is
->   `3ad05d75…`, which is **submission `330327`'s submitted bytes — nominee A**.
->   Editing so much as a comment breaks the property that the file on disk *is*
->   the graded artifact. The correction lives in `docs/GOTCHAS.md` and here; the
->   docstring is fixed only in a successor file, if one is ever built.
+> - **Two stale scalars read from prose instead of from the function.**
+>   `CURRENT_STATE`'s `215 -> 17 GFLOP/s` (the `17` does not reproduce; `22.82`
+>   does) and `_matmuls`' docstring "1,022 matmuls" (**the function returns
+>   `797`**, which reproduces the graded `L=0` anchor to `0.17%`).
+>   **`estimator_k3_strassen.py` MUST NOT be edited to fix it** — its sha256
+>   `3ad05d75…` is submission `330327`'s bytes, nominee A.
+> - **Two dtype defaults wrong in one session.** The capped run and the ladder
+>   both defaulted to `float64` against `float32` anchors. The capped one reached
+>   `8%` in `2h33m` against a `60m` estimate and starved the queue.
+> - **Two numbers estimated that the repository already contained.** Prediction 2
+>   quoted two rows of `generation_curve.json` and extrapolated past the five rows
+>   below them, which held the answer exactly.
+> - **My wall-time estimates were wrong twice**, by `28x` and by `4x`.
 
 
 > ## 2026-09-09 — SLICE 3 STATUS: **Step 1 is done, the cost half is done, and the AUGMENT port is the next slice with its feasibility PROVEN.**

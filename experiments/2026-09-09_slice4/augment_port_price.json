@@ -17,6 +17,20 @@
   "c": 0.12154856989410756,
   "p": 1.0789460088963172
  },
+ "regen_bound": {
+  "regen_simple_raw": 9.091713096788404e-07,
+  "regen_simple_B": 0.07668394905158493,
+  "augment_gain_granted": 2.0941,
+  "best_case_raw": 4.341584975306052e-07,
+  "multiplier_floor": 0.1,
+  "best_case_adjusted": 4.341584975306052e-08,
+  "nominee_a_adjusted": 2.031e-08,
+  "full_exact_adjusted": 4.001540629943712e-08,
+  "beats_nominee_a": false,
+  "beats_full_exact": false,
+  "ratio_vs_nominee_a": 2.1376587766154858,
+  "assumption": "the ONLY assumption is that regenerating AUGMENT cannot beat its own exact-tower gain of 2.0941x. Cost is not assumed at all -- the bound uses the 0.1 multiplier FLOOR, so it holds even for a free estimator."
+ },
  "rows": [
   {
    "strassen_depth": 0,
