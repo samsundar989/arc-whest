@@ -40937,3 +40937,92 @@ so it cannot regress silently: 23/23 → **25/25**. Fixed at `8f7047e`.
 one of the twenty-one *negative* mutations passed. A battery of refusals cannot
 detect a change that refuses too much, and this one refused a candidate it
 should have merely failed to certify.
+
+## 2026-09-10 — Independent worker review at bcca354; pickup revised
+
+**ROUTINE review/documentation; no instrument or estimator changes, research-label
+reads, seed claims, vault evaluations, promotion, submission or designation.**
+Samuel requested validation of the stopped worker, architecture reassessment and
+an updated execution handoff. This entry supersedes the fit-first pickup above,
+not its historical evidence or gate outcomes.
+
+Two fresh-context Skeptics independently returned **REJECT**:
+
+- Instrument: actual report headings fall into MATH; installed WhestBench version
+  is omitted; the legacy early return hides explicit failures; repeated-memory
+  measurement retains instrument-owned networks; noise and read counting are not
+  integrated across production consumers. Ordinary-alpha, identity pairing,
+  atomic claims and bounded lifecycle improvements survive.
+- Math/protocol: scalar-to-matrix-core projection is not derived; consumer/feed
+  families and registered mechanism arms are missing; one emitted arm cannot
+  parse; report writing raises two distinct exceptions; P01 is already exposed;
+  the cost screen prices a different algorithm. Shared-basis/reassociation/core
+  diagonal identities remain valid in their stated scope. The smoke did not test
+  coherent K4 as registered and cannot kill it.
+
+**Raw review evidence:**
+
+- `experiments/2026-09-10_worker_review/reproduce_review_findings.py` — tiny
+  synthetic reproducer, no research networks/truth loaded.
+- `experiments/2026-09-10_worker_review/reproduction.json` — captured actual stack,
+  legacy-failure suppression, section domains, arm parse failure and writer
+  AttributeError/NameError at reviewed HEAD.
+- `experiments/2026-09-10_worker_review/instrument_skeptic.md` and
+  `math_protocol_skeptic.md` — independent findings and documentation follow-up.
+- `docs/WORKER_REVIEW_2026-09-10.md` — source locations, supported scope,
+  discriminating fixtures, architecture and implementation implications.
+
+**Validation scope:** instrument Skeptic reran memory binding 25/25, truth reads
+27/27, scorer 129/129, certifier units 26/26, vault **sacrificial subset 30/30**.
+Stored Stage-1 28/28 and three-seed tiny-control parity were inspected, not new
+live-shape proof. All these successes coexist with reproduced untested failures.
+No fresh v3 Linux memory proof was demonstrated. Historical seven-report verdict
+reaggregation is not a replay through the repaired consumer.
+
+**In flight:** default preflight queued as workerq **574**, 8 GiB RAM, 0 VRAM,
+2 CPU/no GPU, remained queued at 20:18 UTC. It is not Full and has no source
+snapshot. Record actual executing bytes or replace this owned queued job with a
+frozen-source run; do not duplicate or bypass the queue. Target transcript:
+`experiments/2026-09-10_worker_review/preflight.log`. The prior worker's full
+mutation process was observed still present; no completion artifact was captured.
+Neither check is reported green here. Earlier job 539 does not certify these
+later changes.
+
+**Knowledge delta:** the memory fix's principle is right, but explicit applicable
+negative evidence must survive legacy degradation. Production integration, not
+additional helper-only mutations, is the next discriminator. P01's three DESIGN
+reads and manually supplied timestamps require honest exposure/chronology
+accounting, not a reset or backdating. The compact cost/deployability conclusion
+is withdrawn: its eigencore algorithm differs from the executable SVD and from
+the cited weighted-Gram/thin-QR method. No scientific lane is closed by these
+implementation defects.
+
+**Architecture:** retain a mean/covariance backbone, persistent K3, coherent K4,
+all-age common coordinates with accurate recent sources, explicit residuals and
+final mean-only readout. Prove the tiny dense core and four-arm switches before
+fitting, then price the actual executable complete program. Only after a validated
+compact baseline should a bounded quadratic-product sketch or output-sensitive
+basis experiment follow. Neither a winning method nor the leaders' method is
+established. Chrome board/discussion recheck and targeted primary-source research
+found no new verified leader algorithm.
+
+**Scope remains Samuel's:** eligibility work is held off entirely; Stage 3 stays
+closed, no new organizer question drafted/sent, historical drafts inactive.
+Participant-derived reconstruction remains attributed research. L2 #330566 SHA
+`390bc226bbf517df0110facfc0dc91c78ef670e8a49368a536cabf630057d1db` is untouched.
+
+**Next:** follow revised `docs/GAME_PLAN.md` and
+`docs/CODEX_EXECUTION_HANDOFF.md`: production-path repair → tiny independent core
+conformance → executable compact cost/lifecycle evidence → preflight/Skeptic →
+transparent amended contract and valid design/decision sequence. Required human
+predictions remain required before new strategic results; independent engineering
+can continue meanwhile. CURRENT_STATE is replaced coherently; previous state/plan
+are archived verbatim under `docs/archive/*before_worker_review_2026-09-10.md`.
+
+**Documentation follow-up:** both independent Skeptics ACCEPT the revised
+documentation within their respective scopes; implementation verdicts remain
+REJECT. Their one wording correction (source was read, protected labels were not)
+is applied. Active-document relative links and `git diff --check` pass. The L2
+file was rehashed and matches the SHA above. By 20:30 UTC the old mutation process
+was no longer present, but its result/exit status was unavailable; this is not a
+passing result. Preflight 574 remained queued at the 20:29 check.

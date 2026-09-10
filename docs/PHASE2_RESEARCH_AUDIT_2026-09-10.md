@@ -1,5 +1,7 @@
 # Phase 2: competition, architecture and validation audit
 
+> **Subsequent worker review:** this is the earlier research synthesis. [WORKER_REVIEW_2026-09-10](WORKER_REVIEW_2026-09-10.md) and [CURRENT_STATE](CURRENT_STATE.md) supersede its execution status. Samuel subsequently instructed us to hold eligibility work off entirely; the organizer-question task below is inactive. The earlier documentation ACCEPT does not apply to the worker's later instrument/math changes, which received two REJECT verdicts.
+
 **September 10, 2026. Research and implementation planning; no new estimator experiment, promotion, submission, designation, seed claim or vault evaluation.**
 
 Independent fresh-context Skeptic: **ACCEPT for this documentation package**, after correcting historical line references and adding an explicit derivative-eligibility checkpoint. Acceptance does not establish a winning method, candidate certification or submission eligibility. [Review record](../experiments/2026-09-10_validation_audit/skeptic_verdict.md).

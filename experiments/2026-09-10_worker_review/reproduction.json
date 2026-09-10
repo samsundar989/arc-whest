@@ -1,0 +1,16 @@
+{
+  "source_head_under_review": "bcca354",
+  "uses_research_labels": false,
+  "legacy_explicit_failure": {"failed_checks": [], "degraded": true},
+  "actual_section_domains": {"5-8": "MATH", "5b": "MATH", "11": "MATH"},
+  "actual_stack": {"flopscope": "0.12.1+np2.2.6"},
+  "generated_arm_parse": {
+    "k3_exact": "PARSES",
+    "k3_k4coh": "PARSES",
+    "k3_k4nobirth": {"error": "'(' was never closed", "line": 797}
+  },
+  "writer": {
+    "actual_dict": "AttributeError: 'dict' object has no attribute 'files'",
+    "legacy_archive_like": "NameError: name 'a' is not defined"
+  }
+}
