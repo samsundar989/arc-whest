@@ -1,5 +1,7 @@
 # Phase 2 strategy — 2026-09-05: what the leaders are doing, why we are 22× behind, and the plan to pass them
 
+> **Historical strategy, superseded for current work on 2026-09-10.** Read [CURRENT_STATE](CURRENT_STATE.md) and [GAME_PLAN](GAME_PLAN.md). The [new audit](PHASE2_RESEARCH_AUDIT_2026-09-10.md) corrects leaderboard, rules and mechanism-scope claims. Original contracts/results remain historical evidence; the task ordering and broad closure claims below are not current instructions.
+
 *Prepared for Samuel from a full session: four repo-audit agents, two literature agents, a live crawl of the AICrowd board/telemetry/forum in Chrome, and the Phase-1 write-ups of the current #1 (marius_binner) and #3 (Puffi). Every number below is sourced; inferences are labelled INFERENCE. This supersedes `phase2-strategy-2026-09-01.md` and the 09-10 strategist response where they differ.*
 
 ---

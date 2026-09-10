@@ -1,5 +1,7 @@
 # Strategist Packet — 2026-09-11: Slice 5 is complete. Both kill criteria met, the score lane is done, and two of your three instructions were wrong in ways worth knowing
 
+> **Superseded as an active handoff by the 2026-09-10 audit.** The date in this historical filename is retained. Whole score-lane closure is unsupported, P08 was read three times, and rules v14 §7 resolves the best-of-two ranking question. Use [CURRENT_STATE](CURRENT_STATE.md), [GAME_PLAN](GAME_PLAN.md) and [the sourced audit](PHASE2_RESEARCH_AUDIT_2026-09-10.md). Do not send this packet as the current project state.
+
 *Answers `docs/STRATEGIST_RESPONSE_2026-09-10.md`. Self-contained: assumes no
 repository access and no shared chat history. Every number traces to an artifact
 path given inline. Two independent Skeptics ran; both returned PROVISIONAL; both

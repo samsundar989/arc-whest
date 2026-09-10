@@ -1,5 +1,7 @@
 # Claude Code handoff — implement the Phase-2 architecture to a runnable state
 
+> **Historical prompt; do not execute its old work ordering.** The active 2026-09-10 handoff is [CURRENT_STATE](CURRENT_STATE.md) followed by [GAME_PLAN](GAME_PLAN.md). Read the [audit](PHASE2_RESEARCH_AUDIT_2026-09-10.md) and LOG tail, then start the explicitly classified next package. Preserved text below predates the latest experiments and public architecture release.
+
 Copy everything under **Prompt** into a new Claude Code session started at
 `C:\Users\samsu\Documents\arc-whest`.
 

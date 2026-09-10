@@ -1,5 +1,7 @@
 # BENCHMARK.md — where we actually stand
 
+> **Latest public snapshot: 2026-09-10.** See [the source ledger](research/2026-09-10_competition_sources.md) and [current analysis](PHASE2_RESEARCH_AUDIT_2026-09-10.md). Our best public score is 1.836e-8, rank 44; the inspected leading result is 2.683e-9. Historical figures below remain dated evidence, not current board standings. This file remains PRIVATE.
+
 > **Phase-2 status — rechecked 2026-08-31 14:57 UTC.** The body below is the
 > private Phase-1 benchmark record and must not be used as the live target. The
 > live board has 83 teams: J2W leads at displayed `5.60e-9` adjusted / `2.25e-8` raw;
