@@ -38749,3 +38749,135 @@ The reduced-width run is used **only** to enumerate which matmuls exist and what
 their operands are — every FLOP figure is priced at the live `1024 x 16` from the
 shape law, and any claim that a *ratio* transfers across width would be exactly
 the ladder error this slice already made.
+
+# 2026-09-10 — **THE SYMMETRIC-PACKED LANE IS CLOSED AT `1.0067x`.** Zero of the 797 matmuls can be discounted — and the meter's real discount is not the one anybody was looking for.
+
+*Contract: `experiments/LOG.md` 2026-09-10 CONTRACT (Rule 1): the SYMMETRIC-PACKED
+spelling, committed at `2602253` before this instrument existed. Instrument
+`local_sim/p2_packed_feasibility.py`, artifact
+`experiments/2026-09-10_slice5/packed_feasibility.json`. Real flopscope
+`0.12.1+np2.2.6`. `# seed-ledger: no block named` — no truth read, nothing
+promoted. Ran on CPU in seconds; no queue slot used.*
+
+## The result
+
+    dense counted FLOPs at 1024 x 16     1,711,090,434,048
+    best symmetry-aware bill             1,699,721,057,311
+    SAVING                               1.0067 x
+    GATE (pre-registered)                1.5 x        ->  CLOSE THE LANE
+
+All four pre-registered predictions **CONFIRMED**, including the point estimate:
+I predicted `1.007x` and the instrument reads `1.0067x`.
+
+## What the meter actually discounts, measured rather than read
+
+Twelve spellings of the same arithmetic, billed by the installed package:
+
+| spelling | x dense | ops |
+|---|---:|---:|
+| `A @ B` | `1.0039` | 3 |
+| `as_symmetric(S) @ B` | `1.0176` | 4 |
+| `A @ as_symmetric(S)` | `1.0176` | 4 |
+| `as_symmetric(S1) @ as_symmetric(S2)` | `1.0313` | 5 |
+| `A @ A.T` (symmetric result, written with `@`) | `1.0039` | 3 |
+| **`fnp.einsum("ij,kj->ik", x, x)` — the SAME OBJECT twice** | **`0.5039`** | **2** |
+| `X @ Y.T` (the lineage shape, distinct blocks) | `1.0039` | 3 |
+| **`einsum("ij,kj->ik", x, x)` at the lineage shape** | **`0.5039`** | **2** |
+| `einsum("ij,kj->ik", x, x[:, :])` — a VIEW, not the object | `1.0020` | 2 |
+| `einsum("ij,kj->ik", x*y, x)` — exactly `_dslice21` | `1.0059` | 4 |
+| `(W.T @ C) @ W` (the covariance step, two matmuls) | `2.0039` | 4 |
+| Cholesky route: `Z = W^T L`; `Z Z^T` aliased | `1.6729` | 5 |
+
+**Three facts here were not in the repository and one of them is a trap.**
+
+1. **A symmetric OPERAND buys nothing. It costs `1.8%`.** The premise the lane was
+   opened on — "find the matmuls with a symmetric operand" — is the wrong
+   question on this meter. Cost is set by the output's unique elements and the
+   contracted length; redundancy in an *input* is not billed either way, and
+   `as_symmetric` adds a validation pass on top.
+2. **The discount that exists is `2.00x`, and it needs OBJECT IDENTITY.**
+   `fnp.einsum("ij,kj->ik", x, x)` with one array passed twice bills `0.5039x`.
+   The same product written `x @ x.T` bills full price. **A view does not
+   count** (`x[:, :]` reads `1.0020x`), so the spelling cannot be faked — the two
+   operands must be the same Python object.
+3. **Sharing a factor is not aliasing.** `einsum("ij,kj->ik", x*y, x)` — the exact
+   shape of every `_dslice21` product — bills `1.0059x`. The elementwise product
+   is a new buffer, and the meter is right to charge for it.
+
+## The chain's inventory: complete, and from the instrument, not from reading
+
+`_mm` was wrapped and the shipped chain run at `128 x 16` (enumeration only — every
+FLOP above is priced at `1024 x 16` from the shape law). **The enumeration
+reconciles with the frozen cost model exactly:**
+
+    `_mm` CALLS issued                 132
+    matmul-equivalents from shapes     798.4275
+    blocking term  sum(K-1)/(2w-1)       1.4275
+    `_matmuls(16, None)` says          797     residual +0.0000   MATCH
+
+The blocking term is exact arithmetic, not a tolerance: a blocked
+`(n, Kn) @ (Kn, n)` bills `n^2 (2Kn - 1)` where `K` separate matmuls bill
+`K n^2 (2n - 1)`, so the blocked form is dearer by exactly `n^2 (K - 1)` — one
+`-1` per matmul folded into one `-1` per call. It is `1.43` at the probe width and
+`0.178` at the live one. **The first version of this module counted CALLS against
+`_matmuls` and refused itself**, which is the refusal gate working: 132 calls are
+797 matmuls and comparing them is comparing two different things.
+
+Every call, by site:
+
+| site | calls | sym operand | sym result | aliased |
+|---|---:|---|---|---|
+| `:610 _advance`  W^T A_D | 15 | — | — | 0 |
+| `:611 _advance`  W^T A_L | 15 | **1** (layer 1's born block) | — | 0 |
+| `:612 _advance`  W^T M | 14 | — | — | 0 |
+| `:657 _dslice21` (A_D.M) M^T | 14 | — | — | 0 |
+| `:658 _dslice21` (M.M) A_D^T | 14 | — | — | 0 |
+| `:667 _dslice21` (A_L.M) C_L^T | 14 | — | — | 0 |
+| `:668 _dslice21` (A_L.C_L) M^T | 14 | — | — | 0 |
+| `:805 _layer` W^T C | 16 | **16** (`C` is the covariance) | — | 0 |
+| `:805 _layer` (W^T C) W | 16 | — | **16** | 0 |
+
+**Zero of 132 calls — zero of 797 matmul-equivalents — has aliased operands.**
+Sixteen have a symmetric result, and they are all the same product: the covariance
+congruence `W^T C W`. Seventeen have a symmetric operand, sixteen of which are the
+other half of that same congruence and one of which is a single layer-1 born
+block; and a symmetric operand is worth nothing anyway.
+
+## Why, mechanically — and why no amount of effort changes it
+
+The lineage's four dominant products contract **different factor blocks**:
+`A_D`, `A_L`, `M` and `C_L` are four distinct `(n, kn)` buffers, and a discount
+needs a redundancy the meter can see. Two different blocks share none. The
+identity-leg saving W-EFF already banked (`W^T I = W^T`, at zero FLOPs) **is**
+the factored form's version of symmetry, and it has already been taken. The
+`alpha ~ 1/6` packing bound applies to the unfactored order-3 tensor this chain
+never materialises.
+
+The one reachable saving is the covariance congruence, via Cholesky:
+`C = L L^T`, `Z = W^T L`, `C_out = Z Z^T` with `Z` passed twice. Measured
+`1.6729x` against the dense `2.0039x` — a `1.20x` saving on `32` of `797`
+matmuls, which is the `1.0067x` above. It also costs a fifth operation, needs `C`
+positive definite, and puts a Cholesky in the inner loop of a chain whose whole
+value is exactness. **Not taken.**
+
+## What this closes, and what it hands to the write-up
+
+**Cost is closed at `~0.5 B`** (depth 3) / `0.60 B` (depth 2, the nominee under the
+wall-margin rule). Item 4 was the whole remaining cost lane after item 3 closed at
+`~6%`, so the Slice-4 kill criterion — "if neither item 3 nor item 4 has a `>=1.3x`
+priced saving by Sep 23, cost is closed at `~0.5 B`" — **is now met, thirteen days
+early, and it fails.**
+
+The consequence is a finding, not a gap: **we can reproduce the leaders' accuracy
+and not their cost, and both public routes to their cost are now excluded** — the
+wall lever (memory-bound glue, `~6%`), the exact-metric lever (`1.07x`), Strassen
+depth (bounded by the wall), and now representation-level packing (`1.007x`). The
+leaders' `0.18-0.21 B` is `~3x` below anything this representation can be spelled
+at. **Whatever they are running, it is not this chain spelled better.** That
+sentence belongs in write-up section (v).
+
+**For `docs/GOTCHAS.md`:** flopscope's only matmul discount is object-identity
+aliasing in `einsum`, worth exactly `2x`. Tagging an operand symmetric is a
+`1.8%` *penalty*. If a future candidate ever produces a genuine `X X^T`, spell it
+`fnp.einsum("ij,kj->ik", x, x)` and pass the same object — `x @ x.T` throws the
+discount away silently.
