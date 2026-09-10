@@ -40915,3 +40915,25 @@ permitted touches, ever.
 
 **Owed on this slice:** `scripts/preflight.ps1` (queued, not launched) and the
 Rule 2 Skeptic, along with Stage 0's other six repairs and Stage 1.
+
+### Correction to R2, found by the positive control
+
+The full `certify_candidate` mutation battery went red on three checks of its
+**positive control** — *"the correct minimal candidate is not REFUSED"* and two
+consequences of it. R2's `validate_memory_report` emitted a **failing** check
+when a memory report predates `artifact_version 3`, which made the certifier
+return **REFUSED** for a correct candidate whose only sin was an old report.
+
+A pre-version-3 report cannot **answer** the workload questions. That is an
+absence of evidence, not evidence of a violation. It now returns the degraded
+reason and no failing check, the caller raises a skip, and the verdict lands on
+**INCOMPLETE** — the true state. All seven stored reports are INCOMPLETE rather
+than REFUSED.
+
+`test_linux_memory_binding` gains two checks asserting the distinction directly,
+so it cannot regress silently: 23/23 → **25/25**. Fixed at `8f7047e`.
+
+**The positive control earned its place here**, and it is worth saying why: every
+one of the twenty-one *negative* mutations passed. A battery of refusals cannot
+detect a change that refuses too much, and this one refused a candidate it
+should have merely failed to certify.
