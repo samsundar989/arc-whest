@@ -117,8 +117,16 @@
 > as a check that chooses nothing.
 >
 > **This changes what a negative T2 would mean and is flagged for the next packet.**
-> The cost is label precision: our labels cap any reported `R^2` near `0.40`. It
-> does not bias the fit, and the gate is read with the unbiased cross estimator.
+>
+> **The label-precision cost I claimed was wrong, and the correction is in our
+> favour.** P07's labels are minted and measured: noise `4.4988e-09` per replica,
+> `2.2494e-09` in a two-replica mean, against a chain MSE of `4.0047e-08`. **The
+> `R^2` ceiling is `0.944`, not the `~0.40` my own contract predicted.** I had
+> assumed a post-ReLU activation variance of order 1; the measured value is
+> `0.0755`, a factor of `13` in variance. `2^24` per half was therefore
+> over-provisioned by about three GPU-hours. The replica-independence check passes
+> at ratio `1.0076`, so the cross estimator is unbiased and **the gate does not
+> move** — the ceiling governs only how an `R^2` is read.
 >
 > ### IN FLIGHT
 >
