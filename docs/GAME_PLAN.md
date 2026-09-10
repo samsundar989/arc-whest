@@ -5,9 +5,10 @@
 **Execution status.** Stages 0 and 1 are implemented and independently accepted;
 their exact evidence and limitations are recorded in CURRENT_STATE and the LOG.
 Stage 2 is the active frontier, but its old contract is superseded because P01 was
-already exposed and its promised chronology cannot be reconstructed. No new labels
-may be read until replacement Samuel predictions are recorded and committed. The
-four-arm coherent-K4 mechanism comparison remains first; the compact reference is
+already exposed and its promised chronology cannot be reconstructed. Samuel's
+replacement predictions are recorded as three verbatim `I don't know` answers;
+the exact bounded P07 registry is committed and its pre-mint guard has independent
+Skeptic acceptance. The four-arm coherent-K4 mechanism comparison remains first; the compact reference is
 the priced baseline for later residual/shared-coordinate questions. Stage 4 remains
 conditional on a measured Stage-2 bottleneck.
 
@@ -65,10 +66,12 @@ Start with tiny metered operation-family checks; then queue label-free 1024 x 16
 
 ## Stage 2 — valid design, then fresh decisions
 
-**Current stop condition:** the replacement experiment contract is prepared in
-the LOG, but its human-prediction fields are deliberately blank. Record Samuel's
-new answers and commit them before fitting or opening P07/P01. Do not reuse the
-predictions attached to the rejected placeholder implementation.
+**Current entry condition satisfied:** the replacement experiment contract, three
+verbatim `I don't know` human predictions and bounded coefficient/identity registry
+are committed in the LOG. The label-free producer guard has fresh-context Skeptic
+acceptance. Complete the queued current-source preflight and full producer receipt
+verification before fitting or opening P07/P01. Do not reuse the predictions
+attached to the rejected placeholder implementation.
 
 The current 08f787b contract has **not been tested as specified**. It promised a freeze before P01, but P01 has three recorded DESIGN reads and informed the proposed range. Manual timestamps cannot establish preregistration chronology. Preserve exposure; reconcile independent job records if available; otherwise mark chronology unresolved. Do not recycle the old contract/predictions as evidence for a changed intervention.
 
