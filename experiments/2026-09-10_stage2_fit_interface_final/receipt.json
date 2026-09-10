@@ -1,0 +1,160 @@
+{
+  "bounds": {
+    "lam": {
+      "max": 0.5,
+      "min": 0.0
+    }
+  },
+  "candidate_registry": [
+    {
+      "lam": 0.0
+    },
+    {
+      "lam": 0.25
+    },
+    {
+      "lam": 0.5
+    }
+  ],
+  "counted_costs": [
+    [
+      202,
+      202
+    ],
+    [
+      202,
+      202
+    ],
+    [
+      202,
+      202
+    ]
+  ],
+  "data_role": "synthetic",
+  "generator_binding": {
+    "arms": [
+      "exact",
+      "coherent",
+      "consumers_only",
+      "births_only"
+    ],
+    "lam": "generated arm module constant _K4_LAM"
+  },
+  "identities": [
+    "synthetic-0",
+    "synthetic-1"
+  ],
+  "immutable": true,
+  "inputs": {
+    "bounds": {
+      "path": "experiments/2026-09-10_stage2_fit_interface_final/bounds.json",
+      "sha256": "aea91e32964aa17d59f93f63451a3c46582eb713fddc4503b5d211a67b382098"
+    },
+    "candidates": {
+      "path": "experiments/2026-09-10_stage2_fit_interface_final/candidates.json",
+      "sha256": "9f978a73a7810bef857eb15619d3a3c920ab10bba7c2fffbd7cb30e454f34ece"
+    },
+    "predictions": {
+      "path": "experiments/2026-09-10_stage2_fit_interface_final/predictions.npz",
+      "sha256": "ae901745a3bdc7679500f929640bccc44a28b6fdf8478a393d360a34441cc586"
+    },
+    "truth": {
+      "path": "experiments/2026-09-10_stage2_fit_interface_final/truth.npz",
+      "sha256": "1caf5ac7fa351c1a5b744f1b48046e50a1aa9e61e68c42ecbc4770dc063304f1"
+    }
+  },
+  "objective": {
+    "definition": "mean identity final-layer neuron MSE",
+    "direction": "minimize",
+    "name": "final_layer_mse",
+    "validity": "registered coefficient candidates have identical counted cost for every identity"
+  },
+  "parameter_names": [
+    "lam"
+  ],
+  "producer_asserted_candidate_source_hashes": [
+    "502a2c39b78322e05695e14a9a372a6ceb18d6f30076caae8e68409e19e77782",
+    "fed53ee6b0ddd474f9f2d93dfdb7c00321eb6538ec02a4572f6b986724403584",
+    "5b9f45cfe85bb8dccbe042aadc887f928cba25e9241dcc0442c85e8f8d0c49e9"
+  ],
+  "reservation_receipt": null,
+  "results": [
+    {
+      "candidate": {
+        "lam": 0.0
+      },
+      "objective": 0.08999999999999996,
+      "per_identity": [
+        0.09000000000000001,
+        0.0899999999999999
+      ]
+    },
+    {
+      "candidate": {
+        "lam": 0.25
+      },
+      "objective": 0.0,
+      "per_identity": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "candidate": {
+        "lam": 0.5
+      },
+      "objective": 0.010000000000000009,
+      "per_identity": [
+        0.01,
+        0.010000000000000018
+      ]
+    }
+  ],
+  "schema": "arc-whest.coherent-k4-fit-receipt.v1",
+  "selection": {
+    "frozen_values": {
+      "lam": 0.25
+    },
+    "objective": 0.0,
+    "registered_index": 1,
+    "tie_break": "first in explicitly registered order"
+  },
+  "source_hashes": {
+    "arm_births_only": {
+      "path": "local_sim/p2_arms/arm_births_only.py",
+      "sha256": "b50b916ff8abb4f65c02822e50ad4b6fd94e7c85943e1fd6026477a77a157356"
+    },
+    "arm_coherent": {
+      "path": "local_sim/p2_arms/arm_coherent.py",
+      "sha256": "7f6c0de98dfd2d4cc1bd2b22a8b3103afa4bfaf4463da3f26045d0d3fa043d91"
+    },
+    "arm_consumers_only": {
+      "path": "local_sim/p2_arms/arm_consumers_only.py",
+      "sha256": "b84e998bada65d47ae0dc98935db105da7ceeac0cfca185b3588d7496866cd2b"
+    },
+    "arm_exact": {
+      "path": "local_sim/p2_arms/arm_exact.py",
+      "sha256": "c21ba516fab42d11df7d4167de9fc4689f62dc9456e45ae8458976a7dae8ac13"
+    },
+    "arm_generator": {
+      "path": "local_sim/p2_build_k4_arms.py",
+      "sha256": "3d84b385c040bc0986ca79aa58dd185ee02f62514a9ad42395bf3793af2a7621"
+    },
+    "fit_interface": {
+      "path": "local_sim/p2_k4_fit.py",
+      "sha256": "d75231ff3896ae566860a07316b3d7e77f811dd6beb1d694c8fe7a288d001d13"
+    }
+  },
+  "truth_manifest": {
+    "fixture": "affine-offset-v1",
+    "identity_count": 2,
+    "kind": "synthetic",
+    "labels_protected": false
+  },
+  "validation": {
+    "all_finite": true,
+    "candidate_count": 3,
+    "completed_before_truth_load": true,
+    "identity_count": 2
+  }
+}

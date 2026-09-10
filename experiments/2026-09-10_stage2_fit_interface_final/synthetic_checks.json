@@ -1,0 +1,64 @@
+{
+  "checks": [
+    {
+      "check": "synthetic optimum is frozen",
+      "detail": "{'registered_index': 1, 'frozen_values': {'lam': 0.25}, 'objective': 0.0, 'tie_break': 'first in explicitly registered order'}",
+      "pass": true
+    },
+    {
+      "check": "receipt carries required provenance",
+      "detail": "bounds,candidate_registry,counted_costs,identities,objective,selection,source_hashes,truth_manifest",
+      "pass": true
+    },
+    {
+      "check": "synthetic manifest is explicit",
+      "detail": "synthetic only",
+      "pass": true
+    },
+    {
+      "check": "counted costs preserve identities",
+      "detail": "[[202, 202], [202, 202], [202, 202]]",
+      "pass": true
+    },
+    {
+      "check": "existing receipt is immutable",
+      "detail": "exclusive create; bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "invalid request precedes truth loader",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "MSE objective refuses unequal costs",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "protected fitting requires exact P07",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "synthetic role rejects protected schema",
+      "detail": "truth_reads cannot be bypassed",
+      "pass": true
+    },
+    {
+      "check": "identity mismatch writes no receipt",
+      "detail": "post-load alignment refusal",
+      "pass": true
+    },
+    {
+      "check": "documented synthetic CLI executes",
+      "detail": "exit=0 receipt_created=True",
+      "pass": true
+    }
+  ],
+  "kind": "synthetic coherent-K4 fitting-interface conformance",
+  "labels_read": false,
+  "n_checks": 11,
+  "n_failed": 0,
+  "pass": true
+}
