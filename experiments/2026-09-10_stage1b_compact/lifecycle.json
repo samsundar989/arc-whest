@@ -1,0 +1,22 @@
+{
+  "kind": "label-free end-to-end compact lifecycle",
+  "source_sha256": "b8f57cf0a184176021749ceb7d99d28a8bfbf09470678c6b10ae9e44c6df89e5",
+  "shape": [
+    12,
+    7
+  ],
+  "checks": {
+    "deterministic_output": true,
+    "deterministic_flops": true,
+    "deterministic_calls": true,
+    "family_context_parity": true,
+    "finite_shape": true,
+    "all_history_retained": true,
+    "initial_empty": true,
+    "final_mean_only": true
+  },
+  "pass": true,
+  "output_sha256": "3f1cc5b3183a260b7bd3d2959df2c85715c92c4aa159f435315aef20bde311be",
+  "flops": 740040,
+  "operations": 2469
+}
