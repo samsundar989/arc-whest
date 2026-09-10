@@ -39340,3 +39340,106 @@ quoted beside every number. The chain is `kind=SIMPLE`, `factor=True`,
 public split is read **once**, at the end, read-only, and chooses nothing. No
 feature is selected on P08 and no hyper-parameter is touched after the first P08
 number is seen.
+
+# 2026-09-10 â€” **The depth-2 mini-100 FAILED my own pre-registered gate (h), and the gate is the thing that is wrong.** The nine "errors" are a property of the run: 0 of 9 reproduce.
+
+*Contract: `experiments/LOG.md` 2026-09-10 *CONTRACT (Rule 1): nominee A moves to
+Strassen depth 2*, committed at `0a82ad1`. Jobs `483` (mini-100) and `492`
+(traceback probe). Artifact `experiments/2026-09-10_slice5/mini100_error_probe.json`.
+CONFIRM tier â€” weights only, no truth read, nothing chosen.*
+
+## The result against the gate I wrote
+
+Gate (h) said *"official mini-100 subprocess run with `n_failed_mlps: 0`"*.
+
+    100 of 100 MLPs failed  (0 combined, 0 FLOP, 91 residual, 0 time, 9 error)
+    Mean Score Multiplier   1.00000000      <- every row scored as zeros
+    Adjusted score          9.10e-01        <- meaningless; it is the zeros
+
+**FAIL.** And because every row was zeroed, **the run yielded no accuracy reading
+at all** â€” gate (h) as written cost 67 minutes and returned one bit.
+
+## The 91 are the documented artefact, and the depth-3 precedent settles them
+
+Local per-MLP residual read `2.99 s`â€“`4.67 s` against the `0.4 s` cap. That is the
+known in-process array-traffic artefact, and the comparison that matters was
+recorded on **2026-09-05, before this run existed**:
+
+| file | local residual | ops | graded residual | graded failures |
+|---|---:|---:|---:|---:|
+| Strassen depth 4 (`330290`) | `8.64 s`, `9.85 s` | `15,393` | `0.206 s` | **0 of 100** |
+| Strassen depth 3 (`330327`) | â€” | `12,357` | â€” | **0 of 100** |
+| **Strassen depth 2 (this candidate)** | **`2.99â€“4.67 s`** | **`8,905`** | projected `0.098 s` | OWED |
+
+**The depth-4 file that already graded `0/100` read `2.1xâ€“3.3x` WORSE on the same
+local instrument than the file gate (h) has just refused.** The candidate is
+strictly cheaper on every axis the residual is made of: fewer operations, lower
+local residual, lower projected graded residual. The graded per-op law
+(`10.7â€“11.2 Âµs/op`, corroborated across 20 board rows spanning `6,223â€“33,818` ops)
+puts depth 2 at `0.095â€“0.100 s`, i.e. `4.0xâ€“4.2x` under the cliff.
+
+## The 9 "errors" were the RUN, not the candidate â€” and that is measured, not argued
+
+The nine indices that raised are exactly the complement of the residual warnings:
+`6, 33, 34, 35, 36, 37, 38, 39, 40`. **Eight of them are contiguous**, which is the
+signature of machine state rather than of data. Job `485` (another project, 20 GiB)
+ran for 41 minutes across that window.
+
+Job `492` ran all nine **one at a time, in process, on the organisers' own
+mini-split weights, with the grader's float64 immutable dtype**:
+
+    RAISED 0 of 9
+
+| index | seconds | counted FLOPs | ops | finite | min | max |
+|---:|---:|---:|---:|---|---:|---:|
+| 6 | 24.1 | `1,328,543,577,702` | `8,905` | yes | `0.000` | `4.911` |
+| 33â€“40 | 24.3â€“25.6 | **identical to the byte** | `8,905` | yes | `0.000` | `4.51â€“6.49` |
+
+Three things fall out, and the second is a certification property confirmed on
+data we did not mint:
+
+1. **Every one of the nine completes.** The failures were a property of the run.
+2. **Counted FLOPs are identical across all nine networks, to the byte.** FLOP
+   network-independence is what `certify` Â§6 asserts on minted data; here it holds
+   on the organisers' own weights, which is the stronger statement.
+3. Output is finite and non-negative everywhere, so both answer guards hold.
+
+`1,328,543,577,702 / 2^41 = 0.604152 B`, against the priced `0.60420` and the
+**Linux gate's independently computed multiplier `0.6042021`**. Three instruments,
+three paths, agreeing to `0.008%`.
+
+## The gate is mis-specified, and I am not going to quietly rewrite it
+
+Gate (h) does not discriminate. **It would refuse `330327` â€” nominee A itself,
+which has a real graded `0/100` row â€” for the same reason**, because the local
+instrument charges array traffic that the grader bills to kernel time. A gate that
+fails a file the grader has already passed in a strictly more expensive
+configuration is not testing deployment; it is testing this host.
+
+`docs/VALIDATION.md` Â§2b-iii already says what the real gate is: **the operation
+count**, at the graded per-op law. `8,905` is inside it and `4x` under the cliff.
+
+**But I wrote gate (h) before the data and it failed, so amending it now is
+choosing a gate after seeing the answer** â€” the exact move Rule 1 exists to
+prevent. The honest resolution is not mine to make alone:
+
+- The FAIL stands on the record, unamended.
+- The evidence that the gate rather than the candidate is at fault is above, and
+  the decisive part of it (the depth-4 local-vs-graded comparison) was recorded on
+  2026-09-05, **five days before this run**, so it is not a post-hoc rescue.
+- **The canary is HELD pending Samuel's acknowledgement** that gate (h) was
+  mis-specified. His standing approval covers the submission; it does not cover me
+  reinterpreting my own failed gate.
+
+**Replacement gate, written now and to be judged on its own next time:** *the
+official mini-100 run with `--no-residual-wall-time-limit` completes with
+`n_failed_mlps: 0`, and the op count is `<= 24,000`.* That lifts the one artefact
+that is known not to transfer and keeps every other failure path armed. It is
+queued.
+
+## What gate (h) should have been asked for in the first place
+
+A raw-MSE reading on the organisers' data. The capped run produced none, because
+zeroed rows carry no error signal. The lifted-cap run will, and it is the CONFIRM
+check of pre-registered prediction 1 (`raw in [3.760e-08, 3.798e-08]`) â€” read-only,
+choosing nothing, before the graded row exists.
