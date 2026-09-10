@@ -251,9 +251,9 @@ def t_live_register():
     hits = tr.audit_direct_loads()
     check("the direct-load audit finds real call sites", len(hits) > 0,
           f"{len(hits)} sites in local_sim/, none of which reserve")
-    check("...including the module that actually read P08",
-          any("p2_corrector" in h["file"] for h in hits),
-          "found by the scan, not by memory")
+    check("...and p2_corrector's repaired path is no longer a bypass",
+          not any("p2_corrector" in h["file"] for h in hits),
+          "the historical P08 reads remain in the register; new runs reserve")
 
 
 def main():

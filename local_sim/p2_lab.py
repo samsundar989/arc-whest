@@ -14,7 +14,8 @@ Per arm, per MLP:
     `mean_j (p_j - y1_j)(p_j - y2_j)`, whose expectation is the prediction's MSE
     because `E[e1 e2] = 0`. A single-replica MSE is biased upward by exactly the
     truth noise; the cross product removes that bias without pretending the
-    labels are exact;
+    labels are exact. The report separately applies each arm's multiplier,
+    because unequal multipliers stop label noise cancelling from score;
   * **truth noise** beside every MSE (`docs/VALIDATION.md` section 3.5);
   * **MSE by depth**, which is the mechanism curve. ARC's propagation predicts
     `MSE_K ~ c_K (L/n)^K`, so the shape of error against depth is the thing that
@@ -45,13 +46,14 @@ cannot invent one.
 
 Run:
     uv run python local_sim/p2_lab.py --truth experiments/<dir>/truth.npz \\
-        --out experiments/<dir>/ladder.json
-    uv run python local_sim/p2_lab.py --truth ... --arms k1,k2p1,k2p2 --n 8
+        --out experiments/<dir>/ladder.json \\
+        --arms exact,coherent,consumers-only,births-only --control exact
 """
 
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import os
 import re
@@ -76,10 +78,7 @@ from phase2_manifest import load as load_manifest  # noqa: E402
 
 ARMS_DIR = os.path.join(_HERE, "p2_arms")
 
-DEFAULT_ARMS = [
-    "k1", "k2p1", "k2p2", "k2p3", "k2p4", "k2p6", "k2p1_f32",
-    "sample_iid_max", "sample_iid_floor", "sample_orth", "sample_lattice",
-]
+MECHANISM_ARMS = ("exact", "coherent", "consumers-only", "births-only")
 
 #: The arm every other arm is compared against.
 #:
@@ -95,7 +94,70 @@ DEFAULT_ARMS = [
 #: 0.000027%, and irrelevant while the multiplier is pinned at the 0.1 floor --
 #: but "bitwise identical" and "identical cost" are different claims, and this
 #: ladder reports both accuracy and cost.
-CONTROL = "k2p1"
+CONTROL = "exact"
+
+
+def _arm_path(name):
+    """Map the report-facing arm name to its generated Python source."""
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", name):
+        raise ValueError(f"invalid arm name {name!r}")
+    return os.path.join(ARMS_DIR, f"arm_{name.replace('-', '_')}.py")
+
+
+def _parse_arms(raw):
+    arms = [x.strip() for x in raw.split(",") if x.strip()]
+    if len(arms) != len(set(arms)):
+        raise ValueError("--arms contains duplicates")
+    if set(arms) != set(MECHANISM_ARMS) or len(arms) != 4:
+        raise ValueError(
+            "--arms must explicitly name exactly: " + ",".join(MECHANISM_ARMS))
+    return arms
+
+
+def _validate_request(a, man):
+    """Validate everything knowable without opening protected truth."""
+    arms = _parse_arms(a.arms)
+    if a.control != CONTROL or a.control not in arms:
+        raise ValueError(f"--control must be {CONTROL!r} and appear in --arms")
+    if not a.out:
+        raise ValueError("--out is required")
+    if os.path.lexists(a.out):
+        raise ValueError(f"output already exists: {a.out}")
+    if os.path.abspath(a.out) == os.path.abspath(a.truth):
+        raise ValueError("--out must not be the truth path")
+    if not os.path.isfile(a.truth):
+        raise ValueError(f"truth file does not exist: {a.truth}")
+    if a.n < 0 or a.depth_subset <= 0:
+        raise ValueError("--n must be non-negative and --depth-subset positive")
+    for label, value in (("lambda", a.lam), ("gate", a.gate),
+                         ("official samples", a.official_samples),
+                         ("residual cap", a.residual_cap)):
+        if value is not None and not np.isfinite(value):
+            raise ValueError(f"{label} must be finite")
+    if a.gate is not None and a.gate <= 0:
+        raise ValueError("--gate must be positive")
+    if a.official_samples <= 0:
+        raise ValueError("--official-samples must be positive")
+    try:
+        shape, budget = man["shape"], man["budget"]
+        if int(shape["width"]) <= 0 or int(shape["depth"]) <= 0:
+            raise ValueError("manifest shape must be positive")
+        if float(budget["flop_budget_per_mlp"]) <= 0:
+            raise ValueError("manifest FLOP budget must be positive")
+        if float(budget["multiplier_floor"]) <= 0:
+            raise ValueError("manifest multiplier floor must be positive")
+    except (KeyError, TypeError) as exc:
+        raise ValueError(f"manifest is missing required configuration: {exc}") from exc
+    for name in arms:
+        path = _arm_path(name)
+        if not os.path.isfile(path):
+            raise ValueError(f"generated arm is missing: {path}")
+        try:
+            with open(path, encoding="utf-8") as fh:
+                ast.parse(fh.read(), filename=path)
+        except (OSError, SyntaxError) as exc:
+            raise ValueError(f"generated arm {name!r} does not parse: {exc}") from exc
+    return arms
 
 
 def _replica_noise(y1, y2):
@@ -114,15 +176,15 @@ def _replica_noise(y1, y2):
         needed to recover per-MLP predictions;
       * the subtracted constant IS `V / (2N)`, so it is a measured quantity with
         a predicted value to check it against;
-      * the bias is IDENTICAL across arms, so it cancels exactly in the paired
-        difference. The correction changes no comparison -- it only makes the
-        ABSOLUTE MSEs quotable next to a projection.
+      * the MSE bias is identical across arms, while the SCORE bias is weighted
+        by each arm's per-network multiplier and therefore cancels only when
+        those multipliers are equal.
     """
     return (((y1 - y2) / 2.0) ** 2).mean(axis=1)
 
 
 def _run_arm(name, seeds, truth_final, spec, gt_noise):
-    path = os.path.join(ARMS_DIR, f"arm_{name}.py")
+    path = _arm_path(name)
     if not os.path.exists(path):
         raise SystemExit(f"no such arm: {path}. Run p2_build_arms.py first.")
     return le.evaluate(path, seeds, truth_final, spec=spec, gt_noise=gt_noise)
@@ -154,7 +216,7 @@ def _cost_under_012(name, width, depth, budget):
         "r=np.random.default_rng(ss[0]);sc=float(np.sqrt(2.0/W))\n"
         "wt=[(r.standard_normal((W,W))*sc).astype(np.float32) for _ in range(D)]\n"
         "m=MLP(wt,W,D,int(ss[2].generate_state(1)[0]))\n"
-        f"sp=u.spec_from_file_location('a',r'{os.path.join(ARMS_DIR, f'arm_{name}.py')}')\n"
+        f"sp=u.spec_from_file_location('a',r'{_arm_path(name)}')\n"
         "mo=u.module_from_spec(sp);sp.loader.exec_module(mo);e=mo.Estimator()\n"
         "class C:width,depth,flop_budget,seed=W,D,B,0\n"
         "e.setup(C())\n"
@@ -180,11 +242,13 @@ def _block_from_path(path: str) -> str:
     return m.group(1) if m else ""
 
 
-def main() -> int:
+def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--truth", required=True)
-    ap.add_argument("--out", default="")
-    ap.add_argument("--arms", default=",".join(DEFAULT_ARMS))
+    ap.add_argument("--out", required=True)
+    ap.add_argument("--arms", required=True,
+                    help="explicit four-arm mechanism set: "
+                         + ",".join(MECHANISM_ARMS))
     ap.add_argument("--n", type=int, default=0, help="0 = every network in the truth file")
     ap.add_argument("--lam", type=float, default=None,
                     help="residual price. Pass 0.0 for the COUNTED-FLOPS-ONLY "
@@ -201,24 +265,25 @@ def main() -> int:
                          "otherwise, because guessing is how a single-use "
                          "block gets read twice.")
     ap.add_argument("--ts", default="",
-                    help="UTC timestamp for the read register. REQUIRED: this "
-                         "module must never read the clock, so a replay carries "
-                         "the historical date.")
+                    help="historical event timestamp only; omit for an automatic "
+                         "runtime receipt")
     ap.add_argument("--note", default="", help="recorded on the read line")
-    ap.add_argument("--control", default=CONTROL,
-                    help="the arm every other arm is paired against")
+    ap.add_argument("--control", required=True,
+                    help=f"the registered control; must be {CONTROL!r}")
+    ap.add_argument("--official-samples", type=float, default=1e9,
+                    help="official truth samples used for the precision forecast")
     ap.add_argument("--residual-cap", type=float, default=None,
                     help="override the 0.4 s cliff for an ACCURACY-ONLY run. "
                          "<=0 disables it entirely. The relaxation is printed "
                          "and recorded; such a run is never residual evidence.")
-    a = ap.parse_args()
-    if not a.ts:
-        print("REFUSED: --ts is required. The read register records WHEN a "
-              "protected artifact was looked at, and a module that reads the "
-              "clock cannot replay a historical run honestly.")
-        return 2
+    a = ap.parse_args(argv)
 
     man = load_manifest()
+    try:
+        arms = _validate_request(a, man)
+    except ValueError as exc:
+        print(f"REFUSED before truth access: {exc}")
+        return 2
     width, depth = man["shape"]["width"], man["shape"]["depth"]
     budget = man["budget"]["flop_budget_per_mlp"]
     floor = man["budget"]["multiplier_floor"]
@@ -239,12 +304,19 @@ def main() -> int:
               f"{os.path.basename(a.truth)!r} belongs to. Pass --block. "
               "Guessing here is how a single-use block gets read twice.")
         return 2
-    with _tr.reserve(block, a.truth, consumer="local_sim/p2_lab.py",
-                     purpose=f"arms {a.arms} at the live shape",
-                     ts=a.ts, instrument=os.path.abspath(__file__),
-                     result_artifact=a.out,
-                     note=a.note):
-        z = dict(np.load(a.truth))
+    try:
+        z = _tr.load_truth(
+            block, a.truth, consumer="local_sim/p2_lab.py",
+            purpose=f"four-arm mechanism report: {','.join(arms)}",
+            ts=a.ts, instrument=os.path.abspath(__file__),
+            result_artifact=a.out, note=a.note)
+    except _tr.ReadRefused as exc:
+        print(f"REFUSED before truth access: {exc}")
+        return 2
+    required = {"seeds", "means_r1", "means_r2", "gt_noise", "n_samples"}
+    missing = required - set(z)
+    if missing:
+        raise ValueError(f"truth archive is missing required arrays: {sorted(missing)}")
     seeds = [int(s) for s in z["seeds"]]
     n = len(seeds) if a.n == 0 else min(a.n, len(seeds))
     seeds = seeds[:n]
@@ -252,7 +324,8 @@ def main() -> int:
     y2 = z["means_r2"][:n, -1, :].astype(np.float64)
     all1 = z["means_r1"][:n].astype(np.float64)
     all2 = z["means_r2"][:n].astype(np.float64)
-    gt_noise = z["gt_noise"][:n].astype(np.float64)
+    gt_noise_per_replica = z["gt_noise"][:n].astype(np.float64)
+    gt_noise = gt_noise_per_replica / 2.0
     y_mid = ((y1 + y2) / 2.0).astype(np.float32)
 
     is_probe = bool(int(z["probe"])) if "probe" in z else False
@@ -315,14 +388,12 @@ def main() -> int:
     print(f"  deciding model   lambda = {spec.lam:.4g}"
           + ("   (COUNTED FLOPS ONLY -- the frozen model)" if spec.lam == 0.0
              else "   (Phase-1 lambda; NOT the frozen P2-CP1 model)"))
-    arms = [x for x in a.arms.split(",") if x]
-
     print("=" * 92)
     print("P2-CP1 LADDER  --  one canonical evaluator, paired on common random numbers")
     print("=" * 92)
     print(f"  truth      {os.path.relpath(a.truth, _ROOT)}   {n} networks   "
           f"2 replicas x {int(z['n_samples']):,} samples")
-    print(f"  truth noise per replica   mean {gt_noise.mean():.4e}")
+    print(f"  truth noise per replica   mean {gt_noise_per_replica.mean():.4e}")
     print(f"  shape      {width} x {depth}   B = {budget:,}   floor {floor}")
     print(f"  stack      flopscope {parity['installed_here']['flopscope']}"
           f"   PARITY {parity['status']}")
@@ -335,8 +406,8 @@ def main() -> int:
     # comparison and is subtracted only for the ABSOLUTE numbers.
     rep_noise = _replica_noise(y1, y2)
     print(f"  replica noise of the AVERAGED truth   measured {rep_noise.mean():.4e}"
-          f"   predicted V/2N {gt_noise.mean() / 2:.4e}"
-          f"   ratio {rep_noise.mean() / (gt_noise.mean() / 2):.4f}")
+          f"   predicted V/2N {gt_noise.mean():.4e}"
+          f"   ratio {rep_noise.mean() / gt_noise.mean():.4f}")
     print("     (the ratio is a live check on replica independence; far from 1.0")
     print("      means the two draws share state and every corrected MSE is wrong)")
     print()
@@ -350,6 +421,7 @@ def main() -> int:
         suite = le.score(rows, spec=spec)
         raw = np.array([r.mse for r in rows])
         cross = raw - rep_noise
+        corrected = raw - gt_noise
         # The depth curve needs full prediction arrays, which the evaluator does
         # not return. A mechanism curve does not need 96 networks, so it is
         # computed on a fixed SUBSET and labelled as such rather than pretending
@@ -363,7 +435,8 @@ def main() -> int:
              for d in range(depth)] for i in range(n_depth)])
         c012 = _cost_under_012(name, width, depth, budget)
         results[name] = dict(
-            rows=rows, prov=prov, suite=suite, cross=cross, raw=raw,
+            rows=rows, prov=prov, suite=suite, cross=cross,
+            corrected=corrected, raw=raw,
             by_depth=by_depth, cost012=c012, secs=time.perf_counter() - t0,
             peak_mb=peak_bytes / 2 ** 20, n_depth=n_depth,
         )
@@ -372,7 +445,7 @@ def main() -> int:
                                                   r.residual_wall_time_s, spec.lam)
                              for r in rows]))
         print(f"  {name:<18} score {suite.objective:.5e}   "
-              f"MSE(corr) {cross.mean():.4e}   MSE(raw) {raw.mean():.4e}   "
+              f"MSE(corr) {corrected.mean():.4e}   MSE(raw) {raw.mean():.4e}   "
               f"F/B {f / budget:.4f}   eff {eff / budget:.4f}   "
               f"mult {suite.mean_multiplier:.4f}   fail {suite.n_failed}/{n}   "
               f"resid {1000 * float(np.mean([r.residual_wall_time_s for r in rows])):.0f}ms   "
@@ -389,6 +462,8 @@ def main() -> int:
           f"{'sign p':>8}")
     ctrl_rows = results[a.control]["rows"]
     paired = {}
+    noise_aware = {}
+    local_samples = 2.0 * float(z["n_samples"])
     for name in arms:
         if name == a.control:
             continue
@@ -398,6 +473,12 @@ def main() -> int:
             lam=spec.lam, floor=floor,
         )
         paired[name] = res
+        noise_aware[name] = cs.noise_corrected_compare(
+            [r.to_row() for r in ctrl_rows],
+            [r.to_row() for r in results[name]["rows"]],
+            local_samples=local_samples,
+            official_samples=a.official_samples,
+            lam=spec.lam, floor=floor, require_ids=True)
         # The BINDING interval is the studentised t on the ABSOLUTE difference
         # (docs/VALIDATION.md 2b-i). It is shown relative to the control's mean
         # purely for readability; the decision is made by `decide()`, which takes
@@ -407,6 +488,18 @@ def main() -> int:
         print(f"  {name:<18} {res.arithmetic_gain:>8.4f} "
               f"[{lo / m:>+10.2%}, {hi / m:>+10.2%}] {res.n_candidate_better:>4}/{res.n:<4} "
               f"p={res.sign_test_p:>6.3f}")
+
+    print()
+    print("  NOISE-AWARE ADJUSTED DIFFERENCES -- observed / true-function / "
+          "official precision")
+    for name in arms:
+        if name == a.control:
+            continue
+        q = noise_aware[name]
+        print(f"  {name:<18} {q.observed.mean_difference:+.4e}  "
+              f"{q.true_function.mean_difference:+.4e}  "
+              f"{q.forecast.mean_difference:+.4e}   "
+              f"noise term {q.noise_bias:+.3e}")
 
     # ---- does any arm leave the floor once residual is charged? --------------
     # The frozen deciding model is counted-FLOPs-only, and that is defensible for
@@ -478,16 +571,27 @@ def main() -> int:
           f"networks (a mechanism curve does not need all of them)")
     print("  L1 is exact for EVERY arm, so that column reads the truth-noise "
           "floor -- a built-in calibration")
+    depth_columns = [d for d in (0, 1, 3, 7, 11, 15) if d < depth]
+    if depth - 1 not in depth_columns:
+        depth_columns.append(depth - 1)
     hdr = "  " + f"{'arm':<18}" + "".join(f"{'L' + str(d + 1):>11}"
-                                          for d in (0, 1, 3, 7, 11, 15))
+                                          for d in depth_columns)
     print(hdr)
     for name in arms:
         bd = results[name]["by_depth"].mean(axis=0)
         print("  " + f"{name:<18}" + "".join(f"{bd[d]:>11.3e}"
-                                             for d in (0, 1, 3, 7, 11, 15)))
+                                             for d in depth_columns))
 
     if a.out:
-        _write(a.out, results, paired, man, seeds, z, spec, arms, verdicts, a.gate)
+        run_config = {
+            "control": a.control,
+            "residual_cap_override": a.residual_cap,
+            "accuracy_only": a.residual_cap is not None,
+            "official_samples": float(a.official_samples),
+            "historical_timestamp_supplied": bool(a.ts),
+        }
+        _write(a.out, results, paired, man, seeds, z, spec, arms, verdicts,
+               a.gate, run_config=run_config, noise_aware=noise_aware)
         print(f"\n  artifact -> {os.path.relpath(a.out, _ROOT)}")
     print("=" * 92)
     return 0
@@ -505,7 +609,7 @@ def _predict_all(name, seeds, spec):
     import harness
     from mint_provenance import canonical_mint
 
-    mod, _ = le.load_candidate(os.path.join(ARMS_DIR, f"arm_{name}.py"))
+    mod, _ = le.load_candidate(_arm_path(name))
     est = mod.Estimator()
     est.setup(le.SetupContext(spec))
     finals, alls = [], []
@@ -520,25 +624,61 @@ def _predict_all(name, seeds, spec):
     return np.asarray(finals), np.asarray(alls)
 
 
+def _paired_payload(p):
+    return {
+        "mean_control": p.mean_control,
+        "mean_candidate": p.mean_candidate,
+        "arithmetic_gain": p.arithmetic_gain,
+        "mean_difference": p.mean_difference,
+        "t_ci_difference": list(p.t_ci_difference),
+        "boot_ci_difference": list(p.boot_ci_difference),
+        "relative_improvement": p.relative_improvement,
+        "geometric_gain_DIAGNOSTIC_ONLY": p.geometric_gain,
+        "n_candidate_better": p.n_candidate_better,
+        "n": p.n,
+        "sign_test_p": p.sign_test_p,
+        "estimands_disagree": p.estimands_disagree,
+    }
+
+
 def _write(path, results, paired, man, seeds, z, spec, arms,
-           verdicts=None, gate=None):
-    if os.path.exists(path):
+           verdicts=None, gate=None, *, run_config=None, noise_aware=None):
+    if os.path.lexists(path):
         raise SystemExit(f"REFUSED: {path} exists. Evidence is immutable.")
+    run_config = dict(run_config or {})
+    noise_aware = noise_aware or {}
+    control = run_config.get("control", CONTROL)
+    n_samples = float(z["n_samples"])
+    gt_per_replica = np.asarray(z["gt_noise"][:len(seeds)], dtype=np.float64)
+    gt_average = gt_per_replica / 2.0
+    rep_noise = _replica_noise(
+        z["means_r1"][:len(seeds), -1, :].astype(np.float64),
+        z["means_r2"][:len(seeds), -1, :].astype(np.float64))
+    official_samples = float(run_config.get("official_samples", 1e9))
     payload = {
         "artifact": "p2_cp1_ladder",
-        "is_probe_not_evidence": bool(int(z["probe"])) if "probe" in z.files else False,
-        "artifact_version": 1,
+        "artifact_version": 2,
+        "status": "complete" if (set(arms) == set(MECHANISM_ARMS)
+                                   and set(results) == set(arms)) else "incomplete",
+        "is_probe_not_evidence": bool(int(z["probe"])) if "probe" in z else False,
         "shape": man["shape"],
         "budget": man["budget"],
         "package_parity": man["package_parity"],
         "truth": {
-            "replica_noise_of_average_measured": float(_replica_noise(
-                z["means_r1"][:len(seeds), -1, :].astype(np.float64),
-                z["means_r2"][:len(seeds), -1, :].astype(np.float64)).mean()),
-            "n_samples_per_replica": int(z["n_samples"]),
+            "replica_noise_of_average_measured_mean": float(rep_noise.mean()),
+            "replica_noise_of_average_measured_per_mlp": rep_noise.tolist(),
+            "noise_floor_per_replica_mean": float(gt_per_replica.mean()),
+            "noise_floor_of_two_replica_average_mean": float(gt_average.mean()),
+            "noise_floor_of_two_replica_average_per_mlp": gt_average.tolist(),
+            "noise_floor_half_factor": 0.5,
+            "replica_independence_ratio_measured_to_predicted": (
+                float(rep_noise.mean() / gt_average.mean())
+                if gt_average.mean() else float("nan")),
+            "n_samples_per_replica": int(n_samples),
+            "local_effective_samples": int(2 * n_samples),
+            "official_samples_for_forecast": official_samples,
             "n_networks": len(seeds),
             "replicas": 2,
-            "gt_noise_mean": float(z["gt_noise"].mean()),
         },
         "seeds": [int(s) for s in seeds],
         "lambda_used": spec.lam,
@@ -546,20 +686,18 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
                            "contract" if spec.lam == 0.0 else
                            "effective F + lam*R at the PHASE-1 lambda; this is "
                            "NOT the model the contract froze"),
-        "lambda_provenance": "PHASE-1 value 1e11; Phase-2 lambda is UNPUBLISHED",
+        "lambda_provenance": "Phase 2 sets lambda to zero; any nonzero value is a recorded deviation",
         "residual_is_graded": False,
-        "control": a.control,
-        "residual_cap_override": a.residual_cap,
-        "accuracy_only": a.residual_cap is not None,
+        "control": control,
+        "run_configuration": run_config,
         "pre_registered_gate": gate,
         "gate_note": (
             "the gate is registered in experiments/LOG.md BEFORE any data "
             "existed; decide() requires it explicitly and has no default"
         ),
         "noise_correction_identity": (
-            "mean[(p-y1)(p-y2)] = mean[(p-ybar)^2] - mean[((y1-y2)/2)^2]; the "
-            "subtracted term is the averaged replica's own noise and is identical "
-            "across arms, so it cancels exactly in every paired difference"
+            "the averaged truth has half the per-replica floor; adjusted-score "
+            "noise cancels only where per-network multipliers are equal"
         ),
         "arms": {},
     }
@@ -567,10 +705,13 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
         r = results[name]
         payload["arms"][name] = {
             "objective": r["suite"].objective,
+            "observed_objective": r["suite"].objective,
             "mean_mse_raw_vs_averaged_replica": float(r["raw"].mean()),
-            "mean_mse_noise_corrected": float(r["cross"].mean()),
+            "mean_mse_noise_corrected": float(r["corrected"].mean()),
+            "mean_mse_cross_product_estimate": float(r["cross"].mean()),
             "per_mlp_mse_raw": [float(x) for x in r["raw"]],
-            "per_mlp_mse_noise_corrected": [float(x) for x in r["cross"]],
+            "per_mlp_mse_noise_corrected": [float(x) for x in r["corrected"]],
+            "per_mlp_mse_cross_product_estimate": [float(x) for x in r["cross"]],
             "mean_flops": float(np.mean([x.flops_used for x in r["rows"]])),
             "flops_012": r["cost012"],
             "n_failed": r["suite"].n_failed,
@@ -593,10 +734,24 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
             "per_mlp_score": [float(x) for x in cs.score_suite(
                 [x.to_row() for x in r["rows"]],
                 lam=spec.lam, floor=man["budget"]["multiplier_floor"]).scores],
+            "per_mlp_ids": [x.to_row().name for x in r["rows"]],
             "per_mlp_flops": [float(x.flops_used) for x in r["rows"]],
+            "per_mlp_counted_multiplier": [float(x.to_row().multiplier(
+                0.0, man["budget"]["multiplier_floor"])) for x in r["rows"]],
+            "per_mlp_effective_multiplier": [float(x.to_row().multiplier(
+                spec.lam, man["budget"]["multiplier_floor"])) for x in r["rows"]],
             "per_mlp_residual_s": [float(x.residual_wall_time_s) for x in r["rows"]],
             "per_mlp_failed": [bool(x.failed) for x in r["rows"]],
+            "per_mlp_error_code": [x.error_code for x in r["rows"]],
+            "per_mlp_zero_prediction_mse": [float(x.zero_prediction_mse)
+                                              for x in r["rows"]],
         }
+        q = np.asarray(payload["arms"][name]["per_mlp_effective_multiplier"])
+        official_floor = gt_average * (2.0 * n_samples / official_samples)
+        payload["arms"][name]["true_function_objective_estimate"] = float(
+            np.mean(q * r["corrected"]))
+        payload["arms"][name]["official_precision_objective_forecast"] = float(
+            np.mean(q * (r["corrected"] + official_floor)))
         if verdicts and name in verdicts:
             v = verdicts[name]
             payload["arms"][name]["verdict"] = {
@@ -615,22 +770,29 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
                 "reasons": list(v.reasons),
             }
         if name in paired:
-            p = paired[name]
-            payload["arms"][name]["paired_vs_control"] = {
-                "arithmetic_gain": p.arithmetic_gain,
-                "mean_difference": p.mean_difference,
-                "t_ci_difference": list(p.t_ci_difference),
-                "boot_ci_difference": list(p.boot_ci_difference),
-                "relative_improvement": p.relative_improvement,
-                "geometric_gain_DIAGNOSTIC_ONLY": p.geometric_gain,
-                "n_candidate_better": p.n_candidate_better,
-                "n": p.n,
-                "sign_test_p": p.sign_test_p,
-                "estimands_disagree": p.estimands_disagree,
+            payload["arms"][name]["paired_vs_control"] = _paired_payload(
+                paired[name])
+        if name in noise_aware:
+            nc = noise_aware[name]
+            payload["arms"][name]["noise_aware_vs_control"] = {
+                "observed": _paired_payload(nc.observed),
+                "true_function": _paired_payload(nc.true_function),
+                "official_precision_forecast": _paired_payload(nc.forecast),
+                "noise_bias": nc.noise_bias,
+                "noise_bias_share": nc.noise_bias_share,
+                "local_samples": nc.local_samples,
+                "official_samples": nc.official_samples,
+                "n_negative_corrected": nc.n_negative_corrected,
+                "notes": list(nc.notes),
             }
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as fh:
-        fh.write(json.dumps(payload, indent=1, default=str) + "\n")
+    try:
+        with open(path, "x", encoding="utf-8") as fh:
+            fh.write(json.dumps(payload, indent=1, default=str) + "\n")
+    except FileExistsError as exc:
+        raise SystemExit(
+            f"REFUSED: {path} appeared while the run was executing. Evidence "
+            "is immutable; choose a new path.") from exc
 
 
 if __name__ == "__main__":

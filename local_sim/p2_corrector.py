@@ -55,6 +55,7 @@ import argparse
 import json
 import math
 import os
+import re
 import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -353,8 +354,36 @@ class Corrector:
 # data
 # ---------------------------------------------------------------------------
 
-def load_truth(path):
-    z = np.load(path)
+_BLOCK_RE = re.compile(r"truth_([A-Z]\d{2})")
+
+
+def _block_from_path(path):
+    m = _BLOCK_RE.search(os.path.basename(path))
+    return m.group(1) if m else ""
+
+
+def load_truth(path, *, block="", purpose="p2 corrector study",
+               result_artifact="", ts=""):
+    """Load a protected truth archive only after an atomic read reservation.
+
+    A supplied ``ts`` is retained only for honest historical replay. New runs
+    omit it and receive an automatic runtime receipt from ``truth_reads``.
+    """
+    import truth_reads
+
+    block = block or _block_from_path(path)
+    if not block:
+        raise SystemExit(
+            "REFUSED: cannot identify the truth block from the filename; pass "
+            "--block explicitly before accessing labels")
+    try:
+        z = truth_reads.load_truth(
+            block, path, consumer="local_sim/p2_corrector.py", purpose=purpose,
+            instrument=os.path.abspath(__file__), result_artifact=result_artifact,
+            ts=ts,
+        )
+    except truth_reads.ReadRefused as exc:
+        raise SystemExit(f"REFUSED before truth access: {exc}") from exc
     if "allvar_r1" not in z:
         raise SystemExit(
             f"REFUSED: {path} has no `allvar_r1`. It was produced before the "
@@ -364,6 +393,11 @@ def load_truth(path):
     if int(z.get("probe", 0)):
         print("  *** PROBE truth: unregistered seeds. NOT EVIDENCE. ***")
     return z
+
+
+def _load_for(a, purpose):
+    return load_truth(a.truth, block=a.block, purpose=purpose,
+                      result_artifact=a.json, ts=a.ts)
 
 
 def weights_for(t, seed, device, dtype):
@@ -867,7 +901,7 @@ def run_study(a):
     t = _torch()
     device = "cuda" if t.cuda.is_available() else "cpu"
     dtype = t.float64
-    truth = load_truth(a.truth)
+    truth = _load_for(a, "WP9 corrector study")
     seeds = np.asarray(truth["seeds"])
     n_all = len(seeds) if not a.n_mlps else min(a.n_mlps, len(seeds))
     seeds = seeds[:n_all]
@@ -1035,7 +1069,7 @@ def diagnose_readout(a):
     t = _torch()
     device = "cuda" if t.cuda.is_available() else "cpu"
     dtype = t.float64
-    truth = load_truth(a.truth)
+    truth = _load_for(a, "WP9 readout diagnosis")
     seeds = np.asarray(truth["seeds"])
     n_all = len(seeds) if not a.n_mlps else min(a.n_mlps, len(seeds))
     seeds = seeds[:n_all]
@@ -1208,7 +1242,7 @@ def run_oracles(a):
     t = _torch()
     device = "cuda" if t.cuda.is_available() else "cpu"
     dtype = t.float64
-    truth = load_truth(a.truth)
+    truth = _load_for(a, "WP10 in-flight oracle study")
     seeds = np.asarray(truth["seeds"])
     n_all = len(seeds) if not a.n_mlps else min(a.n_mlps, len(seeds))
     seeds = seeds[:n_all]
@@ -1298,7 +1332,7 @@ def run_wp10(a):
     t = _torch()
     device = "cuda" if t.cuda.is_available() else "cpu"
     dtype = t.float64
-    truth = load_truth(a.truth)
+    truth = _load_for(a, "WP10 mean-channel study")
     seeds = np.asarray(truth["seeds"])
     n_all = len(seeds) if not a.n_mlps else min(a.n_mlps, len(seeds))
     seeds = seeds[:n_all]
@@ -1473,7 +1507,7 @@ def run_sensitivity(a):
     t = _torch()
     device = "cuda" if t.cuda.is_available() else "cpu"
     dtype = t.float64
-    truth = load_truth(a.truth)
+    truth = _load_for(a, "WP10 sensitivity study")
     seeds = np.asarray(truth["seeds"])
     n = min(a.n_mlps or 16, len(seeds))
     seeds = seeds[:n]
@@ -1603,7 +1637,7 @@ def run_state_budget(a):
     t = _torch()
     device = "cuda" if t.cuda.is_available() else "cpu"
     dtype = t.float64
-    truth = load_truth(a.truth)
+    truth = _load_for(a, "WP11 state-error budget")
     seeds = np.asarray(truth["seeds"])
     n = min(a.n_mlps or 12, len(seeds))
     seeds = seeds[:n]
@@ -1759,6 +1793,11 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--truth", default="", help="truth npz from p2_truth.py")
+    ap.add_argument("--block", default="",
+                    help="truth block id; inferred from truth_<BLOCK>.npz when omitted")
+    ap.add_argument("--ts", default="",
+                    help="historical event timestamp only; omit for an automatic "
+                         "runtime receipt")
     ap.add_argument("--n-mlps", type=int, default=0, help="0 = all")
     ap.add_argument("--folds", type=int, default=4,
                     help="leave-NETWORKS-out folds")

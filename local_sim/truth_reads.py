@@ -55,11 +55,13 @@ from __future__ import annotations
 import argparse
 import contextlib
 import dataclasses
+import datetime as _dt
 import hashlib
 import json
 import os
 import re
 import sys
+import time
 import uuid
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional
@@ -112,6 +114,10 @@ class Read:
     result_artifact: str = ""
     note: str = ""
     backfilled: bool = False
+    timestamp_source: str = "legacy_unclassified"
+    receipt_created_utc: str = ""
+    receipt_completed_utc: str = ""
+    elapsed_seconds: Optional[float] = None
 
     @property
     def counts_against_cap(self) -> bool:
@@ -200,12 +206,13 @@ def reserve(
     *,
     consumer: str,
     purpose: str,
-    ts: str,
+    ts: str = "",
     instrument: str = "",
     result_artifact: str = "",
     note: str = "",
     path: str = READS_PATH,
     ledger_path: str = LEDGER_PATH,
+    prior_spent: int = 0,
 ):
     """Reserve one read of `artifact`, or refuse. Yields the resolved path.
 
@@ -213,9 +220,18 @@ def reserve(
     two concurrent consumers cannot both be handed the last read of a
     single-use block. `instrument` is the path of the code doing the reading;
     its sha256 is recorded, so a repaired instrument cannot later be confused
-    with the one that produced a stored result.
+    with the one that produced a stored result. ``prior_spent`` is a fixed
+    adoption baseline for historical exposures absent from this registry. It
+    must not be a live counter that later includes these same reservations.
     """
+    if prior_spent < 0:
+        raise ValueError("prior_spent must be non-negative")
     cap = cap_for(block)
+    receipt_created = (_dt.datetime.now(_dt.timezone.utc)
+                       .isoformat(timespec="seconds").replace("+00:00", "Z"))
+    event_ts = ts or receipt_created
+    timestamp_source = ("supplied_historical" if ts else
+                        "automatic_runtime")
     # UNIQUE per reservation, not per (block, consumer, ts). The first draft
     # hashed only those, so the same consumer reading a reusable design block
     # twice produced the same id and the register counted one read. `spent()`
@@ -224,12 +240,14 @@ def reserve(
     rid = uuid.uuid4().hex[:16]
 
     with ledger_lock(ledger_path):
-        used = spent(block, path)
+        registered = spent(block, path)
+        used = prior_spent + registered
         if cap is not None and used >= cap:
             prior = [r for r in reads(path) if r.block == block]
             raise ReadRefused(
                 f"{block} is {tier_of(block)} and its {cap} permitted "
-                f"read(s) are SPENT ({used} recorded). Prior reads: "
+                f"read(s) are SPENT ({used}: {prior_spent} historical "
+                f"outside this registry + {registered} registered). Prior reads: "
                 + "; ".join(f"{r.consumer} on {r.ts} ({r.status})"
                             for r in prior[:4])
                 + ". A repaired instrument does not restore a pristine "
@@ -239,23 +257,33 @@ def reserve(
             block=block, artifact=_rel(artifact),
             artifact_sha256=_sha256_file(artifact),
             consumer=consumer, instrument_sha256=_sha256_file(instrument),
-            purpose=purpose, ts=ts, status=_OPEN, reservation=rid,
+            purpose=purpose, ts=event_ts, status=_OPEN, reservation=rid,
             result_artifact=result_artifact, note=note,
+            timestamp_source=timestamp_source,
+            receipt_created_utc=receipt_created,
         )
         _append(rec, path)
 
     ok = False
+    t0 = time.perf_counter()
     try:
         yield (artifact if os.path.isabs(artifact)
                else os.path.join(_ROOT, artifact))
         ok = True
     finally:
-        _append(dataclasses.replace(
+        receipt_completed = (_dt.datetime.now(_dt.timezone.utc)
+                             .isoformat(timespec="seconds")
+                             .replace("+00:00", "Z"))
+        done = dataclasses.replace(
             rec, status=(_DONE if ok else _ABORT),
+            receipt_completed_utc=receipt_completed,
+            elapsed_seconds=float(time.perf_counter() - t0),
             note=(rec.note if ok else
                   (rec.note + " | consumer raised before completing; the "
                    "labels were already exposed, so this read STILL COUNTS")
-                  .strip(" |"))), path)
+                  .strip(" |")))
+        with ledger_lock(ledger_path):
+            _append(done, path)
 
 
 def load_truth(block: str, artifact: str, **kw):
