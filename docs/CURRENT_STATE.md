@@ -203,6 +203,10 @@
 >
 > **No job is queued or running. All Slice-5 compute is done.**
 >
+> **`docs/STRATEGIST_PACKET_2026-09-11.md` is written and is the next action.**
+> It reports the closure, the three things in the Sep 10 response that were wrong,
+> and five questions.
+>
 > Waiting on **Samuel**:
 > - the graded row for `330566` to land;
 > - the Rules v14 §6 forum post (drafted in `LOG.md`, needs his account);
