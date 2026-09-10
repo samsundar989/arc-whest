@@ -123,7 +123,32 @@
 > ### IN FLIGHT
 >
 > - `498` — T1's completed 2x2, the Skeptic's discriminating follow-up.
-> - `493`/`494` — T2 labels for P07 and P08.
+> - `493`/`494` — T2 labels for P07 and P08. **~3.3 h and ~1.5 h; my 22 s/net
+>   estimate was `1.8x` low (measured `39.4 s/net`), and the ETAs are corrected
+>   in the queue.**
+>
+> ### PREFLIGHT IS CURRENTLY RED, DELIBERATELY AND TRANSIENTLY — READ THIS BEFORE PROMOTING
+>
+> `preflight` step 7 (`seed_ledger.py --check --scan`) reports **2 ERRORS**:
+>
+>     ERROR local_sim/p2_truth.py: names artifact .../truth_P07.npz but no hash
+>       was ever recorded for it.
+>     ERROR local_sim/p2_truth.py: names artifact .../truth_P08.npz  (same)
+>
+> This is the **expected mid-flight state**, not a defect. `P07`/`P08` were
+> claimed on the host with their artifact paths (a claim is written FIRST so an
+> interrupted run leaves a claim rather than a silent draw), the label jobs run
+> with `--already-claimed` and therefore write nothing to the ledger, and the
+> hash is recorded when the artifact exists. **The fix is one call each, on the
+> host, as soon as jobs `493`/`494` land:**
+>
+>     seed_ledger.finalize('local_sim/p2_truth.py',
+>                          'experiments/2026-09-10_slice5/truth_P07.npz',
+>                          ts='2026-09-10')
+>
+> **Nothing may be promoted or submitted while step 7 is red.** The nominee-A
+> canary is unaffected — it spends no seed block — but a `preflight -Full` run
+> before that finalize will fail, and it should.
 > - `497` — depth-2 mini-100 with the residual cap lifted: the replacement gate,
 >   and the first accuracy read on the organisers' data (the capped run produced
 >   **none**, because every row was zeroed).
