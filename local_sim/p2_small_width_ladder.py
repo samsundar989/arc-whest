@@ -90,11 +90,27 @@ SEED_BASE = 9_100_000
 SAMPLES = 2 ** 24
 CHUNK = 2 ** 16
 
-#: Arms. `full K4` is the CEILING of every kappa_4 carrier, traceless included.
+#: Arms. `full K4` is the CEILING of every kappa_4 carrier, traceless included --
+#: and that is CHECKED, not assumed: `factored_keeps_term(4, ...)` is True for
+#: 171/171 SIMPLE terms (factoring drops nothing outside AUGMENT) and
+#: `FactoredTensor4`'s rank only ever grows by `torch.cat`, never truncates.
+#: `get_vec_cond`'s budget is `k_max - 1 + augment`, so k3-AUGMENT and k4-SIMPLE
+#: share the IDENTICAL diagram budget of 3; the only difference between their
+#: term sets is the all-distinct degree-4 slice `(1,1,1,1)` (0 terms vs 29).
+#: So this is a clean representation comparison and not a raised-budget one --
+#: which is exactly the over-attribution that bit D1's first reading.
+#:
+#: `use_avg_metric` ASYMMETRY, added as its own arm after a Skeptic:
+#: `metric_needed(4, SIMPLE)` is False, so the k4 arm never pays the
+#: `E[WW^T] = 2I` approximation that BOTH k3 arms pay. Left unmeasured, that is
+#: a confound in the headline ratio, so `k3_augment_exactmetric` isolates it.
 ARMS = (
     ("k3_simple", dict(k_max=3, factor=True, kind="SIMPLE")),
     ("k3_augment", dict(k_max=3, factor=True, kind="AUGMENT")),
     ("k3_augment_unfactored", dict(k_max=3, factor=False, kind="AUGMENT")),
+    ("k3_augment_exactmetric",
+     dict(k_max=3, factor=True, kind="AUGMENT",
+          extra={"use_avg_metric": False})),
     ("k4_factored", dict(k_max=4, factor=True, kind="SIMPLE")),
 )
 
@@ -219,7 +235,8 @@ def run(a) -> int:
                         m = BRIDGE.kprop_means(
                             weights, k_max=kw["k_max"], factor=kw["factor"],
                             kind=kinds[kw["kind"]], device=a.device,
-                            dtype=torch.float64)
+                            dtype=getattr(torch, a.dtype),
+                            **kw.get("extra", {}))
                 except (RuntimeError, torch.cuda.OutOfMemoryError) as exc:
                     row[name] = None
                     row[name + "_error"] = "%s: %s" % (type(exc).__name__, exc)
@@ -242,6 +259,18 @@ def run(a) -> int:
         "handoff": "docs/STRATEGIST_RESPONSE_2026-09-09.md section 2 Q2 / section 3 item 5",
         "tier": ("DESIGN. Orients priority; promotes NOTHING. Proxy shapes only; "
                  "no live-shape (1024x16) seed consumed."),
+        # PROVENANCE. The first artifact this module wrote recorded no dtype, no
+        # device, no timestamp and no job id, which is how an f64 run came to be
+        # compared against an f32 anchor with nothing on disk to reveal it.
+        "dtype": a.dtype, "device": a.device,
+        "written_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "workerq_job": os.environ.get("WORKERQ_JOB_ID"),
+        "live_shape_anchor": {
+            "SIMPLE_over_AUGMENT_at_1024x16": 2.0941,
+            "source": "experiments/2026-09-08_slice3/d1_augment.json, dtype float32",
+            "role": ("prediction 3's validity check. The rungs must reproduce it "
+                     "IN THE SAME DTYPE or nothing here extrapolates."),
+        },
         "seed_base": SEED_BASE, "samples_per_replica": a.samples,
         "nets_per_rung": a.nets, "arms": [n for n, _ in ARMS],
         "upstream": v, "rungs": rungs_out,
@@ -275,9 +304,19 @@ def report(a) -> int:
              pred["full_K4_over_AUGMENT_at_256x4"][1],
              pred["unfactored_over_factored_AUGMENT_at_256x4"][0],
              pred["unfactored_over_factored_AUGMENT_at_256x4"][1]))
-    pairs = (("k3_simple", "k3_augment", "SIMPLE / AUGMENT"),
-             ("k3_augment", "k4_factored", "AUGMENT / full-K4"),
-             ("k3_augment_unfactored", "k3_augment", "unfactored / factored"))
+    # The label says which way a ratio BELOW 1 reads, because the first pass at
+    # this table read `unfactored/factored = 0.948` as "the factored arm is
+    # slightly better". It is the opposite: the numerator is the better arm, so
+    # 0.948 means `factor=True` COSTS 5.2% of accuracy. A ratio without its
+    # direction spelled out is a sign error waiting to happen.
+    pairs = (
+        ("k3_simple", "k3_augment", "SIMPLE / AUGMENT       (>1: AUGMENT wins)"),
+        ("k3_augment", "k4_factored", "AUGMENT / full-K4      (>1: full K4 wins)"),
+        ("k3_augment_unfactored", "k3_augment",
+         "unfactored / factored  (<1: factor=True COSTS)"),
+        ("k3_augment_exactmetric", "k3_augment",
+         "exact-metric / avg     (<1: use_avg_metric COSTS)"),
+    )
     for rung in doc["rungs"]:
         rows = rung["rows"]
         print("\n  n=%d L=%d   %d nets   gt_noise %.3e"
@@ -314,6 +353,13 @@ def main(argv=None) -> int:
     ap.add_argument("--samples", type=int, default=SAMPLES)
     ap.add_argument("--chunk", type=int, default=CHUNK)
     ap.add_argument("--device", default="cuda")
+    # float32 IS THE COMPARABLE CHOICE. The whole ladder is validated against
+    # the `2.094x` SIMPLE/AUGMENT measured at the live 1024x16 shape by D1, and
+    # `d1_augment.json` records `"dtype": "float32"`. The first run of this
+    # module hard-coded float64 and then compared its 2.9 against that 2.09 --
+    # a cross-instrument comparison, and the artifact did not even record which
+    # instrument it used. A Skeptic caught it. Record the dtype in the artifact.
+    ap.add_argument("--dtype", default="float32", choices=("float32", "float64"))
     ap.add_argument("--skip", nargs="*", default=[],
                     help="arm names to skip (e.g. k4_factored)")
     ap.add_argument("--report", action="store_true",
