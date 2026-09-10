@@ -648,6 +648,11 @@ def main() -> int:
     ap.add_argument("--depth", type=int, default=DEPTH)
     ap.add_argument("--budget", type=int, default=BUDGET)
     ap.add_argument("--json", default="")
+    ap.add_argument(
+        "--memory-report", default="", metavar="PATH",
+        help="explicit Linux memory-gate artifact to consume. Its candidate, "
+             "workload, stack and instrument bindings are still verified; "
+             "the path itself grants no applicability.")
     ap.add_argument("--quick", action="store_true",
                     help="skip the network-dependent sections (1 whest validate "
                          "is local, 10 subprocess smoke needs the dataset)")
@@ -1220,25 +1225,45 @@ def main() -> int:
     lg_match = ""
     cand_dir = os.path.dirname(cand)
     stem = os.path.splitext(os.path.basename(cand))[0]
-    for c in (os.path.join(cand_dir, "linux_memory_gate_%s.json" % stem),
-              os.path.join(_ROOT, "experiments", "2026-08-31_wp0cd_certify",
-                           "linux_memory_gate_%s.json" % stem),
-              os.path.join(_ROOT, "experiments", "2026-08-31_wp0cd_certify",
-                           "linux_memory_gate_v261.json")):
+    candidates = []
+    if a.memory_report:
+        explicit = os.path.abspath(a.memory_report)
+        if not os.path.isfile(explicit):
+            print(f"no such memory report: {explicit}")
+            return 2
+        candidates.append(explicit)
+    else:
+        candidates.extend((
+            os.path.join(cand_dir, "linux_memory_gate_%s.json" % stem),
+            os.path.join(_ROOT, "experiments", "2026-08-31_wp0cd_certify",
+                         "linux_memory_gate_%s.json" % stem),
+            os.path.join(_ROOT, "experiments", "2026-08-31_wp0cd_certify",
+                         "linux_memory_gate_v261.json"),
+        ))
+    for c in candidates:
         if os.path.exists(c):
             try:
                 with open(c, encoding="utf-8") as fh:
                     _d = json.load(fh)
             except (OSError, ValueError):
+                if a.memory_report:
+                    print(f"invalid memory report JSON: {c}")
+                    return 2
                 continue
             _lg_sha = _d.get("candidate_sha256")
             if _lg_sha:
                 if _lg_sha == sha_before:
                     lg_path, lg_match = c, "sha256"
                     break
+                if a.memory_report:
+                    lg_path, lg_match = c, "explicit candidate mismatch"
+                    break
                 continue
             if _d.get("candidate") == rel:
                 lg_path, lg_match = c, "path only (artifact_version 1)"
+                break
+            if a.memory_report:
+                lg_path, lg_match = c, "explicit unverified identity"
                 break
     if lg_path is None:
         skip("9: the real 8-GiB enforcement",
