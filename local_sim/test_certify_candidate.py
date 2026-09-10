@@ -459,7 +459,12 @@ def unit_tests():
     # The whole point of the attribution: P2 of the WP8 contract turns on
     # whether the failing frame is ours. It must not read as host contention.
     bad = _row(0, 0.0, "error")
-    bad["traceback"] = _TB_OURS
+    # Keep the fixture tied to the checkout under test.  workerq and other
+    # frozen runners relocate the repository, so a hard-coded developer path
+    # would turn this positive attribution control into a false negative.
+    checkout = _ROOT.replace("\\", "/")
+    bad["traceback"] = _TB_OURS.replace(
+        "C:/Users/samsu/Documents/arc-whest", checkout)
     cand = os.path.join(_ROOT, "estimator.py")
     rec = cc._failure_record(1, bad, cand)
     check("U4: a fault inside the candidate names the candidate's frame",
@@ -474,7 +479,9 @@ def unit_tests():
           repr(other["deepest_candidate_frame"]))
     # U4c: the real host traceback, run through the real helper, against a
     # real candidate path. This is the case the broken heuristic failed.
-    host = cc._candidate_frame(_TB_HOST.splitlines(), cand)
+    host_tb = _TB_HOST.replace(
+        "C:/Users/samsu/Documents/arc-whest", checkout)
+    host = cc._candidate_frame(host_tb.splitlines(), cand)
     check("U4c: an installed-package frame under the repo root is EXCLUDED",
           host is None, repr(host))
 
