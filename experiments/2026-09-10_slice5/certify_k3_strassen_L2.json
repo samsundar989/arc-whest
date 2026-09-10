@@ -1,0 +1,302 @@
+{
+  "artifact": "candidate_certification",
+  "artifact_version": 1,
+  "candidate": "estimator_k3_strassen_L2.py",
+  "candidate_sha256": "390bc226bbf517df0110facfc0dc91c78ef670e8a49368a536cabf630057d1db",
+  "width": 1024,
+  "depth": 16,
+  "budget": 2199023255552,
+  "truth_free": false,
+  "confirm_tier_read": true,
+  "is_shipped_file": false,
+  "sections": {
+    "validate": {
+      "returncode": 0
+    },
+    "package_identity": {
+      "whestbench": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\whestbench\\__init__.py",
+      "flopscope": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope\\__init__.py",
+      "official_config_rc": 0
+    },
+    "invariants": {
+      "returncode": 0,
+      "tail": "30/30 checks passed",
+      "world": {
+        "phase2": true,
+        "real_flopscope": true,
+        "weights_mode": "f64_readonly"
+      },
+      "arc_whest_raw_mse": "(unset: the frozen 1.4e-6 decision signal)"
+    },
+    "inv9_battery": {
+      "returncode": 0,
+      "tail": "BATTERY PASSED -- every deliberate equivariance defect is still rejected, the equivariant control is still accepted, and the unmutated prediction passes."
+    },
+    "determinism": {
+      "fresh_worker": [
+        {
+          "sha256": "2a735b63c8bec5be1120ca50cb8cf159af7248ae7b293e3f680014a38c7922fb",
+          "shape": [
+            16,
+            1024
+          ],
+          "flops_used": 1328654462566.0,
+          "pid": 49176
+        },
+        {
+          "sha256": "20a5eae4a7d593b1ecdbdcd2db19a2cf6f693fc444ecf75ad26846fbef6fde41",
+          "shape": [
+            16,
+            1024
+          ],
+          "flops_used": 1328654462566.0,
+          "pid": 44264
+        }
+      ]
+    },
+    "metered_runs": [
+      {
+        "seed": 90000000201,
+        "error": "",
+        "flops_used": 1328688049766.0,
+        "n_ops": 9321,
+        "multiplier": 0.6042173707855909,
+        "residual_wall_time_s": 3.426157699752366,
+        "wall_time_s": 24.02269910000905,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.382906436920166,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.47506295501626694,
+        "weights_mode": "f64_readonly"
+      },
+      {
+        "seed": 90000000202,
+        "error": "",
+        "flops_used": 1328688049766.0,
+        "n_ops": 9321,
+        "multiplier": 0.6042173707855909,
+        "residual_wall_time_s": 3.4096207008115016,
+        "wall_time_s": 24.130235400007223,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.542715072631836,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.7016219997851905,
+        "weights_mode": "f64_readonly"
+      },
+      {
+        "seed": 90000000203,
+        "error": "",
+        "flops_used": 1328688049766.0,
+        "n_ops": 9321,
+        "multiplier": 0.6042173707855909,
+        "residual_wall_time_s": 3.0866702003841056,
+        "wall_time_s": 19.467025300007663,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.458706378936768,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.7448653461712447,
+        "weights_mode": "f64_readonly"
+      },
+      {
+        "seed": 90000000204,
+        "error": "",
+        "flops_used": 1328688049766.0,
+        "n_ops": 9321,
+        "multiplier": 0.6042173707855909,
+        "residual_wall_time_s": 3.090625500801252,
+        "wall_time_s": 19.344350900006248,
+        "materializations": {
+          "__bool__": 0,
+          "__float__": 0,
+          "__int__": 0,
+          "__index__": 0
+        },
+        "materializations_total": 0,
+        "weights_unchanged": true,
+        "shape": [
+          16,
+          1024
+        ],
+        "dtype": "float32",
+        "finite": true,
+        "min_value": 0.0,
+        "max_value": 4.280097007751465,
+        "n_negative": 0,
+        "n_values": 16384,
+        "nbytes": 65536,
+        "mean_square_final_row": 0.6246375580426351,
+        "weights_mode": "f64_readonly"
+      }
+    ],
+    "setup_s_local": 0.000527299998793751,
+    "grader_twin_arm": {
+      "seed": 90000000201,
+      "certified_under": "f64_readonly",
+      "f32_tolerance": 9.5367431640625e-07,
+      "weight_pass_flops": 33554432,
+      "arms": {
+        "f32": {
+          "error": "",
+          "flops_used": 1328654495334.0,
+          "n_ops": 9305,
+          "finite": true,
+          "shape": [
+            16,
+            1024
+          ],
+          "mean_square_final_row": 0.47506295501626694
+        },
+        "f64": {
+          "error": "",
+          "flops_used": 1328688049766.0,
+          "n_ops": 9321,
+          "finite": true,
+          "shape": [
+            16,
+            1024
+          ],
+          "mean_square_final_row": 0.47506295501626694
+        },
+        "f64_readonly": {
+          "error": "",
+          "flops_used": 1328688049766.0,
+          "n_ops": 9321,
+          "finite": true,
+          "shape": [
+            16,
+            1024
+          ],
+          "mean_square_final_row": 0.47506295501626694
+        },
+        "f64_listconstructed": {
+          "error": "",
+          "flops_used": 1328688049766.0,
+          "n_ops": 9321,
+          "finite": true,
+          "shape": [
+            16,
+            1024
+          ],
+          "mean_square_final_row": 0.47506295501626694
+        }
+      }
+    },
+    "linux_memory_gate": "linux_memory_gate_estimator_k3_strassen_L2.json",
+    "windows_memory_accounting": {
+      "available": true,
+      "source": "test_deployment_envelope.peak_memory_bytes",
+      "peak_wset_bytes": 1786613760,
+      "peak_pagefile_bytes": 2294743040
+    },
+    "subprocess_smoke": {
+      "ok_report": true,
+      "n_failed_mlps": 2,
+      "failure_breakdown": {
+        "budget_exhausted": 0,
+        "time_exhausted": 0,
+        "residual_wall_time_exhausted": 2,
+        "combined_budget_exhausted": 0,
+        "error": 0
+      },
+      "failures": [
+        {
+          "rep": 1,
+          "mlp_index": 0,
+          "mlp_name": "logan-fitzgerald",
+          "error_code": null,
+          "error": null,
+          "flags": [
+            "residual_wall_time_exhausted"
+          ],
+          "traceback_last_line": null,
+          "deepest_candidate_frame": null,
+          "residual_wall_time_s": 3.305047500136425,
+          "flops_used": 1328654495334
+        },
+        {
+          "rep": 1,
+          "mlp_index": 1,
+          "mlp_name": "william-graves",
+          "error_code": null,
+          "error": null,
+          "flags": [
+            "residual_wall_time_exhausted"
+          ],
+          "traceback_last_line": null,
+          "deepest_candidate_frame": null,
+          "residual_wall_time_s": 3.234466601134045,
+          "flops_used": 1328654495334
+        }
+      ],
+      "dataset": "hf://aicrowd/arc-whestbench-public-2026@v2-phase2",
+      "width": 1024,
+      "depth": 16,
+      "lambda": 0.0,
+      "residual_cap": 0.4,
+      "wall_limit": 120.0,
+      "worst_residual": 3.305047500136425,
+      "flops_per_mlp": 1328654495334,
+      "multiplier": 1.0,
+      "c_over_b": 0.6042021119965284,
+      "final_layer_mse_CONFIRM_ONLY": 1.0336934924125671
+    },
+    "residual_soak": {
+      "requested": false
+    }
+  },
+  "checks_total": 54,
+  "checks_failed": [
+    "[10] 10: zero failed MLPs",
+    "[10] 10: worst GRADED-PATH residual is under the cliff"
+  ],
+  "checks_skipped": [],
+  "verdict": "REFUSED"
+}

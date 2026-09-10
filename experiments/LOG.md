@@ -39341,12 +39341,12 @@ public split is read **once**, at the end, read-only, and chooses nothing. No
 feature is selected on P08 and no hyper-parameter is touched after the first P08
 number is seen.
 
-# 2026-09-10 â€” **The depth-2 mini-100 FAILED my own pre-registered gate (h), and the gate is the thing that is wrong.** The nine "errors" are a property of the run: 0 of 9 reproduce.
+# 2026-09-10 — **The depth-2 mini-100 FAILED my own pre-registered gate (h), and the gate is the thing that is wrong.** The nine "errors" are a property of the run: 0 of 9 reproduce.
 
 *Contract: `experiments/LOG.md` 2026-09-10 *CONTRACT (Rule 1): nominee A moves to
 Strassen depth 2*, committed at `0a82ad1`. Jobs `483` (mini-100) and `492`
 (traceback probe). Artifact `experiments/2026-09-10_slice5/mini100_error_probe.json`.
-CONFIRM tier â€” weights only, no truth read, nothing chosen.*
+CONFIRM tier — weights only, no truth read, nothing chosen.*
 
 ## The result against the gate I wrote
 
@@ -39357,28 +39357,28 @@ Gate (h) said *"official mini-100 subprocess run with `n_failed_mlps: 0`"*.
     Adjusted score          9.10e-01        <- meaningless; it is the zeros
 
 **FAIL.** And because every row was zeroed, **the run yielded no accuracy reading
-at all** â€” gate (h) as written cost 67 minutes and returned one bit.
+at all** — gate (h) as written cost 67 minutes and returned one bit.
 
 ## The 91 are the documented artefact, and the depth-3 precedent settles them
 
-Local per-MLP residual read `2.99 s`â€“`4.67 s` against the `0.4 s` cap. That is the
+Local per-MLP residual read `2.99 s`–`4.67 s` against the `0.4 s` cap. That is the
 known in-process array-traffic artefact, and the comparison that matters was
 recorded on **2026-09-05, before this run existed**:
 
 | file | local residual | ops | graded residual | graded failures |
 |---|---:|---:|---:|---:|
 | Strassen depth 4 (`330290`) | `8.64 s`, `9.85 s` | `15,393` | `0.206 s` | **0 of 100** |
-| Strassen depth 3 (`330327`) | â€” | `12,357` | â€” | **0 of 100** |
-| **Strassen depth 2 (this candidate)** | **`2.99â€“4.67 s`** | **`8,905`** | projected `0.098 s` | OWED |
+| Strassen depth 3 (`330327`) | — | `12,357` | — | **0 of 100** |
+| **Strassen depth 2 (this candidate)** | **`2.99–4.67 s`** | **`8,905`** | projected `0.098 s` | OWED |
 
-**The depth-4 file that already graded `0/100` read `2.1xâ€“3.3x` WORSE on the same
+**The depth-4 file that already graded `0/100` read `2.1x–3.3x` WORSE on the same
 local instrument than the file gate (h) has just refused.** The candidate is
 strictly cheaper on every axis the residual is made of: fewer operations, lower
 local residual, lower projected graded residual. The graded per-op law
-(`10.7â€“11.2 Âµs/op`, corroborated across 20 board rows spanning `6,223â€“33,818` ops)
-puts depth 2 at `0.095â€“0.100 s`, i.e. `4.0xâ€“4.2x` under the cliff.
+(`10.7–11.2 µs/op`, corroborated across 20 board rows spanning `6,223–33,818` ops)
+puts depth 2 at `0.095–0.100 s`, i.e. `4.0x–4.2x` under the cliff.
 
-## The 9 "errors" were the RUN, not the candidate â€” and that is measured, not argued
+## The 9 "errors" were the RUN, not the candidate — and that is measured, not argued
 
 The nine indices that raised are exactly the complement of the residual warnings:
 `6, 33, 34, 35, 36, 37, 38, 39, 40`. **Eight of them are contiguous**, which is the
@@ -39393,14 +39393,14 @@ mini-split weights, with the grader's float64 immutable dtype**:
 | index | seconds | counted FLOPs | ops | finite | min | max |
 |---:|---:|---:|---:|---|---:|---:|
 | 6 | 24.1 | `1,328,543,577,702` | `8,905` | yes | `0.000` | `4.911` |
-| 33â€“40 | 24.3â€“25.6 | **identical to the byte** | `8,905` | yes | `0.000` | `4.51â€“6.49` |
+| 33–40 | 24.3–25.6 | **identical to the byte** | `8,905` | yes | `0.000` | `4.51–6.49` |
 
 Three things fall out, and the second is a certification property confirmed on
 data we did not mint:
 
 1. **Every one of the nine completes.** The failures were a property of the run.
 2. **Counted FLOPs are identical across all nine networks, to the byte.** FLOP
-   network-independence is what `certify` Â§6 asserts on minted data; here it holds
+   network-independence is what `certify` §6 asserts on minted data; here it holds
    on the organisers' own weights, which is the stronger statement.
 3. Output is finite and non-negative everywhere, so both answer guards hold.
 
@@ -39410,17 +39410,17 @@ three paths, agreeing to `0.008%`.
 
 ## The gate is mis-specified, and I am not going to quietly rewrite it
 
-Gate (h) does not discriminate. **It would refuse `330327` â€” nominee A itself,
-which has a real graded `0/100` row â€” for the same reason**, because the local
+Gate (h) does not discriminate. **It would refuse `330327` — nominee A itself,
+which has a real graded `0/100` row — for the same reason**, because the local
 instrument charges array traffic that the grader bills to kernel time. A gate that
 fails a file the grader has already passed in a strictly more expensive
 configuration is not testing deployment; it is testing this host.
 
-`docs/VALIDATION.md` Â§2b-iii already says what the real gate is: **the operation
+`docs/VALIDATION.md` §2b-iii already says what the real gate is: **the operation
 count**, at the graded per-op law. `8,905` is inside it and `4x` under the cliff.
 
 **But I wrote gate (h) before the data and it failed, so amending it now is
-choosing a gate after seeing the answer** â€” the exact move Rule 1 exists to
+choosing a gate after seeing the answer** — the exact move Rule 1 exists to
 prevent. The honest resolution is not mine to make alone:
 
 - The FAIL stands on the record, unamended.
@@ -39441,5 +39441,120 @@ queued.
 
 A raw-MSE reading on the organisers' data. The capped run produced none, because
 zeroed rows carry no error signal. The lifted-cap run will, and it is the CONFIRM
-check of pre-registered prediction 1 (`raw in [3.760e-08, 3.798e-08]`) â€” read-only,
+check of pre-registered prediction 1 (`raw in [3.760e-08, 3.798e-08]`) — read-only,
 choosing nothing, before the graded row exists.
+
+# 2026-09-10 — **The depth-2 nominee CERTIFIES on everything except §10's two artefact clauses.** Four instruments reported four op counts; all four are now explained, and mine were the wrong ones.
+
+*Contract `0a82ad1`. Job `490` (`certify_candidate.py`, `--no-snapshot`),
+artifact `experiments/2026-09-10_slice5/certify_k3_strassen_L2.json`. Candidate
+sha256 `390bc226…`.*
+
+## The verdict
+
+    CANDIDATE REFUSED -- 2 failed
+      FAIL  10: zero failed MLPs                                2 failed
+      FAIL  10: worst GRADED-PATH residual is under the cliff   3305.05 ms -> 0.1x
+
+**Both failures are §10, and both are the documented local-residual artefact.**
+Every other clause passes, including the ones that decide deployment.
+
+## What passed, and two of these are worth more than the refusal
+
+| section | clause | result |
+|---|---|---|
+| 4 | two FRESH interpreters agree **bitwise**, and bill identical FLOPs | PASS |
+| **5b** | four dtype arms (`f32`, `f64`, `f64_readonly`, `f64_listconstructed`) agree at **`0.000e+00` relative** | PASS |
+| **5b** | the f64-vs-f32 FLOP delta is **exactly `1.0000` passes over the weights** (`+33,554,432`) | PASS |
+| 5b | the read-only arm bills exactly what the writable one does — immutability is free | PASS `+0` |
+| 5 | the grader's weight arrays are **unchanged** after `predict` (sha before == after) | PASS |
+| 6 | counted FLOPs are network-INDEPENDENT | PASS |
+| 6 | the multiplier is the score's own identity `max(0.1, F/B)` | PASS `0.604217` |
+| 7 | worst op count inside the Phase-2 gate | PASS `9,321` of `22,000` |
+| 7 | worst per-MLP wall under the installed 120 s limit | PASS `24.13 s` â†’ `5x` |
+| 8 | **zero** scalar materializations during `predict` | PASS, counted not asserted |
+| **9** | a Linux 8-GiB report exists **matched on the candidate's sha256** | PASS `390bc226…` |
+| 9 | predict completed under the real cap | PASS `VmPeak 3,328.5 MB of 8,192` |
+
+**§5b is the check that would have saved five submission slots on 2026-09-05.**
+It is now green on this candidate at `0.000e+00` relative across all four ways the
+grader can hand weights, with the FLOP delta explained to the exact byte.
+
+**§9 matching on sha256 rather than skipping is the CRLF fix from earlier today
+working.** The first memory-gate run certified a CRLF copy and §9 would have
+skipped; re-running with `--no-snapshot` bound it to the bytes we will package.
+
+## The residual, on the instrument that is actually the gate
+
+    op count                    9,321
+    predicted graded residual   124.9 ms      3.20x under the 0.4 s cliff
+    (29,851 ops would hit it)
+    local residual              3,426 ms      this host measures 368 us/op
+                                              against the grader's 13.4 us/op
+
+The local instrument reads **27x** high per operation. `docs/VALIDATION.md`
+§2b-iii makes the op count the gate for exactly this reason, and §7 applies it and
+passes. §10 applies the seconds and fails. The two disagree by construction, on
+the same file, in the same run.
+
+## Four instruments, four op counts, and the two I produced were wrong
+
+| instrument | weights handed to `predict` | counted FLOPs | ops |
+|---|---|---:|---:|
+| `p2_mini_error_probe.py` (mine) | **bare numpy**, f64 read-only | `1,328,543,577,702` | `8,905` |
+| `opcheck` (mine) | **bare numpy**, f32 and f64 | `1,328,543,577,756` | `8,907` |
+| `p2_hybrid_strassen_price.py` | its own path | — | `9,304` |
+| **`certify_candidate` §6** | **`fnp.array(...)`, f64 read-only** | **`1,328,688,049,766`** | **`9,321`** |
+
+**The last row is the grader-faithful one and the first two are mine.**
+`lifecycle_eval.build_weights` is explicit about why:
+
+> flopscope-backed in every mode, because operations invoked as METHODS ON A
+> WEIGHT are metered on the grader and free on bare numpy (that difference was
+> 33.5M of the 37.8M FLOP shortfall the anchor closed on 2026-08-24).
+
+So my two probes handed **bare numpy** and under-read the meter by
+`144,472,064` FLOPs and `414` operations. **This is a trap the repository had
+already found, closed and written down, and I walked into it anyway** — the same
+shape as the two stale scalars and the two dtype defaults recorded this month.
+
+**What survives from those probes and what does not.** The *conclusions* stand:
+`0 of 9` raised, every output finite and non-negative, and counted FLOPs identical
+across all nine networks (network-independence is a property of the computation and
+is preserved under either convention). The *FLOP and operation figures* do not, and
+the earlier entry's `8,905` should be read as `9,321` wherever it is quoted as a
+graded projection.
+
+The two spellings of depth 2 — `_STRASSEN_DEPTH = 2` and
+`_STRASSEN_MIN_BLOCK = 256` — are **exactly equivalent at the live shape**, at both
+weight dtypes, to the byte (`1,328,543,577,756` / `8,907` in all four cells of job
+`496`). So the spelling was never the discrepancy; the weight convention was.
+
+## Pre-registered predictions, scored
+
+| # | prediction | outcome |
+|---|---|---|
+| 4 | graded ops `9,304 +- 0` | **MISSED.** `9,321`, `+0.18%`. The `+- 0` was overconfident: I quoted a *pricing instrument's* number as if it were the file's |
+| 4 | graded residual `<= 0.15 s` | on track — `0.125 s` predicted at the graded per-op law |
+| 5 | `edge_cases --real-flopscope --phase2` passes on the candidate | **CONFIRMED**, §3 green |
+| 5 | grader-twin arm f32-tolerance-identical | **CONFIRMED**, and stronger: `0.000e+00` |
+
+Predictions 1, 2 and 3 need the graded row and are still open.
+
+## Gate status against the contract
+
+| gate | state |
+|---|---|
+| (a) `whest validate` clean | **PASS** |
+| (b) certify sections 1–11 with no FAIL | **FAIL**, §10 only, both clauses the artefact |
+| (c) grader-twin f64 read-only identical, FLOP delta explained | **PASS**, `0.000e+00`, delta exactly one weight pass |
+| (d) `edge_cases --real-flopscope --phase2` no regression | **PASS** |
+| (e) ops `<= 24,000` | **PASS**, `9,321` |
+| (f) projected residual `<= 0.3 s` | **PASS**, `0.125 s` |
+| (g) Linux memory gate green on the sha | **PASS**, `2.46x` headroom, matched on `390bc226…` |
+| (h) official mini-100, `n_failed_mlps: 0` | **FAIL**, the artefact — see today's mini-100 entry |
+
+**Six of eight pass. The two failures are the same artefact, measured twice.**
+The canary stays HELD pending Samuel's acknowledgement that (b)'s §10 clause and
+(h) are the same mis-specification, for the reason recorded in the mini-100 entry:
+they would refuse `330327`, which has a real graded `0/100` row.
