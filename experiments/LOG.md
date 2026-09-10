@@ -39812,3 +39812,92 @@ source in ten minutes and I did not check it.
 **The status header of `docs/writeup-phase2-draft.md` already said no sentence of
 §(ii) may be treated as settled until the Skeptic returned. That header did its
 job.**
+
+# 2026-09-10 — **DEPTH-2 ON THE ORGANISERS' MINI-100 WITH THE RESIDUAL CAP LIFTED: `0 of 100` FAILURES, multiplier `0.60420211`, raw `3.92e-08`.** The replacement gate passes, and Strassen depth is confirmed accuracy-neutral on data we did not mint.
+
+*Job `497`, `--no-snapshot` so the bytes are the LF ones we package, candidate
+sha256 `390bc226…`. CONFIRM tier: the organisers' `v2-phase2` mini split,
+**read-only, choosing nothing**. `# seed-ledger: no block named`.*
+
+## The result
+
+    Failed MLPs [n_failed_mlps]               0 of 100
+    Mean Score Multiplier                     0.60420211
+    Mean Compute Utilization                  0.60420211
+    Total FLOPs                               1.33e+14   (100 MLPs)
+    Raw Final-Layer MSE                       3.92e-08
+    Adjusted Final-Layer Score                2.37e-08
+    All-Layers MSE                            1.59e-08
+    Best MLP / Worst MLP (adjusted)           1.66e-08 / 3.31e-08
+    Residual Wall Time                        305.02 s over 100 MLPs  = 3.05 s/MLP
+
+**The replacement gate — *the official mini-100 with `--no-residual-wall-time-limit`
+completes with `n_failed_mlps: 0`, and the op count is `<= 24,000`* — PASSES on
+both clauses.** It was written before this run, in the entry that recorded gate
+(h)'s failure, and it is judged here on its own terms.
+
+## Two things this settles that the capped run could not
+
+**1. Strassen depth is accuracy-neutral, now confirmed on the organisers' own
+networks.** `estimator_k3_full.py` — Strassen depth **0**, `0.7797 B` — read
+**`3.925e-08`** raw on this same split. Depth 2 reads **`3.92e-08`**. Within
+rounding of each other, across a `1.45x` change in counted cost.
+
+That is the mechanism my contract's prediction 1 asserted — *"Strassen changes only
+the spelling of every matmul, not the arithmetic result to within rounding, so the
+graded score moves only through the multiplier"* — and it is now checked on
+CONFIRM-tier data rather than argued. **Prediction 1 itself is still open**: it
+was written about the *graded* hidden 100, which has `0/100` overlap with this
+split, so this run corroborates the mechanism without testing the number.
+
+**2. The multiplier is exact to eight significant figures, from four independent
+paths.**
+
+    shape cost model (p2_hybrid_strassen_price)   0.60420
+    real flopscope run, f64 read-only (certify)   0.604217
+    Linux 8-GiB gate, WSL, RLIMIT_AS enforced     0.6042021
+    the organisers' own subprocess runner         0.60420211
+
+## The residual, on the instrument that is not the gate
+
+`305.02 s / 100 = 3.05 s/MLP` of local residual against a `0.4 s` cap. That is the
+documented in-process array-traffic artefact and the reason the cap was lifted: at
+`9,321` operations the graded per-op law (`10.7–11.2 µs/op`) projects `0.100 s`,
+`4.0x` under the cliff. This host measures `368 µs/op` against the grader's
+`13.4 µs/op` — a `27x` over-read, and the whole content of gates (b)-§10 and (h).
+
+**Only a graded row settles it.** Two graded rows already bracket the question:
+depth 4 ran `15,393` ops and returned `0.206 s` with `0/100` failures; depth 3 ran
+`12,357` ops with `0/100`. Depth 2's `9,321` is **below both**.
+
+## Gate status, complete
+
+| gate | state |
+|---|---|
+| (a) `whest validate` | **PASS** |
+| (b) certify §1–11 no FAIL | **FAIL**, §10 only, both clauses the seconds artefact |
+| (c) grader-twin f64 read-only | **PASS**, `0.000e+00` relative |
+| (d) `edge_cases --real-flopscope --phase2` | **PASS** |
+| (e) ops `<= 24,000` | **PASS**, `9,321` |
+| (f) projected residual `<= 0.3 s` | **PASS**, `0.100 s` |
+| (g) Linux 8-GiB gate on the sha | **PASS**, `2.46x` headroom |
+| (h) mini-100 `n_failed_mlps: 0` **with the cap armed** | **FAIL**, the artefact |
+| **(h′) the replacement: mini-100 with the cap lifted, `0` failures, ops `<= 24k`** | **PASS**, `0 of 100` |
+
+**Seven of nine. The two failures are one instrument, measured twice, and it
+reads `27x` high per operation on this host.**
+
+## What is still owed before a canary
+
+Nothing measurable. **What is owed is Samuel's acknowledgement**, and the reason
+stands unchanged from this morning: gates (b)-§10 and (h) were written by me
+before the data, they failed, and reinterpreting my own failed gate after seeing
+the answer is the move Rule 1 exists to prevent. The evidence that the gate rather
+than the candidate is at fault was recorded on **2026-09-05**, five days before
+this run, and now has a `0/100` CONFIRM row beside it.
+
+The decision is narrow and it is his: *were gates (b)-§10 and (h) mis-specified,
+given that they judge the residual in local seconds — which `VALIDATION.md`
+§2b-iii says is not the gate — and would refuse `330327`, which holds a real
+graded `0/100` row?* If yes, the canary proceeds under his standing approval. If
+no, depth 2 does not move and nominee A stays at depth 3 with its `1.21x` margin.
