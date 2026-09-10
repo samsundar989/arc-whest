@@ -37,7 +37,7 @@
                             --labels-only: every coverage count stated in THIS
                             docstring and in VALIDATION.md section 7 is checked
                             against the suite it names. Two commands, one step.
-    8. canonical scorer   - 98/98, the competition identity is still bitwise
+    8. canonical scorer   - 134/134, the competition identity is still bitwise
                             equal to the installed whestbench, AND decide() --
                             THE gate -- still refuses percentile/BCa, still
                             requires a pre-registered threshold, and still
@@ -416,7 +416,7 @@ Step "7. seed ledger (consumption + source scan) + enforcement labels" {
 
 # --- 8. the canonical competition scorer ---------------------------------------
 # local_sim/competition_score.py is the ONE place the grader's identity lives, and
-# every gate downstream reads its numbers. 98/98 asserts it is still bitwise equal
+# every gate downstream reads its numbers. 134/134 asserts it is still bitwise equal
 # to the installed whestbench on the scalar primitives, on the aggregate, and on
 # the real scoring loop INCLUDING both failure paths -- and carries the graded
 # fixture where the arithmetic and geometric estimands pick opposite winners.
