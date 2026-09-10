@@ -233,15 +233,6 @@ def _cost_under_012(name, width, depth, budget):
 
 
 
-_BLOCK_RE = re.compile(r"truth_([A-Z]\d{2})")
-
-
-def _block_from_path(path: str) -> str:
-    """The block id a truth filename carries, or "" if it carries none."""
-    m = _BLOCK_RE.search(os.path.basename(path))
-    return m.group(1) if m else ""
-
-
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--truth", required=True)
@@ -297,13 +288,8 @@ def main(argv=None) -> int:
     # the call site that makes the lab honest, and the block is REQUIRED rather
     # than guessed at when the filename does not carry it.
     import truth_reads as _tr
-    block = a.block or _block_from_path(a.truth)
-    if not block:
-        print("REFUSED: cannot tell which seed block "
-              f"{os.path.basename(a.truth)!r} belongs to. Pass --block. "
-              "Guessing here is how a single-use block gets read twice.")
-        return 2
     try:
+        block = _tr.resolve_block(a.truth, a.block)
         z = _tr.load_truth(
             block, a.truth, consumer="local_sim/p2_lab.py",
             purpose=f"four-arm mechanism report: {','.join(arms)}",

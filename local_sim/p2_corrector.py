@@ -354,14 +354,6 @@ class Corrector:
 # data
 # ---------------------------------------------------------------------------
 
-_BLOCK_RE = re.compile(r"truth_([A-Z]\d{2})")
-
-
-def _block_from_path(path):
-    m = _BLOCK_RE.search(os.path.basename(path))
-    return m.group(1) if m else ""
-
-
 def load_truth(path, *, block="", purpose="p2 corrector study",
                result_artifact="", ts=""):
     """Load a protected truth archive only after an atomic read reservation.
@@ -371,12 +363,8 @@ def load_truth(path, *, block="", purpose="p2 corrector study",
     """
     import truth_reads
 
-    block = block or _block_from_path(path)
-    if not block:
-        raise SystemExit(
-            "REFUSED: cannot identify the truth block from the filename; pass "
-            "--block explicitly before accessing labels")
     try:
+        block = truth_reads.resolve_block(path, block)
         z = truth_reads.load_truth(
             block, path, consumer="local_sim/p2_corrector.py", purpose=purpose,
             instrument=os.path.abspath(__file__), result_artifact=result_artifact,

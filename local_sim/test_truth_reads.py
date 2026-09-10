@@ -88,6 +88,40 @@ def t_cap():
           tr.spent(SU_BLOCK, reads) == 1, f"{tr.spent(SU_BLOCK, reads)} spent")
 
 
+def t_artifact_identity_binding():
+    head("2. a filename's block identity cannot be overridden")
+    d, reads, ledg, art = _sandbox()
+    named = os.path.join(d, "truth_P08.npz")
+    os.replace(art, named)
+    try:
+        tr.resolve_block(named, "P01")
+        mismatch_refused = False
+    except tr.ReadRefused:
+        mismatch_refused = True
+    check("truth_P08.npz cannot be presented as P01", mismatch_refused)
+    check("truth_P08.npz resolves to P08 when no id is supplied",
+          tr.resolve_block(named) == "P08")
+    check("truth-bearing feat_P08.npz also resolves to P08",
+          tr.resolve_block(os.path.join(d, "feat_P08.npz")) == "P08")
+    check("a vault filename resolves only to V",
+          tr.resolve_block(os.path.join(d, "vault_v1.npz")) == "V")
+    try:
+        tr.resolve_block(os.path.join(d, "vault_v1.npz"), "P01")
+        vault_refused = False
+    except tr.ReadRefused:
+        vault_refused = True
+    check("a vault artifact cannot be presented as a design block", vault_refused)
+    check("a generic filename may use an explicit registered block",
+          tr.resolve_block(os.path.join(d, "generic.npz"), "P01") == "P01")
+    try:
+        tr.resolve_block(os.path.join(d, "generic.npz"), "P99")
+        unknown_refused = False
+    except tr.ReadRefused:
+        unknown_refused = True
+    check("an unknown block is refused", unknown_refused)
+    check("identity refusals do not spend a read", tr.reads(reads) == [])
+
+
 def t_aborted_still_counts():
     head("2. a crashed read still counts — the labels were already exposed")
     d, reads, ledg, art = _sandbox()
@@ -260,7 +294,8 @@ def main():
     print("=" * 96)
     print("THE READ REGISTER — a single-use block is single-use when its LABELS are counted")
     print("=" * 96)
-    for fn in (t_cap, t_aborted_still_counts, t_uncapped_tier_is_still_counted,
+    for fn in (t_cap, t_artifact_identity_binding,
+               t_aborted_still_counts, t_uncapped_tier_is_still_counted,
                t_provenance_recorded, t_concurrent_reads, t_ledger_race_is_closed,
                t_lock_is_released, t_live_register):
         fn()

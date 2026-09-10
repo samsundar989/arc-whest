@@ -151,6 +151,31 @@ def test_positive_negative_incomplete():
           and len([c for c in refused["checks"] if not c[1]]) >= 3,
           f"{len(refused['checks'])} explicit negatives")
 
+    # Applicability is the conjunction of candidate bytes and workload. Drive
+    # legacy reports because that was the failure shape: they have no complete
+    # v4 envelope, but their old shape/budget/cap fields can still prove that a
+    # negative belongs to another workload.
+    for field, wrong, needle in (
+            ("width", 64, "certified shape"),
+            ("budget", 272_000_000_000, "certified budget"),
+            ("limit_mb", 512, "full memory cap")):
+        other_workload = copy.deepcopy(negative)
+        other_workload[field] = wrong
+        result = consume(other_workload)
+        check(f"legacy explicit failure with wrong {field} is INCOMPLETE",
+              result["verdict"] == "INCOMPLETE"
+              and result["applicable"] is False
+              and needle in json.dumps(result),
+              f"{result['verdict']}, applicable={result['applicable']}")
+
+    matching_missing = copy.deepcopy(legacy)
+    result = consume(matching_missing)
+    check("matching legacy evidence with missing-only fields stays INCOMPLETE",
+          result["verdict"] == "INCOMPLETE"
+          and result["applicable"] is True
+          and not [c for c in result["checks"] if not c[1]],
+          f"{result['verdict']}, applicable={result['applicable']}")
+
 
 def test_binding_and_applicability():
     head("2. identity, workload, stack and instrument provenance")
@@ -255,13 +280,16 @@ def replay_stored_reports():
 def test_replay():
     head("4. non-rewriting replay of every stored Linux memory report")
     replay = replay_stored_reports()
-    check("the expected seven historical reports were replayed",
-          replay["n_reports"] == 7, str(replay["n_reports"]))
+    check("the seven historical reports plus any new reports were replayed",
+          replay["n_reports"] >= 7, str(replay["n_reports"]))
     check("every historical source artifact remained byte-identical",
           replay["source_reports_unchanged"], "sha256 before == after")
-    verdicts = [row["consumer_verdict"] for row in replay["reports"]]
-    check("all seven legacy reports are incomplete under the v4 consumer",
-          verdicts == ["INCOMPLETE"] * 7, repr(verdicts))
+    legacy_rows = [row for row in replay["reports"]
+                   if "2026-09-10_stage0_cert_memory" not in row["report"]]
+    verdicts = [row["consumer_verdict"] for row in legacy_rows]
+    check("all seven pre-repair reports are incomplete under the v4 consumer",
+          len(legacy_rows) == 7 and verdicts == ["INCOMPLETE"] * 7,
+          repr(verdicts))
 
 
 def main():

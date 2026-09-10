@@ -217,6 +217,13 @@ def _state_features(out_pre, layer, torch):
 
 def extract(a) -> int:
     """Run the chain on the truth file's networks and dump features + prediction."""
+    import truth_reads
+
+    try:
+        block = truth_reads.resolve_block(a.truth, a.block)
+    except truth_reads.ReadRefused as exc:
+        raise SystemExit(f"REFUSED before truth access: {exc}") from exc
+
     import torch
     import p2_kprop_bridge as bridge
     from mint_provenance import canonical_mint
@@ -235,7 +242,13 @@ def extract(a) -> int:
 
     from mlp_kprop.kprop_harmonic import SIMPLE, mlp_kprop  # noqa: E402
 
-    z = np.load(a.truth)
+    try:
+        z = truth_reads.load_truth(
+            block, a.truth, consumer="local_sim/p2_t2_corrector.py",
+            purpose="extract exact-K3 chain features from protected truth",
+            instrument=os.path.abspath(__file__), result_artifact=a.out, ts=a.ts)
+    except truth_reads.ReadRefused as exc:
+        raise SystemExit(f"REFUSED before truth access: {exc}") from exc
     seeds = [int(s) for s in z["seeds"]]
     m1, m2 = z["means_r1"], z["means_r2"]
     n_samples = int(z["n_samples"])
@@ -422,15 +435,34 @@ def _james_stein(c, resid):
 
 
 def fit(a) -> int:
-    import torch
-
     dev = a.device
-    zf = np.load(a.fit_features)
+    import truth_reads
+    try:
+        fit_block = truth_reads.resolve_block(a.fit_features, a.fit_block)
+        zf = truth_reads.load_truth(
+            fit_block, a.fit_features, consumer="local_sim/p2_t2_corrector.py",
+            purpose="fit T2 corrector from truth-bearing extracted features",
+            instrument=os.path.abspath(__file__), result_artifact=a.json, ts=a.ts)
+    except truth_reads.ReadRefused as exc:
+        raise SystemExit(f"REFUSED before feature-label access: {exc}") from exc
     # CONTROLS-ONLY reads the FIT corpus and nothing else. It exists because the
     # 2026-09-10 Skeptic established that P08 had already been read three times
     # (the two broken runs computed `gain` on it), and re-reading a single-use
     # held-out block to repair a control would compound that, not fix it.
-    zr = np.load(a.read_features) if not a.controls_only else zf
+    if a.controls_only:
+        zr = zf
+    else:
+        try:
+            read_block = truth_reads.resolve_block(a.read_features, a.read_block)
+            zr = truth_reads.load_truth(
+                read_block, a.read_features,
+                consumer="local_sim/p2_t2_corrector.py",
+                purpose="evaluate T2 corrector on truth-bearing held-out features",
+                instrument=os.path.abspath(__file__), result_artifact=a.json, ts=a.ts)
+        except truth_reads.ReadRefused as exc:
+            raise SystemExit(f"REFUSED before feature-label access: {exc}") from exc
+
+    import torch
 
     def unpack(z):
         pred, sig = z["pred"], z["sig"]
@@ -713,9 +745,17 @@ def main(argv=None) -> int:
     ap.add_argument("--extract", action="store_true")
     ap.add_argument("--fit", action="store_true")
     ap.add_argument("--truth", default="")
+    ap.add_argument("--block", default="",
+                    help="truth block id; filename identity wins and mismatches are refused")
+    ap.add_argument("--ts", default="",
+                    help="historical event timestamp only; omit for a runtime receipt")
     ap.add_argument("--out", default="")
     ap.add_argument("--fit-features", default="")
     ap.add_argument("--read-features", default="")
+    ap.add_argument("--fit-block", default="",
+                    help="block for truth-bearing fit features; inferred from feat_<BLOCK>.npz")
+    ap.add_argument("--read-block", default="",
+                    help="block for truth-bearing read features; inferred from feat_<BLOCK>.npz")
     ap.add_argument("--json", default="")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--folds", type=int, default=4)

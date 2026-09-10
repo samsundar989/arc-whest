@@ -421,6 +421,39 @@ def consume_memory_report(
                 "checks": checks, "bindings": bindings,
                 "incomplete": incomplete, "artifact_version": ver}
 
+    # Candidate identity alone is insufficient applicability. Legacy reports
+    # often carry enough workload fields to prove that they concern a different
+    # run even though they lack the full current binding envelope. Interpret
+    # those fields before interpreting an explicit failure: a MemoryError at
+    # 64x4 under 512 MiB says nothing about this 1024x16, 8192 MiB workload.
+    known_mismatches = []
+    got_width, got_depth = lg.get("width"), lg.get("depth")
+    if ((got_width is not None and got_width != width) or
+            (got_depth is not None and got_depth != depth)):
+        known_mismatches.append(
+            f"certified shape: {got_width}x{got_depth} vs {width}x{depth}")
+    if lg.get("budget") is not None and lg.get("budget") != budget:
+        known_mismatches.append(
+            f"certified budget: {lg.get('budget')} vs {budget}")
+    if lg.get("limit_mb") is not None and lg.get("limit_mb") != cap_mb:
+        known_mismatches.append(
+            f"full memory cap: {lg.get('limit_mb')} MB vs {cap_mb} MB")
+    if (lg.get("weights_mode") is not None and
+            lg.get("weights_mode") != weights_mode):
+        known_mismatches.append(
+            f"deployment weight representation: {lg.get('weights_mode')!r} "
+            f"vs {weights_mode!r}")
+    if (lg.get("suite_n_mlps") is not None and
+            lg.get("suite_n_mlps") != MEMORY_SUITE_N_MLPS):
+        known_mismatches.append(
+            f"suite lifecycle size: {lg.get('suite_n_mlps')} vs "
+            f"{MEMORY_SUITE_N_MLPS}")
+    if known_mismatches:
+        incomplete.extend(known_mismatches)
+        return {"verdict": "INCOMPLETE", "applicable": False,
+                "checks": checks, "bindings": bindings,
+                "incomplete": incomplete, "artifact_version": ver}
+
     # Preserve explicit negative evidence before considering whether newer
     # binding fields exist. This is the legacy early-return defect from R2.
     explicit = []

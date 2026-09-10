@@ -115,6 +115,10 @@ def main() -> int:
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--truth", required=True)
+    ap.add_argument("--block", default="",
+                    help="truth block id; filename identity wins and mismatches are refused")
+    ap.add_argument("--ts", default="",
+                    help="historical event timestamp only; omit for a runtime receipt")
     ap.add_argument("--out", default="")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--dtype", choices=["f32", "f64"], default="f32")
@@ -127,12 +131,20 @@ def main() -> int:
     if not v["pass"]:
         raise SystemExit("REFUSED: upstream is not rev 93d091a4 plus the patch.")
 
-    d = np.load(a.truth)
+    import truth_reads
+    try:
+        block = truth_reads.resolve_block(a.truth, a.block)
+        d = truth_reads.load_truth(
+            block, a.truth, consumer="local_sim/p2_truth_score.py",
+            purpose="WP14 score against minted truth",
+            instrument=os.path.abspath(__file__), result_artifact=a.out, ts=a.ts)
+    except truth_reads.ReadRefused as exc:
+        raise SystemExit(f"REFUSED before truth access: {exc}") from exc
     seeds = [int(x) for x in d["seeds"]]
     m1, m2 = d["means_r1"], d["means_r2"]
     gt_noise = d["gt_noise"]
     n_samples = int(d["n_samples"])
-    if "probe" in d.files and int(d["probe"]) == 1:
+    if "probe" in d and int(d["probe"]) == 1:
         raise SystemExit("REFUSED: this is a PROBE truth file, not evidence.")
 
     dtype = torch.float64 if a.dtype == "f64" else torch.float32

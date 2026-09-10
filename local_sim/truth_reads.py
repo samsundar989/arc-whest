@@ -98,6 +98,40 @@ class ReadRefused(PermissionError):
     """The cap is spent. Never a warning, never overridable by a flag."""
 
 
+_BLOCK_IN_NAME = re.compile(
+    r"(?:^|[^A-Za-z0-9])(?:truth|feat|features)_([A-Z]\d{2})(?:[^A-Za-z0-9]|$)",
+    re.I)
+_VAULT_IN_NAME = re.compile(r"(?:^|[^A-Za-z0-9])vault_v\d+\.npz(?:$|[^A-Za-z0-9])", re.I)
+
+
+def resolve_block(artifact: str, supplied: str = "") -> str:
+    """Bind a caller's block id to the identity carried by an artifact path.
+
+    A supplied id may fill in an intentionally generic filename. It may never
+    contradict a filename that already identifies a block. Vault artifacts are
+    always block ``V``. This check is deliberately performed before a read is
+    reserved, so a mismatched request neither exposes labels nor spends a look.
+    """
+    name = os.path.basename(os.fspath(artifact))
+    match = _BLOCK_IN_NAME.search(name)
+    inferred = match.group(1).upper() if match else ("V" if _VAULT_IN_NAME.search(name) else "")
+    requested = supplied.strip().upper()
+    if inferred and requested and inferred != requested:
+        raise ReadRefused(
+            f"artifact {name!r} identifies block {inferred}, but the caller "
+            f"supplied {requested}; refusing before truth access")
+    block = inferred or requested
+    if not block:
+        raise ReadRefused(
+            f"cannot identify the seed block for {name!r}; use a truth_<BLOCK>.npz "
+            "filename or supply --block explicitly")
+    try:
+        tier_of(block)
+    except KeyError as exc:
+        raise ReadRefused(f"unknown seed block {block!r}; refusing before truth access") from exc
+    return block
+
+
 @dataclass(frozen=True)
 class Read:
     """One look at a protected artifact's labels."""
@@ -293,6 +327,8 @@ def load_truth(block: str, artifact: str, **kw):
     memory so the reservation cannot outlive a lazy handle.
     """
     import numpy as np
+
+    block = resolve_block(artifact, block)
 
     with reserve(block, artifact, **kw) as p:
         with np.load(p) as z:

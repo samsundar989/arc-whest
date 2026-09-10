@@ -24,6 +24,7 @@ import numpy as np  # noqa: E402
 import lifecycle_eval as le  # noqa: E402
 import p2_corrector as corrector  # noqa: E402
 import p2_lab as lab  # noqa: E402
+import p2_t2_corrector as t2_corrector  # noqa: E402
 import truth_reads as tr  # noqa: E402
 
 
@@ -128,8 +129,56 @@ def test_validation_precedes_truth():
               f"loader calls={len(calls)}")
 
 
+def test_block_identity_mismatch_precedes_truth():
+    print("\n2. an explicit block cannot contradict the truth filename")
+    td, arms, truth_p01 = _sandbox()
+    with td:
+        truth_p08 = os.path.join(td.name, "truth_P08.npz")
+        os.replace(truth_p01, truth_p08)
+        calls = []
+
+        def forbidden(*args, **kwargs):
+            calls.append((args, kwargs))
+            raise AssertionError("mismatched block reached the truth loader")
+
+        args = ["--truth", truth_p08, "--block", "P01", "--out",
+                os.path.join(td.name, "lab.json"), "--arms",
+                ",".join(lab.MECHANISM_ARMS), "--control", "exact",
+                "--lam", "0"]
+        with patched(lab, "ARMS_DIR", arms), patched(lab, "load_manifest", _manifest), \
+                patched(tr, "load_truth", forbidden):
+            lab_rc = lab.main(args)
+            try:
+                corrector.load_truth(truth_p08, block="P01")
+                corrector_refused = False
+            except SystemExit as exc:
+                corrector_refused = "REFUSED before truth access" in str(exc)
+            try:
+                t2_corrector.main(["--extract", "--truth", truth_p08,
+                                   "--block", "P01", "--out",
+                                   os.path.join(td.name, "features.npz")])
+                t2_refused = False
+            except SystemExit as exc:
+                t2_refused = "REFUSED before truth access" in str(exc)
+            feat_p08 = os.path.join(td.name, "feat_P08.npz")
+            os.replace(truth_p08, feat_p08)
+            try:
+                t2_corrector.main(["--fit", "--controls-only",
+                                   "--fit-features", feat_p08,
+                                   "--fit-block", "P01"])
+                t2_fit_refused = False
+            except SystemExit as exc:
+                t2_fit_refused = "REFUSED before feature-label access" in str(exc)
+        check("p2_lab refuses P08-as-P01 through its real main()", lab_rc == 2)
+        check("p2_corrector refuses P08-as-P01", corrector_refused)
+        check("p2_t2_corrector refuses P08-as-P01 before importing its chain", t2_refused)
+        check("p2_t2_corrector also binds truth-bearing feature files", t2_fit_refused)
+        check("all mismatch refusals precede truth reservation", not calls,
+              f"loader calls={len(calls)}")
+
+
 def test_complete_report_and_receipt():
-    print("\n2. real lab entry point writes one complete, noise-aware report")
+    print("\n3. real lab entry point writes one complete, noise-aware report")
     td, arms, truth = _sandbox()
     with td:
         out = os.path.join(td.name, "report.json")
@@ -206,7 +255,7 @@ def test_complete_report_and_receipt():
 
 
 def test_corrector_and_history():
-    print("\n3. corrector uses the shared loader and live history is unchanged")
+    print("\n4. corrector uses the shared loader and live history is unchanged")
     before = _sha(tr.READS_PATH)
     p01, p08 = tr.spent("P01"), tr.spent("P08")
     td, _arms, truth = _sandbox()
@@ -235,7 +284,7 @@ def test_corrector_and_history():
 
 
 def test_historical_baseline():
-    print("\n4. a fixed pre-registry baseline participates in the cap")
+    print("\n5. a fixed pre-registry baseline participates in the cap")
     td, _arms, truth = _sandbox()
     with td:
         reads = os.path.join(td.name, "reads.jsonl")
@@ -266,7 +315,9 @@ def main():
     print("=" * 100)
     print("STAGE 0 LAB / NOISE REPORT / PROTECTED ACCESS")
     print("=" * 100)
-    for fn in (test_validation_precedes_truth, test_complete_report_and_receipt,
+    for fn in (test_validation_precedes_truth,
+               test_block_identity_mismatch_precedes_truth,
+               test_complete_report_and_receipt,
                test_corrector_and_history, test_historical_baseline):
         fn()
     ok = sum(RESULTS)
