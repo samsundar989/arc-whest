@@ -53,9 +53,12 @@ DECIDE allocation. No public or vault truth is authorized.
 At `2026-09-10T23:07:29Z`, the driver mistakenly inspected the P07 NPZ keys,
 shapes and seed endpoints through direct `numpy.load`. It computed no scores or
 candidate comparisons and changed no frozen choice, but it bypassed pre-read
-reservation. The incident is backfilled honestly as P07 DESIGN read 1 in
-`experiments/truth_reads.jsonl`; the future registered fit will be read 2. P07 was
-already exposed reusable DESIGN, so its role is unchanged.
+reservation. The incident is backfilled honestly in `experiments/truth_reads.jsonl`.
+Older T2 work had already accessed P07 before this registry existed, so the
+registered count is a lower bound and no exact read ordinal is claimed. The future
+fit is the next registered P07 access. P07 was already exposed reusable DESIGN, so
+its role is unchanged. The exact command and protected stdout are preserved in
+`experiments/2026-09-10_stage2_k4_design/p07_direct_read_incident.txt`.
 
 ## Submission state
 

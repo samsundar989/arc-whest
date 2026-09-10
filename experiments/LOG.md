@@ -41444,3 +41444,23 @@ in `experiments/truth_reads.jsonl`, reservation
 `automatic_runtime_backfill` timestamp source. The future registered fit, if the
 preflight and producer evidence pass, will therefore be P07 read 2 rather than
 read 1. This backfill records the failure; it does not claim the pre-read guard ran.
+
+### Correction after independent incident review
+
+The ordinal wording immediately above is withdrawn. P07 labels had already been
+used by the T2 fit and follow-up controls before `truth_reads.jsonl` was introduced;
+those historical accesses are documented in this LOG but not exhaustively
+reconstructed as individual reservations. The registry therefore supplies a
+**lower bound**, not an exact lifetime P07 access count. The incident is a newly
+recorded schema-only access to an already exposed reusable DESIGN asset, and the
+planned bounded fit will be called the **next registered P07 access**, never
+"read 2" or the first lifetime access.
+
+The exact command and stdout are now immutable raw evidence at
+`experiments/2026-09-10_stage2_k4_design/p07_direct_read_incident.txt`. They confirm
+that the command printed archive keys, shapes and seed endpoints and no activation,
+MSE, candidate or score values. The same fresh-context Skeptic returned **ACCEPT**
+for proceeding after jobs 633/634 and a verified label-free producer receipt,
+provided no grid, bound, gate, identity, producer behavior or candidate source
+changes. All remain byte-frozen. This acceptance does not excuse the bypass or
+turn P07 into decision evidence.

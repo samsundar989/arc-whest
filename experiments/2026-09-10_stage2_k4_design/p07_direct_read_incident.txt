@@ -1,0 +1,25 @@
+P07 direct-read incident transcript
+===================================
+
+Event recorded: 2026-09-10T23:07:29Z
+Data role: already exposed reusable DESIGN
+Reservation behavior: direct numpy.load bypassed truth_reads pre-read reservation
+
+Exact command segment that accessed P07:
+
+    .venv\Scripts\python.exe -c "import numpy as np; p=r'experiments/2026-09-10_slice5/truth_P07.npz'; z=np.load(p,allow_pickle=False); print(z.files); print({k:z[k].shape for k in z.files}); print(z['seeds'][:3], z['seeds'][-3:])"
+
+Exact stdout from that segment:
+
+    ['seeds', 'means_r1', 'means_r2', 'var_r1', 'var_r2', 'allvar_r1', 'allvar_r2', 'gt_noise', 'n_samples', 'width', 'depth']
+    {'seeds': (384,), 'means_r1': (384, 16, 1024), 'means_r2': (384, 16, 1024), 'var_r1': (384, 1024), 'var_r2': (384, 1024), 'allvar_r1': (384, 16, 1024), 'allvar_r2': (384, 16, 1024), 'gt_noise': (384,), 'n_samples': (), 'width': (), 'depth': ()}
+    [40910007000 40910007001 40910007002] [40910007381 40910007382 40910007383]
+
+No activation values, MSEs, candidate predictions, candidate comparisons, fitted
+coefficients or scores were printed. Accessing each compressed-array shape through
+NPZ indexing still loaded protected arrays and therefore counts as an access.
+
+The original tool call also printed p2_k4_fit.py help and source text and the
+already committed candidate/bounds/identity registries. Those reads were not
+protected-data accesses and are omitted here. The complete relevant protected
+stdout is preserved above.
