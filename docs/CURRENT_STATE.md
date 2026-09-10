@@ -106,9 +106,30 @@
 > accuracy we have priced is `22x` dearer, and Strassen depth alone cannot take
 > our structure to `0.2 B`. **They are not running a 15-generation exact lineage.**
 >
+> ### THE EXACT-METRIC LEVER IS CLOSED, AND THE LADDER IS NOW CALIBRATED
+>
+> `use_avg_metric=False` at the LIVE shape: **`1.070x`** against a
+> pre-registered `1.15x` gate. **FAIL, closed.** Real (`24/24` nets, CI clear
+> of zero) and too small to buy against a ninth born block plus the loss of
+> `_proj_coef_d4_r2`. Cost `41 s` of GPU because accuracy was measured before
+> any cost model. Both pre-registered predictions confirmed; control drift
+> `+1.3e-15`.
+>
+> **The ladder over-reads method ratios by `1.2x`-`1.4x`**, now measured twice:
+>
+>     SIMPLE/AUGMENT       ladder 2.909   live 2.094   over-read 1.39x
+>     exact-metric gain    ladder 1.311   live 1.070   over-read 1.23x
+>
+> Discounting the full-K4 ceiling by the same factor leaves **`6.5x`-`8.8x`**
+> at the live shape — still far above the `1.5x` lane threshold, so **the
+> ceiling HYPOTHESIS survives calibration** and is the most valuable
+> unmeasured quantity in the project. No kappa_4 ceiling has ever been
+> measured at `1024 x 16`.
+>
 > ### IN FLIGHT
 >
-> - **Job `474`** — ladder v3, adds `k3_simple_exactmetric`.
+> - Nothing. **`docs/STRATEGIST_PACKET_2026-09-10.md` is written and is the
+>   next action** — it supersedes the Sep 9 packet, whose plan is void.
 >
 > ### PROCESS DEFECTS THIS SLICE, ALL THE SAME SHAPE
 >
