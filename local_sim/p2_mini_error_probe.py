@@ -145,9 +145,12 @@ def main(argv=None) -> int:
             print(f"  [{idx:3d}] *** RAISED {rec['exc_type']}: {rec['exc'][:90]}")
             print("        " + rec["traceback"].replace("\n", "\n        ")[-1200:])
         else:
+            rss = rec.get("rss_after_gib")
             print(f"  [{idx:3d}] ok   {rec['seconds']:6.1f}s  "
                   f"flops {rec['flops_used']:,}  ops {rec['ops']}  "
-                  f"finite {rec['finite']}  rss {rec['rss_after_gib']:.2f} GiB")
+                  f"finite {rec['finite']}  "
+                  + (f"rss {rss:.2f} GiB" if rss is not None
+                     else "rss unavailable (no psutil)"))
         del weights, m
         gc.collect()
 

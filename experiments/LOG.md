@@ -39221,3 +39221,122 @@ being filled in. The other two IMPORTANT requirements were met in order:
 
 The deviation cost nothing this time only because the machinery caught what a
 prediction would have been about. That is luck, not process.
+
+# 2026-09-10 — CONTRACT (Rule 1): **T2 — a learned corrector on the exact-K3 chain's own state**
+
+*Pre-registered before any datum and **before P07 or P08 is claimed**. Handoff
+`docs/STRATEGIST_RESPONSE_2026-09-10.md` §1 (H2) and §3. Instruments
+`local_sim/p2_truth.py` (labels, proven) and `local_sim/p2_t2_corrector.py`
+(features, fit, read). Artifacts under `experiments/2026-09-10_slice5/`.*
+
+**Question.** The board's leaders reach AUGMENT-class accuracy at `0.18-0.21 B`,
+which no representation we have priced can do. H2 says they run a cheaper chain
+plus a learned per-layer correction fitted on the public labels. **Is a learned
+corrector on OUR exact-K3 chain's own carried state worth `>= 1.15x` held out?**
+
+**Evidence.**
+- CONFIRMED: our exact-K3 chain grades `2.031e-08` adjusted at Strassen depth 3;
+  its raw error is `~3.78e-08` and the residual is **structural, not scale** —
+  O1 output renormalisation was measured at `0.75%` and falsified.
+- CONFIRMED, and it is the strongest evidence AGAINST: `RESULT WP10` closed the
+  **in-flight** mean corrector on the *K2* chain. The fitted arm returned
+  `0.0075x`, and **both null controls diverged too**; a sensitivity injection then
+  showed why — an incoherent per-neuron error of RMS `1e-4` already costs
+  `1.016x`, so a corrector needs held-out `R^2 >= 0.99849` merely to break even.
+  The *readout* corrector on K2 was separately found exhausted by v2.7's sixteen
+  constants.
+- CONFIRMED (public, forum 18063): *"low-rank corrections, learned correctors all
+  failed to beat the scalar at depth 32."* An independent negative.
+- CONFIRMED, and it is the evidence FOR: Hilton's warm-up describes *"factorized
+  3rd cumulant propagation combined with learned networks that consume the
+  cumulant estimates as features"*, and Puffi's A716 — a 10-channel /
+  90-coefficient per-layer fitted adjustment — sits in a `#4` team's pipeline.
+- CONFIRMED: leaders' telemetry runs `25-35k` operations at `5-10 GFLOP/s` into
+  the wall cap, which is what many small elementwise per-layer corrections spelled
+  in `fnp` look like.
+- SPECULATIVE: six teams converging within `14%` is explicable if all of them fit
+  on the same public labels and hit the same generalisation floor.
+
+**Hypothesis + mechanism.** The chain's residual is a smooth function of its own
+**scale-invariant** state. The K2 closure is positively homogeneous of degree 1
+(verified to `1.6e-30`), and so is the K3 chain, so the residual is `sigma` times a
+function of invariants — `alpha = mu/sigma`, the gate probability `Phi(alpha)`, the
+normalised `kappa_3` diagonal slices, and the scalar `c_4` — plus a pooled
+per-layer context. A per-neuron equivariant head over those can capture part of it.
+
+**Why this might work where WP10 failed, stated so the failure is informative
+either way:** WP10 corrected *in flight*, where the corrector's own error is
+consumed by the next layer and compounds through 16 of them — that is what the
+`R^2 >= 0.99849` break-even is measuring. **A readout correction cannot compound.**
+So the readout form faces a threshold lower by orders of magnitude, and it has
+never been tried on an exact K3 chain by us or, as far as the public record goes,
+by anyone.
+
+**Why it might still fail:** forum 18063 and WP10's readout finding both say the
+predictable part of the residual is already taken by a per-layer scalar.
+
+**Intervention.** Fit on **P07** (384 fresh mints, tuning permitted), read **once**
+on **P08** (128 fresh mints, no tuning of any kind). Cross-fitting by network
+inside P07. Arms:
+
+| arm | what |
+|---|---|
+| `B0` | the uncorrected exact-K3 SIMPLE chain — the baseline |
+| `R` | the readout corrector: per-neuron equivariant head + pooled per-layer context, target = final-layer residual / `sigma` |
+| `R0` | **null control** — the correction forced constant across neurons. Must collapse to a per-layer scalar |
+| `Rshuf` | **null control** — features permuted across neurons within a network |
+| `S` | the **in-flight sensitivity probe**: inject a KNOWN incoherent error of given RMS into the K3 chain's state and measure the cost, giving this chain's break-even `R^2` without training anything |
+
+**A corpus substitution, declared.** The handoff says to train on the organisers'
+public 1,100. `docs/VALIDATION.md` §0 forbids fitting anything on the public split.
+**The law wins**; the corpus is minted DECIDE-tier data and the public split is
+read at the end as a check that chooses nothing. Full reasoning in today's
+`IMPORTANT: allocate P07/P08` entry. **This changes what a negative result means
+and is flagged for the next packet.**
+
+**Predictions (numbered, before any datum).**
+1. The held-out gain on P08 lands in `[1.00, 1.10]`. I put `~65%` on the gate
+   failing.
+2. `R0` collapses to a per-layer scalar. **If it does not, the harness leaks and
+   this slice is VOID** — the same clause WP9 wrote and WP10 had to fire.
+3. `Rshuf` gives `<= 1.01x`.
+4. Held-out `R^2` of the residual target is `<= 0.25` **against its noise
+   ceiling**, which at `2^24` samples per half is about `0.40`. A bare `R^2` from
+   this slice is not comparable with WP9's.
+5. The in-flight break-even `R^2` for this chain is **lower** than K2's `0.99849`,
+   because the K3 chain's state is richer and its per-layer sensitivity lower — but
+   still above `0.9`, so the in-flight form stays closed.
+
+**Gate.** `>= 1.15x` held-out on P08 ⇒ spell the head in `fnp` (`<= ~500`
+operations), certify under the `>= 2.0x` wall-margin rule, canary. `<= 1.10x` ⇒
+**close H2's readout form and report immediately.** Between is inconclusive and
+buys one follow-up, not a build. Chosen NOW and passed to
+`competition_score.decide(gate=...)`, which has no default.
+
+**Falsifier.** Prediction 1 is falsified by a held-out gain `>= 1.15x`. Prediction
+2 failing voids the slice rather than being explained.
+
+**Baseline.** The uncorrected chain on the same P08 networks and the same labels,
+paired.
+
+**Cost model.** Phase 2, `lambda = 0`, `C = F`. **Deliberately deferred**: accuracy
+is measured first, because pricing a lever that may not exist is the error this
+project has now made three times. If the gate passes, the budget the port must
+meet is `<= 500` flopscope operations and `<= 0.01 B`, and residual is reported as
+headroom against the `0.4 s` cliff at the graded `10.7-11.2 us/op` law.
+
+**Statistic.** Paired, common random numbers, **arithmetic** difference of per-net
+cross-MSE with a studentised-t interval, on P08. Ratios are ratios of means.
+Percentile and BCa refused.
+
+**Seed blocks.** `P07` `40,910,007,000 + 384` (FIT). `P08` `40,910,008,000 + 128`
+(the single held-out READ). Allocated today, disjoint by construction, and this
+contract is committed **before either is claimed**.
+
+**Confounders / scope / what must not change.** Labels are `2^24` per half, two
+independent replicas, so the cross estimator is unbiased and the label noise is
+quoted beside every number. The chain is `kind=SIMPLE`, `factor=True`,
+`use_pK=True`, `use_avg_metric=True` — the shipped configuration, unchanged. The
+public split is read **once**, at the end, read-only, and chooses nothing. No
+feature is selected on P08 and no hyper-parameter is touched after the first P08
+number is seen.
