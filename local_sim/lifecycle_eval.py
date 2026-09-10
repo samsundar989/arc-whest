@@ -314,7 +314,13 @@ class EvidenceRow:
             residual_wall_time_s=self.residual_wall_time_s,
             budget=self.budget,
             failed=self.failed,
-            name=f"mlp[{self.index}]/{self.input_seed}",
+            # THE NETWORK'S IDENTITY, and nothing arm-local. This was
+            # `mlp[{index}]/{seed}` until 2026-09-10; the index is a position
+            # inside one arm, so two arms that visited the same networks in a
+            # different order would now be refused by
+            # `competition_score.align_rows_by_identity` for a difference that
+            # is not a difference. The input seed IS the network.
+            name=f"seed:{self.input_seed}",
         )
 
     def row_hash(self) -> str:

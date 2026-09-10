@@ -1,0 +1,26 @@
+{
+  "correct": {
+    "mean_difference": 1.0230971426705015e-09,
+    "se": 2.197618578322217e-10,
+    "t_ci": [
+      5.684098588156348e-10,
+      1.4777844265253682e-09
+    ],
+    "wins": 19,
+    "geometric": 1.0707576094562465,
+    "ci_excludes_zero": true
+  },
+  "shuffled": {
+    "se_min": 1.3392404126801698e-09,
+    "se_max": 2.2309482758143836e-09,
+    "se_median": 1.879284959264954e-09,
+    "se_inflation_median_x": 8.551461012400539,
+    "ci_excludes_zero_rate": 0.0,
+    "trials": 200
+  },
+  "gate_correct_pairing": {
+    "passed": true,
+    "gain": 1.0685214976421877,
+    "ci_excludes_zero": true
+  }
+}

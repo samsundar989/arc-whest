@@ -56,10 +56,12 @@ from competition_score import (LAMBDA_FLOPS_PER_SECOND,  # noqa: E402
                                effective_compute, format_paired,
                                is_combined_budget_exhausted, mlp_score,
                                naive_factorised_objective, over_budget_rows,
-                               paired_compare,
+                               paired_compare, paired_compare_rows,
                                reported_scores_by_index,
                                rows_from_graded_report, score_multiplier,
-                               score_suite, zero_prediction_mse, decide, Verdict)
+                               score_suite, zero_prediction_mse, decide, Verdict,
+                               align_rows_by_identity, PairingError, _t_ppf, _t975,
+                               paired_diff_ci)
 
 RESULTS = []
 REPORTS = os.path.join(_ROOT, "experiments", "run_reports")
@@ -943,6 +945,137 @@ def _sign_flip_arms():
     return ctrl, cand
 
 
+
+# --------------------------------------------------------------------------- #
+# 14. Identity-aligned pairing — the 2026-09-10 Stage 0 repair
+#
+# These tests FAIL against the code as it stood at commit 0fe164c. That is the
+# point of them: a regression test that passes on the defect tests nothing.
+# --------------------------------------------------------------------------- #
+
+
+def _named_arms(n=24, seed=11):
+    rs = np.random.default_rng(seed)
+    B = 2.0 ** 41
+    mse_c = rs.uniform(3e-8, 6e-8, n)
+    mse_k = mse_c * rs.uniform(0.85, 1.05, n)
+    fl = rs.uniform(0.2, 0.6, n) * B
+    ctrl = [MlpRow(mse=float(mse_c[i]), flops_used=float(fl[i]), budget=B,
+                   name="mlp%02d" % i) for i in range(n)]
+    cand = [MlpRow(mse=float(mse_k[i]), flops_used=float(fl[i]), budget=B,
+                   name="mlp%02d" % i) for i in range(n)]
+    return ctrl, cand, rs
+
+
+def t_pairing_identity():
+    head("14. pairing is on MLP IDENTITY, not list order")
+    ctrl, cand, rs = _named_arms()
+    ref = paired_compare_rows(ctrl, cand)
+
+    # (a) A permuted candidate arm is REALIGNED, not silently mispaired.
+    #     Before the repair the SE inflated by a median 8.55x while
+    #     mean_difference stayed bit-identical, so nothing printed revealed it.
+    ses, excl = [], 0
+    for _ in range(40):
+        perm = rs.permutation(len(cand))
+        r = paired_compare_rows(ctrl, [cand[i] for i in perm])
+        ses.append(r.se_difference)
+        lo, hi = r.t_ci_difference
+        excl += int(lo > 0 or hi < 0)
+    check("a permuted candidate arm recovers the SAME standard error",
+          max(abs(x - ref.se_difference) for x in ses) < 1e-24,
+          f"se {ref.se_difference:.4e}, 40 permutations, spread "
+          f"{max(ses) - min(ses):.2e}")
+    check("...and the t interval still excludes zero on every permutation",
+          excl == 40, f"{excl}/40 (before the repair: 0/200)")
+    check("...and the result SAYS it reordered, rather than staying silent",
+          any("REORDERED" in n for n in
+              paired_compare_rows(ctrl, list(reversed(cand))).notes),
+          "notes carry the reorder")
+
+    # (b) duplicates move the POINT ESTIMATE, so they are refused outright
+    dup = [cand[0]] * len(cand)
+    try:
+        paired_compare_rows(ctrl, dup)
+        ok = False
+    except PairingError as e:
+        ok = "repeats MLP identities" in str(e)
+    check("a candidate arm of duplicated identities is REFUSED", ok,
+          "a duplicate is a false-promotion route, not a paired design")
+
+    # (c) different networks are refused
+    other = [MlpRow(mse=r.mse, flops_used=r.flops_used, budget=r.budget,
+                    name="other%02d" % i) for i, r in enumerate(cand)]
+    try:
+        paired_compare_rows(ctrl, other)
+        ok = False
+    except PairingError as e:
+        ok = "not the same MLPs" in str(e)
+    check("arms naming DIFFERENT MLPs are refused", ok, "no common random numbers")
+
+    # (d) half-named is ambiguous
+    half = [MlpRow(mse=r.mse, flops_used=r.flops_used, budget=r.budget,
+                   name=(r.name if i % 2 else "")) for i, r in enumerate(cand)]
+    try:
+        paired_compare_rows(ctrl, half)
+        ok = False
+    except PairingError:
+        ok = True
+    check("a PARTLY named arm is refused rather than guessed at", ok, "")
+
+    # (e) the historical unnamed path survives, but says so
+    anon_c = [MlpRow(mse=r.mse, flops_used=r.flops_used, budget=r.budget) for r in ctrl]
+    anon_k = [MlpRow(mse=r.mse, flops_used=r.flops_used, budget=r.budget) for r in cand]
+    r = paired_compare_rows(anon_c, anon_k)
+    check("two fully UNNAMED arms still pair positionally", r.n == len(ctrl),
+          "existing callers keep working")
+    check("...and the result records that it paired on LIST ORDER",
+          any("LIST ORDER" in n for n in r.notes), "the allowance is visible")
+    try:
+        paired_compare_rows(anon_c, anon_k, require_ids=True)
+        ok = False
+    except PairingError:
+        ok = True
+    check("...but require_ids=True refuses them", ok,
+          "a DECIDE-tier contract may not pair on list order")
+
+    # (f) alignment is a pure permutation: same rows, same scores
+    a, b, _ = align_rows_by_identity(ctrl, list(reversed(cand)))
+    check("alignment returns the SAME rows, only reordered",
+          [x.name for x in a] == [x.name for x in b]
+          and sorted(x.mse for x in b) == sorted(x.mse for x in cand),
+          "no row invented, none dropped")
+
+
+def t_t_quantile_alpha():
+    head("15. the t interval honours the alpha it was asked for")
+    d = np.random.default_rng(7).normal(1e-8, 3e-8, size=40)
+    c95 = paired_diff_ci(d, method="t", alpha=0.05)
+    c99 = paired_diff_ci(d, method="t", alpha=0.01)
+    c80 = paired_diff_ci(d, method="t", alpha=0.20)
+    check("a 99% t interval is WIDER than the 95%", (c99[1] - c99[0]) > (c95[1] - c95[0]) * 1.2,
+          f"{(c99[1] - c99[0]) / (c95[1] - c95[0]):.3f}x   (before the repair: 1.000x)")
+    check("an 80% t interval is NARROWER than the 95%", (c80[1] - c80[0]) < (c95[1] - c95[0]) * 0.85,
+          f"{(c80[1] - c80[0]) / (c95[1] - c95[0]):.3f}x   (before the repair: 1.000x)")
+    check("the three intervals are no longer bit-identical",
+          len({c95, c99, c80}) == 3, "alpha 0.05 / 0.01 / 0.20")
+    # the exact quantile must agree with the historical table to the table's
+    # own precision, or the 0.05 seam is drifting
+    worst = max(abs(_t_ppf(0.975, df) - _t975(df)) for df in list(range(1, 31)))
+    check("the exact quantile matches the historical _T975 table to 1e-3",
+          worst < 1.1e-3, f"worst |exact - table| = {worst:.2e} over df 1..30")
+    check("the DEFAULT 0.05 path still reads the table, bit for bit",
+          paired_diff_ci(d, method="t")[0] == c95[0],
+          "no published 95% interval moves")
+    try:
+        import scipy.stats as _st
+        err = max(abs(_t_ppf(p, df) - float(_st.t.ppf(p, df)))
+                  for df in (1, 5, 17, 48, 199) for p in (0.9, 0.975, 0.995))
+        check("...and it matches scipy.stats.t.ppf", err < 1e-9, f"max err {err:.2e}")
+    except ImportError:
+        check("scipy not importable; table comparison stands alone", True, "skipped")
+
+
 def main():
     print("=" * 100)
     print("CANONICAL COMPETITION SCORER — parity with installed whestbench, and the estimand fixture")
@@ -961,6 +1094,8 @@ def main():
         t_graded_replay,
         t_real_pair_v24_vs_v241,
         t_the_binding_gate,
+        t_pairing_identity,
+        t_t_quantile_alpha,
     ):
         fn()
     n_ok = sum(1 for r in RESULTS if r)

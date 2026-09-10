@@ -1,0 +1,33 @@
+{
+  "P3_t_alpha_ignored": {
+    "ci_alpha_0.05": [
+      -9.722822563639695e-09,
+      6.0117129436320615e-09
+    ],
+    "ci_alpha_0.01": [
+      -9.722822563639695e-09,
+      6.0117129436320615e-09
+    ],
+    "ci_alpha_0.20": [
+      -9.722822563639695e-09,
+      6.0117129436320615e-09
+    ],
+    "identical_95_vs_99": true,
+    "identical_95_vs_80": true
+  },
+  "P4_pairs_by_order": {
+    "accepted_shuffled_arm": true,
+    "mean_difference_correct": 1.0230971426705015e-09,
+    "mean_difference_shuffled": 1.0230971426705015e-09,
+    "differs": false
+  },
+  "P4_accepts_duplicate_ids": true,
+  "P8_unequal_multiplier_noise": {
+    "empirical_mean_adjusted_difference": 1.4406484513004378e-08,
+    "closed_form": 1.4404319999999999e-08,
+    "true_part": 1.4e-08,
+    "noise_term_(qc-qk)*v": 4.0431999999999995e-10,
+    "rel_error_vs_closed_form": 0.0001502683225851336,
+    "noise_share_of_measured_difference": 0.02806513966922536
+  }
+}

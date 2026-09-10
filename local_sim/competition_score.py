@@ -67,7 +67,7 @@ Run the self-check:  uv run python local_sim/test_competition_score.py
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace as _dc_replace
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
@@ -411,6 +411,112 @@ def _t975(df: int) -> float:
     return z + (z**3 + z) / (4.0 * df)
 
 
+# --------------------------------------------------------------------------- #
+# A t quantile for EVERY alpha, not just 0.05
+#
+# `paired_diff_ci(method="t", alpha=...)` used to read
+#
+#     q = _t975(n - 1) if abs(alpha - 0.05) < 1e-12 else _t975(n - 1)
+#
+# -- a ternary whose two branches are the same expression, so a requested 99%
+# interval was silently returned as a 95% one. Measured against the code as it
+# stood on 2026-09-10: alpha 0.05, 0.01 and 0.20 all returned the identical
+# tuple, bit for bit (`experiments/2026-09-10_stage0_instrument/
+# defects_before.json`). Nothing in the repository requested a non-default
+# alpha, so no published interval moved -- but a latent silent-wrong-answer is
+# exactly the defect class this module exists to make impossible.
+#
+# WHY THE 0.05 PATH IS LEFT ALONE. `_T975` is a three-decimal table. The exact
+# quantile below differs from it in the fourth decimal, so routing the default
+# through the exact function would move every historical 95% interval by a hair
+# for no gain. The default therefore still reads the table -- bit-identical to
+# every number already in `experiments/LOG.md` -- and only a NON-0.05 alpha
+# takes the exact path. `test_competition_score.py` asserts the two agree to
+# 1e-3, which is the table's own precision, so the seam cannot drift unnoticed.
+
+
+def _lbeta(a: float, b: float) -> float:
+    return math.lgamma(a) + math.lgamma(b) - math.lgamma(a + b)
+
+
+def _betacf(a: float, b: float, x: float) -> float:
+    """Continued fraction for the incomplete beta, modified Lentz method."""
+    tiny = 1e-300
+    qab, qap, qam = a + b, a + 1.0, a - 1.0
+    c = 1.0
+    d = 1.0 - qab * x / qap
+    if abs(d) < tiny:
+        d = tiny
+    d = 1.0 / d
+    h = d
+    for m in range(1, 300):
+        m2 = 2 * m
+        aa = m * (b - m) * x / ((qam + m2) * (a + m2))
+        d = 1.0 + aa * d
+        if abs(d) < tiny:
+            d = tiny
+        c = 1.0 + aa / c
+        if abs(c) < tiny:
+            c = tiny
+        d = 1.0 / d
+        h *= d * c
+        aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2))
+        d = 1.0 + aa * d
+        if abs(d) < tiny:
+            d = tiny
+        c = 1.0 + aa / c
+        if abs(c) < tiny:
+            c = tiny
+        d = 1.0 / d
+        delta = d * c
+        h *= delta
+        if abs(delta - 1.0) < 3e-16:
+            break
+    return h
+
+
+def _betainc(a: float, b: float, x: float) -> float:
+    """Regularised incomplete beta I_x(a, b). No scipy: this module also runs in
+    the torch-only GPU venv."""
+    if x <= 0.0:
+        return 0.0
+    if x >= 1.0:
+        return 1.0
+    front = math.exp(a * math.log(x) + b * math.log1p(-x) - _lbeta(a, b))
+    if x < (a + 1.0) / (a + b + 2.0):
+        return front * _betacf(a, b, x) / a
+    return 1.0 - math.exp(b * math.log1p(-x) + a * math.log(x) - _lbeta(b, a)) *         _betacf(b, a, 1.0 - x) / b
+
+
+def _t_cdf(t: float, df: int) -> float:
+    x = df / (df + t * t)
+    p = 0.5 * _betainc(0.5 * df, 0.5, x)
+    return 1.0 - p if t > 0 else p
+
+
+def _t_ppf(p: float, df: int) -> float:
+    """Exact two-sided-usable Student-t quantile by bisection on `_t_cdf`.
+
+    Bisection rather than Newton because it cannot diverge, and 200 halvings of
+    a bracket that starts at +-1e4 reaches machine precision long before the
+    loop ends. Verified against `scipy.stats.t.ppf` in
+    `test_competition_score.py` when scipy is importable, and against the
+    `_T975` table when it is not.
+    """
+    if df <= 0 or not (0.0 < p < 1.0):
+        return float("nan")
+    if p == 0.5:
+        return 0.0
+    lo, hi = -1e4, 1e4
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        if _t_cdf(mid, df) < p:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+
 @dataclass(frozen=True)
 class PairedResult:
     """Candidate vs control on the SAME MLPs. Positive improvement = candidate better."""
@@ -483,7 +589,10 @@ def paired_diff_ci(
         return (float("nan"), float("nan"))
     if method == "t":
         se = float(d.std(ddof=1) / math.sqrt(n))
-        q = _t975(n - 1) if abs(alpha - 0.05) < 1e-12 else _t975(n - 1)
+        # The 0.05 path reads the historical table so no published interval
+        # moves; every other alpha gets the exact quantile. See `_t_ppf`.
+        q = (_t975(n - 1) if abs(alpha - 0.05) < 1e-12
+             else _t_ppf(1.0 - alpha / 2.0, n - 1))
         return (theta - q * se, theta + q * se)
 
     rng = np.random.default_rng(seed)
@@ -667,6 +776,106 @@ def paired_compare(
     )
 
 
+class PairingError(ValueError):
+    """Two arms could not be shown to be the SAME MLPs. Never a warning."""
+
+
+def align_rows_by_identity(
+    control_rows: Sequence[MlpRow],
+    candidate_rows: Sequence[MlpRow],
+    *,
+    require_ids: bool = False,
+) -> Tuple[List[MlpRow], List[MlpRow], List[str]]:
+    """Align two arms on `MlpRow.name`, or refuse. Returns (ctrl, cand, notes).
+
+    WHY THIS EXISTS, AND WHAT IT COSTS TO NOT HAVE IT
+    ------------------------------------------------
+    `paired_compare_rows` used to check `cs.n != ks.n` and then hand the two
+    score vectors to `paired_compare` **in list order**. Equal length is not
+    common random numbers. Measured on the code as it stood on 2026-09-10, with
+    24 rows and the candidate arm randomly permuted 200 times
+    (`experiments/2026-09-10_stage0_instrument/defects_before_pairing.json`):
+
+        mean_difference          UNCHANGED, to the last bit
+        se_difference            inflated by a median 8.55x
+        t CI excludes zero       true -> 0 of 200 permutations
+
+    Read that table twice. The **point estimate does not move**, because the
+    mean of a difference is permutation-invariant, so nothing a report prints
+    reveals the mispairing; what is destroyed is the entire reason the design
+    was paired. A real promotion silently becomes a non-promotion. And the
+    reverse direction exists too: duplicate identities in one arm DO move the
+    mean, so a repeated favourable row is a false-promotion route.
+
+    THE THREE REFUSALS
+    ------------------
+    * duplicate names inside either arm -- always, even positionally, because a
+      duplicate is never a legitimate paired design;
+    * one arm named and the other not, or an arm only partly named -- ambiguous,
+      and guessing is how the defect above happened;
+    * named arms whose name SETS differ -- these are not the same networks.
+
+    THE ONE ALLOWANCE. Two fully-unnamed arms keep the positional path, with an
+    explicit note recorded on the result, because most rows in this repository
+    predate `name` being populated and silently breaking them would make this
+    repair a much larger change than the defect warrants. Pass
+    `require_ids=True` -- and a DECIDE-tier contract should -- to turn that
+    allowance into a refusal.
+    """
+    notes: List[str] = []
+    if len(control_rows) != len(candidate_rows):
+        raise PairingError(
+            f"arms have different MLP counts: {len(control_rows)} vs "
+            f"{len(candidate_rows)}")
+
+    c_names = [r.name for r in control_rows]
+    k_names = [r.name for r in candidate_rows]
+
+    for label, names in (("control", c_names), ("candidate", k_names)):
+        named = [n for n in names if n]
+        if len(set(named)) != len(named):
+            dupes = sorted({n for n in named if named.count(n) > 1})
+            raise PairingError(
+                f"the {label} arm repeats MLP identities {dupes!r}; a duplicated "
+                f"row is not a paired design and CAN move the point estimate")
+
+    c_all = all(bool(n) for n in c_names)
+    k_all = all(bool(n) for n in k_names)
+    c_any = any(bool(n) for n in c_names)
+    k_any = any(bool(n) for n in k_names)
+
+    if c_all and k_all:
+        if set(c_names) != set(k_names):
+            only_c = sorted(set(c_names) - set(k_names))[:4]
+            only_k = sorted(set(k_names) - set(c_names))[:4]
+            raise PairingError(
+                "the two arms are not the same MLPs: control-only "
+                f"{only_c}, candidate-only {only_k}")
+        by_name = {r.name: r for r in candidate_rows}
+        aligned = [by_name[n] for n in c_names]
+        if [r.name for r in candidate_rows] != c_names:
+            notes.append(
+                "candidate arm REORDERED to the control's MLP order by name; "
+                "the incoming order was not the control's")
+        notes.append(f"paired on {len(c_names)} matched MLP identities")
+        return list(control_rows), aligned, notes
+
+    if c_any or k_any:
+        raise PairingError(
+            "one arm carries MLP identities and the other does not (or an arm "
+            "is only partly named). Refusing to pair: this is the exact "
+            "ambiguity that let list order stand in for common random numbers.")
+
+    if require_ids:
+        raise PairingError(
+            "require_ids=True but neither arm carries MLP identities. Populate "
+            "MlpRow.name -- a DECIDE-tier comparison may not pair on list order.")
+    notes.append(
+        "NO MLP identities on either arm: paired by LIST ORDER. Equal length is "
+        "not common random numbers. Populate MlpRow.name to make this checkable.")
+    return list(control_rows), list(candidate_rows), notes
+
+
 def paired_compare_rows(
     control_rows: Sequence[MlpRow],
     candidate_rows: Sequence[MlpRow],
@@ -674,14 +883,23 @@ def paired_compare_rows(
     lam: float = DEFAULT_LAMBDA_FLOPS_PER_SECOND,
     floor: float = MULTIPLIER_FLOOR,
     on_over_budget: str = "raise",
+    require_ids: bool = False,
     **kw: Any,
 ) -> PairedResult:
-    """`paired_compare` over rows, scoring each arm with the canonical identity."""
+    """`paired_compare` over rows, scoring each arm with the canonical identity.
+
+    Since 2026-09-10 the two arms are aligned on `MlpRow.name` first, or
+    refused. See `align_rows_by_identity` for what that catches and why equal
+    row counts never established it.
+    """
+    control_rows, candidate_rows, pair_notes = align_rows_by_identity(
+        control_rows, candidate_rows, require_ids=require_ids)
     cs = score_suite(control_rows, lam=lam, floor=floor, on_over_budget=on_over_budget)
     ks = score_suite(candidate_rows, lam=lam, floor=floor, on_over_budget=on_over_budget)
     if cs.n != ks.n:
-        raise ValueError(f"arms have different MLP counts: {cs.n} vs {ks.n}")
-    return paired_compare(cs.scores, ks.scores, **kw)
+        raise PairingError(f"arms have different MLP counts: {cs.n} vs {ks.n}")
+    res = paired_compare(cs.scores, ks.scores, **kw)
+    return _dc_replace(res, notes=list(res.notes) + pair_notes)
 
 
 @dataclass(frozen=True)
