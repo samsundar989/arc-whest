@@ -1,0 +1,13 @@
+worker-q: job #862 starting at 2026-09-11T15:25:55.102197+00:00
+worker-q: cwd=C:\Users\samsu\.local\state\gpuq\snapshots\862\job-862
+worker-q: snapshot=git 8f921ec2cb646e07cd9ae1585df8725c63b9ffeb
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'scripts/preflight.ps1', '--json']
+worker-q: ------------------------------------------------------------
+C:\Users\samsu\.local\state\gpuq\snapshots\862\job-862\scripts\preflight.ps1 : A parameter cannot be found that 
+matches parameter name '-json'.
+    + CategoryInfo          : InvalidArgument: (:) [preflight.ps1], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : NamedParameterNotFound,preflight.ps1
+ 
+worker-q: ------------------------------------------------------------
+worker-q: job #862 FAILED (exit code 1) at 2026-09-11T15:25:55.577566+00:00

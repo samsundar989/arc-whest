@@ -42090,3 +42090,36 @@ budget exhaustion on all rows overwhelmingly more likely than RAM, residual or w
 failure. This is an implementation/cost-model diagnosis, not an accuracy result;
 one exact-source, one-identity label-free discriminator remains required after
 preflight and fresh Skeptic acceptance of the diagnostic repair.
+
+### Fresh Skeptic rejection and same-byte repair
+
+The fresh diagnostic Skeptic returned **REJECT**. It reproduced a live-worktree
+replacement in which the producer parsed `lam=0.0`, the candidate/bounds/identity
+files changed during evaluation, and the failure artifact paired the original
+candidate with hashes of the replacement bytes. It also found that the artifact
+recorded only six of twelve `LifecycleSpec` fields and omitted the evaluator's
+round deviations, lifecycle mode, setup outcome and backend provenance. The first
+71/71 suite did not provoke either failure, so its green result was insufficient.
+
+The repair now obtains candidate, bounds and identity hashes from the same byte
+snapshots that the shared strict parsers consumed, and freezes producer, generator
+and upstream-source bindings before evaluation. Both failure and success manifests
+use those frozen source bindings. The failure artifact records the complete
+`dataclasses.asdict(spec)` plus the complete lifecycle provenance returned by the
+canonical evaluator. Its negative fixture replaces all three registry files during
+the mocked lifecycle and requires the artifact to retain the original parsed
+candidate, identity manifest and exact original-byte hashes while all live paths
+have different hashes. It also requires exact preservation of all twelve spec
+fields and the full evaluator provenance. The complete suite again passes **71/71**;
+compilation and `git diff --check` pass. A new fresh Skeptic must review these bytes.
+
+Workerq **862** did no preflight work because `--json` was mistakenly placed after
+the command separator and reached `preflight.ps1` as an invalid parameter. The
+corrected git-snapshot job **863** ran but is not an applicable current-worktree
+gate: checkout normalization changed the byte identity of `estimator.py`, and the
+snapshot omitted gitignored evidence consumed by the seed/truth ledgers. It ended
+RED on those provenance mismatches after 205.2 seconds and peaked at 3,077.3 MiB.
+These runs are recorded as invocation/snapshot-path failures, not candidate or
+instrument failures. The current gate must use the live worktree while it remains
+clean and unchanged for the whole run, because this repository's byte-identity and
+external evidence checks cannot currently survive workerq's git reconstruction.

@@ -91,7 +91,7 @@ def run_checks():
 
     with _temp("p2-k4-fit-p07-registry-") as root:
         manifest = _registered_manifest()
-        loaded, ids, seeds, width, depth = _registered_load(root, manifest)
+        loaded, ids, seeds, width, depth, _ = _registered_load(root, manifest)
         check("exact P07 design identity registry is accepted",
               loaded == manifest and ids == [str(x) for x in seeds] and
               len(seeds) == 384 and (width, depth) == (1024, 16),
@@ -466,9 +466,21 @@ def run_checks():
         _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
         _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
                     "depth": 2, "identities": [{"id": "failed-synthetic", "seed": 7021}]})
+        original_input_hashes = {
+            "candidates_sha256": producer._sha256(candidates),
+            "bounds_sha256": producer._sha256(bounds),
+            "identities_sha256": producer._sha256(identities),
+        }
+        expected_provenance = {}
         original_evaluate = producer.le.evaluate
         def failing_evaluate(source_path, seeds, target, *, spec, gt_noise,
                              predictions_out):
+            _write_json(candidates, {"parameters": ["lam"],
+                        "candidates": [{"lam": 0.5}]})
+            _write_json(bounds, {"lam": {"min": 0.0, "max": 0.5}})
+            _write_json(identities, {"kind": "synthetic-identities-v1",
+                        "width": 3, "depth": 2,
+                        "identities": [{"id": "replacement", "seed": 7022}]})
             row = producer.le.EvidenceRow(
                 index=0, input_seed=seeds[0], estimator_seed=seeds[0],
                 candidate=source_path, candidate_sha256=producer._sha256(source_path),
@@ -478,8 +490,31 @@ def run_checks():
                 gt_noise=0.0, residual_wall_time_s=0.1, wall_time_s=0.2,
                 budget_exhausted=True, error_code="BudgetExceeded", nonfinite=True)
             predictions_out.append(np.zeros((spec.depth, spec.width), dtype=np.float32))
-            return [row], {"candidate_sha256": row.candidate_sha256,
-                           "rows_hash": "failure-row-hash"}
+            expected_provenance.update({
+                "candidate": row.candidate,
+                "candidate_sha256": row.candidate_sha256,
+                "truth_sha256": row.truth_sha256,
+                "n_mlps": 1,
+                "spec": producer.dataclasses.asdict(spec),
+                "round_tag": spec.round_tag,
+                "round_deviations": spec.deviations_from_round(),
+                "lifecycle": "grader",
+                "weights_mode": producer.le.DEFAULT_WEIGHTS_MODE,
+                "weights_mode_is_grader_default": True,
+                "setup_called": True,
+                "setup_seconds": 0.125,
+                "setup_timeout_s": spec.setup_timeout_s,
+                "setup_timed_out": False,
+                "setup_error": "",
+                "host_cold_start_s": producer.le.HOST_COLD_START_S,
+                "residual_measurement_path": "synthetic test path",
+                "residual_is_graded": False,
+                "objective_is_graded": False,
+                "backend": {"flopscope": "test", "flopscope_path": "test",
+                            "numpy": np.__version__, "python": "test"},
+                "rows_hash": "failure-row-hash",
+            })
+            return [row], dict(expected_provenance)
         producer.le.evaluate = failing_evaluate
         try:
             try:
@@ -500,6 +535,18 @@ def run_checks():
                and diagnostic["labels_read"] is False
                and diagnostic["evaluated_rows"] == 1
                and diagnostic["captured_predictions"] == 1
+               and diagnostic["inputs"] == original_input_hashes
+               and all(producer._sha256(path) != original_input_hashes[key]
+                       for key, path in (("candidates_sha256", candidates),
+                                         ("bounds_sha256", bounds),
+                                         ("identities_sha256", identities)))
+               and diagnostic["candidate"] == {"lam": 0.0}
+               and diagnostic["identity_manifest"]["identities"][0] ==
+                   {"id": "failed-synthetic", "seed": 7021}
+               and diagnostic["lifecycle_spec"] ==
+                   producer.dataclasses.asdict(producer.le.LifecycleSpec(
+                       width=3, depth=2, residual_wall_time_limit_s=None))
+               and diagnostic["lifecycle_provenance"] == expected_provenance
                and failure_row["budget_exhausted"] is True
                and failure_row["error_code"] == "BudgetExceeded"
                and failure_row["flops_used"] == float(2 ** 41 + 1)

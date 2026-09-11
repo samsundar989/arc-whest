@@ -54,24 +54,28 @@ def _sha256(path):
         return _sha256_bytes(fh.read())
 
 
-def _diagnostic_scalar(value):
-    """Keep failure evidence strict JSON even when an error row contains NaN."""
+def _diagnostic_value(value):
+    """Keep failure evidence strict JSON even when nested values contain NaN."""
     if isinstance(value, float) and not math.isfinite(value):
         if math.isnan(value):
             return "NaN"
         return "Infinity" if value > 0 else "-Infinity"
+    if isinstance(value, dict):
+        return {key: _diagnostic_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_diagnostic_value(item) for item in value]
     return value
 
 
 def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
                               source_hash, rows, provenance, predictions,
                               identity_manifest, width, depth, spec,
-                              upstream_sha):
+                              input_hashes, producer_binding,
+                              generator_binding):
     row_values = []
     for row in rows:
         raw = dataclasses.asdict(row)
-        row_values.append({key: _diagnostic_scalar(value)
-                           for key, value in raw.items()})
+        row_values.append(_diagnostic_value(raw))
     result = {
         "schema": "arc-whest.coherent-k4-fit-producer-failure.v1",
         "immutable": True,
@@ -83,29 +87,12 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
             "path": os.path.relpath(source_path, _ROOT).replace("\\", "/"),
             "sha256": source_hash,
         },
-        "inputs": {
-            "candidates_sha256": _sha256(a.candidates),
-            "bounds_sha256": _sha256(a.bounds),
-            "identities_sha256": _sha256(a.identities),
-        },
-        "producer": {
-            "path": os.path.relpath(__file__, _ROOT).replace("\\", "/"),
-            "sha256": _sha256(__file__),
-        },
-        "generator": {
-            "path": os.path.relpath(builder.__file__, _ROOT).replace("\\", "/"),
-            "sha256": _sha256(builder.__file__),
-            "upstream_source_sha256": upstream_sha,
-        },
+        "inputs": input_hashes,
+        "producer": producer_binding,
+        "generator": generator_binding,
         "identity_manifest": identity_manifest,
-        "lifecycle_spec": {
-            "width": width,
-            "depth": depth,
-            "flop_budget": int(spec.flop_budget),
-            "wall_time_limit_s": spec.wall_time_limit_s,
-            "residual_cap": spec.residual_wall_time_limit_s,
-            "weights_mode": le.DEFAULT_WEIGHTS_MODE,
-        },
+        "lifecycle_spec": _diagnostic_value(dataclasses.asdict(spec)),
+        "lifecycle_provenance": _diagnostic_value(provenance),
         "evaluated_rows": len(rows),
         "captured_predictions": len(predictions),
         "rows_hash": provenance.get("rows_hash"),
@@ -120,7 +107,8 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
 
 
 def _load_identities(path):
-    manifest, ids = selector._identity_registry(path)
+    manifest, ids, identity_sha = selector._identity_registry(
+        path, return_hash=True)
     kind = manifest.get("kind")
     width, depth = int(manifest.get("width", 0)), int(manifest.get("depth", 0))
     seeds = [int(row["seed"]) for row in manifest["identities"]]
@@ -141,7 +129,7 @@ def _load_identities(path):
             raise ProducerRefused("identity ids must exactly match the ordered P07 seeds")
     else:
         raise ProducerRefused("identity manifest kind must be synthetic-identities-v1 or registered-design-identities-v1")
-    return manifest, ids, seeds, width, depth
+    return manifest, ids, seeds, width, depth, identity_sha
 
 
 def _validate(a):
@@ -155,20 +143,34 @@ def _validate(a):
     if not os.path.isdir(parent):
         raise ProducerRefused("output parent does not exist: %s" % parent)
     try:
-        names, candidates, bounds, matrix = selector._registry(
-            a.candidates, a.bounds)
-        identity_manifest, identities, seeds, width, depth = _load_identities(
-            a.identities)
+        names, candidates, bounds, matrix, registry_hashes = selector._registry(
+            a.candidates, a.bounds, return_hashes=True)
+        (identity_manifest, identities, seeds, width, depth,
+         identity_sha) = _load_identities(a.identities)
     except selector.FitRefused as exc:
         raise ProducerRefused(str(exc)) from exc
+    input_hashes = {
+        "candidates_sha256": registry_hashes["candidates"],
+        "bounds_sha256": registry_hashes["bounds"],
+        "identities_sha256": identity_sha,
+    }
     return (names, candidates, bounds, matrix, identity_manifest,
-            identities, seeds, width, depth)
+            identities, seeds, width, depth, input_hashes)
 
 
 def produce(a):
     (names, candidates, bounds, matrix, identity_manifest,
-     identities, seeds, width, depth) = _validate(a)
+     identities, seeds, width, depth, input_hashes) = _validate(a)
+    producer_binding = {
+        "path": os.path.relpath(__file__, _ROOT).replace("\\", "/"),
+        "sha256": _sha256(__file__),
+    }
+    generator_binding = {
+        "path": os.path.relpath(builder.__file__, _ROOT).replace("\\", "/"),
+        "sha256": _sha256(builder.__file__),
+    }
     src, upstream_sha = builder._source()
+    generator_binding["upstream_source_sha256"] = upstream_sha
     coherent = next(row for row in builder.ARMS if row[0] == "coherent")
     os.mkdir(a.out_dir)
     source_paths, source_hashes = [], []
@@ -194,7 +196,9 @@ def produce(a):
                 source_path=source_path, source_hash=source_hash,
                 rows=rows, provenance=provenance, predictions=predictions,
                 identity_manifest=identity_manifest, width=width, depth=depth,
-                spec=spec, upstream_sha=upstream_sha)
+                spec=spec, input_hashes=input_hashes,
+                producer_binding=producer_binding,
+                generator_binding=generator_binding)
             raise ProducerRefused(
                 "candidate %d failed canonical lifecycle; diagnostic: %s" %
                 (i, diagnostic))
@@ -212,11 +216,8 @@ def produce(a):
     manifest = {
         "kind": "coherent-K4 canonical-lifecycle observations-v1",
         "identity_role": identity_manifest["kind"],
-        "producer": {"path": os.path.relpath(__file__, _ROOT).replace("\\", "/"),
-                     "sha256": _sha256(__file__)},
-        "generator": {"path": os.path.relpath(builder.__file__, _ROOT).replace("\\", "/"),
-                      "sha256": _sha256(builder.__file__),
-                      "upstream_source_sha256": upstream_sha},
+        "producer": producer_binding,
+        "generator": generator_binding,
         "candidate_registry": candidates, "bounds": bounds,
         "identity_manifest": identity_manifest,
         "lifecycle_spec": {"width": width, "depth": depth,
