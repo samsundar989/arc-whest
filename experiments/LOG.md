@@ -41753,3 +41753,57 @@ full-budget off-shape oracle. The new evidence also identifies the confound: the
 correctness-only cases take 2^20 samples under the live 2^41 budget, versus 2^14
 on the actual 1024x16 production shape. Raw job 792--794 manifests and logs are
 preserved beside job 789's evidence.
+
+### WP0E oracle-repair contract - separate off-shape correctness from live-budget stress
+
+**Class:** IMPORTANT instrument work. **Question.** Can the edge oracle retain all
+of its named shape, layer-1, equivariance and determinism checks while removing the
+unintended 2^20-sample off-shape/full-budget cross-product that makes certification
+require more memory than the production estimator?
+
+**Evidence.** CONFIRMED: job 789's four missing logical results are exactly the
+four groups with implicit-budget off-shape calls: shape generality, layer 1,
+permutation and determinism. CONFIRMED: jobs 792--794 reproduce memory failure on
+the 256x2 and 128x8 cases under 8 and 12 GiB limits. CONFIRMED: the actual
+1024x16/full-2^41 candidate passes the exact Linux 8 GiB gate at 2,346.7 MiB
+VmPeak. CONFIRMED: shape generality checks shape/finite/nonnegative/deterministic
+output; layer 1 checks an exact row; permutation compares an equivariant pair;
+determinism compares repeated/fresh estimators. None names the full-budget x
+off-shape interaction. Budget-edge and monotonicity suites independently exercise
+budget arguments at the live shape. INFERRED: tying off-shape budget to dense-work
+scale will retain each named mechanism and eliminate the sampling confound.
+
+**Hypothesis and intervention.** In Phase-2 mode only, every implicit-budget
+off-shape correctness call receives
+
+`B_test(d,w) = min(B_live, floor(B_live * d * w^2 / (D_live * W_live^2)))`.
+
+This is candidate-independent and uses only official round dimensions. All members
+of a repeated/equivariant comparison receive the same value. Every live-shape call,
+all explicit `budget_edges` and `budget_monotone` rungs, and the no-flag historical
+Phase-1 execution retain their exact old arguments. For current off-shape cases the
+shipped estimator then takes log2n 13--14 instead of 20; the live path remains 14.
+The off-shape determinism fresh estimator must receive the same scaled value in its
+setup context as in its four predict calls.
+
+This explicitly drops one cross-product: a candidate that is correct off-shape at
+scaled budget but wrong only off-shape at full 2^41 will pass. That cross-product
+was never the named oracle and is not production coverage. The separation is
+deliberate and reviewable, not a claim that full-budget off-shape behavior passed.
+
+**Predictions.** Samuel's standing answer is **"I don't know"**. The Builder
+predicts exact per-case budget/shape traces, unchanged logical result counts and
+mutation detection, shipped-candidate off-shape log2n <= 14, and a complete Linux
+positive battery under an inherited 8 GiB limit with materially lower runtime.
+
+**Evidence and gate.** Meter rows and receipts must bind `candidate_budget`, MLP
+width and depth for every prediction; determinism evidence must also bind setup
+budget/dimensions and the same-estimator/fresh-estimator transition. A spy suite
+must prove the complete Phase-2 schedule and unchanged historical schedule.
+Validators must reject missing, boolean, changed or misrouted values and mutations
+of any live, explicit-budget or monotonicity call. Cheap wrong-shape, NaN, negative,
+nondeterministic and wrong-layer-1 controls must still go red. Then rerun the
+positive-only battery through workerq under 8 GiB RLIMIT_AS. Any changed named
+predicate/count/order, historical argument drift, live-budget reduction, lost
+mutation, invalid receipt, failure or missing receipt falsifies the repair. Only a
+passing positive result licenses the twelve one-use mutation shards and aggregate.
