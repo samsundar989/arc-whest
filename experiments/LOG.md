@@ -41587,3 +41587,38 @@ repeated-estimator determinism sequence and certification section 5's four-seed
 sequence remain intact. No reduced dimensions, seeds, precision, dtype arms,
 checks or predicates are admissible. Another 20 GiB workerq profile is required;
 no lower-RAM claim exists until it finishes within its declaration.
+
+### WP0E third result — atomic cases expose the retained-state meter history
+
+Commit `91a21dd` split section 3 into 45 authenticated physical cases that
+reconstruct the same 30 logical results. Lightweight parity and adversarial tests
+passed 38/38 and mutation aggregation passed 37/37. A fresh-context Skeptic found
+the implementation logically sound and returned **PROVISIONAL** pending the real
+profile. Its review caught and the commit repaired exact permutation RNG-prefix
+and budget-ladder state-transition details before execution.
+
+Workerq 753 ran the current positive control from clean live commit `91a21dd`
+with 20 GiB RAM, 0 GiB VRAM and 2 CPUs. Its peak remained 8,044.83 MiB through
+268 seconds, then rose to 15,186.96 MiB at 335 seconds, 17,319.96 MiB at 407
+seconds and **28,510.46 MiB** at 479 seconds. It was cancelled at 499 seconds
+after exceeding the declaration. It did not complete and supplies no positive
+receipt. Atomic independent cases are therefore insufficient while the purposely
+retained same-estimator sequences also retain flopscope's session-wide operation
+records across predictions.
+
+This identifies a narrower instrument-owned lifetime. Installed flopscope 0.12.1
+exposes `budget_reset()` specifically to clear accumulated session-wide budget
+records; its implementation clears `_records`, rollups and counters while leaving
+the candidate estimator object untouched. The next intervention is to reset that
+instrument history only between logically distinct predictions, after preserving
+each closed BudgetContext's row ledger. The same estimator, same MLP where the
+oracle requires it, same inputs, output comparisons, per-row counted FLOPs,
+permutation pairs, determinism sequence and four-seed section-5 sequence remain.
+No candidate code, test dimension, seed, dtype, budget, predicate or result slot
+may change. A lightweight order/ledger/reset mutation suite and fresh Skeptic must
+precede another queued profile. The RAM claim remains falsified until then.
+
+Current-byte workerq 754 independently passed default preflight **12/16** at
+`91a21dd`, with the four expected Full-only skips and 3,857.18 MiB peak under a
+5 GiB declaration. Because the instrument will change again, this is valid
+intermediate evidence and not final preflight acceptance for the next commit.
