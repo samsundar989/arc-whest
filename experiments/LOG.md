@@ -41684,3 +41684,35 @@ evidence only. The candidate, checks, dimensions, precision and stateful sequenc
 must not be reduced. The next repair must isolate the exact high-water subphase or
 execute the unchanged battery in a bounded Linux worker whose package identity and
 memory enforcement are recorded; no lower-RAM acceptance claim exists yet.
+
+### WP0E Linux execution contract - unchanged evidence under an inherited hard cap
+
+**Question.** Can the unchanged positive certification battery complete in the
+existing WSL Linux environment while every process inherits the competition's
+8 GiB address-space cap and workerq reserves only 12 GiB of host RAM?
+
+**Evidence before intervention.** CONFIRMED: workerq 599 ran the exact candidate
+and official Linux package versions under `RLIMIT_AS`, completing three same-worker
+predictions at 2,346.7 MiB VmPeak with identical FLOPs. CONFIRMED: the revised
+focused meter/import/receipt suite passes 55/55 under `$HOME/.arcwhest-linux`.
+CONFIRMED: `/usr/bin/prlimit --as=8589934592` reports both soft and hard RLIMIT_AS
+as 8,589,934,592 bytes for its child. INFERRED: the Windows 26 GiB peak is specific
+to that execution path rather than evidence that the unchanged logical battery
+intrinsically needs 26 GiB. SPECULATIVE: the complete positive control will finish
+under the Linux cap without material runtime regression.
+
+**Prediction.** Samuel's standing answer is **"I don't know"**. The Builder predicts
+terminal success, the same three positive-control conclusions, a valid exclusive
+receipt bound to the exact Linux package/source bytes and workerq ID, and no
+RLIMIT_AS failure. The host reservation is 12 GiB, 0 VRAM and 2 CPUs; the workerq
+manifest's literal `prlimit` invocation is the enforcement evidence because WSL
+process memory is not a reliable Windows process-tree measurement.
+
+**Intervention and gate.** Invoke the existing test unchanged through `wsl.exe`
+and `/usr/bin/prlimit --as=8589934592`; do not alter candidate code, dimensions,
+precision, seeds, dtype arms, predicates, repeated-estimator sequences or evidence
+schemas. Run positive-only first. Acceptance requires workerq SUCCEEDED, an
+exclusive receipt with exact provenance and all three positive checks, and no FAIL
+line. A missing/invalid receipt, any logical difference, RLIMIT_AS/other failure,
+or materially worse runtime falsifies this execution option. Only after that may
+the twelve mutation shards run once each and aggregate mechanically.
