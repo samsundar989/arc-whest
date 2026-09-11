@@ -41942,3 +41942,34 @@ whole producer-selector suite, compilation and diff checks. Any accepted coercio
 role confusion, input replacement, stale recorded hash, truth call before refusal,
 or weakened earlier mutation test rejects the repair. A new fresh-context Skeptic
 must accept the exact amended diff; this still authorizes no protected read.
+
+## 2026-09-11 - WP0E Linux positive and complete mutation aggregate pass
+
+The repaired positive battery ran once as workerq **802** with 12 GiB declared host
+RAM, 2 CPUs, no GPU and WSL `RLIMIT_AS=8,589,934,592`. It terminated SUCCEEDED in
+257.65 seconds. Its exclusive receipt binds the executing job and current source,
+contains 30/30 edge checks and no FAIL line, and returns code 3 only because quick
+mode correctly reports omitted deployment checks as INCOMPLETE. This is the
+registered positive gate; it is not a complete deployment certificate.
+
+The licensed one-use mutations then ran separately as workerq **803--814**, mapping
+in order to M1--M12. All twelve terminated SUCCEEDED, each named mutation made the
+battery red at its registered check, and none was silently retried. Workerq measured
+about 38.4--39.5 MiB for each shard's Windows launcher/process tree while the WSL
+process inherited the same 8 GiB hard address-space cap. The low Windows number is
+launcher accounting, not a Linux peak claim; the hard cap is the memory evidence.
+
+The Linux-package aggregator exclusively created
+`experiments/2026-09-11_wp0e_final_acceptance/mutation_aggregate_linux.json`.
+It reports **PASS**, `accepted: true`, complete ordered coverage B plus M1--M12,
+13/13 cases, and zero errors. It binds `flopscope 0.12.1`, `whestbench 0.16.1`,
+the exact distribution-byte manifests and current hashes of the candidate,
+certifier, edge oracle and mutation driver. Raw workerq metadata, manifests, logs
+and individual receipts for jobs 802--814 are preserved in the same directory.
+
+**Knowledge delta.** The original job 726's 32 GiB request was an artifact of a
+monolithic certification process and an unintended full-budget/off-shape sampling
+cross-product. The scaled correctness oracle plus process-isolated one-use shards
+preserves the complete positive/negative logical battery and now executes inside the
+actual 8 GiB production limit. This establishes the current full mutation evidence;
+WP0E still requires current-source preflight and fresh-context Skeptic acceptance.

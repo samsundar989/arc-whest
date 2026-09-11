@@ -1,0 +1,1191 @@
+{
+  "artifact": "certification_mutation_shard",
+  "artifact_version": 1,
+  "cases": [
+    {
+      "battery_red": true,
+      "candidate_sha256": "795f1eca54fe3becaedfe8dda9cf00edcee868a6f2fc6d96ccde96345b035d9b",
+      "expected_fail": "invariant suite passes on THIS candidate",
+      "extra_args": [],
+      "fail_lines": [
+        "FAIL  3: the invariant suite passes on THIS candidate, at the LIVE shape and in the grader's dtype29/30 checks passed   layer1:0: worker rc=1; layer1:1: worker rc=1; layer1:2: worker rc=1; layer1:3: worker rc=1"
+      ],
+      "injection_applied": true,
+      "kind": "mutation",
+      "named_failure_matched": true,
+      "returncode": 1,
+      "section": "3",
+      "stderr": "/mnt/c/Users/samsu/Documents/arc-whest/local_sim/certify_candidate.py:1602: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.\n  flops.configure(symmetry_warnings=False)\n",
+      "stderr_sha256": "448ed972cff5dd8062536ce5ae792d3a9384da70492446bbaa06c333ac837884",
+      "stdout": "candidate certification -- READ-ONLY, TRUTH-FREE\n  candidate   ../../../../../../tmp/wp0c_mutants_2ofwata1/cand_m10.py\n  sha256      795f1eca54fe3becaedfe8dda9cf00edcee868a6f2fc6d96ccde96345b035d9b\n  shape       1024x16   B = 2,199,023,255,552\n  NOTE: this is NOT preflight and NOT a promotion. The ship-file gate is untouched;\n        `scripts/preflight.ps1` still certifies estimator.py.\n\n1  the official grader contract\n  SKIP  1: whest validate                                             --quick\n\n2  package and round identity\n  PASS  2: the LIVE round matches the INSTALLED package, field by field  96/96\n  PASS  2: whestbench is the real package, not local_sim's shim       hon3.12/site-packages/whestbench/__init__.py\n  PASS  2: flopscope is the real package, not local_sim's shim        thon3.12/site-packages/flopscope/__init__.py\n\n3  shape generality, the exact layer-1 closed form, and equivariance\n  FAIL  3: the invariant suite passes on THIS candidate, at the LIVE shape and in the grader's dtype29/30 checks passed   layer1:0: worker rc=1; layer1:1: worker rc=1; layer1:2: worker rc=1; layer1:3: worker rc=1\n  PASS  3b: invariant 9 still rejects deliberate equivariance defects BATTERY PASSED -- every deliberate equivariance defect is st\n\n4  determinism, in-process and in a FRESH worker\n  PASS  4: two FRESH interpreters agree bitwise on seed 90000000201   f2db8eb2bb7fa55a pid 12508 vs 12525\n  PASS  4: ...and bill identical FLOPs on seed 90000000201            137,600,326,688\n  PASS  4: the shape is (16, 1024) on seed 90000000201                [16, 1024]\n  PASS  4: two FRESH interpreters agree bitwise on seed 90000000202   4d7e231d66ef1f3d pid 12542 vs 12570\n  PASS  4: ...and bill identical FLOPs on seed 90000000202            137,600,326,688\n  PASS  4: the shape is (16, 1024) on seed 90000000202                [16, 1024]\n\n5-8  one metered run: immutability, cost, telemetry, scalar sync\n  PASS  5: setup() raised nothing                                     0.0000 s\n  PASS  5: setup is inside the 5 s ceiling (LOCAL, in-process -- the grader's window is larger)0.0000 s of 5.0 s\n  PASS  5: the arm is the GRADER's dtype (f64_readonly), not the historical local float32ran under 'f64_readonly'\n  PASS  5: no run raised                                              clean\n  PASS  5: the grader's weight arrays are UNCHANGED after predict     sha256 before == after\n  PASS  5: every output has shape (depth, width)                      [16, 1024]\n  PASS  5: every output is finite                                     \n  PASS  5: no output is negative beyond float rounding (bar -4.6e-12, scaled to the row)most negative -9.126e-17, 7 entr(ies) of 65536, 2.0e-17 relative\n  PASS  5: no returned array approaches the 4 GiB single-array cap    0.062 MB\n  PASS  6: every counted-FLOP total is finite and inside the hard budget137,600,359,456\n  PASS  6: the multiplier is the score's own identity max(0.1, F/B)   0.100000  (C/B = 0.0625734, PINNED at the floor)\n  PASS  6: the operation ledger is non-empty                          445 ops\n  PASS  7: worst op count is inside the Phase-2 gate (22,000 ops)     445 ops -> PREDICTED graded residual 6.0 ms, 67.08x under the 0.4 s cliff (29,851 ops would hit it)\n  PASS  7: LOCAL residual is stable run to run (a RATIO instrument -- the cliff is judged on the op count above, never on these seconds)worst 19.8 ms / median 16.9 ms = 1.17x spread; this host measures 45 us/op against the grader's 13.4\n  PASS  7: worst per-MLP wall is under the installed 120 s limit      1.667 s -> 72x\n  PASS  8: ZERO scalar materializations during predict (__bool__/__float__/__int__/__index__)counted, not asserted\n  PASS  8: every section-5 allocator teardown completed               gc plus native trim after each closed ledger\n\n5b  grader-twin arm: the same candidate across weight dtypes\n      f32                     137,600,359,456 FLOPs      445 ops  clean\n      f64                     137,600,359,456 FLOPs      445 ops  clean\n      f64_readonly            137,600,359,456 FLOPs      445 ops  clean\n      f64_listconstructed     137,600,359,456 FLOPs      445 ops  clean\n  PASS  5b: the f32 arm raised nothing                                clean\n  PASS  5b: the f32 arm returned a finite (depth, width) array        [16, 1024], finite=True\n  PASS  5b: the f64 arm raised nothing                                clean\n  PASS  5b: the f64 arm returned a finite (depth, width) array        [16, 1024], finite=True\n  PASS  5b: the f64_readonly arm raised nothing                       clean\n  PASS  5b: the f64_readonly arm returned a finite (depth, width) array[16, 1024], finite=True\n  PASS  5b: the f64_listconstructed arm raised nothing                clean\n  PASS  5b: the f64_listconstructed arm returned a finite (depth, width) array[16, 1024], finite=True\n  PASS  5b: every arm allocator teardown completed                    gc plus native trim after each closed arm ledger\n  PASS  5b: f64 agrees with the f32 control within f32 tolerance (9.54e-07 relative)max relative difference 0.000e+00\n  PASS  5b: f64_readonly agrees with the f32 control within f32 tolerance (9.54e-07 relative)max relative difference 0.000e+00\n  PASS  5b: f64_listconstructed agrees with the f32 control within f32 tolerance (9.54e-07 relative)max relative difference 0.000e+00\n  PASS  5b: the f64-vs-f32 FLOP delta is an integer multiple of one pass over the weights (2*depth*width^2 = 33,554,432)delta +0 = 0.0000 passes  (0 passes: the candidate never casts -- it is doing f64 arithmetic on the grader)\n  PASS  5b: the read-only arm bills exactly what the writable f64 arm does (immutability is free, or the candidate is copying)+0\n  PASS  5b: section 5's own bill matches its arm in 5b (the two sections ran the same candidate the same way)137,600,359,456 vs 137,600,359,456\n\n9  memory: accounting here, ENFORCEMENT only on Linux\n      peak working set 580.2 MB, peak commit 0.0 MB (test_deployment_envelope.peak_memory_bytes)\n      RLIMIT_AS caps ADDRESS SPACE, which exceeds both counters by an amount\n      no Windows counter reports. These are accounting, and a headroom computed\n      from them is an UPPER BOUND, never a margin.\n  SKIP  9: the real 8-GiB enforcement                                 no linux_memory_gate report FOR THIS CANDIDATE. Run: uv run python local_sim/linux_memory_gate.py --candidate ../../../../../../tmp/wp0c_mutants_2ofwata1/cand_m10.py --json <dir>/linux_memory_gate_cand_m10.json\n\n10  the official subprocess runner -- DEPLOYMENT AUTHORITY\n  SKIP  10: official Phase-2 subprocess smoke                         --quick/--skip-smoke; a skipped deployment check is NOT a pass\n\n11  residual TAIL -- the soak, not the anecdote\n      not requested (--residual-soak 0, the default).\n      Section 10 measured residual on TWO MLPs, ONCE. That is an\n      anecdote, not a tail, and this certificate does NOT carry a\n      p99. Rung-3 hardening requires --residual-soak 3.\n\nR  the repository was not modified\n  PASS  R: the candidate file is byte-identical                       795f1eca54fe3bec\n  PASS  R: estimator.py is byte-identical                             00240eb1e60810f5\n  PASS  R: this run changed no tracked source under estimator.py/scripts/local_simunchanged since start (already dirty at start: 2 file(s), not this run's doing)\n\n  EVIDENCE BY DOMAIN -- one verdict over three different questions\n    MATH    REFUSED     40 checks, 1 failed, 1 skipped\n            the contract and the arithmetic. Host-independent; a failure here is a failure anywhere.\n    LOCAL   INCOMPLETE  5 checks, 0 failed, 2 skipped\n            what this host measured. REAL, and NOT the grading server: no absolute second here transfers (docs/GOTCHAS.md).\n    SERVER_PREDICTED CERTIFIED   1 checks, 0 failed, 0 skipped\n            a FORECAST from the versioned per-operation model, inside its stated evidence domain. Not a measurement, and not a guarantee.\n    SERVER_MEASURED NOT_RUN     0 checks, 0 failed, 0 skipped\n            telemetry observed on the grading server and bound to submitted bytes. A missing row is NOT_RUN, never a forecast promoted into a measurement.\n\n\n  report -> /tmp/wp0c_mutants_2ofwata1/M10.json\n\nCANDIDATE REFUSED -- 1 failed:\n  - [3] 3: the invariant suite passes on THIS candidate, at the LIVE shape and in the grader's dtype\n",
+      "stdout_sha256": "f68c40c5ae74b0d0636e38b832f3b57a78ffb831d66f32e9c28ba07c47a3bc76",
+      "tag": "M10",
+      "title": "layer 1 scaled by 1/sqrt(2) -- finite, positive, and wrong"
+    }
+  ],
+  "checks": [
+    {
+      "name": "U1: _FAILURE_FLAGS is the installed whestbench's own flag_keys",
+      "ok": true
+    },
+    {
+      "name": "U2: the tail is taken over EXECUTED rows only",
+      "ok": true
+    },
+    {
+      "name": "U2: ...so the median is of executed work",
+      "ok": true
+    },
+    {
+      "name": "U2: ...and the CONTAMINATED median is recorded beside it",
+      "ok": true
+    },
+    {
+      "name": "U2: the worst is UNCHANGED by the zeros -- why the defect hid",
+      "ok": true
+    },
+    {
+      "name": "U2: headroom is quoted on the worst EXECUTED row",
+      "ok": true
+    },
+    {
+      "name": "U3: the dominant failure mode is named",
+      "ok": true
+    },
+    {
+      "name": "U3: every failed row keeps its error_code",
+      "ok": true
+    },
+    {
+      "name": "U3: the traceback's LAST line is kept, not its first",
+      "ok": true
+    },
+    {
+      "name": "U3: a harness fault UNDER the repo root claims no candidate frame",
+      "ok": true
+    },
+    {
+      "name": "U4: a fault inside the candidate names the candidate's frame",
+      "ok": true
+    },
+    {
+      "name": "U4b: ...and it is not claimed for a different candidate file",
+      "ok": true
+    },
+    {
+      "name": "U4c: an installed-package frame under the repo root is EXCLUDED",
+      "ok": true
+    },
+    {
+      "name": "U5: a cliff overrun is attributed to the CLIFF, not to 'error'",
+      "ok": true
+    },
+    {
+      "name": "U5: ...and its flags survive into the record",
+      "ok": true
+    },
+    {
+      "name": "U5: an over-cliff row does not masquerade as the tail",
+      "ok": true
+    },
+    {
+      "name": "U8: an over-cap failed row is retained in worst_all_rows",
+      "ok": true
+    },
+    {
+      "name": "U6: an all-failed run is REFUSED, not reported as 0 ms residual",
+      "ok": true
+    },
+    {
+      "name": "U7: retained failure records are capped",
+      "ok": true
+    },
+    {
+      "name": "U9: a LOCAL-only failure leaves MATH certified",
+      "ok": true
+    },
+    {
+      "name": "U9: ...and SERVER certified",
+      "ok": true
+    },
+    {
+      "name": "U9: ...while LOCAL is REFUSED, naming the check",
+      "ok": true
+    },
+    {
+      "name": "U9: the historical check NAME is unchanged, so old FAIL lines match",
+      "ok": true
+    },
+    {
+      "name": "U9: a domain with no checks reports NOT_RUN, not CERTIFIED",
+      "ok": true
+    },
+    {
+      "name": "U9: a skipped-only domain is INCOMPLETE, not CERTIFIED",
+      "ok": true
+    },
+    {
+      "name": "U9: real head/check emission separates all four evidence domains",
+      "ok": true
+    },
+    {
+      "name": "U9: measured server evidence is not a server forecast",
+      "ok": true
+    },
+    {
+      "name": "U9: installed distribution metadata recovers both package versions",
+      "ok": true
+    },
+    {
+      "name": "U10: every stored certification's verdict is reproduced exactly",
+      "ok": true
+    },
+    {
+      "name": "M[M10] (\u00a73): layer 1 scaled by 1/sqrt(2) -- finite, positive, and wrong -- the battery goes RED",
+      "ok": true
+    },
+    {
+      "name": "M[M10]: ...and the NAMED check 'invariant suite passes on ' is one of them",
+      "ok": true
+    },
+    {
+      "name": "R: estimator.py sha256 unchanged",
+      "ok": true
+    },
+    {
+      "name": "R: edge_cases.py sha256 unchanged",
+      "ok": true
+    },
+    {
+      "name": "R: the mutant directory is gone",
+      "ok": true
+    },
+    {
+      "name": "R: receipt provenance unchanged across execution",
+      "ok": true
+    }
+  ],
+  "mutation_registry": [
+    {
+      "expected_fail": "FRESH interpreters agree bitwise",
+      "extra_args": [],
+      "section": "4",
+      "tag": "M1",
+      "title": "output depends on wall-clock, not on mlp.seed"
+    },
+    {
+      "expected_fail": "shape",
+      "extra_args": [],
+      "section": "3/4/5",
+      "tag": "M2",
+      "title": "returns (depth-1, width)"
+    },
+    {
+      "expected_fail": "finite",
+      "extra_args": [],
+      "section": "5",
+      "tag": "M3",
+      "title": "returns NaN in the first row"
+    },
+    {
+      "expected_fail": "negative beyond float rounding",
+      "extra_args": [],
+      "section": "5",
+      "tag": "M4",
+      "title": "returns a large negative value, not float noise"
+    },
+    {
+      "expected_fail": "UNCHANGED after predict",
+      "extra_args": [],
+      "section": "5",
+      "tag": "M5",
+      "title": "writes into mlp.weights before predicting"
+    },
+    {
+      "expected_fail": "ZERO scalar materializations",
+      "extra_args": [],
+      "section": "8",
+      "tag": "M6",
+      "title": "calls float() on a flopscope value inside predict"
+    },
+    {
+      "expected_fail": "setup() raised nothing",
+      "extra_args": [],
+      "section": "5",
+      "tag": "M7",
+      "title": "setup() raises"
+    },
+    {
+      "expected_fail": "no run raised",
+      "extra_args": [],
+      "section": "5",
+      "tag": "M8",
+      "title": "predict() raises"
+    },
+    {
+      "expected_fail": "no run raised",
+      "extra_args": [
+        "--budget",
+        "1000000"
+      ],
+      "section": "5",
+      "tag": "M9",
+      "title": "spends more than the budget it was handed"
+    },
+    {
+      "expected_fail": "invariant suite passes on THIS candidate",
+      "extra_args": [],
+      "section": "3",
+      "tag": "M10",
+      "title": "layer 1 scaled by 1/sqrt(2) -- finite, positive, and wrong"
+    },
+    {
+      "expected_fail": "the f64 arm raised nothing",
+      "extra_args": [],
+      "section": "5b",
+      "tag": "M11",
+      "title": "a dtype-guarded branch that RAISES on the grader's float64 weights"
+    },
+    {
+      "expected_fail": "agrees with the f32 control",
+      "extra_args": [],
+      "section": "5b",
+      "tag": "M12",
+      "title": "a dtype-guarded branch that silently ANSWERS DIFFERENTLY on float64"
+    }
+  ],
+  "mutation_registry_sha256": "833e7a159300614ce37ac6f648632ddb0ea3ee39675d0439f0e4ddcb9449a03a",
+  "overall_pass": true,
+  "provenance": {
+    "certify_candidate_sha256": "64e8f5d1cc8bdf721c7e557f45fc0f4bb2c047669bde4af33ea6b4e46594de83",
+    "distribution_bytes": {
+      "flopscope": {
+        "file_count": 126,
+        "files": [
+          {
+            "path": "benchmarks/__init__.py",
+            "sha256": "4599d46f0dece65e30e58f1ec30ccbaa61824ef988ee4df568fe2eff6ebd5e2b",
+            "size": 60
+          },
+          {
+            "path": "benchmarks/__main__.py",
+            "sha256": "6006c76a6137b301c5e2b23e9edb7d2dac800c5ab02ed1527217e50d69352da3",
+            "size": 132
+          },
+          {
+            "path": "benchmarks/_baseline.py",
+            "sha256": "378de4e75c3c88438676cc5a85a7baa9d8f43f6b3117e1c0fb8a4ddff6fe1905",
+            "size": 6193
+          },
+          {
+            "path": "benchmarks/_bitwise.py",
+            "sha256": "2269ea7be899623a394b665fbed87ca6dd0c2f23098dcc5c3faebbaa200e9bab",
+            "size": 7162
+          },
+          {
+            "path": "benchmarks/_complex.py",
+            "sha256": "ced24a8092f614b1d4bd67c48ca6c4171d84bf7f43c026dcd7a62901cd51c3df",
+            "size": 5744
+          },
+          {
+            "path": "benchmarks/_contractions.py",
+            "sha256": "976cc5dc6a1bb088c2eba27118d788946f39911871f96ea595a62bdbd8c6c0f9",
+            "size": 11543
+          },
+          {
+            "path": "benchmarks/_fft.py",
+            "sha256": "1fe83a3a452ed0b84f26514beb4933adb80e09aa5463b8d652620bba74b3212d",
+            "size": 6419
+          },
+          {
+            "path": "benchmarks/_impl_urls.py",
+            "sha256": "b734c16e76809fdafab7b10ed58cfe0b829d5bfdcbe013609a4f9a596b346126",
+            "size": 4705
+          },
+          {
+            "path": "benchmarks/_linalg.py",
+            "sha256": "61908aa4d40183a63a8fa1f89c54097e28f958d16b3f4b255fcf308bdb171a41",
+            "size": 7099
+          },
+          {
+            "path": "benchmarks/_linalg_delegates.py",
+            "sha256": "250a49d29de94e4534cc240feaf7283530072c89207ae4d00474017e393b734d",
+            "size": 17136
+          },
+          {
+            "path": "benchmarks/_metadata.py",
+            "sha256": "c581d782d4e48fc1e1cefb48a36a65ccae4038c20e9d41dd6cd1ffd55500996d",
+            "size": 4294
+          },
+          {
+            "path": "benchmarks/_misc.py",
+            "sha256": "94a077fa28e3b081a8b9269ef3026e9c9353ee40ed2d8d5e4b9cf678e222c4f9",
+            "size": 22235
+          },
+          {
+            "path": "benchmarks/_perf.py",
+            "sha256": "81a3a98945c8cf679f2b48f6cea9810aba7d89e56b889675d660f3c550c8ab2d",
+            "size": 10158
+          },
+          {
+            "path": "benchmarks/_perm_group_calibration.py",
+            "sha256": "0b28560265315fbf2356dfaf9984037cb3aa4e31093324b684ce84419922992c",
+            "size": 5368
+          },
+          {
+            "path": "benchmarks/_pointwise.py",
+            "sha256": "a700cb956dd6c2dd19d9de772f4d59dc5254c49da4e5cc57fe8ada3eb2719e57",
+            "size": 11290
+          },
+          {
+            "path": "benchmarks/_polynomial.py",
+            "sha256": "f58711ed2a4150c5e33cae3db799ec1e38bf46fe728827342cbf464d31c92a81",
+            "size": 7634
+          },
+          {
+            "path": "benchmarks/_random.py",
+            "sha256": "b7b578c278d93959633043268a66529f3c5f60a909b52491a08f2df2ec195f95",
+            "size": 6612
+          },
+          {
+            "path": "benchmarks/_reductions.py",
+            "sha256": "1b6f6b30560dee2f26ec3992f14f5feac5940ab05c0155e11093f8cdf2542ce0",
+            "size": 3824
+          },
+          {
+            "path": "benchmarks/_sorting.py",
+            "sha256": "4423463df311090eae8b627587920c53f0be0df41ce2b646c380161b6c763b4d",
+            "size": 11236
+          },
+          {
+            "path": "benchmarks/_stats.py",
+            "sha256": "49d8ba297dc799e7eb39ec38ce0f45b9f1d6aa01a834c79a653294bba267f941",
+            "size": 4391
+          },
+          {
+            "path": "benchmarks/_window.py",
+            "sha256": "6c8f1d3b7b8dc5ffeaa3a9604c3f1e133818276e9d9541ca25a430f003479cbc",
+            "size": 3006
+          },
+          {
+            "path": "benchmarks/accumulation/__init__.py",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "size": 0
+          },
+          {
+            "path": "benchmarks/accumulation/bench_cost_compute.py",
+            "sha256": "4b6bdd210cd7442c554a1758ca8a900ce48efac024ef4ff2a04551347dc8aef1",
+            "size": 4244
+          },
+          {
+            "path": "benchmarks/bench_budget_summary.py",
+            "sha256": "d482d3ea6180515be29bd7a6bbadce92327d1ded1eb3430bfe3ad59ca4ea902c",
+            "size": 3486
+          },
+          {
+            "path": "benchmarks/dashboard.py",
+            "sha256": "7162b4411f8276bdbdae14a33c32131e6b392c22ab503b4857739d76f5ffbb15",
+            "size": 9804
+          },
+          {
+            "path": "benchmarks/runner.py",
+            "sha256": "4ef1fab52d8199ddc6d7de9182c7a243395b65c9162202afc3eda2f64e4609e8",
+            "size": 21825
+          },
+          {
+            "path": "flopscope-0.12.1.dist-info/INSTALLER",
+            "sha256": "e6184ce10e266134fdcfa401e8f1a95005bcd4f18d16b62b757323e2833fe9a9",
+            "size": 2
+          },
+          {
+            "path": "flopscope-0.12.1.dist-info/METADATA",
+            "sha256": "2361aa196ac48da3515abb1104efd184d96de7c48127d34e3f5c688ee579bf54",
+            "size": 17262
+          },
+          {
+            "path": "flopscope-0.12.1.dist-info/RECORD",
+            "sha256": "a1f0600f2792607748a8210591e4a398233a0fac16914d84b9d6c03660c169db",
+            "size": 10711
+          },
+          {
+            "path": "flopscope-0.12.1.dist-info/REQUESTED",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "size": 0
+          },
+          {
+            "path": "flopscope-0.12.1.dist-info/WHEEL",
+            "sha256": "ccec20e2307acd7da453dd7437e70c6b08e2bc3ead3bc3445af135da37b56d59",
+            "size": 87
+          },
+          {
+            "path": "flopscope/__init__.py",
+            "sha256": "91cabcd15b88763cd7af73f2d0e04193c7c7750e3cb0ee09575ad1f0e4594049",
+            "size": 9695
+          },
+          {
+            "path": "flopscope/_accumulation/__init__.py",
+            "sha256": "63365581412edca2cbdb90e7ac4c83d56988069ad2021633ce9b681419703cf6",
+            "size": 379
+          },
+          {
+            "path": "flopscope/_accumulation/_bipartite.py",
+            "sha256": "b6854c31c85258f630d6154ed6ecba3bca6af6e247fc6ec74b5d96ca5a1eb789",
+            "size": 3911
+          },
+          {
+            "path": "flopscope/_accumulation/_burnside.py",
+            "sha256": "6bf5a399cf4271f606c1f866c6244be37452ca5f8c732945d7cbcb1c22d0a4eb",
+            "size": 1847
+          },
+          {
+            "path": "flopscope/_accumulation/_cache.py",
+            "sha256": "8536b459ed00ee0a389493bd6a6f30b156942eddb4600f1deebd1a84000ce24f",
+            "size": 4388
+          },
+          {
+            "path": "flopscope/_accumulation/_components.py",
+            "sha256": "e16c64605797aae182fc13d9e800d1d04f08d713c05219740ebd33f3696779e5",
+            "size": 4939
+          },
+          {
+            "path": "flopscope/_accumulation/_cost.py",
+            "sha256": "89655aa1020ecf19aad80ebd323d88958620b022eb1eb0d9cc0cf24503d5b04c",
+            "size": 63811
+          },
+          {
+            "path": "flopscope/_accumulation/_cost_descriptions.py",
+            "sha256": "c42ee0e4e924c417311f09bc0bd2ce1f843ae4b68bac002e261bac133e64f5ad",
+            "size": 2276
+          },
+          {
+            "path": "flopscope/_accumulation/_detection.py",
+            "sha256": "46d622f6826325d5cb4a557811ec5f4de1dad3731b9a7a951c93f7176df1ba5d",
+            "size": 10480
+          },
+          {
+            "path": "flopscope/_accumulation/_ladder.py",
+            "sha256": "dff12c11c3fbffefe199488188a0ee66bfeedd4fbe98b1c719b2087bf7c43c0c",
+            "size": 5557
+          },
+          {
+            "path": "flopscope/_accumulation/_output_orbit.py",
+            "sha256": "f4243fe72a394c6bd471d4e9dc4df40eb90cd9d6157fa5b504400f04b549806c",
+            "size": 3743
+          },
+          {
+            "path": "flopscope/_accumulation/_partition.py",
+            "sha256": "1d97bc390da5b601c126a20980b2ebf5bdc7c17dde937bc1575e570965e6682e",
+            "size": 10197
+          },
+          {
+            "path": "flopscope/_accumulation/_path_info.py",
+            "sha256": "86f36a6fc4a9d6d6965d7114519c82281e1c4b52daee46e4bc83d972404659c1",
+            "size": 9390
+          },
+          {
+            "path": "flopscope/_accumulation/_public.py",
+            "sha256": "f5791358d353459fa3104f83acf78ad9eb8e326bb3923e9aa4d5fda70e4048ee",
+            "size": 5946
+          },
+          {
+            "path": "flopscope/_accumulation/_reduction.py",
+            "sha256": "a60b2ef74d568c1a1db5ad0cc06edcdea438efa0fdec7830b17bf439bdf65536",
+            "size": 10959
+          },
+          {
+            "path": "flopscope/_accumulation/_regimes.py",
+            "sha256": "1315cdba8042027e55cae53552d7c958a32c859a7c53592021110c394f469764",
+            "size": 9762
+          },
+          {
+            "path": "flopscope/_accumulation/_shape.py",
+            "sha256": "6ef737a15b99aad2c4260e5a05db0d81044248352d14b07485e5620cdbf6af0d",
+            "size": 986
+          },
+          {
+            "path": "flopscope/_accumulation/_wreath.py",
+            "sha256": "d698774b5b1913c86c64e642e2ab9add92b50d80595329dc3859d3f9a77ac273",
+            "size": 7588
+          },
+          {
+            "path": "flopscope/_array_ops.py",
+            "sha256": "ce1faa82aceb3e62f71326e51b34b6bf4443d58efda6bf86af6e90fb6a001f43",
+            "size": 160612
+          },
+          {
+            "path": "flopscope/_batch.py",
+            "sha256": "d077338da1f24731944d4f80ec1297bf78954d3a8f41d003259d9fe45cacb5d7",
+            "size": 886
+          },
+          {
+            "path": "flopscope/_budget.py",
+            "sha256": "ad9e78172bd0e8175533d4aae75b67df749d96ecc1ca868135eb3d781e542d01",
+            "size": 116514
+          },
+          {
+            "path": "flopscope/_canonical_symmetry.py",
+            "sha256": "ed3c41af4cdd0b6a8684910f155a6308beb65ff5a5b7660821c7a97797b2edfa",
+            "size": 11327
+          },
+          {
+            "path": "flopscope/_config.py",
+            "sha256": "5c7242a859dc66c6b815fac20537d7e31ec45a63c133bf300805facb22ea9b99",
+            "size": 5523
+          },
+          {
+            "path": "flopscope/_counting_ops.py",
+            "sha256": "da9b0b744cf9ee697c8a28d65a027a4ba1c9ac1f5694b1c1d0bde969a7e7819a",
+            "size": 28099
+          },
+          {
+            "path": "flopscope/_display.py",
+            "sha256": "4204ce8e8399f9c12d75399058cb85a39bd5235b9e57375832dec134fdcfccc4",
+            "size": 15941
+          },
+          {
+            "path": "flopscope/_docstrings.py",
+            "sha256": "a3d76171f6889229834f86bffb009dba3a7f4cae95f20295123a9967cb9001f0",
+            "size": 4394
+          },
+          {
+            "path": "flopscope/_dtype_billing.py",
+            "sha256": "d6f4df8b2fcf162f41afde2dae23a66d894eba62f173e57d89051e5873569cb8",
+            "size": 35752
+          },
+          {
+            "path": "flopscope/_dtypes.py",
+            "sha256": "70c7fb31dd63f8cf3e35edb0af9f9463d5e265c2c520586ad67fa7c4dcfd5094",
+            "size": 481
+          },
+          {
+            "path": "flopscope/_einsum.py",
+            "sha256": "0f25b8f5709c5a96404f20c38afc9b705568ab2654ab6c5fc81f3de292b73284",
+            "size": 45078
+          },
+          {
+            "path": "flopscope/_errstate.py",
+            "sha256": "d6b530d2de99bc7e9c96afbd65a0391efef6926fde57e4f3554ca2ae43fddafc",
+            "size": 628
+          },
+          {
+            "path": "flopscope/_flops.py",
+            "sha256": "bbdad83348b7ce7b63c9d8da66512c40c69e055c653d24687e62132bd34220c2",
+            "size": 9532
+          },
+          {
+            "path": "flopscope/_io.py",
+            "sha256": "d66b8c5ead134982f9f6d65951a3e7779033e45d5abcfc7c2982783869d4c3f8",
+            "size": 12209
+          },
+          {
+            "path": "flopscope/_module.py",
+            "sha256": "72c574c89ad7665e22a6b60c581cd314dfe42e36643692f667037f1ebefa70c6",
+            "size": 3555
+          },
+          {
+            "path": "flopscope/_ndarray.py",
+            "sha256": "fa5bbecb48b123ab77f31ced3da877d2e333aa5b403a324c33da591b967d3e74",
+            "size": 57408
+          },
+          {
+            "path": "flopscope/_opt_einsum/LICENSE",
+            "sha256": "33806bcc4da4e32dbdaf4ea0e400adc72ab0c771d09796d1f78ae8c00124b975",
+            "size": 1079
+          },
+          {
+            "path": "flopscope/_opt_einsum/NOTICE",
+            "sha256": "34cff74d1a4523a9bf84a0daa0f7773bd0188d1a21dce20ccaa5e5ab2057e3fe",
+            "size": 2954
+          },
+          {
+            "path": "flopscope/_opt_einsum/__init__.py",
+            "sha256": "8b12e3ff823e64a9dda0f9184f037ff7bf5681f8e222a353d565a7e798390a27",
+            "size": 7504
+          },
+          {
+            "path": "flopscope/_opt_einsum/_contract.py",
+            "sha256": "4707c34386aeee628cc54ffb7ae87459dd075380d15b44bc8eeb2b4b00348722",
+            "size": 62686
+          },
+          {
+            "path": "flopscope/_opt_einsum/_helpers.py",
+            "sha256": "0dcb94189684ac38e2d507d7bcadfee0827a30e721a706d87f5e83170e04de22",
+            "size": 5632
+          },
+          {
+            "path": "flopscope/_opt_einsum/_hsluv.py",
+            "sha256": "acc906e7336236bcbead6ea640ccc5e6517ad1be8a3c032740bcd31f29aec16f",
+            "size": 7539
+          },
+          {
+            "path": "flopscope/_opt_einsum/_path_random.py",
+            "sha256": "c11f7a0212203865a28b58b810a0e7c18826ef3237d6be021a594ce0f61d6d90",
+            "size": 16607
+          },
+          {
+            "path": "flopscope/_opt_einsum/_paths.py",
+            "sha256": "728bef683604fff79e334d84d6d2b37f68d63ec2390299eec0f0da55044cd941",
+            "size": 60916
+          },
+          {
+            "path": "flopscope/_opt_einsum/_subgraph_symmetry.py",
+            "sha256": "2d8028d8c51017a0a26dca446de67dec5b906750baebd59b7c932b7a19bca3e8",
+            "size": 21613
+          },
+          {
+            "path": "flopscope/_opt_einsum/_symmetry.py",
+            "sha256": "c4352cf8a6cd16b32a2ac3f58e0fd2986ceb75343e822a957af86daba9d193d0",
+            "size": 5752
+          },
+          {
+            "path": "flopscope/_opt_einsum/_typing.py",
+            "sha256": "57d58b252a75c1eb5543fe6a913ef6734eb477e5eb73a4f19058cd2cda2ffef5",
+            "size": 894
+          },
+          {
+            "path": "flopscope/_perm_group.py",
+            "sha256": "c7d554782302bc401b4691101ccf928031d4180d53f5141a42732996e18690dc",
+            "size": 27823
+          },
+          {
+            "path": "flopscope/_pointwise.py",
+            "sha256": "7d376515446f1b174bef375c48116a552098bd514f5552450876f56822beb0c7",
+            "size": 331932
+          },
+          {
+            "path": "flopscope/_polynomial.py",
+            "sha256": "2577cb380b440135526fba9b9f8ef4095b6f3165041cb407f40bb325785cbb9d",
+            "size": 23067
+          },
+          {
+            "path": "flopscope/_registry.py",
+            "sha256": "342a95f3bc9717cbc6381edf81eb81c03d97c3dfd3253e939d2691b5b2b7bee0",
+            "size": 154744
+          },
+          {
+            "path": "flopscope/_server_only.py",
+            "sha256": "680dd6c51e3e2d3ab2b5b1a809a3a62e260c1c3a9a6841c01c4ef92513b0245f",
+            "size": 2434
+          },
+          {
+            "path": "flopscope/_sorting_ops.py",
+            "sha256": "96bb64ec0d6acf4ebfe6985e5f7b1f2cdd5a9d03e961c36065fd14e00c02da4b",
+            "size": 22597
+          },
+          {
+            "path": "flopscope/_symmetric.py",
+            "sha256": "fd6b1d7badf20602da633393f9ae39a13f918c1ecc10be06f3d8f532f54bc62c",
+            "size": 44879
+          },
+          {
+            "path": "flopscope/_symmetry_transport.py",
+            "sha256": "f34a50e626ceec0d81a266195fdfef33270d28e7507ec7e65b47d709beb73c98",
+            "size": 14786
+          },
+          {
+            "path": "flopscope/_symmetry_utils.py",
+            "sha256": "c4b331399b84b7d6ae8fea9749ad3b1acb3a2657600366bccbf2ded88d013f6d",
+            "size": 29394
+          },
+          {
+            "path": "flopscope/_type_info.py",
+            "sha256": "876c4ed0675d57ae589b19da6132cec938ec1d19c96d29a3ea39b1a7c11a4e7d",
+            "size": 294
+          },
+          {
+            "path": "flopscope/_unwrap.py",
+            "sha256": "2860c1010b0af65e1b2091ede33d9ffdb8292eac8a627ef90fdb910dbe1c8e14",
+            "size": 4325
+          },
+          {
+            "path": "flopscope/_validation.py",
+            "sha256": "6a047b60aaa5954b9301a15a6e3e5f646d10a95ace60c6b47c54cd9f2b52531f",
+            "size": 6636
+          },
+          {
+            "path": "flopscope/_version_check.py",
+            "sha256": "28064e50dd62f7e329b4c2ddf0703047983105b76d55ec3f532cef018147ae06",
+            "size": 1382
+          },
+          {
+            "path": "flopscope/_weights.py",
+            "sha256": "22591dd4dd2d54b4134da82f67eb9c299a7e4452f7d815f2f54d2b96fb9633a2",
+            "size": 12505
+          },
+          {
+            "path": "flopscope/_window.py",
+            "sha256": "9f141ca587d0cfc05b1d7981fff3da9909b81871b457dffcb6568d52c1f9ab2e",
+            "size": 5819
+          },
+          {
+            "path": "flopscope/_write_epoch.py",
+            "sha256": "44d311640c519cebca3834aabd25338a83964e8cf76e9511d5a6f875f49f38c3",
+            "size": 4019
+          },
+          {
+            "path": "flopscope/accounting.py",
+            "sha256": "4487e8ab31fc57074d7534340134de1e1dfffbe3e15e52c1dec3ce10e74be1d4",
+            "size": 17805
+          },
+          {
+            "path": "flopscope/data/README.md",
+            "sha256": "543960af8804136a4177fdc77eba49b788e126d0f37576e521504a143b8b1baa",
+            "size": 1309
+          },
+          {
+            "path": "flopscope/data/default_weights.json",
+            "sha256": "f729bc47f07c080b8c7b9d7b045e5663f0af313669b4c2a962b5a9044a94cb7a",
+            "size": 11271
+          },
+          {
+            "path": "flopscope/data/weights.csv",
+            "sha256": "39f6a9dd17ad15fc48b36ff9114ab7bd73e121a6bfbe3a4fb647d328c74e8c74",
+            "size": 138502
+          },
+          {
+            "path": "flopscope/errors.py",
+            "sha256": "dce9448db1d3eefe70accf485ee927b9f2084081b9c6dd12f4dd7015909091bd",
+            "size": 9472
+          },
+          {
+            "path": "flopscope/numpy/__init__.py",
+            "sha256": "33edacfc6ca01866d4f558e3a43f8fadfd6a2c0efdbc4e4712acc1d839ad4e2f",
+            "size": 14407
+          },
+          {
+            "path": "flopscope/numpy/fft/__init__.py",
+            "sha256": "dc1c02c52c4f07aac0f084f5de780b2bb8b2ae10b2fbd9de71540a6bbea5db8c",
+            "size": 866
+          },
+          {
+            "path": "flopscope/numpy/fft/_free.py",
+            "sha256": "67395765dc0aaf0eb91a3630fb9f370a6b1a57d6d4e30143ac8a2205e4f50bf2",
+            "size": 5332
+          },
+          {
+            "path": "flopscope/numpy/fft/_transforms.py",
+            "sha256": "617952a7756e7b3e4244986ab3399e48f583c3403ac7890286e3170d2e240299",
+            "size": 37212
+          },
+          {
+            "path": "flopscope/numpy/linalg/__init__.py",
+            "sha256": "3737b717828bccb39c690eb8a8f0b9b9e6afdf597eb841073c91fd83257e71a7",
+            "size": 2574
+          },
+          {
+            "path": "flopscope/numpy/linalg/_aliases.py",
+            "sha256": "d49aa76c401a6b0a6c9c9f1dd8bc9fdb5b0cd2ced77b9fd82b1c4208d9204670",
+            "size": 4219
+          },
+          {
+            "path": "flopscope/numpy/linalg/_compound.py",
+            "sha256": "61920a183002963df9c557d19c9146815825aeec408ebe8bc0f70e1cc34009ed",
+            "size": 7171
+          },
+          {
+            "path": "flopscope/numpy/linalg/_decompositions.py",
+            "sha256": "0cd6f08ac3fe3cef97d506be6713d0aa85f6ced74e8fd35016a420bfe6d8d942",
+            "size": 12158
+          },
+          {
+            "path": "flopscope/numpy/linalg/_properties.py",
+            "sha256": "08fb7f5d888870eb72a996c4412aca4b86abd685e76b6a020539b82d69982e1a",
+            "size": 19322
+          },
+          {
+            "path": "flopscope/numpy/linalg/_solvers.py",
+            "sha256": "659d135af5cd4eac32271cfc9693d403a17cd6d7445fc613723ed803c33a08ac",
+            "size": 15924
+          },
+          {
+            "path": "flopscope/numpy/linalg/_svd.py",
+            "sha256": "ec617739a4da011bdc141f14b305ac69b154d5fc48961ca8ef209ad148860d18",
+            "size": 4762
+          },
+          {
+            "path": "flopscope/numpy/random/__init__.py",
+            "sha256": "4e55bd824c031590bee0de31980261a489f1bc9162086091dc8075a804b22253",
+            "size": 32920
+          },
+          {
+            "path": "flopscope/numpy/random/_cost_formulas.py",
+            "sha256": "d14d86a2ca0700c0899318a9c7cd3f08e91ac80948682225d383d71e2d628f8f",
+            "size": 12512
+          },
+          {
+            "path": "flopscope/numpy/random/_counted_classes.py",
+            "sha256": "b7c8b29a339c0cdf2e65c660ca733c96db90313bc62649a635d4b57341918f2d",
+            "size": 12510
+          },
+          {
+            "path": "flopscope/numpy/testing/__init__.py",
+            "sha256": "0a55318a9f63d647fff5e93b054a60e88815c1c28bc3969b5f1d529c6a8d7282",
+            "size": 349
+          },
+          {
+            "path": "flopscope/numpy/typing/__init__.py",
+            "sha256": "b76a1782fd393ec359370070bafebb84aa350e0d9bc092b55f593b62baf0d079",
+            "size": 772
+          },
+          {
+            "path": "flopscope/py.typed",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "size": 0
+          },
+          {
+            "path": "flopscope/stats/__init__.py",
+            "sha256": "d4cb03f7c79a4661c5e9f462ab41d26f0e5cd26c054557b5c111b105e42a4892",
+            "size": 2715
+          },
+          {
+            "path": "flopscope/stats/_base.py",
+            "sha256": "3da5842bce752cefc89462967e6484244c768bb762fe701d2549adc04f940bad",
+            "size": 4731
+          },
+          {
+            "path": "flopscope/stats/_cauchy.py",
+            "sha256": "416fd7bdfed3b724671b63bd31de9b14c61f07e9412f2f659431a781d2101f4e",
+            "size": 5121
+          },
+          {
+            "path": "flopscope/stats/_erf.py",
+            "sha256": "4cdd75fdb85981fc385417082985478566b18e19fa67ebb7d41225b5efaaa3bd",
+            "size": 6040
+          },
+          {
+            "path": "flopscope/stats/_expon.py",
+            "sha256": "65b246a732170c10cae8bdb0900976334869629985866221ee78f52b7df5e6a7",
+            "size": 5013
+          },
+          {
+            "path": "flopscope/stats/_laplace.py",
+            "sha256": "0806e29c778c89f2802bc45e728b5608aa68e9b0cb2ece4b8ba83e40d5895fda",
+            "size": 5451
+          },
+          {
+            "path": "flopscope/stats/_logistic.py",
+            "sha256": "940ba18bbb660c6053c4705d8d00ac38c03fe0b18386a734e152f68e00275b49",
+            "size": 5123
+          },
+          {
+            "path": "flopscope/stats/_lognorm.py",
+            "sha256": "1fcc35fba94bada8516fd4d5cdcfb98327998449c8b48b00704595b7037ae053",
+            "size": 5527
+          },
+          {
+            "path": "flopscope/stats/_ndtri.py",
+            "sha256": "8260579de5ae20a36150eb6576fb66149cdac79454a4561e558d48522c51b14f",
+            "size": 3496
+          },
+          {
+            "path": "flopscope/stats/_norm.py",
+            "sha256": "f23e49201c8e09e2785814b2b31663cda1c6bb217a57a211532e42fc9fe3b65d",
+            "size": 4698
+          },
+          {
+            "path": "flopscope/stats/_truncnorm.py",
+            "sha256": "b32c3c8a2944b516c9dec73e49e85da6752fc8684a6f14f3ebf5a04a26a65aab",
+            "size": 6584
+          },
+          {
+            "path": "flopscope/stats/_uniform.py",
+            "sha256": "5be716109b7af997b26d915019e53e8e13c8c8b3a238a457b40c6c770902574b",
+            "size": 4405
+          }
+        ],
+        "manifest_sha256": "493725b859051826d11f66eaf126f6e44b85d7d26fe57ca3f2d19c725b4df576",
+        "total_bytes": 2197540,
+        "version": "0.12.1"
+      },
+      "whestbench": {
+        "file_count": 53,
+        "files": [
+          {
+            "path": "../../../bin/whest",
+            "sha256": "82b50447ec536839682a4cbc7d72699c183eca9aa712767846b792c3cc953d26",
+            "size": 318
+          },
+          {
+            "path": "../../../bin/whestbench",
+            "sha256": "82b50447ec536839682a4cbc7d72699c183eca9aa712767846b792c3cc953d26",
+            "size": 318
+          },
+          {
+            "path": "whestbench-0.16.1.dist-info/INSTALLER",
+            "sha256": "e6184ce10e266134fdcfa401e8f1a95005bcd4f18d16b62b757323e2833fe9a9",
+            "size": 2
+          },
+          {
+            "path": "whestbench-0.16.1.dist-info/METADATA",
+            "sha256": "80f0c60acdce90a916b2bef361cf69cfaf2b1679a812b2f4e5fde17165657e9a",
+            "size": 553
+          },
+          {
+            "path": "whestbench-0.16.1.dist-info/RECORD",
+            "sha256": "1a7426346e3276372ebc9ac9fef59d571d875d8547add9b29091fa93d575eda6",
+            "size": 4405
+          },
+          {
+            "path": "whestbench-0.16.1.dist-info/REQUESTED",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "size": 0
+          },
+          {
+            "path": "whestbench-0.16.1.dist-info/WHEEL",
+            "sha256": "ccec20e2307acd7da453dd7437e70c6b08e2bc3ead3bc3445af135da37b56d59",
+            "size": 87
+          },
+          {
+            "path": "whestbench-0.16.1.dist-info/entry_points.txt",
+            "sha256": "a2de67b35cd59edda777cf4cada7f221ed7a7a1242f1c20f04c583a1efe81e82",
+            "size": 79
+          },
+          {
+            "path": "whestbench-0.16.1.dist-info/licenses/LICENSE",
+            "sha256": "59ecd5ea2d7418e0783d1c07485b455e85fb6918b70e549896c042da08398a46",
+            "size": 1064
+          },
+          {
+            "path": "whestbench/__init__.py",
+            "sha256": "eab9716010f7314f5d088430456061b941d377994f9d66e6478df415cff05914",
+            "size": 1242
+          },
+          {
+            "path": "whestbench/_provenance.py",
+            "sha256": "42c4060af846b7459e581be0a0f74ebcc389fcf4fea6913c6d761473434da0b9",
+            "size": 3173
+          },
+          {
+            "path": "whestbench/_simulation_torch.py",
+            "sha256": "31042ed31a011a18e2f0ff5104bfc15769e74dfd83e3d21b38c3ed79efe1b086",
+            "size": 6903
+          },
+          {
+            "path": "whestbench/aicrowd_client.py",
+            "sha256": "441cf36acb61266a960164de80fc66b21c5015773a898c76d1807b9c46bae6a6",
+            "size": 20114
+          },
+          {
+            "path": "whestbench/aicrowd_config.py",
+            "sha256": "fcf5175963f0a905b05a7daa4419c964376f4c11ed761b35595dd53bc253a188",
+            "size": 2303
+          },
+          {
+            "path": "whestbench/budget.py",
+            "sha256": "688a8633aa81b51a49a64e0974ac3d45c0a5d64c9867805d8a93af22d976a963",
+            "size": 14575
+          },
+          {
+            "path": "whestbench/cli.py",
+            "sha256": "f6b975fd39a1dfda5e71efada4f7f4da0b5fde0b0130816484a660f91dd2b58d",
+            "size": 158375
+          },
+          {
+            "path": "whestbench/concurrency.py",
+            "sha256": "944a016a5e260096fb3fe24d6c368f737de6f5fe201410ec7778019192d614c2",
+            "size": 2193
+          },
+          {
+            "path": "whestbench/dataset.py",
+            "sha256": "53638e874a26dbec64a1b5d16e756c1e198272795fbc2698eebb77a5a970b55a",
+            "size": 35062
+          },
+          {
+            "path": "whestbench/dataset_io.py",
+            "sha256": "5a861ce0b3465e83ff0aabc18cd88a0a9c79fea5b8c1f023b2c9b5651b6a35bf",
+            "size": 56245
+          },
+          {
+            "path": "whestbench/dataset_torch.py",
+            "sha256": "be39476ed759b8446ac28cefbb0617c8205a8cc941fb1022f0e85b1fc00f87bf",
+            "size": 27681
+          },
+          {
+            "path": "whestbench/doctor.py",
+            "sha256": "57cc36ff4ff9ab4cf59eab047e9f88317744cdce65d4c3daec375b5449d3411f",
+            "size": 10008
+          },
+          {
+            "path": "whestbench/domain.py",
+            "sha256": "db736fec3f983258e363750384d943db1b662a027c998dc494f7646586e3ade5",
+            "size": 8776
+          },
+          {
+            "path": "whestbench/estimators.py",
+            "sha256": "53598fa3c0e81a1e0a6bfc647f17c093f04209f96b974a15c03abcdc8fae73b4",
+            "size": 5210
+          },
+          {
+            "path": "whestbench/generation.py",
+            "sha256": "68bf70d7ac1d876a67044ae9b853fb718f14bce660f6e75b8dab55164d65188b",
+            "size": 1571
+          },
+          {
+            "path": "whestbench/hardware.py",
+            "sha256": "ded7537dfa8fca80155adabc4a1037d3e37f33827086f0cf1501ca9d0d0fc719",
+            "size": 5231
+          },
+          {
+            "path": "whestbench/hf_progress.py",
+            "sha256": "9f570270384eb3225dc5177e8e3a35197810882a06735ca20aab82459410a58e",
+            "size": 13344
+          },
+          {
+            "path": "whestbench/hub.py",
+            "sha256": "babaf628b491b881f08857798ab3e751bcd792ee4058579b478ac35ea9cf1170",
+            "size": 3269
+          },
+          {
+            "path": "whestbench/limits.py",
+            "sha256": "937a23eba10a6d8e693c5117befff6ce7bdb7d01737fbf7f8c162dd73f4846bd",
+            "size": 432
+          },
+          {
+            "path": "whestbench/loader.py",
+            "sha256": "c478cc11f72cef1c585c69493ee818ed31cbcea640a9dc5ac95d5947adc46f46",
+            "size": 4846
+          },
+          {
+            "path": "whestbench/naming.py",
+            "sha256": "f951b44d11f44357684a1000795b9967f651823863169149018169fbc520afcd",
+            "size": 2733
+          },
+          {
+            "path": "whestbench/packaging.py",
+            "sha256": "64f38dfe46951e1f49e40b8872e137a9338b7b33b115d8edd6058ddd3431b0a6",
+            "size": 24238
+          },
+          {
+            "path": "whestbench/presentation/__init__.py",
+            "sha256": "30609ac9f0a0edd883ccbe09686621dd3c0f6e7b5a59ec566d19d5acab683a1d",
+            "size": 650
+          },
+          {
+            "path": "whestbench/presentation/adapters.py",
+            "sha256": "387201b236125fae9ae978a5321765cebbc861357cd14f7201908dae6fb4b4d5",
+            "size": 26754
+          },
+          {
+            "path": "whestbench/presentation/blocks.py",
+            "sha256": "38fd41ca6dddb8362cbaaf769a193b13d4922c806df39897189249626c5dc1aa",
+            "size": 14006
+          },
+          {
+            "path": "whestbench/presentation/breakdowns.py",
+            "sha256": "3a5ec3d7a1d1f7ae49d498b531a6d1f651f5d7ffd9733d5b1006f992cdaf14c9",
+            "size": 6895
+          },
+          {
+            "path": "whestbench/presentation/human.py",
+            "sha256": "5b21acbe906771f8baa223977a969a3688fcafe6dc2c078e6842f420c57ecd2c",
+            "size": 2312
+          },
+          {
+            "path": "whestbench/presentation/models.py",
+            "sha256": "ca0a2c5ad9cee16cb21c35ac43354301f39229bd8a8363823f1f083c440361c6",
+            "size": 4969
+          },
+          {
+            "path": "whestbench/presentation/output.py",
+            "sha256": "ff2a86b37a7eba5a2d53d1aa14484ccd11203a076a6dc119a15bc98ff95649fb",
+            "size": 861
+          },
+          {
+            "path": "whestbench/presentation/presenters.py",
+            "sha256": "4e86c6e90c5ef396af2a758d5b8f1af609a80904ee77f9027ec21213bdd5cf7f",
+            "size": 2025
+          },
+          {
+            "path": "whestbench/profiler.py",
+            "sha256": "f7d19e069601d2eb26ba78d01e5295c9dea0f0425895080282c47617b8af97ad",
+            "size": 34678
+          },
+          {
+            "path": "whestbench/protocol.py",
+            "sha256": "aec1174beedb5d0da93fb529cd785170fbfda06be9bfead7cfe3fa66370041bb",
+            "size": 1666
+          },
+          {
+            "path": "whestbench/reporting.py",
+            "sha256": "f9fd14bf820e522f59f9a98c702e65e993eea843bc2071d811a3e2a2eba155f7",
+            "size": 49620
+          },
+          {
+            "path": "whestbench/runner.py",
+            "sha256": "e2a3db512249fa705775d27b5956971110872958e0603d23bcf24f2673e908fa",
+            "size": 21685
+          },
+          {
+            "path": "whestbench/scoring.py",
+            "sha256": "e6d05ca38e3a69daf6d25e3024e33a79e5bb9571e03b9dc53580d727c64384e3",
+            "size": 49061
+          },
+          {
+            "path": "whestbench/sdk.py",
+            "sha256": "b0fcc52c6b531981e46da6955365aa786260fab53fd66dcf3675791ed8c3c105",
+            "size": 1825
+          },
+          {
+            "path": "whestbench/seeds.py",
+            "sha256": "e0ddfce4f1a788aafc7df0ba09f5a30ff94dffe6fd9fe8dc6fea4f02a31243d1",
+            "size": 13963
+          },
+          {
+            "path": "whestbench/simulation.py",
+            "sha256": "6b3b13e910c7a7e90b2e95c9add4d229976dcfd0490fc9cc0f326601b1684fc2",
+            "size": 5835
+          },
+          {
+            "path": "whestbench/subprocess_worker.py",
+            "sha256": "577744e2241a09dbc45ba244c4adca9c72bdbbccdc0ec92fea81197df4300971",
+            "size": 9248
+          },
+          {
+            "path": "whestbench/templates/dataset_card.md.j2",
+            "sha256": "d2013814283da496ae17c2f6ce052d71ff586fa41ccaa558ffe0ad31a754b4db",
+            "size": 30350
+          },
+          {
+            "path": "whestbench/templates/estimator.py.tmpl",
+            "sha256": "e7339f6b35756cc267427c7db82e94c697ba1161ec09b55614858bc19521e02a",
+            "size": 1723
+          },
+          {
+            "path": "whestbench/templates/whestignore.tmpl",
+            "sha256": "854790fa73c439865bacd5fbc9502a8e2f5df55eb1541431f48ca51571c653c3",
+            "size": 376
+          },
+          {
+            "path": "whestbench/ui.py",
+            "sha256": "469bc42b4478e22235ff234f1b453071684ad4f1104cc7bf277398cd0e333a1e",
+            "size": 9999
+          },
+          {
+            "path": "whestbench/validation.py",
+            "sha256": "239ceb596742baf534743a64ea9bf539011677eb7d0cc13f31b22593660a236b",
+            "size": 9270
+          }
+        ],
+        "manifest_sha256": "6f8788487c9c7df2cf3e88e2b32c2770527a2d909764560cf761cc87486dcb37",
+        "total_bytes": 712121,
+        "version": "0.16.1"
+      }
+    },
+    "distributions": {
+      "flopscope": "0.12.1",
+      "whestbench": "0.16.1"
+    },
+    "edge_cases_sha256": "4265bbd2c9922622934cd07241277639b4abcfe71a528f7c260059dda5875628",
+    "estimator_sha256": "00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec",
+    "test_certify_candidate_sha256": "8014be0d91ae17142c762e7264141ed9828343f652de0b644f028f8b6976b8fa"
+  },
+  "selection": {
+    "include_positive": false,
+    "mutation_tags": [
+      "M10"
+    ]
+  },
+  "unit_check_count": 29,
+  "unit_checks_passed": true,
+  "workerq_job_id": "812"
+}
