@@ -19,8 +19,10 @@ Run:
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import hashlib
 import json
+import math
 import os
 import sys
 
@@ -50,6 +52,71 @@ def _sha256_bytes(value):
 def _sha256(path):
     with open(path, "rb") as fh:
         return _sha256_bytes(fh.read())
+
+
+def _diagnostic_scalar(value):
+    """Keep failure evidence strict JSON even when an error row contains NaN."""
+    if isinstance(value, float) and not math.isfinite(value):
+        if math.isnan(value):
+            return "NaN"
+        return "Infinity" if value > 0 else "-Infinity"
+    return value
+
+
+def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
+                              source_hash, rows, provenance, predictions,
+                              identity_manifest, width, depth, spec,
+                              upstream_sha):
+    row_values = []
+    for row in rows:
+        raw = dataclasses.asdict(row)
+        row_values.append({key: _diagnostic_scalar(value)
+                           for key, value in raw.items()})
+    result = {
+        "schema": "arc-whest.coherent-k4-fit-producer-failure.v1",
+        "immutable": True,
+        "complete_candidate": False,
+        "labels_read": False,
+        "candidate_index": candidate_index,
+        "candidate": candidate,
+        "candidate_source": {
+            "path": os.path.relpath(source_path, _ROOT).replace("\\", "/"),
+            "sha256": source_hash,
+        },
+        "inputs": {
+            "candidates_sha256": _sha256(a.candidates),
+            "bounds_sha256": _sha256(a.bounds),
+            "identities_sha256": _sha256(a.identities),
+        },
+        "producer": {
+            "path": os.path.relpath(__file__, _ROOT).replace("\\", "/"),
+            "sha256": _sha256(__file__),
+        },
+        "generator": {
+            "path": os.path.relpath(builder.__file__, _ROOT).replace("\\", "/"),
+            "sha256": _sha256(builder.__file__),
+            "upstream_source_sha256": upstream_sha,
+        },
+        "identity_manifest": identity_manifest,
+        "lifecycle_spec": {
+            "width": width,
+            "depth": depth,
+            "flop_budget": int(spec.flop_budget),
+            "wall_time_limit_s": spec.wall_time_limit_s,
+            "residual_cap": spec.residual_wall_time_limit_s,
+            "weights_mode": le.DEFAULT_WEIGHTS_MODE,
+        },
+        "evaluated_rows": len(rows),
+        "captured_predictions": len(predictions),
+        "rows_hash": provenance.get("rows_hash"),
+        "lifecycle_candidate_sha256": provenance.get("candidate_sha256"),
+        "rows": row_values,
+    }
+    path = os.path.join(a.out_dir, "failure_diagnostic.json")
+    with open(path, "x", encoding="utf-8", newline="\n") as fh:
+        json.dump(result, fh, indent=2, sort_keys=True, allow_nan=False)
+        fh.write("\n")
+    return path
 
 
 def _load_identities(path):
@@ -122,7 +189,15 @@ def produce(a):
             source_path, seeds, zero_target, spec=spec,
             gt_noise=[0.0] * len(seeds), predictions_out=predictions)
         if len(predictions) != len(seeds) or any(row.failed for row in rows):
-            raise ProducerRefused("candidate %d failed canonical lifecycle" % i)
+            diagnostic = _write_failure_diagnostic(
+                a, candidate_index=i, candidate=candidate,
+                source_path=source_path, source_hash=source_hash,
+                rows=rows, provenance=provenance, predictions=predictions,
+                identity_manifest=identity_manifest, width=width, depth=depth,
+                spec=spec, upstream_sha=upstream_sha)
+            raise ProducerRefused(
+                "candidate %d failed canonical lifecycle; diagnostic: %s" %
+                (i, diagnostic))
         if provenance["candidate_sha256"] != source_hash:
             raise ProducerRefused("candidate %d lifecycle/source hash mismatch" % i)
         all_predictions.append(np.stack(predictions).astype(np.float32))

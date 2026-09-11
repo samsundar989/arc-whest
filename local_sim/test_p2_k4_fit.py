@@ -453,8 +453,62 @@ def run_checks():
         second = subprocess.run(command, capture_output=True, text=True)
         check("documented producer CLI is immutable", proc.returncode == 0 and
               os.path.isfile(os.path.join(out_dir, "producer_receipt.json")) and
+              not os.path.exists(os.path.join(out_dir, "failure_diagnostic.json")) and
               second.returncode == 2 and "already exists" in second.stdout,
               "first=%d second=%d" % (proc.returncode, second.returncode))
+
+    with _temp("p2-k4-producer-failure-") as root:
+        candidates = os.path.join(root, "candidates.json")
+        bounds = os.path.join(root, "bounds.json")
+        identities = os.path.join(root, "identities.json")
+        out_dir = os.path.join(root, "observations")
+        _write_json(candidates, {"parameters": ["lam"], "candidates": [{"lam": 0.0}]})
+        _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
+        _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
+                    "depth": 2, "identities": [{"id": "failed-synthetic", "seed": 7021}]})
+        original_evaluate = producer.le.evaluate
+        def failing_evaluate(source_path, seeds, target, *, spec, gt_noise,
+                             predictions_out):
+            row = producer.le.EvidenceRow(
+                index=0, input_seed=seeds[0], estimator_seed=seeds[0],
+                candidate=source_path, candidate_sha256=producer._sha256(source_path),
+                truth_sha256="synthetic-zero", width=spec.width, depth=spec.depth,
+                budget=float(spec.flop_budget), flops_used=float(spec.flop_budget + 1),
+                n_ops=17.0, mse=float("nan"), zero_prediction_mse=0.0,
+                gt_noise=0.0, residual_wall_time_s=0.1, wall_time_s=0.2,
+                budget_exhausted=True, error_code="BudgetExceeded", nonfinite=True)
+            predictions_out.append(np.zeros((spec.depth, spec.width), dtype=np.float32))
+            return [row], {"candidate_sha256": row.candidate_sha256,
+                           "rows_hash": "failure-row-hash"}
+        producer.le.evaluate = failing_evaluate
+        try:
+            try:
+                producer.produce(Namespace(candidates=candidates, bounds=bounds,
+                                           identities=identities, out_dir=out_dir))
+                refused = False
+            except producer.ProducerRefused:
+                refused = True
+        finally:
+            producer.le.evaluate = original_evaluate
+        diagnostic_path = os.path.join(out_dir, "failure_diagnostic.json")
+        with open(diagnostic_path, encoding="utf-8") as fh:
+            diagnostic = json.load(fh)
+        failure_row = diagnostic["rows"][0]
+        check("failed producer writes exclusive truth-free row evidence",
+              (refused and diagnostic["immutable"] is True
+               and diagnostic["complete_candidate"] is False
+               and diagnostic["labels_read"] is False
+               and diagnostic["evaluated_rows"] == 1
+               and diagnostic["captured_predictions"] == 1
+               and failure_row["budget_exhausted"] is True
+               and failure_row["error_code"] == "BudgetExceeded"
+               and failure_row["flops_used"] == float(2 ** 41 + 1)
+               and failure_row["mse"] == "NaN"
+               and not os.path.exists(os.path.join(out_dir, "predictions.npz"))
+               and not os.path.exists(os.path.join(out_dir, "producer_receipt.json"))),
+              "refused=%s rows=%d no_success_artifacts=%s" %
+              (refused, len(diagnostic["rows"]),
+               not os.path.exists(os.path.join(out_dir, "predictions.npz"))))
     return {"kind": "synthetic coherent-K4 producer-selector conformance", "labels_read": False,
             "checks": rows, "n_checks": len(rows), "n_failed": sum(not x["pass"] for x in rows),
             "pass": all(x["pass"] for x in rows)}

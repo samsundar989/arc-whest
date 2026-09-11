@@ -42068,3 +42068,25 @@ and must not access labels. Add positive and deliberately failing tiny fixtures,
 run current preflight, and obtain a fresh Skeptic before one bounded workerq
 discriminator. Any changed candidate math, registry, lifecycle, swallowed failure,
 overwritten partial output, missing provenance or truth access falsifies the repair.
+
+**Diagnostic implementation result, pending gates.** The producer now writes an
+exclusive `failure_diagnostic.json` before refusing an incomplete candidate. It
+binds the exact candidate and generated source, the three input registries, current
+producer/generator/upstream source bytes, identity manifest and lifecycle spec, and
+preserves every immutable lifecycle row including counted FLOPs, operation count,
+all failure flags, error code and nonfinite state. Non-finite floats use explicit
+JSON string tokens, so the artifact remains strict JSON. A failed arm still writes
+neither `predictions.npz` nor `producer_receipt.json`; a successful arm writes no
+failure artifact. The expanded synthetic producer/selector suite passes **71/71**,
+including a deliberately budget-exhausted row and the prior positive, mutation,
+role, identity and same-byte checks. Compilation and `git diff --check` pass.
+
+An independent raw-evidence audit found a strong, still unmeasured explanation for
+job 824: the generated coherent source inherits the base K3-only projection used to
+choose an uncapped tower, while the injected K4 birth transport and D21 contractions
+add roughly 1,260 dense matmul equivalents. The coefficient is zero but these
+switch-controlled tensors are still computed. That makes deterministic counted-
+budget exhaustion on all rows overwhelmingly more likely than RAM, residual or wall
+failure. This is an implementation/cost-model diagnosis, not an accuracy result;
+one exact-source, one-identity label-free discriminator remains required after
+preflight and fresh Skeptic acceptance of the diagnostic repair.
