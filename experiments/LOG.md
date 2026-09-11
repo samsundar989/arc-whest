@@ -42770,3 +42770,32 @@ changing the algorithm, seeds, lifecycle or evidence contract. At submission it
 was queue position zero but waiting because two running jobs already reserved 46
 GiB of the queue's 53.6 GiB usable RAM. Queue admission is not completion. On
 success, run the standalone truth-free verifier before any protected P07 access.
+
+### IMPORTANT amendment before P07 execution — bind the producer's selector dependency
+
+Workerq 891 was cancelled while still queued; it never started and created no
+output directory. An independent read-only launch audit found that
+`p2_k4_fit_producer.py` imports `p2_k4_fit.py` for registry validation and
+stable-file locking, but the producer manifest does not record or hold those exact
+selector bytes. With `--no-snapshot`, the queue could begin on changed selector
+bytes after submission, and the later verifier would only bind its own current
+selector. This is a production provenance defect, not a K4 result.
+
+**Prediction.** After adding an explicit selector binding, a positive synthetic
+producer receipt will carry the exact `p2_k4_fit.py` path/hash that executed. A
+selector mutation before or during production will refuse without valid success
+artifacts, and a selector mutation after production will make standalone
+verification refuse. Existing exact-regeneration, lifecycle, registry and failure
+diagnostics will remain unchanged in meaning.
+
+**Intervention and scope.** Add the selector to the producer's frozen bindings,
+lock/recheck it wherever the producer already locks/rechecks producer, generator,
+template and inputs, include it in success and failure evidence, and require the
+standalone verifier to match it to the current `fit_interface` source. Add positive,
+negative and incomplete-evidence fixtures. No estimator, candidate math, seed,
+coefficient, label, data role, gate, residual model or protected path changes.
+
+**Falsifier.** Any accepted receipt without the selector binding; any mutation that
+can pass production or verification; any loss of existing refusal behavior; or
+current default preflight failure on final bytes. Required exit is scoped tests,
+current preflight and a fresh-context Skeptic verdict before resubmitting P07.

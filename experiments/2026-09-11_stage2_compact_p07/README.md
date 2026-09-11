@@ -18,6 +18,7 @@ truth-free verifier before the next registered protected P07 access. A queued or
 partially written job is not accepted evidence.
 
 Workerq job **891** was submitted at high priority with the declared envelope
-above. It uses no source snapshot and was queue position zero at submission,
-waiting because two running jobs already reserved 46 GiB of the queue's 53.6 GiB
-usable RAM. This is an admission wait, not producer progress or completion.
+above, then cancelled while still queued after an independent audit found an
+unbound imported selector dependency. It never started and created no output
+directory. Repair and fresh acceptance of that provenance gap precede the next
+submission; job 891 is not producer evidence.
