@@ -42208,3 +42208,41 @@ Workerq **869** ran the committed row/source-completeness version before this fi
 provenance expansion. It completed SUCCEEDED in 342.3 seconds, peaked at 2,985.9
 MiB against 5 GiB and reported the default preflight green. Its raw metadata,
 manifest and log are preserved, but it does not certify these newer bytes.
+
+### Job-824 exact-source one-identity discriminator contract
+
+**Question.** Which canonical lifecycle flag caused job 824's generated coherent
+candidate to fail?
+
+**Evidence.** CONFIRMED: job 824 evaluated coefficient zero over all 384 identities,
+used 2.53 GiB peak RAM and emitted only a generic refusal. CONFIRMED by static
+operation counting: the generated all-history K4 birth transport/D21 work alone is
+about 1.23 budgets and is not truncated by the inherited K3 cap. INFERRED: every
+row therefore encountered `BudgetExhaustedError`. SPECULATIVE: no additional
+lifecycle flag would have fired had counted execution completed.
+
+**Hypothesis, intervention and prediction.** Samuel's standing prediction is
+**"I don't know"**. Run the repaired producer for coefficient `lam=0.0` on only
+the first already-evaluated label-free P07 seed, declared as a synthetic identity
+with the same 1024x16 shape. Use the unchanged canonical lifecycle, f64-readonly
+weights, `2**41` budget, 120-second wall limit and disabled residual cap. The
+generated source must equal job 824 candidate 0 byte-for-byte. No truth is opened.
+
+**Gate and falsifier.** Accept the diagnosis only if fresh Skeptic acceptance and
+current preflight precede execution; workerq terminates with the producer's expected
+refusal; exactly one row is present; the diagnostic binds the registered inputs and
+source; the source SHA equals job 824's
+`ba618dd6ae3e16c9c7618354d92f255e523e62716516378591d4fa78bec41d5b`;
+`budget_exhausted=true`,
+the other three exhaustion flags are false, `error_code` is empty, and counted
+FLOPs reach the official budget. Any source mismatch, missing/extra row, other flag,
+truth access, success artifact or incomplete provenance falsifies the explanation.
+This one-row result classifies the implementation failure only; it does not replace
+the registered 384x4 experiment or test accuracy.
+
+**Cost and resources.** One previously executed identity, expected around six
+seconds, submitted through workerq with 4 GiB RAM, 2 CPUs and no GPU. Counted cost
+is whatever the canonical row reports; failure multiplier is 1.0. Residual is not
+interpreted because the diagnostic deliberately disables that cap, matching job
+824. The compact-arm integration remains a separate contract and must not be
+smuggled into this run.

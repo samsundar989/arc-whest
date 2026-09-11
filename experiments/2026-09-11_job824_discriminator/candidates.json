@@ -1,0 +1,10 @@
+{
+  "parameters": [
+    "lam"
+  ],
+  "candidates": [
+    {
+      "lam": 0.0
+    }
+  ]
+}

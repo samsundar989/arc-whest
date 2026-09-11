@@ -1,0 +1,11 @@
+{
+  "kind": "synthetic-identities-v1",
+  "width": 1024,
+  "depth": 16,
+  "identities": [
+    {
+      "id": "job824-first-label-free-identity",
+      "seed": 40910007000
+    }
+  ]
+}
