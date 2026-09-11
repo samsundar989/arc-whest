@@ -54,6 +54,22 @@ def _sha256(path):
         return _sha256_bytes(fh.read())
 
 
+def _observed_binding(path, frozen_sha256):
+    try:
+        current_sha256 = _sha256(path)
+        observation_error = ""
+    except OSError as exc:
+        current_sha256 = None
+        observation_error = "%s: %s" % (type(exc).__name__, exc)
+    return {
+        "path": os.path.relpath(os.path.abspath(path), _ROOT).replace("\\", "/"),
+        "frozen_sha256": frozen_sha256,
+        "current_sha256": current_sha256,
+        "unchanged_after_evaluation": current_sha256 == frozen_sha256,
+        "observation_error": observation_error,
+    }
+
+
 def _diagnostic_value(value):
     """Keep failure evidence strict JSON even when nested values contain NaN."""
     if isinstance(value, float) and not math.isfinite(value):
@@ -82,6 +98,16 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
     except OSError as exc:
         current_source_sha = None
         source_observation_error = "%s: %s" % (type(exc).__name__, exc)
+    producer_diagnostic = _observed_binding(
+        os.path.join(_ROOT, producer_binding["path"]),
+        producer_binding["sha256"])
+    generator_diagnostic = _observed_binding(
+        os.path.join(_ROOT, generator_binding["path"]),
+        generator_binding["sha256"])
+    generator_diagnostic["upstream_source_sha256"] = \
+        generator_binding["upstream_source_sha256"]
+    generator_diagnostic["upstream_source"] = _observed_binding(
+        builder.SOURCE, generator_binding["upstream_source_sha256"])
     result = {
         "schema": "arc-whest.coherent-k4-fit-producer-failure.v1",
         "immutable": True,
@@ -97,9 +123,16 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
             "unchanged_after_evaluation": current_source_sha == source_hash,
             "observation_error": source_observation_error,
         },
-        "inputs": input_hashes,
-        "producer": producer_binding,
-        "generator": generator_binding,
+        "inputs": {
+            "candidates": _observed_binding(
+                a.candidates, input_hashes["candidates_sha256"]),
+            "bounds": _observed_binding(
+                a.bounds, input_hashes["bounds_sha256"]),
+            "identities": _observed_binding(
+                a.identities, input_hashes["identities_sha256"]),
+        },
+        "producer": producer_diagnostic,
+        "generator": generator_diagnostic,
         "identity_manifest": identity_manifest,
         "lifecycle_spec": _diagnostic_value(dataclasses.asdict(spec)),
         "lifecycle_provenance": _diagnostic_value(provenance),
@@ -159,33 +192,101 @@ def _pre_row_provenance(source_path, source_hash, seeds, zero_target, spec,
     }
 
 
+def _provenance_problem(provenance, *, spec, expected_path, source_hash,
+                        n_mlps, truth_sha256, rows_hash):
+    expected_keys = {
+        "candidate", "candidate_sha256", "truth_sha256", "n_mlps", "spec",
+        "round_tag", "round_deviations", "lifecycle", "weights_mode",
+        "weights_mode_is_grader_default", "setup_called", "setup_seconds",
+        "setup_timeout_s", "setup_timed_out", "setup_error",
+        "host_cold_start_s", "residual_measurement_path",
+        "residual_is_graded", "objective_is_graded", "backend", "rows_hash",
+    }
+    if not isinstance(provenance, dict) or set(provenance) != expected_keys:
+        return "lifecycle provenance keys mismatch"
+    if provenance["candidate"] != expected_path:
+        return "provenance candidate path mismatch"
+    if provenance["candidate_sha256"] != source_hash:
+        return "provenance candidate hash mismatch"
+    if provenance["truth_sha256"] != truth_sha256:
+        return "provenance target hash mismatch"
+    if provenance["n_mlps"] != n_mlps:
+        return "provenance identity count mismatch"
+    if provenance["spec"] != dataclasses.asdict(spec):
+        return "provenance lifecycle spec mismatch"
+    if (provenance["round_tag"] != spec.round_tag or
+            provenance["round_deviations"] != spec.deviations_from_round()):
+        return "provenance round mismatch"
+    if (provenance["lifecycle"] != "grader" or
+            provenance["weights_mode"] != le.DEFAULT_WEIGHTS_MODE or
+            provenance["weights_mode_is_grader_default"] is not True):
+        return "provenance grader lifecycle/weight mode mismatch"
+    if (provenance["setup_called"] is not True or
+            provenance["setup_timed_out"] is not False or
+            provenance["setup_error"] != "" or
+            provenance["setup_timeout_s"] != spec.setup_timeout_s):
+        return "provenance setup outcome mismatch"
+    setup_seconds = provenance["setup_seconds"]
+    if (not isinstance(setup_seconds, (int, float)) or
+            isinstance(setup_seconds, bool) or not math.isfinite(setup_seconds) or
+            setup_seconds < 0):
+        return "provenance setup duration invalid"
+    if provenance["host_cold_start_s"] != le.HOST_COLD_START_S:
+        return "provenance host cold-start mismatch"
+    if (provenance["residual_measurement_path"] !=
+            "runner=local (in-process BudgetContext)" or
+            provenance["residual_is_graded"] is not False or
+            provenance["objective_is_graded"] is not False):
+        return "provenance grading-status mismatch"
+    try:
+        flops = le._require_real_flopscope()
+        expected_backend = {
+            "flopscope": getattr(flops, "__version__", "?"),
+            "flopscope_path": os.path.dirname(flops.__file__ or ""),
+            "numpy": np.__version__,
+            "python": sys.version.split()[0],
+        }
+    except Exception as exc:
+        return "cannot verify lifecycle backend: %s" % exc
+    if provenance["backend"] != expected_backend:
+        return "provenance backend mismatch"
+    if provenance["rows_hash"] != rows_hash:
+        return "provenance rows hash mismatch"
+    return ""
+
+
 def _lifecycle_evidence_problem(rows, predictions, provenance, seeds, spec,
-                                source_path, source_hash):
+                                source_path, source_hash, zero_target):
     if len(predictions) != len(seeds):
         return ("prediction count %d != identity count %d" %
                 (len(predictions), len(seeds)))
     if len(rows) != len(seeds):
         return "row count %d != identity count %d" % (len(rows), len(seeds))
     expected_path = os.path.relpath(source_path, _ROOT).replace("\\", "/")
+    expected_truth_sha = le._array_sha(zero_target[:len(seeds)])
+    for i, prediction in enumerate(predictions):
+        if (not isinstance(prediction, np.ndarray) or
+                prediction.shape != (spec.width,) or
+                prediction.dtype != np.dtype(np.float32) or
+                not bool(np.all(np.isfinite(prediction)))):
+            return "prediction %d shape/dtype/finiteness mismatch" % i
     for i, (row, seed) in enumerate(zip(rows, seeds)):
         if row.index != i or row.input_seed != seed:
             return "row %d identity/order mismatch" % i
         if (row.candidate != expected_path or
                 row.candidate_sha256 != source_hash):
             return "row %d candidate binding mismatch" % i
+        if row.truth_sha256 != expected_truth_sha or row.gt_noise != 0.0:
+            return "row %d target/noise binding mismatch" % i
         if ((row.width, row.depth) != (spec.width, spec.depth) or
                 row.budget != float(spec.flop_budget)):
             return "row %d lifecycle binding mismatch" % i
-    if provenance.get("candidate") != expected_path:
-        return "provenance candidate path mismatch"
-    if provenance.get("candidate_sha256") != source_hash:
-        return "provenance candidate hash mismatch"
-    if provenance.get("n_mlps") != len(seeds):
-        return "provenance identity count mismatch"
-    if provenance.get("spec") != dataclasses.asdict(spec):
-        return "provenance lifecycle spec mismatch"
-    if provenance.get("rows_hash") != le.rows_hash(rows):
-        return "provenance rows hash mismatch"
+    problem = _provenance_problem(
+        provenance, spec=spec, expected_path=expected_path,
+        source_hash=source_hash, n_mlps=len(seeds),
+        truth_sha256=expected_truth_sha, rows_hash=le.rows_hash(rows))
+    if problem:
+        return problem
     try:
         if _sha256(source_path) != source_hash:
             return "candidate source changed during evaluation"
@@ -263,6 +364,7 @@ def produce(a):
     os.mkdir(a.out_dir)
     source_paths, source_hashes = [], []
     all_predictions, all_costs, all_ops, row_hashes = [], [], [], []
+    lifecycle_provenance = []
     spec = le.LifecycleSpec(width=width, depth=depth,
                             residual_wall_time_limit_s=None)
     zero_target = np.zeros((len(seeds), width), dtype=np.float32)
@@ -295,7 +397,8 @@ def produce(a):
                 "candidate %d lifecycle raised %s; diagnostic: %s" %
                 (i, type(exc).__name__, diagnostic)) from exc
         evidence_problem = _lifecycle_evidence_problem(
-            rows, predictions, provenance, seeds, spec, source_path, source_hash)
+            rows, predictions, provenance, seeds, spec, source_path, source_hash,
+            zero_target)
         if evidence_problem or any(row.failed for row in rows):
             failure_stage = ("incomplete_or_misbound_evidence"
                              if evidence_problem else "predict")
@@ -318,6 +421,7 @@ def produce(a):
         all_costs.append([int(row.flops_used) for row in rows])
         all_ops.append([int(row.n_ops) for row in rows])
         row_hashes.append(provenance["rows_hash"])
+        lifecycle_provenance.append(_diagnostic_value(provenance))
         source_paths.append(os.path.relpath(source_path, _ROOT).replace("\\", "/"))
         source_hashes.append(source_hash)
     costs = np.asarray(all_costs, dtype=np.int64)
@@ -341,6 +445,7 @@ def produce(a):
         "counted_costs": costs.tolist(),
         "row_hashes": row_hashes,
         "n_ops": all_ops,
+        "lifecycle_provenance": lifecycle_provenance,
         "labels_read": False}
     output = os.path.join(a.out_dir, "predictions.npz")
     with open(output, "x+b") as fh:

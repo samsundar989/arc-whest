@@ -247,6 +247,11 @@ def run_checks():
             ("row hash type", lambda r: r["manifest"]["row_hashes"].__setitem__(0, True)),
             ("operation coverage", lambda r: r["manifest"].__setitem__("n_ops", [])),
             ("operation count type", lambda r: r["manifest"]["n_ops"][0].__setitem__(0, True)),
+            ("lifecycle provenance", lambda r: r["manifest"].__setitem__(
+                "lifecycle_provenance", [])),
+            ("lifecycle provenance mode", lambda r: r["manifest"]
+             ["lifecycle_provenance"][0].__setitem__("lifecycle",
+                                                       "per_mlp_no_setup")),
         )
         for i, (label, mutation) in enumerate(receipt_mutations):
             mutated = copy.deepcopy(pristine)
@@ -485,16 +490,17 @@ def run_checks():
                 index=0, input_seed=seeds[0], estimator_seed=seeds[0],
                 candidate=os.path.relpath(source_path, _ROOT).replace("\\", "/"),
                 candidate_sha256=producer._sha256(source_path),
-                truth_sha256="synthetic-zero", width=spec.width, depth=spec.depth,
+                truth_sha256=producer.le._array_sha(target),
+                width=spec.width, depth=spec.depth,
                 budget=float(spec.flop_budget), flops_used=float(spec.flop_budget + 1),
                 n_ops=17.0, mse=float("nan"), zero_prediction_mse=0.0,
                 gt_noise=0.0, residual_wall_time_s=0.1, wall_time_s=0.2,
                 budget_exhausted=True, error_code="BudgetExceeded", nonfinite=True)
-            predictions_out.append(np.zeros((spec.depth, spec.width), dtype=np.float32))
+            predictions_out.append(np.zeros(spec.width, dtype=np.float32))
             expected_provenance.update({
                 "candidate": row.candidate,
                 "candidate_sha256": row.candidate_sha256,
-                "truth_sha256": row.truth_sha256,
+                "truth_sha256": producer.le._array_sha(target),
                 "n_mlps": 1,
                 "spec": producer.dataclasses.asdict(spec),
                 "round_tag": spec.round_tag,
@@ -508,11 +514,17 @@ def run_checks():
                 "setup_timed_out": False,
                 "setup_error": "",
                 "host_cold_start_s": producer.le.HOST_COLD_START_S,
-                "residual_measurement_path": "synthetic test path",
+                "residual_measurement_path":
+                    "runner=local (in-process BudgetContext)",
                 "residual_is_graded": False,
                 "objective_is_graded": False,
-                "backend": {"flopscope": "test", "flopscope_path": "test",
-                            "numpy": np.__version__, "python": "test"},
+                "backend": {
+                    "flopscope": getattr(producer.le._require_real_flopscope(),
+                                         "__version__", "?"),
+                    "flopscope_path": os.path.dirname(
+                        producer.le._require_real_flopscope().__file__ or ""),
+                    "numpy": np.__version__,
+                    "python": sys.version.split()[0]},
                 "rows_hash": producer.le.rows_hash([row]),
             })
             return [row], dict(expected_provenance)
@@ -537,11 +549,16 @@ def run_checks():
                and diagnostic["failure_stage"] == "predict"
                and diagnostic["evaluated_rows"] == 1
                and diagnostic["captured_predictions"] == 1
-               and diagnostic["inputs"] == original_input_hashes
-               and all(producer._sha256(path) != original_input_hashes[key]
-                       for key, path in (("candidates_sha256", candidates),
-                                         ("bounds_sha256", bounds),
-                                         ("identities_sha256", identities)))
+               and all(
+                   diagnostic["inputs"][name]["frozen_sha256"] ==
+                       original_input_hashes[name + "_sha256"]
+                   and diagnostic["inputs"][name]["current_sha256"] ==
+                       producer._sha256(path)
+                   and diagnostic["inputs"][name]["unchanged_after_evaluation"] is False
+                   and diagnostic["inputs"][name]["observation_error"] == ""
+                   for name, path in (("candidates", candidates),
+                                      ("bounds", bounds),
+                                      ("identities", identities)))
                and diagnostic["candidate"] == {"lam": 0.0}
                and diagnostic["identity_manifest"]["identities"][0] ==
                    {"id": "failed-synthetic", "seed": 7021}
@@ -636,8 +653,32 @@ def run_checks():
                 gt_noise=0.0, residual_wall_time_s=0.0, wall_time_s=0.0)
             return [row], {"candidate": row.candidate,
                            "candidate_sha256": source_hash,
+                           "truth_sha256": producer.le._array_sha(target),
                            "n_mlps": len(seeds),
                            "spec": producer.dataclasses.asdict(spec),
+                           "round_tag": spec.round_tag,
+                           "round_deviations": spec.deviations_from_round(),
+                           "lifecycle": "grader",
+                           "weights_mode": producer.le.DEFAULT_WEIGHTS_MODE,
+                           "weights_mode_is_grader_default": True,
+                           "setup_called": True,
+                           "setup_seconds": 0.0,
+                           "setup_timeout_s": spec.setup_timeout_s,
+                           "setup_timed_out": False,
+                           "setup_error": "",
+                           "host_cold_start_s": producer.le.HOST_COLD_START_S,
+                           "residual_measurement_path":
+                               "runner=local (in-process BudgetContext)",
+                           "residual_is_graded": False,
+                           "objective_is_graded": False,
+                           "backend": {
+                               "flopscope": getattr(
+                                   producer.le._require_real_flopscope(),
+                                   "__version__", "?"),
+                               "flopscope_path": os.path.dirname(
+                                   producer.le._require_real_flopscope().__file__ or ""),
+                               "numpy": np.__version__,
+                               "python": sys.version.split()[0]},
                            "rows_hash": producer.le.rows_hash([row])}
         producer.le.evaluate = incomplete_rows
         try:
@@ -662,6 +703,80 @@ def run_checks():
               "refused=%s rows=%d predictions=%d" %
               (refused, diagnostic["evaluated_rows"],
                diagnostic["captured_predictions"]))
+
+    with _temp("p2-k4-producer-forged-provenance-") as root:
+        candidates = os.path.join(root, "candidates.json")
+        bounds = os.path.join(root, "bounds.json")
+        identities = os.path.join(root, "identities.json")
+        out_dir = os.path.join(root, "observations")
+        _write_json(candidates, {"parameters": ["lam"], "candidates": [{"lam": 0.0}]})
+        _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
+        _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
+                    "depth": 2, "identities": [{"id": "forged", "seed": 7051}]})
+        original_evaluate = producer.le.evaluate
+        def forged_provenance(source_path, seeds, target, *, spec, gt_noise,
+                              predictions_out):
+            source_hash = producer._sha256(source_path)
+            candidate_path = os.path.relpath(source_path, _ROOT).replace("\\", "/")
+            prediction = np.zeros(spec.width, dtype=np.float32)
+            predictions_out.append(prediction)
+            row = producer.le.EvidenceRow(
+                index=0, input_seed=seeds[0], estimator_seed=seeds[0],
+                candidate=candidate_path, candidate_sha256=source_hash,
+                truth_sha256=producer.le._array_sha(target),
+                width=spec.width, depth=spec.depth, budget=float(spec.flop_budget),
+                flops_used=1.0, n_ops=1.0, mse=0.0, zero_prediction_mse=0.0,
+                gt_noise=0.0, residual_wall_time_s=0.0, wall_time_s=0.0)
+            flops = producer.le._require_real_flopscope()
+            provenance = {
+                "candidate": candidate_path,
+                "candidate_sha256": source_hash,
+                "truth_sha256": producer.le._array_sha(target),
+                "n_mlps": 1,
+                "spec": producer.dataclasses.asdict(spec),
+                "round_tag": "forged-round",
+                "round_deviations": {},
+                "lifecycle": "per_mlp_no_setup",
+                "weights_mode": "f32",
+                "weights_mode_is_grader_default": False,
+                "setup_called": False,
+                "setup_seconds": 0.0,
+                "setup_timeout_s": spec.setup_timeout_s,
+                "setup_timed_out": True,
+                "setup_error": "forged clean setup",
+                "host_cold_start_s": -1.0,
+                "residual_measurement_path": "forged",
+                "residual_is_graded": True,
+                "objective_is_graded": True,
+                "backend": {"flopscope": getattr(flops, "__version__", "?"),
+                            "flopscope_path": "forged", "numpy": np.__version__,
+                            "python": sys.version.split()[0]},
+                "rows_hash": producer.le.rows_hash([row]),
+            }
+            return [row], provenance
+        producer.le.evaluate = forged_provenance
+        try:
+            try:
+                producer.produce(Namespace(candidates=candidates, bounds=bounds,
+                                           identities=identities, out_dir=out_dir))
+                refused = False
+            except producer.ProducerRefused as exc:
+                refused = "provenance round mismatch" in str(exc)
+        finally:
+            producer.le.evaluate = original_evaluate
+        diagnostic_path = os.path.join(out_dir, "failure_diagnostic.json")
+        with open(diagnostic_path, encoding="utf-8") as fh:
+            diagnostic = json.load(fh)
+        check("forged clean lifecycle provenance cannot produce success",
+              (refused and diagnostic["failure_stage"] ==
+               "incomplete_or_misbound_evidence"
+               and diagnostic["lifecycle_provenance"]["lifecycle"] ==
+                   "per_mlp_no_setup"
+               and diagnostic["lifecycle_provenance"]["weights_mode"] == "f32"
+               and not os.path.exists(os.path.join(out_dir, "predictions.npz"))
+               and not os.path.exists(os.path.join(out_dir, "producer_receipt.json"))),
+              "refused=%s forged_lifecycle=%s" %
+              (refused, diagnostic["lifecycle_provenance"]["lifecycle"]))
     return {"kind": "synthetic coherent-K4 producer-selector conformance", "labels_read": False,
             "checks": rows, "n_checks": len(rows), "n_failed": sum(not x["pass"] for x in rows),
             "pass": all(x["pass"] for x in rows)}

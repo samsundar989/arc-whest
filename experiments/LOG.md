@@ -42180,3 +42180,31 @@ the registered coefficient, make the cost model arm-aware, and rerun the dense a
 compact conformance suites plus one label-free live-shape cost row per arm. This is
 a concrete repository-grounded path, so a Strategist is not required yet. A full
 P07 rerun must wait for that integration repair.
+
+The fourth fresh Skeptic returned **REJECT**. It supplied complete clean rows and
+predictions with a forged `per_mlp_no_setup` lifecycle, `f32` weights, false setup
+claim, wrong round/backend and inverted grading-status fields; the producer accepted
+them because its success predicate validated only the spec and row hash. It also
+confirmed that registry substitution was visible only by rereading external paths,
+not in the diagnostic itself.
+
+The repair factors one strict provenance validator shared by producer success and
+the standalone selector. It requires the exact canonical provenance key set,
+candidate/zero-target/count/spec/round/rows bindings, grader lifecycle,
+`f64_readonly`, successful one-time setup with a finite duration, current backend,
+host-cold-start constant, local residual path and honest ungraded flags. Successful
+manifests now preserve the complete validated provenance for every candidate, and
+the selector revalidates it before truth access. Failure diagnostics now record, for
+each candidate/bounds/identities input, path, frozen parsed-byte hash,
+post-evaluation hash, observation error and unchanged status; producer, generator
+and upstream-source bindings receive the same observation treatment. Success also
+requires each captured prediction to be finite float32 of exact final-layer shape
+and each row to bind the zero target and declared zero noise. The adversarial forged-
+provenance fixture and two new receipt mutations join the prior replacements and
+partial-row tests. The suite passes **76/76**, compilation and `git diff --check`
+pass. A fifth fresh-context Skeptic must accept before the one-row discriminator.
+
+Workerq **869** ran the committed row/source-completeness version before this final
+provenance expansion. It completed SUCCEEDED in 342.3 seconds, peaked at 2,985.9
+MiB against 5 GiB and reported the default preflight green. Its raw metadata,
+manifest and log are preserved, but it does not certify these newer bytes.

@@ -385,7 +385,8 @@ def _validate_request(a, *, verify_only=False):
     manifest_keys = {"kind", "identity_role", "producer", "generator",
                      "candidate_registry", "bounds", "identity_manifest",
                      "lifecycle_spec", "candidate_sources", "counted_costs",
-                     "row_hashes", "n_ops", "labels_read"}
+                     "row_hashes", "n_ops", "lifecycle_provenance",
+                     "labels_read"}
     _exact_keys(producer_manifest, manifest_keys, "producer manifest")
     if (producer_manifest["kind"] !=
             "coherent-K4 canonical-lifecycle observations-v1"
@@ -446,6 +447,21 @@ def _validate_request(a, *, verify_only=False):
         raise FitRefused("producer row hashes must cover every candidate")
     if not _valid_int_matrix(n_ops, c, n):
         raise FitRefused("producer operation counts must cover every candidate and identity")
+    lifecycle_provenance = producer_manifest["lifecycle_provenance"]
+    if (not isinstance(lifecycle_provenance, list) or
+            len(lifecycle_provenance) != c):
+        raise FitRefused("producer lifecycle provenance must cover every candidate")
+    import p2_k4_fit_producer as producer
+    zero_truth_sha = le._array_sha(np.zeros((n, width), dtype=np.float32))
+    for i, item in enumerate(lifecycle_provenance):
+        problem = producer._provenance_problem(
+            item, spec=expected_spec,
+            expected_path=candidate_sources[i]["path"],
+            source_hash=candidate_sources[i]["sha256"], n_mlps=n,
+            truth_sha256=zero_truth_sha, rows_hash=row_hashes[i])
+        if problem:
+            raise FitRefused("producer lifecycle provenance %d: %s" %
+                             (i, problem))
 
     producer_receipt, producer_receipt_sha = _read_json(
         a.producer_receipt, "producer receipt")
