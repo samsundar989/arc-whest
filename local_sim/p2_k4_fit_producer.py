@@ -76,6 +76,12 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
     for row in rows:
         raw = dataclasses.asdict(row)
         row_values.append(_diagnostic_value(raw))
+    try:
+        current_source_sha = _sha256(source_path)
+        source_observation_error = ""
+    except OSError as exc:
+        current_source_sha = None
+        source_observation_error = "%s: %s" % (type(exc).__name__, exc)
     result = {
         "schema": "arc-whest.coherent-k4-fit-producer-failure.v1",
         "immutable": True,
@@ -87,6 +93,9 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
         "candidate_source": {
             "path": os.path.relpath(source_path, _ROOT).replace("\\", "/"),
             "sha256": source_hash,
+            "current_sha256": current_source_sha,
+            "unchanged_after_evaluation": current_source_sha == source_hash,
+            "observation_error": source_observation_error,
         },
         "inputs": input_hashes,
         "producer": producer_binding,
@@ -127,7 +136,7 @@ def _pre_row_provenance(source_path, source_hash, seeds, zero_target, spec,
     error = "%s: %s" % (type(exc).__name__, exc)
     return {
         "candidate": os.path.relpath(source_path, _ROOT).replace("\\", "/"),
-        "candidate_sha256": source_hash,
+        "candidate_sha256": None,
         "truth_sha256": le._array_sha(zero_target[:len(seeds)]),
         "n_mlps": len(seeds),
         "spec": dataclasses.asdict(spec),
@@ -136,7 +145,7 @@ def _pre_row_provenance(source_path, source_hash, seeds, zero_target, spec,
         "lifecycle": "grader",
         "weights_mode": le.DEFAULT_WEIGHTS_MODE,
         "weights_mode_is_grader_default": True,
-        "setup_called": True,
+        "setup_called": None,
         "setup_seconds": None,
         "setup_timeout_s": spec.setup_timeout_s,
         "setup_timed_out": "SETUP_TIMEOUT" in str(exc),
@@ -148,6 +157,41 @@ def _pre_row_provenance(source_path, source_hash, seeds, zero_target, spec,
         "backend": backend,
         "rows_hash": le.rows_hash([]),
     }
+
+
+def _lifecycle_evidence_problem(rows, predictions, provenance, seeds, spec,
+                                source_path, source_hash):
+    if len(predictions) != len(seeds):
+        return ("prediction count %d != identity count %d" %
+                (len(predictions), len(seeds)))
+    if len(rows) != len(seeds):
+        return "row count %d != identity count %d" % (len(rows), len(seeds))
+    expected_path = os.path.relpath(source_path, _ROOT).replace("\\", "/")
+    for i, (row, seed) in enumerate(zip(rows, seeds)):
+        if row.index != i or row.input_seed != seed:
+            return "row %d identity/order mismatch" % i
+        if (row.candidate != expected_path or
+                row.candidate_sha256 != source_hash):
+            return "row %d candidate binding mismatch" % i
+        if ((row.width, row.depth) != (spec.width, spec.depth) or
+                row.budget != float(spec.flop_budget)):
+            return "row %d lifecycle binding mismatch" % i
+    if provenance.get("candidate") != expected_path:
+        return "provenance candidate path mismatch"
+    if provenance.get("candidate_sha256") != source_hash:
+        return "provenance candidate hash mismatch"
+    if provenance.get("n_mlps") != len(seeds):
+        return "provenance identity count mismatch"
+    if provenance.get("spec") != dataclasses.asdict(spec):
+        return "provenance lifecycle spec mismatch"
+    if provenance.get("rows_hash") != le.rows_hash(rows):
+        return "provenance rows hash mismatch"
+    try:
+        if _sha256(source_path) != source_hash:
+            return "candidate source changed during evaluation"
+    except OSError as exc:
+        return "candidate source unavailable after evaluation: %s" % exc
+    return ""
 
 
 def _load_identities(path):
@@ -250,7 +294,11 @@ def produce(a):
             raise ProducerRefused(
                 "candidate %d lifecycle raised %s; diagnostic: %s" %
                 (i, type(exc).__name__, diagnostic)) from exc
-        if len(predictions) != len(seeds) or any(row.failed for row in rows):
+        evidence_problem = _lifecycle_evidence_problem(
+            rows, predictions, provenance, seeds, spec, source_path, source_hash)
+        if evidence_problem or any(row.failed for row in rows):
+            failure_stage = ("incomplete_or_misbound_evidence"
+                             if evidence_problem else "predict")
             diagnostic = _write_failure_diagnostic(
                 a, candidate_index=i, candidate=candidate,
                 source_path=source_path, source_hash=source_hash,
@@ -258,10 +306,12 @@ def produce(a):
                 identity_manifest=identity_manifest, width=width, depth=depth,
                 spec=spec, input_hashes=input_hashes,
                 producer_binding=producer_binding,
-                generator_binding=generator_binding)
+                generator_binding=generator_binding,
+                failure_stage=failure_stage)
             raise ProducerRefused(
-                "candidate %d failed canonical lifecycle; diagnostic: %s" %
-                (i, diagnostic))
+                "candidate %d failed canonical lifecycle%s; diagnostic: %s" %
+                (i, (" (%s)" % evidence_problem) if evidence_problem else "",
+                 diagnostic))
         if provenance["candidate_sha256"] != source_hash:
             raise ProducerRefused("candidate %d lifecycle/source hash mismatch" % i)
         all_predictions.append(np.stack(predictions).astype(np.float32))

@@ -42137,6 +42137,32 @@ The expanded suite passes **72/72**, compilation and `git diff --check` pass. A
 third fresh-context Skeptic is required because the two earlier rejections remain
 valuable negative evidence rather than acceptance.
 
+The third fresh Skeptic returned **REJECT** and reproduced two more completeness
+failures. First, two captured predictions plus only one clean row for two identities
+were accepted as a success because the producer checked prediction count but not row
+count/order/identity. Second, changing the generated candidate source before a real
+setup failure left the path paired only with the original hashes even though the
+evaluator saw replacement bytes. The prior 72/72 suite did not cover either route.
+
+The producer now requires exactly one row and prediction per identity, exact row
+index/seed order, candidate path/hash, width/depth/budget, full spec equality,
+provenance candidate/count/hash, recomputed rows hash, and unchanged generated
+source bytes before any success artifact can be written. Every mismatch goes to an
+`incomplete_or_misbound_evidence` failure artifact. Failure artifacts preserve both
+the frozen source hash and the post-evaluation observed hash plus an explicit
+unchanged boolean; a pre-row exception no longer claims that the evaluator returned
+a candidate hash or completed setup. New fixtures replace the source before setup
+failure and return two predictions with one clean row; both must refuse with no
+success archive or receipt. The suite passes **73/73**, compilation and
+`git diff --check` pass. A new fresh-context Skeptic and a new current-source
+preflight remain required before the one-row discriminator.
+
+Workerq **867** is the final-preflight attempt submitted after the setup-exception
+repair and before this row/source completeness repair. It completed SUCCEEDED in
+327.7 seconds, peaked at 3,859.1 MiB within its 5 GiB declaration and reported the
+default preflight green. Its evidence remains scoped to the prior commit; it is not
+the final gate for the current bytes.
+
 The applicable live-worktree preflight, workerq **864**, completed SUCCEEDED in
 330.6 seconds with **PREFLIGHT GREEN - 12/16, 4 SKIPPED** and 3,090.6 MiB peak RAM
 against its 5 GiB declaration. The live tree stayed at committed bytes throughout

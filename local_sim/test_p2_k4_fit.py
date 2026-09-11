@@ -483,7 +483,8 @@ def run_checks():
                         "identities": [{"id": "replacement", "seed": 7022}]})
             row = producer.le.EvidenceRow(
                 index=0, input_seed=seeds[0], estimator_seed=seeds[0],
-                candidate=source_path, candidate_sha256=producer._sha256(source_path),
+                candidate=os.path.relpath(source_path, _ROOT).replace("\\", "/"),
+                candidate_sha256=producer._sha256(source_path),
                 truth_sha256="synthetic-zero", width=spec.width, depth=spec.depth,
                 budget=float(spec.flop_budget), flops_used=float(spec.flop_budget + 1),
                 n_ops=17.0, mse=float("nan"), zero_prediction_mse=0.0,
@@ -512,7 +513,7 @@ def run_checks():
                 "objective_is_graded": False,
                 "backend": {"flopscope": "test", "flopscope_path": "test",
                             "numpy": np.__version__, "python": "test"},
-                "rows_hash": "failure-row-hash",
+                "rows_hash": producer.le.rows_hash([row]),
             })
             return [row], dict(expected_provenance)
         producer.le.evaluate = failing_evaluate
@@ -569,6 +570,8 @@ def run_checks():
                     "depth": 2, "identities": [{"id": "setup-failure", "seed": 7031}]})
         original_evaluate = producer.le.evaluate
         def setup_failure(*args, **kwargs):
+            with open(args[0], "a", encoding="utf-8") as fh:
+                fh.write("\n# replacement before setup failure\n")
             raise producer.le.SetupFailure("SETUP_ERROR: deliberate fixture")
         producer.le.evaluate = setup_failure
         try:
@@ -591,6 +594,11 @@ def run_checks():
                and diagnostic["rows"] == []
                and "SetupFailure: SETUP_ERROR: deliberate fixture" in
                    diagnostic["lifecycle_provenance"]["setup_error"]
+               and diagnostic["lifecycle_provenance"]["candidate_sha256"] is None
+               and diagnostic["lifecycle_provenance"]["setup_called"] is None
+               and diagnostic["candidate_source"]["unchanged_after_evaluation"] is False
+               and diagnostic["candidate_source"]["current_sha256"] !=
+                   diagnostic["candidate_source"]["sha256"]
                and diagnostic["lifecycle_provenance"]["rows_hash"] ==
                    producer.le.rows_hash([])
                and diagnostic["lifecycle_spec"] ==
@@ -600,6 +608,60 @@ def run_checks():
                and not os.path.exists(os.path.join(out_dir, "producer_receipt.json"))),
               "refused=%s rows=%d classified=%s" %
               (refused, len(diagnostic["rows"]), diagnostic["failure_stage"]))
+
+    with _temp("p2-k4-producer-incomplete-rows-") as root:
+        candidates = os.path.join(root, "candidates.json")
+        bounds = os.path.join(root, "bounds.json")
+        identities = os.path.join(root, "identities.json")
+        out_dir = os.path.join(root, "observations")
+        _write_json(candidates, {"parameters": ["lam"], "candidates": [{"lam": 0.0}]})
+        _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
+        _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
+                    "depth": 2, "identities": [
+                        {"id": "incomplete-0", "seed": 7041},
+                        {"id": "incomplete-1", "seed": 7042}]})
+        original_evaluate = producer.le.evaluate
+        def incomplete_rows(source_path, seeds, target, *, spec, gt_noise,
+                            predictions_out):
+            source_hash = producer._sha256(source_path)
+            predictions_out.extend([
+                np.zeros((spec.depth, spec.width), dtype=np.float32),
+                np.zeros((spec.depth, spec.width), dtype=np.float32)])
+            row = producer.le.EvidenceRow(
+                index=0, input_seed=seeds[0], estimator_seed=seeds[0],
+                candidate=os.path.relpath(source_path, _ROOT).replace("\\", "/"),
+                candidate_sha256=source_hash, truth_sha256="synthetic-zero",
+                width=spec.width, depth=spec.depth, budget=float(spec.flop_budget),
+                flops_used=1.0, n_ops=1.0, mse=0.0, zero_prediction_mse=0.0,
+                gt_noise=0.0, residual_wall_time_s=0.0, wall_time_s=0.0)
+            return [row], {"candidate": row.candidate,
+                           "candidate_sha256": source_hash,
+                           "n_mlps": len(seeds),
+                           "spec": producer.dataclasses.asdict(spec),
+                           "rows_hash": producer.le.rows_hash([row])}
+        producer.le.evaluate = incomplete_rows
+        try:
+            try:
+                producer.produce(Namespace(candidates=candidates, bounds=bounds,
+                                           identities=identities, out_dir=out_dir))
+                refused = False
+            except producer.ProducerRefused as exc:
+                refused = "row count 1 != identity count 2" in str(exc)
+        finally:
+            producer.le.evaluate = original_evaluate
+        diagnostic_path = os.path.join(out_dir, "failure_diagnostic.json")
+        with open(diagnostic_path, encoding="utf-8") as fh:
+            diagnostic = json.load(fh)
+        check("incomplete lifecycle rows can never produce success artifacts",
+              (refused and diagnostic["failure_stage"] ==
+               "incomplete_or_misbound_evidence"
+               and diagnostic["evaluated_rows"] == 1
+               and diagnostic["captured_predictions"] == 2
+               and not os.path.exists(os.path.join(out_dir, "predictions.npz"))
+               and not os.path.exists(os.path.join(out_dir, "producer_receipt.json"))),
+              "refused=%s rows=%d predictions=%d" %
+              (refused, diagnostic["evaluated_rows"],
+               diagnostic["captured_predictions"]))
     return {"kind": "synthetic coherent-K4 producer-selector conformance", "labels_read": False,
             "checks": rows, "n_checks": len(rows), "n_failed": sum(not x["pass"] for x in rows),
             "pass": all(x["pass"] for x in rows)}
