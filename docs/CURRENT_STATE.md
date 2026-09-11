@@ -1,7 +1,7 @@
 # CURRENT_STATE.md — read this first
 
-**Current September 11, 2026, after Stage-0 acceptance and before the registered
-Stage-2 label-free producer.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
+**Current September 11, 2026, after compact Stage-2 label-free acceptance and
+before the registered P07 producer.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
 archived at `docs/archive/CURRENT_STATE_before_worker_review_2026-09-10.md`.
 
 ## What is proved
@@ -53,18 +53,21 @@ DESIGN. P08 is exhausted. Samuel's three new predictions are all **“I don't kn
 which is valid and recorded without interpretation.
 
 The exact coefficient and identity registries are committed. Fresh-context Skeptics
-accepted both the producer's exact-P07 pre-mint guard and the repaired standalone
-receipt verifier. The current mutation battery and current-source preflight are now
-complete. Workerq 824 attempted the four bounded coherent candidates on P07 weights
-without labels and FAILED after evaluating coefficient 0 across all 384 identities.
-Peak host RAM was only 2.53 GiB, so memory was not the cause. The producer collapsed
-the row failures into an undifferentiated refusal and wrote no predictions/receipt;
-an IMPORTANT truth-free diagnostic repair is now registered. Classify and repair
-that production-path failure, rerun through workerq, then verify the immutable
-producer receipt before opening P07 through `truth_reads` to freeze the coefficient receipt,
-then run the registered exact/coherent/consumers-only/births-only comparison on exposed P01.
-That DESIGN result must end with synthesis and a fresh Skeptic before any untouched
-DECIDE allocation. No public or vault truth is authorized.
+accepted the producer's exact-P07 pre-mint guard, repaired standalone receipt
+verifier and now the complete compact label-free implementation gate. The four
+generated exact/coherent/consumers-only/births-only arms reproduce the independent
+tiny reference, bind exact current sources through publication, pass official
+validation and execute at 816.293--818.516 billion FLOPs. Current exact peak RAM is
+1,079.0 MiB; the compact reference accounts for 345,587,712 bytes of peak array
+payload. Null outer peak telemetry for three current arms is recorded rather than
+filled in from earlier diagnostics. Job 890 passed current-byte default preflight
+12/16 at 3,328.4 MiB; Full-only deployment evidence remains open.
+
+Run the registered label-free P07 producer next with the accepted compact bytes,
+then verify its immutable receipt before opening P07 through `truth_reads` to
+freeze the coefficient receipt. Then run the registered four-arm comparison on
+exposed P01. That DESIGN result must end with synthesis and a fresh Skeptic before
+any untouched DECIDE allocation. No public or vault truth is authorized.
 
 At `2026-09-10T23:07:29Z`, the driver mistakenly inspected the P07 NPZ keys,
 shapes and seed endpoints through direct `numpy.load`. It computed no scores or

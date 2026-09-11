@@ -12,11 +12,16 @@ Stage 2 is the active frontier, but its old contract is superseded because P01 w
 already exposed and its promised chronology cannot be reconstructed. Samuel's
 replacement predictions are recorded as three verbatim `I don't know` answers;
 the exact bounded P07 registry is committed and its pre-mint guard has independent
-Skeptic acceptance. The standalone Stage-2 producer-receipt verifier passes 70/70
+Skeptic acceptance. The standalone Stage-2 producer-receipt verifier passes 92/92
 and has fresh Skeptic ACCEPT after repair of identity-role and same-byte-snapshot
-defects. The four-arm coherent-K4 mechanism comparison remains first; the compact reference is
-the priced baseline for later residual/shared-coordinate questions. Stage 4 remains
-conditional on a measured Stage-2 bottleneck.
+defects. The compact four-arm implementation now passes its independent tiny dense
+reference, current live-shape source/cost gates, official validation and a fresh
+label-free Skeptic. Its ledgers are 816.293--818.516 billion FLOPs and the current
+exact arm measured 1,079.0 MiB peak RAM. The registered P07 producer and verifier
+are next; no accuracy result exists yet. The four-arm coherent-K4 mechanism
+comparison remains the first scientific discriminator, and the compact reference
+is the priced baseline for later residual/shared-coordinate questions. Stage 4
+remains conditional on a measured Stage-2 bottleneck.
 
 ## Objective and architecture
 
@@ -76,9 +81,11 @@ Start with tiny metered operation-family checks; then queue label-free 1024 x 16
 verbatim `I don't know` human predictions and bounded coefficient/identity registry
 are committed in the LOG. The label-free producer guard has fresh-context Skeptic
 acceptance. Current-source preflight and the standalone producer-receipt verifier
-are accepted. Run the label-free P07 producer next, then apply the verifier to its
-immutable output before fitting or opening P07/P01. Do not reuse the predictions
-attached to the rejected placeholder implementation.
+are accepted. The compact four-arm implementation, complete live-shape ledgers and
+memory accounting also have fresh-context label-free ACCEPT. Run the label-free P07
+producer next, then apply the verifier to its immutable output before fitting or
+opening P07/P01. Do not reuse the predictions attached to the rejected placeholder
+implementation.
 
 The current 08f787b contract has **not been tested as specified**. It promised a freeze before P01, but P01 has three recorded DESIGN reads and informed the proposed range. Manual timestamps cannot establish preregistration chronology. Preserve exposure; reconcile independent job records if available; otherwise mark chronology unresolved. Do not recycle the old contract/predictions as evidence for a changed intervention.
 
