@@ -533,6 +533,7 @@ def run_checks():
               (refused and diagnostic["immutable"] is True
                and diagnostic["complete_candidate"] is False
                and diagnostic["labels_read"] is False
+               and diagnostic["failure_stage"] == "predict"
                and diagnostic["evaluated_rows"] == 1
                and diagnostic["captured_predictions"] == 1
                and diagnostic["inputs"] == original_input_hashes
@@ -556,6 +557,49 @@ def run_checks():
               "refused=%s rows=%d no_success_artifacts=%s" %
               (refused, len(diagnostic["rows"]),
                not os.path.exists(os.path.join(out_dir, "predictions.npz"))))
+
+    with _temp("p2-k4-producer-setup-failure-") as root:
+        candidates = os.path.join(root, "candidates.json")
+        bounds = os.path.join(root, "bounds.json")
+        identities = os.path.join(root, "identities.json")
+        out_dir = os.path.join(root, "observations")
+        _write_json(candidates, {"parameters": ["lam"], "candidates": [{"lam": 0.0}]})
+        _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
+        _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
+                    "depth": 2, "identities": [{"id": "setup-failure", "seed": 7031}]})
+        original_evaluate = producer.le.evaluate
+        def setup_failure(*args, **kwargs):
+            raise producer.le.SetupFailure("SETUP_ERROR: deliberate fixture")
+        producer.le.evaluate = setup_failure
+        try:
+            try:
+                producer.produce(Namespace(candidates=candidates, bounds=bounds,
+                                           identities=identities, out_dir=out_dir))
+                refused = False
+            except producer.ProducerRefused as exc:
+                refused = "SetupFailure" in str(exc)
+        finally:
+            producer.le.evaluate = original_evaluate
+        diagnostic_path = os.path.join(out_dir, "failure_diagnostic.json")
+        with open(diagnostic_path, encoding="utf-8") as fh:
+            diagnostic = json.load(fh)
+        check("setup failure writes classified zero-row evidence",
+              (refused and diagnostic["failure_stage"] ==
+               "setup_or_lifecycle_exception"
+               and diagnostic["evaluated_rows"] == 0
+               and diagnostic["captured_predictions"] == 0
+               and diagnostic["rows"] == []
+               and "SetupFailure: SETUP_ERROR: deliberate fixture" in
+                   diagnostic["lifecycle_provenance"]["setup_error"]
+               and diagnostic["lifecycle_provenance"]["rows_hash"] ==
+                   producer.le.rows_hash([])
+               and diagnostic["lifecycle_spec"] ==
+                   producer.dataclasses.asdict(producer.le.LifecycleSpec(
+                       width=3, depth=2, residual_wall_time_limit_s=None))
+               and not os.path.exists(os.path.join(out_dir, "predictions.npz"))
+               and not os.path.exists(os.path.join(out_dir, "producer_receipt.json"))),
+              "refused=%s rows=%d classified=%s" %
+              (refused, len(diagnostic["rows"]), diagnostic["failure_stage"]))
     return {"kind": "synthetic coherent-K4 producer-selector conformance", "labels_read": False,
             "checks": rows, "n_checks": len(rows), "n_failed": sum(not x["pass"] for x in rows),
             "pass": all(x["pass"] for x in rows)}

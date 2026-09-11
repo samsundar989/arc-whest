@@ -71,7 +71,7 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
                               source_hash, rows, provenance, predictions,
                               identity_manifest, width, depth, spec,
                               input_hashes, producer_binding,
-                              generator_binding):
+                              generator_binding, failure_stage="predict"):
     row_values = []
     for row in rows:
         raw = dataclasses.asdict(row)
@@ -81,6 +81,7 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
         "immutable": True,
         "complete_candidate": False,
         "labels_read": False,
+        "failure_stage": failure_stage,
         "candidate_index": candidate_index,
         "candidate": candidate,
         "candidate_source": {
@@ -104,6 +105,49 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
         json.dump(result, fh, indent=2, sort_keys=True, allow_nan=False)
         fh.write("\n")
     return path
+
+
+def _pre_row_provenance(source_path, source_hash, seeds, zero_target, spec,
+                        exc):
+    """Record what is knowable when lifecycle setup/import fails before rows."""
+    backend = {"numpy": np.__version__, "python": sys.version.split()[0]}
+    try:
+        flops = le._require_real_flopscope()
+        backend.update({
+            "flopscope": getattr(flops, "__version__", "?"),
+            "flopscope_path": os.path.dirname(flops.__file__ or ""),
+        })
+    except Exception as backend_exc:
+        backend.update({
+            "flopscope": "unavailable",
+            "flopscope_path": "",
+            "backend_error": "%s: %s" %
+                             (type(backend_exc).__name__, backend_exc),
+        })
+    error = "%s: %s" % (type(exc).__name__, exc)
+    return {
+        "candidate": os.path.relpath(source_path, _ROOT).replace("\\", "/"),
+        "candidate_sha256": source_hash,
+        "truth_sha256": le._array_sha(zero_target[:len(seeds)]),
+        "n_mlps": len(seeds),
+        "spec": dataclasses.asdict(spec),
+        "round_tag": spec.round_tag,
+        "round_deviations": spec.deviations_from_round(),
+        "lifecycle": "grader",
+        "weights_mode": le.DEFAULT_WEIGHTS_MODE,
+        "weights_mode_is_grader_default": True,
+        "setup_called": True,
+        "setup_seconds": None,
+        "setup_timeout_s": spec.setup_timeout_s,
+        "setup_timed_out": "SETUP_TIMEOUT" in str(exc),
+        "setup_error": error,
+        "host_cold_start_s": le.HOST_COLD_START_S,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "residual_is_graded": False,
+        "objective_is_graded": False,
+        "backend": backend,
+        "rows_hash": le.rows_hash([]),
+    }
 
 
 def _load_identities(path):
@@ -187,9 +231,25 @@ def produce(a):
             fh.write(text)
         source_hash = _sha256(source_path)
         predictions = []
-        rows, provenance = le.evaluate(
-            source_path, seeds, zero_target, spec=spec,
-            gt_noise=[0.0] * len(seeds), predictions_out=predictions)
+        try:
+            rows, provenance = le.evaluate(
+                source_path, seeds, zero_target, spec=spec,
+                gt_noise=[0.0] * len(seeds), predictions_out=predictions)
+        except Exception as exc:
+            provenance = _pre_row_provenance(
+                source_path, source_hash, seeds, zero_target, spec, exc)
+            diagnostic = _write_failure_diagnostic(
+                a, candidate_index=i, candidate=candidate,
+                source_path=source_path, source_hash=source_hash,
+                rows=[], provenance=provenance, predictions=predictions,
+                identity_manifest=identity_manifest, width=width, depth=depth,
+                spec=spec, input_hashes=input_hashes,
+                producer_binding=producer_binding,
+                generator_binding=generator_binding,
+                failure_stage="setup_or_lifecycle_exception")
+            raise ProducerRefused(
+                "candidate %d lifecycle raised %s; diagnostic: %s" %
+                (i, type(exc).__name__, diagnostic)) from exc
         if len(predictions) != len(seeds) or any(row.failed for row in rows):
             diagnostic = _write_failure_diagnostic(
                 a, candidate_index=i, candidate=candidate,

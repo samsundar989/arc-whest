@@ -42123,3 +42123,34 @@ These runs are recorded as invocation/snapshot-path failures, not candidate or
 instrument failures. The current gate must use the live worktree while it remains
 clean and unchanged for the whole run, because this repository's byte-identity and
 external evidence checks cannot currently survive workerq's git reconstruction.
+
+The next fresh Skeptic again returned **REJECT** on a distinct domain boundary:
+`lifecycle_eval.evaluate()` raises a setup failure before returning rows or
+provenance, so the producer left only the generated source and no diagnostic. The
+repair now catches any ordinary lifecycle exception around the unchanged canonical
+call and writes a classified `setup_or_lifecycle_exception` artifact with zero
+rows, frozen input/source bindings, the complete lifecycle spec, the exception type
+and message, empty-rows hash, round deviations and every backend/setup field that
+can be recovered at that boundary. It then raises `ProducerRefused`; no success
+artifact is created. A deliberate `SetupFailure` fixture establishes this route.
+The expanded suite passes **72/72**, compilation and `git diff --check` pass. A
+third fresh-context Skeptic is required because the two earlier rejections remain
+valuable negative evidence rather than acceptance.
+
+The applicable live-worktree preflight, workerq **864**, completed SUCCEEDED in
+330.6 seconds with **PREFLIGHT GREEN - 12/16, 4 SKIPPED** and 3,090.6 MiB peak RAM
+against its 5 GiB declaration. The live tree stayed at committed bytes throughout
+the run. This preflight covers the same-byte repair before the setup-exception
+addition; therefore it is useful evidence but does not replace the final current-
+source gate required after the last repair.
+
+An independent Stage-1/Stage-2 integration audit confirmed that job 824 did not run
+the accepted 0.372208-budget compact program. It patched `estimator_k3_full.py` with
+an untruncated all-history K4 birth tower, while the inherited projection priced
+only the base K3 tower. There is no existing production emitter for all four compact
+arms. The bounded next engineering package is to export the already accepted
+compact kernel to the grader interface, add independent consumer/birth switches and
+the registered coefficient, make the cost model arm-aware, and rerun the dense and
+compact conformance suites plus one label-free live-shape cost row per arm. This is
+a concrete repository-grounded path, so a Strategist is not required yet. A full
+P07 rerun must wait for that integration repair.
