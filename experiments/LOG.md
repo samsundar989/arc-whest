@@ -41986,3 +41986,14 @@ cross-product. The scaled correctness oracle plus process-isolated one-use shard
 preserves the complete positive/negative logical battery and now executes inside the
 actual 8 GiB production limit. This establishes the current full mutation evidence;
 WP0E still requires current-source preflight and fresh-context Skeptic acceptance.
+
+Workerq **821** then ran the current committed default preflight at exact HEAD
+`7730248ed7d2738afe1c05a36f737a95e3cd2627`. It terminated SUCCEEDED in 377.3
+seconds, peaked at 3,089.6 MiB against a 5 GiB declaration, and reported
+**PREFLIGHT GREEN - 12/16, 4 SKIPPED**. The skipped Full-only shape-parity,
+carrier-strength, deployment-envelope and official-smoke steps are named explicitly;
+this run is the required current instrument gate, not deployment authority. The
+earlier workerq 628 Full 16/16 remains exact evidence for older HEAD `e1933f0`, not
+for current bytes. Raw job metadata, manifest, worker log and complete PowerShell
+transcript are preserved in the WP0E final-acceptance directory. Fresh-context
+Skeptic review remains the WP0E exit condition.
