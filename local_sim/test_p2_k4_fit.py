@@ -217,14 +217,19 @@ def run_checks():
             return snapshot
         fit._read_json = swap_after_parse
         try:
-            swapped = fit.verify(swap_request)
+            try:
+                fit.verify(swap_request)
+                refused = False
+            except fit.FitRefused as exc:
+                refused = "producer receipt changed" in str(exc)
         finally:
             fit._read_json = original_reader
         current_receipt_sha = fit._sha256(a.producer_receipt)
-        check("receipt parse/hash uses one byte snapshot",
-              (swapped["inputs"]["producer_receipt"]["sha256"] ==
-               original_receipt_sha != current_receipt_sha),
-              "recorded original bytes after parse-time replacement")
+        check("receipt replacement after snapshot refuses at closing revalidation",
+              (refused and original_receipt_sha != current_receipt_sha
+               and not os.path.exists(swap_request.receipt)),
+              "parsed=%s current=%s" %
+              (original_receipt_sha[:12], current_receipt_sha[:12]))
         with open(a.producer_receipt, "wb") as fh:
             fh.write(original_receipt_bytes)
 
@@ -244,14 +249,19 @@ def run_checks():
             return snapshot
         fit._read_bytes = swap_after_read
         try:
-            swapped = fit.verify(swap_request)
+            try:
+                fit.verify(swap_request)
+                refused = False
+            except fit.FitRefused as exc:
+                refused = "predictions changed" in str(exc)
         finally:
             fit._read_bytes = original_bytes_reader
         current_prediction_sha = fit._sha256(a.predictions)
-        check("NPZ parse/hash uses one byte snapshot",
-              (swapped["inputs"]["predictions"]["sha256"] ==
-               original_prediction_sha != current_prediction_sha),
-              "recorded parsed bytes after read-time replacement")
+        check("NPZ replacement after snapshot refuses at closing revalidation",
+              (refused and original_prediction_sha != current_prediction_sha
+               and not os.path.exists(swap_request.receipt)),
+              "parsed=%s current=%s" %
+              (original_prediction_sha[:12], current_prediction_sha[:12]))
         with open(a.predictions, "wb") as fh:
             fh.write(original_prediction_bytes)
 
@@ -405,6 +415,33 @@ def run_checks():
         try: fit.fit(a, truth_loader=lambda _a: calls.append(True)); refused = False
         except fit.FitRefused: refused = True
         check("mutated candidate source refuses before truth", refused and not calls, "loader calls=%d" % len(calls))
+
+    with _temp("p2-k4-fit-source-closing-race-") as root:
+        a, made = _fixture(root)
+        source = os.path.join(_ROOT, made["candidate_sources"][0])
+        request = _verify_args(a, os.path.join(root, "must-not-verify.json"))
+        original_problem = producer._provenance_problem
+        mutated = [False]
+        def mutate_source_during_provenance(*args, **kwargs):
+            result = original_problem(*args, **kwargs)
+            if not mutated[0]:
+                with open(source, "a", encoding="utf-8") as fh:
+                    fh.write("\n# closing-race mutation\n")
+                mutated[0] = True
+            return result
+        producer._provenance_problem = mutate_source_during_provenance
+        try:
+            try:
+                fit.verify(request)
+                refused = False
+            except fit.FitRefused as exc:
+                refused = "candidate source 0 changed" in str(exc)
+        finally:
+            producer._provenance_problem = original_problem
+        check("verifier closing recheck catches source changed during provenance",
+              refused and mutated[0] and not os.path.exists(request.receipt),
+              "refused=%s receipt=%s" %
+              (refused, os.path.exists(request.receipt)))
 
     with _temp("p2-k4-fit-source-hash-") as root:
         a, _ = _fixture(root)
@@ -1040,6 +1077,57 @@ def run_checks():
                                                    "producer_receipt.json"))),
               "refused=%s provenance=%r" %
               (refused, diagnostic["lifecycle_provenance"]))
+
+    with _temp("p2-k4-producer-prior-source-race-") as root:
+        candidates = os.path.join(root, "candidates.json")
+        bounds = os.path.join(root, "bounds.json")
+        identities = os.path.join(root, "identities.json")
+        out_dir = os.path.join(root, "observations")
+        _write_json(candidates, {"parameters": ["lam"], "candidates": [
+                    {"lam": 0.0}, {"lam": 0.25}]})
+        _write_json(bounds, {"lam": {"min": 0.0, "max": 0.25}})
+        _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
+                    "depth": 2,
+                    "identities": [{"id": "source-race", "seed": 7091}]})
+        original_evaluate = producer.le.evaluate
+        calls = [0]
+        def mutate_prior_source(source_path, seeds, target, *, spec, gt_noise,
+                                predictions_out):
+            calls[0] += 1
+            result = _mock_clean_evidence(
+                source_path, seeds, target, spec, predictions_out)
+            if calls[0] == 2:
+                prior = os.path.join(out_dir,
+                                     "candidate_000_coherent.py")
+                with open(prior, "a", encoding="utf-8") as fh:
+                    fh.write("\n# later-candidate mutation\n")
+            return result
+        producer.le.evaluate = mutate_prior_source
+        try:
+            try:
+                producer.produce(Namespace(candidates=candidates, bounds=bounds,
+                                           identities=identities,
+                                           out_dir=out_dir))
+                refused = False
+            except producer.ProducerRefused as exc:
+                refused = "candidate source bytes changed" in str(exc)
+        finally:
+            producer.le.evaluate = original_evaluate
+        with open(os.path.join(out_dir, "failure_diagnostic.json"),
+                  encoding="utf-8") as fh:
+            diagnostic = json.load(fh)
+        check("producer closing recheck catches prior candidate source mutation",
+              (refused and diagnostic["failure_stage"] ==
+               "source_changed_before_success_write"
+               and diagnostic["candidate_index"] == 0
+               and not diagnostic["candidate_source"]
+                   ["unchanged_after_evaluation"]
+               and not os.path.exists(os.path.join(out_dir, "predictions.npz"))
+               and not os.path.exists(os.path.join(out_dir,
+                                                   "producer_receipt.json"))),
+              "refused=%s current_match=%s" %
+              (refused, diagnostic["candidate_source"]
+               ["unchanged_after_evaluation"]))
     return {"kind": "synthetic coherent-K4 producer-selector conformance", "labels_read": False,
             "checks": rows, "n_checks": len(rows), "n_failed": sum(not x["pass"] for x in rows),
             "pass": all(x["pass"] for x in rows)}

@@ -42289,3 +42289,25 @@ is whatever the canonical row reports; failure multiplier is 1.0. Residual is no
 interpreted because the diagnostic deliberately disables that cap, matching job
 824. The compact-arm integration remains a separate contract and must not be
 smuggled into this run.
+
+The seventh fresh Skeptic returned **REJECT**. It changed candidate zero's
+generated source while candidate one was evaluated; the producer retained the
+old hash and wrote a success package. It also changed a candidate source while
+the standalone selector was validating lifecycle provenance; the selector
+wrote a verification receipt claiming current-source revalidation. These were
+closing-boundary races after each source's earlier individual check. No
+protected truth was opened.
+
+The producer now re-observes every generated candidate, its own source, the arm
+generator and the upstream estimator immediately before serializing success.
+If a dependency changed, it writes the exclusive failure diagnostic for the
+affected candidate and emits no prediction archive or producer receipt. The
+selector now revalidates the producer receipt, prediction archive, three
+registries, every generated candidate, all bound local sources and the upstream
+source immediately before a verification receipt; fitting performs the same
+closing check immediately before protected truth access and again before its
+receipt. The existing post-snapshot receipt/NPZ replacement tests now require
+refusal, and exact fixtures cover the two Skeptic attacks. The complete suite
+passes **85/85**; compilation and `git diff --check` pass. An eighth
+fresh-context Skeptic and a final current-source preflight remain required
+before the one-row discriminator.

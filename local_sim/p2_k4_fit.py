@@ -589,6 +589,45 @@ def _write_receipt(path, payload):
         raise FitRefused("receipt already exists: %s" % path) from exc
 
 
+def _closing_revalidate(a, validated):
+    """Refuse when any validated input or source changed before the next action."""
+    def observed_sha(path, label):
+        try:
+            return _sha256(path)
+        except OSError as exc:
+            raise FitRefused("%s unavailable at closing revalidation: %s" %
+                             (label, exc)) from exc
+
+    inputs = (
+        (a.producer_receipt, validated["producer_receipt_sha256"],
+         "producer receipt"),
+        (a.predictions, validated["predictions_sha256"], "predictions"),
+        (a.candidates, validated["registry_hashes"]["candidates"],
+         "candidate registry"),
+        (a.bounds, validated["registry_hashes"]["bounds"], "bounds"),
+        (a.identities, validated["identities_sha256"], "identity registry"),
+    )
+    for path, expected, label in inputs:
+        actual = observed_sha(path, label)
+        if actual != expected:
+            raise FitRefused("%s changed before closing revalidation" % label)
+    for i, source in enumerate(validated["candidate_sources"]):
+        path = _repo_path(source["path"], "candidate source %d" % i)
+        if observed_sha(path, "candidate source %d" % i) != source["sha256"]:
+            raise FitRefused(
+                "candidate source %d changed before closing revalidation" % i)
+    for label, source in validated["source_hashes"].items():
+        path = _repo_path(source["path"], "source %s" % label)
+        if observed_sha(path, "source %s" % label) != source["sha256"]:
+            raise FitRefused("source %s changed before closing revalidation" %
+                             label)
+    upstream = os.path.join(_ROOT, "estimator_k3_full.py")
+    expected_upstream = validated["producer_manifest"]["generator"][
+        "upstream_source_sha256"]
+    if observed_sha(upstream, "upstream source") != expected_upstream:
+        raise FitRefused("upstream source changed before closing revalidation")
+
+
 def verify(a):
     """Validate a producer receipt without accepting or resolving truth."""
     validated = _validate_request(a, verify_only=True)
@@ -627,12 +666,14 @@ def verify(a):
             "truth_arguments_accepted": False,
         },
     }
+    _closing_revalidate(a, validated)
     _write_receipt(a.receipt, receipt)
     return receipt
 
 
 def fit(a, truth_loader=_load_truth):
     validated = _validate_request(a)  # receipt validation precedes truth loading
+    _closing_revalidate(a, validated)  # immediately before protected access
     loaded = truth_loader(a)
     if len(loaded) == 3:  # injectable synthetic test loaders
         truth_ids, truth, manifest = loaded
@@ -696,6 +737,7 @@ def fit(a, truth_loader=_load_truth):
                        "candidate_count": len(objective),
                        "identity_count": len(truth_ids),
                        "all_finite": True}}
+    _closing_revalidate(a, validated)
     # Exclusive creation is the immutability guarantee, including concurrent runs.
     _write_receipt(a.receipt, receipt)
     return receipt

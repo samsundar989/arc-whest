@@ -302,6 +302,28 @@ def _input_evidence_problem(a, input_hashes):
     return ""
 
 
+def _closing_source_problem(source_paths, source_hashes, producer_binding,
+                            generator_binding):
+    """Re-observe every executable byte dependency at the write boundary."""
+    for i, (path, frozen_sha256) in enumerate(zip(source_paths, source_hashes)):
+        observed = _observed_binding(path, frozen_sha256)
+        if not observed["unchanged_after_evaluation"]:
+            return "candidate", i
+    static_sources = (
+        ("producer", os.path.join(_ROOT, producer_binding["path"]),
+         producer_binding["sha256"]),
+        ("generator", os.path.join(_ROOT, generator_binding["path"]),
+         generator_binding["sha256"]),
+        ("upstream", builder.SOURCE,
+         generator_binding["upstream_source_sha256"]),
+    )
+    for label, path, frozen_sha256 in static_sources:
+        observed = _observed_binding(path, frozen_sha256)
+        if not observed["unchanged_after_evaluation"]:
+            return label, None
+    return "", None
+
+
 def _lifecycle_evidence_problem(rows, predictions, provenance, seeds, spec,
                                 source_path, source_hash, zero_target):
     if len(predictions) != len(seeds):
@@ -456,9 +478,9 @@ def produce(a):
     generator_binding["upstream_source_sha256"] = upstream_sha
     coherent = next(row for row in builder.ARMS if row[0] == "coherent")
     os.mkdir(a.out_dir)
-    source_paths, source_hashes = [], []
+    source_paths, absolute_source_paths, source_hashes = [], [], []
     all_predictions, all_costs, all_ops, row_hashes = [], [], [], []
-    lifecycle_provenance = []
+    lifecycle_provenance, all_rows, raw_predictions = [], [], []
     spec = le.LifecycleSpec(width=width, depth=depth,
                             residual_wall_time_limit_s=None)
     zero_target = np.zeros((len(seeds), width), dtype=np.float32)
@@ -522,7 +544,10 @@ def produce(a):
         all_ops.append([int(row.n_ops) for row in rows])
         row_hashes.append(provenance["rows_hash"])
         lifecycle_provenance.append(_diagnostic_value(provenance))
+        all_rows.append(rows)
+        raw_predictions.append(predictions)
         source_paths.append(os.path.relpath(source_path, _ROOT).replace("\\", "/"))
+        absolute_source_paths.append(source_path)
         source_hashes.append(source_hash)
     costs = np.asarray(all_costs, dtype=np.int64)
     if not np.array_equal(costs, np.repeat(costs[:1], len(candidates), axis=0)):
@@ -545,6 +570,28 @@ def produce(a):
         raise ProducerRefused(
             "input registry bytes changed before success write; diagnostic: %s" %
             diagnostic)
+    changed_label, changed_index = _closing_source_problem(
+        absolute_source_paths, source_hashes, producer_binding,
+        generator_binding)
+    if changed_label:
+        diagnostic_index = (changed_index if changed_index is not None
+                            else len(candidates) - 1)
+        diagnostic = _write_failure_diagnostic(
+            a, candidate_index=diagnostic_index,
+            candidate=candidates[diagnostic_index],
+            source_path=absolute_source_paths[diagnostic_index],
+            source_hash=source_hashes[diagnostic_index],
+            rows=all_rows[diagnostic_index],
+            provenance=lifecycle_provenance[diagnostic_index],
+            predictions=raw_predictions[diagnostic_index],
+            identity_manifest=identity_manifest, width=width, depth=depth,
+            spec=spec, input_hashes=input_hashes,
+            producer_binding=producer_binding,
+            generator_binding=generator_binding,
+            failure_stage="source_changed_before_success_write")
+        raise ProducerRefused(
+            "%s source bytes changed before success write; diagnostic: %s" %
+            (changed_label, diagnostic))
     manifest = {
         "kind": "coherent-K4 canonical-lifecycle observations-v1",
         "identity_role": identity_manifest["kind"],
