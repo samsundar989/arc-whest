@@ -42020,3 +42020,13 @@ exclusive verify-only behavior, current source/registry/lifecycle/cost bindings 
 full revalidation before fitting. Its explicit scope limitation is that row hashes
 and operation counts are structurally bound rather than replaying the expensive
 lifecycle producer. That producer is the next label-free execution step.
+
+Workerq **824** is now queued for that label-free producer at committed HEAD
+`72dc9c9b760cb8041e639a67eeb85873c3fdfcc0`: four frozen coefficients across the
+384 exact P07 identities, 1,536 canonical lifecycle predictions, no labels. It has
+inherited project priority HIGH and declares 12 GiB RAM, 2 CPUs and no GPU. At
+submission it was queue position 0 but could not start because two running jobs
+reserved 46 GiB of the 53.6 GiB usable worker pool. This is deliberate admission
+control, not completion. On success, the next action is standalone `--verify-only`
+against its immutable predictions and producer receipt; only then may the registered
+P07 truth access occur.
