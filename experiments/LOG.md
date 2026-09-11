@@ -41559,3 +41559,31 @@ four sequential networks, while isolating heavy phases so process memory is
 released. The receipt layer must also close the second review findings. Both remain
 IMPORTANT instrument work and require current preflight, the complete mutation
 evidence and a new fresh-context Skeptic before Stage 0 can close.
+
+### WP0E second result — thirteen edge groups are still too coarse
+
+Commit `4a079db` moved the 30 existing edge-suite result slots into thirteen
+sequential subprocess groups and added fail-closed, exact-byte receipts. The
+truth-free lightweight suites passed (edge receipt/parity 25/25, mutation-shard
+aggregation 37/37, invariant-9 battery green), and a fresh-context Skeptic found
+the source partition correct but returned **PROVISIONAL** pending real execution.
+
+Workerq 743 then ran the current positive control from clean live commit
+`4a079db`, with 20 GiB RAM, 0 GiB VRAM and 2 CPUs. At 360 seconds, before the
+positive control completed, its measured Windows process-tree commit reached
+**29,281.20 MiB**. It was cancelled at 380 seconds because it had exceeded its
+declaration. This is not a passing certification and supplies no positive
+receipt. It falsifies thirteen top-level groups as a sufficient memory boundary:
+at least one group still retains enough sequential production-shape prediction
+state to recreate almost the old peak. Workerq 742 was an immediately failed
+submission-command typo (`--description` reached argv); it started no project
+code and supplies no evidence.
+
+The next intervention stays inside WP0E's registered mechanism and falsifier:
+split the multi-case groups at individual mathematical-case boundaries, retaining
+the exact 30 logical results and reconstructing compound permutation and budget
+monotonicity predicates from authenticated case receipts. The purposeful
+repeated-estimator determinism sequence and certification section 5's four-seed
+sequence remain intact. No reduced dimensions, seeds, precision, dtype arms,
+checks or predicates are admissible. Another 20 GiB workerq profile is required;
+no lower-RAM claim exists until it finishes within its declaration.
