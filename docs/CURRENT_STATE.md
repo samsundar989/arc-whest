@@ -69,6 +69,14 @@ freeze the coefficient receipt. Then run the registered four-arm comparison on
 exposed P01. That DESIGN result must end with synthesis and a fresh Skeptic before
 any untouched DECIDE allocation. No public or vault truth is authorized.
 
+An independent launch audit caught one final no-snapshot provenance gap before
+P07 started: the producer used the selector before binding its disk bytes. Job 891
+was cancelled while queued. The repaired producer now compiles and executes one
+locked selector byte snapshot and holds it through publication. Its suite passes
+97/97, workerq 893 passed current-byte preflight 12/16 at 2,966.6 MiB peak, and a
+new fresh Skeptic returned ACCEPT. This repair changed no candidate math or data
+role. The next P07 producer must use these accepted bytes.
+
 At `2026-09-10T23:07:29Z`, the driver mistakenly inspected the P07 NPZ keys,
 shapes and seed endpoints through direct `numpy.load`. It computed no scores or
 candidate comparisons and changed no frozen choice, but it bypassed pre-read

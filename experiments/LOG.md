@@ -42874,3 +42874,23 @@ candidate deployment evidence. Raw transcript, manifest and queue metadata are
 `locked_selector_preflight.log`, `job893_raw.log`, `job893_manifest.json` and
 `job893_metadata.json` in the compact P07 evidence directory. The fresh Skeptic
 verdict remains the last condition before resubmission.
+
+### Fresh Skeptic ACCEPT — locked selector provenance
+
+The new fresh-context Skeptic returned **ACCEPT**. It independently confirmed that
+the production path locks before reading, compiles and executes the exact locked
+buffer, hashes that same buffer, retains the lock through `_produce()` and final
+publication, and that verification matches the producer-time selector binding to
+current `fit_interface` bytes before truth. It inspected the raw 97/97 suite and
+job 893's current-byte green preflight. No candidate math, registry, lifecycle,
+seed, estimator or data-role change was found; no label path was opened.
+
+The remaining test limitation is explicit: most programmatic fixtures use the
+test-only selector override, while the direct marker fixture and documented
+subprocess exercise the private locked loader. Repository search found no non-test
+programmatic caller. This does not block the registered P07 subprocess. Full
+verdict: `experiments/2026-09-11_stage2_compact_p07/selector_binding_skeptic_verdict.md`.
+
+**Knowledge delta:** the no-snapshot P07 producer now has accepted binding for the
+selector bytes it actually executes. The label-free P07 batch may be resubmitted;
+its queue state or partial files will still not count as completion.
