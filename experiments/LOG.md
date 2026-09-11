@@ -41664,3 +41664,23 @@ and output evidence; drop all heavy references including the context; run
 `gc.collect()` so its weak reference is dead; call `budget_reset()` to clear the
 now-unowned accumulator records; then request the native allocator trim. This is
 the order the workerq gate will test. It changes no candidate call or evidence.
+
+### WP0E fourth result - meter/allocator teardown is still insufficient on Windows
+
+Commit `8f7e12a` implemented the corrected lifetime boundary and real-package
+binding. The focused adversarial suite passed 55/55, mutation-shard tests passed
+37/37, and a fresh-context Skeptic returned **PROVISIONAL** solely pending the
+registered workerq profile. Workerq 786 then ran the positive control from clean
+live commit `8f7e12a` with high project priority, 20 GiB RAM, 0 GiB VRAM and 2
+CPUs. It rose through 2,587.86 MiB at 89 seconds, 8,478.57 MiB at 135 seconds and
+14,351.30 MiB at 233 seconds, then reached **26,892.30 MiB** at 309 seconds. The
+driver requested cancellation immediately; the job terminated CANCELLED at 329
+seconds. Its exclusive receipt is absent.
+
+This triggers the registered falsifier. Successful `_heapmin` calls prove that the
+request was accepted, not that the Windows process peak fell, and neither meter
+records nor allocator retention are established as the owner. Job 786 is diagnostic
+evidence only. The candidate, checks, dimensions, precision and stateful sequences
+must not be reduced. The next repair must isolate the exact high-water subphase or
+execute the unchanged battery in a bounded Linux worker whose package identity and
+memory enforcement are recorded; no lower-RAM acceptance claim exists yet.
