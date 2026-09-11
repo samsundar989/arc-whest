@@ -79,6 +79,8 @@ PD, PW = 32, 256
 #: which is how a defect reached five submission slots on 2026-09-05.
 WEIGHTS_BACKEND = "numpy"
 WEIGHTS_MODE = "f64_readonly"
+PHASE2_MODE = False
+LIVE_DEPTH, LIVE_WIDTH, LIVE_BUDGET = 16, 1024, 2 ** 41
 INSTRUMENT_IDENTITY = {"kind": "historical_numpy", "path": None,
                        "version": None}
 
@@ -112,13 +114,19 @@ CASE_REGISTRY = tuple(
     ("%s:%d" % (group, index), group, index)
     for group, count in CASE_COUNTS for index in range(count)
 )
-GROUP_RECEIPT_VERSION = 4
-CASE_RECEIPT_VERSION = 4
+GROUP_RECEIPT_VERSION = 5
+CASE_RECEIPT_VERSION = 5
 METER_RESET_POLICY = (
     "real-flopscope: fresh explicit context at captured implicit-global cap, "
     "capture ledger/output after every candidate predict, then drop context, "
     "collect, reset accumulator, and trim; historical "
-    "numpy mode: direct predict; v3"
+    "numpy mode: direct predict; Phase2 off-shape correctness budgets scale "
+    "with dense work; v4"
+)
+CORRECTNESS_BUDGET_POLICY = (
+    "Phase2 implicit off-shape: min(B_live, "
+    "floor(B_live*d*w^2/(D_live*W_live^2))); live-shape, explicit-budget, "
+    "and historical calls unchanged; v1"
 )
 METER_PREDICTIONS = []
 
@@ -152,6 +160,15 @@ def _implicit_default_budget():
     """Capture flopscope 0.12's effective budget outside an explicit context."""
     raw = os.environ.get("FLOPSCOPE_DEFAULT_BUDGET")
     return int(float(raw)) if raw is not None else int(1e15)
+
+
+def _correctness_budget(depth, width):
+    """Phase2-only dense-work budget for implicit off-shape correctness calls."""
+    if not PHASE2_MODE or (depth, width) == (LIVE_DEPTH, LIVE_WIDTH):
+        return BUDGET
+    scaled = (LIVE_BUDGET * depth * width * width
+              // (LIVE_DEPTH * LIVE_WIDTH * LIVE_WIDTH))
+    return min(LIVE_BUDGET, scaled)
 
 
 def _release_allocator(gc_collected=None):
@@ -214,6 +231,8 @@ def _predict(est, mlp, budget):
             "flops_used": int(context.flops_used),
             "n_ops": len(context.op_log), "status": status,
             "output_sha256": output_sha256,
+            "candidate_budget": int(budget),
+            "mlp_width": int(mlp.width), "mlp_depth": int(mlp.depth),
         }
         context = None
         collected = int(gc.collect())
@@ -345,7 +364,8 @@ def _execute_group(group, est, est_mod, case_index=None, evidence=None):
         for d, wd in _one(((2, 256), (8, 128), (32, 64), (4, 256),
                            (64, 256)), case_index):
             results.append(check(f"depth {d} x width {wd}", est,
-                                 MLP(he(d, wd, 8), seed=23)))
+                                 MLP(he(d, wd, 8), seed=23),
+                                 budget=_correctness_budget(d, wd)))
     elif group == "budget_edges":
         print("\n6. BUDGET EDGES (the analytic fallback path)")
         m = MLP(he(PD, PW, 9), seed=29)
@@ -372,7 +392,7 @@ def _execute_group(group, est, est_mod, case_index=None, evidence=None):
     elif group == "budget_monotone":
         results += inv_budget_monotone(est, est_mod)
     elif group == "determinism":
-        results += inv_determinism(est, est_mod)
+        results += inv_determinism(est, est_mod, evidence=evidence)
     elif group == "seed_hygiene":
         results += inv_seed_hygiene()
     elif group == "gt_noise":
@@ -428,6 +448,11 @@ def _execute_case(case_id, est, est_mod):
         details = evidence[0] if len(evidence) == 1 else {
             "evidence_error": "expected exactly one permutation record",
         }
+    elif group == "determinism":
+        evidence = []
+        results = _execute_group(group, est, est_mod, case_index=case_index,
+                                 evidence=evidence)
+        details = {"cases": evidence}
     else:
         results = _execute_group(group, est, est_mod, case_index=case_index)
         details = {}
@@ -436,6 +461,7 @@ def _execute_case(case_id, est, est_mod):
 
 def main():
     global BUDGET, PD, PW, WEIGHTS_BACKEND, WEIGHTS_MODE, INSTRUMENT_IDENTITY
+    global PHASE2_MODE, LIVE_DEPTH, LIVE_WIDTH, LIVE_BUDGET
     import argparse
     ap = argparse.ArgumentParser(
         description="The invariant suite. Defaults reproduce the historical "
@@ -470,6 +496,8 @@ def main():
         import official_config as _oc
         PD, PW = _oc.LIVE.depth, _oc.LIVE.width
         BUDGET = _oc.LIVE.flop_budget
+        PHASE2_MODE = True
+        LIVE_DEPTH, LIVE_WIDTH, LIVE_BUDGET = PD, PW, BUDGET
     if a.real_flopscope:
         # This script lives beside a historical package named ``flopscope``.
         # Move that directory behind site-packages before the candidate import;
@@ -542,6 +570,7 @@ def main():
             "candidate_sha256_after": candidate_sha_after,
             "edge_cases_sha256": _sha(__file__),
             "meter_reset_policy": METER_RESET_POLICY,
+            "correctness_budget_policy": CORRECTNESS_BUDGET_POLICY,
             "metered_predictions": METER_PREDICTIONS,
             "group_registry": [
                 {"group": group, "expected_result_count": count}
@@ -607,7 +636,8 @@ def inv_layer1(est, case_index=None):
              (4, 64, 30_806_006_003), (2, 256, 30_806_006_004))
     for depth, width, seed in _one(cases, case_index):
         m = canon(depth, width, seed)
-        pred = np.asarray(_predict(est, m, BUDGET), dtype=np.float64)
+        candidate_budget = _correctness_budget(depth, width)
+        pred = np.asarray(_predict(est, m, candidate_budget), dtype=np.float64)
         w0 = np.asarray(m.weights[0], dtype=np.float64)
         exact = np.sqrt((w0 * w0).sum(axis=0)) / np.sqrt(2.0 * np.pi)
         rel = float(np.abs(pred[0] - exact).max() / np.abs(exact).max())
@@ -765,14 +795,15 @@ def inv_permutation(est, case_index=None, evidence=None):
     for index, (depth, width, seed, k), P in _permutation_case_stream(
             rng, cases, case_index):
         k = _k_for(depth, k)
+        candidate_budget = _correctness_budget(depth, width)
         m = canon(depth, width, seed)
-        base = np.asarray(_predict(est, m, BUDGET), dtype=np.float64)
+        base = np.asarray(_predict(est, m, candidate_budget), dtype=np.float64)
 
         w = [np.array(x) for x in m.weights]
         w[k] = w[k][:, P]                      # rename layer-k outputs
         w[k + 1] = w[k + 1][P, :]              # and the matching inputs
         mp = MLP(w, seed=m.seed)
-        perm = np.asarray(_predict(est, mp, BUDGET), dtype=np.float64)
+        perm = np.asarray(_predict(est, mp, candidate_budget), dtype=np.float64)
 
         g = perm_gate(base, perm, P, k, depth, denom=denom)
         if evidence is not None:
@@ -856,24 +887,37 @@ def inv_budget_monotone(est, est_mod):
     return [ok]
 
 
-def inv_determinism(est, est_mod):
+def inv_determinism(est, est_mod, evidence=None):
     """Three bit-identical runs, plus a fresh Estimator instance."""
     print("\n11. DETERMINISM  (3x bit-identity + fresh instance)")
     ok = True
-    for depth, width, seed in ((PD, PW, 30_806_006_031), (8, 128, 30_806_006_032)):
+    for case_index, (depth, width, seed) in enumerate(
+            ((PD, PW, 30_806_006_031), (8, 128, 30_806_006_032))):
+        candidate_budget = _correctness_budget(depth, width)
         m = canon(depth, width, seed)
-        runs = [np.asarray(_predict(est, m, BUDGET), dtype=np.float64)
+        runs = [np.asarray(_predict(est, m, candidate_budget), dtype=np.float64)
                 for _ in range(3)]
         same3 = all(np.array_equal(runs[0], r) for r in runs[1:])
 
         fresh = est_mod.Estimator()
 
         class Ctx:
-            flop_budget, seed = BUDGET, 0
+            flop_budget, seed = candidate_budget, 0
 
         Ctx.width, Ctx.depth = width, depth
         fresh.setup(Ctx())
-        r4 = np.asarray(_predict(fresh, m, BUDGET), dtype=np.float64)
+        r4 = np.asarray(_predict(fresh, m, candidate_budget), dtype=np.float64)
+        if evidence is not None:
+            evidence.append({
+                "case_index": case_index, "width": width, "depth": depth,
+                "candidate_budget": candidate_budget,
+                "setup_width": Ctx.width, "setup_depth": Ctx.depth,
+                "setup_budget": Ctx.flop_budget,
+                "reused_estimator_identity": id(est),
+                "fresh_setup_estimator_identity": id(fresh),
+                "fresh_predict_estimator_identity": id(fresh),
+                "fresh_distinct_from_reused": id(fresh) != id(est),
+            })
         same_fresh = np.array_equal(runs[0], r4)
         ok &= same3 and same_fresh
         print(f"  {f'{width}x{depth}':<34} 3x identical={same3}  "

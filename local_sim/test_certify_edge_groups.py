@@ -47,11 +47,34 @@ def allocator_fixture():
             "returncode": None, "succeeded": True}
 
 
-def meter_fixture():
+def meter_fixture(route=None):
+    candidate_budget, width, depth = route or (
+        cert.BUDGET, cert.WIDTH, cert.DEPTH)
     return {"flop_budget": cert._implicit_default_budget(),
             "flops_used": 1, "n_ops": 1, "status": "returned",
             "output_sha256": "d" * 64,
+            "candidate_budget": candidate_budget,
+            "mlp_width": width, "mlp_depth": depth,
             "allocator_release": allocator_fixture()}
+
+
+def determinism_details():
+    rows = []
+    reused_identity = 101
+    for index, (depth, width) in enumerate(
+            ((cert.DEPTH, cert.WIDTH), (8, 128))):
+        budget = cert._correctness_budget(depth, width)
+        fresh_identity = 200 + index
+        rows.append({
+            "case_index": index, "width": width, "depth": depth,
+            "candidate_budget": budget, "setup_width": width,
+            "setup_depth": depth, "setup_budget": budget,
+            "reused_estimator_identity": reused_identity,
+            "fresh_setup_estimator_identity": fresh_identity,
+            "fresh_predict_estimator_identity": fresh_identity,
+            "fresh_distinct_from_reused": True,
+        })
+    return {"cases": rows}
 
 
 def fixture(group="normal", count=1):
@@ -65,10 +88,10 @@ def fixture(group="normal", count=1):
         "candidate_sha256_after": candidate_sha,
         "edge_cases_sha256": edge_sha,
         "meter_reset_policy": cert.EDGE_METER_RESET_POLICY,
+        "correctness_budget_policy": cert.EDGE_CORRECTNESS_BUDGET_POLICY,
         "metered_predictions": [
-            meter_fixture() for _ in range(
-                dict(cert.EDGE_CASE_COUNTS)[group]
-                * cert.EDGE_PREDICTIONS_PER_CASE[group])],
+            meter_fixture(route)
+            for route in cert._expected_group_meter_schedule(group)],
         "group_registry": [
             {"group": name, "expected_result_count": expected}
             for name, expected in cert.EDGE_GROUP_REGISTRY
@@ -107,9 +130,10 @@ def case_fixture(case="normal:0", group="normal", case_index=0):
             for name, logical, index in cert.EDGE_CASE_REGISTRY
         ],
         "case": case, "logical_group": group, "case_index": case_index,
-        "details": {},
-        "metered_predictions": [meter_fixture() for _ in range(
-            cert.EDGE_PREDICTIONS_PER_CASE[group])],
+        "details": determinism_details() if group == "determinism" else {},
+        "metered_predictions": [meter_fixture(route) for route in
+                                cert._expected_case_meter_schedule(
+                                    group, case_index)],
     })
     kwargs = {key: value for key, value in group_kwargs.items()
               if key not in ("expected_count",)}
@@ -142,6 +166,87 @@ def main():
           and sum(count for _, count in edge.GROUP_REGISTRY) == 30
           and len({group for group, _ in edge.GROUP_REGISTRY})
           == len(edge.GROUP_REGISTRY))
+    check("producer and consumer correctness-budget policies are exact",
+          edge.CORRECTNESS_BUDGET_POLICY
+          == cert.EDGE_CORRECTNESS_BUDGET_POLICY)
+
+    live = (2 ** 41, 1024, 16)
+    expected_scaled = {
+        (2, 256): 2 ** 34, (8, 128): 2 ** 34,
+        (32, 64): 2 ** 34, (4, 256): 2 ** 35,
+        (64, 256): 2 ** 39, (4, 64): 2 ** 31,
+    }
+    exact_schedules = True
+    for group in ("normal", "degenerate", "dynamic_range", "seed_extremes"):
+        exact_schedules &= cert._expected_group_meter_schedule(group) == (
+            [live] * (2 * dict(cert.EDGE_CASE_COUNTS)[group]))
+    shape_cases = ((2, 256), (8, 128), (32, 64), (4, 256),
+                   (64, 256))
+    for index, (depth, width) in enumerate(shape_cases):
+        route = (expected_scaled[(depth, width)], width, depth)
+        exact_schedules &= cert._expected_case_meter_schedule(
+            "shape_generality", index) == [route, route]
+    layer_cases = ((16, 1024), (8, 128), (4, 64), (2, 256))
+    for index, (depth, width) in enumerate(layer_cases):
+        budget = (2 ** 41 if (depth, width) == (16, 1024)
+                  else expected_scaled[(depth, width)])
+        exact_schedules &= cert._expected_case_meter_schedule(
+            "layer1", index) == [(budget, width, depth)]
+    for index, (depth, width, _seed, _k) in enumerate(
+            cert.EDGE_PERMUTATION_CASES):
+        budget = (2 ** 41 if (depth, width) == (16, 1024)
+                  else expected_scaled[(depth, width)])
+        route = (budget, width, depth)
+        exact_schedules &= cert._expected_case_meter_schedule(
+            "permutation", index) == [route, route]
+    exact_schedules &= cert._expected_case_meter_schedule(
+        "determinism", 0) == [live] * 4 + [(2 ** 34, 128, 8)] * 4
+    for index, budget in enumerate((0, 1, 10 ** 7, 10 ** 9,
+                                    10 * (2 ** 41))):
+        exact_schedules &= cert._expected_case_meter_schedule(
+            "budget_edges", index) == [(budget, 1024, 16)] * 2
+    exact_schedules &= cert._expected_case_meter_schedule(
+        "immutability", 0) == [live]
+    for index, budget in enumerate(cert.EDGE_BUDGET_LADDER):
+        exact_schedules &= cert._expected_case_meter_schedule(
+            "budget_monotone", index) == [(budget, 1024, 16)]
+    exact_schedules &= all(cert._expected_group_meter_schedule(group) == []
+                           for group in ("seed_hygiene", "gt_noise"))
+    check("consumer freezes the exact full Phase2 candidate-budget schedules",
+          exact_schedules)
+
+    saved_budget_state = (edge.PHASE2_MODE, edge.LIVE_DEPTH,
+                          edge.LIVE_WIDTH, edge.LIVE_BUDGET, edge.BUDGET,
+                          edge.PD, edge.PW)
+    try:
+        edge.PHASE2_MODE = True
+        edge.LIVE_DEPTH, edge.LIVE_WIDTH, edge.LIVE_BUDGET = 16, 1024, 2 ** 41
+        edge.BUDGET, edge.PD, edge.PW = 2 ** 41, 16, 1024
+        phase2_values = {
+            shape: edge._correctness_budget(*shape)
+            for shape in ((16, 1024),) + tuple(expected_scaled)
+        }
+        edge.PHASE2_MODE = False
+        edge.BUDGET = 2_720_000_000_000
+        historical_values = [edge._correctness_budget(depth, width)
+                             for depth, width in ((16, 1024),)
+                             + tuple(expected_scaled)]
+        check("producer applies scaling only in Phase2 implicit calls",
+              phase2_values[(16, 1024)] == 2 ** 41
+              and all(phase2_values[shape] == wanted
+                      for shape, wanted in expected_scaled.items())
+              and historical_values == [edge.BUDGET] * len(historical_values))
+        targeted_sources = [inspect.getsource(function) for function in (
+            edge._execute_group, edge.inv_layer1, edge.inv_permutation,
+            edge.inv_determinism)]
+        check("all four off-shape mechanisms route through the frozen helper",
+              all("_correctness_budget" in source
+                  for source in targeted_sources)
+              and "flop_budget, seed = candidate_budget, 0"
+              in targeted_sources[-1])
+    finally:
+        (edge.PHASE2_MODE, edge.LIVE_DEPTH, edge.LIVE_WIDTH,
+         edge.LIVE_BUDGET, edge.BUDGET, edge.PD, edge.PW) = saved_budget_state
 
     import flopscope
     import flopscope.numpy as fnp
@@ -158,7 +263,10 @@ def main():
             return "prediction"
 
     probe_estimator = ProbeEstimator()
-    probe_mlp = object()
+    class ProbeMLP:
+        width, depth = 4, 2
+
+    probe_mlp = ProbeMLP()
     original_backend = edge.WEIGHTS_BACKEND
 
     class Snapshot:
@@ -218,6 +326,87 @@ def main():
         flopscope.current_budget = original_current
         flopscope.BudgetContext = original_context
         edge._release_allocator = original_release
+
+    original_canon = edge.canon
+    original_predict = edge._predict
+    saved_budget_state = (edge.PHASE2_MODE, edge.LIVE_DEPTH,
+                          edge.LIVE_WIDTH, edge.LIVE_BUDGET, edge.BUDGET,
+                          edge.PD, edge.PW)
+    identity_predicts = []
+    identity_setups = []
+
+    class IdentityMLP:
+        def __init__(self, depth, width):
+            self.depth, self.width = depth, width
+
+    class IdentityEstimator:
+        def setup(self, context):
+            identity_setups.append((id(self), context.flop_budget,
+                                    context.width, context.depth))
+
+    class IdentityModule:
+        Estimator = IdentityEstimator
+
+    primary = IdentityEstimator()
+
+    def identity_canon(depth, width, _seed):
+        return IdentityMLP(depth, width)
+
+    def identity_predict(estimator, mlp, budget):
+        identity_predicts.append((id(estimator), budget,
+                                  mlp.width, mlp.depth))
+        return edge.np.zeros((mlp.depth, mlp.width), dtype=edge.np.float64)
+
+    try:
+        edge.canon, edge._predict = identity_canon, identity_predict
+        edge.PHASE2_MODE = True
+        edge.LIVE_DEPTH, edge.LIVE_WIDTH, edge.LIVE_BUDGET = 16, 1024, 2 ** 41
+        edge.BUDGET, edge.PD, edge.PW = 2 ** 41, 16, 1024
+        evidence = []
+        result = edge.inv_determinism(primary, IdentityModule,
+                                      evidence=evidence)
+        expected_routes = ([((2 ** 41), 1024, 16)] * 4
+                           + [((2 ** 34), 128, 8)] * 4)
+        routes = [(budget, width, depth)
+                  for _identity, budget, width, depth in identity_predicts]
+        first_primary = all(row[0] == id(primary)
+                            for row in identity_predicts[0:3])
+        second_primary = all(row[0] == id(primary)
+                             for row in identity_predicts[4:7])
+        fresh_ids = (identity_predicts[3][0], identity_predicts[7][0])
+        setup_ids = tuple(row[0] for row in identity_setups)
+        check("determinism spies preserve reused/fresh identity and scaled setup",
+              result == [True] and routes == expected_routes
+              and first_primary and second_primary
+              and setup_ids == fresh_ids
+              and all(value != id(primary) for value in fresh_ids)
+              and [(row[1], row[2], row[3]) for row in identity_setups]
+              == [(2 ** 41, 1024, 16), (2 ** 34, 128, 8)]
+              and len(evidence) == 2
+              and [row["candidate_budget"] for row in evidence]
+              == [2 ** 41, 2 ** 34]
+              and all(row["reused_estimator_identity"] == id(primary)
+                      and row["fresh_setup_estimator_identity"]
+                      == row["fresh_predict_estimator_identity"]
+                      and row["fresh_distinct_from_reused"] is True
+                      for row in evidence))
+
+        identity_predicts.clear()
+        identity_setups.clear()
+        edge.PHASE2_MODE = False
+        edge.BUDGET = 2_720_000_000_000
+        historical_result = edge.inv_determinism(
+            primary, IdentityModule, evidence=[])
+        check("historical determinism keeps its exact unscaled schedule",
+              historical_result == [True]
+              and [row[1] for row in identity_predicts]
+              == [edge.BUDGET] * 8
+              and [row[1] for row in identity_setups]
+              == [edge.BUDGET] * 2)
+    finally:
+        edge.canon, edge._predict = original_canon, original_predict
+        (edge.PHASE2_MODE, edge.LIVE_DEPTH, edge.LIVE_WIDTH,
+         edge.LIVE_BUDGET, edge.BUDGET, edge.PD, edge.PW) = saved_budget_state
 
     from flopscope._budget import _reset_global_default, get_active_budget
 
@@ -414,6 +603,9 @@ def main():
             "edge_cases_sha256", "c" * 64), "edge_cases.py hash"),
         ("wrong meter reset policy", lambda p: p.__setitem__(
             "meter_reset_policy", "omitted"), "meter reset policy"),
+        ("wrong correctness budget policy", lambda p: p.__setitem__(
+            "correctness_budget_policy", "omitted"),
+         "correctness budget policy"),
         ("missing meter evidence", lambda p: p.pop("metered_predictions"),
          "metered predictions are not"),
         ("failed allocator release", lambda p: p["metered_predictions"][0][
@@ -425,6 +617,14 @@ def main():
             "flops_used", True), "schema differs"),
         ("boolean operation count", lambda p: p["metered_predictions"][0].__setitem__(
             "n_ops", False), "schema differs"),
+        ("boolean candidate budget", lambda p: p["metered_predictions"][0].__setitem__(
+            "candidate_budget", True), "schema differs"),
+        ("wrong candidate budget", lambda p: p["metered_predictions"][0].__setitem__(
+            "candidate_budget", cert.BUDGET - 1), "route differs"),
+        ("boolean metered width", lambda p: p["metered_predictions"][0].__setitem__(
+            "mlp_width", True), "schema differs"),
+        ("wrong metered depth", lambda p: p["metered_predictions"][0].__setitem__(
+            "mlp_depth", cert.DEPTH - 1), "route differs"),
         ("truncated registry", lambda p: p["group_registry"].pop(),
          "group registry"),
         ("boolean registry count", lambda p: p["group_registry"][0].__setitem__(
@@ -481,6 +681,54 @@ def main():
         bad = copy.deepcopy(case_payload)
         mutate(bad)
         errors = cert.validate_edge_case_receipt(bad, **case_kwargs)
+        check(name + " refuses", any(needle in error for error in errors))
+
+    route_cases = (
+        ("shape_generality:1", "shape_generality", 1),
+        ("budget_edges:0", "budget_edges", 0),
+        ("budget_edges:4", "budget_edges", 4),
+        ("budget_monotone:0", "budget_monotone", 0),
+        ("budget_monotone:9", "budget_monotone", 9),
+    )
+    for case, group, case_index in route_cases:
+        route_payload, route_kwargs = case_fixture(
+            case=case, group=group, case_index=case_index)
+        if group == "budget_monotone":
+            budget = cert.EDGE_BUDGET_LADDER[case_index]
+            route_payload["details"] = {
+                "budget": budget, "has_ladder": True,
+                "log2n": case_index, "finite": True, "error": "",
+            }
+        accepted = cert.validate_edge_case_receipt(
+            route_payload, **route_kwargs) == []
+        bad_route = copy.deepcopy(route_payload)
+        bad_route["metered_predictions"][0]["candidate_budget"] += 1
+        errors = cert.validate_edge_case_receipt(bad_route, **route_kwargs)
+        check(case + " exact route accepts and a changed route refuses",
+              accepted and any("route differs" in error for error in errors))
+
+    determinism_payload, determinism_kwargs = case_fixture(
+        case="determinism:0", group="determinism", case_index=0)
+    check("determinism setup/identity receipt accepts",
+          cert.validate_edge_case_receipt(
+              determinism_payload, **determinism_kwargs) == [])
+    determinism_mutations = (
+        ("wrong fresh setup budget", lambda p: p["details"]["cases"][1].__setitem__(
+            "setup_budget", cert.BUDGET), "determinism setup/identity"),
+        ("wrong fresh setup width", lambda p: p["details"]["cases"][1].__setitem__(
+            "setup_width", 129), "determinism setup/identity"),
+        ("fresh identity aliases reused", lambda p: p["details"]["cases"][0].update({
+            "fresh_setup_estimator_identity": 101,
+            "fresh_predict_estimator_identity": 101,
+            "fresh_distinct_from_reused": False,
+        }), "determinism setup/identity"),
+        ("boolean reused identity", lambda p: p["details"]["cases"][0].__setitem__(
+            "reused_estimator_identity", True), "determinism setup/identity"),
+    )
+    for name, mutate, needle in determinism_mutations:
+        bad = copy.deepcopy(determinism_payload)
+        mutate(bad)
+        errors = cert.validate_edge_case_receipt(bad, **determinism_kwargs)
         check(name + " refuses", any(needle in error for error in errors))
 
     permutation_payload, permutation_kwargs = case_fixture(

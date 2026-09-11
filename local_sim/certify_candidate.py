@@ -100,7 +100,7 @@ EDGE_GROUP_REGISTRY = (
     ("budget_monotone", 1), ("determinism", 1), ("seed_hygiene", 1),
     ("gt_noise", 1),
 )
-EDGE_GROUP_RECEIPT_VERSION = 4
+EDGE_GROUP_RECEIPT_VERSION = 5
 EDGE_CASE_COUNTS = (
     ("normal", 1), ("degenerate", 3), ("dynamic_range", 4),
     ("seed_extremes", 5), ("shape_generality", 5), ("budget_edges", 5),
@@ -119,12 +119,18 @@ EDGE_PREDICTIONS_PER_CASE = {
     "budget_monotone": 1, "determinism": 8, "seed_hygiene": 0,
     "gt_noise": 0,
 }
-EDGE_CASE_RECEIPT_VERSION = 4
+EDGE_CASE_RECEIPT_VERSION = 5
 EDGE_METER_RESET_POLICY = (
     "real-flopscope: fresh explicit context at captured implicit-global cap, "
     "capture ledger/output after every candidate predict, then drop context, "
     "collect, reset accumulator, and trim; historical "
-    "numpy mode: direct predict; v3"
+    "numpy mode: direct predict; Phase2 off-shape correctness budgets scale "
+    "with dense work; v4"
+)
+EDGE_CORRECTNESS_BUDGET_POLICY = (
+    "Phase2 implicit off-shape: min(B_live, "
+    "floor(B_live*d*w^2/(D_live*W_live^2))); live-shape, explicit-budget, "
+    "and historical calls unchanged; v1"
 )
 SECTION5_METER_RESET_POLICY = (
     "section5/5b: reset before context; after ledger/output capture drop heavy "
@@ -419,14 +425,58 @@ def _implicit_default_budget():
     return int(float(raw)) if raw is not None else int(1e15)
 
 
-def _metered_prediction_errors(rows, *, expected_count, complete):
+def _correctness_budget(depth, width):
+    scaled = (BUDGET * depth * width * width
+              // (DEPTH * WIDTH * WIDTH))
+    return min(BUDGET, scaled)
+
+
+def _expected_case_meter_schedule(group, case_index):
+    live = (BUDGET, WIDTH, DEPTH)
+    if group in {"normal", "degenerate", "dynamic_range", "seed_extremes"}:
+        return [live, live]
+    if group == "shape_generality":
+        depth, width = ((2, 256), (8, 128), (32, 64), (4, 256),
+                        (64, 256))[case_index]
+        value = (_correctness_budget(depth, width), width, depth)
+        return [value, value]
+    if group == "budget_edges":
+        budget = (0, 1, 10**7, 10**9, 10 * BUDGET)[case_index]
+        return [(budget, WIDTH, DEPTH), (budget, WIDTH, DEPTH)]
+    if group == "immutability":
+        return [live]
+    if group == "layer1":
+        depth, width = ((DEPTH, WIDTH), (8, 128), (4, 64),
+                        (2, 256))[case_index]
+        return [(_correctness_budget(depth, width), width, depth)]
+    if group == "permutation":
+        depth, width, _seed, _k = EDGE_PERMUTATION_CASES[case_index]
+        value = (_correctness_budget(depth, width), width, depth)
+        return [value, value]
+    if group == "budget_monotone":
+        return [(EDGE_BUDGET_LADDER[case_index], WIDTH, DEPTH)]
+    if group == "determinism":
+        off = (_correctness_budget(8, 128), 128, 8)
+        return [live, live, live, live, off, off, off, off]
+    if group in {"seed_hygiene", "gt_noise"}:
+        return []
+    raise ValueError("unknown edge group " + str(group))
+
+
+def _expected_group_meter_schedule(group):
+    return [row for index in range(dict(EDGE_CASE_COUNTS)[group])
+            for row in _expected_case_meter_schedule(group, index)]
+
+
+def _metered_prediction_errors(rows, *, expected_schedule, complete):
     errors = []
     if not isinstance(rows, list):
         return ["metered predictions are not a list"]
-    if complete and len(rows) != expected_count:
+    if complete and len(rows) != len(expected_schedule):
         errors.append("metered prediction coverage differs")
     expected_keys = {"flop_budget", "flops_used", "n_ops", "status",
-                     "output_sha256", "allocator_release"}
+                     "output_sha256", "candidate_budget", "mlp_width",
+                     "mlp_depth", "allocator_release"}
     for index, row in enumerate(rows):
         if (not isinstance(row, dict) or set(row) != expected_keys
                 or type(row.get("flop_budget")) is not int
@@ -439,9 +489,16 @@ def _metered_prediction_errors(rows, *, expected_count, complete):
                 or (row.get("status") == "returned"
                     and not _is_sha256(row.get("output_sha256")))
                 or (row.get("status") == "raised"
-                    and row.get("output_sha256") is not None)):
+                    and row.get("output_sha256") is not None)
+                or type(row.get("candidate_budget")) is not int
+                or type(row.get("mlp_width")) is not int
+                or type(row.get("mlp_depth")) is not int):
             errors.append("metered prediction %d schema differs" % index)
             continue
+        if index >= len(expected_schedule) or (
+                row["candidate_budget"], row["mlp_width"], row["mlp_depth"]
+                ) != expected_schedule[index]:
+            errors.append("metered prediction %d route differs" % index)
         if complete and row["status"] != "returned":
             errors.append("metered prediction %d did not return" % index)
         if not _allocator_release_valid(row.get("allocator_release")):
@@ -466,7 +523,8 @@ def validate_edge_group_receipt(payload, *, group, expected_count,
     expected_keys = {
         "artifact", "artifact_version", "candidate",
         "candidate_sha256_before", "candidate_sha256_after",
-        "edge_cases_sha256", "meter_reset_policy", "metered_predictions",
+        "edge_cases_sha256", "meter_reset_policy", "correctness_budget_policy",
+        "metered_predictions",
         "group_registry", "world", "group",
         "expected_result_count", "results", "passed", "all_passed",
     }
@@ -490,6 +548,8 @@ def validate_edge_group_receipt(payload, *, group, expected_count,
         errors.append("edge_cases.py hash differs")
     if payload.get("meter_reset_policy") != EDGE_METER_RESET_POLICY:
         errors.append("meter reset policy differs")
+    if payload.get("correctness_budget_policy") != EDGE_CORRECTNESS_BUDGET_POLICY:
+        errors.append("correctness budget policy differs")
     registry = payload.get("group_registry")
     expected_registry = [
         {"group": name, "expected_result_count": count}
@@ -540,11 +600,10 @@ def validate_edge_group_receipt(payload, *, group, expected_count,
         errors.append("all_passed is not a boolean")
     elif results is not None and all_passed != all(results):
         errors.append("all_passed differs from results")
-    expected_predictions = (dict(EDGE_CASE_COUNTS)[group]
-                            * EDGE_PREDICTIONS_PER_CASE[group])
     errors.extend(_metered_prediction_errors(
         payload.get("metered_predictions"),
-        expected_count=expected_predictions, complete=all_passed is True))
+        expected_schedule=_expected_group_meter_schedule(group),
+        complete=all_passed is True))
     return errors
 
 
@@ -558,7 +617,8 @@ def validate_edge_case_receipt(payload, *, case, group, case_index,
     expected_keys = {
         "artifact", "artifact_version", "candidate",
         "candidate_sha256_before", "candidate_sha256_after",
-        "edge_cases_sha256", "meter_reset_policy", "metered_predictions",
+        "edge_cases_sha256", "meter_reset_policy", "correctness_budget_policy",
+        "metered_predictions",
         "group_registry", "case_registry", "world",
         "case", "logical_group", "case_index", "details",
         "results", "passed", "all_passed",
@@ -585,6 +645,8 @@ def validate_edge_case_receipt(payload, *, case, group, case_index,
         errors.append("edge_cases.py hash differs")
     if payload.get("meter_reset_policy") != EDGE_METER_RESET_POLICY:
         errors.append("meter reset policy differs")
+    if payload.get("correctness_budget_policy") != EDGE_CORRECTNESS_BUDGET_POLICY:
+        errors.append("correctness budget policy differs")
     expected_groups = [{"group": name, "expected_result_count": count}
                        for name, count in EDGE_GROUP_REGISTRY]
     expected_cases = [{"case": name, "group": logical, "case_index": index}
@@ -616,6 +678,7 @@ def validate_edge_case_receipt(payload, *, case, group, case_index,
         "candidate_sha256_after": candidate_sha256,
         "edge_cases_sha256": edge_cases_sha256,
         "meter_reset_policy": EDGE_METER_RESET_POLICY,
+        "correctness_budget_policy": EDGE_CORRECTNESS_BUDGET_POLICY,
         "metered_predictions": [],
         "group_registry": expected_groups,
         "world": payload.get("world"), "group": group,
@@ -648,6 +711,44 @@ def validate_edge_case_receipt(payload, *, case, group, case_index,
                          or type(details.get("raw_mse_env")) is str))
         if not types_ok or details != expected_details:
             errors.append("permutation evidence differs")
+    elif group == "determinism":
+        detail_cases = details.get("cases")
+        keys = {"case_index", "width", "depth", "candidate_budget",
+                "setup_width", "setup_depth", "setup_budget",
+                "reused_estimator_identity", "fresh_setup_estimator_identity",
+                "fresh_predict_estimator_identity",
+                "fresh_distinct_from_reused"}
+        valid = isinstance(detail_cases, list) and len(detail_cases) == 2
+        reused_identity = None
+        for index, wanted in enumerate(((DEPTH, WIDTH), (8, 128))):
+            if not valid:
+                break
+            row = detail_cases[index]
+            depth, width = wanted
+            candidate_budget = _correctness_budget(depth, width)
+            ints = keys - {"fresh_distinct_from_reused"}
+            row_valid = (isinstance(row, dict) and set(row) == keys
+                         and all(type(row.get(key)) is int for key in ints)
+                         and type(row.get("fresh_distinct_from_reused")) is bool
+                         and row.get("case_index") == index
+                         and row.get("width") == width
+                         and row.get("depth") == depth
+                         and row.get("candidate_budget") == candidate_budget
+                         and row.get("setup_width") == width
+                         and row.get("setup_depth") == depth
+                         and row.get("setup_budget") == candidate_budget
+                         and row.get("fresh_setup_estimator_identity")
+                         == row.get("fresh_predict_estimator_identity")
+                         and row.get("fresh_distinct_from_reused") is True
+                         and row.get("fresh_setup_estimator_identity")
+                         != row.get("reused_estimator_identity"))
+            if reused_identity is None and row_valid:
+                reused_identity = row["reused_estimator_identity"]
+            elif row_valid:
+                row_valid = row["reused_estimator_identity"] == reused_identity
+            valid = valid and row_valid
+        if not valid:
+            errors.append("determinism setup/identity evidence differs")
     elif group != "budget_monotone" and details != {}:
         errors.append("unexpected case details")
     passed = payload.get("passed")
@@ -659,7 +760,7 @@ def validate_edge_case_receipt(payload, *, case, group, case_index,
         errors.append("all_passed differs")
     errors.extend(_metered_prediction_errors(
         payload.get("metered_predictions"),
-        expected_count=EDGE_PREDICTIONS_PER_CASE[group],
+        expected_schedule=_expected_case_meter_schedule(group, case_index),
         complete=all_passed is True))
     return errors
 
@@ -1703,6 +1804,7 @@ def main() -> int:
     report["sections"]["metered_runs"] = rows
     report["sections"]["meter_reset_policy"] = {
         "edge_cases": EDGE_METER_RESET_POLICY,
+        "edge_correctness_budget": EDGE_CORRECTNESS_BUDGET_POLICY,
         "section5": SECTION5_METER_RESET_POLICY,
         "section5b": SECTION5_METER_RESET_POLICY,
     }
