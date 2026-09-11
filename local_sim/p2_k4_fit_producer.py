@@ -536,9 +536,14 @@ def produce(a):
         source_hash = _sha256(source_path)
         predictions = []
         try:
-            rows, provenance = le.evaluate(
-                source_path, seeds, zero_target, spec=spec,
-                gt_noise=[0.0] * len(seeds), predictions_out=predictions)
+            evaluation_dependencies = [
+                a.candidates, a.bounds, a.identities, source_path, __file__,
+                builder.__file__, builder.SOURCE]
+            with selector._stable_files(evaluation_dependencies):
+                rows, provenance = le.evaluate(
+                    source_path, seeds, zero_target, spec=spec,
+                    gt_noise=[0.0] * len(seeds),
+                    predictions_out=predictions)
         except Exception as exc:
             provenance = _pre_row_provenance(
                 source_path, source_hash, seeds, zero_target, spec, exc)

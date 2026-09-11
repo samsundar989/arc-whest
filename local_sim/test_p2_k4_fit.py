@@ -699,8 +699,6 @@ def run_checks():
                     "depth": 2, "identities": [{"id": "setup-failure", "seed": 7031}]})
         original_evaluate = producer.le.evaluate
         def setup_failure(*args, **kwargs):
-            with open(args[0], "a", encoding="utf-8") as fh:
-                fh.write("\n# replacement before setup failure\n")
             raise producer.le.SetupFailure("SETUP_ERROR: deliberate fixture")
         producer.le.evaluate = setup_failure
         try:
@@ -725,8 +723,8 @@ def run_checks():
                    diagnostic["lifecycle_provenance"]["setup_error"]
                and diagnostic["lifecycle_provenance"]["candidate_sha256"] is None
                and diagnostic["lifecycle_provenance"]["setup_called"] is None
-               and diagnostic["candidate_source"]["unchanged_after_evaluation"] is False
-               and diagnostic["candidate_source"]["current_sha256"] !=
+               and diagnostic["candidate_source"]["unchanged_after_evaluation"] is True
+               and diagnostic["candidate_source"]["current_sha256"] ==
                    diagnostic["candidate_source"]["sha256"]
                and diagnostic["lifecycle_provenance"]["rows_hash"] ==
                    producer.le.rows_hash([])
@@ -993,15 +991,21 @@ def run_checks():
         _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
                     "depth": 2, "identities": [{"id": "byte-swap", "seed": 7061}]})
         original_evaluate = producer.le.evaluate
+        original_input_problem = producer._input_evidence_problem
         def swap_inputs_after_clean_evaluation(source_path, seeds, target, *, spec,
                                                gt_noise, predictions_out):
-            result = _mock_clean_evidence(
+            return _mock_clean_evidence(
                 source_path, seeds, target, spec, predictions_out)
-            for path in (candidates, bounds, identities):
-                with open(path, "a", encoding="utf-8") as fh:
-                    fh.write("\n")
-            return result
+        swapped = [False]
+        def swap_before_input_revalidation(a, input_hashes):
+            if not swapped[0]:
+                for path in (candidates, bounds, identities):
+                    with open(path, "a", encoding="utf-8") as fh:
+                        fh.write("\n")
+                swapped[0] = True
+            return original_input_problem(a, input_hashes)
         producer.le.evaluate = swap_inputs_after_clean_evaluation
+        producer._input_evidence_problem = swap_before_input_revalidation
         try:
             try:
                 producer.produce(Namespace(candidates=candidates, bounds=bounds,
@@ -1011,6 +1015,7 @@ def run_checks():
                 refused = "registry bytes changed" in str(exc)
         finally:
             producer.le.evaluate = original_evaluate
+            producer._input_evidence_problem = original_input_problem
         with open(os.path.join(out_dir, "failure_diagnostic.json"),
                   encoding="utf-8") as fh:
             diagnostic = json.load(fh)
@@ -1252,6 +1257,49 @@ def run_checks():
                and os.path.exists(os.path.join(out_dir,
                                                "producer_receipt.json"))),
               "accepted=%s denied=%s" % (accepted, denied[0]))
+
+    with _temp("p2-k4-producer-loader-source-lock-") as root:
+        candidates = os.path.join(root, "candidates.json")
+        bounds = os.path.join(root, "bounds.json")
+        identities = os.path.join(root, "identities.json")
+        out_dir = os.path.join(root, "observations")
+        _write_json(candidates, {"parameters": ["lam"],
+                    "candidates": [{"lam": 0.0}]})
+        _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
+        _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
+                    "depth": 2,
+                    "identities": [{"id": "loader-lock", "seed": 7093}]})
+        original_loader = producer.le.load_candidate
+        attempted = [False]
+        denied = [False]
+        def attempt_source_swap_before_load(path):
+            attempted[0] = True
+            try:
+                with open(path, "r+b") as fh:
+                    raw = fh.read()
+                    replacement = raw.replace(b"_K4_LAM = 0.0",
+                                              b"_K4_LAM = 0.25")
+                    fh.seek(0)
+                    fh.write(replacement)
+                    fh.truncate()
+            except PermissionError:
+                denied[0] = True
+            return original_loader(path)
+        producer.le.load_candidate = attempt_source_swap_before_load
+        try:
+            result = producer.produce(Namespace(
+                candidates=candidates, bounds=bounds,
+                identities=identities, out_dir=out_dir))
+        finally:
+            producer.le.load_candidate = original_loader
+        source_path = os.path.join(_ROOT, result["candidate_sources"][0])
+        check("producer lifecycle lock blocks source swap before module load",
+              (attempted[0] and denied[0]
+               and producer._sha256(source_path) ==
+                   result["candidate_source_hashes"][0]
+               and result["manifest"]["lifecycle_provenance"][0]
+                   ["candidate_sha256"] == result["candidate_source_hashes"][0]),
+              "attempted=%s denied=%s" % (attempted[0], denied[0]))
     return {"kind": "synthetic coherent-K4 producer-selector conformance", "labels_read": False,
             "checks": rows, "n_checks": len(rows), "n_failed": sum(not x["pass"] for x in rows),
             "pass": all(x["pass"] for x in rows)}

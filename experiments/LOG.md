@@ -42356,3 +42356,23 @@ success remain valid and exactly hash-bound. Earlier changes outside the boundar
 still refuse and remove success artifacts. The complete suite remains **88/88**;
 compilation and `git diff --check` pass. A new fresh-context Skeptic and current-
 source preflight are required before the discriminator.
+
+The next fresh Skeptic returned **REJECT** after confirming the Windows closing
+locks themselves work. It transiently replaced `_K4_LAM=0` with `0.25` while
+`lifecycle_eval.load_candidate` imported the generated module, restored the
+registered bytes before the evaluator's later file hash, and obtained producer
+and verifier receipts bound to the restored source although the replacement had
+executed. The closing lock began only after evaluation, so it could not establish
+which bytes the loader executed. No protected truth was opened.
+
+Each generated candidate is now held with deny-write/delete handles, together
+with all three registries and producer/generator/upstream sources, for the entire
+canonical lifecycle call from module load through predictions and provenance.
+The existing closing lock remains around success serialization. A loader-time
+fixture attempts the exact coefficient swap through a write handle; Windows
+denies the write, the registered module executes, and lifecycle provenance,
+generated-source hash and receipt agree. Setup-failure and persistent-registry
+fixtures were separated from now-denied in-lifecycle mutations so they continue
+to test their intended failure boundaries. The suite passes **89/89**;
+compilation and `git diff --check` pass. A fresh-context Skeptic and final current-
+source preflight remain required before the discriminator.
