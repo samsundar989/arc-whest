@@ -41530,3 +41530,32 @@ requires an independently reviewed certifier-memory intervention or a larger nod
 
 **Scope.** No protected truth, seed block, gate, residual model, `estimator.py`,
 frozen estimator, vault, submission, designation or eligibility action is touched.
+
+### WP0E first result — sharding alone is falsified; receipt implementation refused
+
+Workerq 740 ran the current positive control only from clean live HEAD `291ce11`
+with a 20 GiB declaration. At about 335 seconds, before the positive control
+completed, its measured Windows process-tree commit reached **30,272.08 MiB**.
+The job was cancelled immediately because it had exceeded its declaration. This
+triggers the registered P3 falsifier: workerq-boundary sharding can improve
+attribution and scheduling, but it cannot reduce the intrinsic peak of one
+certifier invocation and is not a sufficient RAM repair. Cancelled job 740 is
+diagnostic evidence only. The concurrently running current preflight job 741 was
+also cancelled because the instrument now requires another repair; neither job is
+called complete or accepted.
+
+The first independent review of commit `2a7f56c` **REJECTED** unsupported execution
+claims, version-only package binding and malformed-shard acceptance. Commit
+`291ce11` added exact installed-package byte manifests, workerq-ID declarations,
+exact unit/repository checks and honest case-coverage wording. A second fresh
+Skeptic still **REJECTED** it: JSON booleans could compare equal to integer schema
+values, unhashable malformed tags could crash rather than REFUSE, and provenance
+was computed only before a live-worktree execution. No shard aggregate is accepted.
+
+The authorized next intervention under the contract's falsifier is an actual
+certifier memory-ownership repair. It must preserve the production CLI, exact
+candidate work and checks, including one estimator instance across section 5's
+four sequential networks, while isolating heavy phases so process memory is
+released. The receipt layer must also close the second review findings. Both remain
+IMPORTANT instrument work and require current preflight, the complete mutation
+evidence and a new fresh-context Skeptic before Stage 0 can close.
