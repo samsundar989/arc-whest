@@ -41469,3 +41469,64 @@ The follow-up review of commit `7598db3` returned **ACCEPT** and independently
 verified that the exact command/stdout artifact contains only keys, shapes and six
 seed endpoints. It also verified the corrected lower-bound wording and did not
 open the protected NPZ. The precise lifetime P07 access count remains unknown.
+ 
+## 2026-09-10 — CONTRACT WP0E: bounded-RAM certification mutation acceptance
+
+**Class:** IMPORTANT. This changes only the mutation-test orchestration around
+`local_sim/certify_candidate.py`; the production certifier, candidate, packages,
+seeds, dtype arms and checks must remain unchanged.
+
+**Question.** Can the required full certification mutation evidence be executed
+with a queue reservation the machine can routinely admit, without removing a
+case, weakening the named-check oracle or increasing the number of expensive
+candidate certifications?
+
+**Evidence before intervention.** CONFIRMED: historical workerq 576 used obsolete
+source/package bytes, reached 31,844.28 MiB process-tree commit and failed for
+unrelated old-stack reasons, so it does not establish current-source RAM.
+CONFIRMED: current-source diagnostic workerq 725 ran the always-present positive
+control plus a requested M1/M3/M5 shard, reached 14,998.29 MiB before cancellation,
+and therefore proves that a 12 GiB declaration is unsafe. CONFIRMED from source:
+the monolithic harness already invokes the production certifier in a fresh blocking
+subprocess for the positive control and for each mutation; the expensive call count
+is one positive plus twelve mutations. INFERRED: separate workerq shards can make
+the queue reservation case-specific and guarantee complete process-tree teardown,
+but cannot reduce the intrinsic peak of one certifier invocation. SPECULATIVE: the
+current positive control and every current mutation will fit inside a 20 GiB shard.
+
+**Hypothesis and mechanism.** A receipt-bound serial shard protocol will preserve
+the monolithic test's evidence while keeping total expensive calls at thirteen.
+Run the positive control exactly once; run every registered mutation exactly once
+without repeating the positive; bind each result to exact source, estimator and
+package identities; and accept only a mechanical aggregate whose coverage is
+exactly the source registry. Workerq then releases each shard's process tree before
+the next shard is admitted.
+
+**Predictions.** P1: the aggregate will refuse a missing, duplicate, unknown,
+failed or provenance-mismatched mutation receipt. P2: the complete accepted
+aggregate will contain exactly M1 through M12, with both the red-verdict and named
+failure match for every mutation, the three positive-control checks, unit checks
+and repository-integrity checks. P3: a positive-only current-source profile will
+peak below a 20 GiB declaration; if it does not, sharding alone cannot solve the
+per-invocation floor. Samuel's standing answer for prediction questions in this
+session is **“I don't know”**; it is recorded without assigning him a direction.
+
+**Intervention.** Add an explicit positive-only/skip-positive shard interface and
+exclusive-create JSON receipts to `test_certify_candidate.py`, plus a read-only
+aggregator that derives the complete mutation registry from receipt-bound source
+metadata. Keep the default no-argument monolithic behavior equivalent in cases and
+verdict semantics. Use unbuffered Python output for observable workerq progress.
+No certifier math, candidate behavior, dimensions, seeds, budget, dtype mode,
+package or named expected failure may change.
+
+**Gate and falsifier.** The implementation gate is lightweight positive/negative
+receipt tests, current default preflight, then raw workerq shards and an aggregate
+that passes exact coverage/provenance checks, followed by fresh-context Skeptic
+review. Any change in the thirteen candidate invocations, any omitted/duplicated
+tag, any acceptance of a wrong named failure or mismatched provenance, or any shard
+whose measured peak exceeds its declared RAM falsifies the repair. A positive-only
+peak at or above 20 GiB falsifies sharding as a sufficient queue-admission fix and
+requires an independently reviewed certifier-memory intervention or a larger node.
+
+**Scope.** No protected truth, seed block, gate, residual model, `estimator.py`,
+frozen estimator, vault, submission, designation or eligibility action is touched.
