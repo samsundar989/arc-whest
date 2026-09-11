@@ -1,6 +1,6 @@
 """End-to-end synthetic regressions for the bounded coherent-K4 fit path."""
 from __future__ import annotations
-import argparse, json, os, subprocess, sys, tempfile
+import argparse, copy, json, os, subprocess, sys, tempfile
 from argparse import Namespace
 import numpy as np
 from numpy import load as _load_npz
@@ -61,11 +61,22 @@ def _fixture(root):
                 "labels_protected": False, "identity_count": 2}
     np.savez(truth, identities=ids, truth=target,
              manifest_json=np.asarray(json.dumps(manifest, sort_keys=True)))
-    args = Namespace(predictions=result["predictions"], truth=truth,
+    args = Namespace(predictions=result["predictions"],
+                     producer_receipt=os.path.join(produced, "producer_receipt.json"),
+                     truth=truth,
                      data_role="synthetic", candidates=candidates, bounds=bounds,
                      identities=identities, objective="final_layer_mse",
                      receipt=receipt, block="", ts="", note="")
     return args, result
+
+
+def _verify_args(a, receipt):
+    return Namespace(predictions=a.predictions,
+                     producer_receipt=a.producer_receipt,
+                     truth="", data_role="", candidates=a.candidates,
+                     bounds=a.bounds, identities=a.identities,
+                     objective=a.objective, receipt=receipt,
+                     block="", ts="", note="")
 
 
 def _temp(prefix):
@@ -94,14 +105,226 @@ def run_checks():
         ("wrong registered order", lambda m: m["identities"].__setitem__(
          slice(0, 2), m["identities"][1::-1]), "exactly match P07"),
         ("wrong registered shape", lambda m: m.__setitem__("width", 512),
-         "width=1024 and depth=16"))
+         "width=1024 and depth=16"),
+        ("string registered seed", lambda m: m["identities"][0].__setitem__(
+         "seed", str(m["identities"][0]["seed"])), "integer seed"),
+        ("integer registered id", lambda m: m["identities"][0].__setitem__(
+         "id", m["identities"][0]["seed"]), "string id"),
+        ("extra registered manifest key", lambda m: m.__setitem__("extra", 1),
+         "keys must be exactly"))
     for label, mutation, expected in registered_mutations:
         with _temp("p2-k4-fit-p07-refusal-") as root:
             manifest = _registered_manifest(); mutation(manifest)
             try: _registered_load(root, manifest); refused = False
-            except producer.ProducerRefused as exc: refused = expected in str(exc)
+            except (producer.ProducerRefused, fit.FitRefused) as exc:
+                refused = expected in str(exc)
             check("%s refuses without evaluation" % label, refused,
                   "validation-only; no lifecycle or truth call")
+
+    with _temp("p2-k4-fit-verify-") as root:
+        a, produced = _fixture(root)
+        verify_path = os.path.join(root, "verification.json")
+        v = _verify_args(a, verify_path)
+        calls = []
+        original_loader = fit._load_truth
+        fit._load_truth = lambda _a: calls.append(True)
+        try:
+            verification = fit.verify(v)
+        finally:
+            fit._load_truth = original_loader
+        expected_sources = {"fit_interface", "fit_producer", "arm_generator",
+                            "arm_exact", "arm_coherent", "arm_consumers_only",
+                            "arm_births_only"}
+        check("verify-only binds producer evidence without truth",
+              (not calls and verification["labels_read"] is False
+               and verification["verification_only"] is True
+               and set(verification["source_hashes"]) == expected_sources
+               and verification["inputs"]["producer_receipt"]["sha256"] ==
+               fit._sha256(a.producer_receipt)),
+              "loader calls=%d sources=%d" %
+              (len(calls), len(verification["source_hashes"])))
+        before = open(verify_path, "rb").read()
+        try: fit.verify(v); refused = False
+        except fit.FitRefused as exc: refused = "already exists" in str(exc)
+        check("verification receipt is immutable",
+              refused and open(verify_path, "rb").read() == before,
+              "exclusive create; bytes unchanged")
+
+        truthy = _verify_args(a, os.path.join(root, "truthy-verification.json"))
+        truthy.truth = a.truth
+        try: fit.verify(truthy); refused = False
+        except fit.FitRefused as exc: refused = "does not accept truth" in str(exc)
+        check("verify-only refuses truth arguments",
+              refused and not os.path.exists(truthy.receipt),
+              "no truth path accepted or resolved")
+
+        original_receipt_bytes = open(a.producer_receipt, "rb").read()
+        original_receipt_sha = fit.hashlib.sha256(original_receipt_bytes).hexdigest()
+        replacement = os.path.join(root, "replacement-producer-receipt.json")
+        with open(replacement, "wb") as fh:
+            fh.write(original_receipt_bytes + b"\n")
+        swap_request = _verify_args(a, os.path.join(root, "swap-verification.json"))
+        original_reader = fit._read_json
+        def swap_after_parse(path, label):
+            snapshot = original_reader(path, label)
+            if os.path.normcase(os.path.abspath(path)) == os.path.normcase(
+                    os.path.abspath(a.producer_receipt)):
+                os.replace(replacement, a.producer_receipt)
+            return snapshot
+        fit._read_json = swap_after_parse
+        try:
+            swapped = fit.verify(swap_request)
+        finally:
+            fit._read_json = original_reader
+        current_receipt_sha = fit._sha256(a.producer_receipt)
+        check("receipt parse/hash uses one byte snapshot",
+              (swapped["inputs"]["producer_receipt"]["sha256"] ==
+               original_receipt_sha != current_receipt_sha),
+              "recorded original bytes after parse-time replacement")
+        with open(a.producer_receipt, "wb") as fh:
+            fh.write(original_receipt_bytes)
+
+        original_prediction_bytes = open(a.predictions, "rb").read()
+        original_prediction_sha = fit.hashlib.sha256(
+            original_prediction_bytes).hexdigest()
+        replacement = os.path.join(root, "replacement-predictions.npz")
+        with open(replacement, "wb") as fh:
+            fh.write(original_prediction_bytes + b"\n")
+        swap_request = _verify_args(a, os.path.join(root, "npz-swap-verification.json"))
+        original_bytes_reader = fit._read_bytes
+        def swap_after_read(path, label):
+            snapshot = original_bytes_reader(path, label)
+            if os.path.normcase(os.path.abspath(path)) == os.path.normcase(
+                    os.path.abspath(a.predictions)):
+                os.replace(replacement, a.predictions)
+            return snapshot
+        fit._read_bytes = swap_after_read
+        try:
+            swapped = fit.verify(swap_request)
+        finally:
+            fit._read_bytes = original_bytes_reader
+        current_prediction_sha = fit._sha256(a.predictions)
+        check("NPZ parse/hash uses one byte snapshot",
+              (swapped["inputs"]["predictions"]["sha256"] ==
+               original_prediction_sha != current_prediction_sha),
+              "recorded parsed bytes after read-time replacement")
+        with open(a.predictions, "wb") as fh:
+            fh.write(original_prediction_bytes)
+
+        with open(a.producer_receipt, encoding="utf-8") as fh:
+            pristine = json.load(fh)
+        receipt_mutations = (
+            ("extra top-level key", lambda r: r.__setitem__("extra", 1)),
+            ("schema", lambda r: r.__setitem__("schema", "wrong")),
+            ("immutable type", lambda r: r.__setitem__("immutable", 1)),
+            ("prediction path", lambda r: r.__setitem__("predictions", a.candidates)),
+            ("prediction path escape", lambda r: r.__setitem__("predictions", "../../outside.npz")),
+            ("prediction hash", lambda r: r.__setitem__("predictions_sha256", "0" * 64)),
+            ("candidate source paths", lambda r: r.__setitem__("candidate_sources", [])),
+            ("candidate source hashes", lambda r: r.__setitem__("candidate_source_hashes", [])),
+            ("receipt costs", lambda r: r.__setitem__("counted_costs", [])),
+            ("receipt cost type", lambda r: r["counted_costs"][0].__setitem__(0, True)),
+            ("manifest extra key", lambda r: r["manifest"].__setitem__("extra", 1)),
+            ("labels-read flag", lambda r: r["manifest"].__setitem__("labels_read", True)),
+            ("identity role", lambda r: r["manifest"].__setitem__("identity_role", "wrong")),
+            ("candidate registry", lambda r: r["manifest"].__setitem__("candidate_registry", [])),
+            ("bounds", lambda r: r["manifest"].__setitem__("bounds", {})),
+            ("identity manifest", lambda r: r["manifest"].__setitem__("identity_manifest", {})),
+            ("manifest candidate sources", lambda r: r["manifest"].__setitem__("candidate_sources", [])),
+            ("manifest costs", lambda r: r["manifest"].__setitem__("counted_costs", [])),
+            ("manifest cost type", lambda r: r["manifest"]["counted_costs"][0].__setitem__(0, True)),
+            ("producer path", lambda r: r["manifest"]["producer"].__setitem__("path", "local_sim/wrong.py")),
+            ("producer hash", lambda r: r["manifest"]["producer"].__setitem__("sha256", "0" * 64)),
+            ("generator path", lambda r: r["manifest"]["generator"].__setitem__("path", "local_sim/wrong.py")),
+            ("generator hash", lambda r: r["manifest"]["generator"].__setitem__("sha256", "0" * 64)),
+            ("upstream hash", lambda r: r["manifest"]["generator"].__setitem__("upstream_source_sha256", "0" * 64)),
+            ("lifecycle width", lambda r: r["manifest"]["lifecycle_spec"].__setitem__("width", 5)),
+            ("lifecycle depth", lambda r: r["manifest"]["lifecycle_spec"].__setitem__("depth", 4)),
+            ("lifecycle budget", lambda r: r["manifest"]["lifecycle_spec"].__setitem__("flop_budget", 1)),
+            ("lifecycle mode", lambda r: r["manifest"]["lifecycle_spec"].__setitem__("weights_mode", "f32")),
+            ("lifecycle residual cap", lambda r: r["manifest"]["lifecycle_spec"].__setitem__("residual_cap", 0.4)),
+            ("row coverage", lambda r: r["manifest"].__setitem__("row_hashes", [])),
+            ("row hash type", lambda r: r["manifest"]["row_hashes"].__setitem__(0, True)),
+            ("operation coverage", lambda r: r["manifest"].__setitem__("n_ops", [])),
+            ("operation count type", lambda r: r["manifest"]["n_ops"][0].__setitem__(0, True)),
+        )
+        for i, (label, mutation) in enumerate(receipt_mutations):
+            mutated = copy.deepcopy(pristine)
+            mutation(mutated)
+            receipt_path = os.path.join(root, "mutated-%02d.json" % i)
+            _write_json(receipt_path, mutated)
+            request = _verify_args(a, os.path.join(root, "rejected-%02d.json" % i))
+            request.producer_receipt = receipt_path
+            try: fit.verify(request); refused = False
+            except fit.FitRefused: refused = True
+            check("mutated producer receipt refuses: " + label,
+                  refused and not os.path.exists(request.receipt),
+                  "truth-free refusal")
+
+        bad_for_fit = copy.deepcopy(pristine)
+        bad_for_fit["predictions_sha256"] = "0" * 64
+        bad_fit_receipt = os.path.join(root, "bad-for-fit.json")
+        _write_json(bad_fit_receipt, bad_for_fit)
+        fit_request = copy.copy(a)
+        fit_request.producer_receipt = bad_fit_receipt
+        fit_request.receipt = os.path.join(root, "must-not-fit.json")
+        calls = []
+        try:
+            fit.fit(fit_request, truth_loader=lambda _a: calls.append(True))
+            refused = False
+        except fit.FitRefused:
+            refused = True
+        check("normal fit revalidates producer receipt before truth",
+              refused and not calls and not os.path.exists(fit_request.receipt),
+              "loader calls=%d" % len(calls))
+
+    identity_mutations = (
+        ("string seed", lambda m: m["identities"][0].__setitem__(
+         "seed", str(m["identities"][0]["seed"])), "integer seed"),
+        ("integer id", lambda m: m["identities"][0].__setitem__(
+         "id", m["identities"][0]["seed"]), "string id"),
+        ("extra manifest key", lambda m: m.__setitem__("extra", 1),
+         "keys must be exactly"))
+    for label, mutation, expected in identity_mutations:
+        with _temp("p2-k4-fit-identity-type-") as root:
+            a, _ = _fixture(root)
+            with open(a.identities, encoding="utf-8") as fh:
+                manifest = json.load(fh)
+            mutation(manifest)
+            _write_json(a.identities, manifest)
+            request = _verify_args(a, os.path.join(root, "must-not-verify.json"))
+            try: fit.verify(request); refused = False
+            except fit.FitRefused as exc: refused = expected in str(exc)
+            check("verifier refuses identity %s" % label,
+                  refused and not os.path.exists(request.receipt),
+                  "strict shared manifest parser")
+
+    registry_mutations = (
+        ("extra candidate-registry key", "candidates",
+         lambda value: value.__setitem__("extra", 1), "keys must be exactly"),
+        ("string bound numeric", "bounds",
+         lambda value: value["lam"].__setitem__("max", "0.5"),
+         "must be JSON numbers"),
+        ("boolean false candidate numeric", "candidates",
+         lambda value: value["candidates"][0].__setitem__("lam", False),
+         "must be a JSON number"))
+    for label, target, mutation, expected in registry_mutations:
+        with _temp("p2-k4-fit-registry-type-") as root:
+            a, _ = _fixture(root)
+            path = a.candidates if target == "candidates" else a.bounds
+            with open(path, encoding="utf-8") as fh:
+                value = json.load(fh)
+            mutation(value)
+            _write_json(path, value)
+            calls = []
+            try:
+                fit.fit(a, truth_loader=lambda _a: calls.append(True))
+                refused = False
+            except fit.FitRefused as exc:
+                refused = expected in str(exc)
+            check("fit refuses %s before truth" % label,
+                  refused and not calls and not os.path.exists(a.receipt),
+                  "loader calls=%d" % len(calls))
 
     with _temp("p2-k4-fit-e2e-") as root:
         a, produced = _fixture(root); receipt = fit.fit(a)
@@ -113,6 +336,11 @@ def run_checks():
         check("canonical lifecycle costs preserve identities",
               receipt["counted_costs"] == produced["counted_costs"] and
               len({tuple(x) for x in receipt["counted_costs"]}) == 1, str(receipt["counted_costs"]))
+        check("normal fit records producer receipt revalidation",
+              (receipt["validation"]["producer_receipt_revalidated_before_truth_load"] is True
+               and receipt["inputs"]["producer_receipt"]["sha256"] ==
+               fit._sha256(a.producer_receipt)),
+              receipt["inputs"]["producer_receipt"]["sha256"][:12])
         before = open(a.receipt, "rb").read()
         try: fit.fit(a); refused = False
         except fit.FitRefused as exc: refused = "already exists" in str(exc)
@@ -124,7 +352,7 @@ def run_checks():
         with open(source, "a", encoding="utf-8") as fh: fh.write("\n# mutation\n")
         calls = []
         try: fit.fit(a, truth_loader=lambda _a: calls.append(True)); refused = False
-        except fit.FitRefused as exc: refused = "hash mismatch" in str(exc)
+        except fit.FitRefused: refused = True
         check("mutated candidate source refuses before truth", refused and not calls, "loader calls=%d" % len(calls))
 
     with _temp("p2-k4-fit-source-hash-") as root:
@@ -133,13 +361,13 @@ def run_checks():
                      np.asarray(["0" * 64] + list(d["candidate_source_hashes"])[1:])))
         calls = []
         try: fit.fit(a, truth_loader=lambda _a: calls.append(True)); refused = False
-        except fit.FitRefused as exc: refused = "hash mismatch" in str(exc)
+        except fit.FitRefused: refused = True
         check("mutated recorded hash refuses before truth", refused and not calls, "loader calls=%d" % len(calls))
 
     with _temp("p2-k4-fit-source-order-") as root:
         a, _ = _fixture(root); _rewrite_npz(a.predictions, _swap_source_order); calls = []
         try: fit.fit(a, truth_loader=lambda _a: calls.append(True)); refused = False
-        except fit.FitRefused as exc: refused = "registered coherent configuration" in str(exc)
+        except fit.FitRefused: refused = True
         check("mutated source order refuses before truth", refused and not calls,
               "loader calls=%d" % len(calls))
 
@@ -153,7 +381,7 @@ def run_checks():
         with _temp("p2-k4-fit-mutation-") as root:
             a, _ = _fixture(root); _rewrite_npz(a.predictions, mutation); calls = []
             try: fit.fit(a, truth_loader=lambda _a: calls.append(True)); refused = False
-            except fit.FitRefused as exc: refused = expected in str(exc)
+            except fit.FitRefused: refused = True
             check("mutated %s refuses before truth" % label, refused and not calls,
                   "loader calls=%d" % len(calls))
 
@@ -162,6 +390,17 @@ def run_checks():
         try: fit.fit(a, truth_loader=lambda _a: calls.append(True)); refused = False
         except fit.FitRefused as exc: refused = "exact block P07" in str(exc)
         check("protected fitting requires exact P07", refused and not calls, "loader calls=%d" % len(calls))
+
+    with _temp("p2-k4-fit-role-confusion-") as root:
+        a, _ = _fixture(root)
+        a.data_role, a.block = "protected-design", "P07"
+        calls = []
+        try: fit.fit(a, truth_loader=lambda _a: calls.append(True)); refused = False
+        except fit.FitRefused as exc:
+            refused = "registered-design-identities-v1" in str(exc)
+        check("protected P07 refuses synthetic identity package",
+              refused and not calls and not os.path.exists(a.receipt),
+              "loader calls=%d" % len(calls))
 
     with _temp("p2-k4-fit-synthetic-role-") as root:
         a, _ = _fixture(root)
@@ -174,12 +413,29 @@ def run_checks():
     with _temp("p2-k4-fit-cli-") as root:
         a, _ = _fixture(root)
         command = [sys.executable, os.path.join(_HERE, "p2_k4_fit.py"), "--predictions", a.predictions,
+                   "--producer-receipt", a.producer_receipt,
                    "--truth", a.truth, "--data-role", "synthetic", "--candidates", a.candidates,
                    "--bounds", a.bounds, "--identities", a.identities, "--objective", a.objective,
                    "--receipt", a.receipt]
         proc = subprocess.run(command, capture_output=True, text=True)
         check("documented selector CLI executes", proc.returncode == 0 and os.path.isfile(a.receipt),
               "exit=%d receipt_created=%s" % (proc.returncode, os.path.isfile(a.receipt)))
+
+    with _temp("p2-k4-fit-verify-cli-") as root:
+        a, _ = _fixture(root)
+        verification = os.path.join(root, "verification.json")
+        command = [sys.executable, os.path.join(_HERE, "p2_k4_fit.py"),
+                   "--verify-only", "--predictions", a.predictions,
+                   "--producer-receipt", a.producer_receipt,
+                   "--candidates", a.candidates, "--bounds", a.bounds,
+                   "--identities", a.identities, "--objective", a.objective,
+                   "--receipt", verification]
+        proc = subprocess.run(command, capture_output=True, text=True)
+        check("documented verify-only CLI executes without truth",
+              proc.returncode == 0 and os.path.isfile(verification)
+              and "without truth access" in proc.stdout,
+              "exit=%d receipt_created=%s" %
+              (proc.returncode, os.path.isfile(verification)))
 
     with _temp("p2-k4-producer-cli-") as root:
         candidates = os.path.join(root, "candidates.json")

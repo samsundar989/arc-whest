@@ -41943,6 +41943,19 @@ role confusion, input replacement, stale recorded hash, truth call before refusa
 or weakened earlier mutation test rejects the repair. A new fresh-context Skeptic
 must accept the exact amended diff; this still authorizes no protected read.
 
+**Repair result, pending independent acceptance.** The selector now reads each
+trusted JSON, NPZ and parsed source from one byte snapshot and carries that
+snapshot's hash into its receipts. The shared identity parser enforces exact root
+and row schemas, non-coercing types and exact ordered P07 seeds/IDs. A protected
+fit requires that registered P07 role before checking the truth path or invoking a
+loader. Candidate registry keys are exact and numeric bounds/candidates reject
+strings and booleans before conversion. The producer reuses the same strict parser.
+The expanded producer-selector suite passes **70/70**, including both reproduced
+Skeptic falsifiers, coupled identity types, extra keys, registry type confusion and
+zero-truth-call spies. Compilation and `git diff --check` pass. No protected truth
+or heavy workload was used. This is implementation evidence, not acceptance; a new
+fresh-context Skeptic and current preflight remain required.
+
 ## 2026-09-11 - WP0E Linux positive and complete mutation aggregate pass
 
 The repaired positive battery ran once as workerq **802** with 12 GiB declared host
