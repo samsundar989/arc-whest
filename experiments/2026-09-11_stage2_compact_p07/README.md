@@ -22,3 +22,10 @@ above, then cancelled while still queued after an independent audit found an
 unbound imported selector dependency. It never started and created no output
 directory. Repair and fresh acceptance of that provenance gap precede the next
 submission; job 891 is not producer evidence.
+
+The repaired production path passed 97/97 scoped checks, current-byte default
+preflight in workerq 893 and a new fresh-context Skeptic. Workerq job **894** is
+the accepted-byte resubmission at high priority with 8 GiB RAM, 2 CPUs and no
+GPU. At submission it was queue position zero, waiting for admission because two
+running jobs reserved 46 GiB of the queue's 53.6 GiB usable RAM. It has no result
+until it terminates and its receipt passes standalone verification.

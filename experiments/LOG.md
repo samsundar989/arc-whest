@@ -42894,3 +42894,14 @@ verdict: `experiments/2026-09-11_stage2_compact_p07/selector_binding_skeptic_ver
 **Knowledge delta:** the no-snapshot P07 producer now has accepted binding for the
 selector bytes it actually executes. The label-free P07 batch may be resubmitted;
 its queue state or partial files will still not count as completion.
+
+### Accepted-byte P07 producer resubmitted — workerq 894
+
+Workerq 894 is the high-priority resubmission of the unchanged registered P07
+command after selector-provenance acceptance. It requests 8 GiB RAM, 2 CPUs and
+no GPU and uses `--no-snapshot` so execution occurs on the exact live bytes that
+the producer locks and records. At submission it was queue position zero, waiting
+because two running jobs already reserved 46 GiB of the queue's 53.6 GiB usable
+RAM. No output directory or label access exists yet. Success requires terminal
+completion plus standalone verification of `predictions.npz` and
+`producer_receipt.json`; queued work is not recorded as complete.
