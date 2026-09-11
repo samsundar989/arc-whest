@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import importlib.metadata
+import json
 import os
 import shutil
 import subprocess
@@ -52,10 +53,14 @@ SHIP = os.path.join(_ROOT, "estimator.py")
 
 _FAILED = []
 _TOTAL = [0]
+_CHECKS = []
+
+RECEIPT_VERSION = 1
 
 
 def check(name, ok, detail=""):
     _TOTAL[0] += 1
+    _CHECKS.append({"name": str(name), "ok": bool(ok)})
     print(f"  {'PASS' if ok else 'FAIL'}  {name:<64}{detail}")
     if not ok:
         _FAILED.append(name)
@@ -64,6 +69,30 @@ def check(name, ok, detail=""):
 def _sha(p):
     with open(p, "rb") as fh:
         return hashlib.sha256(fh.read()).hexdigest()
+
+
+def _write_json_exclusive(path, payload):
+    """Write one complete receipt without replacing prior evidence."""
+    out = os.path.abspath(path)
+    parent = os.path.dirname(out)
+    if not os.path.isdir(parent):
+        raise ValueError(f"receipt parent directory does not exist: {parent}")
+    with open(out, "x", encoding="utf-8", newline="\n") as fh:
+        json.dump(payload, fh, indent=2, sort_keys=True)
+        fh.write("\n")
+
+
+def receipt_provenance():
+    """Exact identities needed to combine independently executed shards."""
+    return {
+        "test_certify_candidate_sha256": _sha(__file__),
+        "certify_candidate_sha256": _sha(os.path.join(_HERE, "certify_candidate.py")),
+        "estimator_sha256": _sha(SHIP),
+        "distributions": {
+            name: importlib.metadata.version(name)
+            for name in ("whestbench", "flopscope")
+        },
+    }
 
 
 # --------------------------------------------------------------------------- #
@@ -303,6 +332,40 @@ def _certify(cand, tmp_json, timeout=7200, extra=()):
 def _failed_lines(stdout):
     return [l.strip() for l in (stdout or "").splitlines()
             if l.strip().startswith("FAIL ")]
+
+
+def mutation_registry():
+    """Machine-readable registry in the same order the monolith executes."""
+    return [
+        {"tag": tag, "title": title, "expected_fail": expect,
+         "section": section, "extra_args": list(extra)}
+        for tag, title, _builder, expect, section, extra in MUTATIONS
+    ]
+
+
+def shard_selection(only_text="", *, skip_positive=False,
+                    positive_only=False):
+    """Validate a shard request before a candidate or temporary file exists."""
+    requested = [t.strip() for t in only_text.split(",") if t.strip()]
+    if len(requested) != len(set(requested)):
+        raise ValueError("--only contains a duplicate mutation tag")
+    known = [m["tag"] for m in mutation_registry()]
+    unknown = sorted(set(requested) - set(known))
+    if unknown:
+        raise ValueError("unknown mutation tag(s): " + ", ".join(unknown))
+    if skip_positive and positive_only:
+        raise ValueError("--skip-positive and --positive-only are mutually exclusive")
+    if skip_positive and not requested:
+        raise ValueError("--skip-positive requires a non-empty --only selection")
+    if positive_only and requested:
+        raise ValueError("--positive-only cannot be combined with --only")
+    selected = known if not requested else [tag for tag in known if tag in requested]
+    if positive_only:
+        selected = []
+    return {
+        "include_positive": not skip_positive,
+        "mutation_tags": selected,
+    }
 
 
 
@@ -665,47 +728,93 @@ def unit_tests():
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--only", default="", help="comma-separated tags, e.g. M3,M7")
+    ap.add_argument("--skip-positive", action="store_true",
+                    help="omit B from a non-empty --only mutation shard")
+    ap.add_argument("--positive-only", action="store_true",
+                    help="run B and no mutations")
+    ap.add_argument("--receipt", default="", metavar="PATH",
+                    help="exclusive-create machine-readable shard receipt")
     a = ap.parse_args()
-    only = {t.strip() for t in a.only.split(",") if t.strip()}
+    try:
+        selection = shard_selection(
+            a.only, skip_positive=a.skip_positive,
+            positive_only=a.positive_only)
+    except ValueError as exc:
+        ap.error(str(exc))
+    if a.receipt:
+        receipt_path = os.path.abspath(a.receipt)
+        if os.path.exists(receipt_path):
+            ap.error("receipt already exists; evidence is never overwritten")
+        if not os.path.isdir(os.path.dirname(receipt_path)):
+            ap.error("receipt parent directory must already exist")
+
+    provenance = receipt_provenance() if a.receipt else None
+    registry = mutation_registry()
+    registry_sha = hashlib.sha256(json.dumps(
+        registry, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    selected_tags = set(selection["mutation_tags"])
+    cases = []
 
     print("WP0C - every certification section must be able to FAIL\n")
     unit_tests()
+    unit_check_count = len(_CHECKS)
     print()
     ship_before = _sha(SHIP)
     tmp = tempfile.mkdtemp(prefix="wp0c_mutants_")
     try:
         # ---- the positive control ----------------------------------------
-        print("B  a CORRECT minimal candidate is not rejected by the battery")
-        ok_path = build_ok(tmp)
-        r = _certify(ok_path, os.path.join(tmp, "ok.json"))
-        fails = _failed_lines(r.stdout)
-        # rc 3 = INCOMPLETE (sections 1 and 10 skipped by --quick), which is the
-        # certifier refusing to call a skip a pass. rc 1 would be a real refusal.
-        check("B: the correct minimal candidate is not REFUSED",
-              r.returncode in (0, 3),
-              f"rc={r.returncode}, {len(fails)} FAIL line(s)"
-              + ("" if not fails else " -- " + fails[0][:60]))
-        check("B: ...and it produced no FAIL line at all", not fails,
-              "; ".join(fails[:2])[:88] or "clean")
-        check("B: the certifier REFUSES to call its skips a pass",
-              r.returncode == 3 and "NOT CHECKED" in (r.stdout or ""),
-              f"rc={r.returncode}")
+        if selection["include_positive"]:
+            print("B  a CORRECT minimal candidate is not rejected by the battery")
+            ok_path = build_ok(tmp)
+            r = _certify(ok_path, os.path.join(tmp, "ok.json"))
+            fails = _failed_lines(r.stdout)
+            # rc 3 = INCOMPLETE (sections 1 and 10 skipped by --quick), which is the
+            # certifier refusing to call a skip a pass. rc 1 would be a real refusal.
+            not_refused = r.returncode in (0, 3)
+            no_fail_lines = not fails
+            skips_named = r.returncode == 3 and "NOT CHECKED" in (r.stdout or "")
+            check("B: the correct minimal candidate is not REFUSED", not_refused,
+                  f"rc={r.returncode}, {len(fails)} FAIL line(s)"
+                  + ("" if not fails else " -- " + fails[0][:60]))
+            check("B: ...and it produced no FAIL line at all", no_fail_lines,
+                  "; ".join(fails[:2])[:88] or "clean")
+            check("B: the certifier REFUSES to call its skips a pass",
+                  skips_named, f"rc={r.returncode}")
+            cases.append({
+                "tag": "B", "kind": "positive",
+                "candidate_sha256": _sha(ok_path),
+                "returncode": r.returncode, "fail_lines": fails,
+                "stdout": r.stdout or "", "stderr": r.stderr or "",
+                "stdout_sha256": hashlib.sha256(
+                    (r.stdout or "").encode("utf-8")).hexdigest(),
+                "stderr_sha256": hashlib.sha256(
+                    (r.stderr or "").encode("utf-8")).hexdigest(),
+                "not_refused": not_refused, "no_fail_lines": no_fail_lines,
+                "skips_named": skips_named,
+            })
 
         # ---- the mutations ------------------------------------------------
         print("\nM  each mutation must fail its NAMED check")
         for tag, title, builder, expect, section, extra in MUTATIONS:
-            if only and tag not in only:
+            if tag not in selected_tags:
                 continue
             try:
                 path = builder(tmp)
             except AssertionError as exc:
                 check(f"M[{tag}]: the injection applies", False, str(exc)[:70])
+                cases.append({"tag": tag, "kind": "mutation",
+                              "title": title, "section": section,
+                              "expected_fail": expect,
+                              "extra_args": list(extra),
+                              "injection_applied": False,
+                              "error": str(exc)})
                 continue
             r = _certify(path, os.path.join(tmp, f"{tag}.json"), extra=extra)
             fails = _failed_lines(r.stdout)
             named = any(expect in f for f in fails)
+            red = r.returncode == 1
             check(f"M[{tag}] (§{section}): {title} -- the battery goes RED",
-                  r.returncode == 1,
+                  red,
                   f"rc={r.returncode}, {len(fails)} FAIL line(s)")
             check(f"M[{tag}]: ...and the NAMED check '{expect[:26]}' is one of them",
                   named,
@@ -713,6 +822,19 @@ def main():
                   "HARNESS FAILURE -- red for another reason: "
                   + ("; ".join(f[6:] for f in fails[:2])[:80] or
                      "(no FAIL line at all)"))
+            cases.append({
+                "tag": tag, "kind": "mutation", "title": title,
+                "section": section, "expected_fail": expect,
+                "extra_args": list(extra), "injection_applied": True,
+                "candidate_sha256": _sha(path),
+                "returncode": r.returncode, "battery_red": red,
+                "named_failure_matched": named, "fail_lines": fails,
+                "stdout": r.stdout or "", "stderr": r.stderr or "",
+                "stdout_sha256": hashlib.sha256(
+                    (r.stdout or "").encode("utf-8")).hexdigest(),
+                "stderr_sha256": hashlib.sha256(
+                    (r.stderr or "").encode("utf-8")).hexdigest(),
+            })
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -720,6 +842,24 @@ def main():
     check("R: estimator.py sha256 unchanged", _sha(SHIP) == ship_before,
           ship_before[:16])
     check("R: the mutant directory is gone", not os.path.exists(tmp), tmp)
+
+    if a.receipt:
+        payload = {
+            "artifact": "certification_mutation_shard",
+            "artifact_version": RECEIPT_VERSION,
+            "provenance": provenance,
+            "mutation_registry": registry,
+            "mutation_registry_sha256": registry_sha,
+            "selection": selection,
+            "cases": cases,
+            "unit_check_count": unit_check_count,
+            "unit_checks_passed": all(c["ok"] for c in _CHECKS[:unit_check_count]),
+            "checks": _CHECKS,
+            "overall_pass": not _FAILED,
+            "workerq_job_id": os.environ.get("WORKERQ_JOB_ID", ""),
+        }
+        _write_json_exclusive(a.receipt, payload)
+        print("  receipt -> " + os.path.abspath(a.receipt))
 
     print()
     if _FAILED:
