@@ -41655,3 +41655,12 @@ completes with a valid exclusive receipt and a measured peak below 20 GiB. Failu
 receipt mismatch, changed logical evidence, or a peak at or above the declaration
 falsifies this intervention. Only then may the twelve mutation shards, exact
 aggregate, current preflight and fresh-context Skeptic acceptance establish WP0E.
+
+**Teardown-order correction before measurement.** The prose above lists clearing
+the accumulator before collection. Installed flopscope keeps live contexts in a
+weak set, so that order would leave the just-closed context's `_op_log` alive when
+`budget_reset()` marks baselines. The required order is: extract the complete row
+and output evidence; drop all heavy references including the context; run
+`gc.collect()` so its weak reference is dead; call `budget_reset()` to clear the
+now-unowned accumulator records; then request the native allocator trim. This is
+the order the workerq gate will test. It changes no candidate call or evidence.
