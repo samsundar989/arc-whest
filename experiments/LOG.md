@@ -41997,3 +41997,26 @@ earlier workerq 628 Full 16/16 remains exact evidence for older HEAD `e1933f0`, 
 for current bytes. Raw job metadata, manifest, worker log and complete PowerShell
 transcript are preserved in the WP0E final-acceptance directory. Fresh-context
 Skeptic review remains the WP0E exit condition.
+
+### Independent acceptance verdicts
+
+The fresh WP0E Skeptic independently recomputed the Linux aggregate and returned
+**ACCEPT**. It matched all four current source hashes, both complete installed
+distribution-byte manifests, the unique workerq IDs and terminal results, the exact
+B plus M1--M12 coverage and every named red mutation. It confirmed each command's
+8,589,934,592-byte `prlimit` and the positive receipt's honest INCOMPLETE evidence
+domains. Limitations retained: workerq used live worktrees rather than authenticated
+snapshots; the aggregate says receipts do not authenticate execution; job 807 saw
+unrelated Stage-2 files change mid-run, while its registered M5 candidate-immutability
+failure remained independently present; child edge JSON was temporary; no Linux
+peak below the cap is claimed; off-shape full-budget behavior is deliberately out of
+scope; this is not candidate deployment certification. No further WP0E run is
+required. Future versions should freeze snapshots and archive the child JSON.
+
+The second fresh Stage-2 verifier Skeptic also returned **ACCEPT** on commit
+`7730248` after reproducing the repaired role and same-byte-snapshot tests. It
+confirmed exact non-coercing P07 identities before protected loading, truth-free
+exclusive verify-only behavior, current source/registry/lifecycle/cost bindings and
+full revalidation before fitting. Its explicit scope limitation is that row hashes
+and operation counts are structurally bound rather than replaying the expensive
+lifecycle producer. That producer is the next label-free execution step.

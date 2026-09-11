@@ -3,14 +3,18 @@
 **Revised September 10, 2026 after worker review at bcca354.** This is the sole active roadmap. Read [CURRENT_STATE](CURRENT_STATE.md), [WORKER_REVIEW](WORKER_REVIEW_2026-09-10.md), VALIDATION.md, GOTCHAS.md and LOG tail. The [prior plan](archive/GAME_PLAN_before_worker_review_2026-09-10.md) is historical. Existing gate verdicts, data restrictions and human approvals retain their scope.
 
 **Execution status.** Stages 0 and 1 are implemented and independently accepted
-within their recorded scopes; Stage 0's current full certifier mutation battery is
-still an acceptance prerequisite, and Stage 1 has no server-residual evidence.
+within their recorded scopes. Stage 0's current positive plus M1--M12 certifier
+battery passed under an enforced 8 GiB Linux cap and its final fresh Skeptic
+returned ACCEPT; current default preflight passed 12/16 with the four Full-only
+deployment steps explicitly skipped. Stage 1 has no server-residual evidence.
 Their exact evidence and limitations are recorded in CURRENT_STATE and the LOG.
 Stage 2 is the active frontier, but its old contract is superseded because P01 was
 already exposed and its promised chronology cannot be reconstructed. Samuel's
 replacement predictions are recorded as three verbatim `I don't know` answers;
 the exact bounded P07 registry is committed and its pre-mint guard has independent
-Skeptic acceptance. The four-arm coherent-K4 mechanism comparison remains first; the compact reference is
+Skeptic acceptance. The standalone Stage-2 producer-receipt verifier passes 70/70
+and has fresh Skeptic ACCEPT after repair of identity-role and same-byte-snapshot
+defects. The four-arm coherent-K4 mechanism comparison remains first; the compact reference is
 the priced baseline for later residual/shared-coordinate questions. Stage 4 remains
 conditional on a measured Stage-2 bottleneck.
 
@@ -71,8 +75,9 @@ Start with tiny metered operation-family checks; then queue label-free 1024 x 16
 **Current entry condition satisfied:** the replacement experiment contract, three
 verbatim `I don't know` human predictions and bounded coefficient/identity registry
 are committed in the LOG. The label-free producer guard has fresh-context Skeptic
-acceptance. Complete the queued current-source preflight and full producer receipt
-verification before fitting or opening P07/P01. Do not reuse the predictions
+acceptance. Current-source preflight and the standalone producer-receipt verifier
+are accepted. Run the label-free P07 producer next, then apply the verifier to its
+immutable output before fitting or opening P07/P01. Do not reuse the predictions
 attached to the rejected placeholder implementation.
 
 The current 08f787b contract has **not been tested as specified**. It promised a freeze before P01, but P01 has three recorded DESIGN reads and informed the proposed range. Manual timestamps cannot establish preregistration chronology. Preserve exposure; reconcile independent job records if available; otherwise mark chronology unresolved. Do not recycle the old contract/predictions as evidence for a changed intervention.

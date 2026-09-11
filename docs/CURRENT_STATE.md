@@ -1,17 +1,21 @@
 # CURRENT_STATE.md — read this first
 
-**Current September 10, 2026, after execution of the reviewed Stage-0/1 repair
-plan.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
+**Current September 11, 2026, after Stage-0 acceptance and before the registered
+Stage-2 label-free producer.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
 archived at `docs/archive/CURRENT_STATE_before_worker_review_2026-09-10.md`.
 
 ## What is proved
 
 Stage 0's production certification, reporting, noise and protected-access repairs
-are implemented and received scoped fresh-context Skeptic **ACCEPT** verdicts.
-Exact package-byte Linux memory evidence passed 24/24 in workerq 599 and the real
-certification consumer binds it. Positive, negative and incomplete-evidence
-fixtures discriminate failures. Final acceptance closure still requires the
-current full certifier mutation battery queued below.
+are implemented and independently **ACCEPTED** within scope. The final WP0E packet
+adds workerq 802's positive battery under an enforced 8 GiB Linux address-space
+limit, twelve one-use mutation jobs 803--814, and a Linux aggregate that reports
+PASS, 13/13 cases and zero errors with exact current source and distribution-byte
+provenance. Workerq 821 passed the current default preflight 12/16 at exact HEAD
+`7730248`; its four Full-only deployment steps remain explicitly skipped. The
+fresh final Skeptic independently recomputed the aggregate and returned ACCEPT.
+This proves the instrument's current mutation coverage, not deployment of a future
+candidate and not full-budget behavior on off-shape networks.
 
 Stage 1's four coherent-K4 arms pass an independent dense oracle (37/37). The
 compact all-history reference passes conformance and independent dense closure and
@@ -24,17 +28,22 @@ implementation, counted cost and lifecycle; it does not prove accuracy, server
 residual headroom, deployability or competitiveness.
 
 The bounded K4 fitting path now generates immutable candidate-specific modules,
-runs canonical lifecycle observations, verifies paths/hashes/configuration/costs,
-and writes immutable selection receipts. Its synthetic producer-to-selector suite
-passes 14/14 and its fresh Skeptic returned **ACCEPT**. No real fit has run yet.
+runs canonical lifecycle observations, and has a standalone truth-free verifier.
+The verifier binds same-byte snapshots, current fitter/producer/generator/arm
+sources, exact registries, lifecycle settings, costs and row/op coverage; protected
+fitting revalidates the same evidence and exact ordered P07 identity role before
+truth access. Its expanded synthetic suite passes 70/70. A first Skeptic rejected
+identity-role confusion and parse/hash races; the repaired commit `7730248` received
+a new fresh-context **ACCEPT**. No production producer or real fit has run yet.
 
 Workerq 628 ran the Full exact-working-byte preflight at HEAD `e1933f0` and passed
 **16/16**, including zero-failure official Phase-2 subprocess smoke. Transcript:
 `experiments/2026-09-10_final_acceptance/preflight-full.log`. It began with only
 that transcript directory untracked; tested source and package bytes were unchanged.
-The separate current full certifier mutation battery remains required because it is
-not part of preflight. Historical workerq 576 failed on obsolete snapshot `fd9173`
-and old package versions; it is preserved as negative evidence, not current proof.
+That remains older-byte deployment evidence. Current workerq 821 passed 12/16 and
+the separate current mutation battery passed as described above. Historical workerq
+576 failed on obsolete snapshot `fd9173` and old package versions; it is preserved
+as negative evidence, not current proof.
 
 ## Active Stage 2 contract
 
@@ -43,11 +52,11 @@ and placeholder-smoke exposure; it is never relabeled untouched. P07 is reusable
 DESIGN. P08 is exhausted. Samuel's three new predictions are all **“I don't know”**,
 which is valid and recorded without interpretation.
 
-The exact coefficient and identity registries are committed, and a fresh-context
-Skeptic accepted the producer's exact-P07 pre-mint guard after independently
-checking all 384 ordered identities and the negative mutations. Produce bounded
-coherent candidates on P07 weights without labels, verify the immutable producer
-receipt, open P07 once through `truth_reads` to freeze the coefficient receipt,
+The exact coefficient and identity registries are committed. Fresh-context Skeptics
+accepted both the producer's exact-P07 pre-mint guard and the repaired standalone
+receipt verifier. The current mutation battery and current-source preflight are now
+complete. Next, produce bounded coherent candidates on P07 weights without labels,
+verify the immutable producer receipt, open P07 through `truth_reads` to freeze the coefficient receipt,
 then run the registered exact/coherent/consumers-only/births-only comparison on exposed P01.
 That DESIGN result must end with synthesis and a fresh Skeptic before any untouched
 DECIDE allocation. No public or vault truth is authorized.
