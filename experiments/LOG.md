@@ -41622,3 +41622,36 @@ Current-byte workerq 754 independently passed default preflight **12/16** at
 `91a21dd`, with the four expected Full-only skips and 3,857.18 MiB peak under a
 5 GiB declaration. Because the instrument will change again, this is valid
 intermediate evidence and not final preflight acceptance for the next commit.
+
+### WP0E correction and prediction before the meter-lifetime intervention
+
+The preceding statement that workerq 753 identified retained flopscope operation
+history as the owner of the Windows memory growth is withdrawn. A fresh-context
+Skeptic inspected flopscope 0.12.1 and demonstrated that `budget_reset()` clears
+session summaries but does not clear a live `BudgetContext._op_log`. Its operation
+records contain metadata rather than operand arrays, so they also cannot by
+themselves explain the observed 7--13 GiB jumps. Jobs 740, 743 and 753 prove the
+memory-growth pattern and falsify the prior boundaries; they do not identify its
+owner. NumPy/CRT allocator retention remains a plausible, unproved mechanism.
+
+**Class:** IMPORTANT instrument work. **Prediction:** Samuel's standing answer for
+all prediction questions in this session is **"I don't know"**. The Builder predicts
+that giving each real-flopscope prediction a fresh explicit `BudgetContext`, then
+preserving its output and complete ledger before dropping that context, clearing
+the session accumulator, collecting unreachable Python objects and requesting a
+best-effort platform allocator trim will finish the positive control below the
+frozen 20 GiB workerq declaration. This direction is SPECULATIVE until measured.
+
+The intervention must retain the same estimator and MLP identities wherever an
+oracle requires repeated state, all inputs, seeds, budgets, dimensions, precision,
+dtype arms, ordering, output comparisons, named predicates and counted-FLOP
+ledgers. It applies between section-5 seeds and section-5b arms as well as edge
+predictions, and may claim a release boundary only on the installed core flopscope
+backend; the client backend cannot reset authoritative server state. Lightweight
+tests must discriminate output hashes, FLOPs, budget exhaustion, RNG/configuration,
+object identity, sequence order, implicit-global history and receipt-policy
+mutations. The execution gate remains a current positive-only workerq run that
+completes with a valid exclusive receipt and a measured peak below 20 GiB. Failure,
+receipt mismatch, changed logical evidence, or a peak at or above the declaration
+falsifies this intervention. Only then may the twelve mutation shards, exact
+aggregate, current preflight and fresh-context Skeptic acceptance establish WP0E.
