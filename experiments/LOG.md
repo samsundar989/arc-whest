@@ -42864,3 +42864,13 @@ race fixtures remain green. Accepted raw artifacts are
 `selector_binding_tests_locked.json` and `.log`; job 892's partial preflight and
 workerq records are preserved separately. A new complete default preflight and a
 new fresh-context Skeptic are still required before P07 resubmission.
+
+Workerq **893** ran the final locked-snapshot bytes with no source snapshot and
+passed the current default preflight: **12/16, 4 SKIPPED**. It completed in
+387.156 seconds at 2,966.6 MiB measured peak RAM under a 5 GiB/2 CPU/no-GPU
+declaration. The skipped steps are the Full-only shape, carrier, deployment and
+official smoke gates; this is current instrument acceptance evidence, not
+candidate deployment evidence. Raw transcript, manifest and queue metadata are
+`locked_selector_preflight.log`, `job893_raw.log`, `job893_manifest.json` and
+`job893_metadata.json` in the compact P07 evidence directory. The fresh Skeptic
+verdict remains the last condition before resubmission.
