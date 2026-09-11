@@ -35,9 +35,11 @@ coarser floor -- and that `docs/VALIDATION.md` section 3.2 had to be rewritten,
 because it assigned invariant 9 a second job that lived entirely inside the
 band that was given away.
 
-The battery is deliberately run on SMALL networks (128x8, 64x4). Detection here
-is a property of the gate arithmetic, not of the shape, and the invariant itself
-already runs the live shapes.
+The battery uses SMALL synthetic prediction arrays (128x8, 64x4). Detection here
+is a property of the gate arithmetic, not of the candidate, package backend or
+shape. The invariant suite separately runs the candidate through four real
+permutation cases, including the live shape, so this canary stays a pure test of
+the amended gate and has no accidental SciPy/backend dependency.
 
 Run:  uv run python local_sim/test_edge_cases_inv9.py [candidate.py]
 """
@@ -61,16 +63,13 @@ import edge_cases as ec  # noqa: E402
 CASES = ((8, 128, 30_806_006_013, 3), (4, 64, 30_806_006_015, 1))
 
 
-def _truth_pair(est, depth, width, seed, k, rng):
-    """The honest (base, perm, P) triple for one case -- no mutation yet."""
-    m = ec.canon(depth, width, seed)
-    base = np.asarray(est.predict(m, ec.BUDGET), dtype=np.float64)
+def _truth_pair(depth, width, seed, k, rng):
+    """An exact deterministic equivariant pair for testing gate arithmetic."""
+    values = np.random.default_rng(seed).standard_normal((depth, width))
+    base = np.abs(values).astype(np.float64) + 0.1
     P = rng.permutation(width)
-    w = [np.array(x) for x in m.weights]
-    w[k] = w[k][:, P]
-    w[k + 1] = w[k + 1][P, :]
-    perm = np.asarray(est.predict(ec.MLP(w, seed=m.seed), ec.BUDGET),
-                      dtype=np.float64)
+    perm = base.copy()
+    perm[k] = base[k][P]
     return base, perm, P
 
 
@@ -293,37 +292,32 @@ def old_bar_floor(base, perm, P, k, depth):
 
 def main():
     cand = sys.argv[1] if len(sys.argv) > 1 else "estimator.py"
-    est = ec.load(cand).Estimator()
-
-    class Ctx:
-        width, depth, flop_budget, seed = 256, 32, ec.BUDGET, 0
-
-    est.setup(Ctx())
 
     denom, denom_src = ec.raw_mse_denominator()
     bar = ec.DRIFT_SHARE * denom
-    print("MUTATION BATTERY for invariant 9 -- candidate: %s" % cand)
+    print("MUTATION BATTERY for invariant 9 -- pure gate fixture; candidate "
+          "permutation is covered separately: %s" % cand)
     print("gate: edge_cases.perm_gate, bar = %.0f%% of raw MSE = %.3e  [%s]\n"
           % (ec.DRIFT_SHARE * 100, bar, denom_src))
 
     rng = np.random.default_rng(30_806_006_100)
     failures, surrendered = [], []
     for depth, width, seed, k in CASES:
-        base, perm, P = _truth_pair(est, depth, width, seed, k, rng)
+        base, perm, P = _truth_pair(depth, width, seed, k, rng)
 
         clean = ec.perm_gate(base, perm, P, k, depth, denom=denom)
         tag = "%dx%d layer %d" % (width, depth, k)
-        print("%s   UNMUTATED   worst %.3e = %.4f%% of bar   %s"
+        print("%s   EXACT FIXTURE   worst %.3e = %.4f%% of bar   %s"
               % (tag, clean["worst"], clean["worst"] / bar * 100,
                  "accepted" if clean["ok"] else "REJECTED"))
         if not clean["ok"]:
-            failures.append("%s: the UNMUTATED prediction was rejected" % tag)
+            failures.append("%s: the exact equivariant fixture was rejected" % tag)
 
         a_star, mse_ref = detection_floor(base, perm, P, k, depth, denom)
         a_old = old_bar_floor(base, perm, P, k, depth)
         print("%s   detection floor: a POSITIONAL distortion is rejected once "
               "it exceeds %.3e = %.4f%% of the row" % (tag, a_star, a_star * 100))
-        print("%s   THE SENSITIVITY SURRENDERED: the retired clause rejected at "
+        print("%s   FIXTURE SENSITIVITY BAND: the retired clause rejected at "
               "%.3e (%.6f%%); the amendment gives away a factor of %.0fx"
               % (tag, a_old, a_old * 100, a_star / max(a_old, 1e-300)))
         surrendered.append((tag, a_old, a_star, a_star / max(a_old, 1e-300)))
@@ -375,7 +369,8 @@ def main():
               "it (LOG, IMPORTANT (instrument), 'what would make me revert').")
         return 1
 
-    print("SURRENDERED SENSITIVITY, and it is the honest cost of the amendment:")
+    print("FIXTURE-SPECIFIC SURRENDERED SENSITIVITY (the historical candidate "
+          "measurement remains in docs/VALIDATION.md):")
     for tag, a_old, a_new, ratio in surrendered:
         print("  %-18s old %.3e -> new %.3e   = %.0fx given away"
               % (tag, a_old, a_new, ratio))
@@ -385,8 +380,8 @@ def main():
           "has been rewritten to record that this\n  instrument no longer "
           "measures it.\n")
     print("BATTERY PASSED -- every deliberate equivariance defect is still "
-          "rejected, the equivariant control is still accepted, and the "
-          "unmutated prediction passes.")
+          "rejected, the equivariant controls are accepted, and the exact "
+          "fixture passes.")
     return 0
 
 

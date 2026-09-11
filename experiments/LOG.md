@@ -41862,3 +41862,15 @@ edge checks, no FAIL line and unchanged production/full-budget routes. Any lost
 candidate permutation case, changed explicit budget, changed predicate, WSL-only
 dependency, invalid receipt, logical failure or memory failure falsifies the
 repair. The twelve mutation shards remain unauthorized until that gate passes.
+
+**Pre-run evidence and independent review.** The focused edge/receipt suite now
+passes 77/77 in both Windows and the minimal WSL environment; the invariant-9
+canary passes in both; the mutation-receipt suite passes 37/37; compilation and
+`git diff --check` pass. A fresh-context Skeptic independently reproduced both
+job-798 causes and found the three-file repair scope-preserving. It also found two
+pre-existing test literals that misstated the historical budget by 10x; both are
+now corrected to 272,000,000,000, and the focused suites were rerun green. Verdict:
+**PROVISIONAL**, solely because the repaired real positive run has not yet passed.
+The review notes that job 798's archived outer receipt did not retain the canary
+child's stderr; its cause is supported by source, environment, stopped stdout and
+an independent exact reproduction rather than that receipt alone.

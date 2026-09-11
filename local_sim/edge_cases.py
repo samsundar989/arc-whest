@@ -268,7 +268,12 @@ def he(depth, width, seed, scale=None):
     return w
 
 
-def check(name, est, mlp, budget=BUDGET, expect_depth=None, rerun=True):
+def check(name, est, mlp, budget=None, expect_depth=None, rerun=True):
+    # Resolve the default at call time.  ``--phase2`` updates the module's
+    # active BUDGET after functions are defined; a default of ``budget=BUDGET``
+    # silently retained the historical Phase-1 value in otherwise-live calls.
+    if budget is None:
+        budget = BUDGET
     try:
         out = _predict(est, mlp, budget)
     except Exception as e:  # a raise on the grader is a zero-scored MLP

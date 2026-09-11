@@ -227,7 +227,7 @@ def main():
             for shape in ((16, 1024),) + tuple(expected_scaled)
         }
         edge.PHASE2_MODE = False
-        edge.BUDGET = 2_720_000_000_000
+        edge.BUDGET = 272_000_000_000
         historical_values = [edge._correctness_budget(depth, width)
                              for depth, width in ((16, 1024),)
                              + tuple(expected_scaled)]
@@ -236,6 +236,29 @@ def main():
               and all(phase2_values[shape] == wanted
                       for shape, wanted in expected_scaled.items())
               and historical_values == [edge.BUDGET] * len(historical_values))
+
+        # Python evaluates default arguments at function definition time.  The
+        # real Phase-2 run caught an older ``budget=BUDGET`` default retaining
+        # 272e9 after main() changed the active world to 2**41.  Exercise the
+        # public check dispatcher itself so schedule helpers cannot mask that
+        # drift again.
+        routed = []
+        original_predict_for_check = edge._predict
+        try:
+            edge._predict = lambda _est, _mlp, budget: (
+                routed.append(budget) or edge.np.zeros((1, 1)))
+
+            class CheckMLP:
+                weights = [edge.np.zeros((1, 1))]
+                width = 1
+
+            edge.BUDGET = cert.BUDGET
+            default_check_ok = edge.check(
+                "runtime budget", object(), CheckMLP(), rerun=False)
+        finally:
+            edge._predict = original_predict_for_check
+        check("check resolves the active Phase2 default budget at call time",
+              default_check_ok and routed == [cert.BUDGET])
         targeted_sources = [inspect.getsource(function) for function in (
             edge._execute_group, edge.inv_layer1, edge.inv_permutation,
             edge.inv_determinism)]
@@ -394,7 +417,7 @@ def main():
         identity_predicts.clear()
         identity_setups.clear()
         edge.PHASE2_MODE = False
-        edge.BUDGET = 2_720_000_000_000
+        edge.BUDGET = 272_000_000_000
         historical_result = edge.inv_determinism(
             primary, IdentityModule, evidence=[])
         check("historical determinism keeps its exact unscaled schedule",
