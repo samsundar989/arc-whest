@@ -63,7 +63,7 @@ def _distribution_manifest_errors(provenance, label):
     """Validate the deterministic byte manifests embedded in provenance."""
     errors = []
     for key in ("test_certify_candidate_sha256", "certify_candidate_sha256",
-                "estimator_sha256"):
+                "edge_cases_sha256", "estimator_sha256"):
         if not isinstance(provenance, dict) or not _is_sha(provenance.get(key)):
             errors.append(f"{label}: {key} is absent or invalid")
     versions = provenance.get("distributions") if isinstance(provenance, dict) else None
@@ -187,6 +187,7 @@ def _aggregate_payloads(payloads, *, current_provenance=None,
         repository_checks = []
         for required_check in (
             "R: estimator.py sha256 unchanged",
+            "R: edge_cases.py sha256 unchanged",
             "R: the mutant directory is gone",
             "R: receipt provenance unchanged across execution",
         ):

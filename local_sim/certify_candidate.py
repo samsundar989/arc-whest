@@ -58,6 +58,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -86,6 +87,18 @@ SINGLE_ARRAY_CAP = 4 * (1 << 30)
 #: argparse can offer the choices before `lifecycle_eval` is imported.
 _TWIN_MODES = ("f32", "f64", "f64_readonly", "f64_listconstructed")
 _TWIN_DEFAULT = "f64_readonly"
+
+# Must match ``edge_cases.GROUP_REGISTRY``.  Keeping the consumer's required
+# coverage here prevents the producer from certifying an accidental omission in
+# its own registry.
+EDGE_GROUP_REGISTRY = (
+    ("normal", 1), ("degenerate", 3), ("dynamic_range", 4),
+    ("seed_extremes", 5), ("shape_generality", 5), ("budget_edges", 5),
+    ("immutability", 1), ("layer1", 1), ("permutation", 1),
+    ("budget_monotone", 1), ("determinism", 1), ("seed_hygiene", 1),
+    ("gt_noise", 1),
+)
+EDGE_GROUP_RECEIPT_VERSION = 1
 
 _FAILED = []
 _SKIPPED = []
@@ -251,6 +264,93 @@ def _load(path):
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
+
+
+def _is_sha256(value):
+    return (isinstance(value, str) and len(value) == 64
+            and all(c in "0123456789abcdef" for c in value))
+
+
+def validate_edge_group_receipt(payload, *, group, expected_count,
+                                candidate, candidate_sha256,
+                                edge_cases_sha256, weights_mode):
+    """Strictly validate one allocator-bounded edge-suite worker receipt."""
+    errors = []
+    if not isinstance(payload, dict):
+        return ["receipt is not a JSON object"]
+    expected_keys = {
+        "artifact", "artifact_version", "candidate",
+        "candidate_sha256_before", "candidate_sha256_after",
+        "edge_cases_sha256", "group_registry", "world", "group",
+        "expected_result_count", "results", "passed", "all_passed",
+    }
+    if set(payload) != expected_keys:
+        errors.append("receipt schema differs")
+    if payload.get("artifact") != "edge_cases_group":
+        errors.append("artifact identity differs")
+    if type(payload.get("artifact_version")) is not int or payload.get(
+            "artifact_version") != EDGE_GROUP_RECEIPT_VERSION:
+        errors.append("artifact version differs")
+    if payload.get("group") != group:
+        errors.append("group identity differs")
+    if payload.get("candidate") != candidate:
+        errors.append("candidate path differs")
+    for key in ("candidate_sha256_before", "candidate_sha256_after"):
+        value = payload.get(key)
+        if not _is_sha256(value) or value != candidate_sha256:
+            errors.append(key + " differs")
+    value = payload.get("edge_cases_sha256")
+    if not _is_sha256(value) or value != edge_cases_sha256:
+        errors.append("edge_cases.py hash differs")
+    registry = payload.get("group_registry")
+    expected_registry = [
+        {"group": name, "expected_result_count": count}
+        for name, count in EDGE_GROUP_REGISTRY
+    ]
+    registry_valid = (
+        isinstance(registry, list) and len(registry) == len(expected_registry)
+        and all(isinstance(row, dict)
+                and set(row) == {"group", "expected_result_count"}
+                and isinstance(row.get("group"), str)
+                and type(row.get("expected_result_count")) is int
+                for row in registry)
+    )
+    if not registry_valid or registry != expected_registry:
+        errors.append("group registry differs")
+
+    expected_world = {
+        "phase2": True, "real_flopscope": True,
+        "weights_mode": weights_mode,
+        "width": WIDTH, "depth": DEPTH, "budget": BUDGET,
+    }
+    world = payload.get("world")
+    if not isinstance(world, dict) or set(world) != set(expected_world):
+        errors.append("world schema differs")
+    else:
+        for key, wanted in expected_world.items():
+            got = world.get(key)
+            if type(got) is not type(wanted) or got != wanted:
+                errors.append("world field %s differs" % key)
+
+    count = payload.get("expected_result_count")
+    if type(count) is not int or count != expected_count:
+        errors.append("expected result count differs")
+    results = payload.get("results")
+    if (not isinstance(results, list) or len(results) != expected_count
+            or not all(type(value) is bool for value in results)):
+        errors.append("results are not the exact boolean result vector")
+        results = None
+    passed = payload.get("passed")
+    if type(passed) is not int:
+        errors.append("passed count is not an integer")
+    elif results is not None and passed != sum(results):
+        errors.append("passed count differs from results")
+    all_passed = payload.get("all_passed")
+    if type(all_passed) is not bool:
+        errors.append("all_passed is not a boolean")
+    elif results is not None and all_passed != all(results):
+        errors.append("all_passed differs from results")
+    return errors
 
 
 class _Ctx:
@@ -821,17 +921,87 @@ def main() -> int:
     # measured at a shape the competition stopped grading on 2026-08-21 and in a
     # dtype the grading server has never handed anyone. `--phase2
     # --real-flopscope` puts it in the world that decides the score.
-    edge_argv = [rel, "--phase2", "--real-flopscope",
-                 "--weights-mode", twin_mode_for_edge]
-    p = _uvpy(os.path.join(_HERE, "edge_cases.py"), *edge_argv, timeout=5400)
-    tail = [l for l in (p.stdout or "").splitlines() if l.strip()][-1:] or [""]
+    edge_path = os.path.join(_HERE, "edge_cases.py")
+    edge_sha = _sha(edge_path)
+    edge_workers = []
+    edge_errors = []
+    edge_passed = 0
+    edge_observed = 0
+    with tempfile.TemporaryDirectory(prefix="certify_edge_groups_") as edge_tmp:
+        for edge_group, edge_expected in EDGE_GROUP_REGISTRY:
+            edge_receipt_path = os.path.join(edge_tmp, edge_group + ".json")
+            edge_argv = [rel, "--phase2", "--real-flopscope",
+                         "--weights-mode", twin_mode_for_edge,
+                         "--group", edge_group,
+                         "--receipt", edge_receipt_path]
+            try:
+                p = _uvpy(edge_path, *edge_argv, timeout=1800)
+                rc = p.returncode
+                stdout, stderr = p.stdout or "", p.stderr or ""
+            except subprocess.TimeoutExpired as exc:
+                rc = -1
+                stdout = exc.stdout or ""
+                stderr = exc.stderr or ""
+                edge_errors.append(edge_group + ": worker timed out")
+            except Exception as exc:
+                rc = -1
+                stdout = ""
+                stderr = "%s: %s" % (type(exc).__name__, exc)
+                edge_errors.append(edge_group + ": worker launch failed")
+            if isinstance(stdout, bytes):
+                stdout = stdout.decode("utf-8", errors="replace")
+            if isinstance(stderr, bytes):
+                stderr = stderr.decode("utf-8", errors="replace")
+            lines = [line for line in stdout.splitlines() if line.strip()]
+            worker_tail = lines[-1] if lines else ""
+            payload = None
+            if os.path.isfile(edge_receipt_path):
+                try:
+                    with open(edge_receipt_path, encoding="utf-8") as fh:
+                        payload = json.load(fh)
+                except (OSError, ValueError) as exc:
+                    edge_errors.append(edge_group + ": invalid receipt: " + str(exc))
+            else:
+                edge_errors.append(edge_group + ": receipt is absent")
+            receipt_errors = validate_edge_group_receipt(
+                payload, group=edge_group, expected_count=edge_expected,
+                candidate=rel, candidate_sha256=sha_before,
+                edge_cases_sha256=edge_sha, weights_mode=twin_mode_for_edge)
+            edge_errors.extend(edge_group + ": " + err for err in receipt_errors)
+            if isinstance(payload, dict):
+                results = payload.get("results")
+                if (isinstance(results, list)
+                        and all(type(value) is bool for value in results)):
+                    edge_passed += sum(results)
+                    edge_observed += len(results)
+            if rc != 0:
+                edge_errors.append(edge_group + ": worker rc=%s" % rc)
+            edge_workers.append({
+                "group": edge_group,
+                "expected_result_count": edge_expected,
+                "returncode": rc,
+                "tail": worker_tail,
+                "stdout_sha256": hashlib.sha256(stdout.encode("utf-8")).hexdigest(),
+                "stderr_sha256": hashlib.sha256(stderr.encode("utf-8")).hexdigest(),
+                "receipt": payload,
+                "receipt_errors": receipt_errors,
+            })
+    edge_total = sum(count for _, count in EDGE_GROUP_REGISTRY)
+    edge_ok = not edge_errors and edge_observed == edge_total and edge_passed == edge_total
+    tail = "%d/%d checks passed" % (edge_passed, edge_total)
     check("3: the invariant suite passes on THIS candidate, at the LIVE shape "
-          "and in the grader's dtype", p.returncode == 0,
-          tail[0][:60] + f"   [{' '.join(edge_argv[1:])}]")
+          "and in the grader's dtype", edge_ok,
+          tail[:60] + ("" if not edge_errors else
+                       "   " + "; ".join(edge_errors)[:120]))
     report["sections"]["invariants"] = {
-        "returncode": p.returncode, "tail": tail[0],
+        "returncode": 0 if edge_ok else 1, "tail": tail,
         "world": {"phase2": True, "real_flopscope": True,
-                  "weights_mode": twin_mode_for_edge},
+                   "weights_mode": twin_mode_for_edge},
+        "edge_cases_sha256": edge_sha,
+        "group_registry": [{"group": group, "expected_result_count": count}
+                           for group, count in EDGE_GROUP_REGISTRY],
+        "workers": edge_workers,
+        "worker_errors": edge_errors,
         # SKEPTIC (2026-09-03): the report recorded only a returncode and a tail
         # line, so it did not say WHICH denominator invariant 9 ran against.
         # `ARC_WHEST_RAW_MSE` is inherited from the environment and can only

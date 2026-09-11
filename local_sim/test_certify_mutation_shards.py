@@ -70,6 +70,7 @@ def _receipt(provenance, registry, tags, *, include_positive=False,
             *[{"name": name, "ok": True}
               for name in battery.UNIT_CHECK_NAMES],
             {"name": "R: estimator.py sha256 unchanged", "ok": True},
+            {"name": "R: edge_cases.py sha256 unchanged", "ok": True},
             {"name": "R: the mutant directory is gone", "ok": True},
             {"name": "R: receipt provenance unchanged across execution",
              "ok": True},
@@ -103,7 +104,8 @@ def main():
     provenance = {
         "test_certify_candidate_sha256": "1" * 64,
         "certify_candidate_sha256": "2" * 64,
-        "estimator_sha256": "3" * 64,
+        "edge_cases_sha256": "3" * 64,
+        "estimator_sha256": "6" * 64,
         "distributions": {"whestbench": "0.16.1", "flopscope": "0.12.1"},
         "distribution_bytes": {
             "whestbench": _manifest("0.16.1", "whestbench", "4"),
@@ -168,7 +170,7 @@ def main():
           all(row["unit_check_count"] == len(battery.UNIT_CHECK_NAMES)
               and [c["name"] for c in row["unit_checks"]]
               == list(battery.UNIT_CHECK_NAMES)
-              and len(row["repository_checks"]) == 3
+              and len(row["repository_checks"]) == 4
               for row in good["shards"]))
 
     adversarial = []

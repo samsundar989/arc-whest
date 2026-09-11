@@ -42,7 +42,9 @@ INVARIANTS (added 2026-08-06). The cases above ask "does it survive?"; these ask
 Run: uv run python local_sim/edge_cases.py
 """
 
+import hashlib
 import importlib.util
+import json
 import os
 import sys
 
@@ -74,6 +76,42 @@ PD, PW = 32, 256
 #: which is how a defect reached five submission slots on 2026-09-05.
 WEIGHTS_BACKEND = "numpy"
 WEIGHTS_MODE = "f64_readonly"
+
+# Frozen execution partition used by ``certify_candidate.py`` to bound the
+# allocator lifetime of the live Phase-2 suite.  The ordinary no-argument suite
+# still executes these groups in this order with one Estimator, exactly as it
+# did before the partition existed.
+GROUP_REGISTRY = (
+    ("normal", 1),
+    ("degenerate", 3),
+    ("dynamic_range", 4),
+    ("seed_extremes", 5),
+    ("shape_generality", 5),
+    ("budget_edges", 5),
+    ("immutability", 1),
+    ("layer1", 1),
+    ("permutation", 1),
+    ("budget_monotone", 1),
+    ("determinism", 1),
+    ("seed_hygiene", 1),
+    ("gt_noise", 1),
+)
+GROUP_RECEIPT_VERSION = 1
+
+
+def _sha(path):
+    with open(path, "rb") as fh:
+        return hashlib.sha256(fh.read()).hexdigest()
+
+
+def _write_json_exclusive(path, payload):
+    out = os.path.abspath(path)
+    parent = os.path.dirname(out)
+    if not os.path.isdir(parent):
+        raise ValueError("receipt parent directory does not exist: " + parent)
+    with open(out, "x", encoding="utf-8", newline="\n") as fh:
+        json.dump(payload, fh, indent=2, sort_keys=True)
+        fh.write("\n")
 
 
 def _weights(arrays):
@@ -156,6 +194,79 @@ def check(name, est, mlp, budget=BUDGET, expect_depth=None, rerun=True):
     return ok
 
 
+def _execute_group(group, est, est_mod):
+    """Execute one frozen group and return its existing result booleans."""
+    results = []
+    if group == "normal":
+        print("1. NORMAL CASE")
+        results.append(check(f"he {PW}x{PD}", est,
+                             MLP(he(PD, PW, 1), seed=7)))
+    elif group == "degenerate":
+        print("\n2. DEGENERATE PRUNING (whole layers pushed below tau)")
+        for s, label in ((0.02, "layer 5 scaled 0.02"),
+                         (0.001, "layer 5 scaled 0.001")):
+            results.append(check(label, est,
+                                 MLP(he(PD, PW, 2, {5: s}), seed=11)))
+        w = he(PD, PW, 3)
+        w[7] = (w[7] * np.float32(0.0)).copy()
+        results.append(check("layer 7 identically zero", est,
+                             MLP(w, seed=13)))
+    elif group == "dynamic_range":
+        print("\n3. EXTREME DYNAMIC RANGE")
+        for s, label in ((100.0, "layer 12 scaled 100x"),
+                         (1e-3, "layer 12 scaled 1e-3"),
+                         (1e4, "layer 12 scaled 1e4")):
+            results.append(check(label, est,
+                                 MLP(he(PD, PW, 4, {12: s}), seed=17)))
+        w = he(PD, PW, 5).copy()
+        w[3] = w[3] + np.float32(2.0) * np.float32(np.sqrt(2.0 / PW))
+        results.append(check("layer 3 mean-shifted (all on)", est,
+                             MLP(w, seed=19)))
+    elif group == "seed_extremes":
+        print("\n4. SEED EXTREMES (the rng contract)")
+        base = he(PD, PW, 6)
+        for sd in (0, 1, 2**31 - 1, 2**63 - 1,
+                   12345678901234567890 % (2**64)):
+            results.append(check(f"seed {sd}", est, MLP(base, seed=sd)))
+    elif group == "shape_generality":
+        print("\n5. SHAPE GENERALITY (calibration must disable itself off-width)")
+        for d, wd in ((2, 256), (8, 128), (32, 64), (4, 256), (64, 256)):
+            results.append(check(f"depth {d} x width {wd}", est,
+                                 MLP(he(d, wd, 8), seed=23)))
+    elif group == "budget_edges":
+        print("\n6. BUDGET EDGES (the analytic fallback path)")
+        m = MLP(he(PD, PW, 9), seed=29)
+        for b, label in ((0, "budget 0"), (1, "budget 1"),
+                         (10**7, "budget 1e7 (below min N)"),
+                         (10**9, "budget 1e9"),
+                         (10 * BUDGET, "budget 10x")):
+            results.append(check(label, est, m, budget=b))
+    elif group == "immutability":
+        print("\n7. GRADER-ARRAY IMMUTABILITY (weights must be untouched)")
+        m = MLP(he(PD, PW, 10), seed=31)
+        before = [w.copy() for w in m.weights]
+        est.predict(m, BUDGET)
+        same = all(np.array_equal(a, b) for a, b in zip(before, m.weights))
+        print(f"  {'input weights unmodified':<34} "
+              f"{'ok' if same else 'MUTATED INPUT'}")
+        results.append(same)
+    elif group == "layer1":
+        results += inv_layer1(est)
+    elif group == "permutation":
+        results += inv_permutation(est)
+    elif group == "budget_monotone":
+        results += inv_budget_monotone(est, est_mod)
+    elif group == "determinism":
+        results += inv_determinism(est, est_mod)
+    elif group == "seed_hygiene":
+        results += inv_seed_hygiene()
+    elif group == "gt_noise":
+        results += inv_gt_noise_reporting()
+    else:  # argparse prevents this; retain a fail-closed programmatic boundary.
+        raise ValueError("unknown edge-case group: " + str(group))
+    return results
+
+
 def main():
     global BUDGET, PD, PW, WEIGHTS_BACKEND, WEIGHTS_MODE
     import argparse
@@ -173,7 +284,16 @@ def main():
     ap.add_argument("--weights-mode", default="f64_readonly",
                     choices=("f32", "f64", "f64_readonly", "f64_listconstructed"),
                     help="which grader-twin arm --real-flopscope uses")
+    ap.add_argument("--group", choices=tuple(tag for tag, _ in GROUP_REGISTRY),
+                    help="run one frozen allocator-bounded group")
+    ap.add_argument("--receipt", default="", metavar="PATH",
+                    help="exclusive-create a machine-readable group receipt; "
+                         "requires --group")
     a = ap.parse_args()
+    if a.receipt and not a.group:
+        ap.error("--receipt requires --group")
+    if a.receipt and os.path.exists(os.path.abspath(a.receipt)):
+        ap.error("receipt already exists; evidence is never overwritten")
 
     if a.phase2:
         import official_config as _oc
@@ -188,6 +308,8 @@ def main():
           + ("   [LIVE PHASE-2 WORLD]" if a.phase2 and a.real_flopscope
              else "   [HISTORICAL DEFAULT -- not the graded world]"))
 
+    candidate_path = os.path.abspath(os.path.join(_ROOT, a.candidate))
+    candidate_sha_before = _sha(candidate_path)
     est_mod = load(a.candidate)
     est = est_mod.Estimator()
 
@@ -208,55 +330,46 @@ def main():
     print(f"candidate: tau={_b['_PRUNE_TAU']}  target C/B={_b['_TARGET_CB']}  "
           f"chunk={_b['_CHUNK']}\n")
 
+    selected = [a.group] if a.group else [tag for tag, _ in GROUP_REGISTRY]
     results = []
-
-    print("1. NORMAL CASE")
-    results.append(check(f"he {PW}x{PD}", est, MLP(he(PD, PW, 1), seed=7)))
-
-    print("\n2. DEGENERATE PRUNING (whole layers pushed below tau)")
-    # A strongly negative-biased layer drives the next layer's alpha very low.
-    for s, label in ((0.02, "layer 5 scaled 0.02"), (0.001, "layer 5 scaled 0.001")):
-        results.append(check(label, est, MLP(he(PD, PW, 2, {5: s}), seed=11)))
-    w = he(PD, PW, 3)
-    w[7] = (w[7] * np.float32(0.0)).copy()  # an exactly zero layer: sigma -> 0
-    results.append(check("layer 7 identically zero", est, MLP(w, seed=13)))
-
-    print("\n3. EXTREME DYNAMIC RANGE")
-    for s, label in ((100.0, "layer 12 scaled 100x"), (1e-3, "layer 12 scaled 1e-3"),
-                     (1e4, "layer 12 scaled 1e4")):
-        results.append(check(label, est, MLP(he(PD, PW, 4, {12: s}), seed=17)))
-    w = he(PD, PW, 5)
-    w = w.copy()
-    w[3] = w[3] + np.float32(2.0) * np.float32(np.sqrt(2.0 / PW))  # strong positive bias
-    results.append(check("layer 3 mean-shifted (all on)", est, MLP(w, seed=19)))
-
-    print("\n4. SEED EXTREMES (the rng contract)")
-    base = he(PD, PW, 6)
-    for sd in (0, 1, 2**31 - 1, 2**63 - 1, 12345678901234567890 % (2**64)):
-        results.append(check(f"seed {sd}", est, MLP(base, seed=sd)))
-
-    print("\n5. SHAPE GENERALITY (calibration must disable itself off-width)")
-    for d, wd in ((2, 256), (8, 128), (32, 64), (4, 256), (64, 256)):
-        results.append(check(f"depth {d} x width {wd}", est, MLP(he(d, wd, 8), seed=23)))
-
-    print("\n6. BUDGET EDGES (the analytic fallback path)")
-    m = MLP(he(PD, PW, 9), seed=29)
-    for b, label in ((0, "budget 0"), (1, "budget 1"), (10**7, "budget 1e7 (below min N)"),
-                     (10**9, "budget 1e9"), (10 * BUDGET, "budget 10x")):
-        results.append(check(label, est, m, budget=b))
-
-    print("\n7. GRADER-ARRAY IMMUTABILITY (weights must be untouched)")
-    m = MLP(he(PD, PW, 10), seed=31)
-    before = [w.copy() for w in m.weights]
-    est.predict(m, BUDGET)
-    same = all(np.array_equal(a, b) for a, b in zip(before, m.weights))
-    print(f"  {'input weights unmodified':<34} {'ok' if same else 'MUTATED INPUT'}")
-    results.append(same)
-
-    results += invariants(est, est_mod)
+    group_rows = []
+    expected_by_group = dict(GROUP_REGISTRY)
+    for group in selected:
+        group_results = _execute_group(group, est, est_mod)
+        results += group_results
+        group_rows.append({
+            "group": group,
+            "expected_result_count": expected_by_group[group],
+            "results": group_results,
+        })
 
     n_ok = sum(1 for r in results if r)
     print(f"\n{n_ok}/{len(results)} checks passed")
+    if a.receipt:
+        candidate_sha_after = _sha(candidate_path)
+        _write_json_exclusive(a.receipt, {
+            "artifact": "edge_cases_group",
+            "artifact_version": GROUP_RECEIPT_VERSION,
+            "candidate": os.path.relpath(candidate_path, _ROOT).replace("\\", "/"),
+            "candidate_sha256_before": candidate_sha_before,
+            "candidate_sha256_after": candidate_sha_after,
+            "edge_cases_sha256": _sha(__file__),
+            "group_registry": [
+                {"group": group, "expected_result_count": count}
+                for group, count in GROUP_REGISTRY
+            ],
+            "world": {
+                "phase2": bool(a.phase2),
+                "real_flopscope": bool(a.real_flopscope),
+                "weights_mode": WEIGHTS_MODE if a.real_flopscope else "numpy_float32",
+                "width": int(PW), "depth": int(PD), "budget": int(BUDGET),
+            },
+            "group": a.group,
+            "expected_result_count": expected_by_group[a.group],
+            "results": results,
+            "passed": n_ok,
+            "all_passed": n_ok == len(results),
+        })
     return 0 if n_ok == len(results) else 1
 
 

@@ -50,6 +50,7 @@ sys.path[:] = [p for p in sys.path if os.path.abspath(p or ".") != _HERE] + [_RO
 import certify_candidate as cc  # noqa: E402  (after the sys.path fix)
 
 SHIP = os.path.join(_ROOT, "estimator.py")
+EDGE_CASES = os.path.join(_HERE, "edge_cases.py")
 
 _FAILED = []
 _TOTAL = [0]
@@ -143,6 +144,7 @@ def receipt_provenance():
     return {
         "test_certify_candidate_sha256": _sha(__file__),
         "certify_candidate_sha256": _sha(os.path.join(_HERE, "certify_candidate.py")),
+        "edge_cases_sha256": _sha(EDGE_CASES),
         "estimator_sha256": _sha(SHIP),
         "distributions": {name: importlib.metadata.version(name)
                           for name in ("whestbench", "flopscope")},
@@ -842,6 +844,7 @@ def main():
               f"expected {len(UNIT_CHECK_NAMES)}, observed {unit_check_count}")
     print()
     ship_before = _sha(SHIP)
+    edge_cases_before = _sha(EDGE_CASES)
     tmp = tempfile.mkdtemp(prefix="wp0c_mutants_")
     try:
         # ---- the positive control ----------------------------------------
@@ -923,12 +926,14 @@ def main():
     print("\nR  the repository was not modified")
     check("R: estimator.py sha256 unchanged", _sha(SHIP) == ship_before,
           ship_before[:16])
+    check("R: edge_cases.py sha256 unchanged",
+          _sha(EDGE_CASES) == edge_cases_before, edge_cases_before[:16])
     check("R: the mutant directory is gone", not os.path.exists(tmp), tmp)
     if a.receipt:
         provenance_after = receipt_provenance()
         check("R: receipt provenance unchanged across execution",
               provenance_after == provenance,
-              "test, certifier, estimator, and installed package bytes")
+              "test, certifier, edge suite, estimator, and installed package bytes")
 
     if a.receipt:
         payload = {
