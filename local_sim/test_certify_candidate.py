@@ -924,6 +924,11 @@ def main():
     check("R: estimator.py sha256 unchanged", _sha(SHIP) == ship_before,
           ship_before[:16])
     check("R: the mutant directory is gone", not os.path.exists(tmp), tmp)
+    if a.receipt:
+        provenance_after = receipt_provenance()
+        check("R: receipt provenance unchanged across execution",
+              provenance_after == provenance,
+              "test, certifier, estimator, and installed package bytes")
 
     if a.receipt:
         payload = {

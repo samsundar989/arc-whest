@@ -71,6 +71,8 @@ def _receipt(provenance, registry, tags, *, include_positive=False,
               for name in battery.UNIT_CHECK_NAMES],
             {"name": "R: estimator.py sha256 unchanged", "ok": True},
             {"name": "R: the mutant directory is gone", "ok": True},
+            {"name": "R: receipt provenance unchanged across execution",
+             "ok": True},
         ],
         "overall_pass": True,
         "workerq_job_id": workerq_job_id,
@@ -166,8 +168,49 @@ def main():
           all(row["unit_check_count"] == len(battery.UNIT_CHECK_NAMES)
               and [c["name"] for c in row["unit_checks"]]
               == list(battery.UNIT_CHECK_NAMES)
-              and len(row["repository_checks"]) == 2
+              and len(row["repository_checks"]) == 3
               for row in good["shards"]))
+
+    adversarial = []
+    bad = copy.deepcopy(wrapped)
+    bad[0]["payload"]["artifact_version"] = True
+    adversarial.append(("boolean artifact version refuses", bad,
+                        "wrong artifact version"))
+
+    bad = copy.deepcopy(wrapped)
+    bad[0]["payload"]["provenance"]["distribution_bytes"]["whestbench"][
+        "files"][0]["size"] = True
+    adversarial.append(("boolean package file size refuses", bad,
+                        "manifest rows are malformed"))
+
+    bad = copy.deepcopy(wrapped)
+    bad[1]["payload"]["cases"][0]["returncode"] = True
+    adversarial.append(("boolean mutation return code refuses", bad,
+                        "required red verdict"))
+
+    bad = copy.deepcopy(wrapped)
+    bad[1]["payload"]["selection"]["mutation_tags"][0] = {"tag": tags[0]}
+    adversarial.append(("object selected tag refuses without raising", bad,
+                        "selection fields are malformed"))
+
+    bad = copy.deepcopy(wrapped)
+    bad[1]["payload"]["cases"][0]["tag"] = [tags[0]]
+    adversarial.append(("array case tag refuses without raising", bad,
+                        "case tag must be a string"))
+
+    for name, bad, expected_error in adversarial:
+        out = agg.aggregate_payloads(
+            bad, current_provenance=provenance, current_registry=registry)
+        check(name, out["accepted"] is False
+              and out["status"] == "REFUSED"
+              and any(expected_error in error for error in out["errors"]))
+
+    out = agg.aggregate_payloads(
+        [[]], current_provenance=provenance, current_registry=registry)
+    check("malformed top-level payload returns REFUSED instead of raising",
+          out["accepted"] is False and out["status"] == "REFUSED"
+          and any("malformed receipt payload" in error
+                  for error in out["errors"]))
 
     bad = copy.deepcopy(wrapped)
     bad[-1]["payload"]["cases"].pop()

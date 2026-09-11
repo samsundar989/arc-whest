@@ -44,6 +44,14 @@ def _text_sha(value):
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
+def _is_json_int(value):
+    return type(value) is int
+
+
+def _is_json_bool(value):
+    return type(value) is bool
+
+
 def _raw_streams_valid(case):
     stdout, stderr = case.get("stdout"), case.get("stderr")
     return (isinstance(stdout, str) and isinstance(stderr, str)
@@ -74,21 +82,27 @@ def _distribution_manifest_errors(provenance, label):
         valid_rows = all(
             isinstance(row, dict)
             and isinstance(row.get("path"), str) and bool(row["path"])
-            and isinstance(row.get("size"), int) and row["size"] >= 0
+            and _is_json_int(row.get("size")) and row["size"] >= 0
             and _is_sha(row.get("sha256"))
             for row in files
         )
         paths = [row.get("path") for row in files if isinstance(row, dict)]
-        if (not valid_rows or paths != sorted(paths)
-                or len(paths) != len(set(paths))):
+        if not valid_rows:
+            errors.append(f"{label}: {name} byte manifest rows are malformed")
+            continue
+        if paths != sorted(paths) or len(paths) != len(set(paths)):
             errors.append(f"{label}: {name} byte manifest rows are malformed")
             continue
         raw = json.dumps(files, sort_keys=True, separators=(",", ":"))
-        if manifest.get("version") != versions.get(name):
+        if (not isinstance(manifest.get("version"), str)
+                or not isinstance(versions.get(name), str)
+                or manifest.get("version") != versions.get(name)):
             errors.append(f"{label}: {name} manifest version mismatch")
-        if manifest.get("file_count") != len(files):
+        if (not _is_json_int(manifest.get("file_count"))
+                or manifest.get("file_count") != len(files)):
             errors.append(f"{label}: {name} manifest file count mismatch")
-        if manifest.get("total_bytes") != sum(row["size"] for row in files):
+        if (not _is_json_int(manifest.get("total_bytes"))
+                or manifest.get("total_bytes") != sum(row["size"] for row in files)):
             errors.append(f"{label}: {name} manifest byte count mismatch")
         if manifest.get("manifest_sha256") != hashlib.sha256(
                 raw.encode("utf-8")).hexdigest():
@@ -96,8 +110,8 @@ def _distribution_manifest_errors(provenance, label):
     return errors
 
 
-def aggregate_payloads(payloads, *, current_provenance=None,
-                       current_registry=None):
+def _aggregate_payloads(payloads, *, current_provenance=None,
+                        current_registry=None):
     """Pure validator used by the CLI and focused mutation tests."""
     provenance = (battery.receipt_provenance() if current_provenance is None
                   else current_provenance)
@@ -138,7 +152,9 @@ def aggregate_payloads(payloads, *, current_provenance=None,
             workerq_job_ids.add(workerq_job_id)
         if receipt.get("artifact") != "certification_mutation_shard":
             errors.append(f"{label}: wrong artifact kind")
-        if receipt.get("artifact_version") != battery.RECEIPT_VERSION:
+        artifact_version = receipt.get("artifact_version")
+        if (not _is_json_int(artifact_version)
+                or artifact_version != battery.RECEIPT_VERSION):
             errors.append(f"{label}: wrong artifact version")
         errors.extend(_distribution_manifest_errors(
             receipt.get("provenance"), label))
@@ -156,7 +172,8 @@ def aggregate_payloads(payloads, *, current_provenance=None,
             errors.append(f"{label}: at least one outer battery check failed")
         unit_n = receipt.get("unit_check_count")
         expected_unit_names = list(battery.UNIT_CHECK_NAMES)
-        if unit_n != len(expected_unit_names):
+        if (not _is_json_int(unit_n)
+                or unit_n != len(expected_unit_names)):
             errors.append(f"{label}: unit check count does not match current registry")
         unit_prefix = checks[:len(expected_unit_names)]
         prefix_names = [c.get("name") for c in unit_prefix
@@ -171,6 +188,7 @@ def aggregate_payloads(payloads, *, current_provenance=None,
         for required_check in (
             "R: estimator.py sha256 unchanged",
             "R: the mutant directory is gone",
+            "R: receipt provenance unchanged across execution",
         ):
             matches = [c for c in checks if isinstance(c, dict)
                        and c.get("name") == required_check]
@@ -199,7 +217,9 @@ def aggregate_payloads(payloads, *, current_provenance=None,
         selected = selection.get("mutation_tags")
         include_b = selection.get("include_positive")
         shard_row["selection"] = selection
-        if not isinstance(selected, list) or include_b not in (True, False):
+        if (not isinstance(selected, list)
+                or not _is_json_bool(include_b)
+                or any(not isinstance(tag, str) for tag in selected)):
             errors.append(f"{label}: selection fields are malformed")
             continue
         if include_b is False and not selected:
@@ -213,6 +233,9 @@ def aggregate_payloads(payloads, *, current_provenance=None,
             case_tags = []
         else:
             case_tags = [case.get("tag") for case in cases]
+            if any(not isinstance(tag, str) for tag in case_tags):
+                errors.append(f"{label}: every case tag must be a string")
+                case_tags = []
         wanted = (["B"] if include_b else []) + selected
         if case_tags != wanted:
             errors.append(f"{label}: executed cases {case_tags!r} != selection {wanted!r}")
@@ -221,6 +244,9 @@ def aggregate_payloads(payloads, *, current_provenance=None,
     by_tag = {}
     for label, case in all_cases:
         tag = case.get("tag")
+        if not isinstance(tag, str):
+            errors.append(f"{label}: executed case tag must be a string")
+            continue
         if tag not in {"B", *expected}:
             errors.append(f"{label}: unknown executed case {tag!r}")
             continue
@@ -241,6 +267,7 @@ def aggregate_payloads(payloads, *, current_provenance=None,
         if not (positive.get("not_refused") is True
                 and positive.get("no_fail_lines") is True
                 and positive.get("skips_named") is True
+                and _is_json_int(positive.get("returncode"))
                 and positive.get("returncode") == 3):
             errors.append("B: the three positive-control checks are not all proved")
         if positive.get("fail_lines") != []:
@@ -265,7 +292,9 @@ def aggregate_payloads(payloads, *, current_provenance=None,
                 errors.append(f"{tag}: {key} does not match the current registry")
         if case.get("injection_applied") is not True:
             errors.append(f"{tag}: mutation injection did not apply")
-        if not (case.get("battery_red") is True and case.get("returncode") == 1):
+        if not (case.get("battery_red") is True
+                and _is_json_int(case.get("returncode"))
+                and case.get("returncode") == 1):
             errors.append(f"{tag}: certifier did not return the required red verdict")
         fail_lines = case.get("fail_lines")
         if not _raw_streams_valid(case):
@@ -308,6 +337,30 @@ def aggregate_payloads(payloads, *, current_provenance=None,
         ),
         "shards": shard_rows,
     }
+
+
+def aggregate_payloads(payloads, *, current_provenance=None,
+                       current_registry=None):
+    """Return a refusal receipt for malformed input instead of raising."""
+    try:
+        return _aggregate_payloads(
+            payloads, current_provenance=current_provenance,
+            current_registry=current_registry)
+    except Exception as exc:
+        return {
+            "artifact": "certification_mutation_aggregate",
+            "artifact_version": ARTIFACT_VERSION,
+            "aggregator_sha256": _sha(__file__),
+            "status": "REFUSED",
+            "accepted": False,
+            "errors": [f"malformed receipt payload: {type(exc).__name__}: {exc}"],
+            "required_cases": ["B"] + [row["tag"] for row in
+                                          battery.mutation_registry()],
+            "cases": [],
+            "required_cases_covered": [],
+            "coverage_complete": False,
+            "shards": [],
+        }
 
 
 def _write_exclusive(path, payload):
