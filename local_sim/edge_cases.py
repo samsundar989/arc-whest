@@ -42,7 +42,10 @@ INVARIANTS (added 2026-08-06). The cases above ask "does it survive?"; these ask
 Run: uv run python local_sim/edge_cases.py
 """
 
+import ctypes
+import gc
 import hashlib
+import importlib.metadata
 import importlib.util
 import json
 import os
@@ -76,6 +79,8 @@ PD, PW = 32, 256
 #: which is how a defect reached five submission slots on 2026-09-05.
 WEIGHTS_BACKEND = "numpy"
 WEIGHTS_MODE = "f64_readonly"
+INSTRUMENT_IDENTITY = {"kind": "historical_numpy", "path": None,
+                       "version": None}
 
 # Frozen execution partition used by ``certify_candidate.py`` to bound the
 # allocator lifetime of the live Phase-2 suite.  The ordinary no-argument suite
@@ -107,8 +112,15 @@ CASE_REGISTRY = tuple(
     ("%s:%d" % (group, index), group, index)
     for group, count in CASE_COUNTS for index in range(count)
 )
-GROUP_RECEIPT_VERSION = 1
-CASE_RECEIPT_VERSION = 1
+GROUP_RECEIPT_VERSION = 4
+CASE_RECEIPT_VERSION = 4
+METER_RESET_POLICY = (
+    "real-flopscope: fresh explicit context at captured implicit-global cap, "
+    "capture ledger/output after every candidate predict, then drop context, "
+    "collect, reset accumulator, and trim; historical "
+    "numpy mode: direct predict; v3"
+)
+METER_PREDICTIONS = []
 
 
 def _sha(path):
@@ -134,6 +146,80 @@ def _weights(arrays):
     from lifecycle_eval import build_weights
     return build_weights([np.asarray(w, dtype=np.float32) for w in arrays],
                          WEIGHTS_MODE, fnp)
+
+
+def _implicit_default_budget():
+    """Capture flopscope 0.12's effective budget outside an explicit context."""
+    raw = os.environ.get("FLOPSCOPE_DEFAULT_BUDGET")
+    return int(float(raw)) if raw is not None else int(1e15)
+
+
+def _release_allocator(gc_collected=None):
+    """Best-effort return native pages after caller drops and collects refs."""
+    collected = int(gc.collect()) if gc_collected is None else gc_collected
+    result = {
+        "platform": sys.platform, "gc_collected": collected,
+        "mechanism": "gc_only", "available": False,
+        "returncode": None, "succeeded": True,
+    }
+    try:
+        if sys.platform == "win32":
+            fn = ctypes.CDLL("ucrtbase.dll")._heapmin
+            fn.argtypes, fn.restype = [], ctypes.c_int
+            rc = int(fn())
+            result.update({"mechanism": "ucrtbase._heapmin",
+                           "available": True, "returncode": rc,
+                           "succeeded": rc == 0})
+        elif sys.platform.startswith("linux"):
+            fn = ctypes.CDLL(None).malloc_trim
+            fn.argtypes, fn.restype = [ctypes.c_size_t], ctypes.c_int
+            rc = int(fn(0))
+            result.update({"mechanism": "libc.malloc_trim(0)",
+                           "available": True, "returncode": rc,
+                           "succeeded": True})
+    except Exception as exc:
+        result.update({"succeeded": False,
+                       "error": "%s: %s" % (type(exc).__name__, exc)})
+    return result
+
+
+def _predict(est, mlp, budget):
+    """Run one prediction without retaining its instrument history."""
+    if WEIGHTS_BACKEND != "flopscope":
+        return est.predict(mlp, budget)
+    import flopscope
+    # Every real-world MLP has already been constructed from fnp weights, so
+    # the implicit default exists. Capture its actual cap rather than treating
+    # the candidate's 0/1 fallback argument as an enforcement budget.
+    effective_cap = int(flopscope.current_budget().flop_budget)
+    context = flopscope.BudgetContext(
+        flop_budget=effective_cap, quiet=True)
+    status = "raised"
+    output_sha256 = None
+    try:
+        with context:
+            result = est.predict(mlp, budget)
+        status = "returned"
+        try:
+            output = np.ascontiguousarray(np.asarray(result))
+            output_sha256 = hashlib.sha256(output.tobytes()).hexdigest()
+        except Exception:
+            # Preserve the returned object so the existing shape/dtype gates
+            # remain authoritative; a successful receipt still fails closed.
+            output_sha256 = None
+        return result
+    finally:
+        row = {
+            "flop_budget": int(context.flop_budget),
+            "flops_used": int(context.flops_used),
+            "n_ops": len(context.op_log), "status": status,
+            "output_sha256": output_sha256,
+        }
+        context = None
+        collected = int(gc.collect())
+        flopscope.budget_reset()
+        row["allocator_release"] = _release_allocator(collected)
+        METER_PREDICTIONS.append(row)
 
 
 def load(path="estimator.py"):
@@ -165,7 +251,7 @@ def he(depth, width, seed, scale=None):
 
 def check(name, est, mlp, budget=BUDGET, expect_depth=None, rerun=True):
     try:
-        out = est.predict(mlp, budget)
+        out = _predict(est, mlp, budget)
     except Exception as e:  # a raise on the grader is a zero-scored MLP
         print(f"  {name:<34} RAISED {type(e).__name__}: {e}")
         return False
@@ -195,7 +281,7 @@ def check(name, est, mlp, budget=BUDGET, expect_depth=None, rerun=True):
         ok = False
     ident = True
     if rerun and ok:
-        b = np.asarray(est.predict(mlp, budget), dtype=np.float64)
+        b = np.asarray(_predict(est, mlp, budget), dtype=np.float64)
         ident = bool(np.array_equal(a, b))
         if not ident:
             print(f"  {name:<34} NON-DETERMINISTIC (max diff {np.abs(a - b).max():.3e})")
@@ -273,7 +359,7 @@ def _execute_group(group, est, est_mod, case_index=None, evidence=None):
         if case_index in (None, 0):
             m = MLP(he(PD, PW, 10), seed=31)
             before = [w.copy() for w in m.weights]
-            est.predict(m, BUDGET)
+            _predict(est, m, BUDGET)
             same = all(np.array_equal(a, b) for a, b in zip(before, m.weights))
             print(f"  {'input weights unmodified':<34} "
                   f"{'ok' if same else 'MUTATED INPUT'}")
@@ -312,7 +398,7 @@ def _budget_monotone_case(est, est_mod, case_index):
             log2n = est._log2_samples(PW, PD, b)
             if isinstance(log2n, np.generic):
                 log2n = log2n.item()
-        out = np.asarray(est.predict(m, b), dtype=np.float64)
+        out = np.asarray(_predict(est, m, b), dtype=np.float64)
         tol = -1e-12 * max(1.0, float(np.max(np.abs(out))))
         finite = (bool(np.isfinite(out).all()) and out.shape == (PD, PW)
                   and bool((out >= tol).all()))
@@ -349,7 +435,7 @@ def _execute_case(case_id, est, est_mod):
 
 
 def main():
-    global BUDGET, PD, PW, WEIGHTS_BACKEND, WEIGHTS_MODE
+    global BUDGET, PD, PW, WEIGHTS_BACKEND, WEIGHTS_MODE, INSTRUMENT_IDENTITY
     import argparse
     ap = argparse.ArgumentParser(
         description="The invariant suite. Defaults reproduce the historical "
@@ -385,8 +471,21 @@ def main():
         PD, PW = _oc.LIVE.depth, _oc.LIVE.width
         BUDGET = _oc.LIVE.flop_budget
     if a.real_flopscope:
+        # This script lives beside a historical package named ``flopscope``.
+        # Move that directory behind site-packages before the candidate import;
+        # otherwise --real-flopscope silently loads the unmetered local shim.
+        sys.path[:] = [p for p in sys.path
+                       if os.path.abspath(p or ".") != _HERE] + [_HERE]
+        import flopscope as real_flopscope
+        instrument_path = os.path.abspath(real_flopscope.__file__)
+        if instrument_path.startswith(os.path.join(_HERE, "flopscope")):
+            raise RuntimeError("--real-flopscope resolved the local shim")
         WEIGHTS_BACKEND = "flopscope"
         WEIGHTS_MODE = a.weights_mode
+        INSTRUMENT_IDENTITY = {
+            "kind": "installed_flopscope", "path": instrument_path,
+            "version": importlib.metadata.version("flopscope"),
+        }
 
     print(f"world: {PW}x{PD}  B = {BUDGET:,}  weights = {WEIGHTS_BACKEND}"
           + (f"/{WEIGHTS_MODE}" if WEIGHTS_BACKEND != "numpy" else " float32")
@@ -442,6 +541,8 @@ def main():
             "candidate_sha256_before": candidate_sha_before,
             "candidate_sha256_after": candidate_sha_after,
             "edge_cases_sha256": _sha(__file__),
+            "meter_reset_policy": METER_RESET_POLICY,
+            "metered_predictions": METER_PREDICTIONS,
             "group_registry": [
                 {"group": group, "expected_result_count": count}
                 for group, count in GROUP_REGISTRY
@@ -451,6 +552,8 @@ def main():
                 "real_flopscope": bool(a.real_flopscope),
                 "weights_mode": WEIGHTS_MODE if a.real_flopscope else "numpy_float32",
                 "width": int(PW), "depth": int(PD), "budget": int(BUDGET),
+                "flopscope_file": INSTRUMENT_IDENTITY["path"],
+                "flopscope_version": INSTRUMENT_IDENTITY["version"],
             },
             "results": results,
             "passed": n_ok,
@@ -504,7 +607,7 @@ def inv_layer1(est, case_index=None):
              (4, 64, 30_806_006_003), (2, 256, 30_806_006_004))
     for depth, width, seed in _one(cases, case_index):
         m = canon(depth, width, seed)
-        pred = np.asarray(est.predict(m, BUDGET), dtype=np.float64)
+        pred = np.asarray(_predict(est, m, BUDGET), dtype=np.float64)
         w0 = np.asarray(m.weights[0], dtype=np.float64)
         exact = np.sqrt((w0 * w0).sum(axis=0)) / np.sqrt(2.0 * np.pi)
         rel = float(np.abs(pred[0] - exact).max() / np.abs(exact).max())
@@ -663,13 +766,13 @@ def inv_permutation(est, case_index=None, evidence=None):
             rng, cases, case_index):
         k = _k_for(depth, k)
         m = canon(depth, width, seed)
-        base = np.asarray(est.predict(m, BUDGET), dtype=np.float64)
+        base = np.asarray(_predict(est, m, BUDGET), dtype=np.float64)
 
         w = [np.array(x) for x in m.weights]
         w[k] = w[k][:, P]                      # rename layer-k outputs
         w[k + 1] = w[k + 1][P, :]              # and the matching inputs
         mp = MLP(w, seed=m.seed)
-        perm = np.asarray(est.predict(mp, BUDGET), dtype=np.float64)
+        perm = np.asarray(_predict(est, mp, BUDGET), dtype=np.float64)
 
         g = perm_gate(base, perm, P, k, depth, denom=denom)
         if evidence is not None:
@@ -721,7 +824,7 @@ def inv_budget_monotone(est, est_mod):
         try:
             if has_ladder:
                 log2n = est._log2_samples(PW, PD, b)
-            out = np.asarray(est.predict(m, b), dtype=np.float64)
+            out = np.asarray(_predict(est, m, b), dtype=np.float64)
             # Same scaled non-negativity bar as `check()` above and as
             # `certify_candidate.py` section 5: an absolute `>= 0` is exact at
             # width 256 and wrong at width 1024, where a float64 sum on a
@@ -759,7 +862,8 @@ def inv_determinism(est, est_mod):
     ok = True
     for depth, width, seed in ((PD, PW, 30_806_006_031), (8, 128, 30_806_006_032)):
         m = canon(depth, width, seed)
-        runs = [np.asarray(est.predict(m, BUDGET), dtype=np.float64) for _ in range(3)]
+        runs = [np.asarray(_predict(est, m, BUDGET), dtype=np.float64)
+                for _ in range(3)]
         same3 = all(np.array_equal(runs[0], r) for r in runs[1:])
 
         fresh = est_mod.Estimator()
@@ -769,7 +873,7 @@ def inv_determinism(est, est_mod):
 
         Ctx.width, Ctx.depth = width, depth
         fresh.setup(Ctx())
-        r4 = np.asarray(fresh.predict(m, BUDGET), dtype=np.float64)
+        r4 = np.asarray(_predict(fresh, m, BUDGET), dtype=np.float64)
         same_fresh = np.array_equal(runs[0], r4)
         ok &= same3 and same_fresh
         print(f"  {f'{width}x{depth}':<34} 3x identical={same3}  "

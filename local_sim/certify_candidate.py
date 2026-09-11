@@ -50,6 +50,8 @@ Run:
 from __future__ import annotations
 
 import argparse
+import ctypes
+import gc
 import hashlib
 import importlib.metadata
 import importlib.util
@@ -98,7 +100,7 @@ EDGE_GROUP_REGISTRY = (
     ("budget_monotone", 1), ("determinism", 1), ("seed_hygiene", 1),
     ("gt_noise", 1),
 )
-EDGE_GROUP_RECEIPT_VERSION = 1
+EDGE_GROUP_RECEIPT_VERSION = 4
 EDGE_CASE_COUNTS = (
     ("normal", 1), ("degenerate", 3), ("dynamic_range", 4),
     ("seed_extremes", 5), ("shape_generality", 5), ("budget_edges", 5),
@@ -110,7 +112,24 @@ EDGE_CASE_REGISTRY = tuple(
     ("%s:%d" % (group, index), group, index)
     for group, count in EDGE_CASE_COUNTS for index in range(count)
 )
-EDGE_CASE_RECEIPT_VERSION = 1
+EDGE_PREDICTIONS_PER_CASE = {
+    "normal": 2, "degenerate": 2, "dynamic_range": 2,
+    "seed_extremes": 2, "shape_generality": 2, "budget_edges": 2,
+    "immutability": 1, "layer1": 1, "permutation": 2,
+    "budget_monotone": 1, "determinism": 8, "seed_hygiene": 0,
+    "gt_noise": 0,
+}
+EDGE_CASE_RECEIPT_VERSION = 4
+EDGE_METER_RESET_POLICY = (
+    "real-flopscope: fresh explicit context at captured implicit-global cap, "
+    "capture ledger/output after every candidate predict, then drop context, "
+    "collect, reset accumulator, and trim; historical "
+    "numpy mode: direct predict; v3"
+)
+SECTION5_METER_RESET_POLICY = (
+    "section5/5b: reset before context; after ledger/output capture drop heavy "
+    "refs, collect, reset accumulator, then trim; preserve estimator state; v3"
+)
 EDGE_BUDGET_LADDER = (0, 1, 10**6, 10**7, 10**8, 10**9, 10**10,
                       27_200_000_000, 272_000_000_000,
                       2_720_000_000_000)
@@ -336,6 +355,107 @@ def _expected_permutation_details(case_index):
     }
 
 
+def _reset_then_context(flops_module, context):
+    """Reset session records outside, immediately before entering a context."""
+    flops_module.budget_reset()
+    return context
+
+
+def _release_allocator(gc_collected=None):
+    """Best-effort return native pages after caller drops and collects refs."""
+    collected = int(gc.collect()) if gc_collected is None else gc_collected
+    result = {
+        "platform": sys.platform, "gc_collected": collected,
+        "mechanism": "gc_only", "available": False,
+        "returncode": None, "succeeded": True,
+    }
+    try:
+        if sys.platform == "win32":
+            fn = ctypes.CDLL("ucrtbase.dll")._heapmin
+            fn.argtypes, fn.restype = [], ctypes.c_int
+            rc = int(fn())
+            result.update({"mechanism": "ucrtbase._heapmin",
+                           "available": True, "returncode": rc,
+                           "succeeded": rc == 0})
+        elif sys.platform.startswith("linux"):
+            fn = ctypes.CDLL(None).malloc_trim
+            fn.argtypes, fn.restype = [ctypes.c_size_t], ctypes.c_int
+            rc = int(fn(0))
+            result.update({"mechanism": "libc.malloc_trim(0)",
+                           "available": True, "returncode": rc,
+                           "succeeded": True})
+    except Exception as exc:
+        result.update({"succeeded": False,
+                       "error": "%s: %s" % (type(exc).__name__, exc)})
+    return result
+
+
+def _allocator_release_valid(value):
+    if not isinstance(value, dict):
+        return False
+    base = {"platform", "gc_collected", "mechanism", "available",
+            "returncode", "succeeded"}
+    if set(value) not in (base, base | {"error"}):
+        return False
+    if (type(value.get("platform")) is not str
+            or type(value.get("gc_collected")) is not int
+            or value["gc_collected"] < 0
+            or type(value.get("mechanism")) is not str
+            or type(value.get("available")) is not bool
+            or (value.get("returncode") is not None
+                and type(value.get("returncode")) is not int)
+            or type(value.get("succeeded")) is not bool):
+        return False
+    if sys.platform == "win32":
+        return (value["platform"] == "win32" and value["available"]
+                and value["mechanism"] == "ucrtbase._heapmin"
+                and value["returncode"] == 0 and value["succeeded"]
+                and "error" not in value)
+    return value["platform"] == sys.platform and value["succeeded"]
+
+
+def _implicit_default_budget():
+    raw = os.environ.get("FLOPSCOPE_DEFAULT_BUDGET")
+    return int(float(raw)) if raw is not None else int(1e15)
+
+
+def _metered_prediction_errors(rows, *, expected_count, complete):
+    errors = []
+    if not isinstance(rows, list):
+        return ["metered predictions are not a list"]
+    if complete and len(rows) != expected_count:
+        errors.append("metered prediction coverage differs")
+    expected_keys = {"flop_budget", "flops_used", "n_ops", "status",
+                     "output_sha256", "allocator_release"}
+    for index, row in enumerate(rows):
+        if (not isinstance(row, dict) or set(row) != expected_keys
+                or type(row.get("flop_budget")) is not int
+                or row.get("flop_budget") != _implicit_default_budget()
+                or type(row.get("flops_used")) is not int
+                or row.get("flops_used", -1) < 0
+                or type(row.get("n_ops")) is not int
+                or row.get("n_ops", -1) < 0
+                or row.get("status") not in ("returned", "raised")
+                or (row.get("status") == "returned"
+                    and not _is_sha256(row.get("output_sha256")))
+                or (row.get("status") == "raised"
+                    and row.get("output_sha256") is not None)):
+            errors.append("metered prediction %d schema differs" % index)
+            continue
+        if complete and row["status"] != "returned":
+            errors.append("metered prediction %d did not return" % index)
+        if not _allocator_release_valid(row.get("allocator_release")):
+            errors.append("metered prediction %d allocator release failed" % index)
+    return errors
+
+
+def _expected_edge_instrument():
+    import flopscope
+    return {"kind": "installed_flopscope",
+            "path": os.path.abspath(flopscope.__file__),
+            "version": importlib.metadata.version("flopscope")}
+
+
 def validate_edge_group_receipt(payload, *, group, expected_count,
                                 candidate, candidate_sha256,
                                 edge_cases_sha256, weights_mode):
@@ -346,7 +466,8 @@ def validate_edge_group_receipt(payload, *, group, expected_count,
     expected_keys = {
         "artifact", "artifact_version", "candidate",
         "candidate_sha256_before", "candidate_sha256_after",
-        "edge_cases_sha256", "group_registry", "world", "group",
+        "edge_cases_sha256", "meter_reset_policy", "metered_predictions",
+        "group_registry", "world", "group",
         "expected_result_count", "results", "passed", "all_passed",
     }
     if set(payload) != expected_keys:
@@ -367,6 +488,8 @@ def validate_edge_group_receipt(payload, *, group, expected_count,
     value = payload.get("edge_cases_sha256")
     if not _is_sha256(value) or value != edge_cases_sha256:
         errors.append("edge_cases.py hash differs")
+    if payload.get("meter_reset_policy") != EDGE_METER_RESET_POLICY:
+        errors.append("meter reset policy differs")
     registry = payload.get("group_registry")
     expected_registry = [
         {"group": name, "expected_result_count": count}
@@ -387,6 +510,8 @@ def validate_edge_group_receipt(payload, *, group, expected_count,
         "phase2": True, "real_flopscope": True,
         "weights_mode": weights_mode,
         "width": WIDTH, "depth": DEPTH, "budget": BUDGET,
+        "flopscope_file": _expected_edge_instrument()["path"],
+        "flopscope_version": _expected_edge_instrument()["version"],
     }
     world = payload.get("world")
     if not isinstance(world, dict) or set(world) != set(expected_world):
@@ -415,6 +540,11 @@ def validate_edge_group_receipt(payload, *, group, expected_count,
         errors.append("all_passed is not a boolean")
     elif results is not None and all_passed != all(results):
         errors.append("all_passed differs from results")
+    expected_predictions = (dict(EDGE_CASE_COUNTS)[group]
+                            * EDGE_PREDICTIONS_PER_CASE[group])
+    errors.extend(_metered_prediction_errors(
+        payload.get("metered_predictions"),
+        expected_count=expected_predictions, complete=all_passed is True))
     return errors
 
 
@@ -428,7 +558,8 @@ def validate_edge_case_receipt(payload, *, case, group, case_index,
     expected_keys = {
         "artifact", "artifact_version", "candidate",
         "candidate_sha256_before", "candidate_sha256_after",
-        "edge_cases_sha256", "group_registry", "case_registry", "world",
+        "edge_cases_sha256", "meter_reset_policy", "metered_predictions",
+        "group_registry", "case_registry", "world",
         "case", "logical_group", "case_index", "details",
         "results", "passed", "all_passed",
     }
@@ -452,6 +583,8 @@ def validate_edge_case_receipt(payload, *, case, group, case_index,
             errors.append(key + " differs")
     if payload.get("edge_cases_sha256") != edge_cases_sha256:
         errors.append("edge_cases.py hash differs")
+    if payload.get("meter_reset_policy") != EDGE_METER_RESET_POLICY:
+        errors.append("meter reset policy differs")
     expected_groups = [{"group": name, "expected_result_count": count}
                        for name, count in EDGE_GROUP_REGISTRY]
     expected_cases = [{"case": name, "group": logical, "case_index": index}
@@ -476,11 +609,14 @@ def validate_edge_case_receipt(payload, *, case, group, case_index,
     if not cases_valid or cases != expected_cases:
         errors.append("case registry differs")
     world_errors = validate_edge_group_receipt({
-        "artifact": "edge_cases_group", "artifact_version": 1,
+        "artifact": "edge_cases_group",
+        "artifact_version": EDGE_GROUP_RECEIPT_VERSION,
         "candidate": candidate,
         "candidate_sha256_before": candidate_sha256,
         "candidate_sha256_after": candidate_sha256,
         "edge_cases_sha256": edge_cases_sha256,
+        "meter_reset_policy": EDGE_METER_RESET_POLICY,
+        "metered_predictions": [],
         "group_registry": expected_groups,
         "world": payload.get("world"), "group": group,
         "expected_result_count": 1, "results": [True], "passed": 1,
@@ -521,6 +657,10 @@ def validate_edge_case_receipt(payload, *, case, group, case_index,
     if type(all_passed) is not bool or (results is not None
                                         and all_passed != all(results)):
         errors.append("all_passed differs")
+    errors.extend(_metered_prediction_errors(
+        payload.get("metered_predictions"),
+        expected_count=EDGE_PREDICTIONS_PER_CASE[group],
+        complete=all_passed is True))
     return errors
 
 
@@ -1246,7 +1386,9 @@ def main() -> int:
     report["sections"]["invariants"] = {
         "returncode": 0 if edge_ok else 1, "tail": tail,
         "world": {"phase2": True, "real_flopscope": True,
-                   "weights_mode": twin_mode_for_edge},
+                   "weights_mode": twin_mode_for_edge,
+                   "flopscope_file": _expected_edge_instrument()["path"],
+                   "flopscope_version": _expected_edge_instrument()["version"]},
         "edge_cases_sha256": edge_sha,
         "group_registry": [{"group": group, "expected_result_count": count}
                            for group, count in EDGE_GROUP_REGISTRY],
@@ -1399,7 +1541,7 @@ def main() -> int:
         pred = None
         with MaterializationCounter() as mc:
             try:
-                with ctx:
+                with _reset_then_context(flops, ctx):
                     pred = est.predict(mlp, a.budget)
                     pred = materialise_predictions(pred, depth=a.depth,
                                                    width=a.width)
@@ -1415,7 +1557,7 @@ def main() -> int:
             n_ops = int(sum(float(v.get("calls", 0.0)) for v in ns.values()))
         except Exception:
             n_ops = -1
-        rows.append({
+        row = {
             "seed": int(s), "error": err,
             "flops_used": float(ctx.flops_used),
             "n_ops": n_ops,
@@ -1427,6 +1569,8 @@ def main() -> int:
             "weights_unchanged": pre == post,
             "shape": None if arr is None else list(arr.shape),
             "dtype": None if arr is None else str(arr.dtype),
+            "output_sha256": None if arr is None else hashlib.sha256(
+                np.ascontiguousarray(arr).tobytes()).hexdigest(),
             "finite": None if arr is None else bool(np.all(np.isfinite(arr))),
             "min_value": 0.0 if arr is None else float(np.min(arr)),
             "max_value": 0.0 if arr is None else float(np.max(arr)),
@@ -1438,7 +1582,15 @@ def main() -> int:
             "mean_square_final_row": None if arr is None
             else float(np.mean(np.asarray(arr[-1], dtype=np.float64) ** 2)),
             "weights_mode": twin_mode,
-        })
+        }
+        rows.append(row)
+        # All authoritative values above come from the now-closed context.
+        # Clear both accumulator ownership and native allocator high-water
+        # before minting the next seed; the Estimator itself remains alive.
+        del ctx, pred, arr, weights, mlp, w_np, pre, post, mc
+        collected = int(gc.collect())
+        flops.budget_reset()
+        row["allocator_release"] = _release_allocator(collected)
 
     check(f"5: the arm is the GRADER's dtype ({_TWIN_DEFAULT}), not the "
           f"historical local float32",
@@ -1545,7 +1697,15 @@ def main() -> int:
           tot_mat == 0,
           "counted, not asserted" if tot_mat == 0
           else json.dumps(rows[0]["materializations"]), domain=MATH)
+    check("8: every section-5 allocator teardown completed",
+          all(_allocator_release_valid(r["allocator_release"]) for r in rows),
+          "gc plus native trim after each closed ledger", domain=LOCAL)
     report["sections"]["metered_runs"] = rows
+    report["sections"]["meter_reset_policy"] = {
+        "edge_cases": EDGE_METER_RESET_POLICY,
+        "section5": SECTION5_METER_RESET_POLICY,
+        "section5b": SECTION5_METER_RESET_POLICY,
+    }
     report["sections"]["setup_s_local"] = setup_s
 
     # --------------------------------------------------------------- 5b ----
@@ -1576,7 +1736,7 @@ def main() -> int:
             p_ = None
             if not terr:
                 try:
-                    with c:
+                    with _reset_then_context(flops, c):
                         p_ = e2.predict(m, a.budget)
                         p_ = materialise_predictions(p_, depth=a.depth,
                                                      width=a.width)
@@ -1594,12 +1754,18 @@ def main() -> int:
                 "n_ops": ops_,
                 "finite": None if pa is None else bool(np.all(np.isfinite(pa))),
                 "shape": None if pa is None else list(pa.shape),
+                "output_sha256": None if pa is None else hashlib.sha256(
+                    np.ascontiguousarray(pa).tobytes()).hexdigest(),
                 "mean_square_final_row": None if pa is None
                 else float(np.mean(pa[-1] ** 2)),
                 "_pred": pa,
             }
             print(f"      {mode:<20} {c.flops_used:>18,.0f} FLOPs  "
                   f"{ops_:>7,} ops  " + (terr or "clean"))
+            del c, p_, wts, m, e2
+            collected = int(gc.collect())
+            flops.budget_reset()
+            arms[mode]["allocator_release"] = _release_allocator(collected)
 
         for mode in WEIGHTS_MODES:
             check(f"5b: the {mode} arm raised nothing",
@@ -1608,6 +1774,10 @@ def main() -> int:
                   arms[mode]["finite"] is True
                   and arms[mode]["shape"] == [a.depth, a.width],
                   f"{arms[mode]['shape']}, finite={arms[mode]['finite']}")
+        check("5b: every arm allocator teardown completed",
+              all(_allocator_release_valid(arms[mode]["allocator_release"])
+                  for mode in WEIGHTS_MODES),
+              "gc plus native trim after each closed arm ledger", domain=LOCAL)
 
         # --- the answer must not depend on the arm ---------------------------
         # float32 tolerance, because a candidate that legitimately computes in

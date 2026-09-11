@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import inspect
 import json
 import os
 import subprocess
 import sys
 import tempfile
+import weakref
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
@@ -31,6 +33,27 @@ def check(name, ok):
         FAILED.append(name)
 
 
+def allocator_fixture():
+    if sys.platform == "win32":
+        return {"platform": "win32", "gc_collected": 0,
+                "mechanism": "ucrtbase._heapmin", "available": True,
+                "returncode": 0, "succeeded": True}
+    if sys.platform.startswith("linux"):
+        return {"platform": sys.platform, "gc_collected": 0,
+                "mechanism": "libc.malloc_trim(0)", "available": True,
+                "returncode": 1, "succeeded": True}
+    return {"platform": sys.platform, "gc_collected": 0,
+            "mechanism": "gc_only", "available": False,
+            "returncode": None, "succeeded": True}
+
+
+def meter_fixture():
+    return {"flop_budget": cert._implicit_default_budget(),
+            "flops_used": 1, "n_ops": 1, "status": "returned",
+            "output_sha256": "d" * 64,
+            "allocator_release": allocator_fixture()}
+
+
 def fixture(group="normal", count=1):
     candidate_sha = "a" * 64
     edge_sha = "b" * 64
@@ -41,6 +64,11 @@ def fixture(group="normal", count=1):
         "candidate_sha256_before": candidate_sha,
         "candidate_sha256_after": candidate_sha,
         "edge_cases_sha256": edge_sha,
+        "meter_reset_policy": cert.EDGE_METER_RESET_POLICY,
+        "metered_predictions": [
+            meter_fixture() for _ in range(
+                dict(cert.EDGE_CASE_COUNTS)[group]
+                * cert.EDGE_PREDICTIONS_PER_CASE[group])],
         "group_registry": [
             {"group": name, "expected_result_count": expected}
             for name, expected in cert.EDGE_GROUP_REGISTRY
@@ -50,6 +78,8 @@ def fixture(group="normal", count=1):
             "weights_mode": "f64_readonly",
             "width": cert.WIDTH, "depth": cert.DEPTH,
             "budget": cert.BUDGET,
+            "flopscope_file": cert._expected_edge_instrument()["path"],
+            "flopscope_version": cert._expected_edge_instrument()["version"],
         },
         "group": group,
         "expected_result_count": count,
@@ -78,6 +108,8 @@ def case_fixture(case="normal:0", group="normal", case_index=0):
         ],
         "case": case, "logical_group": group, "case_index": case_index,
         "details": {},
+        "metered_predictions": [meter_fixture() for _ in range(
+            cert.EDGE_PREDICTIONS_PER_CASE[group])],
     })
     kwargs = {key: value for key, value in group_kwargs.items()
               if key not in ("expected_count",)}
@@ -111,6 +143,255 @@ def main():
           and len({group for group, _ in edge.GROUP_REGISTRY})
           == len(edge.GROUP_REGISTRY))
 
+    import flopscope
+    import flopscope.numpy as fnp
+    reset_events = []
+    context_refs = []
+    original_reset = flopscope.budget_reset
+    original_current = flopscope.current_budget
+    original_context = flopscope.BudgetContext
+    original_release = edge._release_allocator
+
+    class ProbeEstimator:
+        def predict(self, mlp, budget):
+            reset_events.append(("predict", id(self), id(mlp), budget))
+            return "prediction"
+
+    probe_estimator = ProbeEstimator()
+    probe_mlp = object()
+    original_backend = edge.WEIGHTS_BACKEND
+
+    class Snapshot:
+        flop_budget = int(1e15)
+
+    class ProbeBudgetContext:
+        def __init__(self, flop_budget, quiet):
+            self.flop_budget, self.flops_used = flop_budget, 7
+            self.op_log = [1, 2]
+            reset_events.append(("context", flop_budget, quiet))
+            context_refs.append(weakref.ref(self))
+
+        def __enter__(self):
+            reset_events.append(("enter",))
+            return self
+
+        def __exit__(self, *_args):
+            reset_events.append(("exit",))
+
+    try:
+        flopscope.current_budget = lambda: Snapshot()
+        flopscope.BudgetContext = ProbeBudgetContext
+        flopscope.budget_reset = lambda: reset_events.append(
+            ("reset", context_refs[-1]() is None))
+        edge._release_allocator = lambda _collected=None: (
+            reset_events.append(("release",)) or allocator_fixture())
+        edge.WEIGHTS_BACKEND = "flopscope"
+        edge.METER_PREDICTIONS.clear()
+        first = edge._predict(probe_estimator, probe_mlp, 11)
+        second = edge._predict(probe_estimator, probe_mlp, 12)
+        expected_one = [
+            ("context", int(1e15), True), ("enter",),
+            ("predict", id(probe_estimator), id(probe_mlp), 11),
+            ("exit",), ("reset", True), ("release",),
+        ]
+        expected_two = [
+            ("context", int(1e15), True), ("enter",),
+            ("predict", id(probe_estimator), id(probe_mlp), 12),
+            ("exit",), ("reset", True), ("release",),
+        ]
+        check("fresh contexts bound prediction then teardown and preserve objects",
+              first == second == "prediction"
+              and reset_events == expected_one + expected_two
+              and len(edge.METER_PREDICTIONS) == 2
+              and all(row["flop_budget"] == int(1e15)
+                      and row["flops_used"] == 7 and row["n_ops"] == 2
+                      for row in edge.METER_PREDICTIONS))
+        reset_events.clear()
+        edge.WEIGHTS_BACKEND = "numpy"
+        edge._predict(probe_estimator, probe_mlp, 13)
+        check("historical numpy prediction performs no instrument lifecycle",
+              reset_events == [
+                  ("predict", id(probe_estimator), id(probe_mlp), 13)])
+    finally:
+        edge.WEIGHTS_BACKEND = original_backend
+        flopscope.budget_reset = original_reset
+        flopscope.current_budget = original_current
+        flopscope.BudgetContext = original_context
+        edge._release_allocator = original_release
+
+    from flopscope._budget import _reset_global_default, get_active_budget
+
+    class BudgetProbeEstimator:
+        def predict(self, _mlp, budget):
+            x = fnp.array([float(budget) + 2.0])
+            y = x + x
+            active = flopscope.current_budget()
+            return edge.np.asarray(
+                [float(y[0]), float(active.flop_budget),
+                 float(active.flops_used)])
+
+    def isolated_control(estimator, budget, cap):
+        context = flopscope.BudgetContext(flop_budget=cap, quiet=True)
+        result = None
+        caught = None
+        try:
+            with context:
+                result = estimator.predict(probe_mlp, budget)
+        except Exception as exc:
+            caught = exc
+        output_sha = None if result is None else hashlib.sha256(
+            edge.np.ascontiguousarray(edge.np.asarray(result)).tobytes()).hexdigest()
+        row = {"flops_used": int(context.flops_used),
+               "n_ops": len(context.op_log), "output_sha256": output_sha}
+        context = None
+        import gc
+        gc.collect()
+        original_reset()
+        cert._release_allocator(0)
+        return result, caught, row
+
+    parity = True
+    parity_estimator = BudgetProbeEstimator()
+    edge.WEIGHTS_BACKEND = "flopscope"
+    edge.METER_PREDICTIONS.clear()
+    try:
+        for tiny_budget in (0, 1):
+            _reset_global_default()
+            original_reset()
+            history = fnp.array([1.0])
+            _ = history + history
+            implicit = get_active_budget()
+            implicit_before = len(implicit.op_log)
+            implicit_flops_before = int(implicit.flops_used)
+            control, control_error, control_row = isolated_control(
+                parity_estimator, tiny_budget, int(implicit.flop_budget))
+            _reset_global_default()
+            original_reset()
+            history = fnp.array([1.0])
+            _ = history + history
+            implicit = get_active_budget()
+            implicit_before_helper = len(implicit.op_log)
+            implicit_flops_before_helper = int(implicit.flops_used)
+            new = edge._predict(parity_estimator, probe_mlp, tiny_budget)
+            helper_row = edge.METER_PREDICTIONS[-1]
+            parity &= (control_error is None
+                       and edge.np.array_equal(control, new)
+                       and helper_row["output_sha256"]
+                       == control_row["output_sha256"]
+                       and helper_row["flops_used"] == control_row["flops_used"]
+                       and helper_row["n_ops"] == control_row["n_ops"]
+                       and len(implicit.op_log) == implicit_before_helper
+                       and int(implicit.flops_used)
+                       == implicit_flops_before_helper
+                       and implicit_before > 0 and implicit_flops_before > 0
+                       and implicit_before_helper > 0
+                       and implicit_flops_before_helper > 0)
+        check("helper matches no-reset explicit control and isolates global log",
+              parity and len(edge.METER_PREDICTIONS) == 2
+              and all(cert._allocator_release_valid(
+                  row["allocator_release"])
+                      for row in edge.METER_PREDICTIONS))
+
+        class ExhaustEstimator:
+            def predict(self, _mlp, _budget):
+                x = fnp.array([1.0, 2.0])
+                return x + x
+
+        old_env = os.environ.get("FLOPSCOPE_DEFAULT_BUDGET")
+        os.environ["FLOPSCOPE_DEFAULT_BUDGET"] = "5"
+        try:
+            _reset_global_default()
+            original_reset()
+            _, control_error, control_row = isolated_control(
+                ExhaustEstimator(), 0, 5)
+            _reset_global_default()
+            original_reset()
+            _ = fnp.array([0.0])
+            helper_error = None
+            try:
+                edge._predict(ExhaustEstimator(), probe_mlp, 0)
+            except Exception as exc:
+                helper_error = exc
+            helper_row = edge.METER_PREDICTIONS[-1]
+            check("small-cap helper and explicit control fail on same operation",
+                  control_error is not None and helper_error is not None
+                  and type(control_error) is type(helper_error)
+                  and str(control_error) == str(helper_error)
+                  and helper_row["status"] == "raised"
+                  and helper_row["output_sha256"] is None
+                  and helper_row["flops_used"] == control_row["flops_used"]
+                  and helper_row["n_ops"] == control_row["n_ops"])
+        finally:
+            if old_env is None:
+                os.environ.pop("FLOPSCOPE_DEFAULT_BUDGET", None)
+            else:
+                os.environ["FLOPSCOPE_DEFAULT_BUDGET"] = old_env
+    finally:
+        edge.WEIGHTS_BACKEND = original_backend
+        _reset_global_default()
+        original_reset()
+
+    edge_source = inspect.getsource(edge)
+    check("every edge-suite candidate prediction routes through one helper",
+          edge_source.count(".predict(") == 2
+          and "return est.predict(mlp, budget)" in edge_source)
+
+    context_events = []
+
+    class ProbeFlops:
+        @staticmethod
+        def budget_reset():
+            context_events.append("reset")
+
+    class ProbeContext:
+        def __enter__(self):
+            context_events.append("enter")
+            return self
+
+        def __exit__(self, *_args):
+            context_events.append("exit")
+
+    with cert._reset_then_context(ProbeFlops, ProbeContext()):
+        context_events.append("predict")
+    check("section-5 reset is outside and immediately before context entry",
+          context_events == ["reset", "enter", "predict", "exit"])
+    cert_source = inspect.getsource(cert.main)
+    seed_drop = cert_source.find("del ctx, pred, arr, weights, mlp")
+    seed_collect = cert_source.find("collected = int(gc.collect())", seed_drop)
+    seed_reset = cert_source.find("flops.budget_reset()", seed_collect)
+    seed_trim = cert_source.find(
+        "row[\"allocator_release\"] = _release_allocator(collected)",
+        seed_reset)
+    arm_drop = cert_source.find("del c, p_, wts, m, e2")
+    arm_collect = cert_source.find("collected = int(gc.collect())", arm_drop)
+    arm_reset = cert_source.find("flops.budget_reset()", arm_collect)
+    arm_trim = cert_source.find(
+        "arms[mode][\"allocator_release\"] = _release_allocator(collected)",
+        arm_reset)
+    check("section 5 and every 5b arm use the reset/context boundary",
+          "with _reset_then_context(flops, ctx):" in cert_source
+          and "with _reset_then_context(flops, c):" in cert_source
+          and -1 < seed_drop < seed_collect < seed_reset < seed_trim
+          and -1 < arm_drop < arm_collect < arm_reset < arm_trim)
+
+    original_reset()
+    closed = flopscope.BudgetContext(flop_budget=1_000_000, quiet=True)
+    with closed:
+        value = fnp.array([1.0, 2.0])
+        _ = value + value
+    closed_flops = closed.flops_used
+    closed_summary = closed.summary_dict(by_namespace=True)
+    original_reset()
+    next_context = flopscope.BudgetContext(flop_budget=1_000_000, quiet=True)
+    with next_context:
+        _ = fnp.array([1.0]) + fnp.array([2.0])
+    check("reset preserves the prior closed-context row ledger",
+          closed_flops > 0 and next_context.flops_used > 0
+          and closed.flops_used == closed_flops
+          and closed.summary_dict(by_namespace=True) == closed_summary)
+    check("certifier native allocator release is available and succeeds",
+          cert._allocator_release_valid(cert._release_allocator()))
+
     payload, kwargs = fixture()
     check("complete receipt accepts",
           cert.validate_edge_group_receipt(payload, **kwargs) == [])
@@ -131,6 +412,19 @@ def main():
             "candidate_sha256_after", "c" * 64), "after differs"),
         ("wrong instrument", lambda p: p.__setitem__(
             "edge_cases_sha256", "c" * 64), "edge_cases.py hash"),
+        ("wrong meter reset policy", lambda p: p.__setitem__(
+            "meter_reset_policy", "omitted"), "meter reset policy"),
+        ("missing meter evidence", lambda p: p.pop("metered_predictions"),
+         "metered predictions are not"),
+        ("failed allocator release", lambda p: p["metered_predictions"][0][
+            "allocator_release"].__setitem__("succeeded", False),
+         "allocator release failed"),
+        ("malformed output hash", lambda p: p["metered_predictions"][0].__setitem__(
+            "output_sha256", "0" * 63), "schema differs"),
+        ("boolean FLOP count", lambda p: p["metered_predictions"][0].__setitem__(
+            "flops_used", True), "schema differs"),
+        ("boolean operation count", lambda p: p["metered_predictions"][0].__setitem__(
+            "n_ops", False), "schema differs"),
         ("truncated registry", lambda p: p["group_registry"].pop(),
          "group registry"),
         ("boolean registry count", lambda p: p["group_registry"][0].__setitem__(
@@ -141,6 +435,12 @@ def main():
          "world field width"),
         ("wrong dtype", lambda p: p["world"].__setitem__(
             "weights_mode", "f32"), "world field weights_mode"),
+        ("forged shim path", lambda p: p["world"].__setitem__(
+            "flopscope_file", os.path.join(_HERE, "flopscope", "__init__.py")),
+         "world field flopscope_file"),
+        ("forged package version", lambda p: p["world"].__setitem__(
+            "flopscope_version", "0.0-forged"),
+         "world field flopscope_version"),
         ("boolean count", lambda p: p.__setitem__(
             "expected_result_count", True), "expected result count"),
         ("short vector", lambda p: p.__setitem__("results", []),
