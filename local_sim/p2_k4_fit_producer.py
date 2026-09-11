@@ -540,6 +540,13 @@ def produce(a):
                 a.candidates, a.bounds, a.identities, source_path, __file__,
                 builder.__file__, builder.SOURCE]
             with selector._stable_files(evaluation_dependencies):
+                changed_label, _ = _closing_dependency_problem(
+                    a, input_hashes, [source_path], [source_hash],
+                    producer_binding, generator_binding)
+                if changed_label:
+                    raise ProducerRefused(
+                        "%s bytes changed before lifecycle load" %
+                        changed_label)
                 rows, provenance = le.evaluate(
                     source_path, seeds, zero_target, spec=spec,
                     gt_noise=[0.0] * len(seeds),

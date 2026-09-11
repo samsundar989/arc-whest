@@ -1,6 +1,6 @@
 """End-to-end synthetic regressions for the bounded coherent-K4 fit path."""
 from __future__ import annotations
-import argparse, copy, dataclasses, json, os, subprocess, sys, tempfile
+import argparse, contextlib, copy, dataclasses, json, os, subprocess, sys, tempfile
 from argparse import Namespace
 import numpy as np
 from numpy import load as _load_npz
@@ -1277,8 +1277,8 @@ def run_checks():
             try:
                 with open(path, "r+b") as fh:
                     raw = fh.read()
-                    replacement = raw.replace(b"_K4_LAM = 0.0",
-                                              b"_K4_LAM = 0.25")
+                    replacement = raw.replace(b"_K4_LAM = 0\n",
+                                              b"_K4_LAM = 0.25\n")
                     fh.seek(0)
                     fh.write(replacement)
                     fh.truncate()
@@ -1300,6 +1300,71 @@ def run_checks():
                and result["manifest"]["lifecycle_provenance"][0]
                    ["candidate_sha256"] == result["candidate_source_hashes"][0]),
               "attempted=%s denied=%s" % (attempted[0], denied[0]))
+
+    with _temp("p2-k4-producer-prelock-source-swap-") as root:
+        candidates = os.path.join(root, "candidates.json")
+        bounds = os.path.join(root, "bounds.json")
+        identities = os.path.join(root, "identities.json")
+        out_dir = os.path.join(root, "observations")
+        _write_json(candidates, {"parameters": ["lam"],
+                    "candidates": [{"lam": 0.0}]})
+        _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
+        _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
+                    "depth": 2,
+                    "identities": [{"id": "prelock-swap", "seed": 7094}]})
+        original_stable = fit._stable_files
+        swapped = [False]
+        @contextlib.contextmanager
+        def swap_immediately_before_lock(paths):
+            candidate_paths = [path for path in paths
+                               if os.path.basename(path) ==
+                               "candidate_000_coherent.py"]
+            if candidate_paths and not swapped[0]:
+                source_path = candidate_paths[0]
+                with open(source_path, "rb") as fh:
+                    original = fh.read()
+                replacement = original.replace(b"_K4_LAM = 0\n",
+                                               b"_K4_LAM = 0.25\n")
+                if replacement == original:
+                    raise AssertionError("generated coefficient marker missing")
+                with open(source_path, "wb") as fh:
+                    fh.write(replacement)
+                swapped[0] = True
+                try:
+                    with original_stable(paths):
+                        yield
+                finally:
+                    with open(source_path, "wb") as fh:
+                        fh.write(original)
+            else:
+                with original_stable(paths):
+                    yield
+        fit._stable_files = swap_immediately_before_lock
+        try:
+            try:
+                producer.produce(Namespace(
+                    candidates=candidates, bounds=bounds,
+                    identities=identities, out_dir=out_dir))
+                refused = False
+            except producer.ProducerRefused:
+                refused = True
+        finally:
+            fit._stable_files = original_stable
+        with open(os.path.join(out_dir, "failure_diagnostic.json"),
+                  encoding="utf-8") as fh:
+            diagnostic = json.load(fh)
+        check("producer rehashes candidate inside lifecycle lock before load",
+              (refused and swapped[0]
+               and "changed before lifecycle load" in diagnostic
+                   ["lifecycle_provenance"]["setup_error"]
+               and diagnostic["candidate_source"]
+                   ["unchanged_after_evaluation"] is True
+               and not os.path.exists(os.path.join(out_dir, "predictions.npz"))
+               and not os.path.exists(os.path.join(out_dir,
+                                                   "producer_receipt.json"))),
+              "refused=%s restored=%s" %
+              (refused, diagnostic["candidate_source"]
+               ["unchanged_after_evaluation"]))
     return {"kind": "synthetic coherent-K4 producer-selector conformance", "labels_read": False,
             "checks": rows, "n_checks": len(rows), "n_failed": sum(not x["pass"] for x in rows),
             "pass": all(x["pass"] for x in rows)}

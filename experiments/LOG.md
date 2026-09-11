@@ -42376,3 +42376,22 @@ fixtures were separated from now-denied in-lifecycle mutations so they continue
 to test their intended failure boundaries. The suite passes **89/89**;
 compilation and `git diff --check` pass. A fresh-context Skeptic and final current-
 source preflight remain required before the discriminator.
+
+The next fresh Skeptic returned **REJECT** because the frozen candidate hash was
+taken immediately before lifecycle-lock acquisition. It replaced the source in
+that narrow interval, let the replacement remain locked and execute, forced a
+setup failure, then restored the original after release. The diagnostic's
+post-release path observation looked unchanged and the setup fallback had no
+candidate hash, so it did not preserve the mismatch. No truth or success artifact
+was involved.
+
+After acquiring the complete lifecycle handle set, the producer now rehashes all
+locked registries and producer/generator/upstream/candidate sources against their
+frozen hashes before calling the loader. A registered source changed before lock
+acquisition therefore refuses before execution, and the pre-row diagnostic keeps
+the explicit `changed before lifecycle load` error even if the path is later
+restored. The exact pre-lock swap joins the in-lock swap regression. The complete
+suite passes **90/90**; compilation and `git diff --check` pass. A new fresh-
+context Skeptic and final current-source preflight remain required before the
+discriminator.
+
