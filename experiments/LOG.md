@@ -42436,3 +42436,25 @@ metadata are archived under `experiments/2026-09-10_stage2_k4_design/` as
 skipped Full-only deployment checks remain required at the later promotion
 gate; this default preflight certifies the IMPORTANT instrument repair needed
 for the registered one-row discriminator.
+
+Workerq job **877** executed the registered job-824 discriminator from commit
+`2be3c4841ce4fd457b36728ca20a7028350cda40` with 4 GiB RAM, 2 CPUs and no GPU.
+The queue reports `FAILED`/exit 2 because the producer deliberately refuses an
+incomplete candidate; that is the expected process outcome for this diagnostic,
+not a queue or host failure. Runtime was 8.116 seconds and peak measured RAM was
+1,054.254 MiB.
+
+The exclusive failure diagnostic contains exactly one evaluated row and no
+prediction archive or producer receipt. It binds the unchanged job-824 source
+at 45,782 bytes and SHA-256
+`ba618dd6ae3e16c9c7618354d92f255e523e62716516378591d4fa78bec41d5b`.
+That row has `budget_exhausted=true`; `time_exhausted`, `residual_exhausted` and
+`combined_exhausted` are false; `error_code` is empty; and `labels_read=false`.
+The last successfully billed total is 2,191,574,769,235 FLOPs, 99.6613% of the
+2,199,023,255,552 cap. It is below literal equality because flopscope rejects the
+next operation before adding its cost. Thus the registered mechanism discriminator
+is positive, while the contract phrase "FLOPs reach the official budget" needs
+the independent reviewer to decide whether the explicit exhaustion flag plus the
+pre-charge remainder satisfies the intended gate. Raw queue log, manifest and
+metadata are `job877_raw.log`, `job877_manifest.json` and
+`job877_metadata.json` beside the diagnostic. No protected truth was opened.

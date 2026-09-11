@@ -1,0 +1,166 @@
+{
+  "candidate": {
+    "lam": 0.0
+  },
+  "candidate_index": 0,
+  "candidate_source": {
+    "current_sha256": "ba618dd6ae3e16c9c7618354d92f255e523e62716516378591d4fa78bec41d5b",
+    "observation_error": "",
+    "path": "experiments/2026-09-11_job824_discriminator/observations/candidate_000_coherent.py",
+    "sha256": "ba618dd6ae3e16c9c7618354d92f255e523e62716516378591d4fa78bec41d5b",
+    "unchanged_after_evaluation": true
+  },
+  "captured_predictions": 1,
+  "complete_candidate": false,
+  "evaluated_rows": 1,
+  "failure_stage": "predict",
+  "generator": {
+    "current_sha256": "3d84b385c040bc0986ca79aa58dd185ee02f62514a9ad42395bf3793af2a7621",
+    "frozen_sha256": "3d84b385c040bc0986ca79aa58dd185ee02f62514a9ad42395bf3793af2a7621",
+    "observation_error": "",
+    "path": "local_sim/p2_build_k4_arms.py",
+    "unchanged_after_evaluation": true,
+    "upstream_source": {
+      "current_sha256": "220d23143eaadfa583ba629e0bc23634981b47b1594193204d0b181b7e9fbf17",
+      "frozen_sha256": "220d23143eaadfa583ba629e0bc23634981b47b1594193204d0b181b7e9fbf17",
+      "observation_error": "",
+      "path": "estimator_k3_full.py",
+      "unchanged_after_evaluation": true
+    },
+    "upstream_source_sha256": "220d23143eaadfa583ba629e0bc23634981b47b1594193204d0b181b7e9fbf17"
+  },
+  "identity_manifest": {
+    "depth": 16,
+    "identities": [
+      {
+        "id": "job824-first-label-free-identity",
+        "seed": 40910007000
+      }
+    ],
+    "kind": "synthetic-identities-v1",
+    "width": 1024
+  },
+  "immutable": true,
+  "inputs": {
+    "bounds": {
+      "current_sha256": "ded056b01282eaabf35ee1d882af38d50ebd69a0f432fc4a20df5979888ee93f",
+      "frozen_sha256": "ded056b01282eaabf35ee1d882af38d50ebd69a0f432fc4a20df5979888ee93f",
+      "observation_error": "",
+      "path": "experiments/2026-09-11_job824_discriminator/bounds.json",
+      "unchanged_after_evaluation": true
+    },
+    "candidates": {
+      "current_sha256": "c0852cf6f9fd8dc78f1857bc4778b0212f7324715cc508995dfe0937ad2f59e6",
+      "frozen_sha256": "c0852cf6f9fd8dc78f1857bc4778b0212f7324715cc508995dfe0937ad2f59e6",
+      "observation_error": "",
+      "path": "experiments/2026-09-11_job824_discriminator/candidates.json",
+      "unchanged_after_evaluation": true
+    },
+    "identities": {
+      "current_sha256": "82dc37f8c648f1a97cdaf8161d2e4d5bda19afd83ef4b7fa8324f67974cfe6d8",
+      "frozen_sha256": "82dc37f8c648f1a97cdaf8161d2e4d5bda19afd83ef4b7fa8324f67974cfe6d8",
+      "observation_error": "",
+      "path": "experiments/2026-09-11_job824_discriminator/identities.json",
+      "unchanged_after_evaluation": true
+    }
+  },
+  "labels_read": false,
+  "lifecycle_candidate_sha256": "ba618dd6ae3e16c9c7618354d92f255e523e62716516378591d4fa78bec41d5b",
+  "lifecycle_provenance": {
+    "backend": {
+      "flopscope": "0.12.1+np2.2.6",
+      "flopscope_path": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\lib\\site-packages\\flopscope",
+      "numpy": "2.2.6",
+      "python": "3.10.19"
+    },
+    "candidate": "experiments/2026-09-11_job824_discriminator/observations/candidate_000_coherent.py",
+    "candidate_sha256": "ba618dd6ae3e16c9c7618354d92f255e523e62716516378591d4fa78bec41d5b",
+    "host_cold_start_s": 0.24,
+    "lifecycle": "grader",
+    "n_mlps": 1,
+    "objective_is_graded": false,
+    "residual_is_graded": false,
+    "residual_measurement_path": "runner=local (in-process BudgetContext)",
+    "round_deviations": {
+      "residual_wall_time_limit_s": [
+        null,
+        0.4
+      ]
+    },
+    "round_tag": "v2-phase2",
+    "rows_hash": "db4f81c3408b305bf9209ef96c72d25240d47d120a0a1377fa4a32d8fb0973cb",
+    "setup_called": true,
+    "setup_error": "",
+    "setup_seconds": 0.029773299989756197,
+    "setup_timed_out": false,
+    "setup_timeout_s": 5.0,
+    "spec": {
+      "depth": 16,
+      "floor": 0.1,
+      "flop_budget": 2199023255552,
+      "lam": 0.0,
+      "memory_limit_mb": 8192,
+      "predict_timeout_s": 30.0,
+      "residual_wall_time_limit_s": null,
+      "round_tag": "v2-phase2",
+      "seed": 0,
+      "setup_timeout_s": 5.0,
+      "wall_time_limit_s": 120.0,
+      "width": 1024
+    },
+    "truth_sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+    "weights_mode": "f64_readonly",
+    "weights_mode_is_grader_default": true
+  },
+  "lifecycle_spec": {
+    "depth": 16,
+    "floor": 0.1,
+    "flop_budget": 2199023255552,
+    "lam": 0.0,
+    "memory_limit_mb": 8192,
+    "predict_timeout_s": 30.0,
+    "residual_wall_time_limit_s": null,
+    "round_tag": "v2-phase2",
+    "seed": 0,
+    "setup_timeout_s": 5.0,
+    "wall_time_limit_s": 120.0,
+    "width": 1024
+  },
+  "predictions_container_error": "",
+  "producer": {
+    "current_sha256": "d7fe98196fc194d7167648d08ba464cb2bdb3628cde5b65e4bb46cee33910a67",
+    "frozen_sha256": "d7fe98196fc194d7167648d08ba464cb2bdb3628cde5b65e4bb46cee33910a67",
+    "observation_error": "",
+    "path": "local_sim/p2_k4_fit_producer.py",
+    "unchanged_after_evaluation": true
+  },
+  "rows": [
+    {
+      "budget": 2199023255552.0,
+      "budget_exhausted": true,
+      "candidate": "experiments/2026-09-11_job824_discriminator/observations/candidate_000_coherent.py",
+      "candidate_sha256": "ba618dd6ae3e16c9c7618354d92f255e523e62716516378591d4fa78bec41d5b",
+      "combined_exhausted": false,
+      "depth": 16,
+      "error_code": "",
+      "estimator_seed": 2593161100,
+      "flops_used": 2191574769235.0,
+      "gt_noise": 0.0,
+      "index": 0,
+      "input_seed": 40910007000,
+      "mse": 0.0,
+      "n_ops": 3246.0,
+      "nonfinite": false,
+      "residual_exhausted": false,
+      "residual_wall_time_s": 0.8283917002554517,
+      "time_exhausted": false,
+      "truth_sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+      "wall_time_s": 6.217485200002557,
+      "width": 1024,
+      "zero_prediction_mse": 0.0
+    }
+  ],
+  "rows_container_error": "",
+  "rows_hash": "db4f81c3408b305bf9209ef96c72d25240d47d120a0a1377fa4a32d8fb0973cb",
+  "schema": "arc-whest.coherent-k4-fit-producer-failure.v1"
+}
