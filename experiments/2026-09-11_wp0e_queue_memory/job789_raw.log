@@ -1,0 +1,65 @@
+worker-q: job #789 starting at 2026-09-11T07:16:48.532956+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['cmd.exe', '/d', '/s', '/c', 'wsl.exe --cd /mnt/c/Users/samsu/Documents/arc-whest -e env WORKERQ_JOB_ID=%WORKERQ_JOB_ID% /usr/bin/prlimit --as=8589934592 -- /home/samsu/.arcwhest-linux/bin/python -u local_sim/test_certify_candidate.py --positive-only --receipt /mnt/c/Users/samsu/AppData/Local/Temp/arc_whest_wp0e_positive_linux_6dba69b.json --workerq-job-id %WORKERQ_JOB_ID%']
+worker-q: ------------------------------------------------------------
+WP0C - every certification section must be able to FAIL
+
+U  the soak's arithmetic (pure, no official run)
+  PASS  U1: _FAILURE_FLAGS is the installed whestbench's own flag_keys  package ('budget_exhausted', 'time_exhausted', 'residual_wall_time_exhausted', 'combined_budget_exhausted') vs ours ('budget_exhausted', 'time_exhausted', 'residual_wall_time_exhausted', 'combined_budget_exhausted')
+  PASS  U2: the tail is taken over EXECUTED rows only                   10/15 executed
+  PASS  U2: ...so the median is of executed work                        50.0 ms
+  PASS  U2: ...and the CONTAMINATED median is recorded beside it        30.0 ms, bias 1.667x
+  PASS  U2: the worst is UNCHANGED by the zeros -- why the defect hid   100.0 ms
+  PASS  U2: headroom is quoted on the worst EXECUTED row                4.00x
+  PASS  U3: the dominant failure mode is named                          'error'
+  PASS  U3: every failed row keeps its error_code                       5 records
+  PASS  U3: the traceback's LAST line is kept, not its first            'RunnerError: worker died'
+  PASS  U3: a harness fault UNDER the repo root claims no candidate frameNone
+  PASS  U4: a fault inside the candidate names the candidate's frame    rc-whest/estimator.py", line 900, in predict
+  PASS  U4b: ...and it is not claimed for a different candidate file    None
+  PASS  U4c: an installed-package frame under the repo root is EXCLUDED None
+  PASS  U5: a cliff overrun is attributed to the CLIFF, not to 'error'  'residual_wall_time_exhausted'
+  PASS  U5: ...and its flags survive into the record                    [['residual_wall_time_exhausted'], ['residual_wall_time_exhausted']]
+  PASS  U5: an over-cliff row does not masquerade as the tail           worst 50 ms, 2 failed
+  PASS  U8: an over-cap failed row is retained in worst_all_rows        worst_all_rows 420 ms, headroom 0.952x (executed-only says 50 ms, 8.0x)
+  PASS  U6: an all-failed run is REFUSED, not reported as 0 ms residual all 4 rows failed; no executed residual
+  PASS  U7: retained failure records are capped                         40 of 200
+  PASS  U9: a LOCAL-only failure leaves MATH certified                  CERTIFIED
+  PASS  U9: ...and SERVER certified                                     CERTIFIED
+  PASS  U9: ...while LOCAL is REFUSED, naming the check                 10: worst GRADED-PATH residual is under the cl
+  PASS  U9: the historical check NAME is unchanged, so old FAIL lines matchrenaming it would orphan two standing gate failures
+  PASS  U9: a domain with no checks reports NOT_RUN, not CERTIFIED      NOT_RUN
+  PASS  U9: a skipped-only domain is INCOMPLETE, not CERTIFIED          INCOMPLETE
+
+5-8  integration fixture
+  PASS  5: mathematical contract                                      
+  PASS  7: local runtime observation                                  
+  PASS  7: predicted server residual                                  
+  PASS  S: measured grading-server row                                
+
+11  integration fixture
+  PASS  11: residual tail                                             
+  PASS  U9: real head/check emission separates all four evidence domains['MATH', 'LOCAL', 'SERVER_PREDICTED', 'SERVER_MEASURED', 'LOCAL']
+  PASS  U9: measured server evidence is not a server forecast           SERVER_MEASURED vs SERVER_PREDICTED
+  PASS  U9: installed distribution metadata recovers both package versions{'whestbench': '0.16.1', 'flopscope': '0.12.1'}
+  PASS  U10: every stored certification's verdict is reproduced exactly 10 reports, 10 agree
+
+B  a CORRECT minimal candidate is not rejected by the battery
+  FAIL  B: the correct minimal candidate is not REFUSED                 rc=1, 2 FAIL line(s) -- FAIL  3: the invariant suite passes on THIS candidate, at th
+  FAIL  B: ...and it produced no FAIL line at all                       FAIL  3: the invariant suite passes on THIS candidate, at the LIVE shape and in the grad
+  FAIL  B: the certifier REFUSES to call its skips a pass               rc=1
+
+M  each mutation must fail its NAMED check
+
+R  the repository was not modified
+  PASS  R: estimator.py sha256 unchanged                                00240eb1e60810f5
+  PASS  R: edge_cases.py sha256 unchanged                               a123aca414c31d7c
+  PASS  R: the mutant directory is gone                                 /tmp/wp0c_mutants_csbmzo82
+  PASS  R: receipt provenance unchanged across execution                test, certifier, edge suite, estimator, and installed package bytes
+  receipt -> /mnt/c/Users/samsu/AppData/Local/Temp/arc_whest_wp0e_positive_linux_6dba69b.json
+
+FAILED 3: B: the correct minimal candidate is not REFUSED; B: ...and it produced no FAIL line at all; B: the certifier REFUSES to call its skips a pass
+worker-q: ------------------------------------------------------------
+worker-q: job #789 FAILED (exit code 1) at 2026-09-11T07:22:02.729634+00:00

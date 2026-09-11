@@ -41716,3 +41716,30 @@ exclusive receipt with exact provenance and all three positive checks, and no FA
 line. A missing/invalid receipt, any logical difference, RLIMIT_AS/other failure,
 or materially worse runtime falsifies this execution option. Only after that may
 the twelve mutation shards run once each and aggregate mechanically.
+
+### WP0E Linux 8-GiB result - production fits; off-shape stress cases do not
+
+Workerq 789 ran the unchanged positive battery through the registered 8 GiB
+`prlimit` and 12 GiB host declaration. It finished in 314 seconds with exit 1 and
+an exclusive receipt, so the option is **falsified**, not accepted: the positive
+control reported 26/30 edge checks and the battery correctly went red. Raw receipt,
+manifest and log are under `experiments/2026-09-11_wp0e_queue_memory/`.
+
+The two exact failing cases were rerun independently under the same hard limit.
+Workerq 792 showed `shape_generality:0` (depth 2, width 256) raising `MemoryError`
+while allocating a 393 MiB float64 temporary. Workerq 793 showed `layer1:1`
+(depth 8, width 128) raising while allocating a 974 MiB float64 temporary. Both
+use the live 2^41 budget, which drives the shape-generic sampler to 2^20 samples;
+they are correctness stress cases outside the graded 1024x16 shape. The graded
+shape itself remains separately proven under 8 GiB by workerq 599 at 2,346.7 MiB
+VmPeak. Nothing here weakens or reverses that production-memory evidence.
+
+**Next prediction before measurement.** Samuel: **"I don't know"**. The Builder
+predicts those unchanged off-shape cases, and therefore the unchanged positive
+battery, fit under a 12 GiB inherited Linux address-space cap. First rerun the
+larger observed `layer1:1` case alone with 12 GiB `prlimit` and a 12 GiB workerq
+declaration. If it passes, rerun the full positive battery at the same limits.
+No budget, shape, sample count, precision, seed, ordering, check or candidate byte
+may change. Failure under 12 GiB falsifies this bound and requires per-case memory
+measurement or a reviewed test-oracle redesign; it does not license a larger
+undeclared run.
