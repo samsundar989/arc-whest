@@ -42412,3 +42412,27 @@ and any receipt and writes an exclusive diagnostic. The exact boundary attack is
 regression fixture. The complete suite passes **91/91**; compilation and
 `git diff --check` pass. A new fresh-context Skeptic and final current-source
 preflight remain required before the discriminator.
+
+The fifteenth fresh-context review **ACCEPTED** commit
+`c6d36a7818c353b8c818ec80e18d6e6bbf5c2a5e`. Its adversarial evidence replaced
+the prediction archive with a contradictory but finite NPZ before the first
+archive digest and confirmed refusal plus artifact cleanup. It also attempted
+writes to the archive, candidate, registries and fit source during producer and
+standalone verification receipt construction; the Windows stable-file handles
+denied every write, emitted no inconsistent receipt and released cleanly. The
+review independently reproduced job 824's exact 45,782-byte generated source
+and SHA-256
+`ba618dd6ae3e16c9c7618354d92f255e523e62716516378591d4fa78bec41d5b`.
+It accepted the repaired truth-free diagnostic and receipt-integrity scope; it
+did not classify job 824's actual flag or make an accuracy claim.
+
+Workerq job **876** then ran the current-source default preflight at that exact
+commit. It **SUCCEEDED** with exit code zero: `PREFLIGHT GREEN -- 12/16, 4
+SKIPPED`, including all 91 Stage-2 interface tests and the real certification
+entry points. Runtime was 378.991 seconds, peak measured RAM was 3,088.164 MiB,
+and the 5 GiB / 2 CPU reservation was sufficient. Raw log, manifest and job
+metadata are archived under `experiments/2026-09-10_stage2_k4_design/` as
+`job876_raw.log`, `job876_manifest.json` and `job876_metadata.json`. The four
+skipped Full-only deployment checks remain required at the later promotion
+gate; this default preflight certifies the IMPORTANT instrument repair needed
+for the registered one-row discriminator.
