@@ -1,9 +1,9 @@
-"""Combine receipt-bound certification mutation shards without running work.
+"""Validate and combine receipt-bound certification mutation shards.
 
-An accepted aggregate is equivalent in case coverage to the default monolithic
-``test_certify_candidate.py`` run: one positive control and every registered
-mutation exactly once.  It does not reinterpret certifier output; each mutation
-must already have gone red on its registered named check.
+Acceptance validates receipt coverage equivalent to the default monolithic run:
+one positive control and every registered mutation exactly once.  Receipts do
+not authenticate execution.  Raw workerq job metadata and logs are the authority
+that the declared jobs executed the production certifier entry point.
 """
 
 from __future__ import annotations
@@ -51,16 +51,66 @@ def _raw_streams_valid(case):
             and case.get("stderr_sha256") == _text_sha(stderr))
 
 
+def _distribution_manifest_errors(provenance, label):
+    """Validate the deterministic byte manifests embedded in provenance."""
+    errors = []
+    for key in ("test_certify_candidate_sha256", "certify_candidate_sha256",
+                "estimator_sha256"):
+        if not isinstance(provenance, dict) or not _is_sha(provenance.get(key)):
+            errors.append(f"{label}: {key} is absent or invalid")
+    versions = provenance.get("distributions") if isinstance(provenance, dict) else None
+    manifests = provenance.get("distribution_bytes") if isinstance(provenance, dict) else None
+    if not isinstance(versions, dict) or not isinstance(manifests, dict):
+        return [f"{label}: installed distribution byte provenance is absent"]
+    for name in ("whestbench", "flopscope"):
+        manifest = manifests.get(name)
+        if not isinstance(manifest, dict):
+            errors.append(f"{label}: {name} byte manifest is absent")
+            continue
+        files = manifest.get("files")
+        if not isinstance(files, list) or not files:
+            errors.append(f"{label}: {name} byte manifest has no files")
+            continue
+        valid_rows = all(
+            isinstance(row, dict)
+            and isinstance(row.get("path"), str) and bool(row["path"])
+            and isinstance(row.get("size"), int) and row["size"] >= 0
+            and _is_sha(row.get("sha256"))
+            for row in files
+        )
+        paths = [row.get("path") for row in files if isinstance(row, dict)]
+        if (not valid_rows or paths != sorted(paths)
+                or len(paths) != len(set(paths))):
+            errors.append(f"{label}: {name} byte manifest rows are malformed")
+            continue
+        raw = json.dumps(files, sort_keys=True, separators=(",", ":"))
+        if manifest.get("version") != versions.get(name):
+            errors.append(f"{label}: {name} manifest version mismatch")
+        if manifest.get("file_count") != len(files):
+            errors.append(f"{label}: {name} manifest file count mismatch")
+        if manifest.get("total_bytes") != sum(row["size"] for row in files):
+            errors.append(f"{label}: {name} manifest byte count mismatch")
+        if manifest.get("manifest_sha256") != hashlib.sha256(
+                raw.encode("utf-8")).hexdigest():
+            errors.append(f"{label}: {name} byte manifest digest mismatch")
+    return errors
+
+
 def aggregate_payloads(payloads, *, current_provenance=None,
                        current_registry=None):
     """Pure validator used by the CLI and focused mutation tests."""
-    provenance = current_provenance or battery.receipt_provenance()
-    registry = current_registry or battery.mutation_registry()
+    provenance = (battery.receipt_provenance() if current_provenance is None
+                  else current_provenance)
+    registry = (battery.mutation_registry() if current_registry is None
+                else current_registry)
     registry_sha = _registry_sha(registry)
     expected = {row["tag"]: row for row in registry}
     errors = []
     all_cases = []
     shard_rows = []
+    workerq_job_ids = set()
+
+    errors.extend(_distribution_manifest_errors(provenance, "current provenance"))
 
     if not payloads:
         errors.append("no shard receipts supplied")
@@ -69,16 +119,29 @@ def aggregate_payloads(payloads, *, current_provenance=None,
         label = str(item.get("path", f"receipt[{index}]"))
         receipt = item.get("payload")
         file_sha = item.get("sha256", "")
-        shard_rows.append({"path": label, "sha256": file_sha})
+        shard_row = {"path": label, "sha256": file_sha}
+        shard_rows.append(shard_row)
         if not _is_sha(file_sha):
             errors.append(f"{label}: receipt file sha256 is absent or invalid")
         if not isinstance(receipt, dict):
             errors.append(f"{label}: receipt is not an object")
             continue
+        workerq_job_id = receipt.get("workerq_job_id")
+        shard_row["declared_workerq_job_id"] = workerq_job_id
+        if (not isinstance(workerq_job_id, str)
+                or not workerq_job_id.isdecimal()
+                or int(workerq_job_id) <= 0):
+            errors.append(f"{label}: declared workerq job id is absent or invalid")
+        elif workerq_job_id in workerq_job_ids:
+            errors.append(f"{label}: duplicate declared workerq job id {workerq_job_id}")
+        else:
+            workerq_job_ids.add(workerq_job_id)
         if receipt.get("artifact") != "certification_mutation_shard":
             errors.append(f"{label}: wrong artifact kind")
         if receipt.get("artifact_version") != battery.RECEIPT_VERSION:
             errors.append(f"{label}: wrong artifact version")
+        errors.extend(_distribution_manifest_errors(
+            receipt.get("provenance"), label))
         if receipt.get("provenance") != provenance:
             errors.append(f"{label}: provenance does not match current sources/packages")
         if receipt.get("mutation_registry") != registry:
@@ -91,23 +154,42 @@ def aggregate_payloads(payloads, *, current_provenance=None,
             checks = []
         elif any(not isinstance(c, dict) or c.get("ok") is not True for c in checks):
             errors.append(f"{label}: at least one outer battery check failed")
-        check_map = {
-            c.get("name"): c.get("ok") for c in checks if isinstance(c, dict)
-        }
+        unit_n = receipt.get("unit_check_count")
+        expected_unit_names = list(battery.UNIT_CHECK_NAMES)
+        if unit_n != len(expected_unit_names):
+            errors.append(f"{label}: unit check count does not match current registry")
+        unit_prefix = checks[:len(expected_unit_names)]
+        prefix_names = [c.get("name") for c in unit_prefix
+                        if isinstance(c, dict)]
+        if prefix_names != expected_unit_names:
+            errors.append(f"{label}: unit-check prefix does not match current registry")
+        if (len(unit_prefix) != len(expected_unit_names)
+                or any(c.get("ok") is not True for c in unit_prefix
+                       if isinstance(c, dict))):
+            errors.append(f"{label}: unit-check prefix did not pass")
+        repository_checks = []
         for required_check in (
             "R: estimator.py sha256 unchanged",
             "R: the mutant directory is gone",
         ):
-            if check_map.get(required_check) is not True:
+            matches = [c for c in checks if isinstance(c, dict)
+                       and c.get("name") == required_check]
+            if len(matches) != 1 or matches[0].get("ok") is not True:
                 errors.append(f"{label}: required repository check absent: "
                               f"{required_check}")
-        unit_n = receipt.get("unit_check_count")
-        if not isinstance(unit_n, int) or unit_n <= 0:
-            errors.append(f"{label}: unit check count is absent")
+            else:
+                repository_checks.append(matches[0])
         if receipt.get("unit_checks_passed") is not True:
             errors.append(f"{label}: unit checks did not pass")
         if receipt.get("overall_pass") is not True:
             errors.append(f"{label}: shard verdict is not PASS")
+        shard_row.update({
+            "unit_check_count": unit_n,
+            "unit_checks": unit_prefix,
+            "repository_checks": repository_checks,
+            "checks": checks,
+            "overall_pass": receipt.get("overall_pass"),
+        })
 
         selection = receipt.get("selection")
         cases = receipt.get("cases")
@@ -116,14 +198,21 @@ def aggregate_payloads(payloads, *, current_provenance=None,
             continue
         selected = selection.get("mutation_tags")
         include_b = selection.get("include_positive")
+        shard_row["selection"] = selection
         if not isinstance(selected, list) or include_b not in (True, False):
             errors.append(f"{label}: selection fields are malformed")
             continue
+        if include_b is False and not selected:
+            errors.append(f"{label}: empty mutation-only shard is forbidden")
         known_order = [row["tag"] for row in registry]
         canonical = [tag for tag in known_order if tag in set(selected)]
         if selected != canonical or len(selected) != len(set(selected)):
             errors.append(f"{label}: selected tags are unknown, duplicated or out of order")
-        case_tags = [case.get("tag") for case in cases if isinstance(case, dict)]
+        if any(not isinstance(case, dict) for case in cases):
+            errors.append(f"{label}: every case must be an object")
+            case_tags = []
+        else:
+            case_tags = [case.get("tag") for case in cases]
         wanted = (["B"] if include_b else []) + selected
         if case_tags != wanted:
             errors.append(f"{label}: executed cases {case_tags!r} != selection {wanted!r}")
@@ -210,7 +299,13 @@ def aggregate_payloads(payloads, *, current_provenance=None,
         "mutation_registry_sha256": registry_sha,
         "required_cases": required,
         "cases": ordered_cases,
-        "candidate_certification_calls": len(ordered_cases),
+        "required_cases_covered": [case["tag"] for case in ordered_cases],
+        "coverage_complete": len(ordered_cases) == len(required),
+        "execution_authority": (
+            "Raw workerq job metadata and logs; receipt aggregation validates "
+            "declared job IDs, provenance, checks, and case coverage but does not "
+            "authenticate execution."
+        ),
         "shards": shard_rows,
     }
 

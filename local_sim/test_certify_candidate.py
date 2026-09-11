@@ -57,6 +57,38 @@ _CHECKS = []
 
 RECEIPT_VERSION = 1
 
+UNIT_CHECK_NAMES = (
+    "U1: _FAILURE_FLAGS is the installed whestbench's own flag_keys",
+    "U2: the tail is taken over EXECUTED rows only",
+    "U2: ...so the median is of executed work",
+    "U2: ...and the CONTAMINATED median is recorded beside it",
+    "U2: the worst is UNCHANGED by the zeros -- why the defect hid",
+    "U2: headroom is quoted on the worst EXECUTED row",
+    "U3: the dominant failure mode is named",
+    "U3: every failed row keeps its error_code",
+    "U3: the traceback's LAST line is kept, not its first",
+    "U3: a harness fault UNDER the repo root claims no candidate frame",
+    "U4: a fault inside the candidate names the candidate's frame",
+    "U4b: ...and it is not claimed for a different candidate file",
+    "U4c: an installed-package frame under the repo root is EXCLUDED",
+    "U5: a cliff overrun is attributed to the CLIFF, not to 'error'",
+    "U5: ...and its flags survive into the record",
+    "U5: an over-cliff row does not masquerade as the tail",
+    "U8: an over-cap failed row is retained in worst_all_rows",
+    "U6: an all-failed run is REFUSED, not reported as 0 ms residual",
+    "U7: retained failure records are capped",
+    "U9: a LOCAL-only failure leaves MATH certified",
+    "U9: ...and SERVER certified",
+    "U9: ...while LOCAL is REFUSED, naming the check",
+    "U9: the historical check NAME is unchanged, so old FAIL lines match",
+    "U9: a domain with no checks reports NOT_RUN, not CERTIFIED",
+    "U9: a skipped-only domain is INCOMPLETE, not CERTIFIED",
+    "U9: real head/check emission separates all four evidence domains",
+    "U9: measured server evidence is not a server forecast",
+    "U9: installed distribution metadata recovers both package versions",
+    "U10: every stored certification's verdict is reproduced exactly",
+)
+
 
 def check(name, ok, detail=""):
     _TOTAL[0] += 1
@@ -82,17 +114,55 @@ def _write_json_exclusive(path, payload):
         fh.write("\n")
 
 
+def _distribution_bytes(name):
+    """Hash every file declared by an installed distribution's RECORD."""
+    dist = importlib.metadata.distribution(name)
+    declared = dist.files
+    if not declared:
+        raise RuntimeError(f"installed distribution {name!r} has no file manifest")
+    files = []
+    for item in sorted(declared, key=lambda p: str(p).replace("\\", "/")):
+        rel = str(item).replace("\\", "/")
+        path = os.fspath(dist.locate_file(item))
+        if not os.path.isfile(path):
+            raise RuntimeError(f"installed distribution file is absent: {name}:{rel}")
+        files.append({"path": rel, "size": os.path.getsize(path),
+                      "sha256": _sha(path)})
+    raw = json.dumps(files, sort_keys=True, separators=(",", ":"))
+    return {
+        "version": dist.version,
+        "file_count": len(files),
+        "total_bytes": sum(row["size"] for row in files),
+        "manifest_sha256": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
+        "files": files,
+    }
+
+
 def receipt_provenance():
     """Exact identities needed to combine independently executed shards."""
     return {
         "test_certify_candidate_sha256": _sha(__file__),
         "certify_candidate_sha256": _sha(os.path.join(_HERE, "certify_candidate.py")),
         "estimator_sha256": _sha(SHIP),
-        "distributions": {
-            name: importlib.metadata.version(name)
-            for name in ("whestbench", "flopscope")
-        },
+        "distributions": {name: importlib.metadata.version(name)
+                          for name in ("whestbench", "flopscope")},
+        "distribution_bytes": {name: _distribution_bytes(name)
+                               for name in ("whestbench", "flopscope")},
     }
+
+
+def validate_workerq_job_id(value, environ_value=""):
+    """Validate the explicitly declared workerq identity for a receipt.
+
+    This binds the declaration to WORKERQ_JOB_ID when workerq supplies it.  The
+    receipt remains a record, not an authentication mechanism; raw workerq
+    metadata and logs are the execution authority.
+    """
+    if not isinstance(value, str) or not value.isdecimal() or int(value) <= 0:
+        raise ValueError("--workerq-job-id must be a positive decimal job id")
+    if environ_value and value != environ_value:
+        raise ValueError("--workerq-job-id does not match WORKERQ_JOB_ID")
+    return value
 
 
 # --------------------------------------------------------------------------- #
@@ -734,6 +804,8 @@ def main():
                     help="run B and no mutations")
     ap.add_argument("--receipt", default="", metavar="PATH",
                     help="exclusive-create machine-readable shard receipt")
+    ap.add_argument("--workerq-job-id", default="", metavar="ID",
+                    help="required explicit workerq job id when writing a receipt")
     a = ap.parse_args()
     try:
         selection = shard_selection(
@@ -742,11 +814,18 @@ def main():
     except ValueError as exc:
         ap.error(str(exc))
     if a.receipt:
+        try:
+            validate_workerq_job_id(
+                a.workerq_job_id, os.environ.get("WORKERQ_JOB_ID", ""))
+        except ValueError as exc:
+            ap.error(str(exc))
         receipt_path = os.path.abspath(a.receipt)
         if os.path.exists(receipt_path):
             ap.error("receipt already exists; evidence is never overwritten")
         if not os.path.isdir(os.path.dirname(receipt_path)):
             ap.error("receipt parent directory must already exist")
+    elif a.workerq_job_id:
+        ap.error("--workerq-job-id is only valid with --receipt")
 
     provenance = receipt_provenance() if a.receipt else None
     registry = mutation_registry()
@@ -758,6 +837,9 @@ def main():
     print("WP0C - every certification section must be able to FAIL\n")
     unit_tests()
     unit_check_count = len(_CHECKS)
+    if tuple(row.get("name") for row in _CHECKS) != UNIT_CHECK_NAMES:
+        check("H: unit-check prefix matches the registered names", False,
+              f"expected {len(UNIT_CHECK_NAMES)}, observed {unit_check_count}")
     print()
     ship_before = _sha(SHIP)
     tmp = tempfile.mkdtemp(prefix="wp0c_mutants_")
@@ -856,7 +938,7 @@ def main():
             "unit_checks_passed": all(c["ok"] for c in _CHECKS[:unit_check_count]),
             "checks": _CHECKS,
             "overall_pass": not _FAILED,
-            "workerq_job_id": os.environ.get("WORKERQ_JOB_ID", ""),
+            "workerq_job_id": a.workerq_job_id,
         }
         _write_json_exclusive(a.receipt, payload)
         print("  receipt -> " + os.path.abspath(a.receipt))
