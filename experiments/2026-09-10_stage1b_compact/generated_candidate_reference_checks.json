@@ -1,0 +1,86 @@
+{
+  "arms": [
+    {
+      "arm": "exact",
+      "candidate_flops": 361876,
+      "candidate_operations": 1996,
+      "exact_regeneration": true,
+      "internal_reference_max_relative": 5.5223384037069584e-08,
+      "output_boundary_flops": 2120,
+      "output_boundary_operations": 26,
+      "pass": true,
+      "reference_flops": 359756,
+      "reference_operations": 1970,
+      "row0_exact_relative": 1.1102230246251565e-16,
+      "source_sha256": "9e84ae18910fbbbfd8723e563fd9062ab3032fe96a60480e46c1c80e72fa1206"
+    },
+    {
+      "arm": "coherent",
+      "candidate_flops": 407108,
+      "candidate_operations": 3066,
+      "exact_regeneration": true,
+      "internal_reference_max_relative": 8.045454577887412e-06,
+      "output_boundary_flops": 2120,
+      "output_boundary_operations": 26,
+      "pass": true,
+      "reference_flops": 404988,
+      "reference_operations": 3040,
+      "row0_exact_relative": 1.1102230246251565e-16,
+      "source_sha256": "a25e112cbcfd17967ab4a3736808b303c17a17bae4da6b0ec1bfa0ed52c05d68"
+    },
+    {
+      "arm": "consumers_only",
+      "candidate_flops": 377932,
+      "candidate_operations": 2506,
+      "exact_regeneration": true,
+      "internal_reference_max_relative": 5.868299104427877e-07,
+      "output_boundary_flops": 2120,
+      "output_boundary_operations": 26,
+      "pass": true,
+      "reference_flops": 375812,
+      "reference_operations": 2480,
+      "row0_exact_relative": 1.1102230246251565e-16,
+      "source_sha256": "c9d1d2b14ed23a3fc0e7a190edc34d469544ef7799089e27d11719c8e3235d22"
+    },
+    {
+      "arm": "births_only",
+      "candidate_flops": 398612,
+      "candidate_operations": 2865,
+      "exact_regeneration": true,
+      "internal_reference_max_relative": 1.0652058471047332e-06,
+      "output_boundary_flops": 2120,
+      "output_boundary_operations": 26,
+      "pass": true,
+      "reference_flops": 396492,
+      "reference_operations": 2839,
+      "row0_exact_relative": 1.1102230246251565e-16,
+      "source_sha256": "90d83ada33b98b2849da7a889f288599ee7566ecdca30b9359599e17e8d9b934"
+    }
+  ],
+  "kind": "label-free generated compact candidate/reference parity",
+  "master_off": {
+    "arm": "exact-vs-coherent-source-master-off",
+    "flops": [
+      361876,
+      361876
+    ],
+    "operations": [
+      1996,
+      1996
+    ],
+    "output_identical": true,
+    "pass": true
+  },
+  "n_checks": 5,
+  "n_failed": 0,
+  "pass": true,
+  "rank": 8,
+  "recent": 4,
+  "relative_tolerance": 3e-05,
+  "residual_rank": 8,
+  "seed": 123,
+  "shape": [
+    8,
+    8
+  ]
+}

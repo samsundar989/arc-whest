@@ -177,6 +177,7 @@ def run_checks():
         finally:
             fit._load_truth = original_loader
         expected_sources = {"fit_interface", "fit_producer", "arm_generator",
+                            "arm_template",
                             "arm_exact", "arm_coherent", "arm_consumers_only",
                             "arm_births_only"}
         check("verify-only binds producer evidence without truth",
@@ -415,6 +416,27 @@ def run_checks():
         try: fit.fit(a, truth_loader=lambda _a: calls.append(True)); refused = False
         except fit.FitRefused: refused = True
         check("mutated candidate source refuses before truth", refused and not calls, "loader calls=%d" % len(calls))
+
+    with _temp("p2-k4-fit-exact-regeneration-") as root:
+        a, made = _fixture(root)
+        source = os.path.join(_ROOT, made["candidate_sources"][0])
+        with open(source, "a", encoding="utf-8") as fh:
+            fh.write("\n# semantically inert but unregistered bytes\n")
+        changed_hash = fit._sha256(source)
+        def bind_changed_source(values):
+            hashes = np.asarray(values["candidate_source_hashes"]).copy()
+            hashes[0] = changed_hash
+            values["candidate_source_hashes"] = hashes
+        _rewrite_npz(a.predictions, bind_changed_source)
+        calls = []
+        try:
+            fit.fit(a, truth_loader=lambda _a: calls.append(True))
+            refused, detail = False, "accepted"
+        except fit.FitRefused as exc:
+            refused, detail = "not an exact registered regeneration" in str(exc), str(exc)
+        check("same-configuration source with re-bound hash still refuses",
+              refused and not calls and not os.path.exists(a.receipt),
+              "loader calls=%d detail=%s" % (len(calls), detail))
 
     with _temp("p2-k4-fit-source-closing-race-") as root:
         a, made = _fixture(root)

@@ -1,0 +1,87 @@
+{
+  "kind": "label-free compact four-arm reference checks",
+  "checks": [
+    {
+      "check": "default-coherent-regression",
+      "pass": true,
+      "flops": 68912,
+      "operations": 963
+    },
+    {
+      "check": "exact-is-master-off",
+      "pass": true,
+      "unexpected_k4_families": []
+    },
+    {
+      "check": "lambda-does-not-change-cost",
+      "pass": true,
+      "flops": [
+        68912,
+        68912,
+        68912
+      ],
+      "operations": [
+        963,
+        963,
+        963
+      ]
+    },
+    {
+      "check": "depth-one-births-only-nests-exact",
+      "pass": true
+    },
+    {
+      "check": "later-depth-mechanisms-are-active",
+      "pass": true,
+      "first_layer_hashes": {
+        "exact": "d6280efb1847c64d4f16ed7903e07da894f39b0986f9009f9048b9e927e13f23",
+        "coherent": "d6280efb1847c64d4f16ed7903e07da894f39b0986f9009f9048b9e927e13f23",
+        "consumers": "d6280efb1847c64d4f16ed7903e07da894f39b0986f9009f9048b9e927e13f23",
+        "births": "d6280efb1847c64d4f16ed7903e07da894f39b0986f9009f9048b9e927e13f23"
+      }
+    },
+    {
+      "check": "all-arms-dense-full-rank-state-and-closure",
+      "pass": true,
+      "closure_max_relative": {
+        "exact": {
+          "k4_core": 0.0,
+          "k4_consumers": 0.0,
+          "mean": 0.0,
+          "covariance": 0.0,
+          "birth": 1.955655359597852e-07
+        },
+        "coherent": {
+          "k4_core": 0.0,
+          "k4_consumers": 8.422218622516908e-08,
+          "mean": 0.0,
+          "covariance": 1.792851114790217e-08,
+          "birth": 1.1430017488045507e-07
+        },
+        "consumers_only": {
+          "k4_core": 0.0,
+          "k4_consumers": 8.422218622516908e-08,
+          "mean": 0.0,
+          "covariance": 9.498454967005188e-09,
+          "birth": 1.5702470046452532e-07
+        },
+        "births_only": {
+          "k4_core": 0.0,
+          "k4_consumers": 0.0,
+          "mean": 0.0,
+          "covariance": 0.0,
+          "birth": 1.1324016269131931e-07
+        }
+      },
+      "state_max_relative": {
+        "exact": 0.0,
+        "coherent": 0.0,
+        "consumers_only": 0.0,
+        "births_only": 0.0
+      }
+    }
+  ],
+  "n_checks": 6,
+  "n_failed": 0,
+  "pass": true
+}

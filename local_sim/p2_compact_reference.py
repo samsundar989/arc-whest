@@ -12,11 +12,16 @@ at most one source across the age boundary per layer, and skips joins and D21
 on the final layer. No source is deleted.
 
 The metered path also runs a mean/full-covariance Gaussian ReLU backbone, an
-analytic D3/D21 closure, the fixed-lam coherent K4 transport and D4/D22/D31
-consumers, every induced structured K3 feed, source construction, and a final
+analytic D3/D21 closure, the coherent K4 transport and optional D4/D22/D31
+consumers, optional induced structured K3 feeds, source construction, and a final
 mean-only readout.  It is a label-free research reference and cost instrument,
 not a submission estimator.  Its omitted higher cross-cumulant nonlinear terms
 are reported explicitly; no accuracy conclusion follows from this program.
+
+The carried K4 core is the diagonal of the total ``G`` in
+``G = diag(gcore) + lam * C_off``.  It is not a residual with a hidden scalar
+component.  Consumers and births are independent switches; K4 state exists when
+either switch is enabled.
 """
 
 from __future__ import annotations
@@ -121,18 +126,24 @@ def dense_slices(sources, need_d21=True):
         PP = source.P * source.P
         MP = M * source.P
         d3 += (3.0 * source.A * AP * source.w2[None, :] + MP * source.P).sum(axis=1)
-        rf = AP @ source.c1 + PP @ source.c2
-        d3 += rf * source.Y
+        has_birth_feed = (source.c1 is not None and source.c2 is not None
+                          and source.Y is not None)
+        rf = (AP @ source.c1 + PP @ source.c2
+              if has_birth_feed else None)
+        if has_birth_feed:
+            d3 += rf * source.Y
         if need_d21:
             LA = 2.0 * AP * source.w2[None, :] + PP * source.e[None, :]
             LP = (source.A * source.A) * source.w2[None, :]
             LP += PP * (source.s[None, :] / 3.0) + (2.0 / 3.0) * MP
-            LP += (source.A * source.c1[None, :]
-                   + source.P * source.c2[None, :]) * (
-                       (2.0 / 3.0) * source.Y[:, None])
+            if has_birth_feed:
+                LP += (source.A * source.c1[None, :]
+                       + source.P * source.c2[None, :]) * (
+                           (2.0 / 3.0) * source.Y[:, None])
             d21 += (LA @ source.A.T + LP @ source.P.T
-                    + ((PP @ source.L) @ source.Z.T) / 3.0
-                    + (rf[:, None] * source.Y[None, :]) / 3.0)
+                    + ((PP @ source.L) @ source.Z.T) / 3.0)
+            if has_birth_feed:
+                d21 += (rf[:, None] * source.Y[None, :]) / 3.0
     return d3, d21
 
 
@@ -143,26 +154,34 @@ def dense_closure_oracle(rows, n, residual_rank):
     off_mask = np.ones((n, n)) - np.eye(n)
     for row in rows:
         row = {k: (None if v is None else
-                   tuple(np.asarray(x) for x in v) if k == "newborn" else
+                   tuple(None if x is None else np.asarray(x) for x in v)
+                   if k == "newborn" else
                    np.asarray(v) if hasattr(v, "shape") else v)
                for k, v in row.items()}
         W, C_old = row["W"], row["C_old"]
         mu_pre, var_pre = row["mu_pre"], row["var_pre"]
         C_off, D3 = row["C_off"], row["D3"]
         w1, w2, w3, w4 = row["w1"], row["w2"], row["w3"], row["w4"]
-        if row["gcore_in"] is None:
+        active = row.get("active", True)
+        consumers = row.get("consumers", True)
+        births = row.get("births", True)
+        lam = row.get("lam", 1.0 / 3.0)
+        if not active or row["gcore_in"] is None:
             dG = np.zeros(n)
         else:
-            dG = ((W * W) @ (row["gcore_in"] - np.diag(C_old) / 3.0)
-                  + var_pre / 3.0)
-        D4 = 2.0 * dG
-        D22 = (dG[:, None] + dG[None, :]) / 3.0
-        D31 = C_off / 3.0
+            dG = ((W * W) @ (row["gcore_in"] - lam * np.diag(C_old))
+                  + lam * var_pre)
+        D4 = 2.0 * dG if consumers else np.zeros(n)
+        D22 = ((dG[:, None] + dG[None, :]) / 3.0
+               if consumers else np.zeros((n, n)))
+        D31 = lam * C_off if consumers else np.zeros((n, n))
         worst["k4_consumers"] = max(
             worst["k4_consumers"], _rel(D4, row["D4"]),
             _rel(D22, row["D22"]), _rel(D31, row["D31"]))
         base = row["sigma"] * row["phi"] + mu_pre * w1
-        mean = base + D3 * w3 / 6.0 + D4 * w4 / 24.0
+        mean = (base + D3 * w3 / 6.0
+                + D4 * w4 / 24.0 if consumers
+                else base + D3 * w3 / 6.0)
         worst["mean"] = max(worst["mean"], _rel(mean, row["mu"]))
         if row["last"]:
             continue
@@ -174,28 +193,37 @@ def dense_closure_oracle(rows, n, residual_rank):
                + 0.5 * C_off * C_off * (w2[:, None] * w2[None, :]))
         K11 += 0.25 * (D21 * (w2[:, None] * w1[None, :])
                        + D21.T * (w1[:, None] * w2[None, :]))
-        K11 += D22 * (w2[:, None] * w2[None, :]) / 4.0
-        K11 += (D31 + D31.T) * (w3[:, None] * w1[None, :]) / 12.0
+        if consumers:
+            K11 += D22 * (w2[:, None] * w2[None, :]) / 4.0
+            K11 += (D31 + D31.T) * (w3[:, None] * w1[None, :]) / 12.0
         covariance = np.diag(var_out) + K11 * off_mask
         worst["covariance"] = max(worst["covariance"],
                                   _rel(covariance, row["C"]))
         k4v, k22 = row["k4v"], row["k22"]
-        h4 = k4v + k22.sum(axis=1)
-        gcore = ((6.0 / (n + 4.0)) * h4
-                 - (3.0 / ((n + 2.0) * (n + 4.0))) * h4.sum()) / 2.0
-        worst["k4_core"] = max(worst["k4_core"], _rel(gcore, row["gcore"]))
+        if active:
+            h4 = k4v + k22.sum(axis=1)
+            gcore = ((6.0 / (n + 4.0)) * h4
+                     - (3.0 / ((n + 2.0) * (n + 4.0))) * h4.sum()) / 2.0
+            worst["k4_core"] = max(worst["k4_core"],
+                                    _rel(gcore, row["gcore"]))
 
         a = w1[:, None] * C_off
         local21 = ((w1[:, None] ** 2) * w2[None, :] * (C_off ** 2)
                    + 2.0 * (w2 * w1 * var_pre)[:, None]
                    * w1[None, :] * C_off)
         old21 = (w1[:, None] ** 2) * D21 * w1[None, :]
-        y = 0.5 * w2
-        dgw, u, c1 = w1 * w1 * dG, y * dG, w1 / 3.0
-        feed21 = (dgw[:, None] * y[None, :] / 3.0
-                  + (2.0 / 3.0) * y[:, None] * (a * c1[None, :])
-                  + (w1 * w1)[:, None] * u[None, :] / 3.0)
-        feed3 = dgw * y + u * w1 * w1
+        if births:
+            y = 0.5 * w2
+            dgw, u, c1 = w1 * w1 * dG, y * dG, lam * w1
+            feed21 = (dgw[:, None] * y[None, :] / 3.0
+                      + (2.0 / 3.0) * y[:, None] * (a * c1[None, :])
+                      + (w1 * w1)[:, None] * u[None, :] / 3.0)
+            feed3 = dgw * y + u * w1 * w1
+            c2 = dgw
+        else:
+            y = c1 = c2 = None
+            feed21 = np.zeros((n, n))
+            feed3 = np.zeros(n)
         rep21 = old21 + (a * a) * w2[None, :] + feed21
         K21 = old21 + local21 + feed21
         s = row["k3v"] - D3 * (w1 ** 3) - feed3
@@ -207,11 +235,24 @@ def dense_closure_oracle(rows, n, residual_rank):
                           mode="reduced")[0][:, :residual_rank]
         R = (Qr.T @ residual).T * 3.0
         birth = row["newborn"]
-        expected = (a, R, Qr, s, e, w2,
+        # QR factors are not individually unique (column signs, and bases in a
+        # rank-deficient/full-width tail, may differ).  The transported source
+        # only consumes their product R @ L.T, so compare that invariant and
+        # then compare the remaining fields directly.
+        got_residual = np.asarray(birth[1]) @ np.asarray(birth[2]).T
+        want_residual = R @ Qr.T
+        worst["birth"] = max(worst["birth"],
+                             _rel(got_residual, want_residual))
+        expected = (a, s, e, w2,
                     9.0 + w2 * w2 + 9.0 * e * e,
-                    1.0 + s * s, c1, dgw, y)
-        for got, want in zip(birth, expected):
-            worst["birth"] = max(worst["birth"], _rel(np.asarray(got), want))
+                    1.0 + s * s, c1, c2, y)
+        for got, want in zip((birth[0],) + tuple(birth[3:]), expected):
+            if got is None or want is None:
+                if got is not None or want is not None:
+                    worst["birth"] = float("inf")
+            else:
+                worst["birth"] = max(worst["birth"],
+                                     _rel(np.asarray(got), want))
     return worst
 
 
@@ -226,7 +267,8 @@ def dense_shadow_oracle(rows):
             shadow.append(insert_birth(newborn, W))
         actual = []
         for _kind, values in row["sources"]:
-            actual.append(Source(*[np.asarray(x) for x in values[:12]],
+            actual.append(Source(*[None if x is None else np.asarray(x)
+                                   for x in values[:12]],
                                  age=int(values[12])))
         shadow.sort(key=lambda source: source.age)
         actual.sort(key=lambda source: source.age)
@@ -236,11 +278,16 @@ def dense_shadow_oracle(rows):
             age_exact = age_exact and want.age == got.age
             for name in ("A", "P", "Z", "L", "s", "e", "w2", "dA",
                          "dP", "c1", "c2", "Y"):
-                worst = max(worst, _rel(getattr(want, name),
-                                        getattr(got, name)))
+                wv, gv = getattr(want, name), getattr(got, name)
+                if wv is None or gv is None:
+                    if wv is not None or gv is not None:
+                        return float("inf"), False
+                else:
+                    worst = max(worst, _rel(wv, gv))
         birth = row["newborn"]
         newborn = (None if birth is None else
-                   Birth(*[np.asarray(x) for x in birth]))
+                   Birth(*[None if x is None else np.asarray(x)
+                           for x in birth]))
     return worst, age_exact
 
 
@@ -267,17 +314,21 @@ def compact_slices(shared, need_d21=True):
         M = shared.Q @ H + R
         AP, PP, MP = A * P, P * P, M * P
         d3 += (3.0 * A * AP * f.w2[None, :] + MP * P).sum(axis=1)
-        rf = AP @ f.c1 + PP @ f.c2
-        d3 += rf * f.Y
+        has_birth_feed = f.c1 is not None and f.c2 is not None and f.Y is not None
+        rf = AP @ f.c1 + PP @ f.c2 if has_birth_feed else None
+        if has_birth_feed:
+            d3 += rf * f.Y
         if need_d21:
             LA = 2.0 * AP * f.w2[None, :] + PP * f.e[None, :]
             LP = (A * A) * f.w2[None, :]
             LP += PP * (f.s[None, :] / 3.0) + (2.0 / 3.0) * MP
-            LP += (A * f.c1[None, :] + P * f.c2[None, :]) * (
-                (2.0 / 3.0) * f.Y[:, None])
+            if has_birth_feed:
+                LP += (A * f.c1[None, :] + P * f.c2[None, :]) * (
+                    (2.0 / 3.0) * f.Y[:, None])
             coord += LA @ f.FA.T + LP @ f.FP.T
-            residual += (((PP @ f.L) @ f.Z.T) / 3.0
-                         + (rf[:, None] * f.Y[None, :]) / 3.0)
+            residual += ((PP @ f.L) @ f.Z.T) / 3.0
+            if has_birth_feed:
+                residual += (rf[:, None] * f.Y[None, :]) / 3.0
     return d3, None if not need_d21 else coord @ shared.Q.T + residual
 
 
@@ -324,7 +375,8 @@ def transport_dense(source, W, wick):
                   W @ (wick[:, None] * source.P),
                   W @ (wick[:, None] * source.Z), source.L,
                   source.s, source.e, source.w2, source.dA, source.dP,
-                  source.c1, source.c2, W @ (wick * source.Y),
+                  source.c1, source.c2,
+                  None if source.Y is None else W @ (wick * source.Y),
                   source.age + 1)
 
 
@@ -334,7 +386,8 @@ def transport_shared(shared, W, wick):
     return Shared(W @ (wick[:, None] * shared.Q),
                   [Factors(f.FA, f.FP, W @ (wick[:, None] * f.Z), f.L,
                            f.s, f.e, f.w2, f.dA, f.dP, f.c1, f.c2,
-                           W @ (wick * f.Y), f.age + 1)
+                           None if f.Y is None else W @ (wick * f.Y),
+                           f.age + 1)
                    for f in shared.factors], shared.gram)
 
 
@@ -361,7 +414,8 @@ def make_birth(rng, n, residual_rank):
 def insert_birth(birth, W):
     return Source(W @ birth.a, W.copy(), W @ birth.R, birth.L,
                   birth.s, birth.e, birth.w2, birth.dA, birth.dP,
-                  birth.c1, birth.c2, W @ birth.y, 0)
+                  birth.c1, birth.c2,
+                  None if birth.y is None else W @ birth.y, 0)
 
 
 def run_schedule(n=12, depth=7, recent=2, rank=None, residual_rank=3,
@@ -456,9 +510,16 @@ def _real_flopscope():
     return flops, fnp
 
 
-def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
-    """Execute the actual schedule and return an exact metered family ledger."""
+def metered_program(n, depth, recent, rank, residual_rank, seed=20260910,
+                    consumers=True, births=True, lam=1.0 / 3.0,
+                    capture_prediction=False):
+    """Execute one compact mechanism arm and return its exact metered ledger."""
     flops, fnp = _real_flopscope()
+    consumers, births = bool(consumers), bool(births)
+    active = consumers or births
+    lam = float(lam)
+    if not math.isfinite(lam):
+        raise ValueError("lam must be finite")
     rank = min(rank, n)
     residual_rank = min(residual_rank, n)
     rng = np.random.default_rng(seed)
@@ -544,8 +605,9 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                      c1i, c2i, Yi, ai) in facts:
                     Zi = meter.run("transport_residual_Z",
                                    lambda Zi=Zi: W @ (wick[:, None] * Zi))
-                    Yi = meter.run("transport_k4_birth_Y",
-                                   lambda Yi=Yi: W @ (wick * Yi))
+                    if births:
+                        Yi = meter.run("transport_k4_birth_Y",
+                                       lambda Yi=Yi: W @ (wick * Yi))
                     nf.append((FA, FP, Zi, Li, si, ei, w2i, dAi, dPi,
                                c1i, c2i, Yi, ai + 1))
                 shared = (Qout, nf, Sg)
@@ -558,8 +620,9 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                      c1, c2, Yfeed, age) in facts:
                     Z = meter.run("transport_residual_Z",
                                   lambda Z=Z: W @ (wick[:, None] * Z))
-                    Yfeed = meter.run("transport_k4_birth_Y",
-                                      lambda Yfeed=Yfeed: W @ (wick * Yfeed))
+                    if births:
+                        Yfeed = meter.run("transport_k4_birth_Y",
+                                          lambda Yfeed=Yfeed: W @ (wick * Yfeed))
                     nf.append((FA, FP, Z, L, s, e, w2, dA, dP,
                                c1, c2, Yfeed, age + 1))
                 shared = (Q, nf, Sg)
@@ -569,8 +632,9 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                 A1 = meter.run("transport_young_A", lambda A=A: W @ (wick[:, None] * A))
                 P1 = meter.run("transport_young_P", lambda P=P: W @ (wick[:, None] * P))
                 Z1 = meter.run("transport_residual_Z", lambda Z=Z: W @ (wick[:, None] * Z))
-                Y1 = meter.run("transport_k4_birth_Y",
-                               lambda: W @ (wick * Yfeed))
+                Y1 = (meter.run("transport_k4_birth_Y",
+                                lambda: W @ (wick * Yfeed))
+                      if births else None)
                 transported.append((A1, P1, Z1, L, s, e, w2, dA, dP,
                                     c1, c2, Y1, age + 1))
             young = transported
@@ -579,7 +643,8 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                 A = meter.run("source_insert_A", lambda: W @ a)
                 P = meter.run("source_insert_P_copy", lambda: fnp.copy(W))
                 Z = meter.run("source_insert_Z", lambda: W @ Rr)
-                Yb = meter.run("source_insert_k4_birth_Y", lambda: W @ yb)
+                Yb = (meter.run("source_insert_k4_birth_Y", lambda: W @ yb)
+                      if births else None)
                 young.append((A, P, Z, Lr, sb, eb, w2b, dAb, dPb,
                               c1b, c2b, Yb, 0))
                 newborn = None
@@ -616,31 +681,45 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                                + PP * e[None, :]))
                 LP = meter.run("materialize_LP", lambda: ((A * A) * w2[None, :]
                                + PP * (s[None, :] / 3.0) + (2.0 / 3.0) * MP))
-                RF = meter.run("materialize_k4_birth_R",
-                               lambda: AP @ c1 + PP @ c2)
-                LP = meter.run("materialize_k4_birth_LP", lambda: LP
-                               + (A * c1[None, :] + P * c2[None, :])
-                               * ((2.0 / 3.0) * Yfeed[:, None]))
-                d3part = meter.run("D3_contraction", lambda: (
-                    (3.0 * A * AP * w2[None, :] + MP * P).sum(axis=1)
-                    + RF * Yfeed))
+                if births:
+                    RF = meter.run("materialize_k4_birth_R",
+                                   lambda: AP @ c1 + PP @ c2)
+                    LP = meter.run("materialize_k4_birth_LP", lambda: LP
+                                   + (A * c1[None, :] + P * c2[None, :])
+                                   * ((2.0 / 3.0) * Yfeed[:, None]))
+                    d3part = meter.run("D3_contraction", lambda: (
+                        (3.0 * A * AP * w2[None, :] + MP * P).sum(axis=1)
+                        + RF * Yfeed))
+                else:
+                    RF = None
+                    d3part = meter.run("D3_contraction", lambda: (
+                        (3.0 * A * AP * w2[None, :] + MP * P).sum(axis=1)))
                 D3_total = meter.run("history_D3_add",
                                      lambda: D3_total + d3part)
                 if not last:
                     if kind == "young":
-                        d21part = meter.run("D21_young", lambda: (
-                            LA @ A.T + LP @ P.T
-                            + ((PP @ L) @ Z.T) / 3.0
-                            + (RF[:, None] * Yfeed[None, :]) / 3.0))
+                        if births:
+                            d21part = meter.run("D21_young", lambda: (
+                                LA @ A.T + LP @ P.T
+                                + ((PP @ L) @ Z.T) / 3.0
+                                + (RF[:, None] * Yfeed[None, :]) / 3.0))
+                        else:
+                            d21part = meter.run("D21_young", lambda: (
+                                LA @ A.T + LP @ P.T
+                                + ((PP @ L) @ Z.T) / 3.0))
                         D21_total = meter.run("history_D21_add",
                                              lambda: D21_total + d21part)
                     else:
                         FA, FP = src[13], src[14]
                         coord = meter.run("D21_shared_coords",
                                           lambda: coord + LA @ FA.T + LP @ FP.T)
-                        residual = meter.run("D21_residual",
-                                             lambda: residual + ((PP @ L) @ Z.T) / 3.0
-                                             + (RF[:, None] * Yfeed[None, :]) / 3.0)
+                        if births:
+                            residual = meter.run("D21_residual", lambda: (
+                                residual + ((PP @ L) @ Z.T) / 3.0
+                                + (RF[:, None] * Yfeed[None, :]) / 3.0))
+                        else:
+                            residual = meter.run("D21_residual", lambda: (
+                                residual + ((PP @ L) @ Z.T) / 3.0))
             if shared is not None and not last:
                 d21old = meter.run("D21_shared_return",
                                    lambda: coord @ shared[0].T + residual)
@@ -669,13 +748,16 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
             w1 = Phi
             w2now = meter.run("nonlinear_w2", lambda: phi / sigma)
             w3 = meter.run("nonlinear_w3", lambda: -alpha * phi / safe_var)
-            w4 = meter.run("nonlinear_w4",
-                           lambda: (alpha * alpha - 1.0) * phi / (safe_var * sigma))
+            w4 = (meter.run("nonlinear_w4", lambda: (
+                        (alpha * alpha - 1.0) * phi / (safe_var * sigma)))
+                  if consumers else None)
             base = meter.run("nonlinear_gaussian_mean",
                              lambda: sigma * phi + mu_pre * Phi)
             C_off = meter.run("backbone_cov_offdiag",
                               lambda: C_pre - fnp.diag(var_pre))
-            if gcore is None:
+            if not active:
+                dG = None
+            elif gcore is None:
                 dG = meter.run("k4_transport_initial",
                                lambda: fnp.zeros(n, dtype=fnp.float32))
             else:
@@ -683,17 +765,25 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                 old_var = meter.run("k4_old_variance",
                                     lambda: fnp.diagonal(C_old))
                 dG = meter.run("k4_transport_core", lambda: (
-                    WW @ (gcore - (1.0 / 3.0) * old_var)
-                    + (1.0 / 3.0) * var_pre))
-            D4 = meter.run("k4_consumer_D4", lambda: 2.0 * dG)
-            D22 = meter.run("k4_consumer_D22", lambda: (
-                (dG[:, None] + dG[None, :]) / 3.0))
-            D31 = meter.run("k4_consumer_D31", lambda: C_off / 3.0)
+                    WW @ (gcore - lam * old_var) + lam * var_pre))
+            if consumers:
+                D4 = meter.run("k4_consumer_D4", lambda: 2.0 * dG)
+                D22 = meter.run("k4_consumer_D22", lambda: (
+                    (dG[:, None] + dG[None, :]) / 3.0))
+                D31 = meter.run(
+                    "k4_consumer_D31",
+                    (lambda: C_off / 3.0) if lam == 1.0 / 3.0
+                    else (lambda: lam * C_off))
+            else:
+                D4 = D22 = D31 = 0.0
             mean3 = meter.run("nonlinear_mean_k3",
                               lambda: D3_total * w3 / 6.0)
-            mean4 = meter.run("nonlinear_mean_k4",
-                              lambda: D4 * w4 / 24.0)
-            mu = meter.run("nonlinear_mean_add", lambda: base + mean3 + mean4)
+            if consumers:
+                mean4 = meter.run("nonlinear_mean_k4",
+                                  lambda: D4 * w4 / 24.0)
+                mu = meter.run("nonlinear_mean_add", lambda: base + mean3 + mean4)
+            else:
+                mu = meter.run("nonlinear_mean_add", lambda: base + mean3)
             outputs.append(mu)
             if last:
                 if n <= 16 and rank == n:
@@ -704,7 +794,9 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                         "gcore_in": gcore_in, "sigma": sigma, "phi": phi,
                         "w1": w1, "w2": w2now, "w3": w3, "w4": w4,
                         "D4": D4, "D22": D22, "D31": D31, "mu": mu,
-                        "newborn": None})
+                        "newborn": None, "active": active,
+                        "consumers": consumers, "births": births,
+                        "lam": lam})
                     state_trace.append({"W": W, "wick": wick,
                                         "sources": list(all_sources),
                                         "newborn": None})
@@ -721,10 +813,11 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
             K11 = meter.run("k3_consumer_cov", lambda: K11 + 0.25 * (
                 D21_total * (w2now[:, None] * w1[None, :])
                 + D21_total.T * (w1[:, None] * w2now[None, :])))
-            K11 = meter.run("k4_consumer_cov", lambda: K11
-                            + D22 * (w2now[:, None] * w2now[None, :]) / 4.0
-                            + (D31 + D31.T)
-                            * (w3[:, None] * w1[None, :]) / 12.0)
+            if consumers:
+                K11 = meter.run("k4_consumer_cov", lambda: K11
+                                + D22 * (w2now[:, None] * w2now[None, :]) / 4.0
+                                + (D31 + D31.T)
+                                * (w3[:, None] * w1[None, :]) / 12.0)
             off_mask = meter.run("backbone_off_mask",
                                  lambda: fnp.ones((n, n), dtype=fnp.float32)
                                  - fnp.eye(n, dtype=fnp.float32))
@@ -738,21 +831,32 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                 + (mu_pre * mu_pre * sigma + 2.0 * sigma * safe_var) * phi))
             k3v = meter.run("nonlinear_gaussian_k3",
                             lambda: e3 - 3.0 * base * e2 + 2.0 * base * base * base)
-            e4 = meter.run("nonlinear_gaussian_e4", lambda: (
-                (mu_pre**4 + 6.0 * mu_pre * mu_pre * safe_var
-                 + 3.0 * safe_var * safe_var) * Phi
-                + (mu_pre**3 * sigma + 5.0 * mu_pre * sigma * safe_var) * phi))
-            k4v = meter.run("nonlinear_gaussian_k4", lambda: (
-                e4 - 4.0 * base * e3 + 6.0 * base * base * e2
-                - 3.0 * base**4 + D4 * w1**4))
-            k22 = meter.run("k4_project_K22", lambda: (
-                ((k4v[:, None] + k4v[None, :]) / 6.0
-                 + D22 * (w1[:, None] * w1[None, :])) * off_mask))
-            h4 = meter.run("k4_project_trace",
-                           lambda: k4v + k22.sum(axis=1))
-            gcore = meter.run("k4_project_core", lambda: (
-                (6.0 / (n + 4.0)) * h4
-                - (3.0 / ((n + 2.0) * (n + 4.0))) * h4.sum()) / 2.0)
+            k4v = k22 = None
+            if active:
+                e4 = meter.run("nonlinear_gaussian_e4", lambda: (
+                    (mu_pre**4 + 6.0 * mu_pre * mu_pre * safe_var
+                     + 3.0 * safe_var * safe_var) * Phi
+                    + (mu_pre**3 * sigma + 5.0 * mu_pre * sigma * safe_var) * phi))
+                if consumers:
+                    k4v = meter.run("nonlinear_gaussian_k4", lambda: (
+                        e4 - 4.0 * base * e3 + 6.0 * base * base * e2
+                        - 3.0 * base**4 + D4 * w1**4))
+                    k22 = meter.run("k4_project_K22", lambda: (
+                        ((k4v[:, None] + k4v[None, :]) / 6.0
+                         + D22 * (w1[:, None] * w1[None, :])) * off_mask))
+                else:
+                    k4v = meter.run("nonlinear_gaussian_k4", lambda: (
+                        e4 - 4.0 * base * e3 + 6.0 * base * base * e2
+                        - 3.0 * base**4))
+                    k22 = meter.run("k4_project_K22", lambda: (
+                        (k4v[:, None] + k4v[None, :]) / 6.0 * off_mask))
+                h4 = meter.run("k4_project_trace",
+                               lambda: k4v + k22.sum(axis=1))
+                gcore = meter.run("k4_project_core", lambda: (
+                    (6.0 / (n + 4.0)) * h4
+                    - (3.0 / ((n + 2.0) * (n + 4.0))) * h4.sum()) / 2.0)
+            else:
+                gcore = None
             wick_prev = w1
 
             if not last:
@@ -763,24 +867,37 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                     * w1[None, :] * C_off))
                 old21 = meter.run("source_transport_K21", lambda: (
                     (w1[:, None] * w1[:, None]) * D21_total * w1[None, :]))
-                w1sq = meter.run("k4_birth_w1sq", lambda: w1 * w1)
-                yb = meter.run("k4_birth_y", lambda: 0.5 * w2now)
-                dgw = meter.run("k4_birth_dgw", lambda: w1sq * dG)
-                ub = meter.run("k4_birth_u", lambda: yb * dG)
-                c1b = meter.run("k4_birth_c1", lambda: w1 / 3.0)
-                c2b = dgw
-                feed21 = meter.run("k4_birth_D21", lambda: (
-                    dgw[:, None] * yb[None, :] / 3.0
-                    + (2.0 / 3.0) * yb[:, None]
-                    * (a * c1b[None, :])
-                    + w1sq[:, None] * ub[None, :] / 3.0))
-                feed3 = meter.run("k4_birth_D3",
-                                  lambda: dgw * yb + ub * w1sq)
-                rep21 = meter.run("source_repeated_K21",
-                                  lambda: old21 + (a * a) * w2now[None, :] + feed21)
-                K21 = meter.run("source_K21_closure",
-                                lambda: old21 + local21 + feed21)
-                s0 = meter.run("source_s", lambda: k3v - D3_total * (w1**3) - feed3)
+                if births:
+                    w1sq = meter.run("k4_birth_w1sq", lambda: w1 * w1)
+                    yb = meter.run("k4_birth_y", lambda: 0.5 * w2now)
+                    dgw = meter.run("k4_birth_dgw", lambda: w1sq * dG)
+                    ub = meter.run("k4_birth_u", lambda: yb * dG)
+                    c1b = meter.run(
+                        "k4_birth_c1",
+                        (lambda: w1 / 3.0) if lam == 1.0 / 3.0
+                        else (lambda: lam * w1))
+                    c2b = dgw
+                    feed21 = meter.run("k4_birth_D21", lambda: (
+                        dgw[:, None] * yb[None, :] / 3.0
+                        + (2.0 / 3.0) * yb[:, None]
+                        * (a * c1b[None, :])
+                        + w1sq[:, None] * ub[None, :] / 3.0))
+                    feed3 = meter.run("k4_birth_D3",
+                                      lambda: dgw * yb + ub * w1sq)
+                    rep21 = meter.run("source_repeated_K21", lambda: (
+                        old21 + (a * a) * w2now[None, :] + feed21))
+                    K21 = meter.run("source_K21_closure",
+                                    lambda: old21 + local21 + feed21)
+                    s0 = meter.run("source_s", lambda: (
+                        k3v - D3_total * (w1**3) - feed3))
+                else:
+                    c1b = c2b = yb = None
+                    rep21 = meter.run("source_repeated_K21",
+                                      lambda: old21 + (a * a) * w2now[None, :])
+                    K21 = meter.run("source_K21_closure",
+                                    lambda: old21 + local21)
+                    s0 = meter.run("source_s",
+                                   lambda: k3v - D3_total * (w1**3))
                 e0 = meter.run("source_e", lambda: w2now - 2.0 * mu * w1)
                 Ssep = meter.run("source_separable_K21", lambda: (
                     e0[:, None] * C_off * w1[None, :]))
@@ -810,7 +927,9 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                         "D4": D4, "D22": D22, "D31": D31, "mu": mu,
                         "C": C, "k4v": k4v, "k22": k22,
                         "gcore": gcore, "k3v": k3v,
-                        "newborn": newborn})
+                        "newborn": newborn, "active": active,
+                        "consumers": consumers, "births": births,
+                        "lam": lam})
                     state_trace.append({"W": W, "wick": wick,
                                         "sources": list(all_sources),
                                         "newborn": newborn})
@@ -826,7 +945,8 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
     for source_rows, got_d3, got_d21, was_last in oracle_trace:
         dense_sources = []
         for _kind, row in source_rows:
-            dense_sources.append(Source(*[np.asarray(x) for x in row[:12]],
+            dense_sources.append(Source(*[None if x is None else np.asarray(x)
+                                          for x in row[:12]],
                                         age=int(row[12])))
         want_d3, want_d21 = dense_slices(dense_sources, need_d21=not was_last)
         want_d3 = np.zeros(n) if want_d3 is None else want_d3
@@ -853,31 +973,34 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
     prediction_np = np.asarray(prediction)
     if prediction_np.shape != (depth, n) or not np.isfinite(prediction_np).all():
         raise AssertionError("invalid end-to-end output")
+    vector_fields = 8 if births else 5
     persistent = bpe * (
-        len(young) * (2 * n * n + 2 * n * residual_rank + 8 * n)
+        len(young) * (2 * n * n + 2 * n * residual_rank + vector_fields * n)
         + (0 if shared is None else n * rank + rank * rank
-           + len(shared[1]) * (2 * rank * n + 2 * n * residual_rank + 8 * n)))
-    births = max(depth - 1, 0)
-    young_peak = min(recent + 1, births)
-    old_peak = births - young_peak
+           + len(shared[1]) * (2 * rank * n + 2 * n * residual_rank
+                               + vector_fields * n)))
+    source_count = max(depth - 1, 0)
+    young_peak = min(recent + 1, source_count)
+    old_peak = source_count - young_peak
     weights_bytes = 8 * depth * n * n
     weight_cast_scratch = bpe * n * n
     backbone_state_bytes = bpe * (2 * n * n + (depth + 12) * n)
     young_payload = young_peak * (
-        2 * n * n + 2 * n * residual_rank + 8 * n)
+        2 * n * n + 2 * n * residual_rank + vector_fields * n)
     shared_payload = (0 if old_peak == 0 else
                       n * rank + rank * rank
-                      + old_peak * (2 * rank * n + 2 * n * residual_rank + 8 * n))
+                      + old_peak * (2 * rank * n + 2 * n * residual_rank
+                                    + vector_fields * n))
     source_state_bytes = bpe * (young_payload + shared_payload)
-    source_construction_scratch = (0 if births == 0 else bpe * (
+    source_construction_scratch = (0 if source_count == 0 else bpe * (
         9 * n * n + 5 * n * residual_rank
         + residual_rank * residual_rank + 12 * n))
     join_scratch = (0 if old_peak == 0 else
                     bpe * (2 * n * n + 5 * n * rank + 3 * rank * rank))
     shared_dense_leg_stack = bpe * 2 * old_peak * n * n
-    materialize_scratch = (0 if births == 0 else
+    materialize_scratch = (0 if source_count == 0 else
                            shared_dense_leg_stack + bpe * 6 * n * n)
-    contraction_scratch = (0 if births == 0 else
+    contraction_scratch = (0 if source_count == 0 else
                            bpe * (3 * n * n + 2 * n * rank + n * residual_rank))
     peak_algorithm = weights_bytes + backbone_state_bytes + source_state_bytes + max(
         weight_cast_scratch, source_construction_scratch, join_scratch,
@@ -915,13 +1038,16 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
     group_totals = {name: sum(values.values()) for name, values in groups.items()}
     if sum(group_totals.values()) != used:
         raise AssertionError("operation-group ledger mismatch")
-    return {"kind": "label-free end-to-end compact all-history reference ledger",
+    result = {"kind": "label-free end-to-end compact all-history reference ledger",
             "evidence_note": ("Counted-cost and lifecycle evidence for this "
                               "research reference only; it makes no accuracy or "
                               "competitiveness claim."),
             "source_sha256": _source_sha256(),
             "shape": [n, depth], "recent": recent, "rank": rank,
-            "residual_rank": residual_rank, "flops": used,
+            "residual_rank": residual_rank,
+            "mechanisms": {"consumers": consumers, "births": births,
+                           "active": active, "lam": lam},
+            "flops": used,
             "budget_fraction": used / BUDGET, "operations": ops,
             "operations_kind": "atomic flopscope op_log entries",
             "families": meter.families, "family_calls": meter.calls,
@@ -951,27 +1077,33 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                                    if name.startswith("cast_")),
                       "reason": "incoming float64 weights and normal CDF/PDF outputs are explicitly cast to float32"},
             "source_factors": {
-                "latent_constructed": ["a", "R", "L", "s", "e", "w2", "dA", "dP", "c1", "c2", "y"],
-                "inserted_next_layer": ["A=W@a", "P=copy(W)", "Z=W@R", "Y=W@y"],
-                "shared_per_source": ["FA", "FP", "Z", "L", "s", "e", "w2", "dA", "dP", "c1", "c2", "Y"],
+                "latent_constructed": (["a", "R", "L", "s", "e", "w2", "dA", "dP"]
+                                       + (["c1", "c2", "y"] if births else [])),
+                "inserted_next_layer": (["A=W@a", "P=copy(W)", "Z=W@R"]
+                                        + (["Y=W@y"] if births else [])),
+                "shared_per_source": (["FA", "FP", "Z", "L", "s", "e", "w2", "dA", "dP"]
+                                      + (["c1", "c2", "Y"] if births else [])),
                 "third_leg_identity": "M = P diag(s) + 3 A diag(e) + Z L.T"},
-            "schedule": {"initial_sources": 0, "births": births,
+            "schedule": {"initial_sources": 0, "births": source_count,
                          "young_peak": young_peak, "shared_peak": old_peak,
                          "final_join": False, "final_D21": False},
             "lifecycle": {"output_shape": list(prediction_np.shape),
                           "all_finite": bool(np.isfinite(prediction_np).all()),
                           "output_sha256": hashlib.sha256(
                               prediction_np.astype(np.float32, copy=False).tobytes()).hexdigest(),
+                          "layer_output_sha256": [hashlib.sha256(
+                              prediction_np[i].astype(np.float32, copy=False).tobytes()
+                          ).hexdigest() for i in range(depth)],
                           "output_max_abs": float(np.max(np.abs(prediction_np))),
                           "retained_sources": retained,
-                          "all_births_retained": retained == births,
+                          "all_births_retained": retained == source_count,
                           "initial_layer_has_history": False,
                           "final_layer_mean_only": True},
             "scope": {
                 "exact_algebra": ["two-leg M reassociation", "explicit residual contractions", "shared-Q transport and factor rotation", "full-rank tiny old-source parity"],
                 "compression": ["residual rank %d" % residual_rank, "old-source shared rank %d" % rank],
                 "term_deletion": "the analytic reference closure omits higher cross-cumulant nonlinear terms outside D3/D21 and represented D4/D22/D31",
-                "coefficient_policy": "fixed lam=1/3 structural fixture; no fitted coefficients or labels"},
+                "coefficient_policy": "explicit structural lam; no fitted coefficients or labels"},
             "parity": {"family_sum": family_sum, "context_flops": used,
                        "exact": family_sum == used,
                        "tiny_dense_oracle_executed": bool(oracle_trace),
@@ -980,12 +1112,21 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910):
                        "tiny_dense_closure_max_relative": closure_oracle,
                        "tiny_dense_shadow_max_relative": shadow_rel,
                        "tiny_dense_shadow_ages_exact": shadow_ages}}
+    if capture_prediction:
+        # Test-only escape hatch.  The CLI never enables this because ndarrays
+        # are deliberately absent from durable JSON ledgers.  Keeping the
+        # captured output outside the counted context makes this observational.
+        result["_prediction"] = prediction_np.copy()
+    return result
 
 
-def lifecycle_check(n=12, depth=7, recent=2, rank=12, residual_rank=3):
+def lifecycle_check(n=12, depth=7, recent=2, rank=12, residual_rank=3,
+                    consumers=True, births=True, lam=1.0 / 3.0):
     """Run twice and make deterministic lifecycle/cost drift fatal."""
-    first = metered_program(n, depth, recent, rank, residual_rank)
-    second = metered_program(n, depth, recent, rank, residual_rank)
+    args = (n, depth, recent, rank, residual_rank)
+    kwargs = {"consumers": consumers, "births": births, "lam": lam}
+    first = metered_program(*args, **kwargs)
+    second = metered_program(*args, **kwargs)
     checks_ = {
         "deterministic_output": (first["lifecycle"]["output_sha256"]
                                  == second["lifecycle"]["output_sha256"]),
@@ -1010,6 +1151,7 @@ def lifecycle_check(n=12, depth=7, recent=2, rank=12, residual_rank=3):
         raise AssertionError("lifecycle failure: %r" % checks_)
     return {"kind": "label-free end-to-end compact lifecycle",
             "source_sha256": _source_sha256(), "shape": [n, depth],
+            "mechanisms": first["mechanisms"],
             "checks": checks_, "pass": True,
             "output_sha256": first["lifecycle"]["output_sha256"],
             "flops": first["flops"], "operations": first["operations"]}
@@ -1063,12 +1205,17 @@ def main(argv=None):
     ap.add_argument("--recent", type=int, default=4)
     ap.add_argument("--rank", type=int, default=384)
     ap.add_argument("--residual-rank", type=int, default=16)
+    ap.add_argument("--consumers", type=int, choices=(0, 1), default=1)
+    ap.add_argument("--births", type=int, choices=(0, 1), default=1)
+    ap.add_argument("--lam", type=float, default=1.0 / 3.0)
     ap.add_argument("--json", default="")
     a = ap.parse_args(argv)
+    arm = {"consumers": bool(a.consumers), "births": bool(a.births),
+           "lam": a.lam}
     result = (lifecycle_check(a.width, a.depth, a.recent, a.rank,
-                              a.residual_rank) if a.lifecycle else
+                              a.residual_rank, **arm) if a.lifecycle else
               metered_program(a.width, a.depth, a.recent, a.rank,
-                              a.residual_rank) if a.meter else checks())
+                              a.residual_rank, **arm) if a.meter else checks())
     if a.json:
         write_json(a.json, result)
     if a.lifecycle:

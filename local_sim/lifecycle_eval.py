@@ -570,6 +570,7 @@ def evaluate(
     on_setup_failure: str = "raise",
     weights_mode: str = DEFAULT_WEIGHTS_MODE,
     predictions_out: Optional[List[np.ndarray]] = None,
+    operation_logs_out: Optional[List[List[Any]]] = None,
     _lifecycle: str = "grader",
 ) -> Tuple[List[EvidenceRow], Dict[str, Any]]:
     """Run `candidate` over `seeds` under the GRADER's lifecycle.
@@ -590,6 +591,11 @@ def evaluate(
     function reads it, and passing nothing changes no behaviour. It exists
     because `vault.py` used to save its own predictions from its own loop, and
     deleting that loop must not delete the raw output of a once-ever touch.
+
+    `operation_logs_out` is the analogous label-free audit hook for an explicitly
+    requested run. It copies the completed BudgetContext operation records after
+    the row has finished. Normal evaluation and production producers leave it
+    unset, so they retain no additional history or memory.
 
     `_lifecycle` exists ONLY so the regression test can drive the historical
     `"per_mlp_no_setup"` path (vault.py:282 / coverage_lab.py:226) through the
@@ -788,6 +794,8 @@ def evaluate(
             # reach back into this loop's state, and what it stores must be what
             # was scored.
             predictions_out.append(np.array(final, dtype=np.float32, copy=True))
+        if operation_logs_out is not None:
+            operation_logs_out.append(list(getattr(ctx, "op_log", []) or []))
 
         rows.append(
             EvidenceRow(

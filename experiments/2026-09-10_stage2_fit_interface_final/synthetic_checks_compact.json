@@ -1,0 +1,469 @@
+{
+  "checks": [
+    {
+      "check": "exact P07 design identity registry is accepted",
+      "detail": "384 ordered identities at 1024x16",
+      "pass": true
+    },
+    {
+      "check": "wrong registered block refuses without evaluation",
+      "detail": "validation-only; no lifecycle or truth call",
+      "pass": true
+    },
+    {
+      "check": "wrong registered seed refuses without evaluation",
+      "detail": "validation-only; no lifecycle or truth call",
+      "pass": true
+    },
+    {
+      "check": "wrong registered order refuses without evaluation",
+      "detail": "validation-only; no lifecycle or truth call",
+      "pass": true
+    },
+    {
+      "check": "wrong registered shape refuses without evaluation",
+      "detail": "validation-only; no lifecycle or truth call",
+      "pass": true
+    },
+    {
+      "check": "string registered seed refuses without evaluation",
+      "detail": "validation-only; no lifecycle or truth call",
+      "pass": true
+    },
+    {
+      "check": "integer registered id refuses without evaluation",
+      "detail": "validation-only; no lifecycle or truth call",
+      "pass": true
+    },
+    {
+      "check": "extra registered manifest key refuses without evaluation",
+      "detail": "validation-only; no lifecycle or truth call",
+      "pass": true
+    },
+    {
+      "check": "verify-only binds producer evidence without truth",
+      "detail": "loader calls=0 sources=8",
+      "pass": true
+    },
+    {
+      "check": "verification receipt is immutable",
+      "detail": "exclusive create; bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "verify-only refuses truth arguments",
+      "detail": "no truth path accepted or resolved",
+      "pass": true
+    },
+    {
+      "check": "receipt replacement after snapshot refuses at closing revalidation",
+      "detail": "parsed=ec32f24d4902 current=b3851d6a2602",
+      "pass": true
+    },
+    {
+      "check": "NPZ replacement after snapshot refuses at closing revalidation",
+      "detail": "parsed=114650ef2ba6 current=66e3daf47ab3",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: extra top-level key",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: schema",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: immutable type",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: prediction path",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: prediction path escape",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: prediction hash",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: candidate source paths",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: candidate source hashes",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: receipt costs",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: receipt cost type",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: manifest extra key",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: labels-read flag",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: identity role",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: candidate registry",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: bounds",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: identity manifest",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: input bindings",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: manifest candidate sources",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: manifest costs",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: manifest cost type",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: producer path",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: producer hash",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: generator path",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: generator hash",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: upstream hash",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: lifecycle width",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: lifecycle depth",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: lifecycle budget",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: lifecycle mode",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: lifecycle residual cap",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: row coverage",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: row hash type",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: operation coverage",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: operation count type",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: lifecycle provenance",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "mutated producer receipt refuses: lifecycle provenance mode",
+      "detail": "truth-free refusal",
+      "pass": true
+    },
+    {
+      "check": "normal fit revalidates producer receipt before truth",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "verifier refuses identity string seed",
+      "detail": "strict shared manifest parser",
+      "pass": true
+    },
+    {
+      "check": "verifier refuses identity integer id",
+      "detail": "strict shared manifest parser",
+      "pass": true
+    },
+    {
+      "check": "verifier refuses identity extra manifest key",
+      "detail": "strict shared manifest parser",
+      "pass": true
+    },
+    {
+      "check": "fit refuses extra candidate-registry key before truth",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "fit refuses string bound numeric before truth",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "fit refuses boolean false candidate numeric before truth",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "producer to selector freezes synthetic optimum",
+      "detail": "{'registered_index': 1, 'frozen_values': {'lam': 0.25}, 'objective': 0.0, 'tie_break': 'first in explicitly registered order'}",
+      "pass": true
+    },
+    {
+      "check": "candidate source paths and hashes are verified",
+      "detail": "3 generated sources",
+      "pass": true
+    },
+    {
+      "check": "canonical lifecycle costs preserve identities",
+      "detail": "[[12020, 12020], [12020, 12020], [12020, 12020]]",
+      "pass": true
+    },
+    {
+      "check": "normal fit records producer receipt revalidation",
+      "detail": "74336307024e",
+      "pass": true
+    },
+    {
+      "check": "existing receipt is immutable",
+      "detail": "exclusive create; bytes unchanged",
+      "pass": true
+    },
+    {
+      "check": "mutated candidate source refuses before truth",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "same-configuration source with re-bound hash still refuses",
+      "detail": "loader calls=0 detail=candidate source 0 is not an exact registered regeneration",
+      "pass": true
+    },
+    {
+      "check": "verifier closing recheck catches source changed during provenance",
+      "detail": "refused=True receipt=False",
+      "pass": true
+    },
+    {
+      "check": "verifier lock blocks registry write during closing scan",
+      "detail": "accepted=True denied=True",
+      "pass": true
+    },
+    {
+      "check": "mutated recorded hash refuses before truth",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "mutated source order refuses before truth",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "mutated cost refuses before truth",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "mutated candidate order refuses before truth",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "mutated identity refuses before truth",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "protected fitting requires exact P07",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "protected P07 refuses synthetic identity package",
+      "detail": "loader calls=0",
+      "pass": true
+    },
+    {
+      "check": "synthetic role rejects protected schema",
+      "detail": "truth_reads cannot be bypassed",
+      "pass": true
+    },
+    {
+      "check": "documented selector CLI executes",
+      "detail": "exit=0 receipt_created=True",
+      "pass": true
+    },
+    {
+      "check": "documented verify-only CLI executes without truth",
+      "detail": "exit=0 receipt_created=True",
+      "pass": true
+    },
+    {
+      "check": "documented producer CLI is immutable",
+      "detail": "first=0 second=2",
+      "pass": true
+    },
+    {
+      "check": "failed producer writes exclusive truth-free row evidence",
+      "detail": "refused=True rows=1 no_success_artifacts=True",
+      "pass": true
+    },
+    {
+      "check": "setup failure writes classified zero-row evidence",
+      "detail": "refused=True rows=0 classified=setup_or_lifecycle_exception",
+      "pass": true
+    },
+    {
+      "check": "incomplete lifecycle rows can never produce success artifacts",
+      "detail": "refused=True rows=1 predictions=2",
+      "pass": true
+    },
+    {
+      "check": "forged clean lifecycle provenance cannot produce success",
+      "detail": "refused=True forged_lifecycle=per_mlp_no_setup",
+      "pass": true
+    },
+    {
+      "check": "forged estimator seed and fractional counts is diagnosed before conversion",
+      "detail": "refused=True flops=1.5 n_ops=2.5",
+      "pass": true
+    },
+    {
+      "check": "nonfinite operation count is diagnosed before conversion",
+      "detail": "refused=True flops=1.0 n_ops='NaN'",
+      "pass": true
+    },
+    {
+      "check": "semantic input byte replacement cannot produce success",
+      "detail": "refused=True changed=['bounds', 'candidates', 'identities']",
+      "pass": true
+    },
+    {
+      "check": "clean row above FLOP cap is diagnosed",
+      "detail": "refused=True flags={'budget_exhausted': False, 'time_exhausted': False}",
+      "pass": true
+    },
+    {
+      "check": "clean row above wall cap is diagnosed",
+      "detail": "refused=True flags={'budget_exhausted': False, 'time_exhausted': False}",
+      "pass": true
+    },
+    {
+      "check": "missing provenance is diagnosed without a serializer crash",
+      "detail": "refused=True provenance=None",
+      "pass": true
+    },
+    {
+      "check": "boolean lifecycle identity count cannot equal integer one",
+      "detail": "refused=True type=bool",
+      "pass": true
+    },
+    {
+      "check": "producer closing recheck catches prior candidate source mutation",
+      "detail": "refused=True current_match=False",
+      "pass": true
+    },
+    {
+      "check": "producer lock blocks registry write during source scan",
+      "detail": "accepted=True denied=True",
+      "pass": true
+    },
+    {
+      "check": "producer lifecycle lock blocks source swap before module load",
+      "detail": "attempted=True denied=True",
+      "pass": true
+    },
+    {
+      "check": "producer rehashes candidate inside lifecycle lock before load",
+      "detail": "refused=True restored=True",
+      "pass": true
+    },
+    {
+      "check": "producer binds archive digest before publication and locks receipt",
+      "detail": "refused=True replaced=True",
+      "pass": true
+    }
+  ],
+  "kind": "synthetic coherent-K4 producer-selector conformance",
+  "labels_read": false,
+  "n_checks": 92,
+  "n_failed": 0,
+  "pass": true
+}

@@ -39,6 +39,8 @@ import re
 import numpy as np
 from numpy import load as _load_npz
 
+import p2_build_k4_arms as arm_builder
+
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
 _ARMS = ("exact", "coherent", "consumers_only", "births_only")
@@ -200,7 +202,8 @@ def _generated_constants(text, path):
 def _validate_sources():
     paths = {"fit_interface": os.path.abspath(__file__),
              "fit_producer": os.path.join(_HERE, "p2_k4_fit_producer.py"),
-             "arm_generator": os.path.join(_HERE, "p2_build_k4_arms.py")}
+             "arm_generator": os.path.join(_HERE, "p2_build_k4_arms.py"),
+             "arm_template": arm_builder.SOURCE}
     for arm in _ARMS:
         paths["arm_" + arm] = os.path.join(_HERE, "p2_arms",
                                             "arm_%s.py" % arm)
@@ -214,6 +217,16 @@ def _validate_sources():
         except (UnicodeDecodeError, SyntaxError) as exc:
             raise FitRefused("source does not parse: %s: %s" % (path, exc)) from exc
         hashes[name] = {"path": _relative(path), "sha256": sha256}
+    template, template_sha = arm_builder._source()
+    for name, consumers, births, blurb in arm_builder.ARMS:
+        expected = arm_builder.build(
+            name, consumers, births, blurb, template, template_sha,
+            arm_builder.DEFAULT_LAM).encode("utf-8")
+        arm_path = paths["arm_" + name]
+        actual, _ = _read_bytes(arm_path, "generated arm " + name)
+        if actual != expected:
+            raise FitRefused(
+                "generated arm %s is stale or not an exact regeneration" % name)
     return hashes
 
 
@@ -414,6 +427,8 @@ def _validate_request(a, *, verify_only=False):
     if len(candidate_paths) != c or len(candidate_hashes) != c:
         raise FitRefused("candidate source path/hash count must equal candidate count")
     candidate_sources = []
+    template, template_sha = arm_builder._source()
+    coherent = next(row for row in arm_builder.ARMS if row[0] == "coherent")
     for i, (raw_path, expected) in enumerate(zip(candidate_paths, candidate_hashes)):
         path = _repo_path(raw_path, "candidate source %d" % i)
         if not os.path.isfile(path) or not re.fullmatch(r"[0-9a-f]{64}", expected):
@@ -422,7 +437,8 @@ def _validate_request(a, *, verify_only=False):
         if actual != expected:
             raise FitRefused("candidate source %d hash mismatch" % i)
         try:
-            constants = _generated_constants(source_bytes.decode("utf-8"), path)
+            source_text = source_bytes.decode("utf-8")
+            constants = _generated_constants(source_text, path)
         except UnicodeDecodeError as exc:
             raise FitRefused("candidate source %d cannot be read: %s" %
                              (i, exc)) from exc
@@ -431,6 +447,12 @@ def _validate_request(a, *, verify_only=False):
                               "_K4_LAM": candidates[i]["lam"]}
         if constants != expected_constants:
             raise FitRefused("candidate source %d does not encode its registered coherent configuration" % i)
+        regenerated = arm_builder.build(
+            coherent[0], coherent[1], coherent[2], coherent[3], template,
+            template_sha, candidates[i]["lam"])
+        if source_text != regenerated:
+            raise FitRefused(
+                "candidate source %d is not an exact registered regeneration" % i)
         candidate_sources.append({"path": _relative(path), "sha256": actual,
                                   "verified": True})
     expected_manifest_sources = [
@@ -469,10 +491,11 @@ def _validate_request(a, *, verify_only=False):
     if ({"path": generator["path"], "sha256": generator["sha256"]} !=
             source_hashes["arm_generator"]):
         raise FitRefused("producer manifest does not match current generator bytes")
-    upstream = os.path.join(_ROOT, "estimator_k3_full.py")
+    upstream = _repo_path(arm_builder.SOURCE, "generator upstream source")
     if (not _valid_hash(generator["upstream_source_sha256"])
             or not os.path.isfile(upstream)
-            or generator["upstream_source_sha256"] != _sha256(upstream)):
+            or generator["upstream_source_sha256"] !=
+            source_hashes["arm_template"]["sha256"]):
         raise FitRefused("producer manifest upstream source hash mismatch")
 
     width = identity_manifest.get("width")
@@ -678,7 +701,7 @@ def _closing_revalidate(a, validated):
             if observed_sha(path, "source %s" % label) != source["sha256"]:
                 raise FitRefused("source %s changed before closing revalidation" %
                                  label)
-        upstream = os.path.join(_ROOT, "estimator_k3_full.py")
+        upstream = _repo_path(arm_builder.SOURCE, "generator upstream source")
         expected_upstream = validated["producer_manifest"]["generator"][
             "upstream_source_sha256"]
         if observed_sha(upstream, "upstream source") != expected_upstream:
@@ -688,7 +711,8 @@ def _closing_revalidate(a, validated):
 def _write_revalidated_receipt(a, validated, payload):
     dependency_paths = [a.producer_receipt, a.predictions, a.candidates,
                         a.bounds, a.identities,
-                        os.path.join(_ROOT, "estimator_k3_full.py")]
+                        _repo_path(arm_builder.SOURCE,
+                                   "generator upstream source")]
     dependency_paths.extend(
         _repo_path(source["path"], "candidate source")
         for source in validated["candidate_sources"])
