@@ -16,3 +16,8 @@ array payload.
 On success, `predictions.npz` and `producer_receipt.json` must pass the standalone
 truth-free verifier before the next registered protected P07 access. A queued or
 partially written job is not accepted evidence.
+
+Workerq job **891** was submitted at high priority with the declared envelope
+above. It uses no source snapshot and was queue position zero at submission,
+waiting because two running jobs already reserved 46 GiB of the queue's 53.6 GiB
+usable RAM. This is an admission wait, not producer progress or completion.

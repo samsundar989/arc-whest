@@ -42751,3 +42751,22 @@ registered label-free P07 producer and standalone verification. Full verdict:
 next uncertainty is scientific: which registered coefficient P07 selects and
 whether coherent K4 beats exact and the two half-arms on exposed P01. P07 remains
 closed until a new immutable producer package passes standalone verification.
+
+### Registered compact P07 producer submitted — workerq 891
+
+The label-free producer was submitted at high priority through workerq as job 891:
+8 GiB RAM, 2 CPUs, no GPU, six-hour declared ETA, exact current working bytes with
+`--no-snapshot`. The earlier git-snapshot preflight proved that snapshot line-ending
+normalization can break exact-byte provenance; the producer itself holds and
+rehashes every registered source/input dependency through each evaluation and final
+publication. Its fresh output directory is
+`experiments/2026-09-11_stage2_compact_p07/observations`.
+
+The 8 GiB request replaces the old oversized all-history reservation. One compact
+real-shape prediction measured about 1.0--1.2 GiB process RAM, and the reference
+accounts for 345,587,712 bytes of peak array payload. The larger batch allowance
+covers Python/flopscope/process accumulation across 1,536 sequential rows without
+changing the algorithm, seeds, lifecycle or evidence contract. At submission it
+was queue position zero but waiting because two running jobs already reserved 46
+GiB of the queue's 53.6 GiB usable RAM. Queue admission is not completion. On
+success, run the standalone truth-free verifier before any protected P07 access.
