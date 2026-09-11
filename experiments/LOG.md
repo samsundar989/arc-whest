@@ -42209,6 +42209,29 @@ provenance expansion. It completed SUCCEEDED in 342.3 seconds, peaked at 2,985.9
 MiB against 5 GiB and reported the default preflight green. Its raw metadata,
 manifest and log are preserved, but it does not certify these newer bytes.
 
+The fifth fresh Skeptic returned **REJECT**. It constructed a complete clean row
+with a wrong estimator seed and fractional FLOP/operation counts; the producer
+silently truncated those counts to integers and the standalone verifier accepted
+the package. A second fixture used `n_ops=NaN`, which raised during `int()` after
+the diagnostic boundary and left only the generated source. The prior 76/76 suite
+did not exercise these row-level types.
+
+The success predicate now derives each canonical estimator seed from
+`mint_provenance.seed_streams`, requires exact nonnegative integral FLOP and
+operation counts before conversion, and validates all remaining row numeric fields,
+boolean failure flags, error-code type, nonfinite state and zero-target objective
+consistency. It also refuses a nominally successful setup duration beyond the setup
+limit. Both the forged fractional row and reachable `n_ops=NaN` path now write an
+`incomplete_or_misbound_evidence` diagnostic with no success archive or receipt.
+The full producer/selector suite passes **78/78**, compilation and
+`git diff --check` pass. A sixth fresh-context Skeptic and current-source preflight
+remain required.
+
+Workerq **874** ran the committed complete-provenance version before this final row-
+scalar repair. It completed SUCCEEDED in 339.2 seconds, peaked at 2,691.6 MiB
+against 5 GiB and reported default preflight green. It is retained as scoped prior-
+byte evidence, not the current final gate.
+
 ### Job-824 exact-source one-identity discriminator contract
 
 **Question.** Which canonical lifecycle flag caused job 824's generated coherent

@@ -36,6 +36,7 @@ for _p in (_HERE, _ROOT):
         sys.path.append(_p)
 
 import lifecycle_eval as le  # noqa: E402
+import mint_provenance  # noqa: E402
 import p2_build_k4_arms as builder  # noqa: E402
 import p2_k4_fit as selector  # noqa: E402
 import seed_blocks  # noqa: E402
@@ -233,6 +234,8 @@ def _provenance_problem(provenance, *, spec, expected_path, source_hash,
         return "provenance setup duration invalid"
     if provenance["host_cold_start_s"] != le.HOST_COLD_START_S:
         return "provenance host cold-start mismatch"
+    if setup_seconds + le.HOST_COLD_START_S > spec.setup_timeout_s:
+        return "provenance setup duration exceeds its declared limit"
     if (provenance["residual_measurement_path"] !=
             "runner=local (in-process BudgetContext)" or
             provenance["residual_is_graded"] is not False or
@@ -255,6 +258,19 @@ def _provenance_problem(provenance, *, spec, expected_path, source_hash,
     return ""
 
 
+def _nonnegative_integer_measure(value):
+    return (isinstance(value, (int, float, np.integer, np.floating)) and
+            not isinstance(value, (bool, np.bool_)) and
+            math.isfinite(float(value)) and float(value) >= 0.0 and
+            float(value).is_integer())
+
+
+def _finite_nonnegative_measure(value):
+    return (isinstance(value, (int, float, np.integer, np.floating)) and
+            not isinstance(value, (bool, np.bool_)) and
+            math.isfinite(float(value)) and float(value) >= 0.0)
+
+
 def _lifecycle_evidence_problem(rows, predictions, provenance, seeds, spec,
                                 source_path, source_hash, zero_target):
     if len(predictions) != len(seeds):
@@ -271,8 +287,13 @@ def _lifecycle_evidence_problem(rows, predictions, provenance, seeds, spec,
                 not bool(np.all(np.isfinite(prediction)))):
             return "prediction %d shape/dtype/finiteness mismatch" % i
     for i, (row, seed) in enumerate(zip(rows, seeds)):
-        if row.index != i or row.input_seed != seed:
+        if (type(row.index) is not int or type(row.input_seed) is not int or
+                row.index != i or row.input_seed != seed):
             return "row %d identity/order mismatch" % i
+        expected_estimator_seed = mint_provenance.seed_streams(seed)[2]
+        if (type(row.estimator_seed) is not int or
+                row.estimator_seed != expected_estimator_seed):
+            return "row %d estimator seed mismatch" % i
         if (row.candidate != expected_path or
                 row.candidate_sha256 != source_hash):
             return "row %d candidate binding mismatch" % i
@@ -281,6 +302,32 @@ def _lifecycle_evidence_problem(rows, predictions, provenance, seeds, spec,
         if ((row.width, row.depth) != (spec.width, spec.depth) or
                 row.budget != float(spec.flop_budget)):
             return "row %d lifecycle binding mismatch" % i
+        if (not _nonnegative_integer_measure(row.flops_used) or
+                not _nonnegative_integer_measure(row.n_ops)):
+            return "row %d FLOP/operation count is not a nonnegative integer" % i
+        for label, value in (
+                ("mse", row.mse),
+                ("zero_prediction_mse", row.zero_prediction_mse),
+                ("gt_noise", row.gt_noise),
+                ("residual_wall_time_s", row.residual_wall_time_s),
+                ("wall_time_s", row.wall_time_s)):
+            if not _finite_nonnegative_measure(value):
+                return "row %d %s is not finite and nonnegative" % (i, label)
+        for label, value in (
+                ("budget_exhausted", row.budget_exhausted),
+                ("time_exhausted", row.time_exhausted),
+                ("residual_exhausted", row.residual_exhausted),
+                ("combined_exhausted", row.combined_exhausted),
+                ("nonfinite", row.nonfinite)):
+            if type(value) is not bool:
+                return "row %d %s is not boolean" % (i, label)
+        if not isinstance(row.error_code, str):
+            return "row %d error_code is not a string" % i
+        if row.nonfinite:
+            return "row %d reports nonfinite output" % i
+        expected_mse = float(np.mean(predictions[i].astype(np.float32) ** 2))
+        if row.mse != expected_mse or row.zero_prediction_mse != 0.0:
+            return "row %d zero-target objective mismatch" % i
     problem = _provenance_problem(
         provenance, spec=spec, expected_path=expected_path,
         source_hash=source_hash, n_mlps=len(seeds),
