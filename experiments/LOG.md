@@ -41874,3 +41874,41 @@ now corrected to 272,000,000,000, and the focused suites were rerun green. Verdi
 The review notes that job 798's archived outer receipt did not retain the canary
 child's stderr; its cause is supported by source, environment, stopped stdout and
 an independent exact reproduction rather than that receipt alone.
+
+## 2026-09-11 - IMPORTANT contract: verify the Stage-2 producer receipt before protected truth
+
+**Question.** Can the already implemented label-free P07 producer be verified as
+a standalone artifact before the fitter reserves or opens P07, while making the
+later fit reverify the same producer receipt and current bytes?
+
+**Evidence.** CONFIRMED: the accepted pre-mint guard checks the exact 384 ordered
+P07 identities and rejects registry mutations. CONFIRMED: `p2_k4_fit.py` validates
+the prediction archive's embedded manifest, candidate sources, coefficient grid,
+identities and value-independent costs before calling `truth_reads`. CONFIRMED: the
+producer also writes `producer_receipt.json`, but no CLI independently consumes it;
+therefore GAME_PLAN's requirement to verify the full producer receipt before fitting
+cannot be executed literally. INFERRED: one shared strict validator used by both a
+truth-free verification mode and the fit will close this gap without altering any
+candidate observation or protected-data role.
+
+**Intervention and prediction.** This is fitting-instrument work; Samuel's standing
+prediction is **"I don't know"**. Add a fail-closed producer-receipt validator to
+`p2_k4_fit.py`. It must bind the receipt schema and exact keys, prediction path and
+hash, embedded manifest equality, current producer/generator/fitter/arm hashes,
+registered candidates/bounds/identities, generated source paths/hashes/switches,
+value-independent counted costs, lifecycle dimensions/budget/mode, row/op coverage,
+and `labels_read: false`. Add `--verify-only` to write an exclusive immutable
+verification receipt without accepting or resolving any truth path. Require normal
+fits to receive and revalidate the same raw producer receipt before truth loading,
+so verification cannot become a stale permission token. Preserve the current
+protected `P07` restriction and automatic present-time `truth_reads` reservation.
+
+**Gate and falsifier.** Extend the synthetic producer-to-selector suite with a
+positive verification/fit round trip and negative mutations of every newly trusted
+binding, including a spy proving zero truth resolution/load in verify-only mode and
+zero truth-loader calls before any refusal. Require the exact P07 registry guard,
+truth-read audit, current preflight and fresh-context Skeptic acceptance before the
+production producer or P07 access. Any loose field, type confusion, path escape,
+verify/use gap, overwritten receipt, protected read, changed candidate registry or
+failure to revalidate current bytes falsifies the repair. This work authorizes no
+truth access; Stage 0 acceptance still precedes the production Stage-2 sequence.
