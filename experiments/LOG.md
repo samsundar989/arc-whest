@@ -42828,3 +42828,39 @@ Artifacts:
 
 Current default preflight and a fresh-context Skeptic remain required before the
 P07 producer can be resubmitted.
+
+### Fresh Skeptic REJECT — selector import-to-bind race
+
+The required fresh Skeptic rejected the first repair. `p2_k4_fit.py` was still
+imported before production; `_validate()` could execute version A, the file could
+change, and `produce()` could then hash and bind version B while continuing to use
+the cached version A module. The added locks and fixtures began too late to prove
+that executed and recorded selector bytes were identical. Workerq 892 was cancelled
+during default preflight after steps 1--6; it has no green verdict and is preserved
+as incomplete evidence.
+
+The repair remains in the same IMPORTANT scope. The next implementation must take
+one locked selector byte snapshot, compile and execute that snapshot, and hold the
+source stable through production. A synthetic regression must distinguish loaded
+version A from later disk version B and refuse or prove the executed snapshot is
+the one recorded. Then rerun the complete suite, default preflight and a new fresh
+Skeptic. This rejection concerns provenance only and says nothing about K4 accuracy.
+
+### Locked-snapshot selector repair after Skeptic rejection
+
+The producer no longer imports the selector at module load. Its production path
+opens `p2_k4_fit.py` under an operating-system source lock, reads one byte snapshot,
+compiles and executes a private module from exactly that snapshot, records that
+snapshot's SHA256, and holds the source lock through the complete producer run.
+All registry parsing and stable-file operations therefore execute from the bytes
+the receipt binds. The existing closing scans still require those bytes at every
+lifecycle and publication boundary. Tests inject the ordinary imported selector
+explicitly; the documented producer subprocess exercises the real locked loader.
+
+The expanded suite passes **97/97**. Its new direct fixture compiles marker A from
+the locked bytes, observes marker A, records A's exact hash and confirms that a
+concurrent Windows write is denied. All 96 prior positive, negative, incomplete and
+race fixtures remain green. Accepted raw artifacts are
+`selector_binding_tests_locked.json` and `.log`; job 892's partial preflight and
+workerq records are preserved separately. A new complete default preflight and a
+new fresh-context Skeptic are still required before P07 resubmission.

@@ -1,0 +1,449 @@
+﻿worker-q: job #892 starting at 2026-09-11T23:41:42.920937+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=none -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'scripts/preflight.ps1', '-Log', 'experiments/2026-09-11_stage2_compact_p07/selector_binding_preflight.log']
+worker-q: ------------------------------------------------------------
+preflight -- arc-whest
+repo:    C:\Users\samsu\Documents\arc-whest
+shipped: estimator.py   archive: estimator_v2_6_1.py
+HEAD:    bb972b87e54c16a96e9111f1d90a1d2f9e5463ff
+worktree: DIRTY at start --
+    ?? experiments/2026-09-11_stage2_compact_p07/selector_binding_preflight.log
+  (steps 15/16 regenerate tracked evidence, so the tree is
+   EXPECTED to be dirty at the END of a -Full run)
+
+=== 1. official stack + round configuration ===
+official_config -- every value asserted against the installed package
+  LIVE round: Phase 2 (v2-phase2), AIcrowd round 1429
+
+  PASS  grader_stack.json exists and is complete (the pin is EVIDENCE, not a default) from canary4_329896_graded_report.json (submission 329896, 2026-09-05T11:07:21Z)
+  PASS  whestbench == the GRADED stack (0.16.1), not merely 0.16.x installed 0.16.1, graded 0.16.1
+  PASS  flopscope == the GRADED stack (0.12.1), not merely 0.12.x  installed 0.12.1, graded 0.12.1
+  PASS  the frozen pin still equals what the NEWEST stored graded report says (a stale freeze is drift too) frozen {'whestbench_version': '0.16.1', 'flopscope_version': '0.12.1'} vs newest report {'whestbench_version': '0.16.1', 'flopscope_version': '0.12.1'}
+  PASS  pyproject.toml pins whestbench to ==0.16.1 (a runtime pin a `uv sync` can undo is not a pin) "whestbench==0.16.1"
+  PASS  pyproject.toml pins flopscope to ==0.12.1 (a runtime pin a `uv sync` can undo is not a pin) "flopscope==0.12.1"
+  PASS  whestbench is the real package, not the local_sim shim     C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\whestbench
+  PASS  LIVE round tag == whestbench budget.CURRENT_ROUND.tag      v2-phase2 == v2-phase2
+  PASS  every round we know is a round the package knows           ours ['v1-phase1', 'v1-warmup', 'v2-phase2'] <= package ['v1-phase1', 'v1-warmup', 'v2-phase2']
+  PASS  and the package knows no round we have not recorded        package ['v1-phase1', 'v1-warmup', 'v2-phase2'] <= ours ['v1-phase1', 'v1-warmup', 'v2-phase2']
+  PASS  v1-phase1.width                                            256 == 256
+  PASS  v1-phase1.depth                                            32 == 32
+  PASS  v1-phase1.n_samples                                        1000000000 == 1000000000
+  PASS  v1-phase1.flop_budget                                      272000000000 == 272000000000
+  PASS  v1-phase1.lambda                                           100000000000.0 == 100000000000.0
+  PASS  v1-phase1.residual_wall_time_limit_s                       None == None
+  PASS  v1-phase1.wall_time_limit_s                                60.0 == 60.0
+  PASS  v1-phase1.residual_mode                                    'priced' == 'priced'
+  PASS  v1-warmup.width                                            256 == 256
+  PASS  v1-warmup.depth                                            8 == 8
+  PASS  v1-warmup.n_samples                                        1000000000 == 1000000000
+  PASS  v1-warmup.flop_budget                                      68000000000 == 68000000000
+  PASS  v1-warmup.lambda                                           100000000000.0 == 100000000000.0
+  PASS  v1-warmup.residual_wall_time_limit_s                       None == None
+  PASS  v1-warmup.wall_time_limit_s                                60.0 == 60.0
+  PASS  v1-warmup.residual_mode                                    'priced' == 'priced'
+  PASS  v2-phase2.width                                            1024 == 1024
+  PASS  v2-phase2.depth                                            16 == 16
+  PASS  v2-phase2.n_samples                                        1000000000 == 1000000000
+  PASS  v2-phase2.flop_budget                                      2199023255552 == 2199023255552
+  PASS  v2-phase2.lambda                                           0.0 == 0.0
+  PASS  v2-phase2.residual_wall_time_limit_s                       0.4 == 0.4
+  PASS  v2-phase2.wall_time_limit_s                                120.0 == 120.0
+  PASS  v2-phase2.residual_mode                                    'gated' == 'gated'
+  PASS  LIVE.limits_verifiable is set for the round the package grades True
+  PASS  ContestSpec.memory_limit_mb                                8192 == 8192
+  PASS  ContestSpec.setup_timeout_s                                5.0 == 5.0
+  PASS  ContestSpec.predict_timeout_s                              30.0 == 30.0
+  PASS  ContestSpec.wall_time_limit_s                              120.0 == 120.0
+  PASS  ContestSpec.residual_wall_time_limit_s                     0.4 == 0.4
+  PASS  ContestSpec.lambda_flops_per_second                        0.0 == 0.0
+  PASS  ContestSpec.width is REQUIRED, so it carries no stale default no class default
+  PASS  ContestSpec.depth is REQUIRED, so it carries no stale default no class default
+  PASS  ContestSpec.flop_budget is REQUIRED, so it carries no stale default no class default
+  PASS  v1-phase1: ContestSpec-only limits are NOT claimed verifiable read from whestbench 0.14.0, recorded not asserted
+  PASS  v1-warmup: ContestSpec-only limits are NOT claimed verifiable read from whestbench 0.14.0, recorded not asserted
+  PASS  floor: a tiny C is floored at 0.1, by the package          0.1
+  PASS  floor: ...and by us                                        
+  PASS  uncapped above: C = 5B gives 5.0, by the package           5.0
+  PASS  uncapped above: ...and by us                               
+  PASS  failure is priced at 1.0, NOT the 0.1 floor, by the package 1.0
+  PASS  failure is priced at 1.0 ...and by us                      
+  PASS  package effective_compute default: C == F (lambda is 0)    1.000000e+09
+  PASS  our LIVE.effective_compute agrees                          
+  PASS  the DEPRECATED alias LAMBDA_FLOPS_PER_SECOND is still 1e11 -- and is NOT the live rate alias 1e+11, default 0e+00
+  PASS  PHASE1's lambda equals the package's Phase-1 rate          1e+11
+  PASS  Phase 2 gates residual and does not price it               cap 0.4s, lambda 0.0
+  PASS  Phase 1 prices residual and does not gate it               
+  PASS  headroom is a ratio to the cap, not a cost                 7.452x at the recorded anchor residual
+  PASS  an uncapped round has no headroom number to quote          
+  PASS  for_shape(1024, 16) is Phase 2                             
+  PASS  for_shape(256, 32) is Phase 1                              
+  PASS  for_shape refuses an unknown shape rather than guessing    
+  PASS  the report was produced by the PINNED grader stack (equality, not 0.16.x) report 0.16.1, pinned 0.16.1
+  PASS  the report is the LIVE round's dataset revision            hf://aicrowd/arc-whestbench-public-2026@v2-phase2
+  PASS  run_config.width (what the runner USED)                    1024 == 1024
+  PASS  run_config.depth (what the runner USED)                    16 == 16
+  PASS  run_config.flop_budget (what the runner USED)              2199023255552 == 2199023255552
+  PASS  run_config.lambda_flops_per_second (what the runner USED)  0.0 == 0.0
+  PASS  run_config.residual_wall_time_limit_s (what the runner USED) 0.4 == 0.4
+  PASS  run_config.wall_time_limit_s (what the runner USED)        120.0 == 120.0
+  PASS  run_config.setup_timeout_s (what the runner USED)          5.0 == 5.0
+  PASS  run_config does NOT carry memory_limit_mb (class default only) absent -- so it is a ContestSpec default, not an observation
+  PASS  run_config does NOT carry predict_timeout_s (class default only) absent -- so it is a ContestSpec default, not an observation
+  PASS  the observed multiplier is the floor, so C/B < floor at this operating point 0.1
+  PASS  OfficialRound is frozen (a mutable config is a variable)   
+  PASS  replace() still produces a modified COPY for what-if analysis 
+  PASS  the Phase-2 server offset is recorded as MEASURED, with a range range (0, 16777216)
+  PASS  graded_flops() never UNDER-estimates a stored graded total errors +0.0, +32.0, +16,777,216.0, +16,777,216.0
+  PASS  the offset is NOT a constant, and the range says so        2**24 on 328662, 2**24-32 on 328664, ZERO on 329896 under the grader-twin arm; the preregistered 'bit-identical constant' reading was falsified 2026-09-01 and the range widened to [0, 2**24] on 2026-09-05
+  PASS  the genuine-cast family is predicted EXACTLY by the grader-twin arm (offset 0), so the offset is not a server constant 329896 canary4 168,669,961,830 and 330212 k3_full 1,714,587,938,406 -- local == graded, and 330212 was predicted before it was submitted
+  PASS  every stored graded offset lies inside the recorded range  
+  PASS  the carried offset is the MAXIMUM observed (conservative direction) 16,777,216
+  PASS  a round with no measured offset is distinguishable from offset-zero Phase 1 never measured; that is NOT measured-and-zero
+  PASS  meter='server' costs exactly the offset in floor headroom  219,885,548,339 FLOPs is the local ceiling for a floor-pinned candidate
+  PASS  multiplier() defaults to the LOCAL meter and rejects any other name 
+  PASS  the offset cannot rescue a FAILED MLP                      
+  PASS  the graded reports for the residual law are present        found ['329896', '330212', '330290'] of ['329896', '330212', '330290']
+  PASS  the per-op residual MEDIANS agree across candidates (this is the whole per-operation law) 329896=11.192us 330212=11.205us 330290=10.991us  spread 1.95%
+  PASS  GRADED_RESIDUAL_S_PER_OP is >= every per-op residual we have MEASURED (the policy is the maximum observed) carried 13.4 us vs worst measured row 12.096 us
+  PASS  ...and >= the maximum INFERRED across the visible board population, which is 5.4x wider in op count than our own two neilarmstrong4 329639 at 13.31 us/op; Camaro 329762 at 12.17. Both exceed our own worst row (12.096) -- see local_sim/p2_residual_law.py
+  PASS  every measured per-op residual lies inside the recorded range range (9.0, 13.4) us
+  PASS  the graded WALL of every recorded submission is inside the cap 329896=3.9s  330212=9.5s  330290=114.7s   cap 120s
+  PASS  GRADED_WALL_S_WORST_OBSERVED is the maximum actually observed carried 114.68s vs observed 114.68s
+  PASS  a contention-surviving nominee still exists (margins at the MEASURED 1.60x) 329896=19.45x  330212=7.86x  330290=0.65x   <1.00x = that submission would FAIL rows on a busy server
+  PASS  the op gate leaves at least a 1.25x margin under the cliff at the carried per-op figure 22,000 ops x 13.4 us = 0.295 s -> 1.36x
+
+  96/96
+  PASS  1. official stack + round configuration
+
+=== 2. mint provenance + dataset pin ===
+========================================================================================
+MINT PROVENANCE PROOF — canonical_mint  vs  whestbench.sample_mlp
+========================================================================================
+whestbench   : C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\whestbench\generation.py
+SeedSequence : fnp.random.SeedSequence is np.random.SeedSequence = True
+
+     shape  seeds   weights bit-identical   MLP.seed identical  legacy identical
+----------------------------------------------------------------------------------------
+1024x16         20                   20/20                20/20              0/20
+256x32         20                   20/20                20/20              0/20
+256x8          20                   20/20                20/20              0/20
+128x16         20                   20/20                20/20              0/20
+64x4          20                   20/20                20/20              0/20
+256x2          20                   20/20                20/20              0/20
+----------------------------------------------------------------------------------------
+canonical_mint is bit-identical to whestbench.sample_mlp : True
+legacy harness.gen_mlp ever matched                      : False
+legacy max relative elementwise divergence               : 1.868
+
+DISTRIBUTIONAL CHECK (12 x 256x8 nets, He target std = 0.088388)
+  canonical  mean +2.762e-05   std 0.08841742   std/target 1.000329
+  legacy     mean +9.335e-06   std 0.08839059   std/target 1.000025
+  -> same distribution, different realisation. Past *statistical* results
+     stand; per-seed reproducibility against the grader did not exist.
+
+SEED SEMANTICS
+  input_seed        123456789
+  estimator seed    3367517259   <- what MLP.seed holds on the grader
+  legacy MLP.seed   123456789   <- what our mints used (== the weight seed)
+  The evaluator's estimator seed is an INDEPENDENT substream of the weight
+  seed. Our mints coupled them, so any estimator that derives randomness
+  from mlp.seed (v2.4.1 derives its digital shift from it) had a spurious
+  functional dependence between its point set and the weights it scored.
+
+VERDICT: PROVEN — canonical_mint == whestbench.sample_mlp
+WP0A - the tag-drift records, their verdicts, and their tampers
+
+P1/P2  the source record reproduces its pinned digest; no source moved
+  PASS  P1: canonical digest recomputes from the rows                       3cb3e81907069725662edc01
+  PASS  P1: it matches the PINNED constant, not merely its own header       a record cannot certify itself
+  PASS  P2: source objects that changed bytes                               0 of 70
+  PASS  the record passes every pinned integrity clause                     no violations
+  PASS  record covers the expected object count                             70 rows
+  PASS  every row is a data/ SOURCE object                                  by construction
+  PASS  prose comment lines do not become header fields                     8 header keys, all identifier-ish
+
+L  the FULL loader-visible tree, because data/ is NOT the whole input
+  PASS  L: the loader record exists                                         experiments/2026-08-31_phase2_tag_drift/loader_manifest.tsv
+  PASS  L: it covers every object at the new commit                         226 rows
+  PASS  L: its digest recomputes to the pinned constant                     29664dbb64a02b8d8e26a213
+  PASS  L: it passes every pinned integrity clause                          no violations
+  PASS  L: 70 source objects unchanged                                      70
+  PASS  L: README and .gitattributes unchanged                              1 + 1
+  PASS  L: metadata.json CHANGED                                            it gained prepared_splits
+  PASS  L: 153 prepared objects ADDED                                       the tree whestbench now prefers
+  PASS  L: NOTHING was removed                                              [('metadata', 'changed'), ('other', 'unchanged'), ('prepared', 'added'), ('readme', 'unchanged'), ('source', 'unchanged')]
+  PASS  L: the verdict reports that the LOADER ROUTE moved                  whestbench dataset.py:479-491 prefers prepared/<split>
+  PASS  L: source-equivalence and loader-route change are SEPARATE fields   the bytes did not move; the path to them did
+
+F  the two loader routes were compared functionally, on real bytes
+  PASS  F: prepared/mini shard 0 vs data/mini shard 0 was measured          8 rows
+  PASS  F: 'weights' is BITWISE identical on every compared row             8/8, max|diff|=0.0
+  PASS  F: 'all_layer_means' is BITWISE identical on every compared row     8/8, max|diff|=0.0
+  PASS  F: mlp_id/mlp_seed agree IN ORDER, not merely as sets               row order decides which 50 rows are publicly scored
+  PASS  F: the schemas match exactly                                        no column drift
+  PASS  F: the record states its own scope honestly                         13 shards and the full split remain unverified
+
+P3  the live commit classifies as SOURCE_EQUIVALENT, and evidence holds
+  PASS  P3: live 6a416f against pinned ce926b7 is SOURCE_EQUIVALENT         SOURCE_EQUIVALENT
+  PASS  P3: shape-dependent evidence stays valid                            all 70 source objects are byte-identical and not
+  PASS  P3: and the executable pin is nonetheless reported STALE            bookkeeping, separate from evidence validity
+  PASS  no-move classifies PINNED, not SOURCE_EQUIVALENT                    PINNED
+
+P4  an unrecorded commit can NEVER obtain SOURCE_EQUIVALENT
+  PASS  P4: an arbitrary unrecorded commit -> UNKNOWN                       UNKNOWN
+  PASS  P4: an arbitrary unrecorded commit -> evidence NOT asserted valid   UNKNOWN is not a pass
+  PASS  P4: the OLD commit presented as live against the NEW pin -> UNKNOWN UNKNOWN
+  PASS  P4: the OLD commit presented as live against the NEW pin -> evidence NOT asserted validUNKNOWN is not a pass
+  PASS  P4: a third commit against the recorded pin -> UNKNOWN              UNKNOWN
+  PASS  P4: a third commit against the recorded pin -> evidence NOT asserted validUNKNOWN is not a pass
+  PASS  P4: empty live commit -> UNKNOWN                                    UNKNOWN
+  PASS  P4: empty live commit -> evidence NOT asserted valid                UNKNOWN is not a pass
+  PASS  P4: live is right but the pin is not the recorded old commit -> UNKNOWNUNKNOWN
+  PASS  P4: live is right but the pin is not the recorded old commit -> evidence NOT asserted validUNKNOWN is not a pass
+  PASS  P4: a prefix of the real commit is not the real commit -> UNKNOWN   UNKNOWN
+  PASS  P4: a prefix of the real commit is not the real commit -> evidence NOT asserted validUNKNOWN is not a pass
+  PASS  the records license exactly ONE transition                          the reverse move is unmeasured
+
+T  the four tampers an independent Skeptic used to obtain a false pass
+  PASS  T1: a rewritten `# new_commit` header -> UNKNOWN                    the commit pair is pinned in code
+  PASS  T1: ...and the row digest alone would NOT have caught it            which is exactly why the header is pinned too
+  PASS  T2: both columns forged identically + re-stamped digest -> UNKNOWN  old == new, so `differing_rows` sees nothing; the digest does
+  PASS  T2: ...and `differing_rows` really is blind to it                   the naive check would have passed
+  PASS  T3: truncation to 5 of 70 rows + re-stamped digest -> UNKNOWN       5 rows against a pinned 70
+  PASS  T3: ...and coverage is enforced in classify(), not in a test literalrow digest 0645258aa7435e32 != pinned 3cb3e81907069725; 
+  PASS  T4: `removed_count: 999` -> UNKNOWN                                 a REMOVAL is never source-equivalent
+  PASS  T4: ...and the reason names the removal, not something else         removed_count is 999; a REMOVAL is never source-equivale
+  PASS  T5: a forged loader digest is refused                               pinned in code
+  PASS  T5: ...and it degrades the SOURCE verdict to UNKNOWN too            an untrusted loader record licenses nothing
+  PASS  T6: a smuggled REMOVED row in the loader record is refused          row digest f91da7095a454bf3 != pinned 29664dbb64a02b8d; 
+
+M  structural corruption is refused before any verdict is formed
+  PASS  M1: one asymmetric flipped hash + repaired digest -> SOURCE_CHANGED UNKNOWN
+  PASS  M4: a non-data/ path in the SOURCE record is refused                DriftRecordError: <M4>: row 70 path 'prepared/mini-000.arrow' is not a 'da
+  PASS  M5: a row with the wrong column count is refused                    DriftRecordError: <M5>: row 0 has 3 columns, expected 4
+  PASS  M5: a renamed column header is refused                              DriftRecordError: <M5b>: column header is 'path\tsize\tsha\tsha2', expecte
+  PASS  M5: a truncated sha256 is refused                                   DriftRecordError: <M5c>: row 0 bad sha256 '948908f79ba7163304af945efab1f8f
+  PASS  M6: a duplicated source path is refused                             DriftRecordError: <M6>: duplicate source paths in the record
+  PASS  M7: a duplicated path in the loader record is refused               DriftRecordError: <M7>: duplicate paths in the record
+
+D  the manifest lineage block, and the field names a reviewer read wrong
+  PASS  D: the record's two endpoints are named for what they ARE           not 'pinned_commit', which stopped being true after the repin
+  PASS  D: `manifest_pin` is a separate field the manifest writer fills     None
+  PASS  D: canonical digest carried                                         3cb3e81907069725
+  PASS  D: the block records that the record passed pinned integrity        not self-certified
+  PASS  D: the loader half is carried too                                   226 objects
+  PASS  D: source vs prepared counts are SEPARATE fields                    70 source unchanged, 153 prepared added
+  PASS  D: both evidence paths exist on disk                                experiments/2026-08-31_phase2_tag_drift/source_manifest.tsv
+  PASS  D: the block is JSON-serialisable                                   round-trips
+  PASS  D: the manifest carries dataset.commit_lineage                      present
+  PASS  D: the pin is one of the record's two endpoints                     pinned at 6a416fa5fb45
+  PASS  D: `manifest_pin` in the stored block equals dataset.commit         the field a reviewer found self-contradictory is now filled
+  PASS  D: the OLD commit our stored evidence used is preserved             provenance survives
+  PASS  D: shape and budget are unchanged by the repin                      1024x16, B = 2**41, floor 0.1
+
+R  neither durable record was modified by this suite
+  PASS  R: source_manifest.tsv sha256 unchanged                             01da901df7af3128
+  PASS  R: loader_manifest.tsv sha256 unchanged                             d6c3fbfe2b0ab83a
+
+74/74 checks passed
+  PASS  2. mint provenance + dataset pin
+
+=== 3. invariant suite ===
+world: 256x32  B = 272,000,000,000  weights = numpy float32   [HISTORICAL DEFAULT -- not the graded world]
+candidate: tau=-2.5  target C/B=0.3  chunk=16384
+
+1. NORMAL CASE
+  he 256x32                          ok   shape (32, 256)  range [0.000e+00, 5.171e+00]  final mean 0.6462  deterministic=True
+
+2. DEGENERATE PRUNING (whole layers pushed below tau)
+  layer 5 scaled 0.02                ok   shape (32, 256)  range [0.000e+00, 4.003e+00]  final mean 0.0133  deterministic=True
+  layer 5 scaled 0.001               ok   shape (32, 256)  range [0.000e+00, 4.003e+00]  final mean 0.0007  deterministic=True
+  layer 7 identically zero           ok   shape (32, 256)  range [0.000e+00, 4.352e+00]  final mean 0.0000  deterministic=True
+
+3. EXTREME DYNAMIC RANGE
+  layer 12 scaled 100x               ok   shape (32, 256)  range [0.000e+00, 5.158e+02]  final mean 67.7158  deterministic=True
+  layer 12 scaled 1e-3               ok   shape (32, 256)  range [0.000e+00, 4.554e+00]  final mean 0.0007  deterministic=True
+  layer 12 scaled 1e4                ok   shape (32, 256)  range [0.000e+00, 5.158e+04]  final mean 6771.5833  deterministic=True
+  layer 3 mean-shifted (all on)      ok   shape (32, 256)  range [0.000e+00, 1.577e+02]  final mean 15.9039  deterministic=True
+
+4. SEED EXTREMES (the rng contract)
+  seed 0                             ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5729  deterministic=True
+  seed 1                             ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5720  deterministic=True
+  seed 2147483647                    ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5720  deterministic=True
+  seed 9223372036854775807           ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5728  deterministic=True
+  seed 12345678901234567890          ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5717  deterministic=True
+
+5. SHAPE GENERALITY (calibration must disable itself off-width)
+  depth 2 x width 256                ok   shape (2, 256)  range [7.214e-03, 1.983e+00]  final mean 0.5480  deterministic=True
+  depth 8 x width 128                ok   shape (8, 128)  range [0.000e+00, 2.760e+00]  final mean 0.3155  deterministic=True
+  depth 32 x width 64                ok   shape (32, 64)  range [0.000e+00, 4.656e+00]  final mean 0.1559  deterministic=True
+  depth 4 x width 256                ok   shape (4, 256)  range [1.154e-05, 2.968e+00]  final mean 0.5810  deterministic=True
+  depth 64 x width 256               ok   shape (64, 256)  range [0.000e+00, 4.687e+00]  final mean 0.5158  deterministic=True
+
+6. BUDGET EDGES (the analytic fallback path)
+  budget 0                           ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 1                           ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 1e7 (below min N)           ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 1e9                         ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 10x                         ok   shape (32, 256)  range [0.000e+00, 4.670e+00]  final mean 0.4044  deterministic=True
+
+7. GRADER-ARRAY IMMUTABILITY (weights must be untouched)
+  input weights unmodified           ok
+
+8. LAYER-1 CLOSED FORM  (exact: ||W1[:,j]|| / sqrt(2*pi))
+  256x32                             max rel err 1.773e-16   ok
+  128x8                              max rel err 1.644e-16   ok
+  64x4                               max rel err 1.631e-16   ok
+  256x2                              max rel err 1.724e-16   ok
+
+9. PERMUTATION EQUIVARIANCE  (hidden-layer relabelling)
+  bar: every row MSE <= 1% of raw MSE = 1.400e-08   [frozen decision signal]
+  256x32 permute layer 7             row-k 2.22e-15  other-rows 7.75e-08  final 7.75e-08
+                                     MSE row-k 1.13e-31  other 1.30e-17  final 4.04e-16
+                                     worst 4.04e-16 = 0.0000% of raw MSE   ok
+  256x32 permute layer 20            row-k 1.78e-15  other-rows 1.93e-07  final 1.93e-07
+                                     MSE row-k 1.68e-31  other 4.45e-17  final 1.38e-15
+                                     worst 1.38e-15 = 0.0000% of raw MSE   ok
+  128x8 permute layer 1              row-k 8.88e-16  other-rows 3.47e-08  final 3.47e-08
+                                     MSE row-k 2.65e-32  other 1.79e-17  final 1.26e-16
+                                     worst 1.26e-16 = 0.0000% of raw MSE   ok
+  256x32 permute layer 30            row-k 1.33e-15  other-rows 1.59e-07  final 1.59e-07
+                                     MSE row-k 3.62e-32  other 3.10e-17  final 9.61e-16
+                                     worst 9.61e-16 = 0.0000% of raw MSE   ok
+
+10. BUDGET MONOTONICITY  (the failsafe ladder)
+  budget                0  analytic   valid=True  non-decreasing=True
+  budget                1  analytic   valid=True  non-decreasing=True
+  budget        1,000,000  analytic   valid=True  non-decreasing=True
+  budget       10,000,000  analytic   valid=True  non-decreasing=True
+  budget      100,000,000  analytic   valid=True  non-decreasing=True
+  budget    1,000,000,000  analytic   valid=True  non-decreasing=True
+  budget   10,000,000,000  N=2^9      valid=True  non-decreasing=True
+  budget   27,200,000,000  N=2^11     valid=True  non-decreasing=True
+  budget  272,000,000,000  N=2^14     valid=True  non-decreasing=True
+  budget 2,720,000,000,000  N=2^17     valid=True  non-decreasing=True
+  ladder monotone and total          ok
+
+11. DETERMINISM  (3x bit-identity + fresh instance)
+  256x32                             3x identical=True  fresh-instance identical=True  ok
+  128x8                              3x identical=True  fresh-instance identical=True  ok
+
+12. SEED-BLOCK HYGIENE
+  live blocks disjoint               ok   (27 decision blocks + vault block 20,260,806,000..20,260,806,499)
+
+13. GT-NOISE FLOOR  (what counts as signal)
+  vault GT samples/MLP               33,554,432
+  vault GT-noise MSE (mean)          1.575e-09  (0.113% of the 1.4e-6 decision signal)
+  vault touches                      1
+  noise < 10% of signal              ok
+
+30/30 checks passed
+MUTATION BATTERY for invariant 9 -- pure gate fixture; candidate permutation is covered separately: estimator.py
+gate: edge_cases.perm_gate, bar = 1% of raw MSE = 1.400e-08  [frozen decision signal]
+
+128x8 layer 3   EXACT FIXTURE   worst 0.000e+00 = 0.0000% of bar   accepted
+128x8 layer 3   detection floor: a POSITIONAL distortion is rejected once it exceeds 2.681e-04 = 0.0268% of the row
+128x8 layer 3   FIXTURE SENSITIVITY BAND: the retired clause rejected at 5.187e-07 (0.000052%); the amendment gives away a factor of 517x
+128x8 layer 3   floor probe amp = 0.50x floor -> mse_k 3.500e-09, accepted   ok
+128x8 layer 3   floor probe amp = 2.00x floor -> mse_k 5.600e-08, REJECTED   ok
+
+  transposed index (row reversed)            worst 5.589e-01 = 3.99e+07x bar   REJECTED  ok
+  reduction axis swapped (positional ramp)   worst 1.948e-03 = 1.39e+05x bar   REJECTED  ok
+  off-by-one on the depth axis               worst 7.954e-01 = 5.68e+07x bar   REJECTED  ok
+  basis on the wrong side (fixed shuffle)    worst 6.862e-01 =  4.9e+07x bar   REJECTED  ok
+  minimal index bug (adjacent positions 0<->1) worst 1.607e-03 = 1.15e+05x bar   REJECTED  ok
+  closest-valued positions swapped           worst 8.747e-04 = 6.25e+04x bar   REJECTED  ok
+  NaN on the SCORED final row                worst nan =      infx bar   REJECTED  ok
+  NaN on the permuted row k                  worst nan =      infx bar   REJECTED  ok
+  inf on a non-k, non-final row              worst nan =      infx bar   REJECTED  ok
+  CONTROL: equivariant 0.1% scale error      worst 0.000e+00 =        0x bar   accepted  ok
+  CONTROL: value-selected swap (commutes)    worst 0.000e+00 =        0x bar   accepted  ok
+
+64x4 layer 1   EXACT FIXTURE   worst 0.000e+00 = 0.0000% of bar   accepted
+64x4 layer 1   detection floor: a POSITIONAL distortion is rejected once it exceeds 2.999e-04 = 0.0300% of the row
+64x4 layer 1   FIXTURE SENSITIVITY BAND: the retired clause rejected at 5.505e-07 (0.000055%); the amendment gives away a factor of 545x
+64x4 layer 1   floor probe amp = 0.50x floor -> mse_k 3.500e-09, accepted   ok
+64x4 layer 1   floor probe amp = 2.00x floor -> mse_k 5.600e-08, REJECTED   ok
+
+  transposed index (row reversed)            worst 4.630e-01 = 3.31e+07x bar   REJECTED  ok
+  reduction axis swapped (positional ramp)   worst 1.557e-03 = 1.11e+05x bar   REJECTED  ok
+  off-by-one on the depth axis               worst 8.951e-01 = 6.39e+07x bar   REJECTED  ok
+  basis on the wrong side (fixed shuffle)    worst 4.196e-01 =    3e+07x bar   REJECTED  ok
+  minimal index bug (adjacent positions 0<->1) worst 2.235e-02 =  1.6e+06x bar   REJECTED  ok
+  closest-valued positions swapped           worst 1.286e-04 = 9.19e+03x bar   REJECTED  ok
+  NaN on the SCORED final row                worst nan =      infx bar   REJECTED  ok
+  NaN on the permuted row k                  worst nan =      infx bar   REJECTED  ok
+  inf on a non-k, non-final row              worst nan =      infx bar   REJECTED  ok
+  CONTROL: equivariant 0.1% scale error      worst 0.000e+00 =        0x bar   accepted  ok
+  CONTROL: value-selected swap (commutes)    worst 0.000e+00 =        0x bar   accepted  ok
+
+FIXTURE-SPECIFIC SURRENDERED SENSITIVITY (the historical candidate measurement remains in docs/VALIDATION.md):
+  128x8 layer 3      old 5.187e-07 -> new 2.681e-04   = 517x given away
+  64x4 layer 1       old 5.505e-07 -> new 2.999e-04   = 545x given away
+  Every mutation above sits FAR ABOVE this band, so the battery says nothing about
+  what lives inside it. docs/VALIDATION.md section 3.2 names one thing that does
+  (rotation stability at 4.4e-08) and it has been rewritten to record that this
+  instrument no longer measures it.
+
+BATTERY PASSED -- every deliberate equivariance defect is still rejected, the equivariant controls are accepted, and the exact fixture passes.
+  PASS  3. invariant suite
+
+=== 4. whest validate ===
+  child stdout encoding: utf-8
+Validating estimator estimator.py
+C:\Users\samsu\Documents\arc-whest\estimator.py:772: SymmetryLossWarning: Symmetry lost along dims (0, 1): multiply — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)
+C:\Users\samsu\Documents\arc-whest\estimator.py:772: SymmetryLossWarning: Symmetry lost along dims (0, 1): add — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)
+┌──────────────────────────────── Validation ─────────────────────────────────┐
+│ Command: validate                                                           │
+│ Status: success                                                             │
+│ ┌──────────────────────────────── Checks ─────────────────────────────────┐ │
+│ │ ┌────────┬──────────────────────────┬────────────────┐                  │ │
+│ │ │ Status │ Check                    │ Detail         │                  │ │
+│ │ ├────────┼──────────────────────────┼────────────────┤                  │ │
+│ │ │ OK     │ class resolved           │ Estimator      │                  │ │
+│ │ │ OK     │ setup(context) completed │ 0.00s (cap 5s) │                  │ │
+│ │ │ OK     │ predict() returned shape │ (2, 4)         │                  │ │
+│ │ │ OK     │ values finite            │ all finite     │                  │ │
+│ │ └────────┴──────────────────────────┴────────────────┘                  │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────┘
+✓ Validation passed in 34ms
+Next: `whest run --estimator estimator.py --split mini`
+  PASS  4. whest validate
+
+=== 5. ship-file identity vs estimator_v2_6_1.py ===
+  estimator.py  sha256(lf) = 1caa3752be56e8625ddb8b163ff8ffa8
+  estimator_v2_6_1.py sha256(lf) = 1caa3752be56e8625ddb8b163ff8ffa8
+  identical
+  PASS  5. ship-file identity vs estimator_v2_6_1.py
+
+=== 6. vault seal (counter vs log) ===
+  manifest touches = 1  log entries = 1
+  seal consistent
+  PASS  6. vault seal (counter vs log)
+
+=== 7. seed ledger (consumption + source scan) + enforcement labels ===
+seed ledger — consistency
+  ledger records                     58  (38 claims, 16 finalizations, 3 pairings)
+  claims naming an artifact          24  (0 absent on this host, hash recorded)
+  tier tightenings                   1  (permitted; recorded so they are never silent)
+    - local_sim/p2_truth.py: P08 was TIGHTENED 'DESIGN' -> 'SINGLE_USE' by a declared `retier` record. The claim stands and every rule now in force is stricter.
+  hard collisions (DECISION/VAULT)   0
+  permitted overlaps (DESIGN)        5
+    - D16[30,806,016,200..30,806,016,223]  local_sim/probe_whitening.py  vs  local_sim/probe_design_carrier.py   <- CORRELATED EVIDENCE, never quote as two independent results
+    - D11[30,806,011,000..30,806,011,499]  local_sim/packed_sparse_probe.py  vs  local_sim/packed_truth.py   <- SAME NETWORKS BY DESIGN (one experiment, two roles)
+    - P01[40,821,001,168..40,821,001,175]  local_sim/p2_slice_lab.py::WP13 E0-TOL/E1/E2  vs  local_sim/p2_truth.py   <- DECLARED DELIBERATE: EXTENDS the standing declaration on this range to a THIRD consumer. WP16 re-drives the same eight networks to check that the fnp port and the torch reference are the same function -- the 3.31x the canary exposed. It makes no new statistical claim on them: the comparison is deterministic parity, and the only number quoted against truth is a re-read of the ALREADY-MINTED truth_P01_wp13nets.npz. All three consumers remain CORRELATED EVIDENCE and must never be quoted as independent results.
+    - P01[40,821,001,168..40,821,001,175]  local_sim/p2_slice_lab.py::WP13 E0-TOL/E1/E2  vs  local_sim/p2_k3_parity.py   <- DECLARED DELIBERATE: EXTENDS the standing declaration on this range to a THIRD consumer. WP16 re-drives the same eight networks to check that the fnp port and the torch reference are the same function -- the 3.31x the canary exposed. It makes no new statistical claim on them: the comparison is deterministic parity, and the only number quoted against truth is a re-read of the ALREADY-MINTED truth_P01_wp13nets.npz. All three consumers remain CORRELATED EVIDENCE and must never be quoted as independent results.
+    - P01[40,821,001,168..40,821,001,175]  local_sim/p2_truth.py  vs  local_sim/p2_k3_parity.py   <- DECLARED DELIBERATE: EXTENDS the standing declaration on this range to a THIRD consumer. WP16 re-drives the same eight networks to check that the fnp port and the torch reference are the same function -- the 3.31x the canary exposed. It makes no new statistical claim on them: the comparison is deterministic parity, and the only number quoted against truth is a re-read of the ALREADY-MINTED truth_P01_wp13nets.npz. All three consumers remain CORRELATED EVIDENCE and must never be quoted as independent results.
+  CONSISTENT
+
+seed ledger — static source scan
+  no unrecorded seed literals
+
+worker-q: cancellation requested; stopping job
+worker-q: ------------------------------------------------------------
+worker-q: job #892 CANCELLED (exit code 1) at 2026-09-11T23:45:19.458292+00:00

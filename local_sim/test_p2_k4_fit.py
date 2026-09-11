@@ -7,6 +7,8 @@ from numpy import load as _load_npz
 import p2_k4_fit as fit
 import p2_k4_fit_producer as producer
 
+producer._SELECTOR_OVERRIDE = fit
+
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
 
@@ -40,7 +42,7 @@ def _registered_manifest():
 def _registered_load(root, manifest):
     path = os.path.join(root, "registered-identities.json")
     _write_json(path, manifest)
-    return producer._load_identities(path)
+    return producer._load_identities(path, fit)
 
 
 def _fixture(root):
@@ -132,6 +134,37 @@ def run_checks():
     def check(name, condition, detail):
         rows.append({"check": name, "pass": bool(condition), "detail": detail})
         print("%-52s %s  %s" % (name, "PASS" if condition else "FAIL", detail))
+
+    with _temp("p2-k4-selector-snapshot-") as root:
+        source = os.path.join(root, "selector_fixture.py")
+        source_a = b"MARKER = 'A'\n"
+        source_b = b"MARKER = 'B'\n"
+        with open(source, "wb") as fh:
+            fh.write(source_a)
+        original_path = producer._SELECTOR_PATH
+        original_override = producer._SELECTOR_OVERRIDE
+        producer._SELECTOR_PATH = source
+        producer._SELECTOR_OVERRIDE = None
+        denied = False
+        try:
+            with producer._bound_selector() as (module, binding):
+                try:
+                    with open(source, "wb") as fh:
+                        fh.write(source_b)
+                except PermissionError:
+                    denied = True
+                executed = module.MARKER
+                bound_sha = binding["sha256"]
+                current_sha = producer._sha256(source)
+        finally:
+            producer._SELECTOR_PATH = original_path
+            producer._SELECTOR_OVERRIDE = original_override
+        check("selector executes the exact locked source snapshot",
+              (executed == "A"
+               and bound_sha == producer._sha256_bytes(source_a)
+               and (denied or current_sha != bound_sha)),
+              "executed=%s denied_write=%s bound=%s current=%s" %
+              (executed, denied, bound_sha[:12], current_sha[:12]))
 
     with _temp("p2-k4-fit-p07-registry-") as root:
         manifest = _registered_manifest()

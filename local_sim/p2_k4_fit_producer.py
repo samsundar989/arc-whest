@@ -19,6 +19,8 @@ Run:
 from __future__ import annotations
 
 import argparse
+import contextlib
+import ctypes
 import dataclasses
 import hashlib
 import io
@@ -26,6 +28,7 @@ import json
 import math
 import os
 import sys
+import types
 
 import numpy as np
 
@@ -39,8 +42,10 @@ for _p in (_HERE, _ROOT):
 import lifecycle_eval as le  # noqa: E402
 import mint_provenance  # noqa: E402
 import p2_build_k4_arms as builder  # noqa: E402
-import p2_k4_fit as selector  # noqa: E402
 import seed_blocks  # noqa: E402
+
+_SELECTOR_PATH = os.path.join(_HERE, "p2_k4_fit.py")
+_SELECTOR_OVERRIDE = None  # Tests only; production compiles the locked snapshot.
 
 
 class ProducerRefused(ValueError):
@@ -54,6 +59,67 @@ def _sha256_bytes(value):
 def _sha256(path):
     with open(path, "rb") as fh:
         return _sha256_bytes(fh.read())
+
+
+@contextlib.contextmanager
+def _locked_source_bytes(path):
+    """Yield bytes while denying cooperative source replacement."""
+    path = os.path.abspath(path)
+    if os.name == "nt":
+        from ctypes import wintypes
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        create = kernel32.CreateFileW
+        create.argtypes = (wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
+                           wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD,
+                           wintypes.HANDLE)
+        create.restype = wintypes.HANDLE
+        close = kernel32.CloseHandle
+        close.argtypes = (wintypes.HANDLE,)
+        close.restype = wintypes.BOOL
+        handle = create(path, 0x80000000, 0x00000001, None, 3, 0x00000080,
+                        None)
+        if handle == wintypes.HANDLE(-1).value:
+            raise ProducerRefused(
+                "cannot lock selector source: WinError %d" %
+                ctypes.get_last_error())
+        try:
+            with open(path, "rb") as fh:
+                yield fh.read()
+        finally:
+            close(handle)
+        return
+    import fcntl
+    with open(path, "rb") as fh:
+        try:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            yield fh.read()
+        except (OSError, BlockingIOError) as exc:
+            raise ProducerRefused(
+                "cannot lock selector source: %s" % exc) from exc
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+
+
+@contextlib.contextmanager
+def _bound_selector():
+    """Compile one locked selector snapshot and hold its bytes through output."""
+    if _SELECTOR_OVERRIDE is not None:
+        with open(_SELECTOR_PATH, "rb") as fh:
+            raw = fh.read()
+        yield _SELECTOR_OVERRIDE, {
+            "path": os.path.relpath(_SELECTOR_PATH, _ROOT).replace("\\", "/"),
+            "sha256": _sha256_bytes(raw),
+        }
+        return
+    with _locked_source_bytes(_SELECTOR_PATH) as raw:
+        module = types.ModuleType("_arc_whest_bound_p2_k4_fit")
+        module.__file__ = _SELECTOR_PATH
+        module.__package__ = ""
+        exec(compile(raw, _SELECTOR_PATH, "exec"), module.__dict__)
+        yield module, {
+            "path": os.path.relpath(_SELECTOR_PATH, _ROOT).replace("\\", "/"),
+            "sha256": _sha256_bytes(raw),
+        }
 
 
 def _observed_binding(path, frozen_sha256):
@@ -462,7 +528,7 @@ def _lifecycle_evidence_problem(rows, predictions, provenance, seeds, spec,
     return ""
 
 
-def _load_identities(path):
+def _load_identities(path, selector):
     manifest, ids, identity_sha = selector._identity_registry(
         path, return_hash=True)
     kind = manifest.get("kind")
@@ -488,7 +554,7 @@ def _load_identities(path):
     return manifest, ids, seeds, width, depth, identity_sha
 
 
-def _validate(a):
+def _validate(a, selector):
     for label, path in (("candidates", a.candidates), ("bounds", a.bounds),
                         ("identities", a.identities)):
         if not os.path.isfile(path):
@@ -502,7 +568,7 @@ def _validate(a):
         names, candidates, bounds, matrix, registry_hashes = selector._registry(
             a.candidates, a.bounds, return_hashes=True)
         (identity_manifest, identities, seeds, width, depth,
-         identity_sha) = _load_identities(a.identities)
+         identity_sha) = _load_identities(a.identities, selector)
     except selector.FitRefused as exc:
         raise ProducerRefused(str(exc)) from exc
     input_hashes = {
@@ -514,16 +580,12 @@ def _validate(a):
             identities, seeds, width, depth, input_hashes)
 
 
-def produce(a):
+def _produce(a, selector, selector_binding):
     (names, candidates, bounds, matrix, identity_manifest,
-     identities, seeds, width, depth, input_hashes) = _validate(a)
+     identities, seeds, width, depth, input_hashes) = _validate(a, selector)
     producer_binding = {
         "path": os.path.relpath(__file__, _ROOT).replace("\\", "/"),
         "sha256": _sha256(__file__),
-    }
-    selector_binding = {
-        "path": os.path.relpath(selector.__file__, _ROOT).replace("\\", "/"),
-        "sha256": _sha256(selector.__file__),
     }
     generator_binding = {
         "path": os.path.relpath(builder.__file__, _ROOT).replace("\\", "/"),
@@ -749,6 +811,11 @@ def produce(a):
                 (output_problem or "%s bytes changed during success write" %
                  changed_label, diagnostic))
         return result
+
+
+def produce(a):
+    with _bound_selector() as (selector, selector_binding):
+        return _produce(a, selector, selector_binding)
 
 
 def main(argv=None):
