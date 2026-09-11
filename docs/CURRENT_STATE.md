@@ -55,11 +55,13 @@ which is valid and recorded without interpretation.
 The exact coefficient and identity registries are committed. Fresh-context Skeptics
 accepted both the producer's exact-P07 pre-mint guard and the repaired standalone
 receipt verifier. The current mutation battery and current-source preflight are now
-complete. Workerq 824 is queued at inherited HIGH priority to produce the four
-bounded coherent candidates on P07 weights without labels. It requests 12 GiB RAM,
-2 CPUs and no GPU; queue admission is waiting on system RAM reservations. This
-queued state is not completion. When it succeeds, verify the immutable producer
-receipt, open P07 through `truth_reads` to freeze the coefficient receipt,
+complete. Workerq 824 attempted the four bounded coherent candidates on P07 weights
+without labels and FAILED after evaluating coefficient 0 across all 384 identities.
+Peak host RAM was only 2.53 GiB, so memory was not the cause. The producer collapsed
+the row failures into an undifferentiated refusal and wrote no predictions/receipt;
+an IMPORTANT truth-free diagnostic repair is now registered. Classify and repair
+that production-path failure, rerun through workerq, then verify the immutable
+producer receipt before opening P07 through `truth_reads` to freeze the coefficient receipt,
 then run the registered exact/coherent/consumers-only/births-only comparison on exposed P01.
 That DESIGN result must end with synthesis and a fresh Skeptic before any untouched
 DECIDE allocation. No public or vault truth is authorized.
