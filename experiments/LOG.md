@@ -41807,3 +41807,58 @@ positive-only battery through workerq under 8 GiB RLIMIT_AS. Any changed named
 predicate/count/order, historical argument drift, live-budget reduction, lost
 mutation, invalid receipt, failure or missing receipt falsifies the repair. Only a
 passing positive result licenses the twelve one-use mutation shards and aggregate.
+
+### WP0E fifth result and bounded repair contract - the memory fix exposed two portability defects
+
+Workerq 798 executed committed source `e3de36165c55a72ab12c21648477bbf3b1edd99c`
+through WSL with a 12 GiB host declaration, 2 CPUs, no GPU and an inherited
+8,589,934,592-byte `RLIMIT_AS`. It reached terminal FAILED after 287.28 seconds
+with an exclusive, provenance-bound receipt. There was no `MemoryError` or
+address-space-cap failure: all 45 atomic edge workers, both fresh-process
+determinism checks, section 5 and every 5b dtype arm completed. This establishes
+that the scaled off-shape oracle removed the RAM blocker. It is not certification
+acceptance because section 3 remained red.
+
+The raw receipt reports exactly two failures. First, the strict route consumer
+rejected the normal, degenerate, dynamic-range and seed-extreme calls. Source
+inspection identifies a Python default-argument capture: `check(...,
+budget=BUDGET)` froze the historical 272,000,000,000 value at function definition
+time, before `--phase2` changed the module global to 2^41. The new receipt correctly
+made this pre-existing drift visible. Second, section 3b launched
+`test_edge_cases_inv9.py` under WSL, where the script directory shadowed the
+installed `flopscope` package with `local_sim/flopscope`; that shim's normal PPF
+requires SciPy, which the bounded official-package environment does not install.
+The same canary passes on Windows only because SciPy happens to be present. Raw
+job metadata, manifest, log, receipt and extracted streams are under
+`experiments/2026-09-11_wp0e_final_acceptance/`.
+
+**Class and question.** IMPORTANT instrument repair. Can two narrow portability
+repairs make the already memory-bounded battery platform-independent without
+weakening a candidate check or changing the Phase-2 budget schedule? Samuel's
+standing prediction is **"I don't know"**.
+
+**Hypothesis and intervention.** Replace `check`'s captured default with a
+runtime lookup of the active global `BUDGET`; all explicit budgets remain exact.
+Make the invariant-9 mutation battery a pure test of `edge_cases.perm_gate` by
+constructing an exact deterministic equivariant `(base, perm, P)` fixture instead
+of running the candidate through whichever `flopscope` module the script path
+happens to shadow. Candidate permutation behavior remains covered by the four
+real-package edge cases, while the canary continues to test its registered
+positional/index/non-finite mutations and both sides of its detection floor.
+
+**Builder prediction.** The exact Phase-2 spy schedule and all historical schedule
+tests remain green; job-798's previously misrouted calls record 2^41; the pure
+canary passes in both Windows and the minimal WSL environment with no SciPy;
+wrong-route receipt mutations still refuse; every registered equivariance defect
+still goes red; and a new positive-only run completes below the same inherited
+8 GiB cap with all 30 logical edge checks and all three outer positive assertions.
+
+**Gate and falsifier.** Before another real run, require focused schedule,
+receipt, positive/negative canary and portability tests plus a fresh-context
+Skeptic review of the exact diff. Then rerun positive-only once through workerq
+at 12 GiB host RAM, 2 CPUs and inherited 8 GiB `RLIMIT_AS`. Acceptance requires
+terminal SUCCEEDED, a valid exclusive receipt, exact current provenance, 30/30
+edge checks, no FAIL line and unchanged production/full-budget routes. Any lost
+candidate permutation case, changed explicit budget, changed predicate, WSL-only
+dependency, invalid receipt, logical failure or memory failure falsifies the
+repair. The twelve mutation shards remain unauthorized until that gate passes.

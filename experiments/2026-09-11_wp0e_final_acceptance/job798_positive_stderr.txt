@@ -1,0 +1,3 @@
+﻿/mnt/c/Users/samsu/Documents/arc-whest/local_sim/certify_candidate.py:1602: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+
