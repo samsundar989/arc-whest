@@ -42232,6 +42232,26 @@ scalar repair. It completed SUCCEEDED in 339.2 seconds, peaked at 2,691.6 MiB
 against 5 GiB and reported default preflight green. It is retained as scoped prior-
 byte evidence, not the current final gate.
 
+The sixth fresh Skeptic returned **REJECT**. It replaced all three registries with
+semantically identical but byte-different JSON during a clean evaluation; both the
+producer and standalone selector accepted the resulting success package. It also
+constructed clean rows beyond the FLOP and wall limits with false exhaustion flags,
+and showed that `provenance=None` crashed the diagnostic writer after the intended
+refusal boundary. The prior 78/78 suite lacked these cases.
+
+The producer now re-observes each registry after every candidate and immediately
+before success serialization. Successful manifests preserve path, frozen parsed-
+byte hash, observed hash, observation status and unchanged flag for all three
+inputs; the selector requires those bindings to equal its own same-byte snapshots
+before truth access. Clean rows cannot exceed FLOP, wall, residual or combined
+limits without a failure flag. The failure serializer accepts malformed provenance,
+row containers and row objects without calling unchecked attributes, records an
+explicit container/serialization error, and keeps strict JSON. The exact semantic-
+byte-swap, over-FLOP, over-wall and missing-provenance attacks now produce only an
+immutable diagnostic. Success receipts add an input-binding mutation. The complete
+suite passes **83/83** with compilation and `git diff --check` green. A seventh
+fresh-context Skeptic and final current-source preflight remain required.
+
 ### Job-824 exact-source one-identity discriminator contract
 
 **Question.** Which canonical lifecycle flag caused job 824's generated coherent

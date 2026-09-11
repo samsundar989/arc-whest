@@ -1,6 +1,6 @@
 """End-to-end synthetic regressions for the bounded coherent-K4 fit path."""
 from __future__ import annotations
-import argparse, copy, json, os, subprocess, sys, tempfile
+import argparse, copy, dataclasses, json, os, subprocess, sys, tempfile
 from argparse import Namespace
 import numpy as np
 from numpy import load as _load_npz
@@ -81,6 +81,50 @@ def _verify_args(a, receipt):
 
 def _temp(prefix):
     return tempfile.TemporaryDirectory(prefix=prefix, dir=_ROOT)
+
+
+def _mock_clean_evidence(source_path, seeds, target, spec, predictions_out):
+    if len(seeds) != 1:
+        raise AssertionError("mock helper expects one identity")
+    source_hash = producer._sha256(source_path)
+    candidate_path = os.path.relpath(source_path, _ROOT).replace("\\", "/")
+    prediction = np.zeros(spec.width, dtype=np.float32)
+    predictions_out.append(prediction)
+    row = producer.le.EvidenceRow(
+        index=0, input_seed=seeds[0],
+        estimator_seed=producer.mint_provenance.seed_streams(seeds[0])[2],
+        candidate=candidate_path, candidate_sha256=source_hash,
+        truth_sha256=producer.le._array_sha(target), width=spec.width,
+        depth=spec.depth, budget=float(spec.flop_budget), flops_used=1.0,
+        n_ops=1.0, mse=0.0, zero_prediction_mse=0.0, gt_noise=0.0,
+        residual_wall_time_s=0.0, wall_time_s=0.0)
+    flops = producer.le._require_real_flopscope()
+    provenance = {
+        "candidate": candidate_path,
+        "candidate_sha256": source_hash,
+        "truth_sha256": producer.le._array_sha(target),
+        "n_mlps": 1,
+        "spec": producer.dataclasses.asdict(spec),
+        "round_tag": spec.round_tag,
+        "round_deviations": spec.deviations_from_round(),
+        "lifecycle": "grader",
+        "weights_mode": producer.le.DEFAULT_WEIGHTS_MODE,
+        "weights_mode_is_grader_default": True,
+        "setup_called": True,
+        "setup_seconds": 0.0,
+        "setup_timeout_s": spec.setup_timeout_s,
+        "setup_timed_out": False,
+        "setup_error": "",
+        "host_cold_start_s": producer.le.HOST_COLD_START_S,
+        "residual_measurement_path": "runner=local (in-process BudgetContext)",
+        "residual_is_graded": False,
+        "objective_is_graded": False,
+        "backend": {"flopscope": getattr(flops, "__version__", "?"),
+                    "flopscope_path": os.path.dirname(flops.__file__ or ""),
+                    "numpy": np.__version__, "python": sys.version.split()[0]},
+        "rows_hash": producer.le.rows_hash([row]),
+    }
+    return [row], provenance
 
 
 def run_checks():
@@ -230,6 +274,8 @@ def run_checks():
             ("candidate registry", lambda r: r["manifest"].__setitem__("candidate_registry", [])),
             ("bounds", lambda r: r["manifest"].__setitem__("bounds", {})),
             ("identity manifest", lambda r: r["manifest"].__setitem__("identity_manifest", {})),
+            ("input bindings", lambda r: r["manifest"].__setitem__(
+                "input_bindings", {})),
             ("manifest candidate sources", lambda r: r["manifest"].__setitem__("candidate_sources", [])),
             ("manifest costs", lambda r: r["manifest"].__setitem__("counted_costs", [])),
             ("manifest cost type", lambda r: r["manifest"]["counted_costs"][0].__setitem__(0, True)),
@@ -480,12 +526,6 @@ def run_checks():
         original_evaluate = producer.le.evaluate
         def failing_evaluate(source_path, seeds, target, *, spec, gt_noise,
                              predictions_out):
-            _write_json(candidates, {"parameters": ["lam"],
-                        "candidates": [{"lam": 0.5}]})
-            _write_json(bounds, {"lam": {"min": 0.0, "max": 0.5}})
-            _write_json(identities, {"kind": "synthetic-identities-v1",
-                        "width": 3, "depth": 2,
-                        "identities": [{"id": "replacement", "seed": 7022}]})
             row = producer.le.EvidenceRow(
                 index=0, input_seed=seeds[0],
                 estimator_seed=producer.mint_provenance.seed_streams(seeds[0])[2],
@@ -555,7 +595,7 @@ def run_checks():
                        original_input_hashes[name + "_sha256"]
                    and diagnostic["inputs"][name]["current_sha256"] ==
                        producer._sha256(path)
-                   and diagnostic["inputs"][name]["unchanged_after_evaluation"] is False
+                   and diagnostic["inputs"][name]["unchanged_after_evaluation"] is True
                    and diagnostic["inputs"][name]["observation_error"] == ""
                    for name, path in (("candidates", candidates),
                                       ("bounds", bounds),
@@ -871,6 +911,135 @@ def run_checks():
                   "refused=%s flops=%r n_ops=%r" %
                   (refused, diagnostic["rows"][0]["flops_used"],
                    diagnostic["rows"][0]["n_ops"]))
+
+    with _temp("p2-k4-producer-input-byte-swap-") as root:
+        candidates = os.path.join(root, "candidates.json")
+        bounds = os.path.join(root, "bounds.json")
+        identities = os.path.join(root, "identities.json")
+        out_dir = os.path.join(root, "observations")
+        _write_json(candidates, {"parameters": ["lam"], "candidates": [{"lam": 0.0}]})
+        _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
+        _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
+                    "depth": 2, "identities": [{"id": "byte-swap", "seed": 7061}]})
+        original_evaluate = producer.le.evaluate
+        def swap_inputs_after_clean_evaluation(source_path, seeds, target, *, spec,
+                                               gt_noise, predictions_out):
+            result = _mock_clean_evidence(
+                source_path, seeds, target, spec, predictions_out)
+            for path in (candidates, bounds, identities):
+                with open(path, "a", encoding="utf-8") as fh:
+                    fh.write("\n")
+            return result
+        producer.le.evaluate = swap_inputs_after_clean_evaluation
+        try:
+            try:
+                producer.produce(Namespace(candidates=candidates, bounds=bounds,
+                                           identities=identities, out_dir=out_dir))
+                refused = False
+            except producer.ProducerRefused as exc:
+                refused = "registry bytes changed" in str(exc)
+        finally:
+            producer.le.evaluate = original_evaluate
+        with open(os.path.join(out_dir, "failure_diagnostic.json"),
+                  encoding="utf-8") as fh:
+            diagnostic = json.load(fh)
+        check("semantic input byte replacement cannot produce success",
+              (refused and diagnostic["failure_stage"] ==
+               "incomplete_or_misbound_evidence"
+               and all(not diagnostic["inputs"][name]
+                           ["unchanged_after_evaluation"]
+                       for name in ("candidates", "bounds", "identities"))
+               and not os.path.exists(os.path.join(out_dir, "predictions.npz"))
+               and not os.path.exists(os.path.join(out_dir,
+                                                   "producer_receipt.json"))),
+              "refused=%s changed=%s" %
+              (refused, [name for name, value in diagnostic["inputs"].items()
+                         if not value["unchanged_after_evaluation"]]))
+
+    inconsistent_limits = (
+        ("FLOP", {"flops_used": float(2 ** 41 + 1)}, "exceeds FLOP limit"),
+        ("wall", {"wall_time_s": 121.0}, "exceeds wall limit"),
+    )
+    for label, changes, expected_error in inconsistent_limits:
+        with _temp("p2-k4-producer-inconsistent-limit-") as root:
+            candidates = os.path.join(root, "candidates.json")
+            bounds = os.path.join(root, "bounds.json")
+            identities = os.path.join(root, "identities.json")
+            out_dir = os.path.join(root, "observations")
+            _write_json(candidates, {"parameters": ["lam"],
+                        "candidates": [{"lam": 0.0}]})
+            _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
+            _write_json(identities, {"kind": "synthetic-identities-v1",
+                        "width": 3, "depth": 2,
+                        "identities": [{"id": "limit", "seed": 7071}]})
+            original_evaluate = producer.le.evaluate
+            def inconsistent_limit(source_path, seeds, target, *, spec, gt_noise,
+                                   predictions_out, _changes=changes):
+                rows_out, provenance = _mock_clean_evidence(
+                    source_path, seeds, target, spec, predictions_out)
+                row = dataclasses.replace(rows_out[0], **_changes)
+                provenance["rows_hash"] = producer.le.rows_hash([row])
+                return [row], provenance
+            producer.le.evaluate = inconsistent_limit
+            try:
+                try:
+                    producer.produce(Namespace(candidates=candidates, bounds=bounds,
+                                               identities=identities, out_dir=out_dir))
+                    refused = False
+                except producer.ProducerRefused as exc:
+                    refused = expected_error in str(exc)
+            finally:
+                producer.le.evaluate = original_evaluate
+            with open(os.path.join(out_dir, "failure_diagnostic.json"),
+                      encoding="utf-8") as fh:
+                diagnostic = json.load(fh)
+            check("clean row above %s cap is diagnosed" % label,
+                  (refused and diagnostic["failure_stage"] ==
+                   "incomplete_or_misbound_evidence"
+                   and not os.path.exists(os.path.join(out_dir, "predictions.npz"))
+                   and not os.path.exists(os.path.join(out_dir,
+                                                       "producer_receipt.json"))),
+                  "refused=%s flags=%s" %
+                  (refused, {name: diagnostic["rows"][0][name] for name in
+                             ("budget_exhausted", "time_exhausted")}))
+
+    with _temp("p2-k4-producer-none-provenance-") as root:
+        candidates = os.path.join(root, "candidates.json")
+        bounds = os.path.join(root, "bounds.json")
+        identities = os.path.join(root, "identities.json")
+        out_dir = os.path.join(root, "observations")
+        _write_json(candidates, {"parameters": ["lam"], "candidates": [{"lam": 0.0}]})
+        _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
+        _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
+                    "depth": 2, "identities": [{"id": "none-prov", "seed": 7081}]})
+        original_evaluate = producer.le.evaluate
+        def none_provenance(source_path, seeds, target, *, spec, gt_noise,
+                            predictions_out):
+            rows_out, _ = _mock_clean_evidence(
+                source_path, seeds, target, spec, predictions_out)
+            return rows_out, None
+        producer.le.evaluate = none_provenance
+        try:
+            try:
+                producer.produce(Namespace(candidates=candidates, bounds=bounds,
+                                           identities=identities, out_dir=out_dir))
+                refused = False
+            except producer.ProducerRefused as exc:
+                refused = "provenance keys mismatch" in str(exc)
+        finally:
+            producer.le.evaluate = original_evaluate
+        with open(os.path.join(out_dir, "failure_diagnostic.json"),
+                  encoding="utf-8") as fh:
+            diagnostic = json.load(fh)
+        check("missing provenance is diagnosed without a serializer crash",
+              (refused and diagnostic["lifecycle_provenance"] is None
+               and diagnostic["failure_stage"] ==
+                   "incomplete_or_misbound_evidence"
+               and not os.path.exists(os.path.join(out_dir, "predictions.npz"))
+               and not os.path.exists(os.path.join(out_dir,
+                                                   "producer_receipt.json"))),
+              "refused=%s provenance=%r" %
+              (refused, diagnostic["lifecycle_provenance"]))
     return {"kind": "synthetic coherent-K4 producer-selector conformance", "labels_read": False,
             "checks": rows, "n_checks": len(rows), "n_failed": sum(not x["pass"] for x in rows),
             "pass": all(x["pass"] for x in rows)}

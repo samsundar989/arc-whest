@@ -384,6 +384,7 @@ def _validate_request(a, *, verify_only=False):
         for i in range(c)]
     manifest_keys = {"kind", "identity_role", "producer", "generator",
                      "candidate_registry", "bounds", "identity_manifest",
+                     "input_bindings",
                      "lifecycle_spec", "candidate_sources", "counted_costs",
                      "row_hashes", "n_ops", "lifecycle_provenance",
                      "labels_read"}
@@ -452,6 +453,33 @@ def _validate_request(a, *, verify_only=False):
             len(lifecycle_provenance) != c):
         raise FitRefused("producer lifecycle provenance must cover every candidate")
     import p2_k4_fit_producer as producer
+    input_bindings = producer_manifest["input_bindings"]
+    _exact_keys(input_bindings, {"candidates", "bounds", "identities"},
+                "producer input bindings")
+    expected_input_hashes = {
+        "candidates": registry_hashes["candidates"],
+        "bounds": registry_hashes["bounds"],
+        "identities": identity_sha,
+    }
+    expected_input_paths = {
+        "candidates": a.candidates,
+        "bounds": a.bounds,
+        "identities": a.identities,
+    }
+    for name in ("candidates", "bounds", "identities"):
+        binding = input_bindings[name]
+        _exact_keys(binding, {"path", "frozen_sha256", "current_sha256",
+                              "unchanged_after_evaluation", "observation_error"},
+                    "producer %s input binding" % name)
+        expected_hash = expected_input_hashes[name]
+        if (binding != {
+                "path": _relative(expected_input_paths[name]),
+                "frozen_sha256": expected_hash,
+                "current_sha256": expected_hash,
+                "unchanged_after_evaluation": True,
+                "observation_error": ""}):
+            raise FitRefused("producer %s input bytes do not match current input" %
+                             name)
     zero_truth_sha = le._array_sha(np.zeros((n, width), dtype=np.float32))
     for i, item in enumerate(lifecycle_provenance):
         problem = producer._provenance_problem(

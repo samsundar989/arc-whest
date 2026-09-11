@@ -77,11 +77,17 @@ def _diagnostic_value(value):
         if math.isnan(value):
             return "NaN"
         return "Infinity" if value > 0 else "-Infinity"
+    if isinstance(value, float):
+        return value
     if isinstance(value, dict):
-        return {key: _diagnostic_value(item) for key, item in value.items()}
+        return {str(key): _diagnostic_value(item) for key, item in value.items()}
     if isinstance(value, (list, tuple)):
         return [_diagnostic_value(item) for item in value]
-    return value
+    if value is None or isinstance(value, (str, int, bool)):
+        return value
+    if isinstance(value, (np.integer, np.floating, np.bool_)):
+        return _diagnostic_value(value.item())
+    return {"unserializable_type": type(value).__name__, "repr": repr(value)}
 
 
 def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
@@ -90,8 +96,13 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
                               input_hashes, producer_binding,
                               generator_binding, failure_stage="predict"):
     row_values = []
-    for row in rows:
-        raw = dataclasses.asdict(row)
+    rows_are_sequence = isinstance(rows, (list, tuple))
+    for row in rows if rows_are_sequence else ():
+        try:
+            raw = dataclasses.asdict(row)
+        except Exception as exc:
+            raw = {"serialization_error": "%s: %s" %
+                   (type(exc).__name__, exc), "repr": repr(row)}
         row_values.append(_diagnostic_value(raw))
     try:
         current_source_sha = _sha256(source_path)
@@ -137,10 +148,21 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
         "identity_manifest": identity_manifest,
         "lifecycle_spec": _diagnostic_value(dataclasses.asdict(spec)),
         "lifecycle_provenance": _diagnostic_value(provenance),
-        "evaluated_rows": len(rows),
-        "captured_predictions": len(predictions),
-        "rows_hash": provenance.get("rows_hash"),
-        "lifecycle_candidate_sha256": provenance.get("candidate_sha256"),
+        "evaluated_rows": len(rows) if rows_are_sequence else None,
+        "rows_container_error": ("" if rows_are_sequence else
+                                 "expected list/tuple, got %s" %
+                                 type(rows).__name__),
+        "captured_predictions": (len(predictions)
+                                 if isinstance(predictions, (list, tuple))
+                                 else None),
+        "predictions_container_error": (
+            "" if isinstance(predictions, (list, tuple)) else
+            "expected list/tuple, got %s" % type(predictions).__name__),
+        "rows_hash": (provenance.get("rows_hash")
+                      if isinstance(provenance, dict) else None),
+        "lifecycle_candidate_sha256": (
+            provenance.get("candidate_sha256")
+            if isinstance(provenance, dict) else None),
         "rows": row_values,
     }
     path = os.path.join(a.out_dir, "failure_diagnostic.json")
@@ -271,6 +293,15 @@ def _finite_nonnegative_measure(value):
             math.isfinite(float(value)) and float(value) >= 0.0)
 
 
+def _input_evidence_problem(a, input_hashes):
+    for name, path in (("candidates", a.candidates), ("bounds", a.bounds),
+                       ("identities", a.identities)):
+        observed = _observed_binding(path, input_hashes[name + "_sha256"])
+        if not observed["unchanged_after_evaluation"]:
+            return "%s registry bytes changed during evaluation" % name
+    return ""
+
+
 def _lifecycle_evidence_problem(rows, predictions, provenance, seeds, spec,
                                 source_path, source_hash, zero_target):
     if len(predictions) != len(seeds):
@@ -287,6 +318,8 @@ def _lifecycle_evidence_problem(rows, predictions, provenance, seeds, spec,
                 not bool(np.all(np.isfinite(prediction)))):
             return "prediction %d shape/dtype/finiteness mismatch" % i
     for i, (row, seed) in enumerate(zip(rows, seeds)):
+        if not isinstance(row, le.EvidenceRow):
+            return "row %d is not an EvidenceRow" % i
         if (type(row.index) is not int or type(row.input_seed) is not int or
                 row.index != i or row.input_seed != seed):
             return "row %d identity/order mismatch" % i
@@ -328,6 +361,20 @@ def _lifecycle_evidence_problem(rows, predictions, provenance, seeds, spec,
         expected_mse = float(np.mean(predictions[i].astype(np.float32) ** 2))
         if row.mse != expected_mse or row.zero_prediction_mse != 0.0:
             return "row %d zero-target objective mismatch" % i
+        if not row.failed:
+            if row.flops_used > spec.flop_budget:
+                return "row %d exceeds FLOP limit without a failure flag" % i
+            if (spec.wall_time_limit_s is not None and
+                    row.wall_time_s > spec.wall_time_limit_s):
+                return "row %d exceeds wall limit without a failure flag" % i
+            if (spec.residual_wall_time_limit_s is not None and
+                    row.residual_wall_time_s >
+                    spec.residual_wall_time_limit_s):
+                return "row %d exceeds residual limit without a failure flag" % i
+            if le.is_combined_budget_exhausted(
+                    row.flops_used, row.residual_wall_time_s,
+                    spec.flop_budget, spec.lam):
+                return "row %d exceeds combined limit without a failure flag" % i
     problem = _provenance_problem(
         provenance, spec=spec, expected_path=expected_path,
         source_hash=source_hash, n_mlps=len(seeds),
@@ -443,9 +490,15 @@ def produce(a):
             raise ProducerRefused(
                 "candidate %d lifecycle raised %s; diagnostic: %s" %
                 (i, type(exc).__name__, diagnostic)) from exc
-        evidence_problem = _lifecycle_evidence_problem(
-            rows, predictions, provenance, seeds, spec, source_path, source_hash,
-            zero_target)
+        try:
+            evidence_problem = _lifecycle_evidence_problem(
+                rows, predictions, provenance, seeds, spec, source_path,
+                source_hash, zero_target)
+        except Exception as exc:
+            evidence_problem = ("evidence validation raised %s: %s" %
+                                (type(exc).__name__, exc))
+        if not evidence_problem:
+            evidence_problem = _input_evidence_problem(a, input_hashes)
         if evidence_problem or any(row.failed for row in rows):
             failure_stage = ("incomplete_or_misbound_evidence"
                              if evidence_problem else "predict")
@@ -474,6 +527,24 @@ def produce(a):
     costs = np.asarray(all_costs, dtype=np.int64)
     if not np.array_equal(costs, np.repeat(costs[:1], len(candidates), axis=0)):
         raise ProducerRefused("coefficient candidates unexpectedly changed counted cost")
+    input_bindings = {
+        name: _observed_binding(path, input_hashes[name + "_sha256"])
+        for name, path in (("candidates", a.candidates), ("bounds", a.bounds),
+                           ("identities", a.identities))}
+    if not all(item["unchanged_after_evaluation"]
+               for item in input_bindings.values()):
+        diagnostic = _write_failure_diagnostic(
+            a, candidate_index=i, candidate=candidate,
+            source_path=source_path, source_hash=source_hash,
+            rows=rows, provenance=provenance, predictions=predictions,
+            identity_manifest=identity_manifest, width=width, depth=depth,
+            spec=spec, input_hashes=input_hashes,
+            producer_binding=producer_binding,
+            generator_binding=generator_binding,
+            failure_stage="input_changed_before_success_write")
+        raise ProducerRefused(
+            "input registry bytes changed before success write; diagnostic: %s" %
+            diagnostic)
     manifest = {
         "kind": "coherent-K4 canonical-lifecycle observations-v1",
         "identity_role": identity_manifest["kind"],
@@ -481,6 +552,7 @@ def produce(a):
         "generator": generator_binding,
         "candidate_registry": candidates, "bounds": bounds,
         "identity_manifest": identity_manifest,
+        "input_bindings": input_bindings,
         "lifecycle_spec": {"width": width, "depth": depth,
                            "flop_budget": int(spec.flop_budget),
                            "weights_mode": le.DEFAULT_WEIGHTS_MODE,
