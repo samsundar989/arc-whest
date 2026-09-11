@@ -95,7 +95,8 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
                               source_hash, rows, provenance, predictions,
                               identity_manifest, width, depth, spec,
                               input_hashes, producer_binding,
-                              generator_binding, failure_stage="predict"):
+                              selector_binding, generator_binding,
+                              failure_stage="predict"):
     def safe_observed(path, frozen_sha256):
         try:
             return _observed_binding(path, frozen_sha256)
@@ -128,6 +129,9 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
     producer_diagnostic = safe_observed(
         os.path.join(_ROOT, producer_binding["path"]),
         producer_binding["sha256"])
+    selector_diagnostic = safe_observed(
+        os.path.join(_ROOT, selector_binding["path"]),
+        selector_binding["sha256"])
     generator_diagnostic = safe_observed(
         os.path.join(_ROOT, generator_binding["path"]),
         generator_binding["sha256"])
@@ -159,6 +163,7 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
                 a.identities, input_hashes["identities_sha256"]),
         },
         "producer": producer_diagnostic,
+        "selector": selector_diagnostic,
         "generator": generator_diagnostic,
         "identity_manifest": identity_manifest,
         "lifecycle_spec": _diagnostic_value(dataclasses.asdict(spec)),
@@ -323,7 +328,8 @@ def _input_evidence_problem(a, input_hashes):
 
 
 def _closing_dependency_problem(a, input_hashes, source_paths, source_hashes,
-                                producer_binding, generator_binding):
+                                producer_binding, selector_binding,
+                                generator_binding):
     """Require two stable whole-package scans at the write boundary."""
     inputs = (
         ("candidates", a.candidates, input_hashes["candidates_sha256"]),
@@ -333,6 +339,8 @@ def _closing_dependency_problem(a, input_hashes, source_paths, source_hashes,
     static_sources = (
         ("producer", os.path.join(_ROOT, producer_binding["path"]),
          producer_binding["sha256"]),
+        ("selector", os.path.join(_ROOT, selector_binding["path"]),
+         selector_binding["sha256"]),
         ("generator", os.path.join(_ROOT, generator_binding["path"]),
          generator_binding["sha256"]),
         ("upstream", builder.SOURCE,
@@ -513,6 +521,10 @@ def produce(a):
         "path": os.path.relpath(__file__, _ROOT).replace("\\", "/"),
         "sha256": _sha256(__file__),
     }
+    selector_binding = {
+        "path": os.path.relpath(selector.__file__, _ROOT).replace("\\", "/"),
+        "sha256": _sha256(selector.__file__),
+    }
     generator_binding = {
         "path": os.path.relpath(builder.__file__, _ROOT).replace("\\", "/"),
         "sha256": _sha256(builder.__file__),
@@ -539,11 +551,11 @@ def produce(a):
         try:
             evaluation_dependencies = [
                 a.candidates, a.bounds, a.identities, source_path, __file__,
-                builder.__file__, builder.SOURCE]
+                selector.__file__, builder.__file__, builder.SOURCE]
             with selector._stable_files(evaluation_dependencies):
                 changed_label, _ = _closing_dependency_problem(
                     a, input_hashes, [source_path], [source_hash],
-                    producer_binding, generator_binding)
+                    producer_binding, selector_binding, generator_binding)
                 if changed_label:
                     raise ProducerRefused(
                         "%s bytes changed before lifecycle load" %
@@ -562,6 +574,7 @@ def produce(a):
                 identity_manifest=identity_manifest, width=width, depth=depth,
                 spec=spec, input_hashes=input_hashes,
                 producer_binding=producer_binding,
+                selector_binding=selector_binding,
                 generator_binding=generator_binding,
                 failure_stage="setup_or_lifecycle_exception")
             raise ProducerRefused(
@@ -586,6 +599,7 @@ def produce(a):
                 identity_manifest=identity_manifest, width=width, depth=depth,
                 spec=spec, input_hashes=input_hashes,
                 producer_binding=producer_binding,
+                selector_binding=selector_binding,
                 generator_binding=generator_binding,
                 failure_stage=failure_stage)
             raise ProducerRefused(
@@ -605,7 +619,7 @@ def produce(a):
         absolute_source_paths.append(source_path)
         source_hashes.append(source_hash)
     dependency_paths = [a.candidates, a.bounds, a.identities, __file__,
-                        builder.__file__, builder.SOURCE]
+                        selector.__file__, builder.__file__, builder.SOURCE]
     dependency_paths.extend(absolute_source_paths)
     with selector._stable_files(dependency_paths):
         costs = np.asarray(all_costs, dtype=np.int64)
@@ -613,7 +627,7 @@ def produce(a):
             raise ProducerRefused("coefficient candidates unexpectedly changed counted cost")
         changed_label, changed_index = _closing_dependency_problem(
             a, input_hashes, absolute_source_paths, source_hashes,
-            producer_binding, generator_binding)
+            producer_binding, selector_binding, generator_binding)
         if changed_label:
             diagnostic_index = (changed_index if changed_index is not None
                                 else len(candidates) - 1)
@@ -628,6 +642,7 @@ def produce(a):
                 identity_manifest=identity_manifest, width=width, depth=depth,
                 spec=spec, input_hashes=input_hashes,
                 producer_binding=producer_binding,
+                selector_binding=selector_binding,
                 generator_binding=generator_binding,
                 failure_stage="dependency_changed_before_success_write")
             raise ProducerRefused(
@@ -648,6 +663,7 @@ def produce(a):
             "kind": "coherent-K4 canonical-lifecycle observations-v1",
             "identity_role": identity_manifest["kind"],
             "producer": producer_binding,
+            "selector": selector_binding,
             "generator": generator_binding,
             "candidate_registry": candidates, "bounds": bounds,
             "identity_manifest": identity_manifest,
@@ -703,7 +719,7 @@ def produce(a):
                         "prediction archive changed during receipt write"
                 changed_label, changed_index = _closing_dependency_problem(
                     a, input_hashes, absolute_source_paths, source_hashes,
-                    producer_binding, generator_binding)
+                    producer_binding, selector_binding, generator_binding)
         if output_problem or changed_label:
             for invalid_path in (receipt_path, output):
                 try:
@@ -723,6 +739,7 @@ def produce(a):
                 identity_manifest=identity_manifest, width=width, depth=depth,
                 spec=spec, input_hashes=input_hashes,
                 producer_binding=producer_binding,
+                selector_binding=selector_binding,
                 generator_binding=generator_binding,
                 failure_stage=("prediction_archive_changed_before_receipt"
                                if output_problem else

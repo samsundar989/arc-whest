@@ -184,6 +184,8 @@ def run_checks():
               (not calls and verification["labels_read"] is False
                and verification["verification_only"] is True
                and set(verification["source_hashes"]) == expected_sources
+               and produced["manifest"]["selector"] ==
+                   verification["source_hashes"]["fit_interface"]
                and verification["inputs"]["producer_receipt"]["sha256"] ==
                fit._sha256(a.producer_receipt)),
               "loader calls=%d sources=%d" %
@@ -292,6 +294,9 @@ def run_checks():
             ("manifest cost type", lambda r: r["manifest"]["counted_costs"][0].__setitem__(0, True)),
             ("producer path", lambda r: r["manifest"]["producer"].__setitem__("path", "local_sim/wrong.py")),
             ("producer hash", lambda r: r["manifest"]["producer"].__setitem__("sha256", "0" * 64)),
+            ("selector missing", lambda r: r["manifest"].pop("selector")),
+            ("selector path", lambda r: r["manifest"]["selector"].__setitem__("path", "local_sim/wrong.py")),
+            ("selector hash", lambda r: r["manifest"]["selector"].__setitem__("sha256", "0" * 64)),
             ("generator path", lambda r: r["manifest"]["generator"].__setitem__("path", "local_sim/wrong.py")),
             ("generator hash", lambda r: r["manifest"]["generator"].__setitem__("sha256", "0" * 64)),
             ("upstream hash", lambda r: r["manifest"]["generator"].__setitem__("upstream_source_sha256", "0" * 64)),
@@ -694,6 +699,11 @@ def run_checks():
                                       ("bounds", bounds),
                                       ("identities", identities)))
                and diagnostic["candidate"] == {"lam": 0.0}
+               and diagnostic["selector"]["path"] ==
+                   os.path.relpath(fit.__file__, _ROOT).replace("\\", "/")
+               and diagnostic["selector"]["frozen_sha256"] ==
+                   fit._sha256(fit.__file__)
+               and diagnostic["selector"]["unchanged_after_evaluation"] is True
                and diagnostic["identity_manifest"]["identities"][0] ==
                    {"id": "failed-synthetic", "seed": 7021}
                and diagnostic["lifecycle_spec"] ==
@@ -709,6 +719,53 @@ def run_checks():
               "refused=%s rows=%d no_success_artifacts=%s" %
               (refused, len(diagnostic["rows"]),
                not os.path.exists(os.path.join(out_dir, "predictions.npz"))))
+
+    with _temp("p2-k4-producer-selector-change-") as root:
+        candidates = os.path.join(root, "candidates.json")
+        bounds = os.path.join(root, "bounds.json")
+        identities = os.path.join(root, "identities.json")
+        out_dir = os.path.join(root, "observations")
+        _write_json(candidates, {"parameters": ["lam"],
+                    "candidates": [{"lam": 0.0}]})
+        _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
+        _write_json(identities, {"kind": "synthetic-identities-v1",
+                    "width": 3, "depth": 2,
+                    "identities": [{"id": "selector-change", "seed": 7035}]})
+        original_observed = producer._observed_binding
+        def changed_selector(path, frozen_sha256):
+            result = original_observed(path, frozen_sha256)
+            if os.path.normcase(os.path.abspath(path)) == os.path.normcase(
+                    os.path.abspath(fit.__file__)):
+                result["current_sha256"] = "0" * 64
+                result["unchanged_after_evaluation"] = False
+            return result
+        producer._observed_binding = changed_selector
+        try:
+            try:
+                producer.produce(Namespace(
+                    candidates=candidates, bounds=bounds,
+                    identities=identities, out_dir=out_dir))
+                refused, detail = False, "accepted"
+            except producer.ProducerRefused as exc:
+                refused, detail = True, str(exc)
+        finally:
+            producer._observed_binding = original_observed
+        with open(os.path.join(out_dir, "failure_diagnostic.json"),
+                  encoding="utf-8") as fh:
+            diagnostic = json.load(fh)
+        check("producer refuses changed selector before lifecycle evaluation",
+              (refused and diagnostic["failure_stage"] ==
+               "setup_or_lifecycle_exception"
+               and diagnostic["evaluated_rows"] == 0
+               and diagnostic["selector"]["unchanged_after_evaluation"] is False
+               and "selector bytes changed before lifecycle load" in
+                   diagnostic["lifecycle_provenance"]["setup_error"]
+               and not os.path.exists(os.path.join(out_dir, "predictions.npz"))
+               and not os.path.exists(os.path.join(out_dir,
+                                                   "producer_receipt.json"))),
+              "refused=%s selector_match=%s detail=%s" %
+              (refused, diagnostic["selector"]
+               ["unchanged_after_evaluation"], detail))
 
     with _temp("p2-k4-producer-setup-failure-") as root:
         candidates = os.path.join(root, "candidates.json")

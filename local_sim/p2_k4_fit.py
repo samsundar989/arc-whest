@@ -460,7 +460,7 @@ def _validate_request(a, *, verify_only=False):
          "path": candidate_sources[i]["path"],
          "sha256": candidate_sources[i]["sha256"]}
         for i in range(c)]
-    manifest_keys = {"kind", "identity_role", "producer", "generator",
+    manifest_keys = {"kind", "identity_role", "producer", "selector", "generator",
                      "candidate_registry", "bounds", "identity_manifest",
                      "input_bindings",
                      "lifecycle_spec", "candidate_sources", "counted_costs",
@@ -484,6 +484,10 @@ def _validate_request(a, *, verify_only=False):
                 "producer manifest producer")
     if producer_manifest["producer"] != source_hashes["fit_producer"]:
         raise FitRefused("producer manifest does not match current producer bytes")
+    _exact_keys(producer_manifest["selector"], {"path", "sha256"},
+                "producer manifest selector")
+    if producer_manifest["selector"] != source_hashes["fit_interface"]:
+        raise FitRefused("producer manifest does not match current selector bytes")
     _exact_keys(producer_manifest["generator"],
                 {"path", "sha256", "upstream_source_sha256"},
                 "producer manifest generator")

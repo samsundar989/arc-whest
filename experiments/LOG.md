@@ -42799,3 +42799,32 @@ coefficient, label, data role, gate, residual model or protected path changes.
 can pass production or verification; any loss of existing refusal behavior; or
 current default preflight failure on final bytes. Required exit is scoped tests,
 current preflight and a fresh-context Skeptic verdict before resubmitting P07.
+
+### Selector provenance repair — implementation result before preflight
+
+The producer now records an explicit selector path/hash, holds `p2_k4_fit.py`
+inside every lifecycle and final-publication dependency lock, rechecks it twice at
+each boundary, and includes its observed state in failure diagnostics. The
+standalone verifier requires that producer-time selector binding to equal its
+current `fit_interface` bytes. Candidate math, registries, lifecycle and outputs
+are otherwise unchanged.
+
+The expanded synthetic producer/verifier suite passes **96/96**. New checks prove
+the positive manifest binds the selector, missing/path/hash mutations refuse in
+truth-free verification, failed-row evidence includes the selector, and a
+simulated selector change before lifecycle evaluation produces only classified
+failure evidence. The first run recorded 95/96 because the new test inspected the
+outer wrapper's abbreviated exception instead of the already correct detailed
+diagnostic; the assertion was repaired and both raw artifacts are retained. This
+was a test defect, not accepted evidence and not a scientific result.
+
+Artifacts:
+
+- `experiments/2026-09-11_stage2_compact_p07/selector_binding_tests.json`
+  — first 95/96 diagnostic run.
+- `experiments/2026-09-11_stage2_compact_p07/selector_binding_tests_rerun.json`
+  and `.log` — accepted 96/96 rerun.
+- `scripts/verify_portability.py` — 103/103, PORTABLE.
+
+Current default preflight and a fresh-context Skeptic remain required before the
+P07 producer can be resubmitted.
