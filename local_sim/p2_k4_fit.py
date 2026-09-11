@@ -28,6 +28,8 @@ from __future__ import annotations
 
 import argparse
 import ast
+import contextlib
+import ctypes
 import hashlib
 import io
 import json
@@ -45,6 +47,60 @@ _OBJECTIVES = ("final_layer_mse",)
 
 class FitRefused(ValueError):
     pass
+
+
+@contextlib.contextmanager
+def _stable_files(paths):
+    """Hold existing dependency files against write/delete during a receipt."""
+    unique = []
+    seen = set()
+    for raw in paths:
+        path = os.path.normcase(os.path.realpath(os.path.abspath(raw)))
+        if path not in seen:
+            seen.add(path)
+            unique.append(path)
+    if os.name == "nt":
+        from ctypes import wintypes
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        create = kernel32.CreateFileW
+        create.argtypes = (wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
+                           wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD,
+                           wintypes.HANDLE)
+        create.restype = wintypes.HANDLE
+        close = kernel32.CloseHandle
+        close.argtypes = (wintypes.HANDLE,)
+        close.restype = wintypes.BOOL
+        handles = []
+        try:
+            for path in unique:
+                handle = create(path, 0x80000000, 0x00000001, None, 3,
+                                0x00000080, None)
+                if handle == wintypes.HANDLE(-1).value:
+                    raise FitRefused(
+                        "cannot lock dependency %s: WinError %d" %
+                        (path, ctypes.get_last_error()))
+                handles.append(handle)
+            yield
+        finally:
+            for handle in reversed(handles):
+                close(handle)
+        return
+    import fcntl
+    files = []
+    try:
+        for path in unique:
+            fh = open(path, "rb")
+            files.append(fh)
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        yield
+    except (OSError, BlockingIOError) as exc:
+        raise FitRefused("cannot lock receipt dependencies: %s" % exc) from exc
+    finally:
+        for fh in reversed(files):
+            try:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+            finally:
+                fh.close()
 
 
 def _sha256(path):
@@ -630,16 +686,26 @@ def _closing_revalidate(a, validated):
 
 
 def _write_revalidated_receipt(a, validated, payload):
-    _closing_revalidate(a, validated)
-    _write_receipt(a.receipt, payload)
-    try:
+    dependency_paths = [a.producer_receipt, a.predictions, a.candidates,
+                        a.bounds, a.identities,
+                        os.path.join(_ROOT, "estimator_k3_full.py")]
+    dependency_paths.extend(
+        _repo_path(source["path"], "candidate source")
+        for source in validated["candidate_sources"])
+    dependency_paths.extend(
+        _repo_path(source["path"], "bound source")
+        for source in validated["source_hashes"].values())
+    with _stable_files(dependency_paths):
         _closing_revalidate(a, validated)
-    except Exception:
+        _write_receipt(a.receipt, payload)
         try:
-            os.remove(a.receipt)
-        except FileNotFoundError:
-            pass
-        raise
+            _closing_revalidate(a, validated)
+        except Exception:
+            try:
+                os.remove(a.receipt)
+            except FileNotFoundError:
+                pass
+            raise
 
 
 def verify(a):

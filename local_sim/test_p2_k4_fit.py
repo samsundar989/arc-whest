@@ -448,28 +448,34 @@ def run_checks():
         request = _verify_args(a, os.path.join(root, "must-not-verify.json"))
         original_sha = fit._sha256
         mutated = [False]
+        denied = [False]
         def mutate_registry_after_its_closing_read(path):
             result = original_sha(path)
             if (not mutated[0] and
                     os.path.normcase(os.path.abspath(path)) ==
                     os.path.normcase(os.path.abspath(a.candidates))):
-                with open(a.candidates, "a", encoding="utf-8") as fh:
-                    fh.write("\n")
                 mutated[0] = True
+                try:
+                    with open(a.candidates, "a", encoding="utf-8") as fh:
+                        fh.write("\n")
+                except PermissionError:
+                    denied[0] = True
             return result
         fit._sha256 = mutate_registry_after_its_closing_read
         try:
             try:
-                fit.verify(request)
-                refused = False
-            except fit.FitRefused as exc:
-                refused = "candidate registry changed" in str(exc)
+                verified = fit.verify(request)
+                accepted = True
+            except fit.FitRefused:
+                accepted = False
         finally:
             fit._sha256 = original_sha
-        check("verifier stable scan catches registry changed during closing scan",
-              refused and mutated[0] and not os.path.exists(request.receipt),
-              "refused=%s receipt=%s" %
-              (refused, os.path.exists(request.receipt)))
+        check("verifier lock blocks registry write during closing scan",
+              (accepted and mutated[0] and denied[0]
+               and fit._sha256(a.candidates) ==
+                   verified["inputs"]["candidates"]["sha256"]
+               and os.path.exists(request.receipt)),
+              "accepted=%s denied=%s" % (accepted, denied[0]))
 
     with _temp("p2-k4-fit-source-hash-") as root:
         a, _ = _fixture(root)
@@ -1212,42 +1218,40 @@ def run_checks():
         original_evaluate = producer.le.evaluate
         original_observed = producer._observed_binding
         mutated = [False]
+        denied = [False]
         producer.le.evaluate = lambda source_path, seeds, target, *, spec, gt_noise, predictions_out: _mock_clean_evidence(source_path, seeds, target, spec, predictions_out)
         def mutate_registry_during_source_scan(path, frozen_sha256):
             result = original_observed(path, frozen_sha256)
             if (not mutated[0] and
                     os.path.basename(path) == "candidate_000_coherent.py"):
-                with open(candidates, "a", encoding="utf-8") as fh:
-                    fh.write("\n")
                 mutated[0] = True
+                try:
+                    with open(candidates, "a", encoding="utf-8") as fh:
+                        fh.write("\n")
+                except PermissionError:
+                    denied[0] = True
             return result
         producer._observed_binding = mutate_registry_during_source_scan
         try:
             try:
-                producer.produce(Namespace(candidates=candidates, bounds=bounds,
-                                           identities=identities,
-                                           out_dir=out_dir))
-                refused = False
-            except producer.ProducerRefused as exc:
-                refused = "input:candidates bytes changed" in str(exc)
+                result = producer.produce(Namespace(
+                    candidates=candidates, bounds=bounds,
+                    identities=identities, out_dir=out_dir))
+                accepted = True
+            except producer.ProducerRefused:
+                accepted = False
         finally:
             producer.le.evaluate = original_evaluate
             producer._observed_binding = original_observed
-        with open(os.path.join(out_dir, "failure_diagnostic.json"),
-                  encoding="utf-8") as fh:
-            diagnostic = json.load(fh)
-        check("producer stable scan catches registry changed during source scan",
-              (refused and mutated[0]
-               and diagnostic["failure_stage"] ==
-                   "dependency_changed_before_success_write"
-               and not diagnostic["inputs"]["candidates"]
-                   ["unchanged_after_evaluation"]
-               and not os.path.exists(os.path.join(out_dir, "predictions.npz"))
-               and not os.path.exists(os.path.join(out_dir,
-                                                   "producer_receipt.json"))),
-              "refused=%s input_match=%s" %
-              (refused, diagnostic["inputs"]["candidates"]
-               ["unchanged_after_evaluation"]))
+        check("producer lock blocks registry write during source scan",
+              (accepted and mutated[0] and denied[0]
+               and producer._sha256(candidates) ==
+                   result["manifest"]["input_bindings"]["candidates"]
+                   ["current_sha256"]
+               and os.path.exists(os.path.join(out_dir, "predictions.npz"))
+               and os.path.exists(os.path.join(out_dir,
+                                               "producer_receipt.json"))),
+              "accepted=%s denied=%s" % (accepted, denied[0]))
     return {"kind": "synthetic coherent-K4 producer-selector conformance", "labels_read": False,
             "checks": rows, "n_checks": len(rows), "n_failed": sum(not x["pass"] for x in rows),
             "pass": all(x["pass"] for x in rows)}

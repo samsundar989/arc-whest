@@ -95,6 +95,20 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
                               identity_manifest, width, depth, spec,
                               input_hashes, producer_binding,
                               generator_binding, failure_stage="predict"):
+    def safe_observed(path, frozen_sha256):
+        try:
+            return _observed_binding(path, frozen_sha256)
+        except Exception as exc:
+            return {
+                "path": os.path.relpath(os.path.abspath(path), _ROOT).replace(
+                    "\\", "/"),
+                "frozen_sha256": frozen_sha256,
+                "current_sha256": None,
+                "unchanged_after_evaluation": False,
+                "observation_error": "%s: %s" %
+                                     (type(exc).__name__, exc),
+            }
+
     row_values = []
     rows_are_sequence = isinstance(rows, (list, tuple))
     for row in rows if rows_are_sequence else ():
@@ -110,15 +124,15 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
     except OSError as exc:
         current_source_sha = None
         source_observation_error = "%s: %s" % (type(exc).__name__, exc)
-    producer_diagnostic = _observed_binding(
+    producer_diagnostic = safe_observed(
         os.path.join(_ROOT, producer_binding["path"]),
         producer_binding["sha256"])
-    generator_diagnostic = _observed_binding(
+    generator_diagnostic = safe_observed(
         os.path.join(_ROOT, generator_binding["path"]),
         generator_binding["sha256"])
     generator_diagnostic["upstream_source_sha256"] = \
         generator_binding["upstream_source_sha256"]
-    generator_diagnostic["upstream_source"] = _observed_binding(
+    generator_diagnostic["upstream_source"] = safe_observed(
         builder.SOURCE, generator_binding["upstream_source_sha256"])
     result = {
         "schema": "arc-whest.coherent-k4-fit-producer-failure.v1",
@@ -136,11 +150,11 @@ def _write_failure_diagnostic(a, *, candidate_index, candidate, source_path,
             "observation_error": source_observation_error,
         },
         "inputs": {
-            "candidates": _observed_binding(
+            "candidates": safe_observed(
                 a.candidates, input_hashes["candidates_sha256"]),
-            "bounds": _observed_binding(
+            "bounds": safe_observed(
                 a.bounds, input_hashes["bounds_sha256"]),
-            "identities": _observed_binding(
+            "identities": safe_observed(
                 a.identities, input_hashes["identities_sha256"]),
         },
         "producer": producer_diagnostic,
@@ -325,16 +339,25 @@ def _closing_dependency_problem(a, input_hashes, source_paths, source_hashes,
     )
     for _ in range(2):
         for label, path, frozen_sha256 in inputs:
-            observed = _observed_binding(path, frozen_sha256)
+            try:
+                observed = _observed_binding(path, frozen_sha256)
+            except Exception:
+                return "input:" + label, None
             if not observed["unchanged_after_evaluation"]:
                 return "input:" + label, None
         for i, (path, frozen_sha256) in enumerate(
                 zip(source_paths, source_hashes)):
-            observed = _observed_binding(path, frozen_sha256)
+            try:
+                observed = _observed_binding(path, frozen_sha256)
+            except Exception:
+                return "candidate", i
             if not observed["unchanged_after_evaluation"]:
                 return "candidate", i
         for label, path, frozen_sha256 in static_sources:
-            observed = _observed_binding(path, frozen_sha256)
+            try:
+                observed = _observed_binding(path, frozen_sha256)
+            except Exception:
+                return label, None
             if not observed["unchanged_after_evaluation"]:
                 return label, None
     return "", None
@@ -568,110 +591,114 @@ def produce(a):
         source_paths.append(os.path.relpath(source_path, _ROOT).replace("\\", "/"))
         absolute_source_paths.append(source_path)
         source_hashes.append(source_hash)
-    costs = np.asarray(all_costs, dtype=np.int64)
-    if not np.array_equal(costs, np.repeat(costs[:1], len(candidates), axis=0)):
-        raise ProducerRefused("coefficient candidates unexpectedly changed counted cost")
-    changed_label, changed_index = _closing_dependency_problem(
-        a, input_hashes, absolute_source_paths, source_hashes,
-        producer_binding, generator_binding)
-    if changed_label:
-        diagnostic_index = (changed_index if changed_index is not None
-                            else len(candidates) - 1)
-        diagnostic = _write_failure_diagnostic(
-            a, candidate_index=diagnostic_index,
-            candidate=candidates[diagnostic_index],
-            source_path=absolute_source_paths[diagnostic_index],
-            source_hash=source_hashes[diagnostic_index],
-            rows=all_rows[diagnostic_index],
-            provenance=lifecycle_provenance[diagnostic_index],
-            predictions=raw_predictions[diagnostic_index],
-            identity_manifest=identity_manifest, width=width, depth=depth,
-            spec=spec, input_hashes=input_hashes,
-            producer_binding=producer_binding,
-            generator_binding=generator_binding,
-            failure_stage="dependency_changed_before_success_write")
-        raise ProducerRefused(
-            "%s bytes changed before success write; diagnostic: %s" %
-            (changed_label, diagnostic))
-    input_bindings = {
-        name: {
-            "path": os.path.relpath(os.path.abspath(path), _ROOT).replace(
-                "\\", "/"),
-            "frozen_sha256": input_hashes[name + "_sha256"],
-            "current_sha256": input_hashes[name + "_sha256"],
-            "unchanged_after_evaluation": True,
-            "observation_error": "",
-        }
-        for name, path in (("candidates", a.candidates), ("bounds", a.bounds),
-                           ("identities", a.identities))}
-    manifest = {
-        "kind": "coherent-K4 canonical-lifecycle observations-v1",
-        "identity_role": identity_manifest["kind"],
-        "producer": producer_binding,
-        "generator": generator_binding,
-        "candidate_registry": candidates, "bounds": bounds,
-        "identity_manifest": identity_manifest,
-        "input_bindings": input_bindings,
-        "lifecycle_spec": {"width": width, "depth": depth,
-                           "flop_budget": int(spec.flop_budget),
-                           "weights_mode": le.DEFAULT_WEIGHTS_MODE,
-                           "residual_cap": None},
-        "candidate_sources": [
-            {"index": i, "candidate": candidates[i], "path": source_paths[i],
-             "sha256": source_hashes[i]}
-            for i in range(len(candidates))],
-        "counted_costs": costs.tolist(),
-        "row_hashes": row_hashes,
-        "n_ops": all_ops,
-        "lifecycle_provenance": lifecycle_provenance,
-        "labels_read": False}
-    output = os.path.join(a.out_dir, "predictions.npz")
-    with open(output, "x+b") as fh:
-        np.savez(fh, parameter_names=np.asarray(names), candidate_values=matrix,
-                 identities=np.asarray(identities),
-                 predictions=np.stack(all_predictions), counted_costs=costs,
-                 candidate_source_paths=np.asarray(source_paths),
-                 candidate_source_hashes=np.asarray(source_hashes),
-                 producer_manifest_json=np.asarray(json.dumps(manifest, sort_keys=True)))
-    result = {"schema": "arc-whest.coherent-k4-fit-producer-receipt.v1",
-              "immutable": True, "predictions": output,
-              "predictions_sha256": _sha256(output),
-              "candidate_sources": source_paths,
-              "candidate_source_hashes": source_hashes,
-              "counted_costs": costs.tolist(), "manifest": manifest}
-    with open(os.path.join(a.out_dir, "producer_receipt.json"), "x",
-              encoding="utf-8", newline="\n") as fh:
-        json.dump(result, fh, indent=2, sort_keys=True)
-        fh.write("\n")
-    changed_label, changed_index = _closing_dependency_problem(
-        a, input_hashes, absolute_source_paths, source_hashes,
-        producer_binding, generator_binding)
-    if changed_label:
-        receipt_path = os.path.join(a.out_dir, "producer_receipt.json")
-        for invalid_path in (receipt_path, output):
-            try:
-                os.remove(invalid_path)
-            except FileNotFoundError:
-                pass
-        diagnostic_index = (changed_index if changed_index is not None
-                            else len(candidates) - 1)
-        diagnostic = _write_failure_diagnostic(
-            a, candidate_index=diagnostic_index,
-            candidate=candidates[diagnostic_index],
-            source_path=absolute_source_paths[diagnostic_index],
-            source_hash=source_hashes[diagnostic_index],
-            rows=all_rows[diagnostic_index],
-            provenance=lifecycle_provenance[diagnostic_index],
-            predictions=raw_predictions[diagnostic_index],
-            identity_manifest=identity_manifest, width=width, depth=depth,
-            spec=spec, input_hashes=input_hashes,
-            producer_binding=producer_binding,
-            generator_binding=generator_binding,
-            failure_stage="dependency_changed_during_success_write")
-        raise ProducerRefused(
-            "%s bytes changed during success write; diagnostic: %s" %
-            (changed_label, diagnostic))
-    return result
+    dependency_paths = [a.candidates, a.bounds, a.identities, __file__,
+                        builder.__file__, builder.SOURCE]
+    dependency_paths.extend(absolute_source_paths)
+    with selector._stable_files(dependency_paths):
+        costs = np.asarray(all_costs, dtype=np.int64)
+        if not np.array_equal(costs, np.repeat(costs[:1], len(candidates), axis=0)):
+            raise ProducerRefused("coefficient candidates unexpectedly changed counted cost")
+        changed_label, changed_index = _closing_dependency_problem(
+            a, input_hashes, absolute_source_paths, source_hashes,
+            producer_binding, generator_binding)
+        if changed_label:
+            diagnostic_index = (changed_index if changed_index is not None
+                                else len(candidates) - 1)
+            diagnostic = _write_failure_diagnostic(
+                a, candidate_index=diagnostic_index,
+                candidate=candidates[diagnostic_index],
+                source_path=absolute_source_paths[diagnostic_index],
+                source_hash=source_hashes[diagnostic_index],
+                rows=all_rows[diagnostic_index],
+                provenance=lifecycle_provenance[diagnostic_index],
+                predictions=raw_predictions[diagnostic_index],
+                identity_manifest=identity_manifest, width=width, depth=depth,
+                spec=spec, input_hashes=input_hashes,
+                producer_binding=producer_binding,
+                generator_binding=generator_binding,
+                failure_stage="dependency_changed_before_success_write")
+            raise ProducerRefused(
+                "%s bytes changed before success write; diagnostic: %s" %
+                (changed_label, diagnostic))
+        input_bindings = {
+            name: {
+                "path": os.path.relpath(os.path.abspath(path), _ROOT).replace(
+                    "\\", "/"),
+                "frozen_sha256": input_hashes[name + "_sha256"],
+                "current_sha256": input_hashes[name + "_sha256"],
+                "unchanged_after_evaluation": True,
+                "observation_error": "",
+            }
+            for name, path in (("candidates", a.candidates), ("bounds", a.bounds),
+                               ("identities", a.identities))}
+        manifest = {
+            "kind": "coherent-K4 canonical-lifecycle observations-v1",
+            "identity_role": identity_manifest["kind"],
+            "producer": producer_binding,
+            "generator": generator_binding,
+            "candidate_registry": candidates, "bounds": bounds,
+            "identity_manifest": identity_manifest,
+            "input_bindings": input_bindings,
+            "lifecycle_spec": {"width": width, "depth": depth,
+                               "flop_budget": int(spec.flop_budget),
+                               "weights_mode": le.DEFAULT_WEIGHTS_MODE,
+                               "residual_cap": None},
+            "candidate_sources": [
+                {"index": i, "candidate": candidates[i], "path": source_paths[i],
+                 "sha256": source_hashes[i]}
+                for i in range(len(candidates))],
+            "counted_costs": costs.tolist(),
+            "row_hashes": row_hashes,
+            "n_ops": all_ops,
+            "lifecycle_provenance": lifecycle_provenance,
+            "labels_read": False}
+        output = os.path.join(a.out_dir, "predictions.npz")
+        with open(output, "x+b") as fh:
+            np.savez(fh, parameter_names=np.asarray(names), candidate_values=matrix,
+                     identities=np.asarray(identities),
+                     predictions=np.stack(all_predictions), counted_costs=costs,
+                     candidate_source_paths=np.asarray(source_paths),
+                     candidate_source_hashes=np.asarray(source_hashes),
+                     producer_manifest_json=np.asarray(json.dumps(manifest, sort_keys=True)))
+        result = {"schema": "arc-whest.coherent-k4-fit-producer-receipt.v1",
+                  "immutable": True, "predictions": output,
+                  "predictions_sha256": _sha256(output),
+                  "candidate_sources": source_paths,
+                  "candidate_source_hashes": source_hashes,
+                  "counted_costs": costs.tolist(), "manifest": manifest}
+        with open(os.path.join(a.out_dir, "producer_receipt.json"), "x",
+                  encoding="utf-8", newline="\n") as fh:
+            json.dump(result, fh, indent=2, sort_keys=True)
+            fh.write("\n")
+        changed_label, changed_index = _closing_dependency_problem(
+            a, input_hashes, absolute_source_paths, source_hashes,
+            producer_binding, generator_binding)
+        if changed_label:
+            receipt_path = os.path.join(a.out_dir, "producer_receipt.json")
+            for invalid_path in (receipt_path, output):
+                try:
+                    os.remove(invalid_path)
+                except FileNotFoundError:
+                    pass
+            diagnostic_index = (changed_index if changed_index is not None
+                                else len(candidates) - 1)
+            diagnostic = _write_failure_diagnostic(
+                a, candidate_index=diagnostic_index,
+                candidate=candidates[diagnostic_index],
+                source_path=absolute_source_paths[diagnostic_index],
+                source_hash=source_hashes[diagnostic_index],
+                rows=all_rows[diagnostic_index],
+                provenance=lifecycle_provenance[diagnostic_index],
+                predictions=raw_predictions[diagnostic_index],
+                identity_manifest=identity_manifest, width=width, depth=depth,
+                spec=spec, input_hashes=input_hashes,
+                producer_binding=producer_binding,
+                generator_binding=generator_binding,
+                failure_stage="dependency_changed_during_success_write")
+            raise ProducerRefused(
+                "%s bytes changed during success write; diagnostic: %s" %
+                (changed_label, diagnostic))
+        return result
 
 
 def main(argv=None):

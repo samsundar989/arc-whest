@@ -42335,3 +42335,24 @@ scan, prior-candidate source mutation, and selector mutation during provenance o
 closing validation. The complete suite passes **88/88**; compilation and
 `git diff --check` pass. Another fresh-context Skeptic and final current-source
 preflight remain required before the registered discriminator.
+
+The following fresh Skeptic returned **REJECT**. It moved a dependency after that
+dependency's read in the second and final scan; both producer and verifier could
+therefore finish with stale path bindings. This established that repeated unlocked
+hash passes cannot create a stable boundary: there is always a last read. The
+counterexample did not open protected truth and independently reconfirmed the job
+824 source and worker evidence.
+
+Receipt construction now holds every registry, prediction package, generated
+candidate and bound producer/generator/upstream source against write or deletion
+for the full closing validation and write interval. On Windows this uses shared-
+read, deny-write/delete `CreateFileW` handles without changing file permissions;
+the POSIX fallback holds exclusive advisory locks. A pre-existing incompatible
+writer makes acquisition refuse. Producer success construction occurs entirely
+inside this boundary; selector verification receipts use the same boundary, and
+both still hash twice and recheck after writing. Tests inject the prior final-pass
+registry writes: Windows denies both writes while ordinary producer and verifier
+success remain valid and exactly hash-bound. Earlier changes outside the boundary
+still refuse and remove success artifacts. The complete suite remains **88/88**;
+compilation and `git diff --check` pass. A new fresh-context Skeptic and current-
+source preflight are required before the discriminator.
