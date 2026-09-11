@@ -512,7 +512,7 @@ def _real_flopscope():
 
 def metered_program(n, depth, recent, rank, residual_rank, seed=20260910,
                     consumers=True, births=True, lam=1.0 / 3.0,
-                    capture_prediction=False):
+                    capture_prediction=False, capture_trace=False):
     """Execute one compact mechanism arm and return its exact metered ledger."""
     flops, fnp = _real_flopscope()
     consumers, births = bool(consumers), bool(births)
@@ -531,6 +531,8 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910,
     oracle_trace = []
     closure_trace = []
     state_trace = []
+    trace_enabled = n <= 16 and (rank == n or capture_trace)
+    shadow_enabled = n <= 16 and rank == n
     with flops.BudgetContext(flop_budget=100 * BUDGET, quiet=True) as ctx:
         meter = Meter(ctx)
         mu = meter.run("backbone_mean_init",
@@ -730,7 +732,7 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910,
             # dense oracle.  This is enabled only at tiny full rank, so oracle
             # arithmetic is outside the counted reference and cannot affect its
             # output or ledger.
-            if n <= 16 and rank == n:
+            if trace_enabled:
                 oracle_trace.append((list(all_sources), D3_total, D21_total, last))
 
             # Analytic ReLU closure.  This is deliberately coefficient-free:
@@ -786,7 +788,7 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910,
                 mu = meter.run("nonlinear_mean_add", lambda: base + mean3)
             outputs.append(mu)
             if last:
-                if n <= 16 and rank == n:
+                if trace_enabled:
                     closure_trace.append({
                         "last": True, "W": W, "C_old": C_old,
                         "mu_pre": mu_pre, "var_pre": var_pre,
@@ -917,7 +919,7 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910,
                 dP0 = meter.run("source_dP", lambda: 1.0 + s0 * s0)
                 newborn = (a, Rr, Lr, s0, e0, w2now, dA0, dP0,
                             c1b, c2b, yb)
-                if n <= 16 and rank == n:
+                if trace_enabled:
                     closure_trace.append({
                         "last": False, "W": W, "C_old": C_old,
                         "mu_pre": mu_pre, "var_pre": var_pre,
@@ -961,8 +963,10 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910,
     closure_oracle = dense_closure_oracle(closure_trace, n, residual_rank)
     if closure_trace and max(closure_oracle.values()) > 3e-5:
         raise AssertionError("dense closure oracle mismatch: %r" % closure_oracle)
-    shadow_rel, shadow_ages = dense_shadow_oracle(state_trace)
-    if state_trace and (shadow_rel > 3e-5 or not shadow_ages):
+    shadow_rel, shadow_ages = (dense_shadow_oracle(state_trace)
+                               if shadow_enabled else (0.0, True))
+    if shadow_enabled and state_trace and (
+            shadow_rel > 3e-5 or not shadow_ages):
         raise AssertionError("dense shadow mismatch: %.3e ages=%s" %
                              (shadow_rel, shadow_ages))
 
@@ -1117,6 +1121,11 @@ def metered_program(n, depth, recent, rank, residual_rank, seed=20260910,
         # are deliberately absent from durable JSON ledgers.  Keeping the
         # captured output outside the counted context makes this observational.
         result["_prediction"] = prediction_np.copy()
+    if capture_trace:
+        # Same test-only rule as `_prediction`: raw state objects never enter a
+        # durable JSON ledger and are observed only after the counted context.
+        result["_state_trace"] = state_trace
+        result["_closure_trace"] = closure_trace
     return result
 
 

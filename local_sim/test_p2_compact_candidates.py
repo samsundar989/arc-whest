@@ -46,10 +46,14 @@ def _weights():
             for _ in range(DEPTH)]
 
 
-def _candidate(path, raw_weights):
+def _candidate(path, raw_weights, *, shared_rank=None, residual_rank=None):
     flops = le._require_real_flopscope()
     fnp = le._require_real_fnp()
     module, _ = le.load_candidate(path)
+    if shared_rank is not None:
+        module._SHARED_RANK = int(shared_rank)
+    if residual_rank is not None:
+        module._RESIDUAL_RANK = int(residual_rank)
     spec = le.LifecycleSpec(width=N, depth=DEPTH,
                             residual_wall_time_limit_s=None)
     estimator = module.Estimator()
@@ -71,6 +75,7 @@ def _candidate(path, raw_weights):
     state = (fnp.zeros(N, dtype=dtype), fnp.eye(N, dtype=dtype),
              fnp.ones(N, dtype=dtype), [], None, None, None)
     internal = []
+    states = []
     with flops.BudgetContext(flop_budget=100 * (2 ** 41), quiet=True):
         for layer, raw in enumerate(weights):
             W = raw.T if raw.dtype == dtype else raw.T.astype(dtype)
@@ -80,7 +85,79 @@ def _candidate(path, raw_weights):
             state = (mu, state[1], state[2], state[3], state[4],
                      state[5], state[6])
             internal.append(np.asarray(mu))
-    return np.asarray(prediction), np.stack(internal), used, operations
+            states.append(state)
+    return np.asarray(prediction), np.stack(internal), states, used, operations
+
+
+def _source_values(source):
+    values = list(source[:13])
+    return [None if value is None else
+            int(value) if i == 12 else np.asarray(value)
+            for i, value in enumerate(values)]
+
+
+def _candidate_sources(state):
+    out = [_source_values(source) for source in state[3]]
+    shared = state[4]
+    if shared is not None:
+        Q, factors, _gram = shared
+        for factor in factors:
+            FA, FP = factor[0], factor[1]
+            dense = (Q @ FA, Q @ FP) + tuple(factor[2:13])
+            out.append(_source_values(dense))
+    return sorted(out, key=lambda values: values[12])
+
+
+def _reference_sources(row):
+    return sorted((_source_values(values) for _kind, values in row["sources"]),
+                  key=lambda values: values[12])
+
+
+def _state_error(states, reference_states, closures):
+    worst = 0.0
+    ages_exact = True
+    for state, ref_state, closure in zip(states, reference_states, closures):
+        worst = max(worst, _rel(state[0], closure["mu"]))
+        if not closure["last"]:
+            worst = max(worst, _rel(state[1], closure["C"]),
+                        _rel(state[2], closure["w1"]))
+            if state[6] is None or closure["gcore"] is None:
+                if state[6] is not None or closure["gcore"] is not None:
+                    return float("inf"), False
+            else:
+                worst = max(worst, _rel(state[6], closure["gcore"]))
+        got_sources = _candidate_sources(state)
+        want_sources = _reference_sources(ref_state)
+        if len(got_sources) != len(want_sources):
+            return float("inf"), False
+        for got, want in zip(got_sources, want_sources):
+            ages_exact = ages_exact and got[12] == want[12]
+            # Compare the represented residual, because its QR factors are not
+            # individually unique.  All other fields are representation values.
+            worst = max(worst, _rel(got[2] @ got[3].T,
+                                    want[2] @ want[3].T))
+            for i in (0, 1, 4, 5, 6, 7, 8, 9, 10, 11):
+                if got[i] is None or want[i] is None:
+                    if got[i] is not None or want[i] is not None:
+                        return float("inf"), False
+                else:
+                    worst = max(worst, _rel(got[i], want[i]))
+        got_birth, want_birth = state[5], ref_state["newborn"]
+        if got_birth is None or want_birth is None:
+            if got_birth is not None or want_birth is not None:
+                return float("inf"), False
+        else:
+            worst = max(worst, _rel(np.asarray(got_birth[1])
+                                    @ np.asarray(got_birth[2]).T,
+                                    np.asarray(want_birth[1])
+                                    @ np.asarray(want_birth[2]).T))
+            for i in (0, 3, 4, 5, 6, 7, 8, 9, 10):
+                if got_birth[i] is None or want_birth[i] is None:
+                    if got_birth[i] is not None or want_birth[i] is not None:
+                        return float("inf"), False
+                else:
+                    worst = max(worst, _rel(got_birth[i], want_birth[i]))
+    return worst, ages_exact
 
 
 def _generated_sources(lam=1.0 / 3.0):
@@ -110,8 +187,8 @@ def run():
             N, DEPTH, RECENT, RANK, RESIDUAL_RANK, seed=SEED,
             consumers=item["consumers"], births=item["births"],
             lam=1.0 / 3.0, capture_prediction=True)
-        candidate, candidate_internal, candidate_flops, candidate_operations = _candidate(
-            item["path"], raw_weights)
+        (candidate, candidate_internal, _states, candidate_flops,
+         candidate_operations) = _candidate(item["path"], raw_weights)
         internal = np.asarray(reference.pop("_prediction"))
         exact0 = (np.sqrt((raw_weights[0].astype(np.float64) ** 2).sum(axis=0))
                   / math.sqrt(2.0 * math.pi))
@@ -137,9 +214,34 @@ def run():
                 candidate_operations - reference["operations"]),
         })
 
+        compressed_reference = metered_program(
+            N, DEPTH, RECENT, 4, 2, seed=SEED,
+            consumers=item["consumers"], births=item["births"],
+            lam=1.0 / 3.0, capture_prediction=True, capture_trace=True)
+        (_compressed_output, compressed_internal, compressed_states,
+         _compressed_flops, _compressed_ops) = _candidate(
+             item["path"], raw_weights, shared_rank=4, residual_rank=2)
+        reference_internal = np.asarray(
+            compressed_reference.pop("_prediction"))
+        reference_states = compressed_reference.pop("_state_trace")
+        reference_closures = compressed_reference.pop("_closure_trace")
+        state_rel, ages_exact = _state_error(
+            compressed_states, reference_states, reference_closures)
+        compressed_rel = _rel(compressed_internal, reference_internal)
+        rows[-1].update({
+            "compressed_rank": 4,
+            "compressed_residual_rank": 2,
+            "compressed_internal_max_relative": compressed_rel,
+            "compressed_state_max_relative": state_rel,
+            "compressed_source_ages_exact": ages_exact,
+        })
+        rows[-1]["pass"] = bool(
+            rows[-1]["pass"] and compressed_rel <= REL_TOL
+            and state_rel <= REL_TOL and ages_exact)
+
     exact_path = generated["exact"]["path"]
     coherent_path = generated["coherent"]["path"]
-    exact_output, _exact_internal, exact_flops, exact_ops = _candidate(
+    exact_output, _exact_internal, _exact_states, exact_flops, exact_ops = _candidate(
         exact_path, raw_weights)
     coherent_module, _ = le.load_candidate(coherent_path)
     coherent_module._K4_ACTIVE = False

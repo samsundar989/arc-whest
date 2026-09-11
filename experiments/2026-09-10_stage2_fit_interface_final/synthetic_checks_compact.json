@@ -57,12 +57,12 @@
     },
     {
       "check": "receipt replacement after snapshot refuses at closing revalidation",
-      "detail": "parsed=ec32f24d4902 current=b3851d6a2602",
+      "detail": "parsed=9f9607fc71ab current=cd4aeddcc2af",
       "pass": true
     },
     {
       "check": "NPZ replacement after snapshot refuses at closing revalidation",
-      "detail": "parsed=114650ef2ba6 current=66e3daf47ab3",
+      "detail": "parsed=3930dc5b7756 current=2de14f2d7846",
       "pass": true
     },
     {
@@ -297,7 +297,7 @@
     },
     {
       "check": "normal fit records producer receipt revalidation",
-      "detail": "74336307024e",
+      "detail": "eeb21a74df5d",
       "pass": true
     },
     {

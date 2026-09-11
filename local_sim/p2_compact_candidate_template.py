@@ -189,7 +189,8 @@ def _layer(W, state, n, rank, residual_rank, dtype, last):
     if _K4_ACTIVE and _K4_CONSUMERS:
         D4 = 2.0 * dG
         D22 = (dG[:, None] + dG[None, :]) / 3.0
-        D31 = _K4_LAM * C_off
+        D31 = (C_off / 3.0 if _K4_LAM == 1.0 / 3.0
+               else _K4_LAM * C_off)
         mu = base + D3 * w3 / 6.0 + D4 * w4 / 24.0
     else:
         D4 = None
@@ -242,7 +243,8 @@ def _layer(W, state, n, rank, residual_rank, dtype, last):
         y = 0.5 * w2
         dgw = w1sq * dG
         u = y * dG
-        c1 = _K4_LAM * w1
+        c1 = (w1 / 3.0 if _K4_LAM == 1.0 / 3.0
+              else _K4_LAM * w1)
         c2 = dgw
         feed21 = (dgw[:, None] * y[None, :] / 3.0
                   + (2.0 / 3.0) * y[:, None] * (a * c1[None, :])

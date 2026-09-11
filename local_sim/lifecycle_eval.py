@@ -592,10 +592,11 @@ def evaluate(
     because `vault.py` used to save its own predictions from its own loop, and
     deleting that loop must not delete the raw output of a once-ever touch.
 
-    `operation_logs_out` is the analogous label-free audit hook for an explicitly
-    requested run. It copies the completed BudgetContext operation records after
-    the row has finished. Normal evaluation and production producers leave it
-    unset, so they retain no additional history or memory.
+    `operation_logs_out` is the analogous one-row, label-free audit hook. It
+    copies the completed BudgetContext operation records after the row has
+    finished. Multi-row use is refused so callers cannot accidentally retain an
+    unbounded rows-times-operations history. Normal evaluation and production
+    producers leave it unset, so they retain no additional history or memory.
 
     `_lifecycle` exists ONLY so the regression test can drive the historical
     `"per_mlp_no_setup"` path (vault.py:282 / coverage_lab.py:226) through the
@@ -604,6 +605,8 @@ def evaluate(
     if weights_mode not in WEIGHTS_MODES:
         raise ValueError(f"unknown weights_mode {weights_mode!r}; expected one "
                          f"of {list(WEIGHTS_MODES)}")
+    if operation_logs_out is not None and len(seeds) != 1:
+        raise ValueError("operation_logs_out is restricted to one-row audits")
     flops = _require_real_flopscope()
     fnp = _require_real_fnp()
     try:

@@ -1,0 +1,36 @@
+﻿worker-q: job #65 starting at 2026-09-11T23:02:06.045781+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000879
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['uv', 'run', 'python', 'local_sim/p2_compact_arm_gate.py', '--candidate', 'local_sim/p2_arms/arm_coherent.py', '--seed', '40910007000', '--width', '1024', '--depth', '16', '--out', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-11_stage2_compact_arms/arm_coherent_gate.json']
+worker-q: ------------------------------------------------------------
+Using CPython 3.10.0 interpreter at: C:\Users\samsu\AppData\Local\Programs\Python\Python310\python.exe
+Removed virtual environment at: .venv
+Creating virtual environment at: .venv
+Downloading fonttools (1.5MiB)
+Downloading pyarrow (26.6MiB)
+Downloading pillow (6.9MiB)
+Downloading matplotlib (7.8MiB)
+Downloading pandas (10.8MiB)
+Downloading scipy (39.3MiB)
+ Downloaded fonttools
+ Downloaded pillow
+ Downloaded matplotlib
+ Downloaded pandas
+ Downloaded pyarrow
+ Downloaded scipy
+Installed 61 packages in 4.45s
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000879\local_sim\lifecycle_eval.py:610: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000879\local_sim\p2_arms\arm_coherent.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000879\local_sim\p2_arms\arm_coherent.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+Traceback (most recent call last):
+  File "C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000879\local_sim\p2_compact_arm_gate.py", line 116, in <module>
+    raise SystemExit(main())
+  File "C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000879\local_sim\p2_compact_arm_gate.py", line 105, in main
+    with open(args.out, "x", encoding="utf-8", newline="\n") as fh:
+FileNotFoundError: [Errno 2] No such file or directory: 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-11_stage2_compact_arms/arm_coherent_gate.json'
+worker-q: ------------------------------------------------------------
+worker-q: job #65 FAILED (exit code 1) at 2026-09-11T23:02:54.240479+00:00

@@ -42638,3 +42638,47 @@ incomplete-evidence fixtures. `whest validate` passes all four generated arms in
 the installed official environment. These are tiny label-free implementation
 results only. The contract's four separate 1024x16 workerq rows, current
 preflight and fresh Skeptic verdict remain open; P07 truth remains closed.
+
+### Independent compact-code audit and repair
+
+A fresh-context read-only code audit rejected the first implementation packet.
+It found that `p2_compact_arm_gate.py` hashed and parsed an arm before lifecycle
+evaluation without holding the file stable, requiring exact template
+regeneration, comparing the lifecycle hash, or rehashing through publication.
+It also found that the direct candidate/reference test exercised full shared rank
+only and compared means with a single global scale; a compressed-basis state bug
+could therefore pass. The audit found no separate grader-legality or mathematical
+defect, but these two evidence defects block acceptance.
+
+Jobs 878--883 had already been submitted at high priority when the audit arrived.
+Job 878 completed the old gate's exact arm in 10.77 seconds at 1,126.7 MiB peak,
+with 816,292,940,328 FLOPs and 6,857 operations. Jobs 879 and 880 computed their
+rows but failed to publish because the untracked destination directory was
+temporarily absent. Jobs 881--883 were cancelled; job 882 had written a reference
+ledger before cancellation. The entire attempt is preserved under
+`experiments/2026-09-11_stage2_compact_arms/` as diagnostic performance evidence,
+not an accepted gate. Its low measured RAM supports the compact architecture's
+memory estimate but proves no source-bound arm result.
+
+The repaired gate now holds the candidate, generator and template against writes
+and deletion from the first read through exclusive JSON publication. It requires
+the candidate path to be one of the four registered outputs, verifies exact
+regeneration, matches both lifecycle hashes to the pre-read hash, and performs
+closing rehashes. Its tiny positive/refusal suite passes 4/4, including stale-arm
+and misbound-provenance rejection. The generic operation-log hook now refuses
+multi-row use, bounding its retained metadata to the gate's one row.
+
+The expanded candidate/reference test now also forces shared rank 4 and residual
+rank 2 at width 8, reconstructs every compressed source, and compares per-layer
+mean, covariance, Wick factor, total K4 core, source fields, residual products,
+births and exact ages against the independent reference. This stronger check
+found one implementation discrepancy: the candidate spelled one-third products
+as multiplication while the accepted reference uses division by three. The
+float32 rounding difference amplified in the consumers-only compressed path to
+about `5e-4`. The template now uses the reference's one-third fast paths for D31
+and birth `c1`, and all arms were regenerated. Full-rank internal errors are at
+most `5.53e-8`; compressed internal errors are at most `4.57e-7`; reconstructed
+compressed-state errors are at most `1.52e-6`, with exact source ages. The 6/6
+reference suite, 92/92 producer/verifier suite and all four official validation
+calls pass again. Real-shape jobs and current preflight must be rerun on these new
+bytes before a Skeptic can accept the label-free gate. P07 remains closed.
