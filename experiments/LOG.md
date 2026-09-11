@@ -41743,3 +41743,13 @@ No budget, shape, sample count, precision, seed, ordering, check or candidate by
 may change. Failure under 12 GiB falsifies this bound and requires per-case memory
 measurement or a reviewed test-oracle redesign; it does not license a larger
 undeclared run.
+
+Workerq 794 then executed the registered larger `layer1:1` discriminator alone
+with a 12 GiB workerq declaration and an inherited 12 GiB `RLIMIT_AS`. It still
+failed after 22.22 seconds while flopscope's normal-PPF path requested another
+786 MiB float64 temporary; workerq observed 5,792.47 MiB host RAM. No receipt was
+written. This falsifies the proposed 12 GiB virtual-address bound for the unchanged
+full-budget off-shape oracle. The new evidence also identifies the confound: these
+correctness-only cases take 2^20 samples under the live 2^41 budget, versus 2^14
+on the actual 1024x16 production shape. Raw job 792--794 manifests and logs are
+preserved beside job 789's evidence.
