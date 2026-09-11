@@ -1,0 +1,115 @@
+{
+  "arms": {
+    "births_only": {
+      "all_failure_fields_clear": true,
+      "artifact": "experiments/2026-09-11_stage2_compact_arms/arm_births_only_gate.json",
+      "budget_fraction": 0.37210900082209264,
+      "candidate_sha256": "2ff91070f30d56abff1644fe82b27ffaab87ef8807fb7744ee551ec6d71cbf49",
+      "exact_registered_regeneration": true,
+      "flops": 818276346408,
+      "labels_read": false,
+      "local_residual_seconds_non_authoritative": 1.379579901258694,
+      "operation_groups_reconcile": true,
+      "operations": 9678,
+      "source_hashes_close": true
+    },
+    "coherent": {
+      "all_failure_fields_clear": true,
+      "artifact": "experiments/2026-09-11_stage2_compact_arms/arm_coherent_gate.json",
+      "budget_fraction": 0.3722179124779359,
+      "candidate_sha256": "d3ec837b72f5dacb4f8f622394d3d635268649c741289fb9754197e993343665",
+      "exact_registered_regeneration": true,
+      "flops": 818515845672,
+      "labels_read": false,
+      "local_residual_seconds_non_authoritative": 1.4354964019439649,
+      "operation_groups_reconcile": true,
+      "operations": 10095,
+      "source_hashes_close": true
+    },
+    "consumers_only": {
+      "all_failure_fields_clear": true,
+      "artifact": "experiments/2026-09-11_stage2_compact_arms/arm_consumers_only_gate.json",
+      "budget_fraction": 0.3713665835275606,
+      "candidate_sha256": "08fa7f7f39c49c622132bdd22a4d862db702fae5deb6d8b88b679b1e24d652c7",
+      "exact_registered_regeneration": true,
+      "flops": 816643753512,
+      "labels_read": false,
+      "local_residual_seconds_non_authoritative": 1.1693931994668674,
+      "operation_groups_reconcile": true,
+      "operations": 7935,
+      "source_hashes_close": true
+    },
+    "exact": {
+      "all_failure_fields_clear": true,
+      "artifact": "experiments/2026-09-11_stage2_compact_arms/arm_exact_gate.json",
+      "budget_fraction": 0.37120705216148053,
+      "candidate_sha256": "f704f83b2063894c8dcd13120a8baada762229563f6d08bccee39d3aad2e6efc",
+      "exact_registered_regeneration": true,
+      "flops": 816292940328,
+      "labels_read": false,
+      "local_residual_seconds_non_authoritative": 1.0363098002271727,
+      "operation_groups_reconcile": true,
+      "operations": 6857,
+      "source_hashes_close": true
+    }
+  },
+  "coherent_reference_delta": {
+    "explanation": "grader-facing exact float64 row zero, output stacking/cast, finite replacement and nonnegative clamp",
+    "flops": 21349376,
+    "operations": 43
+  },
+  "labels_read": false,
+  "reference": {
+    "artifact": "experiments/2026-09-11_stage2_compact_arms/coherent_reference_live.json",
+    "estimated_peak_array_payload_bytes": 345587712,
+    "flops": 818494496296,
+    "operations": 10052,
+    "single_array_max_bytes": 4194304,
+    "source_sha256": "81f8bbbbe60a617cf0533f13657440ed35feb9bb5d0bc0fbf8956ef002febdd2"
+  },
+  "schema": "arc-whest.compact-k4-label-free-acceptance-summary.v1",
+  "scope": "Label-free local lifecycle, counted cost, source binding and memory accounting. No accuracy, server residual, protected-data, public, vault, submission or designation claim.",
+  "source_commit": "d1eeb11",
+  "source_hashes": {
+    "gate": "44ae14d969bcf50ee97cd4d96a4b4161ebd5f44b4f5b746696f922e1a1306235",
+    "generator": "9f6d1952e4b6b9f3fa3888af54379ee886ed172bc7f97c465b5a9dce64737b96",
+    "reference": "81f8bbbbe60a617cf0533f13657440ed35feb9bb5d0bc0fbf8956ef002febdd2",
+    "template": "6cba4c6a89c79d9b3cfc7e3444bb5448cd0ce672536c207ea34235ed6782d939"
+  },
+  "workerq": {
+    "accepted_arm_jobs": [
+      884,
+      885,
+      886,
+      887
+    ],
+    "current_live_worktree_preflight_job": 890,
+    "current_preflight_result": {
+      "exit_code": 0,
+      "peak_ram_mib": 3328.3671875,
+      "runtime_seconds": 384.665211,
+      "state": "SUCCEEDED",
+      "verdict": "PREFLIGHT GREEN -- 12/16, 4 SKIPPED"
+    },
+    "measured_peak_ram_mib": {
+      "884": 1079.00390625,
+      "885": null,
+      "886": null,
+      "887": null,
+      "888": null
+    },
+    "normalized_snapshot_preflight_job_889": {
+      "exit_code": 1,
+      "scope": "negative provenance evidence only; git snapshot normalized tracked bytes and therefore failed artifact/source hashes",
+      "state": "FAILED"
+    },
+    "reference_job": 888,
+    "requested_per_arm": {
+      "cpus": 2,
+      "gpus": 0,
+      "ram_mib": 4096,
+      "vram_mib": 0
+    },
+    "telemetry_limitation": "Concurrent dispatcher jobs 885-888 returned null outer peak telemetry. Job 884 measured current exact at 1079.0 MiB. Earlier pre-audit jobs measured coherent at 1211.5 MiB and consumers-only at 1033.5 MiB; those earlier rows are diagnostic, not accepted source-binding evidence."
+  }
+}

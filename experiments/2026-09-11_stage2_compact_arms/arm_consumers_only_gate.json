@@ -1,0 +1,614 @@
+{
+  "arm_constants": {
+    "_K4_ACTIVE": true,
+    "_K4_BIRTHS": false,
+    "_K4_CONSUMERS": true,
+    "_K4_LAM": 0.3333333333333333
+  },
+  "candidate": "local_sim/p2_arms/arm_consumers_only.py",
+  "candidate_sha256": "08fa7f7f39c49c622132bdd22a4d862db702fae5deb6d8b88b679b1e24d652c7",
+  "identity": {
+    "depth": 16,
+    "kind": "synthetic",
+    "seed": 40910007000,
+    "width": 1024
+  },
+  "labels_read": false,
+  "lifecycle_provenance": {
+    "backend": {
+      "flopscope": "0.12.1+np2.2.6",
+      "flopscope_path": "C:\\Users\\samsu\\Documents\\arc-whest\\.gpuq-work\\job-000886\\.venv\\lib\\site-packages\\flopscope",
+      "numpy": "2.2.6",
+      "python": "3.10.0"
+    },
+    "candidate": "local_sim/p2_arms/arm_consumers_only.py",
+    "candidate_sha256": "08fa7f7f39c49c622132bdd22a4d862db702fae5deb6d8b88b679b1e24d652c7",
+    "host_cold_start_s": 0.24,
+    "lifecycle": "grader",
+    "n_mlps": 1,
+    "objective_is_graded": false,
+    "residual_is_graded": false,
+    "residual_measurement_path": "runner=local (in-process BudgetContext)",
+    "round_deviations": {
+      "residual_wall_time_limit_s": [
+        null,
+        0.4
+      ]
+    },
+    "round_tag": "v2-phase2",
+    "rows_hash": "e1e5bd3d3d10fbe0b2896c63012866736a870b695c11e030b9d177e44bb52a15",
+    "setup_called": true,
+    "setup_error": "",
+    "setup_seconds": 0.0037668999866582453,
+    "setup_timed_out": false,
+    "setup_timeout_s": 5.0,
+    "spec": {
+      "depth": 16,
+      "floor": 0.1,
+      "flop_budget": 2199023255552,
+      "lam": 0.0,
+      "memory_limit_mb": 8192,
+      "predict_timeout_s": 30.0,
+      "residual_wall_time_limit_s": null,
+      "round_tag": "v2-phase2",
+      "seed": 0,
+      "setup_timeout_s": 5.0,
+      "wall_time_limit_s": 120.0,
+      "width": 1024
+    },
+    "truth_sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+    "weights_mode": "f64_readonly",
+    "weights_mode_is_grader_default": true
+  },
+  "lifecycle_row": {
+    "budget": 2199023255552.0,
+    "budget_exhausted": false,
+    "candidate": "local_sim/p2_arms/arm_consumers_only.py",
+    "candidate_sha256": "08fa7f7f39c49c622132bdd22a4d862db702fae5deb6d8b88b679b1e24d652c7",
+    "combined_exhausted": false,
+    "depth": 16,
+    "error_code": "",
+    "estimator_seed": 2593161100,
+    "flops_used": 816643753512.0,
+    "gt_noise": 0.0,
+    "index": 0,
+    "input_seed": 40910007000,
+    "mse": 8064.998046875,
+    "n_ops": 7935.0,
+    "nonfinite": false,
+    "residual_exhausted": false,
+    "residual_wall_time_s": 1.1693931994668674,
+    "time_exhausted": false,
+    "truth_sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+    "wall_time_s": 9.72308999998495,
+    "width": 1024,
+    "zero_prediction_mse": 0.0
+  },
+  "operation_group_parity": {
+    "calls_exact": true,
+    "context_flops": 816643753512,
+    "flops_exact": true,
+    "group_calls": 7935,
+    "group_flops": 816643753512,
+    "reported_calls": 7935
+  },
+  "operation_groups": [
+    {
+      "calls": 227,
+      "dtype": "float32",
+      "flops": 487240761344,
+      "op": "matmul",
+      "shapes": "(1024,1024)x(1024,1024)"
+    },
+    {
+      "calls": 161,
+      "dtype": "float32",
+      "flops": 129591017472,
+      "op": "matmul",
+      "shapes": "(1024,1024)x(1024,384)"
+    },
+    {
+      "calls": 140,
+      "dtype": "float32",
+      "flops": 112596090880,
+      "op": "matmul",
+      "shapes": "(1024,384)x(384,1024)"
+    },
+    {
+      "calls": 90,
+      "dtype": "float32",
+      "flops": 27143700480,
+      "op": "matmul",
+      "shapes": "(384,384)x(384,1024)"
+    },
+    {
+      "calls": 20,
+      "dtype": "float32",
+      "flops": 16098263040,
+      "op": "matmul",
+      "shapes": "(384,1024)x(1024,1024)"
+    },
+    {
+      "calls": 38,
+      "dtype": "float32",
+      "flops": 11470012416,
+      "op": "matmul",
+      "shapes": "(384,1024)x(1024,384)"
+    },
+    {
+      "calls": 270,
+      "dtype": "float32",
+      "flops": 9055272960,
+      "op": "matmul",
+      "shapes": "(1024,1024)x(1024,16)"
+    },
+    {
+      "calls": 225,
+      "dtype": "float32",
+      "flops": 7313817600,
+      "op": "matmul",
+      "shapes": "(1024,16)x(16,1024)"
+    },
+    {
+      "calls": 10,
+      "dtype": "float32",
+      "flops": 5284823040,
+      "op": "linalg.qr",
+      "shapes": "(1024,384)"
+    },
+    {
+      "calls": 27,
+      "dtype": "float32",
+      "flops": 3053666304,
+      "op": "matmul",
+      "shapes": "(384,384)x(384,384)"
+    },
+    {
+      "calls": 9,
+      "dtype": "float32",
+      "flops": 2714370048,
+      "op": "matmul",
+      "shapes": "(1024,384)x(384,384)"
+    },
+    {
+      "calls": 1110,
+      "dtype": "float32",
+      "flops": 1163919360,
+      "op": "add",
+      "shapes": "(1024,1024)x(1024,1024)"
+    },
+    {
+      "calls": 945,
+      "dtype": "float32",
+      "flops": 990904320,
+      "op": "multiply",
+      "shapes": "(1024,1024)x(1024,1024)"
+    },
+    {
+      "calls": 885,
+      "dtype": "float32",
+      "flops": 927989760,
+      "op": "multiply",
+      "shapes": "(1024,1024)x(1,1024)"
+    },
+    {
+      "calls": 510,
+      "dtype": "float32",
+      "flops": 534773760,
+      "op": "multiply",
+      "shapes": "()x(1024,1024)"
+    },
+    {
+      "calls": 15,
+      "dtype": "float32",
+      "flops": 503070720,
+      "op": "matmul",
+      "shapes": "(16,1024)x(1024,1024)"
+    },
+    {
+      "calls": 182,
+      "dtype": "float32",
+      "flops": 190840832,
+      "op": "true_divide",
+      "shapes": "(1024,1024)x()"
+    },
+    {
+      "calls": 145,
+      "dtype": "float32",
+      "flops": 152043520,
+      "op": "multiply",
+      "shapes": "(1024,1)x(1024,1024)"
+    },
+    {
+      "calls": 135,
+      "dtype": "float32",
+      "flops": 141557760,
+      "op": "multiply",
+      "shapes": "(1024,1)x(1,1024)"
+    },
+    {
+      "calls": 135,
+      "dtype": "float32",
+      "flops": 141419520,
+      "op": "sum",
+      "shapes": "(1024,1024)"
+    },
+    {
+      "calls": 31,
+      "dtype": "float32",
+      "flops": 64979968,
+      "op": "matmul",
+      "shapes": "(1024,1024)x(1024)"
+    },
+    {
+      "calls": 61,
+      "dtype": "float32",
+      "flops": 56106496,
+      "op": "subtract",
+      "shapes": "(1024,1024)x(1024,1024)"
+    },
+    {
+      "calls": 129,
+      "dtype": "float32",
+      "flops": 50724864,
+      "op": "add",
+      "shapes": "(1024,384)x(1024,384)"
+    },
+    {
+      "calls": 16,
+      "dtype": "float64",
+      "flops": 33554432,
+      "op": "astype",
+      "shapes": "(1024,1024)"
+    },
+    {
+      "calls": 31,
+      "dtype": "float32",
+      "flops": 32505856,
+      "op": "add",
+      "shapes": "(1024,1)x(1,1024)"
+    },
+    {
+      "calls": 30,
+      "dtype": "float32",
+      "flops": 31293480,
+      "op": "linalg.qr",
+      "shapes": "(1024,16)"
+    },
+    {
+      "calls": 16,
+      "dtype": "float32",
+      "flops": 15729664,
+      "op": "ones",
+      "shapes": ""
+    },
+    {
+      "calls": 15,
+      "dtype": "float32",
+      "flops": 15728640,
+      "op": "copy",
+      "shapes": "(1024,1024)"
+    },
+    {
+      "calls": 30,
+      "dtype": "float32",
+      "flops": 11796480,
+      "op": "multiply",
+      "shapes": "(1024,1)x(1024,384)"
+    },
+    {
+      "calls": 20,
+      "dtype": "float32",
+      "flops": 7864320,
+      "op": "multiply",
+      "shapes": "(384,1024)x(1,1024)"
+    },
+    {
+      "calls": 20,
+      "dtype": "float32",
+      "flops": 2949120,
+      "op": "add",
+      "shapes": "(384,384)x(384,384)"
+    },
+    {
+      "calls": 1,
+      "dtype": "float64",
+      "flops": 2097152,
+      "op": "multiply",
+      "shapes": "(1024,1024)x(1024,1024)"
+    },
+    {
+      "calls": 1,
+      "dtype": "float64",
+      "flops": 2095104,
+      "op": "sum",
+      "shapes": "(1024,1024)"
+    },
+    {
+      "calls": 105,
+      "dtype": "float32",
+      "flops": 1720320,
+      "op": "multiply",
+      "shapes": "(1024,1)x(1024,16)"
+    },
+    {
+      "calls": 16,
+      "dtype": "float64",
+      "flops": 1572864,
+      "op": "stats.norm.cdf",
+      "shapes": "(1024)"
+    },
+    {
+      "calls": 75,
+      "dtype": "float32",
+      "flops": 1228800,
+      "op": "power",
+      "shapes": "(1024)x()"
+    },
+    {
+      "calls": 16,
+      "dtype": "float64",
+      "flops": 884736,
+      "op": "stats.norm.pdf",
+      "shapes": "(1024)"
+    },
+    {
+      "calls": 653,
+      "dtype": "float32",
+      "flops": 668672,
+      "op": "multiply",
+      "shapes": "(1024)x(1024)"
+    },
+    {
+      "calls": 393,
+      "dtype": "float32",
+      "flops": 402432,
+      "op": "add",
+      "shapes": "(1024)x(1024)"
+    },
+    {
+      "calls": 241,
+      "dtype": "float32",
+      "flops": 246784,
+      "op": "multiply",
+      "shapes": "()x(1024)"
+    },
+    {
+      "calls": 15,
+      "dtype": "float32",
+      "flops": 245760,
+      "op": "multiply",
+      "shapes": "(1024,16)x()"
+    },
+    {
+      "calls": 1,
+      "dtype": "float64",
+      "flops": 131072,
+      "op": "where",
+      "shapes": "(16,1024)x(16,1024)x()"
+    },
+    {
+      "calls": 120,
+      "dtype": "float32",
+      "flops": 122880,
+      "op": "true_divide",
+      "shapes": "(1,1024)x()"
+    },
+    {
+      "calls": 105,
+      "dtype": "float32",
+      "flops": 107520,
+      "op": "subtract",
+      "shapes": "(1024)x(1024)"
+    },
+    {
+      "calls": 64,
+      "dtype": "float32",
+      "flops": 65536,
+      "op": "true_divide",
+      "shapes": "(1024)x(1024)"
+    },
+    {
+      "calls": 32,
+      "dtype": "float64",
+      "flops": 65536,
+      "op": "astype",
+      "shapes": "(1024)"
+    },
+    {
+      "calls": 16,
+      "dtype": "float32",
+      "flops": 65536,
+      "op": "where",
+      "shapes": "(1024)x(1024)x()"
+    },
+    {
+      "calls": 47,
+      "dtype": "float32",
+      "flops": 48128,
+      "op": "true_divide",
+      "shapes": "(1024)x()"
+    },
+    {
+      "calls": 1,
+      "dtype": "float64",
+      "flops": 32768,
+      "op": "asarray",
+      "shapes": "(16,1024)"
+    },
+    {
+      "calls": 1,
+      "dtype": "float64",
+      "flops": 32768,
+      "op": "concatenate",
+      "shapes": ""
+    },
+    {
+      "calls": 1,
+      "dtype": "float64",
+      "flops": 32768,
+      "op": "isfinite",
+      "shapes": "(16,1024)"
+    },
+    {
+      "calls": 1,
+      "dtype": "float64",
+      "flops": 32768,
+      "op": "maximum",
+      "shapes": "(16,1024)x()"
+    },
+    {
+      "calls": 31,
+      "dtype": "float32",
+      "flops": 31744,
+      "op": "diag",
+      "shapes": "(1024)"
+    },
+    {
+      "calls": 31,
+      "dtype": "float32",
+      "flops": 31744,
+      "op": "maximum",
+      "shapes": "(1024)x()"
+    },
+    {
+      "calls": 31,
+      "dtype": "float32",
+      "flops": 31744,
+      "op": "subtract",
+      "shapes": "(1024)x()"
+    },
+    {
+      "calls": 30,
+      "dtype": "float32",
+      "flops": 30720,
+      "op": "add",
+      "shapes": "()x(1024)"
+    },
+    {
+      "calls": 30,
+      "dtype": "float32",
+      "flops": 30720,
+      "op": "multiply",
+      "shapes": "(1024,1)x(1024,1)"
+    },
+    {
+      "calls": 1,
+      "dtype": "float64",
+      "flops": 30720,
+      "op": "astype",
+      "shapes": "(15,1024)"
+    },
+    {
+      "calls": 16,
+      "dtype": "float32",
+      "flops": 16384,
+      "op": "eye",
+      "shapes": ""
+    },
+    {
+      "calls": 16,
+      "dtype": "float32",
+      "flops": 16384,
+      "op": "isfinite",
+      "shapes": "(1024)"
+    },
+    {
+      "calls": 16,
+      "dtype": "float32",
+      "flops": 16384,
+      "op": "negative",
+      "shapes": "(1024)"
+    },
+    {
+      "calls": 16,
+      "dtype": "float32",
+      "flops": 16384,
+      "op": "sqrt",
+      "shapes": "(1024)"
+    },
+    {
+      "calls": 15,
+      "dtype": "float32",
+      "flops": 15360,
+      "op": "multiply",
+      "shapes": "()x(1024,1)"
+    },
+    {
+      "calls": 1,
+      "dtype": "float32",
+      "flops": 15360,
+      "op": "stack",
+      "shapes": ""
+    },
+    {
+      "calls": 15,
+      "dtype": "float32",
+      "flops": 15345,
+      "op": "sum",
+      "shapes": "(1024)"
+    },
+    {
+      "calls": 1,
+      "dtype": "float64",
+      "flops": 2048,
+      "op": "multiply",
+      "shapes": "(1024)x()"
+    },
+    {
+      "calls": 1,
+      "dtype": "float64",
+      "flops": 2048,
+      "op": "reshape",
+      "shapes": "(1024)"
+    },
+    {
+      "calls": 1,
+      "dtype": "float64",
+      "flops": 2048,
+      "op": "sqrt",
+      "shapes": "(1024)"
+    },
+    {
+      "calls": 15,
+      "dtype": "float32",
+      "flops": 15,
+      "op": "multiply",
+      "shapes": "()x()"
+    },
+    {
+      "calls": 54,
+      "dtype": "None",
+      "flops": 0,
+      "op": "zeros",
+      "shapes": ""
+    },
+    {
+      "calls": 31,
+      "dtype": "None",
+      "flops": 0,
+      "op": "diagonal",
+      "shapes": "(1024,1024)"
+    }
+  ],
+  "prediction_dtype": "float32",
+  "prediction_sha256": "cc693b7ec1b932e96e9c493f63768e71622b60961be53cc1c10ade0353ec4613",
+  "prediction_shape": [
+    1024
+  ],
+  "schema": "arc-whest.compact-k4-arm-label-free-gate.v1",
+  "scope": "label-free canonical local lifecycle with residual cap disabled; not server residual or accuracy evidence",
+  "source_binding": {
+    "closing_candidate_sha256": "08fa7f7f39c49c622132bdd22a4d862db702fae5deb6d8b88b679b1e24d652c7",
+    "exact_registered_regeneration": true,
+    "generator": {
+      "path": "local_sim/p2_build_k4_arms.py",
+      "sha256": "9f6d1952e4b6b9f3fa3888af54379ee886ed172bc7f97c465b5a9dce64737b96"
+    },
+    "lifecycle_candidate_sha256": "08fa7f7f39c49c622132bdd22a4d862db702fae5deb6d8b88b679b1e24d652c7",
+    "template": {
+      "path": "local_sim/p2_compact_candidate_template.py",
+      "sha256": "6cba4c6a89c79d9b3cfc7e3444bb5448cd0ce672536c207ea34235ed6782d939"
+    }
+  }
+}

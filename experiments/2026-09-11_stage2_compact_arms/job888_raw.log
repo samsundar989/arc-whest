@@ -1,0 +1,148 @@
+﻿worker-q: job #72 starting at 2026-09-11T23:11:29.626971+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000888
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['uv', 'run', 'python', 'local_sim/p2_compact_reference.py', '--meter', '--width', '1024', '--depth', '16', '--recent', '4', '--rank', '384', '--residual-rank', '16', '--consumers', '1', '--births', '1', '--lam', '0.3333333333333333', '--json', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-11_stage2_compact_arms/coherent_reference_live.json']
+worker-q: ------------------------------------------------------------
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000888\local_sim\p2_compact_reference.py:745: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  lambda: flops.stats.norm.pdf(alpha))
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000888\local_sim\p2_compact_reference.py:748: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  lambda: flops.stats.norm.cdf(alpha))
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000888\local_sim\p2_compact_reference.py:759: SymmetryLossWarning: Symmetry lost along dims (0, 1): subtract — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  lambda: C_pre - fnp.diag(var_pre))
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000888\local_sim\p2_compact_reference.py:816: SymmetryLossWarning: Symmetry lost along dims (0, 1): multiply — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  D21_total * (w2now[:, None] * w1[None, :])
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000888\local_sim\p2_compact_reference.py:817: SymmetryLossWarning: Symmetry lost along dims (1, 0): multiply — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  + D21_total.T * (w1[:, None] * w2now[None, :])))
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000888\local_sim\p2_compact_reference.py:827: SymmetryLossWarning: Symmetry lost along dims (0, 1): multiply — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  lambda: fnp.diag(var_out) + K11 * off_mask)
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000888\local_sim\p2_compact_reference.py:827: SymmetryLossWarning: Symmetry lost along dims (0, 1): add — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  lambda: fnp.diag(var_out) + K11 * off_mask)
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000888\local_sim\p2_compact_reference.py:847: SymmetryLossWarning: Symmetry lost along dims (0, 1): multiply — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  ((k4v[:, None] + k4v[None, :]) / 6.0
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000888\local_sim\p2_compact_reference.py:871: SymmetryLossWarning: Symmetry lost along dims (0, 1): multiply — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  (w1[:, None] * w1[:, None]) * D21_total * w1[None, :]))
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000888\local_sim\p2_compact_reference.py:713: SymmetryLossWarning: Symmetry lost along dims (0, 1): add — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  lambda: D21_total + d21part)
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000888\local_sim\p2_compact_reference.py:601: SymmetryLossWarning: Symmetry lost along dims (0, 1): add — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  Sg = meter.run("carried_gram_add", lambda: Sg + Sj)
+C:\Users\samsu\Documents\arc-whest\.gpuq-work\job-000888\local_sim\p2_compact_reference.py:720: SymmetryLossWarning: Symmetry lost along dims (0, 1): add — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  residual + ((PP @ L) @ Z.T) / 3.0
+metered 818494496296 FLOPs (0.372208 B), 10052 operations
+  D21_coord_init                                  0
+  D21_residual                           3920773120
+  D21_residual_init                               0
+  D21_shared_coords                     88583700480
+  D21_shared_return                      8053063680
+  D21_young                            218260275200
+  D3_contraction                          755097600
+  backbone_cov_assemble                    31472640
+  backbone_cov_delta2                     110100480
+  backbone_cov_init                            1024
+  backbone_cov_linear_left              34342961152
+  backbone_cov_linear_right             34342961152
+  backbone_cov_offdiag                     16793600
+  backbone_mean_init                              0
+  backbone_mean_linear                     33538048
+  backbone_off_mask                        23616000
+  backbone_variance_extract                       0
+  backbone_wick_init                           1024
+  carried_gram_add                          1474560
+  carried_gram_init                               0
+  carried_gram_update                    6046187520
+  cast_Phi_f32                                32768
+  cast_phi_f32                                32768
+  cast_weight_f32                          16777216
+  factor_rotation_matrix                 2716581888
+  history_D21_add                          62914560
+  history_D21_init                                0
+  history_D3_add                             122880
+  history_D3_init                                 0
+  joiner_wick_A                            10485760
+  joiner_wick_P                            10485760
+  k3_consumer_cov                         110100480
+  k4_birth_D21                            125844480
+  k4_birth_D3                                 46080
+  k4_birth_c1                                 15360
+  k4_birth_dgw                                15360
+  k4_birth_u                                  15360
+  k4_birth_w1sq                               15360
+  k4_birth_y                                  15360
+  k4_consumer_D22                          33554432
+  k4_consumer_D31                          16777216
+  k4_consumer_D4                              16384
+  k4_consumer_cov                         141557760
+  k4_old_variance                                 0
+  k4_project_K22                           94371840
+  k4_project_core                             61440
+  k4_project_trace                         15728640
+  k4_transport_core                        31503360
+  k4_transport_initial                            0
+  k4_transport_square                      15728640
+  materialize_AP                          125829120
+  materialize_LA                          503316480
+  materialize_LP                          755097600
+  materialize_MP                          754974720
+  materialize_PP                          125829120
+  materialize_k4_birth_LP                 629268480
+  materialize_k4_birth_R                  503193600
+  materialize_residual_M                 3900702720
+  materialize_shared_A                  52276756480
+  materialize_shared_P                  52276756480
+  nonlinear_Phi                             1572864
+  nonlinear_alpha                             16384
+  nonlinear_gaussian_e2                       92160
+  nonlinear_gaussian_e3                      199680
+  nonlinear_gaussian_e4                      721920
+  nonlinear_gaussian_k3                      107520
+  nonlinear_gaussian_k4                      660480
+  nonlinear_gaussian_mean                     49152
+  nonlinear_gaussian_var                      46080
+  nonlinear_mean_add                          32768
+  nonlinear_mean_k3                           32768
+  nonlinear_mean_k4                           32768
+  nonlinear_phi                              884736
+  nonlinear_safe_variance                     16384
+  nonlinear_sigma                             16384
+  nonlinear_w2                                16384
+  nonlinear_w3                                49152
+  nonlinear_w4                                81920
+  output_stack                                16384
+  project_joiner_A                       8049131520
+  project_joiner_P                       8049131520
+  rotate_carried_gram                    2035777536
+  rotate_factor_A                       13571850240
+  rotate_factor_P                       13571850240
+  shared_wick_Q                             3538944
+  source_K21_closure                       31457280
+  source_L_alias                                  0
+  source_R_scale                             245760
+  source_a                                 15728640
+  source_dA                                   76800
+  source_dP                                   30720
+  source_e                                    46080
+  source_insert_A                       32196526080
+  source_insert_P_copy                     15728640
+  source_insert_Z                         503070720
+  source_insert_k4_birth_Y                 31441920
+  source_local_K21                         94433280
+  source_repeated_K21                      62914560
+  source_residual                          31457280
+  source_residual_power                  1006141440
+  source_residual_project                 503070720
+  source_residual_qr1                      15646740
+  source_residual_qr2                      15646740
+  source_residual_sketch                  503070720
+  source_s                                   291840
+  source_separable_K21                     31457280
+  source_transport_K21                     31472640
+  thin_qr                                5284823040
+  transport_k4_birth_Y                    220200960
+  transport_residual_Z                   3523215360
+  transport_shared_Q                     8854437888
+  transport_young_A                     85899345920
+  transport_young_P                     85899345920
+  weighted_gram_sketch                  38660702208
+family/context parity: True
+worker-q: ------------------------------------------------------------
+worker-q: job #72 SUCCEEDED (exit code 0) at 2026-09-11T23:11:41.138561+00:00

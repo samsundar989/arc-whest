@@ -42682,3 +42682,48 @@ compressed-state errors are at most `1.52e-6`, with exact source ages. The 6/6
 reference suite, 92/92 producer/verifier suite and all four official validation
 calls pass again. Real-shape jobs and current preflight must be rerun on these new
 bytes before a Skeptic can accept the label-free gate. P07 remains closed.
+
+### Repaired real-shape compact gate and current-byte preflight
+
+Workerq jobs 884--888 reran the repaired label-free gate at width 1024, depth 16,
+4 GiB RAM, 2 CPUs and no GPU per job. All four arms and the current independent
+reference completed. Every arm binds exact regenerated candidate bytes to the
+lifecycle and closing hashes, reconciles every operation-group FLOP and call,
+reports `labels_read=false`, and has no budget, wall, residual, combined or generic
+exception flag. Their executed ledgers are:
+
+| arm | FLOPs | fraction of `2**41` | operations |
+|---|---:|---:|---:|
+| compact exact | 816,292,940,328 | 0.371207 | 6,857 |
+| coherent | 818,515,845,672 | 0.372218 | 10,095 |
+| consumers only | 816,643,753,512 | 0.371367 | 7,935 |
+| births only | 818,276,346,408 | 0.372109 | 9,678 |
+
+The independent coherent reference executed 818,494,496,296 FLOPs and 10,052
+operations. The generated coherent module's exact difference is +21,349,376 FLOPs
+and +43 operations, fully accounted by the grader-facing exact float64 first row,
+output stack/cast, finite replacement and nonnegative clamp. The reference's array
+payload model is 345,587,712 bytes at peak and 4,194,304 bytes for its largest
+single array.
+
+Workerq measured the current exact arm at 1,079.0 MiB peak. Concurrent dispatcher
+jobs 885--888 returned null outer peak telemetry, so they are not described as
+individual measured-memory passes. The pre-audit diagnostics measured the same
+allocation architecture at 1,211.5 MiB for coherent and 1,033.5 MiB for consumers
+only; the later repairs changed byte locking, tests and multiplication-versus-
+division spelling, not candidate allocation shapes. All current arms completed
+with 4 GiB declarations. This is strong accounting and diagnostic evidence that
+4 GiB is sufficient, with the missing per-job telemetry preserved as a limitation
+for the Skeptic rather than silently filled in.
+
+The first current preflight attempt, job 889, used a git snapshot that normalized
+tracked line endings. It correctly failed seed-artifact and official-anchor byte
+hashes and is negative provenance evidence, not a source failure. Job 890 reran
+the unchanged working bytes with `--no-snapshot`, high priority, 5 GiB RAM and 2
+CPUs. It succeeded in 384.7 seconds at 3,328.4 MiB measured peak with
+`PREFLIGHT GREEN -- 12/16, 4 SKIPPED`. The four Full-only deployment steps remain
+open and no server-residual claim is made. Raw arm/reference JSON, queue logs,
+manifests, metadata and the exact summary are under
+`experiments/2026-09-11_stage2_compact_arms/`; the aggregate entry point is
+`acceptance_summary.json`. P07 remains closed pending the required fresh-context
+Skeptic verdict on this label-free package.

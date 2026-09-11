@@ -11,5 +11,9 @@ cancelled-after-write artifact. None of these jobs satisfies the compact-arm
 acceptance gate.
 
 `gate_conformance.json` is the tiny truth-free positive/refusal suite for the
-repaired gate. Accepted real-shape artifacts and their workerq records are added
-only after rerunning from the repaired committed source.
+repaired gate. Jobs 884--888 are the repaired real-shape arm/reference runs.
+Job 889 is preserved negative evidence: its git snapshot normalized tracked line
+endings, so the source/artifact hashes correctly failed. Job 890 reran the default
+preflight against the actual live working bytes and passed 12/16 with the four
+Full-only deployment steps skipped. `acceptance_summary.json` binds the results,
+source hashes and the explicit worker telemetry limitation.
