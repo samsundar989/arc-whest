@@ -443,6 +443,34 @@ def run_checks():
               "refused=%s receipt=%s" %
               (refused, os.path.exists(request.receipt)))
 
+    with _temp("p2-k4-fit-registry-closing-race-") as root:
+        a, _ = _fixture(root)
+        request = _verify_args(a, os.path.join(root, "must-not-verify.json"))
+        original_sha = fit._sha256
+        mutated = [False]
+        def mutate_registry_after_its_closing_read(path):
+            result = original_sha(path)
+            if (not mutated[0] and
+                    os.path.normcase(os.path.abspath(path)) ==
+                    os.path.normcase(os.path.abspath(a.candidates))):
+                with open(a.candidates, "a", encoding="utf-8") as fh:
+                    fh.write("\n")
+                mutated[0] = True
+            return result
+        fit._sha256 = mutate_registry_after_its_closing_read
+        try:
+            try:
+                fit.verify(request)
+                refused = False
+            except fit.FitRefused as exc:
+                refused = "candidate registry changed" in str(exc)
+        finally:
+            fit._sha256 = original_sha
+        check("verifier stable scan catches registry changed during closing scan",
+              refused and mutated[0] and not os.path.exists(request.receipt),
+              "refused=%s receipt=%s" %
+              (refused, os.path.exists(request.receipt)))
+
     with _temp("p2-k4-fit-source-hash-") as root:
         a, _ = _fixture(root)
         _rewrite_npz(a.predictions, lambda d: d.__setitem__("candidate_source_hashes",
@@ -1078,6 +1106,47 @@ def run_checks():
               "refused=%s provenance=%r" %
               (refused, diagnostic["lifecycle_provenance"]))
 
+    with _temp("p2-k4-producer-bool-provenance-") as root:
+        candidates = os.path.join(root, "candidates.json")
+        bounds = os.path.join(root, "bounds.json")
+        identities = os.path.join(root, "identities.json")
+        out_dir = os.path.join(root, "observations")
+        _write_json(candidates, {"parameters": ["lam"],
+                    "candidates": [{"lam": 0.0}]})
+        _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
+        _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
+                    "depth": 2,
+                    "identities": [{"id": "bool-prov", "seed": 7082}]})
+        original_evaluate = producer.le.evaluate
+        def boolean_identity_count(source_path, seeds, target, *, spec, gt_noise,
+                                   predictions_out):
+            rows_out, provenance = _mock_clean_evidence(
+                source_path, seeds, target, spec, predictions_out)
+            provenance["n_mlps"] = True
+            return rows_out, provenance
+        producer.le.evaluate = boolean_identity_count
+        try:
+            try:
+                producer.produce(Namespace(candidates=candidates, bounds=bounds,
+                                           identities=identities,
+                                           out_dir=out_dir))
+                refused = False
+            except producer.ProducerRefused as exc:
+                refused = "identity count mismatch" in str(exc)
+        finally:
+            producer.le.evaluate = original_evaluate
+        with open(os.path.join(out_dir, "failure_diagnostic.json"),
+                  encoding="utf-8") as fh:
+            diagnostic = json.load(fh)
+        check("boolean lifecycle identity count cannot equal integer one",
+              (refused and diagnostic["lifecycle_provenance"]["n_mlps"] is True
+               and not os.path.exists(os.path.join(out_dir, "predictions.npz"))
+               and not os.path.exists(os.path.join(out_dir,
+                                                   "producer_receipt.json"))),
+              "refused=%s type=%s" %
+              (refused, type(diagnostic["lifecycle_provenance"]
+                             ["n_mlps"]).__name__))
+
     with _temp("p2-k4-producer-prior-source-race-") as root:
         candidates = os.path.join(root, "candidates.json")
         bounds = os.path.join(root, "bounds.json")
@@ -1110,7 +1179,7 @@ def run_checks():
                                            out_dir=out_dir))
                 refused = False
             except producer.ProducerRefused as exc:
-                refused = "candidate source bytes changed" in str(exc)
+                refused = "candidate bytes changed" in str(exc)
         finally:
             producer.le.evaluate = original_evaluate
         with open(os.path.join(out_dir, "failure_diagnostic.json"),
@@ -1118,7 +1187,7 @@ def run_checks():
             diagnostic = json.load(fh)
         check("producer closing recheck catches prior candidate source mutation",
               (refused and diagnostic["failure_stage"] ==
-               "source_changed_before_success_write"
+               "dependency_changed_before_success_write"
                and diagnostic["candidate_index"] == 0
                and not diagnostic["candidate_source"]
                    ["unchanged_after_evaluation"]
@@ -1127,6 +1196,57 @@ def run_checks():
                                                    "producer_receipt.json"))),
               "refused=%s current_match=%s" %
               (refused, diagnostic["candidate_source"]
+               ["unchanged_after_evaluation"]))
+
+    with _temp("p2-k4-producer-registry-closing-race-") as root:
+        candidates = os.path.join(root, "candidates.json")
+        bounds = os.path.join(root, "bounds.json")
+        identities = os.path.join(root, "identities.json")
+        out_dir = os.path.join(root, "observations")
+        _write_json(candidates, {"parameters": ["lam"],
+                    "candidates": [{"lam": 0.0}]})
+        _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
+        _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
+                    "depth": 2,
+                    "identities": [{"id": "registry-race", "seed": 7092}]})
+        original_evaluate = producer.le.evaluate
+        original_observed = producer._observed_binding
+        mutated = [False]
+        producer.le.evaluate = lambda source_path, seeds, target, *, spec, gt_noise, predictions_out: _mock_clean_evidence(source_path, seeds, target, spec, predictions_out)
+        def mutate_registry_during_source_scan(path, frozen_sha256):
+            result = original_observed(path, frozen_sha256)
+            if (not mutated[0] and
+                    os.path.basename(path) == "candidate_000_coherent.py"):
+                with open(candidates, "a", encoding="utf-8") as fh:
+                    fh.write("\n")
+                mutated[0] = True
+            return result
+        producer._observed_binding = mutate_registry_during_source_scan
+        try:
+            try:
+                producer.produce(Namespace(candidates=candidates, bounds=bounds,
+                                           identities=identities,
+                                           out_dir=out_dir))
+                refused = False
+            except producer.ProducerRefused as exc:
+                refused = "input:candidates bytes changed" in str(exc)
+        finally:
+            producer.le.evaluate = original_evaluate
+            producer._observed_binding = original_observed
+        with open(os.path.join(out_dir, "failure_diagnostic.json"),
+                  encoding="utf-8") as fh:
+            diagnostic = json.load(fh)
+        check("producer stable scan catches registry changed during source scan",
+              (refused and mutated[0]
+               and diagnostic["failure_stage"] ==
+                   "dependency_changed_before_success_write"
+               and not diagnostic["inputs"]["candidates"]
+                   ["unchanged_after_evaluation"]
+               and not os.path.exists(os.path.join(out_dir, "predictions.npz"))
+               and not os.path.exists(os.path.join(out_dir,
+                                                   "producer_receipt.json"))),
+              "refused=%s input_match=%s" %
+              (refused, diagnostic["inputs"]["candidates"]
                ["unchanged_after_evaluation"]))
     return {"kind": "synthetic coherent-K4 producer-selector conformance", "labels_read": False,
             "checks": rows, "n_checks": len(rows), "n_failed": sum(not x["pass"] for x in rows),

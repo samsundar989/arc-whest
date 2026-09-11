@@ -607,25 +607,39 @@ def _closing_revalidate(a, validated):
         (a.bounds, validated["registry_hashes"]["bounds"], "bounds"),
         (a.identities, validated["identities_sha256"], "identity registry"),
     )
-    for path, expected, label in inputs:
-        actual = observed_sha(path, label)
-        if actual != expected:
-            raise FitRefused("%s changed before closing revalidation" % label)
-    for i, source in enumerate(validated["candidate_sources"]):
-        path = _repo_path(source["path"], "candidate source %d" % i)
-        if observed_sha(path, "candidate source %d" % i) != source["sha256"]:
-            raise FitRefused(
-                "candidate source %d changed before closing revalidation" % i)
-    for label, source in validated["source_hashes"].items():
-        path = _repo_path(source["path"], "source %s" % label)
-        if observed_sha(path, "source %s" % label) != source["sha256"]:
-            raise FitRefused("source %s changed before closing revalidation" %
-                             label)
-    upstream = os.path.join(_ROOT, "estimator_k3_full.py")
-    expected_upstream = validated["producer_manifest"]["generator"][
-        "upstream_source_sha256"]
-    if observed_sha(upstream, "upstream source") != expected_upstream:
-        raise FitRefused("upstream source changed before closing revalidation")
+    for _ in range(2):
+        for path, expected, label in inputs:
+            actual = observed_sha(path, label)
+            if actual != expected:
+                raise FitRefused("%s changed before closing revalidation" % label)
+        for i, source in enumerate(validated["candidate_sources"]):
+            path = _repo_path(source["path"], "candidate source %d" % i)
+            if observed_sha(path, "candidate source %d" % i) != source["sha256"]:
+                raise FitRefused(
+                    "candidate source %d changed before closing revalidation" % i)
+        for label, source in validated["source_hashes"].items():
+            path = _repo_path(source["path"], "source %s" % label)
+            if observed_sha(path, "source %s" % label) != source["sha256"]:
+                raise FitRefused("source %s changed before closing revalidation" %
+                                 label)
+        upstream = os.path.join(_ROOT, "estimator_k3_full.py")
+        expected_upstream = validated["producer_manifest"]["generator"][
+            "upstream_source_sha256"]
+        if observed_sha(upstream, "upstream source") != expected_upstream:
+            raise FitRefused("upstream source changed before closing revalidation")
+
+
+def _write_revalidated_receipt(a, validated, payload):
+    _closing_revalidate(a, validated)
+    _write_receipt(a.receipt, payload)
+    try:
+        _closing_revalidate(a, validated)
+    except Exception:
+        try:
+            os.remove(a.receipt)
+        except FileNotFoundError:
+            pass
+        raise
 
 
 def verify(a):
@@ -666,8 +680,7 @@ def verify(a):
             "truth_arguments_accepted": False,
         },
     }
-    _closing_revalidate(a, validated)
-    _write_receipt(a.receipt, receipt)
+    _write_revalidated_receipt(a, validated, receipt)
     return receipt
 
 
@@ -737,9 +750,8 @@ def fit(a, truth_loader=_load_truth):
                        "candidate_count": len(objective),
                        "identity_count": len(truth_ids),
                        "all_finite": True}}
-    _closing_revalidate(a, validated)
     # Exclusive creation is the immutability guarantee, including concurrent runs.
-    _write_receipt(a.receipt, receipt)
+    _write_revalidated_receipt(a, validated, receipt)
     return receipt
 
 

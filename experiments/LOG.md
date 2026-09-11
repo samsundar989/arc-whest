@@ -42311,3 +42311,27 @@ refusal, and exact fixtures cover the two Skeptic attacks. The complete suite
 passes **85/85**; compilation and `git diff --check` pass. An eighth
 fresh-context Skeptic and a final current-source preflight remain required
 before the one-row discriminator.
+
+The next usable fresh Skeptic returned **REJECT** (the immediately preceding
+fresh-context launch was interrupted by its platform before producing a verdict).
+Its deterministic counterexample set `n_mlps=true` in otherwise complete
+one-identity lifecycle provenance. Python value equality made that boolean equal
+integer one, so both producer and standalone verifier wrote success receipts.
+It also moved a registry after that registry's first closing read but while later
+sources were still being checked, exposing that one sequential pass was not a
+stable whole-package boundary. No protected truth was opened. The Skeptic also
+independently reproduced job 824's exact generated source hash and its retained
+2,588.238 MiB peak-RAM record.
+
+Lifecycle provenance now requires `n_mlps` to have exact integer type and requires
+every lifecycle-spec field to match both canonical value and Python type. Row
+width/depth/budget bindings likewise reject boolean or type-confused values. The
+producer and selector now require two complete dependency scans at each closing
+boundary, so a change made after an earlier file's read is found on the next pass.
+Both recheck after writing; an invalid just-created success/verification artifact
+is removed before refusal, and the producer preserves an exclusive diagnostic.
+Exact fixtures cover boolean provenance, registry mutation during a later source
+scan, prior-candidate source mutation, and selector mutation during provenance or
+closing validation. The complete suite passes **88/88**; compilation and
+`git diff --check` pass. Another fresh-context Skeptic and final current-source
+preflight remain required before the registered discriminator.

@@ -233,9 +233,14 @@ def _provenance_problem(provenance, *, spec, expected_path, source_hash,
         return "provenance candidate hash mismatch"
     if provenance["truth_sha256"] != truth_sha256:
         return "provenance target hash mismatch"
-    if provenance["n_mlps"] != n_mlps:
+    if type(provenance["n_mlps"]) is not int or provenance["n_mlps"] != n_mlps:
         return "provenance identity count mismatch"
-    if provenance["spec"] != dataclasses.asdict(spec):
+    expected_spec = dataclasses.asdict(spec)
+    if (not isinstance(provenance["spec"], dict) or
+            set(provenance["spec"]) != set(expected_spec) or
+            any(type(provenance["spec"][key]) is not type(value) or
+                provenance["spec"][key] != value
+                for key, value in expected_spec.items())):
         return "provenance lifecycle spec mismatch"
     if (provenance["round_tag"] != spec.round_tag or
             provenance["round_deviations"] != spec.deviations_from_round()):
@@ -302,13 +307,14 @@ def _input_evidence_problem(a, input_hashes):
     return ""
 
 
-def _closing_source_problem(source_paths, source_hashes, producer_binding,
-                            generator_binding):
-    """Re-observe every executable byte dependency at the write boundary."""
-    for i, (path, frozen_sha256) in enumerate(zip(source_paths, source_hashes)):
-        observed = _observed_binding(path, frozen_sha256)
-        if not observed["unchanged_after_evaluation"]:
-            return "candidate", i
+def _closing_dependency_problem(a, input_hashes, source_paths, source_hashes,
+                                producer_binding, generator_binding):
+    """Require two stable whole-package scans at the write boundary."""
+    inputs = (
+        ("candidates", a.candidates, input_hashes["candidates_sha256"]),
+        ("bounds", a.bounds, input_hashes["bounds_sha256"]),
+        ("identities", a.identities, input_hashes["identities_sha256"]),
+    )
     static_sources = (
         ("producer", os.path.join(_ROOT, producer_binding["path"]),
          producer_binding["sha256"]),
@@ -317,10 +323,20 @@ def _closing_source_problem(source_paths, source_hashes, producer_binding,
         ("upstream", builder.SOURCE,
          generator_binding["upstream_source_sha256"]),
     )
-    for label, path, frozen_sha256 in static_sources:
-        observed = _observed_binding(path, frozen_sha256)
-        if not observed["unchanged_after_evaluation"]:
-            return label, None
+    for _ in range(2):
+        for label, path, frozen_sha256 in inputs:
+            observed = _observed_binding(path, frozen_sha256)
+            if not observed["unchanged_after_evaluation"]:
+                return "input:" + label, None
+        for i, (path, frozen_sha256) in enumerate(
+                zip(source_paths, source_hashes)):
+            observed = _observed_binding(path, frozen_sha256)
+            if not observed["unchanged_after_evaluation"]:
+                return "candidate", i
+        for label, path, frozen_sha256 in static_sources:
+            observed = _observed_binding(path, frozen_sha256)
+            if not observed["unchanged_after_evaluation"]:
+                return label, None
     return "", None
 
 
@@ -354,7 +370,10 @@ def _lifecycle_evidence_problem(rows, predictions, provenance, seeds, spec,
             return "row %d candidate binding mismatch" % i
         if row.truth_sha256 != expected_truth_sha or row.gt_noise != 0.0:
             return "row %d target/noise binding mismatch" % i
-        if ((row.width, row.depth) != (spec.width, spec.depth) or
+        if (type(row.width) is not int or type(row.depth) is not int or
+                (row.width, row.depth) != (spec.width, spec.depth) or
+                not isinstance(row.budget, (int, float)) or
+                isinstance(row.budget, bool) or
                 row.budget != float(spec.flop_budget)):
             return "row %d lifecycle binding mismatch" % i
         if (not _nonnegative_integer_measure(row.flops_used) or
@@ -552,27 +571,9 @@ def produce(a):
     costs = np.asarray(all_costs, dtype=np.int64)
     if not np.array_equal(costs, np.repeat(costs[:1], len(candidates), axis=0)):
         raise ProducerRefused("coefficient candidates unexpectedly changed counted cost")
-    input_bindings = {
-        name: _observed_binding(path, input_hashes[name + "_sha256"])
-        for name, path in (("candidates", a.candidates), ("bounds", a.bounds),
-                           ("identities", a.identities))}
-    if not all(item["unchanged_after_evaluation"]
-               for item in input_bindings.values()):
-        diagnostic = _write_failure_diagnostic(
-            a, candidate_index=i, candidate=candidate,
-            source_path=source_path, source_hash=source_hash,
-            rows=rows, provenance=provenance, predictions=predictions,
-            identity_manifest=identity_manifest, width=width, depth=depth,
-            spec=spec, input_hashes=input_hashes,
-            producer_binding=producer_binding,
-            generator_binding=generator_binding,
-            failure_stage="input_changed_before_success_write")
-        raise ProducerRefused(
-            "input registry bytes changed before success write; diagnostic: %s" %
-            diagnostic)
-    changed_label, changed_index = _closing_source_problem(
-        absolute_source_paths, source_hashes, producer_binding,
-        generator_binding)
+    changed_label, changed_index = _closing_dependency_problem(
+        a, input_hashes, absolute_source_paths, source_hashes,
+        producer_binding, generator_binding)
     if changed_label:
         diagnostic_index = (changed_index if changed_index is not None
                             else len(candidates) - 1)
@@ -588,10 +589,21 @@ def produce(a):
             spec=spec, input_hashes=input_hashes,
             producer_binding=producer_binding,
             generator_binding=generator_binding,
-            failure_stage="source_changed_before_success_write")
+            failure_stage="dependency_changed_before_success_write")
         raise ProducerRefused(
-            "%s source bytes changed before success write; diagnostic: %s" %
+            "%s bytes changed before success write; diagnostic: %s" %
             (changed_label, diagnostic))
+    input_bindings = {
+        name: {
+            "path": os.path.relpath(os.path.abspath(path), _ROOT).replace(
+                "\\", "/"),
+            "frozen_sha256": input_hashes[name + "_sha256"],
+            "current_sha256": input_hashes[name + "_sha256"],
+            "unchanged_after_evaluation": True,
+            "observation_error": "",
+        }
+        for name, path in (("candidates", a.candidates), ("bounds", a.bounds),
+                           ("identities", a.identities))}
     manifest = {
         "kind": "coherent-K4 canonical-lifecycle observations-v1",
         "identity_role": identity_manifest["kind"],
@@ -631,6 +643,34 @@ def produce(a):
               encoding="utf-8", newline="\n") as fh:
         json.dump(result, fh, indent=2, sort_keys=True)
         fh.write("\n")
+    changed_label, changed_index = _closing_dependency_problem(
+        a, input_hashes, absolute_source_paths, source_hashes,
+        producer_binding, generator_binding)
+    if changed_label:
+        receipt_path = os.path.join(a.out_dir, "producer_receipt.json")
+        for invalid_path in (receipt_path, output):
+            try:
+                os.remove(invalid_path)
+            except FileNotFoundError:
+                pass
+        diagnostic_index = (changed_index if changed_index is not None
+                            else len(candidates) - 1)
+        diagnostic = _write_failure_diagnostic(
+            a, candidate_index=diagnostic_index,
+            candidate=candidates[diagnostic_index],
+            source_path=absolute_source_paths[diagnostic_index],
+            source_hash=source_hashes[diagnostic_index],
+            rows=all_rows[diagnostic_index],
+            provenance=lifecycle_provenance[diagnostic_index],
+            predictions=raw_predictions[diagnostic_index],
+            identity_manifest=identity_manifest, width=width, depth=depth,
+            spec=spec, input_hashes=input_hashes,
+            producer_binding=producer_binding,
+            generator_binding=generator_binding,
+            failure_stage="dependency_changed_during_success_write")
+        raise ProducerRefused(
+            "%s bytes changed during success write; diagnostic: %s" %
+            (changed_label, diagnostic))
     return result
 
 
