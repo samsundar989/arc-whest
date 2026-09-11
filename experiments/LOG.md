@@ -42030,3 +42030,41 @@ reserved 46 GiB of the 53.6 GiB usable worker pool. This is deliberate admission
 control, not completion. On success, the next action is standalone `--verify-only`
 against its immutable predictions and producer receipt; only then may the registered
 P07 truth access occur.
+
+## 2026-09-11 - Stage-2 label-free producer job 824 failed without diagnostic rows
+
+Workerq **824** eventually started and terminated FAILED with exit code 2 after
+2,214.0 seconds. It used 2,588.2 MiB peak host RAM against its 12 GiB declaration,
+so RAM was not the failure. The producer generated only
+`p07_candidate_observations/candidate_000_coherent.py`, evaluated coefficient index
+0 across the exact 384 P07 identities, then printed only `REFUSED: candidate 0
+failed canonical lifecycle`. It wrote no predictions archive or producer receipt.
+No labels or protected truth were opened. Raw worker metadata, manifest and log are
+preserved beside the registered Stage-2 artifacts.
+
+This is **not** a K4 accuracy result or a scientific kill. The current producer
+collapses all row-level failure modes into one refusal after the full lifecycle call,
+so the evidence does not yet distinguish counted-budget exhaustion, 120-second wall
+failure, an estimator exception, or another lifecycle flag. The partial output is
+preserved and will not be relabeled as a completed producer.
+
+### IMPORTANT diagnostic/producer repair contract
+
+**Question and prediction.** Which exact canonical-lifecycle row flags caused job
+824 to refuse, and can the producer preserve enough immutable failure evidence to
+classify a failed run without weakening the registered evaluation? Samuel's standing
+prediction is **"I don't know"**. The Builder tentatively predicts deterministic
+counted-budget exhaustion because the run completed all 384 rows at roughly six
+seconds per identity, but this is SPECULATIVE until row evidence exists.
+
+**Intervention and gate.** First use code inspection and the partial generated source
+to find any existing recoverable evidence. If none exists, make the smallest
+truth-free instrument change so a failed candidate exclusively writes a diagnostic
+receipt containing candidate/source/registry hashes and, for every evaluated row,
+identity, counted FLOPs, operation count and every lifecycle failure flag/error code.
+It must never write a success receipt or predictions archive for an incomplete arm,
+must preserve the exact candidate order, identities, lifecycle spec and source bytes,
+and must not access labels. Add positive and deliberately failing tiny fixtures,
+run current preflight, and obtain a fresh Skeptic before one bounded workerq
+discriminator. Any changed candidate math, registry, lifecycle, swallowed failure,
+overwritten partial output, missing provenance or truth access falsifies the repair.
