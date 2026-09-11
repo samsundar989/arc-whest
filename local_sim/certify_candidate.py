@@ -99,6 +99,27 @@ EDGE_GROUP_REGISTRY = (
     ("gt_noise", 1),
 )
 EDGE_GROUP_RECEIPT_VERSION = 1
+EDGE_CASE_COUNTS = (
+    ("normal", 1), ("degenerate", 3), ("dynamic_range", 4),
+    ("seed_extremes", 5), ("shape_generality", 5), ("budget_edges", 5),
+    ("immutability", 1), ("layer1", 4), ("permutation", 4),
+    ("budget_monotone", 10), ("determinism", 1), ("seed_hygiene", 1),
+    ("gt_noise", 1),
+)
+EDGE_CASE_REGISTRY = tuple(
+    ("%s:%d" % (group, index), group, index)
+    for group, count in EDGE_CASE_COUNTS for index in range(count)
+)
+EDGE_CASE_RECEIPT_VERSION = 1
+EDGE_BUDGET_LADDER = (0, 1, 10**6, 10**7, 10**8, 10**9, 10**10,
+                      27_200_000_000, 272_000_000_000,
+                      2_720_000_000_000)
+EDGE_PERMUTATION_CASES = (
+    (DEPTH, WIDTH, 30_806_006_011, 7),
+    (DEPTH, WIDTH, 30_806_006_012, 20),
+    (8, 128, 30_806_006_013, 3),
+    (DEPTH, WIDTH, 30_806_006_014, 30),
+)
 
 _FAILED = []
 _SKIPPED = []
@@ -271,6 +292,50 @@ def _is_sha256(value):
             and all(c in "0123456789abcdef" for c in value))
 
 
+def _effective_permutation_bar():
+    """Independently derive the worker's effective invariant-9 threshold."""
+    raw = os.environ.get("ARC_WHEST_RAW_MSE")
+    decision_mse = 1.4e-6
+    if not raw:
+        return raw, decision_mse, 0.01 * decision_mse, "frozen decision signal"
+    try:
+        value = float(raw)
+    except ValueError:
+        return (raw, decision_mse, 0.01 * decision_mse,
+                "frozen decision signal (ARC_WHEST_RAW_MSE unparseable)")
+    if not (value > 0.0):
+        return (raw, decision_mse, 0.01 * decision_mse,
+                "frozen decision signal (ARC_WHEST_RAW_MSE non-positive)")
+    if value >= decision_mse:
+        return (raw, decision_mse, 0.01 * decision_mse,
+                "frozen decision signal (override %.4e would loosen; clamped)"
+                % value)
+    return raw, value, 0.01 * value, "candidate raw MSE %.4e" % value
+
+
+def _expected_permutation_details(case_index):
+    """Reconstruct a permutation case without trusting the worker receipt."""
+    rng = np.random.default_rng(30_806_006_100)
+    permutation = None
+    for index, (_depth, width, _seed, _k) in enumerate(
+            EDGE_PERMUTATION_CASES):
+        permutation = rng.permutation(width)
+        if index == case_index:
+            break
+    depth, width, seed, k = EDGE_PERMUTATION_CASES[case_index]
+    if depth != 32:
+        k = max(1, min(depth - 2, int(round(k * depth / 32.0))))
+    raw, denom, bar, source = _effective_permutation_bar()
+    return {
+        "case_index": case_index, "depth": depth, "width": width,
+        "seed": seed, "layer": k,
+        "permutation_sha256": hashlib.sha256(
+            np.asarray(permutation, dtype="<i8").tobytes()).hexdigest(),
+        "raw_mse_env": raw, "denom": denom, "bar": bar,
+        "denom_source": source,
+    }
+
+
 def validate_edge_group_receipt(payload, *, group, expected_count,
                                 candidate, candidate_sha256,
                                 edge_cases_sha256, weights_mode):
@@ -351,6 +416,167 @@ def validate_edge_group_receipt(payload, *, group, expected_count,
     elif results is not None and all_passed != all(results):
         errors.append("all_passed differs from results")
     return errors
+
+
+def validate_edge_case_receipt(payload, *, case, group, case_index,
+                               candidate, candidate_sha256,
+                               edge_cases_sha256, weights_mode):
+    """Strictly validate one atomic edge-case worker receipt."""
+    errors = []
+    if not isinstance(payload, dict):
+        return ["receipt is not a JSON object"]
+    expected_keys = {
+        "artifact", "artifact_version", "candidate",
+        "candidate_sha256_before", "candidate_sha256_after",
+        "edge_cases_sha256", "group_registry", "case_registry", "world",
+        "case", "logical_group", "case_index", "details",
+        "results", "passed", "all_passed",
+    }
+    if set(payload) != expected_keys:
+        errors.append("receipt schema differs")
+    if payload.get("artifact") != "edge_cases_case":
+        errors.append("artifact identity differs")
+    if (type(payload.get("artifact_version")) is not int
+            or payload.get("artifact_version") != EDGE_CASE_RECEIPT_VERSION):
+        errors.append("artifact version differs")
+    if payload.get("case") != case or payload.get("logical_group") != group:
+        errors.append("case identity differs")
+    if type(payload.get("case_index")) is not int or payload.get(
+            "case_index") != case_index:
+        errors.append("case index differs")
+    if payload.get("candidate") != candidate:
+        errors.append("candidate path differs")
+    for key in ("candidate_sha256_before", "candidate_sha256_after"):
+        value = payload.get(key)
+        if not _is_sha256(value) or value != candidate_sha256:
+            errors.append(key + " differs")
+    if payload.get("edge_cases_sha256") != edge_cases_sha256:
+        errors.append("edge_cases.py hash differs")
+    expected_groups = [{"group": name, "expected_result_count": count}
+                       for name, count in EDGE_GROUP_REGISTRY]
+    expected_cases = [{"case": name, "group": logical, "case_index": index}
+                      for name, logical, index in EDGE_CASE_REGISTRY]
+    groups = payload.get("group_registry")
+    groups_valid = (isinstance(groups, list) and len(groups) == len(expected_groups)
+                    and all(isinstance(row, dict)
+                            and set(row) == {"group", "expected_result_count"}
+                            and isinstance(row.get("group"), str)
+                            and type(row.get("expected_result_count")) is int
+                            for row in groups))
+    cases = payload.get("case_registry")
+    cases_valid = (isinstance(cases, list) and len(cases) == len(expected_cases)
+                   and all(isinstance(row, dict)
+                           and set(row) == {"case", "group", "case_index"}
+                           and isinstance(row.get("case"), str)
+                           and isinstance(row.get("group"), str)
+                           and type(row.get("case_index")) is int
+                           for row in cases))
+    if not groups_valid or groups != expected_groups:
+        errors.append("group registry differs")
+    if not cases_valid or cases != expected_cases:
+        errors.append("case registry differs")
+    world_errors = validate_edge_group_receipt({
+        "artifact": "edge_cases_group", "artifact_version": 1,
+        "candidate": candidate,
+        "candidate_sha256_before": candidate_sha256,
+        "candidate_sha256_after": candidate_sha256,
+        "edge_cases_sha256": edge_cases_sha256,
+        "group_registry": expected_groups,
+        "world": payload.get("world"), "group": group,
+        "expected_result_count": 1, "results": [True], "passed": 1,
+        "all_passed": True,
+    }, group=group, expected_count=1, candidate=candidate,
+        candidate_sha256=candidate_sha256, edge_cases_sha256=edge_cases_sha256,
+        weights_mode=weights_mode)
+    errors.extend("world " + error for error in world_errors
+                  if error.startswith("world"))
+    results = payload.get("results")
+    if (not isinstance(results, list) or len(results) != 1
+            or type(results[0]) is not bool):
+        errors.append("results are not one exact boolean")
+        results = None
+    details = payload.get("details")
+    if not isinstance(details, dict):
+        errors.append("details are not an object")
+    elif group == "permutation":
+        expected_details = _expected_permutation_details(case_index)
+        exact_types = {
+            "case_index": int, "depth": int, "width": int, "seed": int,
+            "layer": int, "permutation_sha256": str,
+            "denom": float, "bar": float, "denom_source": str,
+        }
+        types_ok = (set(details) == set(expected_details)
+                    and all(type(details.get(key)) is wanted
+                            for key, wanted in exact_types.items())
+                    and (details.get("raw_mse_env") is None
+                         or type(details.get("raw_mse_env")) is str))
+        if not types_ok or details != expected_details:
+            errors.append("permutation evidence differs")
+    elif group != "budget_monotone" and details != {}:
+        errors.append("unexpected case details")
+    passed = payload.get("passed")
+    if type(passed) is not int or (results is not None and passed != sum(results)):
+        errors.append("passed count differs")
+    all_passed = payload.get("all_passed")
+    if type(all_passed) is not bool or (results is not None
+                                        and all_passed != all(results)):
+        errors.append("all_passed differs")
+    return errors
+
+
+def reduce_budget_monotone_cases(cases):
+    """Reproduce ``inv_budget_monotone`` across isolated rung receipts."""
+    ok = True
+    errors = []
+    previous = -2
+    has_ladder = None
+    for row, wanted_budget in zip(cases, EDGE_BUDGET_LADDER):
+        details = row["details"]
+        log2n = details.get("log2n") if isinstance(details, dict) else None
+        numeric_log2n = (type(log2n) in (int, float))
+        valid_details = (
+            isinstance(details, dict)
+            and set(details) == {"budget", "has_ladder", "log2n",
+                                 "finite", "error"}
+            and type(details.get("budget")) is int
+            and details.get("budget") == wanted_budget
+            and type(details.get("has_ladder")) is bool
+            and type(details.get("finite")) is bool
+            and isinstance(details.get("error"), str)
+            and (log2n is None or numeric_log2n))
+        if not valid_details:
+            errors.append(row["case"] + ": budget-rung details differ")
+            ok = False
+            continue
+        if has_ladder is None:
+            has_ladder = details["has_ladder"]
+        elif details["has_ladder"] != has_ladder:
+            errors.append("budget_monotone: capability changed across rungs")
+            ok = False
+        # The original monolith continued immediately on an exception, even
+        # when _log2_samples had returned first, so that rung did not move the
+        # comparison state.
+        if details["error"]:
+            ok = False
+            continue
+        if details["has_ladder"]:
+            if not numeric_log2n:
+                errors.append(row["case"] + ": log2n is not numeric")
+                ok = False
+                continue
+            if not (log2n >= previous):
+                errors.append(row["case"] + ": sample ladder decreased")
+                ok = False
+            # This update is intentionally unconditional after a non-throwing
+            # rung. The monolith updated prev_n even when the prediction was
+            # invalid or this comparison itself failed.
+            previous = log2n
+        elif log2n is not None:
+            errors.append(row["case"] + ": unexposed ladder returned log2n")
+            ok = False
+        if not details["finite"] or not row["result"]:
+            ok = False
+    return ok, errors
 
 
 class _Ctx:
@@ -925,14 +1151,14 @@ def main() -> int:
     edge_sha = _sha(edge_path)
     edge_workers = []
     edge_errors = []
-    edge_passed = 0
-    edge_observed = 0
+    edge_case_results = {group: [] for group, _ in EDGE_GROUP_REGISTRY}
     with tempfile.TemporaryDirectory(prefix="certify_edge_groups_") as edge_tmp:
-        for edge_group, edge_expected in EDGE_GROUP_REGISTRY:
-            edge_receipt_path = os.path.join(edge_tmp, edge_group + ".json")
+        for edge_case, edge_group, edge_index in EDGE_CASE_REGISTRY:
+            edge_receipt_path = os.path.join(
+                edge_tmp, edge_case.replace(":", "_") + ".json")
             edge_argv = [rel, "--phase2", "--real-flopscope",
                          "--weights-mode", twin_mode_for_edge,
-                         "--group", edge_group,
+                         "--case", edge_case,
                          "--receipt", edge_receipt_path]
             try:
                 p = _uvpy(edge_path, *edge_argv, timeout=1800)
@@ -942,12 +1168,12 @@ def main() -> int:
                 rc = -1
                 stdout = exc.stdout or ""
                 stderr = exc.stderr or ""
-                edge_errors.append(edge_group + ": worker timed out")
+                edge_errors.append(edge_case + ": worker timed out")
             except Exception as exc:
                 rc = -1
                 stdout = ""
                 stderr = "%s: %s" % (type(exc).__name__, exc)
-                edge_errors.append(edge_group + ": worker launch failed")
+                edge_errors.append(edge_case + ": worker launch failed")
             if isinstance(stdout, bytes):
                 stdout = stdout.decode("utf-8", errors="replace")
             if isinstance(stderr, bytes):
@@ -960,25 +1186,25 @@ def main() -> int:
                     with open(edge_receipt_path, encoding="utf-8") as fh:
                         payload = json.load(fh)
                 except (OSError, ValueError) as exc:
-                    edge_errors.append(edge_group + ": invalid receipt: " + str(exc))
+                    edge_errors.append(edge_case + ": invalid receipt: " + str(exc))
             else:
-                edge_errors.append(edge_group + ": receipt is absent")
-            receipt_errors = validate_edge_group_receipt(
-                payload, group=edge_group, expected_count=edge_expected,
+                edge_errors.append(edge_case + ": receipt is absent")
+            receipt_errors = validate_edge_case_receipt(
+                payload, case=edge_case, group=edge_group, case_index=edge_index,
                 candidate=rel, candidate_sha256=sha_before,
                 edge_cases_sha256=edge_sha, weights_mode=twin_mode_for_edge)
-            edge_errors.extend(edge_group + ": " + err for err in receipt_errors)
-            if isinstance(payload, dict):
+            edge_errors.extend(edge_case + ": " + err for err in receipt_errors)
+            if not receipt_errors and isinstance(payload, dict):
                 results = payload.get("results")
-                if (isinstance(results, list)
-                        and all(type(value) is bool for value in results)):
-                    edge_passed += sum(results)
-                    edge_observed += len(results)
+                edge_case_results[edge_group].append({
+                    "case": edge_case, "case_index": edge_index,
+                    "result": results[0], "details": payload.get("details"),
+                })
             if rc != 0:
-                edge_errors.append(edge_group + ": worker rc=%s" % rc)
+                edge_errors.append(edge_case + ": worker rc=%s" % rc)
             edge_workers.append({
-                "group": edge_group,
-                "expected_result_count": edge_expected,
+                "case": edge_case, "group": edge_group,
+                "case_index": edge_index,
                 "returncode": rc,
                 "tail": worker_tail,
                 "stdout_sha256": hashlib.sha256(stdout.encode("utf-8")).hexdigest(),
@@ -986,13 +1212,37 @@ def main() -> int:
                 "receipt": payload,
                 "receipt_errors": receipt_errors,
             })
+    edge_results = []
+    case_count_by_group = dict(EDGE_CASE_COUNTS)
+    for edge_group, logical_count in EDGE_GROUP_REGISTRY:
+        cases = sorted(edge_case_results[edge_group],
+                       key=lambda row: row["case_index"])
+        expected_cases = case_count_by_group[edge_group]
+        if (len(cases) != expected_cases
+                or [row["case_index"] for row in cases]
+                != list(range(expected_cases))):
+            edge_errors.append(edge_group + ": atomic case coverage differs")
+            edge_results.extend([False] * logical_count)
+            continue
+        if logical_count > 1:
+            edge_results.extend(row["result"] for row in cases)
+        elif edge_group == "budget_monotone":
+            ladder_ok, ladder_errors = reduce_budget_monotone_cases(cases)
+            edge_errors.extend(ladder_errors)
+            edge_results.append(ladder_ok)
+        else:
+            edge_results.append(all(row["result"] for row in cases))
     edge_total = sum(count for _, count in EDGE_GROUP_REGISTRY)
+    edge_passed = sum(edge_results)
+    edge_observed = len(edge_results)
     edge_ok = not edge_errors and edge_observed == edge_total and edge_passed == edge_total
     tail = "%d/%d checks passed" % (edge_passed, edge_total)
     check("3: the invariant suite passes on THIS candidate, at the LIVE shape "
           "and in the grader's dtype", edge_ok,
           tail[:60] + ("" if not edge_errors else
                        "   " + "; ".join(edge_errors)[:120]))
+    raw_mse_env, effective_denom, effective_bar, denom_source = \
+        _effective_permutation_bar()
     report["sections"]["invariants"] = {
         "returncode": 0 if edge_ok else 1, "tail": tail,
         "world": {"phase2": True, "real_flopscope": True,
@@ -1000,6 +1250,8 @@ def main() -> int:
         "edge_cases_sha256": edge_sha,
         "group_registry": [{"group": group, "expected_result_count": count}
                            for group, count in EDGE_GROUP_REGISTRY],
+        "case_registry": [{"case": case, "group": group, "case_index": index}
+                          for case, group, index in EDGE_CASE_REGISTRY],
         "workers": edge_workers,
         "worker_errors": edge_errors,
         # SKEPTIC (2026-09-03): the report recorded only a returncode and a tail
@@ -1009,6 +1261,10 @@ def main() -> int:
         # a certification of anything in particular.
         "arc_whest_raw_mse": os.environ.get(
             "ARC_WHEST_RAW_MSE", "(unset: the frozen 1.4e-6 decision signal)"),
+        "permutation_bar": {
+            "raw_mse_env": raw_mse_env, "denom": effective_denom,
+            "bar": effective_bar, "denom_source": denom_source,
+        },
     }
 
     # Invariant 9's mutation battery. It exists because that invariant's

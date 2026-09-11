@@ -96,7 +96,19 @@ GROUP_REGISTRY = (
     ("seed_hygiene", 1),
     ("gt_noise", 1),
 )
+CASE_COUNTS = (
+    ("normal", 1), ("degenerate", 3), ("dynamic_range", 4),
+    ("seed_extremes", 5), ("shape_generality", 5), ("budget_edges", 5),
+    ("immutability", 1), ("layer1", 4), ("permutation", 4),
+    ("budget_monotone", 10), ("determinism", 1), ("seed_hygiene", 1),
+    ("gt_noise", 1),
+)
+CASE_REGISTRY = tuple(
+    ("%s:%d" % (group, index), group, index)
+    for group, count in CASE_COUNTS for index in range(count)
+)
 GROUP_RECEIPT_VERSION = 1
+CASE_RECEIPT_VERSION = 1
 
 
 def _sha(path):
@@ -194,66 +206,83 @@ def check(name, est, mlp, budget=BUDGET, expect_depth=None, rerun=True):
     return ok
 
 
-def _execute_group(group, est, est_mod):
+def _one(items, case_index):
+    return items if case_index is None else (items[case_index],)
+
+
+def _execute_group(group, est, est_mod, case_index=None, evidence=None):
     """Execute one frozen group and return its existing result booleans."""
     results = []
     if group == "normal":
         print("1. NORMAL CASE")
-        results.append(check(f"he {PW}x{PD}", est,
-                             MLP(he(PD, PW, 1), seed=7)))
+        if case_index in (None, 0):
+            results.append(check(f"he {PW}x{PD}", est,
+                                 MLP(he(PD, PW, 1), seed=7)))
     elif group == "degenerate":
         print("\n2. DEGENERATE PRUNING (whole layers pushed below tau)")
-        for s, label in ((0.02, "layer 5 scaled 0.02"),
-                         (0.001, "layer 5 scaled 0.001")):
+        cases = ((0.02, "layer 5 scaled 0.02", 2, 11),
+                 (0.001, "layer 5 scaled 0.001", 2, 11))
+        selected_cases = cases if case_index is None else (
+            (cases[case_index],) if case_index < len(cases) else ())
+        for s, label, weight_seed, mlp_seed in selected_cases:
             results.append(check(label, est,
-                                 MLP(he(PD, PW, 2, {5: s}), seed=11)))
-        w = he(PD, PW, 3)
-        w[7] = (w[7] * np.float32(0.0)).copy()
-        results.append(check("layer 7 identically zero", est,
-                             MLP(w, seed=13)))
+                                 MLP(he(PD, PW, weight_seed, {5: s}),
+                                     seed=mlp_seed)))
+        if case_index in (None, 2):
+            w = he(PD, PW, 3)
+            w[7] = (w[7] * np.float32(0.0)).copy()
+            results.append(check("layer 7 identically zero", est,
+                                 MLP(w, seed=13)))
     elif group == "dynamic_range":
         print("\n3. EXTREME DYNAMIC RANGE")
-        for s, label in ((100.0, "layer 12 scaled 100x"),
-                         (1e-3, "layer 12 scaled 1e-3"),
-                         (1e4, "layer 12 scaled 1e4")):
+        cases = ((100.0, "layer 12 scaled 100x"),
+                 (1e-3, "layer 12 scaled 1e-3"),
+                 (1e4, "layer 12 scaled 1e4"))
+        selected_cases = cases if case_index is None else (
+            (cases[case_index],) if case_index < len(cases) else ())
+        for s, label in selected_cases:
             results.append(check(label, est,
                                  MLP(he(PD, PW, 4, {12: s}), seed=17)))
-        w = he(PD, PW, 5).copy()
-        w[3] = w[3] + np.float32(2.0) * np.float32(np.sqrt(2.0 / PW))
-        results.append(check("layer 3 mean-shifted (all on)", est,
-                             MLP(w, seed=19)))
+        if case_index in (None, 3):
+            w = he(PD, PW, 5).copy()
+            w[3] = w[3] + np.float32(2.0) * np.float32(np.sqrt(2.0 / PW))
+            results.append(check("layer 3 mean-shifted (all on)", est,
+                                 MLP(w, seed=19)))
     elif group == "seed_extremes":
         print("\n4. SEED EXTREMES (the rng contract)")
         base = he(PD, PW, 6)
-        for sd in (0, 1, 2**31 - 1, 2**63 - 1,
-                   12345678901234567890 % (2**64)):
+        for sd in _one((0, 1, 2**31 - 1, 2**63 - 1,
+                        12345678901234567890 % (2**64)), case_index):
             results.append(check(f"seed {sd}", est, MLP(base, seed=sd)))
     elif group == "shape_generality":
         print("\n5. SHAPE GENERALITY (calibration must disable itself off-width)")
-        for d, wd in ((2, 256), (8, 128), (32, 64), (4, 256), (64, 256)):
+        for d, wd in _one(((2, 256), (8, 128), (32, 64), (4, 256),
+                           (64, 256)), case_index):
             results.append(check(f"depth {d} x width {wd}", est,
                                  MLP(he(d, wd, 8), seed=23)))
     elif group == "budget_edges":
         print("\n6. BUDGET EDGES (the analytic fallback path)")
         m = MLP(he(PD, PW, 9), seed=29)
-        for b, label in ((0, "budget 0"), (1, "budget 1"),
-                         (10**7, "budget 1e7 (below min N)"),
-                         (10**9, "budget 1e9"),
-                         (10 * BUDGET, "budget 10x")):
+        cases = ((0, "budget 0"), (1, "budget 1"),
+                 (10**7, "budget 1e7 (below min N)"),
+                 (10**9, "budget 1e9"), (10 * BUDGET, "budget 10x"))
+        for b, label in _one(cases, case_index):
             results.append(check(label, est, m, budget=b))
     elif group == "immutability":
         print("\n7. GRADER-ARRAY IMMUTABILITY (weights must be untouched)")
-        m = MLP(he(PD, PW, 10), seed=31)
-        before = [w.copy() for w in m.weights]
-        est.predict(m, BUDGET)
-        same = all(np.array_equal(a, b) for a, b in zip(before, m.weights))
-        print(f"  {'input weights unmodified':<34} "
-              f"{'ok' if same else 'MUTATED INPUT'}")
-        results.append(same)
+        if case_index in (None, 0):
+            m = MLP(he(PD, PW, 10), seed=31)
+            before = [w.copy() for w in m.weights]
+            est.predict(m, BUDGET)
+            same = all(np.array_equal(a, b) for a, b in zip(before, m.weights))
+            print(f"  {'input weights unmodified':<34} "
+                  f"{'ok' if same else 'MUTATED INPUT'}")
+            results.append(same)
     elif group == "layer1":
-        results += inv_layer1(est)
+        results += inv_layer1(est, case_index=case_index)
     elif group == "permutation":
-        results += inv_permutation(est)
+        results += inv_permutation(est, case_index=case_index,
+                                   evidence=evidence)
     elif group == "budget_monotone":
         results += inv_budget_monotone(est, est_mod)
     elif group == "determinism":
@@ -265,6 +294,58 @@ def _execute_group(group, est, est_mod):
     else:  # argparse prevents this; retain a fail-closed programmatic boundary.
         raise ValueError("unknown edge-case group: " + str(group))
     return results
+
+
+def _budget_monotone_case(est, est_mod, case_index):
+    """Execute one rung; the certifier reconstructs the ordered monotonicity."""
+    ladder = (0, 1, 10**6, 10**7, 10**8, 10**9, 10**10,
+              27_200_000_000, 272_000_000_000, 2_720_000_000_000)
+    b = ladder[case_index]
+    m = canon(PD, PW, 30_806_006_021)
+    has_ladder = callable(getattr(est, "_log2_samples", None)) and \
+        hasattr(est_mod, "_MIN_LOG2_N")
+    log2n = None
+    error = ""
+    finite = False
+    try:
+        if has_ladder:
+            log2n = est._log2_samples(PW, PD, b)
+            if isinstance(log2n, np.generic):
+                log2n = log2n.item()
+        out = np.asarray(est.predict(m, b), dtype=np.float64)
+        tol = -1e-12 * max(1.0, float(np.max(np.abs(out))))
+        finite = (bool(np.isfinite(out).all()) and out.shape == (PD, PW)
+                  and bool((out >= tol).all()))
+    except Exception as exc:
+        error = "%s: %s" % (type(exc).__name__, exc)
+    print("\n10. BUDGET MONOTONICITY  (isolated rung %d)" % case_index)
+    print("  budget %16s  valid=%s  log2n=%s%s" % (
+        format(b, ","), finite, log2n,
+        "  RAISED " + error if error else ""))
+    return [bool(finite and not error)], {
+        "budget": b, "has_ladder": bool(has_ladder), "log2n": log2n,
+        "finite": bool(finite), "error": error,
+    }
+
+
+def _execute_case(case_id, est, est_mod):
+    matches = [row for row in CASE_REGISTRY if row[0] == case_id]
+    if len(matches) != 1:
+        raise ValueError("unknown or duplicate edge-case id: " + str(case_id))
+    _, group, case_index = matches[0]
+    if group == "budget_monotone":
+        results, details = _budget_monotone_case(est, est_mod, case_index)
+    elif group == "permutation":
+        evidence = []
+        results = _execute_group(group, est, est_mod, case_index=case_index,
+                                 evidence=evidence)
+        details = evidence[0] if len(evidence) == 1 else {
+            "evidence_error": "expected exactly one permutation record",
+        }
+    else:
+        results = _execute_group(group, est, est_mod, case_index=case_index)
+        details = {}
+    return group, case_index, results, details
 
 
 def main():
@@ -286,12 +367,16 @@ def main():
                     help="which grader-twin arm --real-flopscope uses")
     ap.add_argument("--group", choices=tuple(tag for tag, _ in GROUP_REGISTRY),
                     help="run one frozen allocator-bounded group")
+    ap.add_argument("--case", choices=tuple(case for case, _, _ in CASE_REGISTRY),
+                    help="run one atomic allocator-bounded case")
     ap.add_argument("--receipt", default="", metavar="PATH",
                     help="exclusive-create a machine-readable group receipt; "
-                         "requires --group")
+                         "requires --group or --case")
     a = ap.parse_args()
-    if a.receipt and not a.group:
-        ap.error("--receipt requires --group")
+    if a.group and a.case:
+        ap.error("--group and --case are mutually exclusive")
+    if a.receipt and not (a.group or a.case):
+        ap.error("--receipt requires --group or --case")
     if a.receipt and os.path.exists(os.path.abspath(a.receipt)):
         ap.error("receipt already exists; evidence is never overwritten")
 
@@ -330,26 +415,29 @@ def main():
     print(f"candidate: tau={_b['_PRUNE_TAU']}  target C/B={_b['_TARGET_CB']}  "
           f"chunk={_b['_CHUNK']}\n")
 
-    selected = [a.group] if a.group else [tag for tag, _ in GROUP_REGISTRY]
     results = []
     group_rows = []
     expected_by_group = dict(GROUP_REGISTRY)
-    for group in selected:
-        group_results = _execute_group(group, est, est_mod)
-        results += group_results
-        group_rows.append({
-            "group": group,
-            "expected_result_count": expected_by_group[group],
-            "results": group_results,
-        })
+    case_details = {}
+    if a.case:
+        group, case_index, results, case_details = _execute_case(
+            a.case, est, est_mod)
+    else:
+        selected = [a.group] if a.group else [tag for tag, _ in GROUP_REGISTRY]
+        for group in selected:
+            group_results = _execute_group(group, est, est_mod)
+            results += group_results
+            group_rows.append({
+                "group": group,
+                "expected_result_count": expected_by_group[group],
+                "results": group_results,
+            })
 
     n_ok = sum(1 for r in results if r)
     print(f"\n{n_ok}/{len(results)} checks passed")
     if a.receipt:
         candidate_sha_after = _sha(candidate_path)
-        _write_json_exclusive(a.receipt, {
-            "artifact": "edge_cases_group",
-            "artifact_version": GROUP_RECEIPT_VERSION,
+        common = {
             "candidate": os.path.relpath(candidate_path, _ROOT).replace("\\", "/"),
             "candidate_sha256_before": candidate_sha_before,
             "candidate_sha256_after": candidate_sha_after,
@@ -364,12 +452,29 @@ def main():
                 "weights_mode": WEIGHTS_MODE if a.real_flopscope else "numpy_float32",
                 "width": int(PW), "depth": int(PD), "budget": int(BUDGET),
             },
-            "group": a.group,
-            "expected_result_count": expected_by_group[a.group],
             "results": results,
             "passed": n_ok,
             "all_passed": n_ok == len(results),
-        })
+        }
+        if a.case:
+            common.update({
+                "artifact": "edge_cases_case",
+                "artifact_version": CASE_RECEIPT_VERSION,
+                "case_registry": [
+                    {"case": case, "group": logical, "case_index": index}
+                    for case, logical, index in CASE_REGISTRY
+                ],
+                "case": a.case, "logical_group": group,
+                "case_index": case_index, "details": case_details,
+            })
+        else:
+            common.update({
+                "artifact": "edge_cases_group",
+                "artifact_version": GROUP_RECEIPT_VERSION,
+                "group": a.group,
+                "expected_result_count": expected_by_group[a.group],
+            })
+        _write_json_exclusive(a.receipt, common)
     return 0 if n_ok == len(results) else 1
 
 
@@ -386,7 +491,7 @@ def canon(depth, width, seed):
     return m
 
 
-def inv_layer1(est):
+def inv_layer1(est, case_index=None):
     """Row 0 must equal ||W1[:,j]||_2 / sqrt(2*pi) to floating-point tolerance.
 
     For x ~ N(0, I) the layer-1 pre-activation z_j = <W1[:,j], x> is exactly
@@ -395,8 +500,9 @@ def inv_layer1(est):
     """
     print("\n8. LAYER-1 CLOSED FORM  (exact: ||W1[:,j]|| / sqrt(2*pi))")
     ok = True
-    for depth, width, seed in ((PD, PW, 30_806_006_001), (8, 128, 30_806_006_002),
-                               (4, 64, 30_806_006_003), (2, 256, 30_806_006_004)):
+    cases = ((PD, PW, 30_806_006_001), (8, 128, 30_806_006_002),
+             (4, 64, 30_806_006_003), (2, 256, 30_806_006_004))
+    for depth, width, seed in _one(cases, case_index):
         m = canon(depth, width, seed)
         pred = np.asarray(est.predict(m, BUDGET), dtype=np.float64)
         w0 = np.asarray(m.weights[0], dtype=np.float64)
@@ -483,7 +589,17 @@ def perm_gate(base, perm, P, k, depth, denom=None):
     return d
 
 
-def inv_permutation(est):
+def _permutation_case_stream(rng, cases, case_index=None):
+    """Yield selected cases after consuming the monolith's exact RNG prefix."""
+    for index, case in enumerate(cases):
+        permutation = rng.permutation(case[1])
+        if case_index is None or index == case_index:
+            yield index, case, permutation
+        if case_index is not None and index >= case_index:
+            break
+
+
+def inv_permutation(est, case_index=None, evidence=None):
     """Relabelling hidden layer k must permute row k and change nothing else.
 
     Swapping the output columns of W_k and the matching input rows of W_{k+1} by
@@ -539,15 +655,16 @@ def inv_permutation(est):
             return k_
         return max(1, min(depth_ - 2, int(round(k_ * depth_ / 32.0))))
 
-    for depth, width, seed, k in ((PD, PW, 30_806_006_011, 7),
-                                  (PD, PW, 30_806_006_012, 20),
-                                  (8, 128, 30_806_006_013, 3),
-                                  (PD, PW, 30_806_006_014, 30)):
+    cases = ((PD, PW, 30_806_006_011, 7),
+             (PD, PW, 30_806_006_012, 20),
+             (8, 128, 30_806_006_013, 3),
+             (PD, PW, 30_806_006_014, 30))
+    for index, (depth, width, seed, k), P in _permutation_case_stream(
+            rng, cases, case_index):
         k = _k_for(depth, k)
         m = canon(depth, width, seed)
         base = np.asarray(est.predict(m, BUDGET), dtype=np.float64)
 
-        P = rng.permutation(width)
         w = [np.array(x) for x in m.weights]
         w[k] = w[k][:, P]                      # rename layer-k outputs
         w[k + 1] = w[k + 1][P, :]              # and the matching inputs
@@ -555,6 +672,15 @@ def inv_permutation(est):
         perm = np.asarray(est.predict(mp, BUDGET), dtype=np.float64)
 
         g = perm_gate(base, perm, P, k, depth, denom=denom)
+        if evidence is not None:
+            evidence.append({
+                "case_index": index, "depth": depth, "width": width,
+                "seed": seed, "layer": k,
+                "permutation_sha256": hashlib.sha256(
+                    np.asarray(P, dtype="<i8").tobytes()).hexdigest(),
+                "raw_mse_env": os.environ.get("ARC_WHEST_RAW_MSE"),
+                "denom": denom, "bar": bar, "denom_source": denom_src,
+            })
         ok &= g["ok"]
         print("  %-34s row-k %.2e  other-rows %.2e  final %.2e"
               % ("%dx%d permute layer %d" % (width, depth, k),

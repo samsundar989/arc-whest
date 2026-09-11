@@ -65,9 +65,48 @@ def fixture(group="normal", count=1):
     return payload, kwargs
 
 
+def case_fixture(case="normal:0", group="normal", case_index=0):
+    payload, group_kwargs = fixture(group=group, count=1)
+    payload.pop("expected_result_count")
+    payload.pop("group")
+    payload.update({
+        "artifact": "edge_cases_case",
+        "artifact_version": cert.EDGE_CASE_RECEIPT_VERSION,
+        "case_registry": [
+            {"case": name, "group": logical, "case_index": index}
+            for name, logical, index in cert.EDGE_CASE_REGISTRY
+        ],
+        "case": case, "logical_group": group, "case_index": case_index,
+        "details": {},
+    })
+    kwargs = {key: value for key, value in group_kwargs.items()
+              if key not in ("expected_count",)}
+    kwargs.update({"case": case, "group": group, "case_index": case_index})
+    return payload, kwargs
+
+
+def budget_rows(log2ns, *, invalid_index=None, error_index=None):
+    rows = []
+    for index, (budget, log2n) in enumerate(zip(cert.EDGE_BUDGET_LADDER,
+                                                log2ns)):
+        finite = index != invalid_index
+        error = "RuntimeError: injected" if index == error_index else ""
+        rows.append({
+            "case": "budget_monotone:%d" % index,
+            "case_index": index, "result": bool(finite and not error),
+            "details": {
+                "budget": budget, "has_ladder": True, "log2n": log2n,
+                "finite": finite, "error": error,
+            },
+        })
+    return rows
+
+
 def main():
     check("producer and consumer registries are exact and equal",
           edge.GROUP_REGISTRY == cert.EDGE_GROUP_REGISTRY
+          and edge.CASE_COUNTS == cert.EDGE_CASE_COUNTS
+          and edge.CASE_REGISTRY == cert.EDGE_CASE_REGISTRY
           and sum(count for _, count in edge.GROUP_REGISTRY) == 30
           and len({group for group, _ in edge.GROUP_REGISTRY})
           == len(edge.GROUP_REGISTRY))
@@ -123,6 +162,77 @@ def main():
         errors = cert.validate_edge_group_receipt(bad, **kwargs)
         check(name + " refuses", any(needle in error for error in errors))
 
+    case_payload, case_kwargs = case_fixture()
+    check("complete atomic-case receipt accepts",
+          cert.validate_edge_case_receipt(case_payload, **case_kwargs) == [])
+    case_mutations = (
+        ("boolean case index", lambda p: p.__setitem__("case_index", False),
+         "case index"),
+        ("truncated case registry", lambda p: p["case_registry"].pop(),
+         "case registry"),
+        ("boolean registry index", lambda p: p["case_registry"][0].__setitem__(
+            "case_index", False), "case registry"),
+        ("non-object details", lambda p: p.__setitem__("details", []),
+         "details are not"),
+        ("wrong result length", lambda p: p.__setitem__("results", []),
+         "one exact boolean"),
+    )
+    for name, mutate, needle in case_mutations:
+        bad = copy.deepcopy(case_payload)
+        mutate(bad)
+        errors = cert.validate_edge_case_receipt(bad, **case_kwargs)
+        check(name + " refuses", any(needle in error for error in errors))
+
+    permutation_payload, permutation_kwargs = case_fixture(
+        case="permutation:3", group="permutation", case_index=3)
+    permutation_payload["details"] = cert._expected_permutation_details(3)
+    check("effective permutation bar and digest receipt accepts",
+          cert.validate_edge_case_receipt(
+              permutation_payload, **permutation_kwargs) == [])
+    bad_bar = copy.deepcopy(permutation_payload)
+    bad_bar["details"]["bar"] *= 2.0
+    check("unbound permutation bar refuses",
+          "permutation evidence differs" in cert.validate_edge_case_receipt(
+              bad_bar, **permutation_kwargs))
+    bad_digest = copy.deepcopy(permutation_payload)
+    bad_digest["details"]["permutation_sha256"] = "0" * 64
+    check("wrong permutation stream digest refuses",
+          "permutation evidence differs" in cert.validate_edge_case_receipt(
+              bad_digest, **permutation_kwargs))
+
+    permutation_cases = cert.EDGE_PERMUTATION_CASES
+    monolith = list(edge._permutation_case_stream(
+        edge.np.random.default_rng(30_806_006_100), permutation_cases))
+    streams_match = len(monolith) == len(permutation_cases)
+    for index in range(len(permutation_cases)):
+        atomic = list(edge._permutation_case_stream(
+            edge.np.random.default_rng(30_806_006_100), permutation_cases,
+            case_index=index))
+        streams_match &= (len(atomic) == 1 and atomic[0][0] == index
+                          and edge.np.array_equal(atomic[0][2],
+                                                  monolith[index][2]))
+    check("atomic permutations preserve every monolith RNG prefix",
+          streams_match)
+
+    increasing = list(range(len(cert.EDGE_BUDGET_LADDER)))
+    budget_ok, budget_errors = cert.reduce_budget_monotone_cases(
+        budget_rows(increasing))
+    check("budget reducer accepts an exact valid monotone ladder",
+          budget_ok and budget_errors == [])
+    invalid_rows = budget_rows(
+        [0, 1, 2, 3, 10, 9, 10, 11, 12, 13], invalid_index=4)
+    invalid_ok, invalid_errors = cert.reduce_budget_monotone_cases(invalid_rows)
+    check("non-throwing invalid rung still advances comparison state",
+          not invalid_ok and any("budget_monotone:5: sample ladder decreased"
+                                 in error for error in invalid_errors))
+    thrown_rows = budget_rows(
+        [0, 1, 2, 3, 10, 9, 10, 11, 12, 13], error_index=4)
+    thrown_ok, thrown_errors = cert.reduce_budget_monotone_cases(thrown_rows)
+    check("throwing rung does not advance comparison state",
+          not thrown_ok and not any(
+              "budget_monotone:5: sample ladder decreased" in error
+              for error in thrown_errors))
+
     # The default path and isolated path share the one frozen dispatcher.  This
     # source-level identity is the cheap parity proof; numerical parity is then
     # exercised by the real positive control under workerq.
@@ -142,20 +252,21 @@ def main():
         run = subprocess.run(
             [sys.executable, edge.__file__, candidate,
              "--phase2", "--real-flopscope", "--weights-mode", "f64_readonly",
-             "--group", "seed_hygiene", "--receipt", receipt],
+             "--case", "seed_hygiene:0", "--receipt", receipt],
             cwd=_ROOT, capture_output=True, text=True, timeout=60)
         produced = json.load(open(receipt, encoding="utf-8")) if os.path.exists(
             receipt) else {}
-        check("lightweight CLI group writes an exact exclusive receipt",
+        check("lightweight CLI case writes an exact exclusive receipt",
               run.returncode == 0
-              and produced.get("group") == "seed_hygiene"
+              and produced.get("case") == "seed_hygiene:0"
               and produced.get("results") == [True]
               and produced.get("candidate_sha256_before")
               == produced.get("candidate_sha256_after")
               and produced.get("edge_cases_sha256")
               == cert._sha(edge.__file__)
-              and cert.validate_edge_group_receipt(
-                  produced, group="seed_hygiene", expected_count=1,
+              and cert.validate_edge_case_receipt(
+                  produced, case="seed_hygiene:0", group="seed_hygiene",
+                  case_index=0,
                   candidate=os.path.relpath(candidate, _ROOT).replace("\\", "/"),
                   candidate_sha256=cert._sha(candidate),
                   edge_cases_sha256=cert._sha(edge.__file__),
@@ -163,7 +274,7 @@ def main():
         again = subprocess.run(
             [sys.executable, edge.__file__, candidate,
              "--phase2", "--real-flopscope", "--weights-mode", "f64_readonly",
-             "--group", "seed_hygiene", "--receipt", receipt],
+             "--case", "seed_hygiene:0", "--receipt", receipt],
             cwd=_ROOT, capture_output=True, text=True, timeout=60)
         check("CLI receipt refuses overwrite", again.returncode != 0
               and "never overwritten" in again.stderr)
@@ -182,23 +293,27 @@ def main():
         default = subprocess.run(
             [sys.executable, edge.__file__, candidate], cwd=_ROOT,
             capture_output=True, text=True, timeout=60)
-        isolated_results = []
+        by_group = {group: [] for group, _ in edge.GROUP_REGISTRY}
         isolated_ok = True
-        for group, _count in edge.GROUP_REGISTRY:
-            path = os.path.join(td, "parity-" + group + ".json")
+        for case, group, case_index in edge.CASE_REGISTRY:
+            path = os.path.join(td, "parity-" + case.replace(":", "_") + ".json")
             run = subprocess.run(
                 [sys.executable, edge.__file__, candidate,
-                 "--group", group, "--receipt", path],
+                 "--case", case, "--receipt", path],
                 cwd=_ROOT, capture_output=True, text=True, timeout=60)
             if not os.path.exists(path):
                 isolated_ok = False
                 continue
             row = json.load(open(path, encoding="utf-8"))
-            isolated_results += row.get("results", [])
+            by_group[group].append((case_index, row.get("results", [False])[0]))
             isolated_ok &= run.returncode == (0 if row.get("all_passed") else 1)
+        isolated_results = []
+        for group, logical_count in edge.GROUP_REGISTRY:
+            values = [value for _, value in sorted(by_group[group])]
+            isolated_results.extend(values if logical_count > 1 else [all(values)])
         expected_tail = "%d/%d checks passed" % (
             sum(isolated_results), len(isolated_results))
-        check("cheap default execution equals concatenated isolated groups",
+        check("cheap default execution equals aggregated atomic cases",
               isolated_ok and len(isolated_results) == 30
               and expected_tail in default.stdout
               and default.returncode == (0 if all(isolated_results) else 1))
