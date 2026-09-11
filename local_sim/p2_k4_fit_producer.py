@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import hashlib
+import io
 import json
 import math
 import os
@@ -665,28 +666,45 @@ def produce(a):
             "lifecycle_provenance": lifecycle_provenance,
             "labels_read": False}
         output = os.path.join(a.out_dir, "predictions.npz")
+        archive = io.BytesIO()
+        np.savez(archive, parameter_names=np.asarray(names),
+                 candidate_values=matrix, identities=np.asarray(identities),
+                 predictions=np.stack(all_predictions), counted_costs=costs,
+                 candidate_source_paths=np.asarray(source_paths),
+                 candidate_source_hashes=np.asarray(source_hashes),
+                 producer_manifest_json=np.asarray(
+                     json.dumps(manifest, sort_keys=True)))
+        output_bytes = archive.getvalue()
+        expected_output_sha = _sha256_bytes(output_bytes)
         with open(output, "x+b") as fh:
-            np.savez(fh, parameter_names=np.asarray(names), candidate_values=matrix,
-                     identities=np.asarray(identities),
-                     predictions=np.stack(all_predictions), counted_costs=costs,
-                     candidate_source_paths=np.asarray(source_paths),
-                     candidate_source_hashes=np.asarray(source_hashes),
-                     producer_manifest_json=np.asarray(json.dumps(manifest, sort_keys=True)))
-        result = {"schema": "arc-whest.coherent-k4-fit-producer-receipt.v1",
-                  "immutable": True, "predictions": output,
-                  "predictions_sha256": _sha256(output),
-                  "candidate_sources": source_paths,
-                  "candidate_source_hashes": source_hashes,
-                  "counted_costs": costs.tolist(), "manifest": manifest}
-        with open(os.path.join(a.out_dir, "producer_receipt.json"), "x",
-                  encoding="utf-8", newline="\n") as fh:
-            json.dump(result, fh, indent=2, sort_keys=True)
-            fh.write("\n")
-        changed_label, changed_index = _closing_dependency_problem(
-            a, input_hashes, absolute_source_paths, source_hashes,
-            producer_binding, generator_binding)
-        if changed_label:
-            receipt_path = os.path.join(a.out_dir, "producer_receipt.json")
+            fh.write(output_bytes)
+            fh.flush()
+            os.fsync(fh.fileno())
+        receipt_path = os.path.join(a.out_dir, "producer_receipt.json")
+        output_problem = ""
+        changed_label, changed_index = "", None
+        with selector._stable_files([output]):
+            if _sha256(output) != expected_output_sha:
+                output_problem = "prediction archive changed before first digest"
+            else:
+                result = {
+                    "schema": "arc-whest.coherent-k4-fit-producer-receipt.v1",
+                    "immutable": True, "predictions": output,
+                    "predictions_sha256": expected_output_sha,
+                    "candidate_sources": source_paths,
+                    "candidate_source_hashes": source_hashes,
+                    "counted_costs": costs.tolist(), "manifest": manifest}
+                with open(receipt_path, "x", encoding="utf-8",
+                          newline="\n") as fh:
+                    json.dump(result, fh, indent=2, sort_keys=True)
+                    fh.write("\n")
+                if _sha256(output) != expected_output_sha:
+                    output_problem = \
+                        "prediction archive changed during receipt write"
+                changed_label, changed_index = _closing_dependency_problem(
+                    a, input_hashes, absolute_source_paths, source_hashes,
+                    producer_binding, generator_binding)
+        if output_problem or changed_label:
             for invalid_path in (receipt_path, output):
                 try:
                     os.remove(invalid_path)
@@ -706,10 +724,13 @@ def produce(a):
                 spec=spec, input_hashes=input_hashes,
                 producer_binding=producer_binding,
                 generator_binding=generator_binding,
-                failure_stage="dependency_changed_during_success_write")
+                failure_stage=("prediction_archive_changed_before_receipt"
+                               if output_problem else
+                               "dependency_changed_during_success_write"))
             raise ProducerRefused(
-                "%s bytes changed during success write; diagnostic: %s" %
-                (changed_label, diagnostic))
+                "%s; diagnostic: %s" %
+                (output_problem or "%s bytes changed during success write" %
+                 changed_label, diagnostic))
         return result
 
 

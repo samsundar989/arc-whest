@@ -1365,6 +1365,52 @@ def run_checks():
               "refused=%s restored=%s" %
               (refused, diagnostic["candidate_source"]
                ["unchanged_after_evaluation"]))
+
+    with _temp("p2-k4-producer-output-publication-") as root:
+        candidates = os.path.join(root, "candidates.json")
+        bounds = os.path.join(root, "bounds.json")
+        identities = os.path.join(root, "identities.json")
+        out_dir = os.path.join(root, "observations")
+        _write_json(candidates, {"parameters": ["lam"],
+                    "candidates": [{"lam": 0.0}]})
+        _write_json(bounds, {"lam": {"min": 0.0, "max": 0.0}})
+        _write_json(identities, {"kind": "synthetic-identities-v1", "width": 3,
+                    "depth": 2,
+                    "identities": [{"id": "output-publish", "seed": 7095}]})
+        original_stable = fit._stable_files
+        replaced = [False]
+        @contextlib.contextmanager
+        def replace_archive_before_first_lock(paths):
+            output_paths = [path for path in paths
+                            if os.path.basename(path) == "predictions.npz"]
+            if output_paths and not replaced[0]:
+                with open(output_paths[0], "ab") as fh:
+                    fh.write(b"post-publication replacement")
+                replaced[0] = True
+            with original_stable(paths):
+                yield
+        fit._stable_files = replace_archive_before_first_lock
+        try:
+            try:
+                producer.produce(Namespace(
+                    candidates=candidates, bounds=bounds,
+                    identities=identities, out_dir=out_dir))
+                refused = False
+            except producer.ProducerRefused as exc:
+                refused = "prediction archive changed before first digest" in str(exc)
+        finally:
+            fit._stable_files = original_stable
+        with open(os.path.join(out_dir, "failure_diagnostic.json"),
+                  encoding="utf-8") as fh:
+            diagnostic = json.load(fh)
+        check("producer binds archive digest before publication and locks receipt",
+              (refused and replaced[0]
+               and diagnostic["failure_stage"] ==
+                   "prediction_archive_changed_before_receipt"
+               and not os.path.exists(os.path.join(out_dir, "predictions.npz"))
+               and not os.path.exists(os.path.join(out_dir,
+                                                   "producer_receipt.json"))),
+              "refused=%s replaced=%s" % (refused, replaced[0]))
     return {"kind": "synthetic coherent-K4 producer-selector conformance", "labels_read": False,
             "checks": rows, "n_checks": len(rows), "n_failed": sum(not x["pass"] for x in rows),
             "pass": all(x["pass"] for x in rows)}

@@ -42395,3 +42395,20 @@ suite passes **90/90**; compilation and `git diff --check` pass. A new fresh-
 context Skeptic and final current-source preflight remain required before the
 discriminator.
 
+The next fresh Skeptic returned **REJECT** after accepting the lifecycle locks.
+The producer closed `predictions.npz` before taking its first digest, so a
+replacement at that boundary became the receipted archive. The replacement kept
+valid shape and finite values but contradicted the captured lifecycle predictions;
+the producer hashed it as authoritative and the standalone verifier accepted it.
+No protected truth was opened.
+
+The producer now serializes the complete NPZ into memory, fixes its SHA-256 over
+those exact bytes before publication, writes and flushes those bytes, then acquires
+a deny-write/delete handle on the published archive. Inside that handle it rehashes
+against the predetermined digest, writes the producer receipt using that digest,
+rehashes the archive again, and finishes the already-locked source checks. A
+replacement before the archive handle is acquired now deletes the invalid archive
+and any receipt and writes an exclusive diagnostic. The exact boundary attack is a
+regression fixture. The complete suite passes **91/91**; compilation and
+`git diff --check` pass. A new fresh-context Skeptic and final current-source
+preflight remain required before the discriminator.
