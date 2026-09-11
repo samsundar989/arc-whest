@@ -41912,3 +41912,33 @@ production producer or P07 access. Any loose field, type confusion, path escape,
 verify/use gap, overwritten receipt, protected read, changed candidate registry or
 failure to revalidate current bytes falsifies the repair. This work authorizes no
 truth access; Stage 0 acceptance still precedes the production Stage-2 sequence.
+
+### Skeptic rejection and bounded verifier repair
+
+The fresh-context Skeptic rejected the first implementation even though its focused
+suite passed 58/58. It independently reproduced three contract falsifiers. First,
+an otherwise valid `synthetic-identities-v1` producer package could be presented as
+`protected-design` block P07 and reach the injected truth-loader sentinel: the
+producer checked the exact P07 registry, but the selector did not repeat that check
+before protected access. Second, replacing `producer_receipt.json` after its JSON
+parse but before the later path hash let verification succeed while recording the
+hash of the replacement bytes. Third, the shared identity parser coerced a string
+seed and integer ID and accepted an extra manifest key. The passing suite therefore
+did not establish the registered identity or same-byte-snapshot claims.
+
+**Class, prediction and intervention.** This remains the same IMPORTANT fitting
+instrument package. Samuel's standing prediction is **"I don't know"**. Add one
+shared strict identity-manifest validator with exact root and row keys, non-boolean
+integer seeds, string IDs, positive integer dimensions, the two explicit roles, and
+the exact ordered seed/ID registry for registered P07. Use it in both producer and
+selector; protected fitting must refuse every role except registered P07 before any
+truth resolver or loader can run. Parse each trusted JSON/NPZ input and bind its hash
+to the same byte snapshot, or detect any replacement before truth access and before
+writing verification output. Preserve valid synthetic fixtures.
+
+**Gate and falsifier.** Add focused role-confusion, coupled type/extra-key and
+parse/hash swap tests, with truth-loader spies for all protected refusals. Rerun the
+whole producer-selector suite, compilation and diff checks. Any accepted coercion,
+role confusion, input replacement, stale recorded hash, truth call before refusal,
+or weakened earlier mutation test rejects the repair. A new fresh-context Skeptic
+must accept the exact amended diff; this still authorizes no protected read.
