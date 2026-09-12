@@ -1,0 +1,38 @@
+{
+  "job_id": 990,
+  "state": "SUCCEEDED",
+  "exit_code": 0,
+  "peak_ram_mib": 3091.625,
+  "requested_ram_mib": 5120.0,
+  "requested_cpus": 2,
+  "requested_gpu_count": 0,
+  "snapshot_mode": "live",
+  "zip_sha256": "c96ba459cdc0a91066f4fb5fc3354fb36b26347e0b387605a925fe51ee1914c4",
+  "members": {
+    "job990_log.log": {
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\logs\\job-000990.log",
+      "bytes": 90791,
+      "sha256": "e5ddcb1ee3ae1f7e3cb12469daa3645b42f4080552863794b393d72fc5c0f7d2"
+    },
+    "job990_manifest.json": {
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\990\\manifest.json",
+      "bytes": 1093,
+      "sha256": "b521a7ebecfe450700d73e5d3f3622428d28ebae281f93ecf19de7709eb93c82"
+    },
+    "job990_environment.json": {
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\990\\environment.json",
+      "bytes": 2365,
+      "sha256": "641d23076ac0e0c4074bc3ef22f29e4edca993d7e4a448d7c7f756d630c3e74f"
+    },
+    "job990_result.json": {
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\990\\result.json",
+      "bytes": 189,
+      "sha256": "ac252feb17ddc42edd5e1ccaa44181be849db3e46f8eb3819e37f8b69c36c739"
+    },
+    "job990_show.json": {
+      "original": "workerq show 990 --json stdout",
+      "bytes": 2469,
+      "sha256": "bfa324048ac1f166675a23eb2f5613aef5b748638c9db61d74e61f39392c7e7c"
+    }
+  }
+}

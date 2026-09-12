@@ -25,8 +25,8 @@ def main():
     show = subprocess.run(["workerq", "show", str(job), "--json"],
                           check=True, capture_output=True).stdout
     receipt = json.loads(show)
-    if receipt["state"] != "SUCCEEDED" or receipt["exit_code"] != 0:
-        raise AssertionError("terminal successful preflight required")
+    if receipt["state"] not in ("SUCCEEDED", "FAILED") or receipt["exit_code"] is None:
+        raise AssertionError("terminal preflight receipt required")
     originals = {
         f"job{job}_log.log": QUEUE / "logs" / f"job-{job:06d}.log",
         f"job{job}_manifest.json": QUEUE / "jobs" / str(job) / "manifest.json",

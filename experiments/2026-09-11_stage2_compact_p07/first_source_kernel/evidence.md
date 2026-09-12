@@ -70,6 +70,14 @@ passes (`seed_scan.log`).
 
 Workerq #987 passed prior-test-byte default preflight 12/16 with four Full-only
 steps skipped; its original queue files are preserved in `job987_raw.zip`.
-The full-tensor test was added afterward. A final current-byte
-preflight and independent Skeptic verdict are still required before using this
-cost result beyond this instrument's scope.
+The full-tensor test was added afterward. Snapshot-bound current-byte job #988
+was **RED**: the snapshot omitted four gitignored seed/truth-read artifacts,
+and byte normalization changed the frozen `estimator.py` anchor hash. Its
+original failure record is preserved in `job988_raw.zip` and was not treated
+as instrument evidence. At start HEAD `4622426`, the kernel and test hashes
+still matched commit `076031f`; the live-worktree current-byte default
+preflight #990 then **passed 12/16**, with four Full-only deployment steps
+explicitly skipped. Its complete original transcript and terminal receipt
+are preserved in `job990_raw.zip` and hash-checked by
+`job990_verification.json`. The fresh independent Skeptic verdict is still
+required before using this cost result beyond this instrument's scope.
