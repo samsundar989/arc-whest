@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import types
 
 import numpy as np
 
@@ -384,6 +385,36 @@ def run_checks():
                   rc == 0 and attempts == {"lifecycle": True, "depth": True,
                                            "publication": True} and os.path.isfile(out),
                   "subprocess write/exclusive-lock attempts cannot change a held arm")
+
+        with tempfile.TemporaryDirectory(prefix="p2-lab-scoped-module-", dir=_ROOT) as root:
+            arm = os.path.join(root, "arm_exact.py")
+            with open(arm, "wb") as fh:
+                fh.write(b"# sacrificial candidate module\n")
+            source_hash = hashlib.sha256(open(arm, "rb").read()).hexdigest()
+            key = "_lifecycle_candidate_" + hashlib.sha1(
+                os.path.abspath(arm).encode()).hexdigest()[:12]
+            proper = types.ModuleType(key)
+            proper.__spec__ = types.SimpleNamespace(origin=arm)
+            with patched(lab, "_ACTIVE_ARM_PATHS", {"exact": arm}):
+                with lab._scoped_frozen_candidate("exact", source_hash):
+                    sys.modules[key] = proper
+            check("scoped loader retires only its receipt-bound arm module",
+                  key not in sys.modules, "matching private name, origin and bytes")
+            impostor = types.ModuleType(key)
+            impostor.__spec__ = types.SimpleNamespace(origin=os.path.join(root, "other.py"))
+            try:
+                with patched(lab, "_ACTIVE_ARM_PATHS", {"exact": arm}):
+                    with lab._scoped_frozen_candidate("exact", source_hash):
+                        sys.modules[key] = impostor
+                origin_refused = False
+            except freezer.FreezeRefused as exc:
+                origin_refused = "module origin" in str(exc)
+            finally:
+                still_loaded = sys.modules.get(key) is impostor
+                sys.modules.pop(key, None)
+            check("scoped cleanup leaves an unrelated module for the bootstrap audit",
+                  origin_refused and still_loaded,
+                  "wrong-origin private module is refused, never silently purged")
 
         with tempfile.TemporaryDirectory(prefix="p2-lab-loaded-a-disk-b-", dir=_ROOT) as root:
             copied = os.path.join(root, "lab_copy.py")

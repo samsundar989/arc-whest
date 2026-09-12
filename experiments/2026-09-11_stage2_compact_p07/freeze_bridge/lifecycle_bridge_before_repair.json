@@ -1,0 +1,19 @@
+{
+  "baseline_reproduced": true,
+  "pass": true,
+  "positive": {
+    "pass": false,
+    "report_arms": [],
+    "reported_hashes": {},
+    "returncode": 2,
+    "stderr_tail": "C:\\Users\\samsu\\Documents\\arc-whest\\p2-locked-lifecycle-yj57j43e\\local_sim\\lifecycle_eval.py:613: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.\n  flops.configure(symmetry_warnings=False)\n",
+    "stdout_tail": "  *** RESIDUAL CAP RELAXED -- this run is ACCURACY-ONLY. Its failure accounting\n      cannot see a 0.4 s violation and it is NOT residual evidence for anything.\n  deciding model   lambda = 0   (COUNTED FLOPS ONLY -- the frozen model)\n============================================================================================\nP2-CP1 LADDER  --  one canonical evaluator, paired on common random numbers\n============================================================================================\n  truth      truth_P01.npz   2 networks   2 replicas x 10 samples\n  truth noise per replica   mean 2.0000e-02\n  shape      2 x 2   B = 1,000,000   floor 0.1\n  stack      flopscope fixture   PARITY SYNTHETIC\n\n  replica noise of the AVERAGED truth   measured 1.0000e-02   predicted V/2N 1.0000e-02   ratio 1.0000\n     (the ratio is a live check on replica independence; far from 1.0\n      means the two draws share state and every corrected MSE is wrong)\n\nREFUSED: depth lifecycle for exact did not execute its frozen candidate bytes\nREFUSED: loaded repo-local module _lifecycle_candidate_5628a3a1e323 is absent from the locked registry: C:\\Users\\samsu\\Documents\\arc-whest\\p2-locked-lifecycle-yj57j43e\\arms\\arm_exact.py\n"
+  },
+  "source_swap": {
+    "pass": true,
+    "publication_absent": true,
+    "returncode": 2,
+    "stderr_tail": "",
+    "stdout_tail": "REFUSED: sacrificial arm source swapped\n"
+  }
+}

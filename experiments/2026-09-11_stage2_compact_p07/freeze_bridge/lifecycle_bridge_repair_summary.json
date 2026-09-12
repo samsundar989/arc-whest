@@ -1,0 +1,119 @@
+{
+  "classification": "IMPORTANT instrument repair; truth-free test data only",
+  "contract_commit": "8236e25f2f4a04296c2661736026a447c7fa66a5",
+  "created_utc": "2026-09-12T05:27:16.001982+00:00",
+  "negative_controls": {
+    "existing_freeze_receipt_validated_current_bytes": true,
+    "preexisting_module_and_stale_source_controls": "bridge fixture PASS",
+    "scoped_right_origin_removed": "bridge fixture PASS",
+    "scoped_wrong_origin_refused_and_preserved_for_bootstrap_audit": "bridge fixture PASS",
+    "tampered_arm_before_truth_and_closing_publication": "bridge fixture PASS"
+  },
+  "next_gate": {
+    "current_byte_preflight": "workerq submit --project arc-whest --priority high --gpus 0 --ram 5 --vram 0 --cpus 2 --no-snapshot -- powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/preflight.ps1",
+    "fresh_skeptic_required": true,
+    "p01_retry": "only after current-byte preflight and independent acceptance; previous failed P01 reads remain recorded"
+  },
+  "repair": {
+    "module_cleanup": "remove only the private lifecycle module whose deterministic name and spec origin match the held receipt-bound arm; wrong-origin entries remain for the unchanged bootstrap origin audit",
+    "path_hash": "hash the loaded full path after verifying it equals the receipt-selected arm path; check bytes against the held receipt before and after each pass",
+    "scope": "local_sim/p2_lab.py only; no lifecycle_eval or bootstrap change",
+    "self_fingerprint": "1be06b61665550bd8e5bd041296a2224a1cc12db18106ef8beebb29d9a7390f7"
+  },
+  "root_cause": {
+    "depth_loader_second_return": "lifecycle_eval.load_candidate returned the full source path, not a SHA-256",
+    "job949": "96 exact scored rows completed; depth hash comparison and final bootstrap origin audit refused; no report",
+    "origin_audit": "lifecycle_eval registered a private _lifecycle_candidate_* module in sys.modules and left it after the scored/depth passes"
+  },
+  "schema": "arc-whest.p2-lab-locked-lifecycle-bridge-repair.v1",
+  "scope_protection": {
+    "commit_made": false,
+    "estimator_changed": false,
+    "fit_selection_changed": false,
+    "frozen_arm_or_receipt_bytes_changed": false,
+    "p07_p01_roles_gate_statistic_cost_residual_changed": false,
+    "preflight_run": false,
+    "protected_truth_read": false,
+    "truth_ledger_changed": false,
+    "workerq_submitted": false
+  },
+  "source_sha256": {
+    "local_sim/p2_lab.py": "45548ede0eb8dc7fce6fc5fda67c6444b6ed4e69993a67efc4d49512b1ab982c",
+    "local_sim/test_p2_lab_freeze_bridge.py": "493f8c1120481c7e94700dfda11a01b7ef8ce1b612508a24e49f101f12a8d537",
+    "local_sim/test_p2_lab_locked_lifecycle.py": "2b768f64aaa646c740fda994a90a907e8e169ca94b6212b8f928a5a607b3a8a3"
+  },
+  "synthetic_locked_entry": {
+    "after": {
+      "artifact": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/lifecycle_bridge_after_repair_final.json",
+      "four_distinct_reported_arm_hashes": true,
+      "pass": true,
+      "positive_returncode": 0,
+      "report_arms": [
+        "births-only",
+        "coherent",
+        "consumers-only",
+        "exact"
+      ],
+      "sha256": "3129f440715d5fd019067802db9ef054e50a89679e665c74c3465971a1b34e68",
+      "source_swap_publication_absent": true,
+      "source_swap_refused": true
+    },
+    "before": {
+      "artifact": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/lifecycle_bridge_before_repair.json",
+      "failure_mentions_depth_mismatch": true,
+      "failure_mentions_origin_audit": true,
+      "pass": true,
+      "positive_returncode": 2,
+      "report_absent": true,
+      "reproduced": true,
+      "sha256": "b1fb7282e07840e6ba803bed65b6616a21593e9f4943b805e5b5084faff86f44"
+    },
+    "data": "two generated 2x2 probe networks, four distinct tiny sacrificial arms; no research label/seed block used",
+    "fixture": "local_sim/test_p2_lab_locked_lifecycle.py",
+    "interface": "copied real p2_lab public script -> stdlib early handoff -> copied real bootstrap -> real canonical lifecycle_eval and real depth helper; fixture hooks replace only freeze/truth access and manifest with sacrificial state"
+  },
+  "verification": [
+    {
+      "command": "uv run python local_sim/test_p2_lab_locked_lifecycle.py --baseline --output <before>",
+      "result": "PASS; old committed source reproduces rc2/no report"
+    },
+    {
+      "command": "uv run python local_sim/test_p2_lab_locked_lifecycle.py --output <after>",
+      "result": "PASS; four-arm complete probe report and swapped-arm refusal"
+    },
+    {
+      "command": "uv run python local_sim/test_p2_lab_freeze_bridge.py",
+      "result": "PASS 17/17"
+    },
+    {
+      "artifact": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/freezer_tests_lifecycle_bridge_repair.json",
+      "command": "uv run python local_sim/test_p2_freeze_k4_arms.py --output <artifact>",
+      "result": "PASS 19/19",
+      "sha256": "f5d08de6f4b50add35b94df57077dea5931b8e2826de106a05981809c29a3ec3"
+    },
+    {
+      "command": "uv run python local_sim/test_stage0_lab_data.py",
+      "result": "PASS 32/32; live P01 count 6, P08 3; no ledger mutation"
+    },
+    {
+      "command": "uv run python scripts/verify_portability.py",
+      "result": "PASS 103/103"
+    },
+    {
+      "command": "uv run python -m py_compile <three changed Python files>",
+      "result": "PASS"
+    },
+    {
+      "command": "real public and direct-bootstrap p2_lab.py --help",
+      "result": "PASS 2/2"
+    },
+    {
+      "command": "p2_freeze_k4_arms.validate_freeze_receipt existing metadata-protocol receipt",
+      "result": "PASS, four arms"
+    },
+    {
+      "command": "embedded normalized p2_lab source fingerprint and git diff --check",
+      "result": "PASS"
+    }
+  ]
+}

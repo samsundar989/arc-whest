@@ -56,6 +56,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import contextlib
 import hashlib
 import json
 import os
@@ -68,7 +69,7 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
 _BOOTSTRAP = os.path.join(_HERE, "p2_locked_bootstrap.py")
 _CLI_BINDINGS_ENV = "ARC_WHEST_P2_LAB_LOCKED_BINDINGS"
-_SELF_FINGERPRINT = "5d1b70f91c0b8cce07bc00f0083c568693b386fa130e163f0d162f9160718479"
+_SELF_FINGERPRINT = "1be06b61665550bd8e5bd041296a2224a1cc12db18106ef8beebb29d9a7390f7"
 
 
 def _attested_target_sha():
@@ -358,6 +359,41 @@ def _run_arm(name, seeds, truth_final, spec, gt_noise):
     if not os.path.exists(path):
         raise SystemExit(f"no such arm: {path}. Run p2_build_arms.py first.")
     return le.evaluate(path, seeds, truth_final, spec=spec, gt_noise=gt_noise)
+
+
+@contextlib.contextmanager
+def _scoped_frozen_candidate(name, expected_sha):
+    """Retire only a lifecycle module loaded from this held frozen arm."""
+    if _ACTIVE_ARM_PATHS is None:
+        raise k4_freezer.FreezeRefused("frozen arm cleanup requires a held receipt")
+    path = os.path.abspath(_arm_path(name))
+    if not k4_freezer._same_path(path, _ACTIVE_ARM_PATHS[name]):
+        raise k4_freezer.FreezeRefused("frozen arm path differs from the held receipt")
+    with open(path, "rb") as fh:
+        if _sha256_bytes(fh.read()) != expected_sha:
+            raise k4_freezer.FreezeRefused("frozen arm bytes differ before lifecycle")
+    module_name = "_lifecycle_candidate_" + hashlib.sha1(
+        path.encode()).hexdigest()[:12]
+    if module_name in sys.modules:
+        raise k4_freezer.FreezeRefused(
+            "lifecycle module name was already occupied before this arm")
+    try:
+        yield
+    finally:
+        module = sys.modules.get(module_name)
+        if module is not None:
+            spec = getattr(module, "__spec__", None)
+            origin = getattr(spec, "origin", None)
+            if (getattr(module, "__name__", None) != module_name or
+                    not isinstance(origin, str) or
+                    not k4_freezer._same_path(origin, path)):
+                raise k4_freezer.FreezeRefused(
+                    "lifecycle module origin is not the held frozen arm")
+            with open(path, "rb") as fh:
+                if _sha256_bytes(fh.read()) != expected_sha:
+                    raise k4_freezer.FreezeRefused(
+                        "frozen arm bytes changed during lifecycle")
+            del sys.modules[module_name]
 
 
 def _cost_under_012(name, width, depth, budget):
@@ -685,8 +721,9 @@ def _execute_held(a, man, frozen, arms, arm_paths, instrument_bindings) -> int:
     for name in arms:
         t0 = time.perf_counter()
         # ONE scored pass. `lifecycle_eval` owns every scored number.
-        rows, prov = _run_arm(name, seeds, y_mid, spec, list(gt_noise))
         expected_hash = frozen_hashes[name]
+        with _scoped_frozen_candidate(name, expected_hash):
+            rows, prov = _run_arm(name, seeds, y_mid, spec, list(gt_noise))
         row_hashes = {row.candidate_sha256 for row in rows}
         if prov.get("candidate_sha256") != expected_hash or row_hashes != {expected_hash}:
             raise k4_freezer.FreezeRefused(
@@ -700,7 +737,8 @@ def _execute_held(a, man, frozen, arms, arm_paths, instrument_bindings) -> int:
         # computed on a fixed SUBSET and labelled as such rather than pretending
         # otherwise.
         tracemalloc.start()
-        _f, alld, depth_hash = _predict_all(name, seeds[:n_depth], spec)
+        with _scoped_frozen_candidate(name, expected_hash):
+            _f, alld, depth_hash = _predict_all(name, seeds[:n_depth], spec)
         if depth_hash != expected_hash:
             raise k4_freezer.FreezeRefused(
                 f"depth lifecycle for {name} did not execute its frozen candidate bytes")
@@ -910,7 +948,12 @@ def _predict_all(name, seeds, spec):
     import harness
     from mint_provenance import canonical_mint
 
-    mod, source_hash = le.load_candidate(_arm_path(name))
+    mod, full = le.load_candidate(_arm_path(name))
+    if not k4_freezer._same_path(full, _arm_path(name)):
+        raise k4_freezer.FreezeRefused(
+            f"depth lifecycle for {name} loaded a different candidate path")
+    with open(full, "rb") as fh:
+        source_hash = _sha256_bytes(fh.read())
     est = mod.Estimator()
     est.setup(le.SetupContext(spec))
     finals, alls = [], []

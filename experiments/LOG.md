@@ -43625,3 +43625,65 @@ source path or math, hash mismatch, leaked module, failed preflight or fresh
 Skeptic rejection blocks retry. **Scope:** repair only the depth/loader
 bridge and focused fixtures; preserve arm bytes, fit selection, score gate,
 data roles, protected labels, estimator, cost model and residual policy.
+
+
+## 2026-09-12 - Receipt-bound lifecycle module closes the P01 depth bridge
+
+**IMPORTANT result; no protected truth.** The real public lab entry in a
+sacrificial copied tree reproduced workerq 949's exact failure from committed
+`8236e25`: the scored exact arm completed, then the depth pass compared the
+pathname returned by `lifecycle_eval.load_candidate()` to the frozen arm's
+SHA-256 and refused. The bootstrap also rejected the surviving private
+`_lifecycle_candidate_*` module as repo-local and absent from its static source
+registry. The fixture exited 2 and published no report. Raw before evidence is
+`freeze_bridge/lifecycle_bridge_before_repair.json` (SHA-256
+`b1fb7282e07840e6ba803bed65b6616a21593e9f4943b805e5b5084faff86f44`).
+
+The repair is confined to `local_sim/p2_lab.py`. Both scored and depth calls now
+run inside a receipt-bound scope that verifies the selected arm path and SHA-256
+before execution. It removes only the module entry matching
+`lifecycle_eval.load_candidate()`'s deterministic private name, if its loaded
+`__spec__.origin` is exactly that held arm path and the source bytes still match
+the receipt. A differently sourced entry is refused and left for the unchanged
+bootstrap audit. The depth helper now verifies the returned full path, hashes
+that file's bytes and returns the SHA-256 expected by the report. The lab's
+normalized embedded fingerprint was refreshed. `lifecycle_eval` and the
+bootstrap import guard did not change.
+
+The same fixture, using the real scored evaluator and depth helper under the
+public script's lock-first bootstrap, now completes all four distinct tiny
+sacrificial arms and publishes one complete **probe, not evidence** report with
+four matching receipt hashes. Its sacrificial truth contains only two generated
+2x2 networks; fixture hooks isolate freeze and truth access in the copied tree.
+A post-receipt arm swap exits 2 before publication. Raw final after evidence is
+`freeze_bridge/lifecycle_bridge_after_repair_final.json` (SHA-256
+`3129f440715d5fd019067802db9ef054e50a89679e665c74c3465971a1b34e68`).
+An earlier after run is retained as
+`freeze_bridge/lifecycle_bridge_after_repair.json`; the final fixture marks its
+synthetic truth explicitly as a probe.
+
+Focused bridge **17/17** includes matching-module cleanup and wrong-origin
+refusal/preservation, along with the existing forged source, cache, truth,
+receipt and closing-publication negatives. Freezer **19/19**, Stage-0 **32/32**
+(P01's six honest DESIGN reads unchanged; P08 remains three/exhausted), and
+portability **103/103** passed. `py_compile`, public and direct-bootstrap lab
+help **2/2**, current four-arm freeze receipt validation, embedded fingerprint
+and `git diff --check` passed. The structured evidence packet is
+`freeze_bridge/lifecycle_bridge_repair_summary.json` (SHA-256
+`b88870c8c546858a987f9a83565078e0f35f6163894e2f98ccc6e3df515f1119`).
+Source hashes are lab
+`45548ede0eb8dc7fce6fc5fda67c6444b6ed4e69993a67efc4d49512b1ab982c`,
+bridge fixture
+`493f8c1120481c7e94700dfda11a01b7ef8ce1b612508a24e49f101f12a8d537`
+and real-entry fixture
+`2b768f64aaa646c740fda994a90a907e8e169ca94b6212b8f928a5a607b3a8a3`.
+
+No protected truth, truth ledger, estimator, arm byte, fit/freeze receipt,
+selected coefficient, role, gate, statistic, cost or residual model changed. No
+workerq job, preflight or P01 retry was launched. The proposed terminal
+current-byte check for root is `workerq submit --project arc-whest --priority
+high --gpus 0 --ram 5 --vram 0 --cpus 2 --no-snapshot -- powershell.exe
+-NoProfile -ExecutionPolicy Bypass -File scripts/preflight.ps1`. A fresh
+independent Skeptic and a successful current-byte preflight remain required
+before another exposed-DESIGN P01 read. The synthetic report makes no accuracy
+or residual claim for the frozen K4 arms.
