@@ -1,0 +1,105 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260912071301
+Username: SAM_MEGA_PC\samsu
+RunAs User: SAM_MEGA_PC\samsu
+Configuration Name: 
+Machine: SAM_MEGA_PC (Microsoft Windows NT 10.0.26200.0)
+Host Application: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/preflight.ps1 -Log C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\integrated_first_source\memory_boundary_preflight.log
+Process ID: 42776
+PSVersion: 5.1.26100.9444
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9444
+BuildVersion: 10.0.26100.9444
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+preflight -- arc-whest
+repo:    C:\Users\samsu\Documents\arc-whest
+shipped: estimator.py   archive: estimator_v2_6_1.py
+HEAD:    bac84089bcfacfe274dd36932b08d8535c1ee68a
+worktree: DIRTY at start --
+    ?? experiments/2026-09-11_stage2_compact_p07/integrated_first_source/memory_boundary_preflight.log
+  (steps 15/16 regenerate tracked evidence, so the tree is
+   EXPECTED to be dirty at the END of a -Full run)
+
+=== 1. official stack + round configuration ===
+
+  PASS  1. official stack + round configuration
+
+=== 2. mint provenance + dataset pin ===
+
+
+  PASS  2. mint provenance + dataset pin
+
+=== 3. invariant suite ===
+
+
+  PASS  3. invariant suite
+
+=== 4. whest validate ===
+  child stdout encoding: utf-8
+
+  PASS  4. whest validate
+
+=== 5. ship-file identity vs estimator_v2_6_1.py ===
+
+  PASS  5. ship-file identity vs estimator_v2_6_1.py
+
+=== 6. vault seal (counter vs log) ===
+
+  PASS  6. vault seal (counter vs log)
+
+=== 7. seed ledger (consumption + source scan) + enforcement labels ===
+
+
+  PASS  7. seed ledger (consumption + source scan) + enforcement labels
+
+=== 8. canonical scorer + the binding gate ===
+
+  PASS  8. canonical scorer + the binding gate
+
+=== 9. seed-ledger refusals + the truth-read register ===
+
+
+  PASS  9. seed-ledger refusals + the truth-read register
+
+=== 10. vault integrity (array hashes + seed->weights) ===
+
+  PASS  10. vault integrity (array hashes + seed->weights)
+
+=== 11. lifecycle evaluator + the certification consumers' mutation battery ===
+
+
+  PASS  11. lifecycle evaluator + the certification consumers' mutation battery
+
+=== 12. counted-FLOP anchor vs the official runner ===
+
+  PASS  12. counted-FLOP anchor vs the official runner
+
+PREFLIGHT GREEN -- 12/16, 4 SKIPPED
+
+NOT CHECKED by this run. A skipped step is NOT a pass.
+Clear every line below before promoting, submitting, or
+spending a vault touch:
+  - 13. shape parity              -- not run without -Full (~480 s)
+  - 14. carrier strength         -- not run without -Full (~130 s)
+  - 15. deployment envelope      -- not run without -Full (~40 s)
+  - 16. official Phase-2 smoke   -- not run without -Full (~30 s), and it is DEPLOYMENT AUTHORITY
+  .\scripts\preflight.ps1 -Full
+
+Not covered by this gate, and still required before promotion:
+  - public Phase-2 mini (CONFIRM, read-only -- FIT NOTHING ON IT):
+      uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --runner subprocess
+    (v1-phase1 is the PHASE-1 split; use it only to replay a Phase-1 artifact)
+  - the 8,192 MB memory limit is UNENFORCEABLE on this host (no RLIMIT_AS on
+    Windows). Step 15 ACCOUNTS for it; nothing here TESTS it.
+  - GPU mirror parity:                     .venv-gpu\Scripts\python.exe local_sim/gpu_parity.py
+  - vault touch (ONE per estimator change): .venv-gpu\Scripts\python.exe local_sim/vault.py evaluate --label <v> --reason estimator-change
+  - Samuel's explicit approval before any submission.
+**********************
+Windows PowerShell transcript end
+End time: 20260912071927
+**********************
