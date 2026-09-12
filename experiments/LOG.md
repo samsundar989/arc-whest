@@ -46501,3 +46501,21 @@ recent preflights 1015/1018/1019 peaked near 3 GiB, so declare **5 GiB RAM,
 0 VRAM, 2 CPUs**. Full-only steps are deliberately deferred until candidate
 engineering passes to avoid an unnecessary 11-minute pass; this default run
 cannot be misreported as Full certification.
+
+**F21 workerq node-placement correction (before reruns).** Job 1073's default
+preflight was placed on the `3080ti` node and FAILED for environment/provenance
+reasons, not a candidate check. Its remote `estimator.py` SHA256 was
+`1caa3752be56e8625ddb8b163ff8ffa8533cf261f42c9fb8`, while the live
+shipped file and pinned official anchor are
+`00240eb1e60810f5e9a6f743b8ad89a1533cfd8671c08e07525f1ed1de54d9ec`.
+The remote checkout also lacked ignored historical artifact files, reported
+`uv trampoline failed to canonicalize script path`, and lacked a Linux runner;
+steps 4, 7, 9, 11 and 12 were red. The raw queue log is `workerq logs 1073`.
+This does not test the fused candidate. Job 1072 (candidate quick certificate)
+was also placed remotely and cancellation was requested before accepting any
+result. Job 1070 (full-width trajectory) had not started; it too will be
+requeued locally. Subsequent evidence jobs use `workerq submit --node local`
+with the same conservative RAM/CPU declarations. Node pinning preserves queue
+admission while making source hashes, ignored passthroughs, and receipts
+meaningful on the live host. The earlier optimization reviews still apply;
+no test coverage or resource request is reduced.
