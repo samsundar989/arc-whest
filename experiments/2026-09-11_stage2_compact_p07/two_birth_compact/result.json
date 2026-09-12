@@ -1,0 +1,632 @@
+{
+  "checks": [
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "bank1_total_mass",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 5.551115123125783e-17,
+      "name": "bank1_centered",
+      "pass": true
+    },
+    {
+      "name": "bank1_positive_weights",
+      "pass": true
+    },
+    {
+      "name": "bank1_nonzero_quadratic",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "bank2_total_mass",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.6653345369377348e-16,
+      "name": "bank2_centered",
+      "pass": true
+    },
+    {
+      "name": "bank2_positive_weights",
+      "pass": true
+    },
+    {
+      "name": "bank2_nonzero_quadratic",
+      "pass": true
+    },
+    {
+      "name": "distinct_banks_and_signed_maps",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "birth1_subsource1_gram_symmetric",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.7763568394002505e-15,
+      "name": "birth1_subsource1_weighted_gram",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.7755575615628914e-17,
+      "name": "birth1_subsource2_gram_symmetric",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 3.552713678800501e-15,
+      "name": "birth1_subsource2_weighted_gram",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 8.881784197001252e-16,
+      "name": "birth1_full_cubic",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 8.881784197001252e-16,
+      "name": "birth1_D3",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 8.881784197001252e-16,
+      "name": "birth1_oriented_D21",
+      "pass": true
+    },
+    {
+      "ages": [
+        0,
+        0
+      ],
+      "expected_ages": [
+        0,
+        0
+      ],
+      "name": "birth1_birth_age_count",
+      "pass": true,
+      "retained_sources": 2
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.7755575615628914e-17,
+      "name": "birth1_gram_symmetric",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 3.552713678800501e-15,
+      "name": "birth1_weighted_gram",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 3.3306690738754696e-16,
+      "name": "birth1_basis_orthogonality_at_join",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "birth1_factor_rotation_A0",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 3.3306690738754696e-16,
+      "name": "birth1_factor_rotation_P0",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.1102230246251565e-16,
+      "name": "birth1_factor_rotation_A1",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 3.3306690738754696e-16,
+      "name": "birth1_factor_rotation_P1",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.7763568394002505e-15,
+      "name": "carry1_full_cubic",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.7763568394002505e-15,
+      "name": "carry1_D3",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.5543122344752192e-15,
+      "name": "carry1_oriented_D21",
+      "pass": true
+    },
+    {
+      "ages": [
+        1,
+        1
+      ],
+      "expected_ages": [
+        1,
+        1
+      ],
+      "name": "carry1_birth_age_count",
+      "pass": true,
+      "retained_sources": 2
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.7755575615628914e-17,
+      "name": "carry1_gram_symmetric",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.6645352591003757e-15,
+      "name": "carry1_weighted_gram",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "carry1_factor_rotation_A0",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.220446049250313e-16,
+      "name": "carry1_factor_rotation_P0",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.3877787807814457e-16,
+      "name": "carry1_factor_rotation_A1",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 4.440892098500626e-16,
+      "name": "carry1_factor_rotation_P1",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 8.881784197001252e-16,
+      "name": "birth2_subsource1_gram_symmetric",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.0658141036401503e-14,
+      "name": "birth2_subsource1_weighted_gram",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 8.881784197001252e-16,
+      "name": "birth2_subsource2_gram_symmetric",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 7.105427357601002e-15,
+      "name": "birth2_subsource2_weighted_gram",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 3.774758283725532e-15,
+      "name": "birth2_join_full_cubic",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 3.774758283725532e-15,
+      "name": "birth2_join_D3",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 4.052314039881821e-15,
+      "name": "birth2_join_oriented_D21",
+      "pass": true
+    },
+    {
+      "ages": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "expected_ages": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "name": "birth2_join_birth_age_count",
+      "pass": true,
+      "retained_sources": 4
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 8.881784197001252e-16,
+      "name": "birth2_join_gram_symmetric",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 7.105427357601002e-15,
+      "name": "birth2_join_weighted_gram",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 4.440892098500626e-16,
+      "name": "birth2_join_basis_orthogonality_at_join",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "birth2_join_factor_rotation_A0",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 4.440892098500626e-16,
+      "name": "birth2_join_factor_rotation_P0",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.6653345369377348e-16,
+      "name": "birth2_join_factor_rotation_A1",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.220446049250313e-16,
+      "name": "birth2_join_factor_rotation_P1",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "birth2_join_factor_rotation_A2",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 8.881784197001252e-16,
+      "name": "birth2_join_factor_rotation_P2",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.220446049250313e-16,
+      "name": "birth2_join_factor_rotation_A3",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 6.661338147750939e-16,
+      "name": "birth2_join_factor_rotation_P3",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.2212453270876722e-15,
+      "name": "carry2_full_cubic",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.2212453270876722e-15,
+      "name": "carry2_D3",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.4432899320127035e-15,
+      "name": "carry2_oriented_D21",
+      "pass": true
+    },
+    {
+      "ages": [
+        2,
+        2,
+        1,
+        1
+      ],
+      "expected_ages": [
+        2,
+        2,
+        1,
+        1
+      ],
+      "name": "carry2_birth_age_count",
+      "pass": true,
+      "retained_sources": 4
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 8.881784197001252e-16,
+      "name": "carry2_gram_symmetric",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 5.329070518200751e-15,
+      "name": "carry2_weighted_gram",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "carry2_factor_rotation_A0",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.498001805406602e-16,
+      "name": "carry2_factor_rotation_P0",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.6653345369377348e-16,
+      "name": "carry2_factor_rotation_A1",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.220446049250313e-16,
+      "name": "carry2_factor_rotation_P1",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "carry2_factor_rotation_A2",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 6.661338147750939e-16,
+      "name": "carry2_factor_rotation_P2",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.6653345369377348e-16,
+      "name": "carry2_factor_rotation_A3",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 5.551115123125783e-16,
+      "name": "carry2_factor_rotation_P3",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.2212453270876722e-15,
+      "name": "final_mean_only_D3",
+      "pass": true
+    },
+    {
+      "name": "final_mean_only_skips_D21",
+      "pass": true
+    },
+    {
+      "gap": 1.2686917136584706,
+      "minimum": 0.001,
+      "name": "dropped_negative_pair_mutant_refused",
+      "pass": true
+    },
+    {
+      "D21_error": 0.0,
+      "D21_max_abs": 0.0,
+      "D3_error": 0.0,
+      "D3_max_abs": 0.0,
+      "full_tensor_error": 0.0,
+      "full_tensor_max_abs": 0.0,
+      "limit": 1e-10,
+      "name": "birth1_zero_source",
+      "pass": true
+    },
+    {
+      "D21_error": 0.0,
+      "D21_max_abs": 0.0,
+      "D3_error": 0.0,
+      "D3_max_abs": 0.0,
+      "full_tensor_error": 0.0,
+      "full_tensor_max_abs": 0.0,
+      "limit": 1e-10,
+      "name": "carry1_zero_source",
+      "pass": true
+    },
+    {
+      "D21_error": 0.0,
+      "D21_max_abs": 0.0,
+      "D3_error": 0.0,
+      "D3_max_abs": 0.0,
+      "full_tensor_error": 0.0,
+      "full_tensor_max_abs": 0.0,
+      "limit": 1e-10,
+      "name": "birth2_join_zero_source",
+      "pass": true
+    },
+    {
+      "D21_error": 0.0,
+      "D21_max_abs": 0.0,
+      "D3_error": 0.0,
+      "D3_max_abs": 0.0,
+      "full_tensor_error": 0.0,
+      "full_tensor_max_abs": 0.0,
+      "limit": 1e-10,
+      "name": "carry2_zero_source",
+      "pass": true
+    }
+  ],
+  "compact_reference_sha256": "81f8bbbbe60a617cf0533f13657440ed35feb9bb5d0bc0fbf8956ef002febdd2",
+  "contract_commit": "424477e",
+  "feed_constructor_sha256": "f50c199adb1204e47bd931283f7f1973d85b5a256d0a0cbeb0dc1f32560751c4",
+  "full_rank": [
+    {
+      "D21_error": 8.881784197001252e-16,
+      "D21_max_abs": 2.106143424000001,
+      "D3_error": 8.881784197001252e-16,
+      "D3_max_abs": 2.106143424000001,
+      "ages": [
+        0,
+        0
+      ],
+      "full_tensor_error": 8.881784197001252e-16,
+      "full_tensor_max_abs": 2.106143424000001,
+      "retained_sources": 2,
+      "stage": "birth1"
+    },
+    {
+      "D21_error": 1.5543122344752192e-15,
+      "D21_max_abs": 1.2743219052143144,
+      "D3_error": 1.7763568394002505e-15,
+      "D3_max_abs": 1.2743219052143142,
+      "ages": [
+        1,
+        1
+      ],
+      "full_tensor_error": 1.7763568394002505e-15,
+      "full_tensor_max_abs": 1.2743219052143144,
+      "retained_sources": 2,
+      "stage": "carry1"
+    },
+    {
+      "D21_error": 4.052314039881821e-15,
+      "D21_max_abs": 0.8971451326561987,
+      "D3_error": 3.774758283725532e-15,
+      "D3_max_abs": 0.8971451326561989,
+      "ages": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "full_tensor_error": 3.774758283725532e-15,
+      "full_tensor_max_abs": 0.8971451326561988,
+      "retained_sources": 4,
+      "stage": "birth2_join"
+    },
+    {
+      "D21_error": 1.4432899320127035e-15,
+      "D21_max_abs": 0.5158086075957583,
+      "D3_error": 1.2212453270876722e-15,
+      "D3_max_abs": 0.5158086075957582,
+      "ages": [
+        2,
+        2,
+        1,
+        1
+      ],
+      "full_tensor_error": 1.2212453270876722e-15,
+      "full_tensor_max_abs": 0.5158086075957582,
+      "retained_sources": 4,
+      "stage": "carry2"
+    }
+  ],
+  "kind": "truth-free two-birth abstract compact K3-feed integration",
+  "mutant_gap": 1.2686917136584706,
+  "n_checks": 74,
+  "n_failed": 0,
+  "pass": true,
+  "rank2_diagnostic": {
+    "is_exactness_gate": false,
+    "max_full_tensor_loss": 1.2281892830323515,
+    "minimum_material_loss": 1e-06,
+    "predicted_material_loss": true,
+    "rows": [
+      {
+        "D21_error": 0.22935725764561313,
+        "D21_max_abs": 2.032765764912764,
+        "D3_error": 0.22935725764561313,
+        "D3_max_abs": 2.032765764912764,
+        "ages": [
+          0,
+          0
+        ],
+        "full_tensor_error": 0.22935725764561313,
+        "full_tensor_max_abs": 2.0327657649127646,
+        "retained_sources": 2,
+        "stage": "birth1"
+      },
+      {
+        "D21_error": 0.15983116634987923,
+        "D21_max_abs": 1.2439741108570581,
+        "D3_error": 0.13342435229188954,
+        "D3_max_abs": 1.2439741108570583,
+        "ages": [
+          1,
+          1
+        ],
+        "full_tensor_error": 0.15983116634987932,
+        "full_tensor_max_abs": 1.2439741108570581,
+        "retained_sources": 2,
+        "stage": "carry1"
+      },
+      {
+        "D21_error": 1.228189283032352,
+        "D21_max_abs": 1.2024835725184113,
+        "D3_error": 1.228189283032352,
+        "D3_max_abs": 1.2024835725184113,
+        "ages": [
+          1,
+          1,
+          0,
+          0
+        ],
+        "full_tensor_error": 1.2281892830323515,
+        "full_tensor_max_abs": 1.2024835725184109,
+        "retained_sources": 4,
+        "stage": "birth2_join"
+      },
+      {
+        "D21_error": 0.42448916231448747,
+        "D21_max_abs": 0.4521216130018272,
+        "D3_error": 0.2286926210613387,
+        "D3_max_abs": 0.45212161300182707,
+        "ages": [
+          2,
+          2,
+          1,
+          1
+        ],
+        "full_tensor_error": 0.42448916231448736,
+        "full_tensor_max_abs": 0.45212161300182707,
+        "retained_sources": 4,
+        "stage": "carry2"
+      }
+    ]
+  },
+  "scope": "two abstract discrete feeds, not physical nonlinear source, live rank or challenge score",
+  "source_sha256": "552dd841a3baacfe682c86271e601cdac7a5c52383e420ba4ad646bc65e7cdf6"
+}
