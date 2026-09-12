@@ -1,0 +1,7 @@
+Source commit: 166ef15
+Command: uv run python local_sim/p2_k4_integrated_memory_ledger.py --json experiments/2026-09-11_stage2_compact_p07/integrated_first_source/memory_ledger_colive_result.json
+Exit code: 0
+stdout final line: memory ledger PASS; optimized modeled peak 715840768 bytes; padded 910983936 bytes
+Raw JSON SHA256: df2dc24f2dd1d05fb9d58aece87d02c2b0ebc90f61f72e00e7ee900873e3b44e
+Preserved ZIP SHA256: cf543a3434fca61831d75c6721852be112d1cd2f4077c391dbaa4803d2c592d7
+Status: 32/32 checks passed, but exhaustive n8 outer-frame comparison found the named Om = W[:, :ordinary_residual] view absent from the explicit inventory. W's backing bytes were counted. This draft is preserved, then superseded by a stricter name/shape coverage check.
