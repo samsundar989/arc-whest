@@ -74,6 +74,11 @@ def _read(path: str, block: str, purpose: str, out: str) -> tuple[dict, dict]:
 def _labels(a: argparse.Namespace) -> tuple[list[int], np.ndarray, np.ndarray, dict]:
     """Return seeds, float32 midpoint labels, predicted midpoint noise, provenance."""
     if a.tier == "design":
+        canonical = (_ROOT / "experiments" / "2026-08-26_p2_gt").resolve()
+        if Path(a.truth_a).resolve() != canonical / "gt_halfA.npz" or (
+            Path(a.truth_b).resolve() != canonical / "gt_halfB.npz"
+        ):
+            raise ValueError("DESIGN must use the registered 24-network high-resolution P01 pair")
         da, pa = _read(a.truth_a, "P01", "F21 exposed DESIGN half A", a.out)
         db, pb = _read(a.truth_b, "P01", "F21 exposed DESIGN half B", a.out)
         required = {"seeds", "means", "var", "n_samples"}
@@ -97,6 +102,13 @@ def _labels(a: argparse.Namespace) -> tuple[list[int], np.ndarray, np.ndarray, d
         noise = ((v1 + v2) / 2).mean(axis=1) / (2 * n_samples)
         files = [pa, pb]
     else:
+        truth_path = Path(a.truth).resolve()
+        truth_rel = os.path.relpath(truth_path, _ROOT).replace("\\", "/")
+        truth_sha = _sha(truth_path)
+        if not any(c.block == "P09" and c.artifact == truth_rel
+                   and c.artifact_sha256 == truth_sha
+                   for c in seed_ledger.finalizations()):
+            raise ValueError("P09 truth must be finalized in the seed ledger before reading")
         d, p = _read(a.truth, "P09", "F21 fresh DECIDE truth", a.out)
         required = {"seeds", "means_r1", "means_r2", "gt_noise", "n_samples"}
         if required - d.keys():
@@ -238,16 +250,19 @@ def main() -> int:
             "noise_bias_in_observed_difference": noise_compare.noise_bias,
         }
 
-    c = arms["L4"]["vectors"]["forecast"]
-    k = arms["fused_L4"]["vectors"]["forecast"]
+    # The preregistered gate uses the conservative observed maximum server
+    # offset.  The offset-zero forecast remains a sensitivity analysis only.
+    c = arms["L4"]["vectors"]["forecast_offset_max"]
+    k = arms["fused_L4"]["vectors"]["forecast_offset_max"]
     if a.tier == "design":
         design_ratio = float(k.mean() / c.mean())
-        verdict = {"kind": "DESIGN accuracy screen only", "forecast_score_ratio": design_ratio,
+        verdict = {"kind": "DESIGN accuracy screen, official precision and max observed server offset",
+                   "forecast_offset_max_score_ratio": design_ratio,
                    "max_allowed_ratio": 1.05, "passed": bool(design_ratio <= 1.05),
                    "promotion": False}
     else:
         v = cs.decide(c, k, gate=1.05, interval="t")
-        verdict = {"kind": "DECIDE primary L4 comparison at official truth precision",
+        verdict = {"kind": "DECIDE primary L4 comparison at official truth precision and max observed server offset",
                    "passed": v.passed, "gain": v.gain, "gate": v.gate,
                    "interval": v.interval, "ci_difference": list(v.ci),
                    "ci_excludes_zero": v.ci_excludes_zero,
@@ -264,6 +279,8 @@ def main() -> int:
                         "official_samples": OFFICIAL_SAMPLES,
                         "server_offset_max_observed": SERVER_OFFSET_MAX,
                         "offset_is_fixed": False,
+                        "binding_gate_score": "forecast_offset_max",
+                        "offset_zero_forecast_is_sensitivity_only": True,
                         "local_residual_cap_relaxed_accuracy_only": True,
                         "subprocess_deployment_certification": False},
         "source_hashes": {name: {"path": str(path), "sha256": digest}
