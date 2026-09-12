@@ -1,0 +1,12 @@
+{
+  "baseline_changed_input_refused": true,
+  "bootstrap_sha256": "0bba6abae9379b398ed473d935c295009371b95efd9526310038614a8db6341f",
+  "changed_registered_input_refused": true,
+  "complete_output_absent": true,
+  "former_unlocked_json_load_not_called": true,
+  "lab_sha256": "50ac2e231e59522161ee46694b187d7c61c7d0808315b623365a8c2ef202b44b",
+  "receipt_on_disk_unchanged": true,
+  "registered_input": "p2-receipt-race-qna8oyim/input.txt",
+  "schema": "arc-whest.publication-receipt-parse-regression.v1",
+  "scope": "disposable receipt, arms, input and truth; no protected arrays opened"
+}

@@ -44030,3 +44030,55 @@ changed score/role/arm/source, false-complete report or failed preflight
 blocks the retry. Scope: parent publication lock ordering plus sacrificial
 fixtures only. Preserve the receipt-pinned bootstrap, actual fit/freeze
 receipts, estimator, frozen arms, truth ledger, cost/statistic/gate and vault.
+
+## 2026-09-12 - Freeze receipt locked before the parent parses its bindings
+
+**IMPORTANT repair result; sacrificial evidence only.** The parent resolves the
+freeze-receipt path from its locked pending report, then acquires the existing
+`_stable_files` lock on that receipt **before its first read**. It checks the
+held raw bytes against the child's expected receipt SHA-256, parses exactly
+those bytes, and keeps the receipt lock through derived source/input/arm locks,
+complete-stage verification and the final exclusive hard link. The bootstrap,
+actual fit/freeze receipts, frozen arms and estimator remain byte-untouched.
+
+The independent disposable disk-swap counterexample is retained at
+`freeze_bridge/skeptic_receipt_disk_swap_probe.py` with its pre-repair raw JSON.
+Its adapted regression `freeze_bridge/publication_receipt_lock_regression.py`
+(SHA-256 `bd354882c9540d6496fb8e60aed92e2798d78abee82f49f1166f8e9945b4c5e6`)
+tries to replace the receipt during the locked parse. Windows denies the write,
+the already changed registered input is still detected, and no complete output
+is published. Raw result `freeze_bridge/publication_receipt_lock_regression.json`
+SHA-256 `1537360f568f476e08c85d9de762dcb8d35350570248a2c2cf03234ef8954eac`.
+The original parser-hook counterexample is also retained. Its adapted regression
+confirms the former unlocked `json.load` call is gone, the changed input refuses,
+and no complete output appears; script/result
+`freeze_bridge/publication_receipt_parse_regression.py/.json` SHA-256
+`d65f7a908c66b302f63c65b6dc89398c5fd01086247c8b6a32e8c63dab538cb2` /
+`768aa2437533ae077709c3f8cd8cff7b60ac1f3ae13447365d1854b770a8383e`.
+
+The current immutable-receipt binding-layer probe still passes with sacrificial
+truth, including the blocked complete-stage writer, synthetic truth mutation,
+missing and malformed bindings, pending/status/arm-coverage and preexisting
+output controls. Raw `freeze_bridge/publication_receipt_lock_actual.json`
+SHA-256 `0d9baf597271c2812d7566baf4fc260a108016f8aac67aa4c91b17696a1e2b5a`.
+The real lock-first synthetic four-arm entry publishes a complete version-3
+report with receipt-matching hashes and passing build status, while missing or
+swapped arms, preexisting output and direct-bootstrap-without-stage refuse;
+`freeze_bridge/publication_receipt_lock_lifecycle.json` SHA-256
+`2426074c6246893ce6806bd5cc643c32a4d0e06f42e06899700e636adfc8a3e7`.
+Direct caller-stage and normal late-origin refusals remain fail-closed:
+`freeze_bridge/publication_receipt_lock_stage_spoof.json` SHA-256
+`d0195b5223fb13c93cff0b68ddc19a39f070e18e095161dd2ecbc612458b741c`
+and `freeze_bridge/publication_receipt_lock_late_origin.json` SHA-256
+`f7830d277cc3557d680c81da1ff92f80df8ad4ae50c33fe163ccf4259e7cd340`.
+
+Focused lab bridge 17/17, freezer 19/19, truth reads 35/35, seed ledger 66/66,
+portability 103/103, strict current freeze-receipt validation, `py_compile`
+and `git diff --check` pass. Current lab SHA-256 is
+`50ac2e231e59522161ee46694b187d7c61c7d0808315b623365a8c2ef202b44b`;
+the receipt-pinned bootstrap remains
+`0bba6abae9379b398ed473d935c295009371b95efd9526310038614a8db6341f`.
+No protected P01/P07/vault truth arrays were opened, and no truth ledger,
+scientific arm, statistic, gate, role, cost or residual model changed. This is
+an instrument result only. A current-byte default preflight and fresh
+independent Skeptic ACCEPT are still required before any P01 retry.

@@ -71,7 +71,7 @@ _ROOT = os.path.dirname(_HERE)
 _BOOTSTRAP = os.path.join(_HERE, "p2_locked_bootstrap.py")
 _CLI_BINDINGS_ENV = "ARC_WHEST_P2_LAB_LOCKED_BINDINGS"
 _REPORT_STAGE_ENV = "ARC_WHEST_P2_LAB_REPORT_STAGE"
-_SELF_FINGERPRINT = "6dd73989bba665b75c32aee86692f995399bc20e349e464bf27d88441fb2a287"
+_SELF_FINGERPRINT = "4b16165de98d3cedf1eb1a7f823be5f8662c28e8b06821727069f7e941beea4c"
 
 
 def _attested_target_sha():
@@ -185,57 +185,66 @@ def _publish_audited_stage(stage, output, target_sha):
                         bridge["protected_truth"]["reservation_receipt"]["result_artifact"],
                         "truth result artifact"), output):
                 raise ValueError("staged truth receipt does not bind the requested output")
-            bindings = list(bridge["locked_cli_source_bindings"].values())
-            bindings += list(bridge["instrument_bindings"].values())
-            bindings += [bridge["fit_receipt"], bridge["freeze_receipt"],
-                         {"path": bridge["protected_truth"]["path"],
-                          "sha256": bridge["protected_truth"]["sha256"]}]
             frozen_path = bootstrap._repo_path(bridge["freeze_receipt"]["path"],
                                                "freeze receipt")
-            with open(frozen_path, "rb") as fh:
-                frozen = json.load(fh)
-            bindings += list(frozen["source_bindings"].values())
-            bindings += list(frozen.get("input_bindings", {}).values())
-            bindings += [{"path": row["path"], "sha256": row["sha256"]}
-                         for row in frozen["arms"]]
-            expected_arms = {row["name"].replace("_", "-"): row["sha256"]
-                             for row in frozen["arms"]}
-            if (set(expected_arms) != set(report["arms"]) or
-                    any(report["arms"][name]["candidate_sha256"] != digest
-                        for name, digest in expected_arms.items())):
-                raise ValueError("staged report arm hashes differ from the freeze receipt")
-            paths = [bootstrap._repo_path(row["path"], "report binding")
-                     for row in bindings]
         except (KeyError, TypeError, json.JSONDecodeError) as exc:
             raise ValueError("staged report bindings are incomplete: %s" % exc) from exc
-        with bootstrap._stable_files(paths):
-            for row, path in zip(bindings, paths):
-                with open(path, "rb") as fh:
-                    actual = hashlib.sha256(fh.read()).hexdigest()
-                if actual != row["sha256"]:
-                    raise ValueError("report binding changed before publication: %s" % path)
-            with open(stage, "rb") as fh:
-                if fh.read() != raw:
-                    raise ValueError("staged report changed before publication")
-            if os.path.lexists(output):
-                raise ValueError("%s appeared before publication" % output)
-            report["status"] = "complete"
-            complete_raw = (json.dumps(report, indent=1, default=str) + "\n").encode("utf-8")
-            complete_stage = os.path.join(os.path.dirname(stage), "complete.json")
-            with open(complete_stage, "xb") as fh:
-                fh.write(complete_raw)
-                fh.flush()
-                os.fsync(fh.fileno())
-            with bootstrap._stable_files([complete_stage]):
-                with open(complete_stage, "rb") as fh:
-                    if fh.read() != complete_raw:
-                        raise ValueError("complete report stage changed before publication")
+        # The receipt itself is a source of path names.  Bind its disk bytes
+        # before parsing any of those names and hold that lock through the link.
+        with bootstrap._stable_files([frozen_path]):
+            with open(frozen_path, "rb") as fh:
+                frozen_raw = fh.read()
+            if hashlib.sha256(frozen_raw).hexdigest() != bridge["freeze_receipt"]["sha256"]:
+                raise ValueError("freeze receipt changed before publication")
+            try:
+                frozen = json.loads(frozen_raw)
+                bindings = list(bridge["locked_cli_source_bindings"].values())
+                bindings += list(bridge["instrument_bindings"].values())
+                bindings += [bridge["fit_receipt"], bridge["freeze_receipt"],
+                             {"path": bridge["protected_truth"]["path"],
+                              "sha256": bridge["protected_truth"]["sha256"]}]
+                bindings += list(frozen["source_bindings"].values())
+                bindings += list(frozen.get("input_bindings", {}).values())
+                bindings += [{"path": row["path"], "sha256": row["sha256"]}
+                             for row in frozen["arms"]]
+                expected_arms = {row["name"].replace("_", "-"): row["sha256"]
+                                 for row in frozen["arms"]}
+                if (set(expected_arms) != set(report["arms"]) or
+                        any(report["arms"][name]["candidate_sha256"] != digest
+                            for name, digest in expected_arms.items())):
+                    raise ValueError("staged report arm hashes differ from the freeze receipt")
+                paths = [bootstrap._repo_path(row["path"], "report binding")
+                         for row in bindings]
+            except (KeyError, TypeError, json.JSONDecodeError) as exc:
+                raise ValueError("staged report bindings are incomplete: %s" % exc) from exc
+            with bootstrap._stable_files(paths):
+                for row, path in zip(bindings, paths):
+                    with open(path, "rb") as fh:
+                        actual = hashlib.sha256(fh.read()).hexdigest()
+                    if actual != row["sha256"]:
+                        raise ValueError("report binding changed before publication: %s" % path)
+                with open(stage, "rb") as fh:
+                    if fh.read() != raw:
+                        raise ValueError("staged report changed before publication")
                 if os.path.lexists(output):
                     raise ValueError("%s appeared before publication" % output)
-                try:
-                    os.link(complete_stage, output)
-                except FileExistsError as exc:
-                    raise ValueError("%s appeared before publication" % output) from exc
+                report["status"] = "complete"
+                complete_raw = (json.dumps(report, indent=1, default=str) + "\n").encode("utf-8")
+                complete_stage = os.path.join(os.path.dirname(stage), "complete.json")
+                with open(complete_stage, "xb") as fh:
+                    fh.write(complete_raw)
+                    fh.flush()
+                    os.fsync(fh.fileno())
+                with bootstrap._stable_files([complete_stage]):
+                    with open(complete_stage, "rb") as fh:
+                        if fh.read() != complete_raw:
+                            raise ValueError("complete report stage changed before publication")
+                    if os.path.lexists(output):
+                        raise ValueError("%s appeared before publication" % output)
+                    try:
+                        os.link(complete_stage, output)
+                    except FileExistsError as exc:
+                        raise ValueError("%s appeared before publication" % output) from exc
 
 
 # A real script process must hand off before numpy or any executable project
