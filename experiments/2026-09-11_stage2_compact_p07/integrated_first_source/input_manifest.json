@@ -1,0 +1,39 @@
+{
+  "kind": "frozen synthetic integrated first-source inputs before tiny measurement",
+  "contract_commit": "ec0bdf3",
+  "join_schedule_amendment_commit": "e91f390",
+  "taylor_amendment_commit": "3560e35",
+  "generator": "local_sim/p2_k4_integrated_first_source.py::_integrated_inputs",
+  "numpy_generator": "default_rng(20260912)",
+  "generator_order": "16 float64 n-by-n normal/sqrt(n) maps, then n-by-S float64 normal raw atoms, then S uniform float64 weights",
+  "source_sha256": "284b550f5f1fde7840a7a84923a394bee069a3454f0c780601fe696457b8b9c8",
+  "test_sha256": "81f358fc1dab05ce5cb38f3afd8e1d098b9befe9597a631a720eb890792dc49a",
+  "tiny": {
+    "width": 4,
+    "depth": 16,
+    "source_rank": 3,
+    "common_rank": 4,
+    "ordinary_residual": 4,
+    "input_sha256": "4503ea3a74ef8e5f35e27b77045688d6e006322805a65a6a386d31a60e04a81f"
+  },
+  "live": {
+    "width": 1024,
+    "depth": 16,
+    "source_rank": 64,
+    "common_rank": 384,
+    "ordinary_residual": 16,
+    "input_sha256": null,
+    "input_hash_status": "requires a separate workerq generator-only job and committed amendment before the full meter"
+  },
+  "installed_packages": {
+    "flopscope": {
+      "version": "0.12.1",
+      "entry_sha256": "91cabcd15b88763cd7af73f2d0e04193c7c7750e3cb0ee09575ad1f0e4594049"
+    },
+    "whestbench": {
+      "version": "0.16.1",
+      "entry_sha256": "eab9716010f7314f5d088430456061b941d377994f9d66e6478df415cff05914"
+    }
+  },
+  "scope": "externally supplied synthetic L0 weighted atoms; no physical ReLU source construction"
+}

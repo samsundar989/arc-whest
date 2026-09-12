@@ -45598,3 +45598,11 @@ that those two old covariance terms were correct. Schedule, FLOP and memory
 gates, external-source scope, data roles and score claims are unchanged. A
 tiny mismatch at the registered tolerance is a FAIL, not grounds to tune
 the factorial coefficients after seeing the output.
+
+**September 12 pre-measure C-Gram call clarification.** The integrated
+source's L15 shortcut needs only the weighted V² diagonal to produce D4,
+not a full dense bank covariance. Predict exactly **14** `dense_k4_C_gram`
+calls for L1--L14, reusing each for D22/D31 and that layer's feed q/a;
+L15 uses one diagonal reduction and no K3 birth. The tiny test must assert
+14 calls before interpreting a width meter. This states an already
+registered final shortcut explicitly and changes no result or budget gate.

@@ -113,6 +113,8 @@ correction precedes any integrated-fixture measurement. L0 has no
 history readout, and L15 has no new birth, join or D21. These are frozen
 design predictions, **not observations**; the tiny executable schedule must
 audit ages, calls and each count before a live-width cost is interpreted.
+The final L15 D4-only shortcut uses a weighted V² diagonal; predict **14**
+full `dense_k4_C_gram` calls at L1--L14, each shared with its feed birth.
 
 The full-rank n4 two-birth fixture proves exact abstract feed addition and
 carries for its fixed law. Its rank-2 result shows material loss. Neither
