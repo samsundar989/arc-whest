@@ -43070,3 +43070,31 @@ The repaired bridge bytes were committed as `16ff8f7`. Current default preflight
 was submitted at high priority as workerq **914**, with 5 GiB RAM, two CPUs, no GPU
 and no source snapshot. It is queued behind the current 51 GiB reservation load;
 it has no verdict yet. The bridge sources will remain unchanged until it completes.
+
+## 2026-09-11 - Bridge launcher child-marker Skeptic rejection
+
+**IMPORTANT instrument result; no protected truth.** A fresh-context Skeptic
+rejected the locked-child bridge repair at `16ff8f7`. The normal launcher path
+does lock its declared source graph and starts a private-pycache child, and its
+focused suites still pass (freezer 17/17; lab 14/14). The stronger provenance
+claim nevertheless fails when the child environment marker is supplied directly.
+
+The independent truth-free reproducer imports a synthetic `lifecycle_eval` A,
+replaces its source on disk with B, supplies the exact current B binding map in
+`ARC_WHEST_P2_LAB_LOCKED_BINDINGS`, then calls the production entrypoint. The
+entrypoint returns success while executing loaded A and recording B's SHA-256.
+The saved result is
+`experiments/2026-09-11_stage2_compact_p07/freeze_bridge/skeptic_env_marker_counterexample.json`;
+the reproducer and formal verdict are beside it. This proves that the binding map
+is a replayable marker rather than evidence that the process is the fresh child
+of the lock-owning parent. The analogous freezer marker also bypasses the stated
+in-process refusal, although no stale freezer dependency execution was shown.
+
+Workerq 914 was cancelled while queued, before start, because its current-byte
+preflight would have tested rejected bytes. It has no runtime, exit code or
+preflight verdict. P07/P01 remain closed. No candidate math, coefficient, registry,
+gate, data role, estimator, protected label, public data or vault state changed.
+The required discriminator is a parent-authenticated worker path plus regression
+fixtures in which forged/pre-set markers either refuse or execute disk B, followed
+by focused suites, a terminal current-byte default preflight and another fresh
+Skeptic.

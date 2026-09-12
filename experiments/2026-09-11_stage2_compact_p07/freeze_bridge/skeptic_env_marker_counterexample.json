@@ -1,0 +1,12 @@
+{
+  "accepted_loaded_A_while_binding_disk_B": true,
+  "actual_disk_lifecycle_sha256": "5b74e6fe2642d6768bf0ae89b16df4e974a2e56c4f5a6410d6ea70efc318b3cd",
+  "cli_return_code": 0,
+  "loaded_lifecycle_version": "A",
+  "on_disk_lifecycle_version": "VERSION='B'",
+  "recorded_lifecycle_sha256": "5b74e6fe2642d6768bf0ae89b16df4e974a2e56c4f5a6410d6ea70efc318b3cd",
+  "reviewed_freezer_sha256": "736fdb2043b584d080828a2b6f6d507f027b31e088a07a2bb3141de849279088",
+  "reviewed_lab_sha256": "b540c55c745c0d2cfe5274705c579318e62d31dbf4385d3ac1c2c9cdc6b6da98",
+  "schema": "arc-whest.skeptic-child-marker-counterexample.v1",
+  "truth_or_labels_opened": false
+}
