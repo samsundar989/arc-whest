@@ -1,7 +1,7 @@
 # CURRENT_STATE.md — read this first
 
-**Current September 12, 2026, after the registered P07 fit and a refused
-P01 four-arm DESIGN comparison.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
+**Current September 12, 2026, after the registered P07 fit and a rejected
+P01 report-publication gate.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
 archived at `docs/archive/CURRENT_STATE_before_worker_review_2026-09-10.md`.
 
 ## What is proved
@@ -78,6 +78,17 @@ fixture, current-byte preflight and fresh independent Skeptic must accept the
 repair before another P01 read. Then preserve the complete report, analyze the
 noise-aware paired outcomes and obtain a result Skeptic and synthesis before
 the next Stage-2 slice. A failed implementation path does not reject coherent K4.
+
+That scoped loader repair passed workerq **950** current-byte default preflight
+**12/16** (four Full-only skips; 3,089.4 MiB peak), but its fresh Skeptic
+**REJECTED** the combined report-publication gate. A repeatable truth-free
+counterexample exits 2 after the bootstrap's final origin audit refuses an
+unregistered module, yet leaves a `status: complete` report written earlier
+by the lab. The raw probe, preflight and verdict are in `freeze_bridge/`, and
+an IMPORTANT repair contract is at the LOG tail. A publication transaction
+must pass this negative, the clean four-arm fixture, preflight and another
+fresh Skeptic before retrying P01. The loader fix remains valid within its
+narrow scope. No four-arm accuracy verdict exists.
 
 The old contract at `08f787b` is superseded. P01 has three recorded DESIGN reads
 and placeholder-smoke exposure; it is never relabeled untouched. P07 is reusable

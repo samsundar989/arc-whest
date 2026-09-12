@@ -91,7 +91,12 @@ exposed P01 DESIGN networks, before depth analysis or publication. Its peak
 was 1,543.9 MiB against an 8 GiB queue reservation. The bounded depth-loader
 and origin-audit repair is preregistered in the LOG; truth-free real-entry
 evidence, current-byte preflight and a fresh Skeptic must precede the next
-P01 attempt. The registered comparison remains explicitly accuracy-only under
+P01 attempt. Workerq 950 passed current-byte default preflight 12/16 (four
+Full-only skips), but an independent Skeptic rejected the final publication
+gate: a copied truth-free lab can leave a complete report after the outer
+bootstrap refuses an unregistered late module. The LOG now contracts a
+publication-transaction repair and a new preflight/Skeptic gate before any
+P01 retry. The registered comparison remains explicitly accuracy-only under
 its residual-cap relaxation. A terminal four-arm report, result Skeptic and
 synthesis are still required before the residual-rank question. P01 had five
 documented reads before job 949 (three historical smoke reads and two failed
