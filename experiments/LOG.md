@@ -43009,3 +43009,28 @@ Current-byte bridge preflight was resubmitted as high-priority workerq **904** a
 not acceptance until it reaches a green terminal verdict. The required fresh
 Skeptic is auditing the committed raw packet independently and will include job
 904's terminal evidence before deciding.
+
+### Fresh Skeptic REJECT — bridge import-to-bind race
+
+The independent Skeptic rejected commit `efdf038`. Both entry points could import
+and execute version A of their own or a dependency's code before acquiring the
+locks whose hashes later recorded disk version B. The existing closing fixture
+injected an exception; it did not attempt an operating-system-denied write at the
+validation, lifecycle, depth and publication boundaries. This is the same defect
+class that invalidated the producer's first selector repair. The score/noise,
+P01-role, lambda separation, fit validation and post-lock arm binding checks were
+otherwise independently reproduced as green.
+
+Job 904 was cancelled while queued and never started, so it supplies no preflight
+evidence. Full verdict:
+`experiments/2026-09-11_stage2_compact_p07/freeze_bridge/skeptic_verdict.md`.
+
+**Repair continuation and falsifier.** Keep this IMPORTANT scope open. The
+production CLI paths must execute exact source bytes while the same bytes and all
+claimed dependencies are already locked through publication. Programmatic test
+overrides must be explicit and cannot weaken the CLI. Direct A-to-B fixtures must
+show either that the executed snapshot is the recorded snapshot or that the write
+is denied/refused at every named boundary. Any remaining pre-lock executed module,
+mutation that succeeds, regression, current preflight failure or new fresh Skeptic
+rejection blocks P01. Running job 903 is unaffected because it imports none of the
+bridge files changed by this repair.
