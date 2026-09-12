@@ -44896,3 +44896,91 @@ No claim for later non-Gaussian source generation, full all-history K4
 closure, adequate S64 rank, official server residual or hidden score. Run
 focused tests, full raw operation evidence, current-byte default preflight
 and a new independent Skeptic before using the cost number.
+
+**September 12 boundary-aware increment synthesis (negative).** The
+preregistered `f4f1305` intervention in `local_sim/test_p2_k4_increment_boundary.py`
+and `increment_boundary/result.json` is **FAIL: 640/688 checks pass; all 48
+failures are registered N32/N48 comparisons**. The worst material-relative
+increment gap is `8.807266285723563e-6` against `1e-8`; the largest raw
+absolute gap is `2.899732760575091e-7`. N48/N64 and the separately coded
+continuous conditional-Gaussian reference pass at the same numerical gate
+as *diagnostics only*. The independent fresh-context Skeptic reran the
+committed fixture byte for byte, independently recomputed 81 structural
+checks (max `4.580e-16`), located the N32 excess in the mapped-axis fourth
+moment (`0.18987757012046474` versus continuous
+`0.18987749632524198`), verified the raw workerq ZIP, and **REJECTED the
+combined registered convergence gate**, accepting only the narrow mass,
+finite-measure algebra, failure and diagnosis. Verdict
+`increment_boundary/skeptic_verdict.md`, SHA-256
+`7c79f723bf3bb45ab04a5af3bf1d36933ef1b4a5fd819ec7c453af05bfbdb74b`,
+commit `fdc6e3c`; implementation/result commit `46c77a2`, source SHA-256
+`c9759cea80eda54302a9800ac8f960b0ff5e1ef5c1b4a530a21138d2dd849ceb`,
+and result SHA-256
+`6ec0a6ee32bd1a277dc352bf81f241c23b5860cd5aa42538e0e57bb9a02f5b18`.
+Workerq 985's separate live-byte default preflight was GREEN 12/16,
+four Full-only skips, 2833.96 MiB peak/5 GiB request; it did not run the
+focused fixture or independently timestamp-bind its then-untracked bytes.
+The committed source/result and exact rerun do bind this negative result.
+CONFIRMED: the chosen finite-measure increment algebra holds and its
+prescribed N32 numerical approximation fails. INFERRED: exact high axis
+moments can resolve this local convergence defect. SPECULATIVE: any
+affordable real nonlinear old-history response, width-1024 rank, full
+counted cost, residual headroom or score improvement. No protected labels,
+registry block, public split or vault were read. The absence of a separately
+named non-test source file is a path typo in the Skeptic request; the actual
+fixture and digest are explicit here.
+
+**Next IMPORTANT axis-exact two-layer increment contract, committed before
+new integration.** **Question:** can replacing only the underresolved
+half-axis integration rule satisfy the original continuous-convergence
+threshold while keeping the complete signed increment/consumer identities?
+**Evidence:** CONFIRMED the 32/48 failure, narrow algebra and independent
+axis-moment diagnosis above; CONFIRMED the positive half-axis density
+`f(x)=phi(x) Phi(-rho*x/sqrt(1-rho**2))` for `rho=1/2`, each axis mass `1/6`;
+INFERRED a three-node Gaussian rule exact through fifth axis moment fixes
+the degree-four raw-moment defect; SPECULATIVE that the unchanged N32
+quadrant/angular and continuous reference comparisons then pass. The
+design-only derivation is in `docs/research/2026-09-12_axis_gauss_proposal.md`.
+**Hypothesis/mechanism:** construct moments `mu[0..5]` of this positive
+half-axis measure by independent one-dimensional integration. The symmetric
+3x3 Hankel pencil `H0[i,j]=mu[i+j]`, `H1[i,j]=mu[i+j+1]` yields three
+positive nodes and positive weights via Cholesky/eigendecomposition; it
+reproduces all six axis moments in exact arithmetic. This directly removes
+the N32 fourth-moment integration error rather than moving the gate.
+**Intervention:** copy the frozen boundary fixture into a new source file,
+replace only its mapped-axis nodes and weights with this rule, and leave
+`rho`, both signed maps, origin atom, three quadrant sectors, radial rule,
+angular orders N32/48/64, cumulant partitions, feed and independent
+conditional reference unchanged. Record the two axis and quadrant
+contributions to each raw degree-four moment *before* support-mass scaling,
+plus the independent axis-moment integration error. The resulting banks
+contain 295/439/583 nodes. Preserve old FAIL bytes and new positive,
+identity/-I and naive-double-count controls.
+
+**Predictions:** (1) 32/48 and 48/64 raw, K(X), K(BX), K(Y), Delta and all
+two-map readouts agree within `1e-8` relative above magnitude `1e-6`,
+otherwise `1e-8` absolute; N48 and N64 each agree with the independent
+continuous conditional reference under the same rule; (2) six axis
+moments through degree five, the radial moments and scaled support masses
+agree within `1e-12` absolute, axis nodes/weights are strictly positive,
+and every pre-scaling support-mass error is below `1e-8`; (3) all
+raw-partition/signed-factor/old-plus-Delta/two-map consumer and K3-feed
+identities and zero controls agree within `1e-10`, and nonconstant Delta
+and naive-double-count gaps each exceed `1e-3`. Samuel's standing human
+prediction is **"I don't know"**. **Falsifier:** any registered convergence,
+moment, positivity, mass, identity or strict discriminator fails; preserve
+the negative result without raising N or changing thresholds in this
+contract. **Control:** unchanged independent conditional-Gaussian raw
+moments and set-partition cumulants; exact same-bank dense transport and
+identity/-I controls; old mapped-axis N32 failure remains a historical
+method comparator, not a scored baseline. **Cost model:** at most 583
+two-dimensional weighted nodes, a 3x3 eigensystem, and tiny CPU-only
+integration under 64 MiB working arrays. This does not measure n1024
+flopscope FLOPs or server residual; Phase 2 charges `C=F` and fails at
+the 0.4 s residual cliff. **Statistic/gate:** deterministic material-relative
+and absolute thresholds above, no paired score or seed block. **Scope and
+confounders:** one fixed two-coordinate continuous law and toy *linear* old
+carry, not a deployable nonlinear multi-source increment, compression,
+all-history cost or accuracy. Run focused fixture, exact source/result hashes,
+snapshot-bound workerq default preflight at 5 GiB/2 CPUs/zero GPU, and a new
+fresh-context Skeptic before accepting any claim.
