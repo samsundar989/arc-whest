@@ -96,7 +96,7 @@ Passing helper suites is insufficient: reproduce the review counterexamples at t
 
 Inspect in-flight jobs first. Default preflight **574** was submitted with no source snapshot and remained queued; attribute its eventual result to actual executing bytes or replace this owned job with a frozen run. It is not Full. Locate the worker's separate full mutation result; avoid duplicate substantial runs. Required heavy preflight, full mutation, live-shape memory/evaluation jobs go through workerq with RAM/VRAM/CPU declarations. No priority changes or queue bypass.
 
-## Stage 1 — intended representation and executable cost (**implemented and accepted**)
+## Stage 1 — intended representation and executable cost (**supplied-core baseline accepted; physical closure open**)
 
 **IMPORTANT probe mathematics, without protected labels.** The worker's 28 tiny identity checks survive; its complete-closure and cost conclusions do not. Use independently derived dense fixtures rather than mirroring implementation formulas.
 
