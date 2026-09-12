@@ -43753,3 +43753,54 @@ bootstrap audit, protected-data read or source race blocks the retry.
 only; no estimator, frozen arm, fit/freeze receipt, coefficient, P01/P07 data
 role, score gate, truth ledger, vault or residual model change. Any substantial
 test goes through workerq with declared resources.
+
+## 2026-09-12 - Parent-owned atomic report publication after the final origin audit
+
+**IMPORTANT repair result; instrument evidence only.** The receipt pins the
+existing `p2_locked_bootstrap.py` SHA, so that file remains byte-identical. The
+public `p2_lab.py` launcher now chooses a private same-directory stage, strips
+inherited stage variables, and gives only that stage to the locked child. The
+child keeps the logical `--out` for the P01 truth reservation and report binding,
+but writes the complete JSON only to the stage. A direct bootstrap call without
+a separate stage refuses. After the child exits zero, including its last loaded
+repo-module origin scan, the parent locks and rehashes the stage, executed lab,
+bootstrap, CLI sources, instrument bindings, fit/freeze receipts, frozen arms,
+frozen input/source bindings and truth artifact. It checks the report's arm hashes
+against the frozen receipt and its truth reservation's result path against the
+requested output, then uses a same-volume atomic exclusive hard link to publish.
+The requested path is never transiently complete before that commit point. A
+failure removes the private stage without publishing the requested path. The
+child now prints `artifact staged for final audit`; only the parent prints
+`artifact published` after the link.
+
+The Skeptic's original counterexample is preserved at
+`freeze_bridge/skeptic_late_origin_probe.py` and its pre-repair raw result at
+`freeze_bridge/skeptic_late_origin_probe.json`. The repaired regression
+`freeze_bridge/publication_late_origin_regression.py` exits zero: its copied,
+attested real-entry child still exits 2 on `_skeptic_rogue` after the lab's
+stage write, while the final `late_report.json` does not exist. Raw output is
+`freeze_bridge/publication_late_origin_final.json` (SHA-256
+`fc740206b117fce8428a4f86055f1215ebc809e238577856060f7d908e275027`).
+The sacrificial real four-arm entry publishes exactly one complete report with
+four distinct receipt-matching candidate hashes, while post-receipt source
+swap, missing arm, preexisting output and direct-bootstrap bypass refuse without
+new publication; `freeze_bridge/publication_lifecycle_final.json` (SHA-256
+`916aa9807025240b6285573af0c00491ce93e4dceb13e560757a8ad1a9654f9b`).
+The independent binding-layer probe uses the current immutable
+`frozen_arms_metadata_protocol/freeze_receipt.json` and sacrificial text truth;
+it accepts the real fit/freeze/arm/input/source bindings, then refuses closing
+synthetic-truth mutation, missing synthetic truth and a preexisting final path.
+It creates no scored report and reads no P01/P07/vault truth arrays;
+`freeze_bridge/publication_actual_receipt_probe.json` (SHA-256
+`51ca2ddbbe87acbebff79df1bc1889e8eaa7849ddc28d5c9b66316a90a98c59e`).
+
+Focused bridge 17/17, freezer 19/19, truth-read Stage-0 35/35, seed-ledger
+66/66, portability 103/103, `py_compile`, and `git diff --check` pass. The
+current lab SHA-256 is
+`99dfe07b3441afe91dc2b3e17d77bd442467e4a8d5b372fa93642b8c26af3638`;
+the bootstrap remains `0bba6abae9379b398ed473d935c295009371b95efd9526310038614a8db6341f`.
+No frozen arm, fit/freeze receipt, estimator, protected truth ledger, role,
+gate, statistic, cost model, residual policy or vault changed. This proves the
+publication ordering and binding controls on sacrificial fixtures, not scored
+versus depth numerical equality or K4 accuracy. Current-byte default preflight
+and a fresh independent Skeptic remain pending before any further P01 read.

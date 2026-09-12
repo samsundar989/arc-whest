@@ -63,13 +63,15 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
 _BOOTSTRAP = os.path.join(_HERE, "p2_locked_bootstrap.py")
 _CLI_BINDINGS_ENV = "ARC_WHEST_P2_LAB_LOCKED_BINDINGS"
-_SELF_FINGERPRINT = "1be06b61665550bd8e5bd041296a2224a1cc12db18106ef8beebb29d9a7390f7"
+_REPORT_STAGE_ENV = "ARC_WHEST_P2_LAB_REPORT_STAGE"
+_SELF_FINGERPRINT = "fa14e113d8dffdeae9bfe62da19ec45cb38237514d071a00957c5db9d60044e8"
 
 
 def _attested_target_sha():
@@ -93,18 +95,134 @@ def _attested_target_sha():
 
 
 def _launch_locked_cli(args):
+    published = False
     try:
         target_sha = _attested_target_sha()
     except RuntimeError as exc:
         print("REFUSED: %s" % exc)
         return 2
+    # The parent owns the requested output.  The locked child may only write a
+    # private stage; its bootstrap has to finish its final origin audit before
+    # this process makes the report visible at --out.
+    try:
+        output = _requested_output(args)
+        if output is None:
+            return _run_locked_child(args, target_sha, None)
+        if os.path.lexists(output):
+            raise ValueError("%s exists. Evidence is immutable." % output)
+        parent = os.path.dirname(output)
+        os.makedirs(parent, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix=".p2-report-stage-", dir=parent) as stage_dir:
+            stage = os.path.join(stage_dir, "report.json")
+            result = _run_locked_child(args, target_sha, stage)
+            if result != 0:
+                return result
+            _publish_audited_stage(stage, output, target_sha)
+            published = True
+            print("  artifact published -> %s" % os.path.relpath(output, _ROOT))
+            return 0
+    except (OSError, ValueError) as exc:
+        if published:
+            # The atomic link is the terminal commit point.  A cleanup or
+            # console failure afterwards cannot recast a published report as
+            # a refused run.
+            return 0
+        print("REFUSED: %s" % exc)
+        return 2
+
+
+def _requested_output(args):
+    values = []
+    for index, arg in enumerate(args):
+        if arg == "--out":
+            if index + 1 >= len(args):
+                raise ValueError("--out requires a path")
+            values.append(args[index + 1])
+        elif arg.startswith("--out="):
+            values.append(arg[6:])
+    if not values:
+        return None
+    if len(values) != 1 or not values[0]:
+        raise ValueError("exactly one nonempty --out path is required")
+    return os.path.abspath(values[0])
+
+
+def _run_locked_child(args, target_sha, stage):
     env = dict(os.environ)
     env.pop(_CLI_BINDINGS_ENV, None)
+    env.pop(_REPORT_STAGE_ENV, None)
+    if stage is not None:
+        env[_REPORT_STAGE_ENV] = stage
     completed = subprocess.run(
         [sys.executable, _BOOTSTRAP, "--target", os.path.abspath(__file__),
          "--expected-target-sha", target_sha, "--"] + list(args),
         cwd=os.getcwd(), env=env)
     return int(completed.returncode)
+
+
+def _publish_audited_stage(stage, output, target_sha):
+    """Rebind every reported source under locks, then link without overwrite."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("_p2_report_lock", _BOOTSTRAP)
+    bootstrap = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(bootstrap)
+    with bootstrap._stable_files([_BOOTSTRAP, os.path.abspath(__file__), stage]):
+        bootstrap._assert_loaded_source()
+        with open(stage, "rb") as fh:
+            raw = fh.read()
+        if os.path.islink(stage):
+            raise ValueError("report stage is a symlink")
+        try:
+            report = json.loads(raw)
+            bridge = report["k4_freeze"]
+            if report["status"] != "complete" or set(report["arms"]) != {
+                    "exact", "coherent", "consumers-only", "births-only"}:
+                raise ValueError("staged report is not complete for the four frozen arms")
+            if bridge["locked_cli_source_bindings"]["p2_lab"]["sha256"] != target_sha:
+                raise ValueError("staged report does not bind this lab source")
+            if not bootstrap._same_path(
+                    bootstrap._repo_path(
+                        bridge["protected_truth"]["reservation_receipt"]["result_artifact"],
+                        "truth result artifact"), output):
+                raise ValueError("staged truth receipt does not bind the requested output")
+            bindings = list(bridge["locked_cli_source_bindings"].values())
+            bindings += list(bridge["instrument_bindings"].values())
+            bindings += [bridge["fit_receipt"], bridge["freeze_receipt"],
+                         {"path": bridge["protected_truth"]["path"],
+                          "sha256": bridge["protected_truth"]["sha256"]}]
+            frozen_path = bootstrap._repo_path(bridge["freeze_receipt"]["path"],
+                                               "freeze receipt")
+            with open(frozen_path, "rb") as fh:
+                frozen = json.load(fh)
+            bindings += list(frozen["source_bindings"].values())
+            bindings += list(frozen.get("input_bindings", {}).values())
+            bindings += [{"path": row["path"], "sha256": row["sha256"]}
+                         for row in frozen["arms"]]
+            expected_arms = {row["name"].replace("_", "-"): row["sha256"]
+                             for row in frozen["arms"]}
+            if (set(expected_arms) != set(report["arms"]) or
+                    any(report["arms"][name]["candidate_sha256"] != digest
+                        for name, digest in expected_arms.items())):
+                raise ValueError("staged report arm hashes differ from the freeze receipt")
+            paths = [bootstrap._repo_path(row["path"], "report binding")
+                     for row in bindings]
+        except (KeyError, TypeError, json.JSONDecodeError) as exc:
+            raise ValueError("staged report bindings are incomplete: %s" % exc) from exc
+        with bootstrap._stable_files(paths):
+            for row, path in zip(bindings, paths):
+                with open(path, "rb") as fh:
+                    actual = hashlib.sha256(fh.read()).hexdigest()
+                if actual != row["sha256"]:
+                    raise ValueError("report binding changed before publication: %s" % path)
+            with open(stage, "rb") as fh:
+                if fh.read() != raw:
+                    raise ValueError("staged report changed before publication")
+            if os.path.lexists(output):
+                raise ValueError("%s appeared before publication" % output)
+            try:
+                os.link(stage, output)
+            except FileExistsError as exc:
+                raise ValueError("%s appeared before publication" % output) from exc
 
 
 # A real script process must hand off before numpy or any executable project
@@ -525,7 +643,8 @@ def main(argv=None) -> int:
                 _revalidate_instruments(instrument_bindings)
                 return rc
     except (ValueError, k4_freezer.FreezeRefused) as exc:
-        if not out_preexisting and os.path.isfile(a.out):
+        if (_BOUND_CLI_BINDINGS is None and not out_preexisting and
+                os.path.isfile(a.out)):
             os.remove(a.out)
         print(f"REFUSED: {exc}")
         return 2
@@ -931,7 +1050,10 @@ def _execute_held(a, man, frozen, arms, arm_paths, instrument_bindings) -> int:
         _write(a.out, results, paired, man, seeds, z, spec, arms, verdicts,
                a.gate, run_config=run_config, noise_aware=noise_aware,
                bridge=bridge, before_publish=before_publish)
-        print(f"\n  artifact -> {os.path.relpath(a.out, _ROOT)}")
+        if _BOUND_CLI_BINDINGS is not None:
+            print(f"\n  artifact staged for final audit -> {os.path.relpath(a.out, _ROOT)}")
+        else:
+            print(f"\n  artifact -> {os.path.relpath(a.out, _ROOT)}")
     print("=" * 92)
     return 0
 
@@ -1167,9 +1289,17 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
         raise k4_freezer.FreezeRefused(
             "closing dependency revalidation is required before report publication")
     before_publish()
-    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    stage = os.environ.get(_REPORT_STAGE_ENV)
+    if _BOUND_CLI_BINDINGS is not None:
+        if not stage or os.path.normcase(os.path.abspath(stage)) == os.path.normcase(os.path.abspath(path)):
+            raise k4_freezer.FreezeRefused(
+                "locked report requires a separate parent-owned publication stage")
+        destination = stage
+    else:
+        destination = path
+    os.makedirs(os.path.dirname(os.path.abspath(destination)), exist_ok=True)
     try:
-        with open(path, "x", encoding="utf-8") as fh:
+        with open(destination, "x", encoding="utf-8") as fh:
             fh.write(json.dumps(payload, indent=1, default=str) + "\n")
     except FileExistsError as exc:
         raise SystemExit(

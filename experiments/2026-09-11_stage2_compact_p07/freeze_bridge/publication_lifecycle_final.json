@@ -1,0 +1,44 @@
+{
+  "baseline_reproduced": false,
+  "direct_bootstrap_without_parent_stage": {
+    "pass": true,
+    "publication_absent": true,
+    "returncode": 2
+  },
+  "missing_arm": {
+    "pass": true,
+    "publication_absent": true,
+    "returncode": 2
+  },
+  "pass": true,
+  "positive": {
+    "pass": true,
+    "report_arms": [
+      "births-only",
+      "coherent",
+      "consumers-only",
+      "exact"
+    ],
+    "reported_hashes": {
+      "births-only": "8f638d93654bf08328afa45415ebae8da427624270950ade0873648c570abc79",
+      "coherent": "6ae602adad8339d013a5b409b66912bde6e7de74a8f9ab4dc51725387a19930f",
+      "consumers-only": "cb1758b1afc8d5b59fe81d1a0510e2ff1c722cfc83c0734b2881a1a55b2da9e1",
+      "exact": "5b2f9705928708bfa65cb379b7227d2a76b4dd7fc98d051e398684a822ee829f"
+    },
+    "returncode": 0,
+    "stderr_tail": "C:\\Users\\samsu\\Documents\\arc-whest\\p2-locked-lifecycle-hwwioojw\\local_sim\\lifecycle_eval.py:613: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.\n  flops.configure(symmetry_warnings=False)\nC:\\Users\\samsu\\Documents\\arc-whest\\p2-locked-lifecycle-hwwioojw\\local_sim\\lifecycle_eval.py:613: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.\n  flops.configure(symmetry_warnings=False)\n",
+    "stdout_tail": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n  *** RESIDUAL CAP RELAXED -- this run is ACCURACY-ONLY. Its failure accounting\n      cannot see a 0.4 s violation and it is NOT residual evidence for anything.\n  deciding model   lambda = 0   (COUNTED FLOPS ONLY -- the frozen model)\n============================================================================================\nP2-CP1 LADDER  --  one canonical evaluator, paired on common random numbers\n============================================================================================\n  truth      truth_P01.npz   2 networks   2 replicas x 10 samples\n  truth noise per replica   mean 2.0000e-02\n  shape      2 x 2   B = 1,000,000   floor 0.1\n  stack      flopscope fixture   PARITY SYNTHETIC\n\n  replica noise of the AVERAGED truth   measured 1.0000e-02   predicted V/2N 1.0000e-02   ratio 1.0000\n     (the ratio is a live check on replica independence; far from 1.0\n      means the two draws share state and every corrected MSE is wrong)\n\n  exact              score 1.00000e-03   MSE(corr) 7.0781e-10   MSE(raw) 1.0000e-02   F/B 0.0000   eff 0.0000   mult 0.1000   fail 0/2   resid 0ms   3s\n  coherent           score 1.00000e-03   MSE(corr) 7.0781e-10   MSE(raw) 1.0000e-02   F/B 0.0000   eff 0.0000   mult 0.1000   fail 0/2   resid 0ms   0s\n  consumers-only     score 1.00000e-03   MSE(corr) 7.0781e-10   MSE(raw) 1.0000e-02   F/B 0.0000   eff 0.0000   mult 0.1000   fail 0/2   resid 0ms   0s\n  births-only        score 1.00000e-03   MSE(corr) 7.0781e-10   MSE(raw) 1.0000e-02   F/B 0.0000   eff 0.0000   mult 0.1000   fail 0/2   resid 0ms   0s\n\n  PAIRED vs exact -- arithmetic score difference, studentised-t 95% (the binding statistic, docs/VALIDATION.md 2b-i)\n  arm                    gain        95% t CI (relative)    better   sign p\n  coherent             1.0000 [    +0.00%,     +0.00%]    0/2    p= 0.500\n  consumers-only       1.0000 [    +0.00%,     +0.00%]    0/2    p= 0.500\n  births-only          1.0000 [    +0.00%,     +0.00%]    0/2    p= 0.500\n\n  NOISE-AWARE ADJUSTED DIFFERENCES -- observed / true-function / official precision\n  coherent           +0.0000e+00  +0.0000e+00  +0.0000e+00   noise term +0.000e+00\n  consumers-only     +0.0000e+00  +0.0000e+00  +0.0000e+00   noise term +0.000e+00\n  births-only        +0.0000e+00  +0.0000e+00  +0.0000e+00   noise term +0.000e+00\n\n  COST CHECK -- Phase 2 lambda = 0, so effective C equals counted F\n  (local residual is shown separately as a cliff-risk diagnostic;\n   it is not priced and its absolute level does not transfer)\n    exact              F/B 0.0000   eff mean 3.1950   eff max 3.5200   resid      0 ms  ( 1.00x control)   *** OFF THE FLOOR once residual is charged ***\n    coherent           F/B 0.0000   eff mean 2.8150   eff max 2.9600   resid      0 ms  ( 0.88x control)   *** OFF THE FLOOR once residual is charged ***\n    consumers-only     F/B 0.0000   eff mean 2.7900   eff max 2.9000   resid      0 ms  ( 0.87x control)   *** OFF THE FLOOR once residual is charged ***\n    births-only        F/B 0.0000   eff mean 2.7750   eff max 2.9100   resid      0 ms  ( 0.87x control)   *** OFF THE FLOOR once residual is charged ***\n\n  NO GATE SUPPLIED -- no verdict is printed. The numbers above are\n  descriptive. Pass --gate <the pre-registered threshold> to get a\n  decision, and only the threshold registered BEFORE the data.\n\n  MSE BY DEPTH -- the (L/n)^K mechanism curve, on 2 of 2 networks (a mechanism curve does not need all of them)\n  L1 is exact for EVERY arm, so that column reads the truth-noise floor -- a built-in calibration\n  arm                        L1         L2\n  exact               1.000e-02  1.000e-02\n  coherent            1.000e-02  1.000e-02\n  consumers-only      1.000e-02  1.000e-02\n  births-only         1.000e-02  1.000e-02\n\n  artifact staged for final audit -> report.json\n============================================================================================\n  artifact published -> report.json\n"
+  },
+  "preexisting_output": {
+    "original_sha_unchanged": true,
+    "pass": true,
+    "returncode": 2
+  },
+  "source_swap": {
+    "pass": true,
+    "publication_absent": true,
+    "returncode": 2,
+    "stderr_tail": "",
+    "stdout_tail": "REFUSED: sacrificial arm source swapped\n"
+  }
+}

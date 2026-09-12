@@ -197,18 +197,40 @@ def run_probe(*, baseline=False):
                        len(set(expected.values())) == 4 and
                        all(report["arms"][name]["candidate_sha256"] == sha
                            for name, sha in expected.items()))
+        original_output_sha = _sha(out) if out.exists() else None
+        again = _invoke(target, receipt, truth, out)
+        preexisting_ok = (again.returncode == 2 and out.exists() and
+                          _sha(out) == original_output_sha and
+                          "Evidence is immutable" in again.stdout)
+        direct_out = root / "direct_bootstrap_report.json"
+        direct = subprocess.run(
+            [sys.executable, str(target.parent / "p2_locked_bootstrap.py"),
+             "--target", str(target), "--expected-target-sha", _sha(target),
+             "--", "--truth", str(truth), "--freeze-receipt", str(receipt),
+             "--out", str(direct_out), "--control", "exact",
+             "--competition-cost-lambda", "0", "--residual-cap", "0",
+             "--depth-subset", "2"],
+            capture_output=True, text=True, cwd=root)
+        direct_ok = (direct.returncode == 2 and not direct_out.exists() and
+                     "separate parent-owned publication stage" in direct.stdout)
         swapped = root / "swapped_report.json"
         with (root / "arms" / "arm_exact.py").open("ab") as fh:
             fh.write(b"\n# swapped after receipt\n")
         negative = _invoke(target, receipt, truth, swapped)
         negative_ok = (negative.returncode == 2 and not swapped.exists() and
                        "sacrificial arm source swapped" in negative.stdout)
+        (root / "arms" / "arm_exact.py").unlink()
+        missing_out = root / "missing_report.json"
+        missing = _invoke(target, receipt, truth, missing_out)
+        missing_ok = missing.returncode == 2 and not missing_out.exists()
         reproduced = (baseline and positive.returncode == 2 and report is None and
                       "depth lifecycle for exact did not execute its frozen candidate bytes"
                       in positive.stdout and
                       "loaded repo-local module _lifecycle_candidate_" in positive.stdout)
         return {
-            "pass": (reproduced and negative_ok) if baseline else (positive_ok and negative_ok),
+            "pass": ((reproduced and negative_ok and missing_ok) if baseline else
+                     (positive_ok and negative_ok and missing_ok and
+                      preexisting_ok and direct_ok)),
             "baseline_reproduced": bool(reproduced),
             "positive": {"pass": positive_ok, "returncode": positive.returncode,
                          "stdout_tail": positive.stdout[-4000:],
@@ -220,6 +242,14 @@ def run_probe(*, baseline=False):
                             "stdout_tail": negative.stdout[-2000:],
                             "stderr_tail": negative.stderr[-2000:],
                             "publication_absent": not swapped.exists()},
+            "missing_arm": {"pass": missing_ok, "returncode": missing.returncode,
+                            "publication_absent": not missing_out.exists()},
+            "preexisting_output": {"pass": preexisting_ok, "returncode": again.returncode,
+                                   "original_sha_unchanged": (out.exists() and
+                                                              _sha(out) == original_output_sha)},
+            "direct_bootstrap_without_parent_stage": {
+                "pass": direct_ok, "returncode": direct.returncode,
+                "publication_absent": not direct_out.exists()},
         }
 
 
