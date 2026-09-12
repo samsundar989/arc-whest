@@ -1,0 +1,6 @@
+Source commit: 528e7f9
+Command: uv run python local_sim/p2_k4_integrated_memory_ledger.py --json experiments/2026-09-11_stage2_compact_p07/integrated_first_source/memory_ledger_result.json
+Exit code: 1
+stdout: memory ledger FAIL; optimized modeled peak 634477824 bytes; padded 827499264 bytes
+Failed checks: optimized_schedule, old_schedule, tiny_schedule, tiny_old_schedule, tiny_old_partial_resident_floor_crosscheck.
+Diagnosis: newborn insertion retained age 1 instead of resetting to age 0; the padded old control allocated separate positive/negative zero and one vectors despite their source-level alias. Both were symbolic-ledger implementation errors. Raw JSON was moved without modification to memory_ledger_first_fail.json.
