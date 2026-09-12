@@ -1,6 +1,6 @@
 # D21 fusion candidate: source and attribution manifest
 
-Prepared September 12, 2026, for the bounded fusion in [GAME_PLAN.md](GAME_PLAN.md). This records parent identity and attribution before a new candidate is certified. It is not an accuracy, cost, eligibility, or submission verdict. Bind the final candidate SHA-256 and exact diff in the release evidence after its bytes are frozen.
+Prepared September 12, 2026, for the bounded fusion in [GAME_PLAN.md](GAME_PLAN.md). This records parent identity and attribution before a new candidate is certified. It is not an accuracy, cost, eligibility, or submission verdict. The current candidate bytes are bound below; a later change requires a new hash and diff before release.
 
 | Source | Verified identity | Role |
 |---|---|---|
@@ -8,6 +8,7 @@ Prepared September 12, 2026, for the bounded fusion in [GAME_PLAN.md](GAME_PLAN.
 | `submission-k3strassen-L4.tar.gz` | Archive SHA-256 `eb4b542d269490ee66b46c9f027c831b6d5898bd9946b84a434147502f44e10a`; contained `estimator.py` SHA-256 `052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58` | Frozen own-team best-public L4 parent and primary comparator; submission [#330290](https://www.aicrowd.com/challenges/arc-white-box-estimation-challenge-2026/submissions/330290). The archive is locally ignored by Git (`*.tar.gz`), so the byte hashes, not Git tracking, identify it. |
 | Archive `manifest.json` | SHA-256 `e1a2f7421ad00ef1df5277670ea18d47ce7cea252348851f63cca51a26b2d908` | Package manifest repeats the L4 estimator hash and records WhestBench `0.16.1` and flopscope `0.12.1` at packaging. |
 | [`estimator.py`](../estimator.py) | SHA-256 `00240eb1e60810f5e9a6f743b8ad89a1533cf8671c08e07525f1ed1de54d9ec` at this review | Shipped v2.6.1, excluded from the candidate edit. |
+| [`estimator_k3_strassen_L4_f21.py`](../estimator_k3_strassen_L4_f21.py) | Current SHA-256 `d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`; committed at `eeec14d` | New F21 candidate, copied byte-for-byte from the L4 archive member before the one `_dslice21` change. [Exact parent-to-candidate diff](../experiments/2026-09-12_f21/parent_to_f21.diff); the pinned [parent copy](../experiments/2026-09-12_f21/estimator_L4_parent.py) retains SHA-256 `052dd768…` for queued comparisons. |
 
 Direct UTF-8 source comparison found 1,127 lines in each L2/L4 estimator. The **only textual change** from L2 to the L4 archive member is `_STRASSEN_DEPTH = 2` to `4` at line 510. All 23 top-level function/class ASTs match. Thus the L4 `_dslice21` and working recurrence are the same source as L2; the L4 Strassen depth remains a distinct configuration whose numerical behavior must be measured at its actual precision. [The September 12 strategist response](STRATEGIST_RESPONSE_2026-09-12.md) independently reported the relevant-function AST match.
 
