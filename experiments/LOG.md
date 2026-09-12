@@ -45334,3 +45334,124 @@ full tiny rank does not establish n1024 memory, arithmetic overlap, or
 rank384/residual16 adequacy. Commit before any fixture execution; focused
 tiny CPU-only test, live current-byte default preflight through workerq with
 5 GiB/2 CPUs/zero GPU, then independent fresh-context Skeptic with raw files.
+
+**September 12 nonlinear old-history first fixture synthesis (combined
+REJECT, finite-bank identities only).** Contract `dca4e7f` preceded source/
+result commit `39f21de`. The first unchanged focused fixture **FAILED 54/56**:
+layer-three positive order48/64 material-relative raw gap
+`3.573549143066814e-05` and order48/direct-continuous gap
+`3.1351810768989914e-05` exceed `1e-8`. Layer two positive comparisons
+were below `1.3e-15`; the worst layer-three moment is oriented degree-four
+`(3,1)`. The old signed-law conditional nonlinear gap `0.0029198036`,
+linear control `2.56e-15`, positive unit counterfactuals and direct atomwise
+K3/K4/consumer/feed identity checks pass *on the fixed discrete bank*; true
+K3 differs from the declared derivative-truncated feed by up to `0.006863`.
+Source SHA256 `991a4e38eefe90ee2f761556dd60ac1b3b6c86280437d096d8a8d8f29a6d5c61`;
+raw result SHA256 `fead616c0b5149ad48ca109a12eafe56a5ec698a0e45ddcba86e9af738735df9`.
+Shared workerq 994 live default preflight **SUCCEEDED GREEN 12/16** with
+four Full-only skips, peak 2,842.914 MiB under 5 GiB/2 CPUs/zero GPU;
+tested HEAD `e84b16c`, source/result targets and all 248 Python hashes
+match before/after. Raw log SHA256
+`02d2dd28ee190044cd1cf754fcd3ab2c6756e218cc9c72d34e6c7a23b9003a26`.
+The raw transcript/receipt bytes were initially normalized on git add;
+commits `f2b4d74` and `1b8bd7e` install scoped attributes and preserve
+their exact original bytes. The independent fresh-context Skeptic **REJECTED
+the combined three-layer gate**, ACCEPTED only finite-bank identities and
+independently integrated all 15 raw moments to within `1.15e-14` of the
+stored continuous reference. Two final-D angular roots, at
+`tan(theta)=1.125/1.735` and `0.94/0.83`, lie inside existing B-sector
+intervals. This explains the plausible numerical failure; it is not a
+repaired source result. Verdict: `nonlinear_old_history/skeptic_verdict.md`.
+CONFIRMED: the exact frozen bank is underresolved for the continuous third
+layer and conditional signed-law bookkeeping on that finite bank is sound.
+INFERRED: splitting all final-D kinks may repair positive-law integration.
+SPECULATIVE: K4-only closure, feasible rank, counted cost or score benefit.
+No protected labels, seed block, public split or vault was touched.
+
+**September 12 IMPORTANT contract: full-polar split-bank numerical repair,
+BEFORE any new fixture measurement.** Design-only derivation
+`docs/research/2026-09-12_full_polar_nonlinear_bank_proposal.md` at
+`b33481b`. **Question:** can an independently constructed positive polar
+Gaussian bank resolve the layer-three continuous law and preserve the
+conditional signed-law discriminator without changing the old failed
+fixture? **Evidence:** CONFIRMED independent continuous integration and
+underresolved order48/64 final-D boundaries above; CONFIRMED the prior
+two-layer exact-axis bank only in its fixed scope; INFERRED smooth angular
+intervals plus exact radial moments will converge; SPECULATIVE that a
+reweighted fourth-order source on the new bank retains material nonlinear
+response or teaches a practical wide-network representation.
+**Hypothesis/mechanism:** start from original `Z~N(0,[[1,.5],[.5,1]])`,
+partition the entire polar circle at every zero of Z, fixed B ReLU(Z), and
+fixed D ReLU(B ReLU(Z)), including the two final-D roots recorded above.
+On each resulting fixed-sign interval, nested biasless ReLUs are linear
+in radius. Construct a *positive* three-node Rayleigh radial Gaussian
+rule from exact `mu_k=2^(k/2) Gamma(1+k/2)`, `k=0,...,5`, by the 3x3
+Hankel generalized eigenproblem. At angular node theta with
+`q=e(theta).T Sigma^-1 e(theta)`, a radial particle is
+`Z=t e(theta)/sqrt(q)` and weight is
+`wtheta*wradial/(2*pi*sqrt(det Sigma)*q)`; preserve indexed atoms and
+no post hoc mass rescaling. Use frozen per-sector Gauss-Legendre angular
+orders 32/48/64. This changes the *new* positive bank and thus the
+artificial reweighted reference, so it is a separately contracted test,
+not a retest that reverses the old failure.
+
+**Intervention/gates:** independently enumerate all 15 raw monomials
+through degree four at both layers from each new positive bank, compare
+order32/48/64 pairwise and order48/direct continuous under the frozen
+`max(1,|reference|)` material-relative denominator, each <=`1e-8`.
+The independent scalar continuous integration reports error estimates
+<`1e-10` per moment. Require all fixed breakpoints, positive nodes/
+weights, full unit mass within `1e-10`, and all six Rayleigh radial
+moment defects <=`1e-12`; an unsplit order48 bank negative control must
+still miss layer three by >`1e-6`. Then and only then rebuild both
+positive degree<=3-matched references using the *unchanged* bounded
+quartic contrasts, epsilon .2, B/D, four-counterfactual assignment and
+frozen source controls of `dca4e7f`. Require rank10, condition<=1e12,
+positive unit references, moment match <=`1e-11`, all same-bank
+atomwise dense K3/K4/consumer/oriented-D31/feed identities <=`1e-10`,
+nonlinear old gap >`1e-6` absolute and >`1e-3` of old layer-two K4,
+signed-linear D gap <=`1e-10`, zero and swapped-D31/linear-carry mutants
+detected at the original gates. If any fails, preserve the failure;
+do not select angular orders, source contrast or threshold after seeing
+the output. **Predictions:** the newly split positive bank resolves all
+three layers, unsplit control remains inaccurate, and the material
+finite-bank nonlinear source gap remains; Samuel's standing human answer
+is **"I don't know"**. **Falsifier:** any specified numerical, structure,
+identity or mutant gate fails; this law is then not accepted. **Baseline:**
+unchanged failed order48 bank and independent continuous integral;
+new order32/48/64 fully split positive banks. **Cost model:** n2 with a
+few thousand indexed particles at most, <64 MiB focused payload and one
+CPU; no live-width flopscope or score. Phase-2 `C=F`, residual cliff 0.4 s
+remains untested. **Statistic/data:** deterministic material-relative and
+absolute gates, no seed block, paired score, truth noise, public/vault or
+protected data. **Scope:** future-dependent angular splitting is a toy
+diagnostic, not deployable source construction or K4-only closure. Commit
+this contract before coding/running a new fixture; live current-byte
+workerq default preflight 5 GiB/2 CPUs/zero GPU and fresh independent
+Skeptic follow any focused test.
+
+**September 12 two-birth abstract compact feed synthesis (scoped ACCEPT).**
+Contract `424477e` preceded source/result commit `e84b16c`. Frozen n4 two-
+birth fixture **PASSED 74/74**, with maximum full-rank tensor/D3/oriented
+D21 errors `3.77e-15`, `3.77e-15`, `4.05e-15` against `1e-10`. The actual
+weighted-Gram/thin-QR join, shared transport, factor rotation, Gram, two
+separate source ages, zero control and final mean-only D3 agree with an
+independent raw-cumulant/explicit-cubic carry oracle. Dropped-negative
+mutant gap `1.2686917` exceeds `1e-3`; frozen rank-2 diagnostic loses up
+to `1.2281893` in the full tensor and is **not** an exactness gate.
+Source SHA256 `552dd841a3baacfe682c86271e601cdac7a5c52383e420ba4ad646bc65e7cdf6`;
+result SHA256 `1b750c57b65ef64f611ab8434887145817410b40f2ff76704a9ae52e30a26713`.
+The shared workerq 994 default live preflight is GREEN 12/16 at tested
+HEAD `e84b16c`, four Full-only skips, peak 2,842.914 MiB, with all four
+target and 248 Python hashes equal before/after; transcript SHA256
+`02d2dd28ee190044cd1cf754fcd3ab2c6756e218cc9c72d34e6c7a23b9003a26`.
+Independent fresh-context Skeptic **ACCEPTED only the truth-free n4
+full-rank two-birth abstract K3 feed**. It separately recomputed both
+cumulants and carried cubic tensors, replayed the exact result bytes, and
+identified the material rank-2 loss as the strongest scope boundary;
+verdict at `two_birth_compact/skeptic_verdict.md`. CONFIRMED: this compact
+join/transport supports two discrete feed births exactly at full tiny
+rank. INFERRED: multi-birth cost metering is a concrete next instrument.
+SPECULATIVE: nonlinear physical old response, rank384/residual16 adequacy,
+complete width1024 cost, residual and score. No protected label, decision
+seed, public or vault was touched.
