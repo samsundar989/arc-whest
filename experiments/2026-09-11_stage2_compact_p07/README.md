@@ -7,11 +7,11 @@ sets without reading labels.
 
 The workerq job uses the live working bytes (`--no-snapshot`) because the evidence
 contract binds exact repository bytes and the queue's git snapshot can normalize
-line endings. Its output directory is `observations/` and must not exist before
-the job starts. The declared envelope is 8 GiB RAM, 2 CPUs and no GPU. This is a
-batch-process allowance for 1,536 lifecycle rows; one compact prediction has
-measured about 1.0--1.2 GiB process RAM and 345,587,712 bytes of accounted peak
-array payload.
+line endings. Its output directory is `observations/` and did not exist before
+the job started. The accepted computation is 1,536 lifecycle rows; one compact
+prediction had measured about 1.0--1.2 GiB process RAM and 345,587,712 bytes of
+accounted peak array payload. Whole-batch process memory is a separate quantity
+and must use workerq's final measured peak.
 
 On success, `predictions.npz` and `producer_receipt.json` must pass the standalone
 truth-free verifier before the next registered protected P07 access. A queued or
@@ -24,8 +24,12 @@ directory. Repair and fresh acceptance of that provenance gap precede the next
 submission; job 891 is not producer evidence.
 
 The repaired production path passed 97/97 scoped checks, current-byte default
-preflight in workerq 893 and a new fresh-context Skeptic. Workerq job **894** is
-the accepted-byte resubmission at high priority with 8 GiB RAM, 2 CPUs and no
-GPU. At submission it was queue position zero, waiting for admission because two
-running jobs reserved 46 GiB of the queue's 53.6 GiB usable RAM. It has no result
-until it terminates and its receipt passes standalone verification.
+preflight in workerq 893 and a new fresh-context Skeptic. Jobs 894 and 900 were
+cancelled while queued and are not evidence. Workerq job **903** is the actual
+accepted-byte run at high priority with 2 CPUs, no GPU and no source snapshot.
+It was submitted with 5 GiB RAM after the old 32 GiB/8 GiB reservations were
+reduced, but its live measured peak exceeded that declaration while ample system
+headroom remained. The final safe declaration is therefore pending the terminal
+peak; 6 GiB is only a lower bound. Job 903 has no result until it terminates and
+its receipt passes standalone verification. Its partial `observations/` directory
+must not be inspected or committed.
