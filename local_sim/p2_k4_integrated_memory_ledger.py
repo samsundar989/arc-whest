@@ -74,7 +74,8 @@ def compact_inventory(arrays: list[Array]) -> dict:
 
 def source_fields(m: Maker, tag: str, kind: str, location: str,
                   n: int, s: int, rank: int, residual: int,
-                  padded: bool) -> dict[str, Array]:
+                  padded: bool,
+                  shared_zero_one: tuple[Array, Array] | None = None) -> dict[str, Array]:
     width = n if kind != "feed_positive" or padded else s
     leg = rank if location == "shared" else n
     residual_width = (residual if kind == "ordinary" else
@@ -96,8 +97,9 @@ def source_fields(m: Maker, tag: str, kind: str, location: str,
         one = m.make(tag + ".one", (width,))
         fields.update(s=zero, e=zero, w2=zero, dA=one, dP=one)
     elif kind == "feed_negative":
-        zero = m.make(tag + ".zero", (n,))
-        one = m.make(tag + ".one", (n,))
+        zero, one = (shared_zero_one if shared_zero_one is not None else
+                     (m.make(tag + ".zero", (n,)),
+                      m.make(tag + ".one", (n,))))
         fields.update(s=zero, e=m.make(tag + ".negative_e", (n,)),
                       w2=zero, dA=one, dP=one)
     else:
@@ -107,7 +109,7 @@ def source_fields(m: Maker, tag: str, kind: str, location: str,
 
 
 def transport(m: Maker, source: History, n: int, rank: int,
-              label: str, location: str) -> History:
+              label: str, location: str, newborn: bool = False) -> History:
     f = dict(source.fields)
     width = f["FA" if location == "shared" else "A"].shape[1]
     if location == "shared":
@@ -117,7 +119,7 @@ def transport(m: Maker, source: History, n: int, rank: int,
         f["A"] = m.make(label + ".A", (n, width))
         f["P"] = m.make(label + ".P", (n, width))
         f["Z"] = m.make(label + ".Z", f["Z"].shape)
-    return History(source.kind, source.age + 1, f)
+    return History(source.kind, 0 if newborn else source.age + 1, f)
 
 
 def join(m: Maker, source: History, n: int, rank: int,
@@ -228,7 +230,9 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
             new_shared = [transport(m, h, n, rank, prefix + ".shared",
                                     "shared") for h in new_shared]
         next_young = [transport(m, h, n, rank, prefix + ".young", "young")
-                      for h in staying + newborn]
+                      for h in staying]
+        next_young += [transport(m, h, n, rank, prefix + ".insert", "young",
+                                 newborn=True) for h in newborn]
         young, shared, newborn, Q, gram = next_young, new_shared, [], new_Q, new_gram
         next_state = state_arrays(young + shared, Q, gram)
         if ready or shared:
@@ -312,10 +316,16 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
             newborn = [ordinary]
             counters["ordinary_births"] += 1
             if layer > 0:
-                for kind in ("feed_positive", "feed_negative"):
-                    newborn.append(History(kind, 0, source_fields(
-                        m, prefix + ".birth." + kind, kind, "young",
-                        n, s, rank, residual, padded)))
+                positive = History("feed_positive", 0, source_fields(
+                    m, prefix + ".birth.feed_positive", "feed_positive",
+                    "young", n, s, rank, residual, padded))
+                shared_constants = ((positive.fields["s"], positive.fields["dA"])
+                                    if padded else None)
+                negative = History("feed_negative", 0, source_fields(
+                    m, prefix + ".birth.feed_negative", "feed_negative",
+                    "young", n, s, rank, residual, padded,
+                    shared_zero_one=shared_constants))
+                newborn.extend((positive, negative))
                 counters["feed_births"] += 1
             row_newborn = [h.kind for h in newborn]
             birth_named = [(name, (n, n), 4) for name in
