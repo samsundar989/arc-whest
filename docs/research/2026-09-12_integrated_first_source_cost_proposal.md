@@ -99,7 +99,11 @@ D21 uses plus 14 final D3-only uses. Because every feed has two sub-sources,
 predict **210 feed sub-source D3 uses** and **182 feed sub-source D21 uses**.
 With the reference's 120 ordinary D3 and 105 ordinary D21 uses, predicted
 totals are **330 D3 Source uses** and **287 D21 Source uses**. For recent=4,
-predict **30 joins**: 10 ordinary plus 20 feed sub-source joins. L0 has no
+predict **28 joins**: 10 ordinary plus 18 feed sub-source joins. An ordinary
+L0 source inserts at L1 and first joins at L5; a feed born L1 inserts at L2
+and first joins at L6. The final L15 skips joins, so only feed births L1--L9
+join (nine pairs), not ten. The original design predicted 30; this static
+correction precedes any integrated-fixture measurement. L0 has no
 history readout, and L15 has no new birth, join or D21. These are frozen
 design predictions, **not observations**; the tiny executable schedule must
 audit ages, calls and each count before a live-width cost is interpreted.
@@ -144,7 +148,7 @@ above, cost threshold and falsifiers in `experiments/LOG.md`, commit source
 and a tiny independent n4 dense cumulant/feed/readout oracle, then run the
 tiny CPU-only schedule. The first large milestone is the **one-source
 integrated** executable, not all later nonlinear K4 increments. Required
-checks: exact context/family reconciliation; audited 15/14/105/91/30 and
+checks: exact context/family reconciliation; audited 15/14/105/91/28 and
 330/287 counts and ages; no duplicate charge for shared casts/C or removed
 dense feed path; deterministic output and hash; final shortcut execution;
 each instrumented array below 4 GiB; explicit counted FLOPs relative to

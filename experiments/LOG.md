@@ -45565,3 +45565,19 @@ two CPU request and inherited project priority. Verify raw job/HEAD/input/
 source/package bytes, run separate current-byte default preflight at
 5 GiB/2 CPUs/zero GPU and obtain a fresh-context Skeptic before accepting
 the instrument. A 12 GiB queue reservation is not 8 GiB grader proof.
+
+**September 12 pre-measure integrated-meter schedule amendment.** The
+contract immediately above predicted 30 joins. Before any integrated
+fixture was run or raw cost observed, static inspection of the existing
+recent=4 schedule showed that this arithmetic was wrong: ordinary birth
+L0 inserts at L1 and joins at L5, with ten ordinary joins through L14;
+feed birth L1 inserts at L2 and joins at L6, and only feed births L1--L9
+can join before the final L15 skip. That gives **9 pairs x 2 = 18 feed
+subsource joins plus 10 ordinary = 28 total**, not 30. The other frozen
+15 K4 uses/14 feed births/105 feed age uses/91 nonfinal uses and
+330 D3/287 D21 Source uses remain unchanged. Replace only the deterministic
+join-count assertion with 28. The original mistaken prediction remains
+visible above; the design memo records the correction. This changes no
+experiment data, physical source, score gate, residual model or protected
+role. If the executable reports any other count, preserve a failed
+schedule rather than silently rewriting it.
