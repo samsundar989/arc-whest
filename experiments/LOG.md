@@ -46416,3 +46416,15 @@ stripped quotes from its inline `-c` argument. Replacement job **1049
 SUCCEEDED** on a Git snapshot: candidate, L4 parent and L2 SHA256 values all
 match exact live bytes. Neither job used a seed block, truth or estimator
 execution. The actual engineering/result Skeptic is still owed after evidence.
+
+**F21 receipt follow-up, still before labels/results.** Scorer repair `1521fd7`
+uses snapshot-relative truth paths (P01 configured passthroughs; P09 must use
+an exact per-job passthrough), writes its reservation through the explicitly
+supplied live register/ledger, and verifies a completed canonical-path/SHA
+receipt. A second fresh-context Skeptic returned **PROVISIONAL** in
+`experiments/2026-09-12_f21/receipt_skeptic.md`: a Git snapshot itself also
+passes the scorer's Git-root check, so the **exact workerq command** must pass
+`C:\Users\samsu\Documents\arc-whest` as live root and an absolute output
+under that tree; verify the live receipt after the first exposed P01 read.
+No protected data was used to inspect this path. No-label workerq 1049 did
+establish snapshot source-byte parity, not receipt persistence.
