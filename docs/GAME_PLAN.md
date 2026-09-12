@@ -111,6 +111,15 @@ documented reads before job 949 (three historical smoke reads and two failed
 production attempts), and job 949 added one more; it remains exposed DESIGN.
 The earlier paragraphs below describe the entry contract and historical queue state.
 
+**Terminal P01 update.** Workerq 957 published the complete four-arm report
+over 96 exposed-DESIGN identities with no failed lifecycle rows and about
+3,792.4 MiB peak process RAM. All three K4 arms fail the registered arithmetic
+1.10x gate and are worse on every paired case; the consumer-bearing arms are
+numerically extreme. These are raw DESIGN observations pending a fresh result
+Skeptic and synthesis, not a registered kill or a basis to fit a new constant.
+The residual-cap relaxation means this run supplies no 0.4 s server-cliff
+evidence. Do not implement the next strategic slice from this partial analysis.
+
 **Current entry condition satisfied:** the replacement experiment contract, three
 verbatim `I don't know` human predictions and bounded coefficient/identity registry
 are committed in the LOG. The label-free producer guard has fresh-context Skeptic

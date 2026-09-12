@@ -1,7 +1,7 @@
 # CURRENT_STATE.md — read this first
 
-**Current September 12, 2026, after the registered P07 fit and a rejected
-P01 report-publication gate.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
+**Current September 12, 2026, after a terminal exposed-DESIGN P01 four-arm
+report; independent result review is pending.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
 archived at `docs/archive/CURRENT_STATE_before_worker_review_2026-09-10.md`.
 
 ## What is proved
@@ -111,6 +111,19 @@ P01 four-arm accuracy-only comparison is now the next unblocked test; P01 is
 exposed DESIGN and six earlier reads are documented. After its terminal
 report, obtain an independent result Skeptic and synthesize before the
 residual-rank question. No K4 accuracy verdict or better submission exists yet.
+
+Workerq **957** subsequently published the complete registered P01 report over
+96 paired networks with zero lifecycle failures, in 2,554.7 seconds and at
+3,792.4 MiB peak RAM (8 GiB reserved). The result is **exposed DESIGN** and
+explicitly accuracy-only. Its three K4 arms all fail the registered 1.10x
+arithmetic promotion gate and are worse on every paired network; coherent and
+consumers-only have very large errors, while births-only also worsens markedly.
+The averaged-truth noise floor is about `9.319e-9`, far below these MSEs.
+The raw report, queue record and seventh registered P01 read are committed at
+`f90a128`. A fresh independent result Skeptic is checking the report and
+possible live-shape implementation/numerical pathology before synthesis. This
+is neither a registered kill nor a new submission candidate. No fresh DECIDE,
+public CONFIRM or vault evaluation has occurred.
 
 The old contract at `08f787b` is superseded. P01 has three recorded DESIGN reads
 and placeholder-smoke exposure; it is never relabeled untouched. P07 is reusable
