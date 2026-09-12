@@ -44238,3 +44238,84 @@ not whether a corrected approximation improves accuracy; do not claim a
 scientific kill or change the frozen P01 bytes. Commit this contract before
 running the fixture. Require preflight and fresh independent Skeptic before
 believing an IMPORTANT probe-math change.
+
+## 2026-09-12 — independent source identity accepted; executable discriminator contracted
+
+The committed analytic fixture `2026-09-11_stage2_compact_p07/source_cumulant/analytic_fixture.py`
+SHA-256 `a203b5b4b600eb6b540d1b81b03318943e66a957371ae15fc7d993164862046c`
+produced result JSON SHA-256
+`92ae8a460f1c6eb79fccb4f5009848d3fbc28163bac85d018acaad40b64737a6`.
+For independent `ReLU(N(0,2))` coordinates, variance is `0.6816901138162095`,
+fourth central moment `2.51293758723508`, fourth cumulant
+`1.1188333534108104`, and true mixed `K22=0`; the frozen source instead
+sets mixed `K22=0.8376458624116934`. Under an equal-magnitude He row, exact
+independent-cumulant `D4` is `0.5594166767054052` at width 8 and
+`0.004370442786760978` at width 1024, while the frozen formula predicts
+`5.02587517447016` at both widths. A signed two-coordinate `D31` covariance
+correction differs by `0.0026885636057682595` across transposed entries.
+These are deterministic algebra findings on an atypical but valid synthetic
+network, not P01 performance estimates.
+
+Workerq **958** git-snapshot default preflight was **RED**, exit 1, steps 7,
+9 and 12, because snapshot byte normalization invalidated pinned source hashes;
+it is preserved as negative provenance evidence, not a scientific failure.
+Workerq **959** reran current live-worktree bytes with zero GPU, 5 GiB RAM and
+two CPUs, and finished **GREEN 12/16**, four Full-only steps skipped, exit 0,
+3,275.566 MiB peak. Direct logs, manifests, environment, terminal result and
+byte-preserving queue ZIPs for both jobs are under `source_cumulant/job958_*`
+and `source_cumulant/job959_*`; their exact hashes are in the fresh verdict.
+Independent derivation `2026-09-11_stage2_compact_p07/source_derivation.md`
+SHA-256 `45d3a8e8696dc57caee2bd2d578f0ce13b265ab65a2cc7b674980f4ffb6bef63`
+documents additional Gaussian-zero, off-diagonal core transport, metric and
+birth-source counterexamples, with no labels.
+
+The new fresh-context Skeptic **ACCEPTED the scoped frozen-source identity
+defect** in `source_cumulant/skeptic_verdict.md` SHA-256
+`dcc322b12559a1d3a7675b3da94af10a9080372dbc99601c4a801c4818c38015`.
+They independently recomputed the fourth cumulant and source reduction,
+checked the signed covariance example, equal frozen hashes at all relevant
+paths, and distinguished job 958 from live job 959. The reviewer explicitly
+warned that source projection remains approximate even if marginal cumulants
+and independent mixed terms are corrected. CONFIRMED: the frozen implementation
+does not obey the intended source identity and its P01 promotion gate failed.
+INFERRED: these defects contribute to its P01 instability. SPECULATIVE: any
+corrected coherent-K4 approximation could improve accuracy or score. The
+earlier supplied-core transport oracle and compact counted-cost result retain
+their narrow scopes, but **full Stage-1 source closure is reopened**. Do not
+reuse the P07 fitted `lam` as evidence for a changed architecture or claim a
+scientific kill.
+
+**Next IMPORTANT contract (truth-free executable check, committed before
+execution). Question:** does the actual frozen `_layer` at width 8 take the
+source values predicted by the independent analytic fixture, or is there an
+additional source/path distinction before downstream nonlinear feedback?
+**Evidence:** CONFIRMED analytic defect and accepted Skeptic above;
+INFERRED frozen live execution follows the exact source reduction;
+SPECULATIVE contribution to P01. **Hypothesis/mechanism:** with first-layer
+`W0=sqrt(2)*I` and an equal-magnitude signed Hadamard He row at L2, the
+frozen executable constructs `gcore=M4/2` at L1 and `D4=2M4` at L2,
+independent of history compression. **Intervention:** use the exact frozen
+coherent arm bytes through the real `_layer` path on this deterministic
+two-layer synthetic network; capture L1 `C`/`gcore` and L2 `dG`/`D4` before
+any output cleanup, with source SHA binding. A separate signed two-coordinate
+K11 term check exercises the actual orientation. Do not edit frozen arm bytes
+or read any protected truth. **Predictions:** (1) measured L1 `gcore` agrees
+with `M4/2`; (2) measured L2 `D4` agrees with `2M4` and exceeds the independent
+`4κ4/8` contraction; (3) the signed correction is not symmetric. Samuel's
+standing prediction response is verbatim **“I don't know”**, not an inferred
+technical endorsement. **Falsifier:** executable traced terms disagree with
+these source reductions beyond float32 relative `1e-4`, or the signed
+correction is symmetric. **Baseline/control:** the analytic independent
+fourth-cumulant expansion and exact frozen source SHA, not any score arm.
+**Cost model:** only a width-8/depth-2 CPU identity check; no scored challenge
+cost or server residual measurement. Phase-2 counted `C=F` and the 0.4 s
+cliff remain unchanged. **Statistic/gate:** deterministic term identity,
+relative tolerance `1e-4`; no paired score, noise floor, promotion boolean
+or seed block because no labels/networks from the registry are touched.
+**Confounders/scope:** distinguish literal source trace from a reimplemented
+formula; source tracing must not change arithmetic, and the analytic fixture
+has atypical orthogonal W0. If useful, compare a negative exact-arm K4-off
+control. Require scoped tests, current-source preflight and fresh-context
+Skeptic before believing this IMPORTANT probe. No residual-rank or fresh
+decision measurement follows until source representation is separately
+repaired and reviewed.
