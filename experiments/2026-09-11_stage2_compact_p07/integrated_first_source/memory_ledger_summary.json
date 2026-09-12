@@ -1,0 +1,584 @@
+{
+  "checks": [
+    {
+      "expected": "3a57e5e5709a62848f8412de094f218ea9b323933b9071e04c5dabbdab8b12b3",
+      "got": "3a57e5e5709a62848f8412de094f218ea9b323933b9071e04c5dabbdab8b12b3",
+      "name": "frozen_optimized_source_sha",
+      "pass": true
+    },
+    {
+      "name": "shortcut_source_binding",
+      "pass": true
+    },
+    {
+      "existing_n8_min_prevariance": -0.11771620810031891,
+      "name": "shortcut_existing_gate_remains_red",
+      "pass": true
+    },
+    {
+      "name": "optimized_schedule",
+      "pass": true
+    },
+    {
+      "name": "optimized_single_array_cap",
+      "pass": true
+    },
+    {
+      "name": "optimized_final_shortcut",
+      "pass": true
+    },
+    {
+      "name": "old_schedule",
+      "pass": true
+    },
+    {
+      "name": "old_single_array_cap",
+      "pass": true
+    },
+    {
+      "name": "old_final_shortcut",
+      "pass": true
+    },
+    {
+      "name": "tiny_schedule",
+      "pass": true
+    },
+    {
+      "name": "tiny_single_array_cap",
+      "pass": true
+    },
+    {
+      "name": "tiny_final_shortcut",
+      "pass": true
+    },
+    {
+      "name": "tiny_old_schedule",
+      "pass": true
+    },
+    {
+      "name": "tiny_old_single_array_cap",
+      "pass": true
+    },
+    {
+      "name": "tiny_old_final_shortcut",
+      "pass": true
+    },
+    {
+      "committed": 38520,
+      "ledger": 38520,
+      "name": "tiny_partial_resident_floor_crosscheck",
+      "pass": true
+    },
+    {
+      "committed": 40312,
+      "ledger": 40312,
+      "name": "tiny_old_partial_resident_floor_crosscheck",
+      "pass": true
+    },
+    {
+      "bytes": 110100480,
+      "name": "positive_14_birth_raw_AP_saves_at_least_100MiB",
+      "pass": true
+    },
+    {
+      "bytes": 117440512,
+      "name": "negative_14_birth_raw_AP_is_112MiB",
+      "pass": true
+    },
+    {
+      "name": "skinny_peak_below_padded_peak",
+      "pass": true
+    }
+  ],
+  "frozen_integrated_source_sha256": "3a57e5e5709a62848f8412de094f218ea9b323933b9071e04c5dabbdab8b12b3",
+  "kind": "compact index of raw shape-only memory ledger",
+  "limits": {
+    "individual_array_strict_bytes": 4294967296,
+    "process_cap_gate": "NOT_TESTED",
+    "process_cap_reference_bytes": 8589934592
+  },
+  "old_padded_control": {
+    "external_input_bytes": 134742528,
+    "largest_single_array": {
+      "bytes": 8388608,
+      "id": "external.W0.float64#1",
+      "shape": [
+        1024,
+        1024
+      ]
+    },
+    "layers": [
+      {
+        "explicit_resident_bytes": 148275968,
+        "layer": 0,
+        "newborn": [
+          "ordinary"
+        ],
+        "peak_modeled_array_payload_bytes": 207800064,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 0,
+        "young": 0
+      },
+      {
+        "explicit_resident_bytes": 174134016,
+        "layer": 1,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 242370304,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 0,
+        "young": 1
+      },
+      {
+        "explicit_resident_bytes": 199992064,
+        "layer": 2,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 293721856,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 0,
+        "young": 4
+      },
+      {
+        "explicit_resident_bytes": 225850112,
+        "layer": 3,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 345073408,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 0,
+        "young": 7
+      },
+      {
+        "explicit_resident_bytes": 251708160,
+        "layer": 4,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 396424960,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 0,
+        "young": 10
+      },
+      {
+        "explicit_resident_bytes": 274486016,
+        "layer": 5,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 444696320,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 1,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 284615424,
+        "layer": 6,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 477239040,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 4,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 294744832,
+        "layer": 7,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 518263552,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 7,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 304874240,
+        "layer": 8,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 563323648,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 10,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 315003648,
+        "layer": 9,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 608383744,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 13,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 325133056,
+        "layer": 10,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 653443840,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 16,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 335262464,
+        "layer": 11,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 698503936,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 19,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 345391872,
+        "layer": 12,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 743564032,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 22,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 355521280,
+        "layer": 13,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 788624128,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 25,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 365650688,
+        "layer": 14,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 833684224,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 28,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 365654784,
+        "layer": 15,
+        "newborn": [],
+        "peak_modeled_array_payload_bytes": 762286848,
+        "peak_stage": "final_D3_only",
+        "shared": 28,
+        "young": 15
+      }
+    ],
+    "max_modeled_array_payload_bytes": 833684224,
+    "max_resident_array_bytes": 365654784,
+    "schedule": {
+      "feed_births": 14,
+      "feed_negative_D21_uses": 91,
+      "feed_negative_D3_uses": 105,
+      "feed_positive_D21_uses": 91,
+      "feed_positive_D3_uses": 105,
+      "join_feed_negative": 9,
+      "join_feed_positive": 9,
+      "join_ordinary": 10,
+      "joins": 28,
+      "k4_final": 1,
+      "k4_full": 14,
+      "k4_uses": 15,
+      "ordinary_D21_uses": 105,
+      "ordinary_D3_uses": 120,
+      "ordinary_births": 15,
+      "source_D21_uses": 287,
+      "source_D3_uses": 330
+    }
+  },
+  "optimized": {
+    "external_input_bytes": 134742528,
+    "largest_single_array": {
+      "bytes": 8388608,
+      "id": "external.W0.float64#1",
+      "shape": [
+        1024,
+        1024
+      ]
+    },
+    "layers": [
+      {
+        "explicit_resident_bytes": 148275968,
+        "layer": 0,
+        "newborn": [
+          "ordinary"
+        ],
+        "peak_modeled_array_payload_bytes": 199673600,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 0,
+        "young": 0
+      },
+      {
+        "explicit_resident_bytes": 166024448,
+        "layer": 1,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 226134272,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 0,
+        "young": 1
+      },
+      {
+        "explicit_resident_bytes": 183772928,
+        "layer": 2,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 261511936,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 0,
+        "young": 4
+      },
+      {
+        "explicit_resident_bytes": 201521408,
+        "layer": 3,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 296889600,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 0,
+        "young": 7
+      },
+      {
+        "explicit_resident_bytes": 219269888,
+        "layer": 4,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 332267264,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 0,
+        "young": 10
+      },
+      {
+        "explicit_resident_bytes": 233938176,
+        "layer": 5,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 364564736,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 1,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 240873216,
+        "layer": 6,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 390384896,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 4,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 247808256,
+        "layer": 7,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 421437184,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 7,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 254743296,
+        "layer": 8,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 452489472,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 10,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 261678336,
+        "layer": 9,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 483541760,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 13,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 268613376,
+        "layer": 10,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 514594048,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 16,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 275548416,
+        "layer": 11,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 545646336,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 19,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 282483456,
+        "layer": 12,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 576698624,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 22,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 289418496,
+        "layer": 13,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 607750912,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 25,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 296353536,
+        "layer": 14,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 638803200,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 28,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 296357632,
+        "layer": 15,
+        "newborn": [],
+        "peak_modeled_array_payload_bytes": 582889216,
+        "peak_stage": "final_D3_only",
+        "shared": 28,
+        "young": 15
+      }
+    ],
+    "max_modeled_array_payload_bytes": 638803200,
+    "max_resident_array_bytes": 296357632,
+    "schedule": {
+      "feed_births": 14,
+      "feed_negative_D21_uses": 91,
+      "feed_negative_D3_uses": 105,
+      "feed_positive_D21_uses": 91,
+      "feed_positive_D3_uses": 105,
+      "join_feed_negative": 9,
+      "join_feed_positive": 9,
+      "join_ordinary": 10,
+      "joins": 28,
+      "k4_final": 1,
+      "k4_full": 14,
+      "k4_uses": 15,
+      "ordinary_D21_uses": 105,
+      "ordinary_D3_uses": 120,
+      "ordinary_births": 15,
+      "source_D21_uses": 287,
+      "source_D3_uses": 330
+    }
+  },
+  "pass": true,
+  "raw_AP_control": {
+    "negative_14_birth_bytes": 117440512,
+    "positive_14_birth_saving_bytes": 110100480
+  },
+  "raw_result_sha256": "10c7835042b581b6691f6f98963a90adeeb222ba846557da2582396443025155",
+  "scope": "Explicit float64 inputs, float32 retained field identities and named co-live arrays. Library allocator, flopscope wrapper, BLAS/QR workspaces, fragmentation, Python process overhead and true peak cannot be bounded here. Windows does not enforce the 8 GiB cap. Existing n8 variance and n4 numeric gates remain FAIL; this is no stability, cost, accuracy, or deployment claim.",
+  "source_sha256": "88f2fedacdcd778f8709b1b0110096f70314bba95116f3cd970999651a4cae67",
+  "tiny_partial_resident_floors": {
+    "old_padded": 40312,
+    "optimized": 38520
+  }
+}
