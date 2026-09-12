@@ -45821,3 +45821,21 @@ claim. Samuel's prediction is **"I don't know"**. Commit implementation
 and tiny result, current-byte preflight and obtain fresh independent
 Skeptic before accepting optimized cost. A red numerical stability gate
 still blocks a full-width cost verdict.
+
+**September 12 same-input n8 negative-variance diagnosis (descriptive).**
+At L2, assembled covariance has minimum eigenvalue `-0.231173`;
+independent summation of named terms reconstructs it within `8.01e-9`.
+At L3 neuron 1, preactivation variance is `-0.117716` versus
+`+0.033250` if the K4 covariance consumer is omitted; the K4 component
+alone is `-0.150966`, compared with ordinary K3 `-0.004458`, positive
+feed `-0.005528` and negative feed `+0.022222`. At neuron 6,
+`-0.057594` becomes `+0.065337` without K4; K4 contributes
+`-0.122931`. This locates the first failed n8 stability gate in the K4
+covariance consumer for this *synthetic externally supplied linearly
+carried source*. It does not prove the intended physical K4 hypothesis
+fails, nor certify a repaired covariance algorithm. Raw script/JSON/log
+committed `d3c9229`, JSON SHA256
+`bb9193bc0d3a634b721690855fc7c6686c584826e077c3d98cf43e8cbe31e56a`.
+The n8 186/187 and n4 93/172 FAILs remain unchanged. The exact S-column
+shortcut contract above is an accounting/algebra repair, not a cure for
+the negative eigenvalue. No new network, label, score or width meter.
