@@ -97,6 +97,18 @@ width1024 cost estimate. Per-layer modeled resident bytes omit co-live
 temporaries, and neither those numbers nor preflight's ~3 GiB process peak
 prove an 8 GiB deployed limit.
 
+A subsequent separate shape-only audit now enumerates the integrated
+prototype's retained source fields and nine sampled Python-frame
+boundaries. After two independently caught missing-lifetime defects,
+fresh Skeptics accepted the n8 and thinner n16/rank8/residual2 traces
+only in that scope (63/63 and 93/93). At n1024/S64/rank384 the
+*inclusive named-array payload model* is 715,844,864 bytes with the
+positive S-column leg versus 910,988,032 padded; the negative full
+n-column leg remains. This symbolic count excludes unbounded helper,
+library, allocator and process overhead. No stable full-width integrated
+run has measured an actual peak or complete counted FLOPs, and the 8 GiB
+limit has not been tested. Raw evidence and verdicts are at the LOG tail.
+
 ## The decision we need from you
 
 1. Derive the smallest **causal, compressed** state that could carry an older

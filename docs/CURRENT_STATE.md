@@ -320,12 +320,29 @@ MiB peak is **preflight RAM**, not a full-width candidate measurement.
 The integrated first-source n4 gate remains 93/172 FAIL from overflow, and
 the distinct n8 gate remains 186/187 FAIL because K4 covariance makes L3
 preactivation variance -0.117716. The shortcut does not change that failure.
-No width1024 integrated cost or complete peak-memory result exists; its
-retained-array model omits live temporaries. The truth-free mechanism needs
+No width1024 integrated cost or complete peak-memory result exists; the
+original retained-array model omits live temporaries. The truth-free mechanism needs
 a causal compressed nonlinear signed source and stable covariance before
 new labels. The self-contained
 `docs/STRATEGIST_PACKET_2026-09-12.md` asks for a falsifiable architecture
 decision. Raw paths and exact scopes are at the LOG tail.
+
+**Memory accounting update (September 12).** Two independent Skeptics found
+missing Python-frame arrays in successive shape ledgers; both first
+results and INCOMPLETE verdicts remain preserved. A separately contracted
+nine-boundary repair and n16/rank8/residual2 extension now pass 63/63 and
+93/93 truth-free checks, respectively, with fresh scoped Skeptic ACCEPT
+(`a3bbfb7`, `16c819b`). The n16 replay independently matched all 172
+retained L14 field occurrences and the raw result byte-for-byte. The
+inclusive *named array payload* model at n1024 is 715,844,864 bytes with
+the positive S64 leg versus 910,988,032 padded; this explicitly includes
+negative full n-column A/P and sampled outer-frame lifetimes. Workerq
+1018/1019 passed controlled exact-byte default preflight 12/16, four
+Full-only skips, at about 3.02 GiB **preflight** peaks. These checks do
+not measure a full-width integrated process, its helper/library workspaces
+or the grader's 8 GiB cap. The n4/n8 stability failures still bar that
+run. Raw artifacts and receipt hashes are at the LOG tail under
+`experiments/2026-09-11_stage2_compact_p07/integrated_first_source/`.
 
 There is **no newly proven better submission**. The compact arms now have a
 negative exposed-DESIGN accuracy result, an independently identified source

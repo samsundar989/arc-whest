@@ -68,6 +68,16 @@ Stage 1's supplied-core algebra and compact baseline cost remain accepted
 narrowly; physical nonlinear compression, stable covariance, complete
 full-width cost and peak memory are open. The next scientific architecture
 decision is specified in `STRATEGIST_PACKET_2026-09-12.md`.
+The latest shape-only memory package is also accepted **only for sampled
+named array lifetimes**: first/second independent Skeptics found omitted
+frame arrays and returned INCOMPLETE; a nine-site n8 repair passed 63/63
+and a n16/rank8/residual2 extension passed 93/93 with fresh scoped
+Skeptic ACCEPT. At n1024 its inclusive modeled named-array payload is
+715,844,864 bytes with S64 positive feed versus 910,988,032 padded;
+workerq 1018/1019 current-byte default preflights were GREEN 12/16, four
+Full-only skips. No whole-process peak, 8 GiB cap pass, stable physical
+source or width1024 full integrated FLOP meter follows. The exact raw
+artifacts, failed drafts, hashes and verdicts are in the LOG tail.
 There is no better submission candidate, no fresh DECIDE/public/vault result,
 and Samuel's Stage-3 hold remains binding. Historical pickup instructions below
 must not cause a second fit or P01 relabeling.

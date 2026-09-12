@@ -86,6 +86,17 @@ hashes unchanged. Full physical nonlinear source/compression, stable
 covariance, complete counted cost, process peak and score remain open. The
 self-contained `STRATEGIST_PACKET_2026-09-12.md` requests a priced causal
 representation or explicit no-go before another fit or fresh decision.
+The separate shape-only memory audit now has narrow fresh Skeptic ACCEPT
+after two preserved INCOMPLETE ledger attempts: nine n8 boundaries pass
+63/63, and a distinct n16/rank8/residual2 trace passes 93/93 with exact
+retained-field shape/alias checks. Its n1024 **inclusive named-array
+payload** is 715,844,864 bytes optimized versus 910,988,032 padded.
+Workerq 1018/1019 controlled default preflights passed 12/16 with four
+Full-only skips. The ledger does not bound helper/library workspaces or
+whole-process RAM, and Windows did not enforce the grader's 8 GiB cap.
+It is a planning instrument, not a priced stable integrated estimator;
+do not launch the full-width meter until the causal source and covariance
+gates pass. Exact raw paths and verdicts are at the LOG tail.
 Stage 4 remains
 conditional on a measured Stage-2 bottleneck.
 
