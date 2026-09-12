@@ -1,0 +1,12 @@
+Frozen thin-shape contract: experiments/LOG.md, commit 24b389c
+Source commit before fixture: 9ad41f8
+Command: uv run python local_sim/p2_k4_integrated_memory_ledger.py --json experiments/2026-09-11_stage2_compact_p07/integrated_first_source/memory_ledger_thin_result.json
+Terminal exit: 0
+Final stdout line: memory ledger PASS; optimized modeled peak 715844864 bytes; padded 910988032 bytes
+Result: 93/93 checks PASS. The n16/depth16/S8/rank8/residual2 trace covers nine sampled boundaries: 68 shaped bindings at L14 and L15 final readout, 64 at final mean/output. Name/shape, both alias directions (with the Om/W backing-view exception), and exact None sets match.
+Observed thin shapes: shared Q (16,8), Gram (8,8), ordinary newborn Z/L (16,2), Om/Qr/Y (16,2), Bm (2,16).
+Schedule: 28 joins; 15 ordinary and 14 feed births; 330 D3 and 287 D21 uses. The accepted n8 raw result SHA256 remains 3368f9e26b9fb0ff506d9241f18a9b86c774cb5224681b99d202981b97a847cf.
+Source SHA256: d6cbed70cc581a4ad90d6cb1783531ccc907520d5726c356a7971058d11e4176
+Raw result SHA256: dd3bf40edaedeed3551529d19553d4501a56bbc0d8939164676eaf113eb04697
+Summary SHA256: 9e7dcaa83d39984a1a8563bc615089fa21c4ad311ce4fe4d7220a80b8cbc3f9a
+This remains a finite named-array planning model. It does not bound helper/library workspace, Python process memory, or the grader's 8 GiB cap; the original n4/n8 stability gates remain red.
