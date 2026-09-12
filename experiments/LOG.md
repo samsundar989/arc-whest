@@ -46100,3 +46100,60 @@ Skeptic. This is a finite set of tested named boundary inventories,
 **not** an upper bound on whole-process RAM or proof of the 8 GiB cap;
 the unstable n4/n8 gates still block full-width cost. Samuel's prediction
 is **"I don't know"**.
+
+**September 12 nine-boundary memory result and scoped independent ACCEPT.**
+The consolidated ledger source commits `cb9d94e`, `418c0db`, `73f471a`
+preceded its final fixture at `5c61040`. The first 54/54 draft lacked
+reverse alias testing; the second 54/54 lacked exact `sources=None`
+coverage. Both are preserved as raw draft ZIPs; final JSON SHA256
+`3368f9e26b9fb0ff506d9241f18a9b86c774cb5224681b99d202981b97a847cf`
+passed **63/63**, terminal exit 0. A fresh-context Skeptic independently
+replayed the JSON byte-for-byte and **ACCEPTED only the nine sampled named
+Python-frame boundaries** (`a3bbfb7`). At n8 the trace covers 68 shaped
+bindings at L14 sites/L15 readout and 64 at final mean/output, both alias
+directions, `Om`'s prior-W backing and every null binding. It closes the
+specific L14/L15, transport-vector and post-C omissions found by two
+earlier independent INCOMPLETE verdicts. Source-history schedule remains
+28 joins, 15 ordinary/14 feed births, 330 D3/287 D21 uses; S64 positive
+A/P raw birth saving is 110,100,480 bytes and negative n-column A/P
+birth fields total 117,440,512 bytes. At n1024 the *inclusive named-array
+payload model* peaks at 715,844,864 bytes optimized versus 910,988,032
+padded; this is not a measured process peak or cap test. Workerq **1018**
+SUCCEEDED on exact HEAD `bac8408`, 350/350 Python hashes unchanged;
+controlled default preflight GREEN 12/16, four Full-only skips, preflight
+peak 3,017.1 MiB, receipt SHA256
+`7f1a3ad370e9521342c08c99bce9808c8003c8a79904b4292afb65eada9dbde2`,
+raw ZIP SHA256 `b0262321758f3b0ef8f1a20015e0f5f329bd96ec0b14181d9cfe100f0f7f49c7`,
+committed `b76b950`. The verdict does not cover arrays inside helper calls,
+allocator/BLAS/QR/flopscope overhead, deployed width1024 process peak,
+8 GiB enforcement, stable covariance or official full integrated FLOPs.
+
+**September 12 IMPORTANT thin-shape memory trace contract (before new
+fixture).** **Question:** do the accepted boundary identities and alias
+rules still cover actual shaped bindings when common rank and ordinary
+residual are *strictly thinner* than network width? **Evidence:** CONFIRMED
+the n8/rank8/residual8 63/63 scoped ACCEPT and its exact source/receipt;
+INFERRED that n16/rank8/residual2 should exercise rank and residual shape
+paths absent from that trace; SPECULATIVE that all nine boundary name/shape,
+alias and null sets remain covered. **Intervention:** extend the deterministic
+no-truth tracer/ledger fixture with a separately generated n16, depth16,
+S8, common rank8, recent4, ordinary residual2 control using the same
+frozen integrated source. At the same nine sampled sites compare every
+shaped outer-frame name/shape, both directions of object aliases with only
+the documented Om/W backing exception, and exact `None` sets; assert the
+history schedule, retained field widths, individual-array bound, original
+n8 raw SHA/result unchanged. Do not allocate n1024 arrays or touch data.
+**Predictions/gates:** all nine n16 sites pass exhaustive boundary checks,
+rank8 and residual2 shapes are actually observed, and 28 joins/15+14
+births/330+287 uses remain. Any mismatched name, alias, null or schedule
+FAILS. **Falsifier:** an unmodeled thin-shape binding or a requirement to
+charge an unrepresented full-width factor. **Baseline:** accepted n8 raw
+SHA above, source SHA
+`990eb0f61c08962b42dd8ed0a5727dea0095b7d505ef34fe9dac20b070545c74`,
+Skeptic verdict `a3bbfb7`. **Cost/statistic:** deterministic shape/byte
+arithmetic, no challenge network, seed block, protected truth, score or
+estimator change. Commit revised source before run, preserve raw,
+controlled workerq default preflight (5 GiB/2 CPU/0 GPU) and fresh-context
+Skeptic. Acceptance only extends sampled named arrays to a thin tiny
+shape; process-cap/stability/full-width cost claims remain forbidden.
+Samuel's prediction is **"I don't know"**.
