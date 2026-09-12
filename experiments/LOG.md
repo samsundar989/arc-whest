@@ -44834,3 +44834,65 @@ public/vault access. **Scope/confounders:** finite two-coordinate law and
 toy old linear carry only, not a real nonlinear old-history response,
 cross-source closure, scalable rank, all-history cost or score. Run focused
 test, current-byte default preflight via workerq and a new fresh Skeptic.
+
+**Parallel IMPORTANT first-source-only cost contract, committed before its
+microkernel.** **Question:** what does the *executing* exact-for-discrete-
+measure first-source K4 and induced quadratic K3 tower cost at n1024,d16,
+S64, and can its persistent factors and scratch be streamed below an 8 GiB
+observed process peak? **Evidence:** CONFIRMED signed-cubature n=2 factor
+identity and tiny n=4 Gaussian source; CONFIRMED low-rank feed design-only
+Skeptic accepts conditional algebra and `0.703252660224` trillion
+conventional dense-product first-source subtotal; CONFIRMED later whole
+cumulants cannot be inserted as additive ages; SPECULATIVE official-package
+operation billing, allocation peak and residual headroom for a new kernel.
+**Hypothesis/mechanism:** retain just the first source as centered weighted
+columns `V,p` plus its own covariance subtraction; each nonfinal layer reads
+D4/D22/D31, makes its declared quadratic K3 feed and carries the shared
+birth matrix `A`, age-specific `P,a` and birth-time coefficient `V` through
+later signed dense maps. Reconstruct `Q,H,A+` only at readout, release scratch
+per age and use final D4/D3-only shortcuts. This avoids the unproved later
+source-increment law while exercising the rank-independent negative D21
+bottleneck. **Intervention:** implement an immutable-array research microkernel
+and an independently enumerated tiny n4 weighted-discrete dense oracle under
+two signed/nonconstant maps. At n1024,d16,S64 use deterministic synthetic
+source inputs without registry seeds or protected truth, follow the memo's
+one-source schedule (15 K4 uses, 14 useful K3 births, 105 future K3 uses,
+91 full D21 readouts) and meter every actual operation family with official
+flopscope primitives. Account for source generation/centering, covariance,
+factor transports, positive/negative consumers and feed, reconstructions,
+casts, materialization, initial/final shortcuts, operation calls and peak
+scratch/process RAM. Compare with, but do not silently add to, the accepted
+818.494B supplied-core compact baseline; shared/fused work needs an explicit
+reconciled ledger. No later age is generated and no estimator is shipped.
+
+**Predictions:** (1) every tiny dense K4/K3 tensor and D4/D22/D31/D3/D21
+consumer after two maps agrees within `1e-5` relative on material float32
+entries and `1e-6` absolute near zero; (2) the measured operation-family
+ledger sums exactly to the official-package meter, and its dense-product
+family is within 5% of the frozen `703252660224` conventional subtotal
+after any explicitly priced source-generation shortcut is reconciled;
+(3) peak process RAM is under 8 GiB, while the negative K3 D21 family is
+larger than 0.35 trillion counted FLOPs. Samuel's standing prediction is
+**"I don't know"**. **Falsifier:** any tiny identity, ledger equality,
+family-cost tolerance or observed-memory bound fails; preserve that outcome
+and do not call the architecture competitive from a partial bill.
+**Control/baseline:** independent dense n4 cumulant/feed enumeration for
+algebra, actual flopscope operation log for cost, memo's fixed one-source
+conventional arithmetic as prediction, supplied-core compact reference only
+as a separately measured contextual baseline. **Cost model:** freeze
+`F_increment,conv=703252660224` at n1024,d16,S64 with the memo's 11 product
+families, plus separately counted pointwise/source/setup/allocator work;
+`F_baseline=818494496296` is a different executable and cannot be added
+without overlap analysis. Phase 2 charges counted `C=F`; residual is only
+headroom against 0.4 s, not part of score. Local absolute time is not
+server authority. Submit live-shape execution through workerq with at least
+8 GiB RAM, 2 CPUs, zero GPU, and report measured peak, requested resources
+and any Windows memory-limit non-enforcement. **Statistic/gate:** deterministic
+algebra tolerance and cost-ledger checks, no score/noise/promotion boolean,
+no seed block/public/vault. **Scope/confounders:** one first-layer chosen
+discrete law and *declared quadratic-response* K3 feed only; the 2-layer
+continuous increment gate is independent and currently under repair.
+No claim for later non-Gaussian source generation, full all-history K4
+closure, adequate S64 rank, official server residual or hidden score. Run
+focused tests, full raw operation evidence, current-byte default preflight
+and a new independent Skeptic before using the cost number.
