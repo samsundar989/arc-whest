@@ -43687,3 +43687,69 @@ high --gpus 0 --ram 5 --vram 0 --cpus 2 --no-snapshot -- powershell.exe
 independent Skeptic and a successful current-byte preflight remain required
 before another exposed-DESIGN P01 read. The synthetic report makes no accuracy
 or residual claim for the frozen K4 arms.
+## 2026-09-12 — Job 950 preflight passes; fresh Skeptic rejects final report publication
+
+Workerq **950** tested the committed scored/depth repair `36af85a` on the live
+worktree with no snapshot, zero GPU, 5 GiB RAM and two CPUs. It finished
+`SUCCEEDED`, exit 0, in 331.099315 seconds at 3,089.35546875 MiB peak.
+The default preflight reported **GREEN 12/16, four Full-only steps SKIPPED**.
+Raw queue transcript, metadata and manifest are `2026-09-11_stage2_compact_p07/freeze_bridge/job950_preflight.log`,
+`job950_metadata.json` and `job950_manifest.json` (SHA-256 respectively
+`4b00062425d7bdb27cd623404c0a47e85eeb727386af01ff88d32680d6f3bbc9`,
+`42affb4ed35eab97f6269a03e4f36e01d044c2e0d5edec963449b285f9b69636`,
+`2127c4bec08fd34cc6441ffdf87bfae27abda47bc40a3d64394a0d701e0b5077`).
+
+A fresh-context independent Skeptic **REJECTED** the combined final-origin and
+publication gate. The narrow job-949 fix passes its truth-free four-arm entry
+fixture, but the lab publishes a `status: complete` report before the outer
+bootstrap's last global origin scan. In a copied, attested, sacrificial lab,
+the Skeptic registered an unlisted repo-local module immediately after
+`_write`: the bootstrap refused with exit 2, yet the complete report remained.
+The repeatable script and raw JSON are `freeze_bridge/skeptic_late_origin_probe.py`
+and `freeze_bridge/skeptic_late_origin_probe.json` (SHA-256
+`76f088939caf0dc44095eb730049c600401d63d17593d7fc067101445a279bc6`,
+`0f21194fab2dedada315c49cc0bbfeb9b2d10a3853c0b8b22fbf929a4d5ae747`).
+Verdict `freeze_bridge/skeptic_verdict_depth_bridge.md` SHA-256
+`0cc0ec904c9523b862f75f84bc1af271bcd5a7eddb7dcfa7044af57c1e8f3d77`.
+This is an instrument refusal/publication defect, not evidence against K4.
+No P01 retry is permitted under this verdict. Its zero-output sacrificial arms
+also do not prove nontrivial scored/depth numerical equality.
+
+### IMPORTANT contract — close the final-origin audit before complete report publication
+
+**Question.** Can a locked four-arm lab publish an immutable complete report
+only after every source and loaded-module audit has closed, while preserving
+the receipt-bound arm and protected-truth semantics?
+
+**Evidence.** **CONFIRMED:** `p2_lab._write` performs its dependency check then
+creates the output with exclusive mode before `p2_lab.main()` returns.
+**CONFIRMED:** `p2_locked_bootstrap._execute_target` checks `guard.violation`
+and loaded repo modules only after `main()` returns. **CONFIRMED:** the Skeptic's
+truth-free copied-entry counterexample exits 2 with a complete report left
+behind. **INFERRED:** publication must be contingent on the bootstrap's last
+origin verdict or a narrowly scoped rollback must make refusal unable to leave
+a complete report; staging and atomic final publication would also prevent
+transient visibility. **SPECULATIVE:** deferred publication can preserve the
+current frozen-receipt/source checks without introducing a later import or
+source race. No protected outcome has been seen from the four-arm P01 run.
+
+**Prediction.** The old counterexample remains reproducible before change.
+With the repair, its copied lab still exits 2 on the unlisted source but leaves
+no complete output at the requested path. A clean synthetic locked four-arm
+entry publishes exactly one complete report after a successful final audit;
+swapped, missing, wrongly sourced and closing-mutated arm/dependency controls
+still refuse without publication. Current freeze receipt validation, focused
+bridge/freezer/Stage-0 suites and current-byte default preflight remain green.
+Samuel's standing mechanism prediction is `I don't know`; this is an instrument
+repair with no new scientific result.
+
+**Gate / falsifier.** The truth-free real-entry positive and late-origin
+negative must both pass, including no complete report after any final refusal;
+the preexisting negative controls, stable provenance, default preflight and
+fresh-context independent Skeptic must accept before another exposed P01 read.
+Any false-complete artifact, changed scientific arm/cost/statistic, bypassed
+bootstrap audit, protected-data read or source race blocks the retry.
+**Scope:** locked bootstrap/lab publication protocol and sacrificial fixtures
+only; no estimator, frozen arm, fit/freeze receipt, coefficient, P01/P07 data
+role, score gate, truth ledger, vault or residual model change. Any substantial
+test goes through workerq with declared resources.
