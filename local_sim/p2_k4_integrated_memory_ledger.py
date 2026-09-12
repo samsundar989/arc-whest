@@ -774,10 +774,25 @@ def main() -> int:
                        name in modeled and field["alias_of"] in modeled and
                        modeled[name]["array_id"] !=
                        modeled[field["alias_of"]]["array_id"]]
+        modeled_groups = {}
+        for name in actual:
+            if name in modeled:
+                modeled_groups.setdefault(modeled[name]["array_id"], []).append(name)
+        false_modeled_alias = []
+        for names in modeled_groups.values():
+            if len(names) < 2:
+                continue
+            actual_identities = {actual[name]["alias_of"] or name
+                                 for name in names}
+            if len(actual_identities) > 1 and set(names) != {"Om", "W"}:
+                false_modeled_alias.append(names)
         check("boundary_" + site + "_outer_array_coverage",
-              bool(actual) and not missing_or_wrong and not false_alias,
+              bool(actual) and not missing_or_wrong and not false_alias and
+              not false_modeled_alias,
               actual_array_bindings=len(actual),
-              missing_or_wrong=missing_or_wrong, false_alias=false_alias)
+              missing_or_wrong=missing_or_wrong, false_alias=false_alias,
+              false_modeled_alias=false_modeled_alias,
+              allowed_backing_exception="Om is a distinct W column-view object whose retained backing payload is W")
     output_actual = runtime.get("L15_output_stack", {}).get("arrays", {})
     output_none = runtime.get("L15_output_stack", {}).get("none", [])
     output_stage = stage_at(tiny, 15, "output_stack")
