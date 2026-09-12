@@ -45930,3 +45930,51 @@ back as a pre-registered truth-free contract. Exact symbolic polar kernels
 can be checked locally but do not solve width1024 rank/cost. P01/P07
 remain exposed DESIGN, P08 exhausted, Stage 3 held, HUMAN_MODEL and vault
 untouched. Samuel's prediction answer remains **"I don't know"**.
+
+**September 12 IMPORTANT pre-measure shape-only compact memory ledger
+contract.** **Question:** at n1024/d16/S64/rank384/ordinary residual16,
+what explicit array payload does the accepted S-column positive feed and
+literal n-column negative feed retain by layer, including the external
+inputs, ordinary history, Gram/QR state, backbone/output arrays and a
+conservative named co-live scratch envelope? **Evidence:** CONFIRMED
+the n8 shortcut saves only `40,312 -> 38,520` bytes in a deliberately
+partial resident-accounting function; CONFIRMED current source omits W,
+WC, C_pre, mu_pre and derivatives from that report; CONFIRMED the
+negative source retains full n-column A/P; SPECULATIVE that peak process
+memory on a stable full-width path is below 8 GiB. **Intervention:** a
+separate deterministic shape-only script, without allocating n1024
+arrays or modifying estimator/source math, enumerates each retained field
+and its lifetime at every layer, exact 15/14 births, 28 joins, 330/287
+uses, shared Gram/rank state and final shortcut. It reports explicit
+float64 external input bytes, float32 array fields, per-layer resident
+and named transient operand/result/workspace allowances (including
+Gram sketch, thin QR, rotation, D3/D21 materialization, C/W/K11 and
+output). Deduplicate object aliases; do not add two historical meters
+or call maximum individual scratch an actual peak. Compare its n8
+structural counts and lower-bound included fields to the committed
+optimized n8 result; independently enumerate negative n-column and
+positive S-column shape widths, and check all modeled individual arrays
+<4 GiB. **Predictions/gates:** exact source ages and schedule must agree
+with the committed tiny trace, positive versus padded source fields
+save at least 100 MiB of 14-birth raw A/P storage at n1024 before
+considering temporal liveness, while 14 negative A/P birth fields
+are exactly 112 MiB at float32. Per-layer explicit array payload is
+expected well below 8 GiB but there is **no process-memory pass gate**;
+if required family or co-live field is missing, the ledger FAILS.
+**Falsifier:** mismatched schedule/source dimensions or missing weight,
+backbone, resident history, Gram/QR, source construction, scratch,
+output or final-shortcut row. Preserve a failure. **Baseline/control:**
+independent shape arithmetic for old padded and optimized positive leg,
+current n8 live result and exact source SHA
+`3a57e5e5709a62848f8412de094f218ea9b323933b9071e04c5dabbdab8b12b3`.
+**Cost/statistic:** deterministic GiB/byte arithmetic only, not an
+official FLOP meter, no new challenge network, label, seed block, public
+split, vault, residual or score. Library allocator/BLAS workspace and
+whole-process Python memory cannot be bounded from this model; the
+Windows 8 GiB limit is not enforced. Commit the source before running,
+preserve raw positive/negative fixtures, run current-byte default
+preflight through workerq 5 GiB/2 CPUs/0 GPU, and obtain a fresh
+independent Skeptic before using the explicit array ledger. A stable
+integrated program and workerq measured process peak remain separate
+required work before a deployable memory claim. Samuel's prediction
+is **"I don't know"**.
