@@ -1,0 +1,198 @@
+{
+  "analytic": {
+    "central4": 2.512937587235079,
+    "cumulant4": 1.1188333534108093,
+    "independent_d4": 0.5594166767054046,
+    "variance": 0.6816901138162095
+  },
+  "capture": {
+    "exact_l2_has_D4": false,
+    "exact_l2_has_dG": false,
+    "l1_local_C": [
+      [
+        0.681689977645874,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.681689977645874,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.681689977645874,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.681689977645874,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.681689977645874,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.681689977645874,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.681689977645874,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.681689977645874
+      ]
+    ],
+    "l1_local_gcore": [
+      1.2564682960510254,
+      1.2564682960510254,
+      1.2564682960510254,
+      1.2564682960510254,
+      1.2564682960510254,
+      1.2564682960510254,
+      1.2564682960510254,
+      1.2564682960510254
+    ],
+    "l1_local_k22_01": 0.8376455307006836,
+    "l1_local_k4v": [
+      2.512936592102051,
+      2.512936592102051,
+      2.512936592102051,
+      2.512936592102051,
+      2.512936592102051,
+      2.512936592102051,
+      2.512936592102051,
+      2.512936592102051
+    ],
+    "l2_local_D4": [
+      5.025873184204102,
+      5.025873184204102,
+      5.025873184204102,
+      5.025873184204102,
+      5.025873184204102,
+      5.025873184204102,
+      5.025873184204102,
+      5.025873184204102
+    ],
+    "l2_local_dG": [
+      2.512936592102051,
+      2.512936592102051,
+      2.512936592102051,
+      2.512936592102051,
+      2.512936592102051,
+      2.512936592102051,
+      2.512936592102051,
+      2.512936592102051
+    ],
+    "method": "sys.settrace return/line events, read-only copied locals",
+    "signed_d31_increment_01": 0.002262009307742119,
+    "signed_d31_increment_10": -0.0004265550523996353,
+    "signed_d31_increment_antisymmetry": 0.002688564360141754,
+    "signed_k11_assignment_lines": [
+      204,
+      207
+    ]
+  },
+  "checks": {
+    "d4_exceeds_independent_cumulant": true,
+    "exact_control_has_no_k4_terms": true,
+    "exact_control_source_sha": true,
+    "l1_central_moment": true,
+    "l1_covariance": true,
+    "l1_fabricated_mixed_k22": true,
+    "l1_gcore": true,
+    "l2_d4": true,
+    "l2_dg": true,
+    "signed_k11_increment_asymmetric": true,
+    "signed_k11_increment_matches_analytic_orientation": true,
+    "signed_source_d31_symmetric": true,
+    "source_sha": true,
+    "trace_preserves_returned_state": true
+  },
+  "contract_commit": "2164401",
+  "exact_control_source_sha256": "f704f83b2063894c8dcd13120a8baada762229563f6d08bccee39d3aad2e6efc",
+  "fixture": {
+    "W0": "sqrt(2)*I",
+    "W1": "row-signed Sylvester H8*sqrt(2/8)",
+    "depth": 2,
+    "row_signs": [
+      1.0,
+      -1.0,
+      1.0,
+      -1.0,
+      -1.0,
+      1.0,
+      -1.0,
+      1.0
+    ],
+    "signed_k11_C_off": 0.2,
+    "signed_k11_alpha": [
+      -1,
+      1
+    ],
+    "width": 8
+  },
+  "relative_errors": {
+    "C": 1.9975401240539687e-07,
+    "D4": 3.9600387748593585e-07,
+    "dG": 3.9600387748593585e-07,
+    "gcore": 3.9600387748593585e-07
+  },
+  "schema": "truth_free_frozen_layer_trace_v1",
+  "scope": "Deterministic source execution only; no accuracy, score, cost, or residual result.",
+  "script_sha256": "635f7c4a0f6e6a0b93389d375c271f82e0d8b20b97d3418850776558d805a253",
+  "signed_analytic": {
+    "d31_increment_01": 0.0022620088641842223,
+    "d31_increment_10": -0.0004265547415840372
+  },
+  "source_path": "frozen_arms_metadata_protocol/arm_coherent.py",
+  "source_sha256": "d3ec837b72f5dacb4f8f622394d3d635268649c741289fb9754197e993343665",
+  "status": "PASS"
+}
