@@ -45688,3 +45688,72 @@ through workerq 5 GiB/2 CPUs/zero GPU, and obtain a fresh-context
 independent Skeptic before any acceptance. If exact finite identities pass,
 claim only this fixed physical n2 conditional decomposition; width1024
 compression, residual, score and submission remain unproved.
+
+**September 12 integrated frozen-input diagnosis and generator-only receipt.**
+The same n4 input was replayed for *descriptive diagnosis*, not as a new
+pass gate. First catastrophic scale change is L10: max backbone preactivation
+variance `2.66e-8`, yet separate bank |D4| reaches `0.373` and its mean
+Taylor correction `1.60e10` versus Gaussian mean `6.51e-5`.
+`source_dP` becomes nonfinite at calls 12--15; the flopscope warning is
+actual array overflow. Full-rank tiny QR sketches include zero singular
+values. Later ordinary tensors reach about `1.13e22` at L14. Feed-age
+discrepancies there cannot be interpreted independently of this unstable
+trajectory. The diagnostic source and raw same-input output are at
+`integrated_first_source/tiny_diagnose.py` and `tiny_diagnostic.json`
+(SHA256 `3080ae933f77b613640d2ef7d831a762a92ddb29b45e7f0c670a533eb9d6e0d3`),
+committed `3f66a9a`; the original **93/172 FAIL remains binding**.
+Separately, workerq 1002 was canceled while queued because `--vram 0`
+alone still requested one GPU; #1003 explicitly requested `--gpus 0`,
+2 GiB RAM and one CPU with inherited **high** project priority and
+SUCCEEDED at a git source snapshot. Its generator-only input digest is
+`b573acbdf0cac0b284337798809f34c5de21cbecc88efe4db697aeab5632d4c7`
+for 1024x16/S64, 134,742,528 external input bytes, source SHA
+`284b550f5f1fde7840a7a84923a394bee069a3454f0c780601fe696457b8b9c8`.
+Snapshot, manifest, status, log and result are byte-preserved in
+`integrated_first_source/job1003_raw.zip` SHA256
+`d00d59ee5d919dce26e67445f276eab034ce8e9566bb8e8e45f3d9240009df0b`,
+committed `12fbb55`. It measured **no** flopscope operations, RAM of the
+integrated path, residual, accuracy or score.
+
+**September 12 IMPORTANT fresh integrated-tiny stability adjudication,
+BEFORE its implementation/measurement.** **Question:** does the unchanged
+integrated source algebra agree with an independent dense reference on a
+distinct full-depth, full-rank tiny synthetic input whose ordinary variance
+and K4 perturbation remain numerically usable? **Evidence:** CONFIRMED
+original n4 frozen strict 1e-8 oracle FAIL and actual n4 source overflow;
+CONFIRMED schedule/cost-family assertions held before that instability;
+INFERRED the tiny random map/bank mismatch drove a singular Taylor regime;
+SPECULATIVE whether a different n8 profile will stay finite or the
+integrated feed/consumer algebra is correct. The original fail cannot be
+promoted by moving its threshold. **Intervention:** use the **unchanged**
+source SHA above with its frozen generator, shape n8/depth16/S6/common
+rank8/ordinary residual8/recent4. Its distinct precomputed input SHA256
+is `50e78f1851bf4432447c9436db147063bf241b060e5560ca144cf29a2b5aebcc`.
+Write a separate independent factorial/direct-birth tensor oracle with
+all 16 layers and no copied readout formula; no source math changes.
+**Predictions/gates:** all instrument intermediate array results must be
+finite (record first offending family/call), every positive preactivation
+variance >`1e-6`, and the K4 mean correction divided by
+`max(1,|Gaussian mean|)` <`100` at every layer. With float32 operations
+and long QR/carry chains, require every material-relative K4 D4/D22/both
+D31 orientations, dense K3 D3/oriented D21, mean and covariance Taylor
+consumer to agree with independent float64 enumeration <=`1e-4` on
+`max(1,|reference|)`; this tolerance is a new conservative numerical
+test, **not** a retrospective pass of n4's 1e-8 gate. Require a dropped
+negative-feed birth tensor to differ by >`1e-6` at some layer as a
+nontrivial discrimination control. Preserve exact 15/14/105/91, 28 joins,
+330/287 uses, 16 casts, 14 C Grams, final shortcut, family/context
+reconciliation, no old direct feed family, deterministic result and
+same-byte input/source/package manifest. **Falsifier:** any numeric,
+finite, scale, negative-control or schedule gate fails; preserve its raw
+output and do not run width1024 from a red tiny path. **Baseline/statistic:**
+separate dense tensor and factorial enumeration on common synthetic
+inputs; deterministic truth-free error, no paired score or seed block.
+**Cost/scope:** tiny operation ledger only, no full-width budget claim.
+The distinct n8 input is chosen before its result, while the original n4
+path remains a documented failure. If this passes, still require current
+preflight and fresh independent Skeptic before interpreting any full-width
+integrated cost; a passing n8 does not rehabilitate n4 or establish
+physical source construction, rank384 adequacy, server residual, 8 GiB
+cap, or submission eligibility. Samuel's recorded answer remains
+**"I don't know"**. No protected data/estimator/vault change.
