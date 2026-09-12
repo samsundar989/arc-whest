@@ -163,6 +163,8 @@ def _loaded_dependency_ab_uses_locked_child(root):
     os.makedirs(manifest_dir)
     copied_lab = os.path.join(local, "p2_lab.py")
     shutil.copyfile(lab.__file__, copied_lab)
+    copied_bootstrap = os.path.join(local, "p2_locked_bootstrap.py")
+    shutil.copyfile(lab._BOOTSTRAP, copied_bootstrap)
     marker = os.path.join(root, "loaded_marker.txt")
     lifecycle = os.path.join(local, "lifecycle_eval.py")
 
@@ -192,12 +194,15 @@ def _loaded_dependency_ab_uses_locked_child(root):
     parent = os.path.join(root, "exercise.py")
     with open(parent, "w", encoding="utf-8") as fh:
         fh.write(
-            "import importlib.util, json, os, pathlib, sys\n"
+            "import importlib.util, json, os, pathlib, subprocess, sys\n"
             f"path={copied_lab!r}\n"
+            f"lifecycle={lifecycle!r}\n"
+            "stamp=pathlib.Path(lifecycle).stat()\n"
             "spec=importlib.util.spec_from_file_location('_copied_lab_a',path)\n"
             "module=importlib.util.module_from_spec(spec)\n"
             "spec.loader.exec_module(module)\n"
             f"pathlib.Path({lifecycle!r}).write_text({lifecycle_text('B')!r},encoding='utf-8')\n"
+            "os.utime(lifecycle,ns=(stamp.st_atime_ns,stamp.st_mtime_ns))\n"
             "bindings=module._binding_snapshot(module._cli_source_paths())\n"
             "os.environ[module._CLI_BINDINGS_ENV]=json.dumps(bindings,sort_keys=True,separators=(',',':'))\n"
             f"pathlib.Path({marker!r}).unlink(missing_ok=True)\n"
@@ -205,8 +210,12 @@ def _loaded_dependency_ab_uses_locked_child(root):
             " rc=module.cli_entry(['--help'])\n"
             "except SystemExit as exc:\n"
             " rc=exc.code\n"
-            f"seen=pathlib.Path({marker!r}).read_text(encoding='utf-8') if pathlib.Path({marker!r}).exists() else 'missing'\n"
-            "raise SystemExit(0 if rc==0 and seen=='B' else 9)\n")
+            f"seen_public=pathlib.Path({marker!r}).read_text(encoding='utf-8') if pathlib.Path({marker!r}).exists() else 'missing'\n"
+            f"pathlib.Path({marker!r}).unlink(missing_ok=True)\n"
+            "direct=subprocess.run([sys.executable,module._BOOTSTRAP,'--target',path,'--','--help'],cwd="
+            f"{root!r})\n"
+            f"seen_direct=pathlib.Path({marker!r}).read_text(encoding='utf-8') if pathlib.Path({marker!r}).exists() else 'missing'\n"
+            "raise SystemExit(0 if rc==0 and direct.returncode==0 and seen_public=='B' and seen_direct=='B' else 9)\n")
     result = subprocess.run([sys.executable, parent], cwd=root,
                             capture_output=True, text=True)
     if result.returncode != 0:
@@ -244,7 +253,7 @@ def run_checks():
                       "mint_provenance", "phase2_manifest", "p2_tag_drift",
                       "phase2_manifest_data",
                       "official_config", "seed_ledger", "seed_blocks",
-                      "truth_reads_interface", "arm_freezer"} and
+                      "truth_reads_interface", "arm_freezer", "locked_bootstrap"} and
                   report["k4_freeze"]["protected_truth"]["data_role"] == "exposed-design" and
                   report["k4_freeze"]["protected_truth"]["block"] == "P01" and
                   report["k4_freeze"]["protected_truth"]["reservation_receipt"]["status"] == "completed",
@@ -310,16 +319,17 @@ def run_checks():
         with patched(lab, "_ALLOW_IN_PROCESS_TEST", False):
             guarded = lab.main([])
         check("in-process production bypass is refused", guarded == 2,
-              "only the locked CLI child or an explicit test override may run")
+              "only the lock-first bootstrap or an explicit test override may run")
 
         with tempfile.TemporaryDirectory(prefix="p2-lab-dependency-a-b-") as root:
             child_used_b = _loaded_dependency_ab_uses_locked_child(root)
         check("forged env cannot run cached dependency A instead of disk B", child_used_b,
               "real entry ignores marker; locked fresh __main__ child imports B")
 
-        rc = lab.cli_entry([lab._LOCKED_CHILD_ARG, "--help"])
-        check("programmatic lab child mode is refused", rc == 2,
-              "dedicated stdin bindings are accepted only by script execution")
+        check("lab exposes no bearer-authorized private child mode",
+              not hasattr(lab, "_LOCKED_CHILD_ARG") and
+              not hasattr(lab, "_locked_child_entry"),
+              "public and direct bootstrap calls both lock before target import")
 
         with tempfile.TemporaryDirectory(prefix="p2-lab-freeze-missing-", dir=_ROOT) as root:
             truth = os.path.join(root, "truth_P01.npz")

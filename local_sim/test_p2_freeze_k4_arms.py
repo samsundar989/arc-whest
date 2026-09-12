@@ -273,7 +273,7 @@ def run_checks():
     finally:
         freezer._ALLOW_IN_PROCESS_TEST = previous
     check("in-process production freeze bypass is refused", guarded,
-          "only the locked CLI child or an explicit test override may write")
+          "only the lock-first bootstrap or an explicit test override may write")
 
     with _temp("p2-freeze-forged-child-env-") as root:
         freezer._TRUTH_READS_LEDGER = os.path.join(
@@ -301,11 +301,12 @@ def run_checks():
                 os.environ[freezer._CLI_BINDINGS_ENV] = previous_env
         check("forged child environment cannot enter loaded freezer core",
               rc == 0 and not os.path.exists(marker),
-              "real parent entry ignores marker and a fresh __main__ child handles help")
+              "public entry ignores marker and the lock-first bootstrap handles help")
 
-    rc = freezer.cli_entry([freezer._LOCKED_CHILD_ARG, "--help"])
-    check("programmatic freezer child mode is refused", rc == 2,
-          "dedicated stdin bindings are accepted only by script execution")
+    check("freezer exposes no bearer-authorized private child mode",
+          not hasattr(freezer, "_LOCKED_CHILD_ARG") and
+          not hasattr(freezer, "_locked_child_entry"),
+          "all public calls route through the lock-first bootstrap")
 
     return rows
 

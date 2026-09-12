@@ -43165,3 +43165,34 @@ target, acquire the full source graph, then compile/import and execute the targe
 while those locks remain held. Direct bootstrap invocation is safe because the
 lock precedes every executable project import. Current focused green results for
 `c54cc27` remain implementation diagnostics only and do not establish provenance.
+
+## 2026-09-11 - Lock-first bridge bootstrap implemented; acceptance pending
+
+**IMPORTANT implementation result; no protected truth.** The replayable private
+target mode is removed. New `local_sim/p2_locked_bootstrap.py` uses only the Python
+standard library before the lock boundary. It locks and self-fingerprints itself
+and the target, reads exactly one literal `_CLI_SOURCE_REGISTRY` from the locked
+target with `ast.literal_eval`, acquires and hashes that complete graph, purges the
+registered local module names, compiles the target directly from its locked bytes
+under a fresh private bytecode cache, mechanically matches the target's runtime
+source graph and bindings, and keeps every lock through `main()` and publication.
+Both public CLIs now delegate every invocation to this bootstrap and expose no
+bearer-authorized private child branch. Direct bootstrap invocation follows the
+same lock-before-import order and is therefore safe within the tested threat
+model.
+
+On exact current bytes, freezer tests pass **19/19**, P01 bridge tests **15/15**,
+Stage-0 lab/data **32/32**, and portability **103/103**. The lab fixture creates a
+timestamp-and-size-compatible cached dependency A, changes source to B, and proves
+both the public entry and direct bootstrap execute B. Public freezer/lab help and
+direct-bootstrap help exit zero. `py_compile`, embedded source fingerprints and
+`git diff --check` pass. Raw commands, hashes, scope and residual risks are in
+`freeze_bridge/bootstrap_repair_summary.json`; structured freezer rows are in
+`freeze_bridge/freezer_tests_bootstrap_repair.json`. The independent replay
+reproducer for the rejected nonce version is preserved beside them.
+
+No job-903 producer dependency, estimator, candidate math, coefficient, registry,
+gate, data role, protected label, public data or vault state changed. The remaining
+known risks are registry completeness after future imports and advisory POSIX
+locking; Windows mandatory sharing locks are the active tested platform. Current
+default preflight and a new fresh-context Skeptic remain required before P07/P01.

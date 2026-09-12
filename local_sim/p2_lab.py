@@ -56,16 +56,12 @@ from __future__ import annotations
 
 import argparse
 import ast
-import contextlib
-import ctypes
 import hashlib
 import json
 import os
 import re
-import secrets
 import subprocess
 import sys
-import tempfile
 import time
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -85,13 +81,35 @@ import p2_freeze_k4_arms as k4_freezer  # noqa: E402
 from phase2_manifest import load as load_manifest  # noqa: E402
 
 ARMS_DIR = os.path.join(_HERE, "p2_arms")
+_BOOTSTRAP = os.path.join(_HERE, "p2_locked_bootstrap.py")
 _ACTIVE_ARM_PATHS = None
 _CLI_BINDINGS_ENV = "ARC_WHEST_P2_LAB_LOCKED_BINDINGS"
-_SELF_FINGERPRINT = "1ea7ed02f95ab64cf7b4819f31945adec5ed1593ce4bce87b7eec989bdf123de"
-_LOCKED_CHILD_ARG = "--arc-whest-lab-locked-child"
-_LOCKED_CHILD_SCHEMA = "arc-whest.p2-lab-locked-child.v1"
+_SELF_FINGERPRINT = "8d3b5a50d6f5c0dd31d343e5c8005b5416f8d19f3991a1428bb5e68811b17ab7"
 _BOUND_CLI_BINDINGS = None
 _ALLOW_IN_PROCESS_TEST = False
+
+# Parsed by p2_locked_bootstrap.py with ast.literal_eval before this module or
+# any project dependency is imported.  Keep this a single literal assignment.
+_CLI_SOURCE_REGISTRY = {
+    "locked_bootstrap": "local_sim/p2_locked_bootstrap.py",
+    "p2_lab": "local_sim/p2_lab.py",
+    "lifecycle_eval": "local_sim/lifecycle_eval.py",
+    "competition_score": "local_sim/competition_score.py",
+    "arm_freezer": "local_sim/p2_freeze_k4_arms.py",
+    "phase2_manifest": "local_sim/phase2_manifest.py",
+    "p2_tag_drift": "local_sim/p2_tag_drift.py",
+    "phase2_manifest_data": "experiments/2026-08-21_phase2_manifest/phase2_manifest.json",
+    "official_config": "local_sim/official_config.py",
+    "harness": "local_sim/harness.py",
+    "mint_provenance": "local_sim/mint_provenance.py",
+    "seed_ledger": "local_sim/seed_ledger.py",
+    "seed_blocks": "local_sim/seed_blocks.py",
+    "truth_reads_interface": "local_sim/truth_reads.py",
+    "fit_interface": "local_sim/p2_k4_fit.py",
+    "fit_producer": "local_sim/p2_k4_fit_producer.py",
+    "arm_generator": "local_sim/p2_build_k4_arms.py",
+    "arm_template": "local_sim/p2_compact_candidate_template.py",
+}
 
 MECHANISM_ARMS = ("exact", "coherent", "consumers-only", "births-only")
 
@@ -143,82 +161,9 @@ def _assert_loaded_source(expected_exact_sha=None):
     return exact_sha
 
 
-@contextlib.contextmanager
-def _bootstrap_stable_files(paths):
-    """Hold CLI sources before a fresh child imports any of them."""
-    unique, seen = [], set()
-    for raw in paths:
-        path = os.path.normcase(os.path.realpath(os.path.abspath(raw)))
-        if path not in seen:
-            seen.add(path)
-            unique.append(path)
-    if os.name == "nt":
-        from ctypes import wintypes
-        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-        create = kernel32.CreateFileW
-        create.argtypes = (wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
-                           wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD,
-                           wintypes.HANDLE)
-        create.restype = wintypes.HANDLE
-        close = kernel32.CloseHandle
-        close.argtypes = (wintypes.HANDLE,)
-        close.restype = wintypes.BOOL
-        handles = []
-        try:
-            for path in unique:
-                handle = create(path, 0x80000000, 0x00000001, None, 3,
-                                0x00000080, None)
-                if handle == wintypes.HANDLE(-1).value:
-                    raise k4_freezer.FreezeRefused(
-                        "cannot lock lab CLI dependency %s: WinError %d" %
-                        (path, ctypes.get_last_error()))
-                handles.append(handle)
-            yield
-        finally:
-            for handle in reversed(handles):
-                close(handle)
-        return
-    import fcntl
-    files = []
-    try:
-        for path in unique:
-            fh = open(path, "rb")
-            files.append(fh)
-            fcntl.flock(fh.fileno(), fcntl.LOCK_SH | fcntl.LOCK_NB)
-        yield
-    except (OSError, BlockingIOError) as exc:
-        raise k4_freezer.FreezeRefused(
-            "cannot lock lab CLI dependencies: %s" % exc) from exc
-    finally:
-        for fh in reversed(files):
-            try:
-                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
-            finally:
-                fh.close()
-
-
 def _cli_source_paths():
-    return {
-        "p2_lab": os.path.abspath(__file__),
-        "lifecycle_eval": os.path.abspath(le.__file__),
-        "competition_score": os.path.abspath(cs.__file__),
-        "arm_freezer": os.path.abspath(k4_freezer.__file__),
-        "phase2_manifest": os.path.join(_HERE, "phase2_manifest.py"),
-        "p2_tag_drift": os.path.join(_HERE, "p2_tag_drift.py"),
-        "phase2_manifest_data": os.path.join(
-            _ROOT, "experiments", "2026-08-21_phase2_manifest",
-            "phase2_manifest.json"),
-        "official_config": os.path.join(_HERE, "official_config.py"),
-        "harness": os.path.join(_HERE, "harness.py"),
-        "mint_provenance": os.path.join(_HERE, "mint_provenance.py"),
-        "seed_ledger": os.path.join(_HERE, "seed_ledger.py"),
-        "seed_blocks": os.path.join(_HERE, "seed_blocks.py"),
-        "truth_reads_interface": os.path.join(_HERE, "truth_reads.py"),
-        "fit_interface": os.path.join(_HERE, "p2_k4_fit.py"),
-        "fit_producer": os.path.join(_HERE, "p2_k4_fit_producer.py"),
-        "arm_generator": os.path.join(_HERE, "p2_build_k4_arms.py"),
-        "arm_template": os.path.join(_HERE, "p2_compact_candidate_template.py"),
-    }
+    return {name: os.path.abspath(os.path.join(_ROOT, *path.split("/")))
+            for name, path in _CLI_SOURCE_REGISTRY.items()}
 
 
 def _binding_snapshot(paths):
@@ -245,81 +190,16 @@ def _verify_cli_bindings(bindings, paths):
     k4_freezer._assert_loaded_source(bindings["arm_freezer"]["sha256"])
 
 
-def _locked_child_entry(args, paths, launch_nonce):
-    """Accept bindings only from the real script child's dedicated stdin."""
-    if __name__ != "__main__":
-        print("REFUSED: locked lab child mode requires script execution")
-        return 2
-    try:
-        encoded = sys.stdin.read()
-        payload = json.loads(encoded)
-        if not isinstance(payload, dict) or set(payload) != {
-                "schema", "launch_nonce", "bindings"}:
-            raise k4_freezer.FreezeRefused(
-                "locked lab child payload keys are invalid")
-        if payload["schema"] != _LOCKED_CHILD_SCHEMA:
-            raise k4_freezer.FreezeRefused("locked lab child schema is invalid")
-        if (not isinstance(launch_nonce, str) or
-                re.fullmatch(r"[0-9a-f]{64}", launch_nonce) is None or
-                payload["launch_nonce"] != launch_nonce):
-            raise k4_freezer.FreezeRefused(
-                "locked lab child launch nonce is invalid")
-        bindings = payload["bindings"]
-    except (OSError, json.JSONDecodeError, k4_freezer.FreezeRefused) as exc:
-        print("REFUSED: invalid locked lab child payload: %s" % exc)
-        return 2
-    global _BOUND_CLI_BINDINGS
-    try:
-        with _bootstrap_stable_files(paths.values()):
-            _verify_cli_bindings(bindings, paths)
-            _BOUND_CLI_BINDINGS = bindings
-            return main(args)
-    except k4_freezer.FreezeRefused as exc:
-        print("REFUSED: %s" % exc)
-        return 2
-    finally:
-        _BOUND_CLI_BINDINGS = None
-
-
 def cli_entry(argv=None):
-    """Run production in a fresh child while the parent holds source locks."""
-    from_sys_argv = argv is None
-    args = list(sys.argv[1:] if from_sys_argv else argv)
-    paths = _cli_source_paths()
-    child_prefix = _LOCKED_CHILD_ARG + "="
-    if args and (args[0] == _LOCKED_CHILD_ARG or
-                 args[0].startswith(child_prefix)):
-        if not from_sys_argv or not args[0].startswith(child_prefix):
-            print("REFUSED: locked lab child mode is private to the CLI launcher")
-            return 2
-        return _locked_child_entry(args[1:], paths,
-                                   args[0][len(child_prefix):])
-
-    try:
-        with _bootstrap_stable_files(paths.values()):
-            _assert_loaded_source()
-            bindings = _binding_snapshot(paths)
-            env = dict(os.environ)
-            # A legacy marker is replayable process state, not launch evidence.
-            # Strip it so even a pre-set/forged value cannot authorize this
-            # already-imported parent to execute production core.
-            env.pop(_CLI_BINDINGS_ENV, None)
-            launch_nonce = secrets.token_hex(32)
-            payload = json.dumps({
-                "schema": _LOCKED_CHILD_SCHEMA,
-                "launch_nonce": launch_nonce,
-                "bindings": bindings,
-            }, sort_keys=True, separators=(",", ":"))
-            with tempfile.TemporaryDirectory(prefix="p2-lab-pycache-") as cache:
-                completed = subprocess.run(
-                    [sys.executable, "-X", "pycache_prefix=" + cache,
-                     os.path.abspath(__file__),
-                     child_prefix + launch_nonce] + args,
-                    cwd=os.getcwd(), env=env, input=payload, text=True)
-            return int(completed.returncode)
-    except k4_freezer.FreezeRefused as exc:
-        print("REFUSED: %s" % exc)
-        return 2
+    """Delegate every public invocation to the stdlib-only lock-first bootstrap."""
+    args = list(sys.argv[1:] if argv is None else argv)
+    env = dict(os.environ)
+    env.pop(_CLI_BINDINGS_ENV, None)
+    completed = subprocess.run(
+        [sys.executable, _BOOTSTRAP, "--target", os.path.abspath(__file__),
+         "--"] + args,
+        cwd=os.getcwd(), env=env)
+    return int(completed.returncode)
 
 
 def _revalidate_instruments(bindings):
@@ -522,6 +402,7 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
 
     instrument_paths = {
+        "locked_bootstrap": _BOOTSTRAP,
         "p2_lab": os.path.abspath(__file__),
         "lifecycle_eval": os.path.abspath(le.__file__),
         "competition_score": os.path.abspath(cs.__file__),

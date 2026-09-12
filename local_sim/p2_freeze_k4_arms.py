@@ -17,7 +17,6 @@ import json
 import math
 import os
 import re
-import secrets
 import shutil
 import subprocess
 import sys
@@ -33,16 +32,32 @@ _PRODUCER = os.path.join(_HERE, "p2_k4_fit_producer.py")
 _TRUTH_READS_SOURCE = os.path.join(_HERE, "truth_reads.py")
 _TRUTH_READS_LEDGER = os.path.join(_ROOT, "experiments", "truth_reads.jsonl")
 _DEFAULT_ARMS = os.path.join(_HERE, "p2_arms")
+_BOOTSTRAP = os.path.join(_HERE, "p2_locked_bootstrap.py")
 _ARMS = ("exact", "coherent", "consumers_only", "births_only")
 _HASH = re.compile(r"[0-9a-f]{64}")
 _FIT_SCHEMA = "arc-whest.coherent-k4-fit-receipt.v1"
 _FREEZE_SCHEMA = "arc-whest.coherent-k4-arm-freeze-receipt.v1"
 _CLI_BINDINGS_ENV = "ARC_WHEST_P2_FREEZE_LOCKED_BINDINGS"
-_SELF_FINGERPRINT = "f86be58a2c4fdd990344c19009f6836e08f5ce0d33942519f9e26fe02839fb70"
-_LOCKED_CHILD_ARG = "--arc-whest-freeze-locked-child"
-_LOCKED_CHILD_SCHEMA = "arc-whest.p2-freeze-locked-child.v1"
+_SELF_FINGERPRINT = "d49ee5baad9c2778dbe7f200576413e8507452fa65543a45c2ccb2a2df410abf"
 _BOUND_CLI_BINDINGS = None
 _ALLOW_IN_PROCESS_TEST = False
+
+# Parsed by p2_locked_bootstrap.py with ast.literal_eval before this module or
+# any project dependency is imported.  Keep this a single literal assignment.
+_CLI_SOURCE_REGISTRY = {
+    "locked_bootstrap": "local_sim/p2_locked_bootstrap.py",
+    "arm_freezer": "local_sim/p2_freeze_k4_arms.py",
+    "fit_interface": "local_sim/p2_k4_fit.py",
+    "fit_producer": "local_sim/p2_k4_fit_producer.py",
+    "arm_generator": "local_sim/p2_build_k4_arms.py",
+    "arm_template": "local_sim/p2_compact_candidate_template.py",
+    "truth_reads_interface": "local_sim/truth_reads.py",
+    "truth_reads_ledger": "experiments/truth_reads.jsonl",
+    "arm_exact": "local_sim/p2_arms/arm_exact.py",
+    "arm_coherent": "local_sim/p2_arms/arm_coherent.py",
+    "arm_consumers_only": "local_sim/p2_arms/arm_consumers_only.py",
+    "arm_births_only": "local_sim/p2_arms/arm_births_only.py",
+}
 
 
 class FreezeRefused(ValueError):
@@ -186,18 +201,8 @@ def _stable_files(paths):
 
 
 def _cli_source_paths():
-    paths = {
-        "arm_freezer": os.path.abspath(__file__),
-        "fit_interface": _FIT,
-        "fit_producer": _PRODUCER,
-        "arm_generator": _GENERATOR,
-        "arm_template": _TEMPLATE,
-        "truth_reads_interface": _TRUTH_READS_SOURCE,
-        "truth_reads_ledger": _TRUTH_READS_LEDGER,
-    }
-    paths.update({"arm_" + name: os.path.join(_DEFAULT_ARMS, "arm_%s.py" % name)
-                  for name in _ARMS})
-    return paths
+    return {name: os.path.abspath(os.path.join(_ROOT, *path.split("/")))
+            for name, path in _CLI_SOURCE_REGISTRY.items()}
 
 
 def _binding_snapshot(paths):
@@ -217,78 +222,16 @@ def _verify_cli_bindings(bindings, paths):
     _assert_loaded_source(bindings["arm_freezer"]["sha256"])
 
 
-def _locked_child_entry(args, paths, launch_nonce):
-    """Accept bindings only from the real script child's dedicated stdin."""
-    if __name__ != "__main__":
-        print("REFUSED: locked freezer child mode requires script execution")
-        return 2
-    try:
-        encoded = sys.stdin.read()
-        payload = json.loads(encoded)
-        _exact(payload, {"schema", "launch_nonce", "bindings"},
-               "locked freezer child payload")
-        if payload["schema"] != _LOCKED_CHILD_SCHEMA:
-            raise FreezeRefused("locked freezer child schema is invalid")
-        if (not isinstance(launch_nonce, str) or
-                not re.fullmatch(r"[0-9a-f]{64}", launch_nonce) or
-                payload["launch_nonce"] != launch_nonce):
-            raise FreezeRefused("locked freezer child launch nonce is invalid")
-        bindings = payload["bindings"]
-    except (OSError, json.JSONDecodeError, FreezeRefused) as exc:
-        print("REFUSED: invalid locked freezer child payload: %s" % exc)
-        return 2
-    global _BOUND_CLI_BINDINGS
-    try:
-        with _stable_files(paths.values()):
-            _verify_cli_bindings(bindings, paths)
-            _BOUND_CLI_BINDINGS = bindings
-            return main(args)
-    except FreezeRefused as exc:
-        print("REFUSED: %s" % exc)
-        return 2
-    finally:
-        _BOUND_CLI_BINDINGS = None
-
-
 def cli_entry(argv=None):
-    """Run production in a fresh child while the parent holds source locks."""
-    from_sys_argv = argv is None
-    args = list(sys.argv[1:] if from_sys_argv else argv)
-    paths = _cli_source_paths()
-    child_prefix = _LOCKED_CHILD_ARG + "="
-    if args and (args[0] == _LOCKED_CHILD_ARG or
-                 args[0].startswith(child_prefix)):
-        if not from_sys_argv or not args[0].startswith(child_prefix):
-            print("REFUSED: locked freezer child mode is private to the CLI launcher")
-            return 2
-        return _locked_child_entry(args[1:], paths,
-                                   args[0][len(child_prefix):])
-
-    try:
-        with _stable_files(paths.values()):
-            _assert_loaded_source()
-            bindings = _binding_snapshot(paths)
-            env = dict(os.environ)
-            # A legacy marker is replayable process state, not launch evidence.
-            # Strip it so even a pre-set/forged value cannot authorize this
-            # already-imported parent to execute production core.
-            env.pop(_CLI_BINDINGS_ENV, None)
-            launch_nonce = secrets.token_hex(32)
-            payload = json.dumps({
-                "schema": _LOCKED_CHILD_SCHEMA,
-                "launch_nonce": launch_nonce,
-                "bindings": bindings,
-            }, sort_keys=True, separators=(",", ":"))
-            with tempfile.TemporaryDirectory(prefix="p2-freeze-pycache-") as cache:
-                completed = subprocess.run(
-                    [sys.executable, "-X", "pycache_prefix=" + cache,
-                     os.path.abspath(__file__),
-                     child_prefix + launch_nonce] + args,
-                    cwd=os.getcwd(), env=env, input=payload, text=True)
-            return int(completed.returncode)
-    except FreezeRefused as exc:
-        print("REFUSED: %s" % exc)
-        return 2
+    """Delegate every public invocation to the stdlib-only lock-first bootstrap."""
+    args = list(sys.argv[1:] if argv is None else argv)
+    env = dict(os.environ)
+    env.pop(_CLI_BINDINGS_ENV, None)
+    completed = subprocess.run(
+        [sys.executable, _BOOTSTRAP, "--target", os.path.abspath(__file__),
+         "--"] + args,
+        cwd=os.getcwd(), env=env)
+    return int(completed.returncode)
 
 
 def _binding_path(binding, label):
@@ -697,6 +640,9 @@ def freeze(a):
             source_bindings.update(valid["extra_sources"])
             source_bindings["arm_freezer"] = {"path": _relative(os.path.abspath(__file__)),
                                                "sha256": freezer_sha}
+            source_bindings["locked_bootstrap"] = {
+                "path": _relative(_BOOTSTRAP),
+                "sha256": _read_bytes(_BOOTSTRAP, "locked bootstrap")[1]}
             nontruth_inputs = {name: valid["receipt"]["inputs"][name]
                                for name in ("predictions", "producer_receipt", "candidates",
                                             "bounds", "identities")}
@@ -767,6 +713,9 @@ def _validate_freeze_locked(path, frozen, frozen_sha, valid, arm_paths):
     expected_sources = dict(valid["sources"])
     expected_sources.update(valid["extra_sources"])
     expected_sources["arm_freezer"] = freezer_binding
+    expected_sources["locked_bootstrap"] = {
+        "path": _relative(_BOOTSTRAP),
+        "sha256": _read_bytes(_BOOTSTRAP, "locked bootstrap")[1]}
     if (frozen["input_bindings"] != expected_inputs or
             frozen["source_bindings"] != expected_sources or
             frozen["reservation_evidence"] != valid["reservation_evidence"]):
