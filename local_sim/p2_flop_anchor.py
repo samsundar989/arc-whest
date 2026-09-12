@@ -330,7 +330,7 @@ def materialise_like_grader(predictions, depth: int, width: int):
     return materialise_predictions(predictions, depth=depth, width=width)
 
 
-def _run_arm(candidate: str, arm: str) -> dict:
+def _run_arm(candidate: str, arm: str, *, input_weight_dtype: str = "f32") -> dict:
     """One arm: per-op counted FLOPs for one `predict` at 1024 x 16.
 
     See `ARMS`. "raw" is the historical local spelling, "fnp" fixes the weight
@@ -359,12 +359,23 @@ def _run_arm(candidate: str, arm: str) -> dict:
         raise ValueError(f"unknown arm {arm!r}") from None
 
     w_np, est_seed = _mint_weights()
-    if weight_repr == "np":
-        weights = [np.asarray(w) for w in w_np]
+    if input_weight_dtype == "f64_readonly":
+        if weight_repr != "fnp":
+            raise ValueError("f64_readonly requires the flopscope weight arm")
+        # The historical anchor's default f32 inputs suffice for its shipped
+        # estimator, which always casts.  A dtype-branching candidate needs
+        # the accepted lifecycle grader-twin construction instead.
+        from lifecycle_eval import build_weights
+        weights = build_weights(w_np, "f64_readonly", fnp)
+    elif input_weight_dtype == "f32":
+        if weight_repr == "np":
+            weights = [np.asarray(w) for w in w_np]
+        else:
+            # Built OUTSIDE the BudgetContext, exactly as the grader builds
+            # weight objects during dataset load.
+            weights = [fnp.array(w) for w in w_np]
     else:
-        # Built OUTSIDE the BudgetContext, exactly as the grader builds them
-        # during dataset load. Construction is free on every arm.
-        weights = [fnp.array(w) for w in w_np]
+        raise ValueError(f"unknown input_weight_dtype {input_weight_dtype!r}")
 
     mlp = sys.modules["whestbench"].MLP(
         weights=weights, width=WIDTH, depth=DEPTH, seed=est_seed

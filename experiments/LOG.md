@@ -46629,3 +46629,58 @@ recoverable from its full queue log without protected data or seeds. The
 remote attempt peaked 2.67 GiB and comparable local gates near 3 GiB; request
 **5 GiB RAM, 0 VRAM, 2 CPUs**. Full-only checks are owed later with the
 candidate; this default preflight must not be called Full certification.
+
+**F21 Skeptic-discovered cost-meter defect and preregistered repair, before
+f64 rerun.** The initial 1079/1080 files are complete *f32-input* grader-arm
+ledgers, not exact grader-weight ledgers: `_run_arm`'s historical canonical
+mint supplies float32 weights. Our L4 `predict` branches on input dtype and
+skips its opening f64→f32 cast for those weights. The actual dataset loader
+hands float64, and `lifecycle_eval.build_weights(..., 'f64_readonly', fnp)`
+is the accepted grader-twin construction. The stored graded original-L4
+report is 1,068,245,507,686 FLOPs and 15,393 ops per row, exactly the f32
+meter's 1,068,211,953,254 + 33,554,432 FLOPs and 15,377 + 16 ops. This
+corroborates the mechanism but does **not** license calling the f32 file a
+full grader bill. The cost Skeptic verdict is provisional until repair.
+
+The smallest intervention is an optional `f64_readonly` mode on the accepted
+`p2_flop_anchor._run_arm`, delegated to `lifecycle_eval.build_weights` outside
+the BudgetContext; the historical f32 default and all anchor checks remain
+unchanged. The F21 wrapper selects only that mode. **Prediction before result:**
+each 1024x16 arm rises by exactly `2*16*1024**2 = 33,554,432` counted FLOPs
+and 16 cast calls, all other operation families and the isolated F21 delta
+unchanged. Thus parent should be exactly 1,068,245,507,686 (matching graded
+L4), fused 928,457,637,478, with relative saving approximately 13.0857%,
+above the already registered 8% screen. Falsifier: a different total,
+non-cast operation-family movement, mismatch to the stored parent graded
+row, or source hash mismatch. This is instrument repair in the same F21 slice,
+not a second candidate or a new score threshold; no labels are read.
+
+**F21 pre-submission optimization review — f64 original-L4 one-arm meter.**
+Reuse the accepted anchor arithmetic and one canonical no-label network; only
+the already validated `f64_readonly` weight constructor differs from 1079.
+No duplicated truth loader, extra arm, workers, caching, batching or prefetch.
+The dtype objects are built before the budget window, matching the grader.
+No GPU. The original f32 arm peaked 2.71 GiB; a full f64 input adds less
+than 0.2 GiB of weights, so **6 GiB RAM, 0 VRAM, 2 CPUs** remains conservative.
+An immutable new JSON path makes an interrupted run recoverable without a
+checkpoint; reuse 1079 only as the preregistered comparator, not as final
+grader-weight evidence.
+
+**F21 pre-submission optimization review — f64 fused-L4 one-arm meter.**
+The exact same one-network, one-arm constructor/instrument, no additional
+loaders, workers, cache, prefetch, batching or GPU; preserving precision is
+required for grader fidelity. F32 1080 peaked 2.76 GiB; request **6 GiB RAM,
+0 VRAM, 2 CPUs** with room for f64 input and transient state. New JSON output
+and source-hash checks permit a clean rerun if interrupted. Reuse the fixed
+fused candidate and the f32 ledger only for testing the predicted cast delta.
+
+**F21 pre-submission optimization review — local preflight policy retry.**
+Job 1082 ran for 0.54 seconds and failed before step 1 because the local
+PowerShell process default disables scripts. No gate check or candidate result
+was obtained. Its source/fixture pass, CPU-only placement, no duplicate loader,
+no worker/cache/prefetch/batch and recovery plan are unchanged from the review
+above. Use `-ExecutionPolicy Bypass` on this one PowerShell process under
+workerq; it does not alter repository or machine policy. The gate itself is
+unmodified. Request **5 GiB RAM, 0 VRAM, 2 CPUs** based on the same comparable
+local preflight peaks. Run after committing the instrument repair and before
+any DESIGN access.

@@ -1,7 +1,8 @@
 """One-arm CLI for the accepted official-stack P2 FLOP anchor instrument.
 
-This only selects its existing ``grader`` arm, which uses flopscope-backed
-weights and in-window WhestBench materialisation.  It does not read labels.
+This selects its existing ``grader`` arm with float64 loader weights, which
+uses flopscope-backed weights and in-window WhestBench materialisation.
+It does not read labels.
 The stored one-row official report remains the separate external check.
 """
 
@@ -39,7 +40,7 @@ def main() -> int:
     if not out.is_relative_to(ROOT / "experiments") or out.exists():
         p.error("output must be new and under live experiments")
     before = sha256(source)
-    arm = _run_arm(a.candidate, "grader")
+    arm = _run_arm(a.candidate, "grader", input_weight_dtype="f64_readonly")
     after = sha256(source)
     if before != after:
         raise RuntimeError("candidate source changed during metering")
@@ -49,6 +50,7 @@ def main() -> int:
         "candidate": a.candidate,
         "candidate_sha256": before,
         "arm": "grader",
+        "weights_mode": "f64_readonly",
         "shape": {"width": 1024, "depth": 16},
         "truth_or_seed_block_read": False,
         "result": arm,
