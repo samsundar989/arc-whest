@@ -34,9 +34,15 @@ scoped ACCEPT: at `rho=0.5`, mixed `K1122=0.10914008` changes fixed signed
 future D4 substantially. Its metric-core projection needs a residual even
 for independent inputs. Workerq 962 and 964 passed current live-byte default
 preflight 12/16 each, four Full-only skips, with peaks 3,592.5 and 3,911.1
-MiB. LOG commit `47d5061` preregisters a signed-cubature factor check; the
-separate `mixed_source/cost_options.md` prices options only with conventional
-arithmetic. No full K4 source/compression/counted-cost path is accepted yet.
+MiB. The subsequent full-sign n=2 weighted-cubature factor fixture passes
+83 checks with fresh scoped Skeptic ACCEPT; workerq 971 passed live-byte
+default preflight 12/16, four Full-only skips, at 3,720.9 MiB peak. It carries
+the covariance subtraction and full residual through two signed maps, but
+does not establish adequate factor rank at challenge width. LOG commit
+`6a873ba` preregisters a four-coordinate source test with independent
+integrals. The separate `mixed_source/cost_options.md` prices options only
+with conventional arithmetic. No full K4 source/compression/counted-cost path
+is accepted yet.
 Stage 4 remains
 conditional on a measured Stage-2 bottleneck.
 
@@ -148,9 +154,10 @@ architecture INCOMPLETE: present repeated-index slices do not carry an
 all-distinct residual through future dense transport. The dense linear oracle
 and correlated Gaussian-pair source now each have narrow fresh Skeptic
 ACCEPT; their artifacts are under `source_dense/` and `mixed_source/`.
-The latter's metric-core residual remains material. LOG commit `47d5061`
-contracts a full-sign weighted-cubature factor check before any implementation
-of a corrected full arm. Do not fit a new constant or spend
+The latter's metric-core residual remains material. The full-sign weighted
+cubature factor check now has scoped fresh Skeptic ACCEPT for n=2 algebra;
+LOG commit `6a873ba` contracts an n=4 source reference before any corrected
+full arm. Do not fit a new constant or spend
 another protected label until the source math is independently checked and
 repaired within a new contract and fresh Skeptic gate. This is not a registered
 scientific kill of the intended representation.

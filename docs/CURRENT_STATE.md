@@ -164,8 +164,16 @@ and `-0.064639` (`mixed_source/`, `cfdf62c`; workerq 964 live-byte default
 preflight 12/16, four Full-only skips, 3,911.1 MiB peak). The metric core
 alone misses independent-input future D4 by `0.06992708`; its residual
 cannot simply be dropped. LOG commit `47d5061` preregisters a tiny signed
-cubature factor/consumer/feed check. Full Stage-1 source conformance remains
-open; the supplied-core algebra and compact cost remain valid in scope. No
+cubature factor/consumer/feed check. That full-sign n=2 discrete-measure
+fixture passed 83/83 checks with fresh scoped Skeptic **ACCEPT**
+(`signed_cubature/`, `4b779cd`; workerq 971 live-byte default preflight
+12/16, four Full-only skips, 3,720.9 MiB peak). It carries its covariance
+subtraction and full residual through two signed maps; finite-factor rank and
+width-1024 cost remain unknown. LOG commit `6a873ba` preregisters a fixed
+four-coordinate Gaussian/ReLU source with independent conditional and streamed
+direct integrals, including three/four-distinct cumulants. Full Stage-1 source
+conformance remains open; supplied-core algebra and compact cost remain valid
+in scope. No
 protected labels should be spent on this diagnosis. There is no scientific kill or
 new submission candidate. No fresh DECIDE, public CONFIRM or vault evaluation
 has occurred.
@@ -253,8 +261,9 @@ exhausted: the frozen coherent-K4 DESIGN comparison failed, its source-identity
 counterexample and executable trace have independent acceptance, and the
 repair-math Skeptic supplied a concrete residual counterexample. The dense
 linear oracle and Gaussian-pair mixed-source check have accepted narrow
-verdicts; the signed-cubature factor check and priced complete source/history
-path remain concrete label-free discriminators. The `mixed_source/cost_options.md`
+verdicts; the signed-cubature factor identity also has scoped acceptance.
+The four-coordinate source check and priced complete source/history path
+remain concrete label-free discriminators. The `mixed_source/cost_options.md`
 ledger is conventional arithmetic, not measured flopscope cost or a feasible
 rank proof.
 Consult a strategist if corrected algebra and fresh Skeptic synthesis leave no
