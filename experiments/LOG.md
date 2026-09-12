@@ -45272,3 +45272,65 @@ and higher moments; retaining its atomic law is oracle bookkeeping, not a
 deployable wide model. Commit this contract before any fixture execution,
 run its tiny focused CPU fixture, then current-byte live workerq default
 preflight 5 GiB/2 CPUs/zero GPU and an independent fresh-context Skeptic.
+
+**September 12 IMPORTANT contract: two-birth abstract compact K3-feed
+integration, BEFORE any fixture measurement.** **Question:** do two independently
+specified weighted-discrete K4-induced K3 feed sources survive actual repeated
+`weighted_gram_join`, `transport_shared`, factor rotation and compact D3/D21
+readouts when their positive and covariance-negative legs are both retained?
+What does a deliberately smaller common rank discard on this fixed toy law?
+**Evidence:** CONFIRMED the single-source abstract full-rank embedding (48/48,
+scoped Skeptic ACCEPT), and separately the supplied-core compact history
+reference (11/11 dense closure); INFERRED that adding the two algebraic
+Sources for each birth at full rank n can preserve their sum through carries;
+SPECULATIVE that rank384/residual16, any physically generated law, or a
+complete challenge-width schedule is exact or competitive.
+**Hypothesis/mechanism:** each birth contributes one positive-minus-a Source
+with S residual columns and one negative-pairing Source with a full n-column
+A/Q leg as in `60ab638`. Both are ordinary additive cubic tensors after
+the birth. Carry all their legs by the same fixed signed dense map; at each
+age boundary join both Sources into the *actual* reference's shared weighted
+Gram/thin-QR state with fixed full-rank omega=identity, then transport and
+join the second birth. The direct control instead enumerates each birth's
+fourth raw moment and three covariance Wick pairings, contracts all three
+quadratic K3 placements, and transports its complete cubic tensor by explicit
+index loops. Distinct deterministic n4 banks, weights, w1/w2 and two fixed
+signed nonconstant maps prevent accidental same-source equality. The source
+constructor under test may use the accepted feed helper, but the direct
+oracle must not call it, `dense_slices` or `compact_slices`.
+
+**Intervention/gates:** at birth 1, after carry 1 and second birth/join, and
+after carry 2, compare every full cubic entry reconstructed from the
+shared state with direct enumeration, plus complete D3 and oriented D21,
+within `1e-10` absolute. Check Gram symmetry and independently reconstructed
+sum of weighted A/P outer products at each join/transport within `1e-10`;
+check every retained source age/birth count, total mass and zero-source
+control. A dropped negative-pairing subsource mutant must differ from the
+direct tensor by >`1e-3`. Repeat the exact same frozen schedule with common
+rank 2, fixed omega the first two identity columns, and report the
+full-tensor/D3/D21 errors without treating them as an exactness gate; a
+material loss >`1e-6` is predicted on generic distinct sources, but an
+unexpectedly exact case is a diagnostic rather than proof of universal
+compression. Compare final mean-only D3 with direct tensor at the last
+stage, skipping full D21 only in that additional shortcut check.
+**Predictions:** full-rank tensor/readout/Gram/age checks pass; mutant is
+detected; rank-2 run has a nonzero material full-tensor loss, though its
+exact size is unknown. Samuel's standing human prediction is **"I don't
+know"**. **Falsifier:** any registered full-rank identity, bookkeeping,
+zero control or mutant gate fails. Preserve a rank-2 surprise rather than
+changing the law or claiming the compressed architecture correct from one
+toy. **Baseline/control:** independently enumerated raw discrete cumulants
+and direct cubic tensor carries, versus the actual `p2_compact_reference.py`
+join/transport/reconstruct/slice code. The earlier one-source fixture is
+supporting evidence only, not the oracle.
+**Cost model:** n4, at most two births/four Source objects and two maps,
+<64 MiB fixture payload/one CPU; no flopscope measurement or challenge score.
+For Phase 2 `C=F`, residual headroom against the 0.4 s cliff remains unknown.
+**Statistic:** deterministic absolute identity gates and one diagnostic
+rank-2 contrast, no truth noise, paired score, seed block, public or vault.
+**Scope/confounders:** the imported Source algebra is an *abstract discrete
+K3 feed*, not physical nonlinear source construction or all K4 consumers;
+full tiny rank does not establish n1024 memory, arithmetic overlap, or
+rank384/residual16 adequacy. Commit before any fixture execution; focused
+tiny CPU-only test, live current-byte default preflight through workerq with
+5 GiB/2 CPUs/zero GPU, then independent fresh-context Skeptic with raw files.
