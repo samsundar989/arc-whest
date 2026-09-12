@@ -46562,3 +46562,39 @@ envelope. Run source hash/ledger checks and independent review before accepting
 the cost result. Official subprocess profile and candidate-specific deployment
 certification remain separate required gates. The binding 8% threshold and
 Samuel's already recorded F21 prediction remain unchanged.
+
+**F21 A1 counted-cost result, no labels.** Local workerq jobs 1079 and 1080
+SUCCEEDED with the scoped grader arm; raw JSON SHA256s are respectively
+`7aceb9464a52443efb300bc85f890c0c25c63234c2c62ff7e8011543cceb9fc5`
+and `3aa0377a634bb3d4504041b58c6b2a974c94de824e58497c110082f1b15ba0d9`
+Exact source SHA256s in the records match pinned original L4
+`052dd768...` and fused L4 `d77dab0e...` before and after the run. At
+1024x16 the original used **1,068,211,953,254** counted FLOPs; fused used
+**928,424,083,046**, a saving of **139,787,870,208 = 13.0862%** of the
+original complete grader-arm bill. The registered 8% engineering cost screen
+is MET. All 23 operation families reconcile exactly to both totals. Matmul
+calls 148→134 (14 fewer), counted matmul FLOPs -132,037,943,296; the other
+moving families are add -1,995,628,544, concatenate -4,633,108,480,
+subtract -1,312,030,720, multiply +190,840,832. Total operation calls
+15,377→14,075. Peak workerq RAM was 2,777/2,826 MiB against 6 GiB requests.
+These are measured complete *local grader-arm* costs, not yet an official
+candidate subprocess profile or a score. The predicted saving is superseded by
+this result; full-width numerical trajectory, independent Skeptic, official
+meter/validation and score still remain.
+
+**F21 pre-submission optimization review — local full-depth trajectory rerun.**
+The prior 8 GiB job was removed while queued before it executed because its
+relative Python executable would not launch through Windows CreateProcess.
+Use the absolute interpreter under workerq `--live-worktree`, which is the
+documented local-only workaround, and retain width 1024/depth 4, both original
+and fused L4 sources, all 29 sampled state/output checks, and no labels.
+No duplicate truth loader exists; the probe deliberately shares one canonical
+network. No workers, cache, prefetch, batching or GPU can reduce the test while
+preserving its fixed-backend recurrence comparison. The 1024x16 one-arm meter
+peaked below 2.9 GiB; the canceled full certificate's broader suite peaked
+4.36 GiB. Two sequential depth-four trajectories plus shared weights justify
+**7.5 GiB RAM, 0 VRAM, 2 CPUs** as a conservative peak, a 0.5 GiB reduction
+from the prior unmeasured 8 GiB request that fits the local available
+reservation. If workerq records a higher peak or OOM, this bound is falsified
+and must be raised, never bypassed. JSON output is a new path, so rerun rather
+than checkpoint this one-network diagnostic. The code and precision are fixed.
