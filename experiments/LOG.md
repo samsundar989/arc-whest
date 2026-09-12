@@ -43966,3 +43966,67 @@ validation, `py_compile` and `git diff --check` pass on lab SHA-256
 No source or role beyond the publication lock and sacrificial lock probe changed.
 This closes the identified publication race; current-byte default preflight
 and an independent Skeptic verdict are still required before P01 is read.
+## 2026-09-12 — Job 955 passes; freeze-receipt read must be locked before binding extraction
+
+Workerq **955** tested commit `027b753` in the live worktree, no snapshot,
+zero GPU, 5 GiB RAM, two CPUs. It finished `SUCCEEDED`, exit 0, in
+321.88514 seconds, peak 3,091.3671875 MiB. Default preflight was **GREEN
+12/16**, four Full-only steps SKIPPED. Raw transcript, manifest and metadata
+at `2026-09-11_stage2_compact_p07/freeze_bridge/job955_*` have SHA-256
+`fb9520ee797df1017af2debb029fe6ca42397047595217d93c99a1122c7d50e8`,
+`d2f9a4bc588d2cf1e39edaa218e3b17df01e1993b66fbba6af35aa91dc937064`,
+`77cc58d0d56cf6a86ec78a3c913963a7c922cc0d62c763ee48a40f164143b3f0`.
+
+A fresh-context independent reviewer reran the pending-stage positive and
+negative sacrificial fixtures, then found that the parent reads and parses the
+freeze receipt before acquiring its file lock. The later locked hash check
+can therefore validate a restored receipt while using input/source bindings
+extracted from transient earlier bytes. A disposable-receipt fixture first
+refuses a changed registered input, then briefly substitutes a receipt without
+that input during the unlocked parse, restores the expected receipt before
+locking, and produces a complete output despite the changed registered input.
+The actual on-disk receipt returns to its expected SHA. Reproducible script
+`freeze_bridge/skeptic_receipt_disk_swap_probe.py` SHA-256
+`0a1d4342f235cfb8e57a6f15fdcc443b863f0e8b90560516b95c81caf8f6dda5`;
+raw result `.json` SHA-256
+`641bd7b0b358c22ebc33e3ea23af219d70abf686085db4150f0e4180aa8a1e4f`.
+The reviewer's final message failed automatic review before it could save a
+formal verdict, so this is **not an independent ACCEPT**. The raw counterexample
+holds P01. No protected arrays were opened. The pending-status and locked
+complete-stage repairs remain valid within their tested scopes.
+
+### IMPORTANT contract — derive freeze bindings from continuously held receipt bytes
+
+**Question.** Does acquiring and holding the actual freeze-receipt lock before
+its parse ensure the parent validates exactly the source and input bindings
+it will use to publish the complete report?
+
+**Evidence.** **CONFIRMED:** `p2_lab._publish_audited_stage` locks the stage,
+lab and bootstrap, parses `freeze_receipt`, then only later locks the derived
+binding paths including that receipt. **CONFIRMED:** the sacrificial on-disk
+replacement fixture publishes with a changed registered input under this
+ordering. **INFERRED:** a nested lock on the resolved receipt before its first
+read, held through binding extraction, child-reported receipt-hash equality,
+all derived file locks and final atomic link, closes this mismatch. **SPECULATIVE:**
+the same lock ordering suffices for every nested source/input path; test with
+one changed registered input and the real immutable receipt binding probe.
+This is instrument evidence; no K4 accuracy result exists.
+
+**Prediction.** The old fixture reproducibly demonstrates a complete output
+with a changed input. After the lock-order repair, either its attempted
+replacement is denied while held or the parent refuses before publication;
+the changed-input baseline also refuses. The normal sacrificial four-arm
+entry still publishes one complete report, pending direct-bootstrap stages
+never claim completion after refusal, and source/arm/truth/preexisting-output
+negatives remain fail-closed. Current receipt validation, focused suites and
+current-byte default preflight pass. Samuel's standing response remains
+`I don't know`; this is a repair without a new strategic result.
+
+**Gate / falsifier.** No complete output in the disposable receipt-change
+negative, unchanged positive and other negatives, no protected-data read,
+current-byte preflight and a fresh independent Skeptic ACCEPT before another
+P01 read. Any binding extracted from bytes not held until publication,
+changed score/role/arm/source, false-complete report or failed preflight
+blocks the retry. Scope: parent publication lock ordering plus sacrificial
+fixtures only. Preserve the receipt-pinned bootstrap, actual fit/freeze
+receipts, estimator, frozen arms, truth ledger, cost/statistic/gate and vault.

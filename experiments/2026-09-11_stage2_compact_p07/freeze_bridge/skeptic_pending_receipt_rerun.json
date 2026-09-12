@@ -1,0 +1,18 @@
+{
+  "bootstrap_sha256": "0bba6abae9379b398ed473d935c295009371b95efd9526310038614a8db6341f",
+  "closing_truth_mutation_refused_without_output": true,
+  "complete_stage_write_blocked_during_link": true,
+  "complete_status_stage_refused_without_output": true,
+  "incomplete_arm_stage_refused_without_output": true,
+  "lab_sha256": "3807109838e9302be33e9119a2a9c02059ae779c3d8667cad5ad71221d1a1859",
+  "malformed_stage_refused_without_output": true,
+  "missing_truth_binding_refused_without_output": true,
+  "positive_real_receipt_binding": true,
+  "preexisting_output_preserved": true,
+  "real_freeze_receipt": "experiments/2026-09-11_stage2_compact_p07/frozen_arms_metadata_protocol/freeze_receipt.json",
+  "real_freeze_receipt_sha256": "4c889be3258f13a21d20d698896286e7253949791f2c95e0016aa38f79878298",
+  "schema": "arc-whest.p2-publication-receipt-probe.v1",
+  "staged_payload": "binding-layer probe; no scored outcomes",
+  "symlink_stage_refused_without_output": null,
+  "truth": "sacrificial text only; no P01/P07/vault truth arrays opened"
+}
