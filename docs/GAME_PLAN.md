@@ -106,10 +106,9 @@ contract requires a pending stage until successful parent publication; no
 independent acceptance existed at that historical point. The final held
 receipt-lock repair `bb81abf` passed workerq 956 current-byte default
 preflight 12/16 (four Full-only skips) and a new fresh Skeptic **ACCEPTED**
-the scoped publication instrument. The registered P01 comparison can resume
-on exposed DESIGN data. It remains explicitly accuracy-only under
-its residual-cap relaxation. A terminal four-arm report, result Skeptic and
-synthesis are still required before the residual-rank question. P01 had five
+the scoped publication instrument. The registered P01 comparison subsequently
+ran on exposed DESIGN data with an accuracy-only residual-cap relaxation;
+its terminal report, result Skeptic and synthesis are recorded below. P01 had five
 documented reads before job 949 (three historical smoke reads and two failed
 production attempts), and job 949 added one more; it remains exposed DESIGN.
 The earlier paragraphs below describe the entry contract and historical queue state.

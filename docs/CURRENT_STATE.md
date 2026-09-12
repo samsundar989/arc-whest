@@ -34,7 +34,7 @@ sources, exact registries, lifecycle settings, costs and row/op coverage; protec
 fitting revalidates the same evidence and exact ordered P07 identity role before
 truth access. Its expanded synthetic suite passes 70/70. A first Skeptic rejected
 identity-role confusion and parse/hash races; the repaired commit `7730248` received
-a new fresh-context **ACCEPT**. No production producer or real fit has run yet.
+a new fresh-context **ACCEPT**. The producer and fit later ran as recorded below.
 
 Workerq 628 ran the Full exact-working-byte preflight at HEAD `e1933f0` and passed
 **16/16**, including zero-failure official Phase-2 subprocess smoke. Transcript:
@@ -100,17 +100,16 @@ parent's successful post-audit atomic publication. The reviewing agent's
 final turn failed automatic review before a formal verdict; no independent
 acceptance is claimed. Preserve the raw probe and hold P01.
 
-**Latest gate (September 12).** The parent now locks the freeze receipt before
+**Publication gate before job 957 (September 12).** The parent now locks the freeze receipt before
 reading and holds it through binding checks and atomic report publication.
 The disposable receipt-change negative, normal four-arm synthetic positive,
 pending-stage and source controls pass. Workerq **956** passed current-byte
 default preflight **12/16** (four Full-only skips; 3,211.5 MiB peak), and a
 new fresh-context Skeptic **ACCEPTED** this scoped Windows publication repair.
-The immutable metadata-protocol freeze receipt remains valid. The registered
-P01 four-arm accuracy-only comparison is now the next unblocked test; P01 is
-exposed DESIGN and six earlier reads are documented. After its terminal
-report, obtain an independent result Skeptic and synthesize before the
-residual-rank question. No K4 accuracy verdict or better submission exists yet.
+The immutable metadata-protocol freeze receipt remains valid. This gate
+permitted job 957 to run on exposed P01 DESIGN after six documented earlier
+reads. Its terminal report, independent result Skeptic and synthesis follow
+below. No better submission exists.
 
 Workerq **957** subsequently published the complete registered P01 report over
 96 paired networks with zero lifecycle failures, in 2,554.7 seconds and at
