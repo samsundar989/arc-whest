@@ -44484,3 +44484,84 @@ Gaussian preactivation only; a later non-Gaussian source, full all-history
 cost, compression, and accuracy remain open. Require focused tests,
 current-byte default preflight and fresh independent Skeptic before using
 this source result to select an implementation.
+
+**September 12 source-result synthesis.** The committed implementation
+`4f5afea` passes 80/80 deterministic checks. At correlation zero the mixed
+fourth cumulants vanish; at `rho=0.5`, `K1122=0.10914008267226893`, and the
+full-minus-diagonal future D4 differences under the registered signed map are
+`+0.3920589722891677` and `-0.0646387242723612`, clearing the preregistered
+`1e-3` bounds. Workerq **964** passed live-worktree default preflight **12/16**,
+four Full-only skips, exit zero, measured peak `3911.1171875 MiB` under its
+5 GiB/2 CPU/zero GPU declaration. Its byte-exact raw ZIP and receipt live under
+`experiments/2026-09-11_stage2_compact_p07/mixed_source/`. The source script
+SHA-256 is `00f5485b44769d3545a9485a30165c11c4e77ad62cac1ba49e493edea80b43b1`;
+result SHA-256 is `6490c583d40125335e33ad30ed2c13a0e656f6e78548123a6cda09db6f27de70`.
+The preflight did not itself execute or start-time hash this new standalone
+oracle; its focused rerun reproduced result bytes. A fresh-context Skeptic
+independently integrated conditional-Gaussian moments, reconstructed the
+fourth cumulants and signed D4, checked raw queue provenance, and returned
+**ACCEPT for this n=2 Gaussian-pair source and linear transport only**.
+Verdict `mixed_source/skeptic_verdict.md`, SHA-256
+`29cbaf889704ad89552b9a30f3be58dd8a9a931e212773a2bc1c739edcd6bf11`,
+commit `cfdf62c`. The contraction-matched metric core alone misses rho-zero
+future D4 by `0.069927084588176`, so its residual is necessary. CONFIRMED:
+nonzero mixed source and future consequence in this pair. INFERRED: the frozen
+arms' omitted mixed terms are one contributor to their source error, not an
+isolated causal explanation for the P01 score. SPECULATIVE: a feasible
+all-history mixed representation and any score gain. No protected labels or
+seed block were touched. The separate `mixed_source/cost_options.md` at
+`d8641f8` is an unfused conventional cost/options memo, not a flopscope
+measurement or a Skeptic-accepted architecture.
+
+**Next IMPORTANT truth-free factor-source contract, committed before its
+fixture.** **Question:** can a full signed Gaussian cubature carry the
+mixed fourth source as weighted rank-one fourth factors plus the *same-measure*
+covariance subtraction, and preserve every declared consumer and K3 feed
+through two signed linear maps? **Evidence:** CONFIRMED the accepted pair
+source and selected dense transport above; CONFIRMED a metric core without
+its residual changes future D4; INFERRED finite weighted cubature is an exact
+algebraic representation of its own discrete measure; SPECULATIVE that a
+small factor count approximates the continuous source cheaply enough.
+**Hypothesis/mechanism:** rectifying every full-sign joint-Gaussian grid node
+and retaining its normalized weight yields centered columns `V`, weights
+`p`, and `C_p=V diag(p) V^T`, whose discrete fourth cumulant is
+`sum_s p_s V_s^⊗4 - 3T(C_p,C_p)`; both factors and covariance legs must
+transport. Positive-quadrant nodes alone miss axis/origin probability and
+cannot serve as that discrete measure. **Intervention:** use fixed
+`rho=0,0.5`, split Gauss-Legendre intervals `[-10,0]` and `[0,10]` with
+32 and 48 nodes per half-axis (64/96 full signed nodes per coordinate),
+and rectify the complete product grid. Implement the factor/covariance
+construction independently of raw-moment set partitions of the *same*
+weighted measure; compare each with the existing order-96 continuous
+positive-quadrant reference separately. Apply the fixed Hadamard map and a
+second fixed signed nonconstant 2x2 map, and compare full dense transport,
+all D4/D22/D31 entries, oriented covariance and the declared quadratic K4
+to K3 feed with separately enumerated dense expressions. Retain and report
+the metric-core residual under both maps.
+
+**Predictions:** (1) every same-discrete-measure fourth tensor entry,
+two-map consumer and feed comparison agrees within `1e-10` absolute;
+(2) order-32/48 signed-grid cumulants and raw moments agree within `1e-8`
+relative for material entries and `1e-8` absolute near zero, while order-48
+agrees with the separate continuous pair reference within `1e-8` on the
+five fourth-cumulant classes; (3) dropping either the weighted covariance
+subtraction or axis/origin nodes creates at least `1e-3` source-entry or
+future-D4 error at `rho=0.5`. Samuel's standing response to all prediction
+questions is **"I don't know"**. **Falsifier:** any identity or convergence
+threshold fails, or the two negative controls do not discriminate the
+mistakes; retain the failure instead of retuning a threshold.
+**Control/baseline:** exact raw-moment partition cumulant of the weighted
+discrete measure; independently accepted continuous Gaussian pair source
+only for quadrature accuracy, not for the algebra identity. **Cost model:**
+at most 96^2 tiny two-dimensional nodes and under 64 MiB working arrays;
+this is direct CPU-only truth-free arithmetic, no measured challenge FLOPs,
+no server residual, and no promoted estimator. Phase 2 still charges counted
+`C=F`, with residual headroom against 0.4 s. **Statistic/gate:** deterministic
+numeric equalities and fixed lower bounds above, no competition-score gate,
+seed block, truth-noise estimate or paired decision. **Scope/confounders:**
+the Gaussian pair only, full signed probability including zero ReLU outputs,
+fixed maps and fixed response truncation. This does not cover three/four
+distinct coordinates, later non-Gaussian sources, rank adequacy, full costs,
+8 GiB deployed memory, or accuracy. Run focused tests, current-byte default
+preflight via workerq and a new fresh-context Skeptic before claiming this
+factor construction works.
