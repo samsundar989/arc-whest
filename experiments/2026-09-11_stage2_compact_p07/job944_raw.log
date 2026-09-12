@@ -1,0 +1,61 @@
+﻿worker-q: job #944 starting at 2026-09-12T04:19:20.559672+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=none -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['uv', 'run', 'python', 'local_sim/p2_lab.py', '--truth', 'experiments/2026-08-21_p2_cp1/truth_P01.npz', '--out', 'experiments/2026-09-11_stage2_compact_p07/p01_report.json', '--freeze-receipt', 'experiments/2026-09-11_stage2_compact_p07/frozen_arms/freeze_receipt.json', '--n', '0', '--competition-cost-lambda', '0', '--depth-subset', '8', '--gate', '1.10', '--block', 'P01', '--note', 'Registered coherent-K4 mechanism comparison on exposed P01 DESIGN', '--control', 'exact', '--official-samples', '1e9', '--residual-cap', '0']
+worker-q: ------------------------------------------------------------
+C:\Users\samsu\Documents\arc-whest\local_sim\lifecycle_eval.py:613: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+  *** RESIDUAL CAP RELAXED -- this run is ACCURACY-ONLY. Its failure accounting
+      cannot see a 0.4 s violation and it is NOT residual evidence for anything.
+  deciding model   lambda = 0   (COUNTED FLOPS ONLY -- the frozen model)
+============================================================================================
+P2-CP1 LADDER  --  one canonical evaluator, paired on common random numbers
+============================================================================================
+  truth      experiments\2026-08-21_p2_cp1\truth_P01.npz   96 networks   2 replicas x 4,194,304 samples
+  truth noise per replica   mean 1.8063e-08
+  shape      1024 x 16   B = 2,199,023,255,552   floor 0.1
+  stack      flopscope 0.12.0   PARITY ACHIEVED
+
+  replica noise of the AVERAGED truth   measured 9.3191e-09   predicted V/2N 9.0313e-09   ratio 1.0319
+     (the ratio is a live check on replica independence; far from 1.0
+      means the two draws share state and every corrected MSE is wrong)
+
+Traceback (most recent call last):
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\p2_locked_bootstrap.py", line 393, in <module>
+    raise SystemExit(main())
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\p2_locked_bootstrap.py", line 386, in main
+    return run(parsed.target, parsed.expected_target_sha, args)
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\p2_locked_bootstrap.py", line 372, in run
+    return _execute_target(
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\p2_locked_bootstrap.py", line 336, in _execute_target
+    result = int(module.main(args))
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\p2_lab.py", line 486, in main
+    rc = _execute_held(a, man, frozen, arms, arm_paths,
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\p2_lab.py", line 688, in _execute_held
+    rows, prov = _run_arm(name, seeds, y_mid, spec, list(gt_noise))
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\p2_lab.py", line 360, in _run_arm
+    return le.evaluate(path, seeds, truth_final, spec=spec, gt_noise=gt_noise)
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\lifecycle_eval.py", line 619, in evaluate
+    import harness
+  File "C:\Users\samsu\Documents\arc-whest\local_sim\harness.py", line 22, in <module>
+    from whestbench import MLP  # noqa: E402  (shim)
+  File "C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\whestbench\__init__.py", line 3, in <module>
+    from .dataset import (
+  File "C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\whestbench\dataset.py", line 30, in <module>
+    from datasets import Dataset, IterableDataset, IterableDatasetDict
+  File "C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\datasets\__init__.py", line 17, in <module>
+    from .arrow_dataset import Column, Dataset
+  File "C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\datasets\arrow_dataset.py", line 78, in <module>
+    from . import __version__, config
+  File "C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\datasets\config.py", line 36, in <module>
+    DILL_VERSION = version.parse(importlib.metadata.version("dill"))
+  File "C:\Users\samsu\AppData\Roaming\uv\python\cpython-3.10.19-windows-x86_64-none\lib\importlib\metadata\__init__.py", line 996, in version
+    return distribution(distribution_name).version
+  File "C:\Users\samsu\AppData\Roaming\uv\python\cpython-3.10.19-windows-x86_64-none\lib\importlib\metadata\__init__.py", line 969, in distribution
+    return Distribution.from_name(distribution_name)
+  File "C:\Users\samsu\AppData\Roaming\uv\python\cpython-3.10.19-windows-x86_64-none\lib\importlib\metadata\__init__.py", line 548, in from_name
+    raise PackageNotFoundError(name)
+importlib.metadata.PackageNotFoundError: No package metadata was found for dill
+worker-q: ------------------------------------------------------------
+worker-q: job #944 FAILED (exit code 1) at 2026-09-12T04:19:27.873744+00:00

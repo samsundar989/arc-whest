@@ -1,0 +1,8 @@
+﻿{
+    "schema":  "arc-whest.stage2-continuation-state.v1",
+    "recorded_utc":  "2026-09-12T04:19:19.1781289Z",
+    "pid":  47696,
+    "stage":  "continuation",
+    "status":  "SUCCEEDED",
+    "detail":  "P07 verified/fitted/frozen and P01 submitted; driver must inspect terminal P01 evidence"
+}

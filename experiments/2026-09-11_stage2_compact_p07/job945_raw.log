@@ -1,0 +1,9 @@
+﻿worker-q: job #945 starting at 2026-09-12T04:45:00.658770+00:00
+worker-q: cwd=C:\Users\samsu\.local\state\gpuq\snapshots\945\job-945
+worker-q: snapshot=git cdc6f0f722e4fe3a10e5840be2a36c13cb1f7a3c
+worker-q: CUDA_VISIBLE_DEVICES=0
+worker-q: command=['uv', 'run', '--no-sync', 'python', 'local_sim/p2_lab.py', '--truth', 'experiments/2026-08-21_p2_cp1/truth_P01.npz', '--out', 'experiments/2026-09-11_stage2_compact_p07/p01_report.json', '--freeze-receipt', 'experiments/2026-09-11_stage2_compact_p07/frozen_arms/freeze_receipt.json', '--n', '0', '--competition-cost-lambda', '0', '--depth-subset', '8', '--gate', '1.10', '--block', 'P01', '--note', 'Registered coherent-K4 mechanism comparison on exposed P01 DESIGN; exact retry after job944 environment metadata failure', '--control', 'exact', '--official-samples', '1e9', '--residual-cap', '0']
+worker-q: ------------------------------------------------------------
+REFUSED: cannot lock dependency c:\users\samsu\.local\state\gpuq\snapshots\945\job-945\experiments\2026-09-11_stage2_compact_p07\observations\predictions.npz: WinError 2
+worker-q: ------------------------------------------------------------
+worker-q: job #945 FAILED (exit code 2) at 2026-09-12T04:45:01.791159+00:00

@@ -1,0 +1,164 @@
+{
+  "arms": [
+    {
+      "constants": {
+        "_K4_ACTIVE": false,
+        "_K4_BIRTHS": false,
+        "_K4_CONSUMERS": false,
+        "_K4_LAM": 0.3333333333333333
+      },
+      "index": 0,
+      "name": "exact",
+      "path": "experiments/2026-09-11_stage2_compact_p07/frozen_arms/arm_exact.py",
+      "sha256": "f704f83b2063894c8dcd13120a8baada762229563f6d08bccee39d3aad2e6efc"
+    },
+    {
+      "constants": {
+        "_K4_ACTIVE": true,
+        "_K4_BIRTHS": true,
+        "_K4_CONSUMERS": true,
+        "_K4_LAM": 0.3333333333333333
+      },
+      "index": 1,
+      "name": "coherent",
+      "path": "experiments/2026-09-11_stage2_compact_p07/frozen_arms/arm_coherent.py",
+      "sha256": "d3ec837b72f5dacb4f8f622394d3d635268649c741289fb9754197e993343665"
+    },
+    {
+      "constants": {
+        "_K4_ACTIVE": true,
+        "_K4_BIRTHS": false,
+        "_K4_CONSUMERS": true,
+        "_K4_LAM": 0.3333333333333333
+      },
+      "index": 2,
+      "name": "consumers_only",
+      "path": "experiments/2026-09-11_stage2_compact_p07/frozen_arms/arm_consumers_only.py",
+      "sha256": "08fa7f7f39c49c622132bdd22a4d862db702fae5deb6d8b88b679b1e24d652c7"
+    },
+    {
+      "constants": {
+        "_K4_ACTIVE": true,
+        "_K4_BIRTHS": true,
+        "_K4_CONSUMERS": false,
+        "_K4_LAM": 0.3333333333333333
+      },
+      "index": 3,
+      "name": "births_only",
+      "path": "experiments/2026-09-11_stage2_compact_p07/frozen_arms/arm_births_only.py",
+      "sha256": "2ff91070f30d56abff1644fe82b27ffaab87ef8807fb7744ee551ec6d71cbf49"
+    }
+  ],
+  "data_role": "protected-design",
+  "fit_receipt": {
+    "path": "experiments/2026-09-11_stage2_compact_p07/fit_receipt.json",
+    "sha256": "d8dcdcd2bf246952abc8c757c4b917b8fc3e10267793b79e1aacb6428ebea02c"
+  },
+  "generator": {
+    "executed_sha256": "9f6d1952e4b6b9f3fa3888af54379ee886ed172bc7f97c465b5a9dce64737b96",
+    "path": "local_sim/p2_build_k4_arms.py",
+    "sha256": "9f6d1952e4b6b9f3fa3888af54379ee886ed172bc7f97c465b5a9dce64737b96"
+  },
+  "immutable": true,
+  "input_bindings": {
+    "bounds": {
+      "path": "experiments/2026-09-10_stage2_k4_design/bounds.json",
+      "sha256": "f82db3064a93b37598b8d0fb1d9dc99b1b2971c9372a1a7c2cd1a359c5c72a35"
+    },
+    "candidates": {
+      "path": "experiments/2026-09-10_stage2_k4_design/candidates.json",
+      "sha256": "d7ee311bfd12bf9f72d9cd3d5729905b68d142129d254efedb92b5e25291afc2"
+    },
+    "identities": {
+      "path": "experiments/2026-09-10_stage2_k4_design/identities.json",
+      "sha256": "f1fb4c309de1da593ca1efe3f46a355a069288871b36fe14acb33fd3105e7815"
+    },
+    "predictions": {
+      "path": "experiments/2026-09-11_stage2_compact_p07/observations/predictions.npz",
+      "sha256": "4ae1e119805c1cb126c4f6a5121b7c879d7522c26c61b99566517862850b1560"
+    },
+    "producer_receipt": {
+      "path": "experiments/2026-09-11_stage2_compact_p07/observations/producer_receipt.json",
+      "sha256": "451c9b45b35043e8a017e2400af8fe578f9e2a1656ee4f59a04ba2b300cea3ea"
+    }
+  },
+  "labels_read": false,
+  "objective": {
+    "definition": "mean identity final-layer neuron MSE",
+    "direction": "minimize",
+    "name": "final_layer_mse",
+    "validity": "registered coefficient candidates have identical counted cost for every identity"
+  },
+  "reservation_evidence": {
+    "completed_row_sha256": "c67ad827de64b642233a7abf34ee460fc2262c0be3bcd84bea2cb3ca4d8a1aed",
+    "ledger_path": "experiments/truth_reads.jsonl",
+    "reservation": "a346d462ef3f4eb2",
+    "reserved_row_sha256": "8f57bb98d8a6ff9466a8a021a9ac2699fbbe3bd7ef7653d33ad77657fe7a9c51"
+  },
+  "schema": "arc-whest.coherent-k4-arm-freeze-receipt.v1",
+  "selection": {
+    "frozen_values": {
+      "lam": 0.3333333333333333
+    },
+    "k4_lam": 0.3333333333333333,
+    "registered_index": 2
+  },
+  "source_bindings": {
+    "arm_births_only": {
+      "path": "local_sim/p2_arms/arm_births_only.py",
+      "sha256": "2ff91070f30d56abff1644fe82b27ffaab87ef8807fb7744ee551ec6d71cbf49"
+    },
+    "arm_coherent": {
+      "path": "local_sim/p2_arms/arm_coherent.py",
+      "sha256": "d3ec837b72f5dacb4f8f622394d3d635268649c741289fb9754197e993343665"
+    },
+    "arm_consumers_only": {
+      "path": "local_sim/p2_arms/arm_consumers_only.py",
+      "sha256": "08fa7f7f39c49c622132bdd22a4d862db702fae5deb6d8b88b679b1e24d652c7"
+    },
+    "arm_exact": {
+      "path": "local_sim/p2_arms/arm_exact.py",
+      "sha256": "f704f83b2063894c8dcd13120a8baada762229563f6d08bccee39d3aad2e6efc"
+    },
+    "arm_freezer": {
+      "path": "local_sim/p2_freeze_k4_arms.py",
+      "sha256": "1e5a725b5182de466eab7594b863f107ba46d36e3d191b9cd5c3b13e9b08b30d"
+    },
+    "arm_generator": {
+      "path": "local_sim/p2_build_k4_arms.py",
+      "sha256": "9f6d1952e4b6b9f3fa3888af54379ee886ed172bc7f97c465b5a9dce64737b96"
+    },
+    "arm_template": {
+      "path": "local_sim/p2_compact_candidate_template.py",
+      "sha256": "6cba4c6a89c79d9b3cfc7e3444bb5448cd0ce672536c207ea34235ed6782d939"
+    },
+    "fit_interface": {
+      "path": "local_sim/p2_k4_fit.py",
+      "sha256": "6efb7cf64a879efc9a56bd20b57a77ffafbd409dd5e86920443e892d3efb447b"
+    },
+    "fit_producer": {
+      "path": "local_sim/p2_k4_fit_producer.py",
+      "sha256": "3d2262efb6b41313441aca247330582cf6aa49d1c47ab084038ba25e0ebf6a97"
+    },
+    "locked_bootstrap": {
+      "path": "local_sim/p2_locked_bootstrap.py",
+      "sha256": "9abb5243ed2e4cbd19d5013d7dba8e4529a60bd37487672dc0d802223a5d08d1"
+    },
+    "truth_reads_interface": {
+      "path": "local_sim/truth_reads.py",
+      "sha256": "eb02e12f2dcbe1b1bf660ae4f9fa98d38d988a8ad2f968725453312b6ad52114"
+    }
+  },
+  "template": {
+    "path": "local_sim/p2_compact_candidate_template.py",
+    "sha256": "6cba4c6a89c79d9b3cfc7e3444bb5448cd0ce672536c207ea34235ed6782d939"
+  },
+  "validation": {
+    "completed_reservation_validated": true,
+    "dependencies_locked_through_publication": true,
+    "generator_snapshot_executed": true,
+    "protected_p07_fit_validated": true,
+    "selection_matches_registered_candidate": true,
+    "truth_opened_by_freezer": false
+  }
+}

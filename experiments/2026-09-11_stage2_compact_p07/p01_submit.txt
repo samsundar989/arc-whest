@@ -1,0 +1,8 @@
+﻿worker-q job #944 submitted
+Project:  arc-whest
+Priority: high
+State:    QUEUED
+Backend job: 936
+Snapshot: none
+Requests: 8.0 GiB RAM, 2 CPU
+Logs:     workerq logs 944 --follow

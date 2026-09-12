@@ -43393,3 +43393,79 @@ not evidence that the eventual estimator needs that memory. A terminal P01 resul
 raw report review and fresh result Skeptic remain manual gates. Samuel's three
 predictions are already recorded verbatim as `I don't know`; this helper neither
 changes them nor opens any public/vault/submission path.
+
+## 2026-09-11 - P07 fit/freeze complete; P01 exposed a package-metadata guard defect
+
+Workerq **903** finished `SUCCEEDED`, exit 0, after 13,282.631098 seconds. Its
+measured peak was **10,771.8671875 MiB**: the 5 GiB declaration was materially
+low, although the broker retained ample machine headroom and the run completed
+safely. The original 32 GiB request was also unnecessarily high. A future
+identical monolithic producer must declare at least 12 GiB; this is producer-lab
+memory, not deployment memory for an arm.
+
+The immutable producer receipt passed the separate truth-free verifier. The next
+registered P07 access then completed through `truth_reads` with one exact
+reserved/completed pair (`a346d462ef3f4eb2`). P07 remains reusable exposed
+**DESIGN** data. All four registered candidates had identical counted cost
+818,515,845,672 FLOPs on each of 384 identities. Their mean final-layer MSE
+objectives in registered order were 8.059745886739617e18 (`lam=0`),
+2.240013305107397e19 (`1/6`), 1.191168003606905e18 (`1/3`) and
+3.3093006436636635e19 (`1/2`), so the immutable selector chose registered index
+2, **`lam=1/3`**. The freezer revalidated that completed receipt and emitted the
+exact, coherent, consumers-only and births-only arms with a binding receipt.
+This is a DESIGN fit and does not establish a better submission.
+
+The registered P01 mechanism report has not produced a result. Workerq **944**
+opened exposed reusable DESIGN block P01 through reservation
+`529f55e416ea4fab`, printed the truth/noise header, then failed before scoring
+the first arm because `importlib.metadata.version("dill")` could not see installed
+package metadata inside the locked bootstrap. No report was published. Workerq
+**945** was a launcher-only failure before truth access: its accidental git
+snapshot did not contain the newly untracked immutable producer artifacts.
+Workerq **946** used the intended live worktree, zero GPU and 8 GiB RAM, created
+P01 reservation `a0636510b6614dd5`, and reproduced the same package-metadata
+failure before the first arm. No report was published. These are instrument and
+launcher failures, not a rejected K4 hypothesis; both P01 accesses remain
+truthfully recorded as exposed DESIGN reads.
+
+### IMPORTANT contract - preserve metadata discovery under the locked import guard
+
+**Question.** Can the bootstrap keep its fail-closed repo-import provenance
+boundary while preserving Python's standard external-package metadata discovery,
+so the accepted public P01 entry point reaches lifecycle evaluation?
+
+**Evidence.** **CONFIRMED:** both no-snapshot production attempts fail at the
+same first-arm import with `PackageNotFoundError: dill`, while direct
+`uv run --no-sync` sees `dill 0.4.1` and `whestbench 0.16.1`. **CONFIRMED:**
+`_RegistryImportGuard` replaces `sys.meta_path` with itself and delegates
+`find_spec`, but implements no `find_distributions`; `importlib.metadata` asks
+meta-path finders for that protocol. **CONFIRMED:** no arm was scored and no P01
+report exists. **INFERRED:** forwarding distribution discovery to the original
+finder set restores installed metadata without weakening source-origin checks,
+because metadata discovery returns distribution descriptors and executable
+module imports still cross `find_spec`. **SPECULATIVE:** no third-party package
+uses another omitted meta-path protocol in this execution path.
+
+**Prediction.** Before repair, a locked synthetic target that requests the
+installed `dill` version fails exactly like jobs 944/946. After adding a narrowly
+delegating `find_distributions` method, that target and an actual external-package
+import succeed, while the existing omitted repo-module, late import,
+timestamp/size bytecode and cached parent-package negative controls retain their
+current outcomes. Focused freezer/bridge/Stage-0 suites, portability and default
+preflight remain green. Samuel's standing prediction for the strategic K4 result
+remains the already recorded `I don't know`; this instrument repair asks no new
+scientific question.
+
+**Gate / falsifier.** Accept the repair only if a focused fixture first reproduces
+the missing-metadata failure on the prior guard and then proves the repaired guard
+returns the exact installed distribution version through the real locked
+bootstrap. Every existing provenance adversary must still refuse before execution
+or publication. A regression, source-binding mismatch, incomplete current-byte
+preflight, or fresh-context Skeptic rejection blocks another P01 attempt.
+
+**Scope.** Change only the bootstrap's metadata protocol and focused truth-free
+fixtures/evidence. Do not alter candidate math, the selected coefficient, arm
+bytes, P07/P01 roles, truth archives, gate, statistic, cost model, residual model,
+estimator, archive, public split or vault. P01 may be retried only after this
+IMPORTANT repair earns current-byte preflight and an independent fresh-context
+Skeptic acceptance.

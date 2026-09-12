@@ -1,0 +1,45 @@
+﻿worker-q: job #903 starting at 2026-09-12T00:37:50.112622+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=none -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['uv', 'run', 'python', 'local_sim/p2_k4_fit_producer.py', '--candidates', 'experiments/2026-09-10_stage2_k4_design/candidates.json', '--bounds', 'experiments/2026-09-10_stage2_k4_design/bounds.json', '--identities', 'experiments/2026-09-10_stage2_k4_design/identities.json', '--out-dir', 'experiments/2026-09-11_stage2_compact_p07/observations']
+worker-q: ------------------------------------------------------------
+C:\Users\samsu\Documents\arc-whest\local_sim\lifecycle_eval.py:613: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\experiments/2026-09-11_stage2_compact_p07/observations\candidate_000_coherent.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments/2026-09-11_stage2_compact_p07/observations\candidate_000_coherent.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\flopscope\_budget.py:540: RuntimeWarning: overflow encountered in power
+  return fn(*args, **kwargs)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\flopscope\_budget.py:540: RuntimeWarning: invalid value encountered in multiply
+  return fn(*args, **kwargs)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\flopscope\_budget.py:540: RuntimeWarning: overflow encountered in multiply
+  return fn(*args, **kwargs)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\flopscope\_budget.py:540: RuntimeWarning: invalid value encountered in subtract
+  return fn(*args, **kwargs)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\flopscope\_budget.py:540: RuntimeWarning: invalid value encountered in add
+  return fn(*args, **kwargs)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\flopscope\_budget.py:540: RuntimeWarning: overflow encountered in add
+  return fn(*args, **kwargs)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\numpy\_core\fromnumeric.py:86: RuntimeWarning: overflow encountered in reduce
+  return ufunc.reduce(obj, axis, dtype, out, **passkwargs)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\numpy\_core\fromnumeric.py:86: RuntimeWarning: invalid value encountered in reduce
+  return ufunc.reduce(obj, axis, dtype, out, **passkwargs)
+C:\Users\samsu\Documents\arc-whest\local_sim\lifecycle_eval.py:613: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\experiments/2026-09-11_stage2_compact_p07/observations\candidate_001_coherent.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments/2026-09-11_stage2_compact_p07/observations\candidate_001_coherent.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments/2026-09-11_stage2_compact_p07/observations\candidate_002_coherent.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments/2026-09-11_stage2_compact_p07/observations\candidate_002_coherent.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments/2026-09-11_stage2_compact_p07/observations\candidate_003_coherent.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments/2026-09-11_stage2_compact_p07/observations\candidate_003_coherent.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+produced 4 immutable candidates at experiments/2026-09-11_stage2_compact_p07/observations\predictions.npz
+worker-q: ------------------------------------------------------------
+worker-q: job #903 SUCCEEDED (exit code 0) at 2026-09-12T04:19:12.743720+00:00
