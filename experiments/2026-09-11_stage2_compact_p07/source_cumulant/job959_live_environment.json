@@ -1,0 +1,43 @@
+{
+  "gpuq_version": "1.4.0",
+  "gpuq_job_id": 959,
+  "host": "Sam_Mega_PC",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.12 (main, Jan 27 2026, 23:45:36) [MSC v.1944 64 bit (AMD64)]",
+  "python_executable": "C:\\Users\\samsu\\AppData\\Roaming\\uv\\tools\\worker-q\\Scripts\\pythonw.exe",
+  "runner_pid": 64520,
+  "argv": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "scripts/preflight.ps1"
+  ],
+  "execution_cwd": "C:\\Users\\samsu\\Documents\\arc-whest",
+  "cuda_visible_devices": null,
+  "path": "C:\\Users\\samsu\\bin;C:\\Program Files\\Git\\mingw64\\bin;C:\\Program Files\\Git\\usr\\local\\bin;C:\\Program Files\\Git\\usr\\bin;C:\\Program Files\\Git\\usr\\bin;C:\\Program Files\\Git\\mingw64\\bin;C:\\Program Files\\Git\\usr\\bin;C:\\Users\\samsu\\bin;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0;C:\\WINDOWS\\System32\\OpenSSH;C:\\Program Files\\NVIDIA Corporation\\NVIDIA App\\NvDLISR;C:\\Program Files (x86)\\NVIDIA Corporation\\PhysX\\Common;C:\\Program Files\\dotnet;C:\\Program Files\\Git\\cmd;C:\\Users\\samsu\\Documents\\flutter\\bin;C:\\Program Files\\nodejs;C:\\Program Files\\Tailscale;C:\\Program Files\\Docker\\Docker\\resources\\bin;C:\\Users\\samsu\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\samsu\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Users\\samsu\\AppData\\Roaming\\npm;C:\\Users\\samsu\\AppData\\Local\\Programs\\cursor\\resources\\app\\bin;C:\\Users\\samsu\\.local\\bin;C:\\Users\\samsu\\AppData\\Local\\Python\\bin;C:\\Users\\samsu\\AppData\\Local\\Programs\\Ollama;C:\\Program Files\\Git\\usr\\bin\\vendor_perl;C:\\Program Files\\Git\\usr\\bin\\core_perl",
+  "virtual_env": null,
+  "conda_prefix": null,
+  "started_at": "2026-09-12T07:15:07.324510+00:00",
+  "gpu_inventory": {
+    "available": true,
+    "driver_version": "596.49",
+    "cuda_version": "13.2",
+    "error": null,
+    "devices": [
+      {
+        "index": 0,
+        "uuid": "GPU-4299ece0-5d55-2c21-d622-018acaaf41ac",
+        "name": "NVIDIA GeForce RTX 5090",
+        "memory_total_mib": 32607.0,
+        "memory_used_mib": 1942.0,
+        "memory_free_mib": 30246.0,
+        "utilization_percent": 10.0,
+        "processes": [],
+        "free_percent": 92.75922347962094
+      }
+    ]
+  },
+  "job_env_overrides": {}
+}
