@@ -46342,14 +46342,22 @@ baseline. A cost screen failure is not a scientific kill of exact fusion.
 DESIGN networks with the existing two independent high-resolution `2**26`
 truth halves (the lower-resolution 96-network truth has too large a noise floor
 for L4-level absolute MSE), paired L4/fused-L4, with original L2 as context
-and correct per-network truth floors. A >5% regression in paired
+and correct per-network truth floors. Use the official-precision forecast
+score vectors as the binding accuracy estimand: per-network midpoint-label
+MSE minus its measured midpoint truth floor, plus that floor scaled from
+`2*N` effective midpoint samples to the official `1e9`, each multiplied by
+that arm's own counted-cost multiplier. Show observed and corrected readings
+separately. Use the conservative observed `+2**24` server offset for both
+arms in this forecast; also show local-meter and offset-zero sensitivity.
+A >5% regression in paired
 arithmetic mean score stops the candidate; otherwise freeze exact bytes before
 DECIDE. No choice among variants is made from P01 or DECIDE. Allocate a new
 Phase-2 DECISION block `P09` (128 fresh canonical mints, proposed span in
 `seed_blocks.py` to be committed before claim) and claim through
 `seed_ledger.py` before first read. No P08 or vault use. The promotion gate is
 `competition_score.decide(control=L4, candidate=fused_L4, gate=1.05,
-interval="t")` on paired per-MLP **arithmetic** scores; passing also requires
+interval="t")` on the paired per-MLP **arithmetic official-precision forecast**
+score vectors just specified; passing also requires
 its 95% difference interval strictly above zero. Compare L2 on those same
 networks as context only. Report raw MSE with ground-truth noise floor,
 observed/corrected scores and official-precision forecast. No public-fit
