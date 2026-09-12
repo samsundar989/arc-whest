@@ -1,0 +1,9 @@
+test_dense_independent_two_step_signed_transport (__main__.FirstSourceKernelTest) ... C:\Users\samsu\Documents\arc-whest\local_sim\p2_k4_first_source_kernel.py:162: SymmetryLossWarning: Symmetry lost along dims (0, 1): add — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  D21 = m.run("readout_D21_accumulate", lambda D21=D21, delta=delta: D21 + delta)
+ok
+test_full_tensors_survive_two_signed_future_maps (__main__.FirstSourceKernelTest) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.174s
+
+OK

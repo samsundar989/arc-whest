@@ -1,0 +1,16 @@
+seed ledger — consistency
+  ledger records                     58  (38 claims, 16 finalizations, 3 pairings)
+  claims naming an artifact          24  (0 absent on this host, hash recorded)
+  tier tightenings                   1  (permitted; recorded so they are never silent)
+    - local_sim/p2_truth.py: P08 was TIGHTENED 'DESIGN' -> 'SINGLE_USE' by a declared `retier` record. The claim stands and every rule now in force is stricter.
+  hard collisions (DECISION/VAULT)   0
+  permitted overlaps (DESIGN)        5
+    - D16[30,806,016,200..30,806,016,223]  local_sim/probe_whitening.py  vs  local_sim/probe_design_carrier.py   <- CORRELATED EVIDENCE, never quote as two independent results
+    - D11[30,806,011,000..30,806,011,499]  local_sim/packed_sparse_probe.py  vs  local_sim/packed_truth.py   <- SAME NETWORKS BY DESIGN (one experiment, two roles)
+    - P01[40,821,001,168..40,821,001,175]  local_sim/p2_slice_lab.py::WP13 E0-TOL/E1/E2  vs  local_sim/p2_truth.py   <- DECLARED DELIBERATE: EXTENDS the standing declaration on this range to a THIRD consumer. WP16 re-drives the same eight networks to check that the fnp port and the torch reference are the same function -- the 3.31x the canary exposed. It makes no new statistical claim on them: the comparison is deterministic parity, and the only number quoted against truth is a re-read of the ALREADY-MINTED truth_P01_wp13nets.npz. All three consumers remain CORRELATED EVIDENCE and must never be quoted as independent results.
+    - P01[40,821,001,168..40,821,001,175]  local_sim/p2_slice_lab.py::WP13 E0-TOL/E1/E2  vs  local_sim/p2_k3_parity.py   <- DECLARED DELIBERATE: EXTENDS the standing declaration on this range to a THIRD consumer. WP16 re-drives the same eight networks to check that the fnp port and the torch reference are the same function -- the 3.31x the canary exposed. It makes no new statistical claim on them: the comparison is deterministic parity, and the only number quoted against truth is a re-read of the ALREADY-MINTED truth_P01_wp13nets.npz. All three consumers remain CORRELATED EVIDENCE and must never be quoted as independent results.
+    - P01[40,821,001,168..40,821,001,175]  local_sim/p2_truth.py  vs  local_sim/p2_k3_parity.py   <- DECLARED DELIBERATE: EXTENDS the standing declaration on this range to a THIRD consumer. WP16 re-drives the same eight networks to check that the fnp port and the torch reference are the same function -- the 3.31x the canary exposed. It makes no new statistical claim on them: the comparison is deterministic parity, and the only number quoted against truth is a re-read of the ALREADY-MINTED truth_P01_wp13nets.npz. All three consumers remain CORRELATED EVIDENCE and must never be quoted as independent results.
+  CONSISTENT
+
+seed ledger — static source scan
+  no unrecorded seed literals

@@ -1,0 +1,11 @@
+worker-q: job #986 starting at 2026-09-12T09:25:09.948276+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['uv', 'run', 'python', 'local_sim/p2_k4_first_source_kernel.py', '--width', '1024', '--depth', '16', '--rank', '64', '--json', 'experiments/2026-09-11_stage2_compact_p07/first_source_kernel/meter.json']
+worker-q: ------------------------------------------------------------
+C:\Users\samsu\Documents\arc-whest\local_sim\p2_k4_first_source_kernel.py:162: SymmetryLossWarning: Symmetry lost along dims (0, 1): add — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  D21 = m.run("readout_D21_accumulate", lambda D21=D21, delta=delta: D21 + delta)
+flops=704164664384 dense=702496398336 negative_D21=390651183104 operations=4729
+worker-q: ------------------------------------------------------------
+worker-q: job #986 SUCCEEDED (exit code 0) at 2026-09-12T09:25:14.376070+00:00

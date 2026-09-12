@@ -1,0 +1,59 @@
+{
+  "job_id": 986,
+  "checks": {
+    "source_hash_matches_meter": true,
+    "shape_S64": true,
+    "ledger_equals_context": true,
+    "dense_families_equal_subtotal": true,
+    "dense_within_five_percent": true,
+    "negative_D21_over_350B": true,
+    "process_peak_under_8GiB": true,
+    "queue_resources": true,
+    "schedule_exact": true,
+    "single_array_below_4GiB": true
+  },
+  "pass": true,
+  "source_sha256": "be73d8d0f35c050adb0c27a2c59fb13cb41dd79b81974ba1c6307574774fabdd",
+  "test_sha256": "a4f649852997831deff3c78ec53b3a9068f86db1c80729d73dfe5c38b2f31961",
+  "meter_sha256": "4be4a6dc369eff375d9f39944e01cfc0c23d57590c9adc476212d0c348c1c795",
+  "raw_zip_sha256": "5cc681b09d8cd455d4231c405abeda554e8608337cb7f86888ac8563d72153f9",
+  "raw_members": {
+    "job986_live.log": {
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\logs\\job-000986.log",
+      "bytes": 1101,
+      "sha256": "9559c61b9cee472b894d031e26078fd59abe1823bef67d9c1971d33bc5394cc3"
+    },
+    "job986_manifest.json": {
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\986\\manifest.json",
+      "bytes": 1228,
+      "sha256": "0b376aa56bcff4ca97b302fc5275811081372ce49e7b50248a2bb373ea81d8f2"
+    },
+    "job986_environment.json": {
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\986\\environment.json",
+      "bytes": 2499,
+      "sha256": "07fca4664550437d51587013b714ad6efe416803dae495bb848bdbbea7e4b1fa"
+    },
+    "job986_result.json": {
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\986\\result.json",
+      "bytes": 189,
+      "sha256": "7fb932a6544686b0a94f51de8b6f44b682a878651b455e8a47a0cec7530c96f4"
+    },
+    "job986_terminal_show.json": {
+      "original": "workerq show 986 --json stdout",
+      "bytes": 2610,
+      "sha256": "773eb739c91e725b0f42da3f7bf60c273cb6ef4d2dba2939137fea25aec577d1"
+    }
+  },
+  "frozen_dense_conventional": 703252660224,
+  "counted_dense": 702496398336,
+  "dense_relative_difference": -0.0010753772161474773,
+  "counted_total": 704164664384,
+  "counted_nondense": 1668266048,
+  "negative_D21": 390651183104,
+  "operations": 4729,
+  "peak_ram_mib": 889.8828125,
+  "separate_supplied_core_baseline_flops": 818494496296,
+  "baseline_note": "Different executable. Overlap is unreconciled; do not add totals.",
+  "memory_limit_note": "Windows does not enforce the challenge 8 GiB RLIMIT_AS; observed workerq peak only.",
+  "scope_note": "Only first-source discrete K4 and declared quadratic K3 feed; one A per birth, so multi-age same-birth sharing is untested."
+}
