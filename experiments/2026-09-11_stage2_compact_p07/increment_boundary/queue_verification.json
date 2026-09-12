@@ -1,0 +1,36 @@
+{
+  "exit_code": 0,
+  "fixture_result_sha256": "6ec0a6ee32bd1a277dc352bf81f241c23b5860cd5aa42538e0e57bb9a02f5b18",
+  "job_id": 985,
+  "members": {
+    "job985_live_environment.json": {
+      "bytes": 2364,
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\985\\environment.json",
+      "sha256": "af8c296023b7b4b01115e4475b2afaf7c7c00ff11c1b9ba900a4df57c950ed3d"
+    },
+    "job985_live_manifest.json": {
+      "bytes": 1093,
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\985\\manifest.json",
+      "sha256": "b5a775d54e6d61fe90bfcbfeb873050e65d5373fa2a6d5b32298ac138f5ab76c"
+    },
+    "job985_live_preflight.log": {
+      "bytes": 90195,
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\logs\\job-000985.log",
+      "sha256": "29a07a6f4407b51750911f691cee68f72f9c9ef513f1195107dc3dad3d6d2294"
+    },
+    "job985_live_result.json": {
+      "bytes": 189,
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\985\\result.json",
+      "sha256": "923773d9c7d60861bd5a3b894c098652fd64b95267ebb028faecd47a50486dfe"
+    },
+    "job985_terminal_show.json": {
+      "bytes": 2472,
+      "original": "workerq show 985 --json terminal stdout",
+      "sha256": "d231d66f02f3420054eecfddde643ceb090da054e38dbe83569f384fa419cb2d"
+    }
+  },
+  "peak_ram_mib": 2833.9609375,
+  "source_sha256": "c9759cea80eda54302a9800ac8f960b0ff5e1ef5c1b4a530a21138d2dd849ceb",
+  "terminal_state": "SUCCEEDED",
+  "zip_sha256": "4e9a2aea6a77b0ba22e2b3758d91d9636b9f852fa3bee552b1414968fe5550ff"
+}
