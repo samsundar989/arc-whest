@@ -45170,3 +45170,105 @@ residual or score benefit. No protected labels, registry block, public
 split or vault was touched. A deterministic three-layer/two-source
 nonlinear-carry fixture is a separate potential follow-up, not evidence
 already earned by this two-layer test.
+
+**September 12 abstract discrete K4-to-K3 feed embedding synthesis (scoped
+ACCEPT).** The IMPORTANT contract `60ab638` preceded fixture/result commit
+`8844ee8`. The raw fixture in `feed_embedding/` passed **48/48** with maximum
+full-tensor/readout error `2.22e-15` versus the fixed `1e-10` gate; the
+dropped-negative-pair mutant gap was `1.161675` versus `1e-3`. Full tensor,
+D3/D21, positive/negative parts, zero controls and full-rank weighted-Gram
+joins agree through two signed carries. The fixed equilateral example has
+covariance rank 2 but feed unfolding rank 3, determinant `-2.5`; this only
+rules out the stated rank-2 common-span/no-residual/no-Y representation.
+The literal negative branch's `A` and `Q` are n-column factors: 14 births
+would carry 112 MiB payload and 450,971,566,080 **conventional**, not counted,
+transport FLOPs over 105 uses, before joins, K4 bank and ordinary K3.
+Source SHA256 `f50c199adb1204e47bd931283f7f1973d85b5a256d0a0cbeb0dc1f32560751c4`;
+result SHA256 `e11bb7c9fbedd032274792feaa98d838a006b1397f2044b5559950ce26d43d5c`.
+The first queue submission 992 failed before executing because a mistyped
+description flag became argv; it has no test verdict. Corrected live workerq
+993 **SUCCEEDED GREEN 12/16**, four Full-only skips, peak 2,722.191 MiB
+under 5 GiB/2 CPUs/zero GPU. Raw log SHA256
+`f7928305b8ae7744e6568106139b280253931ce90f49b028a002e706a75ab55c`;
+pre/post HEAD `8844ee8`, source/result and 246 Python hashes match.
+The fresh-context read-only Skeptic verdict is recorded verbatim in substance
+at `feed_embedding/skeptic_verdict.md`: **ACCEPT only one abstract discrete
+K4-induced K3 feed**. It independently checked the tensor identity and
+48 additional bounded signed-weight cases (extra check not committed as a
+separate fixture), while explicitly refusing inference to rank384/residual16,
+physical source, later increments, complete measured cost, residual or score.
+CONFIRMED: the existing compact Source can encode this feed exactly at full
+rank in a tiny discrete case. INFERRED: a multi-birth full-rank integration is
+a worthwhile falsifier. SPECULATIVE: affordable compression and the actual
+physical all-history architecture. No seed, truth, public or vault access.
+
+**September 12 IMPORTANT contract: nonlinear three-layer/two-source
+old-history response, BEFORE any new fixture measurement.** Design-only
+derivation: `docs/research/2026-09-12_nonlinear_old_history_proposal.md`
+(commit `3950b0c`). **Question:** does a genuine later ReLU response to an
+old signed law differ materially from carrying only its fourth cumulant by
+a fourth tensor power, and can two source ages be attributed with an
+independent dense oracle? **Evidence:** CONFIRMED the scoped exact-axis
+two-layer continuous positive law and signed *linear* old carry; CONFIRMED
+one discrete abstract K3-feed embedding at full tiny rank; INFERRED that a
+nonlinear later map can create lower-moment leakage and age interactions;
+SPECULATIVE that any finite K4-only closure or rank384/residual16 can
+represent it cheaply. **Hypothesis/mechanism:** on the fixed positive
+order-48 `rho=.5` exact-axis bank P1, project fixed bounded quartic contrasts
+off all ten degree<=3 monomials in the weighted inner product, normalize the
+signed reweighting to at most `0.2 p` per atom, and form a positive
+degree<=3-matched reference R1. Apply fixed `B=[[.8,-.3],[-.55,1.4]]` with
+coordinate ReLU to obtain a nonlinear old signed law O2. Form a second
+degree<=3-matched positive reference R2 on the *indexed* pushed-forward R1
+bank using the independently frozen contrast in the proposal. New signed
+law N2 is its difference from that bank. The four layer-two counterfactuals
+Q00=R2, Q10=R2+O2, Q01=R2+N2 and Q11=R2+O2+N2 are all positive unit laws.
+Apply fixed `D=[[-.65,1.1],[.9,-.4]]` with coordinate ReLU separately.
+The conditional old source is `K11-K01`, new `K01-K00`, and mixed
+`K11-K10-K01+K00`; the assignment order is explicit, not an additive-age
+assumption. A nonlinear old response generally differs from
+`D^tensor4 (K11-K01)` before D, because ReLU acts on the *whole law*, not
+only K4. This is a signed-law toy mechanism, not K4-only closure.
+
+**Intervention:** implement a tiny independent direct-atom raw-moment and
+set-partition cumulant oracle at both layers; compare all dense K4/K3 entries,
+both oriented D31, D4/D22, frozen unequal-response covariance term and all
+three placements of the declared quadratic K4-to-K3 feed. Record true K3
+contrasts separately from that derivative-truncated feed. Check the four
+source counterfactuals, zero-source controls, source-order interaction,
+signed linear-map and swapped-D31 mutants. Compare unreweighted order-48
+versus order-64 positive banks and an *independent* angular-sector integral
+of the original Gaussian through both ReLU maps; do not use that continuous
+reference to certify the artificial reweighting. No source help from the
+compact factor implementation enters the oracle. **Predictions/gates,
+frozen now:** both weighted degree<=3 moment matrices rank 10 with relative
+condition <=1e12; nonzero projected contrasts, positive references and
+`max|M u|<=1e-11`; all ten matched raw moments at insertion <=1e-11.
+Independent same-bank raw/cumulant/consumer/feed and inclusion-exclusion
+errors <=1e-10 absolute. Unreweighted positive raw moments through degree
+four at layers 2/3 agree between order48/64 and the direct continuous
+reference within `1e-8` material-relative error using denominator
+`max(1,|reference|)`; scalar integration absolute error bound <1e-10 per
+moment. The layer-three nonlinear old gap exceeds `1e-6` absolute **and**
+`1e-3` times the layer-two conditional old K4 maximum; the corresponding
+signed *linear* D carry gap <=1e-10. Zero-source identities <=1e-10;
+dropped-linear-carry and one-oriented-D31 mutants must be detected at
+the fixed gates. A mixed term is reported as nonzero only if its max exceeds
+1e-10 and direct enumeration agrees. Record both layer-two nonlinear gap
+and lower-moment leakage regardless of direction. Samuel's standing human
+prediction remains **"I don't know"**. **Falsifier:** rank, conditioning,
+positivity, independent integration, identity, mutant or nonlinear materiality
+gate fails; retain the failed law/result and do not select a different
+contrast after seeing it. **Control/baseline:** order48 fixed positive bank,
+its order64 and independent continuous checks, four counterfactuals and
+signed linear D; prior axis fixture is evidence only for its own law.
+**Cost model:** tiny n2 <=583 atoms/four counterfactuals, <64 MiB fixture
+payload and one CPU; no live-shape bill. Phase 2 `C=F`, residual is a
+0.4 s failure cliff, and neither is measured by this fixture. **Statistic:**
+deterministic absolute/material-relative identity gates, no paired score,
+seed block or decision/public/vault tier. **Confounders/scope:** nonlinear
+ReLU can turn an initially pure fourth-order signed perturbation into lower
+and higher moments; retaining its atomic law is oracle bookkeeping, not a
+deployable wide model. Commit this contract before any fixture execution,
+run its tiny focused CPU fixture, then current-byte live workerq default
+preflight 5 GiB/2 CPUs/zero GPU and an independent fresh-context Skeptic.
