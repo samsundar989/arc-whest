@@ -1,0 +1,345 @@
+{
+  "all_distinct_residual": {
+    "dropped_slice_prediction": 0.0,
+    "future_d4": 1.5,
+    "present_max_slice": 0.0
+  },
+  "check_count": 49,
+  "checks": {
+    "all_distinct_dropped_slices_future": {
+      "max_absolute_error": 0.0,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 0.0,
+      "max_scaled_error": 0.0
+    },
+    "all_distinct_future_d4": {
+      "max_absolute_error": 0.0,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 0.0,
+      "max_scaled_error": 0.0
+    },
+    "all_distinct_present_d22": {
+      "max_absolute_error": 0.0,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 0.0,
+      "max_scaled_error": 0.0
+    },
+    "all_distinct_present_d31": {
+      "max_absolute_error": 0.0,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 0.0,
+      "max_scaled_error": 0.0
+    },
+    "all_distinct_present_d4": {
+      "max_absolute_error": 0.0,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 0.0,
+      "max_scaled_error": 0.0
+    },
+    "correlated_gaussian_zero_factor": {
+      "max_absolute_error": 0.0,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 0.0,
+      "max_scaled_error": 0.0
+    },
+    "correlated_gaussian_zero_feed": {
+      "max_absolute_error": 0.0,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 0.0,
+      "max_scaled_error": 0.0
+    },
+    "correlated_gaussian_zero_full_k4": {
+      "max_absolute_error": 0.0,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 0.0,
+      "max_scaled_error": 0.0
+    },
+    "metric_both_legs_full_tensor": {
+      "max_absolute_error": 2.786659791809143e-14,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 3.07447546077247e-14,
+      "max_scaled_error": 2.786659791809143e-14
+    },
+    "metric_d22": {
+      "max_absolute_error": 4.440892098500626e-16,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 3.700743415417189e-16,
+      "max_scaled_error": 2.7755575615628914e-16
+    },
+    "metric_d31": {
+      "max_absolute_error": 2.220446049250313e-16,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 2.2204460492503126e-16,
+      "max_scaled_error": 1.3877787807814457e-16
+    },
+    "metric_d4": {
+      "max_absolute_error": 2.220446049250313e-16,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 1.4233628520835337e-16,
+      "max_scaled_error": 1.3877787807814457e-16
+    },
+    "metric_permutation": {
+      "max_absolute_error": 0.0,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 0.0,
+      "max_scaled_error": 0.0
+    },
+    "metric_quadratic_feed": {
+      "max_absolute_error": 5.551115123125783e-17,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 1.458567945047763e-15,
+      "max_scaled_error": 5.551115123125783e-17
+    },
+    "metric_signed_scaling": {
+      "max_absolute_error": 8.881784197001252e-16,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 1.0053101932691758e-15,
+      "max_scaled_error": 4.3191104599712764e-16
+    },
+    "metric_transported_d22": {
+      "max_absolute_error": 1.4210854715202004e-14,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 2.139544062398791e-15,
+      "max_scaled_error": 1.7763568394002505e-15
+    },
+    "metric_transported_d31": {
+      "max_absolute_error": 1.4210854715202004e-14,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 4.071631109882509e-15,
+      "max_scaled_error": 4.071631109882509e-15
+    },
+    "metric_transported_d4": {
+      "max_absolute_error": 1.4210854715202004e-14,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 1.1665892611067224e-15,
+      "max_scaled_error": 1.1665892611067224e-15
+    },
+    "metric_transported_feed": {
+      "max_absolute_error": 3.552713678800501e-15,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 1.0389204272469802e-14,
+      "max_scaled_error": 2.275957200481571e-15
+    },
+    "metric_zero_g_feed": {
+      "max_absolute_error": 0.0,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 0.0,
+      "max_scaled_error": 0.0
+    },
+    "metric_zero_g_tensor": {
+      "max_absolute_error": 0.0,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 0.0,
+      "max_scaled_error": 0.0
+    },
+    "singular_full_with_carried_residual": {
+      "max_absolute_error": 5.551115123125783e-17,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 2.4671622769447924e-16,
+      "max_scaled_error": 5.551115123125783e-17
+    },
+    "singular_support_recovered_g": {
+      "max_absolute_error": 5.551115123125783e-17,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 1.8503717077085943e-16,
+      "max_scaled_error": 5.551115123125783e-17
+    },
+    "singular_support_residual_zero_on_support": {
+      "max_absolute_error": 5.551115123125783e-17,
+      "max_absolute_zero_or_near_zero": 5.551115123125783e-17,
+      "max_relative_nonzero": 0.0,
+      "max_scaled_error": 5.551115123125783e-17
+    },
+    "singular_unsupported_component": {
+      "max_absolute_error": 0.0,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 0.0,
+      "max_scaled_error": 0.0
+    },
+    "source_n4_covariance_symmetric": {
+      "max_absolute_error": 8.326672684688674e-17,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 3.357235235661536e-16,
+      "max_scaled_error": 8.326672684688674e-17
+    },
+    "source_n4_d22": {
+      "max_absolute_error": 1.7763568394002505e-15,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 1.8893783757707318e-16,
+      "max_scaled_error": 1.8893783757707318e-16
+    },
+    "source_n4_d31": {
+      "max_absolute_error": 1.7763568394002505e-15,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 1.828896606585994e-16,
+      "max_scaled_error": 1.828896606585994e-16
+    },
+    "source_n4_d4": {
+      "max_absolute_error": 1.7763568394002505e-15,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 1.2704250802327689e-16,
+      "max_scaled_error": 1.2704250802327689e-16
+    },
+    "source_n4_feed_iii": {
+      "max_absolute_error": 2.220446049250313e-16,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 1.6267469029800718e-16,
+      "max_scaled_error": 1.6267469029800718e-16
+    },
+    "source_n4_feed_iij": {
+      "max_absolute_error": 4.440892098500626e-16,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 2.2169369493101346e-16,
+      "max_scaled_error": 2.2169369493101346e-16
+    },
+    "source_n4_full_tensor": {
+      "max_absolute_error": 1.7763568394002505e-15,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 6.880168423615538e-16,
+      "max_scaled_error": 6.880168423615538e-16
+    },
+    "source_n4_oriented_covariance": {
+      "max_absolute_error": 4.440892098500626e-16,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 2.8467612038575375e-16,
+      "max_scaled_error": 2.8467612038575375e-16
+    },
+    "source_n4_permutation": {
+      "max_absolute_error": 1.7763568394002505e-15,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 6.880168423615538e-16,
+      "max_scaled_error": 6.880168423615538e-16
+    },
+    "source_n4_quadratic_feed": {
+      "max_absolute_error": 1.3322676295501878e-15,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 5.559923126790694e-16,
+      "max_scaled_error": 5.559923126790694e-16
+    },
+    "source_n4_signed_scaling": {
+      "max_absolute_error": 1.4210854715202004e-14,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 9.289504331376794e-16,
+      "max_scaled_error": 9.289504331376794e-16
+    },
+    "source_n4_two_transports": {
+      "max_absolute_error": 2.2737367544323206e-13,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 6.977874468144247e-15,
+      "max_scaled_error": 6.977874468144247e-15
+    },
+    "source_n5_covariance_symmetric": {
+      "max_absolute_error": 4.440892098500626e-16,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 3.3523497165492316e-16,
+      "max_scaled_error": 1.9671134016621482e-16
+    },
+    "source_n5_d22": {
+      "max_absolute_error": 3.552713678800501e-15,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 2.1782192945276544e-16,
+      "max_scaled_error": 2.1782192945276544e-16
+    },
+    "source_n5_d31": {
+      "max_absolute_error": 3.552713678800501e-15,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 2.410723756064244e-16,
+      "max_scaled_error": 2.410723756064244e-16
+    },
+    "source_n5_d4": {
+      "max_absolute_error": 8.881784197001252e-16,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 1.8500394360746455e-16,
+      "max_scaled_error": 1.8500394360746455e-16
+    },
+    "source_n5_feed_iii": {
+      "max_absolute_error": 8.881784197001252e-16,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 1.9673953781090956e-16,
+      "max_scaled_error": 1.9673953781090956e-16
+    },
+    "source_n5_feed_iij": {
+      "max_absolute_error": 3.552713678800501e-15,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 7.983453330198518e-15,
+      "max_scaled_error": 1.3322676295501878e-15
+    },
+    "source_n5_full_tensor": {
+      "max_absolute_error": 3.552713678800501e-15,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 6.507795578963315e-16,
+      "max_scaled_error": 6.507795578963315e-16
+    },
+    "source_n5_oriented_covariance": {
+      "max_absolute_error": 8.881784197001252e-16,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 3.9519090349944195e-16,
+      "max_scaled_error": 3.9519090349944195e-16
+    },
+    "source_n5_permutation": {
+      "max_absolute_error": 3.552713678800501e-15,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 6.507795578963315e-16,
+      "max_scaled_error": 6.507795578963315e-16
+    },
+    "source_n5_quadratic_feed": {
+      "max_absolute_error": 8.881784197001252e-16,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 1.3126773373055804e-14,
+      "max_scaled_error": 8.849847744692766e-16
+    },
+    "source_n5_signed_scaling": {
+      "max_absolute_error": 1.4210854715202004e-14,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 1.244894940766397e-15,
+      "max_scaled_error": 1.244894940766397e-15
+    },
+    "source_n5_two_transports": {
+      "max_absolute_error": 2.7284841053187847e-12,
+      "max_absolute_zero_or_near_zero": 0.0,
+      "max_relative_nonzero": 2.4549713512286152e-15,
+      "max_scaled_error": 2.4549713512286152e-15
+    }
+  },
+  "gaussian_control": "Isserlis fourth-moment identity, not empirical evidence",
+  "independent_sources": [
+    {
+      "cumulants": [
+        0.13705708579282433,
+        0.3182459316368528,
+        0.5746452417934964,
+        0.9062550162627558
+      ],
+      "d31_orientation_gap": 5.2224232835943205,
+      "n": 4,
+      "wrong_covariance_orientation_gap": 0.15043159755336655
+    },
+    {
+      "cumulants": [
+        0.13705708579282433,
+        0.2658977391465378,
+        0.43704427867609763,
+        0.6504967043815035,
+        0.9062550162627558
+      ],
+      "d31_orientation_gap": 8.781652640078727,
+      "n": 5,
+      "wrong_covariance_orientation_gap": 0.32797366967748065
+    }
+  ],
+  "max_absolute_zero_or_near_zero": 5.551115123125783e-17,
+  "max_relative_nonzero": 3.07447546077247e-14,
+  "max_scaled_error": 2.786659791809143e-14,
+  "metric": {
+    "fixed_metric_error": 43.71184317211828,
+    "offdiagonal_shortcut_error": 12.622970412518244
+  },
+  "scope": "truth-free deterministic algebra; exact linear components and declared quadratic truncation only",
+  "singular_metric": {
+    "cross_support_residual_0002": 0.4000000000000001,
+    "future_d4_residual": 0.12500000000000003,
+    "rank": 2
+  },
+  "status": "PASS",
+  "tolerance": 1e-12
+}
