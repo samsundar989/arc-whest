@@ -23,6 +23,8 @@ SHORTCUT = (ROOT / "experiments/2026-09-11_stage2_compact_p07/"
 FROZEN_SHA = "3a57e5e5709a62848f8412de094f218ea9b323933b9071e04c5dabbdab8b12b3"
 FIRST_RESULT_SHA = "10c7835042b581b6691f6f98963a90adeeb222ba846557da2582396443025155"
 FIRST_RESULT = SHORTCUT.with_name("memory_ledger_result.json")
+COLIVE_RESULT_SHA = "f7d5c67bd549d66ecb6f3d3e1f0a2be055c9e7fad2e8fd9be181e84bb1f72b1f"
+COLIVE_RESULT = SHORTCUT.with_name("memory_ledger_colive_result.json")
 ARRAY_LIMIT = 4 * 1024 ** 3
 PROCESS_LIMIT = 8 * 1024 ** 3
 PRIOR_14 = ("C_off", "bank_covariance", "positive22", "D22",
@@ -37,11 +39,12 @@ class Array:
     key: str
     shape: tuple[int, ...]
     bytes_per_element: int = 4
+    backing_shape: tuple[int, ...] | None = None
 
     @property
     def nbytes(self) -> int:
         count = 1
-        for axis in self.shape:
+        for axis in self.backing_shape or self.shape:
             count *= axis
         return count * self.bytes_per_element
 
@@ -153,7 +156,8 @@ def rotate(m: Maker, source: History, rank: int, label: str) -> History:
 
 def stage(m: Maker, name: str, permanent: list[Array],
           named: list[tuple[str, tuple[int, ...], int]],
-          named_live: dict[str, Array] | None = None) -> dict:
+          named_live: dict[str, Array] | None = None,
+          named_none: tuple[str, ...] = ()) -> dict:
     # Each named array is a simultaneous operand/result/workspace allowance.
     named_live = {} if named_live is None else named_live
     scratch = [m.make("scratch." + name + "." + label, shape, bpe)
@@ -169,6 +173,7 @@ def stage(m: Maker, name: str, permanent: list[Array],
     return {"name": name, "bytes": live["bytes"],
             "resident_bytes": compact_inventory(permanent)["bytes"],
             "named_live": live_names,
+            "named_none": list(named_none),
             "named_extra": [{"name": label, "shape": list(shape),
                              "bytes": a.nbytes}
                             for (label, shape, _), a in zip(named, scratch)],
@@ -232,17 +237,19 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
             counters["k4_uses"] += 1
             counters["k4_final" if final else "k4_full"] += 1
         common = external + fixed + old_backbone + old_state
+        prior_named = {"prior." + k: v for k, v in previous_locals.items()}
+        early_current = {"W": W, "WC": WC, "C_pre": C_pre,
+                         "mu_pre": mu_pre, "var_pre": var_pre, "V": V,
+                         "nodes": nodes, "center": center,
+                         "centered": centered, "probability": probability,
+                         "raw": external[-2], "p_in": external[-1],
+                         "wick": old_wick, "wick_prev": old_wick}
+        early_named = {"current." + k: v for k, v in early_current.items()}
         stages = [stage(m, "cast_and_backbone", common +
                         [W, WC, C_pre, mu_pre, var_pre, V],
                         [("cov_matmul_result", (n, n), 4),
                          ("source_map_operand", (n, s), 4)],
-                        named_live={**{"prior." + k: v for k, v in
-                                       previous_locals.items()},
-                                    "current.W": W, "current.WC": WC,
-                                    "current.C_pre": C_pre,
-                                    "current.mu_pre": mu_pre,
-                                    "current.var_pre": var_pre,
-                                    "current.V": V})]
+                        named_live=prior_named | early_named)]
 
         ready = ([] if final else [h for h in young if h.age + 1 >= recent])
         staying = [h for h in young if h not in ready]
@@ -270,7 +277,8 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
         next_state = state_arrays(young + shared, Q, gram)
         if ready or shared:
             stages.append(stage(m, "gram_qr_rotate_transport",
-                                common + next_state + [W, WC, C_pre, V],
+                                common + next_state +
+                                [W, WC, C_pre, mu_pre, var_pre, V],
                                 [("wick_A", (n, n), 4),
                                  ("wick_P", (n, n), 4),
                                  ("Q_pre", (n, rank), 4),
@@ -282,15 +290,13 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
                                  ("gram_update", (rank, rank), 4),
                                  ("factor_rotation_result", (rank, n), 4),
                                  ("transport_matmul_operand", (n, n), 4)],
-                                named_live={"prior." + k: v for k, v in
-                                            previous_locals.items()}))
+                                named_live=prior_named | early_named))
         stages.append(stage(m, "young_transport", common + next_state +
-                            [W, WC, C_pre, V],
+                            [W, WC, C_pre, mu_pre, var_pre, V],
                             [("wick_A_or_P", (n, n), 4),
                              ("matmul_result", (n, n), 4),
                              ("residual_operand", (n, residual), 4)],
-                            named_live={"prior." + k: v for k, v in
-                                        previous_locals.items()}))
+                            named_live=prior_named | early_named))
 
         for h in young + shared:
             counters["source_D3_uses"] += 1
@@ -318,8 +324,7 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
         stages.append(stage(m, "D3_D21_materialization" if not final else
                             "final_D3_only", common + next_state + materialized +
                             [W, WC, C_pre, mu_pre, var_pre, V], readout_named,
-                            named_live={"prior." + k: v for k, v in
-                                        previous_locals.items()}))
+                            named_live=prior_named | early_named))
 
         mu = m.make(prefix + ".mu", (n,))
         outputs.append(mu)  # Same object: output and current mean are aliases.
@@ -372,19 +377,28 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
                              ("K4_Gram_operand", (n, s), 4)]
         if final:
             covariance_fields = [("final_V2_operand", (n, s), 4)]
+        else:
+            # The assembled C exists at the post-C boundary. Keep the older
+            # C in common too as an explicitly inclusive lifetime allowance.
+            C_next = m.make(prefix + ".C", (n, n))
+            current_locals["C"] = C_next
+        final_none = ("bank_covariance", "D22", "D31", "D21")
+        prior_after_none = {k: v for k, v in previous_locals.items()
+                            if not final or k not in final_none}
         stages.append(stage(m, "nonlinear_C_W_K11" if not final else
                             "final_mean_shortcut", common + next_state +
                             [W, WC, C_pre, mu_pre, var_pre, V, mu] +
+                            ([] if final else [C_next]) +
                             derivatives + outputs, covariance_fields,
                             named_live={"prior." + k: v for k, v in
-                                        previous_locals.items()} |
+                                        prior_after_none.items()} |
                                        {"current." + k: v for k, v in
-                                        current_locals.items() if v is not None}))
+                                        current_locals.items() if v is not None},
+                            named_none=final_none if final else ()))
         if final:
             row_newborn = []
         else:
-            C = m.make(prefix + ".C", (n, n))
-            current_locals["C"] = C
+            C = C_next
             wick = derivatives[6]  # Phi = w1, an object alias.
             current_locals["wick_prev"] = wick
             ordinary = History("ordinary", 0, source_fields(
@@ -425,7 +439,8 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
             current_locals["Bm"] = m.make(prefix + ".local.Bm", (residual, n))
             # Om is W[:, :ordinary_residual]: a distinct view object whose
             # backing W payload is already charged. Keep its logical shape.
-            current_locals["Om"] = Array(W.key, (n, residual))
+            current_locals["Om"] = Array(W.key, (n, residual),
+                                          backing_shape=(n, n))
             if layer:
                 positive, negative = newborn[1:]
                 current_locals.update({
@@ -462,8 +477,12 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
         # loop body. At the next readout they still have their previous-layer
         # identity. Including any already-rebound value in a later overlapping
         # stage is deliberately conservative and may overcount actual liveness.
-        previous_locals = {k: v for k, v in current_locals.items()
-                           if v is not None}
+        current_bound = {k: v for k, v in current_locals.items()
+                         if v is not None}
+        previous_locals = (
+            {k: v for k, v in previous_locals.items()
+             if k not in current_locals and k not in final_none} | current_bound
+            if final else current_bound)
 
         current_partial = ([V, probability, mu, C] + outputs +
                            state_arrays(young + shared + newborn, Q, gram))
@@ -499,8 +518,11 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
     output_stack = m.make("output.stack", (depth, n))
     final_arrays = (external + fixed + [mu, C, wick, V] + outputs +
                     state_arrays(young + shared, Q, gram))
-    rows[-1]["stages"].append(stage(m, "output_stack", final_arrays,
-                                      [("stack_result", (depth, n), 4)]))
+    rows[-1]["stages"].append(stage(
+        m, "output_stack", final_arrays,
+        [("stack_result", (depth, n), 4)],
+        named_live={"frame." + k: v for k, v in previous_locals.items()},
+        named_none=("bank_covariance", "D22", "D31", "D21")))
     rows[-1]["peak_modeled_array_payload_bytes"] = max(
         x["bytes"] for x in rows[-1]["stages"])
     maximum = max(m.all_arrays, key=lambda a: a.nbytes)
@@ -523,7 +545,7 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
 
 
 def tiny_runtime_snapshot() -> dict:
-    """Inspect actual n8 outer-frame bindings at the two disputed L14 sites.
+    """Inspect actual n8 outer-frame bindings at each sampled boundary.
 
     Only names/shapes/within-snapshot aliases are saved. The runtime never
     exposes protected truth and never constructs a full-width array.
@@ -536,23 +558,47 @@ def tiny_runtime_snapshot() -> dict:
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     lines = SOURCE.read_text(encoding="utf-8").splitlines()
-    readout_line = next(i for i, line in enumerate(lines, 1)
-                        if "D3, D21, sources = _integrated_readout(" in line)
+    start = next(i for i, line in enumerate(lines, 1)
+                 if line.startswith("def integrated_metered_program("))
+
+    def find_after(needle: str, after: int = start) -> int:
+        return next(i for i, line in enumerate(lines, 1)
+                    if i > after and needle in line)
+
+    cast_line = find_after("if layer == 0:")
+    join_line = find_after("shared, staying = _integrated_join_ready(")
+    young_line = find_after("young = [_integrated_transport_source(")
+    readout_line = find_after("D3, D21, sources = _integrated_readout(")
+    cov_assemble_line = find_after('C = meter.run("backbone_cov_assemble"')
+    post_c_line = find_after("if capture_tiny:", cov_assemble_line)
+    output_append_line = find_after("outputs.append(mu)")
+    final_mean_line = find_after("if final:", output_append_line)
+    output_line = find_after('prediction = meter.run("output_stack"')
     birth_lines = [i for i, line in enumerate(lines, 1)
-                   if 'layer_rows.append({"layer": layer' in line]
+                   if i > start and 'layer_rows.append({"layer": layer' in line]
     if len(birth_lines) != 2:
         raise AssertionError("expected final and nonfinal row publication sites")
-    sites = {readout_line: "L14_readout_before_call",
-             birth_lines[-1]: "L14_birth_after_construction"}
+    sites = {(cast_line, 14): "L14_cast_after_backbone",
+             (join_line, 14): "L14_join_before_call",
+             (young_line, 14): "L14_young_transport_before_call",
+             (readout_line, 14): "L14_readout_before_call",
+             (post_c_line, 14): "L14_post_C",
+             (birth_lines[-1], 14): "L14_birth_after_construction",
+             (readout_line, 15): "L15_final_readout_before_call",
+             (final_mean_line, 15): "L15_final_mean",
+             (output_line, 15): "L15_output_stack"}
     snapshots = {}
 
     def tracer(frame, event, _arg):
         if frame.f_code is module.integrated_metered_program.__code__:
-            if (event == "line" and frame.f_lineno in sites and
-                    frame.f_locals.get("layer") == 14):
+            key = (frame.f_lineno, frame.f_locals.get("layer"))
+            if event == "line" and key in sites:
                 identities: dict[int, str] = {}
                 fields = {}
+                none = []
                 for name, value in sorted(frame.f_locals.items()):
+                    if value is None:
+                        none.append(name)
                     shape = getattr(value, "shape", None)
                     if shape is None:
                         continue
@@ -566,7 +612,8 @@ def tiny_runtime_snapshot() -> dict:
                         identities[identity] = name
                     fields[name] = {"shape": dimensions,
                                     "alias_of": alias_of}
-                snapshots[sites[frame.f_lineno]] = fields
+                snapshots[sites[key]] = {"arrays": fields, "none": none,
+                                         "line": frame.f_lineno}
             return tracer
         return None
 
@@ -602,6 +649,9 @@ def main() -> int:
     first_sha = hashlib.sha256(FIRST_RESULT.read_bytes()).hexdigest()
     check("first_incomplete_result_unchanged", first_sha == FIRST_RESULT_SHA,
           got=first_sha, expected=FIRST_RESULT_SHA)
+    colive_sha = hashlib.sha256(COLIVE_RESULT.read_bytes()).hexdigest()
+    check("second_incomplete_result_unchanged", colive_sha == COLIVE_RESULT_SHA,
+          got=colive_sha, expected=COLIVE_RESULT_SHA)
     check("shortcut_existing_gate_remains_red", stored["pass"] and
           stored["n8_L3_min_prevariance_new"] < 0,
           existing_n8_min_prevariance=stored["n8_L3_min_prevariance_new"])
@@ -612,6 +662,18 @@ def main() -> int:
         check(label + "_final_shortcut", not case["layers"][-1]["final"] is False
               and not any(x["name"] == "ordinary_and_feed_birth" for x in
                           case["layers"][-1]["stages"]))
+        source_width = case["shape"]["source_rank"]
+        width = case["shape"]["width"]
+        positive_width = (width if case["variant"] == "old_padded"
+                          else source_width)
+        wrong_legs = [
+            (row["layer"], f["kind"], f["field"], f["shape"])
+            for row in case["layers"] for f in row["retained_fields"]
+            if f["field"] in ("A", "P", "FA", "FP") and
+            f["shape"][1] != (positive_width if f["kind"] == "feed_positive"
+                              else width)]
+        check(label + "_positive_S_or_padded_negative_n_ordinary_n_legs",
+              not wrong_legs, wrong_legs=wrong_legs[:8])
     # The source's partial function excludes external inputs, W/WC/C_pre and
     # derivatives. We reproduce those included fields from shapes and aliases.
     check("tiny_partial_resident_floor_crosscheck",
@@ -665,7 +727,7 @@ def main() -> int:
         runtime = {"error": repr(exc)}
     for site, names in (("L14_readout_before_call", PRIOR_14),
                         ("L14_birth_after_construction", CURRENT_BIRTH_9)):
-        actual = runtime.get(site, {})
+        actual = runtime.get(site, {}).get("arrays", {})
         check("tiny_runtime_" + site + "_distinct_matrices",
               all(name in actual and actual[name]["shape"] == [8, 8] and
                   actual[name]["alias_of"] is None for name in names),
@@ -685,12 +747,80 @@ def main() -> int:
               missing_or_wrong=missing_or_wrong,
               actual_array_bindings=len(actual),
               modeled_array_bindings=len(modeled))
+    boundaries = {
+        "L14_cast_after_backbone": (14, "cast_and_backbone"),
+        "L14_join_before_call": (14, "gram_qr_rotate_transport"),
+        "L14_young_transport_before_call": (14, "young_transport"),
+        "L14_readout_before_call": (14, "D3_D21_materialization"),
+        "L14_post_C": (14, "nonlinear_C_W_K11"),
+        "L14_birth_after_construction": (14, "ordinary_and_feed_birth"),
+        "L15_final_readout_before_call": (15, "final_D3_only"),
+        "L15_final_mean": (15, "final_mean_shortcut"),
+        "L15_output_stack": (15, "output_stack"),
+    }
+    for site, (layer, stage_name) in boundaries.items():
+        snapshot = runtime.get(site, {})
+        actual = snapshot.get("arrays", {})
+        modeled_stage = stage_at(tiny, layer, stage_name)
+        modeled = {}
+        for row in modeled_stage["named_live"]:
+            name = row["name"].split(".", 1)[1]
+            modeled[name] = row
+        missing_or_wrong = [name for name, field in actual.items()
+                            if name not in modeled or
+                            field["shape"] != modeled[name]["shape"]]
+        false_alias = [name for name, field in actual.items()
+                       if field["alias_of"] is not None and
+                       name in modeled and field["alias_of"] in modeled and
+                       modeled[name]["array_id"] !=
+                       modeled[field["alias_of"]]["array_id"]]
+        check("boundary_" + site + "_outer_array_coverage",
+              bool(actual) and not missing_or_wrong and not false_alias,
+              actual_array_bindings=len(actual),
+              missing_or_wrong=missing_or_wrong, false_alias=false_alias)
+    output_actual = runtime.get("L15_output_stack", {}).get("arrays", {})
+    output_none = runtime.get("L15_output_stack", {}).get("none", [])
+    output_stage = stage_at(tiny, 15, "output_stack")
+    fourteen = ("W", "WC", "C_pre", "C_off", "positive22",
+                "positive31", "K11", "off_mask", "local21", "old21",
+                "repeated", "K21", "separable", "Rres")
+    output_modeled = {row["name"].removeprefix("frame."): row
+                      for row in output_stage["named_live"]}
+    check("L15_output_fourteen_distinct_matrices",
+          all(name in output_actual and output_actual[name]["shape"] == [8, 8]
+              and name in output_modeled and
+              output_modeled[name]["shape"] == [8, 8]
+              for name in fourteen) and
+          len({output_modeled[name]["array_id"] for name in fourteen
+               if name in output_modeled}) == 14,
+          expected_names=list(fourteen))
+    check("L15_output_none_bindings_explicit",
+          set(output_stage["named_none"]) ==
+          {"bank_covariance", "D22", "D31", "D21"} and
+          set(output_stage["named_none"]).issubset(output_none),
+          modeled_none=output_stage["named_none"],
+          runtime_none=output_none)
+    full_output_stage = stage_at(optimized, 15, "output_stack")
+    full_om = next((row for row in full_output_stage["named_live"]
+                    if row["name"] == "frame.Om"), None)
+    check("L15_Om_view_keeps_prior_W_backing",
+          full_om is not None and full_om["shape"] == [1024, 16] and
+          full_om["bytes"] == 4 * 1024 * 1024)
+    for stage_name in ("gram_qr_rotate_transport", "young_transport"):
+        s14 = stage_at(optimized, 14, stage_name)
+        names = {row["name"] for row in s14["named_live"]}
+        check(stage_name + "_has_current_mu_pre_var_pre",
+              {"current.mu_pre", "current.var_pre"}.issubset(names))
+    cov_names = {row["name"] for row in
+                 stage_at(optimized, 14, "nonlinear_C_W_K11")["named_live"]}
+    check("L14_post_C_has_current_C", "current.C" in cov_names)
     result = {"kind": "shape-only integrated first-source array memory audit",
               "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "frozen_integrated_source_sha256": sha,
               "committed_shortcut_result_sha256": hashlib.sha256(
                   SHORTCUT.read_bytes()).hexdigest(),
               "first_incomplete_result_sha256": first_sha,
+              "second_incomplete_result_sha256": colive_sha,
               "tiny_runtime_outer_frame": runtime,
               "checks": checks, "pass": all(x["pass"] for x in checks),
               "optimized": optimized, "old_padded_control": old,
@@ -701,7 +831,7 @@ def main() -> int:
               "limits": {"individual_array_strict_bytes": ARRAY_LIMIT,
                          "process_cap_reference_bytes": PROCESS_LIMIT,
                          "process_cap_gate": "NOT_TESTED"},
-              "scope": "Explicit float64 inputs, float32 retained field identities, prior/current outer-frame bindings and named co-live arrays. The inclusive stages intentionally retain some prior values after rebinding and may overcount actual liveness. This is no rigorous whole-process upper bound: library allocator, flopscope wrappers, BLAS/QR workspaces, fragmentation and Python process overhead are unbounded by this model. Windows does not enforce the 8 GiB cap. Existing n8 variance and n4 numeric gates remain FAIL; this is no stability, cost, accuracy, or deployment claim."}
+              "scope": "Finite sampled named-boundary shape inventory: explicit float64 inputs, float32 retained Source fields, prior/current outer-frame bindings and named co-live arrays. Om is a view whose backing W payload is charged. The inclusive stages intentionally retain some prior values after rebinding and may overcount actual liveness. This is no rigorous whole-process upper bound: library allocator, flopscope wrappers, BLAS/QR workspaces, fragmentation and Python process overhead are unbounded by this model. Windows does not enforce the 8 GiB cap. Existing n8 variance and n4 numeric gates remain FAIL; this is no stability, cost, accuracy, or deployment claim."}
     target = Path(args.json)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n",
