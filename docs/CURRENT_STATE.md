@@ -100,6 +100,18 @@ parent's successful post-audit atomic publication. The reviewing agent's
 final turn failed automatic review before a formal verdict; no independent
 acceptance is claimed. Preserve the raw probe and hold P01.
 
+**Latest gate (September 12).** The parent now locks the freeze receipt before
+reading and holds it through binding checks and atomic report publication.
+The disposable receipt-change negative, normal four-arm synthetic positive,
+pending-stage and source controls pass. Workerq **956** passed current-byte
+default preflight **12/16** (four Full-only skips; 3,211.5 MiB peak), and a
+new fresh-context Skeptic **ACCEPTED** this scoped Windows publication repair.
+The immutable metadata-protocol freeze receipt remains valid. The registered
+P01 four-arm accuracy-only comparison is now the next unblocked test; P01 is
+exposed DESIGN and six earlier reads are documented. After its terminal
+report, obtain an independent result Skeptic and synthesize before the
+residual-rank question. No K4 accuracy verdict or better submission exists yet.
+
 The old contract at `08f787b` is superseded. P01 has three recorded DESIGN reads
 and placeholder-smoke exposure; it is never relabeled untouched. P07 is reusable
 DESIGN. P08 is exhausted. Samuel's three new predictions are all **“I don't know”**,

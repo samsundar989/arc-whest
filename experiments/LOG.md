@@ -44082,3 +44082,34 @@ No protected P01/P07/vault truth arrays were opened, and no truth ledger,
 scientific arm, statistic, gate, role, cost or residual model changed. This is
 an instrument result only. A current-byte default preflight and fresh
 independent Skeptic ACCEPT are still required before any P01 retry.
+## 2026-09-12 — Current publication gate accepted; exposed P01 comparison may resume
+
+Workerq **956** ran the exact committed receipt-lock repair `bb81abf` in the
+live worktree with no snapshot, zero GPU, 5 GiB RAM and two CPUs. It finished
+`SUCCEEDED`, exit 0, in 321.686657 seconds at 3,211.46875 MiB peak. Default
+preflight reported **GREEN 12/16**, with four Full-only steps SKIPPED. Raw
+transcript, manifest and metadata at
+`2026-09-11_stage2_compact_p07/freeze_bridge/job956_*` have SHA-256
+`dab7ad853673e027768fa52bf5c61c7e08dd31ee392a64a497f50da39b1c7c55`,
+`a7df75e9d5fec036f2cb6f8737d215bc20999f2f88689e141dd03282d28b24c6`,
+`64276d44e4663eb7a5b11ca76863aebdfb7d72db8c5c46afc3332f71baf0545c`.
+
+A **new fresh-context independent Skeptic ACCEPTED** the scoped Windows local
+report-publication and held receipt-binding repair after independently
+rerunning the two sacrificial receipt regressions and inspecting the final
+origin/status, immutable binding and source limits. Verdict
+`freeze_bridge/skeptic_verdict_receipt_binding_final.md` SHA-256
+`982e5d22799fe73aca3f515c2fa1067a3190db82959f85a95eeaa423c5198637`.
+This is instrument acceptance, not K4 accuracy or server residual evidence;
+the four Full-only steps remain skipped and symlink-stage fixture unavailable.
+The old bootstrap hash and current frozen-arm receipt remain valid.
+
+The already registered scientific comparison may now be retried on **exposed
+P01 DESIGN** through `truth_reads`, with all six earlier documented P01 reads
+preserved. Use the same immutable four arms and `lam=1/3` fit, exact control,
+all 96 identities, `gate=1.10`, paired arithmetic difference, Phase-2
+`competition_cost_lambda=0`, depth subset eight, and explicit `--residual-cap 0`
+accuracy-only relaxation. This operational retry changes no scientific gate,
+data role or human prediction (`I don't know`). A terminal complete report,
+raw queue evidence, result Skeptic and synthesis are required before any next
+Stage-2 intervention. A local P01 result alone is not a submission candidate.

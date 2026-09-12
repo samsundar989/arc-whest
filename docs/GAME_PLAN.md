@@ -100,7 +100,11 @@ P01 retry. Its first implementation `fa9a4d8` passed workerq 952 default
 preflight 12/16, but a separate sacrificial direct-bootstrap call supplied
 its own stage and left a `complete` stage after final refusal. The new LOG-tail
 contract requires a pending stage until successful parent publication; no
-independent acceptance or P01 retry exists. The registered comparison remains explicitly accuracy-only under
+independent acceptance existed at that historical point. The final held
+receipt-lock repair `bb81abf` passed workerq 956 current-byte default
+preflight 12/16 (four Full-only skips) and a new fresh Skeptic **ACCEPTED**
+the scoped publication instrument. The registered P01 comparison can resume
+on exposed DESIGN data. It remains explicitly accuracy-only under
 its residual-cap relaxation. A terminal four-arm report, result Skeptic and
 synthesis are still required before the residual-rank question. P01 had five
 documented reads before job 949 (three historical smoke reads and two failed
