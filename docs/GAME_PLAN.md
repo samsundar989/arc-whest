@@ -2,8 +2,10 @@
 
 **Revised September 10, 2026 after worker review at bcca354.** This is the sole active roadmap. Read [CURRENT_STATE](CURRENT_STATE.md), [WORKER_REVIEW](WORKER_REVIEW_2026-09-10.md), VALIDATION.md, GOTCHAS.md and LOG tail. The [prior plan](archive/GAME_PLAN_before_worker_review_2026-09-10.md) is historical. Existing gate verdicts, data restrictions and human approvals retain their scope.
 
-**Execution status.** Stages 0 and 1 are implemented and independently accepted
-within their recorded scopes. Stage 0's current positive plus M1--M12 certifier
+**Execution status.** Stage 0 is implemented and independently accepted;
+Stage 1's supplied-core algebra and compact counted-cost implementation have
+scoped independent acceptance, while physical K4 source closure is reopened.
+Stage 0's current positive plus M1--M12 certifier
 battery passed under an enforced 8 GiB Linux cap and its final fresh Skeptic
 returned ACCEPT; current default preflight passed 12/16 with the four Full-only
 deployment steps explicitly skipped. Stage 1 has no server-residual evidence.
@@ -122,8 +124,13 @@ for causal K4** but accepts the failed promotion gate for the frozen program.
 The source constructs a central moment rather than a fourth cumulant, fabricates
 mixed fourth cumulants on independent coordinates, and applies a generally
 asymmetric D31 covariance term. The earlier dense oracle did not check this
-source construction. LOG commit `c54eb87` records the synthesis and a
-preregistered truth-free identity fixture. Do not fit a new constant or spend
+source construction. LOG commits `c54eb87` and `2164401` record synthesis,
+a truth-free analytic fixture, live-byte preflight and a fresh Skeptic
+**ACCEPT** for the scoped source-identity defect. The fixture's synthetic
+width-1024 frozen D4 is about 1150 times the direct independent cumulant;
+that is an algebra error on an atypical network, not a measured P01 effect.
+The next committed check traces the actual frozen two-layer kernel before
+any source repair. Do not fit a new constant or spend
 another protected label until the source math is independently checked and
 repaired within a new contract and fresh Skeptic gate. This is not a registered
 scientific kill of the intended representation.

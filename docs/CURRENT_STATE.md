@@ -17,15 +17,17 @@ fresh final Skeptic independently recomputed the aggregate and returned ACCEPT.
 This proves the instrument's current mutation coverage, not deployment of a future
 candidate and not full-budget behavior on off-shape networks.
 
-Stage 1's four coherent-K4 arms pass an independent dense oracle (37/37). The
+Stage 1's four K4 arms pass an independent *supplied-core* dense oracle (37/37). The
 compact all-history reference passes conformance and independent dense closure and
 state-shadow checks (11/11 each). At 1024 x 16, old-source rank 384 and residual
 rank 16, workerq 614/615 meter **818,494,496,296 FLOPs = 0.372208 x 2^41** over
 **10,052 operations**,
 345,587,712 bytes estimated peak array payload and about 1,014 MiB observed process
 RAM. Its fresh Skeptic returned **ACCEPT**. This proves the represented algebra,
-implementation, counted cost and lifecycle; it does not prove accuracy, server
-residual headroom, deployability or competitiveness.
+implementation, counted cost and lifecycle for that supplied core; it does not
+prove physical source-cumulant construction, accuracy, server residual
+headroom, deployability or competitiveness. The source-closure claim has since
+been reopened by the accepted truth-free counterexample below.
 
 The bounded K4 fitting path now generates immutable candidate-specific modules,
 runs canonical lifecycle observations, and has a standalone truth-free verifier.
@@ -129,8 +131,18 @@ fourth central moment where it names a cumulant, fabricates mixed fourth
 cumulants for independent coordinates, and includes a generally asymmetric
 D31 covariance update. These are plausible implementation explanations, not
 proof that a corrected method will improve accuracy. A preregistered truth-free
-independent identity fixture is the next discriminator; no protected labels
-should be spent on this diagnosis. There is no registered scientific kill or
+independent identity fixture has now **passed its ten algebraic checks** and a
+fresh Skeptic **ACCEPTED the scoped frozen-source defect**. Workerq 959 passed
+live-worktree default preflight **12/16** (four Full-only skips) with 3,275.6
+MiB peak; snapshot job 958 is explicitly RED from byte normalization. Raw
+fixture, queue evidence, derivation and verdict are committed under
+`experiments/2026-09-11_stage2_compact_p07/source_cumulant/`; LOG commit
+`2164401` records their hashes and the next truth-free executable trace
+contract. The fixture's synthetic n=1024 frozen `D4` is about 1150 times
+the independently contracted fourth cumulant; the signed covariance
+correction is asymmetric. This reopens full Stage-1 source conformance, while
+the supplied-core algebra and compact cost remain valid in their scopes. No
+protected labels should be spent on this diagnosis. There is no scientific kill or
 new submission candidate. No fresh DECIDE, public CONFIRM or vault evaluation
 has occurred.
 
@@ -213,11 +225,12 @@ on eligibility work remains binding; Stage 3 stays closed.
 ## Strategist decision
 
 A new Strategist Packet is **not required yet**. Repository evidence is not
-exhausted: the frozen coherent-K4 DESIGN comparison failed, and the resulting
-source-cumulant/symmetry counterexample supplies a bounded truth-free next
-discriminator. Consult a strategist if corrected algebra and fresh Skeptic
-synthesis leave no supported next step, or before changing architecture beyond
-GAME_PLAN's bounded frontier options.
+exhausted: the frozen coherent-K4 DESIGN comparison failed, the source-identity
+counterexample has independent acceptance, and an actual frozen-kernel trace
+and separately derived repair architecture are in progress without labels.
+Consult a strategist if corrected algebra and fresh Skeptic synthesis leave no
+supported next step, or before changing architecture beyond GAME_PLAN's
+bounded frontier options.
 
 ## Preserved constraints
 

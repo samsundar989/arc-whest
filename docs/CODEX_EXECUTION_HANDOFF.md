@@ -9,8 +9,11 @@ battery supplied terminal accepted evidence. Workerq 957 completed the exposed
 P01 DESIGN four-arm accuracy-only comparison. All K4 arms fail its registered
 score gate, but the fresh result Skeptic marks the coherent-K4 causal claim
 INCOMPLETE because source-cumulant and covariance-symmetry defects remain.
-The next step is the committed truth-free math discriminator at LOG commit
-`c54eb87`, followed by fresh review and any separately contracted repair.
+The truth-free analytic discriminator at LOG commit `c54eb87` has now passed
+and has a fresh scoped Skeptic ACCEPT. LOG commit `2164401` binds its raw
+fixture/preflight evidence and preregisters a tiny actual-kernel trace before
+any separately contracted source repair. Stage 1's supplied-core algebra and
+cost remain accepted narrowly; full source closure is reopened.
 There is no better submission candidate, no fresh DECIDE/public/vault result,
 and Samuel's Stage-3 hold remains binding. Historical pickup instructions below
 must not cause a second fit or P01 relabeling.
