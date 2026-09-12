@@ -1,0 +1,3545 @@
+{
+  "input_sha256": "4503ea3a74ef8e5f35e27b77045688d6e006322805a65a6a386d31a60e04a81f",
+  "largest_family_values": [
+    {
+      "call": 12,
+      "family": "source_residual_power",
+      "max_abs": 1.0526970129442896e+32
+    },
+    {
+      "call": 12,
+      "family": "nonlinear_gaussian_e3",
+      "max_abs": 2.809477718327229e+30
+    },
+    {
+      "call": 13,
+      "family": "source_residual_power",
+      "max_abs": 1.4505471740889972e+30
+    },
+    {
+      "call": 14,
+      "family": "source_residual_power",
+      "max_abs": 2.054085671212557e+29
+    },
+    {
+      "call": 13,
+      "family": "nonlinear_gaussian_e3",
+      "max_abs": 1.133447858329605e+29
+    },
+    {
+      "call": 14,
+      "family": "nonlinear_gaussian_e3",
+      "max_abs": 1.4188654690419994e+28
+    },
+    {
+      "call": 15,
+      "family": "source_residual_power",
+      "max_abs": 3.0905297231774353e+27
+    },
+    {
+      "call": 15,
+      "family": "nonlinear_gaussian_e3",
+      "max_abs": 2.4543927207778933e+27
+    },
+    {
+      "call": 13,
+      "family": "nonlinear_gaussian_k3",
+      "max_abs": 1.888946593147858e+22
+    },
+    {
+      "call": 13,
+      "family": "source_s",
+      "max_abs": 1.8869266161249917e+22
+    },
+    {
+      "call": 254,
+      "family": "history_D3_add",
+      "max_abs": 1.6005571273393095e+22
+    },
+    {
+      "call": 146,
+      "family": "history_D21_add",
+      "max_abs": 1.6005571273393095e+22
+    }
+  ],
+  "nonfinite_families": [
+    "source_dP"
+  ],
+  "nonfinite_occurrences": [
+    {
+      "call": 12,
+      "family": "source_dP"
+    },
+    {
+      "call": 13,
+      "family": "source_dP"
+    },
+    {
+      "call": 14,
+      "family": "source_dP"
+    },
+    {
+      "call": 15,
+      "family": "source_dP"
+    }
+  ],
+  "qr_by_family": {
+    "source_residual_qr1": {
+      "count": 15,
+      "max_condition": Infinity
+    },
+    "source_residual_qr2": {
+      "count": 15,
+      "max_condition": Infinity
+    },
+    "thin_qr": {
+      "count": 28,
+      "max_condition": Infinity
+    }
+  },
+  "qr_worst": [
+    {
+      "condition": Infinity,
+      "family": "source_residual_qr1",
+      "largest_singular": 0.053184814751148224,
+      "smallest_singular": 0.0
+    },
+    {
+      "condition": Infinity,
+      "family": "source_residual_qr2",
+      "largest_singular": 0.0016890313709154725,
+      "smallest_singular": 0.0
+    },
+    {
+      "condition": Infinity,
+      "family": "source_residual_qr1",
+      "largest_singular": 0.043053265661001205,
+      "smallest_singular": 0.0
+    },
+    {
+      "condition": Infinity,
+      "family": "source_residual_qr2",
+      "largest_singular": 0.002377667697146535,
+      "smallest_singular": 0.0
+    },
+    {
+      "condition": Infinity,
+      "family": "thin_qr",
+      "largest_singular": 0.002913877833634615,
+      "smallest_singular": 0.0
+    },
+    {
+      "condition": Infinity,
+      "family": "source_residual_qr1",
+      "largest_singular": 0.0005745122907683253,
+      "smallest_singular": 0.0
+    },
+    {
+      "condition": Infinity,
+      "family": "source_residual_qr2",
+      "largest_singular": 4.3119234760524705e-07,
+      "smallest_singular": 0.0
+    },
+    {
+      "condition": Infinity,
+      "family": "thin_qr",
+      "largest_singular": 0.05293966457247734,
+      "smallest_singular": 0.0
+    },
+    {
+      "condition": Infinity,
+      "family": "thin_qr",
+      "largest_singular": 0.05330782011151314,
+      "smallest_singular": 0.0
+    },
+    {
+      "condition": Infinity,
+      "family": "thin_qr",
+      "largest_singular": 0.23445528745651245,
+      "smallest_singular": 0.0
+    },
+    {
+      "condition": Infinity,
+      "family": "source_residual_qr1",
+      "largest_singular": 0.0,
+      "smallest_singular": 0.0
+    },
+    {
+      "condition": Infinity,
+      "family": "source_residual_qr2",
+      "largest_singular": 0.0,
+      "smallest_singular": 0.0
+    }
+  ],
+  "rows": [
+    {
+      "feed_pair_gaps": [
+        {
+          "birth": 1,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 2,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 3,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 4,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 5,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 6,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 7,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 8,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 9,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 10,
+          "max_abs_gap": 4.260796035993053e-06,
+          "max_abs_got": 27.905384749174118,
+          "max_abs_want": 27.905380488378082
+        },
+        {
+          "birth": 11,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 12,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 13,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        }
+      ],
+      "layer": 14,
+      "max_feed_pair_gap": 4.260796035993053e-06,
+      "max_feed_sum": 27.905384749174118,
+      "max_feed_sum_gap": 4.260796035993053e-06,
+      "max_ordinary_tensor": 1.1312419465384337e+22
+    },
+    {
+      "feed_pair_gaps": [
+        {
+          "birth": 1,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 2,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 3,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 4,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 5,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 6,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 7,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 8,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 9,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 10,
+          "max_abs_gap": 1.0679662757473452e-06,
+          "max_abs_got": 1.5040337406098843,
+          "max_abs_want": 1.5040337900622074
+        },
+        {
+          "birth": 11,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 12,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 13,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        },
+        {
+          "birth": 14,
+          "max_abs_gap": 0.0,
+          "max_abs_got": 0.0,
+          "max_abs_want": 0.0
+        }
+      ],
+      "layer": 15,
+      "max_feed_pair_gap": 1.0679662757473452e-06,
+      "max_feed_sum": 1.5040337406098843,
+      "max_feed_sum_gap": 1.0679662757473452e-06,
+      "max_ordinary_tensor": 9.143372348722559e+20
+    }
+  ],
+  "source_sha256": "284b550f5f1fde7840a7a84923a394bee069a3454f0c780601fe696457b8b9c8",
+  "tracked_by_call": [
+    {
+      "call": 1,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 1.474371075630188
+    },
+    {
+      "call": 1,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 1.474371075630188
+    },
+    {
+      "call": 1,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 0.48441043496131897
+    },
+    {
+      "call": 1,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 1,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 1,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 0.48441043496131897
+    },
+    {
+      "call": 1,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 1.4284014701843262
+    },
+    {
+      "call": 1,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 0.5844375491142273
+    },
+    {
+      "call": 1,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 0.5844375491142273
+    },
+    {
+      "call": 1,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 1.983931541442871
+    },
+    {
+      "call": 1,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 0.04564517363905907
+    },
+    {
+      "call": 1,
+      "family": "source_dP",
+      "finite": true,
+      "max_abs": 1.3415672779083252
+    },
+    {
+      "call": 2,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 0.13942570984363556
+    },
+    {
+      "call": 1,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.08039608597755432
+    },
+    {
+      "call": 2,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 0.13942570984363556
+    },
+    {
+      "call": 2,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 0.303291380405426
+    },
+    {
+      "call": 1,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 0.5087549686431885
+    },
+    {
+      "call": 2,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 0.02033878304064274
+    },
+    {
+      "call": 2,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 0.07390467077493668
+    },
+    {
+      "call": 2,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 0.3568572700023651
+    },
+    {
+      "call": 2,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 0.12852495908737183
+    },
+    {
+      "call": 2,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 0.02186490222811699
+    },
+    {
+      "call": 2,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 0.011395908892154694
+    },
+    {
+      "call": 2,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 1.8504326343536377
+    },
+    {
+      "call": 2,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 0.008187700062990189
+    },
+    {
+      "call": 2,
+      "family": "source_dP",
+      "finite": true,
+      "max_abs": 1.0001298189163208
+    },
+    {
+      "call": 3,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 0.034776490181684494
+    },
+    {
+      "call": 2,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.013096701353788376
+    },
+    {
+      "call": 3,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.00921197235584259
+    },
+    {
+      "call": 4,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.02898946963250637
+    },
+    {
+      "call": 5,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.11639143526554108
+    },
+    {
+      "call": 3,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 0.034776490181684494
+    },
+    {
+      "call": 3,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 0.04367665946483612
+    },
+    {
+      "call": 2,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 0.5797208547592163
+    },
+    {
+      "call": 3,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 0.07539640367031097
+    },
+    {
+      "call": 3,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 0.6208235621452332
+    },
+    {
+      "call": 3,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 0.5403943061828613
+    },
+    {
+      "call": 3,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 0.0017095741350203753
+    },
+    {
+      "call": 3,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 0.0008796493639238179
+    },
+    {
+      "call": 3,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 0.00133906293194741
+    },
+    {
+      "call": 3,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 2.5330817699432373
+    },
+    {
+      "call": 3,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 0.00023371387214865535
+    },
+    {
+      "call": 3,
+      "family": "source_dP",
+      "finite": true,
+      "max_abs": 1.0000017881393433
+    },
+    {
+      "call": 4,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 0.260490357875824
+    },
+    {
+      "call": 6,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 6.050001684343442e-05
+    },
+    {
+      "call": 7,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.00017363308870699257
+    },
+    {
+      "call": 8,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.00015840912237763405
+    },
+    {
+      "call": 9,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0006323712877929211
+    },
+    {
+      "call": 10,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0007452861755155027
+    },
+    {
+      "call": 11,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.00586439436301589
+    },
+    {
+      "call": 12,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.023519953712821007
+    },
+    {
+      "call": 4,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 0.260490357875824
+    },
+    {
+      "call": 4,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 0.24837929010391235
+    },
+    {
+      "call": 3,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 0.30378052592277527
+    },
+    {
+      "call": 4,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 0.0027405705768615007
+    },
+    {
+      "call": 4,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 0.06432584673166275
+    },
+    {
+      "call": 4,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 0.30999669432640076
+    },
+    {
+      "call": 4,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 0.06515492498874664
+    },
+    {
+      "call": 4,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 0.009889645501971245
+    },
+    {
+      "call": 4,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 0.007245760411024094
+    },
+    {
+      "call": 4,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 0.589625358581543
+    },
+    {
+      "call": 4,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 0.0016863784985616803
+    },
+    {
+      "call": 4,
+      "family": "source_dP",
+      "finite": true,
+      "max_abs": 1.0000524520874023
+    },
+    {
+      "call": 5,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 0.036995530128479004
+    },
+    {
+      "call": 13,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 5.960166163276881e-06
+    },
+    {
+      "call": 14,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 7.481737156922463e-06
+    },
+    {
+      "call": 15,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.5424411685671657e-05
+    },
+    {
+      "call": 16,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 6.172683788463473e-05
+    },
+    {
+      "call": 17,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0001472569420002401
+    },
+    {
+      "call": 18,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0004262147704139352
+    },
+    {
+      "call": 19,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0017083770362660289
+    },
+    {
+      "call": 20,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.001921348855830729
+    },
+    {
+      "call": 21,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.018793050199747086
+    },
+    {
+      "call": 22,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.07517983764410019
+    },
+    {
+      "call": 5,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 0.036995530128479004
+    },
+    {
+      "call": 5,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 0.21286526322364807
+    },
+    {
+      "call": 4,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 0.32742607593536377
+    },
+    {
+      "call": 5,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 0.06567846238613129
+    },
+    {
+      "call": 5,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 3.701209306716919
+    },
+    {
+      "call": 5,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 3.633127212524414
+    },
+    {
+      "call": 5,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 0.03026818484067917
+    },
+    {
+      "call": 5,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 0.002655826508998871
+    },
+    {
+      "call": 5,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 0.03711339831352234
+    },
+    {
+      "call": 5,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 2.2143378257751465
+    },
+    {
+      "call": 5,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 0.0023775079753249884
+    },
+    {
+      "call": 5,
+      "family": "source_dP",
+      "finite": true,
+      "max_abs": 1.0013774633407593
+    },
+    {
+      "call": 6,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 0.6162499785423279
+    },
+    {
+      "call": 23,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 6.668877858828637e-07
+    },
+    {
+      "call": 24,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 7.223556419688748e-09
+    },
+    {
+      "call": 25,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.077285898849368e-08
+    },
+    {
+      "call": 26,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 3.430251308600418e-05
+    },
+    {
+      "call": 27,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.7512403903529048e-05
+    },
+    {
+      "call": 28,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.00011018189979949966
+    },
+    {
+      "call": 29,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 6.224271783139557e-05
+    },
+    {
+      "call": 30,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0046708774752914906
+    },
+    {
+      "call": 31,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.01868516579270363
+    },
+    {
+      "call": 32,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.011786894872784615
+    },
+    {
+      "call": 33,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.01922420971095562
+    },
+    {
+      "call": 34,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.07696759700775146
+    },
+    {
+      "call": 35,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.344395966247248e-07
+    },
+    {
+      "call": 6,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 0.12688007950782776
+    },
+    {
+      "call": 6,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 2.988631010055542
+    },
+    {
+      "call": 5,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 0.6418328285217285
+    },
+    {
+      "call": 6,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 8.478902996378324e-11
+    },
+    {
+      "call": 6,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 1.9581578669658484e-07
+    },
+    {
+      "call": 6,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 2.988631010055542
+    },
+    {
+      "call": 6,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 26.694198608398438
+    },
+    {
+      "call": 6,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 1.9073486328125e-06
+    },
+    {
+      "call": 6,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 0.055503033101558685
+    },
+    {
+      "call": 6,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 5.977262020111084
+    },
+    {
+      "call": 6,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 2.2763619422912598
+    },
+    {
+      "call": 6,
+      "family": "source_dP",
+      "finite": true,
+      "max_abs": 1.0030806064605713
+    },
+    {
+      "call": 7,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 0.4256395697593689
+    },
+    {
+      "call": 36,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.00011718134919647127
+    },
+    {
+      "call": 37,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 8.747555693844333e-05
+    },
+    {
+      "call": 38,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.00035039943759329617
+    },
+    {
+      "call": 39,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.00017880031373351812
+    },
+    {
+      "call": 40,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.016164790838956833
+    },
+    {
+      "call": 41,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.06466471403837204
+    },
+    {
+      "call": 42,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.038625795394182205
+    },
+    {
+      "call": 43,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0864967331290245
+    },
+    {
+      "call": 44,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.3462739586830139
+    },
+    {
+      "call": 45,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.16197308897972107
+    },
+    {
+      "call": 46,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 6.207162783766762e-09
+    },
+    {
+      "call": 47,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.4833628486931048e-08
+    },
+    {
+      "call": 48,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 7.850518954910513e-07
+    },
+    {
+      "call": 49,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.4352373202418676e-06
+    },
+    {
+      "call": 50,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.749835298880953e-08
+    },
+    {
+      "call": 51,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 4.359125682640297e-08
+    },
+    {
+      "call": 7,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 0.22421564161777496
+    },
+    {
+      "call": 7,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 1.2840299606323242
+    },
+    {
+      "call": 6,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 1.2237324714660645
+    },
+    {
+      "call": 7,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 2.1278827261994593e-05
+    },
+    {
+      "call": 7,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 1.6048802535806317e-06
+    },
+    {
+      "call": 7,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 1.2840299606323242
+    },
+    {
+      "call": 7,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 2.1627652645111084
+    },
+    {
+      "call": 7,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 5.8780192375706974e-06
+    },
+    {
+      "call": 7,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 0.0007469109841622412
+    },
+    {
+      "call": 7,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 2.5680599212646484
+    },
+    {
+      "call": 7,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 4.311015402436169e-07
+    },
+    {
+      "call": 7,
+      "family": "source_dP",
+      "finite": true,
+      "max_abs": 1.0000005960464478
+    },
+    {
+      "call": 8,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 0.005599833093583584
+    },
+    {
+      "call": 52,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 3.3376945793861523e-06
+    },
+    {
+      "call": 53,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.00021566348732449114
+    },
+    {
+      "call": 54,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0008627324132248759
+    },
+    {
+      "call": 55,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0005719896289519966
+    },
+    {
+      "call": 56,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0006548047531396151
+    },
+    {
+      "call": 57,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0026219284627586603
+    },
+    {
+      "call": 58,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0021331210155040026
+    },
+    {
+      "call": 59,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 8.244011029390208e-11
+    },
+    {
+      "call": 60,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 3.298356587855267e-10
+    },
+    {
+      "call": 61,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.000244961294811219
+    },
+    {
+      "call": 62,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 7.123779255380214e-08
+    },
+    {
+      "call": 63,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.84964869479154e-07
+    },
+    {
+      "call": 64,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.1160757651396125e-08
+    },
+    {
+      "call": 65,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.9191031813979862e-08
+    },
+    {
+      "call": 66,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 4.557741128952131e-10
+    },
+    {
+      "call": 67,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.427501672424114e-09
+    },
+    {
+      "call": 68,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.6032522580644581e-06
+    },
+    {
+      "call": 69,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.3713184898733743e-06
+    },
+    {
+      "call": 70,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 5.490931926033227e-06
+    },
+    {
+      "call": 8,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 0.005599833093583584
+    },
+    {
+      "call": 8,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 0.25922951102256775
+    },
+    {
+      "call": 7,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 1.5588120222091675
+    },
+    {
+      "call": 8,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 3.542214693363917e-32
+    },
+    {
+      "call": 8,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 1.4946440088924174e-24
+    },
+    {
+      "call": 8,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 0.25922951102256775
+    },
+    {
+      "call": 8,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 0.01780724711716175
+    },
+    {
+      "call": 8,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 3.725290298461914e-09
+    },
+    {
+      "call": 8,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 4.771330623043468e-06
+    },
+    {
+      "call": 8,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 0.5184590220451355
+    },
+    {
+      "call": 8,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 5.2987591203645934e-08
+    },
+    {
+      "call": 8,
+      "family": "source_dP",
+      "finite": true,
+      "max_abs": 1.0
+    },
+    {
+      "call": 9,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 0.00012516741116996855
+    },
+    {
+      "call": 71,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.894628780974017e-06
+    },
+    {
+      "call": 72,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.1668563476850977e-06
+    },
+    {
+      "call": 73,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 8.676395736983977e-06
+    },
+    {
+      "call": 74,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 7.0652395152137615e-06
+    },
+    {
+      "call": 75,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.729812903501383e-13
+    },
+    {
+      "call": 76,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.092174202639573e-12
+    },
+    {
+      "call": 77,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.2225495993334334e-06
+    },
+    {
+      "call": 78,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 8.225175207599023e-09
+    },
+    {
+      "call": 79,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 3.2902288893410514e-08
+    },
+    {
+      "call": 80,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 3.2597549761703704e-06
+    },
+    {
+      "call": 81,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.143594183266851e-29
+    },
+    {
+      "call": 82,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 8.574461594355579e-29
+    },
+    {
+      "call": 83,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 3.696654787832543e-11
+    },
+    {
+      "call": 84,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 9.666725753199046e-11
+    },
+    {
+      "call": 85,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.5106137911738426e-12
+    },
+    {
+      "call": 86,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 4.732079311731141e-12
+    },
+    {
+      "call": 87,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 5.310047512807614e-09
+    },
+    {
+      "call": 88,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 4.542572984433946e-09
+    },
+    {
+      "call": 89,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.8189025396964098e-08
+    },
+    {
+      "call": 90,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.1058064686153557e-08
+    },
+    {
+      "call": 91,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 7.142663207559963e-07
+    },
+    {
+      "call": 92,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.8573244890139904e-06
+    },
+    {
+      "call": 9,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 0.00012516741116996855
+    },
+    {
+      "call": 9,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 0.13138732314109802
+    },
+    {
+      "call": 8,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 0.6652666330337524
+    },
+    {
+      "call": 9,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 9.350810575322257e-29
+    },
+    {
+      "call": 9,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 2.186423949549658e-21
+    },
+    {
+      "call": 9,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 0.13138732314109802
+    },
+    {
+      "call": 9,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 0.002317426959052682
+    },
+    {
+      "call": 9,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 4.656612873077393e-10
+    },
+    {
+      "call": 9,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 2.2934427761356346e-06
+    },
+    {
+      "call": 9,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 0.26277464628219604
+    },
+    {
+      "call": 9,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 7.591267614515118e-10
+    },
+    {
+      "call": 9,
+      "family": "source_dP",
+      "finite": true,
+      "max_abs": 1.0
+    },
+    {
+      "call": 10,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 7.131125312298536e-05
+    },
+    {
+      "call": 93,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.9660429845534964e-06
+    },
+    {
+      "call": 94,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.1452914083689286e-13
+    },
+    {
+      "call": 95,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 4.582209720167818e-13
+    },
+    {
+      "call": 96,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 6.397719971573679e-07
+    },
+    {
+      "call": 97,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 3.3634148799421837e-09
+    },
+    {
+      "call": 98,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.3454310554550375e-08
+    },
+    {
+      "call": 99,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 5.573163889494026e-06
+    },
+    {
+      "call": 100,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 6.369222456077369e-29
+    },
+    {
+      "call": 101,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.5476851305710587e-28
+    },
+    {
+      "call": 102,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.4822529667289928e-06
+    },
+    {
+      "call": 103,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 3.5567266863110785e-26
+    },
+    {
+      "call": 104,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.4226994259500987e-25
+    },
+    {
+      "call": 105,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.5519176221889808e-11
+    },
+    {
+      "call": 106,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 4.056332353341574e-11
+    },
+    {
+      "call": 107,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 6.351377214962317e-13
+    },
+    {
+      "call": 108,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.990374878801937e-12
+    },
+    {
+      "call": 109,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.2290216339371227e-09
+    },
+    {
+      "call": 110,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.9075243606891945e-09
+    },
+    {
+      "call": 111,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 7.637959598127964e-09
+    },
+    {
+      "call": 112,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 4.645190010421629e-09
+    },
+    {
+      "call": 113,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.998102672790992e-07
+    },
+    {
+      "call": 114,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.1993503221674473e-06
+    },
+    {
+      "call": 115,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 7.954799343679042e-07
+    },
+    {
+      "call": 116,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 9.077880918084702e-07
+    },
+    {
+      "call": 117,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 3.6349124457046855e-06
+    },
+    {
+      "call": 10,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 7.131125312298536e-05
+    },
+    {
+      "call": 10,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 2.8453714543665286e-21
+    },
+    {
+      "call": 9,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 1.1294227838516235
+    },
+    {
+      "call": 10,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 2.43247942908309e-19
+    },
+    {
+      "call": 10,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 7.05358618735552e-11
+    },
+    {
+      "call": 10,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 7.05358618735552e-11
+    },
+    {
+      "call": 10,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 2.9358846982993143e-24
+    },
+    {
+      "call": 10,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 2.9358846982993143e-24
+    },
+    {
+      "call": 10,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 2.9358846982993143e-24
+    },
+    {
+      "call": 10,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 2.3020378213835636e-16
+    },
+    {
+      "call": 10,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 10,
+      "family": "source_dP",
+      "finite": true,
+      "max_abs": 1.0
+    },
+    {
+      "call": 11,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 2.6624750404380393e-08
+    },
+    {
+      "call": 118,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 119,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 120,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 121,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 122,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 123,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 124,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 125,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 126,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 127,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.2434176653156525e-24
+    },
+    {
+      "call": 128,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 129,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 130,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 131,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 132,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 133,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 134,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 135,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 136,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 137,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 138,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 139,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 140,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 141,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 142,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 143,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 144,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 145,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 11,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 2.6624750404380393e-08
+    },
+    {
+      "call": 11,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 6.509581726277247e-05
+    },
+    {
+      "call": 10,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 1.3363999128341675
+    },
+    {
+      "call": 11,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 2.2141532923146687e-24
+    },
+    {
+      "call": 11,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 15952952320.0
+    },
+    {
+      "call": 11,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 15952952320.0
+    },
+    {
+      "call": 11,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 3.4663207634094695e-12
+    },
+    {
+      "call": 11,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 1.4182617753821791e-12
+    },
+    {
+      "call": 11,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 1.4182617753821791e-12
+    },
+    {
+      "call": 11,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 15952953344.0
+    },
+    {
+      "call": 11,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 2883.708984375
+    },
+    {
+      "call": 11,
+      "family": "source_dP",
+      "finite": true,
+      "max_abs": 1.0
+    },
+    {
+      "call": 12,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 542047.125
+    },
+    {
+      "call": 146,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 147,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 148,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 149,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 150,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 151,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 152,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 5.870413813088716e-26
+    },
+    {
+      "call": 153,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 154,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 155,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 6.772284905309789e-06
+    },
+    {
+      "call": 156,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 259.9122314453125
+    },
+    {
+      "call": 157,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1039.6456298828125
+    },
+    {
+      "call": 158,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 159,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 160,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 161,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 162,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 163,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 164,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 165,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 166,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 167,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 168,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 169,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 170,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 171,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 172,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 173,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 174,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 175,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 176,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 12,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 542047.125
+    },
+    {
+      "call": 12,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 14110482432.0
+    },
+    {
+      "call": 11,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 0.3726564049720764
+    },
+    {
+      "call": 12,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 12,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 12,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 14110482432.0
+    },
+    {
+      "call": 12,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 2.809477718327229e+30
+    },
+    {
+      "call": 12,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 9.44473296573929e+21
+    },
+    {
+      "call": 12,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 9.44473296573929e+21
+    },
+    {
+      "call": 12,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 28220964864.0
+    },
+    {
+      "call": 12,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 1.0526970129442896e+32
+    },
+    {
+      "call": 12,
+      "family": "source_dP",
+      "finite": false,
+      "max_abs": Infinity
+    },
+    {
+      "call": 13,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 224392.484375
+    },
+    {
+      "call": 177,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 178,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 179,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 180,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 5.678041453184422e-26
+    },
+    {
+      "call": 181,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 182,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 183,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 3.2964892398013035e-06
+    },
+    {
+      "call": 184,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 44.12993240356445
+    },
+    {
+      "call": 185,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 176.5211944580078
+    },
+    {
+      "call": 186,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.4825076821213934e+21
+    },
+    {
+      "call": 187,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 188,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 189,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 190,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 191,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 192,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 193,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 194,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 195,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 196,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 197,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 198,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 199,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 200,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 201,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 202,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 203,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 204,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 205,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 206,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 207,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 208,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 209,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 210,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 13,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 224392.484375
+    },
+    {
+      "call": 13,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 4839500288.0
+    },
+    {
+      "call": 12,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 0.21110232174396515
+    },
+    {
+      "call": 13,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 13,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 13,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 4839500288.0
+    },
+    {
+      "call": 13,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 1.133447858329605e+29
+    },
+    {
+      "call": 13,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 1.888946593147858e+22
+    },
+    {
+      "call": 13,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 1.8869266161249917e+22
+    },
+    {
+      "call": 13,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 9679000576.0
+    },
+    {
+      "call": 13,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 1.4505471740889972e+30
+    },
+    {
+      "call": 13,
+      "family": "source_dP",
+      "finite": false,
+      "max_abs": Infinity
+    },
+    {
+      "call": 14,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 69212.5859375
+    },
+    {
+      "call": 211,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.7384508332112448e-26
+    },
+    {
+      "call": 212,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 213,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 214,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 7.716414529568283e-08
+    },
+    {
+      "call": 215,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 10.330602645874023
+    },
+    {
+      "call": 216,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 41.32279968261719
+    },
+    {
+      "call": 217,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 7.940461165878297e+20
+    },
+    {
+      "call": 218,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 219,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 220,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 7.578386111061522e+21
+    },
+    {
+      "call": 221,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 222,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 223,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 224,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 225,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 226,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 227,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 228,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 229,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 230,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 231,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 232,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 233,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 234,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 235,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 236,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 237,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 238,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 239,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 240,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 241,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 242,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 243,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 244,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 245,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 246,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 247,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 14,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 52166.74609375
+    },
+    {
+      "call": 14,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 2420919808.0
+    },
+    {
+      "call": 13,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 0.07253188639879227
+    },
+    {
+      "call": 14,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 14,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 14,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 2420919808.0
+    },
+    {
+      "call": 14,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 1.4188654690419994e+28
+    },
+    {
+      "call": 14,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 2.3611832414348226e+21
+    },
+    {
+      "call": 14,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 1.0097011817769496e+22
+    },
+    {
+      "call": 14,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 4841839616.0
+    },
+    {
+      "call": 14,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 2.054085671212557e+29
+    },
+    {
+      "call": 14,
+      "family": "source_dP",
+      "finite": false,
+      "max_abs": Infinity
+    },
+    {
+      "call": 15,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 136803.5
+    },
+    {
+      "call": 248,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.9746563495459668e-08
+    },
+    {
+      "call": 249,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 9.301681518554688
+    },
+    {
+      "call": 250,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 37.207061767578125
+    },
+    {
+      "call": 251,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 3.0449749059576466e+21
+    },
+    {
+      "call": 252,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 253,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 254,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.2960596367435448e+22
+    },
+    {
+      "call": 255,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 256,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 257,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 4.6931507876619627e+21
+    },
+    {
+      "call": 258,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 259,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 260,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 261,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 262,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 263,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 264,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 265,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 266,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 267,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 268,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 269,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 270,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 271,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 272,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 273,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 274,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 275,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 276,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 277,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 278,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 279,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 280,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 281,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 282,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 283,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 284,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 285,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 5.480142136562922e-26
+    },
+    {
+      "call": 286,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 287,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 15,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 136803.5
+    },
+    {
+      "call": 15,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 1348904960.0
+    },
+    {
+      "call": 14,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 0.44413551688194275
+    },
+    {
+      "call": 15,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 15,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 15,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 1348904960.0
+    },
+    {
+      "call": 15,
+      "family": "nonlinear_gaussian_e3",
+      "finite": true,
+      "max_abs": 2.4543927207778933e+27
+    },
+    {
+      "call": 15,
+      "family": "nonlinear_gaussian_k3",
+      "finite": true,
+      "max_abs": 7.378697629483821e+19
+    },
+    {
+      "call": 15,
+      "family": "source_s",
+      "finite": true,
+      "max_abs": 1.1386207743500947e+22
+    },
+    {
+      "call": 15,
+      "family": "source_e",
+      "finite": true,
+      "max_abs": 2697809920.0
+    },
+    {
+      "call": 15,
+      "family": "source_residual_power",
+      "finite": true,
+      "max_abs": 3.0905297231774353e+27
+    },
+    {
+      "call": 15,
+      "family": "source_dP",
+      "finite": false,
+      "max_abs": Infinity
+    },
+    {
+      "call": 16,
+      "family": "backbone_cov_linear_right",
+      "finite": true,
+      "max_abs": 15985.53515625
+    },
+    {
+      "call": 288,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 9.302532077981596e-09
+    },
+    {
+      "call": 289,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.5013441443443298
+    },
+    {
+      "call": 290,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 2.005378007888794
+    },
+    {
+      "call": 291,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 3.0583234345156844e+20
+    },
+    {
+      "call": 292,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 293,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 294,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 3.7661678394858757e+21
+    },
+    {
+      "call": 295,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 296,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 297,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 3.223227097733994e+21
+    },
+    {
+      "call": 298,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 299,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 300,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 1.5734646823234484e+21
+    },
+    {
+      "call": 301,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 302,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 303,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 304,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 305,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 306,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 307,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 308,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 309,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 310,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 311,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 312,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 313,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 314,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 315,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 316,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 317,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 318,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 319,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 320,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 321,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 322,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 323,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 324,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 325,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 326,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 327,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 328,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 5.1462099968490794e-27
+    },
+    {
+      "call": 329,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 330,
+      "family": "D3_contraction",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 16,
+      "family": "nonlinear_safe_variance",
+      "finite": true,
+      "max_abs": 15985.53515625
+    },
+    {
+      "call": 16,
+      "family": "nonlinear_gaussian_mean",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 15,
+      "family": "k4_D4_negative",
+      "finite": true,
+      "max_abs": 0.009828472509980202
+    },
+    {
+      "call": 16,
+      "family": "nonlinear_mean_k3",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 16,
+      "family": "nonlinear_mean_k4",
+      "finite": true,
+      "max_abs": 0.0
+    },
+    {
+      "call": 16,
+      "family": "nonlinear_mean_add",
+      "finite": true,
+      "max_abs": 0.0
+    }
+  ]
+}
