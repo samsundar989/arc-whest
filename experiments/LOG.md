@@ -45009,3 +45009,122 @@ live-worktree retry, terminal GREEN 12/16 at HEAD `4622426`, peak
 3091.625 MiB; its final packet/Skeptic remain pending here. No axis
 focused result, protected label, seed block or vault read preceded this
 amendment.
+
+**September 12 first-source-only cost synthesis, independently accepted
+within scope.** Source/result packet `076031f`, final queue-evidence packet
+`defadb2`, and independent fresh-context verdict `70a2d80` establish the
+registered *one externally supplied weighted-discrete source* kernel and
+declared K4-induced quadratic K3 feed. The tiny independently enumerated
+K4 and full K3 tensors, their D4/D22/D31/D3/D21 slices and two signed
+transports pass both focused checks; the source SHA-256 is
+`be73d8d0f35c050adb0c27a2c59fb13cb41dd79b81974ba1c6307574774fabdd`,
+the final test SHA-256 is
+`a4f649852997831deff3c78ec53b3a9068f86db1c80729d73dfe5c38b2f31961`,
+and the verdict SHA-256 is
+`9d787b3504ba2237264301d87a1bf5f530d16533c2111e112c889cd88599838c`.
+Raw `first_source_kernel/meter.json`, `verification.json`, job986/987/988/990
+queue archives and `skeptic_verdict.md` are durable evidence. Workerq 986
+observed **704,164,664,384 official-package counted FLOPs** over 4,729
+operations at n1024,d16,S64, with 702,496,398,336 dense (0.10754% below
+the frozen conventional dense subtotal), 1,668,266,048 nondense and
+390,651,183,104 in the two negative D21 products. The schedule is 15
+K4 uses, 14 births, 105 future feed uses, 91 full D21 and 14 final D3
+readouts. Its workerq process peak was 889.883 MiB under the conservative
+8 GiB request, sampled only twice; external inputs account for about
+135 MB and the estimated internal payload for about 114 MB. A repeat of
+this *same one-source* kernel can reasonably request about 2 GiB with
+headroom; that is no estimate for a complete estimator. Workerq 987
+passed preflight on older test bytes. Job988's Git-snapshot preflight was
+**RED** at steps 7/9/12 because ignored ledger/truth artifacts were absent
+and checkout normalization changed hashed files; preserve it. Job990's
+live-worktree preflight on committed kernel/test bytes was **GREEN 12/16**,
+four Full-only skips, peak 3091.625 MiB under 5 GiB. Its worktree also
+contained an unrelated untracked axis fixture, so the queue transcript
+does not timestamp-bind every file; both *cost* source/test hashes matched
+`076031f` before/after and the Skeptic verified that narrow attribution.
+The fresh Skeptic **ACCEPTED the registered algebra/schedule/counted-cost
+scope**, independently recalculating every dense family and all ZIP member
+hashes. CONFIRMED: this synthetic single-source operator and its counted
+bill. INFERRED: the negative D21 pair and dense A transports are priority
+targets for a *complete* cost reconciliation. SPECULATIVE: construction of
+physical ReLU source factors, later nonlinear increments, rank adequacy,
+full compact all-history cost, server residual or improved score. The
+818,494,496,296-FLOP supplied-core reference is a different executable;
+the bills cannot be added without an overlap proof. No protected truth,
+seed block, public split or vault was touched. Windows did not enforce the
+8 GiB challenge cap.
+
+**Next IMPORTANT abstract-feed embedding/counterexample contract, before
+any new fixture.** **Question:** can the signed weighted-discrete K4-to-K3
+feed be represented exactly by the existing compact reference's cubic
+two-leg-plus-residual tensor, and does low covariance rank alone justify
+the rank chosen for its common A/P state? **Evidence:** CONFIRMED the
+accepted discrete K4 and K3 dense oracle/cost above; CONFIRMED the
+supplied-core weighted-Gram/thin-QR reference is exact only for its
+represented algebra and an uncompressed dense shadow; INFERRED a pair
+of abstract compact sub-sources can represent positive/covariance terms;
+SPECULATIVE that this identity can be compressed to rank384/residual16
+or priced competitively. The axis-exact continuous two-layer fixture has
+a committed positive focused result but its independent Skeptic is
+pending; this contract needs only the separately accepted discrete feed.
+**Hypothesis/mechanism:** let centered weighted nodes be `V,p`, birth
+coordinates `P=diag(w1)V`, source covariance `C=V diag(p)V.T`,
+`a=w2*diag(C)`, `A=diag(w2)`, `Q=P diag(p)V.T`, and
+`Aplus=A(V*V)`. The feed's symmetric cubic tensor is the sum of a
+positive-minus-`a` sub-source with `A_comp=0`, padded `P_comp=P`,
+`M_comp[:,s]=(3/2)p_s(Aplus[:,s]-a)`, and a negative covariance-pairing
+sub-source with `A_comp=A`, `P_comp=Q`, `M_comp=-3A`. Here the compact
+tensor's `M` is explicitly reconstructed from its
+`P diag(s)+3A diag(e)+Z L.T` state, and the two sub-sources are added,
+not merged by an
+unproved compression. Transport every live A/P/M leg by the *same* fixed
+signed dense map, retaining birth-time V,p. In the literal negative
+embedding A is generically full n-rank while Q occupies n stored columns
+despite rank at most S-1; factorizing Q is a separate implementation.
+The alternative moving A into the M residual requires full residual
+rank. This is a conditional algebraic representation, not yet a claim
+about the actual rank384/residual16 implementation.
+
+**Intervention:** build a new truth-free n3/n4 fixture with an independently
+enumerated raw-moment fourth cumulant and direct quadratic K3 feed.
+Construct both abstract compact sub-sources and enumerate their *entire*
+cubic tensor and D3/D21 readouts at birth and after two fixed signed,
+nonconstant maps. Check source-positive, covariance-negative and total
+separately; include zero-w2/zero-source controls and a deliberate dropped
+negative-pairing mutant. For a fixed three-atom centered equilateral law
+with equal weights, `G` rows `(1,0),(0,1),(1,1)` and `w1=w2=1`, compare
+covariance rank 2 with the full feed's matrix unfolding across rows `i`
+and columns `(jk)=(11),(22),(12)`. A rank-2 common A/P/M span *with zero
+residual and no optional Y birth leg* cannot reproduce a rank-3 unfolding;
+do not generalize this example to every possible encoding.
+**Predictions:** (1) complete positive/negative/total cubic tensors and
+D3/D21 at birth and two maps agree with independent dense enumeration
+within `1e-10` absolute; the dropped-negative mutant differs by more
+than `1e-3`; zero controls agree within `1e-10`; (2) the fixed example
+has covariance rank exactly 2 and feed unfolding rank 3 at `1e-10`
+singular-value tolerance, with absolute determinant greater than 1;
+(3) the literal negative embedding has n A/Q columns and the positive
+embedding requires up to S residual columns; a literal 14-birth n1024
+negative path would store 112 MiB of A/Q payload and transport them
+for 450,971,566,080 **conventional** FLOPs over 105 uses. These are
+conditional arithmetic, *not flopscope measurements*. Samuel's standing
+human prediction is **"I don't know"**. **Falsifier:** any identity,
+rank/determinant, mutant, or dimensional arithmetic gate fails; preserve
+the failure rather than redefining the abstract compact tensor.
+**Control:** separately enumerated discrete raw cumulants/feed and full
+tensor transport, plus the existing supplied-core dense shadow only as
+a distinct algebra comparison. **Cost model:** n3/n4 direct arrays under
+64 MiB, tiny CPU-only; the 112 MiB and 450.972B figures are frozen
+conventional predictions for a literal full-rank n1024 embedding and do
+not include QR, weighted-Gram joins, materialization, K4 source bank or
+the ordinary K3 backbone. Phase 2 charges `C=F`, and residual is a
+0.4 s failure cliff; no server runtime claim follows. **Statistic/gate:**
+deterministic tensor/mutant/rank thresholds above; no score, noise,
+seed block, public or vault. **Scope/confounders:** this tests *only the
+induced K3 feed* for a discrete K4 bank. Physical source construction,
+K4 D4/D22/D31 consumers and later nonlinear increments remain separate.
+The fixed map is already the complete signed carry, so no second
+derivative is applied to birth-time V/p. Commit the fixture and raw
+result, run current-byte live workerq default preflight with 5 GiB RAM,
+2 CPUs and zero GPU (four Full-only skips explicit), then obtain a new
+fresh-context Skeptic before accepting or pricing a compact integration.
