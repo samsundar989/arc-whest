@@ -53,10 +53,12 @@ off-diagonal formula.
 
 K4-induced K3 must use the **same** tensor. A definition that avoids borrowing
 the frozen cubic polynomial is the first-order cumulant response: with Gaussian
-reference `Z`, output map `f`, and `L_a=Q_:a dot grad_Z`, take the cubic
-coefficient in `t` of
+reference `Z`, output map `f`, and `L_a=Q_:a dot grad_Z`, take the **third
+derivative at `t=0`** of
 `sum_a (k_a/24) E[L_a^4 exp(t dot f(Z))]/E[exp(t dot f(Z))]`.
-This is an identity for the first-order K4 perturbation, not a cheap evaluation
+A literal scalar cubic coefficient instead carries `1/3!`, and mixed
+multi-indices carry their own factorials. This is an identity for the
+first-order K4 perturbation, not a cheap evaluation
 algorithm. If the chosen local closure keeps only one quadratic and two linear
 response factors, its *direct* fourth-cumulant feed is
 
@@ -161,8 +163,10 @@ entries in this evaluation was `5.551115123125783e-17`. This checks the
 factorization identity only, not a ReLU source or the frozen birth tower.
 
 Source insertion and projection are approximations. For a candidate source
-`S`, define `E=S-T(G,M)` and retain either `E` itself or its measured slice
-errors. With invertible `M`, metric contraction
+`S`, define `E=S-T(G,M)`. Retain `E` itself, a transportable factorization,
+or a valid norm bound if future consumers depend on it. Present D4/D22/D31
+slice errors are diagnostics **only at the current coordinate**. With
+invertible `M`, metric contraction
 `H_ij=sum_ab (M^-1)_ab S_ijab` gives the unique contraction-matching core
 `G=6H/(n+4)-3 tr(M^-1 H) M/((n+2)(n+4))`. For singular `M`, the same formula
 holds only on its rank-`r` support with `M^+` and `n` replaced by `r`; a
@@ -215,3 +219,16 @@ representation. A general mixed-ReLU source, response-order choice, feasible
 compression, counted cost, 8 GiB behavior, server residual headroom and any
 accuracy benefit remain unknown. They need separate contracts and a fresh
 Skeptic before a labeled decision.
+
+## September 12 Skeptic correction to this design memo
+
+The fresh independent verdict `repair_architecture_skeptic.md` accepted the
+stated tensor algebra but marked the architecture incomplete. A symmetric
+residual supported on the 24 permutations of `(0,1,2,3)` has zero current
+D4/D22/D31 slices. Row `(1,1,1,1)/2` turns its next D4 into `24/16=1.5`.
+Therefore a small current slice error, or even exact current slice agreement,
+cannot establish small future error. The metric-core projection must carry a
+transportable residual or a proved bound; a source split does not become a
+complete nonlinear ReLU closure merely because its diagonal component is
+exact under linear transport. The rough FLOP estimates above remain
+conventional arithmetic, not a flopscope price or server timing.
