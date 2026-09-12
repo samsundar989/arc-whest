@@ -1,8 +1,23 @@
 # CURRENT_STATE.md — read this first
 
+**F21 implementation checkpoint, September 12.** The separate L4-derived
+candidate [estimator_k3_strassen_L4_f21.py](../estimator_k3_strassen_L4_f21.py)
+is committed at SHA256 `d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`.
+Its [exact diff](../experiments/2026-09-12_f21/parent_to_f21.diff) changes only
+the specified `_dslice21` contraction and its local explanation. The frozen
+L4 parent is [pinned separately](../experiments/2026-09-12_f21/estimator_L4_parent.py).
+The tiny oracle, trajectory probe, paired scorer, provenance manifest and a
+source-plus-MIT-notice package are prepared; **none has produced a candidate
+cost, parity or accuracy result**. The required F21 contract is committed in
+the LOG; Samuel's three predictions are pending. Do not run these probes or
+read P01/P09 before recording them. A [fresh-context pre-score Skeptic](../experiments/2026-09-12_f21/prescore_skeptic.md)
+returned PROVISIONAL and prompted a targeted snapshot receipt-path repair;
+its follow-up review is pending. No P09 block is allocated or claimed, no
+vault/public labels were read, and there is no submission approval.
+
 **September 12, 2026: strategist review of worker d124234.** Then read LOG from the bottom. The preceding detailed chronology is [archived verbatim](archive/CURRENT_STATE_before_worker_review_2026-09-12.md); all original contracts and results remain in experiments/LOG.md.
 
-## Next action: a bounded candidate from our working estimator
+## Next measured action: conformance and cost of the bounded candidate
 
 **Build and test the three-product D21 contraction before more signed-source research.** Two existing products in the frozen estimator share M.T. Combining their left operands reduces four wide products to three while preserving the full recurrence, all history, scalar K4 and current backend. Fourteen wide calls disappear at depth16, equivalent to 105 lineage products. Roughly 13% dominant-work saving is a hypothesis, not measured official cost or score.
 
