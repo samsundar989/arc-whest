@@ -1,0 +1,8 @@
+{
+  "bootstrap_returncode": 1,
+  "expected_version": "0.4.1",
+  "pass": false,
+  "result": null,
+  "stderr": "Traceback (most recent call last):\n  File \"C:\\Users\\samsu\\Documents\\arc-whest\\local_sim\\p2_locked_bootstrap.py\", line 393, in <module>\n    raise SystemExit(main())\n  File \"C:\\Users\\samsu\\Documents\\arc-whest\\local_sim\\p2_locked_bootstrap.py\", line 386, in main\n    return run(parsed.target, parsed.expected_target_sha, args)\n  File \"C:\\Users\\samsu\\Documents\\arc-whest\\local_sim\\p2_locked_bootstrap.py\", line 372, in run\n    return _execute_target(\n  File \"C:\\Users\\samsu\\Documents\\arc-whest\\local_sim\\p2_locked_bootstrap.py\", line 336, in _execute_target\n    result = int(module.main(args))\n  File \"C:\\Users\\samsu\\Documents\\arc-whest\\p2-bootstrap-metadata-o6p5b703\\p2_lab.py\", line 22, in main\n    \"metadata_version\": importlib.metadata.version(\"dill\"),\n  File \"C:\\Users\\samsu\\AppData\\Roaming\\uv\\python\\cpython-3.10.19-windows-x86_64-none\\lib\\importlib\\metadata\\__init__.py\", line 996, in version\n    return distribution(distribution_name).version\n  File \"C:\\Users\\samsu\\AppData\\Roaming\\uv\\python\\cpython-3.10.19-windows-x86_64-none\\lib\\importlib\\metadata\\__init__.py\", line 969, in distribution\n    return Distribution.from_name(distribution_name)\n  File \"C:\\Users\\samsu\\AppData\\Roaming\\uv\\python\\cpython-3.10.19-windows-x86_64-none\\lib\\importlib\\metadata\\__init__.py\", line 548, in from_name\n    raise PackageNotFoundError(name)\nimportlib.metadata.PackageNotFoundError: No package metadata was found for dill\n",
+  "stdout": ""
+}

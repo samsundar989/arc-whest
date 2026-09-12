@@ -1,0 +1,101 @@
+{
+  "base_commit": "28fde21190efa5ea703dec7bbd484be3c3b60c01",
+  "cause": {
+    "detail": "_RegistryImportGuard replaced sys.meta_path with itself and delegated find_spec, but did not implement the find_distributions protocol used by importlib.metadata.",
+    "localized": true
+  },
+  "claim": "The locked bootstrap preserves standard installed-distribution metadata discovery while every executable repo-local import remains subject to the existing source-origin registry guard.",
+  "classification": "IMPORTANT instrument repair; truth-free",
+  "created_utc": "2026-09-12T04:52:23.011453+00:00",
+  "file_sha256": {
+    "local_sim/p2_locked_bootstrap.py": "0bba6abae9379b398ed473d935c295009371b95efd9526310038614a8db6341f",
+    "local_sim/test_p2_locked_bootstrap_metadata.py": "bfbc0e48d773d71fb8b68a2f8a0d2f22f94583b02fe9daf2fad7da7f3ef56d26",
+    "local_sim/test_stage0_lab_data.py": "0f2098731f6eac157e9e4604177326aa65f0a2079f8b42b26b461bc369f6cef4"
+  },
+  "focused_reproduction": {
+    "after": {
+      "artifact": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/metadata_protocol_after_repair.json",
+      "artifact_sha256": "e331b6c8f31419d54be308314f575381a83f4652a2cb215b6672209961bf6781",
+      "bootstrap_returncode": 0,
+      "external_module_imported": true,
+      "fixture_exit": 0,
+      "imported_module_version": "0.4.1",
+      "metadata_version": "0.4.1"
+    },
+    "before": {
+      "artifact": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/metadata_protocol_before_repair.json",
+      "artifact_sha256": "e55a4d1d2714912b87b03911b112372531cf4fdff367d62d0de8d9d4e2fc2eb7",
+      "bootstrap_returncode": 1,
+      "fixture_exit": 1,
+      "package_not_found": true,
+      "publication_absent": true
+    },
+    "distribution": "dill",
+    "expected_installed_version": "0.4.1",
+    "fixture": "local_sim/test_p2_locked_bootstrap_metadata.py"
+  },
+  "repair": {
+    "detail": "_RegistryImportGuard.find_distributions(context) yields from only the captured original meta-path finders, in their original order, passing the same context keyword. find_spec and its repo-origin checks are unchanged.",
+    "self_fingerprint": "b893af510d090aabce8c36b6ed0dd38b496eb0e652425ae6c5639aabf55a63d8"
+  },
+  "required_terminal_review": {
+    "fresh_skeptic_required": true,
+    "proposed_preflight": "workerq submit --project arc-whest --priority high --gpus 0 --ram 5 --vram 0 --cpus 2 --no-snapshot -- powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/preflight.ps1"
+  },
+  "schema": "arc-whest.p2-locked-bootstrap-metadata-repair.v1",
+  "scope": {
+    "candidate_math_or_selected_coefficient_changed": false,
+    "estimator_changed": false,
+    "frozen_arm_bytes_or_receipt_changed": false,
+    "p07_p01_roles_gates_statistics_cost_or_residual_models_changed": false,
+    "preflight_run": false,
+    "protected_truth_read": false,
+    "truth_registry_or_ledger_changed": false,
+    "workerq_submitted": false
+  },
+  "stage0_fixture_update": {
+    "initial_result": "31/32 because the fixture fixed P01 reads at 3 while the committed live ledger truthfully held 5 after jobs 944/946",
+    "repair": "snapshot and recheck the live P01 count and ledger hash; retain the P08 exhausted-at-three invariant",
+    "truth_reads_jsonl_changed": false
+  },
+  "verification": [
+    {
+      "command": "uv run python local_sim/test_p2_locked_bootstrap_metadata.py --output <after-artifact>",
+      "result": "PASS; bootstrap rc=0; metadata/import 0.4.1"
+    },
+    {
+      "artifact": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/freezer_tests_metadata_protocol_repair.json",
+      "artifact_sha256": "f5d08de6f4b50add35b94df57077dea5931b8e2826de106a05981809c29a3ec3",
+      "command": "uv run python local_sim/test_p2_freeze_k4_arms.py --output <artifact>",
+      "result": "PASS 19/19"
+    },
+    {
+      "command": "uv run python local_sim/test_p2_lab_freeze_bridge.py",
+      "result": "PASS 15/15; existing omitted top-level/dynamic imports and stale module/package cache adversaries still refuse"
+    },
+    {
+      "command": "uv run python local_sim/test_stage0_lab_data.py",
+      "result": "PASS 32/32"
+    },
+    {
+      "command": "uv run python scripts/verify_portability.py",
+      "result": "PASS 103/103"
+    },
+    {
+      "command": "uv run python -m py_compile local_sim/p2_locked_bootstrap.py local_sim/test_p2_locked_bootstrap_metadata.py",
+      "result": "PASS"
+    },
+    {
+      "command": "public and direct-bootstrap --help for p2_lab.py and p2_freeze_k4_arms.py",
+      "result": "PASS 4/4"
+    },
+    {
+      "command": "embedded normalized bootstrap fingerprint assertion",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ]
+}

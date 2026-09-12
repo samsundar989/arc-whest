@@ -1,0 +1,13 @@
+{
+  "bootstrap_returncode": 0,
+  "expected_version": "0.4.1",
+  "pass": true,
+  "result": {
+    "distribution": "dill",
+    "metadata_version": "0.4.1",
+    "module_file": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\Lib\\site-packages\\dill\\__init__.py",
+    "module_version": "0.4.1"
+  },
+  "stderr": "",
+  "stdout": ""
+}

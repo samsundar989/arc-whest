@@ -22,7 +22,7 @@ import types
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
-_SELF_FINGERPRINT = "475d2f243f107d1706b1ef4b051303c88162b858b317fab98d6dad70eda96468"
+_SELF_FINGERPRINT = "b893af510d090aabce8c36b6ed0dd38b496eb0e652425ae6c5639aabf55a63d8"
 _REGISTRY_NAME = "_CLI_SOURCE_REGISTRY"
 _TARGETS = {"p2_freeze_k4_arms.py", "p2_lab.py"}
 
@@ -154,6 +154,13 @@ class _RegistryImportGuard:
                 self._check_spec(fullname, spec)
                 return spec
         return None
+
+    def find_distributions(self, context=None):
+        """Preserve metadata discovery while this guard owns ``meta_path``."""
+        for finder in self._finders:
+            method = getattr(finder, "find_distributions", None)
+            if method is not None:
+                yield from method(context=context)
 
 
 def _purge_repo_modules_for_guard():

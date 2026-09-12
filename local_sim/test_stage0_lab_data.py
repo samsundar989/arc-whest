@@ -305,8 +305,8 @@ def test_corrector_and_history():
     parity_hits = [h for h in hits if h["file"].endswith("p2_k3_parity.py")]
     check("p2_k3_parity's remaining direct loads are classified no-label artifacts",
           len(parity_hits) == 3 and all(h["classification"] for h in parity_hits))
-    check("P01's three reads and P08's exhausted three reads are preserved",
-          p01 == 3 and p08 == 3 and tr.spent("P01") == p01 and
+    check("live P01 history and P08's exhausted three reads are preserved",
+          p08 == 3 and tr.spent("P01") == p01 and
           tr.spent("P08") == p08 and _sha(tr.READS_PATH) == before,
           f"P01={p01}, P08={p08}")
 

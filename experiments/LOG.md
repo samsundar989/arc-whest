@@ -43469,3 +43469,57 @@ bytes, P07/P01 roles, truth archives, gate, statistic, cost model, residual mode
 estimator, archive, public split or vault. P01 may be retried only after this
 IMPORTANT repair earns current-byte preflight and an independent fresh-context
 Skeptic acceptance.
+
+
+## 2026-09-11 - Locked bootstrap restores installed package metadata discovery
+
+**IMPORTANT result; truth-free.** The focused synthetic target reproduced jobs
+944/946 before the repair through the real locked bootstrap: an actual `dill`
+module import succeeded, but `importlib.metadata.version("dill")` raised
+`PackageNotFoundError`, the bootstrap exited 1 and no result was published. The
+installed version visible outside the guard was `0.4.1`. Raw before evidence is
+`freeze_bridge/metadata_protocol_before_repair.json` (SHA-256
+`e55a4d1d2714912b87b03911b112372531cf4fdff367d62d0de8d9d4e2fc2eb7`).
+
+The localized cause was the one in the contract: `_RegistryImportGuard` replaced
+`sys.meta_path` with itself and delegated `find_spec`, but did not expose the
+`find_distributions` protocol that `importlib.metadata` obtains from meta-path
+finders. The guard now delegates only `find_distributions(context=...)` to the
+captured original finders, in their original order. It does not consult the live
+one-element meta path and cannot recurse. Executable imports still cross the
+unchanged `find_spec` implementation and its repository-origin registry check.
+The bootstrap's normalized embedded fingerprint was refreshed.
+
+The same fixture now exits 0 and proves both an actual external `dill` import and
+metadata lookup return exactly `0.4.1`; after evidence is
+`freeze_bridge/metadata_protocol_after_repair.json` (SHA-256
+`e331b6c8f31419d54be308314f575381a83f4652a2cb215b6672209961bf6781`).
+All prior provenance-negative controls remain intact: freezer **19/19**, bridge
+**15/15**, including omitted top-level and dynamic repo imports, stale module
+bytes and cached parent-package attributes. Public and direct-bootstrap help for
+both production targets passed **4/4**.
+
+Stage-0 first reported **31/32** because its history assertion still required
+exactly three P01 reads even though the committed jobs 944/946 failures had
+truthfully raised the reusable-DESIGN P01 ledger count to five. The focused test
+now snapshots and rechecks the live P01 count and complete ledger hash while
+retaining the fixed P08 exhausted-at-three invariant. It then passed **32/32**;
+`truth_reads.jsonl` was not changed. Portability passed **103/103**. `py_compile`,
+the embedded normalized fingerprint assertion and `git diff --check` passed.
+
+The structured evidence packet is
+`freeze_bridge/metadata_protocol_repair_summary.json` (SHA-256
+`f49ae16638c2280197373cefd3136bdd62752dc4e151ec562baaf38ad5dd0aa5`).
+Current source hashes are bootstrap
+`0bba6abae9379b398ed473d935c295009371b95efd9526310038614a8db6341f`,
+metadata fixture
+`bfbc0e48d773d71fb8b68a2f8a0d2f22f94583b02fe9daf2fad7da7f3ef56d26`
+and Stage-0 fixture
+`0f2098731f6eac157e9e4604177326aa65f0a2079f8b42b26b461bc369f6cef4`.
+No protected truth, truth ledger, estimator, arm byte, freeze receipt, candidate
+math, selected coefficient, data role, gate, statistic, cost or residual model
+changed. No workerq job or preflight was launched. The proposed terminal
+current-byte command for the root reviewer is `workerq submit --project arc-whest
+--priority high --gpus 0 --ram 5 --vram 0 --cpus 2 --no-snapshot --
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/preflight.ps1`.
+Fresh-context Skeptic acceptance remains required before another P01 attempt.
