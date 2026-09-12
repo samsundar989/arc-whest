@@ -45978,3 +45978,59 @@ independent Skeptic before using the explicit array ledger. A stable
 integrated program and workerq measured process peak remain separate
 required work before a deployable memory claim. Samuel's prediction
 is **"I don't know"**.
+
+**September 12 IMPORTANT memory-ledger co-live repair contract (before repair/run).**
+The fresh independent verdict `224c7a1` is **INCOMPLETE** for the first
+shape-only ledger (`0597827`), despite 20/20 structural checks and controlled
+default preflight workerq **1013** GREEN 12/16 (four Full-only skipped).
+Exact-source receipt SHA256 `dd7b2ceed52df6e7acaac7f359581f34c6299f0f9f79763da7106d99863f786b`,
+raw workerq bundle SHA256 `e398a54a00f4cc32be6547de2de480942b11b9000fa9e91e81e5e071c7e95cd2`,
+committed `8c3594d`. The 638,803,200-byte reported stage maximum omits
+at least 14 float32 n-by-n prior-loop locals at L14 readout; adding them
+under the *ledger's inclusive convention* yields at least 697,523,456
+bytes for that stage, not an observed or rigorous runtime lower bound.
+Current L14 birth also omits live covariance/consumer arrays. Preserve
+the original result and verdict as a failed completeness claim.
+
+**Question:** can a deterministic, no-large-allocation shape inventory
+account conservatively for the integrated prototype's named Python loop
+locals across iterations and for all named current covariance/source-birth
+arrays? **Evidence:** CONFIRMED the independent missing-local counterexample
+above; CONFIRMED the first ledger's history schedule/field dimensions,
+positive S-column storage saving, negative full n-column fields, and
+n8 partial resident floor; INFERRED that an explicit old/current local
+allowance can repair the *named-array* envelope; UNKNOWN library workspace,
+allocator/fragmentation, flopscope wrappers and physical-source lifetime.
+**Intervention:** in a separately committed ledger revision, model prior
+iteration locals persisting into the next readout and current covariance
+and source-birth locals, with explicit labels/shapes/alias deduplication.
+Keep old padded and skinny controls and original JSON untouched. Add
+checks that independently enumerate the omitted L14 readout and birth
+objects, verify they are present in the revised stage inventory, preserve
+the 28 joins, 15 ordinary/14 feed births, 330 D3/287 D21 uses, n8 partial
+floor, exact positive/negative widths and no individual modeled array
+>=4 GiB. If an explicit source variable's lifetime is uncertain, include
+it in both overlapping stages as a conservative allowance and disclose
+the overcount; do not call the model whole-process memory.
+
+**Predictions/gates:** revised L14 readout includes at least the 14
+independently identified n-by-n prior local identities, and the revised
+birth includes all currently named covariance and source-construction
+matrices; schedule/field arithmetic remains identical. The revised
+inclusive stage number must exceed the rejected 638,803,200-byte figure,
+but no 8 GiB/process pass follows. **Falsifier:** any named co-live omission,
+missing label/alias, historical schedule change, or contradiction with the
+committed tiny n8 resident control. **Baseline:** first ledger JSON SHA256
+`10c7835042b581b6691f6f98963a90adeeb222ba846557da2582396443025155`,
+source SHA `88f2fedacdcd778f8709b1b0110096f70314bba95116f3cd970999651a4cae67`,
+integrated optimized source SHA
+`3a57e5e5709a62848f8412de094f218ea9b323933b9071e04c5dabbdab8b12b3`,
+and verdict `224c7a1`. **Cost/statistic:** exact byte and deterministic
+shape arithmetic, no allocated width1024 arrays or experimental scores;
+no seed block, public/vault touch, residual model, or estimator change.
+Commit the revised instrument before running the fixture, preserve failure
+artifacts if any, run controlled current-byte default preflight through
+workerq (5 GiB RAM/2 CPUs/0 GPU), then seek a *fresh-context* Skeptic
+against contract/source/raw result/receipt. This remains an architecture
+memory planning aid, not an 8 GiB cap validation or clearance to meter
+the unstable full-width source. Samuel's prediction is **"I don't know"**.
