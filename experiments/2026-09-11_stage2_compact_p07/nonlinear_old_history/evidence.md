@@ -53,3 +53,14 @@ Source SHA-256:
 `991a4e38eefe90ee2f761556dd60ac1b3b6c86280437d096d8a8d8f29a6d5c61`.
 Raw result SHA-256:
 `fead616c0b5149ad48ca109a12eafe56a5ec698a0e45ddcba86e9af738735df9`.
+
+Shared workerq 994 ran the live default preflight at tested HEAD `e84b16c`
+with 5 GiB RAM, zero GPU and two CPUs. It **SUCCEEDED GREEN 12/16** with
+four Full-only skips, peak process RAM `2842.9140625 MiB`. Raw transcript
+`../shared_preflight_994.log` SHA256
+`02d2dd28ee190044cd1cf754fcd3ab2c6756e218cc9c72d34e6c7a23b9003a26`.
+Before/after receipts match HEAD, both fixture source/result pairs and all
+248 scoped Python hashes. An untracked design-only memo and receipt appeared
+during the live run; no Python or tested result changed. This default gate
+does not execute the focused nonlinear fixture or enforce Windows' 8 GiB
+grader cap. Independent Skeptic review remains pending.

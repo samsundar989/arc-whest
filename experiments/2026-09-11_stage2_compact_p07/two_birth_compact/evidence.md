@@ -38,3 +38,14 @@ Result SHA256:
 The receipt binds both. `result.json` also binds the imported feed constructor
 and compact reference source bytes. No physical nonlinear source, live-width
 rank adequacy, complete challenge cost, residual, or score was measured.
+
+Shared live workerq 994 ran default preflight at tested HEAD `e84b16c` under
+5 GiB RAM, zero GPU and two CPUs: **GREEN 12/16**, four Full-only skips,
+peak process RAM `2842.9140625 MiB`. Raw transcript
+`../shared_preflight_994.log` SHA256
+`02d2dd28ee190044cd1cf754fcd3ab2c6756e218cc9c72d34e6c7a23b9003a26`.
+Before/after receipts agree on HEAD, both fixture source/result pairs and
+248 scoped Python hashes. An untracked design memo and receipt appeared
+during the live job, but no tested source/result changed. The default gate
+does not run this focused fixture or enforce the Windows 8 GiB grader cap.
+Independent Skeptic review is pending.
