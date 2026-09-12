@@ -44984,3 +44984,28 @@ carry, not a deployable nonlinear multi-source increment, compression,
 all-history cost or accuracy. Run focused fixture, exact source/result hashes,
 snapshot-bound workerq default preflight at 5 GiB/2 CPUs/zero GPU, and a new
 fresh-context Skeptic before accepting any claim.
+
+**September 12 operational amendment to the axis-exact contract, before its
+first focused result.** The numerical intervention, N32/48/64 orders,
+thresholds, controls, scope and Samuel's `"I don't know"` prediction above
+are unchanged. Workerq 988 subsequently tested a Git-snapshot default
+preflight of the separate first-source cost packet and returned **RED**:
+the snapshot omitted gitignored historical ledger/truth artifacts, changed
+their byte hashes via checkout conversion, and normalized the frozen
+`estimator.py` bytes away from the stored official FLOP anchor. It failed
+steps 7, 9 and 12, not the new axis fixture. Requiring that same snapshot
+mode for the axis fixture would measure a known packaging difference
+instead of the registered source. Replace only the *operational preflight
+method* with a workerq **live-worktree** default preflight at 5 GiB RAM,
+2 CPUs and zero GPU after committing the new fixture/result. Record HEAD
+and fixture SHA-256 immediately before submission, verify the same bytes
+and HEAD after terminal, retain the raw queue manifest/log/result/ZIP,
+and report the four Full-only skips. Keep the worktree's tested Python
+bytes stable while that job runs; if they drift, the preflight attribution
+is incomplete and must be rerun. Do not use the red snapshot as a green
+gate, and do not alter the registered numerical result because of this
+instrument-path amendment. Workerq 990 is the separate first-source
+live-worktree retry, terminal GREEN 12/16 at HEAD `4622426`, peak
+3091.625 MiB; its final packet/Skeptic remain pending here. No axis
+focused result, protected label, seed block or vault read preceded this
+amendment.
