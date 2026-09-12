@@ -1,0 +1,16 @@
+{
+  "contract_commit": "ad856c6",
+  "focused_command": "uv run python local_sim/test_p2_k4_nonlinear_split_bank.py --output experiments/2026-09-11_stage2_compact_p07/nonlinear_split_bank/result.json",
+  "focused_exit_code": 0,
+  "result_path": "experiments/2026-09-11_stage2_compact_p07/nonlinear_split_bank/result.json",
+  "result_sha256": "9a8692559f2744bccd4a0bcd6fef1941f9bab551af984f3fdeb316fe15e277ab",
+  "source_path": "local_sim/test_p2_k4_nonlinear_split_bank.py",
+  "source_sha256": "e3708d9d878f3191cbf61dcd632e188507d0b575e77e692219108c280d3ff59f",
+  "imported_helper_sha256": {
+    "local_sim/test_p2_k4_nonlinear_old_history.py": "991a4e38eefe90ee2f761556dd60ac1b3b6c86280437d096d8a8d8f29a6d5c61",
+    "local_sim/test_p2_k4_increment_axis_gauss.py": "1f2f421bcc696dec263a77847b076914982bc41eba08f251a4034925a6f4d1d9"
+  },
+  "status": "PASS",
+  "checks_passed": 77,
+  "checks_total": 77
+}
