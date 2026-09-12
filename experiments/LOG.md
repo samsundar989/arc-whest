@@ -43796,6 +43796,9 @@ It creates no scored report and reads no P01/P07/vault truth arrays;
 
 Focused bridge 17/17, freezer 19/19, truth-read Stage-0 35/35, seed-ledger
 66/66, portability 103/103, `py_compile`, and `git diff --check` pass. The
+current immutable metadata-protocol freeze receipt also passes its strict
+`validate_freeze_receipt()` check; this opens no protected truth arrays.
+Public and direct-bootstrap `p2_lab.py --help` both exit zero. The
 current lab SHA-256 is
 `99dfe07b3441afe91dc2b3e17d77bd442467e4a8d5b372fa93642b8c26af3638`;
 the bootstrap remains `0bba6abae9379b398ed473d935c295009371b95efd9526310038614a8db6341f`.
@@ -43804,3 +43807,67 @@ gate, statistic, cost model, residual policy or vault changed. This proves the
 publication ordering and binding controls on sacrificial fixtures, not scored
 versus depth numerical equality or K4 accuracy. Current-byte default preflight
 and a fresh independent Skeptic remain pending before any further P01 read.
+## 2026-09-12 — Job 952 passes; independent stage-spoof counterexample blocks P01
+
+Workerq **952** ran committed `fa9a4d8` on the live worktree with no snapshot,
+zero GPU, 5 GiB RAM and two CPUs. It finished `SUCCEEDED`, exit 0, in
+324.954364 seconds at 3,090.9140625 MiB peak. Default preflight was **GREEN
+12/16**, with four Full-only steps SKIPPED. Raw transcript, manifest and
+metadata in `2026-09-11_stage2_compact_p07/freeze_bridge/job952_*` have SHA-256
+`4d4cf122f4126087aad7cf2d291b2db6eb73dd9443c878741939c4d26536322f`,
+`f7dc6c9074f1a242c8919f6614441bea053aa0fa98216e97db3ec6a5a8359215`,
+`cad70c27cfff9a511c010d9163fec4d2d33089b6bef689cd2539ef8c8fa21d3a`.
+
+A separate fresh-context Skeptic independently reran the normal late-origin
+and real-receipt probes, then found that a caller can pass a stage path directly
+to the old pinned bootstrap through `ARC_WHEST_P2_LAB_REPORT_STAGE` without
+the public parent. In the sacrificial copied lab, final origin audit exits 2
+and the requested `--out` remains absent, but the caller-selected stage holds
+all four arms with `status: complete`. Its truth reservation names the requested
+path, not the caller stage. Reproducer and raw JSON are
+`freeze_bridge/skeptic_stage_spoof_probe.py` (SHA-256
+`3cbfb88efe8bab9a4c52b190ec345f0b29cfa8b6efeefff71ff066619a08e9be`)
+and `freeze_bridge/skeptic_stage_spoof_probe.json` (SHA-256
+`992c7fd15c1f114157ae9b38571d217233c031a2243582df1f5d94111f08a6fe`).
+The Skeptic's final turn failed automatic review before a written verdict;
+there is **no accepted independent verdict** on `fa9a4d8`. The raw negative
+is sufficient to hold P01. It is an instrument publication failure, not a
+K4 accuracy outcome. No protected truth was read in the probe.
+
+### IMPORTANT contract — staged reports remain pending until audited promotion
+
+**Question.** Can every locked lab child write only explicitly pending staged
+data, so neither the normal launcher nor a direct-bootstrap caller can leave
+a report claiming complete after a final origin refusal?
+
+**Evidence.** **CONFIRMED:** the standard parent at `fa9a4d8` withholds the
+requested output until child exit 0 and rechecks real receipt/arm/truth/source
+bindings; its late-origin negative leaves no requested output. **CONFIRMED:**
+the direct-bootstrap stage-spoof fixture exits 2 yet leaves a complete
+caller-selected stage. **INFERRED:** the child should serialize a pending status
+that has no final authority, and the parent should construct and atomically
+link complete bytes only after the child's terminal audit and its own binding
+checks. **SPECULATIVE:** this can preserve all original score/report fields,
+exclusive immutability and no transient complete artifact without changing
+the receipt-pinned bootstrap. The fixture arms return zeros, so it tests
+publication, not numerical K4 accuracy.
+
+**Prediction.** The old copied direct-bootstrap probe reproduces exit 2 plus
+a complete caller stage. After repair, the same origin refusal still exits 2,
+the requested path remains absent, and every surviving caller stage is marked
+pending rather than complete. The normal public real-entry synthetic four-arm
+path publishes one complete report with receipt-matching hashes and correct
+truth result path. Preexisting output, missing/swapped arm or truth, closing
+source change and malformed or symlink stage refuse without complete output.
+Current freeze receipt remains valid and the focused suites/default preflight
+pass. Samuel's standing K4 prediction is `I don't know`; no new scientific
+prediction is needed for this instrument repair.
+
+**Gate / falsifier.** The truth-free direct and normal positive/negative
+fixtures, actual-receipt binding probe, protected-read invariants, current-byte
+default preflight and a **new fresh-context independent Skeptic ACCEPT** are
+required before retrying P01. Any complete stage surviving a final refusal,
+altered report statistic/cost/role, source-binding regression or protected
+read blocks the retry. Scope: `p2_lab.py` publication status/parent finalization
+and sacrificial fixtures; preserve the old bootstrap, fit/freeze receipts,
+frozen arms, estimator, protected data/ledger, gate and residual model.
