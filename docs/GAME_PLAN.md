@@ -19,10 +19,13 @@ reference, current live-shape source/cost gates, official validation and a fresh
 label-free Skeptic. Its ledgers are 816.293--818.516 billion FLOPs and the current
 exact arm measured 1,079.0 MiB peak RAM. The registered P07 producer and verifier
 completed; the exposed-DESIGN fit selected `lam=1/3`, and all four arms were
-frozen. Job 949's loader refusal left no four-arm accuracy result. The four-arm coherent-K4 mechanism
-comparison remains the first scientific discriminator, and the compact reference
-is the priced baseline for later residual/shared-coordinate questions. Stage 4
-remains conditional on a measured Stage-2 bottleneck.
+frozen. Job 957 subsequently completed the registered exposed-DESIGN four-arm
+accuracy-only comparison: all K4 arms fail the arithmetic score gate. The fresh
+result Skeptic accepted that measured failure but found the scientific cause
+INCOMPLETE. A source-cumulant and covariance-symmetry defect needs a truth-free
+discriminator before another label. The compact reference remains the priced
+baseline for later residual/shared-coordinate questions. Stage 4 remains
+conditional on a measured Stage-2 bottleneck.
 
 ## Objective and architecture
 
@@ -111,14 +114,22 @@ documented reads before job 949 (three historical smoke reads and two failed
 production attempts), and job 949 added one more; it remains exposed DESIGN.
 The earlier paragraphs below describe the entry contract and historical queue state.
 
-**Terminal P01 update.** Workerq 957 published the complete four-arm report
+**Terminal P01 update and synthesis.** Workerq 957 published the complete four-arm report
 over 96 exposed-DESIGN identities with no failed lifecycle rows and about
 3,792.4 MiB peak process RAM. All three K4 arms fail the registered arithmetic
 1.10x gate and are worse on every paired case; the consumer-bearing arms are
-numerically extreme. These are raw DESIGN observations pending a fresh result
-Skeptic and synthesis, not a registered kill or a basis to fit a new constant.
+numerically extreme. The independent result Skeptic's verdict is **INCOMPLETE
+for causal K4** but accepts the failed promotion gate for the frozen program.
+The source constructs a central moment rather than a fourth cumulant, fabricates
+mixed fourth cumulants on independent coordinates, and applies a generally
+asymmetric D31 covariance term. The earlier dense oracle did not check this
+source construction. LOG commit `c54eb87` records the synthesis and a
+preregistered truth-free identity fixture. Do not fit a new constant or spend
+another protected label until the source math is independently checked and
+repaired within a new contract and fresh Skeptic gate. This is not a registered
+scientific kill of the intended representation.
 The residual-cap relaxation means this run supplies no 0.4 s server-cliff
-evidence. Do not implement the next strategic slice from this partial analysis.
+evidence. Defer the residual-rank slice until the first mechanism is sound.
 
 **Current entry condition satisfied:** the replacement experiment contract, three
 verbatim `I don't know` human predictions and bounded coefficient/identity registry

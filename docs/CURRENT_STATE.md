@@ -1,7 +1,7 @@
 # CURRENT_STATE.md — read this first
 
-**Current September 12, 2026, after a terminal exposed-DESIGN P01 four-arm
-report; independent result review is pending.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
+**Current September 12, 2026, after the exposed-DESIGN P01 four-arm result
+and independent result synthesis.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
 archived at `docs/archive/CURRENT_STATE_before_worker_review_2026-09-10.md`.
 
 ## What is proved
@@ -120,10 +120,20 @@ arithmetic promotion gate and are worse on every paired network; coherent and
 consumers-only have very large errors, while births-only also worsens markedly.
 The averaged-truth noise floor is about `9.319e-9`, far below these MSEs.
 The raw report, queue record and seventh registered P01 read are committed at
-`f90a128`. A fresh independent result Skeptic is checking the report and
-possible live-shape implementation/numerical pathology before synthesis. This
-is neither a registered kill nor a new submission candidate. No fresh DECIDE,
-public CONFIRM or vault evaluation has occurred.
+`f90a128`. The fresh result Skeptic returned **INCOMPLETE for the coherent-K4
+causal hypothesis** while accepting the source-bound accuracy-only measurement
+and its failed arithmetic gate. Verdict and synthesis are in
+`experiments/2026-09-11_stage2_compact_p07/skeptic_verdict_p01_mechanism.md`
+and LOG commit `c54eb87`. The consumer arms first diverge at L2, before
+old-history compression. Source inspection found that the frozen arm builds a
+fourth central moment where it names a cumulant, fabricates mixed fourth
+cumulants for independent coordinates, and includes a generally asymmetric
+D31 covariance update. These are plausible implementation explanations, not
+proof that a corrected method will improve accuracy. A preregistered truth-free
+independent identity fixture is the next discriminator; no protected labels
+should be spent on this diagnosis. There is no registered scientific kill or
+new submission candidate. No fresh DECIDE, public CONFIRM or vault evaluation
+has occurred.
 
 The old contract at `08f787b` is superseded. P01 has three recorded DESIGN reads
 and placeholder-smoke exposure; it is never relabeled untouched. P07 is reusable
@@ -134,8 +144,11 @@ The exact coefficient and identity registries are committed. Fresh-context Skept
 accepted the producer's exact-P07 pre-mint guard, repaired standalone receipt
 verifier and now the complete compact label-free implementation gate. The four
 generated exact/coherent/consumers-only/births-only arms reproduce the independent
-tiny reference, bind exact current sources through publication, pass official
-validation and execute at 816.293--818.516 billion FLOPs. Current exact peak RAM is
+tiny supplied-core transport and contraction reference, bind exact current
+sources through publication, pass official validation and execute at
+816.293--818.516 billion FLOPs. The source-cumulant construction did not have
+an independent distributional identity proof and now has a concrete challenge.
+Current exact peak RAM is
 1,079.0 MiB; the compact reference accounts for 345,587,712 bytes of peak array
 payload. Null outer peak telemetry for three current arms is recorded rather than
 filled in from earlier diagnostics. Job 890 passed current-byte default preflight
@@ -145,9 +158,9 @@ Workerq **903** completed the registered label-free P07 producer. Its 5 GiB RAM
 declaration was too low: measured peak was 10,771.9 MiB. Its immutable receipt
 passed standalone verification before the protected P07 DESIGN fit and four-arm
 freeze described above. An identical monolithic producer needs at least 12 GiB
-declared RAM. The P01 mechanism result, its synthesis and independent Skeptic
-still precede any untouched DECIDE allocation. No public or vault truth is
-authorized.
+declared RAM. The P01 result, synthesis and independent Skeptic are complete
+in their stated scope; source-math repair and fresh conformance precede an
+untouched DECIDE allocation. No public or vault truth is authorized.
 
 An independent launch audit caught one final no-snapshot provenance gap before
 P07 started: the producer used the selector before binding its disk bytes. Job 891
@@ -183,8 +196,9 @@ so its role is unchanged. The exact command and protected stdout are preserved i
 
 ## Submission state
 
-There is **no newly proven better submission**. The compact arms have only DESIGN
-fit and label-free cost evidence so far, and are not shipped estimator candidates.
+There is **no newly proven better submission**. The compact arms now have a
+negative exposed-DESIGN accuracy result, an independently identified source
+identity gap and label-free cost evidence; they are not shipped candidates.
 The standing choices are
 unchanged:
 
@@ -200,11 +214,11 @@ on eligibility work remains binding; Stage 3 stays closed.
 ## Strategist decision
 
 A new Strategist Packet is **not required yet**. Repository evidence is not
-exhausted: the repaired coherent-K4 DESIGN comparison has not run, so it can still
-identify whether the bottleneck is the K4 mechanism, residual rank or shared-basis
-compression. Consult a strategist after that measured result and Skeptic synthesis
-if it leaves no supported next discriminator, or before changing architecture
-beyond GAME_PLAN's bounded frontier options.
+exhausted: the frozen coherent-K4 DESIGN comparison failed, and the resulting
+source-cumulant/symmetry counterexample supplies a bounded truth-free next
+discriminator. Consult a strategist if corrected algebra and fresh Skeptic
+synthesis leave no supported next step, or before changing architecture beyond
+GAME_PLAN's bounded frontier options.
 
 ## Preserved constraints
 
