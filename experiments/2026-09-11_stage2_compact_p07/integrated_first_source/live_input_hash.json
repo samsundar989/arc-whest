@@ -1,0 +1,17 @@
+{
+  "head": "9248c62a6d5a8f1ab4e116072a96635f46202166",
+  "input_array_bytes": 134742528,
+  "input_manifest_sha256": "0f7930c575dca7637b57477ef29a8b46715635bcc7ef9664a6a9fbc96248eeaf",
+  "input_sha256": "b573acbdf0cac0b284337798809f34c5de21cbecc88efe4db697aeab5632d4c7",
+  "kind": "generator-only full-width input hash; no flopscope context",
+  "map_dtype": "float64",
+  "probability_dtype": "float64",
+  "raw_dtype": "float64",
+  "script_sha256": "dec666b437396f3abc3e2b5ca04851a936b03d83b38f46118563dfd04455a810",
+  "shape": [
+    1024,
+    16
+  ],
+  "source_rank": 64,
+  "source_sha256": "284b550f5f1fde7840a7a84923a394bee069a3454f0c780601fe696457b8b9c8"
+}

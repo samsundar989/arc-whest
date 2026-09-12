@@ -1,0 +1,27 @@
+{
+  "archive_sha256": "d00d59ee5d919dce26e67445f276eab034ce8e9566bb8e8e45f3d9240009df0b",
+  "canonical_result_sha256": "42591e63e233140e7d03c5af8c9a9febf3ec4dcb8cc951ff6ad1837f3bd1d820",
+  "command": [
+    "uv",
+    "run",
+    "python",
+    "experiments/2026-09-11_stage2_compact_p07/integrated_first_source/hash_inputs.py",
+    "--json",
+    "experiments/2026-09-11_stage2_compact_p07/integrated_first_source/live_input_hash.json"
+  ],
+  "input_sha256": "b573acbdf0cac0b284337798809f34c5de21cbecc88efe4db697aeab5632d4c7",
+  "job": 1003,
+  "raw_members_sha256": {
+    "hash_inputs.py": "dec666b437396f3abc3e2b5ca04851a936b03d83b38f46118563dfd04455a810",
+    "input_manifest.json": "0f7930c575dca7637b57477ef29a8b46715635bcc7ef9664a6a9fbc96248eeaf",
+    "job.log": "e5051d6af19363d88ee057eb821b1bca22869ca90d9ab79cadb94dc971e3c008",
+    "live_input_hash.json": "8b8d97a6a7f318da2f9ace7e2db83fa2d29e19cb2de3e9457ffe9b2baccfba8e",
+    "manifest.json": "13c4e0c3437d49b90de552aa7e2d74e68ad7af612373a94b4f34dba0144028ac",
+    "source.py": "284b550f5f1fde7840a7a84923a394bee069a3454f0c780601fe696457b8b9c8",
+    "status.json": "35438621d7b63a102d251546e7b9cd2072a3f72e255360d38f3bd27b61322ac9"
+  },
+  "snapshot_commit": "9248c62a6d5a8f1ab4e116072a96635f46202166",
+  "source_matches_current": true,
+  "source_matches_frozen_manifest": true,
+  "state": "SUCCEEDED"
+}
