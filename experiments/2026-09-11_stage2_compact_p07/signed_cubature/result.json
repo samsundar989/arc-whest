@@ -1,0 +1,862 @@
+{
+  "cases": {
+    "rho_0": {
+      "cumulant_classes_order48": {
+        "k04": 0.2797083383527066,
+        "k13": -2.341201058720714e-17,
+        "k22": 1.1102230246251565e-16,
+        "k31": 2.7233376807414613e-17,
+        "k40": 0.27970833835270603
+      },
+      "discrete_covariance_order48": [
+        [
+          0.3408450569081021,
+          5.106903147834069e-19
+        ],
+        [
+          -4.7901842751966315e-19,
+          0.34084505690810196
+        ]
+      ],
+      "full_node_counts": [
+        4096,
+        9216
+      ],
+      "half_orders": [
+        32,
+        48
+      ],
+      "maps": {
+        "hadamard": {
+          "d22": [
+            [
+              0.13985416917635304,
+              0.1398541691763529
+            ],
+            [
+              0.13985416917635282,
+              0.13985416917635302
+            ]
+          ],
+          "d31": [
+            [
+              0.13985416917635304,
+              8.326672684688674e-17
+            ],
+            [
+              5.551115123125783e-17,
+              0.13985416917635302
+            ]
+          ],
+          "d4": [
+            0.13985416917635304,
+            0.13985416917635302
+          ],
+          "matrix": [
+            [
+              0.7071067811865475,
+              0.7071067811865475
+            ],
+            [
+              0.7071067811865475,
+              -0.7071067811865475
+            ]
+          ],
+          "metric_residual_d4": [
+            -0.06992708458817648,
+            -0.06992708458817648
+          ],
+          "metric_residual_max_absolute": 0.06992708458817648,
+          "wrong_d31_orientation_covariance_gap": 0.0
+        },
+        "second": {
+          "d22": [
+            [
+              0.10675068733231013,
+              0.3343668440210537
+            ],
+            [
+              0.33436684402105354,
+              1.0475785283040282
+            ]
+          ],
+          "d31": [
+            [
+              0.10675068733231013,
+              -0.17406249895688872
+            ],
+            [
+              -0.548878665057973,
+              1.0475785283040282
+            ]
+          ],
+          "d4": [
+            0.10675068733231013,
+            1.0475785283040282
+          ],
+          "matrix": [
+            [
+              0.8,
+              -0.3
+            ],
+            [
+              -0.55,
+              1.4
+            ]
+          ],
+          "metric_residual_d4": [
+            -0.005041742798807543,
+            -0.026272042724056338
+          ],
+          "metric_residual_max_absolute": 0.14069679054564055,
+          "wrong_d31_orientation_covariance_gap": 0.011812956168285885
+        }
+      },
+      "metric_G": [
+        [
+          0.10489062688226478,
+          2.2480204426964728e-18
+        ],
+        [
+          2.5853577752892108e-18,
+          0.10489062688226505
+        ]
+      ],
+      "metric_M": [
+        [
+          2.0,
+          0.0
+        ],
+        [
+          0.0,
+          2.0
+        ]
+      ],
+      "metric_source_residual_max_absolute": 0.06992708458817651,
+      "negative_controls": {
+        "axis_origin_omission_future_d4_gap": 0.08246882814924253,
+        "axis_origin_omission_source_gap": 0.1649376562984866,
+        "no_covariance_subtraction_source_gap": 0.348526058456062,
+        "wrong_d31_orientation_covariance_gap": 0.011812956168285885
+      },
+      "normalization_order48": 0.9999999999999998,
+      "positive_quadrant_probability_order48": 0.24999999999999997,
+      "raw_moments_order32": {
+        "00": 1.0,
+        "01": 0.398942280401433,
+        "02": 0.5000000000000002,
+        "03": 0.7978845608028656,
+        "04": 1.5000000000000004,
+        "10": 0.398942280401433,
+        "11": 0.1591549430918956,
+        "12": 0.19947114020071657,
+        "13": 0.3183098861837911,
+        "20": 0.5000000000000002,
+        "21": 0.19947114020071655,
+        "22": 0.25000000000000017,
+        "30": 0.7978845608028655,
+        "31": 0.318309886183791,
+        "40": 1.5000000000000009
+      },
+      "raw_moments_order48": {
+        "00": 1.0,
+        "01": 0.39894228040142765,
+        "02": 0.49999999999999356,
+        "03": 0.7978845608028547,
+        "04": 1.4999999999999796,
+        "10": 0.39894228040142754,
+        "11": 0.15915494309189132,
+        "12": 0.19947114020071122,
+        "13": 0.31830988618378236,
+        "20": 0.49999999999999345,
+        "21": 0.19947114020071122,
+        "22": 0.24999999999999356,
+        "30": 0.7978845608028546,
+        "31": 0.31830988618378236,
+        "40": 1.4999999999999796
+      },
+      "rho": 0.0
+    },
+    "rho_0.5": {
+      "cumulant_classes_order48": {
+        "k04": 0.2797083383527055,
+        "k13": 0.11417442414038381,
+        "k22": 0.10914008267227016,
+        "k31": 0.11417442414038367,
+        "k40": 0.27970833835270503
+      },
+      "discrete_covariance_order48": [
+        [
+          0.340845056908101,
+          0.14534394743021603
+        ],
+        [
+          0.14534394743021603,
+          0.34084505690810085
+        ]
+      ],
+      "full_node_counts": [
+        4096,
+        9216
+      ],
+      "half_orders": [
+        32,
+        48
+      ],
+      "maps": {
+        "hadamard": {
+          "d22": [
+            [
+              0.5319131414655247,
+              0.08528412784021727
+            ],
+            [
+              0.08528412784021733,
+              0.07521544490399024
+            ]
+          ],
+          "d31": [
+            [
+              0.5319131414655247,
+              -1.942890293094024e-16
+            ],
+            [
+              8.326672684688674e-17,
+              0.07521544490399024
+            ]
+          ],
+          "d4": [
+            0.5319131414655247,
+            0.07521544490399024
+          ],
+          "matrix": [
+            [
+              0.7071067811865475,
+              0.7071067811865475
+            ],
+            [
+              0.7071067811865475,
+              -0.7071067811865475
+            ]
+          ],
+          "metric_residual_d4": [
+            0.011927977416026341,
+            0.011927977416026369
+          ],
+          "metric_residual_max_absolute": 0.011927977416026383,
+          "wrong_d31_orientation_covariance_gap": 3.469446951953614e-18
+        },
+        "second": {
+          "d22": [
+            [
+              0.2479550624295805,
+              0.28859068631149654
+            ],
+            [
+              0.2885906863114967,
+              0.6410107864231871
+            ]
+          ],
+          "d31": [
+            [
+              0.2479550624295805,
+              -0.2315347595318318
+            ],
+            [
+              -0.385868134248535,
+              0.6410107864231871
+            ]
+          ],
+          "d4": [
+            0.2479550624295805,
+            0.6410107864231871
+          ],
+          "matrix": [
+            [
+              0.8,
+              -0.3
+            ],
+            [
+              -0.55,
+              1.4
+            ]
+          ],
+          "metric_residual_d4": [
+            0.0008600071716955263,
+            0.004481415665059649
+          ],
+          "metric_residual_max_absolute": 0.023999686959916052,
+          "wrong_d31_orientation_covariance_gap": 0.004864073526488134
+        }
+      },
+      "metric_G": [
+        [
+          0.14581815788436567,
+          0.11417442414038374
+        ],
+        [
+          0.11417442414038374,
+          0.14581815788436592
+        ]
+      ],
+      "metric_M": [
+        [
+          2.0,
+          0.0
+        ],
+        [
+          0.0,
+          2.0
+        ]
+      ],
+      "metric_source_residual_max_absolute": 0.011927977416026372,
+      "negative_controls": {
+        "axis_origin_omission_future_d4_gap": 0.3470734820778318,
+        "axis_origin_omission_source_gap": 0.19704650026257436,
+        "no_covariance_subtraction_source_gap": 0.3485260584560599,
+        "wrong_d31_orientation_covariance_gap": 0.004864073526488134
+      },
+      "normalization_order48": 0.9999999999999996,
+      "positive_quadrant_probability_order48": 0.33333333333333115,
+      "raw_moments_order32": {
+        "00": 1.0,
+        "01": 0.3989422804014329,
+        "02": 0.5000000000000002,
+        "03": 0.7978845608028657,
+        "04": 1.500000000000001,
+        "10": 0.39894228040143304,
+        "11": 0.30449889052211504,
+        "12": 0.4488100654516121,
+        "13": 0.810122503674759,
+        "20": 0.5000000000000002,
+        "21": 0.4488100654516122,
+        "22": 0.7067483357831726,
+        "30": 0.7978845608028657,
+        "31": 0.8101225036747588,
+        "40": 1.5000000000000009
+      },
+      "raw_moments_order48": {
+        "00": 1.0,
+        "01": 0.3989422804014269,
+        "02": 0.49999999999999195,
+        "03": 0.7978845608028509,
+        "04": 1.4999999999999707,
+        "10": 0.3989422804014269,
+        "11": 0.30449889052210677,
+        "12": 0.44881006545159985,
+        "13": 0.8101225036747364,
+        "20": 0.4999999999999918,
+        "21": 0.44881006545159996,
+        "22": 0.706748335783153,
+        "30": 0.7978845608028509,
+        "31": 0.8101225036747363,
+        "40": 1.4999999999999705
+      },
+      "rho": 0.5
+    }
+  },
+  "checks": {
+    "rho_0.5_axis_origin_omission_future_d4_gap": {
+      "actual": 0.3470734820778318,
+      "pass": true,
+      "strict_lower_bound": 0.001
+    },
+    "rho_0.5_axis_origin_omission_source_gap": {
+      "actual": 0.19704650026257436,
+      "pass": true,
+      "strict_lower_bound": 0.001
+    },
+    "rho_0.5_cumulant_convergence": {
+      "max_absolute_error": 2.9976021664879227e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.2588418107573097e-14,
+      "pass": true
+    },
+    "rho_0.5_hadamard_covariance_symmetric": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "rho_0.5_hadamard_d22": {
+      "max_absolute_error": 4.440892098500626e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.603586511912738e-15,
+      "pass": true
+    },
+    "rho_0.5_hadamard_d31": {
+      "max_absolute_error": 4.440892098500626e-16,
+      "max_absolute_nearzero": 1.4526339869525704e-16,
+      "max_relative_material": 1.6605644017629691e-15,
+      "pass": true
+    },
+    "rho_0.5_hadamard_d4": {
+      "max_absolute_error": 1.6653345369377348e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.2140858690172923e-15,
+      "pass": true
+    },
+    "rho_0.5_hadamard_full_tensor": {
+      "max_absolute_error": 4.440892098500626e-16,
+      "max_absolute_nearzero": 2.6985754736555686e-16,
+      "max_relative_material": 2.603586511912738e-15,
+      "pass": true
+    },
+    "rho_0.5_hadamard_metric_with_residual": {
+      "max_absolute_error": 5.551115123125783e-16,
+      "max_absolute_nearzero": 2.450987813232011e-16,
+      "max_relative_material": 3.0917589828963763e-15,
+      "pass": true
+    },
+    "rho_0.5_hadamard_oriented_covariance": {
+      "max_absolute_error": 3.469446951953614e-17,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 3.063908058643309e-15,
+      "pass": true
+    },
+    "rho_0.5_hadamard_quadratic_k3_feed": {
+      "max_absolute_error": 5.551115123125783e-17,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.0635351933239733e-14,
+      "pass": true
+    },
+    "rho_0.5_k04_continuous_reference": {
+      "max_absolute_error": 3.1086244689504383e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.1113806929239887e-14,
+      "pass": true
+    },
+    "rho_0.5_k13_continuous_reference": {
+      "max_absolute_error": 1.5543122344752192e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.3613488714111024e-14,
+      "pass": true
+    },
+    "rho_0.5_k22_continuous_reference": {
+      "max_absolute_error": 1.2212453270876722e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.118970498450955e-14,
+      "pass": true
+    },
+    "rho_0.5_k31_continuous_reference": {
+      "max_absolute_error": 1.304512053934559e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.142560659934317e-14,
+      "pass": true
+    },
+    "rho_0.5_k40_continuous_reference": {
+      "max_absolute_error": 2.6645352591003757e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 9.52612022506276e-15,
+      "pass": true
+    },
+    "rho_0.5_metric_source_reconstruction": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "rho_0.5_no_covariance_subtraction_source_gap": {
+      "actual": 0.3485260584560599,
+      "pass": true,
+      "strict_lower_bound": 0.001
+    },
+    "rho_0.5_raw_00_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "rho_0.5_raw_01_convergence": {
+      "max_absolute_error": 6.050715484207103e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.516689451446135e-14,
+      "pass": true
+    },
+    "rho_0.5_raw_02_convergence": {
+      "max_absolute_error": 8.271161533457416e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.6542323066915098e-14,
+      "pass": true
+    },
+    "rho_0.5_raw_03_convergence": {
+      "max_absolute_error": 1.4876988529977098e-14,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.8645540045301176e-14,
+      "pass": true
+    },
+    "rho_0.5_raw_04_convergence": {
+      "max_absolute_error": 3.042011087472929e-14,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.028007391648659e-14,
+      "pass": true
+    },
+    "rho_0.5_raw_10_convergence": {
+      "max_absolute_error": 6.161737786669619e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.544518615692853e-14,
+      "pass": true
+    },
+    "rho_0.5_raw_11_convergence": {
+      "max_absolute_error": 8.271161533457416e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.7163191035853464e-14,
+      "pass": true
+    },
+    "rho_0.5_raw_12_convergence": {
+      "max_absolute_error": 1.226796442210798e-14,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.733442354899897e-14,
+      "pass": true
+    },
+    "rho_0.5_raw_13_convergence": {
+      "max_absolute_error": 2.2648549702353193e-14,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.795694428881903e-14,
+      "pass": true
+    },
+    "rho_0.5_raw_20_convergence": {
+      "max_absolute_error": 8.43769498715119e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.6875389974302657e-14,
+      "pass": true
+    },
+    "rho_0.5_raw_21_convergence": {
+      "max_absolute_error": 1.2212453270876722e-14,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.7210738374569104e-14,
+      "pass": true
+    },
+    "rho_0.5_raw_22_convergence": {
+      "max_absolute_error": 1.965094753586527e-14,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.7804731247212507e-14,
+      "pass": true
+    },
+    "rho_0.5_raw_30_convergence": {
+      "max_absolute_error": 1.4876988529977098e-14,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.8645540045301176e-14,
+      "pass": true
+    },
+    "rho_0.5_raw_31_convergence": {
+      "max_absolute_error": 2.2537527399890678e-14,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.7819900444265996e-14,
+      "pass": true
+    },
+    "rho_0.5_raw_40_convergence": {
+      "max_absolute_error": 3.042011087472929e-14,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.0280073916486592e-14,
+      "pass": true
+    },
+    "rho_0.5_same_measure_partition": {
+      "max_absolute_error": 6.661338147750939e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.3815300562656692e-15,
+      "pass": true
+    },
+    "rho_0.5_same_measure_partition_order32": {
+      "max_absolute_error": 6.661338147750939e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.430980127519814e-15,
+      "pass": true
+    },
+    "rho_0.5_second_covariance_symmetric": {
+      "max_absolute_error": 1.3877787807814457e-17,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.421943809066483e-16,
+      "pass": true
+    },
+    "rho_0.5_second_d22": {
+      "max_absolute_error": 1.9984014443252818e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 3.1175784973545872e-15,
+      "pass": true
+    },
+    "rho_0.5_second_d31": {
+      "max_absolute_error": 2.220446049250313e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 3.884231296172785e-15,
+      "pass": true
+    },
+    "rho_0.5_second_d4": {
+      "max_absolute_error": 2.1094237467877974e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 3.2907773027631753e-15,
+      "pass": true
+    },
+    "rho_0.5_second_full_tensor": {
+      "max_absolute_error": 2.4424906541753444e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 4.6035333880566375e-15,
+      "pass": true
+    },
+    "rho_0.5_second_metric_with_residual": {
+      "max_absolute_error": 2.3314683517128287e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 3.884231296172788e-15,
+      "pass": true
+    },
+    "rho_0.5_second_oriented_covariance": {
+      "max_absolute_error": 1.734723475976807e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 3.027429761333112e-15,
+      "pass": true
+    },
+    "rho_0.5_second_quadratic_k3_feed": {
+      "max_absolute_error": 6.38378239159465e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 3.7963299391393e-15,
+      "pass": true
+    },
+    "rho_0_cumulant_convergence": {
+      "max_absolute_error": 3.9968028886505635e-15,
+      "max_absolute_nearzero": 2.0885495970013553e-16,
+      "max_relative_material": 1.4289180337593924e-14,
+      "pass": true
+    },
+    "rho_0_hadamard_covariance_symmetric": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "rho_0_hadamard_d22": {
+      "max_absolute_error": 1.1102230246251565e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 7.93843352088554e-16,
+      "pass": true
+    },
+    "rho_0_hadamard_d31": {
+      "max_absolute_error": 2.2148547063935338e-16,
+      "max_absolute_nearzero": 2.2148547063935338e-16,
+      "max_relative_material": 9.92304190110691e-16,
+      "pass": true
+    },
+    "rho_0_hadamard_d4": {
+      "max_absolute_error": 5.551115123125783e-17,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 3.9692167604427646e-16,
+      "pass": true
+    },
+    "rho_0_hadamard_full_tensor": {
+      "max_absolute_error": 3.1689526181807777e-16,
+      "max_absolute_nearzero": 3.1689526181807777e-16,
+      "max_relative_material": 1.984608380221385e-15,
+      "pass": true
+    },
+    "rho_0_hadamard_metric_with_residual": {
+      "max_absolute_error": 3.0346367293507773e-16,
+      "max_absolute_nearzero": 3.0346367293507773e-16,
+      "max_relative_material": 1.786147542199244e-15,
+      "pass": true
+    },
+    "rho_0_hadamard_oriented_covariance": {
+      "max_absolute_error": 3.122502256758253e-17,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.6815548316694103e-15,
+      "pass": true
+    },
+    "rho_0_hadamard_quadratic_k3_feed": {
+      "max_absolute_error": 6.245004513516506e-17,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.5069021011674747e-14,
+      "pass": true
+    },
+    "rho_0_k04_continuous_reference": {
+      "max_absolute_error": 4.218847493575595e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.5083023689682705e-14,
+      "pass": true
+    },
+    "rho_0_k13_continuous_reference": {
+      "max_absolute_error": 2.341201058720714e-17,
+      "max_absolute_nearzero": 2.341201058720714e-17,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "rho_0_k22_continuous_reference": {
+      "max_absolute_error": 1.1102230246251565e-16,
+      "max_absolute_nearzero": 1.1102230246251565e-16,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "rho_0_k31_continuous_reference": {
+      "max_absolute_error": 2.7233376807414613e-17,
+      "max_absolute_nearzero": 2.7233376807414613e-17,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "rho_0_k40_continuous_reference": {
+      "max_absolute_error": 3.6637359812630166e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.3098415309461295e-14,
+      "pass": true
+    },
+    "rho_0_metric_source_reconstruction": {
+      "max_absolute_error": 3.0814879110195774e-33,
+      "max_absolute_nearzero": 3.0814879110195774e-33,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "rho_0_raw_00_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "rho_0_raw_01_convergence": {
+      "max_absolute_error": 5.329070518200751e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.335799883842465e-14,
+      "pass": true
+    },
+    "rho_0_raw_02_convergence": {
+      "max_absolute_error": 6.661338147750939e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.332267629550205e-14,
+      "pass": true
+    },
+    "rho_0_raw_03_convergence": {
+      "max_absolute_error": 1.0880185641326534e-14,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.3636290480891838e-14,
+      "pass": true
+    },
+    "rho_0_raw_04_convergence": {
+      "max_absolute_error": 2.0872192862952943e-14,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.3914795241968817e-14,
+      "pass": true
+    },
+    "rho_0_raw_10_convergence": {
+      "max_absolute_error": 5.440092820663267e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.3636290480891834e-14,
+      "pass": true
+    },
+    "rho_0_raw_11_convergence": {
+      "max_absolute_error": 4.274358644806853e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.6856587434667143e-14,
+      "pass": true
+    },
+    "rho_0_raw_12_convergence": {
+      "max_absolute_error": 5.35682609381638e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.685514349808324e-14,
+      "pass": true
+    },
+    "rho_0_raw_13_convergence": {
+      "max_absolute_error": 8.715250743307479e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.7379767709368474e-14,
+      "pass": true
+    },
+    "rho_0_raw_20_convergence": {
+      "max_absolute_error": 6.772360450213455e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.3544720900427086e-14,
+      "pass": true
+    },
+    "rho_0_raw_21_convergence": {
+      "max_absolute_error": 5.329070518200751e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.671599767684965e-14,
+      "pass": true
+    },
+    "rho_0_raw_22_convergence": {
+      "max_absolute_error": 6.6058269965196814e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.6423307986079407e-14,
+      "pass": true
+    },
+    "rho_0_raw_30_convergence": {
+      "max_absolute_error": 1.0880185641326534e-14,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.3636290480891842e-14,
+      "pass": true
+    },
+    "rho_0_raw_31_convergence": {
+      "max_absolute_error": 8.659739592076221e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.720537428446804e-14,
+      "pass": true
+    },
+    "rho_0_raw_40_convergence": {
+      "max_absolute_error": 2.1316282072803006e-14,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.4210854715202196e-14,
+      "pass": true
+    },
+    "rho_0_same_measure_partition": {
+      "max_absolute_error": 8.881784197001252e-16,
+      "max_absolute_nearzero": 8.555500835951337e-17,
+      "max_relative_material": 3.1753734083542156e-15,
+      "pass": true
+    },
+    "rho_0_same_measure_partition_order32": {
+      "max_absolute_error": 1.7948592428587142e-16,
+      "max_absolute_nearzero": 1.7948592428587142e-16,
+      "max_relative_material": 3.969216760442804e-16,
+      "pass": true
+    },
+    "rho_0_second_covariance_symmetric": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "rho_0_second_d22": {
+      "max_absolute_error": 2.886579864025407e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.7554782634755033e-15,
+      "pass": true
+    },
+    "rho_0_second_d31": {
+      "max_absolute_error": 2.6645352591003757e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 3.8269806464175834e-15,
+      "pass": true
+    },
+    "rho_0_second_d4": {
+      "max_absolute_error": 3.552713678800501e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 3.391357862739081e-15,
+      "pass": true
+    },
+    "rho_0_second_full_tensor": {
+      "max_absolute_error": 3.552713678800501e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 4.145895700285717e-15,
+      "pass": true
+    },
+    "rho_0_second_metric_with_residual": {
+      "max_absolute_error": 3.3306690738754696e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 3.826980646417586e-15,
+      "pass": true
+    },
+    "rho_0_second_oriented_covariance": {
+      "max_absolute_error": 1.6653345369377348e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.504138081316014e-15,
+      "pass": true
+    },
+    "rho_0_second_quadratic_k3_feed": {
+      "max_absolute_error": 9.992007221626409e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 4.440605417622971e-15,
+      "pass": true
+    }
+  },
+  "checks_count": 83,
+  "failures": [],
+  "identity_tolerance": 1e-10,
+  "material_threshold": 1e-08,
+  "quadrature_tolerance": 1e-08,
+  "scope": "n=2 Gaussian/ReLU weighted discrete cumulant and two linear maps; no score, cost, or deployment claim",
+  "status": "PASS"
+}

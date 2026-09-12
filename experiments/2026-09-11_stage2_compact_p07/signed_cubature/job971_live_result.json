@@ -1,0 +1,8 @@
+{
+  "gpuq_job_id": 971,
+  "state": "SUCCEEDED",
+  "exit_code": 0,
+  "started_at": "2026-09-12T08:23:05.814431+00:00",
+  "finished_at": "2026-09-12T08:29:49.403823+00:00",
+  "error": null
+}
