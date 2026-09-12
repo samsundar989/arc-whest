@@ -1,0 +1,1129 @@
+worker-q: job #983 starting at 2026-09-12T09:01:00.717431+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'scripts/preflight.ps1']
+worker-q: ------------------------------------------------------------
+preflight -- arc-whest
+repo:    C:\Users\samsu\Documents\arc-whest
+shipped: estimator.py   archive: estimator_v2_6_1.py
+HEAD:    1e9949481add90627d97df9d33a77ab3211543f6
+worktree: DIRTY at start --
+    ?? experiments/2026-09-11_stage2_compact_p07/increment_source/
+    ?? local_sim/test_p2_k4_increment.py
+  (steps 15/16 regenerate tracked evidence, so the tree is
+   EXPECTED to be dirty at the END of a -Full run)
+
+=== 1. official stack + round configuration ===
+official_config -- every value asserted against the installed package
+  LIVE round: Phase 2 (v2-phase2), AIcrowd round 1429
+
+  PASS  grader_stack.json exists and is complete (the pin is EVIDENCE, not a default) from canary4_329896_graded_report.json (submission 329896, 2026-09-05T11:07:21Z)
+  PASS  whestbench == the GRADED stack (0.16.1), not merely 0.16.x installed 0.16.1, graded 0.16.1
+  PASS  flopscope == the GRADED stack (0.12.1), not merely 0.12.x  installed 0.12.1, graded 0.12.1
+  PASS  the frozen pin still equals what the NEWEST stored graded report says (a stale freeze is drift too) frozen {'whestbench_version': '0.16.1', 'flopscope_version': '0.12.1'} vs newest report {'whestbench_version': '0.16.1', 'flopscope_version': '0.12.1'}
+  PASS  pyproject.toml pins whestbench to ==0.16.1 (a runtime pin a `uv sync` can undo is not a pin) "whestbench==0.16.1"
+  PASS  pyproject.toml pins flopscope to ==0.12.1 (a runtime pin a `uv sync` can undo is not a pin) "flopscope==0.12.1"
+  PASS  whestbench is the real package, not the local_sim shim     C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\whestbench
+  PASS  LIVE round tag == whestbench budget.CURRENT_ROUND.tag      v2-phase2 == v2-phase2
+  PASS  every round we know is a round the package knows           ours ['v1-phase1', 'v1-warmup', 'v2-phase2'] <= package ['v1-phase1', 'v1-warmup', 'v2-phase2']
+  PASS  and the package knows no round we have not recorded        package ['v1-phase1', 'v1-warmup', 'v2-phase2'] <= ours ['v1-phase1', 'v1-warmup', 'v2-phase2']
+  PASS  v1-phase1.width                                            256 == 256
+  PASS  v1-phase1.depth                                            32 == 32
+  PASS  v1-phase1.n_samples                                        1000000000 == 1000000000
+  PASS  v1-phase1.flop_budget                                      272000000000 == 272000000000
+  PASS  v1-phase1.lambda                                           100000000000.0 == 100000000000.0
+  PASS  v1-phase1.residual_wall_time_limit_s                       None == None
+  PASS  v1-phase1.wall_time_limit_s                                60.0 == 60.0
+  PASS  v1-phase1.residual_mode                                    'priced' == 'priced'
+  PASS  v1-warmup.width                                            256 == 256
+  PASS  v1-warmup.depth                                            8 == 8
+  PASS  v1-warmup.n_samples                                        1000000000 == 1000000000
+  PASS  v1-warmup.flop_budget                                      68000000000 == 68000000000
+  PASS  v1-warmup.lambda                                           100000000000.0 == 100000000000.0
+  PASS  v1-warmup.residual_wall_time_limit_s                       None == None
+  PASS  v1-warmup.wall_time_limit_s                                60.0 == 60.0
+  PASS  v1-warmup.residual_mode                                    'priced' == 'priced'
+  PASS  v2-phase2.width                                            1024 == 1024
+  PASS  v2-phase2.depth                                            16 == 16
+  PASS  v2-phase2.n_samples                                        1000000000 == 1000000000
+  PASS  v2-phase2.flop_budget                                      2199023255552 == 2199023255552
+  PASS  v2-phase2.lambda                                           0.0 == 0.0
+  PASS  v2-phase2.residual_wall_time_limit_s                       0.4 == 0.4
+  PASS  v2-phase2.wall_time_limit_s                                120.0 == 120.0
+  PASS  v2-phase2.residual_mode                                    'gated' == 'gated'
+  PASS  LIVE.limits_verifiable is set for the round the package grades True
+  PASS  ContestSpec.memory_limit_mb                                8192 == 8192
+  PASS  ContestSpec.setup_timeout_s                                5.0 == 5.0
+  PASS  ContestSpec.predict_timeout_s                              30.0 == 30.0
+  PASS  ContestSpec.wall_time_limit_s                              120.0 == 120.0
+  PASS  ContestSpec.residual_wall_time_limit_s                     0.4 == 0.4
+  PASS  ContestSpec.lambda_flops_per_second                        0.0 == 0.0
+  PASS  ContestSpec.width is REQUIRED, so it carries no stale default no class default
+  PASS  ContestSpec.depth is REQUIRED, so it carries no stale default no class default
+  PASS  ContestSpec.flop_budget is REQUIRED, so it carries no stale default no class default
+  PASS  v1-phase1: ContestSpec-only limits are NOT claimed verifiable read from whestbench 0.14.0, recorded not asserted
+  PASS  v1-warmup: ContestSpec-only limits are NOT claimed verifiable read from whestbench 0.14.0, recorded not asserted
+  PASS  floor: a tiny C is floored at 0.1, by the package          0.1
+  PASS  floor: ...and by us                                        
+  PASS  uncapped above: C = 5B gives 5.0, by the package           5.0
+  PASS  uncapped above: ...and by us                               
+  PASS  failure is priced at 1.0, NOT the 0.1 floor, by the package 1.0
+  PASS  failure is priced at 1.0 ...and by us                      
+  PASS  package effective_compute default: C == F (lambda is 0)    1.000000e+09
+  PASS  our LIVE.effective_compute agrees                          
+  PASS  the DEPRECATED alias LAMBDA_FLOPS_PER_SECOND is still 1e11 -- and is NOT the live rate alias 1e+11, default 0e+00
+  PASS  PHASE1's lambda equals the package's Phase-1 rate          1e+11
+  PASS  Phase 2 gates residual and does not price it               cap 0.4s, lambda 0.0
+  PASS  Phase 1 prices residual and does not gate it               
+  PASS  headroom is a ratio to the cap, not a cost                 7.452x at the recorded anchor residual
+  PASS  an uncapped round has no headroom number to quote          
+  PASS  for_shape(1024, 16) is Phase 2                             
+  PASS  for_shape(256, 32) is Phase 1                              
+  PASS  for_shape refuses an unknown shape rather than guessing    
+  PASS  the report was produced by the PINNED grader stack (equality, not 0.16.x) report 0.16.1, pinned 0.16.1
+  PASS  the report is the LIVE round's dataset revision            hf://aicrowd/arc-whestbench-public-2026@v2-phase2
+  PASS  run_config.width (what the runner USED)                    1024 == 1024
+  PASS  run_config.depth (what the runner USED)                    16 == 16
+  PASS  run_config.flop_budget (what the runner USED)              2199023255552 == 2199023255552
+  PASS  run_config.lambda_flops_per_second (what the runner USED)  0.0 == 0.0
+  PASS  run_config.residual_wall_time_limit_s (what the runner USED) 0.4 == 0.4
+  PASS  run_config.wall_time_limit_s (what the runner USED)        120.0 == 120.0
+  PASS  run_config.setup_timeout_s (what the runner USED)          5.0 == 5.0
+  PASS  run_config does NOT carry memory_limit_mb (class default only) absent -- so it is a ContestSpec default, not an observation
+  PASS  run_config does NOT carry predict_timeout_s (class default only) absent -- so it is a ContestSpec default, not an observation
+  PASS  the observed multiplier is the floor, so C/B < floor at this operating point 0.1
+  PASS  OfficialRound is frozen (a mutable config is a variable)   
+  PASS  replace() still produces a modified COPY for what-if analysis 
+  PASS  the Phase-2 server offset is recorded as MEASURED, with a range range (0, 16777216)
+  PASS  graded_flops() never UNDER-estimates a stored graded total errors +0.0, +32.0, +16,777,216.0, +16,777,216.0
+  PASS  the offset is NOT a constant, and the range says so        2**24 on 328662, 2**24-32 on 328664, ZERO on 329896 under the grader-twin arm; the preregistered 'bit-identical constant' reading was falsified 2026-09-01 and the range widened to [0, 2**24] on 2026-09-05
+  PASS  the genuine-cast family is predicted EXACTLY by the grader-twin arm (offset 0), so the offset is not a server constant 329896 canary4 168,669,961,830 and 330212 k3_full 1,714,587,938,406 -- local == graded, and 330212 was predicted before it was submitted
+  PASS  every stored graded offset lies inside the recorded range  
+  PASS  the carried offset is the MAXIMUM observed (conservative direction) 16,777,216
+  PASS  a round with no measured offset is distinguishable from offset-zero Phase 1 never measured; that is NOT measured-and-zero
+  PASS  meter='server' costs exactly the offset in floor headroom  219,885,548,339 FLOPs is the local ceiling for a floor-pinned candidate
+  PASS  multiplier() defaults to the LOCAL meter and rejects any other name 
+  PASS  the offset cannot rescue a FAILED MLP                      
+  PASS  the graded reports for the residual law are present        found ['329896', '330212', '330290'] of ['329896', '330212', '330290']
+  PASS  the per-op residual MEDIANS agree across candidates (this is the whole per-operation law) 329896=11.192us 330212=11.205us 330290=10.991us  spread 1.95%
+  PASS  GRADED_RESIDUAL_S_PER_OP is >= every per-op residual we have MEASURED (the policy is the maximum observed) carried 13.4 us vs worst measured row 12.096 us
+  PASS  ...and >= the maximum INFERRED across the visible board population, which is 5.4x wider in op count than our own two neilarmstrong4 329639 at 13.31 us/op; Camaro 329762 at 12.17. Both exceed our own worst row (12.096) -- see local_sim/p2_residual_law.py
+  PASS  every measured per-op residual lies inside the recorded range range (9.0, 13.4) us
+  PASS  the graded WALL of every recorded submission is inside the cap 329896=3.9s  330212=9.5s  330290=114.7s   cap 120s
+  PASS  GRADED_WALL_S_WORST_OBSERVED is the maximum actually observed carried 114.68s vs observed 114.68s
+  PASS  a contention-surviving nominee still exists (margins at the MEASURED 1.60x) 329896=19.45x  330212=7.86x  330290=0.65x   <1.00x = that submission would FAIL rows on a busy server
+  PASS  the op gate leaves at least a 1.25x margin under the cliff at the carried per-op figure 22,000 ops x 13.4 us = 0.295 s -> 1.36x
+
+  96/96
+  PASS  1. official stack + round configuration
+
+=== 2. mint provenance + dataset pin ===
+========================================================================================
+MINT PROVENANCE PROOF — canonical_mint  vs  whestbench.sample_mlp
+========================================================================================
+whestbench   : C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\whestbench\generation.py
+SeedSequence : fnp.random.SeedSequence is np.random.SeedSequence = True
+
+     shape  seeds   weights bit-identical   MLP.seed identical  legacy identical
+----------------------------------------------------------------------------------------
+1024x16         20                   20/20                20/20              0/20
+256x32         20                   20/20                20/20              0/20
+256x8          20                   20/20                20/20              0/20
+128x16         20                   20/20                20/20              0/20
+64x4          20                   20/20                20/20              0/20
+256x2          20                   20/20                20/20              0/20
+----------------------------------------------------------------------------------------
+canonical_mint is bit-identical to whestbench.sample_mlp : True
+legacy harness.gen_mlp ever matched                      : False
+legacy max relative elementwise divergence               : 1.868
+
+DISTRIBUTIONAL CHECK (12 x 256x8 nets, He target std = 0.088388)
+  canonical  mean +2.762e-05   std 0.08841742   std/target 1.000329
+  legacy     mean +9.335e-06   std 0.08839059   std/target 1.000025
+  -> same distribution, different realisation. Past *statistical* results
+     stand; per-seed reproducibility against the grader did not exist.
+
+SEED SEMANTICS
+  input_seed        123456789
+  estimator seed    3367517259   <- what MLP.seed holds on the grader
+  legacy MLP.seed   123456789   <- what our mints used (== the weight seed)
+  The evaluator's estimator seed is an INDEPENDENT substream of the weight
+  seed. Our mints coupled them, so any estimator that derives randomness
+  from mlp.seed (v2.4.1 derives its digital shift from it) had a spurious
+  functional dependence between its point set and the weights it scored.
+
+VERDICT: PROVEN — canonical_mint == whestbench.sample_mlp
+WP0A - the tag-drift records, their verdicts, and their tampers
+
+P1/P2  the source record reproduces its pinned digest; no source moved
+  PASS  P1: canonical digest recomputes from the rows                       3cb3e81907069725662edc01
+  PASS  P1: it matches the PINNED constant, not merely its own header       a record cannot certify itself
+  PASS  P2: source objects that changed bytes                               0 of 70
+  PASS  the record passes every pinned integrity clause                     no violations
+  PASS  record covers the expected object count                             70 rows
+  PASS  every row is a data/ SOURCE object                                  by construction
+  PASS  prose comment lines do not become header fields                     8 header keys, all identifier-ish
+
+L  the FULL loader-visible tree, because data/ is NOT the whole input
+  PASS  L: the loader record exists                                         experiments/2026-08-31_phase2_tag_drift/loader_manifest.tsv
+  PASS  L: it covers every object at the new commit                         226 rows
+  PASS  L: its digest recomputes to the pinned constant                     29664dbb64a02b8d8e26a213
+  PASS  L: it passes every pinned integrity clause                          no violations
+  PASS  L: 70 source objects unchanged                                      70
+  PASS  L: README and .gitattributes unchanged                              1 + 1
+  PASS  L: metadata.json CHANGED                                            it gained prepared_splits
+  PASS  L: 153 prepared objects ADDED                                       the tree whestbench now prefers
+  PASS  L: NOTHING was removed                                              [('metadata', 'changed'), ('other', 'unchanged'), ('prepared', 'added'), ('readme', 'unchanged'), ('source', 'unchanged')]
+  PASS  L: the verdict reports that the LOADER ROUTE moved                  whestbench dataset.py:479-491 prefers prepared/<split>
+  PASS  L: source-equivalence and loader-route change are SEPARATE fields   the bytes did not move; the path to them did
+
+F  the two loader routes were compared functionally, on real bytes
+  PASS  F: prepared/mini shard 0 vs data/mini shard 0 was measured          8 rows
+  PASS  F: 'weights' is BITWISE identical on every compared row             8/8, max|diff|=0.0
+  PASS  F: 'all_layer_means' is BITWISE identical on every compared row     8/8, max|diff|=0.0
+  PASS  F: mlp_id/mlp_seed agree IN ORDER, not merely as sets               row order decides which 50 rows are publicly scored
+  PASS  F: the schemas match exactly                                        no column drift
+  PASS  F: the record states its own scope honestly                         13 shards and the full split remain unverified
+
+P3  the live commit classifies as SOURCE_EQUIVALENT, and evidence holds
+  PASS  P3: live 6a416f against pinned ce926b7 is SOURCE_EQUIVALENT         SOURCE_EQUIVALENT
+  PASS  P3: shape-dependent evidence stays valid                            all 70 source objects are byte-identical and not
+  PASS  P3: and the executable pin is nonetheless reported STALE            bookkeeping, separate from evidence validity
+  PASS  no-move classifies PINNED, not SOURCE_EQUIVALENT                    PINNED
+
+P4  an unrecorded commit can NEVER obtain SOURCE_EQUIVALENT
+  PASS  P4: an arbitrary unrecorded commit -> UNKNOWN                       UNKNOWN
+  PASS  P4: an arbitrary unrecorded commit -> evidence NOT asserted valid   UNKNOWN is not a pass
+  PASS  P4: the OLD commit presented as live against the NEW pin -> UNKNOWN UNKNOWN
+  PASS  P4: the OLD commit presented as live against the NEW pin -> evidence NOT asserted validUNKNOWN is not a pass
+  PASS  P4: a third commit against the recorded pin -> UNKNOWN              UNKNOWN
+  PASS  P4: a third commit against the recorded pin -> evidence NOT asserted validUNKNOWN is not a pass
+  PASS  P4: empty live commit -> UNKNOWN                                    UNKNOWN
+  PASS  P4: empty live commit -> evidence NOT asserted valid                UNKNOWN is not a pass
+  PASS  P4: live is right but the pin is not the recorded old commit -> UNKNOWNUNKNOWN
+  PASS  P4: live is right but the pin is not the recorded old commit -> evidence NOT asserted validUNKNOWN is not a pass
+  PASS  P4: a prefix of the real commit is not the real commit -> UNKNOWN   UNKNOWN
+  PASS  P4: a prefix of the real commit is not the real commit -> evidence NOT asserted validUNKNOWN is not a pass
+  PASS  the records license exactly ONE transition                          the reverse move is unmeasured
+
+T  the four tampers an independent Skeptic used to obtain a false pass
+  PASS  T1: a rewritten `# new_commit` header -> UNKNOWN                    the commit pair is pinned in code
+  PASS  T1: ...and the row digest alone would NOT have caught it            which is exactly why the header is pinned too
+  PASS  T2: both columns forged identically + re-stamped digest -> UNKNOWN  old == new, so `differing_rows` sees nothing; the digest does
+  PASS  T2: ...and `differing_rows` really is blind to it                   the naive check would have passed
+  PASS  T3: truncation to 5 of 70 rows + re-stamped digest -> UNKNOWN       5 rows against a pinned 70
+  PASS  T3: ...and coverage is enforced in classify(), not in a test literalrow digest 0645258aa7435e32 != pinned 3cb3e81907069725; 
+  PASS  T4: `removed_count: 999` -> UNKNOWN                                 a REMOVAL is never source-equivalent
+  PASS  T4: ...and the reason names the removal, not something else         removed_count is 999; a REMOVAL is never source-equivale
+  PASS  T5: a forged loader digest is refused                               pinned in code
+  PASS  T5: ...and it degrades the SOURCE verdict to UNKNOWN too            an untrusted loader record licenses nothing
+  PASS  T6: a smuggled REMOVED row in the loader record is refused          row digest f91da7095a454bf3 != pinned 29664dbb64a02b8d; 
+
+M  structural corruption is refused before any verdict is formed
+  PASS  M1: one asymmetric flipped hash + repaired digest -> SOURCE_CHANGED UNKNOWN
+  PASS  M4: a non-data/ path in the SOURCE record is refused                DriftRecordError: <M4>: row 70 path 'prepared/mini-000.arrow' is not a 'da
+  PASS  M5: a row with the wrong column count is refused                    DriftRecordError: <M5>: row 0 has 3 columns, expected 4
+  PASS  M5: a renamed column header is refused                              DriftRecordError: <M5b>: column header is 'path\tsize\tsha\tsha2', expecte
+  PASS  M5: a truncated sha256 is refused                                   DriftRecordError: <M5c>: row 0 bad sha256 '948908f79ba7163304af945efab1f8f
+  PASS  M6: a duplicated source path is refused                             DriftRecordError: <M6>: duplicate source paths in the record
+  PASS  M7: a duplicated path in the loader record is refused               DriftRecordError: <M7>: duplicate paths in the record
+
+D  the manifest lineage block, and the field names a reviewer read wrong
+  PASS  D: the record's two endpoints are named for what they ARE           not 'pinned_commit', which stopped being true after the repin
+  PASS  D: `manifest_pin` is a separate field the manifest writer fills     None
+  PASS  D: canonical digest carried                                         3cb3e81907069725
+  PASS  D: the block records that the record passed pinned integrity        not self-certified
+  PASS  D: the loader half is carried too                                   226 objects
+  PASS  D: source vs prepared counts are SEPARATE fields                    70 source unchanged, 153 prepared added
+  PASS  D: both evidence paths exist on disk                                experiments/2026-08-31_phase2_tag_drift/source_manifest.tsv
+  PASS  D: the block is JSON-serialisable                                   round-trips
+  PASS  D: the manifest carries dataset.commit_lineage                      present
+  PASS  D: the pin is one of the record's two endpoints                     pinned at 6a416fa5fb45
+  PASS  D: `manifest_pin` in the stored block equals dataset.commit         the field a reviewer found self-contradictory is now filled
+  PASS  D: the OLD commit our stored evidence used is preserved             provenance survives
+  PASS  D: shape and budget are unchanged by the repin                      1024x16, B = 2**41, floor 0.1
+
+R  neither durable record was modified by this suite
+  PASS  R: source_manifest.tsv sha256 unchanged                             01da901df7af3128
+  PASS  R: loader_manifest.tsv sha256 unchanged                             d6c3fbfe2b0ab83a
+
+74/74 checks passed
+  PASS  2. mint provenance + dataset pin
+
+=== 3. invariant suite ===
+world: 256x32  B = 272,000,000,000  weights = numpy float32   [HISTORICAL DEFAULT -- not the graded world]
+candidate: tau=-2.5  target C/B=0.3  chunk=16384
+
+1. NORMAL CASE
+  he 256x32                          ok   shape (32, 256)  range [0.000e+00, 5.171e+00]  final mean 0.6462  deterministic=True
+
+2. DEGENERATE PRUNING (whole layers pushed below tau)
+  layer 5 scaled 0.02                ok   shape (32, 256)  range [0.000e+00, 4.003e+00]  final mean 0.0133  deterministic=True
+  layer 5 scaled 0.001               ok   shape (32, 256)  range [0.000e+00, 4.003e+00]  final mean 0.0007  deterministic=True
+  layer 7 identically zero           ok   shape (32, 256)  range [0.000e+00, 4.352e+00]  final mean 0.0000  deterministic=True
+
+3. EXTREME DYNAMIC RANGE
+  layer 12 scaled 100x               ok   shape (32, 256)  range [0.000e+00, 5.158e+02]  final mean 67.7158  deterministic=True
+  layer 12 scaled 1e-3               ok   shape (32, 256)  range [0.000e+00, 4.554e+00]  final mean 0.0007  deterministic=True
+  layer 12 scaled 1e4                ok   shape (32, 256)  range [0.000e+00, 5.158e+04]  final mean 6771.5833  deterministic=True
+  layer 3 mean-shifted (all on)      ok   shape (32, 256)  range [0.000e+00, 1.577e+02]  final mean 15.9039  deterministic=True
+
+4. SEED EXTREMES (the rng contract)
+  seed 0                             ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5729  deterministic=True
+  seed 1                             ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5720  deterministic=True
+  seed 2147483647                    ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5720  deterministic=True
+  seed 9223372036854775807           ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5728  deterministic=True
+  seed 12345678901234567890          ok   shape (32, 256)  range [0.000e+00, 5.345e+00]  final mean 0.5717  deterministic=True
+
+5. SHAPE GENERALITY (calibration must disable itself off-width)
+  depth 2 x width 256                ok   shape (2, 256)  range [7.214e-03, 1.983e+00]  final mean 0.5480  deterministic=True
+  depth 8 x width 128                ok   shape (8, 128)  range [0.000e+00, 2.760e+00]  final mean 0.3155  deterministic=True
+  depth 32 x width 64                ok   shape (32, 64)  range [0.000e+00, 4.656e+00]  final mean 0.1559  deterministic=True
+  depth 4 x width 256                ok   shape (4, 256)  range [1.154e-05, 2.968e+00]  final mean 0.5810  deterministic=True
+  depth 64 x width 256               ok   shape (64, 256)  range [0.000e+00, 4.687e+00]  final mean 0.5158  deterministic=True
+
+6. BUDGET EDGES (the analytic fallback path)
+  budget 0                           ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 1                           ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 1e7 (below min N)           ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 1e9                         ok   shape (32, 256)  range [2.981e-16, 4.670e+00]  final mean 0.4081  deterministic=True
+  budget 10x                         ok   shape (32, 256)  range [0.000e+00, 4.670e+00]  final mean 0.4044  deterministic=True
+
+7. GRADER-ARRAY IMMUTABILITY (weights must be untouched)
+  input weights unmodified           ok
+
+8. LAYER-1 CLOSED FORM  (exact: ||W1[:,j]|| / sqrt(2*pi))
+  256x32                             max rel err 1.773e-16   ok
+  128x8                              max rel err 1.644e-16   ok
+  64x4                               max rel err 1.631e-16   ok
+  256x2                              max rel err 1.724e-16   ok
+
+9. PERMUTATION EQUIVARIANCE  (hidden-layer relabelling)
+  bar: every row MSE <= 1% of raw MSE = 1.400e-08   [frozen decision signal]
+  256x32 permute layer 7             row-k 2.22e-15  other-rows 7.75e-08  final 7.75e-08
+                                     MSE row-k 1.13e-31  other 1.30e-17  final 4.04e-16
+                                     worst 4.04e-16 = 0.0000% of raw MSE   ok
+  256x32 permute layer 20            row-k 1.78e-15  other-rows 1.93e-07  final 1.93e-07
+                                     MSE row-k 1.68e-31  other 4.45e-17  final 1.38e-15
+                                     worst 1.38e-15 = 0.0000% of raw MSE   ok
+  128x8 permute layer 1              row-k 8.88e-16  other-rows 3.47e-08  final 3.47e-08
+                                     MSE row-k 2.65e-32  other 1.79e-17  final 1.26e-16
+                                     worst 1.26e-16 = 0.0000% of raw MSE   ok
+  256x32 permute layer 30            row-k 1.33e-15  other-rows 1.59e-07  final 1.59e-07
+                                     MSE row-k 3.62e-32  other 3.10e-17  final 9.61e-16
+                                     worst 9.61e-16 = 0.0000% of raw MSE   ok
+
+10. BUDGET MONOTONICITY  (the failsafe ladder)
+  budget                0  analytic   valid=True  non-decreasing=True
+  budget                1  analytic   valid=True  non-decreasing=True
+  budget        1,000,000  analytic   valid=True  non-decreasing=True
+  budget       10,000,000  analytic   valid=True  non-decreasing=True
+  budget      100,000,000  analytic   valid=True  non-decreasing=True
+  budget    1,000,000,000  analytic   valid=True  non-decreasing=True
+  budget   10,000,000,000  N=2^9      valid=True  non-decreasing=True
+  budget   27,200,000,000  N=2^11     valid=True  non-decreasing=True
+  budget  272,000,000,000  N=2^14     valid=True  non-decreasing=True
+  budget 2,720,000,000,000  N=2^17     valid=True  non-decreasing=True
+  ladder monotone and total          ok
+
+11. DETERMINISM  (3x bit-identity + fresh instance)
+  256x32                             3x identical=True  fresh-instance identical=True  ok
+  128x8                              3x identical=True  fresh-instance identical=True  ok
+
+12. SEED-BLOCK HYGIENE
+  live blocks disjoint               ok   (27 decision blocks + vault block 20,260,806,000..20,260,806,499)
+
+13. GT-NOISE FLOOR  (what counts as signal)
+  vault GT samples/MLP               33,554,432
+  vault GT-noise MSE (mean)          1.575e-09  (0.113% of the 1.4e-6 decision signal)
+  vault touches                      1
+  noise < 10% of signal              ok
+
+30/30 checks passed
+MUTATION BATTERY for invariant 9 -- pure gate fixture; candidate permutation is covered separately: estimator.py
+gate: edge_cases.perm_gate, bar = 1% of raw MSE = 1.400e-08  [frozen decision signal]
+
+128x8 layer 3   EXACT FIXTURE   worst 0.000e+00 = 0.0000% of bar   accepted
+128x8 layer 3   detection floor: a POSITIONAL distortion is rejected once it exceeds 2.681e-04 = 0.0268% of the row
+128x8 layer 3   FIXTURE SENSITIVITY BAND: the retired clause rejected at 5.187e-07 (0.000052%); the amendment gives away a factor of 517x
+128x8 layer 3   floor probe amp = 0.50x floor -> mse_k 3.500e-09, accepted   ok
+128x8 layer 3   floor probe amp = 2.00x floor -> mse_k 5.600e-08, REJECTED   ok
+
+  transposed index (row reversed)            worst 5.589e-01 = 3.99e+07x bar   REJECTED  ok
+  reduction axis swapped (positional ramp)   worst 1.948e-03 = 1.39e+05x bar   REJECTED  ok
+  off-by-one on the depth axis               worst 7.954e-01 = 5.68e+07x bar   REJECTED  ok
+  basis on the wrong side (fixed shuffle)    worst 6.862e-01 =  4.9e+07x bar   REJECTED  ok
+  minimal index bug (adjacent positions 0<->1) worst 1.607e-03 = 1.15e+05x bar   REJECTED  ok
+  closest-valued positions swapped           worst 8.747e-04 = 6.25e+04x bar   REJECTED  ok
+  NaN on the SCORED final row                worst nan =      infx bar   REJECTED  ok
+  NaN on the permuted row k                  worst nan =      infx bar   REJECTED  ok
+  inf on a non-k, non-final row              worst nan =      infx bar   REJECTED  ok
+  CONTROL: equivariant 0.1% scale error      worst 0.000e+00 =        0x bar   accepted  ok
+  CONTROL: value-selected swap (commutes)    worst 0.000e+00 =        0x bar   accepted  ok
+
+64x4 layer 1   EXACT FIXTURE   worst 0.000e+00 = 0.0000% of bar   accepted
+64x4 layer 1   detection floor: a POSITIONAL distortion is rejected once it exceeds 2.999e-04 = 0.0300% of the row
+64x4 layer 1   FIXTURE SENSITIVITY BAND: the retired clause rejected at 5.505e-07 (0.000055%); the amendment gives away a factor of 545x
+64x4 layer 1   floor probe amp = 0.50x floor -> mse_k 3.500e-09, accepted   ok
+64x4 layer 1   floor probe amp = 2.00x floor -> mse_k 5.600e-08, REJECTED   ok
+
+  transposed index (row reversed)            worst 4.630e-01 = 3.31e+07x bar   REJECTED  ok
+  reduction axis swapped (positional ramp)   worst 1.557e-03 = 1.11e+05x bar   REJECTED  ok
+  off-by-one on the depth axis               worst 8.951e-01 = 6.39e+07x bar   REJECTED  ok
+  basis on the wrong side (fixed shuffle)    worst 4.196e-01 =    3e+07x bar   REJECTED  ok
+  minimal index bug (adjacent positions 0<->1) worst 2.235e-02 =  1.6e+06x bar   REJECTED  ok
+  closest-valued positions swapped           worst 1.286e-04 = 9.19e+03x bar   REJECTED  ok
+  NaN on the SCORED final row                worst nan =      infx bar   REJECTED  ok
+  NaN on the permuted row k                  worst nan =      infx bar   REJECTED  ok
+  inf on a non-k, non-final row              worst nan =      infx bar   REJECTED  ok
+  CONTROL: equivariant 0.1% scale error      worst 0.000e+00 =        0x bar   accepted  ok
+  CONTROL: value-selected swap (commutes)    worst 0.000e+00 =        0x bar   accepted  ok
+
+FIXTURE-SPECIFIC SURRENDERED SENSITIVITY (the historical candidate measurement remains in docs/VALIDATION.md):
+  128x8 layer 3      old 5.187e-07 -> new 2.681e-04   = 517x given away
+  64x4 layer 1       old 5.505e-07 -> new 2.999e-04   = 545x given away
+  Every mutation above sits FAR ABOVE this band, so the battery says nothing about
+  what lives inside it. docs/VALIDATION.md section 3.2 names one thing that does
+  (rotation stability at 4.4e-08) and it has been rewritten to record that this
+  instrument no longer measures it.
+
+BATTERY PASSED -- every deliberate equivariance defect is still rejected, the equivariant controls are accepted, and the exact fixture passes.
+  PASS  3. invariant suite
+
+=== 4. whest validate ===
+  child stdout encoding: utf-8
+Validating estimator estimator.py
+C:\Users\samsu\Documents\arc-whest\estimator.py:772: SymmetryLossWarning: Symmetry lost along dims (0, 1): multiply — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)
+C:\Users\samsu\Documents\arc-whest\estimator.py:772: SymmetryLossWarning: Symmetry lost along dims (0, 1): add — no symmetry groups shared by both operands. Use as_symmetric() to re-tag if you know the result is symmetric. Suppress with flops.configure(symmetry_warnings=False).
+  cov = fnp.outer(Phi, Phi) * cov_pre * off_mask + fnp.diag(var)
+┌──────────────────────────────── Validation ─────────────────────────────────┐
+│ Command: validate                                                           │
+│ Status: success                                                             │
+│ ┌──────────────────────────────── Checks ─────────────────────────────────┐ │
+│ │ ┌────────┬──────────────────────────┬────────────────┐                  │ │
+│ │ │ Status │ Check                    │ Detail         │                  │ │
+│ │ ├────────┼──────────────────────────┼────────────────┤                  │ │
+│ │ │ OK     │ class resolved           │ Estimator      │                  │ │
+│ │ │ OK     │ setup(context) completed │ 0.00s (cap 5s) │                  │ │
+│ │ │ OK     │ predict() returned shape │ (2, 4)         │                  │ │
+│ │ │ OK     │ values finite            │ all finite     │                  │ │
+│ │ └────────┴──────────────────────────┴────────────────┘                  │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────┘
+✓ Validation passed in 32ms
+Next: `whest run --estimator estimator.py --split mini`
+  PASS  4. whest validate
+
+=== 5. ship-file identity vs estimator_v2_6_1.py ===
+  estimator.py  sha256(lf) = 1caa3752be56e8625ddb8b163ff8ffa8
+  estimator_v2_6_1.py sha256(lf) = 1caa3752be56e8625ddb8b163ff8ffa8
+  identical
+  PASS  5. ship-file identity vs estimator_v2_6_1.py
+
+=== 6. vault seal (counter vs log) ===
+  manifest touches = 1  log entries = 1
+  seal consistent
+  PASS  6. vault seal (counter vs log)
+
+=== 7. seed ledger (consumption + source scan) + enforcement labels ===
+seed ledger — consistency
+  ledger records                     58  (38 claims, 16 finalizations, 3 pairings)
+  claims naming an artifact          24  (0 absent on this host, hash recorded)
+  tier tightenings                   1  (permitted; recorded so they are never silent)
+    - local_sim/p2_truth.py: P08 was TIGHTENED 'DESIGN' -> 'SINGLE_USE' by a declared `retier` record. The claim stands and every rule now in force is stricter.
+  hard collisions (DECISION/VAULT)   0
+  permitted overlaps (DESIGN)        5
+    - D16[30,806,016,200..30,806,016,223]  local_sim/probe_whitening.py  vs  local_sim/probe_design_carrier.py   <- CORRELATED EVIDENCE, never quote as two independent results
+    - D11[30,806,011,000..30,806,011,499]  local_sim/packed_sparse_probe.py  vs  local_sim/packed_truth.py   <- SAME NETWORKS BY DESIGN (one experiment, two roles)
+    - P01[40,821,001,168..40,821,001,175]  local_sim/p2_slice_lab.py::WP13 E0-TOL/E1/E2  vs  local_sim/p2_truth.py   <- DECLARED DELIBERATE: EXTENDS the standing declaration on this range to a THIRD consumer. WP16 re-drives the same eight networks to check that the fnp port and the torch reference are the same function -- the 3.31x the canary exposed. It makes no new statistical claim on them: the comparison is deterministic parity, and the only number quoted against truth is a re-read of the ALREADY-MINTED truth_P01_wp13nets.npz. All three consumers remain CORRELATED EVIDENCE and must never be quoted as independent results.
+    - P01[40,821,001,168..40,821,001,175]  local_sim/p2_slice_lab.py::WP13 E0-TOL/E1/E2  vs  local_sim/p2_k3_parity.py   <- DECLARED DELIBERATE: EXTENDS the standing declaration on this range to a THIRD consumer. WP16 re-drives the same eight networks to check that the fnp port and the torch reference are the same function -- the 3.31x the canary exposed. It makes no new statistical claim on them: the comparison is deterministic parity, and the only number quoted against truth is a re-read of the ALREADY-MINTED truth_P01_wp13nets.npz. All three consumers remain CORRELATED EVIDENCE and must never be quoted as independent results.
+    - P01[40,821,001,168..40,821,001,175]  local_sim/p2_truth.py  vs  local_sim/p2_k3_parity.py   <- DECLARED DELIBERATE: EXTENDS the standing declaration on this range to a THIRD consumer. WP16 re-drives the same eight networks to check that the fnp port and the torch reference are the same function -- the 3.31x the canary exposed. It makes no new statistical claim on them: the comparison is deterministic parity, and the only number quoted against truth is a re-read of the ALREADY-MINTED truth_P01_wp13nets.npz. All three consumers remain CORRELATED EVIDENCE and must never be quoted as independent results.
+  CONSISTENT
+
+seed ledger — static source scan
+  no unrecorded seed literals
+WP0B - the enforcement layer's stated coverage, under test
+
+A  every documented N/N matches the suite it names
+  PASS  A: suite 'official_config' runs green and reports a count         96/96, rc=0
+  PASS  A: suite 'edge_cases' runs green and reports a count              30/30, rc=0
+  PASS  A: suite 'competition_score' runs green and reports a count       134/134, rc=0
+  PASS  A: suite 'seed_ledger_refusals' runs green and reports a count    66/66, rc=0
+  PASS  A: suite 'lifecycle' runs green and reports a count               56/56, rc=0
+  PASS  A: preflight.ps1 claims edge_cases = 30/30                        suite reports 30/30
+  PASS  A: preflight.ps1 claims competition_score = 134/134               suite reports 134/134
+  PASS  A: preflight.ps1 claims competition_score = 134/134               suite reports 134/134
+  PASS  A: preflight.ps1 claims seed_ledger_refusals = 66/66              suite reports 66/66
+  PASS  A: preflight.ps1 claims lifecycle = 56/56                         suite reports 56/56
+  PASS  A: preflight.ps1 claims shape_parity = 27/27 (not measured this run)slow suite; run with --full to check it
+  PASS  A: preflight.ps1 claims carriers = 48/48 (not measured this run)  slow suite; run with --full to check it
+  PASS  A: VALIDATION.md claims official_config = 96/96                   suite reports 96/96
+  PASS  A: VALIDATION.md claims edge_cases = 30/30                        suite reports 30/30
+  PASS  A: VALIDATION.md claims competition_score = 134/134               suite reports 134/134
+  PASS  A: VALIDATION.md claims seed_ledger_refusals = 66/66              suite reports 66/66
+  PASS  A: VALIDATION.md claims lifecycle = 56/56                         suite reports 56/56
+  PASS  A: VALIDATION.md claims edge_cases = 30/30                        suite reports 30/30
+  PASS  A: VALIDATION.md claims edge_cases = 30/30                        suite reports 30/30
+  PASS  A: VALIDATION.md claims seed_ledger_refusals = 66/66              suite reports 66/66
+  PASS  A: preflight.ps1 claims seed_ledger_refusals = 66/66              suite reports 66/66
+  PASS  A: every count in preflight.ps1 is claimed or explicitly exempt   15 spans cover every occurrence
+  PASS  A: every count in VALIDATION.md is claimed or explicitly exempt   30 spans cover every occurrence
+  PASS  A: VALIDATION.md carries no count where none exists               step 7 (consumption + source scan) reports no count; a number there is step 9's, mis-attached
+  PASS  A: preflight.ps1 carries no count where none exists               step 7 reports no count
+  PASS  A: 'official_config' is claimed by at least one document          otherwise the label is unguarded
+  PASS  A: 'edge_cases' is claimed by at least one document               otherwise the label is unguarded
+  PASS  A: 'competition_score' is claimed by at least one document        otherwise the label is unguarded
+  PASS  A: 'seed_ledger_refusals' is claimed by at least one document     otherwise the label is unguarded
+  PASS  A: 'lifecycle' is claimed by at least one document                otherwise the label is unguarded
+
+B  the label checker is not vacuous -- mutate a label, it must complain
+  PASS  B: a wrong count at preflight step 9 is DETECTED                  66/66 -> 67/67, mismatch seen: True
+  PASS  B: a wrong count at preflight step 11 is DETECTED                 56/56 -> 57/57, mismatch seen: True
+  PASS  B: a wrong count at VALIDATION step 8 is DETECTED                 134/134 -> 135/135, mismatch seen: True
+  PASS  B: a wrong count at VALIDATION step 9 is DETECTED                 66/66 -> 67/67, mismatch seen: True
+  PASS  B: reintroducing the step-7 mis-attachment is DETECTED            the exact 2026-08-31 defect, put back on purpose
+  PASS  B: ...and the mutation actually changed the document              a no-op mutation would make the check above vacuous
+
+R  the two documents were opened read-only, and the one repository
+   write any child makes is left clean
+  PASS  R: preflight.ps1 sha256 unchanged                                 8b796a46b28ad8b1
+  PASS  R: VALIDATION.md sha256 unchanged                                 56644762726324b7
+  PASS  R: local_sim/_ledger_scan_tmp/ left by no child                   the one repository write this suite's children make, cleaned up
+
+39/39 checks passed
+  PASS  7. seed ledger (consumption + source scan) + enforcement labels
+
+=== 8. canonical scorer + the binding gate ===
+C:\Users\samsu\Documents\arc-whest\local_sim\test_competition_score.py:43: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\local_sim\test_competition_score.py:294: BudgetExhaustionWarning: MLP 0 (depth=4, width=16) exhausted FLOP budget after 200,000 FLOPs (budget=200,000); estimator output set to zeros.
+  res = evaluate_estimator(estimator, data)
+C:\Users\samsu\Documents\arc-whest\local_sim\test_competition_score.py:294: BudgetExhaustionWarning: MLP 1 (depth=4, width=16) exhausted FLOP budget after 200,000 FLOPs (budget=200,000); estimator output set to zeros.
+  res = evaluate_estimator(estimator, data)
+C:\Users\samsu\Documents\arc-whest\local_sim\test_competition_score.py:294: BudgetExhaustionWarning: MLP 2 (depth=4, width=16) exhausted FLOP budget after 200,000 FLOPs (budget=200,000); estimator output set to zeros.
+  res = evaluate_estimator(estimator, data)
+C:\Users\samsu\Documents\arc-whest\local_sim\test_competition_score.py:294: BudgetExhaustionWarning: MLP 3 (depth=4, width=16) exhausted FLOP budget after 200,000 FLOPs (budget=200,000); estimator output set to zeros.
+  res = evaluate_estimator(estimator, data)
+====================================================================================================
+CANONICAL COMPETITION SCORER — parity with installed whestbench, and the estimand fixture
+====================================================================================================
+
+0. environment
+--------------
+  whestbench 0.16.1   flopscope 0.12.1   numpy 2.2.6
+  floor constant matches the installed evaluator             ok   
+  graded reports present                                     ok   
+
+1. scalar parity vs whestbench.budget (bitwise ==)
+--------------------------------------------------
+  effective_compute exact on 12,000 rows                     ok   0 mismatches
+  score_multiplier exact on 12,000 rows                      ok   0 mismatches
+  is_combined_budget_exhausted exact                         ok   0 mismatches
+  the DEPRECATED lambda alias matches the package's deprecated alias ok   1.000e+11
+  the LIVE default lambda matches the package's live default ok   0.000e+00
+  ...and it is ZERO, so C == F and residual is gated, not priced ok   C(1e+09 FLOPs, 1e6 s) = 1.000000e+09
+  the Phase-1 rate is still available, explicitly, for replay ok   1.000e+11
+  the LIVE budget matches the package's live default         ok   2,199,023,255,552
+  the Phase-1 budget is still available, explicitly, for replay ok   272,000,000,000
+  configurable floor: max(floor, C/B), B<=0 -> 1.0           ok   floor=0.5
+  floor boundary C/B = 0.1 exactly                           ok   
+  below floor is clamped, above floor is not capped          ok   
+  failure multiplier is 1.0, NOT the 0.1 floor               ok   
+
+2. aggregation parity — arithmetic mean, same accumulation as the grader
+------------------------------------------------------------------------
+  np.mean == fnp.mean on score lists (200 trials)            ok   bitwise
+
+3. evaluator parity — the REAL whestbench scoring loop
+------------------------------------------------------
+  clean (at floor): per-MLP score bitwise == grader          ok   
+  clean (at floor): aggregate objective == grader            ok   3.233262961730e-02 vs 3.233262961730e-02
+  clean (at floor): n_failed == grader                       ok   0 vs 0
+  clean (at floor): mean multiplier == grader                ok   0.100000
+  clean (at floor): expected 0 failure(s) actually occurred  ok   got 0
+  clean (budget probe): per-MLP score bitwise == grader      ok   
+  clean (budget probe): aggregate objective == grader        ok   3.583830942710e-02 vs 3.583830942710e-02
+  clean (budget probe): n_failed == grader                   ok   0 vs 0
+  clean (budget probe): mean multiplier == grader            ok   0.100000
+  clean (above floor, try 1): per-MLP score bitwise == grader ok   
+  clean (above floor, try 1): aggregate objective == grader  ok   2.754131875756e-01 vs 2.754131875756e-01
+  clean (above floor, try 1): n_failed == grader             ok   0 vs 0
+  clean (above floor, try 1): mean multiplier == grader      ok   0.768409
+  above-floor arm: no failures, every multiplier strictly above the floor ok   mult in [0.768, 0.769]
+  raising (2 of 8): per-MLP score bitwise == grader          ok   
+  raising (2 of 8): aggregate objective == grader            ok   1.841074301861e-01 vs 1.841074301861e-01
+  raising (2 of 8): n_failed == grader                       ok   2 vs 2
+  raising (2 of 8): mean multiplier == grader                ok   0.325000
+  raising (2 of 8): expected 2 failure(s) actually occurred  ok   got 2
+  failure MSE == zero_prediction_mse(target)                 ok   1.943431e-01 vs 1.943431e-01
+  failure row: multiplier forced to 1.0 and C recorded as 0  ok   
+  budget-exhausting: per-MLP score bitwise == grader         ok   
+  budget-exhausting: aggregate objective == grader           ok   6.418364308774e-01 vs 6.418364308774e-01
+  budget-exhausting: n_failed == grader                      ok   4 vs 4
+  budget-exhausting: mean multiplier == grader               ok   1.000000
+  exhaustion path exercised (flops recorded, mult still 1.0) ok   4/4 exhausted
+
+4. heterogeneous per-MLP budgets (whestbench 0.14.0 has one B; we must not assume it)
+-------------------------------------------------------------------------------------
+  per-row scores exact against whestbench with per-row B     ok   
+  objective == arithmetic mean of those rows                 ok   
+
+4b. combined-budget guard — C > B with failed=False must not be scored silently
+-------------------------------------------------------------------------------
+  P1: the grader itself would fail that row                  ok   C = 1.500e+11 vs B = 1.000e+11
+  P1: default on_over_budget='raise' refuses it              ok   
+  P1: over_budget_rows names the offender                    ok   
+  P1: on_over_budget='fail' forces multiplier 1.0 on that row only ok   mults [0.6, 1.0]
+  P1: on_over_budget='ignore' keeps the raw uncapped identity ok   mult 1.5000
+  P2: an absurdly slow row is NOT over budget — lambda is 0, so C == F ok   C = 5.000e+10 vs B = 1.000e+11 at 1e6 s of residual
+  P2: ...and the guard therefore does not fire on it         ok   
+  P2: a row over budget on FLOPs alone still trips the guard ok   C = 1.500e+11 vs B = 1.000e+11
+  P2: default on_over_budget='raise' refuses it              ok   
+  P2: 'fail' forces multiplier 1.0 on that row only          ok   mults [0.5, 1.0]
+  an unknown mode is rejected                                ok   
+  clean suites are unaffected by the guard                   ok   
+
+5. what one failure costs — prediction P2, FALSIFIED AS STATED; the exact law
+-----------------------------------------------------------------------------
+  failure penalty is EXACTLY 1/mult_i (multiplier half only) ok   4.680x   (mult 0.2137 -> 1.0)
+  P2 as written (> 5x) is FALSE for part of the real suite   ok   penalty range [4.59x, 5.41x], at suite-mean mult 0.19896 -> 5.03x
+  one failed MLP in 50 moves the objective measurably        ok   2.631432e-07 -> 2.752357e-07 (+4.60%, MSE held fixed)
+    note: a real failure ALSO replaces mse with mean(target^2); this check isolates the multiplier half only, which is the falsifiable one.
+
+6. MSE/cost correlation — prediction P6 (the factorised form is biased)
+-----------------------------------------------------------------------
+  P6: mean(mse)*mean(mult) != mean(mse*mult) on real graded rows ok   rel bias +0.7367%   corr(mse, mult) = -0.3391
+  positive corr => factorised UNDERstates the objective      ok   3.409894e-07 < 4.733041e-07  (-27.96%)
+
+7. REGRESSION FIXTURE — arithmetic vs geometric select opposite winners (P3)
+----------------------------------------------------------------------------
+  P3 as pre-registered was ALGEBRAICALLY WRONG (dropped the -g term) ok   contract 41.80%  exact 38.80%  error 3.00pp = g
+  a sign flip exists                                         ok   first grid point at X = 39.00%
+  the flip lands on the first grid point above the exact law (0.5% grid) ok   observed 39.00%  exact 38.80%  gap 0.199pp
+  FIXTURE: geometric says candidate WINS, arithmetic says it LOSES ok   geo 1.0221x  vs  arith 0.9927x
+
+paired, n = 50 MLPs   (v2.4.1 graded vs tail-regressing candidate)
+  mean score          v2.4.1 graded: 2.631432e-07   tail-regressing candidate: 2.650692e-07
+  PRIMARY  arithmetic mean difference (ctrl - cand, >0 = candidate better)
+      delta            -1.926031e-09
+      relative         -0.732%   (gain 0.9927x)
+      bootstrap 95% CI [-2.1291e-08, +8.3210e-09]  (20000 resamples, seed 12345)
+      BCa       95% CI [-4.0214e-08, +7.8329e-09]   (2x the false-promotion rate at n~50 — do not gate on it)
+      relative  95% CI [-7.818%, +3.000%]
+      studentised   CI [-2.0842e-08, +1.6990e-08]   <- READ THIS ONE (measured at nominal coverage; see coverage_lab)
+  SECONDARY  geometric mean of per-MLP ratios (>1 = candidate better)
+      gain             1.0221x   95% CI [1.0051, 1.0395]
+  candidate better on 49/50   sign-test p = 0.0000
+  *** ESTIMANDS DISAGREE: arithmetic says control, geometric says candidate. The competition is arithmetic. ***
+
+    mechanism: the candidate improves 49/50 MLPs by 3% and regresses one by 49%.
+    The geometric mean weights every MLP's LOG equally, so a single tail blow-up is
+    invisible to it. The competition sums scores, so that one MLP is 7.2% of the objective.
+
+8. paired statistics — determinism and analytic sanity
+------------------------------------------------------
+  paired_compare is deterministic                            ok   
+  uniform 2x improvement: arithmetic gain == geometric gain == 2 ok   arith 2.000000  geo 2.000000
+  uniform improvement: estimands agree                       ok   
+  identical arms: zero difference, gain 1.0, p = 1           ok   
+  mismatched lengths are refused                             ok   
+
+9. GRADED REPLAY — real published rows, read-only (P4, P5, P7)
+--------------------------------------------------------------
+  P4 v2.4  / 324420: 50 rows reproduce to 1e-12              ok   worst rel 0.000e+00
+  P5 v2.4  / 324420: C == F + 1e11*R on all 100 rows to 1e-9 ok   worst rel 0.000e+00
+  P7 v2.4  / 324420: aggregates.public is over the 50 PUBLIC rows, not 100 ok   reported 5.412154e+10 | 50-row 5.412154e+10 | 100-row 5.389333e+10
+  P7 v2.4  / 324420: our 50-row objective IS the published score, bitwise ok   2.719427529595e-07 vs 2.719427529595e-07
+      worst MLP 8.0801e-07  best 6.1554e-08  worst/mean 2.97x  top-1 tail share 5.9%  top-5 27.1%
+  P4 v2.4.1 / 327743: 50 rows reproduce to 1e-12             ok   worst rel 0.000e+00
+  P5 v2.4.1 / 327743: C == F + 1e11*R on all 100 rows to 1e-9 ok   worst rel 0.000e+00
+  P7 v2.4.1 / 327743: aggregates.public is over the 50 PUBLIC rows, not 100 ok   reported 5.411771e+10 | 50-row 5.411771e+10 | 100-row 5.390057e+10
+  P7 v2.4.1 / 327743: our 50-row objective IS the published score, bitwise ok   2.631432177242e-07 vs 2.631432177242e-07
+      worst MLP 9.4426e-07  best 5.3347e-08  worst/mean 3.59x  top-1 tail share 7.2%  top-5 24.0%
+
+10. the real v2.4 -> v2.4.1 pair, scored by the canonical scorer
+----------------------------------------------------------------
+  the two submissions were scored on the SAME 50 MLPs in the same order ok   50 names
+
+paired, n = 50 MLPs   (v2.4 (324420) vs v2.4.1 (327743))
+  mean score          v2.4 (324420): 2.669813e-07   v2.4.1 (327743): 2.582275e-07
+  PRIMARY  arithmetic mean difference (ctrl - cand, >0 = candidate better)
+      delta            +8.753803e-09
+      relative         +3.279%   (gain 1.0339x)
+      bootstrap 95% CI [-4.7557e-08, +6.5006e-08]  (20000 resamples, seed 12345)
+      BCa       95% CI [-4.7346e-08, +6.5192e-08]   (2x the false-promotion rate at n~50 — do not gate on it)
+      relative  95% CI [-20.104%, +21.361%]
+      studentised   CI [-4.9252e-08, +6.6760e-08]   <- READ THIS ONE (measured at nominal coverage; see coverage_lab)
+  SECONDARY  geometric mean of per-MLP ratios (>1 = candidate better)
+      gain             0.9669x   95% CI [0.7972, 1.1727]
+  candidate better on 22/50   sign-test p = 0.4799
+  *** ESTIMANDS DISAGREE: arithmetic says candidate, geometric says control. The competition is arithmetic. ***
+  the real graded pair reproduces the documented estimand disagreement ok   arith 1.0339x  geo 0.9669x
+  arithmetic improvement is NOT resolvable (bootstrap CI spans 0) ok   [-4.756e-08, 6.501e-08]
+
+13. the binding gate — arithmetic primary, t/basic interval only
+----------------------------------------------------------------
+  a real 11% improvement PASSES a 1.05x gate                 ok   gain 1.1249x, t CI [+3.731e-08, +5.682e-08]
+  ...and FAILS a 1.25x gate, on the same data                ok   
+  the gate has NO default — it must be pre-registered        ok   TypeError without gate=
+  the percentile bootstrap is REFUSED, not deprecated        ok   
+  BCa is REFUSED (measured 9.1-11.5% false promotion at n~50) ok   
+  the basic bootstrap IS permitted                           ok   
+  a true null does not clear a 1.05x gate                    ok   gain 0.9984x; reasons: 4
+  when the estimands DISAGREE the verdict follows ARITHMETIC ok   arith 1.4687x, geo 0.9666x
+  ...and the disagreement is surfaced in the reasons, not hidden ok   
+  the GAIN follows arithmetic even when geometric disagrees  ok   arith 1.4687x vs geo 0.9666x
+  but a gain resting on ONE network is still refused by the interval ok   biggest mover carries 105% of the delta
+  a 30%-worse candidate FAILS at every legal gate            ok   one-sided interval + the gate floor, two independent locks
+  ...and the Verdict SAYS it is worse, rather than staying silent ok   
+  a gate below 1.0 is REFUSED (it would ask to promote a regression) ok   
+  a non-finite gate is REFUSED                               ok   
+  the interval condition is ONE-SIDED (strictly above zero)  ok   a regression's interval excludes zero two-sidedly; that is not a pass
+  Verdict is frozen — a verdict you can edit is not a verdict ok   
+
+14. pairing is on MLP IDENTITY, not list order
+----------------------------------------------
+  a permuted candidate arm recovers the SAME standard error  ok   se 2.1976e-10, 40 permutations, spread 0.00e+00
+  ...and the t interval still excludes zero on every permutation ok   40/40 (before the repair: 0/200)
+  ...and the result SAYS it reordered, rather than staying silent ok   notes carry the reorder
+  a candidate arm of duplicated identities is REFUSED        ok   a duplicate is a false-promotion route, not a paired design
+  arms naming DIFFERENT MLPs are refused                     ok   no common random numbers
+  a PARTLY named arm is refused rather than guessed at       ok   
+  two fully UNNAMED arms still pair positionally             ok   existing callers keep working
+  ...and the result records that it paired on LIST ORDER     ok   the allowance is visible
+  ...but require_ids=True refuses them                       ok   a DECIDE-tier contract may not pair on list order
+  alignment returns the SAME rows, only reordered            ok   no row invented, none dropped
+
+15. the t interval honours the alpha it was asked for
+-----------------------------------------------------
+  a 99% t interval is WIDER than the 95%                     ok   1.340x   (before the repair: 1.000x)
+  an 80% t interval is NARROWER than the 95%                 ok   0.645x   (before the repair: 1.000x)
+  the three intervals are no longer bit-identical            ok   alpha 0.05 / 0.01 / 0.20
+  the exact quantile matches the historical _T975 table to 1e-3 ok   worst |exact - table| = 4.71e-04 over df 1..30
+  the DEFAULT 0.05 path still reads the table, bit for bit   ok   no published 95% interval moves
+  ...and it matches scipy.stats.t.ppf                        ok   max err 2.57e-10
+  the df=1 extreme tail is not silently capped at 10,000     ok   actual 636619.772349, scipy 636619.772419
+  unsupported alpha=0.0 is explicitly refused                ok   no NaN or clipped interval escapes
+  unsupported alpha=1.0 is explicitly refused                ok   no NaN or clipped interval escapes
+  unsupported alpha=-0.1 is explicitly refused               ok   no NaN or clipped interval escapes
+  unsupported alpha=1.1 is explicitly refused                ok   no NaN or clipped interval escapes
+
+16. label noise, and the multiplier that stops it cancelling
+------------------------------------------------------------
+  the noise bias matches the closed form (q_c - q_k) * v     ok   4.044445e-10 vs 4.044445e-10
+  ...and it is exactly the gap between observed and true-function ok   4.044445e-10
+  the observed difference OVERSTATES the true-function difference ok   1.4404e-08 vs 1.4000e-08
+  ...and the report says what share of it is noise           ok   2.81% of the observed difference
+  at EQUAL multipliers the noise bias is exactly zero        ok   the old cancellation claim is right here, and only here
+  ...and observed equals true-function to the last bit       ok   
+
+17. the official-precision forecast, and what it refuses
+--------------------------------------------------------
+  the official-precision forecast lies between corrected and observed ok   1.650679e-08 in [1.6500e-08, 1.6904e-08]
+  ...and much nearer the corrected figure, since 2**24 << 1e9 ok   the official labels are ~60x more precise than ours
+  a row with no gt_noise is REFUSED, not treated as zero     ok   an unknown floor is not a floor of zero
+  two arms disagreeing about one network's floor are REFUSED ok   
+  a non-positive sample count is refused rather than guessed at ok   
+
+18. a negative corrected MSE is retained, never clipped
+-------------------------------------------------------
+  negative corrected MSEs occur and are COUNTED              ok   84 of 160 rows
+  ...and the result says so in its notes                     ok   
+  ...and no network was dropped                              ok   n = 80
+  the corrected true-function means stay near zero           ok   ctrl -1.524e-11, cand -6.897e-12
+
+134/134 checks passed
+  PASS  8. canonical scorer + the binding gate
+
+=== 9. seed-ledger refusals + the truth-read register ===
+  NOTE D18 is DESIGN: [30,806,018,000..30,806,018,023] overlaps 'probe_a.py'. Permitted, but the two results are CORRELATED evidence and must not be quoted as independent.
+========================================================================================================
+SEED LEDGER — does the enforcement bite?
+========================================================================================================
+
+1. a SINGLE_USE block may be claimed exactly once, ever
+-------------------------------------------------------
+  first claim on D17 succeeds                                    ok   
+  a SECOND claim on D17 is refused even on disjoint seeds        ok   
+  an explicit non-overlapping range is refused too               ok   
+  the refused claims wrote nothing                               ok   
+  D17 and D19 are registered single-use                          ok   
+
+2. a DESIGN block permits overlap — and always reports it
+---------------------------------------------------------
+  the overlapping DESIGN claim is allowed                        ok   
+  and it is reported as a collision                              ok   
+  check_ledger does NOT error on a DESIGN overlap                ok   
+  distinct-seed accounting counts the shared range once          ok   24 distinct from 48 claimed
+
+3. ranges that leave their block, and blocks that do not exist
+--------------------------------------------------------------
+  a range running past the end of the block is refused           ok   
+  a range starting before the block is refused                   ok   
+  an unregistered block is refused                               ok   
+  n <= 0 is refused                                              ok   
+  nothing was written                                            ok   
+
+4. free-range accounting, and running a block dry
+-------------------------------------------------
+  free ranges are the gaps, exactly                              ok   [(30806018100, 30806018199), (30806018300, 30806018599)]
+  claim() takes the FIRST gap that fits                          ok   
+  a request larger than any gap is refused                       ok   
+
+5. a hand-edited ledger does not pass quietly
+---------------------------------------------
+  an out-of-block hand-written record is caught                  ok   1 error(s)
+  a record claiming the wrong tier is caught                     ok   
+  a malformed line raises rather than being skipped              ok   
+
+6. a DECISION-tier overlap is a hard error, not a note
+------------------------------------------------------
+  claimed twice is caught                                        ok   
+  the seed overlap is ALSO caught as a hard collision            ok   2 error(s)
+
+7. an artifact that changes after the claim is caught
+-----------------------------------------------------
+  the claim recorded a hash                                      ok   
+  unchanged artifact passes                                      ok   
+  a rewritten artifact is caught                                 ok   
+
+7b. an artifact CLAIMED but never hashed is caught -- the fail-open
+-------------------------------------------------------------------
+  a claim made before its artifact exists records NO hash        ok   
+  an unhashed artifact is now an ERROR, not silence              ok   1 error(s)
+  finalize REFUSES an artifact that does not exist               ok   
+  after finalize the ledger is clean                             ok   
+  finalize is idempotent                                         ok   
+  finalize does not consume seeds                                ok   10 seeds after 1 claim + 2 finalize calls
+  finalize does not collide with its own claim                   ok   
+  claims() and finalizations() split the ledger                  ok   
+  an artifact swapped AFTER finalization is caught               ok   
+  re-finalizing a swapped artifact is REFUSED                    ok   
+  finalize REFUSES an artifact no claim named                    ok   
+
+7c. a gitignored artifact absent from a fresh clone is REPORTED, not failed
+---------------------------------------------------------------------------
+  present + finalized is clean                                   ok   
+  an ABSENT finalized artifact does not fail the gate            ok   
+  and its hash is still pinned in the record                     ok   
+
+8. the source scan catches the failure that actually happened
+-------------------------------------------------------------
+  a hardcoded seed inside a registered block is flagged          ok   1 finding(s)
+  a seeds() call with no literal is ALSO flagged                 ok   the blind spot that hid D12/D14/D15
+  an explicit 'excludes' pragma suppresses it (naming a block to refuse it) ok   
+  the temporary probe is gone                                    ok   
+
+9. the REAL ledger — read-only assertions (predictions A1, A2, A6)
+------------------------------------------------------------------
+  the committed ledger is consistent                             ok   0 error(s)
+  allocations are still disjoint (invariant 12)                  ok   
+  the block registry is non-empty and was really read            ok   33 blocks
+  every registered block has a tier in seed_ledger.TIERS         ok   missing: []
+  and every tier names a registered block                        ok   orphaned: []
+  a tier lookup succeeds for every registered block              ok   
+  A1: every UNDECLARED overlap is one of the known accidents     ok   
+  A1: and the D16 accident is still in the record, not quietly resolved ok   1 undeclared overlap(s)
+  A1: the P01 WP13/WP14 overlap is DECLARED, and its reason still warns that the evidence is correlated ok   
+  A1: a pairing cannot be declared for an overlap that does not exist ok   
+  A2: D17 is SINGLE_USE and has at most one recorded claim       ok   0 claim(s), 0 seeds  <- UNSPENT
+  A2: any D17 claim names a real consumer inside the block       ok   vacuously true while unspent
+  A2: D19 is SINGLE_USE and has at most one recorded claim       ok   0 claim(s), 0 seeds  <- UNSPENT
+  A2: any D19 claim names a real consumer inside the block       ok   vacuously true while unspent
+  D18 accounting closes: consumed + free == the block            ok   384 consumed, 216 free of 600
+  every D18 claim names a real consumer inside the block         ok   2 claim(s): ['local_sim/coverage_lab.py', 'local_sim/probe_oa_carrier.py']
+  A6: D16 accounting closes: consumed + free == the block        ok   270 consumed, 330 free in 4 gaps of 600
+  A6: every D16 claim names a real consumer inside the block     ok   6 claim(s)
+  A6: free ranges are disjoint, ascending, and inside the block  ok   
+  A3: the tree has no unrecorded seed use                        ok   
+  A7: every artifact-naming claim in the REAL ledger is hashed   ok   unhashed: []
+  A7: D17 and D19 are still unspent after the finalize change    ok   D17 0, D19 0
+  no test wrote to the real ledger                               ok   
+
+66/66 checks passed
+================================================================================================
+THE READ REGISTER — a single-use block is single-use when its LABELS are counted
+================================================================================================
+
+1. a single-use block permits exactly one read
+----------------------------------------------
+  the register starts EMPTY                                          ok   prediction 7: no machine-readable read log existed
+  the first read is permitted                                        ok   
+  the SECOND read is REFUSED                                         ok   P08 is SINGLE_USE and its 1 permitted read(s) are SPENT 
+  ...and the refusal names the prior consumer and its status         ok   a refusal that will not say what spent the block is not auditable
+  ...and refusing wrote no extra line                                ok   1 spent
+
+2. a filename's block identity cannot be overridden
+---------------------------------------------------
+  truth_P08.npz cannot be presented as P01                           ok   
+  truth_P08.npz resolves to P08 when no id is supplied               ok   
+  truth-bearing feat_P08.npz also resolves to P08                    ok   
+  a vault filename resolves only to V                                ok   
+  a vault artifact cannot be presented as a design block             ok   
+  a generic filename may use an explicit registered block            ok   
+  an unknown block is refused                                        ok   
+  identity refusals do not spend a read                              ok   
+
+2. a crashed read still counts — the labels were already exposed
+----------------------------------------------------------------
+  the reservation was written BEFORE the body ran                    ok   reserve-then-look
+  ...and the crash is recorded as ABORTED                            ok   
+  an aborted read CONSUMES the cap                                   ok   otherwise 'my script raised' is an unlimited supply of looks
+  ...so the next read is refused                                     ok   
+
+3. a reusable design block is counted, not capped
+-------------------------------------------------
+  four reads of a DESIGN block are permitted                         ok   tier DESIGN, cap None
+  ...and none of them is 'exhausted'                                 ok   how much a design corpus has been mined is a different question from whether it was allowed
+
+4. every line says who looked, at what, with which instrument
+-------------------------------------------------------------
+  the artifact's sha256 is recorded                                  ok   313a891fd25a3d91...
+  the INSTRUMENT's sha256 is recorded                                ok   a repaired instrument cannot be confused with the one that ran
+  the consumer, purpose and result artifact are recorded             ok   
+  the register is append-only JSON-Lines, like the claim ledger      ok   
+
+5. two consumers cannot both be handed the LAST read
+----------------------------------------------------
+  exactly ONE of eight concurrent readers succeeds                   ok   1 ok, 7 refused, 0 other
+  ...and the other seven are REFUSED, not crashed                    ok   []
+
+6. the CLAIM race the register depends on
+-----------------------------------------
+  exactly ONE of twelve concurrent claimers succeeds                 ok   1 ok, 11 refused  (before the lock: 12 ok)
+  ...and the ledger holds exactly one claim line                     ok   1 lines
+  ...and no claimer crashed instead of being refused                 ok   []
+
+7. the lock is released, including when the body raises
+-------------------------------------------------------
+  the lockfile exists while held                                     ok   
+  ...and is gone after the body raises                               ok   a lock leaked by an exception would wedge every later claim
+
+8. the LIVE register — P08's three historical reads
+---------------------------------------------------
+  P08 is SINGLE_USE with a cap of 1                                  ok   tier SINGLE_USE, cap 1
+  ...and its register records THREE reads, backfilled                ok   the two broken instrument runs plus the repaired one
+  ...so P08 reads as EXHAUSTED to anything that asks                 ok   prose in seed_blocks.py became an executable refusal
+  the direct-load audit finds real call sites                        ok   37 sites in local_sim/, none of which reserve
+  ...and p2_corrector's repaired path is no longer a bypass          ok   the historical P08 reads remain in the register; new runs reserve
+
+35/35 checks passed
+  PASS  9. seed-ledger refusals + the truth-read register
+
+=== 10. vault integrity (array hashes + seed->weights) ===
+========================================================================================
+VAULT INTEGRITY
+========================================================================================
+created            2026-08-06T06:52:32Z
+shape              500 MLPs, 256x32
+GT samples/MLP     33,554,432
+GT-noise MSE       mean 1.575e-09  max 6.183e-09
+touches so far     1
+  seeds      sha256 OK  d42bb96896d8dc5c5545c7c725ff2c5f8f346609c3070192...
+  truth      sha256 OK  a0f3e05a169a3a4f99702835a343facea5a261e24a4ccccd...
+  truth_var  sha256 OK  9064f20b7ab0dc0c3f0a8572fbffb2738faeb7dad9f1f034...
+  gt_noise   sha256 OK  61cc0f50451b720173fa62254f895d9cd71d4facdbf09fa0...
+
+reconstructing 5 MLPs from seeds to confirm the seed->weights map:
+  [  0] seed 20,260,806,000  est_seed     61790341  w[0] sha 0ff5571f667e559c...  ||w||_F 128.0090
+  [124] seed 20,260,806,124  est_seed    107173543  w[0] sha 0092cd52c73a73e1...  ||w||_F 128.0745
+  [249] seed 20,260,806,249  est_seed   3246351195  w[0] sha ff76309f905d7058...  ||w||_F 128.0390
+  [374] seed 20,260,806,374  est_seed   3826728198  w[0] sha 3aab93e6dc99244a...  ||w||_F 128.0002
+  [499] seed 20,260,806,499  est_seed   3415474530  w[0] sha a183acd80ff9a9b1...  ||w||_F 127.9286
+
+TOUCH LOG (1 entries)
+----------------------------------------------------------------------------------------
+  # 1 2026-08-06T09:17:34Z  seal         v2.4.1
+      median 2.4651e-07  mean 3.2669e-07  p99 2.0535e-06  max 3.0469e-06
+
+counter and log agree (1).
+  PASS  10. vault integrity (array hashes + seed->weights)
+
+=== 11. lifecycle evaluator + the certification consumers' mutation battery ===
+C:\Users\samsu\Documents\arc-whest\local_sim\lifecycle_eval.py:613: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+========================================================================================================
+LIFECYCLE EVALUATOR — self-test (predictions L1-L6)
+========================================================================================================
+
+0. the transcribed grader constants still match the installed whestbench
+  setup_timeout_s                                                ok   5.0 == 5.0
+  wall_time_limit_s                                              ok   120.0 == 120.0
+  residual_wall_time_limit_s                                     ok   0.4
+  lambda                                                         ok   0.000e+00
+  predict_timeout_s                                              ok   30.0
+  memory_limit_mb                                                ok   8,192 MB  <- RLIMIT_AS; already killed v2.5
+       NOTE: these are PACKAGE DEFAULTS. No graded report publishes them; only lambda is corroborated.
+       whestbench 0.16.1   flopscope 0.12.1+np2.2.6
+
+1. L1/L5 — the grader lifecycle vs the historical vault lifecycle
+        i   grader flops    vault flops         delta   d ops
+        0    4.56596e+10    4.59123e+10   +2.5273e+08    +155
+        1    4.72558e+10    4.72558e+10   +0.0000e+00      +0
+        2    4.90169e+10    4.90169e+10   +0.0000e+00      +0
+        3    5.14794e+10    5.14794e+10   +0.0000e+00      +0
+        4    4.56259e+10    4.56259e+10   +0.0000e+00      +0
+        5    4.88886e+10    4.88886e+10   +0.0000e+00      +0
+  L5: exactly ONE row differs between the two lifecycles         ok   1 differ
+  L5: and it is index 0                                          ok   index 0
+  L1: rows 1.. are BIT-IDENTICAL across lifecycles               ok   
+  L1: the old lifecycle over-charges MLP #0, it never under-charges ok   +2.5273e+08 FLOPs
+  L1: setup() was called exactly once on the grader path         ok   
+
+2. L3 — setup() fits inside the grader's 5-second ceiling
+  L3: module load + setup(), plus the measured host cold start, fits ok   284.2 ms + 240 ms = 524 ms of 5000 ms (a PACKAGE DEFAULT, not observed)
+  L3: and is therefore not timed out                             ok   
+  L3: setup raised nothing                                       ok   clean
+
+3. L2 — the objective agrees with a hand-computed identity
+  L2: score_suite == mean_i mse_i * max(0.1, C_i/B)              ok   relative deviation 0.000e+00
+  L2: no row silently over budget                                ok   0 failed
+
+4. L4 — every provokable failure path, exactly as the grader prices it
+  L4: a 1e6 budget exhausts the FLOP budget                      ok   2/2 exhausted
+  L4: exhausted rows are FAILED                                  ok   
+  L4: and their MSE is EXACTLY mean(target^2), i.e. zeroed predictions ok   8.45848843455314636e-02 vs 8.45848843455314636e-02
+  L4: a failure is priced at multiplier EXACTLY 1.0, not the 0.1 floor ok   [1.0, 1.0]
+  L4: a raising predict() routes to the exception path           ok   ['RuntimeError', 'RuntimeError']
+  L4: exception rows are FAILED and exactly zeroed               ok   
+  L4: a TRANSPOSED prediction is caught by validation, not scored ok   ValueError
+  L4: a 1e-9 s residual limit trips the residual path            ok   2/2
+  L4: residual-exhausted rows are exactly zeroed at multiplier 1.0 ok   
+  L4: a 1e-9 s WALL limit trips the TIME path                    ok   2/2 time_exhausted
+  L4: wall-exhausted rows are exactly zeroed at multiplier 1.0   ok   
+  L4: ...and the WALL path is distinct from the RESIDUAL path    ok   time_exhausted set, residual_exhausted clear
+  L4: 50 ms of residual at B=1e9 trips the COMBINED budget C=F+lam*R>B ok   C = 5.190e+09 vs B = 1.000e+09
+  L4: combined-exhausted rows are exactly zeroed at multiplier 1.0 ok   
+  L4: and `competition_score` owns that predicate, not this module ok   C = 3.000e+11 vs B = 2.72e11, at the PHASE-1 rate
+  L4: ...and under the LIVE round the same row is IN budget, because lambda is 0 ok   C = 2.000e+11 vs B = 2.72e11
+
+4b. SETUP failure is a REFUSAL, because the grader aborts the whole run
+  a 6 s setup RAISES SetupFailure — no clean objective is produced ok   grader: cli.py:2357 -> runner.py:155-172 kills the run
+  ...and the opt-in path marks it, rather than hiding it         ok   setup 6.01s + 0.24s cold start > 5.0s
+  a RAISING setup also refuses                                   ok   SETUP_ERROR
+
+4c. the setup clock starts where the grader's does
+  the timer covers module load, not just setup() (runner.py:144 precedes load_estimator_from_path) ok   measured 284.2 ms + 240 ms host cold start, of 5000 ms
+  the evidence bundle says its residual is a LOCAL-runner figure ok   runner=local (in-process BudgetContext)
+
+5. L6 — evidence rows are content-addressed and reproducible
+  L6: rows_hash is stable across two independent runs            ok   7ee1615d2b007a1b9a47a8fa...
+  L6: the two lifecycles have DIFFERENT hashes (it can discriminate) ok   
+  L6: ...and the hash is stable EVEN THOUGH timings moved between runs ok   timings differed run-to-run, hash did not
+  L6: EvidenceRow is frozen (an editable row is not evidence)    ok   
+
+6. L7 — a spec names its round, and any deviation from it is recorded
+  L7: for_round('v1-phase1') carries ALL SIX Phase-1 constants together ok   B=2.720e+11 lam=1e+11 wall=60.0 residual=None
+  L7: a clean spec reports NO deviation from the round it names  ok   {}
+  L7: ...and a modified one names exactly what it changed        ok   {'flop_budget': [1000000, 272000000000]}
+  L7: the provenance blob carries the round tag and its deviations ok   v1-phase1, deviations {}
+  L7: for_round refuses an unknown field rather than ignoring it ok   
+
+7. L8 — the LIVE round at 1024x16: the exact anchor and the 0.4 s cliff
+  L8: the live spec is Phase 2, with the cliff ARMED             ok   B=2**41 lam=0.0 residual_cap=0.4s mem=8192 MB
+  L8: counted FLOPs EXACTLY equal the official one-row subprocess anchor ok   137,600,326,656 vs 137,600,326,656 (delta +0)
+        (context: that is +37,779,456 FLOPs on the pre-repair local figure of 137,562,547,200)
+  L8: C == F, because lambda is 0                                ok   C = 137,600,326,656
+  L8: the multiplier is pinned at the 0.1 floor at this operating point ok   C/B = 0.0625734 < floor 0.1
+  L8: no failure path fires on the shipped file                  ok   budget=False time=False residual=False combined=False error=''
+  L8: local in-process residual leaves headroom under the 0.4 s cliff ok   59.6 ms local -> 6.71x headroom (LOCAL, in-process; the grader's own figure is the authority)
+  L8: the 0.4 s cliff FIRES when provoked (1e-9 s limit)         ok   
+  L8: a residual failure is zeroed and priced at multiplier 1.0, not 0.1 ok   mult 1.0
+  L8: ...and that run's provenance DECLARES it was not a clean round ok   {'residual_wall_time_limit_s': [1e-09, 0.4]}
+  L8: no amount of residual can trip the combined budget under lambda 0 ok   C = 137,600,326,656 vs B = 2,199,023,255,552
+
+========================================================================================================
+56/56 checks passed
+
+1. positive, negative and incomplete producer fixtures
+------------------------------------------------------
+  complete v5 positive control CERTIFIES                               ok   CERTIFIED
+  legacy missing v5 bindings is INCOMPLETE                             ok   artifact_version 2 < 5: missing current workload, distribution, instrume
+  applicable legacy explicit failures remain REFUSED                   ok   4 explicit negatives
+  legacy explicit failure with wrong width is INCOMPLETE               ok   INCOMPLETE, applicable=False
+  legacy explicit failure with wrong budget is INCOMPLETE              ok   INCOMPLETE, applicable=False
+  legacy explicit failure with wrong limit_mb is INCOMPLETE            ok   INCOMPLETE, applicable=False
+  matching legacy evidence with missing-only fields stays INCOMPLETE   ok   INCOMPLETE, applicable=True
+
+2. identity, workload, stack and instrument provenance
+------------------------------------------------------
+  other candidate bytes are inapplicable, not a candidate failure      ok   INCOMPLETE; different candidate bytes
+  missing candidate sha is incomplete path-only evidence               ok   INCOMPLETE; path-only
+  a small-shape report is inapplicable to the live workload            ok   INCOMPLETE; certified shape
+  a Phase-1 budget report is inapplicable                              ok   INCOMPLETE; certified budget
+  a looser cap report is inapplicable                                  ok   INCOMPLETE; full memory cap
+  a writable-f32 report is inapplicable                                ok   INCOMPLETE; deployment weight representation
+  a superseded WhestBench report is incomplete                         ok   INCOMPLETE; installed distribution whestbench
+  a non-current instrument hash cannot certify                         ok   INCOMPLETE; instrument sha256
+  a missing explicit instrument policy cannot certify                  ok   INCOMPLETE; instrument verification policy
+
+3. applicable explicit failures and lifecycle evidence
+------------------------------------------------------
+  a mismatched child cap is REFUSED                                    ok   REFUSED; cap read back exactly
+  a surviving negative control is REFUSED                              ok   REFUSED; negative control
+  a dead positive control is REFUSED                                   ok   REFUSED; positive control
+  a candidate MemoryError is REFUSED                                   ok   REFUSED; MemoryError
+  one prediction cannot establish lifecycle stability                  ok   REFUSED; at least three
+  candidate settled address-space growth is REFUSED                    ok   REFUSED; settled address space
+  missing lifecycle controls is INCOMPLETE                             ok   INCOMPLETE; lifecycle controls are present
+  a stateless control that grows cannot certify the instrument         ok   INCOMPLETE; stateless lifecycle positive control
+  a retaining control that does not grow cannot certify the instrument ok   INCOMPLETE; retaining lifecycle negative control
+  unexpected candidate stderr is an explicit refusal                   ok   REFUSED; unexpected stderr
+
+4. Linux runner preserves embedded Python source literally
+----------------------------------------------------------
+  backticks reach Python byte-for-byte instead of shell expansion      ok   '`printf SOURCE_WAS_MUTATED`'
+  the literal-source discriminator writes no stderr                    ok   
+  the literal interpreter remains inside the certified Linux venv      ok   '/home/samsu/.arcwhest-linux'
+  the runner sees the exact installed Phase-2 distributions            ok   '0.16.1', '0.12.1'
+
+5. non-rewriting replay of every stored Linux memory report
+-----------------------------------------------------------
+  the seven historical reports plus any new reports were replayed      ok   11
+  every historical source artifact remained byte-identical             ok   sha256 before == after
+  all seven pre-repair reports are incomplete under the v5 consumer    ok   ['INCOMPLETE', 'INCOMPLETE', 'INCOMPLETE', 'INCOMPLETE', 'INCOMPLETE', 'INCOMPLETE', 'INCOMPLETE']
+
+6. production certifier consumes an explicit report
+---------------------------------------------------
+  explicit applicable report is CERTIFIED through the real CLI         ok   returncode=0
+  explicit wrong-candidate report is INCOMPLETE through the CLI        ok   returncode=1
+
+35/35 checks passed
+  PASS  11. lifecycle evaluator + the certification consumers' mutation battery
+
+=== 12. counted-FLOP anchor vs the official runner ===
+C:\Users\samsu\Documents\arc-whest\local_sim\p2_flop_anchor.py:351: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+  candidate         estimator.py
+  official report   experiments/2026-08-24_p2_p0/official_anchor_1row_0161.json (whestbench 0.16.1)
+  official total         137,600,326,656
+  local total            137,600,326,656   delta +0
+  operations        19 compared, 0 disagreeing
+
+  op-by-op parity with the official runner: EXACT
+  PASS  12. counted-FLOP anchor vs the official runner
+
+PREFLIGHT GREEN -- 12/16, 4 SKIPPED
+
+NOT CHECKED by this run. A skipped step is NOT a pass.
+Clear every line below before promoting, submitting, or
+spending a vault touch:
+  - 13. shape parity              -- not run without -Full (~480 s)
+  - 14. carrier strength         -- not run without -Full (~130 s)
+  - 15. deployment envelope      -- not run without -Full (~40 s)
+  - 16. official Phase-2 smoke   -- not run without -Full (~30 s), and it is DEPLOYMENT AUTHORITY
+  .\scripts\preflight.ps1 -Full
+
+Not covered by this gate, and still required before promotion:
+  - public Phase-2 mini (CONFIRM, read-only -- FIT NOTHING ON IT):
+      uv run whest run --estimator estimator.py --dataset hf://aicrowd/arc-whestbench-public-2026@v2-phase2 --split mini --runner subprocess
+    (v1-phase1 is the PHASE-1 split; use it only to replay a Phase-1 artifact)
+  - the 8,192 MB memory limit is UNENFORCEABLE on this host (no RLIMIT_AS on
+    Windows). Step 15 ACCOUNTS for it; nothing here TESTS it.
+  - GPU mirror parity:                     .venv-gpu\Scripts\python.exe local_sim/gpu_parity.py
+  - vault touch (ONE per estimator change): .venv-gpu\Scripts\python.exe local_sim/vault.py evaluate --label <v> --reason estimator-change
+  - Samuel's explicit approval before any submission.
+worker-q: ------------------------------------------------------------
+worker-q: job #983 SUCCEEDED (exit code 0) at 2026-09-12T09:07:27.311539+00:00

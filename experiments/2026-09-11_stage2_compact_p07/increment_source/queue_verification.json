@@ -1,0 +1,36 @@
+{
+  "exit_code": 0,
+  "fixture_result_sha256": "08468eabff7d9134bff172f3ee0d6af6b62110e8eea0dac892532507e9337d16",
+  "job_id": 983,
+  "members": {
+    "job983_live_environment.json": {
+      "bytes": 2362,
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\983\\environment.json",
+      "sha256": "7c0f5e6d1f7302c0f0f3797745c255c4ba2eb3338f934bd5261de4885bafb338"
+    },
+    "job983_live_manifest.json": {
+      "bytes": 1093,
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\983\\manifest.json",
+      "sha256": "05578ff033c9a9cda0c766c058c0a43744f2a1a7195422392605465ddd996b02"
+    },
+    "job983_live_preflight.log": {
+      "bytes": 90138,
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\logs\\job-000983.log",
+      "sha256": "f3eb6cb6183229f7fd3c2c064efba61b45142a6c2a9d98752fd6f7dd79a02833"
+    },
+    "job983_live_result.json": {
+      "bytes": 189,
+      "original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\983\\result.json",
+      "sha256": "82fc36c59caa533493ec654f7b7be4bf593f976396e998c9d1e6d9c7c42e6f85"
+    },
+    "job983_terminal_show.json": {
+      "bytes": 2470,
+      "original": "workerq show 983 --json terminal stdout",
+      "sha256": "2123c978075eb4f782ff727e5a343af23904259005c57460e79fee51640b9b99"
+    }
+  },
+  "peak_ram_mib": 2842.15625,
+  "source_sha256": "c09860e6c96cf812ede6d3f1bf1d891205afa6e2517fae683427155ecbf5721e",
+  "terminal_state": "SUCCEEDED",
+  "zip_sha256": "a7ac24d8ff0c48cc06ff66058b0521c6b6c2ad96f7dbed37912d877b7b086327"
+}

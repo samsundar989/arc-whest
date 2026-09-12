@@ -1,0 +1,3830 @@
+{
+  "checks": {
+    "identity_delta_tensor_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "identity_hadamard_delta_D22_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "identity_hadamard_delta_D31_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "identity_hadamard_delta_D4_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "identity_hadamard_delta_oriented_covariance_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "identity_hadamard_delta_quadratic_K3_feed_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "identity_hadamard_total_D22_convergence": {
+      "max_absolute_error": 4.3298697960381105e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.1808457968092207e-14,
+      "pass": true
+    },
+    "identity_hadamard_total_D31_convergence": {
+      "max_absolute_error": 4.3298697960381105e-15,
+      "max_absolute_nearzero": 5.551115123125783e-17,
+      "max_relative_material": 1.1808457968092207e-14,
+      "pass": true
+    },
+    "identity_hadamard_total_D4_convergence": {
+      "max_absolute_error": 4.3298697960381105e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.1808457968092207e-14,
+      "pass": true
+    },
+    "identity_hadamard_total_oriented_covariance_convergence": {
+      "max_absolute_error": 6.418476861114186e-17,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 5.668229908490109e-15,
+      "pass": true
+    },
+    "identity_hadamard_total_quadratic_K3_feed_convergence": {
+      "max_absolute_error": 3.8163916471489756e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 4.683645370599785e-14,
+      "pass": true
+    },
+    "identity_mean_later_convergence": {
+      "max_absolute_error": 6.217248937900877e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.5584331978162125e-14,
+      "pass": true
+    },
+    "identity_old_tensor_convergence": {
+      "max_absolute_error": 2.220446049250313e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.0172459076826761e-14,
+      "pass": true
+    },
+    "identity_signed_delta_D22_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "identity_signed_delta_D31_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "identity_signed_delta_D4_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "identity_signed_delta_oriented_covariance_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "identity_signed_delta_quadratic_K3_feed_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "identity_signed_total_D22_convergence": {
+      "max_absolute_error": 2.0539125955565396e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.0063366544769167e-14,
+      "pass": true
+    },
+    "identity_signed_total_D31_convergence": {
+      "max_absolute_error": 2.0539125955565396e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.0063366544769167e-14,
+      "pass": true
+    },
+    "identity_signed_total_D4_convergence": {
+      "max_absolute_error": 2.0539125955565396e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.0063366544769167e-14,
+      "pass": true
+    },
+    "identity_signed_total_oriented_covariance_convergence": {
+      "max_absolute_error": 1.5612511283791264e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 6.49190929165217e-15,
+      "pass": true
+    },
+    "identity_signed_total_quadratic_K3_feed_convergence": {
+      "max_absolute_error": 5.412337245047638e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.0108748605238316e-14,
+      "pass": true
+    },
+    "identity_total_tensor_convergence": {
+      "max_absolute_error": 2.220446049250313e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.0172459076826761e-14,
+      "pass": true
+    },
+    "negative_identity_delta_tensor_convergence": {
+      "max_absolute_error": 2.220446049250313e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.0172459076826761e-14,
+      "pass": true
+    },
+    "negative_identity_hadamard_delta_D22_convergence": {
+      "max_absolute_error": 4.3298697960381105e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.1808457968092207e-14,
+      "pass": true
+    },
+    "negative_identity_hadamard_delta_D31_convergence": {
+      "max_absolute_error": 4.3298697960381105e-15,
+      "max_absolute_nearzero": 5.551115123125783e-17,
+      "max_relative_material": 1.1808457968092207e-14,
+      "pass": true
+    },
+    "negative_identity_hadamard_delta_D4_convergence": {
+      "max_absolute_error": 4.3298697960381105e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.1808457968092207e-14,
+      "pass": true
+    },
+    "negative_identity_hadamard_delta_oriented_covariance_convergence": {
+      "max_absolute_error": 6.418476861114186e-17,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 5.668229908490109e-15,
+      "pass": true
+    },
+    "negative_identity_hadamard_delta_quadratic_K3_feed_convergence": {
+      "max_absolute_error": 3.8163916471489756e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 4.683645370599785e-14,
+      "pass": true
+    },
+    "negative_identity_hadamard_total_D22_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "negative_identity_hadamard_total_D31_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "negative_identity_hadamard_total_D4_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "negative_identity_hadamard_total_oriented_covariance_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "negative_identity_hadamard_total_quadratic_K3_feed_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "negative_identity_mean_later_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "negative_identity_old_tensor_convergence": {
+      "max_absolute_error": 2.220446049250313e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.0172459076826761e-14,
+      "pass": true
+    },
+    "negative_identity_signed_delta_D22_convergence": {
+      "max_absolute_error": 2.0539125955565396e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.0063366544769167e-14,
+      "pass": true
+    },
+    "negative_identity_signed_delta_D31_convergence": {
+      "max_absolute_error": 2.0539125955565396e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.0063366544769167e-14,
+      "pass": true
+    },
+    "negative_identity_signed_delta_D4_convergence": {
+      "max_absolute_error": 2.0539125955565396e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.0063366544769167e-14,
+      "pass": true
+    },
+    "negative_identity_signed_delta_oriented_covariance_convergence": {
+      "max_absolute_error": 1.5612511283791264e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 6.49190929165217e-15,
+      "pass": true
+    },
+    "negative_identity_signed_delta_quadratic_K3_feed_convergence": {
+      "max_absolute_error": 5.412337245047638e-16,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.0108748605238316e-14,
+      "pass": true
+    },
+    "negative_identity_signed_total_D22_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "negative_identity_signed_total_D31_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "negative_identity_signed_total_D4_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "negative_identity_signed_total_oriented_covariance_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "negative_identity_signed_total_quadratic_K3_feed_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "negative_identity_total_tensor_convergence": {
+      "max_absolute_error": 0.0,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0,
+      "pass": true
+    },
+    "nonconstant_delta_tensor_convergence": {
+      "max_absolute_error": 2.105534106192769e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0008482699465060005,
+      "pass": false
+    },
+    "nonconstant_hadamard_delta_D22_convergence": {
+      "max_absolute_error": 2.9157539775975794e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0008818294921227059,
+      "pass": false
+    },
+    "nonconstant_hadamard_delta_D31_convergence": {
+      "max_absolute_error": 2.9157539775975794e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0008818294921227059,
+      "pass": false
+    },
+    "nonconstant_hadamard_delta_D4_convergence": {
+      "max_absolute_error": 2.9157539775975794e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0008818294921227059,
+      "pass": false
+    },
+    "nonconstant_hadamard_delta_oriented_covariance_convergence": {
+      "max_absolute_error": 1.347759850502464e-07,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.2610235408815995e-05,
+      "pass": false
+    },
+    "nonconstant_hadamard_delta_quadratic_K3_feed_convergence": {
+      "max_absolute_error": 7.648911988199225e-06,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0008818294921226803,
+      "pass": false
+    },
+    "nonconstant_hadamard_total_D22_convergence": {
+      "max_absolute_error": 2.9157539780971797e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.00022472798341271832,
+      "pass": false
+    },
+    "nonconstant_hadamard_total_D31_convergence": {
+      "max_absolute_error": 2.9157539780971797e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.00022472798341271832,
+      "pass": false
+    },
+    "nonconstant_hadamard_total_D4_convergence": {
+      "max_absolute_error": 2.9157539780971797e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.00022472798341271832,
+      "pass": false
+    },
+    "nonconstant_hadamard_total_oriented_covariance_convergence": {
+      "max_absolute_error": 1.3477598485162057e-07,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 3.7254342319005427e-06,
+      "pass": false
+    },
+    "nonconstant_hadamard_total_quadratic_K3_feed_convergence": {
+      "max_absolute_error": 7.648911989524554e-06,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.00022472798341268045,
+      "pass": false
+    },
+    "nonconstant_mean_later_convergence": {
+      "max_absolute_error": 9.02678390007905e-06,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 2.1843640157463572e-05,
+      "pass": false
+    },
+    "nonconstant_old_tensor_convergence": {
+      "max_absolute_error": 5.218048215738236e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.486479610237977e-14,
+      "pass": true
+    },
+    "nonconstant_signed_delta_D22_convergence": {
+      "max_absolute_error": 4.773618308306915e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.00024466817204551886,
+      "pass": false
+    },
+    "nonconstant_signed_delta_D31_convergence": {
+      "max_absolute_error": 4.773618308306915e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.00024466817204551886,
+      "pass": false
+    },
+    "nonconstant_signed_delta_D4_convergence": {
+      "max_absolute_error": 4.773618308306915e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.00024466817204551886,
+      "pass": false
+    },
+    "nonconstant_signed_delta_oriented_covariance_convergence": {
+      "max_absolute_error": 2.9794843627549417e-07,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 4.2900061482185004e-05,
+      "pass": false
+    },
+    "nonconstant_signed_delta_quadratic_K3_feed_convergence": {
+      "max_absolute_error": 1.25226567762593e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0002446681720455214,
+      "pass": false
+    },
+    "nonconstant_signed_total_D22_convergence": {
+      "max_absolute_error": 4.7736183096835916e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 5.613166679999383e-05,
+      "pass": false
+    },
+    "nonconstant_signed_total_D31_convergence": {
+      "max_absolute_error": 4.7736183096835916e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 5.613166679999383e-05,
+      "pass": false
+    },
+    "nonconstant_signed_total_D4_convergence": {
+      "max_absolute_error": 4.7736183096835916e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 5.613166679999383e-05,
+      "pass": false
+    },
+    "nonconstant_signed_total_oriented_covariance_convergence": {
+      "max_absolute_error": 2.9794843710295726e-07,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 3.294553904348649e-06,
+      "pass": false
+    },
+    "nonconstant_signed_total_quadratic_K3_feed_convergence": {
+      "max_absolute_error": 1.252265677989528e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 5.613166680004209e-05,
+      "pass": false
+    },
+    "nonconstant_total_tensor_convergence": {
+      "max_absolute_error": 2.1055341062350963e-05,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 0.0018697216703024802,
+      "pass": false
+    },
+    "order32_identity_additive": {
+      "absolute_error": 1.609823385706477e-15,
+      "pass": true
+    },
+    "order32_identity_delta_factors": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_identity_hadamard_additive": {
+      "absolute_error": 7.771561172376096e-16,
+      "pass": true
+    },
+    "order32_identity_hadamard_delta_D22": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_identity_hadamard_delta_D31": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_identity_hadamard_delta_D4": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_identity_hadamard_delta_oriented_covariance": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_identity_hadamard_delta_quadratic_K3_feed": {
+      "absolute_error": 6.938893903907228e-18,
+      "pass": true
+    },
+    "order32_identity_hadamard_delta_tensor": {
+      "absolute_error": 1.232595164407831e-32,
+      "pass": true
+    },
+    "order32_identity_hadamard_metric_later": {
+      "absolute_error": 1.1102230246251565e-16,
+      "pass": true
+    },
+    "order32_identity_hadamard_metric_old": {
+      "absolute_error": 1.1102230246251565e-16,
+      "pass": true
+    },
+    "order32_identity_hadamard_sequential_delta_partition": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_identity_hadamard_sequential_later_partition": {
+      "absolute_error": 7.771561172376096e-16,
+      "pass": true
+    },
+    "order32_identity_hadamard_total_D22": {
+      "absolute_error": 4.440892098500626e-16,
+      "pass": true
+    },
+    "order32_identity_hadamard_total_D31": {
+      "absolute_error": 3.265254993612788e-16,
+      "pass": true
+    },
+    "order32_identity_hadamard_total_D4": {
+      "absolute_error": 9.992007221626409e-16,
+      "pass": true
+    },
+    "order32_identity_hadamard_total_oriented_covariance": {
+      "absolute_error": 1.0408340855860843e-17,
+      "pass": true
+    },
+    "order32_identity_hadamard_total_quadratic_K3_feed": {
+      "absolute_error": 7.502679033599691e-17,
+      "pass": true
+    },
+    "order32_identity_hadamard_total_tensor": {
+      "absolute_error": 2.9976021664879227e-15,
+      "pass": true
+    },
+    "order32_identity_later_partition": {
+      "absolute_error": 1.609823385706477e-15,
+      "pass": true
+    },
+    "order32_identity_linear_partition": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_identity_naive_old_plus_whole_later_error": {
+      "pass": true,
+      "strict_lower_bound": 0.001,
+      "value": 0.27970833835270303
+    },
+    "order32_identity_old_factors": {
+      "absolute_error": 1.609823385706477e-15,
+      "pass": true
+    },
+    "order32_identity_signed_additive": {
+      "absolute_error": 3.3306690738754696e-16,
+      "pass": true
+    },
+    "order32_identity_signed_delta_D22": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_identity_signed_delta_D31": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_identity_signed_delta_D4": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_identity_signed_delta_oriented_covariance": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_identity_signed_delta_quadratic_K3_feed": {
+      "absolute_error": 1.734723475976807e-18,
+      "pass": true
+    },
+    "order32_identity_signed_delta_tensor": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_identity_signed_metric_later": {
+      "absolute_error": 1.1102230246251565e-16,
+      "pass": true
+    },
+    "order32_identity_signed_metric_old": {
+      "absolute_error": 1.1102230246251565e-16,
+      "pass": true
+    },
+    "order32_identity_signed_sequential_delta_partition": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_identity_signed_sequential_later_partition": {
+      "absolute_error": 3.3306690738754696e-16,
+      "pass": true
+    },
+    "order32_identity_signed_total_D22": {
+      "absolute_error": 3.608224830031759e-16,
+      "pass": true
+    },
+    "order32_identity_signed_total_D31": {
+      "absolute_error": 3.608224830031759e-16,
+      "pass": true
+    },
+    "order32_identity_signed_total_D4": {
+      "absolute_error": 3.3306690738754696e-16,
+      "pass": true
+    },
+    "order32_identity_signed_total_oriented_covariance": {
+      "absolute_error": 2.7755575615628914e-17,
+      "pass": true
+    },
+    "order32_identity_signed_total_quadratic_K3_feed": {
+      "absolute_error": 4.5102810375396984e-17,
+      "pass": true
+    },
+    "order32_identity_signed_total_tensor": {
+      "absolute_error": 9.159339953157541e-16,
+      "pass": true
+    },
+    "order32_identity_zero_increment": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_additive": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_delta_factors": {
+      "absolute_error": 1.609823385706477e-15,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_additive": {
+      "absolute_error": 7.771561172376096e-16,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_delta_D22": {
+      "absolute_error": 4.440892098500626e-16,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_delta_D31": {
+      "absolute_error": 3.265254993612788e-16,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_delta_D4": {
+      "absolute_error": 9.992007221626409e-16,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_delta_oriented_covariance": {
+      "absolute_error": 1.0408340855860843e-17,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_delta_quadratic_K3_feed": {
+      "absolute_error": 7.502679033599691e-17,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_delta_tensor": {
+      "absolute_error": 2.9976021664879227e-15,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_metric_later": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_metric_old": {
+      "absolute_error": 1.1102230246251565e-16,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_sequential_delta_partition": {
+      "absolute_error": 7.771561172376096e-16,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_sequential_later_partition": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_total_D22": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_total_D31": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_total_D4": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_total_oriented_covariance": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_total_quadratic_K3_feed": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_hadamard_total_tensor": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_later_partition": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_linear_partition": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_minus_old": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_old_factors": {
+      "absolute_error": 1.609823385706477e-15,
+      "pass": true
+    },
+    "order32_negative_identity_signed_additive": {
+      "absolute_error": 3.3306690738754696e-16,
+      "pass": true
+    },
+    "order32_negative_identity_signed_delta_D22": {
+      "absolute_error": 3.608224830031759e-16,
+      "pass": true
+    },
+    "order32_negative_identity_signed_delta_D31": {
+      "absolute_error": 3.608224830031759e-16,
+      "pass": true
+    },
+    "order32_negative_identity_signed_delta_D4": {
+      "absolute_error": 3.3306690738754696e-16,
+      "pass": true
+    },
+    "order32_negative_identity_signed_delta_oriented_covariance": {
+      "absolute_error": 2.7755575615628914e-17,
+      "pass": true
+    },
+    "order32_negative_identity_signed_delta_quadratic_K3_feed": {
+      "absolute_error": 4.5102810375396984e-17,
+      "pass": true
+    },
+    "order32_negative_identity_signed_delta_tensor": {
+      "absolute_error": 9.159339953157541e-16,
+      "pass": true
+    },
+    "order32_negative_identity_signed_metric_later": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_signed_metric_old": {
+      "absolute_error": 1.1102230246251565e-16,
+      "pass": true
+    },
+    "order32_negative_identity_signed_sequential_delta_partition": {
+      "absolute_error": 3.3306690738754696e-16,
+      "pass": true
+    },
+    "order32_negative_identity_signed_sequential_later_partition": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_signed_total_D22": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_signed_total_D31": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_signed_total_D4": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_signed_total_oriented_covariance": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_signed_total_quadratic_K3_feed": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_signed_total_tensor": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_negative_identity_zero_later": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_nonconstant_additive": {
+      "absolute_error": 2.55351295663786e-15,
+      "pass": true
+    },
+    "order32_nonconstant_delta_factors": {
+      "absolute_error": 3.552713678800501e-15,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_additive": {
+      "absolute_error": 6.38378239159465e-16,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_delta_D22": {
+      "absolute_error": 7.494005416219807e-16,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_delta_D31": {
+      "absolute_error": 6.938893903907228e-16,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_delta_D4": {
+      "absolute_error": 1.915134717478395e-15,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_delta_oriented_covariance": {
+      "absolute_error": 8.673617379884035e-19,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_delta_quadratic_K3_feed": {
+      "absolute_error": 3.0531133177191805e-16,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_delta_tensor": {
+      "absolute_error": 2.1371793224034263e-15,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_metric_later": {
+      "absolute_error": 1.1102230246251565e-16,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_metric_old": {
+      "absolute_error": 1.6653345369377348e-16,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_sequential_delta_partition": {
+      "absolute_error": 9.159339953157541e-16,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_sequential_later_partition": {
+      "absolute_error": 3.885780586188048e-16,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_total_D22": {
+      "absolute_error": 2.220446049250313e-16,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_total_D31": {
+      "absolute_error": 1.6653345369377348e-16,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_total_D4": {
+      "absolute_error": 4.996003610813204e-16,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_total_oriented_covariance": {
+      "absolute_error": 2.7755575615628914e-17,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_total_quadratic_K3_feed": {
+      "absolute_error": 4.163336342344337e-17,
+      "pass": true
+    },
+    "order32_nonconstant_hadamard_total_tensor": {
+      "absolute_error": 1.1657341758564144e-15,
+      "pass": true
+    },
+    "order32_nonconstant_later_partition": {
+      "absolute_error": 2.55351295663786e-15,
+      "pass": true
+    },
+    "order32_nonconstant_linear_partition": {
+      "absolute_error": 6.106226635438361e-16,
+      "pass": true
+    },
+    "order32_nonconstant_naive_old_plus_whole_later_error": {
+      "pass": true,
+      "strict_lower_bound": 0.001,
+      "value": 0.6927530692282029
+    },
+    "order32_nonconstant_nonzero_delta": {
+      "pass": true,
+      "strict_lower_bound": 0.001,
+      "value": 0.08756293632223053
+    },
+    "order32_nonconstant_old_factors": {
+      "absolute_error": 9.992007221626409e-16,
+      "pass": true
+    },
+    "order32_nonconstant_signed_additive": {
+      "absolute_error": 2.6645352591003757e-15,
+      "pass": true
+    },
+    "order32_nonconstant_signed_delta_D22": {
+      "absolute_error": 2.1649348980190553e-15,
+      "pass": true
+    },
+    "order32_nonconstant_signed_delta_D31": {
+      "absolute_error": 2.609024107869118e-15,
+      "pass": true
+    },
+    "order32_nonconstant_signed_delta_D4": {
+      "absolute_error": 3.885780586188048e-16,
+      "pass": true
+    },
+    "order32_nonconstant_signed_delta_oriented_covariance": {
+      "absolute_error": 1.0755285551056204e-16,
+      "pass": true
+    },
+    "order32_nonconstant_signed_delta_quadratic_K3_feed": {
+      "absolute_error": 6.938893903907228e-16,
+      "pass": true
+    },
+    "order32_nonconstant_signed_delta_tensor": {
+      "absolute_error": 4.274358644806853e-15,
+      "pass": true
+    },
+    "order32_nonconstant_signed_metric_later": {
+      "absolute_error": 1.6653345369377348e-16,
+      "pass": true
+    },
+    "order32_nonconstant_signed_metric_old": {
+      "absolute_error": 2.220446049250313e-16,
+      "pass": true
+    },
+    "order32_nonconstant_signed_sequential_delta_partition": {
+      "absolute_error": 3.608224830031759e-15,
+      "pass": true
+    },
+    "order32_nonconstant_signed_sequential_later_partition": {
+      "absolute_error": 8.881784197001252e-16,
+      "pass": true
+    },
+    "order32_nonconstant_signed_total_D22": {
+      "absolute_error": 1.2212453270876722e-15,
+      "pass": true
+    },
+    "order32_nonconstant_signed_total_D31": {
+      "absolute_error": 1.2212453270876722e-15,
+      "pass": true
+    },
+    "order32_nonconstant_signed_total_D4": {
+      "absolute_error": 1.5543122344752192e-15,
+      "pass": true
+    },
+    "order32_nonconstant_signed_total_oriented_covariance": {
+      "absolute_error": 8.326672684688674e-17,
+      "pass": true
+    },
+    "order32_nonconstant_signed_total_quadratic_K3_feed": {
+      "absolute_error": 2.498001805406602e-16,
+      "pass": true
+    },
+    "order32_nonconstant_signed_total_tensor": {
+      "absolute_error": 1.7763568394002505e-15,
+      "pass": true
+    },
+    "order32_normalized": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order32_source_partition": {
+      "absolute_error": 1.609823385706477e-15,
+      "pass": true
+    },
+    "order48_identity_additive": {
+      "absolute_error": 1.0269562977782698e-15,
+      "pass": true
+    },
+    "order48_identity_delta_factors": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_identity_hadamard_additive": {
+      "absolute_error": 2.478999084384404e-16,
+      "pass": true
+    },
+    "order48_identity_hadamard_delta_D22": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_identity_hadamard_delta_D31": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_identity_hadamard_delta_D4": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_identity_hadamard_delta_oriented_covariance": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_identity_hadamard_delta_quadratic_K3_feed": {
+      "absolute_error": 6.938893903907228e-18,
+      "pass": true
+    },
+    "order48_identity_hadamard_delta_tensor": {
+      "absolute_error": 2.465190328815662e-32,
+      "pass": true
+    },
+    "order48_identity_hadamard_metric_later": {
+      "absolute_error": 8.326672684688674e-17,
+      "pass": true
+    },
+    "order48_identity_hadamard_metric_old": {
+      "absolute_error": 8.326672684688674e-17,
+      "pass": true
+    },
+    "order48_identity_hadamard_sequential_delta_partition": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_identity_hadamard_sequential_later_partition": {
+      "absolute_error": 2.478999084384404e-16,
+      "pass": true
+    },
+    "order48_identity_hadamard_total_D22": {
+      "absolute_error": 8.881784197001252e-16,
+      "pass": true
+    },
+    "order48_identity_hadamard_total_D31": {
+      "absolute_error": 8.881784197001252e-16,
+      "pass": true
+    },
+    "order48_identity_hadamard_total_D4": {
+      "absolute_error": 4.440892098500626e-16,
+      "pass": true
+    },
+    "order48_identity_hadamard_total_oriented_covariance": {
+      "absolute_error": 2.6020852139652106e-17,
+      "pass": true
+    },
+    "order48_identity_hadamard_total_quadratic_K3_feed": {
+      "absolute_error": 8.326672684688674e-17,
+      "pass": true
+    },
+    "order48_identity_hadamard_total_tensor": {
+      "absolute_error": 4.440892098500626e-16,
+      "pass": true
+    },
+    "order48_identity_later_partition": {
+      "absolute_error": 1.0269562977782698e-15,
+      "pass": true
+    },
+    "order48_identity_linear_partition": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_identity_naive_old_plus_whole_later_error": {
+      "pass": true,
+      "strict_lower_bound": 0.001,
+      "value": 0.2797083383527048
+    },
+    "order48_identity_old_factors": {
+      "absolute_error": 1.0269562977782698e-15,
+      "pass": true
+    },
+    "order48_identity_signed_additive": {
+      "absolute_error": 3.608224830031759e-16,
+      "pass": true
+    },
+    "order48_identity_signed_delta_D22": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_identity_signed_delta_D31": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_identity_signed_delta_D4": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_identity_signed_delta_oriented_covariance": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_identity_signed_delta_quadratic_K3_feed": {
+      "absolute_error": 3.469446951953614e-18,
+      "pass": true
+    },
+    "order48_identity_signed_delta_tensor": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_identity_signed_metric_later": {
+      "absolute_error": 1.6653345369377348e-16,
+      "pass": true
+    },
+    "order48_identity_signed_metric_old": {
+      "absolute_error": 1.6653345369377348e-16,
+      "pass": true
+    },
+    "order48_identity_signed_sequential_delta_partition": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_identity_signed_sequential_later_partition": {
+      "absolute_error": 3.608224830031759e-16,
+      "pass": true
+    },
+    "order48_identity_signed_total_D22": {
+      "absolute_error": 3.191891195797325e-16,
+      "pass": true
+    },
+    "order48_identity_signed_total_D31": {
+      "absolute_error": 3.608224830031759e-16,
+      "pass": true
+    },
+    "order48_identity_signed_total_D4": {
+      "absolute_error": 3.3306690738754696e-16,
+      "pass": true
+    },
+    "order48_identity_signed_total_oriented_covariance": {
+      "absolute_error": 6.245004513516506e-17,
+      "pass": true
+    },
+    "order48_identity_signed_total_quadratic_K3_feed": {
+      "absolute_error": 1.249000902703301e-16,
+      "pass": true
+    },
+    "order48_identity_signed_total_tensor": {
+      "absolute_error": 1.1934897514720433e-15,
+      "pass": true
+    },
+    "order48_identity_zero_increment": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_additive": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_delta_factors": {
+      "absolute_error": 1.0269562977782698e-15,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_additive": {
+      "absolute_error": 2.478999084384404e-16,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_delta_D22": {
+      "absolute_error": 8.881784197001252e-16,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_delta_D31": {
+      "absolute_error": 8.881784197001252e-16,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_delta_D4": {
+      "absolute_error": 4.440892098500626e-16,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_delta_oriented_covariance": {
+      "absolute_error": 2.6020852139652106e-17,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_delta_quadratic_K3_feed": {
+      "absolute_error": 8.326672684688674e-17,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_delta_tensor": {
+      "absolute_error": 4.440892098500626e-16,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_metric_later": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_metric_old": {
+      "absolute_error": 8.326672684688674e-17,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_sequential_delta_partition": {
+      "absolute_error": 2.478999084384404e-16,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_sequential_later_partition": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_total_D22": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_total_D31": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_total_D4": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_total_oriented_covariance": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_total_quadratic_K3_feed": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_hadamard_total_tensor": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_later_partition": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_linear_partition": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_minus_old": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_old_factors": {
+      "absolute_error": 1.0269562977782698e-15,
+      "pass": true
+    },
+    "order48_negative_identity_signed_additive": {
+      "absolute_error": 3.608224830031759e-16,
+      "pass": true
+    },
+    "order48_negative_identity_signed_delta_D22": {
+      "absolute_error": 3.191891195797325e-16,
+      "pass": true
+    },
+    "order48_negative_identity_signed_delta_D31": {
+      "absolute_error": 3.608224830031759e-16,
+      "pass": true
+    },
+    "order48_negative_identity_signed_delta_D4": {
+      "absolute_error": 3.3306690738754696e-16,
+      "pass": true
+    },
+    "order48_negative_identity_signed_delta_oriented_covariance": {
+      "absolute_error": 6.245004513516506e-17,
+      "pass": true
+    },
+    "order48_negative_identity_signed_delta_quadratic_K3_feed": {
+      "absolute_error": 1.249000902703301e-16,
+      "pass": true
+    },
+    "order48_negative_identity_signed_delta_tensor": {
+      "absolute_error": 1.1934897514720433e-15,
+      "pass": true
+    },
+    "order48_negative_identity_signed_metric_later": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_signed_metric_old": {
+      "absolute_error": 1.6653345369377348e-16,
+      "pass": true
+    },
+    "order48_negative_identity_signed_sequential_delta_partition": {
+      "absolute_error": 3.608224830031759e-16,
+      "pass": true
+    },
+    "order48_negative_identity_signed_sequential_later_partition": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_signed_total_D22": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_signed_total_D31": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_signed_total_D4": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_signed_total_oriented_covariance": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_signed_total_quadratic_K3_feed": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_signed_total_tensor": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_negative_identity_zero_later": {
+      "absolute_error": 0.0,
+      "pass": true
+    },
+    "order48_nonconstant_additive": {
+      "absolute_error": 5.551115123125783e-15,
+      "pass": true
+    },
+    "order48_nonconstant_delta_factors": {
+      "absolute_error": 2.220446049250313e-15,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_additive": {
+      "absolute_error": 3.3306690738754696e-16,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_delta_D22": {
+      "absolute_error": 1.0547118733938987e-15,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_delta_D31": {
+      "absolute_error": 1.1657341758564144e-15,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_delta_D4": {
+      "absolute_error": 3.885780586188048e-16,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_delta_oriented_covariance": {
+      "absolute_error": 7.806255641895632e-18,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_delta_quadratic_K3_feed": {
+      "absolute_error": 1.1796119636642288e-16,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_delta_tensor": {
+      "absolute_error": 1.609823385706477e-15,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_metric_later": {
+      "absolute_error": 2.7755575615628914e-16,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_metric_old": {
+      "absolute_error": 2.7755575615628914e-16,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_sequential_delta_partition": {
+      "absolute_error": 2.7755575615628914e-16,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_sequential_later_partition": {
+      "absolute_error": 1.3877787807814457e-16,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_total_D22": {
+      "absolute_error": 3.0531133177191805e-16,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_total_D31": {
+      "absolute_error": 3.3306690738754696e-16,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_total_D4": {
+      "absolute_error": 3.608224830031759e-16,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_total_oriented_covariance": {
+      "absolute_error": 6.938893903907228e-18,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_total_quadratic_K3_feed": {
+      "absolute_error": 5.551115123125783e-17,
+      "pass": true
+    },
+    "order48_nonconstant_hadamard_total_tensor": {
+      "absolute_error": 1.2212453270876722e-15,
+      "pass": true
+    },
+    "order48_nonconstant_later_partition": {
+      "absolute_error": 5.551115123125783e-15,
+      "pass": true
+    },
+    "order48_nonconstant_linear_partition": {
+      "absolute_error": 4.440892098500626e-16,
+      "pass": true
+    },
+    "order48_nonconstant_naive_old_plus_whole_later_error": {
+      "pass": true,
+      "strict_lower_bound": 0.001,
+      "value": 0.6927530692282082
+    },
+    "order48_nonconstant_nonzero_delta": {
+      "pass": true,
+      "strict_lower_bound": 0.001,
+      "value": 0.08756215922577214
+    },
+    "order48_nonconstant_old_factors": {
+      "absolute_error": 3.3306690738754696e-15,
+      "pass": true
+    },
+    "order48_nonconstant_signed_additive": {
+      "absolute_error": 5.551115123125783e-16,
+      "pass": true
+    },
+    "order48_nonconstant_signed_delta_D22": {
+      "absolute_error": 1.1657341758564144e-15,
+      "pass": true
+    },
+    "order48_nonconstant_signed_delta_D31": {
+      "absolute_error": 2.0539125955565396e-15,
+      "pass": true
+    },
+    "order48_nonconstant_signed_delta_D4": {
+      "absolute_error": 8.326672684688674e-16,
+      "pass": true
+    },
+    "order48_nonconstant_signed_delta_oriented_covariance": {
+      "absolute_error": 4.0766001685454967e-17,
+      "pass": true
+    },
+    "order48_nonconstant_signed_delta_quadratic_K3_feed": {
+      "absolute_error": 8.326672684688674e-17,
+      "pass": true
+    },
+    "order48_nonconstant_signed_delta_tensor": {
+      "absolute_error": 7.216449660063518e-15,
+      "pass": true
+    },
+    "order48_nonconstant_signed_metric_later": {
+      "absolute_error": 3.3306690738754696e-16,
+      "pass": true
+    },
+    "order48_nonconstant_signed_metric_old": {
+      "absolute_error": 1.1102230246251565e-16,
+      "pass": true
+    },
+    "order48_nonconstant_signed_sequential_delta_partition": {
+      "absolute_error": 6.661338147750939e-16,
+      "pass": true
+    },
+    "order48_nonconstant_signed_sequential_later_partition": {
+      "absolute_error": 6.661338147750939e-16,
+      "pass": true
+    },
+    "order48_nonconstant_signed_total_D22": {
+      "absolute_error": 6.661338147750939e-16,
+      "pass": true
+    },
+    "order48_nonconstant_signed_total_D31": {
+      "absolute_error": 7.771561172376096e-16,
+      "pass": true
+    },
+    "order48_nonconstant_signed_total_D4": {
+      "absolute_error": 1.1102230246251565e-15,
+      "pass": true
+    },
+    "order48_nonconstant_signed_total_oriented_covariance": {
+      "absolute_error": 5.551115123125783e-17,
+      "pass": true
+    },
+    "order48_nonconstant_signed_total_quadratic_K3_feed": {
+      "absolute_error": 1.1102230246251565e-16,
+      "pass": true
+    },
+    "order48_nonconstant_signed_total_tensor": {
+      "absolute_error": 4.773959005888173e-15,
+      "pass": true
+    },
+    "order48_normalized": {
+      "absolute_error": 4.440892098500626e-16,
+      "pass": true
+    },
+    "order48_source_partition": {
+      "absolute_error": 1.0269562977782698e-15,
+      "pass": true
+    },
+    "source_cumulant_convergence": {
+      "max_absolute_error": 2.220446049250313e-15,
+      "max_absolute_nearzero": 0.0,
+      "max_relative_material": 1.0172459076826761e-14,
+      "pass": true
+    }
+  },
+  "checks_count": 323,
+  "failures": [
+    "nonconstant_mean_later_convergence",
+    "nonconstant_total_tensor_convergence",
+    "nonconstant_delta_tensor_convergence",
+    "nonconstant_hadamard_delta_D4_convergence",
+    "nonconstant_hadamard_delta_D22_convergence",
+    "nonconstant_hadamard_delta_D31_convergence",
+    "nonconstant_hadamard_delta_oriented_covariance_convergence",
+    "nonconstant_hadamard_delta_quadratic_K3_feed_convergence",
+    "nonconstant_hadamard_total_D4_convergence",
+    "nonconstant_hadamard_total_D22_convergence",
+    "nonconstant_hadamard_total_D31_convergence",
+    "nonconstant_hadamard_total_oriented_covariance_convergence",
+    "nonconstant_hadamard_total_quadratic_K3_feed_convergence",
+    "nonconstant_signed_delta_D4_convergence",
+    "nonconstant_signed_delta_D22_convergence",
+    "nonconstant_signed_delta_D31_convergence",
+    "nonconstant_signed_delta_oriented_covariance_convergence",
+    "nonconstant_signed_delta_quadratic_K3_feed_convergence",
+    "nonconstant_signed_total_D4_convergence",
+    "nonconstant_signed_total_D22_convergence",
+    "nonconstant_signed_total_D31_convergence",
+    "nonconstant_signed_total_oriented_covariance_convergence",
+    "nonconstant_signed_total_quadratic_K3_feed_convergence"
+  ],
+  "gates": {
+    "absolute_identity": 1e-10,
+    "convergence": 1e-08,
+    "material": 1e-06,
+    "strict_magnitude": 0.001
+  },
+  "orders": {
+    "32": {
+      "cases": {
+        "identity": {
+          "delta_tensor": [
+            [
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ]
+            ]
+          ],
+          "maps": {
+            "hadamard": {
+              "delta_D22": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "delta_D31": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "delta_D4": [
+                0.0,
+                0.0
+              ],
+              "delta_oriented_covariance": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "delta_quadratic_K3_feed": [
+                [
+                  [
+                    0.0,
+                    -0.0
+                  ],
+                  [
+                    -0.0,
+                    0.0
+                  ]
+                ],
+                [
+                  [
+                    -0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    -0.0
+                  ]
+                ]
+              ],
+              "total_D22": [
+                [
+                  0.5319131414655199,
+                  0.08528412784021694
+                ],
+                [
+                  0.08528412784021688,
+                  0.07521544490398946
+                ]
+              ],
+              "total_D31": [
+                [
+                  0.5319131414655199,
+                  -2.498001805406602e-16
+                ],
+                [
+                  2.7755575615628914e-17,
+                  0.07521544490398946
+                ]
+              ],
+              "total_D4": [
+                0.5319131414655199,
+                0.07521544490398946
+              ],
+              "total_oriented_covariance": [
+                [
+                  0.0,
+                  -0.01132360007398481
+                ],
+                [
+                  -0.011323600073984806,
+                  0.0
+                ]
+              ],
+              "total_quadratic_K3_feed": [
+                [
+                  [
+                    0.047694257786076576,
+                    -0.0010602096352456173
+                  ],
+                  [
+                    -0.0010602096352456175,
+                    0.017929836542679774
+                  ]
+                ],
+                [
+                  [
+                    -0.0010602096352456077,
+                    0.017929836542679753
+                  ],
+                  [
+                    0.017929836542679756,
+                    -0.019731305269386004
+                  ]
+                ]
+              ]
+            },
+            "signed": {
+              "delta_D22": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "delta_D31": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "delta_D4": [
+                0.0,
+                0.0
+              ],
+              "delta_oriented_covariance": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "delta_quadratic_K3_feed": [
+                [
+                  [
+                    0.0,
+                    -0.0
+                  ],
+                  [
+                    -0.0,
+                    0.0
+                  ]
+                ],
+                [
+                  [
+                    -0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    -0.0
+                  ]
+                ]
+              ],
+              "total_D22": [
+                [
+                  0.16975551439145165,
+                  0.12330426730003285
+                ],
+                [
+                  0.12330426730003284,
+                  0.2040979612954793
+                ]
+              ],
+              "total_D31": [
+                [
+                  0.16975551439145165,
+                  -0.11872844539193013
+                ],
+                [
+                  -0.12995708765524014,
+                  0.2040979612954793
+                ]
+              ],
+              "total_D4": [
+                0.16975551439145165,
+                0.2040979612954793
+              ],
+              "total_oriented_covariance": [
+                [
+                  0.0,
+                  -0.024049182732523714
+                ],
+                [
+                  -0.02404918273252371,
+                  0.0
+                ]
+              ],
+              "total_quadratic_K3_feed": [
+                [
+                  [
+                    0.015221213075666706,
+                    0.01729023200505085
+                  ],
+                  [
+                    0.01729023200505085,
+                    0.017353557275149166
+                  ]
+                ],
+                [
+                  [
+                    0.01729023200505085,
+                    0.01735355727514916
+                  ],
+                  [
+                    0.01735355727514916,
+                    -0.053541120235623726
+                  ]
+                ]
+              ]
+            }
+          },
+          "mean_later": [
+            0.39894228040143265,
+            0.398942280401433
+          ],
+          "old_tensor": [
+            [
+              [
+                [
+                  0.2797083383527026,
+                  0.11417442414038248
+                ],
+                [
+                  0.11417442414038248,
+                  0.10914008267226893
+                ]
+              ],
+              [
+                [
+                  0.11417442414038248,
+                  0.10914008267226893
+                ],
+                [
+                  0.10914008267226893,
+                  0.11417442414038281
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  0.11417442414038259,
+                  0.10914008267226893
+                ],
+                [
+                  0.10914008267226893,
+                  0.11417442414038281
+                ]
+              ],
+              [
+                [
+                  0.10914008267226893,
+                  0.11417442414038281
+                ],
+                [
+                  0.11417442414038281,
+                  0.27970833835270303
+                ]
+              ]
+            ]
+          ],
+          "total_tensor": [
+            [
+              [
+                [
+                  0.2797083383527026,
+                  0.11417442414038248
+                ],
+                [
+                  0.11417442414038248,
+                  0.10914008267226893
+                ]
+              ],
+              [
+                [
+                  0.11417442414038248,
+                  0.10914008267226893
+                ],
+                [
+                  0.10914008267226893,
+                  0.11417442414038281
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  0.11417442414038259,
+                  0.10914008267226893
+                ],
+                [
+                  0.10914008267226893,
+                  0.11417442414038281
+                ]
+              ],
+              [
+                [
+                  0.10914008267226893,
+                  0.11417442414038281
+                ],
+                [
+                  0.11417442414038281,
+                  0.27970833835270303
+                ]
+              ]
+            ]
+          ]
+        },
+        "negative_identity": {
+          "delta_tensor": [
+            [
+              [
+                [
+                  -0.2797083383527026,
+                  -0.11417442414038248
+                ],
+                [
+                  -0.11417442414038248,
+                  -0.10914008267226893
+                ]
+              ],
+              [
+                [
+                  -0.11417442414038248,
+                  -0.10914008267226893
+                ],
+                [
+                  -0.10914008267226893,
+                  -0.11417442414038281
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  -0.11417442414038259,
+                  -0.10914008267226893
+                ],
+                [
+                  -0.10914008267226893,
+                  -0.11417442414038281
+                ]
+              ],
+              [
+                [
+                  -0.10914008267226893,
+                  -0.11417442414038281
+                ],
+                [
+                  -0.11417442414038281,
+                  -0.27970833835270303
+                ]
+              ]
+            ]
+          ],
+          "maps": {
+            "hadamard": {
+              "delta_D22": [
+                [
+                  -0.5319131414655199,
+                  -0.08528412784021694
+                ],
+                [
+                  -0.08528412784021688,
+                  -0.07521544490398946
+                ]
+              ],
+              "delta_D31": [
+                [
+                  -0.5319131414655199,
+                  2.498001805406602e-16
+                ],
+                [
+                  -2.7755575615628914e-17,
+                  -0.07521544490398946
+                ]
+              ],
+              "delta_D4": [
+                -0.5319131414655199,
+                -0.07521544490398946
+              ],
+              "delta_oriented_covariance": [
+                [
+                  0.0,
+                  0.01132360007398481
+                ],
+                [
+                  0.011323600073984806,
+                  0.0
+                ]
+              ],
+              "delta_quadratic_K3_feed": [
+                [
+                  [
+                    -0.047694257786076576,
+                    0.0010602096352456173
+                  ],
+                  [
+                    0.0010602096352456175,
+                    -0.017929836542679774
+                  ]
+                ],
+                [
+                  [
+                    0.0010602096352456077,
+                    -0.017929836542679753
+                  ],
+                  [
+                    -0.017929836542679756,
+                    0.019731305269386004
+                  ]
+                ]
+              ],
+              "total_D22": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "total_D31": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "total_D4": [
+                0.0,
+                0.0
+              ],
+              "total_oriented_covariance": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "total_quadratic_K3_feed": [
+                [
+                  [
+                    0.0,
+                    -0.0
+                  ],
+                  [
+                    -0.0,
+                    0.0
+                  ]
+                ],
+                [
+                  [
+                    -0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    -0.0
+                  ]
+                ]
+              ]
+            },
+            "signed": {
+              "delta_D22": [
+                [
+                  -0.16975551439145165,
+                  -0.12330426730003285
+                ],
+                [
+                  -0.12330426730003284,
+                  -0.2040979612954793
+                ]
+              ],
+              "delta_D31": [
+                [
+                  -0.16975551439145165,
+                  0.11872844539193013
+                ],
+                [
+                  0.12995708765524014,
+                  -0.2040979612954793
+                ]
+              ],
+              "delta_D4": [
+                -0.16975551439145165,
+                -0.2040979612954793
+              ],
+              "delta_oriented_covariance": [
+                [
+                  0.0,
+                  0.024049182732523714
+                ],
+                [
+                  0.02404918273252371,
+                  0.0
+                ]
+              ],
+              "delta_quadratic_K3_feed": [
+                [
+                  [
+                    -0.015221213075666706,
+                    -0.01729023200505085
+                  ],
+                  [
+                    -0.01729023200505085,
+                    -0.017353557275149166
+                  ]
+                ],
+                [
+                  [
+                    -0.01729023200505085,
+                    -0.01735355727514916
+                  ],
+                  [
+                    -0.01735355727514916,
+                    0.053541120235623726
+                  ]
+                ]
+              ],
+              "total_D22": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "total_D31": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "total_D4": [
+                0.0,
+                0.0
+              ],
+              "total_oriented_covariance": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "total_quadratic_K3_feed": [
+                [
+                  [
+                    0.0,
+                    -0.0
+                  ],
+                  [
+                    -0.0,
+                    0.0
+                  ]
+                ],
+                [
+                  [
+                    -0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    -0.0
+                  ]
+                ]
+              ]
+            }
+          },
+          "mean_later": [
+            0.0,
+            0.0
+          ],
+          "old_tensor": [
+            [
+              [
+                [
+                  0.2797083383527026,
+                  0.11417442414038248
+                ],
+                [
+                  0.11417442414038248,
+                  0.10914008267226893
+                ]
+              ],
+              [
+                [
+                  0.11417442414038248,
+                  0.10914008267226893
+                ],
+                [
+                  0.10914008267226893,
+                  0.11417442414038281
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  0.11417442414038259,
+                  0.10914008267226893
+                ],
+                [
+                  0.10914008267226893,
+                  0.11417442414038281
+                ]
+              ],
+              [
+                [
+                  0.10914008267226893,
+                  0.11417442414038281
+                ],
+                [
+                  0.11417442414038281,
+                  0.27970833835270303
+                ]
+              ]
+            ]
+          ],
+          "total_tensor": [
+            [
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ]
+            ]
+          ]
+        },
+        "nonconstant": {
+          "delta_tensor": [
+            [
+              [
+                [
+                  0.00045242769002190597,
+                  0.024842565461341462
+                ],
+                [
+                  0.02484256546134144,
+                  -0.08756293632223053
+                ]
+              ],
+              [
+                [
+                  0.024842565461341483,
+                  -0.08756293632223046
+                ],
+                [
+                  -0.08756293632223049,
+                  0.07437857335937184
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  0.024842565461341393,
+                  -0.08756293632223043
+                ],
+                [
+                  -0.08756293632223042,
+                  0.0743785733593718
+                ]
+              ],
+              [
+                [
+                  -0.08756293632223042,
+                  0.07437857335937179
+                ],
+                [
+                  0.07437857335937181,
+                  0.0022472548701392148
+                ]
+              ]
+            ]
+          ],
+          "maps": {
+            "hadamard": {
+              "delta_D22": [
+                [
+                  -0.031448345022592146,
+                  0.04445638880115548
+                ],
+                [
+                  0.044456388801155475,
+                  -0.22989062266401858
+                ]
+              ],
+              "delta_D31": [
+                [
+                  -0.031448345022592146,
+                  -0.025216710744044475
+                ],
+                [
+                  0.024319297153985876,
+                  -0.22989062266401858
+                ]
+              ],
+              "delta_D4": [
+                -0.031448345022592146,
+                -0.22989062266401858
+              ],
+              "delta_oriented_covariance": [
+                [
+                  0.0,
+                  -0.005960974307876685
+                ],
+                [
+                  -0.005960974307876682,
+                  0.0
+                ]
+              ],
+              "delta_quadratic_K3_feed": [
+                [
+                  [
+                    -0.0028198315806232358,
+                    0.0034451725072685026
+                  ],
+                  [
+                    0.0034451725072685057,
+                    0.010949994357825097
+                  ]
+                ],
+                [
+                  [
+                    0.0034451725072685087,
+                    0.01094999435782511
+                  ],
+                  [
+                    0.010949994357825104,
+                    0.06030732198876331
+                  ]
+                ]
+              ],
+              "total_D22": [
+                [
+                  0.12353954287288929,
+                  0.20043115311336912
+                ],
+                [
+                  0.20043115311336912,
+                  0.21385814015138377
+                ]
+              ],
+              "total_D31": [
+                [
+                  0.12353954287288929,
+                  -0.1436625989633456
+                ],
+                [
+                  -0.16634157470887445,
+                  0.21385814015138377
+                ]
+              ],
+              "total_D4": [
+                0.12353954287288929,
+                0.21385814015138377
+              ],
+              "total_oriented_covariance": [
+                [
+                  0.0,
+                  -0.03617738995272277
+                ],
+                [
+                  -0.03617738995272277,
+                  0.0
+                ]
+              ],
+              "total_quadratic_K3_feed": [
+                [
+                  [
+                    0.011077234881469054,
+                    0.020284464897120998
+                  ],
+                  [
+                    0.020284464897120998,
+                    0.031169214343640925
+                  ]
+                ],
+                [
+                  [
+                    0.020284464897120998,
+                    0.031169214343640925
+                  ],
+                  [
+                    0.031169214343640932,
+                    -0.05610151283498256
+                  ]
+                ]
+              ]
+            },
+            "signed": {
+              "delta_D22": [
+                [
+                  0.016957250518277647,
+                  -0.020829002481777832
+                ],
+                [
+                  -0.020829002481777853,
+                  -0.49295008247751365
+                ]
+              ],
+              "delta_D31": [
+                [
+                  0.016957250518277647,
+                  -0.018641874445780846
+                ],
+                [
+                  0.1574275815569226,
+                  -0.49295008247751365
+                ]
+              ],
+              "delta_D4": [
+                0.016957250518277647,
+                -0.49295008247751365
+              ],
+              "delta_oriented_covariance": [
+                [
+                  0.0,
+                  0.006945472989717327
+                ],
+                [
+                  0.0069454729897173335,
+                  0.0
+                ]
+              ],
+              "delta_quadratic_K3_feed": [
+                [
+                  [
+                    0.0015204803463466244,
+                    0.0032143998771118703
+                  ],
+                  [
+                    0.0032143998771118724,
+                    0.0060019155751847375
+                  ]
+                ],
+                [
+                  [
+                    0.0032143998771118733,
+                    0.006001915575184743
+                  ],
+                  [
+                    0.006001915575184742,
+                    0.12931584161136736
+                  ]
+                ]
+              ],
+              "total_D22": [
+                [
+                  0.23806987155509937,
+                  0.46120134668160895
+                ],
+                [
+                  0.461201346681609,
+                  0.8503845744576619
+                ]
+              ],
+              "total_D31": [
+                [
+                  0.23806987155509937,
+                  -0.33525857536217774
+                ],
+                [
+                  -0.6153257953790551,
+                  0.8503845744576619
+                ]
+              ],
+              "total_D4": [
+                0.23806987155509937,
+                0.8503845744576619
+              ],
+              "total_oriented_covariance": [
+                [
+                  0.0,
+                  -0.0904363577425443
+                ],
+                [
+                  -0.09043635774254431,
+                  0.0
+                ]
+              ],
+              "total_quadratic_K3_feed": [
+                [
+                  [
+                    0.02134665406792376,
+                    0.04741813473807187
+                  ],
+                  [
+                    0.04741813473807187,
+                    0.056386158648537785
+                  ]
+                ],
+                [
+                  [
+                    0.047418134738071875,
+                    0.0563861586485378
+                  ],
+                  [
+                    0.05638615864853782,
+                    -0.22308181060976565
+                  ]
+                ]
+              ]
+            }
+          },
+          "mean_later": [
+            0.23936701714800895,
+            0.41323637714181705
+          ],
+          "old_tensor": [
+            [
+              [
+                [
+                  0.07453954906388,
+                  -0.03608272690820065
+                ],
+                [
+                  -0.03608272690820064,
+                  0.07169678052161421
+                ]
+              ],
+              [
+                [
+                  -0.036082726908200656,
+                  0.07169678052161417
+                ],
+                [
+                  0.07169678052161418,
+                  -0.10829771055175991
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  -0.036082726908200594,
+                  0.07169678052161411
+                ],
+                [
+                  0.07169678052161413,
+                  -0.10829771055175987
+                ]
+              ],
+              [
+                [
+                  0.07169678052161413,
+                  -0.10829771055175982
+                ],
+                [
+                  -0.10829771055175991,
+                  0.692753069228203
+                ]
+              ]
+            ]
+          ],
+          "total_tensor": [
+            [
+              [
+                [
+                  0.0749919767539019,
+                  -0.011240161446859187
+                ],
+                [
+                  -0.011240161446859201,
+                  -0.015866155800616316
+                ]
+              ],
+              [
+                [
+                  -0.011240161446859173,
+                  -0.01586615580061629
+                ],
+                [
+                  -0.015866155800616302,
+                  -0.033919137192388066
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  -0.011240161446859201,
+                  -0.015866155800616316
+                ],
+                [
+                  -0.01586615580061629,
+                  -0.033919137192388066
+                ]
+              ],
+              [
+                [
+                  -0.01586615580061629,
+                  -0.03391913719238804
+                ],
+                [
+                  -0.033919137192388094,
+                  0.6950003240983422
+                ]
+              ]
+            ]
+          ]
+        }
+      },
+      "node_count": 4096,
+      "source_tensor": [
+        [
+          [
+            [
+              0.2797083383527026,
+              0.11417442414038248
+            ],
+            [
+              0.11417442414038248,
+              0.10914008267226893
+            ]
+          ],
+          [
+            [
+              0.11417442414038248,
+              0.10914008267226893
+            ],
+            [
+              0.10914008267226893,
+              0.11417442414038281
+            ]
+          ]
+        ],
+        [
+          [
+            [
+              0.11417442414038259,
+              0.10914008267226893
+            ],
+            [
+              0.10914008267226893,
+              0.11417442414038281
+            ]
+          ],
+          [
+            [
+              0.10914008267226893,
+              0.11417442414038281
+            ],
+            [
+              0.11417442414038281,
+              0.27970833835270303
+            ]
+          ]
+        ]
+      ]
+    },
+    "48": {
+      "cases": {
+        "identity": {
+          "delta_tensor": [
+            [
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ]
+            ]
+          ],
+          "maps": {
+            "hadamard": {
+              "delta_D22": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "delta_D31": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "delta_D4": [
+                0.0,
+                0.0
+              ],
+              "delta_oriented_covariance": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "delta_quadratic_K3_feed": [
+                [
+                  [
+                    0.0,
+                    -0.0
+                  ],
+                  [
+                    -0.0,
+                    0.0
+                  ]
+                ],
+                [
+                  [
+                    -0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    -0.0
+                  ]
+                ]
+              ],
+              "total_D22": [
+                [
+                  0.5319131414655243,
+                  0.08528412784021744
+                ],
+                [
+                  0.08528412784021733,
+                  0.07521544490399035
+                ]
+              ],
+              "total_D31": [
+                [
+                  0.5319131414655243,
+                  -1.942890293094024e-16
+                ],
+                [
+                  2.7755575615628914e-17,
+                  0.07521544490399035
+                ]
+              ],
+              "total_D4": [
+                0.5319131414655243,
+                0.07521544490399035
+              ],
+              "total_oriented_covariance": [
+                [
+                  0.0,
+                  -0.011323600073984873
+                ],
+                [
+                  -0.011323600073984856,
+                  0.0
+                ]
+              ],
+              "total_quadratic_K3_feed": [
+                [
+                  [
+                    0.04769425778607696,
+                    -0.0010602096352456322
+                  ],
+                  [
+                    -0.0010602096352456626,
+                    0.017929836542679878
+                  ]
+                ],
+                [
+                  [
+                    -0.0010602096352456574,
+                    0.017929836542679864
+                  ],
+                  [
+                    0.01792983654267985,
+                    -0.019731305269386237
+                  ]
+                ]
+              ]
+            },
+            "signed": {
+              "delta_D22": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "delta_D31": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "delta_D4": [
+                0.0,
+                0.0
+              ],
+              "delta_oriented_covariance": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "delta_quadratic_K3_feed": [
+                [
+                  [
+                    0.0,
+                    -0.0
+                  ],
+                  [
+                    -0.0,
+                    0.0
+                  ]
+                ],
+                [
+                  [
+                    -0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    -0.0
+                  ]
+                ]
+              ],
+              "total_D22": [
+                [
+                  0.16975551439145278,
+                  0.12330426730003363
+                ],
+                [
+                  0.12330426730003358,
+                  0.20409796129548136
+                ]
+              ],
+              "total_D31": [
+                [
+                  0.16975551439145278,
+                  -0.11872844539193089
+                ],
+                [
+                  -0.12995708765524114,
+                  0.20409796129548136
+                ]
+              ],
+              "total_D4": [
+                0.16975551439145278,
+                0.20409796129548136
+              ],
+              "total_oriented_covariance": [
+                [
+                  0.0,
+                  -0.02404918273252387
+                ],
+                [
+                  -0.02404918273252386,
+                  0.0
+                ]
+              ],
+              "total_quadratic_K3_feed": [
+                [
+                  [
+                    0.015221213075666807,
+                    0.017290232005050962
+                  ],
+                  [
+                    0.01729023200505095,
+                    0.01735355727514926
+                  ]
+                ],
+                [
+                  [
+                    0.01729023200505095,
+                    0.01735355727514926
+                  ],
+                  [
+                    0.01735355727514925,
+                    -0.05354112023562427
+                  ]
+                ]
+              ]
+            }
+          },
+          "mean_later": [
+            0.3989422804014269,
+            0.39894228040142676
+          ],
+          "old_tensor": [
+            [
+              [
+                [
+                  0.2797083383527048,
+                  0.11417442414038348
+                ],
+                [
+                  0.11417442414038337,
+                  0.10914008267227004
+                ]
+              ],
+              [
+                [
+                  0.11417442414038348,
+                  0.10914008267227004
+                ],
+                [
+                  0.10914008267226993,
+                  0.11417442414038359
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  0.11417442414038348,
+                  0.10914008267227004
+                ],
+                [
+                  0.10914008267226993,
+                  0.11417442414038359
+                ]
+              ],
+              [
+                [
+                  0.10914008267226993,
+                  0.11417442414038359
+                ],
+                [
+                  0.11417442414038348,
+                  0.2797083383527048
+                ]
+              ]
+            ]
+          ],
+          "total_tensor": [
+            [
+              [
+                [
+                  0.2797083383527048,
+                  0.11417442414038348
+                ],
+                [
+                  0.11417442414038337,
+                  0.10914008267227004
+                ]
+              ],
+              [
+                [
+                  0.11417442414038348,
+                  0.10914008267227004
+                ],
+                [
+                  0.10914008267226993,
+                  0.11417442414038359
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  0.11417442414038348,
+                  0.10914008267227004
+                ],
+                [
+                  0.10914008267226993,
+                  0.11417442414038359
+                ]
+              ],
+              [
+                [
+                  0.10914008267226993,
+                  0.11417442414038359
+                ],
+                [
+                  0.11417442414038348,
+                  0.2797083383527048
+                ]
+              ]
+            ]
+          ]
+        },
+        "negative_identity": {
+          "delta_tensor": [
+            [
+              [
+                [
+                  -0.2797083383527048,
+                  -0.11417442414038348
+                ],
+                [
+                  -0.11417442414038337,
+                  -0.10914008267227004
+                ]
+              ],
+              [
+                [
+                  -0.11417442414038348,
+                  -0.10914008267227004
+                ],
+                [
+                  -0.10914008267226993,
+                  -0.11417442414038359
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  -0.11417442414038348,
+                  -0.10914008267227004
+                ],
+                [
+                  -0.10914008267226993,
+                  -0.11417442414038359
+                ]
+              ],
+              [
+                [
+                  -0.10914008267226993,
+                  -0.11417442414038359
+                ],
+                [
+                  -0.11417442414038348,
+                  -0.2797083383527048
+                ]
+              ]
+            ]
+          ],
+          "maps": {
+            "hadamard": {
+              "delta_D22": [
+                [
+                  -0.5319131414655243,
+                  -0.08528412784021744
+                ],
+                [
+                  -0.08528412784021733,
+                  -0.07521544490399035
+                ]
+              ],
+              "delta_D31": [
+                [
+                  -0.5319131414655243,
+                  1.942890293094024e-16
+                ],
+                [
+                  -2.7755575615628914e-17,
+                  -0.07521544490399035
+                ]
+              ],
+              "delta_D4": [
+                -0.5319131414655243,
+                -0.07521544490399035
+              ],
+              "delta_oriented_covariance": [
+                [
+                  0.0,
+                  0.011323600073984873
+                ],
+                [
+                  0.011323600073984856,
+                  0.0
+                ]
+              ],
+              "delta_quadratic_K3_feed": [
+                [
+                  [
+                    -0.04769425778607696,
+                    0.0010602096352456322
+                  ],
+                  [
+                    0.0010602096352456626,
+                    -0.017929836542679878
+                  ]
+                ],
+                [
+                  [
+                    0.0010602096352456574,
+                    -0.017929836542679864
+                  ],
+                  [
+                    -0.01792983654267985,
+                    0.019731305269386237
+                  ]
+                ]
+              ],
+              "total_D22": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "total_D31": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "total_D4": [
+                0.0,
+                0.0
+              ],
+              "total_oriented_covariance": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "total_quadratic_K3_feed": [
+                [
+                  [
+                    0.0,
+                    -0.0
+                  ],
+                  [
+                    -0.0,
+                    0.0
+                  ]
+                ],
+                [
+                  [
+                    -0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    -0.0
+                  ]
+                ]
+              ]
+            },
+            "signed": {
+              "delta_D22": [
+                [
+                  -0.16975551439145278,
+                  -0.12330426730003363
+                ],
+                [
+                  -0.12330426730003358,
+                  -0.20409796129548136
+                ]
+              ],
+              "delta_D31": [
+                [
+                  -0.16975551439145278,
+                  0.11872844539193089
+                ],
+                [
+                  0.12995708765524114,
+                  -0.20409796129548136
+                ]
+              ],
+              "delta_D4": [
+                -0.16975551439145278,
+                -0.20409796129548136
+              ],
+              "delta_oriented_covariance": [
+                [
+                  0.0,
+                  0.02404918273252387
+                ],
+                [
+                  0.02404918273252386,
+                  0.0
+                ]
+              ],
+              "delta_quadratic_K3_feed": [
+                [
+                  [
+                    -0.015221213075666807,
+                    -0.017290232005050962
+                  ],
+                  [
+                    -0.01729023200505095,
+                    -0.01735355727514926
+                  ]
+                ],
+                [
+                  [
+                    -0.01729023200505095,
+                    -0.01735355727514926
+                  ],
+                  [
+                    -0.01735355727514925,
+                    0.05354112023562427
+                  ]
+                ]
+              ],
+              "total_D22": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "total_D31": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "total_D4": [
+                0.0,
+                0.0
+              ],
+              "total_oriented_covariance": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              "total_quadratic_K3_feed": [
+                [
+                  [
+                    0.0,
+                    -0.0
+                  ],
+                  [
+                    -0.0,
+                    0.0
+                  ]
+                ],
+                [
+                  [
+                    -0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    -0.0
+                  ]
+                ]
+              ]
+            }
+          },
+          "mean_later": [
+            0.0,
+            0.0
+          ],
+          "old_tensor": [
+            [
+              [
+                [
+                  0.2797083383527048,
+                  0.11417442414038348
+                ],
+                [
+                  0.11417442414038337,
+                  0.10914008267227004
+                ]
+              ],
+              [
+                [
+                  0.11417442414038348,
+                  0.10914008267227004
+                ],
+                [
+                  0.10914008267226993,
+                  0.11417442414038359
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  0.11417442414038348,
+                  0.10914008267227004
+                ],
+                [
+                  0.10914008267226993,
+                  0.11417442414038359
+                ]
+              ],
+              [
+                [
+                  0.10914008267226993,
+                  0.11417442414038359
+                ],
+                [
+                  0.11417442414038348,
+                  0.2797083383527048
+                ]
+              ]
+            ]
+          ],
+          "total_tensor": [
+            [
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ],
+              [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0
+                ]
+              ]
+            ]
+          ]
+        },
+        "nonconstant": {
+          "delta_tensor": [
+            [
+              [
+                [
+                  0.0004524632647480431,
+                  0.024821510120279562
+                ],
+                [
+                  0.02482151012027961,
+                  -0.08756215922577214
+                ]
+              ],
+              [
+                [
+                  0.024821510120279555,
+                  -0.08756215922577204
+                ],
+                [
+                  -0.08756215922577201,
+                  0.07437117165321178
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  0.024821510120279555,
+                  -0.087562159225772
+                ],
+                [
+                  -0.08756215922577203,
+                  0.07437117165321169
+                ]
+              ],
+              [
+                [
+                  -0.08756215922577193,
+                  0.0743711716532117
+                ],
+                [
+                  0.0743711716532118,
+                  0.0022453586868786957
+                ]
+              ]
+            ]
+          ],
+          "maps": {
+            "hadamard": {
+              "delta_D22": [
+                [
+                  -0.031476101577260024,
+                  0.04445553510079264
+                ],
+                [
+                  0.0444555351007927,
+                  -0.2298614651242426
+                ]
+              ],
+              "delta_D31": [
+                [
+                  -0.031476101577260024,
+                  -0.025223054621998656
+                ],
+                [
+                  0.02432660691093344,
+                  -0.2298614651242426
+                ]
+              ],
+              "delta_D4": [
+                -0.031476101577260024,
+                -0.2298614651242426
+              ],
+              "delta_oriented_covariance": [
+                [
+                  0.0,
+                  -0.005960839531891635
+                ],
+                [
+                  -0.005960839531891643,
+                  0.0
+                ]
+              ],
+              "delta_quadratic_K3_feed": [
+                [
+                  [
+                    -0.0028223203859758083,
+                    0.0034461888721115407
+                  ],
+                  [
+                    0.0034461888721115564,
+                    0.010950296891531645
+                  ]
+                ],
+                [
+                  [
+                    0.003446188872111559,
+                    0.01095029689153166
+                  ],
+                  [
+                    0.010950296891531664,
+                    0.06029967307677511
+                  ]
+                ]
+              ],
+              "total_D22": [
+                [
+                  0.1235117863182223,
+                  0.20043029941300727
+                ],
+                [
+                  0.20043029941300727,
+                  0.21388729769116474
+                ]
+              ],
+              "total_D31": [
+                [
+                  0.1235117863182223,
+                  -0.14366894284130044
+                ],
+                [
+                  -0.1663342649519286,
+                  0.21388729769116474
+                ]
+              ],
+              "total_D4": [
+                0.1235117863182223,
+                0.21388729769116474
+              ],
+              "total_oriented_covariance": [
+                [
+                  0.0,
+                  -0.03617725517673792
+                ],
+                [
+                  -0.03617725517673792,
+                  0.0
+                ]
+              ],
+              "total_quadratic_K3_feed": [
+                [
+                  [
+                    0.01107474607611656,
+                    0.02028548126196413
+                  ],
+                  [
+                    0.020285481261964125,
+                    0.031169516877347564
+                  ]
+                ],
+                [
+                  [
+                    0.020285481261964125,
+                    0.031169516877347574
+                  ],
+                  [
+                    0.03116951687734757,
+                    -0.056109161746972086
+                  ]
+                ]
+              ]
+            },
+            "signed": {
+              "delta_D22": [
+                [
+                  0.016953102633645772,
+                  -0.020828541569224236
+                ],
+                [
+                  -0.020828541569224243,
+                  -0.4929023462944306
+                ]
+              ],
+              "delta_D31": [
+                [
+                  0.016953102633645772,
+                  -0.018641538978579182
+                ],
+                [
+                  0.15741941457024317,
+                  -0.4929023462944306
+                ]
+              ],
+              "delta_D4": [
+                0.016953102633645772,
+                -0.4929023462944306
+              ],
+              "delta_oriented_covariance": [
+                [
+                  0.0,
+                  0.0069451750412810554
+                ],
+                [
+                  0.006945175041281058,
+                  0.0
+                ]
+              ],
+              "delta_quadratic_K3_feed": [
+                [
+                  [
+                    0.001520108424197165,
+                    0.003214340962642776
+                  ],
+                  [
+                    0.0032143409626427836,
+                    0.006001473936558188
+                  ]
+                ],
+                [
+                  [
+                    0.003214340962642784,
+                    0.00600147393655819
+                  ],
+                  [
+                    0.00600147393655819,
+                    0.1293033189545911
+                  ]
+                ]
+              ],
+              "total_D22": [
+                [
+                  0.23806572367046883,
+                  0.4612018075941665
+                ],
+                [
+                  0.46120180759416657,
+                  0.8504323106407587
+                ]
+              ],
+              "total_D31": [
+                [
+                  0.23806572367046883,
+                  -0.3352582398949784
+                ],
+                [
+                  -0.6153339623657417,
+                  0.8504323106407587
+                ]
+              ],
+              "total_D4": [
+                0.23806572367046883,
+                0.8504323106407587
+              ],
+              "total_oriented_covariance": [
+                [
+                  0.0,
+                  -0.0904366556909814
+                ],
+                [
+                  -0.09043665569098142,
+                  0.0
+                ]
+              ],
+              "total_quadratic_K3_feed": [
+                [
+                  [
+                    0.02134628214577442,
+                    0.04741807582360309
+                  ],
+                  [
+                    0.04741807582360309,
+                    0.0563857170099116
+                  ]
+                ],
+                [
+                  [
+                    0.04741807582360309,
+                    0.0563857170099116
+                  ],
+                  [
+                    0.05638571700991163,
+                    -0.22309433326654554
+                  ]
+                ]
+              ]
+            }
+          },
+          "mean_later": [
+            0.2393660615815786,
+            0.4132454039257171
+          ],
+          "old_tensor": [
+            [
+              [
+                [
+                  0.0745395490638806,
+                  -0.0360827269082011
+                ],
+                [
+                  -0.03608272690820115,
+                  0.07169678052161525
+                ]
+              ],
+              [
+                [
+                  -0.03608272690820108,
+                  0.07169678052161516
+                ],
+                [
+                  0.07169678052161513,
+                  -0.10829771055176146
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  -0.03608272690820109,
+                  0.07169678052161513
+                ],
+                [
+                  0.07169678052161513,
+                  -0.10829771055176143
+                ]
+              ],
+              [
+                [
+                  0.07169678052161504,
+                  -0.10829771055176142
+                ],
+                [
+                  -0.10829771055176152,
+                  0.6927530692282082
+                ]
+              ]
+            ]
+          ],
+          "total_tensor": [
+            [
+              [
+                [
+                  0.07499201232862865,
+                  -0.011261216787921538
+                ],
+                [
+                  -0.011261216787921538,
+                  -0.015865378704156885
+                ]
+              ],
+              [
+                [
+                  -0.011261216787921524,
+                  -0.015865378704156885
+                ],
+                [
+                  -0.015865378704156885,
+                  -0.033926538898549685
+                ]
+              ]
+            ],
+            [
+              [
+                [
+                  -0.011261216787921538,
+                  -0.01586537870415687
+                ],
+                [
+                  -0.0158653787041569,
+                  -0.03392653889854974
+                ]
+              ],
+              [
+                [
+                  -0.015865378704156885,
+                  -0.03392653889854971
+                ],
+                [
+                  -0.03392653889854971,
+                  0.6949984279150869
+                ]
+              ]
+            ]
+          ]
+        }
+      },
+      "node_count": 9216,
+      "source_tensor": [
+        [
+          [
+            [
+              0.2797083383527048,
+              0.11417442414038348
+            ],
+            [
+              0.11417442414038337,
+              0.10914008267227004
+            ]
+          ],
+          [
+            [
+              0.11417442414038348,
+              0.10914008267227004
+            ],
+            [
+              0.10914008267226993,
+              0.11417442414038359
+            ]
+          ]
+        ],
+        [
+          [
+            [
+              0.11417442414038348,
+              0.10914008267227004
+            ],
+            [
+              0.10914008267226993,
+              0.11417442414038359
+            ]
+          ],
+          [
+            [
+              0.10914008267226993,
+              0.11417442414038359
+            ],
+            [
+              0.11417442414038348,
+              0.2797083383527048
+            ]
+          ]
+        ]
+      ]
+    }
+  },
+  "scope": "fixed n=2 full-sign finite measure, linear old carry, and declared quadratic feed only",
+  "status": "FAIL"
+}
