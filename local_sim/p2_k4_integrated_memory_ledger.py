@@ -249,7 +249,8 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
                         [W, WC, C_pre, mu_pre, var_pre, V],
                         [("cov_matmul_result", (n, n), 4),
                          ("source_map_operand", (n, s), 4)],
-                        named_live=prior_named | early_named)]
+                        named_live=prior_named | early_named,
+                        named_none=("sources",) if layer else ())]
 
         ready = ([] if final else [h for h in young if h.age + 1 >= recent])
         staying = [h for h in young if h not in ready]
@@ -290,13 +291,15 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
                                  ("gram_update", (rank, rank), 4),
                                  ("factor_rotation_result", (rank, n), 4),
                                  ("transport_matmul_operand", (n, n), 4)],
-                                named_live=prior_named | early_named))
+                                named_live=prior_named | early_named,
+                                named_none=("sources",) if layer else ()))
         stages.append(stage(m, "young_transport", common + next_state +
                             [W, WC, C_pre, mu_pre, var_pre, V],
                             [("wick_A_or_P", (n, n), 4),
                              ("matmul_result", (n, n), 4),
                              ("residual_operand", (n, residual), 4)],
-                            named_live=prior_named | early_named))
+                            named_live=prior_named | early_named,
+                            named_none=("sources",) if layer else ()))
 
         for h in young + shared:
             counters["source_D3_uses"] += 1
@@ -324,7 +327,8 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
         stages.append(stage(m, "D3_D21_materialization" if not final else
                             "final_D3_only", common + next_state + materialized +
                             [W, WC, C_pre, mu_pre, var_pre, V], readout_named,
-                            named_live=prior_named | early_named))
+                            named_live=prior_named | early_named,
+                            named_none=("sources",) if layer else ()))
 
         mu = m.make(prefix + ".mu", (n,))
         outputs.append(mu)  # Same object: output and current mean are aliases.
@@ -394,7 +398,8 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
                                         prior_after_none.items()} |
                                        {"current." + k: v for k, v in
                                         current_locals.items() if v is not None},
-                            named_none=final_none if final else ()))
+                            named_none=final_none + ("sources",) if final
+                            else ("sources",)))
         if final:
             row_newborn = []
         else:
@@ -471,7 +476,8 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
                                 [W, WC, C_pre, mu_pre, var_pre, V, mu, C] +
                                 derivatives + outputs, birth_named,
                                 named_live={"current." + k: v for k, v in
-                                            current_locals.items() if v is not None}))
+                                            current_locals.items() if v is not None},
+                                named_none=("sources",)))
 
         # The integrated function keeps many of these locals bound after the
         # loop body. At the next readout they still have their previous-layer
@@ -522,7 +528,7 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
         m, "output_stack", final_arrays,
         [("stack_result", (depth, n), 4)],
         named_live={"frame." + k: v for k, v in previous_locals.items()},
-        named_none=("bank_covariance", "D22", "D31", "D21")))
+        named_none=("bank_covariance", "D22", "D31", "D21", "sources")))
     rows[-1]["peak_modeled_array_payload_bytes"] = max(
         x["bytes"] for x in rows[-1]["stages"])
     maximum = max(m.all_arrays, key=lambda a: a.nbytes)
@@ -761,6 +767,7 @@ def main() -> int:
     for site, (layer, stage_name) in boundaries.items():
         snapshot = runtime.get(site, {})
         actual = snapshot.get("arrays", {})
+        actual_none = set(snapshot.get("none", []))
         modeled_stage = stage_at(tiny, layer, stage_name)
         modeled = {}
         for row in modeled_stage["named_live"]:
@@ -793,6 +800,10 @@ def main() -> int:
               missing_or_wrong=missing_or_wrong, false_alias=false_alias,
               false_modeled_alias=false_modeled_alias,
               allowed_backing_exception="Om is a distinct W column-view object whose retained backing payload is W")
+        check("boundary_" + site + "_exact_None_bindings",
+              bool(actual) and actual_none == set(modeled_stage["named_none"]),
+              actual_none=sorted(actual_none),
+              modeled_none=sorted(modeled_stage["named_none"]))
     output_actual = runtime.get("L15_output_stack", {}).get("arrays", {})
     output_none = runtime.get("L15_output_stack", {}).get("none", [])
     output_stage = stage_at(tiny, 15, "output_stack")
@@ -811,8 +822,8 @@ def main() -> int:
           expected_names=list(fourteen))
     check("L15_output_none_bindings_explicit",
           set(output_stage["named_none"]) ==
-          {"bank_covariance", "D22", "D31", "D21"} and
-          set(output_stage["named_none"]).issubset(output_none),
+          {"bank_covariance", "D22", "D31", "D21", "sources"} and
+          set(output_stage["named_none"]) == set(output_none),
           modeled_none=output_stage["named_none"],
           runtime_none=output_none)
     full_output_stage = stage_at(optimized, 15, "output_stack")
