@@ -1303,25 +1303,25 @@ def _integrated_feed_sources(meter, f, V, probability, covariance,
     a = meter.run("feed_birth_a", lambda: derivative2 * c)
     Pbase = meter.run("feed_birth_Pbase",
                       lambda: derivative1[:, None] * V)
-    zeros_pad = meter.run("feed_birth_pad_zeros",
-                          lambda: f.zeros((n, n - source_rank), dtype=f.float32))
-    Pplus = meter.run("feed_birth_Ppad",
-                      lambda: f.concatenate([Pbase, zeros_pad], axis=1))
     Aplus = meter.run("feed_birth_Aplus",
                       lambda: derivative2[:, None] * (V * V))
     Zplus = meter.run("feed_birth_positive_residual",
                       lambda: 1.5 * (Aplus - a[:, None])
                       * probability[None, :])
-    selector = meter.run("feed_birth_selector",
-                         lambda: f.eye(n, dtype=f.float32)[:, :source_rank])
+    selector = meter.run("feed_birth_positive_identity",
+                         lambda: f.eye(source_rank, dtype=f.float32))
+    z_s = meter.run("feed_birth_positive_zero_vector",
+                    lambda: f.zeros(source_rank, dtype=f.float32))
+    one_s = meter.run("feed_birth_positive_one_vector",
+                      lambda: f.ones(source_rank, dtype=f.float32))
     z_n = meter.run("feed_birth_zero_vector",
                     lambda: f.zeros(n, dtype=f.float32))
     one_n = meter.run("feed_birth_one_vector",
                       lambda: f.ones(n, dtype=f.float32))
     zero_A = meter.run("feed_birth_positive_A",
-                       lambda: f.zeros((n, n), dtype=f.float32))
-    positive = Source(zero_A, Pplus, Zplus, selector, z_n, z_n, z_n,
-                      one_n, one_n, None, None, None)
+                       lambda: f.zeros((n, source_rank), dtype=f.float32))
+    positive = Source(zero_A, Pbase, Zplus, selector, z_s, z_s, z_s,
+                      one_s, one_s, None, None, None)
     positive.kind = "feed_positive"
     negative_A = meter.run("feed_birth_negative_A",
                            lambda: f.diag(derivative2))
@@ -1344,15 +1344,26 @@ def _integrated_transport_source(meter, f, W, wick, source, newborn=False):
     """Transport a young or newborn Source with one common layer map."""
     prefix = "insert_" if newborn else "young_"
     if newborn:
-        A = meter.run(prefix + source.kind + "_A", lambda: W @ source.A)
+        if source.kind == "feed_positive":
+            A = meter.run(prefix + "feed_positive_A_zero",
+                          lambda: f.zeros(source.A.shape, dtype=f.float32))
+        elif source.kind == "feed_negative":
+            A = meter.run(prefix + "feed_negative_A_column_scale",
+                          lambda: W * f.diagonal(source.A)[None, :])
+        else:
+            A = meter.run(prefix + source.kind + "_A", lambda: W @ source.A)
         P = (meter.run(prefix + source.kind + "_P_copy", lambda: f.copy(W))
              if source.kind == "ordinary" else
              meter.run(prefix + source.kind + "_P", lambda: W @ source.P))
         Z = meter.run(prefix + source.kind + "_Z", lambda: W @ source.Z)
         age = 0
     else:
-        A = meter.run(prefix + source.kind + "_A",
-                      lambda: W @ (wick[:, None] * source.A))
+        if source.kind == "feed_positive":
+            A = meter.run(prefix + "feed_positive_A_zero",
+                          lambda: f.zeros(source.A.shape, dtype=f.float32))
+        else:
+            A = meter.run(prefix + source.kind + "_A",
+                          lambda: W @ (wick[:, None] * source.A))
         P = meter.run(prefix + source.kind + "_P",
                       lambda: W @ (wick[:, None] * source.P))
         Z = meter.run(prefix + source.kind + "_Z",
@@ -1378,17 +1389,24 @@ def _integrated_join_ready(meter, f, young, shared, W, wick, recent, rank,
     factors = [] if shared is None else shared.factors
     Om = W[:, :rank]
     for source in ready:
-        A = meter.run("joiner_wick_A", lambda: wick[:, None] * source.A)
+        A = (meter.run("joiner_positive_A_zero",
+                       lambda: f.zeros(source.A.shape, dtype=f.float32))
+             if source.kind == "feed_positive" else
+             meter.run("joiner_wick_A", lambda: wick[:, None] * source.A))
         P = meter.run("joiner_wick_P", lambda: wick[:, None] * source.P)
         def sketch():
-            y = A @ (source.dA[:, None] * (A.T @ Om))
-            y = y + P @ (source.dP[:, None] * (P.T @ Om))
+            y = P @ (source.dP[:, None] * (P.T @ Om))
+            if source.kind != "feed_positive":
+                y = y + A @ (source.dA[:, None] * (A.T @ Om))
             if Qpre is not None:
                 y = y + Qpre @ (gram @ (Qpre.T @ Om))
             return y
         Y = meter.run("weighted_gram_sketch", sketch)
         Qn = meter.run("thin_qr", lambda: f.linalg.qr(Y)[0])[:, :rank]
-        FAj = meter.run("project_joiner_A", lambda: Qn.T @ A)
+        FAj = (meter.run("project_positive_A_zero",
+                         lambda: f.zeros((rank, A.shape[1]), dtype=f.float32))
+               if source.kind == "feed_positive" else
+               meter.run("project_joiner_A", lambda: Qn.T @ A))
         FPj = meter.run("project_joiner_P", lambda: Qn.T @ P)
         if Qpre is None:
             rotated = []
@@ -1398,7 +1416,11 @@ def _integrated_join_ready(meter, f, young, shared, W, wick, recent, rank,
             T = meter.run("factor_rotation_matrix", lambda: Qn.T @ Qpre)
             rotated = []
             for old in factors:
-                new_fa = meter.run("rotate_factor_A", lambda old=old: T @ old.FA)
+                new_fa = (meter.run("rotate_positive_factor_A_zero",
+                                    lambda old=old: f.zeros(
+                                        old.FA.shape, dtype=f.float32))
+                          if old.kind == "feed_positive" else
+                          meter.run("rotate_factor_A", lambda old=old: T @ old.FA))
                 new_fp = meter.run("rotate_factor_P", lambda old=old: T @ old.FP)
                 new = Factors(new_fa, new_fp, old.Z, old.L, old.s, old.e,
                               old.w2, old.dA, old.dP, None, None, None,
@@ -1407,9 +1429,13 @@ def _integrated_join_ready(meter, f, young, shared, W, wick, recent, rank,
                 rotated.append(new)
             Sg = meter.run("rotate_carried_gram",
                            lambda: T @ (gram @ T.T))
-        update = meter.run("carried_gram_update",
-                           lambda: ((FAj * source.dA[None, :]) @ FAj.T
-                                    + (FPj * source.dP[None, :]) @ FPj.T))
+        if source.kind == "feed_positive":
+            update = meter.run("carried_positive_gram_update",
+                               lambda: (FPj * source.dP[None, :]) @ FPj.T)
+        else:
+            update = meter.run("carried_gram_update",
+                               lambda: ((FAj * source.dA[None, :]) @ FAj.T
+                                        + (FPj * source.dP[None, :]) @ FPj.T))
         gram = meter.run("carried_gram_add", lambda: Sg + update)
         new = Factors(FAj, FPj, source.Z, source.L, source.s, source.e,
                       source.w2, source.dA, source.dP, None, None, None,
@@ -1442,8 +1468,12 @@ def _integrated_readout(meter, f, young, shared, final, counters,
     rows = [(s.kind, s, None) for s in young]
     if shared is not None:
         for factor in shared.factors:
-            A = meter.run("materialize_shared_A",
-                          lambda factor=factor: shared.Q @ factor.FA)
+            A = (meter.run("materialize_positive_A_zero",
+                           lambda factor=factor: f.zeros(
+                               (n, factor.FA.shape[1]), dtype=f.float32))
+                 if factor.kind == "feed_positive" else
+                 meter.run("materialize_shared_A",
+                           lambda factor=factor: shared.Q @ factor.FA))
             P = meter.run("materialize_shared_P",
                           lambda factor=factor: shared.Q @ factor.FP)
             source = Source(A, P, factor.Z, factor.L, factor.s, factor.e,
@@ -1459,23 +1489,41 @@ def _integrated_readout(meter, f, young, shared, final, counters,
                 if shared is not None and not final else None)
     for kind, source, factor in rows:
         A, P, Z, L = source.A, source.P, source.Z, source.L
-        AP = meter.run("materialize_AP", lambda: A * P)
-        PP = meter.run("materialize_PP", lambda: P * P)
-        R = meter.run("materialize_residual_M", lambda: Z @ L.T)
-        MP = meter.run("materialize_MP", lambda: (
-            R * P + PP * source.s[None, :] + 3.0 * AP * source.e[None, :]))
-        LA = meter.run("materialize_LA", lambda: (
-            2.0 * AP * source.w2[None, :] + PP * source.e[None, :]))
-        LP = meter.run("materialize_LP", lambda: (
-            (A * A) * source.w2[None, :] + PP * (source.s[None, :] / 3.0)
-            + (2.0 / 3.0) * MP))
-        d3part = meter.run("D3_contraction", lambda: (
-            3.0 * A * AP * source.w2[None, :] + MP * P).sum(axis=1))
+        if kind == "feed_positive":
+            # A=s=e=w2=0 and L=I_S exactly, including after joins.
+            PP = meter.run("positive_materialize_PP", lambda: P * P)
+            MP = meter.run("positive_materialize_MP", lambda: Z * P)
+            LP = (None if final else meter.run(
+                "positive_materialize_LP", lambda: (2.0 / 3.0) * MP))
+            d3part = meter.run("positive_D3_contraction",
+                               lambda: (MP * P).sum(axis=1))
+        else:
+            AP = meter.run("materialize_AP", lambda: A * P)
+            PP = meter.run("materialize_PP", lambda: P * P)
+            R = meter.run("materialize_residual_M", lambda: Z @ L.T)
+            MP = meter.run("materialize_MP", lambda: (
+                R * P + PP * source.s[None, :] + 3.0 * AP * source.e[None, :]))
+            LA = meter.run("materialize_LA", lambda: (
+                2.0 * AP * source.w2[None, :] + PP * source.e[None, :]))
+            LP = meter.run("materialize_LP", lambda: (
+                (A * A) * source.w2[None, :] + PP * (source.s[None, :] / 3.0)
+                + (2.0 / 3.0) * MP))
+            d3part = meter.run("D3_contraction", lambda: (
+                3.0 * A * AP * source.w2[None, :] + MP * P).sum(axis=1))
         D3 = meter.run("history_D3_add", lambda: D3 + d3part)
         counters["source_D3_uses"] += 1
         counters[kind + "_D3_uses"] += 1
         if not final:
-            if factor is None:
+            if kind == "feed_positive" and factor is None:
+                piece = meter.run("positive_D21_young", lambda: (
+                    LP @ P.T + (PP @ Z.T) / 3.0))
+                D21 = meter.run("history_D21_add", lambda: D21 + piece)
+            elif kind == "feed_positive":
+                coord = meter.run("positive_D21_shared_coords", lambda: (
+                    coord + LP @ factor.FP.T))
+                residual = meter.run("positive_D21_residual", lambda: (
+                    residual + (PP @ Z.T) / 3.0))
+            elif factor is None:
                 piece = meter.run("D21_young", lambda: (
                     LA @ A.T + LP @ P.T + ((PP @ L) @ Z.T) / 3.0))
                 D21 = meter.run("history_D21_add", lambda: D21 + piece)
