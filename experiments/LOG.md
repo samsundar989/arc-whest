@@ -46532,3 +46532,33 @@ snapshotted; therefore the next jobs require exact source SHA checks before
 and after, and the live tree will be held free of edits while they run. This
 is a necessary local-placement workaround, not a bypass of workerq. The
 cancelled/remote results will not be used as candidate evidence.
+
+**F21 cost-first correction.** Local job 1071 ran the frozen L4
+`certify_candidate.py --quick` for about 20 minutes and reached only seven
+edge-case receipts (through `dynamic_range:2`); I terminated it before a
+certificate or cost result existed. The later full candidate certificate is
+still owed, but this broad battery is an inefficient first cost discriminator.
+Local-only job 1077 failed immediately because Windows CreateProcess did not
+resolve the relative `.venv/Scripts/python.exe`; it produced no result. Job
+1078, with the same executable spelling, was removed while queued. No truth or
+seed block was touched. The replacement commands use the absolute local Python
+path and `--live-worktree`, with candidate hashes bound in the output.
+
+**F21 pre-submission optimization review — paired one-arm grader meter.** The
+accepted `local_sim/p2_flop_anchor.py::_run_arm` already reproduces the official
+stack with flopscope-backed weights and in-window WhestBench materialisation.
+The scoped wrapper `experiments/2026-09-12_f21/meter_grader_arm.py` calls only
+its `grader` arm and records source/instrument SHA256 plus the complete
+operation-family ledger; no math, shape, dtype, backend, or budget code is
+changed. This removes the anchor CLI's two duplicate non-grader weight arms
+for each candidate without weakening the isolated F21 cost comparison. The
+parent and fused candidate run separately on the same no-label deterministic
+mint, with no truth loader, workers, caching, prefetch or batching. No GPU is
+used. Each job has a new immutable output; a failed one can be repeated without
+spending a seed. The cancelled full certificate peaked 4.36 GiB; allow
+**6 GiB RAM, 0 VRAM, 2 CPUs** for each one-network meter. This is conservative
+for its single full-width run and fits the currently available local reservation
+envelope. Run source hash/ledger checks and independent review before accepting
+the cost result. Official subprocess profile and candidate-specific deployment
+certification remain separate required gates. The binding 8% threshold and
+Samuel's already recorded F21 prediction remain unchanged.
