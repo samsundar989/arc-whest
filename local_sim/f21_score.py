@@ -17,6 +17,7 @@ import dataclasses
 import hashlib
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -52,7 +53,11 @@ def _sha(path: Path) -> str:
 
 
 def _source(path: str, expected: str) -> tuple[Path, str]:
-    full = Path(path).resolve()
+    if Path(path).is_absolute():
+        raise ValueError("candidate sources must be repo-relative snapshot paths")
+    full = Path(os.path.abspath(_ROOT / path))
+    if not full.is_relative_to(_ROOT):
+        raise ValueError("candidate source leaves the executing snapshot")
     if not full.is_file():
         raise ValueError(f"missing candidate file: {full}")
     actual = _sha(full)
@@ -63,23 +68,48 @@ def _source(path: str, expected: str) -> tuple[Path, str]:
 
 def _read(path: str, block: str, purpose: str, out: str,
           live_reads: Path, live_ledger: Path) -> tuple[dict, dict]:
-    full = Path(path).resolve()
+    if Path(path).is_absolute():
+        raise ValueError("truth must be a repo-relative snapshot path")
+    full = Path(os.path.abspath(_ROOT / path))
+    if not full.is_relative_to(_ROOT):
+        raise ValueError("truth path leaves the executing snapshot")
     if not full.is_file():
         raise ValueError(f"missing truth file: {full}")
+    canonical = full.relative_to(_ROOT).as_posix()
+    prior = {r.reservation for r in truth_reads.reads(path=str(live_reads))}
     data = truth_reads.load_truth(
         block, str(full), consumer="local_sim/f21_score.py", purpose=purpose,
         instrument=str(Path(__file__).resolve()), result_artifact=str(Path(out).resolve()),
         path=str(live_reads), ledger_path=str(live_ledger))
-    return data, {"path": str(full), "sha256": _sha(full)}
+    actual_sha = _sha(full)
+    records = truth_reads.reads(path=str(live_reads))
+    mine = [r for r in records if r.reservation not in prior
+            and r.consumer == "local_sim/f21_score.py"
+            and r.artifact == canonical and r.result_artifact == str(Path(out).resolve())]
+    reserved = [r for r in mine if r.status == "reserved"]
+    complete = [r for r in mine if r.status == "completed"]
+    if len(reserved) != 1 or len(complete) != 1 or (
+        reserved[0].reservation != complete[0].reservation
+        or reserved[0].artifact_sha256 != actual_sha
+        or complete[0].artifact_sha256 != actual_sha
+    ):
+        raise ValueError(f"truth read receipt failed to record canonical path {canonical}")
+    return data, {"path": canonical, "snapshot_path": str(full),
+                  "sha256": actual_sha, "live_register": str(live_reads),
+                  "read_receipt_before_count": len(prior),
+                  "read_receipt_after_count": len({r.reservation for r in records}),
+                  "read_receipt_reservation": reserved[0].reservation,
+                  "read_receipt_path": reserved[0].artifact,
+                  "read_receipt_status": complete[0].status}
 
 
 def _labels(a: argparse.Namespace, live_root: Path, live_reads: Path,
             live_ledger: Path) -> tuple[list[int], np.ndarray, np.ndarray, dict]:
     """Return seeds, float32 midpoint labels, predicted midpoint noise, provenance."""
     if a.tier == "design":
-        canonical = (live_root / "experiments" / "2026-08-26_p2_gt").resolve()
-        if Path(a.truth_a).resolve() != canonical / "gt_halfA.npz" or (
-            Path(a.truth_b).resolve() != canonical / "gt_halfB.npz"
+        canonical = (_ROOT / "experiments" / "2026-08-26_p2_gt")
+        if Path(os.path.abspath(_ROOT / a.truth_a)) != canonical / "gt_halfA.npz" or (
+            Path(os.path.abspath(_ROOT / a.truth_b)) != canonical / "gt_halfB.npz"
         ):
             raise ValueError("DESIGN must use the registered 24-network high-resolution P01 pair")
         da, pa = _read(a.truth_a, "P01", "F21 exposed DESIGN half A", a.out,
@@ -107,8 +137,8 @@ def _labels(a: argparse.Namespace, live_root: Path, live_reads: Path,
         noise = ((v1 + v2) / 2).mean(axis=1) / (2 * n_samples)
         files = [pa, pb]
     else:
-        truth_path = Path(a.truth).resolve()
-        truth_rel = os.path.relpath(truth_path, live_root).replace("\\", "/")
+        truth_path = Path(os.path.abspath(_ROOT / a.truth))
+        truth_rel = os.path.relpath(truth_path, _ROOT).replace("\\", "/")
         truth_sha = _sha(truth_path)
         if not any(c.block == "P09" and c.artifact == truth_rel
                    and c.artifact_sha256 == truth_sha
@@ -183,13 +213,13 @@ def _pair(a: np.ndarray, b: np.ndarray) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--tier", choices=("design", "decide"), required=True)
-    ap.add_argument("--truth-a", help="DESIGN high-resolution half A")
-    ap.add_argument("--truth-b", help="DESIGN high-resolution half B")
-    ap.add_argument("--truth", help="DECIDE P09 p2_truth NPZ")
-    ap.add_argument("--l4", required=True, help="frozen original L4 parent")
-    ap.add_argument("--fused", required=True, help="single frozen fused L4 candidate")
+    ap.add_argument("--truth-a", help="repo-relative snapshot DESIGN half A")
+    ap.add_argument("--truth-b", help="repo-relative snapshot DESIGN half B")
+    ap.add_argument("--truth", help="repo-relative snapshot DECIDE P09 NPZ")
+    ap.add_argument("--l4", required=True, help="repo-relative frozen original L4 parent")
+    ap.add_argument("--fused", required=True, help="repo-relative fused L4 candidate")
     ap.add_argument("--fused-sha", required=True, help="expected candidate SHA256")
-    ap.add_argument("--l2", required=True, help="frozen original L2 context")
+    ap.add_argument("--l2", required=True, help="repo-relative frozen original L2 context")
     ap.add_argument("--out", required=True)
     ap.add_argument("--live-register-root", required=True,
                     help="absolute live repo root for truth-read and seed-ledger receipts")
@@ -202,18 +232,27 @@ def main() -> int:
     if not live_root.is_absolute():
         ap.error("--live-register-root must be absolute")
     live_root = live_root.resolve()
+    git_root = subprocess.run(
+        ["git", "-C", str(live_root), "rev-parse", "--show-toplevel"],
+        capture_output=True, text=True, check=True).stdout.strip()
+    if Path(git_root).resolve() != live_root:
+        ap.error("--live-register-root is not a Git repository root")
+    if Path.cwd().resolve() != _ROOT:
+        ap.error("run from the executing snapshot repository root")
     live_reads = live_root / "experiments" / "truth_reads.jsonl"
     live_ledger = live_root / "experiments" / "seed_ledger.jsonl"
     if not live_reads.is_file() or not live_ledger.is_file():
         ap.error("live truth-read and seed-ledger files must already exist")
     truth_paths = [a.truth] if a.tier == "decide" else [a.truth_a, a.truth_b]
-    if any(not Path(p).is_absolute() for p in truth_paths):
-        ap.error("truth paths must be absolute live paths, not snapshot-relative")
+    if any(Path(p).is_absolute() for p in truth_paths):
+        ap.error("truth paths must be repo-relative snapshot paths")
     if a.tier == "decide" and not Path(a.truth).name.startswith("truth_P09"):
         ap.error("DECIDE truth filename must identify P09")
     out = Path(a.out).resolve()
     if not Path(a.out).is_absolute():
         ap.error("--out must be an absolute live path")
+    if not out.is_relative_to(live_root / "experiments"):
+        ap.error("--out must be inside the live experiments directory")
     if out.exists():
         ap.error("output already exists; evidence is immutable")
     if not a.fused_sha or len(a.fused_sha) != 64:
@@ -226,6 +265,10 @@ def main() -> int:
     }
     if len({p for p, _ in paths.values()}) != 3:
         raise ValueError("all three arms must be distinct files")
+    for name, (path, digest) in paths.items():
+        live_copy = live_root / path.relative_to(_ROOT)
+        if not live_copy.is_file() or _sha(live_copy) != digest:
+            raise ValueError(f"live workspace does not contain snapshot-pinned {name} bytes")
     seeds, truth, noise, truth_prov = _labels(a, live_root, live_reads, live_ledger)
     spec = le.LifecycleSpec.for_round("v2-phase2", residual_wall_time_limit_s=None)
     print(f"F21 {a.tier.upper()}: {len(seeds)} paired networks; local residual cap explicitly relaxed", flush=True)
