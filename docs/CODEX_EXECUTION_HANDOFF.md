@@ -41,9 +41,13 @@ The synthetic first-source K4/K3 kernel measured 704.165 billion counted FLOPs
 and received a fresh narrow Skeptic ACCEPT (`first_source_kernel/`, `70a2d80`);
 it does not include physical source production, later births, ordinary K3
 backbone overlap or full Gram/QR integration. LOG commit `60ab638` contracts
-the next signed-feed embedding/rank fixture. Stage 1's supplied-core algebra
-and compact baseline cost remain accepted narrowly; full source closure and
-complete cost are open.
+the signed-feed embedding/rank fixture, which passed 48/48 and received
+fresh scoped Skeptic ACCEPT for one abstract discrete K3 feed. Its negative
+leg is generically full rank, so no rank384/residual16 or complete cost is
+accepted. LOG commit `dca4e7f` preregisters the next nonlinear three-layer
+old-history source discriminator. Stage 1's supplied-core algebra and compact
+baseline cost remain accepted narrowly; full source closure and complete
+cost are open.
 There is no better submission candidate, no fresh DECIDE/public/vault result,
 and Samuel's Stage-3 hold remains binding. Historical pickup instructions below
 must not cause a second fit or P01 relabeling.

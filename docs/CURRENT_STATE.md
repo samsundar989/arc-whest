@@ -209,9 +209,16 @@ fresh Skeptic accepted only that discrete partial path (`first_source_kernel/`,
 K3 backbone overlap, Gram/QR integration, residual and score are outside its
 meter. Snapshot workerq 988 was red due ignored evidence and checkout-byte
 normalization; live current-byte workerq 990 passed default preflight 12/16.
-LOG commit `60ab638` preregisters a tiny signed-feed embedding/rank fixture
-before its measurement. The feed's compatibility with the existing compact
-two-leg state, including any compression to rank 384/residual 16, is pending.
+The signed-feed embedding/rank fixture passed **48/48** against independent
+tiny raw-moment enumeration, max error `2.22e-15`, and received fresh scoped
+Skeptic **ACCEPT** (`feed_embedding/`, `dca4e7f`). Workerq 993 live-byte
+default preflight passed 12/16 (four Full-only skips) at 2,722.2 MiB under
+5 GiB; workerq 992 was an immediate CLI-flag failure without a test verdict.
+The existing compact Source can encode this discrete K3 feed exactly at full
+tiny rank, but its literal negative branch has a generically full-rank A leg.
+No exact rank-384/residual-16 integration or complete cost follows. LOG commit
+`dca4e7f` preregisters a tiny three-layer/two-source nonlinear old-history
+response discriminator before its measurement.
 Full Stage-1 source conformance remains open; supplied-core algebra and compact
 cost remain valid in scope. No
 protected labels should be spent on this diagnosis. There is no scientific kill or
@@ -303,8 +310,9 @@ repair-math Skeptic supplied a concrete residual counterexample. The dense
 linear oracle and Gaussian-pair mixed-source check have accepted narrow
 verdicts; the signed-cubature factor identity and fixed n=4 first-layer source
 also have scoped acceptance. The boundary-aware two-layer attempt failed;
-the exact-axis repair and synthetic first-source cost have narrow acceptance.
-Nonlinear old-history response, signed-feed embedding/rank and the priced
+the exact-axis repair, synthetic first-source cost and abstract signed-feed
+embedding have narrow acceptance. Nonlinear old-history response, full-rank
+multi-birth integration, compression and the priced
 complete source/history path remain concrete label-free discriminators.
 The `mixed_source/cost_options.md`
 ledger is conventional arithmetic, not measured flopscope cost or a feasible

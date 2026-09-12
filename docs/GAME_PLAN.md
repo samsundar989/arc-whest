@@ -55,7 +55,11 @@ old carry (`increment_axis_gauss/`, `0782efa`). A separately accepted synthetic
 one-first-source kernel measured 704.165 billion official-package FLOPs and
 889.9 MiB process peak (`first_source_kernel/`, `70a2d80`); it omits physical
 source generation, later increments and ordinary K3 backbone overlap. A
-preregistered signed-feed embedding/rank fixture (`60ab638`) is pending.
+signed-feed embedding/rank fixture then passed 48/48 with fresh scoped
+Skeptic ACCEPT (`feed_embedding/`, `dca4e7f`); its literal negative leg is
+generically full rank, so rank384/residual16 remains unproved. The next
+three-layer/two-source nonlinear old-history fixture is preregistered at
+`dca4e7f`, before any measurement.
 No full K4 source/compression/counted-cost path is accepted.
 Stage 4 remains
 conditional on a measured Stage-2 bottleneck.
@@ -174,7 +178,7 @@ Skeptic ACCEPT. A later whole cumulant is not an additive increment; the
 first two-layer convergence gate failed while its finite-measure algebra
 passed. The boundary-aware attempt also failed its combined convergence gate;
 the exact-axis repair passed with narrow independent acceptance. A genuinely
-nonlinear old-history increment and compact-feed/rank integration remain open
+nonlinear old-history increment and compact multi-birth/compressed integration remain open
 before any corrected full arm. Do not fit a new constant or spend
 another protected label until the source math is independently checked and
 repaired within a new contract and fresh Skeptic gate. This is not a registered
