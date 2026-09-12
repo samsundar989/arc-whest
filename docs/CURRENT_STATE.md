@@ -12,7 +12,9 @@ cost, parity or accuracy result**. The required F21 contract is committed in
 the LOG; Samuel's three predictions are pending. Do not run these probes or
 read P01/P09 before recording them. A [fresh-context pre-score Skeptic](../experiments/2026-09-12_f21/prescore_skeptic.md)
 returned PROVISIONAL and prompted a targeted snapshot receipt-path repair;
-its follow-up review is pending. No P09 block is allocated or claimed, no
+its [follow-up review](../experiments/2026-09-12_f21/receipt_skeptic.md) is
+also PROVISIONAL until an exact workerq scoring command and live receipt are
+verified. No P09 block is allocated or claimed, no
 vault/public labels were read, and there is no submission approval.
 
 **September 12, 2026: strategist review of worker d124234.** Then read LOG from the bottom. The preceding detailed chronology is [archived verbatim](archive/CURRENT_STATE_before_worker_review_2026-09-12.md); all original contracts and results remain in experiments/LOG.md.
