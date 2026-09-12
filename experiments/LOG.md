@@ -46519,3 +46519,16 @@ with the same conservative RAM/CPU declarations. Node pinning preserves queue
 admission while making source hashes, ignored passthroughs, and receipts
 meaningful on the live host. The earlier optimization reviews still apply;
 no test coverage or resource request is reduced.
+
+**Queue pin erratum, before further evidence.** Workerq 1.4.0 accepts
+`--node local` but its `core.py::submit` maps that value to `pinned_node=None`,
+which the dispatcher treats as eligible for remote placement. Job 1074 was in
+fact sent to `3080ti` despite `--node local`; 1075/1076 were queued with the
+same ineffective pin. Cancellation was requested for 1074, and 1075/1076
+were removed before running. The queue's own code confirms that
+`--live-worktree` supplies no remote travel spec, making local placement
+mandatory while retaining RAM/CPU admission. It means the source is not
+snapshotted; therefore the next jobs require exact source SHA checks before
+and after, and the live tree will be held free of edits while they run. This
+is a necessary local-placement workaround, not a bypass of workerq. The
+cancelled/remote results will not be used as candidate evidence.
