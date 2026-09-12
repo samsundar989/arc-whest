@@ -46186,3 +46186,97 @@ closed, the next meaningful full-width RAM observation depends on a
 physically causal, numerically stable integrated implementation, rather
 than another symbolic-lifetime extension. No data, estimator, vault,
 HUMAN_MODEL or standing L2 candidate changed; Stage 3 stays held.
+
+## 2026-09-12 — Worker review and strategist response: first improve the working estimator
+
+**ROUTINE source/result review and planning documentation.** Reviewed worker HEAD
+`d124234913c5b38d3841dea606f6907507c853d5` with independent architecture, validation
+and primary-source reviewers. No candidate/instrument/seed/gate changes, protected
+truth reads, new networks, vault evaluation or heavy workload were performed.
+No new estimator measurement, promotion, submission or designation is claimed.
+
+**Samuel's scope change, recorded verbatim:** asked whether to include eligibility
+review and candidate preparation, he answered **“Include eligibility and candidate
+preparation.”** The earlier blanket Stage-3 hold is superseded for these activities.
+Actual submission remains a separate per-submission decision; no external message,
+agreement acceptance or designation is authorized. The previous instruction above
+remains the historical state at that entry, not the current scope.
+
+**Accepted evidence retained.** Stage0 Linux aggregate is PASS 13/13 in its mutation
+scope, not a future-candidate certificate. Current default preflight 1019 is 12/16
+with four Full-only skips. The 93/93 thin memory inventory remains a sampled named
+payload model, not process RAM or an enforced-cap measurement. New symbolic memory
+extensions are not the next bottleneck absent a concrete omission.
+
+**Independent validation:** recomputed saved P01 rows for all four arms with no
+score-identity discrepancy and96 unique IDs each. The compact new-K4-off `exact`
+control already scored mean raw MSE2.11130e-5, averaged-truth noise9.31914e-9,
+mean score7.83730e-6. P01 remains exposed DESIGN; no matched L2 comparison follows.
+The n4 93/172 and n8 186/187 failures and their source hashes remain real. The
+same-state n8 covariance decomposition does not prove an end-to-end K4-off ablation.
+Raw report/hash checks: `experiments/2026-09-12_worker_review/validation_skeptic.md`.
+
+**Architecture diagnosis:** compact template Gaussian-only diagonal variance and
+third-moment births differ from the full standing Wick/centering recurrence; its
+self-oracles therefore do not establish L2 parity. Scalar K4 already exists in L2.
+The frozen causal signed-source path transports an external bank linearly against
+a changing nonlinear backbone and is not the next deployable candidate. Defer it
+as a strategy, preserving its scientific question and scoped findings. No K4 lane
+kill is claimed and no exact probability-law theorem is made a prerequisite for
+every approximate estimator.
+
+**Concrete first candidate proposed, not built:** in standing `_dslice21`, with
+`C=A_L*w2b`, distribute
+`2*mm(A_D*M,M.T)+3*mm(A_L*C,M.T)` into
+`mm(2*(A_D*M)+3*(A_L*C),M.T)`. The other two products and division/mask remain.
+Four products become three;14 actual wide calls disappear at depth16, equivalent
+to105 lineage products. Roughly13% dominant-work saving is a planning estimate,
+not measured total FLOPs, runtime or score. This is distinct from the failed
+within-product symmetry/alias packing gate. Preserve the full recurrence, scalar
+K4, precision, backend and conservative generation chooser in the first candidate.
+
+The independent validation reviewer inspected L4 inside
+`submission-k3strassen-L4.tar.gz` without extracting/altering it. Its estimator.py
+SHA is `052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58`;
+relevant functions match L2 by AST. L2 SHA remains
+`390bc226bbf517df0110facfc0dc91c78ef670e8a49368a536cabf630057d1db`.
+Use originalL4 as primary paired control for a best-score improvement, L2 for
+robustness context; predeclare selection if multiple fused variants are considered.
+
+**Proposed execution:** two productive working days for a committed/predicted
+contraction/trajectory/cost package, proposed8% complete counted-cost screen,
+then registered DESIGN check without coefficient fitting and genuinely fresh
+DECIDE with proposed `decide(gate=1.05)`. These thresholds are proposals requiring
+a new contract and Samuel's predictions before results, not approved gate changes.
+If ready, complete exact-byte candidate/eligibility preparation and ask about a
+specific submission. Larger gains follow a full-rank bridge to the working
+recurrence, then one declared compression approximation. That second route must
+not delay a ready first candidate. No autonomous sweep or new all-source proof
+campaign is authorized by this planning entry.
+
+**Fresh public research:** Chrome board showed rank52 for neopok919 at rounded
+1.84e-8 and two rank1 rows at2.60e-9; displayed reference-noise floors unavailable.
+Public discussion still29 topics; no new verified leader algorithm found. Primary
+review confirmed unchanged504aldo/ARC code pins and corrected the paper reference
+to arXiv2605.05179v2. Published V29 tiny-shape runs bypass regenerated K4 and its
+variance floor does not prove PSD. Rulesv14 still contain both public-resource
+permission and participant-derivation restriction. Eligibility clarification is
+prepared but unsent; no private project material was shared externally.
+
+**Durable decision:** `docs/STRATEGIST_RESPONSE_2026-09-12.md`, updated
+`docs/GAME_PLAN.md`, `docs/CURRENT_STATE.md`, `docs/CODEX_EXECUTION_HANDOFF.md`,
+`docs/ELIGIBILITY_REVIEW_2026-09-12.md`; independent architecture and literature
+reviews under `docs/research/2026-09-12_*`. Previous state/plan/handoff are archived
+verbatim. The old strategist packet is retained with an answered/superseded notice.
+Before each future heavy or >30-minute job, the new AGENTS workload optimization
+review is required; no heavy job was submitted by this review.
+
+**Independent documentation acceptance:** the validation Skeptic accepted the
+final direction and handoff in scope: original L4 primary control, L2 robustness
+control, 14 actual wide calls versus 105 lineage equivalents, unchanged generation
+chooser/scalar K4/full recurrence, proposed gates clearly unapproved, scoped old
+failures retained, and eligibility/preparation authorization correctly reopened.
+Its clarifications are applied: setup is measured separately off the per-MLP FLOP
+budget and the L4 archive verification is explicit. This ACCEPT is for the plan,
+not a measured candidate, legal signoff or new submission authorization. Active
+relative links and git whitespace checks pass; no implementation files changed.

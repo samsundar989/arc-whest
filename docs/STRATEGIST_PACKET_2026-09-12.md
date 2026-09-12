@@ -1,5 +1,7 @@
 # Strategist Packet — causal compact nonlinear source for ARC Whest Phase 2
 
+> **Answered and superseded for execution:** [STRATEGIST_RESPONSE_2026-09-12](STRATEGIST_RESPONSE_2026-09-12.md) prioritizes exact contraction fusion in the working estimator, then a full-recurrence compact bridge. This packet remains the historical signed-source question. Samuel subsequently reopened eligibility review and candidate preparation; its blanket hold language is historical. Submission still needs separate approval.
+
 **Private research packet, September 12, 2026.** Address this without repository
 access or chat history. We need a falsifiable architecture decision, not a
 parameter fit or an open-ended literature survey. The evidence below is
