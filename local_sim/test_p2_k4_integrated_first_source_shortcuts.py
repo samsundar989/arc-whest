@@ -122,6 +122,9 @@ def collect_prevariance(module):
 
 def evaluate():
     checks = []
+    # The historical source is loaded from a temporary path; initialize the
+    # official package from the repo-root source before that module runs.
+    optimized._real_flopscope()
     source_sha = sha(HERE.with_name("p2_k4_integrated_first_source.py"))
     old_bytes = baseline_bytes()
     n4_sha = n4_birth_identity(checks)
