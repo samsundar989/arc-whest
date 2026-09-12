@@ -45606,3 +45606,29 @@ calls for L1--L14, reusing each for D22/D31 and that layer's feed q/a;
 L15 uses one diagonal reduction and no K3 birth. The tiny test must assert
 14 calls before interpreting a width meter. This states an already
 registered final shortcut explicitly and changes no result or budget gate.
+
+**September 12 frozen integrated n4 first result: FAIL, not a cost verdict.**
+At committed HEAD `5861747`, source/test and manifest hashes matched their
+frozen bytes before the focused 4x16 truth-free run. The independent dense
+oracle passed **93/172** registered checks and failed **79/172** at the
+frozen `1e-8` material-relative tolerance; the worst discrepancy was
+`6.266864920923348e-6` in final D3, with L14 oriented D21 at
+`3.2400190035166904e-6`. The full K4 contractions already differ from
+float64 dense arithmetic by `3.92e-8` at L1. Exact schedule 15/14/105/91,
+28 joins, 330 D3/287 D21 Source uses, 16 common weight casts, 14 C Grams,
+no old direct-feed family and context/family accounting all passed. The
+tiny context billed 566,244 FLOPs; its output was finite. The focused log
+contains a flopscope internal overflow warning that needs diagnosis before
+attributing all late discrepancies to rounding. Raw evidence:
+`experiments/2026-09-11_stage2_compact_p07/integrated_first_source/`
+`tiny_result.json` SHA256
+`623ec4524c6e526be8037d4a09043cd81314acf97edcbe1eafbc36a087817e28`,
+`tiny_focused.log` SHA256
+`f535cc6450516c86373c02d9834a527db77875ad766fe2476c13cbf5b8d5d1fc`,
+input SHA256 `4503ea3a74ef8e5f35e27b77045688d6e006322805a65a6a386d31a60e04a81f`.
+The committed source/test hashes are in `input_manifest.json`; package
+entries are flopscope 0.12.1 and whestbench 0.16.1 with exact entry hashes.
+Do **not** run or interpret a width1024 meter until a separately registered
+numerical/algebra adjudication and independent Skeptic accept the tiny path.
+This FAIL does not reject K4 scientific behavior, compressed-rank accuracy,
+or the unmeasured integrated FLOP budget. No label, block or vault touched.
