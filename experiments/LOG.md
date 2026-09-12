@@ -44319,3 +44319,92 @@ control. Require scoped tests, current-source preflight and fresh-context
 Skeptic before believing this IMPORTANT probe. No residual-rank or fresh
 decision measurement follows until source representation is separately
 repaired and reviewed.
+
+## 2026-09-12 — executable source trace accepted; repair representation still incomplete
+
+The preregistered actual `_layer` fixture is committed in `a419e55` and
+byte-exact queue evidence in `040b472`. Script
+`2026-09-11_stage2_compact_p07/source_cumulant/executable_trace/trace_frozen_layer.py`
+SHA-256 `635f7c4a0f6e6a0b93389d375c271f82e0d8b20b97d3418850776558d805a253`
+captured frozen coherent L1 `C=0.681689978 I`, central `k4v=2.512936592`,
+fabricated `k22[0,1]=0.837645531`, `gcore=1.256468296`, and L2
+`dG=2.512936592`, `D4=5.025873184` on the registered width-8 synthetic
+network. Direct independent fourth-cumulant contraction is `0.559416677`.
+The signed actual K11 D31 increments are `0.0022620093` and
+`-0.0004265551`; the traced state exactly equals untraced state, and the
+frozen exact-arm K4-off control has no D4 local. Result JSON SHA-256
+`a7f25fb4b20c3cbeccc98f3aa59c8158f1e2d2a2d3fec7c13cc948e531b8ef8a`.
+Workerq **961** passed live-byte default preflight **GREEN 12/16**, four
+Full-only steps skipped, exit 0, 3,275.398 MiB peak under a 5 GiB/2-CPU/
+zero-GPU request. Git normalized the readable log blob; exact queue bytes
+are preserved in `executable_trace/job961_raw.zip` SHA-256
+`d8bb0a7d09d747fb8297d8d8c8b3ae2beeda3935aae579be799c8a05d25fa4f0`.
+The new fresh-context Skeptic independently re-executed the frozen `_layer`,
+checked trace invariance and exact raw queue ZIP, and **ACCEPTED the scoped
+executable source-identity finding**. Verdict
+`executable_trace/skeptic_verdict.md` SHA-256
+`038a1c9b21814a5b96d4a539d30321db54bd1ac8cd0ba733584d41c1804f6d0c`.
+This says nothing about corrected accuracy, counted cost, residual cliff or
+P01 causation beyond the frozen-program gate already recorded.
+
+Independent design memo `2026-09-11_stage2_compact_p07/repair_architecture.md`
+SHA-256 `8f9f8fe3d0f66692262b5c4b2f16966d4a172d13a1bc8b8c67e061d52e165b599`
+derives an exact independent diagonal fourth-cumulant component and a
+two-matrix metric core with explicit projection residual. A *separate fresh
+Skeptic* **ACCEPTED the stated tensor/symmetric-consumer/truncated K3-feed
+algebra but marked the repair architecture INCOMPLETE** in
+`repair_architecture_skeptic.md` SHA-256
+`4f9c101009ee5ff93add745d9e6ef7c4e4fa721454407d8f071cd0fff3609030`.
+Their strongest counterexample has a symmetric fourth tensor supported only
+on permutations of `(0,1,2,3)`: all present D4/D22/D31 slices vanish, yet
+row `(1,1,1,1)/2` transports it to future D4 `1.5`. Current slice errors
+are diagnostics, **not a transportable residual**. A contraction-matched
+metric core also gives about 3x the true diagonal-source D4 on an equal-He
+width-1024 row, and its rough conventional FLOPs cannot certify flopscope
+cost or residual headroom. The memo's MGF cubic-coefficient factorial wording
+and nonlinear-versus-linear exactness need correction. CONFIRMED: exact
+diagonal-source tensor identities and metric-core transport algebra;
+INFERRED: an explicit carried residual/factorization is required for a
+scientifically coherent chain; SPECULATIVE: any feasible source architecture
+would win on random MLPs. No P01/P07/fresh/public/vault label was used.
+
+**Next IMPORTANT truth-free dense-reference contract, committed before data.**
+**Question:** can the proposed exact independent diagonal component, oriented
+consumers and truncated induced K3 feed match a full independently enumerated
+fourth tensor after arbitrary signed transport, and can a metric core plus
+*actual* residual expose the all-distinct counterexample? **Evidence:**
+CONFIRMED source defect and accepted trace; CONFIRMED math identities but
+INCOMPLETE residual architecture above; SPECULATIVE efficient all-history
+implementation. **Hypothesis/mechanism:** a rank-n diagonal-source factor
+`(Q,k)` transports its selected fourth cumulant exactly through linear maps;
+both core matrices `(G,M)` transport together, while the residual tensor is
+necessary to predict future slices. **Intervention:** implement a separate
+CPU-only n=4/5 independent dense enumeration and factor formulas. Include
+independent ReLU marginal κ4, arbitrary signed nonconstant Q/B, all repeated
+and mixed D4/D22/D31 indices, symmetric K11 D31 orientation, all cubic K3
+feed entries, zero K4 on correlated Gaussian preactivation, permutation and
+scaling, singular metric support/cross-support, and the all-distinct residual
+whose present slices are zero but future D4 is 1.5. Do not edit frozen arms,
+fit lambda, implement a full candidate, or touch labels.
+
+**Predictions:** (1) dense and factor slices/feeds agree to `1e-12` relative
+for nonzero signed cases; (2) transported `(G,M)` core matches dense tensor
+to `1e-12`, while a fixed metric or `lambda*C_pre` off-diagonal shortcut
+fails a signed fixture; (3) storing only present residual slices fails the
+all-distinct future contraction, while carrying its tensor gives `1.5`.
+Samuel's standing answer to prediction questions remains verbatim **“I don't
+know”**. **Falsifier:** any exact path disagrees outside tolerance or the
+all-distinct tensor does not transport as predicted. **Baseline/control:**
+independent direct dense tensor enumeration, not the old shared-core oracle
+or a scored estimator. **Cost model:** tiny CPU-only proof has no challenge
+FLOP/residual claim; separately quote conventional operation and array
+payload estimates for n1024 without calling them measured flopscope cost.
+The unchanged Phase-2 model is counted `C=F`, 0.4 s residual cliff.
+**Statistic/gate:** deterministic max relative error `1e-12` for dense
+nonzero terms and max absolute `1e-12` for zero/permutation cases, no
+paired score/seed block/noise/promotion because there are no labels.
+**Scope/confounders:** separate exact linear component from a complete
+nonlinear ReLU closure; a tiny tensor is not an 8 GiB or server proof.
+Require focused tests, current-byte default preflight and a fresh independent
+Skeptic before relying on the new probe math. Only then price an executable
+flopscope architecture and contract any new DESIGN measurement.
