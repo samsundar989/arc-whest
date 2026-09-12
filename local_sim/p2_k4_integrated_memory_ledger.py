@@ -25,6 +25,9 @@ FIRST_RESULT_SHA = "10c7835042b581b6691f6f98963a90adeeb222ba846557da258239644302
 FIRST_RESULT = SHORTCUT.with_name("memory_ledger_result.json")
 COLIVE_RESULT_SHA = "f7d5c67bd549d66ecb6f3d3e1f0a2be055c9e7fad2e8fd9be181e84bb1f72b1f"
 COLIVE_RESULT = SHORTCUT.with_name("memory_ledger_colive_result.json")
+BOUNDARY_RESULT_SHA = "3368f9e26b9fb0ff506d9241f18a9b86c774cb5224681b99d202981b97a847cf"
+BOUNDARY_RESULT = SHORTCUT.with_name("memory_ledger_boundary_result.json")
+BOUNDARY_SOURCE_SHA = "990eb0f61c08962b42dd8ed0a5727dea0095b7d505ef34fe9dac20b070545c74"
 ARRAY_LIMIT = 4 * 1024 ** 3
 PROCESS_LIMIT = 8 * 1024 ** 3
 PRIOR_14 = ("C_off", "bank_covariance", "positive22", "D22",
@@ -550,8 +553,9 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
             "final_output_shape": list(output_stack.shape)}
 
 
-def tiny_runtime_snapshot() -> dict:
-    """Inspect actual n8 outer-frame bindings at each sampled boundary.
+def tiny_runtime_snapshot(n: int, source_rank: int, rank: int,
+                          ordinary_residual: int) -> dict:
+    """Inspect actual tiny outer-frame bindings at each sampled boundary.
 
     Only names/shapes/within-snapshot aliases are saved. The runtime never
     exposes protected truth and never constructs a full-width array.
@@ -618,7 +622,23 @@ def tiny_runtime_snapshot() -> dict:
                         identities[identity] = name
                     fields[name] = {"shape": dimensions,
                                     "alias_of": alias_of}
+                nested = {}
+                shared = frame.f_locals.get("shared")
+                if shared is not None:
+                    nested["shared.Q"] = list(shared.Q.shape)
+                    nested["shared.gram"] = list(shared.gram.shape)
+                    if shared.factors:
+                        factor = shared.factors[-1]
+                        nested["shared.last.FA"] = list(factor.FA.shape)
+                        nested["shared.last.FP"] = list(factor.FP.shape)
+                        nested["shared.last.Z"] = list(factor.Z.shape)
+                newborn = frame.f_locals.get("newborn")
+                if newborn:
+                    ordinary = newborn[0]
+                    nested["newborn.ordinary.Z"] = list(ordinary.Z.shape)
+                    nested["newborn.ordinary.L"] = list(ordinary.L.shape)
                 snapshots[sites[key]] = {"arrays": fields, "none": none,
+                                         "nested": nested,
                                          "line": frame.f_lineno}
             return tracer
         return None
@@ -627,8 +647,8 @@ def tiny_runtime_snapshot() -> dict:
     try:
         sys.settrace(tracer)
         module.integrated_metered_program(
-            n=8, depth=16, source_rank=6, rank=8, recent=4,
-            ordinary_residual=8, capture_tiny=False)
+            n=n, depth=16, source_rank=source_rank, rank=rank, recent=4,
+            ordinary_residual=ordinary_residual, capture_tiny=False)
     finally:
         sys.settrace(previous_trace)
     return snapshots
@@ -644,6 +664,8 @@ def main() -> int:
     old = audit(1024, 16, 64, 384, 4, 16, True)
     tiny = audit(8, 16, 6, 8, 4, 8, False)
     tiny_old = audit(8, 16, 6, 8, 4, 8, True)
+    thin = audit(16, 16, 8, 8, 4, 2, False)
+    thin_old = audit(16, 16, 8, 8, 4, 2, True)
     checks = []
 
     def check(name: str, ok: bool, **details: object) -> None:
@@ -658,11 +680,20 @@ def main() -> int:
     colive_sha = hashlib.sha256(COLIVE_RESULT.read_bytes()).hexdigest()
     check("second_incomplete_result_unchanged", colive_sha == COLIVE_RESULT_SHA,
           got=colive_sha, expected=COLIVE_RESULT_SHA)
+    accepted_n8_sha = hashlib.sha256(BOUNDARY_RESULT.read_bytes()).hexdigest()
+    check("accepted_n8_result_unchanged",
+          accepted_n8_sha == BOUNDARY_RESULT_SHA,
+          got=accepted_n8_sha, expected=BOUNDARY_RESULT_SHA)
+    accepted_n8 = json.loads(BOUNDARY_RESULT.read_text(encoding="utf-8"))
+    check("accepted_n8_source_binding_unchanged",
+          accepted_n8["source_sha256"] == BOUNDARY_SOURCE_SHA and
+          accepted_n8["frozen_integrated_source_sha256"] == FROZEN_SHA)
     check("shortcut_existing_gate_remains_red", stored["pass"] and
           stored["n8_L3_min_prevariance_new"] < 0,
           existing_n8_min_prevariance=stored["n8_L3_min_prevariance_new"])
     for label, case in (("optimized", optimized), ("old", old),
-                        ("tiny", tiny), ("tiny_old", tiny_old)):
+                        ("tiny", tiny), ("tiny_old", tiny_old),
+                        ("thin", thin), ("thin_old", thin_old)):
         check(label + "_schedule", case["schedule"] == stored["new_schedule"])
         check(label + "_single_array_cap", case["every_modeled_array_below_4GiB"])
         check(label + "_final_shortcut", not case["layers"][-1]["final"] is False
@@ -728,9 +759,13 @@ def main() -> int:
           rejected_peak=638803200,
           revised_peak=optimized["max_modeled_array_payload_bytes"])
     try:
-        runtime = tiny_runtime_snapshot()
+        runtime = tiny_runtime_snapshot(8, 6, 8, 8)
     except Exception as exc:
         runtime = {"error": repr(exc)}
+    try:
+        runtime_thin = tiny_runtime_snapshot(16, 8, 8, 2)
+    except Exception as exc:
+        runtime_thin = {"error": repr(exc)}
     for site, names in (("L14_readout_before_call", PRIOR_14),
                         ("L14_birth_after_construction", CURRENT_BIRTH_9)):
         actual = runtime.get(site, {}).get("arrays", {})
@@ -764,46 +799,48 @@ def main() -> int:
         "L15_final_mean": (15, "final_mean_shortcut"),
         "L15_output_stack": (15, "output_stack"),
     }
-    for site, (layer, stage_name) in boundaries.items():
-        snapshot = runtime.get(site, {})
-        actual = snapshot.get("arrays", {})
-        actual_none = set(snapshot.get("none", []))
-        modeled_stage = stage_at(tiny, layer, stage_name)
-        modeled = {}
-        for row in modeled_stage["named_live"]:
-            name = row["name"].split(".", 1)[1]
-            modeled[name] = row
-        missing_or_wrong = [name for name, field in actual.items()
-                            if name not in modeled or
-                            field["shape"] != modeled[name]["shape"]]
-        false_alias = [name for name, field in actual.items()
-                       if field["alias_of"] is not None and
-                       name in modeled and field["alias_of"] in modeled and
-                       modeled[name]["array_id"] !=
-                       modeled[field["alias_of"]]["array_id"]]
-        modeled_groups = {}
-        for name in actual:
-            if name in modeled:
-                modeled_groups.setdefault(modeled[name]["array_id"], []).append(name)
-        false_modeled_alias = []
-        for names in modeled_groups.values():
-            if len(names) < 2:
-                continue
-            actual_identities = {actual[name]["alias_of"] or name
-                                 for name in names}
-            if len(actual_identities) > 1 and set(names) != {"Om", "W"}:
-                false_modeled_alias.append(names)
-        check("boundary_" + site + "_outer_array_coverage",
-              bool(actual) and not missing_or_wrong and not false_alias and
-              not false_modeled_alias,
-              actual_array_bindings=len(actual),
-              missing_or_wrong=missing_or_wrong, false_alias=false_alias,
-              false_modeled_alias=false_modeled_alias,
-              allowed_backing_exception="Om is a distinct W column-view object whose retained backing payload is W")
-        check("boundary_" + site + "_exact_None_bindings",
-              bool(actual) and actual_none == set(modeled_stage["named_none"]),
-              actual_none=sorted(actual_none),
-              modeled_none=sorted(modeled_stage["named_none"]))
+    for shape_label, model, snapshots in (("n8", tiny, runtime),
+                                          ("n16_thin", thin, runtime_thin)):
+        for site, (layer, stage_name) in boundaries.items():
+            snapshot = snapshots.get(site, {})
+            actual = snapshot.get("arrays", {})
+            actual_none = set(snapshot.get("none", []))
+            modeled_stage = stage_at(model, layer, stage_name)
+            modeled = {}
+            for row in modeled_stage["named_live"]:
+                name = row["name"].split(".", 1)[1]
+                modeled[name] = row
+            missing_or_wrong = [name for name, field in actual.items()
+                                if name not in modeled or
+                                field["shape"] != modeled[name]["shape"]]
+            false_alias = [name for name, field in actual.items()
+                           if field["alias_of"] is not None and
+                           name in modeled and field["alias_of"] in modeled and
+                           modeled[name]["array_id"] !=
+                           modeled[field["alias_of"]]["array_id"]]
+            modeled_groups = {}
+            for name in actual:
+                if name in modeled:
+                    modeled_groups.setdefault(modeled[name]["array_id"], []).append(name)
+            false_modeled_alias = []
+            for names in modeled_groups.values():
+                if len(names) < 2:
+                    continue
+                actual_identities = {actual[name]["alias_of"] or name
+                                     for name in names}
+                if len(actual_identities) > 1 and set(names) != {"Om", "W"}:
+                    false_modeled_alias.append(names)
+            check(shape_label + "_boundary_" + site + "_outer_array_coverage",
+                  bool(actual) and not missing_or_wrong and not false_alias and
+                  not false_modeled_alias,
+                  actual_array_bindings=len(actual),
+                  missing_or_wrong=missing_or_wrong, false_alias=false_alias,
+                  false_modeled_alias=false_modeled_alias,
+                  allowed_backing_exception="Om is a distinct W column-view object whose retained backing payload is W")
+            check(shape_label + "_boundary_" + site + "_exact_None_bindings",
+                  bool(actual) and actual_none == set(modeled_stage["named_none"]),
+                  actual_none=sorted(actual_none),
+                  modeled_none=sorted(modeled_stage["named_none"]))
     output_actual = runtime.get("L15_output_stack", {}).get("arrays", {})
     output_none = runtime.get("L15_output_stack", {}).get("none", [])
     output_stage = stage_at(tiny, 15, "output_stack")
@@ -832,6 +869,26 @@ def main() -> int:
     check("L15_Om_view_keeps_prior_W_backing",
           full_om is not None and full_om["shape"] == [1024, 16] and
           full_om["bytes"] == 4 * 1024 * 1024)
+    thin_readout_nested = runtime_thin.get("L14_readout_before_call", {}).get(
+        "nested", {})
+    thin_birth_nested = runtime_thin.get("L14_birth_after_construction", {}).get(
+        "nested", {})
+    thin_birth_arrays = runtime_thin.get("L14_birth_after_construction", {}).get(
+        "arrays", {})
+    check("n16_thin_common_rank8_observed",
+          thin_readout_nested.get("shared.Q") == [16, 8] and
+          thin_readout_nested.get("shared.gram") == [8, 8] and
+          thin_readout_nested.get("shared.last.FA", [None])[0] == 8 and
+          thin_readout_nested.get("shared.last.FP", [None])[0] == 8,
+          observed=thin_readout_nested)
+    check("n16_thin_ordinary_residual2_observed",
+          thin_birth_nested.get("newborn.ordinary.Z") == [16, 2] and
+          thin_birth_nested.get("newborn.ordinary.L") == [16, 2] and
+          thin_birth_arrays.get("Om", {}).get("shape") == [16, 2] and
+          thin_birth_arrays.get("Qr", {}).get("shape") == [16, 2] and
+          thin_birth_arrays.get("Bm", {}).get("shape") == [2, 16] and
+          thin_birth_arrays.get("Y", {}).get("shape") == [16, 2],
+          observed_nested=thin_birth_nested)
     for stage_name in ("gram_qr_rotate_transport", "young_transport"):
         s14 = stage_at(optimized, 14, stage_name)
         names = {row["name"] for row in s14["named_live"]}
@@ -847,17 +904,21 @@ def main() -> int:
                   SHORTCUT.read_bytes()).hexdigest(),
               "first_incomplete_result_sha256": first_sha,
               "second_incomplete_result_sha256": colive_sha,
+              "accepted_n8_result_sha256": accepted_n8_sha,
               "tiny_runtime_outer_frame": runtime,
+              "thin_runtime_outer_frame": runtime_thin,
               "checks": checks, "pass": all(x["pass"] for x in checks),
               "optimized": optimized, "old_padded_control": old,
               "tiny_optimized_crosscheck": tiny,
               "tiny_old_padded_crosscheck": tiny_old,
+              "thin_optimized_crosscheck": thin,
+              "thin_old_padded_crosscheck": thin_old,
               "raw_AP_control": {"positive_14_birth_saving_bytes": saved_raw_ap,
                                  "negative_14_birth_bytes": negative_raw_ap},
               "limits": {"individual_array_strict_bytes": ARRAY_LIMIT,
                          "process_cap_reference_bytes": PROCESS_LIMIT,
                          "process_cap_gate": "NOT_TESTED"},
-              "scope": "Finite sampled named-boundary shape inventory: explicit float64 inputs, float32 retained Source fields, prior/current outer-frame bindings and named co-live arrays. Om is a view whose backing W payload is charged. The inclusive stages intentionally retain some prior values after rebinding and may overcount actual liveness. This is no rigorous whole-process upper bound: library allocator, flopscope wrappers, BLAS/QR workspaces, fragmentation and Python process overhead are unbounded by this model. Windows does not enforce the 8 GiB cap. Existing n8 variance and n4 numeric gates remain FAIL; this is no stability, cost, accuracy, or deployment claim."}
+              "scope": "Finite sampled n8 and n16 thin-shape named-boundary inventory: explicit float64 inputs, float32 retained Source fields, prior/current outer-frame bindings and named co-live arrays. Om is a view whose backing W payload is charged. The inclusive stages intentionally retain some prior values after rebinding and may overcount actual liveness. This is no rigorous whole-process upper bound: library allocator, flopscope wrappers, BLAS/QR workspaces, fragmentation and Python process overhead are unbounded by this model. Windows does not enforce the 8 GiB cap. Existing n8 variance and n4 numeric gates remain FAIL; this is no stability, cost, accuracy, or deployment claim."}
     target = Path(args.json)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n",
