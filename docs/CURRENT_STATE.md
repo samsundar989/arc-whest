@@ -169,11 +169,27 @@ fixture passed 83/83 checks with fresh scoped Skeptic **ACCEPT**
 (`signed_cubature/`, `4b779cd`; workerq 971 live-byte default preflight
 12/16, four Full-only skips, 3,720.9 MiB peak). It carries its covariance
 subtraction and full residual through two signed maps; finite-factor rank and
-width-1024 cost remain unknown. LOG commit `6a873ba` preregisters a fixed
-four-coordinate Gaussian/ReLU source with independent conditional and streamed
-direct integrals, including three/four-distinct cumulants. Full Stage-1 source
-conformance remains open; supplied-core algebra and compact cost remain valid
-in scope. No
+width-1024 cost remain unknown. The fixed four-coordinate Gaussian/ReLU source
+passes 1088/1088 independent conditional/direct checks: `K0012=0.01468684`,
+`K0123=0.01043695`, and isolated signed future D4 `0.01565543`.
+Its fresh Skeptic **ACCEPTED only this tiny first-layer source**
+(`four_distinct_source/`, `99bc83f`); workerq 976 peaked at 1,130.9 MiB under
+2 GiB, and workerq 977 default preflight passed 12/16 (four Full-only skips)
+at 3,860.6 MiB. The finite-order quadrature uncertainty is an estimate.
+The design-only low-rank feed Skeptic **ACCEPTED conditional factor/cost
+algebra but marked the architecture INCOMPLETE** (`signed_cubature/`,
+`a5e3e56`): inserting a later layer's whole cumulant double-counts old
+history. Its hypothetical S64 all-age ledger is 1.868 trillion conventional
+FLOPs before the ordinary K3 backbone, not measured flopscope cost.
+The first two-layer increment fixture preserves **FAIL 300/323**: all 23
+registered convergence failures follow the new oblique ReLU boundary;
+same-discrete-measure factor/consumer identities pass. Its fresh Skeptic
+**REJECTED the combined numeric gate** while accepting only that limited
+algebra (`increment_source/`, `16996f1`; workerq 983 default preflight
+12/16, four Full-only skips, 2,842.2 MiB peak). LOG commit `f4f1305`
+preregisters a boundary-aware numerical repair without moving the gate.
+Full Stage-1 source conformance remains open; supplied-core algebra and compact
+cost remain valid in scope. No
 protected labels should be spent on this diagnosis. There is no scientific kill or
 new submission candidate. No fresh DECIDE, public CONFIRM or vault evaluation
 has occurred.
@@ -261,9 +277,10 @@ exhausted: the frozen coherent-K4 DESIGN comparison failed, its source-identity
 counterexample and executable trace have independent acceptance, and the
 repair-math Skeptic supplied a concrete residual counterexample. The dense
 linear oracle and Gaussian-pair mixed-source check have accepted narrow
-verdicts; the signed-cubature factor identity also has scoped acceptance.
-The four-coordinate source check and priced complete source/history path
-remain concrete label-free discriminators. The `mixed_source/cost_options.md`
+verdicts; the signed-cubature factor identity and fixed n=4 first-layer source
+also have scoped acceptance. The boundary-aware two-layer increment and priced
+complete source/history path remain concrete label-free discriminators.
+The `mixed_source/cost_options.md`
 ledger is conventional arithmetic, not measured flopscope cost or a feasible
 rank proof.
 Consult a strategist if corrected algebra and fresh Skeptic synthesis leave no

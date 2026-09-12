@@ -25,9 +25,15 @@ contracted a tiny full-sign weighted-cubature factor check. The separate
 `mixed_source/cost_options.md` is conventional cost/options work, not a
 counted-cost or rank certificate. The full-sign n=2 cubature factor check
 then passed 83 checks with a fresh scoped Skeptic ACCEPT, workerq 971 default
-preflight 12/16 and full residual retained. LOG commit `6a873ba` now
-contracts an independent four-coordinate Gaussian/ReLU source reference.
-Stage 1's supplied-core algebra and compact
+preflight 12/16 and full residual retained. The fixed n=4 first-layer source
+subsequently passed 1088 checks and a separate fresh Skeptic ACCEPT; its
+all-distinct cumulant contributes to future D4. A design-only Skeptic
+accepted the low-rank feed algebra and conventional cost arithmetic but
+found a later whole cumulant double-counts old history. The first
+two-layer increment fixture failed 23 of 323 registered convergence checks;
+its Skeptic REJECTED the combined numeric gate while accepting limited
+finite-measure identities. LOG commit `f4f1305` contracts a boundary-aware
+repair without changing the threshold. Stage 1's supplied-core algebra and compact
 baseline cost remain accepted narrowly; full source closure is reopened.
 There is no better submission candidate, no fresh DECIDE/public/vault result,
 and Samuel's Stage-3 hold remains binding. Historical pickup instructions below

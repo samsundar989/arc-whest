@@ -39,10 +39,17 @@ MiB. The subsequent full-sign n=2 weighted-cubature factor fixture passes
 default preflight 12/16, four Full-only skips, at 3,720.9 MiB peak. It carries
 the covariance subtraction and full residual through two signed maps, but
 does not establish adequate factor rank at challenge width. LOG commit
-`6a873ba` preregisters a four-coordinate source test with independent
-integrals. The separate `mixed_source/cost_options.md` prices options only
-with conventional arithmetic. No full K4 source/compression/counted-cost path
-is accepted yet.
+`6a873ba` preregistered a four-coordinate source test: it passed 1088 checks
+with fresh scoped Skeptic ACCEPT for the fixed first-layer Gaussian/ReLU
+source (`K0123=0.01043695`; workerq 976/977 terminal, default preflight
+12/16 with four Full-only skips). The separate low-rank feed/cost memo has a
+fresh design-only Skeptic ACCEPT for its conditional algebra and conventional
+ledger, but architecture INCOMPLETE: a later whole cumulant cannot be inserted
+as an additive age source. The first two-layer increment fixture fails its
+registered 32/48 convergence gate (300/323 pass); its independent Skeptic
+REJECTED the combined numeric claim and accepted only same-discrete-measure
+accounting. LOG commit `f4f1305` contracts a boundary-aware repair with the
+unchanged gate. No full K4 source/compression/counted-cost path is accepted.
 Stage 4 remains
 conditional on a measured Stage-2 bottleneck.
 
@@ -155,9 +162,11 @@ all-distinct residual through future dense transport. The dense linear oracle
 and correlated Gaussian-pair source now each have narrow fresh Skeptic
 ACCEPT; their artifacts are under `source_dense/` and `mixed_source/`.
 The latter's metric-core residual remains material. The full-sign weighted
-cubature factor check now has scoped fresh Skeptic ACCEPT for n=2 algebra;
-LOG commit `6a873ba` contracts an n=4 source reference before any corrected
-full arm. Do not fit a new constant or spend
+cubature factor and n=4 first-layer source checks now have narrow fresh
+Skeptic ACCEPT. A later whole cumulant is not an additive increment; the
+first two-layer convergence gate failed while its finite-measure algebra
+passed. LOG commit `f4f1305` contracts a boundary-aware numeric repair
+before any corrected full arm. Do not fit a new constant or spend
 another protected label until the source math is independently checked and
 repaired within a new contract and fresh Skeptic gate. This is not a registered
 scientific kill of the intended representation.
