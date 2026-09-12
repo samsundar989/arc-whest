@@ -1,0 +1,9 @@
+{
+  "contract_commit": "5588b4c",
+  "error": "real flopscope required, got C:\\Users\\samsu\\Documents\\arc-whest\\local_sim\\flopscope\\__init__.py",
+  "error_type": "RuntimeError",
+  "kind": "exact skinny positive K4-feed Source shortcut equivalence",
+  "optimized_source_sha256": "3a57e5e5709a62848f8412de094f218ea9b323933b9071e04c5dabbdab8b12b3",
+  "pass": false,
+  "source_sha256": "319ffc09471b768e9407202dcac140169e9606c69fc4e2696b30592b3b46342f"
+}
