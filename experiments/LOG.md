@@ -44565,3 +44565,88 @@ distinct coordinates, later non-Gaussian sources, rank adequacy, full costs,
 8 GiB deployed memory, or accuracy. Run focused tests, current-byte default
 preflight via workerq and a new fresh-context Skeptic before claiming this
 factor construction works.
+
+**September 12 signed-cubature synthesis.** The committed truth-free fixture
+`7feb6d0` passed 83/83 fixed checks, including complete full-sign quadrature,
+weighted discrete fourth cumulant versus raw-moment partitions, two sequential
+signed maps, every D4/D22/D31 entry, oriented covariance, the declared
+quadratic K3 feed and explicitly carried metric residual. At `rho=0.5`,
+dropping covariance subtraction changes a source entry by `0.34852606`;
+conditioning on the positive quadrant (discarding rectified axis/origin
+mass) changes a source entry by `0.19704650` and future D4 by `0.34707348`.
+The same-measure algebra maximum absolute error is `3.55e-15`; material
+quadrature relative error is at most `2.80e-14`. Workerq **971** terminal
+SUCCEEDED, current live-worktree default preflight **12/16** with four
+Full-only skips, exit zero, `3720.86328125 MiB` peak under 5 GiB/2 CPUs/zero
+GPU. Its byte-exact raw ZIP, run evidence and result are in
+`experiments/2026-09-11_stage2_compact_p07/signed_cubature/`; source SHA-256
+`4ffd2704c0dc8f550f41f1327b28e0966d95ae7255c9a95545a2969a527b5db7`,
+result SHA-256 `2ac1f3c15e52a048ec6dffce14d26936fa300c9a8cb5da9f5fd6abf3612410d5`.
+A fresh-context Skeptic independently recomputed conditional-Gaussian raw
+moments, partition cumulants, signed readouts and negative controls, checked
+raw queue bytes and reran 83 checks, returning **ACCEPT only for n=2 weighted
+discrete source and sequential linear algebra**. Verdict
+`signed_cubature/skeptic_verdict.md`, SHA-256
+`6066eb45c2d340220bade42a91a2818f89561346b9c16bf046b32bbb84a89534`,
+commit `4b779cd`. The continuous reference shares integration/partition code
+with the earlier pair fixture, so the Skeptic used a different 1D conditional
+integral. Job 971 preflight did not itself execute the standalone fixture or
+prove deployment. CONFIRMED: the discrete factor/covariance representation
+transports all stated pair consumers/feeds with its full residual. INFERRED:
+this is a valid *component* for a larger source. SPECULATIVE: finite rank
+adequacy and affordable all-history cost. No label or seed block was read.
+The design-only `mixed_source/four_distinct_method.md` at `e21c666` fixes
+an independent n=4 source reference and resource estimate without an outcome.
+
+**Next IMPORTANT truth-free four-coordinate source contract, committed before
+integration.** **Question:** does the correlated Gaussian/ReLU fourth source
+have material three- and four-distinct-index cumulants, and do all-distinct
+terms survive a signed dense map into future D4? **Evidence:** CONFIRMED the
+accepted n=2 mixed cumulants and finite-discrete transport above; CONFIRMED
+current repeated-index slices do not bound a hidden all-distinct residual;
+INFERRED positive shared Gaussian correlation induces higher-index mixed
+cumulants; SPECULATIVE their magnitude or usefulness at challenge width.
+**Hypothesis/mechanism:** the fixed one-factor Gaussian in the method memo
+shares a latent driver across four rectified coordinates, producing nonzero
+`K_0012` and `K_0123`; a diagonal/pair-only source omits terms that a later
+signed row can consume. **Intervention:** use the memo's fixed
+`a=(0.4,0.5,0.6,0.7)` and `R=diag(1-a²)+aaᵀ` (minimum eigenvalue at least
+`0.51`). Independently compute raw ReLU moments of total degree at most four
+by a 1D conditional-Gaussian integral and by support-aware direct marginal
+Gaussian positive-orthant integration, streamed at 32, 48 and 64 nodes per
+active dimension on `[0,12]`. The latter uses a 4D density for `m1111`, 3D
+for the 12 oriented three-distinct highest moments, lower marginals for
+zero-exponent coordinates, and a conservative tail bound. Reconstruct full
+n=4 fourth tensors via separately coded raw partitions and central fourth
+moment minus three covariance pairings. Verify all 12 `K_iijk` classes,
+all 24 permutations of `K_0123`, selected independent raw moments, a signed
+4x4 Hadamard map, D4/D22/D31 and the isolated all-distinct contribution to a
+future D4. Report the full transportable residual for any metric projection;
+do not infer full closure from current slices.
+
+**Predictions:** (1) `K_0012 > 1e-4` and `K_0123 > 1e-5`, with all symmetry
+permutations equal to `1e-10` absolute; (2) 48/64 direct quadrature and the
+independent 1D conditional reference agree within `1e-8` relative for values
+larger than `1e-6`, `1e-8` absolute otherwise, both on selected raw moments
+and the two decisive cumulants; (3) the isolated all-distinct source component
+changes a Hadamard future D4 by `>1e-5`, while full tensor transport and
+consumer enumeration agree within `1e-10` absolute. Samuel's standing human
+prediction is **"I don't know"**. **Falsifier:** the registered magnitude,
+convergence, symmetry or transport gates fail; preserve failures instead of
+changing thresholds or attributing them to score. **Baseline/control:** 1D
+conditional-Gaussian moment reference and full enumerated cumulant/tensor
+transport. Pair/diagonal truncations are explicit interventions, not score
+controls. **Cost model:** at 64 nodes, one 4D integral has 16,777,216 density
+points and selected 3D integrals at most about 3.15 million; stream in tiles
+at most 65,536 points, target under 128 MiB array payload and 1 GiB process
+RAM. Queue the substantial calculation at `--ram 2 --cpus 2 --gpus 0`; revise
+if measured peak requires it. This is not measured flopscope cost or server
+residual; Phase 2 still charges `C=F` and has a 0.4 s failure cliff.
+**Statistic/gate:** deterministic raw/tensor absolute and material-relative
+error with fixed bounds above, no paired competition score, seed block, truth
+noise, public or vault access. **Scope/confounders:** first correlated Gaussian
+preactivation of this fixed four-coordinate network only; exact source
+specification here does not imply cheap width-1024 storage, a full nonlinear
+later-layer closure, candidate accuracy or deployment. Run the independent
+focused reference through workerq with raw evidence, current-byte default
+preflight and a new fresh-context Skeptic before using its result.
