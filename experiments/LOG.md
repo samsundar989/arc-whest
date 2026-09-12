@@ -42983,3 +42983,29 @@ seed block, estimator, default arm, vault or job-894 dependency changed.
 coefficient to the four P01 mechanism arms now exists on current working bytes.
 Current default preflight and a fresh-context Skeptic remain required before this
 instrument may open P01; implementation tests alone are not acceptance.
+
+### Producer RAM reservation reduced from 8 GiB to 5 GiB — workerq 903 running
+
+Jobs 894 and 900 were cancelled while queued and never executed. The queue had
+only about 7.6 GiB of declared headroom, so the accepted producer's 8 GiB request
+blocked it and also held the smaller bridge preflight behind the queue head.
+
+The replacement producer job **903** uses the same command signature
+`0d7eb36ac46deb90`, accepted live source and input bytes, high priority, two CPUs,
+no GPU and no source snapshot. Only its RAM declaration changed, from 8 GiB to
+**5 GiB**. This is supported by the previous real producer job 824's 2,588.2 MiB
+measured peak before its correctly diagnosed evidence refusal, current compact-arm
+peaks around 1.0--1.2 GiB, and the producer's bounded retained payload: four
+float32 prediction stacks plus their temporary full-output lists are roughly
+0.3 GiB at the registered 4 x 384 x 16 x 1024 shape. Five GiB therefore leaves
+material process/interpreter/archive headroom without changing computation,
+identity order, precision, lifecycle, provenance or output. Job 903 started after
+0.22 seconds; terminal success and its measured whole-batch peak are still
+required. A memory failure would invalidate this bound, not the scientific
+hypothesis.
+
+Current-byte bridge preflight was resubmitted as high-priority workerq **904** at
+5 GiB, two CPUs and no GPU. It is queued behind the now-running producer and is
+not acceptance until it reaches a green terminal verdict. The required fresh
+Skeptic is auditing the committed raw packet independently and will include job
+904's terminal evidence before deciding.
