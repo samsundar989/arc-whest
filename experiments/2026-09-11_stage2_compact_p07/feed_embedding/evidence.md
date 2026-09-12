@@ -31,5 +31,17 @@ transports cost **450,971,566,080 conventional FLOPs**. Those frozen arithmetic
 figures exclude joins, QR, materialization, the K4 source bank and the
 ordinary K3 backbone. They are not a flopscope measurement or a score.
 
-The original focused stdout is `focused.log`. A current-byte default
-preflight and independent fresh-context Skeptic review remain open.
+The original focused stdout is `focused.log`. Workerq 992 failed before
+executing a command because its unsupported `--description` flag became the
+first argv element; `preflight_992_command_failure.log` is preserved as an
+infrastructure failure, with no test verdict. Corrected workerq 993 ran
+`powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/preflight.ps1`
+on the live worktree with 5 GiB RAM, zero GPU and two CPUs. Its
+`preflight_993.log` SHA256 is
+`f7928305b8ae7744e6568106139b280253931ce90f49b028a002e706a75ab55c`:
+**GREEN 12/16**, four Full-only skips, peak process RAM 2,722.191 MiB.
+`preflight_before.json` and `preflight_after.json` agree on tested HEAD
+`8844ee89b866e1d5e8a6ff5d5340bde73fedda62`, the source/result hashes
+above, and all 246 scoped Python hashes. The default gate did not run the
+new focused fixture; its separate result is recorded above. Windows does not
+enforce the 8 GiB grader memory cap. Fresh-context Skeptic review is pending.

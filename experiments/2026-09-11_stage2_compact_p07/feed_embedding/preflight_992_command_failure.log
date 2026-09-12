@@ -1,0 +1,7 @@
+worker-q: job #992 starting at 2026-09-12T10:04:45.621635+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=none -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['--description', 'Live-byte default preflight for abstract K4 feed embedding 8844ee8', 'powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'scripts/preflight.ps1']
+worker-q: ------------------------------------------------------------
+worker-q: failed to start command: [WinError 2] The system cannot find the file specified
