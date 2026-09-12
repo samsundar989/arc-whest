@@ -43065,3 +43065,8 @@ scope are in `freeze_bridge/race_repair_summary.json` and its referenced files.
 No estimator, default arm, protected label, seed block, vault or running-job-903
 dependency changed. Current default preflight and a new fresh-context Skeptic are
 still required before the bridge is accepted or P01 is opened.
+
+The repaired bridge bytes were committed as `16ff8f7`. Current default preflight
+was submitted at high priority as workerq **914**, with 5 GiB RAM, two CPUs, no GPU
+and no source snapshot. It is queued behind the current 51 GiB reservation load;
+it has no verdict yet. The bridge sources will remain unchanged until it completes.
