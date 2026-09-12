@@ -46388,3 +46388,31 @@ rotation-using cost low; official stack governs metering. Preserve all frozen
 archives, shipped estimator, HUMAN_MODEL, vault and standing data roles.
 Independent fresh-context Skeptic reviews the probe/instrument and result
 packet before any promotion or submission claim.
+
+**F21 implementation/provenance checkpoint, before results.** Contract
+commits `d4944d0`, `7626f3f`, `481f959`, `b24c36b` precede any candidate
+execution or P01/P09 read. The one-change candidate
+`estimator_k3_strassen_L4_f21.py` is SHA256
+`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`
+from frozen L4 member SHA256 `052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58`.
+The tracked parent and exact source diff are in `experiments/2026-09-12_f21/`;
+all top-level AST nodes outside `_dslice21` match the parent. The independent
+tiny exact oracle, fixed-backend trajectory probe and paired scorer are
+committed but **unrun**. No P01/P09 labels were read and no score, FLOP or
+candidate validation result exists. Samuel's F21 predictions remain pending.
+
+The own-code attribution manifest is `docs/CANDIDATE_PROVENANCE_2026-09-12.md`.
+The staged source plus pinned ARC MIT notice packaged successfully with
+WhestBench 0.16.1; `experiments/2026-09-12_f21/package_receipt.json` binds
+the current tar SHA256 `4f3cc6f440e4cb66ea86a0904c00e182eb7ecf5aaab0ee64c73efb7d22904775`.
+This is packaging only, not candidate certification or organizer eligibility.
+
+An independent fresh-context **PROVISIONAL** pre-score Skeptic verdict is
+preserved at `experiments/2026-09-12_f21/prescore_skeptic.md`. It verified
+source diff and score/truth-floor identities and identified a workerq snapshot
+truth-receipt path issue; the scoring runner is receiving a targeted repair
+before any protected read. No-label workerq job 1045 failed because PowerShell
+stripped quotes from its inline `-c` argument. Replacement job **1049
+SUCCEEDED** on a Git snapshot: candidate, L4 parent and L2 SHA256 values all
+match exact live bytes. Neither job used a seed block, truth or estimator
+execution. The actual engineering/result Skeptic is still owed after evidence.
