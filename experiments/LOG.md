@@ -44650,3 +44650,102 @@ specification here does not imply cheap width-1024 storage, a full nonlinear
 later-layer closure, candidate accuracy or deployment. Run the independent
 focused reference through workerq with raw evidence, current-byte default
 preflight and a new fresh-context Skeptic before using its result.
+
+**September 12 n=4 source and cost synthesis.** The committed fixture
+`7ddd487` passed 1088/1088 fixed truth-free checks. In the fixed one-factor
+Gaussian/ReLU model, independent conditional and streamed direct marginal
+integrals give `K0012=0.014686836253094` and `K0123=0.010436951764302`;
+the latter's isolated signed future D4 contribution is `0.0156554276464524`.
+Workerq **976** main integration SUCCEEDED under 2 GiB/2 CPUs/zero GPU,
+`1130.9 MiB` peak (above the memo's 1 GiB target but below reservation).
+Workerq **977** current-byte default preflight GREEN **12/16**, four Full-only
+skips, `3860.6 MiB` peak under 5 GiB/2 CPUs/zero GPU. Workerq **979** ran an
+optional non-gating tail/convergence diagnostic under 2 GiB/2 CPUs/zero GPU,
+`1129.1 MiB` peak. Raw queue originals are byte-exact in each ZIP; Git
+normalizes three convenience log blobs on checkout. Source SHA-256
+`4fee7ec37469f281dc7ee444b8e1628e4857aac85296cd43418b0e3cf06dcedd`,
+result SHA-256 `7b6c163474fed33e0e2bdb83474dba0868e22eb616e712091d7080b244e9dcc2`.
+A fresh-context Skeptic used separately coded nested conditional and direct
+support-aware integrals, reproduced both decisive cumulants within about
+`2.2e-12`, checked signed source and all 12 three-distinct classes, and
+returned **ACCEPT only for this fixed n=4 first-layer source and tiny linear
+transport**. Verdict `four_distinct_source/skeptic_verdict.md`, SHA-256
+`9b45975f38e0e70261625e248389597bf563d0b03beaff67a9bbcf7516f7a8fc`,
+commit `99bc83f`. Its analytic `[0,12]` raw tail bound is valid; 48/64
+finite-order error propagation is an estimate, not a certified interval.
+Live workerq receipts do not independently timestamp the script digest.
+CONFIRMED: material three/four-distinct source terms in this synthetic
+Gaussian and their future signed contraction. INFERRED: pair-only/diagonal
+source truncations lose these terms in a real correlated layer. SPECULATIVE:
+their challenge-wide magnitude, feasible compression and score benefit.
+
+The separate exact-for-a-chosen-discrete-measure feed/cost memo
+`signed_cubature/lowrank_feed_cost.md` (`809b65b`) has a fresh *design-only*
+Skeptic verdict (`lowrank_feed_skeptic.md`, SHA-256
+`c90c8d9c662caf35331bf7e837baa1db2f0d44f52da762b5b695fc0d131558ab`,
+commit `a5e3e56`): **ACCEPT the quadratic-feed factor algebra, 120/105/560/455
+age-use arithmetic and conventional conditional ledger; architecture
+INCOMPLETE.** At n1024,d16 the uncompressed hypothetical additive-source
+bank prices `1.868/3.276/8.905` trillion conventional FLOPs for S=64/256/1024,
+including `1.173` trillion in negative K3 D21 readouts at every S, before
+ordinary K3 and actual source generation. That is neither a flopscope bill
+nor server runtime or a lower bound against another representation. More
+critically, using a later layer's *whole* cubature cumulant as an additive
+new age source double-counts the old cumulant even under identity transport.
+Only an explicitly defined increment could be inserted; its source law,
+signed-factor structure, covariance and cost are not established. No new
+protected truth, seed block, estimator or vault touch occurred.
+
+**Next IMPORTANT truth-free two-layer increment contract, committed before
+fixture.** **Question:** can a later non-Gaussian ReLU fourth-cumulant
+*increment* be represented without double-counting, and do its signed
+factors plus covariance terms preserve consumers and the declared quadratic
+K3 feed after another map? **Evidence:** CONFIRMED n=2 full-sign weighted
+source and exact linear transport; CONFIRMED n=4 Gaussian source has
+all-distinct terms; CONFIRMED the design Skeptic's identity-map double-count
+counterexample; INFERRED subtracting an explicitly declared old transport
+defines an exact additive increment for a finite discrete law; SPECULATIVE
+that such increments are cheap or reconstructible in the challenge.
+**Hypothesis/mechanism:** for the *same* normalized full-sign `rho=0.5`
+Gaussian cubature measure, first rectify `X=ReLU(Z)`; for a fixed signed
+nonconstant `B=[[0.8,-0.3],[-0.55,1.4]]`, rectify again
+`Y=ReLU(BX)`. Define the toy old linear carry as
+`K_old=B^⊗4 K(X)=K(BX)` and the true later increment as
+`Delta=K(Y)-K_old`. It has an exact signed discrete-factor decomposition:
+positive fourth factors of centered `Y`, negative fourth factors of
+centered `BX`, and *both* same-measure covariance-pairing tensors with
+opposite signs. This is a declared toy accounting operator, not the full
+nonlinear response in a deployed estimator. **Intervention:** use the fixed
+32/48 nodes per signed half-axis from the accepted fixture, compute both
+full fourth cumulants independently from raw moments/partitions and from
+centered factors/covariances, then derive Delta as above. Include identity
+`B=I` (zero increment) and `B=-I` (zero later output, negative old carry),
+and show the naive old-plus-whole-later insertion error. Transport the
+increment and total through a second fixed signed nonconstant map, compare
+all D4/D22/D31 entries, oriented covariance and the declared quadratic K3
+feed to a separately enumerated dense fourth tensor, retaining both metric
+components as transportable factors.
+
+**Predictions:** (1) same-measure cumulants, incremental decomposition,
+two-map consumers and feed agree within `1e-10` absolute; (2) identity
+increment and negative-identity total are zero within `1e-10`, while the
+nonconstant map has `max|Delta|>1e-3` and naive double-count error `>1e-3`;
+(3) 32/48 signed quadrature agrees within `1e-8` relative on material
+values above `1e-6` and `1e-8` absolute near zero. Samuel's standing human
+prediction is **"I don't know"**. **Falsifier:** any registered identity,
+numeric convergence or discriminator fails; preserve the failure without
+moving gates. **Control:** independent raw-moment fourth-cumulant partitions
+of each weighted output law and exact dense subtraction/transport;
+positive/negative identities are structural controls, not score baselines.
+**Cost model:** two coordinates and at most 96² full-sign nodes, under 64 MiB
+working arrays and tiny direct CPU-only arithmetic. This is not measured
+challenge FLOPs or server residual; Phase 2 still charges `C=F` and fails at
+the 0.4 s residual cliff. A later n1024 factor bank would carry positive and
+negative fourth terms plus both covariance tensors; no cheap rank is assumed.
+**Statistic/gate:** deterministic absolute/material-relative errors and
+fixed magnitude controls above, no paired score, seed block, truth-noise,
+public or vault read. **Scope/confounders:** fixed finite measure and chosen
+old *linear* carry only; the real nonlinear response, cross-source mixed
+cumulants, all-history integration, compression, counted costs, and accuracy
+remain separate. Run focused fixture, current-byte default preflight via
+workerq and a new fresh-context Skeptic before using this increment identity.
