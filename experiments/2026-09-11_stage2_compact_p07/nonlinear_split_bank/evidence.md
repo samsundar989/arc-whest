@@ -68,3 +68,17 @@ Source SHA-256:
 `e3708d9d878f3191cbf61dcd632e188507d0b575e77e692219108c280d3ff59f`.
 Raw result SHA-256:
 `9a8692559f2744bccd4a0bcd6fef1941f9bab551af984f3fdeb316fe15e277ab`.
+
+Workerq 996 ran live default preflight at tested HEAD `238ce53` with
+5 GiB RAM, zero GPU, two CPUs and no source snapshot. It **SUCCEEDED
+GREEN 12/16**, four Full-only skips, at measured process peak
+`2946.8125 MiB`. Raw `preflight_996.log` SHA256 is
+`c791e0bb250b8d8ab464f48d44905d7665a3834d9e7cbb4fe5627ca29fcfd788`.
+The first post-run PowerShell hash enumerator failed and wrote an empty
+`python` object; that intermediate receipt was not accepted as evidence.
+`preflight_996_after.json` was regenerated from the exact 249 paths
+listed in `preflight_996_before.json` using Python. HEAD, four named
+source/helper/result hashes and **249/249 Python hashes** now match;
+the independent Skeptic also recomputed them from live files. The
+default preflight did not run the focused 77-check fixture or enforce
+the grader's 8 GiB cap on Windows. Skeptic verdict remains pending.

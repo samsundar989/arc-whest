@@ -1,2 +1,5 @@
 # Retain focused run output byte for byte, including Windows CRLF.
 result.json -text -diff
+preflight_996.log -text -diff
+preflight_996_before.json -text -diff
+preflight_996_after.json -text -diff
