@@ -1,0 +1,7 @@
+Source commit: cb9d94e
+Command: uv run python local_sim/p2_k4_integrated_memory_ledger.py --json experiments/2026-09-11_stage2_compact_p07/integrated_first_source/memory_ledger_boundary_result.json
+Exit code: 0
+stdout final line: memory ledger PASS; optimized modeled peak 715844864 bytes; padded 910988032 bytes
+Raw JSON SHA256: fbe039b8dc516947750aaa211c55cfdf95e2bd99f26ea4c126adba080f017e01
+Preserved ZIP SHA256: c8e0613a9bde0e337675617a6426c73e0919305d521cb5efe329efc8d23f4813
+Status: 54/54 checks passed across nine sampled frame boundaries. Post-run reverse alias inspection found one distinct-object/same-backing case, Om versus W, expected because Om is a W column view. This draft is preserved; a stricter reverse alias assertion with that explicit exception follows in a separate source commit.

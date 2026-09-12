@@ -1,0 +1,5193 @@
+{
+  "checks": [
+    {
+      "expected": "3a57e5e5709a62848f8412de094f218ea9b323933b9071e04c5dabbdab8b12b3",
+      "got": "3a57e5e5709a62848f8412de094f218ea9b323933b9071e04c5dabbdab8b12b3",
+      "name": "frozen_optimized_source_sha",
+      "pass": true
+    },
+    {
+      "name": "shortcut_source_binding",
+      "pass": true
+    },
+    {
+      "expected": "10c7835042b581b6691f6f98963a90adeeb222ba846557da2582396443025155",
+      "got": "10c7835042b581b6691f6f98963a90adeeb222ba846557da2582396443025155",
+      "name": "first_incomplete_result_unchanged",
+      "pass": true
+    },
+    {
+      "expected": "f7d5c67bd549d66ecb6f3d3e1f0a2be055c9e7fad2e8fd9be181e84bb1f72b1f",
+      "got": "f7d5c67bd549d66ecb6f3d3e1f0a2be055c9e7fad2e8fd9be181e84bb1f72b1f",
+      "name": "second_incomplete_result_unchanged",
+      "pass": true
+    },
+    {
+      "existing_n8_min_prevariance": -0.11771620810031891,
+      "name": "shortcut_existing_gate_remains_red",
+      "pass": true
+    },
+    {
+      "name": "optimized_schedule",
+      "pass": true
+    },
+    {
+      "name": "optimized_single_array_cap",
+      "pass": true
+    },
+    {
+      "name": "optimized_final_shortcut",
+      "pass": true
+    },
+    {
+      "name": "optimized_positive_S_or_padded_negative_n_ordinary_n_legs",
+      "pass": true,
+      "wrong_legs": []
+    },
+    {
+      "name": "old_schedule",
+      "pass": true
+    },
+    {
+      "name": "old_single_array_cap",
+      "pass": true
+    },
+    {
+      "name": "old_final_shortcut",
+      "pass": true
+    },
+    {
+      "name": "old_positive_S_or_padded_negative_n_ordinary_n_legs",
+      "pass": true,
+      "wrong_legs": []
+    },
+    {
+      "name": "tiny_schedule",
+      "pass": true
+    },
+    {
+      "name": "tiny_single_array_cap",
+      "pass": true
+    },
+    {
+      "name": "tiny_final_shortcut",
+      "pass": true
+    },
+    {
+      "name": "tiny_positive_S_or_padded_negative_n_ordinary_n_legs",
+      "pass": true,
+      "wrong_legs": []
+    },
+    {
+      "name": "tiny_old_schedule",
+      "pass": true
+    },
+    {
+      "name": "tiny_old_single_array_cap",
+      "pass": true
+    },
+    {
+      "name": "tiny_old_final_shortcut",
+      "pass": true
+    },
+    {
+      "name": "tiny_old_positive_S_or_padded_negative_n_ordinary_n_legs",
+      "pass": true,
+      "wrong_legs": []
+    },
+    {
+      "committed": 38520,
+      "ledger": 38520,
+      "name": "tiny_partial_resident_floor_crosscheck",
+      "pass": true
+    },
+    {
+      "committed": 40312,
+      "ledger": 40312,
+      "name": "tiny_old_partial_resident_floor_crosscheck",
+      "pass": true
+    },
+    {
+      "bytes": 110100480,
+      "name": "positive_14_birth_raw_AP_saves_at_least_100MiB",
+      "pass": true
+    },
+    {
+      "bytes": 117440512,
+      "name": "negative_14_birth_raw_AP_is_112MiB",
+      "pass": true
+    },
+    {
+      "name": "skinny_peak_below_padded_peak",
+      "pass": true
+    },
+    {
+      "expected_names": [
+        "prior.C_off",
+        "prior.bank_covariance",
+        "prior.positive22",
+        "prior.D22",
+        "prior.positive31",
+        "prior.D31",
+        "prior.K11",
+        "prior.off_mask",
+        "prior.local21",
+        "prior.old21",
+        "prior.repeated",
+        "prior.K21",
+        "prior.separable",
+        "prior.Rres"
+      ],
+      "name": "optimized_L14_prior_readout_named_distinct_matrices",
+      "pass": true,
+      "present_names": [
+        "prior.C_off",
+        "prior.bank_covariance",
+        "prior.positive22",
+        "prior.D22",
+        "prior.positive31",
+        "prior.D31",
+        "prior.K11",
+        "prior.off_mask",
+        "prior.local21",
+        "prior.old21",
+        "prior.repeated",
+        "prior.K21",
+        "prior.separable",
+        "prior.Rres"
+      ]
+    },
+    {
+      "expected_names": [
+        "current.C_off",
+        "current.bank_covariance",
+        "current.positive22",
+        "current.D22",
+        "current.positive31",
+        "current.D31",
+        "current.K11",
+        "current.off_mask",
+        "current.D21"
+      ],
+      "name": "optimized_L14_current_birth_named_distinct_matrices",
+      "pass": true,
+      "present_names": [
+        "current.C_off",
+        "current.bank_covariance",
+        "current.positive22",
+        "current.D22",
+        "current.positive31",
+        "current.D31",
+        "current.K11",
+        "current.off_mask",
+        "current.D21"
+      ]
+    },
+    {
+      "expected_names": [
+        "prior.C_off",
+        "prior.bank_covariance",
+        "prior.positive22",
+        "prior.D22",
+        "prior.positive31",
+        "prior.D31",
+        "prior.K11",
+        "prior.off_mask",
+        "prior.local21",
+        "prior.old21",
+        "prior.repeated",
+        "prior.K21",
+        "prior.separable",
+        "prior.Rres"
+      ],
+      "name": "old_padded_L14_prior_readout_named_distinct_matrices",
+      "pass": true,
+      "present_names": [
+        "prior.C_off",
+        "prior.bank_covariance",
+        "prior.positive22",
+        "prior.D22",
+        "prior.positive31",
+        "prior.D31",
+        "prior.K11",
+        "prior.off_mask",
+        "prior.local21",
+        "prior.old21",
+        "prior.repeated",
+        "prior.K21",
+        "prior.separable",
+        "prior.Rres"
+      ]
+    },
+    {
+      "expected_names": [
+        "current.C_off",
+        "current.bank_covariance",
+        "current.positive22",
+        "current.D22",
+        "current.positive31",
+        "current.D31",
+        "current.K11",
+        "current.off_mask",
+        "current.D21"
+      ],
+      "name": "old_padded_L14_current_birth_named_distinct_matrices",
+      "pass": true,
+      "present_names": [
+        "current.C_off",
+        "current.bank_covariance",
+        "current.positive22",
+        "current.D22",
+        "current.positive31",
+        "current.D31",
+        "current.K11",
+        "current.off_mask",
+        "current.D21"
+      ]
+    },
+    {
+      "expected_names": [
+        "prior.C_off",
+        "prior.bank_covariance",
+        "prior.positive22",
+        "prior.D22",
+        "prior.positive31",
+        "prior.D31",
+        "prior.K11",
+        "prior.off_mask",
+        "prior.local21",
+        "prior.old21",
+        "prior.repeated",
+        "prior.K21",
+        "prior.separable",
+        "prior.Rres"
+      ],
+      "name": "tiny_optimized_L14_prior_readout_named_distinct_matrices",
+      "pass": true,
+      "present_names": [
+        "prior.C_off",
+        "prior.bank_covariance",
+        "prior.positive22",
+        "prior.D22",
+        "prior.positive31",
+        "prior.D31",
+        "prior.K11",
+        "prior.off_mask",
+        "prior.local21",
+        "prior.old21",
+        "prior.repeated",
+        "prior.K21",
+        "prior.separable",
+        "prior.Rres"
+      ]
+    },
+    {
+      "expected_names": [
+        "current.C_off",
+        "current.bank_covariance",
+        "current.positive22",
+        "current.D22",
+        "current.positive31",
+        "current.D31",
+        "current.K11",
+        "current.off_mask",
+        "current.D21"
+      ],
+      "name": "tiny_optimized_L14_current_birth_named_distinct_matrices",
+      "pass": true,
+      "present_names": [
+        "current.C_off",
+        "current.bank_covariance",
+        "current.positive22",
+        "current.D22",
+        "current.positive31",
+        "current.D31",
+        "current.K11",
+        "current.off_mask",
+        "current.D21"
+      ]
+    },
+    {
+      "expected_names": [
+        "prior.C_off",
+        "prior.bank_covariance",
+        "prior.positive22",
+        "prior.D22",
+        "prior.positive31",
+        "prior.D31",
+        "prior.K11",
+        "prior.off_mask",
+        "prior.local21",
+        "prior.old21",
+        "prior.repeated",
+        "prior.K21",
+        "prior.separable",
+        "prior.Rres"
+      ],
+      "name": "tiny_old_L14_prior_readout_named_distinct_matrices",
+      "pass": true,
+      "present_names": [
+        "prior.C_off",
+        "prior.bank_covariance",
+        "prior.positive22",
+        "prior.D22",
+        "prior.positive31",
+        "prior.D31",
+        "prior.K11",
+        "prior.off_mask",
+        "prior.local21",
+        "prior.old21",
+        "prior.repeated",
+        "prior.K21",
+        "prior.separable",
+        "prior.Rres"
+      ]
+    },
+    {
+      "expected_names": [
+        "current.C_off",
+        "current.bank_covariance",
+        "current.positive22",
+        "current.D22",
+        "current.positive31",
+        "current.D31",
+        "current.K11",
+        "current.off_mask",
+        "current.D21"
+      ],
+      "name": "tiny_old_L14_current_birth_named_distinct_matrices",
+      "pass": true,
+      "present_names": [
+        "current.C_off",
+        "current.bank_covariance",
+        "current.positive22",
+        "current.D22",
+        "current.positive31",
+        "current.D31",
+        "current.K11",
+        "current.off_mask",
+        "current.D21"
+      ]
+    },
+    {
+      "name": "repaired_inclusive_peak_exceeds_rejected_peak",
+      "pass": true,
+      "rejected_peak": 638803200,
+      "revised_peak": 715844864
+    },
+    {
+      "expected_names": [
+        "C_off",
+        "bank_covariance",
+        "positive22",
+        "D22",
+        "positive31",
+        "D31",
+        "K11",
+        "off_mask",
+        "local21",
+        "old21",
+        "repeated",
+        "K21",
+        "separable",
+        "Rres"
+      ],
+      "name": "tiny_runtime_L14_readout_before_call_distinct_matrices",
+      "pass": true,
+      "present_names": [
+        "C_off",
+        "bank_covariance",
+        "positive22",
+        "D22",
+        "positive31",
+        "D31",
+        "K11",
+        "off_mask",
+        "local21",
+        "old21",
+        "repeated",
+        "K21",
+        "separable",
+        "Rres"
+      ]
+    },
+    {
+      "actual_array_bindings": 68,
+      "missing_or_wrong": [],
+      "modeled_array_bindings": 77,
+      "name": "tiny_runtime_L14_readout_before_call_full_outer_array_shape_coverage",
+      "pass": true
+    },
+    {
+      "expected_names": [
+        "C_off",
+        "bank_covariance",
+        "positive22",
+        "D22",
+        "positive31",
+        "D31",
+        "K11",
+        "off_mask",
+        "D21"
+      ],
+      "name": "tiny_runtime_L14_birth_after_construction_distinct_matrices",
+      "pass": true,
+      "present_names": [
+        "C_off",
+        "bank_covariance",
+        "positive22",
+        "D22",
+        "positive31",
+        "D31",
+        "K11",
+        "off_mask",
+        "D21"
+      ]
+    },
+    {
+      "actual_array_bindings": 68,
+      "missing_or_wrong": [],
+      "modeled_array_bindings": 77,
+      "name": "tiny_runtime_L14_birth_after_construction_full_outer_array_shape_coverage",
+      "pass": true
+    },
+    {
+      "actual_array_bindings": 68,
+      "allowed_backing_exception": "Om is a distinct W column-view object whose retained backing payload is W",
+      "false_alias": [],
+      "false_modeled_alias": [],
+      "missing_or_wrong": [],
+      "name": "boundary_L14_cast_after_backbone_outer_array_coverage",
+      "pass": true
+    },
+    {
+      "actual_none": [
+        "sources"
+      ],
+      "modeled_none": [
+        "sources"
+      ],
+      "name": "boundary_L14_cast_after_backbone_exact_None_bindings",
+      "pass": true
+    },
+    {
+      "actual_array_bindings": 68,
+      "allowed_backing_exception": "Om is a distinct W column-view object whose retained backing payload is W",
+      "false_alias": [],
+      "false_modeled_alias": [],
+      "missing_or_wrong": [],
+      "name": "boundary_L14_join_before_call_outer_array_coverage",
+      "pass": true
+    },
+    {
+      "actual_none": [
+        "sources"
+      ],
+      "modeled_none": [
+        "sources"
+      ],
+      "name": "boundary_L14_join_before_call_exact_None_bindings",
+      "pass": true
+    },
+    {
+      "actual_array_bindings": 68,
+      "allowed_backing_exception": "Om is a distinct W column-view object whose retained backing payload is W",
+      "false_alias": [],
+      "false_modeled_alias": [],
+      "missing_or_wrong": [],
+      "name": "boundary_L14_young_transport_before_call_outer_array_coverage",
+      "pass": true
+    },
+    {
+      "actual_none": [
+        "sources"
+      ],
+      "modeled_none": [
+        "sources"
+      ],
+      "name": "boundary_L14_young_transport_before_call_exact_None_bindings",
+      "pass": true
+    },
+    {
+      "actual_array_bindings": 68,
+      "allowed_backing_exception": "Om is a distinct W column-view object whose retained backing payload is W",
+      "false_alias": [],
+      "false_modeled_alias": [],
+      "missing_or_wrong": [],
+      "name": "boundary_L14_readout_before_call_outer_array_coverage",
+      "pass": true
+    },
+    {
+      "actual_none": [
+        "sources"
+      ],
+      "modeled_none": [
+        "sources"
+      ],
+      "name": "boundary_L14_readout_before_call_exact_None_bindings",
+      "pass": true
+    },
+    {
+      "actual_array_bindings": 68,
+      "allowed_backing_exception": "Om is a distinct W column-view object whose retained backing payload is W",
+      "false_alias": [],
+      "false_modeled_alias": [],
+      "missing_or_wrong": [],
+      "name": "boundary_L14_post_C_outer_array_coverage",
+      "pass": true
+    },
+    {
+      "actual_none": [
+        "sources"
+      ],
+      "modeled_none": [
+        "sources"
+      ],
+      "name": "boundary_L14_post_C_exact_None_bindings",
+      "pass": true
+    },
+    {
+      "actual_array_bindings": 68,
+      "allowed_backing_exception": "Om is a distinct W column-view object whose retained backing payload is W",
+      "false_alias": [],
+      "false_modeled_alias": [],
+      "missing_or_wrong": [],
+      "name": "boundary_L14_birth_after_construction_outer_array_coverage",
+      "pass": true
+    },
+    {
+      "actual_none": [
+        "sources"
+      ],
+      "modeled_none": [
+        "sources"
+      ],
+      "name": "boundary_L14_birth_after_construction_exact_None_bindings",
+      "pass": true
+    },
+    {
+      "actual_array_bindings": 68,
+      "allowed_backing_exception": "Om is a distinct W column-view object whose retained backing payload is W",
+      "false_alias": [],
+      "false_modeled_alias": [],
+      "missing_or_wrong": [],
+      "name": "boundary_L15_final_readout_before_call_outer_array_coverage",
+      "pass": true
+    },
+    {
+      "actual_none": [
+        "sources"
+      ],
+      "modeled_none": [
+        "sources"
+      ],
+      "name": "boundary_L15_final_readout_before_call_exact_None_bindings",
+      "pass": true
+    },
+    {
+      "actual_array_bindings": 64,
+      "allowed_backing_exception": "Om is a distinct W column-view object whose retained backing payload is W",
+      "false_alias": [],
+      "false_modeled_alias": [],
+      "missing_or_wrong": [],
+      "name": "boundary_L15_final_mean_outer_array_coverage",
+      "pass": true
+    },
+    {
+      "actual_none": [
+        "D21",
+        "D22",
+        "D31",
+        "bank_covariance",
+        "sources"
+      ],
+      "modeled_none": [
+        "D21",
+        "D22",
+        "D31",
+        "bank_covariance",
+        "sources"
+      ],
+      "name": "boundary_L15_final_mean_exact_None_bindings",
+      "pass": true
+    },
+    {
+      "actual_array_bindings": 64,
+      "allowed_backing_exception": "Om is a distinct W column-view object whose retained backing payload is W",
+      "false_alias": [],
+      "false_modeled_alias": [],
+      "missing_or_wrong": [],
+      "name": "boundary_L15_output_stack_outer_array_coverage",
+      "pass": true
+    },
+    {
+      "actual_none": [
+        "D21",
+        "D22",
+        "D31",
+        "bank_covariance",
+        "sources"
+      ],
+      "modeled_none": [
+        "D21",
+        "D22",
+        "D31",
+        "bank_covariance",
+        "sources"
+      ],
+      "name": "boundary_L15_output_stack_exact_None_bindings",
+      "pass": true
+    },
+    {
+      "expected_names": [
+        "W",
+        "WC",
+        "C_pre",
+        "C_off",
+        "positive22",
+        "positive31",
+        "K11",
+        "off_mask",
+        "local21",
+        "old21",
+        "repeated",
+        "K21",
+        "separable",
+        "Rres"
+      ],
+      "name": "L15_output_fourteen_distinct_matrices",
+      "pass": true
+    },
+    {
+      "modeled_none": [
+        "bank_covariance",
+        "D22",
+        "D31",
+        "D21",
+        "sources"
+      ],
+      "name": "L15_output_none_bindings_explicit",
+      "pass": true,
+      "runtime_none": [
+        "D21",
+        "D22",
+        "D31",
+        "bank_covariance",
+        "sources"
+      ]
+    },
+    {
+      "name": "L15_Om_view_keeps_prior_W_backing",
+      "pass": true
+    },
+    {
+      "name": "gram_qr_rotate_transport_has_current_mu_pre_var_pre",
+      "pass": true
+    },
+    {
+      "name": "young_transport_has_current_mu_pre_var_pre",
+      "pass": true
+    },
+    {
+      "name": "L14_post_C_has_current_C",
+      "pass": true
+    }
+  ],
+  "first_incomplete_result_sha256": "10c7835042b581b6691f6f98963a90adeeb222ba846557da2582396443025155",
+  "frozen_integrated_source_sha256": "3a57e5e5709a62848f8412de094f218ea9b323933b9071e04c5dabbdab8b12b3",
+  "kind": "compact index of nine-boundary memory ledger",
+  "limits": {
+    "individual_array_strict_bytes": 4294967296,
+    "process_cap_gate": "NOT_TESTED",
+    "process_cap_reference_bytes": 8589934592
+  },
+  "old_padded_control": {
+    "external_input_bytes": 134742528,
+    "largest_single_array": {
+      "bytes": 8388608,
+      "id": "external.W0.float64#1",
+      "shape": [
+        1024,
+        1024
+      ]
+    },
+    "layers": [
+      {
+        "explicit_resident_bytes": 148275968,
+        "layer": 0,
+        "newborn": [
+          "ordinary"
+        ],
+        "peak_modeled_array_payload_bytes": 233113344,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 0,
+        "young": 0
+      },
+      {
+        "explicit_resident_bytes": 174134016,
+        "layer": 1,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 284463872,
+        "peak_stage": "nonlinear_C_W_K11",
+        "shared": 0,
+        "young": 1
+      },
+      {
+        "explicit_resident_bytes": 199992064,
+        "layer": 2,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 349979392,
+        "peak_stage": "nonlinear_C_W_K11",
+        "shared": 0,
+        "young": 4
+      },
+      {
+        "explicit_resident_bytes": 225850112,
+        "layer": 3,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 401330944,
+        "peak_stage": "nonlinear_C_W_K11",
+        "shared": 0,
+        "young": 7
+      },
+      {
+        "explicit_resident_bytes": 251708160,
+        "layer": 4,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 452682496,
+        "peak_stage": "nonlinear_C_W_K11",
+        "shared": 0,
+        "young": 10
+      },
+      {
+        "explicit_resident_bytes": 274486016,
+        "layer": 5,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 500953856,
+        "peak_stage": "nonlinear_C_W_K11",
+        "shared": 1,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 284615424,
+        "layer": 6,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 550507264,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 4,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 294744832,
+        "layer": 7,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 595567360,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 7,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 304874240,
+        "layer": 8,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 640627456,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 10,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 315003648,
+        "layer": 9,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 685687552,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 13,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 325133056,
+        "layer": 10,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 730747648,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 16,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 335262464,
+        "layer": 11,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 775807744,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 19,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 345391872,
+        "layer": 12,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 820867840,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 22,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 355521280,
+        "layer": 13,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 865927936,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 25,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 365650688,
+        "layer": 14,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 910988032,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 28,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 365654784,
+        "layer": 15,
+        "newborn": [],
+        "peak_modeled_array_payload_bytes": 839590656,
+        "peak_stage": "final_D3_only",
+        "shared": 28,
+        "young": 15
+      }
+    ],
+    "max_modeled_array_payload_bytes": 910988032,
+    "max_resident_array_bytes": 365654784,
+    "schedule": {
+      "feed_births": 14,
+      "feed_negative_D21_uses": 91,
+      "feed_negative_D3_uses": 105,
+      "feed_positive_D21_uses": 91,
+      "feed_positive_D3_uses": 105,
+      "join_feed_negative": 9,
+      "join_feed_positive": 9,
+      "join_ordinary": 10,
+      "joins": 28,
+      "k4_final": 1,
+      "k4_full": 14,
+      "k4_uses": 15,
+      "ordinary_D21_uses": 105,
+      "ordinary_D3_uses": 120,
+      "ordinary_births": 15,
+      "source_D21_uses": 287,
+      "source_D3_uses": 330
+    }
+  },
+  "optimized": {
+    "external_input_bytes": 134742528,
+    "largest_single_array": {
+      "bytes": 8388608,
+      "id": "external.W0.float64#1",
+      "shape": [
+        1024,
+        1024
+      ]
+    },
+    "layers": [
+      {
+        "explicit_resident_bytes": 148275968,
+        "layer": 0,
+        "newborn": [
+          "ordinary"
+        ],
+        "peak_modeled_array_payload_bytes": 224986880,
+        "peak_stage": "ordinary_and_feed_birth",
+        "shared": 0,
+        "young": 0
+      },
+      {
+        "explicit_resident_bytes": 166024448,
+        "layer": 1,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 284463872,
+        "peak_stage": "nonlinear_C_W_K11",
+        "shared": 0,
+        "young": 1
+      },
+      {
+        "explicit_resident_bytes": 183772928,
+        "layer": 2,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 333743360,
+        "peak_stage": "nonlinear_C_W_K11",
+        "shared": 0,
+        "young": 4
+      },
+      {
+        "explicit_resident_bytes": 201521408,
+        "layer": 3,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 369121024,
+        "peak_stage": "nonlinear_C_W_K11",
+        "shared": 0,
+        "young": 7
+      },
+      {
+        "explicit_resident_bytes": 219269888,
+        "layer": 4,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 404498688,
+        "peak_stage": "nonlinear_C_W_K11",
+        "shared": 0,
+        "young": 10
+      },
+      {
+        "explicit_resident_bytes": 233938176,
+        "layer": 5,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 436796160,
+        "peak_stage": "nonlinear_C_W_K11",
+        "shared": 1,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 240873216,
+        "layer": 6,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 467426560,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 4,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 247808256,
+        "layer": 7,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 498478848,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 7,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 254743296,
+        "layer": 8,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 529531136,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 10,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 261678336,
+        "layer": 9,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 560583424,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 13,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 268613376,
+        "layer": 10,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 591635712,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 16,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 275548416,
+        "layer": 11,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 622688000,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 19,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 282483456,
+        "layer": 12,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 653740288,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 22,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 289418496,
+        "layer": 13,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 684792576,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 25,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 296353536,
+        "layer": 14,
+        "newborn": [
+          "ordinary",
+          "feed_positive",
+          "feed_negative"
+        ],
+        "peak_modeled_array_payload_bytes": 715844864,
+        "peak_stage": "D3_D21_materialization",
+        "shared": 28,
+        "young": 12
+      },
+      {
+        "explicit_resident_bytes": 296357632,
+        "layer": 15,
+        "newborn": [],
+        "peak_modeled_array_payload_bytes": 659930880,
+        "peak_stage": "final_D3_only",
+        "shared": 28,
+        "young": 15
+      }
+    ],
+    "max_modeled_array_payload_bytes": 715844864,
+    "max_resident_array_bytes": 296357632,
+    "schedule": {
+      "feed_births": 14,
+      "feed_negative_D21_uses": 91,
+      "feed_negative_D3_uses": 105,
+      "feed_positive_D21_uses": 91,
+      "feed_positive_D3_uses": 105,
+      "join_feed_negative": 9,
+      "join_feed_positive": 9,
+      "join_ordinary": 10,
+      "joins": 28,
+      "k4_final": 1,
+      "k4_full": 14,
+      "k4_uses": 15,
+      "ordinary_D21_uses": 105,
+      "ordinary_D3_uses": 120,
+      "ordinary_births": 15,
+      "source_D21_uses": 287,
+      "source_D3_uses": 330
+    }
+  },
+  "pass": true,
+  "raw_AP_control": {
+    "negative_14_birth_bytes": 117440512,
+    "positive_14_birth_saving_bytes": 110100480
+  },
+  "raw_result_sha256": "3368f9e26b9fb0ff506d9241f18a9b86c774cb5224681b99d202981b97a847cf",
+  "scope": "Finite sampled named-boundary shape inventory: explicit float64 inputs, float32 retained Source fields, prior/current outer-frame bindings and named co-live arrays. Om is a view whose backing W payload is charged. The inclusive stages intentionally retain some prior values after rebinding and may overcount actual liveness. This is no rigorous whole-process upper bound: library allocator, flopscope wrappers, BLAS/QR workspaces, fragmentation and Python process overhead are unbounded by this model. Windows does not enforce the 8 GiB cap. Existing n8 variance and n4 numeric gates remain FAIL; this is no stability, cost, accuracy, or deployment claim.",
+  "second_incomplete_result_sha256": "f7d5c67bd549d66ecb6f3d3e1f0a2be055c9e7fad2e8fd9be181e84bb1f72b1f",
+  "source_sha256": "990eb0f61c08962b42dd8ed0a5727dea0095b7d505ef34fe9dac20b070545c74",
+  "tiny_partial_resident_floors": {
+    "old_padded": 40312,
+    "optimized": 38520
+  },
+  "tiny_runtime_outer_frame": {
+    "L14_birth_after_construction": {
+      "arrays": {
+        "Bm": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_off": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_pre": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "D31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "K11": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "K21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Om": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Qr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rres": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "V": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V3p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "W": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "WC": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Y": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "a": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "alpha": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "bank_covariance": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "bank_p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "base": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "c": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "center": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "centered": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "dA": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "dP": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e2": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "identity": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "k3v": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "local21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "mean3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mean4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "nodes": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "off_mask": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "old21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "p_in": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "positive22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "probability": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "raw": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "repeated": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "s0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "safe_var": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "separable": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "sigma": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_out": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w1": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        },
+        "w2now": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "wick": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "wick_prev": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        }
+      },
+      "line": 1774,
+      "none": [
+        "sources"
+      ]
+    },
+    "L14_cast_after_backbone": {
+      "arrays": {
+        "Bm": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_off": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_pre": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "D31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "K11": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "K21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Om": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Qr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rres": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "V": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V3p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "W": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "WC": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Y": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "a": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "alpha": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "bank_covariance": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "bank_p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "base": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "c": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "center": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "centered": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "dA": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "dP": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e2": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "identity": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "k3v": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "local21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "mean3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mean4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "nodes": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "off_mask": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "old21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "p_in": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "positive22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "probability": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "raw": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "repeated": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "s0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "safe_var": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "separable": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "sigma": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_out": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w1": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        },
+        "w2now": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "wick": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        },
+        "wick_prev": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        }
+      },
+      "line": 1592,
+      "none": [
+        "sources"
+      ]
+    },
+    "L14_join_before_call": {
+      "arrays": {
+        "Bm": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_off": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_pre": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "D31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "K11": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "K21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Om": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Qr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rres": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "V": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V3p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "W": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "WC": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Y": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "a": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "alpha": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "bank_covariance": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "bank_p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "base": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "c": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "center": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "centered": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "dA": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "dP": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e2": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "identity": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "k3v": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "local21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "mean3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mean4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "nodes": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "off_mask": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "old21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "p_in": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "positive22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "probability": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "raw": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "repeated": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "s0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "safe_var": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "separable": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "sigma": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_out": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w1": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        },
+        "w2now": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "wick": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        },
+        "wick_prev": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        }
+      },
+      "line": 1598,
+      "none": [
+        "sources"
+      ]
+    },
+    "L14_post_C": {
+      "arrays": {
+        "Bm": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_off": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_pre": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "D31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "K11": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "K21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Om": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Qr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rres": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "V": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V3p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "W": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "WC": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Y": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "a": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "alpha": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "bank_covariance": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "bank_p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "base": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "c": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "center": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "centered": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "dA": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "dP": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e2": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "identity": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "k3v": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "local21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "mean3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mean4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "nodes": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "off_mask": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "old21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "p_in": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "positive22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "probability": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "raw": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "repeated": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "s0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "safe_var": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "separable": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "sigma": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_out": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w1": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        },
+        "w2now": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "wick": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "wick_prev": {
+          "alias_of": "wick",
+          "shape": [
+            8
+          ]
+        }
+      },
+      "line": 1722,
+      "none": [
+        "sources"
+      ]
+    },
+    "L14_readout_before_call": {
+      "arrays": {
+        "Bm": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_off": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_pre": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "D31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "K11": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "K21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Om": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Qr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rres": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "V": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V3p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "W": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "WC": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Y": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "a": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "alpha": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "bank_covariance": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "bank_p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "base": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "c": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "center": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "centered": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "dA": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "dP": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e2": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "identity": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "k3v": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "local21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "mean3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mean4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "nodes": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "off_mask": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "old21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "p_in": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "positive22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "probability": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "raw": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "repeated": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "s0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "safe_var": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "separable": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "sigma": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_out": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w1": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        },
+        "w2now": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "wick": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        },
+        "wick_prev": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        }
+      },
+      "line": 1607,
+      "none": [
+        "sources"
+      ]
+    },
+    "L14_young_transport_before_call": {
+      "arrays": {
+        "Bm": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_off": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_pre": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "D31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "K11": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "K21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Om": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Qr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rres": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "V": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V3p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "W": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "WC": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Y": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "a": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "alpha": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "bank_covariance": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "bank_p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "base": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "c": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "center": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "centered": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "dA": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "dP": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e2": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "identity": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "k3v": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "local21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "mean3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mean4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "nodes": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "off_mask": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "old21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "p_in": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "positive22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "probability": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "raw": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "repeated": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "s0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "safe_var": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "separable": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "sigma": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_out": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w1": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        },
+        "w2now": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "wick": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        },
+        "wick_prev": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        }
+      },
+      "line": 1600,
+      "none": [
+        "sources"
+      ]
+    },
+    "L15_final_mean": {
+      "arrays": {
+        "Bm": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_off": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_pre": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "D4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "K11": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "K21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Om": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Qr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rres": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "V": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V3p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "W": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "WC": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Y": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "a": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "alpha": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "bank_p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "base": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "c": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "center": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "centered": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "dA": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "dP": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e2": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "identity": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "k3v": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "local21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "mean3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mean4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "nodes": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "off_mask": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "old21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "p_in": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "positive22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "probability": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "raw": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "repeated": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "s0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "safe_var": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "separable": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "sigma": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_out": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w1": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        },
+        "w2now": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "wick": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "wick_prev": {
+          "alias_of": "wick",
+          "shape": [
+            8
+          ]
+        }
+      },
+      "line": 1691,
+      "none": [
+        "D21",
+        "D22",
+        "D31",
+        "bank_covariance",
+        "sources"
+      ]
+    },
+    "L15_final_readout_before_call": {
+      "arrays": {
+        "Bm": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_off": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_pre": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "D31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "K11": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "K21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Om": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Qr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rres": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "V": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V3p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "W": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "WC": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Y": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "a": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "alpha": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "bank_covariance": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "bank_p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "base": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "c": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "center": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "centered": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "dA": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "dP": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e2": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "identity": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "k3v": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "local21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "mean3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mean4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "nodes": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "off_mask": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "old21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "p_in": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "positive22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "probability": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "raw": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "repeated": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "s0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "safe_var": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "separable": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "sigma": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_out": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w1": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        },
+        "w2now": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "wick": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        },
+        "wick_prev": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        }
+      },
+      "line": 1607,
+      "none": [
+        "sources"
+      ]
+    },
+    "L15_output_stack": {
+      "arrays": {
+        "Bm": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_off": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "C_pre": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "D3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "D4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "K11": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "K21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Om": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "Qr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rr": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Rres": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "V": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V2p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "V3p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "W": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "WC": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "Y": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "a": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "alpha": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "bank_p": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "base": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "c": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "center": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "centered": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "dA": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "dP": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e2": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "e3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "identity": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "k3v": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "local21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "mean3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mean4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "mu_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "nodes": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "off_mask": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "old21": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "p_in": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "phi": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "phi64": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "positive22": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive31": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "positive4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "probability": {
+          "alias_of": null,
+          "shape": [
+            6
+          ]
+        },
+        "raw": {
+          "alias_of": null,
+          "shape": [
+            8,
+            6
+          ]
+        },
+        "repeated": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "s0": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "safe_var": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "separable": {
+          "alias_of": null,
+          "shape": [
+            8,
+            8
+          ]
+        },
+        "sigma": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_out": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "var_pre": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w1": {
+          "alias_of": "Phi",
+          "shape": [
+            8
+          ]
+        },
+        "w2now": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w3": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "w4": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "wick": {
+          "alias_of": null,
+          "shape": [
+            8
+          ]
+        },
+        "wick_prev": {
+          "alias_of": "wick",
+          "shape": [
+            8
+          ]
+        }
+      },
+      "line": 1783,
+      "none": [
+        "D21",
+        "D22",
+        "D31",
+        "bank_covariance",
+        "sources"
+      ]
+    }
+  }
+}

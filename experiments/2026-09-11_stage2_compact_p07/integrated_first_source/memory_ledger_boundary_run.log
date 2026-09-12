@@ -1,0 +1,11 @@
+Frozen boundary contract: experiments/LOG.md, commit a536d71
+Source commits before fixtures: cb9d94e, 418c0db, 73f471a
+First two narrower 54/54 fixtures are preserved as memory_ledger_boundary_draft_raw.zip and memory_ledger_boundary_second_raw.zip, with adjacent logs.
+Final source commit before final fixture: 73f471a
+Final command: uv run python local_sim/p2_k4_integrated_memory_ledger.py --json experiments/2026-09-11_stage2_compact_p07/integrated_first_source/memory_ledger_boundary_result.json
+Final terminal exit: 0
+Final stdout line: memory ledger PASS; optimized modeled peak 715844864 bytes; padded 910988032 bytes
+Final result: 63/63 checks PASS; nine n8 outer-frame boundaries sampled; six L14 sites have 68 array bindings, L15 final readout has 68, final mean/output have 64; exact shaped names, two-way aliases with Om/W backing-view exception, and all None bindings matched.
+Source SHA256: 990eb0f61c08962b42dd8ed0a5727dea0095b7d505ef34fe9dac20b070545c74
+Raw result SHA256: 3368f9e26b9fb0ff506d9241f18a9b86c774cb5224681b99d202981b97a847cf
+The inclusive named-array model still may overcount rebound locals and cannot bound process memory, library workspace, or the grader's 8 GiB cap. The existing n4/n8 stability gates remain red.

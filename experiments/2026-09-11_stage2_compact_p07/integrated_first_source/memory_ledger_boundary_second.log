@@ -1,0 +1,7 @@
+Source commit: 418c0db
+Command: uv run python local_sim/p2_k4_integrated_memory_ledger.py --json experiments/2026-09-11_stage2_compact_p07/integrated_first_source/memory_ledger_boundary_result.json
+Exit code: 0
+stdout final line: memory ledger PASS; optimized modeled peak 715844864 bytes; padded 910988032 bytes
+Raw JSON SHA256: 76e6db8ae77c69fb450d8b5905be849717d1bd6de2508cb0bbb4273b9a970d9c
+Preserved ZIP SHA256: d57bde2e8f2889f8cff8d540fe5ed3bdefe573908b4425cfc98390e9a40c1095
+Status: 54/54 checks passed, including both alias directions with the Om/W backing-view exception. A post-run audit found sources=None at every sampled site and the four analytic nulls at final mean/output; a stricter exact-None check followed in a separate source commit.
