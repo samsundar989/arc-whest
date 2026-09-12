@@ -1,0 +1,35 @@
+﻿worker-q: job #949 starting at 2026-09-12T05:08:42.956852+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=none -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['uv', 'run', '--no-sync', 'python', 'local_sim/p2_lab.py', '--truth', 'experiments/2026-08-21_p2_cp1/truth_P01.npz', '--out', 'experiments/2026-09-11_stage2_compact_p07/p01_report.json', '--freeze-receipt', 'experiments/2026-09-11_stage2_compact_p07/frozen_arms_metadata_protocol/freeze_receipt.json', '--n', '0', '--competition-cost-lambda', '0', '--depth-subset', '8', '--gate', '1.10', '--block', 'P01', '--note', 'Registered coherent-K4 mechanism comparison on exposed P01 DESIGN; retry after accepted metadata bridge repair; jobs 944/946 scored no arms', '--control', 'exact', '--official-samples', '1e9', '--residual-cap', '0']
+worker-q: ------------------------------------------------------------
+C:\Users\samsu\Documents\arc-whest\local_sim\lifecycle_eval.py:613: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_exact.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_exact.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_exact.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_exact.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+  *** RESIDUAL CAP RELAXED -- this run is ACCURACY-ONLY. Its failure accounting
+      cannot see a 0.4 s violation and it is NOT residual evidence for anything.
+  deciding model   lambda = 0   (COUNTED FLOPS ONLY -- the frozen model)
+============================================================================================
+P2-CP1 LADDER  --  one canonical evaluator, paired on common random numbers
+============================================================================================
+  truth      experiments\2026-08-21_p2_cp1\truth_P01.npz   96 networks   2 replicas x 4,194,304 samples
+  truth noise per replica   mean 1.8063e-08
+  shape      1024 x 16   B = 2,199,023,255,552   floor 0.1
+  stack      flopscope 0.12.0   PARITY ACHIEVED
+
+  replica noise of the AVERAGED truth   measured 9.3191e-09   predicted V/2N 9.0313e-09   ratio 1.0319
+     (the ratio is a live check on replica independence; far from 1.0
+      means the two draws share state and every corrected MSE is wrong)
+
+REFUSED: depth lifecycle for exact did not execute its frozen candidate bytes
+REFUSED: loaded repo-local module _lifecycle_candidate_4425abd3c3d6 is absent from the locked registry: C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_exact.py
+worker-q: ------------------------------------------------------------
+worker-q: job #949 FAILED (exit code 2) at 2026-09-12T05:18:54.859005+00:00

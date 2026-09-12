@@ -43572,3 +43572,56 @@ bridge and documented their failed P01 reads. No report or verdict exists while
 job 949 is running. Keep the reviewed source and freeze bytes unchanged until
 the job terminates, then preserve the raw queue record before reading the
 complete report. A fresh result Skeptic and synthesis remain required.
+
+## 2026-09-12 - P01 depth path refuses after exact control; no report
+
+Workerq **949** finished `FAILED`, exit 2, in 611.902153 seconds at
+1,543.89453125 MiB peak (8 GiB declared, zero GPU). It made one recorded
+reserved/completed P01 DESIGN read, reservation `63f0388826f94910`, and
+completed the exact control's scored lifecycle over the 96 P01 networks. Before
+the first depth curve or another arm, the lab printed `REFUSED: depth lifecycle
+for exact did not execute its frozen candidate bytes` and the locked bootstrap
+printed `REFUSED: loaded repo-local module _lifecycle_candidate_... is absent
+from the locked registry`. No P01 report exists. The run cannot establish a
+coherent-K4 accuracy verdict; the exact-control scored output was neither
+published nor compared to another arm. Its raw job log, metadata and manifest
+are `2026-09-11_stage2_compact_p07/job949_*`.
+
+### IMPORTANT contract - bind dynamic frozen-arm loads through both lab passes
+
+**Question.** Can the accepted P07 freeze bridge drive both canonical scored
+lifecycle and the separate depth-only pass from exactly its held frozen arm
+bytes, then close the bootstrap's repo-module audit without accepting an
+unregistered local source?
+
+**Evidence.** **CONFIRMED:** `lifecycle_eval.load_candidate()` returns `(module,
+full_path)` and registers a private module name in `sys.modules` after loading
+the file. **CONFIRMED:** `_predict_all()` treats the returned second value as
+`source_hash`, so its comparison to the receipt SHA fails even when the file
+is correct. **CONFIRMED:** the guard's final module-origin scan rejects the
+private frozen-arm module because the bootstrap's literal target registry names
+instrument files, while the freeze receipt binds generated arm paths only
+inside `main()`. **INFERRED:** hash the held file bytes for the depth pass and
+remove only the exact lifecycle module generated from the receipt-bound arm
+after each scoped use, with origin/name checks, to leave the import guard's
+global fail-closed invariant intact. **SPECULATIVE:** no other dynamic loader
+keeps an unregistered repo module after all four arms; the full path will test
+this.
+
+**Prediction.** A truth-free real locked-entry fixture on a tiny registered
+arm reproduces the current path/hash mismatch and late module refusal before
+repair. After repair, the depth pass returns the arm's actual SHA-256, matches
+canonical scored predictions under its stated representation limits, and
+does not leave an unregistered private module in `sys.modules`. Synthetic
+real-entry report publication succeeds for all four arms, while swapped,
+missing, unregistered and closing-mutated frozen arm sources still refuse.
+Focused freeze/bridge/Stage-0 tests, portability and current-byte preflight
+remain green. Samuel's standing K4 prediction remains `I don't know`.
+
+**Gate / falsifier.** A complete truth-free real locked-entry report with
+all four matching receipt hashes and closed origin audit, plus unchanged
+negative controls, is required before another P01 read. Any new lifecycle
+source path or math, hash mismatch, leaked module, failed preflight or fresh
+Skeptic rejection blocks retry. **Scope:** repair only the depth/loader
+bridge and focused fixtures; preserve arm bytes, fit selection, score gate,
+data roles, protected labels, estimator, cost model and residual policy.
