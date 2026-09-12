@@ -61,26 +61,31 @@ def _source(path: str, expected: str) -> tuple[Path, str]:
     return full, actual
 
 
-def _read(path: str, block: str, purpose: str, out: str) -> tuple[dict, dict]:
+def _read(path: str, block: str, purpose: str, out: str,
+          live_reads: Path, live_ledger: Path) -> tuple[dict, dict]:
     full = Path(path).resolve()
     if not full.is_file():
         raise ValueError(f"missing truth file: {full}")
     data = truth_reads.load_truth(
         block, str(full), consumer="local_sim/f21_score.py", purpose=purpose,
-        instrument=str(Path(__file__).resolve()), result_artifact=str(Path(out).resolve()))
+        instrument=str(Path(__file__).resolve()), result_artifact=str(Path(out).resolve()),
+        path=str(live_reads), ledger_path=str(live_ledger))
     return data, {"path": str(full), "sha256": _sha(full)}
 
 
-def _labels(a: argparse.Namespace) -> tuple[list[int], np.ndarray, np.ndarray, dict]:
+def _labels(a: argparse.Namespace, live_root: Path, live_reads: Path,
+            live_ledger: Path) -> tuple[list[int], np.ndarray, np.ndarray, dict]:
     """Return seeds, float32 midpoint labels, predicted midpoint noise, provenance."""
     if a.tier == "design":
-        canonical = (_ROOT / "experiments" / "2026-08-26_p2_gt").resolve()
+        canonical = (live_root / "experiments" / "2026-08-26_p2_gt").resolve()
         if Path(a.truth_a).resolve() != canonical / "gt_halfA.npz" or (
             Path(a.truth_b).resolve() != canonical / "gt_halfB.npz"
         ):
             raise ValueError("DESIGN must use the registered 24-network high-resolution P01 pair")
-        da, pa = _read(a.truth_a, "P01", "F21 exposed DESIGN half A", a.out)
-        db, pb = _read(a.truth_b, "P01", "F21 exposed DESIGN half B", a.out)
+        da, pa = _read(a.truth_a, "P01", "F21 exposed DESIGN half A", a.out,
+                       live_reads, live_ledger)
+        db, pb = _read(a.truth_b, "P01", "F21 exposed DESIGN half B", a.out,
+                       live_reads, live_ledger)
         required = {"seeds", "means", "var", "n_samples"}
         if required - da.keys() or required - db.keys():
             raise ValueError("high-resolution halves lack required arrays")
@@ -103,13 +108,14 @@ def _labels(a: argparse.Namespace) -> tuple[list[int], np.ndarray, np.ndarray, d
         files = [pa, pb]
     else:
         truth_path = Path(a.truth).resolve()
-        truth_rel = os.path.relpath(truth_path, _ROOT).replace("\\", "/")
+        truth_rel = os.path.relpath(truth_path, live_root).replace("\\", "/")
         truth_sha = _sha(truth_path)
         if not any(c.block == "P09" and c.artifact == truth_rel
                    and c.artifact_sha256 == truth_sha
-                   for c in seed_ledger.finalizations()):
+                   for c in seed_ledger.finalizations(path=str(live_ledger))):
             raise ValueError("P09 truth must be finalized in the seed ledger before reading")
-        d, p = _read(a.truth, "P09", "F21 fresh DECIDE truth", a.out)
+        d, p = _read(a.truth, "P09", "F21 fresh DECIDE truth", a.out,
+                     live_reads, live_ledger)
         required = {"seeds", "means_r1", "means_r2", "gt_noise", "n_samples"}
         if required - d.keys():
             raise ValueError("P09 truth lacks required arrays")
@@ -121,7 +127,7 @@ def _labels(a: argparse.Namespace) -> tuple[list[int], np.ndarray, np.ndarray, d
             raise ValueError("DECIDE truth must contain 128 unique networks")
         if seeds != seed_blocks.seeds("P09")[:128]:
             raise ValueError("DECIDE truth must contain the registered P09 span")
-        claims = seed_ledger.claims()
+        claims = seed_ledger.claims(path=str(live_ledger))
         if not all(any(c.block == "P09" and c.start <= s < c.start + c.n
                        for c in claims) for s in seeds):
             raise ValueError("all P09 seeds must be claimed before truth is scored")
@@ -185,14 +191,29 @@ def main() -> int:
     ap.add_argument("--fused-sha", required=True, help="expected candidate SHA256")
     ap.add_argument("--l2", required=True, help="frozen original L2 context")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--live-register-root", required=True,
+                    help="absolute live repo root for truth-read and seed-ledger receipts")
     a = ap.parse_args()
 
     if (a.tier == "design" and (not a.truth_a or not a.truth_b or a.truth)) or (
         a.tier == "decide" and (not a.truth or a.truth_a or a.truth_b)):
         ap.error("DESIGN needs --truth-a/--truth-b; DECIDE needs --truth")
+    live_root = Path(a.live_register_root)
+    if not live_root.is_absolute():
+        ap.error("--live-register-root must be absolute")
+    live_root = live_root.resolve()
+    live_reads = live_root / "experiments" / "truth_reads.jsonl"
+    live_ledger = live_root / "experiments" / "seed_ledger.jsonl"
+    if not live_reads.is_file() or not live_ledger.is_file():
+        ap.error("live truth-read and seed-ledger files must already exist")
+    truth_paths = [a.truth] if a.tier == "decide" else [a.truth_a, a.truth_b]
+    if any(not Path(p).is_absolute() for p in truth_paths):
+        ap.error("truth paths must be absolute live paths, not snapshot-relative")
     if a.tier == "decide" and not Path(a.truth).name.startswith("truth_P09"):
         ap.error("DECIDE truth filename must identify P09")
     out = Path(a.out).resolve()
+    if not Path(a.out).is_absolute():
+        ap.error("--out must be an absolute live path")
     if out.exists():
         ap.error("output already exists; evidence is immutable")
     if not a.fused_sha or len(a.fused_sha) != 64:
@@ -205,7 +226,7 @@ def main() -> int:
     }
     if len({p for p, _ in paths.values()}) != 3:
         raise ValueError("all three arms must be distinct files")
-    seeds, truth, noise, truth_prov = _labels(a)
+    seeds, truth, noise, truth_prov = _labels(a, live_root, live_reads, live_ledger)
     spec = le.LifecycleSpec.for_round("v2-phase2", residual_wall_time_limit_s=None)
     print(f"F21 {a.tier.upper()}: {len(seeds)} paired networks; local residual cap explicitly relaxed", flush=True)
     print(f"midpoint truth floor {noise.mean():.6e}; official forecast N={OFFICIAL_SAMPLES:,}", flush=True)
@@ -275,6 +296,8 @@ def main() -> int:
         "experiment": "F21 one shared-right D21 fusion", "tier": a.tier.upper(),
         "data_role": "exposed DESIGN" if a.tier == "design" else "fresh DECIDE",
         "n": len(seeds), "seeds": seeds, "truth": truth_prov,
+        "live_register_root": str(live_root),
+        "live_truth_reads": str(live_reads), "live_seed_ledger": str(live_ledger),
         "score_model": {"lambda": 0, "budget": 2**41, "floor": 0.1,
                         "official_samples": OFFICIAL_SAMPLES,
                         "server_offset_max_observed": SERVER_OFFSET_MAX,
