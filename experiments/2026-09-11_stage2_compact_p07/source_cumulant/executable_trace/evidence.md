@@ -28,7 +28,9 @@ terminal record says SUCCEEDED, exit 0, measured peak 3275.398 MiB. The raw
 queue files are copied here byte-for-byte as `job961_live_preflight.log`,
 `job961_live_manifest.json`, `job961_live_environment.json`, and
 `job961_live_result.json`; `job961_terminal_show.json` records the terminal
-peak and live snapshot mode.
+peak and live snapshot mode. Windows Git normalizes the readable log on add;
+`job961_raw.zip` contains the exact original queue bytes of all four copied
+files. Each ZIP member was checked equal to its queue copy before commit.
 
 SHA-256 (disk bytes, before this packet was committed):
 
@@ -43,6 +45,7 @@ SHA-256 (disk bytes, before this packet was committed):
 | `job961_live_environment.json` | `205e4112003b908083a32397d06d63d4ec969166a6062e87a02d38ec4c85fbf7` |
 | `job961_live_result.json` | `a7c8e42a84926fb69cc69daff4423665acd1f2a3e00b09b8367f6bbdcbf61412` |
 | `job961_terminal_show.json` | `928bb6eba569bf22e403a634117686cf15ae390f87edeb86368c62850130e245` |
+| `job961_raw.zip` | `d8bb0a7d09d747fb8297d8d8c8b3ae2beeda3935aae579be799c8a05d25fa4f0` |
 
 This is an executable source-identity finding on an atypical synthetic
 network. It does not measure accuracy, challenge score, counted FLOPs,
