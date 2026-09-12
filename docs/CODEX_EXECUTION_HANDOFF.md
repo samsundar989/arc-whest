@@ -1,5 +1,20 @@
 # Codex execution handoff — reviewed September 10, 2026
 
+**Execution update, September 12:** The copy-ready prompt below records the
+September 10 starting state. For current execution, follow `CURRENT_STATE.md`
+and the bottom of `experiments/LOG.md`: Stage 0's production/mutation repair and
+Stage 1's supplied-core/compact-cost work have scoped independent ACCEPT
+verdicts. Workerq 726 was cancelled while queued; the later full mutation
+battery supplied terminal accepted evidence. Workerq 957 completed the exposed
+P01 DESIGN four-arm accuracy-only comparison. All K4 arms fail its registered
+score gate, but the fresh result Skeptic marks the coherent-K4 causal claim
+INCOMPLETE because source-cumulant and covariance-symmetry defects remain.
+The next step is the committed truth-free math discriminator at LOG commit
+`c54eb87`, followed by fresh review and any separately contracted repair.
+There is no better submission candidate, no fresh DECIDE/public/vault result,
+and Samuel's Stage-3 hold remains binding. Historical pickup instructions below
+must not cause a second fit or P01 relabeling.
+
 Copy the prompt below into Codex started in `C:\Users\samsu\Documents\arc-whest`. This supersedes the worker's fit-first pickup at `bcca354` and older Claude handoffs. It directs execution of the active plan, not another planning-only pass.
 
 ---
