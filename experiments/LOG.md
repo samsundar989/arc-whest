@@ -46285,7 +46285,10 @@ relative links and git whitespace checks pass; no implementation files changed.
 
 **Class:** STRATEGIC candidate and future DECIDE; the independent tiny math probe
 is IMPORTANT. This entry precedes candidate measurements and any new seed read.
-Samuel's three predictions are **pending** and will be recorded before results.
+Samuel's response to the bundled three-prediction request on 2026-09-12 was
+**"i dont know proceed"**. Recorded before any F21 result: (1) tiny exact
+contraction **I don't know**; (2) at least 8% counted-cost saving with bounded
+rounding **I don't know**; (3) fresh paired `1.05x` score gate **I don't know**.
 
 **Question.** Can fusing two D21 products that share `M.T` lower the complete
 counted cost of the best-public L4 own-code estimator without material accuracy,
@@ -46399,7 +46402,9 @@ The tracked parent and exact source diff are in `experiments/2026-09-12_f21/`;
 all top-level AST nodes outside `_dslice21` match the parent. The independent
 tiny exact oracle, fixed-backend trajectory probe and paired scorer are
 committed but **unrun**. No P01/P09 labels were read and no score, FLOP or
-candidate validation result exists. Samuel's F21 predictions remain pending.
+candidate validation result existed at this checkpoint. Samuel subsequently
+answered **"i dont know proceed"** for all three F21 predictions; that record
+was committed before the first F21 result-producing command.
 
 The own-code attribution manifest is `docs/CANDIDATE_PROVENANCE_2026-09-12.md`.
 The staged source plus pinned ARC MIT notice packaged successfully with

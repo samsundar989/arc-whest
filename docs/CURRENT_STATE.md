@@ -9,8 +9,8 @@ L4 parent is [pinned separately](../experiments/2026-09-12_f21/estimator_L4_pare
 The tiny oracle, trajectory probe, paired scorer, provenance manifest and a
 source-plus-MIT-notice package are prepared; **none has produced a candidate
 cost, parity or accuracy result**. The required F21 contract is committed in
-the LOG; Samuel's three predictions are pending. Do not run these probes or
-read P01/P09 before recording them. A [fresh-context pre-score Skeptic](../experiments/2026-09-12_f21/prescore_skeptic.md)
+the LOG; Samuel answered "i dont know proceed" for all three predictions,
+recorded there before F21 results. A [fresh-context pre-score Skeptic](../experiments/2026-09-12_f21/prescore_skeptic.md)
 returned PROVISIONAL and prompted a targeted snapshot receipt-path repair;
 its [follow-up review](../experiments/2026-09-12_f21/receipt_skeptic.md) is
 also PROVISIONAL until an exact workerq scoring command and live receipt are
