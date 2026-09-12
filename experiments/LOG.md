@@ -43202,3 +43202,22 @@ The bootstrap repair and evidence were committed as `b364072`. Verified workerq
 high priority, 5 GiB RAM, 2 CPUs, zero GPUs/VRAM, snapshot mode `none`, command
 signature `0e90486f730c343b`. It is queued first for RAM and has no verdict yet.
 The bridge/bootstrap bytes remain unchanged until its terminal result.
+
+## 2026-09-11 - Public target still imported dependencies before bootstrap
+
+**IMPORTANT launch-audit rejection; no protected truth.** A fresh-context Skeptic
+found that direct invocation of the bootstrap is lock-first, but the documented
+public command first executes `p2_lab.py` or the freezer normally. Those files
+import project dependencies near module load and only call `cli_entry()` at their
+bottom, which then launches the bootstrap. The experiment core still runs in the
+locked child, but the stronger claim that every executed project dependency is
+bound from before import is false for the public parent process. Existing A/B
+fixtures proved that the later bootstrap uses B; they did not prove that the
+public parent never imported A.
+
+Workerq 922 was cancelled while queued and is not preflight evidence. The repair
+must move a stdlib-only public handoff before every project import, verify the
+parent target's embedded fingerprint, pass its exact SHA to the bootstrap, and
+require the same target SHA after the bootstrap acquires its lock. Programmatic
+production entry must refuse. No labels, estimator, candidate math, registry,
+gate, data role, job-903 dependency or vault state changed.
