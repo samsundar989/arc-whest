@@ -217,8 +217,20 @@ default preflight passed 12/16 (four Full-only skips) at 2,722.2 MiB under
 The existing compact Source can encode this discrete K3 feed exactly at full
 tiny rank, but its literal negative branch has a generically full-rank A leg.
 No exact rank-384/residual-16 integration or complete cost follows. LOG commit
-`dca4e7f` preregisters a tiny three-layer/two-source nonlinear old-history
-response discriminator before its measurement.
+`dca4e7f` preregistered a three-layer/two-source nonlinear old-history
+discriminator. Its first frozen fixture **FAILED 54/56**: layer-three
+positive-bank order48/64 and order48/continuous gaps `3.57e-5` and
+`3.14e-5` exceed `1e-8`, although same-bank conditional algebra passed.
+The fresh Skeptic independently integrated the continuous law and
+**REJECTED the combined gate**, accepting only finite-bank bookkeeping
+(`nonlinear_old_history/`, `ad856c6`). A separately contracted abstract
+two-birth compact feed fixture **PASSED 74/74** with fresh Skeptic ACCEPT
+at full n4 rank (`two_birth_compact/`, `ad856c6`); rank 2 loses up to
+`1.228` in its tensor diagnostic. Shared live workerq 994 default
+preflight passed 12/16, four Full-only skips, at 2,842.9 MiB under
+5 GiB; tested HEAD, four result/source targets and 248 Python hashes match.
+LOG commit `ad856c6` preregisters a separate full-polar bank split at
+the final ReLU's angular boundaries. It has no result yet.
 Full Stage-1 source conformance remains open; supplied-core algebra and compact
 cost remain valid in scope. No
 protected labels should be spent on this diagnosis. There is no scientific kill or
@@ -311,8 +323,9 @@ linear oracle and Gaussian-pair mixed-source check have accepted narrow
 verdicts; the signed-cubature factor identity and fixed n=4 first-layer source
 also have scoped acceptance. The boundary-aware two-layer attempt failed;
 the exact-axis repair, synthetic first-source cost and abstract signed-feed
-embedding have narrow acceptance. Nonlinear old-history response, full-rank
-multi-birth integration, compression and the priced
+embedding/multi-birth integration have narrow acceptance. The nonlinear
+continuous law's first fixture failed its numerical gate; a split-bank
+repair, compression and the priced
 complete source/history path remain concrete label-free discriminators.
 The `mixed_source/cost_options.md`
 ledger is conventional arithmetic, not measured flopscope cost or a feasible

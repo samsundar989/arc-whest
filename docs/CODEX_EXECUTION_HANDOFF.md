@@ -45,9 +45,15 @@ the signed-feed embedding/rank fixture, which passed 48/48 and received
 fresh scoped Skeptic ACCEPT for one abstract discrete K3 feed. Its negative
 leg is generically full rank, so no rank384/residual16 or complete cost is
 accepted. LOG commit `dca4e7f` preregisters the next nonlinear three-layer
-old-history source discriminator. Stage 1's supplied-core algebra and compact
-baseline cost remain accepted narrowly; full source closure and complete
-cost are open.
+old-history source discriminator. Its first fixed bank failed 54/56 at
+the continuous third-layer convergence gates; a fresh Skeptic rejected the
+combined claim while accepting finite-bank identities. The separately
+contracted two-birth abstract compact feed passed 74/74 with fresh scoped
+Skeptic ACCEPT at full n4 rank; rank2 loses materially. Shared workerq 994
+live-byte default preflight passed 12/16, four Full-only skips, at 2,842.9 MiB.
+LOG commit `ad856c6` contracts a new split-bank numerical repair before any
+result. Stage 1's supplied-core algebra and compact baseline cost remain
+accepted narrowly; full physical source closure and complete cost are open.
 There is no better submission candidate, no fresh DECIDE/public/vault result,
 and Samuel's Stage-3 hold remains binding. Historical pickup instructions below
 must not cause a second fit or P01 relabeling.
