@@ -43127,3 +43127,11 @@ gate, data role, protected label, public data or vault state changed. Current-by
 default preflight and a new independent fresh-context Skeptic remain required.
 The previously queued job 914 is not evidence because it was cancelled without
 starting on the rejected bytes.
+
+The exact repair and evidence were committed as `c54cc27`. An initial preflight
+submission, workerq 918, was cancelled while queued because `--vram 0` did not
+override workerq's one-GPU default and the command omitted the required live-byte
+mode; it is not evidence. The corrected current-byte default preflight is workerq
+**920**, submitted high priority with `--gpus 0 --ram 5 --vram 0 --cpus 2
+--no-snapshot`. It is queued and has no verdict. The reviewed bridge sources must
+remain unchanged through its terminal result.
