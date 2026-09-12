@@ -153,10 +153,19 @@ transported metric-core tensor identities but marked the *architecture*
 slices can become future D4 `1.5` after a dense map. Current slice errors
 cannot be used as a transportable residual. The counterexample and corrected
 memo are `repair_architecture_skeptic.md` (`6e4eca1`) and
-`repair_architecture.md` (`a8bb5e1`). LOG commit `fbedd3b` preregisters a
-tiny independent dense-reference implementation; no score data is involved.
-This reopens full Stage-1 source conformance, while the supplied-core algebra
-and compact cost remain valid in their scopes. No
+`repair_architecture.md` (`a8bb5e1`). The independent dense source oracle
+passes 49 truth-free checks with fresh scoped Skeptic **ACCEPT** (`source_dense/`,
+`b02607a`; workerq 962 default preflight 12/16, four Full-only skips,
+3,592.5 MiB peak). It proves selected linear contractions and the hidden
+residual, not a nonlinear source. Subsequent Gaussian-pair/ReLU integration
+passes 80 checks, and a separate fresh Skeptic independently reproduced
+`rho=0.5` mixed `K1122=0.10914008` and future signed D4 gaps `+0.392059`
+and `-0.064639` (`mixed_source/`, `cfdf62c`; workerq 964 live-byte default
+preflight 12/16, four Full-only skips, 3,911.1 MiB peak). The metric core
+alone misses independent-input future D4 by `0.06992708`; its residual
+cannot simply be dropped. LOG commit `47d5061` preregisters a tiny signed
+cubature factor/consumer/feed check. Full Stage-1 source conformance remains
+open; the supplied-core algebra and compact cost remain valid in scope. No
 protected labels should be spent on this diagnosis. There is no scientific kill or
 new submission candidate. No fresh DECIDE, public CONFIRM or vault evaluation
 has occurred.
@@ -242,8 +251,12 @@ on eligibility work remains binding; Stage 3 stays closed.
 A new Strategist Packet is **not required yet**. Repository evidence is not
 exhausted: the frozen coherent-K4 DESIGN comparison failed, its source-identity
 counterexample and executable trace have independent acceptance, and the
-repair-math Skeptic supplied a concrete residual counterexample. A tiny
-label-free dense oracle is now the next committed discriminator.
+repair-math Skeptic supplied a concrete residual counterexample. The dense
+linear oracle and Gaussian-pair mixed-source check have accepted narrow
+verdicts; the signed-cubature factor check and priced complete source/history
+path remain concrete label-free discriminators. The `mixed_source/cost_options.md`
+ledger is conventional arithmetic, not measured flopscope cost or a feasible
+rank proof.
 Consult a strategist if corrected algebra and fresh Skeptic synthesis leave no
 supported next step, or before changing architecture beyond GAME_PLAN's
 bounded frontier options.

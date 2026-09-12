@@ -26,7 +26,18 @@ accuracy-only comparison: all K4 arms fail the arithmetic score gate. The fresh
 result Skeptic accepted that measured failure but found the scientific cause
 INCOMPLETE. A source-cumulant and covariance-symmetry defect needs a truth-free
 discriminator before another label. The compact reference remains the priced
-baseline for later residual/shared-coordinate questions. Stage 4 remains
+baseline for later residual/shared-coordinate questions. The subsequent
+independent dense tensor oracle passes 49 checks with fresh scoped ACCEPT;
+it proves selected linear contractions and a hidden residual, not nonlinear
+closure. The Gaussian-pair post-ReLU integration passes 80 checks with fresh
+scoped ACCEPT: at `rho=0.5`, mixed `K1122=0.10914008` changes fixed signed
+future D4 substantially. Its metric-core projection needs a residual even
+for independent inputs. Workerq 962 and 964 passed current live-byte default
+preflight 12/16 each, four Full-only skips, with peaks 3,592.5 and 3,911.1
+MiB. LOG commit `47d5061` preregisters a signed-cubature factor check; the
+separate `mixed_source/cost_options.md` prices options only with conventional
+arithmetic. No full K4 source/compression/counted-cost path is accepted yet.
+Stage 4 remains
 conditional on a measured Stage-2 bottleneck.
 
 ## Objective and architecture
@@ -134,9 +145,12 @@ executable source identity (commits `a419e55`, `040b472`, `95c70b8`;
 workerq 961 default preflight 12/16, four Full-only skips). The separate
 repair-math Skeptic accepted the proposed tensor algebra but marked the
 architecture INCOMPLETE: present repeated-index slices do not carry an
-all-distinct residual through future dense transport. LOG commit `fbedd3b`
-contracts an independent tiny dense reference before any implementation of
-a corrected full arm. Do not fit a new constant or spend
+all-distinct residual through future dense transport. The dense linear oracle
+and correlated Gaussian-pair source now each have narrow fresh Skeptic
+ACCEPT; their artifacts are under `source_dense/` and `mixed_source/`.
+The latter's metric-core residual remains material. LOG commit `47d5061`
+contracts a full-sign weighted-cubature factor check before any implementation
+of a corrected full arm. Do not fit a new constant or spend
 another protected label until the source math is independently checked and
 repaired within a new contract and fresh Skeptic gate. This is not a registered
 scientific kill of the intended representation.

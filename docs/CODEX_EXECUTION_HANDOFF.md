@@ -15,9 +15,16 @@ fixture/preflight evidence; the actual-kernel trace subsequently passed with
 fresh scoped Skeptic ACCEPT. A separate repair-math Skeptic marked the
 architecture INCOMPLETE because present repeated-index slices cannot carry
 a hidden fourth-order residual through future transport. LOG commit
-`fbedd3b` now contracts a tiny independent dense reference. Stage 1's
-supplied-core algebra and cost remain accepted narrowly; full source closure
-is reopened.
+`fbedd3b` contracted a tiny independent dense reference, which subsequently
+passed 49 checks with fresh scoped Skeptic ACCEPT. The next Gaussian-pair
+post-ReLU source check passed 80 checks and a separate fresh Skeptic ACCEPT;
+mixed fourth cumulants matter at `rho=0.5`, and the metric core still needs
+its transported residual. Workerq 962 and 964 passed live-byte default
+preflights 12/16, with four Full-only skips. LOG commit `47d5061` now
+contracts a tiny full-sign weighted-cubature factor check. The separate
+`mixed_source/cost_options.md` is conventional cost/options work, not a
+counted-cost or rank certificate. Stage 1's supplied-core algebra and compact
+baseline cost remain accepted narrowly; full source closure is reopened.
 There is no better submission candidate, no fresh DECIDE/public/vault result,
 and Samuel's Stage-3 hold remains binding. Historical pickup instructions below
 must not cause a second fit or P01 relabeling.
