@@ -1,0 +1,380 @@
+{
+  "checks": [
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.220446049250313e-16,
+      "name": "birth_positive",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.1102230246251565e-16,
+      "name": "birth_negative_a",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.220446049250313e-16,
+      "name": "birth_negative_pair",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.220446049250313e-16,
+      "name": "birth_negative_total",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.220446049250313e-16,
+      "name": "birth_total",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.1102230246251565e-16,
+      "name": "birth_D3",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.220446049250313e-16,
+      "name": "birth_D21",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.1102230246251565e-15,
+      "name": "carry1_positive",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 4.440892098500626e-16,
+      "name": "carry1_negative_a",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.5543122344752192e-15,
+      "name": "carry1_negative_pair",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.5543122344752192e-15,
+      "name": "carry1_negative_total",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.3322676295501878e-15,
+      "name": "carry1_total",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.3322676295501878e-15,
+      "name": "carry1_D3",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.1102230246251565e-15,
+      "name": "carry1_D21",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 3.655929725621121e-16,
+      "name": "carry2_positive",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.5153490401663703e-16,
+      "name": "carry2_negative_a",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.220446049250313e-15,
+      "name": "carry2_negative_pair",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.220446049250313e-15,
+      "name": "carry2_negative_total",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.220446049250313e-15,
+      "name": "carry2_total",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.220446049250313e-15,
+      "name": "carry2_D3",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.9984014443252818e-15,
+      "name": "carry2_D21",
+      "pass": true
+    },
+    {
+      "gap": 1.16167506244911,
+      "minimum": 0.001,
+      "name": "dropped_negative_pair_mutant_refused",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 8.881784197001252e-16,
+      "name": "full_rank_join_D3",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 8.881784197001252e-16,
+      "name": "full_rank_join_D21",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.7763568394002505e-15,
+      "name": "full_rank_join_carry1_D3",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.5543122344752192e-15,
+      "name": "full_rank_join_carry1_D21",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 8.881784197001252e-16,
+      "name": "full_rank_join_carry2_D3",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 8.881784197001252e-16,
+      "name": "full_rank_join_carry2_D21",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "zero_w2_birth_oracle",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "zero_w2_birth_zero",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "zero_w2_carry1_oracle",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "zero_w2_carry1_zero",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "zero_w2_carry2_oracle",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "zero_w2_carry2_zero",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "zero_source_birth_oracle",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "zero_source_birth_zero",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "zero_source_carry1_oracle",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "zero_source_carry1_zero",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "zero_source_carry2_oracle",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 0.0,
+      "name": "zero_source_carry2_zero",
+      "pass": true
+    },
+    {
+      "name": "equilateral_covariance_rank_2",
+      "pass": true,
+      "rank": 2,
+      "singular_values": [
+        2.9999999999999996,
+        1.0,
+        1.10501982973654e-16
+      ],
+      "tolerance": 1e-10
+    },
+    {
+      "name": "equilateral_feed_unfolding_rank_3",
+      "pass": true,
+      "rank": 3,
+      "singular_values": [
+        4.449277491119694,
+        1.9999999999999984,
+        0.28094449098642915
+      ],
+      "tolerance": 1e-10
+    },
+    {
+      "determinant": -2.4999999999999982,
+      "minimum_abs": 1.0,
+      "name": "equilateral_determinant_over_one",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 2.220446049250313e-16,
+      "name": "equilateral_fixed_C",
+      "pass": true
+    },
+    {
+      "limit": 1e-10,
+      "max_abs_error": 1.3322676295501878e-15,
+      "name": "equilateral_fixed_unfolding",
+      "pass": true
+    },
+    {
+      "bytes": 117440512,
+      "frozen_bytes": 117440512,
+      "name": "literal_negative_storage_112MiB",
+      "pass": true
+    },
+    {
+      "conventional_flops": 450971566080,
+      "frozen_conventional_flops": 450971566080,
+      "name": "literal_negative_transport_450971566080",
+      "pass": true
+    },
+    {
+      "name": "embedding_dimensions",
+      "negative_A_shape": [
+        4,
+        4
+      ],
+      "negative_Q_shape": [
+        4,
+        4
+      ],
+      "pass": true,
+      "positive_residual_shape": [
+        4,
+        4
+      ]
+    }
+  ],
+  "conditional_cost": {
+    "negative_dense_A_Q_bytes": 117440512,
+    "negative_dense_transport_conventional_flops": 450971566080,
+    "note": "conditional arithmetic only; excludes joins, QR, K4 bank, backbone and server residual"
+  },
+  "contract_commit": "60ab638",
+  "equilateral": {
+    "covariance": [
+      [
+        1.0,
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.9999999999999998,
+        0.9999999999999998
+      ],
+      [
+        1.0,
+        0.9999999999999998,
+        2.0
+      ]
+    ],
+    "covariance_rank": 2,
+    "determinant": -2.4999999999999982,
+    "feed_rank": 3,
+    "unfolding": [
+      [
+        -2.2499999999999996,
+        -0.24999999999999997,
+        -0.24999999999999997
+      ],
+      [
+        -0.24999999999999997,
+        -2.2499999999999987,
+        -0.25
+      ],
+      [
+        -2.4999999999999996,
+        -2.4999999999999987,
+        -1.0
+      ]
+    ]
+  },
+  "kind": "truth-free abstract compact feed embedding and rank counterexample",
+  "n_checks": 48,
+  "n_failed": 0,
+  "pass": true,
+  "scope": "induced K3 feed for one discrete K4 source; no physical ReLU source or later increment",
+  "source_sha256": "f50c199adb1204e47bd931283f7f1973d85b5a256d0a0cbeb0dc1f32560751c4",
+  "stages": [
+    {
+      "max_D21_asymmetry": 1.8613967904000006,
+      "max_abs_feed": 2.1061434240000008,
+      "stage": "birth"
+    },
+    {
+      "max_D21_asymmetry": 2.2681707312846804,
+      "max_abs_feed": 1.2743219052143155,
+      "stage": "carry1"
+    },
+    {
+      "max_D21_asymmetry": 0.3681639397036669,
+      "max_abs_feed": 1.1957520104066475,
+      "stage": "carry2"
+    }
+  ]
+}
