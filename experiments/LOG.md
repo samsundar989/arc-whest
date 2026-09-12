@@ -43143,3 +43143,25 @@ command `powershell.exe -NoProfile -ExecutionPolicy Bypass -File
 scripts/preflight.ps1`, high priority, 5 GiB RAM, 2 CPUs, zero GPUs/VRAM,
 snapshot mode `none`, command signature `0e90486f730c343b`. It is queue position
 zero and has no verdict yet. Jobs 918 and 920 never started and are not evidence.
+
+## 2026-09-11 - Private child nonce remains replayable; bootstrap required
+
+**IMPORTANT negative implementation result; no protected truth.** A second fresh
+launch audit rejected `c54cc27` before workerq 921 ran. The 256-bit value is fresh
+in the normal parent, but it appears in both command arguments and stdin and the
+child checks only equality. An external caller can choose its own nonce, compute
+the public current binding map and invoke the private child mode directly without
+a parent-held lock. Both real `--help` entrypoints returned success under that
+replay. The Builder then reproduced the consequential A/B case with a copied lab:
+a timestamp/size-compatible cached dependency A executed while the private child
+verified and claimed disk source B. This invalidates the claimed discriminator;
+the nonce is correlation, not proof of locked import order.
+
+Workerq 921 was cancelled without a preflight verdict because its source was
+rejected. No protected data was touched. The replacement design removes the
+private binding bearer entirely: a stdlib-only bootstrap must lock and fingerprint
+itself and the target, parse a literal dependency registry without importing the
+target, acquire the full source graph, then compile/import and execute the target
+while those locks remain held. Direct bootstrap invocation is safe because the
+lock precedes every executable project import. Current focused green results for
+`c54cc27` remain implementation diagnostics only and do not establish provenance.
