@@ -46353,7 +46353,11 @@ interval="t")` on paired per-MLP **arithmetic** scores; passing also requires
 its 95% difference interval strictly above zero. Compare L2 on those same
 networks as context only. Report raw MSE with ground-truth noise floor,
 observed/corrected scores and official-precision forecast. No public-fit
-constants. Mint two independent `2**26` truth replicas for P09, or stop and
+constants. Mint two independent `2**24` truth replicas for P09: scaled from
+the measured P01 high-resolution midpoint floor `6.1271e-10` at `2**26`
+per half, this predicts about `2.45e-9`, roughly 6% of L4's approximately
+`4e-8` MSE, below VALIDATION's 10% noise bar. This saves fourfold truth
+work without weakening that bar. Or stop and
 amend the preregistration before any P09 draw if the measured truth-producer
 resource requirement makes this impossible; lower precision is not a silent
 substitution. Public mini/full is read-only CONFIRM after decision.
