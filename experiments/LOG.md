@@ -45839,3 +45839,30 @@ committed `d3c9229`, JSON SHA256
 The n8 186/187 and n4 93/172 FAILs remain unchanged. The exact S-column
 shortcut contract above is an accounting/algebra repair, not a cure for
 the negative eigenvalue. No new network, label, score or width meter.
+
+**September 12 physical signed-law tiny first evidence and failed snapshot
+preflight.** Isolated source at `a1a0eed` SHA256
+`dffd6aa6d4232827082f77f6d72da5f2781dfb93c374674192a88556b315416a`
+produced **102/102** frozen focused gates, original first-publication
+CRLF raw bytes SHA256
+`de0822109e54a27d04b58fff9f36b37dac2c0ea8eb82ea936d39bd8160d2cf5f`
+preserved as `.bin`, canonical LF JSON SHA256
+`d838fed959e64ae20afa7114d0c7f8680c0d5697d160d08b55270f2889ede344`.
+Two earlier implementation exceptions before JSON publication are disclosed
+in `execution_attempts.md`; no gate/matrix/reference changes. Physical
+nonlinear old contrast `0.3264477` versus prior K4 norm `0.5723005`,
+linear-D gap `3.33e-16`, lower raw leakage max `0.9137891` and conditional
+K4 versus bare fourth-raw gap `1.8150961`. These are truth-free fixed n2
+results, not a scalable source or score. Workerq **1005**, requested 5 GiB/
+2 CPUs/**0 GPUs** with inherited high priority, used its default git
+snapshot and terminal **FAILED** preflight steps 7, 9, 12 (exit 1; peak
+2,847.8 MiB). The snapshot converted historical CRLF artifacts and
+`estimator.py` to LF, changing protected source/ledger hashes even though
+the physical fixture source itself matched. Raw terminal status, workerq
+log and snapshot transcript are preserved in
+`experiments/2026-09-12_causal_signed_physical/job1005_raw.zip` SHA256
+`28177fa66a2792efaaa6f99a6780272c3c41c857db207d94f148f0e696271a3a`.
+Do not call this a green preflight. A live-worktree workerq default
+preflight, with exact before/after bytes and no concurrent source edits,
+and fresh Skeptic verdict remain required before accepting the tiny
+claim. No decision data, public/vault, frozen estimator edit or submission.
