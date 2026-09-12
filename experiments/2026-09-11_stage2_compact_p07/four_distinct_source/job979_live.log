@@ -1,0 +1,8 @@
+worker-q: job #979 starting at 2026-09-12T08:48:21.116797+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['uv', 'run', 'python', 'experiments/2026-09-11_stage2_compact_p07/four_distinct_source/tail_diagnostic.py']
+worker-q: ------------------------------------------------------------
+worker-q: ------------------------------------------------------------
+worker-q: job #979 SUCCEEDED (exit code 0) at 2026-09-12T08:48:25.741748+00:00

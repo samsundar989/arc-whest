@@ -1,0 +1,77 @@
+{
+  "976": {
+    "archive_sha256": "43830fe15fc6c26d550f246384b2eb4183ccb41959500ca50ef4f1e3be6c5259",
+    "files": {
+      "job976_live.log": {
+        "bytes": 587,
+        "queue_original": "C:\\Users\\samsu\\.local\\state\\gpuq\\logs\\job-000976.log",
+        "sha256": "3f328d309a8a1c1d59ba7654b5738dae833e88f4ebac7bda435b88b53532d7f4"
+      },
+      "job976_live_environment.json": {
+        "bytes": 2434,
+        "queue_original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\976\\environment.json",
+        "sha256": "b9f3c96b26e6d84db1c13659ccac17c8c7ce3a4badb374e129e480fcb60764bc"
+      },
+      "job976_live_manifest.json": {
+        "bytes": 1175,
+        "queue_original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\976\\manifest.json",
+        "sha256": "0bdbd13540ff58af2d995d71e9a548c77119ff97c4e1c5e673616005edbe5685"
+      },
+      "job976_live_result.json": {
+        "bytes": 189,
+        "queue_original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\976\\result.json",
+        "sha256": "33168903db39c2417d471f1596ae754a3b3e12d671154c2021dd37691e54af0d"
+      }
+    }
+  },
+  "977": {
+    "archive_sha256": "e2d8abb06abf3412916a9898147632793a16a16ca3aa5e990580ecb11dbce3fa",
+    "files": {
+      "job977_live_environment.json": {
+        "bytes": 2363,
+        "queue_original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\977\\environment.json",
+        "sha256": "7d82d56be9a8696cf856ed2bec07fcd84c52b8a973b7771a7a7033955c80fb91"
+      },
+      "job977_live_manifest.json": {
+        "bytes": 1109,
+        "queue_original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\977\\manifest.json",
+        "sha256": "4773ca10422292f6c1218fce8ce3f00210e49c0a496ff2e822308892013d0c85"
+      },
+      "job977_live_preflight.log": {
+        "bytes": 90153,
+        "queue_original": "C:\\Users\\samsu\\.local\\state\\gpuq\\logs\\job-000977.log",
+        "sha256": "fc9e00da76dda8088e39506c0e991304be8b6bdc30765b4a67c3343b4d4fec9d"
+      },
+      "job977_live_result.json": {
+        "bytes": 189,
+        "queue_original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\977\\result.json",
+        "sha256": "2a4cf7136f3c913b6c70995d7741ed04e799921e6b407a8d52f76085e2408b2d"
+      }
+    }
+  },
+  "979": {
+    "archive_sha256": "5b2787fd73eecfa6f9850954210feddafdbaaa47d25506a2ebc2c77f00697ee6",
+    "files": {
+      "job979_live.log": {
+        "bytes": 534,
+        "queue_original": "C:\\Users\\samsu\\.local\\state\\gpuq\\logs\\job-000979.log",
+        "sha256": "c338e5696d4de844a07f45a495e010d97b22e941fe56a89e6a0fd30525a0b46e"
+      },
+      "job979_live_environment.json": {
+        "bytes": 2371,
+        "queue_original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\979\\environment.json",
+        "sha256": "12e4abc9ae7df899c169ccbc5b895818ab01b595fc4d7e93c92957e9c155f045"
+      },
+      "job979_live_manifest.json": {
+        "bytes": 1112,
+        "queue_original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\979\\manifest.json",
+        "sha256": "52f2cd473ff139277f023a7c9b05f6463a9ac039f51a992304bfb37fd4916524"
+      },
+      "job979_live_result.json": {
+        "bytes": 189,
+        "queue_original": "C:\\Users\\samsu\\.local\\state\\gpuq\\jobs\\979\\result.json",
+        "sha256": "9ff3b7399495e4024f5562be75c0d88d123d2398e69940986df43201d41ce485"
+      }
+    }
+  }
+}
