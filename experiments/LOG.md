@@ -44749,3 +44749,88 @@ old *linear* carry only; the real nonlinear response, cross-source mixed
 cumulants, all-history integration, compression, counted costs, and accuracy
 remain separate. Run focused fixture, current-byte default preflight via
 workerq and a new fresh-context Skeptic before using this increment identity.
+
+**September 12 two-layer increment negative synthesis.** The committed
+fixture `856d938` preserves **FAIL: 300/323 checks pass, 23 fail**, all 23
+on registered 32/48 convergence of the nonconstant second ReLU output,
+increment and their transported readouts. The first-layer cumulant changes
+only `2.22e-15` between orders, but later means differ by up to
+`9.02678390007905e-6`, and the increment tensor by up to `2.1055e-5`.
+Every same-finite-measure raw-partition/factor identity, signed covariance,
+two-map consumer and declared quadratic K3-feed check passes to maximum
+`7.216e-15` absolute. At order 48 `max|Delta|=0.08756216` and naive
+old-plus-whole-later double counting is `0.69275307`; those values are
+**not** continuous-law estimates certified by the failed convergence gate.
+The standalone focused command exits 1; workerq **983** separately ran
+current-byte *default preflight* GREEN **12/16**, four Full-only skips,
+exit zero, `2842.15625 MiB` peak under 5 GiB/2 CPUs/zero GPU. Its raw ZIP
+and negative result are in `increment_source/`. Source SHA-256
+`c09860e6c96cf812ede6d3f1bf1d891205afa6e2517fae683427155ecbf5721e`,
+result SHA-256 `08468eabff7d9134bff172f3ee0d6af6b62110e8eea0dac892532507e9337d16`.
+A new fresh-context Skeptic independently reproduced the 32/48 mean and
+`K0011` increment, checked signed finite-measure algebra and queue ZIP,
+and returned **REJECT for the registered combined convergence gate**, while
+accepting only the explicitly scoped weighted-discrete accounting identity.
+Verdict `increment_source/skeptic_verdict.md`, SHA-256
+`70c0989469d775e18941bb61f4c6e5d5d022d5339f5aa949bae73e885f8b60a1`,
+commit `16996f1`. The oblique lines `x2=(11/28)x1` and `x2=(8/3)x1`
+cut the unsplit product grid; this supports a numerical-integration diagnosis,
+not a scientific rejection of the increment. CONFIRMED: finite-measure
+old-plus-Delta is exact and the registered continuous convergence fails.
+INFERRED: resolving both kinks should repair this numerical test.
+SPECULATIVE: an affordable actual nonlinear increment law or score benefit.
+The independently written design-only method memo
+`increment_source/kink_quadrature_method.md` at `03d9887` fixes the boundary
+partition and positive-node scheme without reading the failed result or
+computing a new outcome. No protected labels or seed block were touched.
+
+**Next IMPORTANT boundary-aware increment contract, committed before new
+integration.** **Question:** does splitting the two new ReLU zero rays yield
+a converged continuous two-layer source/increment while preserving the same
+finite-measure factor identities? **Evidence:** CONFIRMED failure and
+accepted limited algebra above; CONFIRMED the exact support masses and
+piecewise sectors derived in the design memo; INFERRED a positive radial/
+angular/axis cubature integrates each smooth sector accurately; SPECULATIVE
+that fixed 32/48/64 orders clear the unchanged `1e-8` threshold.
+**Hypothesis/mechanism:** for the fixed `rho=.5`, `X=ReLU(Z)`,
+`B=[[.8,-.3],[-.55,1.4]]`, the law of X has an origin atom, two open axes
+and a positive quadrant. Split the quadrant into three angular sectors at
+`atan(11/28)` and `atan(8/3)`; within each, Y=ReLU(BX) is linear. A positive
+three-node radial Gaussian rule is exact for degree-four radial moments.
+**Intervention:** implement the memo's full support bank with fixed
+Gauss-Legendre angular and mapped-axis orders `N=32,48,64`, positive radial
+nodes/weights derived from its Hankel moments, and exact `rho=.5` support
+masses. Record pre-normalization support-mass error separately; retain
+origin/axis nodes and each component's covariance pairing. Compare raw
+moments and fourth cumulants for X, BX and Y, Delta, and two-map D4/D22/D31,
+oriented covariance and quadratic K3 feed at 32/48 and 48/64. Independently
+integrate the conditional Gaussian in one dimension with its truncation
+intervals split at the same physical boundaries, using separately coded
+truncated-normal moments; do not derive this reference from the discrete
+node bank. Preserve identity/-I controls and naive-double-count discriminator.
+
+**Predictions:** (1) 32/48 and 48/64 raw, later-source/increment and readout
+values agree within `1e-8` relative above magnitude `1e-6` and `1e-8`
+absolute otherwise; both higher-order results agree with the independent
+continuous conditional reference at the same gate; (2) radial moments
+through degree five and exact support masses agree within `1e-12` absolute,
+and each *pre-scaling* support-mass error is below `1e-8` absolute; (3)
+finite-measure partitions versus signed factors, old-plus-Delta, two-map
+consumers/feed and zero structural controls agree within `1e-10` absolute,
+with nonconstant `max|Delta|>1e-3` and naive double-count gap `>1e-3`.
+Samuel's standing prediction is **"I don't know"**. **Falsifier:** any
+numerical, mass, identity or discriminator threshold fails; retain that
+negative result rather than increasing nodes or moving a gate in this
+contract. **Control:** independently integrated continuous raw moments and
+separately enumerated raw set-partition cumulants, plus same-bank dense
+subtraction/transport for algebra. The prior unsplit FAIL is a named negative
+numerical method, not a score control. **Cost model:** at N64 the positive
+node bank has 705 nodes, with under 1 MiB nominal array payload and expected
+under 64 MiB working data; tiny CPU-only direct test. This is not a measured
+challenge FLOP bill or server residual; Phase 2 remains counted `C=F` with
+a 0.4 s residual failure cliff. **Statistic/gate:** fixed deterministic
+absolute/material-relative checks above, no paired score/seed block/noise/
+public/vault access. **Scope/confounders:** finite two-coordinate law and
+toy old linear carry only, not a real nonlinear old-history response,
+cross-source closure, scalable rank, all-history cost or score. Run focused
+test, current-byte default preflight via workerq and a new fresh Skeptic.
