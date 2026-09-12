@@ -43098,3 +43098,32 @@ The required discriminator is a parent-authenticated worker path plus regression
 fixtures in which forged/pre-set markers either refuse or execute disk B, followed
 by focused suites, a terminal current-byte default preflight and another fresh
 Skeptic.
+
+## 2026-09-11 - Bridge launcher marker repair implemented; gates pending
+
+**IMPORTANT implementation result; no protected truth.** The replayable binding
+JSON no longer selects child execution. Both bridge CLIs strip the legacy marker
+from the child environment and reserve worker mode for actual script execution
+with an exact stdin envelope and the same fresh 256-bit nonce in its private
+command argument. The parent holds the complete source graph before launch and
+through the child; the child reacquires the locks, verifies the exact binding map,
+and runs with a fresh private bytecode cache. Programmatic child entry refuses.
+This establishes the supported launcher boundary; it does not claim security
+against a hostile same-user process deliberately reconstructing private process
+inputs.
+
+The freezer suite passes **19/19** and the P01 bridge suite **15/15**. New fixtures
+show that a pre-set legacy marker cannot execute an already imported freezer core,
+the Skeptic's exact lifecycle A-to-disk-B reproducer now returns refusal, and
+programmatic access to each private child mode refuses. Stage-0 lab/data remains
+**32/32**, portability **103/103**, both real `--help` CLIs pass with and without a
+pre-set legacy marker, embedded source fingerprints and `py_compile` pass, and
+`git diff --check` is clean. Raw hashes, commands, development observations and
+scope are in `freeze_bridge/launcher_repair_summary.json`; the structured freezer
+rows are in `freeze_bridge/freezer_tests_launcher_repair.json`.
+
+No producer/job-903 dependency, estimator, candidate math, coefficient, registry,
+gate, data role, protected label, public data or vault state changed. Current-byte
+default preflight and a new independent fresh-context Skeptic remain required.
+The previously queued job 914 is not evidence because it was cancelled without
+starting on the rejected bytes.

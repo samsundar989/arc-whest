@@ -62,6 +62,7 @@ import hashlib
 import json
 import os
 import re
+import secrets
 import subprocess
 import sys
 import tempfile
@@ -86,7 +87,9 @@ from phase2_manifest import load as load_manifest  # noqa: E402
 ARMS_DIR = os.path.join(_HERE, "p2_arms")
 _ACTIVE_ARM_PATHS = None
 _CLI_BINDINGS_ENV = "ARC_WHEST_P2_LAB_LOCKED_BINDINGS"
-_SELF_FINGERPRINT = "fffec4338ea76757566b7d30b054f045d6e8b5924524f4a28c82fe74fab9db83"
+_SELF_FINGERPRINT = "1ea7ed02f95ab64cf7b4819f31945adec5ed1593ce4bce87b7eec989bdf123de"
+_LOCKED_CHILD_ARG = "--arc-whest-lab-locked-child"
+_LOCKED_CHILD_SCHEMA = "arc-whest.p2-lab-locked-child.v1"
 _BOUND_CLI_BINDINGS = None
 _ALLOW_IN_PROCESS_TEST = False
 
@@ -242,41 +245,77 @@ def _verify_cli_bindings(bindings, paths):
     k4_freezer._assert_loaded_source(bindings["arm_freezer"]["sha256"])
 
 
-def cli_entry(argv=None):
-    """Run production from a child imported under parent-held source locks."""
-    args = list(sys.argv[1:] if argv is None else argv)
-    paths = _cli_source_paths()
-    encoded = os.environ.get(_CLI_BINDINGS_ENV, "")
+def _locked_child_entry(args, paths, launch_nonce):
+    """Accept bindings only from the real script child's dedicated stdin."""
+    if __name__ != "__main__":
+        print("REFUSED: locked lab child mode requires script execution")
+        return 2
+    try:
+        encoded = sys.stdin.read()
+        payload = json.loads(encoded)
+        if not isinstance(payload, dict) or set(payload) != {
+                "schema", "launch_nonce", "bindings"}:
+            raise k4_freezer.FreezeRefused(
+                "locked lab child payload keys are invalid")
+        if payload["schema"] != _LOCKED_CHILD_SCHEMA:
+            raise k4_freezer.FreezeRefused("locked lab child schema is invalid")
+        if (not isinstance(launch_nonce, str) or
+                re.fullmatch(r"[0-9a-f]{64}", launch_nonce) is None or
+                payload["launch_nonce"] != launch_nonce):
+            raise k4_freezer.FreezeRefused(
+                "locked lab child launch nonce is invalid")
+        bindings = payload["bindings"]
+    except (OSError, json.JSONDecodeError, k4_freezer.FreezeRefused) as exc:
+        print("REFUSED: invalid locked lab child payload: %s" % exc)
+        return 2
     global _BOUND_CLI_BINDINGS
-    if encoded:
-        try:
-            bindings = json.loads(encoded)
-        except json.JSONDecodeError as exc:
-            print("REFUSED: invalid parent-locked lab bindings: %s" % exc)
+    try:
+        with _bootstrap_stable_files(paths.values()):
+            _verify_cli_bindings(bindings, paths)
+            _BOUND_CLI_BINDINGS = bindings
+            return main(args)
+    except k4_freezer.FreezeRefused as exc:
+        print("REFUSED: %s" % exc)
+        return 2
+    finally:
+        _BOUND_CLI_BINDINGS = None
+
+
+def cli_entry(argv=None):
+    """Run production in a fresh child while the parent holds source locks."""
+    from_sys_argv = argv is None
+    args = list(sys.argv[1:] if from_sys_argv else argv)
+    paths = _cli_source_paths()
+    child_prefix = _LOCKED_CHILD_ARG + "="
+    if args and (args[0] == _LOCKED_CHILD_ARG or
+                 args[0].startswith(child_prefix)):
+        if not from_sys_argv or not args[0].startswith(child_prefix):
+            print("REFUSED: locked lab child mode is private to the CLI launcher")
             return 2
-        try:
-            with _bootstrap_stable_files(paths.values()):
-                _verify_cli_bindings(bindings, paths)
-                _BOUND_CLI_BINDINGS = bindings
-                return main(args)
-        except k4_freezer.FreezeRefused as exc:
-            print("REFUSED: %s" % exc)
-            return 2
-        finally:
-            _BOUND_CLI_BINDINGS = None
+        return _locked_child_entry(args[1:], paths,
+                                   args[0][len(child_prefix):])
 
     try:
         with _bootstrap_stable_files(paths.values()):
             _assert_loaded_source()
             bindings = _binding_snapshot(paths)
             env = dict(os.environ)
-            env[_CLI_BINDINGS_ENV] = json.dumps(
-                bindings, sort_keys=True, separators=(",", ":"))
+            # A legacy marker is replayable process state, not launch evidence.
+            # Strip it so even a pre-set/forged value cannot authorize this
+            # already-imported parent to execute production core.
+            env.pop(_CLI_BINDINGS_ENV, None)
+            launch_nonce = secrets.token_hex(32)
+            payload = json.dumps({
+                "schema": _LOCKED_CHILD_SCHEMA,
+                "launch_nonce": launch_nonce,
+                "bindings": bindings,
+            }, sort_keys=True, separators=(",", ":"))
             with tempfile.TemporaryDirectory(prefix="p2-lab-pycache-") as cache:
                 completed = subprocess.run(
                     [sys.executable, "-X", "pycache_prefix=" + cache,
-                     os.path.abspath(__file__)] + args,
-                    cwd=os.getcwd(), env=env)
+                     os.path.abspath(__file__),
+                     child_prefix + launch_nonce] + args,
+                    cwd=os.getcwd(), env=env, input=payload, text=True)
             return int(completed.returncode)
     except k4_freezer.FreezeRefused as exc:
         print("REFUSED: %s" % exc)

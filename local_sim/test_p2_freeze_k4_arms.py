@@ -275,6 +275,38 @@ def run_checks():
     check("in-process production freeze bypass is refused", guarded,
           "only the locked CLI child or an explicit test override may write")
 
+    with _temp("p2-freeze-forged-child-env-") as root:
+        freezer._TRUTH_READS_LEDGER = os.path.join(
+            _ROOT, "experiments", "truth_reads.jsonl")
+        marker = os.path.join(root, "stale_core_marker.txt")
+        bindings = freezer._binding_snapshot(freezer._cli_source_paths())
+        previous_env = os.environ.get(freezer._CLI_BINDINGS_ENV)
+        previous_main = freezer.main
+
+        def stale_loaded_main(_args):
+            with open(marker, "w", encoding="utf-8") as fh:
+                fh.write("already-imported core executed")
+            return 17
+
+        os.environ[freezer._CLI_BINDINGS_ENV] = json.dumps(
+            bindings, sort_keys=True, separators=(",", ":"))
+        freezer.main = stale_loaded_main
+        try:
+            rc = freezer.cli_entry(["--help"])
+        finally:
+            freezer.main = previous_main
+            if previous_env is None:
+                os.environ.pop(freezer._CLI_BINDINGS_ENV, None)
+            else:
+                os.environ[freezer._CLI_BINDINGS_ENV] = previous_env
+        check("forged child environment cannot enter loaded freezer core",
+              rc == 0 and not os.path.exists(marker),
+              "real parent entry ignores marker and a fresh __main__ child handles help")
+
+    rc = freezer.cli_entry([freezer._LOCKED_CHILD_ARG, "--help"])
+    check("programmatic freezer child mode is refused", rc == 2,
+          "dedicated stdin bindings are accepted only by script execution")
+
     return rows
 
 

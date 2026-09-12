@@ -1,0 +1,102 @@
+{
+  "checks": [
+    {
+      "check": "nondefault P07 selection freezes four exact arms",
+      "detail": "selected index 1, lam=1/6, four strict regenerations",
+      "pass": true
+    },
+    {
+      "check": "held validator covers execution and closing publication",
+      "detail": "closing check works only inside complete dependency lock",
+      "pass": true
+    },
+    {
+      "check": "freeze receipt is published after its arm files",
+      "detail": "all arm mtimes precede/equal receipt mtime",
+      "pass": true
+    },
+    {
+      "check": "existing output directory is refused immutably",
+      "detail": "exclusive fresh-directory contract",
+      "pass": true
+    },
+    {
+      "check": "post-freeze arm mutation is detected",
+      "detail": "strict bytes and exact regeneration",
+      "pass": true
+    },
+    {
+      "check": "freezer refuses wrong fit role",
+      "detail": "fit receipt must have protected-design data role",
+      "pass": true
+    },
+    {
+      "check": "freezer refuses selected value mismatch",
+      "detail": "fit selected index/value/objective are inconsistent",
+      "pass": true
+    },
+    {
+      "check": "freezer refuses objective/per-identity mismatch",
+      "detail": "fit result 1 objective does not equal its arithmetic mean",
+      "pass": true
+    },
+    {
+      "check": "freezer refuses wrong objective",
+      "detail": "fit objective is not the registered final-layer MSE",
+      "pass": true
+    },
+    {
+      "check": "freezer refuses missing reservation",
+      "detail": "reservation receipt keys must be exactly ['artifact', 'artifact_sha256', 'backfilled', 'block', 'consumer', 'elapsed_seconds', 'instrument_sha256', 'note', 'purpose', 'receipt_completed_utc', 'receipt_created_utc', 'reservation', 'result_artifact', 'status', 'timestamp_source', 'ts'], got NoneType",
+      "pass": true
+    },
+    {
+      "check": "freezer refuses incomplete reservation",
+      "detail": "fit receipt lacks matching completed P07 reservation evidence",
+      "pass": true
+    },
+    {
+      "check": "freezer refuses forged embedded reservation",
+      "detail": "live truth-read ledger must contain exactly one reserved and one completed row for the fit reservation",
+      "pass": true
+    },
+    {
+      "check": "freezer refuses wrong identity binding",
+      "detail": "fit input identities hash mismatch",
+      "pass": true
+    },
+    {
+      "check": "freezer refuses stale source binding",
+      "detail": "source arm_generator no longer matches fit receipt",
+      "pass": true
+    },
+    {
+      "check": "candidate mutation refuses without partial freeze",
+      "detail": "pre-publication source check",
+      "pass": true
+    },
+    {
+      "check": "loaded freezer A cannot bind changed disk B",
+      "detail": "self-normalized fingerprint refuses the pre-lock A-to-B race",
+      "pass": true
+    },
+    {
+      "check": "in-process production freeze bypass is refused",
+      "detail": "only the locked CLI child or an explicit test override may write",
+      "pass": true
+    },
+    {
+      "check": "forged child environment cannot enter loaded freezer core",
+      "detail": "real parent entry ignores marker and a fresh __main__ child handles help",
+      "pass": true
+    },
+    {
+      "check": "programmatic freezer child mode is refused",
+      "detail": "dedicated stdin bindings are accepted only by script execution",
+      "pass": true
+    }
+  ],
+  "passed": 19,
+  "suite": "p2-freeze-k4-arms",
+  "total": 19
+}

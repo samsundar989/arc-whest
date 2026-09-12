@@ -192,15 +192,20 @@ def _loaded_dependency_ab_uses_locked_child(root):
     parent = os.path.join(root, "exercise.py")
     with open(parent, "w", encoding="utf-8") as fh:
         fh.write(
-            "import importlib.util, os, pathlib, sys\n"
+            "import importlib.util, json, os, pathlib, sys\n"
             f"path={copied_lab!r}\n"
             "spec=importlib.util.spec_from_file_location('_copied_lab_a',path)\n"
             "module=importlib.util.module_from_spec(spec)\n"
             "spec.loader.exec_module(module)\n"
             f"pathlib.Path({lifecycle!r}).write_text({lifecycle_text('B')!r},encoding='utf-8')\n"
+            "bindings=module._binding_snapshot(module._cli_source_paths())\n"
+            "os.environ[module._CLI_BINDINGS_ENV]=json.dumps(bindings,sort_keys=True,separators=(',',':'))\n"
             f"pathlib.Path({marker!r}).unlink(missing_ok=True)\n"
-            "rc=module.cli_entry(['--help'])\n"
-            f"seen=pathlib.Path({marker!r}).read_text(encoding='utf-8')\n"
+            "try:\n"
+            " rc=module.cli_entry(['--help'])\n"
+            "except SystemExit as exc:\n"
+            " rc=exc.code\n"
+            f"seen=pathlib.Path({marker!r}).read_text(encoding='utf-8') if pathlib.Path({marker!r}).exists() else 'missing'\n"
             "raise SystemExit(0 if rc==0 and seen=='B' else 9)\n")
     result = subprocess.run([sys.executable, parent], cwd=root,
                             capture_output=True, text=True)
@@ -309,8 +314,12 @@ def run_checks():
 
         with tempfile.TemporaryDirectory(prefix="p2-lab-dependency-a-b-") as root:
             child_used_b = _loaded_dependency_ab_uses_locked_child(root)
-        check("cached dependency A is replaced by parent-locked child B", child_used_b,
-              "production CLI child imports the exact dependency bytes it records")
+        check("forged env cannot run cached dependency A instead of disk B", child_used_b,
+              "real entry ignores marker; locked fresh __main__ child imports B")
+
+        rc = lab.cli_entry([lab._LOCKED_CHILD_ARG, "--help"])
+        check("programmatic lab child mode is refused", rc == 2,
+              "dedicated stdin bindings are accepted only by script execution")
 
         with tempfile.TemporaryDirectory(prefix="p2-lab-freeze-missing-", dir=_ROOT) as root:
             truth = os.path.join(root, "truth_P01.npz")

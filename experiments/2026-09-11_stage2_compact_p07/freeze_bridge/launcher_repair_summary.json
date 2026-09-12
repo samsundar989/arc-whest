@@ -1,0 +1,106 @@
+{
+  "schema": "arc-whest.p07-p01-freeze-bridge-launcher-repair-evidence.v1",
+  "status": "implementation_complete_preflight_and_fresh_skeptic_pending",
+  "recorded_utc": "2026-09-12T01:09:34.9590935Z",
+  "base_commit": "39fb18fa02c7f91036ccc8e808d48c58e212f627",
+  "rejection": {
+    "verdict": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/skeptic_verdict_race_repair.md",
+    "verdict_sha256": "70eed683ed2217d901b3740773c4c92b573e924dbedc074a89ce470f8b30a32f",
+    "counterexample": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/skeptic_env_marker_counterexample.py",
+    "counterexample_sha256": "c17baac6ef738d97bfebfb7409a2f7da6265b37bb9df63030660591f876fb0fc",
+    "original_counterexample_accepted_loaded_A_while_binding_disk_B": true
+  },
+  "scope": {
+    "research_labels_read": false,
+    "protected_truth_read": false,
+    "estimator_modified": false,
+    "candidate_math_modified": false,
+    "score_noise_gate_or_data_role_modified": false,
+    "registry_or_vault_modified": false,
+    "job_903_dependencies_modified": false,
+    "job_903_state_at_recording": "RUNNING"
+  },
+  "repair": {
+    "legacy_environment_binding_authorizes_child": false,
+    "legacy_environment_binding_is_removed_from_child_environment": true,
+    "child_execution_requirement": "module executes as __main__ from the real script entrypoint",
+    "binding_transport": "dedicated subprocess stdin",
+    "launch_binding": "fresh 256-bit nonce must match the private command argument and exact stdin envelope",
+    "source_stability": "parent holds the complete static source graph before launch and through the child; child reacquires and verifies the same bindings",
+    "bytecode_policy": "fresh private pycache_prefix per child",
+    "programmatic_child_mode": "refused"
+  },
+  "source_hashes": {
+    "local_sim/p2_freeze_k4_arms.py": "6a6bb4388a62fce4f0fb748df4f471f54f0ed18cecaa70f0d99da80d1da803b4",
+    "local_sim/p2_lab.py": "103d74a88901ba03fc649303c4dc01daab77c3d48e1b851d41154d0d73ac3c51",
+    "local_sim/test_p2_freeze_k4_arms.py": "2b3a783f39f0b9841be6ea3f996de534c906fafa89578ebee22d07e0bf66fcd0",
+    "local_sim/test_p2_lab_freeze_bridge.py": "73ca4864a3e364c3079f614cc3dd233b8a52e3b719fe75b540b474017abbd92e"
+  },
+  "tests": {
+    "freezer": {
+      "command": "uv run python local_sim/test_p2_freeze_k4_arms.py --output experiments/2026-09-11_stage2_compact_p07/freeze_bridge/freezer_tests_launcher_repair.json",
+      "exit_code": 0,
+      "passed": 19,
+      "total": 19,
+      "artifact": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/freezer_tests_launcher_repair.json",
+      "artifact_sha256": "47cee2253c9b1570e58243cae8f254c655b9563b0b7a1973c9d3f88b173292a1"
+    },
+    "lab_bridge": {
+      "command": "uv run python local_sim/test_p2_lab_freeze_bridge.py",
+      "exit_code": 0,
+      "passed": 15,
+      "total": 15
+    },
+    "stage0_lab_data": {
+      "command": "uv run python local_sim/test_stage0_lab_data.py",
+      "exit_code": 0,
+      "passed": 32,
+      "total": 32
+    },
+    "portability": {
+      "command": "uv run python scripts/verify_portability.py",
+      "exit_code": 0,
+      "passed": 103,
+      "total": 103,
+      "status": "PORTABLE"
+    },
+    "original_skeptic_counterexample_on_repaired_bytes": {
+      "command": "uv run python experiments/2026-09-11_stage2_compact_p07/freeze_bridge/skeptic_env_marker_counterexample.py",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "accepted_loaded_A_while_binding_disk_B": false,
+      "observed_cli_return_code": 2
+    },
+    "real_cli_help": {
+      "freezer_exit_code": 0,
+      "lab_exit_code": 0,
+      "freezer_with_preset_legacy_env_exit_code": 0,
+      "lab_with_preset_legacy_env_exit_code": 0
+    },
+    "static_checks": {
+      "py_compile": "pass",
+      "git_diff_check": "pass",
+      "embedded_source_fingerprints": "pass"
+    }
+  },
+  "development_observations": [
+    "An initial parent-PID equality check was removed because the Windows uv launcher inserts an intermediate process; both real help paths correctly refused that draft.",
+    "The first freezer-suite run exposed a test fixture that retained a deleted temporary truth-ledger path. The final fixture restores the live nontruth ledger before constructing the real CLI binding graph. This was test setup only; production code did not reach core in that run."
+  ],
+  "preflight": {
+    "run_here": false,
+    "reason": "The task requires the default preflight to use workerq and forbids running a substantial job directly.",
+    "proposed_command": "workerq submit --project arc-whest --priority high --ram 5 --vram 0 --cpus 2 -- powershell -NoProfile -ExecutionPolicy Bypass -File scripts/preflight.ps1",
+    "declared_resources": {
+      "ram_gib": 5,
+      "vram_gib": 0,
+      "cpus": 2,
+      "priority": "high"
+    }
+  },
+  "acceptance_pending": [
+    "commit the exact reviewed bytes",
+    "terminal green current-byte default preflight through workerq",
+    "new independent fresh-context Skeptic verdict"
+  ]
+}
