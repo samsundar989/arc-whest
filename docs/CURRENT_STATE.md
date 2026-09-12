@@ -90,6 +90,16 @@ must pass this negative, the clean four-arm fixture, preflight and another
 fresh Skeptic before retrying P01. The loader fix remains valid within its
 narrow scope. No four-arm accuracy verdict exists.
 
+The first parent-owned transaction at `fa9a4d8` passed workerq **952** default
+preflight **12/16** (four Full-only skips), but an independent truth-free
+direct-bootstrap probe found that a caller-supplied stage still contains JSON
+marked `complete` after final refusal. The requested output is absent, yet
+that surviving stage is not an acceptable complete artifact. The new LOG-tail
+IMPORTANT contract requires staged reports to remain pending until the
+parent's successful post-audit atomic publication. The reviewing agent's
+final turn failed automatic review before a formal verdict; no independent
+acceptance is claimed. Preserve the raw probe and hold P01.
+
 The old contract at `08f787b` is superseded. P01 has three recorded DESIGN reads
 and placeholder-smoke exposure; it is never relabeled untouched. P07 is reusable
 DESIGN. P08 is exhausted. Samuel's three new predictions are all **“I don't know”**,

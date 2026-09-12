@@ -96,7 +96,11 @@ Full-only skips), but an independent Skeptic rejected the final publication
 gate: a copied truth-free lab can leave a complete report after the outer
 bootstrap refuses an unregistered late module. The LOG now contracts a
 publication-transaction repair and a new preflight/Skeptic gate before any
-P01 retry. The registered comparison remains explicitly accuracy-only under
+P01 retry. Its first implementation `fa9a4d8` passed workerq 952 default
+preflight 12/16, but a separate sacrificial direct-bootstrap call supplied
+its own stage and left a `complete` stage after final refusal. The new LOG-tail
+contract requires a pending stage until successful parent publication; no
+independent acceptance or P01 retry exists. The registered comparison remains explicitly accuracy-only under
 its residual-cap relaxation. A terminal four-arm report, result Skeptic and
 synthesis are still required before the residual-rank question. P01 had five
 documented reads before job 949 (three historical smoke reads and two failed
