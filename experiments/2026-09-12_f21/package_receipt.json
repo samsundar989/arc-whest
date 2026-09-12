@@ -1,0 +1,24 @@
+{
+  "package_path": "experiments/2026-09-12_f21/f21-with-notice.tar.gz",
+  "package_sha256": "4f3cc6f440e4cb66ea86a0904c00e182eb7ecf5aaab0ee64c73efb7d22904775",
+  "members": [
+    {
+      "name": "estimator.py",
+      "size": 52433,
+      "sha256": "d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94"
+    },
+    {
+      "name": "LICENSE",
+      "size": 1103,
+      "sha256": "e83f75bdf098e029fd72df880b39cce65bb92c43a99aaed6fd96071cca361207"
+    },
+    {
+      "name": "manifest.json",
+      "size": 650,
+      "sha256": "d29dfbe9ebcd2b2d71a94017cdc484855e38bdb35b08cde7992abcd1de47bc85"
+    }
+  ],
+  "source_candidate": "estimator_k3_strassen_L4_f21.py",
+  "validated_for_submission": false,
+  "submitted": false
+}
