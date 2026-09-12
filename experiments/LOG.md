@@ -43196,3 +43196,9 @@ gate, data role, protected label, public data or vault state changed. The remain
 known risks are registry completeness after future imports and advisory POSIX
 locking; Windows mandatory sharing locks are the active tested platform. Current
 default preflight and a new fresh-context Skeptic remain required before P07/P01.
+
+The bootstrap repair and evidence were committed as `b364072`. Verified workerq
+**922** is the current-byte default preflight: exact PowerShell preflight command,
+high priority, 5 GiB RAM, 2 CPUs, zero GPUs/VRAM, snapshot mode `none`, command
+signature `0e90486f730c343b`. It is queued first for RAM and has no verdict yet.
+The bridge/bootstrap bytes remain unchanged until its terminal result.
