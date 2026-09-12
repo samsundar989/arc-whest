@@ -43523,3 +43523,38 @@ current-byte command for the root reviewer is `workerq submit --project arc-whes
 --priority high --gpus 0 --ram 5 --vram 0 --cpus 2 --no-snapshot --
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/preflight.ps1`.
 Fresh-context Skeptic acceptance remains required before another P01 attempt.
+
+### Terminal metadata guard preflight, independent verdict and unchanged-arm re-freeze
+
+The first attempted default preflight, workerq **947**, ran in a git snapshot
+`f502c50` and failed. That snapshot did not carry the current ignored evidence
+artifacts and its checkout altered the Windows shipped-file byte hash, so steps
+7, 9 and 12 correctly refused; it is negative snapshot evidence, not a repair
+verdict. The applicable high-priority, zero-GPU, 5 GiB / two-CPU workerq **948**
+ran the live worktree at committed `ab969c8`, finished `SUCCEEDED`, exit 0, in
+330.902201 seconds, peak **3,089.63671875 MiB**, and reported **PREFLIGHT GREEN
+-- 12/16, 4 SKIPPED**. The skips are Full-only; raw transcripts, metadata and
+manifests for both jobs are `freeze_bridge/job947_*` and `job948_*`.
+
+A fresh-context independent Skeptic returned **ACCEPT** for the scoped
+distribution-metadata repair after checking the exact diff, raw before/after
+fixtures, both preflight paths, rerunning the metadata fixture and 15/15 bridge
+and 19/19 freezer adversaries. It required a fresh freeze receipt because the
+old one correctly refused the new bootstrap hash. Its complete verdict is
+`freeze_bridge/skeptic_verdict_metadata_protocol.md` (SHA-256
+`a827121cef58b018a314f8bd5c3020ace385bcd142d398ef8e99dc24b24157d8`).
+Custom nonstandard meta-path protocols and interpreter-startup hooks remain
+outside this accepted claim.
+
+The freezer was rerun on the *same immutable* P07 fit into the new directory
+`frozen_arms_metadata_protocol/`. Its receipt validates against current sources,
+selects the same registered index 2 / `lam=1/3` and records bootstrap SHA-256
+`0bba6abae9379b398ed473d935c295009371b95efd9526310038614a8db6341f`.
+The four arm files are **byte-identical** to the original freeze, with matching
+per-arm hashes; only the fresh receipt's provenance binding changes. The
+truth-free comparison and validator result is
+`freeze_bridge/refreeze_verification.json`; receipt SHA-256 is
+`4c889be3258f13a21d20d698896286e7253949791f2c95e0016aa38f79878298`.
+No P07/P01 truth was opened by re-freezing. P01 remains exposed DESIGN; the
+registered full four-arm report is now the next operational test, not yet a
+scientific result.
