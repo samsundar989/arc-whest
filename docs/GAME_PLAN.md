@@ -18,7 +18,8 @@ defects. The compact four-arm implementation now passes its independent tiny den
 reference, current live-shape source/cost gates, official validation and a fresh
 label-free Skeptic. Its ledgers are 816.293--818.516 billion FLOPs and the current
 exact arm measured 1,079.0 MiB peak RAM. The registered P07 producer and verifier
-are next; no accuracy result exists yet. The four-arm coherent-K4 mechanism
+completed; the exposed-DESIGN fit selected `lam=1/3`, and all four arms were
+frozen. Job 949's loader refusal left no four-arm accuracy result. The four-arm coherent-K4 mechanism
 comparison remains the first scientific discriminator, and the compact reference
 is the priced baseline for later residual/shared-coordinate questions. Stage 4
 remains conditional on a measured Stage-2 bottleneck.
@@ -85,13 +86,17 @@ metadata-import repair at `ab969c8` was necessary after two P01 attempts failed
 before arm scoring; workerq 948 passed live-byte default preflight 12/16 (four
 Full-only skips), a fresh Skeptic accepted the scoped repair, and a fresh freeze
 receipt now binds the repaired bootstrap while all four arm bytes remain exactly
-unchanged. Workerq **949** is running the registered exposed-DESIGN P01
-comparison at high priority, 8 GiB RAM, two CPUs, zero GPU, no snapshot. It uses
-the explicit accuracy-only residual relaxation. A terminal report, result
-Skeptic and synthesis are still required before the residual-rank question.
-P01 has five documented reads before job 949 (three historical smoke reads and
-two failed production attempts); it must never be relabeled untouched. The
-earlier paragraphs below describe the entry contract and historical queue state.
+unchanged. Workerq **949** failed after scoring the exact control on all 96
+exposed P01 DESIGN networks, before depth analysis or publication. Its peak
+was 1,543.9 MiB against an 8 GiB queue reservation. The bounded depth-loader
+and origin-audit repair is preregistered in the LOG; truth-free real-entry
+evidence, current-byte preflight and a fresh Skeptic must precede the next
+P01 attempt. The registered comparison remains explicitly accuracy-only under
+its residual-cap relaxation. A terminal four-arm report, result Skeptic and
+synthesis are still required before the residual-rank question. P01 had five
+documented reads before job 949 (three historical smoke reads and two failed
+production attempts), and job 949 added one more; it remains exposed DESIGN.
+The earlier paragraphs below describe the entry contract and historical queue state.
 
 **Current entry condition satisfied:** the replacement experiment contract, three
 verbatim `I don't know` human predictions and bounded coefficient/identity registry
@@ -100,9 +105,10 @@ acceptance. Current-source preflight and the standalone producer-receipt verifie
 are accepted. The compact four-arm implementation, complete live-shape ledgers and
 memory accounting also have fresh-context label-free ACCEPT. The downstream
 freeze/P01 bridge now has current-byte default preflight and fresh-context ACCEPT
-after fail-closed import/source-binding repairs. The label-free P07 producer is
-running as workerq 903; after it terminates, apply the verifier to its immutable
-output before fitting or opening P07/P01. Do not reuse the predictions attached to the rejected placeholder
+after fail-closed import/source-binding repairs. The label-free P07 producer,
+verification and registered protected P07 fit completed. The later metadata and
+depth-loader issues are described in the September 12 execution state above.
+Do not reuse the predictions attached to the rejected placeholder
 implementation.
 
 The current 08f787b contract has **not been tested as specified**. It promised a freeze before P01, but P01 has three recorded DESIGN reads and informed the proposed range. Manual timestamps cannot establish preregistration chronology. Preserve exposure; reconcile independent job records if available; otherwise mark chronology unresolved. Do not recycle the old contract/predictions as evidence for a changed intervention.

@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — read this first
 
-**Current September 12, 2026, after the registered P07 fit and during the
+**Current September 12, 2026, after the registered P07 fit and a refused
 P01 four-arm DESIGN comparison.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
 archived at `docs/archive/CURRENT_STATE_before_worker_review_2026-09-10.md`.
 
@@ -68,14 +68,16 @@ fresh receipt was validated from the unchanged P07 fit and all four arm files
 are byte-identical to the prior freeze. Evidence and verdict live under
 `experiments/2026-09-11_stage2_compact_p07/freeze_bridge/`.
 
-Workerq **949** is the current high-priority, no-snapshot, zero-GPU P01 retry
-with 8 GiB declared RAM and two CPUs. It uses the newly validated receipt,
-all 96 exposed DESIGN networks, paired four-arm comparison, Phase-2 counted
-cost, the registered `gate=1.10` and explicit **accuracy-only** residual-cap
-relaxation. Do not inspect a partial report or call it complete. After terminal
-success, preserve raw job/report evidence, analyze noise-aware paired outcomes,
-and obtain a new fresh-context result Skeptic and synthesis before the next
-Stage-2 slice. A failed implementation path does not reject coherent K4.
+Workerq **949** failed after scoring the exact control on all 96 exposed P01
+DESIGN networks, before any four-arm comparison or report. It peaked at 1,543.9
+MiB, well below its 8 GiB queue reservation. Its depth-only loader compared a
+candidate path to the receipt hash and left a dynamic frozen-arm module for the
+outer origin audit to reject. The raw failure and a bounded IMPORTANT repair
+contract are at the bottom of `experiments/LOG.md`. A truth-free real-entry
+fixture, current-byte preflight and fresh independent Skeptic must accept the
+repair before another P01 read. Then preserve the complete report, analyze the
+noise-aware paired outcomes and obtain a result Skeptic and synthesis before
+the next Stage-2 slice. A failed implementation path does not reject coherent K4.
 
 The old contract at `08f787b` is superseded. P01 has three recorded DESIGN reads
 and placeholder-smoke exposure; it is never relabeled untouched. P07 is reusable
@@ -93,20 +95,12 @@ payload. Null outer peak telemetry for three current arms is recorded rather tha
 filled in from earlier diagnostics. Job 890 passed current-byte default preflight
 12/16 at 3,328.4 MiB; Full-only deployment evidence remains open.
 
-The registered label-free P07 producer is running as workerq **903** at high
-priority with no source snapshot. Its exact producer dependencies remain at their
-accepted bytes; the later bridge repairs do not intersect them. The 5 GiB RAM
-declaration has proved too low as accounting: interim measured peak reached
-5,862.4 MiB while the system still had ample admitted headroom. Do not call this
-running work complete and do not inspect its partial observations. A future
-identical run must declare above its final observed peak; 6 GiB is only the current
-lower bound, not a final reservation.
-
-After job 903 is terminal, preserve its raw queue evidence and apply the
-standalone verifier to its immutable receipt before opening P07 through
-`truth_reads` to freeze the coefficient receipt. Then run the registered four-arm
-comparison on exposed P01. That DESIGN result must end with synthesis and a fresh
-Skeptic before any untouched DECIDE allocation. No public or vault truth is
+Workerq **903** completed the registered label-free P07 producer. Its 5 GiB RAM
+declaration was too low: measured peak was 10,771.9 MiB. Its immutable receipt
+passed standalone verification before the protected P07 DESIGN fit and four-arm
+freeze described above. An identical monolithic producer needs at least 12 GiB
+declared RAM. The P01 mechanism result, its synthesis and independent Skeptic
+still precede any untouched DECIDE allocation. No public or vault truth is
 authorized.
 
 An independent launch audit caught one final no-snapshot provenance gap before
@@ -115,7 +109,7 @@ was cancelled while queued. The repaired producer now compiles and executes one
 locked selector byte snapshot and holds it through publication. Its suite passes
 97/97, workerq 893 passed current-byte preflight 12/16 at 2,966.6 MiB peak, and a
 new fresh Skeptic returned ACCEPT. This repair changed no candidate math or data
-role. The next P07 producer must use these accepted bytes.
+role. Workerq 903 subsequently used these accepted bytes.
 
 The downstream freeze/P01 production bridge is also accepted after truth-free
 launch audits exposed and repaired selector/import ordering, replayable child
@@ -136,9 +130,9 @@ shapes and seed endpoints through direct `numpy.load`. It computed no scores or
 candidate comparisons and changed no frozen choice, but it bypassed pre-read
 reservation. The incident is backfilled honestly in `experiments/truth_reads.jsonl`.
 Older T2 work had already accessed P07 before this registry existed, so the
-registered count is a lower bound and no exact read ordinal is claimed. The future
-fit is the next registered P07 access. P07 was already exposed reusable DESIGN, so
-its role is unchanged. The exact command and protected stdout are preserved in
+registered count is a lower bound and no exact read ordinal is claimed. The later
+fit used the registered P07 access path. P07 was already exposed reusable DESIGN,
+so its role is unchanged. The exact command and protected stdout are preserved in
 `experiments/2026-09-10_stage2_k4_design/p07_direct_read_incident.txt`.
 
 ## Submission state
