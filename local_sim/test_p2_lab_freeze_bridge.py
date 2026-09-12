@@ -166,7 +166,19 @@ def _loaded_dependency_ab_uses_lock_first_entrypoints(root):
     copied_bootstrap = os.path.join(local, "p2_locked_bootstrap.py")
     shutil.copyfile(lab._BOOTSTRAP, copied_bootstrap)
     marker = os.path.join(root, "loaded_marker.txt")
+    success_marker = os.path.join(root, "success_marker.txt")
+    dynamic_marker = os.path.join(root, "dynamic_marker.txt")
+    dynamic_success = os.path.join(root, "dynamic_success.txt")
     lifecycle = os.path.join(local, "lifecycle_eval.py")
+    success_code = ("\nwith open(%r, 'w', encoding='utf-8') as _success_fh:\n"
+                    "    _success_fh.write('published')\n" % success_marker)
+    dynamic_code = (
+        "\n_original_main = main\n"
+        "def main(argv=None):\n"
+        "    import dynamic_unregistered\n"
+        "    with open(%r, 'w', encoding='utf-8') as _dynamic_success_fh:\n"
+        "        _dynamic_success_fh.write('published')\n"
+        "    return 0\n" % dynamic_success)
 
     def lifecycle_text(value):
         return ("from pathlib import Path\n"
@@ -175,6 +187,10 @@ def _loaded_dependency_ab_uses_lock_first_entrypoints(root):
 
     with open(lifecycle, "w", encoding="utf-8") as fh:
         fh.write(lifecycle_text("A"))
+    with open(os.path.join(local, "dynamic_unregistered.py"), "w",
+              encoding="utf-8") as fh:
+        fh.write("with open(%r, 'w', encoding='utf-8') as _fh:\n"
+                 "    _fh.write('executed')\n" % dynamic_marker)
     with open(os.path.join(local, "competition_score.py"), "w", encoding="utf-8") as fh:
         fh.write("# synthetic scorer\n")
     with open(os.path.join(local, "p2_freeze_k4_arms.py"), "w", encoding="utf-8") as fh:
@@ -195,8 +211,9 @@ def _loaded_dependency_ab_uses_lock_first_entrypoints(root):
     parent = os.path.join(root, "exercise.py")
     with open(parent, "w", encoding="utf-8") as fh:
         fh.write(
-            "import hashlib, importlib.util, json, os, pathlib, subprocess, sys\n"
+            "import hashlib, importlib.util, json, os, pathlib, re, subprocess, sys\n"
             f"path={copied_lab!r}\n"
+            "original_target_raw=pathlib.Path(path).read_bytes()\n"
             f"lifecycle={lifecycle!r}\n"
             "stamp=pathlib.Path(lifecycle).stat()\n"
             "spec=importlib.util.spec_from_file_location('_copied_lab_a',path)\n"
@@ -222,11 +239,44 @@ def _loaded_dependency_ab_uses_lock_first_entrypoints(root):
             f"{root!r})\n"
             f"seen_real=pathlib.Path({marker!r}).read_text(encoding='utf-8') if pathlib.Path({marker!r}).exists() else 'missing'\n"
             f"pathlib.Path({marker!r}).unlink(missing_ok=True)\n"
+            "target_raw=pathlib.Path(path).read_bytes()\n"
+            "target_raw,count=re.subn(rb'(?m)^    \"lifecycle_eval\": \"local_sim/lifecycle_eval.py\",\\r?\\n',b'',target_raw)\n"
+            "assert count==1\n"
+            f"target_raw+={success_code!r}.encode('utf-8')\n"
+            "fingerprint=re.compile(rb'(?m)^_SELF_FINGERPRINT = \"[0-9a-f]{64}\"')\n"
+            "zeroed,count=fingerprint.subn(b'_SELF_FINGERPRINT = \"'+b'0'*64+b'\"',target_raw)\n"
+            "assert count==1\n"
+            "target_fingerprint=hashlib.sha256(zeroed.replace(b'\\r\\n',b'\\n')).hexdigest().encode('ascii')\n"
+            "target_raw=fingerprint.sub(b'_SELF_FINGERPRINT = \"'+target_fingerprint+b'\"',target_raw)\n"
+            "pathlib.Path(path).write_bytes(target_raw)\n"
+            "missing_sha=hashlib.sha256(target_raw).hexdigest()\n"
+            "direct_missing=subprocess.run([sys.executable,module._BOOTSTRAP,'--target',path,'--expected-target-sha',missing_sha,'--','--help'],cwd="
+            f"{root!r},capture_output=True,text=True)\n"
+            f"direct_missing_clean=not pathlib.Path({marker!r}).exists() and not pathlib.Path({success_marker!r}).exists()\n"
+            "public_missing=subprocess.run([sys.executable,path,'--help'],cwd="
+            f"{root!r},capture_output=True,text=True)\n"
+            f"public_missing_clean=not pathlib.Path({marker!r}).exists() and not pathlib.Path({success_marker!r}).exists()\n"
+            f"dynamic_raw=original_target_raw+{dynamic_code!r}.encode('utf-8')\n"
+            "zeroed,count=fingerprint.subn(b'_SELF_FINGERPRINT = \"'+b'0'*64+b'\"',dynamic_raw)\n"
+            "assert count==1\n"
+            "dynamic_fingerprint=hashlib.sha256(zeroed.replace(b'\\r\\n',b'\\n')).hexdigest().encode('ascii')\n"
+            "dynamic_raw=fingerprint.sub(b'_SELF_FINGERPRINT = \"'+dynamic_fingerprint+b'\"',dynamic_raw)\n"
+            "pathlib.Path(path).write_bytes(dynamic_raw)\n"
+            "dynamic_sha=hashlib.sha256(dynamic_raw).hexdigest()\n"
+            "direct_dynamic=subprocess.run([sys.executable,module._BOOTSTRAP,'--target',path,'--expected-target-sha',dynamic_sha,'--','--help'],cwd="
+            f"{root!r},capture_output=True,text=True)\n"
+            f"direct_dynamic_clean=not pathlib.Path({dynamic_marker!r}).exists() and not pathlib.Path({dynamic_success!r}).exists()\n"
+            "public_dynamic=subprocess.run([sys.executable,path,'--help'],cwd="
+            f"{root!r},capture_output=True,text=True)\n"
+            f"public_dynamic_clean=not pathlib.Path({dynamic_marker!r}).exists() and not pathlib.Path({dynamic_success!r}).exists()\n"
+            f"pathlib.Path({marker!r}).unlink(missing_ok=True)\n"
             "pathlib.Path(path).write_bytes(pathlib.Path(path).read_bytes()+b'\\n# target version B\\n')\n"
-            "mismatch=subprocess.run([sys.executable,module._BOOTSTRAP,'--target',path,'--expected-target-sha',target_sha,'--','--help'],cwd="
+            "mismatch=subprocess.run([sys.executable,module._BOOTSTRAP,'--target',path,'--expected-target-sha',dynamic_sha,'--','--help'],cwd="
             f"{root!r})\n"
             f"seen_mismatch=pathlib.Path({marker!r}).exists()\n"
-            "raise SystemExit(0 if rc==2 and direct.returncode==0 and real.returncode==0 and mismatch.returncode==2 and seen_imported=='missing' and seen_direct=='B' and seen_real=='B' and not seen_mismatch else 9)\n")
+            "missing_text=direct_missing.stdout+public_missing.stdout\n"
+            "dynamic_text=direct_dynamic.stdout+public_dynamic.stdout\n"
+            "raise SystemExit(0 if rc==2 and direct.returncode==0 and real.returncode==0 and direct_missing.returncode==2 and public_missing.returncode==2 and direct_dynamic.returncode==2 and public_dynamic.returncode==2 and mismatch.returncode==2 and seen_imported=='missing' and seen_direct=='B' and seen_real=='B' and direct_missing_clean and public_missing_clean and direct_dynamic_clean and public_dynamic_clean and not seen_mismatch and missing_text.count('outside the locked registry')>=2 and dynamic_text.count('outside the locked registry')>=2 else 9)\n")
     result = subprocess.run([sys.executable, parent], cwd=root,
                             capture_output=True, text=True)
     if result.returncode != 0:
@@ -335,7 +385,7 @@ def run_checks():
         with tempfile.TemporaryDirectory(prefix="p2-lab-dependency-a-b-") as root:
             child_used_b = _loaded_dependency_ab_uses_lock_first_entrypoints(root)
         check("forged env cannot run cached dependency A instead of disk B", child_used_b,
-              "imported entry refuses; locked paths use B; target hash drift refuses")
+              "locked paths use B; missing top-level/dynamic imports refuse cleanly")
 
         check("lab exposes no bearer-authorized private child mode",
               not hasattr(lab, "_LOCKED_CHILD_ARG") and

@@ -1,7 +1,7 @@
 {
   "schema": "arc-whest.p07-p01-freeze-bridge-bootstrap-repair-evidence.v1",
   "status": "implementation_complete_preflight_and_fresh_skeptic_pending",
-  "recorded_utc": "2026-09-12T01:48:54.756146Z",
+  "recorded_utc": "2026-09-12T02:07:19.466828Z",
   "base_commit": "d7bd5634b53c08eac1b9f88e338dd8c22466b496",
   "reproduced_residual_before_repair": {
     "truth_or_labels_opened": false,
@@ -21,14 +21,18 @@
     "stage_one": "lock and self-fingerprint bootstrap plus target before parsing target text",
     "registry": "one strict AST-literal repo-relative _CLI_SOURCE_REGISTRY in each target",
     "stage_two": "lock and hash the complete registry before target or project dependency import",
-    "import_policy": "purge registered project module names, use a fresh private pycache, and compile the target directly from its locked bytes",
+    "import_policy": "purge cached repo-local modules by origin, use a fresh private pycache, and compile the target directly from its locked bytes",
     "runtime_attestation": "compare executed target _cli_source_paths() against the prelocked registry and verify exact binding hashes before enabling main",
     "lock_lifetime": "complete source graph remains held through target main and report or freeze publication",
     "direct_bootstrap_invocation": "requires an expected exact target SHA and is safe by construction because target equality and the full lock-before-import path are enforced",
     "lock_implementation": "one canonical stdlib-only bootstrap; obsolete lab-local prelock helper removed",
     "public_script_stage_zero": "after stdlib imports only, validate the executing target against its embedded normalized fingerprint, hash exact bytes, and exit into bootstrap before sys.path changes, numpy, or project imports",
     "expected_target_sha": "bootstrap requires the launcher exact SHA-256 and compares it to target bytes while holding bootstrap and target locks, before AST parsing or project import",
-    "imported_cli_entry": "both targets refuse with exit code 2; imported project side effects cannot be followed by production core through cli_entry"
+    "imported_cli_entry": "both targets refuse with exit code 2; imported project side effects cannot be followed by production core through cli_entry",
+    "registry_import_guard": "wrap the complete meta-path for target exec through main/publication; every resolved repo-local file origin must match a locked registry path before its loader runs",
+    "origin_handling": "check package and submodule file origins exactly; map pyc origins to source; allow built-in/frozen/namespace containers and exclude site-packages or dist-packages roots even when the environment lives under the repo",
+    "closing_import_audit": "after target top-level execution and again after successful main, scan loaded module origins and refuse any repo-local file absent from the registry",
+    "dynamic_receipt_loaders": "manual file loaders for frozen arms remain governed by their existing narrower held receipt/source locks; normal imports throughout main remain under the registry guard"
   },
   "scope": {
     "research_labels_read": false,
@@ -41,11 +45,11 @@
     "job_903_state_at_recording": "RUNNING"
   },
   "source_hashes": {
-    "local_sim/p2_locked_bootstrap.py": "ca4d178b8985dee61c0c398635d2dfed9649eb16968d4b26c951c55f8f3158b0",
+    "local_sim/p2_locked_bootstrap.py": "da8ce54a013e9a4db61ebc8dd55849fa7f3c186f238ce35178ff18c725814869",
     "local_sim/p2_freeze_k4_arms.py": "1e5a725b5182de466eab7594b863f107ba46d36e3d191b9cd5c3b13e9b08b30d",
     "local_sim/p2_lab.py": "e2c59420ff9a237fc94356fc4612ac24d23b59c3b6cb5b9ff05cfceb1fb0a962",
     "local_sim/test_p2_freeze_k4_arms.py": "5c70373d221d5436afcb7388cf6a314be1aadfe238bc702b4d13508bc75ce4fb",
-    "local_sim/test_p2_lab_freeze_bridge.py": "293f54800b8d18e0bb5a4744dc5fdbe47ba1a760a22dc07de35f2433bcf12104"
+    "local_sim/test_p2_lab_freeze_bridge.py": "bc90c32e376e906f473ca377798e1a9db2b70d71cda32418a031c56c62b7e179"
   },
   "tests": {
     "freezer": {
@@ -74,7 +78,16 @@
       "final_rerun_after_public_entry_repair": true,
       "imported_cli_entry_exit_code": 2,
       "loaded_dependency_executed_by_imported_cli_entry": false,
-      "final_rerun_after_imported_entry_refusal": true
+      "final_rerun_after_imported_entry_refusal": true,
+      "missing_lifecycle_public_exit_code": 2,
+      "missing_lifecycle_direct_bootstrap_exit_code": 2,
+      "missing_lifecycle_top_level_code_executed": false,
+      "missing_lifecycle_success_published": false,
+      "unregistered_dynamic_import_public_exit_code": 2,
+      "unregistered_dynamic_import_direct_bootstrap_exit_code": 2,
+      "unregistered_dynamic_module_code_executed": false,
+      "unregistered_dynamic_success_published": false,
+      "final_rerun_after_registry_guard": true
     },
     "stage0_lab_data": {
       "command": "uv run python local_sim/test_stage0_lab_data.py",
@@ -83,7 +96,8 @@
       "total": 32,
       "final_rerun_after_cleanup": true,
       "final_rerun_after_public_entry_repair": true,
-      "final_rerun_after_imported_entry_refusal": true
+      "final_rerun_after_imported_entry_refusal": true,
+      "final_rerun_after_registry_guard": true
     },
     "portability": {
       "command": "uv run python scripts/verify_portability.py",
@@ -93,7 +107,8 @@
       "status": "PORTABLE",
       "final_rerun_after_cleanup": true,
       "final_rerun_after_public_entry_repair": true,
-      "final_rerun_after_imported_entry_refusal": true
+      "final_rerun_after_imported_entry_refusal": true,
+      "final_rerun_after_registry_guard": true
     },
     "real_cli_help": {
       "freezer_public_exit_code": 0,
@@ -113,13 +128,15 @@
   },
   "preflight": {
     "run_here": false,
-    "proposed_command": "workerq submit --project arc-whest --priority high --ram 5 --vram 0 --cpus 2 -- powershell -NoProfile -ExecutionPolicy Bypass -File scripts/preflight.ps1",
+    "proposed_command": "workerq submit --project arc-whest --priority high --gpus 0 --ram 5 --vram 0 --cpus 2 --no-snapshot -- powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/preflight.ps1",
     "declared_resources": {
       "ram_gib": 5,
       "vram_gib": 0,
       "cpus": 2,
-      "priority": "high"
-    }
+      "priority": "high",
+      "gpus": 0
+    },
+    "snapshot_mode": "none"
   },
   "acceptance_pending": [
     "commit the exact reviewed bytes",
@@ -131,6 +148,13 @@
     "independent_skeptic_verdict": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/skeptic_verdict_bootstrap.md",
     "independent_skeptic_verdict_sha256": "ccbac9cf2529c8f0205ebbfa78b7e61dc44903a12d80d7db732f3efde9941c9c",
     "finding": "documented public p2_lab.py path imported numpy and project dependencies before reaching the prior bottom-of-file bootstrap handoff",
+    "accepted": true
+  },
+  "registry_guard_repair_base_commit": "a87c8dc",
+  "reproduced_registry_completeness_residual": {
+    "independent_skeptic_verdict": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/skeptic_verdict_preimport.md",
+    "independent_skeptic_verdict_sha256": "615a94a952054b3ae40cf20dabe1716d35ac0650b520513fe943ecc6647d8371",
+    "finding": "removing lifecycle_eval from the literal registry while retaining its import let unregistered top-level code execute on public and direct-bootstrap paths",
     "accepted": true
   }
 }

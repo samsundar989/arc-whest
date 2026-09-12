@@ -12,6 +12,7 @@ import ast
 import contextlib
 import ctypes
 import hashlib
+import importlib.util
 import os
 import re
 import sys
@@ -21,7 +22,7 @@ import types
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
-_SELF_FINGERPRINT = "c52be6237591bf0184268c0666d860296d882c993359aed1bfa0d3280dd3e9df"
+_SELF_FINGERPRINT = "b66ac9b57df160b363ffd1d49e8f372088ef5046442d107cff8b974ea86ade3d"
 _REGISTRY_NAME = "_CLI_SOURCE_REGISTRY"
 _TARGETS = {"p2_freeze_k4_arms.py", "p2_lab.py"}
 
@@ -83,6 +84,105 @@ def _relative(path):
 def _same_path(left, right):
     return (os.path.normcase(os.path.realpath(left)) ==
             os.path.normcase(os.path.realpath(right)))
+
+
+def _inside(path, root):
+    try:
+        return os.path.commonpath([path, root]) == root
+    except ValueError:
+        return False
+
+
+def _external_import_roots():
+    """Return environment package roots that may physically live in the repo."""
+    roots = []
+    for raw in sys.path:
+        if not raw:
+            continue
+        path = os.path.normcase(os.path.realpath(os.path.abspath(raw)))
+        parts = {part.lower() for part in path.split(os.sep)}
+        if "site-packages" in parts or "dist-packages" in parts:
+            roots.append(path)
+    return tuple(roots)
+
+
+def _repo_origin_candidates(origin, external_roots):
+    """Map an import origin to lockable repo files, including cached bytecode."""
+    if not isinstance(origin, str) or origin in {"built-in", "frozen"}:
+        return ()
+    path = os.path.normcase(os.path.realpath(os.path.abspath(origin)))
+    root = os.path.normcase(os.path.realpath(_ROOT))
+    if not _inside(path, root) or any(_inside(path, ext) for ext in external_roots):
+        return ()
+    candidates = {path}
+    if path.endswith((".pyc", ".pyo")):
+        try:
+            source = importlib.util.source_from_cache(path)
+        except ValueError:
+            source = path[:-1]
+        candidates.add(os.path.normcase(os.path.realpath(source)))
+    return tuple(candidates)
+
+
+class _RegistryImportGuard:
+    """Resolve imports normally but reject unbound repo source before loading."""
+
+    def __init__(self, finders, allowed_paths):
+        self._finders = tuple(finders)
+        self._allowed = {
+            os.path.normcase(os.path.realpath(os.path.abspath(path)))
+            for path in allowed_paths
+        }
+        self._external = _external_import_roots()
+        self.violation = None
+
+    def _check_spec(self, fullname, spec):
+        candidates = _repo_origin_candidates(spec.origin, self._external)
+        if candidates and not self._allowed.intersection(candidates):
+            self.violation = (
+                "repo-local import %s resolves outside the locked registry: %s" %
+                (fullname, spec.origin))
+            raise BootstrapRefused(self.violation)
+
+    def find_spec(self, fullname, path=None, target=None):
+        for finder in self._finders:
+            method = getattr(finder, "find_spec", None)
+            if method is None:
+                continue
+            spec = method(fullname, path, target)
+            if spec is not None:
+                self._check_spec(fullname, spec)
+                return spec
+        return None
+
+
+def _purge_repo_modules_for_guard(allowed_paths):
+    """Remove cached repo modules so every target import passes the guard."""
+    external = _external_import_roots()
+    bootstrap = os.path.normcase(os.path.realpath(os.path.abspath(__file__)))
+    for name, module in tuple(sys.modules.items()):
+        spec = getattr(module, "__spec__", None)
+        origin = getattr(spec, "origin", None) or getattr(module, "__file__", None)
+        candidates = _repo_origin_candidates(origin, external)
+        if candidates and bootstrap not in candidates:
+            sys.modules.pop(name, None)
+
+
+def _assert_loaded_repo_modules_registered(allowed_paths):
+    """Catch loaders that bypassed meta_path but registered a local module."""
+    allowed = {
+        os.path.normcase(os.path.realpath(os.path.abspath(path)))
+        for path in allowed_paths
+    }
+    external = _external_import_roots()
+    for name, module in tuple(sys.modules.items()):
+        spec = getattr(module, "__spec__", None)
+        origin = getattr(spec, "origin", None) or getattr(module, "__file__", None)
+        candidates = _repo_origin_candidates(origin, external)
+        if candidates and not allowed.intersection(candidates):
+            raise BootstrapRefused(
+                "loaded repo-local module %s is absent from the locked registry: %s" %
+                (name, origin))
 
 
 @contextlib.contextmanager
@@ -180,10 +280,7 @@ def _binding_snapshot(paths):
 
 
 def _execute_target(target, target_raw, paths, target_name, bindings, args):
-    module_names = {os.path.splitext(os.path.basename(path))[0]
-                    for path in paths.values() if path.endswith(".py")}
-    for name in module_names:
-        sys.modules.pop(name, None)
+    _purge_repo_modules_for_guard(paths.values())
     with tempfile.TemporaryDirectory(prefix="p2-locked-pycache-") as cache:
         previous_prefix = sys.pycache_prefix
         sys.pycache_prefix = cache
@@ -192,29 +289,45 @@ def _execute_target(target, target_raw, paths, target_name, bindings, args):
             module.__file__ = target
             module.__package__ = None
             module.__builtins__ = __builtins__
-            exec(compile(target_raw, target, "exec"), module.__dict__)
-            if not hasattr(module, "_cli_source_paths") or not hasattr(module, "main"):
-                raise BootstrapRefused("target lacks the locked CLI interface")
-            actual = module._cli_source_paths()
-            if (not isinstance(actual, dict) or set(actual) != set(paths) or
-                    any(not _same_path(actual[name], paths[name]) for name in paths)):
-                raise BootstrapRefused(
-                    "executed target source graph differs from its prelocked registry")
+            original_meta_path = list(sys.meta_path)
+            guard = _RegistryImportGuard(original_meta_path, paths.values())
+            sys.meta_path[:] = [guard]
             try:
-                module._verify_cli_bindings(bindings, paths)
-            except Exception as exc:
-                raise BootstrapRefused(
-                    "executed target rejected prelocked bindings: %s" % exc) from exc
-            if bindings[target_name]["sha256"] != _sha256_bytes(target_raw):
-                raise BootstrapRefused("executed target bytes differ from binding")
-            module._BOUND_CLI_BINDINGS = bindings
-            previous_argv0 = sys.argv[0]
-            sys.argv[0] = target
-            try:
-                return int(module.main(args))
+                exec(compile(target_raw, target, "exec"), module.__dict__)
+                if guard.violation is not None:
+                    raise BootstrapRefused(guard.violation)
+                _assert_loaded_repo_modules_registered(paths.values())
+                if (not hasattr(module, "_cli_source_paths") or
+                        not hasattr(module, "main")):
+                    raise BootstrapRefused("target lacks the locked CLI interface")
+                actual = module._cli_source_paths()
+                if (not isinstance(actual, dict) or set(actual) != set(paths) or
+                        any(not _same_path(actual[name], paths[name])
+                            for name in paths)):
+                    raise BootstrapRefused(
+                        "executed target source graph differs from its prelocked registry")
+                try:
+                    module._verify_cli_bindings(bindings, paths)
+                except Exception as exc:
+                    raise BootstrapRefused(
+                        "executed target rejected prelocked bindings: %s" % exc
+                    ) from exc
+                if bindings[target_name]["sha256"] != _sha256_bytes(target_raw):
+                    raise BootstrapRefused("executed target bytes differ from binding")
+                module._BOUND_CLI_BINDINGS = bindings
+                previous_argv0 = sys.argv[0]
+                sys.argv[0] = target
+                try:
+                    result = int(module.main(args))
+                finally:
+                    sys.argv[0] = previous_argv0
+                    module._BOUND_CLI_BINDINGS = None
+                if guard.violation is not None:
+                    raise BootstrapRefused(guard.violation)
+                _assert_loaded_repo_modules_registered(paths.values())
+                return result
             finally:
-                sys.argv[0] = previous_argv0
-                module._BOUND_CLI_BINDINGS = None
+                sys.meta_path[:] = original_meta_path
         finally:
             sys.pycache_prefix = previous_prefix
 

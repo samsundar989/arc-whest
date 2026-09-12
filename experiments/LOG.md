@@ -43245,3 +43245,48 @@ updated in place with the final source hashes and test observations.
 No protected data, producer/job-903 dependency, estimator, candidate math,
 coefficient, registry, gate, data role, public data or vault state changed. A new
 current-byte default preflight and a new fresh-context Skeptic remain required.
+
+## 2026-09-11 - Bootstrap registry completeness enforced before import
+
+**IMPORTANT Skeptic rejection and repair; no protected truth.** The fresh-context
+Skeptic rejected `a87c8dc` because `_CLI_SOURCE_REGISTRY` completeness was
+self-asserted. Its truth-free mutation removed only the `lifecycle_eval` row,
+refreshed the target fingerprint and left the import in place; unregistered
+top-level code then executed successfully through both the public script and
+direct bootstrap. The verdict is
+`experiments/2026-09-11_stage2_compact_p07/freeze_bridge/skeptic_verdict_preimport.md`
+(SHA-256 `615a94a952054b3ae40cf20dabe1716d35ac0650b520513fe943ecc6647d8371`).
+Workerq 925's green default preflight did not contain this discriminator and does
+not accept the rejected provenance claim.
+
+The bootstrap now purges cached repo-local modules by origin and installs a
+meta-path guard before compiling the target. The guard remains installed through
+`main()` and publication. It resolves imports normally but refuses any repo-local
+file origin absent from the already locked binding registry before that module's
+loader executes. Exact package/submodule origins and source equivalents of cached
+bytecode are checked; built-in, frozen and namespace containers carry no local
+executable file, and site-packages/dist-packages roots are excluded even when the
+virtual environment is physically under the repository. Loaded-module origin
+checks run after target top-level execution and again after successful `main()`.
+The existing manual frozen-arm loaders remain covered by their narrower held
+receipt/source locks.
+
+The strengthened P01 bridge fixture reproduces the Skeptic's missing-lifecycle
+mutation for both the direct bootstrap and real public script. Both return 2,
+the omitted module's top-level marker is absent, and no success marker is
+published. A second mutation imports an omitted repo-local module from inside
+`main()`; both paths again return 2 before module code or publication. The prior
+positive controls remain: direct bootstrap and real public script load disk B
+from a timestamp/size-compatible A-to-B bytecode fixture. Exact current-byte
+checks pass: freezer **19/19**, P01 bridge **15/15**, Stage-0 lab/data **32/32**,
+portability **103/103**, both public and direct-bootstrap help paths, `py_compile`,
+embedded fingerprints and `git diff --check`. Structured evidence is
+`freeze_bridge/bootstrap_repair_summary.json` (SHA-256
+`6b8d4532d060563d807b8b4bb16e796c8846b6de469b0287060797a82975bc84`)
+and `freeze_bridge/freezer_tests_bootstrap_repair.json`.
+
+No job-903 producer dependency, estimator, default arm, candidate math,
+coefficient, registry, gate, data role, protected label, public data or vault
+state changed. Job 903 remained running. No preflight was launched for these new
+bytes. A reviewed commit, terminal current-byte default preflight and a new
+fresh-context Skeptic remain required.
