@@ -45757,3 +45757,67 @@ integrated cost; a passing n8 does not rehabilitate n4 or establish
 physical source construction, rank384 adequacy, server residual, 8 GiB
 cap, or submission eligibility. Samuel's recorded answer remains
 **"I don't know"**. No protected data/estimator/vault change.
+
+**September 12 integrated n8 first result: FAIL, preserved before any
+optimization.** The test source was committed at `7b385ec`, unchanged
+integrated source SHA `284b550f5f1fde7840a7a84923a394bee069a3454f0c780601fe696457b8b9c8`,
+distinct input SHA `50e78f1851bf4432447c9436db147063bf241b060e5560ca144cf29a2b5aebcc`.
+Its focused fixture passed **186/187** and failed the frozen preactivation
+variance gate: L3 minimum `-0.1177162081`, with multiple later negative
+variances. All tracked intermediate arrays remained finite, maximum dense
+material-relative discrepancy `2.41036e-6` under the separately frozen
+`1e-4` comparison, negative-feed deletion gap `0.405`, K4 mean correction
+ratio max `0.920`, expected schedule and family/context accounting passed.
+The context billed 3,936,609 tiny FLOPs. The `safe_var` floor explains how
+finite results can coexist with a negative preactivation variance; this is
+**not** a numerically healthy run. Raw result SHA256
+`15f3b5c5f80942a03219c4babf8812aa5f0440b5bfca878e469e8a9a0dbe2b88`,
+with receipt/log at `integrated_first_source/n8_*`, committed `c3c6b96`.
+The earlier n4 **93/172 FAIL** remains unchanged. No width1024 meter,
+physical source, protected data or score result was produced. A same-input
+descriptive decomposition may locate the first negative covariance term;
+it cannot relabel the registered FAIL.
+
+**September 12 IMPORTANT pre-implementation exact compact-feed shortcut
+contract.** **Question:** can the positive K4-induced K3 Source use its
+actual S-dimensional source space and can the first transport exploit
+zero/diagonal structure, without changing the represented tensor?
+**Evidence:** CONFIRMED n4/n8 original synthetic program schedule and dense
+feed algebra checks; CONFIRMED both numerical-stability gates FAILED;
+CONFIRMED the accepted two-birth feed algebra uses a separate full n-column
+negative A/P leg; INFERRED the positive leg's n-S padded columns are all
+zero and exact to remove; SPECULATIVE full-width savings and rank adequacy.
+**Mechanism/intervention:** replace only the positive Source's padded
+P(n,n), zero A(n,n), selector(n,S), length-n zero/one vectors by
+P=w1*V (n,S), A=0(n,S), Z=1.5*(w2*V²-a)*p (n,S), L=I_S and length-S
+zeros/ones. It is a separate Source; the negative Source keeps literal
+A=diag(w2) and P=w1*C at n columns. On insertion, compute positive A
+as zero, positive P via W@(w1*V) at n×S, negative A by column-scaling W
+at n×n, and keep negative P's genuine dense multiplication. During
+positive ages and joins, zero A remains zero; omit zero A products while
+retaining its mathematically zero factors/Gram contribution. All positive
+P/Z contractions use S columns. Retain the ordinary path, 16 common
+casts, 14 shared C Grams, 15 K4 uses, 14 feed births, 28 joins and
+330/287 Source uses, final shortcut and all K3/K4 consumers.
+**Predictions/gates:** source birth tensors and independently enumerated
+full-rank tiny feeds equal the padded baseline/direct dense algebra to
+`1e-8` in float64 isolated algebra and `1e-4` material-relative across
+the float32 n8 16-layer integrated trace; unaltered negative-leg deletion
+remains a material mutant (>1e-6). Exact schedule/family context sums,
+no old direct-feed family, no n×n positive pad/source-space allocation,
+zero first positive-A/negative diagonal-A dense matmuls, source/input/
+package hashes, deterministic result and layer resident/scratch ledger
+must be verified. **Falsifier:** a tensor/consumer mismatch, unexpected
+dense positive family, lost negative full-rank leg, or schedule/memory
+accounting discrepancy. The existing negative n8 variance must remain
+visible; equivalent outputs there do **not** make it a stable trajectory.
+**Baseline/statistic/cost:** unchanged `5861747` padded source at exact
+frozen n4 and n8 inputs, direct n4/n8 dense tensor, paired deterministic
+differences; bill actual operations in one BudgetContext, report FLOP
+delta and process peak only after a separate stable input exists. No
+Phase-2 score, residual headroom, protected label, seed block, estimator
+or vault. This is an exact efficiency repair, not a model-improvement
+claim. Samuel's prediction is **"I don't know"**. Commit implementation
+and tiny result, current-byte preflight and obtain fresh independent
+Skeptic before accepting optimized cost. A red numerical stability gate
+still blocks a full-width cost verdict.
