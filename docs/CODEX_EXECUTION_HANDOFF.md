@@ -51,8 +51,13 @@ combined claim while accepting finite-bank identities. The separately
 contracted two-birth abstract compact feed passed 74/74 with fresh scoped
 Skeptic ACCEPT at full n4 rank; rank2 loses materially. Shared workerq 994
 live-byte default preflight passed 12/16, four Full-only skips, at 2,842.9 MiB.
-LOG commit `ad856c6` contracts a new split-bank numerical repair before any
-result. Stage 1's supplied-core algebra and compact baseline cost remain
+LOG commit `ad856c6` contracted a separate split-bank repair, which passed
+77/77 and received fresh Skeptic ACCEPT only for its fixed two-coordinate
+positive law and finite-bank conditional identities; workerq 996 passed
+current-byte default preflight 12/16, four Full-only skips, at 2,946.8 MiB.
+Lower-moment leakage remains material, so K4-only closure is unproved. LOG
+`ec0bdf3` contracts a single integrated first-source compact cost meter,
+not yet run. Stage 1's supplied-core algebra and compact baseline cost remain
 accepted narrowly; full physical source closure and complete cost are open.
 There is no better submission candidate, no fresh DECIDE/public/vault result,
 and Samuel's Stage-3 hold remains binding. Historical pickup instructions below

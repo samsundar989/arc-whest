@@ -65,8 +65,15 @@ accepted finite-bank algebra only. A separate abstract two-birth compact
 feed fixture passed 74/74 with fresh scoped Skeptic ACCEPT at full n4
 rank; rank2 loses materially (`two_birth_compact/`, `ad856c6`). Shared
 workerq 994 default preflight passed 12/16, four Full-only skips, peak
-2,842.9 MiB at exact tested bytes. The full-polar split-bank repair is
-preregistered in LOG `ad856c6`, with no result yet.
+2,842.9 MiB at exact tested bytes. The separately contracted full-polar
+split-bank repair then passed 77/77, with 48/direct continuous third-layer
+raw error `3.40e-15` and unchanged unsplit-bank negative control `3.14e-5`.
+Its independent Skeptic ACCEPTED only the fixed two-coordinate numerical
+repair and finite-bank conditional identities; workerq 996 default preflight
+passed 12/16 at 2,946.8 MiB (`nonlinear_split_bank/`, `ec0bdf3`). Material
+lower-moment leakage prevents a K4-only closure claim. LOG `ec0bdf3`
+contracts a complete-cost instrument for one externally supplied first
+source plus the ordinary compact K3 backbone; it has no result yet.
 No full K4 source/compression/counted-cost path is accepted.
 Stage 4 remains
 conditional on a measured Stage-2 bottleneck.
@@ -185,8 +192,9 @@ Skeptic ACCEPT. A later whole cumulant is not an additive increment; the
 first two-layer convergence gate failed while its finite-measure algebra
 passed. The boundary-aware attempt also failed its combined convergence gate;
 the exact-axis repair passed with narrow independent acceptance. The first
-genuinely nonlinear old-history toy failed its continuous integration gate;
-full-rank abstract compact multi-birth feed integration passed narrowly,
+nonlinear old-history bank failed continuous integration; a separate
+split-bank toy repair passed narrowly. Full-rank abstract compact multi-birth
+feed integration passed narrowly,
 but physical source closure and compressed integration remain open
 before any corrected full arm. Do not fit a new constant or spend
 another protected label until the source math is independently checked and

@@ -229,8 +229,18 @@ at full n4 rank (`two_birth_compact/`, `ad856c6`); rank 2 loses up to
 `1.228` in its tensor diagnostic. Shared live workerq 994 default
 preflight passed 12/16, four Full-only skips, at 2,842.9 MiB under
 5 GiB; tested HEAD, four result/source targets and 248 Python hashes match.
-LOG commit `ad856c6` preregisters a separate full-polar bank split at
-the final ReLU's angular boundaries. It has no result yet.
+The separately contracted full-polar split bank then **PASSED 77/77**:
+layer-three positive order48/continuous error `3.40e-15` versus `1e-8`,
+while the unchanged unsplit bank still misses by `3.14e-5`. Its fresh
+Skeptic independently integrated all raw moments and **ACCEPTED only the
+fixed two-coordinate numerical repair and finite-bank conditional-law
+identities** (`nonlinear_split_bank/`, `ec0bdf3`). Workerq 996 passed
+current-byte default preflight 12/16, four Full-only skips, peak
+2,946.8 MiB under 5 GiB; four targets and 249 Python hashes match.
+The nonlinear K4 gap is not K4-only physics: lower moments leak and the
+true K3 contrast differs from its derivative-truncated feed. LOG
+`ec0bdf3` contracts an integrated **one externally supplied first source**
+compact cost meter; no result exists yet.
 Full Stage-1 source conformance remains open; supplied-core algebra and compact
 cost remain valid in scope. No
 protected labels should be spent on this diagnosis. There is no scientific kill or
@@ -324,8 +334,8 @@ verdicts; the signed-cubature factor identity and fixed n=4 first-layer source
 also have scoped acceptance. The boundary-aware two-layer attempt failed;
 the exact-axis repair, synthetic first-source cost and abstract signed-feed
 embedding/multi-birth integration have narrow acceptance. The nonlinear
-continuous law's first fixture failed its numerical gate; a split-bank
-repair, compression and the priced
+continuous law's first fixture failed its numerical gate; the split-bank
+toy repair has narrow acceptance, while compression and the priced
 complete source/history path remain concrete label-free discriminators.
 The `mixed_source/cost_options.md`
 ledger is conventional arithmetic, not measured flopscope cost or a feasible
