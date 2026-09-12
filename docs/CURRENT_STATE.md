@@ -1,7 +1,7 @@
 # CURRENT_STATE.md — read this first
 
-**Current September 11, 2026, after compact Stage-2 label-free acceptance and
-during the registered P07 producer.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
+**Current September 12, 2026, after the registered P07 fit and during the
+P01 four-arm DESIGN comparison.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
 archived at `docs/archive/CURRENT_STATE_before_worker_review_2026-09-10.md`.
 
 ## What is proved
@@ -46,6 +46,36 @@ the separate current mutation battery passed as described above. Historical work
 as negative evidence, not current proof.
 
 ## Active Stage 2 contract
+
+**Live update (September 12).** Workerq 903 completed the accepted label-free
+P07 producer and its standalone truth-free verifier passed. Its measured peak
+was 10,771.9 MiB over 13,282.6 seconds; the declared 5 GiB was too low. An
+identical monolithic producer needs at least a 12 GiB queue declaration. This
+does not measure deployed estimator RAM. The protected, registered P07 DESIGN
+fit selected the explicitly registered `lam=1/3` (index 2) from four equal-cost
+values over 384 identities. All four mechanism arms were frozen with immutable
+hashes. P07 remains exposed reusable DESIGN, not fresh DECIDE evidence.
+
+The first P01 jobs 944 and 946 read exposed DESIGN truth but crashed before
+scoring an arm because the lock-first import guard hid installed `dill` package
+metadata. Job 945 failed in a git snapshot before truth access. Their complete
+reads and failures are preserved, without a P01 report. The narrow metadata
+protocol repair is committed at `ab969c8`: the real before/after fixture and
+existing provenance adversaries pass, workerq 948 passed current-live-byte
+default preflight 12/16 with four Full-only skips, and a new independent Skeptic
+**ACCEPTED** the scoped fix. The old freeze receipt correctly became stale; a
+fresh receipt was validated from the unchanged P07 fit and all four arm files
+are byte-identical to the prior freeze. Evidence and verdict live under
+`experiments/2026-09-11_stage2_compact_p07/freeze_bridge/`.
+
+Workerq **949** is the current high-priority, no-snapshot, zero-GPU P01 retry
+with 8 GiB declared RAM and two CPUs. It uses the newly validated receipt,
+all 96 exposed DESIGN networks, paired four-arm comparison, Phase-2 counted
+cost, the registered `gate=1.10` and explicit **accuracy-only** residual-cap
+relaxation. Do not inspect a partial report or call it complete. After terminal
+success, preserve raw job/report evidence, analyze noise-aware paired outcomes,
+and obtain a new fresh-context result Skeptic and synthesis before the next
+Stage-2 slice. A failed implementation path does not reject coherent K4.
 
 The old contract at `08f787b` is superseded. P01 has three recorded DESIGN reads
 and placeholder-smoke exposure; it is never relabeled untouched. P07 is reusable
@@ -113,8 +143,9 @@ its role is unchanged. The exact command and protected stdout are preserved in
 
 ## Submission state
 
-There is **no newly proven better submission**. The compact reference has no score
-evidence and is not a legal shipped estimator candidate. The standing choices are
+There is **no newly proven better submission**. The compact arms have only DESIGN
+fit and label-free cost evidence so far, and are not shipped estimator candidates.
+The standing choices are
 unchanged:
 
 | role | evidence |

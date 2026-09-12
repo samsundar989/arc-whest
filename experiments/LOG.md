@@ -43558,3 +43558,17 @@ truth-free comparison and validator result is
 No P07/P01 truth was opened by re-freezing. P01 remains exposed DESIGN; the
 registered full four-arm report is now the next operational test, not yet a
 scientific result.
+
+### Registered exposed-DESIGN P01 four-arm retry submitted
+
+Workerq **949** began the already contracted P01 comparison against the newly
+validated receipt `frozen_arms_metadata_protocol/freeze_receipt.json`: high
+priority, 8 GiB RAM, two CPUs, zero GPU, `--no-snapshot`, `uv run --no-sync`,
+all 96 P01 networks, `gate=1.10`, `competition_cost_lambda=0`, exact control,
+four unchanged arms and `--residual-cap 0` explicitly marking **accuracy-only**
+evidence. Its command signature is `d283b765897e26cf`. This is the same
+registered scientific intervention; the retries changed only the execution
+bridge and documented their failed P01 reads. No report or verdict exists while
+job 949 is running. Keep the reviewed source and freeze bytes unchanged until
+the job terminates, then preserve the raw queue record before reading the
+complete report. A fresh result Skeptic and synthesis remain required.

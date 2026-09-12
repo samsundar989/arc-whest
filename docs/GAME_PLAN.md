@@ -77,6 +77,22 @@ Start with tiny metered operation-family checks; then queue label-free 1024 x 16
 
 ## Stage 2 — valid design, then fresh decisions
 
+**September 12 execution state.** The label-free producer (workerq 903),
+standalone verifier, registered protected P07 DESIGN fit and four-arm freeze
+completed. The selected registered coefficient is `lam=1/3`; the four candidates
+had identical counted costs per identity. This fit is DESIGN only. The accepted
+metadata-import repair at `ab969c8` was necessary after two P01 attempts failed
+before arm scoring; workerq 948 passed live-byte default preflight 12/16 (four
+Full-only skips), a fresh Skeptic accepted the scoped repair, and a fresh freeze
+receipt now binds the repaired bootstrap while all four arm bytes remain exactly
+unchanged. Workerq **949** is running the registered exposed-DESIGN P01
+comparison at high priority, 8 GiB RAM, two CPUs, zero GPU, no snapshot. It uses
+the explicit accuracy-only residual relaxation. A terminal report, result
+Skeptic and synthesis are still required before the residual-rank question.
+P01 has five documented reads before job 949 (three historical smoke reads and
+two failed production attempts); it must never be relabeled untouched. The
+earlier paragraphs below describe the entry contract and historical queue state.
+
 **Current entry condition satisfied:** the replacement experiment contract, three
 verbatim `I don't know` human predictions and bounded coefficient/identity registry
 are committed in the LOG. The label-free producer guard has fresh-context Skeptic
