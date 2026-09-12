@@ -46280,3 +46280,94 @@ Its clarifications are applied: setup is measured separately off the per-MLP FLO
 budget and the L4 archive verification is explicit. This ACCEPT is for the plan,
 not a measured candidate, legal signoff or new submission authorization. Active
 relative links and git whitespace checks pass; no implementation files changed.
+
+## 2026-09-12 — F21 preregistration: one exact D21 shared-right contraction
+
+**Class:** STRATEGIC candidate and future DECIDE; the independent tiny math probe
+is IMPORTANT. This entry precedes candidate measurements and any new seed read.
+Samuel's three predictions are **pending** and will be recorded before results.
+
+**Question.** Can fusing two D21 products that share `M.T` lower the complete
+counted cost of the best-public L4 own-code estimator without material accuracy,
+shape, lifecycle, or deployment regression? Does its paired competition score
+beat original L4 on fresh Phase-2 networks?
+
+**Evidence.** CONFIRMED: frozen L2 SHA256
+`390bc226bbf517df0110facfc0dc91c78ef670e8a49368a536cabf630057d1db`;
+L4 `estimator.py` member in `submission-k3strassen-L4.tar.gz` SHA256
+`052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58`.
+CONFIRMED: L4 is the best-public current score, but its dated unpaired public
+mean and wall reading do not prove a new candidate. INFERRED: 14 actual wide
+products/105 lineage equivalents disappear at depth 16. SPECULATIVE: roughly
+13% dominant-work saving and any total cost, runtime, or score improvement.
+
+**Hypothesis and mechanism.** Distributivity changes
+`2*mm(A_D*M,M.T)+3*mm(A_L*C,M.T)`, `C=A_L*w2b`, into
+`mm(2*(A_D*M)+3*(A_L*C),M.T)`, removing one wide matmul per noninitial D21
+read. Float32/Strassen rounding may alter the trajectory; the hypothesis is
+that its score effect is smaller than the counted-cost reduction.
+
+**Intervention and frozen selection.** Construct exactly one candidate from
+the L4 member. Change only `_dslice21`'s named terms and its explanatory
+comment. Keep the other products, `/3`, off-mask, D3, full Wick/centering,
+source births, all history, scalar K4, saturation, dtype, backend, setup,
+and conservative generation chooser byte-identical. No fused L2 candidate or
+backend selection on DECIDE; original L2 is robustness context on the same
+networks. No coefficient fitting, budget spending, rank change, or calibration.
+
+**Predictions before results.** (1) Tiny exact rational dense tensor and both
+oriented contraction controls, including signed cancellation, zero, non-square
+lineage and off-diagonal mask, agree exactly. Actual float32 need not be bitwise.
+(2) Fixed backend/precision trajectories will have normalized per-entry error
+`abs(new-old)/max(1,abs(old)) <= 2e-3` at every sampled state/source field and
+output, and final-output relative RMS error `<= 1e-2`; no nonfinite or shape
+regression. (3) Full official-stack counted FLOPs fall at least 8% against the
+same L4 parent, after all operand additions and materializations. On exposed
+DESIGN, paired mean score will not regress more than 5%; on fresh DECIDE the
+candidate will clear the isolated `1.05x` arithmetic gain gate against L4.
+These are hypotheses, not measured values.
+
+**Engineering gate/falsifier.** A source diff outside the named contraction,
+failed tiny exact/orientation/mask check, any trajectory bound failure, new
+failure/nonfinite state, fewer than 8% total counted-FLOP savings, or a
+resource/lifecycle failure rejects this implementation for promotion. Complete
+metering uses the official flopscope/WhestBench stack on live 1024x16 shape,
+with immutable flopscope arrays, actual float32 and unchanged Strassen backend.
+Record operation families, new left-operand construction, materialization,
+setup separately, and peak process RAM where measured. The 8% threshold is on
+the **isolated candidate-minus-original-L4** counted program, not on a mixed
+baseline. A cost screen failure is not a scientific kill of exact fusion.
+
+**DESIGN and DECIDE.** After engineering passes, read one declared exposed P01
+DESIGN sample of 96 canonical networks, paired L4/fused-L4, with original L2
+as context and correct per-network truth floors. A >5% regression in paired
+arithmetic mean score stops the candidate; otherwise freeze exact bytes before
+DECIDE. No choice among variants is made from P01 or DECIDE. Allocate a new
+Phase-2 DECISION block `P09` (128 fresh canonical mints, proposed span in
+`seed_blocks.py` to be committed before claim) and claim through
+`seed_ledger.py` before first read. No P08 or vault use. The promotion gate is
+`competition_score.decide(control=L4, candidate=fused_L4, gate=1.05,
+interval="t")` on paired per-MLP **arithmetic** scores; passing also requires
+its 95% difference interval strictly above zero. Compare L2 on those same
+networks as context only. Report raw MSE with ground-truth noise floor,
+observed/corrected scores and official-precision forecast. No public-fit
+constants. Public mini/full is read-only CONFIRM after decision.
+
+**Frozen cost and deployment model.** Phase 2 has lambda zero, so cost is
+counted `F`; calculate each score as final-layer MSE times
+`max(0.1,F/2**41)`, including the applicable observed server `+2**24`
+offset when relevant, never conflating counted and effective FLOPs.
+Residual is a failure cliff, not a score cost: record worst observed
+subprocess residual and `0.4 / worst`, with observation domain explicit.
+Local absolute wall seconds do not certify the grading server. Setup is
+measured separately and is off the per-MLP cost. Whole-process Linux 8192 MiB
+enforcement and official subprocess mini remain candidate-specific gates.
+
+**Confounders and scope.** Common random networks, truth and precision for
+all arms; same source hashes and evaluator path. Changed operation order can
+change rounding and downstream nonlinear state. Exposed P01 estimates design
+robustness only, not independent promotion evidence. The local shim reads
+rotation-using cost low; official stack governs metering. Preserve all frozen
+archives, shipped estimator, HUMAN_MODEL, vault and standing data roles.
+Independent fresh-context Skeptic reviews the probe/instrument and result
+packet before any promotion or submission claim.
