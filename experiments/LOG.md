@@ -45632,3 +45632,59 @@ Do **not** run or interpret a width1024 meter until a separately registered
 numerical/algebra adjudication and independent Skeptic accept the tiny path.
 This FAIL does not reject K4 scientific behavior, compressed-rank accuracy,
 or the unmeasured integrated FLOP budget. No label, block or vault touched.
+
+**September 12 IMPORTANT contract: physical two-coordinate causal signed-law
+increment, BEFORE implementation or numeric fixture.** Design-only derivation
+`docs/research/2026-09-12_causal_signed_k4_increment.md` at `73c2176`.
+**Question:** can an exactly defined Gaussian-reference reset decompose a
+physical three-layer ReLU law into new and carried old signed measures, and
+do the conditional K3/K4 contrasts remain correct through the second
+nonlinear map? **Evidence:** CONFIRMED the fixed first-layer Gaussian/ReLU
+source tiny tensor and two-coordinate exact-axis law; CONFIRMED the
+full-polar positive-bank repair on an artificial conditional law; CONFIRMED
+lower-moment leakage in that toy and failure of K4-only closure;
+INFERRED a physical signed whole-law reference can be a causal symbolic
+source; SPECULATIVE that it admits cheap finite-rank representation or
+useful width1024 cost. **Hypothesis/mechanism:** with fixed rho=1/2 and
+the B,D maps in the memo, let R2=ReLU#N(0,B E[XX.T] B.T) and
+R3=ReLU#N(0,D E[YY.T] D.T), both using **second raw** preactivation
+moments. Then Delta2=P2-R2, Q3=F_D#R2, Delta3=Q3-R3 and
+O3=F_D#Delta2 are causal signed laws satisfying
+P3=R3+Delta3+O3. Conditional cumulant differences
+kappa4(Q3)-kappa4(R3) and kappa4(P3)-kappa4(Q3) telescope only after
+all lower raw-moment cross terms are included. The n2 continuous polar
+oracle derives all five positive laws independently, while a three-node
+radial, angular 32/48/64 split bank checks numerical implementation.
+**Intervention/gates/falsifier:** freeze exact matrices, analytic
+c=1/6+sqrt(3)/(4*pi), formula and all five gate groups in the memo.
+Require M1/S2 analytic defect <=1e-12, M2/S3 reference defect <=1e-10,
+positive-definite S2/S3, positive unrescaled mass-one banks and radial
+degree0..5 defects <=1e-12. All 15 raw monomials per law at the three
+angular comparisons and 48/direct continuous must be <=1e-8 material
+relative, reported scalar integration error estimate <1e-10. Same-bank
+signed raw identity and all 16 K4/eight K3 conditional contrasts must be
+<=1e-10; old nonlinear contrast from linear transport >1e-6 absolute
+and >1e-3 times its previous K4 norm, signed linear-D control <=1e-10.
+At least one lower-degree old signed raw moment >1e-8, and its conditional
+K4 differs from bare fourth-raw contrast >1e-6; zeroed-source controls
+<=1e-10. Preserve any failed gate, including integration not resolving a
+boundary. **Predictions:** signed raw/tensor identities should close to
+floating precision on one common finite bank; a physically nonlinear old
+contrast and lower-moment leakage should be material, whereas linear D
+should transport K4 exactly. Samuel's recorded prediction for new
+questions is **"I don't know"**. **Baseline/data/statistic:** five
+independently integrated positive laws, direct atom enumeration and
+set-partition cumulants, paired same-bank deterministic identities, no
+challenge labels, seed ledger, protected split or vault. This is an
+IMPORTANT probe-math fixture; no competition score, cost gate, residual
+cliff, human fit or estimator change. **Cost model/scope:** tiny CPU-only
+scalar quadrature with operation counts and no Phase-2 FLOP inference;
+the exact symbolic signed laws retain full distributions, later-map
+split occurs only when that map becomes available, and future-aware finite
+banks are diagnostics, not a deployable online algorithm. Implement in
+isolated `local_sim/` script, run focused tiny only after this commit,
+preserve raw positive and negative results, current-byte default preflight
+through workerq 5 GiB/2 CPUs/zero GPU, and obtain a fresh-context
+independent Skeptic before any acceptance. If exact finite identities pass,
+claim only this fixed physical n2 conditional decomposition; width1024
+compression, residual, score and submission remain unproved.
