@@ -45455,3 +45455,113 @@ rank. INFERRED: multi-birth cost metering is a concrete next instrument.
 SPECULATIVE: nonlinear physical old response, rank384/residual16 adequacy,
 complete width1024 cost, residual and score. No protected label, decision
 seed, public or vault was touched.
+
+**September 12 full-polar split-bank synthesis (scoped ACCEPT).** IMPORTANT
+contract `ad856c6` preceded separate source/result commit `238ce53`. The
+new full-polar three-node radial and fully split angular bank **PASSED 77/77**
+with original `1e-8` positive-law and fixed signed-law gates. At 32/48/64
+angular nodes per eight sectors (768/1152/1536 positive particles), worst
+layer-three 48/direct-continuous material-relative raw error was
+`3.4036091470118717e-15`, 32/48 `1.7648343725246743e-15`;
+radial six-moment defect `3.91e-14`, unit mass defect `6.66e-16`.
+Unchanged *failed* unsplit order48 bank remains a negative control at
+`3.1351810768989914e-05`. The new conditional nonlinear signed-law gap
+is `0.00592546157`, relative `0.8870` to its layer-two old K4; signed
+linear control `3.19e-15` and swapped-D31 mutant `2.04e-6`. The true K3
+contrast differs from the declared quadratic K4-to-K3 feed by up to
+`0.012438`; layer-three lower-moment leakage is material. Source SHA256
+`e3708d9d878f3191cbf61dcd632e188507d0b575e77e692219108c280d3ff59f`;
+raw result SHA256 `9a8692559f2744bccd4a0bcd6fef1941f9bab551af984f3fdeb316fe15e277ab`.
+Workerq 996 live default preflight **SUCCEEDED GREEN 12/16**, four Full-only
+skips, peak 2,946.813 MiB under 5 GiB/2 CPUs/zero GPU at tested HEAD
+`238ce53`. A first post-run PowerShell receipt was malformed and refused;
+the corrected `preflight_996_after.json` recomputes the exact before-listed
+249 Python paths. HEAD, four target and **249/249** Python hashes match;
+the fresh Skeptic independently recomputed them. Raw log SHA256
+`c791e0bb250b8d8ab464f48d44905d7665a3834d9e7cbb4fe5627ca29fcfd788`.
+The fresh independent Skeptic **ACCEPTED only the fixed two-coordinate
+positive-law numerical repair and same-bank conditional signed-atomic
+identities**. It independently integrated all 15 moments at both layers
+(worst stored-reference discrepancies `1.11e-16`, `5.55e-17`), derived
+all boundaries, and recomputed the nonlinear gap. Verdict at
+`nonlinear_split_bank/skeptic_verdict.md`. CONFIRMED: the extra final-D
+sector breaks repair this toy positive-law quadrature and the nonlinear
+signed-law conditional response is material on its finite bank. INFERRED:
+bank-refinement replay may test stability of this artificial source signal.
+SPECULATIVE: continuous signed source, K4-only closure, later physical
+increments, compressed rank, cost, residual or score. The bank uses fixed
+future-map lookahead and is not a deployable source constructor. No
+protected data, decision/public/vault or estimator change.
+
+**September 12 IMPORTANT contract: integrated one-source compact cost
+instrument, BEFORE implementation or any new measurement.** Design-only
+derivation `docs/research/2026-09-12_integrated_first_source_cost_proposal.md`
+at `0551191`. **Question:** what are the actual counted FLOPs and peak
+memory of one *externally supplied* S64 discrete K4 source and all its
+induced K3 births when they share the existing compact ordinary K3
+backbone, weighted-Gram/thin-QR state and first/final shortcuts, with
+overlap charged exactly once? **Evidence:** CONFIRMED supplied-core compact
+reference 818,494,496,296 official-package FLOPs for its own source
+algebra; CONFIRMED dense one-first-source partial kernel 704,164,664,384
+FLOPs, 390.651B of which are two negative D21 dense products and 225.376B
+are dense A transports; CONFIRMED full-rank n4 abstract two-birth feed
+identity; INFERRED dense feed-age operations must be replaced by compact
+ones, and shared input casts/C can be reused; SPECULATIVE that rank384
+plus residual16 for ordinary sources and S64 positive-feed residual is
+accurate, under budget or under 8 GiB. The two historical totals must
+**not** be added. **Hypothesis/mechanism:** a single official-flopscope
+`BudgetContext` with one common deterministic map bank and one external
+weighted discrete source carries V across L1..L15, forms exact-discrete
+D4/D22/oriented-D31 consumers and 14 quadratic K3 feed births. Each feed
+is the accepted positive-minus-a plus covariance-negative Source. Both
+share the *same* young/old weighted-Gram sketch, thin QR, factor rotation,
+carried Gram and residual state as all ordinary K3 sources. Use C from
+the K4 readout for birth q/a without another dense reconstruction, cast
+each common W once, and remove old approximate K4 feed/consumer and
+separate dense feed-age readout. Retain ordinary K3, mean/full covariance,
+all K4 consumers, response costs and final mean-only readout. External
+source-bank generation is explicitly outside this first cost milestone.
+
+**Intervention:** implement one deterministic synthetic n4 schedule and
+independent dense fourth-cumulant/K3-feed plus ordinary K3 readout oracle
+before a width1024 run. Audit every retained ordinary and feed Source,
+signed carry, shared/young join, source age, D4/D22/D31 and D3/oriented
+D21 against the raw dense reference at full tiny rank, with `1e-8`
+float32 material-relative gate and exact schedule/call gates. For the
+full-width meter use common `W0=source_map`, `W1..W15` in both backbone
+and K4 bank, fixed synthetic source/response values declared in a frozen
+input manifest, rank384, ordinary residual16 and **untruncated S64**
+positive feed residual; negative A/Q has literal n columns. Record a
+compressed-versus-full tiny diagnostic separately, not an exactness
+assertion for rank384. Freeze expected 15 K4 uses (14 full, one D4-only
+final), 14 feed births/28 sub-Sources, 15 ordinary births, 105 feed
+age uses (91 nonfinal), 210 feed subsource D3/182 D21 uses, 330 total
+Source D3/287 D21 uses, and 30 old-source joins at recent4; assert or
+preserve a failed schedule. L0 has no K3 readout; L15 has no birth,
+join or D21. Each flopscope family delta must sum to context FLOPs;
+assert no duplicate common casts/C or lingering dense feed-age family,
+largest array <=4 GiB, deterministic result and exact frozen package/
+source/input hashes. Report per-layer resident/scratch payload and
+workerq measured process peak. **Predictions/cost gate:** 14 feed births
+and full negative A/P make the total substantially larger than the
+818.494B supplied-core anchor, perhaps order `1e12`--`3e12` FLOPs;
+the actual integration must determine it. A path is within the Phase-2
+FLOP budget only if counted F <`2**41`; record a failure otherwise.
+Measured process peak <8 GiB is an observation gate, **not** enforcement
+of the grader's cap on Windows; failure is preserved. Samuel's standing
+prediction is **"I don't know"**. **Falsifier:** tiny oracle or complete
+family/schedule/provenance/memory gate fails; an over-budget result rejects
+this specific integrated implementation's feasibility, not the intended
+K4 scientific hypothesis. **Baseline/control:** independent n4 dense
+oracle; old compact and dense-source meters are accounting anchors, not
+addends. **Statistic/data:** deterministic truth-free algebra and counted
+FLOPs, no paired score, noise, seed block, public or vault. Phase-2
+`C=F`, residual 0.4 s cliff remains unmeasured. **Scope:** ONE first
+discrete source with linear carries, not a generated physical later-source
+law, multi-source nonlinear response or eligible estimator. Commit the
+tiny/width meter source and its manifests, run tiny CPU-only first, then
+width1024 only via workerq with a conservative 12 GiB RAM/zero VRAM/
+two CPU request and inherited project priority. Verify raw job/HEAD/input/
+source/package bytes, run separate current-byte default preflight at
+5 GiB/2 CPUs/zero GPU and obtain a fresh-context Skeptic before accepting
+the instrument. A 12 GiB queue reservation is not 8 GiB grader proof.
