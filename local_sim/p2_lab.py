@@ -39,21 +39,24 @@ via `competition_score.decide()`. Percentile and BCa are refused there, not here
 
 ## What it will NOT do
 
-It will not choose anything on public mini/full: it reads a fresh DESIGN truth
-file and nothing else. It will not spend a block -- `p2_truth.py` does that, once,
-inside the contract. And `decide()` requires a pre-registered gate, so this module
-cannot invent one.
+It will not choose anything on public mini/full. It accepts only the already
+exposed P01 DESIGN truth and only four arms bound by a strict P07 fit/freeze
+receipt. It cannot accept free-form arm paths or confuse the fitted ``k4_lam``
+with Phase 2's zero ``competition_cost_lambda``. ``decide()`` requires a
+pre-registered gate, so this module cannot invent one.
 
 Run:
     uv run python local_sim/p2_lab.py --truth experiments/<dir>/truth.npz \\
         --out experiments/<dir>/ladder.json \\
-        --arms exact,coherent,consumers-only,births-only --control exact
+        --freeze-receipt experiments/<freeze>/freeze_receipt.json --control exact \
+        --competition-cost-lambda 0
 """
 
 from __future__ import annotations
 
 import argparse
 import ast
+import hashlib
 import json
 import os
 import re
@@ -74,9 +77,11 @@ import tracemalloc  # noqa: E402
 
 import competition_score as cs  # noqa: E402
 import lifecycle_eval as le  # noqa: E402
+import p2_freeze_k4_arms as k4_freezer  # noqa: E402
 from phase2_manifest import load as load_manifest  # noqa: E402
 
 ARMS_DIR = os.path.join(_HERE, "p2_arms")
+_ACTIVE_ARM_PATHS = None
 
 MECHANISM_ARMS = ("exact", "coherent", "consumers-only", "births-only")
 
@@ -97,28 +102,52 @@ MECHANISM_ARMS = ("exact", "coherent", "consumers-only", "births-only")
 CONTROL = "exact"
 
 
+def _revalidate_instruments(bindings):
+    for name, binding in bindings.items():
+        path = k4_freezer._repo_path(binding["path"], f"lab instrument {name}")
+        try:
+            with open(path, "rb") as fh:
+                closing = hashlib.sha256(fh.read()).hexdigest()
+        except OSError as exc:
+            raise k4_freezer.FreezeRefused(
+                f"lab instrument {name} unavailable at closing publication: {exc}") from exc
+        if closing != binding["sha256"]:
+            raise k4_freezer.FreezeRefused(
+                f"lab instrument {name} changed before closing publication")
+
+
 def _arm_path(name):
     """Map the report-facing arm name to its generated Python source."""
     if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", name):
         raise ValueError(f"invalid arm name {name!r}")
+    if _ACTIVE_ARM_PATHS is not None:
+        try:
+            return _ACTIVE_ARM_PATHS[name]
+        except KeyError as exc:
+            raise ValueError(f"freeze receipt has no arm {name!r}") from exc
     return os.path.join(ARMS_DIR, f"arm_{name.replace('-', '_')}.py")
 
 
 def _parse_arms(raw):
     arms = [x.strip() for x in raw.split(",") if x.strip()]
     if len(arms) != len(set(arms)):
-        raise ValueError("--arms contains duplicates")
+        raise ValueError("freeze receipt arm set contains duplicates")
     if set(arms) != set(MECHANISM_ARMS) or len(arms) != 4:
         raise ValueError(
-            "--arms must explicitly name exactly: " + ",".join(MECHANISM_ARMS))
+            "freeze receipt must name exactly: " + ",".join(MECHANISM_ARMS))
     return arms
 
 
-def _validate_request(a, man):
+def _validate_request(a, man, frozen):
     """Validate everything knowable without opening protected truth."""
-    arms = _parse_arms(a.arms)
+    freeze_rows = frozen["receipt"]["arms"]
+    arms = _parse_arms(",".join(row["name"].replace("_", "-")
+                                for row in freeze_rows))
+    arm_paths = {row["name"].replace("_", "-"):
+                 k4_freezer._repo_path(row["path"], "frozen arm")
+                 for row in freeze_rows}
     if a.control != CONTROL or a.control not in arms:
-        raise ValueError(f"--control must be {CONTROL!r} and appear in --arms")
+        raise ValueError(f"--control must be {CONTROL!r} and appear in the frozen arms")
     if not a.out:
         raise ValueError("--out is required")
     if os.path.lexists(a.out):
@@ -129,7 +158,8 @@ def _validate_request(a, man):
         raise ValueError(f"truth file does not exist: {a.truth}")
     if a.n < 0 or a.depth_subset <= 0:
         raise ValueError("--n must be non-negative and --depth-subset positive")
-    for label, value in (("lambda", a.lam), ("gate", a.gate),
+    for label, value in (("competition cost lambda", a.competition_cost_lambda),
+                         ("gate", a.gate),
                          ("official samples", a.official_samples),
                          ("residual cap", a.residual_cap)):
         if value is not None and not np.isfinite(value):
@@ -138,6 +168,8 @@ def _validate_request(a, man):
         raise ValueError("--gate must be positive")
     if a.official_samples <= 0:
         raise ValueError("--official-samples must be positive")
+    if a.competition_cost_lambda != 0.0:
+        raise ValueError("Phase-2 --competition-cost-lambda must be exactly zero")
     try:
         shape, budget = man["shape"], man["budget"]
         if int(shape["width"]) <= 0 or int(shape["depth"]) <= 0:
@@ -149,7 +181,7 @@ def _validate_request(a, man):
     except (KeyError, TypeError) as exc:
         raise ValueError(f"manifest is missing required configuration: {exc}") from exc
     for name in arms:
-        path = _arm_path(name)
+        path = arm_paths[name]
         if not os.path.isfile(path):
             raise ValueError(f"generated arm is missing: {path}")
         try:
@@ -157,7 +189,7 @@ def _validate_request(a, man):
                 ast.parse(fh.read(), filename=path)
         except (OSError, SyntaxError) as exc:
             raise ValueError(f"generated arm {name!r} does not parse: {exc}") from exc
-    return arms
+    return arms, arm_paths
 
 
 def _replica_noise(y1, y2):
@@ -237,14 +269,12 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--truth", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--arms", required=True,
-                    help="explicit four-arm mechanism set: "
-                         + ",".join(MECHANISM_ARMS))
+    ap.add_argument("--freeze-receipt", default="",
+                    help="immutable P07 coefficient-to-four-arm freeze receipt")
     ap.add_argument("--n", type=int, default=0, help="0 = every network in the truth file")
-    ap.add_argument("--lam", type=float, default=None,
-                    help="lambda used by the named lifecycle. The live Phase-2 "
-                         "default is 0, so cost is counted FLOPs only; any "
-                         "nonzero value is an explicit non-Phase-2 deviation.")
+    ap.add_argument("--competition-cost-lambda", type=float, default=0.0,
+                    help="Phase-2 score-cost lambda; must be zero and is distinct "
+                         "from the fitted K4 coefficient")
     ap.add_argument("--depth-subset", type=int, default=8,
                     help="networks used for the MSE-by-depth mechanism curve")
     ap.add_argument("--gate", type=float, default=None,
@@ -268,16 +298,64 @@ def main(argv=None) -> int:
                          "and recorded; such a run is never residual evidence.")
     a = ap.parse_args(argv)
 
-    man = load_manifest()
+    instrument_paths = {
+        "p2_lab": os.path.abspath(__file__),
+        "lifecycle_eval": os.path.abspath(le.__file__),
+        "competition_score": os.path.abspath(cs.__file__),
+        "harness": os.path.join(_HERE, "harness.py"),
+        "mint_provenance": os.path.join(_HERE, "mint_provenance.py"),
+        "phase2_manifest": os.path.join(_HERE, "phase2_manifest.py"),
+        "phase2_manifest_data": os.path.join(
+            _ROOT, "experiments", "2026-08-21_phase2_manifest",
+            "phase2_manifest.json"),
+        "official_config": os.path.join(_HERE, "official_config.py"),
+        "seed_ledger": os.path.join(_HERE, "seed_ledger.py"),
+        "seed_blocks": os.path.join(_HERE, "seed_blocks.py"),
+    }
+    out_preexisting = os.path.lexists(a.out)
+    global _ACTIVE_ARM_PATHS
     try:
-        arms = _validate_request(a, man)
-    except ValueError as exc:
-        print(f"REFUSED before truth access: {exc}")
+        with k4_freezer.hold_freeze_receipt(a.freeze_receipt) as frozen:
+            with k4_freezer._stable_files(list(instrument_paths.values()) +
+                                          [os.path.abspath(a.truth)]):
+                instrument_bindings = {}
+                for name, path in instrument_paths.items():
+                    with open(path, "rb") as fh:
+                        raw = fh.read()
+                    if path.endswith(".py"):
+                        ast.parse(raw.decode("utf-8"), filename=path)
+                    else:
+                        json.loads(raw.decode("utf-8"))
+                    instrument_bindings[name] = {
+                        "path": os.path.relpath(path, _ROOT).replace("\\", "/"),
+                        "sha256": hashlib.sha256(raw).hexdigest()}
+                for name in ("truth_reads_interface", "arm_freezer"):
+                    binding = frozen["receipt"]["source_bindings"][name]
+                    instrument_bindings[name] = binding
+                man = load_manifest()
+                arms, arm_paths = _validate_request(a, man, frozen)
+                _ACTIVE_ARM_PATHS = arm_paths
+                rc = _execute_held(a, man, frozen, arms, arm_paths,
+                                   instrument_bindings)
+                k4_freezer.revalidate_held_freeze(frozen)
+                _revalidate_instruments(instrument_bindings)
+                return rc
+    except (ValueError, k4_freezer.FreezeRefused) as exc:
+        if not out_preexisting and os.path.isfile(a.out):
+            os.remove(a.out)
+        print(f"REFUSED: {exc}")
         return 2
+    finally:
+        _ACTIVE_ARM_PATHS = None
+
+
+def _execute_held(a, man, frozen, arms, arm_paths, instrument_bindings) -> int:
     width, depth = man["shape"]["width"], man["shape"]["depth"]
     budget = man["budget"]["flop_budget_per_mlp"]
     floor = man["budget"]["multiplier_floor"]
     parity = man["package_parity"]
+    frozen_hashes = {row["name"].replace("_", "-"): row["sha256"]
+                     for row in frozen["receipt"]["arms"]}
 
     # THE TRUTH READ IS REGISTERED, NOT MERELY PERFORMED.
     #
@@ -290,11 +368,68 @@ def main(argv=None) -> int:
     import truth_reads as _tr
     try:
         block = _tr.resolve_block(a.truth, a.block)
+        if block != "P01":
+            raise _tr.ReadRefused(
+                "the receipt-driven four-arm mechanism report is restricted to exposed DESIGN block P01")
+        read_status = _tr.status(block)
+        if read_status.get("tier") != "DESIGN":
+            raise _tr.ReadRefused(
+                "P01 must remain registered as exposed DESIGN data")
+        before_reservations = {row["reservation"] for row in read_status["reads"]}
         z = _tr.load_truth(
             block, a.truth, consumer="local_sim/p2_lab.py",
             purpose=f"four-arm mechanism report: {','.join(arms)}",
             ts=a.ts, instrument=os.path.abspath(__file__),
             result_artifact=a.out, note=a.note)
+        after_rows = _tr.status(block)["reads"]
+        def is_this_report(row):
+            try:
+                return k4_freezer._same_path(
+                    k4_freezer._repo_path(row["result_artifact"],
+                                          "P01 result artifact"),
+                    os.path.abspath(a.out))
+            except (KeyError, k4_freezer.FreezeRefused):
+                return False
+        new_rows = [row for row in after_rows
+                    if row["reservation"] not in before_reservations and
+                    row["consumer"] == "local_sim/p2_lab.py" and
+                    row.get("purpose") == f"four-arm mechanism report: {','.join(arms)}" and
+                    is_this_report(row)]
+        ids = {row["reservation"] for row in new_rows}
+        if (len(ids) != 1 or len(new_rows) != 2 or
+                {row["status"] for row in new_rows} != {"reserved", "completed"}):
+            raise k4_freezer.FreezeRefused(
+                "P01 truth access lacks one unique reserved/completed receipt pair")
+        truth_reservation = next(row for row in new_rows if row["status"] == "completed")
+        truth_reserved = next(row for row in new_rows if row["status"] == "reserved")
+        immutable_reservation_fields = {
+            "block", "artifact", "artifact_sha256", "consumer",
+            "instrument_sha256", "purpose", "ts", "reservation",
+            "result_artifact", "note", "backfilled", "timestamp_source",
+            "receipt_created_utc"}
+        if (not k4_freezer._same_path(
+                k4_freezer._repo_path(truth_reservation["result_artifact"],
+                                      "P01 result artifact"),
+                os.path.abspath(a.out)) or
+                truth_reservation["block"] != "P01" or
+                truth_reservation.get("instrument_sha256") !=
+                instrument_bindings["p2_lab"]["sha256"] or
+                truth_reservation.get("backfilled") is not False or
+                any(truth_reserved.get(key) != truth_reservation.get(key)
+                    for key in immutable_reservation_fields) or
+                truth_reserved.get("receipt_completed_utc") != "" or
+                truth_reserved.get("elapsed_seconds") is not None):
+            raise k4_freezer.FreezeRefused(
+                "P01 truth receipt does not bind this report path")
+        with open(a.truth, "rb") as fh:
+            truth_sha = hashlib.sha256(fh.read()).hexdigest()
+        if truth_reservation["artifact_sha256"] != truth_sha:
+            raise k4_freezer.FreezeRefused(
+                "P01 truth bytes do not match the completed reservation")
+        truth_binding = {
+            "data_role": "exposed-design", "block": "P01",
+            "path": os.path.relpath(os.path.abspath(a.truth), _ROOT).replace("\\", "/"),
+            "sha256": truth_sha, "reservation_receipt": truth_reservation}
     except _tr.ReadRefused as exc:
         print(f"REFUSED before truth access: {exc}")
         return 2
@@ -364,7 +499,7 @@ def main(argv=None) -> int:
                                        else a.residual_cap)}
     spec = le.LifecycleSpec(width=width, depth=depth, flop_budget=budget,
                             floor=floor, **_res,
-                            **({} if a.lam is None else {"lam": a.lam}))
+                            lam=a.competition_cost_lambda)
     if a.residual_cap is not None:
         print("  *** RESIDUAL CAP RELAXED -- this run is ACCURACY-ONLY. Its "
               "failure accounting")
@@ -403,6 +538,11 @@ def main(argv=None) -> int:
         t0 = time.perf_counter()
         # ONE scored pass. `lifecycle_eval` owns every scored number.
         rows, prov = _run_arm(name, seeds, y_mid, spec, list(gt_noise))
+        expected_hash = frozen_hashes[name]
+        row_hashes = {row.candidate_sha256 for row in rows}
+        if prov.get("candidate_sha256") != expected_hash or row_hashes != {expected_hash}:
+            raise k4_freezer.FreezeRefused(
+                f"scored lifecycle for {name} did not execute its frozen candidate bytes")
         suite = le.score(rows, spec=spec)
         raw = np.array([r.mse for r in rows])
         cross = raw - rep_noise
@@ -412,7 +552,10 @@ def main(argv=None) -> int:
         # computed on a fixed SUBSET and labelled as such rather than pretending
         # otherwise.
         tracemalloc.start()
-        _f, alld = _predict_all(name, seeds[:n_depth], spec)
+        _f, alld, depth_hash = _predict_all(name, seeds[:n_depth], spec)
+        if depth_hash != expected_hash:
+            raise k4_freezer.FreezeRefused(
+                f"depth lifecycle for {name} did not execute its frozen candidate bytes")
         _cur, peak_bytes = tracemalloc.get_traced_memory()
         tracemalloc.stop()
         by_depth = np.array([
@@ -580,8 +723,25 @@ def main(argv=None) -> int:
             "official_samples": float(a.official_samples),
             "historical_timestamp_supplied": bool(a.ts),
         }
+        bridge = {
+            "fit_receipt": {"path": os.path.relpath(
+                frozen["fit_receipt_path"], _ROOT).replace("\\", "/"),
+                "sha256": frozen["fit_receipt_sha256"]},
+            "freeze_receipt": {"path": os.path.relpath(
+                frozen["receipt_path"], _ROOT).replace("\\", "/"),
+                "sha256": frozen["receipt_sha256"]},
+            "k4_lam": frozen["k4_lam"],
+            "competition_cost_lambda": spec.lam,
+            "protected_truth": truth_binding,
+            "frozen_arm_hashes": frozen_hashes,
+            "instrument_bindings": instrument_bindings,
+        }
+        def before_publish():
+            k4_freezer.revalidate_held_freeze(frozen)
+            _revalidate_instruments(instrument_bindings)
         _write(a.out, results, paired, man, seeds, z, spec, arms, verdicts,
-               a.gate, run_config=run_config, noise_aware=noise_aware)
+               a.gate, run_config=run_config, noise_aware=noise_aware,
+               bridge=bridge, before_publish=before_publish)
         print(f"\n  artifact -> {os.path.relpath(a.out, _ROOT)}")
     print("=" * 92)
     return 0
@@ -599,7 +759,7 @@ def _predict_all(name, seeds, spec):
     import harness
     from mint_provenance import canonical_mint
 
-    mod, _ = le.load_candidate(_arm_path(name))
+    mod, source_hash = le.load_candidate(_arm_path(name))
     est = mod.Estimator()
     est.setup(le.SetupContext(spec))
     finals, alls = [], []
@@ -611,7 +771,7 @@ def _predict_all(name, seeds, spec):
             p = np.asarray(est.predict(mlp, spec.flop_budget), dtype=np.float64)
         alls.append(p)
         finals.append(p[-1])
-    return np.asarray(finals), np.asarray(alls)
+    return np.asarray(finals), np.asarray(alls), source_hash
 
 
 def _paired_payload(p):
@@ -632,11 +792,15 @@ def _paired_payload(p):
 
 
 def _write(path, results, paired, man, seeds, z, spec, arms,
-           verdicts=None, gate=None, *, run_config=None, noise_aware=None):
+           verdicts=None, gate=None, *, run_config=None, noise_aware=None,
+           bridge=None, before_publish=None):
     if os.path.lexists(path):
         raise SystemExit(f"REFUSED: {path} exists. Evidence is immutable.")
     run_config = dict(run_config or {})
     noise_aware = noise_aware or {}
+    if not isinstance(bridge, dict):
+        raise k4_freezer.FreezeRefused(
+            "a validated K4 freeze bridge is required for report publication")
     control = run_config.get("control", CONTROL)
     n_samples = float(z["n_samples"])
     gt_per_replica = np.asarray(z["gt_noise"][:len(seeds)], dtype=np.float64)
@@ -647,7 +811,7 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
     official_samples = float(run_config.get("official_samples", 1e9))
     payload = {
         "artifact": "p2_cp1_ladder",
-        "artifact_version": 2,
+        "artifact_version": 3,
         "status": "complete" if (set(arms) == set(MECHANISM_ARMS)
                                    and set(results) == set(arms)) else "incomplete",
         "is_probe_not_evidence": bool(int(z["probe"])) if "probe" in z else False,
@@ -671,12 +835,13 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
             "replicas": 2,
         },
         "seeds": [int(s) for s in seeds],
-        "lambda_used": spec.lam,
+        "k4_freeze": bridge,
+        "competition_cost_lambda": spec.lam,
         "deciding_model": ("counted FLOPs only (lam=0), as frozen in the P2-CP1 "
                            "contract" if spec.lam == 0.0 else
                            "effective F + lam*R at the PHASE-1 lambda; this is "
                            "NOT the model the contract froze"),
-        "lambda_provenance": "Phase 2 sets lambda to zero; any nonzero value is a recorded deviation",
+        "competition_cost_lambda_provenance": "Phase 2 sets competition cost lambda to zero",
         "residual_is_graded": False,
         "control": control,
         "run_configuration": run_config,
@@ -804,6 +969,10 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
             "authority": "competition_score.decide(gate=..., interval='t')",
         },
     }
+    if before_publish is None:
+        raise k4_freezer.FreezeRefused(
+            "closing dependency revalidation is required before report publication")
+    before_publish()
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     try:
         with open(path, "x", encoding="utf-8") as fh:

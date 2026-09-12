@@ -1,0 +1,55 @@
+{
+  "acceptance_pending": [
+    "current default preflight",
+    "fresh-context Skeptic"
+  ],
+  "data_access": {
+    "fixtures": "synthetic/sacrificial only",
+    "p01_labels_read": false,
+    "p07_labels_read": false
+  },
+  "schema": "arc-whest.p07-p01-freeze-bridge-evidence.v1",
+  "scope": {
+    "default_arms_modified": false,
+    "estimator_modified": false,
+    "job_894_dependencies_modified": false,
+    "research_labels_read": false
+  },
+  "source_hashes": {
+    "local_sim/p2_freeze_k4_arms.py": "1536dee036dc542d477727e7b89cb1e81de0d3d2f5352a795faadea112519052",
+    "local_sim/p2_lab.py": "a842e3d7a82412440ffb50148e0b791ec0947150fe3641f02aa0da5ab70eea04",
+    "local_sim/test_p2_freeze_k4_arms.py": "978a25cc67b20ed59bfdcd36177374725f42a1773a5202e0679d9e01cfd16050",
+    "local_sim/test_p2_lab_freeze_bridge.py": "4e66627cff6f3d8b9bc7159db4d70250a70423731322e4d4674b211c193baffe",
+    "local_sim/test_stage0_lab_data.py": "3192b384610051d7bdf4b34b3909baa957ec8a1e68802a1344c34f1e4fdac68d"
+  },
+  "tests": {
+    "diff_check": "clean",
+    "freezer": {
+      "artifact": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/freezer_tests.json",
+      "log": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/freezer_tests.log",
+      "passed": 15,
+      "total": 15
+    },
+    "k4_fit_regression": {
+      "log": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/k4_fit_regression.log",
+      "passed": 97,
+      "total": 97
+    },
+    "lab_bridge": {
+      "log": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/lab_bridge_tests.log",
+      "passed": 10,
+      "total": 10
+    },
+    "portability": {
+      "log": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/portability.log",
+      "passed": 103,
+      "status": "PORTABLE",
+      "total": 103
+    },
+    "stage0_lab_data": {
+      "log": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/stage0_lab_data_tests.log",
+      "passed": 32,
+      "total": 32
+    }
+  }
+}

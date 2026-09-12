@@ -24,6 +24,8 @@ import numpy as np  # noqa: E402
 import lifecycle_eval as le  # noqa: E402
 import p2_corrector as corrector  # noqa: E402
 import p2_lab as lab  # noqa: E402
+import p2_freeze_k4_arms as freezer  # noqa: E402
+import test_p2_freeze_k4_arms as freeze_test  # noqa: E402
 import p2_k3_parity as k3_parity  # noqa: E402
 import p2_t2_corrector as t2_corrector  # noqa: E402
 import truth_reads as tr  # noqa: E402
@@ -55,7 +57,7 @@ def patched(obj, name, value):
 
 
 def _sandbox():
-    td = tempfile.TemporaryDirectory(prefix="stage0_lab_data_")
+    td = tempfile.TemporaryDirectory(prefix="stage0_lab_data_", dir=_ROOT)
     root = td.name
     arms = os.path.join(root, "arms")
     os.makedirs(arms)
@@ -73,7 +75,11 @@ def _sandbox():
         gt_noise=np.asarray([0.02, 0.02]), n_samples=np.asarray(10),
         width=np.asarray(2), depth=np.asarray(2), probe=np.asarray(0),
     )
-    return td, arms, truth
+    fit_receipt, _ = freeze_test._fixture(root, selected=1)
+    frozen_dir = os.path.join(root, "frozen")
+    freezer.freeze(type("A", (), {"fit_receipt": fit_receipt,
+                                   "out_dir": frozen_dir})())
+    return td, arms, truth, os.path.join(frozen_dir, "freeze_receipt.json")
 
 
 def _manifest():
@@ -86,10 +92,10 @@ def _manifest():
     }
 
 
-def _row(name, i, seed, mse, flops, noise):
+def _row(name, i, seed, mse, flops, noise, source_hash=None):
     return le.EvidenceRow(
         index=i, input_seed=seed, estimator_seed=seed + 1,
-        candidate=f"arm_{name}.py", candidate_sha256=(name[0] * 64),
+        candidate=f"arm_{name}.py", candidate_sha256=(source_hash or name[0] * 64),
         truth_sha256=("f" * 64), width=2, depth=2, budget=100.0,
         flops_used=float(flops), n_ops=1.0, mse=float(mse),
         zero_prediction_mse=0.01, gt_noise=float(noise),
@@ -98,7 +104,7 @@ def _row(name, i, seed, mse, flops, noise):
 
 def test_validation_precedes_truth():
     print("\n1. request validation precedes protected truth access")
-    td, arms, truth = _sandbox()
+    td, arms, truth, freeze_receipt = _sandbox()
     with td:
         calls = []
 
@@ -107,21 +113,24 @@ def test_validation_precedes_truth():
             raise AssertionError("truth loader must not run")
 
         base = ["--truth", truth, "--out", os.path.join(td.name, "out.json"),
-                "--arms", ",".join(lab.MECHANISM_ARMS),
-                "--control", "exact", "--lam", "0"]
+                "--freeze-receipt", freeze_receipt,
+                "--control", "exact", "--competition-cost-lambda", "0"]
         with patched(lab, "ARMS_DIR", arms), patched(lab, "load_manifest", _manifest), \
                 patched(tr, "load_truth", forbidden):
-            rc_control = lab.main(base[:-3] + ["wrong", "--lam", "0"])
+            bad_control = list(base)
+            bad_control[bad_control.index("exact")] = "wrong"
+            rc_control = lab.main(bad_control)
             existing = os.path.join(td.name, "exists.json")
             with open(existing, "w", encoding="utf-8") as fh:
                 fh.write("keep")
             rc_output = lab.main([
-                "--truth", truth, "--out", existing, "--arms",
-                ",".join(lab.MECHANISM_ARMS), "--control", "exact",
-                "--lam", "0"])
-            bad_arm = os.path.join(arms, "arm_births_only.py")
-            with open(bad_arm, "w", encoding="utf-8") as fh:
-                fh.write("def broken(\n")
+                "--truth", truth, "--out", existing,
+                "--freeze-receipt", freeze_receipt, "--control", "exact",
+                "--competition-cost-lambda", "0"])
+            frozen = json.load(open(freeze_receipt, encoding="utf-8"))
+            bad_arm = freezer._repo_path(frozen["arms"][-1]["path"], "test arm")
+            with open(bad_arm, "ab") as fh:
+                fh.write(b"\n# invalid frozen bytes\n")
             rc_parse = lab.main(base)
         check("invalid control is refused", rc_control == 2)
         check("existing output is refused", rc_output == 2)
@@ -132,7 +141,7 @@ def test_validation_precedes_truth():
 
 def test_block_identity_mismatch_precedes_truth():
     print("\n2. an explicit block cannot contradict the truth filename")
-    td, arms, truth_p01 = _sandbox()
+    td, arms, truth_p01, freeze_receipt = _sandbox()
     with td:
         truth_p08 = os.path.join(td.name, "truth_P08.npz")
         os.replace(truth_p01, truth_p08)
@@ -143,9 +152,9 @@ def test_block_identity_mismatch_precedes_truth():
             raise AssertionError("mismatched block reached the truth loader")
 
         args = ["--truth", truth_p08, "--block", "P01", "--out",
-                os.path.join(td.name, "lab.json"), "--arms",
-                ",".join(lab.MECHANISM_ARMS), "--control", "exact",
-                "--lam", "0"]
+                os.path.join(td.name, "lab.json"), "--freeze-receipt",
+                freeze_receipt, "--control", "exact",
+                "--competition-cost-lambda", "0"]
         with patched(lab, "ARMS_DIR", arms), patched(lab, "load_manifest", _manifest), \
                 patched(tr, "load_truth", forbidden):
             lab_rc = lab.main(args)
@@ -186,17 +195,21 @@ def test_block_identity_mismatch_precedes_truth():
 
 def test_complete_report_and_receipt():
     print("\n3. real lab entry point writes one complete, noise-aware report")
-    td, arms, truth = _sandbox()
+    td, arms, truth, freeze_receipt = _sandbox()
     with td:
         out = os.path.join(td.name, "report.json")
         reads = os.path.join(td.name, "reads.jsonl")
         ledger = os.path.join(td.name, "ledger.jsonl")
         open(ledger, "w").close()
         original_load = tr.load_truth
+        original_status = tr.status
 
         def sacrificial_load(block, artifact, **kw):
             kw.update(path=reads, ledger_path=ledger)
             return original_load(block, artifact, **kw)
+
+        def sacrificial_status(block):
+            return original_status(block, path=reads)
 
         flops = {"exact": 20, "coherent": 60,
                  "consumers-only": 35, "births-only": 45}
@@ -206,25 +219,27 @@ def test_complete_report_and_receipt():
         def fake_run(name, seeds, truth_final, spec, gt_noise):
             check(f"{name} receives half the per-replica noise floor",
                   np.allclose(gt_noise, [0.01, 0.01]))
+            source_hash = _sha(lab._arm_path(name))
             rows = [_row(name, i, int(seed), mse[name] + i * 0.001,
-                         flops[name], gt_noise[i])
+                         flops[name], gt_noise[i], source_hash)
                     for i, seed in enumerate(seeds)]
             return rows, {"setup_seconds": 0.0,
-                          "candidate_sha256": name[0] * 64}
+                          "candidate_sha256": source_hash}
 
         def fake_predict(name, seeds, spec):
             a = np.zeros((len(seeds), spec.depth, spec.width), dtype=np.float64)
-            return a[:, -1], a
+            return a[:, -1], a, _sha(lab._arm_path(name))
 
-        args = ["--truth", truth, "--out", out, "--arms",
-                ",".join(lab.MECHANISM_ARMS), "--control", "exact",
-                "--lam", "0", "--residual-cap", "0",
+        args = ["--truth", truth, "--out", out, "--freeze-receipt",
+                freeze_receipt, "--control", "exact",
+                "--competition-cost-lambda", "0", "--residual-cap", "0",
                 "--official-samples", "1000"]
         with patched(lab, "ARMS_DIR", arms), patched(lab, "load_manifest", _manifest), \
                 patched(lab, "_run_arm", fake_run), \
                 patched(lab, "_predict_all", fake_predict), \
                 patched(lab, "_cost_under_012", lambda *x: None), \
-                patched(tr, "load_truth", sacrificial_load):
+                patched(tr, "load_truth", sacrificial_load), \
+                patched(tr, "status", sacrificial_status):
             rc = lab.main(args)
             n_lines_after_first = len(tr.reads(reads))
             rc_again = lab.main(args)
@@ -265,7 +280,7 @@ def test_corrector_and_history():
     print("\n4. corrector uses the shared loader and live history is unchanged")
     before = _sha(tr.READS_PATH)
     p01, p08 = tr.spent("P01"), tr.spent("P08")
-    td, _arms, truth = _sandbox()
+    td, _arms, truth, _freeze_receipt = _sandbox()
     with td:
         seen = {}
 
@@ -295,7 +310,7 @@ def test_corrector_and_history():
 
 def test_historical_baseline():
     print("\n5. a fixed pre-registry baseline participates in the cap")
-    td, _arms, truth = _sandbox()
+    td, _arms, truth, _freeze_receipt = _sandbox()
     with td:
         reads = os.path.join(td.name, "reads.jsonl")
         ledger = os.path.join(td.name, "ledger.jsonl")

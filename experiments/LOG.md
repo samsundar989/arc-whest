@@ -42951,3 +42951,35 @@ accepted report. Any ambiguous lambda field, unbound dependency, accepted mutati
 changed score/noise/gate behavior, current preflight failure or fresh Skeptic
 rejection blocks P01. This is IMPORTANT instrument work, uses no seed block and
 opens no research truth.
+
+### P07-to-P01 freeze bridge — implementation result before preflight
+
+The new `p2_freeze_k4_arms.py` validates the completed protected-design P07 fit
+receipt, recomputes the registered objective from its per-identity evidence, checks
+the exact selected candidate and all current registry/source bindings, and requires
+the fit receipt's completed truth-read pair to exist in the live ledger. It renders
+the four registered arms into a fresh directory from one locked generator/template
+snapshot and publishes the freeze receipt last. It never reads a label file.
+
+`p2_lab.py` now accepts only that freeze receipt and exposed P01 DESIGN truth. It
+holds and revalidates the receipts, generated arms, generator/template and relevant
+instrument/data-registry sources through the scored and depth passes and exclusive
+report publication. Executed lifecycle hashes must equal the frozen arm hashes.
+The report records `k4_lam` independently from the enforced Phase-2
+`competition_cost_lambda=0`, plus the exact fit/freeze, arm, truth and P01 completed
+read bindings. A closing mutation removes the just-written report.
+
+Synthetic and regression evidence is green: freezer **15/15**, receipt-driven lab
+**10/10**, Stage-0 lab/data **32/32**, unchanged K4 producer/fitter **97/97**, and
+portability **103/103**. The negative fixtures cover missing and wrong-role
+evidence, stale/mixed/wrong-lambda arms, changed sources, recomputed-selection
+mismatch, incomplete P07 read evidence, non-DESIGN P01 status, forged lifecycle
+hashes, and closing publication races. `py_compile` and `git diff --check` pass.
+Raw logs and the source-hash manifest are under
+`experiments/2026-09-11_stage2_compact_p07/freeze_bridge/`. No research label,
+seed block, estimator, default arm, vault or job-894 dependency changed.
+
+**Knowledge delta:** the formerly missing mechanical bridge from the P07-selected
+coefficient to the four P01 mechanism arms now exists on current working bytes.
+Current default preflight and a fresh-context Skeptic remain required before this
+instrument may open P01; implementation tests alone are not acceptance.
