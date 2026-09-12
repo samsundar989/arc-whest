@@ -33,8 +33,17 @@ found a later whole cumulant double-counts old history. The first
 two-layer increment fixture failed 23 of 323 registered convergence checks;
 its Skeptic REJECTED the combined numeric gate while accepting limited
 finite-measure identities. LOG commit `f4f1305` contracts a boundary-aware
-repair without changing the threshold. Stage 1's supplied-core algebra and compact
-baseline cost remain accepted narrowly; full source closure is reopened.
+repair without changing the threshold. That repair failed its combined
+convergence gate (640/688). A distinct exact-axis three-node repair passed
+715/715 and received fresh Skeptic ACCEPT only for its two-coordinate
+continuous law and toy linear old carry (`increment_axis_gauss/`, `0782efa`).
+The synthetic first-source K4/K3 kernel measured 704.165 billion counted FLOPs
+and received a fresh narrow Skeptic ACCEPT (`first_source_kernel/`, `70a2d80`);
+it does not include physical source production, later births, ordinary K3
+backbone overlap or full Gram/QR integration. LOG commit `60ab638` contracts
+the next signed-feed embedding/rank fixture. Stage 1's supplied-core algebra
+and compact baseline cost remain accepted narrowly; full source closure and
+complete cost are open.
 There is no better submission candidate, no fresh DECIDE/public/vault result,
 and Samuel's Stage-3 hold remains binding. Historical pickup instructions below
 must not cause a second fit or P01 relabeling.

@@ -48,8 +48,15 @@ ledger, but architecture INCOMPLETE: a later whole cumulant cannot be inserted
 as an additive age source. The first two-layer increment fixture fails its
 registered 32/48 convergence gate (300/323 pass); its independent Skeptic
 REJECTED the combined numeric claim and accepted only same-discrete-measure
-accounting. LOG commit `f4f1305` contracts a boundary-aware repair with the
-unchanged gate. No full K4 source/compression/counted-cost path is accepted.
+accounting. The boundary-aware repair failed its unchanged combined gate
+(640/688); a distinct exact-axis three-node repair then passed 715/715 with
+fresh Skeptic ACCEPT limited to a two-coordinate continuous law and toy linear
+old carry (`increment_axis_gauss/`, `0782efa`). A separately accepted synthetic
+one-first-source kernel measured 704.165 billion official-package FLOPs and
+889.9 MiB process peak (`first_source_kernel/`, `70a2d80`); it omits physical
+source generation, later increments and ordinary K3 backbone overlap. A
+preregistered signed-feed embedding/rank fixture (`60ab638`) is pending.
+No full K4 source/compression/counted-cost path is accepted.
 Stage 4 remains
 conditional on a measured Stage-2 bottleneck.
 
@@ -165,7 +172,9 @@ The latter's metric-core residual remains material. The full-sign weighted
 cubature factor and n=4 first-layer source checks now have narrow fresh
 Skeptic ACCEPT. A later whole cumulant is not an additive increment; the
 first two-layer convergence gate failed while its finite-measure algebra
-passed. LOG commit `f4f1305` contracts a boundary-aware numeric repair
+passed. The boundary-aware attempt also failed its combined convergence gate;
+the exact-axis repair passed with narrow independent acceptance. A genuinely
+nonlinear old-history increment and compact-feed/rank integration remain open
 before any corrected full arm. Do not fit a new constant or spend
 another protected label until the source math is independently checked and
 repaired within a new contract and fresh Skeptic gate. This is not a registered

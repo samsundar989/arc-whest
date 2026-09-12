@@ -1,7 +1,7 @@
 # CURRENT_STATE.md — read this first
 
-**Current September 12, 2026, after the exposed-DESIGN P01 four-arm result
-and independent result synthesis.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
+**Current September 12, 2026, after the exact-axis and first-source cost
+Skeptic verdicts.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
 archived at `docs/archive/CURRENT_STATE_before_worker_review_2026-09-10.md`.
 
 ## What is proved
@@ -188,6 +188,30 @@ same-discrete-measure factor/consumer identities pass. Its fresh Skeptic
 algebra (`increment_source/`, `16996f1`; workerq 983 default preflight
 12/16, four Full-only skips, 2,842.2 MiB peak). LOG commit `f4f1305`
 preregisters a boundary-aware numerical repair without moving the gate.
+That boundary-aware fixture also **FAILED its unchanged combined gate**:
+640/688 passed, with 48 N32/48 fourth-moment discrepancies. Its independent
+Skeptic rejected convergence while accepting finite-measure identities and
+the N48/64/conditional-reference diagnosis (`increment_boundary/`, `fdc6e3c`).
+The separately contracted exact-axis three-node measure then passed **715/715**
+at the original N32/48/64 and `1e-8` gate, with worst material-relative
+comparison below `8e-13`. Its fresh Skeptic **ACCEPTED only the fixed
+two-coordinate continuous law and toy linear old carry** (`increment_axis_gauss/`,
+`0782efa`); workerq 991 live-byte default preflight passed 12/16, four Full-only
+skips, at 2,827.1 MiB under a 5 GiB request. The failed fixtures remain intact.
+The accepted source does not yet establish nonlinear old-history response or
+width-1024 source/rank.
+
+A separately contracted synthetic **one externally supplied first-source**
+K4/K3 kernel measured 704,164,664,384 official-package FLOPs at width 1024,
+depth 16, S64, with 889.9 MiB observed process peak. Its n4 dense oracle and
+fresh Skeptic accepted only that discrete partial path (`first_source_kernel/`,
+`70a2d80`). The synthetic input generation, later physical increments, ordinary
+K3 backbone overlap, Gram/QR integration, residual and score are outside its
+meter. Snapshot workerq 988 was red due ignored evidence and checkout-byte
+normalization; live current-byte workerq 990 passed default preflight 12/16.
+LOG commit `60ab638` preregisters a tiny signed-feed embedding/rank fixture
+before its measurement. The feed's compatibility with the existing compact
+two-leg state, including any compression to rank 384/residual 16, is pending.
 Full Stage-1 source conformance remains open; supplied-core algebra and compact
 cost remain valid in scope. No
 protected labels should be spent on this diagnosis. There is no scientific kill or
@@ -278,7 +302,9 @@ counterexample and executable trace have independent acceptance, and the
 repair-math Skeptic supplied a concrete residual counterexample. The dense
 linear oracle and Gaussian-pair mixed-source check have accepted narrow
 verdicts; the signed-cubature factor identity and fixed n=4 first-layer source
-also have scoped acceptance. The boundary-aware two-layer increment and priced
+also have scoped acceptance. The boundary-aware two-layer attempt failed;
+the exact-axis repair and synthetic first-source cost have narrow acceptance.
+Nonlinear old-history response, signed-feed embedding/rank and the priced
 complete source/history path remain concrete label-free discriminators.
 The `mixed_source/cost_options.md`
 ledger is conventional arithmetic, not measured flopscope cost or a feasible
