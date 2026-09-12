@@ -46338,9 +46338,11 @@ setup separately, and peak process RAM where measured. The 8% threshold is on
 the **isolated candidate-minus-original-L4** counted program, not on a mixed
 baseline. A cost screen failure is not a scientific kill of exact fusion.
 
-**DESIGN and DECIDE.** After engineering passes, read one declared exposed P01
-DESIGN sample of 96 canonical networks, paired L4/fused-L4, with original L2
-as context and correct per-network truth floors. A >5% regression in paired
+**DESIGN and DECIDE.** After engineering passes, read the 24 exposed P01
+DESIGN networks with the existing two independent high-resolution `2**26`
+truth halves (the lower-resolution 96-network truth has too large a noise floor
+for L4-level absolute MSE), paired L4/fused-L4, with original L2 as context
+and correct per-network truth floors. A >5% regression in paired
 arithmetic mean score stops the candidate; otherwise freeze exact bytes before
 DECIDE. No choice among variants is made from P01 or DECIDE. Allocate a new
 Phase-2 DECISION block `P09` (128 fresh canonical mints, proposed span in
@@ -46351,7 +46353,10 @@ interval="t")` on paired per-MLP **arithmetic** scores; passing also requires
 its 95% difference interval strictly above zero. Compare L2 on those same
 networks as context only. Report raw MSE with ground-truth noise floor,
 observed/corrected scores and official-precision forecast. No public-fit
-constants. Public mini/full is read-only CONFIRM after decision.
+constants. Mint two independent `2**26` truth replicas for P09, or stop and
+amend the preregistration before any P09 draw if the measured truth-producer
+resource requirement makes this impossible; lower precision is not a silent
+substitution. Public mini/full is read-only CONFIRM after decision.
 
 **Frozen cost and deployment model.** Phase 2 has lambda zero, so cost is
 counted `F`; calculate each score as final-layer MSE times
