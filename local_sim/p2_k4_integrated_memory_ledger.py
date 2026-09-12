@@ -69,7 +69,12 @@ class History:
 
 
 def inventory(arrays: list[Array]) -> dict:
-    unique = {array.key: array for array in arrays}
+    # A sliced view may carry a smaller logical shape with the same backing
+    # payload identity. The largest extent wins when summing that identity.
+    unique = {}
+    for array in arrays:
+        if array.key not in unique or array.nbytes > unique[array.key].nbytes:
+            unique[array.key] = array
     return {"bytes": sum(a.nbytes for a in unique.values()),
             "objects": len(unique),
             "fields": [{"id": a.key, "shape": list(a.shape),
@@ -216,6 +221,7 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
         prefix = f"L{layer}"
         old_state = state_arrays(young + shared + newborn, Q, gram)
         old_backbone = [mu, C, wick] + outputs + ([] if V is None else [V])
+        old_wick = wick
         W = m.make(prefix + ".W.float32", (n, n))
         WC = m.make(prefix + ".WC", (n, n))
         C_pre = m.make(prefix + ".C_pre", (n, n))
@@ -326,6 +332,10 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
         current_locals = {"W": W, "WC": WC, "C_pre": C_pre,
                           "mu_pre": mu_pre, "var_pre": var_pre, "V": V,
                           "mu": mu, "D3": derivatives[11],
+                          "nodes": nodes, "center": center,
+                          "centered": centered, "probability": probability,
+                          "raw": external[-2], "p_in": external[-1],
+                          "wick": old_wick, "wick_prev": old_wick,
                           "w1": derivatives[6], "Phi": derivatives[6],
                           "w2now": derivatives[7], "w3": derivatives[8],
                           "w4": derivatives[9], "base": derivatives[10]}
@@ -376,6 +386,7 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
             C = m.make(prefix + ".C", (n, n))
             current_locals["C"] = C
             wick = derivatives[6]  # Phi = w1, an object alias.
+            current_locals["wick_prev"] = wick
             ordinary = History("ordinary", 0, source_fields(
                 m, prefix + ".birth.ordinary", "ordinary", "young",
                 n, s, rank, residual, padded))
@@ -412,6 +423,9 @@ def audit(n: int, depth: int, s: int, rank: int, recent: int,
                     prefix + ".local." + name, (n, n))
             current_locals["Y"] = m.make(prefix + ".local.Y", (n, residual))
             current_locals["Bm"] = m.make(prefix + ".local.Bm", (residual, n))
+            # Om is W[:, :ordinary_residual]: a distinct view object whose
+            # backing W payload is already charged. Keep its logical shape.
+            current_locals["Om"] = Array(W.key, (n, residual))
             if layer:
                 positive, negative = newborn[1:]
                 current_locals.update({
@@ -657,6 +671,20 @@ def main() -> int:
                   actual[name]["alias_of"] is None for name in names),
               expected_names=list(names),
               present_names=[name for name in names if name in actual])
+        modeled_stage = stage_at(
+            tiny, 14, "D3_D21_materialization" if "readout" in site else
+            "ordinary_and_feed_birth")
+        prefix = "prior." if "readout" in site else "current."
+        modeled = {row["name"][len(prefix):]: row for row in
+                   modeled_stage["named_live"] if row["name"].startswith(prefix)}
+        missing_or_wrong = [name for name, field in actual.items()
+                            if name not in modeled or
+                            field["shape"] != modeled[name]["shape"]]
+        check("tiny_runtime_" + site + "_full_outer_array_shape_coverage",
+              bool(actual) and not missing_or_wrong,
+              missing_or_wrong=missing_or_wrong,
+              actual_array_bindings=len(actual),
+              modeled_array_bindings=len(modeled))
     result = {"kind": "shape-only integrated first-source array memory audit",
               "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "frozen_integrated_source_sha256": sha,
