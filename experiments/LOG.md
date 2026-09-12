@@ -42905,3 +42905,49 @@ because two running jobs already reserved 46 GiB of the queue's 53.6 GiB usable
 RAM. No output directory or label access exists yet. Success requires terminal
 completion plus standalone verification of `predictions.npz` and
 `producer_receipt.json`; queued work is not recorded as complete.
+
+### IMPORTANT bridge contract — freeze P07 selection into the P01 arms
+
+**Question.** Can the next P01 mechanism report mechanically prove that all four
+arms were generated from the immutable coefficient selected by the registered P07
+fit, while keeping the competition cost lambda distinct and holding every source
+stable through report publication?
+
+**Evidence.** CONFIRMED: the fitter writes `selection.frozen_values.lam`, but the
+generator accepts an arbitrary CLI `--lam` and overwrites shared default arms.
+CONFIRMED: current `p2_lab.py` accepts no fit/freeze receipt; its `--lam` is the
+competition cost coefficient, not `_K4_LAM`; it checks only that arm files exist
+and parse before truth. CONFIRMED: lifecycle rows contain candidate hashes, but the
+lab does not bind a common selected coefficient or hold all arm/receipt/generator
+bytes through its scored and depth passes. INFERRED: without a receipt-driven
+bridge, a stale default arm or a value passed to the wrong `--lam` can create a
+plausible but invalid P01 report. No labels were read for this audit.
+
+**Prediction.** A nondefault synthetic P07 selection will generate four fresh
+immutable arm files that all encode exactly the selected K4 coefficient and differ
+only by registered mechanism switches. The P01 runner will refuse stale, mixed,
+mutated or misbound arms and receipts before truth access, will record K4 lambda
+separately from Phase-2 competition lambda zero, and will remove/refuse any report
+whose dependencies change before closing publication. Existing score/noise/gate
+semantics will remain unchanged.
+
+**Intervention.** Add a receipt-driven freezer that strictly validates the fit
+receipt's protected-design P07 role, objective, selected index/value, candidate
+registry/bounds/identity bindings, truth-read reservation evidence and current
+nontruth source hashes. From a locked generator/template snapshot, render the four
+registered arms into a fresh experiment directory and publish an immutable freeze
+receipt last. Extend `p2_lab.py` to require and validate that receipt before truth,
+hold fit/freeze receipts, generator/template, arms and relevant instrument sources
+through all lifecycle/depth evaluations and exclusive report publication, compare
+executed lifecycle hashes to frozen hashes, closing-rehash everything, and record
+both receipt hashes plus `k4_lam` and `competition_cost_lambda`. Keep the accepted
+default arms and every job-894 dependency untouched.
+
+**Fixtures and falsifier.** Positive synthetic nondefault fit-to-freeze-to-lab;
+missing/malformed/wrong-role/mutated receipt; stale/default/mixed/wrong-lambda arm;
+mutation between validation, lifecycle, depth and publication; forged lifecycle
+hash; and existing-output refusal, all before protected truth or without an
+accepted report. Any ambiguous lambda field, unbound dependency, accepted mutation,
+changed score/noise/gate behavior, current preflight failure or fresh Skeptic
+rejection blocks P01. This is IMPORTANT instrument work, uses no seed block and
+opens no research truth.
