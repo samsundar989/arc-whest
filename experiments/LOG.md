@@ -46034,3 +46034,69 @@ workerq (5 GiB RAM/2 CPUs/0 GPU), then seek a *fresh-context* Skeptic
 against contract/source/raw result/receipt. This remains an architecture
 memory planning aid, not an 8 GiB cap validation or clearance to meter
 the unstable full-width source. Samuel's prediction is **"I don't know"**.
+
+**September 12 memory co-live repair result and second independent
+INCOMPLETE verdict.** The first repaired source commits `166ef15` and
+`9378b44` and raw evidence `ff7df97` (JSON SHA256
+`f7d5c67bd549d66ecb6f3d3e1f0a2be055c9e7fad2e8fd9be181e84bb1f72b1f`)
+passed **34/34**: L14 prior/readout and current/birth names, aliases,
+tiny runtime frame shape coverage, and historical schedule. Its inclusive
+named-array maximum was 715,844,864 bytes optimized versus 910,988,032
+padded. A first draft 32/32 omitted the `Om` W-column view label and is
+preserved separately. Workerq **1014** failed before running project code
+because unsupported `--description` was interpreted as its executable
+(raw ZIP SHA256 `a9d05a4dadbb2ad89a7e5cfbaf9089b4b233ac7354e6c3e1aa415d9078905de2`).
+Corrected workerq **1015** SUCCEEDED; controlled exact HEAD `bdeec4f`,
+349/349 tracked Python hashes unchanged, default preflight GREEN 12/16,
+four Full-only skips, preflight-only peak 3,023.6 MiB, receipt SHA256
+`f6e9a463d74ab584b069e56e2e7dc128c7a0040a403519b52d25c16cd8294145`,
+raw ZIP SHA256 `feb7acf73636ed09d4941d6e70a5da9a4b8af7763a9acd5b8599b62d09c25bf8`,
+committed `d67ff32`. A new fresh-context Skeptic verdict `7114686`
+**INCOMPLETE** finds the final output-stack stage omits 14 distinct live
+outer-frame n-by-n matrices in a tiny n8 runtime trace; transport rows omit
+current `mu_pre`/`var_pre` and the nonlinear row omits newly assembled `C`.
+The 34/34 L14 checks stand only in their narrow scope, and neither the
+revised maximum nor preflight peak is a deployed-process memory test.
+
+**September 12 IMPORTANT consolidated final-stage memory repair contract
+(before any further source edit/run).** **Question:** can the shape ledger's
+named Python-frame inventory cover *all* sampled lifecycle boundaries,
+including output stack, rather than just the two L14 sites that failed
+before? **Evidence:** CONFIRMED the three omissions in the independent
+verdict `7114686`, the exact 64-binding n8 output frame and 14 distinct
+8-by-8 matrices; CONFIRMED L14 68-binding snapshot and source field/schedule
+arithmetic; INFERRED that carrying conditionally un-rebound prior locals
+through final and adding current transport/covariance bindings repairs the
+named inventory; UNKNOWN all library/allocator workspaces and process peak.
+**Intervention:** model current `mu_pre`, `var_pre` at gram/young stages and
+new `C` at covariance stage; carry outer-frame locals that survive the final
+branch into the final shortcut and output stack, representing `None` and
+view aliases explicitly and permitting inclusive overcount. Extend the
+tiny no-truth runtime tracer to each relevant n8 boundary: cast, join/gram,
+young transport, L14 readout, post-C, birth, L15 final readout/mean and
+output stack. Independently compare **every actual shaped outer-frame
+binding** at those sites by name and shape to that stage's named/permanent
+inventory, with documented alias/backing exceptions. Check the old padded
+and optimized controls, original failures/results unchanged, source hashes,
+28 joins, births/uses, positive S and negative n columns, n8 partial floor,
+and strict individual modeled array size. No width1024 array allocation.
+
+**Predictions/gates:** all sampled boundaries' actual n8 outer-array names
+and shapes have a modeled resident/named identity or an explicitly mapped
+alias; the output row covers all 14 identified matrices, transport covers
+both vectors, covariance covers new C. The previous storage/schedule checks
+remain identical. A missing name or mismatched shape FAILS; no numeric
+memory-cap gate exists, and the global modeled maximum need not change.
+**Falsifier:** any unmatched runtime binding, repeated missing co-live
+stage, false alias, or change to protected math/data/source. **Baseline:**
+first INCOMPLETE verdict `224c7a1`, second `7114686`, raw co-live result
+SHA above, frozen integrated prototype SHA
+`3a57e5e5709a62848f8412de094f218ea9b323933b9071e04c5dabbdab8b12b3`.
+**Cost/statistic:** deterministic byte/shape accounting, no score/seed or
+truth, no estimator/public/vault/residual change. Commit source before the
+fixture; preserve all attempts, run current-byte default preflight via
+workerq 5 GiB/2 CPU/0 GPU, obtain another fresh-context independent
+Skeptic. This is a finite set of tested named boundary inventories,
+**not** an upper bound on whole-process RAM or proof of the 8 GiB cap;
+the unstable n4/n8 gates still block full-width cost. Samuel's prediction
+is **"I don't know"**.
