@@ -43034,3 +43034,34 @@ is denied/refused at every named boundary. Any remaining pre-lock executed modul
 mutation that succeeds, regression, current preflight failure or new fresh Skeptic
 rejection blocks P01. Running job 903 is unaffected because it imports none of the
 bridge files changed by this repair.
+
+### Bridge import-to-bind repair — implementation result before preflight
+
+Both production CLIs now use a two-process entry. The already loaded parent first
+checks a normalized fingerprint of its own source, locks the complete static source
+graph, records exact hashes, and starts a fresh child interpreter. The child
+reacquires the same locks, verifies the parent bindings, and holds them through
+freeze/report publication. Direct in-process freeze or P01 reporting is refused
+unless a test explicitly enables its isolated override. The P01 report records the
+complete locked-CLI binding map in addition to the fit/freeze and executed arm
+hashes.
+
+The first new A-to-B dependency fixture found an additional real failure mode:
+Python could reuse a timestamp/size-compatible `.pyc` for version A even though the
+parent had locked and hashed source B. That development run was **13/14** and is
+not accepted evidence. Each production child now receives a fresh private
+`pycache_prefix`, forcing import from the locked source bytes; the same fixture then
+observed B as required. This is a provenance repair, not a scientific result.
+
+Accepted truth-free/sacrificial evidence is freezer **17/17**, P01 lab bridge
+**14/14**, Stage-0 lab/data **32/32**, unchanged producer/fitter **97/97**, and
+portability **103/103**. The new direct fixtures cover loaded-self A versus disk B,
+cached dependency A versus child-loaded B, refusal of in-process production
+bypasses, and real subprocess write/exclusive-lock attempts during lifecycle,
+depth and publication. Both real CLI `--help` paths traverse the parent/child entry
+and exit zero. `py_compile` and `git diff --check` pass. Raw logs, source hashes and
+scope are in `freeze_bridge/race_repair_summary.json` and its referenced files.
+
+No estimator, default arm, protected label, seed block, vault or running-job-903
+dependency changed. Current default preflight and a new fresh-context Skeptic are
+still required before the bridge is accepted or P01 is opened.

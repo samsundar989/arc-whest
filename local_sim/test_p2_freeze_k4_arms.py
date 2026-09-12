@@ -3,12 +3,16 @@ from __future__ import annotations
 
 import argparse
 import copy
+import importlib.util
 import json
 import os
+import shutil
 import tempfile
 from argparse import Namespace
 
 import p2_freeze_k4_arms as freezer
+
+freezer._ALLOW_IN_PROCESS_TEST = True
 
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -240,6 +244,36 @@ def run_checks():
             refused = "exact registered regeneration" in str(exc)
         check("candidate mutation refuses without partial freeze",
               refused and not os.path.exists(out_dir), "pre-publication source check")
+
+    with _temp("p2-freeze-loaded-a-disk-b-") as root:
+        copied = os.path.join(root, "freezer_copy.py")
+        shutil.copyfile(freezer.__file__, copied)
+        spec = importlib.util.spec_from_file_location("_freezer_loaded_a", copied)
+        loaded_a = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(loaded_a)
+        positive = bool(loaded_a._assert_loaded_source())
+        with open(copied, "ab") as fh:
+            fh.write(b"\n# disk version B\n")
+        try:
+            loaded_a._assert_loaded_source()
+            refused = False
+        except loaded_a.FreezeRefused as exc:
+            refused = "does not match the locked disk snapshot" in str(exc)
+        check("loaded freezer A cannot bind changed disk B", positive and refused,
+              "self-normalized fingerprint refuses the pre-lock A-to-B race")
+
+    previous = freezer._ALLOW_IN_PROCESS_TEST
+    freezer._ALLOW_IN_PROCESS_TEST = False
+    try:
+        try:
+            freezer.freeze(Namespace(fit_receipt="", out_dir=""))
+            guarded = False
+        except freezer.FreezeRefused as exc:
+            guarded = "locked CLI entrypoint" in str(exc)
+    finally:
+        freezer._ALLOW_IN_PROCESS_TEST = previous
+    check("in-process production freeze bypass is refused", guarded,
+          "only the locked CLI child or an explicit test override may write")
 
     return rows
 

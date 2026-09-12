@@ -3,8 +3,12 @@ from __future__ import annotations
 
 import contextlib
 import hashlib
+import importlib.util
 import json
 import os
+import shutil
+import subprocess
+import sys
 import tempfile
 
 import numpy as np
@@ -14,6 +18,9 @@ import p2_freeze_k4_arms as freezer
 import p2_lab as lab
 import test_p2_freeze_k4_arms as freeze_test
 import truth_reads as tr
+
+freezer._ALLOW_IN_PROCESS_TEST = True
+lab._ALLOW_IN_PROCESS_TEST = True
 
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -70,7 +77,8 @@ def _build(root):
     return os.path.join(freeze_dir, "freeze_receipt.json"), truth
 
 
-def _run(root, *, runner=None, competition_lambda="0", tier="DESIGN"):
+def _run(root, *, runner=None, predictor=None, instrument_revalidator=None,
+         competition_lambda="0", tier="DESIGN"):
     freeze_receipt, truth = _build(root)
     out = os.path.join(root, "report.json")
     calls = []
@@ -113,14 +121,93 @@ def _run(root, *, runner=None, competition_lambda="0", tier="DESIGN"):
     args = ["--truth", truth, "--out", out, "--freeze-receipt", freeze_receipt,
             "--control", "exact", "--competition-cost-lambda", competition_lambda,
             "--residual-cap", "0", "--official-samples", "1000"]
+    revalidator = instrument_revalidator or lab._revalidate_instruments
     with patched(lab, "load_manifest", _manifest), \
             patched(lab, "_run_arm", runner or fake_run), \
-            patched(lab, "_predict_all", fake_predict), \
+            patched(lab, "_predict_all", predictor or fake_predict), \
+            patched(lab, "_revalidate_instruments", revalidator), \
             patched(lab, "_cost_under_012", lambda *args: None), \
             patched(tr, "load_truth", fake_load), \
             patched(tr, "status", fake_status):
         rc = lab.main(args)
     return rc, out, calls, freeze_receipt
+
+
+def _write_attempt_denied(path):
+    if os.name == "nt":
+        code = ("import sys\n"
+                "p=sys.argv[1]\n"
+                "try:\n"
+                " f=open(p,'ab'); f.write(b'X'); f.close()\n"
+                "except OSError:\n"
+                " raise SystemExit(7)\n"
+                "raise SystemExit(0)\n")
+    else:
+        code = ("import fcntl,sys\n"
+                "f=open(sys.argv[1],'rb')\n"
+                "try:\n"
+                " fcntl.flock(f.fileno(),fcntl.LOCK_EX|fcntl.LOCK_NB)\n"
+                "except OSError:\n"
+                " raise SystemExit(7)\n"
+                "raise SystemExit(0)\n")
+    return subprocess.run([sys.executable, "-c", code, path],
+                          capture_output=True).returncode == 7
+
+
+def _loaded_dependency_ab_uses_locked_child(root):
+    """Load dependency A in the parent, then prove the CLI child imports disk B."""
+    local = os.path.join(root, "local_sim")
+    manifest_dir = os.path.join(
+        root, "experiments", "2026-08-21_phase2_manifest")
+    os.makedirs(local)
+    os.makedirs(manifest_dir)
+    copied_lab = os.path.join(local, "p2_lab.py")
+    shutil.copyfile(lab.__file__, copied_lab)
+    marker = os.path.join(root, "loaded_marker.txt")
+    lifecycle = os.path.join(local, "lifecycle_eval.py")
+
+    def lifecycle_text(value):
+        return ("from pathlib import Path\n"
+                f"Path({marker!r}).write_text({value!r}, encoding='utf-8')\n")
+
+    with open(lifecycle, "w", encoding="utf-8") as fh:
+        fh.write(lifecycle_text("A"))
+    with open(os.path.join(local, "competition_score.py"), "w", encoding="utf-8") as fh:
+        fh.write("# synthetic scorer\n")
+    with open(os.path.join(local, "p2_freeze_k4_arms.py"), "w", encoding="utf-8") as fh:
+        fh.write("class FreezeRefused(ValueError): pass\n"
+                 "def _assert_loaded_source(expected=None): return expected or 'ok'\n")
+    with open(os.path.join(local, "phase2_manifest.py"), "w", encoding="utf-8") as fh:
+        fh.write("def load(): return {}\n")
+    for name in ("p2_tag_drift.py", "official_config.py", "harness.py",
+                 "mint_provenance.py", "seed_ledger.py", "seed_blocks.py",
+                 "truth_reads.py", "p2_k4_fit.py", "p2_k4_fit_producer.py",
+                 "p2_build_k4_arms.py", "p2_compact_candidate_template.py"):
+        with open(os.path.join(local, name), "w", encoding="utf-8") as fh:
+            fh.write("# locked synthetic dependency\n")
+    with open(os.path.join(manifest_dir, "phase2_manifest.json"), "w",
+              encoding="utf-8") as fh:
+        fh.write("{}\n")
+
+    parent = os.path.join(root, "exercise.py")
+    with open(parent, "w", encoding="utf-8") as fh:
+        fh.write(
+            "import importlib.util, os, pathlib, sys\n"
+            f"path={copied_lab!r}\n"
+            "spec=importlib.util.spec_from_file_location('_copied_lab_a',path)\n"
+            "module=importlib.util.module_from_spec(spec)\n"
+            "spec.loader.exec_module(module)\n"
+            f"pathlib.Path({lifecycle!r}).write_text({lifecycle_text('B')!r},encoding='utf-8')\n"
+            f"pathlib.Path({marker!r}).unlink(missing_ok=True)\n"
+            "rc=module.cli_entry(['--help'])\n"
+            f"seen=pathlib.Path({marker!r}).read_text(encoding='utf-8')\n"
+            "raise SystemExit(0 if rc==0 and seen=='B' else 9)\n")
+    result = subprocess.run([sys.executable, parent], cwd=root,
+                            capture_output=True, text=True)
+    if result.returncode != 0:
+        print("dependency A/B fixture stdout:", result.stdout)
+        print("dependency A/B fixture stderr:", result.stderr)
+    return result.returncode == 0
 
 
 def run_checks():
@@ -149,7 +236,8 @@ def run_checks():
                   set(report["k4_freeze"]["frozen_arm_hashes"]) == set(lab.MECHANISM_ARMS) and
                   set(report["k4_freeze"]["instrument_bindings"]) == {
                       "p2_lab", "lifecycle_eval", "competition_score", "harness",
-                      "mint_provenance", "phase2_manifest", "phase2_manifest_data",
+                      "mint_provenance", "phase2_manifest", "p2_tag_drift",
+                      "phase2_manifest_data",
                       "official_config", "seed_ledger", "seed_blocks",
                       "truth_reads_interface", "arm_freezer"} and
                   report["k4_freeze"]["protected_truth"]["data_role"] == "exposed-design" and
@@ -162,6 +250,67 @@ def run_checks():
                   all(report["arms"][name]["candidate_sha256"] == expected[name]
                       for name in lab.MECHANISM_ARMS),
                   "all four scored paths")
+
+        with tempfile.TemporaryDirectory(prefix="p2-lab-real-locks-", dir=_ROOT) as root:
+            attempts = {}
+            arm_path = os.path.join(root, "freeze", "arm_exact.py")
+            real_revalidator = lab._revalidate_instruments
+
+            def attempt(stage):
+                if stage not in attempts:
+                    attempts[stage] = _write_attempt_denied(arm_path)
+
+            def locked_run(name, seeds, truth_final, spec, gt_noise):
+                attempt("lifecycle")
+                source_hash = hashlib.sha256(open(lab._arm_path(name), "rb").read()).hexdigest()
+                return ([_row(name, i, int(seed), source_hash)
+                         for i, seed in enumerate(seeds)],
+                        {"setup_seconds": 0.0, "candidate_sha256": source_hash})
+
+            def locked_predict(name, seeds, spec):
+                attempt("depth")
+                values = np.zeros((len(seeds), spec.depth, spec.width), dtype=np.float64)
+                source_hash = hashlib.sha256(open(lab._arm_path(name), "rb").read()).hexdigest()
+                return values[:, -1], values, source_hash
+
+            def locked_publish(bindings):
+                attempt("publication")
+                return real_revalidator(bindings)
+
+            rc, out, _calls, _receipt = _run(
+                root, runner=locked_run, predictor=locked_predict,
+                instrument_revalidator=locked_publish)
+            check("real writes are denied through lifecycle, depth, and publication",
+                  rc == 0 and attempts == {"lifecycle": True, "depth": True,
+                                           "publication": True} and os.path.isfile(out),
+                  "subprocess write/exclusive-lock attempts cannot change a held arm")
+
+        with tempfile.TemporaryDirectory(prefix="p2-lab-loaded-a-disk-b-", dir=_ROOT) as root:
+            copied = os.path.join(root, "lab_copy.py")
+            shutil.copyfile(lab.__file__, copied)
+            spec = importlib.util.spec_from_file_location("_lab_loaded_a", copied)
+            loaded_a = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(loaded_a)
+            positive = bool(loaded_a._assert_loaded_source())
+            with open(copied, "ab") as fh:
+                fh.write(b"\n# disk version B\n")
+            try:
+                loaded_a._assert_loaded_source()
+                refused = False
+            except loaded_a.k4_freezer.FreezeRefused as exc:
+                refused = "does not match the locked disk snapshot" in str(exc)
+            check("loaded lab A cannot bind changed disk B", positive and refused,
+                  "self-normalized fingerprint refuses the pre-lock A-to-B race")
+
+        with patched(lab, "_ALLOW_IN_PROCESS_TEST", False):
+            guarded = lab.main([])
+        check("in-process production bypass is refused", guarded == 2,
+              "only the locked CLI child or an explicit test override may run")
+
+        with tempfile.TemporaryDirectory(prefix="p2-lab-dependency-a-b-") as root:
+            child_used_b = _loaded_dependency_ab_uses_locked_child(root)
+        check("cached dependency A is replaced by parent-locked child B", child_used_b,
+              "production CLI child imports the exact dependency bytes it records")
 
         with tempfile.TemporaryDirectory(prefix="p2-lab-freeze-missing-", dir=_ROOT) as root:
             truth = os.path.join(root, "truth_P01.npz")

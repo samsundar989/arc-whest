@@ -56,12 +56,15 @@ from __future__ import annotations
 
 import argparse
 import ast
+import contextlib
+import ctypes
 import hashlib
 import json
 import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -82,6 +85,10 @@ from phase2_manifest import load as load_manifest  # noqa: E402
 
 ARMS_DIR = os.path.join(_HERE, "p2_arms")
 _ACTIVE_ARM_PATHS = None
+_CLI_BINDINGS_ENV = "ARC_WHEST_P2_LAB_LOCKED_BINDINGS"
+_SELF_FINGERPRINT = "fffec4338ea76757566b7d30b054f045d6e8b5924524f4a28c82fe74fab9db83"
+_BOUND_CLI_BINDINGS = None
+_ALLOW_IN_PROCESS_TEST = False
 
 MECHANISM_ARMS = ("exact", "coherent", "consumers-only", "births-only")
 
@@ -100,6 +107,180 @@ MECHANISM_ARMS = ("exact", "coherent", "consumers-only", "births-only")
 #: but "bitwise identical" and "identical cost" are different claims, and this
 #: ladder reports both accuracy and cost.
 CONTROL = "exact"
+
+
+def _sha256_bytes(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def _normalized_self_sha(raw):
+    marker = re.compile(
+        rb'(?m)^_SELF_FINGERPRINT = "[0-9a-f]{64}"')
+    normalized, count = marker.subn(
+        b'_SELF_FINGERPRINT = "' + (b'0' * 64) + b'"', raw)
+    if count != 1:
+        raise k4_freezer.FreezeRefused(
+            "lab source fingerprint marker is missing or ambiguous")
+    return _sha256_bytes(normalized.replace(b"\r\n", b"\n"))
+
+
+def _assert_loaded_source(expected_exact_sha=None):
+    try:
+        with open(os.path.abspath(__file__), "rb") as fh:
+            raw = fh.read()
+    except OSError as exc:
+        raise k4_freezer.FreezeRefused("cannot read lab source: %s" % exc) from exc
+    exact_sha = _sha256_bytes(raw)
+    if _normalized_self_sha(raw) != _SELF_FINGERPRINT:
+        raise k4_freezer.FreezeRefused(
+            "loaded lab source does not match the locked disk snapshot")
+    if expected_exact_sha is not None and exact_sha != expected_exact_sha:
+        raise k4_freezer.FreezeRefused(
+            "lab source differs from the parent-locked snapshot")
+    return exact_sha
+
+
+@contextlib.contextmanager
+def _bootstrap_stable_files(paths):
+    """Hold CLI sources before a fresh child imports any of them."""
+    unique, seen = [], set()
+    for raw in paths:
+        path = os.path.normcase(os.path.realpath(os.path.abspath(raw)))
+        if path not in seen:
+            seen.add(path)
+            unique.append(path)
+    if os.name == "nt":
+        from ctypes import wintypes
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        create = kernel32.CreateFileW
+        create.argtypes = (wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
+                           wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD,
+                           wintypes.HANDLE)
+        create.restype = wintypes.HANDLE
+        close = kernel32.CloseHandle
+        close.argtypes = (wintypes.HANDLE,)
+        close.restype = wintypes.BOOL
+        handles = []
+        try:
+            for path in unique:
+                handle = create(path, 0x80000000, 0x00000001, None, 3,
+                                0x00000080, None)
+                if handle == wintypes.HANDLE(-1).value:
+                    raise k4_freezer.FreezeRefused(
+                        "cannot lock lab CLI dependency %s: WinError %d" %
+                        (path, ctypes.get_last_error()))
+                handles.append(handle)
+            yield
+        finally:
+            for handle in reversed(handles):
+                close(handle)
+        return
+    import fcntl
+    files = []
+    try:
+        for path in unique:
+            fh = open(path, "rb")
+            files.append(fh)
+            fcntl.flock(fh.fileno(), fcntl.LOCK_SH | fcntl.LOCK_NB)
+        yield
+    except (OSError, BlockingIOError) as exc:
+        raise k4_freezer.FreezeRefused(
+            "cannot lock lab CLI dependencies: %s" % exc) from exc
+    finally:
+        for fh in reversed(files):
+            try:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+            finally:
+                fh.close()
+
+
+def _cli_source_paths():
+    return {
+        "p2_lab": os.path.abspath(__file__),
+        "lifecycle_eval": os.path.abspath(le.__file__),
+        "competition_score": os.path.abspath(cs.__file__),
+        "arm_freezer": os.path.abspath(k4_freezer.__file__),
+        "phase2_manifest": os.path.join(_HERE, "phase2_manifest.py"),
+        "p2_tag_drift": os.path.join(_HERE, "p2_tag_drift.py"),
+        "phase2_manifest_data": os.path.join(
+            _ROOT, "experiments", "2026-08-21_phase2_manifest",
+            "phase2_manifest.json"),
+        "official_config": os.path.join(_HERE, "official_config.py"),
+        "harness": os.path.join(_HERE, "harness.py"),
+        "mint_provenance": os.path.join(_HERE, "mint_provenance.py"),
+        "seed_ledger": os.path.join(_HERE, "seed_ledger.py"),
+        "seed_blocks": os.path.join(_HERE, "seed_blocks.py"),
+        "truth_reads_interface": os.path.join(_HERE, "truth_reads.py"),
+        "fit_interface": os.path.join(_HERE, "p2_k4_fit.py"),
+        "fit_producer": os.path.join(_HERE, "p2_k4_fit_producer.py"),
+        "arm_generator": os.path.join(_HERE, "p2_build_k4_arms.py"),
+        "arm_template": os.path.join(_HERE, "p2_compact_candidate_template.py"),
+    }
+
+
+def _binding_snapshot(paths):
+    result = {}
+    for name, path in paths.items():
+        try:
+            with open(path, "rb") as fh:
+                raw = fh.read()
+        except OSError as exc:
+            raise k4_freezer.FreezeRefused(
+                "cannot read lab CLI source %s: %s" % (name, exc)) from exc
+        result[name] = {
+            "path": os.path.relpath(path, _ROOT).replace("\\", "/"),
+            "sha256": _sha256_bytes(raw)}
+    return result
+
+
+def _verify_cli_bindings(bindings, paths):
+    current = _binding_snapshot(paths)
+    if not isinstance(bindings, dict) or bindings != current:
+        raise k4_freezer.FreezeRefused(
+            "parent-locked lab source bindings are invalid or changed")
+    _assert_loaded_source(bindings["p2_lab"]["sha256"])
+    k4_freezer._assert_loaded_source(bindings["arm_freezer"]["sha256"])
+
+
+def cli_entry(argv=None):
+    """Run production from a child imported under parent-held source locks."""
+    args = list(sys.argv[1:] if argv is None else argv)
+    paths = _cli_source_paths()
+    encoded = os.environ.get(_CLI_BINDINGS_ENV, "")
+    global _BOUND_CLI_BINDINGS
+    if encoded:
+        try:
+            bindings = json.loads(encoded)
+        except json.JSONDecodeError as exc:
+            print("REFUSED: invalid parent-locked lab bindings: %s" % exc)
+            return 2
+        try:
+            with _bootstrap_stable_files(paths.values()):
+                _verify_cli_bindings(bindings, paths)
+                _BOUND_CLI_BINDINGS = bindings
+                return main(args)
+        except k4_freezer.FreezeRefused as exc:
+            print("REFUSED: %s" % exc)
+            return 2
+        finally:
+            _BOUND_CLI_BINDINGS = None
+
+    try:
+        with _bootstrap_stable_files(paths.values()):
+            _assert_loaded_source()
+            bindings = _binding_snapshot(paths)
+            env = dict(os.environ)
+            env[_CLI_BINDINGS_ENV] = json.dumps(
+                bindings, sort_keys=True, separators=(",", ":"))
+            with tempfile.TemporaryDirectory(prefix="p2-lab-pycache-") as cache:
+                completed = subprocess.run(
+                    [sys.executable, "-X", "pycache_prefix=" + cache,
+                     os.path.abspath(__file__)] + args,
+                    cwd=os.getcwd(), env=env)
+            return int(completed.returncode)
+    except k4_freezer.FreezeRefused as exc:
+        print("REFUSED: %s" % exc)
+        return 2
 
 
 def _revalidate_instruments(bindings):
@@ -266,6 +447,9 @@ def _cost_under_012(name, width, depth, budget):
 
 
 def main(argv=None) -> int:
+    if _BOUND_CLI_BINDINGS is None and not _ALLOW_IN_PROCESS_TEST:
+        print("REFUSED: production P01 reporting requires the locked CLI entrypoint")
+        return 2
     ap = argparse.ArgumentParser()
     ap.add_argument("--truth", required=True)
     ap.add_argument("--out", required=True)
@@ -305,6 +489,7 @@ def main(argv=None) -> int:
         "harness": os.path.join(_HERE, "harness.py"),
         "mint_provenance": os.path.join(_HERE, "mint_provenance.py"),
         "phase2_manifest": os.path.join(_HERE, "phase2_manifest.py"),
+        "p2_tag_drift": os.path.join(_HERE, "p2_tag_drift.py"),
         "phase2_manifest_data": os.path.join(
             _ROOT, "experiments", "2026-08-21_phase2_manifest",
             "phase2_manifest.json"),
@@ -332,6 +517,11 @@ def main(argv=None) -> int:
                 for name in ("truth_reads_interface", "arm_freezer"):
                     binding = frozen["receipt"]["source_bindings"][name]
                     instrument_bindings[name] = binding
+                if _BOUND_CLI_BINDINGS is not None:
+                    for name, binding in instrument_bindings.items():
+                        if _BOUND_CLI_BINDINGS.get(name) != binding:
+                            raise k4_freezer.FreezeRefused(
+                                f"executed lab dependency {name} does not match its parent lock")
                 man = load_manifest()
                 arms, arm_paths = _validate_request(a, man, frozen)
                 _ACTIVE_ARM_PATHS = arm_paths
@@ -735,6 +925,9 @@ def _execute_held(a, man, frozen, arms, arm_paths, instrument_bindings) -> int:
             "protected_truth": truth_binding,
             "frozen_arm_hashes": frozen_hashes,
             "instrument_bindings": instrument_bindings,
+            "locked_cli_source_bindings": (
+                dict(_BOUND_CLI_BINDINGS) if _BOUND_CLI_BINDINGS is not None else
+                {"mode": "explicit-in-process-test"}),
         }
         def before_publish():
             k4_freezer.revalidate_held_freeze(frozen)
@@ -984,4 +1177,4 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(cli_entry())

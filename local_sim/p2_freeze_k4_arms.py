@@ -18,6 +18,9 @@ import math
 import os
 import re
 import shutil
+import subprocess
+import sys
+import tempfile
 
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -33,6 +36,10 @@ _ARMS = ("exact", "coherent", "consumers_only", "births_only")
 _HASH = re.compile(r"[0-9a-f]{64}")
 _FIT_SCHEMA = "arc-whest.coherent-k4-fit-receipt.v1"
 _FREEZE_SCHEMA = "arc-whest.coherent-k4-arm-freeze-receipt.v1"
+_CLI_BINDINGS_ENV = "ARC_WHEST_P2_FREEZE_LOCKED_BINDINGS"
+_SELF_FINGERPRINT = "a9d92475d22f3983c85eb911206564adffc367c2b7029c3fc5477cf785b65353"
+_BOUND_CLI_BINDINGS = None
+_ALLOW_IN_PROCESS_TEST = False
 
 
 class FreezeRefused(ValueError):
@@ -41,6 +48,26 @@ class FreezeRefused(ValueError):
 
 def _sha256_bytes(raw):
     return hashlib.sha256(raw).hexdigest()
+
+
+def _normalized_self_sha(raw):
+    marker = re.compile(
+        rb'(?m)^_SELF_FINGERPRINT = "[0-9a-f]{64}"')
+    normalized, count = marker.subn(
+        b'_SELF_FINGERPRINT = "' + (b'0' * 64) + b'"', raw)
+    if count != 1:
+        raise FreezeRefused("freezer source fingerprint marker is missing or ambiguous")
+    return _sha256_bytes(normalized.replace(b"\r\n", b"\n"))
+
+
+def _assert_loaded_source(expected_exact_sha=None):
+    raw, exact_sha = _read_bytes(os.path.abspath(__file__), "freezer source")
+    if _normalized_self_sha(raw) != _SELF_FINGERPRINT:
+        raise FreezeRefused(
+            "loaded freezer source does not match the locked disk snapshot")
+    if expected_exact_sha is not None and exact_sha != expected_exact_sha:
+        raise FreezeRefused("freezer source differs from the parent-locked snapshot")
+    return exact_sha
 
 
 def _read_bytes(path, label):
@@ -140,7 +167,10 @@ def _stable_files(paths):
         for path in unique:
             fh = open(path, "rb")
             files.append(fh)
-            fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            # Readers share the stability lock; cooperative writers request an
+            # exclusive lock.  This also permits the locked CLI parent and child
+            # to overlap while the child enters narrower validation contexts.
+            fcntl.flock(fh.fileno(), fcntl.LOCK_SH | fcntl.LOCK_NB)
         yield
     except (OSError, BlockingIOError) as exc:
         raise FreezeRefused("cannot lock freeze dependencies: %s" % exc) from exc
@@ -150,6 +180,79 @@ def _stable_files(paths):
                 fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
             finally:
                 fh.close()
+
+
+def _cli_source_paths():
+    paths = {
+        "arm_freezer": os.path.abspath(__file__),
+        "fit_interface": _FIT,
+        "fit_producer": _PRODUCER,
+        "arm_generator": _GENERATOR,
+        "arm_template": _TEMPLATE,
+        "truth_reads_interface": _TRUTH_READS_SOURCE,
+        "truth_reads_ledger": _TRUTH_READS_LEDGER,
+    }
+    paths.update({"arm_" + name: os.path.join(_DEFAULT_ARMS, "arm_%s.py" % name)
+                  for name in _ARMS})
+    return paths
+
+
+def _binding_snapshot(paths):
+    return {name: {"path": _relative(path),
+                   "sha256": _read_bytes(path, "CLI source %s" % name)[1]}
+            for name, path in paths.items()}
+
+
+def _verify_cli_bindings(bindings, paths):
+    if not isinstance(bindings, dict) or set(bindings) != set(paths):
+        raise FreezeRefused("parent-locked freezer binding set is invalid")
+    for name, path in paths.items():
+        expected = {"path": _relative(path),
+                    "sha256": _read_bytes(path, "CLI source %s" % name)[1]}
+        if bindings[name] != expected:
+            raise FreezeRefused("parent-locked freezer source %s changed" % name)
+    _assert_loaded_source(bindings["arm_freezer"]["sha256"])
+
+
+def cli_entry(argv=None):
+    """Run the production CLI from source bytes locked before child import."""
+    args = list(sys.argv[1:] if argv is None else argv)
+    paths = _cli_source_paths()
+    encoded = os.environ.get(_CLI_BINDINGS_ENV, "")
+    global _BOUND_CLI_BINDINGS
+    if encoded:
+        try:
+            bindings = json.loads(encoded)
+        except json.JSONDecodeError as exc:
+            print("REFUSED: invalid parent-locked freezer bindings: %s" % exc)
+            return 2
+        try:
+            with _stable_files(paths.values()):
+                _verify_cli_bindings(bindings, paths)
+                _BOUND_CLI_BINDINGS = bindings
+                return main(args)
+        except FreezeRefused as exc:
+            print("REFUSED: %s" % exc)
+            return 2
+        finally:
+            _BOUND_CLI_BINDINGS = None
+
+    try:
+        with _stable_files(paths.values()):
+            _assert_loaded_source()
+            bindings = _binding_snapshot(paths)
+            env = dict(os.environ)
+            env[_CLI_BINDINGS_ENV] = json.dumps(bindings, sort_keys=True,
+                                                separators=(",", ":"))
+            with tempfile.TemporaryDirectory(prefix="p2-freeze-pycache-") as cache:
+                completed = subprocess.run(
+                    [sys.executable, "-X", "pycache_prefix=" + cache,
+                     os.path.abspath(__file__)] + args,
+                    cwd=os.getcwd(), env=env)
+            return int(completed.returncode)
+    except FreezeRefused as exc:
+        print("REFUSED: %s" % exc)
+        return 2
 
 
 def _binding_path(binding, label):
@@ -513,6 +616,12 @@ def _write_exclusive(path, raw):
 
 
 def freeze(a):
+    if _BOUND_CLI_BINDINGS is None and not _ALLOW_IN_PROCESS_TEST:
+        raise FreezeRefused(
+            "production freezing requires the locked CLI entrypoint")
+    _assert_loaded_source(
+        None if _BOUND_CLI_BINDINGS is None else
+        _BOUND_CLI_BINDINGS["arm_freezer"]["sha256"])
     fit_path = _repo_path(a.fit_receipt, "fit receipt")
     out_dir = _repo_path(a.out_dir, "output directory")
     parent = os.path.dirname(out_dir)
@@ -752,4 +861,4 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(cli_entry())

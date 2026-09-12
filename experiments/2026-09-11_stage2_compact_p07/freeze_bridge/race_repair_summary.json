@@ -1,0 +1,66 @@
+{
+  "schema": "arc-whest.p07-p01-freeze-bridge-race-repair-evidence.v1",
+  "status": "implementation_complete_preflight_pending",
+  "rejected_commit": "efdf038",
+  "scope": {
+    "research_labels_read": false,
+    "estimator_modified": false,
+    "job_903_dependencies_modified": false,
+    "default_arms_modified": false
+  },
+  "repair": {
+    "production_entry": "parent-held source locks plus fresh child interpreter",
+    "bytecode_policy": "fresh private pycache_prefix for each child",
+    "self_binding": "normalized embedded source fingerprint plus exact parent hash",
+    "in_process_policy": "refused unless an explicit test-only override is set"
+  },
+  "source_hashes": {
+    "local_sim/p2_freeze_k4_arms.py": "736fdb2043b584d080828a2b6f6d507f027b31e088a07a2bb3141de849279088",
+    "local_sim/p2_lab.py": "b540c55c745c0d2cfe5274705c579318e62d31dbf4385d3ac1c2c9cdc6b6da98",
+    "local_sim/test_p2_freeze_k4_arms.py": "29b4f9fecbcb241e8200ff713a5c332f51e0af967aefca7bbd3ddede1a873043",
+    "local_sim/test_p2_lab_freeze_bridge.py": "ba8bb0f03f97bb298a3556c653773d37bc1cd078c548f4f46ead558ed60fa067",
+    "local_sim/test_stage0_lab_data.py": "b84d86b3d315cea2df41460485fd4d2724bbc153c8c7125f182723df5ae1b34a"
+  },
+  "tests": {
+    "freezer": {
+      "passed": 17,
+      "total": 17,
+      "artifact": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/freezer_tests_race_repair.json",
+      "log": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/freezer_tests_race_repair.log"
+    },
+    "lab_bridge": {
+      "passed": 14,
+      "total": 14,
+      "log": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/lab_bridge_tests_race_repair.log"
+    },
+    "stage0_lab_data": {
+      "passed": 32,
+      "total": 32,
+      "log": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/stage0_lab_data_tests_race_repair.log"
+    },
+    "k4_fit_regression": {
+      "passed": 97,
+      "total": 97,
+      "log": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/k4_fit_regression_race_repair.log"
+    },
+    "portability": {
+      "passed": 103,
+      "total": 103,
+      "status": "PORTABLE",
+      "log": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/portability_race_repair.log"
+    },
+    "production_cli": {
+      "freezer_help_exit": 0,
+      "lab_help_exit": 0,
+      "freezer_log": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/freezer_cli_help_race_repair.log",
+      "lab_log": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/lab_cli_help_race_repair.log"
+    },
+    "py_compile": "pass",
+    "diff_check": "clean"
+  },
+  "development_observation": "The first A-to-B dependency fixture reproduced stale version A through a valid timestamp/size-compatible pyc. The accepted repair gives every production child a fresh private pycache prefix; the rerun executed and recorded version B. The failed development run is not acceptance evidence.",
+  "acceptance_pending": [
+    "current default preflight",
+    "new fresh-context Skeptic"
+  ]
+}

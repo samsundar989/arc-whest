@@ -30,6 +30,9 @@ import p2_k3_parity as k3_parity  # noqa: E402
 import p2_t2_corrector as t2_corrector  # noqa: E402
 import truth_reads as tr  # noqa: E402
 
+freezer._ALLOW_IN_PROCESS_TEST = True
+lab._ALLOW_IN_PROCESS_TEST = True
+
 
 RESULTS = []
 
