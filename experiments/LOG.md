@@ -44408,3 +44408,79 @@ nonlinear ReLU closure; a tiny tensor is not an 8 GiB or server proof.
 Require focused tests, current-byte default preflight and a fresh independent
 Skeptic before relying on the new probe math. Only then price an executable
 flopscope architecture and contract any new DESIGN measurement.
+
+## 2026-09-12 — dense linear source accepted; correlated-ReLU source contracted
+
+The independent CPU dense oracle `local_sim/test_p2_k4_source_dense.py`
+SHA-256 `1bf120cd5f4e53e4c72d6578b7ea742221542881f22f63cb5278933d84627b06`
+reports **PASS 49/49**, maximum nonzero relative error
+`3.07447546077247e-14` and near-zero absolute error
+`5.551115123125783e-17` against the registered `1e-12` tolerances.
+Result JSON `2026-09-11_stage2_compact_p07/source_dense/result.json` SHA-256
+`cd5b217732970d52ae5c5f053288480bf26a2b1aabc01863b1f592940fd2187f`.
+It enumerates a signed independent diagonal-source tensor and its two linear
+transports, all D4/D22/D31 entries, oriented K11 and declared quadratic K3
+feed, both-leg metric core, singular support, permutation/scaling/zero cases,
+and the all-distinct residual whose present slices vanish but future D4 is
+`1.5`. Workerq **962** live-byte default preflight **GREEN 12/16**, four
+Full-only skips, exit 0, 3,592.535 MiB peak under 5 GiB/2 CPU/zero GPU.
+Raw transcript/manifest/environment/result/terminal show and byte-exact ZIP
+are under `source_dense/`, ZIP SHA-256
+`3c6d4e140775d570204a240e08fa66ca1c8273235f40363a4a5c27be479744e9`.
+
+A new fresh-context Skeptic **ACCEPTED only the selected linear tensor
+algebra**, independently recomputing signed n4/n5 entries, covariance/feed,
+metric transport, projection error and hidden residual. Verdict
+`source_dense/skeptic_verdict.md` SHA-256
+`a2b96a85bde67976fa9285aeb75c13ad3d46f2e06b1c382a6b1c60846a3bce61`.
+The Gaussian-zero check is an algebraic sentinel, not a new nonlinear source
+test; dense covariance/feed both use the explicitly declared response
+truncation. The oracle does not establish a complete correlated-ReLU K4
+source, a transportable compressed residual, feasible counted cost, accuracy
+or deployment. CONFIRMED: exact selected linear component and insufficiency
+of present residual slices. INFERRED: a corrected source needs mixed ReLU
+terms. SPECULATIVE: those terms improve challenge score. No protected truth
+or seed block was touched.
+
+**Next IMPORTANT truth-free source contract, committed before integration.**
+**Question:** how large are the exact mixed fourth cumulants created by a
+correlated Gaussian preactivation pair after ReLU, and does dropping them
+change a future dense-row D4? **Evidence:** CONFIRMED independent-coordinate
+and linear tensor checks above; CONFIRMED original frozen mixed formula is
+invalid at zero correlation; SPECULATIVE magnitude at nonzero correlation.
+**Hypothesis/mechanism:** correlation creates nonzero K1112/K1122 even though
+each preactivation marginal is Gaussian. A diagonal-only source loses their
+contractions after a signed dense map; the frozen pairwise marginal average
+cannot satisfy both zero-correlation and correlated cases. **Intervention:**
+integrate positive-quadrant bivariate Gaussian raw ReLU moments (orders up to
+four) using independent Gauss-Legendre grids at 64 and 96 nodes per axis on
+`[0,10]`, at unit variance and correlations `rho=0` and `rho=0.5`.
+Construct the full symmetric n=2 fourth cumulant tensor from central
+moments minus three covariance pairings; cross-check marginals against exact
+univariate half-normal formulas. Transport it through the fixed signed
+Hadamard map `B=[[1,1],[1,-1]]/sqrt(2)`, comparing D4 from full tensor
+to diagonal-only source and the
+projected metric core with residual shown explicitly. Do not adjust or fit
+lambda, edit frozen arms, or read P01/P07/public/vault labels.
+
+**Predictions:** (1) rho-zero mixed cumulants are zero within `1e-8`, while
+at rho=0.5 at least K1122 is positive and exceeds `1e-3`; (2) 64/96-node
+raw-moment and cumulant comparisons agree within `1e-8` relative on
+materially nonzero terms and `1e-8` absolute near zero; (3) a signed dense
+future row has >`1e-3` D4 difference between full and diagonal-only source.
+Samuel's standing human response to prediction questions is **“I don't
+know”**. **Falsifier:** mixed terms remain within quadrature error at rho=.5,
+the independent control fails, integration does not converge, or transported
+omission is below the registered threshold. **Baseline/control:** independent
+fourth-cumulant reconstruction from numerical raw moments and analytic
+univariate moments, plus exact full tensor transport; diagonal-only and
+metric-core are approximations, not controls for competition score.
+**Cost model:** tiny CPU-only quadrature has no measured challenge FLOPs or
+server residual; expected working arrays under 64 MiB. The Phase-2 counted
+`C=F` and 0.4 s cliff remain unchanged. **Statistic/gate:** deterministic
+quadrature convergence and tensor differences at the numeric tolerances
+above; no paired score/seed block/noise/promotion decision. **Scope:** first
+Gaussian preactivation only; a later non-Gaussian source, full all-history
+cost, compression, and accuracy remain open. Require focused tests,
+current-byte default preflight and fresh independent Skeptic before using
+this source result to select an implementation.
