@@ -1,0 +1,118 @@
+worker-q: job #957 starting at 2026-09-12T06:16:54.046409+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=none -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['uv', 'run', '--no-sync', 'python', 'local_sim/p2_lab.py', '--truth', 'experiments/2026-08-21_p2_cp1/truth_P01.npz', '--out', 'experiments/2026-09-11_stage2_compact_p07/p01_report.json', '--freeze-receipt', 'experiments/2026-09-11_stage2_compact_p07/frozen_arms_metadata_protocol/freeze_receipt.json', '--n', '0', '--competition-cost-lambda', '0', '--depth-subset', '8', '--gate', '1.10', '--block', 'P01', '--note', 'Registered coherent-K4 comparison on exposed P01 DESIGN; retry after accepted publication gate, prior runs produced no four-arm report', '--control', 'exact', '--official-samples', '1e9', '--residual-cap', '0']
+worker-q: ------------------------------------------------------------
+C:\Users\samsu\Documents\arc-whest\local_sim\lifecycle_eval.py:613: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_exact.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_exact.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_exact.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_exact.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\local_sim\lifecycle_eval.py:613: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_coherent.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_coherent.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\flopscope\_budget.py:540: RuntimeWarning: overflow encountered in power
+  return fn(*args, **kwargs)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\flopscope\_budget.py:540: RuntimeWarning: invalid value encountered in multiply
+  return fn(*args, **kwargs)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\flopscope\_budget.py:540: RuntimeWarning: overflow encountered in multiply
+  return fn(*args, **kwargs)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\flopscope\_budget.py:540: RuntimeWarning: invalid value encountered in subtract
+  return fn(*args, **kwargs)
+C:\Users\samsu\Documents\arc-whest\.venv\lib\site-packages\flopscope\_budget.py:540: RuntimeWarning: invalid value encountered in add
+  return fn(*args, **kwargs)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_coherent.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_coherent.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_consumers_only.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_consumers_only.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_consumers_only.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_consumers_only.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_births_only.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_births_only.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_births_only.py:167: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\experiments\2026-09-11_stage2_compact_p07\frozen_arms_metadata_protocol\arm_births_only.py:168: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+  *** RESIDUAL CAP RELAXED -- this run is ACCURACY-ONLY. Its failure accounting
+      cannot see a 0.4 s violation and it is NOT residual evidence for anything.
+  deciding model   lambda = 0   (COUNTED FLOPS ONLY -- the frozen model)
+============================================================================================
+P2-CP1 LADDER  --  one canonical evaluator, paired on common random numbers
+============================================================================================
+  truth      experiments\2026-08-21_p2_cp1\truth_P01.npz   96 networks   2 replicas x 4,194,304 samples
+  truth noise per replica   mean 1.8063e-08
+  shape      1024 x 16   B = 2,199,023,255,552   floor 0.1
+  stack      flopscope 0.12.0   PARITY ACHIEVED
+
+  replica noise of the AVERAGED truth   measured 9.3191e-09   predicted V/2N 9.0313e-09   ratio 1.0319
+     (the ratio is a live check on replica independence; far from 1.0
+      means the two draws share state and every corrected MSE is wrong)
+
+  exact              score 7.83730e-06   MSE(corr) 2.1104e-05   MSE(raw) 2.1113e-05   F/B 0.3712   eff 0.3712   mult 0.3712   fail 0/96   resid 664ms   553s   [0.12: 0.371190  MOVED 0.999954x]
+  coherent           score 1.75838e+11   MSE(corr) 4.7241e+11   MSE(raw) 4.7241e+11   F/B 0.3722   eff 0.3722   mult 0.3722   fail 0/96   resid 864ms   703s   [0.12: 0.372194  MOVED 0.999935x]
+  consumers-only     score 1.26967e+17   MSE(corr) 3.4189e+17   MSE(raw) 3.4189e+17   F/B 0.3714   eff 0.3714   mult 0.3714   fail 0/96   resid 710ms   599s   [0.12: 0.371342  MOVED 0.999934x]
+  births-only        score 6.72887e-04   MSE(corr) 1.8083e-03   MSE(raw) 1.8083e-03   F/B 0.3721   eff 0.3721   mult 0.3721   fail 0/96   resid 831ms   690s   [0.12: 0.372085  MOVED 0.999935x]
+
+  PAIRED vs exact -- arithmetic score difference, studentised-t 95% (the binding statistic, docs/VALIDATION.md 2b-i)
+  arm                    gain        95% t CI (relative)    better   sign p
+  coherent             0.0000 [-6693860405600707584.00%, +2206649033005314304.00%]    0/96   p= 0.000
+  consumers-only       0.0000 [-4049315268873277572907008.00%, +809245021368517344100352.00%]    0/96   p= 0.000
+  births-only          0.0116 [ -8815.27%,  -8156.12%]    0/96   p= 0.000
+
+  NOISE-AWARE ADJUSTED DIFFERENCES -- observed / true-function / official precision
+  coherent           -1.7584e+11  -1.7584e+11  -1.7584e+11   noise term -9.129e-12
+  consumers-only     -1.2697e+17  -1.2697e+17  -1.2697e+17   noise term -1.441e-12
+  births-only        -6.6505e-04  -6.6505e-04  -6.6505e-04   noise term -8.146e-12
+
+  COST CHECK -- Phase 2 lambda = 0, so effective C equals counted F
+  (local residual is shown separately as a cliff-risk diagnostic;
+   it is not priced and its absolute level does not transfer)
+    exact              F/B 0.3712   eff mean 0.4014   eff max 0.4022   resid    664 ms  ( 1.00x control)
+    coherent           F/B 0.3722   eff mean 0.4115   eff max 0.4126   resid    864 ms  ( 1.30x control)
+    consumers-only     F/B 0.3714   eff mean 0.4037   eff max 0.4044   resid    710 ms  ( 1.07x control)
+    births-only        F/B 0.3721   eff mean 0.4099   eff max 0.4111   resid    831 ms  ( 1.25x control)
+
+  VERDICT vs exact, pre-registered gate 1.1000x, studentised-t, one-sided
+  coherent           fail  gain  0.0000x   t CI on the difference [-5.246e+11, +1.729e+11]   excl 0: False   0/96   mover   99.9%
+       - arithmetic gain 0.0000x is below the pre-registered gate 1.1000x
+       - the candidate is WORSE than the control (0.0000x)
+       - the t 95% interval on the paired difference does not lie strictly above zero [-5.2462e+11, +1.7294e+11]
+  consumers-only     fail  gain  0.0000x   t CI on the difference [-3.174e+17, +6.342e+16]   excl 0: False   0/96   mover   69.4%
+       - arithmetic gain 0.0000x is below the pre-registered gate 1.1000x
+       - the candidate is WORSE than the control (0.0000x)
+       - the t 95% interval on the paired difference does not lie strictly above zero [-3.1736e+17, +6.3423e+16]
+  births-only        fail  gain  0.0116x   t CI on the difference [-6.909e-04, -6.392e-04]   excl 0: False   0/96   mover    1.6%
+       - arithmetic gain 0.0116x is below the pre-registered gate 1.1000x
+       - the candidate is WORSE than the control (0.0116x)
+       - the t 95% interval on the paired difference does not lie strictly above zero [-6.9088e-04, -6.3922e-04]
+
+  MSE BY DEPTH -- the (L/n)^K mechanism curve, on 8 of 96 networks (a mechanism curve does not need all of them)
+  L1 is exact for EVERY arm, so that column reads the truth-noise floor -- a built-in calibration
+  arm                        L1         L2         L4         L8        L12        L16
+  exact               8.216e-08  1.354e-07  8.192e-07  4.789e-06  1.199e-05  2.417e-05
+  coherent            8.216e-08  1.369e-03  2.292e-02  2.079e+02  1.212e+03  1.919e+03
+  consumers-only      8.216e-08  1.369e-03  2.117e-02  1.678e+02  5.185e+02  5.607e+02
+  births-only         8.216e-08  1.383e-07  1.861e-04  7.381e-04  1.266e-03  1.783e-03
+
+  artifact staged for final audit -> experiments\2026-09-11_stage2_compact_p07\p01_report.json
+============================================================================================
+  artifact published -> experiments\2026-09-11_stage2_compact_p07\p01_report.json
+worker-q: ------------------------------------------------------------
+worker-q: job #957 SUCCEEDED (exit code 0) at 2026-09-12T06:59:28.782277+00:00

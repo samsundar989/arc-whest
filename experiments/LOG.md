@@ -44113,3 +44113,45 @@ accuracy-only relaxation. This operational retry changes no scientific gate,
 data role or human prediction (`I don't know`). A terminal complete report,
 raw queue evidence, result Skeptic and synthesis are required before any next
 Stage-2 intervention. A local P01 result alone is not a submission candidate.
+## 2026-09-12 — P01 exposed-DESIGN four-arm report is terminal; result review pending
+
+Workerq **957** ran the registered `lam=1/3` frozen four-arm comparison through
+the accepted publication bridge, no snapshot, high priority, zero GPU, 8 GiB
+RAM and two CPUs. It finished `SUCCEEDED`, exit 0, in 2,554.735868 seconds,
+peak **3,792.43359375 MiB**. The published `p01_report.json` has schema
+`p2_cp1_ladder` version 3, `status: complete`, `is_probe_not_evidence: false`,
+all four arms and 96 paired identities, `build: PASS`, zero failed lifecycle
+rows per arm, `kill: NOT_EVALUATED`, `mechanism: DESCRIPTIVE`, and a recorded
+promotion evaluation at pre-registered `gate=1.10`. Raw report SHA-256 is
+`a197516ccdd008c8f0083c6c5c781dd7718c5401f2e7af5758e3be29f207f963`.
+Queue log, manifest and metadata are `2026-09-11_stage2_compact_p07/job957_*`,
+SHA-256 `374bfa9370a5e61f9226679d99dd1892a5ee7f507d390ec7547a9c71127c39f6`,
+`1fe268654df21725e3e32ffe014fec2beb31ebb654a7e5304b82528b5adffc40f`,
+`2cb706f44bae5fd8f2c135e117edc692a3a1bbaa571e5f25daa2dd8f62059de5`.
+The protected read reservation `c3e657f9906049dd` was reserved/completed
+automatically for this result path. Six prior documented P01 DESIGN reads remain
+in `truth_reads.jsonl`; this is the seventh registered read, while older
+pre-ledger exposure means that number is not an exact lifetime count. P01 is
+still exposed DESIGN, not untouched DECIDE.
+
+**Raw report values, before independent result review.** The mean noise floor
+of the averaged replica truth is `9.319142001565295e-9`, measured/predicted
+ratio `1.0318772389820459`. Mean final raw MSE and counted-FLOP score are,
+respectively: exact `2.11130086048191e-5`, `7.83729768645487e-6`;
+coherent `4.7240621864430695e11`, `1.7583805654537924e11`;
+consumers-only `3.41891222596173e17`, `1.26966975273602e17`;
+births-only `1.8083050854329485e-3`, `6.728865985219634e-4`.
+The three noncontrol arms each have `0/96` paired scores better than exact;
+their reported arithmetic gains are about `4.46e-17`, `6.17e-23`, and
+`0.0116473`, with all three registered promotion booleans false. Mean counted
+FLOPs range 816.293--818.516 billion per MLP. The run explicitly set
+`--residual-cap 0` and is **accuracy-only**; local residual means of
+0.664--0.864 seconds are descriptive, not a server cliff pass/fail claim.
+The separate synthetic two-network `--gate 1.10` locked-entry check passed
+before job 957 terminated; it added no protected read.
+
+These are report observations, not yet a scientific kill, a result Skeptic
+verdict, a fresh-decision result, server-residual evidence, or a candidate for
+submission. A fresh independent Skeptic is auditing the raw paired rows,
+bindings, noise and possible numerical or instrument pathologies before
+Stage-2 synthesis. No next strategic implementation follows from this entry.
