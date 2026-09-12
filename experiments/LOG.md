@@ -46598,3 +46598,34 @@ from the prior unmeasured 8 GiB request that fits the local available
 reservation. If workerq records a higher peak or OOM, this bound is falsified
 and must be raised, never bypassed. JSON output is a new path, so rerun rather
 than checkpoint this one-network diagnostic. The code and precision are fixed.
+
+**F21 A1 full-width fixed-precision trajectory result.** Workerq 1081
+SUCCEEDED at width 1024/depth 4, using the actual flopscope backend and
+effective Strassen depth 4 in both arms. Raw
+`experiments/2026-09-12_f21/trajectory_1024x4.json` SHA256 is
+`f0199bc736fe4d57a672b124dbf160fc9c1cc57b848bd5cf0c426e4168e2acf9`.
+Both recorded source hashes match the frozen controls; configuration,
+coefficient table and generation chooser match. All **29/29** sampled
+state/source/output fields pass their preregistered normalized entry bound
+`2e-3`; maximum observed is `1.52439e-5`. Final relative RMS is
+`2.24901e-7` against `1e-2`. This is a deterministic no-label parity probe
+on one canonical network, not an accuracy distribution or score gate. Workerq
+peak RAM was 1,025 MiB under the conservative 7.5 GiB reservation. Tiny
+exact, 128x4 and full-width 1024x4 checks now pass in their separate scopes;
+the cost screen also passes. Independent engineering review and preflight
+remain owed before DESIGN.
+
+**F21 pre-submission optimization review — local default preflight.** The new
+one-arm wrapper is a scoped IMPORTANT measurement consumer and the corrected
+tiny oracle is also an IMPORTANT probe; reuse the existing 12-step default
+gate once rather than launch its individual suites. It loads only the gate's
+existing fixtures, no duplicate new dataset loader, workers, GPU, batching,
+prefetch or cache. Skipping a step would weaken assurance. Job 1073's remote
+failure was caused by non-identical checkout bytes/missing ignored files, so
+the rerun uses workerq `--live-worktree` for local-only placement and an
+absolute PowerShell executable. Current source/probe/raw results are
+committed first and no source edits occur during the gate. A failed run is
+recoverable from its full queue log without protected data or seeds. The
+remote attempt peaked 2.67 GiB and comparable local gates near 3 GiB; request
+**5 GiB RAM, 0 VRAM, 2 CPUs**. Full-only checks are owed later with the
+candidate; this default preflight must not be called Full certification.
