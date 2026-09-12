@@ -46157,3 +46157,32 @@ controlled workerq default preflight (5 GiB/2 CPU/0 GPU) and fresh-context
 Skeptic. Acceptance only extends sampled named arrays to a thin tiny
 shape; process-cap/stability/full-width cost claims remain forbidden.
 Samuel's prediction is **"I don't know"**.
+
+**September 12 thin-shape memory trace result and independent verdict.**
+The source at `9ad41f8` and raw evidence at `b0343f7` give a terminal
+**93/93 PASS** at n8/rank8/residual8 and n16/rank8/residual2, nine sampled
+outer-frame boundaries each, exact named shapes, both alias directions,
+complete `None` sets and unchanged old result SHA. Final raw JSON SHA256
+`dd3bf40edaedeed3551529d19553d4501a56bbc0d8939164676eaf113eb04697`;
+source SHA256
+`d6cbed70cc581a4ad90d6cb1783531ccc907520d5726c356a7971058d11e4176`.
+The n16 runtime exhibits Q `16x8`, Gram `8x8`, ordinary Z/L `16x2`,
+positive feed width S8 and literal negative n16 A/P. The independent
+fresh-context Skeptic `16c819b` replayed the JSON byte-for-byte,
+matched **172/172** L14 retained field occurrences and returned **ACCEPT
+only for the sampled tiny shape inventory**. Workerq **1019** SUCCEEDED,
+controlled exact HEAD `33898b8` before/after, 351/351 Python hashes
+unchanged, default preflight GREEN 12/16 (four Full-only skips), peak
+3,025.0 MiB **preflight-only**; receipt SHA256
+`47a9811a1377cef03d62fef5579693bf396b6a6662f0517d48ed9bbe227a5c92`,
+raw ZIP SHA256 `8d13341102e0465692bfc13606c8c2c9017f4700539121599bab22fabeede863`,
+committed `1536831`. At modeled n1024 the inclusive explicit named-array
+payload remains 715,844,864 bytes optimized versus 910,988,032 padded;
+its exact raw A/P savings remain 110,100,480 bytes over 14 positive births.
+This does **not** measure process memory or establish the 8 GiB cap,
+helper/BLAS/QR/allocator/flopscope temporaries, stable source, full-width
+counted cost, score or a new candidate. With the sampled thin-shape gap
+closed, the next meaningful full-width RAM observation depends on a
+physically causal, numerically stable integrated implementation, rather
+than another symbolic-lifetime extension. No data, estimator, vault,
+HUMAN_MODEL or standing L2 candidate changed; Stage 3 stays held.
