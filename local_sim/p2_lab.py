@@ -71,7 +71,7 @@ _ROOT = os.path.dirname(_HERE)
 _BOOTSTRAP = os.path.join(_HERE, "p2_locked_bootstrap.py")
 _CLI_BINDINGS_ENV = "ARC_WHEST_P2_LAB_LOCKED_BINDINGS"
 _REPORT_STAGE_ENV = "ARC_WHEST_P2_LAB_REPORT_STAGE"
-_SELF_FINGERPRINT = "fa14e113d8dffdeae9bfe62da19ec45cb38237514d071a00957c5db9d60044e8"
+_SELF_FINGERPRINT = "6dd73989bba665b75c32aee86692f995399bc20e349e464bf27d88441fb2a287"
 
 
 def _attested_target_sha():
@@ -161,7 +161,7 @@ def _run_locked_child(args, target_sha, stage):
 
 
 def _publish_audited_stage(stage, output, target_sha):
-    """Rebind every reported source under locks, then link without overwrite."""
+    """Rebind a pending report, then create and link its complete bytes."""
     import importlib.util
     spec = importlib.util.spec_from_file_location("_p2_report_lock", _BOOTSTRAP)
     bootstrap = importlib.util.module_from_spec(spec)
@@ -175,9 +175,9 @@ def _publish_audited_stage(stage, output, target_sha):
         try:
             report = json.loads(raw)
             bridge = report["k4_freeze"]
-            if report["status"] != "complete" or set(report["arms"]) != {
+            if report["status"] != "pending" or set(report["arms"]) != {
                     "exact", "coherent", "consumers-only", "births-only"}:
-                raise ValueError("staged report is not complete for the four frozen arms")
+                raise ValueError("stage is not pending for the four frozen arms")
             if bridge["locked_cli_source_bindings"]["p2_lab"]["sha256"] != target_sha:
                 raise ValueError("staged report does not bind this lab source")
             if not bootstrap._same_path(
@@ -219,10 +219,23 @@ def _publish_audited_stage(stage, output, target_sha):
                     raise ValueError("staged report changed before publication")
             if os.path.lexists(output):
                 raise ValueError("%s appeared before publication" % output)
-            try:
-                os.link(stage, output)
-            except FileExistsError as exc:
-                raise ValueError("%s appeared before publication" % output) from exc
+            report["status"] = "complete"
+            complete_raw = (json.dumps(report, indent=1, default=str) + "\n").encode("utf-8")
+            complete_stage = os.path.join(os.path.dirname(stage), "complete.json")
+            with open(complete_stage, "xb") as fh:
+                fh.write(complete_raw)
+                fh.flush()
+                os.fsync(fh.fileno())
+            with bootstrap._stable_files([complete_stage]):
+                with open(complete_stage, "rb") as fh:
+                    if fh.read() != complete_raw:
+                        raise ValueError("complete report stage changed before publication")
+                if os.path.lexists(output):
+                    raise ValueError("%s appeared before publication" % output)
+                try:
+                    os.link(complete_stage, output)
+                except FileExistsError as exc:
+                    raise ValueError("%s appeared before publication" % output) from exc
 
 
 # A real script process must hand off before numpy or any executable project
@@ -1125,11 +1138,14 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
         z["means_r1"][:len(seeds), -1, :].astype(np.float64),
         z["means_r2"][:len(seeds), -1, :].astype(np.float64))
     official_samples = float(run_config.get("official_samples", 1e9))
+    coverage_complete = (set(arms) == set(MECHANISM_ARMS) and
+                         set(results) == set(arms))
     payload = {
         "artifact": "p2_cp1_ladder",
         "artifact_version": 3,
-        "status": "complete" if (set(arms) == set(MECHANISM_ARMS)
-                                   and set(results) == set(arms)) else "incomplete",
+        "status": ("pending" if _BOUND_CLI_BINDINGS is not None and
+                   coverage_complete else "complete" if coverage_complete else
+                   "incomplete"),
         "is_probe_not_evidence": bool(int(z["probe"])) if "probe" in z else False,
         "shape": man["shape"],
         "budget": man["budget"],
@@ -1256,7 +1272,7 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
                 "n_negative_corrected": nc.n_negative_corrected,
                 "notes": list(nc.notes),
             }
-    build_ok = (payload["status"] == "complete" and
+    build_ok = (coverage_complete and
                 all(payload["arms"][name]["n_failed"] == 0 for name in arms))
     payload["outcomes"] = {
         "build": {

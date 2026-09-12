@@ -8,9 +8,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import p2_lab as lab  # noqa: E402
@@ -38,7 +41,7 @@ def main():
         final = root / "final.json"
         target_sha = sha(lab.__file__)
         report = {
-            "status": "complete",
+            "status": "pending",
             "arms": {row["name"].replace("_", "-"):
                      {"candidate_sha256": row["sha256"]} for row in frozen["arms"]},
             "k4_freeze": {
@@ -55,9 +58,29 @@ def main():
                     "path": rel(truth), "sha256": sha(truth),
                     "reservation_receipt": {"result_artifact": rel(final)}}}}
         stage.write_text(json.dumps(report), encoding="utf-8")
-        lab._publish_audited_stage(str(stage), str(final), target_sha)
-        positive = final.exists() and final.read_bytes() == stage.read_bytes()
+        real_link = os.link
+        blocked_writes = []
+
+        def link_with_write_attempt(source, destination):
+            if os.name == "nt":
+                attempt = subprocess.run(
+                    [sys.executable, "-c",
+                     "import pathlib,sys;pathlib.Path(sys.argv[1]).write_bytes(b'corrupted')",
+                     source], capture_output=True, text=True)
+                blocked_writes.append(attempt.returncode != 0)
+            return real_link(source, destination)
+
+        with patch.object(lab.os, "link", link_with_write_attempt):
+            lab._publish_audited_stage(str(stage), str(final), target_sha)
+        complete_stage_write_blocked = (blocked_writes == [True] if os.name == "nt"
+                                        else None)
+        final_report = json.loads(final.read_text(encoding="utf-8")) if final.exists() else None
+        positive = (final_report is not None and final_report["status"] == "complete"
+                    and json.loads(stage.read_text(encoding="utf-8"))["status"] == "pending"
+                    and {k: v for k, v in final_report.items() if k != "status"} ==
+                    {k: v for k, v in report.items() if k != "status"})
         final.unlink()
+        (root / "complete.json").unlink()
 
         truth.write_text("mutated sacrificial binding\n", encoding="utf-8")
         try:
@@ -81,6 +104,42 @@ def main():
         except ValueError:
             preexisting_preserved = sha(final) == preexisting_sha
 
+        final.unlink()
+        stage.write_text("{malformed", encoding="utf-8")
+        try:
+            lab._publish_audited_stage(str(stage), str(final), target_sha)
+            malformed_refused = False
+        except ValueError:
+            malformed_refused = not final.exists()
+        complete_spoof = dict(report, status="complete")
+        stage.write_text(json.dumps(complete_spoof), encoding="utf-8")
+        try:
+            lab._publish_audited_stage(str(stage), str(final), target_sha)
+            complete_status_refused = False
+        except ValueError:
+            complete_status_refused = not final.exists()
+        incomplete = dict(report, arms={"exact": report["arms"]["exact"]})
+        stage.write_text(json.dumps(incomplete), encoding="utf-8")
+        try:
+            lab._publish_audited_stage(str(stage), str(final), target_sha)
+            incomplete_arms_refused = False
+        except ValueError:
+            incomplete_arms_refused = not final.exists()
+        stage.write_text(json.dumps(report), encoding="utf-8")
+        stage.unlink()
+        symlink_refused = None
+        try:
+            stage.symlink_to(truth)
+            try:
+                lab._publish_audited_stage(str(stage), str(final), target_sha)
+                symlink_refused = False
+            except ValueError:
+                symlink_refused = not final.exists()
+        except (OSError, NotImplementedError):
+            pass
+        finally:
+            stage.unlink(missing_ok=True)
+
         result = {
             "schema": "arc-whest.p2-publication-receipt-probe.v1",
             "truth": "sacrificial text only; no P01/P07/vault truth arrays opened",
@@ -90,15 +149,23 @@ def main():
             "lab_sha256": target_sha,
             "bootstrap_sha256": sha(lab._BOOTSTRAP),
             "positive_real_receipt_binding": positive,
+            "complete_stage_write_blocked_during_link": complete_stage_write_blocked,
             "closing_truth_mutation_refused_without_output": mutation_refused,
             "missing_truth_binding_refused_without_output": missing_refused,
             "preexisting_output_preserved": preexisting_preserved,
+            "malformed_stage_refused_without_output": malformed_refused,
+            "complete_status_stage_refused_without_output": complete_status_refused,
+            "incomplete_arm_stage_refused_without_output": incomplete_arms_refused,
+            "symlink_stage_refused_without_output": symlink_refused,
         }
     Path(args.output).open("x", encoding="utf-8", newline="\n").write(
         json.dumps(result, indent=2, sort_keys=True) + "\n")
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if all((positive, mutation_refused, missing_refused,
-                     preexisting_preserved)) else 1
+                     preexisting_preserved, malformed_refused,
+                     complete_status_refused, incomplete_arms_refused,
+                     complete_stage_write_blocked is not False,
+                     symlink_refused is not False)) else 1
 
 
 if __name__ == "__main__":

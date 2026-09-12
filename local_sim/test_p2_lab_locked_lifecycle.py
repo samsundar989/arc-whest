@@ -193,8 +193,18 @@ def run_probe(*, baseline=False):
                     for row in json.loads(receipt.read_text(encoding="utf-8"))["arms"]}
         positive_ok = (positive.returncode == 0 and report is not None and
                        report["status"] == "complete" and
+                       report["artifact"] == "p2_cp1_ladder" and
+                       report["artifact_version"] == 3 and
+                       report["truth"]["n_networks"] == 2 and
+                       set(report["outcomes"]) == {
+                           "build", "kill", "mechanism", "promotion"} and
+                       report["outcomes"]["build"]["status"] == "PASS" and
+                       report["k4_freeze"]["protected_truth"]["reservation_receipt"][
+                           "result_artifact"] == "report.json" and
                        set(report["arms"]) == set(expected) and
                        len(set(expected.values())) == 4 and
+                       all(len(report["arms"][name]["per_mlp_score"]) == 2
+                           for name in expected) and
                        all(report["arms"][name]["candidate_sha256"] == sha
                            for name, sha in expected.items()))
         original_output_sha = _sha(out) if out.exists() else None

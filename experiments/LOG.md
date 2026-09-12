@@ -43871,3 +43871,98 @@ altered report statistic/cost/role, source-binding regression or protected
 read blocks the retry. Scope: `p2_lab.py` publication status/parent finalization
 and sacrificial fixtures; preserve the old bootstrap, fit/freeze receipts,
 frozen arms, estimator, protected data/ledger, gate and residual model.
+
+## 2026-09-12 - Pending child stage closes the direct-bootstrap spoof
+
+**IMPORTANT repair result; synthetic publication evidence only.** The locked
+`p2_lab.py` child now serializes `status: pending` only when the four requested
+arms and their results have complete coverage; otherwise it remains
+`incomplete`. The normal parent requires the pending status and exact four-arm
+receipt hashes. After the child's exit-zero final origin scan and the parent's
+locked revalidation of source, instrument, fit/freeze, arm, input and truth
+bindings, it builds a second private same-directory JSON with `status:
+complete`, preserving every other report field. It flushes and verifies those
+bytes before an atomic exclusive hard link at the requested path. The build
+outcome still uses the original coverage/failure condition, so `pending` does
+not turn a valid final report's build result into `FAIL`. The receipt-pinned
+`p2_locked_bootstrap.py` remains byte-unchanged.
+
+The Skeptic's original direct-bootstrap spoof script and raw pre-repair result
+remain `freeze_bridge/skeptic_stage_spoof_probe.py` and
+`freeze_bridge/skeptic_stage_spoof_probe.json`. The repaired copy
+`freeze_bridge/publication_pending_stage_regression.py` (SHA-256
+`b51e1e576212ec8579cbe3babaca2cb703f462cec98078f9a429f93c41cfb0df`)
+repeats the same copied real-entry call. The child still exits 2 on the rogue
+module after writing a caller-selected stage, and the requested path remains
+absent. The surviving caller stage now has `status: pending`, not `complete`,
+with its truth reservation still naming the requested path. Raw result
+`freeze_bridge/publication_pending_stage_spoof.json` SHA-256
+`68336a5c6e86fb66d13defcecbb1c7c0cd7d7ecaa91f3eebbc82a76b0327633b`.
+The normal public late-origin counterexample also exits 2 without requested
+output, `freeze_bridge/publication_pending_late_origin.json` SHA-256
+`afafdb53509e7c7961a0dc00e17eaff3c2f022edf1dc2192fc6c1667227f1295`.
+
+The real lock-first synthetic four-arm entry publishes a `complete` artifact
+with the original version 3 schema, a passing build outcome, four distinct
+receipt-matching candidate hashes, per-MLP score rows, and the truth result
+path bound to the requested output. Source swap, missing arm, preexisting
+output and direct-bootstrap-without-stage all refuse without new publication;
+`freeze_bridge/publication_pending_lifecycle.json` SHA-256
+`ff201bcc5a3630ac896f9ac68bfdc6dc4d0a0c712e45d0510796673ec1213d30`.
+The truth-free parent binding probe uses the current immutable metadata-protocol
+freeze receipt; it publishes a `complete` binding-layer probe from a `pending`
+stage with all other fields identical, then refuses synthetic truth mutation,
+missing truth, malformed stage, a complete-status spoof, incomplete arm coverage
+and a preexisting final path. Symlink creation was unavailable on this Windows
+session, so that branch is recorded `null`, not passed. Raw result
+`freeze_bridge/publication_pending_actual_receipt_final.json` SHA-256
+`0d4e8088e0ce87cd669e4824ff392d295e501eb511a1524ee2c8314952f679ee`.
+
+Focused lab bridge 17/17, freezer 19/19, truth reads 35/35, seed ledger 66/66,
+portability 103/103, strict validation of the current immutable freeze
+receipt, public help, `py_compile` and `git diff --check` pass. The lab SHA-256
+is `b473351a5ea6811171c65b631bef44dc0edc6759e3462d29cefe414cb7b31767`;
+the bootstrap remains `0bba6abae9379b398ed473d935c295009371b95efd9526310038614a8db6341f`.
+No protected P01/P07/vault truth arrays were opened by these fixtures; no
+ledger, frozen arm, fit/freeze receipt, estimator, role, gate, statistic, cost
+model or residual policy changed. This is an instrument result, not a K4
+accuracy or scored-depth equality claim. Job 952 preflight covered the prior
+code bytes only. A current-byte default preflight and a new independent
+Skeptic ACCEPT remain required before any P01 retry.
+
+## 2026-09-12 - Complete-stage bytes held through atomic publication
+
+**IMPORTANT closing repair; no protected truth.** The parent now holds its
+private `complete.json` under the same `_stable_files` mechanism while it
+re-reads the completed bytes and hard-links them to the requested output.
+This closes the interval between verification and link that could previously
+admit another same-user writer. The parent still holds the pending stage,
+bootstrap/lab files, receipt, frozen arms, instrument and source bindings
+through that link. The receipt-pinned bootstrap remains byte-identical.
+
+The current immutable-receipt binding probe interposes a separate Windows
+process at the exact `os.link` call and attempts to overwrite `complete.json`.
+The write is denied while the exclusive hard link succeeds with verified bytes;
+all prior malformed, pending-status, arm-coverage, synthetic truth mutation,
+missing and preexisting-path controls still pass. Raw result
+`freeze_bridge/publication_source_lock_receipt.json` SHA-256
+`173a810d62c20cf2b93c9af7267a259c09d842ed5e4c32fd284c853cf7d2f624`.
+Symlink creation remained unavailable in this Windows session and is recorded
+as `null`, not a passing control. The copied real-entry four-arm positive and
+negative evidence is `freeze_bridge/publication_source_lock_lifecycle.json`
+(SHA-256 `24dd43c67212c89b95633df2f8d9a05a9a753933ed72acb60287ecdab2487e9c`);
+the direct-bootstrap caller-stage refusal is
+`freeze_bridge/publication_source_lock_stage_spoof.json` (SHA-256
+`2e83c56f159e1019854c5165af089ca763b5617e4b8e1e6112aec07a1d773ef2`);
+and the normal late-origin refusal is
+`freeze_bridge/publication_source_lock_late_origin.json` (SHA-256
+`508598a6784c95b9db506ac6111e08eabee3a7b2d473c6caadab67ef8845463e`).
+The first publishes one `complete` four-arm report; both origin refusals leave
+the requested path absent, and the caller-supplied stage remains `pending`.
+
+Focused bridge 17/17, portability 103/103, current strict freeze-receipt
+validation, `py_compile` and `git diff --check` pass on lab SHA-256
+`3807109838e9302be33e9119a2a9c02059ae779c3d8667cad5ad71221d1a1859`.
+No source or role beyond the publication lock and sacrificial lock probe changed.
+This closes the identified publication race; current-byte default preflight
+and an independent Skeptic verdict are still required before P01 is read.

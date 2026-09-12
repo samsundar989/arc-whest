@@ -1,0 +1,23 @@
+{
+  "caller_stage_arms": [
+    "births-only",
+    "coherent",
+    "consumers-only",
+    "exact"
+  ],
+  "caller_stage_exists": true,
+  "caller_stage_relative": "caller_chosen_complete_report.json",
+  "caller_stage_status": "pending",
+  "copied_hooked_lab_sha256": "59fb1f83f614c4a8561cd7bd7e433b22704627e4cc6adacf93a875c0ef6f9b2a",
+  "current_bootstrap_sha256": "0bba6abae9379b398ed473d935c295009371b95efd9526310038614a8db6341f",
+  "current_lab_sha256": "b473351a5ea6811171c65b631bef44dc0edc6759e3462d29cefe414cb7b31767",
+  "direct_bootstrap_returncode": 2,
+  "final_origin_refused": true,
+  "requested_out_exists": false,
+  "requested_out_relative": "requested_report.json",
+  "schema": "arc-whest.skeptic-stage-spoof.v1",
+  "stderr_tail": "3: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.\n  flops.configure(symmetry_warnings=False)\nC:\\Users\\samsu\\Documents\\arc-whest\\skeptic-stage-spoof-m_b0dv0h\\local_sim\\lifecycle_eval.py:613: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.\n  flops.configure(symmetry_warnings=False)\n",
+  "stdout_tail": "0  +0.0000e+00  +0.0000e+00   noise term +0.000e+00\n\n  COST CHECK -- Phase 2 lambda = 0, so effective C equals counted F\n  (local residual is shown separately as a cliff-risk diagnostic;\n   it is not priced and its absolute level does not transfer)\n    exact              F/B 0.0000   eff mean 3.7700   eff max 4.0000   resid      0 ms  ( 1.00x control)   *** OFF THE FLOOR once residual is charged ***\n    coherent           F/B 0.0000   eff mean 5.2350   eff max 5.7700   resid      0 ms  ( 1.39x control)   *** OFF THE FLOOR once residual is charged ***\n    consumers-only     F/B 0.0000   eff mean 2.8700   eff max 2.9300   resid      0 ms  ( 0.76x control)   *** OFF THE FLOOR once residual is charged ***\n    births-only        F/B 0.0000   eff mean 4.5650   eff max 5.2800   resid      0 ms  ( 1.21x control)   *** OFF THE FLOOR once residual is charged ***\n\n  NO GATE SUPPLIED -- no verdict is printed. The numbers above are\n  descriptive. Pass --gate <the pre-registered threshold> to get a\n  decision, and only the threshold registered BEFORE the data.\n\n  MSE BY DEPTH -- the (L/n)^K mechanism curve, on 2 of 2 networks (a mechanism curve does not need all of them)\n  L1 is exact for EVERY arm, so that column reads the truth-noise floor -- a built-in calibration\n  arm                        L1         L2\n  exact               1.000e-02  1.000e-02\n  coherent            1.000e-02  1.000e-02\n  consumers-only      1.000e-02  1.000e-02\n  births-only         1.000e-02  1.000e-02\n\n  artifact staged for final audit -> requested_report.json\n============================================================================================\nREFUSED: loaded repo-local module _skeptic_rogue is absent from the locked registry: C:\\Users\\samsu\\Documents\\arc-whest\\skeptic-stage-spoof-m_b0dv0h\\rogue.py\n",
+  "truth": "two generated 2x2 sacrificial networks; no P01/P07/vault read",
+  "truth_result_artifact": "requested_report.json"
+}
