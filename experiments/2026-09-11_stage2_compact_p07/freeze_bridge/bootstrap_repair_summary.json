@@ -1,7 +1,7 @@
 {
   "schema": "arc-whest.p07-p01-freeze-bridge-bootstrap-repair-evidence.v1",
   "status": "implementation_complete_preflight_and_fresh_skeptic_pending",
-  "recorded_utc": "2026-09-12T01:32:33.201769Z",
+  "recorded_utc": "2026-09-12T01:48:54.756146Z",
   "base_commit": "d7bd5634b53c08eac1b9f88e338dd8c22466b496",
   "reproduced_residual_before_repair": {
     "truth_or_labels_opened": false,
@@ -24,8 +24,11 @@
     "import_policy": "purge registered project module names, use a fresh private pycache, and compile the target directly from its locked bytes",
     "runtime_attestation": "compare executed target _cli_source_paths() against the prelocked registry and verify exact binding hashes before enabling main",
     "lock_lifetime": "complete source graph remains held through target main and report or freeze publication",
-    "direct_bootstrap_invocation": "safe by construction because it follows the same lock-before-import path",
-    "lock_implementation": "one canonical stdlib-only bootstrap; obsolete lab-local prelock helper removed"
+    "direct_bootstrap_invocation": "requires an expected exact target SHA and is safe by construction because target equality and the full lock-before-import path are enforced",
+    "lock_implementation": "one canonical stdlib-only bootstrap; obsolete lab-local prelock helper removed",
+    "public_script_stage_zero": "after stdlib imports only, validate the executing target against its embedded normalized fingerprint, hash exact bytes, and exit into bootstrap before sys.path changes, numpy, or project imports",
+    "expected_target_sha": "bootstrap requires the launcher exact SHA-256 and compares it to target bytes while holding bootstrap and target locks, before AST parsing or project import",
+    "imported_cli_entry": "both targets refuse with exit code 2; imported project side effects cannot be followed by production core through cli_entry"
   },
   "scope": {
     "research_labels_read": false,
@@ -38,11 +41,11 @@
     "job_903_state_at_recording": "RUNNING"
   },
   "source_hashes": {
-    "local_sim/p2_locked_bootstrap.py": "335d7dbd1cb96ba3d578aaa479cf62877ee158452d4452b38f47255b68d29917",
-    "local_sim/p2_freeze_k4_arms.py": "fb01fc1029001a7c524d700d25090f295303791b8b44be0d46c123d55fbc351c",
-    "local_sim/p2_lab.py": "2703c3da971f27f400927e67f007ef7ea3aceaac9fe511a2561b0b55c8109f02",
-    "local_sim/test_p2_freeze_k4_arms.py": "46739363c1e5dcd3f7d7ed1298324e8238b057330f4fab20d68428ad8730c2fc",
-    "local_sim/test_p2_lab_freeze_bridge.py": "e070aaaf1390f049ba654e3daebb45035de61f9f63c4a02d2ad99b77cbcc6794"
+    "local_sim/p2_locked_bootstrap.py": "ca4d178b8985dee61c0c398635d2dfed9649eb16968d4b26c951c55f8f3158b0",
+    "local_sim/p2_freeze_k4_arms.py": "1e5a725b5182de466eab7594b863f107ba46d36e3d191b9cd5c3b13e9b08b30d",
+    "local_sim/p2_lab.py": "e2c59420ff9a237fc94356fc4612ac24d23b59c3b6cb5b9ff05cfceb1fb0a962",
+    "local_sim/test_p2_freeze_k4_arms.py": "5c70373d221d5436afcb7388cf6a314be1aadfe238bc702b4d13508bc75ce4fb",
+    "local_sim/test_p2_lab_freeze_bridge.py": "293f54800b8d18e0bb5a4744dc5fdbe47ba1a760a22dc07de35f2433bcf12104"
   },
   "tests": {
     "freezer": {
@@ -51,7 +54,9 @@
       "passed": 19,
       "total": 19,
       "artifact": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/freezer_tests_bootstrap_repair.json",
-      "artifact_sha256": "23203c6dd9aab026ee7746a04a0927521a8958244545a3cc0cf90709c0ea8a0a"
+      "artifact_sha256": "f5d08de6f4b50add35b94df57077dea5931b8e2826de106a05981809c29a3ec3",
+      "imported_cli_entry_exit_code": 2,
+      "loaded_core_executed_by_imported_cli_entry": false
     },
     "lab_bridge": {
       "command": "uv run python local_sim/test_p2_lab_freeze_bridge.py",
@@ -61,14 +66,24 @@
       "stale_dependency_fixture": "timestamp-and-size-compatible bytecode A with source B",
       "public_entry_observed_version": "B",
       "direct_bootstrap_observed_version": "B",
-      "final_rerun_after_cleanup": true
+      "final_rerun_after_cleanup": true,
+      "real_public_script_observed_import_history": "B",
+      "unsafe_outer_then_bootstrap_history_would_be": "AB",
+      "target_sha_A_then_disk_target_B_exit_code": 2,
+      "dependency_executed_on_target_sha_mismatch": false,
+      "final_rerun_after_public_entry_repair": true,
+      "imported_cli_entry_exit_code": 2,
+      "loaded_dependency_executed_by_imported_cli_entry": false,
+      "final_rerun_after_imported_entry_refusal": true
     },
     "stage0_lab_data": {
       "command": "uv run python local_sim/test_stage0_lab_data.py",
       "exit_code": 0,
       "passed": 32,
       "total": 32,
-      "final_rerun_after_cleanup": true
+      "final_rerun_after_cleanup": true,
+      "final_rerun_after_public_entry_repair": true,
+      "final_rerun_after_imported_entry_refusal": true
     },
     "portability": {
       "command": "uv run python scripts/verify_portability.py",
@@ -76,19 +91,24 @@
       "passed": 103,
       "total": 103,
       "status": "PORTABLE",
-      "final_rerun_after_cleanup": true
+      "final_rerun_after_cleanup": true,
+      "final_rerun_after_public_entry_repair": true,
+      "final_rerun_after_imported_entry_refusal": true
     },
     "real_cli_help": {
       "freezer_public_exit_code": 0,
       "lab_public_exit_code": 0,
       "lab_direct_bootstrap_exit_code": 0,
-      "target_program_names_preserved": true
+      "target_program_names_preserved": true,
+      "freezer_direct_bootstrap_exit_code": 0,
+      "expected_target_sha_required": true
     },
     "static_checks": {
       "py_compile": "pass",
       "git_diff_check": "pass",
       "embedded_source_fingerprints": "pass",
-      "private_nonce_or_child_symbols_remaining": false
+      "private_nonce_or_child_symbols_remaining": false,
+      "public_lab_guard_precedes_numpy_and_project_imports": true
     }
   },
   "preflight": {
@@ -105,5 +125,12 @@
     "commit the exact reviewed bytes",
     "terminal green current-byte default preflight through workerq",
     "new independent fresh-context Skeptic verdict"
-  ]
+  ],
+  "public_entry_repair_base_commit": "d363f6e",
+  "reproduced_public_entry_residual": {
+    "independent_skeptic_verdict": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/skeptic_verdict_bootstrap.md",
+    "independent_skeptic_verdict_sha256": "ccbac9cf2529c8f0205ebbfa78b7e61dc44903a12d80d7db732f3efde9941c9c",
+    "finding": "documented public p2_lab.py path imported numpy and project dependencies before reaching the prior bottom-of-file bootstrap handoff",
+    "accepted": true
+  }
 }

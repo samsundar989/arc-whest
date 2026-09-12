@@ -43221,3 +43221,27 @@ parent target's embedded fingerprint, pass its exact SHA to the bootstrap, and
 require the same target SHA after the bootstrap acquires its lock. Programmatic
 production entry must refuse. No labels, estimator, candidate math, registry,
 gate, data role, job-903 dependency or vault state changed.
+
+## 2026-09-11 - Public script now hands off before project imports
+
+**IMPORTANT implementation result; acceptance pending.** Each real script now
+executes only standard-library setup, verifies the loaded target against its
+embedded normalized fingerprint, hashes the exact target bytes, and exits into
+the bootstrap before `sys.path` changes, NumPy, or any project import. The
+bootstrap requires that exact SHA-256 while holding the target lock before it
+parses the registry or imports project code. Imported-module `cli_entry()` calls
+now refuse with exit 2 and cannot run loaded core; the supported script and direct
+bootstrap paths both use lock-before-import execution.
+
+The strengthened A/B fixture records import history. A real public script and a
+direct bootstrap each import only disk B; an unsafe outer import followed by the
+bootstrap would record `AB`. Supplying target hash A after changing the target to
+B refuses with exit 2 before the dependency executes. Exact current-byte suites
+pass: freezer **19/19**, P01 bridge **15/15**, Stage-0 lab/data **32/32**, and
+portability **103/103**. Public and direct-bootstrap help for both targets,
+`py_compile`, fingerprints and `git diff --check` pass. The evidence summary was
+updated in place with the final source hashes and test observations.
+
+No protected data, producer/job-903 dependency, estimator, candidate math,
+coefficient, registry, gate, data role, public data or vault state changed. A new
+current-byte default preflight and a new fresh-context Skeptic remain required.

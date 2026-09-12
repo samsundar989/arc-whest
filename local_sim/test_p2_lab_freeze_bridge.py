@@ -154,8 +154,8 @@ def _write_attempt_denied(path):
                           capture_output=True).returncode == 7
 
 
-def _loaded_dependency_ab_uses_locked_child(root):
-    """Load dependency A in the parent, then prove the CLI child imports disk B."""
+def _loaded_dependency_ab_uses_lock_first_entrypoints(root):
+    """Prove imported entry refuses while locked entrypoints execute B."""
     local = os.path.join(root, "local_sim")
     manifest_dir = os.path.join(
         root, "experiments", "2026-08-21_phase2_manifest")
@@ -170,7 +170,8 @@ def _loaded_dependency_ab_uses_locked_child(root):
 
     def lifecycle_text(value):
         return ("from pathlib import Path\n"
-                f"Path({marker!r}).write_text({value!r}, encoding='utf-8')\n")
+                f"with Path({marker!r}).open('a', encoding='utf-8') as fh:\n"
+                f"    fh.write({value!r})\n")
 
     with open(lifecycle, "w", encoding="utf-8") as fh:
         fh.write(lifecycle_text("A"))
@@ -194,7 +195,7 @@ def _loaded_dependency_ab_uses_locked_child(root):
     parent = os.path.join(root, "exercise.py")
     with open(parent, "w", encoding="utf-8") as fh:
         fh.write(
-            "import importlib.util, json, os, pathlib, subprocess, sys\n"
+            "import hashlib, importlib.util, json, os, pathlib, subprocess, sys\n"
             f"path={copied_lab!r}\n"
             f"lifecycle={lifecycle!r}\n"
             "stamp=pathlib.Path(lifecycle).stat()\n"
@@ -210,12 +211,22 @@ def _loaded_dependency_ab_uses_locked_child(root):
             " rc=module.cli_entry(['--help'])\n"
             "except SystemExit as exc:\n"
             " rc=exc.code\n"
-            f"seen_public=pathlib.Path({marker!r}).read_text(encoding='utf-8') if pathlib.Path({marker!r}).exists() else 'missing'\n"
+            f"seen_imported=pathlib.Path({marker!r}).read_text(encoding='utf-8') if pathlib.Path({marker!r}).exists() else 'missing'\n"
             f"pathlib.Path({marker!r}).unlink(missing_ok=True)\n"
-            "direct=subprocess.run([sys.executable,module._BOOTSTRAP,'--target',path,'--','--help'],cwd="
+            "target_sha=hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()\n"
+            "direct=subprocess.run([sys.executable,module._BOOTSTRAP,'--target',path,'--expected-target-sha',target_sha,'--','--help'],cwd="
             f"{root!r})\n"
             f"seen_direct=pathlib.Path({marker!r}).read_text(encoding='utf-8') if pathlib.Path({marker!r}).exists() else 'missing'\n"
-            "raise SystemExit(0 if rc==0 and direct.returncode==0 and seen_public=='B' and seen_direct=='B' else 9)\n")
+            f"pathlib.Path({marker!r}).unlink(missing_ok=True)\n"
+            "real=subprocess.run([sys.executable,path,'--help'],cwd="
+            f"{root!r})\n"
+            f"seen_real=pathlib.Path({marker!r}).read_text(encoding='utf-8') if pathlib.Path({marker!r}).exists() else 'missing'\n"
+            f"pathlib.Path({marker!r}).unlink(missing_ok=True)\n"
+            "pathlib.Path(path).write_bytes(pathlib.Path(path).read_bytes()+b'\\n# target version B\\n')\n"
+            "mismatch=subprocess.run([sys.executable,module._BOOTSTRAP,'--target',path,'--expected-target-sha',target_sha,'--','--help'],cwd="
+            f"{root!r})\n"
+            f"seen_mismatch=pathlib.Path({marker!r}).exists()\n"
+            "raise SystemExit(0 if rc==2 and direct.returncode==0 and real.returncode==0 and mismatch.returncode==2 and seen_imported=='missing' and seen_direct=='B' and seen_real=='B' and not seen_mismatch else 9)\n")
     result = subprocess.run([sys.executable, parent], cwd=root,
                             capture_output=True, text=True)
     if result.returncode != 0:
@@ -322,9 +333,9 @@ def run_checks():
               "only the lock-first bootstrap or an explicit test override may run")
 
         with tempfile.TemporaryDirectory(prefix="p2-lab-dependency-a-b-") as root:
-            child_used_b = _loaded_dependency_ab_uses_locked_child(root)
+            child_used_b = _loaded_dependency_ab_uses_lock_first_entrypoints(root)
         check("forged env cannot run cached dependency A instead of disk B", child_used_b,
-              "real entry ignores marker; locked fresh __main__ child imports B")
+              "imported entry refuses; locked paths use B; target hash drift refuses")
 
         check("lab exposes no bearer-authorized private child mode",
               not hasattr(lab, "_LOCKED_CHILD_ARG") and

@@ -25,6 +25,51 @@ import tempfile
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
+_BOOTSTRAP = os.path.join(_HERE, "p2_locked_bootstrap.py")
+_CLI_BINDINGS_ENV = "ARC_WHEST_P2_FREEZE_LOCKED_BINDINGS"
+_SELF_FINGERPRINT = "d8cb3c7287ac0a5b83271b894018a0894c672d6404160c443b5f5cdf4c9aee08"
+
+
+def _attested_target_sha():
+    """Bind the source this interpreter loaded before production can run."""
+    try:
+        with open(os.path.abspath(__file__), "rb") as fh:
+            raw = fh.read()
+    except OSError as exc:
+        raise RuntimeError("cannot read freezer source: %s" % exc) from exc
+    marker = re.compile(rb'(?m)^_SELF_FINGERPRINT = "[0-9a-f]{64}"')
+    normalized, count = marker.subn(
+        b'_SELF_FINGERPRINT = "' + (b'0' * 64) + b'"', raw)
+    if count != 1:
+        raise RuntimeError(
+            "freezer source fingerprint marker is missing or ambiguous")
+    normalized_sha = hashlib.sha256(
+        normalized.replace(b"\r\n", b"\n")).hexdigest()
+    if normalized_sha != _SELF_FINGERPRINT:
+        raise RuntimeError(
+            "loaded freezer source does not match the current disk source")
+    return hashlib.sha256(raw).hexdigest()
+
+
+def _launch_locked_cli(args):
+    try:
+        target_sha = _attested_target_sha()
+    except RuntimeError as exc:
+        print("REFUSED: %s" % exc)
+        return 2
+    env = dict(os.environ)
+    env.pop(_CLI_BINDINGS_ENV, None)
+    completed = subprocess.run(
+        [sys.executable, _BOOTSTRAP, "--target", os.path.abspath(__file__),
+         "--expected-target-sha", target_sha, "--"] + list(args),
+        cwd=os.getcwd(), env=env)
+    return int(completed.returncode)
+
+
+if __name__ == "__main__":
+    raise SystemExit(_launch_locked_cli(sys.argv[1:]))
+
+
 _GENERATOR = os.path.join(_HERE, "p2_build_k4_arms.py")
 _TEMPLATE = os.path.join(_HERE, "p2_compact_candidate_template.py")
 _FIT = os.path.join(_HERE, "p2_k4_fit.py")
@@ -32,13 +77,10 @@ _PRODUCER = os.path.join(_HERE, "p2_k4_fit_producer.py")
 _TRUTH_READS_SOURCE = os.path.join(_HERE, "truth_reads.py")
 _TRUTH_READS_LEDGER = os.path.join(_ROOT, "experiments", "truth_reads.jsonl")
 _DEFAULT_ARMS = os.path.join(_HERE, "p2_arms")
-_BOOTSTRAP = os.path.join(_HERE, "p2_locked_bootstrap.py")
 _ARMS = ("exact", "coherent", "consumers_only", "births_only")
 _HASH = re.compile(r"[0-9a-f]{64}")
 _FIT_SCHEMA = "arc-whest.coherent-k4-fit-receipt.v1"
 _FREEZE_SCHEMA = "arc-whest.coherent-k4-arm-freeze-receipt.v1"
-_CLI_BINDINGS_ENV = "ARC_WHEST_P2_FREEZE_LOCKED_BINDINGS"
-_SELF_FINGERPRINT = "d49ee5baad9c2778dbe7f200576413e8507452fa65543a45c2ccb2a2df410abf"
 _BOUND_CLI_BINDINGS = None
 _ALLOW_IN_PROCESS_TEST = False
 
@@ -223,15 +265,9 @@ def _verify_cli_bindings(bindings, paths):
 
 
 def cli_entry(argv=None):
-    """Delegate every public invocation to the stdlib-only lock-first bootstrap."""
-    args = list(sys.argv[1:] if argv is None else argv)
-    env = dict(os.environ)
-    env.pop(_CLI_BINDINGS_ENV, None)
-    completed = subprocess.run(
-        [sys.executable, _BOOTSTRAP, "--target", os.path.abspath(__file__),
-         "--"] + args,
-        cwd=os.getcwd(), env=env)
-    return int(completed.returncode)
+    """Refuse imported-module production entry; real scripts exit above."""
+    print("REFUSED: production freezer entry requires the real script or locked bootstrap")
+    return 2
 
 
 def _binding_path(binding, label):
@@ -843,7 +879,3 @@ def main(argv=None):
           (result["selection"]["k4_lam"], result["selection"]["registered_index"]))
     print("receipt: %s" % os.path.join(args.out_dir, "freeze_receipt.json"))
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(cli_entry())

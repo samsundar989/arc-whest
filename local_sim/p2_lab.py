@@ -66,6 +66,53 @@ import time
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
+_BOOTSTRAP = os.path.join(_HERE, "p2_locked_bootstrap.py")
+_CLI_BINDINGS_ENV = "ARC_WHEST_P2_LAB_LOCKED_BINDINGS"
+_SELF_FINGERPRINT = "5d1b70f91c0b8cce07bc00f0083c568693b386fa130e163f0d162f9160718479"
+
+
+def _attested_target_sha():
+    """Bind the source this interpreter loaded before any project import."""
+    try:
+        with open(os.path.abspath(__file__), "rb") as fh:
+            raw = fh.read()
+    except OSError as exc:
+        raise RuntimeError("cannot read lab source: %s" % exc) from exc
+    marker = re.compile(rb'(?m)^_SELF_FINGERPRINT = "[0-9a-f]{64}"')
+    normalized, count = marker.subn(
+        b'_SELF_FINGERPRINT = "' + (b'0' * 64) + b'"', raw)
+    if count != 1:
+        raise RuntimeError("lab source fingerprint marker is missing or ambiguous")
+    normalized_sha = hashlib.sha256(
+        normalized.replace(b"\r\n", b"\n")).hexdigest()
+    if normalized_sha != _SELF_FINGERPRINT:
+        raise RuntimeError(
+            "loaded lab source does not match the current disk source")
+    return hashlib.sha256(raw).hexdigest()
+
+
+def _launch_locked_cli(args):
+    try:
+        target_sha = _attested_target_sha()
+    except RuntimeError as exc:
+        print("REFUSED: %s" % exc)
+        return 2
+    env = dict(os.environ)
+    env.pop(_CLI_BINDINGS_ENV, None)
+    completed = subprocess.run(
+        [sys.executable, _BOOTSTRAP, "--target", os.path.abspath(__file__),
+         "--expected-target-sha", target_sha, "--"] + list(args),
+        cwd=os.getcwd(), env=env)
+    return int(completed.returncode)
+
+
+# A real script process must hand off before numpy or any executable project
+# dependency can be imported.  The bootstrap rechecks this exact source hash
+# while holding the target lock.
+if __name__ == "__main__":
+    raise SystemExit(_launch_locked_cli(sys.argv[1:]))
+
+
 sys.path = [p for p in sys.path if os.path.abspath(p or ".") != _HERE]
 for _p in (_HERE, _ROOT):
     if _p not in sys.path:
@@ -81,10 +128,7 @@ import p2_freeze_k4_arms as k4_freezer  # noqa: E402
 from phase2_manifest import load as load_manifest  # noqa: E402
 
 ARMS_DIR = os.path.join(_HERE, "p2_arms")
-_BOOTSTRAP = os.path.join(_HERE, "p2_locked_bootstrap.py")
 _ACTIVE_ARM_PATHS = None
-_CLI_BINDINGS_ENV = "ARC_WHEST_P2_LAB_LOCKED_BINDINGS"
-_SELF_FINGERPRINT = "8d3b5a50d6f5c0dd31d343e5c8005b5416f8d19f3991a1428bb5e68811b17ab7"
 _BOUND_CLI_BINDINGS = None
 _ALLOW_IN_PROCESS_TEST = False
 
@@ -191,15 +235,9 @@ def _verify_cli_bindings(bindings, paths):
 
 
 def cli_entry(argv=None):
-    """Delegate every public invocation to the stdlib-only lock-first bootstrap."""
-    args = list(sys.argv[1:] if argv is None else argv)
-    env = dict(os.environ)
-    env.pop(_CLI_BINDINGS_ENV, None)
-    completed = subprocess.run(
-        [sys.executable, _BOOTSTRAP, "--target", os.path.abspath(__file__),
-         "--"] + args,
-        cwd=os.getcwd(), env=env)
-    return int(completed.returncode)
+    """Refuse imported-module production entry; real scripts exit above."""
+    print("REFUSED: production lab entry requires the real script or locked bootstrap")
+    return 2
 
 
 def _revalidate_instruments(bindings):
@@ -1094,7 +1132,3 @@ def _write(path, results, paired, man, seeds, z, spec, arms,
         raise SystemExit(
             f"REFUSED: {path} appeared while the run was executing. Evidence "
             "is immutable; choose a new path.") from exc
-
-
-if __name__ == "__main__":
-    raise SystemExit(cli_entry())

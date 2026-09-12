@@ -87,7 +87,7 @@
     },
     {
       "check": "forged child environment cannot enter loaded freezer core",
-      "detail": "public entry ignores marker and the lock-first bootstrap handles help",
+      "detail": "imported entry refuses regardless of marker or loaded core",
       "pass": true
     },
     {

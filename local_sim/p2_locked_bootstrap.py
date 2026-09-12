@@ -21,7 +21,7 @@ import types
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
-_SELF_FINGERPRINT = "ee30128a7b3141a202e1002a1756bc7dfba74d7b50726a39c2ab5ac9e3d1fed8"
+_SELF_FINGERPRINT = "c52be6237591bf0184268c0666d860296d882c993359aed1bfa0d3280dd3e9df"
 _REGISTRY_NAME = "_CLI_SOURCE_REGISTRY"
 _TARGETS = {"p2_freeze_k4_arms.py", "p2_lab.py"}
 
@@ -219,16 +219,22 @@ def _execute_target(target, target_raw, paths, target_name, bindings, args):
             sys.pycache_prefix = previous_prefix
 
 
-def run(target, args):
+def run(target, expected_target_sha, args):
     target = _repo_path(target, "bootstrap target")
     if os.path.basename(target) not in _TARGETS:
         raise BootstrapRefused("unsupported bootstrap target")
+    if (not isinstance(expected_target_sha, str) or
+            re.fullmatch(r"[0-9a-f]{64}", expected_target_sha) is None):
+        raise BootstrapRefused("expected target SHA-256 is invalid")
     bootstrap = os.path.abspath(__file__)
     # Stage one binds the only code that executes before the complete graph is
     # known: this stdlib-only bootstrap and the target text parsed by ast.
     with _stable_files([bootstrap, target]):
         _assert_loaded_source()
         target_raw, target_sha = _read_bytes(target, "bootstrap target")
+        if target_sha != expected_target_sha:
+            raise BootstrapRefused(
+                "target changed between the public launcher and bootstrap lock")
         paths, target_name = _literal_registry(target_raw, target)
         # Stage two holds the complete literal graph through import and main.
         with _stable_files(paths.values()):
@@ -242,13 +248,14 @@ def run(target, args):
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", required=True)
+    parser.add_argument("--expected-target-sha", required=True)
     parser.add_argument("args", nargs=argparse.REMAINDER)
     parsed = parser.parse_args(argv)
     args = list(parsed.args)
     if args[:1] == ["--"]:
         args = args[1:]
     try:
-        return run(parsed.target, args)
+        return run(parsed.target, parsed.expected_target_sha, args)
     except BootstrapRefused as exc:
         print("REFUSED: %s" % exc)
         return 2

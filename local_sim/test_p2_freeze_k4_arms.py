@@ -300,8 +300,8 @@ def run_checks():
             else:
                 os.environ[freezer._CLI_BINDINGS_ENV] = previous_env
         check("forged child environment cannot enter loaded freezer core",
-              rc == 0 and not os.path.exists(marker),
-              "public entry ignores marker and the lock-first bootstrap handles help")
+              rc == 2 and not os.path.exists(marker),
+              "imported entry refuses regardless of marker or loaded core")
 
     check("freezer exposes no bearer-authorized private child mode",
           not hasattr(freezer, "_LOCKED_CHILD_ARG") and
