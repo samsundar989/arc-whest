@@ -72,9 +72,20 @@ Its independent Skeptic ACCEPTED only the fixed two-coordinate numerical
 repair and finite-bank conditional identities; workerq 996 default preflight
 passed 12/16 at 2,946.8 MiB (`nonlinear_split_bank/`, `ec0bdf3`). Material
 lower-moment leakage prevents a K4-only closure claim. LOG `ec0bdf3`
-contracts a complete-cost instrument for one externally supplied first
-source plus the ordinary compact K3 backbone; it has no result yet.
-No full K4 source/compression/counted-cost path is accepted.
+contracted an integrated one-first-source compact cost instrument. Its
+frozen n4 oracle failed 93/172 from an unstable trajectory, and a separate
+n8 oracle failed 186/187 from negative K4-corrected preactivation variance.
+These are implementation/numerical FAILs, not a K4 scientific kill; no
+width1024 meter was run. An exact positive S-column feed shortcut passed
+789/789, cut counted tiny FLOPs 18.37%, and received fresh scoped Skeptic
+ACCEPT without changing the n8 negative variance. A physical n2 signed-law
+Gaussian-reset fixture passed 102/102 with fresh Skeptic ACCEPT only for
+conditional cumulants and lower-moment leakage. Workerq 1009 controlled
+live-byte default preflight passed 12/16, four Full-only skips, 346 Python
+hashes unchanged. Full physical nonlinear source/compression, stable
+covariance, complete counted cost, process peak and score remain open. The
+self-contained `STRATEGIST_PACKET_2026-09-12.md` requests a priced causal
+representation or explicit no-go before another fit or fresh decision.
 Stage 4 remains
 conditional on a measured Stage-2 bottleneck.
 

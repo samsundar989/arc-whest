@@ -45866,3 +45866,67 @@ Do not call this a green preflight. A live-worktree workerq default
 preflight, with exact before/after bytes and no concurrent source edits,
 and fresh Skeptic verdict remain required before accepting the tiny
 claim. No decision data, public/vault, frozen estimator edit or submission.
+
+**September 12 independent acceptance and current synthesis.** Controlled
+workerq **1009** used `--live-worktree`, 5 GiB RAM/2 CPUs/**0 GPUs** and
+inherited **high** priority. It terminal **SUCCEEDED**, exit 0,
+`PREFLIGHT GREEN -- 12/16, 4 SKIPPED`, measured process peak
+`3,012.6 MiB` for *preflight only*. Exact before/after HEAD
+`4cf6c3c64892f610b4483ce9f2385442cec8cc69`, all **346/346**
+tracked Python hashes, physical source SHA `dffd6aa6...` and untouched
+`estimator.py` SHA `00240eb1...` match in the controlled receipt SHA256
+`22e1e20b1f2dd1eb1861d5a188e060771f9035d4da6a06cddcbdaca9c90031c8`.
+Transcript SHA256
+`c9746f5935057809c6ad8e2e70adeb2cfef0f9ba324b8ba2057f7fcdd37569b3`;
+raw job/status/log/receipt/transcript ZIP SHA256
+`e2d05d426e91b23d9fd0f7ff02387499c00e4aaa49e8be39409f69e91f6c0bfe`,
+committed `fc8fda7`. Job **1007** was canceled after steps 1--2 because
+it started against an actively edited live source without a before-run
+manifest; it is NOT a green gate. Its partial raw ZIP SHA256
+`d7bf904e94b8bef953d5be1b6ce61aa7f21d682cd6d501263255e7ef7c19948c`,
+committed `c7df9c6`.
+
+The fresh physical-law Skeptic at `e415578` independently enumerated all
+missing-root candidates, recomputed six positive continuous moment laws and
+conditional oriented K3/K4, verified all **102/102** gates and exact-byte
+preflight; verdict **ACCEPT only fixed n2 causal signed-law identity**.
+It expressly does not accept future-aware finite bank as online source,
+finite-rank compression, width1024 physical source or score.
+
+The exact positive S-column shortcut source at `7ac23da` first had a
+fixture **0/0 setup FAIL** from importing the repo-local flopscope shim,
+preserved `68b53cf`. Test-only official-package preload at `6d5f986`
+preceded the repaired focused run: **789/789 PASS**, worst material-relative
+old/new discrepancy `2.1793e-7`, n8 official-context counted FLOPs
+`3,936,609 -> 3,213,553` (**723,056 / 18.37% saved**), modeled retained
+array bytes `40,312 -> 38,520` at n8. Raw SHA256
+`844983d30ce457968f440ebb79f9f88d285bfd4ee3265e094bcc699217fc2d68`,
+committed `4cf6c3c`. Independent fresh shortcut Skeptic at `9c8739a`
+derived positive ZPP/3 and negative full n-column algebra, reproduced
+the result byte-for-byte under exact installed package bytes, and
+**ACCEPTED only exact tiny algebra and counted reduction**. The shortcut
+artifact itself omitted package hashes, the negative deletion was inherited
+from the prior n8 result, and modeled retained arrays omit co-live local
+arrays and external inputs. Neither tiny modeled memory nor preflight
+peak proves the estimator's 8 GiB cap.
+
+**Knowledge delta / decision:** n4 remains **93/172 FAIL** from real
+overflow; n8 remains **186/187 FAIL** from negative L3 preactivation
+variance `-0.117716`, unchanged by the exact shortcut. A same-input
+decomposition attributes the n8 failure primarily to the K4 covariance
+consumer (`-0.150966` for that neuron), not a misplaced positive feed.
+The supplied S64 bank is synthetic and carries linearly through W; it is
+not a physical nonlinear source. The accepted n2 signed-law identity
+requires lower raw moments and whole-law conditional cumulant differences.
+Together these do **not** justify running the registered width1024 cost
+meter or treating P01's failed exposed-DESIGN arms as a scientific K4 kill.
+There is no fresh DECIDE, no confirmed better candidate, no public/vault
+touch and no changed estimator. The missing causal **compressed** nonlinear
+source and stable covariance are now the decision-critical research gap;
+before another fit/label or bounded frontier extension, obtain a
+self-contained Strategist response to the packet in
+`docs/STRATEGIST_PACKET_2026-09-12.md` and bring any concrete proposal
+back as a pre-registered truth-free contract. Exact symbolic polar kernels
+can be checked locally but do not solve width1024 rank/cost. P01/P07
+remain exposed DESIGN, P08 exhausted, Stage 3 held, HUMAN_MODEL and vault
+untouched. Samuel's prediction answer remains **"I don't know"**.

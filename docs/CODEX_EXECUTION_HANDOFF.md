@@ -56,9 +56,18 @@ LOG commit `ad856c6` contracted a separate split-bank repair, which passed
 positive law and finite-bank conditional identities; workerq 996 passed
 current-byte default preflight 12/16, four Full-only skips, at 2,946.8 MiB.
 Lower-moment leakage remains material, so K4-only closure is unproved. LOG
-`ec0bdf3` contracts a single integrated first-source compact cost meter,
-not yet run. Stage 1's supplied-core algebra and compact baseline cost remain
-accepted narrowly; full physical source closure and complete cost are open.
+`ec0bdf3` contracted a single integrated first-source compact cost meter.
+Its frozen n4 93/172 and n8 186/187 gates failed on overflow and negative
+K4-corrected covariance respectively; no width1024 meter was run. An
+exact S-column feed shortcut passed 789/789 and independently reduced tiny
+counted FLOPs 18.37%, without repairing negative n8 variance. A physical
+n2 signed-law conditional-cumulant fixture passed 102/102. Both have fresh
+scoped Skeptic ACCEPT; workerq 1009 passed controlled live-byte default
+preflight 12/16, four Full-only skips, at unchanged HEAD/Python bytes.
+Stage 1's supplied-core algebra and compact baseline cost remain accepted
+narrowly; physical nonlinear compression, stable covariance, complete
+full-width cost and peak memory are open. The next scientific architecture
+decision is specified in `STRATEGIST_PACKET_2026-09-12.md`.
 There is no better submission candidate, no fresh DECIDE/public/vault result,
 and Samuel's Stage-3 hold remains binding. Historical pickup instructions below
 must not cause a second fit or P01 relabeling.

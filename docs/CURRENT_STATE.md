@@ -1,7 +1,7 @@
 # CURRENT_STATE.md — read this first
 
-**Current September 12, 2026, after the exact-axis and first-source cost
-Skeptic verdicts.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
+**Current September 12, 2026, after the physical signed-law and exact feed
+shortcut Skeptic verdicts.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
 archived at `docs/archive/CURRENT_STATE_before_worker_review_2026-09-10.md`.
 
 ## What is proved
@@ -308,6 +308,25 @@ so its role is unchanged. The exact command and protected stdout are preserved i
 
 ## Submission state
 
+**Latest research update.** An exact fixed n2 physical signed-law
+Gaussian-reset recurrence passed 102/102 and received fresh Skeptic ACCEPT
+only for its conditional K3/K4 identities and lower-moment leakage. The
+future-aware finite bank is not a deployable causal compression. An exact
+positive S-column K3 feed shortcut passed 789/789 and fresh Skeptic ACCEPT
+only for tiny algebra and official-context cost reduction (18.37% at n8).
+Workerq 1009 passed controlled live-byte default preflight 12/16 with four
+Full-only skips; HEAD and 346 Python hashes matched before/after. Its 3,012.6
+MiB peak is **preflight RAM**, not a full-width candidate measurement.
+The integrated first-source n4 gate remains 93/172 FAIL from overflow, and
+the distinct n8 gate remains 186/187 FAIL because K4 covariance makes L3
+preactivation variance -0.117716. The shortcut does not change that failure.
+No width1024 integrated cost or complete peak-memory result exists; its
+retained-array model omits live temporaries. The truth-free mechanism needs
+a causal compressed nonlinear signed source and stable covariance before
+new labels. The self-contained
+`docs/STRATEGIST_PACKET_2026-09-12.md` asks for a falsifiable architecture
+decision. Raw paths and exact scopes are at the LOG tail.
+
 There is **no newly proven better submission**. The compact arms now have a
 negative exposed-DESIGN accuracy result, an independently identified source
 identity gap and label-free cost evidence; they are not shipped candidates.
@@ -325,24 +344,16 @@ on eligibility work remains binding; Stage 3 stays closed.
 
 ## Strategist decision
 
-A new Strategist Packet is **not required yet**. Repository evidence is not
-exhausted: the frozen coherent-K4 DESIGN comparison failed, its source-identity
-counterexample and executable trace have independent acceptance, and the
-repair-math Skeptic supplied a concrete residual counterexample. The dense
-linear oracle and Gaussian-pair mixed-source check have accepted narrow
-verdicts; the signed-cubature factor identity and fixed n=4 first-layer source
-also have scoped acceptance. The boundary-aware two-layer attempt failed;
-the exact-axis repair, synthetic first-source cost and abstract signed-feed
-embedding/multi-birth integration have narrow acceptance. The nonlinear
-continuous law's first fixture failed its numerical gate; the split-bank
-toy repair has narrow acceptance, while compression and the priced
-complete source/history path remain concrete label-free discriminators.
-The `mixed_source/cost_options.md`
-ledger is conventional arithmetic, not measured flopscope cost or a feasible
-rank proof.
-Consult a strategist if corrected algebra and fresh Skeptic synthesis leave no
-supported next step, or before changing architecture beyond GAME_PLAN's
-bounded frontier options.
+A self-contained [Strategist Packet](STRATEGIST_PACKET_2026-09-12.md) is now
+prepared. Local evidence establishes an exact tiny signed-law accounting
+identity and an exact compact feed shortcut, but **not** a causal finite-rank
+nonlinear source, stable covariance, or a valid full-width integrated cost.
+Two distinct frozen synthetic stability gates are red, and the exposed P01
+comparison cannot supply a scientific kill. The packet asks for one priced,
+falsifiable representation or an explicit no-go and fallback. Bring a
+returned proposal back through the LOG contract and truth-free tests before
+new DESIGN fitting or fresh DECIDE. This does not block independent routine
+instrument/memory accounting work.
 
 ## Preserved constraints
 
