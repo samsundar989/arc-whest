@@ -24,7 +24,6 @@ import json
 import math
 from pathlib import Path
 import sys
-import tarfile
 import types
 
 
@@ -37,7 +36,7 @@ for path in (str(ROOT), str(HERE)):
     if path not in sys.path:
         sys.path.append(path)
 
-PARENT_TAR = ROOT / "submission-k3strassen-L4.tar.gz"
+PARENT_FILE = ROOT / "experiments" / "2026-09-12_f21" / "estimator_L4_parent.py"
 PARENT_SHA = "052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58"
 CANDIDATE = ROOT / "estimator_k3_strassen_L4_f21.py"
 BUDGET = 2 ** 41
@@ -48,20 +47,12 @@ CONFIG_NAMES = ("ALPHA_CAP", "_STRASSEN_DEPTH", "_STRASSEN_MIN_BLOCK",
 
 
 def _load_parent():
-    with tarfile.open(PARENT_TAR, "r:gz") as archive:
-        members = [m for m in archive.getmembers()
-                   if m.isfile() and Path(m.name).name == "estimator.py"]
-        if len(members) != 1:
-            raise RuntimeError(f"expected one estimator.py tar member, found {len(members)}")
-        stream = archive.extractfile(members[0])
-        if stream is None:
-            raise RuntimeError("cannot read parent estimator.py member")
-        source = stream.read()
+    source = PARENT_FILE.read_bytes()
     got = hashlib.sha256(source).hexdigest()
     if got != PARENT_SHA:
         raise RuntimeError(f"L4 parent SHA mismatch: {got}")
     module = types.ModuleType("d21_l4_parent")
-    module.__file__ = f"{PARENT_TAR}!estimator.py"
+    module.__file__ = str(PARENT_FILE)
     sys.modules[module.__name__] = module
     exec(compile(source, module.__file__, "exec"), module.__dict__)
     return module, got
@@ -213,7 +204,7 @@ def main(argv=None):
                   and last_run_ok and final_rms_ok and all(row["pass"] for row in rows))
     report = {
         "probe": "D21 L4 fusion float32 per-layer trajectory parity",
-        "parent_tar": str(PARENT_TAR.relative_to(ROOT)), "parent_sha256": parent_sha,
+        "parent_file": str(PARENT_FILE.relative_to(ROOT)), "parent_sha256": parent_sha,
         "candidate": str(CANDIDATE.relative_to(ROOT)), "candidate_sha256": candidate_sha,
         "flopscope_file": str(Path(flops.__file__).resolve()),
         "width": args.width, "depth": args.depth, "fixed_input_seed": args.seed,
