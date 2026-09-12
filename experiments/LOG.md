@@ -45128,3 +45128,45 @@ derivative is applied to birth-time V/p. Commit the fixture and raw
 result, run current-byte live workerq default preflight with 5 GiB RAM,
 2 CPUs and zero GPU (four Full-only skips explicit), then obtain a new
 fresh-context Skeptic before accepting or pricing a compact integration.
+
+**September 12 axis-exact two-layer increment synthesis (scoped ACCEPT).**
+The unchanged-threshold contract `4622426` and operational amendment
+`2b997b2` preceded the first focused result. Source/result commit
+`df81223`, raw workerq/byte-state evidence commit `12c2246` and independent
+fresh-context verdict `0782efa` establish **PASS 715/715** at the original
+N32/48/64 and `1e-8` numerical gate. The new three-node axis measure
+matches moments through degree five (largest defect `2.22e-16`) with
+positive nodes/weights. Its separately bounded integration error including
+the x>12 tail is at most `5.039e-14`; the Skeptic independently integrated
+to infinity and found actual omitted tails through degree five below
+`7.23e-40`. Worst material-relative gaps are `1.9763e-13` for N32/48,
+`3.9526e-13` for N48/64 and N48/reference, and `7.9052e-13` for
+N64/reference. All full-tensor signed factor/partition, two-map consumer,
+quadratic K3-feed, support-mass, zero and naive-double-count controls pass.
+The independent Skeptic recomputed infinite-domain raw moments,
+per-support fourth moments, transported tensors and feed, and **ACCEPTED
+only this fixed two-coordinate continuous law with its toy linear old
+carry**. The old mapped-axis fixture and its 48 failed comparisons remain
+byte-unchanged. Axis source SHA-256
+`1f2f421bcc696dec263a77847b076914982bc41eba08f251a4034925a6f4d1d9`,
+result SHA-256
+`3d297f29b0831c0958c3e86916eaf74b818114cf696f678ef033d32aabffc6b2`,
+Skeptic SHA-256
+`5cbf493c68328a4a3f74fbad897838f44f5c54b1684165e402640f250e8ee1b8`.
+The complete fixture and raw job991 ZIP are under `increment_axis_gauss/`;
+ZIP SHA-256
+`569510bdee07c1340d28b70ae6f22981af08da65e1e6a5ec93ed4e3832e66ad9`.
+Workerq 991 ran live default preflight GREEN **12/16**, four Full-only
+skips, peak `2827.03515625 MiB` under 5 GiB/2 CPUs/zero GPU. Pre/post
+tested HEAD `df81223`, source/result and all 332 Python hashes match;
+the default preflight itself did not execute the focused fixture.
+CONFIRMED: the specific numerical integration failure is repaired and
+the finite-measure increment accounting converges for this toy continuous
+law. INFERRED: a similar signed difference representation could serve
+a later physical source if its full conditional law were available.
+SPECULATIVE: a genuinely nonlinear old-history response, scalable rank,
+complete compact source/Gram integration, counted full cost, server
+residual or score benefit. No protected labels, registry block, public
+split or vault was touched. A deterministic three-layer/two-source
+nonlinear-carry fixture is a separate potential follow-up, not evidence
+already earned by this two-layer test.
