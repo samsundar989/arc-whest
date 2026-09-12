@@ -43135,3 +43135,11 @@ mode; it is not evidence. The corrected current-byte default preflight is worker
 **920**, submitted high priority with `--gpus 0 --ram 5 --vram 0 --cpus 2
 --no-snapshot`. It is queued and has no verdict. The reviewed bridge sources must
 remain unchanged through its terminal result.
+
+**Immediate queue-command correction.** Workerq 920 was also cancelled while
+queued: inspection showed the mistyped `--description` token had entered the
+payload command. Correct replacement **921** is verified by `workerq show`: exact
+command `powershell.exe -NoProfile -ExecutionPolicy Bypass -File
+scripts/preflight.ps1`, high priority, 5 GiB RAM, 2 CPUs, zero GPUs/VRAM,
+snapshot mode `none`, command signature `0e90486f730c343b`. It is queue position
+zero and has no verdict yet. Jobs 918 and 920 never started and are not evidence.
