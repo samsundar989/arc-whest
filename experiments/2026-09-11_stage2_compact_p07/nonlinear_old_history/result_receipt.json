@@ -1,0 +1,12 @@
+{
+  "contract_commit": "dca4e7f",
+  "focused_command": "uv run python local_sim/test_p2_k4_nonlinear_old_history.py --output experiments/2026-09-11_stage2_compact_p07/nonlinear_old_history/result.json",
+  "focused_exit_code": 1,
+  "result_path": "experiments/2026-09-11_stage2_compact_p07/nonlinear_old_history/result.json",
+  "result_sha256": "fead616c0b5149ad48ca109a12eafe56a5ec698a0e45ddcba86e9af738735df9",
+  "source_path": "local_sim/test_p2_k4_nonlinear_old_history.py",
+  "source_sha256": "991a4e38eefe90ee2f761556dd60ac1b3b6c86280437d096d8a8d8f29a6d5c61",
+  "status": "FAIL",
+  "checks_passed": 54,
+  "checks_total": 56
+}
