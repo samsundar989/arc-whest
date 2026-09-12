@@ -16,6 +16,12 @@ births, 10 weighted-Gram/thin-QR joins, rank 384, and ordinary residual rank
 16. It also contains the **old analytic K4 core and its embedded K3 birth**.
 Its supplied-core bill does not establish a physical source identity; the
 separate frozen arm's source construction has a known cumulant defect.
+Static review before the integrated tiny measurement also found half-weight
+off-diagonal covariance consumers in that old reference: oriented K3 D21
+used `1/4` instead of the Taylor `1/2` per orientation, and oriented K4 D31
+used `1/12` instead of `1/6`. The integrated implementation and independent
+dense factorial oracle must use the corrected coefficients. The old FLOP
+total remains a ledger anchor only, not consumer correctness evidence.
 
 The separately accepted
 [`first_source_kernel/meter.json`](../../experiments/2026-09-11_stage2_compact_p07/first_source_kernel/meter.json)

@@ -45581,3 +45581,20 @@ visible above; the design memo records the correction. This changes no
 experiment data, physical source, score gate, residual model or protected
 role. If the executable reports any other count, preserve a failed
 schedule rather than silently rewriting it.
+
+**September 12 pre-measure integrated-consumer coefficient amendment.**
+Static review of the copied supplied-core compact reference found that its
+off-diagonal covariance Taylor readout assigned half the factorial weight
+to two oriented contractions: the K3 D21 term used `1/4` per orientation
+where the third-order Taylor term requires `1/2`, and the K4 D31 term used
+`1/12` per orientation where the fourth-order Taylor term requires `1/6`.
+This was found before running the new integrated tiny oracle or width meter.
+The integrated executable and its independently enumerated dense factorial
+oracle must use `1/2` and `1/6` respectively for each orientation; preserve
+the unchanged D22 `1/4` and other coefficients. The 818.494B old
+supplied-core result remains a cost/algebra accounting anchor for its own
+implementation, **not** an exact integrated-consumer prediction or evidence
+that those two old covariance terms were correct. Schedule, FLOP and memory
+gates, external-source scope, data roles and score claims are unchanged. A
+tiny mismatch at the registered tolerance is a FAIL, not grounds to tune
+the factorial coefficients after seeing the output.
