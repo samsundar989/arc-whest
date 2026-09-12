@@ -46433,3 +46433,58 @@ passes the scorer's Git-root check, so the **exact workerq command** must pass
 under that tree; verify the live receipt after the first exposed P01 read.
 No protected data was used to inspect this path. No-label workerq 1049 did
 establish snapshot source-byte parity, not receipt persistence.
+
+**F21 first measured conformance, after prediction commit `3999e70`.** The
+first independent tiny-oracle invocation failed its *fixture premise*, not
+the candidate: `column_cancellation` produced the exact masked tensor
+`[[0,74,-82],[-12,0,-70],[28,64,0]]`. Raw failure/cause is preserved in
+`experiments/2026-09-12_f21/tiny_oracle_attempt1_failure.md`. The only repair,
+commit `c151775`, made paired `A_L` columns equal and their `w2b` opposite,
+which cancels the two-leg term along with the already opposite D columns.
+Rerun `tiny_oracle.json` passed **6/6 exact tensor, orientation and mask cases**.
+Its NumPy float32 diagnostic deliberately found one non-bit-identical case:
+`1.333333` maximum absolute old/fused drift under a `1e8` cancellation fixture;
+that is not a typical-network trajectory claim. Actual flopscope/L4 backend
+`trajectory_128x4.json` passed all sampled layer-state/source fields and final
+output at effective Strassen depth 1; final relative RMS `9.8513e-8` against
+the preregistered `1e-2` ceiling. `whest validate` accepted the candidate
+contract (`output_shape=[2,4]`, WhestBench 0.16.1). No truth or seed block was
+read. Full L4-depth trajectory and complete official metering remain owed.
+
+**F21 pre-submission optimization review — live-shape trajectory job.** Planned
+command is `test_p2_d21_fusion_trajectory.py --width 1024 --depth 4`, one
+canonical no-label network at the smallest depth that exercises all four
+Strassen levels, both arms in the same process with shared weight arrays.
+This avoids duplicate mint/load and any truth loader. No worker processes,
+prefetch, batching or cache change is useful for this deterministic parity
+check; changing operand order/backend would weaken it. Four layers cannot be
+reduced without losing the recurrence sample, and one no-label network is the
+declared diagnostic, not statistical evidence. CPU only, no GPU; immutable
+JSON output permits a clean rerun if interrupted, so checkpointing adds no
+recovery value. Prior candidate certification at 1024x16 measured about 3 GiB
+process peak for one arm; two co-live tiny-depth states plus Strassen work
+justify a conservative **8 GiB RAM, 0 VRAM, 2 CPUs** request, not a claim of
+measured peak. Reuse the exact frozen parent/candidate and tiny result.
+
+**F21 pre-submission optimization review — original-L4 quick certificate.**
+The existing `certify_candidate.py --quick` is reused for complete grader-twin
+metering without rerunning its official two-MLP smoke or label access; the
+candidate-specific deployment check is later and separate. Its four fixed
+no-label seeds/invariant cases are the instrument's required coverage; no
+duplicate dataset/loader, worker process, batch/prefetch or cache is added.
+CPU only. An interruption leaves no protected data spent and is recoverable
+by a new immutable report path. Prior comparable certification jobs measured
+about 3 GiB; declare **5 GiB RAM, 0 VRAM, 2 CPUs**. This parent run is
+necessary to compare counted with counted on the same program, rather than
+substituting the dated graded result.
+
+**F21 pre-submission optimization review — fused-L4 quick certificate.**
+Same existing four-seed no-label certificate and CPU placement, no extra
+loader/workers/cache/prefetch. No pass is removed from the complete meter;
+`--quick` skips only the smoke and package validation that do not isolate
+counted work, and those are scheduled candidate-specifically later. Reuse
+the same immutable source and controls; a failed job can be rerun under a
+new report filename without spending a seed. Prior one-arm ~3 GiB peak
+supports **5 GiB RAM, 0 VRAM, 2 CPUs**. The report retains all operation
+families/materialization checks; a separate ledger extraction is needed if
+its summary omits per-op family detail.

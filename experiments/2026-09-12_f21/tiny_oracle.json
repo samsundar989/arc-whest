@@ -1,0 +1,104 @@
+{
+  "scope": "tiny exact tensor contraction and NumPy float32 diagnostic",
+  "seed_block": null,
+  "candidate_imported": false,
+  "cases": [
+    {
+      "name": "oriented_single_column",
+      "shape": [
+        2,
+        1
+      ],
+      "exact_old_tensor": true,
+      "exact_fused_tensor": true,
+      "off_diagonal_entries": 2,
+      "float32": {
+        "max_abs_old_fused": 0.0,
+        "n_different_bits": 0,
+        "max_abs_old": 7.0,
+        "backend": "NumPy float32 matmul; diagnostic only"
+      }
+    },
+    {
+      "name": "signed_non_square_lineage",
+      "shape": [
+        3,
+        5
+      ],
+      "exact_old_tensor": true,
+      "exact_fused_tensor": true,
+      "off_diagonal_entries": 6,
+      "float32": {
+        "max_abs_old_fused": 0.0,
+        "n_different_bits": 0,
+        "max_abs_old": 104.0,
+        "backend": "NumPy float32 matmul; diagnostic only"
+      }
+    },
+    {
+      "name": "column_cancellation",
+      "shape": [
+        3,
+        4
+      ],
+      "exact_old_tensor": true,
+      "exact_fused_tensor": true,
+      "off_diagonal_entries": 6,
+      "float32": {
+        "max_abs_old_fused": 0.0,
+        "n_different_bits": 0,
+        "max_abs_old": 0.0,
+        "backend": "NumPy float32 matmul; diagnostic only"
+      }
+    },
+    {
+      "name": "all_zero",
+      "shape": [
+        4,
+        3
+      ],
+      "exact_old_tensor": true,
+      "exact_fused_tensor": true,
+      "off_diagonal_entries": 12,
+      "float32": {
+        "max_abs_old_fused": 0.0,
+        "n_different_bits": 0,
+        "max_abs_old": 0.0,
+        "backend": "NumPy float32 matmul; diagnostic only"
+      }
+    },
+    {
+      "name": "wide_lineage_thin_rows",
+      "shape": [
+        2,
+        5
+      ],
+      "exact_old_tensor": true,
+      "exact_fused_tensor": true,
+      "off_diagonal_entries": 2,
+      "float32": {
+        "max_abs_old_fused": 0.0,
+        "n_different_bits": 0,
+        "max_abs_old": 83.33333587646484,
+        "backend": "NumPy float32 matmul; diagnostic only"
+      }
+    },
+    {
+      "name": "float32_large_cancellation",
+      "shape": [
+        2,
+        3
+      ],
+      "exact_old_tensor": true,
+      "exact_fused_tensor": true,
+      "off_diagonal_entries": 2,
+      "float32": {
+        "max_abs_old_fused": 1.3333330154418945,
+        "n_different_bits": 1,
+        "max_abs_old": 46.0,
+        "backend": "NumPy float32 matmul; diagnostic only"
+      }
+    }
+  ],
+  "passed": 6
+}
