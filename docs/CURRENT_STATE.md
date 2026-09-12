@@ -1,7 +1,7 @@
 # CURRENT_STATE.md — read this first
 
 **Current September 11, 2026, after compact Stage-2 label-free acceptance and
-before the registered P07 producer.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
+during the registered P07 producer.** Read `experiments/LOG.md` from the bottom next. The pre-review state is
 archived at `docs/archive/CURRENT_STATE_before_worker_review_2026-09-10.md`.
 
 ## What is proved
@@ -63,11 +63,21 @@ payload. Null outer peak telemetry for three current arms is recorded rather tha
 filled in from earlier diagnostics. Job 890 passed current-byte default preflight
 12/16 at 3,328.4 MiB; Full-only deployment evidence remains open.
 
-Run the registered label-free P07 producer next with the accepted compact bytes,
-then verify its immutable receipt before opening P07 through `truth_reads` to
-freeze the coefficient receipt. Then run the registered four-arm comparison on
-exposed P01. That DESIGN result must end with synthesis and a fresh Skeptic before
-any untouched DECIDE allocation. No public or vault truth is authorized.
+The registered label-free P07 producer is running as workerq **903** at high
+priority with no source snapshot. Its exact producer dependencies remain at their
+accepted bytes; the later bridge repairs do not intersect them. The 5 GiB RAM
+declaration has proved too low as accounting: interim measured peak reached
+5,862.4 MiB while the system still had ample admitted headroom. Do not call this
+running work complete and do not inspect its partial observations. A future
+identical run must declare above its final observed peak; 6 GiB is only the current
+lower bound, not a final reservation.
+
+After job 903 is terminal, preserve its raw queue evidence and apply the
+standalone verifier to its immutable receipt before opening P07 through
+`truth_reads` to freeze the coefficient receipt. Then run the registered four-arm
+comparison on exposed P01. That DESIGN result must end with synthesis and a fresh
+Skeptic before any untouched DECIDE allocation. No public or vault truth is
+authorized.
 
 An independent launch audit caught one final no-snapshot provenance gap before
 P07 started: the producer used the selector before binding its disk bytes. Job 891
@@ -76,6 +86,20 @@ locked selector byte snapshot and holds it through publication. Its suite passes
 97/97, workerq 893 passed current-byte preflight 12/16 at 2,966.6 MiB peak, and a
 new fresh Skeptic returned ACCEPT. This repair changed no candidate math or data
 role. The next P07 producer must use these accepted bytes.
+
+The downstream freeze/P01 production bridge is also accepted after truth-free
+launch audits exposed and repaired selector/import ordering, replayable child
+markers, pre-bootstrap project imports, a self-attested source registry and a
+cached parent-package attribute. Final commit `fffd670` purges both repo-local
+module cache entries and their exact parent links, then keeps a repo-origin import
+guard active through target execution and publication. The supplied six-path
+counterexample now refuses everywhere with no publication; focused suites pass
+19/19 and 15/15. Workerq 938 passed current-byte default preflight **12/16** at
+3,079.8 MiB peak, with the four Full-only deployment steps explicitly skipped. A
+new fresh-context Skeptic returned **ACCEPT** for the ordinary-import/source-binding
+claim. Interpreter-startup hooks remain outside that claim. Raw evidence and the
+verdict are under
+`experiments/2026-09-11_stage2_compact_p07/freeze_bridge/`.
 
 At `2026-09-10T23:07:29Z`, the driver mistakenly inspected the P07 NPZ keys,
 shapes and seed endpoints through direct `numpy.load`. It computed no scores or

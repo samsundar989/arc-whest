@@ -82,9 +82,11 @@ verbatim `I don't know` human predictions and bounded coefficient/identity regis
 are committed in the LOG. The label-free producer guard has fresh-context Skeptic
 acceptance. Current-source preflight and the standalone producer-receipt verifier
 are accepted. The compact four-arm implementation, complete live-shape ledgers and
-memory accounting also have fresh-context label-free ACCEPT. Run the label-free P07
-producer next, then apply the verifier to its immutable output before fitting or
-opening P07/P01. Do not reuse the predictions attached to the rejected placeholder
+memory accounting also have fresh-context label-free ACCEPT. The downstream
+freeze/P01 bridge now has current-byte default preflight and fresh-context ACCEPT
+after fail-closed import/source-binding repairs. The label-free P07 producer is
+running as workerq 903; after it terminates, apply the verifier to its immutable
+output before fitting or opening P07/P01. Do not reuse the predictions attached to the rejected placeholder
 implementation.
 
 The current 08f787b contract has **not been tested as specified**. It promised a freeze before P01, but P01 has three recorded DESIGN reads and informed the proposed range. Manual timestamps cannot establish preregistration chronology. Preserve exposure; reconcile independent job records if available; otherwise mark chronology unresolved. Do not recycle the old contract/predictions as evidence for a changed intervention.

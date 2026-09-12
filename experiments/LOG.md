@@ -43333,3 +43333,38 @@ math, coefficient, registry, gate, data role, public data or vault state changed
 No preflight was launched. A reviewed commit, terminal current-byte default
 preflight and the separately requested fresh neutral Skeptic verdict remain
 required.
+
+## 2026-09-11 - Cache-link bridge repair accepted; P07 producer still running
+
+**IMPORTANT acceptance result; no protected truth.** The cache-link repair was
+committed as `fffd670`. Workerq **938** executed the exact default preflight from
+the live worktree with high priority, 5 GiB RAM, two CPUs, zero GPU/VRAM and no
+source snapshot. It finished `SUCCEEDED`, exit 0, in 368.411435 seconds at
+3,079.8125 MiB measured peak and reported **PREFLIGHT GREEN -- 12/16, 4
+SKIPPED**. The four skips are the Full-only shape parity, carrier strength,
+deployment envelope and official Phase-2 smoke; they are not passes. Exact command
+signature was `0e90486f730c343b`. Raw transcript, metadata and manifest are
+`freeze_bridge/job938_raw.log`, `job938_metadata.json` and
+`job938_manifest.json`.
+
+A new fresh-context Skeptic independently checked the before/after cache
+counterexample, ordinary Python `from package import submodule` behavior, the
+complete `64b920f..fffd670` diff, source hashes, focused suites and job 938 raw
+evidence. It returned **ACCEPT** for the scoped claim: after bootstrap startup,
+ordinary repo-local imports omitted from the locked registry cannot supply cached
+source, execute or publish through the two production targets. The verdict is
+`freeze_bridge/skeptic_verdict_cache_link.md` (SHA-256
+`a9afed9514fa99b6b15d515bfc32384941da38cbe6ea4ac0632d55279fcbafd8`).
+Arbitrary interpreter-startup hooks remain outside this claim.
+
+This closes the IMPORTANT freeze/P01 bridge gate. It does not certify a future
+candidate's Full deployment envelope and does not create accuracy or server
+residual evidence. Workerq **903** remains RUNNING and its partial observations
+have not been inspected. Its 5 GiB declaration has been exceeded by the measured
+interim peak (5,862.4 MiB at this recording), while `workerq resources` reported
+27.8 GiB system headroom. The live run remains safely admitted, but 5 GiB is now
+known to understate this process. For any identical rerun, 6 GiB is only the
+current lower bound; freeze the declaration from job 903's final measured peak.
+The original 32 GiB request has therefore been reduced substantially without
+altering candidate math, but the final safe minimum is not known until job 903
+terminates.

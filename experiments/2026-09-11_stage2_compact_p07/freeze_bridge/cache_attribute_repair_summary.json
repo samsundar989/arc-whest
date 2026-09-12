@@ -1,6 +1,6 @@
 {
   "schema": "arc-whest.p07-p01-freeze-bridge-cache-attribute-repair-evidence.v1",
-  "status": "implementation_complete_preflight_and_fresh_skeptic_pending",
+  "status": "accepted",
   "recorded_utc": "2026-09-12T02:23:16.362782Z",
   "base_commit": "64b920ff8e34b4c98e3d6938db9b7b19244e26ba",
   "reproduction_before_repair": {
@@ -93,12 +93,24 @@
     "job_903_state": "RUNNING"
   },
   "preflight": {
-    "run": false,
-    "proposed_command": "workerq submit --project arc-whest --priority high --gpus 0 --ram 5 --vram 0 --cpus 2 --no-snapshot -- powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/preflight.ps1"
+    "run": true,
+    "job_id": 938,
+    "state": "SUCCEEDED",
+    "exit_code": 0,
+    "verdict": "PREFLIGHT GREEN -- 12/16, 4 SKIPPED",
+    "runtime_seconds": 368.411435,
+    "peak_ram_mib": 3079.8125,
+    "command_signature": "0e90486f730c343b",
+    "snapshot_mode": "none",
+    "raw_log": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/job938_raw.log",
+    "metadata": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/job938_metadata.json",
+    "manifest": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/job938_manifest.json"
   },
-  "acceptance_pending": [
-    "reviewed commit",
-    "terminal current-byte default preflight",
-    "fresh-context Skeptic verdict"
-  ]
+  "fresh_skeptic": {
+    "verdict": "ACCEPT",
+    "path": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/skeptic_verdict_cache_link.md",
+    "sha256": "a9afed9514fa99b6b15d515bfc32384941da38cbe6ea4ac0632d55279fcbafd8",
+    "scope": "ordinary repo-local import cache and locked source binding after bootstrap startup"
+  },
+  "acceptance_pending": []
 }
