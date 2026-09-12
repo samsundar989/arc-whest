@@ -44155,3 +44155,86 @@ verdict, a fresh-decision result, server-residual evidence, or a candidate for
 submission. A fresh independent Skeptic is auditing the raw paired rows,
 bindings, noise and possible numerical or instrument pathologies before
 Stage-2 synthesis. No next strategic implementation follows from this entry.
+
+## 2026-09-12 — P01 result Skeptic and Stage-2 synthesis
+
+The fresh-context result Skeptic returned **INCOMPLETE for the causal coherent-K4
+hypothesis**, while accepting workerq 957 as a source-bound, accuracy-only
+measurement that mechanically **fails the registered 1.10 arithmetic promotion
+gate**. Verdict `2026-09-11_stage2_compact_p07/skeptic_verdict_p01_mechanism.md`
+SHA-256 `f358e514224482869a9d302ffa3fe4e143f36cc932e38cb50efa2c3c3b874e79`;
+raw report SHA-256 `a197516ccdd008c8f0083c6c5c781dd7718c5401f2e7af5758e3be29f207f963`,
+raw queue log SHA-256 `374bfa9370a5e61f9226679d99dd1892a5ee7f507d390ec7547a9c71127c39f6`.
+The Skeptic independently recomputed all 96 paired scores, FLOP multipliers,
+noise floor, t intervals and four frozen-source/receipt bindings without
+opening protected arrays. Each K4 arm is worse on all 96 pairs; the enormous
+consumer tails dominate their means. `kill: NOT_EVALUATED` and
+`mechanism: DESCRIPTIVE` stay unchanged; no scientific kill or private-rerun
+claim is promoted from an exposed-DESIGN result. `--residual-cap 0` gives no
+server 0.4-second cliff proof.
+
+**Synthesis.** CONFIRMED: coherent and consumers-only first diverge from exact
+at L2, before compact old-history rank truncation; births-only stays close at
+L2 and worsens from L3. CONFIRMED by source inspection and a separate analytic
+calculation: frozen coherent arm `arm_coherent.py:220-230` names a fourth
+*central moment* `k4v` without subtracting `3*var_out**2` for a cumulant;
+it also creates mixed `k22` from marginal `k4v` even for independent input
+coordinates. The D31 covariance correction at lines 204-206 is generally
+asymmetric for unequal `w1,w3`. INFERRED: these errors can explain a large
+width-dependent L2 consumer scale and the feedback explosion. SPECULATIVE:
+repairing them may improve the score; no corrected live-width or protected
+accuracy result exists. The previously accepted tiny dense oracle proved
+transport/contractions for an *assumed supplied core*; its closure comparison
+mirrored these source formulas and did not prove that the source constructs a
+valid cumulant. Keep that acceptance in its original narrow scope.
+
+No rank, coefficient, gate, seed role or cost model is changed. Do not refit
+lambda or spend P01/P07/fresh DECIDE/public/vault labels to diagnose this.
+The next discriminator is a truth-free independent fourth-cumulant and
+covariance-symmetry fixture, then a live-width L2 term trace if needed. The
+compact counted-cost baseline is measured, but its accuracy implementation
+has not passed the first mechanism question. Stage-2 residual-rank and later
+frontier extensions wait for this synthesis/repair. No better submission
+candidate exists; repository evidence is not exhausted, so no Strategist Packet
+is yet required. The standing estimator, L2 candidate and Stage-3 hold remain.
+
+## 2026-09-12 — preregistered truth-free source-cumulant discriminator
+
+**Class:** IMPORTANT probe mathematics. **Question:** Does the frozen arm's
+L1-to-L2 fourth-order source construction obey the independently known
+fourth-cumulant contraction for independent ReLU Gaussian coordinates and
+the elementary symmetry of an output covariance? **Evidence:** CONFIRMED
+P01 gate failure and L2 separation above; CONFIRMED source expressions;
+INFERRED scale error; SPECULATIVE accuracy of any correction. **Hypothesis and
+mechanism:** using a central moment in place of a cumulant and fabricating
+off-diagonal mixed cumulants turns the dense He-row fourth-order input from
+O(1/n) into O(1), while an unsymmetrized D31 term makes off-diagonal
+covariance invalid. **Intervention:** independently derive a tiny analytic
+independent-ReLU fixture in pure CPU math, compare exact fourth-cumulant
+contraction and the frozen closure's predicted D4 at widths 8 and 1024, and
+assert symmetry on a signed unequal-derivative two-coordinate example. Do
+not edit frozen arms, use research truth, fit constants or run a promotion
+test. Any live-width state trace is a separate follow-up with its own
+source/term controls and declared workerq resources if substantial.
+
+**Predictions (recorded before this fixture):** (1) central fourth moment
+exceeds cumulant by exactly `3*variance**2`; (2) independent mixed K22 is
+zero, direct D4 scales with inverse width under equal-magnitude He weights,
+while frozen closure does not; (3) the current D31 correction has unequal
+transposed off-diagonal entries for the signed fixture. Samuel's standing
+answer to all prediction questions in this session is verbatim **“I don't
+know”**; these numbered technical predictions are the Builder's, not
+attributed to him. **Falsifier:** direct independent cumulant expansion or
+symmetry check agrees with the frozen source at both widths and the signed
+fixture. **Baseline/control:** algebraic independent-coordinate cumulants
+and symmetric covariance, not P01 exact-arm score. **Cost model:** this tiny
+CPU-only identity test has no network evaluation, no counted challenge FLOPs
+and no residual claim; the existing Phase-2 model remains counted `C=F`,
+with server headroom unproven. **Statistic/gate:** exact deterministic algebra
+within float64 tolerance `1e-10` relative at width 8, `1e-8` at 1024;
+there is no paired score, seed block, promotion boolean or noise floor because
+no labels are touched. **Scope/confounders:** this tests a source identity,
+not whether a corrected approximation improves accuracy; do not claim a
+scientific kill or change the frozen P01 bytes. Commit this contract before
+running the fixture. Require preflight and fresh independent Skeptic before
+believing an IMPORTANT probe-math change.
