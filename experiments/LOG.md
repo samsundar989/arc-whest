@@ -43368,3 +43368,28 @@ current lower bound; freeze the declaration from job 903's final measured peak.
 The original 32 GiB request has therefore been reduced substantially without
 altering candidate math, but the final safe minimum is not known until job 903
 terminates.
+
+### Deterministic continuation armed behind job 903
+
+The already registered sequence now has a fail-closed operational continuation at
+`experiments/2026-09-11_stage2_compact_p07/continue_after_job903.ps1` (SHA-256
+`c90d3eda1b4ef2efca9152f4aa9220ecb074fb6f872417fabcf9f707be2f52de`). This adds no
+scientific choice and reads no partial output. It polls workerq 903 until a terminal
+state, stops on any state other than `SUCCEEDED`, and only then preserves the raw
+queue log, metadata and manifest. It requires both immutable producer outputs,
+runs the standalone truth-free verifier into a fresh receipt, performs the next
+registered P07 access through `p2_k4_fit.py --data-role protected-design --block
+P07`, freezes the selected coefficient into four fresh receipt-bound arms, and
+submits the exposed-DESIGN P01 comparison with the registered exact control,
+`gate=1.10`, Phase-2 cost lambda zero, official sample precision and the explicit
+accuracy-only residual relaxation.
+
+Every artifact path is required absent before the helper starts; each native step
+must exit zero before the next begins. The helper holds an exclusive run marker,
+writes an operational state/log, and stops after submitting P01. P01 itself goes
+through workerq at high priority with 8 GiB RAM, two CPUs and no GPU or source
+snapshot. The 8 GiB request is an execution allowance for the four-arm lab process,
+not evidence that the eventual estimator needs that memory. A terminal P01 result,
+raw report review and fresh result Skeptic remain manual gates. Samuel's three
+predictions are already recorded verbatim as `I don't know`; this helper neither
+changes them nor opens any public/vault/submission path.
