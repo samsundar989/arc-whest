@@ -137,11 +137,26 @@ live-worktree default preflight **12/16** (four Full-only skips) with 3,275.6
 MiB peak; snapshot job 958 is explicitly RED from byte normalization. Raw
 fixture, queue evidence, derivation and verdict are committed under
 `experiments/2026-09-11_stage2_compact_p07/source_cumulant/`; LOG commit
-`2164401` records their hashes and the next truth-free executable trace
-contract. The fixture's synthetic n=1024 frozen `D4` is about 1150 times
+`2164401` records their hashes and executable-trace contract. The fixture's
+synthetic n=1024 frozen `D4` is about 1150 times
 the independently contracted fourth cumulant; the signed covariance
-correction is asymmetric. This reopens full Stage-1 source conformance, while
-the supplied-core algebra and compact cost remain valid in their scopes. No
+correction is asymmetric. The actual frozen width-8 `_layer` trace passed
+14/14 scoped checks, and fresh Skeptic **ACCEPTED** its executable source
+identity finding; workerq 961 live-byte default preflight passed **12/16**
+(four Full-only skips) at 3,275.4 MiB peak. Raw byte-preserving queue ZIP,
+trace and verdict are under `source_cumulant/executable_trace/`, commits
+`a419e55`, `040b472`, `95c70b8`.
+
+A separate repair-math Skeptic accepted the exact diagonal-source and
+transported metric-core tensor identities but marked the *architecture*
+**INCOMPLETE**: a fourth-order residual invisible in all present D4/D22/D31
+slices can become future D4 `1.5` after a dense map. Current slice errors
+cannot be used as a transportable residual. The counterexample and corrected
+memo are `repair_architecture_skeptic.md` (`6e4eca1`) and
+`repair_architecture.md` (`a8bb5e1`). LOG commit `fbedd3b` preregisters a
+tiny independent dense-reference implementation; no score data is involved.
+This reopens full Stage-1 source conformance, while the supplied-core algebra
+and compact cost remain valid in their scopes. No
 protected labels should be spent on this diagnosis. There is no scientific kill or
 new submission candidate. No fresh DECIDE, public CONFIRM or vault evaluation
 has occurred.
@@ -225,9 +240,10 @@ on eligibility work remains binding; Stage 3 stays closed.
 ## Strategist decision
 
 A new Strategist Packet is **not required yet**. Repository evidence is not
-exhausted: the frozen coherent-K4 DESIGN comparison failed, the source-identity
-counterexample has independent acceptance, and an actual frozen-kernel trace
-and separately derived repair architecture are in progress without labels.
+exhausted: the frozen coherent-K4 DESIGN comparison failed, its source-identity
+counterexample and executable trace have independent acceptance, and the
+repair-math Skeptic supplied a concrete residual counterexample. A tiny
+label-free dense oracle is now the next committed discriminator.
 Consult a strategist if corrected algebra and fresh Skeptic synthesis leave no
 supported next step, or before changing architecture beyond GAME_PLAN's
 bounded frontier options.

@@ -11,9 +11,13 @@ score gate, but the fresh result Skeptic marks the coherent-K4 causal claim
 INCOMPLETE because source-cumulant and covariance-symmetry defects remain.
 The truth-free analytic discriminator at LOG commit `c54eb87` has now passed
 and has a fresh scoped Skeptic ACCEPT. LOG commit `2164401` binds its raw
-fixture/preflight evidence and preregisters a tiny actual-kernel trace before
-any separately contracted source repair. Stage 1's supplied-core algebra and
-cost remain accepted narrowly; full source closure is reopened.
+fixture/preflight evidence; the actual-kernel trace subsequently passed with
+fresh scoped Skeptic ACCEPT. A separate repair-math Skeptic marked the
+architecture INCOMPLETE because present repeated-index slices cannot carry
+a hidden fourth-order residual through future transport. LOG commit
+`fbedd3b` now contracts a tiny independent dense reference. Stage 1's
+supplied-core algebra and cost remain accepted narrowly; full source closure
+is reopened.
 There is no better submission candidate, no fresh DECIDE/public/vault result,
 and Samuel's Stage-3 hold remains binding. Historical pickup instructions below
 must not cause a second fit or P01 relabeling.

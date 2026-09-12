@@ -129,8 +129,14 @@ a truth-free analytic fixture, live-byte preflight and a fresh Skeptic
 **ACCEPT** for the scoped source-identity defect. The fixture's synthetic
 width-1024 frozen D4 is about 1150 times the direct independent cumulant;
 that is an algebra error on an atypical network, not a measured P01 effect.
-The next committed check traces the actual frozen two-layer kernel before
-any source repair. Do not fit a new constant or spend
+That check now passed 14/14, with fresh Skeptic ACCEPT for the scoped
+executable source identity (commits `a419e55`, `040b472`, `95c70b8`;
+workerq 961 default preflight 12/16, four Full-only skips). The separate
+repair-math Skeptic accepted the proposed tensor algebra but marked the
+architecture INCOMPLETE: present repeated-index slices do not carry an
+all-distinct residual through future dense transport. LOG commit `fbedd3b`
+contracts an independent tiny dense reference before any implementation of
+a corrected full arm. Do not fit a new constant or spend
 another protected label until the source math is independently checked and
 repaired within a new contract and fresh Skeptic gate. This is not a registered
 scientific kill of the intended representation.
