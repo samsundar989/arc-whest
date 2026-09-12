@@ -46488,3 +46488,16 @@ new report filename without spending a seed. Prior one-arm ~3 GiB peak
 supports **5 GiB RAM, 0 VRAM, 2 CPUs**. The report retains all operation
 families/materialization checks; a separate ledger extraction is needed if
 its summary omits per-op family detail.
+
+**F21 pre-submission optimization review — default preflight after the oracle
+fixture repair.** The changed probe is an IMPORTANT instrument, so the existing
+12-step default gate is required. Reuse one gate rather than rerun its
+sub-suites independently. It carries its own small deterministic provenance,
+invariant and ledger fixtures; no new dataset loader, workers, prefetch, cache,
+batching or GPU placement is introduced. Removing a gate step would weaken
+coverage. The command is CPU-only, restartable from scratch without protected
+truth/seed consumption, and its workerq log is the recovery evidence. Controlled
+recent preflights 1015/1018/1019 peaked near 3 GiB, so declare **5 GiB RAM,
+0 VRAM, 2 CPUs**. Full-only steps are deliberately deferred until candidate
+engineering passes to avoid an unnecessary 11-minute pass; this default run
+cannot be misreported as Full certification.
