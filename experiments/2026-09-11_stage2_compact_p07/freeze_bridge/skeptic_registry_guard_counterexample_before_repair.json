@@ -1,0 +1,63 @@
+{
+  "schema": "arc-whest.skeptic-registry-guard-counterexample-before-repair.v1",
+  "source_commit": "64b920ff8e34b4c98e3d6938db9b7b19244e26ba",
+  "truth_or_labels_opened": false,
+  "minimal_supported_target": {
+    "direct_bootstrap": {
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "preload_executed": true,
+      "published": "A",
+      "disk_payload": "VALUE='B'\n"
+    },
+    "real_public_script": {
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "preload_executed": true,
+      "published": "A",
+      "disk_payload": "VALUE='B'\n"
+    },
+    "falsified": true
+  },
+  "copied_real_p2_lab": {
+    "direct_bootstrap": {
+      "exit_code": 0,
+      "stdout": "usage: p2_lab.py [-h] --truth TRUTH --out OUT\n                 [--freeze-receipt FREEZE_RECEIPT] [--n N]\n                 [--competition-cost-lambda COMPETITION_COST_LAMBDA]\n                 [--depth-subset DEPTH_SUBSET] [--gate GATE] [--block BLOCK]\n                 [--ts TS] [--note NOTE] --control CONTROL\n                 [--official-samples OFFICIAL_SAMPLES]\n                 [--residual-cap RESIDUAL_CAP]\n\noptions:\n  -h, --help            show this help message and exit\n  --truth TRUTH\n  --out OUT\n  --freeze-receipt FREEZE_RECEIPT\n                        immutable P07 coefficient-to-four-arm freeze receipt\n  --n N                 0 = every network in the truth file\n  --competition-cost-lambda COMPETITION_COST_LAMBDA\n                        Phase-2 score-cost lambda; must be zero and is\n                        distinct from the fitted K4 coefficient\n  --depth-subset DEPTH_SUBSET\n                        networks used for the MSE-by-depth mechanism curve\n  --gate GATE           pre-registered promotion gate; REQUIRED to print a\n                        verdict\n  --block BLOCK         the seed block this truth belongs to. Inferred from\n                        the filename when it carries a block id; REQUIRED\n                        otherwise, because guessing is how a single-use block\n                        gets read twice.\n  --ts TS               historical event timestamp only; omit for an automatic\n                        runtime receipt\n  --note NOTE           recorded on the read line\n  --control CONTROL     the registered control; must be 'exact'\n  --official-samples OFFICIAL_SAMPLES\n                        official truth samples used for the precision forecast\n  --residual-cap RESIDUAL_CAP\n                        override the 0.4 s cliff for an ACCURACY-ONLY run. <=0\n                        disables it entirely. The relaxation is printed and\n                        recorded; such a run is never residual evidence.\n",
+      "stderr": "",
+      "preload_executed": true,
+      "published": "A",
+      "disk_payload": "VALUE='B'\n"
+    },
+    "real_public_script": {
+      "exit_code": 0,
+      "stdout": "usage: p2_lab.py [-h] --truth TRUTH --out OUT\n                 [--freeze-receipt FREEZE_RECEIPT] [--n N]\n                 [--competition-cost-lambda COMPETITION_COST_LAMBDA]\n                 [--depth-subset DEPTH_SUBSET] [--gate GATE] [--block BLOCK]\n                 [--ts TS] [--note NOTE] --control CONTROL\n                 [--official-samples OFFICIAL_SAMPLES]\n                 [--residual-cap RESIDUAL_CAP]\n\noptions:\n  -h, --help            show this help message and exit\n  --truth TRUTH\n  --out OUT\n  --freeze-receipt FREEZE_RECEIPT\n                        immutable P07 coefficient-to-four-arm freeze receipt\n  --n N                 0 = every network in the truth file\n  --competition-cost-lambda COMPETITION_COST_LAMBDA\n                        Phase-2 score-cost lambda; must be zero and is\n                        distinct from the fitted K4 coefficient\n  --depth-subset DEPTH_SUBSET\n                        networks used for the MSE-by-depth mechanism curve\n  --gate GATE           pre-registered promotion gate; REQUIRED to print a\n                        verdict\n  --block BLOCK         the seed block this truth belongs to. Inferred from\n                        the filename when it carries a block id; REQUIRED\n                        otherwise, because guessing is how a single-use block\n                        gets read twice.\n  --ts TS               historical event timestamp only; omit for an automatic\n                        runtime receipt\n  --note NOTE           recorded on the read line\n  --control CONTROL     the registered control; must be 'exact'\n  --official-samples OFFICIAL_SAMPLES\n                        official truth samples used for the precision forecast\n  --residual-cap RESIDUAL_CAP\n                        override the 0.4 s cliff for an ACCURACY-ONLY run. <=0\n                        disables it entirely. The relaxation is printed and\n                        recorded; such a run is never residual evidence.\n",
+      "stderr": "",
+      "preload_executed": true,
+      "published": "A",
+      "disk_payload": "VALUE='B'\n"
+    },
+    "falsified": true
+  },
+  "copied_real_p2_freeze_k4_arms": {
+    "direct_bootstrap": {
+      "exit_code": 0,
+      "stdout": "usage: p2_freeze_k4_arms.py [-h] --fit-receipt FIT_RECEIPT --out-dir OUT_DIR\n\noptions:\n  -h, --help            show this help message and exit\n  --fit-receipt FIT_RECEIPT\n  --out-dir OUT_DIR\n",
+      "stderr": "",
+      "preload_executed": true,
+      "published": "A",
+      "disk_payload": "VALUE='B'\n"
+    },
+    "real_public_script": {
+      "exit_code": 0,
+      "stdout": "usage: p2_freeze_k4_arms.py [-h] --fit-receipt FIT_RECEIPT --out-dir OUT_DIR\n\noptions:\n  -h, --help            show this help message and exit\n  --fit-receipt FIT_RECEIPT\n  --out-dir OUT_DIR\n",
+      "stderr": "",
+      "preload_executed": true,
+      "published": "A",
+      "disk_payload": "VALUE='B'\n"
+    },
+    "falsified": true
+  },
+  "falsified": true
+}

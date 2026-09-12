@@ -1,0 +1,62 @@
+{
+  "schema": "arc-whest.skeptic-registry-guard-counterexample.v1",
+  "truth_or_labels_opened": false,
+  "minimal_supported_target": {
+    "direct_bootstrap": {
+      "exit_code": 2,
+      "stdout": "REFUSED: repo-local import stale_namespace.payload resolves outside the locked registry: C:\\Users\\samsu\\AppData\\Local\\Temp\\arc-whest-skeptic-registry-i2jchuix\\stale_namespace\\payload.py\n",
+      "stderr": "",
+      "preload_executed": true,
+      "published": null,
+      "disk_payload": "VALUE='B'\n"
+    },
+    "real_public_script": {
+      "exit_code": 2,
+      "stdout": "REFUSED: repo-local import stale_namespace.payload resolves outside the locked registry: C:\\Users\\samsu\\AppData\\Local\\Temp\\arc-whest-skeptic-registry-i2jchuix\\stale_namespace\\payload.py\n",
+      "stderr": "",
+      "preload_executed": true,
+      "published": null,
+      "disk_payload": "VALUE='B'\n"
+    },
+    "falsified": false
+  },
+  "copied_real_p2_lab": {
+    "direct_bootstrap": {
+      "exit_code": 2,
+      "stdout": "REFUSED: repo-local import stale_namespace.payload resolves outside the locked registry: C:\\Users\\samsu\\AppData\\Local\\Temp\\arc-whest-skeptic-p2_lab.py-05tvy7p6\\stale_namespace\\payload.py\n",
+      "stderr": "",
+      "preload_executed": true,
+      "published": null,
+      "disk_payload": "VALUE='B'\n"
+    },
+    "real_public_script": {
+      "exit_code": 2,
+      "stdout": "REFUSED: repo-local import stale_namespace.payload resolves outside the locked registry: C:\\Users\\samsu\\AppData\\Local\\Temp\\arc-whest-skeptic-p2_lab.py-05tvy7p6\\stale_namespace\\payload.py\n",
+      "stderr": "",
+      "preload_executed": true,
+      "published": null,
+      "disk_payload": "VALUE='B'\n"
+    },
+    "falsified": false
+  },
+  "copied_real_p2_freeze_k4_arms": {
+    "direct_bootstrap": {
+      "exit_code": 2,
+      "stdout": "REFUSED: repo-local import stale_namespace.payload resolves outside the locked registry: C:\\Users\\samsu\\AppData\\Local\\Temp\\arc-whest-skeptic-p2_freeze_k4_arms.py-mweqjotz\\stale_namespace\\payload.py\n",
+      "stderr": "",
+      "preload_executed": true,
+      "published": null,
+      "disk_payload": "VALUE='B'\n"
+    },
+    "real_public_script": {
+      "exit_code": 2,
+      "stdout": "REFUSED: repo-local import stale_namespace.payload resolves outside the locked registry: C:\\Users\\samsu\\AppData\\Local\\Temp\\arc-whest-skeptic-p2_freeze_k4_arms.py-mweqjotz\\stale_namespace\\payload.py\n",
+      "stderr": "",
+      "preload_executed": true,
+      "published": null,
+      "disk_payload": "VALUE='B'\n"
+    },
+    "falsified": false
+  },
+  "falsified": false
+}

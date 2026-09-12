@@ -43290,3 +43290,46 @@ coefficient, registry, gate, data role, protected label, public data or vault
 state changed. Job 903 remained running. No preflight was launched for these new
 bytes. A reviewed commit, terminal current-byte default preflight and a new
 fresh-context Skeptic remain required.
+
+## 2026-09-11 - Purged package attributes close the module-cache bypass
+
+**IMPORTANT launch rejection and repair; no protected truth.** A new truth-free
+review of `64b920f` found that removing a repo-local submodule from `sys.modules`
+was incomplete. Python had also attached the loaded submodule object to its
+namespace/package parent. After the bootstrap purged `stale_namespace.payload`,
+`from stale_namespace import payload` could still return parent attribute A
+without consulting the meta-path guard, even though disk held B. I reproduced
+the supplied fixture before editing: its minimal target and copied real lab and
+freezer all returned 0 through both direct-bootstrap and public-script paths and
+published A. The preserved before-repair result is
+`freeze_bridge/skeptic_registry_guard_counterexample_before_repair.json`
+(SHA-256 `a72de45d5be4d63b32cb38fe1d2a4184332e33f87f8ef1fe600caf38785a5eb5`).
+
+The purge now records every removed repo-local module and clears its exact direct
+child attribute from the original parent package object when that attribute still
+references the purged module. Namespace parents are included. A subsequent
+`from package import submodule` must therefore resolve through the still-active
+registry guard, which rejects an unregistered disk origin before its loader runs.
+The guard and loaded-origin audits remain active through `main()` and publication.
+
+The same independent counterexample now returns 2 with no publication for the
+minimal target and for copied real lab/freezer, on both direct and public paths;
+its script exits 1 only because its `falsified` predicate is now false. Disk B's
+top-level marker does not execute. The after-repair artifact is
+`freeze_bridge/skeptic_registry_guard_counterexample.json` (SHA-256
+`aff567f4d18e7a423a3552dc19bc5388d66cf4a4109c03e7d9a641a5b661d166`).
+The tracked bridge fixture carries the cached namespace attribute into a normal
+import inside `main()` and requires the same direct/public refusal before disk B
+or success publication.
+
+Exact current-byte checks pass: freezer **19/19**, P01 bridge **15/15**, Stage-0
+lab/data **32/32**, portability **103/103**, public and direct-bootstrap help for
+both targets, `py_compile`, the embedded bootstrap fingerprint and
+`git diff --check`. The additive evidence summary is
+`freeze_bridge/cache_attribute_repair_summary.json` (SHA-256
+`3359e09f9b0aa267f41d026844bd72c3896046e9b8a77ca7787e724c17cad60f`).
+No job-903 producer dependency, protected data, estimator, default arm, candidate
+math, coefficient, registry, gate, data role, public data or vault state changed.
+No preflight was launched. A reviewed commit, terminal current-byte default
+preflight and the separately requested fresh neutral Skeptic verdict remain
+required.

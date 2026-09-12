@@ -22,7 +22,7 @@ import types
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
-_SELF_FINGERPRINT = "b66ac9b57df160b363ffd1d49e8f372088ef5046442d107cff8b974ea86ade3d"
+_SELF_FINGERPRINT = "475d2f243f107d1706b1ef4b051303c88162b858b317fab98d6dad70eda96468"
 _REGISTRY_NAME = "_CLI_SOURCE_REGISTRY"
 _TARGETS = {"p2_freeze_k4_arms.py", "p2_lab.py"}
 
@@ -156,16 +156,31 @@ class _RegistryImportGuard:
         return None
 
 
-def _purge_repo_modules_for_guard(allowed_paths):
-    """Remove cached repo modules so every target import passes the guard."""
+def _purge_repo_modules_for_guard():
+    """Remove cached local modules and package attributes that reference them."""
     external = _external_import_roots()
     bootstrap = os.path.normcase(os.path.realpath(os.path.abspath(__file__)))
-    for name, module in tuple(sys.modules.items()):
+    snapshot = dict(sys.modules)
+    purged = []
+    for name, module in snapshot.items():
         spec = getattr(module, "__spec__", None)
         origin = getattr(spec, "origin", None) or getattr(module, "__file__", None)
         candidates = _repo_origin_candidates(origin, external)
         if candidates and bootstrap not in candidates:
             sys.modules.pop(name, None)
+            purged.append((name, module))
+    # importlib attaches a loaded child module to its parent package.  Removing
+    # only sys.modules leaves that attribute live, and ``from pkg import child``
+    # may return it without consulting meta_path.  Clear every direct cache link
+    # to the exact module object, including links held by namespace packages.
+    for name, module in purged:
+        parent_name, separator, child_name = name.rpartition(".")
+        if not separator:
+            continue
+        parent = snapshot.get(parent_name)
+        namespace = getattr(parent, "__dict__", None)
+        if isinstance(namespace, dict) and namespace.get(child_name) is module:
+            namespace.pop(child_name, None)
 
 
 def _assert_loaded_repo_modules_registered(allowed_paths):
@@ -280,7 +295,7 @@ def _binding_snapshot(paths):
 
 
 def _execute_target(target, target_raw, paths, target_name, bindings, args):
-    _purge_repo_modules_for_guard(paths.values())
+    _purge_repo_modules_for_guard()
     with tempfile.TemporaryDirectory(prefix="p2-locked-pycache-") as cache:
         previous_prefix = sys.pycache_prefix
         sys.pycache_prefix = cache

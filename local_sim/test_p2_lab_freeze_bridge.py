@@ -170,14 +170,16 @@ def _loaded_dependency_ab_uses_lock_first_entrypoints(root):
     dynamic_marker = os.path.join(root, "dynamic_marker.txt")
     dynamic_success = os.path.join(root, "dynamic_success.txt")
     lifecycle = os.path.join(local, "lifecycle_eval.py")
+    namespace = os.path.join(root, "stale_namespace")
+    payload = os.path.join(namespace, "payload.py")
     success_code = ("\nwith open(%r, 'w', encoding='utf-8') as _success_fh:\n"
                     "    _success_fh.write('published')\n" % success_marker)
     dynamic_code = (
         "\n_original_main = main\n"
         "def main(argv=None):\n"
-        "    import dynamic_unregistered\n"
+        "    from stale_namespace import payload\n"
         "    with open(%r, 'w', encoding='utf-8') as _dynamic_success_fh:\n"
-        "        _dynamic_success_fh.write('published')\n"
+        "        _dynamic_success_fh.write(payload.VALUE)\n"
         "    return 0\n" % dynamic_success)
 
     def lifecycle_text(value):
@@ -187,10 +189,29 @@ def _loaded_dependency_ab_uses_lock_first_entrypoints(root):
 
     with open(lifecycle, "w", encoding="utf-8") as fh:
         fh.write(lifecycle_text("A"))
-    with open(os.path.join(local, "dynamic_unregistered.py"), "w",
-              encoding="utf-8") as fh:
-        fh.write("with open(%r, 'w', encoding='utf-8') as _fh:\n"
-                 "    _fh.write('executed')\n" % dynamic_marker)
+    os.makedirs(namespace)
+    with open(payload, "w", encoding="utf-8") as fh:
+        fh.write("VALUE='initial'\n")
+    payload_a = (
+        "from pathlib import Path\n"
+        "Path(%r).write_text('A-loaded', encoding='utf-8')\n"
+        "VALUE='A'\n" % dynamic_marker)
+    payload_b = (
+        "from pathlib import Path\n"
+        "Path(%r).write_text('B-loaded', encoding='utf-8')\n"
+        "VALUE='B'\n" % dynamic_marker)
+    with open(os.path.join(root, "sitecustomize.py"), "w", encoding="utf-8") as fh:
+        fh.write(
+            "from pathlib import Path\n"
+            "import importlib, shutil\n"
+            "p=Path(%r)\n"
+            "shutil.rmtree(p.parent/'__pycache__', ignore_errors=True)\n"
+            "p.write_text(%r, encoding='utf-8')\n"
+            "importlib.invalidate_caches()\n"
+            "import stale_namespace.payload\n"
+            "Path(%r).unlink(missing_ok=True)\n"
+            "p.write_text(%r, encoding='utf-8')\n" %
+            (payload, payload_a, dynamic_marker, payload_b))
     with open(os.path.join(local, "competition_score.py"), "w", encoding="utf-8") as fh:
         fh.write("# synthetic scorer\n")
     with open(os.path.join(local, "p2_freeze_k4_arms.py"), "w", encoding="utf-8") as fh:
@@ -263,11 +284,15 @@ def _loaded_dependency_ab_uses_lock_first_entrypoints(root):
             "dynamic_raw=fingerprint.sub(b'_SELF_FINGERPRINT = \"'+dynamic_fingerprint+b'\"',dynamic_raw)\n"
             "pathlib.Path(path).write_bytes(dynamic_raw)\n"
             "dynamic_sha=hashlib.sha256(dynamic_raw).hexdigest()\n"
+            "cache_env=dict(os.environ)\n"
+            f"cache_env['PYTHONPATH']={root!r}\n"
+            f"pathlib.Path({dynamic_marker!r}).unlink(missing_ok=True)\n"
+            f"pathlib.Path({dynamic_success!r}).unlink(missing_ok=True)\n"
             "direct_dynamic=subprocess.run([sys.executable,module._BOOTSTRAP,'--target',path,'--expected-target-sha',dynamic_sha,'--','--help'],cwd="
-            f"{root!r},capture_output=True,text=True)\n"
+            f"{root!r},env=cache_env,capture_output=True,text=True)\n"
             f"direct_dynamic_clean=not pathlib.Path({dynamic_marker!r}).exists() and not pathlib.Path({dynamic_success!r}).exists()\n"
             "public_dynamic=subprocess.run([sys.executable,path,'--help'],cwd="
-            f"{root!r},capture_output=True,text=True)\n"
+            f"{root!r},env=cache_env,capture_output=True,text=True)\n"
             f"public_dynamic_clean=not pathlib.Path({dynamic_marker!r}).exists() and not pathlib.Path({dynamic_success!r}).exists()\n"
             f"pathlib.Path({marker!r}).unlink(missing_ok=True)\n"
             "pathlib.Path(path).write_bytes(pathlib.Path(path).read_bytes()+b'\\n# target version B\\n')\n"

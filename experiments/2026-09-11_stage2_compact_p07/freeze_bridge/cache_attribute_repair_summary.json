@@ -1,0 +1,104 @@
+{
+  "schema": "arc-whest.p07-p01-freeze-bridge-cache-attribute-repair-evidence.v1",
+  "status": "implementation_complete_preflight_and_fresh_skeptic_pending",
+  "recorded_utc": "2026-09-12T02:23:16.362782Z",
+  "base_commit": "64b920ff8e34b4c98e3d6938db9b7b19244e26ba",
+  "reproduction_before_repair": {
+    "truth_or_labels_opened": false,
+    "mechanism": "purged stale_namespace.payload remained reachable as stale_namespace.payload after its sys.modules entry was removed",
+    "minimal_direct_bootstrap": {
+      "exit_code": 0,
+      "published": "A",
+      "disk": "B"
+    },
+    "minimal_public_script": {
+      "exit_code": 0,
+      "published": "A",
+      "disk": "B"
+    },
+    "copied_real_lab_direct_and_public": "both exit 0 and publish A while disk is B",
+    "copied_real_freezer_direct_and_public": "both exit 0 and publish A while disk is B",
+    "raw_artifact": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/skeptic_registry_guard_counterexample_before_repair.json",
+    "raw_artifact_sha256": "a72de45d5be4d63b32cb38fe1d2a4184332e33f87f8ef1fe600caf38785a5eb5"
+  },
+  "repair": {
+    "sys_modules_purge": "all repo-local modules except the running bootstrap are removed before target execution",
+    "package_attribute_purge": "for each purged dotted module, remove the direct child attribute from the exact parent package object when it still references that module",
+    "effect": "from package import submodule can no longer return the purged object and must resolve through the registry import guard",
+    "guard_lifetime": "target exec through main and publication",
+    "closing_audits": "after target exec and after successful main"
+  },
+  "counterexample_after_repair": {
+    "command": "uv run python experiments/2026-09-11_stage2_compact_p07/freeze_bridge/skeptic_registry_guard_counterexample.py",
+    "script_exit_code": 1,
+    "exit_semantics": "1 means the script could no longer falsify the bridge",
+    "all_minimal_and_copied_real_public_direct_exit_codes": 2,
+    "all_publications": null,
+    "disk_payload": "B",
+    "raw_artifact": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/skeptic_registry_guard_counterexample.json",
+    "raw_artifact_sha256": "aff567f4d18e7a423a3552dc19bc5388d66cf4a4109c03e7d9a641a5b661d166",
+    "reproducer": "experiments/2026-09-11_stage2_compact_p07/freeze_bridge/skeptic_registry_guard_counterexample.py",
+    "reproducer_sha256": "befe631d4b31320819583445b922232eb740611e2c2d3086781e36c8e487f240"
+  },
+  "source_hashes": {
+    "local_sim/p2_locked_bootstrap.py": "9abb5243ed2e4cbd19d5013d7dba8e4529a60bd37487672dc0d802223a5d08d1",
+    "local_sim/p2_freeze_k4_arms.py": "1e5a725b5182de466eab7594b863f107ba46d36e3d191b9cd5c3b13e9b08b30d",
+    "local_sim/p2_lab.py": "e2c59420ff9a237fc94356fc4612ac24d23b59c3b6cb5b9ff05cfceb1fb0a962",
+    "local_sim/test_p2_freeze_k4_arms.py": "5c70373d221d5436afcb7388cf6a314be1aadfe238bc702b4d13508bc75ce4fb",
+    "local_sim/test_p2_lab_freeze_bridge.py": "1f78e06a8613a52923dc05ad6f0d56e57413f8bffd14c9e22b85375467288d69"
+  },
+  "tests": {
+    "freezer": {
+      "passed": 19,
+      "total": 19,
+      "artifact_sha256": "f5d08de6f4b50add35b94df57077dea5931b8e2826de106a05981809c29a3ec3"
+    },
+    "lab_bridge": {
+      "passed": 15,
+      "total": 15,
+      "cached_namespace_public_exit_code": 2,
+      "cached_namespace_direct_exit_code": 2,
+      "cached_A_published": false,
+      "disk_B_top_level_executed": false,
+      "success_published": false
+    },
+    "stage0_lab_data": {
+      "passed": 32,
+      "total": 32
+    },
+    "portability": {
+      "passed": 103,
+      "total": 103,
+      "status": "PORTABLE"
+    },
+    "public_help": {
+      "lab": 0,
+      "freezer": 0
+    },
+    "direct_bootstrap_help": {
+      "lab": 0,
+      "freezer": 0
+    },
+    "static": {
+      "py_compile": "pass",
+      "git_diff_check": "pass",
+      "embedded_bootstrap_fingerprint": "pass"
+    }
+  },
+  "scope": {
+    "protected_truth_read": false,
+    "estimator_modified": false,
+    "default_arms_modified": false,
+    "producer_dependencies_modified": false,
+    "job_903_state": "RUNNING"
+  },
+  "preflight": {
+    "run": false,
+    "proposed_command": "workerq submit --project arc-whest --priority high --gpus 0 --ram 5 --vram 0 --cpus 2 --no-snapshot -- powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/preflight.ps1"
+  },
+  "acceptance_pending": [
+    "reviewed commit",
+    "terminal current-byte default preflight",
+    "fresh-context Skeptic verdict"
+  ]
+}
