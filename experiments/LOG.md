@@ -46881,3 +46881,38 @@ its partial first run is not checkpoint evidence. Declare **16 GiB RAM,
 peak. This is an honest revised resource estimate, not a new test threshold.
 Do not run directly or lower the request for admission. The Full gate still
 certifies baseline/instruments only; F21 candidate certification is separate.
+
+## 2026-09-12 — B1 full-rank compact storage bridge, no compression
+
+**Class:** IMPORTANT new differential probe, independent of F21. The
+candidate/score/seed/vault paths remain frozen. GAME_PLAN B requires a compact
+representation to carry the *working* recurrence at full rank before any
+approximation is judged. B0 confirmed one reason the current compact nonlinear
+closure is not that recurrence: its D21 covariance coefficient is half of L2's.
+Source inspection also finds Gaussian-only moments, a different K4 state and
+birth behavior. Therefore B1 deliberately retains the frozen L2 nonlinear
+transition as the oracle/engine and tests the storage boundary first; it does
+not infer equivalence from the present compact `metered_program`.
+
+**Question and prediction before result.** Can every full-rank L2 tower age be
+encoded as Source `A=A_L,P=M,w2=w2b,s=e=0,Z=A_D,L=I`, with a shared
+identity basis and scalar `c4` carried separately, then decoded into the next
+unchanged L2 layer without altering any state, source birth or final output?
+Predict full-rank encode/decode will preserve the sampled 4-wide, 4-deep
+nondegenerate asymmetric fixed-weight trajectory within normalized entry
+`1e-6` (`abs(new-old)/max(1,abs(old))`), including all ages and c4; direct
+compact D3/D21 slices should match frozen L2 masked slices within `1e-6` when
+the weight orientation is transposed. This tests representation fidelity, not
+a cheaper complete program. Any missing age, c4, birth, mask/orientation or
+field above the frozen tolerance falsifies B1 and stops compression work.
+
+**Intervention.** Add one new isolated lab adapter/probe; do not edit
+`p2_compact_reference.py`, frozen L2/L4, shipped estimator, F21, scoring or
+registries. Use explicit fixed weights, no truth, no registered seed and no
+rank reduction. Compare per-layer preactivation mean/covariance/c4, tower
+`k/A_D/A_L/M/w2b` for all live ages, D3/D21 including off-mask, source
+births and final output. A full-rank QR path and replacing the unchanged L2
+nonlinear engine with a compact equivalent are subsequent discriminators,
+not claims from this identity-storage check. Run only tiny CPU work directly;
+default preflight and fresh Skeptic review are required before accepting the
+new IMPORTANT probe. It does not gate F21 DESIGN, DECIDE or release.
