@@ -48303,3 +48303,29 @@ called a clean capped mini or a release pass. Any exception to the normal
 clean-mini requirement is Samuel's separate decision with exact evidence;
 it is not assumed here. Neither operation count nor no-cap accuracy by itself
 certifies the server cliff, wall, or eligibility.
+
+**P10 pre-data instrument checkpoint.** Registry commit `24e8b32` allocated
+`P10[40,913,010,000..40,913,010,127]` as fresh SINGLE_USE in both maps;
+zero claims/touches. Its independent registry Skeptic ACCEPT is
+`experiments/2026-09-13_p10_registry_skeptic.md` SHA256
+`8c042adbf4827ebd753528b6a947e1219c237bc9bbf74f31b8834d9ebf57a2b7`.
+The P10-bound scorer SHA256 is
+`d1d5e239d939f1234fb8b5139906dfa25860745e8776beda8bb4ffa7ea8ef04c`;
+`py_compile`, diff check and explicit `LifecycleSpec.deviations_from_round()`
+check passed, showing `wall_time_limit_s: [None,120.0]` and
+`residual_wall_time_limit_s: [None,0.4]`. The corrected pre-data protocol
+Skeptic ACCEPT is `experiments/2026-09-13_p10_protocol_skeptic.md` SHA256
+`e49b3ed43529b799978a496e99c6a7db014d81015d3e4c5649baf357efa500b8`,
+for protocol only; it does not approve score or deployment.
+
+Affected default preflight workerq 1166 finished SUCCEEDED exit 0 in
+349.50 s, peak 3,213.05 MiB against 6 GiB/2 CPU/0 GPU declaration. Its
+complete transcript `experiments/2026-09-13_p10_preflight_default_verdicts.txt`
+SHA256 `cfca92cec6b03181ad133cdafaf1534c5eeeb191a582cd17d803ced4be82c903`
+ends **PREFLIGHT GREEN 12/16, four Full-only skipped**. Workerq log SHA256
+`16bad1c68ed3e9b95232422117bdf2b61c1aeacc6eeb85de737de81c110c2f56`,
+receipt SHA256
+`0c43efef657a079c54098be939fb3da77b1b0c9fcba9b7a7e33a0abdd55ff46a`.
+This is affected-path preparation, not a candidate certificate. P10 remains
+unclaimed; Samuel's new predictions remain pending, so **no P10 truth or
+scorer workload may start yet**.
