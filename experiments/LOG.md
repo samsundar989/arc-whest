@@ -48431,3 +48431,18 @@ score invocation; no public or vault data are involved. The host
 `seed_ledger.py --check` returned CONSISTENT after finalization; that check
 hashed the artifact for integrity only, without decoding labels or
 reserving a protected score read.
+
+**P10 single protected DECIDE read launched.** After the committed
+pre-score Skeptic ACCEPT `dfba967` and final host recheck, workerq **1185**
+was submitted with its exact permitted scorer argv: original L4 first,
+frozen F21 second, original L2 context third; the finalized P10 truth,
+absolute live register/output, local live worktree, nonpreemptible,
+**10 GiB RAM, 0 VRAM, 2 CPUs, 0 GPUs**. The pre-submit check reconfirmed all
+three arm SHA256s, scorer SHA256, the finalized truth SHA, zero P10 reads,
+and absent `decide_P10.json`. The receipt then showed the intended argv,
+live execution root and RUNNING state. The live truth-read register now has
+one matching reservation/completion pair `16c62eacd58d49ee`, artifact SHA
+`9026b4ea...`, instrument SHA `d1d5e239...`, intended output
+`decide_P10.json`: **P10 is spent 1/1**, regardless of this job's eventual
+result. No second P10 score attempt is permitted. There is no score or
+promotion verdict at this checkpoint.
