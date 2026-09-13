@@ -1,0 +1,58 @@
+﻿worker-q: job #1093 starting at 2026-09-13T01:25:42.382018+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['C:/Users/samsu/Documents/arc-whest/.venv/Scripts/python.exe', 'local_sim/linux_memory_gate.py', '--candidate', 'estimator_k3_strassen_L4_f21.py', '--json', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-12_f21/linux_memory_gate_f21.json']
+worker-q: ------------------------------------------------------------
+Linux 8-GiB enforcement gate
+  candidate   estimator_k3_strassen_L4_f21.py
+  cap         8192 MB   shape 1024x16   B = 2,199,023,255,552
+  linux       wsl -- WSL2 Ubuntu, official stack in $HOME/.arcwhest-linux
+
+N  the cap is in force -- controls first, so a pass below means something
+  PASS  N: the negative-control child reported                        json returned
+  PASS  N: the negative-control child wrote no stderr                 
+  PASS  N: the cap was APPLIED in that child (soft == requested)      True
+  PASS  N: requesting 9.0 GiB under a 8192 MB cap DIES                MemoryError: 
+  PASS  P: the positive-control child wrote no stderr                 
+  PASS  P: the SAME allocation with NO cap succeeds                   so the death above is the cap, not the machine
+
+L  repeated-worker lifecycle controls
+  PASS  L: stateless allocations settle below the growth threshold    +0.0 MB
+  PASS  L: deliberately retained allocations exceed the threshold     +192.0 MB
+  PASS  L: lifecycle-control children wrote no stderr                 
+
+C  the candidate's own predict(), under the real cap
+  PASS  C: the child reported                                         stage=done
+  FAIL  C: the candidate child wrote no stderr                        float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+
+  PASS  C: the cap was applied to the candidate's process too         soft=8589934592 requested=8589934592
+  PASS  C: the REAL packages loaded, not local_sim's shims            ython3.12/site-packages/whestbench/__init__.py
+  PASS  C: installed distribution metadata names both package versionswhestbench='0.16.1', flopscope='0.12.1'
+  PASS  C: setup() raised nothing                                     0.0136 s
+  PASS  C: predict() completed under the cap                          103.090 s
+  PASS  C: the output has the right shape                             [16, 1024]
+  PASS  C: every value is finite                                      float32
+  PASS  C: peak address space is under the cap                        VmPeak 5383.3 MB of 8192 MB -> 1.52x headroom
+  PASS  C: the weights were the DEPLOYMENT representation             f64_readonly / dtype float64 / writeable False
+  PASS  C: repeated predictions in the SAME worker all completed      3 runs
+  PASS  C: ...and SETTLED address space did not GROW across them      +15.0 MB over 3 predictions
+      repeated FLOPs  928,457,637,478, 928,457,637,478, 928,457,637,478 (identical)
+  PASS  C: the single largest returned array is under 4 GiB           0.062 MB
+
+  counted FLOPs   928,457,637,478
+  multiplier      0.422214
+  peak RSS        3506.6 MB
+  VmPeak          5383.3 MB (address space -- THE quantity RLIMIT_AS caps)
+  VmHWM           3506.6 MB
+
+  SCOPE: this is a Linux kernel applying the installed package's own
+  default. It is not the grading server, whose `memory_limit_mb` appears in
+  no run_config and no graded report this repository holds. No absolute
+  second measured here transfers either.
+  report -> C:/Users/samsu/Documents/arc-whest/experiments/2026-09-12_f21/linux_memory_gate_f21.json
+
+FAILED 1: C: the candidate child wrote no stderr
+worker-q: ------------------------------------------------------------
+worker-q: job #1093 FAILED (exit code 1) at 2026-09-13T01:31:23.010490+00:00

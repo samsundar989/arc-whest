@@ -47212,3 +47212,29 @@ one-fixture full-rank interpreter-parity evidence, while noting that the
 returned 4x4 QR basis rank does not independently certify pre-QR sketch
 rank. Shared immutable L2 coefficient data and the tiny fixture cannot
 support width-1024 stability, compression, score, cost or deployment claims.
+
+**F21 Linux cap job 1093: formal v5 gate FAIL, raw resource evidence retained.**
+The existing `linux_memory_gate.py` ran the exact F21 SHA `d77dab0e...` on
+WSL/official 0.16.1/0.12.1 with `f64_readonly` 1024x16 weights and a readback
+8,192 MiB `RLIMIT_AS`. Its 9 GiB negative allocation failed under the cap
+and the uncapped positive control succeeded. Three same-worker predictions
+completed, each at **928,457,637,478** counted FLOPs; `VmPeak` reached
+5,644,836,864 bytes (about 5,383 MiB), peak RSS 3,676,954,624 bytes,
+settled address-space growth 15 MiB. All candidate output/finite/shape/cap
+checks passed, but the **overall status is FAIL** (workerq exit 1, 22/23):
+`C: the candidate child wrote no stderr` rejected exactly the two
+`FlopscopeWarning` messages from `stats.norm.cdf/pdf` promoting float32
+inputs to float64 at candidate lines 303/304. Those two lines are unchanged
+from the frozen L4 parent and appear in its DESIGN worker log too. This is
+not a score or memory failure; it is nevertheless a real failure of the
+pre-existing zero-stderr instrument policy. Do not relabel the v5 report as
+PASS. The immutable failed report is
+`experiments/2026-09-12_f21/linux_memory_gate_f21_v5_failed_stderr.json`
+SHA256 `6714c20fb05ac3bfe50b7e8b5fe99cf84a4d06e0b55c594547885964500e566b`;
+workerq log SHA256
+`8739bea5e8f5808df91a797e08d1b61bb8a8626b8eddecfd5eaeb20e68b503d9`,
+and receipt SHA256
+`643bea28707df2b34d27bb0986b13c0dd4428f595596df6c5786994b9bb6c501`.
+An independent Skeptic is reviewing whether a narrowly preregistered
+warning classifier and fresh run can restore a formal cap gate without
+hiding unexpected stderr. Candidate certification and release remain open.
