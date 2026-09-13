@@ -47013,3 +47013,35 @@ No P09, vault or public read was observed for this DESIGN path. It correctly
 does **not** infer a score or gate pass from receipt completion; the result
 packet needs terminal status, all three arms, paired rows, truth floors and
 the predeclared `<=1.05` forecast ratio before synthesis.
+
+## 2026-09-12 — B2 full-rank QR storage discriminator, no compression
+
+**Class:** IMPORTANT new no-label probe, separate from F21. B1's identity
+storage result is still provisional pending Full preflight, and its Skeptic
+correctly limits it to the storage boundary; no compact nonlinear engine
+has been validated. B2 tests the next exact *representation* operation only,
+not a score or release claim, using the same frozen full-rank mapping and
+unchanged L2 nonlinear layer. No result of B1 is used to tune a coefficient.
+
+**Question and prediction before measurement.** Does existing
+`weighted_gram_join` at `rank=n=4`, `residual_rank=n=4`, with a deterministic
+full-rank sketch and all ages retained, rotate `A_L`/`M` into a shared basis
+without losing the `A_D=Z L.T` residual or changing compact D3/masked D21?
+Predict reconstructed per-age Source fields, scalar c4 carried outside,
+per-layer post-state and final output will match the unjoined full-rank B1
+path within normalized entry `1e-5`; no age may vanish and the effective
+joined basis must have full rank 4. A failed QR rank, missing age, incorrect
+orientation/mask, or any field over `1e-5` falsifies this representation
+operation. This is a numerical full-rank test; bit identity is not expected.
+
+**Intervention and limits.** Add one standalone n4/depth4 fixed-weight
+differential using the existing compact `weighted_gram_join`/`reconstruct`
+with `omega=I` (full-rank deterministic sketch) at each live nonfinal layer.
+Compare against frozen L2 and B1 identity storage on the same explicit
+weights, with all source births and every age, but continue to use frozen
+L2 `_layer` for Wick/centering/scalar K4. Do not edit compact/frozen/F21
+sources, use a seed block, read truth, reduce rank, fit, or test score. A
+green B2 would still not prove an independent compact nonlinear recurrence
+or a cheaper candidate. Run only tiny CPU work directly. Default/Full
+preflight and fresh independent Skeptic are required before accepting the
+IMPORTANT result; this probe must not delay F21 DESIGN/DECIDE.
