@@ -47990,3 +47990,19 @@ receipt SHA256 is
 These certify only the affected diagnostic repair plus the default gate;
 they do not rescue P09 or certify F21 for submission. Independent instrument
 Skeptic verdict remains pending at this line.
+
+**Independent repair verdict and stopping decision.** Fresh-context
+`experiments/2026-09-12_f21/p09_failure_diag_skeptic.md` SHA256
+`80976325f0e7150688ea9022cdf04dd633fc8867ac49381e9c3758d88b522080`
+ACCEPTS only the failure-metadata repair. The current scorer SHA256 is
+`3139e65d17a07173ca5039976733338d398e16eb795bb93f5af7c7d5cb3cd937`;
+the F21 candidate remains `d77dab0e...`. No fresh arithmetic DECIDE result
+exists, so F21 is **not promoted and not submission-ready**. Candidate-specific
+Full certification and public mini were not opened after the failed P09
+execution; neither can substitute for the missing fresh paired gate. A next
+discriminator must first observe failure flags in a label-free, non-P09
+lifecycle stress, then determine whether the local 120-second wall threshold,
+an actual estimator exception or a budget path needs action. Any score retry
+requires a newly registered and claimed single-use DECIDE block, a committed
+contract and new Samuel predictions before data. No P09 read/retry, public
+CONFIRM, vault touch, external message, submission or designation occurred.

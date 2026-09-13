@@ -44,7 +44,9 @@ kill. The read-only
 [forensic note](../experiments/2026-09-12_f21/p09_failure_forensics.md)
 records what the terminal artifacts can and cannot show. A minimal scorer
 diagnostic now logs only failure flags/timing before the unchanged abort;
-workerq **1141** is running its affected default preflight. The frozen F21
+workerq **1141** passed its affected default preflight 12/12, and the
+[diagnostic Skeptic](../experiments/2026-09-12_f21/p09_failure_diag_skeptic.md)
+ACCEPTED only that repair. The frozen F21
 selection remains SHA `d77dab0e...` against original L4. The separate compact
 B0/B1/B2/B3 probes establish n4/depth4 tiny full-rank recurrence parity only,
 not compression or score. A separately preregistered n8/depth6 B4 extension
@@ -59,8 +61,7 @@ fresh DECIDE result or submission approval exists.
 
 ## Next discriminator: identify the lifecycle failure without rereading P09
 
-Finish workerq 1141 and its independent diagnostic Skeptic. Then run a
-bounded label-free lifecycle stress on exposed DESIGN or newly registered
+Run a bounded label-free lifecycle stress on exposed DESIGN or newly registered
 diagnostic networks, with failure flags preserved and no score claim, to
 separate a local 120-second wall timeout from a budget or estimator exception.
 Do not reopen P09, infer a paired score from 128/128 progress, or use exposed
@@ -83,7 +84,7 @@ Samuel answered **“Include eligibility and candidate preparation.”** The old
 | Area | Current status |
 |---|---|
 | Stage 0 | Scoped independent ACCEPT; Linux positive plus M1–M12 aggregate 13/13. This is instrument coverage, not a complete future candidate certificate. Reuse it unless an affected path or new failure requires retesting. |
-| Preflight | Workerq 1092 passed Full 16/16; default 1095, P09 registry 1097 and B4 1100 passed 12/12. The F21 failure-diagnostic edit has affected default preflight 1141 running. Candidate-specific full checks remain conditional on a valid fresh DECIDE. |
+| Preflight | Workerq 1092 passed Full 16/16; default 1095, P09 registry 1097, B4 1100 and F21 diagnostic 1141 passed 12/12. Candidate-specific full checks remain conditional on a valid fresh DECIDE. |
 | Compact supplied-core implementation | Algebra/cost evidence remains scoped: about 0.372208 B and about 1,014 MiB on its supplied-core program. Not the cost of a complete physical signed-source method. |
 | Existing compact off control | Already evaluated on 96 exposed P01 DESIGN networks: raw mean MSE 2.11130e-5, averaged-truth noise 9.31914e-9, score 7.83730e-6. Saved arithmetic independently checks out. It is not a matched L2 comparison and is not the working L2 recurrence. |
 | New K4 arms | Frozen P01 arms failed their promotion gate. The source and covariance defects explain why scientific causation remains incomplete; do not fit them again unchanged. |
