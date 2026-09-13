@@ -46702,3 +46702,42 @@ declarations. The 23 op families reconcile to each total. The original L4
 graded agreement supplies an external anchor for the local meter, but an
 official **candidate-specific** subprocess profile and cap/mini checks remain
 owed. The f32 files stay as transparent diagnostics of the detected defect.
+
+**F21 engineering review checkpoint.** Fresh-context cost Skeptic
+`experiments/2026-09-12_f21/cost_skeptic.md` ACCEPTS the corrected f64-readonly
+13.08574% cost result only; it exposed and retained the first f32 convention
+error. Fresh-context trajectory Skeptic
+`experiments/2026-09-12_f21/trajectory_skeptic.md` ACCEPTS 1024x4 parity only,
+with a precise limit: final-layer tower pruning means it observes just two
+noninitial D21 reads, not the accumulated live 16-layer history. Both raw
+reviews retain score/deployment as unknown. Workerq 1085 then passed default
+preflight **12/12** on the local host after the instrument repair, with clean
+worktree at start and 3,079 MiB peak under 5 GiB declared. Job 1082 had
+failed before its first step due local PowerShell execution policy; 1085 used
+process-local `-ExecutionPolicy Bypass` and did not change the gate. This is
+default preflight of the shipped baseline/instruments, not candidate-specific
+Full validation.
+
+**F21 no-label depth-16 extension, preregistered before result.** The Skeptic's
+depth-coverage finding directly affects confidence in the changed D21
+recurrence. Run the *same* fixed-precision/backend, same canonical no-label
+input seed, same frozen L4/candidate source hashes and same probe at width
+1024/depth **16**. Keep the original `2e-3` normalized entry and `1e-2`
+final relative RMS bounds; require every sampled state/source/output field
+to pass, equal chooser/table/config, and effective Strassen depth 4. This
+follow-up discriminates whether accumulation over all ages amplifies the
+small 1024x4 rounding difference; it does not select a coefficient or use a
+decision block. A failure would stop DESIGN and require source-level diagnosis
+under a new implementation contract, not an unregistered tolerance change.
+
+**F21 pre-submission optimization review — full-depth trajectory.** Reuse
+the same probe and single canonical network, sharing weight arrays across
+parent/fused arms, so there is no duplicate dataset/truth loader. No workers,
+cache, prefetch, batching or GPU; reducing layer count would omit the exact
+history the Skeptic challenged. Output is a new reproducible JSON and a
+one-network interrupted run can be restarted without checkpoint or label
+loss. Width1024/depth4 probe peaked 1.00 GiB; one full-depth f64 meter peaked
+2.89 GiB, and this probe retains both arms' sampled tower states. Reserve
+**7.5 GiB RAM, 0 VRAM, 2 CPUs** conservatively for the added lifetime. Use
+workerq local-only live-worktree because its normal snapshot can travel to
+the provenance-broken remote node; the probe checks exact source hashes.
