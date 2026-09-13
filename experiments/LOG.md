@@ -47097,3 +47097,49 @@ storage trajectory: all nonlinear arms still call frozen L2 `_layer`, the
 newborn and Wick scaling are frozen-derived, and the returned full-width Q
 rank is checked without a separately recorded pre-QR sketch rank. Accept no
 compression, compact nonlinear, cost or score conclusion from B2.
+
+## 2026-09-13 — B3 independent full-rank nonlinear recurrence discriminator
+
+**Class and question.** IMPORTANT no-label tiny probe, off the F21 candidate
+path. On B1/B2's fixed asymmetric n4/depth4 weights, can a full-rank compact
+Source/QR arm execute the entire frozen L2 nonlinear recurrence independently,
+preserving centered Wick terms, scalar c4, source-birth subtraction and all
+ages? B1/B2 establish only storage parity while calling frozen `_layer`.
+
+**Hypothesis/mechanism and prediction before measurement.** Replacing the
+Gaussian-only compact closure with an exact interpreter of L2's immutable
+Wick and pK-to-K coefficient tables, plus its scalar c4 and pK_111 birth
+subtraction, should preserve the recurrence when full shared and residual
+rank equal width four. Predict finite elementwise normalized error
+`abs(got-want)/max(1,abs(want)) <= 1e-5` for every compared numeric field,
+exact inventory/key/age equality, and no lost QR rank. Any discrepancy,
+missing term/age, inactive required path or rank loss falsifies B3; do not
+relax the tolerance after inspection.
+
+**Intervention and checks.** Add only an isolated
+`local_sim/p2_compact_fullrank_nonlinear_b3.py`, reading the frozen L2 tables
+as immutable coefficient data. The compact arm may not call frozen `_layer`,
+`_wick`, `_get_pk_block`, `_append`, `_wick_tower` or `_proj_coef_d4_r2`.
+Frozen `_layer` is reference-only; a read-only Python trace hook may capture
+its local intermediates without source edits. Independently evaluate Wick
+coefficients, every `terms` row, all pK-to-K centering rows, scalar c4
+projection, old-source Wick scaling and the new full-residual Source. Reuse
+existing compact slices, transport, reconstruct and full-rank weighted-Gram
+QR join with `rank=residual_rank=n=4`, `omega=I`, and no pruning. Compare
+all coefficient/table key and row inventories; every consumed S and Wick
+coefficient; every pK and centered K key including asymmetric/masked 2,1
+and 1,2; p111_3/p111_21 and S3/S21 subtraction; c4 in/out; pre/post mean
+and covariance; every reconstructed Source field, age/count and materialized
+A_D; D3/masked D21 on nonfinal layers; final mean-only output. Require
+nonzero off-diagonal D21, c4 and p111 subtraction, at least two ages at one
+nonfinal layer and full QR rank. Record raw per-field/per-layer checks and
+source hashes.
+
+**Scope and dependencies.** Use only fixed weights, no truth, mint, seed
+block, score, cost, compression, F21 edits or heavy job. A green result
+supports one tiny full-rank recurrence trajectory only, not width-1024
+stability or a cheaper candidate. Run required preflight on the affected
+tree and obtain a fresh independent Skeptic before accepting this IMPORTANT
+probe. This does not delay F21 DESIGN/DECIDE or imply a general scientific
+closure. AGENTS requires a written prediction for IMPORTANT; no Samuel
+prediction is required because this probe touches no strategic gate/data.
