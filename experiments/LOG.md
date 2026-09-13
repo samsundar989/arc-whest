@@ -47186,3 +47186,18 @@ the frozen L2 reference intermediates. This supports only this explicit
 n4/depth4 full-rank recurrence, not general-width stability, compression,
 cost, score or deployment. Fresh Skeptic and affected-tree preflight remain
 required before accepting even this scoped IMPORTANT result.
+
+**Pre-submission optimization review — affected-tree default preflight after
+B3.** B3 adds one standalone no-label instrument, so rerun the accepted
+12-step default gate on the committed `77e60f5` tree to check source scan,
+provenance, invariant suite, contract and official FLOP anchor after the
+change. Reuse existing immutable fixtures/installed stack and the preceding
+Full 1092 evidence for unaffected Full-only checks; rerunning all 16 would
+duplicate expensive shape/carrier/envelope/smoke passes without a changed
+production source or observed defect there. The default command has one
+ordinary loader per step, no extra workers, prefetch/batch, GPU use or
+recoverable partial checkpoint. If interrupted, restart the 12 steps with a
+new transcript. Comparable workerq 1085 measured **3,079.10 MiB** RAM in
+405.94 s. Request **6 GiB RAM, 0 VRAM, 2 CPUs**, nearly twice that measured
+peak. Current workerq reports 16.2 GiB free after its reserve; the queue
+controls admission while DESIGN and candidate Linux cap run.
