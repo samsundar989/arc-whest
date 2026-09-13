@@ -19,15 +19,15 @@ Skeptics ACCEPT these narrow engineering claims. There is no accuracy,
 score, memory-cap or submission result. The F21 contract and Samuel's three
 "I don't know" predictions were committed before results.
 
-**Live jobs:** workerq 1087 is the registered exposed-P01 DESIGN comparison
-(original L4 primary, fused L4, original L2 context; 24 high-resolution
-networks). It is queued for 8 GiB because other projects reserve most host
-RAM. Workerq 1088 is the candidate-specific Linux 8,192 MiB memory gate
-queued behind it; workerq 1090 is the required baseline/instrument Full
-preflight queued with a corrected 16 GiB request. Job 1089 was cancelled
-at step 13 after its 6 GiB estimate proved too low; its partial transcript
-is preserved and is not a Full verdict. P01 truth has not yet been read by
-F21. The provisional
+**Live job:** workerq **1091** is running the registered exposed-P01 DESIGN
+comparison (original L4 primary, fused L4, original L2 context; 24
+high-resolution networks) with a conservatively reviewed 7.5 GiB request.
+Both P01 truth halves have canonical completed live-read receipts; no score
+or DESIGN verdict exists yet. The first 8 GiB job 1087 and candidate Linux
+cap/Full jobs 1088/1090 were removed while QUEUED, before execution, to
+prioritize DESIGN. They require requeue if it passes. Partial Full job 1089
+was cancelled at step 13 after its 6 GiB estimate proved too low; its
+transcript is preserved and is not a Full verdict. The provisional
 [pre-score](../experiments/2026-09-12_f21/prescore_skeptic.md) and
 [receipt](../experiments/2026-09-12_f21/receipt_skeptic.md) reviews require
 the actual 1087 live receipt/output. No P09 block is allocated or claimed;
@@ -60,7 +60,7 @@ Samuel answered **“Include eligibility and candidate preparation.”** The old
 | Area | Current status |
 |---|---|
 | Stage 0 | Scoped independent ACCEPT; Linux positive plus M1–M12 aggregate 13/13. This is instrument coverage, not a complete future candidate certificate. Reuse it unless an affected path or new failure requires retesting. |
-| Preflight | Workerq 1085 passed current-byte default 12/16 after the F21 meter repair. Workerq 1090 Full is queued at 16 GiB after partial 1089's RAM estimate error; candidate-specific checks still required. |
+| Preflight | Workerq 1085 passed current-byte default 12/16 after the F21 meter repair. Full job 1089 was cancelled after a low RAM estimate; corrected 16 GiB job 1090 was removed while queued to prioritize DESIGN. Candidate-specific checks still required. |
 | Compact supplied-core implementation | Algebra/cost evidence remains scoped: about 0.372208 B and about 1,014 MiB on its supplied-core program. Not the cost of a complete physical signed-source method. |
 | Existing compact off control | Already evaluated on 96 exposed P01 DESIGN networks: raw mean MSE 2.11130e-5, averaged-truth noise 9.31914e-9, score 7.83730e-6. Saved arithmetic independently checks out. It is not a matched L2 comparison and is not the working L2 recurrence. |
 | New K4 arms | Frozen P01 arms failed their promotion gate. The source and covariance defects explain why scientific causation remains incomplete; do not fit them again unchanged. |

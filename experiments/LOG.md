@@ -46974,3 +46974,32 @@ truth halves, receipts and output unchanged. Cancel only the still-queued
 1087 and resubmit through workerq at 7.5 GiB; if its state changes to
 RUNNING first, do not duplicate a protected read. This amendment and
 independent audit precede any P01 result.
+
+**F21 P01 DESIGN launch and live receipt.** Workerq 1087 was removed while
+QUEUED, without a runner or truth read. The unchanged three-arm command was
+resubmitted as **1091** with the independently reviewed 7.5 GiB RAM,
+0 VRAM, 2 CPU request and started locally in live-worktree mode. It pinned
+F21 `d77dab0e...`, original L4 `052dd768...`, and L2 `390bc226...` in the
+exact command. `truth_reads.py --block P01` reports DESIGN tier, unlimited
+registered reads, `spent: 9` after the two new high-resolution halves, and
+the live register has one `reserved` plus one `completed` row for each
+canonical `gt_halfA.npz` SHA
+`63522c5669aec72603b4baec0d3ce1d4d445e86cceebfb408794e956bd4878b2`
+and `gt_halfB.npz` SHA
+`c91265059874f53f23a20dc722ed1203a6badf0a972ebf9a92ae6de669ca45e1`,
+both tied to the absolute DESIGN output and scorer instrument hash
+`68b162ef20562cfed423f0105df98ad7a4f45f65058025834ba25bb446d5fedb`.
+The pre-output `experiments/truth_reads.jsonl` physical SHA256 is
+`8f772ade888dafacf45dab067bd3bbc4510f458095bff53e57256147058680a6`.
+The scorer announced 24 paired networks, midpoint truth floor
+`5.776091e-10`, local residual cap relaxed for accuracy only, and began
+original L4. **No score or DESIGN verdict yet.** Independent receipt Skeptic
+is reviewing the actual command/rows.
+
+Queued validation jobs 1088 (Linux cap) and 1090 (corrected Full preflight)
+were then removed **before execution** so they would not sit ahead of the
+running registered DESIGN job. Their optimization reviews, including 16 GiB
+declarations, remain valid for later requeue if DESIGN passes; each new heavy
+submission will be re-reviewed against the then-current code/resources.
+Neither cancellation is a cap or Full result. Candidate-specific `whest
+validate` already passed; all other deployment gates remain open.
