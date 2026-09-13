@@ -47249,3 +47249,46 @@ blanket-suppressed. It recommended a preregistered, typed, exact-message
 instrument repair with a negative unexpected-stderr mutation, affected-tree
 preflight, independent review, and fresh cap run to a new path. The v5
 artifact cannot be relabeled after its outcome was seen.
+
+## 2026-09-13 — LMG6 narrow warning-policy repair, before revised gate data
+
+**Class/question/evidence.** IMPORTANT change to the accepted Linux memory
+instrument, prompted by the preserved F21 v5 failure, not a new estimator or
+score gate. CONFIRMED: job 1093 applied/read back the 8,192 MiB cap and passed
+its controls and candidate memory/output checks, but its zero-stderr check
+failed on exactly the two `FlopscopeWarning` cdf/pdf float32-to-float64
+messages emitted at source lines unchanged from frozen L4. CONFIRMED: the
+same two warnings appear in original L4's DESIGN log, and the raw v5
+candidate FLOP ledger includes the promoted dtype work. INFERRED: these
+warnings disclose cost and precision but do not imply memory-cap or
+prediction failure. A fresh Skeptic independently confirmed the v5 formal
+FAIL and refused post-hoc relabeling.
+
+**Hypothesis/prediction before code or revised run.** A warning filter typed
+as `flopscope.FlopscopeWarning` and anchored to the complete, exact
+`stats.norm.cdf` or `.pdf` float32-to-float64 promotion message will remove
+only those two inherited warnings from the candidate child's stderr. An
+unrelated `FlopscopeWarning`, ordinary Python warning or arbitrary stderr
+byte must remain visible and still cause the existing v5 zero-stderr check
+to fail. On a fresh identical F21 1024x16/f64-readonly three-repeat capped
+run, predict all 23 existing checks pass, cap readback remains exactly
+8,589,934,592 bytes, 9 GiB negative/positive controls behave identically,
+all three counted totals remain 928,457,637,478, outputs stay finite and
+shape-correct, VmPeak remains below 8,192 MiB, and settled growth remains
+below the existing 64 MiB bound. These are predictions, not a relabeling of
+job 1093.
+
+**Intervention/falsifier/scope.** Change only `CHILD_PREDICT`'s warning filter
+in `local_sim/linux_memory_gate.py`, keeping `SymmetryLossWarning` treatment
+and the existing `C: candidate child wrote no stderr` check, report fields,
+consumer, candidate bytes, packages, cap, controls, shape, weights,
+repeats, resource thresholds and scorer fixed. Add a tiny mutation check of
+the actual child-filter fragment: the exact two typed messages are hidden,
+while a near-match, an unrelated typed warning and an ordinary stderr print
+remain visible. A swallowed unexpected byte, changed memory criterion, any
+failed control/candidate check or failed affected-tree preflight falsifies
+the repair. Preserve v5 raw FAIL and run the revised full Linux gate to a
+**new** artifact path through workerq with a fresh optimization review.
+No label, seed, public/vault read, score or threshold choice is involved.
+Fresh independent Skeptic must review the diff, tiny mutation raw, and new
+Linux artifact before the candidate's resource evidence is accepted.
