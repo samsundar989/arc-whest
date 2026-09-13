@@ -47647,3 +47647,7 @@ checks printed PASS. Raw
 `60e6da64113fc01c1e9c79bcbde9da6a898b9b182cf139cc86c0b8a7f73af8ab`.
 This is only the memory-report consumer, not a full candidate certificate,
 score or official mini. No P09 read occurred.
+
+**Portability after P09 registry edit.** `python scripts/verify_portability.py`
+passed **103/103, 0 failed** on the committed registry tree. This checks
+the cross-agent harness contract; it does not consume P09 or certify score.
