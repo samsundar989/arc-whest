@@ -46741,3 +46741,36 @@ loss. Width1024/depth4 probe peaked 1.00 GiB; one full-depth f64 meter peaked
 **7.5 GiB RAM, 0 VRAM, 2 CPUs** conservatively for the added lifetime. Use
 workerq local-only live-worktree because its normal snapshot can travel to
 the provenance-broken remote node; the probe checks exact source hashes.
+
+**F21 A1 full-depth trajectory result, no labels.** Workerq 1086 SUCCEEDED
+at width 1024/depth 16 with the installed flopscope backend and effective
+Strassen depth 4 in both pinned arms. Raw
+`experiments/2026-09-12_f21/trajectory_1024x16.json` SHA256 is
+`73a803444cecd2b43597c77fac7101434a7f2d5f2ea3f0b4a68decf6b520a242`;
+it identifies frozen L4 `052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58`
+and F21 `d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`.
+All **125/125** sampled state/source/output fields pass; the largest numeric
+normalized entry error is **6.09644e-5** against `2e-3`, and final relative
+RMS is **7.30922e-7** against `1e-2`. Config, table, chooser, backend, setup
+and `last_run` checks pass. No labels/decision block were read. The job ran
+287.98 s and measured 3,660 MiB peak under 7.5 GiB declared. This is one
+deterministic full-depth trajectory, not a distributional score or deployment
+certificate. Independent Skeptic review is pending before DESIGN.
+
+**F21 pre-submission optimization review — exposed P01 DESIGN score.** The
+registered scorer reads the two existing immutable 24-network `2**26` halves
+once into a single midpoint truth/floor and evaluates original L4, frozen F21
+and original L2 sequentially on those same canonical seeds. There is no
+duplicate dataset loader, worker pool, cache, prefetch, batching or GPU. Each
+arm must rebuild its canonical lifecycle weights to retain independent source
+and counted-cost checks; reusing an estimator instance or dropping L2 would
+weaken the prespecified comparison. No coefficient fitting or extra accuracy
+pass is performed. The earlier 24-network three-arm WP21 score took about
+59 minutes and workerq 957's four-arm run peaked 3,792 MiB; this three-arm
+f64-readonly run may have a larger transient, so reserve **8 GiB RAM, 0 VRAM,
+2 CPUs**. The score report is written once after all arms, with exact candidate
+hashes and live truth-read receipts; if interrupted, rerun from the same
+exposed DESIGN halves with a new output path and preserve both receipt trails.
+Use workerq local live-worktree so the pinned bytes and live receipts agree.
+Reuse accepted meter, trajectory and source-diff artifacts rather than repeat
+them inside this score job. This review precedes submission of the DESIGN job.

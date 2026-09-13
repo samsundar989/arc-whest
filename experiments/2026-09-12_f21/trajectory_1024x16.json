@@ -1,0 +1,1374 @@
+{
+  "probe": "D21 L4 fusion float32 per-layer trajectory parity",
+  "parent_file": "experiments\\2026-09-12_f21\\estimator_L4_parent.py",
+  "parent_sha256": "052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58",
+  "candidate": "estimator_k3_strassen_L4_f21.py",
+  "candidate_sha256": "d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94",
+  "flopscope_file": "C:\\Users\\samsu\\Documents\\arc-whest\\.venv\\Lib\\site-packages\\flopscope\\__init__.py",
+  "width": 1024,
+  "depth": 16,
+  "fixed_input_seed": 1000921,
+  "estimator_seed": 254081100,
+  "no_labels_or_decision_block": true,
+  "entry_tolerance": 0.002,
+  "final_relative_rms_tolerance": 0.01,
+  "config": {
+    "ALPHA_CAP": {
+      "parent": 40.0,
+      "candidate": 40.0
+    },
+    "_STRASSEN_DEPTH": {
+      "parent": 4,
+      "candidate": 4
+    },
+    "_STRASSEN_MIN_BLOCK": {
+      "parent": 64,
+      "candidate": 64
+    },
+    "_BUDGET_FRACTION": {
+      "parent": 0.95,
+      "candidate": 0.95
+    },
+    "_ELEM_PER_LAYER": {
+      "parent": 400,
+      "candidate": 400
+    }
+  },
+  "config_equal": true,
+  "table_equal": true,
+  "generation_chooser": {
+    "parent": null,
+    "candidate": null
+  },
+  "generation_chooser_equal": true,
+  "effective_strassen_depth": {
+    "parent": 4,
+    "candidate": 4
+  },
+  "backend_equal_and_active": true,
+  "setup_ok": true,
+  "last_run_equal": true,
+  "final_relative_rms": 7.309221571652574e-07,
+  "final_relative_rms_pass": true,
+  "fields": [
+    {
+      "field": "layer0.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer0.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer0.tower.k",
+      "ref": 1,
+      "new": 1,
+      "pass": true
+    },
+    {
+      "field": "layer0.tower.A_D",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer0.tower.A_L",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer0.tower.M",
+      "shape": null,
+      "dtype_ref": null,
+      "dtype_new": null,
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer0.tower.w2b",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer0.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer1.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer1.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.2351741790771484e-08,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer1.tower.k",
+      "ref": 2,
+      "new": 2,
+      "pass": true
+    },
+    {
+      "field": "layer1.tower.A_D",
+      "shape": [
+        1024,
+        2048
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 3.166496753692627e-07,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer1.tower.A_L",
+      "shape": [
+        1024,
+        2048
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer1.tower.M",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer1.tower.w2b",
+      "shape": [
+        2048
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer1.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer2.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 3.2782554626464844e-07,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer2.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.6811664146370236e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer2.tower.k",
+      "ref": 3,
+      "new": 3,
+      "pass": true
+    },
+    {
+      "field": "layer2.tower.A_D",
+      "shape": [
+        1024,
+        3072
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.5243887901306152e-05,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer2.tower.A_L",
+      "shape": [
+        1024,
+        3072
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.691281795501709e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer2.tower.M",
+      "shape": [
+        1024,
+        2048
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.9802322387695312e-08,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer2.tower.w2b",
+      "shape": [
+        3072
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.980232238769531e-07,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer2.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.1641532182693481e-09,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer3.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 6.715636340681098e-07,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer3.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.9073486328125e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer3.tower.k",
+      "ref": 4,
+      "new": 4,
+      "pass": true
+    },
+    {
+      "field": "layer3.tower.A_D",
+      "shape": [
+        1024,
+        4096
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.6669353246688843e-05,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer3.tower.A_L",
+      "shape": [
+        1024,
+        4096
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.9334256649017334e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer3.tower.M",
+      "shape": [
+        1024,
+        3072
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 5.941838026046753e-07,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer3.tower.w2b",
+      "shape": [
+        4096
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 4.470348358154297e-07,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer3.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer4.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 9.595701683940966e-07,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer4.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.9073486328125e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer4.tower.k",
+      "ref": 5,
+      "new": 5,
+      "pass": true
+    },
+    {
+      "field": "layer4.tower.A_D",
+      "shape": [
+        1024,
+        5120
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.589418388903141e-05,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer4.tower.A_L",
+      "shape": [
+        1024,
+        5120
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.8066493794322014e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer4.tower.M",
+      "shape": [
+        1024,
+        4096
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 9.71369445323944e-07,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer4.tower.w2b",
+      "shape": [
+        5120
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 7.152557373046875e-07,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer4.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.1641532182693481e-09,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer5.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.6686175586957083e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer5.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.9073486328125e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer5.tower.k",
+      "ref": 6,
+      "new": 6,
+      "pass": true
+    },
+    {
+      "field": "layer5.tower.A_D",
+      "shape": [
+        1024,
+        6144
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.5171244740486145e-05,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer5.tower.A_L",
+      "shape": [
+        1024,
+        6144
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.8086284399032593e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer5.tower.M",
+      "shape": [
+        1024,
+        5120
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.087784767150879e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer5.tower.w2b",
+      "shape": [
+        6144
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 8.940696716308594e-07,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer5.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 5.820766091346741e-10,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer6.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.5497207641601562e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer6.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.9073486328125e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer6.tower.k",
+      "ref": 7,
+      "new": 7,
+      "pass": true
+    },
+    {
+      "field": "layer6.tower.A_D",
+      "shape": [
+        1024,
+        7168
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.6792287826538086e-05,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer6.tower.A_L",
+      "shape": [
+        1024,
+        7168
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.0498409867286682e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer6.tower.M",
+      "shape": [
+        1024,
+        6144
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.1324882507324219e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer6.tower.w2b",
+      "shape": [
+        7168
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.0728836059570312e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer6.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 6.984919309616089e-10,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer7.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.7881393432617188e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer7.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.9073486328125e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer7.tower.k",
+      "ref": 8,
+      "new": 8,
+      "pass": true
+    },
+    {
+      "field": "layer7.tower.A_D",
+      "shape": [
+        1024,
+        8192
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.7138198018074036e-05,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer7.tower.A_L",
+      "shape": [
+        1024,
+        8192
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.751817762851715e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer7.tower.M",
+      "shape": [
+        1024,
+        7168
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.1548399925231934e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer7.tower.w2b",
+      "shape": [
+        8192
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.2516975402832031e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer7.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 3.4924596548080444e-10,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer8.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.086162567138672e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer8.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.86102294921875e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer8.tower.k",
+      "ref": 9,
+      "new": 9,
+      "pass": true
+    },
+    {
+      "field": "layer8.tower.A_D",
+      "shape": [
+        1024,
+        9216
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.903623342514038e-05,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer8.tower.A_L",
+      "shape": [
+        1024,
+        9216
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.687556505203247e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer8.tower.M",
+      "shape": [
+        1024,
+        8192
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.2461096048355103e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer8.tower.w2b",
+      "shape": [
+        9216
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.4901161193847656e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer8.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.1641532182693481e-10,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer9.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.8477439880371094e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer9.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 3.814697265625e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer9.tower.k",
+      "ref": 10,
+      "new": 10,
+      "pass": true
+    },
+    {
+      "field": "layer9.tower.A_D",
+      "shape": [
+        1024,
+        10240
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 6.0964375734329224e-05,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer9.tower.A_L",
+      "shape": [
+        1024,
+        10240
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.6987323760986328e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer9.tower.M",
+      "shape": [
+        1024,
+        9216
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.1324882507324219e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer9.tower.w2b",
+      "shape": [
+        10240
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.2649765014648438e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer9.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.1059455573558807e-09,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer10.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.4437904357910156e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer10.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 3.814697265625e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer10.tower.k",
+      "ref": 11,
+      "new": 11,
+      "pass": true
+    },
+    {
+      "field": "layer10.tower.A_D",
+      "shape": [
+        1024,
+        11264
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 3.794580698013306e-05,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer10.tower.A_L",
+      "shape": [
+        1024,
+        11264
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.5348196029663086e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer10.tower.M",
+      "shape": [
+        1024,
+        10240
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.1427327990531921e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer10.tower.w2b",
+      "shape": [
+        11264
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 3.0100345611572266e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer10.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.3283064365386963e-09,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer11.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.9669532775878906e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer11.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.86102294921875e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer11.tower.k",
+      "ref": 12,
+      "new": 12,
+      "pass": true
+    },
+    {
+      "field": "layer11.tower.A_D",
+      "shape": [
+        1024,
+        12288
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.901760697364807e-05,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer11.tower.A_L",
+      "shape": [
+        1024,
+        12288
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.560896635055542e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer11.tower.M",
+      "shape": [
+        1024,
+        11264
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.1846423149108887e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer11.tower.w2b",
+      "shape": [
+        12288
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 3.0100345611572266e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer11.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.6880221664905548e-09,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer12.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.644819575367605e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer12.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.86102294921875e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer12.tower.k",
+      "ref": 13,
+      "new": 13,
+      "pass": true
+    },
+    {
+      "field": "layer12.tower.A_D",
+      "shape": [
+        1024,
+        13312
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 3.032386302947998e-05,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer12.tower.A_L",
+      "shape": [
+        1024,
+        13312
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.3988465070724487e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer12.tower.M",
+      "shape": [
+        1024,
+        12288
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.16787850856781e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer12.tower.w2b",
+      "shape": [
+        13312
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 3.516674041748047e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer12.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 3.6670826375484467e-09,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer13.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.9206275939941406e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer13.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.86102294921875e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer13.tower.k",
+      "ref": 14,
+      "new": 14,
+      "pass": true
+    },
+    {
+      "field": "layer13.tower.A_D",
+      "shape": [
+        1024,
+        14336
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.5286728739738464e-05,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer13.tower.A_L",
+      "shape": [
+        1024,
+        14336
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.2505915947258472e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer13.tower.M",
+      "shape": [
+        1024,
+        13312
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.1995434761047363e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer13.tower.w2b",
+      "shape": [
+        14336
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 3.516674041748047e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer13.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.979060471057892e-09,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer14.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.3245811462402344e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer14.cov",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.430511474609375e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer14.tower.k",
+      "ref": 15,
+      "new": 15,
+      "pass": true
+    },
+    {
+      "field": "layer14.tower.A_D",
+      "shape": [
+        1024,
+        15360
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.070524740498513e-05,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer14.tower.A_L",
+      "shape": [
+        1024,
+        15360
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.237727701663971e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer14.tower.M",
+      "shape": [
+        1024,
+        14336
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.1580996215343475e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer14.tower.w2b",
+      "shape": [
+        15360
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 4.172325134277344e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer14.c4",
+      "shape": [],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 1.076841726899147e-09,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer15.mu",
+      "shape": [
+        1024
+      ],
+      "dtype_ref": "float32",
+      "dtype_new": "float32",
+      "max_normalized_entry_error": 2.5033950805664062e-06,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer15.cov",
+      "shape": null,
+      "dtype_ref": null,
+      "dtype_new": null,
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "layer15.tower",
+      "pass": true,
+      "both_none": true
+    },
+    {
+      "field": "layer15.c4",
+      "shape": [],
+      "dtype_ref": "float64",
+      "dtype_new": "float64",
+      "max_normalized_entry_error": 0.0,
+      "finite": true,
+      "pass": true
+    },
+    {
+      "field": "predict.output",
+      "shape": [
+        16,
+        1024
+      ],
+      "dtype_ref": "float64",
+      "dtype_new": "float64",
+      "max_normalized_entry_error": 2.9206275939941406e-06,
+      "finite": true,
+      "pass": true
+    }
+  ],
+  "pass": true
+}
