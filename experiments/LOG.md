@@ -47843,3 +47843,27 @@ The JSON embeds and rechecks the probe, frozen L2, B1, B3 and compact
 reference hashes. The root owner will arrange affected-tree default
 preflight and a fresh Skeptic after the in-flight F21 scorer; neither is
 claimed complete here.
+
+**B4 independent pre-preflight verdict.** Fresh-context
+`experiments/2026-09-12_b4_skeptic.md` SHA256
+`8356AC01145B4970B24B85250AC0D3A2EB6156926916011CB80E9BEE20CDDCB5`
+is PROVISIONAL solely pending the affected default preflight. It
+independently confirms the 85/841 fixed-gate failure, structural activity,
+source/result chronology and no compression/score claim. The mixed f32/f64
+cause remains unresolved, so B4 is a tiny failed parity fixture, not a
+general compact-method kill.
+
+**Pre-submission optimization review — affected B4 default preflight.**
+B4 changes a standalone IMPORTANT probe's math, so one 12-step default
+preflight on current committed bytes is required before closing its scoped
+instrument verdict. Reuse Full 1092's unchanged Full-only steps and the
+already-valid F21 candidate resource evidence; do not rerun them or add
+loaders, workers, caches, prefetch, batch changes or GPU placement.
+Default 1097 ran in 325 s at 3,093 MiB; request **6 GiB RAM, 0 VRAM,
+2 CPUs** on workerq, CPU only, with a new complete transcript. There is no
+protected label read. The run is restartable to another path if interrupted.
+Workerq currently reports 30.7 GiB free RAM and 14 usable CPUs, while the
+F21 scorer holds 8 GiB/2 CPUs; admitting another 6 GiB/2 CPU job is within
+the declared headroom and should not require reducing the F21 scorer's
+resources or changing its priority. If workerq delays this optional B4
+gate, leave it queued rather than bypassing the scheduler.
