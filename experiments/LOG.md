@@ -47201,3 +47201,14 @@ new transcript. Comparable workerq 1085 measured **3,079.10 MiB** RAM in
 405.94 s. Request **6 GiB RAM, 0 VRAM, 2 CPUs**, nearly twice that measured
 peak. Current workerq reports 16.2 GiB free after its reserve; the queue
 controls admission while DESIGN and candidate Linux cap run.
+
+**B3 independent Skeptic review.** Fresh-context review in
+`experiments/2026-09-13_b3_skeptic.md` returned **PROVISIONAL only for the
+pending affected-tree preflight**. It rehashed all source/raw artifacts,
+checked chronology and the preserved final-pK inventory failure/repair,
+independently parsed 421 finite passing rows, and verified active D21,
+c4, p111, multiple ages and source fields. It accepts the narrow
+one-fixture full-rank interpreter-parity evidence, while noting that the
+returned 4x4 QR basis rank does not independently certify pre-QR sketch
+rank. Shared immutable L2 coefficient data and the tiny fixture cannot
+support width-1024 stability, compression, score, cost or deployment claims.
