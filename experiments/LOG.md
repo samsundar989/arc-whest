@@ -47969,3 +47969,9 @@ placement or checkpoint change. The prior comparable default 1100 took
 workerq, CPU-only. Preserve a complete transcript; if interrupted, restart
 to a new transcript path. No protected labels, public split or vault are read
 by this preflight. Do not bypass the queue.
+
+The first submission, workerq 1139, accidentally used workerq's default one
+GPU and git snapshot rather than explicit CPU-only live-worktree options. It
+was terminated after roughly 11 seconds, before a result, with no protected
+read. Resubmit with `--gpus 0 --live-worktree` so the resource declaration
+matches this review and the transcript lands in the live experiments tree.
