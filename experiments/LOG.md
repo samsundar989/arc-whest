@@ -47342,6 +47342,17 @@ transcript path. Comparable 1094 peaked 2,987.07 MiB over 413.49 s (and
 1085 3,079.10 MiB); declare **6 GiB RAM, 0 VRAM, 2 CPUs** on workerq,
 about twice the measured peak. Do not reduce this request for admission.
 
+**LMG6 independent pre-rerun Skeptic.** Fresh-context review
+`experiments/2026-09-12_f21/lmg6_filter_skeptic.md` **ACCEPTED only the
+narrow warning-filter/unit claim**. It independently matched the actual
+v5 cdf/pdf warning messages to the test fixtures, executed the extracted
+committed filter against positive/negative variants, verified chronology,
+hashes and that cap/controls/stderr refusal/consumer remain unchanged.
+Its limit is explicit: the tiny Windows test used stand-in typed classes;
+only a fresh actual Linux child can demonstrate 23/23 and candidate memory
+certification. V5 1093 stays FAIL. Affected-tree default preflight 1095
+is running on the corrected tree.
+
 **LMG6 tiny mutation result, before fresh cap rerun.** The only production
 diff adds one `warnings.filterwarnings` rule inside `CHILD_PREDICT`, typed
 `flops.FlopscopeWarning` and full-message anchored/case-sensitive for the
