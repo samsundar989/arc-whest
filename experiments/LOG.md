@@ -47590,3 +47590,34 @@ date 2026-09-12. The live ledger records antecedent commit `f639c05`.
 Immediate host verification found one claim, 128 covered seeds, no P09
 truth-read reservation, and no output artifact yet. This claim is committed
 before the producer is submitted; it cannot be silently released or reused.
+
+**P09 truth producer submitted.** On committed claim `0ee34db`, workerq
+**1098** started the canonical `p2_truth.py` two-`2**24`-replica 128-network
+mint with `--already-claimed --seed-start 40912009000`, exact absolute
+`truth_P09.npz` output and local live-worktree. It requests **8 GiB RAM,
+6 GiB VRAM, 4 CPUs and one RTX 5090**, nonpreemptible; workerq initially
+warned prior same-command VRAM increments were only about 2.5 GiB, but the
+6 GiB declaration is intentionally conservative against peak contention.
+The job had no result or artifact at submission. No P09 score/truth-read
+receipt exists. Claim/finalization remain host-side, outside the worker.
+
+**Pre-submission optimization review — eventual single-use P09 scorer.**
+After producer success, inspect its printed replica-disagreement/noise
+quality and SHA, finalize the NPZ in the live ledger, verify its digest,
+and then run `f21_score.py --tier decide` exactly once. Reuse the existing
+installed official-stack scorer, one canonical truth load through
+`truth_reads.load_truth`, one in-process common-random mint per arm, frozen
+F21/L4/L2 sources and existing score vectors; no duplicate dataset loader,
+extra workers, cache, prefetch, batch change, GPU device placement or
+unnecessary label pass. All 128 paired networks and three fixed arms are
+required by the preregistration; dropping rows or L2 context would weaken
+it. The scorer has no checkpoint because its one protected truth read is
+reserved before evaluation; an interruption cannot safely reuse P09, so
+use a nonpreemptible workerq job, pinned source hashes and an immutable
+output path. Comparable P01 scorer 1091 peaked 4,018.92 MiB for 24
+networks over 3,722 s; 128 networks should not multiply live state because
+arms/rows are sequential, but takes roughly fivefold longer. Declare
+**8 GiB RAM, 0 VRAM, 2 CPUs** conservatively, versus the measured 4 GiB
+peak, on local live-worktree with absolute live register/output paths.
+Observe all score rows and the binding `gate=1.05`, t interval; no
+coefficient fitting, score-model change or variant selection is allowed.

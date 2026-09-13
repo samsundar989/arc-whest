@@ -28,9 +28,10 @@ passed 23/23 at 8,192 MiB, and its [independent review](../experiments/2026-09-1
 accepted the three-repeat local memory gate. Candidate release checks,
 fresh DECIDE and submission approval remain open.
 
-**Current gate:** Full preflight 1092 passed 16/16 and repaired default 1095
-passed 12/12. P09 is registered, not claimed; its affected registry change
-requires a new default preflight before the first mint. The frozen selection
+**Current gate:** Full preflight 1092 passed 16/16, repaired default 1095
+passed 12/12, and P09-registry default preflight 1097 passed 12/12. P09 is
+registered and claimed exactly once (128 seeds); workerq **1098** is running
+the two-`2**24`-replica truth mint. No P09 score read exists. The frozen selection
 is solely F21 SHA `d77dab0e...` against original L4. The separate compact
 B0/B1/B2/B3 probes establish tiny full-rank recurrence parity only, not
 compression or score. P08 remains exhausted. No vault/public F21 labels,
@@ -40,9 +41,9 @@ fresh DECIDE result or submission approval exists.
 
 ## Next measured action: fresh P09 DECIDE
 
-Run affected registry preflight, then claim and mint the 128-network P09
-fresh DECIDE block with two `2**24` truth replicas. Finalize its ledger
-digest before the single score read. `competition_score.decide(gate=1.05,
+When workerq 1098 finishes, verify producer quality from its log, finalize
+the P09 artifact digest on the host, then make the single protected score
+read. `competition_score.decide(gate=1.05,
 interval="t")` on paired arithmetic F21-versus-original-L4 scores is the
 promotion gate. L2 is robustness context, not the primary comparator. Do
 not use exposed P01 as promotion evidence.
