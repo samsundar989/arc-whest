@@ -47292,3 +47292,24 @@ the repair. Preserve v5 raw FAIL and run the revised full Linux gate to a
 No label, seed, public/vault read, score or threshold choice is involved.
 Fresh independent Skeptic must review the diff, tiny mutation raw, and new
 Linux artifact before the candidate's resource evidence is accepted.
+
+**Affected-tree default preflight 1094 RED and artifact-name correction.**
+After B3 commit, job 1094 ran all 12 default steps under 6 GiB RAM/0 VRAM/
+2 CPUs; workerq peak was 2,987.07 MiB, runtime 413.49 s. Steps 1–10 and
+12 passed; step 11's stored Linux-report replay raised
+`JSONDecodeError: Unexpected UTF-8 BOM` on our newly stored workerq receipt
+`linux_memory_gate_1093_workerq.json`. That receipt was written by
+PowerShell `Out-File -Encoding utf8` (BOM) and its **name**, not its content,
+matched `linux_memory_gate_*.json`, a glob reserved for actual reports.
+This is an artifact-naming error introduced in this session, not a B3
+recurrence failure. Preserve the RED verdict
+`experiments/2026-09-13_b3_preflight_default_verdicts.txt` SHA256
+`2d7dc293d5ce559b9684c34305099baec6201508c650ffd8fff6849e2e29ff4b`,
+workerq log SHA256
+`7d405610d4db3255efa62b3c81e1a2d15991f888e82eeab3580418efacbab888`,
+receipt SHA256
+`ee5f170536de08e64489ca897006b425680f4132f173fd670deab4c835d1a5d8`.
+Move only that receipt to `workerq_1093_linux_cap.json`, outside the replay
+glob; its content and hash remain unchanged. Do not call 1094 green.
+Rerun default preflight after the LMG6 source fix so B3 and the repaired
+instrument both receive one coherent affected-tree verdict.
