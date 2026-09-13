@@ -46795,3 +46795,33 @@ misleading parent figure. This gate may queue behind P01 DESIGN; it does not
 read labels or select the candidate. Preserve the raw WSL child RSS/VmPeak,
 applied cap and both controls. The exact source hash must be checked against
 the frozen F21 SHA before accepting its result.
+
+## 2026-09-12 — B0 full-rank compact bridge: isolate the K3 covariance coefficient
+
+**Class:** IMPORTANT new math probe; no estimator candidate, seed block, truth,
+gate change, or compression trial. This is separate from F21 and cannot alter
+its frozen files, scorer or decision. The revised GAME_PLAN B requires the
+compact representation to reproduce the full working recurrence at full rank
+before any compression claim.
+
+**Question/prediction before measurement.** Source-level inspection suggests
+that the existing compact `K11` path uses `0.25` on the oriented D21 pair,
+whereas the frozen L2 Wick table yields `0.5` after its symmetrization. Predict
+that an independent tiny polynomial moment oracle with only off-diagonal D21
+active gives exactly one-half of each oriented third-cumulant/derivative
+product in the covariance. The frozen L2 table should agree with the oracle;
+the compact current formula should produce half that contribution. If either
+orientation, off-diagonal mask, or coefficient differs, reject this specific
+source diagnosis. This is an algebraic one-step discriminator, not evidence of
+full recurrence parity or a score improvement.
+
+**Intervention/scope.** Add one standalone no-label/no-flopscope tiny oracle
+under `local_sim/` using exact rational arithmetic and independently
+enumerated polynomial cross moments. Keep `p2_compact_reference.py`, frozen
+L2/L4, shipped estimator, F21, all seed/truth registries and existing data
+untouched. Test signed and zero D21, both matrix orientations, nontrivial
+derivative vectors, and diagonal masking. Do not fix the compact coefficient
+or compress yet. A later full-rank bridge must separately reproduce parent
+Wick tables, scalar K4, centering, birth subtraction and all ages. Require
+default preflight and independent Skeptic before treating this probe as an
+accepted instrument; it does not gate F21 DESIGN or DECIDE.
