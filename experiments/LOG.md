@@ -47651,3 +47651,28 @@ score or official mini. No P09 read occurred.
 **Portability after P09 registry edit.** `python scripts/verify_portability.py`
 passed **103/103, 0 failed** on the committed registry tree. This checks
 the cross-agent harness contract; it does not consume P09 or certify score.
+
+**P09 two-replica truth producer completed and finalized, before score read.**
+Workerq 1098 **SUCCEEDED, exit 0** after 5,084.84 s, measured peak
+4,557.46 MiB host RAM and 2,528 MiB VRAM under the declared 8/6 GiB and
+4 CPUs/one GPU. Its canonical `p2_truth.py` log verifies the exact claimed
+128-seed span and two `2**24` replicas. Replica disagreement observed
+`9.0680e-9` versus variance-predicted `8.9767e-9`, ratio **1.0102**;
+mean per-replica truth noise `4.4884e-9`, so predicted midpoint floor
+`2.2442e-9` is about 5.5% of exposed L4 raw MSE `4.0655e-8`, under
+VALIDATION's 10% noise bar. This is a producer-level quality diagnostic,
+not a peek at fresh score or a replacement for scorer's per-row floors.
+The producer wrote ignored immutable
+`experiments/2026-09-12_f21/truth_P09.npz` (48,737,362 bytes) and printed
+SHA256 `82229948c1b2ca4373901f63664dd6c98f112ec45130b7642bfb652dd4d4825c`.
+Its raw workerq log SHA256
+`1c2545fa8e30845a2c283ccf8c5ef8fa096354e5625a84d7135bcc2753567769`
+and receipt SHA256
+`02afd540ad07c5b7fd2217d64a901bf4a295a4934ba21f0518d97c8b89de656a`
+are saved. The host invoked `seed_ledger.finalize` for the original
+`local_sim/p2_truth.py` claim and exact artifact path; returned SHA equals
+the producer's print. `seed_ledger.py --check --scan` is consistent with
+no unrecorded seed literals. P09 has one claim and still **zero truth-read
+reservations**. No NPZ label arrays were opened for this quality check;
+the single protected scorer read remains pending. Commit this finalization
+before submitting the score job.

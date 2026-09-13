@@ -1,0 +1,66 @@
+﻿worker-q: job #1098 starting at 2026-09-13T02:04:16.612116+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=0
+worker-q: command=['C:/Users/samsu/Documents/arc-whest/.venv-gpu/Scripts/python.exe', '-u', 'local_sim/p2_truth.py', '--block', 'P09', '--n-mlps', '128', '--log2-samples', '24', '--already-claimed', '--seed-start', '40912009000', '--ts', '2026-09-12', '--out', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-12_f21/truth_P09.npz']
+worker-q: ------------------------------------------------------------
+==============================================================================
+PHASE-2 TRUTH  --  1024 x 16, two independent replicas
+==============================================================================
+  block           P09
+  networks        128
+  samples/replica 2^24 = 16,777,216   (2 replicas each)
+  expected truth noise per replica  ~ avg_variance / N
+                  ~ 0.087 / 16,777,216 = 5.186e-09
+  total work      1.441e+17 FLOPs
+  out             C:/Users/samsu/Documents/arc-whest/experiments/2026-09-12_f21/truth_P09.npz
+  device          cuda  NVIDIA GeForce RTX 5090
+
+  verified        P09[40,912,009,000 .. 40,912,009,127] already claimed by local_sim/p2_truth.py
+  ledger          NOT written (--already-claimed); finalize on the host
+       4/128     158.5s   eta  4913.2s
+       8/128     317.4s   eta  4761.7s
+      12/128     476.2s   eta  4603.4s
+      16/128     634.9s   eta  4444.0s
+      20/128     793.6s   eta  4285.3s
+      24/128     952.3s   eta  4126.6s
+      28/128    1111.0s   eta  3968.0s
+      32/128    1269.7s   eta  3809.1s
+      36/128    1428.5s   eta  3650.5s
+      40/128    1587.1s   eta  3491.7s
+      44/128    1745.7s   eta  3332.8s
+      48/128    1904.5s   eta  3174.1s
+      52/128    2063.3s   eta  3015.6s
+      56/128    2222.1s   eta  2857.0s
+      60/128    2380.9s   eta  2698.3s
+      64/128    2539.6s   eta  2539.6s
+      68/128    2698.3s   eta  2380.9s
+      72/128    2857.1s   eta  2222.2s
+      76/128    3015.8s   eta  2063.4s
+      80/128    3174.5s   eta  1904.7s
+      84/128    3333.2s   eta  1746.0s
+      88/128    3492.0s   eta  1587.3s
+      92/128    3650.8s   eta  1428.6s
+      96/128    3809.6s   eta  1269.9s
+     100/128    3968.4s   eta  1111.1s
+     104/128    4127.1s   eta   952.4s
+     108/128    4285.9s   eta   793.7s
+     112/128    4444.6s   eta   634.9s
+     116/128    4603.4s   eta   476.2s
+     120/128    4762.1s   eta   317.5s
+     124/128    4920.9s   eta   158.7s
+     128/128    5079.7s   eta     0.0s
+  ledger finalize SKIPPED (--already-claimed); bind on the host with
+    seed_ledger.finalize(<the claiming consumer>, 'experiments/2026-09-12_f21/truth_P09.npz', ts=...)
+
+  replica disagreement  observed 9.0680e-09   predicted 2*V/N 8.9767e-09   ratio 1.0102
+     (a ratio far from 1.0 means the replicas are NOT independent, or
+      the variance model is wrong. It is a check, not a formality.)
+  mean truth noise      4.4884e-09
+  wrote                 experiments/2026-09-12_f21/truth_P09.npz
+  sha256                82229948c1b2ca4373901f63664dd6c98f112ec45130b7642bfb652dd4d4825c
+  ledger finalized      no (--already-claimed)
+  elapsed               5081.4s
+==============================================================================
+worker-q: ------------------------------------------------------------
+worker-q: job #1098 SUCCEEDED (exit code 0) at 2026-09-13T03:29:01.456745+00:00
