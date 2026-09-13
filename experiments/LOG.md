@@ -47733,3 +47733,39 @@ completed P09 receipt. No second reservation or snapshot-local register
 appeared. It did not inspect partial scores or NPZ arrays. The job is
 running; promotion and deployment still require terminal raw evidence and
 a separate independent result Skeptic.
+
+**Pre-submission optimization review — conditional full F21 candidate
+certificate.** Only if the fresh DECIDE gate and independent Skeptic pass,
+run one complete `certify_candidate.py` on the frozen F21 SHA with the explicit
+accepted v6 Linux memory report, without `--quick` or `--skip-smoke`.
+Its fixed sections, repeated lifecycle cases, package/shape checks and
+two-row official subprocess smoke are required candidate-specific evidence;
+the smoke is public CONFIRM and must wait until the decision freezes.
+Reuse the installed stack, accepted full preflight/invariants, the same
+source bytes and existing memory artifact. Do not duplicate dataset
+downloads/loaders, add workers, prefetch/cache, change batching or device
+placement, or add a residual soak. The certificate is CPU-only and writes
+one immutable report; if interrupted it can restart to a new path without
+spending DECIDE truth, but no section is silently dropped. Prior quick
+remote certificate measured 4.5 GiB, and an official 100-MLP mini measured
+14.32 GiB harness plus roughly 1.67 GiB estimator worker; request
+**20 GiB RAM, 0 VRAM, 6 CPUs** conservatively on local workerq. The local
+120-second and 0.4-second walls are observation-domain gates, not
+grading-server timing forecasts; preserve any refusal exactly.
+
+**Pre-submission optimization review — conditional capped official F21 mini.**
+After fresh DECIDE/independent acceptance, run the installed WhestBench
+Phase-2 public `mini` split with `--runner subprocess --detail full --json`
+and the **default** 0.4-second residual cap, 120-second wall, lambda zero
+and official FLOP budget. This is read-only CONFIRM, not coefficient fitting
+or candidate selection. Reuse the existing pinned HF dataset cache and
+installed runner; no duplicate loaders/downloads, worker expansion,
+prefetch, cache alteration, batch change, device shift or extra passes.
+All 100 rows are required for `n_failed_mlps: 0`; a no-cap run, if ever used,
+is a separate diagnostic and cannot substitute. The run has no label/
+checkpoint side effect beyond a report, so an interrupted execution can
+restart with a new immutable log, but only one clean capped run can satisfy
+the hard-rule mini precondition. Comparable measured host peak was
+14.32 GiB harness plus about 1.67 GiB estimator, so request **20 GiB
+RAM, 0 VRAM, 6 CPUs** on local workerq. Preserve the exact failure counts
+and residual domain if the local cap rejects a graded-plausible file.
