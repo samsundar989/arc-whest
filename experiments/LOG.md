@@ -47769,3 +47769,47 @@ the hard-rule mini precondition. Comparable measured host peak was
 14.32 GiB harness plus about 1.67 GiB estimator, so request **20 GiB
 RAM, 0 VRAM, 6 CPUs** on local workerq. Preserve the exact failure counts
 and residual domain if the local cap rejects a graded-plausible file.
+
+## 2026-09-12 — B4 deeper full-rank compact recurrence bridge (contract before result)
+
+**Class/question.** IMPORTANT, separate from F21 and from any decision block.
+Does B3's independent coefficient-table interpreter still track frozen L2 when
+the same exact full-rank Source/weighted-Gram QR representation carries more
+ages on one wider, deeper tiny network? B3 passed 421/421 checks only at
+n4/depth4, with at most two incoming ages on a nonfinal layer. This is a
+second fixture, not evidence for compression or score.
+
+**Evidence and hypothesis.** CONFIRMED: B3's immutable-table Wick, raw pK,
+centering, scalar K4 and birth interpreter agreed with frozen L2 at n4/depth4
+within normalized `1e-5`; its independent Skeptic limited the claim to that
+fixture. INFERRED: full-rank QR should preserve every older Source and its
+contribution because the shared basis spans all eight coordinates and the
+residual remains rank eight. SPECULATIVE: deeper f32/f64 drift will remain
+within the same `1e-5` elementwise normalized bound. No coefficient is fit.
+
+**Intervention and frozen prediction.** Copy the B3 standalone probe into a
+new B4 file without changing its nonlinear arithmetic or coefficient tables.
+Replace only the explicit fixture with six deterministic asymmetric 8x8
+matrices: diagonal `0.78+0.05*((i+2*l)%4)`, off-diagonal
+`0.18*(((3*i+5*j+7*l)%13)-6)/6 + 0.03*(((i-j+2*l)%5)-2)/2`, for zero-based
+layer `l`, row `i`, column `j`. Keep shared rank, residual rank and identity
+sketch at eight; retain all source ages and scalar K4. Predict exact
+key/term/age inventories and finite normalized numeric error at most `1e-5`
+for D3, masked/oriented D21, each consumed S/Wick/pK/centered K field,
+birth subtraction, each reconstructed source, next mean/covariance/c4 and
+final output. Predict at least four incoming ages on nonfinal layer 4,
+nonzero D21/c4/p111 terms there, and rank eight in the pre-QR full sketch
+and returned basis on every nonfinal join. Any failed field, inactive
+required path or age/rank loss falsifies this scoped prediction. Do not
+relax tolerance or change the fixture after seeing the result.
+
+**Reference, method and boundaries.** Frozen `estimator_k3_strassen_L2.py`
+`_layer` is reference-only, observed at unchanged line checkpoints; its
+coefficient tables are read as data. The compact arm may not call any frozen
+nonlinear helper. Run one direct CPU-only tiny probe, record all checks and
+source hashes in immutable JSON, then run the affected-tree default preflight
+and request an independent Skeptic. This uses no seed, truth, public split,
+vault, score gate, FLOP claim, compression or F21/shipped/frozen edit. Even a
+pass proves only parity on this additional tiny full-rank trajectory. The
+tiny run is well under 4 GiB/30 minutes and needs no workerq; assess the
+default preflight separately before submitting it.
