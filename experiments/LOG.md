@@ -48418,3 +48418,16 @@ The host file SHA256 exactly matched the producer print:
 live truth-read register still reports cap 1, spent 0, reads `[]`. Do not
 open labels before the one pinned scorer; obtain fresh pre-score Skeptic
 review of the binding and command first.
+
+**P10 pre-score independent Skeptic.** The fresh-context verdict
+`experiments/2026-09-13_p10/p10_truth_skeptic.md`, committed at `dfba967`,
+ACCEPTED only the one protected score attempt on the exact finalized P10
+truth and pinned F21/L4/L2 sources. It reconciled the claim, producer and
+host SHA, replica diagnostics, registered floor, zero read count and the
+live-root workerq argv without loading labels. Its strongest challenge is
+that a wrong snapshot/live root or any post-reservation abort spends the
+single-use read. The exact command in that verdict is the only next P10
+score invocation; no public or vault data are involved. The host
+`seed_ledger.py --check` returned CONSISTENT after finalization; that check
+hashed the artifact for integrity only, without decoding labels or
+reserving a protected score read.
