@@ -47560,3 +47560,21 @@ RAM, 6 GiB VRAM, 4 CPUs** on workerq, nonpreemptible, with the exact committed
 source and live output path. Finalize and verify the artifact in the host
 ledger before the only score read; inspect producer quality from its log,
 not by opening P09 NPZ outside `truth_reads.load_truth`.
+
+**P09 affected registry gate, before claim.** Workerq 1097 SUCCEEDED,
+exit 0; complete `-Log` transcript
+`experiments/2026-09-13_p09_registration_preflight_verdicts.txt` SHA256
+`3caa8a7e11db041b440bf68aeb254f0ef85a7cb5b6d2f51ceb94b5ee4393c04c`
+ends **PREFLIGHT GREEN — 12/16, 4 Full-only steps skipped**. The unchanged
+Full 1092 previously passed all 16 steps; 1097 newly exercises the P09
+registry/ledger path. Runtime was 325.00 s and measured host peak
+3,093.35 MiB under the declared 6 GiB/0 VRAM/2 CPUs. Workerq log and
+receipt SHA256 are
+`7336750c014471a976b82bbcb4900e538b16bcdfc19f749267e81531b154a4f4`
+and `5a0546c699e517e475b3b1c86819aa6a587ecf6600f1e7d3ccdbd28cfada8e44`.
+The independent P09 registry Skeptic found the exact 128-span disjoint,
+SINGLE_USE tier and one-read cap; its initial verdict was provisional only
+until this gate and a fresh zero-claim/read check. No P09 claim or read was
+made during preflight. The `p2_truth.py --plan` no-draw output confirms
+the registered entire span free and expected two `2**24` replicas, without
+loading truth or GPU work.
