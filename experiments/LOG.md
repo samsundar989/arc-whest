@@ -46684,3 +46684,21 @@ workerq; it does not alter repository or machine policy. The gate itself is
 unmodified. Request **5 GiB RAM, 0 VRAM, 2 CPUs** based on the same comparable
 local preflight peaks. Run after committing the instrument repair and before
 any DESIGN access.
+
+**F21 A1 corrected grader-twin cost result.** Local workerq 1083/1084
+SUCCEEDED with float64 read-only loader weights; raw file SHA256s are
+`a07d161e570fe37fe03348373f6892d5c695eb8c50b9fe2a5639b6f0c8b496f8`
+and `68c4d2440b9c68223bb02a91e715982cdd47f694dc01c52df11adcf05a74bfcb`.
+The preregistered cast prediction was exact on **both** arms: +33,554,432
+FLOPs, +16 `astype` calls, and no other family changed from the f32 diagnostic.
+The parent is **1,068,245,507,686 FLOPs / 15,393 operations**, exactly the
+stored graded #330290 per-row total/op count. The fused candidate is
+**928,457,637,478 FLOPs / 14,091 operations**. Isolated saving is
+**139,787,870,208 FLOPs = 13.08574%** of parent, above the preregistered 8%
+engineering cost screen. At equal MSE this would imply a 1.15056x cost-only
+score gain; it is not an observed score result. Both retain the same
+source SHA256s as before. Peak workerq RAM was 2,323/2,954 MiB within 6 GiB
+declarations. The 23 op families reconcile to each total. The original L4
+graded agreement supplies an external anchor for the local meter, but an
+official **candidate-specific** subprocess profile and cap/mini checks remain
+owed. The f32 files stay as transparent diagnostics of the detected defect.

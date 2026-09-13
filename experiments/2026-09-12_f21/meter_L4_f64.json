@@ -1,0 +1,112 @@
+{
+  "instrument": "local_sim/p2_flop_anchor.py::_run_arm",
+  "instrument_sha256": "2b6dd48789ff85efd68b7c6d5a1d885f0c17f18da02defd48eacce56aa48cd10",
+  "candidate": "experiments/2026-09-12_f21/estimator_L4_parent.py",
+  "candidate_sha256": "052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58",
+  "arm": "grader",
+  "weights_mode": "f64_readonly",
+  "shape": {
+    "width": 1024,
+    "depth": 16
+  },
+  "truth_or_seed_block_read": false,
+  "result": {
+    "total": 1068245507686.0,
+    "budget": 2199023255552,
+    "cb": 0.48578181471657444,
+    "ops": {
+      "astype": {
+        "flops": 35747840.0,
+        "calls": 50.0
+      },
+      "ones": {
+        "flops": 1049600.0,
+        "calls": 2.0
+      },
+      "eye": {
+        "flops": 2048.0,
+        "calls": 2.0
+      },
+      "subtract": {
+        "flops": 10125950464.0,
+        "calls": 3215.0
+      },
+      "zeros": {
+        "flops": 0.0,
+        "calls": 3.0
+      },
+      "matmul": {
+        "flops": 999051145216.0,
+        "calls": 148.0
+      },
+      "add": {
+        "flops": 19328454671.0,
+        "calls": 6973.0
+      },
+      "concatenate": {
+        "flops": 37026425856.0,
+        "calls": 2697.0
+      },
+      "diagonal": {
+        "flops": 0.0,
+        "calls": 16.0
+      },
+      "maximum": {
+        "flops": 49152.0,
+        "calls": 17.0
+      },
+      "sqrt": {
+        "flops": 18432.0,
+        "calls": 17.0
+      },
+      "true_divide": {
+        "flops": 14745614.0,
+        "calls": 92.0
+      },
+      "clip": {
+        "flops": 32768.0,
+        "calls": 16.0
+      },
+      "stats.norm.cdf": {
+        "flops": 1572864.0,
+        "calls": 16.0
+      },
+      "stats.norm.pdf": {
+        "flops": 884736.0,
+        "calls": 16.0
+      },
+      "multiply": {
+        "flops": 2389340263.0,
+        "calls": 1921.0
+      },
+      "stack": {
+        "flops": 310272.0,
+        "calls": 65.0
+      },
+      "diag": {
+        "flops": 30720.0,
+        "calls": 30.0
+      },
+      "sum": {
+        "flops": 269466594.0,
+        "calls": 61.0
+      },
+      "isfinite": {
+        "flops": 49152.0,
+        "calls": 17.0
+      },
+      "where": {
+        "flops": 196608.0,
+        "calls": 17.0
+      },
+      "reshape": {
+        "flops": 2048.0,
+        "calls": 1.0
+      },
+      "asarray": {
+        "flops": 32768.0,
+        "calls": 1.0
+      }
+    }
+  }
+}
