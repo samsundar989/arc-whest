@@ -46755,7 +46755,11 @@ RMS is **7.30922e-7** against `1e-2`. Config, table, chooser, backend, setup
 and `last_run` checks pass. No labels/decision block were read. The job ran
 287.98 s and measured 3,660 MiB peak under 7.5 GiB declared. This is one
 deterministic full-depth trajectory, not a distributional score or deployment
-certificate. Independent Skeptic review is pending before DESIGN.
+certificate. Independent Skeptic review was required before DESIGN.
+Fresh-context Skeptic `experiments/2026-09-12_f21/full16_skeptic.md`
+subsequently **ACCEPTED** that scoped one-network claim after independently
+checking all 14 live D21 reads, hashes, backend and queue receipt. Population
+accuracy, score and deployment remain open for the registered later gates.
 
 **F21 pre-submission optimization review — exposed P01 DESIGN score.** The
 registered scorer reads the two existing immutable 24-network `2**26` halves
