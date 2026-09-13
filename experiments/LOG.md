@@ -47676,3 +47676,25 @@ no unrecorded seed literals. P09 has one claim and still **zero truth-read
 reservations**. No NPZ label arrays were opened for this quality check;
 the single protected scorer read remains pending. Commit this finalization
 before submitting the score job.
+
+**P09 integrity-read clarification, before scorer.** The host finalization
+necessarily hashes the compressed NPZ. `seed_ledger.py --check --scan`,
+run by the Builder and independently by the pre-score Skeptic, also
+re-hashes finalized artifact bytes as an integrity check. These are
+archive-byte reads, so the earlier phrase "No NPZ label arrays were opened"
+is deliberately narrower than "no file read." Neither operation decompresses
+or exposes a label array, computes a score, or reserves a P09 truth read;
+`truth_reads` still has zero P09 reservations. The only planned label-array
+read remains `truth_reads.load_truth` inside the single registered scorer.
+
+**Independent P09 producer pre-score review.** Fresh-context
+`experiments/2026-09-12_f21/p09_truth_skeptic.md` SHA256
+`fc14b7fd0081a208de87fcadaf77188d3c6397aaa0fdc7ca43ef593289292cfc`
+ACCEPTED one protected DECIDE score read, conditional on the exact live
+root, truth path, new output, source hashes, workerq local placement and
+post-run live receipt. It independently reconciled the producer log,
+claim/finalization, resource use and 1.0102 replica ratio while leaving
+the NPZ arrays unopened. It disclosed its extra ledger-integrity archive
+hash, which did not expose labels or reserve a scored read. The exact
+allowed scorer argv is copied into the Skeptic verdict. Any abort after
+reservation spends P09; no second attempt on those networks is authorized.
