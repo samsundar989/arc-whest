@@ -47087,3 +47087,13 @@ can use much more RAM than workerq observes in the Windows parent, and a
 positive control allocates 9 GiB. Retain **16 GiB RAM, 0 VRAM, 2 CPUs**;
 workerq may serialize it behind Full preflight. This is resource evidence,
 not a score or submission check.
+
+**B2 independent Skeptic review.** Fresh-context review in
+`experiments/2026-09-12_b2_skeptic.md` returned **PROVISIONAL pending Full
+preflight**. It independently parsed all 477 finite raw rows, chronology and
+source/artifact hashes, and checked nonzero QR-side D3/D21, source ages and
+residual comparisons. It limited the claim to one n4/depth4 full-rank QR
+storage trajectory: all nonlinear arms still call frozen L2 `_layer`, the
+newborn and Wick scaling are frozen-derived, and the returned full-width Q
+rank is checked without a separately recorded pre-QR sketch rank. Accept no
+compression, compact nonlinear, cost or score conclusion from B2.
