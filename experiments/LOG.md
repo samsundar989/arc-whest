@@ -47894,3 +47894,47 @@ arithmetic or recurrence logic. The full-rank bridge is therefore not
 validated for compression at this deeper fixture; no compression was tested
 and no general scientific kill is claimed. B4 is closed at that scope and
 does not block the F21 first candidate.
+
+### 2026-09-13 — P09 failure-diagnostic instrument repair, preregistered before edit (IMPORTANT)
+
+**Question.** Can the F21 scorer preserve the exact lifecycle-failure category
+on a future fresh run without leaking partial protected scores or changing its
+score decision?
+
+**Existing evidence.** CONFIRMED: workerq 1099 finished original L4 128/128
+and fused L4 128/128, then exited 1 at `f21_score.py:291` because at least
+one fused `EvidenceRow.failed`; L2 did not run and no `decide_P09.json` exists.
+CONFIRMED: the scorer SHA was
+`68b162ef20562cfed423f0105df98ad7a4f45f65058025834ba25bb446d5fedb`;
+the error category, row and seed were not emitted, so they are not recoverable.
+CONFIRMED: the residual cap was relaxed for this local score run, leaving
+budget, absolute wall, combined-budget or exception as possible flags.
+INFERRED: host wall contention may be involved, but the terminal artifact does
+not distinguish it from a candidate exception. SPECULATIVE: a future run may
+encounter the same condition. P09 is exhausted and will not be read again.
+
+**Hypothesis and mechanism.** Printing only each failed row's arm, index,
+input seed, budget/time/combined/error flags, error type and measured wall and
+residual seconds immediately before the unchanged raise will identify the
+failure category if it recurs. It requires no label or score field and does
+not enter estimator evaluation or score arithmetic.
+
+**Intervention and prediction.** Edit only `local_sim/f21_score.py`'s failure
+branch to emit that diagnostic to stderr with flush. A synthetic failed-row
+check should show the flags and no `mse`, `gt_noise`, truth or score value;
+a synthetic all-clear check should emit nothing. The original `ValueError`
+must still fire on a failure. The candidate, protected truth, lifecycle
+evaluator, seed protocol and `competition_score.decide` remain unchanged.
+
+**Gate/falsifier.** Accept this IMPORTANT instrument repair only if those
+synthetic checks pass, source diff is confined to failure reporting, affected
+default preflight passes 12/12 and an independent Skeptic accepts the scope.
+Any partial score disclosure, changed success path, swallowed failure or
+preflight failure rejects the repair. This is not a fresh DECIDE gate.
+
+**Cost/roles.** No estimator FLOPs or score-cost model changes; stderr emission
+occurs only after a failed arm completes. No data block, public split or vault
+read is authorized by this repair. Future heavy checks require the separate
+optimization review and workerq submission. Baseline is the pinned P09 scorer
+SHA above and terminal workerq 1099 log/receipt; the candidate remains SHA
+`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`.
