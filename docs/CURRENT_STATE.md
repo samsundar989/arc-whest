@@ -1,5 +1,25 @@
 # CURRENT_STATE.md — read this first
 
+**September 13 F21 lifecycle diagnostic closed; P09 still has no verdict.**
+The preregistered, label-free stress on the first 128 exposed P07 DESIGN
+identities used frozen F21 SHA `d77dab0e...`, the P09 scorer's Phase-2 spec
+with only the residual cap disabled, canonical mint and `f64_readonly` weights.
+Workerq 1150 completed 128/128. Its sole failure was row 27,
+`time_exhausted=true`, local wall `17,914.856` s; the Windows System log
+records a `17,892.563`-s host sleep during this run, so that row is strongly
+environment-confounded. All other 127 rows succeeded, maximum local wall
+`71.860` s, each with `928,457,637,478` counted FLOPs; no estimator exception
+or budget flag reproduced. This does **not** reveal P09's discarded failure
+category, establish graded-host wall or residual behavior, produce an accuracy
+score, or promote F21. The [raw diagnostic](../experiments/2026-09-13_f21_labelfree_stress.json),
+[host sleep events](../experiments/2026-09-13_f21_labelfree/host_sleep_events.json),
+and [fresh Skeptic verdict](../experiments/2026-09-13_f21_labelfree/skeptic_verdict.md)
+are preserved. The Skeptic ACCEPTED this narrow diagnostic only. The first
+affected preflight was RED on an undeclared deliberate P07 overlap; an
+append-only pairing declaration repaired the ledger refusal, and workerq
+1152 passed the retry 12/12. Both transcripts are retained. F21 remains
+**unpromoted and not submission-ready**.
+
 **F21 engineering and DESIGN passed; P09 DECIDE produced no verdict, September 13.** The separate L4-derived
 candidate [estimator_k3_strassen_L4_f21.py](../estimator_k3_strassen_L4_f21.py)
 is committed at SHA256 `d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`.
@@ -59,17 +79,17 @@ fresh DECIDE result or submission approval exists.
 
 **September 12, 2026: strategist review of worker d124234.** Then read LOG from the bottom. The preceding detailed chronology is [archived verbatim](archive/CURRENT_STATE_before_worker_review_2026-09-12.md); all original contracts and results remain in experiments/LOG.md.
 
-## Next discriminator: identify the lifecycle failure without rereading P09
+## Next discriminator: fresh F21 decision after the scoped diagnostic
 
-Run a bounded label-free lifecycle stress on exposed DESIGN or newly registered
-diagnostic networks, with failure flags preserved and no score claim, to
-separate a local 120-second wall timeout from a budget or estimator exception.
-Do not reopen P09, infer a paired score from 128/128 progress, or use exposed
-P01 as promotion evidence. Any subsequent DECIDE requires a new claimed,
-preregistered single-use block, new Samuel predictions and the unchanged
-primary F21-versus-original-L4 arithmetic gate unless a protocol change is
-separately justified and registered. Only a passed fresh gate can justify
-candidate-specific full certification, official mini and submission review.
+P07's single observed timeout was confounded by host sleep; the other 127
+rows have no local lifecycle failure. Do not rerun P09, infer its category
+from P07, or treat this exposed DESIGN diagnostic as a score. A new F21
+DECIDE requires a newly claimed and preregistered single-use block, new
+Samuel predictions, the binding paired arithmetic gate and an explicit
+local-wall handling plan in its contract. Only a passed fresh gate can
+justify candidate-specific full certification, official mini and submission
+review. The optional one-row no-sleep P07 check suggested by the Skeptic
+would remain diagnostic, never a DECIDE substitute.
 
 Use a new candidate file. The best-public L4 parent is inside `submission-k3strassen-L4.tar.gz`: estimator.py SHA256 `052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58`. Its relevant functions match L2 by independent AST comparison. Preserve the conservative generation/budget chooser, scalar K4, precision, saturation and shape behavior. Do not edit frozen files or shipped estimator.py.
 
@@ -84,7 +104,7 @@ Samuel answered **“Include eligibility and candidate preparation.”** The old
 | Area | Current status |
 |---|---|
 | Stage 0 | Scoped independent ACCEPT; Linux positive plus M1–M12 aggregate 13/13. This is instrument coverage, not a complete future candidate certificate. Reuse it unless an affected path or new failure requires retesting. |
-| Preflight | Workerq 1092 passed Full 16/16; default 1095, P09 registry 1097, B4 1100 and F21 diagnostic 1141 passed 12/12. Candidate-specific full checks remain conditional on a valid fresh DECIDE. |
+| Preflight | Workerq 1092 passed Full 16/16; default 1095, P09 registry 1097, B4 1100, F21 scorer diagnostic 1141 and label-free stress retry 1152 passed 12/12. Initial label-free 1148 was RED on undeclared P07 pairing; raw failure and append-only repair remain in LOG. Candidate-specific full checks remain conditional on a valid fresh DECIDE. |
 | Compact supplied-core implementation | Algebra/cost evidence remains scoped: about 0.372208 B and about 1,014 MiB on its supplied-core program. Not the cost of a complete physical signed-source method. |
 | Existing compact off control | Already evaluated on 96 exposed P01 DESIGN networks: raw mean MSE 2.11130e-5, averaged-truth noise 9.31914e-9, score 7.83730e-6. Saved arithmetic independently checks out. It is not a matched L2 comparison and is not the working L2 recurrence. |
 | New K4 arms | Frozen P01 arms failed their promotion gate. The source and covariance defects explain why scientific causation remains incomplete; do not fit them again unchanged. |

@@ -48090,3 +48090,79 @@ CPU-only job, reusing unchanged Full-only evidence; recent default 1141 peaked
 complete transcript. Check workerq before submission; wait in queue if its
 RAM reservations prevent admission. Do not trade away correctness or source
 binding for a shorter run.
+
+**Terminal diagnostic and synthesis (after contract, one actual pass).**
+Contract/source commit `e966ecc` precedes the P07 claim commit `2a5eb95`;
+the latter explicitly warned of correlated DESIGN reuse. The first stress
+reservation, workerq 1147, failed before Python launched (`WinError 2` for a
+relative interpreter), with no network touched and no output. Its exact
+source and spec were resubmitted with an absolute interpreter as workerq
+1150. The first affected default preflight, workerq 1148, was RED at steps
+7 and 9 because the deliberate P07 overlap had not been entered as a
+machine-readable pairing; its refusal suite was 65/66. Append-only pairing
+commit `949629d` declares the existing P07 truth-producer/diagnostic reuse,
+without changing either claim or any seed/ledger implementation. The
+refusal suite then passed 66/66. Retry workerq 1152 passed the default
+preflight **12/12**, four Full-only steps skipped, before stress 1150 began.
+The initial RED transcript is preserved, not superseded or described as
+green. Raw workerq logs/receipts for 1147, 1148, 1150 and 1152 are in
+`experiments/2026-09-13_f21_labelfree/`; the RED and GREEN transcripts are
+`experiments/2026-09-13_f21_labelfree_preflight_default_verdicts.txt`
+(SHA256 `2f8d95d0425bd74db264fe66ef67901469847f7428d2341370161726565d4eb1`)
+and `experiments/2026-09-13_f21_labelfree_preflight_retry_default_verdicts.txt`
+(SHA256 `11ba05820946e4ca759efb33b42524fbc970567aa8d900b536e467982f0e77d`).
+The GREEN workerq log/receipt SHAs are `2e953e897d00fc91494ca1e8fb194d8b87fcd78135bac5c3b8709c23371fbb8a`
+and `0af06a0ed93d3aa4a64d93d89a2f71ed3a9411e070d8e861004d3aa0b3565937`.
+
+Workerq 1150 completed 128/128, exit 0, measured peak 4,925.41 MiB against
+12 GiB declared. Workerq inherited the project's standing `high` priority;
+no explicit priority override was passed, despite the contract's shorthand
+"normal inherited priority." The exclusive-create raw result
+`experiments/2026-09-13_f21_labelfree_stress.json` SHA256
+`dafe4a65f90fd6a3c38763d15aba0e8d6affaa59a89577698c16ea05750e3b36`
+has exactly **one** failed row: index 27, P07 seed `40910007027`,
+`time_exhausted=true`, `error_code=""`, budget/combined/residual flags false,
+local wall `17,914.856001` s, partial counted FLOPs `566,012,683,855`.
+The other 127 rows all passed; their maximum local wall was `71.8603434` s,
+and every successful row had exactly `928,457,637,478` counted FLOPs below
+`2**41`. No exception or budget failure reproduced. Source hashes, exact
+first-128 P07 order, spec SHA
+`4603d4fd92524bafeddf913a65a7faa0c8c0dfaa5ab27110a1f47dd0f889d418`,
+failure disjunction/category counts and the forbidden-field-free JSON schema
+were independently recomputed. Probe SHA is
+`76e1f97254cc8aaebf0aaf9dda53670bcf08ef9cd4921a6918d1ca056cfa2ea4`;
+F21 remains `d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`.
+The 1150 terminal workerq log/receipt SHAs are
+`d8545b47a77176c6ddaef5e6a2522ab318ed5704220af0683624e62e11cc310e`
+and `8c1b78cf677094985672061ab4c5bbe877699d322d6c09e2db0063ab2cdb8d44`.
+
+The Windows System event log independently records sleep from
+`2026-09-13 09:37:54.3657925 UTC` to `14:36:06.9289700 UTC`, a
+`17,892.563178`-second low-power interval while workerq 1150 was running.
+Raw event IDs, record IDs, messages and XML are preserved in
+`experiments/2026-09-13_f21_labelfree/host_sleep_events.json` SHA256
+`6095c011da8959999ce2fec56cf3ee840461a4c7a66acb2319cc239802b30e3c`.
+The failed row's measured wall exceeds that sleep interval by only
+`22.292823` s, and preceding row wall readings place it near the sleep
+start. This is strong **environmental confounding** of this run's sole
+time failure, not a claim that P09 failed for the same reason. P09's lost
+row/category remains unrecoverable. The local residual maximum was
+`9.858068` s, giving `0.040576 = 0.4 / observed` headroom on this host;
+the residual cap was deliberately disabled, and this does not estimate
+grader residual or pass an installed-cap gate. No label, MSE, ground-truth
+floor, score, prediction, public CONFIRM or vault data were read or emitted.
+There is no F21 promotion decision or submission readiness claim.
+
+**Independent verdict.** The fresh-context Skeptic ACCEPTED the narrow
+diagnostic-reporting gate after checking raw rows, source/spec/seed hashes,
+the initial RED refusal and pairing repair, GREEN preflight and host sleep
+events. It specifically refused to use the sleep-confounded time flag as
+evidence of ordinary F21 fragility or to infer P09's category. Verdict:
+`experiments/2026-09-13_f21_labelfree/skeptic_verdict.md` SHA256
+`b1abecd1221d5c883d485f1f6f880f9286121aa63a25b7642c74949707648f5b`.
+A quiet no-sleep, single-row
+P07 rerun is an optional future **diagnostic**, not a promotion gate. Any
+future F21 DECIDE still needs a newly claimed, preregistered single-use
+block, new Samuel predictions, the binding paired arithmetic decision and
+separate candidate-specific deployment checks. This slice did not change
+that protocol.

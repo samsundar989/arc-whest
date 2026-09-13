@@ -1,0 +1,31 @@
+worker-q: job #1150 starting at 2026-09-13T09:11:51.125281+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['C:/Users/samsu/Documents/arc-whest/.venv/Scripts/python.exe', '-u', 'local_sim/f21_labelfree_stress.py', '--out', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-13_f21_labelfree_stress.json']
+worker-q: ------------------------------------------------------------
+C:\Users\samsu\Documents\arc-whest\local_sim\lifecycle_eval.py:613: ConfigureNoOpWarning: flops.configure() configures the in-process flopscope backend only; it is a no-op on flopscope-client and the evaluation servers, so these settings will not affect a graded submission.
+  flops.configure(symmetry_warnings=False)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_strassen_L4_f21.py:303: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  Phi = flops.stats.norm.cdf(alpha).astype(dtype)
+C:\Users\samsu\Documents\arc-whest\estimator_k3_strassen_L4_f21.py:304: FlopscopeWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.
+  phi = flops.stats.norm.pdf(alpha).astype(dtype)
+  8/128
+  16/128
+  24/128
+  32/128
+  40/128
+  48/128
+  56/128
+  64/128
+  72/128
+  80/128
+  88/128
+  96/128
+  104/128
+  112/128
+  120/128
+  128/128
+published 128 label-free lifecycle rows; failures=1
+worker-q: ------------------------------------------------------------
+worker-q: job #1150 SUCCEEDED (exit code 0) at 2026-09-13T16:13:21.779327+00:00

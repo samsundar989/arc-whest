@@ -1,0 +1,7 @@
+worker-q: job #1147 starting at 2026-09-13T08:54:59.232316+00:00
+worker-q: cwd=C:\Users\samsu\Documents\arc-whest
+worker-q: snapshot=live -
+worker-q: CUDA_VISIBLE_DEVICES=(unset)
+worker-q: command=['.venv/Scripts/python.exe', '-u', 'local_sim/f21_labelfree_stress.py', '--out', 'C:/Users/samsu/Documents/arc-whest/experiments/2026-09-13_f21_labelfree_stress.json']
+worker-q: ------------------------------------------------------------
+worker-q: failed to start command: [WinError 2] The system cannot find the file specified
