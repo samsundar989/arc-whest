@@ -38,8 +38,12 @@ disagreement ratio is 1.0102 and predicted midpoint truth floor about
 read receipt is completed and the block is exhausted, with no score result
 yet. The frozen selection
 is solely F21 SHA `d77dab0e...` against original L4. The separate compact
-B0/B1/B2/B3 probes establish tiny full-rank recurrence parity only, not
-compression or score. P08 remains exhausted. No vault/public F21 labels,
+B0/B1/B2/B3 probes establish n4/depth4 tiny full-rank recurrence parity only,
+not compression or score. A separately preregistered n8/depth6 B4 extension
+failed its fixed `1e-5` parity gate: 85/841 checks failed, worst normalized
+error `4.04473e-4`; all age/activity/rank checks passed. The raw artifact and
+contract are in LOG. B4 affected-tree preflight and independent Skeptic are
+pending; no wider or scientific closure follows. P08 remains exhausted. No vault/public F21 labels,
 fresh DECIDE result or submission approval exists.
 
 **September 12, 2026: strategist review of worker d124234.** Then read LOG from the bottom. The preceding detailed chronology is [archived verbatim](archive/CURRENT_STATE_before_worker_review_2026-09-12.md); all original contracts and results remain in experiments/LOG.md.

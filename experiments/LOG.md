@@ -47813,3 +47813,33 @@ vault, score gate, FLOP claim, compression or F21/shipped/frozen edit. Even a
 pass proves only parity on this additional tiny full-rank trajectory. The
 tiny run is well under 4 GiB/30 minutes and needs no workerq; assess the
 default preflight separately before submitting it.
+
+**B4 result — preregistered tiny gate FAIL, preserved.** The contract-only
+commit `c0f2f019d85c5c1da7f51dae7ce6a493dc727449` was created at
+03:38:06 UTC, before the B4 source was created at 03:38:21 UTC and the
+single result artifact was created at 03:38:52 UTC. The first and only run
+of the fixed n8/depth6 fixture, unchanged `1e-5` tolerance and full-rank
+eight-dimensional path returned **756/841 checks passing, 85 failing**.
+All 61 structural checks passed; 85/780 numeric checks failed. The first
+over-tolerance layer is 3 (first `wick.(4, 1)` at `1.59962e-5`); per-layer
+maximum normalized errors for layers 0–5 are `2.17196e-7`, `2.33857e-7`,
+`8.96992e-7`, `3.73624e-5`, `3.09453e-4`, `4.04473e-4`. The largest
+error is final-layer raw `pK.(2,)`, `4.044729768326572e-4`, and final
+output error is `3.0362822878520217e-4`. These are errors against frozen
+L2 at its actual f32 path, with the compact arm's f64 arithmetic; this run
+does not distinguish amplified precision drift from a deeper recurrence
+defect. Scalar c4 grows to 33.3474 on layer 4, so the tested trajectory
+amplifies small differences. Full pre-QR sketch and QR basis rank are eight
+on every nonfinal layer; layer 4 carries four incoming ages and has active
+D21, c4 and both p111 subtraction terms. Thus the activity conditions held,
+but the strict parity prediction failed. No tolerance/fixture repair,
+compression, score or general scientific closure follows.
+
+Raw artifact `experiments/2026-09-12_b4_fullrank_deep.json` SHA256
+`a5c6295c45695cc104f6db4d4f779cce059b18773184dfb418092953e420e52c`;
+probe `local_sim/p2_compact_fullrank_deep_b4.py` SHA256
+`748e72ceae7f96c5e9cf87ddce265f3dc62e7222bf334ca16675ffba35e319a5`.
+The JSON embeds and rechecks the probe, frozen L2, B1, B3 and compact
+reference hashes. The root owner will arrange affected-tree default
+preflight and a fresh Skeptic after the in-flight F21 scorer; neither is
+claimed complete here.

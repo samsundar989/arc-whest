@@ -1,0 +1,10225 @@
+{
+  "fixture": "B4 fixed asymmetric n8/depth6 formula; full shared/residual rank",
+  "scope": "tiny full-rank nonlinear parity only; no compression/cost/score/truth",
+  "tolerance": 1e-05,
+  "normalization": "abs(got-want)/max(1,abs(want)) elementwise",
+  "source_sha256": {
+    "probe": "748e72ceae7f96c5e9cf87ddce265f3dc62e7222bf334ca16675ffba35e319a5",
+    "frozen_L2": "390bc226bbf517df0110facfc0dc91c78ef670e8a49368a536cabf630057d1db",
+    "B1_probe": "21bf86f859554bb43a23bcd07dbcf6c53ffc8a0a99ea71ad2482a5a26f43e154",
+    "B3_probe": "f2ae8b7a62999e0b1f0e23be80c410abccc33f62341d1dff4c700900a0fc3e54",
+    "compact_reference": "81f8bbbbe60a617cf0533f13657440ed35feb9bb5d0bc0fbf8956ef002febdd2"
+  },
+  "weights": [
+    [
+      [
+        0.78,
+        0.0,
+        0.135,
+        -0.12,
+        0.015,
+        0.15000000000000002,
+        -0.03,
+        0.10500000000000001
+      ],
+      [
+        -0.10500000000000001,
+        0.8300000000000001,
+        -0.15000000000000002,
+        -0.015,
+        0.12,
+        -0.135,
+        0.0,
+        0.21000000000000002
+      ],
+      [
+        0.0,
+        0.135,
+        0.88,
+        0.09,
+        -0.16500000000000004,
+        -0.03,
+        0.105,
+        -0.15
+      ],
+      [
+        0.10500000000000001,
+        -0.15,
+        -0.015,
+        0.93,
+        -0.06000000000000001,
+        0.075,
+        -0.18000000000000002,
+        -0.045
+      ],
+      [
+        0.21000000000000002,
+        -0.045,
+        0.09000000000000001,
+        -0.16499999999999998,
+        0.78,
+        0.18,
+        -0.07500000000000001,
+        0.06
+      ],
+      [
+        -0.15,
+        0.06,
+        0.195,
+        -0.06,
+        0.07500000000000001,
+        0.8300000000000001,
+        0.03,
+        0.16499999999999998
+      ],
+      [
+        -0.045,
+        0.09,
+        -0.09,
+        0.045,
+        0.18000000000000002,
+        -0.075,
+        0.88,
+        -0.12
+      ],
+      [
+        0.06,
+        -0.195,
+        -0.06,
+        0.15,
+        -0.105,
+        0.03,
+        0.16500000000000004,
+        0.93
+      ]
+    ],
+    [
+      [
+        0.88,
+        0.16500000000000004,
+        -0.09,
+        0.12000000000000001,
+        -0.135,
+        0.0,
+        0.135,
+        -0.12000000000000001
+      ],
+      [
+        0.135,
+        0.93,
+        0.015,
+        0.15000000000000002,
+        -0.03,
+        0.10500000000000001,
+        -0.15,
+        -0.015
+      ],
+      [
+        -0.15000000000000002,
+        -0.015,
+        0.78,
+        -0.135,
+        0.0,
+        0.21000000000000002,
+        -0.045,
+        0.09000000000000001
+      ],
+      [
+        -0.12000000000000001,
+        0.09,
+        -0.16500000000000004,
+        0.8300000000000001,
+        0.105,
+        -0.15,
+        0.06,
+        0.195
+      ],
+      [
+        -0.015,
+        0.12,
+        -0.06000000000000001,
+        0.075,
+        0.88,
+        -0.045,
+        0.09,
+        -0.09
+      ],
+      [
+        0.09000000000000001,
+        -0.16499999999999998,
+        -0.03,
+        0.18,
+        -0.07500000000000001,
+        0.93,
+        -0.195,
+        -0.06
+      ],
+      [
+        0.195,
+        -0.06,
+        0.07500000000000001,
+        -0.18,
+        0.03,
+        0.16499999999999998,
+        0.78,
+        0.045
+      ],
+      [
+        -0.09,
+        0.045,
+        0.18000000000000002,
+        -0.075,
+        0.06000000000000001,
+        -0.12,
+        0.015,
+        0.8300000000000001
+      ]
+    ],
+    [
+      [
+        0.78,
+        0.015,
+        0.15,
+        -0.10500000000000001,
+        0.03,
+        -0.15000000000000002,
+        -0.015,
+        0.12
+      ],
+      [
+        -0.09,
+        0.8300000000000001,
+        -0.135,
+        0.0,
+        0.135,
+        -0.12000000000000001,
+        0.09,
+        -0.16500000000000004
+      ],
+      [
+        0.015,
+        0.15000000000000002,
+        0.88,
+        0.10500000000000001,
+        -0.15,
+        -0.015,
+        0.12,
+        -0.06000000000000001
+      ],
+      [
+        0.12,
+        -0.135,
+        0.0,
+        0.93,
+        -0.045,
+        0.09000000000000001,
+        -0.16499999999999998,
+        -0.03
+      ],
+      [
+        -0.16500000000000004,
+        -0.03,
+        0.105,
+        -0.15,
+        0.78,
+        0.195,
+        -0.06,
+        0.07500000000000001
+      ],
+      [
+        -0.06000000000000001,
+        0.075,
+        -0.18000000000000002,
+        -0.045,
+        0.09,
+        0.8300000000000001,
+        0.045,
+        0.18000000000000002
+      ],
+      [
+        -0.03,
+        0.18,
+        -0.07500000000000001,
+        0.06,
+        -0.195,
+        -0.06,
+        0.88,
+        -0.105
+      ],
+      [
+        0.07500000000000001,
+        -0.18,
+        0.03,
+        0.16499999999999998,
+        -0.09000000000000001,
+        0.045,
+        -0.21000000000000002,
+        0.93
+      ]
+    ],
+    [
+      [
+        0.88,
+        -0.21000000000000002,
+        0.0,
+        0.135,
+        -0.12,
+        0.015,
+        0.15000000000000002,
+        -0.03
+      ],
+      [
+        0.15,
+        0.93,
+        0.03,
+        -0.15000000000000002,
+        -0.015,
+        0.12,
+        -0.135,
+        0.0
+      ],
+      [
+        -0.135,
+        0.0,
+        0.78,
+        -0.12000000000000001,
+        0.09,
+        -0.16500000000000004,
+        -0.03,
+        0.105
+      ],
+      [
+        -0.03,
+        0.10500000000000001,
+        -0.15,
+        0.8300000000000001,
+        0.12,
+        -0.06000000000000001,
+        0.075,
+        -0.18000000000000002
+      ],
+      [
+        0.0,
+        0.21000000000000002,
+        -0.045,
+        0.09000000000000001,
+        0.88,
+        -0.03,
+        0.18,
+        -0.07500000000000001
+      ],
+      [
+        0.105,
+        -0.15,
+        0.06,
+        0.195,
+        -0.06,
+        0.93,
+        -0.18,
+        0.03
+      ],
+      [
+        -0.18000000000000002,
+        -0.045,
+        0.09,
+        -0.09,
+        0.045,
+        0.18000000000000002,
+        0.78,
+        0.06000000000000001
+      ],
+      [
+        -0.07500000000000001,
+        0.06,
+        -0.195,
+        -0.06,
+        0.15,
+        -0.105,
+        0.03,
+        0.8300000000000001
+      ]
+    ],
+    [
+      [
+        0.78,
+        0.03,
+        0.16500000000000004,
+        -0.09,
+        0.12000000000000001,
+        -0.135,
+        0.0,
+        0.135
+      ],
+      [
+        0.0,
+        0.8300000000000001,
+        -0.12,
+        0.015,
+        0.15000000000000002,
+        -0.03,
+        0.10500000000000001,
+        -0.15
+      ],
+      [
+        0.03,
+        -0.15000000000000002,
+        0.88,
+        0.12,
+        -0.135,
+        0.0,
+        0.21000000000000002,
+        -0.045
+      ],
+      [
+        0.135,
+        -0.12000000000000001,
+        0.09,
+        0.93,
+        -0.03,
+        0.105,
+        -0.15,
+        0.06
+      ],
+      [
+        -0.15,
+        -0.015,
+        0.12,
+        -0.06000000000000001,
+        0.78,
+        -0.18000000000000002,
+        -0.045,
+        0.09
+      ],
+      [
+        -0.045,
+        0.09000000000000001,
+        -0.16499999999999998,
+        -0.03,
+        0.18,
+        0.8300000000000001,
+        0.06,
+        -0.195
+      ],
+      [
+        0.06,
+        0.195,
+        -0.06,
+        0.07500000000000001,
+        -0.18,
+        0.03,
+        0.88,
+        -0.09000000000000001
+      ],
+      [
+        0.09,
+        -0.09,
+        0.045,
+        0.18000000000000002,
+        -0.075,
+        0.06000000000000001,
+        -0.12,
+        0.93
+      ]
+    ],
+    [
+      [
+        0.88,
+        -0.12,
+        0.015,
+        0.15,
+        -0.10500000000000001,
+        0.03,
+        -0.15000000000000002,
+        -0.015
+      ],
+      [
+        0.16500000000000004,
+        0.93,
+        0.12000000000000001,
+        -0.135,
+        0.0,
+        0.135,
+        -0.12000000000000001,
+        0.09
+      ],
+      [
+        -0.12,
+        0.015,
+        0.78,
+        -0.03,
+        0.10500000000000001,
+        -0.15,
+        -0.015,
+        0.12
+      ],
+      [
+        -0.015,
+        0.12,
+        -0.135,
+        0.8300000000000001,
+        0.21000000000000002,
+        -0.045,
+        0.09000000000000001,
+        -0.16499999999999998
+      ],
+      [
+        0.09,
+        -0.16500000000000004,
+        -0.03,
+        0.105,
+        0.88,
+        0.06,
+        0.195,
+        -0.06
+      ],
+      [
+        0.12,
+        -0.06000000000000001,
+        0.075,
+        -0.18000000000000002,
+        -0.045,
+        0.93,
+        -0.09,
+        0.045
+      ],
+      [
+        -0.16499999999999998,
+        -0.03,
+        0.18,
+        -0.07500000000000001,
+        0.06,
+        -0.195,
+        0.78,
+        0.15
+      ],
+      [
+        -0.06,
+        0.07500000000000001,
+        -0.18,
+        0.03,
+        0.16499999999999998,
+        -0.09000000000000001,
+        0.045,
+        0.8300000000000001
+      ]
+    ]
+  ],
+  "activity": [
+    {
+      "layer": 0,
+      "ages": 1,
+      "incoming_ages": 0,
+      "D3_max_abs": 0.0,
+      "D21_max_abs": 0.0,
+      "c4_max_abs": 0.061842208122635106,
+      "p111_3_max_abs": 0.0,
+      "p111_21_max_abs": 0.005504072387189903,
+      "pre_sketch_rank": 8,
+      "qr_rank": 8
+    },
+    {
+      "layer": 1,
+      "ages": 2,
+      "incoming_ages": 1,
+      "D3_max_abs": 0.18617924950016013,
+      "D21_max_abs": 0.05477787861489379,
+      "c4_max_abs": 0.10384395490268197,
+      "p111_3_max_abs": 0.08494554624392708,
+      "p111_21_max_abs": 0.02536024091488014,
+      "pre_sketch_rank": 8,
+      "qr_rank": 8
+    },
+    {
+      "layer": 2,
+      "ages": 3,
+      "incoming_ages": 2,
+      "D3_max_abs": 0.1680179782520967,
+      "D21_max_abs": 0.04895169134095735,
+      "c4_max_abs": 0.1942367627694946,
+      "p111_3_max_abs": 0.0880501983849676,
+      "p111_21_max_abs": 0.027638230522493576,
+      "pre_sketch_rank": 8,
+      "qr_rank": 8
+    },
+    {
+      "layer": 3,
+      "ages": 4,
+      "incoming_ages": 3,
+      "D3_max_abs": 0.19099755564039167,
+      "D21_max_abs": 0.07982401976678069,
+      "c4_max_abs": 0.390839033028744,
+      "p111_3_max_abs": 0.10903880525101085,
+      "p111_21_max_abs": 0.0435502605230107,
+      "pre_sketch_rank": 8,
+      "qr_rank": 8
+    },
+    {
+      "layer": 4,
+      "ages": 5,
+      "incoming_ages": 4,
+      "D3_max_abs": 1.8515723325671662,
+      "D21_max_abs": 0.7756107895260208,
+      "c4_max_abs": 33.34742469961926,
+      "p111_3_max_abs": 1.8315999456980363,
+      "p111_21_max_abs": 0.3398461967213552,
+      "pre_sketch_rank": 8,
+      "qr_rank": 8
+    },
+    {
+      "layer": 5,
+      "ages": 0,
+      "D3_max_abs": 48.08904955805113,
+      "D21_max_abs": null,
+      "qr_rank": null
+    }
+  ],
+  "checks": [
+    {
+      "layer": 0,
+      "field": "incoming.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "incoming.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "incoming.c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "pre.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "pre.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.3415480604759296e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "S.keys",
+      "actual": [
+        "(1, 1)",
+        "(1, 2)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1, 2)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.keys",
+      "actual": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "expected": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.table_keys",
+      "actual": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "expected": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "S.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "S.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.3939291387821129e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "S.(1, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "S.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.3415480604759296e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "S.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "S.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "S.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "S.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "D3.compact",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "D21.compact_masked",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "D21.transpose",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "D21.diagonal_zero",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(0, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.366448614843364e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(0, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.369709649676423e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(0, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.0297856622987211e-07,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(0, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.17196220230386e-07,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(1, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(1, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.732897229686728e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(2, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(2, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(3, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(3, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.87645137498194e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(3, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(3, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.0316190505640372e-07,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(4, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 9.478430507137148e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(4, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(4, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 9.311748866524762e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "wick.(4, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "pK.keys",
+      "actual": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "pK.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.366448614843364e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "pK.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.6595767388680756e-09,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "pK.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.369709649676423e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "pK.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.0657267235369972e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "pK.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.5019067392540997e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "pK.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.0297856622987211e-07,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "pK.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.17196220230386e-07,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "K.keys",
+      "actual": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "K.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.366448614843364e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "K.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.6595767388680756e-09,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "K.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.418980637492908e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "K.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.525517070090416e-09,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "K.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.0090005039820049e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "K.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.2628832302705746e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "K.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.3275691246317223e-07,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "terms.row_inventory",
+      "actual": [
+        "0",
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "2",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "expected": [
+        "0",
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "2",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "center.row_inventory",
+      "actual": [
+        "('(1, 1)', 0)",
+        "('(1,)', 0)",
+        "('(2, 1)', 0)",
+        "('(2, 1)', 1)",
+        "('(2, 2)', 0)",
+        "('(2, 2)', 1)",
+        "('(2, 2)', 2)",
+        "('(2, 2)', 3)",
+        "('(2, 2)', 4)",
+        "('(2,)', 0)",
+        "('(2,)', 1)",
+        "('(3,)', 0)",
+        "('(3,)', 1)",
+        "('(3,)', 2)",
+        "('(4,)', 0)",
+        "('(4,)', 1)",
+        "('(4,)', 2)",
+        "('(4,)', 3)",
+        "('(4,)', 4)"
+      ],
+      "expected": [
+        "('(1, 1)', 0)",
+        "('(1,)', 0)",
+        "('(2, 1)', 0)",
+        "('(2, 1)', 1)",
+        "('(2, 2)', 0)",
+        "('(2, 2)', 1)",
+        "('(2, 2)', 2)",
+        "('(2, 2)', 3)",
+        "('(2, 2)', 4)",
+        "('(2,)', 0)",
+        "('(2,)', 1)",
+        "('(3,)', 0)",
+        "('(3,)', 1)",
+        "('(3,)', 2)",
+        "('(4,)', 0)",
+        "('(4,)', 1)",
+        "('(4,)', 2)",
+        "('(4,)', 3)",
+        "('(4,)', 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "post.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.366448614843364e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "p111_3",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "p111_21",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.425493280492247e-10,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "birth.S3",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.2628832302705746e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "birth.S21",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.360743042861273e-09,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "old_after_wick.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "old_after_wick.ages",
+      "actual": [],
+      "expected": [],
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "qr.pre_sketch_rank",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "post.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.418980637492908e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "post.c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 2.468204279848507e-09,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "birth.A_L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.9696456939105644e-09,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "birth.A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.2628832302705746e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "source.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "source.ages",
+      "actual": [
+        "0"
+      ],
+      "expected": [
+        "0"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "source.age0.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.969645707788352e-09,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "source.age0.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.771561172376096e-16,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "source.age0.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.2628832302705746e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "source.age0.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "source.age0.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "source.age0.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "source.age0.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "source.age0.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "source.age0.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "source.age0.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.2628832302705746e-08,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "source.age0.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 0,
+      "field": "qr.rank",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.366448614843364e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.418980637492908e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "incoming.c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 2.468204279848507e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.ages",
+      "actual": [
+        "0"
+      ],
+      "expected": [
+        "0"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.969645707788352e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.771561172376096e-16,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.2628832302705746e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.2628832302705746e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "pre.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.389286613002639e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "pre.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.396988690340663e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "S.keys",
+      "actual": [
+        "(1, 1)",
+        "(1, 2)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1, 2)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.keys",
+      "actual": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "expected": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.table_keys",
+      "actual": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "expected": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "S.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.389286613002639e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "S.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1201935615212655e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "S.(1, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.281664425416335e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "S.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.396988690340663e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "S.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.281664425416335e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "S.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.7744659054392855e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "S.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.112027704976761e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "S.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 9.872817119394028e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "D3.compact",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.112027704976761e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "D21.compact_masked",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.281664425416335e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "D21.transpose",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.281664425416335e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "D21.diagonal_zero",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(0, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.4261565190772956e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(0, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6738779251568303e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(0, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.2599201499626815e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(0, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.824761721897389e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(1, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.122745106942659e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(1, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.852313038154591e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(2, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.706196705088871e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(2, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.0563311834520306e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(3, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.1245103470326694e-07,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(3, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.922798283023498e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(3, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.458094446684398e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(3, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2012322696792998e-07,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(4, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.3385659786434587e-07,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(4, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.1245103470326694e-07,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(4, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 9.097897969171208e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "wick.(4, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.458094446684398e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "pK.keys",
+      "actual": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "pK.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.262745100820254e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "pK.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.5661160142800314e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "pK.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.2996526150297356e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "pK.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.4135300513418159e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "pK.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.952975898014686e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "pK.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9231152054443044e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "pK.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2058065579356736e-07,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "K.keys",
+      "actual": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "K.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.262745100820254e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "K.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.5661160142800314e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "K.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.810266177572963e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "K.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1714828877795735e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "K.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.554978084656767e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "K.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.5483260890357684e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "K.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6810279024337405e-07,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "terms.row_inventory",
+      "actual": [
+        "0",
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "2",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "expected": [
+        "0",
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "2",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "center.row_inventory",
+      "actual": [
+        "('(1, 1)', 0)",
+        "('(1,)', 0)",
+        "('(2, 1)', 0)",
+        "('(2, 1)', 1)",
+        "('(2, 2)', 0)",
+        "('(2, 2)', 1)",
+        "('(2, 2)', 2)",
+        "('(2, 2)', 3)",
+        "('(2, 2)', 4)",
+        "('(2,)', 0)",
+        "('(2,)', 1)",
+        "('(3,)', 0)",
+        "('(3,)', 1)",
+        "('(3,)', 2)",
+        "('(4,)', 0)",
+        "('(4,)', 1)",
+        "('(4,)', 2)",
+        "('(4,)', 3)",
+        "('(4,)', 4)"
+      ],
+      "expected": [
+        "('(1, 1)', 0)",
+        "('(1,)', 0)",
+        "('(2, 1)', 0)",
+        "('(2, 1)', 1)",
+        "('(2, 2)', 0)",
+        "('(2, 2)', 1)",
+        "('(2, 2)', 2)",
+        "('(2, 2)', 3)",
+        "('(2, 2)', 4)",
+        "('(2,)', 0)",
+        "('(2,)', 1)",
+        "('(3,)', 0)",
+        "('(3,)', 1)",
+        "('(3,)', 2)",
+        "('(4,)', 0)",
+        "('(4,)', 1)",
+        "('(4,)', 2)",
+        "('(4,)', 3)",
+        "('(4,)', 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "post.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.262745100820254e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "p111_3",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.815888205942585e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "p111_21",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.698812483885153e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "birth.S3",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.676874410496467e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "birth.S21",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.0674473301802712e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "old_after_wick.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "old_after_wick.ages",
+      "actual": [
+        "1"
+      ],
+      "expected": [
+        "1"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "old_after_wick.age1.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.355846376455588e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "old_after_wick.age1.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.750981912910902e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "old_after_wick.age1.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.065483478170705e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "old_after_wick.age1.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "old_after_wick.age1.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "old_after_wick.age1.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "old_after_wick.age1.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "old_after_wick.age1.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "old_after_wick.age1.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "old_after_wick.age1.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.065483478170705e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "old_after_wick.age1.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "qr.pre_sketch_rank",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "post.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.810266177572963e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "post.c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 9.73364386314124e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "birth.A_L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.88933598258701e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "birth.A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.676874410496467e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.ages",
+      "actual": [
+        "0",
+        "1"
+      ],
+      "expected": [
+        "0",
+        "1"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age1.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.3558464180889516e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age1.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.750981868501981e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age1.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.065483478170705e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age1.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age1.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age1.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age1.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age1.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age1.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age1.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.065483478170705e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age1.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.88933599299535e-09,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.661338147750939e-16,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.676874410496467e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.706196705088871e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.676874410496467e-08,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "source.age0.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 1,
+      "field": "qr.rank",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.262745100820254e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.810266177572963e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "incoming.c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 9.73364386314124e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.ages",
+      "actual": [
+        "0",
+        "1"
+      ],
+      "expected": [
+        "0",
+        "1"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.3558464180889516e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.750981868501981e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.065483478170705e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.065483478170705e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.88933599299535e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.661338147750939e-16,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.676874410496467e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.706196705088871e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.676874410496467e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "pre.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.222592891485078e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "pre.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9019476294189772e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "S.keys",
+      "actual": [
+        "(1, 1)",
+        "(1, 2)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1, 2)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.keys",
+      "actual": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "expected": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.table_keys",
+      "actual": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "expected": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "S.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.222592891485078e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "S.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 9.887194264701638e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "S.(1, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.3162188727822155e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "S.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9019476294189772e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "S.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.3162188727822155e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "S.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.7945245539552346e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "S.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.382081703058205e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "S.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.893457545256496e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "D3.compact",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.382081703058205e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "D21.compact_masked",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.3162188727822155e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "D21.transpose",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.3162188727822155e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "D21.diagonal_zero",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(0, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.927687278863615e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(0, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.3166560265438534e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(0, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.571222535029953e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(0, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.825810479673457e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(1, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.851539818304332e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(1, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.585537455772723e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(2, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6955244253788225e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(2, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 9.905689586506938e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(3, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.267412220039307e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(3, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6955244253788225e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(3, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.192804646614792e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(3, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.3264083715697555e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(4, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.969921888772934e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(4, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.267412220039307e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(4, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6955244246705968e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "wick.(4, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.192804646614792e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "pK.keys",
+      "actual": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "pK.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.299556800504753e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "pK.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1496297649959963e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "pK.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.885275810608604e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "pK.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.079932376330973e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "pK.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.8809567764455082e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "pK.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.2670960370981845e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "pK.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 9.438775849801573e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "K.keys",
+      "actual": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "K.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.299556800504753e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "K.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1496297649959963e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "K.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.4868237869820646e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "K.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.8361493436813703e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "K.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.7691135834052574e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "K.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.030387684705872e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "K.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.3208494109573365e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "terms.row_inventory",
+      "actual": [
+        "0",
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "2",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "expected": [
+        "0",
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "2",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "center.row_inventory",
+      "actual": [
+        "('(1, 1)', 0)",
+        "('(1,)', 0)",
+        "('(2, 1)', 0)",
+        "('(2, 1)', 1)",
+        "('(2, 2)', 0)",
+        "('(2, 2)', 1)",
+        "('(2, 2)', 2)",
+        "('(2, 2)', 3)",
+        "('(2, 2)', 4)",
+        "('(2,)', 0)",
+        "('(2,)', 1)",
+        "('(3,)', 0)",
+        "('(3,)', 1)",
+        "('(3,)', 2)",
+        "('(4,)', 0)",
+        "('(4,)', 1)",
+        "('(4,)', 2)",
+        "('(4,)', 3)",
+        "('(4,)', 4)"
+      ],
+      "expected": [
+        "('(1, 1)', 0)",
+        "('(1,)', 0)",
+        "('(2, 1)', 0)",
+        "('(2, 1)', 1)",
+        "('(2, 2)', 0)",
+        "('(2, 2)', 1)",
+        "('(2, 2)', 2)",
+        "('(2, 2)', 3)",
+        "('(2, 2)', 4)",
+        "('(2,)', 0)",
+        "('(2,)', 1)",
+        "('(3,)', 0)",
+        "('(3,)', 1)",
+        "('(3,)', 2)",
+        "('(4,)', 0)",
+        "('(4,)', 1)",
+        "('(4,)', 2)",
+        "('(4,)', 3)",
+        "('(4,)', 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "post.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.299556800504753e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "p111_3",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1750903874951923e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "p111_21",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.3332731315941925e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "birth.S3",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.8010150693601474e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "birth.S21",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.8110199395682258e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.ages",
+      "actual": [
+        "1",
+        "2"
+      ],
+      "expected": [
+        "1",
+        "2"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age2.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.046882064514314e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age2.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.383265138687477e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age2.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.964509424052686e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age2.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age2.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age2.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age2.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age2.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age2.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age2.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.964509424052686e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age2.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age1.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.550639922332403e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age1.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.2051697901612783e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age1.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.930688117186442e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age1.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age1.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age1.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age1.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.706196705088871e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age1.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age1.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age1.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.930688117186442e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "old_after_wick.age1.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "qr.pre_sketch_rank",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "post.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.4868237869820646e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "post.c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 2.24039215512839e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "birth.A_L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.774762895984555e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "birth.A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.4330598187046775e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.ages",
+      "actual": [
+        "0",
+        "1",
+        "2"
+      ],
+      "expected": [
+        "0",
+        "1",
+        "2"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age2.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.046882067983761e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age2.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.383265144238592e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age2.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.964509424052686e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age2.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age2.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age2.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age2.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age2.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age2.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age2.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.964509424052686e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age2.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.550639922332403e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.2051697901612783e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.930688117186442e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.706196705088871e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.930688117186442e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age1.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.774762882106767e-09,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.440892098500626e-16,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.4330598187046775e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6955244253788225e-07,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.4330598187046775e-08,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "source.age0.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 2,
+      "field": "qr.rank",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.299556800504753e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.4868237869820646e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "incoming.c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 2.24039215512839e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.ages",
+      "actual": [
+        "0",
+        "1",
+        "2"
+      ],
+      "expected": [
+        "0",
+        "1",
+        "2"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.046882067983761e-09,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.383265144238592e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.964509424052686e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.964509424052686e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.550639922332403e-09,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.2051697901612783e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.930688117186442e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.706196705088871e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.930688117186442e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.774762882106767e-09,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.440892098500626e-16,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.4330598187046775e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6955244253788225e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.4330598187046775e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "pre.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 9.619933727389451e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "pre.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.767593699521843e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "S.keys",
+      "actual": [
+        "(1, 1)",
+        "(1, 2)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1, 2)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.keys",
+      "actual": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "expected": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.table_keys",
+      "actual": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "expected": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "S.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 9.619933727389451e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "S.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.379968509075292e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "S.(1, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2405622695776941e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "S.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.767593699521843e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "S.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2405622695776941e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "S.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.980600288278069e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "S.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.491502825221261e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "S.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.96156862051356e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "D3.compact",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.491502825221261e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "D21.compact_masked",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2405622695776941e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "D21.transpose",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2405622695776941e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "D21.diagonal_zero",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(0, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.822167868460795e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(0, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.45453434588994e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(0, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.969377936925312e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(0, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.804334408081701e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(1, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.5731045338872605e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(1, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.764433573692159e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(2, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.632171081889201e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(2, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.985486832290434e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(3, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.7791370958984984e-06,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(3, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.632171081889201e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(3, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.985486832290434e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(3, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.258737540462427e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(4, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.599622105104226e-05,
+      "passed": false
+    },
+    {
+      "layer": 3,
+      "field": "wick.(4, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.558274191796997e-06,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(4, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.632171082623893e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "wick.(4, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.985486832290434e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "pK.keys",
+      "actual": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "pK.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.566006638120676e-05,
+      "passed": false
+    },
+    {
+      "layer": 3,
+      "field": "pK.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.3494771500255354e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "pK.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.854688194811652e-06,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "pK.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.392698240065826e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "pK.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 9.162088138170432e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "pK.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.331302368345888e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "pK.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.979458789686973e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "K.keys",
+      "actual": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "K.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.566006638120676e-05,
+      "passed": false
+    },
+    {
+      "layer": 3,
+      "field": "K.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.3494771500255354e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "K.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.4481297057217628e-05,
+      "passed": false
+    },
+    {
+      "layer": 3,
+      "field": "K.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.514800988623783e-06,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "K.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.5983110500393813e-05,
+      "passed": false
+    },
+    {
+      "layer": 3,
+      "field": "K.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.8650666675316333e-05,
+      "passed": false
+    },
+    {
+      "layer": 3,
+      "field": "K.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.736239650641298e-05,
+      "passed": false
+    },
+    {
+      "layer": 3,
+      "field": "terms.row_inventory",
+      "actual": [
+        "0",
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "2",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "expected": [
+        "0",
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "2",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "center.row_inventory",
+      "actual": [
+        "('(1, 1)', 0)",
+        "('(1,)', 0)",
+        "('(2, 1)', 0)",
+        "('(2, 1)', 1)",
+        "('(2, 2)', 0)",
+        "('(2, 2)', 1)",
+        "('(2, 2)', 2)",
+        "('(2, 2)', 3)",
+        "('(2, 2)', 4)",
+        "('(2,)', 0)",
+        "('(2,)', 1)",
+        "('(3,)', 0)",
+        "('(3,)', 1)",
+        "('(3,)', 2)",
+        "('(4,)', 0)",
+        "('(4,)', 1)",
+        "('(4,)', 2)",
+        "('(4,)', 3)",
+        "('(4,)', 4)"
+      ],
+      "expected": [
+        "('(1, 1)', 0)",
+        "('(1,)', 0)",
+        "('(2, 1)', 0)",
+        "('(2, 1)', 1)",
+        "('(2, 2)', 0)",
+        "('(2, 2)', 1)",
+        "('(2, 2)', 2)",
+        "('(2, 2)', 3)",
+        "('(2, 2)', 4)",
+        "('(2,)', 0)",
+        "('(2,)', 1)",
+        "('(3,)', 0)",
+        "('(3,)', 1)",
+        "('(3,)', 2)",
+        "('(4,)', 0)",
+        "('(4,)', 1)",
+        "('(4,)', 2)",
+        "('(4,)', 3)",
+        "('(4,)', 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "post.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.566006638120676e-05,
+      "passed": false
+    },
+    {
+      "layer": 3,
+      "field": "p111_3",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.447607872079764e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "p111_21",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2372218239492527e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "birth.S3",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9217363395579875e-05,
+      "passed": false
+    },
+    {
+      "layer": 3,
+      "field": "birth.S21",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.514349690597056e-06,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.ages",
+      "actual": [
+        "1",
+        "2",
+        "3"
+      ],
+      "expected": [
+        "1",
+        "2",
+        "3"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age3.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1573996046287949e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age3.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2720717118552827e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age3.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.496624557952632e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age3.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age3.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age3.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age3.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age3.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age3.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age3.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.496624557952632e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age3.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age2.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.0141006319408508e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age2.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.7741134572535344e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age2.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.7940793997927038e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age2.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age2.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age2.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age2.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.706196705088871e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age2.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age2.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age2.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.7940793997927038e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age2.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age1.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.898188391503025e-09,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age1.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.019326897917395e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age1.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.625594253986453e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age1.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age1.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age1.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age1.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6955244253788225e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age1.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age1.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age1.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.625594253986453e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "old_after_wick.age1.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "qr.pre_sketch_rank",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "post.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.4481297057217628e-05,
+      "passed": false
+    },
+    {
+      "layer": 3,
+      "field": "post.c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 2.638230595752855e-05,
+      "passed": false
+    },
+    {
+      "layer": 3,
+      "field": "birth.A_L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6754970369459166e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "birth.A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9217363395579875e-05,
+      "passed": false
+    },
+    {
+      "layer": 3,
+      "field": "source.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.ages",
+      "actual": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "expected": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age3.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1573996046287949e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age3.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2720717101899481e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age3.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.496624557952632e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age3.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age3.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age3.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age3.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age3.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age3.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age3.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.496624557952632e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age3.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.0141006319408508e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.7741134561433114e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.7940793997927038e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.706196705088871e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.7940793997927038e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age2.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.898188388033578e-09,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.019326897917395e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.625594253986453e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6955244253788225e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.625594253986453e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age1.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.675497037639806e-08,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.661338147750939e-16,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9217363395579875e-05,
+      "passed": false
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.632171081889201e-07,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9217363395579875e-05,
+      "passed": false
+    },
+    {
+      "layer": 3,
+      "field": "source.age0.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 3,
+      "field": "qr.rank",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "incoming.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.566006638120676e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "incoming.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.4481297057217628e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "incoming.c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 2.638230595752855e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "source.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.ages",
+      "actual": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "expected": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1573996046287949e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2720717101899481e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.496624557952632e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.496624557952632e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.0141006319408508e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.7741134561433114e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.7940793997927038e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.706196705088871e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.7940793997927038e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.898188388033578e-09,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.019326897917395e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.625594253986453e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6955244253788225e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.625594253986453e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.675497037639806e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.661338147750939e-16,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9217363395579875e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.632171081889201e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9217363395579875e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "pre.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2169803710104787e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "pre.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.467303571061676e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "S.keys",
+      "actual": [
+        "(1, 1)",
+        "(1, 2)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1, 2)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.keys",
+      "actual": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "expected": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.table_keys",
+      "actual": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "expected": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "S.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2169803710104787e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "S.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.2791064586840113e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "S.(1, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1023928364051194e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "S.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.08623623473847e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "S.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1023928364051194e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "S.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.5156539728409264e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "S.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.7728130028447034e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "S.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.749716122859616e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "D3.compact",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.7728130028447034e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "D21.compact_masked",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1023928364051194e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "D21.transpose",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1023928364051194e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "D21.diagonal_zero",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.(0, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.0322181593219737e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.(0, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.5743094098719674e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.(0, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.4228784422573582e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.(0, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.277442279141107e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.(1, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.3361247244734216e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.(1, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.0644363186439474e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.(2, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.672189055576508e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.(2, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.665951900079602e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.(3, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.670504756430088e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "wick.(3, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.672189055576508e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.(3, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.6262527120832896e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.(3, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.3265466234574998e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "wick.(4, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.99352823287176e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.(4, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00017341009512860175,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "wick.(4, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.672189055649122e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "wick.(4, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.6262527120832896e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "pK.keys",
+      "actual": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "pK.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.50541839148848e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "pK.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.6302021407242915e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "pK.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1066823445815555e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "pK.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.905405789378369e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "pK.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.526575752199612e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "pK.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.7347655338491066e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "pK.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 6.76113757785012e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "K.keys",
+      "actual": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1, 1)",
+        "(1,)",
+        "(2, 1)",
+        "(2, 2)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "K.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.50541839148848e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "K.(1, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.6302021407242915e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "K.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00015412881454261843,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "K.(2, 1)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.59547148602084e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "K.(2, 2)",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0001759436570578536,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "K.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0002322225442414532,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "K.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00030945341538160737,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "terms.row_inventory",
+      "actual": [
+        "0",
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "2",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "expected": [
+        "0",
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "2",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "center.row_inventory",
+      "actual": [
+        "('(1, 1)', 0)",
+        "('(1,)', 0)",
+        "('(2, 1)', 0)",
+        "('(2, 1)', 1)",
+        "('(2, 2)', 0)",
+        "('(2, 2)', 1)",
+        "('(2, 2)', 2)",
+        "('(2, 2)', 3)",
+        "('(2, 2)', 4)",
+        "('(2,)', 0)",
+        "('(2,)', 1)",
+        "('(3,)', 0)",
+        "('(3,)', 1)",
+        "('(3,)', 2)",
+        "('(4,)', 0)",
+        "('(4,)', 1)",
+        "('(4,)', 2)",
+        "('(4,)', 3)",
+        "('(4,)', 4)"
+      ],
+      "expected": [
+        "('(1, 1)', 0)",
+        "('(1,)', 0)",
+        "('(2, 1)', 0)",
+        "('(2, 1)', 1)",
+        "('(2, 2)', 0)",
+        "('(2, 2)', 1)",
+        "('(2, 2)', 2)",
+        "('(2, 2)', 3)",
+        "('(2, 2)', 4)",
+        "('(2,)', 0)",
+        "('(2,)', 1)",
+        "('(3,)', 0)",
+        "('(3,)', 1)",
+        "('(3,)', 2)",
+        "('(4,)', 0)",
+        "('(4,)', 1)",
+        "('(4,)', 2)",
+        "('(4,)', 3)",
+        "('(4,)', 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "post.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.50541839148848e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "p111_3",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.7728130028447034e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "p111_21",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1023928364051194e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "birth.S3",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00023238872223217233,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "birth.S21",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 8.376195317223703e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.ages",
+      "actual": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "expected": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age4.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1120428761515755e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age4.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.025169342194765e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age4.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.0643491974458037e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age4.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age4.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age4.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age4.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age4.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age4.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age4.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.0643491974458037e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age4.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age3.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.288402544871562e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age3.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.537553668440328e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age3.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.9985311345074863e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age3.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age3.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age3.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age3.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.706196705088871e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age3.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age3.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age3.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.9985311345074863e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age3.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age2.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2950125660368683e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age2.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.946720789458567e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age2.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.433305280423071e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age2.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age2.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age2.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age2.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6955244253788225e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age2.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age2.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age2.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.433305280423071e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age2.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age1.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 9.881687128981964e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age1.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.087698235038072e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age1.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9011803919548228e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age1.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age1.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age1.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age1.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.632171081889201e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age1.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age1.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age1.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9011803919548228e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "old_after_wick.age1.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "qr.pre_sketch_rank",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "post.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00015412881454261843,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "post.c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0003091874844984346,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "birth.A_L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.25675471689324e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "birth.A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00023238872223217233,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "source.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.ages",
+      "actual": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "expected": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age4.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1120428761515755e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age4.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.0251693421392538e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age4.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.0643491974458037e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age4.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age4.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age4.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age4.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age4.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age4.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age4.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.0643491974458037e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age4.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.288402544784826e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.5375536683848168e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.9985311345074863e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.706196705088871e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.9985311345074863e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age3.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2950125659674794e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.946720789458567e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.433305280423071e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6955244253788225e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.433305280423071e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age2.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 9.881687128461547e-08,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.0876982350935833e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9011803919548228e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.632171081889201e-07,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9011803919548228e-05,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "source.age1.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.256754716879362e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.440892098500626e-16,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00023238872223217233,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.672189055576508e-06,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00023238872223217233,
+      "passed": false
+    },
+    {
+      "layer": 4,
+      "field": "source.age0.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "qr.rank",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "incoming.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.50541839148848e-05,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "incoming.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00015412881454261843,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "incoming.c4",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0003091874844984346,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "source.age_count",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.ages",
+      "actual": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "expected": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age4.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1120428761515755e-07,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age4.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.0251693421392538e-06,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age4.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.0643491974458037e-07,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age4.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age4.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age4.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age4.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.43822568749097e-08,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age4.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age4.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age4.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.0643491974458037e-07,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age4.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age3.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.288402544784826e-08,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age3.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.5375536683848168e-06,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age3.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.9985311345074863e-07,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age3.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age3.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age3.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age3.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.706196705088871e-08,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age3.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age3.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age3.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.9985311345074863e-07,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age3.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age2.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.2950125659674794e-07,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age2.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.946720789458567e-06,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age2.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.433305280423071e-07,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age2.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age2.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age2.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age2.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6955244253788225e-07,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age2.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age2.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age2.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.433305280423071e-07,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age2.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age1.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 9.881687128461547e-08,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age1.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.0876982350935833e-06,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age1.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9011803919548228e-05,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "source.age1.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age1.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age1.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age1.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.632171081889201e-07,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age1.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age1.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age1.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.9011803919548228e-05,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "source.age1.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age0.A",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.256754716879362e-06,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age0.P",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.440892098500626e-16,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age0.Z",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00023238872223217233,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "source.age0.L",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age0.s",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age0.e",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age0.w2",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.672189055576508e-06,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age0.dA",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age0.dP",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "source.age0.materialized_A_D",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00023238872223217233,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "source.age0.feed_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "pre.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.510617458547024e-05,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "pre.cov",
+      "shape": [
+        8,
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.000161536743174149,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "S.keys",
+      "actual": [
+        "(1,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "wick.keys",
+      "actual": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "expected": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "wick.table_keys",
+      "actual": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "expected": [
+        "(0, 1)",
+        "(0, 2)",
+        "(0, 3)",
+        "(0, 4)",
+        "(1, 1)",
+        "(1, 2)",
+        "(2, 1)",
+        "(2, 2)",
+        "(3, 1)",
+        "(3, 2)",
+        "(3, 3)",
+        "(3, 4)",
+        "(4, 1)",
+        "(4, 2)",
+        "(4, 3)",
+        "(4, 4)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "S.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.510617458547024e-05,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "S.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0002350813654012383,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "S.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0003091874844984346,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "D3.compact",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0002350813654012383,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "wick.(0, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.8407301449474556e-06,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "wick.(0, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.407609778943558e-07,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "wick.(0, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.5716092674185906e-07,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "wick.(0, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.9497513677191325e-07,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "wick.(1, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 5.974058292390616e-06,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "wick.(1, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 3.681460289894911e-06,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "wick.(2, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6225374990467544e-06,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "wick.(2, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.1948116584781232e-05,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "wick.(3, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.639900707877744e-05,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "wick.(3, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.6225374990467544e-06,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "wick.(3, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.4217471654539936e-05,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "wick.(3, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 2.2523049462187683e-05,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "wick.(4, 1)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 4.992175175232211e-06,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "wick.(4, 2)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 7.639900707877744e-05,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "wick.(4, 3)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.5954930699287682e-06,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "wick.(4, 4)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 1.4217471654539936e-05,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "pK.keys",
+      "actual": [
+        "(1,)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "expected": [
+        "(1,)",
+        "(2,)",
+        "(3,)",
+        "(4,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "pK.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00030362822878520217,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "pK.(2,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.0004044729768326572,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "pK.(3,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00031074764665420815,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "pK.(4,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00030924326615816415,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "K.keys",
+      "actual": [
+        "(1,)"
+      ],
+      "expected": [
+        "(1,)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "K.(1,)",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00030362822878520217,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "terms.row_inventory",
+      "actual": [
+        "0",
+        "1",
+        "10",
+        "11",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "expected": [
+        "0",
+        "1",
+        "10",
+        "11",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "center.row_inventory",
+      "actual": [
+        "('(1,)', 0)"
+      ],
+      "expected": [
+        "('(1,)', 0)"
+      ],
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "post.mu",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00030362822878520217,
+      "passed": false
+    },
+    {
+      "layer": 5,
+      "field": "final.tower_absent",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "final.c4_zero",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "activity.off_diagonal_D21",
+      "magnitude": 0.7756107895260208,
+      "threshold": 1e-10,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "activity.scalar_c4",
+      "magnitude": 33.34742469961926,
+      "threshold": 1e-10,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "activity.p111_3",
+      "magnitude": 1.8315999456980363,
+      "threshold": 1e-10,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "activity.p111_21",
+      "magnitude": 0.3398461967213552,
+      "threshold": 1e-10,
+      "passed": true
+    },
+    {
+      "layer": 4,
+      "field": "activity.four_ages_nonfinal",
+      "shape": [],
+      "finite": true,
+      "normalized_error": 0.0,
+      "passed": true
+    },
+    {
+      "layer": 5,
+      "field": "final.output",
+      "shape": [
+        8
+      ],
+      "finite": true,
+      "normalized_error": 0.00030362822878520217,
+      "passed": false
+    }
+  ],
+  "check_count": 841,
+  "failed_count": 85,
+  "max_normalized_error": 0.0004044729768326572
+}
