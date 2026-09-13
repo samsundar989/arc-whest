@@ -47372,3 +47372,21 @@ passed **8/8**: exact typed cdf/pdf hidden, near-match/case-changed/
 unrelated typed/same-message wrong-type/arbitrary stderr visible, existing
 symmetry policy retained. This is only the filter unit result; affected-tree
 preflight, independent review and fresh Linux cap run are still required.
+
+**Late remote quick-certificate artifact, not a promotion gate.** Canceled
+workerq 1072 eventually returned `FAILED` from a `3080ti` git snapshot
+(`56660c90...`) after its cancellation request. Its F21 quick certificate
+has candidate SHA `d77dab0e...`, but verdict **REFUSED** on section 7's
+remote LOCAL 120-second wall check; sections 1, 9 and 10 are skipped by
+`--quick`, and it is not a server/official-mini reading. Its environment
+and checkout are why the earlier queue-placement correction excluded
+remote evidence. Preserve the raw report as
+`experiments/2026-09-12_f21/cert_F21_quick_remote1072_refused.json`
+SHA256 `246e1fae091eac0c7b3c0b3cda22355ff1114cfe3f79e4fbc862004ff0876439`,
+workerq log SHA256
+`dbdeedafaea6220695e3442cec36f09052922d28f37c30bc9df76bc17a9d6187`
+and receipt SHA256
+`17f7ba6c55b90e2d549805957c8e7e915a1839498ec04a6b0d40dcff803a4296`.
+No local absolute wall time is generalized from that host. Workerq 1074,
+the duplicate remote quick job, still shows cancellation requested/running
+without a log; it must not be mistaken for a current candidate check.
