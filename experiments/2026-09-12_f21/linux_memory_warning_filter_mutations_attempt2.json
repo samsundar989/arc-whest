@@ -1,0 +1,50 @@
+{
+  "artifact": "linux_memory_warning_filter_mutations",
+  "gate_source_sha256": "463b8560aa5be78bd18270a3507b80edb552ee8b1b7929d4089f7624a7261e8f",
+  "test_source_sha256": "bb70b5494b0a6ea845f67ac4f04053eac7c63c59118b4093561508df9224eab4",
+  "checks_total": 8,
+  "checks_failed": [],
+  "rows": [
+    {
+      "case": "exact_cdf_typed",
+      "passed": true,
+      "stderr": ""
+    },
+    {
+      "case": "exact_pdf_typed",
+      "passed": true,
+      "stderr": ""
+    },
+    {
+      "case": "near_match_typed",
+      "passed": true,
+      "stderr": "C:\\Users\\samsu\\Documents\\arc-whest\\local_sim\\test_linux_memory_warning_filter.py:92: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate. extra\n  warnings.warn(message, category)\n"
+    },
+    {
+      "case": "case_changed_typed",
+      "passed": true,
+      "stderr": "C:\\Users\\samsu\\Documents\\arc-whest\\local_sim\\test_linux_memory_warning_filter.py:92: FlopscopeWarning: Stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.\n  warnings.warn(message, category)\n"
+    },
+    {
+      "case": "unrelated_typed",
+      "passed": true,
+      "stderr": "C:\\Users\\samsu\\Documents\\arc-whest\\local_sim\\test_linux_memory_warning_filter.py:92: FlopscopeWarning: unexpected flopscope numerical warning\n  warnings.warn(message, category)\n"
+    },
+    {
+      "case": "same_message_wrong_type",
+      "passed": true,
+      "stderr": "C:\\Users\\samsu\\Documents\\arc-whest\\local_sim\\test_linux_memory_warning_filter.py:92: UserWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.\n  warnings.warn(message, category)\n"
+    },
+    {
+      "case": "symmetry_policy",
+      "passed": true,
+      "stderr": ""
+    },
+    {
+      "case": "arbitrary_stderr",
+      "passed": true,
+      "stderr": "arbitrary child stderr\n"
+    }
+  ],
+  "status": "PASS"
+}

@@ -47313,3 +47313,23 @@ Move only that receipt to `workerq_1093_linux_cap.json`, outside the replay
 glob; its content and hash remain unchanged. Do not call 1094 green.
 Rerun default preflight after the LMG6 source fix so B3 and the repaired
 instrument both receive one coherent affected-tree verdict.
+
+**LMG6 tiny mutation result, before fresh cap rerun.** The only production
+diff adds one `warnings.filterwarnings` rule inside `CHILD_PREDICT`, typed
+`flops.FlopscopeWarning` and full-message anchored/case-sensitive for the
+known cdf/pdf float32-to-float64 promotion. Existing symmetry handling,
+the zero-stderr check, controls, memory thresholds, report schema and
+candidate bytes are unchanged. Instrument SHA256
+`463b8560aa5be78bd18270a3507b80edb552ee8b1b7929d4089f7624a7261e8f`;
+new AST-extracting tiny mutation test SHA256
+`bb70b5494b0a6ea845f67ac4f04053eac7c63c59118b4093561508df9224eab4`.
+Its first 7/7 draft is preserved at
+`linux_memory_warning_filter_mutations_attempt1.json` SHA256
+`1b191dfc7e27e0ad78f0ecb70e8356d117a56616e14f921e00ae6559dcb122c7`;
+the test was strengthened with a case-change mutation before acceptance.
+Final `linux_memory_warning_filter_mutations_attempt2.json` SHA256
+`2bda20826cc0572c40b6be3f987e9978bdf23e03b83f1aa404113413b16ff230`
+passed **8/8**: exact typed cdf/pdf hidden, near-match/case-changed/
+unrelated typed/same-message wrong-type/arbitrary stderr visible, existing
+symmetry policy retained. This is only the filter unit result; affected-tree
+preflight, independent review and fresh Linux cap run are still required.

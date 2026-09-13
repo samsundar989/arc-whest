@@ -1,0 +1,45 @@
+{
+  "artifact": "linux_memory_warning_filter_mutations",
+  "gate_source_sha256": "99d7528b0ef910230487d6f3ac57bb51b498a52248c51c050cd0c4748f812955",
+  "test_source_sha256": "9469f2493942a8b8c8bf3121527688ee405224f601dc8ea1d4c720634bde22b9",
+  "checks_total": 7,
+  "checks_failed": [],
+  "rows": [
+    {
+      "case": "exact_cdf_typed",
+      "passed": true,
+      "stderr": ""
+    },
+    {
+      "case": "exact_pdf_typed",
+      "passed": true,
+      "stderr": ""
+    },
+    {
+      "case": "near_match_typed",
+      "passed": true,
+      "stderr": "C:\\Users\\samsu\\Documents\\arc-whest\\local_sim\\test_linux_memory_warning_filter.py:90: FlopscopeWarning: stats.norm.cdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate. extra\n  warnings.warn(message, category)\n"
+    },
+    {
+      "case": "unrelated_typed",
+      "passed": true,
+      "stderr": "C:\\Users\\samsu\\Documents\\arc-whest\\local_sim\\test_linux_memory_warning_filter.py:90: FlopscopeWarning: unexpected flopscope numerical warning\n  warnings.warn(message, category)\n"
+    },
+    {
+      "case": "same_message_wrong_type",
+      "passed": true,
+      "stderr": "C:\\Users\\samsu\\Documents\\arc-whest\\local_sim\\test_linux_memory_warning_filter.py:90: UserWarning: stats.norm.pdf promoted its float32 input to float64 to match scipy.stats. If float64 output was not intended, cast the result back with result.astype(np.float32) before downstream operations; float64 operations are billed at twice the float32 dtype rate.\n  warnings.warn(message, category)\n"
+    },
+    {
+      "case": "symmetry_policy",
+      "passed": true,
+      "stderr": ""
+    },
+    {
+      "case": "arbitrary_stderr",
+      "passed": true,
+      "stderr": "arbitrary child stderr\n"
+    }
+  ],
+  "status": "PASS"
+}
