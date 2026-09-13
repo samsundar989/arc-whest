@@ -48265,3 +48265,16 @@ external message, submission or designation. Obtain fresh independent
 Skeptic review of instrument/registry and terminal score evidence. Before
 each heavy or >30-minute workload, record a separate optimization review and
 submit through workerq with conservative declared RAM/VRAM/CPU.
+
+**Pre-submission optimization review — P10 affected default preflight.**
+The P10 registration and scorer's explicit local timing deviation affect
+the source/seed instrument, so run one complete 12-step default preflight
+before claiming or minting P10. Reuse Full 1092's unchanged Full-only steps,
+prior P09/P07 diagnostics, existing small preflight fixtures and installed
+packages; do not run a duplicate Full or candidate public smoke now. No
+additional dataset loader, worker pool, cache, batch, prefetch, pass or GPU
+placement is needed. Preserve the script's sequential checks and full
+transcript; a failed or interrupted run is restartable to a new path. The
+comparable affected default 1152 took 321.85 s at 2,941.50 MiB peak;
+declare **6 GiB RAM, 0 VRAM, 2 CPUs, 0 GPUs** on workerq live-worktree.
+No protected P10 truth, public CONFIRM or vault data is read by this check.
