@@ -47427,3 +47427,69 @@ request; no queue-time underdeclaration. Keep candidate SHA
 weights, repeat count and all 23 existing checks fixed. An independent
 post-run Skeptic must examine the actual Linux artifact before any formal
 memory claim.
+
+**F21 exposed P01 DESIGN result (2026-09-13; no promotion).** Workerq 1091
+SUCCEEDED (exit 0, 3,722.43 s, measured peak 4,018.92 MiB against the
+declared 7.5 GiB/0 VRAM/2 CPUs). The immutable raw report is
+`experiments/2026-09-12_f21/design_P01.json` SHA256
+`B5D74868DC950D14448AE33788A49D80089FECAAEEB7D29E77DE3150FA9632E6`.
+Workerq log/receipt hashes are `15653d068dfdba8aa20382db55127f0b9a1f81886b0aece551d7981a1b4386f2`
+and `312e8ed9be4eb94b8f3f34d6e677b7185d74d89f746574f937f689052d177832`.
+All three arms used the same 24 P01 seeds 40,821,001,144–167, 1024x16
+f64-readonly official precision, identical truth SHA
+`97b8656e1558ca87d8d68e5cbd4672ce309d41f9a62147528acf91c058824025`;
+0 errors, exhaustion or nonfinite rows per arm. Live P01 truth-read
+receipts for halves A/B are completed. Each half has 2^26 samples;
+empirical/predicted midpoint-noise ratio is 1.0608. This is exposed DESIGN,
+with locally relaxed residual for accuracy only, not an official deployment
+result or a DECIDE promotion.
+
+Original L4, F21 and original L2 raw mean MSEs respectively are
+`4.06552403594e-8`, `4.06569569122e-8` and `4.06570489867e-8`, each
+quoted with the same predicted midpoint truth floor `5.77609132865e-10`
+(empirical midpoint noise `6.12713383888e-10`). Their exact counted FLOPs
+per network are respectively `1,068,245,507,686`, `928,457,637,478`,
+`1,328,688,049,766`. Using the preregistered official-sample forecast,
+conservative maximum observed server offset +2^24, and λ=0, mean arithmetic
+scores are L4 `1.95069512088e-8`, F21 `1.69550864065e-8`, L2
+`2.42638423290e-8`. Paired L4 minus F21 difference is
+`2.55186480230e-9`, studentised-t 95% interval
+`[2.41845343450e-9, 2.68527617010e-9]` over 24 networks; the
+geometric ratio is only a stability diagnostic. The preregistered DESIGN
+ratio F21/L4 is `0.86918177141`, below its maximum `1.05`: **DESIGN
+PASS, not promotion**. Worst local accuracy-run residual is 13.047 s for
+F21, giving only 0.0307 nominal local headroom against the 0.4 s cliff;
+this local in-process number is not graded server residual. The first
+variant/backend remains the sole selection; independent result Skeptic
+review is pending before P09 registration.
+
+**F21 fresh Linux cap v6 result (2026-09-13; post-Skeptic claim pending).**
+Workerq 1096 SUCCEEDED (exit 0, 173.40 s) and wrote
+`experiments/2026-09-12_f21/f21_linux_cap_v6.json` SHA256
+`f48516139b8ef99109a89b342e3808f15879bf8fb3e1e3aa3f8005e631f344ab`.
+The actual WSL report says **PASS, 23/23** with the candidate SHA
+`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`
+and repaired instrument SHA `463b8560aa5be78bd18270a3507b80edb552ee8b1b7929d4089f7624a7261e8f`.
+The exact 8,192 MiB RLIMIT_AS readback is 8,589,934,592 bytes; capped
+9 GiB negative control failed and uncapped 9 GiB positive control survived.
+Three f64-readonly 1024x16 same-worker predictions completed with finite
+16x1024 outputs and identical 928,457,637,478 FLOPs. Worst VmPeak is
+5,643,083,776 bytes, peak RSS 3,676,622,848 bytes, settled growth
+41,119,744 bytes under the 67,108,864-byte limit; all child stderr fields
+are empty. The workerq receipt/log hashes are
+`e80851e0647e75ee23af1231ed8321bd4721e706c8cf576a92e0f81ed3825b2f`
+and `cd9467da4c837ee7436bfdcf5820efb65311bd238986fdabd94c9e9f317d885e`.
+Workerq's parent-side measured peak is only 42.42 MiB and misses the WSL
+child/9 GiB positive control; the conservative 16 GiB declaration was
+appropriate. The earlier v5 **22/23 FAIL** remains intact and is not
+relabeled. A fresh independent post-run Skeptic is reviewing the v6 raw.
+
+**Late cancelled remote quick-cert 1074, excluded.** Its report arrived at
+the old output path after cancellation and is preserved as
+`experiments/2026-09-12_f21/cert_F21_quick_remote1074_refused.json`
+SHA256 `da322b6be96f011102a3712edc95f23fd5ba0a18ffa50703716aaf9f8d8976ef`.
+It is a `3080ti` snapshot (`a5406104...`), terminal FAILED/cancellation
+requested, report **REFUSED** on remote local wall. Its workerq receipt/log
+hashes are `ebce72427daba16465a315242704aa25af79254b7ab036933228` and
+`6E9286597924E3B906B73A8920E4DE7CCEB4721B982741E3BA98643F9ACB3061`.
+No promotion or readiness claim relies on either remote quick certificate.
