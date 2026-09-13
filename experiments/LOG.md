@@ -47637,3 +47637,13 @@ parts is needed in addition to ARC's notice; that later release is not
 authorized here. The auditor read the official L4 submission page only for
 account/round metadata, not its scoring rows. No P09/public F21 labels or
 vault were used for this provenance verdict.
+
+**F21 candidate-specific memory consumer receipt, truth-free.** The
+production `certify_candidate.py --memory-only --memory-report
+f21_linux_cap_v6.json` accepted the exact F21 source and current instrument
+bindings as **CERTIFIED (applicable=True)**, with all eleven section-9
+checks printed PASS. Raw
+`experiments/2026-09-12_f21/cert_F21_memory_only_v6.json` SHA256
+`60e6da64113fc01c1e9c79bcbde9da6a898b9b182cf139cc86c0b8a7f73af8ab`.
+This is only the memory-report consumer, not a full candidate certificate,
+score or official mini. No P09 read occurred.
