@@ -47143,3 +47143,46 @@ tree and obtain a fresh independent Skeptic before accepting this IMPORTANT
 probe. This does not delay F21 DESIGN/DECIDE or imply a general scientific
 closure. AGENTS requires a written prediction for IMPORTANT; no Samuel
 prediction is required because this probe touches no strategic gate/data.
+
+**Full preflight 1092 terminal receipt.** The complete 16-step baseline and
+instrument gate **PASSED 16/16**, workerq exit 0, runtime 1,319.43 s and
+measured process-tree peak 10,040.36 MiB under the declared 16 GiB RAM,
+0 VRAM, 2 CPU reservation. Exact official-runner op parity, 27/27 shape
+parity, 48/48 carrier checks, deployment-envelope read-only proof, and
+zero-failure shipped-file Phase-2 smoke are in the full transcript.
+`experiments/2026-09-12_f21/preflight_full_1092_verdicts.txt` SHA256
+`8e840696103d33d486f75c56ece13266f662e67961c00de3c02e0c34359c93b8`,
+workerq log SHA256
+`0a611e4ce852ebff56c524acc57a4b635d4b7527823b0e149c54f291d556ccc2`,
+workerq JSON SHA256
+`d890e1215f9a8bfee80fbdc5c8470b3c733c899dc8f70c42766640c93dfb969c`.
+The gate regenerated two tracked historical timing/memory self-test JSONs
+with only nondeterministic host measurements; their exact baseline bytes
+were restored after retaining this run's complete transcript. This green
+gate validates shared instruments and shipped `estimator.py`, and permits
+the scoped B0/B1/B2 IMPORTANT reviews to close within their tiny-fixture
+limits. It does **not** certify F21 candidate bytes, the 8,192 MiB Linux
+limit, or the uncommitted/unrun-at-gate-start B3 probe.
+
+**B3 tiny full-rank recurrence result, scoped.** The first direct CPU run
+produced 418 checks with one structural failure at final `pK.keys`:
+independent `[(1,)]` versus the frozen fast-1D path's precomputed but
+unused `[(1,),(2,),(3,),(4,)]`. Its raw JSON is preserved at
+`experiments/2026-09-13_b3_fullrank_nonlinear_attempt1.json`, SHA256
+`c8d7590bdfb0f0ec30ac48c59395e45760ceb4d1156fc24386cc77eb8838718c`.
+The isolated probe was repaired to calculate those final one-dimensional
+pK rows; no tolerance, frozen file, compact reference or F21 source changed.
+Final `local_sim/p2_compact_fullrank_nonlinear_b3.py` SHA256
+`f2ae8b7a62999e0b1f0e23be80c410abccc33f62341d1dff4c700900a0fc3e54`
+produced raw `experiments/2026-09-13_b3_fullrank_nonlinear.json` SHA256
+`55d2a1614d1e17278523b95e5da435447fa8d754be60ca6234cc81fa24939956`:
+**421/421** finite/structural checks passed, largest normalized numeric
+error `2.0984071203943477e-6` versus preregistered `1e-5`. The fixture
+has two live ages at layer 2, rank 4 QR at every nonfinal join, nonzero
+off-diagonal D21, scalar c4 and both p111 birth-subtraction terms.
+The compact arm interprets the frozen coefficient tables independently
+without calling frozen nonlinear helpers; a read-only line trace captures
+the frozen L2 reference intermediates. This supports only this explicit
+n4/depth4 full-rank recurrence, not general-width stability, compression,
+cost, score or deployment. Fresh Skeptic and affected-tree preflight remain
+required before accepting even this scoped IMPORTANT result.
