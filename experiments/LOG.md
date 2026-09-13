@@ -46945,3 +46945,13 @@ WhestBench `0.16.1`. Raw JSON
 The existing flopscope dtype/symmetry warnings appeared on stderr, with
 exit 0. This is only the small contract check; it does not establish live
 1024x16 lifecycle, residual, memory or official mini behavior.
+
+**B1 independent review.** Fresh-context Skeptic
+`experiments/2026-09-12_b1_skeptic.md` returned **PROVISIONAL** pending
+Full preflight 1090. It independently checked all 318 rows, source hashes,
+chronology, ages, orientation, mask and nonzero D21/c4 activity. Its strongest
+limit is explicit: both output arms call frozen L2 `_layer`, and the compact
+slice comparison uses L2-derived advanced sources. The accepted scope after
+a green Full gate can be only full-rank identity **storage-boundary** parity;
+it is not an independent compact nonlinear recurrence, QR, compression,
+cost or score claim. No further compression test is authorized by B1 alone.
