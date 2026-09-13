@@ -48397,3 +48397,24 @@ recorded optimization review and the P09 observed peaks. At submission the
 job was QUEUED with no artifact or protected P10 truth read. Its output must
 be finalized on the host and pass the preregistered midpoint floor screen
 before the one scorer read.
+
+**P10 two-replica truth producer completed; pre-score floor screen passed.**
+Workerq 1176 SUCCEEDED, exit 0, 5,615.23 s; observed peak 4,565.33 MiB RAM
+and 2,636 MiB VRAM under the declared 8/6 GiB, 4 CPU, 1 GPU. The raw
+terminal log SHA256 is `ea4a1298f9128f5d10772750f0a4259aed0c8bbacba1117930ee224792007abc`;
+the receipt SHA256 is
+`e6f24529f1449a982e792df787e24c412baf16d956e4ac5cdded319e158c0364`.
+The producer completed 128/128 of the exact claimed P10 networks with two
+`2**24` replicas. Printed replica disagreement was `8.7309e-9` observed
+versus `8.9455e-9` predicted, ratio `0.9760`; this supports the intended
+independent-replica noise model. Printed *per-replica* mean truth noise was
+`4.4727e-9`, so the registered midpoint screen uses `2.23635e-9`, or
+`5.5008%` of the exposed original-L4 raw MSE `4.06552403594e-8`; it passes
+the predeclared `10%` ceiling `4.06552403594e-9`. These are producer
+metadata only, not a protected score read or a fresh accuracy result.
+The host file SHA256 exactly matched the producer print:
+`9026b4ea66900695929cc9a32f1a801258733c176ae100b079e979907a04de30`.
+`seed_ledger.finalize` appended that digest to the exact P10 claim. The
+live truth-read register still reports cap 1, spent 0, reads `[]`. Do not
+open labels before the one pinned scorer; obtain fresh pre-score Skeptic
+review of the binding and command first.

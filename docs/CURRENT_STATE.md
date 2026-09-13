@@ -1,16 +1,21 @@
 # CURRENT_STATE.md — read this first
 
-**September 13 P10 is claimed; truth producer workerq 1176 is queued/running.**
+**September 13 P10 truth is finalized; one protected score read remains.**
 Samuel answered "I don't know" to all three new predictions; that response
 was committed at `ce853f7` before any P10 data. The fresh single-use claim was
-committed at `883bd45`; job 1176 requests 8 GiB RAM, 6 GiB VRAM, 4 CPUs and
-one GPU for two `2**24` truth replicas on 128 networks. There is no P10 score
-or protected truth read yet. The same exact F21 candidate SHA
+committed at `883bd45`; workerq 1176 SUCCEEDED with two `2**24` truth
+replicas on all 128 networks. The artifact SHA256 is
+`9026b4ea66900695929cc9a32f1a801258733c176ae100b079e979907a04de30`.
+The producer's disagreement ratio is `0.9760`; its printed per-replica
+noise `4.4727e-9` gives a midpoint screen of `2.23635e-9`, or `5.50%` of
+the exposed L4 MSE, below the predeclared 10% ceiling. The ledger finalized
+the exact hash, and the truth-read register remains spent 0/1. A fresh
+pre-score Skeptic must review the binding before scorer submission. The same exact F21 candidate SHA
 `d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`
 is frozen against original L4, with L2 context. P09's only protected read
 ended without a score and cannot be repeated. P10 allocates fresh
 `40,913,010,000..127` as SINGLE_USE (registry commit `24e8b32`) and still has
-one claim and zero truth reads. The [P10 contract](../experiments/LOG.md) keeps
+one finalized claim and zero truth reads. The [P10 contract](../experiments/LOG.md) keeps
 the paired arithmetic `competition_score.decide(gate=1.05, interval="t")`
 on the official-precision forecast with the conservative `+2**24` FLOP
 offset. It explicitly disables both **local scoring** wall/residual caps so
