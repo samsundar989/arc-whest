@@ -47238,3 +47238,14 @@ and receipt SHA256
 An independent Skeptic is reviewing whether a narrowly preregistered
 warning classifier and fresh run can restore a formal cap gate without
 hiding unexpected stderr. Candidate certification and release remain open.
+
+**Independent Linux-failure audit.** Fresh-context Skeptic
+`experiments/2026-09-12_f21/linux_cap_failure_skeptic.md` returned
+**PROVISIONAL**: 1093 remains a formal FAIL and `certify_candidate.py`
+would REFUSE its `status: FAIL`/nonempty stderr, even though cap, controls,
+three predictions and 5,383.3 MiB VmPeak support a narrower resource
+observation. The warnings disclose real float64 work and must not be
+blanket-suppressed. It recommended a preregistered, typed, exact-message
+instrument repair with a negative unexpected-stderr mutation, affected-tree
+preflight, independent review, and fresh cap run to a new path. The v5
+artifact cannot be relabeled after its outcome was seen.
