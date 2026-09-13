@@ -47329,6 +47329,19 @@ be supplied explicitly to the candidate certifier; no report is hidden
 from its required candidate-specific consumer. This naming repair plus
 LMG6 source change still requires the affected-tree default preflight.
 
+**Pre-submission optimization review — corrected affected-tree default
+preflight.** Run the same accepted 12 steps once on committed LMG6/B3 and
+renamed-artifact bytes; 1094's red verdict cannot be reused. The direct
+memory-binding discriminator now passes 35/35, so no duplicate report loader
+or special worker is added. Reuse official stack, existing fixtures and
+Full 1092's unchanged 13–16 results, without rerunning that expensive
+shape/carrier/envelope/smoke set. Do not skip default step 11 or the source
+scan: they are the checks affected by this repair. No prefetch, batch or GPU
+work is involved. The default run is restart-only if interrupted; use a new
+transcript path. Comparable 1094 peaked 2,987.07 MiB over 413.49 s (and
+1085 3,079.10 MiB); declare **6 GiB RAM, 0 VRAM, 2 CPUs** on workerq,
+about twice the measured peak. Do not reduce this request for admission.
+
 **LMG6 tiny mutation result, before fresh cap rerun.** The only production
 diff adds one `warnings.filterwarnings` rule inside `CHILD_PREDICT`, typed
 `flops.FlopscopeWarning` and full-message anchored/case-sensitive for the
