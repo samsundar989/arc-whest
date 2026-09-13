@@ -47229,7 +47229,7 @@ from the frozen L4 parent and appear in its DESIGN worker log too. This is
 not a score or memory failure; it is nevertheless a real failure of the
 pre-existing zero-stderr instrument policy. Do not relabel the v5 report as
 PASS. The immutable failed report is
-`experiments/2026-09-12_f21/linux_memory_gate_f21_v5_failed_stderr.json`
+`experiments/2026-09-12_f21/f21_linux_cap_v5_failed_stderr_copy.json`
 SHA256 `6714c20fb05ac3bfe50b7e8b5fe99cf84a4d06e0b55c594547885964500e566b`;
 workerq log SHA256
 `8739bea5e8f5808df91a797e08d1b61bb8a8626b8eddecfd5eaeb20e68b503d9`,
@@ -47313,6 +47313,21 @@ Move only that receipt to `workerq_1093_linux_cap.json`, outside the replay
 glob; its content and hash remain unchanged. Do not call 1094 green.
 Rerun default preflight after the LMG6 source fix so B3 and the repaired
 instrument both receive one coherent affected-tree verdict.
+
+**Report replay naming correction before LMG6 rerun.** A tiny direct
+`test_linux_memory_binding.py` run after moving only the workerq receipt
+still found two newly stored failed F21 JSONs under its
+`linux_memory_gate_*.json` glob. Its fixed seven-report historical check
+then failed 34/35 because those are new results, not one of the seven
+legacy reports; the test does not mutate any report. Move both byte-identical
+v5 failed copies outside that historical replay glob to
+`f21_linux_cap_v5_original.json` and
+`f21_linux_cap_v5_failed_stderr_copy.json`, preserving their SHA and FAIL
+contents. The same direct test then passed **35/35** without any source
+change. The new v6 Linux output will also use a name outside that glob and
+be supplied explicitly to the candidate certifier; no report is hidden
+from its required candidate-specific consumer. This naming repair plus
+LMG6 source change still requires the affected-tree default preflight.
 
 **LMG6 tiny mutation result, before fresh cap rerun.** The only production
 diff adds one `warnings.filterwarnings` rule inside `CHILD_PREDICT`, typed
