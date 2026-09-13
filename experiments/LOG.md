@@ -47578,3 +47578,15 @@ until this gate and a fresh zero-claim/read check. No P09 claim or read was
 made during preflight. The `p2_truth.py --plan` no-draw output confirms
 the registered entire span free and expected two `2**24` replicas, without
 loading truth or GPU work.
+
+**P09 exact host claim (one-way boundary).** After 1097 green and the
+registry Skeptic's final ACCEPT (SHA256
+`2d46d6a419e92fba2dfec5bb8e0f97443bb7ef1b39661d587de1189a52747f46`),
+`seed_ledger.claim_range` wrote exactly one `SINGLE_USE` claim for
+`P09[40_912_009_000..40_912_009_127]`, consumer
+`local_sim/p2_truth.py`, artifact
+`experiments/2026-09-12_f21/truth_P09.npz`, two replicas x `2**24`,
+date 2026-09-12. The live ledger records antecedent commit `f639c05`.
+Immediate host verification found one claim, 128 covered seeds, no P09
+truth-read reservation, and no output artifact yet. This claim is committed
+before the producer is submitted; it cannot be silently released or reused.
