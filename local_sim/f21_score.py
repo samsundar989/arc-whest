@@ -5,9 +5,10 @@ The L4 parent and L2 control are frozen own-code files.  The fused L4 SHA is
 supplied after the engineering gate freezes its bytes.  All three arms use the
 same canonical mints and the grader-twin lifecycle evaluator.
 
-Local residual timing is not server timing.  This score run explicitly relaxes
-the local 0.4 s residual cliff so host speed cannot replace an accuracy result
-with zeroed predictions.  Subprocess and Linux memory gates remain separate.
+Local timing is not server timing.  The fresh P10 decision explicitly relaxes
+both the local 120 s wall and 0.4 s residual cliffs so host sleep/scheduling
+cannot replace an accuracy result with zeroed predictions.  Subprocess and
+Linux memory gates remain separate.
 """
 
 from __future__ import annotations
@@ -140,27 +141,27 @@ def _labels(a: argparse.Namespace, live_root: Path, live_reads: Path,
         truth_path = Path(os.path.abspath(_ROOT / a.truth))
         truth_rel = os.path.relpath(truth_path, _ROOT).replace("\\", "/")
         truth_sha = _sha(truth_path)
-        if not any(c.block == "P09" and c.artifact == truth_rel
+        if not any(c.block == "P10" and c.artifact == truth_rel
                    and c.artifact_sha256 == truth_sha
                    for c in seed_ledger.finalizations(path=str(live_ledger))):
-            raise ValueError("P09 truth must be finalized in the seed ledger before reading")
-        d, p = _read(a.truth, "P09", "F21 fresh DECIDE truth", a.out,
+            raise ValueError("P10 truth must be finalized in the seed ledger before reading")
+        d, p = _read(a.truth, "P10", "F21 fresh DECIDE truth", a.out,
                      live_reads, live_ledger)
         required = {"seeds", "means_r1", "means_r2", "gt_noise", "n_samples"}
         if required - d.keys():
-            raise ValueError("P09 truth lacks required arrays")
+            raise ValueError("P10 truth lacks required arrays")
         n_samples = int(d["n_samples"])
         if n_samples != 2**24:
             raise ValueError("DECIDE truth must use 2**24 samples per replica")
         seeds = [int(s) for s in d["seeds"]]
         if len(seeds) != 128 or len(set(seeds)) != 128:
             raise ValueError("DECIDE truth must contain 128 unique networks")
-        if seeds != seed_blocks.seeds("P09")[:128]:
-            raise ValueError("DECIDE truth must contain the registered P09 span")
+        if seeds != seed_blocks.seeds("P10")[:128]:
+            raise ValueError("DECIDE truth must contain the registered P10 span")
         claims = seed_ledger.claims(path=str(live_ledger))
-        if not all(any(c.block == "P09" and c.start <= s < c.start + c.n
+        if not all(any(c.block == "P10" and c.start <= s < c.start + c.n
                        for c in claims) for s in seeds):
-            raise ValueError("all P09 seeds must be claimed before truth is scored")
+            raise ValueError("all P10 seeds must be claimed before truth is scored")
         y1 = np.asarray(d["means_r1"][:, -1, :], dtype=np.float64)
         y2 = np.asarray(d["means_r2"][:, -1, :], dtype=np.float64)
         noise = np.asarray(d["gt_noise"], dtype=np.float64) / 2.0
@@ -236,7 +237,7 @@ def main() -> int:
     ap.add_argument("--tier", choices=("design", "decide"), required=True)
     ap.add_argument("--truth-a", help="repo-relative snapshot DESIGN half A")
     ap.add_argument("--truth-b", help="repo-relative snapshot DESIGN half B")
-    ap.add_argument("--truth", help="repo-relative snapshot DECIDE P09 NPZ")
+    ap.add_argument("--truth", help="repo-relative snapshot DECIDE P10 NPZ")
     ap.add_argument("--l4", required=True, help="repo-relative frozen original L4 parent")
     ap.add_argument("--fused", required=True, help="repo-relative fused L4 candidate")
     ap.add_argument("--fused-sha", required=True, help="expected candidate SHA256")
@@ -267,8 +268,8 @@ def main() -> int:
     truth_paths = [a.truth] if a.tier == "decide" else [a.truth_a, a.truth_b]
     if any(Path(p).is_absolute() for p in truth_paths):
         ap.error("truth paths must be repo-relative snapshot paths")
-    if a.tier == "decide" and not Path(a.truth).name.startswith("truth_P09"):
-        ap.error("DECIDE truth filename must identify P09")
+    if a.tier == "decide" and not Path(a.truth).name.startswith("truth_P10"):
+        ap.error("DECIDE truth filename must identify P10")
     out = Path(a.out).resolve()
     if not Path(a.out).is_absolute():
         ap.error("--out must be an absolute live path")
@@ -291,8 +292,12 @@ def main() -> int:
         if not live_copy.is_file() or _sha(live_copy) != digest:
             raise ValueError(f"live workspace does not contain snapshot-pinned {name} bytes")
     seeds, truth, noise, truth_prov = _labels(a, live_root, live_reads, live_ledger)
-    spec = le.LifecycleSpec.for_round("v2-phase2", residual_wall_time_limit_s=None)
-    print(f"F21 {a.tier.upper()}: {len(seeds)} paired networks; local residual cap explicitly relaxed", flush=True)
+    local_timing = {"residual_wall_time_limit_s": None}
+    if a.tier == "decide":
+        local_timing["wall_time_limit_s"] = None
+    spec = le.LifecycleSpec.for_round("v2-phase2", **local_timing)
+    print(f"F21 {a.tier.upper()}: {len(seeds)} paired networks; "
+          f"local timing caps relaxed for accuracy only: {sorted(local_timing)}", flush=True)
     print(f"midpoint truth floor {noise.mean():.6e}; official forecast N={OFFICIAL_SAMPLES:,}", flush=True)
 
     arms = {}
@@ -369,6 +374,7 @@ def main() -> int:
                         "binding_gate_score": "forecast_offset_max",
                         "offset_zero_forecast_is_sensitivity_only": True,
                         "local_residual_cap_relaxed_accuracy_only": True,
+                        "local_absolute_wall_cap_relaxed_accuracy_only": a.tier == "decide",
                         "subprocess_deployment_certification": False},
         "source_hashes": {name: {"path": str(path), "sha256": digest}
                           for name, (path, digest) in paths.items()},
