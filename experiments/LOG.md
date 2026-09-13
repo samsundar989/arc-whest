@@ -48166,3 +48166,102 @@ future F21 DECIDE still needs a newly claimed, preregistered single-use
 block, new Samuel predictions, the binding paired arithmetic decision and
 separate candidate-specific deployment checks. This slice did not change
 that protocol.
+
+## 2026-09-13 — P10 fresh F21 decision after inconclusive P09 (STRATEGIC contract, before data)
+
+**Question.** With original L4 as primary control, does the unchanged exact
+F21 candidate improve paired Phase-2 arithmetic score on 128 fresh networks
+when local-host timing cannot zero an otherwise completed accuracy prediction?
+
+**Existing evidence.** CONFIRMED: F21 SHA256
+`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`
+passed independent tiny/full-depth checks and lowered official-stack counted
+FLOPs from `1,068,245,507,686` for own L4 parent SHA
+`052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58`
+to `928,457,637,478` (13.08574%). CONFIRMED: exposed P01 DESIGN with
+two `2**26` truth halves had F21/L4 official-precision forecast mean score
+ratio `0.8691817714`; raw MSE was nearly unchanged/slightly worse. CONFIRMED:
+P09's sole score attempt aborted after 128 L4 and 128 F21 evaluations with
+an unspecified fused lifecycle failure; no row, score, interval or verdict
+was published, L2 did not run, and P09 is spent. CONFIRMED: a separate
+label-free exposed-P07 128-network run produced 127 successful F21 rows and
+one local `time_exhausted` row whose 17,914.856-second wall includes a
+documented 17,892.563-second Windows sleep; it does not recover P09's cause.
+INFERRED: wall-time failure on this host is an unreliable accuracy proxy for
+the grading server. SPECULATIVE: F21's accuracy and server deployment remain
+acceptable on fresh networks; the P01 score ratio may not generalize.
+
+**Hypothesis and mechanism.** The distributive D21 fusion removes a counted
+wide product while changing only float32 operation order. If its small P01
+accuracy difference generalizes, the 13.1% counted saving should produce a
+paired score gain near 13% against original L4. Host sleep and scheduling can
+make local absolute wall time unrelated to the same bytes on the server, so
+local wall time will be recorded, but will not zero accuracy rows in P10.
+
+**Frozen intervention and selection.** No estimator, coefficient, backend,
+precision, saturation, history, chooser or candidate variant changes. The
+single candidate is F21 SHA above; original L4 SHA above is the only primary
+control; original L2 SHA
+`390bc226bbf517df0110facfc0dc91c78ef670e8a49368a536cabf630057d1db`
+is robustness context on the same ordered seeds. Use the existing canonical
+Phase-2 lifecycle, `f64_readonly` weights and flopscope meter, with two
+explicit **local score-only timing deviations**:
+`wall_time_limit_s=None` and `residual_wall_time_limit_s=None`. The former
+prevents a sleeping/contended local host from zeroing a completed prediction;
+the latter was already the P09 accuracy-domain deviation. Neither is a
+deployment pass. Preserve setup, budget, error handling, source checks and
+failure-metadata logging; any budget or estimator exception still aborts the
+decision. The installed 120-second wall and 0.4-second residual caps must be
+checked later under candidate-specific official subprocess mini before any
+submission review. This explicit change to the local scoring protocol is
+specific to this fresh experiment; it does not retroactively repair P09.
+
+**Predictions before data.** (1) No candidate exception or counted-budget
+failure on 128 P10 networks; local wall records may be large but are not
+graded timings. (2) Two independent `2**24` truth replicas should yield a
+predicted midpoint noise floor near `2.2e-9`, below 10% of the approximately
+`4.1e-8` exposed-L4 raw MSE. (3) F21's official-precision arithmetic mean
+score should be about 0.87 times L4's, clearing the `1.05` gain gate and a
+positive paired t interval. These are proposed predictions, not results.
+Samuel's three separate predictions are **pending** and must be appended and
+committed before any P10 truth mint or scoring result.
+
+**Registered data, baseline and statistic.** Register fresh block `P10` as
+128 consecutive Phase-2 canonical network seeds, disjoint from P01/P07/P08/
+P09, single-use. Claim through `seed_ledger` after registration and before
+mint. Mint two independent `2**24` final-mean truth replicas per network with
+the already accepted `p2_truth.py`, then finalize their exact artifact SHA
+before its **one** protected read. If predicted midpoint floor exceeds 10%
+of the exposed L4 raw MSE, stop without a score read; do not silently lower
+precision or select a new block after seeing an answer. Run L4, F21, L2 in
+that fixed order on common random networks/labels. Report every arm's raw
+MSE with per-network truth floor, observed score, noise-corrected estimate,
+official-precision forecast at 1e9 truth samples, and sensitivity to zero
+versus the observed maximum `+2**24` graded FLOP offset. The **binding**
+promotion gate is `competition_score.decide(control=L4,
+candidate=fused_L4, gate=1.05, interval="t")` on paired **arithmetic**
+official-precision forecast score vectors with `+2**24` offset for both
+arms; require its gain threshold and 95% difference interval strictly above
+zero. L2 is context only. The geometric ratio is a stability diagnostic, not
+a promotion gate. There is one variant and one primary comparison; no
+fresh-result selection or coefficient fitting.
+
+**Falsifier and cost model.** Any failed non-timing lifecycle row, incorrect
+source/seed/read binding, excessive truth floor, paired gain below 1.05,
+or interval including zero rejects P10 as promotion evidence. A valid gate
+still does not certify server deployment. Phase 2 has lambda zero, so score
+cost is counted `F` and multiplier `max(0.1,F/2**41)`; use each arm's own
+metered FLOPs and the declared server offset. Local residual/absolute wall
+are diagnostic only; eventual official subprocess worst residual and
+`0.4/worst` headroom are separate. Preserve the existing Linux 8192 MiB
+candidate evidence and recheck applicability to exact bytes. P09's failure
+category remains unknown and cannot be inferred from P10.
+
+**Confounders and boundaries.** Local score-only timing deviations are
+explicit in the report. A host sleep must be recorded rather than hidden.
+Official mini/CONFIRM stays read-only and **after** a valid DECIDE; no public
+constant fitting, vault touch, P09 re-read, frozen/shipped/HUMAN_MODEL edit,
+external message, submission or designation. Obtain fresh independent
+Skeptic review of instrument/registry and terminal score evidence. Before
+each heavy or >30-minute workload, record a separate optimization review and
+submit through workerq with conservative declared RAM/VRAM/CPU.
