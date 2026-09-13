@@ -19,26 +19,27 @@ Skeptics ACCEPT these narrow engineering claims. There is no accuracy,
 score, memory-cap or submission result. The F21 contract and Samuel's three
 "I don't know" predictions were committed before results.
 
-**Live job:** workerq **1091** is running the registered exposed-P01 DESIGN
+**Live jobs:** workerq **1091** is running the registered exposed-P01 DESIGN
 comparison (original L4 primary, fused L4, original L2 context; 24
-high-resolution networks) with a conservatively reviewed 7.5 GiB request.
-Both P01 truth halves have canonical completed live-read receipts; no score
-or DESIGN verdict exists yet. The first 8 GiB job 1087 and candidate Linux
-cap/Full jobs 1088/1090 were removed while QUEUED, before execution, to
-prioritize DESIGN. They require requeue if it passes. Partial Full job 1089
-was cancelled at step 13 after its 6 GiB estimate proved too low; its
-transcript is preserved and is not a Full verdict. The provisional
-[pre-score](../experiments/2026-09-12_f21/prescore_skeptic.md) and
-[receipt](../experiments/2026-09-12_f21/receipt_skeptic.md) reviews require
-the actual 1087 live receipt/output. No P09 block is allocated or claimed;
-P08 remains exhausted. No vault/public labels were read for F21, and there is
-no submission approval.
+high-resolution networks), conservatively declared at 7.5 GiB. It reached
+16/24 on its first original-L4 arm; no score or DESIGN verdict exists.
+Both P01 truth halves have completed canonical live-read receipts and an
+independent [receipt audit](../experiments/2026-09-12_f21/design_receipt_skeptic.md),
+provisional pending result. Workerq **1092** is running corrected 16 GiB
+Full preflight on the committed current tree; **1093** queues candidate F21
+Linux 8,192 MiB enforcement at 16 GiB behind it. The earlier Full job 1089
+was cancelled at step 13 after an underdeclared 6 GiB request; its partial
+transcript is preserved, with no Full verdict. B0/B1/B2 compact full-rank
+probes have tiny passes and scoped independent Skeptics, but remain
+provisional until Full preflight and do not establish a compact nonlinear
+engine, compression or score. No P09 is allocated or claimed; P08 remains
+exhausted. No vault/public F21 labels or submission approval exist.
 
 **September 12, 2026: strategist review of worker d124234.** Then read LOG from the bottom. The preceding detailed chronology is [archived verbatim](archive/CURRENT_STATE_before_worker_review_2026-09-12.md); all original contracts and results remain in experiments/LOG.md.
 
 ## Next measured action: exposed DESIGN, then fresh DECIDE if it passes
 
-Check 1087's terminal status, live truth-read receipts, exact source hashes,
+Check 1091's terminal status, live truth-read receipts, exact source hashes,
 per-arm failures, raw MSE and truth floor, and the preregistered at-most-5%
 official-precision forecast score regression screen. A pass freezes this sole
 variant/backend before registering and claiming fresh P09 (128 networks,
