@@ -46934,3 +46934,14 @@ nonlinear Wick/centering/K4 steps**, not an independently implemented compact
 nonlinear engine, actual full-rank QR, compression cost or score. No
 registered data or candidate file was touched. The corrected Full preflight
 1090 is queued; a fresh Skeptic must review this scoped result before use.
+
+**F21 candidate-specific contract validation.** The exact F21 source
+`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`
+passed `uv run whest validate --estimator estimator_k3_strassen_L4_f21.py
+--format json` with `ok: true`, class `Estimator`, output shape `[2,4]`,
+WhestBench `0.16.1`. Raw JSON
+`experiments/2026-09-12_f21/whest_validate_f21.json` SHA256
+`986396ebfd1ae814954529d2c83c0dadca7e08d2c0d9ec17415c29a4a112c314`.
+The existing flopscope dtype/symmetry warnings appeared on stderr, with
+exit 0. This is only the small contract check; it does not establish live
+1024x16 lifecycle, residual, memory or official mini behavior.
