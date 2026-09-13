@@ -47975,3 +47975,18 @@ GPU and git snapshot rather than explicit CPU-only live-worktree options. It
 was terminated after roughly 11 seconds, before a result, with no protected
 read. Resubmit with `--gpus 0 --live-worktree` so the resource declaration
 matches this review and the transcript lands in the live experiments tree.
+
+**Affected preflight result.** Corrected CPU-only workerq 1141 used
+`--gpus 0 --ram 6 --vram 0 --cpus 2 --live-worktree`, finished SUCCEEDED
+exit 0 in 421.46 s, measured peak 2,967.20 MiB. The complete
+`experiments/2026-09-13_f21_failure_diag_preflight_default_verdicts.txt`
+transcript SHA256 is
+`24584955DC40B829D2F3120B804E5667CC59EA411AE4D2BD9CBD8A84E3E0E47A`;
+it ends **PREFLIGHT GREEN — 12/16, four Full-only steps skipped**. The saved
+workerq 1141 log SHA256 is
+`70B2334D67CC213B754C425C985876AE230C0D3DA06054E5F3343EB4B93222C7`;
+receipt SHA256 is
+`983E8E9347B0DADC2F19D265AAF124D259CF4C49E616F1244DA671ED272AFF59`.
+These certify only the affected diagnostic repair plus the default gate;
+they do not rescue P09 or certify F21 for submission. Independent instrument
+Skeptic verdict remains pending at this line.

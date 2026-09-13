@@ -12,9 +12,12 @@ at the recorded live read was `local_sim/f21_score.py` SHA256
 - Workerq 1099 ended **FAILED, exit 1** after 4h55m; its receipt reports a
   measured 5,851.27 MiB peak against 8,192 MiB requested. The process's own
   traceback, not a workerq resource error, ended the job. The log SHA256 is
-  `a170334c3465a27caf128954e5462972f890f309525741fe351615018e1d31a5`;
+  `95f322e9514f9687be5d6bf140c8947c702ce13842420d468ba627deec32bf14`
+  for the finalized `workerq_1099_terminal.log` artifact;
   terminal receipt SHA256 is
-  `853956d3a2b8806d4b227922731820cde099e46f1b98a283be20b8087cd53b6d`.
+  `78ede92ea62793d30629a426576976ff9ea0f4c22671ead502028dfe53b0370e`
+  for `workerq_1099_terminal_receipt.json`. Earlier transient captures had
+  different bytes; these are the durable raw artifact hashes.
 - The log shows `128/128` for original L4, then `128/128` for fused L4. The
   scorer completes an arm's `le.evaluate()` and checks `any(r.failed)` before
   starting the next arm. Thus original L4 passed that check, and **at least
