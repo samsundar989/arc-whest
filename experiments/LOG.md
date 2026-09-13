@@ -48387,3 +48387,13 @@ file or score/read exists yet. The temporary ledger `--check` complaint that
 this new artifact lacks a finalized hash is expected until the workerq truth
 producer succeeds; it is not a completed validation pass. The claim is
 one-way and will be committed before submitting the producer.
+
+**P10 truth producer submitted, no result yet.** On committed claim `883bd45`,
+workerq job **1176** received the canonical `p2_truth.py` two-`2**24`-replica
+128-network mint with `--already-claimed --seed-start 40913010000`, absolute
+`truth_P10.npz` output and live worktree. It requests **8 GiB RAM, 6 GiB VRAM,
+4 CPUs and one RTX 5090**, nonpreemptible; this follows the preceding
+recorded optimization review and the P09 observed peaks. At submission the
+job was QUEUED with no artifact or protected P10 truth read. Its output must
+be finalized on the host and pass the preregistered midpoint floor screen
+before the one scorer read.

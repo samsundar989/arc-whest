@@ -1,12 +1,16 @@
 # CURRENT_STATE.md — read this first
 
-**September 13 P10 is preregistered but unclaimed, pending Samuel's three
-new predictions.** The same exact F21 candidate SHA
+**September 13 P10 is claimed; truth producer workerq 1176 is queued/running.**
+Samuel answered "I don't know" to all three new predictions; that response
+was committed at `ce853f7` before any P10 data. The fresh single-use claim was
+committed at `883bd45`; job 1176 requests 8 GiB RAM, 6 GiB VRAM, 4 CPUs and
+one GPU for two `2**24` truth replicas on 128 networks. There is no P10 score
+or protected truth read yet. The same exact F21 candidate SHA
 `d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`
 is frozen against original L4, with L2 context. P09's only protected read
 ended without a score and cannot be repeated. P10 allocates fresh
 `40,913,010,000..127` as SINGLE_USE (registry commit `24e8b32`) and still has
-zero claims or truth reads. The [P10 contract](../experiments/LOG.md) keeps
+one claim and zero truth reads. The [P10 contract](../experiments/LOG.md) keeps
 the paired arithmetic `competition_score.decide(gate=1.05, interval="t")`
 on the official-precision forecast with the conservative `+2**24` FLOP
 offset. It explicitly disables both **local scoring** wall/residual caps so
@@ -15,8 +19,7 @@ pre-data [protocol Skeptic](../experiments/2026-09-13_p10_protocol_skeptic.md)
 and [registry Skeptic](../experiments/2026-09-13_p10_registry_skeptic.md)
 accepted their narrow scopes; affected default preflight 1166 passed 12/12.
 The producer's printed per-replica truth floor must be divided by two for
-the midpoint before the one protected score read. No P10 mint or scorer may
-run until Samuel's new predictions are appended and committed. After a
+the midpoint before the one protected score read. After a
 valid fresh score, full candidate checks and a **clean capped** official
 mini remain release gates; a no-cap mini cannot substitute.
 
