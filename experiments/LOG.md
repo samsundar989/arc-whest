@@ -46955,3 +46955,22 @@ slice comparison uses L2-derived advanced sources. The accepted scope after
 a green Full gate can be only full-rank identity **storage-boundary** parity;
 it is not an independent compact nonlinear recurrence, QR, compression,
 cost or score claim. No further compression test is authorized by B1 alone.
+
+**F21 DESIGN memory-request refinement, before first P01 read.** Workerq
+1087 remains QUEUED and has produced no score or F21 truth-read receipt.
+The earlier 8 GiB request was a rounded estimate. A fresh independent
+resource audit checked comparable workerq peaks: job 350's 24-network
+multi-arm P01 score **3,702 MiB**, job 957's 96-network four-arm P01 score
+**3,792 MiB**, one-network f64 L4/F21 meters 1083/1084 **2,323/2,954 MiB**.
+`f21_score.py` evaluates 24 networks per arm serially, then three arms
+serially, retaining compact evidence rows rather than prediction arrays or
+operation histories. The two larger completed score workloads provide a
+more appropriate memory envelope than the Full-preflight shape step that
+was previously underestimated. **7.5 GiB RAM, 0 VRAM, 2 CPUs** remains
+almost 2x the largest measured comparable peak, with about 3.8 GiB
+headroom. It is a conservative expected peak, not a smaller workload or a
+weakened correctness gate. Keep the exact score command, source hashes,
+truth halves, receipts and output unchanged. Cancel only the still-queued
+1087 and resubmit through workerq at 7.5 GiB; if its state changes to
+RUNNING first, do not duplicate a protected read. This amendment and
+independent audit precede any P01 result.
