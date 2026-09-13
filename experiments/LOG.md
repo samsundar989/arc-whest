@@ -47045,3 +47045,17 @@ green B2 would still not prove an independent compact nonlinear recurrence
 or a cheaper candidate. Run only tiny CPU work directly. Default/Full
 preflight and fresh independent Skeptic are required before accepting the
 IMPORTANT result; this probe must not delay F21 DESIGN/DECIDE.
+
+**B2 result, scoped.** `local_sim/p2_compact_fullrank_qr_b2.py` SHA256
+`be0e6cfb80cd33dbd60e21f127b76fa50353dbbc9f3911dfa4eb7279c745b67e`
+produced `experiments/2026-09-12_b2_fullrank_qr.json` SHA256
+`56145fbdc44c7eb38f418213021e47478919f32d17c04addf3b0bf71b71230c5`.
+All 477 registered tiny checks passed; maximum normalized error
+`5.960464477539063e-8` against `1e-5`. Joined nonfinal source ages were
+1, 2, and 3, each with rank 4; D21 and scalar c4 were active. This is
+evidence that full-rank weighted-Gram QR storage and reconstruction preserve
+the B1/frozen L2 recurrence on this one explicit fixture. Both arms still
+use the frozen L2 nonlinear `_layer`; the result does not establish an
+independent compact nonlinear recurrence, compression, cost, or score.
+The IMPORTANT verdict remains provisional pending Full preflight and an
+independent Skeptic review of this source, contract, and raw artifact.
