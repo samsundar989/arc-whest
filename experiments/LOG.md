@@ -47003,3 +47003,13 @@ declarations, remain valid for later requeue if DESIGN passes; each new heavy
 submission will be re-reviewed against the then-current code/resources.
 Neither cancellation is a cap or Full result. Candidate-specific `whest
 validate` already passed; all other deployment gates remain open.
+
+**F21 DESIGN receipt independent audit.** Fresh-context Skeptic
+`experiments/2026-09-12_f21/design_receipt_skeptic.md` returned
+**PROVISIONAL pending job 1091 completion**. It independently matched
+the scorer, all three source SHA256s, both P01 half SHA256s, the exact
+workerq argv/live mode and each canonical reserved/completed receipt pair.
+No P09, vault or public read was observed for this DESIGN path. It correctly
+does **not** infer a score or gate pass from receipt completion; the result
+packet needs terminal status, all three arms, paired rows, truth floors and
+the predeclared `<=1.05` forecast ratio before synthesis.
