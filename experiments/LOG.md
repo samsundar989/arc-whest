@@ -48349,6 +48349,16 @@ successful completion. If interrupted, do not score a partial file; recover
 with the same claimed span and a distinct diagnostic path, never claim again.
 No protected P10 read occurs until the floor screen and finalization pass.
 
+**2026-09-13 P10 Samuel predictions, before claim or data.** Samuel answered
+"i dont know for all" to the three P10 questions. Record each explicitly:
+(1) whether F21 will have any exception or counted-budget failure on the fresh
+128 networks: **I don't know**; (2) whether F21 will clear the preregistered
+paired official-precision score gate against original L4: **I don't know**;
+(3) whether the two-replica midpoint truth-noise floor will be below 10% of
+the exposed L4 raw MSE: **I don't know**. These are Samuel's predictions for
+P10 only, distinct from the earlier F21 contract. No P10 seed has been
+claimed or result observed when this entry was written.
+
 **Pre-submission optimization review — conditional P10 fresh scorer.** After
 truth finalization and the pre-score floor check, run the pinned P10 scorer
 once under workerq on three fixed arms. Reuse its one NPZ load, canonical
