@@ -46857,3 +46857,27 @@ rerun the entire gate from a clean committed tree rather than reusing a
 partial verdict. This is baseline/instrument validation, not certification
 of the F21 candidate bytes. Queue on the local live worktree to preserve
 source hashes and capture the process-local PowerShell execution policy.
+
+**Full preflight resource correction before retry.** Job 1089 began the
+unchanged Full gate under workerq with 6 GiB RAM declared, then measured
+7,713.76 MiB during step 13 shape parity. The earlier review used default
+preflight peaks and overlooked a directly comparable prior **Full** workerq
+628 peak of **10,580.75 MiB** recorded above in the September 10 acceptance
+entry. This is an estimate error; the job was cancelled at 546.23 s before
+step 13 completed, with no Full verdict. Preserve its partial verdict,
+transcript and workerq receipt under `experiments/2026-09-12_f21/` rather
+than treating it as a pass. Actual host headroom remained large, but the
+declaration was below a known comparable peak, so resubmission must wait for
+workerq admission at the corrected request.
+
+**Revised pre-submission optimization review — Full retry.** The required
+16 steps and source/fixture set are unchanged. Reuse existing caches and
+valid immutable reference artifacts only as the gate normally does; do not
+skip shape parity, envelope, carrier or official smoke, and do not overlap
+duplicate loaders/workers/prefetch/batches or use GPU. Restart the whole
+gate from committed bytes, with a new verdict path and full queue transcript;
+its partial first run is not checkpoint evidence. Declare **16 GiB RAM,
+0 VRAM, 2 CPUs**, providing about 5.7 GiB above the prior comparable Full
+peak. This is an honest revised resource estimate, not a new test threshold.
+Do not run directly or lower the request for admission. The Full gate still
+certifies baseline/instruments only; F21 candidate certification is separate.
