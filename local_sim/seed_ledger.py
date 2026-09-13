@@ -108,6 +108,7 @@ TIERS: Dict[str, str] = {
     # held-out read of the T2 gate and its own registry text always said so. It
     # was prose until the T2 Skeptic pointed out that nothing enforced it.
     "P08": "SINGLE_USE",
+    "P09": "SINGLE_USE",
 }
 
 #: Strictness ordering, so a tier CHANGE can be judged as a tightening or a

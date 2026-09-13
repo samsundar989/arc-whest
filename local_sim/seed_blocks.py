@@ -190,6 +190,12 @@ DECISION_BLOCKS = [
                                  "claiming P08 for anything but the single "
                                  "held-out read defeats the only reason it "
                                  "exists."),
+    ("P09", 40_912_009_000, 128, "PHASE-2 fresh single-use DECIDE block for "
+                                 "the preregistered F21 fused-L4 versus original-L4 "
+                                 "paired arithmetic score gate. Original L2 is "
+                                 "robustness context only; no fitting or selection. "
+                                 "Register after exposed P01 DESIGN passed and "
+                                 "independent Skeptic accepted; claim once before mint."),
 ]
 
 # --- single-use blocks -------------------------------------------------------
@@ -210,6 +216,7 @@ SINGLE_USE_BLOCKS = {
     # already-claimed block, which is the deeper gap: see READ-COUNTED ARTIFACTS
     # below.
     "P08": "the one Phase-2 T2 held-out read — allocated and claimed 2026-09-10, SPENT",
+    "P09": "the one fresh Phase-2 F21 DECIDE read — registered 2026-09-12, unspent",
 }
 
 # --- READ-COUNTED ARTIFACTS, owed --------------------------------------------

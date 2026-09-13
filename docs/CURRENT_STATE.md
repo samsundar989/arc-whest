@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — read this first
 
-**F21 engineering checkpoint, September 12.** The separate L4-derived
+**F21 DESIGN passed; fresh DECIDE pending, September 12.** The separate L4-derived
 candidate [estimator_k3_strassen_L4_f21.py](../estimator_k3_strassen_L4_f21.py)
 is committed at SHA256 `d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`.
 Its [exact diff](../experiments/2026-09-12_f21/parent_to_f21.diff) changes only
@@ -15,42 +15,41 @@ network. The parent exactly matches the stored graded L4 ledger; F21 still
 needs its own official subprocess evidence. Independent
 [cost](../experiments/2026-09-12_f21/cost_skeptic.md) and
 [full-depth trajectory](../experiments/2026-09-12_f21/full16_skeptic.md)
-Skeptics ACCEPT these narrow engineering claims. There is no accuracy,
-score, memory-cap or submission result. The F21 contract and Samuel's three
-"I don't know" predictions were committed before results.
+Skeptics ACCEPT these narrow engineering claims. The F21 contract and
+Samuel's three "I don't know" predictions were committed before results.
+The exposed-P01 DESIGN screen passed: F21/L4 paired official-precision
+forecast score ratio `0.8691817714` against the predeclared `1.05`
+maximum, with 24/24 score pairs favoring F21. Raw MSE is essentially
+unchanged/slightly worse, so the gain is the measured FLOP reduction. The
+[fresh DESIGN Skeptic](../experiments/2026-09-12_f21/f21_design_skeptic.md)
+ACCEPTED only that screen; it is not a promotion decision. The repaired
+candidate [Linux cap report](../experiments/2026-09-12_f21/f21_linux_cap_v6.json)
+passed 23/23 at 8,192 MiB, and its [independent review](../experiments/2026-09-12_f21/f21_cap_v6_skeptic.md)
+accepted the three-repeat local memory gate. Candidate release checks,
+fresh DECIDE and submission approval remain open.
 
-**Live jobs:** workerq **1091** is running the registered exposed-P01 DESIGN
-comparison (original L4 primary, fused L4, original L2 context; 24
-high-resolution networks), conservatively declared at 7.5 GiB. It reached
-16/24 on its first original-L4 arm; no score or DESIGN verdict exists.
-Both P01 truth halves have completed canonical live-read receipts and an
-independent [receipt audit](../experiments/2026-09-12_f21/design_receipt_skeptic.md),
-provisional pending result. Workerq **1092** is running corrected 16 GiB
-Full preflight on the committed current tree; **1093** queues candidate F21
-Linux 8,192 MiB enforcement at 16 GiB behind it. The earlier Full job 1089
-was cancelled at step 13 after an underdeclared 6 GiB request; its partial
-transcript is preserved, with no Full verdict. B0/B1/B2 compact full-rank
-probes have tiny passes and scoped independent Skeptics, but remain
-provisional until Full preflight and do not establish a compact nonlinear
-engine, compression or score. No P09 is allocated or claimed; P08 remains
-exhausted. No vault/public F21 labels or submission approval exist.
+**Current gate:** Full preflight 1092 passed 16/16 and repaired default 1095
+passed 12/12. P09 is registered, not claimed; its affected registry change
+requires a new default preflight before the first mint. The frozen selection
+is solely F21 SHA `d77dab0e...` against original L4. The separate compact
+B0/B1/B2/B3 probes establish tiny full-rank recurrence parity only, not
+compression or score. P08 remains exhausted. No vault/public F21 labels,
+fresh DECIDE result or submission approval exists.
 
 **September 12, 2026: strategist review of worker d124234.** Then read LOG from the bottom. The preceding detailed chronology is [archived verbatim](archive/CURRENT_STATE_before_worker_review_2026-09-12.md); all original contracts and results remain in experiments/LOG.md.
 
-## Next measured action: exposed DESIGN, then fresh DECIDE if it passes
+## Next measured action: fresh P09 DECIDE
 
-Check 1091's terminal status, live truth-read receipts, exact source hashes,
-per-arm failures, raw MSE and truth floor, and the preregistered at-most-5%
-official-precision forecast score regression screen. A pass freezes this sole
-variant/backend before registering and claiming fresh P09 (128 networks,
-two `2**24` truth replicas); `competition_score.decide(gate=1.05,
+Run affected registry preflight, then claim and mint the 128-network P09
+fresh DECIDE block with two `2**24` truth replicas. Finalize its ledger
+digest before the single score read. `competition_score.decide(gate=1.05,
 interval="t")` on paired arithmetic F21-versus-original-L4 scores is the
-promotion gate. If DESIGN fails, stop this candidate and record the exact
-failed gate. L2 is robustness context, not the primary comparator.
+promotion gate. L2 is robustness context, not the primary comparator. Do
+not use exposed P01 as promotion evidence.
 
 Use a new candidate file. The best-public L4 parent is inside `submission-k3strassen-L4.tar.gz`: estimator.py SHA256 `052dd768e970c4bae831cff26f8ff15b0487f3b95eadf2fd3578e542aec34d58`. Its relevant functions match L2 by independent AST comparison. Preserve the conservative generation/budget chooser, scalar K4, precision, saturation and shape behavior. Do not edit frozen files or shipped estimator.py.
 
-Read [STRATEGIST_RESPONSE](STRATEGIST_RESPONSE_2026-09-12.md) for equations and evidence, [GAME_PLAN](GAME_PLAN.md) for execution, and [CODEX_EXECUTION_HANDOFF](CODEX_EXECUTION_HANDOFF.md) for the task boundaries. The F21 cost and score thresholds are now preregistered in LOG; the 13.08574% cost result clears the isolated 8% screen. No score result exists yet.
+Read [STRATEGIST_RESPONSE](STRATEGIST_RESPONSE_2026-09-12.md) for equations and evidence, [GAME_PLAN](GAME_PLAN.md) for execution, and [CODEX_EXECUTION_HANDOFF](CODEX_EXECUTION_HANDOFF.md) for the task boundaries. The F21 cost and score thresholds were preregistered in LOG; engineering and exposed DESIGN passed, but no fresh DECIDE result exists.
 
 ## Scope changed explicitly
 
@@ -61,7 +60,7 @@ Samuel answered **“Include eligibility and candidate preparation.”** The old
 | Area | Current status |
 |---|---|
 | Stage 0 | Scoped independent ACCEPT; Linux positive plus M1–M12 aggregate 13/13. This is instrument coverage, not a complete future candidate certificate. Reuse it unless an affected path or new failure requires retesting. |
-| Preflight | Workerq 1085 passed current-byte default 12/16 after the F21 meter repair. Full job 1089 was cancelled after a low RAM estimate; corrected 16 GiB job 1090 was removed while queued to prioritize DESIGN. Candidate-specific checks still required. |
+| Preflight | Workerq 1092 passed Full 16/16; repaired default 1095 passed 12/12. The new P09 registry edit requires an affected-path default run before claim. Candidate-specific checks still required. |
 | Compact supplied-core implementation | Algebra/cost evidence remains scoped: about 0.372208 B and about 1,014 MiB on its supplied-core program. Not the cost of a complete physical signed-source method. |
 | Existing compact off control | Already evaluated on 96 exposed P01 DESIGN networks: raw mean MSE 2.11130e-5, averaged-truth noise 9.31914e-9, score 7.83730e-6. Saved arithmetic independently checks out. It is not a matched L2 comparison and is not the working L2 recurrence. |
 | New K4 arms | Frozen P01 arms failed their promotion gate. The source and covariance defects explain why scientific causation remains incomplete; do not fit them again unchanged. |

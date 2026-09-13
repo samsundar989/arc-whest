@@ -47493,3 +47493,70 @@ requested, report **REFUSED** on remote local wall. Its workerq receipt/log
 hashes are `ebce72427daba16465a315242704aa25af79254b7ab036933228` and
 `6E9286597924E3B906B73A8920E4DE7CCEB4721B982741E3BA98643F9ACB3061`.
 No promotion or readiness claim relies on either remote quick certificate.
+
+**F21 DESIGN synthesis and exact selection freeze, before P09 draw.** Fresh
+independent `f21_design_skeptic.md` SHA256
+`3876d6fc51b728dc27da1c7ca583b321d85c4d17d7063eafeef7b090510e8d05`
+ACCEPTED the narrow exposed-P01 regression screen after recomputing all 24
+paired arithmetic score rows, source hashes, live receipts, truth floors and
+chronology. It found the raw F21 MSE slightly worse (1.71655e-12 mean),
+so this is a counted-cost gain, not an accuracy claim; all 24 paired scores
+favor F21. The frozen choice is **only**
+`estimator_k3_strassen_L4_f21.py` SHA256
+`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`,
+with its existing backend, L4 control SHA `052dd768...` and original L2
+context SHA `390bc226...`. There is no alternate variant, coefficient fit,
+or choice from P09. The precommitted F21 DECIDE gate remains
+`competition_score.decide(gate=1.05, interval="t")` on paired arithmetic
+official-precision forecast scores with the declared +2^24 server-offset
+sensitivity; exposed DESIGN is not promotion. Samuel's three predictions
+remain the pre-result "I don't know" answers in the F21 contract.
+
+Fresh independent `f21_cap_v6_skeptic.md` SHA256
+`4cdb0aac8ada1ab88755b694d629ccbc9b5151e0b0a83307dc60d1df6565e8`
+ACCEPTED the exact F21 Linux 8,192-MiB 23/23 gate, including the production
+memory-only consumer. Its limit is three repeated predictions with setup
+configured for 100 networks, not a measured 100-run or grading-server
+guarantee; local wall and score are still open. V5 stays a formal failure.
+
+**P09 registration before claim.** The F21 contract already specified a new
+128-network single-use fresh DECIDE block, gate and truth precision before
+P01 existed. After DESIGN/Skeptic pass, register the previously absent,
+disjoint span `40_912_009_000..40_912_009_127` in both
+`seed_blocks.DECISION_BLOCKS` and `seed_ledger.TIERS`, and in
+`SINGLE_USE_BLOCKS`; no claim or P09 data exists at this entry. The one
+canonical producer is `local_sim/p2_truth.py` with two independent `2**24`
+replicas per network. The score read will be single-use even if an attempt
+aborts. Lightweight affected registry checks passed 66/66 after this
+registration diff. Commit registration and this synthesis before claim.
+
+**Pre-submission optimization review — affected P09 registry preflight.**
+Because `seed_blocks.py` and `seed_ledger.py` are an IMPORTANT instrument
+path, run one 12-step default preflight on their committed bytes before a
+claim. Reuse Full 1092's unchanged Full-only checks and default 1095's
+unchanged candidate-memory checks; the default still rechecks the affected
+seed-ledger/provenance path. No dataset duplication, extra loader, workers,
+cache, prefetch, changeable batch, GPU device placement or unneeded second
+pass is introduced. It is CPU only and restartable with a distinct verdict
+transcript if interrupted; no protected read. Default 1095 peaked 3,080 MiB
+over 370 s, so declare **6 GiB RAM, 0 VRAM, 2 CPUs** with workerq. Do not
+submit P09 producer until this affected-tree gate is green.
+
+**Pre-submission optimization review — P09 two-replica truth producer.**
+After the registration/preflight gate, claim the exact 128-seed span on the
+live host once and commit the ledger before a workerq producer with
+`--already-claimed`. Comparable job 493 minted 384 networks with the same
+two-`2**24` GPU method in 4h14m and measured 4,808 MiB host RAM/2,555 MiB
+VRAM; this 128-network run is estimated about 85 minutes, not guaranteed.
+Use the existing canonical one-pass mint and two independent replica
+accumulators; avoid duplicate datasets/loaders, keep current chunk/batch
+and device placement to preserve numerical and memory equivalence, and do
+not add workers, prefetch or caches. The producer writes one compressed NPZ
+at end, with no partial checkpoint; adding an unverified restart format risks
+truth integrity, so an interruption requires a new recorded attempt while
+the claim remains. No reduced truth precision, unnecessary additional pass,
+or alternative network set is permitted. Declare conservatively **8 GiB
+RAM, 6 GiB VRAM, 4 CPUs** on workerq, nonpreemptible, with the exact committed
+source and live output path. Finalize and verify the artifact in the host
+ledger before the only score read; inspect producer quality from its log,
+not by opening P09 NPZ outside `truth_reads.load_truth`.
