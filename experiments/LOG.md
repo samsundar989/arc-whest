@@ -46778,3 +46778,20 @@ exposed DESIGN halves with a new output path and preserve both receipt trails.
 Use workerq local live-worktree so the pinned bytes and live receipts agree.
 Reuse accepted meter, trajectory and source-diff artifacts rather than repeat
 them inside this score job. This review precedes submission of the DESIGN job.
+
+**F21 pre-submission optimization review — candidate Linux 8,192 MiB cap.**
+`linux_memory_gate.py` is the existing accepted candidate-specific WSL instrument;
+its one canonical 1024x16 no-label workload, three predictions in one capped
+worker, readback of `RLIMIT_AS`, and capped negative/uncapped positive controls
+are all required for an actual enforcement claim. Reuse the already installed
+official Linux stack and exact F21 source, with no duplicate dataset/truth
+loader, worker pool, cache, prefetch, batch, or GPU. Reducing repeats or
+omitting either control would weaken leak/cap evidence; an interrupted run can
+restart to a new immutable JSON because it consumes no seed block. The positive
+control deliberately allocates 9 GiB, while workerq's measured Windows parent
+RSS does not include all WSL child demand (historical job 190 showed only
+59 MiB); reserve **16 GiB host RAM, 0 VRAM, 2 CPUs** rather than using that
+misleading parent figure. This gate may queue behind P01 DESIGN; it does not
+read labels or select the candidate. Preserve the raw WSL child RSS/VmPeak,
+applied cap and both controls. The exact source hash must be checked against
+the frozen F21 SHA before accepting its result.
