@@ -47722,3 +47722,14 @@ Job 1099 is still running the first original-L4 arm. No P09 score or
 promotion verdict exists at this entry. An independent live-receipt audit
 is in progress; final statistical Skeptic will review only the complete
 terminal raw report.
+
+**Independent P09 live-receipt audit.** Fresh-context
+`experiments/2026-09-12_f21/p09_receipt_skeptic.md` SHA256
+`03aced3fe062bbab67ed75f51d0870a7c3a6e7639c9f848b92a4d01f7268dd28`
+ACCEPTED only workerq 1099's launch and one completed live read. It checked
+the actual local live-root argv, finalized truth/source hashes, exact
+absolute output, nonpreemptible 8 GiB/2 CPU request and the one reserved+
+completed P09 receipt. No second reservation or snapshot-local register
+appeared. It did not inspect partial scores or NPZ arrays. The job is
+running; promotion and deployment still require terminal raw evidence and
+a separate independent result Skeptic.
