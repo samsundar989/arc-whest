@@ -47074,3 +47074,16 @@ reached 7,713.76 MiB during shape parity. Request **16 GiB RAM, 0 VRAM,
 Full peak. Current queue shows enough capacity for admission while DESIGN
 1091 runs; workerq remains the admission authority. This checks shared
 instruments and shipped baseline, not candidate F21 bytes.
+
+**Pre-submission optimization review — candidate Linux cap requeue.** Job
+1088 was cancelled while queued, without execution. Keep the accepted
+`linux_memory_gate.py` three-repeat 1024x16 candidate workload, the 8,192
+MiB `RLIMIT_AS` readback, and 9 GiB positive/negative controls. Reuse the
+installed Linux stack and exact committed F21 source. There is no truth or
+duplicate dataset loader, worker pool, caching, prefetch, extra pass or GPU
+placement to remove. Shortening repeats or either control would weaken the
+cap claim; an interrupted run may restart with a new raw path. The WSL child
+can use much more RAM than workerq observes in the Windows parent, and a
+positive control allocates 9 GiB. Retain **16 GiB RAM, 0 VRAM, 2 CPUs**;
+workerq may serialize it behind Full preflight. This is resource evidence,
+not a score or submission check.
