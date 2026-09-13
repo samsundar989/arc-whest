@@ -48006,3 +48006,87 @@ an actual estimator exception or a budget path needs action. Any score retry
 requires a newly registered and claimed single-use DECIDE block, a committed
 contract and new Samuel predictions before data. No P09 read/retry, public
 CONFIRM, vault touch, external message, submission or designation occurred.
+
+## 2026-09-13 — F21 exposed-P07 label-free lifecycle stress (IMPORTANT contract, before data)
+
+**Question and data role.** Can the frozen F21 file reproduce a local lifecycle
+failure on 128 already exposed P07 DESIGN identities, and if so, which failure
+flag or exception type fires? This is an **IMPORTANT diagnostic**, not a DECIDE,
+accuracy, promotion, candidate-certificate, public CONFIRM or vault result. No
+truth, score, prediction or MSE may enter the output. The dummy zero target is
+an API argument to `lifecycle_eval.evaluate`, never an accuracy label.
+
+**Evidence.** CONFIRMED: P09 workerq 1099 reached original L4 and fused L4
+128/128, then aborted because at least one fused lifecycle row failed; the
+scorer discarded its row flags and produced no decision. CONFIRMED: its spec
+was `LifecycleSpec.for_round("v2-phase2", residual_wall_time_limit_s=None)`,
+keeping local wall 120 s; original L4 passed its all-row failure check.
+CONFIRMED: F21 is frozen at SHA256
+`d77dab0e2c740cc9f6cd7d9172adacc8da731cc5b40ca87798f3fb006e475a94`.
+INFERRED: a local wall timeout is plausible because the failed run lasted
+17,713.76 s for two 128-row arms, but its log cannot separate wall, counted
+budget or estimator exception. SPECULATIVE: the same category may recur on
+different, exposed P07 seeds under this host's present load.
+
+**Hypothesis, mechanism and prediction.** The leading hypothesis is that host
+wall variability pushed one or more F21 rows past 120 s; the budget and
+exception alternatives remain live. Predict (1) exactly 128 ordered first-P07
+identities yield lifecycle rows from the pinned source, (2) any reproduced
+failure is `time_exhausted` with `error_code` empty, rather than a counted
+budget or exception failure, and (3) the counted F21 ledger stays below
+`2**41` on successful rows. Zero failures falsifies recurrence on this exposed
+set, but does not prove P09 was healthy. Any budget/combined/exception flag
+falsifies the leading category hypothesis and must be reported exactly.
+
+**Intervention, baseline and fixed protocol.** Add only
+`local_sim/f21_labelfree_stress.py`; do not edit the candidate, scorer,
+`lifecycle_eval.py`, mint, seed registry/ledger implementation, P09, public
+split or vault. Ledger-claim the first 128 `seed_blocks.seeds("P07")` identities
+after this contract commit; DESIGN overlap is expected and correlated. Run
+one candidate-only `le.evaluate` with canonical mint, `f64_readonly`, the
+unchanged failed-scorer Phase-2 spec (only residual limit set to `None`),
+dummy zeros, no `gt_noise`, and no prediction capture. Emit only pinned
+candidate/source/spec hashes, seed identities, each row's failure flags,
+exception code, wall/residual seconds and counted FLOPs, plus category counts.
+Output is an exclusive-create immutable JSON. P09 workerq 1099 is the
+historical baseline for failure-category motivation, not a paired control;
+P07 exposed reuse cannot recover the P09 seed or establish independent rates.
+
+**Diagnostic gate and falsifier.** The instrument passes only if source and
+spec hashes match, exactly 128 identities/rows and no forbidden label/score
+fields publish, no output is overwritten, affected default preflight passes
+12/12, and a fresh independent Skeptic accepts the narrow reporting claim.
+Failure recurrence is separately classified from this instrument gate; zero
+failures remains a valid negative diagnostic. Any partial artifact, wrong
+source/spec, forbidden field, preflight failure or independent rejection
+invalidates the instrument. No `competition_score.decide` call or promotion
+boolean is permitted.
+
+**Frozen cost model and limits.** Phase 2 has lambda zero, so counted score cost
+is `C=F`, with budget `2**41`; this diagnostic reports `flops_used` only,
+without scoring. Residual is a disabled local failure check in this exact
+failed-scorer spec; report its worst observed `0.4 / residual_seconds` as
+headroom context after the run, never as server timing or a pass against the
+installed residual cliff. The local 120 s flag likewise does not predict
+the graded host. Windows cannot enforce the 8-GiB memory cap.
+
+**Mandatory pre-submission workload optimization review.** This is one
+128-network, 1024×16 CPU-only estimator pass and may take over 30 minutes.
+Reuse the existing canonical mint and lifecycle evaluator; neither load P09
+truth nor create a duplicate dataset or second arm. Generate one network at a
+time inside `evaluate`; retain only its small frozen evidence row, not weights,
+predictions or operation histories. Use no extra loaders/workers, caches,
+prefetch, batching, redundant passes or GPU placement. Do not change the
+frozen estimator's arithmetic to save time. Exclusive output publication is
+the recovery boundary: interruption before completion leaves no diagnostic
+result; a fresh explicitly identified rerun would be required, not an
+overwrite. Workerq 1099's three-arm context peaked at 5,851 MiB, and this
+one-arm no-truth pass should be lower, but allow **12 GiB RAM**, 0 VRAM,
+2 CPUs (above the required 10-GiB conservative floor) to cover Python,
+flopscope and transient arrays. Submit with `--gpus 0 --live-worktree` and
+normal inherited priority. The affected default preflight is a separate
+CPU-only job, reusing unchanged Full-only evidence; recent default 1141 peaked
+2,967 MiB and took 421 s, so request 6 GiB RAM, 0 VRAM, 2 CPUs, with a
+complete transcript. Check workerq before submission; wait in queue if its
+RAM reservations prevent admission. Do not trade away correctness or source
+binding for a shorter run.
