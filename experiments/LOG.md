@@ -48278,3 +48278,28 @@ transcript; a failed or interrupted run is restartable to a new path. The
 comparable affected default 1152 took 321.85 s at 2,941.50 MiB peak;
 declare **6 GiB RAM, 0 VRAM, 2 CPUs, 0 GPUs** on workerq live-worktree.
 No protected P10 truth, public CONFIRM or vault data is read by this check.
+
+**Pre-data P10 clarification after independent protocol challenge (no gate
+change).** `p2_truth.py` prints `mean truth noise` for **one** `2**24`
+replica. P10 scores against the midpoint of two independent replicas, so the
+pre-score noise-screen value is that printed mean divided by **two**. Compare
+it with `0.1 * 4.06552403594e-8 = 4.06552403594e-9`, where the control
+MSE is the previously exposed P01 original-L4 mean. Use the producer's
+terminal log/metadata for this screen, without opening the protected NPZ;
+if it exceeds the threshold, stop before its one score read. No score gate,
+candidate, variant, truth precision or block selection changes.
+
+Residual deployability follows `VALIDATION.md` §2b-iii: the binding local
+**evidence model** is the candidate's grader-convention operation count
+against the working 22,000-op gate, while measured local residual seconds
+are ratio-only and cannot be a graded-host go/no-go. This does **not** waive
+AGENTS hard rule 6 or the handoff's candidate-specific release checks.
+After a valid fresh DECIDE, run complete candidate certification and an
+official capped subprocess mini; require `n_failed_mlps: 0` for the normal
+submission-approval path. If this host's local residual over-read makes the
+capped mini fail, preserve that refusal. An uncapped subprocess mini can then
+be run as **read-only CONFIRM accuracy/functional evidence only**, never
+called a clean capped mini or a release pass. Any exception to the normal
+clean-mini requirement is Samuel's separate decision with exact evidence;
+it is not assumed here. Neither operation count nor no-cap accuracy by itself
+certifies the server cliff, wall, or eligibility.
