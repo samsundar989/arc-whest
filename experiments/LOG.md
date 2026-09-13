@@ -47867,3 +47867,19 @@ F21 scorer holds 8 GiB/2 CPUs; admitting another 6 GiB/2 CPU job is within
 the declared headroom and should not require reducing the F21 scorer's
 resources or changing its priority. If workerq delays this optional B4
 gate, leave it queued rather than bypassing the scheduler.
+
+**B4 affected-tree process gate completed.** Workerq 1100 ran the
+committed B4 tree concurrently with F21 scorer under its own reservation,
+SUCCEEDED exit 0 in 365.94 s, measured peak 3,848.73 MiB versus declared
+6 GiB RAM/0 VRAM/2 CPUs. Complete transcript
+`experiments/2026-09-13_b4_preflight_default_verdicts.txt` SHA256
+`ad3645014bc303592aab49e705b566557d5c112c2726bb88949dba20e738c014`
+ends **PREFLIGHT GREEN — 12/16, 4 Full-only skipped**. Workerq log SHA256
+`381fdc978c9a8c2f4f1feaa2b0394d28ebbbd9eb085221d47151854108727f58`
+and receipt SHA256
+`cd55dfeb816a4f2cfab061af1048d7b0f0042577e2871486471ef2e8f0d7eee1`
+are saved. B4 source/raw hashes remain `748e72ce...`/`a5c6295c...`.
+`scripts/verify_portability.py` passed 103/103 after the edit. The
+independent B4 Skeptic is checking this terminal gate before its final
+scoped verdict. The original B4 numeric parity result remains **FAIL**;
+preflight does not convert it to a pass. F21 P09 scorer remains separate.
